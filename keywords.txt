@@ -1,0 +1,41 @@
+#######################################
+# Syntax Coloring Map For DmxSimple
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+CFastSPI_LED	KEYWORD1
+FastSPI_LED	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+start	KEYWORD2
+stop	KEYWORD2
+init	KEYWORD2
+setLeds KEYWORD2
+setChipset KEYWORD2
+setCPUPercentage KEYWORD2
+setRGBData KEYWORD2
+getRGBData KEYWORD2
+setDirty KEYWORD2
+show KEYWORD2
+getCounter KEYWORD2
+clearCounter KEYWORD2
+getCycleTime KEYWORD2
+getCycleTarget KEYWORD2
+  
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+SPI_595		LITERAL1
+SPI_HL1606	LITERAL1
+SPI_LPD6803	LITERAL1
+CFastSPI_LED::SPI_595	LITERAL1
+CFastSPI_LED::SPI_HL1606 LITERAL1
+CFastSPI_LED::SPI_LPD6803 LITERAL1
+
