@@ -137,7 +137,7 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
       // nTimerKick = 153; // shooting for ~ 125,000 rounds/second - 66% cpu
       nBrightIdx = (m_nLeds <= 20) ? (256 / 80) : (256 / 32); 
       nBrightMax = 256 - nBrightIdx;
-      nCount = m_nLeds;
+      nCount = nCountBase;
       break;
     case SPI_LPD6803: 
       nBrightIdx = 0; 
@@ -231,12 +231,12 @@ void TIMER1_OVF_vect(void) {
   ISR(spihl1606)
   {
      static unsigned char nBrightness = 1;
+     register unsigned char aByte = Command;
     
     //if(pData == FastSPI_LED.m_pData) 
     if(nCount != 0)
     {  
       register unsigned char nCheck = nBrightness;
-      register unsigned char aByte = Command;
       if(*(--pData) > nCheck) { aByte |= BlueOn; } if(*(--pData) > nCheck) { aByte |= GreenOn; } if(*(--pData) > nCheck) { aByte |= RedOn; } 
       // SPI_B;
       SPI_A(aByte);
@@ -246,13 +246,15 @@ void TIMER1_OVF_vect(void) {
     else
     { 
       BIT_HI(SPI_PORT,SPI_SSN);
-  
       pData = FastSPI_LED.m_pDataEnd;
+      BIT_LO(SPI_PORT,SPI_SSN);
       if (nBrightness <= nBrightMax) { nBrightness += nBrightIdx; } 
       else { nBrightness = 1; }
+      BIT_HI(SPI_PORT,SPI_SSN);
       // if( (nBrightness += nBrightIdx) > BRIGHT_MAX) { nBrightness = 1; }  
       nCount = nCountBase;
       BIT_LO(SPI_PORT,SPI_SSN);
+      SPI_A(aByte);
       return;
     } 
   } 
