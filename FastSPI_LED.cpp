@@ -135,7 +135,7 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
       break;
     case SPI_HL1606: 
       // nTimerKick = 153; // shooting for ~ 125,000 rounds/second - 66% cpu
-      nBrightIdx = (m_nLeds <= 20) ? (256 / 80) : (256 / 48); 
+      nBrightIdx = (m_nLeds <= 20) ? (256 / 80) : (256 / 32); 
       nBrightMax = 256 - nBrightIdx;
       nCount = m_nLeds;
       break;
