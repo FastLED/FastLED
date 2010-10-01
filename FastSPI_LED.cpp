@@ -205,14 +205,14 @@ void TIMER1_OVF_vect(void) {
   __asm__ __volatile__ ( "lds r1, nChip" );
   __asm__ __volatile__ ( "sbrc r1, 1" );
   __asm__ __volatile__ ( "rjmp do1606" );
-  __asm__ __volatile__ ( "sbrs r1, 2" );
-  __asm__ __volatile__ ( "rjmp do595" );
+  __asm__ __volatile__ ( "sbrs r1, 0" );
+  __asm__ __volatile__ ( "rjmp do6803" );
+  __asm__ __volatile__ ( "do595: pop r1" );
+  __asm__ __volatile__ ( "  jmp spi595" );
   __asm__ __volatile__ ( "do6803: pop r1" );
   __asm__ __volatile__ ( "  jmp spilpd6803" );
   __asm__ __volatile__ ( "do1606: pop r1" );
   __asm__ __volatile__ ( "  jmp spihl1606" );
-  __asm__ __volatile__ ( "do595: pop r1" );
-  __asm__ __volatile__ ( "  jmp spi595" );
 #else
   __asm__ __volatile__ ( "lds r1, nChip" );
   __asm__ __volatile__ ( "sbrc r1, 1" );
@@ -304,38 +304,58 @@ void TIMER1_OVF_vect(void) {
   ISR(spilpd6803)
   {
     static unsigned char nState=1;
-    if(nState==1) 
+    if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD6803)
     {
-      SPI_A(0); 
+      if(nState==1) 
+      {
+        SPI_A(0); 
+        if(FastSPI_LED.m_nDirty==1) {
+          nState = 0;
+          FastSPI_LED.m_nDirty = 0;
+          SPI_B; 
+          SPI_A(0);
+          pData = FastSPI_LED.m_pData;
+          return;
+        }
+        SPI_B;
+        SPI_A(0);
+        return;
+      }
+      else
+      {
+        register unsigned int command;
+        command = 0x8000;
+        command |= (*(pData++) & 0xF8) << 7; // red is the high 5 bits
+        command |= (*(pData++) & 0xF8) << 2; // green is the middle 5 bits
+        command |= *(pData++) >> 3 ; // blue is the low 5 bits
+        SPI_B;
+        SPI_A( (command>>8) &0xFF);
+        if(pData == FastSPI_LED.m_pDataEnd) { 
+          nState = 1;
+        }
+        SPI_B;
+        SPI_A( command & 0xFF);
+        return;
+     } 
+  }
+  else // if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WSC2801)
+  {
+    if(nState==1) {
       if(FastSPI_LED.m_nDirty==1) {
         nState = 0;
         FastSPI_LED.m_nDirty = 0;
-        SPI_B; 
-        SPI_A(0);
         pData = FastSPI_LED.m_pData;
         return;
       }
-      SPI_B;
-      SPI_A(0);
+    } else {
+      while(pData != FastSPI_LED.m_pDataEnd) { 
+        SPI_B; SPI_A(*pData++); 
+      }
+      nState = 1; 
       return;
     }
-    else
-    {
-      register unsigned int command;
-      command = 0x8000;
-      command |= (*(pData++) & 0xF8) << 7; // red is the high 5 bits
-      command |= (*(pData++) & 0xF8) << 2; // green is the middle 5 bits
-      command |= *(pData++) >> 3 ; // blue is the low 5 bits
-      SPI_B;
-      SPI_A( (command>>8) &0xFF);
-      if(pData == FastSPI_LED.m_pDataEnd) { 
-        nState = 1;
-      }
-      SPI_B;
-      SPI_A( command & 0xFF);
-      return;
-    } 
   }
+}
 //}
 
 void CFastSPI_LED::setup_hardware_spi(void) {
@@ -377,6 +397,7 @@ void CFastSPI_LED::setup_hardware_spi(void) {
       }
       break;
     case CFastSPI_LED::SPI_LPD6803:
+    case CFastSPI_LED::SPI_WSC2801:
       SPSR |= (1<<SPI2X); // set 2x for prescalar
       break;
   }
@@ -423,6 +444,7 @@ void CFastSPI_LED::setup_timer1_ovf(void) {
     case CFastSPI_LED::SPI_LPD6803: us10 = (1000000 ) / baseCounts; break;
     case CFastSPI_LED::SPI_HL1606: us10 = (1000000 ) / baseCounts; break;
     case CFastSPI_LED::SPI_595: us10 = (1000000 ) / baseCounts; break; 
+    case CFastSPI_LED::SPI_WSC2801: us10 = (1000000) / baseCounts; break;
   }
   
   DPRINT("bc:"); DPRINTLN(baseCounts);
