@@ -31,7 +31,7 @@ public:
     SPI_595 = 0x01,
     SPI_HL1606 = 0x02,
     SPI_LPD6803 = 0x04,
-    SPI_WSC2801 = 0x08
+    SPI_WS2801 = 0x08
   };
 
 public:  

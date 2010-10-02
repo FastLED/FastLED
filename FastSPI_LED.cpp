@@ -338,7 +338,7 @@ void TIMER1_OVF_vect(void) {
         return;
      } 
   }
-  else // if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WSC2801)
+  else // if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
   {
     if(nState==1) {
       if(FastSPI_LED.m_nDirty==1) {
@@ -397,7 +397,7 @@ void CFastSPI_LED::setup_hardware_spi(void) {
       }
       break;
     case CFastSPI_LED::SPI_LPD6803:
-    case CFastSPI_LED::SPI_WSC2801:
+    case CFastSPI_LED::SPI_WS2801:
       SPSR |= (1<<SPI2X); // set 2x for prescalar
       break;
   }
@@ -444,7 +444,7 @@ void CFastSPI_LED::setup_timer1_ovf(void) {
     case CFastSPI_LED::SPI_LPD6803: us10 = (1000000 ) / baseCounts; break;
     case CFastSPI_LED::SPI_HL1606: us10 = (1000000 ) / baseCounts; break;
     case CFastSPI_LED::SPI_595: us10 = (1000000 ) / baseCounts; break; 
-    case CFastSPI_LED::SPI_WSC2801: us10 = (1000000) / baseCounts; break;
+    case CFastSPI_LED::SPI_WS2801: us10 = (1000000) / baseCounts; break;
   }
   
   DPRINT("bc:"); DPRINTLN(baseCounts);
