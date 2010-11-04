@@ -100,14 +100,10 @@ void CFastSPI_LED::init() {
   // for the timer below  
   setup_hardware_spi();
   delay(10);
-  
-  // setup (but don't yet start) the timer
-  { //if(!m_eChip == SPI_HL1606) { 
-    setup_timer1_ovf();
-  }
+  setup_timer1_ovf();
 }
 
-// start the timer by setting the clock select bits
+// 
 void CFastSPI_LED::start() {
   TCCR1B |= clockSelectBits;                                                     // reset clock select register
 }
@@ -149,7 +145,23 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
     case CFastSPI_LED::SPI_595: m_cpuPercentage = 53; break;
     case CFastSPI_LED::SPI_LPD6803: m_cpuPercentage = 50; break;
     case CFastSPI_LED::SPI_HL1606: m_cpuPercentage = 65; break;
+    case CFastSPI_LED::SPI_WS2801: m_cpuPercentage = 25; break;
   }  
+
+  // set default spi rates
+  switch(m_eChip) { 
+    case CFastSPI_LED::SPI_HL1606:
+      m_nDataRate = 2;
+      if(m_nLeds > 20) { 
+        m_nDataRate = 3;
+      }
+      break;
+    case CFastSPI_LED::SPI_595:  
+    case CFastSPI_LED::SPI_LPD6803:
+    case CFastSPI_LED::SPI_WS2801:
+      m_nDataRate = 0;
+      break;
+  }
 }
 
 #define SPI_A(data) SPDR=data;
@@ -358,6 +370,10 @@ void TIMER1_OVF_vect(void) {
 }
 //}
 
+void CFastSPI_LED::setDataRate(int datarate) {
+  m_nDataRate = datarate;
+}
+
 void CFastSPI_LED::setup_hardware_spi(void) {
   byte clr;
   pinMode(DATA_PIN,OUTPUT);
@@ -385,27 +401,27 @@ void CFastSPI_LED::setup_hardware_spi(void) {
   clr=SPSR; // clear SPI status reg
   clr=SPDR; // clear SPI data reg
 
-  switch(m_eChip) { 
-    case CFastSPI_LED::SPI_595:  
-      SPSR |= (1<<SPI2X); // set 2x for prescalar 
-      break;
-    case CFastSPI_LED::SPI_HL1606:
-//      SPCR |= 1<<SPIE;
-      SPCR |= 1<<SPR0;
-      if(m_nLeds <= 20) { 
-        SPSR |= (1<<SPI2X);
-      }
-      break;
-    case CFastSPI_LED::SPI_LPD6803:
-    case CFastSPI_LED::SPI_WS2801:
-      SPSR |= (1<<SPI2X); // set 2x for prescalar
-      break;
+  // set the prescalar bits based on the chosen data rate values
+  bool b2x = false;
+  switch(m_nDataRate) { 
+    /* fosc/2   */ case 0: b2x=true; break;
+    /* fosc/4   */ case 1: break;
+    /* fosc/8   */ case 2: SPCR |= (1<<SPR0); b2x=true; break;
+    /* fosc/16  */ case 3: SPCR |= (1<<SPR0); break;
+    /* fosc/32  */ case 4: SPCR |= (1<<SPR1); b2x=true; break;
+    /* fosc/64  */ case 5: SPCR |= (1<<SPR1); break;
+    /* fosc/64  */ case 6: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); b2x=true; break;
+    /* fosc/128 */ default: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); break;
   }
+  if(b2x) { SPSR |= (1<<SPI2X); }
+  else { SPSR &= ~ (1<<SPI2X); }
 
   // dig out some timing info 
   SPI_A(0);
   TIMER1_OVF_vect();
   
+  // First thing to do is count our cycles to figure out how to line
+  // up the desired performance percentages
   unsigned long nRounds=0;
   volatile int x = 0;
   unsigned long mCStart = millis();
@@ -429,12 +445,15 @@ void CFastSPI_LED::setup_hardware_spi(void) {
   
   // This gives us the time for 10 rounds in µs
   m_adjustedUSecTime = (mStop-mStart) - (mCEnd - mCStart);
+
 }
 
 // Core borrowed and adapted from the Timer1 Arduino library - by Jesse Tane
 #define RESOLUTION 65536
 
 void CFastSPI_LED::setup_timer1_ovf(void) {
+  // Now that we have our per-cycle timing, figure out how to set up the timer to
+  // match the desired cpu percentage
   TCCR1A = 0;
   TCCR1B = _BV(WGM13);
   

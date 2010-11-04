@@ -36,6 +36,7 @@ public:
 
 public:  
   int m_nLeds;
+  unsigned char m_nDataRate;
   unsigned char m_nDirty;
   unsigned char m_eChip;
   unsigned long m_nCounter;
@@ -43,7 +44,7 @@ public:
   unsigned char *m_pDataEnd;
   
 public:
-  CFastSPI_LED() {m_cpuPercentage=50; m_nCounter = 0; m_nDirty=0; m_eChip = SPI_595; m_adjustedUSecTime=0;}
+  CFastSPI_LED() {m_nDataRate=0; m_cpuPercentage=50; m_nCounter = 0; m_nDirty=0; m_eChip = SPI_595; m_adjustedUSecTime=0;}
  
   // set the number of rgb leds 
   void setLeds(int nLeds) { m_nLeds = nLeds * 3; m_nCounter = 0; m_nDirty = 0; m_pData = (unsigned char*)malloc(m_nLeds); memset(m_pData,0,m_nLeds); m_pDataEnd = m_pData + m_nLeds; }
@@ -104,6 +105,13 @@ public:
   // available per second.  For manually PWM'd chipsets like 595 or hl1606, that base number is also
   // desiredHz * colorLevels - higher refresh rate means fewer color levels, which may mean more flickering
   unsigned long getCycleTarget() { return (((unsigned long)m_cpuPercentage) * 100000) / m_adjustedUSecTime; }
+
+  // override the spi data rate - the library sets a default data rate for each chipset.  You
+  // can forcibly change the data rate that you want used, with 0 being the fastest and 7 being
+  // the slowest.  Note that you may need to play around with the max cpu percentage a bit if you
+  // change the data rate.  Call this after you have set the chipset to override the chipset's data rate
+  void setDataRate(int datarate);
+
 };
 
 extern CFastSPI_LED FastSPI_LED;
