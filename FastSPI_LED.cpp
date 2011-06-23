@@ -69,6 +69,31 @@
 
 #define BRIGHT_MAX 256
 
+// Some ASM defines
+#define NOP __asm__ __volatile__ ("cp r0,r0\n");
+#define NOP2 NOP NOP
+#define NOP1 NOP
+#define NOP3 NOP NOP2
+#define NOP4 NOP NOP3
+#define NOP5 NOP NOP4
+#define NOP6 NOP NOP5
+#define NOP7 NOP NOP6
+#define NOP8 NOP NOP7
+#define NOP9 NOP NOP8
+#define NOP10 NOP NOP9
+#define NOP11 NOP NOP10
+#define NOP12 NOP NOP11
+#define NOP13 NOP NOP12
+#define NOP14 NOP NOP13
+#define NOP16 NOP14 NOP2
+#define NOP20 NOP10 NOP10
+#define NOP22 NOP20 NOP2
+
+#define TM1809_BIT_SET(X,N) if( X & (1<<N) ) { BIT_HI(PORT,PIN); NOP7; BIT_LO(PORT,PIN); NOP4; } else { BIT_HI(PORT,PIN); NOP4; BIT_LO(PORT,PIN); NOP7; }
+#define TM1809_BIT_ALL 	TM1809_BIT_SET(x,7); TM1809_BIT_SET(x,6); TM1809_BIT_SET(x,5); TM1809_BIT_SET(x,4); \
+			TM1809_BIT_SET(x,3); TM1809_BIT_SET(x,2); TM1809_BIT_SET(x,1); TM1809_BIT_SET(x,0);
+
+
 CFastSPI_LED FastSPI_LED;
 
 // local prototyps
@@ -123,10 +148,10 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
       nBrightMax = 256 - nBrightIdx;
       // Set some info used for taking advantage of extreme loop unrolling elsewhere
       if(m_nLeds % 24 == 0 ) { 
-        nLedBlocks = m_nLeds / 24;
-        if(nLedBlocks > 4) { nLedBlocks = 0; }
+	nLedBlocks = m_nLeds / 24;
+	if(nLedBlocks > 4) { nLedBlocks = 0; }
       } else { 
-        nLedBlocks = 0;
+	nLedBlocks = 0;
       }
       break;
     case SPI_HL1606: 
@@ -146,6 +171,7 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
     case CFastSPI_LED::SPI_LPD6803: m_cpuPercentage = 50; break;
     case CFastSPI_LED::SPI_HL1606: m_cpuPercentage = 65; break;
     case CFastSPI_LED::SPI_WS2801: m_cpuPercentage = 25; break;
+    case CFastSPI_LED::SPI_TM1809: m_cpuPercentage = 25; break;
   }  
 
   // set default spi rates
@@ -153,12 +179,13 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
     case CFastSPI_LED::SPI_HL1606:
       m_nDataRate = 2;
       if(m_nLeds > 20) { 
-        m_nDataRate = 3;
+	m_nDataRate = 3;
       }
       break;
     case CFastSPI_LED::SPI_595:  
     case CFastSPI_LED::SPI_LPD6803:
     case CFastSPI_LED::SPI_WS2801:
+    case CFastSPI_LED::SPI_TM1809:
       m_nDataRate = 0;
       break;
   }
@@ -294,18 +321,18 @@ void TIMER1_OVF_vect(void) {
       // loop unrolling for cases where we have multiples of 3 shift registers - i should expand this out to
       // handle a wider range of cases at some point
       switch(nLedBlocks) { 
-        case 4: COM12; break;
-        case 3: COM3A; COM3B; COM3B; break;
-        case 2: COM3A; COM3B; break;
-        case 1: COM3A; break;
-        default:
-          BLOCK8;
-          SPI_A(aByte);
-          for(register char i = FastSPI_LED.m_nLeds; i > 8; i-= 8) { 
-            BLOCK8;
-            SPI_B;
-            SPI_A(aByte);
-          }
+	case 4: COM12; break;
+	case 3: COM3A; COM3B; COM3B; break;
+	case 2: COM3A; COM3B; break;
+	case 1: COM3A; break;
+	default:
+	  BLOCK8;
+	  SPI_A(aByte);
+	  for(register char i = FastSPI_LED.m_nLeds; i > 8; i-= 8) { 
+	    BLOCK8;
+	    SPI_B;
+	    SPI_A(aByte);
+	  }
       }
       BIT_HI(SPI_PORT,SPI_SSN);
       pData = FastSPI_LED.m_pDataEnd;
@@ -320,48 +347,69 @@ void TIMER1_OVF_vect(void) {
     {
       if(nState==1) 
       {
-        SPI_A(0); 
-        if(FastSPI_LED.m_nDirty==1) {
-          nState = 0;
-          FastSPI_LED.m_nDirty = 0;
-          SPI_B; 
-          SPI_A(0);
-          pData = FastSPI_LED.m_pData;
-          return;
-        }
-        SPI_B;
-        SPI_A(0);
-        return;
+	SPI_A(0); 
+	if(FastSPI_LED.m_nDirty==1) {
+	  nState = 0;
+	  FastSPI_LED.m_nDirty = 0;
+	  SPI_B; 
+	  SPI_A(0);
+	  pData = FastSPI_LED.m_pData;
+	  return;
+	}
+	SPI_B;
+	SPI_A(0);
+	return;
       }
       else
       {
-        register unsigned int command;
-        command = 0x8000;
-        command |= (*(pData++) & 0xF8) << 7; // red is the high 5 bits
-        command |= (*(pData++) & 0xF8) << 2; // green is the middle 5 bits
-        command |= *(pData++) >> 3 ; // blue is the low 5 bits
-        SPI_B;
-        SPI_A( (command>>8) &0xFF);
-        if(pData == FastSPI_LED.m_pDataEnd) { 
-          nState = 1;
-        }
-        SPI_B;
-        SPI_A( command & 0xFF);
-        return;
+	register unsigned int command;
+	command = 0x8000;
+	command |= (*(pData++) & 0xF8) << 7; // red is the high 5 bits
+	command |= (*(pData++) & 0xF8) << 2; // green is the middle 5 bits
+	command |= *(pData++) >> 3 ; // blue is the low 5 bits
+	SPI_B;
+	SPI_A( (command>>8) &0xFF);
+	if(pData == FastSPI_LED.m_pDataEnd) { 
+	  nState = 1;
+	}
+	SPI_B;
+	SPI_A( command & 0xFF);
+	return;
      } 
   }
-  else // if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
+  else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
   {
     if(nState==1) {
       if(FastSPI_LED.m_nDirty==1) {
-        nState = 0;
-        FastSPI_LED.m_nDirty = 0;
-        pData = FastSPI_LED.m_pData;
-        return;
+	nState = 0;
+	FastSPI_LED.m_nDirty = 0;
+	pData = FastSPI_LED.m_pData;
+	return;
       }
     } else {
       while(pData != FastSPI_LED.m_pDataEnd) { 
-        SPI_B; SPI_A(*pData++); 
+	SPI_B; SPI_A(*pData++); 
+      }
+      nState = 1; 
+      return;
+    }
+  }
+  else // if(FastSPI_LED.m_eCHip == CFastSPI_LED::SPI_TM1809)
+  {
+    if(nState==1) {
+      if(FastSPI_LED.m_nDirty==1) {
+	nState = 0;
+	FastSPI_LED.m_nDirty = 0;
+	pData = FastSPI_LED.m_pData;
+	return;
+      }
+    } else {
+      register unsigned char PIN = FastSPI_LED.m_nPin;
+      register unsigned char PORT = FastSPI_LED.m_nPort;
+      register unsigned char DDR = FastSPI_LED.m_nDDR;
+      while(pData != FastSPI_LED.m_pDataEnd) { 
+        register unsigned char x = *pData++;
+        TM1809_BIT_ALL;
       }
       nState = 1; 
       return;
@@ -376,14 +424,20 @@ void CFastSPI_LED::setDataRate(int datarate) {
 
 void CFastSPI_LED::setup_hardware_spi(void) {
   byte clr;
-  pinMode(DATA_PIN,OUTPUT);
-  pinMode(LATCH_PIN,OUTPUT);
-  pinMode(CLOCK_PIN,OUTPUT);
-  pinMode(SLAVE_PIN,OUTPUT);
-  digitalWrite(DATA_PIN,LOW);
-  digitalWrite(LATCH_PIN,LOW);
-  digitalWrite(CLOCK_PIN,LOW);
-  digitalWrite(SLAVE_PIN,LOW);
+  
+  if(m_eChip != SPI_TM1809) { 
+    pinMode(DATA_PIN,OUTPUT);
+    pinMode(LATCH_PIN,OUTPUT);
+    pinMode(CLOCK_PIN,OUTPUT);
+    pinMode(SLAVE_PIN,OUTPUT);
+    digitalWrite(DATA_PIN,LOW);
+    digitalWrite(LATCH_PIN,LOW);
+    digitalWrite(CLOCK_PIN,LOW);
+    digitalWrite(SLAVE_PIN,LOW);
+  } else { 
+    BIT_HI(DDRD, m_nPin);
+    BIT_LO(PORTD, m_nPin);
+  }
 
 
   // spi prescaler: 

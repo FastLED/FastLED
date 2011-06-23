@@ -31,7 +31,8 @@ public:
     SPI_595 = 0x01,
     SPI_HL1606 = 0x02,
     SPI_LPD6803 = 0x04,
-    SPI_WS2801 = 0x08
+    SPI_WS2801 = 0x08,
+    SPI_TM1809 = 0x10
   };
 
 public:  
@@ -42,7 +43,9 @@ public:
   unsigned long m_nCounter;
   unsigned char *m_pData;
   unsigned char *m_pDataEnd;
-  
+  unsigned int m_nPin; // used by tm1809
+  unsigned int m_nPort;
+  unsigned int m_nDDR;
 public:
   CFastSPI_LED() {m_nDataRate=0; m_cpuPercentage=50; m_nCounter = 0; m_nDirty=0; m_eChip = SPI_595; m_adjustedUSecTime=0;}
  
@@ -112,6 +115,18 @@ public:
   // change the data rate.  Call this after you have set the chipset to override the chipset's data rate
   void setDataRate(int datarate);
 
+  // set the pin used for output.  Note, at the moment this only makes sense for the TM1809 based leds, as everything
+  // else makes use of the spi infrastructure for its work.
+  void setPin(int pin) { 
+    m_nPin = pin; 
+    if(m_nPin >= 0 && m_nPin <= 7) { 
+      m_nPort = PORTD;
+      m_nDDR = DDRD;
+    } else if(m_nPin >= 8 && m_nPin <= 13) { 
+      m_nPort = PORTB;
+      m_nDDR = DDRB;
+    }
+  } 
 };
 
 extern CFastSPI_LED FastSPI_LED;
