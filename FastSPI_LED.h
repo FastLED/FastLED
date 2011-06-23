@@ -92,7 +92,7 @@ public:
   
   // 'show' or push the current led data (note, with some chipsets, data shows up in the
   // leds as soon as it is written to the array returned by getRGBData.
-  void show() { setDirty(); }
+  void show();
   
   // get a count of how many output cycles have been performed.  Only useful during debugging, this
   // will often return 0

@@ -128,17 +128,23 @@ void CFastSPI_LED::init() {
   // for the timer below  
   setup_hardware_spi();
   delay(10);
-  setup_timer1_ovf();
+  if(m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809) { 
+    setup_timer1_ovf();
+  }
 }
 
 // 
 void CFastSPI_LED::start() {
-  TCCR1B |= clockSelectBits;                                                     // reset clock select register
+  if(m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809) { 
+    TCCR1B |= clockSelectBits;                                                     // reset clock select register
+  }
 }
 
 void CFastSPI_LED::stop() {
-  // clear the clock select bits
-  TCCR1B &= ~(_BV(CS10) | _BV(CS11) | _BV(CS12));
+  if(m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809) { 
+    // clear the clock select bits
+    TCCR1B &= ~(_BV(CS10) | _BV(CS11) | _BV(CS12));
+  }
 }
 
 
@@ -380,52 +386,41 @@ void TIMER1_OVF_vect(void) {
 	return;
       } 
     }
-    else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
+  }
+
+void CFastSPI_LED::show() { 
+    setDirty();
+    if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
     {
-      if(nState==1) {
-        if(FastSPI_LED.m_nDirty==1) {
-    	  nState = 0;
-	  FastSPI_LED.m_nDirty = 0;
-	  pData = FastSPI_LED.m_pData;
-	  return;
-        }
-      } else {
+        cli();
+	pData = FastSPI_LED.m_pData;
         while(pData != FastSPI_LED.m_pDataEnd) { 
   	  SPI_B; SPI_A(*pData++); 
         }
-        nState = 1; 
-        return;
-      }
+	m_nDirty = 0;
+        sei();
     }
     else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_TM1809)
     {
-      if(nState==1) {
-        if(FastSPI_LED.m_nDirty==1) {
-	  nState = 0;
-	  FastSPI_LED.m_nDirty = 0;
-	  pData = FastSPI_LED.m_pData;
-	  return;
-        }
-      } else if(nState == 0 && FastSPI_LED.m_nPort == PORTD) { 
+      cli();
+      m_nDirty = 0;
+      pData = FastSPI_LED.m_pData;
+      if(FastSPI_LED.m_nPort == PORTD) { 
         register unsigned char PIN = FastSPI_LED.m_nPin;
         while(pData != FastSPI_LED.m_pDataEnd) { 
           register unsigned char x = *pData++;
           TM1809_BIT_ALLD;
         }
-        nState = 1; 
-        return;
-      } else if(nState == 0 && FastSPI_LED.m_nPort == PORTB) { 
+      } else if(FastSPI_LED.m_nPort == PORTB) { 
         register unsigned char PIN = FastSPI_LED.m_nPin - 8;
         while(pData != FastSPI_LED.m_pDataEnd) { 
           register unsigned char x = *pData++;
           TM1809_BIT_ALLB;
         }
-        nState = 1; 
-        return;
       }
+      sei();
     }
-  }
-//}
+}
 
 void CFastSPI_LED::setDataRate(int datarate) {
   m_nDataRate = datarate;
