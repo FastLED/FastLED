@@ -4,10 +4,10 @@
 #include "FastSPI_LED.h"
 #include "wiring.h"
 
-/* */
+/* 
 #define DPRINT Serial.print
 #define DPRINTLN Serial.println
-/* /
+/* */
 #define DPRINT(x)
 #define DPRINTLN(x)
 /* */
@@ -89,9 +89,12 @@
 #define NOP20 NOP10 NOP10
 #define NOP22 NOP20 NOP2
 
-#define TM1809_BIT_SET(X,N) if( X & (1<<N) ) { BIT_HI(PORT,PIN); NOP7; BIT_LO(PORT,PIN); NOP4; } else { BIT_HI(PORT,PIN); NOP4; BIT_LO(PORT,PIN); NOP7; }
-#define TM1809_BIT_ALL 	TM1809_BIT_SET(x,7); TM1809_BIT_SET(x,6); TM1809_BIT_SET(x,5); TM1809_BIT_SET(x,4); \
-			TM1809_BIT_SET(x,3); TM1809_BIT_SET(x,2); TM1809_BIT_SET(x,1); TM1809_BIT_SET(x,0);
+#define TM1809_BIT_SETD(X,N) if( X & (1<<N) ) { BIT_HI(PORTD,PIN); NOP7; BIT_LO(PORTD,PIN); NOP4; } else { BIT_HI(PORTD,PIN); NOP4; BIT_LO(PORTD,PIN); NOP7; }
+#define TM1809_BIT_ALLD	TM1809_BIT_SETD(x,7); TM1809_BIT_SETD(x,6); TM1809_BIT_SETD(x,5); TM1809_BIT_SETD(x,4); \
+			TM1809_BIT_SETD(x,3); TM1809_BIT_SETD(x,2); TM1809_BIT_SETD(x,1); TM1809_BIT_SETD(x,0);
+#define TM1809_BIT_SETB(X,N) if( X & (1<<N) ) { BIT_HI(PORTB,PIN); NOP7; BIT_LO(PORTB,PIN); NOP4; } else { BIT_HI(PORTB,PIN); NOP4; BIT_LO(PORTB,PIN); NOP7; }
+#define TM1809_BIT_ALLB	TM1809_BIT_SETB(x,7); TM1809_BIT_SETB(x,6); TM1809_BIT_SETB(x,5); TM1809_BIT_SETB(x,4); \
+			TM1809_BIT_SETB(x,3); TM1809_BIT_SETB(x,2); TM1809_BIT_SETB(x,1); TM1809_BIT_SETB(x,0);
 
 
 CFastSPI_LED FastSPI_LED;
@@ -171,7 +174,7 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
     case CFastSPI_LED::SPI_LPD6803: m_cpuPercentage = 50; break;
     case CFastSPI_LED::SPI_HL1606: m_cpuPercentage = 65; break;
     case CFastSPI_LED::SPI_WS2801: m_cpuPercentage = 25; break;
-    case CFastSPI_LED::SPI_TM1809: m_cpuPercentage = 25; break;
+    case CFastSPI_LED::SPI_TM1809: m_cpuPercentage = 5; break;
   }  
 
   // set default spi rates
@@ -375,47 +378,53 @@ void TIMER1_OVF_vect(void) {
 	SPI_B;
 	SPI_A( command & 0xFF);
 	return;
-     } 
-  }
-  else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
-  {
-    if(nState==1) {
-      if(FastSPI_LED.m_nDirty==1) {
-	nState = 0;
-	FastSPI_LED.m_nDirty = 0;
-	pData = FastSPI_LED.m_pData;
-	return;
+      } 
+    }
+    else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
+    {
+      if(nState==1) {
+        if(FastSPI_LED.m_nDirty==1) {
+    	  nState = 0;
+	  FastSPI_LED.m_nDirty = 0;
+	  pData = FastSPI_LED.m_pData;
+	  return;
+        }
+      } else {
+        while(pData != FastSPI_LED.m_pDataEnd) { 
+  	  SPI_B; SPI_A(*pData++); 
+        }
+        nState = 1; 
+        return;
       }
-    } else {
-      while(pData != FastSPI_LED.m_pDataEnd) { 
-	SPI_B; SPI_A(*pData++); 
+    }
+    else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_TM1809)
+    {
+      if(nState==1) {
+        if(FastSPI_LED.m_nDirty==1) {
+	  nState = 0;
+	  FastSPI_LED.m_nDirty = 0;
+	  pData = FastSPI_LED.m_pData;
+	  return;
+        }
+      } else if(nState == 0 && FastSPI_LED.m_nPort == PORTD) { 
+        register unsigned char PIN = FastSPI_LED.m_nPin;
+        while(pData != FastSPI_LED.m_pDataEnd) { 
+          register unsigned char x = *pData++;
+          TM1809_BIT_ALLD;
+        }
+        nState = 1; 
+        return;
+      } else if(nState == 0 && FastSPI_LED.m_nPort == PORTB) { 
+        register unsigned char PIN = FastSPI_LED.m_nPin - 8;
+        while(pData != FastSPI_LED.m_pDataEnd) { 
+          register unsigned char x = *pData++;
+          TM1809_BIT_ALLB;
+        }
+        nState = 1; 
+        return;
       }
-      nState = 1; 
-      return;
     }
   }
-  else // if(FastSPI_LED.m_eCHip == CFastSPI_LED::SPI_TM1809)
-  {
-    if(nState==1) {
-      if(FastSPI_LED.m_nDirty==1) {
-	nState = 0;
-	FastSPI_LED.m_nDirty = 0;
-	pData = FastSPI_LED.m_pData;
-	return;
-      }
-    } else {
-      register unsigned char PIN = FastSPI_LED.m_nPin;
-      register unsigned char PORT = FastSPI_LED.m_nPort;
-      register unsigned char DDR = FastSPI_LED.m_nDDR;
-      while(pData != FastSPI_LED.m_pDataEnd) { 
-        register unsigned char x = *pData++;
-        TM1809_BIT_ALL;
-      }
-      nState = 1; 
-      return;
-    }
-  }
-}
 //}
 
 void CFastSPI_LED::setDataRate(int datarate) {
