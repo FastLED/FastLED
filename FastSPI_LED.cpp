@@ -494,11 +494,19 @@ void CFastSPI_LED::setup_hardware_spi(void) {
   nRounds = 10000;
   DPRINT("10000 round empty loop in ms: "); DPRINTLN(mCEnd - mCStart);
   unsigned long mStart,mStop;
-  mStart = millis();
-  for(volatile int i = 0; i < 10000; i++) { 
-    TIMER1_OVF_vect(); 
+  if(m_eChip == SPI_WS2801 || m_eChip == SPI_TM1809) { 
+    mStart = millis();
+    for(volatile int i = 0; i < 10000; i++) { 
+      show(); 
+    }
+    mStop = millis();
+  } else { 
+    mStart = millis();
+    for(volatile int i = 0; i < 10000; i++) { 
+      TIMER1_OVF_vect(); 
+    }
+    mStop = millis();
   }
-  mStop = millis();
   DPRINT(nRounds); DPRINT(" rounds of rgb out in ms: "); DPRINTLN(mStop - mStart); 
   
   // This gives us the time for 10 rounds in µs

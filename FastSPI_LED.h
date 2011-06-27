@@ -1,7 +1,7 @@
 #ifndef __INC_SPIRGB_H
 #define __INC_SPIRGB_H
-#include <HardwareSerial.h>
 #include <WProgram.h>
+#include <HardwareSerial.h>
 #include "string.h"
 #include <avr/pgmspace.h>
 
