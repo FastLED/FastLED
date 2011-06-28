@@ -44,7 +44,7 @@ public:
   unsigned char *m_pData;
   unsigned char *m_pDataEnd;
   unsigned int m_nPin; // used by tm1809
-  unsigned int m_nPort;
+  uint8_t *m_pPort;
   unsigned int m_nDDR;
 public:
   CFastSPI_LED() {m_nDataRate=0; m_cpuPercentage=50; m_nCounter = 0; m_nDirty=0; m_eChip = SPI_595; m_adjustedUSecTime=0;}
@@ -117,16 +117,7 @@ public:
 
   // set the pin used for output.  Note, at the moment this only makes sense for the TM1809 based leds, as everything
   // else makes use of the spi infrastructure for its work.
-  void setPin(int pin) { 
-    m_nPin = pin; 
-    if(m_nPin >= 0 && m_nPin <= 7) { 
-      m_nPort = PORTD;
-      m_nDDR = DDRD;
-    } else if(m_nPin >= 8 && m_nPin <= 13) { 
-      m_nPort = PORTB;
-      m_nDDR = DDRB;
-    }
-  } 
+  void setPin(int pin);
 };
 
 extern CFastSPI_LED FastSPI_LED;

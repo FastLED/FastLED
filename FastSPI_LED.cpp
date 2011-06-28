@@ -3,14 +3,16 @@
 #include <avr/io.h>
 #include "FastSPI_LED.h"
 #include "wiring.h"
+#include "pins_arduino.h"
 
-/* 
+// #define DEBUG_SPI
+#ifdef DEBUG_SPI
 #define DPRINT Serial.print
 #define DPRINTLN Serial.println
-/* */
+#else
 #define DPRINT(x)
 #define DPRINTLN(x)
-/* */
+#endif
 
 // #define COUNT_ROUNDS 1
 
@@ -30,7 +32,7 @@
 #define LATCH_PIN 10
 
 // Mega.
-#elif defined(__AVR_ATmega1280__)
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 #define SPI_PORT PORTB
 #define SPI_DDR  DDRB
 #define SPI_PIN  PINB
@@ -46,6 +48,9 @@
 
 #define BIT_HI(R, P) (R) |= _BV(P)
 #define BIT_LO(R, P) (R) &= ~_BV(P)
+
+#define MASK_HI(R, P) (R) |= (P)
+#define MASK_LO(R, P) (R) &= ~(P)
 
 // HL1606 defines
 //Commands for each LED to be ORd together.
@@ -89,13 +94,23 @@
 #define NOP20 NOP10 NOP10
 #define NOP22 NOP20 NOP2
 
-#define TM1809_BIT_SETD(X,N) if( X & (1<<N) ) { BIT_HI(PORTD,PIN); NOP7; BIT_LO(PORTD,PIN); NOP4; } else { BIT_HI(PORTD,PIN); NOP4; BIT_LO(PORTD,PIN); NOP7; }
-#define TM1809_BIT_ALLD	TM1809_BIT_SETD(x,7); TM1809_BIT_SETD(x,6); TM1809_BIT_SETD(x,5); TM1809_BIT_SETD(x,4); \
-			TM1809_BIT_SETD(x,3); TM1809_BIT_SETD(x,2); TM1809_BIT_SETD(x,1); TM1809_BIT_SETD(x,0);
-#define TM1809_BIT_SETB(X,N) if( X & (1<<N) ) { BIT_HI(PORTB,PIN); NOP7; BIT_LO(PORTB,PIN); NOP4; } else { BIT_HI(PORTB,PIN); NOP4; BIT_LO(PORTB,PIN); NOP7; }
-#define TM1809_BIT_ALLB	TM1809_BIT_SETB(x,7); TM1809_BIT_SETB(x,6); TM1809_BIT_SETB(x,5); TM1809_BIT_SETB(x,4); \
-			TM1809_BIT_SETB(x,3); TM1809_BIT_SETB(x,2); TM1809_BIT_SETB(x,1); TM1809_BIT_SETB(x,0);
+#define TM1809_BIT_SET(X,N,_PORT) if( X & (1<<N) ) { MASK_HI(_PORT,PIN); NOP5; MASK_LO(_PORT,PIN); NOP2; } else { MASK_HI(_PORT,PIN); NOP2; MASK_LO(_PORT,PIN); NOP5; }
 
+#define TM1809_BIT_ALL(_PORT)   \
+                TM1809_BIT_SET(x,7,_PORT); \
+                TM1809_BIT_SET(x,6,_PORT); \
+                TM1809_BIT_SET(x,5,_PORT); \
+                TM1809_BIT_SET(x,4,_PORT); \
+                TM1809_BIT_SET(x,3,_PORT); \
+                TM1809_BIT_SET(x,2,_PORT); \
+                TM1809_BIT_SET(x,1,_PORT); \
+                TM1809_BIT_SET(x,0,_PORT);
+
+#define TM1809_ALL(_PORT) \
+        while(pData != FastSPI_LED.m_pDataEnd) { register unsigned char x = *pData++;  TM1809_BIT_ALL(_PORT); }
+
+#define TM1809_BIT_ALLD TM1809_BIT_ALL(PORTD);
+#define TM1809_BIT_ALLB TM1809_BIT_ALL(PORTB);
 
 CFastSPI_LED FastSPI_LED;
 
@@ -405,25 +420,22 @@ void CFastSPI_LED::show() {
       cli();
       m_nDirty = 0;
       pData = FastSPI_LED.m_pData;
-      if(FastSPI_LED.m_nPort == PORTD) { 
-        register unsigned char PIN = FastSPI_LED.m_nPin;
-        while(pData != FastSPI_LED.m_pDataEnd) { 
-          register unsigned char x = *pData++;
-          TM1809_BIT_ALLD;
-        }
-      } else if(FastSPI_LED.m_nPort == PORTB) { 
-        register unsigned char PIN = FastSPI_LED.m_nPin - 8;
-        while(pData != FastSPI_LED.m_pDataEnd) { 
-          register unsigned char x = *pData++;
-          TM1809_BIT_ALLB;
-        }
-      }
+      register unsigned char PIN = digitalPinToBitMask(FastSPI_LED.m_nPin); 
+      register volatile uint8_t *pPort = FastSPI_LED.m_pPort;
+
+      if(m_pPort == NOT_A_PIN) { /* do nothing */ } 
+      else { TM1809_ALL(*pPort); }
       sei();
     }
 }
 
 void CFastSPI_LED::setDataRate(int datarate) {
   m_nDataRate = datarate;
+}
+
+void CFastSPI_LED::setPin(int pin) {
+  m_nPin = pin;
+  m_pPort = (uint8_t*)portOutputRegister(digitalPinToPort(pin));
 }
 
 void CFastSPI_LED::setup_hardware_spi(void) {
@@ -439,8 +451,8 @@ void CFastSPI_LED::setup_hardware_spi(void) {
     digitalWrite(CLOCK_PIN,LOW);
     digitalWrite(SLAVE_PIN,LOW);
   } else { 
-    BIT_HI(DDRD, m_nPin);
-    BIT_LO(PORTD, m_nPin);
+    pinMode(m_nPin, OUTPUT);
+    digitalWrite(m_nPin,LOW);
   }
 
 
@@ -495,11 +507,13 @@ void CFastSPI_LED::setup_hardware_spi(void) {
   DPRINT("10000 round empty loop in ms: "); DPRINTLN(mCEnd - mCStart);
   unsigned long mStart,mStop;
   if(m_eChip == SPI_WS2801 || m_eChip == SPI_TM1809) { 
+#ifdef DEBUG_SPI
     mStart = millis();
     for(volatile int i = 0; i < 10000; i++) { 
       show(); 
     }
     mStop = millis();
+#endif
   } else { 
     mStart = millis();
     for(volatile int i = 0; i < 10000; i++) { 
