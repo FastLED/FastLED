@@ -219,34 +219,6 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
 #define SPI_B while(!(SPSR & (1<<SPIF))); 
 #define SPI_TRANSFER(data) { SPDR=data; while(!(SPSR & (1<<SPIF))); } 
 
-#if 0
-static int in=0;
-ISR(SPI_STC_vect) {
-       static unsigned char nBrightness = 1;
-    if(pData == FastSPI_LED.m_pData) 
-    { 
-      BIT_HI(SPI_PORT,SPI_SSN);
-  
-      pData = FastSPI_LED.m_pDataEnd;
-      if(nBrightness > nBrightMax) { nBrightness = 1; } 
-      else { nBrightness += nBrightIdx; }
-      // if( (nBrightness += nBrightIdx) > BRIGHT_MAX) { nBrightness = 1; }  
-      // nCount = FastSPI_LED.m_nLeds+1;
-      BIT_LO(SPI_PORT,SPI_SSN);
-      //return;
-    } 
-    {  
-      register unsigned char nCheck = nBrightness;
-      register unsigned char aByte = Command;
-      if(*(--pData) > nCheck) { aByte |= BlueOn; } if(*(--pData) > nCheck) { aByte |= GreenOn; } if(*(--pData) > nCheck) { aByte |= RedOn; } 
-      SPI_A(aByte);
-#ifdef COUNT_ROUNDS
-      FastSPI_LED.m_nCounter++;
-#endif
-    }
-}
-#endif
-
 // Why not use function pointers?  They're expensive!  Having TIMER1_OVF_vect call a chip
 // specific interrupt function through a pointer adds approximately 1.3µs over the if/else blocks 
 // below per cycle.  That doesn't sound like a lot, though, right?  Wrong.  For the HL-1606, with
@@ -266,13 +238,13 @@ void TIMER1_OVF_vect(void) {
 #if 1
   __asm__ __volatile__ ( "push r1");
   __asm__ __volatile__ ( "lds r1, nChip" );
-  __asm__ __volatile__ ( "sbrc r1, 1" );
-  __asm__ __volatile__ ( "rjmp do1606" );
-  __asm__ __volatile__ ( "sbrs r1, 0" );
-  __asm__ __volatile__ ( "rjmp do6803" );
-  __asm__ __volatile__ ( "do595: pop r1" );
-  __asm__ __volatile__ ( "  jmp spi595" );
-  __asm__ __volatile__ ( "do6803: pop r1" );
+  __asm__ __volatile__ ( "sbrc r1, 1" );          // if(nChip == SPI_HL1606) { 
+  __asm__ __volatile__ ( "rjmp do1606" );         //   do1606();
+  __asm__ __volatile__ ( "sbrs r1, 0" );          // } else if(nChip != SPI_595) { 
+  __asm__ __volatile__ ( "rjmp do6803" );         //   do6803(); 
+  __asm__ __volatile__ ( "do595: pop r1" );       // } else if(nChip == SPI_595) { 
+  __asm__ __volatile__ ( "  jmp spi595" );        //   do595();
+  __asm__ __volatile__ ( "do6803: pop r1" );      // }
   __asm__ __volatile__ ( "  jmp spilpd6803" );
   __asm__ __volatile__ ( "do1606: pop r1" );
   __asm__ __volatile__ ( "  jmp spihl1606" );
@@ -284,10 +256,6 @@ void TIMER1_OVF_vect(void) {
   __asm__ __volatile__ ( "jmp spilpd6803");
   __asm__ __volatile__ ( "jmp spi595" );
 #endif
-//ISR(TIMER1_OVF_vect) {
-//#ifdef COUNT_ROUNDS
-//  FastSPI_LED.m_nCounter++;
-//#endif
 }
 
 //  if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_HL1606)
