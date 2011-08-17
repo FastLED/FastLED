@@ -396,11 +396,14 @@ void CFastSPI_LED::show() {
       cli();
       m_nDirty = 0;
       register byte *pData = m_pData;
-      register unsigned char PIN = digitalPinToBitMask(FastSPI_LED.m_nPin); 
-      register volatile uint8_t *pPort = FastSPI_LED.m_pPort;
+      for(int iPins = 0; iPins < m_nPins; iPins++) { 
+        register byte *pEnd = pData + m_pPinLengths[iPins];
+        register unsigned char PIN = digitalPinToBitMask(FastSPI_LED.m_pPins[iPins]); 
+        register volatile uint8_t *pPort = m_pPorts[iPins];
 
-      if(m_pPort == NOT_A_PIN) { /* do nothing */ } 
-      else { TM1809_ALL(*pPort, pData, m_pDataEnd); }
+        if(pPort == NOT_A_PIN) { /* do nothing */ } 
+        else { TM1809_ALL(*pPort, pData, pEnd); }
+      }
       sei();
     }
 }
@@ -409,9 +412,21 @@ void CFastSPI_LED::setDataRate(int datarate) {
   m_nDataRate = datarate;
 }
 
-void CFastSPI_LED::setPin(int pin) {
-  m_nPin = pin;
-  m_pPort = (uint8_t*)portOutputRegister(digitalPinToPort(pin));
+void CFastSPI_LED::setPinCount(int nPins) {
+  m_nPins = nPins;
+  m_pPins = (unsigned int*)malloc(sizeof(unsigned int) * nPins);
+  m_pPinLengths = (unsigned int*)malloc(sizeof(unsigned int) * nPins);
+  m_pPorts = (uint8_t**)malloc(sizeof(uint8_t*) * nPins);
+  for(int i = 0; i < nPins; i++) { 
+    m_pPins[i] = m_pPinLengths[i] = 0;
+    m_pPorts[i] = NULL;
+  }
+}
+
+void CFastSPI_LED::setPin(int iPins, int nPin, int nLength) {
+  m_pPins[iPins] = nPin;
+  m_pPinLengths[iPins] = nLength*3;
+  m_pPorts[iPins] = (uint8_t*)portOutputRegister(digitalPinToPort(nPin));
 }
 
 void CFastSPI_LED::setup_hardware_spi(void) {
@@ -427,8 +442,10 @@ void CFastSPI_LED::setup_hardware_spi(void) {
     digitalWrite(CLOCK_PIN,LOW);
     digitalWrite(SLAVE_PIN,LOW);
   } else { 
-    pinMode(m_nPin, OUTPUT);
-    digitalWrite(m_nPin,LOW);
+    for(int i = 0; i < m_nPins; i++) { 
+      pinMode(m_pPins[i], OUTPUT);
+      digitalWrite(m_pPins[i],LOW);
+    }
   }
 
 

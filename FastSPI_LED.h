@@ -44,11 +44,13 @@ public:
   unsigned long m_nCounter;
   unsigned char *m_pData;
   unsigned char *m_pDataEnd;
-  unsigned int m_nPin; // used by tm1809
-  uint8_t *m_pPort;
+  unsigned int *m_pPins; // used by tm1809
+  unsigned int *m_pPinLengths;
+  unsigned int m_nPins;
+  uint8_t **m_pPorts;
   unsigned int m_nDDR;
 public:
-  CFastSPI_LED() {m_nDataRate=0; m_cpuPercentage=50; m_nCounter = 0; m_nDirty=0; m_eChip = SPI_595; m_adjustedUSecTime=0;}
+  CFastSPI_LED() {m_nDataRate=0; m_cpuPercentage=50; m_nCounter = 0; m_nDirty=0; m_eChip = SPI_595; m_adjustedUSecTime=0; m_nPins = 0; m_pPins = NULL; m_pPinLengths=NULL;}
  
   // set the number of rgb leds 
   void setLeds(int nLeds) { m_nLeds = nLeds * 3; m_nCounter = 0; m_nDirty = 0; m_pData = (unsigned char*)malloc(m_nLeds); memset(m_pData,0,m_nLeds); m_pDataEnd = m_pData + m_nLeds; }
@@ -117,8 +119,12 @@ public:
   void setDataRate(int datarate);
 
   // set the pin used for output.  Note, at the moment this only makes sense for the TM1809 based leds, as everything
-  // else makes use of the spi infrastructure for its work.
-  void setPin(int pin);
+  // else makes use of the spi infrastructure for its work.  Setting pins is done in two parts.  First, set the number
+  // of pins (even if only one, for now, we'll do saner defaults later).  Then set each individual pin and how many
+  // leds you want it to take up.  Note that this is linear, so if pin 0 has 20 leds, pin 1 will start at the 21st led
+  void setPinCount(int nPins);
+  void setPin(int iPins, int nPin, int nLength);
+  int lengthAtPin(int nPin) { return m_pPinLengths[nPin]; }
 };
 
 extern CFastSPI_LED FastSPI_LED;
