@@ -94,7 +94,10 @@
 #define NOP20 NOP10 NOP10
 #define NOP22 NOP20 NOP2
 
-#define TM1809_BIT_SET(X,N,_PORT) if( X & (1<<N) ) { MASK_HI(_PORT,PIN); NOP5; MASK_LO(_PORT,PIN); NOP2; } else { MASK_HI(_PORT,PIN); NOP2; MASK_LO(_PORT,PIN); NOP5; }
+#define NOP_SHORT NOP2
+#define NOP_LONG NOP5
+
+#define TM1809_BIT_SET(X,N,_PORT) if( X & (1<<N) ) { MASK_HI(_PORT,PIN); NOP_LONG; MASK_LO(_PORT,PIN); NOP_SHORT; } else { MASK_HI(_PORT,PIN); NOP_SHORT; MASK_LO(_PORT,PIN); NOP_LONG; }
 
 #define TM1809_BIT_ALL(_PORT)   \
                 TM1809_BIT_SET(x,7,_PORT); \
@@ -106,8 +109,10 @@
                 TM1809_BIT_SET(x,1,_PORT); \
                 TM1809_BIT_SET(x,0,_PORT);
 
-#define TM1809_ALL(_PORT) \
-        while(pData != FastSPI_LED.m_pDataEnd) { register unsigned char x = *pData++;  TM1809_BIT_ALL(_PORT); }
+#define TM1809_ALL(_PORT,PTR, END) \
+        while(PTR != END) { register unsigned char x = *PTR++;  TM1809_BIT_ALL(_PORT); \
+						 x = *PTR++; TM1809_BIT_ALL(_PORT); \
+						 x = *PTR++; TM1809_BIT_ALL(_PORT); }
 
 #define TM1809_BIT_ALLD TM1809_BIT_ALL(PORTD);
 #define TM1809_BIT_ALLB TM1809_BIT_ALL(PORTB);
@@ -376,9 +381,12 @@ void CFastSPI_LED::show() {
     if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
     {
         cli();
-	pData = FastSPI_LED.m_pData;
-        while(pData != FastSPI_LED.m_pDataEnd) { 
-  	  SPI_B; SPI_A(*pData++); 
+        register byte *p = m_pData;
+	register byte *e = m_pDataEnd;
+        while(p != e) { 
+  	  SPI_B; SPI_A(*p++);
+  	  SPI_B; SPI_A(*p++);
+  	  SPI_B; SPI_A(*p++);
         }
 	m_nDirty = 0;
         sei();
@@ -387,12 +395,12 @@ void CFastSPI_LED::show() {
     {
       cli();
       m_nDirty = 0;
-      pData = FastSPI_LED.m_pData;
+      register byte *pData = m_pData;
       register unsigned char PIN = digitalPinToBitMask(FastSPI_LED.m_nPin); 
       register volatile uint8_t *pPort = FastSPI_LED.m_pPort;
 
       if(m_pPort == NOT_A_PIN) { /* do nothing */ } 
-      else { TM1809_ALL(*pPort); }
+      else { TM1809_ALL(*pPort, pData, m_pDataEnd); }
       sei();
     }
 }
