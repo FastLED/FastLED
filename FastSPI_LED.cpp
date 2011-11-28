@@ -117,6 +117,10 @@
 #define TM1809_BIT_ALLD TM1809_BIT_ALL(PORTD);
 #define TM1809_BIT_ALLB TM1809_BIT_ALL(PORTB);
 
+#define SPI_A(data) SPDR=data;
+#define SPI_B while(!(SPSR & (1<<SPIF))); 
+#define SPI_TRANSFER(data) { SPDR=data; while(!(SPSR & (1<<SPIF))); } 
+
 CFastSPI_LED FastSPI_LED;
 
 // local prototyps
@@ -137,6 +141,7 @@ static unsigned char nLedBlocks=0;
 unsigned char nChip=0;
 //static unsigned long adjustedUSecTime;
 
+#define USE_TIMER (m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809 && m_eChip != SPI_LPD8806)
 
 void CFastSPI_LED::setDirty() { m_nDirty = 1; }
 
@@ -147,21 +152,32 @@ void CFastSPI_LED::init() {
   // set up the spi timer - also do some initial timing loops to get base adjustments
   // for the timer below  
   setup_hardware_spi();
-  delay(10);
-  if(m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809) { 
+  if(USE_TIMER) {
+    delay(10);
     setup_timer1_ovf();
+  }
+
+  if(m_eChip == SPI_LPD8806) { 
+      // write out the initial set of 0's to latch out the world
+      int n = (m_nLeds + 191 / 192);
+      while(n--) { 
+        SPI_A(0);
+        SPI_B; SPI_A(0);
+        SPI_B; SPI_A(0);
+        SPI_B;
+      }
   }
 }
 
 // 
 void CFastSPI_LED::start() {
-  if(m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809) { 
+  if(USE_TIMER) {
     TCCR1B |= clockSelectBits;                                                     // reset clock select register
   }
 }
 
 void CFastSPI_LED::stop() {
-  if(m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809) { 
+  if(USE_TIMER) { 
     // clear the clock select bits
     TCCR1B &= ~(_BV(CS10) | _BV(CS11) | _BV(CS12));
   }
@@ -199,6 +215,7 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
     case CFastSPI_LED::SPI_595: m_cpuPercentage = 53; break;
     case CFastSPI_LED::SPI_LPD6803: m_cpuPercentage = 50; break;
     case CFastSPI_LED::SPI_HL1606: m_cpuPercentage = 65; break;
+    case CFastSPI_LED::SPI_LPD8806: 
     case CFastSPI_LED::SPI_WS2801: m_cpuPercentage = 25; break;
     case CFastSPI_LED::SPI_TM1809: m_cpuPercentage = 5; break;
   }  
@@ -213,16 +230,13 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
       break;
     case CFastSPI_LED::SPI_595:  
     case CFastSPI_LED::SPI_LPD6803:
+    case CFastSPI_LED::SPI_LPD8806:
     case CFastSPI_LED::SPI_WS2801:
     case CFastSPI_LED::SPI_TM1809:
       m_nDataRate = 0;
       break;
   }
 }
-
-#define SPI_A(data) SPDR=data;
-#define SPI_B while(!(SPSR & (1<<SPIF))); 
-#define SPI_TRANSFER(data) { SPDR=data; while(!(SPSR & (1<<SPIF))); } 
 
 // Why not use function pointers?  They're expensive!  Having TIMER1_OVF_vect call a chip
 // specific interrupt function through a pointer adds approximately 1.3µs over the if/else blocks 
@@ -406,6 +420,29 @@ void CFastSPI_LED::show() {
       }
       sei();
     }
+    else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD8806) 
+    {
+      cli();
+      register byte *p = m_pData;
+      register byte *e = m_pDataEnd;
+
+      // The LPD8806 requires the high bit to be set
+      while(p != e) { 
+        SPI_B; SPI_A( *p++ >> 1 | 0x80);
+        SPI_B; SPI_A( *p++ >> 1 | 0x80);
+        SPI_B; SPI_A( *p++ >> 1 | 0x80);
+      }
+
+      // Latch out our 0's to set the data stream
+      int n = (m_nLeds + 191 / 192);
+      while(n--) { 
+        SPI_B; SPI_A(0);
+        SPI_B; SPI_A(0);
+        SPI_B; SPI_A(0);
+      }
+      m_nDirty=0;
+      sei();
+    }
 }
 
 void CFastSPI_LED::setDataRate(int datarate) {
@@ -480,44 +517,46 @@ void CFastSPI_LED::setup_hardware_spi(void) {
   else { SPSR &= ~ (1<<SPI2X); }
 
   // dig out some timing info 
-  SPI_A(0);
-  TIMER1_OVF_vect();
+  if(USE_TIMER) { 
+    SPI_A(0);
+    TIMER1_OVF_vect();
   
-  // First thing to do is count our cycles to figure out how to line
-  // up the desired performance percentages
-  unsigned long nRounds=0;
-  volatile int x = 0;
-  unsigned long mCStart = millis();
-  for(volatile int i = 0 ; i < 10000; i++) {
-    ;
+    // First thing to do is count our cycles to figure out how to line
+    // up the desired performance percentages
+    unsigned long nRounds=0;
+    volatile int x = 0;
+    unsigned long mCStart = millis();
+    for(volatile int i = 0 ; i < 10000; i++) {
+      ;
 #ifdef COUNT_ROUNDS
-  m_nCounter++;
+    m_nCounter++;
 #endif
-  }
-  unsigned long mCEnd = millis();
-  m_nCounter=0;
-  nRounds = 10000;
-  DPRINT("10000 round empty loop in ms: "); DPRINTLN(mCEnd - mCStart);
-  unsigned long mStart,mStop;
-  if(m_eChip == SPI_WS2801 || m_eChip == SPI_TM1809) { 
+    }
+    unsigned long mCEnd = millis();
+    m_nCounter=0;
+    nRounds = 10000;
+    DPRINT("10000 round empty loop in ms: "); DPRINTLN(mCEnd - mCStart);
+    unsigned long mStart,mStop;
+    if(m_eChip == SPI_WS2801 || m_eChip == SPI_TM1809) { 
 #ifdef DEBUG_SPI
-    mStart = millis();
-    for(volatile int i = 0; i < 10000; i++) { 
-      show(); 
-    }
-    mStop = millis();
+      mStart = millis();
+      for(volatile int i = 0; i < 10000; i++) { 
+        show(); 
+      }
+      mStop = millis();
 #endif
-  } else { 
-    mStart = millis();
-    for(volatile int i = 0; i < 10000; i++) { 
-      TIMER1_OVF_vect(); 
+    } else { 
+      mStart = millis();
+      for(volatile int i = 0; i < 10000; i++) { 
+        TIMER1_OVF_vect(); 
+      }
+      mStop = millis();
     }
-    mStop = millis();
-  }
-  DPRINT(nRounds); DPRINT(" rounds of rgb out in ms: "); DPRINTLN(mStop - mStart); 
+    DPRINT(nRounds); DPRINT(" rounds of rgb out in ms: "); DPRINTLN(mStop - mStart); 
   
-  // This gives us the time for 10 rounds in µs
-  m_adjustedUSecTime = (mStop-mStart) - (mCEnd - mCStart);
+    // This gives us the time for 10 rounds in µs
+    m_adjustedUSecTime = (mStop-mStart) - (mCEnd - mCStart);
+  }
 
 }
 
