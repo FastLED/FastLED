@@ -1,9 +1,14 @@
 #ifndef __INC_SPIRGB_H
 #define __INC_SPIRGB_H
-#include <WProgram.h>
-#include <HardwareSerial.h>
+#if defined(ARDUINO) && ARDUINO >= 100
+  #include "Arduino.h"
+#else
+  #include "WProgram.h"
+  #include <pins_arduino.h>
+#endif
+#include "HardwareSerial.h"
 #include "string.h"
-#include <avr/pgmspace.h>
+#include "avr/pgmspace.h"
 
 extern "C" { 
   void TIMER1_OVF_vect(void) __attribute__ ((signal,naked,__INTR_ATTRS));
@@ -125,6 +130,7 @@ public:
   // leds you want it to take up.  Note that this is linear, so if pin 0 has 20 leds, pin 1 will start at the 21st led
   void setPinCount(int nPins);
   void setPin(int iPins, int nPin, int nLength);
+  void setPin(int nPin) { setPinCount(1); setPin(0, nPin, m_nLeds / 3); }
   int lengthAtPin(int nPin) { return m_pPinLengths[nPin]; }
 };
 

@@ -1,9 +1,13 @@
-#include <WProgram.h>
-#include <avr/interrupt.h>
-#include <avr/io.h>
-#include "FastSPI_LED.h"
+#if defined(ARDUINO) && ARDUINO >= 100
+  #include "Arduino.h"
+#else
+  #include "WProgram.h"
+  #include <pins_arduino.h>
 #include "wiring.h"
-#include "pins_arduino.h"
+#endif
+#include "avr/interrupt.h"
+#include "avr/io.h"
+#include "FastSPI_LED.h"
 
 // #define DEBUG_SPI
 #ifdef DEBUG_SPI
