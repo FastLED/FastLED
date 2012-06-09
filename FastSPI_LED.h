@@ -39,7 +39,8 @@ public:
     SPI_WS2801 = 0x08,
     SPI_TM1809 = 0x10,
     SPI_TM1804 = 0x10,
-    SPI_LPD8806 = 0x20
+    SPI_LPD8806 = 0x20,
+    SPI_UCS1903 = 0x40
   };
 
 public:  

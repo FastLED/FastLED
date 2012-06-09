@@ -94,12 +94,13 @@
 #define NOP12 NOP NOP11
 #define NOP13 NOP NOP12
 #define NOP14 NOP NOP13
+#define NOP15 NOP10 NOP5
 #define NOP16 NOP14 NOP2
 #define NOP20 NOP10 NOP10
 #define NOP22 NOP20 NOP2
 
-#define NOP_SHORT NOP2
-#define NOP_LONG NOP5
+#define NOP_SHORT NOP1
+#define NOP_LONG NOP4
 
 #define TM1809_BIT_SET(X,N,_PORT) if( X & (1<<N) ) { MASK_HI(_PORT,PIN); NOP_LONG; MASK_LO(_PORT,PIN); NOP_SHORT; } else { MASK_HI(_PORT,PIN); NOP_SHORT; MASK_LO(_PORT,PIN); NOP_LONG; }
 
@@ -117,6 +118,26 @@
         while(PTR != END) { register unsigned char x = *PTR++;  TM1809_BIT_ALL(_PORT); \
 						 x = *PTR++; TM1809_BIT_ALL(_PORT); \
 						 x = *PTR++; TM1809_BIT_ALL(_PORT); }
+
+#define NOP_SHORT_1903 NOP2
+#define NOP_LONG_1903 NOP15
+
+#define UCS1903_BIT_SET(X,N,_PORT) if( X & (1<<N) ) { MASK_HI(_PORT,PIN); NOP_LONG_1903; MASK_LO(_PORT,PIN); NOP_SHORT_1903; } else { MASK_HI(_PORT,PIN); NOP_SHORT_1903; MASK_LO(_PORT,PIN); NOP_LONG_1903; }
+
+#define UCS1903_BIT_ALL(_PORT)   \
+                UCS1903_BIT_SET(x,7,_PORT); \
+                UCS1903_BIT_SET(x,6,_PORT); \
+                UCS1903_BIT_SET(x,5,_PORT); \
+                UCS1903_BIT_SET(x,4,_PORT); \
+                UCS1903_BIT_SET(x,3,_PORT); \
+                UCS1903_BIT_SET(x,2,_PORT); \
+                UCS1903_BIT_SET(x,1,_PORT); \
+                UCS1903_BIT_SET(x,0,_PORT);
+
+#define UCS1903_ALL(_PORT,PTR, END) \
+        while(PTR != END) { register unsigned char x = *PTR++;  UCS1903_BIT_ALL(_PORT); \
+                                                 x = *PTR++; UCS1903_BIT_ALL(_PORT); \
+                                                 x = *PTR++; UCS1903_BIT_ALL(_PORT); }
 
 #define TM1809_BIT_ALLD TM1809_BIT_ALL(PORTD);
 #define TM1809_BIT_ALLB TM1809_BIT_ALL(PORTB);
@@ -145,7 +166,7 @@ static unsigned char nLedBlocks=0;
 unsigned char nChip=0;
 //static unsigned long adjustedUSecTime;
 
-#define USE_TIMER (m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809 && m_eChip != SPI_LPD8806)
+#define USE_TIMER (m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809 && m_eChip != SPI_UCS1903 && m_eChip != SPI_LPD8806)
 
 void CFastSPI_LED::setDirty() { m_nDirty = 1; }
 
@@ -222,6 +243,7 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
     case CFastSPI_LED::SPI_LPD8806: 
     case CFastSPI_LED::SPI_WS2801: m_cpuPercentage = 25; break;
     case CFastSPI_LED::SPI_TM1809: m_cpuPercentage = 5; break;
+    case CFastSPI_LED::SPI_UCS1903: m_cpuPercentage = 5; break;
   }  
 
   // set default spi rates
@@ -237,6 +259,7 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
     case CFastSPI_LED::SPI_LPD8806:
     case CFastSPI_LED::SPI_WS2801:
     case CFastSPI_LED::SPI_TM1809:
+    case CFastSPI_LED::SPI_UCS1903:
       m_nDataRate = 0;
       break;
   }
@@ -409,6 +432,21 @@ void CFastSPI_LED::show() {
 	m_nDirty = 0;
         sei();
     }
+    else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_UCS1903)
+    {
+      cli();
+      m_nDirty = 0;
+      register byte *pData = m_pData;
+      for(int iPins = 0; iPins < m_nPins; iPins++) { 
+        register byte *pEnd = pData + m_pPinLengths[iPins];
+        register unsigned char PIN = digitalPinToBitMask(FastSPI_LED.m_pPins[iPins]); 
+        register volatile uint8_t *pPort = m_pPorts[iPins];
+
+        if(pPort == NOT_A_PIN) { /* do nothing */ } 
+        else { UCS1903_ALL(*pPort, pData, pEnd); }
+      }
+      sei();
+    }
     else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_TM1809)
     {
       cli();
@@ -473,7 +511,7 @@ void CFastSPI_LED::setPin(int iPins, int nPin, int nLength) {
 void CFastSPI_LED::setup_hardware_spi(void) {
   byte clr;
   
-  if(m_eChip != SPI_TM1809) { 
+  if(m_eChip != SPI_TM1809 && m_eChip != SPI_UCS1903) { 
     pinMode(DATA_PIN,OUTPUT);
     pinMode(LATCH_PIN,OUTPUT);
     pinMode(CLOCK_PIN,OUTPUT);
