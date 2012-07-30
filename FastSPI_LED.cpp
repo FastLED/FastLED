@@ -167,6 +167,7 @@ unsigned char nChip=0;
 //static unsigned long adjustedUSecTime;
 
 #define USE_TIMER (m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809 && m_eChip != SPI_UCS1903 && m_eChip != SPI_LPD8806)
+#define USE_SPI (m_eChip != SPI_TM1809 && m_eChip != SPI_UCS1903)
 
 void CFastSPI_LED::setDirty() { m_nDirty = 1; }
 
@@ -418,12 +419,21 @@ void TIMER1_OVF_vect(void) {
   }
 
 void CFastSPI_LED::show() { 
+    static byte run=0;
+
     setDirty();
     if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
     {
         cli();
         register byte *p = m_pData;
 	register byte *e = m_pDataEnd;
+
+	// If we haven't run through yet - nothing has primed the SPI bus,
+	// and the first SPI_B will block.  
+        if(!run) { 
+          run = 1;
+	  SPI_A(*p++);
+	}
         while(p != e) { 
   	  SPI_B; SPI_A(*p++);
   	  SPI_B; SPI_A(*p++);
@@ -598,8 +608,7 @@ void CFastSPI_LED::setup_hardware_spi(void) {
   
     // This gives us the time for 10 rounds in µs
     m_adjustedUSecTime = (mStop-mStart) - (mCEnd - mCStart);
-  }
-
+  } 
 }
 
 // Core borrowed and adapted from the Timer1 Arduino library - by Jesse Tane
