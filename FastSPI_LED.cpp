@@ -22,7 +22,7 @@
 
 // some spi defines
 // Duemilanove and mini w/328
-#if defined(__AVR_ATmega328P__)
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 #define SPI_PORT PORTB
 #define SPI_DDR  DDRB
 #define SPI_PIN  PINB
