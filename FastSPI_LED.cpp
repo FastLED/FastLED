@@ -433,6 +433,8 @@ void CFastSPI_LED::show() {
         if(!run) { 
           run = 1;
 	  SPI_A(*p++);
+  	  SPI_B; SPI_A(*p++);
+  	  SPI_B; SPI_A(*p++);
 	}
         while(p != e) { 
   	  SPI_B; SPI_A(*p++);
