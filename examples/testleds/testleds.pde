@@ -12,7 +12,8 @@ struct CRGB *leds;
 void setup()
 {
   FastSPI_LED.setLeds(NUM_LEDS);
-  FastSPI_LED.setChipset(CFastSPI_LED::SPI_TM1809);
+  FastSPI_LED.setChipset(CFastSPI_LED::SPI_SM16716);
+  //FastSPI_LED.setChipset(CFastSPI_LED::SPI_TM1809);
   //FastSPI_LED.setChipset(CFastSPI_LED::SPI_LPD6803);
   //FastSPI_LED.setChipset(CFastSPI_LED::SPI_HL1606);
   //FastSPI_LED.setChipset(CFastSPI_LED::SPI_595);

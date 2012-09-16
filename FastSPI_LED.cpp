@@ -105,19 +105,19 @@
 #define TM1809_BIT_SET(X,N,_PORT) if( X & (1<<N) ) { MASK_HI(_PORT,PIN); NOP_LONG; MASK_LO(_PORT,PIN); NOP_SHORT; } else { MASK_HI(_PORT,PIN); NOP_SHORT; MASK_LO(_PORT,PIN); NOP_LONG; }
 
 #define TM1809_BIT_ALL(_PORT)   \
-                TM1809_BIT_SET(x,7,_PORT); \
-                TM1809_BIT_SET(x,6,_PORT); \
-                TM1809_BIT_SET(x,5,_PORT); \
-                TM1809_BIT_SET(x,4,_PORT); \
-                TM1809_BIT_SET(x,3,_PORT); \
-                TM1809_BIT_SET(x,2,_PORT); \
-                TM1809_BIT_SET(x,1,_PORT); \
-                TM1809_BIT_SET(x,0,_PORT);
+TM1809_BIT_SET(x,7,_PORT); \
+TM1809_BIT_SET(x,6,_PORT); \
+TM1809_BIT_SET(x,5,_PORT); \
+TM1809_BIT_SET(x,4,_PORT); \
+TM1809_BIT_SET(x,3,_PORT); \
+TM1809_BIT_SET(x,2,_PORT); \
+TM1809_BIT_SET(x,1,_PORT); \
+TM1809_BIT_SET(x,0,_PORT);
 
 #define TM1809_ALL(_PORT,PTR, END) \
-        while(PTR != END) { register unsigned char x = *PTR++;  TM1809_BIT_ALL(_PORT); \
-						 x = *PTR++; TM1809_BIT_ALL(_PORT); \
-						 x = *PTR++; TM1809_BIT_ALL(_PORT); }
+while(PTR != END) { register unsigned char x = *PTR++;  TM1809_BIT_ALL(_PORT); \
+ x = *PTR++; TM1809_BIT_ALL(_PORT); \
+ x = *PTR++; TM1809_BIT_ALL(_PORT); }
 
 #define NOP_SHORT_1903 NOP2
 #define NOP_LONG_1903 NOP15
@@ -125,19 +125,19 @@
 #define UCS1903_BIT_SET(X,N,_PORT) if( X & (1<<N) ) { MASK_HI(_PORT,PIN); NOP_LONG_1903; MASK_LO(_PORT,PIN); NOP_SHORT_1903; } else { MASK_HI(_PORT,PIN); NOP_SHORT_1903; MASK_LO(_PORT,PIN); NOP_LONG_1903; }
 
 #define UCS1903_BIT_ALL(_PORT)   \
-                UCS1903_BIT_SET(x,7,_PORT); \
-                UCS1903_BIT_SET(x,6,_PORT); \
-                UCS1903_BIT_SET(x,5,_PORT); \
-                UCS1903_BIT_SET(x,4,_PORT); \
-                UCS1903_BIT_SET(x,3,_PORT); \
-                UCS1903_BIT_SET(x,2,_PORT); \
-                UCS1903_BIT_SET(x,1,_PORT); \
-                UCS1903_BIT_SET(x,0,_PORT);
+ UCS1903_BIT_SET(x,7,_PORT); \
+ UCS1903_BIT_SET(x,6,_PORT); \
+ UCS1903_BIT_SET(x,5,_PORT); \
+ UCS1903_BIT_SET(x,4,_PORT); \
+ UCS1903_BIT_SET(x,3,_PORT); \
+ UCS1903_BIT_SET(x,2,_PORT); \
+ UCS1903_BIT_SET(x,1,_PORT); \
+ UCS1903_BIT_SET(x,0,_PORT);
 
 #define UCS1903_ALL(_PORT,PTR, END) \
-        while(PTR != END) { register unsigned char x = *PTR++;  UCS1903_BIT_ALL(_PORT); \
-                                                 x = *PTR++; UCS1903_BIT_ALL(_PORT); \
-                                                 x = *PTR++; UCS1903_BIT_ALL(_PORT); }
+ while(PTR != END) { register unsigned char x = *PTR++;  UCS1903_BIT_ALL(_PORT); \
+   x = *PTR++; UCS1903_BIT_ALL(_PORT); \
+   x = *PTR++; UCS1903_BIT_ALL(_PORT); }
 
 #define TM1809_BIT_ALLD TM1809_BIT_ALL(PORTD);
 #define TM1809_BIT_ALLB TM1809_BIT_ALL(PORTB);
@@ -145,45 +145,47 @@
 #define SPI_A(data) SPDR=data;
 #define SPI_B while(!(SPSR & (1<<SPIF))); 
 #define SPI_TRANSFER(data) { SPDR=data; while(!(SPSR & (1<<SPIF))); } 
+#define SPI_BIT(bit) digitalWrite(DATA_PIN, bit); digitalWrite(CLOCK_PIN, HIGH); digitalWrite(CLOCK_PIN, LOW);
 
-CFastSPI_LED FastSPI_LED;
+
+   CFastSPI_LED FastSPI_LED;
 
 // local prototyps
-extern "C" { 
-void spi595(void);
-void spihl1606(void);
-void spilpd6803(void);
-};
+   extern "C" { 
+    void spi595(void);
+    void spihl1606(void);
+    void spilpd6803(void);
+  };
 
 // local variables used for state tracking and pre-computed values
 // TODO: move these into the class as necessary
-static unsigned char *pData;
-static unsigned char nBrightIdx=0;
-static unsigned char nBrightMax=0;
-static unsigned char nCountBase=0;
-static unsigned char nCount=0;
-static unsigned char nLedBlocks=0;
-unsigned char nChip=0;
+  static unsigned char *pData;
+  static unsigned char nBrightIdx=0;
+  static unsigned char nBrightMax=0;
+  static unsigned char nCountBase=0;
+  static unsigned char nCount=0;
+  static unsigned char nLedBlocks=0;
+  unsigned char nChip=0;
 //static unsigned long adjustedUSecTime;
 
-#define USE_TIMER (m_eChip != SPI_WS2801 && m_eChip != SPI_TM1809 && m_eChip != SPI_UCS1903 && m_eChip != SPI_LPD8806)
+#define USE_TIMER (m_eChip == SPI_595 || m_eChip == SPI_HL1606 || m_eChip == SPI_LPD6803) 
 #define USE_SPI (m_eChip != SPI_TM1809 && m_eChip != SPI_UCS1903)
 
-void CFastSPI_LED::setDirty() { m_nDirty = 1; }
+  void CFastSPI_LED::setDirty() { m_nDirty = 1; }
 
-void CFastSPI_LED::init() { 
+  void CFastSPI_LED::init() { 
   // store some static locals (makes lookup faster)
-  pData = m_pDataEnd;
-  nCountBase = m_nLeds / 3;
+    pData = m_pDataEnd;
+    nCountBase = m_nLeds / 3;
   // set up the spi timer - also do some initial timing loops to get base adjustments
   // for the timer below  
-  setup_hardware_spi();
-  if(USE_TIMER) {
-    delay(10);
-    setup_timer1_ovf();
-  }
+    setup_hardware_spi();
+    if(USE_TIMER) {
+      delay(10);
+      setup_timer1_ovf();
+    }
 
-  if(m_eChip == SPI_LPD8806) { 
+    if(m_eChip == SPI_LPD8806) { 
       // write out the initial set of 0's to latch out the world
       int n = (m_nLeds + 191 / 192);
       while(n--) { 
@@ -192,12 +194,12 @@ void CFastSPI_LED::init() {
         SPI_B; SPI_A(0);
         SPI_B;
       }
+    }
   }
-}
 
 // 
-void CFastSPI_LED::start() {
-  if(USE_TIMER) {
+  void CFastSPI_LED::start() {
+    if(USE_TIMER) {
     TCCR1B |= clockSelectBits;                                                     // reset clock select register
   }
 }
@@ -215,55 +217,57 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
   nChip = eChip;
   switch(eChip) { 
     case SPI_595: 
-      nBrightIdx = 256 / 128; 
-      nBrightMax = 256 - nBrightIdx;
+    nBrightIdx = 256 / 128; 
+    nBrightMax = 256 - nBrightIdx;
       // Set some info used for taking advantage of extreme loop unrolling elsewhere
-      if(m_nLeds % 24 == 0 ) { 
-	nLedBlocks = m_nLeds / 24;
-	if(nLedBlocks > 4) { nLedBlocks = 0; }
-      } else { 
-	nLedBlocks = 0;
-      }
-      break;
-    case SPI_HL1606: 
+    if(m_nLeds % 24 == 0 ) { 
+     nLedBlocks = m_nLeds / 24;
+     if(nLedBlocks > 4) { nLedBlocks = 0; }
+   } else { 
+     nLedBlocks = 0;
+   }
+   break;
+   case SPI_HL1606: 
       // nTimerKick = 153; // shooting for ~ 125,000 rounds/second - 66% cpu
-      nBrightIdx = (m_nLeds <= 20) ? (256 / 80) : (256 / 32); 
-      nBrightMax = 256 - nBrightIdx;
-      nCount = nCountBase;
-      break;
-    case SPI_LPD6803: 
-      nBrightIdx = 0; 
-      break;
-  }
+   nBrightIdx = (m_nLeds <= 20) ? (256 / 80) : (256 / 32); 
+   nBrightMax = 256 - nBrightIdx;
+   nCount = nCountBase;
+   break;
+   case SPI_LPD6803: 
+   nBrightIdx = 0; 
+   break;
+ }
 
   // set default cpu percentage targets  
-  switch(FastSPI_LED.m_eChip) { 
-    case CFastSPI_LED::SPI_595: m_cpuPercentage = 53; break;
-    case CFastSPI_LED::SPI_LPD6803: m_cpuPercentage = 50; break;
-    case CFastSPI_LED::SPI_HL1606: m_cpuPercentage = 65; break;
-    case CFastSPI_LED::SPI_LPD8806: 
-    case CFastSPI_LED::SPI_WS2801: m_cpuPercentage = 25; break;
-    case CFastSPI_LED::SPI_TM1809: m_cpuPercentage = 5; break;
-    case CFastSPI_LED::SPI_UCS1903: m_cpuPercentage = 5; break;
-  }  
+ switch(FastSPI_LED.m_eChip) { 
+  case CFastSPI_LED::SPI_595: m_cpuPercentage = 53; break;
+  case CFastSPI_LED::SPI_LPD6803: m_cpuPercentage = 50; break;
+  case CFastSPI_LED::SPI_HL1606: m_cpuPercentage = 65; break;
+  case CFastSPI_LED::SPI_LPD8806: 
+  case CFastSPI_LED::SPI_SM16716:
+  case CFastSPI_LED::SPI_WS2801: m_cpuPercentage = 25; break;
+  case CFastSPI_LED::SPI_TM1809: m_cpuPercentage = 5; break;
+  case CFastSPI_LED::SPI_UCS1903: m_cpuPercentage = 5; break;
+}  
 
   // set default spi rates
-  switch(m_eChip) { 
-    case CFastSPI_LED::SPI_HL1606:
-      m_nDataRate = 2;
-      if(m_nLeds > 20) { 
-	m_nDataRate = 3;
-      }
-      break;
-    case CFastSPI_LED::SPI_595:  
-    case CFastSPI_LED::SPI_LPD6803:
-    case CFastSPI_LED::SPI_LPD8806:
-    case CFastSPI_LED::SPI_WS2801:
-    case CFastSPI_LED::SPI_TM1809:
-    case CFastSPI_LED::SPI_UCS1903:
-      m_nDataRate = 0;
-      break;
-  }
+switch(m_eChip) { 
+  case CFastSPI_LED::SPI_HL1606:
+  m_nDataRate = 2;
+  if(m_nLeds > 20) { 
+   m_nDataRate = 3;
+ }
+ break;
+ case CFastSPI_LED::SPI_595:  
+ case CFastSPI_LED::SPI_LPD6803:
+ case CFastSPI_LED::SPI_LPD8806:
+ case CFastSPI_LED::SPI_WS2801:
+ case CFastSPI_LED::SPI_SM16716:
+ case CFastSPI_LED::SPI_TM1809:
+ case CFastSPI_LED::SPI_UCS1903:
+ m_nDataRate = 0;
+ break;
+}
 }
 
 // Why not use function pointers?  They're expensive!  Having TIMER1_OVF_vect call a chip
@@ -306,48 +310,48 @@ void TIMER1_OVF_vect(void) {
 }
 
 //  if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_HL1606)
-  ISR(spihl1606)
-  {
-     static unsigned char nBrightness = 1;
-     register unsigned char aByte = Command;
-    
+ISR(spihl1606)
+{
+ static unsigned char nBrightness = 1;
+ register unsigned char aByte = Command;
+
     //if(pData == FastSPI_LED.m_pData) 
-    if(nCount != 0)
-    {  
-      register unsigned char nCheck = nBrightness;
-      if(*(--pData) > nCheck) { aByte |= BlueOn; } if(*(--pData) > nCheck) { aByte |= GreenOn; } if(*(--pData) > nCheck) { aByte |= RedOn; } 
+ if(nCount != 0)
+ {  
+  register unsigned char nCheck = nBrightness;
+  if(*(--pData) > nCheck) { aByte |= BlueOn; } if(*(--pData) > nCheck) { aByte |= GreenOn; } if(*(--pData) > nCheck) { aByte |= RedOn; } 
       // SPI_B;
-      SPI_A(aByte);
-      nCount--;
-      return;
-    }
-    else
-    { 
-      BIT_HI(SPI_PORT,SPI_SSN);
-      pData = FastSPI_LED.m_pDataEnd;
-      BIT_LO(SPI_PORT,SPI_SSN);
-      if (nBrightness <= nBrightMax) { nBrightness += nBrightIdx; } 
-      else { nBrightness = 1; }
-      BIT_HI(SPI_PORT,SPI_SSN);
+  SPI_A(aByte);
+  nCount--;
+  return;
+}
+else
+{ 
+  BIT_HI(SPI_PORT,SPI_SSN);
+  pData = FastSPI_LED.m_pDataEnd;
+  BIT_LO(SPI_PORT,SPI_SSN);
+  if (nBrightness <= nBrightMax) { nBrightness += nBrightIdx; } 
+  else { nBrightness = 1; }
+  BIT_HI(SPI_PORT,SPI_SSN);
       // if( (nBrightness += nBrightIdx) > BRIGHT_MAX) { nBrightness = 1; }  
-      nCount = nCountBase;
-      BIT_LO(SPI_PORT,SPI_SSN);
-      SPI_A(aByte);
-      return;
-    } 
-  } 
+  nCount = nCountBase;
+  BIT_LO(SPI_PORT,SPI_SSN);
+  SPI_A(aByte);
+  return;
+} 
+} 
   //else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_595)
-  ISR(spi595)
-  {
-    static unsigned char nBrightness = 1;
-    if(nBrightness > nBrightMax) { nBrightness = 1; } 
-    else { nBrightness += nBrightIdx; }
+ISR(spi595)
+{
+  static unsigned char nBrightness = 1;
+  if(nBrightness > nBrightMax) { nBrightness = 1; } 
+  else { nBrightness += nBrightIdx; }
     // register unsigned char nCheck = nBrightness;
-    register unsigned char aByte;
+  register unsigned char aByte;
     //register unsigned char *
-    { 
-      BIT_LO(SPI_PORT,SPI_SSN);
-  
+  { 
+    BIT_LO(SPI_PORT,SPI_SSN);
+
 #define BIT_SET(nBit) if(*(--pData) >= nBrightness) { aByte |= nBit; }
 #define BLOCK8 aByte=0; BIT_SET(0x80); BIT_SET(0x40); BIT_SET(0x20); BIT_SET(0x10); BIT_SET(0x08); BIT_SET(0x04); BIT_SET(0x02); BIT_SET(0x01);
 #define COMMANDA BLOCK8 ; SPI_A(aByte);
@@ -359,144 +363,170 @@ void TIMER1_OVF_vect(void) {
       // If we have blocks of 3 8 bit shift registers, that gives us 8 rgb leds, we'll do some aggressive
       // loop unrolling for cases where we have multiples of 3 shift registers - i should expand this out to
       // handle a wider range of cases at some point
-      switch(nLedBlocks) { 
-	case 4: COM12; break;
-	case 3: COM3A; COM3B; COM3B; break;
-	case 2: COM3A; COM3B; break;
-	case 1: COM3A; break;
-	default:
-	  BLOCK8;
-	  SPI_A(aByte);
-	  for(register char i = FastSPI_LED.m_nLeds; i > 8; i-= 8) { 
-	    BLOCK8;
-	    SPI_B;
-	    SPI_A(aByte);
-	  }
-      }
-      BIT_HI(SPI_PORT,SPI_SSN);
-      pData = FastSPI_LED.m_pDataEnd;
-      return;
-    }
-  }
+    switch(nLedBlocks) { 
+     case 4: COM12; break;
+     case 3: COM3A; COM3B; COM3B; break;
+     case 2: COM3A; COM3B; break;
+     case 1: COM3A; break;
+     default:
+     BLOCK8;
+     SPI_A(aByte);
+     for(register char i = FastSPI_LED.m_nLeds; i > 8; i-= 8) { 
+       BLOCK8;
+       SPI_B;
+       SPI_A(aByte);
+     }
+   }
+   BIT_HI(SPI_PORT,SPI_SSN);
+   pData = FastSPI_LED.m_pDataEnd;
+   return;
+ }
+}
   //else // if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD6803)
-  ISR(spilpd6803)
+ISR(spilpd6803)
+{
+  static unsigned char nState=1;
+  if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD6803)
   {
-    static unsigned char nState=1;
-    if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD6803)
+    if(nState==1) 
     {
-      if(nState==1) 
-      {
-	SPI_A(0); 
-	if(FastSPI_LED.m_nDirty==1) {
-	  nState = 0;
-	  FastSPI_LED.m_nDirty = 0;
-	  SPI_B; 
-	  SPI_A(0);
-	  pData = FastSPI_LED.m_pData;
-	  return;
-	}
-	SPI_B;
-	SPI_A(0);
-	return;
-      }
-      else
-      {
-	register unsigned int command;
-	command = 0x8000;
+     SPI_A(0); 
+     if(FastSPI_LED.m_nDirty==1) {
+       nState = 0;
+       FastSPI_LED.m_nDirty = 0;
+       SPI_B; 
+       SPI_A(0);
+       pData = FastSPI_LED.m_pData;
+       return;
+     }
+     SPI_B;
+     SPI_A(0);
+     return;
+   }
+   else
+   {
+     register unsigned int command;
+     command = 0x8000;
 	command |= (*(pData++) & 0xF8) << 7; // red is the high 5 bits
 	command |= (*(pData++) & 0xF8) << 2; // green is the middle 5 bits
 	command |= *(pData++) >> 3 ; // blue is the low 5 bits
 	SPI_B;
 	SPI_A( (command>>8) &0xFF);
 	if(pData == FastSPI_LED.m_pDataEnd) { 
-	  nState = 1;
-	}
-	SPI_B;
-	SPI_A( command & 0xFF);
-	return;
-      } 
-    }
-  }
+   nState = 1;
+ }
+ SPI_B;
+ SPI_A( command & 0xFF);
+ return;
+} 
+}
+}
 
 void CFastSPI_LED::show() { 
-    static byte run=0;
+  static byte run=0;
 
-    setDirty();
-    if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
-    {
-        cli();
-        register byte *p = m_pData;
-	register byte *e = m_pDataEnd;
+  setDirty();
+  if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_WS2801)
+  {
+    cli();
+    register byte *p = m_pData;
+    register byte *e = m_pDataEnd;
 
 	// If we haven't run through yet - nothing has primed the SPI bus,
 	// and the first SPI_B will block.  
-        if(!run) { 
-          run = 1;
-	  SPI_A(*p++);
-  	  SPI_B; SPI_A(*p++);
-  	  SPI_B; SPI_A(*p++);
-	}
-        while(p != e) { 
-  	  SPI_B; SPI_A(*p++);
-  	  SPI_B; SPI_A(*p++);
-  	  SPI_B; SPI_A(*p++);
-        }
-	m_nDirty = 0;
-        sei();
+    if(!run) { 
+      run = 1;
+      SPI_A(*p++);
+      SPI_B; SPI_A(*p++);
+      SPI_B; SPI_A(*p++);
     }
-    else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_UCS1903)
-    {
-      cli();
-      m_nDirty = 0;
-      register byte *pData = m_pData;
-      for(int iPins = 0; iPins < m_nPins; iPins++) { 
-        register byte *pEnd = pData + m_pPinLengths[iPins];
-        register unsigned char PIN = digitalPinToBitMask(FastSPI_LED.m_pPins[iPins]); 
-        register volatile uint8_t *pPort = m_pPorts[iPins];
+    while(p != e) { 
+     SPI_B; SPI_A(*p++);
+     SPI_B; SPI_A(*p++);
+     SPI_B; SPI_A(*p++);
+   }
+   m_nDirty = 0;
+   sei();
+ }
+ else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_SM16716)
+ {
+  cli();
+  register byte *p = m_pData;
+  register byte *e = m_pDataEnd;
+
+    // SM167176 starts with a control block of 50 bits
+  SPI_A(0);
+  SPI_B; SPI_A(0);
+  SPI_B; SPI_A(0);
+  SPI_B; SPI_A(0);
+  SPI_B; SPI_A(0);
+  SPI_B; SPI_A(0);
+  SPI_B; 
+  SPI_BIT(0);
+  SPI_BIT(0);
+
+  while(p != e) {
+      // every 24 bit block starts with a 1 bit being sent
+   SPI_BIT(1); 
+   SPI_A(*p++); SPI_B;
+   SPI_A(*p++); SPI_B;
+   SPI_A(*p++); SPI_B;
+ }
+ m_nDirty = 0;
+ sei();
+}else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_UCS1903)
+{
+  cli();
+  m_nDirty = 0;
+  register byte *pData = m_pData;
+  for(int iPins = 0; iPins < m_nPins; iPins++) { 
+    register byte *pEnd = pData + m_pPinLengths[iPins];
+    register unsigned char PIN = digitalPinToBitMask(FastSPI_LED.m_pPins[iPins]); 
+    register volatile uint8_t *pPort = m_pPorts[iPins];
 
         if(pPort == NOT_A_PIN) { /* do nothing */ } 
-        else { UCS1903_ALL(*pPort, pData, pEnd); }
-      }
-      sei();
-    }
-    else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_TM1809)
-    {
-      cli();
-      m_nDirty = 0;
-      register byte *pData = m_pData;
-      for(int iPins = 0; iPins < m_nPins; iPins++) { 
-        register byte *pEnd = pData + m_pPinLengths[iPins];
-        register unsigned char PIN = digitalPinToBitMask(FastSPI_LED.m_pPins[iPins]); 
-        register volatile uint8_t *pPort = m_pPorts[iPins];
+    else { UCS1903_ALL(*pPort, pData, pEnd); }
+  }
+  sei();
+}
+else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_TM1809)
+{
+  cli();
+  m_nDirty = 0;
+  register byte *pData = m_pData;
+  for(int iPins = 0; iPins < m_nPins; iPins++) { 
+    register byte *pEnd = pData + m_pPinLengths[iPins];
+    register unsigned char PIN = digitalPinToBitMask(FastSPI_LED.m_pPins[iPins]); 
+    register volatile uint8_t *pPort = m_pPorts[iPins];
 
         if(pPort == NOT_A_PIN) { /* do nothing */ } 
-        else { TM1809_ALL(*pPort, pData, pEnd); }
-      }
-      sei();
-    }
-    else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD8806) 
-    {
-      cli();
-      register byte *p = m_pData;
-      register byte *e = m_pDataEnd;
+    else { TM1809_ALL(*pPort, pData, pEnd); }
+  }
+  sei();
+}
+else if(FastSPI_LED.m_eChip == CFastSPI_LED::SPI_LPD8806) 
+{
+  cli();
+  register byte *p = m_pData;
+  register byte *e = m_pDataEnd;
 
       // The LPD8806 requires the high bit to be set
-      while(p != e) { 
-        SPI_B; SPI_A( *p++ >> 1 | 0x80);
-        SPI_B; SPI_A( *p++ >> 1 | 0x80);
-        SPI_B; SPI_A( *p++ >> 1 | 0x80);
-      }
+  while(p != e) { 
+    SPI_B; SPI_A( *p++ >> 1 | 0x80);
+    SPI_B; SPI_A( *p++ >> 1 | 0x80);
+    SPI_B; SPI_A( *p++ >> 1 | 0x80);
+  }
 
       // Latch out our 0's to set the data stream
-      int n = (m_nLeds + 191 / 192);
-      while(n--) { 
-        SPI_B; SPI_A(0);
-        SPI_B; SPI_A(0);
-        SPI_B; SPI_A(0);
-      }
-      m_nDirty=0;
-      sei();
-    }
+  int n = (m_nLeds + 191 )/ 192;
+  while(n--) { 
+    SPI_B; SPI_A(0);
+    SPI_B; SPI_A(0);
+    SPI_B; SPI_A(0);
+  }
+  m_nDirty=0;
+  sei();
+}
 }
 
 void CFastSPI_LED::setDataRate(int datarate) {
@@ -574,7 +604,7 @@ void CFastSPI_LED::setup_hardware_spi(void) {
   if(USE_TIMER) { 
     SPI_A(0);
     TIMER1_OVF_vect();
-  
+
     // First thing to do is count our cycles to figure out how to line
     // up the desired performance percentages
     unsigned long nRounds=0;
@@ -583,7 +613,7 @@ void CFastSPI_LED::setup_hardware_spi(void) {
     for(volatile int i = 0 ; i < 10000; i++) {
       ;
 #ifdef COUNT_ROUNDS
-    m_nCounter++;
+      m_nCounter++;
 #endif
     }
     unsigned long mCEnd = millis();
@@ -591,7 +621,7 @@ void CFastSPI_LED::setup_hardware_spi(void) {
     nRounds = 10000;
     DPRINT("10000 round empty loop in ms: "); DPRINTLN(mCEnd - mCStart);
     unsigned long mStart,mStop;
-    if(m_eChip == SPI_WS2801 || m_eChip == SPI_TM1809) { 
+    if(!USE_TIMER) { 
 #ifdef DEBUG_SPI
       mStart = millis();
       for(volatile int i = 0; i < 10000; i++) { 
@@ -607,7 +637,7 @@ void CFastSPI_LED::setup_hardware_spi(void) {
       mStop = millis();
     }
     DPRINT(nRounds); DPRINT(" rounds of rgb out in ms: "); DPRINTLN(mStop - mStart); 
-  
+
     // This gives us the time for 10 rounds in µs
     m_adjustedUSecTime = (mStop-mStart) - (mCEnd - mCStart);
   } 
@@ -628,7 +658,6 @@ void CFastSPI_LED::setup_timer1_ovf(void) {
     case CFastSPI_LED::SPI_LPD6803: us10 = (1000000 ) / baseCounts; break;
     case CFastSPI_LED::SPI_HL1606: us10 = (1000000 ) / baseCounts; break;
     case CFastSPI_LED::SPI_595: us10 = (1000000 ) / baseCounts; break; 
-    case CFastSPI_LED::SPI_WS2801: us10 = (1000000) / baseCounts; break;
   }
   
   DPRINT("bc:"); DPRINTLN(baseCounts);
