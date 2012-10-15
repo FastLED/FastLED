@@ -1,5 +1,6 @@
 #if defined(ARDUINO) && ARDUINO >= 100
   #include "Arduino.h"
+  #include <pins_arduino.h>
 #else
   #include "WProgram.h"
   #include <pins_arduino.h>
@@ -11,11 +12,11 @@
 
 // #define DEBUG_SPI
 #ifdef DEBUG_SPI
-#define DPRINT Serial.print
-#define DPRINTLN Serial.println
+#  define DPRINT Serial.print
+#  define DPRINTLN Serial.println
 #else
-#define DPRINT(x)
-#define DPRINTLN(x)
+#  define DPRINT(x)
+#  define DPRINTLN(x)
 #endif
 
 // #define COUNT_ROUNDS 1
@@ -34,6 +35,7 @@
 #define SLAVE_PIN 12
 #define CLOCK_PIN 13
 #define LATCH_PIN 10
+#define TIMER_AVAILABLE 1
 
 // Mega.
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
@@ -48,6 +50,39 @@
 #define SLAVE_PIN 50
 #define CLOCK_PIN 52
 #define LATCH_PIN 53
+#define TIMER_AVAILABLE 1
+
+// Leonardo, teensy, blinkm
+#elif defined(__AVR_ATmega32U4__)
+
+#define SPI_PORT PORTB
+#define SPI_DDR  DDRB
+#define SPI_PIN  PINB
+#define SPI_MOSI 2       // Arduino pin 10.
+#define SPI_MISO 3       // Arduino pin 11.
+#define SPI_SCK  1       // Arduino pin 9.
+#define SPI_SSN  0       // Arduino pin 8.
+#define DATA_PIN 16      // PB2, pin 10, Digital16
+#define SLAVE_PIN 14     // PB3, pin 11, Digital14
+#define CLOCK_PIN 15     // PB1, pin 9, Digital15
+#define LATCH_PIN 17     // PB0, pin 8, Digital17
+#define TIMER_AVAILABLE 1
+
+#elif defined(__MK20DX128__)   // for Teensy 3.0
+#define SPI_PORT PORTB
+#define SPI_DDR  DDRB
+#define SPI_PIN  PINB
+#define SPI_MOSI 2       // Arduino pin 10.
+#define SPI_MISO 3       // Arduino pin 11.
+#define SPI_SCK  1       // Arduino pin 9.
+#define SPI_SSN  0       // Arduino pin 8.
+#define DATA_PIN 11      // PB2, pin 10, Digital16
+#define SLAVE_PIN 12     // PB3, pin 11, Digital14
+#define CLOCK_PIN 13     // PB1, pin 9, Digital15
+#define LATCH_PIN 10      // PB0, pin 8, Digital17
+
+#define NOT_A_PIN NULL
+#define TIMER_AVAILABLE 0
 #endif
 
 #define BIT_HI(R, P) (R) |= _BV(P)
@@ -79,7 +114,12 @@
 #define BRIGHT_MAX 256
 
 // Some ASM defines
-#define NOP __asm__ __volatile__ ("cp r0,r0\n");
+#if defined(__arm__) 
+# define NOP __asm__ __volatile__ ("nop\n");
+#else
+#  define NOP __asm__ __volatile__ ("cp r0,r0\n");
+#endif
+
 #define NOP2 NOP NOP
 #define NOP1 NOP
 #define NOP3 NOP NOP2
@@ -102,6 +142,8 @@
 #define NOP_SHORT NOP2
 #define NOP_LONG NOP5
 
+// TODO: Better: MASH_HI(_PORT,PIN); NOP; NOP; MASK_SET(_PORT, PIN, X & (1<<N)); NOP; NOP; MASK_LO(_PORT, PIN); (loop logic)
+// TODO: Best - interleave X lines 
 #define TM1809_BIT_SET(X,N,_PORT) if( X & (1<<N) ) { MASK_HI(_PORT,PIN); NOP_LONG; MASK_LO(_PORT,PIN); NOP_SHORT; } else { MASK_HI(_PORT,PIN); NOP_SHORT; MASK_LO(_PORT,PIN); NOP_LONG; }
 
 #define TM1809_BIT_ALL(_PORT)   \
@@ -199,16 +241,20 @@ while(PTR != END) { register unsigned char x = *PTR++;  TM1809_BIT_ALL(_PORT); \
 
 // 
   void CFastSPI_LED::start() {
+#if TIMER_AVAILABLE
     if(USE_TIMER) {
     TCCR1B |= clockSelectBits;                                                     // reset clock select register
   }
+#endif
 }
 
 void CFastSPI_LED::stop() {
+#if TIMER_AVAILABLE
   if(USE_TIMER) { 
     // clear the clock select bits
     TCCR1B &= ~(_BV(CS10) | _BV(CS11) | _BV(CS12));
   }
+#endif
 }
 
 
@@ -217,25 +263,29 @@ void CFastSPI_LED::setChipset(EChipSet eChip) {
   nChip = eChip;
   switch(eChip) { 
     case SPI_595: 
-    nBrightIdx = 256 / 128; 
-    nBrightMax = 256 - nBrightIdx;
-      // Set some info used for taking advantage of extreme loop unrolling elsewhere
-    if(m_nLeds % 24 == 0 ) { 
-     nLedBlocks = m_nLeds / 24;
-     if(nLedBlocks > 4) { nLedBlocks = 0; }
-   } else { 
-     nLedBlocks = 0;
-   }
-   break;
+      nBrightIdx = 256 / 128; 
+      nBrightMax = 256 - nBrightIdx;
+        // Set some info used for taking advantage of extreme loop unrolling elsewhere
+      if(m_nLeds % 24 == 0 ) { 
+       nLedBlocks = m_nLeds / 24;
+       if(nLedBlocks > 4) { nLedBlocks = 0; }
+     } else { 
+       nLedBlocks = 0;
+     }
+     break;
    case SPI_HL1606: 
       // nTimerKick = 153; // shooting for ~ 125,000 rounds/second - 66% cpu
-   nBrightIdx = (m_nLeds <= 20) ? (256 / 80) : (256 / 32); 
-   nBrightMax = 256 - nBrightIdx;
-   nCount = nCountBase;
-   break;
+     nBrightIdx = (m_nLeds <= 20) ? (256 / 80) : (256 / 32); 
+     nBrightMax = 256 - nBrightIdx;
+     nCount = nCountBase;
+     break;
    case SPI_LPD6803: 
-   nBrightIdx = 0; 
+     nBrightIdx = 0; 
+     break;
+   default:
+     // no one else does anything 'special' here
    break;
+
  }
 
   // set default cpu percentage targets  
@@ -270,6 +320,7 @@ switch(m_eChip) {
 }
 }
 
+#if TIMER_AVAILABLE
 // Why not use function pointers?  They're expensive!  Having TIMER1_OVF_vect call a chip
 // specific interrupt function through a pointer adds approximately 1.3µs over the if/else blocks 
 // below per cycle.  That doesn't sound like a lot, though, right?  Wrong.  For the HL-1606, with
@@ -421,6 +472,7 @@ ISR(spilpd6803)
 } 
 }
 }
+#endif
 
 void CFastSPI_LED::show() { 
   static byte run=0;
@@ -553,7 +605,7 @@ void CFastSPI_LED::setPin(int iPins, int nPin, int nLength) {
 void CFastSPI_LED::setup_hardware_spi(void) {
   byte clr;
   
-  if(m_eChip != SPI_TM1809 && m_eChip != SPI_UCS1903) { 
+  if(USE_SPI) { 
     pinMode(DATA_PIN,OUTPUT);
     pinMode(LATCH_PIN,OUTPUT);
     pinMode(CLOCK_PIN,OUTPUT);
@@ -562,6 +614,37 @@ void CFastSPI_LED::setup_hardware_spi(void) {
     digitalWrite(LATCH_PIN,LOW);
     digitalWrite(CLOCK_PIN,LOW);
     digitalWrite(SLAVE_PIN,LOW);
+
+    // spi prescaler: 
+    // SPI2X SPR1 SPR0
+    //   0     0     0    fosc/4
+    //   0     0     1    fosc/16
+    //   0     1     0    fosc/64
+    //   0     1     1    fosc/128
+    //   1     0     0    fosc/2
+    //   1     0     1    fosc/8
+    //   1     1     0    fosc/32
+    //   1     1     1    fosc/64
+    SPCR |= ( (1<<SPE) | (1<<MSTR) ); // enable SPI as master
+    SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); // clear prescaler bits
+    clr=SPSR; // clear SPI status reg
+    clr=SPDR; // clear SPI data reg
+
+    // set the prescalar bits based on the chosen data rate values
+    bool b2x = false;
+    switch(m_nDataRate) { 
+      /* fosc/2   */ case 0: b2x=true; break;
+      /* fosc/4   */ case 1: break;
+      /* fosc/8   */ case 2: SPCR |= (1<<SPR0); b2x=true; break;
+      /* fosc/16  */ case 3: SPCR |= (1<<SPR0); break;
+      /* fosc/32  */ case 4: SPCR |= (1<<SPR1); b2x=true; break;
+      /* fosc/64  */ case 5: SPCR |= (1<<SPR1); break;
+      /* fosc/64  */ case 6: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); b2x=true; break;
+      /* fosc/128 */ default: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); break;
+    }
+    if(b2x) { SPSR |= (1<<SPI2X); }
+    else { SPSR &= ~ (1<<SPI2X); }
+
   } else { 
     for(int i = 0; i < m_nPins; i++) { 
       pinMode(m_pPins[i], OUTPUT);
@@ -569,39 +652,9 @@ void CFastSPI_LED::setup_hardware_spi(void) {
     }
   }
 
-
-  // spi prescaler: 
-  // SPI2X SPR1 SPR0
-  //   0     0     0    fosc/4
-  //   0     0     1    fosc/16
-  //   0     1     0    fosc/64
-  //   0     1     1    fosc/128
-  //   1     0     0    fosc/2
-  //   1     0     1    fosc/8
-  //   1     1     0    fosc/32
-  //   1     1     1    fosc/64
-  SPCR |= ( (1<<SPE) | (1<<MSTR) ); // enable SPI as master
-  SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); // clear prescaler bits
-  clr=SPSR; // clear SPI status reg
-  clr=SPDR; // clear SPI data reg
-
-  // set the prescalar bits based on the chosen data rate values
-  bool b2x = false;
-  switch(m_nDataRate) { 
-    /* fosc/2   */ case 0: b2x=true; break;
-    /* fosc/4   */ case 1: break;
-    /* fosc/8   */ case 2: SPCR |= (1<<SPR0); b2x=true; break;
-    /* fosc/16  */ case 3: SPCR |= (1<<SPR0); break;
-    /* fosc/32  */ case 4: SPCR |= (1<<SPR1); b2x=true; break;
-    /* fosc/64  */ case 5: SPCR |= (1<<SPR1); break;
-    /* fosc/64  */ case 6: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); b2x=true; break;
-    /* fosc/128 */ default: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); break;
-  }
-  if(b2x) { SPSR |= (1<<SPI2X); }
-  else { SPSR &= ~ (1<<SPI2X); }
-
   // dig out some timing info 
-  if(USE_TIMER) { 
+#if TIMER_AVAILABLE
+  if(USE_TIMER && USE_SPI) { 
     SPI_A(0);
     TIMER1_OVF_vect();
 
@@ -641,12 +694,14 @@ void CFastSPI_LED::setup_hardware_spi(void) {
     // This gives us the time for 10 rounds in µs
     m_adjustedUSecTime = (mStop-mStart) - (mCEnd - mCStart);
   } 
+#endif
 }
 
 // Core borrowed and adapted from the Timer1 Arduino library - by Jesse Tane
 #define RESOLUTION 65536
 
 void CFastSPI_LED::setup_timer1_ovf(void) {
+#if TIMER_AVAILABLE
   // Now that we have our per-cycle timing, figure out how to set up the timer to
   // match the desired cpu percentage
   TCCR1A = 0;
@@ -686,5 +741,6 @@ void CFastSPI_LED::setup_timer1_ovf(void) {
   
   TIMSK1 = _BV(TOIE1);
   sei();
+#endif
 }
 
