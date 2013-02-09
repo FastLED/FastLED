@@ -21,7 +21,7 @@ public:
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN>
 class LPD8806Controller : public CLEDController {
-	typedef ArduinoSPIOutput<DATA_PIN, CLOCK_PIN, LATCH_PIN, 0> SPI;
+	typedef AVRSPIOutput<DATA_PIN, CLOCK_PIN, LATCH_PIN, 0> SPI;
 
 	void clearLine(int nLeds) { 
 		int n = ((nLeds  + 63) >> 6);
@@ -53,7 +53,7 @@ public:
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN>
 class WS2801Controller : public CLEDController {
-	typedef ArduinoSPIOutput<DATA_PIN, CLOCK_PIN, LATCH_PIN, 0> SPI;
+	typedef AVRSPIOutput<DATA_PIN, CLOCK_PIN, LATCH_PIN, 0> SPI;
 
 public:
 	virtual void init() { 

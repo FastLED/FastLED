@@ -61,7 +61,7 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED>
-class ArduinoSoftwareSPIOutput { 
+class AVRSoftwareSPIOutput { 
 public:
 	static void init() {
 		// set the pins to output
@@ -287,16 +287,16 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED>
-class ArduinoHardwareSPIOutput { 
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _LATCH_PIN, uint8_t _SPI_SPEED>
+class AVRHardwareSPIOutput { 
 public:
 	static void init() {
 		uint8_t clr;
 
 		// set the pins to output
-		Pin<DATA_PIN>::setOutput();
-		Pin<LATCH_PIN>::setOutput();
-		Pin<CLOCK_PIN>::setOutput();
+		Pin<_DATA_PIN>::setOutput();
+		Pin<_LATCH_PIN>::setOutput();
+		Pin<_CLOCK_PIN>::setOutput();
 
 		SPCR |= ((1<<SPE) | (1<<MSTR) ); 		// enable SPI as master
 		SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); 	// clear out the prescalar bits
@@ -305,7 +305,7 @@ public:
 		clr = SPDR; // clear SPI data register
 
 	    bool b2x = false;
-	    switch(SPI_SPEED) { 
+	    switch(_SPI_SPEED) { 
 	      /* fosc/2   */ case 0: b2x=true; break;
 	      /* fosc/4   */ case 1: break;
 	      /* fosc/8   */ case 2: SPCR |= (1<<SPR0); b2x=true; break;
@@ -340,24 +340,24 @@ public:
 	template <uint8_t BIT> inline static void writeBit(uint8_t b, volatile uint8_t *clockpin, volatile uint8_t *datapin) { 
 		SPCR &= ~(1 << SPE);
 		if(b & (1 << BIT)) { 
-			Pin<DATA_PIN>::hi(datapin);
+			Pin<_DATA_PIN>::hi(datapin);
 		} else { 
-			Pin<DATA_PIN>::lo(datapin);
+			Pin<_DATA_PIN>::lo(datapin);
 		}
 
-		Pin<CLOCK_PIN>::hi(clockpin);
-		Pin<CLOCK_PIN>::lo(clockpin);
+		Pin<_CLOCK_PIN>::hi(clockpin);
+		Pin<_CLOCK_PIN>::lo(clockpin);
 		SPCR |= 1 << SPE;
 	}
 
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
-		register volatile uint8_t *clockpin = Pin<CLOCK_PIN>::port();
-		register volatile uint8_t *datapin = Pin<CLOCK_PIN>::port();
+		register volatile uint8_t *clockpin = Pin<_CLOCK_PIN>::port();
+		register volatile uint8_t *datapin = Pin<_CLOCK_PIN>::port();
 		writeBit<BIT>(b, clockpin, datapin);	
 	}
 
-	static void latch() { Pin<LATCH_PIN>::hi(); }
-	static void release() { Pin<LATCH_PIN>::lo(); }
+	static void latch() { Pin<_LATCH_PIN>::hi(); }
+	static void release() { Pin<_LATCH_PIN>::lo(); }
 
 	static void writeBytesValue(uint8_t value, int len) { 
 		latch();
@@ -407,8 +407,8 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED>
-class ArduinoSPIOutput : public ArduinoSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, LATCH_PIN, SPI_SPEED> {};
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _LATCH_PIN, uint8_t _SPI_SPEED>
+class AVRSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _LATCH_PIN, _SPI_SPEED> {};
 
 // uno/mini/duemilanove
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
@@ -416,7 +416,7 @@ class ArduinoSPIOutput : public ArduinoSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, LA
 #define SPI_CLOCK 13
 #define SPI_LATCH 10
 template<uint8_t SPI_SPEED>
-class ArduinoSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> : public ArduinoHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> {};
+class AVRSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> {};
 
 // Leonardo, teensy, blinkm
 #elif defined(__AVR_ATmega32U4__)
@@ -424,10 +424,11 @@ class ArduinoSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> : public Ardui
 #define SPI_CLOCK 1
 #define SPI_LATCH 0
 template<uint8_t SPI_SPEED>
-class ArduinoSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> : public ArduinoHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> {};
+class AVRSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> {};
 
 
+#else
+#pragma message "No hardware SPI pins defined.  All SPI access will default to bitbanged output"
 #endif
-
 
 #endif

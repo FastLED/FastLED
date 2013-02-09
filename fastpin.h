@@ -74,7 +74,7 @@ typedef volatile uint8_t & reg8_t;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Pin definitions for AVR
+// Pin definitions for AVR.  If there are pin definitions supplied below for the platform being built on 
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -99,6 +99,10 @@ _DEFPIN(8, 8, D); _DEFPIN(9, 64, C); _DEFPIN(10, 128, C); _DEFPIN(11, 64, D);
 _DEFPIN(12, 128, D); _DEFPIN(13, 16, B); _DEFPIN(14, 32, B); _DEFPIN(15, 64, B); 
 _DEFPIN(16, 128, F); _DEFPIN(17, 64, F); _DEFPIN(18, 32, F); _DEFPIN(19, 16, F); 
 _DEFPIN(20, 2, F); _DEFPIN(21, 1, F); _DEFPIN(22, 16, D); _DEFPIN(23, 32, D); 
+#else
+
+#pragma message "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
+
 #endif
 
 
