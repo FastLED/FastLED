@@ -4,6 +4,12 @@
 #include "controller.h"
 #include <avr/interrupt.h> // for cli/se definitions
 
+// Macro to convert from nano-seconds to clocks
+#define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
+
+//  Macro for making sure there's enough time available
+#define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 2 || NS(C) < 6)
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point

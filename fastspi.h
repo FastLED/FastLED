@@ -68,6 +68,10 @@ public:
 		Pin<DATA_PIN>::setOutput();
 		Pin<LATCH_PIN>::setOutput();
 		Pin<CLOCK_PIN>::setOutput();
+		release();
+
+		// Flush out a bunch of 0's to clear out the line
+		writeBytesValue(0, 192*3);
 	}
 
 	static void wait() __attribute__((always_inline)) { }
@@ -162,8 +166,8 @@ public:
 		}
 	}
 
-	static void latch() { Pin<LATCH_PIN>::hi(); }
-	static void release() { Pin<LATCH_PIN>::lo(); }
+	static void latch() { Pin<LATCH_PIN>::lo(); }
+	static void release() { Pin<LATCH_PIN>::hi(); }
 
 	static void writeBytesValue(uint8_t value, int len) { 
 		latch();
@@ -283,62 +287,39 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Hardware SPI support using SPDR registers and friends
+// Hardware SPI support using USART registers and friends
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _LATCH_PIN, uint8_t _SPI_SPEED>
-class AVRHardwareSPIOutput { 
+class AVRUSARTSPIOutput { 
 public:
-	static void init() {
-		uint8_t clr;
-
-		// set the pins to output
-		Pin<_DATA_PIN>::setOutput();
+	static void init() { 
 		Pin<_LATCH_PIN>::setOutput();
-		Pin<_CLOCK_PIN>::setOutput();
+		UBRR0 = 0;
+		UCSR0A = 1<<TXC0;
 
-		SPCR |= ((1<<SPE) | (1<<MSTR) ); 		// enable SPI as master
-		SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); 	// clear out the prescalar bits
+		Pin<_CLOCK_PIN>::setOutpuut();
+		Pin<_DATA_PIN>::setOutput();
 
-		clr = SPSR; // clear SPI status register 
-		clr = SPDR; // clear SPI data register
+		UCSR0C = _BV (UMSEL00) | _BV (UMSEL01);  // Master SPI mode
+		UCSR0B = _BV (TXEN0) | _BV (RXEN0);  // transmit enable and receive enable
 
-	    bool b2x = false;
-	    switch(_SPI_SPEED) { 
-	      /* fosc/2   */ case 0: b2x=true; break;
-	      /* fosc/4   */ case 1: break;
-	      /* fosc/8   */ case 2: SPCR |= (1<<SPR0); b2x=true; break;
-	      /* fosc/16  */ case 3: SPCR |= (1<<SPR0); break;
-	      /* fosc/32  */ case 4: SPCR |= (1<<SPR1); b2x=true; break;
-	      /* fosc/64  */ case 5: SPCR |= (1<<SPR1); break;
-	      /* fosc/64  */ case 6: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); b2x=true; break;
-	      /* fosc/128 */ default: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); break;
-	    }
-	    if(b2x) { SPSR |= (1<<SPI2X); }
-	    else { SPSR &= ~ (1<<SPI2X); }
-
-	    // push 192 0s to prime the spi stuff
-	    SPDR = 0;
-	    for(int i = 0; i < 191; i++) { 
-	    	writeByte(0);
-	    }
+		// must be done last, see page 206
+		UBRR0 = 3;  // 2 Mhz clock rate
 	}
 
-	static void wait() __attribute__((always_inline)) { while(!(SPSR & (1<<SPIF))); }
+	static void wait() __attribute__((always_inline)) { while(!(UCSR0A & (1<<UDRE0))); }
 
-	// All the write functions stub out and degrade to the SPDR write.  The various parameter combinations are attempts to support
-	// bitbanging optimizations
+	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); UDR0 = b; }
 	static void writeByte(uint8_t b, volatile uint8_t *, volatile uint8_t *,
-						  uint8_t , uint8_t , uint8_t , uint8_t ) __attribute__((always_inline)) { wait(); SPDR=b; }
+						  uint8_t , uint8_t , uint8_t , uint8_t ) __attribute__((always_inline)) { writeByte(b); }
 	static void writeByte(uint8_t b, volatile uint8_t *, 
-						  uint8_t , uint8_t , uint8_t , uint8_t ) __attribute__((always_inline)) { wait(); SPDR=b; }
+						  uint8_t , uint8_t , uint8_t , uint8_t ) __attribute__((always_inline)) { writeByte(b); }
 
-	static void writeByte(uint8_t b, volatile uint8_t*, volatile uint8_t*) __attribute__((always_inline)) { wait(); SPDR=b; }
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPDR=b; }
+	static void writeByte(uint8_t b, volatile uint8_t*, volatile uint8_t*) __attribute__((always_inline)) { writeByte(b); }
 
 	template <uint8_t BIT> inline static void writeBit(uint8_t b, volatile uint8_t *clockpin, volatile uint8_t *datapin) { 
-		SPCR &= ~(1 << SPE);
 		if(b & (1 << BIT)) { 
 			Pin<_DATA_PIN>::hi(datapin);
 		} else { 
@@ -347,17 +328,20 @@ public:
 
 		Pin<_CLOCK_PIN>::hi(clockpin);
 		Pin<_CLOCK_PIN>::lo(clockpin);
-		SPCR |= 1 << SPE;
 	}
 
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
 		register volatile uint8_t *clockpin = Pin<_CLOCK_PIN>::port();
-		register volatile uint8_t *datapin = Pin<_CLOCK_PIN>::port();
+		register volatile uint8_t *datapin = Pin<_DATA_PIN>::port();
 		writeBit<BIT>(b, clockpin, datapin);	
 	}
 
-	static void latch() { Pin<_LATCH_PIN>::hi(); }
-	static void release() { Pin<_LATCH_PIN>::lo(); }
+	static void latch() { Pin<_LATCH_PIN>::lo(); }
+	static void release() { 
+		// wait for all transmissions to finish
+  		while ((UCSR0A & (1 <<TXC0)) == 0) {}
+    	Pin<_LATCH_PIN>::hi(); 
+	}
 
 	static void writeBytesValue(uint8_t value, int len) { 
 		latch();
@@ -400,6 +384,135 @@ public:
 
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Hardware SPI support using SPDR registers and friends
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _LATCH_PIN, uint8_t _SPI_SPEED>
+class AVRHardwareSPIOutput { 
+public:
+	static void init() {
+		uint8_t clr;
+
+		// set the pins to output
+		Pin<_DATA_PIN>::setOutput();
+		Pin<_LATCH_PIN>::setOutput();
+		Pin<_CLOCK_PIN>::setOutput();
+		release();
+
+		SPCR |= ((1<<SPE) | (1<<MSTR) ); 		// enable SPI as master
+		SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); 	// clear out the prescalar bits
+
+		clr = SPSR; // clear SPI status register 
+		clr = SPDR; // clear SPI data register
+
+	    bool b2x = false;
+	    switch(_SPI_SPEED) { 
+	      /* fosc/2   */ case 0: b2x=true; break;
+	      /* fosc/4   */ case 1: break;
+	      /* fosc/8   */ case 2: SPCR |= (1<<SPR0); b2x=true; break;
+	      /* fosc/16  */ case 3: SPCR |= (1<<SPR0); break;
+	      /* fosc/32  */ case 4: SPCR |= (1<<SPR1); b2x=true; break;
+	      /* fosc/64  */ case 5: SPCR |= (1<<SPR1); break;
+	      /* fosc/64  */ case 6: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); b2x=true; break;
+	      /* fosc/128 */ default: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); break;
+	    }
+	    if(b2x) { SPSR |= (1<<SPI2X); }
+	    else { SPSR &= ~ (1<<SPI2X); }
+
+	    // push 192 0s to prime the spi stuff
+	    latch();
+	    SPDR = 0;
+	    for(int i = 0; i < 191; i++) { 
+	    	writeByte(0); writeByte(0); writeByte(0);
+	    }
+	    release();
+	}
+
+	static void wait() __attribute__((always_inline)) { while(!(SPSR & (1<<SPIF))); }
+
+	// All the write functions stub out and degrade to the SPDR write.  The various parameter combinations are attempts to support
+	// bitbanging optimizations
+	static void writeByte(uint8_t b, volatile uint8_t *, volatile uint8_t *,
+						  uint8_t , uint8_t , uint8_t , uint8_t ) __attribute__((always_inline)) { writeByte(b); }
+	static void writeByte(uint8_t b, volatile uint8_t *, 
+						  uint8_t , uint8_t , uint8_t , uint8_t ) __attribute__((always_inline)) { writeByte(b); }
+
+	static void writeByte(uint8_t b, volatile uint8_t*, volatile uint8_t*) __attribute__((always_inline)) { writeByte(b); }
+	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPDR=b; }
+	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; }
+
+	template <uint8_t BIT> inline static void writeBit(uint8_t b, volatile uint8_t *clockpin, volatile uint8_t *datapin) { 
+		SPCR &= ~(1 << SPE);
+		if(b & (1 << BIT)) { 
+			Pin<_DATA_PIN>::hi(datapin);
+		} else { 
+			Pin<_DATA_PIN>::lo(datapin);
+		}
+
+		Pin<_CLOCK_PIN>::hi(clockpin);
+		Pin<_CLOCK_PIN>::lo(clockpin);
+		SPCR |= 1 << SPE;
+	}
+
+	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
+		register volatile uint8_t *clockpin = Pin<_CLOCK_PIN>::port();
+		register volatile uint8_t *datapin = Pin<_DATA_PIN>::port();
+		writeBit<BIT>(b, clockpin, datapin);	
+	}
+
+	static void latch() { Pin<_LATCH_PIN>::lo(); }
+	static void release() { Pin<_LATCH_PIN>::hi(); }
+
+	static void writeBytesValue(uint8_t value, int len) { 
+		latch();
+		while(len--) { 
+			writeByte(value);
+		}
+		release();
+	}
+	
+	// Write a block of n uint8_ts out 
+	template <class D> static void writeBytes(register uint8_t *data, int len) { 
+		uint8_t *end = data + len;
+		latch();
+		while(data != end) { 
+			writeByteNoWait(D::adjust(*data++));
+		}
+		release();	
+	}
+
+	static void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+
+	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
+	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
+	template <uint8_t SKIP, class D> static void writeBytes3(register uint8_t *data, int len) { 
+		uint8_t *end = data + len;
+		latch();
+		while(data != end) { 
+			data += SKIP;
+			// a slight touch of delay here helps optimize the timing of the status register check loop 
+			if(_SPI_SPEED == 0) { 
+				writeByteNoWait(D::adjust(*data++)); delaycycles<13>();
+				writeByteNoWait(D::adjust(*data++)); delaycycles<13>();
+				writeByteNoWait(D::adjust(*data++)); delaycycles<9>();
+			} else { 
+				writeByte(D::adjust(*data++)); delaycycles<3>();
+				writeByte(D::adjust(*data++)); delaycycles<3>();
+				writeByte(D::adjust(*data++)); delaycycles<3>();
+			}
+		}
+		release();
+	}
+
+	template <uint8_t SKIP> static void writeBytes3(register uint8_t *data, int len) { writeBytes3<SKIP, DATA_NOP>(data, len); }
+	template <class D> static void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, D>(data, len); }
+	static void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, DATA_NOP>(data, len); }
+
+};
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -414,17 +527,20 @@ class AVRSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _LATCH_P
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 #define SPI_DATA 11
 #define SPI_CLOCK 13
-#define SPI_LATCH 10
-template<uint8_t SPI_SPEED>
-class AVRSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> {};
+template<uint8_t _LATCH, uint8_t SPI_SPEED>
+class AVRSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> {};
+
+#define USART_DATA 0
+#define USART_CLOCK 4
+template<uint8_t _LATCH, uint8_t SPI_SPEED>
+class AVRSPIOutput<USART_DATA, USART_CLOCK, _LATCH, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, _LATCH, SPI_SPEED> {};
 
 // Leonardo, teensy, blinkm
 #elif defined(__AVR_ATmega32U4__)
 #define SPI_DATA 2
 #define SPI_CLOCK 1
-#define SPI_LATCH 0
-template<uint8_t SPI_SPEED>
-class AVRSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> {};
+template<uint8_t _LATCH, uint8_t SPI_SPEED>
+class AVRSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> {};
 
 
 #else
