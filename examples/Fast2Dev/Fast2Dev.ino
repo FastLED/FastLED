@@ -38,16 +38,19 @@ struct CRGB leds[NUM_LEDS];
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // Hardware SPIr2 - .539ms @8Mhz, .799 @4Mhz, 1.315ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
-LPD8806Controller<11, 13, 10> LED;
+// LPD8806Controller<11, 13, 10> LED;
+// LPD8806Controller<2, 1, 0> LED; // teensy pins
 
 // Same Port, non-hardware SPI - 1.2ms for an 86 led frame, 1.12ms with large switch 
 // r2 - .939ms without large switch  .823ms with large switch
 // r3 - .824ms removing 0 balancing nop, .823 with large switch removing balancing
-// LPD8806Controller<12, 13, 10> LED;
+//LPD8806Controller<12, 13, 10> LED;
+LPD8806Controller<14, 1, 10> LED; // teensy pins
 
 // Different Port, non-hardware SPI - 1.47ms for an 86 led frame
 // Different PortR2, non-hardware SPI - 1.07ms for an 86 led frame
 // LPD8806Controller<7, 13, 10> LED;
+// LPD8806Controller<8, 1, 10> LED;
 
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
@@ -86,6 +89,11 @@ LPD8806Controller<11, 13, 10> LED;
 
 void setup() {
 
+	aPin.hi();
+	aPin.lo();
+	Pin<2>::hi();
+	Pin<2>::lo();
+
 #ifdef DEBUG
     Serial.begin(38400);
     Serial.println("resetting!");
@@ -104,34 +112,27 @@ void setup() {
 }
 
 void loop() { 
-	memset(leds, 0, NUM_LEDS * sizeof(struct CRGB));
-	LED.showRGB((byte*)leds, NUM_LEDS);
-	// ledset++;
-	// if(ledset > 4) { ledset = 0; }
-	// ledset = 0;
-	// // memset( leds, 128, NUM_LEDS * sizeof(struct CRGB));
-	// // show();
-	// for(int i = 0; i < 3; i++) {
-	// 	for(int iLed = 0; iLed < NUM_LEDS; iLed++) {
-	// 		memset(leds, 0,  NUM_LEDS * sizeof(struct CRGB));
-	// 		switch(i) { 
-	// 		 	case 0: leds[iLed].r = 128; break;
-	// 		 	case 1: leds[iLed].g = 128; break;
-	// 		 	case 2: leds[iLed].b = 128; break;
-	// 		 }
+	for(int i = 0; i < 3; i++) {
+		for(int iLed = 0; iLed < NUM_LEDS; iLed++) {
+			memset(leds, 0,  NUM_LEDS * sizeof(struct CRGB));
+			switch(i) { 
+			 	case 0: leds[iLed].r = 128; break;
+			 	case 1: leds[iLed].g = 128; break;
+			 	case 2: leds[iLed].b = 128; break;
+			 }
 
-	// 		show();
-	// 		// delay(20);
-	// 	}
-	// }
+			LED.showRGB((byte*)leds, NUM_LEDS);;
+			delay(20);
+		}
+	}
 	// for(int i = 0; i < 64; i++) { 
 	//  	memset(leds, i, NUM_LEDS * 3);
-	//  	show();
+	// 	LED.showRGB((byte*)leds, NUM_LEDS);;
 	//  	delay(20);
 	// }
 	// for(int i = 64; i >= 0; i--) { 
 	//  	memset(leds, i, NUM_LEDS * 3);
-	//  	show();
+	// 	LED.showRGB((byte*)leds, NUM_LEDS);;
 	//  	delay(20);
 	// }
 }
