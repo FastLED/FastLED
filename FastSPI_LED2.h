@@ -30,6 +30,8 @@ class LPD8806Controller : public CLEDController {
 public:
 	virtual void init() { 
 		SPI::init();
+		SPI::writeBytesValue(0x80, 1000);
+		clearLine(1000);
 	}
 
 	virtual void showRGB(uint8_t *data, int nLeds) {

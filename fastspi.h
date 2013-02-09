@@ -60,7 +60,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPEED>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED>
 class ArduinoSoftwareSPIOutput { 
 public:
 	static void init() {
@@ -170,7 +170,7 @@ public:
 		register volatile uint8_t *clockpin = Pin<CLOCK_PIN>::port();
 		register volatile uint8_t *datapin = Pin<DATA_PIN>::port();
 
-		if((DATA_PIN & 0xF8) != (CLOCK_PIN & 0xF8)) {
+		if(Pin<DATA_PIN>::port() != Pin<CLOCK_PIN>::port()) {
 			// If data and clock are on different ports, then writing a bit will consist of writing the value foor
 			// the bit (hi or low) to the data pin port, and then two writes to the clock port to strobe the clock line
 			register uint8_t datahi = Pin<DATA_PIN>::hival();
@@ -201,7 +201,7 @@ public:
 		register volatile uint8_t *clockpin = Pin<CLOCK_PIN>::port();
 		register volatile uint8_t *datapin = Pin<DATA_PIN>::port();
 
-		if((DATA_PIN & 0xF8) != (CLOCK_PIN & 0xF8)) {
+		if(Pin<DATA_PIN>::port() != Pin<CLOCK_PIN>::port()) {
 			// If data and clock are on different ports, then writing a bit will consist of writing the value foor
 			// the bit (hi or low) to the data pin port, and then two writes to the clock port to strobe the clock line
 			register uint8_t datahi = Pin<DATA_PIN>::hival();
@@ -240,7 +240,7 @@ public:
 		register volatile uint8_t *clockpin = Pin<CLOCK_PIN>::port();
 		register volatile uint8_t *datapin = Pin<DATA_PIN>::port();
 
-		if((DATA_PIN & 0xF8) != (CLOCK_PIN & 0xF8)) {
+		if(Pin<DATA_PIN>::port() != Pin<CLOCK_PIN>::port()) {
 			// If data and clock are on different ports, then writing a bit will consist of writing the value foor
 			// the bit (hi or low) to the data pin port, and then two writes to the clock port to strobe the clock line
 			register uint8_t datahi = Pin<DATA_PIN>::hival();
@@ -287,11 +287,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define SPI_DATA 11
-#define SPI_CLOCK 13
-#define SPI_LATCH 10
-
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPEED>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED>
 class ArduinoHardwareSPIOutput { 
 public:
 	static void init() {
@@ -309,7 +305,7 @@ public:
 		clr = SPDR; // clear SPI data register
 
 	    bool b2x = false;
-	    switch(SPEED) { 
+	    switch(SPI_SPEED) { 
 	      /* fosc/2   */ case 0: b2x=true; break;
 	      /* fosc/4   */ case 1: break;
 	      /* fosc/8   */ case 2: SPCR |= (1<<SPR0); b2x=true; break;
@@ -411,11 +407,27 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPEED>
-class ArduinoSPIOutput : public ArduinoSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, LATCH_PIN, SPEED> {};
+template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED>
+class ArduinoSPIOutput : public ArduinoSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, LATCH_PIN, SPI_SPEED> {};
 
-template<uint8_t SPEED>
-class ArduinoSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPEED> : public ArduinoHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPEED> {};
+// uno/mini/duemilanove
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPI_LATCH 10
+template<uint8_t SPI_SPEED>
+class ArduinoSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> : public ArduinoHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> {};
+
+// Leonardo, teensy, blinkm
+#elif defined(__AVR_ATmega32U4__)
+#define SPI_DATA 2
+#define SPI_CLOCK 1
+#define SPI_LATCH 0
+template<uint8_t SPI_SPEED>
+class ArduinoSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> : public ArduinoHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_LATCH, SPI_SPEED> {};
+
+
+#endif
 
 
 #endif
