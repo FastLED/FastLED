@@ -20,8 +20,11 @@
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3>
 class ClocklessController : public CLEDController {
-	uint8_t mPinMask;
-	volatile uint8_t *mPort;
+	typedef typename Pin<DATA_PIN>::port_ptr_t data_ptr_t;
+	typedef typename Pin<DATA_PIN>::port_t data_t;
+
+	data_t mPinMask;
+	data_ptr_t mPort;
 public:
 	virtual void init() { 
 		Pin<DATA_PIN>::setOutput();
@@ -29,7 +32,9 @@ public:
 		mPort = Pin<DATA_PIN>::port();
 	}
 
-	template <int N>inline static void bitSetFast(register volatile uint8_t *port, register uint8_t hi, register uint8_t lo, register uint8_t b) { 
+#if defined(__MK20DX128__)
+#else
+	template <int N>inline static void bitSetFast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
 		Pin<DATA_PIN>::fastset(port, hi); 								// 1/2 clock cycle if using out
 		delaycycles<T1 - (_CYCLES(DATA_PIN) + 1)>();					// 1st cycle length minus 1/2 clock for out, 1 clock for sbrs
@@ -45,7 +50,7 @@ public:
 	}
 	
 	#define END_OF_LOOP 6 		// loop compare, jump, next uint8_t load
-	template <int N, int ADJ>inline static void bitSetLast(register volatile uint8_t *port, register uint8_t hi, register uint8_t lo, register uint8_t b) { 
+	template <int N, int ADJ>inline static void bitSetLast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
 		Pin<DATA_PIN>::fastset(port, hi); 							// 1 clock cycle if using out, 2 otherwise
 		delaycycles<T1 - (_CYCLES(DATA_PIN) + 1)>();					// 1st cycle length minus 1 clock for out, 1 clock for sbrs
@@ -59,18 +64,44 @@ public:
 		Pin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
 		delaycycles<T3 - (_CYCLES(DATA_PIN) + ADJ)>();				// 3rd cycle length minus 7 clocks for out, loop compare, jump, next uint8_t load
 	}
+#endif
 
 	virtual void showRGB(register uint8_t *data, register int nLeds) {
 		cli();
 		
-		register uint8_t mask = mPinMask;
-		register volatile uint8_t *port = mPort;
+		register data_t mask = mPinMask;
+		register data_ptr_t port = mPort;
 		nLeds *= (3);
 		register uint8_t *end = data + nLeds; 
-		register uint8_t hi = *port | mask;
-		register uint8_t lo = *port & ~mask;
+		register data_t hi = *port | mask;
+		register data_t lo = *port & ~mask;
 		*port = lo;
 
+#if defined(__MK20DX128__)
+		register uint32_t b = *data++;
+		while(data != end) { 
+			for(register uint32_t i = 7; i > 0; i--) { 
+				Pin<DATA_PIN>::fastset(port, hi);
+				delaycycles<1 + T1 - 4>(); // 4 cycles - 2 store, 1 test, 1 if
+				if(b & 0x80) { Pin<DATA_PIN>::fastset(port, hi); } else { Pin<DATA_PIN>::fastset(port, lo); }
+				b <<= 1;
+				delaycycles<1 + T2 - 5>(); // 5 cycles, 2 store, 2 store/skip,  1 shift 
+				Pin<DATA_PIN>::fastset(port, lo);
+				delaycycles<1 + T3 - 5>(); // 5 cycles, 2 store, 1 sub, 2 branch backwards
+			}
+			// extra delay because branch is faster falling through
+			delaycycles<1>();
+
+			// 8th bit, interleave loading rest of data
+			Pin<DATA_PIN>::fastset(port, hi);
+			delaycycles<1 + T1 - 4>();
+			if(b & 0x80) { Pin<DATA_PIN>::fastset(port, hi); } else { Pin<DATA_PIN>::fastset(port, lo); }
+			delaycycles<1 + T2 - 4>(); // 4 cycles, 2 store, store/skip
+			Pin<DATA_PIN>::fastset(port, lo);
+			b = *data++;
+			delaycycles<1 + T3 - 8>(); // 2 store, 2 load, 1 cmp, 2 branch backwards, 1 movim
+		}
+#else
 		while(data != end) { 
 			register uint8_t b = *data++;
 			bitSetFast<7>(port, hi, lo, b);
@@ -82,6 +113,7 @@ public:
 			bitSetFast<1>(port, hi, lo, b);
 			bitSetLast<0, END_OF_LOOP>(port, hi, lo, b);
 		}
+#endif
 		sei();
 	}
 

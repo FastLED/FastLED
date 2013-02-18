@@ -10,7 +10,7 @@
 // #include "xxxwiring.h"
 // #endif
 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 #define DPRINT Serial.print
 #define DPRINTLN Serial.println
@@ -38,19 +38,22 @@ struct CRGB leds[NUM_LEDS];
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // Hardware SPIr2 - .539ms @8Mhz, .799 @4Mhz, 1.315ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
-LPD8806Controller<11, 13, 10> LED;
+// LPD8806Controller<11, 13, 10> LED;
 // LPD8806Controller<2, 1, 0> LED; // teensy pins
+// LPD8806Controller<0, 4, 10> LED;
+// LPD8806Controller<12, 13, 10, 0> LED;
 
 // Same Port, non-hardware SPI - 1.2ms for an 86 led frame, 1.12ms with large switch 
 // r2 - .939ms without large switch  .823ms with large switch
 // r3 - .824ms removing 0 balancing nop, .823 with large switch removing balancing
-//LPD8806Controller<12, 13, 10> LED;
+// LPD8806Controller<12, 13, 10> LED;
 // LPD8806Controller<14, 1, 10> LED; // teensy pins
 
 // Different Port, non-hardware SPI - 1.47ms for an 86 led frame
 // Different PortR2, non-hardware SPI - 1.07ms for an 86 led frame
 // LPD8806Controller<7, 13, 10> LED;
 // LPD8806Controller<8, 1, 10> LED;
+// LPD8806Controller<11, 14, 10> LED;
 
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
@@ -64,7 +67,8 @@ LPD8806Controller<11, 13, 10> LED;
 
 // TM1809Controller800Mhz<6> LED;
 // UCS1903Controller400Mhz<7> LED;
-// WS2811Controller800Mhz<6> LED;
+// WS2811Controller800Mhz<12> LED;
+WS2811Controller800Mhz<5> LED;
 // TM1803Controller400Mhz<5> LED;
 
 // struct aLED { void init() { FastSPI_LED.setLeds(NUM_LEDS, (unsigned char*)leds); FastSPI_LED.setPin(8); FastSPI_LED.setChipset(CFastSPI_LED::SPI_LPD8806); FastSPI_LED.init(); FastSPI_LED.start();}; void showRGB(byte *, int) { FastSPI_LED.show();} } LED;
@@ -89,12 +93,13 @@ LPD8806Controller<11, 13, 10> LED;
 
 void setup() {
 
-	aPin.hi();
-	aPin.lo();
-	Pin<2>::hi();
-	Pin<2>::lo();
-
+	// aPin.hi();
+	// aPin.lo();
+	// Pin<2>::hi();
+	// Pin<2>::lo();
 #ifdef DEBUG
+	delay(5000);
+
     Serial.begin(38400);
     Serial.println("resetting!");
 #endif
@@ -112,6 +117,11 @@ void setup() {
 }
 
 void loop() { 
+#if 0
+	memset(leds, 0, NUM_LEDS * sizeof(struct CRGB));
+	LED.showRGB((byte*)leds, NUM_LEDS);
+	delay(20);
+#else
 	for(int i = 0; i < 3; i++) {
 		for(int iLed = 0; iLed < NUM_LEDS; iLed++) {
 			memset(leds, 0,  NUM_LEDS * sizeof(struct CRGB));
@@ -122,17 +132,21 @@ void loop() {
 			 }
 
 			LED.showRGB((byte*)leds, NUM_LEDS);;
+			//DPRINTLN("waiting");
 			delay(20);
 		}
 	}
 	 for(int i = 0; i < 64; i++) { 
 	 	memset(leds, i, NUM_LEDS * 3);
 		LED.showRGB((byte*)leds, NUM_LEDS);;
-	 	delay(20);
+		//	DPRINTLN("waiting");
+	 	delay(40);
 	}
 	for(int i = 64; i >= 0; i--) { 
 	 	memset(leds, i, NUM_LEDS * 3);
 		LED.showRGB((byte*)leds, NUM_LEDS);;
-	 	delay(20);
+		//	DPRINTLN("waiting");
+	 	delay(40);
 	}
+#endif
 }

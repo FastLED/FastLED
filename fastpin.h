@@ -23,54 +23,135 @@ template<uint8_t PIN> class Pin {
 		mPort = portOutputRegister(digitalPinToPort(PIN));
 	}
 public:
+	typedef volatile uint8_t * port_ptr_t;
+	typedef uint8_t port_t;
+
 	inline static void setOutput() { _init(); pinMode(PIN, OUTPUT); }
 	inline static void setInput() { _init(); pinMode(PIN, INPUT); }
 
-	inline static void hi() { *mPort |= mPinMask; } 
-	inline static void lo() { *mPort &= ~mPinMask; }
+	inline static void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; } 
+	inline static void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
 
-	inline static void hi(register volatile uint8_t * port) { *port |= mPinMask; } 
-	inline static void lo(register volatile uint8_t * port) { *port &= ~mPinMask; } 
-	inline static void set(register uint8_t val) { *mPort = val; }
+	inline static void strobe() __attribute__ ((always_inline)) { hi(); lo(); }
 
-	inline static void fastset(register volatile uint8_t * port, register uint8_t val) { *port  = val; }
+	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; } 
+	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; } 
+	inline static void set(register port_t val) __attribute__ ((always_inline)) { *mPort = val; }
 
-	static uint8_t hival() { return *mPort | mPinMask;  }
-	static uint8_t loval() { return *mPort & ~mPinMask; }
-	static volatile uint8_t *  port() { return mPort; }
-	static uint8_t mask() { return mPinMask; }
+	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
+
+	static port_t hival() __attribute__ ((always_inline)) { return *mPort | mPinMask;  }
+	static port_t loval() __attribute__ ((always_inline)) { return *mPort & ~mPinMask; }
+	static port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
+	static port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
 };
 
 template<uint8_t PIN> uint8_t Pin<PIN>::mPinMask;
 template<uint8_t PIN> volatile uint8_t *Pin<PIN>::mPort;
 
-template<uint8_t PIN, uint8_t _MASK, typename _PORT, typename _DDR, typename _PIN> class _NUPIN { 
+// Template definition for AVR pins, providing direct access to port/ddr/pin registers
+template<uint8_t PIN, uint8_t _MASK, typename _PORT, typename _DDR, typename _PIN> class _AVRPIN { 
 public:
+	typedef volatile uint8_t * port_ptr_t;
+	typedef uint8_t port_t;
+	 
 	inline static void setOutput() { _DDR::r() |= _MASK; }
 	inline static void setInput() { _DDR::r() &= ~_MASK; }
 
-	inline static void hi() { _PORT::r() |= _MASK; }
-	inline static void lo() { _PORT::r() &= ~_MASK; }
-	inline static void set(register uint8_t val) { _PORT::r() = val; }
+	inline static void hi() __attribute__ ((always_inline)) { _PORT::r() |= _MASK; }
+	inline static void lo() __attribute__ ((always_inline)) { _PORT::r() &= ~_MASK; }
+	inline static void set(register uint8_t val) __attribute__ ((always_inline)) { _PORT::r() = val; }
 
-	inline static void hi(register volatile uint8_t *port) { hi(); }
-	inline static void lo(register volatile uint8_t *port) { lo(); }
-	inline static void fastset(register volatile uint8_t *port, register uint8_t val) { set(val); }
+	inline static void strobe() __attribute__ ((always_inline)) { hi(); lo(); }
+	
+	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+	inline static void fastset(register port_ptr_t port, register uint8_t val) __attribute__ ((always_inline)) { set(val); }
 
-	inline static uint8_t hival() { return _PORT::r() | _MASK; }
-	inline static uint8_t loval() { return _PORT::r() & ~_MASK; }
-	inline static volatile uint8_t * port() { return &_PORT::r(); }
-	inline static uint8_t mask() { return _MASK; }
+	inline static port_t hival() __attribute__ ((always_inline)) { return _PORT::r() | _MASK; }
+	inline static port_t loval() __attribute__ ((always_inline)) { return _PORT::r() & ~_MASK; }
+	inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_PORT::r(); }
+	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
+// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers
+template<uint8_t PIN, uint32_t _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN { 
+public:
+	typedef volatile uint32_t * port_ptr_t;
+	typedef uint32_t port_t;
 
+	inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
+	inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+
+	inline static void hi() __attribute__ ((always_inline)) { _PSOR::r() = _MASK; }
+	inline static void lo() __attribute__ ((always_inline)) { _PCOR::r() = _MASK; }
+	inline static void set(register port_t val) __attribute__ ((always_inline)) { _PDOR::r() = val; }
+
+	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+	
+	inline static void toggle() __attribute__ ((always_inline)) { _PTOR::r() = _MASK; }
+
+	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+
+	inline static port_t hival() __attribute__ ((always_inline)) { return _PDOR::r() | _MASK; }
+	inline static port_t loval() __attribute__ ((always_inline)) { return _PDOR::r() & ~_MASK; }
+	inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_PDOR::r(); }
+	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+};
+
+// Template definition for teensy 3.0 style ARM pins using bit banding, providing direct access to the various GPIO registers
+template<uint8_t PIN, int _BIT, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN_BITBAND { 
+public:
+	typedef volatile uint32_t * port_ptr_t;
+	typedef uint32_t port_t;
+
+	inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
+	inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+
+	inline static void hi() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = 1; }
+	inline static void lo() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = 0; }
+	inline static void set(register port_t val) __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = val; }
+
+	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+	
+	inline static void toggle() __attribute__ ((always_inline)) { *_PTOR::template rx<_BIT>() = 1; }
+
+	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port = 1;  }
+	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port = 0; }
+	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+
+	inline static port_t hival() __attribute__ ((always_inline)) { return 1; }
+	inline static port_t loval() __attribute__ ((always_inline)) { return 0; }
+	inline static port_ptr_t port() __attribute__ ((always_inline)) { return _PDOR::template rx<_BIT>(); }
+	inline static port_t mask() __attribute__ ((always_inline)) { return 1; }
+};
+
+// AVR definitions
 typedef volatile uint8_t & reg8_t;
 #define _R(T) struct __gen_struct_ ## T
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
 #define _IO(L) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L);
+#define _DEFPIN_AVR(PIN, MASK, L) template<> class Pin<PIN> : public _AVRPIN<PIN, MASK, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
 
+// ARM definitions
+#define GPIO_BITBAND_ADDR(reg, bit) (((uint32_t)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
+#define GPIO_BITBAND_PTR(reg, bit) ((uint32_t *)GPIO_BITBAND_ADDR((reg), (bit)))
 
-#define _DEFPIN(PIN, MASK, L) template<> class Pin<PIN> : public _NUPIN<PIN, MASK, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
+typedef volatile uint32_t & reg32_t;
+typedef volatile uint32_t * ptr_reg32_t;
+
+#define _RD32(T) struct __gen_struct_ ## T { static inline reg32_t r() { return T; } template<int BIT> static inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
+#define _IO32(L) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR);
+
+#define _DEFPIN_ARM(PIN, BIT, L) template<> class Pin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
+																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; 
+
+// Don't use bit band'd pins for now, the compiler generates far less efficient code around them
+// #define _DEFPIN_ARM(PIN, BIT, L) template<> class Pin<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
+// 																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; 
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -81,24 +162,38 @@ typedef volatile uint8_t & reg8_t;
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 // Accelerated port definitions for arduino avrs
 _IO(D); _IO(B); _IO(C);
-_DEFPIN( 0, 0x01, D); _DEFPIN( 1, 0x02, D); _DEFPIN( 2, 0x04, D); _DEFPIN( 3, 0x08, D);
-_DEFPIN( 4, 0x10, D); _DEFPIN( 5, 0x20, D); _DEFPIN( 6, 0x40, D); _DEFPIN( 7, 0x80, D);
-_DEFPIN( 8, 0x01, B); _DEFPIN( 9, 0x02, B); _DEFPIN(10, 0x04, B); _DEFPIN(11, 0x08, B);
-_DEFPIN(12, 0x10, B); _DEFPIN(13, 0x20, B); _DEFPIN(14, 0x40, B); _DEFPIN(15, 0x80, B);
-_DEFPIN(16, 0x01, C); _DEFPIN(17, 0x02, C); _DEFPIN(18, 0x04, C); _DEFPIN(19, 0x08, C);
-_DEFPIN(20, 0x10, C); _DEFPIN(21, 0x20, C); _DEFPIN(22, 0x40, C); _DEFPIN(23, 0x80, C);
+_DEFPIN_AVR( 0, 0x01, D); _DEFPIN_AVR( 1, 0x02, D); _DEFPIN_AVR( 2, 0x04, D); _DEFPIN_AVR( 3, 0x08, D);
+_DEFPIN_AVR( 4, 0x10, D); _DEFPIN_AVR( 5, 0x20, D); _DEFPIN_AVR( 6, 0x40, D); _DEFPIN_AVR( 7, 0x80, D);
+_DEFPIN_AVR( 8, 0x01, B); _DEFPIN_AVR( 9, 0x02, B); _DEFPIN_AVR(10, 0x04, B); _DEFPIN_AVR(11, 0x08, B);
+_DEFPIN_AVR(12, 0x10, B); _DEFPIN_AVR(13, 0x20, B); _DEFPIN_AVR(14, 0x40, B); _DEFPIN_AVR(15, 0x80, B);
+_DEFPIN_AVR(16, 0x01, C); _DEFPIN_AVR(17, 0x02, C); _DEFPIN_AVR(18, 0x04, C); _DEFPIN_AVR(19, 0x08, C);
+_DEFPIN_AVR(20, 0x10, C); _DEFPIN_AVR(21, 0x20, C); _DEFPIN_AVR(22, 0x40, C); _DEFPIN_AVR(23, 0x80, C);
 
 // Leonardo, teensy, blinkm
 #elif defined(__AVR_ATmega32U4__)
 
 _IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
 
-_DEFPIN(0, 1, B); _DEFPIN(1, 2, B); _DEFPIN(2, 4, B); _DEFPIN(3, 8, B); 
-_DEFPIN(4, 128, B); _DEFPIN(5, 1, D); _DEFPIN(6, 2, D); _DEFPIN(7, 4, D); 
-_DEFPIN(8, 8, D); _DEFPIN(9, 64, C); _DEFPIN(10, 128, C); _DEFPIN(11, 64, D); 
-_DEFPIN(12, 128, D); _DEFPIN(13, 16, B); _DEFPIN(14, 32, B); _DEFPIN(15, 64, B); 
-_DEFPIN(16, 128, F); _DEFPIN(17, 64, F); _DEFPIN(18, 32, F); _DEFPIN(19, 16, F); 
-_DEFPIN(20, 2, F); _DEFPIN(21, 1, F); _DEFPIN(22, 16, D); _DEFPIN(23, 32, D); 
+_DEFPIN_AVR(0, 1, B); _DEFPIN_AVR(1, 2, B); _DEFPIN_AVR(2, 4, B); _DEFPIN_AVR(3, 8, B); 
+_DEFPIN_AVR(4, 128, B); _DEFPIN_AVR(5, 1, D); _DEFPIN_AVR(6, 2, D); _DEFPIN_AVR(7, 4, D); 
+_DEFPIN_AVR(8, 8, D); _DEFPIN_AVR(9, 64, C); _DEFPIN_AVR(10, 128, C); _DEFPIN_AVR(11, 64, D); 
+_DEFPIN_AVR(12, 128, D); _DEFPIN_AVR(13, 16, B); _DEFPIN_AVR(14, 32, B); _DEFPIN_AVR(15, 64, B); 
+_DEFPIN_AVR(16, 128, F); _DEFPIN_AVR(17, 64, F); _DEFPIN_AVR(18, 32, F); _DEFPIN_AVR(19, 16, F); 
+_DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AVR(23, 32, D); 
+
+#elif defined(__MK20DX128__)
+
+_IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
+
+_DEFPIN_ARM(0, 16, B); _DEFPIN_ARM(1, 17, B); _DEFPIN_ARM(2, 0, D); _DEFPIN_ARM(3, 12, A);
+_DEFPIN_ARM(4, 13, A); _DEFPIN_ARM(5, 7, D); _DEFPIN_ARM(6, 4, D); _DEFPIN_ARM(7, 2, D);
+_DEFPIN_ARM(8, 3, D); _DEFPIN_ARM(9, 3, C); _DEFPIN_ARM(10, 4, C); _DEFPIN_ARM(11, 6, C);
+_DEFPIN_ARM(12, 7, C); _DEFPIN_ARM(13, 5, C); _DEFPIN_ARM(14, 1, D); _DEFPIN_ARM(15, 0, C);
+_DEFPIN_ARM(16, 0, B); _DEFPIN_ARM(17, 1, B); _DEFPIN_ARM(18, 3, B); _DEFPIN_ARM(19, 2, B);
+_DEFPIN_ARM(20, 5, D); _DEFPIN_ARM(21, 6, D); _DEFPIN_ARM(22, 1, C); _DEFPIN_ARM(23, 2, C);
+_DEFPIN_ARM(24, 5, A); _DEFPIN_ARM(25, 19, B); _DEFPIN_ARM(26, 1, E); _DEFPIN_ARM(27, 9, C);
+_DEFPIN_ARM(28, 8, C); _DEFPIN_ARM(29, 10, C); _DEFPIN_ARM(30, 11, C); _DEFPIN_ARM(31, 0, E);
+_DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 #else
 
 #pragma message "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."

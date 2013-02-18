@@ -16,7 +16,7 @@
 
 class LPD8806_ADJUST {
 public:
-	static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
+	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
 };
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED = 0 >
@@ -30,6 +30,8 @@ class LPD8806Controller : public CLEDController {
 public:
 	virtual void init() { 
 		SPI::init();
+
+		// push out 1000 leds worth of 0's to clear out the line
 		SPI::writeBytesValue(0x80, 1000);
 		clearLine(1000);
 	}
@@ -58,6 +60,8 @@ class WS2801Controller : public CLEDController {
 public:
 	virtual void init() { 
 		SPI::init();
+	    // 0 out as much as we can on the line
+	    SPI::writeBytesValue(0, 1000);
 	}
 
 	virtual void showRGB(uint8_t *data, int nLeds) {
@@ -89,7 +93,7 @@ class TM1809Controller800Mhz : public ClocklessController<DATA_PIN, NS(350), NS(
 #pragma message "No enough clock cycles available for the UCS103"
 #endif
 
-// 380s, 380ns, 725ns
+// 350n, 350ns, 550ns
 template <uint8_t DATA_PIN>
 class WS2811Controller800Mhz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550)> {};
 #if NO_TIME(350, 350, 550) 
