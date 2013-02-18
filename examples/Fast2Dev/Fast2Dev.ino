@@ -31,7 +31,7 @@
 // #include <FastSPI_LED2.h>
 #define NUM_LEDS 86
 
-struct CRGB { byte r; byte g; byte b; };
+struct CRGB { byte g; byte r; byte b; };
 
 struct CRGB leds[NUM_LEDS];
 
@@ -67,8 +67,8 @@ struct CRGB leds[NUM_LEDS];
 
 // TM1809Controller800Mhz<6> LED;
 // UCS1903Controller400Mhz<7> LED;
-// WS2811Controller800Mhz<12> LED;
-WS2811Controller800Mhz<5> LED;
+WS2811Controller800Mhz<12> LED;
+// WS2811Controller800Mhz<5> LED;
 // TM1803Controller400Mhz<5> LED;
 
 // struct aLED { void init() { FastSPI_LED.setLeds(NUM_LEDS, (unsigned char*)leds); FastSPI_LED.setPin(8); FastSPI_LED.setChipset(CFastSPI_LED::SPI_LPD8806); FastSPI_LED.init(); FastSPI_LED.start();}; void showRGB(byte *, int) { FastSPI_LED.show();} } LED;
@@ -118,7 +118,7 @@ void setup() {
 
 void loop() { 
 #if 0
-	memset(leds, 0, NUM_LEDS * sizeof(struct CRGB));
+	memset(leds, 255, NUM_LEDS * sizeof(struct CRGB));
 	LED.showRGB((byte*)leds, NUM_LEDS);
 	delay(20);
 #else

@@ -95,8 +95,8 @@ class TM1809Controller800Mhz : public ClocklessController<DATA_PIN, NS(350), NS(
 
 // 350n, 350ns, 550ns
 template <uint8_t DATA_PIN>
-class WS2811Controller800Mhz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550)> {};
-#if NO_TIME(350, 350, 550) 
+class WS2811Controller800Mhz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550)> {};
+#if NO_TIME(320, 320, 550) 
 #pragma message "No enough clock cycles available for the UCS103"
 #endif
 

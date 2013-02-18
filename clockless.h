@@ -5,7 +5,12 @@
 #include <avr/interrupt.h> // for cli/se definitions
 
 // Macro to convert from nano-seconds to clocks
-#define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
+// #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
+#if F_CPU < 96000000
+#define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
+#else
+#define NS(_NS) ( (_NS * (F_CPU / 2000000L))) / 1000
+#endif
 
 //  Macro for making sure there's enough time available
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 2 || NS(C) < 6)
@@ -79,30 +84,30 @@ public:
 
 #if defined(__MK20DX128__)
 		register uint32_t b = *data++;
-		while(data != end) { 
+		while(data <= end) { 
 			for(register uint32_t i = 7; i > 0; i--) { 
 				Pin<DATA_PIN>::fastset(port, hi);
-				delaycycles<1 + T1 - 4>(); // 4 cycles - 2 store, 1 test, 1 if
+				delaycycles<T1 - 3>(); // 4 cycles - 1 store, 1 test, 1 if
 				if(b & 0x80) { Pin<DATA_PIN>::fastset(port, hi); } else { Pin<DATA_PIN>::fastset(port, lo); }
 				b <<= 1;
-				delaycycles<1 + T2 - 5>(); // 5 cycles, 2 store, 2 store/skip,  1 shift 
+				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
 				Pin<DATA_PIN>::fastset(port, lo);
-				delaycycles<1 + T3 - 5>(); // 5 cycles, 2 store, 1 sub, 2 branch backwards
+				delaycycles<T3 - 3>(); // 3 cycles, 1 store, 1 sub, 1 branch backwards
 			}
 			// extra delay because branch is faster falling through
 			delaycycles<1>();
 
 			// 8th bit, interleave loading rest of data
 			Pin<DATA_PIN>::fastset(port, hi);
-			delaycycles<1 + T1 - 4>();
+			delaycycles<T1 - 3>();
 			if(b & 0x80) { Pin<DATA_PIN>::fastset(port, hi); } else { Pin<DATA_PIN>::fastset(port, lo); }
-			delaycycles<1 + T2 - 4>(); // 4 cycles, 2 store, store/skip
+			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
 			Pin<DATA_PIN>::fastset(port, lo);
 			b = *data++;
-			delaycycles<1 + T3 - 8>(); // 2 store, 2 load, 1 cmp, 2 branch backwards, 1 movim
-		}
+			delaycycles<T3 - 6>(); // 1 store, 2 load, 1 cmp, 1 branch backwards, 1 movim
+		};
 #else
-		while(data != end) { 
+		while(data <= end) { 
 			register uint8_t b = *data++;
 			bitSetFast<7>(port, hi, lo, b);
 			bitSetFast<6>(port, hi, lo, b);
