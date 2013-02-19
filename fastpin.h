@@ -2,6 +2,8 @@
 #define __INC_FASTPIN_H
 
 #include<avr/io.h>
+
+// Arduino.h needed for convinience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #include<Arduino.h>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

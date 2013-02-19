@@ -1,15 +1,5 @@
 #include "FastSPI_LED2.h"
 
-// #include "FastSPI_LED.h"
-// #if defined(ARDUINO) && ARDUINO >= 100
-//   #include "xxxArduino.h"
-//   #include <xxxpins_arduino.h>
-// #else
-//   #include "xxxWProgram.h"
-//   #include <xxxpins_arduino.h>
-// #include "xxxwiring.h"
-// #endif
-
 // #define DEBUG
 #ifdef DEBUG
 #define DPRINT Serial.print
@@ -19,22 +9,19 @@
 #define DPRINTLN(x)
 #endif
 
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // test code
 //
 //////////////////////////////////////////////////
 
-// #include <FastSPI_LED2.h>
 #define NUM_LEDS 86
 
 struct CRGB { byte g; byte r; byte b; };
 
 struct CRGB leds[NUM_LEDS];
 
+// Note: timing values in the code below are stale/out of date
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // Hardware SPIr2 - .539ms @8Mhz, .799 @4Mhz, 1.315ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
@@ -71,7 +58,10 @@ WS2811Controller800Mhz<12> LED;
 // WS2811Controller800Mhz<5> LED;
 // TM1803Controller400Mhz<5> LED;
 
-// struct aLED { void init() { FastSPI_LED.setLeds(NUM_LEDS, (unsigned char*)leds); FastSPI_LED.setPin(8); FastSPI_LED.setChipset(CFastSPI_LED::SPI_LPD8806); FastSPI_LED.init(); FastSPI_LED.start();}; void showRGB(byte *, int) { FastSPI_LED.show();} } LED;
+//////////////////////////////////////////////////////////////////////////////////////
+//
+// Sample code showing using multiple LED controllers simultaneously
+//
 // int ledset = 0;
 // void show() { 
 // 	switch(ledset) {
@@ -92,11 +82,6 @@ WS2811Controller800Mhz<12> LED;
 
 
 void setup() {
-
-	// aPin.hi();
-	// aPin.lo();
-	// Pin<2>::hi();
-	// Pin<2>::lo();
 #ifdef DEBUG
 	delay(5000);
 
