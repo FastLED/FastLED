@@ -38,6 +38,7 @@ public:
 	}
 
 #if defined(__MK20DX128__)
+	// We don't use the bitSetFast methods for ARM.
 #else
 	template <int N>inline static void bitSetFast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
@@ -85,9 +86,11 @@ public:
 #if defined(__MK20DX128__)
 		register uint32_t b = *data++;
 		while(data <= end) { 
+			// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
+			// will bite me in the ass at some point, I know it.
 			for(register uint32_t i = 7; i > 0; i--) { 
 				Pin<DATA_PIN>::fastset(port, hi);
-				delaycycles<T1 - 3>(); // 4 cycles - 1 store, 1 test, 1 if
+				delaycycles<T1 - 3>(); // 3 cycles - 1 store, 1 test, 1 if
 				if(b & 0x80) { Pin<DATA_PIN>::fastset(port, hi); } else { Pin<DATA_PIN>::fastset(port, lo); }
 				b <<= 1;
 				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
@@ -123,6 +126,7 @@ public:
 	}
 
 	virtual void showARGB(uint8_t *data, int nLeds) { 
+		// TODO: IMPLEMENTME
 	}
 };
 

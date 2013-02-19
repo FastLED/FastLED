@@ -10,11 +10,22 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define DDR(_PIN) ((_PIN >= 16) ? DDRC : (_PIN >= 8) ? DDRB : DDRD)
-#define PORT(_PIN) ((_PIN >= 16) ? PORTC : (_PIN >= 8) ? PORTB : PORTD)  
-#define PINP(_PIN) ((_PIN >= 16) ? PINC : (_PIN >= 8) ? PINB : PIND)  
 #define _CYCLES(_PIN) ((_PIN >= 24) ? 2 : 1)
 
+/// The simplest level of Pin class.  This relies on runtime functions durinig initialization to get the port/pin mask for the pin.  Most
+/// of the accesses involve references to these static globals that get set up.  This won't be the fastest set of pin operations, but it
+/// will provide pin level access on pretty much all arduino environments.  In addition, it includes some methods to help optimize access in
+/// various ways.  Namely, the versions of hi, lo, and fastset that take the port register as a passed in register variable (saving a global
+/// dereference), since these functions are aggressively inlined, that can help collapse out a lot of extraneous memory loads/dereferences.
+/// 
+/// In addition, if, while writing a bunch of data to a pin, you know no other pins will be getting written to, you can get/cache a value of
+/// the pin's port register and use that to do a full set to the register.  This results in one being able to simply do a store to the register,
+/// vs. the load, and/or, and store that would be done normally.
+///
+/// There are platform specific instantiations of this class that provide direct i/o register access to pins for much higher speed pin twiddling.
+///
+/// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended, 
+/// as passing Pin objects around will likely -not- have the effect you're expecting.
 template<uint8_t PIN> class Pin { 
 	static uint8_t mPinMask;
 	static volatile uint8_t *mPort;
@@ -49,7 +60,8 @@ public:
 template<uint8_t PIN> uint8_t Pin<PIN>::mPinMask;
 template<uint8_t PIN> volatile uint8_t *Pin<PIN>::mPort;
 
-// Template definition for AVR pins, providing direct access to port/ddr/pin registers
+/// Class definition for a Pin where we know the port registers at compile time for said pin.  This allows us to make
+/// a lot of optimizations, as the inlined hi/lo methods will devolve to a single io register write/bitset.  
 template<uint8_t PIN, uint8_t _MASK, typename _PORT, typename _DDR, typename _PIN> class _AVRPIN { 
 public:
 	typedef volatile uint8_t * port_ptr_t;
@@ -74,7 +86,9 @@ public:
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers
+/// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
+/// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
+/// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 template<uint8_t PIN, uint32_t _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN { 
 public:
 	typedef volatile uint32_t * port_ptr_t;
@@ -101,7 +115,8 @@ public:
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-// Template definition for teensy 3.0 style ARM pins using bit banding, providing direct access to the various GPIO registers
+/// Template definition for teensy 3.0 style ARM pins using bit banding, providing direct access to the various GPIO registers.  GCC 
+/// does a poor job of optimizing around these accesses so they are not being used just yet.
 template<uint8_t PIN, int _BIT, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN_BITBAND { 
 public:
 	typedef volatile uint32_t * port_ptr_t;
@@ -128,7 +143,9 @@ public:
 	inline static port_t mask() __attribute__ ((always_inline)) { return 1; }
 };
 
-// AVR definitions
+/// AVR definitions for pins.  Getting around  the fact that I can't pass GPIO register addresses in as template arguments by instead creating
+/// a custom type for each GPIO register with a single, static, aggressively inlined function that returns that specific GPIO register.  A similar
+/// trick is used a bit further below for the ARM GPIO registers (of which there are far more than on AVR!)
 typedef volatile uint8_t & reg8_t;
 #define _R(T) struct __gen_struct_ ## T
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
@@ -142,20 +159,22 @@ typedef volatile uint8_t & reg8_t;
 typedef volatile uint32_t & reg32_t;
 typedef volatile uint32_t * ptr_reg32_t;
 
-#define _RD32(T) struct __gen_struct_ ## T { static inline reg32_t r() { return T; } template<int BIT> static inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
+#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } \
+	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
 #define _IO32(L) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR);
 
 #define _DEFPIN_ARM(PIN, BIT, L) template<> class Pin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
 																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; 
 
 // Don't use bit band'd pins for now, the compiler generates far less efficient code around them
-// #define _DEFPIN_ARM(PIN, BIT, L) template<> class Pin<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
+// #define _DEFPIN_ARM(PIN, BIT, L) template<> class Pin<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR),
 // 																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; 
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Pin definitions for AVR.  If there are pin definitions supplied below for the platform being built on 
+// Pin definitions for AVR and ARM.  If there are pin definitions supplied below for the platform being 
+// built on, then much higher speed access will be possible, namely with direct GPIO register accesses.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -199,12 +218,5 @@ _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 #pragma message "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
 
 #endif
-
-
-//template<1> class NUPUN<1, 0x01, struct_PORTD, struct_DDRD, struct_PIND>;
-
-// template<> class NUPIN<2> : public _NUPIN<1, 0x02, &DDRD, &PORTD, &PIND> {};
-
-Pin<1> aPin;
 
 #endif

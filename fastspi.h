@@ -16,8 +16,9 @@
 // predeclaration to not upset the compiler
 template<int CYCLES> inline void delaycycles();
 
+// TODO: ARM version of _delaycycles_
 // worker template - this will nop for LOOP * 3 + PAD cycles total
-template<int LOOP, int PAD> inline void _delaycycles() { 
+template<int LOOP, int PAD> inline void _delaycycles_AVR() { 
 	delaycycles<PAD>();
 	// the loop below is 3 cycles * LOOP.  the LDI is one cycle,
 	// the DEC is 1 cycle, the BRNE is 2 cycles if looping back and
@@ -35,7 +36,7 @@ template<int LOOP, int PAD> inline void _delaycycles() {
 // usable definition
 #if !defined(__MK20DX128__)
 template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() { 
-	_delaycycles<CYCLES / 3, CYCLES % 3>();	
+	_delaycycles_AVR<CYCLES / 3, CYCLES % 3>();	
 }
 #else
 template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() { 
@@ -43,7 +44,8 @@ template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 }
 #endif
 
-// pre-instantiations for values small enough to not need the loop
+// pre-instantiations for values small enough to not need the loop, as well as sanity holders
+// for some negative values.
 template<> __attribute__((always_inline)) inline void delaycycles<-3>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-2>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-1>() {}
@@ -52,14 +54,22 @@ template<> __attribute__((always_inline)) inline void delaycycles<1>() {NOP;}
 template<> __attribute__((always_inline)) inline void delaycycles<2>() {NOP;NOP;}
 template<> __attribute__((always_inline)) inline void delaycycles<3>() {NOP;NOP;NOP;}
 
+/// Some of the SPI controllers will need to perform a transform on each byte before doing
+/// anyting with it.  Creating a class of this form and passing it in as a template parameter to
+/// writeBytes/writeBytes3 below will ensure that the body of this method will get called on every
+/// byte worked on.  Recommendation, make the adjust method aggressively inlined.
+///
+/// TODO: Convinience macro for building these
 class DATA_NOP { 
 public:
-	static uint8_t adjust(uint8_t data) { return data; } 
+	static __attribute__((always_inline)) inline uint8_t adjust(uint8_t data) { return data; } 
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Software SPI (aka bit-banging) support - with optimizations for when the clock and data pin are on the same port
+// Software SPI (aka bit-banging) support - with aggressive optimizations for when the clock and data pin are on the same port
+//
+// TODO: Replace the latch pin definition with a set of pins, to allow using mux hardware for routing in the future
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -76,21 +86,21 @@ class AVRSoftwareSPIOutput {
 	typedef typename Pin<CLOCK_PIN>::port_t clock_t;
 public:
 	static void init() {
-		// set the pins to output
+		// set the pins to output and make sure the latch is released (which apparently means hi?  This is a bit
+		// confusing to me)
 		Pin<DATA_PIN>::setOutput();
 		Pin<LATCH_PIN>::setOutput();
 		Pin<CLOCK_PIN>::setOutput();
 		release();
-
-		// Flush out a bunch of 0's to clear out the line
-		writeBytesValue(0, 192*3);
 	}
 
-	// stop the SPI output
+	// stop the SPI output.  Pretty much a NOP with software, as there's no registers to kick
 	static void stop() { }
 
+	// wait until the SPI subsystem is ready for more data to write.  A NOP when bitbanging
 	static void wait() __attribute__((always_inline)) { }
 	
+	// naive writeByte implelentation, simply calls writeBit on the 8 bits in the byte.
 	static void writeByte(uint8_t b) __attribute__((always_inline)) { 
 		writeBit<7>(b);
 		writeBit<6>(b);
@@ -103,6 +113,7 @@ public:
 	}
 
 private:	
+	// writeByte implementation with data/clock registers passed in.
 	static void writeByte(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin) __attribute__((always_inline)) { 
 		writeBit<7>(b, clockpin, datapin);
 		writeBit<6>(b, clockpin, datapin);
@@ -114,6 +125,9 @@ private:
 		writeBit<0>(b, clockpin, datapin);
 	}
 
+	// writeByte implementation with the data register passed in and prebaked values for data hi w/clock hi and
+	// low and data lo w/clock hi and lo.  This is to be used when clock and data are on the same GPIO register, 
+	// can get close to getting a bit out the door in 2 clock cycles!
 	static void writeByte(uint8_t b, data_ptr_t datapin, 
 						  data_t hival, data_t loval, 
 						  clock_t hiclock, clock_t loclock) __attribute__((always_inline, hot)) { 
@@ -127,6 +141,9 @@ private:
 		writeBit<0>(b, datapin, hival, loval, hiclock, loclock);
 	}
 
+	// writeByte implementation with not just registers passed in, but pre-baked values for said registers for
+	// data hi/lo and clock hi/lo values.  Note: weird things will happen if this method is called in cases where
+	// the data and clock pins are on the same port!  Don't do that!
 	static void writeByte(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin, 
 						  data_t hival, data_t loval, 
 						  clock_t hiclock, clock_t loclock) __attribute__((always_inline)) { 
@@ -143,6 +160,7 @@ private:
 public:
 	#define SPI_DELAY delaycycles< (SPI_SPEED-2) / 2>();
 
+	// write the BIT'th bit out via spi, setting the data pin then strobing the clcok
 	template <uint8_t BIT> __attribute__((always_inline, hot)) inline static void writeBit(uint8_t b) { 
 		if(b & (1 << BIT)) { 
 			Pin<DATA_PIN>::hi();
@@ -164,6 +182,7 @@ public:
 	}
 	
 private:
+	// write the BIT'th bit out via spi, setting the data pin then strobing the clock, using the passed in pin registers to accelerate access if needed
 	template <uint8_t BIT> __attribute__((always_inline)) inline static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin) { 
 		if(b & (1 << BIT)) { 
 			Pin<DATA_PIN>::hi(datapin);
@@ -210,12 +229,20 @@ private:
 	}
 public:
 
+	// latch the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move latch responsibility out of the SPI classes
+	// entirely, make it up to the caller to remember to lock/latch the line?)
 	static void latch() { Pin<LATCH_PIN>::lo(); }
+
+	// release the SPI line
 	static void release() { Pin<LATCH_PIN>::hi(); }
 
+	// Write out len bytes of the given value out over SPI.  Useful for quickly flushing, say, a line of 0's down the line.
 	static void writeBytesValue(uint8_t value, int len) { 
 		latch();
 #if 0
+		// TODO: Weird things may happen if software bitbanging SPI output and other pins on the output reigsters are being twiddled.  Need
+		// to allow specifying whether or not exclusive i/o access is allowed during this process, and if i/o access is not allowed fall
+		// back to the degenerative code below
 		while(len--) { 
 			writeByte(value);
 		}
@@ -249,7 +276,8 @@ public:
 		release();	
 	}
 
-	// write a block of len uint8_ts out 
+	// write a block of len uint8_ts out.  Need to type this better so that explicit casts into the call aren't required.
+	// note that this template version takes a class parameter for a per-byte modifier to the data. 
 	template <class D> static void writeBytes(register uint8_t *data, int len) { 
 		latch();
 #if 0
@@ -291,11 +319,13 @@ public:
 		release();	
 	}
 
+	// default version of writing a block of data out to the SPI port, with no data modifications being made
 	static void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
-	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
+	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
+	// byte of data modification to be made.  (See DATA_NOP above)
 	template <uint8_t SKIP, class D> static void writeBytes3(register uint8_t *data, int len) { 
 		latch();
 
@@ -359,6 +389,8 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Hardware SPI support using USART registers and friends
+//
+// TODO: Complete/test implementation - right now this doesn't work
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -465,6 +497,11 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Hardware SPI support using SPDR registers and friends
+//
+// Technically speaking, this uses the AVR SPI registers.  This will work on the Teensy 3.0 because Paul made a set of compatability
+// classes that map the AVR SPI registers to ARM's, however this caps the performance of output.  
+//
+// TODO: implement ARMHardwareSPIOutput
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -609,7 +646,8 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// External SPI template definition with partial instantiation(s) to map to hardware SPI ports
+// External SPI template definition with partial instantiation(s) to map to hardware SPI ports on platforms/builds where the pin
+// mappings are known at compile time.
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
