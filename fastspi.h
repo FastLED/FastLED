@@ -69,11 +69,11 @@ public:
 //
 // Software SPI (aka bit-banging) support - with aggressive optimizations for when the clock and data pin are on the same port
 //
-// TODO: Replace the latch pin definition with a set of pins, to allow using mux hardware for routing in the future
+// TODO: Replace the select pin definition with a set of pins, to allow using mux hardware for routing in the future
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED>
 class AVRSoftwareSPIOutput { 
 	// The data types for pointers to the pin port - typedef'd here from the Pin definition because on avr these
 	// are pointers to 8 bit values, while on arm they are 32 bit
@@ -86,10 +86,10 @@ class AVRSoftwareSPIOutput {
 	typedef typename Pin<CLOCK_PIN>::port_t clock_t;
 public:
 	static void init() {
-		// set the pins to output and make sure the latch is released (which apparently means hi?  This is a bit
+		// set the pins to output and make sure the select is released (which apparently means hi?  This is a bit
 		// confusing to me)
 		Pin<DATA_PIN>::setOutput();
-		Pin<LATCH_PIN>::setOutput();
+		Pin<SELECT_PIN>::setOutput();
 		Pin<CLOCK_PIN>::setOutput();
 		release();
 	}
@@ -229,16 +229,16 @@ private:
 	}
 public:
 
-	// latch the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move latch responsibility out of the SPI classes
-	// entirely, make it up to the caller to remember to lock/latch the line?)
-	static void latch() { Pin<LATCH_PIN>::lo(); }
+	// select the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move select responsibility out of the SPI classes
+	// entirely, make it up to the caller to remember to lock/select the line?)
+	static void select() { Pin<SELECT_PIN>::hi(); }
 
 	// release the SPI line
-	static void release() { Pin<LATCH_PIN>::hi(); }
+	static void release() { Pin<SELECT_PIN>::lo(); }
 
 	// Write out len bytes of the given value out over SPI.  Useful for quickly flushing, say, a line of 0's down the line.
 	static void writeBytesValue(uint8_t value, int len) { 
-		latch();
+		select();
 #if 0
 		// TODO: Weird things may happen if software bitbanging SPI output and other pins on the output reigsters are being twiddled.  Need
 		// to allow specifying whether or not exclusive i/o access is allowed during this process, and if i/o access is not allowed fall
@@ -279,7 +279,7 @@ public:
 	// write a block of len uint8_ts out.  Need to type this better so that explicit casts into the call aren't required.
 	// note that this template version takes a class parameter for a per-byte modifier to the data. 
 	template <class D> static void writeBytes(register uint8_t *data, int len) { 
-		latch();
+		select();
 #if 0
 		uint8_t *end = data + len;
 		while(data != end) { 
@@ -327,7 +327,7 @@ public:
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
 	template <uint8_t SKIP, class D> static void writeBytes3(register uint8_t *data, int len) { 
-		latch();
+		select();
 
 #if 0
 		// If interrupts or other things may be generating output while we're working on things, then we need
@@ -397,11 +397,11 @@ public:
 // uno/mini/duemilanove
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _LATCH_PIN, uint8_t _SPI_SPEED>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SELECT_PIN, uint8_t _SPI_SPEED>
 class AVRUSARTSPIOutput { 
 public:
 	static void init() { 
-		Pin<_LATCH_PIN>::setOutput();
+		Pin<_SELECT_PIN>::setOutput();
 		UBRR0 = 0;
 		UCSR0A = 1<<TXC0;
 
@@ -434,15 +434,15 @@ public:
 		Pin<_CLOCK_PIN>::lo();
 	}
 
-	static void latch() { Pin<_LATCH_PIN>::lo(); }
+	static void select() { Pin<_SELECT_PIN>::hi(); }
 	static void release() { 
 		// wait for all transmissions to finish
   		while ((UCSR0A & (1 <<TXC0)) == 0) {}
-    	Pin<_LATCH_PIN>::hi(); 
+    	Pin<_SELECT_PIN>::hi(); 
 	}
 
 	static void writeBytesValue(uint8_t value, int len) { 
-		latch();
+		select();
 		while(len--) { 
 			writeByte(value);
 		}
@@ -452,7 +452,7 @@ public:
 	// Write a block of n uint8_ts out 
 	template <class D> static void writeBytes(register uint8_t *data, int len) { 
 		uint8_t *end = data + len;
-		latch();
+		select();
 		while(data != end) { 
 #if defined(__MK20DX128__) 
 			writeByte(D::adjust(*data++));
@@ -470,7 +470,7 @@ public:
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
 	template <uint8_t SKIP, class D> static void writeBytes3(register uint8_t *data, int len) { 
 		uint8_t *end = data + len;
-		latch();
+		select();
 		while(data != end) { 
 			data += SKIP;
 #if defined(__MK20DX128__) 
@@ -505,7 +505,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _LATCH_PIN, uint8_t _SPI_SPEED>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SELECT_PIN, uint8_t _SPI_SPEED>
 class AVRHardwareSPIOutput { 
 public:
 	static void init() {
@@ -513,7 +513,7 @@ public:
 
 		// set the pins to output
 		Pin<_DATA_PIN>::setOutput();
-		Pin<_LATCH_PIN>::setOutput();
+		Pin<_SELECT_PIN>::setOutput();
 		Pin<_CLOCK_PIN>::setOutput();
 		release();
 
@@ -547,7 +547,7 @@ public:
 	    else { SPSR &= ~ (1<<SPI2X); }
 
 	    // push 192 0s to prime the spi stuff
-	    latch();
+	    select();
 	    SPDR = 0;
 	    for(int i = 0; i < 191; i++) { 
 	    	writeByte(0); writeByte(0); writeByte(0);
@@ -573,11 +573,11 @@ public:
 		SPCR |= 1 << SPE;
 	}
 
-	static void latch() { Pin<_LATCH_PIN>::lo(); }
-	static void release() { Pin<_LATCH_PIN>::hi(); }
+	static void select() { Pin<_SELECT_PIN>::hi(); }
+	static void release() { Pin<_SELECT_PIN>::lo(); }
 
 	static void writeBytesValue(uint8_t value, int len) { 
-		latch();
+		select();
 		while(len--) { 
 			writeByte(value);
 		}
@@ -587,7 +587,7 @@ public:
 	// Write a block of n uint8_ts out 
 	template <class D> static void writeBytes(register uint8_t *data, int len) { 
 		uint8_t *end = data + len;
-		latch();
+		select();
 		while(data != end) { 
 #if defined(__MK20DX128__) 
 			writeByte(D::adjust(*data++));
@@ -605,7 +605,7 @@ public:
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
 	template <uint8_t SKIP, class D> static void writeBytes3(register uint8_t *data, int len) { 
 		uint8_t *end = data + len;
-		latch();
+		select();
 		while(data != end) { 
 			data += SKIP;
 #if defined(__MK20DX128__) 
@@ -614,7 +614,7 @@ public:
 			writeByte(D::adjust(*data++));
 #else 
 			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
-			if(_SPI_SPEED == 0) { 
+			if(false && _SPI_SPEED == 0) { 
 				writeByteNoWait(D::adjust(*data++)); delaycycles<13>();
 				writeByteNoWait(D::adjust(*data++)); delaycycles<13>();
 				writeByteNoWait(D::adjust(*data++)); delaycycles<9>();
@@ -651,33 +651,33 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _LATCH_PIN, uint8_t _SPI_SPEED>
-class AVRSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _LATCH_PIN, _SPI_SPEED> {};
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SELECT_PIN, uint8_t _SPI_SPEED>
+class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SELECT_PIN, _SPI_SPEED> {};
 
 // uno/mini/duemilanove
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 #define SPI_DATA 11
 #define SPI_CLOCK 13
-template<uint8_t _LATCH, uint8_t SPI_SPEED>
-class AVRSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> {};
+template<uint8_t _SELECT, uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, _SELECT, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, _SELECT, SPI_SPEED> {};
 
 // #define USART_DATA 0
 // #define USART_CLOCK 4
-// template<uint8_t _LATCH, uint8_t SPI_SPEED>
-// class AVRSPIOutput<USART_DATA, USART_CLOCK, _LATCH, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, _LATCH, SPI_SPEED> {};
+// template<uint8_t _SELECT, uint8_t SPI_SPEED>
+// class AVRSPIOutput<USART_DATA, USART_CLOCK, _SELECT, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, _SELECT, SPI_SPEED> {};
 
 // Leonardo, teensy, blinkm
 #elif defined(__AVR_ATmega32U4__)
 #define SPI_DATA 2
 #define SPI_CLOCK 1
-template<uint8_t _LATCH, uint8_t SPI_SPEED>
-class AVRSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> {};
+template<uint8_t _SELECT, uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, _SELECT, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, _SELECT, SPI_SPEED> {};
 
 #elif defined(__MK20DX128__)   // for Teensy 3.0
 #define SPI_DATA 11
 #define SPI_CLOCK 13
-template<uint8_t _LATCH, uint8_t SPI_SPEED>
-class AVRSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, _LATCH, SPI_SPEED> {};
+template<uint8_t _SELECT, uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, _SELECT, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, _SELECT, SPI_SPEED> {};
 
 #else
 #pragma message "No hardware SPI pins defined.  All SPI access will default to bitbanged output"

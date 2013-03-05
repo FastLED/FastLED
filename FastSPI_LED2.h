@@ -10,18 +10,19 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// LPD8806 controller class - takes data/clock/latch pin values (N.B. should take an SPI definition?)
+// LPD8806 controller class - takes data/clock/select pin values (N.B. should take an SPI definition?)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class LPD8806_ADJUST {
 public:
+	// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
 	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
 };
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED = 0 >
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 0 >
 class LPD8806Controller : public CLEDController {
-	typedef AVRSPIOutput<DATA_PIN, CLOCK_PIN, LATCH_PIN, SPI_SPEED> SPI;
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SELECT_PIN, SPI_SPEED> SPI;
 
 	void clearLine(int nLeds) { 
 		int n = ((nLeds  + 63) >> 6);
@@ -49,13 +50,13 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// WS2801 definition - takes data/clock/latch pin values (N.B. should take an SPI definition?)
+// WS2801 definition - takes data/clock/select pin values (N.B. should take an SPI definition?)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t LATCH_PIN, uint8_t SPI_SPEED = 1>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 1>
 class WS2801Controller : public CLEDController {
-	typedef AVRSPIOutput<DATA_PIN, CLOCK_PIN, LATCH_PIN, SPI_SPEED> SPI;
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SELECT_PIN, SPI_SPEED> SPI;
 
 public:
 	virtual void init() { 
