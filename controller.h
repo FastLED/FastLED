@@ -33,6 +33,7 @@ public:
 
 	// wait until the controller is ready to write data out 
 	virtual void wait() { return; }
+
 };
 
 #endif

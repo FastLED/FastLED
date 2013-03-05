@@ -14,6 +14,41 @@
 
 #define _CYCLES(_PIN) ((_PIN >= 24) ? 2 : 1)
 
+class Pin { 
+	uint8_t mPinMask;
+	volatile uint8_t *mPort;
+	uint8_t mPin;
+
+	void _init() { 
+		mPinMask = digitalPinToBitMask(mPin);
+		mPort = portOutputRegister(digitalPinToPort(mPin));
+	}
+public:
+	Pin(int pin) : mPin(pin) { _init(); }
+
+	typedef volatile uint8_t * port_ptr_t;
+	typedef uint8_t port_t;
+
+	inline void setOutput() { pinMode(mPin, OUTPUT); }
+	inline void setInput() { pinMode(mPin, INPUT); }
+
+	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; } 
+	inline void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
+
+	inline void strobe() __attribute__ ((always_inline)) { hi(); lo(); }
+
+	inline void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; } 
+	inline void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; } 
+	inline void set(register port_t val) __attribute__ ((always_inline)) { *mPort = val; }
+
+	inline void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
+
+	port_t hival() __attribute__ ((always_inline)) { return *mPort | mPinMask;  }
+	port_t loval() __attribute__ ((always_inline)) { return *mPort & ~mPinMask; }
+	port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
+	port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
+};
+
 /// The simplest level of Pin class.  This relies on runtime functions durinig initialization to get the port/pin mask for the pin.  Most
 /// of the accesses involve references to these static globals that get set up.  This won't be the fastest set of pin operations, but it
 /// will provide pin level access on pretty much all arduino environments.  In addition, it includes some methods to help optimize access in
@@ -28,12 +63,12 @@
 ///
 /// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended, 
 /// as passing Pin objects around will likely -not- have the effect you're expecting.
-template<uint8_t PIN> class Pin { 
-	static uint8_t mPinMask;
-	static volatile uint8_t *mPort;
+template<uint8_t PIN> class FastPin { 
+	static uint8_t sPinMask;
+	static volatile uint8_t *sPort;
 	static void _init() { 
-		mPinMask = digitalPinToBitMask(PIN);
-		mPort = portOutputRegister(digitalPinToPort(PIN));
+		sPinMask = digitalPinToBitMask(PIN);
+		sPort = portOutputRegister(digitalPinToPort(PIN));
 	}
 public:
 	typedef volatile uint8_t * port_ptr_t;
@@ -42,25 +77,25 @@ public:
 	inline static void setOutput() { _init(); pinMode(PIN, OUTPUT); }
 	inline static void setInput() { _init(); pinMode(PIN, INPUT); }
 
-	inline static void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; } 
-	inline static void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
+	inline static void hi() __attribute__ ((always_inline)) { *sPort |= sPinMask; } 
+	inline static void lo() __attribute__ ((always_inline)) { *sPort &= ~sPinMask; }
 
 	inline static void strobe() __attribute__ ((always_inline)) { hi(); lo(); }
 
-	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; } 
-	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; } 
-	inline static void set(register port_t val) __attribute__ ((always_inline)) { *mPort = val; }
+	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= sPinMask; } 
+	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~sPinMask; } 
+	inline static void set(register port_t val) __attribute__ ((always_inline)) { *sPort = val; }
 
 	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
 
-	static port_t hival() __attribute__ ((always_inline)) { return *mPort | mPinMask;  }
-	static port_t loval() __attribute__ ((always_inline)) { return *mPort & ~mPinMask; }
-	static port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
-	static port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
+	static port_t hival() __attribute__ ((always_inline)) { return *sPort | sPinMask;  }
+	static port_t loval() __attribute__ ((always_inline)) { return *sPort & ~sPinMask; }
+	static port_ptr_t  port() __attribute__ ((always_inline)) { return sPort; }
+	static port_t mask() __attribute__ ((always_inline)) { return sPinMask; }
 };
 
-template<uint8_t PIN> uint8_t Pin<PIN>::mPinMask;
-template<uint8_t PIN> volatile uint8_t *Pin<PIN>::mPort;
+template<uint8_t PIN> uint8_t FastPin<PIN>::sPinMask;
+template<uint8_t PIN> volatile uint8_t *FastPin<PIN>::sPort;
 
 /// Class definition for a Pin where we know the port registers at compile time for said pin.  This allows us to make
 /// a lot of optimizations, as the inlined hi/lo methods will devolve to a single io register write/bitset.  
@@ -152,7 +187,7 @@ typedef volatile uint8_t & reg8_t;
 #define _R(T) struct __gen_struct_ ## T
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
 #define _IO(L) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L);
-#define _DEFPIN_AVR(PIN, MASK, L) template<> class Pin<PIN> : public _AVRPIN<PIN, MASK, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
+#define _DEFPIN_AVR(PIN, MASK, L) template<> class FastPin<PIN> : public _AVRPIN<PIN, MASK, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
 
 // ARM definitions
 #define GPIO_BITBAND_ADDR(reg, bit) (((uint32_t)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
@@ -165,7 +200,7 @@ typedef volatile uint32_t * ptr_reg32_t;
 	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
 #define _IO32(L) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR);
 
-#define _DEFPIN_ARM(PIN, BIT, L) template<> class Pin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
+#define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
 																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; 
 
 // Don't use bit band'd pins for now, the compiler generates far less efficient code around them
