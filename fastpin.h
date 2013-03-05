@@ -14,10 +14,17 @@
 
 #define _CYCLES(_PIN) ((_PIN >= 24) ? 2 : 1)
 
-class Pin { 
+class Selectable {
+public:
+	virtual void select() = 0;
+	virtual void release() = 0;
+	virtual bool isSelected() = 0;
+};
+
+class Pin : public Selectable { 
 	uint8_t mPinMask;
-	volatile uint8_t *mPort;
 	uint8_t mPin;
+	volatile uint8_t *mPort;
 
 	void _init() { 
 		mPinMask = digitalPinToBitMask(mPin);
@@ -47,6 +54,20 @@ public:
 	port_t loval() __attribute__ ((always_inline)) { return *mPort & ~mPinMask; }
 	port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
 	port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
+
+	virtual void select() { hi(); }
+	virtual void release() { lo(); }
+	virtual bool isSelected() { return (*mPort & mPinMask) == mPinMask; }
+};
+
+class OutputPin : public Pin {
+public:
+	OutputPin(int pin) : Pin(pin) { setOutput(); }
+};
+
+class InputPin : public Pin {
+public:
+	InputPin(int pin) : Pin(pin) { setInput(); }
 };
 
 /// The simplest level of Pin class.  This relies on runtime functions durinig initialization to get the port/pin mask for the pin.  Most

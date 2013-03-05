@@ -125,9 +125,11 @@ public:
 		sei();
 	}
 
+#ifdef SUPPORT_ARGB
 	virtual void showARGB(uint8_t *data, int nLeds) { 
 		// TODO: IMPLEMENTME
 	}
+#endif
 };
 
 #endif

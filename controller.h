@@ -25,9 +25,11 @@ public:
 	// nLeds is the number of RGB leds being written to
 	virtual void showRGB(uint8_t *data, int nLeds) = 0;
 
+#ifdef SUPPORT_ARGB
 	// as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
 	virtual void showARGB(uint8_t *data, int nLeds) = 0;
-
+#endif
+	
 	// is the controller ready to write data out
 	virtual bool ready() { return true; }
 

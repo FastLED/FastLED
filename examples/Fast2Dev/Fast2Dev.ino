@@ -25,7 +25,7 @@ struct CRGB leds[NUM_LEDS];
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // Hardware SPIr2 - .539ms @8Mhz, .799 @4Mhz, 1.315ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
-// LPD8806Controller<11, 13, 10> LED;
+LPD8806Controller<11, 13, 10> LED;
 // LPD8806Controller<2, 1, 0> LED; // teensy pins
 // LPD8806Controller<0, 4, 10> LED;
 // LPD8806Controller<12, 13, 10, 0> LED;
@@ -55,7 +55,7 @@ struct CRGB leds[NUM_LEDS];
 // TM1809Controller800Mhz<6> LED;
 // UCS1903Controller400Mhz<7> LED;
 // WS2811Controller800Mhz<12> LED;
-WS2811Controller800Mhz<5> LED;
+// WS2811Controller800Mhz<5> LED;
 // TM1803Controller400Mhz<5> LED;
 
 //////////////////////////////////////////////////////////////////////////////////////

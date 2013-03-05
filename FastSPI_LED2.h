@@ -22,30 +22,36 @@ public:
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 0 >
 class LPD8806Controller : public CLEDController {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SELECT_PIN, SPI_SPEED> SPI;
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	SPI mSPI;
+	OutputPin selectPin;
 
 	void clearLine(int nLeds) { 
 		int n = ((nLeds  + 63) >> 6);
-		SPI::writeBytesValue(0, n);
+		mSPI.writeBytesValue(0, n);
 	}
 public:
+	LPD8806Controller() : selectPin(SELECT_PIN) {}
 	virtual void init() { 
-		SPI::init();
+		mSPI.setSelect(&selectPin);
+		mSPI.init();
 
 		// push out 1000 leds worth of 0's to clear out the line
-		SPI::writeBytesValue(0x80, 1000);
+		mSPI.writeBytesValue(0x80, 1000);
 		clearLine(1000);
 	}
 
 	virtual void showRGB(uint8_t *data, int nLeds) {
-		SPI::template writeBytes3<LPD8806_ADJUST>(data, nLeds * 3);
+		mSPI.template writeBytes3<LPD8806_ADJUST>(data, nLeds * 3);
 		clearLine(nLeds);
 	}
 
+#ifdef SUPPORT_ARGB
 	virtual void showARGB(uint8_t *data, int nLeds) {
-		SPI::template writeBytes3<1, LPD8806_ADJUST>(data, nLeds * 4);
+		mSPI.template writeBytes3<1, LPD8806_ADJUST>(data, nLeds * 4);
 		clearLine(nLeds);
 	}
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,22 +62,28 @@ public:
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 1>
 class WS2801Controller : public CLEDController {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SELECT_PIN, SPI_SPEED> SPI;
-
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	SPI mSPI;
+	OutputPin selectPin;
 public:
+	WS2801Controller() : selectPin(SELECT_PIN) {}
+	
 	virtual void init() { 
-		SPI::init();
+		mSPI.setSelect(&selectPin);
+		mSPI.init();
 	    // 0 out as much as we can on the line
-	    SPI::writeBytesValue(0, 1000);
+	    mSPI.writeBytesValue(0, 1000);
 	}
 
 	virtual void showRGB(uint8_t *data, int nLeds) {
-		SPI::template writeBytes3(data, nLeds * 3);
+		mSPI.writeBytes3(data, nLeds * 3);
 	}
 
+#ifdef SUPPORT_ARGB
 	virtual void showARGB(uint8_t *data, int nLeds) {
-		SPI::template writeBytes3<1>(data, nLeds * 4);
+		mSPI.template writeBytes3<1>(data, nLeds * 4);
 	}
+#endif
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
