@@ -65,8 +65,8 @@ public:
 	static __attribute__((always_inline)) inline uint8_t adjust(uint8_t data) { return data; } 
 };
 
-#define FLAG_START_BIT 0x80
-#define MASK_SKIP_BITS 0x7F
+#define FLAG_START_BIT 0xF0
+#define MASK_SKIP_BITS 0x3F
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -247,7 +247,7 @@ public:
 	// Write out len bytes of the given value out over SPI.  Useful for quickly flushing, say, a line of 0's down the line.
 	void writeBytesValue(uint8_t value, int len) { 
 		select();
-#if 0
+#ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		// TODO: Weird things may happen if software bitbanging SPI output and other pins on the output reigsters are being twiddled.  Need
 		// to allow specifying whether or not exclusive i/o access is allowed during this process, and if i/o access is not allowed fall
 		// back to the degenerative code below
@@ -288,7 +288,7 @@ public:
 	// note that this template version takes a class parameter for a per-byte modifier to the data. 
 	template <class D> void writeBytes(register uint8_t *data, int len) { 
 		select();
-#if 0
+#ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		uint8_t *end = data + len;
 		while(data != end) { 
 			writeByte(D::adjust(*data++));
@@ -337,12 +337,15 @@ public:
 	template <uint8_t SKIP, class D> void writeBytes3(register uint8_t *data, int len) { 
 		select();
 
-#if 0
+#ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		// If interrupts or other things may be generating output while we're working on things, then we need
 		// to use this block
 		uint8_t *end = data + len;
 		while(data != end) { 
 			data += SKIP;
+			if(SKIP & FLAG_START_BIT) { 
+				writeBit<0>(1);
+			}
 			writeByte(D::adjust(*data++));
 			writeByte(D::adjust(*data++));
 			writeByte(D::adjust(*data++));
