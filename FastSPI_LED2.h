@@ -108,6 +108,50 @@ public:
 #endif
 };
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// SM16716 definition - takes data/clock/select pin values (N.B. should take an SPI definition?)
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 1>
+class SM16716Controller : public CLEDController {
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	SPI mSPI;
+	OutputPin selectPin;
+public:
+	SM16716Controller() : selectPin(SELECT_PIN) {}
+
+	virtual void init() { 
+		mSPI.setSelect(&selectPin);
+		mSPI.init();
+	}
+
+	virtual void showRGB(uint8_t *data, int nLeds) {
+		// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)
+		mSPI.writeBytesValue(0, 6);
+		mSPI.template writeBit<0>(0);
+		mSPI.template writeBit<0>(0);
+
+		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
+		// of each triplet of bytes for rgb data
+		mSPI.template writeBytes3<FLAG_START_BIT>(data, nLeds * 3);
+	}
+
+#ifdef SUPPORT_ARGB
+	virtual void showARGB(uint8_t *data, int nLeds) {
+		mSPI.writeBytesValue(0, 6);
+		mSPI.template writeBit<0>(0);
+		mSPI.template writeBit<0>(0);
+
+		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
+		// of each triplet of bytes for rgb data
+		mSPI.template writeBytes3<1 | FLAG_START_BIT>(data, nLeds * 4);
+	}
+#endif
+};
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Clockless template instantiations

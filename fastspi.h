@@ -65,6 +65,9 @@ public:
 	static __attribute__((always_inline)) inline uint8_t adjust(uint8_t data) { return data; } 
 };
 
+#define FLAG_START_BIT 0x80
+#define MASK_SKIP_BITS 0x7F
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Software SPI (aka bit-banging) support - with aggressive optimizations for when the clock and data pin are on the same port
@@ -360,7 +363,10 @@ public:
 			uint8_t *end = data + len;
 
 			while(data != end) { 
-				data += SKIP;
+				data += (MASK_SKIP_BITS & SKIP);
+				if(SKIP & FLAG_START_BIT) { 
+					writeBit<0>(1, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+				}
 				writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
 				writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
 				writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
@@ -376,7 +382,10 @@ public:
 			uint8_t *end = data + len;
 
 			while(data != end) { 
-				data += SKIP;
+				data += (MASK_SKIP_BITS & SKIP);
+				if(SKIP & FLAG_START_BIT) { 
+					writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				}
 				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
@@ -481,7 +490,7 @@ public:
 		uint8_t *end = data + len;
 		select();
 		while(data != end) { 
-			data += SKIP;
+			data += (MASK_SKIP_BITS & SKIP);
 #if defined(__MK20DX128__) 
 			writeByte(D::adjust(*data++));
 			writeByte(D::adjust(*data++));
@@ -620,7 +629,13 @@ public:
 		uint8_t *end = data + len;
 		select();
 		while(data != end) { 
-			data += SKIP;
+			data += (MASK_SKIP_BITS & SKIP);
+			if(SKIP & FLAG_START_BIT) { 
+				if(_SPI_SPEED != 0) {
+					wait(); 
+				}
+				writeBit<0>(1);
+			}
 #if defined(__MK20DX128__) 
 			writeByte(D::adjust(*data++));
 			writeByte(D::adjust(*data++));
