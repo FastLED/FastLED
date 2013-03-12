@@ -7,6 +7,22 @@
 #include "clockless.h"
 
 
+// Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet
+// this should make sure that chipsets that have 
+template<int WAIT> class CMinWait {
+	long mLastMicros;
+public:
+	CMinWait() { mLastMicros = 0; }
+
+	void wait() { 
+		long diff = micros() - mLastMicros;
+		if(diff < WAIT) { 
+			delayMicroseconds(WAIT - diff);
+		}
+	}
+
+	void mark() { mLastMicros = micros(); }
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -65,23 +81,29 @@ class WS2801Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 	OutputPin selectPin;
+	CMinWait<24>  mWaitDelay;
 public:
 	WS2801Controller() : selectPin(SELECT_PIN) {}
-	
+
 	virtual void init() { 
 		mSPI.setSelect(&selectPin);
 		mSPI.init();
 	    // 0 out as much as we can on the line
 	    mSPI.writeBytesValue(0, 1000);
+	    mWaitDelay.mark();
 	}
 
 	virtual void showRGB(uint8_t *data, int nLeds) {
+		mWaitDelay.wait();
 		mSPI.writeBytes3(data, nLeds * 3);
+		mWaitDelay.mark();
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void showARGB(uint8_t *data, int nLeds) {
+		mWaitDelay.wait();
 		mSPI.template writeBytes3<1>(data, nLeds * 4);
+		mWaitDelay.mark();
 	}
 #endif
 };

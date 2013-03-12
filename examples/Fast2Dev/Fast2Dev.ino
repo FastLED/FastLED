@@ -26,6 +26,7 @@ struct CRGB leds[NUM_LEDS];
 // Hardware SPIr2 - .539ms @8Mhz, .799 @4Mhz, 1.315ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
 LPD8806Controller<11, 13, 10> LED;
+//LPD8806Controller<11, 13, 14> LED;
 // LPD8806Controller<2, 1, 0> LED; // teensy pins
 // LPD8806Controller<0, 4, 10> LED;
 // LPD8806Controller<12, 13, 10, 0> LED;
@@ -95,6 +96,7 @@ void setup() {
 	int start = millis();
 	for(int i = 0; i < 1000; i++){ 
 		LED.showRGB((byte*)leds, NUM_LEDS);
+		// LED2.showRGB((byte*)leds, NUM_LEDS);
 	}
 	int end = millis();
 	DPRINT("Time for 1000 loops: "); DPRINTLN(end - start);
