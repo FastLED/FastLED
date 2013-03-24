@@ -711,14 +711,23 @@ class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SP
 // template<uint8_t SPI_SPEED>
 // class AVRSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> {};
 
-// Leonardo, teensy, blinkm
-#elif defined(__AVR_ATmega32U4__)
+// Teensy
+#elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
+
 #define SPI_DATA 2
 #define SPI_CLOCK 1
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
-#elif defined(__MK20DX128__)   // for Teensy 3.0
+// Leonardo
+#elif defined(__AVR_ATmega32U4__)
+
+#define SPI_DATA 16
+#define SPI_CLOCK 15
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
+
+#elif defined(__MK20DX128__) && defined(CORE_TEENSY)  // for Teensy 3.0
 #define SPI_DATA 11
 #define SPI_CLOCK 13
 template<uint8_t SPI_SPEED>

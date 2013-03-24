@@ -247,8 +247,9 @@ _DEFPIN_AVR(16, 0x01, C); _DEFPIN_AVR(17, 0x02, C); _DEFPIN_AVR(18, 0x04, C); _D
 _DEFPIN_AVR(20, 0x10, C); _DEFPIN_AVR(21, 0x20, C); _DEFPIN_AVR(22, 0x40, C); _DEFPIN_AVR(23, 0x80, C);
 
 // Leonardo, teensy, blinkm
-#elif defined(__AVR_ATmega32U4__)
+#elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
 
+// teensy defs
 _IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
 
 _DEFPIN_AVR(0, 1, B); _DEFPIN_AVR(1, 2, B); _DEFPIN_AVR(2, 4, B); _DEFPIN_AVR(3, 8, B); 
@@ -258,7 +259,19 @@ _DEFPIN_AVR(12, 128, D); _DEFPIN_AVR(13, 16, B); _DEFPIN_AVR(14, 32, B); _DEFPIN
 _DEFPIN_AVR(16, 128, F); _DEFPIN_AVR(17, 64, F); _DEFPIN_AVR(18, 32, F); _DEFPIN_AVR(19, 16, F); 
 _DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AVR(23, 32, D); 
 
-#elif defined(__MK20DX128__)
+#elif defined(__AVR_ATmega32U4__)
+
+// leonard defs
+_IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
+
+_DEFPIN_AVR(0, 4, D); _DEFPIN_AVR(1, 8, D); _DEFPIN_AVR(2, 2, D); _DEFPIN_AVR(3, 1, D); 
+_DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 64, C); _DEFPIN_AVR(6, 127, D); _DEFPIN_AVR(7, 64, E); 
+_DEFPIN_AVR(8, 16, B); _DEFPIN_AVR(9, 32, B); _DEFPIN_AVR(10, 64, B); _DEFPIN_AVR(11, 128, B); 
+_DEFPIN_AVR(12, 64, D); _DEFPIN_AVR(13, 127, C); _DEFPIN_AVR(14, 8, B); _DEFPIN_AVR(15, 2, B); 
+_DEFPIN_AVR(16, 4, B); _DEFPIN_AVR(17, 1, B); _DEFPIN_AVR(18, 128, F); _DEFPIN_AVR(19, 64, F); 
+_DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_AVR(23, 0, F); 
+
+#elif defined(__MK20DX128__) && defined(CORE_TEENSY)
 
 _IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
 
