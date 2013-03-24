@@ -1,0 +1,13 @@
+Preview 2
+* Rename pin class to FastPin
+* Replace latch with select, more accurate description of what it does
+* Enforce intra-frame timing for ws2801s
+* SM16716 support
+* Add #define FAST_SPI_INTERRUPTS_WRITE_PINS to make sure world is ok w/interrupts and SPI
+* Add #define FORCE_SOFTWARE_SPI for those times when you absolutely don't want to use hardware SPI, ev
+en if you're using the hardware SPI pins
+* Add pin definitions for the arduino megas
+* Add pin definitions for the leonardo
+
+Preview 1
+* Initial release
