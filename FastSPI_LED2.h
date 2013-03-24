@@ -115,9 +115,15 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 1>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 0>
 class SM16716Controller : public CLEDController {
+#if defined(__MK20DX128__)   // for Teensy 3.0
+	// Have to force software SPI for the teensy 3.0 right now because it doesn't deal well
+	// with flipping in and out of hardware SPI
+	typedef SoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+#else
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+#endif
 	SPI mSPI;
 	OutputPin selectPin;
 public:

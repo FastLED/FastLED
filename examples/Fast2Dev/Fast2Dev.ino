@@ -1,3 +1,5 @@
+// #define FAST_SPI_INTERRUPTS_WRITE_PINS 1
+// #define FORCE_SOFTWARE_SPI 1
 #include "FastSPI_LED2.h"
 
 // #define DEBUG
@@ -15,18 +17,19 @@
 //
 //////////////////////////////////////////////////
 
-#define NUM_LEDS 86
+#define NUM_LEDS 10
 
 struct CRGB { byte g; byte r; byte b; };
 
 struct CRGB leds[NUM_LEDS];
 
+// gdn clk data pwr
 // Note: timing values in the code below are stale/out of date
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // Hardware SPIr2 - .539ms @8Mhz, .799 @4Mhz, 1.315ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
 // LPD8806Controller<11, 13, 10> LED;
-SM16716Controller<14, 13, 10> LED;
+SM16716Controller<11, 13, 10> LED;
 
 //LPD8806Controller<11, 13, 14> LED;
 // LPD8806Controller<2, 1, 0> LED; // teensy pins
