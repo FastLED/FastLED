@@ -742,10 +742,10 @@ template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
 #else
-#pragma message "No hardware SPI pins defined.  All SPI access will default to bitbanged output"
+#warning "No hardware SPI pins defined.  All SPI access will default to bitbanged output"
 #endif
 #else
-#pragma message "Forcing software SPI - no hardware SPI for you!"
+#warning "Forcing software SPI - no hardware SPI for you!"
 #endif 
 
 #endif

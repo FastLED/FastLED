@@ -310,7 +310,8 @@ _DEFPIN_ARM(28, 8, C); _DEFPIN_ARM(29, 10, C); _DEFPIN_ARM(30, 11, C); _DEFPIN_A
 _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 #else
 
-#pragma message "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
+#warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
+#define NO_HARDWARE_PIN_SUPPORT
 
 #endif
 

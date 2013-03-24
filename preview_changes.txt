@@ -6,8 +6,9 @@ Preview 2
 * Add #define FAST_SPI_INTERRUPTS_WRITE_PINS to make sure world is ok w/interrupts and SPI
 * Add #define FORCE_SOFTWARE_SPI for those times when you absolutely don't want to use hardware SPI, ev
 en if you're using the hardware SPI pins
-* Add pin definitions for the arduino megas
-* Add pin definitions for the leonardo
+* Add pin definitions for the arduino megas - should fix ws2811 support
+* Add pin definitions for the leonardo - should fix spi support and pin mappings
+* Add warnings when pin definitions are missing
 
 Preview 1
 * Initial release
