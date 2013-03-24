@@ -9,6 +9,9 @@ en if you're using the hardware SPI pins
 * Add pin definitions for the arduino megas - should fix ws2811 support
 * Add pin definitions for the leonardo - should fix spi support and pin mappings
 * Add warnings when pin definitions are missing
+* Added google+ community for fastspi users - https://plus.google.com/communities/109127054924227823508
+# Add pin definitions for Teensy++ 2.0
+
 
 Preview 1
 * Initial release

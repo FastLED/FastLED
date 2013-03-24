@@ -699,51 +699,22 @@ template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_SPEED>
 class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
 
 #ifndef FORCE_SOFTWARE_SPI
-// uno/mini/duemilanove
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
-#define SPI_DATA 11
-#define SPI_CLOCK 13
+#if defined(SPI_DATA) && defined(SPI_CLOCK)
+
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
-// #define USART_DATA 0
-// #define USART_CLOCK 4
-// template<uint8_t SPI_SPEED>
-// class AVRSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> {};
-
-// megas
-#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-
-#define SPI_DATA 51
-#define SPI_CLOCK 52
-template<uint8_t SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
-
-// Teensy
-#elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
-
-#define SPI_DATA 2
-#define SPI_CLOCK 1
-template<uint8_t SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
-
-// Leonardo
-#elif defined(__AVR_ATmega32U4__)
-
-#define SPI_DATA 16
-#define SPI_CLOCK 15
-template<uint8_t SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
-
-#elif defined(__MK20DX128__) && defined(CORE_TEENSY)  // for Teensy 3.0
-#define SPI_DATA 11
-#define SPI_CLOCK 13
-template<uint8_t SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
 #else
 #warning "No hardware SPI pins defined.  All SPI access will default to bitbanged output"
+
 #endif
+
+// #if defined(USART_DATA) && defined(USART_CLOCK)
+// template<uint8_t SPI_SPEED>
+// class AVRSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> {};
+// #endif
+
 #else
 #warning "Forcing software SPI - no hardware SPI for you!"
 #endif 

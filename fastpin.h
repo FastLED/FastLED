@@ -246,6 +246,9 @@ _DEFPIN_AVR(12, 0x10, B); _DEFPIN_AVR(13, 0x20, B); _DEFPIN_AVR(14, 0x40, B); _D
 _DEFPIN_AVR(16, 0x01, C); _DEFPIN_AVR(17, 0x02, C); _DEFPIN_AVR(18, 0x04, C); _DEFPIN_AVR(19, 0x08, C);
 _DEFPIN_AVR(20, 0x10, C); _DEFPIN_AVR(21, 0x20, C); _DEFPIN_AVR(22, 0x40, C); _DEFPIN_AVR(23, 0x80, C);
 
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 // megas
 
@@ -270,6 +273,9 @@ _DEFPIN_AVR(60, 64, F); _DEFPIN_AVR(61, 128, F); _DEFPIN_AVR(62, 1, K); _DEFPIN_
 _DEFPIN_AVR(64, 4, K); _DEFPIN_AVR(65, 8, K); _DEFPIN_AVR(66, 16, K); _DEFPIN_AVR(67, 32, K); 
 _DEFPIN_AVR(68, 64, K); _DEFPIN_AVR(69, 128, K); 
 
+#define SPI_DATA 51
+#define SPI_CLOCK 52
+
 // Leonardo, teensy, blinkm
 #elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
 
@@ -283,6 +289,30 @@ _DEFPIN_AVR(12, 128, D); _DEFPIN_AVR(13, 16, B); _DEFPIN_AVR(14, 32, B); _DEFPIN
 _DEFPIN_AVR(16, 128, F); _DEFPIN_AVR(17, 64, F); _DEFPIN_AVR(18, 32, F); _DEFPIN_AVR(19, 16, F); 
 _DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AVR(23, 32, D); 
 
+#define SPI_DATA 2
+#define SPI_CLOCK 1
+
+#elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)
+// teensy++ 2 defs
+
+_IO(A); _IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
+
+_DEFPIN_AVR(0, 1, D); _DEFPIN_AVR(1, 2, D); _DEFPIN_AVR(2, 4, D); _DEFPIN_AVR(3, 8, D); 
+_DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 32, D); _DEFPIN_AVR(6, 64, D); _DEFPIN_AVR(7, 128, D); 
+_DEFPIN_AVR(8, 1, E); _DEFPIN_AVR(9, 2, E); _DEFPIN_AVR(10, 1, C); _DEFPIN_AVR(11, 2, C); 
+_DEFPIN_AVR(12, 4, C); _DEFPIN_AVR(13, 8, C); _DEFPIN_AVR(14, 16, C); _DEFPIN_AVR(15, 32, C); 
+_DEFPIN_AVR(16, 64, C); _DEFPIN_AVR(17, 128, C); _DEFPIN_AVR(18, 64, E); _DEFPIN_AVR(19, 128, E); 
+_DEFPIN_AVR(20, 1, B); _DEFPIN_AVR(21, 2, B); _DEFPIN_AVR(22, 4, B); _DEFPIN_AVR(23, 8, B); 
+_DEFPIN_AVR(24, 16, B); _DEFPIN_AVR(25, 32, B); _DEFPIN_AVR(26, 64, B); _DEFPIN_AVR(27, 128, B); 
+_DEFPIN_AVR(28, 1, A); _DEFPIN_AVR(29, 2, A); _DEFPIN_AVR(30, 4, A); _DEFPIN_AVR(31, 8, A); 
+_DEFPIN_AVR(32, 16, A); _DEFPIN_AVR(33, 32, A); _DEFPIN_AVR(34, 64, A); _DEFPIN_AVR(35, 128, A); 
+_DEFPIN_AVR(36, 16, E); _DEFPIN_AVR(37, 32, E); _DEFPIN_AVR(38, 1, F); _DEFPIN_AVR(39, 2, F); 
+_DEFPIN_AVR(40, 4, F); _DEFPIN_AVR(41, 8, F); _DEFPIN_AVR(42, 16, F); _DEFPIN_AVR(43, 32, F); 
+_DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F); 
+
+#define SPI_DATA 22
+#define SPI_CLOCK 21
+
 #elif defined(__AVR_ATmega32U4__)
 
 // leonard defs
@@ -294,6 +324,9 @@ _DEFPIN_AVR(8, 16, B); _DEFPIN_AVR(9, 32, B); _DEFPIN_AVR(10, 64, B); _DEFPIN_AV
 _DEFPIN_AVR(12, 64, D); _DEFPIN_AVR(13, 127, C); _DEFPIN_AVR(14, 8, B); _DEFPIN_AVR(15, 2, B); 
 _DEFPIN_AVR(16, 4, B); _DEFPIN_AVR(17, 1, B); _DEFPIN_AVR(18, 128, F); _DEFPIN_AVR(19, 64, F); 
 _DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_AVR(23, 0, F); 
+
+#define SPI_DATA 16
+#define SPI_CLOCK 15
 
 #elif defined(__MK20DX128__) && defined(CORE_TEENSY)
 
@@ -308,6 +341,10 @@ _DEFPIN_ARM(20, 5, D); _DEFPIN_ARM(21, 6, D); _DEFPIN_ARM(22, 1, C); _DEFPIN_ARM
 _DEFPIN_ARM(24, 5, A); _DEFPIN_ARM(25, 19, B); _DEFPIN_ARM(26, 1, E); _DEFPIN_ARM(27, 9, C);
 _DEFPIN_ARM(28, 8, C); _DEFPIN_ARM(29, 10, C); _DEFPIN_ARM(30, 11, C); _DEFPIN_ARM(31, 0, E);
 _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
+
+#define SPI_DATA 11
+#define SPI_DATA 13
+
 #else
 
 #warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
