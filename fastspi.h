@@ -711,6 +711,14 @@ class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SP
 // template<uint8_t SPI_SPEED>
 // class AVRSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> {};
 
+// megas
+#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
+#define SPI_DATA 51
+#define SPI_CLOCK 52
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
+
 // Teensy
 #elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
 
