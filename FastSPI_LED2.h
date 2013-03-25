@@ -36,7 +36,7 @@ public:
 	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
 };
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 0 >
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 2 >
 class LPD8806Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -76,7 +76,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 1>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 3>
 class WS2801Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -94,9 +94,9 @@ public:
 	}
 
 	virtual void showRGB(uint8_t *data, int nLeds) {
-		mWaitDelay.wait();
+		// mWaitDelay.wait();
 		mSPI.writeBytes3(data, nLeds * 3);
-		mWaitDelay.mark();
+		// mWaitDelay.mark();
 	}
 
 #ifdef SUPPORT_ARGB
@@ -120,7 +120,7 @@ class SM16716Controller : public CLEDController {
 #if defined(__MK20DX128__)   // for Teensy 3.0
 	// Have to force software SPI for the teensy 3.0 right now because it doesn't deal well
 	// with flipping in and out of hardware SPI
-	typedef SoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 #else
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 #endif

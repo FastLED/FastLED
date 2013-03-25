@@ -343,7 +343,7 @@ _DEFPIN_ARM(28, 8, C); _DEFPIN_ARM(29, 10, C); _DEFPIN_ARM(30, 11, C); _DEFPIN_A
 _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 
 #define SPI_DATA 11
-#define SPI_DATA 13
+#define SPI_CLOCK 13
 
 #else
 

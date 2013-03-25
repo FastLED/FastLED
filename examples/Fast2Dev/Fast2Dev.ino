@@ -17,7 +17,7 @@
 //
 //////////////////////////////////////////////////
 
-#define NUM_LEDS 10
+#define NUM_LEDS 160
 
 struct CRGB { byte g; byte r; byte b; };
 
@@ -25,11 +25,12 @@ struct CRGB leds[NUM_LEDS];
 
 // gdn clk data pwr
 // Note: timing values in the code below are stale/out of date
+// Hardware SPI Teensy 3 - .362ms for an 86 led frame 
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // Hardware SPIr2 - .539ms @8Mhz, .799 @4Mhz, 1.315ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
-// LPD8806Controller<11, 13, 10> LED;
-SM16716Controller<11, 13, 10> LED;
+LPD8806Controller<11, 13, 10> LED;
+// SM16716Controller<11, 13, 10> LED;
 
 //LPD8806Controller<11, 13, 14> LED;
 // LPD8806Controller<2, 1, 0> LED; // teensy pins
@@ -53,7 +54,7 @@ SM16716Controller<11, 13, 10> LED;
 // WS2801Controller<11, 13, 10, 0> LED;
 
 // Same Port, non-hardware SPI - 1.2ms for an 86 led frame, 1.12ms with large switch 
-// WS2801Controller<12, 13, 10> LED;
+// WS2801Controller<11, 13, 10, 0> LED;
 
 // Different Port, non-hardware SPI - 1.47ms for an 86 led frame
 // WS2801Controller<7, 13, 10> LED;
@@ -108,6 +109,9 @@ void setup() {
 #endif 
 }
 
+int count = 0;
+long start = millis();
+
 void loop() { 
 #if 0
 	memset(leds, 255, NUM_LEDS * sizeof(struct CRGB));
@@ -123,22 +127,30 @@ void loop() {
 			 	case 2: leds[iLed].b = 128; break;
 			 }
 
+	if(count == 0) { 
+		start = millis();
+	} 
+
+	if(count++ == 1000) { 
+		count = 0;
+		DPRINT("Time for 1000 frames: "); DPRINTLN(millis() - start);
+	}
 			LED.showRGB((byte*)leds, NUM_LEDS);;
 			//DPRINTLN("waiting");
-			delay(20);
+//			delay(20);
 		}
 	}
-	 for(int i = 0; i < 64; i++) { 
-	 	memset(leds, i, NUM_LEDS * 3);
-		LED.showRGB((byte*)leds, NUM_LEDS);;
-		//	DPRINTLN("waiting");
-	 	delay(40);
-	}
-	for(int i = 64; i >= 0; i--) { 
-	 	memset(leds, i, NUM_LEDS * 3);
-		LED.showRGB((byte*)leds, NUM_LEDS);;
-		//	DPRINTLN("waiting");
-	 	delay(40);
-	}
+	//  for(int i = 0; i < 64; i++) { 
+	//  	memset(leds, i, NUM_LEDS * 3);
+	// 	LED.showRGB((byte*)leds, NUM_LEDS);;
+	// 	//	DPRINTLN("waiting");
+	//  	delay(40);
+	// }
+	// for(int i = 64; i >= 0; i--) { 
+	//  	memset(leds, i, NUM_LEDS * 3);
+	// 	LED.showRGB((byte*)leds, NUM_LEDS);;
+	// 	//	DPRINTLN("waiting");
+	//  	delay(40);
+	// }
 #endif
 }

@@ -1,3 +1,6 @@
+Preview 3
+* True hardware SPI support for teensy (up to 20Mbit output!)
+* Minor bug fixes/tweaks
 Preview 2
 * Rename pin class to FastPin
 * Replace latch with select, more accurate description of what it does
