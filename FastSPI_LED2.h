@@ -41,7 +41,15 @@ class LPD8806Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 	OutputPin selectPin;
+	int mClearedLeds;
 
+	void checkClear(int nLeds) { 
+		if(nLeds > mClearedLeds) { 
+			clearLine(nLeds);
+			mClearedLeds = nLeds;
+		}
+	}
+	
 	void clearLine(int nLeds) { 
 		int n = ((nLeds  + 63) >> 6);
 		mSPI.writeBytesValue(0, n);
@@ -51,19 +59,23 @@ public:
 	virtual void init() { 
 		mSPI.setSelect(&selectPin);
 		mSPI.init();
-
-		// push out 1000 leds worth of 0's to clear out the line
-		mSPI.writeBytesValue(0x80, 1000);
-		clearLine(1000);
+		mClearedLeds = 0;
 	}
 
+	virtual void clearLeds(int nLeds) { 
+		checkClear(nLeds);
+		mSPI.writeBytesValue(0x80, nLeds * 3);	
+	}
+	
 	virtual void showRGB(uint8_t *data, int nLeds) {
+		checkClear(nLeds);
 		mSPI.template writeBytes3<LPD8806_ADJUST>(data, nLeds * 3);
 		clearLine(nLeds);
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void showARGB(uint8_t *data, int nLeds) {
+		checkClear(nLeds);
 		mSPI.template writeBytes3<1, LPD8806_ADJUST>(data, nLeds * 4);
 		clearLine(nLeds);
 	}
@@ -93,10 +105,16 @@ public:
 	    mWaitDelay.mark();
 	}
 
+	virtual void clearLeds(int nLeds) { 
+		mWaitDelay.wait();
+		mSPI.writeBytesValue(0, nLeds*3);
+		mWaitDelay.mark();
+	}
+	
 	virtual void showRGB(uint8_t *data, int nLeds) {
-		// mWaitDelay.wait();
+		mWaitDelay.wait();
 		mSPI.writeBytes3(data, nLeds * 3);
-		// mWaitDelay.mark();
+		mWaitDelay.mark();
 	}
 
 #ifdef SUPPORT_ARGB
@@ -126,6 +144,14 @@ class SM16716Controller : public CLEDController {
 #endif
 	SPI mSPI;
 	OutputPin selectPin;
+
+	void writeHeader() { 
+		// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)
+		mSPI.writeBytesValue(0, 6);
+		mSPI.template writeBit<0>(0);
+		mSPI.template writeBit<0>(0);
+	}
+
 public:
 	SM16716Controller() : selectPin(SELECT_PIN) {}
 
@@ -134,12 +160,20 @@ public:
 		mSPI.init();
 	}
 
-	virtual void showRGB(uint8_t *data, int nLeds) {
-		// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)
-		mSPI.writeBytesValue(0, 6);
-		mSPI.template writeBit<0>(0);
-		mSPI.template writeBit<0>(0);
+	virtual void clearLeds(int nLeds) { 
+		writeHeader();
+		mSPI.select();
+		while(nLeds--) { 
+			mSPI.template writeBit<0>(1);
+			mSPI.writeByte(0);
+			mSPI.writeByte(0);
+			mSPI.writeByte(0);
+		}
+		mSPI.waitFully();
+		mSPI.release();
+	}
 
+	virtual void showRGB(uint8_t *data, int nLeds) {
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		mSPI.template writeBytes3<FLAG_START_BIT>(data, nLeds * 3);

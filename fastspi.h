@@ -107,7 +107,11 @@ public:
 
 	// wait until the SPI subsystem is ready for more data to write.  A NOP when bitbanging
 	static void wait() __attribute__((always_inline)) { }
-	
+	static void waitFully() __attribute__((always_inline)) { wait(); }
+		
+	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); }
+	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); wait(); }
+
 	// naive writeByte implelentation, simply calls writeBit on the 8 bits in the byte.
 	static void writeByte(uint8_t b) __attribute__((always_inline)) { 
 		writeBit<7>(b);
@@ -449,7 +453,10 @@ public:
 	}
 
 	static void wait() __attribute__((always_inline)) { while(!(UCSR0A & (1<<UDRE0))); }
-
+	static void waitFully() __attribute__((always_inline)) { wait(); }
+	
+	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { UDR0 = b;}
+	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { UDR0 = b; wait(); }
 	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); UDR0 = b; }
 
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
@@ -589,6 +596,7 @@ public:
 	}
 
 	static void wait() __attribute__((always_inline)) { while(!(SPSR & (1<<SPIF))); }
+	static void waitFully() __attribute__((always_inline)) { wait(); }
 
 	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPDR=b; }
 	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; wait(); }
@@ -793,14 +801,6 @@ public:
 				}
 	    }
 
-	    // push 192 0s to prime the spi stuff
-	    select();
-	    writeByteNoWait(0);
-	    for(int i = 0; i < 191; i++) { 
-	    	writeByte(0); writeByte(0); writeByte(0);
-	    }
-	    waitFully();
-	    release();
 	}
 
 	static void waitFully() __attribute__((always_inline)) { 
