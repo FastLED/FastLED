@@ -5,6 +5,7 @@
 #include "fastpin.h"
 #include "fastspi.h"
 #include "clockless.h"
+#include "lib8tion.h"
 
 
 // Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet
