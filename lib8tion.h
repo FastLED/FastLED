@@ -1,6 +1,7 @@
 #ifndef __INC_LIB8TION_H
 #define __INC_LIB8TION_H
 
+
 // Assembly language implementations of useful functions,
 // with generic C implementaions as fallbacks as well.
 
@@ -8,6 +9,14 @@
 //   AVR (ATmega/ATtiny)
 //   ARM (generic)
 //   ARM (Cortex M4 with DSP)
+
+
+// TODO: merge asm blocks to prevent splitting/reordering
+
+
+#include <stdint.h>
+
+#define LIB8STATIC __attribute__ ((unused)) static
 
 
 #if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
@@ -81,31 +90,8 @@
 
 #endif
 
-// A 16-bit PNRG good enough for LED animations
-
-// X(n+1) = (2053 * X(n)) + 13849)
-#define RAND16_2053  2053
-#define RAND16_13849 13849
-
-extern uint16_t rand16seed;// = RAND16_SEED;
-
-
-#define LIB8STATIC __attribute__ ((unused)) static
-
-LIB8STATIC byte random8()
-{
-    rand16seed = (rand16seed * RAND16_2053) + RAND16_13849;
-    return rand16seed;
-}
-
-LIB8STATIC uint16_t random16()
-{
-    rand16seed = (rand16seed * RAND16_2053) + RAND16_13849;
-    return rand16seed;
-}
-
 // qadd8: add one byte to another, saturating at 0xFF
-LIB8STATIC byte qadd8( byte i, byte j)
+LIB8STATIC uint8_t qadd8( uint8_t i, uint8_t j)
 {
 #if QADD8_C == 1
     int t = i + j;
@@ -131,9 +117,9 @@ LIB8STATIC byte qadd8( byte i, byte j)
 }
 
 
-// qadd7: add one nonnegative signed byte to another,
+// qadd7: add one nonnegative signed uint8_t to another,
 //        saturating at 0x7F.
-LIB8STATIC byte qadd7( byte i, byte j)
+LIB8STATIC uint8_t qadd7( uint8_t i, uint8_t j)
 {
 #if QADD7_C == 1
     int t = i + j;
@@ -159,7 +145,7 @@ LIB8STATIC byte qadd7( byte i, byte j)
 }
 
 // qsub8: subtract one byte to another, saturating at 0x00
-LIB8STATIC byte qsub8( byte i, byte j)
+LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
 {
 #if QSUB8_C == 1
     int t = i - j;
@@ -183,7 +169,7 @@ LIB8STATIC byte qsub8( byte i, byte j)
 
 // sub8: subtract one byte from another, keeping
 //       everything within 8 bits
-LIB8STATIC byte sub8( byte i, byte j)
+LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 {
 #if SUB8_C == 1
     int t = i - j;
@@ -201,7 +187,7 @@ LIB8STATIC byte sub8( byte i, byte j)
 // scale8: scale one byte by a second one, which is treated as
 //         the numerator of a fraction whose demominator is 256
 //         In other words, it computes i * (scale / 256)
-LIB8STATIC byte scale8( byte i, byte scale)
+LIB8STATIC uint8_t scale8( uint8_t i, uint8_t scale)
 {
 #if SCALE8_C == 1
     return ((int)i * (int)(scale) ) >> 8;
@@ -224,7 +210,7 @@ LIB8STATIC byte scale8( byte i, byte scale)
 //         the numerator of a fraction whose demominator is 256
 //         In other words, it computes i * (scale / 256)
 
-LIB8STATIC byte scale8_LEAVING_R1_DIRTY( byte i, byte scale)
+LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, uint8_t scale)
 {
 #if SCALE8_C == 1
     return ((int)i * (int)(scale) ) >> 8;
@@ -241,7 +227,7 @@ LIB8STATIC byte scale8_LEAVING_R1_DIRTY( byte i, byte scale)
 #endif
 }
 
-LIB8STATIC void nscale8_LEAVING_R1_DIRTY( byte& i, byte scale)
+LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, uint8_t scale)
 {
 #if SCALE8_C == 1
     i = ((int)i * (int)(scale) ) >> 8;
@@ -268,7 +254,7 @@ LIB8STATIC void cleanup_R1()
 //         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
 
 
-LIB8STATIC void nscale8x3( byte& r, byte& g, byte& b, byte scale)
+LIB8STATIC void nscale8x3( uint8_t& r, uint8_t& g, uint8_t& b, uint8_t scale)
 {
 #if SCALE8_C == 1
     r = ((int)r * (int)(scale) ) >> 8;
@@ -304,16 +290,16 @@ LIB8STATIC void nscale8x3( byte& r, byte& g, byte& b, byte scale)
 //
 //         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
 
-LIB8STATIC void nscale8x3_video( byte& r, byte& g, byte& b, byte scale)
+LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, uint8_t scale)
 {
 #if SCALE8_C == 1
-    byte nonzeroscale = (scale != 0) ? 1 : 0;
+    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
     r = (r == 0) ? 0 : (((int)r * (int)(scale) ) >> 8) + nonzeroscale;
     g = (g == 0) ? 0 : (((int)g * (int)(scale) ) >> 8) + nonzeroscale;
     b = (b == 0) ? 0 : (((int)b * (int)(scale) ) >> 8) + nonzeroscale;
 #elif SCALE8_AVRASM == 1
     
-    byte nonzeroscale = (scale != 0) ? 1 : 0;
+    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
     
     asm volatile("     tst %0          \n"
                  "     breq L_%=       \n"
@@ -357,15 +343,15 @@ LIB8STATIC void nscale8x3_video( byte& r, byte& g, byte& b, byte scale)
 #endif
 }
 
-LIB8STATIC byte scale8_video( byte i, byte scale)
+LIB8STATIC uint8_t scale8_video( uint8_t i, uint8_t scale)
 {
 #if SCALE8_C == 1
-    byte nonzeroscale = (scale != 0) ? 1 : 0;
-    byte j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
+    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
     return j;
 #elif SCALE8_AVRASM == 1
     
-    byte nonzeroscale = (scale != 0) ? 1 : 0;
+    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
     asm volatile("      tst %0          \n"
                  "      breq L_%=       \n"
                  "      mul %0, %1      \n"
@@ -386,7 +372,7 @@ LIB8STATIC byte scale8_video( byte i, byte scale)
 
 
 // mul8: 8x8 bit multiplication, with 8 bit result
-LIB8STATIC byte mul8( byte i, byte j)
+LIB8STATIC uint8_t mul8( uint8_t i, uint8_t j)
 {
 #if MUL8_C == 1
     return ((int)i * (int)(j) ) & 0xFF;
@@ -406,7 +392,7 @@ LIB8STATIC byte mul8( byte i, byte j)
 }
 
 
-// abs8: take abs() of a signed 8-bit byte
+// abs8: take abs() of a signed 8-bit uint8_t
 LIB8STATIC int8_t abs8( int8_t i)
 {
 #if ABS8_C == 1
@@ -428,6 +414,61 @@ LIB8STATIC int8_t abs8( int8_t i)
 #error "No implementation for abs8 available."
 #endif
 }
+
+
+///////////////////////////////////////////////////////////////////////
+
+// A 16-bit PNRG good enough for LED animations
+
+// X(n+1) = (2053 * X(n)) + 13849)
+#define RAND16_2053  2053
+#define RAND16_13849 13849
+
+extern uint16_t rand16seed;// = RAND16_SEED;
+
+
+LIB8STATIC uint8_t random8()
+{
+    rand16seed = (rand16seed * RAND16_2053) + RAND16_13849;
+    return rand16seed;
+}
+
+LIB8STATIC uint16_t random16()
+{
+    rand16seed = (rand16seed * RAND16_2053) + RAND16_13849;
+    return rand16seed;
+}
+
+
+LIB8STATIC uint8_t random8(uint8_t lim)
+{
+    uint8_t r = random8();
+    r = scale8( r, lim);
+    return r;
+}
+
+LIB8STATIC uint8_t random8(uint8_t min, uint8_t lim)
+{
+    uint8_t delta = lim - min;
+    uint8_t r = random8(delta) + min;
+    return r;
+}
+
+LIB8STATIC uint16_t random16( uint16_t lim)
+{
+    uint16_t r = random16();
+    uint32_t p = (uint32_t)lim * (uint32_t)r;
+    r = p >> 16;
+    return r;
+}
+
+LIB8STATIC uint16_t random16( uint16_t min, uint16_t lim)
+{
+    uint16_t delta = lim - min;
+    uint16_t r = random16( delta) + min;
+    return r;
+}
+
 
 
 #endif
