@@ -18,3 +18,5 @@ en if you're using the hardware SPI pins
 
 Preview 1
 * Initial release
+
+----
