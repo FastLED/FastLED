@@ -2,18 +2,27 @@
 #define __INC_CLOCKLESS_H
 
 #include "controller.h"
+#include "lib8tion.h"
 #include <avr/interrupt.h> // for cli/se definitions
 
-// Macro to convert from nano-seconds to clocks
+// Macro to convert from nano-seconds to clocks and clocks to nano-seconds
 // #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
 #if F_CPU < 96000000
 #define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
+#define CLKS_TO_MICROS(_CLKS) _CLKS / (F_CPU / 1000000L)
 #else
 #define NS(_NS) ( (_NS * (F_CPU / 2000000L))) / 1000
+#define CLKS_TO_MICROS(_CLKS) _CLKS / (F_CPU / 2000000L)
 #endif
 
 //  Macro for making sure there's enough time available
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 2 || NS(C) < 6)
+
+#if defined(__MK20DX128__)
+extern volatile uint32_t systick_millis_count;
+#else
+extern volatile unsigned long timer0_millis;
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -23,13 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
 	data_t mPinMask;
 	data_ptr_t mPort;
+	CMinWait<WAIT_TIME> mWait;
 public:
 	virtual void init() { 
 		FastPin<DATA_PIN>::setOutput();
@@ -55,6 +65,7 @@ public:
 		delaycycles<T3 - _CYCLES(DATA_PIN)>();							// 3rd cycle length minus 1 clock for out
 	}
 	
+	#define END_OF_BYTE
 	#define END_OF_LOOP 6 		// loop compare, jump, next uint8_t load
 	template <int N, int ADJ>inline static void bitSetLast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
@@ -72,11 +83,35 @@ public:
 	}
 #endif
 
-	virtual void showRGB(register uint8_t *data, register int nLeds) {
+	virtual void clearLeds(int nLeds) {
+		// can't do anything quickly/easily here - oops
+	}
+
+	virtual void showRGB(register struct CRGB *rgbdata, register int nLeds) { 
+		showRGB(rgbdata, nLeds, 255);
+	}
+	
+	virtual void showRGB(struct CRGB *rgbdata, int nLeds, int scale) { 
+		mWait.wait();
 		cli();
-		
-		register data_t mask = mPinMask;
-		register data_ptr_t port = mPort;
+
+		showRGBInternal(nLeds, scale, rgbdata);
+
+		// Adjust the timer
+		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
+#if defined(__MK20DX128__)
+		systick_millis_count += microsTaken;
+#else
+		timer0_millis += microsTaken;
+#endif
+		sei();
+		mWait.mark();
+	}
+
+	static void showRGBInternal(register int nLeds, register uint8_t scale, register struct CRGB *rgbdata) {
+		register byte *data = (byte*)rgbdata;
+		register data_t mask = FastPin<DATA_PIN>::mask();
+		register data_ptr_t port = FastPin<DATA_PIN>::port();
 		nLeds *= (3);
 		register uint8_t *end = data + nLeds; 
 		register data_t hi = *port | mask;
@@ -84,7 +119,7 @@ public:
 		*port = lo;
 
 #if defined(__MK20DX128__)
-		register uint32_t b = *data++;
+		register uint32_t b = scale8(data[RGB_BYTE0(RGB_ORDER)], scale);
 		while(data <= end) { 
 			// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
 			// will bite me in the ass at some point, I know it.
@@ -106,27 +141,126 @@ public:
 			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
 			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
 			FastPin<DATA_PIN>::fastset(port, lo);
-			b = *data++;
-			delaycycles<T3 - 6>(); // 1 store, 2 load, 1 cmp, 1 branch backwards, 1 movim
+			b = scale8(data[RGB_BYTE1(RGB_ORDER)], scale);
+			delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
+
+			for(register uint32_t i = 7; i > 0; i--) { 
+				FastPin<DATA_PIN>::fastset(port, hi);
+				delaycycles<T1 - 3>(); // 3 cycles - 1 store, 1 test, 1 if
+				if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+				b <<= 1;
+				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
+				FastPin<DATA_PIN>::fastset(port, lo);
+				delaycycles<T3 - 3>(); // 3 cycles, 1 store, 1 sub, 1 branch backwards
+			}
+			// extra delay because branch is faster falling through
+			delaycycles<1>();
+
+			// 8th bit, interleave loading rest of data
+			FastPin<DATA_PIN>::fastset(port, hi);
+			delaycycles<T1 - 3>();
+			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
+			FastPin<DATA_PIN>::fastset(port, lo);
+			b = scale8(data[RGB_BYTE2(RGB_ORDER)], scale);
+			data += 3;
+			if(RGB_ORDER & 0070 == 0) {
+				delaycycles<T3 - 6>(); // 1 store, 2 load, 1 mul, 1 shift,  1 adds if BRG or GRB
+			} else {
+				delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
+			}
+
+			for(register uint32_t i = 7; i > 0; i--) { 
+				FastPin<DATA_PIN>::fastset(port, hi);
+				delaycycles<T1 - 3>(); // 3 cycles - 1 store, 1 test, 1 if
+				if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+				b <<= 1;
+				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
+				FastPin<DATA_PIN>::fastset(port, lo);
+				delaycycles<T3 - 3>(); // 3 cycles, 1 store, 1 sub, 1 branch backwards
+			}
+			// extra delay because branch is faster falling through
+			delaycycles<1>();
+
+			// 8th bit, interleave loading rest of data
+			FastPin<DATA_PIN>::fastset(port, hi);
+			delaycycles<T1 - 3>();
+			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
+			FastPin<DATA_PIN>::fastset(port, lo);
+			b = scale8(data[RGB_BYTE0(RGB_ORDER)], scale);
+			delaycycles<T3 - 8>(); // 1 store, 2 load (with increment), 1 mul, 1 shift, 1 cmp, 1 branch backwards, 1 movim
 		};
 #else
+#if 0
+		register uint8_t b = *data++;
 		while(data <= end) { 
-			register uint8_t b = *data++;
 			bitSetFast<7>(port, hi, lo, b);
 			bitSetFast<6>(port, hi, lo, b);
 			bitSetFast<5>(port, hi, lo, b);
 			bitSetFast<4>(port, hi, lo, b);
 			bitSetFast<3>(port, hi, lo, b);
-			bitSetFast<2>(port, hi, lo, b);
-			bitSetFast<1>(port, hi, lo, b);
+			// Leave an extra 2 clocks for the next byte load
+			bitSetLast<2, 2>(port, hi, lo, b);
+			register uint8_t next = *data++;
+			// Leave an extra 4 clocks for the scale
+			bitSetLast<1, 4>(port, hi, lo, b);
+			next = scale8(next, scale);
 			bitSetLast<0, END_OF_LOOP>(port, hi, lo, b);
+			b = next;
+		}
+#else
+		register uint8_t b = data[RGB_BYTE0(RGB_ORDER)];
+		while(data <= end) { 
+			for(register byte x=5; x; x--) {
+				bitSetLast<7, 4>(port, hi, lo, b);
+				b <<= 1;
+			}
+			delaycycles<1>();
+			// Leave an extra 2 clocks for the next byte load
+			bitSetLast<7, 2>(port, hi, lo, b);
+			register uint8_t next = data[RGB_BYTE1(RGB_ORDER)];
+			// Leave an extra 4 clocks for the scale
+			bitSetLast<6, 4>(port, hi, lo, b);
+			next = scale8(next, scale);
+			bitSetLast<5, 1>(port, hi, lo, b);
+			b = next;
+
+			for(register byte x=5; x; x--) {
+				bitSetLast<7, 6>(port, hi, lo, b);
+				b <<= 1;
+			}
+			delaycycles<1>();
+			// Leave an extra 2 clocks for the next byte load
+			bitSetLast<7, 2>(port, hi, lo, b);
+			next = data[RGB_BYTE2(RGB_ORDER)];
+			// Leave an extra 4 clocks for the scale
+			bitSetLast<6, 4>(port, hi, lo, b);
+			next = scale8(next, scale);
+			bitSetLast<5, 1>(port, hi, lo, b);
+			b = next;
+
+			for(register byte x=5; x; x--) {
+				bitSetLast<7, 6>(port, hi, lo, b);
+				b <<= 1;
+			}
+			delaycycles<1>();
+			// Leave an extra 2 clocks for the next byte load
+			bitSetLast<7, 3>(port, hi, lo, b);
+			next = data[RGB_BYTE0(RGB_ORDER)];
+			data += 3;
+			// Leave an extra 4 clocks for the scale
+			bitSetLast<6, 4>(port, hi, lo, b);
+			next = scale8(next, scale);
+			bitSetLast<5, END_OF_LOOP>(port, hi, lo, b);
+			b = next;
 		}
 #endif
-		sei();
+#endif
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void showARGB(uint8_t *data, int nLeds) { 
+	virtual void showARGB(struct CARGB *data, int nLeds) { 
 		// TODO: IMPLEMENTME
 	}
 #endif

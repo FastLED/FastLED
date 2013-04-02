@@ -8,22 +8,6 @@
 #include "lib8tion.h"
 
 
-// Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet
-// this should make sure that chipsets that have 
-template<int WAIT> class CMinWait {
-	long mLastMicros;
-public:
-	CMinWait() { mLastMicros = 0; }
-
-	void wait() { 
-		long diff = micros() - mLastMicros;
-		if(diff < WAIT) { 
-			delayMicroseconds(WAIT - diff);
-		}
-	}
-
-	void mark() { mLastMicros = micros(); }
-};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -35,9 +19,10 @@ class LPD8806_ADJUST {
 public:
 	// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
 	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
+	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data, register uint8_t scale) { return (scale8(data, scale)>>1) | 0x80; }
 };
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 2 >
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = 2 >
 class LPD8806Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -68,16 +53,20 @@ public:
 		mSPI.writeBytesValue(0x80, nLeds * 3);	
 	}
 	
-	virtual void showRGB(uint8_t *data, int nLeds) {
+	virtual void showRGB(register struct CRGB *rgbdata, register int nLeds) { 
+		showRGB(rgbdata, nLeds, 255);
+	}
+
+	virtual void showRGB(struct CRGB *data, int nLeds, uint8_t scale) {
 		checkClear(nLeds);
-		mSPI.template writeBytes3<LPD8806_ADJUST>(data, nLeds * 3);
+		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 		clearLine(nLeds);
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void showARGB(uint8_t *data, int nLeds) {
+	virtual void showARGB(struct CARGB *data, int nLeds) {
 		checkClear(nLeds);
-		mSPI.template writeBytes3<1, LPD8806_ADJUST>(data, nLeds * 4);
+		mSPI.template writeBytes3<1, LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 4, 255);
 		clearLine(nLeds);
 	}
 #endif
@@ -89,7 +78,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 3>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = 3>
 class WS2801Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -112,16 +101,20 @@ public:
 		mWaitDelay.mark();
 	}
 	
-	virtual void showRGB(uint8_t *data, int nLeds) {
+	virtual void showRGB(register struct CRGB *rgbdata, register int nLeds) { 
+		showRGB(rgbdata, nLeds, 255);
+	}
+
+	virtual void showRGB(struct CRGB *data, int nLeds, uint8_t scale) {
 		mWaitDelay.wait();
-		mSPI.writeBytes3(data, nLeds * 3);
+		mSPI.template writeBytes3<0, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 		mWaitDelay.mark();
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void showARGB(uint8_t *data, int nLeds) {
+	virtual void showARGB(struct CRGB *data, int nLeds) {
 		mWaitDelay.wait();
-		mSPI.template writeBytes3<1>(data, nLeds * 4);
+		mSPI.template writeBytes3<1, RGB_ORDER>((byte*)data, nLeds * 4, 255);
 		mWaitDelay.mark();
 	}
 #endif
@@ -134,7 +127,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, uint8_t SPI_SPEED = 0>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = 0>
 class SM16716Controller : public CLEDController {
 #if defined(__MK20DX128__)   // for Teensy 3.0
 	// Have to force software SPI for the teensy 3.0 right now because it doesn't deal well
@@ -174,21 +167,25 @@ public:
 		mSPI.release();
 	}
 
-	virtual void showRGB(uint8_t *data, int nLeds) {
+	virtual void showRGB(register struct CRGB *rgbdata, register int nLeds) { 
+		showRGB(rgbdata, nLeds, 255);
+	}
+
+	virtual void showRGB(struct CRGB *data, int nLeds, uint8_t scale) {
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
-		mSPI.template writeBytes3<FLAG_START_BIT>(data, nLeds * 3);
+		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void showARGB(uint8_t *data, int nLeds) {
+	virtual void showARGB(struct CARGB *data, int nLeds) {
 		mSPI.writeBytesValue(0, 6);
 		mSPI.template writeBit<0>(0);
 		mSPI.template writeBit<0>(0);
 
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
-		mSPI.template writeBytes3<1 | FLAG_START_BIT>(data, nLeds * 4);
+		mSPI.template writeBytes3<1 | FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 4, 255);
 	}
 #endif
 };
@@ -200,29 +197,37 @@ public:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 500ns, 1500ns, 500ns
-template <uint8_t DATA_PIN>
-class UCS1903Controller400Mhz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500)> {};
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1903Controller400Mhz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
 #if NO_TIME(500, 1500, 500) 
 #warning "No enough clock cycles available for the UCS103"
 #endif
 
 // 312.5ns, 312.5ns, 325ns
-template <uint8_t DATA_PIN>
-class TM1809Controller800Mhz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550)> {};
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1809Controller800Mhz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
 #if NO_TIME(350, 350, 550) 
 #warning "No enough clock cycles available for the UCS103"
 #endif
 
 // 350n, 350ns, 550ns
-template <uint8_t DATA_PIN>
-class WS2811Controller800Mhz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550)> {};
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2811Controller800Mhz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550), RGB_ORDER> {};
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550), RGB_ORDER> {};
 #if NO_TIME(320, 320, 550) 
 #warning "No enough clock cycles available for the UCS103"
 #endif
 
 // 750NS, 750NS, 750NS
-template <uint8_t DATA_PIN>
-class TM1803Controller400Mhz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750)> {};
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1803Controller400Mhz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1803Controller400Khz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
 #if NO_TIME(750, 750, 750) 
 #warning "No enough clock cycles available for the UCS103"
 #endif

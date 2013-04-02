@@ -187,6 +187,7 @@ LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 // scale8: scale one byte by a second one, which is treated as
 //         the numerator of a fraction whose demominator is 256
 //         In other words, it computes i * (scale / 256)
+//         4 clocks AVR, 2 clocks ARM
 LIB8STATIC uint8_t scale8( uint8_t i, uint8_t scale)
 {
 #if SCALE8_C == 1

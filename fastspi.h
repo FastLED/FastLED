@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_H
 #define __INC_FASTSPI_H
 
+#include "lib8tion.h"
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Clock cycle counted delay loop
@@ -53,6 +55,14 @@ template<> __attribute__((always_inline)) inline void delaycycles<0>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<1>() {NOP;}
 template<> __attribute__((always_inline)) inline void delaycycles<2>() {NOP;NOP;}
 template<> __attribute__((always_inline)) inline void delaycycles<3>() {NOP;NOP;NOP;}
+template<> __attribute__((always_inline)) inline void delaycycles<4>() {NOP;NOP;NOP;NOP;}
+template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP;NOP;NOP;NOP;NOP;}
+
+// Some helper macros for getting at mis-ordered byte values
+#define SPI_B0 (RGB_BYTE0(RGB_ORDER) + (MASK_SKIP_BITS & SKIP))
+#define SPI_B1 (RGB_BYTE1(RGB_ORDER) + (MASK_SKIP_BITS & SKIP))
+#define SPI_B2 (RGB_BYTE2(RGB_ORDER) + (MASK_SKIP_BITS & SKIP))
+#define SPI_ADVANCE (3 + (MASK_SKIP_BITS & SKIP))
 
 /// Some of the SPI controllers will need to perform a transform on each byte before doing
 /// anyting with it.  Creating a class of this form and passing it in as a template parameter to
@@ -62,7 +72,8 @@ template<> __attribute__((always_inline)) inline void delaycycles<3>() {NOP;NOP;
 /// TODO: Convinience macro for building these
 class DATA_NOP { 
 public:
-	static __attribute__((always_inline)) inline uint8_t adjust(uint8_t data) { return data; } 
+	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data) { return data; } 
+	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data, register uint8_t scale) { return scale8(data, scale); } 
 };
 
 #define FLAG_START_BIT 0x80
@@ -344,7 +355,7 @@ public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
-	template <uint8_t SKIP, class D> void writeBytes3(register uint8_t *data, int len) { 
+	template <uint8_t SKIP, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
 		select();
 
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
@@ -352,13 +363,13 @@ public:
 		// to use this block
 		uint8_t *end = data + len;
 		while(data != end) { 
-			data += (MASK_SKIP_BITS & SKIP);
 			if(SKIP & FLAG_START_BIT) { 
 				writeBit<0>(1);
 			}
-			writeByte(D::adjust(*data++));
-			writeByte(D::adjust(*data++));
-			writeByte(D::adjust(*data++));
+			writeByte(D::adjust(data[SPI_B0], scale));
+			writeByte(D::adjust(data[SPI_B1], scale));
+			writeByte(D::adjust(data[SPI_B2], scale));
+			data += SPI_ADVANCE;
 		}
 #else
 		// If we can guaruntee that no one else will be writing data while we are running (namely, changing the values of the PORT/PDOR pins)
@@ -376,13 +387,13 @@ public:
 			uint8_t *end = data + len;
 
 			while(data != end) { 
-				data += (MASK_SKIP_BITS & SKIP);
 				if(SKIP & FLAG_START_BIT) { 
 					writeBit<0>(1, clockpin, datapin, datahi, datalo, clockhi, clocklo);
 				}
-				writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
-				writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
-				writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+				writeByte(D::adjust(data[SPI_B0], scale), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+				writeByte(D::adjust(data[SPI_B1], scale), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+				writeByte(D::adjust(data[SPI_B2], scale), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+				data += SPI_ADVANCE;
 			}
 
 		} else {
@@ -396,13 +407,13 @@ public:
 			uint8_t *end = data + len;
 
 			while(data != end) { 
-				data += (MASK_SKIP_BITS & SKIP);
 				if(SKIP & FLAG_START_BIT) { 
 					writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 				}
-				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
-				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
-				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByte(D::adjust(data[SPI_B0], scale), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByte(D::adjust(data[SPI_B1], scale), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				writeByte(D::adjust(data[SPI_B2], scale), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+				data += SPI_ADVANCE;
 			}
 			FastPin<CLOCK_PIN>::lo();
 		}	
@@ -410,9 +421,18 @@ public:
 		release();
 	}
 
-	template <uint8_t SKIP> void writeBytes3(register uint8_t *data, int len) { writeBytes3<SKIP, DATA_NOP>(data, len); }
-	template <class D> void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, D>(data, len); }
-	void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, DATA_NOP>(data, len); }
+	template <uint8_t SKIP, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	}
+	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, D, RGB_ORDER>(data, len, scale); 
+	}
+	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	}
+	void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, DATA_NOP, RGB>(data, len, scale); 
+	}
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -504,28 +524,30 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t SKIP, class D> void writeBytes3(register uint8_t *data, int len) { 
+	template <uint8_t SKIP, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
 		uint8_t *end = data + len;
 		select();
 		while(data != end) { 
-			data += (MASK_SKIP_BITS & SKIP);
-#if defined(__MK20DX128__) 
-			writeByte(D::adjust(*data++));
-			writeByte(D::adjust(*data++));
-			writeByte(D::adjust(*data++));
-#else
-			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
-			writeByte(D::adjust(*data++)); delaycycles<3>();
-			writeByte(D::adjust(*data++)); delaycycles<3>();
-			writeByte(D::adjust(*data++)); delaycycles<3>();
-#endif
+			writeByte(D::adjust(data[SPI_B0], scale));
+			writeByte(D::adjust(data[SPI_B1], scale));
+			writeByte(D::adjust(data[SPI_B2], scale));
+			data += SPI_ADVANCE;
 		}
 		release();
 	}
 
-	template <uint8_t SKIP> void writeBytes3(register uint8_t *data, int len) { writeBytes3<SKIP, DATA_NOP>(data, len); }
-	template <class D> void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, D>(data, len); }
-	void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, DATA_NOP>(data, len); }
+	template <uint8_t SKIP, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	}
+	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, D, RGB_ORDER>(data, len, scale); 
+	}
+	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	}
+	void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, DATA_NOP, RGB>(data, len, scale); 
+	}
 
 };
 
@@ -550,7 +572,7 @@ public:
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
 	void init() {
-		uint8_t clr;
+		volatile uint8_t clr;
 
 		// set the pins to output
 		FastPin<_DATA_PIN>::setOutput();
@@ -562,7 +584,7 @@ public:
 
 		clr = SPSR; // clear SPI status register 
 		clr = SPDR; // clear SPI data register
-
+		clr; 
 	    bool b2x = false;
 	    int hiBit = 0;
 	    int spd = _SPI_SPEED;
@@ -645,41 +667,50 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t SKIP, class D> void writeBytes3(register uint8_t *data, int len) { 
+	template <uint8_t SKIP, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
 		uint8_t *end = data + len;
 		select();
 		while(data != end) { 
-			data += (MASK_SKIP_BITS & SKIP);
 			if(SKIP & FLAG_START_BIT) { 
 				writeBit<0>(1);
 			}
 #if defined(__MK20DX128__) 
-			writeByte(D::adjust(*data++));
-			writeByte(D::adjust(*data++));
-			writeByte(D::adjust(*data++));
+			writeByte(D::adjust(data[SPI_B0], scale));
+			writeByte(D::adjust(data[SPI_B1], scale));
+			writeByte(D::adjust(data[SPI_B2], scale));
 #else 
 			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
 			if(false && _SPI_SPEED == 0) { 
-				writeByteNoWait(D::adjust(*data++)); delaycycles<13>();
-				writeByteNoWait(D::adjust(*data++)); delaycycles<13>();
-				writeByteNoWait(D::adjust(*data++)); delaycycles<9>();
+				writeByteNoWait(D::adjust(data[SPI_B0], scale)); delaycycles<13>();
+				writeByteNoWait(D::adjust(data[SPI_B1], scale)); delaycycles<13>();
+				writeByteNoWait(D::adjust(data[SPI_B2], scale)); delaycycles<9>();
 			} else if(SKIP & FLAG_START_BIT) { 
-				writeBytePostWait(D::adjust(*data++));
-				writeBytePostWait(D::adjust(*data++));
-				writeBytePostWait(D::adjust(*data++));
+				writeBytePostWait(D::adjust(data[SPI_B0], scale));
+				writeBytePostWait(D::adjust(data[SPI_B1], scale));
+				writeBytePostWait(D::adjust(data[SPI_B2], scale));
 			} else { 
-				writeByte(D::adjust(*data++)); delaycycles<3>();
-				writeByte(D::adjust(*data++)); delaycycles<3>();
-				writeByte(D::adjust(*data++)); delaycycles<3>();
+				writeByte(D::adjust(data[SPI_B0], scale));
+				writeByte(D::adjust(data[SPI_B1], scale));
+				writeByte(D::adjust(data[SPI_B2], scale));
 			}
 #endif
+			data += SPI_ADVANCE;
 		}
 		release();
 	}
 
-	template <uint8_t SKIP> void writeBytes3(register uint8_t *data, int len) { writeBytes3<SKIP, DATA_NOP>(data, len); }
-	template <class D> void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, D>(data, len); }
-	void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, DATA_NOP>(data, len); }
+	template <uint8_t SKIP, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	}
+	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, D, RGB_ORDER>(data, len, scale); 
+	}
+	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	}
+	void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, DATA_NOP, RGB>(data, len, scale); 
+	}
 
 };
 
@@ -730,7 +761,7 @@ public:
     }
 
 	void init() {
-		uint8_t clr;
+		volatile uint8_t clr;
 
 		// set the pins to output
 		FastPin<_DATA_PIN>::setOutput();
@@ -742,6 +773,7 @@ public:
 
 		clr = SPSR; // clear SPI status register 
 		clr = SPDR; // clear SPI data register
+		clr; 
 
 	    bool b2x = false;
 	    int hiBit = 0;
@@ -857,21 +889,24 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t SKIP, class D> void writeBytes3(register uint8_t *data, int len) { 
+	template <uint8_t SKIP, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
 		uint8_t *end = data + len;
 		select();
-		if(false && !SKIP && ((len % 2) == 0)) {
-			switch(len % 8) { 
-				case 0: while(data != end) { 
-					writeWord(D::adjust(*data++) << 8 | D::adjust(*data++));
-				case 6: 
-					writeWord(D::adjust(*data++) << 8 | D::adjust(*data++));
-				case 4:
-					writeWord(D::adjust(*data++) << 8 | D::adjust(*data++));
-				case 2:
-					writeWord(D::adjust(*data++) << 8 | D::adjust(*data++));
-					wait();
-				}
+		if((SKIP & FLAG_START_BIT) == 0) {
+			// If no start bit stupiditiy, write out as many 16-bit blocks as we can
+			uint8_t *first_end = end - (len % (6 + SPI_ADVANCE + SPI_ADVANCE));
+			while(data != first_end) {
+					writeWord(D::adjust(data[SPI_B0], scale) << 8 | D::adjust(data[SPI_B1], scale));
+					writeWord(D::adjust(data[SPI_B2], scale) << 8 | D::adjust(data[SPI_ADVANCE + SPI_B0], scale));
+					writeWord(D::adjust(data[SPI_ADVANCE + SPI_B1], scale) << 8 | D::adjust(data[SPI_ADVANCE + SPI_B2], scale));
+					data += (SPI_ADVANCE + SPI_ADVANCE);
+			}
+
+			// write out the rest as alternating 16/8-bit blocks (likely to be just one)
+			while(data != end) { 
+				writeWord(D::adjust(data[SPI_B0], scale) << 8 | D::adjust(data[SPI_B1], scale));
+				writeByte(D::adjust(data[SPI_B2], scale));
+				data += SPI_ADVANCE;
 			}
 			waitFully();
 		} else if(SKIP & FLAG_START_BIT) {
@@ -882,30 +917,38 @@ public:
 			update_ctar1(ctar1);
 
 			while(data != end) { 
-				data += (MASK_SKIP_BITS & SKIP);
-				writeWord( 0x100 | D::adjust(*data++));
-				writeByte(D::adjust(*data++));
-				writeByte(D::adjust(*data++));
+				writeWord( 0x100 | D::adjust(data[SPI_B0], scale));
+				writeByte(D::adjust(data[SPI_B1], scale));
+				writeByte(D::adjust(data[SPI_B2], scale));
+				data += SPI_ADVANCE;
 			}
 			waitFully();
 
 			// restore ctar1
 			update_ctar1(ctar1_save);
-		} else {
-			while(data != end) { 
-				data += (MASK_SKIP_BITS & SKIP);
-				writeByte(D::adjust(*data++));
-				writeWord(D::adjust(*data++) << 8 | D::adjust(*data++));
-			}
-			waitFully();
+		// } else {
+		// 	while(data != end) { 
+		// 		writeByte(D::adjust(data[SPI_B0], scale);
+		// 		writeWord(D::adjust(data[SPI_B1], scale) << 8 | D::adjust(data[SPI_B2], scale));
+		// 		data += SPI_ADVANCE;
+		// 	}
+		// 	waitFully();
 		}
 		release();
 	}
 
-	template <uint8_t SKIP> void writeBytes3(register uint8_t *data, int len) { writeBytes3<SKIP, DATA_NOP>(data, len); }
-	template <class D> void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, D>(data, len); }
-	void writeBytes3(register uint8_t *data, int len) { writeBytes3<0, DATA_NOP>(data, len); }
-
+	template <uint8_t SKIP, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	}
+	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, D, RGB_ORDER>(data, len, scale); 
+	}
+	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	}
+	void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		writeBytes3<0, DATA_NOP, RGB>(data, len, scale); 
+	}
 };
 #endif
 

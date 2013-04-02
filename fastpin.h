@@ -6,6 +6,23 @@
 // Arduino.h needed for convinience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #include<Arduino.h>
 
+// Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet
+// this should make sure that chipsets that have 
+template<int WAIT> class CMinWait {
+	long mLastMicros;
+public:
+	CMinWait() { mLastMicros = 0; }
+
+	void wait() { 
+		long diff = micros() - mLastMicros;
+		if(diff < WAIT) { 
+			delayMicroseconds(WAIT - diff);
+		}
+	}
+
+	void mark() { mLastMicros = micros(); }
+};
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Pin access class - needs to tune for various platforms (naive fallback solution?)
