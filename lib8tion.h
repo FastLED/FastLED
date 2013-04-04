@@ -11,8 +11,6 @@
 //   ARM (Cortex M4 with DSP)
 
 
-// TODO: merge asm blocks to prevent splitting/reordering
-
 
 #include <stdint.h>
 
@@ -98,15 +96,19 @@ LIB8STATIC uint8_t qadd8( uint8_t i, uint8_t j)
     if( t > 255) t = 255;
     return t;
 #elif QADD8_AVRASM == 1
-    // First, add j to i, conditioning the C flag
-    asm volatile( "add %0, %1" : "+a" (i) : "a" (j));
-    
-    // Now test the C flag.
-    // If C is clear, we branch around a load of 0xFF into i.
-    // If C is set, we go ahead and load 0xFF into i.
-    asm volatile( "brcc L_%=\n\t"
-                 "ldi %0, 0xFF\n\t"
-                 "L_%=: " : "+a" (i) : "a" (i) );
+    asm volatile(
+         /* First, add j to i, conditioning the C flag */
+         "add %0, %1    \n\t"
+
+         /* Now test the C flag.
+           If C is clear, we branch around a load of 0xFF into i.
+           If C is set, we go ahead and load 0xFF into i.
+         */
+         "brcc L_%=     \n\t"
+         "ldi %0, 0xFF  \n\t"
+         "L_%=: "
+         : "+a" (i)
+         : "a"  (j) );
     return i;
 #elif QADD8_ARM_DSP_ASM == 1
     asm volatile( "uqadd8 %0, %0, %1" : "+r" (i) : "r" (j));
@@ -117,24 +119,29 @@ LIB8STATIC uint8_t qadd8( uint8_t i, uint8_t j)
 }
 
 
-// qadd7: add one nonnegative signed uint8_t to another,
+// qadd7: add one signed byte to another,
 //        saturating at 0x7F.
-LIB8STATIC uint8_t qadd7( uint8_t i, uint8_t j)
+LIB8STATIC int8_t qadd7( int8_t i, int8_t j)
 {
 #if QADD7_C == 1
-    int t = i + j;
+    int16_t t = i + j;
     if( t > 127) t = 127;
     return t;
 #elif QADD7_AVRASM == 1
-    // First, add j to i, conditioning the C flag
-    asm volatile( "add %0, %1" : "+a" (i) : "a" (j));
-    
-    // Now test the V flag.
-    // If V is clear, we branch around a load of 0x7F into i.
-    // If V is set, we go ahead and load 0x7F into i.
-    asm volatile( "brvc L_%=\n\t"
-                 "ldi %0, 0x7F\n\t"
-                 "L_%=: " : "+a" (i) : "a" (i) );
+    asm volatile(
+         /* First, add j to i, conditioning the V flag */
+         "add %0, %1    \n\t"
+         
+         /* Now test the V flag.
+          If V is clear, we branch around a load of 0x7F into i.
+          If V is set, we go ahead and load 0x7F into i.
+          */
+         "brvc L_%=     \n\t"
+         "ldi %0, 0x7F  \n\t"
+         "L_%=: "
+         : "+a" (i)
+         : "a"  (j) );
+
     return i;
 #elif QADD7_ARM_DSP_ASM == 1
     asm volatile( "qadd8 %0, %0, %1" : "+r" (i) : "r" (j));
@@ -144,7 +151,7 @@ LIB8STATIC uint8_t qadd7( uint8_t i, uint8_t j)
 #endif
 }
 
-// qsub8: subtract one byte to another, saturating at 0x00
+// qsub8: subtract one byte from another, saturating at 0x00
 LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
 {
 #if QSUB8_C == 1
@@ -152,15 +159,21 @@ LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
     if( t < 0) t = 0;
     return t;
 #elif QSUB8_AVRASM == 1
-    // First, subtract j from i, conditioning the C flag
-    asm volatile( "sub %0, %1" : "+a" (i) : "a" (j));
+
+    asm volatile(
+         /* First, subtract j from i, conditioning the C flag */
+         "sub %0, %1    \n\t"
+         
+         /* Now test the C flag.
+          If C is clear, we branch around a load of 0x00 into i.
+          If C is set, we go ahead and load 0x00 into i.
+          */
+         "brcc L_%=     \n\t"
+         "ldi %0, 0x00  \n\t"
+         "L_%=: "
+         : "+a" (i)
+         : "a"  (j) );
     
-    // Now test the C flag.
-    // If C is clear, we branch around a load of 0x00 into i.
-    // If C is set, we go ahead and load 0x00 into i.
-    asm volatile( "brcc L_%=\n\t"
-                 "ldi %0, 0x00\n\t"
-                 "L_%=: " : "+a" (i) : "a" (i) );
     return i;
 #else
 #error "No implementation for qsub8 available."
@@ -185,7 +198,7 @@ LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 
 
 // scale8: scale one byte by a second one, which is treated as
-//         the numerator of a fraction whose demominator is 256
+//         the numerator of a fraction whose denominator is 256
 //         In other words, it computes i * (scale / 256)
 //         4 clocks AVR, 2 clocks ARM
 LIB8STATIC uint8_t scale8( uint8_t i, uint8_t scale)
@@ -193,157 +206,31 @@ LIB8STATIC uint8_t scale8( uint8_t i, uint8_t scale)
 #if SCALE8_C == 1
     return ((int)i * (int)(scale) ) >> 8;
 #elif SCALE8_AVRASM == 1
-    // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
-    asm volatile( "mul %0, %1"     : "+a" (i) : "a" (scale));
-    // Extract the high 8-bits (r1)
-    asm volatile( "mov %0, r1\n\t" : "+a" (i) : "a" (i) : "r0", "r1");
-    
-    // Restore r1 to "0"; it's expected to always be that
-    asm volatile( "eor r1, r1\n\t" : : : "r1" );
-    // Return the result
+    asm volatile(
+         /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
+         "mul %0, %1    \n\t"
+         /* Move the high 8-bits of the product (r1) back to i */
+         "mov %0, r1    \n\t"
+         /* Restore r1 to "0"; it's expected to always be that */
+         "eor r1, r1    \n\t"
+         
+         : "+a" (i)      /* writes to i */
+         : "a"  (scale)  /* uses scale */
+         : "r0", "r1"    /* clobbers r0, r1 */ );
+
+    /* Return the result */
     return i;
 #else
 #error "No implementation for scale8 available."
 #endif
 }
 
-// scale8: scale one byte by a second one, which is treated as
-//         the numerator of a fraction whose demominator is 256
-//         In other words, it computes i * (scale / 256)
 
-LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, uint8_t scale)
-{
-#if SCALE8_C == 1
-    return ((int)i * (int)(scale) ) >> 8;
-#elif SCALE8_AVRASM == 1
-    // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
-    asm volatile( "mul %0, %1"     : "+a" (i) : "a" (scale));
-    // Extract the high 8-bits (r1)
-    asm volatile( "mov %0, r1\n\t" : "+a" (i) : "a" (i) : "r0", "r1");
-    
-    // Return the result
-    return i;
-#else
-#error "No implementation for scale8_LEAVING_R1_DIRTY available."
-#endif
-}
-
-LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, uint8_t scale)
-{
-#if SCALE8_C == 1
-    i = ((int)i * (int)(scale) ) >> 8;
-#elif SCALE8_AVRASM == 1
-    // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
-    asm volatile( "mul %0, %1"     : "+a" (i) : "a" (scale));
-    // Extract the high 8-bits (r1)
-    asm volatile( "mov %0, r1\n\t" : "+a" (i) : "a" (i) : "r0", "r1");
-#else
-#error "No implementation for nscale8_LEAVING_R1_DIRTY available."
-#endif
-}
-
-LIB8STATIC void cleanup_R1()
-{
-    // Restore r1 to "0"; it's expected to always be that
-    asm volatile( "eor r1, r1\n\t" : : : "r1" );
-}
-
-// nscale8x3: scale three one byte values by a fourth one, which is treated as
-//         the numerator of a fraction whose demominator is 256
-//         In other words, it computes r,g,b * (scale / 256)
-//
-//         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
-
-
-LIB8STATIC void nscale8x3( uint8_t& r, uint8_t& g, uint8_t& b, uint8_t scale)
-{
-#if SCALE8_C == 1
-    r = ((int)r * (int)(scale) ) >> 8;
-    g = ((int)g * (int)(scale) ) >> 8;
-    b = ((int)b * (int)(scale) ) >> 8;
-#elif SCALE8_AVRASM == 1
-    // Multiply 8-bit r * 8-bit scale, giving 16-bit r1,r0
-    asm volatile( "mul %0, %1"     : "+a" (r) : "a" (scale));
-    // Extract the high 8-bits (r1)
-    asm volatile( "mov %0, r1\n\t" : "+a" (r) : "a" (r) : "r0", "r1");
-    
-    // Multiply 8-bit g * 8-bit scale, giving 16-bit r1,r0
-    asm volatile( "mul %0, %1"     : "+a" (g) : "a" (scale));
-    // Extract the high 8-bits (r1), store in g
-    asm volatile( "mov %0, r1\n\t" : "+a" (g) : "a" (g) : "r0", "r1");
-    
-    // Multiply 8-bit b * 8-bit scale, giving 16-bit r1,r0
-    asm volatile( "mul %0, %1"     : "+a" (b) : "a" (scale));
-    // Extract the high 8-bits (r1), store in b
-    asm volatile( "mov %0, r1\n\t" : "+a" (b) : "a" (b) : "r0", "r1");
-    
-    // Restore r1 to "0"; it's expected to always be that
-    asm volatile( "eor r1, r1\n\t" : : : "r1" );
-    // Return the result
-#else
-#error "No implementation for nscale8x3 available."
-#endif
-}
-
-// nscale8x3: scale three one byte values by a fourth one, which is treated as
-//         the numerator of a fraction whose demominator is 256
-//         In other words, it computes r,g,b * (scale / 256)
-//
-//         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
-
-LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, uint8_t scale)
-{
-#if SCALE8_C == 1
-    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
-    r = (r == 0) ? 0 : (((int)r * (int)(scale) ) >> 8) + nonzeroscale;
-    g = (g == 0) ? 0 : (((int)g * (int)(scale) ) >> 8) + nonzeroscale;
-    b = (b == 0) ? 0 : (((int)b * (int)(scale) ) >> 8) + nonzeroscale;
-#elif SCALE8_AVRASM == 1
-    
-    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
-    
-    asm volatile("     tst %0          \n"
-                 "     breq L_%=       \n"
-                 "     mul %0, %1      \n"
-                 "     mov %0, r1      \n"
-                 "     add %0, %2      \n"
-                 "L_%=:                \n"
-                 
-                 : "+a" (r)
-                 : "a" (scale), "a" (nonzeroscale)
-                 : "r0", "r1");
-    
-    asm volatile("     tst %0          \n"
-                 "     breq L_%=       \n"
-                 "     mul %0, %1      \n"
-                 "     mov %0, r1      \n"
-                 "     add %0, %2      \n"
-                 "L_%=:                \n"
-                 
-                 : "+a" (g)
-                 : "a" (scale), "a" (nonzeroscale)
-                 : "r0", "r1");
-    
-    asm volatile("     tst %0          \n"
-                 "     breq L_%=       \n"
-                 "     mul %0, %1      \n"
-                 "     mov %0, r1      \n"
-                 "     add %0, %2      \n"
-                 "L_%=:                \n"
-                 
-                 : "+a" (b)
-                 : "a" (scale), "a" (nonzeroscale)
-                 : "r0", "r1");
-    
-    
-    // Restore r1 to "0"; it's expected to always be that
-    asm volatile( "eor r1, r1\n\t" : : : "r1" );
-    // Return the result
-#else
-#error "No implementation for nscale8x3 available."
-#endif
-}
-
+//  The "video" version of scale8 guarantees that the output will
+//  be only be zero if one or both of the inputs are zero.  If both
+//  inputs are non-zero, the output is guaranteed to be non-zero.
+//  This makes for better 'video'/LED dimming, at the cost of
+//  several additional cycles.
 LIB8STATIC uint8_t scale8_video( uint8_t i, uint8_t scale)
 {
 #if SCALE8_C == 1
@@ -353,21 +240,153 @@ LIB8STATIC uint8_t scale8_video( uint8_t i, uint8_t scale)
 #elif SCALE8_AVRASM == 1
     
     uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
-    asm volatile("      tst %0          \n"
-                 "      breq L_%=       \n"
-                 "      mul %0, %1      \n"
-                 "      mov %0, r1      \n"
-                 "      add %0, %2      \n"
-                 "L_%=: eor r1, r1      \n"
-                 
-                 : "+a" (i)
-                 : "a" (scale), "a" (nonzeroscale)
-                 : "r0", "r1");
+    asm volatile(
+         "      tst %0          \n"
+         "      breq L_%=       \n"
+         "      mul %0, %1      \n"
+         "      mov %0, r1      \n"
+         "      add %0, %2      \n"
+         "L_%=: eor r1, r1      \n"
+         
+         : "+a" (i)
+         : "a" (scale), "a" (nonzeroscale)
+         : "r0", "r1");
     
     // Return the result
     return i;
 #else
 #error "No implementation for scale8_video available."
+#endif
+}
+
+
+// This version of scale8 does not clean up the R1 register on AVR
+// If you are doing several 'scale8's in a row, use this, and
+// then explicitly call cleanup_R1.
+LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, uint8_t scale)
+{
+#if SCALE8_C == 1
+    return ((int)i * (int)(scale) ) >> 8;
+#elif SCALE8_AVRASM == 1
+    asm volatile(
+         /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
+         "mul %0, %1    \n\t"
+         /* Move the high 8-bits of the product (r1) back to i */
+         "mov %0, r1    \n\t"
+         /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */
+         /* "eor r1, r1    \n\t" */
+         
+         : "+a" (i)      /* writes to i */
+         : "a"  (scale)  /* uses scale */
+         : "r0", "r1"    /* clobbers r0, r1 */ );
+    
+    // Return the result
+    return i;
+#else
+#error "No implementation for scale8_LEAVING_R1_DIRTY available."
+#endif
+}
+
+//   THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENT DIRECTLY IN PLACE
+
+LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, uint8_t scale)
+{
+#if SCALE8_C == 1
+    i = ((int)i * (int)(scale) ) >> 8;
+#elif SCALE8_AVRASM == 1
+    asm volatile(
+         /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
+         "mul %0, %1    \n\t"
+         /* Move the high 8-bits of the product (r1) back to i */
+         "mov %0, r1    \n\t"
+         /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF */
+         /* "eor r1, r1    \n\t" */
+         
+         : "+a" (i)      /* writes to i */
+         : "a"  (scale)  /* uses scale */
+         : "r0", "r1"    /* clobbers r0, r1 */ );
+#else
+#error "No implementation for nscale8_LEAVING_R1_DIRTY available."
+#endif
+}
+
+
+
+LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, uint8_t scale)
+{
+#if SCALE8_C == 1
+    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
+    return j;
+#elif SCALE8_AVRASM == 1
+    
+    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    asm volatile(
+         "      tst %0          \n"
+         "      breq L_%=       \n"
+         "      mul %0, %1      \n"
+         "      mov %0, r1      \n"
+         "      add %0, %2      \n"
+         /* R1 IS LEFT DIRTY, YOU MUST ZERO IT OUT YOURSELF */
+         "L_%=:                 \n"
+         
+         : "+a" (i)
+         : "a" (scale), "a" (nonzeroscale)
+         : "r0", "r1");
+    
+    // Return the result
+    return i;
+#else
+#error "No implementation for scale8_video available."
+#endif
+}
+
+
+
+LIB8STATIC void cleanup_R1()
+{
+    // Restore r1 to "0"; it's expected to always be that
+    asm volatile( "eor r1, r1\n\t" : : : "r1" );
+}
+
+
+// nscale8x3: scale three one byte values by a fourth one, which is treated as
+//         the numerator of a fraction whose demominator is 256
+//         In other words, it computes r,g,b * (scale / 256)
+//
+//         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
+
+LIB8STATIC void nscale8x3( uint8_t& r, uint8_t& g, uint8_t& b, uint8_t scale)
+{
+#if SCALE8_C == 1
+    r = ((int)r * (int)(scale) ) >> 8;
+    g = ((int)g * (int)(scale) ) >> 8;
+    b = ((int)b * (int)(scale) ) >> 8;
+#elif SCALE8_AVRASM == 1
+    r = scale8_LEAVING_R1_DIRTY(r, scale);
+    g = scale8_LEAVING_R1_DIRTY(g, scale);
+    b = scale8_LEAVING_R1_DIRTY(b, scale);
+    cleanup_R1();
+#else
+#error "No implementation for nscale8x3 available."
+#endif
+}
+
+
+LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, uint8_t scale)
+{
+#if SCALE8_C == 1
+    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    r = (r == 0) ? 0 : (((int)r * (int)(scale) ) >> 8) + nonzeroscale;
+    g = (g == 0) ? 0 : (((int)g * (int)(scale) ) >> 8) + nonzeroscale;
+    b = (b == 0) ? 0 : (((int)b * (int)(scale) ) >> 8) + nonzeroscale;
+#elif SCALE8_AVRASM == 1
+    r = scale8_video_LEAVING_R1_DIRTY( r, scale);
+    g = scale8_video_LEAVING_R1_DIRTY( g, scale);
+    b = scale8_video_LEAVING_R1_DIRTY( b, scale);
+    cleanup_R1();
+#else
+#error "No implementation for nscale8x3 available."
 #endif
 }
 
@@ -378,14 +397,17 @@ LIB8STATIC uint8_t mul8( uint8_t i, uint8_t j)
 #if MUL8_C == 1
     return ((int)i * (int)(j) ) & 0xFF;
 #elif MUL8_AVRASM == 1
-    // Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0
-    asm volatile( "mul %0, %1"     : "+a" (i) : "a" (j));
-    // Extract the high 8-bits (r1)
-    asm volatile( "mov %0, r0\n\t" : "+a" (i) : "a" (i) : "r0", "r1");
+    asm volatile(
+         /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
+         "mul %0, %1    \n\t"
+         /* Extract the LOW 8-bits (r0) */
+         "mov %0, r0    \n\t"
+         /* Restore r1 to "0"; it's expected to always be that */
+         "eor r1, r1    \n\t"
+         : "+a" (i)
+         : "a"  (j)
+         : "r0", "r1");
     
-    // Restore r1 to "0"; it's expected to always be that
-    asm volatile( "eor r1, r1\n\t" : : : "r1" );
-    // Return the result
     return i;
 #else
 #error "No implementation for mul8 available."
@@ -403,10 +425,10 @@ LIB8STATIC int8_t abs8( int8_t i)
     
     
     asm volatile(
-                 // First, check the high bit, and prepare to skip if it's clear
+                 /* First, check the high bit, and prepare to skip if it's clear */
                  "sbrc %0, 7 \n"
                  
-                 // Negate the value
+                 /* Negate the value */
                  "neg %0     \n"
                  
                  : "+r" (i) : "r" (i) );
