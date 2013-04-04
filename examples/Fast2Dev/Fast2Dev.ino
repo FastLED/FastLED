@@ -17,7 +17,7 @@
 //
 //////////////////////////////////////////////////
 
-#define NUM_LEDS 150
+#define NUM_LEDS 2
 
 // struct CRGB { byte g; byte r; byte b; };
 
@@ -61,9 +61,9 @@ struct CRGB leds[NUM_LEDS];
 // Different Port, non-hardware SPI - 1.47ms for an 86 led frame
 // WS2801Controller<7, 13, 10> LED;
 
-// TM1809Controller800Khz<12> LED;
+TM1809Controller800Khz<4, RGB> LED;
 // UCS1903Controller400Khz<7> LED;
-WS2811Controller800Khz<12, BRG> LED;
+// WS2811Controller800Khz<12, BRG> LED;
 // WS2811Controller800Khz<23> LED;
 // TM1803Controller400Khz<5> LED;
 
@@ -118,9 +118,9 @@ int count = 0;
 long start = millis();
 
 void loop() { 
-#if 1
-	memset(leds, 255, NUM_LEDS * sizeof(struct CRGB));
-	LED.showRGB(leds, NUM_LEDS);
+#if 0
+	memset(leds, 0, NUM_LEDS * sizeof(struct CRGB));
+	LED.showRGB(leds, 2);
 	delay(20);
 #else
 	for(int i = 0; i < 3; i++) {

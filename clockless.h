@@ -100,15 +100,15 @@ public:
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
 #if defined(__MK20DX128__)
-		systick_millis_count += microsTaken;
+		systick_millis_count += (microsTaken / 1000);
 #else
-		timer0_millis += microsTaken;
+		timer0_millis += (microsTaken / 1000);
 #endif
 		sei();
 		mWait.mark();
 	}
 
-	static void showRGBInternal(register int nLeds, register uint8_t scale, register struct CRGB *rgbdata) {
+	static void showRGBInternal(register int nLeds, register uint8_t scale, register struct CRGB *rgbdata) __attribute__((noinline)) {
 		register byte *data = (byte*)rgbdata;
 		register data_t mask = FastPin<DATA_PIN>::mask();
 		register data_ptr_t port = FastPin<DATA_PIN>::port();
@@ -120,7 +120,7 @@ public:
 
 #if defined(__MK20DX128__)
 		register uint32_t b = scale8(data[RGB_BYTE0(RGB_ORDER)], scale);
-		while(data <= end) { 
+		while(data < end) { 
 			// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
 			// will bite me in the ass at some point, I know it.
 			for(register uint32_t i = 7; i > 0; i--) { 
@@ -211,50 +211,50 @@ public:
 		}
 #else
 		register uint8_t b = data[RGB_BYTE0(RGB_ORDER)];
-		while(data <= end) { 
+		register uint8_t c;
+		register uint8_t d;
+		while(data < end) { 
 			for(register byte x=5; x; x--) {
 				bitSetLast<7, 4>(port, hi, lo, b);
 				b <<= 1;
 			}
 			delaycycles<1>();
 			// Leave an extra 2 clocks for the next byte load
-			bitSetLast<7, 2>(port, hi, lo, b);
-			register uint8_t next = data[RGB_BYTE1(RGB_ORDER)];
+			bitSetLast<7, 0>(port, hi, lo, b);
 			// Leave an extra 4 clocks for the scale
-			bitSetLast<6, 4>(port, hi, lo, b);
-			next = scale8(next, scale);
+			bitSetLast<6, 5>(port, hi, lo, b);
+			c = data[RGB_BYTE1(RGB_ORDER)];
+			c = scale8_LEAVING_R1_DIRTY(c, scale);
 			bitSetLast<5, 1>(port, hi, lo, b);
-			b = next;
-
+			
 			for(register byte x=5; x; x--) {
-				bitSetLast<7, 6>(port, hi, lo, b);
-				b <<= 1;
+				bitSetLast<7, 4>(port, hi, lo, c);
+				c <<= 1;
 			}
 			delaycycles<1>();
 			// Leave an extra 2 clocks for the next byte load
-			bitSetLast<7, 2>(port, hi, lo, b);
-			next = data[RGB_BYTE2(RGB_ORDER)];
+			bitSetLast<7, 0>(port, hi, lo, c);
 			// Leave an extra 4 clocks for the scale
-			bitSetLast<6, 4>(port, hi, lo, b);
-			next = scale8(next, scale);
-			bitSetLast<5, 1>(port, hi, lo, b);
-			b = next;
-
+			bitSetLast<6, 5>(port, hi, lo, c);
+			d = data[RGB_BYTE2(RGB_ORDER)];
+			d = scale8_LEAVING_R1_DIRTY(d, scale);
+			bitSetLast<5, 1>(port, hi, lo, c);
+			
 			for(register byte x=5; x; x--) {
-				bitSetLast<7, 6>(port, hi, lo, b);
-				b <<= 1;
+				bitSetLast<7, 4>(port, hi, lo, d);
+				d <<= 1;
 			}
 			delaycycles<1>();
 			// Leave an extra 2 clocks for the next byte load
-			bitSetLast<7, 3>(port, hi, lo, b);
-			next = data[RGB_BYTE0(RGB_ORDER)];
+			bitSetLast<7, 2>(port, hi, lo, d);
 			data += 3;
 			// Leave an extra 4 clocks for the scale
-			bitSetLast<6, 4>(port, hi, lo, b);
-			next = scale8(next, scale);
-			bitSetLast<5, END_OF_LOOP>(port, hi, lo, b);
-			b = next;
+			bitSetLast<6, 5>(port, hi, lo, d);
+			b = data[RGB_BYTE0(RGB_ORDER)];
+			b = scale8_LEAVING_R1_DIRTY(b, scale);
+			bitSetLast<5, 6>(port, hi, lo, d);
 		}
+		cleanup_R1();
 #endif
 #endif
 	}
