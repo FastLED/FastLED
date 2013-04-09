@@ -16,7 +16,7 @@
 #endif
 
 //  Macro for making sure there's enough time available
-#define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 2 || NS(C) < 6)
+#define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)
 
 #if defined(__MK20DX128__)
 extern volatile uint32_t systick_millis_count;
