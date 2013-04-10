@@ -2,40 +2,14 @@
 #define __INC_CONTROLLER_H
 
 #include <avr/io.h>
+#include "pixeltypes.h"
 
-struct CRGB { 
-	union { 
-		struct { uint8_t r; uint8_t g; uint8_t b; }; 
-		uint8_t raw[3]; 
-	};
-};
-
-// Define RGB orderings 
-enum EOrder {
-	RGB=0012,
-	RBG=0021,
-	GRB=0102,
-	GBR=0120,
-	BRG=0201,
-	BGR=0210
-};
 
 #define RGB_BYTE0(X) ((X>>6) & 0x3) 
 #define RGB_BYTE1(X) ((X>>3) & 0x3) 
 #define RGB_BYTE2(X) ((X) & 0x3)
 
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
-
-#ifdef SUPPORT_ARGB
-struct CARGB { 
-	union { 
-		struct { uint8_t a; uint8_t g; uint8_t r; uint8_t b; }; 
-		uint8_t raw[4];
-		uint32_t all32; 
-	};
-};
-
-#endif
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

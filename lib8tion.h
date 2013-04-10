@@ -1,16 +1,84 @@
 #ifndef __INC_LIB8TION_H
 #define __INC_LIB8TION_H
 
+/*
+ 
+ Fast, efficient 8-bit math functions specifically
+ designed for high-performance LED programming.
+ 
+ Because of the AVR(Arduino) and ARM assembly language
+ implementations provided, using these functions often
+ results in smaller and faster code than the equivalent
+ program using plain "C" arithmetic and logic.
+ 
+ 
+ Included are:
+ 
+ 
+ - Saturating unsigned 8-bit add and subtract.
+   Instead of wrapping around if an overflow occurs,
+   these routines just 'clamp' the output at a maxumum
+   of 255, or a minimum of 0.  Useful for adding pixel 
+   values.  E.g., qadd8( 200, 100) = 255.
+ 
+     qadd8( i, j) == MIN( (i + j), 0xFF )
+     qsub8( i, j) == MAX( (i - j), 0 )
+ 
+ - Saturating signed 8-bit ("7-bit") add.
+     qadd7( i, j) == MIN( (i + j), 0x7F)
+ 
+ 
+ - Scaling (down) of unsigned 8-bit values.  
+   Scaledown value is specified in 1/256ths.
+     scale8( i, sc) == (i * sc) / 256
+ 
+   Example: scaling a 0-255 value down into a
+   range from 0-99:
+     downscaled = scale8( originalnumber, 100);
 
-// Assembly language implementations of useful functions,
-// with generic C implementaions as fallbacks as well.
+   A special version of scale8 is provided for scaling
+   LED brightness values, to make sure that they don't
+   accidentally scale down to total black at low
+   dimming levels, since that would look wrong:
+     scale8_video( i, sc) = ((i * sc) / 256) +? 1
+ 
+   Example: reducing an LED brightness by a
+   dimming factor:
+     new_bright = scale8_video( orig_bright, dimming);
+ 
+ 
+ - Fast 8- and 16- bit unsigned random numbers.
+   Significantly faster than Arduino random(), but 
+   also somewhat less random.  You can add entropy.
+     random8()       == random from 0..255
+     random8( n)     == random from 0..(N-1)
+     random8( n, m)  == random from N..(M-1)
+ 
+     random16()      == random from 0..65535
+     random16( n)    == random from 0..(N-1)
+     random16( n, m) == random from N..(M-1)
+   
+     random16_set_seed( k)    ==  seed = k
+     random16_add_entropy( k) ==  seed += k
 
-// Assembly implementations of some functions for:
-//   AVR (ATmega/ATtiny)
-//   ARM (generic)
-//   ARM (Cortex M4 with DSP)
+ 
+ - Absolute value of a signed 8-bit value.
+     abs8( i)     == abs( i)
 
 
+ - 8-bit math operations which return 8-bit values.
+   These are provided mostly for completeness, not 
+   particularly for performance.
+     mul8( i, j)  == (i * j) & 0xFF
+     add8( i, j)  == (i + j) & 0xFF
+     sub8( i, j)  == (i - j) & 0xFF
+
+ 
+Lib8tion is pronounced like 'libation': lie-BAY-shun
+
+*/
+ 
+ 
 
 #include <stdint.h>
 
@@ -40,6 +108,7 @@
 #define SCALE8_C 1
 #define ABS8_C 1
 #define MUL8_C 1
+#define ADD8_C 1
 #define SUB8_C 1
 
 
@@ -51,12 +120,14 @@
 #define QADD7_C 0
 #define QSUB8_C 0
 #define ABS8_C 0
+#define ADD8_C 0
 #define SUB8_C 0
 
 #define QADD8_AVRASM 1
 #define QADD7_AVRASM 1
 #define QSUB8_AVRASM 1
 #define ABS8_AVRASM 1
+#define ADD8_AVRASM 1
 #define SUB8_AVRASM 1
 
 // Note: these require hardware MUL instruction
@@ -66,6 +137,7 @@
 #define MUL8_C 0
 #define SCALE8_AVRASM 1
 #define MUL8_AVRASM 1
+#define CLEANUP_R1_AVRASM 1
 #else
 // On ATtiny, we just use C implementations
 #define SCALE8_C 1
@@ -84,6 +156,7 @@
 #define SCALE8_C 1
 #define ABS8_C 1
 #define MUL8_C 1
+#define ADD8_C 1
 #define SUB8_C 1
 
 #endif
@@ -180,8 +253,23 @@ LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
 #endif
 }
 
-// sub8: subtract one byte from another, keeping
-//       everything within 8 bits
+// add8: add one byte to another, with one byte result
+LIB8STATIC uint8_t add8( uint8_t i, uint8_t j)
+{
+#if ADD8_C == 1
+    int t = i + j;
+    return t;
+#elif ADD8_AVRASM == 1
+    // Add j to i, period.
+    asm volatile( "add %0, %1" : "+a" (i) : "a" (j));
+    return i;
+#else
+#error "No implementation for add8 available."
+#endif
+}
+
+
+// sub8: subtract one byte from another, 8-bit result
 LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 {
 #if SUB8_C == 1
@@ -345,8 +433,10 @@ LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, uint8_t scale)
 
 LIB8STATIC void cleanup_R1()
 {
+#if CLEANUP_R1_AVRASM == 1
     // Restore r1 to "0"; it's expected to always be that
     asm volatile( "eor r1, r1\n\t" : : : "r1" );
+#endif
 }
 
 
@@ -425,13 +515,13 @@ LIB8STATIC int8_t abs8( int8_t i)
     
     
     asm volatile(
-                 /* First, check the high bit, and prepare to skip if it's clear */
-                 "sbrc %0, 7 \n"
-                 
-                 /* Negate the value */
-                 "neg %0     \n"
-                 
-                 : "+r" (i) : "r" (i) );
+         /* First, check the high bit, and prepare to skip if it's clear */
+         "sbrc %0, 7 \n"
+         
+         /* Negate the value */
+         "neg %0     \n"
+         
+         : "+r" (i) : "r" (i) );
     return i;
 #else
 #error "No implementation for abs8 available."
@@ -490,6 +580,16 @@ LIB8STATIC uint16_t random16( uint16_t min, uint16_t lim)
     uint16_t delta = lim - min;
     uint16_t r = random16( delta) + min;
     return r;
+}
+
+LIB8STATIC void random16_set_seed( uint16_t seed)
+{
+    rand16seed = seed;
+}
+
+LIB8STATIC void random16_add_entropy( uint16_t entropy)
+{
+    rand16seed += entropy;
 }
 
 

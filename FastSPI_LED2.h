@@ -6,6 +6,7 @@
 #include "fastspi.h"
 #include "clockless.h"
 #include "lib8tion.h"
+#include "hsv2rgb.h"
 
 
 
