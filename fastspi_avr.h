@@ -10,8 +10,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // uno/mini/duemilanove
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
-#if defined(SPSR)
+#if defined(AVR_HARDWARE_SPI)
+#if defined(UBRR0)
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_SPEED>
 class AVRUSARTSPIOutput { 
 	Selectable *m_pSelect;
@@ -119,6 +119,9 @@ public:
 };
 
 #endif
+
+#if defined(SPSR)
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Hardware SPI support using SPDR registers and friends
@@ -271,6 +274,8 @@ public:
 	}
 
 };
+#endif
+
 #else
 // #define FORCE_SOFTWARE_SPI
 #endif

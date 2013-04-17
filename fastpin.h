@@ -265,6 +265,7 @@ _DEFPIN_AVR(20, 0x10, C); _DEFPIN_AVR(21, 0x20, C); _DEFPIN_AVR(22, 0x40, C); _D
 
 #define SPI_DATA 11
 #define SPI_CLOCK 13
+#define AVR_HARDWARE_SPI
 
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 // megas
@@ -292,6 +293,7 @@ _DEFPIN_AVR(68, 64, K); _DEFPIN_AVR(69, 128, K);
 
 #define SPI_DATA 51
 #define SPI_CLOCK 52
+#define AVR_HARDWARE_SPI
 
 // Leonardo, teensy, blinkm
 #elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
@@ -308,6 +310,7 @@ _DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AV
 
 #define SPI_DATA 2
 #define SPI_CLOCK 1
+#define AVR_HARDWARE_SPI
 
 #elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)
 // teensy++ 2 defs
@@ -329,6 +332,7 @@ _DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F);
 
 #define SPI_DATA 22
 #define SPI_CLOCK 21
+#define AVR_HARDWARE_SPI
 
 #elif defined(__AVR_ATmega32U4__)
 
@@ -344,6 +348,7 @@ _DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_A
 
 #define SPI_DATA 16
 #define SPI_CLOCK 15
+#define AVR_HARDWARE_SPI
 
 #elif defined(__MK20DX128__) && defined(CORE_TEENSY)
 
@@ -361,7 +366,7 @@ _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 
 #define SPI_DATA 11
 #define SPI_CLOCK 13
-
+#define ARM_HARDWARE_SPI
 #else
 
 #warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
