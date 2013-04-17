@@ -191,4 +191,127 @@ void hsv2rgb_avr(struct CHSV & hsv, struct CRGB & rgb)
 }
 // End of AVR asm implementation
 
+
+
+
+#define GREEN2 0
+
+void rainbow2rgb( CHSV& hsv, CRGB& rgb)
+{
+    uint8_t hue = hsv.hue;
+    uint8_t sat = hsv.sat;
+    uint8_t val = hsv.val;
+    
+    val = scale8( val, val);
+    
+    uint8_t offset = hue & 0x1F; // 0..31
+    uint8_t section = hue / 0x20; //0..7
+    
+    uint8_t third = scale8((offset * 8), (256 / 3));
+    //uint8_t third = (offset * 8) / 3;
+    
+    uint8_t &r(rgb.r), &g(rgb.g), &b(rgb.b);
+    
+    if( section < 4 ) {
+        if( section < 2 ) {
+            //section 0-1
+            if( section == 0) {
+                //case 0: // R -> O
+                r = 255 - third;
+#if GREEN2 == 0
+                g = third;
+#else
+                g = third / 2;
 #endif
+                b = 0;
+                //break;
+            } else {
+                // ADJ Yellow high
+                //case 1: // O -> Y
+                r = 171 + third;
+#if GREEN2 == 0
+                g = (85 + (third * 2));
+#else
+                g = (85 / 2)  + third;
+#endif
+                b = 0;
+                //break;
+            }
+        } else {
+            // section 2-3
+            if( section == 2) {
+                // ADJ Yellow high
+                //case 2: // Y -> G
+                r = 255 - (offset * 8);
+#if GREEN2 == 0
+                g = 255;
+#else
+                g = 255 / 2;
+#endif
+                b = 0;
+                //break;
+            } else {
+                // case 3: // G -> A
+                r = 0;
+#if GREEN2 == 0
+                g = (255 - third);
+#else
+                g = (255 - third) / 2;
+#endif
+                b = third;
+                //break;
+            }
+        }
+    } else {
+        // section 4-7
+        if( section < 6) {
+            if( section == 4) {
+                //case 4: // A -> B
+                r = 0;
+#if GREEN2 == 0
+                g = (171 - (third * 2));
+#else
+                g = (171 / 2) - third;
+#endif
+                b = 85 + (third * 2);
+                //break;
+            } else {
+                //case 5: // B -> P
+                r = third;
+                g = 0;
+                b = 255 - third;
+                //break;
+            }
+        } else {
+            if( section == 6 ) {
+                //case 6: // P -- K
+                r = 85 + third;
+                g = 0;
+                b = 171 - third;
+                //break;
+            } else {
+                //case 7: // K -> R
+                r = 171 + third;
+                g = 0;
+                b = 85 - third;
+                //break;
+            }
+        }
+    }
+    
+    nscale8x3_video( r, g, b, sat);
+    
+    uint8_t desat = 255 - sat;
+    desat = scale8(desat, desat);
+    uint8_t brightness_floor = desat;
+    
+    r += brightness_floor;
+    g += brightness_floor;
+    b += brightness_floor;
+    
+    nscale8x3_video( r, g, b, val);
+}
+
+
+#endif
+
