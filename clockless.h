@@ -108,6 +108,8 @@ public:
 		mWait.mark();
 	}
 
+	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
+	// gcc will use register Y for the this pointer.
 	static void showRGBInternal(register int nLeds, register uint8_t scale, register struct CRGB *rgbdata) __attribute__((noinline)) {
 		register byte *data = (byte*)rgbdata;
 		register data_t mask = FastPin<DATA_PIN>::mask();
@@ -164,7 +166,7 @@ public:
 			FastPin<DATA_PIN>::fastset(port, lo);
 			b = scale8(data[RGB_BYTE2(RGB_ORDER)], scale);
 			data += 3;
-			if(RGB_ORDER & 0070 == 0) {
+			if((RGB_ORDER & 0070) == 0) {
 				delaycycles<T3 - 6>(); // 1 store, 2 load, 1 mul, 1 shift,  1 adds if BRG or GRB
 			} else {
 				delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
