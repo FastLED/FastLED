@@ -7,6 +7,23 @@
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_SPEED>
 class ARMHardwareSPIOutput { 
 	Selectable *m_pSelect;
+
+	// Borrowed from the teensy3 SPSR emulation code
+	static inline void enable_pins(void) __attribute__((always_inline)) {
+		//serial_print("enable_pins\n");
+		CORE_PIN11_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
+		CORE_PIN12_CONFIG = PORT_PCR_MUX(2);
+		CORE_PIN13_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
+	}
+
+	// Borrowed from the teensy3 SPSR emulation code
+	static inline void disable_pins(void) __attribute__((always_inline)) {
+		//serial_print("disable_pins\n");
+		CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+		CORE_PIN12_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+		CORE_PIN13_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+	}
+
 public:
 	ARMHardwareSPIOutput() { m_pSelect = NULL; }
 	ARMHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
@@ -50,78 +67,48 @@ public:
     }
 
 	void init() {
-		volatile uint8_t clr;
-
 		// set the pins to output
 		FastPin<_DATA_PIN>::setOutput();
 		FastPin<_CLOCK_PIN>::setOutput();
 		release();
 
-		SPCR |= ((1<<SPE) | (1<<MSTR) ); 		// enable SPI as master
-		SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); 	// clear out the prescalar bits
+		// Enable SPI0 clock
+		uint32_t sim6 = SIM_SCGC6;
+		if (!(sim6 & SIM_SCGC6_SPI0)) {
+			//serial_print("init1\n");
+			SIM_SCGC6 = sim6 | SIM_SCGC6_SPI0;
+			SPI0_CTAR0 = SPI_CTAR_FMSZ(7) | SPI_CTAR_PBR(1) | SPI_CTAR_BR(1);
+		}
 
-		clr = SPSR; // clear SPI status register 
-		clr = SPDR; // clear SPI data register
-		clr; 
+		// Configure CTAR0, defaulting to 8 bits and CTAR1, defaulting to 16 bits
+	 	int _PBR = 0;
+	 	int _BR = 0;
+	 	int _CSSCK = 0;
+	 	int _DBR = 1;
 
-	    bool b2x = false;
-	    int hiBit = 0;
-	    int spd = _SPI_SPEED;
-	    while(spd >>= 1) { hiBit++; }
-	 
-	 	// Spped mappings are a little different, here they are based on the highest bit set in the speed parameter.  
-	 	// If bit 8 is set, it's at osc/128, bit 7, then osc/64, etc... down the line.
-	    switch(hiBit) { 
-	      /* fosc/2   */ case 0: // no bits set 
-	    				 case 1: // speed set to 1
-	    				 case 2: // speed set to 2
-	    				 	b2x=true; break;
-	      /* fosc/4   */ case 3: break;
-	      /* fosc/8   */ case 4: SPCR |= (1<<SPR0); b2x=true; break;
-	      /* fosc/16  */ case 5: SPCR |= (1<<SPR0); break;
-	      /* fosc/32  */ case 6: SPCR |= (1<<SPR1); b2x=true; break;
-	      /* fosc/64  */ case 7: SPCR |= (1<<SPR1); break;
-	      // /* fosc/64  */ case 6: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); b2x=true; break;
-	      /* fosc/128 */ default: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); break;
-	    }
-	    if(b2x) { SPSR |= (1<<SPI2X); }
-	    else { SPSR &= ~ (1<<SPI2X); }
+	 	if(_SPI_SPEED >= 128) { _PBR = 0; _BR = _CSSCK = 7; _DBR = 0; }      // osc/256
+	 	else if(_SPI_SPEED >= 64) { _PBR = 0; _BR = _CSSCK = 6; _DBR = 0;  } // osc/128
+	 	else if(_SPI_SPEED >= 32) { _PBR = 0; _BR = _CSSCK = 6; _DBR = 1;  } // osc/64
+	 	else if(_SPI_SPEED >= 16) { _PBR = 0; _BR = _CSSCK = 4; _DBR = 0;  } // osc/32
+	 	else if(_SPI_SPEED >= 8) { _PBR = 0; _BR = _CSSCK = 4; _DBR = 1;  }  // osc/16
+	 	else if(_SPI_SPEED >= 4) { _PBR = 0; _BR = _CSSCK = 1; _DBR = 0;  }  // osc/8
+	 	else if(_SPI_SPEED >= 2) { _PBR = 0; _BR = _CSSCK = 0; _DBR = 0;  }  // osc/4
+	 	else if(_SPI_SPEED >= 1) { _PBR = 1; _BR = _CSSCK = 0; _DBR = 1;  }  // osc/3
+	 	else if(_SPI_SPEED >= 0) { _PBR = 0; _BR = _CSSCK = 0; _DBR = 1; }   // osc/2
 
-	    // force speed faster
-	    switch(_SPI_SPEED) {
-	    	case 0: // ~20Mbps
-		    	{ 
-				    uint32_t ctar0 = SPI_CTAR_FMSZ(7) | SPI_CTAR_PBR(0) | SPI_CTAR_BR(0) | SPI_CTAR_CSSCK(0) | SPI_CTAR_DBR;
-			  		uint32_t ctar1 = SPI_CTAR_FMSZ(15) | SPI_CTAR_PBR(0) | SPI_CTAR_BR(0) | SPI_CTAR_CSSCK(0) | SPI_CTAR_DBR;
-				    update_ctar0(ctar0);
-				    update_ctar1(ctar1);
-				    break;
-				}
-	    	case 1: // ~15Mbps
-		    	{ 
-				    uint32_t ctar0 = SPI_CTAR_FMSZ(7) | SPI_CTAR_PBR(1) | SPI_CTAR_BR(0) | SPI_CTAR_CSSCK(0) | SPI_CTAR_DBR;
-			  		uint32_t ctar1 = SPI_CTAR_FMSZ(15) | SPI_CTAR_PBR(1) | SPI_CTAR_BR(0) | SPI_CTAR_CSSCK(0) | SPI_CTAR_DBR;
-				    update_ctar0(ctar0);
-				    update_ctar1(ctar1);
-				    break;
-				}
-	    	case 2: // ~10Mbps
-		    	{ 
-				    uint32_t ctar0 = SPI_CTAR_FMSZ(7) | SPI_CTAR_PBR(0) | SPI_CTAR_BR(0) | SPI_CTAR_CSSCK(0);
-			  		uint32_t ctar1 = SPI_CTAR_FMSZ(15) | SPI_CTAR_PBR(0) | SPI_CTAR_BR(0) | SPI_CTAR_CSSCK(0);
-				    update_ctar0(ctar0);
-				    update_ctar1(ctar1);
-				    break;
-				}
-			default:
-				{
-					// Configure ctar1 to be 16 bits based off of ctar0's settings
-					update_ctar1(SPI0_CTAR0);
+	 	// double the clock rate, if necessary 
+	 	if(_DBR == 1) { _DBR = SPI_CTAR_DBR; }
 
-					set_ctar1_bits(16);
-				}
-	    }
+	 	uint32_t ctar0 = SPI_CTAR_FMSZ(7) | SPI_CTAR_PBR(_PBR) | SPI_CTAR_BR(_BR) | SPI_CTAR_CSSCK(_CSSCK) | _DBR;
+	 	uint32_t ctar1 = SPI_CTAR_FMSZ(15) | SPI_CTAR_PBR(_PBR) | SPI_CTAR_BR(_BR) | SPI_CTAR_CSSCK(_CSSCK) | _DBR;
+	    update_ctar0(ctar0);
+	    update_ctar1(ctar1);
 
+		// Configure SPI as the master and enable 
+		SPI0_MCR |= SPI_MCR_MSTR;
+		SPI0_MCR &= ~(SPI_MCR_MDIS | SPI_MCR_HALT);
+
+		enable_pins();
 	}
 
 	static void waitFully() __attribute__((always_inline)) { 
@@ -132,11 +119,11 @@ public:
 	static void wait() __attribute__((always_inline)) { while( (SPI0_SR & 0xF000) >= 0x4000);  }
 	
 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI0_PUSHR_CTAS(1) | (w & 0xFFFF); }
+	static void writeWord(uint16_t w) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI0_PUSHR_CONT | SPI0_PUSHR_CTAS(1) | (w & 0xFFFF); }
 
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPI0_PUSHR = (b & 0xFF); }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = (b & 0xFF); wait(); }
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR =  (b & 0xFF); }
+	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI0_PUSHR_CONT | (b & 0xFF); }
+	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI0_PUSHR_CONT | (b & 0xFF); wait(); }
+	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI0_PUSHR_CONT | (b & 0xFF); }
 
 	// not the most efficient mechanism in the world - but should be enough for sm16716 and friends
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
@@ -182,8 +169,8 @@ public:
 		uint8_t *end = data + len;
 		select();
 		if((SKIP & FLAG_START_BIT) == 0) {
-			// If no start bit stupiditiy, write out as many 16-bit blocks as we can
-			uint8_t *first_end = end - (len % (6 + SPI_ADVANCE + SPI_ADVANCE));
+			//If no start bit stupiditiy, write out as many 16-bit blocks as we can
+			uint8_t *first_end = end - (len % (SPI_ADVANCE + SPI_ADVANCE));
 			while(data != first_end) {
 					writeWord(D::adjust(data[SPI_B0], scale) << 8 | D::adjust(data[SPI_B1], scale));
 					writeWord(D::adjust(data[SPI_B2], scale) << 8 | D::adjust(data[SPI_ADVANCE + SPI_B0], scale));
