@@ -67,12 +67,20 @@
 
 
  - 8-bit math operations which return 8-bit values.
-   These are provided mostly for completeness, not 
-   particularly for performance.
+   These are provided mostly for completeness,
+   not particularly for performance.
      mul8( i, j)  == (i * j) & 0xFF
      add8( i, j)  == (i + j) & 0xFF
      sub8( i, j)  == (i - j) & 0xFF
 
+ 
+ - Fast 16-bit approximations of sin and cos.
+   Input angle is a uint16_t from 0-65535.
+   Output is a signed int16_t from -32767 to 32767.
+      sin16( x)  == sin( (x/32768.0) * pi) * 32767
+      cos16( x)  == cos( (x/32768.0) * pi) * 32767
+   Accurate to more than 99% in all cases.
+ 
  
 Lib8tion is pronounced like 'libation': lie-BAY-shun
 
@@ -593,5 +601,48 @@ LIB8STATIC void random16_add_entropy( uint16_t entropy)
 }
 
 
+// sin16 & cos16:
+//        Fast 16-bit approximations of sin(x) & cos(x).
+//        Input angle is an unsigned int from 0-65535.
+//        Output is signed int from -32767 to 32767.
+//
+//        This approximation never varies more than 0.69%
+//        from the floating point value you'd get by doing
+//          float s = sin( x ) * 32767.0;
+//
+//        Don't use this approximation for calculating the
+//        trajectory of a rocket to Mars, but it's great
+//        for art projects and LED displays.
+//
+//        On Arduino/AVR, this approximation is more than
+//        10X faster than floating point sin(x) and cos(x)
+
+LIB8STATIC int16_t sin16( uint16_t theta )
+{
+    static const uint16_t base[] =
+        { 0, 6393, 12539, 18204, 23170, 27245, 30273, 32137 };
+    static const uint8_t slope[] =
+        { 49, 48, 44, 38, 31, 23, 14, 4 };
+    
+    uint16_t offset = (theta & 0x3FFF) >> 4;
+    if( theta & 0x4000 ) offset = 1023 - offset;
+    
+    uint8_t section = offset / 128;
+    uint16_t b   = base[section];
+    uint8_t  m   = slope[section];
+    
+    uint8_t secoffset8 = offset & 0x7F;
+    uint16_t mx = m * secoffset8;
+    int16_t  y  = mx + b;
+    
+    if( theta & 0x8000 ) y = -y;
+    
+    return y;
+}
+
+LIB8STATIC int16_t cos16( uint16_t theta)
+{
+    return sin16( theta + 16384);
+}
 
 #endif
