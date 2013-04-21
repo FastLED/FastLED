@@ -12,7 +12,7 @@
 // uno/mini/duemilanove
 #if defined(AVR_HARDWARE_SPI)
 #if defined(UBRR0)
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_SPEED>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class AVRUSARTSPIOutput { 
 	Selectable *m_pSelect;
 
@@ -64,6 +64,10 @@ public:
     	if(m_pSelect != NULL) { m_pSelect->release(); } // FastPin<_SELECT_PIN>::hi(); 
 	}
 
+	static void writeBytesValueRaw(uint8_t value, int len) {
+		while(len--) { writeByte(value); }
+	}
+	
 	void writeBytesValue(uint8_t value, int len) { 
 		select();
 		while(len--) { 
@@ -84,6 +88,7 @@ public:
 			writeByte(D::adjust(*data++)); delaycycles<3>();
 #endif
 		}
+		D::postBlock(len);
 		release();	
 	}
 
@@ -100,6 +105,7 @@ public:
 			writeByte(D::adjust(data[SPI_B2], scale));
 			data += SPI_ADVANCE;
 		}
+		D::postBlock(len);
 		release();
 	}
 
@@ -133,7 +139,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_SPEED>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class AVRHardwareSPIOutput { 
 	Selectable *m_pSelect;
 public:
@@ -141,6 +147,24 @@ public:
 	AVRHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
+	void setSPIRate() { 
+		SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); 	// clear out the prescalar bits
+
+	    bool b2x = false;
+	    int hiBit = 0;
+
+	    if(_SPI_CLOCK_DIVIDER >= 128) { SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); }
+	    else if(_SPI_CLOCK_DIVIDER >= 64) { SPCR |= (1<<SPR1);}
+	    else if(_SPI_CLOCK_DIVIDER >= 32) { SPCR |= (1<<SPR1); b2x = true;  }
+	    else if(_SPI_CLOCK_DIVIDER >= 16) { SPCR |= (1<<SPR0); } 
+	    else if(_SPI_CLOCK_DIVIDER >= 8) { SPCR |= (1<<SPR0); b2x = true; }
+	    else if(_SPI_CLOCK_DIVIDER >= 4) { /* do nothing - default rate */ }
+	    else { b2x = true; }
+
+	    if(b2x) { SPSR |= (1<<SPI2X); }
+	    else { SPSR &= ~ (1<<SPI2X); }
+	}
+	
 	void init() {
 		volatile uint8_t clr;
 
@@ -150,33 +174,12 @@ public:
 		release();
 
 		SPCR |= ((1<<SPE) | (1<<MSTR) ); 		// enable SPI as master
-		SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); 	// clear out the prescalar bits
 
 		clr = SPSR; // clear SPI status register 
 		clr = SPDR; // clear SPI data register
 		clr; 
-	    bool b2x = false;
-	    int hiBit = 0;
-	    int spd = _SPI_SPEED;
-	    while(spd >>= 1) { hiBit++; }
-	 
-	 	// Spped mappings are a little different, here they are based on the highest bit set in the speed parameter.  
-	 	// If bit 8 is set, it's at osc/128, bit 7, then osc/64, etc... down the line.
-	    switch(hiBit) { 
-	      /* fosc/2   */ case 0: // no bits set 
-	    				 case 1: // speed set to 1
-	    				 case 2: // speed set to 2
-	    				 	b2x=true; break;
-	      /* fosc/4   */ case 3: break;
-	      /* fosc/8   */ case 4: SPCR |= (1<<SPR0); b2x=true; break;
-	      /* fosc/16  */ case 5: SPCR |= (1<<SPR0); break;
-	      /* fosc/32  */ case 6: SPCR |= (1<<SPR1); b2x=true; break;
-	      /* fosc/64  */ case 7: SPCR |= (1<<SPR1); break;
-	      // /* fosc/64  */ case 6: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); b2x=true; break;
-	      /* fosc/128 */ default: SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); break;
-	    }
-	    if(b2x) { SPSR |= (1<<SPI2X); }
-	    else { SPSR &= ~ (1<<SPI2X); }
+
+		setSPIRate();
 
 	    // push 192 0s to prime the spi stuff
 	    select();
@@ -211,6 +214,7 @@ public:
 	void release() { if(m_pSelect != NULL) { m_pSelect->release(); } } // FastPin<_SELECT_PIN>::lo(); }
 
 	void writeBytesValue(uint8_t value, int len) { 
+		setSPIRate();
 		select();
 		while(len--) { 
 			writeBytePostWait(value);
@@ -220,6 +224,7 @@ public:
 	
 	// Write a block of n uint8_ts out 
 	template <class D> void writeBytes(register uint8_t *data, int len) { 
+		setSPIRate();
 		uint8_t *end = data + len;
 		select();
 		while(data != end) { 
@@ -234,6 +239,7 @@ public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
 	template <uint8_t SKIP, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+		setSPIRate();
 		uint8_t *end = data + len;
 		select();
 		while(data != end) { 
@@ -241,7 +247,7 @@ public:
 				writeBit<0>(1);
 			}
 			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
-			if(false && _SPI_SPEED == 0) { 
+			if(false && _SPI_CLOCK_DIVIDER == 0) { 
 				writeByteNoWait(D::adjust(data[SPI_B0], scale)); delaycycles<13>();
 				writeByteNoWait(D::adjust(data[SPI_B1], scale)); delaycycles<13>();
 				writeByteNoWait(D::adjust(data[SPI_B2], scale)); delaycycles<9>();

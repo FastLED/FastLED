@@ -16,18 +16,22 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class LPD8806_ADJUST {
+template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SPI_SPEED> class LPD8806_ADJUST {
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 public:
 	// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
 	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
 	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data, register uint8_t scale) { return (scale8(data, scale)>>1) | 0x80; }
+	__attribute__((always_inline)) inline static void postBlock(int len) { 
+		SPI::writeBytesValueRaw(0, ((len+63)>>6));
+	}
+
 };
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = 2 >
 class LPD8806Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
-	OutputPin selectPin;
 	int mClearedLeds;
 
 	void checkClear(int nLeds) { 
@@ -42,9 +46,13 @@ class LPD8806Controller : public CLEDController {
 		mSPI.writeBytesValue(0, n);
 	}
 public:
-	LPD8806Controller() : selectPin(SELECT_PIN) {}
-	virtual void init() { 
-		mSPI.setSelect(&selectPin);
+	LPD8806Controller()  {}
+	virtual void init() {
+		if(SELECT_PIN != NO_PIN) {  
+			mSPI.setSelect(new OutputPin(SELECT_PIN));
+		} else {
+			// mSPI.setSelect(NULL);
+		}
 		mSPI.init();
 		mClearedLeds = 0;
 	}
@@ -59,16 +67,13 @@ public:
 	}
 
 	virtual void showRGB(struct CRGB *data, int nLeds, uint8_t scale) {
-		checkClear(nLeds);
-		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 3, scale);
-		clearLine(nLeds);
+		mSPI.template writeBytes3<LPD8806_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void showARGB(struct CARGB *data, int nLeds) {
 		checkClear(nLeds);
-		mSPI.template writeBytes3<1, LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 4, 255);
-		clearLine(nLeds);
+		mSPI.template writeBytes3<1, LPD8806_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>((byte*)data, nLeds * 4, 255);
 	}
 #endif
 };
@@ -83,13 +88,16 @@ template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_OR
 class WS2801Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
-	OutputPin selectPin;
 	CMinWait<24>  mWaitDelay;
 public:
-	WS2801Controller() : selectPin(SELECT_PIN) {}
+	WS2801Controller() {}
 
 	virtual void init() { 
-		mSPI.setSelect(&selectPin);
+		if(SELECT_PIN != NO_PIN) {  
+			mSPI.setSelect(new OutputPin(SELECT_PIN));
+		} else { 
+			mSPI.setSelect(NULL);
+		}
 		mSPI.init();
 	    // 0 out as much as we can on the line
 	    mSPI.writeBytesValue(0, 1000);

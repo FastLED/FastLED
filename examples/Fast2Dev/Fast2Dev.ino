@@ -2,7 +2,8 @@
 // #define FORCE_SOFTWARE_SPI 1
 #include "FastSPI_LED2.h"
 
-// #define DEBUG
+// 
+#define DEBUG
 #ifdef DEBUG
 #define DPRINT Serial.print
 #define DPRINTLN Serial.println
@@ -17,7 +18,7 @@
 //
 //////////////////////////////////////////////////
 
-#define NUM_LEDS 2
+#define NUM_LEDS 86
 
 // struct CRGB { byte g; byte r; byte b; };
 
@@ -29,8 +30,8 @@ struct CRGB leds[NUM_LEDS];
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // Hardware SPIr2 - .539ms @8Mhz, .799 @4Mhz, 1.315ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
-// LPD8806Controller<11, 13, 10, RBG, 2> LED;
-// LPD8806Controller<11, 13, 10, 3> LEDSlow;
+LPD8806Controller<11, 13, NO_PIN, RBG, MAX_DATA_RATE> LED;
+LPD8806Controller<11, 13, NO_PIN, RBG, DATA_RATE_MHZ(1)> LEDSlow;
 
 // SM16716Controller<11, 13, 10> LED;
 
@@ -61,7 +62,7 @@ struct CRGB leds[NUM_LEDS];
 // Different Port, non-hardware SPI - 1.47ms for an 86 led frame
 // WS2801Controller<7, 13, 10> LED;
 
-TM1809Controller800Khz<4, RGB> LED;
+// TM1809Controller800Khz<4, RGB> LED;
 // UCS1903Controller400Khz<7> LED;
 // WS2811Controller800Khz<12, BRG> LED;
 // WS2811Controller800Khz<23> LED;
@@ -90,6 +91,12 @@ TM1809Controller800Khz<4, RGB> LED;
 // }
 
 
+static void volRun(CRGB *aled, int num) __attribute__((noinline));
+
+static void volRun(CRGB *aled, int num) { 
+	aled[num-1].r = 0;
+}
+
 void setup() {
 #ifdef DEBUG
 	delay(5000);
@@ -98,19 +105,26 @@ void setup() {
     Serial.println("resetting!");
 #endif
 
-    // LEDSlow.init();
-    // LEDSlow.clearLeds(300);
+    LEDSlow.init();
+    LEDSlow.clearLeds(300);
 
     LED.init();
 
 #ifdef DEBUG
-	int start = millis();
-	for(int i = 0; i < 1000; i++){ 
+    unsigned long emptyStart = millis();
+    for(volatile int i = 0 ; i < 10000; i++) {
+      volRun(leds, NUM_LEDS);
+    }
+    unsigned long emptyEnd = millis();
+	unsigned long start = millis();
+	for(volatile int i = 0; i < 10000; i++){ 
 		LED.showRGB(leds, NUM_LEDS);
 		// LED2.showRGB((byte*)leds, NUM_LEDS);
 	}
-	int end = millis();
-	DPRINT("Time for 1000 loops: "); DPRINTLN(end - start);
+	unsigned long end = millis();
+	DPRINT("Time for 10000 empty loops: "); DPRINTLN( emptyEnd - emptyStart);
+	DPRINT("Time for 10000 loops: "); DPRINTLN(end - start);
+	DPRINT("Time for 10000 adjusted loops: "); DPRINTLN( (end - start) - (emptyEnd - emptyStart));
 #endif 
 }
 
@@ -120,7 +134,7 @@ long start = millis();
 void loop() { 
 #if 0
 	memset(leds, 0, NUM_LEDS * sizeof(struct CRGB));
-	LED.showRGB(leds, 2);
+	LED.showRGB(leds, NUM_LEDS);
 	delay(20);
 #else
 	for(int i = 0; i < 3; i++) {
@@ -137,6 +151,7 @@ void loop() {
 			delay(20);
 		}
 
+		memset(leds, 0,  NUM_LEDS * sizeof(struct CRGB));
 		for(int iLed = NUM_LEDS - 6; iLed < NUM_LEDS; iLed++) {
 			switch(i) { 
 			 	case 0: leds[iLed].r = 255; break;

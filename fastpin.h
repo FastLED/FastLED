@@ -6,6 +6,8 @@
 // Arduino.h needed for convinience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #include<Arduino.h>
 
+#define NO_PIN 255 
+
 // Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet
 // this should make sure that chipsets that have 
 template<int WAIT> class CMinWait {

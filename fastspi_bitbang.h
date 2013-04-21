@@ -153,8 +153,8 @@ private:
 		} else { 
 			// NOP;
 			FastPin<DATA_PIN>::fastset(datapin, loval);
-			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock);
-			FastPin<CLOCK_PIN>::fastset(clockpin, loclock);
+			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); SPI_DELAY;
+			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); SPI_DELAY;
 		}
 	}
 
@@ -167,12 +167,12 @@ private:
 		writeBit<BIT>(b);
 #else
 		if(b & (1 << BIT)) { 
-			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclockhi); SPI_DELAY;
+			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY;
 		} else { 
 			// NOP;
-			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclockhi); SPI_DELAY;
+			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY;
 		}
 #endif
 	}
@@ -188,6 +188,11 @@ public:
 	// Write out len bytes of the given value out over SPI.  Useful for quickly flushing, say, a line of 0's down the line.
 	void writeBytesValue(uint8_t value, int len) { 
 		select();
+		writeBytesValueRaw(value, len);
+		release();
+	}
+
+	static void writeBytesValueRaw(uint8_t value, int len) {
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		// TODO: Weird things may happen if software bitbanging SPI output and other pins on the output reigsters are being twiddled.  Need
 		// to allow specifying whether or not exclusive i/o access is allowed during this process, and if i/o access is not allowed fall
@@ -222,7 +227,6 @@ public:
 			}
 		}
 #endif
-		release();	
 	}
 
 	// write a block of len uint8_ts out.  Need to type this better so that explicit casts into the call aren't required.
@@ -267,6 +271,7 @@ public:
 			FastPin<CLOCK_PIN>::lo();
 		}
 #endif
+		D::postBlock(len);
 		release();	
 	}
 
@@ -340,6 +345,7 @@ public:
 			FastPin<CLOCK_PIN>::lo();
 		}	
 #endif
+		D::postBlock(len);
 		release();
 	}
 

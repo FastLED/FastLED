@@ -20,6 +20,7 @@ class DATA_NOP {
 public:
 	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data) { return data; } 
 	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data, register uint8_t scale) { return scale8(data, scale); } 
+	static __attribute__((always_inline)) inline void postBlock(int len) {}
 };
 
 #define FLAG_START_BIT 0x80
@@ -34,6 +35,10 @@ public:
 #define SPEED_DIV_64 64
 #define SPEED_DIV_128 128
 
+#define MAX_DATA_RATE 0
+#define DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
+#define DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
+
 // Include the various specific SPI implementations
 #include "fastspi_bitbang.h"
 #include "fastspi_arm.h"
@@ -47,11 +52,11 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_SPEED>
-class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_SPEED>
-class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
 #ifndef FORCE_SOFTWARE_SPI
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
