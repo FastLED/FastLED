@@ -70,10 +70,6 @@ public:
 		mSPI.template writeBytes3<LPD8806_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 	}
 
-	virtual void writeHSVBytes(struct CHSV *data, int nLeds, uint8_t scale = 255) { 
-		mSPI.template writeHSVBytes<0, LPD8806_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>(data, nLeds, scale);
-	}
-
 #ifdef SUPPORT_ARGB
 	virtual void showARGB(struct CARGB *data, int nLeds) {
 		checkClear(nLeds);
