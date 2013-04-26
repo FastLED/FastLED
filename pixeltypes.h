@@ -22,6 +22,41 @@ struct CHSV {
 		};
 		uint8_t raw[3];
 	};
+
+    // default values are UNITIALIZED
+    inline CHSV() __attribute__((always_inline))
+    {
+    }
+
+    // allow construction from H, S, V
+    inline CHSV( uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
+        : h(ih), s(is), v(iv)
+    {
+    }
+
+    // allow copy construction
+    inline CHSV(const CHSV& rhs) __attribute__((always_inline))
+    {
+        h = rhs.h;
+        s = rhs.s;
+        v = rhs.v;
+    }
+
+    inline CHSV& operator= (const CHSV& rhs) __attribute__((always_inline))
+    {
+        h = rhs.h;
+        s = rhs.s;
+        v = rhs.v;
+        return *this;
+    }
+
+    inline CHSV& setHSV(uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
+    {
+        h = ih;
+        s = is;
+        v = iv;
+        return *this;
+    }
 };
 
 
@@ -45,6 +80,11 @@ struct CRGB {
 	};
 
 	inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
+    {
+        return raw[x];
+    }
+
+    inline const uint8_t& operator[] (uint8_t x) const __attribute__((always_inline))
     {
         return raw[x];
     }
@@ -90,22 +130,14 @@ struct CRGB {
     // allow assignment from H, S, and V
 	inline CRGB& setHSV (uint8_t nh, uint8_t ns, uint8_t nv) __attribute__((always_inline))
     {
-        CHSV hsv;
-        hsv.hue = nh;
-        hsv.sat = ns;
-        hsv.val = nv;
-        hsv2rgb( hsv, *this);
+        hsv2rgb(CHSV(nh, ns, nv), *this);
         return *this;
     }
     
     // allow assignment from H, S, and V
 	inline CRGB& setRainbowHSV (uint8_t nh, uint8_t ns, uint8_t nv) __attribute__((always_inline))
     {
-        CHSV hsv;
-        hsv.hue = nh;
-        hsv.sat = ns;
-        hsv.val = nv;
-        rainbow2rgb( hsv, *this);
+        hsv2rgb(CHSV(nh, ns, nv), *this);
         return *this;
     }
 #endif
