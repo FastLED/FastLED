@@ -142,8 +142,9 @@ public:
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class AVRHardwareSPIOutput { 
 	Selectable *m_pSelect;
+	bool mWait;
 public:
-	AVRHardwareSPIOutput() { m_pSelect = NULL; }
+	AVRHardwareSPIOutput() { m_pSelect = NULL; mWait = false;}
 	AVRHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
@@ -151,7 +152,6 @@ public:
 		SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); 	// clear out the prescalar bits
 
 	    bool b2x = false;
-	    int hiBit = 0;
 
 	    if(_SPI_CLOCK_DIVIDER >= 128) { SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); }
 	    else if(_SPI_CLOCK_DIVIDER >= 64) { SPCR |= (1<<SPR1);}
@@ -171,31 +171,48 @@ public:
 		// set the pins to output
 		FastPin<_DATA_PIN>::setOutput();
 		FastPin<_CLOCK_PIN>::setOutput();
+#ifdef SPI_SELECT
+		// Make sure the slave select line is set to output, or arduino will block us
+		FastPin<SPI_SELECT>::setOutput();
+		FastPin<SPI_SELECT>::lo();
+#endif
 		release();
 
 		SPCR |= ((1<<SPE) | (1<<MSTR) ); 		// enable SPI as master
+		SPCR &= ~ ( (1<<SPR1) | (1<<SPR0) ); 	// clear out the prescalar bits
 
 		clr = SPSR; // clear SPI status register 
 		clr = SPDR; // clear SPI data register
 		clr; 
 
-		setSPIRate();
+	    bool b2x = false;
 
-	    // push 192 0s to prime the spi stuff
-	    select();
-	    SPDR = 0;
-	    for(int i = 0; i < 191; i++) { 
-	    	writeByte(0); writeByte(0); writeByte(0);
-	    }
-	    release();
+	    if(_SPI_CLOCK_DIVIDER >= 128) { SPCR |= (1<<SPR1); SPCR |= (1<<SPR0); }
+	    else if(_SPI_CLOCK_DIVIDER >= 64) { SPCR |= (1<<SPR1);}
+	    else if(_SPI_CLOCK_DIVIDER >= 32) { SPCR |= (1<<SPR1); b2x = true;  }
+	    else if(_SPI_CLOCK_DIVIDER >= 16) { SPCR |= (1<<SPR0); } 
+	    else if(_SPI_CLOCK_DIVIDER >= 8) { SPCR |= (1<<SPR0); b2x = true; }
+	    else if(_SPI_CLOCK_DIVIDER >= 4) { /* do nothing - default rate */ }
+	    else { b2x = true; }
+
+	    if(b2x) { SPSR |= (1<<SPI2X); }
+	    else { SPSR &= ~ (1<<SPI2X); }
+
+	    SPDR=0;
+	    shouldWait(false);
 	}
 
-	static void wait() __attribute__((always_inline)) { while(!(SPSR & (1<<SPIF))); }
+	static bool shouldWait(bool wait = false) __attribute__((always_inline)) { 
+		static bool sWait=false; 
+		if(sWait) { sWait = wait; return true; } else { sWait = wait; return false; } 
+		// return true;
+	}
+	static void wait() __attribute__((always_inline)) { if(_SPI_CLOCK_DIVIDER >= 4) { if(shouldWait()) { while(!(SPSR & (1<<SPIF))); } } else { delaycycles<9>(); } }
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPDR=b; }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; wait(); }
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; }
+	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPDR=b;  shouldWait(true); }
+	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; shouldWait(true); wait(); }
+	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; shouldWait(true); }
 
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
 		SPCR &= ~(1 << SPE);
@@ -208,23 +225,28 @@ public:
 		FastPin<_CLOCK_PIN>::hi();
 		FastPin<_CLOCK_PIN>::lo();
 		SPCR |= 1 << SPE;
+		shouldWait(false);
 	}
 
 	void select() { if(m_pSelect != NULL) { m_pSelect->select(); } } // FastPin<_SELECT_PIN>::hi(); }
 	void release() { if(m_pSelect != NULL) { m_pSelect->release(); } } // FastPin<_SELECT_PIN>::lo(); }
 
+	static void writeBytesValueRaw(uint8_t value, int len) {
+		while(len--) { writeByte(value); }
+	}
+
 	void writeBytesValue(uint8_t value, int len) { 
-		setSPIRate();
+		//setSPIRate();
 		select();
 		while(len--) { 
-			writeBytePostWait(value);
+			writeByte(value);
 		}
 		release();
 	}
 	
 	// Write a block of n uint8_ts out 
 	template <class D> void writeBytes(register uint8_t *data, int len) { 
-		setSPIRate();
+		//setSPIRate();
 		uint8_t *end = data + len;
 		select();
 		while(data != end) { 
@@ -239,7 +261,7 @@ public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
 	template <uint8_t SKIP, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		setSPIRate();
+		//setSPIRate();
 		uint8_t *end = data + len;
 		select();
 		while(data != end) { 
@@ -263,6 +285,7 @@ public:
 
 			data += SPI_ADVANCE;
 		}
+		D::postBlock(len);
 		release();
 	}
 

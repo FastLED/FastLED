@@ -266,6 +266,7 @@ _DEFPIN_AVR(16, 0x04, C); _DEFPIN_AVR(17, 0x08, C); _DEFPIN_AVR(18, 0x10, C); _D
 
 #define SPI_DATA 11
 #define SPI_CLOCK 13
+#define SPI_SELECT 10
 #define AVR_HARDWARE_SPI
 
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
@@ -294,6 +295,7 @@ _DEFPIN_AVR(68, 64, K); _DEFPIN_AVR(69, 128, K);
 
 #define SPI_DATA 51
 #define SPI_CLOCK 52
+#define SPI_SELECT 53
 #define AVR_HARDWARE_SPI
 
 // Leonardo, teensy, blinkm
@@ -311,6 +313,7 @@ _DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AV
 
 #define SPI_DATA 2
 #define SPI_CLOCK 1
+#define SPI_SELECT 3
 #define AVR_HARDWARE_SPI
 
 #elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)
@@ -333,6 +336,7 @@ _DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F);
 
 #define SPI_DATA 22
 #define SPI_CLOCK 21
+#define SPI_SELECT 20
 #define AVR_HARDWARE_SPI
 
 #elif defined(__AVR_ATmega32U4__)

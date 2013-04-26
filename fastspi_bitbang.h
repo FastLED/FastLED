@@ -268,7 +268,7 @@ public:
 			while(data != end) { 
 				writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 			}
-			FastPin<CLOCK_PIN>::lo();
+			// FastPin<CLOCK_PIN>::lo();
 		}
 #endif
 		D::postBlock(len);

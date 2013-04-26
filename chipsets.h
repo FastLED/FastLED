@@ -16,7 +16,7 @@ public:
 	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
 	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data, register uint8_t scale) { return (scale8(data, scale)>>1) | 0x80; }
 	__attribute__((always_inline)) inline static void postBlock(int len) { 
-		SPI::writeBytesValueRaw(0, ((len+63)>>6));
+		SPI::writeBytesValueRaw(0, 1); // ((len+63)>>6));
 	}
 
 };
@@ -148,33 +148,44 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SPI_SPEED> class SM16716_ADJUST {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+#if defined(__MK20DX128__) 
+		typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+#else
+	// Have to force software SPI for the AVR right now because it doesn't deal well
+	// with flipping in and out of hardware SPI
+//		typedef AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+		typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+#endif
 public:
 	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data) { return data; } 
 	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data, register uint8_t scale) { return scale8(data, scale); } 
 	static __attribute__((always_inline)) inline void postBlock(int len) {
-		SPI::writeBytesValueRaw(0, 3);
+		// SPI::writeBytesValueRaw(0, 3);
 	}
 };
 
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = 0>
 class SM16716Controller : public CLEDController {
-#if defined(__MK20DX128__)   // for Teensy 3.0
-	// Have to force software SPI for the teensy 3.0 right now because it doesn't deal well
-	// with flipping in and out of hardware SPI
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+#if defined(__MK20DX128__)  
+		typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 #else
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	// Have to force software SPI for the AVR right now because it doesn't deal well
+	// with flipping in and out of hardware SPI
+		typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+//		typedef AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 #endif
 	SPI mSPI;
 	OutputPin selectPin;
 
 	void writeHeader() { 
 		// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)
-		mSPI.writeBytesValue(0, 6);
+		mSPI.select();
+		mSPI.writeBytesValueRaw(0, 6);
+		mSPI.waitFully();
 		mSPI.template writeBit<0>(0);
 		mSPI.template writeBit<0>(0);
+		mSPI.release();
 	}
 
 public:
@@ -207,15 +218,16 @@ public:
 			mSPI.writeByte(data[RGB_BYTE1(RGB_ORDER)]);
 			mSPI.writeByte(data[RGB_BYTE2(RGB_ORDER)]);
 		}
-		mSPI.waitFully();
+		writeHeader();
 		mSPI.release();
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, uint8_t scale = 255) {
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
-		writeHeader();
+		// writeHeader();
 		mSPI.template writeBytes3<FLAG_START_BIT, SM16716_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>((byte*)data, nLeds * 3, scale);
+		writeHeader();
 	}
 
 #ifdef SUPPORT_ARGB
