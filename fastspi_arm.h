@@ -4,7 +4,6 @@
 
 #if defined(__MK20DX128__) && defined(CORE_TEENSY)
 
-
 // Template function that, on compilation, expands to a constant representing the highest bit set in a byte.  Right now, 
 // if no bits are set (value is 0), it returns 0, which is also the value returned if the lowest bit is the only bit
 // set (the zero-th bit).  Unclear if I  will want this to change at some point.
@@ -203,6 +202,8 @@ public:
 		while (!(SPI0_SR & SPI_SR_TCF)); 
 		SPI0_SR |= (SPI_SR_TCF | SPI_SR_EOQF); 
 	}
+
+	static bool needwait() __attribute__((always_inline)) { return (SPI0_SR & 0x4000); }
 	static void wait() __attribute__((always_inline)) { while( (SPI0_SR & 0x4000) );  }
 	static void wait1() __attribute__((always_inline)) { while( (SPI0_SR & 0xF000) >= 0x2000);  }
 	
@@ -251,7 +252,7 @@ public:
 		uint32_t ctar1_save = SPI0_CTAR1;
 
 		// Clear out the FMSZ bits, reset them for 9 bits transferd for the start bit
-		uint32_t ctar1 = (ctar1_save & (~SPI_CTAR_FMSZ(15))) | SPI_CTAR_FMSZ(8);
+		uint32_t ctar1 = (ctar1_save & (~SPI_CTAR_FMSZ(15))) | SPI_CTAR_FMSZ(0);
 		update_ctar1(ctar1);
 
 		writeWord( (b & (1 << BIT)) != 0);
@@ -346,6 +347,7 @@ public:
 		}
 		release();
 	}
+
 
 	template <uint8_t SKIP, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
 		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale); 
