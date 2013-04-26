@@ -116,6 +116,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define SCALE8_C 1
 #define ABS8_C 1
 #define MUL8_C 1
+#define QMUL8_C 1
 #define ADD8_C 1
 #define SUB8_C 1
 
@@ -143,15 +144,19 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #if !defined(LIB8_ATTINY)
 #define SCALE8_C 0
 #define MUL8_C 0
+#define QMUL8_C 0
 #define SCALE8_AVRASM 1
 #define MUL8_AVRASM 1
+#define QMUL8_AVRASM 1
 #define CLEANUP_R1_AVRASM 1
 #else
 // On ATtiny, we just use C implementations
 #define SCALE8_C 1
 #define MUL8_C 1
+#define QMUL8_C 1
 #define SCALE8_AVRASM 0
 #define MUL8_AVRASM 0
+#define QMUL8_AVRASM 0
 #endif
 
 #else
@@ -509,6 +514,38 @@ LIB8STATIC uint8_t mul8( uint8_t i, uint8_t j)
     return i;
 #else
 #error "No implementation for mul8 available."
+#endif
+}
+
+
+// mul8: saturating 8x8 bit multiplication, with 8 bit result
+LIB8STATIC uint8_t qmul8( uint8_t i, uint8_t j)
+{
+#if QMUL8_C == 1
+    int p = ((int)i * (int)(j) );
+    if( p > 255) p = 255;
+    return p;
+#elif QMUL8_AVRASM == 1
+    asm volatile(
+                 /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
+                 "  mul %0, %1    \n\t"
+                 /* If high byte of result is zero, all is well. */
+                 "  cpi r1, 0     \n\t"
+                 "  breq L_%=     \n\t"
+                 /* If high byte of result > 0, saturate low byte to 0xFF */
+                 "  ldi r0, 255   \n\t"
+                 "L_%=:           \n\t"
+                 /* Extract the LOW 8-bits (r0) */
+                 "  mov %0, r0    \n\t"
+                 /* Restore r1 to "0"; it's expected to always be that */
+                 "  eor r1, r1    \n\t"
+                 : "+a" (i)
+                 : "a"  (j)
+                 : "r0", "r1");
+    
+    return i;
+#else
+#error "No implementation for qmul8 available."
 #endif
 }
 

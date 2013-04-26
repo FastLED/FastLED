@@ -13,8 +13,10 @@
 #if defined(__AVR__)
 #define hsv2rgb hsv2rgb_avr
 #else
-#define hsvrgb  hsv2rgb_C
+#define hsv2rgb  hsv2rgb_C
 #endif
+
+#define HSV_HUE_MAX 191
 
 void hsv2rgb_C (struct CHSV & hsv, struct CRGB & rgb);
 void hsv2rgb_avr(struct CHSV & hsv, struct CRGB & rgb);
@@ -26,6 +28,8 @@ void hsv2rgb_avr(struct CHSV & hsv, struct CRGB & rgb);
 //
 //               NOTE: here hue is 0-255, not just 0-191!
 //
+
+#define RAINBOW_HUE_MAX 255
 
 void rainbow2rgb( CHSV& hsv, CRGB& rgb);
 
