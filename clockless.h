@@ -84,18 +84,15 @@ public:
 #endif
 
 	virtual void clearLeds(int nLeds) {
-		// can't do anything quickly/easily here - oops
+		showColor(CRGB(0, 0, 0), nLeds, 0);
 	}
 
-	virtual void showRGB(register struct CRGB *rgbdata, register int nLeds) { 
-		showRGB(rgbdata, nLeds, 255);
-	}
-	
-	virtual void showRGB(struct CRGB *rgbdata, int nLeds, int scale) { 
+	// set all the leds on the controller to a given color
+	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) {
 		mWait.wait();
 		cli();
 
-		showRGBInternal(nLeds, scale, rgbdata);
+		showRGBInternal<0, false>(nLeds, scale, (const byte*)&data);
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
@@ -108,20 +105,62 @@ public:
 		mWait.mark();
 	}
 
+	virtual void show(const struct CRGB *rgbdata, int nLeds, uint8_t scale = 255) { 
+		mWait.wait();
+		cli();
+
+		showRGBInternal<0, true>(nLeds, scale, (const byte*)rgbdata);
+
+		// Adjust the timer
+		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
+#if defined(__MK20DX128__)
+		systick_millis_count += (microsTaken / 1000);
+#else
+		timer0_millis += (microsTaken / 1000);
+#endif
+		sei();
+		mWait.mark();
+	}
+
+#ifdef SUPPORT_ARGB
+	virtual void show(const struct CARGB *rgbdata, int nLeds, uint8_t scale = 255) { 
+		mWait.wait();
+		cli();
+
+		showRGBInternal<1, true>(nLeds, scale, (const byte*)rgbdata);
+
+		// Adjust the timer
+		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
+#if defined(__MK20DX128__)
+		systick_millis_count += (microsTaken / 1000);
+#else
+		timer0_millis += (microsTaken / 1000);
+#endif
+		sei();
+		mWait.mark();
+	}
+#endif
+
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	static void showRGBInternal(register int nLeds, register uint8_t scale, register struct CRGB *rgbdata) __attribute__((noinline)) {
+	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register uint8_t scale, register const byte *rgbdata) {
 		register byte *data = (byte*)rgbdata;
 		register data_t mask = FastPin<DATA_PIN>::mask();
 		register data_ptr_t port = FastPin<DATA_PIN>::port();
-		nLeds *= (3);
+		nLeds *= (3 + SKIP);
 		register uint8_t *end = data + nLeds; 
 		register data_t hi = *port | mask;
 		register data_t lo = *port & ~mask;
 		*port = lo;
 
 #if defined(__MK20DX128__)
-		register uint32_t b = scale8(data[RGB_BYTE0(RGB_ORDER)], scale);
+		register uint32_t b;
+		if(ADVANCE) { 
+			b = data[SKIP + RGB_BYTE0(RGB_ORDER)];
+		} else { 
+			b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
+		}
+		b = scale8(b, scale);
 		while(data < end) { 
 			// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
 			// will bite me in the ass at some point, I know it.
@@ -143,7 +182,14 @@ public:
 			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
 			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
 			FastPin<DATA_PIN>::fastset(port, lo);
-			b = scale8(data[RGB_BYTE1(RGB_ORDER)], scale);
+
+			if(ADVANCE) { 
+				b = data[SKIP + RGB_BYTE1(RGB_ORDER)];
+			} else { 
+				b = rgbdata[SKIP + RGB_BYTE1(RGB_ORDER)];
+			}
+			b = scale8(b, scale);
+
 			delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
 
 			for(register uint32_t i = 7; i > 0; i--) { 
@@ -164,8 +210,15 @@ public:
 			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
 			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
 			FastPin<DATA_PIN>::fastset(port, lo);
-			b = scale8(data[RGB_BYTE2(RGB_ORDER)], scale);
-			data += 3;
+
+			if(ADVANCE) { 
+				b = data[SKIP + RGB_BYTE2(RGB_ORDER)];
+			} else { 
+				b = rgbdata[SKIP + RGB_BYTE2(RGB_ORDER)];
+			}
+			b = scale8(b, scale);
+
+			data += 3 + SKIP;
 			if((RGB_ORDER & 0070) == 0) {
 				delaycycles<T3 - 6>(); // 1 store, 2 load, 1 mul, 1 shift,  1 adds if BRG or GRB
 			} else {
@@ -190,7 +243,14 @@ public:
 			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
 			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
 			FastPin<DATA_PIN>::fastset(port, lo);
-			b = scale8(data[RGB_BYTE0(RGB_ORDER)], scale);
+
+			if(ADVANCE) { 
+				b = data[SKIP + RGB_BYTE0(RGB_ORDER)];
+			} else { 
+				b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
+			}
+			b = scale8(b, scale);
+
 			delaycycles<T3 - 8>(); // 1 store, 2 load (with increment), 1 mul, 1 shift, 1 cmp, 1 branch backwards, 1 movim
 		};
 #else
@@ -212,7 +272,15 @@ public:
 			b = next;
 		}
 #else
-		register uint8_t b = data[RGB_BYTE0(RGB_ORDER)];
+		register uint8_t b;
+
+		if(ADVANCE) { 
+			b = data[SKIP + RGB_BYTE0(RGB_ORDER)];
+		} else { 
+			b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
+		}
+		b = scale8_LEAVING_R1_DIRTY(b, scale);
+
 		register uint8_t c;
 		register uint8_t d;
 		while(data < end) { 
@@ -225,7 +293,11 @@ public:
 			bitSetLast<7, 0>(port, hi, lo, b);
 			// Leave an extra 4 clocks for the scale
 			bitSetLast<6, 5>(port, hi, lo, b);
-			c = data[RGB_BYTE1(RGB_ORDER)];
+			if(ADVANCE) { 
+				c = data[SKIP + RGB_BYTE1(RGB_ORDER)];
+			} else { 
+				c = rgbdata[SKIP + RGB_BYTE1(RGB_ORDER)];
+			}
 			c = scale8_LEAVING_R1_DIRTY(c, scale);
 			bitSetLast<5, 1>(port, hi, lo, b);
 			
@@ -238,7 +310,11 @@ public:
 			bitSetLast<7, 0>(port, hi, lo, c);
 			// Leave an extra 4 clocks for the scale
 			bitSetLast<6, 5>(port, hi, lo, c);
-			d = data[RGB_BYTE2(RGB_ORDER)];
+			if(ADVANCE) { 
+				d = data[SKIP + RGB_BYTE2(RGB_ORDER)];
+			} else { 
+				d = rgbdata[SKIP + RGB_BYTE2(RGB_ORDER)];
+			}
 			d = scale8_LEAVING_R1_DIRTY(d, scale);
 			bitSetLast<5, 1>(port, hi, lo, c);
 			
@@ -249,10 +325,14 @@ public:
 			delaycycles<1>();
 			// Leave an extra 2 clocks for the next byte load
 			bitSetLast<7, 2>(port, hi, lo, d);
-			data += 3;
+			data += (SKIP + 3);
 			// Leave an extra 4 clocks for the scale
 			bitSetLast<6, 5>(port, hi, lo, d);
-			b = data[RGB_BYTE0(RGB_ORDER)];
+			if(ADVANCE) { 
+				b = data[SKIP + RGB_BYTE0(RGB_ORDER)];
+			} else { 
+				b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
+			}
 			b = scale8_LEAVING_R1_DIRTY(b, scale);
 			bitSetLast<5, 6>(port, hi, lo, d);
 		}

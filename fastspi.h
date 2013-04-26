@@ -1,6 +1,7 @@
 #ifndef __INC_FASTSPI_H
 #define __INC_FASTSPI_H
 
+#include "controller.h"
 #include "lib8tion.h"
 #include "delay.h"
 

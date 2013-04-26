@@ -2,8 +2,7 @@
 // #define FORCE_SOFTWARE_SPI 1
 #include "FastSPI_LED2.h"
 
-// 
-#define DEBUG
+// #define DEBUG
 #ifdef DEBUG
 #define DPRINT Serial.print
 #define DPRINTLN Serial.println
@@ -23,6 +22,7 @@
 // struct CRGB { byte g; byte r; byte b; };
 
 struct CRGB leds[NUM_LEDS];
+struct CHSV hsv[NUM_LEDS];
 
 // gdn clk data pwr
 // Note: timing values in the code below are stale/out of date
@@ -30,10 +30,10 @@ struct CRGB leds[NUM_LEDS];
 // Hardware SPI - .652ms for an 86 led frame @8Mhz (3.1Mbps?), .913ms @4Mhz 1.434ms @2Mhz
 // Hardware SPIr2 - .539ms @8Mhz, .799 @4Mhz, 1.315ms @2Mhz
 // With the wait ordering reversed,  .520ms at 8Mhz, .779ms @4Mhz, 1.3ms @2Mhz
-LPD8806Controller<11, 13, NO_PIN, RBG, MAX_DATA_RATE> LED;
-LPD8806Controller<11, 13, NO_PIN, RBG, DATA_RATE_MHZ(1)> LEDSlow;
+// LPD8806Controller<11, 13, NO_PIN, RBG, DATA_RATE_MHZ(24)> LED;
+// LPD8806Controller<11, 13, NO_PIN, RBG, DATA_RATE_MHZ(1)> LEDSlow;
 
-// SM16716Controller<11, 13, 10> LED;
+// SM16716Controller<11, 13, 10, RGB, 4> LED;
 
 //LPD8806Controller<11, 13, 14> LED;
 // LPD8806Controller<2, 1, 0> LED; // teensy pins
@@ -65,7 +65,7 @@ LPD8806Controller<11, 13, NO_PIN, RBG, DATA_RATE_MHZ(1)> LEDSlow;
 // TM1809Controller800Khz<4, RGB> LED;
 // UCS1903Controller400Khz<7> LED;
 // WS2811Controller800Khz<12, BRG> LED;
-// WS2811Controller800Khz<23> LED;
+WS2811Controller800Khz<23, GRB> LED;
 // TM1803Controller400Khz<5> LED;
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -75,18 +75,18 @@ LPD8806Controller<11, 13, NO_PIN, RBG, DATA_RATE_MHZ(1)> LEDSlow;
 // int ledset = 0;
 // void show() { 
 // 	switch(ledset) {
-// 		case 0: LED.showRGB((byte*)leds, NUM_LEDS); break;
-// 	 // 	case 1: LED2.showRGB((byte*)leds, NUM_LEDS); break;
-// 		// case 2: LED3.showRGB((byte*)leds, NUM_LEDS); break;
-// 		// case 3: LED4.showRGB((byte*)leds, NUM_LEDS); break;
-// 		// case 4: LED5.showRGB((byte*)leds, NUM_LEDS); break;
+// 		case 0: LED.show((byte*)leds, NUM_LEDS); break;
+// 	 // 	case 1: LED2.show((byte*)leds, NUM_LEDS); break;
+// 		// case 2: LED3.show((byte*)leds, NUM_LEDS); break;
+// 		// case 3: LED4.show((byte*)leds, NUM_LEDS); break;
+// 		// case 4: LED5.show((byte*)leds, NUM_LEDS); break;
 // 	}	
 
-// 	// LED.showRGB((byte*)leds, NUM_LEDS);
-// 	// LED2.showRGB((byte*)leds, NUM_LEDS);
-// 	// LED3.showRGB((byte*)leds, NUM_LEDS);
-// 	// LED4.showRGB((byte*)leds, NUM_LEDS);
-// 	// LED5.showRGB((byte*)leds, NUM_LEDS);
+// 	// LED.show((byte*)leds, NUM_LEDS);
+// 	// LED2.show((byte*)leds, NUM_LEDS);
+// 	// LED3.show((byte*)leds, NUM_LEDS);
+// 	// LED4.show((byte*)leds, NUM_LEDS);
+// 	// LED5.show((byte*)leds, NUM_LEDS);
 // 	memset(leds, 0,  NUM_LEDS * sizeof(struct CRGB));
 // }
 
@@ -103,14 +103,18 @@ void setup() {
 
     Serial.begin(38400);
     Serial.println("resetting!");
+#else
+   	delay(2000);
 #endif
 
-    LEDSlow.init();
-    LEDSlow.clearLeds(300);
+    // LEDSlow.init();
+    // LEDSlow.clearLeds(300);
 
     LED.init();
 
 #ifdef DEBUG
+    memset(hsv, 0, NUM_LEDS * sizeof(struct CHSV));
+
     unsigned long emptyStart = millis();
     for(volatile int i = 0 ; i < 10000; i++) {
       volRun(leds, NUM_LEDS);
@@ -118,8 +122,8 @@ void setup() {
     unsigned long emptyEnd = millis();
 	unsigned long start = millis();
 	for(volatile int i = 0; i < 10000; i++){ 
-		LED.showRGB(leds, NUM_LEDS);
-		// LED2.showRGB((byte*)leds, NUM_LEDS);
+		LED.show(leds, NUM_LEDS);
+		// LED2.show((byte*)leds, NUM_LEDS);
 	}
 	unsigned long end = millis();
 	DPRINT("Time for 10000 empty loops: "); DPRINTLN( emptyEnd - emptyStart);
@@ -132,48 +136,52 @@ int count = 0;
 long start = millis();
 
 void loop() { 
-#if 0
-	memset(leds, 0, NUM_LEDS * sizeof(struct CRGB));
-	LED.showRGB(leds, NUM_LEDS);
-	delay(20);
-#else
 	for(int i = 0; i < 3; i++) {
 		for(int iLed = 0; iLed < NUM_LEDS; iLed++) {
 			memset(leds, 0,  NUM_LEDS * sizeof(struct CRGB));
-			switch(i) { 
-			 	case 0: leds[iLed].r = 128; break;
-			 	case 1: leds[iLed].g = 128; break;
-			 	case 2: leds[iLed].b = 128; break;
-			 }
 
-			LED.showRGB(leds, NUM_LEDS);;
-			//DPRINTLN("waiting");
+			switch(i) { 
+				// You can access the rgb values by field r, g, b
+			 	case 0: leds[iLed].r = 128; break;
+
+			 	// or by indexing into the led (r==0, g==1, b==2) 
+			 	case 1: leds[iLed][i] = 128; break;
+
+			 	// or by setting the rgb values for the pixel all at once
+			 	case 2: leds[iLed] = CRGB(0, 0, 128); break;
+			}
+
+			// and now, show your led array! 
+			LED.show(leds, NUM_LEDS);;
 			delay(20);
 		}
 
-		memset(leds, 0,  NUM_LEDS * sizeof(struct CRGB));
-		for(int iLed = NUM_LEDS - 6; iLed < NUM_LEDS; iLed++) {
-			switch(i) { 
-			 	case 0: leds[iLed].r = 255; break;
-			 	case 1: leds[iLed].g = 255; break;
-			 	case 2: leds[iLed].b = 255; break;
-			 }
+		LED.show(leds, NUM_LEDS);
+		delay(2000);
+
+		// fade up
+		for(int i = 0; i < 128; i++) { 
+			// The showColor method sets all the leds in the strip to the same color
+			LED.showColor(CRGB(i, 0, 0), NUM_LEDS);
+			delay(10);
 		}
 
-		LED.showRGB(leds, NUM_LEDS);
-		delay(2000);
+		// fade down
+		for(int i = 128; i >= 0; i--) { 
+			LED.showColor(CRGB(i, 0, 0), NUM_LEDS);
+			delay(10);
+		}
+
+		// let's fade up by scaling the brightness
+		for(int scale = 0; scale < 128; scale++) { 
+			LED.showColor(CRGB(0, 128, 0), NUM_LEDS, scale);
+			delay(10);
+		}
+
+		// let's fade down by scaling the brightness
+		for(int scale = 128; scale > 0; scale--) { 
+			LED.showColor(CRGB(0, 128, 0), NUM_LEDS, scale);
+			delay(10);
+		}
 	}
-	//  for(int i = 0; i < 64; i++) { 
-	//  	memset(leds, i, NUM_LEDS * 3);
-	// 	LED.showRGB((byte*)leds, NUM_LEDS);;
-	// 	//	DPRINTLN("waiting");
-	//  	delay(40);
-	// }
-	// for(int i = 64; i >= 0; i--) { 
-	//  	memset(leds, i, NUM_LEDS * 3);
-	// 	LED.showRGB((byte*)leds, NUM_LEDS);;
-	// 	//	DPRINTLN("waiting");
-	//  	delay(40);
-	// }
-#endif
 }
