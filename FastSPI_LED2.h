@@ -70,6 +70,10 @@ public:
 		mSPI.template writeBytes3<LPD8806_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 	}
 
+	virtual void writeHSVBytes(struct CHSV *data, int nLeds, uint8_t scale = 255) { 
+		mSPI.template writeHSVBytes<0, LPD8806_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>(data, nLeds, scale);
+	}
+
 #ifdef SUPPORT_ARGB
 	virtual void showARGB(struct CARGB *data, int nLeds) {
 		checkClear(nLeds);
@@ -136,6 +140,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = 0>
 class SM16716Controller : public CLEDController {
 #if defined(__MK20DX128__)   // for Teensy 3.0
@@ -164,8 +169,8 @@ public:
 	}
 
 	virtual void clearLeds(int nLeds) { 
-		writeHeader();
 		mSPI.select();
+		writeHeader();
 		while(nLeds--) { 
 			mSPI.template writeBit<0>(1);
 			mSPI.writeByte(0);
@@ -177,12 +182,14 @@ public:
 	}
 
 	virtual void showRGB(register struct CRGB *rgbdata, register int nLeds) { 
+		writeHeader();
 		showRGB(rgbdata, nLeds, 255);
 	}
 
 	virtual void showRGB(struct CRGB *data, int nLeds, uint8_t scale) {
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
+		writeHeader();
 		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 	}
 
