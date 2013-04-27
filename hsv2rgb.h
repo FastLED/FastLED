@@ -18,8 +18,8 @@
 
 #define HSV_HUE_MAX 191
 
-void hsv2rgb_C (struct CHSV & hsv, struct CRGB & rgb);
-void hsv2rgb_avr(struct CHSV & hsv, struct CRGB & rgb);
+void hsv2rgb_C (const struct CHSV & hsv, struct CRGB & rgb);
+void hsv2rgb_avr(const struct CHSV & hsv, struct CRGB & rgb);
 
 
 // rainbow2rgb - convert a hue, saturation, and value to RGB
@@ -31,7 +31,7 @@ void hsv2rgb_avr(struct CHSV & hsv, struct CRGB & rgb);
 
 #define RAINBOW_HUE_MAX 255
 
-void rainbow2rgb( CHSV& hsv, CRGB& rgb);
+void rainbow2rgb( const CHSV& hsv, CRGB& rgb);
 
 
 #endif

@@ -8,7 +8,7 @@
 #define HSV_SECTION_6 (0x20)
 #define HSV_SECTION_3 (0x40)
 
-void hsv2rgb_C (struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_C (const struct CHSV & hsv, struct CRGB & rgb)
 {
     // Convert hue, saturation and brightness ( HSV/HSB ) to RGB
     // "Dimming" is used on saturation and brightness to make
@@ -97,7 +97,7 @@ void hsv2rgb_C (struct CHSV & hsv, struct CRGB & rgb)
 
 
 #if defined(__AVR__)
-void hsv2rgb_avr(struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_avr(const struct CHSV & hsv, struct CRGB & rgb)
 {
     uint8_t hue, saturation, value;
     
@@ -194,9 +194,22 @@ void hsv2rgb_avr(struct CHSV & hsv, struct CRGB & rgb)
 
 
 
+// Yellow has a higher inherent brightness than
+// any other color; 'pure' yellow is perceived to
+// be 93% as bright as white.  In order to make
+// yellow appear the correct relative brightness,
+// it has to be rendered brighter than all other
+// colors.
+// Level 1 is a moderate boost, the default.
+// Level 2 is a strong boost.
+#define YELLOWLEVEL 1
+
+// Whether to divide all greens by two.
+// Depends GREATLY on your particular LEDs
+// Assume no.
 #define GREEN2 0
 
-void rainbow2rgb( CHSV& hsv, CRGB& rgb)
+void rainbow2rgb( const CHSV& hsv, CRGB& rgb)
 {
     uint8_t hue = hsv.hue;
     uint8_t sat = hsv.sat;
@@ -225,6 +238,40 @@ void rainbow2rgb( CHSV& hsv, CRGB& rgb)
 #endif
                 b = 0;
                 //break;
+
+                
+                
+#if YELLOWLEVEL == 1
+            } else {
+                // ADJ Yellow high
+                //case 1: // O -> Y
+                r = 171;//Y2 + third;
+#if GREEN2 == 0
+                g = (85 + (third )); // Y2 (85 + (third * 2));
+#else
+                g = (85 / 2)  + third;
+#endif
+                b = 0;
+                //break;
+            }
+        } else {
+            // section 2-3
+            if( section == 2) {
+                // ADJ Yellow high
+                //case 2: // Y -> G
+                r = 171 - (third * 2);
+#if GREEN2 == 0
+                g = 171 + third;//Y2 255;
+#else
+                g = 255 / 2;
+#endif
+                b = 0;
+                //break;
+#endif
+                
+                
+                
+#if YELLOWLEVEL == 2
             } else {
                 // ADJ Yellow high
                 //case 1: // O -> Y
@@ -250,6 +297,10 @@ void rainbow2rgb( CHSV& hsv, CRGB& rgb)
 #endif
                 b = 0;
                 //break;
+#endif
+                
+                
+                
             } else {
                 // case 3: // G -> A
                 r = 0;
