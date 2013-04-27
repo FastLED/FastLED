@@ -81,7 +81,15 @@
       cos16( x)  == cos( (x/32768.0) * pi) * 32767
    Accurate to more than 99% in all cases.
  
- 
+ - Dimming and brightening functions for 8-bit
+   light values.
+      dim8_video( x)  == scale8_video( x, x)
+      dim8_raw( x)    == scale8( x, x)
+      brighten8_video( x) == 255 - dim8_video( 255 - x)
+      brighten8_raw( x) == 255 - dim8_raw( 255 - x)
+   The dimming functions in particular are suitable
+   for making LED light output appear more 'linear'.
+
 Lib8tion is pronounced like 'libation': lie-BAY-shun
 
 */
@@ -573,6 +581,41 @@ LIB8STATIC int8_t abs8( int8_t i)
 #endif
 }
 
+///////////////////////////////////////////////////////////////////////
+
+// Dimming and brightening functions
+//
+// The eye does not respond in a linear way to light.
+// High speed PWM'd LEDs at 50% duty cycle appear far
+// brighter then the 'half as bright' you might expect.
+//
+// If you want your midpoint brightness leve (128) to
+// appear half as bright as 'full' brightness (255), you
+// have to apply a 'dimming function'.
+//
+// 
+
+LIB8STATIC uint8_t dim8_raw( uint8_t x)
+{
+    return scale8( x, x);
+}
+
+LIB8STATIC uint8_t dim8_video( uint8_t x)
+{
+    return scale8_video( x, x);
+}
+
+LIB8STATIC uint8_t brighten8_raw( uint8_t x)
+{
+    uint8_t ix = 255 - x;
+    return 255 - scale8( ix, ix);
+}
+
+LIB8STATIC uint8_t brighten8_video( uint8_t x)
+{
+    uint8_t ix = 255 - x;
+    return 255 - scale8_video( ix, ix);
+}
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -654,21 +697,79 @@ LIB8STATIC void random16_add_entropy( uint16_t entropy)
 //        On Arduino/AVR, this approximation is more than
 //        10X faster than floating point sin(x) and cos(x)
 
-LIB8STATIC int16_t sin16( uint16_t theta )
+#if defined(__AVR__)
+#define sin16 sin16_avr
+#else
+#define sin16 sin16_C
+#endif
+
+LIB8STATIC int16_t sin16_avr( uint16_t theta )
+{
+    static const uint8_t data[] =
+    { 0,         0,         49, 0, 6393%256,   6393/256, 48, 0,
+      12539%256, 12539/256, 44, 0, 18204%256, 18204/256, 38, 0,
+      23170%256, 23170/256, 31, 0, 27245%256, 27245/256, 23, 0,
+      30273%256, 30273/256, 14, 0, 32137%256, 32137/256,  4 /*,0*/ };
+    
+    uint16_t offset = (theta & 0x3FFF);
+    
+    // AVR doesn't have a multi-bit shift instruction,
+    // so if we say "offset >>= 3", gcc makes a tiny loop.
+    // Inserting empty volatile statements between each
+    // bit shift forces gcc to unroll the loop.
+    offset >>= 1; // 0..8191
+    asm volatile("");
+    offset >>= 1; // 0..4095
+    asm volatile("");
+    offset >>= 1; // 0..2047
+
+    if( theta & 0x4000 ) offset = 2047 - offset;
+    
+    uint8_t sectionX4;
+    sectionX4 = offset / 256;
+    sectionX4 *= 4;
+    
+    uint8_t m;
+    
+    union {
+        uint16_t b;
+        struct {
+            uint8_t blo;
+            uint8_t bhi;
+        };
+    } u;
+    
+    //in effect u.b = blo + (256 * bhi);
+    u.blo = data[ sectionX4 ];
+    u.bhi = data[ sectionX4 + 1];
+    m     = data[ sectionX4 + 2];
+    
+    uint8_t secoffset8 = (uint8_t)(offset) / 2;
+    
+    uint16_t mx = m * secoffset8;
+    
+    int16_t  y  = mx + u.b;
+    if( theta & 0x8000 ) y = -y;
+    
+    return y;
+}
+
+LIB8STATIC int16_t sin16_C( uint16_t theta )
 {
     static const uint16_t base[] =
-        { 0, 6393, 12539, 18204, 23170, 27245, 30273, 32137 };
+    { 0, 6393, 12539, 18204, 23170, 27245, 30273, 32137 };
     static const uint8_t slope[] =
-        { 49, 48, 44, 38, 31, 23, 14, 4 };
+    { 49, 48, 44, 38, 31, 23, 14, 4 };
     
-    uint16_t offset = (theta & 0x3FFF) >> 4;
-    if( theta & 0x4000 ) offset = 1023 - offset;
+    uint16_t offset = (theta & 0x3FFF) >> 3; // 0..2047
+    if( theta & 0x4000 ) offset = 2047 - offset;
     
-    uint8_t section = offset / 128;
+    uint8_t section = offset / 256; // 0..7
     uint16_t b   = base[section];
     uint8_t  m   = slope[section];
     
-    uint8_t secoffset8 = offset & 0x7F;
+    uint8_t secoffset8 = (uint8_t)(offset) / 2;
+    
     uint16_t mx = m * secoffset8;
     int16_t  y  = mx + b;
     
