@@ -191,6 +191,8 @@ void hsv2rgb_avr(const struct CHSV & hsv, struct CRGB & rgb)
 }
 // End of AVR asm implementation
 
+#endif
+
 
 
 
@@ -401,6 +403,4 @@ void rainbow2rgb( const CHSV& hsv, CRGB& rgb)
 //   http://www.codeproject.com/Articles/9207/An-HSB-RGBA-colour-picker
 
 
-
-#endif
 
