@@ -81,6 +81,7 @@
       cos16( x)  == cos( (x/32768.0) * pi) * 32767
    Accurate to more than 99% in all cases.
  
+ 
  - Dimming and brightening functions for 8-bit
    light values.
       dim8_video( x)  == scale8_video( x, x)
@@ -89,6 +90,14 @@
       brighten8_raw( x) == 255 - dim8_raw( 255 - x)
    The dimming functions in particular are suitable
    for making LED light output appear more 'linear'.
+
+ 
+ - Optimized memmove, memcpy, and memset, that are
+   faster than standard avr-libc 1.8.
+      memmove8( dest, src,  bytecount)
+      memcpy8(  dest, src,  bytecount)
+      memset8(  buf, value, bytecount)
+ 
 
 Lib8tion is pronounced like 'libation': lie-BAY-shun
 
@@ -681,6 +690,8 @@ LIB8STATIC void random16_add_entropy( uint16_t entropy)
 }
 
 
+///////////////////////////////////////////////////////////////////////
+
 // sin16 & cos16:
 //        Fast 16-bit approximations of sin(x) & cos(x).
 //        Input angle is an unsigned int from 0-65535.
@@ -782,5 +793,24 @@ LIB8STATIC int16_t cos16( uint16_t theta)
 {
     return sin16( theta + 16384);
 }
+
+///////////////////////////////////////////////////////////////////////
+//
+// memmove8, memcpy8, and memset8:
+//   alternatives to memmove, memcpy, and memset that are
+//   faster on AVR than standard avr-libc 1.8
+
+#if defined(__AVR__)
+extern "C" {
+void * memmove8( void * dst, const void * src, uint16_t num );
+void * memcpy8 ( void * dst, const void * src, uint16_t num )  __attribute__ ((noinline));
+void * memset8 ( void * ptr, int value, uint16_t num ) __attribute__ ((noinline)) ;
+}
+#else
+// on non-AVR platforms, these names just call standard libc.
+#define memmove8 memmove
+#define memcpy8 memcpy
+#define memset8 memset
+#endif
 
 #endif
