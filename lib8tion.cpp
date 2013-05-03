@@ -22,6 +22,7 @@ uint16_t rand16seed = RAND16_SEED;
 //  than standard avr-libc, at a cost of a few extra
 //  bytes of code.
 
+#if defined(__AVR__)
 extern "C" {
 //__attribute__ ((noinline))
 void * memset8 ( void * ptr, int val, uint16_t num )
@@ -117,7 +118,7 @@ void * memmove8 ( void * dst, void* src, uint16_t num )
 
 } /* end extern "C" */
 
-
+#endif /* AVR */
 
 #if 0
 // TEST / VERIFICATION CODE ONLY BELOW THIS POINT
