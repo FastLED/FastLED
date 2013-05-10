@@ -28,9 +28,10 @@
      qadd7( i, j) == MIN( (i + j), 0x7F)
  
  
- - Scaling (down) of unsigned 8-bit values.  
+ - Scaling (down) of unsigned 8- and 16- bit values.
    Scaledown value is specified in 1/256ths.
      scale8( i, sc) == (i * sc) / 256
+     scale16by8( i, sc) == (i * sc) / 256
  
    Example: scaling a 0-255 value down into a
    range from 0-99:
@@ -91,6 +92,20 @@
    The dimming functions in particular are suitable
    for making LED light output appear more 'linear'.
 
+
+ - Fast 8-bit "easing in/out" function.
+     ease8(x) == eases in from 0..32, 
+                 out from 224..255
+
+ - Linear interpolation between two values, with the
+   fraction between them expressed as an 8- or 16-bit
+   fixed point fraction (Q8 or Q16).
+     lerp8by8(   fromU8, toU8, fracQ8 )
+     lerp16by8(  fromU16, toU16, fracQ8 )
+     lerp15by8(  fromS16, toS16, fracQ8 )
+       == from + (( to - from ) * fracQ8) / 256)
+     lerp16by16( fromU16, toU16, fracQ16 )
+       == from + (( to - from ) * fracQ16) / 65536)
  
  - Optimized memmove, memcpy, and memset, that are
    faster than standard avr-libc 1.8.
@@ -131,11 +146,13 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 
 #define QSUB8_C 1
 #define SCALE8_C 1
+#define SCALE16BY8_C 1
 #define ABS8_C 1
 #define MUL8_C 1
 #define QMUL8_C 1
 #define ADD8_C 1
 #define SUB8_C 1
+#define EASE8_C 1
 
 
 #elif defined(__AVR__)
@@ -160,20 +177,28 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 //       -- sorry, ATtiny!
 #if !defined(LIB8_ATTINY)
 #define SCALE8_C 0
+#define SCALE16BY8_C 0
 #define MUL8_C 0
 #define QMUL8_C 0
+#define EASE8_C 0
 #define SCALE8_AVRASM 1
+#define SCALE16BY8_AVRASM 1
 #define MUL8_AVRASM 1
 #define QMUL8_AVRASM 1
+#define EASE8_AVRASM 1
 #define CLEANUP_R1_AVRASM 1
 #else
 // On ATtiny, we just use C implementations
 #define SCALE8_C 1
+#define SCALE16BY8_C 1
 #define MUL8_C 1
 #define QMUL8_C 1
+#define EASE8_C 1
 #define SCALE8_AVRASM 0
+#define SCALE16BY8_AVRASM 0
 #define MUL8_AVRASM 0
 #define QMUL8_AVRASM 0
+#define EASE8_AVRASM 0
 #endif
 
 #else
@@ -184,12 +209,36 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define QADD7_C 1
 #define QSUB8_C 1
 #define SCALE8_C 1
+#define SCALE16BY8_C 1
 #define ABS8_C 1
 #define MUL8_C 1
 #define ADD8_C 1
 #define SUB8_C 1
+#define EASE8_C 1
 
 #endif
+
+
+///////////////////////////////////////////////////////////////////////
+//
+// typdefs for fast fixed-point fractional types.
+//
+// Q7 should be interpreted as signed 128ths.
+// Q8 should be interpreted as unsigned 256ths.
+// Q15 should be interpreted as signed 32768ths.
+// Q16 should be interpreted as unsigned 65536ths.
+//
+// Example: if a Q8 has the is "128", that should be interpreted
+//          as 128 256ths, or one-half.
+//
+
+typedef int8_t    Q7;
+typedef uint8_t   Q8;
+typedef int16_t  Q15;
+typedef uint16_t Q16;
+
+
+///////////////////////////////////////////////////////////////////////
 
 // qadd8: add one byte to another, saturating at 0xFF
 LIB8STATIC uint8_t qadd8( uint8_t i, uint8_t j)
@@ -510,6 +559,45 @@ LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, uint8_t sca
 #endif
 }
 
+// scale16by8: scale a 16-bit unsigned value by an 8-bit value,
+//         considered as numerator of a fraction whose denominator
+//         is 256. In other words, it computes i * (scale / 256)
+
+#if SCALE16BY8_C == 1
+LIB8STATIC uint16_t scale16by8( uint16_t i, uint8_t scale )
+{
+    uint16_t result;
+    result = (i * scale) / 256;
+    return result;
+}
+#elif SCALE16BY8_AVRASM == 1
+LIB8STATIC uint16_t scale16by8( uint16_t i, uint8_t scale )
+{
+    uint16_t result;
+    asm volatile(
+         // result.A = HighByte(i.A x j )
+         "  mul %A[i], %[scale]                 \n\t"
+         "  mov %A[result], r1                  \n\t"
+         "  eor %B[result], %B[result]          \n\t"
+         
+         // result.A-B += i.B x j
+         "  mul %B[i], %[scale]                 \n\t"
+         "  add %A[result], r0                  \n\t"
+         "  adc %B[result], r1                  \n\t"
+         
+         // cleanup r1
+         "  eor r1, r1                          \n\t"
+         
+         : [result] "+r" (result)
+         : [i] "r" (i), [scale] "r" (scale)
+         : "r0", "r1"
+         );
+    return result;
+}
+#else
+#error "No implementation for scale16by8 available."
+#endif
+
 
 // mul8: 8x8 bit multiplication, with 8 bit result
 LIB8STATIC uint8_t mul8( uint8_t i, uint8_t j)
@@ -794,6 +882,7 @@ LIB8STATIC int16_t cos16( uint16_t theta)
     return sin16( theta + 16384);
 }
 
+
 ///////////////////////////////////////////////////////////////////////
 //
 // memmove8, memcpy8, and memset8:
@@ -804,7 +893,7 @@ LIB8STATIC int16_t cos16( uint16_t theta)
 extern "C" {
 void * memmove8( void * dst, const void * src, uint16_t num );
 void * memcpy8 ( void * dst, const void * src, uint16_t num )  __attribute__ ((noinline));
-void * memset8 ( void * ptr, int value, uint16_t num ) __attribute__ ((noinline)) ;
+void * memset8 ( void * ptr, uint8_t value, uint16_t num ) __attribute__ ((noinline)) ;
 }
 #else
 // on non-AVR platforms, these names just call standard libc.
@@ -812,5 +901,143 @@ void * memset8 ( void * ptr, int value, uint16_t num ) __attribute__ ((noinline)
 #define memcpy8 memcpy
 #define memset8 memset
 #endif
+
+
+///////////////////////////////////////////////////////////////////////
+//
+// linear interpolation, such as could be used for Perlin noise, etc.
+//
+
+// linear interpolation between two unsigned 8-bit values,
+// with 8-bit fraction
+LIB8STATIC uint8_t lerp8by8( uint8_t a, uint8_t b, Q8 frac)
+{
+    uint8_t delta = b - a;
+    uint8_t scaled = scale8( delta, frac);
+    uint8_t result = a + scaled;
+    return result;
+}
+
+// linear interpolation between two unsigned 16-bit values,
+// with 16-bit fraction
+LIB8STATIC uint16_t lerp16by16( uint16_t a, uint16_t b, Q16 frac)
+{
+    uint16_t delta = b - a;
+    uint32_t prod = (uint32_t)delta * (uint32_t)frac;
+    uint16_t scaled = prod >> 16;
+    uint16_t result = a + scaled;
+    return result;
+}
+
+
+// A note on the structure of lerp16by8 (and lerp15by8) :
+// The cases for b>a and b<=a are handled separately for
+// speed: without knowing the relative order of a and b,
+// the value (a-b) might be a signed 17-bit value, which
+// would have to be stored in a 32-bit signed int and
+// processed as such.  To avoid that, we separate the
+// two cases, and are able to do all the math with 16-bit
+// unsigned values, which is much faster and smaller on AVR.
+
+// linear interpolation between two unsigned 16-bit values,
+// with 8-bit fraction
+LIB8STATIC uint16_t lerp16by8( uint16_t a, uint16_t b, Q8 frac)
+{
+    uint16_t result;
+    if( b > a) {
+        uint16_t delta = b - a;
+        uint16_t scaled = scale16by8( delta, frac);
+        result = a + scaled;
+    } else {
+        uint16_t delta = a - b;
+        uint16_t scaled = scale16by8( delta, frac);
+        result = a - scaled;
+    }
+    return result;
+}
+
+// linear interpolation between two signed 15-bit values,
+// with 8-bit fraction
+LIB8STATIC int16_t lerp15by8( int16_t a, int16_t b, Q8 frac)
+{
+    int16_t result;
+    if( b > a) {
+        uint16_t delta = b - a;
+        uint16_t scaled = scale16by8( delta, frac);
+        result = a + scaled;
+    } else {
+        uint16_t delta = a - b;
+        uint16_t scaled = scale16by8( delta, frac);
+        result = a - scaled;
+    }
+    return result;
+}
+
+
+///////////////////////////////////////////////////////////////////////
+//
+// easing function; see http://easings.net
+//
+// ease8: a fast 8-bit ease-in / ease-out function
+//        this one is shaped (very) roughly like 'easeInOutCubic'
+
+#if EASE8_C == 1
+LIB8STATIC uint8_t ease8( uint8_t i)
+{
+    if( i < 32) {
+        // start with slope 0.5
+        i /= 2;
+    } else if( i > (255 - 32)) {
+        // end with slope 0.5
+        i = 255 - i;
+        i /= 2;
+        i = 255 - i;
+    } else {
+        // in the middle, use slope 224/192 = 1.16667 = 299/256
+        // (later, in asm, it becomes important that 299 = 256 + 43)
+        i -= 32;
+        uint16_t jj = i * 299;
+        uint8_t j = jj >> 8;
+        i = j + 16;
+    }
+    
+    return i;
+}
+#elif EASE8_AVRASM == 1
+LIB8STATIC uint8_t ease8( uint8_t i)
+{
+    uint8_t t43;
+    asm volatile (
+        "  subi %[i], 32       \n\t"
+        "  cpi  %[i], 192      \n\t"
+        "  brcc Lshift_%=      \n\t"
+
+        // middle case
+        "  ldi %[t43], 43      \n\t"
+        "  mul %[t43],%[i]     \n\t"
+        "  add %[i], r1        \n\t"
+        "  eor r1, r1          \n\t"
+        "  subi %[i], 240      \n\t"
+        "  rjmp Ldone_%=       \n\t"
+
+        // start or end case
+        "Lshift_%=:            \n\t"
+        "  lsr %[i]            \n\t"
+        "  subi %[i], 112      \n\t"
+
+        "Ldone_%=:            \n\t"
+                  
+        : [i] "+a" (i),
+          [t43] "=r" (t43)
+        : 
+        : "r0", "r1"
+        );
+    return i;
+}
+#else
+#error "No implementation for ease8 available."
+#endif
+
+
 
 #endif
