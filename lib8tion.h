@@ -94,8 +94,10 @@
 
 
  - Fast 8-bit "easing in/out" function.
-     ease8(x) == eases in from 0..32, 
-                 out from 224..255
+     ease8InOutCubic(x) == 3(x^i) - 2(x^3)
+     ease8InOutApprox(x) == 
+       faster, rougher, approximation of cubic easing
+     
 
  - Linear interpolation between two values, with the
    fraction between them expressed as an 8- or 16-bit
@@ -976,59 +978,84 @@ LIB8STATIC int16_t lerp15by8( int16_t a, int16_t b, Q8 frac)
 
 ///////////////////////////////////////////////////////////////////////
 //
-// easing function; see http://easings.net
+// easing functions; see http://easings.net
 //
-// ease8: a fast 8-bit ease-in / ease-out function
-//        this one is shaped (very) roughly like 'easeInOutCubic'
+
+// ease8InOuCubic: 8-bit cubic ease-in / ease-out function
+//                 Takes around 18 cycles on AVR
+LIB8STATIC uint8_t ease8InOutCubic( uint8_t i)
+{
+    uint8_t ii  = scale8_LEAVING_R1_DIRTY(  i, i);
+    uint8_t iii = scale8_LEAVING_R1_DIRTY( ii, i);
+    
+    uint16_t r1 = (3 * (uint16_t)(ii)) - ( 2 * (uint16_t)(iii));
+
+    /* the code generated for the above *'s automatically
+       cleans up R1, so there's no need to explicitily call
+       cleanup_R1(); */
+    
+    uint8_t result = r1;
+    
+    // if we got "256", return 255:
+    if( r1 & 0x100 ) {
+        result = 255;
+    }
+    return result;
+}
+
+// ease8InOutApprox: fast, rough 8-bit ease-in/ease-out function
+//                   shaped approximately like 'ease8InOutCubic',
+//                   it's never off by more than a couple of percent
+//                   from the actual cubic S-curve, and it executes
+//                   more than twice as fast.  Use when the cycles
+//                   are more important than visual smoothness.
+//                   Asm version takes around 7 cycles on AVR.
 
 #if EASE8_C == 1
-LIB8STATIC uint8_t ease8( uint8_t i)
+LIB8STATIC uint8_t ease8InOutApprox( uint8_t i)
 {
-    if( i < 32) {
+    if( i < 64) {
         // start with slope 0.5
         i /= 2;
-    } else if( i > (255 - 32)) {
+    } else if( i > (255 - 64)) {
         // end with slope 0.5
         i = 255 - i;
         i /= 2;
         i = 255 - i;
     } else {
-        // in the middle, use slope 224/192 = 1.16667 = 299/256
-        // (later, in asm, it becomes important that 299 = 256 + 43)
-        i -= 32;
-        uint16_t jj = i * 299;
-        uint8_t j = jj >> 8;
-        i = j + 16;
+        // in the middle, use slope 192/128 = 1.5
+        i -= 64;
+        i += (i / 2);
+        i += 32;
     }
     
     return i;
 }
+
 #elif EASE8_AVRASM == 1
-LIB8STATIC uint8_t ease8( uint8_t i)
+LIB8STATIC uint8_t ease8InOutApprox( uint8_t i)
 {
-    uint8_t t43;
+    // takes around 7 cycles on AVR
     asm volatile (
-        "  subi %[i], 32       \n\t"
-        "  cpi  %[i], 192      \n\t"
-        "  brcc Lshift_%=      \n\t"
+        "  subi %[i], 64         \n\t"
+        "  cpi  %[i], 128        \n\t"
+        "  brcc Lshift_%=        \n\t"
 
         // middle case
-        "  ldi %[t43], 43      \n\t"
-        "  mul %[t43],%[i]     \n\t"
-        "  add %[i], r1        \n\t"
-        "  eor r1, r1          \n\t"
-        "  subi %[i], 240      \n\t"
-        "  rjmp Ldone_%=       \n\t"
+        "  mov __tmp_reg__, %[i] \n\t"
+        "  lsr __tmp_reg__       \n\t"
+        "  add %[i], __tmp_reg__ \n\t"
+        "  subi %[i], 224        \n\t"
+        "  rjmp Ldone_%=         \n\t"
 
         // start or end case
-        "Lshift_%=:            \n\t"
-        "  lsr %[i]            \n\t"
-        "  subi %[i], 112      \n\t"
+        "Lshift_%=:              \n\t"
+        "  lsr %[i]              \n\t"
+        "  subi %[i], 96         \n\t"
 
-        "Ldone_%=:            \n\t"
+        "Ldone_%=:               \n\t"
                   
-        : [i] "+a" (i),
-          [t43] "=r" (t43)
+        : [i] "+a" (i)
         : 
         : "r0", "r1"
         );
