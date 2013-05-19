@@ -365,6 +365,17 @@ void rainbow2rgb( const CHSV& hsv, CRGB& rgb)
     nscale8x3_video( r, g, b, val);
 }
 
+void hsv2rgb(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
+    for(int i = 0; i < numLeds; i++) { 
+        hsv2rgb(phsv[i], prgb[i]);
+    }
+}
+
+void rainbow2rgb(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
+    for(int i = 0; i < numLeds; i++) { 
+        rainbow2rgb(phsv[i], prgb[i]);
+    }
+}
 
 // References:
 //  Spectra and rainbows are not the same thing.  Wikipedia has a good

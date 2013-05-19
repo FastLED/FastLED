@@ -33,5 +33,7 @@ void hsv2rgb_avr(const struct CHSV & hsv, struct CRGB & rgb);
 
 void rainbow2rgb( const CHSV& hsv, CRGB& rgb);
 
+void hsv2rgb(const struct CHSV * phsv, struct CRGB * rgb, int numLeds);
+void rainbow2rgb(const struct CHSV * phsv, struct CRGB * rgb, int numLeds);
 
 #endif
