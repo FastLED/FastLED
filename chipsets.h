@@ -9,21 +9,25 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SPI_SPEED> class LPD8806_ADJUST {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
-public:
-	// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
-	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
-	__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data, register uint8_t scale) { return (scale8(data, scale)>>1) | 0x80; }
-	__attribute__((always_inline)) inline static void postBlock(int len) { 
-		SPI::writeBytesValueRaw(0, 1); // ((len+63)>>6));
-	}
-
-};
-
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = 2 >
+#ifdef SPI_DATA
+template <uint8_t DATA_PIN = SPI_DATA, uint8_t CLOCK_PIN = SPI_CLOCK, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(24) >
+#else
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(24) >
+#endif
 class LPD8806Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+
+	class LPD8806_ADJUST {
+	public:
+		// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
+		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
+		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data, register uint8_t scale) { return (scale8(data, scale)>>1) | 0x80; }
+		__attribute__((always_inline)) inline static void postBlock(int len) { 
+			SPI::writeBytesValueRaw(0, ((len+63)>>6));
+		}
+
+	};
+
 	SPI mSPI;
 	int mClearedLeds;
 
@@ -41,11 +45,6 @@ class LPD8806Controller : public CLEDController {
 public:
 	LPD8806Controller()  {}
 	virtual void init() {
-		if(SELECT_PIN != NO_PIN) {  
-			mSPI.setSelect(new OutputPin(SELECT_PIN));
-		} else {
-			// mSPI.setSelect(NULL);
-		}
 		mSPI.init();
 		mClearedLeds = 0;
 	}
@@ -70,16 +69,17 @@ public:
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, uint8_t scale = 255) {
-		mSPI.template writeBytes3<LPD8806_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>((byte*)data, nLeds * 3, scale);
+		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *data, int nLeds, uint8_t scale) {
 		checkClear(nLeds);
-		mSPI.template writeBytes3<1, LPD8806_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>((byte*)data, nLeds * 4, scale);
+		mSPI.template writeBytes3<1, LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 4, scale);
 	}
 #endif
 };
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -87,7 +87,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = 3>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(1)>
 class WS2801Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -96,14 +96,7 @@ public:
 	WS2801Controller() {}
 
 	virtual void init() { 
-		if(SELECT_PIN != NO_PIN) {  
-			mSPI.setSelect(new OutputPin(SELECT_PIN));
-		} else { 
-			mSPI.setSelect(NULL);
-		}
 		mSPI.init();
-	    // 0 out as much as we can on the line
-	    mSPI.writeBytesValue(0, 1000);
 	    mWaitDelay.mark();
 	}
 
@@ -147,36 +140,11 @@ public:
 // SM16716 definition - takes data/clock/select pin values (N.B. should take an SPI definition?)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SPI_SPEED> class SM16716_ADJUST {
-#if defined(__MK20DX128__) 
-		typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
-#else
-	// Have to force software SPI for the AVR right now because it doesn't deal well
-	// with flipping in and out of hardware SPI
-//		typedef AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
-		typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
-#endif
-public:
-	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data) { return data; } 
-	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data, register uint8_t scale) { return scale8(data, scale); } 
-	static __attribute__((always_inline)) inline void postBlock(int len) {
-		// SPI::writeBytesValueRaw(0, 3);
-	}
-};
 
-
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SELECT_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = 0>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(16)>
 class SM16716Controller : public CLEDController {
-#if defined(__MK20DX128__)  
-		typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
-#else
-	// Have to force software SPI for the AVR right now because it doesn't deal well
-	// with flipping in and out of hardware SPI
-		typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
-//		typedef AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
-#endif
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
-	OutputPin selectPin;
 
 	void writeHeader() { 
 		// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)
@@ -189,10 +157,9 @@ class SM16716Controller : public CLEDController {
 	}
 
 public:
-	SM16716Controller() : selectPin(SELECT_PIN) {}
+	SM16716Controller() {}
 
 	virtual void init() { 
-		mSPI.setSelect(&selectPin);
 		mSPI.init();
 	}
 
@@ -226,7 +193,7 @@ public:
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		// writeHeader();
-		mSPI.template writeBytes3<FLAG_START_BIT, SM16716_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>((byte*)data, nLeds * 3, scale);
+		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 		writeHeader();
 	}
 
@@ -238,7 +205,7 @@ public:
 
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
-		mSPI.template writeBytes3<1 | FLAG_START_BIT, SM16716_ADJUST<DATA_PIN, CLOCK_PIN, SPI_SPEED>, RGB_ORDER>((byte*)data, nLeds * 4, scale);
+		mSPI.template writeBytes3<1 | FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 4, scale);
 	}
 #endif
 };
