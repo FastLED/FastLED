@@ -4,6 +4,24 @@
 #include "hsv2rgb.h"
 
 
+
+void hsv2rgb_C (const struct CHSV & hsv, struct CRGB & rgb);
+void hsv2rgb_avr(const struct CHSV & hsv, struct CRGB & rgb);
+
+#if defined(__AVR__)
+void hsv2rgb(const struct CHSV & hsv, struct CRGB & rgb)
+{
+    hsv2rgb_avr( hsv, rgb);
+}
+#else
+void hsv2rgb(const struct CHSV & hsv, struct CRGB & rgb)
+{
+    hsv2rgb_C( hsv, rgb);
+}
+#endif
+
+
+
 #define APPLY_DIMMING(X) (X)
 #define HSV_SECTION_6 (0x20)
 #define HSV_SECTION_3 (0x40)
@@ -193,6 +211,91 @@ void hsv2rgb_avr(const struct CHSV & hsv, struct CRGB & rgb)
 
 #endif
 
+void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb)
+{
+    CHSV hsv2(hsv);
+    hsv2.hue = scale8( hsv2.hue, 192);
+    hsv2rgb(hsv2, rgb);
+}
+
+
+// 16-bit version for when higher precision is needed,
+// e.g., for longer slower gradients where you don't want
+// banding to show.
+// This higher precision costs more CPU cycles.
+
+#define APPLY_DIMMING_16(X) (X)
+#define HSV_SECTION_16 (32 * 256)
+
+// hue 0..191
+void hsv2rgb16 (const CHSV16& hsv16, CRGB16& rgb16)
+{
+    // Apply dimming curves
+    uint16_t value = APPLY_DIMMING_16( hsv16.val);
+    uint16_t saturation = hsv16.sat;
+    
+    // The brightness floor is minimum number that all of
+    // R, G, and B will be set to.
+    uint16_t invsat = APPLY_DIMMING_16( 65536 - saturation);
+    uint16_t brightness_floor = ((uint32_t)value * (uint32_t)invsat) / (uint32_t)65536;
+    
+    // The color amplitude is the maximum amount of R, G, and B
+    // that will be added on top of the brightness_floor to
+    // create the specific hue desired.
+    uint16_t color_amplitude = value - brightness_floor;
+    
+    // Figure out which section of the hue wheel we're in,
+    // and how far offset we are withing that section
+    uint16_t section = hsv16.hue / HSV_SECTION_16; // 0..5
+    uint16_t offset =  hsv16.hue % HSV_SECTION_16;  // 0..8191
+    
+    uint16_t rampup = offset; // 0..8191
+    uint16_t rampdown = (HSV_SECTION_16 - 1) - offset; // 8191..0
+    
+    if(section & 0x01) {
+        // odd sections
+        rampup += (32 * 256); // 8192 .. 16383
+    } else {
+        // even sections
+        rampdown += (32 * 256); // 8192 .. 16383
+    }
+    
+    
+    // scale up to 255 range
+    rampup *= 4; // 0..65535
+    rampdown *= 4; // 0..65535
+    
+    // compute color-amplitude-scaled-down versions of rampup and rampdown
+    uint16_t rampup_amp_adj   = ((uint32_t)rampup   * (uint32_t)color_amplitude) / (uint32_t)65536; // 0 .. 65535
+    uint16_t rampdown_amp_adj = ((uint32_t)rampdown * (uint32_t)color_amplitude) / (uint32_t)65536; // 0 .. 65535
+    
+    // add brightness_floor offset to everything
+    uint16_t rampup_adj_with_floor   = rampup_amp_adj   + brightness_floor;
+    uint16_t rampdown_adj_with_floor = rampdown_amp_adj + brightness_floor;
+    
+    
+    section /= 2;
+    
+    if( section ) {
+        if( section == 1) {
+            // original sections 2 and 3
+            rgb16.r = brightness_floor;
+            rgb16.g = rampdown_adj_with_floor;
+            rgb16.b = rampup_adj_with_floor;
+        } else {
+            // original sections 4 and 5
+            rgb16.r = rampup_adj_with_floor;
+            rgb16.g = brightness_floor;
+            rgb16.b = rampdown_adj_with_floor;
+        }
+    } else {
+        // original sections 0 and 1
+        rgb16.r = rampdown_adj_with_floor;
+        rgb16.g = rampup_adj_with_floor;
+        rgb16.b = brightness_floor;
+    }
+}
+
 
 
 
@@ -211,7 +314,7 @@ void hsv2rgb_avr(const struct CHSV & hsv, struct CRGB & rgb)
 // Assume no.
 #define GREEN2 0
 
-void rainbow2rgb( const CHSV& hsv, CRGB& rgb)
+void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
 {
     uint8_t hue = hsv.hue;
     uint8_t sat = hsv.sat;
@@ -371,9 +474,15 @@ void hsv2rgb(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
     }
 }
 
-void rainbow2rgb(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
-    for(int i = 0; i < numLeds; i++) { 
-        rainbow2rgb(phsv[i], prgb[i]);
+void hsv2rgb_rainbow( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
+    for(int i = 0; i < numLeds; i++) {
+        hsv2rgb_rainbow(phsv[i], prgb[i]);
+    }
+}
+
+void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
+    for(int i = 0; i < numLeds; i++) {
+        hsv2rgb_spectrum(phsv[i], prgb[i]);
     }
 }
 

@@ -323,6 +323,16 @@ struct CRGB {
         cleanup_R1();
         return avg;
     }
+
+    inline void nMaximizeBrightness( uint8_t limit = 255 )  {
+        uint8_t max = red;
+        if( green > max) max = green;
+        if( blue > max) max = blue;
+        uint16_t factor = ((uint16_t)(limit) * 256) / max;
+        red =   (red   * factor) / 256;
+        green = (green * factor) / 256;
+        blue =  (blue  * factor) / 256;
+    }
 };
 
 
@@ -424,6 +434,46 @@ inline CRGB operator%( const CRGB& p1, uint8_t d)
     return retval;
 }
 
+
+    
+struct CHSV16 {
+    union {
+        struct {
+            union {
+                uint16_t hue;
+                uint16_t h; };
+            union {
+                uint16_t saturation;
+                uint16_t sat;
+                uint16_t s; };
+            union {
+                uint16_t value;
+                uint16_t val;
+                uint16_t v; };
+        };
+        uint16_t raw[3];
+    };
+};
+
+struct CRGB16 {
+    union {
+        struct {
+            union {
+                uint16_t r;
+                uint16_t red;
+            };
+            union {
+                uint16_t g;
+                uint16_t green;
+            };
+            union {
+                uint16_t b;
+                uint16_t blue;
+            };
+        };
+        uint16_t raw[3];
+    };
+};
 
 
 #ifdef SUPPORT_ARGB
