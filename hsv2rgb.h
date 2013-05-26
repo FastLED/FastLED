@@ -46,7 +46,4 @@ void hsv2rgb(const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
 #define HUE_MAX 191
 
 
-void hsv2rgb(const struct CHSV * phsv, struct CRGB * rgb, int numLeds);
-void rainbow2rgb(const struct CHSV * phsv, struct CRGB * rgb, int numLeds);
-
 #endif
