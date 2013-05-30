@@ -1,15 +1,18 @@
 #include "FastSPI_LED2.h"
 
+
 CFastSPI_LED2 LEDS;
 CFastSPI_LED2 & FastSPI_LED = LEDS;
 CFastSPI_LED2 & FastSPI_LED2 = LEDS;
 CFastSPI_LED2 & FastLED = LEDS;
 
+uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 
 CFastSPI_LED2::CFastSPI_LED2() { 
 	// clear out the array of led controllers
-	m_nControllers = 10;
-	memset(m_Controllers, 0, m_nControllers * sizeof(CControllerInfo));
+	m_nControllers = NUM_CONTROLLERS;
+
+	memset8(m_Controllers, 0, m_nControllers * sizeof(CControllerInfo));
 }
 
 CLEDController *CFastSPI_LED2::addLeds(CLEDController *pLed, 
@@ -18,17 +21,26 @@ CLEDController *CFastSPI_LED2::addLeds(CLEDController *pLed,
 	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 	int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 
+	int target = -1;
+
+	// Figure out where to put the new led controller
 	for(int i = 0; i < m_nControllers; i++) { 
 		if(m_Controllers[i].pLedController == NULL) { 
-			m_Controllers[i].pLedController = pLed;
-			m_Controllers[i].pLedData = data;
-			m_Controllers[i].nOffset = nOffset;
-			m_Controllers[i].nLeds = nLeds;
-			pLed->init();
-			return pLed;
+			target = i;
+			break;
 		}
 	}
 
+	// if we have a spot, use it!
+	if(target != -1) {
+		m_Controllers[target].pLedController = pLed;
+		m_Controllers[target].pLedData = data;
+		m_Controllers[target].nOffset = nOffset;
+		m_Controllers[target].nLeds = nLeds;
+		pLed->init();
+		return pLed;
+	}
+	
 	return NULL;
 }
 
@@ -58,7 +70,7 @@ void CFastSPI_LED2::clear(boolean includeLedData) {
 	if(includeLedData) { 
 		for(int i = 0; i < m_nControllers; i++) { 
 			if(m_Controllers[i].pLedData != NULL) { 
-				memset((void*)m_Controllers[i].pLedData, 0, sizeof(struct CRGB) * m_Controllers[i].nLeds);
+				memset8((void*)m_Controllers[i].pLedData, 0, sizeof(struct CRGB) * m_Controllers[i].nLeds);
 			} else {
 				return;
 			}

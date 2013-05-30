@@ -24,6 +24,8 @@ enum EClocklessChipsets {
 	UCS1903
 };
 
+#define NUM_CONTROLLERS 8
+
 class CFastSPI_LED2 {
 	struct CControllerInfo { 
 		CLEDController *pLedController;
@@ -32,7 +34,7 @@ class CFastSPI_LED2 {
 		int nOffset;
 	};
 
-	CControllerInfo	m_Controllers[10];
+	CControllerInfo	m_Controllers[NUM_CONTROLLERS];
 	int m_nControllers;
 
 public:
