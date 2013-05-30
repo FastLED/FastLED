@@ -46,4 +46,14 @@ void hsv2rgb(const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
 #define HUE_MAX 191
 
 
+// fill_solid -   fill a range of LEDs with a solid color
+void fill_solid( struct CRGB * pFirstLED, int numToFill,
+                 const struct CRGB& color);
+
+// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
+//                full saturation and full value (brightness)
+void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
+                   uint8_t initialhue,
+                   uint8_t deltahue = 5);
+
 #endif

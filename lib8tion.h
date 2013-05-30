@@ -671,7 +671,7 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
 LIB8STATIC
 uint16_t scale16( uint16_t i, fract16 scale )
 {
-    uint32_t result;
+    uint32_t result = 0;
     const uint8_t  zero = 0;
     asm volatile(
                  // result.A-B  = i.A x scale.A
@@ -763,13 +763,15 @@ LIB8STATIC uint8_t qmul8( uint8_t i, uint8_t j)
                  /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
                  "  mul %0, %1          \n\t"
                  /* If high byte of result is zero, all is well. */
-                 "  cpi r1, 0           \n\t"
-                 "  breq L_%=           \n\t"
+                 "  tst r1              \n\t"
+                 "  breq Lnospill_%=    \n\t"
                  /* If high byte of result > 0, saturate low byte to 0xFF */
-                 "  ldi r0, 255         \n\t"
-                 "L_%=:                 \n\t"
+                 "  ldi %0,0xFF         \n\t"
+                 "  rjmp Ldone_%=       \n\t"
+                 "Lnospill_%=:          \n\t"
                  /* Extract the LOW 8-bits (r0) */
                  "  mov %0, r0          \n\t"
+                 "Ldone_%=:             \n\t"
                  /* Restore r1 to "0"; it's expected to always be that */
                  "  clr __zero_reg__    \n\t"
                  : "+a" (i)
