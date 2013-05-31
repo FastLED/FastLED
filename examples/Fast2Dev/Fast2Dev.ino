@@ -24,10 +24,20 @@ void setup() {
 	// sanity check delay - allows reprogramming if accidently blowing power w/leds
    	delay(2000);
 
-   	//LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
-	// LEDS.addLeds<WS2811, 12>(leds, NUM_LEDS);
+   	// For safety (to prevent too high of a power draw), the test case defaults to
+   	// setting brightness to 25% brightness
+   	LEDS.setBrightness(64);
 
-   	LEDS.addLeds<WS2811, 11>(leds, NUM_LEDS);
+   	// LEDS.addLeds<WS2811, 13>(leds, NUM_LEDS);
+   	// LEDS.addLeds<TM1809, 13>(leds, NUM_LEDS);
+   	// LEDS.addLeds<UCS1903, 13>(leds, NUM_LEDS);
+   	// LEDS.addLeds<TM1803, 13>(leds, NUM_LEDS);
+
+   	LEDS.addLeds<LPD8806>(leds, NUM_LEDS)->clearLeds(300);
+	// LEDS.addLeds<WS2801>(leds, NUM_LEDS);
+   	// LEDS.addLeds<SM16716>(leds, NUM_LEDS);
+
+   	// LEDS.addLeds<WS2811, 11>(leds, NUM_LEDS);
 
 	// Put ws2801 strip on the hardware SPI pins with a BGR ordering of rgb and limited to a 1Mhz data rate
 	// LEDS.addLeds<WS2801, 11, 13, BGR, DATA_RATE_MHZ(1)>(leds, NUM_LEDS);
@@ -58,20 +68,16 @@ void loop() {
 			delay(10);
 		}
 
-		//delay(2000);
-		// LED.Sshow();
-		// delay(2000);
-
 		// fade up
-		for(int i = 0; i < 128; i++) { 
+		for(int x = 0; x < 128; x++) { 
 			// The showColor method sets all the leds in the strip to the same color
-			LEDS.showColor(CRGB(i, 0, 0));
+			LEDS.showColor(CRGB(x, 0, 0));
 			delay(10);
 		}
 
 		// fade down
-		for(int i = 128; i >= 0; i--) { 
-			LEDS.showColor(CRGB(i, 0, 0));
+		for(int x = 128; x >= 0; x--) { 
+			LEDS.showColor(CRGB(x, 0, 0));
 			delay(10);
 		}
 

@@ -207,7 +207,7 @@ public:
 		if(sWait) { sWait = wait; return true; } else { sWait = wait; return false; } 
 		// return true;
 	}
-	static void wait() __attribute__((always_inline)) { if(_SPI_CLOCK_DIVIDER >= 4) { if(shouldWait()) { while(!(SPSR & (1<<SPIF))); } } else { delaycycles<9>(); } }
+	static void wait() __attribute__((always_inline)) { if(shouldWait()) { while(!(SPSR & (1<<SPIF))); } }
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
 	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPDR=b;  shouldWait(true); }

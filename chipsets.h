@@ -9,11 +9,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef SPI_DATA
-template <uint8_t DATA_PIN = SPI_DATA, uint8_t CLOCK_PIN = SPI_CLOCK, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(24) >
-#else
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(24) >
-#endif
 class LPD8806Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 
@@ -50,21 +46,27 @@ public:
 	}
 
 	virtual void clearLeds(int nLeds) { 
-		checkClear(nLeds);
-		mSPI.writeBytesValue(0x80, nLeds * 3);	
+		mSPI.select();
+		mSPI.writeBytesValueRaw(0x80, nLeds * 3);	
+		mSPI.writeBytesValueRaw(0, ((nLeds*3+63)>>6));
+		mSPI.release();
 	}
 
 	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) {
-		checkClear(nLeds);
 		mSPI.select();
-		while(nLeds--) { 
-			mSPI.writeByte(data[RGB_BYTE0(RGB_ORDER)]);
-			mSPI.writeByte(data[RGB_BYTE1(RGB_ORDER)]);
-			mSPI.writeByte(data[RGB_BYTE2(RGB_ORDER)]);
+		uint8_t a = 0x80 | (scale8(data[RGB_BYTE0(RGB_ORDER)], scale) >> 1);
+		uint8_t b = 0x80 | (scale8(data[RGB_BYTE1(RGB_ORDER)], scale) >> 1);
+		uint8_t c = 0x80 | (scale8(data[RGB_BYTE2(RGB_ORDER)], scale) >> 1);
+		int iLeds = 0;
+
+		while(iLeds++ < nLeds) { 
+			mSPI.writeByte(a);
+			mSPI.writeByte(b);
+			mSPI.writeByte(c);
 		}
+
 		// latch in the world
-		mSPI.writeBytesValueRaw(0, ((nLeds+63)>>6));
-		mSPI.waitFully();
+		mSPI.writeBytesValueRaw(0, ((nLeds*3+63)>>6));
 		mSPI.release();
 	}
 
@@ -109,10 +111,14 @@ public:
 	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) {
 		mWaitDelay.wait();
 		mSPI.select();
+		uint8_t a = scale8(data[RGB_BYTE0(RGB_ORDER)], scale);
+		uint8_t b = scale8(data[RGB_BYTE1(RGB_ORDER)], scale);
+		uint8_t c = scale8(data[RGB_BYTE2(RGB_ORDER)], scale);
+
 		while(nLeds--) { 
-			mSPI.writeByte(data[RGB_BYTE0(RGB_ORDER)]);
-			mSPI.writeByte(data[RGB_BYTE1(RGB_ORDER)]);
-			mSPI.writeByte(data[RGB_BYTE2(RGB_ORDER)]);
+			mSPI.writeByte(a);
+			mSPI.writeByte(b);
+			mSPI.writeByte(c);
 		}
 		mSPI.waitFully();
 		mSPI.release();
@@ -165,7 +171,6 @@ public:
 
 	virtual void clearLeds(int nLeds) { 
 		mSPI.select();
-		writeHeader();
 		while(nLeds--) { 
 			mSPI.template writeBit<0>(1);
 			mSPI.writeByte(0);
@@ -174,16 +179,20 @@ public:
 		}
 		mSPI.waitFully();
 		mSPI.release();
+		writeHeader();
 	}
 
 	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) {
 		mSPI.select();
-		writeHeader();
+		uint8_t a = scale8(data[RGB_BYTE0(RGB_ORDER)], scale);
+		uint8_t b = scale8(data[RGB_BYTE1(RGB_ORDER)], scale);
+		uint8_t c = scale8(data[RGB_BYTE2(RGB_ORDER)], scale);
+
 		while(nLeds--) { 
 			mSPI.template writeBit<0>(1);
-			mSPI.writeByte(data[RGB_BYTE0(RGB_ORDER)]);
-			mSPI.writeByte(data[RGB_BYTE1(RGB_ORDER)]);
-			mSPI.writeByte(data[RGB_BYTE2(RGB_ORDER)]);
+			mSPI.writeByte(a);
+			mSPI.writeByte(b);
+			mSPI.writeByte(c);
 		}
 		writeHeader();
 		mSPI.release();

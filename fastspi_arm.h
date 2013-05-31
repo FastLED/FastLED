@@ -18,6 +18,8 @@ template<int VAL> class BitWork<VAL, 0> {
 
 #define MAX(A, B) (( (A) > (B) ) ? (A) : (B))
 
+#define USE_CONT 0
+
 // Templated function to translate a clock divider value into the prescalar, scalar, and clock doubling setting for the world.
 template <int VAL> void getScalars(uint32_t & preScalar, uint32_t & scalar, uint32_t & dbl) {
     switch(VAL) {
@@ -161,8 +163,13 @@ public:
 	 	getScalars<_SPI_CLOCK_DIVIDER>(_PBR, _BR, _DBR);
 	 	_CSSCK = _BR;
 
-	 	uint32_t ctar0 = /**/ SPI_CTAR_CPHA | SPI_CTAR_CPOL | /* */ SPI_CTAR_FMSZ(7) | SPI_CTAR_PBR(_PBR) | SPI_CTAR_BR(_BR) | SPI_CTAR_CSSCK(_CSSCK);
-	 	uint32_t ctar1 = /**/ SPI_CTAR_CPHA | SPI_CTAR_CPOL | /* */ SPI_CTAR_FMSZ(15) | SPI_CTAR_PBR(_PBR) | SPI_CTAR_BR(_BR) | SPI_CTAR_CSSCK(_CSSCK);
+	 	uint32_t ctar0 = SPI_CTAR_FMSZ(7) | SPI_CTAR_PBR(_PBR) | SPI_CTAR_BR(_BR) | SPI_CTAR_CSSCK(_CSSCK);
+	 	uint32_t ctar1 = SPI_CTAR_FMSZ(15) | SPI_CTAR_PBR(_PBR) | SPI_CTAR_BR(_BR) | SPI_CTAR_CSSCK(_CSSCK);
+
+#if USE_CONT == 1
+	 	ctar0 |= SPI_CTAR_CPHA | SPI_CTAR_CPOL;
+	 	ctar1 |= SPI_CTAR_CPHA | SPI_CTAR_CPOL;
+#endif
 
 	 	if(_DBR) { 
 	 		ctar0 |= SPI_CTAR_DBR;
@@ -211,7 +218,11 @@ public:
 	enum EWait { PRE, POST, NONE };
 	enum ELast { NOTLAST, LAST };
 
+#if USE_CONT == 1
 	#define CM CONT
+#else
+	#define CM NOCONT
+#endif
 	#define WM PRE
 
 	template<ECont CONT_STATE, EWait WAIT_STATE, ELast LAST_STATE> class Write { 

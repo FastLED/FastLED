@@ -11,7 +11,7 @@ uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]
 CFastSPI_LED2::CFastSPI_LED2() { 
 	// clear out the array of led controllers
 	m_nControllers = NUM_CONTROLLERS;
-
+	m_nScale = 255;
 	memset8(m_Controllers, 0, m_nControllers * sizeof(CControllerInfo));
 }
 

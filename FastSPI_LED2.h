@@ -36,6 +36,7 @@ class CFastSPI_LED2 {
 
 	CControllerInfo	m_Controllers[NUM_CONTROLLERS];
 	int m_nControllers;
+	uint8_t m_nScale;
 
 public:
 	CFastSPI_LED2();
@@ -99,11 +100,20 @@ public:
 		}
 	}
 
-	void show(uint8_t scale = 255);
+	void setBrightness(uint8_t scale) { m_nScale = scale; }
+
+	/// Update all our controllers with the current led colors, using the passed in brightness
+	void show(uint8_t scale);
+
+	/// Update all our controllers with the current led colors
+	void show() { show(m_nScale); }
 
 	void clear(boolean includeLedData = true);
 
-	void showColor(const struct CRGB & color, uint8_t scale = 255);
+	void showColor(const struct CRGB & color, uint8_t scale);
+
+	void showColor(const struct CRGB & color) { showColor(color, m_nScale); }
+
 };
 
 extern CFastSPI_LED2 & FastSPI_LED;
