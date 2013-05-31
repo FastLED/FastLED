@@ -5,18 +5,18 @@
 
 
 
-void hsv2rgb_C (const struct CHSV & hsv, struct CRGB & rgb);
-void hsv2rgb_avr(const struct CHSV & hsv, struct CRGB & rgb);
+void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb);
+void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb);
 
 #if defined(__AVR__)
-void hsv2rgb(const struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
 {
-    hsv2rgb_avr( hsv, rgb);
+    hsv2rgb_raw_avr( hsv, rgb);
 }
 #else
-void hsv2rgb(const struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
 {
-    hsv2rgb_C( hsv, rgb);
+    hsv2rgb_raw_C( hsv, rgb);
 }
 #endif
 
@@ -26,7 +26,7 @@ void hsv2rgb(const struct CHSV & hsv, struct CRGB & rgb)
 #define HSV_SECTION_6 (0x20)
 #define HSV_SECTION_3 (0x40)
 
-void hsv2rgb_C (const struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb)
 {
     // Convert hue, saturation and brightness ( HSV/HSB ) to RGB
     // "Dimming" is used on saturation and brightness to make
@@ -115,7 +115,7 @@ void hsv2rgb_C (const struct CHSV & hsv, struct CRGB & rgb)
 
 
 #if defined(__AVR__)
-void hsv2rgb_avr(const struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb)
 {
     uint8_t hue, saturation, value;
     
@@ -215,7 +215,7 @@ void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb)
 {
     CHSV hsv2(hsv);
     hsv2.hue = scale8( hsv2.hue, 192);
-    hsv2rgb(hsv2, rgb);
+    hsv2rgb_raw(hsv2, rgb);
 }
 
 
@@ -241,15 +241,22 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     uint8_t sat = hsv.sat;
     uint8_t val = hsv.val;
     
-    val = scale8( val, val);
+    val = scale8_video_LEAVING_R1_DIRTY( val, val);
     
     uint8_t offset = hue & 0x1F; // 0..31
     uint8_t section = hue / 0x20; //0..7
     
-    uint8_t third = scale8((offset * 8), (256 / 3));
-    //uint8_t third = (offset * 8) / 3;
+    // offset8 = offset * 8
+    uint8_t offset8 = offset;
+    offset8 <<= 1;
+    asm volatile("");
+    offset8 <<= 1;
+    asm volatile("");
+    offset8 <<= 1;
     
-    uint8_t &r(rgb.r), &g(rgb.g), &b(rgb.b);
+    uint8_t third = scale8_video_LEAVING_R1_DIRTY( offset8, (256 / 3));
+    
+    uint8_t r, g, b;
     
     if( section < 4 ) {
         if( section < 2 ) {
@@ -263,8 +270,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 g = third / 2;
 #endif
                 b = 0;
-                //break;
-
+                
                 
                 
 #if YELLOWLEVEL == 1
@@ -278,21 +284,19 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 g = (85 / 2)  + third;
 #endif
                 b = 0;
-                //break;
             }
         } else {
             // section 2-3
             if( section == 2) {
                 // ADJ Yellow high
                 //case 2: // Y -> G
-                r = 171 - (third * 2);
+                r = 171 - (uint8_t)(third * (uint8_t)2);
 #if GREEN2 == 0
                 g = 171 + third;//Y2 255;
 #else
                 g = 255 / 2;
 #endif
                 b = 0;
-                //break;
 #endif
                 
                 
@@ -303,26 +307,24 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 //case 1: // O -> Y
                 r = 171 + third;
 #if GREEN2 == 0
-                g = (85 + (third * 2));
+                g = (85 + (uint8_t)(third * (uint8_t)2));
 #else
                 g = (85 / 2)  + third;
 #endif
                 b = 0;
-                //break;
             }
         } else {
             // section 2-3
             if( section == 2) {
                 // ADJ Yellow high
                 //case 2: // Y -> G
-                r = 255 - (offset * 8);
+                r = 255 - offset8;
 #if GREEN2 == 0
                 g = 255;
 #else
                 g = 255 / 2;
 #endif
                 b = 0;
-                //break;
 #endif
                 
                 
@@ -336,7 +338,6 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 g = (255 - third) / 2;
 #endif
                 b = third;
-                //break;
             }
         }
     } else {
@@ -346,18 +347,18 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 //case 4: // A -> B
                 r = 0;
 #if GREEN2 == 0
-                g = (171 - (third * 2));
+                g = (171 - (uint8_t)(third * (uint8_t)2));
 #else
                 g = (171 / 2) - third;
 #endif
-                b = 85 + (third * 2);
-                //break;
+                b = 85 + (uint8_t)(third * (uint8_t)2);
+
             } else {
                 //case 5: // B -> P
                 r = third;
                 g = 0;
                 b = 255 - third;
-                //break;
+
             }
         } else {
             if( section == 6 ) {
@@ -365,13 +366,13 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 r = 85 + third;
                 g = 0;
                 b = 171 - third;
-                //break;
+
             } else {
                 //case 7: // K -> R
                 r = 171 + third;
                 g = 0;
                 b = 85 - third;
-                //break;
+
             }
         }
     }
@@ -379,7 +380,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     nscale8x3_video( r, g, b, sat);
     
     uint8_t desat = 255 - sat;
-    desat = scale8(desat, desat);
+    desat = scale8_LEAVING_R1_DIRTY(desat, desat);
     uint8_t brightness_floor = desat;
     
     r += brightness_floor;
@@ -387,11 +388,19 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     b += brightness_floor;
     
     nscale8x3_video( r, g, b, val);
+    
+    //The old "missing std X+n" problem shows up here
+    //asm volatile(  ""  :  :  : "r26", "r27" );
+    //asm volatile (" movw r30, r26 \n" : : : "r30", "r31");
+    
+    rgb.r = r;
+    rgb.g = g;
+    rgb.b = b;
 }
 
-void hsv2rgb(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
-    for(int i = 0; i < numLeds; i++) { 
-        hsv2rgb(phsv[i], prgb[i]);
+void hsv2rgb_raw(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
+    for(int i = 0; i < numLeds; i++) {
+        hsv2rgb_raw(phsv[i], prgb[i]);
     }
 }
 
@@ -438,7 +447,7 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
 //  that shows a 'spectrum' and a 'rainbow' side by side.  Among other
 //  differences, you'll see that a 'rainbow' has much more yellow than
 //  a plain spectrum.  "Classic" LED color washes are spectrum based, and
-//  usually show very little yellow.  
+//  usually show very little yellow.
 //
 //  Wikipedia's page on HSV color space, with pseudocode for conversion
 //  to RGB color space
