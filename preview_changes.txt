@@ -1,26 +1,22 @@
-2.1
-* 12/16 bit chipset suppoort 
-* full ARGB 
-* 32-bit padded CRGB types
-* more chipsets (TM1829, APA102, TLS3001)
-* interleaving support
-* DUE support
-* DMA support
-* deep HSV integration
-
--------
-Preview 4
+Release Candidate 1
+* New unified/simplified API for adding/using controllers
+* fleshout clockless chip support
+* add hsv (spectrum and rainbow style colors)
+* high speed memory management operations
+* library for interpolation/easing functions
 * various api changes, addition of clear and showColor functions
 * scale value applied to all show methods 
 * bug fixes for SM16716
 * performance improvements, lpd8806 exceeds 22Mbit now
 * hardware def fixes
-* add hsv library functions
 * allow alternate rgb color orderings
+* high speed math methods
+* rich CRGB structure
 
 Preview 3
 * True hardware SPI support for teensy (up to 20Mbit output!)
 * Minor bug fixes/tweaks
+
 Preview 2
 * Rename pin class to FastPin
 * Replace latch with select, more accurate description of what it does
@@ -39,10 +35,4 @@ en if you're using the hardware SPI pins
 Preview 1
 * Initial release
 
-----
-----
 
-
-
-
-Squant = __TIMESTAMP__[9]<<16 | __TIMESTAMP__[8]<<8 | __TIMESTAMP__[10]
