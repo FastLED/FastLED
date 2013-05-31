@@ -4,6 +4,9 @@
 // Uncomment this line to force always using software, instead of hardware, SPI (why?)
 // #define FORCE_SOFTWARE_SPI 1
 
+// Uncomment this line if you want to talk to DMX controllers
+// #define FASTSPI_USE_DMX_SIMPLE 1
+
 #include "FastSPI_LED2.h"
 
 
@@ -13,7 +16,7 @@
 //
 //////////////////////////////////////////////////
 
-#define NUM_LEDS 20 // 86
+#define NUM_LEDS 150
 
 struct CRGB leds[NUM_LEDS];
 
@@ -21,8 +24,10 @@ void setup() {
 	// sanity check delay - allows reprogramming if accidently blowing power w/leds
    	delay(2000);
 
-   	LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
+   	//LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
 	// LEDS.addLeds<WS2811, 12>(leds, NUM_LEDS);
+
+   	LEDS.addLeds<WS2811, 11>(leds, NUM_LEDS);
 
 	// Put ws2801 strip on the hardware SPI pins with a BGR ordering of rgb and limited to a 1Mhz data rate
 	// LEDS.addLeds<WS2801, 11, 13, BGR, DATA_RATE_MHZ(1)>(leds, NUM_LEDS);
@@ -50,7 +55,7 @@ void loop() {
 
 			// and now, show your led array! 
 			LEDS.show();
-			delay(10); //00);
+			delay(10);
 		}
 
 		//delay(2000);
