@@ -45,6 +45,8 @@ public:
 	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); }
 	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); wait(); }
 
+	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	
 	// naive writeByte implelentation, simply calls writeBit on the 8 bits in the byte.
 	static void writeByte(uint8_t b) __attribute__((always_inline)) { 
 		writeBit<7>(b);

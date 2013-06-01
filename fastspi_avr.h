@@ -46,6 +46,8 @@ public:
 	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { UDR0 = b; wait(); }
 	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); UDR0 = b; }
 
+	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
 		if(b && (1 << BIT)) { 
 			FastPin<_DATA_PIN>::hi();

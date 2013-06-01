@@ -13,7 +13,8 @@
 enum ESPIChipsets {
 	LPD8806,
 	WS2801,
-	SM16716
+	SM16716,
+	P9813
 };
 
 enum EClocklessChipsets {
@@ -48,6 +49,7 @@ public:
 			case LPD8806: return addLeds(new LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case WS2801: return addLeds(new WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case SM16716: return addLeds(new SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+			case P9813: return addLeds(new P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 	}
 	
@@ -56,6 +58,7 @@ public:
 			case LPD8806: return addLeds(new LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE>(), data, nLedsOrOffset, nLedsIfOffset);
 			case WS2801: return addLeds(new WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE>(), data, nLedsOrOffset, nLedsIfOffset);
 			case SM16716: return addLeds(new SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE>(), data, nLedsOrOffset, nLedsIfOffset);
+			case P9813: return addLeds(new P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 	}
 

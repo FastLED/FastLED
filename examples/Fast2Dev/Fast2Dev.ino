@@ -18,7 +18,7 @@
 
 #define NUM_LEDS 150
 
-struct CRGB leds[NUM_LEDS];
+CRGB leds[NUM_LEDS];
 
 void setup() {
 	// sanity check delay - allows reprogramming if accidently blowing power w/leds
@@ -33,7 +33,9 @@ void setup() {
    	// LEDS.addLeds<UCS1903, 13>(leds, NUM_LEDS);
    	// LEDS.addLeds<TM1803, 13>(leds, NUM_LEDS);
 
-   	LEDS.addLeds<LPD8806>(leds, NUM_LEDS)->clearLeds(300);
+   	LEDS.addLeds<P9813>(leds, NUM_LEDS);
+   	
+   	// LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
 	// LEDS.addLeds<WS2801>(leds, NUM_LEDS);
    	// LEDS.addLeds<SM16716>(leds, NUM_LEDS);
 
