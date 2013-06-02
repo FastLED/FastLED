@@ -32,7 +32,11 @@ extern volatile unsigned long timer0_millis;
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int WAIT_TIME = 50>
+// Convinience macros to wrap around the toggling of hi vs. lo
+#define SET_LO FLIP ? FastPin<DATA_PIN>::fastset(port, hi) : FastPin<DATA_PIN>::fastset(port, lo)
+#define SET_HI FLIP ? FastPin<DATA_PIN>::fastset(port, lo) : FastPin<DATA_PIN>::fastset(port, hi)
+
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -52,16 +56,16 @@ public:
 #else
 	template <int N>inline static void bitSetFast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
-		FastPin<DATA_PIN>::fastset(port, hi); 								// 1/2 clock cycle if using out
+		SET_HI; 								// 1/2 clock cycle if using out
 		delaycycles<T1 - (_CYCLES(DATA_PIN) + 1)>();					// 1st cycle length minus 1/2 clock for out, 1 clock for sbrs
 		__asm__ __volatile__ ("sbrs %0, %1" :: "r" (b), "M" (N) :); 	// 1 clock for check (+1 if skipping, next op is also 1 clock)
 
 		// Second cycle
-		FastPin<DATA_PIN>::fastset(port, lo);								// 1/2 clock cycle if using out
+		SET_LO;								// 1/2 clock cycle if using out
 		delaycycles<T2 - _CYCLES(DATA_PIN)>(); 							// 2nd cycle length minus 1/2 clock for out
 
 		// Third cycle
-		FastPin<DATA_PIN>::fastset(port, lo);								// 1 clock cycle if using out
+		SET_LO;								// 1 clock cycle if using out
 		delaycycles<T3 - _CYCLES(DATA_PIN)>();							// 3rd cycle length minus 1 clock for out
 	}
 	
@@ -69,16 +73,16 @@ public:
 	#define END_OF_LOOP 6 		// loop compare, jump, next uint8_t load
 	template <int N, int ADJ>inline static void bitSetLast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
-		FastPin<DATA_PIN>::fastset(port, hi); 							// 1 clock cycle if using out, 2 otherwise
+		SET_HI; 							// 1 clock cycle if using out, 2 otherwise
 		delaycycles<T1 - (_CYCLES(DATA_PIN) + 1)>();					// 1st cycle length minus 1 clock for out, 1 clock for sbrs
 		__asm__ __volatile__ ("sbrs %0, %1" :: "r" (b), "M" (N) :); // 1 clock for check (+1 if skipping, next op is also 1 clock)
 
 		// Second cycle
-		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
+		SET_LO;							// 1/2 clock cycle if using out
 		delaycycles<T2 - _CYCLES(DATA_PIN)>(); 						// 2nd cycle length minus 1/2 clock for out
 
 		// Third cycle
-		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
+		SET_LO;							// 1/2 clock cycle if using out
 		delaycycles<T3 - (_CYCLES(DATA_PIN) + ADJ)>();				// 3rd cycle length minus 7 clocks for out, loop compare, jump, next uint8_t load
 	}
 #endif
@@ -165,23 +169,23 @@ public:
 			// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
 			// will bite me in the ass at some point, I know it.
 			for(register uint32_t i = 7; i > 0; i--) { 
-				FastPin<DATA_PIN>::fastset(port, hi);
+				SET_HI;
 				delaycycles<T1 - 3>(); // 3 cycles - 1 store, 1 test, 1 if
-				if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+				if(b & 0x80) { SET_HI; } else { SET_LO; }
 				b <<= 1;
 				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
-				FastPin<DATA_PIN>::fastset(port, lo);
+				SET_LO;
 				delaycycles<T3 - 3>(); // 3 cycles, 1 store, 1 sub, 1 branch backwards
 			}
 			// extra delay because branch is faster falling through
 			delaycycles<1>();
 
 			// 8th bit, interleave loading rest of data
-			FastPin<DATA_PIN>::fastset(port, hi);
+			SET_HI;
 			delaycycles<T1 - 3>();
-			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+			if(b & 0x80) { SET_HI; } else { SET_LO; }
 			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
-			FastPin<DATA_PIN>::fastset(port, lo);
+			SET_LO;
 
 			if(ADVANCE) { 
 				b = data[SKIP + RGB_BYTE1(RGB_ORDER)];
@@ -193,23 +197,23 @@ public:
 			delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
 
 			for(register uint32_t i = 7; i > 0; i--) { 
-				FastPin<DATA_PIN>::fastset(port, hi);
+				SET_HI;
 				delaycycles<T1 - 3>(); // 3 cycles - 1 store, 1 test, 1 if
-				if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+				if(b & 0x80) { SET_HI; } else { SET_LO; }
 				b <<= 1;
 				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
-				FastPin<DATA_PIN>::fastset(port, lo);
+				SET_LO;
 				delaycycles<T3 - 3>(); // 3 cycles, 1 store, 1 sub, 1 branch backwards
 			}
 			// extra delay because branch is faster falling through
 			delaycycles<1>();
 
 			// 8th bit, interleave loading rest of data
-			FastPin<DATA_PIN>::fastset(port, hi);
+			SET_HI;
 			delaycycles<T1 - 3>();
-			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+			if(b & 0x80) { SET_HI; } else { SET_LO; }
 			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
-			FastPin<DATA_PIN>::fastset(port, lo);
+			SET_LO;
 
 			if(ADVANCE) { 
 				b = data[SKIP + RGB_BYTE2(RGB_ORDER)];
@@ -226,23 +230,23 @@ public:
 			}
 
 			for(register uint32_t i = 7; i > 0; i--) { 
-				FastPin<DATA_PIN>::fastset(port, hi);
+				SET_HI;
 				delaycycles<T1 - 3>(); // 3 cycles - 1 store, 1 test, 1 if
-				if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+				if(b & 0x80) { SET_HI; } else { SET_LO; }
 				b <<= 1;
 				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
-				FastPin<DATA_PIN>::fastset(port, lo);
+				SET_LO;
 				delaycycles<T3 - 3>(); // 3 cycles, 1 store, 1 sub, 1 branch backwards
 			}
 			// extra delay because branch is faster falling through
 			delaycycles<1>();
 
 			// 8th bit, interleave loading rest of data
-			FastPin<DATA_PIN>::fastset(port, hi);
+			SET_HI;
 			delaycycles<T1 - 3>();
-			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+			if(b & 0x80) { SET_HI; } else { SET_LO; }
 			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
-			FastPin<DATA_PIN>::fastset(port, lo);
+			SET_LO;
 
 			if(ADVANCE) { 
 				b = data[SKIP + RGB_BYTE0(RGB_ORDER)];

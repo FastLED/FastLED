@@ -231,7 +231,7 @@ class UCS1903Controller400Mhz : public ClocklessController<DATA_PIN, NS(500), NS
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
 #if NO_TIME(500, 1500, 500) 
-#warning "No enough clock cycles available for the UCS103"
+#warning "Not enough clock cycles available for the UCS103"
 #endif
 
 // TM1809 - 312.5ns, 312.5ns, 325ns
@@ -240,7 +240,7 @@ class TM1809Controller800Mhz : public ClocklessController<DATA_PIN, NS(350), NS(
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
 #if NO_TIME(350, 350, 550) 
-#warning "No enough clock cycles available for the UCS103"
+#warning "Not enough clock cycles available for the UCS103"
 #endif
 
 // WS2811 - 350n, 350ns, 550ns
@@ -249,7 +249,7 @@ class WS2811Controller800Mhz : public ClocklessController<DATA_PIN, NS(320), NS(
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550), RGB_ORDER> {};
 #if NO_TIME(320, 320, 550) 
-#warning "No enough clock cycles available for the UCS103"
+#warning "Not enough clock cycles available for the UCS103"
 #endif
 
 // 750NS, 750NS, 750NS
@@ -258,7 +258,34 @@ class TM1803Controller400Mhz : public ClocklessController<DATA_PIN, NS(750), NS(
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1803Controller400Khz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
 #if NO_TIME(750, 750, 750) 
-#warning "No enough clock cycles available for the UCS103"
+#warning "Not enough clock cycles available for the UCS103"
+#endif
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1829Controller800Khz : public ClocklessController<DATA_PIN, NS(340), NS(340), NS(550), RGB_ORDER, true, 500> {
+public:
+	// virtual void show(const struct CRGB *data, int nLeds, uint8_t scale = 255) {
+	// 	ClocklessController<DATA_PIN, NS(340), NS(340), NS(550), RGB_ORDER, false, 500>::show(data, nLeds, scale8(scale, 254));
+	// }
+
+	// virtual void showColor(const struct CRGB &data, int nLeds, uint8_t scale = 255) {
+	// 	ClocklessController<DATA_PIN, NS(340), NS(340), NS(550), RGB_ORDER, false, 500>::showColor(data, nLeds, scale8(scale, 254));
+	// }
+};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, NS(100), NS(300), NS(200), RGB_ORDER, true, 500> {
+public:
+	virtual void show(const struct CRGB *data, int nLeds, uint8_t scale = 255) {
+		ClocklessController<DATA_PIN, NS(100), NS(300), NS(200), RGB_ORDER, true, 500>::show(data, nLeds, scale8(scale, 254));
+	}
+
+	virtual void showColor(const struct CRGB &data, int nLeds, uint8_t scale = 255) {
+		ClocklessController<DATA_PIN, NS(100), NS(300), NS(200), RGB_ORDER, true, 500>::showColor(data, nLeds, scale8(scale, 254));
+	}
+};
+#if NO_TIME(100, 300, 200)
+#warning "Not enough clock cycles available for TM1829@12v"
 #endif
 
 #endif

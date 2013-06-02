@@ -21,7 +21,8 @@ enum EClocklessChipsets {
 	TM1809,
 	TM1803,
 	WS2811,
-	UCS1903
+	UCS1903,
+	TM1829
 };
 
 #define NUM_CONTROLLERS 8
@@ -80,6 +81,7 @@ public:
 #ifdef FASTSPI_USE_DMX_SIMPLE
 			case DMX: return addLeds(new DMXController<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 #endif
+			case TM1829: return addLeds(new TM1829Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 			case TM1809: return addLeds(new TM1809Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 			case TM1803: return addLeds(new TM1803Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
@@ -93,6 +95,7 @@ public:
 #ifdef FASTSPI_USE_DMX_SIMPLE
 			case DMX: return addLeds(new DMXController<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 #endif
+			case TM1829: return addLeds(new TM1829Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case TM1809: return addLeds(new TM1809Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case TM1803: return addLeds(new TM1803Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);

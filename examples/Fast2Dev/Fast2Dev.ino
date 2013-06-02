@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////
 
-#define NUM_LEDS 150
+#define NUM_LEDS 15
 
 struct CRGB leds[NUM_LEDS];
 
@@ -29,11 +29,13 @@ void setup() {
    	LEDS.setBrightness(64);
 
    	// LEDS.addLeds<WS2811, 13>(leds, NUM_LEDS);
-   	// LEDS.addLeds<TM1809, 13>(leds, NUM_LEDS);
+   	LEDS.addLeds<TM1809, 13>(leds, NUM_LEDS);
    	// LEDS.addLeds<UCS1903, 13>(leds, NUM_LEDS);
    	// LEDS.addLeds<TM1803, 13>(leds, NUM_LEDS);
+   	// LEDS.addLeds<TM1829, 13>(leds, NUM_LEDS);
 
-   	LEDS.addLeds<LPD8806>(leds, NUM_LEDS)->clearLeds(300);
+   	// LEDS.addLeds<P9813>(leds, NUM_LEDS);
+   	// LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
 	// LEDS.addLeds<WS2801>(leds, NUM_LEDS);
    	// LEDS.addLeds<SM16716>(leds, NUM_LEDS);
 
@@ -48,6 +50,8 @@ void setup() {
 }
 
 void loop() { 
+	//	LEDS.clear(); for(;;);
+
 	for(int i = 0; i < 3; i++) {
 		for(int iLed = 0; iLed < NUM_LEDS; iLed++) {
 			memset(leds, 0,  NUM_LEDS * sizeof(struct CRGB));
