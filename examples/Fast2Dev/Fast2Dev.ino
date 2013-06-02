@@ -33,9 +33,9 @@ void setup() {
    	// LEDS.addLeds<UCS1903, 13>(leds, NUM_LEDS);
    	// LEDS.addLeds<TM1803, 13>(leds, NUM_LEDS);
 
-   	LEDS.addLeds<P9813>(leds, NUM_LEDS);
+   	// LEDS.addLeds<P9813>(leds, NUM_LEDS);
    	
-   	// LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
+   	LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
 	// LEDS.addLeds<WS2801>(leds, NUM_LEDS);
    	// LEDS.addLeds<SM16716>(leds, NUM_LEDS);
 
