@@ -19,9 +19,16 @@
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)
 
 #if defined(__MK20DX128__)
-extern volatile uint32_t systick_millis_count;
+   extern volatile uint32_t systick_millis_count;
+#  define MS_COUNTER systick_millis_count
 #else
-extern volatile unsigned long timer0_millis;
+#  if defined(CORE_TEENSY)
+     extern volatile unsigned long timer0_millis_count;
+#    define MS_COUNTER timer0_millis_count
+#  else
+     extern volatile unsigned long timer0_millis;
+#    define MS_COUNTER timer0_millis
+#  endif
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,11 +103,7 @@ public:
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
-#if defined(__MK20DX128__)
-		systick_millis_count += (microsTaken / 1000);
-#else
-		timer0_millis += (microsTaken / 1000);
-#endif
+		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
 	}
@@ -113,11 +116,7 @@ public:
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
-#if defined(__MK20DX128__)
-		systick_millis_count += (microsTaken / 1000);
-#else
-		timer0_millis += (microsTaken / 1000);
-#endif
+		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
 	}
@@ -131,11 +130,7 @@ public:
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
-#if defined(__MK20DX128__)
-		systick_millis_count += (microsTaken / 1000);
-#else
-		timer0_millis += (microsTaken / 1000);
-#endif
+		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
 	}
