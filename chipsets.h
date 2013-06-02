@@ -140,6 +140,75 @@ public:
 #endif
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// P9813 definition - takes data/clock/select pin values (N.B. should take an SPI definition?)
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(24)>
+class P9813Controller : public CLEDController {
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	SPI mSPI;
+	CMinWait<24>  mWaitDelay;
+
+	void writeBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
+
+	inline void writeLed(const struct CRGB & data, uint8_t scale) __attribute__((always_inline)) {
+		// prep the byte
+		register uint8_t r = scale8(data[RGB_BYTE0(RGB_ORDER)], scale);
+		register uint8_t g = scale8(data[RGB_BYTE1(RGB_ORDER)], scale);
+		register uint8_t b = scale8(data[RGB_BYTE2(RGB_ORDER)], scale);
+
+		register uint8_t top = 0xC0 | (~b & 0xC0) >> 2 | (~g & 0xC0) >> 4 | (~r & 0xC0);
+		mSPI.writeByte(top); mSPI.writeByte(b); mSPI.writeByte(g); mSPI.writeByte(r);
+	}
+
+public:
+	P9813Controller() {}
+
+	virtual void init() { 
+		mSPI.init();
+	}
+
+	virtual void clearLeds(int nLeds) { 
+		showColor(CRGB(0,0,0), nLeds);
+	}
+	
+	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) {
+		mSPI.select();
+
+		writeBoundary();
+		while(nLeds--) { 
+			writeLed(data, scale);
+		}
+		writeBoundary();
+
+		mSPI.waitFully();
+		mSPI.release();
+		mWaitDelay.mark();
+	}
+
+	virtual void show(const struct CRGB *data, int nLeds, uint8_t scale) {
+		mSPI.select();
+
+		writeBoundary();
+		for(int i = 0; i < nLeds; i++) { 
+			writeLed(data[i], scale);
+		}
+		writeBoundary();
+
+		mSPI.release();
+	}
+
+#ifdef SUPPORT_ARGB
+	virtual void show(const struct CRGB *data, int nLeds, uint8_t scale) {
+		mWaitDelay.wait();
+		mSPI.template writeBytes3<1, RGB_ORDER>((byte*)data, nLeds * 4, scale);
+		mWaitDelay.mark();
+	}
+#endif
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
