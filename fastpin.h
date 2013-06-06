@@ -153,6 +153,8 @@ public:
 
 	inline static void strobe() __attribute__ ((always_inline)) { hi(); lo(); }
 	
+	inline static void toggle() __attribute__ ((always_inline)) { _PIN::r() = _MASK; }
+	
 	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
 	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
 	inline static void fastset(register port_ptr_t port, register uint8_t val) __attribute__ ((always_inline)) { set(val); }
