@@ -44,10 +44,12 @@ class Pin : public Selectable {
 	uint8_t mPinMask;
 	uint8_t mPin;
 	volatile uint8_t *mPort;
+	volatile uint8_t *mInPort;
 
 	void _init() { 
 		mPinMask = digitalPinToBitMask(mPin);
 		mPort = portOutputRegister(digitalPinToPort(mPin));
+		mInPort = portInputRegister(digitalPinToPort(mPin));
 	}
 public:
 	Pin(int pin) : mPin(pin) { _init(); }
@@ -61,7 +63,8 @@ public:
 	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; } 
 	inline void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
 
-	inline void strobe() __attribute__ ((always_inline)) { hi(); lo(); }
+	inline void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+	inline void toggle() __attribute__ ((always_inline)) { *mInPort = mPinMask; }
 
 	inline void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; } 
 	inline void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; } 
@@ -106,9 +109,11 @@ public:
 template<uint8_t PIN> class FastPin { 
 	static uint8_t sPinMask;
 	static volatile uint8_t *sPort;
+	static volatile uint8_t *sInPort;
 	static void _init() { 
 		sPinMask = digitalPinToBitMask(PIN);
 		sPort = portOutputRegister(digitalPinToPort(PIN));
+		sInPort = portInputRegister(digitalPinToPort(PIN));
 	}
 public:
 	typedef volatile uint8_t * port_ptr_t;
@@ -120,7 +125,9 @@ public:
 	inline static void hi() __attribute__ ((always_inline)) { *sPort |= sPinMask; } 
 	inline static void lo() __attribute__ ((always_inline)) { *sPort &= ~sPinMask; }
 
-	inline static void strobe() __attribute__ ((always_inline)) { hi(); lo(); }
+	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+
+	inline static void toggle() __attribute__ ((always_inline)) { *sInPort = sPinMask; }
 
 	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= sPinMask; } 
 	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~sPinMask; } 
@@ -151,10 +158,10 @@ public:
 	inline static void lo() __attribute__ ((always_inline)) { _PORT::r() &= ~_MASK; }
 	inline static void set(register uint8_t val) __attribute__ ((always_inline)) { _PORT::r() = val; }
 
-	inline static void strobe() __attribute__ ((always_inline)) { hi(); lo(); }
+	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 	
 	inline static void toggle() __attribute__ ((always_inline)) { _PIN::r() = _MASK; }
-	
+
 	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
 	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
 	inline static void fastset(register port_ptr_t port, register uint8_t val) __attribute__ ((always_inline)) { set(val); }
