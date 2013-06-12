@@ -205,7 +205,7 @@ public:
 #else
 		register data_ptr_t datapin = FastPin<DATA_PIN>::port();
 
-		if(FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
+		if(true || FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
 			// If data and clock are on different ports, then writing a bit will consist of writing the value foor
 			// the bit (hi or low) to the data pin port, and then two writes to the clock port to strobe the clock line
 			register clock_ptr_t clockpin = FastPin<CLOCK_PIN>::port();
@@ -244,7 +244,7 @@ public:
 		register clock_ptr_t clockpin = FastPin<CLOCK_PIN>::port();
 		register data_ptr_t datapin = FastPin<DATA_PIN>::port();
 
-		if(FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
+		if(true || FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
 			// If data and clock are on different ports, then writing a bit will consist of writing the value foor
 			// the bit (hi or low) to the data pin port, and then two writes to the clock port to strobe the clock line
 			register data_t datahi = FastPin<DATA_PIN>::hival();
@@ -305,7 +305,7 @@ public:
 		// then we can use a bunch of optimizations in here
 		register data_ptr_t datapin = FastPin<DATA_PIN>::port();
 
-		if(FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
+		if(true || FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
 			register clock_ptr_t clockpin = FastPin<CLOCK_PIN>::port();
 			// If data and clock are on different ports, then writing a bit will consist of writing the value foor
 			// the bit (hi or low) to the data pin port, and then two writes to the clock port to strobe the clock line

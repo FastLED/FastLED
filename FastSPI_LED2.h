@@ -43,6 +43,14 @@ public:
 
 	CLEDController *addLeds(CLEDController *pLed, const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
 
+	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN > CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
+		switch(CHIPSET) { 
+			case LPD8806: return addLeds(new LPD8806Controller<DATA_PIN, CLOCK_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case WS2801: return addLeds(new WS2801Controller<DATA_PIN, CLOCK_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case SM16716: return addLeds(new SM16716Controller<DATA_PIN, CLOCK_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+		}
+	}
+
 	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER > CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) { 
 			case LPD8806: return addLeds(new LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
