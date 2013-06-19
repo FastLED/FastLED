@@ -16,7 +16,7 @@
 //
 //////////////////////////////////////////////////
 
-#define NUM_LEDS 15
+#define NUM_LEDS 256
 
 CRGB leds[NUM_LEDS];
 
@@ -28,8 +28,8 @@ void setup() {
    	// setting brightness to 25% brightness
    	LEDS.setBrightness(64);
 
-   	// LEDS.addLeds<WS2811, 13>(leds, NUM_LEDS);
-   	LEDS.addLeds<TM1809, 13>(leds, NUM_LEDS);
+   	LEDS.addLeds<WS2811, 13, BRG>(leds, NUM_LEDS);
+   	// LEDS.addLeds<TM1809, 13, BRG>(leds, NUM_LEDS);
    	// LEDS.addLeds<UCS1903, 13>(leds, NUM_LEDS);
    	// LEDS.addLeds<TM1803, 13>(leds, NUM_LEDS);
    	// LEDS.addLeds<TM1829, 13>(leds, NUM_LEDS);
@@ -74,6 +74,9 @@ void loop() {
 			LEDS.show();
 			delay(10);
 		}
+
+		// leave the last pixel lit for a bit
+		delay(2000);
 
 		// fade up
 		for(int x = 0; x < 128; x++) { 

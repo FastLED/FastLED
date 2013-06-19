@@ -3,7 +3,7 @@
 
 #include "controller.h"
 #include "lib8tion.h"
-#include <avr/interrupt.h> // for cli/se definitions
+#include "led_sysdefs.h"
 
 // Macro to convert from nano-seconds to clocks and clocks to nano-seconds
 // #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
@@ -21,6 +21,9 @@
 #if defined(__MK20DX128__)
    extern volatile uint32_t systick_millis_count;
 #  define MS_COUNTER systick_millis_count
+#elif defined(__SAM3X8E__)
+	extern volatile uint32_t fuckit;
+#	define MS_COUNTER fuckit
 #else
 #  if defined(CORE_TEENSY)
      extern volatile unsigned long timer0_millis_count;
@@ -58,9 +61,7 @@ public:
 		mPort = FastPin<DATA_PIN>::port();
 	}
 
-#if defined(__MK20DX128__)
-	// We don't use the bitSetFast methods for ARM.
-#else
+#if defined(FASTLED_AVR)
 	template <int N>inline static void bitSetFast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
 		SET_HI; 								// 1/2 clock cycle if using out
@@ -152,7 +153,7 @@ public:
 		register data_t lo = *port & ~mask;
 		*port = lo;
 
-#if defined(__MK20DX128__)
+#if defined(FASTLED_ARM)
 		register uint32_t b;
 		if(ADVANCE) { 
 			b = data[SKIP + RGB_BYTE0(RGB_ORDER)];

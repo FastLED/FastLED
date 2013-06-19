@@ -17,6 +17,9 @@
 template<int CYCLES> inline void delaycycles();
 
 // TODO: ARM version of _delaycycles_
+
+// usable definition
+#if defined(FASTLED_AVR)
 // worker template - this will nop for LOOP * 3 + PAD cycles total
 template<int LOOP, int PAD> inline void _delaycycles_AVR() { 
 	delaycycles<PAD>();
@@ -33,8 +36,6 @@ template<int LOOP, int PAD> inline void _delaycycles_AVR() {
 		);
 }
 
-// usable definition
-#if !defined(__MK20DX128__)
 template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() { 
 	_delaycycles_AVR<CYCLES / 3, CYCLES % 3>();	
 }

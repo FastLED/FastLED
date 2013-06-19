@@ -1,7 +1,7 @@
 #ifndef __INC_CONTROLLER_H
 #define __INC_CONTROLLER_H
 
-#include <avr/io.h>
+#include "led_sysdefs.h"
 #include "pixeltypes.h"
 
 

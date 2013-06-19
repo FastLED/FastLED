@@ -1,5 +1,8 @@
 #include "FastSPI_LED2.h"
 
+#if defined(__SAM3X8E__)
+volatile uint32_t fuckit;
+#endif
 
 CFastSPI_LED2 LEDS;
 CFastSPI_LED2 & FastSPI_LED = LEDS;

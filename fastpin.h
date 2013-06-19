@@ -1,10 +1,7 @@
 #ifndef __INC_FASTPIN_H
 #define __INC_FASTPIN_H
 
-#include<avr/io.h>
-
-// Arduino.h needed for convinience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
-#include<Arduino.h>
+#include "led_sysdefs.h"
 
 #define NO_PIN 255 
 
@@ -41,10 +38,10 @@ public:
 };
 
 class Pin : public Selectable { 
-	uint8_t mPinMask;
+	RwReg mPinMask;
 	uint8_t mPin;
-	volatile uint8_t *mPort;
-	volatile uint8_t *mInPort;
+	volatile RwReg *mPort;
+	volatile RoReg *mInPort;
 
 	void _init() { 
 		mPinMask = digitalPinToBitMask(mPin);
@@ -54,8 +51,8 @@ class Pin : public Selectable {
 public:
 	Pin(int pin) : mPin(pin) { _init(); }
 
-	typedef volatile uint8_t * port_ptr_t;
-	typedef uint8_t port_t;
+	typedef volatile RwReg * port_ptr_t;
+	typedef RwReg port_t;
 
 	inline void setOutput() { pinMode(mPin, OUTPUT); }
 	inline void setInput() { pinMode(mPin, INPUT); }
@@ -107,17 +104,17 @@ public:
 /// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended, 
 /// as passing Pin objects around will likely -not- have the effect you're expecting.
 template<uint8_t PIN> class FastPin { 
-	static uint8_t sPinMask;
-	static volatile uint8_t *sPort;
-	static volatile uint8_t *sInPort;
+	static RwReg sPinMask;
+	static volatile RwReg *sPort;
+	static volatile RoReg *sInPort;
 	static void _init() { 
 		sPinMask = digitalPinToBitMask(PIN);
 		sPort = portOutputRegister(digitalPinToPort(PIN));
 		sInPort = portInputRegister(digitalPinToPort(PIN));
 	}
 public:
-	typedef volatile uint8_t * port_ptr_t;
-	typedef uint8_t port_t;
+	typedef volatile RwReg * port_ptr_t;
+	typedef RwReg port_t;
 
 	inline static void setOutput() { _init(); pinMode(PIN, OUTPUT); }
 	inline static void setInput() { _init(); pinMode(PIN, INPUT); }
@@ -141,8 +138,9 @@ public:
 	static port_t mask() __attribute__ ((always_inline)) { return sPinMask; }
 };
 
-template<uint8_t PIN> uint8_t FastPin<PIN>::sPinMask;
-template<uint8_t PIN> volatile uint8_t *FastPin<PIN>::sPort;
+template<uint8_t PIN> RwReg FastPin<PIN>::sPinMask;
+template<uint8_t PIN> volatile RwReg *FastPin<PIN>::sPort;
+template<uint8_t PIN> volatile RoReg *FastPin<PIN>::sInPort;
 
 /// Class definition for a Pin where we know the port registers at compile time for said pin.  This allows us to make
 /// a lot of optimizations, as the inlined hi/lo methods will devolve to a single io register write/bitset.  
@@ -172,9 +170,40 @@ public:
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
+/// Template definition for arduino due style ARM pins, providing direct access to the various GPIO registers.  Note that this
+/// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
+/// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
+/// The registers are data register, set output register, clear output register, set data direction register
+template<uint8_t PIN, uint32_t _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PDDR> class _DUEPIN { 
+public:
+	typedef volatile uint32_t * port_ptr_t;
+	typedef uint32_t port_t;
+
+	inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
+	inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+
+	inline static void hi() __attribute__ ((always_inline)) { _PSOR::r() = _MASK; }
+	inline static void lo() __attribute__ ((always_inline)) { _PCOR::r() = _MASK; }
+	inline static void set(register port_t val) __attribute__ ((always_inline)) { _PDOR::r() = val; }
+
+	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle();  }
+	
+	inline static void toggle() __attribute__ ((always_inline)) { _PDOR::r() ^= _MASK; }
+
+	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+
+	inline static port_t hival() __attribute__ ((always_inline)) { return _PDOR::r() | _MASK; }
+	inline static port_t loval() __attribute__ ((always_inline)) { return _PDOR::r() & ~_MASK; }
+	inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_PDOR::r(); }
+	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+};
+
 /// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
+/// The registers are data output, set output, clear output, toggle output, input, and direction
 template<uint8_t PIN, uint32_t _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN { 
 public:
 	typedef volatile uint32_t * port_ptr_t;
@@ -249,8 +278,12 @@ typedef volatile uint32_t * ptr_reg32_t;
 	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
 #define _IO32(L) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR);
 
-#define USE_BITBAND 1
+#define DUE_IO32(L) _RD32(REG_PIO ## L ## _ODSR); _RD32(REG_PIO ## L ## _SODR); _RD32(REG_PIO ## L ## _CODR); _RD32(REG_PIO ## L ## _OER);
+
+#define USE_BITBAND 0
 #if USE_BITBAND == 0
+  #define _DEFPIN_DUE(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN<PIN, 1 << BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
+  																			_R(GPIO ## L ## _OER)> {}; 
   #define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
 																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; 
 #else
@@ -382,6 +415,35 @@ _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 #define SPI_DATA 11
 #define SPI_CLOCK 13
 #define ARM_HARDWARE_SPI
+
+#elif defined(__SAM3X8E__)
+
+DUE_IO32(A);
+DUE_IO32(B);
+DUE_IO32(C);
+DUE_IO32(D);
+
+_DEFPIN_DUE(0, 8, A); _DEFPIN_DUE(1, 9, A); _DEFPIN_DUE(2, 25, B); _DEFPIN_DUE(3, 28, C);
+_DEFPIN_DUE(4, 29, A); _DEFPIN_DUE(5, 25, C); _DEFPIN_DUE(6, 24, C); _DEFPIN_DUE(7, 23, C);
+_DEFPIN_DUE(8, 22, C); _DEFPIN_DUE(9, 21, C); _DEFPIN_DUE(10, 28, A); _DEFPIN_DUE(11, 7, D);
+_DEFPIN_DUE(12, 8, D); _DEFPIN_DUE(13, 27, B); _DEFPIN_DUE(14, 4, D); _DEFPIN_DUE(15, 5, D);
+_DEFPIN_DUE(16, 13, A); _DEFPIN_DUE(17, 12, A); _DEFPIN_DUE(18, 11, A); _DEFPIN_DUE(19, 10, A);
+_DEFPIN_DUE(20, 12, B); _DEFPIN_DUE(21, 13, B); _DEFPIN_DUE(22, 26, B); _DEFPIN_DUE(23, 14, A);
+_DEFPIN_DUE(24, 15, A); _DEFPIN_DUE(25, 0, D); _DEFPIN_DUE(26, 1, D); _DEFPIN_DUE(27, 2, D);
+_DEFPIN_DUE(28, 3, D); _DEFPIN_DUE(29, 6, D); _DEFPIN_DUE(30, 9, D); _DEFPIN_DUE(31, 7, A);
+_DEFPIN_DUE(32, 10, D); _DEFPIN_DUE(33, 1, C); _DEFPIN_DUE(34, 2, C); _DEFPIN_DUE(35, 3, C);
+_DEFPIN_DUE(36, 4, C); _DEFPIN_DUE(37, 5, C); _DEFPIN_DUE(38, 6, C); _DEFPIN_DUE(39, 7, C);
+_DEFPIN_DUE(40, 8, C); _DEFPIN_DUE(41, 9, C); _DEFPIN_DUE(42, 19, A); _DEFPIN_DUE(43, 20, A);
+_DEFPIN_DUE(44, 19, C); _DEFPIN_DUE(45, 18, C); _DEFPIN_DUE(46, 17, C); _DEFPIN_DUE(47, 16, C);
+_DEFPIN_DUE(48, 15, C); _DEFPIN_DUE(49, 14, C); _DEFPIN_DUE(50, 13, C); _DEFPIN_DUE(51, 12, C);
+_DEFPIN_DUE(52, 21, B); _DEFPIN_DUE(53, 14, B); _DEFPIN_DUE(54, 16, A); _DEFPIN_DUE(55, 24, A);
+_DEFPIN_DUE(56, 23, A); _DEFPIN_DUE(57, 22, A); _DEFPIN_DUE(58, 6, A); _DEFPIN_DUE(59, 4, A);
+_DEFPIN_DUE(60, 3, A); _DEFPIN_DUE(61, 2, A); _DEFPIN_DUE(62, 17, B); _DEFPIN_DUE(63, 18, B);
+_DEFPIN_DUE(64, 19, B); _DEFPIN_DUE(65, 20, B); _DEFPIN_DUE(66, 15, B); _DEFPIN_DUE(67, 16, B);
+_DEFPIN_DUE(68, 1, A); _DEFPIN_DUE(69, 0, A); _DEFPIN_DUE(70, 17, A); _DEFPIN_DUE(71, 18, A);
+_DEFPIN_DUE(72, 30, C); _DEFPIN_DUE(73, 21, A); _DEFPIN_DUE(74, 25, A); _DEFPIN_DUE(75, 26, A);
+_DEFPIN_DUE(76, 27, A); _DEFPIN_DUE(77, 28, A); _DEFPIN_DUE(78, 23, B);
+
 #else
 
 #warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
