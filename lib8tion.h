@@ -124,7 +124,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 
 #include <stdint.h>
 
-#define LIB8STATIC __attribute__ ((unused)) static
+#define LIB8STATIC __attribute__ ((unused)) static inline
 
 
 #if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
@@ -426,7 +426,7 @@ LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 //         the numerator of a fraction whose denominator is 256
 //         In other words, it computes i * (scale / 256)
 //         4 clocks AVR, 2 clocks ARM
-LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
+LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale) 
 {
 #if SCALE8_C == 1
     return ((int)i * (int)(scale) ) >> 8;

@@ -40,7 +40,23 @@ template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 	_delaycycles_AVR<CYCLES / 3, CYCLES % 3>();	
 }
 #else
+// template<int LOOP, int PAD> inline void _delaycycles_ARM() { 
+// 	delaycycles<PAD>();
+// 	// the loop below is 3 cycles * LOOP.  the LDI is one cycle,
+// 	// the DEC is 1 cycle, the BRNE is 2 cycles if looping back and
+// 	// 1 if not (the LDI balances out the BRNE being 1 cycle on exit)
+// 	__asm__ __volatile__ ( 
+// 		"		mov.w r9, %0\n"
+// 		"L_%=:  subs.w r9, r9, #1\n"
+// 		"		bne.n L_%=\n"
+// 		: /* no outputs */ 
+// 		: "M" (LOOP) 
+// 		: "r9"
+// 		);
+// }
+
 template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() { 
+	// _delaycycles_ARM<CYCLES / 3, CYCLES % 3>();
 	NOP; delaycycles<CYCLES-1>();
 }
 #endif

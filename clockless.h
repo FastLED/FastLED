@@ -43,8 +43,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Convinience macros to wrap around the toggling of hi vs. lo
-#define SET_LO FLIP ? FastPin<DATA_PIN>::fastset(port, hi) : FastPin<DATA_PIN>::fastset(port, lo)
-#define SET_HI FLIP ? FastPin<DATA_PIN>::fastset(port, lo) : FastPin<DATA_PIN>::fastset(port, hi)
+#define SET_LO FLIP ? FastPin<DATA_PIN>::fastset(port, hi) : FastPin<DATA_PIN>::fastset(port, lo); 
+#define SET_HI FLIP ? FastPin<DATA_PIN>::fastset(port, lo) : FastPin<DATA_PIN>::fastset(port, hi); 
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
@@ -145,12 +145,12 @@ public:
 	// gcc will use register Y for the this pointer.
 	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register uint8_t scale, register const byte *rgbdata) {
 		register byte *data = (byte*)rgbdata;
-		register data_t mask = FastPin<DATA_PIN>::mask();
+		data_t mask = FastPin<DATA_PIN>::mask();
 		register data_ptr_t port = FastPin<DATA_PIN>::port();
 		nLeds *= (3 + SKIP);
 		register uint8_t *end = data + nLeds; 
-		register data_t hi = *port | mask;
-		register data_t lo = *port & ~mask;
+		register data_t hi = FastPin<DATA_PIN>::hival();
+		register data_t lo = FastPin<DATA_PIN>::loval();;
 		*port = lo;
 
 #if defined(FASTLED_ARM)

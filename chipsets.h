@@ -150,7 +150,6 @@ template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t S
 class P9813Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
-	CMinWait<24>  mWaitDelay;
 
 	void writeBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
 
@@ -186,7 +185,6 @@ public:
 
 		mSPI.waitFully();
 		mSPI.release();
-		mWaitDelay.mark();
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, uint8_t scale) {
@@ -203,9 +201,7 @@ public:
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CRGB *data, int nLeds, uint8_t scale) {
-		mWaitDelay.wait();
 		mSPI.template writeBytes3<1, RGB_ORDER>((byte*)data, nLeds * 4, scale);
-		mWaitDelay.mark();
 	}
 #endif
 };
@@ -296,8 +292,6 @@ public:
 
 // UCS1903 - 500ns, 1500ns, 500ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903Controller400Mhz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
 #if NO_TIME(500, 1500, 500) 
 #warning "Not enough clock cycles available for the UCS103"
@@ -305,16 +299,12 @@ class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS
 
 // TM1809 - 312.5ns, 312.5ns, 325ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1809Controller800Mhz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
 #if NO_TIME(350, 350, 550) 
 #warning "Not enough clock cycles available for the TM1809"
 #endif
 
 // WS2811 - 350n, 350ns, 550ns
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Mhz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550), RGB_ORDER> {};
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550), RGB_ORDER> {};
 
@@ -326,8 +316,6 @@ class WS2811Controller2800Khz : public ClocklessController2<DATA_PIN, DATA_PIN2,
 #endif
 
 // 750NS, 750NS, 750NS
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1803Controller400Mhz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1803Controller400Khz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
 #if NO_TIME(750, 750, 750) 
