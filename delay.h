@@ -55,6 +55,7 @@ template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 // 		);
 // }
 
+
 template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() { 
 	// _delaycycles_ARM<CYCLES / 3, CYCLES % 3>();
 	NOP; delaycycles<CYCLES-1>();
@@ -72,5 +73,32 @@ template<> __attribute__((always_inline)) inline void delaycycles<2>() {NOP;NOP;
 template<> __attribute__((always_inline)) inline void delaycycles<3>() {NOP;NOP;NOP;}
 template<> __attribute__((always_inline)) inline void delaycycles<4>() {NOP;NOP;NOP;NOP;}
 template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP;NOP;NOP;NOP;NOP;}
+
+#ifdef __SAM3X8E__
+class SysClockSaver {
+	SysTick_Type m_Saved;
+public:
+	SysClockSaver(int newTimeValue) { save(newTimeValue); }
+	void save(int newTimeValue) { 
+		m_Saved.CTRL = SysTick->CTRL;
+		SysTick->CTRL &= ~(SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
+		m_Saved.LOAD = SysTick->LOAD;
+		m_Saved.VAL = SysTick->VAL;
+
+		SysTick->VAL = 0;
+		SysTick->LOAD = newTimeValue;
+		SysTick->CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
+		SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+	}
+
+	void restore() { 
+		SysTick->CTRL &= ~(SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
+		SysTick->LOAD = m_Saved.LOAD;
+		SysTick->VAL = m_Saved.VAL;
+		SysTick->CTRL = m_Saved.CTRL;
+	}
+};
+
+#endif
 
 #endif

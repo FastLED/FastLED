@@ -300,7 +300,7 @@ class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS
 // TM1809 - 312.5ns, 312.5ns, 325ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
-#if NO_TIME(350, 350, 550) 
+#if NO_TIME(320, 320, 550) 
 #warning "Not enough clock cycles available for the TM1809"
 #endif
 

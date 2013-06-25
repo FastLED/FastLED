@@ -6,15 +6,15 @@
 #include <avr/interrupt.h> // for cli/se definitions
 
 // Define the rgister types
-#if defined(ARDUINO) && ARDUINO < 150
+#if defined(ARDUINO) // && ARDUINO < 150
 typedef volatile       uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
 typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
 #endif
 
 #else
 // reuseing/abusing cli/sei defs for due
-#define cli()  __disable_irq()
-#define sei() __enable_irq()
+#define cli()  __disable_irq(); __disable_fault_irq();
+#define sei() __enable_irq(); __enable_fault_irq();
 
 #endif
 

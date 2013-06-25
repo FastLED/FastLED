@@ -142,6 +142,8 @@ template<uint8_t PIN> RwReg FastPin<PIN>::sPinMask;
 template<uint8_t PIN> volatile RwReg *FastPin<PIN>::sPort;
 template<uint8_t PIN> volatile RoReg *FastPin<PIN>::sInPort;
 
+template<uint8_t PIN> class FastPinBB : public FastPin<PIN> {};
+
 /// Class definition for a Pin where we know the port registers at compile time for said pin.  This allows us to make
 /// a lot of optimizations, as the inlined hi/lo methods will devolve to a single io register write/bitset.  
 template<uint8_t PIN, uint8_t _MASK, typename _PORT, typename _DDR, typename _PIN> class _AVRPIN { 
@@ -309,18 +311,14 @@ typedef volatile uint32_t * ptr_reg32_t;
 
 #define DUE_IO32(L) _RD32(REG_PIO ## L ## _ODSR); _RD32(REG_PIO ## L ## _SODR); _RD32(REG_PIO ## L ## _CODR); _RD32(REG_PIO ## L ## _OER);
 
-#define USE_BITBAND 1
-#if USE_BITBAND == 0
   #define _DEFPIN_DUE(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN<PIN, 1 << BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
+  																			_R(GPIO ## L ## _OER)> {}; \
+  								   template<> class FastPinBB<PIN> : public _DUEPIN_BITBAND<PIN, BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
   																			_R(GPIO ## L ## _OER)> {}; 
   #define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
-																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; 
-#else
-  #define _DEFPIN_DUE(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN_BITBAND<PIN, BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
-  																			_R(GPIO ## L ## _OER)> {}; 
-  #define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
+																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; \
+									template<> class FastPinBB<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
  																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; 
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
