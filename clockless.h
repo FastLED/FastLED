@@ -521,8 +521,6 @@ public:
 		_CTRL;
 
 		while(data < end) { 
-			// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
-			// will bite me in the ass at some point, I know it.
 			for(register uint32_t i = 7; i > 0; i--) { 
 				AT_BIT_START(*port = 1);
 				if(b& 0x80) {} else { AT_MARK(*port = 0); }
