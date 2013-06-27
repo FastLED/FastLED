@@ -4,6 +4,14 @@
 
 #if defined(__MK20DX128__) && defined(CORE_TEENSY)
 
+#ifndef SPI_PUSHR_CONT
+#define SPI_PUSHR_CONT SPI0_PUSHR_CONT
+#define SPI_PUSHR_CTAS(X) SPI0_PUSHR_CTAS(X)
+#define SPI_PUSHR_EOQ SPI0_PUSHR_EOQ
+#define SPI_PUSHR_CTCNT SPI0_PUSHR_CTCNT
+#define SPI_PUSHR_PCS(X) SPI0_PUSHR_PCS(X)
+#endif
+
 // Template function that, on compilation, expands to a constant representing the highest bit set in a byte.  Right now, 
 // if no bits are set (value is 0), it returns 0, which is also the value returned if the lowest bit is the only bit
 // set (the zero-th bit).  Unclear if I  will want this to change at some point.
@@ -229,34 +237,34 @@ public:
 	public:
 		static void writeWord(uint16_t w) __attribute__((always_inline)) { 
 			if(WAIT_STATE == PRE) { wait(); }
-			SPI0_PUSHR = ((LAST_STATE == LAST) ? SPI0_PUSHR_EOQ : 0) |
-			             ((CONT_STATE == CONT) ? SPI0_PUSHR_CONT : 0) | 
-			             SPI0_PUSHR_CTAS(1) | (w & 0xFFFF);
+			SPI0_PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
+			             ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) | 
+			             SPI_PUSHR_CTAS(1) | (w & 0xFFFF);
 			if(WAIT_STATE == POST) { wait(); }
 		}
 
 		static void writeByte(uint8_t b) __attribute__((always_inline)) { 
 			if(WAIT_STATE == PRE) { wait(); }
-			SPI0_PUSHR = ((LAST_STATE == LAST) ? SPI0_PUSHR_EOQ : 0) |
-			             ((CONT_STATE == CONT) ? SPI0_PUSHR_CONT : 0) | 
-			             SPI0_PUSHR_CTAS(0) | (b & 0xFF);
+			SPI0_PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
+			             ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) | 
+			             SPI_PUSHR_CTAS(0) | (b & 0xFF);
 			if(WAIT_STATE == POST) { wait(); }
 		}
 	};
 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI0_PUSHR_CTAS(1) | (w & 0xFFFF); }
-	static void writeWordNoWait(uint16_t w) __attribute__((always_inline)) { SPI0_PUSHR = SPI0_PUSHR_CTAS(1) | (w & 0xFFFF); }
+	static void writeWord(uint16_t w) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI_PUSHR_CTAS(1) | (w & 0xFFFF); }
+	static void writeWordNoWait(uint16_t w) __attribute__((always_inline)) { SPI0_PUSHR = SPI_PUSHR_CTAS(1) | (w & 0xFFFF); }
 
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI0_PUSHR_CTAS(0) | (b & 0xFF); }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI0_PUSHR_CTAS(0) | (b & 0xFF); wait(); }
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI0_PUSHR_CTAS(0) | (b & 0xFF); }
+	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI_PUSHR_CTAS(0) | (b & 0xFF); }
+	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI_PUSHR_CTAS(0) | (b & 0xFF); wait(); }
+	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI_PUSHR_CTAS(0) | (b & 0xFF); }
 
-	static void writeWordCont(uint16_t w) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI0_PUSHR_CONT | SPI0_PUSHR_CTAS(1) | (w & 0xFFFF); }
-	static void writeWordContNoWait(uint16_t w) __attribute__((always_inline)) { SPI0_PUSHR = SPI0_PUSHR_CONT | SPI0_PUSHR_CTAS(1) | (w & 0xFFFF); }
+	static void writeWordCont(uint16_t w) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(1) | (w & 0xFFFF); }
+	static void writeWordContNoWait(uint16_t w) __attribute__((always_inline)) { SPI0_PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(1) | (w & 0xFFFF); }
 
-	static void writeByteCont(uint8_t b) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI0_PUSHR_CONT | SPI0_PUSHR_CTAS(0) | (b & 0xFF); }
-	static void writeByteContPostWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI0_PUSHR_CONT | SPI0_PUSHR_CTAS(0) | (b & 0xFF); wait(); }
-	static void writeByteContNoWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI0_PUSHR_CONT | SPI0_PUSHR_CTAS(0) | (b & 0xFF); }
+	static void writeByteCont(uint8_t b) __attribute__((always_inline)) { wait(); SPI0_PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); }
+	static void writeByteContPostWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); wait(); }
+	static void writeByteContNoWait(uint8_t b) __attribute__((always_inline)) { SPI0_PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); }
 
 	// not the most efficient mechanism in the world - but should be enough for sm16716 and friends
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
