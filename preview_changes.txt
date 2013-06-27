@@ -1,3 +1,9 @@
+Release Candidate 2 
+* mostly bug fixes
+* Fix SPI macro definitions for latest teensy3 software update
+* Teensy 2 compilation fix
+* hsv2rgb_rainbow performance fix
+
 Release Candidate 1
 * New unified/simplified API for adding/using controllers
 * fleshout clockless chip support
