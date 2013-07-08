@@ -118,29 +118,6 @@ public:
             }
     }	
 
-    static inline void set_ctar1_bits(int bits) { 
-	    // Set ctar1 to 16 bits
-	    int ctar = SPI0_CTAR1;
-	    
-	    // clear the FMSZ bits
-	    ctar &= SPI_CTAR_FMSZ(0x0F);
-	    ctar |= SPI_CTAR_FMSZ((bits-1) & 0x0F);
-
-	    update_ctar1(ctar);
-    }
-
-    static inline void set_ctar0_bits(int bits) { 
-	    // Set ctar1 to 16 bits
-	    int ctar = SPI0_CTAR1;
-	    
-	    // clear the FMSZ bits
-	    ctar &= SPI_CTAR_FMSZ(0x0F);
-	    ctar |= SPI_CTAR_FMSZ((bits-1) & 0x0F);
-
-	    update_ctar1(ctar);
-    }
-
-
     void setSPIRate() { 
 		// Configure CTAR0, defaulting to 8 bits and CTAR1, defaulting to 16 bits
 	 	uint32_t _PBR = 0;

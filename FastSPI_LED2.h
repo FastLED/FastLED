@@ -5,6 +5,7 @@
 #include "fastpin.h"
 #include "fastspi.h"
 #include "clockless.h"
+#include "block_clockless.h"
 #include "clockless2.h"
 #include "lib8tion.h"
 #include "hsv2rgb.h"
@@ -27,7 +28,11 @@ enum EClocklessChipsets {
 	TM1829
 };
 
-#define NUM_CONTROLLERS 8
+enum EBlockChipsets {
+	WS2811_PORTC
+};
+
+#define NUM_CONTROLLERS 32
 
 class CFastSPI_LED2 {
 	struct CControllerInfo { 
@@ -104,6 +109,13 @@ public:
 			case TM1803: return addLeds(new TM1803Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+		}
+	}
+
+	template<EBlockChipsets CHIPSET, int NUM_LANES>
+	CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
+		switch(CHIPSET) {
+			case WS2811_PORTC: return addLeds(new BlockClocklessController<NUM_LANES, NS(350), NS(350), NS(550)>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 	}
 
