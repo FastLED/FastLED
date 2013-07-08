@@ -471,7 +471,8 @@ LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
          "      mul %0, %1       \n"
          "      mov %0, r1       \n"
          "      add %0, %2       \n"
-         "L_%=: clr __zero_reg__ \n"
+         "      clr __zero_reg__ \n"
+         "L_%=:                  \n"
          
          : "+a" (i)
          : "a" (scale), "a" (nonzeroscale)
@@ -616,6 +617,43 @@ LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scal
 #error "No implementation for nscale8x3 available."
 #endif
 }
+
+// nscale8x2: scale two one byte values by a third one, which is treated as
+//         the numerator of a fraction whose demominator is 256
+//         In other words, it computes i,j * (scale / 256)
+//
+//         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
+
+LIB8STATIC void nscale8x2( uint8_t& i, uint8_t& j, fract8 scale)
+{
+#if SCALE8_C == 1
+    i = ((int)i * (int)(scale) ) >> 8;
+    j = ((int)j * (int)(scale) ) >> 8;
+#elif SCALE8_AVRASM == 1
+    i = scale8_LEAVING_R1_DIRTY(i, scale);
+    j = scale8_LEAVING_R1_DIRTY(j, scale);
+    cleanup_R1();
+#else
+#error "No implementation for nscale8x2 available."
+#endif
+}
+
+
+LIB8STATIC void nscale8x2_video( uint8_t& i, uint8_t& j, fract8 scale)
+{
+#if SCALE8_C == 1
+    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    i = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
+    j = (j == 0) ? 0 : (((int)j * (int)(scale) ) >> 8) + nonzeroscale;
+#elif SCALE8_AVRASM == 1
+    i = scale8_video_LEAVING_R1_DIRTY( i, scale);
+    j = scale8_video_LEAVING_R1_DIRTY( j, scale);
+    cleanup_R1();
+#else
+#error "No implementation for nscale8x2 available."
+#endif
+}
+
 
 // scale16by8: scale a 16-bit unsigned value by an 8-bit value,
 //         considered as numerator of a fraction whose denominator
