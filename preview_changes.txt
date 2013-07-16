@@ -1,3 +1,8 @@
+(Post-RC2 Changes)
+* Added ability to set pixel color directly from HSV
+* Added ability to retrieve current random16 seed
+
+
 Release Candidate 2 
 * mostly bug fixes
 * Fix SPI macro definitions for latest teensy3 software update

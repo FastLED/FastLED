@@ -4,9 +4,16 @@
 #include <stdint.h>
 #include "lib8tion.h"
 
+struct CRGB;
+struct CHSV;
+
+// Forward declaration of hsv2rgb_rainbow here,
+// to avoid circular dependencies.
+extern void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb);
+
 
 struct CHSV {
-	union {
+    union {
 		struct {
 		    union {
 		        uint8_t hue;
@@ -100,7 +107,7 @@ struct CRGB {
     {
     }
     
-    // allow construction from 32 (24) bit color code
+    // allow construction from 32-bit (really 24-bit) bit 0xRRGGBB color code
     inline CRGB( uint32_t colorcode)  __attribute__((always_inline))
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
@@ -114,6 +121,12 @@ struct CRGB {
         b = rhs.b;
     }
     
+    // allow construction from HSV color
+	inline CRGB(const CHSV& rhs) __attribute__((always_inline))
+    {
+        hsv2rgb_rainbow( rhs, *this);
+    }
+
     // allow assignment from one RGB struct to another
 	inline CRGB& operator= (const CRGB& rhs) __attribute__((always_inline))
     {
@@ -123,7 +136,7 @@ struct CRGB {
         return *this;
     }    
 
-    // allow assignment from one RGB struct to another
+    // allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
 	inline CRGB& operator= (const uint32_t colorcode) __attribute__((always_inline))
     {
         r = (colorcode >> 16) & 0xFF;
@@ -141,7 +154,28 @@ struct CRGB {
         return *this;
     }
     
-    // allow assignment from 32 (24) bit color code
+    // allow assignment from H, S, and V
+	inline CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val) __attribute__((always_inline))
+    {
+        hsv2rgb_rainbow( CHSV(hue, sat, val), *this);
+        return *this;
+    }
+    
+    // allow assignment from just a Hue, saturation and value automatically at max.
+	inline CRGB& setHue (uint8_t hue) __attribute__((always_inline))
+    {
+        hsv2rgb_rainbow( CHSV(hue, 255, 255), *this);
+        return *this;
+    }
+    
+    // allow assignment from HSV color
+	inline CRGB& operator= (const CHSV& rhs) __attribute__((always_inline))
+    {
+        hsv2rgb_rainbow( rhs, *this);
+        return *this;
+    }
+    
+    // allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
 	inline CRGB& setColorCode (uint32_t colorcode) __attribute__((always_inline))
     {
         r = (colorcode >> 16) & 0xFF;
