@@ -289,6 +289,13 @@ struct CRGB {
         return *this;
     }
 
+    // fadeLightBy is a synonym for nscale8_video( ..., 255-fadefactor)
+    inline CRGB& fadeLightBy (uint8_t fadefactor )
+    {
+        nscale8x3_video( r, g, b, 255 - fadefactor);
+        return *this;
+    }
+    
     // scale down a RGB to N 256ths of it's current brightness, using
     // 'plain math' dimming rules, which means that if the low light levels
     // may dim all the way to 100% black.
@@ -298,6 +305,13 @@ struct CRGB {
         return *this;
     }
 
+    // fadeToBlackBy is a synonym for nscale8( ..., 255-fadefactor)
+    inline CRGB& fadeToBlackBy (uint8_t fadefactor )
+    {
+        nscale8x3( r, g, b, 255 - fadefactor);
+        return *this;
+    }
+    
     // "or" operator brings each channel up to the higher of the two values
     inline CRGB& operator|= (const CRGB& rhs )
     {
@@ -367,7 +381,7 @@ struct CRGB {
         return avg;
     }
 
-    inline void nMaximizeBrightness( uint8_t limit = 255 )  {
+    inline void maximizeBrightness( uint8_t limit = 255 )  {
         uint8_t max = red;
         if( green > max) max = green;
         if( blue > max) max = blue;
