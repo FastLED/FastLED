@@ -41,7 +41,7 @@ void setup() {
    	LEDS.setBrightness(255);
 
       // Uncomment one of the following lines for your leds arrangement.
-      LEDS.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
+      // LEDS.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
       // LEDS.addLeds<TM1804, DATA_PIN, RGB>(leds, NUM_LEDS);
       // LEDS.addLeds<TM1809, DATA_PIN, RGB>(leds, NUM_LEDS);
       // LEDS.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
