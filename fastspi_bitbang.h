@@ -160,7 +160,7 @@ private:
 		}
 	}
 
-	// the version of write to use when clock and data are on the same pin with precomputed values for the various
+	// the version of write to use when clock and data are on the same port with precomputed values for the various
 	// combinations
 	template <uint8_t BIT> __attribute__((always_inline)) inline static void writeBit(uint8_t b, data_ptr_t clockdatapin, 
 													data_t datahiclockhi, data_t dataloclockhi, 
@@ -169,10 +169,12 @@ private:
 		writeBit<BIT>(b);
 #else
 		if(b & (1 << BIT)) { 
+			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclockhi); SPI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY;
 		} else { 
 			// NOP;
+			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclockhi); SPI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY;
 		}
