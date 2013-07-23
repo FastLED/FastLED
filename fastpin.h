@@ -385,7 +385,7 @@ _DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AV
 
 #define SPI_DATA 2
 #define SPI_CLOCK 1
-#define SPI_SELECT 3
+#define SPI_SELECT 0
 #define AVR_HARDWARE_SPI
 
 #elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)

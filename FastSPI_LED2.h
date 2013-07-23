@@ -104,6 +104,7 @@ public:
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
+		return NULL;
 	}
 
 	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER> 
@@ -118,13 +119,17 @@ public:
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
+		return NULL;
 	}
 
 	template<EBlockChipsets CHIPSET, int NUM_LANES>
 	CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) {
+#ifdef HAS_BLOCKLESS
 			case WS2811_PORTC: return addLeds(new BlockClocklessController<NUM_LANES, NS(350), NS(350), NS(550)>(), data, nLedsOrOffset, nLedsIfOffset);
+#endif
 		}
+		return NULL;
 	}
 
 	void setBrightness(uint8_t scale) { m_nScale = scale; }

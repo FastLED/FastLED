@@ -50,7 +50,7 @@
 #define SKIPLIST ~PORT_MASK
 
 #if defined(__SAM3X8E__)
-
+#define HAS_BLOCKLESS 1
 template <int NUM_LANES, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int WAIT_TIME = 50>
 class BlockClocklessController : public CLEDController {
 	typedef typename FastPinBB<1>::port_ptr_t data_ptr_t;
@@ -66,38 +66,37 @@ class BlockClocklessController : public CLEDController {
 
 		uint32_t *outputdata = m_pBuffer;
 		for(register int i = 0; i < num_leds; i++) {
-		  // register byte rgboffset = R0;
-		  for(int rgb = 0; rgb < 3; rgb++) {
-		  	register byte rgboffset = rgb;
-		    register uint32_t mask = 0x01; // 0x01;
-		    register uint32_t output[8] = {0,0,0,0,0,0,0,0};
+			register byte rgboffset = RGB_BYTE0(RGB_ORDER);
+			for(int rgb = 0; rgb < 3; rgb++) {
+				register uint32_t mask = 0x01; // 0x01;
+				register uint32_t output[8] = {0,0,0,0,0,0,0,0};
 
-		    // set the base address to skip through
-		    uint8_t *database = leddata + (3*i) + rgboffset;
-		    for(int j = 0; j < NUM_LANES; j++) {
-		      register uint8_t byte = ~scale8(*database, scale);
-		      if(byte & 0x80) { output[0] |= mask; }
-		      if(byte & 0x40) { output[1] |= mask; }
-		      if(byte & 0x20) { output[2] |= mask; }
-		      if(byte & 0x10) { output[3] |= mask; }
-		      if(byte & 0x08) { output[4] |= mask; }
-		      if(byte & 0x04) { output[5] |= mask; }
-		      if(byte & 0x02) { output[6] |= mask; }
-		      if(byte & 0x01) { output[7] |= mask; }
+				// set the base address to skip through
+				uint8_t *database = leddata + (3*i) + rgboffset;
+				for(int j = 0; j < NUM_LANES; j++) {
+					register uint8_t byte = ~scale8(*database, scale);
+					if(byte & 0x80) { output[0] |= mask; }
+					if(byte & 0x40) { output[1] |= mask; }
+					if(byte & 0x20) { output[2] |= mask; }
+					if(byte & 0x10) { output[3] |= mask; }
+					if(byte & 0x08) { output[4] |= mask; }
+					if(byte & 0x04) { output[5] |= mask; }
+					if(byte & 0x02) { output[6] |= mask; }
+					if(byte & 0x01) { output[7] |= mask; }
 
-		      // SKIPLIST is a 32 bit constant that contains the bit positions that are off limits, courtesy of port stupidities
-		      do { mask <<= 1; } while(SKIPLIST & mask);
+					// SKIPLIST is a 32 bit constant that contains the bit positions that are off limits, courtesy of port stupidities
+					do { mask <<= 1; } while(SKIPLIST & mask);
 
-		      // move the data pointer forward a lane
-		      database += (num_leds * 3);
-		    }
+					// move the data pointer forward a lane
+					database += (num_leds * 3);
 
-		    // cycle between rgb ordering according to RGB order set (may need per-lane rgb ordering?  ugh ugh ugh, i hope not!)
-		    // rgbbase = (rgbbase == RGB0(RGB_ORDER)) ? RGB1(RGB_ORDER) : (rgbbase == RGB1(RGB_ORDER) ?  RGB2(RGB_ORDER) : RGB0(RGB_ORDER);
-		    
-		    // copy data out
-		    for(int j = 0; j < 8; j++) { *outputdata++ = output[j]; }
-		  }
+					// cycle between rgb ordering according to RGB order set (may need per-lane rgb ordering?  ugh ugh ugh, i hope not!)
+					rgboffset = (rgboffset == RGB_BYTE0(RGB_ORDER)) ? RGB_BYTE1(RGB_ORDER) : (rgboffset == RGB_BYTE1(RGB_ORDER) ?  RGB_BYTE2(RGB_ORDER) : RGB_BYTE0(RGB_ORDER));
+
+					// copy data out
+					for(int j = 0; j < 8; j++) { *outputdata++ = output[j]; }
+				}
+			}
 		}	
 	}
 

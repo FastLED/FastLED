@@ -144,7 +144,6 @@ public:
 	// gcc will use register Y for the this pointer.
 	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register uint8_t scale, register const byte *rgbdata) {
 		register byte *data = (byte*)rgbdata;
-		data_t mask = FastPin<DATA_PIN>::mask();
 		register data_ptr_t port = FastPin<DATA_PIN>::port();
 		nLeds *= (3 + SKIP);
 		register uint8_t *end = data + nLeds; 
@@ -266,11 +265,8 @@ public:
 	}
 #endif
 
-	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
-	// gcc will use register Y for the this pointer.
 	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register uint8_t scale, register const byte *rgbdata) {
 		register byte *data = (byte*)rgbdata;
-		data_t mask = FastPin<DATA_PIN>::mask();
 		register data_ptr_t port = FastPin<DATA_PIN>::port();
 		nLeds *= (3 + SKIP);
 		register uint8_t *end = data + nLeds; 
