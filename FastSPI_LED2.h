@@ -29,7 +29,6 @@ enum EClocklessChipsets {
 	WS2812B,
 	UCS1903,
 	TM1829
-	UCS1903
 };
 
 enum EBlockChipsets {
@@ -150,6 +149,8 @@ public:
 	void show() { show(m_nScale); }
 
 	void clear(boolean includeLedData = true);
+
+	void clearData();
 
 	void showColor(const struct CRGB & color, uint8_t scale);
 
