@@ -36,10 +36,6 @@ void setup() {
 	// sanity check delay - allows reprogramming if accidently blowing power w/leds
    	delay(2000);
 
-   	// For safety (to prevent too high of a power draw), the test case defaults to
-   	// setting brightness to 25% brightness
-   	LEDS.setBrightness(255);
-
       // Uncomment one of the following lines for your leds arrangement.
       // LEDS.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
       // LEDS.addLeds<TM1804, DATA_PIN, RGB>(leds, NUM_LEDS);
