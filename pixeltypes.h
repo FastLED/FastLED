@@ -4,9 +4,16 @@
 #include <stdint.h>
 #include "lib8tion.h"
 
+struct CRGB;
+struct CHSV;
+
+// Forward declaration of hsv2rgb_rainbow here,
+// to avoid circular dependencies.
+extern void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb);
+
 
 struct CHSV {
-	union {
+    union {
 		struct {
 		    union {
 		        uint8_t hue;
@@ -100,7 +107,7 @@ struct CRGB {
     {
     }
     
-    // allow construction from 32 (24) bit color code
+    // allow construction from 32-bit (really 24-bit) bit 0xRRGGBB color code
     inline CRGB( uint32_t colorcode)  __attribute__((always_inline))
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
@@ -114,6 +121,12 @@ struct CRGB {
         b = rhs.b;
     }
     
+    // allow construction from HSV color
+	inline CRGB(const CHSV& rhs) __attribute__((always_inline))
+    {
+        hsv2rgb_rainbow( rhs, *this);
+    }
+
     // allow assignment from one RGB struct to another
 	inline CRGB& operator= (const CRGB& rhs) __attribute__((always_inline))
     {
@@ -123,7 +136,7 @@ struct CRGB {
         return *this;
     }    
 
-    // allow assignment from one RGB struct to another
+    // allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
 	inline CRGB& operator= (const uint32_t colorcode) __attribute__((always_inline))
     {
         r = (colorcode >> 16) & 0xFF;
@@ -141,7 +154,28 @@ struct CRGB {
         return *this;
     }
     
-    // allow assignment from 32 (24) bit color code
+    // allow assignment from H, S, and V
+	inline CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val) __attribute__((always_inline))
+    {
+        hsv2rgb_rainbow( CHSV(hue, sat, val), *this);
+        return *this;
+    }
+    
+    // allow assignment from just a Hue, saturation and value automatically at max.
+	inline CRGB& setHue (uint8_t hue) __attribute__((always_inline))
+    {
+        hsv2rgb_rainbow( CHSV(hue, 255, 255), *this);
+        return *this;
+    }
+    
+    // allow assignment from HSV color
+	inline CRGB& operator= (const CHSV& rhs) __attribute__((always_inline))
+    {
+        hsv2rgb_rainbow( rhs, *this);
+        return *this;
+    }
+    
+    // allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
 	inline CRGB& setColorCode (uint32_t colorcode) __attribute__((always_inline))
     {
         r = (colorcode >> 16) & 0xFF;
@@ -255,6 +289,13 @@ struct CRGB {
         return *this;
     }
 
+    // fadeLightBy is a synonym for nscale8_video( ..., 255-fadefactor)
+    inline CRGB& fadeLightBy (uint8_t fadefactor )
+    {
+        nscale8x3_video( r, g, b, 255 - fadefactor);
+        return *this;
+    }
+    
     // scale down a RGB to N 256ths of it's current brightness, using
     // 'plain math' dimming rules, which means that if the low light levels
     // may dim all the way to 100% black.
@@ -264,6 +305,13 @@ struct CRGB {
         return *this;
     }
 
+    // fadeToBlackBy is a synonym for nscale8( ..., 255-fadefactor)
+    inline CRGB& fadeToBlackBy (uint8_t fadefactor )
+    {
+        nscale8x3( r, g, b, 255 - fadefactor);
+        return *this;
+    }
+    
     // "or" operator brings each channel up to the higher of the two values
     inline CRGB& operator|= (const CRGB& rhs )
     {
@@ -333,7 +381,7 @@ struct CRGB {
         return avg;
     }
 
-    inline void nMaximizeBrightness( uint8_t limit = 255 )  {
+    inline void maximizeBrightness( uint8_t limit = 255 )  {
         uint8_t max = red;
         if( green > max) max = green;
         if( blue > max) max = blue;

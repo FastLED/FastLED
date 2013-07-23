@@ -969,6 +969,11 @@ LIB8STATIC void random16_set_seed( uint16_t seed)
     rand16seed = seed;
 }
 
+LIB8STATIC uint16_t random16_get_seed()
+{
+    return rand16seed;
+}
+
 LIB8STATIC void random16_add_entropy( uint16_t entropy)
 {
     rand16seed += entropy;

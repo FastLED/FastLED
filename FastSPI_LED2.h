@@ -22,10 +22,14 @@ enum ESPIChipsets {
 enum EClocklessChipsets {
 	DMX,
 	TM1809,
+	TM1804,
 	TM1803,
 	WS2811,
+	WS2812,
+	WS2812B,
 	UCS1903,
 	TM1829
+	UCS1903
 };
 
 enum EBlockChipsets {
@@ -99,9 +103,12 @@ public:
 			case DMX: return addLeds(new DMXController<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 #endif
 			case TM1829: return addLeds(new TM1829Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case TM1804:
 			case TM1809: return addLeds(new TM1809Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 			case TM1803: return addLeds(new TM1803Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case WS2812: 
+			case WS2812B:
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 		return NULL;
@@ -117,6 +124,8 @@ public:
 			case TM1809: return addLeds(new TM1809Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case TM1803: return addLeds(new TM1803Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+			case WS2812: 
+			case WS2812B:
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 		return NULL;
