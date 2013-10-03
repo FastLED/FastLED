@@ -28,6 +28,7 @@ enum EClocklessChipsets {
 	WS2812,
 	WS2812B,
 	UCS1903,
+	NEOPIXEL,
 	TM1829
 };
 
@@ -108,6 +109,7 @@ public:
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 			case WS2812: 
 			case WS2812B:
+			case NEOPIXEL:
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 		return NULL;
@@ -125,6 +127,7 @@ public:
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 			case WS2812: 
 			case WS2812B:
+			case NEOPIXEL:
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 		return NULL;
@@ -141,6 +144,7 @@ public:
 	}
 
 	void setBrightness(uint8_t scale) { m_nScale = scale; }
+	void getBrightness() { return m_nScale; }
 
 	/// Update all our controllers with the current led colors, using the passed in brightness
 	void show(uint8_t scale);

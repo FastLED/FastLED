@@ -195,7 +195,10 @@ struct CRGB {
     }
     
     // add a contstant to each channel, saturating at 0xFF
-    inline CRGB& operator+= (uint8_t d )
+    // this is NOT an operator+= overload because the compiler
+    // can't usefully decide when it's being passed a 32-bit
+    // constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
+    inline CRGB& addToRGB (uint8_t d )
     {
         r = qadd8( r, d);
         g = qadd8( g, d);
@@ -213,7 +216,10 @@ struct CRGB {
     }
     
     // subtract a constant from each channel, saturating at 0x00
-    inline CRGB& operator-= (uint8_t d )
+    // this is NOT an operator+= overload because the compiler
+    // can't usefully decide when it's being passed a 32-bit
+    // constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
+    inline CRGB& subtractFromRGB(uint8_t d )
     {
         r = qsub8( r, d);
         g = qsub8( g, d);
@@ -224,7 +230,7 @@ struct CRGB {
     // subtract a constant of '1' from each channel, saturating at 0x00
     inline CRGB& operator-- ()  __attribute__((always_inline))
     {
-        *(this) -= 1;
+        subtractFromRGB(1);
         return *this;
     }
     
@@ -239,7 +245,7 @@ struct CRGB {
     // add a constant of '1' from each channel, saturating at 0xFF
     inline CRGB& operator++ ()  __attribute__((always_inline))
     {
-        *(this) += 1;
+        addToRGB(1);
         return *this;
     }
     
