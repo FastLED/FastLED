@@ -144,7 +144,7 @@ public:
 	}
 
 	void setBrightness(uint8_t scale) { m_nScale = scale; }
-	void getBrightness() { return m_nScale; }
+	uint8_t getBrightness() { return m_nScale; }
 
 	/// Update all our controllers with the current led colors, using the passed in brightness
 	void show(uint8_t scale);
