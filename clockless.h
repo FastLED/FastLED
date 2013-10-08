@@ -77,12 +77,12 @@ public:
 	template <int N, int ADJ>inline static void bitSetLast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
 		FastPin<DATA_PIN>::fastset(port, hi); 							// 1 clock cycle if using out, 2 otherwise
-		delaycycles<T1 - (_CYCLES(DATA_PIN) + 1)>();					// 1st cycle length minus 1 clock for out, 1 clock for sbrs
+		delaycycles<T1 - (_CYCLES(DATA_PIN))>();					// 1st cycle length minus 1 clock for out, 1 clock for sbrs
 		__asm__ __volatile__ ("sbrs %0, %1" :: "r" (b), "M" (N) :); // 1 clock for check (+1 if skipping, next op is also 1 clock)
 
 		// Second cycle
 		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
-		delaycycles<T2 - _CYCLES(DATA_PIN)>(); 						// 2nd cycle length minus 1/2 clock for out
+		delaycycles<T2 - (_CYCLES(DATA_PIN))>(); 						// 2nd cycle length minus 1/2 clock for out
 
 		// Third cycle
 		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
@@ -285,13 +285,16 @@ public:
 			}
 			delaycycles<1>();
 			// Leave an extra 2 clocks for the next byte load
-			bitSetLast<7, 0>(port, hi, lo, b);
+			bitSetLast<7, 1>(port, hi, lo, b);
+			delaycycles<1>();
+
 			// Leave an extra 4 clocks for the scale
-			bitSetLast<6, 5>(port, hi, lo, b);
+			bitSetLast<6, 6>(port, hi, lo, b);
 			if(ADVANCE) { 
 				c = data[SKIP + RGB_BYTE1(RGB_ORDER)];
 			} else { 
 				c = rgbdata[SKIP + RGB_BYTE1(RGB_ORDER)];
+				delaycycles<1>();
 			}
 			c = scale8_LEAVING_R1_DIRTY(c, scale);
 			bitSetLast<5, 1>(port, hi, lo, b);
@@ -302,13 +305,16 @@ public:
 			}
 			delaycycles<1>();
 			// Leave an extra 2 clocks for the next byte load
-			bitSetLast<7, 0>(port, hi, lo, c);
+			bitSetLast<7, 1>(port, hi, lo, c);
+			delaycycles<1>();
+			
 			// Leave an extra 4 clocks for the scale
-			bitSetLast<6, 5>(port, hi, lo, c);
+			bitSetLast<6, 6>(port, hi, lo, c);
 			if(ADVANCE) { 
 				d = data[SKIP + RGB_BYTE2(RGB_ORDER)];
 			} else { 
 				d = rgbdata[SKIP + RGB_BYTE2(RGB_ORDER)];
+				delaycycles<1>();
 			}
 			d = scale8_LEAVING_R1_DIRTY(d, scale);
 			bitSetLast<5, 1>(port, hi, lo, c);
@@ -322,11 +328,12 @@ public:
 			bitSetLast<7, 2>(port, hi, lo, d);
 			data += (SKIP + 3);
 			// Leave an extra 4 clocks for the scale
-			bitSetLast<6, 5>(port, hi, lo, d);
+			bitSetLast<6, 6>(port, hi, lo, d);
 			if(ADVANCE) { 
 				b = data[SKIP + RGB_BYTE0(RGB_ORDER)];
 			} else { 
 				b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
+				delaycycles<1>();
 			}
 			b = scale8_LEAVING_R1_DIRTY(b, scale);
 			bitSetLast<5, 6>(port, hi, lo, d);

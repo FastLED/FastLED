@@ -1,5 +1,6 @@
 (Post RC3)
 * Added NEOPIXEL as a synonym for WS2811
+* Fix WS2811/WS2812B timings, bring it in line to exactly 1.25ns/bit.  
 
 Release Candidate 3
 * Fixed bug when Clock and Data were on the same port

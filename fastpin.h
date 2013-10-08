@@ -31,7 +31,11 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#define _CYCLES(_PIN) (((_PIN >= 62 ) || (_PIN>=42 && _PIN<=49) || (_PIN>=14 && _PIN <=17) || (_PIN>=6 && _PIN <=9)) ? 2 : 1)
+#else
 #define _CYCLES(_PIN) ((_PIN >= 24) ? 2 : 1)
+#endif
 
 class Selectable {
 public:
