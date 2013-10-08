@@ -330,6 +330,8 @@ typedef volatile uint32_t * ptr_reg32_t;
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 // Accelerated port definitions for arduino avrs
 _IO(D); _IO(B); _IO(C);
+
+#define MAX_PIN 19
 _DEFPIN_AVR( 0, 0x01, D); _DEFPIN_AVR( 1, 0x02, D); _DEFPIN_AVR( 2, 0x04, D); _DEFPIN_AVR( 3, 0x08, D);
 _DEFPIN_AVR( 4, 0x10, D); _DEFPIN_AVR( 5, 0x20, D); _DEFPIN_AVR( 6, 0x40, D); _DEFPIN_AVR( 7, 0x80, D);
 _DEFPIN_AVR( 8, 0x01, B); _DEFPIN_AVR( 9, 0x02, B); _DEFPIN_AVR(10, 0x04, B); _DEFPIN_AVR(11, 0x08, B);
@@ -346,6 +348,7 @@ _DEFPIN_AVR(16, 0x04, C); _DEFPIN_AVR(17, 0x08, C); _DEFPIN_AVR(18, 0x10, C); _D
 
 _IO(A); _IO(B); _IO(C); _IO(D); _IO(E); _IO(F); _IO(G); _IO(H); _IO(J); _IO(K); _IO(L);
 
+#define MAX_PIN 69
 _DEFPIN_AVR(0, 1, E); _DEFPIN_AVR(1, 2, E); _DEFPIN_AVR(2, 16, E); _DEFPIN_AVR(3, 32, E); 
 _DEFPIN_AVR(4, 32, G); _DEFPIN_AVR(5, 8, E); _DEFPIN_AVR(6, 8, H); _DEFPIN_AVR(7, 16, H); 
 _DEFPIN_AVR(8, 32, H); _DEFPIN_AVR(9, 64, H); _DEFPIN_AVR(10, 16, B); _DEFPIN_AVR(11, 32, B); 
@@ -376,6 +379,7 @@ _DEFPIN_AVR(68, 64, K); _DEFPIN_AVR(69, 128, K);
 // teensy defs
 _IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
 
+#define MAX_PIN 23
 _DEFPIN_AVR(0, 1, B); _DEFPIN_AVR(1, 2, B); _DEFPIN_AVR(2, 4, B); _DEFPIN_AVR(3, 8, B); 
 _DEFPIN_AVR(4, 128, B); _DEFPIN_AVR(5, 1, D); _DEFPIN_AVR(6, 2, D); _DEFPIN_AVR(7, 4, D); 
 _DEFPIN_AVR(8, 8, D); _DEFPIN_AVR(9, 64, C); _DEFPIN_AVR(10, 128, C); _DEFPIN_AVR(11, 64, D); 
@@ -393,6 +397,7 @@ _DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AV
 
 _IO(A); _IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
 
+#define MAX_PIN 45
 _DEFPIN_AVR(0, 1, D); _DEFPIN_AVR(1, 2, D); _DEFPIN_AVR(2, 4, D); _DEFPIN_AVR(3, 8, D); 
 _DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 32, D); _DEFPIN_AVR(6, 64, D); _DEFPIN_AVR(7, 128, D); 
 _DEFPIN_AVR(8, 1, E); _DEFPIN_AVR(9, 2, E); _DEFPIN_AVR(10, 1, C); _DEFPIN_AVR(11, 2, C); 
@@ -416,6 +421,7 @@ _DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F);
 // leonard defs
 _IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
 
+#define MAX_PIN 23
 _DEFPIN_AVR(0, 4, D); _DEFPIN_AVR(1, 8, D); _DEFPIN_AVR(2, 2, D); _DEFPIN_AVR(3, 1, D); 
 _DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 64, C); _DEFPIN_AVR(6, 128, D); _DEFPIN_AVR(7, 64, E); 
 _DEFPIN_AVR(8, 16, B); _DEFPIN_AVR(9, 32, B); _DEFPIN_AVR(10, 64, B); _DEFPIN_AVR(11, 128, B); 
@@ -431,6 +437,7 @@ _DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_A
 
 _IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
 
+#define MAX_PIN 33
 _DEFPIN_ARM(0, 16, B); _DEFPIN_ARM(1, 17, B); _DEFPIN_ARM(2, 0, D); _DEFPIN_ARM(3, 12, A);
 _DEFPIN_ARM(4, 13, A); _DEFPIN_ARM(5, 7, D); _DEFPIN_ARM(6, 4, D); _DEFPIN_ARM(7, 2, D);
 _DEFPIN_ARM(8, 3, D); _DEFPIN_ARM(9, 3, C); _DEFPIN_ARM(10, 4, C); _DEFPIN_ARM(11, 6, C);
@@ -452,6 +459,7 @@ DUE_IO32(B);
 DUE_IO32(C);
 DUE_IO32(D);
 
+#define MAX_PIN 78
 _DEFPIN_DUE(0, 8, A); _DEFPIN_DUE(1, 9, A); _DEFPIN_DUE(2, 25, B); _DEFPIN_DUE(3, 28, C);
 _DEFPIN_DUE(4, 26, C); _DEFPIN_DUE(5, 25, C); _DEFPIN_DUE(6, 24, C); _DEFPIN_DUE(7, 23, C);
 _DEFPIN_DUE(8, 22, C); _DEFPIN_DUE(9, 21, C); _DEFPIN_DUE(10, 29, C); _DEFPIN_DUE(11, 7, D);
