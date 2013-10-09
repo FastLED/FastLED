@@ -136,6 +136,30 @@ public:
 	}
 #endif
 
+#if defined(__MK20DX128__)
+	inline static void write8Bits(register data_ptr_t port, register data_t hi, register data_t lo, register uint32_t & b)  __attribute__ ((always_inline)) {
+		// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
+		// will bite me in the ass at some point, I know it.
+		for(register uint32_t i = 7; i > 0; i--) { 
+			FastPin<DATA_PIN>::fastset(port, hi);
+			delaycycles<T1 - 5>(); // 5 cycles - 2 store, 1 and, 1 test, 1 if
+			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+			b <<= 1;
+			delaycycles<T2 - 2>(); // 2 cycles,  1 store/skip,  1 shift 
+			FastPin<DATA_PIN>::fastset(port, lo);
+			delaycycles<T3 - 5>(); // 3 cycles, 2 store, 1 sub, 1 branch backwards
+		}
+		// delay an extra cycle because falling out of the loop takes on less cycle than looping around
+		delaycycles<1>();
+
+		FastPin<DATA_PIN>::fastset(port, hi);
+		delaycycles<T1 - 6>();
+		if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+		delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
+		FastPin<DATA_PIN>::fastset(port, lo);
+	}
+#endif
+
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
 	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register uint8_t scale, register const byte *rgbdata) {
@@ -150,67 +174,20 @@ public:
 
 #if defined(__MK20DX128__)
 		register uint32_t b;
-		if(ADVANCE) { 
-			b = data[SKIP + RGB_BYTE0(RGB_ORDER)];
-		} else { 
-			b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
-		}
+		b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE0(RGB_ORDER)];
 		b = scale8(b, scale);
 		while(data < end) { 
-			// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
-			// will bite me in the ass at some point, I know it.
-			for(register uint32_t i = 7; i > 0; i--) { 
-				FastPin<DATA_PIN>::fastset(port, hi);
-				delaycycles<T1 - 3>(); // 3 cycles - 1 store, 1 test, 1 if
-				if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
-				b <<= 1;
-				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
-				FastPin<DATA_PIN>::fastset(port, lo);
-				delaycycles<T3 - 3>(); // 3 cycles, 1 store, 1 sub, 1 branch backwards
-			}
-			// extra delay because branch is faster falling through
-			delaycycles<1>();
+			// Write first byte, read next byte
+			write8Bits(port, hi, lo, b);
 
-			// 8th bit, interleave loading rest of data
-			FastPin<DATA_PIN>::fastset(port, hi);
-			delaycycles<T1 - 3>();
-			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
-			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
-			FastPin<DATA_PIN>::fastset(port, lo);
-
-			if(ADVANCE) { 
-				b = data[SKIP + RGB_BYTE1(RGB_ORDER)];
-			} else { 
-				b = rgbdata[SKIP + RGB_BYTE1(RGB_ORDER)];
-			}
+			b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE1(RGB_ORDER)];
 			b = scale8(b, scale);
-
 			delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
 
-			for(register uint32_t i = 7; i > 0; i--) { 
-				FastPin<DATA_PIN>::fastset(port, hi);
-				delaycycles<T1 - 3>(); // 3 cycles - 1 store, 1 test, 1 if
-				if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
-				b <<= 1;
-				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
-				FastPin<DATA_PIN>::fastset(port, lo);
-				delaycycles<T3 - 3>(); // 3 cycles, 1 store, 1 sub, 1 branch backwards
-			}
-			// extra delay because branch is faster falling through
-			delaycycles<1>();
+			// Write second byte
+			write8Bits(port, hi, lo, b);
 
-			// 8th bit, interleave loading rest of data
-			FastPin<DATA_PIN>::fastset(port, hi);
-			delaycycles<T1 - 3>();
-			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
-			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
-			FastPin<DATA_PIN>::fastset(port, lo);
-
-			if(ADVANCE) { 
-				b = data[SKIP + RGB_BYTE2(RGB_ORDER)];
-			} else { 
-				b = rgbdata[SKIP + RGB_BYTE2(RGB_ORDER)];
-			}
+			b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE2(RGB_ORDER)];
 			b = scale8(b, scale);
 
 			data += 3 + SKIP;
@@ -220,33 +197,13 @@ public:
 				delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
 			}
 
-			for(register uint32_t i = 7; i > 0; i--) { 
-				FastPin<DATA_PIN>::fastset(port, hi);
-				delaycycles<T1 - 3>(); // 3 cycles - 1 store, 1 test, 1 if
-				if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
-				b <<= 1;
-				delaycycles<T2 - 3>(); // 3 cycles, 1 store, 1 store/skip,  1 shift 
-				FastPin<DATA_PIN>::fastset(port, lo);
-				delaycycles<T3 - 3>(); // 3 cycles, 1 store, 1 sub, 1 branch backwards
-			}
-			// extra delay because branch is faster falling through
-			delaycycles<1>();
+			// Write third byte
+			write8Bits(port, hi, lo, b);
 
-			// 8th bit, interleave loading rest of data
-			FastPin<DATA_PIN>::fastset(port, hi);
-			delaycycles<T1 - 3>();
-			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
-			delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
-			FastPin<DATA_PIN>::fastset(port, lo);
-
-			if(ADVANCE) { 
-				b = data[SKIP + RGB_BYTE0(RGB_ORDER)];
-			} else { 
-				b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
-			}
+			b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE0(RGB_ORDER)];
 			b = scale8(b, scale);
 
-			delaycycles<T3 - 8>(); // 1 store, 2 load (with increment), 1 mul, 1 shift, 1 cmp, 1 branch backwards, 1 movim
+			delaycycles<T3 - 11>(); // 1 store, 2 load (with increment), 1 mul, 1 shift, 1 cmp, 1 branch backwards, 1 movim
 		};
 #else
 #if 0

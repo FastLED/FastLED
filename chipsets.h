@@ -226,8 +226,6 @@ public:
 
 // UCS1903 - 500ns, 1500ns, 500ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903Controller400Mhz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
 #if NO_TIME(500, 1500, 500) 
 #warning "No enough clock cycles available for the UCS103"
@@ -235,33 +233,19 @@ class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS
 
 // TM1809 - 312.5ns, 312.5ns, 325ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1809Controller800Mhz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
 #if NO_TIME(350, 350, 550) 
-#warning "No enough clock cycles available for the UCS103"
+#warning "No enough clock cycles available for the TM1809"
 #endif
 
-// WS2811 - 400ns, 400ns, 450ns (n.b. the teensy3 defs down below are vestigal, and the teensy 3 timings should be fixed/cleaned up)
-#if !defined(__MK20DX128__)
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Mhz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
+// WS2811 - 400ns, 400ns, 450ns 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
-#else
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Mhz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550), RGB_ORDER> {};
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550), RGB_ORDER> {};
-#endif
-
-#if NO_TIME(320, 320, 550) 
+#if NO_TIME(400, 400, 450) 
 #warning "No enough clock cycles available for the UCS103"
 #endif
 
 // 750NS, 750NS, 750NS
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1803Controller400Mhz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1803Controller400Khz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
 #if NO_TIME(750, 750, 750) 
