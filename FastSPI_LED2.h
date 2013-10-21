@@ -24,6 +24,7 @@ enum EClocklessChipsets {
 	WS2811,
 	WS2812,
 	WS2812B,
+	WS2811_400,
 	NEOPIXEL,
 	UCS1903
 };
@@ -100,6 +101,7 @@ public:
 			case WS2812B:
 			case NEOPIXEL:
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case WS2811_400: return addLeds(new WS2811Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 	}
 
@@ -116,6 +118,7 @@ public:
 			case WS2812B:
 			case NEOPIXEL:
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+			case WS2811_400: return addLeds(new WS2811Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 	}
 

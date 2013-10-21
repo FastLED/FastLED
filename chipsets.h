@@ -242,7 +242,14 @@ class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
 #if NO_TIME(400, 400, 450) 
-#warning "No enough clock cycles available for the UCS103"
+#warning "No enough clock cycles available for the WS2811 (800khz)"
+#endif
+
+// WS2811@400khz - 800ns, 800ns, 900ns 
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2811Controller400Khz : public ClocklessController<DATA_PIN, NS(800), NS(800), NS(900), RGB_ORDER> {};
+#if NO_TIME(800, 800, 900) 
+#warning "No enough clock cycles available for the WS2811 (400Khz)"
 #endif
 
 // 750NS, 750NS, 750NS
