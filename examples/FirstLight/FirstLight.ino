@@ -7,12 +7,7 @@
 // 
 
 // How many leds are in the strip?
-#define SWITCH 2
-#if SWITCH == 1
-#define NUM_LEDS 18 * 3
-#elif SWITCH == 2
-#define NUM_LEDS 75 * 4
-#endif
+#define NUM_LEDS 60
 
 // Data pin that led data will be written out over
 #define DATA_PIN 6
@@ -32,19 +27,12 @@ void setup() {
       // FastLED.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<TM1804, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<TM1809, DATA_PIN, RGB>(leds, NUM_LEDS);
- #if SWITCH == 1
-    FastSPI_LED2.addLeds<WS2811, 16, GRB>(leds, NUM_LEDS/3);
-    FastSPI_LED2.addLeds<WS2811, 7, GRB>(leds+18, NUM_LEDS/3);
-    FastSPI_LED2.addLeds<WS2811, 19, GRB>(leds+36, NUM_LEDS/3);
- #elif SWITCH == 2
-   FastSPI_LED2.addLeds<WS2811, 17, GRB>(leds, 75);
-   FastSPI_LED2.addLeds<WS2811, 18, GRB>(leds + 75, 75);
-   FastSPI_LED2.addLeds<WS2811, 7, GRB>(leds + 150, 75);
-   FastSPI_LED2.addLeds<WS2811, 8, GRB>(leds + 225, 75);
- #endif  
+      FastSPI_LED2.addLeds<WS2811, DATA_PIN, GRB>(leds+18, NUM_LEDS/3);
       // FastLED.addLeds<WS2811, 8, RGB>(leds + 225, NUM_LEDS/4);
       // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
+      // FastLED.addLeds<NEOPIXEL, DATA_PIN, RGB>(leds, NUM_LEDS);
+      // FastLED.addLeds<WS2811_400, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<UCS1903, DATA_PIN, RGB>(leds, NUM_LEDS);
 
       // FastLED.addLeds<WS2801, RGB>(leds, NUM_LEDS);
