@@ -102,7 +102,7 @@ public:
 		showRGBInternal<0, false>(nLeds, scale, (const byte*)&data);
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS(nLeds * 24 * (T1 + T2 + T3));
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -115,7 +115,7 @@ public:
 		showRGBInternal<0, true>(nLeds, scale, (const byte*)rgbdata);
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS(nLeds * 24 * (T1 + T2 + T3));
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -129,7 +129,7 @@ public:
 		showRGBInternal<1, true>(nLeds, scale, (const byte*)rgbdata);
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(nLeds * 8 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS(nLeds * 24 * (T1 + T2 + T3));
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
