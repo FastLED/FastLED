@@ -196,7 +196,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 // On ATtiny, we just use C implementations
 #define SCALE8_C 1
 #define SCALE16BY8_C 1
-#define SCALE16_C 0
+#define SCALE16_C 1
 #define MUL8_C 1
 #define QMUL8_C 1
 #define EASE8_C 1

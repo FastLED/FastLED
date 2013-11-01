@@ -1,3 +1,6 @@
+Post-Release Candidate 4
+* Gemma and Trinket: HSV2RGB works, LED drivers not yet
+
 Release Candidate 4
 * Added NEOPIXEL as a synonym for WS2811
 * Fix WS2811/WS2812B timings, bring it in line to exactly 1.25ns/bit.  
