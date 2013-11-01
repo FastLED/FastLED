@@ -33,7 +33,7 @@
 
 // Scaling macro choice
 #if defined(LIB8_ATTINY)
-#  define INLINE_SCALE(B, SCALE) delaycycles<3>
+#  define INLINE_SCALE(B, SCALE) delaycycles<3>()
 #  warning "No hardware multiply, inline brightness scaling disabled"
 #else
 #   define INLINE_SCALE(B, SCALE) B = scale8_LEAVING_R1_DIRTY(B, SCALE)
@@ -301,6 +301,7 @@ public:
 				delaycycles<1>();
 			}
 			INLINE_SCALE(b, scale);
+			b = scale8_LEAVING_R1_DIRTY(b, scale);
 			bitSetLast<5, 6>(port, hi, lo, d);
 		}
 		cleanup_R1();
