@@ -301,7 +301,6 @@ public:
 				delaycycles<1>();
 			}
 			INLINE_SCALE(b, scale);
-			b = scale8_LEAVING_R1_DIRTY(b, scale);
 			bitSetLast<5, 6>(port, hi, lo, d);
 		}
 		cleanup_R1();
