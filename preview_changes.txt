@@ -1,6 +1,5 @@
-Post-Release Candidate 4
-* Gemma and Trinket: HSV2RGB works, LED drivers not yet
-* Update LED drivers to punt on inline scaling on gemma/trinket
+Release Candidate 5
+* Gemma and Trinket: supported except for global "setBrightness"
 
 Release Candidate 4
 * Added NEOPIXEL as a synonym for WS2811
