@@ -31,6 +31,14 @@
 #  endif
 #endif
 
+// Scaling macro choice
+#if defined(LIB8_ATTINY)
+#  define INLINE_SCALE(B, SCALE) delaycycles<3>
+#  warning "No hardware multiply, inline brightness scaling disabled"
+#else
+#   define INLINE_SCALE(B, SCALE) B = scale8_LEAVING_R1_DIRTY(B, SCALE)
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point
@@ -181,14 +189,14 @@ public:
 			write8Bits(port, hi, lo, b);
 
 			b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE1(RGB_ORDER)];
-			b = scale8(b, scale);
+			INLINE_SCALE(b, scale);
 			delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
 
 			// Write second byte
 			write8Bits(port, hi, lo, b);
 
 			b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE2(RGB_ORDER)];
-			b = scale8(b, scale);
+			INLINE_SCALE(b, scale);
 
 			data += 3 + SKIP;
 			if((RGB_ORDER & 0070) == 0) {
@@ -201,7 +209,7 @@ public:
 			write8Bits(port, hi, lo, b);
 
 			b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE0(RGB_ORDER)];
-			b = scale8(b, scale);
+			INLINE_SCALE(b, scale);
 
 			delaycycles<T3 - 11>(); // 1 store, 2 load (with increment), 1 mul, 1 shift, 1 cmp, 1 branch backwards, 1 movim
 		};
@@ -253,7 +261,7 @@ public:
 				c = rgbdata[SKIP + RGB_BYTE1(RGB_ORDER)];
 				delaycycles<1>();
 			}
-			c = scale8_LEAVING_R1_DIRTY(c, scale);
+			INLINE_SCALE(c, scale);
 			bitSetLast<5, 1>(port, hi, lo, b);
 			
 			for(register byte x=5; x; x--) {
@@ -273,7 +281,7 @@ public:
 				d = rgbdata[SKIP + RGB_BYTE2(RGB_ORDER)];
 				delaycycles<1>();
 			}
-			d = scale8_LEAVING_R1_DIRTY(d, scale);
+			INLINE_SCALE(d, scale);
 			bitSetLast<5, 1>(port, hi, lo, c);
 			
 			for(register byte x=5; x; x--) {
@@ -292,7 +300,7 @@ public:
 				b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
 				delaycycles<1>();
 			}
-			b = scale8_LEAVING_R1_DIRTY(b, scale);
+			INLINE_SCALE(b, scale);
 			bitSetLast<5, 6>(port, hi, lo, d);
 		}
 		cleanup_R1();
