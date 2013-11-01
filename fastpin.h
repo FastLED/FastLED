@@ -258,8 +258,17 @@ typedef volatile uint32_t * ptr_reg32_t;
 // built on, then much higher speed access will be possible, namely with direct GPIO register accesses.
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if defined(FORCE_SOFTWARE_PINS)
+#warning "Softwrae pin support forced pin access will be slightly slower.  See fastpin.h for info."
+#define NO_HARDWARE_PIN_SUPPORT
 
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+#elif defined(__AVR_ATtiny85__) 
+_IO(B);
+
+_DEFPIN_AVR(0, 0x01, B); _DEFPIN_AVR(1, 0x02, B); _DEFPIN_AVR(2, 0x04, B); _DEFPIN_AVR(3, 0x08, B);
+_DEFPIN_AVR(4, 0x10, B); _DEFPIN_AVR(5, 0x20, B);
+
+#elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 // Accelerated port definitions for arduino avrs
 _IO(D); _IO(B); _IO(C);
 _DEFPIN_AVR( 0, 0x01, D); _DEFPIN_AVR( 1, 0x02, D); _DEFPIN_AVR( 2, 0x04, D); _DEFPIN_AVR( 3, 0x08, D);
