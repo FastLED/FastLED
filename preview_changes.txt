@@ -1,3 +1,7 @@
+* Release Candidate 6
+* Rename library, offically, to FastLED, move to github 
+* Update keywords with all the new stuffs
+
 Release Candidate 5
 * Gemma and Trinket: supported except for global "setBrightness"
 
