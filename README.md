@@ -8,7 +8,10 @@ your RGB values, as well as low level classes for abstracting out access to pins
 still keeping things as fast as possible.
 
 *TODO* - document supported chipsets
+
 *TODO* - provide simple sample code in readme
+
 *TODO* - provide link to full documentation in readme.
+
 *TODO* - get candy
 
