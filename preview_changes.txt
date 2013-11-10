@@ -1,5 +1,10 @@
-(Post RC3)
+Release Candidate 5
+* Gemma and Trinket: supported except for global "setBrightness"
+
+Release Candidate 4
 * Added NEOPIXEL as a synonym for WS2811
+* Fix WS2811/WS2812B timings, bring it in line to exactly 1.25ns/bit.  
+* Fix handling of constant color definitions (damn you, gcc!)
 
 Release Candidate 3
 * Fixed bug when Clock and Data were on the same port

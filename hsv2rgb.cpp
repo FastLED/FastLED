@@ -48,7 +48,7 @@
 void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb);
 void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb);
 
-#if defined(__AVR__)
+#if defined(__AVR__) && !defined( LIB8_ATTINY )
 void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
 {
     hsv2rgb_raw_avr( hsv, rgb);
@@ -154,7 +154,7 @@ void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb)
 
 
 
-#if defined(__AVR__)
+#if defined(__AVR__) && !defined( LIB8_ATTINY )
 void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb)
 {
     uint8_t hue, saturation, value;

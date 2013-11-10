@@ -64,6 +64,9 @@ template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 
 // pre-instantiations for values small enough to not need the loop, as well as sanity holders
 // for some negative values.
+template<> __attribute__((always_inline)) inline void delaycycles<-6>() {}
+template<> __attribute__((always_inline)) inline void delaycycles<-5>() {}
+template<> __attribute__((always_inline)) inline void delaycycles<-4>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-3>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-2>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-1>() {}

@@ -93,7 +93,7 @@ template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t S
 class WS2801Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
-	CMinWait<24>  mWaitDelay;
+	CMinWait<500>  mWaitDelay;
 public:
 	WS2801Controller() {}
 
@@ -300,19 +300,22 @@ class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS
 // TM1809 - 312.5ns, 312.5ns, 325ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
-#if NO_TIME(320, 320, 550) 
+#if NO_TIME(350, 350, 550) 
 #warning "Not enough clock cycles available for the TM1809"
 #endif
 
-// WS2811 - 350n, 350ns, 550ns
+// WS2811 - 400ns, 400ns, 450ns 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(550), RGB_ORDER> {};
+class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
+#if NO_TIME(400, 400, 450) 
+#warning "No enough clock cycles available for the WS2811 (800khz)"
+#endif
 
-template <uint8_t DATA_PIN, uint8_t DATA_PIN2, EOrder RGB_ORDER = RGB>
-class WS2811Controller2800Khz : public ClocklessController2<DATA_PIN, DATA_PIN2, NS(320), NS(320), NS(550), RGB_ORDER> {};
-
-#if NO_TIME(320, 320, 550) 
-#warning "Not enough clock cycles available for the WS2811"
+// WS2811@400khz - 800ns, 800ns, 900ns 
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2811Controller400Khz : public ClocklessController<DATA_PIN, NS(800), NS(800), NS(900), RGB_ORDER> {};
+#if NO_TIME(800, 800, 900) 
+#warning "No enough clock cycles available for the WS2811 (400Khz)"
 #endif
 
 // 750NS, 750NS, 750NS
