@@ -1,21 +1,21 @@
 #include "FastSPI_LED2.h"
 
 
-CFastSPI_LED2 LEDS;
-CFastSPI_LED2 & FastSPI_LED = LEDS;
-CFastSPI_LED2 & FastSPI_LED2 = LEDS;
-CFastSPI_LED2 & FastLED = LEDS;
+CFastLED LEDS;
+CFastLED & FastSPI_LED = LEDS;
+CFastLED & FastSPI_LED2 = LEDS;
+CFastLED & FastLED = LEDS;
 
 uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 
-CFastSPI_LED2::CFastSPI_LED2() { 
+CFastLED::CFastLED() { 
 	// clear out the array of led controllers
 	m_nControllers = NUM_CONTROLLERS;
 	m_nScale = 255;
 	memset8(m_Controllers, 0, m_nControllers * sizeof(CControllerInfo));
 }
 
-CLEDController *CFastSPI_LED2::addLeds(CLEDController *pLed, 
+CLEDController *CFastLED::addLeds(CLEDController *pLed, 
 									   const struct CRGB *data, 
 									   int nLedsOrOffset, int nLedsIfOffset) { 
 	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
@@ -44,7 +44,7 @@ CLEDController *CFastSPI_LED2::addLeds(CLEDController *pLed,
 	return NULL;
 }
 
-void CFastSPI_LED2::show(uint8_t scale) { 
+void CFastLED::show(uint8_t scale) { 
 	for(int i  = 0; i < m_nControllers; i++) { 
 		if(m_Controllers[i].pLedController != NULL) { 
 			m_Controllers[i].pLedController->show(m_Controllers[i].pLedData + m_Controllers[i].nOffset, 
@@ -55,7 +55,7 @@ void CFastSPI_LED2::show(uint8_t scale) {
 	}
 }
 
-void CFastSPI_LED2::showColor(const struct CRGB & color, uint8_t scale) { 
+void CFastLED::showColor(const struct CRGB & color, uint8_t scale) { 
 	for(int i  = 0; i < m_nControllers; i++) { 
 		if(m_Controllers[i].pLedController != NULL) { 
 			m_Controllers[i].pLedController->showColor(color, m_Controllers[i].nLeds, scale);
@@ -65,7 +65,7 @@ void CFastSPI_LED2::showColor(const struct CRGB & color, uint8_t scale) {
 	}
 }
 
-void CFastSPI_LED2::clear(boolean includeLedData) { 
+void CFastLED::clear(boolean includeLedData) { 
 	showColor(CRGB(0,0,0), 0);
 	if(includeLedData) { 
 		for(int i = 0; i < m_nControllers; i++) { 
