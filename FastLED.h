@@ -39,7 +39,7 @@ enum EBlockChipsets {
 
 #define NUM_CONTROLLERS 32
 
-class CFastSPI_LED2 {
+class CFastLED {
 	struct CControllerInfo { 
 		CLEDController *pLedController;
 		const struct CRGB *pLedData;
@@ -52,7 +52,7 @@ class CFastSPI_LED2 {
 	uint8_t m_nScale;
 
 public:
-	CFastSPI_LED2();
+	CFastLED();
 
 	CLEDController *addLeds(CLEDController *pLed, const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
 
@@ -165,9 +165,9 @@ public:
 
 };
 
-extern CFastSPI_LED2 & FastSPI_LED;
-extern CFastSPI_LED2 & FastSPI_LED2;
-extern CFastSPI_LED2 & FastLED;
-extern CFastSPI_LED2 LEDS;
+extern CFastLED & FastSPI_LED;
+extern CFastLED & FastSPI_LED2;
+extern CFastLED & FastLED;
+extern CFastLED LEDS;
 
 #endif

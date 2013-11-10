@@ -7,7 +7,7 @@
 // Uncomment this line if you want to talk to DMX controllers
 // #define FASTSPI_USE_DMX_SIMPLE 1
 
-#include "FastSPI_LED2.h"
+#include "FastLED.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
