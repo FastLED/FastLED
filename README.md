@@ -48,7 +48,17 @@ Right now the library is supported on a variety of arduino compatable platforms.
 
 What types of platforms are we thinking about supporting in the future?  Here's a short list:  MSP430, ChipKit32, Maple, Beagleboard
 
-*TODO* - provide link to full documentation in readme.
+## What about that name?
+
+Wait, what happend to FastSPI_LED and FastSPI_LED2?  The library was initially named FastSPI_LED because it was focused on very fast
+and efficient SPI access.  However, since then, the library has expanded to support a number of LED chipsets that don't use SPI, as 
+well as a number of math and utility functions for LED processing across the board.  We decided that the name FastLED more accurately
+represents the totality of what the library provides, everything fast, for LEDs.
+
+## For more information
+
+Check out the official site http://fastled.io for links to documentation, issues, and news
+
 
 *TODO* - get candy
 
