@@ -110,8 +110,8 @@ public:
 			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 			case WS2812: 
 			case WS2812B:
-			case NEOPIXEL:
 			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case NEOPIXEL: return addLeds(new WS2811Controller800Khz<DATA_PIN, GRB>(), data, nLedsOrOffset, nLedsIfOffset);
 			case WS2811_400: return addLeds(new WS2811Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 		return NULL;
@@ -155,7 +155,7 @@ public:
 	/// Update all our controllers with the current led colors
 	void show() { show(m_nScale); }
 
-	void clear(boolean includeLedData = true);
+	void clear(boolean writeData = false);
 
 	void clearData();
 

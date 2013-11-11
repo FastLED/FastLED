@@ -68,11 +68,11 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 	}
 }
 
-void CFastLED::clear(boolean includeLedData) { 
-	showColor(CRGB(0,0,0), 0);
-	if(includeLedData) { 
-		clearData();
+void CFastLED::clear(boolean writeData) { 
+	if(writeData) { 
+		showColor(CRGB(0,0,0), 0);
 	}
+        clearData();
 }
 
 void CFastSPI_LED2::clearData() {
