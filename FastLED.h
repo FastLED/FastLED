@@ -131,7 +131,7 @@ public:
 	/// Update all our controllers with the current led colors
 	void show() { show(m_nScale); }
 
-	void clear(boolean includeLedData = true);
+	void clear(boolean writeData = false);
 
 	void showColor(const struct CRGB & color, uint8_t scale);
 
