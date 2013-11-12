@@ -23,7 +23,7 @@ How quickly can you get up and running with the library?  Here's a simple blink 
 	void setup() { FastLED.addLeds<NEOPIXEL, 6>(leds, NUM_LEDS); }
 	void loop() { 
 		leds[0] = CRGB::White; FastLED.show(); delay(30); 
-		leds[0] = CRGB::Black; FastLED.show(); delay30);
+		leds[0] = CRGB::Black; FastLED.show(); delay(30);
 	}
 
 ## Supported LED chipsets
