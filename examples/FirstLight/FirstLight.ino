@@ -1,5 +1,5 @@
-#define FORCE_SOFTWARE_SPI
-#define FORCE_SOFTWARE_PINS
+// #define FORCE_SOFTWARE_SPI
+// #define FORCE_SOFTWARE_PINS
 #include "FastLED.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -29,17 +29,16 @@ void setup() {
       // FastLED.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<TM1804, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<TM1809, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<WS2811, DATA_PIN, GRB>(leds+18, NUM_LEDS/3);
-      // FastLED.addLeds<WS2811, 8, RGB>(leds + 225, NUM_LEDS/4);
+      // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
+      FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<NEOPIXEL, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2811_400, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<UCS1903, DATA_PIN, RGB>(leds, NUM_LEDS);
 
       // FastLED.addLeds<WS2801, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<SM16716, RGB>(leds, NUM_LEDS);
-      FastLED.addLeds<LPD8806, RGB>(leds, NUM_LEDS);
+      // FastLED.addLeds<LPD8806, RGB>(leds, NUM_LEDS);
 
       // FastLED.addLeds<WS2801, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<SM16716, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
