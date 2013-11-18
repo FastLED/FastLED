@@ -1,5 +1,7 @@
-#define FORCE_SOFTWARE_SPI
-#define FORCE_SOFTWARE_PINS
+// Use if you want to force the software SPI subsystem to be used for some reason (generally, you don't)
+// #define FORCE_SOFTWARE_SPI
+// Use if you want to force non-accelerated pin access (hint: you really don't, it breaks lots of things)
+// #define FORCE_SOFTWARE_PINS
 #include "FastLED.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -29,8 +31,7 @@ void setup() {
       // FastLED.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<TM1804, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<TM1809, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<WS2811, DATA_PIN, GRB>(leds+18, NUM_LEDS/3);
-      // FastLED.addLeds<WS2811, 8, RGB>(leds + 225, NUM_LEDS/4);
+      // FastLED.addLeds<WS2811, DATA_PIN, GRB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<NEOPIXEL, DATA_PIN, RGB>(leds, NUM_LEDS);
