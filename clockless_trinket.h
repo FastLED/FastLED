@@ -147,6 +147,10 @@ public:
 #define NOP4 NOP2 NOP2
 // 2 cycle byte load 
 #define LD2(B,O) "ldd %[" #B "], Z + %[" #O "]\n\t"
+// 3 cycle byte load to scale scratch and clear
+#define LDSCL3(B,O) "ldd %[scale_base], Z + %[" #O "]\n\t" \
+					  "clr %[" #B "]\n\t"
+
 // 2 cycle data pointer increment
 #define IDATA2 "adiw %[data], %[ADV]\n\t"
 // 1 cycle decrement counter
@@ -155,6 +159,15 @@ public:
 #define JMPLOOP2 "rjmp loop_%=\n\t"
 // 1 cycle (if not branched) end of loop check
 #define BRLOOP1 "breq done_%=\n\t"
+// 2 cycle scale operation, 1/2 of scaling
+#define SCALE2(B,N) "sbrc %[scale], " #N "\n\t"\
+					"add %[" #B "], %[scale_base]\n\t"
+// 2 cycle rotate output byte, clear carry flag
+#define ROR1(B) "ror %[" #B "]\n\t"
+#define CLC1 "clc\n\t"
+
+#define RORSC4(B, N) ROR1(B) CLC1 SCALE2(B, N)
+#define SCROR4(B, N) SCALE2(B, N) ROR1(B) CLC1
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
@@ -169,7 +182,7 @@ public:
 
 		register uint8_t b0, b1, b2;
 		register uint8_t count = nLeds & 0xFF;
-		register uint8_t scale_sum = 0;
+		register uint8_t scale_base = 0;
 
 		b0 = data[RGB_BYTE0(RGB_ORDER)];
 		// b0 = scale8(b0, scale);
@@ -180,35 +193,35 @@ public:
 			/* asm */
 			"loop_%=:		\n\r"	
 			// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
-			HI1	NOP0 QLO2(b0, 7) LD2(b2,O2) NOP2 	LO1 NOP2			
-			HI1 NOP0 QLO2(b0, 6) NOP4 				LO1 NOP2		
-			HI1 NOP0 QLO2(b0, 5) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b0, 4) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b0, 3) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b0, 2) NOP4 				LO1 NOP2			
+			HI1	NOP0 QLO2(b0, 7) LDSCL3(b1,O2) NOP1 LO1 SCALE2(b1,7)			
+			HI1 NOP0 QLO2(b0, 6) RORSC4(b1,6) 		LO1 ROR1(b1) CLC1		
+			HI1 NOP0 QLO2(b0, 5) SCROR4(b1,5)		LO1 SCALE2(b1,4)			
+			HI1 NOP0 QLO2(b0, 4) RORSC4(b1,3) 		LO1 ROR1(b1) CLC1			
+			HI1 NOP0 QLO2(b0, 3) SCROR4(b1,2) 		LO1 SCALE2(b1,1)			
+			HI1 NOP0 QLO2(b0, 2) RORSC4(b1,0) 		LO1 ROR1(b1) NOP1		
 			HI1 NOP0 QLO2(b0, 1) NOP4			 	LO1 NOP2			
 			HI1 NOP0 QLO2(b0, 0) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 7) LD2(b0,O0) NOP2 	LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 6) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 5) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 4) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 3) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 2) NOP4 				LO1 NOP2			
+			HI1	NOP0 QLO2(b1, 7) LDSCL3(b2,O2) NOP1 LO1 SCALE2(b2,7)			
+			HI1 NOP0 QLO2(b1, 6) RORSC4(b2,6) 		LO1 ROR1(b2) CLC1		
+			HI1 NOP0 QLO2(b1, 5) SCROR4(b2,5)		LO1 SCALE2(b2,4)			
+			HI1 NOP0 QLO2(b1, 4) RORSC4(b2,3) 		LO1 ROR1(b2) CLC1			
+			HI1 NOP0 QLO2(b1, 3) SCROR4(b2,2) 		LO1 SCALE2(b2,1)			
+			HI1 NOP0 QLO2(b1, 2) RORSC4(b2,0) 		LO1 ROR1(b2) NOP1		
 			HI1 NOP0 QLO2(b1, 1) NOP4 				LO1 NOP2			
 			HI1 NOP0 QLO2(b1, 0) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 7) LD2(b1, O1) NOP2 	LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 6) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 5) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 4) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 3) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 2) NOP4 				LO1 NOP2			
+			HI1	NOP0 QLO2(b2, 7) LDSCL3(b0,O2) NOP1 LO1 SCALE2(b0,7)			
+			HI1 NOP0 QLO2(b2, 6) RORSC4(b0,6) 		LO1 ROR1(b0) CLC1		
+			HI1 NOP0 QLO2(b2, 5) SCROR4(b0,5)		LO1 SCALE2(b0,4)			
+			HI1 NOP0 QLO2(b2, 4) RORSC4(b0,3) 		LO1 ROR1(b0) CLC1			
+			HI1 NOP0 QLO2(b2, 3) SCROR4(b0,2) 		LO1 SCALE2(b0,1)			
+			HI1 NOP0 QLO2(b2, 2) RORSC4(b0,0) 		LO1 ROR1(b0) NOP1		
 			HI1 NOP0 QLO2(b2, 1) IDATA2 NOP2		LO1 DCOUNT1 NOP1	
 			// The last bit is tricky.  We do the 3 cycle hi, bit check, lo.  Then we do a breq
 			// that if we don't branch, will be 1 cycle, then 3 cycles of nop, then 1 cycle out, then
 			// 2 cycles of jumping around the loop.  If we do branch, then that's 2 cycles, we need to 
 			// wait 2 more cycles, then do the final low and waiting
 			HI1 NOP0 QLO2(b2, 0) BRLOOP1 NOP3 		LO1 JMPLOOP2	
-				
+
 			"done_%=:\n\t"
 			NOP2 LO1 NOP2
 
@@ -217,7 +230,7 @@ public:
 			[b1] "+r" (b1),
 			[b2] "+r" (b2),
 			[count] "+r" (count),
-			[scale_sum] "+r" (scale_sum),
+			[scale_base] "+r" (scale_base),
 			[data] "+z" (data)
 			: /* use variables */
 			[hi] "r" (hi),
