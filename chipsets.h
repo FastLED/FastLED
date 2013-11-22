@@ -220,7 +220,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Clockless template instantiations
+// Clockless template instantiations - see clockless.h for how the timing values are used
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -228,35 +228,35 @@ public:
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
 #if NO_TIME(500, 1500, 500) 
-#warning "No enough clock cycles available for the UCS103"
+#warning "Not enough clock cycles available for the UCS103"
 #endif
 
-// TM1809 - 312.5ns, 312.5ns, 325ns
+// TM1809 - 350ns, 350ns, 550ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
 #if NO_TIME(350, 350, 550) 
-#warning "No enough clock cycles available for the TM1809"
+#warning "Not enough clock cycles available for the TM1809"
 #endif
 
 // WS2811 - 400ns, 400ns, 450ns 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
 #if NO_TIME(400, 400, 450) 
-#warning "No enough clock cycles available for the WS2811 (800khz)"
+#warning "Not enough clock cycles available for the WS2811 (800khz)"
 #endif
 
 // WS2811@400khz - 800ns, 800ns, 900ns 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller400Khz : public ClocklessController<DATA_PIN, NS(800), NS(800), NS(900), RGB_ORDER> {};
 #if NO_TIME(800, 800, 900) 
-#warning "No enough clock cycles available for the WS2811 (400Khz)"
+#warning "Not enough clock cycles available for the WS2811 (400Khz)"
 #endif
 
 // 750NS, 750NS, 750NS
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1803Controller400Khz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
 #if NO_TIME(750, 750, 750) 
-#warning "No enough clock cycles available for the UCS103"
+#warning "Not enough clock cycles available for the UCS103"
 #endif
 
 #endif

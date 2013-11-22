@@ -42,7 +42,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point
-// is where the line is raised hi.  The second pointsnt is where the line is dropped low for a zero.  The third point is where the 
+// is where the line is raised hi.  The second point is where the line is dropped low for a zero.  The third point is where the 
 // line is dropped low for a one.  T1, T2, and T3 correspond to the timings for those three in clock cycles.
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,23 +65,6 @@ public:
 #if defined(__MK20DX128__)
 	// We don't use the bitSetFast methods for ARM.
 #else
-	template <int N>inline static void bitSetFast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
-		// First cycle
-		FastPin<DATA_PIN>::fastset(port, hi); 								// 1/2 clock cycle if using out
-		delaycycles<T1 - (_CYCLES(DATA_PIN) + 1)>();					// 1st cycle length minus 1/2 clock for out, 1 clock for sbrs
-		__asm__ __volatile__ ("sbrs %0, %1" :: "r" (b), "M" (N) :); 	// 1 clock for check (+1 if skipping, next op is also 1 clock)
-
-		// Second cycle
-		FastPin<DATA_PIN>::fastset(port, lo);								// 1/2 clock cycle if using out
-		delaycycles<T2 - _CYCLES(DATA_PIN)>(); 							// 2nd cycle length minus 1/2 clock for out
-
-		// Third cycle
-		FastPin<DATA_PIN>::fastset(port, lo);								// 1 clock cycle if using out
-		delaycycles<T3 - _CYCLES(DATA_PIN)>();							// 3rd cycle length minus 1 clock for out
-	}
-	
-	#define END_OF_BYTE
-	#define END_OF_LOOP 6 		// loop compare, jump, next uint8_t load
 	template <int N, int ADJ>inline static void bitSetLast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
 		FastPin<DATA_PIN>::fastset(port, hi); 							// 1 clock cycle if using out, 2 otherwise
@@ -94,7 +77,7 @@ public:
 
 		// Third cycle
 		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
-		delaycycles<T3 - (_CYCLES(DATA_PIN) + ADJ)>();				// 3rd cycle length minus 7 clocks for out, loop compare, jump, next uint8_t load
+		delaycycles<T3 - (_CYCLES(DATA_PIN) + ADJ)>();				// 3rd cycle length minus the passed in adjustment 
 	}
 #endif
 
@@ -249,11 +232,10 @@ public:
 				b <<= 1;
 			}
 			delaycycles<1>();
-			// Leave an extra 2 clocks for the next byte load
 			bitSetLast<7, 1>(port, hi, lo, b);
 			delaycycles<1>();
 
-			// Leave an extra 4 clocks for the scale
+			// Leave an extra 4 clocks for the load/scale
 			bitSetLast<6, 6>(port, hi, lo, b);
 			if(ADVANCE) { 
 				c = data[SKIP + RGB_BYTE1(RGB_ORDER)];
@@ -269,11 +251,10 @@ public:
 				c <<= 1;
 			}
 			delaycycles<1>();
-			// Leave an extra 2 clocks for the next byte load
 			bitSetLast<7, 1>(port, hi, lo, c);
 			delaycycles<1>();
 			
-			// Leave an extra 4 clocks for the scale
+			// Leave an extra 4 clocks for the load/scale
 			bitSetLast<6, 6>(port, hi, lo, c);
 			if(ADVANCE) { 
 				d = data[SKIP + RGB_BYTE2(RGB_ORDER)];
@@ -289,10 +270,10 @@ public:
 				d <<= 1;
 			}
 			delaycycles<1>();
-			// Leave an extra 2 clocks for the next byte load
+			// Leave an extra clock for the data pointer advance
 			bitSetLast<7, 2>(port, hi, lo, d);
 			data += (SKIP + 3);
-			// Leave an extra 4 clocks for the scale
+			// Leave an extra 4 clocks for the load/scale
 			bitSetLast<6, 6>(port, hi, lo, d);
 			if(ADVANCE) { 
 				b = data[SKIP + RGB_BYTE0(RGB_ORDER)];

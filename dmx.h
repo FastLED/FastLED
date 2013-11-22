@@ -57,7 +57,7 @@ public:
 
 };
 
-#elif defined(DmxSerial_h)
+#elif defined(FASTSPI_USE_DMX_SERIAL)
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB> class DMXController : public CLEDController {
 public:
