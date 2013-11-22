@@ -127,14 +127,34 @@ public:
 	}
 #endif
 
-#define OUT(B, N) \
-			"out %[PORT], %[hi]		\n\t"	/* 0 - write port pin */	\
-			"sbrs %[" #B "], " #N "\n\t"	/* 1 - test bit and skip */	\
-			"out %[PORT], %[lo]     \n\t"	/* 2 - write port pin lo if not skipped */
-#define DONE "out %[PORT], %[lo]  \n\t"
+/// Macro defs for the asm block, flagged with cycle timings
+// 1 cycle, write hi to the port
+#define HI1 "out %[PORT], %[hi]\n\t"
+// 1 cycle, write lo to the port
+#define LO1 "out %[PORT], %[lo]\n\t"
+// 2 cycles, sbrs on flipping the line to lo if we're pushing out a 0
+#define QLO2(B, N) "sbrs %[" #B "], " #N "\n\t" \
+			"out %[PORT], %[lo]\n\t"
+// 0 cycles - nop0 - used to placeholder where wait points would be for other timings/chipsets
+#define NOP0 ""
+// 1 cycle nop
 #define NOP1 "nop\n\t"
+// 2 cycle nop
 #define NOP2 "nop\n\tnop\n\t"
-#define NOP3 "nop\n\tnop\n\tnop\n\t"
+// 3 cycle nop
+#define NOP3 NOP2 NOP1
+// 4 cycle nop
+#define NOP4 NOP2 NOP2
+// 2 cycle byte load 
+#define LD2(B,O) "ldd %[" #B "], Z + %[" #O "]\n\t"
+// 2 cycle data pointer increment
+#define IDATA2 "adiw %[data], %[ADV]\n\t"
+// 1 cycle decrement counter
+#define DCOUNT1 "subi %[count], 1\n\t"
+// 2 cycle loop jump
+#define JMPLOOP2 "rjmp loop_%=\n\t"
+// 1 cycle (if not branched) end of loop check
+#define BRLOOP1 "breq done_%=\n\t"
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
@@ -159,31 +179,39 @@ public:
 		asm __volatile__(
 			/* asm */
 			"loop_%=:		\n\r"	
-			OUT(b0, 7) "ldd %[b2], Z + %[O2]\n\t" NOP1 DONE NOP3			
-			OUT(b0, 6) NOP3 DONE NOP3			
-			OUT(b0, 5) NOP3 DONE NOP3			
-			OUT(b0, 4) NOP3 DONE NOP3			
-			OUT(b0, 3) NOP3 DONE NOP3			
-			OUT(b0, 2) NOP3 DONE NOP3			
-			OUT(b0, 1) NOP3 DONE NOP3			
-			OUT(b0, 0) NOP3 DONE NOP3			
-			OUT(b1, 7) "ldd %[b0], Z + %[O0]\n\t" NOP1 DONE NOP3			
-			OUT(b1, 6) NOP3 DONE NOP3			
-			OUT(b1, 5) NOP3 DONE NOP3			
-			OUT(b1, 4) NOP3 DONE NOP3			
-			OUT(b1, 3) NOP3 DONE NOP3			
-			OUT(b1, 2) NOP3 DONE NOP3			
-			OUT(b1, 1) NOP3 DONE NOP3			
-			OUT(b1, 0) NOP3 DONE NOP3			
-			OUT(b2, 7) "ldd %[b1], Z + %[O1]\n\t" NOP1 DONE NOP3			
-			OUT(b2, 6) NOP3 DONE NOP3			
-			OUT(b2, 5) NOP3 DONE NOP3			
-			OUT(b2, 4) NOP3 DONE NOP3			
-			OUT(b2, 3) NOP3 DONE NOP3			
-			OUT(b2, 2) NOP3 DONE NOP3			
-			OUT(b2, 1) NOP3 DONE NOP3			
-			OUT(b2, 0) "subi %[count],1\n\t" "adiw %[data],1\n\t" DONE "breq done_%=\n\trjmp loop_%=\n\t"			
+			// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
+			HI1	NOP0 QLO2(b0, 7) LD2(b2,O2) NOP2 	LO1 NOP2			
+			HI1 NOP0 QLO2(b0, 6) NOP4 				LO1 NOP2		
+			HI1 NOP0 QLO2(b0, 5) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b0, 4) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b0, 3) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b0, 2) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b0, 1) NOP4			 	LO1 NOP2			
+			HI1 NOP0 QLO2(b0, 0) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b1, 7) LD2(b0,O0) NOP2 	LO1 NOP2			
+			HI1 NOP0 QLO2(b1, 6) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b1, 5) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b1, 4) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b1, 3) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b1, 2) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b1, 1) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b1, 0) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b2, 7) LD2(b1, O1) NOP2 	LO1 NOP2			
+			HI1 NOP0 QLO2(b2, 6) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b2, 5) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b2, 4) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b2, 3) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b2, 2) NOP4 				LO1 NOP2			
+			HI1 NOP0 QLO2(b2, 1) IDATA2 NOP2		LO1 DCOUNT1 NOP1	
+			// The last bit is tricky.  We do the 3 cycle hi, bit check, lo.  Then we do a breq
+			// that if we don't branch, will be 1 cycle, then 3 cycles of nop, then 1 cycle out, then
+			// 2 cycles of jumping around the loop.  If we do branch, then that's 2 cycles, we need to 
+			// wait 2 more cycles, then do the final low and waiting
+			HI1 NOP0 QLO2(b2, 0) BRLOOP1 NOP3 		LO1 JMPLOOP2	
+				
 			"done_%=:\n\t"
+			NOP2 LO1 NOP2
+
 			: /* write variables */
 			[b0] "+r" (b0),
 			[b1] "+r" (b1),
@@ -198,7 +226,8 @@ public:
 			[O0] "M" (RGB_BYTE0(RGB_ORDER)),
 			[O1] "M" (RGB_BYTE1(RGB_ORDER)),
 			[O2] "M" (RGB_BYTE2(RGB_ORDER)),
-			[PORT] "M" (FastPin<DATA_PIN>::port())
+			[PORT] "M" (FastPin<DATA_PIN>::port()),
+			[ADV] "M" (ADVANCE?(SKIP+3):0)
 			: /* clobber registers */
 		);
 	}
