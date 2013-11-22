@@ -5,6 +5,7 @@
 #include "fastpin.h"
 #include "fastspi.h"
 #include "clockless.h"
+#include "clockless_trinket.h"
 #include "lib8tion.h"
 #include "hsv2rgb.h"
 #include "chipsets.h"

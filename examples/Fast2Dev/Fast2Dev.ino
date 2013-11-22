@@ -34,8 +34,9 @@ void setup() {
    	// LEDS.addLeds<TM1803, 13>(leds, NUM_LEDS);
 
    	// LEDS.addLeds<P9813>(leds, NUM_LEDS);
-   	
-   	LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
+   	CLEDController *pLed = new ClocklessController_Trinket<4, NS(400), NS(400), NS(450), GRB>();
+   	LEDS.addLeds(pLed, leds, NUM_LEDS);
+   	// LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
 	// LEDS.addLeds<WS2801>(leds, NUM_LEDS);
    	// LEDS.addLeds<SM16716>(leds, NUM_LEDS);
 
