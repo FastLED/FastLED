@@ -39,6 +39,8 @@
 #   define INLINE_SCALE(B, SCALE) B = scale8_LEAVING_R1_DIRTY(B, SCALE)
 #endif
 
+#define TRINKET_SCALE 1
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point
@@ -62,25 +64,6 @@ public:
 		mPort = FastPin<DATA_PIN>::port();
 	}
 
-#if defined(__MK20DX128__)
-	// We don't use the bitSetFast methods for ARM.
-#else
-	template <int N, int ADJ>inline static void bitSetLast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
-		// First cycle
-		FastPin<DATA_PIN>::fastset(port, hi); 							// 1 clock cycle if using out, 2 otherwise
-		delaycycles<T1 - (_CYCLES(DATA_PIN))>();					// 1st cycle length minus 1 clock for out, 1 clock for sbrs
-		__asm__ __volatile__ ("sbrs %0, %1" :: "r" (b), "M" (N) :); // 1 clock for check (+1 if skipping, next op is also 1 clock)
-
-		// Second cycle
-		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
-		delaycycles<T2 - (_CYCLES(DATA_PIN))>(); 						// 2nd cycle length minus 1/2 clock for out
-
-		// Third cycle
-		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
-		delaycycles<T3 - (_CYCLES(DATA_PIN) + ADJ)>();				// 3rd cycle length minus the passed in adjustment 
-	}
-#endif
-
 	virtual void clearLeds(int nLeds) {
 		showColor(CRGB(0, 0, 0), nLeds, 0);
 	}
@@ -90,7 +73,7 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal<0, false>(nLeds, scale, (const byte*)&data);
+		showRGBInternal(0, false, nLeds, scale, (const byte*)&data);
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 24 * (T1 + T2 + T3));
@@ -103,7 +86,7 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal<0, true>(nLeds, scale, (const byte*)rgbdata);
+		showRGBInternal(0, true, nLeds, scale, (const byte*)rgbdata);
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 24 * (T1 + T2 + T3));
@@ -139,8 +122,8 @@ public:
 #define NOP0 ""
 // 1 cycle nop
 #define NOP1 "nop\n\t"
-// 2 cycle nop
-#define NOP2 "nop\n\tnop\n\t"
+// 2 cycle nop - trick found via adafruit's neopixel code - two cycle inst
+#define NOP2 "rjmp .+0\n\t"
 // 3 cycle nop
 #define NOP3 NOP2 NOP1
 // 4 cycle nop
@@ -152,9 +135,10 @@ public:
 					  "clr %[" #B "]\n\t"
 
 // 2 cycle data pointer increment
-#define IDATA2 "adiw %[data], %[ADV]\n\t"
-// 1 cycle decrement counter
-#define DCOUNT1 "subi %[count], 1\n\t"
+#define IDATA2 "add %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]\n\t"
+
+// 2 cycle decrement counter
+#define DCOUNT2 "sbiw %[count], 1\n\t"
 // 2 cycle loop jump
 #define JMPLOOP2 "rjmp loop_%=\n\t"
 // 1 cycle (if not branched) end of loop check
@@ -166,113 +150,186 @@ public:
 #define ROR1(B) "ror %[" #B "]\n\t"
 #define CLC1 "clc\n\t"
 
+#define MOV1(B1, B2) "mov %[" #B1 "], %[" #B2 "]\n\t"
+
 #define RORSC4(B, N) ROR1(B) CLC1 SCALE2(B, N)
 #define SCROR4(B, N) SCALE2(B, N) ROR1(B) CLC1
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register uint8_t scale, register const byte *rgbdata) {
-		register byte *data = (byte*)rgbdata;
+	static void __attribute__ ((noinline)) showRGBInternal(int skip, bool advance, int nLeds, uint8_t scale,  const byte *rgbdata) {
+		byte *data = (byte*)rgbdata;
 		data_t mask = FastPin<DATA_PIN>::mask();
 		data_ptr_t port = FastPin<DATA_PIN>::port();
 		// register uint8_t *end = data + nLeds; 
-		register data_t hi = *port | mask;
-		register data_t lo = *port & ~mask;
+		data_t hi = *port | mask;
+		data_t lo = *port & ~mask;
 		*port = lo;
 
-		register uint8_t b0, b1, b2;
-		register uint8_t count = nLeds & 0xFF;
-		register uint8_t scale_base = 0;
-
+		uint8_t b0, b1, b2;
+		uint16_t count = nLeds;
+		uint8_t scale_base = 0;
+		uint16_t advanceBy = advance ? (skip+3) : 0;
+		const uint8_t zero = 0;
 		b0 = data[RGB_BYTE0(RGB_ORDER)];
 		// b0 = scale8(b0, scale);
 		b1 = data[RGB_BYTE1(RGB_ORDER)];
 		b2 = 0;
 
-		asm __volatile__(
-			/* asm */
-			"loop_%=:		\n\r"	
-			// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
-#if 1 
-			HI1 NOP0 QLO2(b0, 7) LDSCL3(b1,O1) NOP1 LO1 SCALE2(b1,0)			
-			HI1 NOP0 QLO2(b0, 6) RORSC4(b1,1) 		LO1 ROR1(b1) CLC1		
-			HI1 NOP0 QLO2(b0, 5) SCROR4(b1,2)		LO1 SCALE2(b1,3)			
-			HI1 NOP0 QLO2(b0, 4) RORSC4(b1,4) 		LO1 ROR1(b1) CLC1			
-			HI1 NOP0 QLO2(b0, 3) SCROR4(b1,5) 		LO1 SCALE2(b1,6)			
-			HI1 NOP0 QLO2(b0, 2) RORSC4(b1,7) 		LO1 ROR1(b1) CLC1		
-			HI1 NOP0 QLO2(b0, 1) NOP4			 	LO1 NOP2			
-			HI1 NOP0 QLO2(b0, 0) NOP4 				LO1 NOP2			
-			HI1	NOP0 QLO2(b1, 7) LDSCL3(b2,O2) NOP1 LO1 SCALE2(b2,0)			
-			HI1 NOP0 QLO2(b1, 6) RORSC4(b2,1) 		LO1 ROR1(b2) CLC1		
-			HI1 NOP0 QLO2(b1, 5) SCROR4(b2,2)		LO1 SCALE2(b2,3)			
-			HI1 NOP0 QLO2(b1, 4) RORSC4(b2,4) 		LO1 ROR1(b2) CLC1			
-			HI1 NOP0 QLO2(b1, 3) SCROR4(b2,5) 		LO1 SCALE2(b2,6)			
-			HI1 NOP0 QLO2(b1, 2) RORSC4(b2,7) 		LO1 ROR1(b2) CLC1		
-			HI1 NOP0 QLO2(b1, 1) NOP4 				LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 0) IDATA2 NOP2 		LO1 NOP2			
-			HI1	NOP0 QLO2(b2, 7) LDSCL3(b0,O0) NOP1 LO1 SCALE2(b0,0)			
-			HI1 NOP0 QLO2(b2, 6) RORSC4(b0,1) 		LO1 ROR1(b0) CLC1		
-			HI1 NOP0 QLO2(b2, 5) SCROR4(b0,2)		LO1 SCALE2(b0,3)			
-			HI1 NOP0 QLO2(b2, 4) RORSC4(b0,4) 		LO1 ROR1(b0) CLC1			
-			HI1 NOP0 QLO2(b2, 3) SCROR4(b0,5) 		LO1 SCALE2(b0,6)			
-			HI1 NOP0 QLO2(b2, 2) RORSC4(b0,7) 		LO1 ROR1(b0) CLC1		
-			HI1 NOP0 QLO2(b2, 1) NOP4				LO1 DCOUNT1 NOP1	
-			// The last bit is tricky.  We do the 3 cycle hi, bit check, lo.  Then we do a breq
-			// that if we don't branch, will be 1 cycle, then 3 cycles of nop, then 1 cycle out, then
-			// 2 cycles of jumping around the loop.  If we do branch, then that's 2 cycles, we need to 
-			// wait 2 more cycles, then do the final low and waiting
-			HI1 NOP0 QLO2(b2, 0) BRLOOP1 NOP3 		LO1 JMPLOOP2	
-#else
-			HI1	NOP0 QLO2(b0, 7) LD2(b1,O1) NOP2 		LO1 NOP2
-			HI1 NOP0 QLO2(b0, 6) NOP4 		LO1 NOP2
-			HI1 NOP0 QLO2(b0, 5) NOP4		LO1 NOP2
-			HI1 NOP0 QLO2(b0, 4) NOP4 		LO1 NOP2			
-			HI1 NOP0 QLO2(b0, 3) NOP4 		LO1 NOP2			
-			HI1 NOP0 QLO2(b0, 2) NOP4 		LO1 NOP2		
-			HI1 NOP0 QLO2(b0, 1) NOP4		LO1 NOP2			
-			HI1 NOP0 QLO2(b0, 0) NOP4 		LO1 NOP2			
-			HI1	NOP0 QLO2(b1, 7) LD2(b2,O2) NOP2 		LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 6) NOP4 		LO1 NOP2		
-			HI1 NOP0 QLO2(b1, 5) NOP4		LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 4) NOP4 		LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 3) NOP4 		LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 2) NOP4 		LO1 NOP2		
-			HI1 NOP0 QLO2(b1, 1) NOP4 		LO1 NOP2			
-			HI1 NOP0 QLO2(b1, 0) IDATA2 NOP2	LO1 NOP2			
-			HI1	NOP0 QLO2(b2, 7) LD2(b0,O0) 		LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 6) NOP4 		LO1 NOP2		
-			HI1 NOP0 QLO2(b2, 5) NOP4		LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 4) NOP4 		LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 3) NOP4 		LO1 NOP2			
-			HI1 NOP0 QLO2(b2, 2) NOP4 		LO1 NOP2		
-			HI1 NOP0 QLO2(b2, 1) NOP4		LO1 DCOUNT1 NOP1	
-			// The last bit is tricky.  We do the 3 cycle hi, bit check, lo.  Then we do a breq
-			// that if we don't branch, will be 1 cycle, then 3 cycles of nop, then 1 cycle out, then
-			// 2 cycles of jumping around the loop.  If we do branch, then that's 2 cycles, we need to 
-			// wait 2 more cycles, then do the final low and waiting
-			HI1 NOP0 QLO2(b2, 0) BRLOOP1 NOP3 		LO1 JMPLOOP2	
-#endif			
-			"done_%=:\n\t"
-			NOP2 LO1 NOP2
+		if(RGB_ORDER == GRB) {
+			// If the rgb order is RGB, we can cut back on program space usage by making a much more compact
+			// representation.
 
-			: /* write variables */
-			[b0] "+r" (b0),
-			[b1] "+r" (b1),
-			[b2] "+r" (b2),
-			[count] "+r" (count),
-			[scale_base] "+r" (scale_base),
-			[data] "+z" (data)
-			: /* use variables */
-			[hi] "r" (hi),
-			[lo] "r" (lo),
-			[scale] "r" (scale),
-			[O0] "M" (RGB_BYTE0(RGB_ORDER)),
-			[O1] "M" (RGB_BYTE1(RGB_ORDER)),
-			[O2] "M" (RGB_BYTE2(RGB_ORDER)),
-			[PORT] "M" (0x18),
-			[ADV] "M" (ADVANCE?(SKIP+3):0)
-			: /* clobber registers */
-		);
+			// multiply count by 3, don't use * because there's no hardware multiply
+			count = count+(count<<1);
+			advanceBy = advance ? 1 : 0;
+			asm __volatile__(
+				/* asm */
+				"loop_%=:		\n\r"	
+				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
+#if TRINKET_SCALE
+				// Inline scaling
+				HI1	NOP0 QLO2(b0, 7) LDSCL3(b1,O1) NOP1 LO1 SCALE2(b1,0)			
+				HI1 NOP0 QLO2(b0, 6) RORSC4(b1,1) 		LO1 ROR1(b1) CLC1		
+				HI1 NOP0 QLO2(b0, 5) SCROR4(b1,2)		LO1 SCALE2(b1,3)			
+				HI1 NOP0 QLO2(b0, 4) RORSC4(b1,4) 		LO1 ROR1(b1) CLC1			
+				HI1 NOP0 QLO2(b0, 3) SCROR4(b1,5) 		LO1 SCALE2(b1,6)			
+				HI1 NOP0 QLO2(b0, 2) RORSC4(b1,7) 		LO1 ROR1(b1) CLC1		
+				HI1 NOP0 QLO2(b0, 1) IDATA2 NOP2		LO1 DCOUNT2	
+				// The last bit is tricky.  We do the 3 cycle hi, bit check, lo.  Then we do a breq
+				// that if we don't branch, will be 1 cycle, then 3 cycles of nop, then 1 cycle out, then
+				// 2 cycles of jumping around the loop.  If we do branch, then that's 2 cycles, we need to 
+				// wait 2 more cycles, then do the final low and waiting
+				HI1 NOP0 QLO2(b0, 0) BRLOOP1 MOV1(b0, b1) NOP2 	LO1 JMPLOOP2	
+#else
+				// no inline scaling
+				HI1	NOP0 QLO2(b0, 7) LD2(b1,O1) 		LO1 NOP2			
+				HI1 NOP0 QLO2(b0, 6) NOP4 		LO1 NOP2		
+				HI1 NOP0 QLO2(b0, 5) NOP4		LO1 NOP2			
+				HI1 NOP0 QLO2(b0, 4) NOP4 		LO1 NOP2			
+				HI1 NOP0 QLO2(b0, 3) NOP4 		LO1 NOP2			
+				HI1 NOP0 QLO2(b0, 2) NOP4 		LO1 NOP2		
+				HI1 NOP0 QLO2(b0, 1) IDATA2 NOP2	LO1 DCOUNT2
+				// The last bit is tricky.  We do the 3 cycle hi, bit check, lo.  Then we do a breq
+				// that if we don't branch, will be 1 cycle, then 3 cycles of nop, then 1 cycle out, then
+				// 2 cycles of jumping around the loop.  If we do branch, then that's 2 cycles, we need to 
+				// wait 2 more cycles, then do the final low and waiting
+				HI1 NOP0 QLO2(b2, 0) BRLOOP1 MOV1(b0,b1) NOP2 LO1 JMPLOOP2	
+#endif			
+				"done_%=:\n\t"
+				NOP2 LO1 NOP2
+
+				: /* write variables */
+				[b0] "+r" (b0),
+				[b1] "+r" (b1),
+				[b2] "+r" (b2),
+				[count] "+x" (count),
+				[scale_base] "+r" (scale_base),
+				[data] "+z" (data)
+				: /* use variables */
+				[hi] "r" (hi),
+				[lo] "r" (lo),
+				[scale] "r" (scale),
+				[ADV] "r" (advanceBy),
+				[zero] "r" (zero),
+				[O0] "M" (RGB_BYTE0(RGB_ORDER)),
+				[O1] "M" (RGB_BYTE1(RGB_ORDER)),
+				[O2] "M" (RGB_BYTE2(RGB_ORDER)),
+				[PORT] "M" (0x18)
+				: /* clobber registers */
+			);
+
+		} 
+		else
+		{
+			asm __volatile__(
+				/* asm */
+				"loop_%=:		\n\r"	
+				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
+#if TRINKET_SCALE
+				// Inline scaling
+				HI1 NOP0 QLO2(b0, 7) LDSCL3(b1,O1) NOP1 LO1 SCALE2(b1,0)			
+				HI1 NOP0 QLO2(b0, 6) RORSC4(b1,1) 		LO1 ROR1(b1) CLC1		
+				HI1 NOP0 QLO2(b0, 5) SCROR4(b1,2)		LO1 SCALE2(b1,3)			
+				HI1 NOP0 QLO2(b0, 4) RORSC4(b1,4) 		LO1 ROR1(b1) CLC1			
+				HI1 NOP0 QLO2(b0, 3) SCROR4(b1,5) 		LO1 SCALE2(b1,6)			
+				HI1 NOP0 QLO2(b0, 2) RORSC4(b1,7) 		LO1 ROR1(b1) CLC1		
+				HI1 NOP0 QLO2(b0, 1) NOP4			 	LO1 NOP2			
+				HI1 NOP0 QLO2(b0, 0) NOP4 				LO1 NOP2			
+				HI1	NOP0 QLO2(b1, 7) LDSCL3(b2,O2) NOP1 LO1 SCALE2(b2,0)			
+				HI1 NOP0 QLO2(b1, 6) RORSC4(b2,1) 		LO1 ROR1(b2) CLC1		
+				HI1 NOP0 QLO2(b1, 5) SCROR4(b2,2)		LO1 SCALE2(b2,3)			
+				HI1 NOP0 QLO2(b1, 4) RORSC4(b2,4) 		LO1 ROR1(b2) CLC1			
+				HI1 NOP0 QLO2(b1, 3) SCROR4(b2,5) 		LO1 SCALE2(b2,6)			
+				HI1 NOP0 QLO2(b1, 2) RORSC4(b2,7) 		LO1 ROR1(b2) CLC1		
+				HI1 NOP0 QLO2(b1, 1) NOP4 				LO1 NOP2			
+				HI1 NOP0 QLO2(b1, 0) IDATA2 NOP2 		LO1 NOP2			
+				HI1	NOP0 QLO2(b2, 7) LDSCL3(b0,O0) NOP1 LO1 SCALE2(b0,0)			
+				HI1 NOP0 QLO2(b2, 6) RORSC4(b0,1) 		LO1 ROR1(b0) CLC1		
+				HI1 NOP0 QLO2(b2, 5) SCROR4(b0,2)		LO1 SCALE2(b0,3)			
+				HI1 NOP0 QLO2(b2, 4) RORSC4(b0,4) 		LO1 ROR1(b0) CLC1			
+				HI1 NOP0 QLO2(b2, 3) SCROR4(b0,5) 		LO1 SCALE2(b0,6)			
+				HI1 NOP0 QLO2(b2, 2) RORSC4(b0,7) 		LO1 ROR1(b0) CLC1		
+				HI1 NOP0 QLO2(b2, 1) NOP4				LO1 DCOUNT2	
+				// The last bit is tricky.  We do the 3 cycle hi, bit check, lo.  Then we do a breq
+				// that if we don't branch, will be 1 cycle, then 3 cycles of nop, then 1 cycle out, then
+				// 2 cycles of jumping around the loop.  If we do branch, then that's 2 cycles, we need to 
+				// wait 2 more cycles, then do the final low and waiting
+				HI1 NOP0 QLO2(b2, 0) BRLOOP1 NOP3 		LO1 JMPLOOP2	
+#else
+				// no inline scaling
+				HI1	NOP0 QLO2(b0, 7) LD2(b1,O1) NOP2 		LO1 NOP2
+				HI1 NOP0 QLO2(b0, 6) NOP4 		LO1 NOP2
+				HI1 NOP0 QLO2(b0, 5) NOP4		LO1 NOP2
+				HI1 NOP0 QLO2(b0, 4) NOP4 		LO1 NOP2			
+				HI1 NOP0 QLO2(b0, 3) NOP4 		LO1 NOP2			
+				HI1 NOP0 QLO2(b0, 2) NOP4 		LO1 NOP2		
+				HI1 NOP0 QLO2(b0, 1) NOP4		LO1 NOP2			
+				HI1 NOP0 QLO2(b0, 0) NOP4 		LO1 NOP2			
+				HI1	NOP0 QLO2(b1, 7) LD2(b2,O2) NOP2 		LO1 NOP2			
+				HI1 NOP0 QLO2(b1, 6) NOP4 		LO1 NOP2		
+				HI1 NOP0 QLO2(b1, 5) NOP4		LO1 NOP2			
+				HI1 NOP0 QLO2(b1, 4) NOP4 		LO1 NOP2			
+				HI1 NOP0 QLO2(b1, 3) NOP4 		LO1 NOP2			
+				HI1 NOP0 QLO2(b1, 2) NOP4 		LO1 NOP2		
+				HI1 NOP0 QLO2(b1, 1) NOP4 		LO1 NOP2			
+				HI1 NOP0 QLO2(b1, 0) IDATA2 NOP2	LO1 NOP2			
+				HI1	NOP0 QLO2(b2, 7) LD2(b0,O0) 		LO1 NOP2			
+				HI1 NOP0 QLO2(b2, 6) NOP4 		LO1 NOP2		
+				HI1 NOP0 QLO2(b2, 5) NOP4		LO1 NOP2			
+				HI1 NOP0 QLO2(b2, 4) NOP4 		LO1 NOP2			
+				HI1 NOP0 QLO2(b2, 3) NOP4 		LO1 NOP2			
+				HI1 NOP0 QLO2(b2, 2) NOP4 		LO1 NOP2		
+				HI1 NOP0 QLO2(b2, 1) NOP4		LO1 DCOUNT2	
+				// The last bit is tricky.  We do the 3 cycle hi, bit check, lo.  Then we do a breq
+				// that if we don't branch, will be 1 cycle, then 3 cycles of nop, then 1 cycle out, then
+				// 2 cycles of jumping around the loop.  If we do branch, then that's 2 cycles, we need to 
+				// wait 2 more cycles, then do the final low and waiting
+				HI1 NOP0 QLO2(b2, 0) BRLOOP1 NOP3 		LO1 JMPLOOP2	
+#endif			
+				"done_%=:\n\t"
+				NOP2 LO1 NOP2
+
+				: /* write variables */
+				[b0] "+r" (b0),
+				[b1] "+r" (b1),
+				[b2] "+r" (b2),
+				[count] "+x" (count),
+				[scale_base] "+r" (scale_base),
+				[data] "+z" (data)
+				: /* use variables */
+				[hi] "r" (hi),
+				[lo] "r" (lo),
+				[scale] "r" (scale),
+				[ADV] "r" (advanceBy),
+				[zero] "r" (zero),
+				[O0] "M" (RGB_BYTE0(RGB_ORDER)),
+				[O1] "M" (RGB_BYTE1(RGB_ORDER)),
+				[O2] "M" (RGB_BYTE2(RGB_ORDER)),
+				[PORT] "M" (0x18)
+				: /* clobber registers */
+			);
+		}
 	}
 
 #ifdef SUPPORT_ARGB
