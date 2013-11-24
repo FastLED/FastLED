@@ -133,84 +133,49 @@ public:
 				[PORT] "M" (0x18)						\
 				: /* clobber registers */				
 
-#ifdef USE_ASM_MACROS
+// 1 cycle, write hi to the port
 #define HI1 asm __volatile__("out %[PORT], %[hi]" ASM_VARS );
+// 1 cycle, write lo to the port
 #define LO1 asm __volatile__("out %[PORT], %[lo]" ASM_VARS );
+// 2 cycles, sbrs on flipping the lne to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
+// 0 cycle placeholder nop to keep code columns lined up
 #define NOP0 
+// 1 cycle nop/delay
 #define NOP1 asm __volatile__("cp r0,r0" ASM_VARS );
+// 2 cycle nop/delay
 #define NOP2 asm __volatile__("rjmp .+0" ASM_VARS );
+// 3 cycle nop/delay
 #define NOP3 NOP1 NOP2
+// 4 cycle nop/delay
 #define NOP4 NOP2 NOP2
+// load a byte from ram into the given var with the given offset
 #define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]" ASM_VARS );
+// 3 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var
 #define LDSCL3(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]" ASM_VARS );
+// 2 cycles - increment the data pointer
 #define IDATA2 asm __volatile__("add %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]"  ASM_VARS );
+// 2 cycles - decrement the counter
 #define DCOUNT2 asm __volatile__("sbiw %[count], 1" ASM_VARS );
+// 2 cycles - jump to the beginning of the loop
 #define JMPLOOP2 asm __volatile__("rjmp 1b" ASM_VARS );
+// 2 cycles - jump out of the loop
 #define BRLOOP1 asm __volatile__("breq 2f" ASM_VARS );
+// 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
 #define SCALE2(B, N) asm __volatile__("sbrc %[scale], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
+// 1 cycle - rotate right, pulling in from carry
 #define ROR1(B) asm __volatile__("ror %[" #B "]" ASM_VARS );
+// 1 cycle, clear the carry bit
 #define CLC1 asm __volatile__("clc" ASM_VARS );
+// 1 cycle, move one register to another
 #define MOV1(B1, B2) asm __volatile__("mov %[" #B1 "], %[" #B2 "]" ASM_VARS );
+// 4 cycles, rotate, clear carry, scale next bit
 #define RORSC4(B, N) ROR1(B) CLC1 SCALE2(B, N)
+// 4 cycles, scale bit, rotate, clear carry
 #define SCROR4(B, N) SCALE2(B,N) ROR1(B) CLC1
+// define the beginning of the loop
 #define LOOP asm __volatile__("1:" ASM_VARS );
 #define DONE asm __volatile__("2:" ASM_VARS );
-#define ASM_BEGIN
-#define ASM_END
-#else
-/// Macro defs for the asm block, flagged with cycle timings
-// 1 cycle, write hi to the port
-#define HI1 "out %[PORT], %[hi]\n\t"
-
-// 1 cycle, write lo to the port
-#define LO1 "out %[PORT], %[lo]\n\t"
-// 2 cycles, sbrs on flipping the line to lo if we're pushing out a 0
-#define QLO2(B, N) "sbrs %[" #B "], " #N "\n\t" \
-			"out %[PORT], %[lo]\n\t"
-// 0 cycles - nop0 - used to placeholder where wait points would be for other timings/chipsets
-#define NOP0 ""
-// 1 cycle nop
-#define NOP1 "nop\n\t"
-// 2 cycle nop - trick found via adafruit's neopixel code - two cycle inst
-#define NOP2 "rjmp .+0\n\t"
-// 3 cycle nop
-#define NOP3 NOP2 NOP1
-// 4 cycle nop
-#define NOP4 NOP2 NOP2
-// 2 cycle byte load 
-#define LD2(B,O) "ldd %[" #B "], Z + %[" #O "]\n\t"
-// 3 cycle byte load to scale scratch and clear
-#define LDSCL3(B,O) "ldd %[scale_base], Z + %[" #O "]\n\t" \
-					  "clr %[" #B "]\n\t"
-
-// 2 cycle data pointer increment
-#define IDATA2 "add %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]\n\t"
-
-// 2 cycle decrement counter
-#define DCOUNT2 "sbiw %[count], 1\n\t"
-// 2 cycle loop jump
-#define JMPLOOP2 "rjmp 1b\n\t"
-// 1 cycle (if not branched) end of loop check
-#define BRLOOP1 "breq 2f\n\t"
-// 2 cycle scale operation, 1/2 of scaling
-#define SCALE2(B,N) "sbrc %[scale], " #N "\n\t"\
-					"add %[" #B "], %[scale_base]\n\t"
-// 2 cycle rotate output byte, clear carry flag
-#define ROR1(B) "ror %[" #B "]\n\t"
-#define CLC1 "clc\n\t"
-
-#define MOV1(B1, B2) "mov %[" #B1 "], %[" #B2 "]\n\t"
-
-#define RORSC4(B, N) ROR1(B) CLC1 SCALE2(B, N)
-#define SCROR4(B, N) SCALE2(B, N) ROR1(B) CLC1
-
-#define LOOP "1:\n\t"
-#define DONE "2:\n\t"
-
-#define ASM_BEGIN asm __volatile__(
-#define ASM_END ASM_VARS );
-#endif
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
@@ -240,7 +205,7 @@ public:
 			// multiply count by 3, don't use * because there's no hardware multiply
 			count = count+(count<<1);
 			advanceBy = advance ? 1 : 0;
-			ASM_BEGIN
+			{
 				/* asm */
 				LOOP
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
@@ -278,11 +243,11 @@ public:
 #endif			
 				DONE
 				NOP2 LO1 NOP2
-			ASM_END
+			}
 		} 
 		else
 		{
-			ASM_BEGIN
+			{
 				/* asm */
 				LOOP
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
@@ -349,7 +314,7 @@ public:
 #endif			
 				DONE
 				NOP2 LO1 NOP2
-			ASM_END
+			}
 		}
 	}
 
