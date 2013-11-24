@@ -39,7 +39,9 @@
 #   define INLINE_SCALE(B, SCALE) B = scale8_LEAVING_R1_DIRTY(B, SCALE)
 #endif
 
+#ifndef TRINKET_SCALE
 #define TRINKET_SCALE 1
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -110,9 +112,57 @@ public:
 	}
 #endif
 
+#define USE_ASM_MACROS
+
+#define ASM_VARS : /* write variables */				\
+				[b0] "+r" (b0),							\
+				[b1] "+r" (b1),							\
+				[b2] "+r" (b2),							\
+				[count] "+x" (count),					\
+				[scale_base] "+r" (scale_base),			\
+				[data] "+z" (data)						\
+				: /* use variables */					\
+				[hi] "r" (hi),							\
+				[lo] "r" (lo),							\
+				[scale] "r" (scale),					\
+				[ADV] "r" (advanceBy),					\
+				[zero] "r" (zero),						\
+				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
+				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
+				[O2] "M" (RGB_BYTE2(RGB_ORDER)),		\
+				[PORT] "M" (0x18)						\
+				: /* clobber registers */				
+
+#ifdef USE_ASM_MACROS
+#define HI1 asm __volatile__("out %[PORT], %[hi]" ASM_VARS );
+#define LO1 asm __volatile__("out %[PORT], %[lo]" ASM_VARS );
+#define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
+#define NOP0 
+#define NOP1 asm __volatile__("cp r0,r0" ASM_VARS );
+#define NOP2 asm __volatile__("rjmp .+0" ASM_VARS );
+#define NOP3 NOP1 NOP2
+#define NOP4 NOP2 NOP2
+#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]" ASM_VARS );
+#define LDSCL3(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]" ASM_VARS );
+#define IDATA2 asm __volatile__("add %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]"  ASM_VARS );
+#define DCOUNT2 asm __volatile__("sbiw %[count], 1" ASM_VARS );
+#define JMPLOOP2 asm __volatile__("rjmp 1b" ASM_VARS );
+#define BRLOOP1 asm __volatile__("breq 2f" ASM_VARS );
+#define SCALE2(B, N) asm __volatile__("sbrc %[scale], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
+#define ROR1(B) asm __volatile__("ror %[" #B "]" ASM_VARS );
+#define CLC1 asm __volatile__("clc" ASM_VARS );
+#define MOV1(B1, B2) asm __volatile__("mov %[" #B1 "], %[" #B2 "]" ASM_VARS );
+#define RORSC4(B, N) ROR1(B) CLC1 SCALE2(B, N)
+#define SCROR4(B, N) SCALE2(B,N) ROR1(B) CLC1
+#define LOOP asm __volatile__("1:" ASM_VARS );
+#define DONE asm __volatile__("2:" ASM_VARS );
+#define ASM_BEGIN
+#define ASM_END
+#else
 /// Macro defs for the asm block, flagged with cycle timings
 // 1 cycle, write hi to the port
 #define HI1 "out %[PORT], %[hi]\n\t"
+
 // 1 cycle, write lo to the port
 #define LO1 "out %[PORT], %[lo]\n\t"
 // 2 cycles, sbrs on flipping the line to lo if we're pushing out a 0
@@ -140,9 +190,9 @@ public:
 // 2 cycle decrement counter
 #define DCOUNT2 "sbiw %[count], 1\n\t"
 // 2 cycle loop jump
-#define JMPLOOP2 "rjmp loop_%=\n\t"
+#define JMPLOOP2 "rjmp 1b\n\t"
 // 1 cycle (if not branched) end of loop check
-#define BRLOOP1 "breq done_%=\n\t"
+#define BRLOOP1 "breq 2f\n\t"
 // 2 cycle scale operation, 1/2 of scaling
 #define SCALE2(B,N) "sbrc %[scale], " #N "\n\t"\
 					"add %[" #B "], %[scale_base]\n\t"
@@ -154,6 +204,13 @@ public:
 
 #define RORSC4(B, N) ROR1(B) CLC1 SCALE2(B, N)
 #define SCROR4(B, N) SCALE2(B, N) ROR1(B) CLC1
+
+#define LOOP "1:\n\t"
+#define DONE "2:\n\t"
+
+#define ASM_BEGIN asm __volatile__(
+#define ASM_END ASM_VARS );
+#endif
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
@@ -176,16 +233,16 @@ public:
 		b1 = data[RGB_BYTE1(RGB_ORDER)];
 		b2 = 0;
 
-		if(RGB_ORDER == GRB) {
+		if(RGB_ORDER == RGB) {
 			// If the rgb order is RGB, we can cut back on program space usage by making a much more compact
 			// representation.
 
 			// multiply count by 3, don't use * because there's no hardware multiply
 			count = count+(count<<1);
 			advanceBy = advance ? 1 : 0;
-			asm __volatile__(
+			ASM_BEGIN
 				/* asm */
-				"loop_%=:		\n\r"	
+				LOOP
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 #if TRINKET_SCALE
 				// Inline scaling
@@ -200,7 +257,10 @@ public:
 				// that if we don't branch, will be 1 cycle, then 3 cycles of nop, then 1 cycle out, then
 				// 2 cycles of jumping around the loop.  If we do branch, then that's 2 cycles, we need to 
 				// wait 2 more cycles, then do the final low and waiting
-				HI1 NOP0 QLO2(b0, 0) BRLOOP1 MOV1(b0, b1) NOP2 	LO1 JMPLOOP2	
+				HI1 NOP0 QLO2(b0, 0) 
+				BRLOOP1 
+				MOV1(b0, b1) NOP2 	LO1 
+				JMPLOOP2	
 #else
 				// no inline scaling
 				HI1	NOP0 QLO2(b0, 7) LD2(b1,O1) 		LO1 NOP2			
@@ -216,35 +276,15 @@ public:
 				// wait 2 more cycles, then do the final low and waiting
 				HI1 NOP0 QLO2(b2, 0) BRLOOP1 MOV1(b0,b1) NOP2 LO1 JMPLOOP2	
 #endif			
-				"done_%=:\n\t"
+				DONE
 				NOP2 LO1 NOP2
-
-				: /* write variables */
-				[b0] "+r" (b0),
-				[b1] "+r" (b1),
-				[b2] "+r" (b2),
-				[count] "+x" (count),
-				[scale_base] "+r" (scale_base),
-				[data] "+z" (data)
-				: /* use variables */
-				[hi] "r" (hi),
-				[lo] "r" (lo),
-				[scale] "r" (scale),
-				[ADV] "r" (advanceBy),
-				[zero] "r" (zero),
-				[O0] "M" (RGB_BYTE0(RGB_ORDER)),
-				[O1] "M" (RGB_BYTE1(RGB_ORDER)),
-				[O2] "M" (RGB_BYTE2(RGB_ORDER)),
-				[PORT] "M" (0x18)
-				: /* clobber registers */
-			);
-
+			ASM_END
 		} 
 		else
 		{
-			asm __volatile__(
+			ASM_BEGIN
 				/* asm */
-				"loop_%=:		\n\r"	
+				LOOP
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 #if TRINKET_SCALE
 				// Inline scaling
@@ -307,28 +347,9 @@ public:
 				// wait 2 more cycles, then do the final low and waiting
 				HI1 NOP0 QLO2(b2, 0) BRLOOP1 NOP3 		LO1 JMPLOOP2	
 #endif			
-				"done_%=:\n\t"
+				DONE
 				NOP2 LO1 NOP2
-
-				: /* write variables */
-				[b0] "+r" (b0),
-				[b1] "+r" (b1),
-				[b2] "+r" (b2),
-				[count] "+x" (count),
-				[scale_base] "+r" (scale_base),
-				[data] "+z" (data)
-				: /* use variables */
-				[hi] "r" (hi),
-				[lo] "r" (lo),
-				[scale] "r" (scale),
-				[ADV] "r" (advanceBy),
-				[zero] "r" (zero),
-				[O0] "M" (RGB_BYTE0(RGB_ORDER)),
-				[O1] "M" (RGB_BYTE1(RGB_ORDER)),
-				[O2] "M" (RGB_BYTE2(RGB_ORDER)),
-				[PORT] "M" (0x18)
-				: /* clobber registers */
-			);
+			ASM_END
 		}
 	}
 
