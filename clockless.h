@@ -62,24 +62,6 @@ public:
 		mPort = FastPin<DATA_PIN>::port();
 	}
 
-#if defined(__MK20DX128__)
-	// We don't use the bitSetFast methods for ARM.
-#else
-	template <int N, int ADJ>inline static void bitSetLast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
-		// First cycle
-		FastPin<DATA_PIN>::fastset(port, hi); 							// 1 clock cycle if using out, 2 otherwise
-		delaycycles<T1 - (_CYCLES(DATA_PIN))>();					// 1st cycle length minus 1 clock for out, 1 clock for sbrs
-		__asm__ __volatile__ ("sbrs %0, %1" :: "r" (b), "M" (N) :); // 1 clock for check (+1 if skipping, next op is also 1 clock)
-
-		// Second cycle
-		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
-		delaycycles<T2 - (_CYCLES(DATA_PIN))>(); 						// 2nd cycle length minus 1/2 clock for out
-
-		// Third cycle
-		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
-		delaycycles<T3 - (_CYCLES(DATA_PIN) + ADJ)>();				// 3rd cycle length minus the passed in adjustment 
-	}
-#endif
 
 	virtual void clearLeds(int nLeds) {
 		showColor(CRGB(0, 0, 0), nLeds, 0);
@@ -149,7 +131,6 @@ public:
 		delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
 		FastPin<DATA_PIN>::fastset(port, lo);
 	}
-#endif
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
@@ -163,7 +144,6 @@ public:
 		register data_t lo = *port & ~mask;
 		*port = lo;
 
-#if defined(__MK20DX128__)
 		register uint32_t b;
 		b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE0(RGB_ORDER)];
 		b = scale8(b, scale);
@@ -196,7 +176,37 @@ public:
 
 			delaycycles<T3 - 11>(); // 1 store, 2 load (with increment), 1 mul, 1 shift, 1 cmp, 1 branch backwards, 1 movim
 		};
-#else
+	}
+
+#else // AVR loop/implementation
+
+	template <int N, int ADJ>inline static void bitSetLast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
+		// First cycle
+		FastPin<DATA_PIN>::fastset(port, hi); 							// 1 clock cycle if using out, 2 otherwise
+		delaycycles<T1 - (_CYCLES(DATA_PIN))>();					// 1st cycle length minus 1 clock for out, 1 clock for sbrs
+		__asm__ __volatile__ ("sbrs %0, %1" :: "r" (b), "M" (N) :); // 1 clock for check (+1 if skipping, next op is also 1 clock)
+
+		// Second cycle
+		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
+		delaycycles<T2 - (_CYCLES(DATA_PIN))>(); 						// 2nd cycle length minus 1/2 clock for out
+
+		// Third cycle
+		FastPin<DATA_PIN>::fastset(port, lo);							// 1/2 clock cycle if using out
+		delaycycles<T3 - (_CYCLES(DATA_PIN) + ADJ)>();				// 3rd cycle length minus the passed in adjustment 
+	}
+
+	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
+	// gcc will use register Y for the this pointer.
+	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register uint8_t scale, register const byte *rgbdata) {
+		register byte *data = (byte*)rgbdata;
+		register data_t mask = FastPin<DATA_PIN>::mask();
+		register data_ptr_t port = FastPin<DATA_PIN>::port();
+		nLeds *= (3 + SKIP);
+		register uint8_t *end = data + nLeds; 
+		register data_t hi = *port | mask;
+		register data_t lo = *port & ~mask;
+		*port = lo;
+
 #if 0
 		register uint8_t b = *data++;
 		while(data <= end) { 
@@ -288,7 +298,6 @@ public:
 #endif
 #endif
 	}
-
 #ifdef SUPPORT_ARGB
 	virtual void showARGB(struct CARGB *data, int nLeds) { 
 		// TODO: IMPLEMENTME
