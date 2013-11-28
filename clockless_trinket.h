@@ -120,7 +120,7 @@ public:
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
 				[O2] "M" (RGB_BYTE2(RGB_ORDER)),		\
-				[PORT] "M" (0x18)						\
+				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20)						\
 				: /* clobber registers */				
 
 
@@ -177,7 +177,7 @@ public:
 		uint16_t advanceBy = advance ? (skip+3) : 0;
 		const uint8_t zero = 0;
 		b0 = data[RGB_BYTE0(RGB_ORDER)];
-		// b0 = scale8(b0, scale);
+		b0 = scale8(b0, scale);
 		b1 = data[RGB_BYTE1(RGB_ORDER)];
 		b2 = 0;
 		register uint8_t loopvar;
