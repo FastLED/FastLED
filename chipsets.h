@@ -224,6 +224,42 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if defined(LIB8_ATTINY) && (F_CPU == 8000000)
+// WS2811@8Mhz 2 clocks, 5 clocks, 3 clocks
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2811Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2811Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1903Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 4, 12, 4, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1803Controller400Khz : public ClocklessController<DATA_PIN, 6, 6, 6, RGB_ORDER> {};
+
+#elif defined(LIB8_ATTINY) && (F_CPU == 16000000)
+
+// WS2811@16Mhz 4 clocks, 10 clocks, 6 clocks
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2811Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2811Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 8, 20, 12, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1903Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 8, 24, 8, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1803Controller400Khz : public ClocklessController<DATA_PIN, 12, 12, 12, RGB_ORDER> {};
+
+#else
 // UCS1903 - 500ns, 1500ns, 500ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
@@ -257,6 +293,7 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1803Controller400Khz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
 #if NO_TIME(750, 750, 750) 
 #warning "Not enough clock cycles available for the UCS103"
+#endif
 #endif
 
 #endif
