@@ -271,8 +271,8 @@ public:
 		}
 		cleanup_R1();
 #endif
-#endif
 	}
+#endif
 #ifdef SUPPORT_ARGB
 	virtual void showARGB(struct CARGB *data, int nLeds) { 
 		// TODO: IMPLEMENTME
