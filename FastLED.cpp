@@ -75,7 +75,7 @@ void CFastLED::clear(boolean writeData) {
         clearData();
 }
 
-void CFastSPI_LED2::clearData() {
+void CFastLED::clearData() {
 	for(int i = 0; i < m_nControllers; i++) { 
 		if(m_Controllers[i].pLedData != NULL) { 
 			memset8((void*)m_Controllers[i].pLedData, 0, sizeof(struct CRGB) * m_Controllers[i].nLeds);
