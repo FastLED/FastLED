@@ -17,8 +17,8 @@ public:
 
 	void wait() { 
 		long diff = micros() - mLastMicros;
-		if(diff < WAIT) { 
-			delayMicroseconds(WAIT - diff);
+		while(diff < WAIT) { 
+			diff = micros() - mLastMicros;
 		}
 	}
 

@@ -45,53 +45,38 @@ class ClocklessController_Trinket : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
-	data_t mPinMask;
-	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
 public:
 	virtual void init() { 
 		FastPin<DATA_PIN>::setOutput();
-		mPinMask = FastPin<DATA_PIN>::mask();
-		mPort = FastPin<DATA_PIN>::port();
 	}
 
 	virtual void clearLeds(int nLeds) {
-		showColor(CRGB(0, 0, 0), nLeds, 0);
+		static byte zeros[3] = {0,0,0};
+		showRGBInternal_AdjTime(0, false, nLeds, 0, zeros);
 	}
 
 	// set all the leds on the controller to a given color
 	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) {
-		mWait.wait();
-		cli();
-
-		showRGBInternal(0, false, nLeds, scale, (const byte*)&data);
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)nLeds * 24 * (T1 + T2 + T3));
-		MS_COUNTER += (microsTaken / 1000);
-		sei();
-		mWait.mark();
+		showRGBInternal_AdjTime(0, false, nLeds, scale, (const byte*)&data);
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, uint8_t scale = 255) { 
-		mWait.wait();
-		cli();
-
-		showRGBInternal(0, true, nLeds, scale, (const byte*)rgbdata);
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)nLeds * 24 * (T1 + T2 + T3));
-		MS_COUNTER += (microsTaken / 1000);
-		sei();
-		mWait.mark();
+		showRGBInternal_AdjTime(0, true, nLeds, scale, (const byte*)rgbdata);
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *rgbdata, int nLeds, uint8_t scale = 255) { 
+		showRGBInternal_AdjTime(1, true, nLeds, scale, (const byte*)rgbdata);
+	}
+#endif
+
+	void __attribute__ ((noinline)) showRGBInternal_AdjTime(int skip, bool advance, int nLeds, uint8_t scale,  const byte *rgbdata) {
 		mWait.wait();
 		cli();
 
-		showRGBInternal<1, true>(nLeds, scale, (const byte*)rgbdata);
+		showRGBInternal(skip, advance, nLeds, scale, rgbdata);
+
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 24 * (T1 + T2 + T3));
@@ -99,7 +84,6 @@ public:
 		sei();
 		mWait.mark();
 	}
-#endif
 
 #define USE_ASM_MACROS
 
