@@ -49,7 +49,7 @@ Right now the library is supported on a variety of arduino compatable platforms.
 * Arduino & compatibles - straight up arduino devices, uno, duo, leonardo, mega, nano, etc...
 * Teensy 2, Teensy++ 2, Teensy 3 - arduino compataible from pjrc.com with some extra goodies (note the teensy 3 is ARM, not AVR!)
 
-What types of platforms are we thinking about supporting in the future?  Here's a short list:  MSP430, ChipKit32, Maple, Beagleboard
+What types of platforms are we thinking about supporting in the future?  Here's a short list:  Arduino Due, MSP430, ChipKit32, Maple, Beagleboard
 
 ## What about that name?
 
