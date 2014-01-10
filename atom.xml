@@ -4,7 +4,7 @@
   <title><![CDATA[FastLED]]></title>
   <link href="http://fastled.io//atom.xml" rel="self"/>
   <link href="http://fastled.io//"/>
-  <updated>2014-01-10T03:38:26-08:00</updated>
+  <updated>2014-01-10T04:03:33-08:00</updated>
   <id>http://fastled.io//</id>
   <author>
     <name><![CDATA[FastLED]]></name>
@@ -18,9 +18,7 @@
     <link href="http://fastled.io//blog/2014/01/10/first-post/"/>
     <updated>2014-01-10T03:30:47-08:00</updated>
     <id>http://fastled.io//blog/2014/01/10/first-post</id>
-    <content type="html"><![CDATA[<h1>First Post</h1>
-
-<p>Poking around with markdown because I have insomnia and want to see this thing up and
+    <content type="html"><![CDATA[<p>Poking around with markdown because I have insomnia and want to see this thing up and
 running!</p>
 ]]></content>
   </entry>
