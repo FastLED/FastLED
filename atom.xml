@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My Octopress Blog]]></title>
-  <link href="http://FastLED.github.io/FastLED/atom.xml" rel="self"/>
-  <link href="http://FastLED.github.io/FastLED/"/>
-  <updated>2014-01-10T02:59:48-08:00</updated>
-  <id>http://FastLED.github.io/FastLED/</id>
+  <title><![CDATA[FastLED]]></title>
+  <link href="http://fastled.io//atom.xml" rel="self"/>
+  <link href="http://fastled.io//"/>
+  <updated>2014-01-10T03:10:29-08:00</updated>
+  <id>http://fastled.io//</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[FastLED]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>

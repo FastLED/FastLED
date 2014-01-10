@@ -1,15 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
     <url>
-        <loc>http://FastLED.github.io/FastLED/blog/archives/</loc>
+        <loc>http://fastled.io//blog/archives/</loc>
         <lastmod>2014-01-10T02:56:27-08:00</lastmod>
     </url>
     <url>
-        <loc>http://FastLED.github.io/FastLED/</loc>
+        <loc>http://fastled.io//</loc>
         <lastmod>2014-01-10T02:56:27-08:00</lastmod>
     </url>
     <url>
-        <loc>http://FastLED.github.io/FastLED/robots.txt</loc>
+        <loc>http://fastled.io//robots.txt</loc>
         <lastmod>2014-01-10T02:56:27-08:00</lastmod>
     </url>
 </urlset>
