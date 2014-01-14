@@ -1,203 +1,79 @@
-
 <!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>FastLED</title>
-  <meta name="author" content="FastLED">
+<html>
+   <head>
+       <meta charset="utf-8">
+       <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+       <title></title>
+       <meta name="description" content="">
+       <meta name="viewport" content="width=device-width">
 
-  
-  <meta name="description" content="Poking around with markdown because I have insomnia and want to see this thing up and
-running!
-">
-  
+       <link rel="X-stylesheet" href="css/normalize.min.css">
+       <link rel="X-stylesheet" href="css/main.css">
 
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+       <script src="/blog/javascripts/modernizr-2.0.js"></script>
+   </head>
+   <body>
 
-  
-  <link rel="canonical" href="http://fastled.io/blog">
-  <link href="/blog/favicon.png" rel="icon">
-  <link href="/blog/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/blog/atom.xml" rel="alternate" title="FastLED" type="application/atom+xml">
-  <script src="/blog/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/blog/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+       <div class="header-container">
+           <header class="wrapper clearfix">
+               <h1 class="title">FastLED Animation Library</h1>
+           	<p>formerly FastSPI_LED / FastSPI_LED2</p>
+           </header>  
+       </div>
 
-  
+       <div class="main-container">
+           <div class="main wrapper clearfix">
 
-</head>
+               <article>
+                   <header>
+                       <h1>Fast, easy LED library for Arduino</h1>
+                       <p>FastLED is a fast, efficient, easy-to-use Arduino library for programming addressible LED strips and pixels.  FastLED is used by thousands of developers, in countless art and hobby projects, and in numerous commerical products.  </p
+                       <p>FastLED will help you code faster, and will help your code run faster.</p>
+                   </header>
+                   <section>
+                       <h2>Great compatibility</h2>
+                       <p>FastLED supports all popular LEDs including Neopixel, WS2801, WS2811, WS2812B, LPD8806, TM1809, and more.  The library runs on a wide range of Arduino and compatible boards, including both AVR- and ARM- based microcontrollers.</p>
+                   </section>
+                   <section>
+                       <h2>Great features</h2>
+                       <p>In addition to fast, efficient, compatible LED driver code, FastLED also provides features that get your animations up and running fast:</p>
+                       <ul>
+                       <li><b>Full HSV color support</b> as well as classic RGB</li>
+                       <li><b>Master brightness setting</b> (nondestructive) controls brightness, power use, and battery life</li>
+                       <li><b>Fast math and memory functions</b>, up to 10X faster than standard Arduino libraries</li>
+                       <li><b>User community</b> of thousands, who share tips, ideas, and help</li>
+                       <li><b>Multi-year history</b> of active development and evolution</li>
+                       <li><b>Ruthless efficiency</b>, an almost fanatical devotion to performance, and nice RGB uniforms.</li>
+                       </ul>
+                       <p>FastSPI_LED was created by Daniel Garcia in 2010; Mark Kriegsman joined the project in 2013.
+                   </section>
+<!--                    
+                   <footer>
+                       <h3>footer .h3</h3>
+                       <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam sodales urna non odio egestas tempor. Nunc vel vehicula ante. Etiam bibendum iaculis libero, eget molestie nisl pharetra in. In semper consequat est, eu porta velit mollis nec. Curabitur posuere enim eget turpis feugiat tempor.</p>
+                   </footer>
+-->
+               </article>
+<!--
+               <aside>
+                   <h3>aside</h3>
+                   <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam sodales urna non odio egestas tempor. Nunc vel vehicula ante. Etiam bibendum iaculis libero, eget molestie nisl pharetra in. In semper consequat est, eu porta velit mollis nec. Curabitur posuere enim eget turpis feugiat tempor. Etiam ullamcorper lorem dapibus velit suscipit ultrices.</p>
+               </aside>
+-->
+           </div> <!-- #main -->
+       </div> <!-- #main-container -->
 
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/blog/">FastLED</a></h1>
-  
-    <h2>A library for driving Leds</h2>
-  
-</hgroup>
+       <div class="footer-container">
+           <footer class="wrapper">
+               <h3>footer</h3>
+           </footer>
+       </div>
 
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/blog/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="http://google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="q" value="site:fastled.io/blog" />
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/blog/">Blog</a></li>
-  <li><a href="/blog/blog/archives">Archives</a></li>
-</ul>
+<!--
+       <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+       <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
 
-</nav>
-  <div id="main">
-    <div id="content">
-      <div class="blog-index">
-  
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/blog/2014/01/10/first-post/">First Post</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-01-10T03:30:47-08:00" pubdate data-updated="true">Jan 10<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Poking around with markdown because I have insomnia and want to see this thing up and
-running!</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/blog/2014/01/10/first-post/">First Post</a>
-      </li>
-    
-  </ul>
-</section>
-<section>
-  <h1>Quick links</h1>
-  <ul>
-    <li><a href="http://fastled.io/+">Google+ Community</a>
-    <li><a href="http://fastled.io/wiki">FastLED wiki</a>
-    <li><a href="http://fastled.io/issues">FastLED issue traciker</a>
-  </ul>
-</section>
-
-
-<section>
-  <h1>GitHub Repos</h1>
-  <ul id="gh_repos">
-    <li class="loading">Status updating&#8230;</li>
-  </ul>
-  
-  <a href="https://github.com/FastLED">@FastLED</a> on GitHub
-  
-  <script type="text/javascript">
-    $(document).ready(function(){
-        if (!window.jXHR){
-            var jxhr = document.createElement('script');
-            jxhr.type = 'text/javascript';
-            jxhr.src = '/javascripts/libs/jXHR.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(jxhr, s);
-        }
-
-        github.showRepos({
-            user: 'FastLED',
-            count: 1,
-            skip_forks: true,
-            target: '#gh_repos'
-        });
-    });
-  </script>
-  <script src="/blog/javascripts/github.js" type="text/javascript"> </script>
-</section>
-
-
-
-
-
-  
-</aside>
-
-    </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2014 - FastLED -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
-
-</footer>
-  
-
-
-
-
-
-
-
-  <script type="text/javascript">
-    (function(){
-      var twitterWidgets = document.createElement('script');
-      twitterWidgets.type = 'text/javascript';
-      twitterWidgets.async = true;
-      twitterWidgets.src = '//platform.twitter.com/widgets.js';
-      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
-    })();
-  </script>
-
-
-
-
-
-</body>
+       <script src="js/main.js"></script>
+-->
+   </body>
 </html>
