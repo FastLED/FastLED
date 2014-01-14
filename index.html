@@ -1,79 +1,139 @@
 <!DOCTYPE html>
-<html>
-   <head>
-       <meta charset="utf-8">
-       <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-       <title></title>
-       <meta name="description" content="">
-       <meta name="viewport" content="width=device-width">
+<html class="no-js">
 
-       <link rel="X-stylesheet" href="css/normalize.min.css">
-       <link rel="X-stylesheet" href="css/main.css">
 
-       <script src="/blog/javascripts/modernizr-2.0.js"></script>
-   </head>
-   <body>
+<!-- NOTE: grep for FIXME -->
 
-       <div class="header-container">
-           <header class="wrapper clearfix">
-               <h1 class="title">FastLED Animation Library</h1>
-           	<p>formerly FastSPI_LED / FastSPI_LED2</p>
-           </header>  
-       </div>
 
-       <div class="main-container">
-           <div class="main wrapper clearfix">
 
-               <article>
-                   <header>
-                       <h1>Fast, easy LED library for Arduino</h1>
-                       <p>FastLED is a fast, efficient, easy-to-use Arduino library for programming addressible LED strips and pixels.  FastLED is used by thousands of developers, in countless art and hobby projects, and in numerous commerical products.  </p
-                       <p>FastLED will help you code faster, and will help your code run faster.</p>
-                   </header>
-                   <section>
-                       <h2>Great compatibility</h2>
-                       <p>FastLED supports all popular LEDs including Neopixel, WS2801, WS2811, WS2812B, LPD8806, TM1809, and more.  The library runs on a wide range of Arduino and compatible boards, including both AVR- and ARM- based microcontrollers.</p>
-                   </section>
-                   <section>
-                       <h2>Great features</h2>
-                       <p>In addition to fast, efficient, compatible LED driver code, FastLED also provides features that get your animations up and running fast:</p>
-                       <ul>
-                       <li><b>Full HSV color support</b> as well as classic RGB</li>
-                       <li><b>Master brightness setting</b> (nondestructive) controls brightness, power use, and battery life</li>
-                       <li><b>Fast math and memory functions</b>, up to 10X faster than standard Arduino libraries</li>
-                       <li><b>User community</b> of thousands, who share tips, ideas, and help</li>
-                       <li><b>Multi-year history</b> of active development and evolution</li>
-                       <li><b>Ruthless efficiency</b>, an almost fanatical devotion to performance, and nice RGB uniforms.</li>
-                       </ul>
-                       <p>FastSPI_LED was created by Daniel Garcia in 2010; Mark Kriegsman joined the project in 2013.
-                   </section>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>FastLED LED animation library for Arduino (formerly FastSPI_LED)</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <link rel="stylesheet" href="homepage/css/normalize.min.css">
+        <link rel="stylesheet" href="homepage/css/main.css">
+
+        <script src="homepage/js/vendor/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+    </head>
+    <body>
+
+        <div class="header-container">
+            <header class="wrapper clearfix">
+                <h1 class="title">FastLED Animation Library</h1>
+            	<h4>&nbsp; formerly FastSPI_LED / FastSPI_LED2</h4>
+
+<!--
+                <nav>
+                    <ul>
+                <li><a href="https://github.com/FastLED/FastLED/wiki/Overview">Documentation</a></li>
+
+                <li><a href="http://fastled.io/downloads_FIXME">Downloads</a></li>
+
+                <li><a href="http://fastled.io/code">Code</a></li>
+
+                <li><a href="http://fastled.io/wiki">Wiki</a></li>
+                
+                <li><a href="http://fastled.io/+">Community</a></li>
+                
+                <li><a href="http://fastled.io/issues">Issues</a></li>
+-->
+                    </ul>
+                </nav>
+            </header>  
+        </div>
+
+        <div class="main-container">
+            <div class="main wrapper clearfix">
+
+                <article>
+                    <header>
+                        <h1>Fast, easy LED library for Arduino</h1>
+                        <p>FastLED is a fast, efficient, easy-to-use Arduino library for programming addressable LED strips and pixels such as WS2810, WS2811, LPD8806, Neopixel and <a href="https://github.com/FastLED/FastLED/wiki/Chipset-reference">more</a>.  FastLED is used by thousands of developers, in countless art and hobby projects, and in numerous commerical products.  </p>
+                        <p>We build FastLED to help you get started faster, develop your code faster, and make your code run faster.</p>
+                    </header>
+                    <section>
+                        <h2>Great compatibility</h2>
+                        <p>FastLED supports popular LEDs including Neopixel, WS2801, WS2811, WS2812B, LPD8806, TM1809, and <a href="https://github.com/FastLED/FastLED/wiki/Chipset-reference">more</a>.  The library runs on <a href="https://github.com/FastLED/FastLED/wiki/Overview#wiki-platforms">a wide range</a> of Arduino and compatible boards, including both AVR- and ARM- based microcontrollers.</p>
+                    </section>
+                    <section>
+                        <h2>Great features</h2>
+                        <p>In addition to fast, efficient, compatible LED driver code, FastLED also provides features that get your animations up and running fast:</p>
+                        <ul>
+                        <li><b><a href="https://github.com/FastLED/FastLED/wiki/Pixel-reference#wiki-chsv">Full HSV color support</a></b> as well as classic RGB</li>
+                        <li><b>Master brightness setting</b> (nondestructive) controls brightness, power use, and battery life</li>
+                        <li><b>Fast math and memory functions</b> up to 10X faster than standard Arduino libraries</li>
+                        <li><b>User community</b> of thousands, who share tips, ideas, and help</li>
+                        <li><b>Multi-year history</b> of active development and evolution</li>
+                        <li><b>Ruthless efficiency</b>, an almost fanatical devotion to performance, and nice RGB uniforms.</li>
+                        </ul>
+					</section>
+					<section>
+					<h2>Get started...</h2>
+					<p><a href="http://fastled.io/downloads_FIXME">Download the library</a> and <a href="https://github.com/FastLED/FastLED/wiki/Basic-usage">get started</a> coding!	
+					</section>
+					<section>
+					<p>&nbsp;</p>
+                        <hr>
+                        <p>Daniel Garcia (<a href="https://github.com/focalintent">focalintent</a>) created FastSPI_LED in 2010, FastSPI_LED2 in 2012.  
+                        <br>Mark Kriegsman (<a href="https://github.com/kriegsman">kriegsman</a>) joined the project in 2013.
+                    </section>
 <!--                    
-                   <footer>
-                       <h3>footer .h3</h3>
-                       <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam sodales urna non odio egestas tempor. Nunc vel vehicula ante. Etiam bibendum iaculis libero, eget molestie nisl pharetra in. In semper consequat est, eu porta velit mollis nec. Curabitur posuere enim eget turpis feugiat tempor.</p>
-                   </footer>
+                    <footer>
+                        <h3>footer .h3</h3>
+                        <p>Lorem </p>
+                    </footer>
 -->
-               </article>
-<!--
-               <aside>
-                   <h3>aside</h3>
-                   <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam sodales urna non odio egestas tempor. Nunc vel vehicula ante. Etiam bibendum iaculis libero, eget molestie nisl pharetra in. In semper consequat est, eu porta velit mollis nec. Curabitur posuere enim eget turpis feugiat tempor. Etiam ullamcorper lorem dapibus velit suscipit ultrices.</p>
-               </aside>
+                </article>
+
+                <aside>
+<!--                    <h3>Links</h3>
 -->
-           </div> <!-- #main -->
-       </div> <!-- #main-container -->
+                    <ul>
+                <li><a href="https://github.com/FastLED/FastLED/wiki/Overview">Documentation</a></li>
 
-       <div class="footer-container">
-           <footer class="wrapper">
-               <h3>footer</h3>
-           </footer>
-       </div>
+                <li><a href="http://fastled.io/downloads_FIXME">Downloads</a></li>
 
-<!--
-       <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-       <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
+                <li><a href="http://fastled.io/code">Code</a></li>
 
-       <script src="js/main.js"></script>
+                <li><a href="http://fastled.io/wiki">Wiki</a></li>
+                
+                <li><a href="http://fastled.io/+">Community</a></li>
+                
+                <li><a href="http://fastled.io/issues">Issues</a></li>
+                    </ul>
+                </aside>
+
+            </div> <!-- #main -->
+        </div> <!-- #main-container -->
+
+
+        <div class="footer-container">
+            <footer class="wrapper">
+<!--                <h3>footer</h3>
 -->
-   </body>
+				
+                <p>
+                <a href="https://github.com/FastLED/FastLED/wiki/Overview">Documentation</a> &nbsp; &nbsp;
+
+                <a href="http://fastled.io/downloads_FIXME">Downloads</a> &nbsp; &nbsp;
+
+                <a href="http://fastled.io/code">Code</a> &nbsp; &nbsp;
+
+                <a href="http://fastled.io/wiki">Wiki</a> &nbsp; &nbsp;
+                
+                <a href="http://fastled.io/+">Community</a> &nbsp; &nbsp;
+                
+                <a href="http://fastled.io/issues">Issues</a> &nbsp; &nbsp;
+				</p>                
+            </footer>
+        </div>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="homepage/js/vendor/jquery-1.10.1.min.js"><\/script>')</script>
+
+        <script src="homepage/js/main.js"></script>
+    </body>
 </html>
