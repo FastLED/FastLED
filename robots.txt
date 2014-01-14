@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: 
 
-Sitemap: http://fastled.io//sitemap.xml 
+Sitemap: http://fastled.io/blog/sitemap.xml 
