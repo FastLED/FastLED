@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[FastLED]]></title>
+  <link href="http://fastled.io/blog/atom.xml" rel="self"/>
+  <link href="http://fastled.io/blog/"/>
+  <updated>2014-01-13T19:22:17-08:00</updated>
+  <id>http://fastled.io/blog/</id>
+  <author>
+    <name><![CDATA[FastLED]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[First Post]]></title>
+    <link href="http://fastled.io/blog/blog/2014/01/10/first-post/"/>
+    <updated>2014-01-10T03:30:47-08:00</updated>
+    <id>http://fastled.io/blog/blog/2014/01/10/first-post</id>
+    <content type="html"><![CDATA[<p>Poking around with markdown because I have insomnia and want to see this thing up and
+running!</p>
+]]></content>
+  </entry>
+  
+</feed>
