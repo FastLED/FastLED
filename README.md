@@ -23,7 +23,7 @@ How quickly can you get up and running with the library?  Here's a simple blink 
 	void setup() { FastLED.addLeds<NEOPIXEL, 6>(leds, NUM_LEDS); }
 	void loop() { 
 		leds[0] = CRGB::White; FastLED.show(); delay(30); 
-		leds[0] = CRGB::Black; FastLED.show(); delay30);
+		leds[0] = CRGB::Black; FastLED.show(); delay(30);
 	}
 
 ## Supported LED chipsets
@@ -39,6 +39,9 @@ Here's a list of all the LED chipsets are supported.  More details on the led ch
 * SM16716 - SPI based chipset
 * DMX - send rgb data out over DMX using arduino DMX libraries
 
+LPD6803, HL1606, and "595"-style shift registers are no longer supported by the library.  The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.
+
+
 ## Supported platforms
 
 Right now the library is supported on a variety of arduino compatable platforms.  If it's ARM or AVR and uses the arduino software (or a modified version of it to build) then it is likely supported.  Note that we have a long list of upcoming platforms to support, so if you don't see what you're looking for here, ask, it may be on the roadmap (or may already be supported).  N.B. at the moment we are only supporting the stock compilers that ship with the arduino software.  Support for upgraded compilers, as well as using AVR studio and skipping the arduino entirely, should be coming in a near future release.
@@ -46,9 +49,16 @@ Right now the library is supported on a variety of arduino compatable platforms.
 * Arduino & compatibles - straight up arduino devices, uno, duo, leonardo, mega, nano, etc...
 * Teensy 2, Teensy++ 2, Teensy 3 - arduino compataible from pjrc.com with some extra goodies (note the teensy 3 is ARM, not AVR!)
 
-What types of platforms are we thinking about supporting in the future?  Here's a short list:  MSP430, ChipKit32, Maple, Beagleboard
+What types of platforms are we thinking about supporting in the future?  Here's a short list:  Arduino Due, MSP430, ChipKit32, Maple, Beagleboard
 
-*TODO* - provide link to full documentation in readme.
+## What about that name?
+
+Wait, what happend to FastSPI_LED and FastSPI_LED2?  The library was initially named FastSPI_LED because it was focused on very fast and efficient SPI access.  However, since then, the library has expanded to support a number of LED chipsets that don't use SPI, as well as a number of math and utility functions for LED processing across the board.  We decided that the name FastLED more accurately represents the totality of what the library provides, everything fast, for LEDs.
+
+## For more information
+
+Check out the official site http://fastled.io for links to documentation, issues, and news
+
 
 *TODO* - get candy
 

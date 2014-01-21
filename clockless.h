@@ -144,8 +144,12 @@ public:
 
 		register uint8_t b;
 
-		b = ADVANCE ? data[SKIP + RGB_BYTE0(RGB_ORDER)] :rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
-		b = INLINE_SCALE(b, scale);
+		if(ADVANCE) { 
+			b = data[SKIP + RGB_BYTE0(RGB_ORDER)];
+		} else { 
+			b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
+		}
+		b = scale8_LEAVING_R1_DIRTY(b, scale);
 
 		register uint8_t c;
 		register uint8_t d;
@@ -161,7 +165,12 @@ public:
 
 			// Leave an extra 4 clocks for the scale
 			bitSetLast<6, 6>(port, hi, lo, b);
-			c = ADVANCE ? data[SKIP + RGB_BYTE1(RGB_ORDER)] :rgbdata[SKIP + RGB_BYTE1(RGB_ORDER)];
+			if(ADVANCE) { 
+				c = data[SKIP + RGB_BYTE1(RGB_ORDER)];
+			} else { 
+				c = rgbdata[SKIP + RGB_BYTE1(RGB_ORDER)];
+				delaycycles<1>();
+			}
 			INLINE_SCALE(c, scale);
 			bitSetLast<5, 1>(port, hi, lo, b);
 			
@@ -176,7 +185,12 @@ public:
 			
 			// Leave an extra 4 clocks for the scale
 			bitSetLast<6, 6>(port, hi, lo, c);
-			d = ADVANCE ? data[SKIP + RGB_BYTE2(RGB_ORDER)] :rgbdata[SKIP + RGB_BYTE2(RGB_ORDER)];
+			if(ADVANCE) { 
+				d = data[SKIP + RGB_BYTE2(RGB_ORDER)];
+			} else { 
+				d = rgbdata[SKIP + RGB_BYTE2(RGB_ORDER)];
+				delaycycles<1>();
+			}
 			INLINE_SCALE(d, scale);
 			bitSetLast<5, 1>(port, hi, lo, c);
 			
@@ -190,7 +204,12 @@ public:
 			data += (SKIP + 3);
 			// Leave an extra 4 clocks for the scale
 			bitSetLast<6, 6>(port, hi, lo, d);
-			b = ADVANCE ? data[SKIP + RGB_BYTE0(RGB_ORDER)] :rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
+			if(ADVANCE) { 
+				b = data[SKIP + RGB_BYTE0(RGB_ORDER)];
+			} else { 
+				b = rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
+				delaycycles<1>();
+			}
 			INLINE_SCALE(b, scale);
 			bitSetLast<5, 6>(port, hi, lo, d);
 		}

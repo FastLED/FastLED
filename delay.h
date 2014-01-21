@@ -9,8 +9,10 @@
 
 #if defined(__arm__) 
 # define NOP __asm__ __volatile__ ("nop\n");
+# define NOP2 __asm__ __volatile__ ("nop\n\tnop");
 #else
 #  define NOP __asm__ __volatile__ ("cp r0,r0\n");
+#  define NOP2 __asm__ __volatile__ ("rjmp .+0");
 #endif
 
 // predeclaration to not upset the compiler
@@ -72,10 +74,38 @@ template<> __attribute__((always_inline)) inline void delaycycles<-2>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-1>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<0>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<1>() {NOP;}
-template<> __attribute__((always_inline)) inline void delaycycles<2>() {NOP;NOP;}
-template<> __attribute__((always_inline)) inline void delaycycles<3>() {NOP;NOP;NOP;}
-template<> __attribute__((always_inline)) inline void delaycycles<4>() {NOP;NOP;NOP;NOP;}
-template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP;NOP;NOP;NOP;NOP;}
+template<> __attribute__((always_inline)) inline void delaycycles<2>() {NOP2;}
+template<> __attribute__((always_inline)) inline void delaycycles<3>() {NOP;NOP2;}
+template<> __attribute__((always_inline)) inline void delaycycles<4>() {NOP2;NOP2;}
+template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP2;NOP2;NOP;}
+
+// Some timing related macros/definitions 
+
+// Macro to convert from nano-seconds to clocks and clocks to nano-seconds
+// #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
+#if F_CPU < 96000000
+#define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
+#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 1000000L)
+#else
+#define NS(_NS) ( (_NS * (F_CPU / 2000000L))) / 1000
+#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 2000000L)
+#endif
+
+//  Macro for making sure there's enough time available
+#define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)
+
+#if defined(__MK20DX128__)
+   extern volatile uint32_t systick_millis_count;
+#  define MS_COUNTER systick_millis_count
+#else
+#  if defined(CORE_TEENSY)
+     extern volatile unsigned long timer0_millis_count;
+#    define MS_COUNTER timer0_millis_count
+#  else
+     extern volatile unsigned long timer0_millis;
+#    define MS_COUNTER timer0_millis
+#  endif
+#endif
 
 #ifdef __SAM3X8E__
 class SysClockSaver {

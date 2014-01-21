@@ -82,11 +82,11 @@ void * memcpy8 ( void * dst, void* src, uint16_t num )
 //__attribute__ ((noinline))
 void * memmove8 ( void * dst, void* src, uint16_t num )
 {
-    if( src < dst) {
-        // if src < dst then we can use the forward-stepping memcpy8
+    if( src > dst) {
+        // if src > dst then we can use the forward-stepping memcpy8
         return memcpy8( dst, src, num);
     } else {
-        // if src > dst then we have to step backward:
+        // if src < dst then we have to step backward:
         dst = (char*)dst + num;
         src = (char*)src + num;
         asm volatile(

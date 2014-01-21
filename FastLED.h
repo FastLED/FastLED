@@ -7,6 +7,7 @@
 #include "clockless.h"
 #include "block_clockless.h"
 #include "clockless2.h"
+#include "clockless_trinket.h"
 #include "lib8tion.h"
 #include "hsv2rgb.h"
 #include "chipsets.h"
@@ -58,27 +59,27 @@ public:
 
 	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN > CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) { 
-			case LPD8806: return addLeds(new LPD8806Controller<DATA_PIN, CLOCK_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
-			case WS2801: return addLeds(new WS2801Controller<DATA_PIN, CLOCK_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
-			case SM16716: return addLeds(new SM16716Controller<DATA_PIN, CLOCK_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
 	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER > CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) { 
-			case LPD8806: return addLeds(new LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-			case WS2801: return addLeds(new WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-			case SM16716: return addLeds(new SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-			case P9813: return addLeds(new P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 	
 	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint8_t SPI_DATA_RATE > CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) { 
-			case LPD8806: return addLeds(new LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE>(), data, nLedsOrOffset, nLedsIfOffset);
-			case WS2801: return addLeds(new WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE>(), data, nLedsOrOffset, nLedsIfOffset);
-			case SM16716: return addLeds(new SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE>(), data, nLedsOrOffset, nLedsIfOffset);
-			case P9813: return addLeds(new P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE>(), data, nLedsOrOffset, nLedsIfOffset);
+			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -101,18 +102,18 @@ public:
 	CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) { 
 #ifdef FASTSPI_USE_DMX_SIMPLE
-			case DMX: return addLeds(new DMXController<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case DMX: { static DMXController<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 #endif
-			case TM1829: return addLeds(new TM1829Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case TM1829: { static TM1829Controller800Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case TM1804:
-			case TM1809: return addLeds(new TM1809Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
-			case TM1803: return addLeds(new TM1803Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
-			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case TM1809: { static TM1809Controller800Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case TM1803: { static TM1803Controller400Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case UCS1903: { static UCS1903Controller400Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2812: 
 			case WS2812B:
-			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
-			case NEOPIXEL: return addLeds(new WS2811Controller800Khz<DATA_PIN, GRB>(), data, nLedsOrOffset, nLedsIfOffset);
-			case WS2811_400: return addLeds(new WS2811Controller400Khz<DATA_PIN>(), data, nLedsOrOffset, nLedsIfOffset);
+			case WS2811: { static WS2811Controller800Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case NEOPIXEL: { static WS2811Controller800Khz<DATA_PIN, GRB> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case WS2811_400: { static WS2811Controller400Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 		return NULL;
 	}
@@ -121,17 +122,18 @@ public:
 	CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) { 
 #ifdef FASTSPI_USE_DMX_SIMPLE
-			case DMX: return addLeds(new DMXController<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+			case DMX: {static  DMXController<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 #endif
-			case TM1829: return addLeds(new TM1829Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-			case TM1809: return addLeds(new TM1809Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-			case TM1803: return addLeds(new TM1803Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-			case UCS1903: return addLeds(new UCS1903Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+			case TM1829: { static TM1829Controller800Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case TM1804:
+			case TM1809: { static TM1809Controller800Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case TM1803: { static TM1803Controller400Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case UCS1903: { static UCS1903Controller400Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2812: 
 			case WS2812B:
 			case NEOPIXEL:
-			case WS2811: return addLeds(new WS2811Controller800Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-			case WS2811_400: return addLeds(new WS2811Controller400Khz<DATA_PIN, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+			case WS2811: { static WS2811Controller800Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case WS2811_400: { static WS2811Controller400Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 		return NULL;
 	}
