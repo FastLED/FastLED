@@ -159,7 +159,7 @@ class P9813Controller : public CLEDController {
 		register uint8_t g = scale8(data[RGB_BYTE1(RGB_ORDER)], scale);
 		register uint8_t b = scale8(data[RGB_BYTE2(RGB_ORDER)], scale);
 
-		register uint8_t top = 0xC0 | (~b & 0xC0) >> 2 | (~g & 0xC0) >> 4 | (~r & 0xC0);
+		register uint8_t top = 0xC0 | ((~b & 0xC0) >> 2) | ((~g & 0xC0) >> 4) | ((~r & 0xC0) >> 6);
 		mSPI.writeByte(top); mSPI.writeByte(b); mSPI.writeByte(g); mSPI.writeByte(r);
 	}
 
