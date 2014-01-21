@@ -4,32 +4,8 @@
 #include "controller.h"
 #include "lib8tion.h"
 #include "led_sysdefs.h"
+#include "delay.h"
 
-// Macro to convert from nano-seconds to clocks and clocks to nano-seconds
-// #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
-#if F_CPU < 96000000
-#define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
-#define CLKS_TO_MICROS(_CLKS) _CLKS / (F_CPU / 1000000L)
-#else
-#define NS(_NS) ( (_NS * (F_CPU / 2000000L))) / 1000
-#define CLKS_TO_MICROS(_CLKS) _CLKS / (F_CPU / 2000000L)
-#endif
-
-//  Macro for making sure there's enough time available
-#define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)
-
-#if defined(__MK20DX128__)
-   extern volatile uint32_t systick_millis_count;
-#  define MS_COUNTER systick_millis_count
-#else
-#  if defined(CORE_TEENSY)
-     extern volatile unsigned long timer0_millis_count;
-#    define MS_COUNTER timer0_millis_count
-#  else
-     extern volatile unsigned long timer0_millis;
-#    define MS_COUNTER timer0_millis
-#  endif
-#endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

@@ -27,4 +27,12 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 // Arduino.h needed for convinience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #include<Arduino.h>
 
+// Scaling macro choice
+#if defined(LIB8_ATTINY)
+#  define INLINE_SCALE(B, SCALE) delaycycles<3>()
+#  warning "No hardware multiply, inline brightness scaling disabled"
+#else
+#   define INLINE_SCALE(B, SCALE) B = scale8_LEAVING_R1_DIRTY(B, SCALE)
+#endif
+
 #endif

@@ -370,4 +370,6 @@ class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, NS(100), NS
 #warning "Not enough clock cycles available for TM1829@1.6Mhz"
 #endif
 
+#endif 
+
 #endif

@@ -94,9 +94,13 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP2;NOP
 //  Macro for making sure there's enough time available
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)
 
+
 #if defined(__MK20DX128__)
    extern volatile uint32_t systick_millis_count;
 #  define MS_COUNTER systick_millis_count
+#elif defined(__SAM3X8E__)
+	extern volatile uint32_t fuckit;
+#	define MS_COUNTER fuckit
 #else
 #  if defined(CORE_TEENSY)
      extern volatile unsigned long timer0_millis_count;
