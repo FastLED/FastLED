@@ -93,7 +93,7 @@ template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t S
 class WS2801Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
-	CMinWait<500>  mWaitDelay;
+	CMinWait<1000>  mWaitDelay;
 public:
 	WS2801Controller() {}
 
