@@ -208,6 +208,8 @@ public:
 	static void wait() __attribute__((always_inline)) { if(shouldWait()) { while(!(SPSR & (1<<SPIF))); } }
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
+	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+
 	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPDR=b;  shouldWait(true); }
 	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; shouldWait(true); wait(); }
 	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPDR=b; shouldWait(true); }
