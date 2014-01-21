@@ -2,7 +2,7 @@
 #define __INC_FASTSPI_ARM_H
 
 
-#if defined(__MK20DX128__) && defined(CORE_TEENSY)
+#if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
 #ifndef SPI_PUSHR_CONT
 #define SPI_PUSHR_CONT SPI0_PUSHR_CONT

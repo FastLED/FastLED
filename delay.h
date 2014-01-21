@@ -95,7 +95,7 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP2;NOP
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)
 
 
-#if defined(__MK20DX128__)
+#if defined(FASTLED_TEENSY3)
    extern volatile uint32_t systick_millis_count;
 #  define MS_COUNTER systick_millis_count
 #elif defined(__SAM3X8E__)

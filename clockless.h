@@ -181,7 +181,7 @@ public:
 	}
 };
 
-#elif defined(__MK20DX128__)
+#elif defined(FASTLED_TEENSY3)
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;

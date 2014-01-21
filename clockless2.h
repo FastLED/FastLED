@@ -104,7 +104,7 @@ public:
 		nLeds *= (3 + SKIP);
 		register uint8_t *end = data + nLeds; 
 
-#if defined(__MK20DX128__)
+#if defined(FASTLED_TEENSY3)
 		register uint32_t b;
 		register uint32_t c;
 		if(ADVANCE) { 

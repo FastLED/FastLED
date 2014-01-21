@@ -453,7 +453,7 @@ _DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_A
 #define SPI_CLOCK 15
 #define AVR_HARDWARE_SPI
 
-#elif defined(__MK20DX128__) && defined(CORE_TEENSY)
+#elif defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
 _IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
 

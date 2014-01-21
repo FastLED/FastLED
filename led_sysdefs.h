@@ -18,7 +18,10 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 
 #endif
 
-#if defined(__MK20DX128__) || defined(__SAM3X8E__) 
+#if defined(__MK20DX128__) || defined(__MK20DX256__) 
+#define FASTLED_TEENSY3
+#define FASTLED_ARM
+#elif defined(__SAM3X8E__) 
 #define FASTLED_ARM
 #else
 #define FASTLED_AVR

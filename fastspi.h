@@ -62,7 +62,7 @@ class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SP
 #ifndef FORCE_SOFTWARE_SPI
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
-#if defined(__MK20DX128__) && defined(CORE_TEENSY)
+#if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};

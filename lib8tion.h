@@ -134,7 +134,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 
 #if defined(__arm__)
 
-#if defined(__MK20DX128__)
+#if defined(FASTLED_TEENSY3)
 // Can use Cortex M4 DSP instructions
 #define QADD8_C 0
 #define QADD7_C 0

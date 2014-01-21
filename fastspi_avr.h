@@ -83,12 +83,8 @@ public:
 		uint8_t *end = data + len;
 		select();
 		while(data != end) { 
-#if defined(__MK20DX128__) 
-			writeByte(D::adjust(*data++));
-#else
 			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
 			writeByte(D::adjust(*data++)); delaycycles<3>();
-#endif
 		}
 		D::postBlock(len);
 		release();	
