@@ -29,6 +29,7 @@ enum EClocklessChipsets {
 	WS2812,
 	WS2812B,
 	UCS1903,
+	UCS1903B,
 	WS2811_400,
 	NEOPIXEL,
 	TM1829
@@ -109,6 +110,7 @@ public:
 			case TM1809: { static TM1809Controller800Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case TM1803: { static TM1803Controller400Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case UCS1903: { static UCS1903Controller400Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case UCS1903B: { static UCS1903BController800Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2812: 
 			case WS2812B:
 			case WS2811: { static WS2811Controller800Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
@@ -129,6 +131,7 @@ public:
 			case TM1809: { static TM1809Controller800Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case TM1803: { static TM1803Controller400Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case UCS1903: { static UCS1903Controller400Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case UCS1903B: { static UCS1903BController800Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2812: 
 			case WS2812B:
 			case NEOPIXEL:

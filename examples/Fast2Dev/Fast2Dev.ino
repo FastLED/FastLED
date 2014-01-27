@@ -28,12 +28,14 @@ void setup() {
    	// setting brightness to 25% brightness
    	LEDS.setBrightness(64);
 
-   	LEDS.addLeds<WS2811, 13, BRG>(leds, NUM_LEDS);
+   	// LEDS.addLeds<WS2811, 13, BRG>(leds, NUM_LEDS);
    	// LEDS.addLeds<TM1809, 13, BRG>(leds, NUM_LEDS);
    	// LEDS.addLeds<UCS1903, 13>(leds, NUM_LEDS);
    	// LEDS.addLeds<TM1803, 13>(leds, NUM_LEDS);
    	// LEDS.addLeds<TM1829, 13>(leds, NUM_LEDS);
 
+	FastLED.addLeds<UCS1903B, 13, RGB>(leds, NUM_LEDS);
+      
    	// LEDS.addLeds<P9813>(leds, NUM_LEDS);
    	// LEDS.addLeds<LPD8806>(leds, NUM_LEDS);
    	// LEDS.addLeds<P9813>(leds, NUM_LEDS);

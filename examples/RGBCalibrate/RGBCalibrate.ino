@@ -44,6 +44,7 @@ void setup() {
       // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<UCS1903, DATA_PIN, RGB>(leds, NUM_LEDS);
+      // FastLED.addLeds<UCS1903B, DATA_PIN, RGB>(leds, NUM_LEDS);
 
       // FastLED.addLeds<WS2801, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<SM16716, RGB>(leds, NUM_LEDS);
