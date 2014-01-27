@@ -14,10 +14,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Convinience macros to wrap around the toggling of hi vs. lo
-#define SET_LO FLIP ? FastPin<DATA_PIN>::fastset(port, hi) : FastPin<DATA_PIN>::fastset(port, lo); 
-#define SET_HI FLIP ? FastPin<DATA_PIN>::fastset(port, lo) : FastPin<DATA_PIN>::fastset(port, hi); 
-
 #define PORT_MASK 0x77EFF3FE
 #define SKIPLIST ~PORT_MASK
 

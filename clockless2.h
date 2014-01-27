@@ -6,7 +6,7 @@
 #include "led_sysdefs.h"
 #include "delay.h"
 
-
+#ifdef FASTLED_TEENSY3
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point
@@ -104,7 +104,6 @@ public:
 		nLeds *= (3 + SKIP);
 		register uint8_t *end = data + nLeds; 
 
-#if defined(FASTLED_TEENSY3)
 		register uint32_t b;
 		register uint32_t c;
 		if(ADVANCE) { 
@@ -223,7 +222,6 @@ public:
 			c = scale8(c, scale);
 			delaycycles<T3 - 15>(); // 1/1 store, 2/2 load (with increment), 1/1 mul, 1/1 shift, 1 cmp, 1 branch backwards, 1 movim, 1/1 port lookup
 		};
-#endif
 	}
 
 #ifdef SUPPORT_ARGB
@@ -237,5 +235,7 @@ public:
 #undef SET2_HI2
 #undef SET2_LO
 #undef SET2_LO2
+
+#endif
 
 #endif

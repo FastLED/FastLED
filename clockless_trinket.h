@@ -6,6 +6,7 @@
 #include "delay.h"
 #include <avr/interrupt.h> // for cli/se definitions
 
+#if defined(LIB8_ATTINY)
 
 // Scaling macro choice
 #ifndef TRINKET_SCALE
@@ -275,5 +276,7 @@ public:
 	}
 #endif
 };
+
+#endif
 
 #endif
