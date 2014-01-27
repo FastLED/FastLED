@@ -42,7 +42,7 @@ public:
 
 // Include the various specific SPI implementations
 #include "fastspi_bitbang.h"
-#include "fastspi_arm.h"
+#include "fastspi_arm_k20.h"
 #include "fastspi_avr.h"
 #include "fastspi_dma.h"
 

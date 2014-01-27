@@ -24,16 +24,16 @@ public:
 	template <int N, int ADJ>inline static void bitSetLast(register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t b) { 
 		// First cycle
 		SET_HI; 							// 1 clock cycle if using out, 2 otherwise
-		delaycycles<T1 - (_CYCLES(DATA_PIN) + 1)>();					// 1st cycle length minus 1 clock for out, 1 clock for sbrs
+		delaycycles<T1 - (AVR_PIN_CYCLES(DATA_PIN) + 1)>();					// 1st cycle length minus 1 clock for out, 1 clock for sbrs
 		__asm__ __volatile__ ("sbrs %0, %1" :: "r" (b), "M" (N) :); // 1 clock for check (+1 if skipping, next op is also 1 clock)
 
 		// Second cycle
 		SET_LO;							// 1/2 clock cycle if using out
-		delaycycles<T2 - _CYCLES(DATA_PIN)>(); 						// 2nd cycle length minus 1/2 clock for out
+		delaycycles<T2 - AVR_PIN_CYCLES(DATA_PIN)>(); 						// 2nd cycle length minus 1/2 clock for out
 
 		// Third cycle
 		SET_LO;							// 1/2 clock cycle if using out
-		delaycycles<T3 - (_CYCLES(DATA_PIN) + ADJ)>();				// 3rd cycle length minus 7 clocks for out, loop compare, jump, next uint8_t load
+		delaycycles<T3 - (AVR_PIN_CYCLES(DATA_PIN) + ADJ)>();				// 3rd cycle length minus 7 clocks for out, loop compare, jump, next uint8_t load
 	}
 
 	virtual void clearLeds(int nLeds) {
