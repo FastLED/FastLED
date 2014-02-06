@@ -220,6 +220,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define SCALE16_C 1
 #define ABS8_C 1
 #define MUL8_C 1
+#define QMUL8_C 1
 #define ADD8_C 1
 #define SUB8_C 1
 #define EASE8_C 1
