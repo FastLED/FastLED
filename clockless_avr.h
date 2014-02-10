@@ -6,7 +6,7 @@
 // Definition for a single channel clockless controller for the avr family of chips, like those used in
 // the arduino and teensy 2.x.  Note that there is a special case for hardware-mul-less versions of the avr, 
 // which are tracked in clockless_trinket.h
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, bool FLIP = false, int WAIT_TIME = 50>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -125,6 +125,14 @@ public:
 			INLINE_SCALE(c, scale);
 			bitSetLast<5, 1>(port, hi, lo, b);
 			
+			if(XTRA0 > 0) { 
+				for(register byte x=XTRA0; x; x--) { 
+					bitSetLast<4,4>(port, hi, lo, b);
+					b <<=1;
+				}
+				delaycycles<1>();
+			}
+
 			for(register byte x=5; x; x--) {
 				bitSetLast<7, 4>(port, hi, lo, c);
 				c <<= 1;
@@ -145,9 +153,17 @@ public:
 			INLINE_SCALE(d, scale);
 			bitSetLast<5, 1>(port, hi, lo, c);
 			
+			if(XTRA0 > 0) { 
+				for(register byte x=XTRA0; x; x--) { 
+					bitSetLast<4,4>(port, hi, lo, c);
+					c <<=1;
+				}
+				delaycycles<1>();
+			}
+
 			for(register byte x=5; x; x--) {
-				bitSetLast<7, 4>(port, hi, lo, d);
-				d <<= 1;
+				bitSetLast<7, 4>(port, hi, lo, c);
+				c <<= 1;
 			}
 			delaycycles<1>();
 			// Leave an extra 2 clocks for the next byte load
@@ -162,7 +178,19 @@ public:
 				delaycycles<1>();
 			}
 			INLINE_SCALE(b, scale);
-			bitSetLast<5, 6>(port, hi, lo, d);
+			
+			if(XTRA0 > 0) { 
+				bitSetLast<5, 1>(port, hi, lo, d);
+				for(register byte x=XTRA0-1; x; x--) { 
+					bitSetLast<4,4>(port, hi, lo, d);
+					d <<=1;
+				}
+				delaycycles<1>();
+				bitSetLast<4,6>(port,hi,lo,d);
+			} else {
+				bitSetLast<5,6>(port, hi, lo, d);
+			}
+
 		}
 		cleanup_R1();
 	}

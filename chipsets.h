@@ -338,6 +338,20 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1803Controller400Khz : public ClocklessController<DATA_PIN, 12, 12, 12, RGB_ORDER> {};
 
 #else
+// GW6205@400khz - 800ns, 800ns, 800ns
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GW6205Controller400Khz : public ClocklessController<DATA_PIN, NS(800), NS(800), NS(800), RGB_ORDER, 4> {};
+#if NO_TIME(800, 800, 800) 
+#warning "Not enough clock cycles available for the GW6205@400khz"
+#endif
+
+// GW6205@400khz - 400ns, 400ns, 400ns
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GW6205Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(400), RGB_ORDER, 4> {};
+#if NO_TIME(400, 400, 400) 
+#warning "Not enough clock cycles available for the GW6205@400khz"
+#endif
+
 // UCS1903 - 500ns, 1500ns, 500ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};

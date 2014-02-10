@@ -29,6 +29,8 @@ enum EClocklessChipsets {
 	UCS1903B,
 	WS2811_400,
 	NEOPIXEL,
+	GW6205,
+	GW6205_400,
 	TM1829
 };
 
@@ -113,6 +115,8 @@ public:
 			case WS2811: { static WS2811Controller800Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case NEOPIXEL: { static WS2811Controller800Khz<DATA_PIN, GRB> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2811_400: { static WS2811Controller400Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case GW6205: { static GW6205Controller800Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case GW6205_400: { static GW6205Controller400Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 		return NULL;
 	}
@@ -134,6 +138,8 @@ public:
 			case NEOPIXEL:
 			case WS2811: { static WS2811Controller800Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2811_400: { static WS2811Controller400Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case GW6205: { static GW6205Controller800Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case GW6205_400: { static GW6205Controller400Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 		return NULL;
 	}
