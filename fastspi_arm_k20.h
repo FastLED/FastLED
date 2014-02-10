@@ -344,7 +344,6 @@ public:
 		release();
 	}
 
-
 	template <uint8_t SKIP, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
 		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale); 
 	}

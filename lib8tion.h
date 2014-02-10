@@ -1085,7 +1085,6 @@ LIB8STATIC int16_t cos16( uint16_t theta)
     return sin16( theta + 16384);
 }
 
-
 ///////////////////////////////////////////////////////////////////////
 //
 // memmove8, memcpy8, and memset8:

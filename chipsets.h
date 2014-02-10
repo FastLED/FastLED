@@ -16,8 +16,8 @@ class LPD8806Controller : public CLEDController {
 	class LPD8806_ADJUST {
 	public:
 		// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
-		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80; }
-		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data, register uint8_t scale) { return (scale8(data, scale)>>1) | 0x80; }
+		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80 | (data & 0x01); }
+		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data, register uint8_t scale) { return (scale8(data, scale)>>1) | 0x80 | (data & 0x01); }
 		__attribute__((always_inline)) inline static void postBlock(int len) { 
 			SPI::writeBytesValueRaw(0, ((len+63)>>6));
 		}
@@ -54,9 +54,13 @@ public:
 
 	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) {
 		mSPI.select();
-		uint8_t a = 0x80 | (scale8(data[RGB_BYTE0(RGB_ORDER)], scale) >> 1);
-		uint8_t b = 0x80 | (scale8(data[RGB_BYTE1(RGB_ORDER)], scale) >> 1);
-		uint8_t c = 0x80 | (scale8(data[RGB_BYTE2(RGB_ORDER)], scale) >> 1);
+		uint8_t a = data[RGB_BYTE0(RGB_ORDER)];
+		uint8_t b = data[RGB_BYTE1(RGB_ORDER)];
+		uint8_t c = data[RGB_BYTE1(RGB_ORDER)];
+
+		a = 0x80 | (scale8(a, scale) >> 1) | (a & 0x01);
+		b = 0x80 | (scale8(b, scale) >> 1) | (b & 0x01);
+		c = 0x80 | (scale8(c, scale) >> 1) | (c & 0x01);
 		int iLeds = 0;
 
 		while(iLeds++ < nLeds) { 
@@ -290,7 +294,9 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(LIB8_ATTINY) && (F_CPU == 8000000) // 125ns/clock
+// We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
+// need the more tightly defined timeframes.
+#if (defined(LIB8_ATTINY) || defined(FASTLED_AVR)) && (F_CPU == 8000000) // 125ns/clock
 // WS2811@8Mhz 2 clocks, 5 clocks, 3 clocks
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
