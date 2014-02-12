@@ -31,7 +31,7 @@ public:
 		cli();
 		SysClockSaver savedClock(T1 + T2 + T3);
 
-		showRGBInternal<0, false>(nLeds, scale, (const byte*)&data);
+		showRGBInternal<0, false>(nLeds, CRGB(scale,scale,scale), (const byte*)&data);
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
@@ -47,7 +47,7 @@ public:
 		SysClockSaver savedClock(T1 + T2 + T3);
 		
 		// FastPinBB<DATA_PIN>::hi(); delay(1); FastPinBB<DATA_PIN>::lo();
-		showRGBInternal<0, true>(nLeds, scale, (const byte*)rgbdata);
+		showRGBInternal<0, true>(nLeds, CRGB(scale,scale,scale), (const byte*)rgbdata);
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
@@ -63,7 +63,7 @@ public:
 		cli();
 		SysClockSaver savedClock(T1 + T2 + T3);
 
-		showRGBInternal<1, true>(nLeds, scale, (const byte*)rgbdata);
+		showRGBInternal<1, true>(nLeds, CRGB(scale,scale,scale), (const byte*)rgbdata);
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
@@ -136,21 +136,37 @@ public:
 	}
 
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
-
+#define DITHER 1
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register uint8_t scale, register const byte *rgbdata) {
+	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register CRGB scale, register const byte *rgbdata) {
 		register data_ptr_t port asm("r7") = FastPinBB<DATA_PIN>::port(); FORCE_REFERENCE(port);
 		register byte *data = (byte*)rgbdata;
 		register uint8_t *end = data + (nLeds*3 + SKIP); 
-		
+		uint8_t E[3] = {0xFF,0xFF,0xFF};
+		uint8_t D[3] = {0,0,0};
+
+		static uint8_t Dstore[3] = {0,0,0};
+
+		// compute the E values and seed D from the stored values
+		for(register uint32_t i = 0; i < 3; i++) { 
+			byte S = scale.raw[i];
+			while(S>>=1) { E[i] >>=1; };
+			D[i] = Dstore[i] & E[i];
+		}
+
 		register volatile uint32_t *CTPTR asm("r6")= &SysTick->CTRL; FORCE_REFERENCE(CTPTR);
 		
 		*port = 0;
 
 		register uint32_t b;
-		b = ADVANCE ? data[SKIP + RGB_BYTE0(RGB_ORDER)] :rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
-		b = scale8(b, scale);
+		b = ADVANCE ? data[SKIP + B0] :rgbdata[SKIP + B0];
+		// dither
+		if(DITHER && b) b = qadd8(b, D[B0]);
+		// advance D constrained by E
+		D[B0] += 3; D[B0] &= E[B0];
+		// now scale
+		b = scale8(b, scale.raw[B0]);
 
 		// Setup and start the clock
 		_LOAD = TOTAL;
@@ -173,8 +189,11 @@ public:
 			if(b& 0x80) {} else { AT_MARK(*port = 0); }
 			AT_END(*port = 0);
 
-			b = ADVANCE ? data[SKIP + RGB_BYTE1(RGB_ORDER)] : rgbdata[SKIP + RGB_BYTE1(RGB_ORDER)];
-			b = scale8(b, scale);
+			b = ADVANCE ? data[SKIP + B1] : rgbdata[SKIP + B1];
+			// dither
+			if(DITHER && b) b = qadd8(b, D[B1]);
+			// now scale
+			b = scale8(b, scale.raw[B1]);
 
 			for(register uint32_t i = 7; i > 0; i--) { 
 				AT_BIT_START(*port = 1);
@@ -187,9 +206,11 @@ public:
 			if(b& 0x80) {} else { AT_MARK(*port = 0); }
 			AT_END(*port = 0);
 
-			b = ADVANCE ? data[SKIP + RGB_BYTE2(RGB_ORDER)] : rgbdata[SKIP + RGB_BYTE2(RGB_ORDER)];
-			b = scale8(b, scale);
-			data += (3 + SKIP);
+			b = ADVANCE ? data[SKIP + B2] : rgbdata[SKIP + B2];
+			// dither
+			if(DITHER && b) b = qadd8(b, D[B2]);
+			// now scale
+			b = scale8(b, scale.raw[B2]);
  
 			for(register uint32_t i = 7; i > 0; i--) { 
 				AT_BIT_START(*port = 1);
@@ -202,9 +223,25 @@ public:
 			if(b& 0x80) {} else { AT_MARK(*port = 0); }
 			AT_END(*port = 0);
 
-			b = ADVANCE ? data[SKIP + RGB_BYTE0(RGB_ORDER)] : rgbdata[SKIP + RGB_BYTE0(RGB_ORDER)];
-			b = scale8(b, scale);
+			// We have some extra time between rgb pixels, prep 
+			// the next byte and cycle the dither adjustments
+			data += (3 + SKIP);
+			b = ADVANCE ? data[SKIP + B0] : rgbdata[SKIP + B0];
+			// dither
+			if(DITHER && b) b = qadd8(b, D[B0]);
+			// now scale
+			b = scale8(b, scale.raw[B0]);
+
+			// advance D constrained by E
+			D[B0] += 3; D[B0] &= E[B0];
+			D[B1] += 3; D[B1] &= E[B1];
+			D[B2] += 3; D[B2] &= E[B2];
 		};
+
+		// Save the D values for cycling through next time
+		Dstore[0] = D[0];
+		Dstore[1] = D[1];
+		Dstore[2] = D[2];
 	}
 };
 

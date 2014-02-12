@@ -9,6 +9,10 @@
 #define RGB_BYTE1(X) ((X>>3) & 0x3) 
 #define RGB_BYTE2(X) ((X) & 0x3)
 
+#define B0 RGB_BYTE0(RGB_ORDER)
+#define B1 RGB_BYTE1(RGB_ORDER)
+#define B2 RGB_BYTE2(RGB_ORDER)
+
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
 
