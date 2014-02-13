@@ -86,4 +86,6 @@ void CFastLED::clearData() {
 }
 
 void CFastLED::delay(unsigned long ms) { 
+	unsigned long start = millis();
+	while((millis()-start) < ms) { LEDS.show(); }
 }
