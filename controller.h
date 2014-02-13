@@ -39,15 +39,15 @@ public:
 	virtual void clearLeds(int nLeds) = 0;
 
 	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) = 0;
+	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) = 0;
 
 	// note that the uint8_ts will be in the order that you want them sent out to the device. 
 	// nLeds is the number of RGB leds being written to
-	virtual void show(const struct CRGB *data, int nLeds, uint8_t scale = 255) = 0;
+	virtual void show(const struct CRGB *data, int nLeds, CRGB scale = CRGB::White) = 0;
 
 #ifdef SUPPORT_ARGB
 	// as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
-	virtual void show(const struct CARGB *data, int nLeds, uint8_t scale = 255) = 0;
+	virtual void show(const struct CARGB *data, int nLeds, CRGB scale = CRGB::White) = 0;
 #endif
 	
 	// is the controller ready to write data out

@@ -14,7 +14,7 @@ uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]
 CFastLED::CFastLED() { 
 	// clear out the array of led controllers
 	m_nControllers = NUM_CONTROLLERS;
-	m_nScale = 255;
+	m_Scale = CRGB::White;
 	memset8(m_Controllers, 0, m_nControllers * sizeof(CControllerInfo));
 }
 
@@ -47,7 +47,7 @@ CLEDController *CFastLED::addLeds(CLEDController *pLed,
 	return NULL;
 }
 
-void CFastLED::show(uint8_t scale) { 
+void CFastLED::show(CRGB scale) { 
 	for(int i  = 0; i < m_nControllers; i++) { 
 		if(m_Controllers[i].pLedController != NULL) { 
 			m_Controllers[i].pLedController->show(m_Controllers[i].pLedData + m_Controllers[i].nOffset, 
@@ -58,7 +58,7 @@ void CFastLED::show(uint8_t scale) {
 	}
 }
 
-void CFastLED::showColor(const struct CRGB & color, uint8_t scale) { 
+void CFastLED::showColor(const struct CRGB & color, CRGB scale) { 
 	for(int i  = 0; i < m_nControllers; i++) { 
 		if(m_Controllers[i].pLedController != NULL) { 
 			m_Controllers[i].pLedController->showColor(color, m_Controllers[i].nLeds, scale);
@@ -83,4 +83,7 @@ void CFastLED::clearData() {
 			return;
 		}
 	}
+}
+
+void CFastLED::delay(unsigned long ms) { 
 }

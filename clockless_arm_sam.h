@@ -26,48 +26,55 @@ public:
 	}
 
 	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) {
+	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) {
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(T1 + T2 + T3);
 
-		showRGBInternal<0, false>(nLeds, CRGB(scale,scale,scale), (const byte*)&data);
+		showRGBInternal<0, false>(nLeds, scale, (const byte*)&data);
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
-		MS_COUNTER += (microsTaken / 1000);
+		long millisTaken = (microsTaken / 1000);
+		do { TimeTick_Increment(); } while(--millisTaken > 0);
 		savedClock.restore();
 		sei();
 		mWait.mark();
 	}
 
-	virtual void show(const struct CRGB *rgbdata, int nLeds, uint8_t scale = 255) { 
+	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(T1 + T2 + T3);
 		
+		Serial.print("Scale is "); 
+		Serial.print(scale.raw[0]); Serial.print(" ");
+		Serial.print(scale.raw[1]); Serial.print(" ");
+		Serial.print(scale.raw[2]); Serial.println(" ");
 		// FastPinBB<DATA_PIN>::hi(); delay(1); FastPinBB<DATA_PIN>::lo();
-		showRGBInternal<0, true>(nLeds, CRGB(scale,scale,scale), (const byte*)rgbdata);
+		showRGBInternal<0, true>(nLeds, scale, (const byte*)rgbdata);
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
-		MS_COUNTER += (microsTaken / 1000);
+		long millisTaken = (microsTaken / 1000);
+		do { TimeTick_Increment(); } while(--millisTaken > 0);
 		savedClock.restore();
 		sei();
 		mWait.mark();
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, uint8_t scale = 255) { 
+	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(T1 + T2 + T3);
 
-		showRGBInternal<1, true>(nLeds, CRGB(scale,scale,scale), (const byte*)rgbdata);
+		showRGBInternal<1, true>(nLeds, scale, (const byte*)rgbdata);
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
-		MS_COUNTER += (microsTaken / 1000);
+		long millisTaken = (microsTaken / 1000);
+		do { TimeTick_Increment(); } while(--millisTaken > 0);
 		savedClock.restore();
 		sei();
 		mWait.mark();
@@ -137,6 +144,7 @@ public:
 
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
 #define DITHER 1
+#define DADVANCE 3
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
 	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register CRGB scale, register const byte *rgbdata) {
@@ -163,8 +171,6 @@ public:
 		b = ADVANCE ? data[SKIP + B0] :rgbdata[SKIP + B0];
 		// dither
 		if(DITHER && b) b = qadd8(b, D[B0]);
-		// advance D constrained by E
-		D[B0] += 3; D[B0] &= E[B0];
 		// now scale
 		b = scale8(b, scale.raw[B0]);
 
@@ -178,6 +184,12 @@ public:
 		_CTRL;
 
 		while(data < end) { 
+
+			// advance D constrained by E
+			D[B0] += DADVANCE; D[B0] &= E[B0];
+			D[B1] += DADVANCE; D[B1] &= E[B1];
+			D[B2] += DADVANCE; D[B2] &= E[B2];
+
 			for(register uint32_t i = 7; i > 0; i--) { 
 				AT_BIT_START(*port = 1);
 				if(b& 0x80) {} else { AT_MARK(*port = 0); }
@@ -231,11 +243,6 @@ public:
 			if(DITHER && b) b = qadd8(b, D[B0]);
 			// now scale
 			b = scale8(b, scale.raw[B0]);
-
-			// advance D constrained by E
-			D[B0] += 3; D[B0] &= E[B0];
-			D[B1] += 3; D[B1] &= E[B1];
-			D[B2] += 3; D[B2] &= E[B2];
 		};
 
 		// Save the D values for cycling through next time
