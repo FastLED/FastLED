@@ -36,8 +36,8 @@ public:
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
 		long millisTaken = (microsTaken / 1000);
-		do { TimeTick_Increment(); } while(--millisTaken > 0);
 		savedClock.restore();
+		do { TimeTick_Increment(); } while(--millisTaken > 0);
 		sei();
 		mWait.mark();
 	}
@@ -57,8 +57,8 @@ public:
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
 		long millisTaken = (microsTaken / 1000);
-		do { TimeTick_Increment(); } while(--millisTaken > 0);
 		savedClock.restore();
+		do { TimeTick_Increment(); } while(--millisTaken > 0);
 		sei();
 		mWait.mark();
 	}
@@ -74,8 +74,8 @@ public:
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
 		long millisTaken = (microsTaken / 1000);
-		do { TimeTick_Increment(); } while(--millisTaken > 0);
 		savedClock.restore();
+		do { TimeTick_Increment(); } while(--millisTaken > 0);
 		sei();
 		mWait.mark();
 	}
