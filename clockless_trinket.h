@@ -29,7 +29,7 @@ template<> __attribute__((always_inline)) inline void _dc<0>(register uint8_t & 
 template<> __attribute__((always_inline)) inline void _dc<1>(register uint8_t & loopvar) {asm __volatile__("cp r0,r0":::);}
 template<> __attribute__((always_inline)) inline void _dc<2>(register uint8_t & loopvar) {asm __volatile__("rjmp .+0":::);}
 
-#define D1(ADJ) _dc<T1-(2+ADJ)>(loopvar);
+#define D1(ADJ) _dc<T1-(1+ADJ)>(loopvar);
 #define D2(ADJ) _dc<T2-(1+ADJ)>(loopvar);
 #define D3(ADJ) _dc<T3-(1+ADJ)>(loopvar);
 
@@ -54,25 +54,25 @@ public:
 
 	virtual void clearLeds(int nLeds) {
 		static byte zeros[3] = {0,0,0};
-		showRGBInternal_AdjTime(0, false, nLeds, 0, zeros);
+		showRGBInternal_AdjTime(0, false, nLeds, CRGB(0,0,0), zeros);
 	}
 
 	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & data, int nLeds, uint8_t scale = 255) {
+	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) {
 		showRGBInternal_AdjTime(0, false, nLeds, scale, (const byte*)&data);
 	}
 
-	virtual void show(const struct CRGB *rgbdata, int nLeds, uint8_t scale = 255) { 
+	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
 		showRGBInternal_AdjTime(0, true, nLeds, scale, (const byte*)rgbdata);
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, uint8_t scale = 255) { 
+	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
 		showRGBInternal_AdjTime(1, true, nLeds, scale, (const byte*)rgbdata);
 	}
 #endif
 
-	void __attribute__ ((noinline)) showRGBInternal_AdjTime(int skip, bool advance, int nLeds, uint8_t scale,  const byte *rgbdata) {
+	void __attribute__ ((noinline)) showRGBInternal_AdjTime(int skip, bool advance, int nLeds, CRGB  scale,  const byte *rgbdata) {
 		mWait.wait();
 		cli();
 
@@ -87,32 +87,36 @@ public:
 	}
 
 #define USE_ASM_MACROS
-
+				
 #define ASM_VARS : /* write variables */				\
 				[b0] "+r" (b0),							\
 				[b1] "+r" (b1),							\
 				[b2] "+r" (b2),							\
 				[count] "+x" (count),					\
-				[scale_base] "+r" (scale_base),			\
+				[scale_base] "+a" (scale_base),			\
 				[data] "+z" (data),						\
 				[loopvar] "+a" (loopvar)				\
 				: /* use variables */					\
+				[ADV] "r" (advanceBy),					\
 				[hi] "r" (hi),							\
 				[lo] "r" (lo),							\
-				[scale] "r" (scale),					\
-				[ADV] "r" (advanceBy),					\
-				[zero] "r" (zero),						\
+				[s0] "r" (s0),							\
+				[s1] "r" (s1),							\
+				[s2] "r" (s2),							\
+				[d0] "r" (d0),							\
+				[d1] "r" (d1),							\
+				[d2] "r" (d2),							\
+				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),		\
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
-				[O2] "M" (RGB_BYTE2(RGB_ORDER)),		\
-				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20)						\
+				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
 				: /* clobber registers */				
 
 
 // 1 cycle, write hi to the port
-#define HI1 asm __volatile__("out %[PORT], %[hi]" ASM_VARS );
+#define HI1 asm __volatile__("out 0x02, %[hi]" ASM_VARS );
 // 1 cycle, write lo to the port
-#define LO1 asm __volatile__("out %[PORT], %[lo]" ASM_VARS );
+#define LO1 asm __volatile__("out 0x02, %[lo]" ASM_VARS );
 // 2 cycles, sbrs on flipping the lne to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
 // load a byte from ram into the given var with the given offset
@@ -128,7 +132,9 @@ public:
 // 2 cycles - jump out of the loop
 #define BRLOOP1 asm __volatile__("breq 2f" ASM_VARS );
 // 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
-#define SCALE2(B, N) asm __volatile__("sbrc %[scale], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
+#define SCALE02(B, N) asm __volatile__("sbrc %[s0], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
+#define SCALE12(B, N) asm __volatile__("sbrc %[s1], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
+#define SCALE22(B, N) asm __volatile__("sbrc %[s2], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
 // 1 cycle - rotate right, pulling in from carry
 #define ROR1(B) asm __volatile__("ror %[" #B "]" ASM_VARS );
 // 1 cycle, clear the carry bit
@@ -136,18 +142,29 @@ public:
 // 1 cycle, move one register to another
 #define MOV1(B1, B2) asm __volatile__("mov %[" #B1 "], %[" #B2 "]" ASM_VARS );
 // 4 cycles, rotate, clear carry, scale next bit
-#define RORSC4(B, N) ROR1(B) CLC1 SCALE2(B, N)
+#define RORSC04(B, N) ROR1(B) CLC1 SCALE02(B, N)
+#define RORSC14(B, N) ROR1(B) CLC1 SCALE12(B, N)
+#define RORSC24(B, N) ROR1(B) CLC1 SCALE22(B, N)
 // 4 cycles, scale bit, rotate, clear carry
-#define SCROR4(B, N) SCALE2(B,N) ROR1(B) CLC1
+#define SCROR04(B, N) SCALE02(B,N) ROR1(B) CLC1
+#define SCROR14(B, N) SCALE12(B,N) ROR1(B) CLC1
+#define SCROR24(B, N) SCALE22(B,N) ROR1(B) CLC1
 // define the beginning of the loop
-#define LOOP asm __volatile__("1:" ASM_VARS );
+#define LOOP asm __volatile__("1:" ASM_VARS ); d0 += DADVANCE; d1 += DADVANCE; d2 += DADVANCE; d0 &= e0; d1 &= e1; d2 &= d2; 
 #define DONE asm __volatile__("2:" ASM_VARS );
 // delay time
-
+#define DADVANCE 3
+#define DITHER 1
+#define PRESCALE0_4() if(DITHER) { asm __volatile__("cpse %[scale_base], r1\n\t add %[scale_base],%[d0]\n\tbrcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\t" ASM_VARS); } \
+				      else { _dc<4>(loopvar); }
+#define PRESCALE1_4() if(DITHER) { asm __volatile__("cpse %[scale_base], r1\n\t add %[scale_base],%[d1]\n\tbrcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\t" ASM_VARS); } \
+				      else { _dc<4>(loopvar); }
+#define PRESCALE2_4() if(DITHER) { asm __volatile__("cpse %[scale_base], r1\n\t add %[scale_base],%[d2]\n\tbrcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\t" ASM_VARS); } \
+				      else { _dc<4>(loopvar); }
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	static void __attribute__ ((noinline)) showRGBInternal(int skip, bool advance, int nLeds, uint8_t scale,  const byte *rgbdata) {
+	static void __attribute__ ((noinline)) showRGBInternal(int skip, bool advance, int nLeds, CRGB & scale,  const byte *rgbdata) {
 		byte *data = (byte*)rgbdata;
 		data_t mask = FastPin<DATA_PIN>::mask();
 		data_ptr_t port = FastPin<DATA_PIN>::port();
@@ -156,118 +173,111 @@ public:
 		data_t lo = *port & ~mask;
 		*port = lo;
 
+		uint8_t d0, d1, d2;
+		uint8_t e0, e1, e2;
+		uint8_t s0, s1, s2;
 		uint8_t b0, b1, b2;
+		static uint8_t d[3] = {0,0,0};
+
 		uint16_t count = nLeds;
 		uint8_t scale_base = 0;
 		uint16_t advanceBy = advance ? (skip+3) : 0;
-		const uint8_t zero = 0;
+
+		// initialize the scales
+		s0 = scale.raw[B0];
+		s1 = scale.raw[B1];
+		s2 = scale.raw[B2];
+
+		// initialize the e & d values
+		uint8_t S;
+		S = s0; e0 = 0xFF; while(s0 >>= 1) { e0 >>= 1; }
+		d0 = d[0] & e0;
+		S = s1; e1 = 0xFF; while(s1 >>= 1) { e1 >>= 1; }
+		d1 = d[1] & e1;
+		S = s2; e2 = 0xFF; while(s2 >>= 1) { e2 >>= 1; }
+		d2 = d[2] & e0;
+
 		b0 = data[RGB_BYTE0(RGB_ORDER)];
+		if(DITHER && b0) { b0 = qadd8(b0, d0); }
 		b0 = scale8(b0, scale);
-		b1 = data[RGB_BYTE1(RGB_ORDER)];
+		b1 = 0;
 		b2 = 0;
-		register uint8_t loopvar;
+		register uint8_t loopvar=0;
 
-		if(RGB_ORDER == RGB) {
-			// If the rgb order is RGB, we can cut back on program space usage by making a much more compact
-			// representation.
-
-			// multiply count by 3, don't use * because there's no hardware multiply
-			count = count+(count<<1);
-			advanceBy = advance ? 1 : 0;
-			{
-				/* asm */
-				LOOP
-				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
-#if TRINKET_SCALE
-				// Inline scaling, RGB ordering matches byte ordering
-				HI1	D1(0) QLO2(b0, 7) LDSCL3(b1,O1) D2(3) 	LO1 SCALE2(b1,0) 	D3(2)		
-				HI1 D1(0) QLO2(b0, 6) RORSC4(b1,1) 	D2(4)	LO1 ROR1(b1) CLC1 	D3(2)	
-				HI1 D1(0) QLO2(b0, 5) SCROR4(b1,2)	D2(4)	LO1 SCALE2(b1,3)	D3(2)	
-				HI1 D1(0) QLO2(b0, 4) RORSC4(b1,4) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)	
-				HI1 D1(0) QLO2(b0, 3) SCROR4(b1,5) 	D2(4)	LO1 SCALE2(b1,6)	D3(2)	
-				HI1 D1(0) QLO2(b0, 2) RORSC4(b1,7) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)
-				HI1 D1(0) QLO2(b0, 1) IDATA2 		D2(2)	LO1 				D3(0)
-				// In the last bit's first block, we decrement and branch to done if we decremented to 0
-				HI1 D1(0) QLO2(b0, 0) DCOUNT2 BRLOOP1 MOV1(b0, b1) D2(4) 	LO1 D3(2) JMPLOOP2
-#else
-				// no inline scaling, RGB ordering matches byte ordering
-				HI1	D1(0) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)			
-				HI1 D1(0) QLO2(b0, 6) 				D2(0) 	LO1 D3(0)		
-				HI1 D1(0) QLO2(b0, 5) 				D2(0)	LO1 D3(0)			
-				HI1 D1(0) QLO2(b0, 4) 				D2(0)	LO1 D3(0)		
-				HI1 D1(0) QLO2(b0, 3) 				D2(0)	LO1 D3(0)		
-				HI1 D1(0) QLO2(b0, 2) 				D2(0)	LO1 D3(0)
-				HI1 D1(0) QLO2(b0, 1) IDATA2 		D2(2)	LO1 D3(0)
-				// In the last bit's first block, we decrement and branch to done if we decremented to 0
-				HI1 D1(0) QLO2(b2, 0) DCOUNT2 BRLOOP1 MOV1(b0,b1) D2(4) LO1 D3(2) JMPLOOP2	
-#endif			
-				DONE
-				D2(4) LO1 D3(0)
-			}
-		} 
-		else
 		{
 			{
 				/* asm */
 				LOOP
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
+				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
+				// to allow things to line back up.
+				//
+				// While writing out byte 0, we're loading up byte 1, applying the dithering adjustment,
+				// then scaling it using 8 cycles of shift/add interleaved in between writing the bits 
+				// out.  When doing byte 1, we're doing the above for byte 2.  When we're doing byte 2, 
+				// we're cycling back around and doing the above for byte 0.
 #if TRINKET_SCALE
 				// Inline scaling - RGB ordering
-				HI1 D1(0) QLO2(b0, 7) LDSCL3(b1,O1) 	D2(3)	LO1 SCALE2(b1,0)	D3(2)			
-				HI1 D1(0) QLO2(b0, 6) RORSC4(b1,1) 		D2(4)	LO1 ROR1(b1) CLC1	D3(2)
-				HI1 D1(0) QLO2(b0, 5) SCROR4(b1,2)		D2(4)	LO1 SCALE2(b1,3)	D3(2)			
-				HI1 D1(0) QLO2(b0, 4) RORSC4(b1,4) 		D2(4)	LO1 ROR1(b1) CLC1	D3(2)			
-				HI1 D1(0) QLO2(b0, 3) SCROR4(b1,5) 		D2(4)	LO1 SCALE2(b1,6)	D3(2)			
-				HI1 D1(0) QLO2(b0, 2) RORSC4(b1,7) 		D2(4)	LO1 ROR1(b1) CLC1	D3(2)		
-				HI1 D1(0) QLO2(b0, 1) 				 	D2(0)	LO1 				D3(0)			
-				HI1 D1(0) QLO2(b0, 0) 	 				D2(0)	LO1 				D3(0)
-				HI1	D1(0) QLO2(b1, 7) LDSCL3(b2,O2) 	D2(3)	LO1 SCALE2(b2,0)	D3(2)	
-				HI1 D1(0) QLO2(b1, 6) RORSC4(b2,1) 		D2(4)	LO1 ROR1(b2) CLC1	D3(2)
-				HI1 D1(0) QLO2(b1, 5) SCROR4(b2,2)		D2(4)	LO1 SCALE2(b2,3)	D3(2)	
-				HI1 D1(0) QLO2(b1, 4) RORSC4(b2,4) 		D2(4)	LO1 ROR1(b2) CLC1	D3(2)	
-				HI1 D1(0) QLO2(b1, 3) SCROR4(b2,5) 		D2(4)	LO1 SCALE2(b2,6)	D3(2)	
-				HI1 D1(0) QLO2(b1, 2) RORSC4(b2,7) 		D2(4)	LO1 ROR1(b2) CLC1	D3(2)
-				HI1 D1(0) QLO2(b1, 1) 	 				D2(0)	LO1 				D3(0)
-				HI1 D1(0) QLO2(b1, 0) IDATA2 			D2(2) 	LO1 				D3(0)
-				HI1	D1(0) QLO2(b2, 7) LDSCL3(b0,O0) 	D2(3)	LO1 SCALE2(b0,0)	D3(2)	
-				HI1 D1(0) QLO2(b2, 6) RORSC4(b0,1) 		D2(4)	LO1 ROR1(b0) CLC1	D3(2)
-				HI1 D1(0) QLO2(b2, 5) SCROR4(b0,2)		D2(4)	LO1 SCALE2(b0,3)	D3(2)	
-				HI1 D1(0) QLO2(b2, 4) RORSC4(b0,4) 		D2(4)	LO1 ROR1(b0) CLC1	D3(2)	
-				HI1 D1(0) QLO2(b2, 3) SCROR4(b0,5) 		D2(4)	LO1 SCALE2(b0,6)	D3(2)	
-				HI1 D1(0) QLO2(b2, 2) RORSC4(b0,7) 		D2(4)	LO1 ROR1(b0) CLC1	D3(2)
-				HI1 D1(0) QLO2(b2, 1) 					D2(0)	LO1 				D3(0)
-				HI1 D1(0) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2	
+				HI1 D1(1) QLO2(b0, 7) LDSCL3(b1,O1) 	D2(3)	LO1					D3(0)	
+				HI1	D1(1) QLO2(b0, 6) PRESCALE1_4()		D2(4)	LO1	SCALE12(b1,0)	D3(2)		
+				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)
+				HI1 D1(1) QLO2(b0, 4) SCROR14(b1,2)		D2(4)	LO1 SCALE12(b1,3)	D3(2)			
+				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)			
+				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)			
+				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)		
+				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 				D3(0)			
+				HI1 D1(1) QLO2(b1, 7) LDSCL3(b2,O1) 	D2(3)	LO1					D3(0)	
+				HI1	D1(1) QLO2(b1, 6) PRESCALE2_4()		D2(4)	LO1	SCALE22(b2,0)	D3(2)		
+				HI1 D1(1) QLO2(b1, 5) RORSC24(b2,1) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
+				HI1 D1(1) QLO2(b1, 4) SCROR24(b2,2)		D2(4)	LO1 SCALE22(b2,3)	D3(2)	
+				HI1 D1(1) QLO2(b1, 3) RORSC24(b2,4) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)	
+				HI1 D1(1) QLO2(b1, 2) SCROR24(b2,5) 	D2(4)	LO1 SCALE22(b2,6)	D3(2)	
+				HI1 D1(1) QLO2(b1, 1) RORSC24(b2,7) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
+				HI1 D1(1) QLO2(b1, 0) IDATA2 			D2(2) 	LO1 				D3(0)
+				HI1 D1(1) QLO2(b2, 7) LDSCL3(b2,O1) 	D2(3)	LO1					D3(0)	
+				HI1	D1(1) QLO2(b2, 6) PRESCALE0_4()		D2(4)	LO1	SCALE22(b0,0)	D3(2)		
+				HI1 D1(1) QLO2(b2, 5) RORSC04(b0,1) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
+				HI1 D1(1) QLO2(b2, 4) SCROR04(b0,2)		D2(4)	LO1 SCALE02(b0,3)	D3(2)	
+				HI1 D1(1) QLO2(b2, 3) RORSC04(b0,4) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)	
+				HI1 D1(1) QLO2(b2, 2) SCROR04(b0,5) 	D2(4)	LO1 SCALE02(b0,6)	D3(2)	
+				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
+				HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2	
 #else
 				// no inline scaling - non-straight RGB ordering
-				HI1	D1(0) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
-				HI1 D1(0) QLO2(b0, 6) 				D2(0) 	LO1 D3(0)
-				HI1 D1(0) QLO2(b0, 5) 				D2(0) 	LO1 D3(0)
-				HI1 D1(0) QLO2(b0, 4) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b0, 3) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b0, 2) 				D2(0)	LO1 D3(0)		
-				HI1 D1(0) QLO2(b0, 1) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b0, 0) 				D2(0) 	LO1 D3(0)			
-				HI1	D1(0) QLO2(b1, 7) LD2(b2,O2) 	D2(2)	LO1 D3(0)			
-				HI1 D1(0) QLO2(b1, 6) 				D2(0) 	LO1 D3(0)		
-				HI1 D1(0) QLO2(b1, 5) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b1, 4) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b1, 3) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b1, 2) 				D2(0) 	LO1 D3(0)		
-				HI1 D1(0) QLO2(b1, 1) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b1, 0) IDATA2 		D2(2)	LO1 D3(0)			
-				HI1	D1(0) QLO2(b2, 7) LD2(b0,O0) 	D2(2)	LO1 D3(0)			
-				HI1 D1(0) QLO2(b2, 6) 				D2(0) 	LO1 D3(0)		
-				HI1 D1(0) QLO2(b2, 5) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b2, 4) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b2, 3) 				D2(0) 	LO1 D3(0)			
-				HI1 D1(0) QLO2(b2, 2) 				D2(0) 	LO1 D3(0)		
-				HI1 D1(0) QLO2(b2, 1) 				D2(0) 	LO1 D3(0)
-				HI1 D1(0) QLO2(b2, 0) DCOUNT2 BRLOOP1 D2(3) 		LO1 D3(2) JMPLOOP2	
+				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
+				HI1 D1(1) QLO2(b0, 6) 				D2(0) 	LO1 D3(0)
+				HI1 D1(1) QLO2(b0, 5) 				D2(0) 	LO1 D3(0)
+				HI1 D1(1) QLO2(b0, 4) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b0, 3) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b0, 2) 				D2(0)	LO1 D3(0)		
+				HI1 D1(1) QLO2(b0, 1) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b0, 0) 				D2(0) 	LO1 D3(0)			
+				HI1	D1(1) QLO2(b1, 7) LD2(b2,O2) 	D2(2)	LO1 D3(0)			
+				HI1 D1(1) QLO2(b1, 6) 				D2(0) 	LO1 D3(0)		
+				HI1 D1(1) QLO2(b1, 5) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b1, 4) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b1, 3) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b1, 2) 				D2(0) 	LO1 D3(0)		
+				HI1 D1(1) QLO2(b1, 1) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b1, 0) IDATA2 		D2(2)	LO1 D3(0)			
+				HI1	D1(1) QLO2(b2, 7) LD2(b0,O0) 	D2(2)	LO1 D3(0)			
+				HI1 D1(1) QLO2(b2, 6) 				D2(0) 	LO1 D3(0)		
+				HI1 D1(1) QLO2(b2, 5) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b2, 4) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b2, 3) 				D2(0) 	LO1 D3(0)			
+				HI1 D1(1) QLO2(b2, 2) 				D2(0) 	LO1 D3(0)		
+				HI1 D1(1) QLO2(b2, 1) 				D2(0) 	LO1 D3(0)
+				HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 D2(3) 		LO1 D3(2) JMPLOOP2	
 #endif			
 				DONE
 				D2(4) LO1 D3(0)
 			}
 		}
+
+		// save the d values
+		d[0] = d0;
+		d[1] = d1;
+		d[2] = d2;
 	}
 
 #ifdef SUPPORT_ARGB

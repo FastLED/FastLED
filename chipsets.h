@@ -312,10 +312,19 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903BController800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 4, 4, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
+class TM1809Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1803Controller400Khz : public ClocklessController<DATA_PIN, 6, 6, 6, RGB_ORDER> {};
+class TM1803Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 6, 6, 6, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1829Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GW6205Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 6, 7, 6, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GW6205Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 4, 4, RGB_ORDER> {};
 
 #elif defined(LIB8_ATTINY) && (F_CPU == 16000000) // 62.5ns/clock 
 

@@ -19,6 +19,7 @@
 #define SET_HI FLIP ? FastPin<DATA_PIN>::fastset(port, lo) : FastPin<DATA_PIN>::fastset(port, hi); 
 
 #include "clockless_avr.h"
+#include "clockless_trinket.h"
 #include "clockless_arm_k20.h"
 #include "clockless_arm_sam.h"
 #include "clockless2.h"
