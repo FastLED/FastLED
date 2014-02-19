@@ -460,8 +460,9 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
 LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1
-    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
-    uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
+    uint8_t j = (((int)i * (int)scale) >> 8) + (i?1:0);
+    // uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    // uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
     return j;
 #elif SCALE8_AVRASM == 1
     uint8_t j;

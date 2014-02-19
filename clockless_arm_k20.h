@@ -110,13 +110,13 @@ public:
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 		ARM_DWT_CYCCNT = 0;
+		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
 		register uint32_t b;
 		b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE0(RGB_ORDER)];
 		if(DITHER && b) b = qadd8(b, D[B0]);
 		b = scale8(b, scale.raw[B0]);
 
-		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 		while(data < end) { 
 			D[B0] += DADVANCE; D[B0] &= E[B0];
 			D[B1] += DADVANCE; D[B1] &= E[B1];
