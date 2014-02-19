@@ -35,7 +35,7 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #  define INLINE_SCALE(B, SCALE) delaycycles<3>()
 #  warning "No hardware multiply, inline brightness scaling disabled"
 #else
-#   define INLINE_SCALE(B, SCALE) B = scale8_LEAVING_R1_DIRTY(B, SCALE)
+#   define INLINE_SCALE(B, SCALE) B = scale8_video(B, SCALE)
 #endif
 
 #endif

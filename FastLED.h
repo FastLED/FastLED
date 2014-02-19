@@ -41,7 +41,7 @@ enum EBlockChipsets {
 #if defined(LIB8_ATTINY)
 #define NUM_CONTROLLERS 2
 #else
-#define NUM_CONTROLLERS 32
+#define NUM_CONTROLLERS 8
 #endif
 
 class CFastLED {
