@@ -470,9 +470,9 @@ LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
         "mov %[j], r1\n\t"
         "clr __zero_reg__\n\t"
         "cpse %[i], r1\n\t"
-        "addi %[j], 1\n\t"
-        : "+a" (j)
-        : "a" (i), "a" (scale)
+        "subi %[j], 0xFF\n\t"
+        : [j] "+a" (j)
+        : [i] "a" (i), [scale] "a" (scale)
         : "r0", "r1");
 
     return j;

@@ -297,55 +297,64 @@ public:
 
 // We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
 // need the more tightly defined timeframes.
-#if (defined(LIB8_ATTINY) || defined(FASTLED_AVR)) && (F_CPU == 8000000) // 125ns/clock
+#if defined(FASTLED_AVR) && (F_CPU == 8000000) // 125ns/clock
 // WS2811@8Mhz 2 clocks, 5 clocks, 3 clocks
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
+class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
+class WS2811Controller400Khz : public ClocklessController<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 4, 12, 4, RGB_ORDER> {};
+class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, 4, 12, 4, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903BController800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 4, 4, RGB_ORDER> {};
+class UCS1903BController800Khz : public ClocklessController<DATA_PIN, 2, 4, 4, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1809Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
+class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1803Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 6, 6, 6, RGB_ORDER> {};
+class TM1803Controller400Khz : public ClocklessController<DATA_PIN, 6, 6, 6, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
+class TM1829Controller800Khz : public ClocklessController<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 6, 7, 6, RGB_ORDER> {};
+class GW6205Controller400Khz : public ClocklessController<DATA_PIN, 6, 7, 6, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 2, 4, 4, RGB_ORDER> {};
+class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 2, 4, 4, RGB_ORDER> {};
 
-#elif defined(LIB8_ATTINY) && (F_CPU == 16000000) // 62.5ns/clock 
+#elif defined(FASTLED_AVR) && (F_CPU == 16000000) // 62.5ns/clock 
 
 // WS2811@16Mhz 4 clocks, 10 clocks, 6 clocks
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Khz : public ClocklessController_Trinket<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
+class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 8, 20, 12, RGB_ORDER> {};
+class WS2811Controller400Khz : public ClocklessController<DATA_PIN, 8, 20, 12, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903Controller400Khz : public ClocklessController_Trinket<DATA_PIN, 8, 24, 8, RGB_ORDER> {};
+class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, 8, 24, 8, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903BController800Khz : public ClocklessController_Trinket<DATA_PIN, 4, 8, 8, RGB_ORDER> {};
+class UCS1903BController800Khz : public ClocklessController<DATA_PIN, 4, 8, 8, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1803Controller400Khz : public ClocklessController<DATA_PIN, 12, 12, 12, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class TM1829Controller800Khz : public ClocklessController<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GW6205Controller400Khz : public ClocklessController<DATA_PIN, 12, 14, 12, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 4, 8, 8, RGB_ORDER> {};
 
 #else
 // GW6205@400khz - 800ns, 800ns, 800ns

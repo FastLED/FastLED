@@ -6,7 +6,7 @@
 #include "delay.h"
 #include <avr/interrupt.h> // for cli/se definitions
 
-#if defined(LIB8_ATTINY)
+#if defined(FASTLED_AVR)
 
 // Scaling macro choice
 #ifndef TRINKET_SCALE
@@ -32,6 +32,12 @@ template<int CYCLES> __attribute__((always_inline)) inline void _dc(register uin
 template<> __attribute__((always_inline)) inline void _dc<0>(register uint8_t & loopvar) {}
 template<> __attribute__((always_inline)) inline void _dc<1>(register uint8_t & loopvar) {asm __volatile__("cp r0,r0":::);}
 template<> __attribute__((always_inline)) inline void _dc<2>(register uint8_t & loopvar) {asm __volatile__("rjmp .+0":::);}
+template<> __attribute__((always_inline)) inline void _dc<3>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<4>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<5>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<3>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<6>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); _dc<2>(loopvar);}
+template<> __attribute__((always_inline)) inline void _dc<7>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<8>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }
 
 #define D1(ADJ) _dc<T1-(1+ADJ)>(loopvar);
 #define D2(ADJ) _dc<T2-(1+ADJ)>(loopvar);
@@ -46,7 +52,7 @@ template<> __attribute__((always_inline)) inline void _dc<2>(register uint8_t & 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int WAIT_TIME = 50>
-class ClocklessController_Trinket : public CLEDController {
+class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 

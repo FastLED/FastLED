@@ -6,6 +6,13 @@
 
 #if defined(__SAM3X8E__)
 
+#define TOTAL ( (T1+2) + (T2+2) + (T3+2) )
+#define T1_MARK (TOTAL - (T1+2))
+#define T2_MARK (T1_MARK - (T2+2))
+
+#define SCALE(S,V) scale8_video(S,V)
+// #define SCALE(S,V) scale8(S,V)
+
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
 	typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
@@ -29,12 +36,12 @@ public:
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) {
 		mWait.wait();
 		cli();
-		SysClockSaver savedClock(T1 + T2 + T3);
+		SysClockSaver savedClock(TOTAL);
 
 		showRGBInternal<0, false>(nLeds, scale, (const byte*)&data);
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (TOTAL));
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
@@ -45,17 +52,17 @@ public:
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
 		mWait.wait();
 		cli();
-		SysClockSaver savedClock(T1 + T2 + T3);
+		SysClockSaver savedClock(TOTAL);
 		
-		Serial.print("Scale is "); 
-		Serial.print(scale.raw[0]); Serial.print(" ");
-		Serial.print(scale.raw[1]); Serial.print(" ");
-		Serial.print(scale.raw[2]); Serial.println(" ");
+		// Serial.print("Scale is "); 
+		// Serial.print(scale.raw[0]); Serial.print(" ");
+		// Serial.print(scale.raw[1]); Serial.print(" ");
+		// Serial.print(scale.raw[2]); Serial.println(" ");
 		// FastPinBB<DATA_PIN>::hi(); delay(1); FastPinBB<DATA_PIN>::lo();
 		showRGBInternal<0, true>(nLeds, scale, (const byte*)rgbdata);
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (TOTAL));
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
@@ -67,12 +74,12 @@ public:
 	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
 		mWait.wait();
 		cli();
-		SysClockSaver savedClock(T1 + T2 + T3);
+		SysClockSaver savedClock(TOTAL);
 
 		showRGBInternal<1, true>(nLeds, scale, (const byte*)rgbdata);
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (TOTAL));
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
@@ -126,10 +133,7 @@ public:
 //#define AT_MARK(X) delayclocks_until<T1_MARK>(_VAL); X; 
 //#define AT_END(X) delayclocks_until<T2_MARK>(_VAL); X;
 
-#define TOTAL (T1 + T2 + T3)
 
-#define T1_MARK (TOTAL - T1)
-#define T2_MARK (T1_MARK - T2)
 	template<int MARK> __attribute__((always_inline)) static inline void delayclocks_until(register byte b) { 
 		__asm__ __volatile__ (
 			"	   sub %0, %0, %1\n"
@@ -172,7 +176,7 @@ public:
 		// dither
 		if(DITHER && b) b = qadd8(b, D[B0]);
 		// now scale
-		b = scale8(b, scale.raw[B0]);
+		b = SCALE(b, scale.raw[B0]);
 
 		// Setup and start the clock
 		_LOAD = TOTAL;
@@ -199,13 +203,13 @@ public:
 
 			AT_BIT_START(*port = 1);
 			if(b& 0x80) {} else { AT_MARK(*port = 0); }
+			b = ADVANCE ? data[SKIP + B1] : rgbdata[SKIP + B1];
 			AT_END(*port = 0);
 
-			b = ADVANCE ? data[SKIP + B1] : rgbdata[SKIP + B1];
 			// dither
 			if(DITHER && b) b = qadd8(b, D[B1]);
 			// now scale
-			b = scale8(b, scale.raw[B1]);
+			b = SCALE(b, scale.raw[B1]);
 
 			for(register uint32_t i = 7; i > 0; i--) { 
 				AT_BIT_START(*port = 1);
@@ -216,13 +220,13 @@ public:
 
 			AT_BIT_START(*port = 1);
 			if(b& 0x80) {} else { AT_MARK(*port = 0); }
+			b = ADVANCE ? data[SKIP + B2] : rgbdata[SKIP + B2];
 			AT_END(*port = 0);
 
-			b = ADVANCE ? data[SKIP + B2] : rgbdata[SKIP + B2];
 			// dither
 			if(DITHER && b) b = qadd8(b, D[B2]);
 			// now scale
-			b = scale8(b, scale.raw[B2]);
+			b = SCALE(b, scale.raw[B2]);
  
 			for(register uint32_t i = 7; i > 0; i--) { 
 				AT_BIT_START(*port = 1);
@@ -233,16 +237,14 @@ public:
 
 			AT_BIT_START(*port = 1);
 			if(b& 0x80) {} else { AT_MARK(*port = 0); }
-			AT_END(*port = 0);
-
-			// We have some extra time between rgb pixels, prep 
-			// the next byte and cycle the dither adjustments
 			data += (3 + SKIP);
 			b = ADVANCE ? data[SKIP + B0] : rgbdata[SKIP + B0];
+			AT_END(*port = 0);
+
 			// dither
 			if(DITHER && b) b = qadd8(b, D[B0]);
 			// now scale
-			b = scale8(b, scale.raw[B0]);
+			b = SCALE(b, scale.raw[B0]);
 		};
 
 		// Save the D values for cycling through next time
