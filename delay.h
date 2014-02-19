@@ -83,7 +83,7 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP2;NOP
 
 // Macro to convert from nano-seconds to clocks and clocks to nano-seconds
 // #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
-#if F_CPU < 96000000
+#if 1 || F_CPU < 96000000
 #define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
 #define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 1000000L)
 #else

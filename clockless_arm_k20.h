@@ -65,26 +65,16 @@ public:
 	}
 #endif
 
-	inline static void write8Bits(register data_ptr_t port, register data_t hi, register data_t lo, register uint32_t & b)  __attribute__ ((always_inline)) {
-		// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
-		// will bite me in the ass at some point, I know it.
-		for(register uint32_t i = 7; i > 0; i--) { 
+	inline static void write8Bits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint32_t & b)  __attribute__ ((always_inline)) {
+		for(register uint32_t i = 8; i > 0; i--) { 
+			while(ARM_DWT_CYCCNT < next_mark);
+			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 			FastPin<DATA_PIN>::fastset(port, hi);
-			delaycycles<T1 - 5>(); // 5 cycles - 2 store, 1 and, 1 test, 1 if
-			if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
+			uint32_t flip_mark = next_mark - ((b&0x80) ? (T3) : (T2+T3));
 			b <<= 1;
-			delaycycles<T2 - 2>(); // 2 cycles,  1 store/skip,  1 shift 
+			while(ARM_DWT_CYCCNT < flip_mark);
 			FastPin<DATA_PIN>::fastset(port, lo);
-			delaycycles<T3 - 5>(); // 3 cycles, 2 store, 1 sub, 1 branch backwards
 		}
-		// delay an extra cycle because falling out of the loop takes on less cycle than looping around
-		delaycycles<1>();
-
-		FastPin<DATA_PIN>::fastset(port, hi);
-		delaycycles<T1 - 6>();
-		if(b & 0x80) { FastPin<DATA_PIN>::fastset(port, hi); } else { FastPin<DATA_PIN>::fastset(port, lo); }
-		delaycycles<T2 - 2>(); // 4 cycles, 2 store, store/skip
-		FastPin<DATA_PIN>::fastset(port, lo);
 	}
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
@@ -99,37 +89,36 @@ public:
 		register data_t lo = *port & ~mask;
 		*port = lo;
 
+	    // Get access to the clock 
+		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
+		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
+		ARM_DWT_CYCCNT = 0;
+		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+
 		register uint32_t b;
 		b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE0(RGB_ORDER)];
-		b = scale8(b, scale);
+		INLINE_SCALE(b, scale);
+
 		while(data < end) { 
 			// Write first byte, read next byte
-			write8Bits(port, hi, lo, b);
+			write8Bits(next_mark, port, hi, lo, b);
 
 			b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE1(RGB_ORDER)];
 			INLINE_SCALE(b, scale);
-			delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
 
 			// Write second byte
-			write8Bits(port, hi, lo, b);
+			write8Bits(next_mark, port, hi, lo, b);
 
 			b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE2(RGB_ORDER)];
 			INLINE_SCALE(b, scale);
 
 			data += 3 + SKIP;
-			if((RGB_ORDER & 0070) == 0) {
-				delaycycles<T3 - 6>(); // 1 store, 2 load, 1 mul, 1 shift,  1 adds if BRG or GRB
-			} else {
-				delaycycles<T3 - 5>(); // 1 store, 2 load, 1 mul, 1 shift, 
-			}
 
 			// Write third byte
-			write8Bits(port, hi, lo, b);
+			write8Bits(next_mark, port, hi, lo, b);
 
 			b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE0(RGB_ORDER)];
 			INLINE_SCALE(b, scale);
-
-			delaycycles<T3 - 11>(); // 1 store, 2 load (with increment), 1 mul, 1 shift, 1 cmp, 1 branch backwards, 1 movim
 		};
 	}
 };
