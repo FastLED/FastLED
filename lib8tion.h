@@ -464,23 +464,34 @@ LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
     uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
     return j;
 #elif SCALE8_AVRASM == 1
-    
-    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    uint8_t j;
     asm volatile(
-         "      tst %0           \n"
-         "      breq L_%=        \n"
-         "      mul %0, %1       \n"
-         "      mov %0, r1       \n"
-         "      add %0, %2       \n"
-         "      clr __zero_reg__ \n"
-         "L_%=:                  \n"
+        "mul %[i], %[scale]\n\t"
+        "mov %[j], r1\n\t"
+        "clr __zero_reg__\n\t"
+        "cpse %[i], r1\n\t"
+        "addi %[j], 1\n\t"
+        : "+a" (j)
+        : "a" (i), "a" (scale)
+        : "r0", "r1");
+
+    return j;
+    // uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    // asm volatile(
+    //      "      tst %0           \n"
+    //      "      breq L_%=        \n"
+    //      "      mul %0, %1       \n"
+    //      "      mov %0, r1       \n"
+    //      "      add %0, %2       \n"
+    //      "      clr __zero_reg__ \n"
+    //      "L_%=:                  \n"
          
-         : "+a" (i)
-         : "a" (scale), "a" (nonzeroscale)
-         : "r0", "r1");
+    //      : "+a" (i)
+    //      : "a" (scale), "a" (nonzeroscale)
+    //      : "r0", "r1");
     
-    // Return the result
-    return i;
+    // // Return the result
+    // return i;
 #else
 #error "No implementation for scale8_video available."
 #endif
@@ -541,31 +552,32 @@ LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale)
 
 LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 {
-#if SCALE8_C == 1
-    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
-    uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
-    return j;
-#elif SCALE8_AVRASM == 1
+  return scale8_video(i,scale);
+// #if SCALE8_C == 1
+//     uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+//     uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
+//     return j;
+// #elif SCALE8_AVRASM == 1
     
-    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
-    asm volatile(
-         "      tst %0          \n"
-         "      breq L_%=       \n"
-         "      mul %0, %1      \n"
-         "      mov %0, r1      \n"
-         "      add %0, %2      \n"
-         /* R1 IS LEFT DIRTY, YOU MUST ZERO IT OUT YOURSELF */
-         "L_%=:                 \n"
+//     uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+//     asm volatile(
+//          "      tst %0          \n"
+//          "      breq L_%=       \n"
+//          "      mul %0, %1      \n"
+//          "      mov %0, r1      \n"
+//          "      add %0, %2      \n"
+//          /* R1 IS LEFT DIRTY, YOU MUST ZERO IT OUT YOURSELF */
+//          "L_%=:                 \n"
          
-         : "+a" (i)
-         : "a" (scale), "a" (nonzeroscale)
-         : "r0", "r1");
+//          : "+a" (i)
+//          : "a" (scale), "a" (nonzeroscale)
+//          : "r0", "r1");
     
-    // Return the result
-    return i;
-#else
-#error "No implementation for scale8_video available."
-#endif
+//     // Return the result
+//     return i;
+// #else
+// #error "No implementation for scale8_video available."
+// #endif
 }
 
 

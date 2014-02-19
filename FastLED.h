@@ -38,7 +38,11 @@ enum EBlockChipsets {
 	WS2811_PORTC
 };
 
+#if defined(LIB8_ATTINY)
+#define NUM_CONTROLLERS 2
+#else
 #define NUM_CONTROLLERS 32
+#endif
 
 class CFastLED {
 	struct CControllerInfo { 
