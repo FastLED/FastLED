@@ -79,6 +79,11 @@ public:
 		}
 	}
 
+// Dither values:
+// 0 - no dithering
+// 1 - approximated E values, high
+// 2 - approximated E values, lo
+// 3 - exact E values
 #define DITHER 1
 #define DADVANCE 3
 
@@ -94,16 +99,37 @@ public:
 		register data_t lo = *port & ~mask;
 		*port = lo;
 
-		uint8_t E[3] = {0xFF,0xFF,0xFF};
+
 		uint8_t D[3] = {0,0,0};
+
+#if DITHER > 0
+#  if DITHER == 2
+		uint8_t E[3] = {0x7F,0x7F,0x7F};
+#  else
+		uint8_t E[3] = {0xFF,0xFF,0xFF};
+#  endif
 
 		static uint8_t Dstore[3] = {0,0,0};
 
 		// compute the E values and seed D from the stored values
 		for(register uint32_t i = 0; i < 3; i++) { 
 			byte S = scale.raw[i];
+#  if DITHER == 3
+			E[i] = 255 / S;
+			D[i] = Dstore[i];
+			while(D[i] && D[i] >= E[i]) D[i] -= E[i];
+#  else
 			while(S>>=1) { E[i] >>=1; };
 			D[i] = Dstore[i] & E[i];
+#  endif
+		}
+#endif
+
+		data[0] = data[1] = data[2] = 0;
+		switch(DITHER) { 
+			case 1: data[0] = 255; break;
+			case 2: data[1] = 255; break;
+			case 3: data[2] = 255; break;
 		}
 
 	    // Get access to the clock 
@@ -112,15 +138,25 @@ public:
 		ARM_DWT_CYCCNT = 0;
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
+
 		register uint32_t b;
 		b = ((ADVANCE)?data:rgbdata)[SKIP + RGB_BYTE0(RGB_ORDER)];
 		if(DITHER && b) b = qadd8(b, D[B0]);
 		b = scale8(b, scale.raw[B0]);
 
-		while(data < end) { 
+		while(data < end) { 			
+
+#if DITHER > 0
+#  if DITHER == 3
+			D[B0] += DADVANCE; if(D[B0] >= E[B0]) D[B0] -= E[B0]; // D[B0] &= E[B0];
+			D[B1] += DADVANCE; if(D[B1] >= E[B1]) D[B1] -= E[B1]; // D[B1] &= E[B1];
+			D[B2] += DADVANCE; if(D[B2] >= E[B2]) D[B2] -= E[B2]; // D[B2] &= E[B2];
+#  else
 			D[B0] += DADVANCE; D[B0] &= E[B0];
 			D[B1] += DADVANCE; D[B1] &= E[B1];
 			D[B2] += DADVANCE; D[B2] &= E[B2];
+# 	endif
+#endif
 
 			// Write first byte, read next byte
 			write8Bits(next_mark, port, hi, lo, b);
@@ -146,10 +182,14 @@ public:
 			INLINE_SCALE(b, scale.raw[B0]);
 		};
 
+
+
+#if DITHER > 0
 		// Save the D values for cycling through next time
 		Dstore[0] = D[0];
 		Dstore[1] = D[1];
 		Dstore[2] = D[2];
+#endif
 	}
 };
 #endif
