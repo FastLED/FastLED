@@ -125,12 +125,12 @@ public:
 		}
 #endif
 
-		data[0] = data[1] = data[2] = 0;
-		switch(DITHER) { 
-			case 1: data[0] = 255; break;
-			case 2: data[1] = 255; break;
-			case 3: data[2] = 255; break;
-		}
+		// data[0] = data[1] = data[2] = 0;
+		// switch(DITHER) { 
+		// 	case 1: data[0] = 255; break;
+		// 	case 2: data[1] = 255; break;
+		// 	case 3: data[2] = 255; break;
+		// }
 
 	    // Get access to the clock 
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
