@@ -168,7 +168,7 @@ public:
 			D[B2] += DADVANCE; D[B2] &= E[B2];
 # 	endif
 #endif
-			
+
 			// Write first byte, read next byte
 			write8Bits(next_mark, port, hi, lo, b);
 
@@ -195,7 +195,7 @@ public:
 
 
 
-#if DITHER > 0
+#if DITHER > 0 && DITHER != 3
 		// Save the D values for cycling through next time
 		Dstore[0] = D[0];
 		Dstore[1] = D[1];

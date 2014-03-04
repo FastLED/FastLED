@@ -14,7 +14,7 @@
 // whether or not to use dithering
 #define DITHER 1
 // whether or not to enable scale_video adjustments
-#define SCALE_VIDEO 1
+#define SCALE_VIDEO 0
 #endif
 
 // Variations on the functions in delay.h - w/a loop var passed in to preserve registers across calls by the optimizer/compiler
@@ -173,7 +173,8 @@ public:
 // Loop life cycle
 
 // #define ADJUST_DITHER  d0 += DADVANCE; d1 += DADVANCE; d2 += DADVANCE; d0 &= e0; d1 &= e1; d2 &= d2; 
-#define ADJDITHER2(D, E) D += DADVANCE; D &= E;
+#define ADJDITHER2(D, E) D = E - D;
+
 // #define xstr(a) str(a)
 // #define str(a) #a
 // #define ADJDITHER2(D,E) asm __volatile__("subi %[" #D "], " xstr(DUSE) "\n\tand %[" #D "], %[" #E "]\n\t" ASM_VARS);
@@ -206,16 +207,23 @@ public:
 		data_t lo = *port & ~mask;
 		*port = lo;
 
-		register uint8_t d0, d1, d2;
-		register uint8_t e0, e1, e2;
-		uint8_t s0, s1, s2;
-		uint8_t b0, b1, b2;
-		static uint8_t d[3] = {0,0,0};
-
 		uint16_t count = nLeds;
 		uint8_t scale_base = 0;
 		uint16_t advanceBy = advance ? (skip+3) : 0;
 		// uint8_t dadv = DADVANCE;
+
+
+		static byte oddeven = 0;
+		oddeven = 1 - oddeven;
+
+		static byte Q;
+		Q += 157;
+
+		register uint8_t d0, d1, d2;
+		register uint8_t e0, e1, e2;
+		uint8_t s0, s1, s2;
+		uint8_t b0, b1, b2;
+		// static uint8_t d[3] = {0,0,0};
 
 		// initialize the scales
 		s0 = scale.raw[B0];
@@ -224,13 +232,22 @@ public:
 
 		// initialize the e & d values
 		uint8_t S;
-		S = s0; e0 = 0xFF; while(S >>= 1) { e0 >>= 1; }
-		d0 = d[0] & e0;
-		S = s1; e1 = 0xFF; while(S >>= 1) { e1 >>= 1; }
-		d1 = d[1] & e1;
-		S = s2; e2 = 0xFF; while(S >>= 1) { e2 >>= 1; }
-		d2 = d[2] & e0;
-
+		S = s0; e0 = S ? 256/S : 0; d0 = scale8(Q, e0);
+		if(e0) e0--;
+		if(oddeven) d0 = e0 - d0;
+		//e0 = 0xFF; while(S >>= 1) { e0 >>= 1; }
+		// d0 = d[0] & e0;
+		S = s1; e1 = S ? 256/S : 0; d1 = scale8(Q, e1);
+		if(e1) e1--;
+		if(oddeven) d1 = e1 - d1;
+		// e1 = 0xFF; while(S >>= 1) { e1 >>= 1; }
+		// d1 = d[1] & e1;
+		S = s2; e0 = S ? 256/S : 0; d2 = scale8(Q, e2);
+		// e2 = 0xFF; while(S >>= 1) { e2 >>= 1; }
+		// d2 = d[2] & e0;
+		if(e1) e2--;
+		if(oddeven) d1 = e1 - d1;
+		
 		b0 = data[RGB_BYTE0(RGB_ORDER)];
 		if(DITHER && b0) { b0 = qadd8(b0, d0); }
 		b0 = scale8_video(b0, s0);
@@ -314,9 +331,9 @@ public:
 		}
 
 		// save the d values
-		d[0] = d0;
-		d[1] = d1;
-		d[2] = d2;
+		// d[0] = d0;
+		// d[1] = d1;
+		// d[2] = d2;
 	}
 
 #ifdef SUPPORT_ARGB

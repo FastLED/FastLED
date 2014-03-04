@@ -165,7 +165,6 @@ public:
 		uint8_t E[3] = {0xFF,0xFF,0xFF};
 #  endif
 
-		static uint8_t Dstore[3] = {0,0,0};
 
 #  if DITHER == 3
         static byte oddeven = 0;
@@ -173,7 +172,10 @@ public:
 
         static byte Q;
         Q += 157;
+#  else
+		static uint8_t Dstore[3] = {0,0,0};
 #  endif
+
 		// compute the E values and seed D from the stored values
 		for(register uint32_t i = 0; i < 3; i++) { 
 			byte S = scale.raw[i];
@@ -278,10 +280,12 @@ public:
 			b = SCALE(b, scale.raw[B0]);
 		};
 
+#if DITHER > 0 && DITHER != 3
 		// Save the D values for cycling through next time
 		Dstore[0] = D[0];
 		Dstore[1] = D[1];
 		Dstore[2] = D[2];
+#endif
 	}
 };
 
