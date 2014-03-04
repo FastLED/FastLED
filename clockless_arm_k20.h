@@ -111,13 +111,23 @@ public:
 
 		static uint8_t Dstore[3] = {0,0,0};
 
+#  if DITHER == 3
+        static byte oddeven = 0;
+        oddeven = 1 - oddeven;
+
+        static byte Q;
+        Q += 157;
+#  endif
 		// compute the E values and seed D from the stored values
 		for(register uint32_t i = 0; i < 3; i++) { 
 			byte S = scale.raw[i];
+
 #  if DITHER == 3
-			E[i] = 255 / S;
-			D[i] = Dstore[i];
-			while(D[i] && D[i] >= E[i]) D[i] -= E[i];
+            // Example: assume that S is 32
+			E[i] = S ? 256 / S : 0; // E = 256 / 32 = 8
+            D[i] = scale8( Q, E[i] /* E[i]+1 ? */ ); // D is now Q scaled 0..7
+            if( E[i] ) E[i]--; // E is now 31
+            if( oddeven ) D[i] = E[i] - D[i]; /* ? */ // Flip (invert) initial D on alternating updates
 #  else
 			while(S>>=1) { E[i] >>=1; };
 			D[i] = Dstore[i] & E[i];
@@ -148,16 +158,17 @@ public:
 
 #if DITHER > 0
 #  if DITHER == 3
-			D[B0] += DADVANCE; if(D[B0] >= E[B0]) D[B0] -= E[B0]; // D[B0] &= E[B0];
-			D[B1] += DADVANCE; if(D[B1] >= E[B1]) D[B1] -= E[B1]; // D[B1] &= E[B1];
-			D[B2] += DADVANCE; if(D[B2] >= E[B2]) D[B2] -= E[B2]; // D[B2] &= E[B2];
+            // Flip (invert) D on alternating pixles, to get even lighting
+            D[B0] = E[B0] - D[B0];
+            D[B1] = E[B1] - D[B1];
+            D[B2] = E[B2] - D[B2];
 #  else
 			D[B0] += DADVANCE; D[B0] &= E[B0];
 			D[B1] += DADVANCE; D[B1] &= E[B1];
 			D[B2] += DADVANCE; D[B2] &= E[B2];
 # 	endif
 #endif
-
+			
 			// Write first byte, read next byte
 			write8Bits(next_mark, port, hi, lo, b);
 
