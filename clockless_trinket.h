@@ -6,7 +6,7 @@
 #include "delay.h"
 #include <avr/interrupt.h> // for cli/se definitions
 
-#if defined(LIB8_ATTINY)
+#if defined(FASTLED_AVR)
 
 // Scaling macro choice
 #ifndef TRINKET_SCALE
