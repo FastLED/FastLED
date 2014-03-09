@@ -114,8 +114,10 @@ struct PixelController {
         // advance the data pointer forward
          __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; }
 
-        // step the dithering forward
+        // step the dithering forward 
          __attribute__((always_inline)) inline void stepDithering() {
+         		// IF UPDATING HERE, BE SURE TO UPDATE THE ASM VERSION IN 
+         		// clockless_trinket.h!
                 d[0] = e[0] - d[0];
                 d[1] = e[1] - d[1];
                 d[2] = e[2] - d[2];
