@@ -39,9 +39,9 @@ template<> __attribute__((always_inline)) inline void _dc<6>(register uint8_t & 
 template<> __attribute__((always_inline)) inline void _dc<7>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<8>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }
 
-#define D1(ADJ) _dc<T1-(1+ADJ)>(loopvar);
-#define D2(ADJ) _dc<T2-(1+ADJ)>(loopvar);
-#define D3(ADJ) _dc<T3-(1+ADJ)>(loopvar);
+#define D1(ADJ) _dc<T1-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
+#define D2(ADJ) _dc<T2-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
+#define D3(ADJ) _dc<T3-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -101,12 +101,12 @@ public:
 // The variables that our various asm statemetns use.  The same block of variables needs to be declared for
 // all the asm blocks because GCC is pretty stupid and it would clobber variables happily or optimize code away too aggressively			
 #define ASM_VARS : /* write variables */				\
+				[count] "+x" (count),					\
+				[data] "+z" (data),						\
 				[b0] "+a" (b0),							\
 				[b1] "+a" (b1),							\
 				[b2] "+a" (b2),							\
-				[count] "+x" (count),					\
 				[scale_base] "+a" (scale_base),			\
-				[data] "+z" (data),						\
 				[loopvar] "+a" (loopvar)				\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
@@ -118,7 +118,7 @@ public:
 				[d0] "r" (pixels.d[RO(0)]),							\
 				[d1] "r" (pixels.d[RO(1)]),							\
 				[d2] "r" (pixels.d[RO(2)]),							\
-				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),			\
+				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),		\
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
 				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
@@ -126,9 +126,9 @@ public:
 
 
 // 1 cycle, write hi to the port
-#define HI1 asm __volatile__("out %[PORT], %[hi]" ASM_VARS );
+#define HI1 if((int)(FastPin<DATA_PIN>::port()) < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
-#define LO1 asm __volatile__("out %[PORT], %[lo]" ASM_VARS );
+#define LO1 if((int)(FastPin<DATA_PIN>::port()) < 64) { asm __volatile__("out %[PORT], %[lo]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=lo; }
 // 2 cycles, sbrs on flipping the lne to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
 // load a byte from ram into the given var with the given offset
