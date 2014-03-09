@@ -4,7 +4,7 @@
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, bool FLIP = false, int WAIT_TIME = 500>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 500>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -65,10 +65,10 @@ public:
 	}
 #endif
 
-	inline static void write8Bits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  __attribute__ ((always_inline)) {
+	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  {
 		// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
 		// will bite me in the ass at some point, I know it.
-		for(register uint32_t i = 8; i > 0; i--) { 
+		for(register uint32_t i = BITS; i > 0; i--) { 
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 			FastPin<DATA_PIN>::fastset(port, hi);
@@ -102,15 +102,15 @@ public:
 			pixels.stepDithering();
 
 			// Write first byte, read next byte
-			write8Bits(next_mark, port, hi, lo, b);
+			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
 			b = pixels.loadAndScale1();
 
 			// Write second byte, read 3rd byte
-			write8Bits(next_mark, port, hi, lo, b);
+			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
 			b = pixels.loadAndScale2();
 
 			// Write third byte
-			write8Bits(next_mark, port, hi, lo, b);
+			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
 			b = pixels.advanceAndLoadAndScale0();
 		};
 	}

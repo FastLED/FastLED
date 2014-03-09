@@ -294,10 +294,10 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1829Controller800Khz : public ClocklessController<DATA_PIN, 2, 5, 3, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller400Khz : public ClocklessController<DATA_PIN, 6, 7, 6, RGB_ORDER> {};
+class GW6205Controller400Khz : public ClocklessController<DATA_PIN, 6, 7, 6, RGB_ORDER, 4> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 2, 4, 4, RGB_ORDER> {};
+class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 2, 4, 4, RGB_ORDER, 4> {};
 
 #elif defined(FASTLED_AVR) && (F_CPU == 16000000) // 62.5ns/clock 
 
@@ -324,10 +324,10 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1829Controller800Khz : public ClocklessController<DATA_PIN, 4, 10, 6, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller400Khz : public ClocklessController<DATA_PIN, 12, 14, 12, RGB_ORDER> {};
+class GW6205Controller400Khz : public ClocklessController<DATA_PIN, 12, 14, 12, RGB_ORDER, 4> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 4, 8, 8, RGB_ORDER> {};
+class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 4, 8, 8, RGB_ORDER, 4> {};
 
 #else
 // GW6205@400khz - 800ns, 800ns, 800ns
@@ -387,10 +387,10 @@ class TM1803Controller400Khz : public ClocklessController<DATA_PIN, NS(750), NS(
 #endif
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller800Khz : public ClocklessController<DATA_PIN, NS(340), NS(340), NS(550), RGB_ORDER, true, 500> {};
+class TM1829Controller800Khz : public ClocklessController<DATA_PIN, NS(340), NS(340), NS(550), RGB_ORDER, 0, true, 500> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, NS(100), NS(300), NS(200), RGB_ORDER, true, 500> {};
+class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, NS(100), NS(300), NS(200), RGB_ORDER, 0, true, 500> {};
 #if NO_TIME(100, 300, 200)
 #warning "Not enough clock cycles available for TM1829@1.6Mhz"
 #endif

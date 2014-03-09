@@ -13,7 +13,7 @@
 #define SCALE(S,V) scale8_video(S,V)
 // #define SCALE(S,V) scale8(S,V)
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, bool FLIP = false, int WAIT_TIME = 500>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 500>
 class ClocklessController : public CLEDController {
 	typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPinBB<DATA_PIN>::port_t data_t;
@@ -146,10 +146,10 @@ public:
 
 	}
 
-	inline static void write8Bits(register volatile uint32_t *CTPTR, register data_ptr_t port, register uint8_t & b)  __attribute__ ((always_inline)) {
+	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(register volatile uint32_t *CTPTR, register data_ptr_t port, register uint8_t & b) {
 		// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
 		// will bite me in the ass at some point, I know it.
-		for(register uint32_t i = 8; i > 0; i--) { 
+		for(register uint32_t i = BITS; i > 0; i--) { 
 			AT_BIT_START(*port=1);
 			if(b&0x80) {} else { AT_MARK(*port=0); }
 			b <<= 1;
@@ -182,13 +182,13 @@ public:
 		while(nLeds-- > 0) { 
 			pixels.stepDithering();
 
-			write8Bits(CTPTR, port, b);
+			writeBits<8+XTRA0>(CTPTR, port, b);
 
 			b = pixels.loadAndScale1();
-			write8Bits(CTPTR, port,b);
+			writeBits<8+XTRA0>(CTPTR, port,b);
 
 			b = pixels.loadAndScale2();
-			write8Bits(CTPTR, port,b);
+			writeBits<8+XTRA0>(CTPTR, port,b);
 
 			b = pixels.advanceAndLoadAndScale0();
 		};

@@ -51,7 +51,7 @@ template<> __attribute__((always_inline)) inline void _dc<8>(register uint8_t & 
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int WAIT_TIME = 50>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -249,7 +249,13 @@ public:
 				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)			
 				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)			
 				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)		
-				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 VIDADJ2(b1)		D3(2)			
+				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 VIDADJ2(b1)		D3(2)
+				switch(XTRA0) {
+					case 4: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+					case 3: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+					case 2: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+					case 1: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+				}	
 				HI1 D1(1) QLO2(b1, 7) LDSCL3(b2,O2) 	D2(3)	LO1					D3(0)	
 				HI1	D1(1) QLO2(b1, 6) PRESCALE4(d2)		D2(4)	LO1	SCALE22(b2,0)	D3(2)		
 				HI1 D1(1) QLO2(b1, 5) RORSC24(b2,1) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
@@ -258,6 +264,12 @@ public:
 				HI1 D1(1) QLO2(b1, 2) SCROR24(b2,5) 	D2(4)	LO1 SCALE22(b2,6)	D3(2)	
 				HI1 D1(1) QLO2(b1, 1) RORSC24(b2,7) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
 				HI1 D1(1) QLO2(b1, 0) IDATA2 			D2(2) 	LO1 VIDADJ2(b2)		D3(0)
+				switch(XTRA0) {
+					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				}	
 				HI1 D1(1) QLO2(b2, 7) LDSCL3(b0,O0) 	D2(3)	LO1					D3(0)	
 				HI1	D1(1) QLO2(b2, 6) PRESCALE4(d0)		D2(4)	LO1	SCALE22(b0,0)	D3(2)		
 				HI1 D1(1) QLO2(b2, 5) RORSC04(b0,1) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
@@ -266,6 +278,12 @@ public:
 				HI1 D1(1) QLO2(b2, 2) SCROR04(b0,5) 	D2(4)	LO1 SCALE02(b0,6)	D3(2)	
 				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
 				HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2	
+				switch(XTRA0) {
+					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				}	
 #else
 				// no inline scaling - non-straight RGB ordering
 				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
