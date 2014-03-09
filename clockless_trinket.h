@@ -172,7 +172,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////
 // Loop life cycle
 
-// #define ADJUST_DITHER  d0 += DADVANCE; d1 += DADVANCE; d2 += DADVANCE; d0 &= e0; d1 &= e1; d2 &= d2; 
+// dither adjustment macro - should be kept in sync w/what's in stepDithering
 #define ADJDITHER2(D, E) D = E - D;
 
 // #define xstr(a) str(a)
@@ -212,47 +212,24 @@ public:
 		uint16_t advanceBy = advance ? (skip+3) : 0;
 		// uint8_t dadv = DADVANCE;
 
+		uint8_t b0 = 0;
+		uint8_t b1 = 0;
+		uint8_t b2 = 0;
 
-		static byte oddeven = 0;
-		oddeven = 1 - oddeven;
-
-		static byte Q;
-		Q += 157;
-
-		register uint8_t d0, d1, d2;
-		register uint8_t e0, e1, e2;
-		uint8_t s0, s1, s2;
-		uint8_t b0, b1, b2;
-		// static uint8_t d[3] = {0,0,0};
-
-		// initialize the scales
-		s0 = scale.raw[B0];
-		s1 = scale.raw[B1];
-		s2 = scale.raw[B2];
-
-		// initialize the e & d values
-		uint8_t S;
-		S = s0; e0 = S ? 256/S : 0; d0 = scale8(Q, e0);
-		if(e0) e0--;
-		if(oddeven) d0 = e0 - d0;
-		//e0 = 0xFF; while(S >>= 1) { e0 >>= 1; }
-		// d0 = d[0] & e0;
-		S = s1; e1 = S ? 256/S : 0; d1 = scale8(Q, e1);
-		if(e1) e1--;
-		if(oddeven) d1 = e1 - d1;
-		// e1 = 0xFF; while(S >>= 1) { e1 >>= 1; }
-		// d1 = d[1] & e1;
-		S = s2; e0 = S ? 256/S : 0; d2 = scale8(Q, e2);
-		// e2 = 0xFF; while(S >>= 1) { e2 >>= 1; }
-		// d2 = d[2] & e0;
-		if(e1) e2--;
-		if(oddeven) d1 = e1 - d1;
+		// Setup the pixel controller and load/scale the first byte 
+		PixelController<RGB_ORDER> pixels(data, scale, true, advance, skip);
+		b0 = pixels.loadAndScale0();
 		
-		b0 = data[RGB_BYTE0(RGB_ORDER)];
-		if(DITHER && b0) { b0 = qadd8(b0, d0); }
-		b0 = scale8_video(b0, s0);
-		b1 = 0;
-		b2 = 0;
+		// pull the dithering/adjustment values out of the pixels object for direct asm access
+		uint8_t s0 = scale.raw[RO(0)];
+		uint8_t s1 = scale.raw[RO(1)];
+		uint8_t s2 = scale.raw[RO(2)];
+		uint8_t d0 = pixels.d[RO(0)];
+		uint8_t d1 = pixels.d[RO(1)];
+		uint8_t d2 = pixels.d[RO(2)];
+		uint8_t e0 = pixels.e[RO(0)];
+		uint8_t e1 = pixels.e[RO(1)];
+		uint8_t e2 = pixels.e[RO(2)];
 		register uint8_t loopvar=0;
 
 		{
