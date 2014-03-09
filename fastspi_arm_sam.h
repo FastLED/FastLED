@@ -40,20 +40,20 @@ public:
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) { /* TODO */ }
 
-	template <uint8_t SKIP, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { /* TODO*/ }
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { /* TODO*/ }
 
 	// template instantiations for writeBytes 3
-	template <uint8_t SKIP, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	template <uint8_t FLAGS, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
 	}
-	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<0, D, RGB_ORDER>(data, len, scale); 
+	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<0, D, RGB_ORDER>(data, len, scale, advance, skip); 
 	}
-	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
 	}
-	void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<0, DATA_NOP, RGB>(data, len, scale); 
+	void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<0, DATA_NOP, RGB>(data, len, scale, advance, skip); 
 
 };
 

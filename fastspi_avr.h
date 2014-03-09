@@ -94,30 +94,37 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t SKIP, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { 
 		uint8_t *end = data + len;
+		PixelController<RGB_ORDER> pixels(data, scale, true, advance, skip);
 		select();
 		while(data != end) { 
-			writeByte(D::adjust(data[SPI_B0], scale));
-			writeByte(D::adjust(data[SPI_B1], scale));
-			writeByte(D::adjust(data[SPI_B2], scale));
-			data += SPI_ADVANCE;
+			if(FLAGS & FLAG_START_BIT) { 
+				writeBit<0>(1);
+			}
+			writeByte(D::adjust(pixels.loadAndScale0()));
+			writeByte(D::adjust(pixels.loadAndScale1()));
+			writeByte(D::adjust(pixels.loadAndScale2()));
+			pixels.advanceData();
+			pixels.stepDithering();
+			data += (3+skip);
 		}
 		D::postBlock(len);
 		release();
 	}
 
-	template <uint8_t SKIP, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	// template instantiations for writeBytes 3
+	template <uint8_t FLAGS, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<FLAGS, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
 	}
-	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<0, D, RGB_ORDER>(data, len, scale); 
+	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<0, D, RGB_ORDER>(data, len, scale, advance, skip); 
 	}
-	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
 	}
-	void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<0, DATA_NOP, RGB>(data, len, scale); 
+	void writeBytes3(register uint8_t *data, int len, register uint8_t scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<0, DATA_NOP, RGB>(data, len, scale, advance, skip); 
 	}
 
 };
@@ -260,46 +267,44 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t SKIP, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
 		//setSPIRate();
 		uint8_t *end = data + len;
+		PixelController<RGB_ORDER> pixels(data, scale, true, advance, skip);
+		
 		select();
 		while(data != end) { 
-			if(SKIP & FLAG_START_BIT) { 
+			if(FLAGS & FLAG_START_BIT) { 
 				writeBit<0>(1);
-			}
-			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
-			if(false && _SPI_CLOCK_DIVIDER == 0) { 
-				writeByteNoWait(D::adjust(data[SPI_B0], scale)); delaycycles<13>();
-				writeByteNoWait(D::adjust(data[SPI_B1], scale)); delaycycles<13>();
-				writeByteNoWait(D::adjust(data[SPI_B2], scale)); delaycycles<9>();
-			} else if(SKIP & FLAG_START_BIT) { 
-				writeBytePostWait(D::adjust(data[SPI_B0], scale));
-				writeBytePostWait(D::adjust(data[SPI_B1], scale));
-				writeBytePostWait(D::adjust(data[SPI_B2], scale));
+				writeBytePostWait(D::adjust(pixels.loadAndScale0()));
+				writeBytePostWait(D::adjust(pixels.loadAndScale1()));
+				writeBytePostWait(D::adjust(pixels.loadAndScale2()));
 			} else { 
-				writeByte(D::adjust(data[SPI_B0], scale));
-				writeByte(D::adjust(data[SPI_B1], scale));
-				writeByte(D::adjust(data[SPI_B2], scale));
+				writeByte(D::adjust(pixels.loadAndScale0()));
+				writeByte(D::adjust(pixels.loadAndScale1()));
+				writeByte(D::adjust(pixels.loadAndScale2()));
 			}
 
-			data += SPI_ADVANCE;
+			pixels.advanceData();
+			pixels.stepDithering();
+			data += (3+skip);
 		}
 		D::postBlock(len);
 		release();
 	}
 
-	template <uint8_t SKIP, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<SKIP, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	// template instantiations for writeBytes 3
+	template <uint8_t FLAGS, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<FLAGS, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
 	}
-	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<0, D, RGB_ORDER>(data, len, scale); 
+	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<0, D, RGB_ORDER>(data, len, scale, advance, skip); 
 	}
-	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale); 
+	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
 	}
-	void writeBytes3(register uint8_t *data, int len, register uint8_t scale) { 
-		writeBytes3<0, DATA_NOP, RGB>(data, len, scale); 
+	void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
+		writeBytes3<0, DATA_NOP, RGB>(data, len, scale, advance, skip); 
 	}
 
 };

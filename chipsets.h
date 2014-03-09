@@ -17,7 +17,6 @@ class LPD8806Controller : public CLEDController {
 	public:
 		// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
 		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80 | (data & 0x01); }
-		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data, register uint8_t scale) { return (scale8(data, scale)>>1) | 0x80 | (data & 0x01); }
 		__attribute__((always_inline)) inline static void postBlock(int len) { 
 			SPI::writeBytesValueRaw(0, ((len+63)>>6));
 		}
@@ -53,36 +52,18 @@ public:
 	}
 
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) {
-		mSPI.select();
-		uint8_t a = data[RGB_BYTE0(RGB_ORDER)];
-		uint8_t b = data[RGB_BYTE1(RGB_ORDER)];
-		uint8_t c = data[RGB_BYTE1(RGB_ORDER)];
-
-		a = 0x80 | (scale8(a, scale.raw[B0]) >> 1) | (a & 0x01);
-		b = 0x80 | (scale8(b, scale.raw[B1]) >> 1) | (b & 0x01);
-		c = 0x80 | (scale8(c, scale.raw[B2]) >> 1) | (c & 0x01);
-		int iLeds = 0;
-
-		while(iLeds++ < nLeds) { 
-			mSPI.writeByte(a);
-			mSPI.writeByte(b);
-			mSPI.writeByte(c);
-		}
-
-		// latch in the world
-		mSPI.writeBytesValueRaw(0, ((nLeds*3+63)>>6));
-		mSPI.release();
+		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data.raw, nLeds * 3, scale, false);
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale = CRGB::White) {
 		// TODO rgb-ize scale
-		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 3, scale.raw[0]);
+		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *data, int nLeds, uint8_t scale) {
 		checkClear(nLeds);
-		mSPI.template writeBytes3<1, LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 4, scale);
+		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 4, scale, true, 1);
 	}
 #endif
 };
@@ -115,31 +96,20 @@ public:
 	
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) {
 		mWaitDelay.wait();
-		mSPI.select();
-		uint8_t a = scale8(data[RGB_BYTE0(RGB_ORDER)], scale.raw[B0]);
-		uint8_t b = scale8(data[RGB_BYTE1(RGB_ORDER)], scale.raw[B1]);
-		uint8_t c = scale8(data[RGB_BYTE2(RGB_ORDER)], scale.raw[B2]);
-
-		while(nLeds--) { 
-			mSPI.writeByte(a);
-			mSPI.writeByte(b);
-			mSPI.writeByte(c);
-		}
-		mSPI.waitFully();
-		mSPI.release();
+		mSPI.template writeBytes3<RGB_ORDER>((byte*)data.raw, nLeds * 3, scale, false);
 		mWaitDelay.mark();
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
 		mWaitDelay.wait();
-		mSPI.template writeBytes3<0, RGB_ORDER>((byte*)data, nLeds * 3, scale.raw[0]);
+		mSPI.template writeBytes3<RGB_ORDER>((byte*)data, nLeds * 3, scale);
 		mWaitDelay.mark();
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
 		mWaitDelay.wait();
-		mSPI.template writeBytes3<1, RGB_ORDER>((byte*)data, nLeds * 4, scale.raw[0]);
+		mSPI.template writeBytes3<RGB_ORDER>((byte*)data, nLeds * 4, scale, true, 1);
 		mWaitDelay.mark();
 	}
 #endif
@@ -158,12 +128,7 @@ class P9813Controller : public CLEDController {
 
 	void writeBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
 
-	inline void writeLed(const struct CRGB & data, CRGB scale) __attribute__((always_inline)) {
-		// prep the byte
-		register uint8_t r = scale8(data[RGB_BYTE0(RGB_ORDER)], scale.raw[B0]);
-		register uint8_t g = scale8(data[RGB_BYTE1(RGB_ORDER)], scale.raw[B1]);
-		register uint8_t b = scale8(data[RGB_BYTE2(RGB_ORDER)], scale.raw[B2]);
-
+	inline void writeLed(uint8_t r, uint8_t g, uint8_t b) __attribute__((always_inline)) {
 		register uint8_t top = 0xC0 | ((~b & 0xC0) >> 2) | ((~g & 0xC0) >> 4) | ((~r & 0xC0) >> 6);
 		mSPI.writeByte(top); mSPI.writeByte(b); mSPI.writeByte(g); mSPI.writeByte(r);
 	}
@@ -180,11 +145,14 @@ public:
 	}
 	
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) {
+		PixelController<RGB_ORDER> pixels(data.raw, scale, true, false, 0);
+
 		mSPI.select();
 
 		writeBoundary();
 		while(nLeds--) { 
-			writeLed(data, scale);
+			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
+			pixels.stepDithering();
 		}
 		writeBoundary();
 
@@ -193,11 +161,15 @@ public:
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
+		PixelController<RGB_ORDER> pixels((byte*)data, scale, true, true, 0);
+
 		mSPI.select();
 
 		writeBoundary();
 		for(int i = 0; i < nLeds; i++) { 
-			writeLed(data[i], scale);
+			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
+			pixels.advanceData();
+			pixels.stepDithering();
 		}
 		writeBoundary();
 
@@ -206,7 +178,19 @@ public:
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		mSPI.template writeBytes3<1, RGB_ORDER>((byte*)data, nLeds * 4, scale.raw[0]);
+		PixelController<RGB_ORDER> pixels(data, scale, true, true, 1);
+
+		mSPI.select();
+
+		writeBoundary();
+		for(int i = 0; i < nLeds; i++) { 
+			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
+			pixels.advanceData();
+			pixels.stepDithering();
+		}
+		writeBoundary();
+
+		mSPI.release();
 	}
 #endif
 };
@@ -253,26 +237,15 @@ public:
 	}
 
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) {
-		mSPI.select();
-		uint8_t a = scale8(data[RGB_BYTE0(RGB_ORDER)], scale.raw[B0]);
-		uint8_t b = scale8(data[RGB_BYTE1(RGB_ORDER)], scale.raw[B1]);
-		uint8_t c = scale8(data[RGB_BYTE2(RGB_ORDER)], scale.raw[B2]);
-
-		while(nLeds--) { 
-			mSPI.template writeBit<0>(1);
-			mSPI.writeByte(a);
-			mSPI.writeByte(b);
-			mSPI.writeByte(c);
-		}
+		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data.raw, nLeds * 3, scale, false);
 		writeHeader();
-		mSPI.release();
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale = CRGB::White) {
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		// writeHeader();
-		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 3, scale.raw[0]);
+		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 3, scale);
 		writeHeader();
 	}
 
@@ -284,7 +257,7 @@ public:
 
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
-		mSPI.template writeBytes3<1 | FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 4, scale.raw[0]);
+		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 4, scale, true, 1);
 	}
 #endif
 };
