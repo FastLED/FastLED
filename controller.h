@@ -67,8 +67,8 @@ template<EOrder RGB_ORDER>
 struct PixelController {
         uint8_t d[3];
         uint8_t e[3];
-        CRGB & mScale;
         uint8_t *mData; 
+        CRGB & mScale;
         uint8_t mAdvance;
 
         PixelController(uint8_t *d, CRGB & s, bool dodithering, bool doadvance=0, uint8_t skip=0) : mData(d), mScale(s) {

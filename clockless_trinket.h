@@ -115,12 +115,9 @@ public:
 				[s0] "r" (s0),							\
 				[s1] "r" (s1),							\
 				[s2] "r" (s2),							\
-				[d0] "r" (d0),							\
-				[d1] "r" (d1),							\
-				[d2] "r" (d2),							\
-				[e0] "r" (e0),							\
-				[e1] "r" (e1),							\
-				[e2] "r" (e2),							\
+				[d0] "r" (pixels.d[RO(0)]),							\
+				[d1] "r" (pixels.d[RO(1)]),							\
+				[d2] "r" (pixels.d[RO(2)]),							\
 				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),			\
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
@@ -224,12 +221,6 @@ public:
 		uint8_t s0 = scale.raw[RO(0)];
 		uint8_t s1 = scale.raw[RO(1)];
 		uint8_t s2 = scale.raw[RO(2)];
-		uint8_t d0 = pixels.d[RO(0)];
-		uint8_t d1 = pixels.d[RO(1)];
-		uint8_t d2 = pixels.d[RO(2)];
-		uint8_t e0 = pixels.e[RO(0)];
-		uint8_t e1 = pixels.e[RO(1)];
-		uint8_t e2 = pixels.e[RO(2)];
 		register uint8_t loopvar=0;
 
 		{
@@ -237,9 +228,9 @@ public:
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
 				LOOP; 
-				ADJDITHER2(d0,e0)
-				ADJDITHER2(d1,e1) 
-				ADJDITHER2(d2,e2) 
+				ADJDITHER2(pixels.d[RO(0)],pixels.e[RO(0)])
+				ADJDITHER2(pixels.d[RO(1)],pixels.e[RO(1)]) 
+				ADJDITHER2(pixels.d[RO(2)],pixels.e[RO(2)]) 
 				VIDADJ2(b0);
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
