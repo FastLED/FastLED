@@ -65,7 +65,7 @@ public:
 	}
 #endif
 
-	inline static void write8Bits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint32_t & b)  __attribute__ ((always_inline)) {
+	inline static void write8Bits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  __attribute__ ((always_inline)) {
 		// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
 		// will bite me in the ass at some point, I know it.
 		for(register uint32_t i = 8; i > 0; i--) { 
@@ -83,12 +83,9 @@ public:
 	// gcc will use register Y for the this pointer.
 	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register CRGB scale, register const byte *rgbdata) {
 		register byte *data = (byte*)rgbdata;
-		register data_t mask = FastPin<DATA_PIN>::mask();
 		register data_ptr_t port = FastPin<DATA_PIN>::port();
-		nLeds *= (3 + SKIP);
-		register uint8_t *end = data + nLeds; 
-		register data_t hi = *port | mask;
-		register data_t lo = *port & ~mask;
+		register data_t hi = *port | FastPin<DATA_PIN>::mask();;
+		register data_t lo = *port & ~FastPin<DATA_PIN>::mask();;
 		*port = lo;
 
 		// Setup the pixel controller and load/scale the first byte 
