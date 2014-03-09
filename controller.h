@@ -4,10 +4,12 @@
 #include "led_sysdefs.h"
 #include "pixeltypes.h"
 
+#define RO(X) RGB_BYTE(RGB_ORDER, X)
+#define RGB_BYTE(RO,X) (((RO)>>(3*(2-(X)))) & 0x3)
 
-#define RGB_BYTE0(X) ((X>>6) & 0x3) 
-#define RGB_BYTE1(X) ((X>>3) & 0x3) 
-#define RGB_BYTE2(X) ((X) & 0x3)
+#define RGB_BYTE0(RO) ((RO>>6) & 0x3) 
+#define RGB_BYTE1(RO) ((RO>>3) & 0x3) 
+#define RGB_BYTE2(RO) ((RO) & 0x3)
 
 #define B0 RGB_BYTE0(RGB_ORDER)
 #define B1 RGB_BYTE1(RGB_ORDER)
@@ -55,6 +57,83 @@ public:
 
 	// wait until the controller is ready to write data out 
 	virtual void wait() { return; }
+
+};
+
+// Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
+// support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will 
+// centralize 8/12/16 conversions here as well.
+template<EOrder RGB_ORDER>
+struct PixelController {
+        uint8_t d[3];
+        uint8_t e[3];
+        CRGB & mScale;
+        uint8_t *mData; 
+        uint8_t mAdvance;
+
+        PixelController(uint8_t *d, CRGB & s, bool dodithering, bool doadvance=0, uint8_t skip=0) : mData(d), mScale(s) {
+                enable_dithering(dodithering);
+
+                mData += skip;
+
+                mAdvance = 0;
+                if(doadvance) { mAdvance = 3 + skip; }
+        }
+
+        void init_dithering() {
+                static byte R = 0;
+                R++;
+
+                // fast reverse bits in a byte
+                byte Q = 0;
+                if(R & 0x01) { Q |= 0x80; }
+                if(R & 0x02) { Q |= 0x40; }
+                if(R & 0x04) { Q |= 0x20; }
+                if(R & 0x08) { Q |= 0x10; }
+                if(R & 0x10) { Q |= 0x08; }
+                if(R & 0x20) { Q |= 0x04; }
+                if(R & 0x40) { Q |= 0x02; }
+                if(R & 0x80) { Q |= 0x01; }
+
+                // setup the seed d and e values
+                for(int i = 0; i < 3; i++) {                        byte s = mScale.raw[i];
+                        e[i] = s ? (256/s) + 1 : 0;
+                        d[i] = scale8(Q, e[i]);
+                        if(e[i]) e[i]--;
+                }
+
+                d[0] = e[0] - d[0];
+        }
+
+        // toggle dithering enable
+        void enable_dithering(bool enable) {
+                if(enable) { init_dithering(); }
+                else { d[0]=d[1]=d[2]=e[0]=e[1]=e[2]=0; }
+        }
+
+        // advance the data pointer forward
+         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; }
+
+        // step the dithering forward
+         __attribute__((always_inline)) inline void stepDithering() {
+                d[0] = e[0] - d[0];
+                d[1] = e[1] - d[1];
+                d[2] = e[2] - d[2];
+        }
+
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { return pc.mData[RO(SLOT)]; }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & pc, uint8_t b) { return qadd8(b, pc.d[RO(SLOT)]); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
+
+        // composite shortcut functions for loading, dithering, and scaling
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(PixelController & pc) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc))); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(PixelController & pc) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc); }
+
+		// Helper functions to get around gcc stupidities
+		__attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }    
+		__attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }    
+		__attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }    
+		__attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }    
 
 };
 

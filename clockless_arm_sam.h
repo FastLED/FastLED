@@ -13,7 +13,7 @@
 #define SCALE(S,V) scale8_video(S,V)
 // #define SCALE(S,V) scale8(S,V)
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, bool FLIP = false, int WAIT_TIME = 50>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, bool FLIP = false, int WAIT_TIME = 500>
 class ClocklessController : public CLEDController {
 	typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPinBB<DATA_PIN>::port_t data_t;
@@ -146,65 +146,32 @@ public:
 
 	}
 
+	inline static void write8Bits(register volatile uint32_t *CTPTR, register data_ptr_t port, register uint8_t & b)  __attribute__ ((always_inline)) {
+		// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
+		// will bite me in the ass at some point, I know it.
+		for(register uint32_t i = 8; i > 0; i--) { 
+			AT_BIT_START(*port=1);
+			if(b&0x80) {} else { AT_MARK(*port=0); }
+			b <<= 1;
+			AT_END(*port=0);
+		}
+	}
+
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
-#define DITHER 3
-#define DADVANCE 3
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
 	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register CRGB scale, register const byte *rgbdata) {
 		register data_ptr_t port asm("r7") = FastPinBB<DATA_PIN>::port(); FORCE_REFERENCE(port);
 		register byte *data = (byte*)rgbdata;
 		register uint8_t *end = data + (nLeds*3 + SKIP); 
-
-		uint8_t D[3] = {0,0,0};
-
-#if DITHER > 0
-#  if DITHER == 2
-		uint8_t E[3] = {0x7F,0x7F,0x7F};
-#  else
-		uint8_t E[3] = {0xFF,0xFF,0xFF};
-#  endif
-
-
-#  if DITHER == 3
-        static byte oddeven = 0;
-        oddeven = 1 - oddeven;
-
-        static byte Q;
-        Q += 157;
-#  else
-		static uint8_t Dstore[3] = {0,0,0};
-#  endif
-
-		// compute the E values and seed D from the stored values
-		for(register uint32_t i = 0; i < 3; i++) { 
-			byte S = scale.raw[i];
-
-#  if DITHER == 3
-            // Example: assume that S is 32
-			E[i] = S ? 256 / S : 0; // E = 256 / 32 = 8
-            D[i] = scale8( Q, E[i] /* E[i]+1 ? */ ); // D is now Q scaled 0..7
-            if( E[i] ) E[i]--; // E is now 31
-            if( oddeven ) D[i] = E[i] - D[i]; /* ? */ // Flip (invert) initial D on alternating updates
-#  else
-			while(S>>=1) { E[i] >>=1; };
-			D[i] = Dstore[i] & E[i];
-#  endif
-		}
-#endif
-
-		register volatile uint32_t *CTPTR asm("r6")= &SysTick->CTRL; FORCE_REFERENCE(CTPTR);
-		
 		*port = 0;
 
-		register uint32_t b;
-		b = ADVANCE ? data[SKIP + B0] :rgbdata[SKIP + B0];
-		// dither
-		if(DITHER && b) b = qadd8(b, D[B0]);
-		// now scale
-		b = SCALE(b, scale.raw[B0]);
+		// Setup the pixel controller and load/scale the first byte 
+		PixelController<RGB_ORDER> pixels(data, scale, true, ADVANCE, SKIP);
+		register uint8_t b = pixels.loadAndScale0();
 
 		// Setup and start the clock
+		register volatile uint32_t *CTPTR asm("r6")= &SysTick->CTRL; FORCE_REFERENCE(CTPTR);
 		_LOAD = TOTAL;
 		_VAL = 0;
 		_CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
@@ -212,80 +179,19 @@ public:
 
 		// read to clear the loop flag
 		_CTRL;
+		while(nLeds-- > 0) { 
+			pixels.stepDithering();
 
-		while(data < end) { 
-#if DITHER > 0
-#  if DITHER == 3
-            // Flip (invert) D on alternating pixles, to get even lighting
-            D[B0] = E[B0] - D[B0];
-            D[B1] = E[B1] - D[B1];
-            D[B2] = E[B2] - D[B2];
-#  else
-			D[B0] += DADVANCE; D[B0] &= E[B0];
-			D[B1] += DADVANCE; D[B1] &= E[B1];
-			D[B2] += DADVANCE; D[B2] &= E[B2];
-# 	endif
-#endif
+			write8Bits(CTPTR, port, b);
 
-			for(register uint32_t i = 7; i > 0; i--) { 
-				AT_BIT_START(*port = 1);
-				if(b& 0x80) {} else { AT_MARK(*port = 0); }
-				AT_END(*port = 0);
-				b <<= 1;
-			}
+			b = pixels.loadAndScale1();
+			write8Bits(CTPTR, port,b);
 
-			AT_BIT_START(*port = 1);
-			if(b& 0x80) {} else { AT_MARK(*port = 0); }
-			b = ADVANCE ? data[SKIP + B1] : rgbdata[SKIP + B1];
-			AT_END(*port = 0);
+			b = pixels.loadAndScale2();
+			write8Bits(CTPTR, port,b);
 
-			// dither
-			if(DITHER && b) b = qadd8(b, D[B1]);
-			// now scale
-			b = SCALE(b, scale.raw[B1]);
-
-			for(register uint32_t i = 7; i > 0; i--) { 
-				AT_BIT_START(*port = 1);
-				if(b& 0x80) {} else { AT_MARK(*port = 0); }
-				AT_END(*port = 0);
-				b <<= 1;
-			}
-
-			AT_BIT_START(*port = 1);
-			if(b& 0x80) {} else { AT_MARK(*port = 0); }
-			b = ADVANCE ? data[SKIP + B2] : rgbdata[SKIP + B2];
-			AT_END(*port = 0);
-
-			// dither
-			if(DITHER && b) b = qadd8(b, D[B2]);
-			// now scale
-			b = SCALE(b, scale.raw[B2]);
- 
-			for(register uint32_t i = 7; i > 0; i--) { 
-				AT_BIT_START(*port = 1);
-				if(b& 0x80) {} else { AT_MARK(*port = 0); }
-				AT_END(*port = 0);
-				b <<= 1;
-			}
-
-			AT_BIT_START(*port = 1);
-			if(b& 0x80) {} else { AT_MARK(*port = 0); }
-			data += (3 + SKIP);
-			b = ADVANCE ? data[SKIP + B0] : rgbdata[SKIP + B0];
-			AT_END(*port = 0);
-
-			// dither
-			if(DITHER && b) b = qadd8(b, D[B0]);
-			// now scale
-			b = SCALE(b, scale.raw[B0]);
+			b = pixels.advanceAndLoadAndScale0();
 		};
-
-#if DITHER > 0 && DITHER != 3
-		// Save the D values for cycling through next time
-		Dstore[0] = D[0];
-		Dstore[1] = D[1];
-		Dstore[2] = D[2];
-#endif
 	}
 };
 
