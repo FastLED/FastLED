@@ -1,7 +1,9 @@
 * ALL UNTESTED, USE AT YOUR OWN RISK!
-* Preliminary teensy 3.1 support
-* Preliminary due support (no hardware SPI, yet)
-* Preliminary P9813 (aka Cool Neon Total Control Lighting support)
+* RGB based scaling, allow for color balancing
+* (The moon) dithering support
+* Teensy 3.1 support
+* Due support 
+* P9813 (aka Cool Neon Total Control Lighting support)
 * Preliminary 2-way ws2812 support
 * Preliminary n-way clockless support on due
 * Preliminary TM1829 support (broken, don't use!)

@@ -247,7 +247,7 @@ public:
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
 		uint32_t ctar1_save = SPI0_CTAR1;
 
-		// Clear out the FMSZ bits, reset them for 9 bits transferd for the start bit
+		// Clear out the FMSZ bits, reset them for 1 bit transferd for the start bit
 		uint32_t ctar1 = (ctar1_save & (~SPI_CTAR_FMSZ(15))) | SPI_CTAR_FMSZ(0);
 		update_ctar1(ctar1);
 
@@ -278,6 +278,7 @@ public:
 		setSPIRate();
 		uint8_t *end = data + len;
 		select();
+		// could be optimized to write 16bit words out instead of 8bit bytes
 		while(data != end) { 
 			writeByte(D::adjust(*data++));
 		}
