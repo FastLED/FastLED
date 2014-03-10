@@ -45,7 +45,7 @@ typedef volatile uint8_t & reg8_t;
 #define _R(T) struct __gen_struct_ ## T
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
 #define _IO(L) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L);
-#define _DEFPIN_AVR(PIN, MASK, L) template<> class FastPin<PIN> : public _AVRPIN<PIN, MASK, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
+#define _DEFPIN_AVR(_PIN, MASK, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, MASK, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
 
 #if defined(__AVR_ATtiny85__) 
 _IO(B);

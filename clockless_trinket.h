@@ -39,9 +39,9 @@ template<> __attribute__((always_inline)) inline void _dc<6>(register uint8_t & 
 template<> __attribute__((always_inline)) inline void _dc<7>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<8>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }
 
-#define D1(ADJ) _dc<T1-(1+ADJ)>(loopvar);
-#define D2(ADJ) _dc<T2-(1+ADJ)>(loopvar);
-#define D3(ADJ) _dc<T3-(1+ADJ)>(loopvar);
+#define D1(ADJ) _dc<T1-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
+#define D2(ADJ) _dc<T2-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
+#define D3(ADJ) _dc<T3-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -51,7 +51,7 @@ template<> __attribute__((always_inline)) inline void _dc<8>(register uint8_t & 
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int WAIT_TIME = 50>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -101,12 +101,12 @@ public:
 // The variables that our various asm statemetns use.  The same block of variables needs to be declared for
 // all the asm blocks because GCC is pretty stupid and it would clobber variables happily or optimize code away too aggressively			
 #define ASM_VARS : /* write variables */				\
+				[count] "+x" (count),					\
+				[data] "+z" (data),						\
 				[b0] "+a" (b0),							\
 				[b1] "+a" (b1),							\
 				[b2] "+a" (b2),							\
-				[count] "+x" (count),					\
 				[scale_base] "+a" (scale_base),			\
-				[data] "+z" (data),						\
 				[loopvar] "+a" (loopvar)				\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
@@ -115,13 +115,10 @@ public:
 				[s0] "r" (s0),							\
 				[s1] "r" (s1),							\
 				[s2] "r" (s2),							\
-				[d0] "r" (d0),							\
-				[d1] "r" (d1),							\
-				[d2] "r" (d2),							\
-				[e0] "r" (e0),							\
-				[e1] "r" (e1),							\
-				[e2] "r" (e2),							\
-				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),			\
+				[d0] "r" (pixels.d[RO(0)]),							\
+				[d1] "r" (pixels.d[RO(1)]),							\
+				[d2] "r" (pixels.d[RO(2)]),							\
+				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),		\
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
 				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
@@ -129,9 +126,9 @@ public:
 
 
 // 1 cycle, write hi to the port
-#define HI1 asm __volatile__("out %[PORT], %[hi]" ASM_VARS );
+#define HI1 if((int)(FastPin<DATA_PIN>::port()) < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
-#define LO1 asm __volatile__("out %[PORT], %[lo]" ASM_VARS );
+#define LO1 if((int)(FastPin<DATA_PIN>::port()) < 64) { asm __volatile__("out %[PORT], %[lo]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=lo; }
 // 2 cycles, sbrs on flipping the lne to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
 // load a byte from ram into the given var with the given offset
@@ -172,7 +169,7 @@ public:
 /////////////////////////////////////////////////////////////////////////////////////
 // Loop life cycle
 
-// #define ADJUST_DITHER  d0 += DADVANCE; d1 += DADVANCE; d2 += DADVANCE; d0 &= e0; d1 &= e1; d2 &= d2; 
+// dither adjustment macro - should be kept in sync w/what's in stepDithering
 #define ADJDITHER2(D, E) D = E - D;
 
 // #define xstr(a) str(a)
@@ -212,47 +209,18 @@ public:
 		uint16_t advanceBy = advance ? (skip+3) : 0;
 		// uint8_t dadv = DADVANCE;
 
+		uint8_t b0 = 0;
+		uint8_t b1 = 0;
+		uint8_t b2 = 0;
 
-		static byte oddeven = 0;
-		oddeven = 1 - oddeven;
-
-		static byte Q;
-		Q += 157;
-
-		register uint8_t d0, d1, d2;
-		register uint8_t e0, e1, e2;
-		uint8_t s0, s1, s2;
-		uint8_t b0, b1, b2;
-		// static uint8_t d[3] = {0,0,0};
-
-		// initialize the scales
-		s0 = scale.raw[B0];
-		s1 = scale.raw[B1];
-		s2 = scale.raw[B2];
-
-		// initialize the e & d values
-		uint8_t S;
-		S = s0; e0 = S ? 256/S : 0; d0 = scale8(Q, e0);
-		if(e0) e0--;
-		if(oddeven) d0 = e0 - d0;
-		//e0 = 0xFF; while(S >>= 1) { e0 >>= 1; }
-		// d0 = d[0] & e0;
-		S = s1; e1 = S ? 256/S : 0; d1 = scale8(Q, e1);
-		if(e1) e1--;
-		if(oddeven) d1 = e1 - d1;
-		// e1 = 0xFF; while(S >>= 1) { e1 >>= 1; }
-		// d1 = d[1] & e1;
-		S = s2; e0 = S ? 256/S : 0; d2 = scale8(Q, e2);
-		// e2 = 0xFF; while(S >>= 1) { e2 >>= 1; }
-		// d2 = d[2] & e0;
-		if(e1) e2--;
-		if(oddeven) d1 = e1 - d1;
+		// Setup the pixel controller and load/scale the first byte 
+		PixelController<RGB_ORDER> pixels(data, scale, true, advance, skip);
+		b0 = pixels.loadAndScale0();
 		
-		b0 = data[RGB_BYTE0(RGB_ORDER)];
-		if(DITHER && b0) { b0 = qadd8(b0, d0); }
-		b0 = scale8_video(b0, s0);
-		b1 = 0;
-		b2 = 0;
+		// pull the dithering/adjustment values out of the pixels object for direct asm access
+		uint8_t s0 = scale.raw[RO(0)];
+		uint8_t s1 = scale.raw[RO(1)];
+		uint8_t s2 = scale.raw[RO(2)];
 		register uint8_t loopvar=0;
 
 		{
@@ -260,9 +228,9 @@ public:
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
 				LOOP; 
-				ADJDITHER2(d0,e0)
-				ADJDITHER2(d1,e1) 
-				ADJDITHER2(d2,e2) 
+				ADJDITHER2(pixels.d[RO(0)],pixels.e[RO(0)])
+				ADJDITHER2(pixels.d[RO(1)],pixels.e[RO(1)]) 
+				ADJDITHER2(pixels.d[RO(2)],pixels.e[RO(2)]) 
 				VIDADJ2(b0);
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
@@ -281,7 +249,13 @@ public:
 				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)			
 				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)			
 				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)		
-				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 VIDADJ2(b1)		D3(2)			
+				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 VIDADJ2(b1)		D3(2)
+				switch(XTRA0) {
+					case 4: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+					case 3: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+					case 2: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+					case 1: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+				}	
 				HI1 D1(1) QLO2(b1, 7) LDSCL3(b2,O2) 	D2(3)	LO1					D3(0)	
 				HI1	D1(1) QLO2(b1, 6) PRESCALE4(d2)		D2(4)	LO1	SCALE22(b2,0)	D3(2)		
 				HI1 D1(1) QLO2(b1, 5) RORSC24(b2,1) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
@@ -290,6 +264,12 @@ public:
 				HI1 D1(1) QLO2(b1, 2) SCROR24(b2,5) 	D2(4)	LO1 SCALE22(b2,6)	D3(2)	
 				HI1 D1(1) QLO2(b1, 1) RORSC24(b2,7) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
 				HI1 D1(1) QLO2(b1, 0) IDATA2 			D2(2) 	LO1 VIDADJ2(b2)		D3(0)
+				switch(XTRA0) {
+					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				}	
 				HI1 D1(1) QLO2(b2, 7) LDSCL3(b0,O0) 	D2(3)	LO1					D3(0)	
 				HI1	D1(1) QLO2(b2, 6) PRESCALE4(d0)		D2(4)	LO1	SCALE22(b0,0)	D3(2)		
 				HI1 D1(1) QLO2(b2, 5) RORSC04(b0,1) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
@@ -298,6 +278,12 @@ public:
 				HI1 D1(1) QLO2(b2, 2) SCROR04(b0,5) 	D2(4)	LO1 SCALE02(b0,6)	D3(2)	
 				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
 				HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2	
+				switch(XTRA0) {
+					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				}	
 #else
 				// no inline scaling - non-straight RGB ordering
 				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)

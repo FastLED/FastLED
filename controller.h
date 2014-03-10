@@ -11,10 +11,6 @@
 #define RGB_BYTE1(RO) ((RO>>3) & 0x3) 
 #define RGB_BYTE2(RO) ((RO) & 0x3)
 
-#define B0 RGB_BYTE0(RGB_ORDER)
-#define B1 RGB_BYTE1(RGB_ORDER)
-#define B2 RGB_BYTE2(RGB_ORDER)
-
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
 
@@ -67,11 +63,11 @@ template<EOrder RGB_ORDER>
 struct PixelController {
         uint8_t d[3];
         uint8_t e[3];
+        const uint8_t *mData; 
         CRGB & mScale;
-        uint8_t *mData; 
         uint8_t mAdvance;
 
-        PixelController(uint8_t *d, CRGB & s, bool dodithering, bool doadvance=0, uint8_t skip=0) : mData(d), mScale(s) {
+        PixelController(const uint8_t *d, CRGB & s, bool dodithering, bool doadvance=0, uint8_t skip=0) : mData(d), mScale(s) {
                 enable_dithering(dodithering);
 
                 mData += skip;
@@ -136,7 +132,7 @@ struct PixelController {
 		__attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }    
 		__attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }    
 		__attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }    
-
+        __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }    
 };
 
 #endif

@@ -465,7 +465,7 @@ LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
     // uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
     return j;
 #elif SCALE8_AVRASM == 1
-    uint8_t j;
+    uint8_t j=0;
     asm volatile(
         "mul %[i], %[scale]\n\t"
         "mov %[j], r1\n\t"

@@ -43,6 +43,7 @@ public:
 // Include the various specific SPI implementations
 #include "fastspi_bitbang.h"
 #include "fastspi_arm_k20.h"
+#include "fastspi_arm_sam.h"
 #include "fastspi_avr.h"
 #include "fastspi_dma.h"
 
@@ -66,6 +67,11 @@ class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SP
 
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
+
+#elif defined(__SAM3X8E__)
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public SAMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
 #else
 
