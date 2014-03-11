@@ -17,7 +17,7 @@ class SAMHardwareSPIOutput {
 	void disableSPI() { m_SPI->SPI_CR = SPI_CR_SPIDIS; }
 	void resetSPI() { m_SPI->SPI_CR = SPI_CR_SWRST; }
 
-	static inline void readyTransferBits(register byte bits) { 
+	static inline void readyTransferBits(register uint32_t bits) { 
 		bits -= 8;
 		// don't change the number of transfer bits while data is still being transferred from TDR to the shift register
 		waitForEmpty();
@@ -25,7 +25,7 @@ class SAMHardwareSPIOutput {
 	}
 
 	template<int BITS> static inline void writeBits(uint16_t w) {
-		readyTransferBits(BITS);
+		waitForEmpty();
 		m_SPI->SPI_TDR = (uint32_t)w | SPI_PCS(0);
 	}
 
@@ -62,6 +62,9 @@ public:
 		m_SPI->SPI_MR = SPI_MR_MSTR | SPI_MR_MODFDIS | SPI_MR_PS;
 
 		enableSPI();
+
+		// Send everything out in 8 bit chunks, other sizes appear to work, poorly...
+		readyTransferBits(8);
 	}
 
 	// latch the CS select
@@ -133,20 +136,24 @@ public:
 		// Setup the pixel controller 
 		PixelController<RGB_ORDER> pixels(data, scale, true, advance, skip);
 
-		while(data != end) { 
-			if(FLAGS & FLAG_START_BIT) { 
+		if(FLAGS & FLAG_START_BIT) { 
+			while(data < end) { 
 				writeBits<9>((1<<8) | D::adjust(pixels.loadAndScale0()));
 				writeByte(D::adjust(pixels.loadAndScale1()));
 				writeByte(D::adjust(pixels.loadAndScale2()));
-			} else { 
+				pixels.advanceData();
+				pixels.stepDithering();
+				data += (3+skip);
+			}
+		} else {
+			while(data < end) { 
 				writeByte(D::adjust(pixels.loadAndScale0()));
 				writeByte(D::adjust(pixels.loadAndScale1()));
 				writeByte(D::adjust(pixels.loadAndScale2()));
+				pixels.advanceData();
+				pixels.stepDithering();
+				data += (3+skip);
 			}
-
-			pixels.advanceData();
-			pixels.stepDithering();
-			data += (3+skip);
 		}
 		D::postBlock(len);
 		release();
