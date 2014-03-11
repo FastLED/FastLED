@@ -59,9 +59,9 @@ class CFastLED {
 public:
 	CFastLED();
 
-	CLEDController *addLeds(CLEDController *pLed, const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
+	CLEDController &addLeds(CLEDController *pLed, const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
 
-	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN > CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
+	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN > CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) { 
 			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
@@ -69,7 +69,7 @@ public:
 		}
 	}
 
-	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER > CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
+	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER > CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) { 
 			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
@@ -78,7 +78,7 @@ public:
 		}
 	}
 	
-	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint8_t SPI_DATA_RATE > CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
+	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint8_t SPI_DATA_RATE > CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) { 
 			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
@@ -88,22 +88,22 @@ public:
 	}
 
 #ifdef SPI_DATA
-	template<ESPIChipsets CHIPSET> CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
+	template<ESPIChipsets CHIPSET> CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB>(data, nLedsOrOffset, nLedsIfOffset);
 	}	
 
-	template<ESPIChipsets CHIPSET, EOrder RGB_ORDER> CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
+	template<ESPIChipsets CHIPSET, EOrder RGB_ORDER> CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER>(data, nLedsOrOffset, nLedsIfOffset);
 	}	
 
-	template<ESPIChipsets CHIPSET, EOrder RGB_ORDER, uint8_t SPI_DATA_RATE> CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
+	template<ESPIChipsets CHIPSET, EOrder RGB_ORDER, uint8_t SPI_DATA_RATE> CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER, SPI_DATA_RATE>(data, nLedsOrOffset, nLedsIfOffset);
 	}	
 
 #endif
 
 	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN> 
-	CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) { 
 #ifdef FASTSPI_USE_DMX_SIMPLE
 			case DMX: { static DMXController<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
@@ -122,11 +122,10 @@ public:
 			case GW6205: { static GW6205Controller800Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case GW6205_400: { static GW6205Controller400Khz<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
-		return NULL;
 	}
 
 	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER> 
-	CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) { 
 #ifdef FASTSPI_USE_DMX_SIMPLE
 			case DMX: {static  DMXController<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
@@ -145,18 +144,16 @@ public:
 			case GW6205: { static GW6205Controller800Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case GW6205_400: { static GW6205Controller400Khz<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
-		return NULL;
 	}
 
-	template<EBlockChipsets CHIPSET, int NUM_LANES>
-	CLEDController *addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
-		switch(CHIPSET) {
 #ifdef HAS_BLOCKLESS
+	template<EBlockChipsets CHIPSET, int NUM_LANES>
+	CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
+		switch(CHIPSET) {
 			case WS2811_PORTC: return addLeds(new BlockClocklessController<NUM_LANES, NS(350), NS(350), NS(550)>(), data, nLedsOrOffset, nLedsIfOffset);
-#endif
 		}
-		return NULL;
 	}
+#endif
 
 	void setBrightness(CRGB  scale) { m_Scale = scale; }
 	void setBrightness(uint8_t scale) { m_Scale = CRGB(scale,scale,scale); }

@@ -18,7 +18,7 @@ CFastLED::CFastLED() {
 	memset8(m_Controllers, 0, m_nControllers * sizeof(CControllerInfo));
 }
 
-CLEDController *CFastLED::addLeds(CLEDController *pLed, 
+CLEDController &CFastLED::addLeds(CLEDController *pLed, 
 									   const struct CRGB *data, 
 									   int nLedsOrOffset, int nLedsIfOffset) { 
 	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
@@ -41,10 +41,9 @@ CLEDController *CFastLED::addLeds(CLEDController *pLed,
 		m_Controllers[target].nOffset = nOffset;
 		m_Controllers[target].nLeds = nLeds;
 		pLed->init();
-		return pLed;
 	}
 	
-	return NULL;
+	return *pLed;
 }
 
 void CFastLED::show(CRGB scale) { 
