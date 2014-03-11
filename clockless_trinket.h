@@ -30,7 +30,7 @@ template<int CYCLES> __attribute__((always_inline)) inline void _dc(register uin
 	_dc_AVR<CYCLES/3,CYCLES%3>(loopvar);
 }
 template<> __attribute__((always_inline)) inline void _dc<0>(register uint8_t & loopvar) {}
-template<> __attribute__((always_inline)) inline void _dc<1>(register uint8_t & loopvar) {asm __volatile__("cp r0,r0":::);}
+template<> __attribute__((always_inline)) inline void _dc<1>(register uint8_t & loopvar) {asm __volatile__("mov r0,r0":::);}
 template<> __attribute__((always_inline)) inline void _dc<2>(register uint8_t & loopvar) {asm __volatile__("rjmp .+0":::);}
 template<> __attribute__((always_inline)) inline void _dc<3>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<4>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }
