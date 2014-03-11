@@ -13,8 +13,6 @@
 #define TRINKET_SCALE 1
 // whether or not to use dithering
 #define DITHER 1
-// whether or not to enable scale_video adjustments
-#define SCALE_VIDEO 0
 #endif
 
 // Variations on the functions in delay.h - w/a loop var passed in to preserve registers across calls by the optimizer/compiler
@@ -22,12 +20,17 @@ template<int CYCLES> inline void _dc(register uint8_t & loopvar);
 
 template<int _LOOP, int PAD> inline void _dc_AVR(register uint8_t & loopvar) { 
 	_dc<PAD>(loopvar);
-	asm __volatile__ ( "LDI %[loopvar], %[_LOOP]\n\tL_%=: DEC %[loopvar]\n\t BRNE L_%=\n\t" : 
+	// The convolution in here is to ensure that the state of the carry flag coming into the delay loop is preserved
+	asm __volatile__ (  "BRCS L_PC%=\n\t"
+						"        LDI %[loopvar], %[_LOOP]\n\tL_%=: DEC %[loopvar]\n\t BRNE L_%=\n\tBREQ L_DONE%=\n\t" 
+						"L_PC%=: LDI %[loopvar], %[_LOOP]\n\tL_%=: DEC %[loopvar]\n\t BRNE L_%=\n\tBSET 0\n\t" 
+						"L_DONE%=:\n\t"
+						: 
 							[loopvar] "+a" (loopvar) : [_LOOP] "M" (_LOOP) : );
 }
 
 template<int CYCLES> __attribute__((always_inline)) inline void _dc(register uint8_t & loopvar) { 
-	_dc_AVR<CYCLES/3,CYCLES%3>(loopvar);
+	_dc_AVR<CYCLES/6,CYCLES%6>(loopvar);
 }
 template<> __attribute__((always_inline)) inline void _dc<0>(register uint8_t & loopvar) {}
 template<> __attribute__((always_inline)) inline void _dc<1>(register uint8_t & loopvar) {asm __volatile__("mov r0,r0":::);}
@@ -38,6 +41,8 @@ template<> __attribute__((always_inline)) inline void _dc<5>(register uint8_t & 
 template<> __attribute__((always_inline)) inline void _dc<6>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); _dc<2>(loopvar);}
 template<> __attribute__((always_inline)) inline void _dc<7>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<8>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<9>(register uint8_t & loopvar) { _dc<5>(loopvar); _dc<4>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<10>(register uint8_t & loopvar) { _dc<6>(loopvar); _dc<4>(loopvar); }
 
 #define D1(ADJ) _dc<T1-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
 #define D2(ADJ) _dc<T2-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
@@ -106,6 +111,9 @@ public:
 				[b0] "+a" (b0),							\
 				[b1] "+a" (b1),							\
 				[b2] "+a" (b2),							\
+				[d0] "+r" (d0),							\
+				[d1] "+r" (d1),							\
+				[d2] "+r" (d2),							\
 				[scale_base] "+a" (scale_base),			\
 				[loopvar] "+a" (loopvar)				\
 				: /* use variables */					\
@@ -115,9 +123,6 @@ public:
 				[s0] "r" (s0),							\
 				[s1] "r" (s1),							\
 				[s2] "r" (s2),							\
-				[d0] "r" (pixels.d[RO(0)]),							\
-				[d1] "r" (pixels.d[RO(1)]),							\
-				[d2] "r" (pixels.d[RO(2)]),							\
 				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),		\
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
@@ -126,15 +131,15 @@ public:
 
 
 // 1 cycle, write hi to the port
-#define HI1 if((int)(FastPin<DATA_PIN>::port()) < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
+#define HI1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
-#define LO1 if((int)(FastPin<DATA_PIN>::port()) < 64) { asm __volatile__("out %[PORT], %[lo]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=lo; }
+#define LO1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[lo]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=lo; }
 // 2 cycles, sbrs on flipping the lne to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
 // load a byte from ram into the given var with the given offset
 #define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]" ASM_VARS );
-// 3 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var
-#define LDSCL3(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]" ASM_VARS );
+// 4 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var, clear carry
+#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc" ASM_VARS );
 // 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
 #define SCALE02(B, N) asm __volatile__("sbrc %[s0], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
 #define SCALE12(B, N) asm __volatile__("sbrc %[s1], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
@@ -144,12 +149,13 @@ public:
 #define PRESCALE4(D) if(DITHER) { asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\tbrcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\t" ASM_VARS); } \
 				      else { _dc<4>(loopvar); }
 
-// Do a (rough) approximation of the nscale8_video jump
-#if (SCALE_VIDEO == 1) 
-#define VIDADJ2(B) asm __volatile__("cpse %[scale_base], __zero_reg__\n\tsubi %[" #B "], 0xFF\n\t" ASM_VARS);
-#else
-#define VIDADJ2(B) asm __volatile__("rjmp .+0" ASM_VARS);
-#endif
+// Do the add for the prescale
+#define PRESCALEA2(D) if(DITHER) { asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\t" ASM_VARS); } \
+				      else { _dc<2>(loopvar); }
+// Do the clamp for the prescale, clear carry when we're done - NOTE: Must ensure carry flag state is preserved!
+#define PRESCALEB3(D) if(DITHER) { asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tCLC" ASM_VARS); } \
+				      else { _dc<3>(loopvar); }
+
 
 // 1 cycle - rotate right, pulling in from carry
 #define ROR1(B) asm __volatile__("ror %[" #B "]" ASM_VARS );
@@ -221,6 +227,13 @@ public:
 		uint8_t s0 = scale.raw[RO(0)];
 		uint8_t s1 = scale.raw[RO(1)];
 		uint8_t s2 = scale.raw[RO(2)];
+		uint8_t d0 = pixels.d[RO(0)];
+		uint8_t d1 = pixels.d[RO(1)];
+		uint8_t d2 = pixels.d[RO(2)];
+		uint8_t e0 = pixels.e[RO(0)];
+		uint8_t e1 = pixels.e[RO(1)];
+		uint8_t e2 = pixels.e[RO(2)];
+		
 		register uint8_t loopvar=0;
 
 		{
@@ -228,10 +241,10 @@ public:
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
 				LOOP; 
-				ADJDITHER2(pixels.d[RO(0)],pixels.e[RO(0)])
-				ADJDITHER2(pixels.d[RO(1)],pixels.e[RO(1)]) 
-				ADJDITHER2(pixels.d[RO(2)],pixels.e[RO(2)]) 
-				VIDADJ2(b0);
+				ADJDITHER2(d0,e0);
+				ADJDITHER2(d1,e1);
+				ADJDITHER2(d2,e2);
+				// CLC1;
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
 				// to allow things to line back up.
@@ -242,48 +255,48 @@ public:
 				// we're cycling back around and doing the above for byte 0.
 #if TRINKET_SCALE
 				// Inline scaling - RGB ordering
-				HI1 D1(1) QLO2(b0, 7) LDSCL3(b1,O1) 	D2(3)	LO1					D3(0)	
-				HI1	D1(1) QLO2(b0, 6) PRESCALE4(d1)		D2(4)	LO1	SCALE12(b1,0)	D3(2)		
+				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(3)	LO1	PRESCALEA2(d1)	D3(2)	
+				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d1)	D2(3)	LO1	SCALE12(b1,0)	D3(2)		
 				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR14(b1,2)		D2(4)	LO1 SCALE12(b1,3)	D3(2)			
 				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)			
 				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)			
 				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)		
-				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 VIDADJ2(b1)		D3(2)
-				switch(XTRA0) {
-					case 4: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-					case 3: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-					case 2: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-					case 1: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-				}	
-				HI1 D1(1) QLO2(b1, 7) LDSCL3(b2,O2) 	D2(3)	LO1					D3(0)	
-				HI1	D1(1) QLO2(b1, 6) PRESCALE4(d2)		D2(4)	LO1	SCALE22(b2,0)	D3(2)		
+				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 				D3(0)
+				// switch(XTRA0) {
+				// 	case 4: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+				// 	case 3: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+				// 	case 2: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+				// 	case 1: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+				// }	
+				HI1 D1(1) QLO2(b1, 7) LDSCL4(b2,O2) 	D2(3)	LO1	PRESCALEA2(d2)	D3(2)	
+				HI1	D1(1) QLO2(b1, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b2,0)	D3(2)		
 				HI1 D1(1) QLO2(b1, 5) RORSC24(b2,1) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
 				HI1 D1(1) QLO2(b1, 4) SCROR24(b2,2)		D2(4)	LO1 SCALE22(b2,3)	D3(2)	
 				HI1 D1(1) QLO2(b1, 3) RORSC24(b2,4) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)	
 				HI1 D1(1) QLO2(b1, 2) SCROR24(b2,5) 	D2(4)	LO1 SCALE22(b2,6)	D3(2)	
 				HI1 D1(1) QLO2(b1, 1) RORSC24(b2,7) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
-				HI1 D1(1) QLO2(b1, 0) IDATA2 			D2(2) 	LO1 VIDADJ2(b2)		D3(0)
-				switch(XTRA0) {
-					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				}	
-				HI1 D1(1) QLO2(b2, 7) LDSCL3(b0,O0) 	D2(3)	LO1					D3(0)	
-				HI1	D1(1) QLO2(b2, 6) PRESCALE4(d0)		D2(4)	LO1	SCALE22(b0,0)	D3(2)		
+				HI1 D1(1) QLO2(b1, 0) IDATA2 CLC1		D2(3) 	LO1 				D3(0)
+				// switch(XTRA0) {
+				// 	case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				// 	case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				// 	case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				// 	case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				// }	
+				HI1 D1(1) QLO2(b2, 7) LDSCL4(b0,O0) 	D2(3)	LO1	PRESCALEA2(d0)	D3(2)	
+				HI1	D1(1) QLO2(b2, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b0,0)	D3(2)		
 				HI1 D1(1) QLO2(b2, 5) RORSC04(b0,1) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
 				HI1 D1(1) QLO2(b2, 4) SCROR04(b0,2)		D2(4)	LO1 SCALE02(b0,3)	D3(2)	
 				HI1 D1(1) QLO2(b2, 3) RORSC04(b0,4) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)	
 				HI1 D1(1) QLO2(b2, 2) SCROR04(b0,5) 	D2(4)	LO1 SCALE02(b0,6)	D3(2)	
 				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
 				HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2	
-				switch(XTRA0) {
-					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				}	
+				// switch(XTRA0) {
+				// 	case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				// 	case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				// 	case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				// 	case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				// }	
 #else
 				// no inline scaling - non-straight RGB ordering
 				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
@@ -315,7 +328,6 @@ public:
 				D2(4) LO1 D3(0)
 			}
 		}
-
 		// save the d values
 		// d[0] = d0;
 		// d[1] = d1;
