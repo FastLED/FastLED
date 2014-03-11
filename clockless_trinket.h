@@ -130,6 +130,9 @@ public:
 				: /* clobber registers */				
 
 
+#define xstr(s) str(s)
+#define str(s) #s
+
 // 1 cycle, write hi to the port
 #define HI1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
@@ -237,10 +240,11 @@ public:
 		register uint8_t loopvar=0;
 
 		{
+			while(count--)
 			{
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
-				LOOP; 
+				// LOOP; 
 				ADJDITHER2(d0,e0);
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
@@ -290,7 +294,8 @@ public:
 				HI1 D1(1) QLO2(b2, 3) RORSC04(b0,4) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)	
 				HI1 D1(1) QLO2(b2, 2) SCROR04(b0,5) 	D2(4)	LO1 SCALE02(b0,6)	D3(2)	
 				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
-				HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2	
+				// HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2	
+				HI1 D1(1) QLO2(b2, 0) 					D2(0) 	LO1 				D3(0) 	
 				// switch(XTRA0) {
 				// 	case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
 				// 	case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
@@ -324,8 +329,8 @@ public:
 				HI1 D1(1) QLO2(b2, 1) 				D2(0) 	LO1 D3(0)
 				HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 D2(3) 		LO1 D3(2) JMPLOOP2	
 #endif			
-				DONE
-				D2(4) LO1 D3(0)
+				// DONE
+				// D2(4) LO1 D3(0)
 			}
 		}
 		// save the d values
