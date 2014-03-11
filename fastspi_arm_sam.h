@@ -13,20 +13,20 @@ class SAMHardwareSPIOutput {
 	void enableConfig() { m_SPI->SPI_WPMR &= ~SPI_WPMR_WPEN; }
 	void disableConfig() { m_SPI->SPI_WPMR |= SPI_WPMR_WPEN; }
 
-	void enableSPI() { m_SPI->SPI_CR |= SPI_CR_SPIEN; }
-	void disableSPI() { m_SPI->SPI_CR &= ~SPI_CR_SPIEN; }
+	void enableSPI() { m_SPI->SPI_CR = SPI_CR_SPIEN; }
+	void disableSPI() { m_SPI->SPI_CR = SPI_CR_SPIDIS; }
+	void resetSPI() { m_SPI->SPI_CR = SPI_CR_SWRST; }
 
-	void readyTransferBits(register byte bits) { 
+	static inline void readyTransferBits(register byte bits) { 
 		bits -= 8;
 		// don't change the number of transfer bits while data is still being transferred from TDR to the shift register
 		waitForEmpty();
-		m_SPI->SPI_CSR[0] = (bits << SPI_CSR_BITS_Pos) | SPI_CSR_SCBR(_SPI_CLOCK_DIVIDER);
+		m_SPI->SPI_CSR[0] = SPI_CSR_NCPHA | SPI_CSR_CSAAT | (bits << SPI_CSR_BITS_Pos) | SPI_CSR_DLYBCT(1) | SPI_CSR_SCBR(_SPI_CLOCK_DIVIDER);
 	}
 
 	template<int BITS> static inline void writeBits(uint16_t w) {
-		waitForEmpty();
-		m_SPI->SPI_CSR[0] = (BITS << SPI_CSR_BITS_Pos) | SPI_CSR_SCBR(_SPI_CLOCK_DIVIDER);
-		m_SPI->SPI_TDR = w;
+		readyTransferBits(BITS);
+		m_SPI->SPI_TDR = (uint32_t)w | SPI_PCS(0);
 	}
 
 public:
@@ -40,38 +40,28 @@ public:
 	void init() {
 		// m_SPI = SPI0;
 
-		// set the output pins
-		FastPin<_DATA_PIN>::setOutput();
-		FastPin<_CLOCK_PIN>::setOutput();
+		// set the output pins master out, master in, clock.  Note doing this here because I still don't 
+		// know how I want to expose this type of functionality in FastPin.
+		PIO_Configure(PIOA, PIO_PERIPH_A, FastPin<_DATA_PIN>::mask(), PIO_DEFAULT);
+		PIO_Configure(PIOA, PIO_PERIPH_A, FastPin<_DATA_PIN-1>::mask(), PIO_DEFAULT);
+		PIO_Configure(PIOA, PIO_PERIPH_A, FastPin<_CLOCK_PIN>::mask(), PIO_DEFAULT);
+		
 		release();
 
 		// Configure the SPI clock, divider between 1-255
 		// SCBR = _SPI_CLOCK_DIVIDER
+		pmc_enable_periph_clk(ID_SPI0);
+		disableSPI();
 
-		// Enable writes
-		enableConfig();
+		// reset twice (what the sam code does, not sure why?)
+		resetSPI();
+		resetSPI();
 
 		// Configure SPI as master, enable
+		// Bits we want in MR: master, disable mode fault detection, variable peripheral select
+		m_SPI->SPI_MR = SPI_MR_MSTR | SPI_MR_MODFDIS | SPI_MR_PS;
+
 		enableSPI();
-
-		// Only bit in MR we want on is master, everything is left to 0, see commented out psuedocode
-		m_SPI->SPI_MR = SPI_MR_MSTR;
-		// SPI_MR.MSTR = 1; 		set master
-		// SPI_MR.PS = 0			fixed peripheral select
-		// SPI_MR.PCSDEC = 0		direct connect CS decode
-		// SPI_MR.PCS = 0			device 0
-		// SPI_MR.DLYBCS = 0;		0 delay between chip selects
-
-		// set inter-transfer delay to 0
-		// DLYBCT = 0;
-		// DLYBS = 0;
-
-		// CSR items
-		// SPI_CSR0 = 0;
-		// SPI_CSR0.BITS = 0 (8bit), 1 (9bit), 8 (16bit)
-		// SPI_CSR0.SCBR = _SPI_CLOCK_DIVIDER
-		// SPI_CSR0.DLYBS = 0, SPI_CSR0.DLYBCT = 0
-
 	}
 
 	// latch the CS select
@@ -145,8 +135,7 @@ public:
 
 		while(data != end) { 
 			if(FLAGS & FLAG_START_BIT) { 
-				writeBit<0>(1);
-				writeByte(D::adjust(pixels.loadAndScale0()));
+				writeBits<9>((1<<8) | D::adjust(pixels.loadAndScale0()));
 				writeByte(D::adjust(pixels.loadAndScale1()));
 				writeByte(D::adjust(pixels.loadAndScale2()));
 			} else { 
