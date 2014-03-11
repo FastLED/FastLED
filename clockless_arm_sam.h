@@ -6,9 +6,10 @@
 
 #if defined(__SAM3X8E__)
 
-#define TOTAL ( (T1+2) + (T2+2) + (T3+2) )
-#define T1_MARK (TOTAL - (T1+2))
-#define T2_MARK (T1_MARK - (T2+2))
+#define TADJUST 1
+#define TOTAL ( (T1+TADJUST) + (T2+TADJUST) + (T3+TADJUST) )
+#define T1_MARK (TOTAL - (T1+TADJUST))
+#define T2_MARK (T1_MARK - (T2+TADJUST))
 
 #define SCALE(S,V) scale8_video(S,V)
 // #define SCALE(S,V) scale8(S,V)

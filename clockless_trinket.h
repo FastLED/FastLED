@@ -244,11 +244,9 @@ public:
 			{
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
-				// LOOP; 
 				ADJDITHER2(d0,e0);
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
-				// CLC1;
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
 				// to allow things to line back up.
@@ -267,12 +265,12 @@ public:
 				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)			
 				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)		
 				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 				D3(0)
-				// switch(XTRA0) {
-				// 	case 4: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-				// 	case 3: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-				// 	case 2: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-				// 	case 1: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-				// }	
+				switch(XTRA0) {
+					case 4: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+					case 3: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+					case 2: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+					case 1: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
+				}	
 				HI1 D1(1) QLO2(b1, 7) LDSCL4(b2,O2) 	D2(3)	LO1	PRESCALEA2(d2)	D3(2)	
 				HI1	D1(1) QLO2(b1, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b2,0)	D3(2)		
 				HI1 D1(1) QLO2(b1, 5) RORSC24(b2,1) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
@@ -281,12 +279,12 @@ public:
 				HI1 D1(1) QLO2(b1, 2) SCROR24(b2,5) 	D2(4)	LO1 SCALE22(b2,6)	D3(2)	
 				HI1 D1(1) QLO2(b1, 1) RORSC24(b2,7) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
 				HI1 D1(1) QLO2(b1, 0) IDATA2 CLC1		D2(3) 	LO1 				D3(0)
-				// switch(XTRA0) {
-				// 	case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				// 	case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				// 	case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				// 	case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				// }	
+				switch(XTRA0) {
+					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				}	
 				HI1 D1(1) QLO2(b2, 7) LDSCL4(b0,O0) 	D2(3)	LO1	PRESCALEA2(d0)	D3(2)	
 				HI1	D1(1) QLO2(b2, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b0,0)	D3(2)		
 				HI1 D1(1) QLO2(b2, 5) RORSC04(b0,1) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
@@ -296,12 +294,12 @@ public:
 				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
 				// HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2	
 				HI1 D1(1) QLO2(b2, 0) 					D2(0) 	LO1 				D3(0) 	
-				// switch(XTRA0) {
-				// 	case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				// 	case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				// 	case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				// 	case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				// }	
+				switch(XTRA0) {
+					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+				}	
 #else
 				// no inline scaling - non-straight RGB ordering
 				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
@@ -327,7 +325,7 @@ public:
 				HI1 D1(1) QLO2(b2, 3) 				D2(0) 	LO1 D3(0)			
 				HI1 D1(1) QLO2(b2, 2) 				D2(0) 	LO1 D3(0)		
 				HI1 D1(1) QLO2(b2, 1) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 D2(3) 		LO1 D3(2) JMPLOOP2	
+				HI1 D1(1) QLO2(b2, 0) 				D2(0) 	LO1 D3(0)	
 #endif			
 				// DONE
 				// D2(4) LO1 D3(0)
