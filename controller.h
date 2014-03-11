@@ -3,6 +3,7 @@
 
 #include "led_sysdefs.h"
 #include "pixeltypes.h"
+#include "color.h"
 
 #define RO(X) RGB_BYTE(RGB_ORDER, X)
 #define RGB_BYTE(RO,X) (((RO)>>(3*(2-(X)))) & 0x3)
@@ -26,7 +27,12 @@
 /// to methods, make them references to this type, keeps your code saner.  However, most people won't be seeing/using these objects
 /// directly at all
 class CLEDController { 
+    CRGB m_ColorCorrection;
+    CRGB m_ColorTemperature;
+
 public:
+    CLEDController() : m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature) {}
+
 	// initialize the LED controller
 	virtual void init() = 0;
 
@@ -53,6 +59,41 @@ public:
 
 	// wait until the controller is ready to write data out 
 	virtual void wait() { return; }
+
+    virtual CLEDController & setCorrection(CRGB correction) { m_ColorCorrection = correction; return *this; }
+    virtual CLEDController & setCorrection(LEDColorCorrection correction) { m_ColorCorrection = correction; return *this; }
+    virtual CRGB getCorrection() { return m_ColorCorrection; }
+
+    virtual CLEDController & setTemperature(CRGB temperature) { m_ColorTemperature = temperature; return *this; }
+    virtual CLEDController & setTemperature(ColorTemperature temperature) { m_ColorTemperature = temperature; return *this; }
+    virtual CRGB getTemperature() { return m_ColorTemperature; }
+
+    virtual CRGB getAdjustment(CRGB scale) { 
+        // if(1) return scale;
+        uint32_t r = ((uint32_t)m_ColorCorrection.r * (uint32_t)m_ColorTemperature.r * (uint32_t)scale.r) / (uint32_t)0x10000L;
+        uint32_t g = ((uint32_t)m_ColorCorrection.g * (uint32_t)m_ColorTemperature.g * (uint32_t)scale.g) / (uint32_t)0x10000L;
+        uint32_t b = ((uint32_t)m_ColorCorrection.b * (uint32_t)m_ColorTemperature.b * (uint32_t)scale.b) / (uint32_t)0x10000L;
+
+        // static int done = 0;
+        // if(!done) { 
+        //     done = 1;
+        //     Serial.print("Correction: "); 
+        //     Serial.print(m_ColorCorrection.r); Serial.print(" ");
+        //     Serial.print(m_ColorCorrection.g); Serial.print(" ");
+        //     Serial.print(m_ColorCorrection.b); Serial.println(" ");
+        //     Serial.print("Temperature: "); 
+        //     Serial.print(m_ColorTemperature.r); Serial.print(" ");
+        //     Serial.print(m_ColorTemperature.g); Serial.print(" ");
+        //     Serial.print(m_ColorTemperature.b); Serial.println(" ");
+        //     Serial.print("Scale: ");
+        //     Serial.print(scale.r); Serial.print(" ");
+        //     Serial.print(scale.g); Serial.print(" ");
+        //     Serial.print(scale.b); Serial.println(" ");
+        //     Serial.print("Combined: ");
+        //     Serial.print(r); Serial.print(" "); Serial.print(g); Serial.print(" "); Serial.print(b); Serial.println();
+        // }
+        return CRGB(r,g,b);
+    }
 
 };
 
@@ -92,7 +133,8 @@ struct PixelController {
                 if(R & 0x80) { Q |= 0x01; }
 
                 // setup the seed d and e values
-                for(int i = 0; i < 3; i++) {                        byte s = mScale.raw[i];
+                for(int i = 0; i < 3; i++) {                        
+                        byte s = mScale.raw[i];
                         e[i] = s ? (256/s) + 1 : 0;
                         d[i] = scale8(Q, e[i]);
                         if(e[i]) e[i]--;

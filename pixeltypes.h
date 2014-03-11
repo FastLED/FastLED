@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "lib8tion.h"
+#include "color.h"
 
 struct CRGB;
 struct CHSV;
@@ -113,6 +114,18 @@ struct CRGB {
     {
     }
     
+    inline CRGB( LEDColorCorrection colorcode) __attribute__((always_inline))
+    : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
+    {
+
+    }
+
+    inline CRGB( ColorTemperature colorcode) __attribute__((always_inline))
+    : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
+    {
+        
+    }
+
     // allow copy construction
 	inline CRGB(const CRGB& rhs) __attribute__((always_inline))
     {

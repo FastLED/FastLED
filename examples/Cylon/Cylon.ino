@@ -1,7 +1,7 @@
 #include "FastLED.h"
 
 // How many leds in your strip?
-#define NUM_LEDS 40
+#define NUM_LEDS 8
 
 // For led chips like Neopixels, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
@@ -13,7 +13,7 @@
 CRGB leds[NUM_LEDS];
 
 void setup() { 
-	FastLED.addLeds<LPD8806>(leds, NUM_LEDS);
+	FastLED.addLeds<NEOPIXEL,6>(leds, NUM_LEDS);
 }
 
 void loop() { 
