@@ -224,7 +224,7 @@ public:
 
 		// Setup the pixel controller and load/scale the first byte 
 		PixelController<RGB_ORDER> pixels(data, scale, true, advance, skip);
-		pixels.stepFirstByteDithering();
+		pixels.preStepFirstByteDithering();
 		b0 = pixels.loadAndScale0();
 		
 		// pull the dithering/adjustment values out of the pixels object for direct asm access
