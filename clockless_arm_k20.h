@@ -90,8 +90,9 @@ public:
 
 		// Setup the pixel controller and load/scale the first byte 
 		PixelController<RGB_ORDER> pixels(data, scale, true, ADVANCE, SKIP);
+		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
-
+		
 	    // Get access to the clock 
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;

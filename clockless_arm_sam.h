@@ -169,8 +169,9 @@ public:
 
 		// Setup the pixel controller and load/scale the first byte 
 		PixelController<RGB_ORDER> pixels(data, scale, true, ADVANCE, SKIP);
+		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
-
+		
 		// Setup and start the clock
 		register volatile uint32_t *CTPTR asm("r6")= &SysTick->CTRL; FORCE_REFERENCE(CTPTR);
 		_LOAD = TOTAL;

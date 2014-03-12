@@ -139,8 +139,6 @@ struct PixelController {
                         d[i] = scale8(Q, e[i]);
                         if(e[i]) e[i]--;
                 }
-
-                d[0] = e[0] - d[0];
         }
 
         // toggle dithering enable
@@ -159,6 +157,11 @@ struct PixelController {
                 d[0] = e[0] - d[0];
                 d[1] = e[1] - d[1];
                 d[2] = e[2] - d[2];
+        }
+
+        // Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately
+        __attribute__((always_inline)) inline void preStepFirstByteDithering() { 
+            d[RO(0)] = e[RO(0)] - d[RO(0)];
         }
 
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { return pc.mData[RO(SLOT)]; }
