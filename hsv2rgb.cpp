@@ -337,7 +337,8 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 }
                 if( Y2 ) {
                     r = K171 + third;
-                    uint8_t twothirds = (third << 1);
+                    //uint8_t twothirds = (third << 1);
+                    uint8_t twothirds = scale8( offset8, ((256 * 2) / 3));
                     g = K85 + twothirds;
                     b = 0;
                     FORCE_REFERENCE(b);
@@ -350,7 +351,8 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 // 010
                 //case 2: // Y -> G
                 if( Y1 ) {
-                    uint8_t twothirds = (third << 1);
+                    //uint8_t twothirds = (third << 1);
+                    uint8_t twothirds = scale8( offset8, ((256 * 2) / 3));
                     r = K171 - twothirds;
                     g = K171 + third;
                     b = 0;
@@ -381,7 +383,8 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 //case 4: // A -> B
                 r = 0;
                 FORCE_REFERENCE(r);
-                uint8_t twothirds = (third << 1);
+                //uint8_t twothirds = (third << 1);
+                uint8_t twothirds = scale8( offset8, ((256 * 2) / 3));
                 g = K171 - twothirds;
                 b = K85  + twothirds;
 
