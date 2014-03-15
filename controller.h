@@ -27,9 +27,21 @@
 /// to methods, make them references to this type, keeps your code saner.  However, most people won't be seeing/using these objects
 /// directly at all
 class CLEDController { 
+protected:
     CRGB m_ColorCorrection;
     CRGB m_ColorTemperature;
 
+    // set all the leds on the controller to a given color
+    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
+
+    // note that the uint8_ts will be in the order that you want them sent out to the device. 
+    // nLeds is the number of RGB leds being written to
+    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
+
+#ifdef SUPPORT_ARGB
+    // as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
+    virtual void show(const struct CARGB *data, int nLeds, CRGB scale) = 0;
+#endif
 public:
     CLEDController() : m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature) {}
 
@@ -42,38 +54,57 @@ public:
 	// clear out/zero out the given number of leds.
 	virtual void clearLeds(int nLeds) = 0;
 
-	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) = 0;
-
-	// note that the uint8_ts will be in the order that you want them sent out to the device. 
-	// nLeds is the number of RGB leds being written to
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale = CRGB::White) = 0;
-
-#ifdef SUPPORT_ARGB
-	// as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
-	virtual void show(const struct CARGB *data, int nLeds, CRGB scale = CRGB::White) = 0;
-#endif
-	
 	// is the controller ready to write data out
 	virtual bool ready() { return true; }
 
 	// wait until the controller is ready to write data out 
 	virtual void wait() { return; }
 
-    virtual CLEDController & setCorrection(CRGB correction) { m_ColorCorrection = correction; return *this; }
-    virtual CLEDController & setCorrection(LEDColorCorrection correction) { m_ColorCorrection = correction; return *this; }
-    virtual CRGB getCorrection() { return m_ColorCorrection; }
+    // show function w/integer brightness, will scale for color correction and temperature
+    void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
+        show(data, nLeds, getAdjustment(brightness));
+    }
 
-    virtual CLEDController & setTemperature(CRGB temperature) { m_ColorTemperature = temperature; return *this; }
-    virtual CLEDController & setTemperature(ColorTemperature temperature) { m_ColorTemperature = temperature; return *this; }
-    virtual CRGB getTemperature() { return m_ColorTemperature; }
+    // show function w/integer brightness, will scale for color correction and temperature
+    void showColor(const struct CRGB &data, int nLeds, uint8_t brightness) {
+        showColor(data, nLeds, getAdjustment(brightness));
+    }
 
-    virtual CRGB getAdjustment(CRGB scale) { 
+ #ifdef SUPPORT_ARGB
+    // as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
+    void show(const struct CARGB *data, int nLeds, uint8_t brightness) {
+        show(data, nLeds, getAdjustment(brightness))
+    }
+#endif
+   
+    CLEDController & setCorrection(CRGB correction) { m_ColorCorrection = correction; return *this; }
+    CLEDController & setCorrection(LEDColorCorrection correction) { m_ColorCorrection = correction; return *this; }
+    CRGB getCorrection() { return m_ColorCorrection; }
+
+    CLEDController & setTemperature(CRGB temperature) { m_ColorTemperature = temperature; return *this; }
+    CLEDController & setTemperature(ColorTemperature temperature) { m_ColorTemperature = temperature; return *this; }
+    CRGB getTemperature() { return m_ColorTemperature; }
+
+    CRGB getAdjustment(uint8_t scale) { 
         // if(1) return scale;
-        uint32_t r = ((uint32_t)m_ColorCorrection.r * (uint32_t)m_ColorTemperature.r * (uint32_t)scale.r) / (uint32_t)0x10000L;
-        uint32_t g = ((uint32_t)m_ColorCorrection.g * (uint32_t)m_ColorTemperature.g * (uint32_t)scale.g) / (uint32_t)0x10000L;
-        uint32_t b = ((uint32_t)m_ColorCorrection.b * (uint32_t)m_ColorTemperature.b * (uint32_t)scale.b) / (uint32_t)0x10000L;
+        uint32_t r = 0;
+        uint32_t g = 0;
+        uint32_t b = 0;
 
+        if(m_ColorCorrection.r > 0 && m_ColorTemperature.r > 0 && scale > 0) { 
+            r = ((uint32_t)m_ColorCorrection.r+1) * ((uint32_t)m_ColorTemperature.r+1) * scale;
+            r /= 0x10000L;
+        }
+        if(m_ColorCorrection.g > 0 && m_ColorTemperature.g > 0 && scale > 0) { 
+            g = ((uint32_t)m_ColorCorrection.g+1) * ((uint32_t)m_ColorTemperature.g+1) * scale;
+            g /= 0x10000L;
+        }
+
+        if(m_ColorCorrection.b > 0 && m_ColorTemperature.b >  0 && scale > 0) { 
+            b = ((uint32_t)m_ColorCorrection.b+1) * ((uint32_t)m_ColorTemperature.b+1) * scale;
+            b /= 0x10000L;
+        }
+        
         // static int done = 0;
         // if(!done) { 
         //     done = 1;

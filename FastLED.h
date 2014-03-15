@@ -54,7 +54,7 @@ class CFastLED {
 
 	CControllerInfo	m_Controllers[NUM_CONTROLLERS];
 	int m_nControllers;
-	CRGB m_Scale;
+	uint8_t m_Scale;
 
 public:
 	CFastLED();
@@ -155,12 +155,11 @@ public:
 	}
 #endif
 
-	void setBrightness(CRGB  scale) { m_Scale = scale; }
-	void setBrightness(uint8_t scale) { m_Scale = CRGB(scale,scale,scale); }
-	uint8_t getBrightness() { return m_Scale.raw[0]; }
+	void setBrightness(uint8_t scale) { m_Scale = scale; }
+	uint8_t getBrightness() { return m_Scale; }
 
 	/// Update all our controllers with the current led colors, using the passed in brightness
-	void show(CRGB scale);
+	void show(uint8_t scale);
 
 	/// Update all our controllers with the current led colors
 	void show() { show(m_Scale); }
@@ -169,7 +168,7 @@ public:
 
 	void clearData();
 
-	void showColor(const struct CRGB & color, CRGB scale);
+	void showColor(const struct CRGB & color, uint8_t scale);
 
 	void showColor(const struct CRGB & color) { showColor(color, m_Scale); }
 

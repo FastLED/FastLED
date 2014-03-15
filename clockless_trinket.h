@@ -73,16 +73,16 @@ public:
 	}
 
 	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) {
+	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		showRGBInternal_AdjTime(0, false, nLeds, scale, (const byte*)&data);
 	}
 
-	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
+	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) { 
 		showRGBInternal_AdjTime(0, true, nLeds, scale, (const byte*)rgbdata);
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
+	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) { 
 		showRGBInternal_AdjTime(1, true, nLeds, scale, (const byte*)rgbdata);
 	}
 #endif

@@ -34,7 +34,7 @@ public:
 	}
 
 	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale = CRGB::White) {
+	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(TOTAL);
@@ -50,7 +50,7 @@ public:
 		mWait.mark();
 	}
 
-	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
+	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) { 
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(TOTAL);
@@ -72,7 +72,7 @@ public:
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale = CRGB::White) { 
+	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) { 
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(TOTAL);

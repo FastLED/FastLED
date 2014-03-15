@@ -46,23 +46,21 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
-void CFastLED::show(CRGB scale) { 
+void CFastLED::show(uint8_t scale) { 
 	for(int i  = 0; i < m_nControllers; i++) { 
 		if(m_Controllers[i].pLedController != NULL) { 
 			m_Controllers[i].pLedController->show(m_Controllers[i].pLedData + m_Controllers[i].nOffset, 
-												  m_Controllers[i].nLeds, 
-												  m_Controllers[i].pLedController->getAdjustment(scale));
+												  m_Controllers[i].nLeds, scale);
 		} else {
 			return;
 		}
 	}
 }
 
-void CFastLED::showColor(const struct CRGB & color, CRGB scale) { 
+void CFastLED::showColor(const struct CRGB & color, uint8_t scale) { 
 	for(int i  = 0; i < m_nControllers; i++) { 
 		if(m_Controllers[i].pLedController != NULL) { 
-			m_Controllers[i].pLedController->showColor(color, m_Controllers[i].nLeds, 
-													   m_Controllers[i].pLedController->getAdjustment(scale));
+			m_Controllers[i].pLedController->showColor(color, m_Controllers[i].nLeds, scale);
 		} else { 
 			return;
 		}
