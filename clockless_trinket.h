@@ -68,34 +68,32 @@ public:
 	}
 
 	virtual void clearLeds(int nLeds) {
-		static byte zeros[3] = {0,0,0};
-		showRGBInternal_AdjTime(0, false, nLeds, CRGB(0,0,0), zeros);
+		static CRGB zeros(0,0,0);
+		showRGBInternal_AdjTime(PixelController<RGB_ORDER>(zeros, nLeds, zeros, getDither()));
 	}
 
 	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		showRGBInternal_AdjTime(0, false, nLeds, scale, (const byte*)&data);
+	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
+		showRGBInternal_AdjTime(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) { 
-		showRGBInternal_AdjTime(0, true, nLeds, scale, (const byte*)rgbdata);
+		showRGBInternal_AdjTime(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) { 
-		showRGBInternal_AdjTime(1, true, nLeds, scale, (const byte*)rgbdata);
+		showRGBInternal_AdjTime(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
 	}
 #endif
 
-	void __attribute__ ((noinline)) showRGBInternal_AdjTime(int skip, bool advance, int nLeds, CRGB  scale,  const byte *rgbdata) {
+	void __attribute__ ((noinline)) showRGBInternal_AdjTime(PixelController<RGB_ORDER> pixels) {
 		mWait.wait();
 		cli();
-
-		showRGBInternal(skip, advance, nLeds, scale, rgbdata);
-
+		showRGBInternal(pixels);
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)nLeds * 24 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS((long)pixels.mLen * 24 * (T1 + T2 + T3));
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -204,8 +202,11 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	static void __attribute__ ((noinline)) showRGBInternal(int skip, bool advance, int nLeds, CRGB & scale,  const byte *rgbdata) {
-		byte *data = (byte*)rgbdata;
+	static void __attribute__ ((noinline)) showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+		register byte *data = (byte*)pixels.mData;
+		uint16_t advanceBy = pixels.advanceBy();
+		uint16_t count = pixels.mLen;
+
 		data_t mask = FastPin<DATA_PIN>::mask();
 		data_ptr_t port = FastPin<DATA_PIN>::port();
 		// register uint8_t *end = data + nLeds; 
@@ -213,24 +214,20 @@ public:
 		data_t lo = *port & ~mask;
 		*port = lo;
 
-		uint16_t count = nLeds;
-		uint8_t scale_base = 0;
-		uint16_t advanceBy = advance ? (skip+3) : 0;
-		// uint8_t dadv = DADVANCE;
-
 		uint8_t b0 = 0;
 		uint8_t b1 = 0;
 		uint8_t b2 = 0;
 
 		// Setup the pixel controller and load/scale the first byte 
-		PixelController<RGB_ORDER> pixels(data, scale, true, advance, skip);
 		pixels.preStepFirstByteDithering();
 		b0 = pixels.loadAndScale0();
 		
 		// pull the dithering/adjustment values out of the pixels object for direct asm access
-		uint8_t s0 = scale.raw[RO(0)];
-		uint8_t s1 = scale.raw[RO(1)];
-		uint8_t s2 = scale.raw[RO(2)];
+		uint8_t scale_base = 0;
+
+		uint8_t s0 = pixels.mScale.raw[RO(0)];
+		uint8_t s1 = pixels.mScale.raw[RO(1)];
+		uint8_t s2 = pixels.mScale.raw[RO(2)];
 		uint8_t d0 = pixels.d[RO(0)];
 		uint8_t d1 = pixels.d[RO(1)];
 		uint8_t d2 = pixels.d[RO(2)];
@@ -245,9 +242,11 @@ public:
 			{
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
+				// LOOP;
 				ADJDITHER2(d0,e0);
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
+				CLC1;
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
 				// to allow things to line back up.
@@ -258,7 +257,7 @@ public:
 				// we're cycling back around and doing the above for byte 0.
 #if TRINKET_SCALE
 				// Inline scaling - RGB ordering
-				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(3)	LO1	PRESCALEA2(d1)	D3(2)	
+				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2)	
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d1)	D2(3)	LO1	SCALE12(b1,0)	D3(2)		
 				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR14(b1,2)		D2(4)	LO1 SCALE12(b1,3)	D3(2)			
@@ -272,7 +271,7 @@ public:
 					case 2: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
 					case 1: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
 				}	
-				HI1 D1(1) QLO2(b1, 7) LDSCL4(b2,O2) 	D2(3)	LO1	PRESCALEA2(d2)	D3(2)	
+				HI1 D1(1) QLO2(b1, 7) LDSCL4(b2,O2) 	D2(4)	LO1	PRESCALEA2(d2)	D3(2)	
 				HI1	D1(1) QLO2(b1, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b2,0)	D3(2)		
 				HI1 D1(1) QLO2(b1, 5) RORSC24(b2,1) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
 				HI1 D1(1) QLO2(b1, 4) SCROR24(b2,2)		D2(4)	LO1 SCALE22(b2,3)	D3(2)	
@@ -286,7 +285,7 @@ public:
 					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
 					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
 				}	
-				HI1 D1(1) QLO2(b2, 7) LDSCL4(b0,O0) 	D2(3)	LO1	PRESCALEA2(d0)	D3(2)	
+				HI1 D1(1) QLO2(b2, 7) LDSCL4(b0,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)	
 				HI1	D1(1) QLO2(b2, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b0,0)	D3(2)		
 				HI1 D1(1) QLO2(b2, 5) RORSC04(b0,1) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
 				HI1 D1(1) QLO2(b2, 4) SCROR04(b0,2)		D2(4)	LO1 SCALE02(b0,3)	D3(2)	

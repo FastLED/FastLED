@@ -14,7 +14,7 @@ uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]
 CFastLED::CFastLED() { 
 	// clear out the array of led controllers
 	m_nControllers = NUM_CONTROLLERS;
-	m_Scale = CRGB::White;
+	m_Scale = 255;
 	memset8(m_Controllers, 0, m_nControllers * sizeof(CControllerInfo));
 }
 

@@ -53,18 +53,18 @@ public:
 	}
 
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data.raw, nLeds * 3, scale, false);
+		mSPI.template writePixels<LPD8806_ADJUST, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
 		// TODO rgb-ize scale
-		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 3, scale);
+		mSPI.template writePixels<LPD8806_ADJUST, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *data, int nLeds, uint8_t scale) {
 		checkClear(nLeds);
-		mSPI.template writeBytes3<LPD8806_ADJUST, RGB_ORDER>((byte*)data, nLeds * 4, scale, true, 1);
+		mSPI.template writePixels<LPD8806_ADJUST, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 	}
 #endif
 };
@@ -97,20 +97,20 @@ public:
 	
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mWaitDelay.wait();
-		mSPI.template writeBytes3<RGB_ORDER>((byte*)data.raw, nLeds * 3, scale, false);
+		mSPI.template writePixels<RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 		mWaitDelay.mark();
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
 		mWaitDelay.wait();
-		mSPI.template writeBytes3<RGB_ORDER>((byte*)data, nLeds * 3, scale);
+		mSPI.template writePixels<RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 		mWaitDelay.mark();
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
 		mWaitDelay.wait();
-		mSPI.template writeBytes3<RGB_ORDER>((byte*)data, nLeds * 4, scale, true, 1);
+		mSPI.template writePixels<RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 		mWaitDelay.mark();
 	}
 #endif
@@ -146,7 +146,7 @@ public:
 	}
 	
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data.raw, scale, true, false, 0);
+		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
 
 		mSPI.select();
 
@@ -162,7 +162,7 @@ public:
 	}
 
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels((byte*)data, scale, true, true, 0);
+		PixelController<RGB_ORDER> pixels(data, scale, getDither());
 
 		mSPI.select();
 
@@ -179,7 +179,7 @@ public:
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, scale, true, true, 1);
+		PixelController<RGB_ORDER> pixels(data, scale, getDither());
 
 		mSPI.select();
 
@@ -238,7 +238,7 @@ public:
 	}
 
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data.raw, nLeds * 3, scale, false);
+		mSPI.template writePixels<FLAG_START_BIT, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 		writeHeader();
 	}
 
@@ -246,7 +246,7 @@ public:
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		// writeHeader();
-		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 3, scale);
+		mSPI.template writePixels<FLAG_START_BIT, RGB_ORDER>( PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 		writeHeader();
 	}
 
@@ -258,7 +258,7 @@ public:
 
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
-		mSPI.template writeBytes3<FLAG_START_BIT, RGB_ORDER>((byte*)data, nLeds * 4, scale, true, 1);
+		mSPI.template writePixels<FLAG_START_BIT, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 	}
 #endif
 };

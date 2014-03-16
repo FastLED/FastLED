@@ -286,17 +286,14 @@ public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		// Setup the pixel controller 
-		PixelController<RGB_ORDER> pixels(data, scale, true, advance, skip);
-
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> & pixels) { 
 		select();
+		int len = pixels.mLen;
 
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		// If interrupts or other things may be generating output while we're working on things, then we need
 		// to use this block
-		uint8_t *end = data + len;
-		while(data != end) { 
+		while(pixels.has(1)) { 
 			if(FLAGS & FLAG_START_BIT) { 
 				writeBit<0>(1);
 			}
@@ -305,7 +302,6 @@ public:
 			writeByte(D::adjust(pixels.loadAndScale2()));
 			pixels.advanceData();
 			pixels.stepDithering();
-			data += (skip+3);
 		}
 #else
 		// If we can guaruntee that no one else will be writing data while we are running (namely, changing the values of the PORT/PDOR pins)
@@ -320,9 +316,8 @@ public:
 			register data_t datalo = FastPin<DATA_PIN>::loval();
 			register clock_t clockhi = FastPin<CLOCK_PIN>::hival();
 			register clock_t clocklo = FastPin<CLOCK_PIN>::loval();
-			uint8_t *end = data + len;
-
-			while(data != end) { 
+			
+			while(pixels.has(1)) { 
 				if(FLAGS & FLAG_START_BIT) { 
 					writeBit<0>(1, clockpin, datapin, datahi, datalo, clockhi, clocklo);
 				}
@@ -331,7 +326,6 @@ public:
 				writeByte(D::adjust(pixels.loadAndScale2()), clockpin, datapin, datahi, datalo, clockhi, clocklo);
 				pixels.advanceData();
 				pixels.stepDithering();
-				data += (skip+3);
 			}
 
 		} else {
@@ -341,9 +335,7 @@ public:
 			register data_t datahi_clocklo = FastPin<DATA_PIN>::hival() & ~FastPin<CLOCK_PIN>::mask();
 			register data_t datalo_clocklo = FastPin<DATA_PIN>::loval() & ~FastPin<CLOCK_PIN>::mask();
 			
-			uint8_t *end = data + len;
-
-			while(data != end) { 
+			while(pixels.has(1)) { 
 				if(FLAGS & FLAG_START_BIT) { 
 					writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 				}
@@ -352,7 +344,6 @@ public:
 				writeByte(D::adjust(pixels.loadAndScale2()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
 				pixels.advanceData();
 				pixels.stepDithering();
-				data += (skip+3);
 			}
 		}	
 #endif
@@ -360,18 +351,18 @@ public:
 		release();
 	}
 
-	// template instantiations for writeBytes 3
-	template <uint8_t FLAGS, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<FLAGS, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
+	// template instantiations for writePixels
+	template <uint8_t FLAGS, EOrder RGB_ORDER> __attribute__((always_inline)) inline void writePixels(PixelController<RGB_ORDER> & pixels) {
+		writePixels<FLAGS, DATA_NOP, RGB_ORDER>(pixels); 
 	}
-	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<0, D, RGB_ORDER>(data, len, scale, advance, skip); 
+	template <class D, EOrder RGB_ORDER> __attribute__((always_inline)) inline void writePixels(PixelController<RGB_ORDER> & pixels) {
+		writePixels<0, D, RGB_ORDER>(pixels);
 	}
-	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
+	template <EOrder RGB_ORDER> __attribute__((always_inline)) inline void writePixels(PixelController<RGB_ORDER> & pixels) {
+		writePixels<0, DATA_NOP, RGB_ORDER>(pixels);
 	}
-	void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<0, DATA_NOP, RGB>(data, len, scale, advance, skip); 
+	__attribute__((always_inline)) inline void writePixels(PixelController<RGB> & pixels) {
+		writePixels<0, DATA_NOP, RGB>(pixels);
 	}
 };
 

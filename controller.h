@@ -14,6 +14,10 @@
 
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
+enum EDitherMode {
+    DISABLE = 0x00, 
+    BINARY_DITHER = 0x01
+};
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
@@ -30,6 +34,7 @@ class CLEDController {
 protected:
     CRGB m_ColorCorrection;
     CRGB m_ColorTemperature;
+    EDitherMode m_DitherMode;
 
     // set all the leds on the controller to a given color
     virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
@@ -77,6 +82,9 @@ public:
     }
 #endif
    
+    inline CLEDController & setDither(EDitherMode = BINARY_DITHER) { m_DitherMode = BINARY_DITHER; return *this; }
+    inline EDitherMode getDither() { return m_DitherMode; }
+
     CLEDController & setCorrection(CRGB correction) { m_ColorCorrection = correction; return *this; }
     CLEDController & setCorrection(LEDColorCorrection correction) { m_ColorCorrection = correction; return *this; }
     CRGB getCorrection() { return m_ColorCorrection; }
@@ -136,19 +144,50 @@ struct PixelController {
         uint8_t d[3];
         uint8_t e[3];
         const uint8_t *mData; 
-        CRGB & mScale;
+        CRGB mScale;
         uint8_t mAdvance;
+        int mLen;
 
-        PixelController(const uint8_t *d, CRGB & s, bool dodithering, bool doadvance=0, uint8_t skip=0) : mData(d), mScale(s) {
-                enable_dithering(dodithering);
-
-                mData += skip;
-
-                mAdvance = 0;
-                if(doadvance) { mAdvance = 3 + skip; }
+        PixelController(const PixelController & other) {
+            d[0] = other.d[0];
+            d[1] = other.d[1];
+            d[2] = other.d[2];
+            e[0] = other.e[0];
+            e[1] = other.e[1];
+            e[2] = other.e[2];
+            mData = other.mData;
+            mScale = other.mScale;
+            mAdvance = other.mAdvance;
+            mLen = other.mLen;
         }
 
-        void init_dithering() {
+        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mScale(s), mLen(len) {
+            enable_dithering(dither);
+            mAdvance = 3;
+        }
+
+        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mScale(s), mLen(len) {
+            enable_dithering(dither);
+            mAdvance = 0;
+        }
+
+#ifdef SUPPORT_ARGB
+        PixelController(const CARGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mScale(s), mLen(len) {
+            enable_dithering(dither);
+            // skip the A in CARGB            
+            mData += 1;
+            mAdvance = 0;
+        }
+
+        PixelController(const CARGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mScale(s), mLen(len) {
+            enable_dithering(dither);
+            // skip the A in CARGB
+            mData += 1;
+            mAdvance = 4; 
+        }
+#endif
+
+        void init_binary_dithering() {
                 static byte R = 0;
                 R++;
 
@@ -172,14 +211,24 @@ struct PixelController {
                 }
         }
 
+        // Do we have n pixels left to process?
+        __attribute__((always_inline)) inline bool has(int n) { 
+            return mLen >= n;
+        }
+        
         // toggle dithering enable
-        void enable_dithering(bool enable) {
-                if(enable) { init_dithering(); }
-                else { d[0]=d[1]=d[2]=e[0]=e[1]=e[2]=0; }
+        void enable_dithering(EDitherMode dither) {
+            switch(dither) {
+                case BINARY_DITHER: init_binary_dithering(); break;
+                default: d[0]=d[1]=d[2]=e[0]=e[1]=e[2]=0; break;
+            }
         }
 
-        // advance the data pointer forward
-         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; }
+        // get the amount to advance the pointer by 
+        __attribute__((always_inline)) inline int advanceBy() { return mAdvance; }
+        
+        // advance the data pointer forward, adjust position counter
+         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; mLen--;}
 
         // step the dithering forward 
          __attribute__((always_inline)) inline void stepDithering() {

@@ -291,18 +291,15 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> & pixels) {
 		// setSPIRate();
 		select();
-		uint8_t *end = data + len;
+		int len = pixels.mLen;
 
 		// Setup the pixel controller 
-		PixelController<RGB_ORDER> pixels(data, scale, true, advance, skip);
-
 		if((FLAGS & FLAG_START_BIT) == 0) {
 			//If no start bit stupiditiy, write out as many 16-bit blocks as we can
-			uint8_t *first_end = end - (len % ((3+skip)*2));
-			while(data != first_end) {
+			while(pixels.has(2)) {
 				// Load and write out the first two bytes
 				if(WM == NONE) { wait1(); }
 				Write<CM, WM, NOTLAST>::writeWord(D::adjust(pixels.loadAndScale0()) << 8 | D::adjust(pixels.loadAndScale1()));
@@ -315,11 +312,9 @@ public:
 				Write<CM, WM, NOTLAST>::writeWord(D::adjust(pixels.loadAndScale1()) << 8 | D::adjust(pixels.loadAndScale2()));
 				pixels.stepDithering();
 				pixels.advanceData();
-
-				data += ((3+skip)*2);			
 			}
 
-			if(data != end) { 
+			if(pixels.has(1)) { 
 				if(WM == NONE) { wait1(); }
 				// write out the rest as alternating 16/8-bit blocks (likely to be just one)
 				Write<CM, WM, NOTLAST>::writeWord(D::adjust(pixels.loadAndScale0()) << 8 | D::adjust(pixels.loadAndScale1()));
@@ -335,13 +330,12 @@ public:
 			uint32_t ctar1 = (ctar1_save & (~SPI_CTAR_FMSZ(15))) | SPI_CTAR_FMSZ(8);
 			update_ctar1(ctar1);
 
-			while(data != end) { 
+			while(pixels.has(1)) { 
 				writeWord( 0x100 | D::adjust(pixels.loadAndScale0()));
 				writeByte(D::adjust(pixels.loadAndScale1()));
 				writeByte(D::adjust(pixels.loadAndScale2()));
 				pixels.advanceData();
 				pixels.stepDithering();
-				data += (3+skip);
 			}
 			D::postBlock(len);
 			waitFully();
@@ -352,18 +346,18 @@ public:
 		release();
 	}
 
-	// template instantiations for writeBytes 3
-	template <uint8_t FLAGS, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<FLAGS, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
+	// template instantiations for writePixels
+	template <uint8_t FLAGS, EOrder RGB_ORDER> __attribute__((always_inline)) inline void writePixels(PixelController<RGB_ORDER> & pixels) {
+		writePixels<FLAGS, DATA_NOP, RGB_ORDER>(pixels); 
 	}
-	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<0, D, RGB_ORDER>(data, len, scale, advance, skip); 
+	template <class D, EOrder RGB_ORDER> __attribute__((always_inline)) inline void writePixels(PixelController<RGB_ORDER> & pixels) {
+		writePixels<0, D, RGB_ORDER>(pixels);
 	}
-	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
+	template <EOrder RGB_ORDER> __attribute__((always_inline)) inline void writePixels(PixelController<RGB_ORDER> & pixels) {
+		writePixels<0, DATA_NOP, RGB_ORDER>(pixels);
 	}
-	void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<0, DATA_NOP, RGB>(data, len, scale, advance, skip); 
+	__attribute__((always_inline)) inline void writePixels(PixelController<RGB> & pixels) {
+		writePixels<0, DATA_NOP, RGB>(pixels);
 	}
 };
 #endif

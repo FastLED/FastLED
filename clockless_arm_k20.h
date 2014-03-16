@@ -24,11 +24,11 @@ public:
 	}
 
 	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
+	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
 		mWait.wait();
 		cli();
 
-		showRGBInternal<0, false>(nLeds, scale, (const byte*)&data);
+		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
@@ -41,8 +41,8 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal<0, true>(nLeds, scale, (const byte*)rgbdata);
-
+		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
+		
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
 		MS_COUNTER += (microsTaken / 1000);
@@ -55,7 +55,8 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal<1, true>(nLeds, scale, (const byte*)rgbdata);
+		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
+		
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (T1 + T2 + T3));
@@ -79,15 +80,13 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	template<int SKIP, bool ADVANCE> static void showRGBInternal(register int nLeds, register CRGB scale, register const byte *rgbdata) {
-		register byte *data = (byte*)rgbdata;
+	static void showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		register data_ptr_t port = FastPin<DATA_PIN>::port();
 		register data_t hi = *port | FastPin<DATA_PIN>::mask();;
 		register data_t lo = *port & ~FastPin<DATA_PIN>::mask();;
 		*port = lo;
 
 		// Setup the pixel controller and load/scale the first byte 
-		PixelController<RGB_ORDER> pixels(data, scale, true, ADVANCE, SKIP);
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 		
@@ -97,7 +96,7 @@ public:
 		ARM_DWT_CYCCNT = 0;
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
-		while(nLeds-- > 0) { 			
+		while(pixels.has(1)) { 			
 			pixels.stepDithering();
 
 			// Write first byte, read next byte
