@@ -35,7 +35,7 @@ void setup() {
       // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<NEOPIXEL, DATA_PIN, RGB>(leds, NUM_LEDS);
+      // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2811_400, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<GW6205, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<GW6205_400, DATA_PIN, RGB>(leds, NUM_LEDS);
