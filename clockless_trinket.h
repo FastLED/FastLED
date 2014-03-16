@@ -189,7 +189,7 @@ public:
 #define DONE asm __volatile__("2:" ASM_VARS );
 
 // 2 cycles - increment the data pointer
-#define IDATA2 asm __volatile__("add %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]"  ASM_VARS );
+#define IDATA2 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__"  ASM_VARS );
 // 2 cycles - decrement the counter
 #define DCOUNT2 asm __volatile__("sbiw %[count], 1" ASM_VARS );
 // 2 cycles - jump to the beginning of the loop
@@ -203,9 +203,7 @@ public:
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
 	static void __attribute__ ((noinline)) showRGBInternal(PixelController<RGB_ORDER> & pixels) {
-		register byte *data = (byte*)pixels.mData;
-		uint16_t advanceBy = pixels.advanceBy();
-		uint16_t count = pixels.mLen;
+		uint8_t *data = (uint8_t*)pixels.mData;
 
 		data_t mask = FastPin<DATA_PIN>::mask();
 		data_ptr_t port = FastPin<DATA_PIN>::port();
@@ -225,6 +223,9 @@ public:
 		// pull the dithering/adjustment values out of the pixels object for direct asm access
 		uint8_t scale_base = 0;
 
+		uint8_t advanceBy = pixels.advanceBy();
+		uint16_t count = pixels.mLen;
+
 		uint8_t s0 = pixels.mScale.raw[RO(0)];
 		uint8_t s1 = pixels.mScale.raw[RO(1)];
 		uint8_t s2 = pixels.mScale.raw[RO(2)];
@@ -235,7 +236,7 @@ public:
 		uint8_t e1 = pixels.e[RO(1)];
 		uint8_t e2 = pixels.e[RO(2)];
 		
-		register uint8_t loopvar=0;
+		uint8_t loopvar=0;
 
 		{
 			while(count--)
