@@ -560,7 +560,7 @@ struct CRGB {
         Yellow=0xFFFF00,
         YellowGreen=0x9ACD32
     } HTMLColorCode;
-    static uint32_t Squant;
+    // static uint32_t Squant;
 };
 
 

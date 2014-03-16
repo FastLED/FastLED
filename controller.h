@@ -14,10 +14,9 @@
 
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
-enum EDitherMode {
-    DISABLE = 0x00, 
-    BINARY_DITHER = 0x01
-};
+#define DISABLE_DITHER 0x00
+#define BINARY_DITHER 0x01
+typedef uint8_t EDitherMode;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
@@ -32,9 +31,15 @@ enum EDitherMode {
 /// directly at all
 class CLEDController { 
 protected:
+    friend class CFastLED;
+    const CRGB *m_Data;
+    CLEDController *m_pNext;
     CRGB m_ColorCorrection;
     CRGB m_ColorTemperature;
     EDitherMode m_DitherMode;
+    int m_nLeds;
+    static CLEDController *m_pHead;
+    static CLEDController *m_pTail;
 
     // set all the leds on the controller to a given color
     virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
@@ -48,22 +53,18 @@ protected:
     virtual void show(const struct CARGB *data, int nLeds, CRGB scale) = 0;
 #endif
 public:
-    CLEDController() : m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature) {}
+    CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
+        m_pNext = NULL;
+        if(m_pHead==NULL) { m_pHead = this; }
+        if(m_pTail != NULL) { m_pTail->m_pNext = this; }
+        m_pTail = this;
+    }
 
 	// initialize the LED controller
 	virtual void init() = 0;
 
-	// reset any internal state to a clean point
-	virtual void reset() { init(); } 
-
 	// clear out/zero out the given number of leds.
 	virtual void clearLeds(int nLeds) = 0;
-
-	// is the controller ready to write data out
-	virtual bool ready() { return true; }
-
-	// wait until the controller is ready to write data out 
-	virtual void wait() { return; }
 
     // show function w/integer brightness, will scale for color correction and temperature
     void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
@@ -75,6 +76,19 @@ public:
         showColor(data, nLeds, getAdjustment(brightness));
     }
 
+    // show function using the "attached to this controller" led data
+    void showLeds(uint8_t brightness=255) { 
+        show(m_Data, m_nLeds, getAdjustment(brightness));
+    }
+
+    void showColor(const struct CRGB & data, uint8_t brightness=255) { 
+        showColor(data, m_nLeds, getAdjustment(brightness));
+    }
+
+    // navigating the list of controllers
+    static CLEDController *head() { return m_pHead; }
+    CLEDController *next() { return m_pNext; }
+
  #ifdef SUPPORT_ARGB
     // as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
     void show(const struct CARGB *data, int nLeds, uint8_t brightness) {
@@ -82,8 +96,20 @@ public:
     }
 #endif
    
-    inline CLEDController & setDither(EDitherMode = BINARY_DITHER) { m_DitherMode = BINARY_DITHER; return *this; }
-    inline EDitherMode getDither() { return m_DitherMode; }
+    CLEDController & setLeds(const CRGB *data, int nLeds) { 
+        m_Data = data;
+        m_nLeds = nLeds;
+        return *this;
+    }
+
+    void clearLedData() {
+        if(m_Data) { 
+            memset8((void*)m_Data, 0, sizeof(struct CRGB) * m_nLeds);
+        }
+    }
+
+    inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
+    inline uint8_t getDither() { return m_DitherMode; }
 
     CLEDController & setCorrection(CRGB correction) { m_ColorCorrection = correction; return *this; }
     CLEDController & setCorrection(LEDColorCorrection correction) { m_ColorCorrection = correction; return *this; }
@@ -94,46 +120,23 @@ public:
     CRGB getTemperature() { return m_ColorTemperature; }
 
     CRGB getAdjustment(uint8_t scale) { 
-        // if(1) return scale;
-        uint32_t r = 0;
-        uint32_t g = 0;
-        uint32_t b = 0;
+        // if(1) return CRGB(scale,scale,scale);
+        CRGB adj(0,0,0);
 
-        if(m_ColorCorrection.r > 0 && m_ColorTemperature.r > 0 && scale > 0) { 
-            r = ((uint32_t)m_ColorCorrection.r+1) * ((uint32_t)m_ColorTemperature.r+1) * scale;
-            r /= 0x10000L;
-        }
-        if(m_ColorCorrection.g > 0 && m_ColorTemperature.g > 0 && scale > 0) { 
-            g = ((uint32_t)m_ColorCorrection.g+1) * ((uint32_t)m_ColorTemperature.g+1) * scale;
-            g /= 0x10000L;
+        if(scale > 0) { 
+            for(uint8_t i = 0; i < 3; i++) { 
+                uint8_t cc = m_ColorCorrection.raw[i];
+                uint8_t ct = m_ColorTemperature.raw[i];
+                if(cc > 0 && ct > 0) { 
+                    uint32_t work = (((uint32_t)cc)+1) * (((uint32_t)ct)+1) * scale;
+                    work /= 0x10000L;
+                    adj.raw[i] = work & 0xFF;
+                }
+            }
         }
 
-        if(m_ColorCorrection.b > 0 && m_ColorTemperature.b >  0 && scale > 0) { 
-            b = ((uint32_t)m_ColorCorrection.b+1) * ((uint32_t)m_ColorTemperature.b+1) * scale;
-            b /= 0x10000L;
-        }
-        
-        // static int done = 0;
-        // if(!done) { 
-        //     done = 1;
-        //     Serial.print("Correction: "); 
-        //     Serial.print(m_ColorCorrection.r); Serial.print(" ");
-        //     Serial.print(m_ColorCorrection.g); Serial.print(" ");
-        //     Serial.print(m_ColorCorrection.b); Serial.println(" ");
-        //     Serial.print("Temperature: "); 
-        //     Serial.print(m_ColorTemperature.r); Serial.print(" ");
-        //     Serial.print(m_ColorTemperature.g); Serial.print(" ");
-        //     Serial.print(m_ColorTemperature.b); Serial.println(" ");
-        //     Serial.print("Scale: ");
-        //     Serial.print(scale.r); Serial.print(" ");
-        //     Serial.print(scale.g); Serial.print(" ");
-        //     Serial.print(scale.b); Serial.println(" ");
-        //     Serial.print("Combined: ");
-        //     Serial.print(r); Serial.print(" "); Serial.print(g); Serial.print(" "); Serial.print(b); Serial.println();
-        // }
-        return CRGB(r,g,b);
+        return adj;
     }
-
 };
 
 // Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
@@ -141,12 +144,12 @@ public:
 // centralize 8/12/16 conversions here as well.
 template<EOrder RGB_ORDER>
 struct PixelController {
+        const uint8_t *mData; 
+        int mLen;
         uint8_t d[3];
         uint8_t e[3];
-        const uint8_t *mData; 
         CRGB mScale;
         uint8_t mAdvance;
-        int mLen;
 
         PixelController(const PixelController & other) {
             d[0] = other.d[0];
@@ -161,25 +164,31 @@ struct PixelController {
             mLen = other.mLen;
         }
 
-        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mScale(s), mLen(len) {
+        PixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mScale(s) {
+            enable_dithering(dither);
+            mData += skip;
+            mAdvance = (advance) ? 3+skip : 0;
+        }
+
+        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 3;
         }
 
-        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mScale(s), mLen(len) {
+        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 0;
         }
 
 #ifdef SUPPORT_ARGB
-        PixelController(const CARGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mScale(s), mLen(len) {
+        PixelController(const CARGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mScale(s) {
             enable_dithering(dither);
             // skip the A in CARGB            
             mData += 1;
             mAdvance = 0;
         }
 
-        PixelController(const CARGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mScale(s), mLen(len) {
+        PixelController(const CARGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mScale(s) {
             enable_dithering(dither);
             // skip the A in CARGB
             mData += 1;

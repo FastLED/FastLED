@@ -6,7 +6,7 @@
 // For led chips like Neopixels, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
 // ground, and power), like the LPD8806, define both DATA_PIN and CLOCK_PIN
-#define DATA_PIN 2
+#define DATA_PIN 6
 #define CLOCK_PIN 13
 
 // Define the array of leds
@@ -26,7 +26,7 @@ void loop() {
 		// now that we've shown the leds, reset the i'th led to black
 		leds[i] = CRGB::Black;
 		// Wait a little bit before we loop around and do it again
-		delay(300);
+		delay(30);
 	}
 
 	// Now go in the other direction.  
@@ -38,6 +38,6 @@ void loop() {
 		// now that we've shown the leds, reset the i'th led to black
 		leds[i] = CRGB::Black;
 		// Wait a little bit before we loop around and do it again
-		delay(300);
+		delay(30);
 	}
 }

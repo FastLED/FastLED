@@ -1,6 +1,24 @@
 #ifndef __INC_DELAY_H
 #define __INC_DELAY_H
 
+// Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet
+// this should make sure that chipsets that have 
+template<int WAIT> class CMinWait {
+	uint16_t mLastMicros;
+public:
+	CMinWait() { mLastMicros = 0; }
+
+	void wait() { 
+		uint16_t diff;
+		do {
+			diff = (micros() & 0xFFFF) - mLastMicros;			
+		} while(diff < WAIT);
+	}
+
+	void mark() { mLastMicros = micros() & 0xFFFF; }
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Clock cycle counted delay loop
@@ -85,7 +103,7 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP2;NOP
 // #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
 #if 1 || (F_CPU < 96000000)
 #define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
-#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 1000000L)
+#define CLKS_TO_MICROS(_CLKS) ((_CLKS)) / (F_CPU / 1000000L)
 #else
 #define NS(_NS) ( (_NS * (F_CPU / 2000000L))) / 1000
 #define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 2000000L)

@@ -68,37 +68,38 @@ public:
 	}
 
 	virtual void clearLeds(int nLeds) {
-		static CRGB zeros(0,0,0);
-		showRGBInternal_AdjTime(PixelController<RGB_ORDER>(zeros, nLeds, zeros, getDither()));
+		CRGB zeros(0,0,0); 
+		showAdjTime((uint8_t*)&zeros, nLeds, zeros, false, 0);
 	}
 
 	// set all the leds on the controller to a given color
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-		showRGBInternal_AdjTime(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
+		showAdjTime((uint8_t*)&rgbdata, nLeds, scale, false, 0);
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) { 
-		showRGBInternal_AdjTime(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
+		showAdjTime((uint8_t*)rgbdata, nLeds, scale, true, 0);
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) { 
-		showRGBInternal_AdjTime(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
+		showAdjTime((uint8_t*)rgbdata, nLeds, scale, true, 1);
 	}
 #endif
 
-	void __attribute__ ((noinline)) showRGBInternal_AdjTime(PixelController<RGB_ORDER> pixels) {
+	void showAdjTime(const uint8_t *data, int nLeds, CRGB & scale, bool advance, int skip) { 
 		mWait.wait();
 		cli();
+
+		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither(), advance, skip);
 		showRGBInternal(pixels);
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)pixels.mLen * 24 * (T1 + T2 + T3));
-		MS_COUNTER += (microsTaken / 1000);
+		uint16_t microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+		MS_COUNTER += (microsTaken >> 10);
 		sei();
 		mWait.mark();
 	}
-
 #define USE_ASM_MACROS
 	
 // The variables that our various asm statemetns use.  The same block of variables needs to be declared for
@@ -109,11 +110,11 @@ public:
 				[b0] "+a" (b0),							\
 				[b1] "+a" (b1),							\
 				[b2] "+a" (b2),							\
+				[scale_base] "+a" (scale_base),			\
+				[loopvar] "+a" (loopvar),				\
 				[d0] "+r" (d0),							\
 				[d1] "+r" (d1),							\
-				[d2] "+r" (d2),							\
-				[scale_base] "+a" (scale_base),			\
-				[loopvar] "+a" (loopvar)				\
+				[d2] "+r" (d2)							\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
 				[hi] "r" (hi),							\
@@ -202,11 +203,12 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	static void __attribute__ ((noinline)) showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+	static void __attribute__ ((always_inline))  showRGBInternal(PixelController<RGB_ORDER> & pixels) {
 		uint8_t *data = (uint8_t*)pixels.mData;
-
-		data_t mask = FastPin<DATA_PIN>::mask();
 		data_ptr_t port = FastPin<DATA_PIN>::port();
+		data_t mask = FastPin<DATA_PIN>::mask();
+		uint8_t scale_base = 0;
+
 		// register uint8_t *end = data + nLeds; 
 		data_t hi = *port | mask;
 		data_t lo = *port & ~mask;
@@ -221,7 +223,6 @@ public:
 		b0 = pixels.loadAndScale0();
 		
 		// pull the dithering/adjustment values out of the pixels object for direct asm access
-		uint8_t scale_base = 0;
 
 		uint8_t advanceBy = pixels.advanceBy();
 		uint16_t count = pixels.mLen;
@@ -247,7 +248,7 @@ public:
 				ADJDITHER2(d0,e0);
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
-				CLC1;
+
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
 				// to allow things to line back up.

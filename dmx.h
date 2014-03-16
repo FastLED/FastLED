@@ -11,9 +11,6 @@ public:
 	// initialize the LED controller
 	virtual void init() { DmxSimple.usePin(DATA_PIN); }
 
-	// reset any internal state to a clean point
-	virtual void reset() { init(); } 
-
 	// clear out/zero out the given number of leds.
 	virtual void clearLeds(int nLeds) {
 		int count = min(nLeds * 3, DMX_SIZE);
@@ -48,13 +45,6 @@ public:
 	// as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
 	virtual void show(const struct CARGB *data, int nLeds, uint8_t scale = 255) = 0;
 #endif
-	
-	// is the controller ready to write data out
-	virtual bool ready() { return true; }
-
-	// wait until the controller is ready to write data out 
-	virtual void wait() { return; }
-
 };
 
 #elif defined(FASTSPI_USE_DMX_SERIAL)
@@ -63,9 +53,6 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB> class DMXController : public
 public:
 	// initialize the LED controller
 	virtual void init() { DMXSerial.init(DMXController); }
-
-	// reset any internal state to a clean point
-	virtual void reset() { init(); } 
 
 	// clear out/zero out the given number of leds.
 	virtual void clearLeds(int nLeds) {
@@ -101,13 +88,6 @@ public:
 	// as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
 	virtual void show(const struct CARGB *data, int nLeds, uint8_t scale = 255) = 0;
 #endif
-	
-	// is the controller ready to write data out
-	virtual bool ready() { return true; }
-
-	// wait until the controller is ready to write data out 
-	virtual void wait() { return; }
-	
 };
 
 #endif

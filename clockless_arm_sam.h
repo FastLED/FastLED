@@ -43,7 +43,7 @@ public:
 		showRGBInternal(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (TOTAL));
+		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
@@ -64,7 +64,7 @@ public:
 		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (TOTAL));
+		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
@@ -81,7 +81,7 @@ public:
 		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
 
 		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS((long)nLeds * 8 * (TOTAL));
+		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
