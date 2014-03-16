@@ -286,7 +286,7 @@ public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> & pixels) { 
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) { 
 		select();
 		int len = pixels.mLen;
 
@@ -349,20 +349,6 @@ public:
 #endif
 		D::postBlock(len);
 		release();
-	}
-
-	// template instantiations for writePixels
-	template <uint8_t FLAGS, EOrder RGB_ORDER> __attribute__((always_inline)) inline void writePixels(PixelController<RGB_ORDER> & pixels) {
-		writePixels<FLAGS, DATA_NOP, RGB_ORDER>(pixels); 
-	}
-	template <class D, EOrder RGB_ORDER> __attribute__((always_inline)) inline void writePixels(PixelController<RGB_ORDER> & pixels) {
-		writePixels<0, D, RGB_ORDER>(pixels);
-	}
-	template <EOrder RGB_ORDER> __attribute__((always_inline)) inline void writePixels(PixelController<RGB_ORDER> & pixels) {
-		writePixels<0, DATA_NOP, RGB_ORDER>(pixels);
-	}
-	__attribute__((always_inline)) inline void writePixels(PixelController<RGB> & pixels) {
-		writePixels<0, DATA_NOP, RGB>(pixels);
 	}
 };
 
