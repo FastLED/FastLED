@@ -430,8 +430,31 @@ LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale) 
 {
 #if SCALE8_C == 1
-    return ((int)i * (int)(scale) ) >> 8;
+    return 
+    ((int)i * (int)(scale) ) >> 8;
 #elif SCALE8_AVRASM == 1
+#if defined(LIB8_ATTINY)
+    uint8_t work=0;
+    uint8_t cnt=0x80;
+    asm volatile(
+        "LOOP_%=:                             \n\t"
+        /*"  sbrc %[scale], 0             \n\t"
+        "  add %[work], %[i]            \n\t"
+        "  ror %[work]                  \n\t"
+        "  lsr %[scale]                 \n\t"
+        "  clc                          \n\t"*/
+        "  sbrc %[scale], 0             \n\t"
+        "  add %[work], %[i]            \n\t"
+        "  ror %[work]                  \n\t"
+        "  lsr %[scale]                 \n\t"
+        "  lsr %[cnt]                   \n\t"
+        "brcc LOOP_%="
+        : [work] "+r" (work), [cnt] "+r" (cnt)
+        : [scale] "r" (scale), [i] "r" (i)
+        :
+      );
+    return work;
+#else
     asm volatile(
          /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
          "mul %0, %1          \n\t"
@@ -446,6 +469,7 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
 
     /* Return the result */
     return i;
+#endif
 #else
 #error "No implementation for scale8 available."
 #endif
@@ -459,7 +483,7 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
 //  several additional cycles.
 LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
 {
-#if SCALE8_C == 1
+#if SCALE8_C == 1 || defined(LIB8_ATTINY)
     uint8_t j = (((int)i * (int)scale) >> 8) + (i?1:0);
     // uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
     // uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;

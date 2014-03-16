@@ -120,7 +120,9 @@ public:
     CRGB getTemperature() { return m_ColorTemperature; }
 
     CRGB getAdjustment(uint8_t scale) { 
-        // if(1) return CRGB(scale,scale,scale);
+#if defined(NO_CORRECTION) && (NO_CORRECTION==1)
+        return CRGB(scale,scale,scale);
+#else
         CRGB adj(0,0,0);
 
         if(scale > 0) { 
@@ -136,6 +138,7 @@ public:
         }
 
         return adj;
+#endif
     }
 };
 
@@ -197,6 +200,7 @@ struct PixelController {
 #endif
 
         void init_binary_dithering() {
+#if !defined(NO_DITHERING) || (NO_DITHERING != 1)
                 static byte R = 0;
                 R++;
 
@@ -218,6 +222,7 @@ struct PixelController {
                         d[i] = scale8(Q, e[i]);
                         if(e[i]) e[i]--;
                 }
+#endif
         }
 
         // Do we have n pixels left to process?

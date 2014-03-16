@@ -1,6 +1,9 @@
 #ifndef __INC_FASTSPI_LED2_H
 #define __INC_FASTSPI_LED2_H
 
+// #define NO_CORRECTION 1
+// #define NO_DITHERING 1
+
 #include "controller.h"
 #include "fastpin.h"
 #include "fastspi.h"

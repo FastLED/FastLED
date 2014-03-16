@@ -95,8 +95,10 @@ public:
 		showRGBInternal(pixels);
 
 		// Adjust the timer
+#if !defined(NO_CORRECTION) || (NO_CORRECTION == 0)
 		uint16_t microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
 		MS_COUNTER += (microsTaken >> 10);
+#endif
 		sei();
 		mWait.mark();
 	}
