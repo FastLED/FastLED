@@ -66,3 +66,28 @@ void CFastLED::delay(unsigned long ms) {
 	unsigned long start = millis();
 	while((millis()-start) < ms) { show(); }
 }
+
+void CFastLED::setTemperature(const struct CRGB & temp) {
+	CLEDController *pCur = CLEDController::head();
+	while(pCur) { 
+		pCur->setTemperature(temp);
+		pCur = pCur->next();
+	}
+}
+
+void CFastLED::setCorrection(const struct CRGB & correction) {
+	CLEDController *pCur = CLEDController::head();
+	while(pCur) { 
+		pCur->setCorrection(correction);
+		pCur = pCur->next();
+	}
+}
+
+void CFastLED::setDither(uint8_t ditherMode)  {
+	CLEDController *pCur = CLEDController::head();
+	while(pCur) { 
+		pCur->setDither(ditherMode);
+		pCur = pCur->next();
+	}
+}
+
