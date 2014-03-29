@@ -44,10 +44,10 @@ public:
 	virtual bool isSelected() = 0;
 };
 
-class Pin : public Selectable { 
+class Pin : public Selectable {
+	volatile uint8_t *mPort;
 	uint8_t mPinMask;
 	uint8_t mPin;
-	volatile uint8_t *mPort;
 
 	void _init() { 
 		mPinMask = digitalPinToBitMask(mPin);
