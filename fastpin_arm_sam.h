@@ -28,6 +28,7 @@ public:
 	inline static port_t hival() __attribute__ ((always_inline)) { return _PDOR::r() | _MASK; }
 	inline static port_t loval() __attribute__ ((always_inline)) { return _PDOR::r() & ~_MASK; }
 	inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_PDOR::r(); }
+	inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_PCOR::r(); }
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
@@ -95,6 +96,14 @@ _DEFPIN_DUE(64, 19, B); _DEFPIN_DUE(65, 20, B); _DEFPIN_DUE(66, 15, B); _DEFPIN_
 _DEFPIN_DUE(68, 1, A); _DEFPIN_DUE(69, 0, A); _DEFPIN_DUE(70, 17, A); _DEFPIN_DUE(71, 18, A);
 _DEFPIN_DUE(72, 30, C); _DEFPIN_DUE(73, 21, A); _DEFPIN_DUE(74, 25, A); _DEFPIN_DUE(75, 26, A);
 _DEFPIN_DUE(76, 27, A); _DEFPIN_DUE(77, 28, A); _DEFPIN_DUE(78, 23, B);
+
+// digix pins
+_DEFPIN_DUE(90, 0, B); _DEFPIN_DUE(91, 1, B); _DEFPIN_DUE(92, 2, B); _DEFPIN_DUE(93, 3, B);
+_DEFPIN_DUE(94, 4, B); _DEFPIN_DUE(95, 5, B); _DEFPIN_DUE(96, 6, B); _DEFPIN_DUE(97, 7, B);
+_DEFPIN_DUE(98, 8, B); _DEFPIN_DUE(99, 9, B); _DEFPIN_DUE(100, 5, A); _DEFPIN_DUE(101, 22, B);
+_DEFPIN_DUE(102, 23, B); _DEFPIN_DUE(103, 24, B); _DEFPIN_DUE(104, 27, C); _DEFPIN_DUE(105, 20, C);
+_DEFPIN_DUE(106, 11, C); _DEFPIN_DUE(107, 10, C); _DEFPIN_DUE(108, 21, A); _DEFPIN_DUE(109, 30, C);
+_DEFPIN_DUE(110, 29, B); _DEFPIN_DUE(111, 30, B); _DEFPIN_DUE(112, 31, B); _DEFPIN_DUE(113, 28, B);
 
 #define SPI_DATA 75
 #define SPI_CLOCK 76

@@ -23,6 +23,8 @@
 #include "clockless_arm_k20.h"
 #include "clockless_arm_sam.h"
 #include "clockless2.h"
-#include "block_clockless.h"
+// #include "block_clockless.h"
+#include "clockless_block_arm_sam.h"
+#include "clockless_block_arm_k20.h"
 
 #endif

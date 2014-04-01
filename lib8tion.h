@@ -303,7 +303,7 @@ typedef union {
 LIB8STATIC uint8_t qadd8( uint8_t i, uint8_t j)
 {
 #if QADD8_C == 1
-    int t = i + j;
+    unsigned int t = i + j;
     if( t > 255) t = 255;
     return t;
 #elif QADD8_AVRASM == 1

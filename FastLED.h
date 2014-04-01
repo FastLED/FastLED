@@ -156,7 +156,7 @@ public:
 	template<EBlockChipsets CHIPSET, int NUM_LANES>
 	static CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) {
-			case WS2811_PORTC: return addLeds(new BlockClocklessController<NUM_LANES, NS(350), NS(350), NS(550)>(), data, nLedsOrOffset, nLedsIfOffset);
+			case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, NS(250), NS(550), NS(450)>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 	}
 #endif
