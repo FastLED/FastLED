@@ -7,7 +7,7 @@
 #if defined(__SAM3X8E__)
 
 
-#define TADJUST 3
+#define TADJUST 4
 #define TOTAL ( (T1+TADJUST) + (T2+TADJUST) + (T3+TADJUST) )
 #define T1_MARK (TOTAL - (T1+TADJUST))
 #define T2_MARK (T1_MARK - (T2+TADJUST))
