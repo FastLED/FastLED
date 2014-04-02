@@ -66,30 +66,32 @@ public:
 	}
 #endif
 
-	template<int BITS, int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, PixelController<RGB_ORDER> & pixels, register uint8_t & b)  {
+	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  {
 		for(register uint32_t i = BITS-1; i > 0; i--) { 
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 			FastPin<DATA_PIN>::fastset(port, hi);
-			uint32_t flip_mark = next_mark - ((b&0x80) ? (T3) : (T2+T3));
+			if(b&0x80) { 
+				while((next_mark - ARM_DWT_CYCCNT) > T3);
+				FastPin<DATA_PIN>::fastset(port, lo);
+			} else {
+				while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+1));
+				FastPin<DATA_PIN>::fastset(port, lo);
+			}
 			b <<= 1;
-			while(ARM_DWT_CYCCNT < flip_mark);
-			FastPin<DATA_PIN>::fastset(port, lo);
 		}
 
 		while(ARM_DWT_CYCCNT < next_mark);
 		next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 		FastPin<DATA_PIN>::fastset(port, hi);
-		uint32_t flip_mark = next_mark - ((b&0x80) ? (T3) : (T2+T3));
 
-		// load the next byte in the gap where we would've bit shifted in the past
-		switch(PX) { 
-			case 0: b = pixels.advanceAndLoadAndScale0(); break;
-			case 1: b = pixels.loadAndScale1(); break;
-			case 2: b = pixels.loadAndScale2(); break;
+		if(b&0x80) { 
+			while((next_mark - ARM_DWT_CYCCNT) > T3);
+			FastPin<DATA_PIN>::fastset(port, lo);
+		} else {
+			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+1));
+			FastPin<DATA_PIN>::fastset(port, lo);
 		}
-		while(ARM_DWT_CYCCNT < flip_mark);
-		FastPin<DATA_PIN>::fastset(port, lo);
 	}
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
@@ -114,13 +116,16 @@ public:
 			pixels.stepDithering();
 
 			// Write first byte, read next byte
-			writeBits<8+XTRA0,1>(next_mark, port, hi, lo, pixels, b);
+			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
+			b = pixels.loadAndScale1();
 
 			// Write second byte, read 3rd byte
-			writeBits<8+XTRA0,2>(next_mark, port, hi, lo, pixels, b);
+			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
+			b = pixels.loadAndScale2();
 
 			// Write third byte, read 1st byte of next pixel
-			writeBits<8+XTRA0,0>(next_mark, port, hi, lo, pixels, b);
+			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
+			b = pixels.advanceAndLoadAndScale0();
 		};
 	}
 };
