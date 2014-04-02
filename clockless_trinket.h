@@ -88,10 +88,11 @@ public:
 #endif
 
 	void showAdjTime(const uint8_t *data, int nLeds, CRGB & scale, bool advance, int skip) { 
+		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither(), advance, skip);
+
 		mWait.wait();
 		cli();
 
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither(), advance, skip);
 		showRGBInternal(pixels);
 
 		// Adjust the timer

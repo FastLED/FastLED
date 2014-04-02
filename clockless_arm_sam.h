@@ -35,12 +35,13 @@ public:
 	}
 
 	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
+	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
+		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(TOTAL);
 
-		showRGBInternal(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
+		showRGBInternal(pixels);
 
 		// Adjust the timer
 		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
@@ -52,6 +53,7 @@ public:
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) { 
+		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(TOTAL);
@@ -61,7 +63,7 @@ public:
 		// Serial.print(scale.raw[1]); Serial.print(" ");
 		// Serial.print(scale.raw[2]); Serial.println(" ");
 		// FastPinBB<DATA_PIN>::hi(); delay(1); FastPinBB<DATA_PIN>::lo();
-		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
+		showRGBInternal(pixels);
 
 		// Adjust the timer
 		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
@@ -74,11 +76,12 @@ public:
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) { 
+		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(TOTAL);
 
-		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
+		showRGBInternal(pixels);
 
 		// Adjust the timer
 		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
@@ -208,7 +211,7 @@ public:
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	static void showRGBInternal(PixelController<RGB_ORDER> pixels) {
+	static void showRGBInternal(PixelController<RGB_ORDER> & pixels) {
 		// Serial.print("Going to show "); Serial.print(pixels.mLen); Serial.println(" pixels.");
 
 		register data_ptr_t port asm("r7") = FastPinBB<DATA_PIN>::port(); FORCE_REFERENCE(port);
