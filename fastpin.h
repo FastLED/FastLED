@@ -19,10 +19,10 @@ public:
 };
 
 class Pin : public Selectable { 
-	RwReg mPinMask;
-	uint8_t mPin;
 	volatile RwReg *mPort;
 	volatile RoReg *mInPort;
+	RwReg mPinMask;
+	uint8_t mPin;
 
 	void _init() { 
 		mPinMask = digitalPinToBitMask(mPin);

@@ -180,6 +180,10 @@ public:
 
 	void delay(unsigned long ms);
 
+	void setTemperature(const struct CRGB & temp);
+	void setCorrection(const struct CRGB & correction);
+	void setDither(uint8_t ditherMode = BINARY_DITHER);
+
 };
 
 extern CFastLED & FastSPI_LED;

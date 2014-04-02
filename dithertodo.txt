@@ -1,18 +1,18 @@
 SPI:
-o due
-o bitbang
-o k20
-o avr
+x due
+x bitbang
+x k20
+x avr
 o stm
 
 Clockless:
 X due
-o k20
-o avr
+x k20
+x avr
 o stm
 
 Chipsets:
-o LPD8806
-o WS2801
-o P9813
-o SM1676
+x LPD8806
+x WS2801
+x P9813
+x SM1676
