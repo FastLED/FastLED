@@ -271,7 +271,7 @@ public:
 
 // We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
 // need the more tightly defined timeframes.
-#if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000 || F_CPU == 48000000) // 125ns/clock
+#if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000 || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
 #define FMUL (F_CPU/8000000)
 // WS2811@8Mhz 2 clocks, 5 clocks, 3 clocks
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
