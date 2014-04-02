@@ -55,7 +55,6 @@ public:
 		PixelController<RGB_ORDER> px6(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px7(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px8(rgbdata, nLeds, scale, getDither());
-#if (LANES > 8)
 		PixelController<RGB_ORDER> px9(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px10(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px11(rgbdata, nLeds, scale, getDither());
@@ -64,26 +63,10 @@ public:
 		PixelController<RGB_ORDER> px14(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px15(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px16(rgbdata, nLeds, scale, getDither());
-#if (LANES > 16)
-		PixelController<RGB_ORDER> px17(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px18(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px19(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px20(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px21(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px22(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px23(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px24(rgbdata, nLeds, scale, getDither());
-#endif
-#endif
 
 		PixelController<RGB_ORDER> *allpixels[LANES] = { 
 			&px1, &px2, &px3, &px4, &px5, &px6, &px7, &px8
-#if (LANES > 8) 
 			,&px9, &px10, &px11, &px12, &px13, &px14, &px15, &px16 
-#if (LANES > 16)
-			, &px17, &px18, &px19, &px20, &px21, &px22, &px23, &px24
-#endif
-#endif
 		};
 
 		mWait.wait();
@@ -100,11 +83,11 @@ public:
 		mWait.mark();
 	}
 
-// #define ADV_RGB rgbdata += nLeds;
 // #define ADV_RGB
-#define ADV_RGB rgbdata += nLeds;
+#define ADV_RGB if(maskbit & PORT_MASK) { rgbdata += nLeds; } maskbit <<= 1;
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) { 
+		uint32_t maskbit = 0x00001;
 		PixelController<RGB_ORDER> px1(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px2(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px3(rgbdata, nLeds, scale, getDither()); ADV_RGB
@@ -113,7 +96,6 @@ public:
 		PixelController<RGB_ORDER> px6(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px7(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px8(rgbdata, nLeds, scale, getDither()); ADV_RGB
-#if LANES > 8
 		PixelController<RGB_ORDER> px9(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px10(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px11(rgbdata, nLeds, scale, getDither()); ADV_RGB
@@ -122,26 +104,10 @@ public:
 		PixelController<RGB_ORDER> px14(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px15(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px16(rgbdata, nLeds, scale, getDither()); ADV_RGB
-#if LANES > 16
-		PixelController<RGB_ORDER> px17(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px18(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px19(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px20(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px21(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px22(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px23(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px24(rgbdata, nLeds, scale, getDither()); ADV_RGB
-#endif
-#endif
 
 		PixelController<RGB_ORDER> *allpixels[LANES] = { 
 			&px1, &px2, &px3, &px4, &px5, &px6, &px7, &px8
-#if LANES > 8
 			,&px9, &px10, &px11, &px12, &px13, &px14, &px15, &px16 
-#if LANES > 16
-			, &px17, &px18, &px19, &px20, &px21, &px22, &px23, &px24
-#endif
-#endif
 		};
 
 		mWait.wait();
@@ -220,7 +186,7 @@ public:
 
 	typedef union { 
 		uint8_t bytes[LANES];
-		uint64_t raw[LANES/4];
+		uint32_t raw[LANES/4];
 	} Lines;
 
 // #define IFSKIP(N,X) if(PORT_MASK & 1<<X) { X; }
@@ -237,7 +203,6 @@ public:
 		fuckery.a6 = (b.raw[1] >> 15);
 		fuckery.a7 = (b.raw[1] >> 7);
 		b.raw[1] <<= 1;
-#if (LANES > 8)
 		fuckery.b0 = (b.raw[2] >> 31);
 		fuckery.b1 = (b.raw[2] >> 23);
 		fuckery.b2 = (b.raw[2] >> 15);
@@ -248,28 +213,29 @@ public:
 		fuckery.b6 = (b.raw[3] >> 15);
 		fuckery.b7 = (b.raw[3] >> 7);
 		b.raw[3] <<= 1;
-#if (LANES > 16)
-		fuckery.c0 = (b.raw[4] >> 31);
-		fuckery.c1 = (b.raw[4] >> 23);
-		fuckery.c2 = (b.raw[4] >> 15);
-		fuckery.c3 = (b.raw[4] >> 7);
-		fuckery.c4 = (b.raw[5] >> 31);
-		fuckery.c5 = (b.raw[5] >> 23);
-		fuckery.c6 = (b.raw[5] >> 15);
-		fuckery.c7 = (b.raw[5] >> 7);
-#if (LANES > 24)
-		fuckery.d0 = (b.raw[6] >> 31);
-		fuckery.d1 = (b.raw[6] >> 23);
-		fuckery.d2 = (b.raw[6] >> 15);
-		fuckery.d3 = (b.raw[6] >> 7);
-		fuckery.d4 = (b.raw[7] >> 31);
-		fuckery.d5 = (b.raw[7] >> 23);
-		fuckery.d6 = (b.raw[7] >> 15);
-		fuckery.d7 = (b.raw[7] >> 7);
-#endif
-#endif
-#endif
-		return fuckery.word;
+// #if (LANES > 16)
+// 		fuckery.c0 = (b.raw[4] >> 31);
+// 		fuckery.c1 = (b.raw[4] >> 23);
+// 		fuckery.c2 = (b.raw[4] >> 15);
+// 		fuckery.c3 = (b.raw[4] >> 7);
+// 		b.raw[4] <<= 1;
+// 		fuckery.c4 = (b.raw[5] >> 31);
+// 		fuckery.c5 = (b.raw[5] >> 23);
+// 		fuckery.c6 = (b.raw[5] >> 15);
+// 		fuckery.c7 = (b.raw[5] >> 7);
+// 		b.raw[5] <<= 1;
+// #if (LANES > 24)
+// 		fuckery.d0 = (b.raw[6] >> 31);
+// 		fuckery.d1 = (b.raw[6] >> 23);
+// 		fuckery.d2 = (b.raw[6] >> 15);
+// 		fuckery.d3 = (b.raw[6] >> 7);
+// 		fuckery.d4 = (b.raw[7] >> 31);
+// 		fuckery.d5 = (b.raw[7] >> 23);
+// 		fuckery.d6 = (b.raw[7] >> 15);
+// 		fuckery.d7 = (b.raw[7] >> 7);
+// #endif
+// #endif
+		return ~fuckery.word;
 	}
 
 #define VAL *((uint32_t*)(SysTick_BASE + 8))
@@ -280,31 +246,28 @@ public:
 		for(uint32_t i = 0; i < LANES; i++) { 
 			while(VAL > next_mark);
 
-			next_mark = VAL - (T1+T2+T3+6);
-			*FastPin<33>::port() = 0xFFFFFFFFL;
-			uint32_t flip_mark = next_mark + (T2+T3+3);
+			next_mark = VAL - (TOTAL);
+			*FastPin<33>::sport() = PORT_MASK;
 
-			while(VAL > flip_mark);
-			*FastPin<33>::port() = flipper;			
-			flip_mark = next_mark + (T3);
+			while((VAL-next_mark) > (T2+T3+3));
+			*FastPin<33>::cport() = (flipper & PORT_MASK);			
 			flipper = bits(b); 
 
-#if (LANES > 8)
+
+			while((VAL - next_mark) > T3);
+			*FastPin<33>::cport() = PORT_MASK;
+
 			switch(PX) {
 				case 0: b2.bytes[i] = allpixels[i]->stepAdvanceAndLoadAndScale0(); break;
 				case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
 				case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
 			}			
 			i++;
-#endif
-
-			while(VAL > flip_mark);
-			*FastPin<33>::port() = 0L;
 			switch(PX) {
 				case 0: b2.bytes[i] = allpixels[i]->stepAdvanceAndLoadAndScale0(); break;
 				case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
 				case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
-			}			
+			}	
 		}
 
 		// for(register uint32_t i = 0; i < XTRA0; i++) {

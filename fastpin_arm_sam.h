@@ -28,6 +28,7 @@ public:
 	inline static port_t hival() __attribute__ ((always_inline)) { return _PDOR::r() | _MASK; }
 	inline static port_t loval() __attribute__ ((always_inline)) { return _PDOR::r() & ~_MASK; }
 	inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_PDOR::r(); }
+	inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_PSOR::r(); }
 	inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_PCOR::r(); }
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
