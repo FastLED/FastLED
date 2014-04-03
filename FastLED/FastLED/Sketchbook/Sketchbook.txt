@@ -1,9 +1,0 @@
-
-Drag and drop your user library folder under the Sketchbook group.
-
-Then,
-• Uncheck Copy items into destination group's folder (if necessary).
-• Choose Folders Create groups for any added folders.
-• Check Add to targets Index.
-
-Your user library folder is usually located at Sketchbook > Libraries.
