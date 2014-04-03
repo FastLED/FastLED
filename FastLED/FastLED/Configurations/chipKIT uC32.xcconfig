@@ -1,0 +1,45 @@
+//
+//  chipKIT Uno32.xcconfig 
+//  Board configuration file
+//  ----------------------------------
+//  Developed with embedXcode
+//
+//  Part of embedXcode
+//  Embedded Computing on Xcode
+//
+//  Created by  John James on Apr 20, 2013
+//  License     All rigths reserved
+//
+//  Maintained by Rei VILO on May 10, 2013
+//  Copyright   (c) 2012-2014 http://embedxcode.weebly.com
+//  License     All rigths reserved
+//
+// Last update: Feb 06, 2014 release 131
+
+// Board identifier
+// See Boards.txt for <tag>.name=Arduino Uno (16 MHz)
+//
+BOARD_TAG  = chipkit_uc32
+
+// Port (optionnal)
+// most common are /dev/tty.usbserial*, /dev/tty.usbmodem* or /dev/tty.uart*
+//
+BOARD_PORT = /dev/tty.usbserial*
+
+// References for Xcode code-sense
+// See Boards.txt for <tag>.build.mcu=<GCC_PREPROCESSOR_DEFINITIONS>
+//
+GCC_PREPROCESSOR_DEFINITIONS = __32MX340F512H__ MPIDE
+
+// Specify the full path and name of the application
+// with /Contents/Resources/Java/** after
+//
+HEADER_SEARCH_PATHS = /Applications/Mpide.app/Contents/Resources/Java/**
+
+// Maximum RAM size in bytes
+// given by <tag>.upload.maximum_ram_size in boards.txt for Maple and Teensy
+//
+// Thanks Sinus! http://chipkit.net/forum/viewtopic.php?p=10932#p10932
+//
+MAX_RAM_SIZE = 32768
+
