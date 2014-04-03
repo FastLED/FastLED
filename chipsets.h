@@ -273,7 +273,11 @@ public:
 // need the more tightly defined timeframes.
 #if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000 || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
 #define FMUL (F_CPU/8000000)
-// WS2811@8Mhz 2 clocks, 5 clocks, 3 clocks
+// LPD1886
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER, 4> {};
+
+// WS2811@800khz 2 clocks, 5 clocks, 3 clocks
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
@@ -365,6 +369,12 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, NS(100), NS(300), NS(200), RGB_ORDER, 0, true, 500> {};
 #if NO_TIME(100, 300, 200)
 #warning "Not enough clock cycles available for TM1829@1.6Mhz"
+#endif 
+
+template <uint8_t DATA_PIN, EORder RGB_ORDER = RGB>
+class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER, 4> {};
+#if NO_TIME(200,400,200)
+#warning "Not enough clock cycles for LPD1886"
 #endif
 
 #endif 

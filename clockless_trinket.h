@@ -132,9 +132,6 @@ public:
 				: /* clobber registers */				
 
 
-#define xstr(s) str(s)
-#define str(s) #s
-
 // 1 cycle, write hi to the port
 #define HI1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
