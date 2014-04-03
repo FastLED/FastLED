@@ -4,6 +4,8 @@
 // #define NO_CORRECTION 1
 // #define NO_DITHERING 1
 
+#define FASTLED_VERSION 2001000
+
 #include "controller.h"
 #include "fastpin.h"
 #include "fastspi.h"
