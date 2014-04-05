@@ -152,14 +152,14 @@ public:
 	}
 #endif
 
-#ifdef HAS_BLOCKLESS
+// #ifdef HAS_BLOCKLESS
 	template<EBlockChipsets CHIPSET, int NUM_LANES>
 	static CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) { 
 		switch(CHIPSET) {
 			case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, NS(250), NS(510), NS(490)>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 	}
-#endif
+// #endif
 
 	void setBrightness(uint8_t scale) { m_Scale = scale; }
 	uint8_t getBrightness() { return m_Scale; }

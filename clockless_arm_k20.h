@@ -4,9 +4,9 @@
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
-#define HAS_BLOCKLESS 1
-template <int NUM_LANES, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 500>
-class InlineBlockClocklessController : public CLEDController {
+
+template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 500>
+class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
