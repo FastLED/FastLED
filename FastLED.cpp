@@ -64,7 +64,11 @@ void CFastLED::clearData() {
 
 void CFastLED::delay(unsigned long ms) { 
 	unsigned long start = millis();
-	while((millis()-start) < ms) { show(); }
+	while((millis()-start) < ms) { 
+		show(); 
+
+	}
+
 }
 
 void CFastLED::setTemperature(const struct CRGB & temp) {

@@ -23,7 +23,7 @@ template<int _LOOP, int PAD> inline void _dc_AVR(register uint8_t & loopvar) {
 	// The convolution in here is to ensure that the state of the carry flag coming into the delay loop is preserved
 	asm __volatile__ (  "BRCS L_PC%=\n\t"
 						"        LDI %[loopvar], %[_LOOP]\n\tL_%=: DEC %[loopvar]\n\t BRNE L_%=\n\tBREQ L_DONE%=\n\t" 
-						"L_PC%=: LDI %[loopvar], %[_LOOP]\n\tL_%=: DEC %[loopvar]\n\t BRNE L_%=\n\tBSET 0\n\t" 
+						"L_PC%=: LDI %[loopvar], %[_LOOP]\n\tLL_%=: DEC %[loopvar]\n\t BRNE LL_%=\n\tBSET 0\n\t" 
 						"L_DONE%=:\n\t"
 						: 
 							[loopvar] "+a" (loopvar) : [_LOOP] "M" (_LOOP) : );
@@ -131,9 +131,6 @@ public:
 				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
 				: /* clobber registers */				
 
-
-#define xstr(s) str(s)
-#define str(s) #s
 
 // 1 cycle, write hi to the port
 #define HI1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
