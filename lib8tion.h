@@ -484,18 +484,21 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
 LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1 || defined(LIB8_ATTINY)
-    uint8_t j = (((int)i * (int)scale) >> 8) + (i?1:0);
+    uint8_t j = (((int)i * (int)scale) >> 8) + ((i&&scale)?1:0);
     // uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
     // uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
     return j;
 #elif SCALE8_AVRASM == 1
     uint8_t j=0;
     asm volatile(
-        "mul %[i], %[scale]\n\t"
-        "mov %[j], r1\n\t"
-        "clr __zero_reg__\n\t"
-        "cpse %[i], r1\n\t"
-        "subi %[j], 0xFF\n\t"
+        "  tst %[i]\n\t"
+        "  breq L_%=\n\t"
+        "  mul %[i], %[scale]\n\t"
+        "  mov %[j], r1\n\t"
+        "  clr __zero_reg__\n\t"
+        "  cpse %[scale], r1\n\t"
+        "  subi %[j], 0xFF\n\t"
+        "L_%=: \n\t"
         : [j] "+a" (j)
         : [i] "a" (i), [scale] "a" (scale)
         : "r0", "r1");
