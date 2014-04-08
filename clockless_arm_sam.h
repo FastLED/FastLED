@@ -7,7 +7,7 @@
 #if defined(__SAM3X8E__)
 
 
-#define TADJUST 4
+#define TADJUST 0
 #define TOTAL ( (T1+TADJUST) + (T2+TADJUST) + (T3+TADJUST) )
 #define T1_MARK (TOTAL - (T1+TADJUST))
 #define T2_MARK (T1_MARK - (T2+TADJUST))
@@ -63,10 +63,10 @@ public:
 		// Serial.print(scale.raw[1]); Serial.print(" ");
 		// Serial.print(scale.raw[2]); Serial.println(" ");
 		// FastPinBB<DATA_PIN>::hi(); delay(1); FastPinBB<DATA_PIN>::lo();
-		showRGBInternal(pixels);
+		uint32_t clocks = showRGBInternal(pixels);
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
+		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
@@ -81,10 +81,10 @@ public:
 		cli();
 		SysClockSaver savedClock(TOTAL);
 
-		showRGBInternal(pixels);
+		uint32_t clocks = showRGBInternal(pixels);
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
+		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
@@ -150,69 +150,38 @@ public:
 #define _CTRL CTPTR[0]
 #define _LOAD CTPTR[1]
 #define _VAL CTPTR[2]
+#define VAL *((uint32_t*)(SysTick_BASE + 8))
 
-	__attribute__((always_inline)) static inline void wait_loop_start(register volatile uint32_t *CTPTR) {
-		__asm__ __volatile__ (
-			"L_%=: ldr.w r8, [%0]\n"
-			"      tst.w r8, #65536\n"
-			"		beq.n L_%=\n"
-			: /* no outputs */
-			: "r" (CTPTR)
-			: "r8"
-			);
-	}
-
-	template<int MARK> __attribute__((always_inline)) static inline void wait_loop_mark(register volatile uint32_t *CTPTR) {
-		__asm__ __volatile__ (
-			"L_%=: ldr.w r8, [%0, #8]\n"
-			"      cmp.w r8, %1\n"
-			"		bhi.n L_%=\n"
-			: /* no outputs */
-			: "r" (CTPTR), "I" (MARK)
-			: "r8"
-			);
-	}
-
-	__attribute__((always_inline)) static inline void mark_port(register data_ptr_t port, register int val) {
-		__asm__ __volatile__ (
-			"	str.w %0, [%1]\n"
-			: /* no outputs */
-			: "r" (val), "r" (port)
-			);
-	}
-#define AT_BIT_START(X) wait_loop_start(CTPTR); X;
-#define AT_MARK(X) wait_loop_mark<T1_MARK>(CTPTR); { X; }
-#define AT_END(X) wait_loop_mark<T2_MARK>(CTPTR); { X; }
-
-	template<int MARK> __attribute__((always_inline)) static inline void delayclocks_until(register byte b) { 
-		__asm__ __volatile__ (
-			"	   sub %0, %0, %1\n"
-			"L_%=: subs %0, %0, #2\n"
-			"      bcs.n L_%=\n"
-			: /* no outputs */
-			: "r" (b), "I" (MARK)
-			: /* no clobbers */
-			);
-
-	}
-
-
-	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(register volatile uint32_t *CTPTR, register data_ptr_t port, register uint8_t & b) {
-		// TODO: hand rig asm version of this method.  The timings are based on adjusting/studying GCC compiler ouptut.  This
-		// will bite me in the ass at some point, I know it.
+	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register uint8_t & b) {
 		for(register uint32_t i = BITS; i > 0; i--) { 
-			AT_BIT_START(*port=1);
-			if(b&0x80) {} else { AT_MARK(*port=0); }
+			// wait to start the bit, then set the pin high
+			while(VAL > next_mark);
+			next_mark = (VAL-TOTAL);
+			*port = 1;
+
+			// how long we want to wait next depends on whether or not our bit is set to 1 or 0
+			if(b&0x80) {
+				// we're a 1, wait until there's less than T3 clocks left
+				while((VAL - next_mark) > (T3+TADJUST));
+			} else { 
+				// we're a 0, wait until there's less than (T2+T3+slop) clocks left in this bit
+				while((VAL-next_mark) > (T2+T3+TADJUST+TADJUST)); 
+			}
+			*port=0;
 			b <<= 1;
-			AT_END(*port=0);
 		}
 	}
 
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	static void showRGBInternal(PixelController<RGB_ORDER> & pixels) {
-		// Serial.print("Going to show "); Serial.print(pixels.mLen); Serial.println(" pixels.");
+	static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+		// Setup and start the clock
+		register volatile uint32_t *CTPTR asm("r6")= &SysTick->CTRL; FORCE_REFERENCE(CTPTR);
+		_LOAD = 0x00FFFFFF;
+		_VAL = 0;
+		_CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
+		_CTRL |= SysTick_CTRL_ENABLE_Msk;
 
 		register data_ptr_t port asm("r7") = FastPinBB<DATA_PIN>::port(); FORCE_REFERENCE(port);
 		*port = 0;
@@ -221,28 +190,22 @@ public:
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 		
-		// Setup and start the clock
-		register volatile uint32_t *CTPTR asm("r6")= &SysTick->CTRL; FORCE_REFERENCE(CTPTR);
-		_LOAD = TOTAL;
-		_VAL = 0;
-		_CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
-		_CTRL |= SysTick_CTRL_ENABLE_Msk;
-
-		// read to clear the loop flag
-		_CTRL;
+		uint32_t next_mark = (VAL - (TOTAL));
 		while(pixels.has(1)) { 
 			pixels.stepDithering();
 
-			writeBits<8+XTRA0>(CTPTR, port, b);
+			writeBits<8+XTRA0>(next_mark, port, b);
 
 			b = pixels.loadAndScale1();
-			writeBits<8+XTRA0>(CTPTR, port,b);
+			writeBits<8+XTRA0>(next_mark, port,b);
 
 			b = pixels.loadAndScale2();
-			writeBits<8+XTRA0>(CTPTR, port,b);
+			writeBits<8+XTRA0>(next_mark, port,b);
 
 			b = pixels.advanceAndLoadAndScale0();
 		};
+
+		return 0x00FFFFFF - _VAL;
 	}
 #endif
 };
