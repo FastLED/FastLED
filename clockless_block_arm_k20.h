@@ -3,7 +3,7 @@
 
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
 // See clockless.h for detailed info on how the template parameters are used.
-#if 1 || defined(FASTLED_TEENSY3)
+#if defined(FASTLED_TEENSY3)
 #define HAS_BLOCKLESS 1
 
 template <uint8_t NUM_LANES, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 500>
@@ -187,20 +187,11 @@ public:
 			b.raw[1] <<= 1;
 			flipper = bits(b);
 
-			// switch(PX) {
-			// 	case 0: b2.bytes[i] = allpixels[i]->loadAndScale0(); break;
-			// 	case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
-			// 	case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
-			// }
+
 			while(ARM_DWT_CYCCNT < last_flip_mark);
 			*FastPin<2>::port() = 0;
-			// switch(PX) {
-			// 	case 0: b2.bytes[i] = allpixels[i]->stepAdvanceAndLoadAndScale0(); break;
-			// 	case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
-			// 	case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
-			// }
 			switch(PX) {
-				case 0: b2.bytes[i] = allpixels[i]->stepAdvanceAndLoadAndScale0(); break;
+				case 0: b2.bytes[i] = allpixels[i]->advanceAndLoadAndScale0(); break;
 				case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
 				case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
 			}
