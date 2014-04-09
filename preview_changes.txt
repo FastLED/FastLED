@@ -2,6 +2,7 @@
 * RGB based scaling, allow for color balancing
 * (The moon) dithering support
 * Teensy 3.1 support
+* Second SPI support on teensy 3.1
 * Due support 
 * P9813 (aka Cool Neon Total Control Lighting support)
 * Preliminary TM1829 support (broken, don't use!)
