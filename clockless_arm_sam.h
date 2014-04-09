@@ -150,7 +150,7 @@ public:
 #define _CTRL CTPTR[0]
 #define _LOAD CTPTR[1]
 #define _VAL CTPTR[2]
-#define VAL *((uint32_t*)(SysTick_BASE + 8))
+#define VAL (volatile uint32_t)(*((uint32_t*)(SysTick_BASE + 8)))
 
 	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register uint8_t & b) {
 		for(register uint32_t i = BITS; i > 0; i--) { 
