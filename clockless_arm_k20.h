@@ -31,10 +31,10 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal(pixels);
+		uint32_t clocks = showRGBInternal(pixels);
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3 + 1));
+		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -46,10 +46,10 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal(pixels);
+		uint32_t clocks = showRGBInternal(pixels);
 		
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3 + 1));
+		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -61,11 +61,11 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal(pixels);
+		uint32_t clocks = showRGBInternal(pixels);
 		
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3 + 1));
+		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -102,7 +102,12 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	static void showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+	static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+	    // Get access to the clock 
+		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
+		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
+		ARM_DWT_CYCCNT = 0;
+
 		register data_ptr_t port = FastPin<DATA_PIN>::port();
 		register data_t hi = *port | FastPin<DATA_PIN>::mask();;
 		register data_t lo = *port & ~FastPin<DATA_PIN>::mask();;
@@ -112,10 +117,6 @@ public:
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
-	    // Get access to the clock 
-		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
-		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
-		ARM_DWT_CYCCNT = 0;
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
 		while(pixels.has(1)) { 			
@@ -133,6 +134,8 @@ public:
 			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
 			b = pixels.advanceAndLoadAndScale0();
 		};
+
+		return ARM_DWT_CYCCNT;
 	}
 };
 #endif
