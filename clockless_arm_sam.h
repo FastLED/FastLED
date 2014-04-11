@@ -41,10 +41,10 @@ public:
 		cli();
 		SysClockSaver savedClock(TOTAL);
 
-		showRGBInternal(pixels);
+		uint32_t clocks = showRGBInternal(pixels);
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
+		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
@@ -66,7 +66,7 @@ public:
 		uint32_t clocks = showRGBInternal(pixels);
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);
@@ -84,7 +84,7 @@ public:
 		uint32_t clocks = showRGBInternal(pixels);
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
 		do { TimeTick_Increment(); } while(--millisTaken > 0);

@@ -36,7 +36,7 @@ class InlineBlockClocklessController : public CLEDController {
 public:
 	virtual void init() { 
 		//FastPinBB<DATA_PIN>::setOutput();
-		uint8_t pins[] = { 33, 34, 35, 36, 37, 38, 39, 40, 41, 51, 50, 49, 48, 47, 46,45, 44, 9, 8, 7, 6, 5, 4, 3, 10, 72, 106, 0 };
+		uint8_t pins[] = { 33, 34, 35, 36, 37, 38, 39, 40, 41, 51, 50, 49, 48, 47, 46,45, 44, 9, 8, 7, 6, 5, 4, 3, 10, 0}; // 72, 106, 0 };
 		int i = 0;
 		while(pins[i]) { pinMode(pins[i++], OUTPUT); }
 	}
@@ -73,12 +73,12 @@ public:
 		cli();
 		SysClockSaver savedClock(TOTAL);
 
-		showRGBInternal(allpixels, nLeds);
+		uint32_t clocks = showRGBInternal(allpixels, nLeds);
 
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
-		do { TimeTick_Increment(); } while(--millisTaken > 0);
+		while(millisTaken-- > 0) { TimeTick_Increment(); } 
 		sei();
 		mWait.mark();
 	}
@@ -114,13 +114,13 @@ public:
 		cli();
 		SysClockSaver savedClock(TOTAL);
 
-		showRGBInternal(allpixels,nLeds);
+		uint32_t clocks = showRGBInternal(allpixels,nLeds);
 		
 		
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (TOTAL));
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
-		do { TimeTick_Increment(); } while(--millisTaken > 0);
+		while(millisTaken-- > 0) { TimeTick_Increment(); } 
 		sei();
 		// Adjust the timer
 		// long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
@@ -279,7 +279,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
 	// gcc will use register Y for the this pointer.
-	static void showRGBInternal(PixelController<RGB_ORDER> *allpixels[LANES], int nLeds) {
+	static uint32_t showRGBInternal(PixelController<RGB_ORDER> *allpixels[LANES], int nLeds) {
 		// Serial.println("Entering show");
 		// Setup the pixel controller and load/scale the first byte 
 		Lines b0,b1,b2;
@@ -310,6 +310,8 @@ public:
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels); 
 		}
+
+		return 0x00FFFFFF - _VAL;
 	}
 
 
