@@ -162,10 +162,10 @@ public:
 			// how long we want to wait next depends on whether or not our bit is set to 1 or 0
 			if(b&0x80) {
 				// we're a 1, wait until there's less than T3 clocks left
-				while((VAL - next_mark) > (T3+TADJUST));
+				while((VAL - next_mark) > (T3));
 			} else { 
 				// we're a 0, wait until there's less than (T2+T3+slop) clocks left in this bit
-				while((VAL-next_mark) > (T2+T3+TADJUST+TADJUST)); 
+				while((VAL-next_mark) > (T2+T3+4+TADJUST+TADJUST)); 
 			}
 			*port=0;
 			b <<= 1;
