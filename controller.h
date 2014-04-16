@@ -201,11 +201,24 @@ struct PixelController {
 
         void init_binary_dithering() {
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
-                static byte R = 0;
-                R++;
+            
+#define VIRTUAL_BITS 8
+            // R is the digther signal 'counter'.
+            static byte R = 0;
+            R++;
 
-                // fast reverse bits in a byte
-                byte Q = 0;
+            // R is wrapped around at 2^ditherBits,
+            // so if ditherBits is 2, R will cycle through (0,1,2,3)
+            byte ditherBits = VIRTUAL_BITS;
+            R &= (0x01 << ditherBits) - 1;
+
+            // Q is the "unscaled dither signal" itself.
+            // It's initialized to the reversed bits of R.
+            // If 'ditherBits' is 2, Q here will cycle through (0,128,64,192)
+            byte Q = 0;
+        
+            // Reverse bits in a byte
+            {
                 if(R & 0x01) { Q |= 0x80; }
                 if(R & 0x02) { Q |= 0x40; }
                 if(R & 0x04) { Q |= 0x20; }
@@ -214,14 +227,27 @@ struct PixelController {
                 if(R & 0x20) { Q |= 0x04; }
                 if(R & 0x40) { Q |= 0x02; }
                 if(R & 0x80) { Q |= 0x01; }
-
-                // setup the seed d and e values
-                for(int i = 0; i < 3; i++) {                        
-                        byte s = mScale.raw[i];
-                        e[i] = s ? (256/s) + 1 : 0;
-                        d[i] = scale8(Q, e[i]);
-                        if(e[i]) e[i]--;
-                }
+            }
+            
+            // Now we adjust Q to fall in the center of each range,
+            // instead of at the start of the range.
+            // If ditherBits is 2, Q will be (0, 128, 64, 192) at first,
+            // and this adjustment makes it (31, 159, 95, 223).
+            if( ditherBits < 8) {
+                Q += 0x01 << (7 - ditherBits);
+            }
+            
+            // D and E form the "scaled dither signal"
+            // which is added to pixel values to affect the
+            // actual dithering.
+            
+            // Setup the initial D and E values
+            for(int i = 0; i < 3; i++) {                        
+                    byte s = mScale.raw[i];
+                    e[i] = s ? (256/s) + 1 : 0;
+                    d[i] = scale8(Q, e[i]);
+                    if(e[i]) e[i]--;
+            }
 #endif
         }
 
