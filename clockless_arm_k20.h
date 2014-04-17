@@ -13,7 +13,7 @@ class ClocklessController : public CLEDController {
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
 public:
-	virtual void init() { 
+	virtual void init() {
 		FastPin<DATA_PIN>::setOutput();
 		mPinMask = FastPin<DATA_PIN>::mask();
 		mPort = FastPin<DATA_PIN>::port();
@@ -33,38 +33,38 @@ public:
 		uint32_t clocks = showRGBInternal(pixels);
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
 	}
 
-	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) { 
+	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
 
 		mWait.wait();
 		cli();
 
 		uint32_t clocks = showRGBInternal(pixels);
-		
+
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) { 
+	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
 		mWait.wait();
 		cli();
 
 		uint32_t clocks = showRGBInternal(pixels);
-		
+
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(clocks);
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -72,11 +72,11 @@ public:
 #endif
 
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  {
-		for(register uint32_t i = BITS-1; i > 0; i--) { 
+		for(register uint32_t i = BITS-1; i > 0; i--) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 			FastPin<DATA_PIN>::fastset(port, hi);
-			if(b&0x80) { 
+			if(b&0x80) {
 				while((next_mark - ARM_DWT_CYCCNT) > T3);
 				FastPin<DATA_PIN>::fastset(port, lo);
 			} else {
@@ -90,7 +90,7 @@ public:
 		next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 		FastPin<DATA_PIN>::fastset(port, hi);
 
-		if(b&0x80) { 
+		if(b&0x80) {
 			while((next_mark - ARM_DWT_CYCCNT) > T3);
 			FastPin<DATA_PIN>::fastset(port, lo);
 		} else {
@@ -99,10 +99,10 @@ public:
 		}
 	}
 
-	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
+	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
 	static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
-	    // Get access to the clock 
+	    // Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 		ARM_DWT_CYCCNT = 0;
@@ -112,13 +112,13 @@ public:
 		register data_t lo = *port & ~FastPin<DATA_PIN>::mask();;
 		*port = lo;
 
-		// Setup the pixel controller and load/scale the first byte 
+		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
-		while(pixels.has(1)) { 			
+		while(pixels.has(1)) {
 			pixels.stepDithering();
 
 			// Write first byte, read next byte
@@ -140,4 +140,3 @@ public:
 #endif
 
 #endif
-
