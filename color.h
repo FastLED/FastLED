@@ -7,14 +7,17 @@ typedef enum {
    // Color correction starting points
 
    // typical values for SMD5050 LEDs
-   SMD5050=0xFFA0F0 /* 255, 160, 240 */,
+    TypicalSMD5050=0xFFB0F0 /* 255, 176, 240 */,
+    TypicalLEDStrip=0xFFB0F0 /* 255, 176, 240 */,
 
-   // typical values for 8.25mm "pixels on a string"
-   // also for many through-hole T3 package LEDs
-   Pixel8MM=0xFFE08C /* 255, 224, 140 */,
-
+   // typical values for 8mm "pixels on a string"
+   // also for many through-hole 'T' package LEDs
+   Typical8mmPixel=0xFFE08C /* 255, 224, 140 */,
+   TypicalPixelString=0xFFE08C /* 255, 224, 140 */,
+    
    // uncorrected color
    UncorrectedColor=0xFFFFFF
+    
 } LEDColorCorrection;
 
 
