@@ -7,6 +7,6 @@
 * P9813 (aka Cool Neon Total Control Lighting support)
 * Preliminary TM1829 support (broken, don't use!)
 * Random code changes and cleanups 
-
+* More accurate timing adjustments for k20 and due clockless chips
 * Added HUE_RED, HUE_ORANGE, etc.
 * Added named color correction profiles (eg. TypicalSMD5050)
