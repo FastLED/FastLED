@@ -10,3 +10,5 @@
 * More accurate timing adjustments for k20 and due clockless chips
 * Added HUE_RED, HUE_ORANGE, etc.
 * Added named color correction profiles (eg. TypicalSMD5050)
+* Added XY Matrix example
+* Added Fire2012 example, added HeatColor(...) to the library
