@@ -15,7 +15,7 @@ class InlineBlockClocklessController : public CLEDController {
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
 public:
-	virtual void init() { 
+	virtual void init() {
 		FastPin<2>::setOutput();
 		FastPin<14>::setOutput();
 		FastPin<7>::setOutput();
@@ -53,7 +53,7 @@ public:
 		mWait.mark();
 	}
 
-	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) { 
+	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
 		mWait.wait();
 		cli();
 
@@ -65,7 +65,7 @@ public:
 						PixelController<RGB_ORDER>(rgbdata/**/+(5*nLeds)/**/, nLeds, scale, getDither()),
 						PixelController<RGB_ORDER>(rgbdata/**/+(6*nLeds)/**/, nLeds, scale, getDither()),
 						PixelController<RGB_ORDER>(rgbdata/**/+(7*nLeds)/**/, nLeds, scale, getDither()));
-		
+
 		// Adjust the timer
 		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
 		MS_COUNTER += (microsTaken / 1000);
@@ -74,12 +74,12 @@ public:
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) { 
+	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
 		mWait.wait();
 		cli();
 
 		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
-		
+
 
 		// Adjust the timer
 		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
@@ -89,9 +89,9 @@ public:
 	}
 #endif
 
-	typedef union { 
+	typedef union {
 		uint32_t word;
-		struct { 
+		struct {
 			uint32_t a0:1;
 			uint32_t a1:1;
 			uint32_t a2:1;
@@ -128,8 +128,8 @@ public:
 	} xtype;
 
 
-#define USE_LINES 
-	typedef union { 
+#define USE_LINES
+	typedef union {
 		uint8_t bytes[8];
 		uint32_t raw[2];
 	} Lines;
@@ -174,14 +174,14 @@ public:
 
 	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b2, PixelController<RGB_ORDER> *allpixels[8]) { // , register uint32_t & b2)  {
 		uint32_t flipper = bits(b);
-		for(register uint32_t i = 0; i < 8; i++) { 
+		for(register uint32_t i = 0; i < 8; i++) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 			*FastPin<2>::port() = 0xFF;
-			uint32_t flip_mark = next_mark - (T2+T3);
-			
+			uint32_t flip_mark = next_mark - (T2+T3+2);
+
 			while(ARM_DWT_CYCCNT < flip_mark);
-			uint32_t last_flip_mark = next_mark - (T3+2);
+			uint32_t last_flip_mark = next_mark - (T3);
 			*FastPin<2>::port() = flipper;
 			b.raw[0] <<= 1;
 			b.raw[1] <<= 1;
@@ -198,12 +198,12 @@ public:
 		}
 	}
 
-	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
+	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
 	static void showRGBInternal(PixelController<RGB_ORDER> pixels, PixelController<RGB_ORDER> pixels2, PixelController<RGB_ORDER> pixels3, PixelController<RGB_ORDER> pixels4,
-								PixelController<RGB_ORDER> pixels5,  PixelController<RGB_ORDER> pixels6, PixelController<RGB_ORDER> pixels7,  PixelController<RGB_ORDER> pixels8) {		
+								PixelController<RGB_ORDER> pixels5,  PixelController<RGB_ORDER> pixels6, PixelController<RGB_ORDER> pixels7,  PixelController<RGB_ORDER> pixels8) {
 
-		// Setup the pixel controller and load/scale the first byte 
+		// Setup the pixel controller and load/scale the first byte
 		PixelController<RGB_ORDER> *allpixels[8] = {&pixels,&pixels2,&pixels3,&pixels4,&pixels5,&pixels6,&pixels7,&pixels8};
 		pixels.preStepFirstByteDithering();
 		register Lines b0,b1,b2;
@@ -215,27 +215,26 @@ public:
 			b0.bytes[i] = allpixels[i]->loadAndScale0();
 		}
 
-	    // Get access to the clock 
+	    // Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 		ARM_DWT_CYCCNT = 0;
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
-		while(pixels.has(1)) { 			
+		while(pixels.has(1)) {
 			pixels.stepDithering();
 
 			// Write first byte, read next byte
 			writeBits<8+XTRA0,1>(next_mark, b0, b1, allpixels);
 
 			// Write second byte, read 3rd byte
-			writeBits<8+XTRA0,2>(next_mark, b1, b2, allpixels); 
+			writeBits<8+XTRA0,2>(next_mark, b1, b2, allpixels);
 
 			// Write third byte
-			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels); 
+			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels);
 		};
 	}
 };
 #endif
 
 #endif
-
