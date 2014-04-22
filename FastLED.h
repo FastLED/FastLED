@@ -14,6 +14,7 @@
 #include "clockless.h"
 #include "lib8tion.h"
 #include "hsv2rgb.h"
+#include "colorutils.h"
 #include "chipsets.h"
 #include "dmx.h"
 

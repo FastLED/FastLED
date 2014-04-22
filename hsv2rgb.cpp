@@ -474,25 +474,3 @@ void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds)
         hsv2rgb_spectrum(phsv[i], prgb[i]);
     }
 }
-
-void fill_solid( struct CRGB * pFirstLED, int numToFill,
-                const struct CRGB& color)
-{
-    for( int i = 0; i < numToFill; i++) {
-        pFirstLED[i] = color;
-    }
-}
-
-void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
-                  uint8_t initialhue,
-                  uint8_t deltahue )
-{
-    CHSV hsv;
-    hsv.hue = initialhue;
-    hsv.val = 255;
-    hsv.sat = 255;
-    for( int i = 0; i < numToFill; i++) {
-        hsv2rgb_rainbow( hsv, pFirstLED[i]);
-        hsv.hue += deltahue;
-    }
-}

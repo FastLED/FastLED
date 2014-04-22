@@ -7,7 +7,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // LPD8806 controller class - takes data/clock/select pin values (N.B. should take an SPI definition?)
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(20) >
@@ -17,8 +17,8 @@ class LPD8806Controller : public CLEDController {
 	class LPD8806_ADJUST {
 	public:
 		// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
-		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return (data>>1) | 0x80 | (data & 0x01); }
-		__attribute__((always_inline)) inline static void postBlock(int len) { 
+		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return ((data>>1) | 0x80) + ((data!=255) & 0x01); }
+		__attribute__((always_inline)) inline static void postBlock(int len) {
 			SPI::writeBytesValueRaw(0, ((len+63)>>6));
 		}
 
@@ -27,14 +27,14 @@ class LPD8806Controller : public CLEDController {
 	SPI mSPI;
 	int mClearedLeds;
 
-	void checkClear(int nLeds) { 
-		if(nLeds > mClearedLeds) { 
+	void checkClear(int nLeds) {
+		if(nLeds > mClearedLeds) {
 			clearLine(nLeds);
 			mClearedLeds = nLeds;
 		}
 	}
-	
-	void clearLine(int nLeds) { 
+
+	void clearLine(int nLeds) {
 		int n = ((nLeds  + 63) >> 6);
 		mSPI.writeBytesValue(0, n);
 	}
@@ -45,9 +45,9 @@ public:
 		mClearedLeds = 0;
 	}
 
-	virtual void clearLeds(int nLeds) { 
+	virtual void clearLeds(int nLeds) {
 		mSPI.select();
-		mSPI.writeBytesValueRaw(0x80, nLeds * 3);	
+		mSPI.writeBytesValueRaw(0x80, nLeds * 3);
 		mSPI.writeBytesValueRaw(0, ((nLeds*3+63)>>6));
 		mSPI.release();
 	}
@@ -84,17 +84,17 @@ class WS2801Controller : public CLEDController {
 public:
 	WS2801Controller() {}
 
-	virtual void init() { 
+	virtual void init() {
 		mSPI.init();
 	    mWaitDelay.mark();
 	}
 
-	virtual void clearLeds(int nLeds) { 
+	virtual void clearLeds(int nLeds) {
 		mWaitDelay.wait();
 		mSPI.writeBytesValue(0, nLeds*3);
 		mWaitDelay.mark();
 	}
-	
+
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mWaitDelay.wait();
 		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
@@ -137,21 +137,21 @@ class P9813Controller : public CLEDController {
 public:
 	P9813Controller() {}
 
-	virtual void init() { 
+	virtual void init() {
 		mSPI.init();
 	}
 
-	virtual void clearLeds(int nLeds) { 
+	virtual void clearLeds(int nLeds) {
 		showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0));
 	}
-	
+
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
 
 		mSPI.select();
 
 		writeBoundary();
-		while(nLeds--) { 
+		while(nLeds--) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.stepDithering();
 		}
@@ -167,7 +167,7 @@ public:
 		mSPI.select();
 
 		writeBoundary();
-		for(int i = 0; i < nLeds; i++) { 
+		for(int i = 0; i < nLeds; i++) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.advanceData();
 			pixels.stepDithering();
@@ -184,7 +184,7 @@ public:
 		mSPI.select();
 
 		writeBoundary();
-		for(int i = 0; i < nLeds; i++) { 
+		for(int i = 0; i < nLeds; i++) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.advanceData();
 			pixels.stepDithering();
@@ -207,7 +207,7 @@ class SM16716Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
-	void writeHeader() { 
+	void writeHeader() {
 		// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)
 		mSPI.select();
 		mSPI.writeBytesValueRaw(0, 6);
@@ -220,13 +220,13 @@ class SM16716Controller : public CLEDController {
 public:
 	SM16716Controller() {}
 
-	virtual void init() { 
+	virtual void init() {
 		mSPI.init();
 	}
 
-	virtual void clearLeds(int nLeds) { 
+	virtual void clearLeds(int nLeds) {
 		mSPI.select();
-		while(nLeds--) { 
+		while(nLeds--) {
 			mSPI.template writeBit<0>(1);
 			mSPI.writeByte(0);
 			mSPI.writeByte(0);
@@ -309,56 +309,56 @@ class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 4 
 // GW6205@400khz - 800ns, 800ns, 800ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class GW6205Controller400Khz : public ClocklessController<DATA_PIN, NS(800), NS(800), NS(800), RGB_ORDER, 4> {};
-#if NO_TIME(800, 800, 800) 
+#if NO_TIME(800, 800, 800)
 #warning "Not enough clock cycles available for the GW6205@400khz"
 #endif
 
 // GW6205@400khz - 400ns, 400ns, 400ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class GW6205Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(400), RGB_ORDER, 4> {};
-#if NO_TIME(400, 400, 400) 
+#if NO_TIME(400, 400, 400)
 #warning "Not enough clock cycles available for the GW6205@400khz"
 #endif
 
 // UCS1903 - 500ns, 1500ns, 500ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
-#if NO_TIME(500, 1500, 500) 
+#if NO_TIME(500, 1500, 500)
 #warning "Not enough clock cycles available for the UCS103@400khz"
 #endif
 
 // UCS1903B - 400ns, 450ns, 450ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903BController800Khz : public ClocklessController<DATA_PIN, NS(400), NS(450), NS(450), RGB_ORDER> {};
-#if NO_TIME(400, 450, 450) 
+#if NO_TIME(400, 450, 450)
 #warning "Not enough clock cycles available for the UCS103B@800khz"
 #endif
 
 // TM1809 - 350ns, 350ns, 550ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(350), NS(550), RGB_ORDER> {};
-#if NO_TIME(350, 350, 550) 
+#if NO_TIME(350, 350, 550)
 #warning "Not enough clock cycles available for the TM1809"
 #endif
 
-// WS2811 - 400ns, 400ns, 450ns 
+// WS2811 - 400ns, 400ns, 450ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
-#if NO_TIME(400, 400, 450) 
+#if NO_TIME(400, 400, 450)
 #warning "Not enough clock cycles available for the WS2811 (800khz)"
 #endif
 
-// WS2811@400khz - 800ns, 800ns, 900ns 
+// WS2811@400khz - 800ns, 800ns, 900ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller400Khz : public ClocklessController<DATA_PIN, NS(800), NS(800), NS(900), RGB_ORDER> {};
-#if NO_TIME(800, 800, 900) 
+#if NO_TIME(800, 800, 900)
 #warning "Not enough clock cycles available for the WS2811 (400Khz)"
 #endif
 
 // 750NS, 750NS, 750NS
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1803Controller400Khz : public ClocklessController<DATA_PIN, NS(750), NS(750), NS(750), RGB_ORDER> {};
-#if NO_TIME(750, 750, 750) 
+#if NO_TIME(750, 750, 750)
 #warning "Not enough clock cycles available for the TM1803"
 #endif
 
@@ -369,7 +369,7 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, NS(100), NS(300), NS(200), RGB_ORDER, 0, true, 500> {};
 #if NO_TIME(100, 300, 200)
 #warning "Not enough clock cycles available for TM1829@1.6Mhz"
-#endif 
+#endif
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER, 4> {};
@@ -377,6 +377,6 @@ class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), N
 #warning "Not enough clock cycles for LPD1886"
 #endif
 
-#endif 
+#endif
 
 #endif
