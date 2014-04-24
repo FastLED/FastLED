@@ -1,4 +1,4 @@
-// MultipleStripsInOneArray - see https://github.com/FastLED/FastLED/wiki/Example-MultipleControllers for more info on
+// MultipleStripsInOneArray - see https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples for more info on
 // using multiple controllers.  In this example, we're going to set up four NEOPIXEL strips on three
 // different pins, each strip will be referring to a different part of the single led array
 
