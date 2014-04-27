@@ -82,23 +82,40 @@
       cos16( x)  == cos( (x/32768.0) * pi) * 32767
    Accurate to more than 99% in all cases.
  
+ - Fast 8-bit approximations of sin and cos.
+   Input angle is a uint8_t from 0-255.
+   Output is an UNsigned uint8_t from 0 to 255.
+       sin8( x)  == (sin( (x/128.0) * pi) * 128) + 128
+       cos8( x)  == (cos( (x/128.0) * pi) * 128) + 128
+   Accurate to within about 2%.
+
  
- - Dimming and brightening functions for 8-bit
-   light values.
-      dim8_video( x)  == scale8_video( x, x)
-      dim8_raw( x)    == scale8( x, x)
-      brighten8_video( x) == 255 - dim8_video( 255 - x)
-      brighten8_raw( x) == 255 - dim8_raw( 255 - x)
-   The dimming functions in particular are suitable
-   for making LED light output appear more 'linear'.
-
-
  - Fast 8-bit "easing in/out" function.
      ease8InOutCubic(x) == 3(x^i) - 2(x^3)
      ease8InOutApprox(x) == 
        faster, rougher, approximation of cubic easing
-     
+     ease8InOutQuad(x) == quadratic (vs cubic) easing
 
+ - Cubic, Quadratic, and Triangle wave functions.
+   Input is a uint8_t representing phase withing the wave,
+     similar to how sin8 takes an angle 'theta'.
+   Output is a uint8_t representing the amplitude of
+     the wave at that point.
+       cubicwave8( x)
+       quadwave8( x)
+       triwave8( x)
+ 
+
+ - Dimming and brightening functions for 8-bit
+   light values.
+     dim8_video( x)  == scale8_video( x, x)
+     dim8_raw( x)    == scale8( x, x)
+     brighten8_video( x) == 255 - dim8_video( 255 - x)
+     brighten8_raw( x) == 255 - dim8_raw( 255 - x)
+   The dimming functions in particular are suitable
+   for making LED light output appear more 'linear'.
+ 
+ 
  - Linear interpolation between two values, with the
    fraction between them expressed as an 8- or 16-bit
    fixed point fraction (fract8 or fract16).
@@ -1126,6 +1143,120 @@ LIB8STATIC int16_t cos16( uint16_t theta)
 }
 
 ///////////////////////////////////////////////////////////////////////
+
+// sin8 & cos8
+//        Fast 8-bit approximations of sin(x) & cos(x).
+//        Input angle is an unsigned int from 0-255.
+//        Output is an unsigned int from 0 to 255.
+//
+//        This approximation can vary to to 2%
+//        from the floating point value you'd get by doing
+//          float s = (sin( x ) * 128.0) + 128;
+//
+//        Don't use this approximation for calculating the
+//        "real" trigonometric calculations, but it's great
+//        for art projects and LED displays.
+//
+//        On Arduino/AVR, this approximation is more than
+//        20X faster than floating point sin(x) and cos(x)
+
+#if defined(__AVR__) && !defined(LIB8_ATTINY)
+#define sin8 sin8_avr
+#else
+#define sin8 sin8_C
+#endif
+
+
+const uint8_t b_m16_interleave[] = { 0, 49, 49, 41, 90, 27, 117, 10 };
+
+LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
+{
+    uint8_t offset = theta;
+    
+    asm volatile(
+                 "sbrc %[theta],6         \n\t"
+                 "com  %[offset]           \n\t"
+                 : [theta] "+r" (theta), [offset] "+r" (offset)
+                 );
+    
+    offset &= 0x3F; // 0..63
+    
+    uint8_t secoffset  = offset & 0x0F; // 0..15
+    if( theta & 0x40) secoffset++;
+    
+    uint8_t m16; uint8_t b;
+    
+    uint8_t section = offset >> 4; // 0..3
+    uint8_t s2 = section * 2;
+
+    const uint8_t* p = b_m16_interleave;
+    p += s2;
+    b   = *p;
+    p++;
+    m16 = *p;
+    
+    uint8_t mx;
+    uint8_t xr1;
+    asm volatile(
+                 "mul %[m16],%[secoffset]   \n\t"
+                 "mov %[mx],r0              \n\t"
+                 "mov %[xr1],r1             \n\t"
+                 "eor  r1, r1               \n\t"
+                 "swap %[mx]                \n\t"
+                 "andi %[mx],0x0F           \n\t"
+                 "swap %[xr1]               \n\t"
+                 "andi %[xr1], 0xF0         \n\t"
+                 "or   %[mx], %[xr1]        \n\t"
+                 : [mx] "=r" (mx), [xr1] "=r" (xr1)
+                 : [m16] "r" (m16), [secoffset] "r" (secoffset)
+                 );
+    
+    int8_t y = mx + b;
+    if( theta & 0x80 ) y = -y;
+    
+    y += 128;
+    
+    return y;
+}
+
+
+LIB8STATIC uint8_t sin8_C( uint8_t theta)
+{
+    uint8_t offset = theta;
+    if( theta & 0x40 ) {
+        offset = (uint8_t)255 - offset;
+    }
+    offset &= 0x3F; // 0..63
+    
+    uint8_t secoffset  = offset & 0x0F; // 0..15
+    if( theta & 0x40) secoffset++;
+    
+    uint8_t section = offset >> 4; // 0..3
+    uint8_t s2 = section * 2;
+    const uint8_t* p = b_m16_interleave;
+    p += s2;
+    uint8_t b   =  *p;
+    p++;
+    uint8_t m16 =  *p;
+    
+    uint8_t mx = (m16 * secoffset) >> 4;
+    
+    int8_t y = mx + b;
+    if( theta & 0x80 ) y = -y;
+    
+    y += 128;
+    
+    return y;
+}
+
+
+LIB8STATIC uint8_t cos8( uint8_t theta)
+{
+    return sin8( theta + 64);
+}
+
+
+///////////////////////////////////////////////////////////////////////
 //
 // memmove8, memcpy8, and memset8:
 //   alternatives to memmove, memcpy, and memset that are
@@ -1221,7 +1352,24 @@ LIB8STATIC int16_t lerp15by8( int16_t a, int16_t b, fract8 frac)
 // easing functions; see http://easings.net
 //
 
-// ease8InOuCubic: 8-bit cubic ease-in / ease-out function
+// ease8InOutQuad: 8-bit quadratic ease-in / ease-out function
+//                Takes around 13 cycles on AVR
+LIB8STATIC uint8_t ease8InOutQuad( uint8_t i)
+{
+    uint8_t j = i;
+    if( j & 0x80 ) {
+        j = 255 - j;
+    }
+    uint8_t jj  = scale8(  j, (j+1));
+    uint8_t jj2 = jj << 1;
+    if( i & 0x80 ) {
+        jj2 = 255 - jj2;
+    }
+    return jj2;
+}
+
+
+// ease8InOutCubic: 8-bit cubic ease-in / ease-out function
 //                 Takes around 18 cycles on AVR
 LIB8STATIC fract8 ease8InOutCubic( fract8 i)
 {
@@ -1306,6 +1454,49 @@ LIB8STATIC uint8_t ease8InOutApprox( fract8 i)
 #endif
 
 
+
+// triwave8: triangle (sawtooth) wave generator.  Useful for
+//           turning a one-byte ever-increasing value into a
+//           one-byte value that oscillates up and down.
+//
+//           input         output
+//           0..127        0..254 (positive slope)
+//           128..255      254..0 (negative slope)
+//
+//           On AVR this function takes just three cycles.
+//
+LIB8STATIC uint8_t triwave8(uint8_t in)
+{
+    if( in & 0x80) {
+        in = 255 - in;
+    }
+    uint8_t out = in << 1;
+    return out;
+}
+
+
+// quadwave8 and cubicwave8: S-shaped wave generators (like 'sine').
+//           Useful for turning a one-byte 'counter' value into a
+//           one-byte oscillating value that moves smoothly up and down,
+//           with an 'acceleration' and 'deceleration' curve.
+//
+//           These are even faster than 'sin8', and have
+//           slightly different curve shapes.  
+//
+
+// quadwave8: quadratic waveform generator.  Spends just a little more
+//            time at the limits than 'sine' does.
+LIB8STATIC uint8_t quadwave8(uint8_t in)
+{
+    return ease8InOutQuad( triwave8( in));
+}
+
+// cubicwave8: cubic waveform generator.  Spends visibly more time
+//             at the limits than 'sine' does.
+LIB8STATIC uint8_t cubicwave8(uint8_t in)
+{
+    return ease8InOutCubic( triwave8( in));
+}
 
 
 
