@@ -8,8 +8,8 @@
 #define RO(X) RGB_BYTE(RGB_ORDER, X)
 #define RGB_BYTE(RO,X) (((RO)>>(3*(2-(X)))) & 0x3)
 
-#define RGB_BYTE0(RO) ((RO>>6) & 0x3) 
-#define RGB_BYTE1(RO) ((RO>>3) & 0x3) 
+#define RGB_BYTE0(RO) ((RO>>6) & 0x3)
+#define RGB_BYTE1(RO) ((RO>>3) & 0x3)
 #define RGB_BYTE2(RO) ((RO) & 0x3)
 
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
@@ -19,17 +19,17 @@
 typedef uint8_t EDitherMode;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
+//
 // LED Controller interface definition
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// Base definition for an LED controller.  Pretty much the methods that every LED controller object will make available.  
+/// Base definition for an LED controller.  Pretty much the methods that every LED controller object will make available.
 /// Note that the showARGB method is not impelemented for all controllers yet.   Note also the methods for eventual checking
 /// of background writing of data (I'm looking at you, teensy 3.0 DMA controller!).  If you want to pass LED controllers around
 /// to methods, make them references to this type, keeps your code saner.  However, most people won't be seeing/using these objects
 /// directly at all
-class CLEDController { 
+class CLEDController {
 protected:
     friend class CFastLED;
     const CRGB *m_Data;
@@ -44,7 +44,7 @@ protected:
     // set all the leds on the controller to a given color
     virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
 
-    // note that the uint8_ts will be in the order that you want them sent out to the device. 
+    // note that the uint8_ts will be in the order that you want them sent out to the device.
     // nLeds is the number of RGB leds being written to
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
 
@@ -77,11 +77,11 @@ public:
     }
 
     // show function using the "attached to this controller" led data
-    void showLeds(uint8_t brightness=255) { 
+    void showLeds(uint8_t brightness=255) {
         show(m_Data, m_nLeds, getAdjustment(brightness));
     }
 
-    void showColor(const struct CRGB & data, uint8_t brightness=255) { 
+    void showColor(const struct CRGB & data, uint8_t brightness=255) {
         showColor(data, m_nLeds, getAdjustment(brightness));
     }
 
@@ -95,15 +95,15 @@ public:
         show(data, nLeds, getAdjustment(brightness))
     }
 #endif
-   
-    CLEDController & setLeds(const CRGB *data, int nLeds) { 
+
+    CLEDController & setLeds(const CRGB *data, int nLeds) {
         m_Data = data;
         m_nLeds = nLeds;
         return *this;
     }
 
     void clearLedData() {
-        if(m_Data) { 
+        if(m_Data) {
             memset8((void*)m_Data, 0, sizeof(struct CRGB) * m_nLeds);
         }
     }
@@ -119,17 +119,17 @@ public:
     CLEDController & setTemperature(ColorTemperature temperature) { m_ColorTemperature = temperature; return *this; }
     CRGB getTemperature() { return m_ColorTemperature; }
 
-    CRGB getAdjustment(uint8_t scale) { 
+    CRGB getAdjustment(uint8_t scale) {
 #if defined(NO_CORRECTION) && (NO_CORRECTION==1)
         return CRGB(scale,scale,scale);
 #else
         CRGB adj(0,0,0);
 
-        if(scale > 0) { 
-            for(uint8_t i = 0; i < 3; i++) { 
+        if(scale > 0) {
+            for(uint8_t i = 0; i < 3; i++) {
                 uint8_t cc = m_ColorCorrection.raw[i];
                 uint8_t ct = m_ColorTemperature.raw[i];
-                if(cc > 0 && ct > 0) { 
+                if(cc > 0 && ct > 0) {
                     uint32_t work = (((uint32_t)cc)+1) * (((uint32_t)ct)+1) * scale;
                     work /= 0x10000L;
                     adj.raw[i] = work & 0xFF;
@@ -143,11 +143,11 @@ public:
 };
 
 // Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
-// support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will 
+// support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will
 // centralize 8/12/16 conversions here as well.
 template<EOrder RGB_ORDER>
 struct PixelController {
-        const uint8_t *mData; 
+        const uint8_t *mData;
         int mLen;
         uint8_t d[3];
         uint8_t e[3];
@@ -186,7 +186,7 @@ struct PixelController {
 #ifdef SUPPORT_ARGB
         PixelController(const CARGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mScale(s) {
             enable_dithering(dither);
-            // skip the A in CARGB            
+            // skip the A in CARGB
             mData += 1;
             mAdvance = 0;
         }
@@ -195,13 +195,13 @@ struct PixelController {
             enable_dithering(dither);
             // skip the A in CARGB
             mData += 1;
-            mAdvance = 4; 
+            mAdvance = 4;
         }
 #endif
 
         void init_binary_dithering() {
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
-            
+
 #define VIRTUAL_BITS 8
             // R is the digther signal 'counter'.
             static byte R = 0;
@@ -216,7 +216,7 @@ struct PixelController {
             // It's initialized to the reversed bits of R.
             // If 'ditherBits' is 2, Q here will cycle through (0,128,64,192)
             byte Q = 0;
-        
+
             // Reverse bits in a byte
             {
                 if(R & 0x01) { Q |= 0x80; }
@@ -228,7 +228,7 @@ struct PixelController {
                 if(R & 0x40) { Q |= 0x02; }
                 if(R & 0x80) { Q |= 0x01; }
             }
-            
+
             // Now we adjust Q to fall in the center of each range,
             // instead of at the start of the range.
             // If ditherBits is 2, Q will be (0, 128, 64, 192) at first,
@@ -236,13 +236,13 @@ struct PixelController {
             if( ditherBits < 8) {
                 Q += 0x01 << (7 - ditherBits);
             }
-            
+
             // D and E form the "scaled dither signal"
             // which is added to pixel values to affect the
             // actual dithering.
-            
+
             // Setup the initial D and E values
-            for(int i = 0; i < 3; i++) {                        
+            for(int i = 0; i < 3; i++) {
                     byte s = mScale.raw[i];
                     e[i] = s ? (256/s) + 1 : 0;
                     d[i] = scale8(Q, e[i]);
@@ -252,10 +252,10 @@ struct PixelController {
         }
 
         // Do we have n pixels left to process?
-        __attribute__((always_inline)) inline bool has(int n) { 
+        __attribute__((always_inline)) inline bool has(int n) {
             return mLen >= n;
         }
-        
+
         // toggle dithering enable
         void enable_dithering(EDitherMode dither) {
             switch(dither) {
@@ -264,15 +264,15 @@ struct PixelController {
             }
         }
 
-        // get the amount to advance the pointer by 
+        // get the amount to advance the pointer by
         __attribute__((always_inline)) inline int advanceBy() { return mAdvance; }
-        
+
         // advance the data pointer forward, adjust position counter
          __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; mLen--;}
 
-        // step the dithering forward 
+        // step the dithering forward
          __attribute__((always_inline)) inline void stepDithering() {
-         		// IF UPDATING HERE, BE SURE TO UPDATE THE ASM VERSION IN 
+         		// IF UPDATING HERE, BE SURE TO UPDATE THE ASM VERSION IN
          		// clockless_trinket.h!
                 d[0] = e[0] - d[0];
                 d[1] = e[1] - d[1];
@@ -280,7 +280,7 @@ struct PixelController {
         }
 
         // Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately
-        __attribute__((always_inline)) inline void preStepFirstByteDithering() { 
+        __attribute__((always_inline)) inline void preStepFirstByteDithering() {
             d[RO(0)] = e[RO(0)] - d[RO(0)];
         }
 
@@ -293,11 +293,11 @@ struct PixelController {
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(PixelController & pc) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc); }
 
 		// Helper functions to get around gcc stupidities
-		__attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }    
-		__attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }    
-		__attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }    
-		__attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }    
-        __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }    
+		__attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }
+		__attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }
+		__attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }
+		__attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }
+        __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }
 };
 
 #endif

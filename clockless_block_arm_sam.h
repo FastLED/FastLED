@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point
-// is where the line is raised hi.  The second pointsnt is where the line is dropped low for a zero.  The third point is where the 
+// is where the line is raised hi.  The second pointsnt is where the line is dropped low for a zero.  The third point is where the
 // line is dropped low for a one.  T1, T2, and T3 correspond to the timings for those three in clock cycles.
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,6 +20,14 @@
 #if defined(__SAM3X8E__)
 #define HAS_BLOCKLESS 1
 #define LANES 16
+
+typedef union {
+  uint8_t bytes[LANES];
+  uint32_t raw[LANES/4];
+  uint16_t shorts[LANES/2];
+} Lines;
+
+void transposeLines(Lines & out, Lines & in);
 
 #define TADJUST 0
 #define TOTAL ( (T1+TADJUST) + (T2+TADJUST) + (T3+TADJUST) )
@@ -34,7 +42,7 @@ class InlineBlockClocklessController : public CLEDController {
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
 public:
-	virtual void init() { 
+	virtual void init() {
 		//FastPinBB<DATA_PIN>::setOutput();
 		uint8_t pins[] = { 33, 34, 35, 36, 37, 38, 39, 40, 41, 51, 50, 49, 48, 47, 46,45, 44, 9, 8, 7, 6, 5, 4, 3, 10, 0}; // 72, 106, 0 };
 		int i = 0;
@@ -64,9 +72,9 @@ public:
 		PixelController<RGB_ORDER> px15(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px16(rgbdata, nLeds, scale, getDither());
 
-		PixelController<RGB_ORDER> *allpixels[LANES] = { 
+		PixelController<RGB_ORDER> *allpixels[LANES] = {
 			&px1, &px2, &px3, &px4, &px5, &px6, &px7, &px8
-			,&px9, &px10, &px11, &px12, &px13, &px14, &px15, &px16 
+			,&px9, &px10, &px11, &px12, &px13, &px14, &px15, &px16
 		};
 
 		mWait.wait();
@@ -78,7 +86,7 @@ public:
 		long microsTaken = CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
-		while(millisTaken-- > 0) { TimeTick_Increment(); } 
+		while(millisTaken-- > 0) { TimeTick_Increment(); }
 		sei();
 		mWait.mark();
 	}
@@ -86,7 +94,7 @@ public:
 // #define ADV_RGB
 #define ADV_RGB if(maskbit & PORT_MASK) { rgbdata += nLeds; } maskbit <<= 1;
 
-	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) { 
+	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
 		uint32_t maskbit = 0x00001;
 		PixelController<RGB_ORDER> px1(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px2(rgbdata, nLeds, scale, getDither()); ADV_RGB
@@ -105,9 +113,9 @@ public:
 		PixelController<RGB_ORDER> px15(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px16(rgbdata, nLeds, scale, getDither()); ADV_RGB
 
-		PixelController<RGB_ORDER> *allpixels[LANES] = { 
+		PixelController<RGB_ORDER> *allpixels[LANES] = {
 			&px1, &px2, &px3, &px4, &px5, &px6, &px7, &px8
-			,&px9, &px10, &px11, &px12, &px13, &px14, &px15, &px16 
+			,&px9, &px10, &px11, &px12, &px13, &px14, &px15, &px16
 		};
 
 		mWait.wait();
@@ -115,12 +123,12 @@ public:
 		SysClockSaver savedClock(TOTAL);
 
 		uint32_t clocks = showRGBInternal(allpixels,nLeds);
-		
-		
+
+
 		long microsTaken = CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
 		savedClock.restore();
-		while(millisTaken-- > 0) { TimeTick_Increment(); } 
+		while(millisTaken-- > 0) { TimeTick_Increment(); }
 		sei();
 		// Adjust the timer
 		// long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
@@ -130,12 +138,12 @@ public:
 	}
 
 #ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) { 
+	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
 		mWait.wait();
 		cli();
 
 		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
-		
+
 
 		// Adjust the timer
 		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
@@ -145,9 +153,9 @@ public:
 	}
 #endif
 
-	typedef union { 
+	typedef union {
 		uint32_t word;
-		struct { 
+		struct {
 			uint32_t a0:1;
 			uint32_t a1:1;
 			uint32_t a2:1;
@@ -184,10 +192,6 @@ public:
 	} xtype;
 
 
-	typedef union { 
-		uint8_t bytes[LANES];
-		uint32_t raw[LANES/4];
-	} Lines;
 
 // #define IFSKIP(N,X) if(PORT_MASK & 1<<X) { X; }
 	__attribute__ ((always_inline)) inline static uint32_t bits(Lines & b) {
@@ -240,18 +244,18 @@ public:
 
 #define VAL *((uint32_t*)(SysTick_BASE + 8))
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register volatile uint32_t & next_mark, register Lines & b, Lines & b2, PixelController<RGB_ORDER> *allpixels[LANES]) { // , register uint32_t & b2)  {
-		uint32_t flipper = bits(b); 
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b2, PixelController<RGB_ORDER> *allpixels[LANES]) { // , register uint32_t & b2)  {
+		uint32_t flipper = bits(b);
 		// Serial.print("flipper is "); Serial.println(flipper);
-		for(uint32_t i = 0; i < LANES; i++) { 
+		for(uint32_t i = 0; i < LANES; i++) {
 			while(VAL > next_mark);
 
 			next_mark = VAL - (TOTAL);
 			*FastPin<33>::sport() = PORT_MASK;
 
 			while((VAL-next_mark) > (T2+T3+3));
-			*FastPin<33>::cport() = (flipper & PORT_MASK);			
-			flipper = bits(b); 
+			*FastPin<33>::cport() = (flipper & PORT_MASK);
+			flipper = bits(b);
 
 
 			while((VAL - next_mark) > T3);
@@ -261,29 +265,30 @@ public:
 				case 0: b2.bytes[i] = allpixels[i]->stepAdvanceAndLoadAndScale0(); break;
 				case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
 				case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
-			}			
+			}
 			i++;
 			switch(PX) {
 				case 0: b2.bytes[i] = allpixels[i]->stepAdvanceAndLoadAndScale0(); break;
 				case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
 				case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
-			}	
+			}
 		}
 
+    // transposeLines(b, b2);
 		// for(register uint32_t i = 0; i < XTRA0; i++) {
 		// 	AT_BIT_START(*FastPin<33>::port() = 0xFFFF);
-		// 	AT_MARK(*FastPin<33>::port() = 0);			
+		// 	AT_MARK(*FastPin<33>::port() = 0);
 		// 	AT_END(*FastPin<2>::port() = 0);
-		// }		
+		// }
 	}
 
-	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then 
+	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
 	static uint32_t showRGBInternal(PixelController<RGB_ORDER> *allpixels[LANES], int nLeds) {
 		// Serial.println("Entering show");
-		// Setup the pixel controller and load/scale the first byte 
+		// Setup the pixel controller and load/scale the first byte
 		Lines b0,b1,b2;
-		for(int i = 0; i < LANES/4; i++) { 
+		for(int i = 0; i < LANES/4; i++) {
 			b0.raw[i] = b1.raw[i] = b2.raw[i] = 0;
 		}
 		for(int i = 0; i < LANES; i++) {
@@ -300,15 +305,15 @@ public:
 
 		VAL = 0;
 		uint32_t next_mark = (VAL - (TOTAL));
-		while(nLeds--) { 	
+		while(nLeds--) {
 			// Write first byte, read next byte
 			writeBits<8+XTRA0,1>(next_mark, b0, b1, allpixels);
 
 			// Write second byte, read 3rd byte
-			writeBits<8+XTRA0,2>(next_mark, b1, b2, allpixels); 
+			writeBits<8+XTRA0,2>(next_mark, b1, b2, allpixels);
 
 			// Write third byte
-			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels); 
+			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels);
 		}
 
 		return 0x00FFFFFF - _VAL;
