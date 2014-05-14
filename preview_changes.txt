@@ -12,3 +12,4 @@
 * Added named color correction profiles (eg. TypicalSMD5050)
 * Added XY Matrix example
 * Added Fire2012 example, added HeatColor(...) to the library
+* Added sin8, cos8, quadwave8, cubicwave8, triwave8, and ease8InOutQuad
