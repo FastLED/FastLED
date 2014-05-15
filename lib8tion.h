@@ -125,6 +125,8 @@
        == from + (( to - from ) * fract8) / 256)
      lerp16by16( fromU16, toU16, fract16 )
        == from + (( to - from ) * fract16) / 65536)
+     map8( in, rangeStart, rangeEnd)
+       == map( in, 0, 255, rangeStart, rangeEnd);
  
  - Optimized memmove, memcpy, and memset, that are
    faster than standard avr-libc 1.8.
@@ -1344,6 +1346,28 @@ LIB8STATIC int16_t lerp15by8( int16_t a, int16_t b, fract8 frac)
         result = a - scaled;
     }
     return result;
+}
+
+//  map8: map from one full-range 8-bit value into a narrower
+//        range of 8-bit values, possibly a range of hues.
+//
+//        E.g. map myValue into a hue in the range blue..purple..pink..red
+//        hue = map8( myValue, HUE_BLUE, HUE_RED);
+//
+//        Combines nicely with the waveform functions (like sin8, etc)
+//        to produce continuous hue gradients back and forth:
+//          hue = map8( sin8( myValue), HUE_BLUE, HUE_RED);
+//
+//        Mathematically simiar to lerp8by8, but arguments are more
+//        like Arduino's "map"; this function is similar to
+//          map( in, 0, 255, rangeStart, rangeEnd)
+//        but faster and specifically designed for 8-bit values.
+LIB8STATIC uint8_t map8( uint8_t in, uint8_t rangeStart, uint8_t rangeEnd)
+{
+    uint8_t rangeWidth = rangeEnd - rangeStart;
+    uint8_t out = scale8( in, rangeWidth);
+    out += rangeStart;
+    return out;
 }
 
 
