@@ -95,43 +95,43 @@ void CFastLED::setDither(uint8_t ditherMode)  {
 	}
 }
 
-
-template<int m, int n> void transpose8(unsigned char A[8], unsigned char B[8]) {
-	uint32_t x, y, t;
-
-	// Load the array and pack it into x and y.
-  	y = *(unsigned int*)(A);
-	x = *(unsigned int*)(A+4);
-
-	// x = (A[0]<<24)   | (A[m]<<16)   | (A[2*m]<<8) | A[3*m];
-	// y = (A[4*m]<<24) | (A[5*m]<<16) | (A[6*m]<<8) | A[7*m];
-
-	t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
-	t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
-
-	t = (x ^ (x >>14)) & 0x0000CCCC;  x = x ^ t ^ (t <<14);
-	t = (y ^ (y >>14)) & 0x0000CCCC;  y = y ^ t ^ (t <<14);
-
-	t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
-	y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
-	x = t;
-
-	B[7*n] = y; y >>= 8;
-  B[3*n] = x; x >>= 8;
-
-	B[6*n] = y; y >>= 8;
-	B[2*n] = x; x >>= 8;
-
-	B[5*n] = y; y >>= 8;
-	B[n] = x; x >>= 8;
-
-	B[4*n] = y;
-	B[0] = x;
-	// B[0]=x>>24;    B[n]=x>>16;    B[2*n]=x>>8;  B[3*n]=x>>0;
-	// B[4*n]=y>>24;  B[5*n]=y>>16;  B[6*n]=y>>8;  B[7*n]=y>>0;
-}
-
-void transposeLines(Lines & out, Lines & in) {
-	transpose8<1,2>(in.bytes, out.bytes);
-	transpose8<1,2>(in.bytes + 8, out.bytes + 1);
-}
+// 
+// template<int m, int n> void transpose8(unsigned char A[8], unsigned char B[8]) {
+// 	uint32_t x, y, t;
+//
+// 	// Load the array and pack it into x and y.
+//   	y = *(unsigned int*)(A);
+// 	x = *(unsigned int*)(A+4);
+//
+// 	// x = (A[0]<<24)   | (A[m]<<16)   | (A[2*m]<<8) | A[3*m];
+// 	// y = (A[4*m]<<24) | (A[5*m]<<16) | (A[6*m]<<8) | A[7*m];
+//
+// 	t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
+// 	t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
+//
+// 	t = (x ^ (x >>14)) & 0x0000CCCC;  x = x ^ t ^ (t <<14);
+// 	t = (y ^ (y >>14)) & 0x0000CCCC;  y = y ^ t ^ (t <<14);
+//
+// 	t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
+// 	y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
+// 	x = t;
+//
+// 	B[7*n] = y; y >>= 8;
+//   B[3*n] = x; x >>= 8;
+//
+// 	B[6*n] = y; y >>= 8;
+// 	B[2*n] = x; x >>= 8;
+//
+// 	B[5*n] = y; y >>= 8;
+// 	B[n] = x; x >>= 8;
+//
+// 	B[4*n] = y;
+// 	B[0] = x;
+// 	// B[0]=x>>24;    B[n]=x>>16;    B[2*n]=x>>8;  B[3*n]=x>>0;
+// 	// B[4*n]=y>>24;  B[5*n]=y>>16;  B[6*n]=y>>8;  B[7*n]=y>>0;
+// }
+//
+// void transposeLines(Lines & out, Lines & in) {
+// 	transpose8<1,2>(in.bytes, out.bytes);
+// 	transpose8<1,2>(in.bytes + 8, out.bytes + 1);
+// }
