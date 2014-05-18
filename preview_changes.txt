@@ -13,3 +13,5 @@
 * Added XY Matrix example
 * Added Fire2012 example, added HeatColor(...) to the library
 * Added sin8, cos8, quadwave8, cubicwave8, triwave8, and ease8InOutQuad
+* Added map8
+* Adjusted VIRTAL_BITS of dithering from a flickery 8 to a more solid 3
