@@ -164,6 +164,13 @@ public:
 #endif
 
 // #ifdef HAS_BLOCKLESS
+	template<EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER>
+	static CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		switch(CHIPSET) {
+			case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+		}
+	}
+
 	template<EBlockChipsets CHIPSET, int NUM_LANES>
 	static CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {

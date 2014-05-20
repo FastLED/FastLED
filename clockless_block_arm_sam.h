@@ -19,7 +19,7 @@
 
 #if defined(__SAM3X8E__)
 #define HAS_BLOCKLESS 1
-#define LANES 16
+#define LANES 8
 
 typedef union {
   uint8_t bytes[LANES];
@@ -63,6 +63,7 @@ public:
 		PixelController<RGB_ORDER> px6(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px7(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px8(rgbdata, nLeds, scale, getDither());
+#if LANES > 8
 		PixelController<RGB_ORDER> px9(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px10(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px11(rgbdata, nLeds, scale, getDither());
@@ -71,10 +72,13 @@ public:
 		PixelController<RGB_ORDER> px14(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px15(rgbdata, nLeds, scale, getDither());
 		PixelController<RGB_ORDER> px16(rgbdata, nLeds, scale, getDither());
+#endif
 
 		PixelController<RGB_ORDER> *allpixels[LANES] = {
 			&px1, &px2, &px3, &px4, &px5, &px6, &px7, &px8
+#if LANES > 8
 			,&px9, &px10, &px11, &px12, &px13, &px14, &px15, &px16
+#endif
 		};
 
 		mWait.wait();
@@ -104,6 +108,7 @@ public:
 		PixelController<RGB_ORDER> px6(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px7(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px8(rgbdata, nLeds, scale, getDither()); ADV_RGB
+#if LANES > 8
 		PixelController<RGB_ORDER> px9(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px10(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px11(rgbdata, nLeds, scale, getDither()); ADV_RGB
@@ -112,10 +117,14 @@ public:
 		PixelController<RGB_ORDER> px14(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px15(rgbdata, nLeds, scale, getDither()); ADV_RGB
 		PixelController<RGB_ORDER> px16(rgbdata, nLeds, scale, getDither()); ADV_RGB
+#endif
 
 		PixelController<RGB_ORDER> *allpixels[LANES] = {
-			&px1, &px2, &px3, &px4, &px5, &px6, &px7, &px8
-			,&px9, &px10, &px11, &px12, &px13, &px14, &px15, &px16
+			&px4, &px3, &px2, &px1, &px8, &px7, &px6, &px5
+#if LANES > 8
+			,&px12, &px11, &px10, &px9, &px16, &px15, &px14, &px13
+#endif
+
 		};
 
 		mWait.wait();
@@ -207,6 +216,7 @@ public:
 		fuckery.a6 = (b.raw[1] >> 15);
 		fuckery.a7 = (b.raw[1] >> 7);
 		b.raw[1] <<= 1;
+#if LANES > 8
 		fuckery.b0 = (b.raw[2] >> 31);
 		fuckery.b1 = (b.raw[2] >> 23);
 		fuckery.b2 = (b.raw[2] >> 15);
@@ -217,6 +227,7 @@ public:
 		fuckery.b6 = (b.raw[3] >> 15);
 		fuckery.b7 = (b.raw[3] >> 7);
 		b.raw[3] <<= 1;
+#endif
 // #if (LANES > 16)
 // 		fuckery.c0 = (b.raw[4] >> 31);
 // 		fuckery.c1 = (b.raw[4] >> 23);
@@ -253,9 +264,9 @@ public:
 			next_mark = VAL - (TOTAL);
 			*FastPin<33>::sport() = PORT_MASK;
 
-			while((VAL-next_mark) > (T2+T3+3));
+			while((VAL-next_mark) > (T2+T3+6));
 			*FastPin<33>::cport() = (flipper & PORT_MASK);
-			flipper = bits(b);
+      flipper = bits(b);
 
 
 			while((VAL - next_mark) > T3);
@@ -266,12 +277,14 @@ public:
 				case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
 				case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
 			}
+  #if LANES > 8
 			i++;
 			switch(PX) {
 				case 0: b2.bytes[i] = allpixels[i]->stepAdvanceAndLoadAndScale0(); break;
 				case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
 				case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
 			}
+  #endif
 		}
 
     // transposeLines(b, b2);
