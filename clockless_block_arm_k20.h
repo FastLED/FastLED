@@ -37,7 +37,7 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()),
+		uint32_t clocks = showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()),
 						PixelController<RGB_ORDER>(rgbdata/*/+nLeds/**/, nLeds, scale, getDither()),
 						PixelController<RGB_ORDER>(rgbdata/*/+nLeds/**/, nLeds, scale, getDither()),
 						PixelController<RGB_ORDER>(rgbdata/*/+nLeds/**/, nLeds, scale, getDither()),
@@ -47,7 +47,7 @@ public:
 						PixelController<RGB_ORDER>(rgbdata/*/+(3*nLeds)/**/, nLeds, scale, getDither()));
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -57,7 +57,7 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()),
+		uint32_t clocks = showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()),
 						PixelController<RGB_ORDER>(rgbdata/**/+(1*nLeds)/**/, nLeds, scale, getDither()),
 						PixelController<RGB_ORDER>(rgbdata/**/+(2*nLeds)/**/, nLeds, scale, getDither()),
 						PixelController<RGB_ORDER>(rgbdata/**/+(3*nLeds)/**/, nLeds, scale, getDither()),
@@ -67,7 +67,7 @@ public:
 						PixelController<RGB_ORDER>(rgbdata/**/+(7*nLeds)/**/, nLeds, scale, getDither()));
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -78,11 +78,11 @@ public:
 		mWait.wait();
 		cli();
 
-		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
+		uint32_t clocks = showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
 
 
 		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+		long microsTaken = CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (microsTaken / 1000);
 		sei();
 		mWait.mark();
@@ -200,8 +200,12 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static void showRGBInternal(PixelController<RGB_ORDER> pixels, PixelController<RGB_ORDER> pixels2, PixelController<RGB_ORDER> pixels3, PixelController<RGB_ORDER> pixels4,
+	static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels, PixelController<RGB_ORDER> pixels2, PixelController<RGB_ORDER> pixels3, PixelController<RGB_ORDER> pixels4,
 								PixelController<RGB_ORDER> pixels5,  PixelController<RGB_ORDER> pixels6, PixelController<RGB_ORDER> pixels7,  PixelController<RGB_ORDER> pixels8) {
+		// Get access to the clock
+		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
+		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
+		ARM_DWT_CYCCNT = 0;
 
 		// Setup the pixel controller and load/scale the first byte
 		PixelController<RGB_ORDER> *allpixels[8] = {&pixels,&pixels2,&pixels3,&pixels4,&pixels5,&pixels6,&pixels7,&pixels8};
@@ -215,10 +219,6 @@ public:
 			b0.bytes[i] = allpixels[i]->loadAndScale0();
 		}
 
-	    // Get access to the clock
-		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
-		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
-		ARM_DWT_CYCCNT = 0;
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
 		while(pixels.has(1)) {
@@ -233,6 +233,8 @@ public:
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels);
 		};
+
+		return ARM_DWT_CYCCNT;
 	}
 };
 #endif
