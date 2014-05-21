@@ -103,7 +103,7 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP2;NOP
 // #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
 #if 1 || (F_CPU < 96000000)
 #define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
-#define CLKS_TO_MICROS(_CLKS) ((_CLKS)) / (F_CPU / 1000000L)
+#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 1000000L)
 #else
 #define NS(_NS) ( (_NS * (F_CPU / 2000000L))) / 1000
 #define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 2000000L)
