@@ -211,11 +211,11 @@ public:
 		fuckery.a2 = (b.raw[0] >> 15);
 		fuckery.a3 = (b.raw[0] >> 7);
 		b.raw[0] <<= 1;
-		fuckery.a4 = (b.raw[1] >> 31);
-		fuckery.a5 = (b.raw[1] >> 23);
-		fuckery.a6 = (b.raw[1] >> 15);
-		fuckery.a7 = (b.raw[1] >> 7);
-		b.raw[1] <<= 1;
+		// fuckery.a4 = (b.raw[1] >> 31);
+		// fuckery.a5 = (b.raw[1] >> 23);
+		// fuckery.a6 = (b.raw[1] >> 15);
+		// fuckery.a7 = (b.raw[1] >> 7);
+		// b.raw[1] <<= 1;
 #if LANES > 8
 		fuckery.b0 = (b.raw[2] >> 31);
 		fuckery.b1 = (b.raw[2] >> 23);
@@ -258,7 +258,7 @@ public:
 	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b2, PixelController<RGB_ORDER> *allpixels[LANES]) { // , register uint32_t & b2)  {
 		uint32_t flipper = bits(b);
 		// Serial.print("flipper is "); Serial.println(flipper);
-		for(uint32_t i = 0; i < LANES; i++) {
+		for(uint32_t i = 0; i < LANES/2; i++) {
 			while(VAL > next_mark);
 
 			next_mark = VAL - (TOTAL);
@@ -286,6 +286,21 @@ public:
 			}
   #endif
 		}
+
+    for(uint32_t i = 0; i < LANES/2; i++) {
+      while(VAL > next_mark);
+
+      next_mark = VAL - (TOTAL);
+      *FastPin<33>::sport() = PORT_MASK;
+
+      while((VAL-next_mark) > (T2+T3+6));
+      *FastPin<33>::cport() = (flipper & PORT_MASK);
+      flipper = bits(b);
+
+
+      while((VAL - next_mark) > T3);
+      *FastPin<33>::cport() = PORT_MASK;
+    }
 
     // transposeLines(b, b2);
 		// for(register uint32_t i = 0; i < XTRA0; i++) {
