@@ -19,7 +19,7 @@ class LPD8806Controller : public CLEDController {
 		// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
 		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return ((data>>1) | 0x80) + ((data && (data<254)) & 0x01); }
 		__attribute__((always_inline)) inline static void postBlock(int len) {
-			SPI::writeBytesValueRaw(0, ((len+63)>>6));
+			SPI::writeBytesValueRaw(0, ((len*3+63)>>6));
 		}
 
 	};
@@ -35,7 +35,7 @@ class LPD8806Controller : public CLEDController {
 	}
 
 	void clearLine(int nLeds) {
-		int n = ((nLeds  + 63) >> 6);
+		int n = ((nLeds*3  + 63) >> 6);
 		mSPI.writeBytesValue(0, n);
 	}
 public:
