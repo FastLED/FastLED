@@ -12,16 +12,16 @@
 #define SPI_PUSHR_PCS(X) SPIX.PUSHR_PCS(X)
 #endif
 
-// Template function that, on compilation, expands to a constant representing the highest bit set in a byte.  Right now, 
+// Template function that, on compilation, expands to a constant representing the highest bit set in a byte.  Right now,
 // if no bits are set (value is 0), it returns 0, which is also the value returned if the lowest bit is the only bit
 // set (the zero-th bit).  Unclear if I  will want this to change at some point.
-template<int VAL, int BIT> class BitWork { 
-	public: 
-		static int highestBit() __attribute__((always_inline)) { return (VAL & 1 << BIT) ? BIT : BitWork<VAL, BIT-1>::highestBit(); } 
+template<int VAL, int BIT> class BitWork {
+	public:
+		static int highestBit() __attribute__((always_inline)) { return (VAL & 1 << BIT) ? BIT : BitWork<VAL, BIT-1>::highestBit(); }
 };
-template<int VAL> class BitWork<VAL, 0> { 
-	public: 
-		static int highestBit() __attribute__((always_inline)) { return 0; } 
+template<int VAL> class BitWork<VAL, 0> {
+	public:
+		static int highestBit() __attribute__((always_inline)) { return 0; }
 };
 
 #define MAX(A, B) (( (A) > (B) ) ? (A) : (B))
@@ -77,7 +77,7 @@ template <int VAL> void getScalars(uint32_t & preScalar, uint32_t & scalar, uint
 #define SPIX (*(SPI_t*)pSPIX)
 
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER, uint32_t pSPIX>
-class ARMHardwareSPIOutput { 
+class ARMHardwareSPIOutput {
 	Selectable *m_pSelect;
 
 	// Borrowed from the teensy3 SPSR emulation code
@@ -112,7 +112,7 @@ public:
 
                     SPIX.MCR = mcr;
             }
-    }	
+    }
 
     static inline void update_ctar1(uint32_t ctar) __attribute__((always_inline)) {
             if (SPIX.CTAR1 == ctar) return;
@@ -123,11 +123,11 @@ public:
                     SPIX.MCR = mcr | SPI_MCR_MDIS | SPI_MCR_HALT;
                     SPIX.CTAR1 = ctar;
                     SPIX.MCR = mcr;
-          
-            }
-    }	
 
-    void setSPIRate() { 
+            }
+    }
+
+    void setSPIRate() {
 		// Configure CTAR0, defaulting to 8 bits and CTAR1, defaulting to 16 bits
 	 	uint32_t _PBR = 0;
 	 	uint32_t _BR = 0;
@@ -157,7 +157,7 @@ public:
 	 	ctar1 |= SPI_CTAR_CPHA | SPI_CTAR_CPOL;
 #endif
 
-	 	if(_DBR) { 
+	 	if(_DBR) {
 	 		ctar0 |= SPI_CTAR_DBR;
 	 		ctar1 |= SPI_CTAR_DBR;
 	 	}
@@ -166,7 +166,7 @@ public:
 	    update_ctar1(ctar1);
 
     }
-	
+
 	void init() {
 		// set the pins to output
 		FastPin<_DATA_PIN>::setOutput();
@@ -190,23 +190,23 @@ public:
 		}
 		setSPIRate();
 
-		// Configure SPI as the master and enable 
+		// Configure SPI as the master and enable
 		SPIX.MCR |= SPI_MCR_MSTR; // | SPI_MCR_CONT_SCKE);
 		SPIX.MCR &= ~(SPI_MCR_MDIS | SPI_MCR_HALT);
 
 		enable_pins();
 	}
 
-	static void waitFully() __attribute__((always_inline)) { 
-		while( (SPIX.SR & 0xF000) > 0); 
-		while (!(SPIX.SR & SPI_SR_TCF)); 
-		SPIX.SR |= (SPI_SR_TCF | SPI_SR_EOQF); 
+	static void waitFully() __attribute__((always_inline)) {
+		while( (SPIX.SR & 0xF000) > 0);
+		while (!(SPIX.SR & SPI_SR_TCF));
+		SPIX.SR |= (SPI_SR_TCF | SPI_SR_EOQF);
 	}
 
 	static bool needwait() __attribute__((always_inline)) { return (SPIX.SR & 0x4000); }
 	static void wait() __attribute__((always_inline)) { while( (SPIX.SR & 0x4000) );  }
 	static void wait1() __attribute__((always_inline)) { while( (SPIX.SR & 0xF000) >= 0x2000);  }
-	
+
 	enum ECont { CONT, NOCONT };
 	enum EWait { PRE, POST, NONE };
 	enum ELast { NOTLAST, LAST };
@@ -218,20 +218,20 @@ public:
 #endif
 	#define WM PRE
 
-	template<ECont CONT_STATE, EWait WAIT_STATE, ELast LAST_STATE> class Write { 
+	template<ECont CONT_STATE, EWait WAIT_STATE, ELast LAST_STATE> class Write {
 	public:
-		static void writeWord(uint16_t w) __attribute__((always_inline)) { 
+		static void writeWord(uint16_t w) __attribute__((always_inline)) {
 			if(WAIT_STATE == PRE) { wait(); }
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
-			             ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) | 
+			             ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
 			             SPI_PUSHR_CTAS(1) | (w & 0xFFFF);
 			if(WAIT_STATE == POST) { wait(); }
 		}
 
-		static void writeByte(uint8_t b) __attribute__((always_inline)) { 
+		static void writeByte(uint8_t b) __attribute__((always_inline)) {
 			if(WAIT_STATE == PRE) { wait(); }
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
-			             ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) | 
+			             ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
 			             SPI_PUSHR_CTAS(0) | (b & 0xFF);
 			if(WAIT_STATE == POST) { wait(); }
 		}
@@ -252,7 +252,7 @@ public:
 	static void writeByteContNoWait(uint8_t b) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); }
 
 	// not the most efficient mechanism in the world - but should be enough for sm16716 and friends
-	template <uint8_t BIT> inline static void writeBit(uint8_t b) { 
+	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
 		uint32_t ctar1_save = SPIX.CTAR1;
 
 		// Clear out the FMSZ bits, reset them for 1 bit transferd for the start bit
@@ -264,35 +264,35 @@ public:
 		update_ctar1(ctar1_save);
 	}
 
-	void inline select() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->select(); } } 
-	void inline release() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->release(); } } 
+	void inline select() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->select(); } }
+	void inline release() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->release(); } }
 
 	static void writeBytesValueRaw(uint8_t value, int len) {
 		while(len--) { Write<CM, WM, NOTLAST>::writeByte(value); }
 	}
 
-	void writeBytesValue(uint8_t value, int len) { 
+	void writeBytesValue(uint8_t value, int len) {
 		setSPIRate();
 		select();
-		while(len--) { 
+		while(len--) {
 			writeByte(value);
 		}
 		waitFully();
 		release();
 	}
-	
-	// Write a block of n uint8_ts out 
-	template <class D> void writeBytes(register uint8_t *data, int len) { 
+
+	// Write a block of n uint8_ts out
+	template <class D> void writeBytes(register uint8_t *data, int len) {
 		setSPIRate();
 		uint8_t *end = data + len;
 		select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
-		while(data != end) { 
+		while(data != end) {
 			writeByte(D::adjust(*data++));
 		}
 		D::postBlock(len);
 		waitFully();
-		release();	
+		release();
 	}
 
 	void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
@@ -304,7 +304,7 @@ public:
 		select();
 		int len = pixels.mLen;
 
-		// Setup the pixel controller 
+		// Setup the pixel controller
 		if((FLAGS & FLAG_START_BIT) == 0) {
 			//If no start bit stupiditiy, write out as many 16-bit blocks as we can
 			while(pixels.has(2)) {
@@ -315,14 +315,14 @@ public:
 				// Load and write out the next two bytes (step dithering, advance data in between since we
 				// cross pixels here)
 				Write<CM, WM, NOTLAST>::writeWord(D::adjust(pixels.loadAndScale2()) << 8 | D::adjust(pixels.stepAdvanceAndLoadAndScale0()));
-				
+
 				// Load and write out the next two bytes
 				Write<CM, WM, NOTLAST>::writeWord(D::adjust(pixels.loadAndScale1()) << 8 | D::adjust(pixels.loadAndScale2()));
 				pixels.stepDithering();
 				pixels.advanceData();
 			}
 
-			if(pixels.has(1)) { 
+			if(pixels.has(1)) {
 				if(WM == NONE) { wait1(); }
 				// write out the rest as alternating 16/8-bit blocks (likely to be just one)
 				Write<CM, WM, NOTLAST>::writeWord(D::adjust(pixels.loadAndScale0()) << 8 | D::adjust(pixels.loadAndScale1()));
@@ -338,7 +338,7 @@ public:
 			uint32_t ctar1 = (ctar1_save & (~SPI_CTAR_FMSZ(15))) | SPI_CTAR_FMSZ(8);
 			update_ctar1(ctar1);
 
-			while(pixels.has(1)) { 
+			while(pixels.has(1)) {
 				writeWord( 0x100 | D::adjust(pixels.loadAndScale0()));
 				writeByte(D::adjust(pixels.loadAndScale1()));
 				writeByte(D::adjust(pixels.loadAndScale2()));
@@ -350,6 +350,7 @@ public:
 
 			// restore ctar1
 			update_ctar1(ctar1_save);
+			FastPin<_CLOCK_PIN>::toggle();
 		}
 		release();
 	}
