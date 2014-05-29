@@ -28,6 +28,47 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
 
 
 
+void nscale8_video( CRGB* leds, uint16_t num_leds, uint8_t scale)
+{
+    for( uint16_t i = 0; i < num_leds; i++) {
+        leds[i].nscale8_video( scale);
+    }
+}
+
+void fade_video(CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8_video( leds, num_leds, 255 - fadeBy);
+}
+
+void fadeLightBy(CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8_video( leds, num_leds, 255 - fadeBy);
+}
+
+
+void fadeToBlackBy( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8( leds, num_leds, 255 - fadeBy);
+}
+
+void fade_raw( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8( leds, num_leds, 255 - fadeBy);
+}
+
+void nscale8_raw( CRGB* leds, uint16_t num_leds, uint8_t scale)
+{
+    nscale8( leds, num_leds, scale);
+}
+
+void nscale8( CRGB* leds, uint16_t num_leds, uint8_t scale)
+{
+    for( uint16_t i = 0; i < num_leds; i++) {
+        leds[i].nscale8( scale);
+    }
+}
+
+
 
 // CRGB HeatColor( uint8_t temperature)
 //

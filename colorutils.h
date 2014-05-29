@@ -15,6 +15,33 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
                    uint8_t deltahue = 5);
 
 
+// fadeLightBy and fade_video - reduce the brightness of an array
+//                              of pixels all at once.  Guaranteed
+//                              to never fade all the way to black.
+//                              (The two names are synonyms.)
+void fadeLightBy(   CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
+void fade_video(    CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
+
+// nscale8_video - scale down the brightness of an array of pixels
+//                 all at once.  Guaranteed to never scale a pixel
+//                 all the way down to black, unless 'scale' is zero.
+void nscale8_video( CRGB* leds, uint16_t num_leds, uint8_t scale);
+
+// fadeToBlackBy and fade_raw - reduce the brightness of an array
+//                              of pixels all at once.  These
+//                              functions will eventually fade all
+//                              the way to black.
+//                              (The two names are synonyms.)
+void fadeToBlackBy( CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
+void fade_raw(      CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
+
+// nscale8 - scale down the brightness of an array of pixels
+//           all at once.  This function can scale pixels all the
+//           way down to black even if 'scale' is not zero.
+void nscale8(       CRGB* leds, uint16_t num_leds, uint8_t scale);
+
+
+
 // CRGB HeatColor( uint8_t temperature)
 //
 // Approximates a 'black body radiation' spectrum for
