@@ -348,8 +348,6 @@ public:
 		}
 #endif
 		D::postBlock(len);
-		FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
-		FastPin<CLOCK_PIN>::lo(); 
 		release();
 	}
 };

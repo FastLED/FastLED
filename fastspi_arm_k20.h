@@ -350,7 +350,6 @@ public:
 
 			// restore ctar1
 			update_ctar1(ctar1_save);
-			FastPin<_CLOCK_PIN>::toggle();
 		}
 		release();
 	}

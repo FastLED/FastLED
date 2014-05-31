@@ -151,7 +151,6 @@ public:
 			}
 		}
 		D::postBlock(len);
-		FastPin<_CLOCK_PIN>::toggle();
 		release();
 	}
 };
