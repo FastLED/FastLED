@@ -17,6 +17,7 @@
 #include "colorutils.h"
 #include "chipsets.h"
 #include "dmx.h"
+#include "noise.h"
 
 enum ESPIChipsets {
 	LPD8806,
@@ -195,6 +196,10 @@ public:
 	void setCorrection(const struct CRGB & correction);
 	void setDither(uint8_t ditherMode = BINARY_DITHER);
 
+	// for debugging, will keep track of time between calls to countFPS, and every
+	// nFrames calls, it will print a summary of FPS info out to the serial port.
+	// If the serial port isn't opened, this function does nothing.
+	void countFPS(int nFrames=100);
 };
 
 extern CFastLED & FastSPI_LED;
