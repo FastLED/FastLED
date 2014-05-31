@@ -16,3 +16,4 @@
 * Added map8
 * Adjusted VIRTAL_BITS of dithering from a flickery 8 to a more solid 3
 * Added array versions of fade_video, fade_raw, and some variations
+* Added fill_gradient

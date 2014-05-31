@@ -15,6 +15,29 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
                    uint8_t deltahue = 5);
 
 
+// fill_gradient - fill a range of LEDs with a smooth gradient
+//                 between two specified HSV colors.
+//                 Since 'hue' is a value around a color wheel,
+//                 there are always two ways to sweep from one hue
+//                 to another.
+//                 This function lets you specify which way you want
+//                 the hue gradient to sweep around the color wheel:
+//                   FORWARD_HUES: hue always goes clockwise
+//                   BACKWARD_HUES: hue always goes counter-clockwise
+//                   SHORTEST_HUES: hue goes whichever way is shortest
+//                   LONGEST_HUES: hue goes whichever way is longest
+//                 The default is SHORTEST_HUES, as this is nearly
+//                 always what is wanted.
+//
+typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradientDirectionCode;
+
+void fill_gradient( struct CRGB* leds,
+                    uint16_t startpos, CHSV startcolor,
+                    uint16_t endpos,   CHSV endcolor,
+                    TGradientDirectionCode directionCode = SHORTEST_HUES );
+
+
+
 // fadeLightBy and fade_video - reduce the brightness of an array
 //                              of pixels all at once.  Guaranteed
 //                              to never fade all the way to black.
