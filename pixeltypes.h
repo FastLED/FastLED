@@ -289,6 +289,15 @@ struct CRGB {
         return *this;
     }
 
+    // right shift each of the channels by a constant
+    inline CRGB& operator>>= (uint8_t d)
+    {
+      r >>= d;
+      g >>= d;
+      b >>= d;
+      return *this;
+    }
+
     // multiply each of the channels by a constant,
     // saturating each channel at 0xFF
     inline CRGB& operator*= (uint8_t d )
@@ -424,9 +433,9 @@ struct CRGB {
     {
       CRGB ret;
 
-      ret.r = lerp16by8(r<<8,other.r<<8,frac)>>8;
-      ret.g = lerp16by8(g<<8,other.g<<8,frac)>>8;
-      ret.b = lerp16by8(b<<8,other.b<<8,frac)>>8;
+      ret.r = lerp8by8(r,other.r,frac);
+      ret.g = lerp8by8(g,other.g,frac);
+      ret.b = lerp8by8(b,other.b,frac);
 
       return ret;
     }
