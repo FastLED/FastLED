@@ -386,25 +386,21 @@ void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, u
   }
 }
 
-void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octaves, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
-  uint32_t _xx = x;
-  uint32_t _yy = y;
-  uint32_t scx = scalex;
-  uint32_t scy = scaley;
+inline void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octaves, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
   for(int o = 0; o < octaves; o++) {
-    for(int i = 0,yy=_yy; i < height; i++,yy+=scy) {
+    for(int i = 0,yy=y; i < height; i++,yy+=scaley) {
       uint8_t *pRow = pData + (i * width);
-      for(int j = 0,xx=_xx; j < width; j++,xx+=scx) {
+      for(int j = 0,xx=x; j < width; j++,xx+=scalex) {
         uint32_t accum = (inoise16(xx,yy,time))>>o;
         accum += (pRow[j]<<8);
         if(accum > 65535) { accum = 65535; }
         pRow[j] = accum>>8;
       }
     }
-    _xx <<= 1;
-    scx <<= 1;
-    _yy <<= 1;
-    scy <<= 1;
+    x <<= 1;
+    scalex <<= 1;
+    y <<= 1;
+    scaley <<= 1;
   }
 }
 
