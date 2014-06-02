@@ -3,7 +3,7 @@
 
 #ifdef FASTLED_AVR
 #define USE_PROGMEM
-#endf
+#endif
 
 #ifdef USE_PROGMEM
 #define FL_PROGMEM PROGMEM
