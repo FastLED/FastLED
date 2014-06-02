@@ -61,7 +61,7 @@ void setup() {
 
   delay(3000);
   LEDS.addLeds<WS2811,5,GRB>(leds,NUM_LEDS);
-  LEDS.setBrightness(32);
+  LEDS.setBrightness(96);
 
   x = (uint32_t)((uint32_t)random16() << 16) | random16();
   y = (uint32_t)((uint32_t)random16() << 16) | random16();

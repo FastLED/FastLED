@@ -1,7 +1,10 @@
 #include <FastLED.h>
 #include <avr/pgmspace.h>
 
+#ifdef FASTLED_AVR
 #define USE_PROGMEM
+#endf
+
 #ifdef USE_PROGMEM
 #define FL_PROGMEM PROGMEM
 #define P(x) pgm_read_byte_near(p + x)
