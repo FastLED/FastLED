@@ -37,7 +37,7 @@ int y_speed=1;
 
 void loop() {
   // fill the led array 2/16-bit noise values
-  fill_2dnoise16(leds, kMatrixWidth, kMatrixHeight, kMatrixSerpentineLayout,
+  fill_2dnoise16(LEDS.leds(), kMatrixWidth, kMatrixHeight, kMatrixSerpentineLayout,
                 octaves,x,xscale,y,yscale,time,
                 hue_octaves,x,hue_scale,y,hue_scale,hue_time, false);
   LEDS.show();
