@@ -173,7 +173,7 @@ uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z)
 
   int16_t ans = LERP(Y1,Y2,w);
 
-  return scale16by8(ans+15900,245)<<1;
+  return scale16by8(ans+15900,250)<<1;
   // return N+ans;
 }
 
@@ -207,7 +207,7 @@ uint16_t inoise16(uint32_t x, uint32_t y)
 
   int16_t ans = LERP(X1,X2,v);
 
-  return scale16by8(ans+15900,245)<<1;
+  return scale16by8(ans+15900,250)<<1;
   // return N+ans;
 }
 
@@ -233,7 +233,7 @@ uint16_t inoise16(uint32_t x)
 
   int16_t ans = LERP(grad16(P(AA), xx, 0, 0), grad16(P(BA), xx - N, 0, 0), u);
 
-  return scale16by8(ans+15900,245)<<1;
+  return scale16by8(ans+15900,250)<<1;
   // return N+ans;
 }
 
@@ -336,4 +336,176 @@ uint8_t inoise8(uint16_t x)
   int8_t ans = lerp7by8(grad8(P(AA), xx, 0, 0), grad8(P(BA), xx - N, 0, 0), u);
 
   return scale8((70+(ans)),234)<<1;
+}
+
+void fill_raw_noise8(uint8_t *pData, uint8_t num_points, uint8_t octaves, uint16_t x, int scale, uint16_t time) {
+  uint32_t _xx = x;
+  uint32_t scx = scale;
+  for(int o = 0; o < octaves; o++) {
+    for(int i = 0,xx=_xx; i < num_points; i++, xx+=scx) {
+          pData[i] = qadd8(pData[i],inoise8(xx,time)>>o);
+    }
+
+    _xx <<= 1;
+    scx <<= 1;
+  }
+}
+
+void fill_raw_noise16into8(uint8_t *pData, uint8_t num_points, uint8_t octaves, uint32_t x, int scale, uint32_t time) {
+  uint32_t _xx = x;
+  uint32_t scx = scale;
+  for(int o = 0; o < octaves; o++) {
+    for(int i = 0,xx=_xx; i < num_points; i++, xx+=scx) {
+      uint32_t accum = (inoise16(xx,time))>>o;
+      accum += (pData[i]<<8);
+      if(accum > 65535) { accum = 65535; }
+      pData[i] = accum>>8;
+    }
+
+    _xx <<= 1;
+    scx <<= 1;
+  }
+}
+
+void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, uint16_t x, int scalex, uint16_t y, int scaley, uint16_t time) {
+  uint32_t _xx = x;
+  uint32_t _yy = y;
+  uint32_t scx = scalex;
+  uint32_t scy = scaley;
+  for(int o = 0; o < octaves; o++) {
+    for(int i = 0,yy=_yy; i < height; i++,yy+=scy) {
+      uint8_t *pRow = pData + (i * width);
+      for(int j = 0,xx=_xx; j < width; j++,xx+=scx) {
+        pRow[j] = qadd8(pRow[j],inoise8(xx,yy,time)>>o);
+      }
+    }
+    _xx <<= 1;
+    scx <<= 1;
+    _yy <<= 1;
+    scy <<= 1;
+  }
+}
+
+void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octaves, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
+  uint32_t _xx = x;
+  uint32_t _yy = y;
+  uint32_t scx = scalex;
+  uint32_t scy = scaley;
+  for(int o = 0; o < octaves; o++) {
+    for(int i = 0,yy=_yy; i < height; i++,yy+=scy) {
+      uint8_t *pRow = pData + (i * width);
+      for(int j = 0,xx=_xx; j < width; j++,xx+=scx) {
+        uint32_t accum = (inoise16(xx,yy,time))>>o;
+        accum += (pRow[j]<<8);
+        if(accum > 65535) { accum = 65535; }
+        pRow[j] = accum>>8;
+      }
+    }
+    _xx <<= 1;
+    scx <<= 1;
+    _yy <<= 1;
+    scy <<= 1;
+  }
+}
+
+void fill_noise8(CRGB *leds, int num_leds,
+            uint8_t octaves, uint16_t x, int scale,
+            uint8_t hue_octaves, uint16_t hue_x, int hue_scale,
+            uint16_t time) {
+  uint8_t V[num_leds];
+  uint8_t H[num_leds];
+
+  memset(V,0,num_leds);
+  memset(H,0,num_leds);
+
+  fill_raw_noise8(V,num_leds,octaves,x,scale,time);
+  fill_raw_noise8(H,num_leds,hue_octaves,hue_x,hue_scale,time);
+
+  for(int i = 0; i < num_leds; i++) {
+    leds[i] = CHSV(H[i],255,V[i]);
+  }
+}
+
+void fill_noise16(CRGB *leds, int num_leds,
+            uint8_t octaves, uint16_t x, int scale,
+            uint8_t hue_octaves, uint16_t hue_x, int hue_scale,
+            uint16_t time) {
+  uint8_t V[num_leds];
+  uint8_t H[num_leds];
+
+  memset(V,0,num_leds);
+  memset(H,0,num_leds);
+
+  fill_raw_noise16into8(V,num_leds,octaves,x,scale,time);
+  fill_raw_noise8(H,num_leds,hue_octaves,hue_x,hue_scale,time);
+
+  for(int i = 0; i < num_leds; i++) {
+    leds[i] = CHSV(H[i],255,V[i]);
+  }
+}
+
+void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
+            uint8_t octaves, uint16_t x, int xscale, uint16_t y, int yscale, uint16_t time,
+            uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time,bool blend) {
+  uint8_t V[height][width];
+  uint8_t H[height][width];
+
+  memset(V,0,height*width);
+  memset(H,0,height*width);
+
+  fill_raw_2dnoise8((uint8_t*)V,width,height,octaves,x,xscale,y,yscale,time);
+  fill_raw_2dnoise8((uint8_t*)H,width,height,hue_octaves,hue_x,hue_xscale,hue_y,hue_yscale,hue_time);
+
+  int w1 = width-1;
+  int h1 = height-1;
+  for(int i = 0; i < height; i++) {
+    int wb = i*width;
+    for(int j = 0; j < width; j++) {
+      CRGB led(CHSV(H[h1-i][w1-j],255,V[i][j]));
+
+      int pos = j;
+      if(serpentine && (i&0x1)) {
+        pos = w1-j;
+      }
+
+      if(blend) {
+        leds[wb+pos] >>= 1; leds[wb+pos] += (led>>=1);
+      } else {
+        leds[wb+pos] = led;
+      }
+    }
+  }
+}
+
+void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
+            uint8_t octaves, uint32_t x, int xscale, uint32_t y, int yscale, uint32_t time,
+            uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time, bool blend) {
+  uint8_t V[height][width];
+  uint8_t H[height][width];
+
+  memset(V,0,height*width);
+  memset(H,0,height*width);
+
+  fill_raw_2dnoise16into8((uint8_t*)V,width,height,octaves,x,xscale,y,yscale,time);
+  fill_raw_2dnoise8((uint8_t*)H,width,height,hue_octaves,hue_x,hue_xscale,hue_y,hue_yscale,hue_time);
+
+  int w1 = width-1;
+  int h1 = height-1;
+  for(int i = 0; i < height; i++) {
+    int wb = i*width;
+    for(int j = 0; j < width; j++) {
+      CRGB led(CHSV(H[h1-i][w1-j],255,V[i][j]));
+
+      int pos = j;
+      if(serpentine && (i&0x1)) {
+        pos = w1-j;
+      }
+
+      if(blend) {
+        leds[wb+pos] >>= 1; leds[wb+pos] += (led>>=1);
+      } else {
+        leds[wb+pos] = led;
+      }
+    }
+  }
 }
