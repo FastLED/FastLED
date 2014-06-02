@@ -21,19 +21,19 @@ uint8_t octaves=2;
 uint8_t hue_octaves=2;
 
 // the 'distance' between points on the x and y axis
-int xscale=131;
-int yscale=yscale;
+int xscale=301;
+int yscale=301;
 
 // the 'distance' between x/y points for the hue noise
 int hue_scale=11;
 
 // how fast we move through time & hue noise
 int time_speed=101;
-int hue_speed=2;
+int hue_speed=3;
 
 // adjust these values to move along the x or y axis between frames
 int x_speed=0;
-int y_speed=0;
+int y_speed=1;
 
 void loop() {
   // fill the led array 2/16-bit noise values
@@ -52,16 +52,16 @@ void loop() {
 
 
 void setup() {
+  // initialize the x/y and time values
+  random16_set_seed(18934);
+  random16_add_entropy(analogRead(3));
+
   Serial.begin(38400);
   Serial.println("resetting!");
 
   delay(3000);
   LEDS.addLeds<WS2811,5,GRB>(leds,NUM_LEDS);
-  LEDS.setBrightness(48);
-
-  // initialize the x/y and time values
-  random16_set_seed(8934);
-  random16_add_entropy(analogRead(3));
+  LEDS.setBrightness(32);
 
   x = (uint32_t)((uint32_t)random16() << 16) | random16();
   y = (uint32_t)((uint32_t)random16() << 16) | random16();
