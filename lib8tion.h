@@ -1574,4 +1574,28 @@ LIB8STATIC uint8_t cubicwave8(uint8_t in)
 
 
 
+template<class T, int F, int I> class q {
+  T i:I;
+  T f:F;
+public:
+  q(float fx) { i = fx; f = (fx-i) * (1<<F); }
+  q(uint8_t _i, uint8_t _f) {i=_i; f=_f; }
+  uint32_t operator*(uint32_t v) { return (v*i) + ((v*f)>>F); }
+  uint16_t operator*(uint16_t v) { return (v*i) + ((v*f)>>F); }
+  int32_t operator*(int32_t v) { return (v*i) + ((v*f)>>F); }
+  int16_t operator*(int16_t v) { return (v*i) + ((v*f)>>F); }
+  int operator*(int v) { return (v*i) + ((v*f)>>F); }
+};
+
+template<class T, int F, int I> static uint32_t operator*(uint32_t v, q<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static uint16_t operator*(uint16_t v, q<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static int32_t operator*(int32_t v, q<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static int16_t operator*(int16_t v, q<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static int operator*(int v, q<T,F,I> & q) { return q * v; }
+
+typedef q<uint8_t, 4,4> q44;
+typedef q<uint8_t, 6,2> q62;
+typedef q<uint16_t, 8,8> q88;
+typedef q<uint16_t, 12,4> q124;
+
 #endif
