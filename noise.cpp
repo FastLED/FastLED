@@ -598,7 +598,7 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
       CRGB led(CHSV(H[h1-i][w1-j],255,V[i][j]));
 
       int pos = j;
-      if(serpentine && (i &0x1)) {
+      if(serpentine && (i & 0x1)) {
         pos = w1-j;
       }
 
