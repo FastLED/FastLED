@@ -11,7 +11,7 @@
 CRGB leds[kMatrixWidth * kMatrixHeight];
 
 // x,y, & time values
-uint32_t x,y,time,hue_time;
+uint32_t x,y,v_time,hue_time;
 
 // Play with the values of the variables below and see what kinds of effects they
 // have!  More octaves will make things slower.
@@ -38,7 +38,7 @@ int y_speed=1;
 void loop() {
   // fill the led array 2/16-bit noise values
   fill_2dnoise16(LEDS.leds(), kMatrixWidth, kMatrixHeight, kMatrixSerpentineLayout,
-                octaves,x,xscale,y,yscale,time,
+                octaves,x,xscale,y,yscale,v_time,
                 hue_octaves,x,hue_scale,y,hue_scale,hue_time, false);
   LEDS.show();
   LEDS.countFPS();
@@ -46,7 +46,7 @@ void loop() {
   // adjust the intra-frame time values
   x += x_speed;
   y += y_speed;
-  time += time_speed;
+  v_time += time_speed;
   hue_time += hue_speed;
 }
 
@@ -65,7 +65,7 @@ void setup() {
 
   x = (uint32_t)((uint32_t)random16() << 16) | random16();
   y = (uint32_t)((uint32_t)random16() << 16) | random16();
-  time = (uint32_t)((uint32_t)random16() << 16) | random16();
+  v_time = (uint32_t)((uint32_t)random16() << 16) | random16();
   hue_time = (uint32_t)((uint32_t)random16() << 16) | random16();
 
 }
