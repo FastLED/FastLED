@@ -491,7 +491,7 @@ void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octa
 }
 
 void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octaves, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
-  fill_raw_2dnoise16into8(pData, width, height, octaves, q44(0,8), 171, 1, x, scalex, y, scaley, time);
+  fill_raw_2dnoise16into8(pData, width, height, octaves, q44(2.0), 171, 1, x, scalex, y, scaley, time);
   // for(int o = 0; o < octaves; o++) {
   //   for(int i = 0,yy=y; i < height; i++,yy+=scaley) {
   //     uint8_t *pRow = pData + (i * width);
@@ -587,7 +587,7 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
   memset(V,0,height*width);
   memset(H,0,height*width);
 
-  fill_raw_2dnoise16into8((uint8_t*)V,width,height,octaves,q44(0.5),171,1,x,xscale,y,yscale,time);
+  fill_raw_2dnoise16into8((uint8_t*)V,width,height,octaves,q44(2.0),171,1,x,xscale,y,yscale,time);
   fill_raw_2dnoise8((uint8_t*)H,width,height,hue_octaves,hue_x,hue_xscale,hue_y,hue_yscale,hue_time);
 
   int w1 = width-1;
