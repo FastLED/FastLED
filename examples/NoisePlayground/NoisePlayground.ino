@@ -56,11 +56,11 @@ void setup() {
   random16_set_seed(18934);
   random16_add_entropy(analogRead(3));
 
-  Serial.begin(38400);
+  Serial.begin(57600);
   Serial.println("resetting!");
 
   delay(3000);
-  LEDS.addLeds<WS2811,5,GRB>(leds,NUM_LEDS);
+  LEDS.addLeds<WS2811,6,GRB>(leds,NUM_LEDS);
   LEDS.setBrightness(96);
 
   x = (uint32_t)((uint32_t)random16() << 16) | random16();

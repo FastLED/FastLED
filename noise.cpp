@@ -233,9 +233,8 @@ int16_t inoise16_raw(uint32_t x, uint32_t y, uint32_t z)
 }
 
 uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z) {
-  // return scale16by8(ans+15900,250)<<1;
-  // return N+ans;
-  return scale16by8(inoise16_raw(x,y,z)+19052,220)<<1;
+  return ((inoise16_raw(x,y,z)+19052)*220)>>7;
+  // return scale16by8(inoise16_raw(x,y,z)+19052,220)<<1;
 }
 
 int16_t inoise16_raw(uint32_t x, uint32_t y)
@@ -272,6 +271,7 @@ int16_t inoise16_raw(uint32_t x, uint32_t y)
 }
 
 uint16_t inoise16(uint32_t x, uint32_t y) {
+  return ((inoise16_raw(x,y)+17308)*242)>>7;
   return scale16by8(inoise16_raw(x,y)+17308,242)<<1;
 }
 
@@ -657,6 +657,7 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
   memset(H,0,height*width);
 
   fill_raw_2dnoise16into8((uint8_t*)V,width,height,octaves,q44(2,0),171,1,x,xscale,y,yscale,time);
+  // fill_raw_2dnoise8((uint8_t*)V,width,height,hue_octaves,x,xscale,y,yscale,time);
   fill_raw_2dnoise8((uint8_t*)H,width,height,hue_octaves,hue_x,hue_xscale,hue_y,hue_yscale,hue_time);
 
   int w1 = width-1;
