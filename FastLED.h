@@ -199,7 +199,7 @@ public:
 	// for debugging, will keep track of time between calls to countFPS, and every
 	// nFrames calls, it will print a summary of FPS info out to the serial port.
 	// If the serial port isn't opened, this function does nothing.
-	void countFPS(int nFrames=100);
+	void countFPS(int nFrames=25);
 
 	CLEDController & operator[](int x);
 

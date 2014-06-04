@@ -191,9 +191,9 @@ static int8_t __attribute__((always_inline)) lerp7by8( int8_t a, int8_t b, fract
 int16_t inoise16_raw(uint32_t x, uint32_t y, uint32_t z)
 {
   // Find the unit cube containing the point
-  uint8_t X = x>>16;
-  uint8_t Y = y>>16;
-  uint8_t Z = z>>16;
+  uint8_t X = (x>>16)&0xFF;
+  uint8_t Y = (y>>16)&0xFF;
+  uint8_t Z = (z>>16)&0xFF;
 
   // Hash cube corner coordinates
   uint8_t A = P(X)+Y;
@@ -233,7 +233,12 @@ int16_t inoise16_raw(uint32_t x, uint32_t y, uint32_t z)
 }
 
 uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z) {
-  return ((inoise16_raw(x,y,z)+19052)*220)>>7;
+  int32_t ans = inoise16_raw(x,y,z);
+  ans = ans + 19052L;
+  uint32_t pan = ans;
+  return (pan*220L)>>7;
+  // // return scale16by8(pan,220)<<1;
+  // return ((inoise16_raw(x,y,z)+19052)*220)>>7;
   // return scale16by8(inoise16_raw(x,y,z)+19052,220)<<1;
 }
 
@@ -271,8 +276,12 @@ int16_t inoise16_raw(uint32_t x, uint32_t y)
 }
 
 uint16_t inoise16(uint32_t x, uint32_t y) {
-  return ((inoise16_raw(x,y)+17308)*242)>>7;
-  return scale16by8(inoise16_raw(x,y)+17308,242)<<1;
+  int32_t ans = inoise16_raw(x,y);
+  ans = ans + 17308L;
+  uint32_t pan = ans;
+  return (pan*242L)>>7;
+  // return (uint32_t)(((int32_t)inoise16_raw(x,y)+(uint32_t)17308)*242)>>7;
+  // return scale16by8(inoise16_raw(x,y)+17308,242)<<1;
 }
 
 int16_t inoise16_raw(uint32_t x)
@@ -301,7 +310,7 @@ int16_t inoise16_raw(uint32_t x)
 }
 
 uint16_t inoise16(uint32_t x) {
-  return (inoise16_raw(x) + 17308) << 1;
+  return ((uint32_t)((int32_t)inoise16_raw(x) + 17308L)) << 1;
 }
 
 int8_t inoise8_raw(uint16_t x, uint16_t y, uint16_t z)
@@ -565,7 +574,12 @@ void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octa
   //   for(int i = 0,yy=y; i < height; i++,yy+=scaley) {
   //     uint8_t *pRow = pData + (i * width);
   //     for(int j = 0,xx=x; j < width; j++,xx+=scalex) {
-  //       uint32_t accum = (inoise16(xx,yy,time))>>o;
+  //       // uint32_t accum = (65536/2) + abs(inoise16_raw(xx,yy,time))>>o;
+  //       uint32_t accum = inoise16(xx,yy,time)>>o;
+  //       // if(i==0 && j == 0) {
+  //       //   Serial.print(accum);  Serial.print("/"); Serial.print(inoise16_raw(xx,yy,time)); Serial.print(" ");
+  //       // }
+  //
   //       accum += (pRow[j]<<8);
   //       if(accum > 65535) { accum = 65535; }
   //       pRow[j] = accum>>8;
@@ -656,9 +670,10 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
   memset(V,0,height*width);
   memset(H,0,height*width);
 
-  fill_raw_2dnoise16into8((uint8_t*)V,width,height,octaves,q44(2,0),171,1,x,xscale,y,yscale,time);
+  fill_raw_2dnoise16into8((uint8_t*)V,width,height,octaves,q44(2,0),128,1,x,xscale,y,yscale,time);
   // fill_raw_2dnoise8((uint8_t*)V,width,height,hue_octaves,x,xscale,y,yscale,time);
   fill_raw_2dnoise8((uint8_t*)H,width,height,hue_octaves,hue_x,hue_xscale,hue_y,hue_yscale,hue_time);
+
 
   int w1 = width-1;
   int h1 = height-1;
