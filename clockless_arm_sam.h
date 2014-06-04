@@ -165,7 +165,7 @@ public:
 				while((VAL - next_mark) > (T3));
 			} else {
 				// we're a 0, wait until there's less than (T2+T3+slop) clocks left in this bit
-				while((VAL-next_mark) > (T2+T3+4+TADJUST+TADJUST));
+				while((VAL-next_mark) > (T2+T3+6+TADJUST+TADJUST));
 			}
 			*port=0;
 			b <<= 1;
