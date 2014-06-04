@@ -107,6 +107,9 @@ void CFastLED::setDither(uint8_t ditherMode)  {
 	}
 }
 
+extern int noise_min;
+extern int noise_max;
+
 void CFastLED::countFPS(int nFrames) {
 	if(Serial) {
 	  static uint32_t br = 0;
@@ -116,6 +119,7 @@ void CFastLED::countFPS(int nFrames) {
 	  if(br == nFrames) {
 	    uint32_t now = millis() - lastframe;
 	    uint32_t fps = (br * 1000) / now;
+			/*Serial.print('('); Serial.print(noise_min); Serial.print(','); Serial.print(noise_max); Serial.print(") "); */
 	    Serial.print(now); Serial.print("ms for "); Serial.print(br); Serial.print(" frames, aka ");
 	    Serial.print(fps); Serial.println(" fps. ");
 	    br = 0;

@@ -1,7 +1,7 @@
 #include <FastLED.h>
-#include <avr/pgmspace.h>
 
 #ifdef FASTLED_AVR
+#include <avr/pgmspace.h>
 #define USE_PROGMEM
 #endif
 
@@ -13,7 +13,7 @@
 #define P(x) p[(x)]
 #endif
 
-PROGMEM static uint8_t p[] = { 151,160,137,91,90,15,
+FL_PROGMEM static uint8_t p[] = { 151,160,137,91,90,15,
    131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
    190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
    88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -39,7 +39,6 @@ PROGMEM static uint8_t p[] = { 151,160,137,91,90,15,
 #define FADE(x) scale16(x,x)
 #define LERP(a,b,u) lerp15by16(a,b,u)
 #endif
-
 static int16_t __attribute__((always_inline))  grad16(uint8_t hash, int16_t x, int16_t y, int16_t z) {
 #if 0
   switch(hash & 0xF) {
@@ -69,6 +68,28 @@ static int16_t __attribute__((always_inline))  grad16(uint8_t hash, int16_t x, i
 
   return (u+v)>>1;
 #endif
+}
+
+static int16_t __attribute__((always_inline)) grad16(uint8_t hash, int16_t x, int16_t y) {
+  hash = hash & 7;
+  int16_t u,v;
+  if(hash < 4) { u = x; v = y; } else { u = y; v = x; }
+  if(hash&1) { u = -u; }
+  if(hash&2) { v = -v; }
+
+  return (u+v)>>1;
+}
+
+static int16_t __attribute__((always_inline)) grad16(uint8_t hash, int16_t x) {
+  hash = hash & 15;
+  int16_t u,v;
+  if(hash > 8) { u=x;v=x; }
+  else if(hash < 4) { u=x;v=1; }
+  else { u=1;v=x; }
+  if(hash&1) { u = -u; }
+  if(hash&2) { v = -v; }
+
+  return (u+v)>>1;
 }
 
 static int8_t  __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y, int8_t z) {
@@ -101,6 +122,29 @@ static int8_t  __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8
   return (u+v)>>1;
 #endif
 }
+
+static int8_t __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y) {
+  hash = hash & 7;
+  int8_t u,v;
+  if(hash < 4) { u = x; v = y; } else { u = y; v = x; }
+  if(hash&1) { u = -u; }
+  if(hash&2) { v = -v; }
+
+  return (u+v)>>1;
+}
+
+static int8_t __attribute__((always_inline)) grad8(uint8_t hash, int8_t x) {
+  hash = hash & 15;
+  int8_t u,v;
+  if(hash > 8) { u=x;v=x; }
+  else if(hash < 4) { u=x;v=1; }
+  else { u=1;v=x; }
+  if(hash&1) { u = -u; }
+  if(hash&2) { v = -v; }
+
+  return (u+v)>>1;
+}
+
 
 #ifdef FADE_12
 uint16_t logfade12(uint16_t val) {
@@ -144,7 +188,7 @@ static int8_t __attribute__((always_inline)) lerp7by8( int8_t a, int8_t b, fract
     return result;
 }
 
-uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z)
+int16_t inoise16_raw(uint32_t x, uint32_t y, uint32_t z)
 {
   // Find the unit cube containing the point
   uint8_t X = x>>16;
@@ -185,11 +229,16 @@ uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z)
 
   int16_t ans = LERP(Y1,Y2,w);
 
-  return scale16by8(ans+15900,250)<<1;
-  // return N+ans;
+  return ans;
 }
 
-uint16_t inoise16(uint32_t x, uint32_t y)
+uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z) {
+  // return scale16by8(ans+15900,250)<<1;
+  // return N+ans;
+  return scale16by8(inoise16_raw(x,y,z)+19052,220)<<1;
+}
+
+int16_t inoise16_raw(uint32_t x, uint32_t y)
 {
   // Find the unit cube containing the point
   uint8_t X = x>>16;
@@ -214,16 +263,19 @@ uint16_t inoise16(uint32_t x, uint32_t y)
 
   u = FADE(u); v = FADE(v);
 
-  int16_t X1 = LERP(grad16(P(AA), xx, yy, 0), grad16(P(BA), xx - N, yy, 0), u);
-  int16_t X2 = LERP(grad16(P(AB), xx, yy-N, 0), grad16(P(BB), xx - N, yy - N, 0), u);
+  int16_t X1 = LERP(grad16(P(AA), xx, yy), grad16(P(BA), xx - N, yy), u);
+  int16_t X2 = LERP(grad16(P(AB), xx, yy-N), grad16(P(BB), xx - N, yy - N), u);
 
   int16_t ans = LERP(X1,X2,v);
 
-  return scale16by8(ans+15900,250)<<1;
-  // return N+ans;
+  return ans;
 }
 
-uint16_t inoise16(uint32_t x)
+uint16_t inoise16(uint32_t x, uint32_t y) {
+  return scale16by8(inoise16_raw(x,y)+17308,242)<<1;
+}
+
+int16_t inoise16_raw(uint32_t x)
 {
   // Find the unit cube containing the point
   uint8_t X = x>>16;
@@ -243,13 +295,16 @@ uint16_t inoise16(uint32_t x)
 
   u = FADE(u);
 
-  int16_t ans = LERP(grad16(P(AA), xx, 0, 0), grad16(P(BA), xx - N, 0, 0), u);
+  int16_t ans = LERP(grad16(P(AA), xx), grad16(P(BA), xx - N), u);
 
-  return scale16by8(ans+15900,250)<<1;
-  // return N+ans;
+  return ans;
 }
 
-uint8_t inoise8(uint16_t x, uint16_t y, uint16_t z)
+uint16_t inoise16(uint32_t x) {
+  return (inoise16_raw(x) + 17308) << 1;
+}
+
+int8_t inoise8_raw(uint16_t x, uint16_t y, uint16_t z)
 {
   // Find the unit cube containing the point
   uint8_t X = x>>8;
@@ -288,10 +343,14 @@ uint8_t inoise8(uint16_t x, uint16_t y, uint16_t z)
 
   int8_t ans = lerp7by8(Y1,Y2,w);
 
-  return scale8((70+(ans)),234)<<1;
+  return ans;
 }
 
-uint8_t inoise8(uint16_t x, uint16_t y)
+uint8_t inoise8(uint16_t x, uint16_t y, uint16_t z) {
+  return scale8(76+(inoise8_raw(x,y,z)),215)<<1;
+}
+
+int8_t inoise8_raw(uint16_t x, uint16_t y)
 {
   // Find the unit cube containing the point
   uint8_t X = x>>8;
@@ -317,15 +376,20 @@ uint8_t inoise8(uint16_t x, uint16_t y)
   // u = FADE(u); v = FADE(v); w = FADE(w);
   u = scale8_LEAVING_R1_DIRTY(u,u); v = scale8(v,v);
 
-  int8_t X1 = lerp7by8(grad8(P(AA), xx, yy, 0), grad8(P(BA), xx - N, yy, 0), u);
-  int8_t X2 = lerp7by8(grad8(P(AB), xx, yy-N, 0), grad8(P(BB), xx - N, yy - N, 0), u);
+  int8_t X1 = lerp7by8(grad8(P(AA), xx, yy), grad8(P(BA), xx - N, yy), u);
+  int8_t X2 = lerp7by8(grad8(P(AB), xx, yy-N), grad8(P(BB), xx - N, yy - N), u);
 
   int8_t ans = lerp7by8(X1,X2,v);
 
-  return scale8((70+(ans)),234)<<1;
+  return ans;
+  // return scale8((70+(ans)),234)<<1;
 }
 
-uint8_t inoise8(uint16_t x)
+uint8_t inoise8(uint16_t x, uint16_t y) {
+  return scale8(69+inoise8_raw(x,y),237)<<1;
+}
+
+int8_t inoise8_raw(uint16_t x)
 {
   // Find the unit cube containing the point
   uint8_t X = x>>8;
@@ -345,9 +409,14 @@ uint8_t inoise8(uint16_t x)
 
   u = scale8(u,u);
 
-  int8_t ans = lerp7by8(grad8(P(AA), xx, 0, 0), grad8(P(BA), xx - N, 0, 0), u);
+  int8_t ans = lerp7by8(grad8(P(AA), xx), grad8(P(BA), xx - N), u);
 
-  return scale8((70+(ans)),234)<<1;
+  return ans;
+  // return scale8((70+(ans)),234)<<1;
+}
+
+uint8_t inoise8(uint16_t x) {
+  return scale8(69+inoise8_raw(x), 255)<<1;
 }
 
 // struct q44 {
@@ -432,7 +501,7 @@ void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, u
 
 void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves, q88 freq88, fract16 amplitude, int skip, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
   if(octaves > 1) {
-    fill_raw_2dnoise16(pData, width, height, octaves-1, freq88, amplitude, skip+1, x, scalex *freq88, y, scaley * freq88, time);
+    fill_raw_2dnoise16(pData, width, height, octaves-1, freq88, amplitude, skip+1, x * freq88, scalex *freq88, y *freq88, scaley * freq88, time);
   } else {
     // amplitude is always 255 on the lowest level
     amplitude=65535;
