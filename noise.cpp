@@ -471,13 +471,16 @@ void fill_raw_noise16into8(uint8_t *pData, uint8_t num_points, uint8_t octaves, 
   }
 }
 
-void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, uint16_t x, int scalex, uint16_t y, int scaley, uint16_t time) {
+void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint16_t x, int scalex, uint16_t y, int scaley, uint16_t time) {
   if(octaves > 1) {
-    fill_raw_2dnoise8(pData, width, height, octaves-1, freq44, amplitude, x, freq44 * scalex, y, freq44 * scaley, time);
+    fill_raw_2dnoise8(pData, width, height, octaves-1, freq44, amplitude, skip+1, x*freq44, freq44 * scalex, y*freq44, freq44 * scaley, time);
   } else {
     // amplitude is always 255 on the lowest level
     amplitude=255;
   }
+
+  scalex *= skip;
+  scaley *= skip;
 
   fract8 invamp = 255-amplitude;
   uint16_t xx = x;
@@ -485,18 +488,30 @@ void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q
     uint8_t *pRow = pData + (i*width);
     xx = x;
     for(int j = 0; j < width; j++, xx+=scalex) {
-      pRow[j] = scale8(pRow[j],invamp) + scale8((inoise8(xx,y,time))  , amplitude);
+      uint8_t noise_base = inoise8(xx,y,time);
+      noise_base = (0x80 & noise_base) ? (noise_base - 127) : (127 - noise_base);
+      noise_base = scale8(noise_base<<1,amplitude);
+      if(skip == 1) {
+        pRow[j] = scale8(pRow[j],invamp) + noise_base;
+      } else {
+        for(int ii = i; ii<(i+skip) && ii<height; ii++) {
+          uint8_t *pRow = pData + (ii*width);
+          for(int jj=j; jj<(j+skip) && jj<width; jj++) {
+            pRow[jj] = scale8(pRow[jj],invamp) + noise_base;
+          }
+        }
+      }
     }
   }
 }
 
 void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, uint16_t x, int scalex, uint16_t y, int scaley, uint16_t time) {
-  fill_raw_2dnoise8(pData, width, height, octaves, q44(2,0), 171, x, scalex, y, scaley, time);
+  fill_raw_2dnoise8(pData, width, height, octaves, q44(2,0), 171, 1, x, scalex, y, scaley, time);
 }
 
 void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves, q88 freq88, fract16 amplitude, int skip, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
   if(octaves > 1) {
-    fill_raw_2dnoise16(pData, width, height, octaves-1, freq88, amplitude, skip, x * freq88, scalex *freq88, y *freq88, scaley * freq88, time);
+    fill_raw_2dnoise16(pData, width, height, octaves-1, freq88, amplitude, skip+1, x *freq88 , scalex *freq88, y * freq88, scaley * freq88, time);
   } else {
     // amplitude is always 255 on the lowest level
     amplitude=65535;
@@ -511,7 +526,7 @@ void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves,
     for(int j = 0,xx=x; j < width; j+=skip, xx+=scalex) {
       uint16_t noise_base = inoise16(xx,y,time);
       noise_base = (0x8000 & noise_base) ? noise_base - (32767) : 32767 - noise_base;
-      noise_base = scale16(noise_base, amplitude);
+      noise_base = scale16(noise_base<<1, amplitude);
       if(skip==1) {
         pRow[j] = scale16(pRow[j],invamp) + noise_base;
       } else {
@@ -531,7 +546,7 @@ int32_t nmax=0;
 
 void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
   if(octaves > 1) {
-    fill_raw_2dnoise16into8(pData, width, height, octaves-1, freq44, amplitude, skip, x, scalex *freq44, y, scaley * freq44, time);
+    fill_raw_2dnoise16into8(pData, width, height, octaves-1, freq44, amplitude, skip+1, x*freq44, scalex *freq44, y*freq44, scaley * freq44, time);
   } else {
     // amplitude is always 255 on the lowest level
     amplitude=255;
