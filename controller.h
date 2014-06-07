@@ -32,7 +32,7 @@ typedef uint8_t EDitherMode;
 class CLEDController {
 protected:
     friend class CFastLED;
-    const CRGB *m_Data;
+    CRGB *m_Data;
     CLEDController *m_pNext;
     CRGB m_ColorCorrection;
     CRGB m_ColorTemperature;
@@ -96,7 +96,7 @@ public:
     }
 #endif
 
-    CLEDController & setLeds(const CRGB *data, int nLeds) {
+    CLEDController & setLeds(CRGB *data, int nLeds) {
         m_Data = data;
         m_nLeds = nLeds;
         return *this;
@@ -107,6 +107,15 @@ public:
             memset8((void*)m_Data, 0, sizeof(struct CRGB) * m_nLeds);
         }
     }
+
+    // How many leds does this controller manage?
+    int size() { return m_nLeds; }
+
+    // Pointer to the CRGB array for this controller
+    CRGB* leds() { return m_Data; }
+
+    // Reference to the n'th item in the controller
+    CRGB &operator[](int x) { return m_Data[x]; }
 
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
     inline uint8_t getDither() { return m_DitherMode; }

@@ -2,37 +2,37 @@
 #define __INC_LIB8TION_H
 
 /*
- 
+
  Fast, efficient 8-bit math functions specifically
  designed for high-performance LED programming.
- 
+
  Because of the AVR(Arduino) and ARM assembly language
  implementations provided, using these functions often
  results in smaller and faster code than the equivalent
  program using plain "C" arithmetic and logic.
- 
- 
+
+
  Included are:
- 
- 
+
+
  - Saturating unsigned 8-bit add and subtract.
    Instead of wrapping around if an overflow occurs,
    these routines just 'clamp' the output at a maxumum
-   of 255, or a minimum of 0.  Useful for adding pixel 
+   of 255, or a minimum of 0.  Useful for adding pixel
    values.  E.g., qadd8( 200, 100) = 255.
- 
+
      qadd8( i, j) == MIN( (i + j), 0xFF )
      qsub8( i, j) == MAX( (i - j), 0 )
- 
+
  - Saturating signed 8-bit ("7-bit") add.
      qadd7( i, j) == MIN( (i + j), 0x7F)
- 
- 
+
+
  - Scaling (down) of unsigned 8- and 16- bit values.
    Scaledown value is specified in 1/256ths.
      scale8( i, sc) == (i * sc) / 256
      scale16by8( i, sc) == (i * sc) / 256
- 
+
    Example: scaling a 0-255 value down into a
    range from 0-99:
      downscaled = scale8( originalnumber, 100);
@@ -42,27 +42,27 @@
    accidentally scale down to total black at low
    dimming levels, since that would look wrong:
      scale8_video( i, sc) = ((i * sc) / 256) +? 1
- 
+
    Example: reducing an LED brightness by a
    dimming factor:
      new_bright = scale8_video( orig_bright, dimming);
- 
- 
+
+
  - Fast 8- and 16- bit unsigned random numbers.
-   Significantly faster than Arduino random(), but 
+   Significantly faster than Arduino random(), but
    also somewhat less random.  You can add entropy.
      random8()       == random from 0..255
      random8( n)     == random from 0..(N-1)
      random8( n, m)  == random from N..(M-1)
- 
+
      random16()      == random from 0..65535
      random16( n)    == random from 0..(N-1)
      random16( n, m) == random from N..(M-1)
-   
+
      random16_set_seed( k)    ==  seed = k
      random16_add_entropy( k) ==  seed += k
 
- 
+
  - Absolute value of a signed 8-bit value.
      abs8( i)     == abs( i)
 
@@ -74,14 +74,14 @@
      add8( i, j)  == (i + j) & 0xFF
      sub8( i, j)  == (i - j) & 0xFF
 
- 
+
  - Fast 16-bit approximations of sin and cos.
    Input angle is a uint16_t from 0-65535.
    Output is a signed int16_t from -32767 to 32767.
       sin16( x)  == sin( (x/32768.0) * pi) * 32767
       cos16( x)  == cos( (x/32768.0) * pi) * 32767
    Accurate to more than 99% in all cases.
- 
+
  - Fast 8-bit approximations of sin and cos.
    Input angle is a uint8_t from 0-255.
    Output is an UNsigned uint8_t from 0 to 255.
@@ -89,10 +89,10 @@
        cos8( x)  == (cos( (x/128.0) * pi) * 128) + 128
    Accurate to within about 2%.
 
- 
+
  - Fast 8-bit "easing in/out" function.
      ease8InOutCubic(x) == 3(x^i) - 2(x^3)
-     ease8InOutApprox(x) == 
+     ease8InOutApprox(x) ==
        faster, rougher, approximation of cubic easing
      ease8InOutQuad(x) == quadratic (vs cubic) easing
 
@@ -104,7 +104,7 @@
        cubicwave8( x)
        quadwave8( x)
        triwave8( x)
- 
+
 
  - Dimming and brightening functions for 8-bit
    light values.
@@ -114,8 +114,8 @@
      brighten8_raw( x) == 255 - dim8_raw( 255 - x)
    The dimming functions in particular are suitable
    for making LED light output appear more 'linear'.
- 
- 
+
+
  - Linear interpolation between two values, with the
    fraction between them expressed as an 8- or 16-bit
    fixed point fraction (fract8 or fract16).
@@ -127,19 +127,19 @@
        == from + (( to - from ) * fract16) / 65536)
      map8( in, rangeStart, rangeEnd)
        == map( in, 0, 255, rangeStart, rangeEnd);
- 
+
  - Optimized memmove, memcpy, and memset, that are
    faster than standard avr-libc 1.8.
       memmove8( dest, src,  bytecount)
       memcpy8(  dest, src,  bytecount)
       memset8(  buf, value, bytecount)
- 
+
 
 Lib8tion is pronounced like 'libation': lie-BAY-shun
 
 */
- 
- 
+
+
 
 #include <stdint.h>
 
@@ -361,7 +361,7 @@ LIB8STATIC int8_t qadd7( int8_t i, int8_t j)
     asm volatile(
          /* First, add j to i, conditioning the V flag */
          "add %0, %1    \n\t"
-         
+
          /* Now test the V flag.
           If V is clear, we branch around a load of 0x7F into i.
           If V is set, we go ahead and load 0x7F into i.
@@ -393,7 +393,7 @@ LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
     asm volatile(
          /* First, subtract j from i, conditioning the C flag */
          "sub %0, %1    \n\t"
-         
+
          /* Now test the C flag.
           If C is clear, we branch around a load of 0x00 into i.
           If C is set, we go ahead and load 0x00 into i.
@@ -403,7 +403,7 @@ LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
          "L_%=: "
          : "+a" (i)
          : "a"  (j) );
-    
+
     return i;
 #else
 #error "No implementation for qsub8 available."
@@ -446,10 +446,10 @@ LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 //         the numerator of a fraction whose denominator is 256
 //         In other words, it computes i * (scale / 256)
 //         4 clocks AVR, 2 clocks ARM
-LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale) 
+LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1
-    return 
+    return
     ((int)i * (int)(scale) ) >> 8;
 #elif SCALE8_AVRASM == 1
 #if defined(LIB8_ATTINY)
@@ -481,7 +481,7 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
          "mov %0, r1          \n\t"
          /* Restore r1 to "0"; it's expected to always be that */
          "clr __zero_reg__    \n\t"
-         
+
          : "+a" (i)      /* writes to i */
          : "a"  (scale)  /* uses scale */
          : "r0", "r1"    /* clobbers r0, r1 */ );
@@ -532,11 +532,11 @@ LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
     //      "      add %0, %2       \n"
     //      "      clr __zero_reg__ \n"
     //      "L_%=:                  \n"
-         
+
     //      : "+a" (i)
     //      : "a" (scale), "a" (nonzeroscale)
     //      : "r0", "r1");
-    
+
     // // Return the result
     // return i;
 #else
@@ -560,11 +560,11 @@ LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
          "mov %0, r1    \n\t"
          /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */
          /* "clr __zero_reg__    \n\t" */
-         
+
          : "+a" (i)      /* writes to i */
          : "a"  (scale)  /* uses scale */
          : "r0", "r1"    /* clobbers r0, r1 */ );
-    
+
     // Return the result
     return i;
 #else
@@ -586,7 +586,7 @@ LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale)
          "mov %0, r1    \n\t"
          /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF */
          /* "clr __zero_reg__    \n\t" */
-         
+
          : "+a" (i)      /* writes to i */
          : "a"  (scale)  /* uses scale */
          : "r0", "r1"    /* clobbers r0, r1 */ );
@@ -599,34 +599,67 @@ LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale)
 
 LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 {
-  return scale8_video(i,scale);
-// #if SCALE8_C == 1
-//     uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
-//     uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
-//     return j;
-// #elif SCALE8_AVRASM == 1
-    
-//     uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
-//     asm volatile(
-//          "      tst %0          \n"
-//          "      breq L_%=       \n"
-//          "      mul %0, %1      \n"
-//          "      mov %0, r1      \n"
-//          "      add %0, %2      \n"
-//          /* R1 IS LEFT DIRTY, YOU MUST ZERO IT OUT YOURSELF */
-//          "L_%=:                 \n"
-         
-//          : "+a" (i)
-//          : "a" (scale), "a" (nonzeroscale)
-//          : "r0", "r1");
-    
-//     // Return the result
-//     return i;
-// #else
-// #error "No implementation for scale8_video available."
-// #endif
+#if SCALE8_C == 1 || defined(LIB8_ATTINY)
+    uint8_t j = (((int)i * (int)scale) >> 8) + ((i&&scale)?1:0);
+    // uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    // uint8_t j = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
+    return j;
+#elif SCALE8_AVRASM == 1
+    uint8_t j=0;
+    asm volatile(
+        "  tst %[i]\n\t"
+        "  breq L_%=\n\t"
+        "  mul %[i], %[scale]\n\t"
+        "  mov %[j], r1\n\t"
+        "  breq L_%=\n\t"
+        "  subi %[j], 0xFF\n\t"
+        "L_%=: \n\t"
+        : [j] "+a" (j)
+        : [i] "a" (i), [scale] "a" (scale)
+        : "r0", "r1");
+
+    return j;
+    // uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
+    // asm volatile(
+    //      "      tst %0           \n"
+    //      "      breq L_%=        \n"
+    //      "      mul %0, %1       \n"
+    //      "      mov %0, r1       \n"
+    //      "      add %0, %2       \n"
+    //      "      clr __zero_reg__ \n"
+    //      "L_%=:                  \n"
+
+    //      : "+a" (i)
+    //      : "a" (scale), "a" (nonzeroscale)
+    //      : "r0", "r1");
+
+    // // Return the result
+    // return i;
+#else
+#error "No implementation for scale8_video_LEAVING_R1_DIRTY available."
+#endif
 }
 
+LIB8STATIC void nscale8_video_LEAVING_R1_DIRTY( uint8_t & i, fract8 scale)
+{
+#if SCALE8_C == 1 || defined(LIB8_ATTINY)
+    i = (((int)i * (int)scale) >> 8) + ((i&&scale)?1:0);
+#elif SCALE8_AVRASM == 1
+    asm volatile(
+        "  tst %[i]\n\t"
+        "  breq L_%=\n\t"
+        "  mul %[i], %[scale]\n\t"
+        "  mov %[i], r1\n\t"
+        "  breq L_%=\n\t"
+        "  subi %[i], 0xFF\n\t"
+        "L_%=: \n\t"
+        : [i] "+a" (i)
+        : [scale] "a" (scale)
+        : "r0", "r1");
+#else
+#error "No implementation for scale8_video_LEAVING_R1_DIRTY available."
+#endif
+}
 
 
 LIB8STATIC void cleanup_R1()
@@ -669,9 +702,9 @@ LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scal
     g = (g == 0) ? 0 : (((int)g * (int)(scale) ) >> 8) + nonzeroscale;
     b = (b == 0) ? 0 : (((int)b * (int)(scale) ) >> 8) + nonzeroscale;
 #elif SCALE8_AVRASM == 1
-    r = scale8_video_LEAVING_R1_DIRTY( r, scale);
-    g = scale8_video_LEAVING_R1_DIRTY( g, scale);
-    b = scale8_video_LEAVING_R1_DIRTY( b, scale);
+    nscale8_video_LEAVING_R1_DIRTY( r, scale);
+    nscale8_video_LEAVING_R1_DIRTY( g, scale);
+    nscale8_video_LEAVING_R1_DIRTY( b, scale);
     cleanup_R1();
 #else
 #error "No implementation for nscale8x3 available."
@@ -706,8 +739,8 @@ LIB8STATIC void nscale8x2_video( uint8_t& i, uint8_t& j, fract8 scale)
     i = (i == 0) ? 0 : (((int)i * (int)(scale) ) >> 8) + nonzeroscale;
     j = (j == 0) ? 0 : (((int)j * (int)(scale) ) >> 8) + nonzeroscale;
 #elif SCALE8_AVRASM == 1
-    i = scale8_video_LEAVING_R1_DIRTY( i, scale);
-    j = scale8_video_LEAVING_R1_DIRTY( j, scale);
+    nscale8_video_LEAVING_R1_DIRTY( i, scale);
+    nscale8_video_LEAVING_R1_DIRTY( j, scale);
     cleanup_R1();
 #else
 #error "No implementation for nscale8x2 available."
@@ -735,15 +768,15 @@ LIB8STATIC uint16_t scale16by8( uint16_t i, fract8 scale )
          "  mul %A[i], %[scale]                 \n\t"
          "  mov %A[result], r1                  \n\t"
          "  clr %B[result]                      \n\t"
-         
+
          // result.A-B += i.B x j
          "  mul %B[i], %[scale]                 \n\t"
          "  add %A[result], r0                  \n\t"
          "  adc %B[result], r1                  \n\t"
-         
+
          // cleanup r1
          "  clr __zero_reg__                    \n\t"
-         
+
          : [result] "=r" (result)
          : [i] "r" (i), [scale] "r" (scale)
          : "r0", "r1"
@@ -786,7 +819,7 @@ uint16_t scale16( uint16_t i, fract16 scale )
                  // one clock cycle, just like mov, so might as
                  // well, in case we want to use this code for
                  // a generic 16x16 multiply somewhere.
-                 
+
                  // result.C-D  = i.B x scale.B
                  "  mul %B[i], %B[scale]                 \n\t"
                  //"  mov %C[result], r0                 \n\t"
@@ -795,21 +828,21 @@ uint16_t scale16( uint16_t i, fract16 scale )
 
                  // result.B-D += i.B x scale.A
                  "  mul %B[i], %A[scale]                 \n\t"
-                 
+
                  "  add %B[result], r0                   \n\t"
                  "  adc %C[result], r1                   \n\t"
                  "  adc %D[result], %[zero]              \n\t"
-                 
+
                  // result.B-D += i.A x scale.B
                  "  mul %A[i], %B[scale]                 \n\t"
-                 
+
                  "  add %B[result], r0                   \n\t"
                  "  adc %C[result], r1                   \n\t"
                  "  adc %D[result], %[zero]              \n\t"
-                                  
+
                  // cleanup r1
                  "  clr r1                               \n\t"
-                 
+
                  : [result] "+r" (result)
                  : [i] "r" (i),
                    [scale] "r" (scale),
@@ -841,7 +874,7 @@ LIB8STATIC uint8_t mul8( uint8_t i, uint8_t j)
          : "+a" (i)
          : "a"  (j)
          : "r0", "r1");
-    
+
     return i;
 #else
 #error "No implementation for mul8 available."
@@ -875,7 +908,7 @@ LIB8STATIC uint8_t qmul8( uint8_t i, uint8_t j)
                  : "+a" (i)
                  : "a"  (j)
                  : "r0", "r1");
-    
+
     return i;
 #else
 #error "No implementation for qmul8 available."
@@ -890,15 +923,15 @@ LIB8STATIC int8_t abs8( int8_t i)
     if( i < 0) i = -i;
     return i;
 #elif ABS8_AVRASM == 1
-    
-    
+
+
     asm volatile(
          /* First, check the high bit, and prepare to skip if it's clear */
          "sbrc %0, 7 \n"
-         
+
          /* Negate the value */
          "neg %0     \n"
-         
+
          : "+r" (i) : "r" (i) );
     return i;
 #else
@@ -947,7 +980,7 @@ sfract15 floatToSfract15( float f)
 // appear half as bright as 'full' brightness (255), you
 // have to apply a 'dimming function'.
 //
-// 
+//
 
 LIB8STATIC uint8_t dim8_raw( uint8_t x)
 {
@@ -1071,9 +1104,9 @@ LIB8STATIC int16_t sin16_avr( uint16_t theta )
       12539%256, 12539/256, 44, 0, 18204%256, 18204/256, 38, 0,
       23170%256, 23170/256, 31, 0, 27245%256, 27245/256, 23, 0,
       30273%256, 30273/256, 14, 0, 32137%256, 32137/256,  4 /*,0*/ };
-    
+
     uint16_t offset = (theta & 0x3FFF);
-    
+
     // AVR doesn't have a multi-bit shift instruction,
     // so if we say "offset >>= 3", gcc makes a tiny loop.
     // Inserting empty volatile statements between each
@@ -1085,13 +1118,13 @@ LIB8STATIC int16_t sin16_avr( uint16_t theta )
     offset >>= 1; // 0..2047
 
     if( theta & 0x4000 ) offset = 2047 - offset;
-    
+
     uint8_t sectionX4;
     sectionX4 = offset / 256;
     sectionX4 *= 4;
-    
+
     uint8_t m;
-    
+
     union {
         uint16_t b;
         struct {
@@ -1099,19 +1132,19 @@ LIB8STATIC int16_t sin16_avr( uint16_t theta )
             uint8_t bhi;
         };
     } u;
-    
+
     //in effect u.b = blo + (256 * bhi);
     u.blo = data[ sectionX4 ];
     u.bhi = data[ sectionX4 + 1];
     m     = data[ sectionX4 + 2];
-    
+
     uint8_t secoffset8 = (uint8_t)(offset) / 2;
-    
+
     uint16_t mx = m * secoffset8;
-    
+
     int16_t  y  = mx + u.b;
     if( theta & 0x8000 ) y = -y;
-    
+
     return y;
 }
 
@@ -1121,21 +1154,21 @@ LIB8STATIC int16_t sin16_C( uint16_t theta )
     { 0, 6393, 12539, 18204, 23170, 27245, 30273, 32137 };
     static const uint8_t slope[] =
     { 49, 48, 44, 38, 31, 23, 14, 4 };
-    
+
     uint16_t offset = (theta & 0x3FFF) >> 3; // 0..2047
     if( theta & 0x4000 ) offset = 2047 - offset;
-    
+
     uint8_t section = offset / 256; // 0..7
     uint16_t b   = base[section];
     uint8_t  m   = slope[section];
-    
+
     uint8_t secoffset8 = (uint8_t)(offset) / 2;
-    
+
     uint16_t mx = m * secoffset8;
     int16_t  y  = mx + b;
-    
+
     if( theta & 0x8000 ) y = -y;
-    
+
     return y;
 }
 
@@ -1174,20 +1207,20 @@ const uint8_t b_m16_interleave[] = { 0, 49, 49, 41, 90, 27, 117, 10 };
 LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
 {
     uint8_t offset = theta;
-    
+
     asm volatile(
                  "sbrc %[theta],6         \n\t"
                  "com  %[offset]           \n\t"
                  : [theta] "+r" (theta), [offset] "+r" (offset)
                  );
-    
+
     offset &= 0x3F; // 0..63
-    
+
     uint8_t secoffset  = offset & 0x0F; // 0..15
     if( theta & 0x40) secoffset++;
-    
+
     uint8_t m16; uint8_t b;
-    
+
     uint8_t section = offset >> 4; // 0..3
     uint8_t s2 = section * 2;
 
@@ -1196,7 +1229,7 @@ LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
     b   = *p;
     p++;
     m16 = *p;
-    
+
     uint8_t mx;
     uint8_t xr1;
     asm volatile(
@@ -1212,12 +1245,12 @@ LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
                  : [mx] "=r" (mx), [xr1] "=r" (xr1)
                  : [m16] "r" (m16), [secoffset] "r" (secoffset)
                  );
-    
+
     int8_t y = mx + b;
     if( theta & 0x80 ) y = -y;
-    
+
     y += 128;
-    
+
     return y;
 }
 
@@ -1229,10 +1262,10 @@ LIB8STATIC uint8_t sin8_C( uint8_t theta)
         offset = (uint8_t)255 - offset;
     }
     offset &= 0x3F; // 0..63
-    
+
     uint8_t secoffset  = offset & 0x0F; // 0..15
     if( theta & 0x40) secoffset++;
-    
+
     uint8_t section = offset >> 4; // 0..3
     uint8_t s2 = section * 2;
     const uint8_t* p = b_m16_interleave;
@@ -1240,14 +1273,14 @@ LIB8STATIC uint8_t sin8_C( uint8_t theta)
     uint8_t b   =  *p;
     p++;
     uint8_t m16 =  *p;
-    
+
     uint8_t mx = (m16 * secoffset) >> 4;
-    
+
     int8_t y = mx + b;
     if( theta & 0x80 ) y = -y;
-    
+
     y += 128;
-    
+
     return y;
 }
 
@@ -1348,6 +1381,23 @@ LIB8STATIC int16_t lerp15by8( int16_t a, int16_t b, fract8 frac)
     return result;
 }
 
+// linear interpolation between two signed 15-bit values,
+// with 8-bit fraction
+LIB8STATIC int16_t lerp15by16( int16_t a, int16_t b, fract16 frac)
+{
+    int16_t result;
+    if( b > a) {
+        uint16_t delta = b - a;
+        uint16_t scaled = scale16( delta, frac);
+        result = a + scaled;
+    } else {
+        uint16_t delta = a - b;
+        uint16_t scaled = scale16( delta, frac);
+        result = a - scaled;
+    }
+    return result;
+}
+
 //  map8: map from one full-range 8-bit value into a narrower
 //        range of 8-bit values, possibly a range of hues.
 //
@@ -1399,15 +1449,15 @@ LIB8STATIC fract8 ease8InOutCubic( fract8 i)
 {
     uint8_t ii  = scale8_LEAVING_R1_DIRTY(  i, i);
     uint8_t iii = scale8_LEAVING_R1_DIRTY( ii, i);
-    
+
     uint16_t r1 = (3 * (uint16_t)(ii)) - ( 2 * (uint16_t)(iii));
 
     /* the code generated for the above *'s automatically
        cleans up R1, so there's no need to explicitily call
        cleanup_R1(); */
-    
+
     uint8_t result = r1;
-    
+
     // if we got "256", return 255:
     if( r1 & 0x100 ) {
         result = 255;
@@ -1440,7 +1490,7 @@ LIB8STATIC fract8 ease8InOutApprox( fract8 i)
         i += (i / 2);
         i += 32;
     }
-    
+
     return i;
 }
 
@@ -1466,9 +1516,9 @@ LIB8STATIC uint8_t ease8InOutApprox( fract8 i)
         "  subi %[i], 96         \n\t"
 
         "Ldone_%=:               \n\t"
-                  
+
         : [i] "+a" (i)
-        : 
+        :
         : "r0", "r1"
         );
     return i;
@@ -1505,7 +1555,7 @@ LIB8STATIC uint8_t triwave8(uint8_t in)
 //           with an 'acceleration' and 'deceleration' curve.
 //
 //           These are even faster than 'sin8', and have
-//           slightly different curve shapes.  
+//           slightly different curve shapes.
 //
 
 // quadwave8: quadratic waveform generator.  Spends just a little more
@@ -1523,5 +1573,33 @@ LIB8STATIC uint8_t cubicwave8(uint8_t in)
 }
 
 
+
+template<class T, int F, int I> class q {
+  T i:I;
+  T f:F;
+public:
+  q(float fx) { i = fx; f = (fx-i) * (1<<F); }
+  q(uint8_t _i, uint8_t _f) {i=_i; f=_f; }
+  uint32_t operator*(uint32_t v) { return (v*i) + ((v*f)>>F); }
+  uint16_t operator*(uint16_t v) { return (v*i) + ((v*f)>>F); }
+  int32_t operator*(int32_t v) { return (v*i) + ((v*f)>>F); }
+  int16_t operator*(int16_t v) { return (v*i) + ((v*f)>>F); }
+#ifdef FASTLED_ARM
+  int operator*(int v) { return (v*i) + ((v*f)>>F); }
+#endif
+};
+
+template<class T, int F, int I> static uint32_t operator*(uint32_t v, q<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static uint16_t operator*(uint16_t v, q<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static int32_t operator*(int32_t v, q<T,F,I> & q) { return q * v; }
+template<class T, int F, int I> static int16_t operator*(int16_t v, q<T,F,I> & q) { return q * v; }
+#ifdef FASTLED_ARM
+template<class T, int F, int I> static int operator*(int v, q<T,F,I> & q) { return q * v; }
+#endif
+
+typedef q<uint8_t, 4,4> q44;
+typedef q<uint8_t, 6,2> q62;
+typedef q<uint16_t, 8,8> q88;
+typedef q<uint16_t, 12,4> q124;
 
 #endif

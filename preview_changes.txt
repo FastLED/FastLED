@@ -15,3 +15,7 @@
 * Added sin8, cos8, quadwave8, cubicwave8, triwave8, and ease8InOutQuad
 * Added map8
 * Adjusted VIRTAL_BITS of dithering from a flickery 8 to a more solid 3
+* Added array versions of fade_video, fade_raw, and some variations
+* Added fill_gradient
+* Added inoise8/inoise16 and example program
+* Added LEDS.countFPS() for debugging framerate counts.  Bit rough at the moment, thought

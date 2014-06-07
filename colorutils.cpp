@@ -27,6 +27,115 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
 }
 
 
+#define saccum87 int16_t
+
+void fill_gradient( CRGB* leds,
+                    uint16_t startpos, CHSV startcolor,
+                    uint16_t endpos,   CHSV endcolor,
+                    TGradientDirectionCode directionCode )
+{
+    // if the points are in the wrong order, straighten them
+    if( endpos < startpos ) {
+        uint16_t t = endpos;
+        CHSV tc = endcolor;
+        startpos = t;
+        startcolor = tc;
+        endcolor = startcolor;
+        endpos = startpos;
+    }
+    
+    saccum87 huedistance87;
+    saccum87 satdistance87;
+    saccum87 valdistance87;
+    
+    satdistance87 = (endcolor.sat - startcolor.sat) << 7;
+    valdistance87 = (endcolor.val - startcolor.val) << 7;
+    
+    uint8_t huedelta8 = endcolor.hue - startcolor.hue;
+    
+    if( directionCode == SHORTEST_HUES ) {
+        directionCode = FORWARD_HUES;
+        if( huedelta8 > 127) {
+            directionCode = BACKWARD_HUES;
+        }
+    }
+    
+    if( directionCode == LONGEST_HUES ) {
+        directionCode = FORWARD_HUES;
+        if( huedelta8 < 128) {
+            directionCode = BACKWARD_HUES;
+        }
+    }
+    
+    if( directionCode == FORWARD_HUES) {
+        huedistance87 = huedelta8 << 7;
+    }
+    else /* directionCode == BACKWARD_HUES */
+    {
+        huedistance87 = (uint8_t)(256 - huedelta8) << 7;
+        huedistance87 = -huedistance87;
+    }
+    
+    uint16_t pixeldistance = endpos - startpos;
+    uint16_t p2 = pixeldistance / 2;
+    int16_t divisor = p2 ? p2 : 1;
+    saccum87 huedelta87 = huedistance87 / divisor;
+    saccum87 satdelta87 = satdistance87 / divisor;
+    saccum87 valdelta87 = valdistance87 / divisor;
+    
+    accum88 hue88 = startcolor.hue << 8;
+    accum88 sat88 = startcolor.sat << 8;
+    accum88 val88 = startcolor.val << 8;
+    for( uint16_t i = startpos; i <= endpos; i++) {
+        leds[i] = CHSV( hue88 >> 8, sat88 >> 8, val88 >> 8);
+        hue88 += huedelta87;
+        sat88 += satdelta87;
+        val88 += valdelta87;
+    }
+}
+
+
+
+void nscale8_video( CRGB* leds, uint16_t num_leds, uint8_t scale)
+{
+    for( uint16_t i = 0; i < num_leds; i++) {
+        leds[i].nscale8_video( scale);
+    }
+}
+
+void fade_video(CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8_video( leds, num_leds, 255 - fadeBy);
+}
+
+void fadeLightBy(CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8_video( leds, num_leds, 255 - fadeBy);
+}
+
+
+void fadeToBlackBy( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8( leds, num_leds, 255 - fadeBy);
+}
+
+void fade_raw( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8( leds, num_leds, 255 - fadeBy);
+}
+
+void nscale8_raw( CRGB* leds, uint16_t num_leds, uint8_t scale)
+{
+    nscale8( leds, num_leds, scale);
+}
+
+void nscale8( CRGB* leds, uint16_t num_leds, uint8_t scale)
+{
+    for( uint16_t i = 0; i < num_leds; i++) {
+        leds[i].nscale8( scale);
+    }
+}
+
 
 
 // CRGB HeatColor( uint8_t temperature)

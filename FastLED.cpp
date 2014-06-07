@@ -21,7 +21,7 @@ CFastLED::CFastLED() {
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
-									   const struct CRGB *data,
+									   struct CRGB *data,
 									   int nLedsOrOffset, int nLedsIfOffset) {
 	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 	int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
@@ -36,6 +36,18 @@ void CFastLED::show(uint8_t scale) {
 	while(pCur) {
 		pCur->showLeds(scale);
 		pCur = pCur->next();
+	}
+}
+
+CLEDController & CFastLED::operator[](int x) {
+	CLEDController *pCur = CLEDController::head();
+	while(x-- && pCur) {
+		pCur = pCur->next();
+	}
+	if(pCur == NULL) {
+		return *(CLEDController::head());
+	} else {
+		return *pCur;
 	}
 }
 
@@ -136,3 +148,24 @@ void CFastLED::setDither(uint8_t ditherMode)  {
 // 	transpose8<1,2>(in.bytes, out.bytes);
 // 	transpose8<1,2>(in.bytes + 8, out.bytes + 1);
 // }
+
+extern int noise_min;
+extern int noise_max;
+
+void CFastLED::countFPS(int nFrames) {
+	if(Serial) {
+	  static uint32_t br = 0;
+	  static uint32_t lastframe = millis();
+
+	  br++;
+	  if(br == nFrames) {
+	    uint32_t now = millis() - lastframe;
+	    uint32_t fps = (br * 1000) / now;
+			/*Serial.print('('); Serial.print(noise_min); Serial.print(','); Serial.print(noise_max); Serial.print(") "); */
+	    Serial.print(now); Serial.print("ms for "); Serial.print(br); Serial.print(" frames, aka ");
+	    Serial.print(fps); Serial.println(" fps. ");
+	    br = 0;
+	    lastframe = millis();
+	  }
+	}
+}
