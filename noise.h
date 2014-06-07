@@ -1,6 +1,64 @@
 #ifndef __INC_NOISE_H
 #define __INC_NOISE_H
 
+#if 0
+/// Class for accessing 16 bit noise.  Provides methods for setting origin, scale,
+/// frequency, alplitude, time, octave blurring
+class CFastNoise16 {
+public:
+  CFastNoise16 &setOrigin(uint32_t x, uint32_t y, uint32_t z);
+  CFastNoise16 &setOrigin(uint32_t x, uint32_t y);
+  CFastNoise16 &setOrigin(uint32_t x);
+
+  uint32_t getX();
+  uint32_t getY();
+  uint32_t getZ();
+  uint32_t getTime();
+
+  uint32_t getOrigin(uint32_t & x, uint32_t & y, uint32_t & z);
+  uint32_t getOrigin(uint32_t & x, uint32_t & y);
+  uint32_t getOrigin(uint32_t & x);
+
+  CFastNoise16 &advance(int32_t x, int32_t y, int32_t z);
+  CFastNoise16 &advance(int32_t x, int32_t y;
+  CFastNoise16 &advance(int32_t x);
+
+  CFastNoise16 &advanceTime(int32_t t);
+
+  CFastNoise16 &setScale(int32_t x_scale, int32_t y_scale, int32_t z_scale);
+  CFastNoise16 &setScale(int32_t x_scale, int32_t y_scale);
+  CFastNoise16 &setScale(int32_t x_scale);
+
+  int32_t getScaleX();
+  int32_t getScaleY();
+  int32_t getScaleZ();
+  void getScale(int32_t & x, int32_t & y, int32_t & z);
+  void getScale(int32_t & x, int32_t & y);
+  void getScale(int32_t & x);
+
+  CFastNoise16 &setAmplitude(fract16 amplitude);
+
+  CFastNoise16 &setFrequency(q88 frequency);
+  CFastNoise16 &setTime(uint32_t time);
+
+  CFastNoise16 &setOctaves(int octaves);
+
+  CFastNoise16 &setOctaveBlur(bool blurOctaves);
+
+  void getNoise(uint32_t x, uint32_t y, uint32_t z);
+  void getNoise(uint32_t x, uint32_t y);
+  void getNoise(uint32_t x);
+
+  void fillNoise(uint16_t *pData, int size);
+  void fillNoise(uint16_t *pData, int width, int height);
+  void fillNoise(uint16_t *pData, int width, int height, int depth);
+
+  void fillNoise(uint8_t *pData, int size);
+  void fillNoise(uint8_t *pData, int width, int height);
+  void fillNoise(uint8_t *pData, int width, int height, int depth);
+};
+#endif
+
 // 16 bit, fixed point implementation of perlin's Simplex Noise.  Coordinates are
 // 16.16 fixed point values, 32 bit integers with integral coordinates in the high 16
 // bits and fractional in the low 16 bits, and the function takes 1d, 2d, and 3d coordinate
