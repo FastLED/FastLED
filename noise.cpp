@@ -506,12 +506,12 @@ void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q
 }
 
 void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, uint16_t x, int scalex, uint16_t y, int scaley, uint16_t time) {
-  fill_raw_2dnoise8(pData, width, height, octaves, q44(2,0), 171, 1, x, scalex, y, scaley, time);
+  fill_raw_2dnoise8(pData, width, height, octaves, q44(2,0), 128, 1, x, scalex, y, scaley, time);
 }
 
 void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves, q88 freq88, fract16 amplitude, int skip, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
   if(octaves > 1) {
-    fill_raw_2dnoise16(pData, width, height, octaves-1, freq88, amplitude, skip+1, x *freq88 , scalex *freq88, y * freq88, scaley * freq88, time);
+    fill_raw_2dnoise16(pData, width, height, octaves-1, freq88, amplitude, skip, x *freq88 , scalex *freq88, y * freq88, scaley * freq88, time);
   } else {
     // amplitude is always 255 on the lowest level
     amplitude=65535;
@@ -667,10 +667,13 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
 
   int w1 = width-1;
   int h1 = height-1;
+  static int hz = 0;
+  uint8_t hue_off = hz>>8;
+  hz += 123;
   for(int i = 0; i < height; i++) {
     int wb = i*width;
     for(int j = 0; j < width; j++) {
-      CRGB led(CHSV(H[h1-i][h1-j],255,V[i][j]));
+      CRGB led(CHSV(hue_off + H[h1-i][h1-j],255,V[i][j]));
 
       int pos = j;
       if(serpentine && (i & 0x1)) {
