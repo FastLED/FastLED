@@ -1,17 +1,24 @@
 #ifndef __INC_LED_SYSDEFS_H
 #define __INC_LED_SYSDEFS_H
 
-#if defined(__MK20DX128__) || defined(__MK20DX256__) 
+#if defined(__MK20DX128__) || defined(__MK20DX256__)
 #define FASTLED_TEENSY3
 #define FASTLED_ARM
-#elif defined(__SAM3X8E__) 
+#if (F_CPU == 96000000)
+#define CLK_DBL 1
+#endif
+#elif defined(__SAM3X8E__)
 #define FASTLED_ARM
 #else
 #define FASTLED_AVR
 #endif
 
-#if defined(FASTLED_AVR) || defined(FASTLED_TEENSY3) 
-#include <avr/io.h> 
+#ifndef CLK_DBL
+#define CLK_DBL 0
+#endif
+
+#if defined(FASTLED_AVR) || defined(FASTLED_TEENSY3)
+#include <avr/io.h>
 #include <avr/interrupt.h> // for cli/se definitions
 
 // Define the rgister types
