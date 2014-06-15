@@ -83,19 +83,30 @@ class ARMHardwareSPIOutput {
 	// Borrowed from the teensy3 SPSR emulation code
 	static inline void enable_pins(void) __attribute__((always_inline)) {
 		//serial_print("enable_pins\n");
-		CORE_PIN11_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
-		CORE_PIN12_CONFIG = PORT_PCR_MUX(2);
-		CORE_PIN13_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
+		if(_DATA_PIN == 11) {
+			CORE_PIN11_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
+			CORE_PIN12_CONFIG = PORT_PCR_MUX(2);
+			CORE_PIN13_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
+		} else if(_DATA_PIN == 7) {
+			CORE_PIN7_CONFIG = PORT_PCR_MUX(2);
+			CORE_PIN8_CONFIG = PORT_PCR_MUX(2);
+			CORE_PIN14_CONFIG = PORT_PCR_MUX(2);
+		}
 	}
 
 	// Borrowed from the teensy3 SPSR emulation code
 	static inline void disable_pins(void) __attribute__((always_inline)) {
 		//serial_print("disable_pins\n");
-		CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
-		CORE_PIN12_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
-		CORE_PIN13_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
-	}
-
+		if(_DATA_PIN == 11) {
+			CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+			CORE_PIN12_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+			CORE_PIN13_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+		} else if(_DATA_PIN == 7) {
+			// CORE_PIN7_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+			// CORE_PIN8_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+			// CORE_PIN14_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+		}
+}
 public:
 	ARMHardwareSPIOutput() { m_pSelect = NULL; }
 	ARMHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
