@@ -39,6 +39,16 @@ void CFastLED::show(uint8_t scale) {
 	}
 }
 
+int CFastLED::count() {
+    int x = 0;
+	CLEDController *pCur = CLEDController::head();
+	while( pCur) {
+        x++;
+		pCur = pCur->next();
+	}
+    return x;
+}
+
 CLEDController & CFastLED::operator[](int x) {
 	CLEDController *pCur = CLEDController::head();
 	while(x-- && pCur) {

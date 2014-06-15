@@ -208,10 +208,18 @@ public:
 	// If the serial port isn't opened, this function does nothing.
 	void countFPS(int nFrames=25);
 
+    // returns the number of controllers (strips) that have been added with addLeds
+	int count();
+
+    // returns the Nth controller
 	CLEDController & operator[](int x);
 
+    // Convenience functions for single-strip setups:
+    
+    // returns the number of LEDs in the first strip
 	int size() { return (*this)[0].size(); }
-
+    
+    // returns pointer to the CRGB buffer for the first strip
 	CRGB *leds() { return (*this)[0].leds(); }
 };
 
