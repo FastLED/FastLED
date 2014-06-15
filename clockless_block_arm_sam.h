@@ -55,37 +55,12 @@ public:
 
 	// set all the leds on the controller to a given color
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> px1(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px2(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px3(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px4(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px5(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px6(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px7(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px8(rgbdata, nLeds, scale, getDither());
-#if LANES > 8
-		PixelController<RGB_ORDER> px9(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px10(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px11(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px12(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px13(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px14(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px15(rgbdata, nLeds, scale, getDither());
-		PixelController<RGB_ORDER> px16(rgbdata, nLeds, scale, getDither());
-#endif
-
-		PixelController<RGB_ORDER> *allpixels[LANES] = {
-			&px1, &px2, &px3, &px4, &px5, &px6, &px7, &px8
-#if LANES > 8
-			,&px9, &px10, &px11, &px12, &px13, &px14, &px15, &px16
-#endif
-		};
-
+    MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(TOTAL);
 
-		uint32_t clocks = showRGBInternal(allpixels, nLeds);
+    uint32_t clocks = showRGBInternal(pixels, nLeds);
 
 		long microsTaken = CLKS_TO_MICROS(clocks);
 		long millisTaken = (microsTaken / 1000);
@@ -99,39 +74,12 @@ public:
 #define ADV_RGB if(maskbit & PORT_MASK) { rgbdata += nLeds; } maskbit <<= 1;
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-		uint32_t maskbit = 0x00001;
-		PixelController<RGB_ORDER> px1(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px2(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px3(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px4(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px5(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px6(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px7(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px8(rgbdata, nLeds, scale, getDither()); ADV_RGB
-#if LANES > 8
-		PixelController<RGB_ORDER> px9(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px10(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px11(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px12(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px13(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px14(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px15(rgbdata, nLeds, scale, getDither()); ADV_RGB
-		PixelController<RGB_ORDER> px16(rgbdata, nLeds, scale, getDither()); ADV_RGB
-#endif
-
-		PixelController<RGB_ORDER> *allpixels[LANES] = {
-			&px4, &px3, &px2, &px1, &px8, &px7, &px6, &px5
-#if LANES > 8
-			,&px12, &px11, &px10, &px9, &px16, &px15, &px14, &px13
-#endif
-
-		};
-
+    MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
 		cli();
 		SysClockSaver savedClock(TOTAL);
 
-		uint32_t clocks = showRGBInternal(allpixels,nLeds);
+		uint32_t clocks = showRGBInternal(pixels, nLeds);
 
 
 		long microsTaken = CLKS_TO_MICROS(clocks);
@@ -211,11 +159,11 @@ public:
 		fuckery.a2 = (b.raw[0] >> 15);
 		fuckery.a3 = (b.raw[0] >> 7);
 		b.raw[0] <<= 1;
-		// fuckery.a4 = (b.raw[1] >> 31);
-		// fuckery.a5 = (b.raw[1] >> 23);
-		// fuckery.a6 = (b.raw[1] >> 15);
-		// fuckery.a7 = (b.raw[1] >> 7);
-		// b.raw[1] <<= 1;
+		fuckery.a4 = (b.raw[1] >> 31);
+		fuckery.a5 = (b.raw[1] >> 23);
+		fuckery.a6 = (b.raw[1] >> 15);
+		fuckery.a7 = (b.raw[1] >> 7);
+		b.raw[1] <<= 1;
 #if LANES > 8
 		fuckery.b0 = (b.raw[2] >> 31);
 		fuckery.b1 = (b.raw[2] >> 23);
@@ -228,37 +176,42 @@ public:
 		fuckery.b7 = (b.raw[3] >> 7);
 		b.raw[3] <<= 1;
 #endif
-// #if (LANES > 16)
-// 		fuckery.c0 = (b.raw[4] >> 31);
-// 		fuckery.c1 = (b.raw[4] >> 23);
-// 		fuckery.c2 = (b.raw[4] >> 15);
-// 		fuckery.c3 = (b.raw[4] >> 7);
-// 		b.raw[4] <<= 1;
-// 		fuckery.c4 = (b.raw[5] >> 31);
-// 		fuckery.c5 = (b.raw[5] >> 23);
-// 		fuckery.c6 = (b.raw[5] >> 15);
-// 		fuckery.c7 = (b.raw[5] >> 7);
-// 		b.raw[5] <<= 1;
-// #if (LANES > 24)
-// 		fuckery.d0 = (b.raw[6] >> 31);
-// 		fuckery.d1 = (b.raw[6] >> 23);
-// 		fuckery.d2 = (b.raw[6] >> 15);
-// 		fuckery.d3 = (b.raw[6] >> 7);
-// 		fuckery.d4 = (b.raw[7] >> 31);
-// 		fuckery.d5 = (b.raw[7] >> 23);
-// 		fuckery.d6 = (b.raw[7] >> 15);
-// 		fuckery.d7 = (b.raw[7] >> 7);
-// #endif
-// #endif
+#if (LANES > 16)
+		fuckery.c0 = (b.raw[4] >> 31);
+		fuckery.c1 = (b.raw[4] >> 23);
+		fuckery.c2 = (b.raw[4] >> 15);
+		fuckery.c3 = (b.raw[4] >> 7);
+		b.raw[4] <<= 1;
+		fuckery.c4 = (b.raw[5] >> 31);
+		fuckery.c5 = (b.raw[5] >> 23);
+		fuckery.c6 = (b.raw[5] >> 15);
+		fuckery.c7 = (b.raw[5] >> 7);
+		b.raw[5] <<= 1;
+#if (LANES > 24)
+		fuckery.d0 = (b.raw[6] >> 31);
+		fuckery.d1 = (b.raw[6] >> 23);
+		fuckery.d2 = (b.raw[6] >> 15);
+		fuckery.d3 = (b.raw[6] >> 7);
+    b.raw[6] <<= 1;
+		fuckery.d4 = (b.raw[7] >> 31);
+		fuckery.d5 = (b.raw[7] >> 23);
+		fuckery.d6 = (b.raw[7] >> 15);
+		fuckery.d7 = (b.raw[7] >> 7);
+    b.raw[7] <<= 1;
+#endif
+#endif
 		return ~fuckery.word;
 	}
 
 #define VAL *((uint32_t*)(SysTick_BASE + 8))
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b2, PixelController<RGB_ORDER> *allpixels[LANES]) { // , register uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b2, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
 		uint32_t flipper = bits(b);
+    register uint8_t d = pixels.template getd<PX>(pixels);
+    register uint8_t scale = pixels.template getscale<PX>(pixels);
+
 		// Serial.print("flipper is "); Serial.println(flipper);
-		for(uint32_t i = 0; i < LANES/2; i++) {
+		for(uint32_t i = 0; i < LANES/(LANES/8); i++) {
 			while(VAL > next_mark);
 
 			next_mark = VAL - (TOTAL);
@@ -266,41 +219,68 @@ public:
 
 			while((VAL-next_mark) > (T2+T3+6));
 			*FastPin<33>::cport() = (flipper & PORT_MASK);
-      flipper = bits(b);
 
+      flipper = bits(b);
 
 			while((VAL - next_mark) > T3);
 			*FastPin<33>::cport() = PORT_MASK;
 
-			switch(PX) {
-				case 0: b2.bytes[i] = allpixels[i]->stepAdvanceAndLoadAndScale0(); break;
-				case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
-				case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
-			}
-  #if LANES > 8
-			i++;
-			switch(PX) {
-				case 0: b2.bytes[i] = allpixels[i]->stepAdvanceAndLoadAndScale0(); break;
-				case 1: b2.bytes[i] = allpixels[i]->loadAndScale1(); break;
-				case 2: b2.bytes[i] = allpixels[i]->loadAndScale2(); break;
-			}
-  #endif
+b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale); i++;
+#if LANES > 8
+b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale); i++;
+#if LANES > 16
+b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale); i++;
+#if LANES > 24
+b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale); i++;
+#endif
+#endif
+#endif
+
+//       switch(PX) {
+// 				case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
+// 				case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
+// 				case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
+// 			}
+//   #if LANES > 8
+// 			i++;
+//       switch(PX) {
+//         case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
+//         case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
+//         case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
+//       }
+//   #endif
+// #if LANES > 16
+//       i++;
+//       switch(PX) {
+//         case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
+//         case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
+//         case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
+//       }
+// #endif
+// #if LANES > 24
+//       i++;
+//       switch(PX) {
+//         case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
+//         case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
+//         case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
+//       }
+// #endif
 		}
 
-    for(uint32_t i = 0; i < LANES/2; i++) {
-      while(VAL > next_mark);
-
-      next_mark = VAL - (TOTAL);
-      *FastPin<33>::sport() = PORT_MASK;
-
-      while((VAL-next_mark) > (T2+T3+6));
-      *FastPin<33>::cport() = (flipper & PORT_MASK);
-      flipper = bits(b);
-
-
-      while((VAL - next_mark) > T3);
-      *FastPin<33>::cport() = PORT_MASK;
-    }
+    // for(uint32_t i = 0; i < LANES/2; i++) {
+    //   while(VAL > next_mark);
+    //
+    //   next_mark = VAL - (TOTAL);
+    //   *FastPin<33>::sport() = PORT_MASK;
+    //
+    //   while((VAL-next_mark) > (T2+T3+6));
+    //   *FastPin<33>::cport() = (flipper & PORT_MASK);
+    //   flipper = bits(b);
+    //
+    //
+    //   while((VAL - next_mark) > T3);
+    //   *FastPin<33>::cport() = PORT_MASK;
+    // }
 
     // transposeLines(b, b2);
 		// for(register uint32_t i = 0; i < XTRA0; i++) {
@@ -312,7 +292,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static uint32_t showRGBInternal(PixelController<RGB_ORDER> *allpixels[LANES], int nLeds) {
+	static uint32_t showRGBInternal(MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &allpixels, int nLeds) {
 		// Serial.println("Entering show");
 		// Setup the pixel controller and load/scale the first byte
 		Lines b0,b1,b2;
@@ -320,8 +300,8 @@ public:
 			b0.raw[i] = b1.raw[i] = b2.raw[i] = 0;
 		}
 		for(int i = 0; i < LANES; i++) {
-			allpixels[i]->preStepFirstByteDithering();
-			b0.bytes[i] = allpixels[i]->loadAndScale0();
+			allpixels.preStepFirstByteDithering();
+			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
 		// Setup and start the clock
@@ -334,12 +314,15 @@ public:
 		VAL = 0;
 		uint32_t next_mark = (VAL - (TOTAL));
 		while(nLeds--) {
+      allpixels.stepDithering();
+
 			// Write first byte, read next byte
 			writeBits<8+XTRA0,1>(next_mark, b0, b1, allpixels);
 
 			// Write second byte, read 3rd byte
 			writeBits<8+XTRA0,2>(next_mark, b1, b2, allpixels);
 
+      allpixels.advanceData();
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels);
 		}
