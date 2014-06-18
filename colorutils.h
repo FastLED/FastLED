@@ -116,7 +116,7 @@ CRGB HeatColor( uint8_t temperature);
 //      };
 //
 //    Or you can initiaize your palette with a preset color scheme:
-//      SetRainbowStripesPalette( myPalette);
+//      SetupRainbowStripesPalette( myPalette);
 //
 // 3. Any time you want to set a pixel to a color from your palette, use
 //    "ColorFromPalette(...)" as shown:
@@ -149,12 +149,13 @@ CRGB ColorFromPalette( const CRGBPalette256& pal,
 
 // Preset color schemes, such as they are.
 // Try Rainbow Stripes or Lava first.
-void SetForestPalette(CRGBPalette16& pal);
-void SetCloudPalette(CRGBPalette16& pal);
-void SetLavaPalette(CRGBPalette16& pal);
-void SetOceanPalette(CRGBPalette16& pal);
-void SetRainbowPalette(CRGBPalette16& pal);
-void SetRainbowStripesPalette(CRGBPalette16& pal);
+void SetupForestColors(CRGBPalette16& pal);
+void SetupCloudColors(CRGBPalette16& pal);
+void SetupLavaColors(CRGBPalette16& pal);
+void SetupOceanColor(CRGBPalette16& pal);
+void SetupRainbowColors(CRGBPalette16& pal);
+void SetupRainbowStripesColors(CRGBPalette16& pal);
+void SetupPartyColors(CRGBPalette16& pal);
 
 
 // Convert a 16-entry palette to a 256-entry palette

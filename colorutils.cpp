@@ -371,27 +371,27 @@ void UpscalePalette(const CRGBPalette16& srcpal16, CRGBPalette256& destpal256)
     }
 }
 
-void SetCloudPalette(CRGBPalette16& pal)
+void SetupCloudColors(CRGBPalette16& pal)
 {
     InitPalette( pal, CloudPalette_p);
 }
 
-void SetLavaPalette(CRGBPalette16& pal)
+void SetupLavaColors(CRGBPalette16& pal)
 {
     InitPalette( pal, LavaPalette_p);
 }
 
-void SetOceanPalette(CRGBPalette16& pal)
+void SetupOceanColors(CRGBPalette16& pal)
 {
     InitPalette( pal, OceanPalette_p);
 }
 
-void SetForestPalette(CRGBPalette16& pal)
+void SetupForestColors(CRGBPalette16& pal)
 {
     InitPalette( pal, ForestPalette_p);
 }
 
-void SetRainbowPalette(CRGBPalette16& pal)
+void SetupRainbowColors(CRGBPalette16& pal)
 {
     for( uint8_t c = 0; c < 16; c += 1) {
         uint8_t hue = c << 4;
@@ -399,13 +399,19 @@ void SetRainbowPalette(CRGBPalette16& pal)
     }
 }
 
-void SetRainbowStripesPalette(CRGBPalette16& pal)
+void SetupRainbowStripesColors(CRGBPalette16& pal)
 {
     for( uint8_t c = 0; c < 16; c += 2) {
         uint8_t hue = c << 4;
         pal[c] = CHSV(  hue, 255, 255);
         pal[c+1] = CRGB::Black;
     }
+}
+
+void SetupPartyColors(CRGBPalette16& pal)
+{
+    fill_gradient( pal, 0, CHSV( HUE_PURPLE,255,255), 7, CHSV(HUE_YELLOW - 12,255,255), FORWARD_HUES);
+    fill_gradient( pal, 8, CHSV( HUE_ORANGE,255,255), 15, CHSV(HUE_BLUE + 12,255,255), BACKWARD_HUES);
 }
 
 void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
