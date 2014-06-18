@@ -410,7 +410,7 @@ void SetupRainbowStripesColors(CRGBPalette16& pal)
 
 void SetupPartyColors(CRGBPalette16& pal)
 {
-    fill_gradient( pal, 0, CHSV( HUE_PURPLE,255,255), 7, CHSV(HUE_YELLOW - 12,255,255), FORWARD_HUES);
+    fill_gradient( pal, 0, CHSV( HUE_PURPLE,255,255), 7, CHSV(HUE_YELLOW - 16,255,255), FORWARD_HUES);
     fill_gradient( pal, 8, CHSV( HUE_ORANGE,255,255), 15, CHSV(HUE_BLUE + 12,255,255), BACKWARD_HUES);
 }
 
