@@ -19,3 +19,4 @@
 * Added fill_gradient
 * Added inoise8/inoise16 and example program
 * Added LEDS.countFPS() for debugging framerate counts.  Bit rough at the moment, thought
+* Added Palettes and associated functions and presets
