@@ -190,23 +190,23 @@ CRGB HeatColor( uint8_t temperature)
 
 
 
-CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightness, TInterpolationType interpolationType)
+CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
     uint8_t hi4 = index >> 4;
     uint8_t lo4 = index & 0x0F;
     
     //  CRGB rgb1 = pal[ hi4];
-    const CRGB* entry = pal + hi4;
+    const CRGB* entry = &(pal[0]) + hi4;
     uint8_t red1   = entry->red;
     uint8_t green1 = entry->green;
     uint8_t blue1  = entry->blue;
     
-    uint8_t interpolate = lo4 && (interpolationType != INTERPOLATION_NONE);
+    uint8_t blend = lo4 && (blendType != NOBLEND);
     
-    if( interpolate ) {
+    if( blend ) {
         
         if( hi4 == 15 ) {
-            entry = pal;
+            entry = &(pal[0]);
         } else {
             entry++;
         }
@@ -247,9 +247,9 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
 }
 
 
-CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightness, TInterpolationType)
+CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightness, TBlendType)
 {
-    const CRGB* entry = pal + index;
+    const CRGB* entry = &(pal[0]) + index;
 
     uint8_t red   = entry->red;
     uint8_t green = entry->green;
@@ -262,175 +262,39 @@ CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightn
     return CRGB( red, green, blue);
 }
 
-typedef prog_uint32_t TProgmemPalette16[16];
-
-const TProgmemPalette16 CloudPalette_p PROGMEM =
-{
-    CRGB::Blue,
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    
-    CRGB::Blue,
-    CRGB::DarkBlue,
-    CRGB::SkyBlue,
-    CRGB::SkyBlue,
-    
-    CRGB::LightBlue,
-    CRGB::White,
-    CRGB::LightBlue,
-    CRGB::SkyBlue
-};
-
-const TProgmemPalette16 LavaPalette_p PROGMEM =
-{
-    CRGB::Black,
-    CRGB::Maroon,
-    CRGB::Black,
-    CRGB::Maroon,
-    
-    CRGB::DarkRed,
-    CRGB::Maroon,
-    CRGB::DarkRed,
-    
-    CRGB::DarkRed,
-    CRGB::DarkRed,
-    CRGB::Red,
-    CRGB::Orange,
-    
-    CRGB::White,
-    CRGB::Orange,
-    CRGB::Red,
-    CRGB::DarkRed
-};
-
-
-const TProgmemPalette16 OceanPalette_p PROGMEM =
-{
-    CRGB::MidnightBlue,
-    CRGB::DarkBlue,
-    CRGB::MidnightBlue,
-    CRGB::Navy,
-    
-    CRGB::DarkBlue,
-    CRGB::MediumBlue,
-    CRGB::SeaGreen,
-    CRGB::Teal,
-    
-    CRGB::CadetBlue,
-    CRGB::Blue,
-    CRGB::DarkCyan,
-    CRGB::CornflowerBlue,
-    
-    CRGB::Aquamarine,
-    CRGB::SeaGreen,
-    CRGB::Aqua,
-    CRGB::LightSkyBlue
-};
-
-const TProgmemPalette16 ForestPalette_p PROGMEM =
-{
-    CRGB::DarkGreen,
-    CRGB::DarkGreen,
-    CRGB::DarkOliveGreen,
-    CRGB::DarkGreen,
-    
-    CRGB::Green,
-    CRGB::ForestGreen,
-    CRGB::OliveDrab,
-    CRGB::Green,
-    
-    CRGB::SeaGreen,
-    CRGB::MediumAquamarine,
-    CRGB::LimeGreen,
-    CRGB::YellowGreen,
-
-    CRGB::LightGreen,
-    CRGB::LawnGreen,
-    CRGB::MediumAquamarine,
-    CRGB::ForestGreen
-};
-
-
-void InitPalette(CRGBPalette16& pal, const TProgmemPalette16 ppp)
-{
-    for( uint8_t i = 0; i < 16; i++) {
-        pal[i] =  pgm_read_dword_near( ppp + i);
-    }
-}
 
 void UpscalePalette(const CRGBPalette16& srcpal16, CRGBPalette256& destpal256)
 {
     for( int i = 0; i < 256; i++) {
-        destpal256[i] = ColorFromPalette( srcpal16, i);
-    }
-}
-
-void SetupCloudColors(CRGBPalette16& pal)
-{
-    InitPalette( pal, CloudPalette_p);
-}
-
-void SetupLavaColors(CRGBPalette16& pal)
-{
-    InitPalette( pal, LavaPalette_p);
-}
-
-void SetupOceanColors(CRGBPalette16& pal)
-{
-    InitPalette( pal, OceanPalette_p);
-}
-
-void SetupForestColors(CRGBPalette16& pal)
-{
-    InitPalette( pal, ForestPalette_p);
-}
-
-void SetupRainbowColors(CRGBPalette16& pal)
-{
-    for( uint8_t c = 0; c < 16; c += 1) {
-        uint8_t hue = c << 4;
-        pal[c] = CHSV(  hue, 255, 255);
-    }
-}
-
-void SetupRainbowStripesColors(CRGBPalette16& pal)
-{
-    for( uint8_t c = 0; c < 16; c += 2) {
-        uint8_t hue = c << 4;
-        pal[c] = CHSV(  hue, 255, 255);
-        pal[c+1] = CRGB::Black;
+        destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
     }
 }
 
 void SetupPartyColors(CRGBPalette16& pal)
 {
-    fill_gradient( pal, 0, CHSV( HUE_PURPLE,255,255), 7, CHSV(HUE_YELLOW - 16,255,255), FORWARD_HUES);
-    fill_gradient( pal, 8, CHSV( HUE_ORANGE,255,255), 15, CHSV(HUE_BLUE + 12,255,255), BACKWARD_HUES);
+    fill_gradient( pal, 0, CHSV( HUE_PURPLE,255,255), 7, CHSV(HUE_YELLOW - 18,255,255), FORWARD_HUES);
+    fill_gradient( pal, 8, CHSV( HUE_ORANGE,255,255), 15, CHSV(HUE_BLUE + 18,255,255), BACKWARD_HUES);
 }
 
 void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
-                  const CRGBPalette16& pal, uint8_t brightness, TInterpolationType interpType)
+                  const CRGBPalette16& pal, uint8_t brightness, TBlendType blendType)
 {
     uint8_t colorIndex = startIndex;
     for( uint16_t i = 0; i < N; i++) {
-        L[i] = ColorFromPalette( pal, colorIndex, brightness, interpType);
+        L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
         colorIndex += incIndex;
     }
 }
 
 
 void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
-                  const CRGBPalette256& pal, uint8_t brightness, TInterpolationType interpType)
+                  const CRGBPalette256& pal, uint8_t brightness, TBlendType blendType)
 {
     uint8_t colorIndex = startIndex;
     for( uint16_t i = 0; i < N; i++) {
-        L[i] = ColorFromPalette( pal, colorIndex, brightness, interpType);
+        L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
         colorIndex += incIndex;
     }
 }
+
+
