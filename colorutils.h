@@ -1,6 +1,8 @@
 #ifndef __INC_COLORUTILS_H
 #define __INC_COLORUTILS_H
 
+#include <avr/pgmspace.h>
+
 #include "pixeltypes.h"
 
 
@@ -15,7 +17,7 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
                    uint8_t deltahue = 5);
 
 
-// fill_gradient - fill a range of LEDs with a smooth gradient
+// fill_gradient - fill a range of LEDs with a smooth HSV gradient
 //                 between two specified HSV colors.
 //                 Since 'hue' is a value around a color wheel,
 //                 there are always two ways to sweep from one hue
@@ -36,6 +38,33 @@ void fill_gradient( struct CRGB* leds,
                     uint16_t endpos,   CHSV endcolor,
                     TGradientDirectionCode directionCode = SHORTEST_HUES );
 
+// Convenience functions to fill a range of leds[] with a
+// two-color, three-color, or four-color gradient
+void fill_gradient( struct CRGB* leds, uint16_t numLeds,
+                    const CHSV& c1, const CHSV& c2,
+                    TGradientDirectionCode directionCode = SHORTEST_HUES );
+void fill_gradient( struct CRGB* leds, uint16_t numLeds,
+                   const CHSV& c1, const CHSV& c2, const CHSV& c3,
+                   TGradientDirectionCode directionCode = SHORTEST_HUES );
+void fill_gradient( struct CRGB* leds, uint16_t numLeds,
+                   const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4,
+                   TGradientDirectionCode directionCode = SHORTEST_HUES );
+
+// convenience synonym
+#define fill_gradient_HSV fill_gradient
+
+
+// fill_gradient_RGB - fill a range of LEDs with a smooth RGB gradient
+//                     between two specified RGB colors.
+//                     Unlike HSV, there is no 'color wheel' in RGB space,
+//                     and therefore there's only one 'direction' for the
+//                     gradient to go, and no 'direction code' is needed.
+void fill_gradient_RGB( CRGB* leds,
+                       uint16_t startpos, CRGB startcolor,
+                       uint16_t endpos,   CRGB endcolor );
+void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2);
+void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3);
+void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4);
 
 
 // fadeLightBy and fade_video - reduce the brightness of an array
@@ -62,6 +91,29 @@ void fade_raw(      CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
 //           all at once.  This function can scale pixels all the
 //           way down to black even if 'scale' is not zero.
 void nscale8(       CRGB* leds, uint16_t num_leds, uint8_t scale);
+
+
+
+// Pixel blending
+//
+// blend - computes an RGB-blended some fraction of the way
+//         between two other RGB colors.
+CRGB  blend( const CRGB& p1, const CRGB& p2, fract8 amountOfP2 );
+
+// blend - computes an RGB-blended array of colors, each
+//         a given fraction of the way between corresponding
+//         elements of two source arrays of colors.
+//         Useful for blending palettes.
+CRGB* blend( const CRGB* src1, const CRGB* src2, CRGB* dest,
+             uint16_t count, fract8 amountOfsrc2 );
+
+// nblend - destructively modifies one RGB color, blending
+//          in a given fraction of an overlay RGB color
+CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay );
+
+// nblend - destructively blends a given fraction of
+//          a new RGB array into an existing RGB array
+void  nblend( CRGB* existing, CRGB* overlay, uint16_t count, fract8 amountOfOverlay);
 
 
 
@@ -200,6 +252,42 @@ public:
     {
         return &(entries[0]);
     }
+    
+    CRGBPalette16( const CHSV& c1)
+    {
+        fill_solid( &(entries[0]), 16, c1);
+    }
+    CRGBPalette16( const CHSV& c1, const CHSV& c2)
+    {
+        fill_gradient( &(entries[0]), 16, c1, c2);
+    }
+    CRGBPalette16( const CHSV& c1, const CHSV& c2, const CHSV& c3)
+    {
+        fill_gradient( &(entries[0]), 16, c1, c2, c3);
+    }
+    CRGBPalette16( const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4)
+    {
+        fill_gradient( &(entries[0]), 16, c1, c2, c3, c4);
+    }
+    
+    CRGBPalette16( const CRGB& c1)
+    {
+        fill_solid( &(entries[0]), 16, c1);
+    }
+    CRGBPalette16( const CRGB& c1, const CRGB& c2)
+    {
+        fill_gradient_RGB( &(entries[0]), 16, c1, c2);
+    }
+    CRGBPalette16( const CRGB& c1, const CRGB& c2, const CRGB& c3)
+    {
+        fill_gradient_RGB( &(entries[0]), 16, c1, c2, c3);
+    }
+    CRGBPalette16( const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
+    {
+        fill_gradient_RGB( &(entries[0]), 16, c1, c2, c3, c4);
+    }
+    
+
 };
 
 class CRGBPalette256 {
@@ -270,6 +358,41 @@ public:
     {
         return &(entries[0]);
     }
+    
+    CRGBPalette256( const CHSV& c1)
+    {
+        fill_solid( &(entries[0]), 256, c1);
+    }
+    CRGBPalette256( const CHSV& c1, const CHSV& c2)
+    {
+        fill_gradient( &(entries[0]), 256, c1, c2);
+    }
+    CRGBPalette256( const CHSV& c1, const CHSV& c2, const CHSV& c3)
+    {
+        fill_gradient( &(entries[0]), 256, c1, c2, c3);
+    }
+    CRGBPalette256( const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4)
+    {
+        fill_gradient( &(entries[0]), 256, c1, c2, c3, c4);
+    }
+    
+    CRGBPalette256( const CRGB& c1)
+    {
+        fill_solid( &(entries[0]), 256, c1);
+    }
+    CRGBPalette256( const CRGB& c1, const CRGB& c2)
+    {
+        fill_gradient_RGB( &(entries[0]), 256, c1, c2);
+    }
+    CRGBPalette256( const CRGB& c1, const CRGB& c2, const CRGB& c3)
+    {
+        fill_gradient_RGB( &(entries[0]), 256, c1, c2, c3);
+    }
+    CRGBPalette256( const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
+    {
+        fill_gradient_RGB( &(entries[0]), 256, c1, c2, c3, c4);
+    }
+    
 };
 
 typedef enum { NOBLEND=0, BLEND=1 } TBlendType;
@@ -298,160 +421,6 @@ void fill_palette(CRGB* L, uint16_t N,
                   uint8_t brightness=255,
                   TBlendType blendType=NOBLEND);
 
-
-// Preset color schemes, such as they are.
-const TProgmemPalette16 CloudColors_p PROGMEM =
-{
-    CRGB::Blue,
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    CRGB::DarkBlue,
-    
-    CRGB::Blue,
-    CRGB::DarkBlue,
-    CRGB::SkyBlue,
-    CRGB::SkyBlue,
-    
-    CRGB::LightBlue,
-    CRGB::White,
-    CRGB::LightBlue,
-    CRGB::SkyBlue
-};
-
-const TProgmemPalette16 LavaColors_p PROGMEM =
-{
-    CRGB::Black,
-    CRGB::Maroon,
-    CRGB::Black,
-    CRGB::Maroon,
-    
-    CRGB::DarkRed,
-    CRGB::Maroon,
-    CRGB::DarkRed,
-    
-    CRGB::DarkRed,
-    CRGB::DarkRed,
-    CRGB::Red,
-    CRGB::Orange,
-    
-    CRGB::White,
-    CRGB::Orange,
-    CRGB::Red,
-    CRGB::DarkRed
-};
-
-
-const TProgmemPalette16 OceanColors_p PROGMEM =
-{
-    CRGB::MidnightBlue,
-    CRGB::DarkBlue,
-    CRGB::MidnightBlue,
-    CRGB::Navy,
-    
-    CRGB::DarkBlue,
-    CRGB::MediumBlue,
-    CRGB::SeaGreen,
-    CRGB::Teal,
-    
-    CRGB::CadetBlue,
-    CRGB::Blue,
-    CRGB::DarkCyan,
-    CRGB::CornflowerBlue,
-    
-    CRGB::Aquamarine,
-    CRGB::SeaGreen,
-    CRGB::Aqua,
-    CRGB::LightSkyBlue
-};
-
-const TProgmemPalette16 ForestColors_p PROGMEM =
-{
-    CRGB::DarkGreen,
-    CRGB::DarkGreen,
-    CRGB::DarkOliveGreen,
-    CRGB::DarkGreen,
-    
-    CRGB::Green,
-    CRGB::ForestGreen,
-    CRGB::OliveDrab,
-    CRGB::Green,
-    
-    CRGB::SeaGreen,
-    CRGB::MediumAquamarine,
-    CRGB::LimeGreen,
-    CRGB::YellowGreen,
-    
-    CRGB::LightGreen,
-    CRGB::LawnGreen,
-    CRGB::MediumAquamarine,
-    CRGB::ForestGreen
-};
-
-const TProgmemPalette16 RainbowColors_p PROGMEM =
-{
-    0xFF0000,
-    0xD52A00,
-    0xAB5500,
-    0xAB7F00,
-    0xABAB00,
-    0x56D500,
-    0x00FF00,
-    0x00D52A,
-    0x00AB55,
-    0x0056AA,
-    0x0000FF,
-    0x2A00D5,
-    0x5500AB,
-    0x7F0081,
-    0xAB0055,
-    0xD5002B
-};
-
-#define RainbowStripesColors_p RainbowStripeColors_p
-const TProgmemPalette16 RainbowStripeColors_p PROGMEM =
-{
-    0xFF0000,
-    0x000000,
-    0xAB5500,
-    0x000000,
-    0xABAB00,
-    0x000000,
-    0x00FF00,
-    0x000000,
-    0x00AB55,
-    0x000000,
-    0x0000FF,
-    0x000000,
-    0x5500AB,
-    0x000000,
-    0xAB0055,
-    0x000000
-};
-
-const TProgmemPalette16 PartyColors_p PROGMEM =
-{
-    0x5500AB,
-    0x84007C,
-    0xB5004B,
-    0xE5001B,
-    0xE81700,
-    0xB84700,
-    0xAB7700,
-    0xABAB00,
-    0xAB5500,
-    0xDD2200,
-    0xF2000E,
-    0xC2003E,
-    0x8F0071,
-    0x5F00A1,
-    0x2F00D0,
-    0x0007F9,
-};
 
 
 #endif
