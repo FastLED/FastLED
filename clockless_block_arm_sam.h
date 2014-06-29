@@ -14,7 +14,8 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define PORT_MASK 0x77EFF3FE
+// #define PORT_MASK 0x77EFF3FE // due
+#define PORT_MASK 0x7FFFFFE
 #define SKIPLIST ~PORT_MASK
 
 #if defined(__SAM3X8E__)
@@ -44,8 +45,9 @@ class InlineBlockClocklessController : public CLEDController {
 public:
 	virtual void init() {
 		//FastPinBB<DATA_PIN>::setOutput();
-		uint8_t pins[] = { 33, 34, 35, 36, 37, 38, 39, 40, 41, 51, 50, 49, 48, 47, 46,45, 44, 9, 8, 7, 6, 5, 4, 3, 10, 0}; // 72, 106, 0 };
-		int i = 0;
+		// uint8_t pins[] = { 33, 34, 35, 36, 37, 38, 39, 40, 41, 51, 50, 49, 48, 47, 46,45, 44, 9, 8, 7, 6, 5, 4, 3, 10, 0}; // 72, 106, 0 }; // due
+		uint8_t pins[] = { 33, 34, 35, 36, 37, 38, 39, 40, 41, 107, 106, 51, 50, 49, 48, 47, 46,45, 44, 105, 9, 8, 7, 6, 5, 4, 104, 3, 10, 109, 0}; // 72, 106, 0 }; // digix
+    int i = 0;
 		while(pins[i]) { pinMode(pins[i++], OUTPUT); }
 	}
 
