@@ -15,6 +15,7 @@
 #include "lib8tion.h"
 #include "hsv2rgb.h"
 #include "colorutils.h"
+#include "colorpalettes.h"
 #include "chipsets.h"
 #include "dmx.h"
 #include "noise.h"

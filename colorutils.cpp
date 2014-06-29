@@ -94,6 +94,133 @@ void fill_gradient( CRGB* leds,
     }
 }
 
+void fill_gradient_RGB( CRGB* leds,
+                   uint16_t startpos, CRGB startcolor,
+                   uint16_t endpos,   CRGB endcolor )
+{
+    // if the points are in the wrong order, straighten them
+    if( endpos < startpos ) {
+        uint16_t t = endpos;
+        CRGB tc = endcolor;
+        startpos = t;
+        startcolor = tc;
+        endcolor = startcolor;
+        endpos = startpos;
+    }
+    
+    saccum87 rdistance87;
+    saccum87 gdistance87;
+    saccum87 bdistance87;
+    
+    rdistance87 = (endcolor.r - startcolor.r) << 7;
+    gdistance87 = (endcolor.g - startcolor.g) << 7;
+    bdistance87 = (endcolor.b - startcolor.b) << 7;
+        
+    uint16_t pixeldistance = endpos - startpos;
+    uint16_t p2 = pixeldistance / 2;
+    int16_t divisor = p2 ? p2 : 1;
+    saccum87 rdelta87 = rdistance87 / divisor;
+    saccum87 gdelta87 = gdistance87 / divisor;
+    saccum87 bdelta87 = bdistance87 / divisor;
+    
+    accum88 r88 = startcolor.r << 8;
+    accum88 g88 = startcolor.g << 8;
+    accum88 b88 = startcolor.b << 8;
+    for( uint16_t i = startpos; i <= endpos; i++) {
+        leds[i] = CRGB( r88 >> 8, g88 >> 8, b88 >> 8);
+        r88 += rdelta87;
+        g88 += gdelta87;
+        b88 += bdelta87;
+    }
+}
+
+
+void fill_gradient( CRGB* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2, TGradientDirectionCode directionCode )
+{
+    uint16_t last = numLeds - 1;
+    fill_gradient( leds, 0, c1, last, c2, directionCode);
+}
+
+
+void fill_gradient( CRGB* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2, const CHSV& c3, TGradientDirectionCode directionCode )
+{
+    uint16_t half = (numLeds / 2);
+    uint16_t last = numLeds - 1;
+    fill_gradient( leds,    0, c1, half, c2, directionCode);
+    fill_gradient( leds, half, c2, last, c3, directionCode);
+}
+
+void fill_gradient( CRGB* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4, TGradientDirectionCode directionCode )
+{
+    uint16_t onethird = (numLeds / 3);
+    uint16_t twothirds = ((numLeds * 2) / 3);
+    uint16_t last = numLeds - 1;
+    fill_gradient( leds,         0, c1,  onethird, c2, directionCode);
+    fill_gradient( leds,  onethird, c2, twothirds, c3, directionCode);
+    fill_gradient( leds, twothirds, c3,      last, c4, directionCode);
+}
+
+#if 0
+void fill_gradient( const CHSV& c1, const CHSV& c2)
+{
+    fill_gradient( FastLED[0].leds(), FastLED[0].size(), c1, c2);
+}
+
+void fill_gradient( const CHSV& c1, const CHSV& c2, const CHSV& c3)
+{
+    fill_gradient( FastLED[0].leds(), FastLED[0].size(), c1, c2, c3);
+}
+
+void fill_gradient( const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4)
+{
+    fill_gradient( FastLED[0].leds(), FastLED[0].size(), c1, c2, c3, c4);
+}
+
+void fill_gradient_RGB( const CRGB& c1, const CRGB& c2)
+{
+    fill_gradient_RGB( FastLED[0].leds(), FastLED[0].size(), c1, c2);
+}
+
+void fill_gradient_RGB( const CRGB& c1, const CRGB& c2, const CRGB& c3)
+{
+    fill_gradient_RGB( FastLED[0].leds(), FastLED[0].size(), c1, c2, c3);
+}
+
+void fill_gradient_RGB( const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
+{
+    fill_gradient_RGB( FastLED[0].leds(), FastLED[0].size(), c1, c2, c3, c4);
+}
+#endif
+
+
+
+
+void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2)
+{
+    uint16_t last = numLeds - 1;
+    fill_gradient_RGB( leds, 0, c1, last, c2);
+}
+
+
+void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3)
+{
+    uint16_t half = (numLeds / 2);
+    uint16_t last = numLeds - 1;
+    fill_gradient_RGB( leds,    0, c1, half, c2);
+    fill_gradient_RGB( leds, half, c2, last, c3);
+}
+
+void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
+{
+    uint16_t onethird = (numLeds / 3);
+    uint16_t twothirds = ((numLeds * 2) / 3);
+    uint16_t last = numLeds - 1;
+    fill_gradient_RGB( leds,         0, c1,  onethird, c2);
+    fill_gradient_RGB( leds,  onethird, c2, twothirds, c3);
+    fill_gradient_RGB( leds, twothirds, c3,      last, c4);
+}
+
+
 
 
 void nscale8_video( CRGB* leds, uint16_t num_leds, uint8_t scale)
@@ -135,6 +262,59 @@ void nscale8( CRGB* leds, uint16_t num_leds, uint8_t scale)
         leds[i].nscale8( scale);
     }
 }
+
+
+CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay )
+{
+    if( amountOfOverlay == 0) {
+        return existing;
+    }
+    
+    if( amountOfOverlay == 255) {
+        existing = overlay;
+        return existing;
+    }
+    
+    fract8 amountOfKeep = 256 - amountOfOverlay;
+    
+    existing.red   = scale8_LEAVING_R1_DIRTY( existing.red,   amountOfKeep)
+                    + scale8_LEAVING_R1_DIRTY( overlay.red,    amountOfOverlay);
+    existing.green = scale8_LEAVING_R1_DIRTY( existing.green, amountOfKeep)
+                    + scale8_LEAVING_R1_DIRTY( overlay.green,  amountOfOverlay);
+    existing.blue  = scale8_LEAVING_R1_DIRTY( existing.blue,  amountOfKeep)
+                    + scale8_LEAVING_R1_DIRTY( overlay.blue,   amountOfOverlay);
+    
+    cleanup_R1();
+    
+    return existing;
+}
+
+
+
+void nblend( CRGB* existing, CRGB* overlay, uint16_t count, fract8 amountOfOverlay)
+{
+    for( uint16_t i = count; i; i--) {
+        nblend( *existing, *overlay, amountOfOverlay);
+        existing++;
+        overlay++;
+    }
+}
+
+CRGB blend( const CRGB& p1, const CRGB& p2, fract8 amountOfP2 )
+{
+    CRGB nu(p1);
+    nblend( nu, p2, amountOfP2);
+    return nu;
+}
+
+CRGB* blend( const CRGB* src1, const CRGB* src2, CRGB* dest, uint16_t count, fract8 amountOfsrc2 )
+{
+    for( uint16_t i = count; i; i--) {
+        dest[i] = blend(src1[i], src2[i], amountOfsrc2);
+    }
+    return dest;
+}
+
 
 
 
@@ -185,3 +365,117 @@ CRGB HeatColor( uint8_t temperature)
     
     return heatcolor;
 }
+
+
+
+CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
+{
+    uint8_t hi4 = index >> 4;
+    uint8_t lo4 = index & 0x0F;
+    
+    //  CRGB rgb1 = pal[ hi4];
+    const CRGB* entry = &(pal[0]) + hi4;
+    uint8_t red1   = entry->red;
+    uint8_t green1 = entry->green;
+    uint8_t blue1  = entry->blue;
+    
+    uint8_t blend = lo4 && (blendType != NOBLEND);
+    
+    if( blend ) {
+        
+        if( hi4 == 15 ) {
+            entry = &(pal[0]);
+        } else {
+            entry++;
+        }
+        
+        uint8_t f2 = lo4 << 4;
+        uint8_t f1 = 256 - f2;
+        
+        //    rgb1.nscale8(f1);
+        red1   = scale8_LEAVING_R1_DIRTY( red1,   f1);
+        green1 = scale8_LEAVING_R1_DIRTY( green1, f1);
+        blue1  = scale8_LEAVING_R1_DIRTY( blue1,  f1);
+                
+        //    cleanup_R1();
+        
+        //    CRGB rgb2 = pal[ hi4];
+        //    rgb2.nscale8(f2);
+        uint8_t red2   = entry->red;
+        uint8_t green2 = entry->green;
+        uint8_t blue2  = entry->blue;
+        red2   = scale8_LEAVING_R1_DIRTY( red2,   f2);
+        green2 = scale8_LEAVING_R1_DIRTY( green2, f2);
+        blue2  = scale8_LEAVING_R1_DIRTY( blue2,  f2);
+        
+        cleanup_R1();
+        
+        // These sums can't overflow, so no qadd8 needed.
+        red1   += red2;
+        green1 += green2;
+        blue1  += blue2;
+
+    }
+    
+    if( brightness != 255) {
+        nscale8x3_video( red1, green1, blue1, brightness);
+    }
+    
+    return CRGB( red1, green1, blue1);  
+}
+
+
+CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightness, TBlendType)
+{
+    const CRGB* entry = &(pal[0]) + index;
+
+    uint8_t red   = entry->red;
+    uint8_t green = entry->green;
+    uint8_t blue  = entry->blue;
+    
+    if( brightness != 255) {
+        nscale8x3_video( red, green, blue, brightness);
+    }
+    
+    return CRGB( red, green, blue);
+}
+
+
+void UpscalePalette(const CRGBPalette16& srcpal16, CRGBPalette256& destpal256)
+{
+    for( int i = 0; i < 256; i++) {
+        destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
+    }
+}
+
+#if 0
+// replaced by PartyColors_p
+void SetupPartyColors(CRGBPalette16& pal)
+{
+    fill_gradient( pal, 0, CHSV( HUE_PURPLE,255,255), 7, CHSV(HUE_YELLOW - 18,255,255), FORWARD_HUES);
+    fill_gradient( pal, 8, CHSV( HUE_ORANGE,255,255), 15, CHSV(HUE_BLUE + 18,255,255), BACKWARD_HUES);
+}
+#endif
+
+void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
+                  const CRGBPalette16& pal, uint8_t brightness, TBlendType blendType)
+{
+    uint8_t colorIndex = startIndex;
+    for( uint16_t i = 0; i < N; i++) {
+        L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
+        colorIndex += incIndex;
+    }
+}
+
+
+void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
+                  const CRGBPalette256& pal, uint8_t brightness, TBlendType blendType)
+{
+    uint8_t colorIndex = startIndex;
+    for( uint16_t i = 0; i < N; i++) {
+        L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
+        colorIndex += incIndex;
+    }
+}
+
+
