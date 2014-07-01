@@ -15,6 +15,7 @@
 #include "lib8tion.h"
 #include "hsv2rgb.h"
 #include "colorutils.h"
+#include "colorpalettes.h"
 #include "chipsets.h"
 #include "dmx.h"
 #include "noise.h"
@@ -24,7 +25,8 @@ enum ESPIChipsets {
 	WS2801,
 	WS2803,
 	SM16716,
-	P9813
+	P9813,
+	APA102
 };
 
 enum EClocklessChipsets {
@@ -90,6 +92,7 @@ public:
 			case WS2803: { static WS2803Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -100,6 +103,7 @@ public:
 			case WS2803: { static WS2803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -110,6 +114,7 @@ public:
 			case WS2803: { static WS2803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -215,10 +220,10 @@ public:
 	CLEDController & operator[](int x);
 
     // Convenience functions for single-strip setups:
-    
+
     // returns the number of LEDs in the first strip
 	int size() { return (*this)[0].size(); }
-    
+
     // returns pointer to the CRGB buffer for the first strip
 	CRGB *leds() { return (*this)[0].leds(); }
 };
