@@ -357,7 +357,7 @@ struct MultiPixelController {
             mScale = other.mScale;
             mAdvance = other.mAdvance;
             mLen = other.mLen;
-            for(int i = 0; i < LANES; i++) { mOffsets = other.mOffsets[i]; }
+            for(int i = 0; i < LANES; i++) { mOffsets[i] = other.mOffsets[i]; }
 
         }
 
@@ -523,8 +523,8 @@ struct MultiPixelController {
 
         // composite shortcut functions for loading, dithering, and scaling
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane))); }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane, uint8_t d, uint8_t scale) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), d), scale); }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane, uint8_t scale) { return scale<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), scale); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane, uint8_t d, uint8_t scale) { return scale8(pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), d), scale); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane, uint8_t scale) { return scale8(pc.loadByte<SLOT>(pc, lane), scale); }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(MultiPixelController & pc, int lane) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc, lane); }
 
         template<int SLOT> __attribute__((always_inline)) inline static uint8_t getd(MultiPixelController & pc) { return pc.d[RO(SLOT)]; }

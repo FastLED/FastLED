@@ -202,6 +202,9 @@ public:
     b.raw[7] <<= 1;
 #endif
 #endif
+    fuckery.word |= (fuckery.word << 7);
+    fuckery.word |= (fuckery.word << 14);
+
 		return ~fuckery.word;
 	}
 
@@ -227,22 +230,27 @@ public:
 			while((VAL - next_mark) > T3);
 			*FastPin<33>::cport() = PORT_MASK;
 
-b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale); i++;
+b2.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 #if LANES > 8
-b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale); i++;
+i++; b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale);
 #if LANES > 16
-b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale); i++;
+i++; b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale);
 #if LANES > 24
-b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale); i++;
+i++; b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale);
 #endif
 #endif
 #endif
 
-//       switch(PX) {
-// 				case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
-// 				case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
-// 				case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
-// 			}
+      // switch(PX) {
+			// 	case 0: b2.bytes[i] = pixels.loadAndScale0(i); break;
+			// 	case 1: b2.bytes[i] = pixels.loadAndScale1(i); break;
+			// 	case 2: b2.bytes[i] = pixels.loadAndScale2(i); break;
+			// }
+      // switch(PX) {
+      //   case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
+      //   case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
+      //   case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
+      // }
 //   #if LANES > 8
 // 			i++;
 //       switch(PX) {
@@ -301,8 +309,8 @@ b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale); i++;
 		for(int i = 0; i < LANES/4; i++) {
 			b0.raw[i] = b1.raw[i] = b2.raw[i] = 0;
 		}
+    allpixels.preStepFirstByteDithering();
 		for(int i = 0; i < LANES; i++) {
-			allpixels.preStepFirstByteDithering();
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
