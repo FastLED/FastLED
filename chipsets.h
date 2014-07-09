@@ -130,7 +130,8 @@ class APA102Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
-	void writeBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
+	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
+	void endBoundary() { mSPI.writeWord(0xFFFF); mSPI.writeWord(0xFFFF); }
 
 	inline void writeLed(uint8_t r, uint8_t g, uint8_t b) __attribute__((always_inline)) {
 		mSPI.writeByte(0xFF); mSPI.writeByte(r); mSPI.writeByte(g); mSPI.writeByte(b);
@@ -152,12 +153,12 @@ public:
 
 		mSPI.select();
 
-		writeBoundary();
+		startBoundary();
 		while(nLeds--) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.stepDithering();
 		}
-		writeBoundary();
+		endBoundary();
 
 		mSPI.waitFully();
 		mSPI.release();
@@ -168,13 +169,13 @@ public:
 
 		mSPI.select();
 
-		writeBoundary();
+		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		writeBoundary();
+		endBoundary();
 
 		mSPI.release();
 	}
@@ -185,13 +186,13 @@ public:
 
 		mSPI.select();
 
-		writeBoundary();
+		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		writeBoundary();
+		endBoundary();
 
 		mSPI.release();
 	}
