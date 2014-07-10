@@ -7,6 +7,8 @@
 #define xstr(s) str(s)
 #define str(s) #s
 #define FASTLED_VERSION 2001000
+#define __PROG_TYPES_COMPAT__
+
 
 #include "controller.h"
 #include "fastpin.h"

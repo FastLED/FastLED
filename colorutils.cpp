@@ -1,3 +1,5 @@
+#define __PROG_TYPES_COMPAT__
+
 #include <stdint.h>
 
 #include "hsv2rgb.h"
