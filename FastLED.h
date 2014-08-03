@@ -30,7 +30,7 @@ enum EClocklessChipsets {
 	UCS1903
 };
 
-#define NUM_CONTROLLERS 8
+#define NUM_CONTROLLERS 16
 
 class CFastLED {
 	struct CControllerInfo { 
