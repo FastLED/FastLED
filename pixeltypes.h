@@ -398,6 +398,15 @@ struct CRGB {
         return retval;
     }
 
+#ifdef SmartMatrix_h
+    operator rgb24() const {
+      rgb24 ret;
+      ret.red = r;
+      ret.green = g;
+      ret.blue = b;
+      return ret;
+    }
+#endif
 
     inline uint8_t getLuma ( )  {
         //Y' = 0.2126 R' + 0.7152 G' + 0.0722 B'
@@ -450,6 +459,7 @@ struct CRGB {
 
       return ret;
     }
+
     typedef enum {
         AliceBlue=0xF0F8FF,
         Amethyst=0x9966CC,

@@ -4,6 +4,8 @@
 volatile uint32_t fuckit;
 #endif
 
+void *pSmartMatrix = NULL;
+
 CFastLED LEDS;
 CFastLED & FastSPI_LED = LEDS;
 CFastLED & FastSPI_LED2 = LEDS;
@@ -122,13 +124,15 @@ extern int noise_max;
 
 void CFastLED::countFPS(int nFrames) {
 	if(Serial) {
-	  static uint32_t br = 0;
-	  static uint32_t lastframe = millis();
+	  static int br = 0;
+	  static uint32_t lastframe = 0; // millis();
 
 	  br++;
 	  if(br == nFrames) {
-	    uint32_t now = millis() - lastframe;
-	    uint32_t fps = (br * 1000) / now;
+			uint32_t now = millis();
+	    Serial.print(lastframe); Serial.print("ms and now it is "); Serial.print(now); Serial.println("ms");
+			now -= lastframe;
+			uint32_t fps = (br * 1000) / now;
 			/*Serial.print('('); Serial.print(noise_min); Serial.print(','); Serial.print(noise_max); Serial.print(") "); */
 	    Serial.print(now); Serial.print("ms for "); Serial.print(br); Serial.print(" frames, aka ");
 	    Serial.print(fps); Serial.println(" fps. ");
