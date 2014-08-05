@@ -21,6 +21,7 @@
 #include "chipsets.h"
 #include "dmx.h"
 #include "noise.h"
+#include "power_mgt.h"
 
 enum ESPIChipsets {
 	LPD8806,
