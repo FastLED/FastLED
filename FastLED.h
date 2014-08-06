@@ -25,6 +25,7 @@
 #include "dmx.h"
 #include "smartmatrix_t3.h"
 #include "noise.h"
+#include "power_mgt.h"
 
 enum ESPIChipsets {
 	LPD8806,
