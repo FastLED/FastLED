@@ -49,7 +49,11 @@ public:
   // nLeds is the number of RGB leds being written to
   virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
     PixelController<RGB> pixels(data, nLeds, scale, getDither());
+#ifdef SMART_MATRIX_CAN_TRIPLE_BUFFER
     rgb24 *md = matrix.getRealBackBuffer();
+#else
+    rgb24 *md = matrix.backBuffer();
+#endif
     while(nLeds--) {
       md->red = pixels.loadAndScale0();
       md->green = pixels.loadAndScale1();
@@ -59,7 +63,9 @@ public:
       pixels.stepDithering();
     }
     matrix.swapBuffers();
+#ifdef SMART_MATRIX_CAN_TRIPLE_BUFFER
     matrix.setBackBuffer((rgb24*)data);
+#endif
   }
 
 #ifdef SUPPORT_ARGB
