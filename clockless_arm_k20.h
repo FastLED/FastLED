@@ -34,7 +34,7 @@ public:
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
+		MS_COUNTER += (1 + (microsTaken / 1000));
 		sei();
 		mWait.mark();
 	}
@@ -49,7 +49,7 @@ public:
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
+		MS_COUNTER += (1 + (microsTaken / 1000));
 		sei();
 		mWait.mark();
 	}
@@ -65,7 +65,7 @@ public:
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
+		MS_COUNTER += (1 + (microsTaken / 1000));
 		sei();
 		mWait.mark();
 	}
