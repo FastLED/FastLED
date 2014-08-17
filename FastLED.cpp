@@ -90,7 +90,7 @@ void CFastLED::delay(unsigned long ms) {
 	unsigned long start = millis();
 	while((millis()-start) < ms) {
 		show();
-
+		delay(1);
 	}
 
 }
