@@ -63,7 +63,7 @@ void setup() {
   // Serial.begin(38400);
   // Serial.println("resetting!");
   delay(3000);
-  LEDS.addLeds<SmartMatrix>(leds,NUM_LEDS);
+  LEDS.addLeds<SMART_MATRIX>(leds,NUM_LEDS);
   LEDS.setBrightness(96);
 
   // Initialize our coordinates to some random values
