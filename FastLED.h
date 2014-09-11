@@ -36,7 +36,7 @@ enum ESPIChipsets {
 	APA102
 };
 
-enum ESM { SmartMatrix };
+enum ESM { SMART_MATRIX };
 
 enum EClocklessChipsets {
 	DMX
@@ -165,7 +165,7 @@ public:
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
 		switch(CHIPSET) {
-			case SmartMatrix: { static CSmartMatrixController controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case SMART_MATRIX: { static CSmartMatrixController controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 #endif
