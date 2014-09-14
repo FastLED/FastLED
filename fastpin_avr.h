@@ -81,6 +81,25 @@ _DEFPIN_AVR(16, 0x04, C); _DEFPIN_AVR(17, 0x08, C); _DEFPIN_AVR(18, 0x10, C); _D
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(__AVR_ATmega1284P__)
+
+_IO(A); _IO(B); _IO(C); _IO(D);
+
+_DEFPIN_AVR(0, 1<<0, D); _DEFPIN_AVR(1, 1<<1, D); _DEFPIN_AVR(2, 1<<2, B); _DEFPIN_AVR(3, 1<<3, B);
+_DEFPIN_AVR(4, 1<<0, B); _DEFPIN_AVR(5, 1<<1, B); _DEFPIN_AVR(6, 1<<2, D); _DEFPIN_AVR(7, 1<<3, D);
+_DEFPIN_AVR(8, 1<<5, D); _DEFPIN_AVR(9, 1<<6, D); _DEFPIN_AVR(10, 1<<4, B); _DEFPIN_AVR(11, 1<<5, B);
+_DEFPIN_AVR(12, 1<<6, B); _DEFPIN_AVR(13, 1<<7, B); _DEFPIN_AVR(14, 1<<7, A); _DEFPIN_AVR(15, 1<<6, A);
+_DEFPIN_AVR(16, 1<<5, A); _DEFPIN_AVR(17, 1<<4, A); _DEFPIN_AVR(18, 1<<3, A); _DEFPIN_AVR(19, 1<<2, A);
+_DEFPIN_AVR(20, 1<<1, A); _DEFPIN_AVR(21, 1<<0, A); _DEFPIN_AVR(22, 1<<0, C); _DEFPIN_AVR(23, 1<<1, C);
+_DEFPIN_AVR(24, 1<<2, C); _DEFPIN_AVR(25, 1<<3, C); _DEFPIN_AVR(26, 1<<4, C); _DEFPIN_AVR(27, 1<<5, C);
+_DEFPIN_AVR(28, 1<<6, C); _DEFPIN_AVR(29, 1<<7, C); _DEFPIN_AVR(30, 1<<4, D); _DEFPIN_AVR(31, 1<<7, D);
+
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPI_SELECT 10
+#define AVR_HARDWARE_SPI 1
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 // megas
 
