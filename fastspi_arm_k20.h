@@ -4,6 +4,11 @@
 
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
+// Version 1.20 renamed SPI_t to KINETISK_SPI_t
+#if TEENSYDUINO >= 120
+#define SPI_t KINETISK_SPI_t
+#endif
+
 #ifndef SPI_PUSHR_CONT
 #define SPI_PUSHR_CONT SPIX.PUSHR_CONT
 #define SPI_PUSHR_CTAS(X) SPIX.PUSHR_CTAS(X)

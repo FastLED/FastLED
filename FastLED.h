@@ -7,6 +7,11 @@
 #define xstr(s) str(s)
 #define str(s) #s
 #define FASTLED_VERSION 2001000
+#define __PROG_TYPES_COMPAT__
+
+#ifdef SmartMatrix_h
+#include<SmartMatrix.h>
+#endif
 
 #include "controller.h"
 #include "fastpin.h"
@@ -18,7 +23,9 @@
 #include "colorpalettes.h"
 #include "chipsets.h"
 #include "dmx.h"
+#include "smartmatrix_t3.h"
 #include "noise.h"
+#include "power_mgt.h"
 
 enum ESPIChipsets {
 	LPD8806,
@@ -28,6 +35,8 @@ enum ESPIChipsets {
 	P9813,
 	APA102
 };
+
+enum ESM { SMART_MATRIX };
 
 enum EClocklessChipsets {
 	DMX
@@ -85,7 +94,7 @@ public:
 
 	static CLEDController &addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
 
-	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN > static CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN > static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
 			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
@@ -151,6 +160,15 @@ public:
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+#ifdef SmartMatrix_h
+	template<ESM CHIPSET>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
+	{
+		switch(CHIPSET) {
+			case SMART_MATRIX: { static CSmartMatrixController controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+		}
+	}
+#endif
 
 #ifdef FASTSPI_USE_DMX_SIMPLE
 	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN>

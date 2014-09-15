@@ -133,6 +133,8 @@ public:
 		mSPI.release();
 	}
 
+protected:
+
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 	}
@@ -176,6 +178,8 @@ public:
 		mWaitDelay.mark();
 	}
 
+protected:
+
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mWaitDelay.wait();
 		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
@@ -211,7 +215,8 @@ class APA102Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
-	void writeBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
+	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
+	void endBoundary() { mSPI.writeWord(0xFFFF); mSPI.writeWord(0xFFFF); }
 
 	inline void writeLed(uint8_t r, uint8_t g, uint8_t b) __attribute__((always_inline)) {
 		mSPI.writeByte(0xFF); mSPI.writeByte(r); mSPI.writeByte(g); mSPI.writeByte(b);
@@ -228,17 +233,19 @@ public:
 		showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0));
 	}
 
+protected:
+
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
 
 		mSPI.select();
 
-		writeBoundary();
+		startBoundary();
 		while(nLeds--) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.stepDithering();
 		}
-		writeBoundary();
+		endBoundary();
 
 		mSPI.waitFully();
 		mSPI.release();
@@ -249,13 +256,13 @@ public:
 
 		mSPI.select();
 
-		writeBoundary();
+		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		writeBoundary();
+		endBoundary();
 
 		mSPI.release();
 	}
@@ -266,13 +273,13 @@ public:
 
 		mSPI.select();
 
-		writeBoundary();
+		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		writeBoundary();
+		endBoundary();
 
 		mSPI.release();
 	}
@@ -308,6 +315,8 @@ public:
 	virtual void clearLeds(int nLeds) {
 		showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0));
 	}
+
+protected:
 
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
@@ -402,6 +411,8 @@ public:
 		writeHeader();
 	}
 
+protected:
+	
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 		writeHeader();

@@ -34,6 +34,8 @@ public:
 		showColor(CRGB(0, 0, 0), nLeds, 0);
 	}
 
+protected:
+
 	// set all the leds on the controller to a given color
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());

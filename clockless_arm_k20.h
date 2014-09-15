@@ -24,6 +24,8 @@ public:
 		showColor(CRGB(0, 0, 0), nLeds, 0);
 	}
 
+protected:
+	
 	// set all the leds on the controller to a given color
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
@@ -35,7 +37,7 @@ public:
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
+		MS_COUNTER += (1 + (microsTaken / 1000));
 		sei();
 		mWait.mark();
 	}
@@ -50,7 +52,7 @@ public:
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
+		MS_COUNTER += (1 + (microsTaken / 1000));
 		sei();
 		mWait.mark();
 	}
@@ -66,7 +68,7 @@ public:
 
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
+		MS_COUNTER += (1 + (microsTaken / 1000));
 		sei();
 		mWait.mark();
 	}

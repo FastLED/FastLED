@@ -1,6 +1,9 @@
 FastLED
 =======
 
+IMPORTANT NOTE:  If you are building for AVR based systems, please do not use any version of the arduino
+IDE after 1.5.7 yet.  It messes with some of the asm output which will cause you problems.
+
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
 sold by adafruit (Neopixel, LPD8806), Sparkfun (WS2801), and aliexpress.  In addition to writing to the
 leds, this library also includes a number of functions for high-performing 8bit math for manipulating
@@ -40,10 +43,15 @@ Here's a list of all the LED chipsets are supported.  More details on the led ch
 * TM1809/4 - 3 wire chipset, cheaply available on aliexpress.com
 * TM1803 - 3 wire chipset, sold by radio shack
 * UCS1903 - another 3 wire led chipset, cheap
+* GW6205 - another 3 wire led chipset
 * LPD8806 - SPI based chpiset, very high speed
 * WS2801 - SPI based chipset, cheap and widely available
 * SM16716 - SPI based chipset
+* APA102 - SPI based chipset
+* P9813 - aka Cool Neon's Total Control Lighting
 * DMX - send rgb data out over DMX using arduino DMX libraries
+* SmartMatrix panels - needs the SmartMatrix library - https://github.com/pixelmatix/SmartMatrix
+
 
 LPD6803, HL1606, and "595"-style shift registers are no longer supported by the library.  The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.
 
@@ -53,9 +61,10 @@ LPD6803, HL1606, and "595"-style shift registers are no longer supported by the 
 Right now the library is supported on a variety of arduino compatable platforms.  If it's ARM or AVR and uses the arduino software (or a modified version of it to build) then it is likely supported.  Note that we have a long list of upcoming platforms to support, so if you don't see what you're looking for here, ask, it may be on the roadmap (or may already be supported).  N.B. at the moment we are only supporting the stock compilers that ship with the arduino software.  Support for upgraded compilers, as well as using AVR studio and skipping the arduino entirely, should be coming in a near future release.
 
 * Arduino & compatibles - straight up arduino devices, uno, duo, leonardo, mega, nano, etc...
-* Teensy 2, Teensy++ 2, Teensy 3 - arduino compataible from pjrc.com with some extra goodies (note the teensy 3 is ARM, not AVR!)
+* Teensy 2, Teensy++ 2, Teensy 3.1 - arduino compataible from pjrc.com with some extra goodies (note the teensy 3 is ARM, not AVR!)
+* Arduino Due and the digistump DigiX
 
-What types of platforms are we thinking about supporting in the future?  Here's a short list:  Arduino Due, MSP430, ChipKit32, Maple, Beagleboard
+What types of platforms are we thinking about supporting in the future?  Here's a short list:  , MSP430, ChipKit32, Maple, Beagleboard
 
 ## What about that name?
 
