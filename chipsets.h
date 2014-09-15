@@ -52,6 +52,8 @@ public:
 		mSPI.release();
 	}
 
+protected:
+
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 	}
@@ -94,6 +96,8 @@ public:
 		mSPI.writeBytesValue(0, nLeds*3);
 		mWaitDelay.mark();
 	}
+
+protected:
 
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mWaitDelay.wait();
@@ -147,6 +151,8 @@ public:
 	virtual void clearLeds(int nLeds) {
 		showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0));
 	}
+
+protected:
 
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
@@ -228,6 +234,8 @@ public:
 	virtual void clearLeds(int nLeds) {
 		showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0));
 	}
+
+protected:
 
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
@@ -322,6 +330,8 @@ public:
 		writeHeader();
 	}
 
+protected:
+	
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 		writeHeader();
