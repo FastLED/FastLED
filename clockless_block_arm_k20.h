@@ -23,7 +23,7 @@ public:
 		FastPin<6>::setOutput();
 		FastPin<20>::setOutput();
 		FastPin<21>::setOutput();
-		FastPin<25>::setOutput();
+		FastPin<5>::setOutput();
 		mPinMask = FastPin<2>::mask();
 		mPort = FastPin<2>::port();
 	}
