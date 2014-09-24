@@ -319,6 +319,81 @@ CRGB* blend( const CRGB* src1, const CRGB* src2, CRGB* dest, uint16_t count, fra
 
 
 
+CHSV& nblend( CHSV& existing, const CHSV& overlay, fract8 amountOfOverlay, TGradientDirectionCode directionCode)
+{
+    if( amountOfOverlay == 0) {
+        return existing;
+    }
+    
+    if( amountOfOverlay == 255) {
+        existing = overlay;
+        return existing;
+    }
+    
+    fract8 amountOfKeep = 256 - amountOfOverlay;
+    
+    uint8_t huedelta8 = overlay.hue - existing.hue;
+    
+    if( directionCode == SHORTEST_HUES ) {
+        directionCode = FORWARD_HUES;
+        if( huedelta8 > 127) {
+            directionCode = BACKWARD_HUES;
+        }
+    }
+    
+    if( directionCode == LONGEST_HUES ) {
+        directionCode = FORWARD_HUES;
+        if( huedelta8 < 128) {
+            directionCode = BACKWARD_HUES;
+        }
+    }
+    
+    if( directionCode == FORWARD_HUES) {
+        existing.hue = existing.hue + scale8( huedelta8, amountOfOverlay);
+    }
+    else /* directionCode == BACKWARD_HUES */
+    {
+        huedelta8 = -huedelta8;
+        existing.hue = existing.hue - scale8( huedelta8, amountOfOverlay);
+    }
+    
+    existing.sat   = scale8_LEAVING_R1_DIRTY( existing.sat,   amountOfKeep)
+    + scale8_LEAVING_R1_DIRTY( overlay.sat,    amountOfOverlay);
+    existing.val = scale8_LEAVING_R1_DIRTY( existing.val, amountOfKeep)
+    + scale8_LEAVING_R1_DIRTY( overlay.val,  amountOfOverlay);
+    
+    cleanup_R1();
+    
+    return existing;
+}
+
+
+
+void nblend( CHSV* existing, CHSV* overlay, uint16_t count, fract8 amountOfOverlay, TGradientDirectionCode directionCode )
+{
+    for( uint16_t i = count; i; i--) {
+        nblend( *existing, *overlay, amountOfOverlay, directionCode);
+        existing++;
+        overlay++;
+    }
+}
+
+CHSV blend( const CHSV& p1, const CHSV& p2, fract8 amountOfP2, TGradientDirectionCode directionCode )
+{
+    CHSV nu(p1);
+    nblend( nu, p2, amountOfP2, directionCode);
+    return nu;
+}
+
+CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fract8 amountOfsrc2, TGradientDirectionCode directionCode )
+{
+    for( uint16_t i = count; i; i--) {
+        dest[i] = blend(src1[i], src2[i], amountOfsrc2, directionCode);
+    }
+    return dest;
+}
+
+
 
 // CRGB HeatColor( uint8_t temperature)
 //

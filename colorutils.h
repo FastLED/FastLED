@@ -96,24 +96,37 @@ void nscale8(       CRGB* leds, uint16_t num_leds, uint8_t scale);
 
 // Pixel blending
 //
-// blend - computes an RGB-blended some fraction of the way
-//         between two other RGB colors.
+// blend - computes a new color blended some fraction of the way
+//         between two other colors.
 CRGB  blend( const CRGB& p1, const CRGB& p2, fract8 amountOfP2 );
 
-// blend - computes an RGB-blended array of colors, each
+CHSV  blend( const CHSV& p1, const CHSV& p2, fract8 amountOfP2,
+            TGradientDirectionCode directionCode = SHORTEST_HUES );
+
+// blend - computes a new color blended array of colors, each
 //         a given fraction of the way between corresponding
 //         elements of two source arrays of colors.
 //         Useful for blending palettes.
 CRGB* blend( const CRGB* src1, const CRGB* src2, CRGB* dest,
              uint16_t count, fract8 amountOfsrc2 );
 
-// nblend - destructively modifies one RGB color, blending
-//          in a given fraction of an overlay RGB color
+CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest,
+            uint16_t count, fract8 amountOfsrc2,
+            TGradientDirectionCode directionCode = SHORTEST_HUES );
+
+// nblend - destructively modifies one color, blending
+//          in a given fraction of an overlay color
 CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay );
 
+CHSV& nblend( CHSV& existing, const CHSV& overlay, fract8 amountOfOverlay,
+             TGradientDirectionCode directionCode = SHORTEST_HUES );
+
 // nblend - destructively blends a given fraction of
-//          a new RGB array into an existing RGB array
+//          a new color array into an existing color array
 void  nblend( CRGB* existing, CRGB* overlay, uint16_t count, fract8 amountOfOverlay);
+
+void  nblend( CHSV* existing, CHSV* overlay, uint16_t count, fract8 amountOfOverlay,
+             TGradientDirectionCode directionCode = SHORTEST_HUES);
 
 
 
