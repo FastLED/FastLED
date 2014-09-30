@@ -105,13 +105,19 @@
        quadwave8( x)
        triwave8( x)
 
-
+ - Square root for 16-bit integers.  About three times
+   faster and five times smaller than Arduino's built-in
+   generic 32-bit sqrt routine.
+     sqrt16( uint16_t x ) == sqrt( x)
+ 
  - Dimming and brightening functions for 8-bit
    light values.
      dim8_video( x)  == scale8_video( x, x)
      dim8_raw( x)    == scale8( x, x)
+     dim8_lin( x)    == (x<128) ? ((x+1)/2) : scale8(x,x)
      brighten8_video( x) == 255 - dim8_video( 255 - x)
      brighten8_raw( x) == 255 - dim8_raw( 255 - x)
+     brighten8_lin( x) == 255 - dim8_lin( 255 - x)
    The dimming functions in particular are suitable
    for making LED light output appear more 'linear'.
 
@@ -996,6 +1002,17 @@ LIB8STATIC uint8_t dim8_video( uint8_t x)
     return scale8_video( x, x);
 }
 
+LIB8STATIC uint8_t dim8_lin( uint8_t x )
+{
+    if( x & 0x80 ) {
+        x = scale8( x, x);
+    } else {
+        x += 1;
+        x /= 2;
+    }
+    return x;
+}
+
 LIB8STATIC uint8_t brighten8_raw( uint8_t x)
 {
     uint8_t ix = 255 - x;
@@ -1006,6 +1023,18 @@ LIB8STATIC uint8_t brighten8_video( uint8_t x)
 {
     uint8_t ix = 255 - x;
     return 255 - scale8_video( ix, ix);
+}
+
+LIB8STATIC uint8_t brighten8_lin( uint8_t x )
+{
+    uint8_t ix = 255 - x;
+    if( ix & 0x80 ) {
+        ix = scale8( ix, ix);
+    } else {
+        ix += 1;
+        ix /= 2;
+    }
+    return 255 - ix;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1576,6 +1605,40 @@ LIB8STATIC uint8_t cubicwave8(uint8_t in)
     return ease8InOutCubic( triwave8( in));
 }
 
+
+
+// sqrt16: square root for 16-bit integers
+//         About three times faster and five times smaller
+//         than Arduino's general sqrt on AVR.
+LIB8STATIC uint8_t sqrt16(uint16_t x)
+{
+    if( x <= 1) {
+        return x;
+    }
+    
+    uint8_t low = 1; // lower bound
+    uint8_t hi, mid;
+    
+    if( x > 7904) {
+        hi = 255;
+    } else {
+        hi = (x >> 5) + 8; // initial estimate for upper bound
+    }
+    
+    do {
+        mid = (low + hi) >> 1;
+        if ((mid * mid) > x) {
+            hi = mid - 1;
+        } else {
+            if( mid == 255) {
+                return 255;
+            }
+            low = mid + 1;
+        }
+    } while (hi >= low);
+    
+    return low - 1;
+}
 
 
 template<class T, int F, int I> class q {
