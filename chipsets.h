@@ -374,7 +374,8 @@ class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 
 
 // WS2811@800khz 2 clocks, 5 clocks, 3 clocks
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
+class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
+//class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 10 * FMUL, 6 * FMUL, RGB_ORDER> {};
