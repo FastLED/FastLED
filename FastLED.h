@@ -87,8 +87,8 @@ enum EBlockChipsets {
 
 class CFastLED {
 	// int m_nControllers;
-	uint8_t m_Scale;
-
+	uint8_t  m_Scale;
+	uint16_t m_nFPS;
 public:
 	CFastLED();
 
@@ -220,9 +220,10 @@ public:
 	void setDither(uint8_t ditherMode = BINARY_DITHER);
 
 	// for debugging, will keep track of time between calls to countFPS, and every
-	// nFrames calls, it will print a summary of FPS info out to the serial port.
-	// If the serial port isn't opened, this function does nothing.
+	// nFrames calls, it will update an internal counter for the current FPS.
 	void countFPS(int nFrames=25);
+	// Get the number of frames/second being written out
+	uint16_t getFPS();
 
     // returns the number of controllers (strips) that have been added with addLeds
 	int count();

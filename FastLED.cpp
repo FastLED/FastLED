@@ -20,6 +20,7 @@ CFastLED::CFastLED() {
 	// clear out the array of led controllers
 	// m_nControllers = 0;
 	m_Scale = 255;
+	m_nFPS = 0;
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
@@ -39,6 +40,7 @@ void CFastLED::show(uint8_t scale) {
 		pCur->showLeds(scale);
 		pCur = pCur->next();
 	}
+	countFPS();
 }
 
 int CFastLED::count() {
@@ -69,6 +71,7 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 		pCur->showColor(color, scale);
 		pCur = pCur->next();
 	}
+	countFPS();
 }
 
 void CFastLED::clear(boolean writeData) {
@@ -122,21 +125,14 @@ extern int noise_min;
 extern int noise_max;
 
 void CFastLED::countFPS(int nFrames) {
-	if(Serial) {
-	  static int br = 0;
-	  static uint32_t lastframe = 0; // millis();
+  static int br = 0;
+  static uint32_t lastframe = 0; // millis();
 
-	  br++;
-	  if(br == nFrames) {
-			uint32_t now = millis();
-	    Serial.print(lastframe); Serial.print("ms and now it is "); Serial.print(now); Serial.println("ms");
-			now -= lastframe;
-			uint32_t fps = (br * 1000) / now;
-			/*Serial.print('('); Serial.print(noise_min); Serial.print(','); Serial.print(noise_max); Serial.print(") "); */
-	    Serial.print(now); Serial.print("ms for "); Serial.print(br); Serial.print(" frames, aka ");
-	    Serial.print(fps); Serial.println(" fps. ");
-	    br = 0;
-	    lastframe = millis();
-	  }
-	}
+  if(br++ >= nFrames) {
+		uint32_t now = millis();
+		now -= lastframe;
+		m_nFPS = (br * 1000) / now;
+    br = 0;
+    lastframe = millis();
+  }
 }
