@@ -117,6 +117,5 @@ void loop() {
   circlex += random16(2);
   circley += random16(2);
   LEDS.show();
-  LEDS.countFPS();
   // delay(10);
 }

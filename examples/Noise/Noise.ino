@@ -108,6 +108,5 @@ void loop() {
   ihue+=1;
 
   LEDS.show();
-  LEDS.countFPS();
   // delay(10);
 }

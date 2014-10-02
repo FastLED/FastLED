@@ -42,7 +42,6 @@ void loop() {
                 hue_octaves,hxy,hue_scale,hxy,hue_scale,hue_time, false);
 
   LEDS.show();
-  LEDS.countFPS();
 
   // adjust the intra-frame time values
   x += x_speed;
