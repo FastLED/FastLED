@@ -1627,7 +1627,7 @@ LIB8STATIC uint8_t sqrt16(uint16_t x)
     
     do {
         mid = (low + hi) >> 1;
-        if ((mid * mid) > x) {
+        if ((uint16_t)(mid * mid) > x) {
             hi = mid - 1;
         } else {
             if( mid == 255) {

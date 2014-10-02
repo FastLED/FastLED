@@ -5,6 +5,14 @@
 #define USE_PROGMEM
 #endif
 
+// Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734
+#ifdef FASTLED_AVR
+#ifdef PROGMEM
+#undef PROGMEM
+#define PROGMEM __attribute__((section(".progmem.data")))
+#endif
+#endif
+
 #ifdef USE_PROGMEM
 #define FL_PROGMEM PROGMEM
 #define P(x) pgm_read_byte_near(p + x)
@@ -519,7 +527,6 @@ void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves,
 
   scalex *= skip;
   scaley *= skip;
-  uint32_t xx = x;
   fract16 invamp = 65535-amplitude;
   for(int i = 0; i < height; i+=skip, y+=scaley) {
     uint16_t *pRow = pData + (i*width);
