@@ -223,7 +223,7 @@ public:
 	// nFrames calls, it will update an internal counter for the current FPS.
 	void countFPS(int nFrames=25);
 	// Get the number of frames/second being written out
-	uint16_t getFPS();
+	uint16_t getFPS() { return m_nFPS; }
 
     // returns the number of controllers (strips) that have been added with addLeds
 	int count();
