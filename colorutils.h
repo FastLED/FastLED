@@ -7,17 +7,27 @@
 
 
 // fill_solid -   fill a range of LEDs with a solid color
-void fill_solid( struct CRGB * pFirstLED, int numToFill,
+//                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
+
+void fill_solid( struct CRGB * leds, int numToFill,
                  const struct CRGB& color);
+
+void fill_solid( struct CHSV* targetArray, int numToFill,
+				 const struct CHSV& hsvColor);
+                 
 
 // fill_rainbow - fill a range of LEDs with a rainbow of colors, at
 //                full saturation and full value (brightness)
 void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
                    uint8_t initialhue,
                    uint8_t deltahue = 5);
+                   
+void fill_rainbow( struct CHSV * targetArray, int numToFill,
+                   uint8_t initialhue,
+                   uint8_t deltahue = 5);
 
 
-// fill_gradient - fill a range of LEDs with a smooth HSV gradient
+// fill_gradient - fill an array of colors with a smooth HSV gradient
 //                 between two specified HSV colors.
 //                 Since 'hue' is a value around a color wheel,
 //                 there are always two ways to sweep from one hue
@@ -31,24 +41,125 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
 //                 The default is SHORTEST_HUES, as this is nearly
 //                 always what is wanted.
 //
+// fill_gradient can write the gradient colors EITHER
+//     (1) into an array of CRGBs (e.g., into leds[] array, or an RGB Palette)
+//   OR 
+//     (2) into an array of CHSVs (e.g. an HSV Palette).
+//
+//   In the case of writing into a CRGB array, the gradient is 
+//   computed in HSV space, and then HSV values are converted to RGB 
+//   as they're written into the RGB array.
+
 typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradientDirectionCode;
 
-void fill_gradient( struct CRGB* leds,
+
+
+#define saccum87 int16_t
+
+template <typename T>
+void fill_gradient( T* targetArray,
                     uint16_t startpos, CHSV startcolor,
                     uint16_t endpos,   CHSV endcolor,
-                    TGradientDirectionCode directionCode = SHORTEST_HUES );
+                    TGradientDirectionCode directionCode  = SHORTEST_HUES )
+{
+    // if the points are in the wrong order, straighten them
+    if( endpos < startpos ) {
+        uint16_t t = endpos;
+        CHSV tc = endcolor;
+        startpos = t;
+        startcolor = tc;
+        endcolor = startcolor;
+        endpos = startpos;
+    }
+    
+    saccum87 huedistance87;
+    saccum87 satdistance87;
+    saccum87 valdistance87;
+    
+    satdistance87 = (endcolor.sat - startcolor.sat) << 7;
+    valdistance87 = (endcolor.val - startcolor.val) << 7;
+    
+    uint8_t huedelta8 = endcolor.hue - startcolor.hue;
+    
+    if( directionCode == SHORTEST_HUES ) {
+        directionCode = FORWARD_HUES;
+        if( huedelta8 > 127) {
+            directionCode = BACKWARD_HUES;
+        }
+    }
+    
+    if( directionCode == LONGEST_HUES ) {
+        directionCode = FORWARD_HUES;
+        if( huedelta8 < 128) {
+            directionCode = BACKWARD_HUES;
+        }
+    }
+    
+    if( directionCode == FORWARD_HUES) {
+        huedistance87 = huedelta8 << 7;
+    }
+    else /* directionCode == BACKWARD_HUES */
+    {
+        huedistance87 = (uint8_t)(256 - huedelta8) << 7;
+        huedistance87 = -huedistance87;
+    }
+    
+    uint16_t pixeldistance = endpos - startpos;
+    int16_t divisor = pixeldistance ? pixeldistance : 1;
+    
+    saccum87 huedelta87 = huedistance87 / divisor;
+    saccum87 satdelta87 = satdistance87 / divisor;
+    saccum87 valdelta87 = valdistance87 / divisor;
+    
+    huedelta87 *= 2;
+    satdelta87 *= 2;
+    valdelta87 *= 2;
+    
+    accum88 hue88 = startcolor.hue << 8;
+    accum88 sat88 = startcolor.sat << 8;
+    accum88 val88 = startcolor.val << 8;
+    for( uint16_t i = startpos; i <= endpos; i++) {
+        targetArray[i] = CHSV( hue88 >> 8, sat88 >> 8, val88 >> 8);
+        hue88 += huedelta87;
+        sat88 += satdelta87;
+        val88 += valdelta87;
+    }
+}
 
-// Convenience functions to fill a range of leds[] with a
+
+// Convenience functions to fill an array of colors with a
 // two-color, three-color, or four-color gradient
-void fill_gradient( struct CRGB* leds, uint16_t numLeds,
-                    const CHSV& c1, const CHSV& c2,
-                    TGradientDirectionCode directionCode = SHORTEST_HUES );
-void fill_gradient( struct CRGB* leds, uint16_t numLeds,
-                   const CHSV& c1, const CHSV& c2, const CHSV& c3,
-                   TGradientDirectionCode directionCode = SHORTEST_HUES );
-void fill_gradient( struct CRGB* leds, uint16_t numLeds,
-                   const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4,
-                   TGradientDirectionCode directionCode = SHORTEST_HUES );
+template <typename T>
+void fill_gradient( T* targetArray, uint16_t numLeds, const CHSV& c1, const CHSV& c2, 
+					TGradientDirectionCode directionCode = SHORTEST_HUES )
+{
+    uint16_t last = numLeds - 1;
+    fill_gradient( targetArray, 0, c1, last, c2, directionCode);
+}
+
+template <typename T>
+void fill_gradient( T* targetArray, uint16_t numLeds, 
+					const CHSV& c1, const CHSV& c2, const CHSV& c3, 
+					TGradientDirectionCode directionCode = SHORTEST_HUES )
+{
+    uint16_t half = (numLeds / 2);
+    uint16_t last = numLeds - 1;
+    fill_gradient( targetArray,    0, c1, half, c2, directionCode);
+    fill_gradient( targetArray, half, c2, last, c3, directionCode);
+}
+
+template <typename T>
+void fill_gradient( T* targetArray, uint16_t numLeds, 
+					const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4, 
+					TGradientDirectionCode directionCode = SHORTEST_HUES )
+{
+    uint16_t onethird = (numLeds / 3);
+    uint16_t twothirds = ((numLeds * 2) / 3);
+    uint16_t last = numLeds - 1;
+    fill_gradient( targetArray,         0, c1,  onethird, c2, directionCode);
+    fill_gradient( targetArray,  onethird, c2, twothirds, c3, directionCode);
+    fill_gradient( targetArray, twothirds, c3,      last, c4, directionCode);
+}
 
 // convenience synonym
 #define fill_gradient_HSV fill_gradient

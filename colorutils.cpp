@@ -6,13 +6,30 @@
 #include "colorutils.h"
 
 
-void fill_solid( struct CRGB * pFirstLED, int numToFill,
-                const struct CRGB& color)
+
+
+void fill_solid( struct CRGB * leds, int numToFill,
+                 const struct CRGB& color)
 {
     for( int i = 0; i < numToFill; i++) {
-        pFirstLED[i] = color;
+        leds[i] = color;
     }
 }
+
+void fill_solid( struct CHSV * targetArray, int numToFill,
+                 const struct CHSV& hsvColor)
+{
+    for( int i = 0; i < numToFill; i++) {
+        targetArray[i] = hsvColor;
+    }
+}
+
+
+// void fill_solid( struct CRGB* targetArray, int numToFill,
+// 				 const struct CHSV& hsvColor)
+// {
+// 	fill_solid<CRGB>( targetArray, numToFill, (CRGB) hsvColor);
+// }
 
 void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
                   uint8_t initialhue,
@@ -28,73 +45,20 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
     }
 }
 
-
-#define saccum87 int16_t
-
-void fill_gradient( CRGB* leds,
-                    uint16_t startpos, CHSV startcolor,
-                    uint16_t endpos,   CHSV endcolor,
-                    TGradientDirectionCode directionCode )
+void fill_rainbow( struct CHSV * targetArray, int numToFill,
+                  uint8_t initialhue,
+                  uint8_t deltahue )
 {
-    // if the points are in the wrong order, straighten them
-    if( endpos < startpos ) {
-        uint16_t t = endpos;
-        CHSV tc = endcolor;
-        startpos = t;
-        startcolor = tc;
-        endcolor = startcolor;
-        endpos = startpos;
-    }
-    
-    saccum87 huedistance87;
-    saccum87 satdistance87;
-    saccum87 valdistance87;
-    
-    satdistance87 = (endcolor.sat - startcolor.sat) << 7;
-    valdistance87 = (endcolor.val - startcolor.val) << 7;
-    
-    uint8_t huedelta8 = endcolor.hue - startcolor.hue;
-    
-    if( directionCode == SHORTEST_HUES ) {
-        directionCode = FORWARD_HUES;
-        if( huedelta8 > 127) {
-            directionCode = BACKWARD_HUES;
-        }
-    }
-    
-    if( directionCode == LONGEST_HUES ) {
-        directionCode = FORWARD_HUES;
-        if( huedelta8 < 128) {
-            directionCode = BACKWARD_HUES;
-        }
-    }
-    
-    if( directionCode == FORWARD_HUES) {
-        huedistance87 = huedelta8 << 7;
-    }
-    else /* directionCode == BACKWARD_HUES */
-    {
-        huedistance87 = (uint8_t)(256 - huedelta8) << 7;
-        huedistance87 = -huedistance87;
-    }
-    
-    uint16_t pixeldistance = endpos - startpos;
-    uint16_t p2 = pixeldistance / 2;
-    int16_t divisor = p2 ? p2 : 1;
-    saccum87 huedelta87 = huedistance87 / divisor;
-    saccum87 satdelta87 = satdistance87 / divisor;
-    saccum87 valdelta87 = valdistance87 / divisor;
-    
-    accum88 hue88 = startcolor.hue << 8;
-    accum88 sat88 = startcolor.sat << 8;
-    accum88 val88 = startcolor.val << 8;
-    for( uint16_t i = startpos; i <= endpos; i++) {
-        leds[i] = CHSV( hue88 >> 8, sat88 >> 8, val88 >> 8);
-        hue88 += huedelta87;
-        sat88 += satdelta87;
-        val88 += valdelta87;
+    CHSV hsv;
+    hsv.hue = initialhue;
+    hsv.val = 255;
+    hsv.sat = 255;
+    for( int i = 0; i < numToFill; i++) {
+        targetArray[i] = hsv;
+        hsv.hue += deltahue;
     }
 }
+
 
 void fill_gradient_RGB( CRGB* leds,
                    uint16_t startpos, CRGB startcolor,
@@ -134,32 +98,6 @@ void fill_gradient_RGB( CRGB* leds,
         g88 += gdelta87;
         b88 += bdelta87;
     }
-}
-
-
-void fill_gradient( CRGB* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2, TGradientDirectionCode directionCode )
-{
-    uint16_t last = numLeds - 1;
-    fill_gradient( leds, 0, c1, last, c2, directionCode);
-}
-
-
-void fill_gradient( CRGB* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2, const CHSV& c3, TGradientDirectionCode directionCode )
-{
-    uint16_t half = (numLeds / 2);
-    uint16_t last = numLeds - 1;
-    fill_gradient( leds,    0, c1, half, c2, directionCode);
-    fill_gradient( leds, half, c2, last, c3, directionCode);
-}
-
-void fill_gradient( CRGB* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4, TGradientDirectionCode directionCode )
-{
-    uint16_t onethird = (numLeds / 3);
-    uint16_t twothirds = ((numLeds * 2) / 3);
-    uint16_t last = numLeds - 1;
-    fill_gradient( leds,         0, c1,  onethird, c2, directionCode);
-    fill_gradient( leds,  onethird, c2, twothirds, c3, directionCode);
-    fill_gradient( leds, twothirds, c3,      last, c4, directionCode);
 }
 
 #if 0
