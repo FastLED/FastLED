@@ -93,7 +93,7 @@ void fillnoise8() {
     for(int j = 0; j < MAX_DIMENSION; j++) {
       int joffset = scale * j;
       
-      byte data = inoise8(x + ioffset,y + joffset,z);
+      uint8_t data = inoise8(x + ioffset,y + joffset,z);
 
       // The range of the inoise8 function is roughly 16-240.
       // These two operations expand those values out to roughly 0..255
