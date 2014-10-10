@@ -366,7 +366,7 @@ protected:
 
 // We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
 // need the more tightly defined timeframes.
-#if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000 || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
+#if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000) //  || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
 #define FMUL (F_CPU/8000000)
 // LPD1886
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
@@ -437,10 +437,10 @@ class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(
 #warning "Not enough clock cycles available for the TM1809"
 #endif
 
-// WS2811 - 400ns, 400ns, 450ns
+// WS2811 - 320ns, 320ns, 640ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
-#if NO_TIME(400, 400, 450)
+class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(640), RGB_ORDER> {};
+#if NO_TIME(320, 320, 640)
 #warning "Not enough clock cycles available for the WS2811 (800khz)"
 #endif
 

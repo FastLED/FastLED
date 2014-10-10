@@ -79,7 +79,7 @@ protected:
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 			FastPin<DATA_PIN>::fastset(port, hi);
 			if(b&0x80) {
-				while((next_mark - ARM_DWT_CYCCNT) > (T3+(3*(F_CPU/24000000))));
+				while((next_mark - ARM_DWT_CYCCNT) > (T3+(2*(F_CPU/24000000))));
 				FastPin<DATA_PIN>::fastset(port, lo);
 			} else {
 				while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+(2*(F_CPU/24000000))));
@@ -93,7 +93,7 @@ protected:
 		FastPin<DATA_PIN>::fastset(port, hi);
 
 		if(b&0x80) {
-			while((next_mark - ARM_DWT_CYCCNT) > (T3+(3*(F_CPU/24000000))));
+			while((next_mark - ARM_DWT_CYCCNT) > (T3+(2*(F_CPU/24000000))));
 			FastPin<DATA_PIN>::fastset(port, lo);
 		} else {
 			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+(2*(F_CPU/24000000))));
