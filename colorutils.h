@@ -253,7 +253,7 @@ CRGB HeatColor( uint8_t temperature);
 
 // Palettes
 //
-// Palettes map an 8-bit value (0..255) to an RGB color.
+// RGB Palettes map an 8-bit value (0..255) to an RGB color.
 //
 // You can create any color palette you wish; a couple of starters
 // are provided: Forest, Clouds, Lava, Ocean, Rainbow, and Rainbow Stripes.
@@ -309,11 +309,189 @@ CRGB HeatColor( uint8_t temperature);
 
 class CRGBPalette16;
 class CRGBPalette256;
-typedef prog_uint32_t TProgmemPalette16[16];
+class CHSVPalette16;
+class CHSVPalette256;
+typedef prog_uint32_t TProgmemRGBPalette16[16];
+typedef prog_uint32_t TProgmemHSVPalette16[16];
+#define TProgmemPalette16 TProgmemRGBPalette16 
 
 // Convert a 16-entry palette to a 256-entry palette
-void UpscalePalette(const CRGBPalette16& srcpal16, CRGBPalette256& destpal256);
+void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256);
+void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette256& destpal256);
 
+class CHSVPalette16 {
+public:
+    CHSV entries[16];
+    CHSVPalette16() {};
+    CHSVPalette16( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
+                    const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
+                    const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
+                    const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
+    {
+        entries[0]=c00; entries[1]=c01; entries[2]=c02; entries[3]=c03;
+        entries[4]=c04; entries[5]=c05; entries[6]=c06; entries[7]=c07;
+        entries[8]=c08; entries[9]=c09; entries[10]=c10; entries[11]=c11;
+        entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
+    };
+    
+    CHSVPalette16( const CHSVPalette16& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
+    }
+    CHSVPalette16& operator=( const CHSVPalette16& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
+        return *this;
+    }
+    
+    CHSVPalette16( const TProgmemHSVPalette16& rhs)
+    {
+        for( uint8_t i = 0; i < 16; i++) {
+            CRGB xyz   =  pgm_read_dword_near( rhs + i);
+            entries[i].hue = xyz.red;
+            entries[i].sat = xyz.green;
+            entries[i].val = xyz.blue;
+        }
+    }
+    CHSVPalette16& operator=( const TProgmemHSVPalette16& rhs)
+    {
+        for( uint8_t i = 0; i < 16; i++) {
+            CRGB xyz   =  pgm_read_dword_near( rhs + i);
+            entries[i].hue = xyz.red;
+            entries[i].sat = xyz.green;
+            entries[i].val = xyz.blue;
+        }
+        return *this;
+    }
+    
+    inline CHSV& operator[] (uint8_t x) __attribute__((always_inline))
+    {
+        return entries[x];
+    }
+    inline const CHSV& operator[] (uint8_t x) const __attribute__((always_inline))
+    {
+        return entries[x];
+    }
+    
+    inline CHSV& operator[] (int x) __attribute__((always_inline))
+    {
+        return entries[(uint8_t)x];
+    }
+    inline const CHSV& operator[] (int x) const __attribute__((always_inline))
+    {
+        return entries[(uint8_t)x];
+    }
+    
+    operator CHSV*()
+    {
+        return &(entries[0]);
+    }
+    
+    CHSVPalette16( const CHSV& c1)
+    {
+        fill_solid( &(entries[0]), 16, c1);
+    }
+    CHSVPalette16( const CHSV& c1, const CHSV& c2)
+    {
+        fill_gradient( &(entries[0]), 16, c1, c2);
+    }
+    CHSVPalette16( const CHSV& c1, const CHSV& c2, const CHSV& c3)
+    {
+        fill_gradient( &(entries[0]), 16, c1, c2, c3);
+    }
+    CHSVPalette16( const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4)
+    {
+        fill_gradient( &(entries[0]), 16, c1, c2, c3, c4);
+    }
+    
+};
+
+class CHSVPalette256 {
+public:
+    CHSV entries[256];
+    CHSVPalette256() {};
+    CHSVPalette256( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
+                  const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
+                  const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
+                  const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
+    {
+        CHSVPalette16 p16(c00,c01,c02,c03,c04,c05,c06,c07,
+                          c08,c09,c10,c11,c12,c13,c14,c15);
+        *this = p16;
+    };
+    
+    CHSVPalette256( const CHSVPalette256& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
+    }
+    CHSVPalette256& operator=( const CHSVPalette256& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
+        return *this;
+    }
+    
+    CHSVPalette256( const CHSVPalette16& rhs16)
+    {
+        UpscalePalette( rhs16, *this);
+    }
+    CHSVPalette256& operator=( const CHSVPalette16& rhs16)
+    {
+        UpscalePalette( rhs16, *this);
+        return *this;
+    }
+    
+    CHSVPalette256( const TProgmemRGBPalette16& rhs)
+    {
+        CHSVPalette16 p16(rhs);
+        *this = p16;
+    }
+    CHSVPalette256& operator=( const TProgmemRGBPalette16& rhs)
+    {
+        CHSVPalette16 p16(rhs);
+        *this = p16;
+        return *this;
+    }
+    
+    inline CHSV& operator[] (uint8_t x) __attribute__((always_inline))
+    {
+        return entries[x];
+    }
+    inline const CHSV& operator[] (uint8_t x) const __attribute__((always_inline))
+    {
+        return entries[x];
+    }
+    
+    inline CHSV& operator[] (int x) __attribute__((always_inline))
+    {
+        return entries[(uint8_t)x];
+    }
+    inline const CHSV& operator[] (int x) const __attribute__((always_inline))
+    {
+        return entries[(uint8_t)x];
+    }
+
+    operator CHSV*()
+    {
+        return &(entries[0]);
+    }
+    
+    CHSVPalette256( const CHSV& c1)
+    {
+      fill_solid( &(entries[0]), 256, c1);
+    }
+    CHSVPalette256( const CHSV& c1, const CHSV& c2)
+    {
+        fill_gradient( &(entries[0]), 256, c1, c2);
+    }
+    CHSVPalette256( const CHSV& c1, const CHSV& c2, const CHSV& c3)
+    {
+        fill_gradient( &(entries[0]), 256, c1, c2, c3);
+    }
+    CHSVPalette256( const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4)
+    {
+        fill_gradient( &(entries[0]), 256, c1, c2, c3, c4);
+    }
+};
 
 class CRGBPalette16 {
 public:
@@ -340,13 +518,27 @@ public:
         return *this;
     }
     
-    CRGBPalette16( const TProgmemPalette16& rhs)
+    CRGBPalette16( const CHSVPalette16& rhs)
+    {
+        for( uint8_t i = 0; i < 16; i++) {
+    		entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
+        }
+    }    
+    CRGBPalette16& operator=( const CHSVPalette16& rhs)
+    {
+        for( uint8_t i = 0; i < 16; i++) {
+    		entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
+        }
+        return *this;
+    }
+
+    CRGBPalette16( const TProgmemRGBPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
             entries[i] =  pgm_read_dword_near( rhs + i);
         }
     }
-    CRGBPalette16& operator=( const TProgmemPalette16& rhs)
+    CRGBPalette16& operator=( const TProgmemRGBPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
             entries[i] =  pgm_read_dword_near( rhs + i);
@@ -438,6 +630,20 @@ public:
         return *this;
     }
     
+    CRGBPalette256( const CHSVPalette256& rhs)
+    {
+    	for( int i = 0; i < 256; i++) {
+	    	entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
+    	}
+    }
+    CRGBPalette256& operator=( const CHSVPalette256& rhs)
+    {
+    	for( int i = 0; i < 256; i++) {
+	    	entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
+    	}
+        return *this;
+    }
+
     CRGBPalette256( const CRGBPalette16& rhs16)
     {
         UpscalePalette( rhs16, *this);
@@ -448,12 +654,12 @@ public:
         return *this;
     }
     
-    CRGBPalette256( const TProgmemPalette16& rhs)
+    CRGBPalette256( const TProgmemRGBPalette16& rhs)
     {
         CRGBPalette16 p16(rhs);
         *this = p16;
     }
-    CRGBPalette256& operator=( const TProgmemPalette16& rhs)
+    CRGBPalette256& operator=( const TProgmemRGBPalette16& rhs)
     {
         CRGBPalette16 p16(rhs);
         *this = p16;
@@ -519,6 +725,9 @@ public:
     
 };
 
+
+
+
 typedef enum { NOBLEND=0, BLEND=1 } TBlendType;
 
 CRGB ColorFromPalette( const CRGBPalette16& pal,
@@ -531,20 +740,49 @@ CRGB ColorFromPalette( const CRGBPalette256& pal,
                        uint8_t brightness=255,
                        TBlendType blendType=NOBLEND );
 
+CHSV ColorFromPalette( const CHSVPalette16& pal,
+                       uint8_t index,
+                       uint8_t brightness=255,
+                       TBlendType blendType=BLEND);
+
+CHSV ColorFromPalette( const CHSVPalette256& pal,
+                       uint8_t index,
+                       uint8_t brightness=255,
+                       TBlendType blendType=NOBLEND );
+
 
 // Fill a range of LEDs with a sequece of entryies from a palette
-void fill_palette(CRGB* L, uint16_t N,
-                  uint8_t startIndex, uint8_t incIndex,
-                  const CRGBPalette16& pal,
-                  uint8_t brightness=255,
-                  TBlendType blendType=BLEND);
+template <typename PALETTE> 
+void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
+                  const PALETTE& pal, uint8_t brightness, TBlendType blendType)
+{
+    uint8_t colorIndex = startIndex;
+    for( uint16_t i = 0; i < N; i++) {
+        L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
+        colorIndex += incIndex;
+    }
+}
 
-void fill_palette(CRGB* L, uint16_t N,
-                  uint8_t startIndex, uint8_t incIndex,
-                  const CRGBPalette256& pal,
-                  uint8_t brightness=255,
-                  TBlendType blendType=NOBLEND);
-
-
+template <typename PALETTE>
+void map_data_into_colors_through_palette( 
+	uint8_t *dataArray, uint16_t dataCount, 
+	CRGB* targetColorArray, 
+	const PALETTE& pal, 
+	uint8_t brightness=255, 
+	uint8_t opacity=255, 
+	TBlendType blendType=BLEND)
+{
+	for( uint16_t i = 0; i < dataCount; i++) {
+		uint8_t d = dataArray[i];
+		CRGB rgb = ColorFromPalette( pal, d, brightness, blendType);
+		if( opacity == 255 ) {
+			targetColorArray[i] = rgb;
+		} else {
+			targetColorArray[i].nscale8( 256 - opacity);
+			rgb.nscale8_video( opacity);
+			targetColorArray[i] += rgb;
+		}
+	}
+}
 
 #endif

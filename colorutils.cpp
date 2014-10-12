@@ -456,7 +456,87 @@ CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightn
 }
 
 
-void UpscalePalette(const CRGBPalette16& srcpal16, CRGBPalette256& destpal256)
+CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
+{
+    uint8_t hi4 = index >> 4;
+    uint8_t lo4 = index & 0x0F;
+    
+    //  CRGB rgb1 = pal[ hi4];
+    const CHSV* entry = &(pal[0]) + hi4;
+
+    uint8_t hue1   = entry->hue;
+    uint8_t sat1   = entry->sat;
+    uint8_t val1   = entry->val;
+    
+    uint8_t blend = lo4 && (blendType != NOBLEND);
+    
+    if( blend ) {
+        
+        if( hi4 == 15 ) {
+            entry = &(pal[0]);
+        } else {
+            entry++;
+        }
+        
+        uint8_t f2 = lo4 << 4;
+        uint8_t f1 = 256 - f2;
+        
+        uint8_t hue2  = entry->hue;
+        uint8_t sat2  = entry->sat;
+        uint8_t val2  = entry->val;
+
+        sat1  = scale8_LEAVING_R1_DIRTY( sat1, f1);
+        val1  = scale8_LEAVING_R1_DIRTY( val1, f1);
+                
+        sat2  = scale8_LEAVING_R1_DIRTY( sat2, f2);
+        val2  = scale8_LEAVING_R1_DIRTY( val2, f2);
+        
+        //    cleanup_R1();
+
+        // These sums can't overflow, so no qadd8 needed.
+        sat1  += sat2;
+        val1  += val2;
+
+        uint8_t deltaHue = (uint8_t)(hue2 - hue1);
+        if( deltaHue & 0x80 ) {
+          // go backwards
+          hue1 -= scale8( 256 - deltaHue, f2);
+        } else {
+          // go forwards
+          hue1 += scale8( deltaHue, f2);
+        }
+        
+        cleanup_R1();
+    }
+    
+    if( brightness != 255) {
+        val1 = scale8_video( val1, brightness);
+    }
+    
+    return CHSV( hue1, sat1, val1);  
+}
+
+
+CHSV ColorFromPalette( const struct CHSVPalette256& pal, uint8_t index, uint8_t brightness, TBlendType)
+{
+    CHSV hsv;// = *( &(pal[0]) + index );
+
+    if( brightness != 255) {
+        hsv.value = scale8_video( hsv.value, brightness);
+    }
+    
+    return hsv;
+}
+
+
+void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256)
+{
+    for( int i = 0; i < 256; i++) {
+        destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
+    }
+}
+
+void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette256& destpal256)
 {
     for( int i = 0; i < 256; i++) {
         destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
@@ -471,26 +551,3 @@ void SetupPartyColors(CRGBPalette16& pal)
     fill_gradient( pal, 8, CHSV( HUE_ORANGE,255,255), 15, CHSV(HUE_BLUE + 18,255,255), BACKWARD_HUES);
 }
 #endif
-
-void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
-                  const CRGBPalette16& pal, uint8_t brightness, TBlendType blendType)
-{
-    uint8_t colorIndex = startIndex;
-    for( uint16_t i = 0; i < N; i++) {
-        L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
-        colorIndex += incIndex;
-    }
-}
-
-
-void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
-                  const CRGBPalette256& pal, uint8_t brightness, TBlendType blendType)
-{
-    uint8_t colorIndex = startIndex;
-    for( uint16_t i = 0; i < N; i++) {
-        L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
-        colorIndex += incIndex;
-    }
-}
-
-
