@@ -15,6 +15,15 @@ FastPin	KEYWORD1
 FastSPI	KEYWORD1
 FastSPI_LED2	KEYWORD1
 
+CRGBPalette16	KEYWORD1
+CRGBPalette256	KEYWORD1
+CHSVPalette16	KEYWORD1
+CHSVPalette256	KEYWORD1
+CHSVPalette16	KEYWORD1
+CHSVPalette256	KEYWORD1
+CRGBPalette16	KEYWORD1
+CRGBPalette256	KEYWORD1
+
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
@@ -32,6 +41,21 @@ setDither KEYWORD2
 countFPS KEYWORD2
 getFPS KEYWORD2
 
+# Noise methods
+inoise16_raw	KEYWORD2
+inoise8_raw	KEYWORD2
+inoise16	KEYWORD2
+inoise8	KEYWORD2
+fill_2dnoise16	KEYWORD2
+fill_2dnoise8	KEYWORD2
+fill_noise16	KEYWORD2
+fill_noise8	KEYWORD2
+fill_raw_2dnoise16	KEYWORD2
+fill_raw_2dnoise16into8	KEYWORD2
+fill_raw_2dnoise8	KEYWORD2
+fill_raw_noise16into8	KEYWORD2
+fill_raw_noise8	KEYWORD2
+
 # Lib8tion methods
 qadd8	KEYWORD2
 qadd7	KEYWORD2
@@ -40,9 +64,6 @@ add8	KEYWORD2
 sub8	KEYWORD2
 scale8	KEYWORD2
 scale8_video	KEYWORD2
-scale8_LEAVING_R1_DIRTY	KEYWORD2
-nscale8_LEAVING_R1_DIRTY	KEYWORD2
-scale8_video_LEAVING_R1_DIRTY	KEYWORD2
 cleanup_R1	KEYWORD2
 nscale8x3	KEYWORD2
 nscale8x3_video	KEYWORD2
@@ -56,8 +77,10 @@ qmul8	KEYWORD2
 abs8	KEYWORD2
 dim8_raw	KEYWORD2
 dim8_video	KEYWORD2
+dim8_lin	KEYWORD2
 brighten8_raw	KEYWORD2
 brighten8_video	KEYWORD2
+brighten8_lin	KEYWORD2
 random8	KEYWORD2
 random16	KEYWORD2
 random8	KEYWORD2
@@ -70,13 +93,43 @@ random16_add_entropy	KEYWORD2
 sin16_avr	KEYWORD2
 sin16_C	KEYWORD2
 cos16	KEYWORD2
+sin8_C	KEYWORD2
+cos8	KEYWORD2
 lerp8by8	KEYWORD2
 lerp16by16	KEYWORD2
 lerp16by8	KEYWORD2
 lerp15by8	KEYWORD2
+lerp15by16	KEYWORD2
+map8	KEYWORD2
+ease8InOutQuad	KEYWORD2
 ease8InOutCubic	KEYWORD2
 ease8InOutApprox	KEYWORD2
 ease8InOutApprox	KEYWORD2
+triwave8	KEYWORD2
+quadwave8	KEYWORD2
+cubicwave8	KEYWORD2
+sqrt16	KEYWORD2
+
+# Color util methods
+blend	KEYWORD2
+nblend	KEYWORD2
+ColorFromPalette	KEYWORD2
+HeatColor	KEYWORD2
+UpscalePalette	KEYWORD2
+blend	KEYWORD2
+fadeLightBy	KEYWORD2
+fadeToBlackBy	KEYWORD2
+fade_raw	KEYWORD2
+fade_video	KEYWORD2
+fill_gradient	KEYWORD2
+fill_gradient_RGB	KEYWORD2
+fill_palette	KEYWORD2
+fill_rainbow	KEYWORD2
+fill_solid	KEYWORD2
+map_data_into_colors_through_palette	KEYWORD2
+nblend	KEYWORD2
+nscale8	KEYWORD2
+nscale8_video	KEYWORD2
 
 # HSV methods
 hsv2grb_rainbow	KEYWORD2
@@ -266,3 +319,49 @@ GRB	LITERAL1
 GBR	LITERAL1
 BRG	LITERAL1
 BGR	LITERAL1
+
+# hue literals
+HUE_RED	LITERAL1
+HUE_ORANGE	LITERAL1
+HUE_YELLOW	LITERAL1
+HUE_GREEN	LITERAL1
+HUE_AQUA	LITERAL1
+HUE_BLUE	LITERAL1
+HUE_PURPLE	LITERAL1
+HUE_PINK	LITERAL1
+
+# Color correction values
+TypicalSMD5050	LITERAL1
+TypicalLEDStrip	LITERAL1
+Typical8mmPixel	LITERAL1
+TypicalPixelString	LITERAL1
+UncorrectedColor	LITERAL1
+Candle	LITERAL1
+Tungsten40W	LITERAL1
+Tungsten100W	LITERAL1
+Halogen	LITERAL1
+CarbonArc	LITERAL1
+HighNoonSun	LITERAL1
+DirectSunlight	LITERAL1
+OvercastSky	LITERAL1
+ClearBlueSky	LITERAL1
+WarmFluorescent	LITERAL1
+StandardFluorescent	LITERAL1
+CoolWhiteFluorescent	LITERAL1
+FullSpectrumFluorescent	LITERAL1
+GrowLightFluorescent	LITERAL1
+BlackLightFluorescent	LITERAL1
+MercuryVapor	LITERAL1
+SodiumVapor	LITERAL1
+MetalHalide	LITERAL1
+HighPressureSodium	LITERAL1
+UncorrectedTemperature	LITERAL1
+
+# Color util literals
+FORWARD_HUES	LITERAL1
+BACKWARD_HUES	LITERAL1
+SHORTEST_HUES	LITERAL1
+LONGEST_HUES	LITERAL1
+BLEND		LITERAL1
+NOBLEND		LITERAL1
+
