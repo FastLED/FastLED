@@ -72,6 +72,22 @@ void fill_gradient( T* targetArray,
         endpos = startpos;
     }
     
+    // If we're fading toward black (val=0) or white (sat=0),
+    // then set the endhue to the starthue.
+    // This lets us ramp smoothly to black or white, regardless
+    // of what 'hue' was set in the endcolor (since it doesn't matter)
+    if( endcolor.value == 0 || endcolor.saturation == 0) {
+        endcolor.hue = startcolor.hue;
+    }
+    
+    // Similarly, if we're fading in from black (val=0) or white (sat=0)
+    // then set the starthue to the endhue.
+    // This lets us ramp smoothly up from black or white, regardless
+    // of what 'hue' was set in the startcolor (since it doesn't matter)
+    if( statcolor.value == 0 || startcolor.saturation == 0) {
+        startcolor.hue = endcolor.hue;
+    }
+    
     saccum87 huedistance87;
     saccum87 satdistance87;
     saccum87 valdistance87;
