@@ -84,7 +84,7 @@ void fill_gradient( T* targetArray,
     // then set the starthue to the endhue.
     // This lets us ramp smoothly up from black or white, regardless
     // of what 'hue' was set in the startcolor (since it doesn't matter)
-    if( statcolor.value == 0 || startcolor.saturation == 0) {
+    if( startcolor.value == 0 || startcolor.saturation == 0) {
         startcolor.hue = endcolor.hue;
     }
     
