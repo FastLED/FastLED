@@ -83,12 +83,16 @@ void fill_gradient_RGB( CRGB* leds,
     bdistance87 = (endcolor.b - startcolor.b) << 7;
         
     uint16_t pixeldistance = endpos - startpos;
-    uint16_t p2 = pixeldistance / 2;
-    int16_t divisor = p2 ? p2 : 1;
+    int16_t divisor = pixeldistance ? pixeldistance : 1;
+
     saccum87 rdelta87 = rdistance87 / divisor;
     saccum87 gdelta87 = gdistance87 / divisor;
     saccum87 bdelta87 = bdistance87 / divisor;
     
+    rdelta87 *= 2;
+    gdelta87 *= 2;
+    bdelta87 *= 2;
+
     accum88 r88 = startcolor.r << 8;
     accum88 g88 = startcolor.g << 8;
     accum88 b88 = startcolor.b << 8;
@@ -485,6 +489,28 @@ CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t b
         uint8_t sat2  = entry->sat;
         uint8_t val2  = entry->val;
 
+        // Now some special casing for blending to or from
+        // either black or white.  Black and white don't have
+        // proper 'hue' of their own, so when ramping from
+        // something else to/from black/white, we set the 'hue'
+        // of the black/white color to be the same as the hue
+        // of the other color, so that you get the expected
+        // brightness or saturation ramp, with hue staying
+        // constant:
+        
+        // If we are starting from white (sat=0)
+        // or black (val=0), adopt the target hue.
+        if( sat1 == 0 || val1 == 0) {
+            hue1 = hue2;
+        }
+        
+        // If we are ending at white (sat=0)
+        // or black (val=0), adopt the starting hue.
+        if( sat2 == 0 || val2 == 0) {
+            hue2 = hue1;
+        }
+        
+        
         sat1  = scale8_LEAVING_R1_DIRTY( sat1, f1);
         val1  = scale8_LEAVING_R1_DIRTY( val1, f1);
                 
