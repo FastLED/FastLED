@@ -34,6 +34,9 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 
 #endif
 
+#if defined(ARDUINO) && defined(FASTLED_AVR) && ARDUINO >= 157
+#error Arduion versions 1.5.7 and later not yet supported by FastLED for AVR
+#endif
 
 // Arduino.h needed for convinience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #include<Arduino.h>
