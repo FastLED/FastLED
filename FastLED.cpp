@@ -37,7 +37,10 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 void CFastLED::show(uint8_t scale) {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
+		uint8_t d = pCur->getDither();
+		if(m_nFPS < 100) { pCur->setDither(0); }
 		pCur->showLeds(scale);
+		pCur->setDither(d);
 		pCur = pCur->next();
 	}
 	countFPS();
@@ -68,7 +71,10 @@ CLEDController & CFastLED::operator[](int x) {
 void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
+		uint8_t d = pCur->getDither();
+		if(m_nFPS < 100) { pCur->setDither(0); }
 		pCur->showColor(color, scale);
+		pCur->setDither(d);
 		pCur = pCur->next();
 	}
 	countFPS();
