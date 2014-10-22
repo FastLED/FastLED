@@ -1,8 +1,6 @@
 FastLED2.1
 ==========
 
-* Remove Squant (takes up space!)
-* A number of performance/memory improvements
 * Added support for the following platforms:
   * Arduino due
   * Teensy 3.1
@@ -37,6 +35,8 @@ FastLED2.1
 * Timing adjustments for existing SPI chipsets
 * Cleaned up the code layout to make platform support easier
 * Many bug fixes 
+* A number of performance/memory improvements
+* Remove Squant (takes up space!)
 
 FastLED2
 ========
