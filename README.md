@@ -2,7 +2,7 @@ FastLED
 =======
 
 IMPORTANT NOTE:  If you are building for AVR based systems, please do not use any version of the arduino
-IDE after 1.5.7 yet.  It messes with some of the asm output which will cause you problems.
+IDE 1.5.7 or later yet.  It messes with some of the asm output which will cause you problems.
 
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
 sold by adafruit (Neopixel, LPD8806), Sparkfun (WS2801), and aliexpress.  In addition to writing to the
