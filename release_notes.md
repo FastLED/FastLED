@@ -1,4 +1,4 @@
-FastLED2.1
+FastLED3.0
 ==========
 
 * Added support for the following platforms:

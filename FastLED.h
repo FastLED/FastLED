@@ -7,8 +7,8 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-#define  FASTLED_VERSION 2001001
-#warning FastLED version 2001001  (Not really a warning, just telling you here.)
+#define  FASTLED_VERSION 3000000
+#warning FastLED version 3000000  (Not really a warning, just telling you here.)
 
 #define __PROG_TYPES_COMPAT__
 
