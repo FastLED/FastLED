@@ -659,7 +659,7 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
 
 void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
             uint8_t octaves, uint32_t x, int xscale, uint32_t y, int yscale, uint32_t time,
-            uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time, bool blend) {
+            uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time, bool blend, uint16_t hue_shift) {
   uint8_t V[height][width];
   uint8_t H[height][width];
 
@@ -674,10 +674,12 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
 
   int w1 = width-1;
   int h1 = height-1;
+  hue_shift >>= 8;
+
   for(int i = 0; i < height; i++) {
     int wb = i*width;
     for(int j = 0; j < width; j++) {
-      CRGB led(CHSV(H[h1-i][w1-j],255,V[i][j]));
+      CRGB led(CHSV(hue_shift + (H[h1-i][w1-j]),196,V[i][j]));
 
       int pos = j;
       if(serpentine && (i & 0x1)) {
