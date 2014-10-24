@@ -1,8 +1,8 @@
 IMPORTANT NOTE: If you are building for AVR based systems, please do not use any version of the arduino IDE 1.5.7 or greater yet. It messes with some of the asm output which will cause you problems.
 
 
-FastLED
-=======
+FastLED 3.0
+===========
 
 IMPORTANT NOTE:  If you are building for AVR based systems, please do not use any version of the arduino
 IDE 1.5.7 or later yet.  It messes with some of the asm output which will cause you problems.
