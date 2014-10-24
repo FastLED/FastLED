@@ -1,0 +1,22 @@
+* ALL UNTESTED, USE AT YOUR OWN RISK!
+* RGB based scaling, allow for color balancing
+* (The moon) dithering support
+* Teensy 3.1 support
+* Second SPI support on teensy 3.1
+* Due support 
+* P9813 (aka Cool Neon Total Control Lighting support)
+* Preliminary TM1829 support (broken, don't use!)
+* Random code changes and cleanups 
+* More accurate timing adjustments for k20 and due clockless chips
+* Added HUE_RED, HUE_ORANGE, etc.
+* Added named color correction profiles (eg. TypicalSMD5050)
+* Added XY Matrix example
+* Added Fire2012 example, added HeatColor(...) to the library
+* Added sin8, cos8, quadwave8, cubicwave8, triwave8, and ease8InOutQuad
+* Added map8
+* Adjusted VIRTAL_BITS of dithering from a flickery 8 to a more solid 3
+* Added array versions of fade_video, fade_raw, and some variations
+* Added fill_gradient
+* Added inoise8/inoise16 and example program
+* Added LEDS.countFPS() for debugging framerate counts.  Bit rough at the moment, thought
+* Added Palettes and associated functions and presets

@@ -17,17 +17,17 @@
 /// byte worked on.  Recommendation, make the adjust method aggressively inlined.
 ///
 /// TODO: Convinience macro for building these
-class DATA_NOP { 
+class DATA_NOP {
 public:
-	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data) { return data; } 
-	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data, register uint8_t scale) { return scale8(data, scale); } 
+	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data) { return data; }
+	static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data, register uint8_t scale) { return scale8(data, scale); }
 	static __attribute__((always_inline)) inline void postBlock(int len) {}
 };
 
 #define FLAG_START_BIT 0x80
 #define MASK_SKIP_BITS 0x3F
 
-// Clock speed dividers 
+// Clock speed dividers
 #define SPEED_DIV_2 2
 #define SPEED_DIV_4 4
 #define SPEED_DIV_8 8
@@ -37,12 +37,18 @@ public:
 #define SPEED_DIV_128 128
 
 #define MAX_DATA_RATE 0
+#if (CLK_DBL == 1)
+#define DATA_RATE_MHZ(X) (((F_CPU / 1000000L) / X)/2)
+#define DATA_RATE_KHZ(X) (((F_CPU / 1000L) / X)/2)
+#else
 #define DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
 #define DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
+#endif
 
 // Include the various specific SPI implementations
 #include "fastspi_bitbang.h"
-#include "fastspi_arm.h"
+#include "fastspi_arm_k20.h"
+#include "fastspi_arm_sam.h"
 #include "fastspi_avr.h"
 #include "fastspi_dma.h"
 
@@ -62,10 +68,21 @@ class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SP
 #ifndef FORCE_SOFTWARE_SPI
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
-#if defined(__MK20DX128__) && defined(CORE_TEENSY)
+#if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
 template<uint8_t SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
+
+#if defined(SPI2_DATA)
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, 0x4002C000> {};
+#endif
+
+#elif defined(__SAM3X8E__)
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public SAMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
 #else
 
@@ -86,6 +103,6 @@ class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SP
 
 #else
 #warning "Forcing software SPI - no hardware SPI for you!"
-#endif 
+#endif
 
 #endif

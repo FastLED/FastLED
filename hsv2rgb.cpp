@@ -337,7 +337,8 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 }
                 if( Y2 ) {
                     r = K171 + third;
-                    uint8_t twothirds = (third << 1);
+                    //uint8_t twothirds = (third << 1);
+                    uint8_t twothirds = scale8( offset8, ((256 * 2) / 3));
                     g = K85 + twothirds;
                     b = 0;
                     FORCE_REFERENCE(b);
@@ -350,7 +351,8 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 // 010
                 //case 2: // Y -> G
                 if( Y1 ) {
-                    uint8_t twothirds = (third << 1);
+                    //uint8_t twothirds = (third << 1);
+                    uint8_t twothirds = scale8( offset8, ((256 * 2) / 3));
                     r = K171 - twothirds;
                     g = K171 + third;
                     b = 0;
@@ -381,7 +383,8 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
                 //case 4: // A -> B
                 r = 0;
                 FORCE_REFERENCE(r);
-                uint8_t twothirds = (third << 1);
+                //uint8_t twothirds = (third << 1);
+                uint8_t twothirds = scale8( offset8, ((256 * 2) / 3));
                 g = K171 - twothirds;
                 b = K85  + twothirds;
 
@@ -469,27 +472,5 @@ void hsv2rgb_rainbow( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) 
 void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
     for(int i = 0; i < numLeds; i++) {
         hsv2rgb_spectrum(phsv[i], prgb[i]);
-    }
-}
-
-void fill_solid( struct CRGB * pFirstLED, int numToFill,
-                const struct CRGB& color)
-{
-    for( int i = 0; i < numToFill; i++) {
-        pFirstLED[i] = color;
-    }
-}
-
-void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
-                  uint8_t initialhue,
-                  uint8_t deltahue )
-{
-    CHSV hsv;
-    hsv.hue = initialhue;
-    hsv.val = 255;
-    hsv.sat = 255;
-    for( int i = 0; i < numToFill; i++) {
-        hsv2rgb_rainbow( hsv, pFirstLED[i]);
-        hsv.hue += deltahue;
     }
 }
