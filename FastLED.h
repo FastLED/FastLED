@@ -16,6 +16,7 @@
 #include "controller.h"
 #include "fastpin.h"
 #include "fastspi.h"
+#include "bitswap.h"
 #include "clockless.h"
 #include "lib8tion.h"
 #include "hsv2rgb.h"
@@ -26,6 +27,7 @@
 #include "smartmatrix_t3.h"
 #include "noise.h"
 #include "power_mgt.h"
+
 
 enum ESPIChipsets {
 	LPD8806,
