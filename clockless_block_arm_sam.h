@@ -14,11 +14,11 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if defined(__SAM3X8E__)
 // #define PORT_MASK 0x77EFF3FE // due
 #define PORT_MASK 0x7FFFFFE
 #define SKIPLIST ~PORT_MASK
 
-#if defined(__SAM3X8E__)
 #define HAS_BLOCKLESS 1
 #define LANES 8
 
@@ -241,63 +241,8 @@ i++; b2.bytes[i] = pixels.template loadAndScale<PX>(pixels, i,d,scale);
 #endif
 #endif
 
-      // switch(PX) {
-			// 	case 0: b2.bytes[i] = pixels.loadAndScale0(i); break;
-			// 	case 1: b2.bytes[i] = pixels.loadAndScale1(i); break;
-			// 	case 2: b2.bytes[i] = pixels.loadAndScale2(i); break;
-			// }
-      // switch(PX) {
-      //   case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
-      //   case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
-      //   case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
-      // }
-//   #if LANES > 8
-// 			i++;
-//       switch(PX) {
-//         case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
-//         case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
-//         case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
-//       }
-//   #endif
-// #if LANES > 16
-//       i++;
-//       switch(PX) {
-//         case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
-//         case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
-//         case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
-//       }
-// #endif
-// #if LANES > 24
-//       i++;
-//       switch(PX) {
-//         case 0: b2.bytes[i] = pixels.loadAndScale0(i,d,scale); break;
-//         case 1: b2.bytes[i] = pixels.loadAndScale1(i,d,scale); break;
-//         case 2: b2.bytes[i] = pixels.loadAndScale2(i,d,scale); break;
-//       }
-// #endif
 		}
 
-    // for(uint32_t i = 0; i < LANES/2; i++) {
-    //   while(VAL > next_mark);
-    //
-    //   next_mark = VAL - (TOTAL);
-    //   *FastPin<33>::sport() = PORT_MASK;
-    //
-    //   while((VAL-next_mark) > (T2+T3+6));
-    //   *FastPin<33>::cport() = (flipper & PORT_MASK);
-    //   flipper = bits(b);
-    //
-    //
-    //   while((VAL - next_mark) > T3);
-    //   *FastPin<33>::cport() = PORT_MASK;
-    // }
-
-    // transposeLines(b, b2);
-		// for(register uint32_t i = 0; i < XTRA0; i++) {
-		// 	AT_BIT_START(*FastPin<33>::port() = 0xFFFF);
-		// 	AT_MARK(*FastPin<33>::port() = 0);
-		// 	AT_END(*FastPin<2>::port() = 0);
-		// }
 	}
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
