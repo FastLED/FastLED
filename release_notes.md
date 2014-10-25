@@ -1,31 +1,72 @@
-* FastLED2
+FastLED3.0
+==========
 
-* Full release of the library
+* Added support for the following platforms:
+  * Arduino due
+  * Teensy 3.1
+* Added the following LED chipsets:
+  * USC1903_400
+  * GW6205 / GW6205_400
+  * APA102
+  * APA104
+  * LPD1886
+  * P9813
+  * SmartMatrix
+* Added multiple examples:
+  * ColorPalette - show off the color palette code
+  * ColorTemperature - show off the color correction code
+  * Fire2012
+  * Fire2012WithPalette
+  * Multiple led controller examples
+  * Noise
+  * NoisePlayground
+  * NoisePlusPalette
+  * SmartMatrix - show off SmartMatrix support
+  * XYMatrix - show how to use a mtrix layout of leds
+* Added color correction
+* Added dithering
+* Added power management support
+* Added support for color palettes
+* Added easing functions
+* Added fast trig functions
+* Added simplex noise functions
+* Added color utility functions
+* Fixed DMXSERIAL/DMXSIMPLE support
+* Timing adjustments for existing SPI chipsets
+* Cleaned up the code layout to make platform support easier
+* Many bug fixes 
+* A number of performance/memory improvements
+* Remove Squant (takes up space!)
 
-* Release Candidate 6
+FastLED2
+========
+
+## Full release of the library
+
+## Release Candidate 6
 * Rename library, offically, to FastLED, move to github 
 * Update keywords with all the new stuffs
 
-Release Candidate 5
+## Release Candidate 5
 * Gemma and Trinket: supported except for global "setBrightness"
 
-Release Candidate 4
+## Release Candidate 4
 * Added NEOPIXEL as a synonym for WS2811
 * Fix WS2811/WS2812B timings, bring it in line to exactly 1.25ns/bit.  
 * Fix handling of constant color definitions (damn you, gcc!)
 
-Release Candidate 3
+## Release Candidate 3
 * Fixed bug when Clock and Data were on the same port
 * Added ability to set pixel color directly from HSV
 * Added ability to retrieve current random16 seed
 
-Release Candidate 2 
+## Release Candidate 2 
 * mostly bug fixes
 * Fix SPI macro definitions for latest teensy3 software update
 * Teensy 2 compilation fix
 * hsv2rgb_rainbow performance fix
 
-Release Candidate 1
+## Release Candidate 1
 * New unified/simplified API for adding/using controllers
 * fleshout clockless chip support
 * add hsv (spectrum and rainbow style colors)
@@ -40,11 +81,11 @@ Release Candidate 1
 * high speed math methods
 * rich CRGB structure
 
-Preview 3
+## Preview 3
 * True hardware SPI support for teensy (up to 20Mbit output!)
 * Minor bug fixes/tweaks
 
-Preview 2
+## Preview 2
 * Rename pin class to FastPin
 * Replace latch with select, more accurate description of what it does
 * Enforce intra-frame timing for ws2801s
@@ -59,7 +100,7 @@ en if you're using the hardware SPI pins
 # Add pin definitions for Teensy++ 2.0
 
 
-Preview 1
+## Preview 1
 * Initial release
 
 

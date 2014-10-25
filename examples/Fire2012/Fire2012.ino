@@ -78,7 +78,7 @@ void Fire2012()
     }
   
     // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-    for( int k= NUM_LEDS - 3; k > 0; k--) {
+    for( int k= NUM_LEDS - 1; k >= 2; k--) {
       heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
     }
     

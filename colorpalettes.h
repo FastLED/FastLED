@@ -13,23 +13,23 @@
 // use each one, so you only 'pay for' those you actually use.
 
 
-extern const TProgmemPalette16 CloudColors_p PROGMEM;
-extern const TProgmemPalette16 LavaColors_p PROGMEM;
-extern const TProgmemPalette16 OceanColors_p PROGMEM;
-extern const TProgmemPalette16 ForestColors_p PROGMEM;
+extern const TProgmemRGBPalette16 CloudColors_p PROGMEM;
+extern const TProgmemRGBPalette16 LavaColors_p PROGMEM;
+extern const TProgmemRGBPalette16 OceanColors_p PROGMEM;
+extern const TProgmemRGBPalette16 ForestColors_p PROGMEM;
 
 // HSV Rainbow
-extern const TProgmemPalette16 RainbowColors_p PROGMEM;
+extern const TProgmemRGBPalette16 RainbowColors_p PROGMEM;
 
 // HSV Rainbow colors with alternatating stripes of black
 #define RainbowStripesColors_p RainbowStripeColors_p
-extern const TProgmemPalette16 RainbowStripeColors_p PROGMEM;
+extern const TProgmemRGBPalette16 RainbowStripeColors_p PROGMEM;
 
 // HSV color ramp: blue purple ping red orange yellow (and back)
 // Basically, everything but the greens, which tend to make
 // people's skin look unhealthy.  This palette is good for
 // lighting at a club or party, where it'll be shining on people.
-extern const TProgmemPalette16 PartyColors_p PROGMEM;
+extern const TProgmemRGBPalette16 PartyColors_p PROGMEM;
 
 // Approximate "black body radiation" palette, akin to
 // the FastLED 'HeatColor' function.
@@ -37,6 +37,6 @@ extern const TProgmemPalette16 PartyColors_p PROGMEM;
 // the usual 0-255, as the last 15 colors will be
 // 'wrapping around' from the hot end to the cold end,
 // which looks wrong.
-extern const TProgmemPalette16 HeatColors_p PROGMEM;
+extern const TProgmemRGBPalette16 HeatColors_p PROGMEM;
  
 #endif

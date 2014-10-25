@@ -6,11 +6,22 @@
 
 #define xstr(s) str(s)
 #define str(s) #s
-#define FASTLED_VERSION 2001000
+
+#define  FASTLED_VERSION 3000000
+#warning FastLED version 3000000  (Not really a warning, just telling you here.)
+
 #define __PROG_TYPES_COMPAT__
 
 #ifdef SmartMatrix_h
 #include<SmartMatrix.h>
+#endif
+
+#ifdef DmxSimple_h
+#include<DmxSimple.h>
+#endif
+
+#ifdef DmxSerial_h
+#include<DMXSerial.h>
 #endif
 
 #include "controller.h"
@@ -23,7 +34,7 @@
 #include "colorutils.h"
 #include "colorpalettes.h"
 #include "chipsets.h"
-#include "dmx.h"
+#include "./dmx.h"
 #include "smartmatrix_t3.h"
 #include "noise.h"
 #include "power_mgt.h"
@@ -40,23 +51,6 @@ enum ESPIChipsets {
 
 enum ESM { SMART_MATRIX };
 
-enum EClocklessChipsets {
-	DMX
-	// TM1809,
-	// TM1804,
-	// TM1803,
-	// WS2811,
-	// WS2812,
-	// WS2812B,
-	// UCS1903,
-	// UCS1903B,
-	// WS2811_400,
-	// // NEOPIXEL,
-	// GW6205,
-	// GW6205_400,
-	// TM1829
-};
-
 template<uint8_t DATA_PIN> class NEOPIXEL : public WS2811Controller800Khz<DATA_PIN, GRB> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1829 : public TM1829Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1809 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
@@ -67,10 +61,17 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903B : public UCS1903BCon
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA104 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811_400 : public WS2811Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class GW6205 : public GW6205Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class GW6205_400 : public GW6205Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class LPD1886 : public LPD1886Controller1250Khz<DATA_PIN, RGB_ORDER> {};
+#ifdef DmxSimple_h
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class DMXSIMPLE : public DMXSimpleController<DATA_PIN, RGB_ORDER> {};
+#endif
+#ifdef DmxSerial_h
+template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDER> {};
+#endif
 
 // template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(20)> class LPD8806 : public LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
 // template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(1)> class WS2801 : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
@@ -89,8 +90,8 @@ enum EBlockChipsets {
 
 class CFastLED {
 	// int m_nControllers;
-	uint8_t m_Scale;
-
+	uint8_t  m_Scale;
+	uint16_t m_nFPS;
 public:
 	CFastLED();
 
@@ -162,6 +163,18 @@ public:
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+	template<template<EOrder RGB_ORDER> class CHIPSET>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		static CHIPSET<RGB> c;
+		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+	}
+
+	template<template<EOrder RGB_ORDER> class CHIPSET, EOrder RGB_ORDER>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		static CHIPSET<RGB_ORDER> c;
+		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+	}
+
 #ifdef SmartMatrix_h
 	template<ESM CHIPSET>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
@@ -189,21 +202,14 @@ public:
 	}
 #endif
 
-// #ifdef HAS_BLOCKLESS
-	template<EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER>
-	static CLEDController &addLeds(const struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		switch(CHIPSET) {
-			case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-		}
-	}
-
+#ifdef HAS_BLOCKLESS
 	template<EBlockChipsets CHIPSET, int NUM_LANES>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
 			case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, NS(250), NS(510), NS(490)>(), data, nLedsOrOffset, nLedsIfOffset);
 		}
 	}
-// #endif
+#endif
 
 	void setBrightness(uint8_t scale) { m_Scale = scale; }
 	uint8_t getBrightness() { return m_Scale; }
@@ -229,9 +235,10 @@ public:
 	void setDither(uint8_t ditherMode = BINARY_DITHER);
 
 	// for debugging, will keep track of time between calls to countFPS, and every
-	// nFrames calls, it will print a summary of FPS info out to the serial port.
-	// If the serial port isn't opened, this function does nothing.
+	// nFrames calls, it will update an internal counter for the current FPS.
 	void countFPS(int nFrames=25);
+	// Get the number of frames/second being written out
+	uint16_t getFPS() { return m_nFPS; }
 
     // returns the number of controllers (strips) that have been added with addLeds
 	int count();

@@ -105,7 +105,8 @@ private:
 	}
 
 public:
-	#define SPI_DELAY delaycycles< (SPI_SPEED-2) / 2>();
+	#define SPI_DELAY delaycycles<1+((SPI_SPEED-2) / 2)>();
+	#define SPI_DELAY_HALF delaycycles<1+ ((SPI_SPEED-4) / 4)>();
 
 	// write the BIT'th bit out via spi, setting the data pin then strobing the clcok
 	template <uint8_t BIT> __attribute__((always_inline, hot)) inline static void writeBit(uint8_t b) {
@@ -169,14 +170,14 @@ private:
 		writeBit<BIT>(b);
 #else
 		if(b & (1 << BIT)) {
-			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY;
+			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY_HALF;
 			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclockhi); SPI_DELAY;
-			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY;
+			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY_HALF;
 		} else {
 			// NOP;
-			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY;
+			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY_HALF;
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclockhi); SPI_DELAY;
-			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY;
+			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY_HALF;
 		}
 #endif
 	}

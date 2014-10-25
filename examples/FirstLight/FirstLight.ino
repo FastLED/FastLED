@@ -15,7 +15,7 @@
 #define NUM_LEDS 60
 
 // Data pin that led data will be written out over
-#define DATA_PIN 23
+#define DATA_PIN 3
 
 // Clock pin only needed for SPI based chipsets when not using hardware SPI
 //#define CLOCK_PIN 8
@@ -32,7 +32,7 @@ void setup() {
       // FastLED.addLeds<TM1803, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<TM1804, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<TM1809, DATA_PIN, RGB>(leds, NUM_LEDS);
-      // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
+      FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
@@ -40,7 +40,7 @@ void setup() {
       // FastLED.addLeds<GW6205, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<GW6205_400, DATA_PIN, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<UCS1903, DATA_PIN, RGB>(leds, NUM_LEDS);
-      FastLED.addLeds<UCS1903B, DATA_PIN, RGB>(leds, NUM_LEDS);
+      // FastLED.addLeds<UCS1903B, DATA_PIN, RGB>(leds, NUM_LEDS);
 
       // FastLED.addLeds<WS2801, RGB>(leds, NUM_LEDS);
       // FastLED.addLeds<SM16716, RGB>(leds, NUM_LEDS);

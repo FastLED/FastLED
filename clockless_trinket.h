@@ -32,6 +32,12 @@ template<int _LOOP, int PAD> inline void _dc_AVR(register uint8_t & loopvar) {
 template<int CYCLES> __attribute__((always_inline)) inline void _dc(register uint8_t & loopvar) {
 	_dc_AVR<CYCLES/6,CYCLES%6>(loopvar);
 }
+template<> __attribute__((always_inline)) inline void _dc<-6>(register uint8_t & loopvar) {}
+template<> __attribute__((always_inline)) inline void _dc<-5>(register uint8_t & loopvar) {}
+template<> __attribute__((always_inline)) inline void _dc<-4>(register uint8_t & loopvar) {}
+template<> __attribute__((always_inline)) inline void _dc<-3>(register uint8_t & loopvar) {}
+template<> __attribute__((always_inline)) inline void _dc<-2>(register uint8_t & loopvar) {}
+template<> __attribute__((always_inline)) inline void _dc<-1>(register uint8_t & loopvar) {}
 template<> __attribute__((always_inline)) inline void _dc<0>(register uint8_t & loopvar) {}
 template<> __attribute__((always_inline)) inline void _dc<1>(register uint8_t & loopvar) {asm __volatile__("mov r0,r0":::);}
 template<> __attribute__((always_inline)) inline void _dc<2>(register uint8_t & loopvar) {asm __volatile__("rjmp .+0":::);}

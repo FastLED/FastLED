@@ -24,7 +24,7 @@
 // use each one, so you only 'pay for' those you actually use.
 
 
-extern const TProgmemPalette16 CloudColors_p PROGMEM =
+extern const TProgmemRGBPalette16 CloudColors_p PROGMEM =
 {
     CRGB::Blue,
     CRGB::DarkBlue,
@@ -47,7 +47,7 @@ extern const TProgmemPalette16 CloudColors_p PROGMEM =
     CRGB::SkyBlue
 };
 
-extern const TProgmemPalette16 LavaColors_p PROGMEM =
+extern const TProgmemRGBPalette16 LavaColors_p PROGMEM =
 {
     CRGB::Black,
     CRGB::Maroon,
@@ -70,7 +70,7 @@ extern const TProgmemPalette16 LavaColors_p PROGMEM =
 };
 
 
-extern const TProgmemPalette16 OceanColors_p PROGMEM =
+extern const TProgmemRGBPalette16 OceanColors_p PROGMEM =
 {
     CRGB::MidnightBlue,
     CRGB::DarkBlue,
@@ -93,7 +93,7 @@ extern const TProgmemPalette16 OceanColors_p PROGMEM =
     CRGB::LightSkyBlue
 };
 
-extern const TProgmemPalette16 ForestColors_p PROGMEM =
+extern const TProgmemRGBPalette16 ForestColors_p PROGMEM =
 {
     CRGB::DarkGreen,
     CRGB::DarkGreen,
@@ -117,7 +117,7 @@ extern const TProgmemPalette16 ForestColors_p PROGMEM =
 };
 
 // HSV Rainbow
-extern const TProgmemPalette16 RainbowColors_p PROGMEM =
+extern const TProgmemRGBPalette16 RainbowColors_p PROGMEM =
 {
     0xFF0000, 0xD52A00, 0xAB5500, 0xAB7F00,
     0xABAB00, 0x56D500, 0x00FF00, 0x00D52A,
@@ -127,7 +127,7 @@ extern const TProgmemPalette16 RainbowColors_p PROGMEM =
 
 // HSV Rainbow colors with alternatating stripes of black
 #define RainbowStripesColors_p RainbowStripeColors_p
-extern const TProgmemPalette16 RainbowStripeColors_p PROGMEM =
+extern const TProgmemRGBPalette16 RainbowStripeColors_p PROGMEM =
 {
     0xFF0000, 0x000000, 0xAB5500, 0x000000,
     0xABAB00, 0x000000, 0x00FF00, 0x000000,
@@ -139,7 +139,7 @@ extern const TProgmemPalette16 RainbowStripeColors_p PROGMEM =
 // Basically, everything but the greens, which tend to make
 // people's skin look unhealthy.  This palette is good for
 // lighting at a club or party, where it'll be shining on people.
-extern const TProgmemPalette16 PartyColors_p PROGMEM =
+extern const TProgmemRGBPalette16 PartyColors_p PROGMEM =
 {
     0x5500AB, 0x84007C, 0xB5004B, 0xE5001B,
     0xE81700, 0xB84700, 0xAB7700, 0xABAB00,
@@ -153,7 +153,7 @@ extern const TProgmemPalette16 PartyColors_p PROGMEM =
 // the usual 0-255, as the last 15 colors will be
 // 'wrapping around' from the hot end to the cold end,
 // which looks wrong.
-extern const TProgmemPalette16 HeatColors_p PROGMEM =
+extern const TProgmemRGBPalette16 HeatColors_p PROGMEM =
 {
     0x000000,
     0x330000, 0x660000, 0x990000, 0xCC0000, 0xFF0000,

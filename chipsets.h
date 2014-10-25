@@ -91,7 +91,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(20) >
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(12) >
 class LPD8806Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 
@@ -210,16 +210,16 @@ class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER,
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_KHZ(1200)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = BGR, uint8_t SPI_SPEED = DATA_RATE_MHZ(12)>
 class APA102Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
 	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
-	void endBoundary() { mSPI.writeWord(0xFFFF); mSPI.writeWord(0xFFFF); }
+	void endBoundary() { /*mSPI.writeWord(0xFFFF); mSPI.writeWord(0xFFFF); */}
 
-	inline void writeLed(uint8_t r, uint8_t g, uint8_t b) __attribute__((always_inline)) {
-		mSPI.writeByte(0xFF); mSPI.writeByte(r); mSPI.writeByte(g); mSPI.writeByte(b);
+	inline void writeLed(uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
+		mSPI.writeByte(0xFF); mSPI.writeByte(b0); mSPI.writeByte(b1); mSPI.writeByte(b2);
 	}
 
 public:
@@ -293,7 +293,7 @@ protected:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(15)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(10)>
 class P9813Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -412,7 +412,7 @@ public:
 	}
 
 protected:
-	
+
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
 		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 		writeHeader();
@@ -447,7 +447,7 @@ protected:
 
 // We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
 // need the more tightly defined timeframes.
-#if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000 || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
+#if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000) //  || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
 #define FMUL (F_CPU/8000000)
 // LPD1886
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
@@ -456,6 +456,7 @@ class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 
 // WS2811@800khz 2 clocks, 5 clocks, 3 clocks
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
+//class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 10 * FMUL, 6 * FMUL, RGB_ORDER> {};
@@ -517,10 +518,10 @@ class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(
 #warning "Not enough clock cycles available for the TM1809"
 #endif
 
-// WS2811 - 400ns, 400ns, 450ns
+// WS2811 - 320ns, 320ns, 640ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
-#if NO_TIME(400, 400, 450)
+class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(640), RGB_ORDER> {};
+#if NO_TIME(320, 320, 640)
 #warning "Not enough clock cycles available for the WS2811 (800khz)"
 #endif
 

@@ -6,13 +6,30 @@
 #include "colorutils.h"
 
 
-void fill_solid( struct CRGB * pFirstLED, int numToFill,
-                const struct CRGB& color)
+
+
+void fill_solid( struct CRGB * leds, int numToFill,
+                 const struct CRGB& color)
 {
     for( int i = 0; i < numToFill; i++) {
-        pFirstLED[i] = color;
+        leds[i] = color;
     }
 }
+
+void fill_solid( struct CHSV * targetArray, int numToFill,
+                 const struct CHSV& hsvColor)
+{
+    for( int i = 0; i < numToFill; i++) {
+        targetArray[i] = hsvColor;
+    }
+}
+
+
+// void fill_solid( struct CRGB* targetArray, int numToFill,
+// 				 const struct CHSV& hsvColor)
+// {
+// 	fill_solid<CRGB>( targetArray, numToFill, (CRGB) hsvColor);
+// }
 
 void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
                   uint8_t initialhue,
@@ -28,73 +45,20 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
     }
 }
 
-
-#define saccum87 int16_t
-
-void fill_gradient( CRGB* leds,
-                    uint16_t startpos, CHSV startcolor,
-                    uint16_t endpos,   CHSV endcolor,
-                    TGradientDirectionCode directionCode )
+void fill_rainbow( struct CHSV * targetArray, int numToFill,
+                  uint8_t initialhue,
+                  uint8_t deltahue )
 {
-    // if the points are in the wrong order, straighten them
-    if( endpos < startpos ) {
-        uint16_t t = endpos;
-        CHSV tc = endcolor;
-        startpos = t;
-        startcolor = tc;
-        endcolor = startcolor;
-        endpos = startpos;
-    }
-    
-    saccum87 huedistance87;
-    saccum87 satdistance87;
-    saccum87 valdistance87;
-    
-    satdistance87 = (endcolor.sat - startcolor.sat) << 7;
-    valdistance87 = (endcolor.val - startcolor.val) << 7;
-    
-    uint8_t huedelta8 = endcolor.hue - startcolor.hue;
-    
-    if( directionCode == SHORTEST_HUES ) {
-        directionCode = FORWARD_HUES;
-        if( huedelta8 > 127) {
-            directionCode = BACKWARD_HUES;
-        }
-    }
-    
-    if( directionCode == LONGEST_HUES ) {
-        directionCode = FORWARD_HUES;
-        if( huedelta8 < 128) {
-            directionCode = BACKWARD_HUES;
-        }
-    }
-    
-    if( directionCode == FORWARD_HUES) {
-        huedistance87 = huedelta8 << 7;
-    }
-    else /* directionCode == BACKWARD_HUES */
-    {
-        huedistance87 = (uint8_t)(256 - huedelta8) << 7;
-        huedistance87 = -huedistance87;
-    }
-    
-    uint16_t pixeldistance = endpos - startpos;
-    uint16_t p2 = pixeldistance / 2;
-    int16_t divisor = p2 ? p2 : 1;
-    saccum87 huedelta87 = huedistance87 / divisor;
-    saccum87 satdelta87 = satdistance87 / divisor;
-    saccum87 valdelta87 = valdistance87 / divisor;
-    
-    accum88 hue88 = startcolor.hue << 8;
-    accum88 sat88 = startcolor.sat << 8;
-    accum88 val88 = startcolor.val << 8;
-    for( uint16_t i = startpos; i <= endpos; i++) {
-        leds[i] = CHSV( hue88 >> 8, sat88 >> 8, val88 >> 8);
-        hue88 += huedelta87;
-        sat88 += satdelta87;
-        val88 += valdelta87;
+    CHSV hsv;
+    hsv.hue = initialhue;
+    hsv.val = 255;
+    hsv.sat = 255;
+    for( int i = 0; i < numToFill; i++) {
+        targetArray[i] = hsv;
+        hsv.hue += deltahue;
     }
 }
+
 
 void fill_gradient_RGB( CRGB* leds,
                    uint16_t startpos, CRGB startcolor,
@@ -119,12 +83,16 @@ void fill_gradient_RGB( CRGB* leds,
     bdistance87 = (endcolor.b - startcolor.b) << 7;
         
     uint16_t pixeldistance = endpos - startpos;
-    uint16_t p2 = pixeldistance / 2;
-    int16_t divisor = p2 ? p2 : 1;
+    int16_t divisor = pixeldistance ? pixeldistance : 1;
+
     saccum87 rdelta87 = rdistance87 / divisor;
     saccum87 gdelta87 = gdistance87 / divisor;
     saccum87 bdelta87 = bdistance87 / divisor;
     
+    rdelta87 *= 2;
+    gdelta87 *= 2;
+    bdelta87 *= 2;
+
     accum88 r88 = startcolor.r << 8;
     accum88 g88 = startcolor.g << 8;
     accum88 b88 = startcolor.b << 8;
@@ -134,32 +102,6 @@ void fill_gradient_RGB( CRGB* leds,
         g88 += gdelta87;
         b88 += bdelta87;
     }
-}
-
-
-void fill_gradient( CRGB* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2, TGradientDirectionCode directionCode )
-{
-    uint16_t last = numLeds - 1;
-    fill_gradient( leds, 0, c1, last, c2, directionCode);
-}
-
-
-void fill_gradient( CRGB* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2, const CHSV& c3, TGradientDirectionCode directionCode )
-{
-    uint16_t half = (numLeds / 2);
-    uint16_t last = numLeds - 1;
-    fill_gradient( leds,    0, c1, half, c2, directionCode);
-    fill_gradient( leds, half, c2, last, c3, directionCode);
-}
-
-void fill_gradient( CRGB* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4, TGradientDirectionCode directionCode )
-{
-    uint16_t onethird = (numLeds / 3);
-    uint16_t twothirds = ((numLeds * 2) / 3);
-    uint16_t last = numLeds - 1;
-    fill_gradient( leds,         0, c1,  onethird, c2, directionCode);
-    fill_gradient( leds,  onethird, c2, twothirds, c3, directionCode);
-    fill_gradient( leds, twothirds, c3,      last, c4, directionCode);
 }
 
 #if 0
@@ -319,6 +261,81 @@ CRGB* blend( const CRGB* src1, const CRGB* src2, CRGB* dest, uint16_t count, fra
 
 
 
+CHSV& nblend( CHSV& existing, const CHSV& overlay, fract8 amountOfOverlay, TGradientDirectionCode directionCode)
+{
+    if( amountOfOverlay == 0) {
+        return existing;
+    }
+    
+    if( amountOfOverlay == 255) {
+        existing = overlay;
+        return existing;
+    }
+    
+    fract8 amountOfKeep = 256 - amountOfOverlay;
+    
+    uint8_t huedelta8 = overlay.hue - existing.hue;
+    
+    if( directionCode == SHORTEST_HUES ) {
+        directionCode = FORWARD_HUES;
+        if( huedelta8 > 127) {
+            directionCode = BACKWARD_HUES;
+        }
+    }
+    
+    if( directionCode == LONGEST_HUES ) {
+        directionCode = FORWARD_HUES;
+        if( huedelta8 < 128) {
+            directionCode = BACKWARD_HUES;
+        }
+    }
+    
+    if( directionCode == FORWARD_HUES) {
+        existing.hue = existing.hue + scale8( huedelta8, amountOfOverlay);
+    }
+    else /* directionCode == BACKWARD_HUES */
+    {
+        huedelta8 = -huedelta8;
+        existing.hue = existing.hue - scale8( huedelta8, amountOfOverlay);
+    }
+    
+    existing.sat   = scale8_LEAVING_R1_DIRTY( existing.sat,   amountOfKeep)
+    + scale8_LEAVING_R1_DIRTY( overlay.sat,    amountOfOverlay);
+    existing.val = scale8_LEAVING_R1_DIRTY( existing.val, amountOfKeep)
+    + scale8_LEAVING_R1_DIRTY( overlay.val,  amountOfOverlay);
+    
+    cleanup_R1();
+    
+    return existing;
+}
+
+
+
+void nblend( CHSV* existing, CHSV* overlay, uint16_t count, fract8 amountOfOverlay, TGradientDirectionCode directionCode )
+{
+    for( uint16_t i = count; i; i--) {
+        nblend( *existing, *overlay, amountOfOverlay, directionCode);
+        existing++;
+        overlay++;
+    }
+}
+
+CHSV blend( const CHSV& p1, const CHSV& p2, fract8 amountOfP2, TGradientDirectionCode directionCode )
+{
+    CHSV nu(p1);
+    nblend( nu, p2, amountOfP2, directionCode);
+    return nu;
+}
+
+CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fract8 amountOfsrc2, TGradientDirectionCode directionCode )
+{
+    for( uint16_t i = count; i; i--) {
+        dest[i] = blend(src1[i], src2[i], amountOfsrc2, directionCode);
+    }
+    return dest;
+}
+
+
 
 // CRGB HeatColor( uint8_t temperature)
 //
@@ -443,7 +460,109 @@ CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightn
 }
 
 
-void UpscalePalette(const CRGBPalette16& srcpal16, CRGBPalette256& destpal256)
+CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
+{
+    uint8_t hi4 = index >> 4;
+    uint8_t lo4 = index & 0x0F;
+    
+    //  CRGB rgb1 = pal[ hi4];
+    const CHSV* entry = &(pal[0]) + hi4;
+
+    uint8_t hue1   = entry->hue;
+    uint8_t sat1   = entry->sat;
+    uint8_t val1   = entry->val;
+    
+    uint8_t blend = lo4 && (blendType != NOBLEND);
+    
+    if( blend ) {
+        
+        if( hi4 == 15 ) {
+            entry = &(pal[0]);
+        } else {
+            entry++;
+        }
+        
+        uint8_t f2 = lo4 << 4;
+        uint8_t f1 = 256 - f2;
+        
+        uint8_t hue2  = entry->hue;
+        uint8_t sat2  = entry->sat;
+        uint8_t val2  = entry->val;
+
+        // Now some special casing for blending to or from
+        // either black or white.  Black and white don't have
+        // proper 'hue' of their own, so when ramping from
+        // something else to/from black/white, we set the 'hue'
+        // of the black/white color to be the same as the hue
+        // of the other color, so that you get the expected
+        // brightness or saturation ramp, with hue staying
+        // constant:
+        
+        // If we are starting from white (sat=0)
+        // or black (val=0), adopt the target hue.
+        if( sat1 == 0 || val1 == 0) {
+            hue1 = hue2;
+        }
+        
+        // If we are ending at white (sat=0)
+        // or black (val=0), adopt the starting hue.
+        if( sat2 == 0 || val2 == 0) {
+            hue2 = hue1;
+        }
+        
+        
+        sat1  = scale8_LEAVING_R1_DIRTY( sat1, f1);
+        val1  = scale8_LEAVING_R1_DIRTY( val1, f1);
+                
+        sat2  = scale8_LEAVING_R1_DIRTY( sat2, f2);
+        val2  = scale8_LEAVING_R1_DIRTY( val2, f2);
+        
+        //    cleanup_R1();
+
+        // These sums can't overflow, so no qadd8 needed.
+        sat1  += sat2;
+        val1  += val2;
+
+        uint8_t deltaHue = (uint8_t)(hue2 - hue1);
+        if( deltaHue & 0x80 ) {
+          // go backwards
+          hue1 -= scale8( 256 - deltaHue, f2);
+        } else {
+          // go forwards
+          hue1 += scale8( deltaHue, f2);
+        }
+        
+        cleanup_R1();
+    }
+    
+    if( brightness != 255) {
+        val1 = scale8_video( val1, brightness);
+    }
+    
+    return CHSV( hue1, sat1, val1);  
+}
+
+
+CHSV ColorFromPalette( const struct CHSVPalette256& pal, uint8_t index, uint8_t brightness, TBlendType)
+{
+    CHSV hsv;// = *( &(pal[0]) + index );
+
+    if( brightness != 255) {
+        hsv.value = scale8_video( hsv.value, brightness);
+    }
+    
+    return hsv;
+}
+
+
+void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256)
+{
+    for( int i = 0; i < 256; i++) {
+        destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
+    }
+}
+
+void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette256& destpal256)
 {
     for( int i = 0; i < 256; i++) {
         destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
@@ -458,26 +577,3 @@ void SetupPartyColors(CRGBPalette16& pal)
     fill_gradient( pal, 8, CHSV( HUE_ORANGE,255,255), 15, CHSV(HUE_BLUE + 18,255,255), BACKWARD_HUES);
 }
 #endif
-
-void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
-                  const CRGBPalette16& pal, uint8_t brightness, TBlendType blendType)
-{
-    uint8_t colorIndex = startIndex;
-    for( uint16_t i = 0; i < N; i++) {
-        L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
-        colorIndex += incIndex;
-    }
-}
-
-
-void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
-                  const CRGBPalette256& pal, uint8_t brightness, TBlendType blendType)
-{
-    uint8_t colorIndex = startIndex;
-    for( uint16_t i = 0; i < N; i++) {
-        L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
-        colorIndex += incIndex;
-    }
-}
-
-

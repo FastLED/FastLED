@@ -105,13 +105,19 @@
        quadwave8( x)
        triwave8( x)
 
-
+ - Square root for 16-bit integers.  About three times
+   faster and five times smaller than Arduino's built-in
+   generic 32-bit sqrt routine.
+     sqrt16( uint16_t x ) == sqrt( x)
+ 
  - Dimming and brightening functions for 8-bit
    light values.
      dim8_video( x)  == scale8_video( x, x)
      dim8_raw( x)    == scale8( x, x)
+     dim8_lin( x)    == (x<128) ? ((x+1)/2) : scale8(x,x)
      brighten8_video( x) == 255 - dim8_video( 255 - x)
      brighten8_raw( x) == 255 - dim8_raw( 255 - x)
+     brighten8_lin( x) == 255 - dim8_lin( 255 - x)
    The dimming functions in particular are suitable
    for making LED light output appear more 'linear'.
 
@@ -133,6 +139,18 @@
       memmove8( dest, src,  bytecount)
       memcpy8(  dest, src,  bytecount)
       memset8(  buf, value, bytecount)
+
+ - Beat generators which return sine or sawtooth
+   waves in a specified number of Beats Per Minute.
+   Sine wave beat generators can specify a low and
+   high range for the output.  Sawtooth wave beat
+   generators always range 0-255 or 0-65535.
+     beatsin8( BPM, low8, high8) 
+         = (sine(beatphase) * (high8-low8)) + low8
+     beatsin16( BPM, low16, high16)
+         = (sine(beatphase) * (high16-low16)) + low16
+     beat8( BPM)  = 8-bit repeating sawtooth wave
+     beat16( BPM) = 16-bit repeating sawtooth wave
 
 
 Lib8tion is pronounced like 'libation': lie-BAY-shun
@@ -996,6 +1014,17 @@ LIB8STATIC uint8_t dim8_video( uint8_t x)
     return scale8_video( x, x);
 }
 
+LIB8STATIC uint8_t dim8_lin( uint8_t x )
+{
+    if( x & 0x80 ) {
+        x = scale8( x, x);
+    } else {
+        x += 1;
+        x /= 2;
+    }
+    return x;
+}
+
 LIB8STATIC uint8_t brighten8_raw( uint8_t x)
 {
     uint8_t ix = 255 - x;
@@ -1006,6 +1035,18 @@ LIB8STATIC uint8_t brighten8_video( uint8_t x)
 {
     uint8_t ix = 255 - x;
     return 255 - scale8_video( ix, ix);
+}
+
+LIB8STATIC uint8_t brighten8_lin( uint8_t x )
+{
+    uint8_t ix = 255 - x;
+    if( ix & 0x80 ) {
+        ix = scale8( ix, ix);
+    } else {
+        ix += 1;
+        ix /= 2;
+    }
+    return 255 - ix;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1578,6 +1619,40 @@ LIB8STATIC uint8_t cubicwave8(uint8_t in)
 
 
 
+// sqrt16: square root for 16-bit integers
+//         About three times faster and five times smaller
+//         than Arduino's general sqrt on AVR.
+LIB8STATIC uint8_t sqrt16(uint16_t x)
+{
+    if( x <= 1) {
+        return x;
+    }
+    
+    uint8_t low = 1; // lower bound
+    uint8_t hi, mid;
+    
+    if( x > 7904) {
+        hi = 255;
+    } else {
+        hi = (x >> 5) + 8; // initial estimate for upper bound
+    }
+    
+    do {
+        mid = (low + hi) >> 1;
+        if ((uint16_t)(mid * mid) > x) {
+            hi = mid - 1;
+        } else {
+            if( mid == 255) {
+                return 255;
+            }
+            low = mid + 1;
+        }
+    } while (hi >= low);
+    
+    return low - 1;
+}
+
+
 template<class T, int F, int I> class q {
   T i:I;
   T f:F;
@@ -1605,5 +1680,113 @@ typedef q<uint8_t, 4,4> q44;
 typedef q<uint8_t, 6,2> q62;
 typedef q<uint16_t, 8,8> q88;
 typedef q<uint16_t, 12,4> q124;
+
+
+
+// Beat generators - These functions produce waves at a given
+//                   number of 'beats per minute'.  Internally, they use
+//                   the Arduino function 'millis' to track elapsed time.
+//                   Accuracy is a bit better than one part in a thousand.
+//
+//       beat8( BPM ) returns an 8-bit value that cycles 'BPM' times
+//                    per minute, rising from 0 to 255, resetting to zero,
+//                    rising up again, etc..  The output of this function
+//                    is suitable for feeding directly into sin8, and cos8,
+//                    triwave8, quadwave8, and cubicwave8.
+//       beat16( BPM ) returns a 16-bit value that cycles 'BPM' times
+//                    per minute, rising from 0 to 65535, resetting to zero,
+//                    rising up again, etc.  The output of this function is
+//                    suitable for feeding directly into sin16 and cos16.
+//
+//       beatsin8( BPM, uint8_t low, uint8_t high) returns an 8-bit value that
+//                    rises and falls in a sine wave, 'BPM' times per minute,
+//                    between the values of 'low' and 'high'.
+//       beatsin16( BPM, uint16_t low, uint16_t high) returns a 16-bit value
+//                    that rises and falls in a sine wave, 'BPM' times per
+//                    minute, between the values of 'low' and 'high'.
+//
+//  BPM can be supplied two ways.  The simpler way of specifying BPM is as
+//  a simple 8-bit integer from 1-255, (e.g., "120").
+//  The more sophisticated way of specifying BPM allows for fractional
+//  "Q8.8" fixed point number (an 'accum88') with an 8-bit integer part and
+//  an 8-bit fractional part.  The easiest way to construct this is to multiply
+//  a floating point BPM value (e.g. 120.3) by 256, (e.g. resulting in 30796
+//  in this case), and pass that as the 16-bit BPM argument.
+//
+//  Originally designed to make an entire animation project pulse with brightness.
+//  For that effect, add this line just above your existing call to "FastLED.show()":
+//
+//     uint8_t bright = beatsin8( 60 /*BPM*/, 192 /*dimmest*/, 255 /*brightest*/ ));
+//     FastLED.setBrightness( bright );
+//     FastLED.show();
+//
+//  The entire animation will now pulse between brightness 192 and 255 once per second.
+
+
+// The beat generators need access to a millisecond counter.
+// On Arduino, this is "millis()".  On other platforms, you'll
+// need to provide a function with this signature:
+//   uint32_t get_millisecond_timer();
+// that provides similar functionality.
+// You can also force use of the get_millisecond_timer function
+// by #defining USE_GET_MILLISECOND_TIMER.
+#if defined(ARDUINO) && !defined(USE_GET_MILLISECOND_TIMER)
+// Forward declaration of Arduino function 'millis'.
+uint32_t millis();
+#define GET_MILLIS (millis())
+#else
+uint32_t get_millisecond_timer();
+#define GET_MILLIS (get_millisecond_timer())
+#endif
+
+// beat16 generates a 16-bit 'sawtooth' wave at a given BPM
+LIB8STATIC uint16_t beat16( accum88 beats_per_minute)
+{
+    // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
+    if( beats_per_minute < 256) beats_per_minute <<= 8;
+    
+    // BPM is 'beats per minute', or 'beats per 60000ms'.
+    // To avoid using the (slower) division operator, we
+    // want to convert 'beats per 60000ms' to 'beats per 65536ms',
+    // and then use a simple, fast bit-shift to divide by 65536.
+    //
+    // The ratio 65536:60000 is 279.620266667:256; we'll call it 280:256.
+    // The conversion is accurate to about 0.05%, more or less,
+    // e.g. if you ask for "120 BPM", you'll get about "119.93".
+    // If you need more precision than that, you can specify a
+    // sixteen-bit BPM value in Q8.8 fixed-point (an 'accum88').
+    return ((GET_MILLIS) * beats_per_minute * 280) >> 16;
+}
+
+// beat8 generates an 8-bit 'sawtooth' wave at a given BPM
+LIB8STATIC uint8_t beat8( accum88 beats_per_minute)
+{
+    return beat16( beats_per_minute) >> 8;
+}
+
+// beatsin16 generates a 16-bit sine wave at a given BPM,
+//           that oscillates within a given range.
+LIB8STATIC uint16_t beatsin16( accum88 beats_per_minute, uint16_t lowest = 0, uint16_t highest = 65535)
+{
+    uint16_t beat = beat16( beats_per_minute);
+    uint16_t beatsin = (sin16( beat) + 32768);
+    uint16_t rangewidth = highest - lowest;
+    uint16_t scaledbeat = scale16( beatsin, rangewidth);
+    uint16_t result = lowest + scaledbeat;
+    return result;
+}
+
+// beatsin8 generates an 8-bit sine wave at a given BPM,
+//           that oscillates within a given range.
+LIB8STATIC uint8_t beatsin8( accum88 beats_per_minute, uint8_t lowest = 0, uint8_t highest = 255)
+{
+    uint8_t beat = beat8( beats_per_minute);
+    uint8_t beatsin = sin8( beat);
+    uint8_t rangewidth = highest - lowest;
+    uint8_t scaledbeat = scale8( beatsin, rangewidth);
+    uint8_t result = lowest + scaledbeat;
+    return result;
+}
+
 
 #endif
