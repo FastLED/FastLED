@@ -131,16 +131,27 @@ __attribute__((always_inline)) inline void swapbits8(bitswap_type in, bitswap_ty
 }
 
 __attribute__((always_inline)) inline void slowswap(unsigned char *A, unsigned char *B) {
+
   for(int row = 0; row < 7; row++) {
     uint8_t x = A[row];
-    B[7] |= (x & 0x01) << row; x >>= 1;
-    B[6] |= (x & 0x01) << row; x >>= 1;
-    B[5] |= (x & 0x01) << row; x >>= 1;
-    B[4] |= (x & 0x01) << row; x >>= 1;
-    B[3] |= (x & 0x01) << row; x >>= 1;
-    B[2] |= (x & 0x01) << row; x >>= 1;
-    B[1] |= (x & 0x01) << row; x >>= 1;
-    B[0] |= (x & 0x01) << row; x >>= 1;
+
+    uint8_t bit = (1<<row);
+    unsigned char *p = B;
+    for(uint32_t mask = 1<<7 ; mask ; mask >>= 1) {
+      if(x & mask) {
+        *p++ |= bit;
+      } else {
+        *p++ &= ~bit;
+      }
+    }
+    // B[7] |= (x & 0x01) << row; x >>= 1;
+    // B[6] |= (x & 0x01) << row; x >>= 1;
+    // B[5] |= (x & 0x01) << row; x >>= 1;
+    // B[4] |= (x & 0x01) << row; x >>= 1;
+    // B[3] |= (x & 0x01) << row; x >>= 1;
+    // B[2] |= (x & 0x01) << row; x >>= 1;
+    // B[1] |= (x & 0x01) << row; x >>= 1;
+    // B[0] |= (x & 0x01) << row; x >>= 1;
   }
 }
 
