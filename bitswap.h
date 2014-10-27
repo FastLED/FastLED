@@ -175,8 +175,10 @@ __attribute__((always_inline)) inline void transpose8x1(unsigned char *A, unsign
   y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
   x = t;
 
-  //((uint64_t*)B) = x<<32 | y;
-  //
+#if 1
+  *((uint32_t*)B) = y; 
+  *((uint32_t*)(B+4)) = x; 
+#else
   B[7] = y; y >>= 8;
   B[6] = y; y >>= 8;
   B[5] = y; y >>= 8;
@@ -186,6 +188,7 @@ __attribute__((always_inline)) inline void transpose8x1(unsigned char *A, unsign
   B[2] = x; x >>= 8;
   B[1] = x; x >>= 8;
   B[0] = x; /* */
+#endif
 }
 
 template<int m, int n>
