@@ -5,13 +5,12 @@
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
 #define HAS_BLOCKLESS 1
-#define PORT_MASK 0x000000FF
-#define SKIPLIST ~PORT_MASK
-#define LANES 8
+
+#define PORT_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFF))
 
 #include "kinetis.h"
 
-template <uint8_t NUM_LANES, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 500>
+template <uint8_t NUM_LANES, int FIRST_PIN, int LANES, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class InlineBlockClocklessController : public CLEDController {
 	typedef typename FastPin<2>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<2>::port_t data_t;
@@ -21,17 +20,38 @@ class InlineBlockClocklessController : public CLEDController {
 	CMinWait<WAIT_TIME> mWait;
 public:
 	virtual void init() {
-		FastPin<2>::setOutput();
-		FastPin<14>::setOutput();
-		FastPin<7>::setOutput();
-		FastPin<8>::setOutput();
-		FastPin<6>::setOutput();
-		FastPin<20>::setOutput();
-		FastPin<21>::setOutput();
-		FastPin<5>::setOutput();
-		mPinMask = FastPin<2>::mask();
-		mPort = FastPin<2>::port();
-	}
+		if(FIRST_PIN == 15) {
+			switch(LANES) {
+				// case 12: FastPin<30>::setOutput();
+				// case 11: FastPin<29>::setOutput();
+				// case 10: FastPin<27>::setOutput();
+				// case 9: FastPin<28>::setOutput();
+				case 8: FastPin<12>::setOutput();
+				case 7: FastPin<11>::setOutput();
+				case 6: FastPin<13>::setOutput();
+				case 5: FastPin<10>::setOutput();
+				case 4: FastPin<9>::setOutput();
+				case 3: FastPin<23>::setOutput();
+				case 2: FastPin<22>::setOutput();
+				case 1: FastPin<15>::setOutput();
+			}
+			mPinMask = FastPin<15>::mask();
+			mPort = FastPin<15>::port();
+		} else if(FIRST_PIN == 2) {
+			switch(LANES) {
+				case 8: FastPin<5>::setOutput();
+				case 7: FastPin<21>::setOutput();
+				case 6: FastPin<20>::setOutput();
+				case 5: FastPin<6>::setOutput();
+				case 4: FastPin<8>::setOutput();
+				case 3: FastPin<7>::setOutput();
+				case 2: FastPin<14>::setOutput();
+				case 1: FastPin<2>::setOutput();
+			}
+			mPinMask = FastPin<2>::mask();
+			mPort = FastPin<2>::port();
+		}
+		}
 
 	virtual void clearLeds(int nLeds) {
 		showColor(CRGB(0, 0, 0), nLeds, 0);
@@ -89,27 +109,41 @@ public:
 		uint32_t raw[2];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b2, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
-		transpose8(b.raw,b2.raw);
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
+		register Lines b2;
+		transpose8x1(b.bytes,b2.bytes);
+
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(register uint32_t i = 0; i < 8; i++) {
+		for(register uint32_t i = 0; (i < LANES) && (i < 8); i++) {
 			while(ARM_DWT_CYCCNT < next_mark);
-			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
-			*FastPin<2>::port() = 0xFF;
-			// uint32_t flip_mark = next_mark - (T2+T3+2);
+			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
+			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
 			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+6));
-			// while(ARM_DWT_CYCCNT < flip_mark);
-			// uint32_t last_flip_mark = next_mark - (T3);
-			*FastPin<2>::port() = ~b2.raw[i];
+			*FastPin<FIRST_PIN>::cport() = ((~b2.bytes[7-i]) & PORT_MASK);
 
 			while((next_mark - ARM_DWT_CYCCNT) > (T3));
-			// while(ARM_DWT_CYCCNT < last_flip_mark);
-			*FastPin<2>::port() = 0;
+			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
+			if(LANES>8) {
+				b.bytes[i+8] = pixels.template loadAndScale<PX>(pixels,i+8,d,scale);
+			}
+		}
+
+		for(register uint32_t i = LANES; i < 8; i++) {
+			while(ARM_DWT_CYCCNT < next_mark);
+			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
+			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
+
+			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+6));
+			*FastPin<FIRST_PIN>::cport() = ((~b2.bytes[7-i]) & PORT_MASK);
+
+			while((next_mark - ARM_DWT_CYCCNT) > (T3));
+			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
+
 		}
 	}
 
@@ -126,11 +160,10 @@ public:
 		// Setup the pixel controller and load/scale the first byte
 		allpixels.preStepFirstByteDithering();
 		register Lines b0,b1;
-		b0.raw[0] = b0.raw[1] = 0;
-		b1.raw[0] = b1.raw[1] = 0;
-		allpixels->preStepFirstByteDithering();
-		for(int i = 0; i < 8; i++) {
-			b0.bytes[i] = allpixels->loadAndScale0(i);
+
+		allpixels.preStepFirstByteDithering();
+		for(int i = 0; i < LANES; i++) {
+			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
@@ -139,13 +172,14 @@ public:
 			allpixels.stepDithering();
 
 			// Write first byte, read next byte
-			writeBits<8+XTRA0,1>(next_mark, b0, b1, allpixels);
+			writeBits<8+XTRA0,1>(next_mark, b0, allpixels);
 
 			// Write second byte, read 3rd byte
-			writeBits<8+XTRA0,2>(next_mark, b0, b1, allpixels);
+			writeBits<8+XTRA0,2>(next_mark, b0, allpixels);
+			allpixels.advanceData();
 
 			// Write third byte
-			writeBits<8+XTRA0,0>(next_mark, b0, b1, allpixels);
+			writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
 		};
 
 		return ARM_DWT_CYCCNT;

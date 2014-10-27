@@ -79,7 +79,8 @@ template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDE
 // template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(16)> class SM16716 : public SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
 
 enum EBlockChipsets {
-	WS2811_PORTC
+	WS2811_PORTC,
+	WS2811_PORTD
 };
 
 #if defined(LIB8_ATTINY)
@@ -186,29 +187,23 @@ public:
 #endif
 
 #ifdef FASTSPI_USE_DMX_SIMPLE
-	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN>
+	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER=RGB>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	 {
 		switch(CHIPSET) {
 			case DMX: { static DMXController<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
-
-	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER>
-	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		switch(CHIPSET) {
-			case DMX: {static  DMXController<DATA_PIN, RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
-		}
-	}
 #endif
 
 #ifdef HAS_BLOCKLESS
-	template<EBlockChipsets CHIPSET, int NUM_LANES>
-	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		switch(CHIPSET) {
-			case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, NS(250), NS(510), NS(490)>(), data, nLedsOrOffset, nLedsIfOffset);
-		}
+template<EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER = GRB>
+static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	switch(CHIPSET) {
+		case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, 15, NUM_LANES, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+		case WS2811_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, 2, NUM_LANES, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 	}
+}
 #endif
 
 	void setBrightness(uint8_t scale) { m_Scale = scale; }
