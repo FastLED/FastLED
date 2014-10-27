@@ -6,14 +6,17 @@
 #if defined(FASTLED_TEENSY3)
 #define HAS_BLOCKLESS 1
 
+#define PORTC_FIRST_PIN 15
+#define PORTD_FIRST_PIN 2
+
 #define PORT_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFF))
 
 #include "kinetis.h"
 
-template <uint8_t NUM_LANES, int FIRST_PIN, int LANES, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
+template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class InlineBlockClocklessController : public CLEDController {
-	typedef typename FastPin<2>::port_ptr_t data_ptr_t;
-	typedef typename FastPin<2>::port_t data_t;
+	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
+	typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
 	data_t mPinMask;
 	data_ptr_t mPort;
@@ -35,8 +38,6 @@ public:
 				case 2: FastPin<22>::setOutput();
 				case 1: FastPin<15>::setOutput();
 			}
-			mPinMask = FastPin<15>::mask();
-			mPort = FastPin<15>::port();
 		} else if(FIRST_PIN == 2) {
 			switch(LANES) {
 				case 8: FastPin<5>::setOutput();
@@ -48,10 +49,10 @@ public:
 				case 2: FastPin<14>::setOutput();
 				case 1: FastPin<2>::setOutput();
 			}
-			mPinMask = FastPin<2>::mask();
-			mPort = FastPin<2>::port();
 		}
-		}
+		mPinMask = FastPin<FIRST_PIN>::mask();
+		mPort = FastPin<FIRST_PIN>::port();
+	}
 
 	virtual void clearLeds(int nLeds) {
 		showColor(CRGB(0, 0, 0), nLeds, 0);
@@ -103,7 +104,6 @@ public:
 #endif
 
 
-#define USE_LINES
 	typedef union {
 		uint8_t bytes[8];
 		uint32_t raw[2];
@@ -159,7 +159,7 @@ public:
 
 		// Setup the pixel controller and load/scale the first byte
 		allpixels.preStepFirstByteDithering();
-		register Lines b0,b1;
+		register Lines b0;
 
 		allpixels.preStepFirstByteDithering();
 		for(int i = 0; i < LANES; i++) {

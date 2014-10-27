@@ -79,8 +79,18 @@ template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDE
 // template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(16)> class SM16716 : public SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
 
 enum EBlockChipsets {
+#ifdef PORTA_FIRST_PIN
+	WS2811_PORTA,
+#endif
+#ifdef PORTB_FIRST_PIN
+	WS2811_PORTB,
+#endif
+#ifdef PORTC_FIRST_PIN
 	WS2811_PORTC,
-	WS2811_PORTD
+#endif
+#ifdef PORTD_FIRST_PIN
+	WS2811_PORTD,
+#endif
 };
 
 #if defined(LIB8_ATTINY)
@@ -197,12 +207,27 @@ public:
 #endif
 
 #ifdef HAS_BLOCKLESS
-template<EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER = GRB>
+template<EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER>
 static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 	switch(CHIPSET) {
-		case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, 15, NUM_LANES, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-		case WS2811_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, 2, NUM_LANES, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+#ifdef PORTA_FIRST_PIN
+		case WS2811_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+#endif
+#ifdef PORTB_FIRST_PIN
+		case WS2811_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+#endif
+#ifdef PORTC_FIRST_PIN
+		case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+#endif
+#ifdef PORTD_FIRST_PIN
+		case WS2811_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+#endif
 	}
+}
+
+template<EBlockChipsets CHIPSET, int NUM_LANES>
+static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	return addLeds<CHIPSET,NUM_LANES,RGB>(data,nLedsOrOffset,nLedsIfOffset);
 }
 #endif
 
