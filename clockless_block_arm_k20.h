@@ -11,12 +11,13 @@
 #define HAS_PORTDC 1
 
 #define PORT_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFFF))
-#define PMASK ((1<<LANES)-1)
-#define PMASK_HI (PMASK>>8 & 0xFF)
-#define PMASK_LO (PMASK & 0xFF)
+
+#define MIN(X,Y) (((X)<(Y)) ? (X):(Y))
+#define LANES ((FIRST_PIN==2) ? MIN(__LANES,8) : MIN(__LANES,12))
+
 #include "kinetis.h"
 
-template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
+template <uint8_t __LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class InlineBlockClocklessController : public CLEDController {
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
@@ -205,7 +206,12 @@ public:
 	}
 };
 
-template <uint8_t LANES, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
+#define DLANES (MIN(__LANES,16))
+#define PMASK ((1<<(DLANES))-1)
+#define PMASK_HI (PMASK>>8 & 0xFF)
+#define PMASK_LO (PMASK & 0xFF)
+
+template <uint8_t __LANES, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class SixteenWayInlineBlockClocklessController : public CLEDController {
 	typedef typename FastPin<PORTC_FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<PORTC_FIRST_PIN>::port_t data_t;
@@ -219,7 +225,7 @@ public:
 				// FastPin<29>::setOutput();
 				// FastPin<27>::setOutput();
 				// FastPin<28>::setOutput();
-				switch(LANES) {
+				switch(DLANES) {
 					case 16: FastPin<12>::setOutput();
 					case 15: FastPin<11>::setOutput();
 					case 14: FastPin<13>::setOutput();
@@ -246,7 +252,7 @@ public:
 
 	// set all the leds on the controller to a given color
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-		MultiPixelController<LANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
+		MultiPixelController<DLANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
 		cli();
 
@@ -260,7 +266,7 @@ public:
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-		MultiPixelController<LANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
+		MultiPixelController<DLANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
 		cli();
 
@@ -296,14 +302,14 @@ public:
 		uint32_t raw[4];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<LANES, PMASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<DLANES, PMASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
 		register Lines b2;
 		transpose8x1(b.bytes,b2.bytes);
 		transpose8x1(b.bytes+8,b2.bytes+8);
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(register uint32_t i = 0; (i < LANES) && (i < 8); i++) {
+		for(register uint32_t i = 0; (i < DLANES) && (i < 8); i++) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<PORTD_FIRST_PIN>::sport() = PMASK_LO;
@@ -318,7 +324,7 @@ public:
 			*FastPin<PORTC_FIRST_PIN>::cport() = PMASK_HI;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
-			if(LANES==16 || (LANES>8 && ((i+8) < LANES))) {
+			if(DLANES==16 || (DLANES>8 && ((i+8) < DLANES))) {
 				b.bytes[i+8] = pixels.template loadAndScale<PX>(pixels,i+8,d,scale);
 			}
 		}
@@ -328,7 +334,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-		static uint32_t showRGBInternal(MultiPixelController<LANES, PMASK, RGB_ORDER> &allpixels, int nLeds) {
+		static uint32_t showRGBInternal(MultiPixelController<DLANES, PMASK, RGB_ORDER> &allpixels, int nLeds) {
 		// Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
@@ -339,7 +345,7 @@ public:
 		register Lines b0;
 
 		allpixels.preStepFirstByteDithering();
-		for(int i = 0; i < LANES; i++) {
+		for(int i = 0; i < DLANES; i++) {
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
