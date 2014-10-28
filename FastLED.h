@@ -7,8 +7,8 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-#define  FASTLED_VERSION 3000000
-#warning FastLED version 3000000  (Not really a warning, just telling you here.)
+#define  FASTLED_VERSION 3001000
+#warning FastLED version 3001000  (Not really a warning, just telling you here.)
 
 #define __PROG_TYPES_COMPAT__
 
@@ -91,6 +91,9 @@ enum EBlockChipsets {
 #endif
 #ifdef PORTD_FIRST_PIN
 	WS2811_PORTD,
+#endif
+#ifdef HAS_PORTDC
+	WS2811_PORTDC,
 #endif
 };
 
@@ -240,7 +243,11 @@ static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIf
 #ifdef PORTD_FIRST_PIN
 		case WS2811_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 #endif
+#ifdef HAS_PORTDC
+		case WS2811_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<16,NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+#endif
 	}
+
 }
 
 template<EBlockChipsets CHIPSET, int NUM_LANES>
