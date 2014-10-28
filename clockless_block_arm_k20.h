@@ -124,7 +124,7 @@ public:
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(register uint32_t i = 0; i < 6; i++) {
+		for(register uint32_t i = 0; i < (LANES/2); i++) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
@@ -140,12 +140,15 @@ public:
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
-			if((LANES>6) && ((i+6) < LANES)) {
-				b.bytes[i+6] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
-			}
+			b.bytes[i+(LANES/2)] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 		}
 
-		for(register uint32_t i = 6; i < 8; i++) {
+		// if folks use an odd numnber of lanes, get the last byte's value here
+		if(LANES & 0x01) {
+			b.bytes[LANES-1] = pixels.template loadAndScale<PX>(pixels,LANES-1,d,scale);
+		}
+
+		for(register uint32_t i = LANES/2; i < 8; i++) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
