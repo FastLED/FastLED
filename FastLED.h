@@ -38,7 +38,7 @@
 #include "smartmatrix_t3.h"
 #include "noise.h"
 #include "power_mgt.h"
-
+#include "octows2811_controller.h"
 
 enum ESPIChipsets {
 	LPD8806,
@@ -50,6 +50,7 @@ enum ESPIChipsets {
 };
 
 enum ESM { SMART_MATRIX };
+enum OWS2811 { OCTOWS2811 };
 
 template<uint8_t DATA_PIN> class NEOPIXEL : public WS2811Controller800Khz<DATA_PIN, GRB> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1829 : public TM1829Controller800Khz<DATA_PIN, RGB_ORDER> {};
@@ -185,6 +186,23 @@ public:
 		static CHIPSET<RGB_ORDER> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
+
+#ifdef USE_OCTOWS2811
+template<OWS2811 CHIPSET, EOrder RGB_ORDER>
+static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
+{
+	switch(CHIPSET) {
+		case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+	}
+}
+
+template<OWS2811 CHIPSET>
+static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
+{
+	return addLeds<CHIPSET,GRB>(data,nLedsOrOffset,nLedsIfOffset);
+}
+
+#endif
 
 #ifdef SmartMatrix_h
 	template<ESM CHIPSET>
