@@ -315,7 +315,7 @@ public:
 			*FastPin<PORTC_FIRST_PIN>::cport() = PMASK_HI;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
-			if(LANES>8 && ((i+8) < LANES)) {
+			if(LANES==16 || (LANES>8 && ((i+8) < LANES))) {
 				b.bytes[i+8] = pixels.template loadAndScale<PX>(pixels,i+8,d,scale);
 			}
 		}
