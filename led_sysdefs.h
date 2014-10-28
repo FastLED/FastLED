@@ -49,4 +49,5 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #   define INLINE_SCALE(B, SCALE) B = scale8_video(B, SCALE)
 #endif
 
+#define CLKS_PER_US (F_CPU/1000000)
 #endif

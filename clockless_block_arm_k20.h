@@ -66,43 +66,22 @@ public:
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
 		MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		cli();
-
-		uint32_t clocks = showRGBInternal(pixels,nLeds);
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
-		sei();
+		showRGBInternal(pixels,nLeds);
 		mWait.mark();
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
 		MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		cli();
-
-		uint32_t clocks = showRGBInternal(pixels,nLeds);
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
-		sei();
+		showRGBInternal(pixels,nLeds);
 		mWait.mark();
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
+		MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		cli();
-
-		uint32_t clocks = showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
-
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
-		sei();
+		showRGBInternal(pixels,nLeds);
 		mWait.mark();
 	}
 #endif
@@ -186,9 +165,15 @@ public:
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
+		cli();
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
 		while(nLeds--) {
+			cli();
+			// if interrupts took longer than 45µs, punt on the current frame
+			if(ARM_DWT_CYCCNT > next_mark) {
+				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-5)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
+			}
 			allpixels.stepDithering();
 
 			// Write first byte, read next byte
@@ -200,6 +185,7 @@ public:
 
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
+			sei();
 		};
 
 		return ARM_DWT_CYCCNT;
@@ -254,43 +240,22 @@ public:
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
 		MultiPixelController<DLANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		cli();
-
-		uint32_t clocks = showRGBInternal(pixels,nLeds);
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
-		sei();
+		showRGBInternal(pixels,nLeds);
 		mWait.mark();
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
 		MultiPixelController<DLANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		cli();
-
-		uint32_t clocks = showRGBInternal(pixels,nLeds);
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
-		sei();
+		showRGBInternal(pixels,nLeds);
 		mWait.mark();
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
+		MultiPixelController<DLANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		cli();
-
-		uint32_t clocks = showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
-
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (microsTaken / 1000);
-		sei();
+		showRGBInternal(pixels,nLeds);
 		mWait.mark();
 	}
 #endif
@@ -349,11 +314,16 @@ public:
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
+		cli();
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
 		while(nLeds--) {
 			allpixels.stepDithering();
-
+			cli();
+			// if interrupts took longer than 45µs, punt on the current frame
+			if(ARM_DWT_CYCCNT > next_mark) {
+				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-5)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
+			}
 			// Write first byte, read next byte
 			writeBits<8+XTRA0,1>(next_mark, b0, allpixels);
 
@@ -363,6 +333,7 @@ public:
 
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
+			sei();
 		};
 
 		return ARM_DWT_CYCCNT;
