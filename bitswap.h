@@ -155,6 +155,8 @@ __attribute__((always_inline)) inline void slowswap(unsigned char *A, unsigned c
   }
 }
 
+// Simplified form of bits rotating function found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt - rotating
+// data into LSB for a faster write (the code using this data can happily walk the array backwards)
 __attribute__((always_inline)) inline void transpose8x1(unsigned char *A, unsigned char *B) {
   uint32_t x, y, t;
 
@@ -179,6 +181,7 @@ __attribute__((always_inline)) inline void transpose8x1(unsigned char *A, unsign
   *((uint32_t*)(B+4)) = x;
 }
 
+// Simplified form of bits rotating function found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt
 __attribute__((always_inline)) inline void transpose8x1_MSB(unsigned char *A, unsigned char *B) {
   uint32_t x, y, t;
 
@@ -210,6 +213,7 @@ __attribute__((always_inline)) inline void transpose8x1_MSB(unsigned char *A, un
   B[0] = x; /* */
 }
 
+// templated bit-rotating function based on code found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt
 template<int m, int n>
 __attribute__((always_inline)) inline void transpose8(unsigned char *A, unsigned char *B) {
   uint32_t x, y, t;
