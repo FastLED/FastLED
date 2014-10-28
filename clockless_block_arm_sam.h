@@ -42,7 +42,7 @@ class InlineBlockClocklessController : public CLEDController {
 	CMinWait<WAIT_TIME> mWait;
 public:
 	virtual void init() {
-    if(FIRST_PIN == 69) {
+    if(FIRST_PIN == PORTA_FIRST_PIN) {
       switch(LANES) {
         case 8: FastPin<31>::setOutput();
         case 7: FastPin<58>::setOutput();
@@ -53,7 +53,7 @@ public:
         case 2: FastPin<68>::setOutput();
         case 1: FastPin<69>::setOutput();
       }
-    } else if(FIRST_PIN == 25) {
+    } else if(FIRST_PIN == PORTD_FIRST_PIN) {
       switch(LANES) {
         case 8: FastPin<11>::setOutput();
         case 7: FastPin<29>::setOutput();
@@ -64,7 +64,7 @@ public:
         case 2: FastPin<26>::setOutput();
         case 1: FastPin<25>::setOutput();
       }
-    } else if(FIRST_PIN == 90) {
+    } else if(FIRST_PIN == PORTB_FIRST_PIN) {
       switch(LANES) {
         case 8: FastPin<97>::setOutput();
         case 7: FastPin<96>::setOutput();
@@ -139,7 +139,7 @@ public:
 
 #define VAL *((uint32_t*)(SysTick_BASE + 8))
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b3, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
 		register Lines b2;
     transpose8x1(b.bytes,b2.bytes);
 
@@ -149,29 +149,29 @@ public:
 		for(uint32_t i = 0; (i < LANES) && (i<8); i++) {
 			while(VAL > next_mark);
 
-			next_mark = VAL - (TOTAL);
-			*FastPin<33>::sport() = PORT_MASK;
+			next_mark = VAL - (TOTAL-12);
+			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
 			while((VAL-next_mark) > (T2+T3+6));
-			*FastPin<33>::cport() = (~b2.bytes[7-i]) & PORT_MASK;
+			*FastPin<FIRST_PIN>::cport() = (~b2.bytes[7-i]) & PORT_MASK;
 
 			while((VAL - next_mark) > T3);
-			*FastPin<33>::cport() = PORT_MASK;
+			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
 
-      b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
+      b3.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 		}
 
     for(uint32_t i = LANES; i < 8; i++) {
       while(VAL > next_mark);
 
-      next_mark = VAL - (TOTAL);
-      *FastPin<33>::sport() = PORT_MASK;
+      next_mark = VAL - (TOTAL-3);
+      *FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
       while((VAL-next_mark) > (T2+T3+6));
-      *FastPin<33>::cport() = (~b2.bytes[7-i]) & PORT_MASK;
+      *FastPin<FIRST_PIN>::cport() = (~b2.bytes[7-i]) & PORT_MASK;
 
       while((VAL - next_mark) > T3);
-      *FastPin<33>::cport() = PORT_MASK;
+      *FastPin<FIRST_PIN>::cport() = PORT_MASK;
     }
 	}
 
@@ -180,7 +180,8 @@ public:
 	static uint32_t showRGBInternal(MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &allpixels, int nLeds) {
 		// Serial.println("Entering show");
 		// Setup the pixel controller and load/scale the first byte
-		Lines b0;
+		Lines b0,b1,b2;
+
     allpixels.preStepFirstByteDithering();
 		for(int i = 0; i < LANES; i++) {
 			b0.bytes[i] = allpixels.loadAndScale0(i);
@@ -199,14 +200,14 @@ public:
       allpixels.stepDithering();
 
 			// Write first byte, read next byte
-			writeBits<8+XTRA0,1>(next_mark, b0, allpixels);
+			writeBits<8+XTRA0,1>(next_mark, b0, b1, allpixels);
 
 			// Write second byte, read 3rd byte
-			writeBits<8+XTRA0,2>(next_mark, b0, allpixels);
+			writeBits<8+XTRA0,2>(next_mark, b1, b2, allpixels);
 
       allpixels.advanceData();
 			// Write third byte
-			writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
+			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels);
 		}
 
 		return 0x00FFFFFF - _VAL;

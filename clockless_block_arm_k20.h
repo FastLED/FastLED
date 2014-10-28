@@ -23,7 +23,7 @@ class InlineBlockClocklessController : public CLEDController {
 	CMinWait<WAIT_TIME> mWait;
 public:
 	virtual void init() {
-		if(FIRST_PIN == 15) {
+		if(FIRST_PIN == PORTC_FIRST_PIN) { // PORTC
 			switch(LANES) {
 				// case 12: FastPin<30>::setOutput();
 				// case 11: FastPin<29>::setOutput();
@@ -38,7 +38,7 @@ public:
 				case 2: FastPin<22>::setOutput();
 				case 1: FastPin<15>::setOutput();
 			}
-		} else if(FIRST_PIN == 2) {
+		} else if(FIRST_PIN == PORTD_FIRST_PIN) { // PORTD
 			switch(LANES) {
 				case 8: FastPin<5>::setOutput();
 				case 7: FastPin<21>::setOutput();

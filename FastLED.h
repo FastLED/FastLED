@@ -227,7 +227,7 @@ static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIf
 
 template<EBlockChipsets CHIPSET, int NUM_LANES>
 static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-	return addLeds<CHIPSET,NUM_LANES,RGB>(data,nLedsOrOffset,nLedsIfOffset);
+	return addLeds<CHIPSET,NUM_LANES,GRB>(data,nLedsOrOffset,nLedsIfOffset);
 }
 #endif
 
