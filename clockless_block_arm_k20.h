@@ -9,7 +9,7 @@
 #define PORTC_FIRST_PIN 15
 #define PORTD_FIRST_PIN 2
 
-#define PORT_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFF))
+#define PORT_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFFF))
 
 #include "kinetis.h"
 
@@ -25,10 +25,10 @@ public:
 	virtual void init() {
 		if(FIRST_PIN == PORTC_FIRST_PIN) { // PORTC
 			switch(LANES) {
-				// case 12: FastPin<30>::setOutput();
-				// case 11: FastPin<29>::setOutput();
-				// case 10: FastPin<27>::setOutput();
-				// case 9: FastPin<28>::setOutput();
+				case 12: FastPin<30>::setOutput();
+				case 11: FastPin<29>::setOutput();
+				case 10: FastPin<27>::setOutput();
+				case 9: FastPin<28>::setOutput();
 				case 8: FastPin<12>::setOutput();
 				case 7: FastPin<11>::setOutput();
 				case 6: FastPin<13>::setOutput();
@@ -105,14 +105,19 @@ public:
 
 
 	typedef union {
-		uint8_t bytes[8];
-		uint32_t raw[2];
+		uint8_t bytes[16];
+		uint16_t shorts[8];
+		uint32_t raw[4];
 	} Lines;
 
 	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
 		register Lines b2;
-		transpose8x1(b.bytes,b2.bytes);
-
+		if(LANES>8) {
+			transpose8<1,2>(b.bytes,b2.bytes);
+			transpose8<1,2>(b.bytes+8,b2.bytes+1);
+		} else {
+			transpose8x1(b.bytes,b2.bytes);
+		}
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
@@ -122,13 +127,17 @@ public:
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
 			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+6));
-			*FastPin<FIRST_PIN>::cport() = ((~b2.bytes[7-i]) & PORT_MASK);
+			if(LANES>8) {
+				*FastPin<FIRST_PIN>::cport() = ((~b2.shorts[i]) & PORT_MASK);
+			} else {
+				*FastPin<FIRST_PIN>::cport() = ((~b2.bytes[7-i]) & PORT_MASK);
+			}
 
 			while((next_mark - ARM_DWT_CYCCNT) > (T3));
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
-			if(LANES>8) {
+			if(LANES>8 && ((i+8) < LANES)) {
 				b.bytes[i+8] = pixels.template loadAndScale<PX>(pixels,i+8,d,scale);
 			}
 		}
