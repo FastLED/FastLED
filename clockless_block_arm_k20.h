@@ -124,7 +124,7 @@ public:
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(register uint32_t i = 0; (i < LANES) && (i < 8); i++) {
+		for(register uint32_t i = 0; i < 6; i++) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
@@ -140,18 +140,22 @@ public:
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
-			if(LANES>8 && ((i+8) < LANES)) {
-				b.bytes[i+8] = pixels.template loadAndScale<PX>(pixels,i+8,d,scale);
+			if((LANES>6) && ((i+6) < LANES)) {
+				b.bytes[i+6] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 			}
 		}
 
-		for(register uint32_t i = LANES; i < 8; i++) {
+		for(register uint32_t i = 6; i < 8; i++) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
 			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+6));
-			*FastPin<FIRST_PIN>::cport() = ((~b2.bytes[7-i]) & PORT_MASK);
+			if(LANES>8) {
+				*FastPin<FIRST_PIN>::cport() = ((~b2.shorts[i]) & PORT_MASK);
+			} else {
+				*FastPin<FIRST_PIN>::cport() = ((~b2.bytes[7-i]) & PORT_MASK);
+			}
 
 			while((next_mark - ARM_DWT_CYCCNT) > (T3));
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
