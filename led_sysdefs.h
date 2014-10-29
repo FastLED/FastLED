@@ -4,6 +4,7 @@
 #if defined(__MK20DX128__) || defined(__MK20DX256__)
 #define FASTLED_TEENSY3
 #define FASTLED_ARM
+#define FASTLED_ACCURATE_CLOCK
 #if (F_CPU == 96000000)
 #define CLK_DBL 1
 #endif

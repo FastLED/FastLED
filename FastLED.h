@@ -107,6 +107,7 @@ class CFastLED {
 	// int m_nControllers;
 	uint8_t  m_Scale;
 	uint16_t m_nFPS;
+	uint32_t m_nMinMicros;
 public:
 	CFastLED();
 
@@ -278,6 +279,11 @@ static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIf
 	void setTemperature(const struct CRGB & temp);
 	void setCorrection(const struct CRGB & correction);
 	void setDither(uint8_t ditherMode = BINARY_DITHER);
+
+	// Set the maximum refresh rate.  This is global for all leds.  Attempts to
+	// call show faster than this rate will simply wait.  Defaults to 400Hz.  Set
+	// to 0 to have no maximum rate.
+	void setMaxRefreshRate(uint16_t refresh);
 
 	// for debugging, will keep track of time between calls to countFPS, and every
 	// nFrames calls, it will update an internal counter for the current FPS.

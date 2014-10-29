@@ -195,9 +195,14 @@ public:
 		_CTRL |= SysTick_CTRL_ENABLE_Msk;
 
 		VAL = 0;
+    cli();
 		uint32_t next_mark = (VAL - (TOTAL));
 		while(nLeds--) {
       allpixels.stepDithering();
+      cli();
+      if(VAL < next_mask) {
+        if((next_mark - VAL) > ((WAIT_TIME*5)*CLKS_PER_US)) { sei(); return 0x00FFFFF - _VAL; }
+      }
 
 			// Write first byte, read next byte
 			writeBits<8+XTRA0,1>(next_mark, b0, b1, allpixels);
@@ -208,6 +213,7 @@ public:
       allpixels.advanceData();
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels);
+      sei();
 		}
 
 		return 0x00FFFFFF - _VAL;

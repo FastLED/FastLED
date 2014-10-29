@@ -13,6 +13,7 @@ CFastLED & FastLED = LEDS;
 
 CLEDController *CLEDController::m_pHead = NULL;
 CLEDController *CLEDController::m_pTail = NULL;
+static uint32_t lastshow = 0;
 
 // uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 
@@ -21,6 +22,7 @@ CFastLED::CFastLED() {
 	// m_nControllers = 0;
 	m_Scale = 255;
 	m_nFPS = 0;
+	setMaxRefreshRate(400);
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
@@ -35,6 +37,10 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 }
 
 void CFastLED::show(uint8_t scale) {
+	// guard against showing too rapidly
+	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
+	lastshow = micros();
+
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		uint8_t d = pCur->getDither();
@@ -69,6 +75,9 @@ CLEDController & CFastLED::operator[](int x) {
 }
 
 void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
+	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
+	lastshow = micros();
+
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		uint8_t d = pCur->getDither();
@@ -98,7 +107,11 @@ void CFastLED::clearData() {
 void CFastLED::delay(unsigned long ms) {
 	unsigned long start = millis();
 	while((millis()-start) < ms) {
+#ifndef FASTLED_ACCURATE_CLOCK
+		// make sure to allow at least one ms to pass to ensure the clock moves
+		// forward
 		::delay(1);
+#endif
 		show();
 	}
 }
@@ -183,4 +196,12 @@ void CFastLED::countFPS(int nFrames) {
     br = 0;
     lastframe = millis();
   }
+}
+
+void CFastLED::setMaxRefreshRate(uint16_t refresh) {
+		if(refresh > 0) {
+			m_nMinMicros = 1000000 / refresh;
+		} else {
+			m_nMinMicros = 0;
+		}
 }
