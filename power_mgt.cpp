@@ -43,7 +43,7 @@ static const uint8_t gMCU_mW  =  25 * 5; // 25mA @ 5v = 125 mW
 
 
 static uint32_t gMaxPowerInMilliwatts = (uint32_t)(400) * (uint32_t)(5); // 400mA @ 5v default to avoid USB bricking
-static uint8_t  gMaxPowerIndicatorLEDPinNumber = 13; // default = Arduino onboard LED pin.  set to zero to skip this.
+static uint8_t  gMaxPowerIndicatorLEDPinNumber = 0; // default = Arduino onboard LED pin.  set to zero to skip this.
 
 
 uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) //25354
