@@ -306,9 +306,12 @@ static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIf
 	CRGB *leds() { return (*this)[0].leds(); }
 };
 
-extern CFastLED & FastSPI_LED;
-extern CFastLED & FastSPI_LED2;
-extern CFastLED & FastLED;
-extern CFastLED LEDS;
+#define FastSPI_LED FastLED
+#define FastSPI_LED2 FastLED
+#ifndef LEDS
+#define LEDS FastLED
+#endif
+
+extern CFastLED FastLED;
 
 #endif

@@ -6,10 +6,7 @@ volatile uint32_t fuckit;
 
 void *pSmartMatrix = NULL;
 
-CFastLED LEDS;
-CFastLED & FastSPI_LED = LEDS;
-CFastLED & FastSPI_LED2 = LEDS;
-CFastLED & FastLED = LEDS;
+CFastLED FastLED;
 
 CLEDController *CLEDController::m_pHead = NULL;
 CLEDController *CLEDController::m_pTail = NULL;
