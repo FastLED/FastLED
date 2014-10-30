@@ -1,6 +1,7 @@
 #ifndef __INC_BITSWAP_H
 #define __INC_BITSWAP_H
 
+#ifdef FASTLED_ARM
 // structure representing 8 bits of access
 typedef union {
   uint8_t raw;
@@ -252,5 +253,5 @@ __attribute__((always_inline)) inline void transpose8(unsigned char *A, unsigned
   // B[0]=x>>24;    B[n]=x>>16;    B[2*n]=x>>8;  B[3*n]=x>>0;
   // B[4*n]=y>>24;  B[5*n]=y>>16;  B[6*n]=y>>8;  B[7*n]=y>>0;
 }
-
+#endif
 #endif
