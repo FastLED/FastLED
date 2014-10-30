@@ -12,6 +12,7 @@
 #define FASTLED_ARM
 #else
 #define FASTLED_AVR
+#define FASTLED_ACCURATE_CLOCK
 #endif
 
 #ifndef CLK_DBL
