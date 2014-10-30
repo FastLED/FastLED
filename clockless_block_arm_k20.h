@@ -322,7 +322,7 @@ public:
 			cli();
 			// if interrupts took longer than 45µs, punt on the current frame
 			if(ARM_DWT_CYCCNT > next_mark) {
-				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-5)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
+				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
 			}
 			// Write first byte, read next byte
 			writeBits<8+XTRA0,1>(next_mark, b0, allpixels);

@@ -5,6 +5,9 @@
 #define FASTLED_TEENSY3
 #define FASTLED_ARM
 #define FASTLED_ACCURATE_CLOCK
+#ifndef INTERRUPT_THRESHOLD
+#define INTERRUPT_THRESHOLD 5
+#endif
 #if (F_CPU == 96000000)
 #define CLK_DBL 1
 #endif
@@ -13,6 +16,9 @@
 #else
 #define FASTLED_AVR
 #define FASTLED_ACCURATE_CLOCK
+#ifndef INTERRUPT_THRESHOLD
+#define INTERRUPT_THRESHOLD 10
+#endif
 #endif
 
 #ifndef CLK_DBL
@@ -52,4 +58,9 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #endif
 
 #define CLKS_PER_US (F_CPU/1000000)
+
+#ifndef INTERRUPT_THRESHOLD
+#define INTERRUPT_THRESHOLD 5
+#endif
+
 #endif
