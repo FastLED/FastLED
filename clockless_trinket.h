@@ -54,7 +54,7 @@ template<> __attribute__((always_inline)) inline void _dc<10>(register uint8_t &
 
 #define D1(ADJ) _dc<T1-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
 #define D2(ADJ) _dc<T2-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
-#define D3(ADJ) _dc<T3-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar);
+#define D3(ADJ) (T3-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>0) ? _dc<T3-(AVR_PIN_CYCLES(DATA_PIN)+ADJ)>(loopvar) : _dc<0>(loopvar);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -257,6 +257,9 @@ protected:
 				ADJDITHER2(d2,e2);
 				cli();
 
+				hi = *port | mask;
+				lo = *port & ~mask;
+
 				if((TCNT0-lasttime) > ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK)) { sei(); return; }
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
@@ -304,13 +307,14 @@ protected:
 				HI1 D1(1) QLO2(b2, 2) SCROR04(b0,5) 	D2(4)	LO1 SCALE02(b0,6)	D3(2)
 				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
 				// HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2
-				HI1 D1(1) QLO2(b2, 0) 					D2(0) 	LO1 				D3(0)
+				HI1 D1(1) QLO2(b2, 0) 					D2(0) 	LO1
 				switch(XTRA0) {
-					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
+					case 4: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
+					case 3: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
+					case 2: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
+					case 1: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
 				}
+				D3(12);
 #else
 				// no inline scaling - non-straight RGB ordering
 				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
