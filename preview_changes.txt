@@ -3,5 +3,6 @@ FastLED 3.1 preview changes:
 * 12-way parallel output on teensy 3, 3.1 (portc)
 * 16-way parallel output on teensy 3, 3.1 (portd & portd paired)
 * refresh rate limiting
-* interupt friendly code on teensy 3/3.1
+* interrupt friendly code on teensy 3/3.1
+* interrupt friendly code on AVR
 
