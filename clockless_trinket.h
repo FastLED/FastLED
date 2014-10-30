@@ -103,15 +103,6 @@ protected:
 
 		showRGBInternal(pixels);
 
-		// Adjust the timer
-#if !defined(NO_CORRECTION) || (NO_CORRECTION == 0)
-		uint32_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
-                if(microsTaken > 1024) {
-		  MS_COUNTER += (microsTaken >> 10);
- 		} else {
-		  MS_COUNTER++;
-		}
-#endif
 		sei();
 		mWait.mark();
 	}
@@ -250,17 +241,21 @@ protected:
 		uint8_t e2 = pixels.e[RO(2)];
 
 		uint8_t loopvar=0;
-
+		uint8_t lasttime = TCNT0;
 		{
 			while(count--)
 			{
+				lasttime = TCNT0;
+				sei();
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
 				// LOOP;
 				ADJDITHER2(d0,e0);
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
+				cli();
 
+				if((TCNT0-lasttime) > (F_CPU/2000000)) { sei(); return; }
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
 				// to allow things to line back up.
