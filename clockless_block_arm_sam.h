@@ -200,7 +200,7 @@ public:
 		while(nLeds--) {
       allpixels.stepDithering();
       cli();
-      if(VAL < next_mask) {
+      if(VAL < next_mark) {
         if((next_mark - VAL) > ((WAIT_TIME*5)*CLKS_PER_US)) { sei(); return 0x00FFFFF - _VAL; }
       }
 
