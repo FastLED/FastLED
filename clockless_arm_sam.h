@@ -155,6 +155,9 @@ protected:
 #define VAL (volatile uint32_t)(*((uint32_t*)(SysTick_BASE + 8)))
 
 	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register uint8_t & b) {
+		// Make sure we don't slot into a wrapping spot, this will delay up to 12.5µs for WS2812
+		// while(VAL < (TOTAL*10));
+
 		for(register uint32_t i = BITS; i > 0; i--) {
 			// wait to start the bit, then set the pin high
 			while(VAL > next_mark);
@@ -192,6 +195,7 @@ protected:
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
+		// while(VAL < (TOTAL*10));
 		uint32_t next_mark = (VAL - (TOTAL));
 		while(pixels.has(1)) {
 			pixels.stepDithering();
