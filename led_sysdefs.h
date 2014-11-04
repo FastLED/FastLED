@@ -2,6 +2,7 @@
 #define __INC_LED_SYSDEFS_H
 
 #if defined(__MK20DX128__) || defined(__MK20DX256__)
+
 #define FASTLED_TEENSY3
 #define FASTLED_ARM
 #define FASTLED_ACCURATE_CLOCK
@@ -11,14 +12,33 @@
 #if (F_CPU == 96000000)
 #define CLK_DBL 1
 #endif
+
 #elif defined(__SAM3X8E__)
+
 #define FASTLED_ARM
+
+// Setup DUE timer defines/channels/etc...
+#ifndef DUE_TIMER_CHANNEL
+#define DUE_TIMER_GROUP 0
+#endif
+
+#ifndef DUE_TIMER_CHANNEL
+#define DUE_TIMER_CHANNEL 0
+#endif
+
+#define DUE_TIMER ((DUE_TIMER_GROUP==0) ? TC0 : ((DUE_TIMER_GROUP==1) ? TC1 : TC2))
+#define DUE_TIMER_ID (ID_TC0 + (DUE_TIMER_GROUP*3) + DUE_TIMER_CHANNEL)
+#define DUE_TIMER_VAL (DUE_TIMER->TC_CHANNEL[DUE_TIMER_CHANNEL].TC_CV << 1)
+#define DUE_TIMER_RUNNING ((DUE_TIMER->TC_CHANNEL[DUE_TIMER_CHANNEL].TC_SR & TC_SR_CLKSTA) != 0)
+
 #else
+
 #define FASTLED_AVR
 #define FASTLED_ACCURATE_CLOCK
 #ifndef INTERRUPT_THRESHOLD
 #define INTERRUPT_THRESHOLD 10
 #endif
+
 #endif
 
 #ifndef CLK_DBL

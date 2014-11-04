@@ -88,15 +88,7 @@ public:
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
     MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		cli();
-		SysClockSaver savedClock(TOTAL);
-
-    uint32_t clocks = showRGBInternal(pixels, nLeds);
-
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		long millisTaken = (microsTaken / 1000);
-		savedClock.restore();
-		while(millisTaken-- > 0) { TimeTick_Increment(); }
+    showRGBInternal(pixels, nLeds);
 		sei();
 		mWait.mark();
 	}
@@ -107,37 +99,17 @@ public:
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
     MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		cli();
-		SysClockSaver savedClock(TOTAL);
-
-		uint32_t clocks = showRGBInternal(pixels, nLeds);
-
-
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		long millisTaken = (microsTaken / 1000);
-		savedClock.restore();
-		while(millisTaken-- > 0) { TimeTick_Increment(); }
-		sei();
+		showRGBInternal(pixels, nLeds);
 		mWait.mark();
 	}
 
 #ifdef SUPPORT_ARGB
 	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
 		mWait.wait();
-		cli();
-
 		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
-
-
-		// Adjust the timer
-		long microsTaken = nLeds * CLKS_TO_MICROS(24 * (T1 + T2 + T3));
-		MS_COUNTER += (microsTaken / 1000);
-		sei();
 		mWait.mark();
 	}
 #endif
-
-#define VAL *((uint32_t*)(SysTick_BASE + 8))
 
 	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b3, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
 		register Lines b2;
@@ -147,15 +119,15 @@ public:
     register uint8_t scale = pixels.template getscale<PX>(pixels);
 
 		for(uint32_t i = 0; (i < LANES) && (i<8); i++) {
-			while(VAL > next_mark);
+      while(DUE_TIMER_VAL < next_mark);
+      next_mark = (DUE_TIMER_VAL+TOTAL);
 
-			next_mark = VAL - (TOTAL-12);
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
-			while((VAL-next_mark) > (T2+T3+6));
+			while(next_mark - DUE_TIMER_VAL) > (T2+T3+6));
 			*FastPin<FIRST_PIN>::cport() = (~b2.bytes[7-i]) & PORT_MASK;
 
-			while((VAL - next_mark) > T3);
+			while((next_mark - DUE_TIMER_VAL) > T3);
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
 
       b3.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
@@ -167,10 +139,10 @@ public:
       next_mark = VAL - (TOTAL-3);
       *FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
-      while((VAL-next_mark) > (T2+T3+6));
+      while(next_mark - DUE_TIMER_VAL) > (T2+T3+6));
       *FastPin<FIRST_PIN>::cport() = (~b2.bytes[7-i]) & PORT_MASK;
 
-      while((VAL - next_mark) > T3);
+      while((next_mark - DUE_TIMER_VAL) > T3);
       *FastPin<FIRST_PIN>::cport() = PORT_MASK;
     }
 	}
@@ -188,20 +160,20 @@ public:
 		}
 
 		// Setup and start the clock
-		register volatile uint32_t *CTPTR asm("r6")= &SysTick->CTRL; FORCE_REFERENCE(CTPTR);
-		_LOAD = 0x00FFFFFF;
-		_VAL = 0;
-		_CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
-		_CTRL |= SysTick_CTRL_ENABLE_Msk;
+    TC_Configure(DUE_TIMER,DUE_TIMER_CHANNEL,TC_CMR_TCCLKS_TIMER_CLOCK1);
+    pmc_enable_periph_clk(DUE_TIMER_ID);
+    TC_Start(DUE_TIMER,DUE_TIMER_CHANNEL);
 
 		VAL = 0;
     cli();
-		uint32_t next_mark = (VAL - (TOTAL));
+		uint32_t next_mark = (DUE_TIMER_VAL + (TOTAL));
 		while(nLeds--) {
       allpixels.stepDithering();
       cli();
-      if(VAL < next_mark) {
-        if((next_mark - VAL) > ((WAIT_TIME*5)*CLKS_PER_US)) { sei(); return 0x00FFFFF - _VAL; }
+      if(DUE_TIMER_VAL > next_mark) {
+        if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) {
+          sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return DUE_TIMER_VAL;
+        }
       }
 
 			// Write first byte, read next byte
@@ -216,7 +188,7 @@ public:
       sei();
 		}
 
-		return 0x00FFFFFF - _VAL;
+		return DUE_TIMER_VAL;
 	}
 
 

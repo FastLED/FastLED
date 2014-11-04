@@ -40,39 +40,14 @@ protected:
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
 		mWait.wait();
-		cli();
-		SysClockSaver savedClock(TOTAL);
-
-		uint32_t clocks = showRGBInternal(pixels);
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		long millisTaken = (microsTaken / 1000);
-		savedClock.restore();
-		do { TimeTick_Increment(); } while(--millisTaken > 0);
-		sei();
+		showRGBInternal(pixels);
 		mWait.mark();
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
 		mWait.wait();
-		cli();
-		SysClockSaver savedClock(TOTAL);
-
-		// Serial.print("Scale is ");
-		// Serial.print(scale.raw[0]); Serial.print(" ");
-		// Serial.print(scale.raw[1]); Serial.print(" ");
-		// Serial.print(scale.raw[2]); Serial.println(" ");
-		// FastPinBB<DATA_PIN>::hi(); delay(1); FastPinBB<DATA_PIN>::lo();
-		uint32_t clocks = showRGBInternal(pixels);
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		long millisTaken = (microsTaken / 1000);
-		savedClock.restore();
-		do { TimeTick_Increment(); } while(--millisTaken > 0);
-		sei();
+		showRGBInternal(pixels);
 		mWait.mark();
 	}
 
@@ -80,97 +55,32 @@ protected:
 	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
 		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
 		mWait.wait();
-		cli();
-		SysClockSaver savedClock(TOTAL);
-
-		uint32_t clocks = showRGBInternal(pixels);
-
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		long millisTaken = (microsTaken / 1000);
-		savedClock.restore();
-		do { TimeTick_Increment(); } while(--millisTaken > 0);
+		showRGBInternal(pixels);
 		sei();
 		mWait.mark();
 	}
 #endif
 
-#if 0
-// Get the arm defs, register/macro defs from the k20
-#define ARM_DEMCR               *(volatile uint32_t *)0xE000EDFC // Debug Exception and Monitor Control
-#define ARM_DEMCR_TRCENA                (1 << 24)        // Enable debugging & monitoring blocks
-#define ARM_DWT_CTRL            *(volatile uint32_t *)0xE0001000 // DWT control register
-#define ARM_DWT_CTRL_CYCCNTENA          (1 << 0)                // Enable cycle count
-#define ARM_DWT_CYCCNT          *(volatile uint32_t *)0xE0001004 // Cycle count register
-
-	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register uint8_t & b)  {
-		for(register uint32_t i = BITS; i > 0; i--) {
-			while(ARM_DWT_CYCCNT < next_mark);
-			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
-			*port = 1;
-			uint32_t flip_mark = next_mark - ((b&0x80) ? (T3) : (T2+T3));
-			b <<= 1;
-			while(ARM_DWT_CYCCNT < flip_mark);
-			*port = 0;
-		}
-	}
-
-	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
-	// gcc will use register Y for the this pointer.
-	static void showRGBInternal(PixelController<RGB_ORDER> pixels) {
-		register data_ptr_t port = FastPinBB<DATA_PIN>::port();
-		*port = 0;
-
-		// Setup the pixel controller and load/scale the first byte
-		pixels.preStepFirstByteDithering();
-		register uint8_t b = pixels.loadAndScale0();
-
-	    // Get access to the clock
-		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
-		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
-		ARM_DWT_CYCCNT = 0;
-		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
-
-		while(pixels.has(1)) {
-			pixels.stepDithering();
-
-			// Write first byte, read next byte
-			writeBits<8+XTRA0>(next_mark, port, b);
-			b = pixels.loadAndScale1();
-
-			// Write second byte, read 3rd byte
-			writeBits<8+XTRA0>(next_mark, port, b);
-			b = pixels.loadAndScale2();
-
-			// Write third byte
-			writeBits<8+XTRA0>(next_mark, port, b);
-			b = pixels.advanceAndLoadAndScale0();
-		};
-	}
-#else
-// I hate using defines for these, should find a better representation at some point
-#define _CTRL CTPTR[0]
-#define _LOAD CTPTR[1]
-#define _VAL CTPTR[2]
-#define VAL (volatile uint32_t)(*((uint32_t*)(SysTick_BASE + 8)))
 
 	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register uint8_t & b) {
 		// Make sure we don't slot into a wrapping spot, this will delay up to 12.5µs for WS2812
-		// while(VAL < (TOTAL*10));
+		// bool bShift=0;
+		// while(VAL < (TOTAL*10)) { bShift=true; }
+		// if(bShift) { next_mark = (VAL-TOTAL); };
 
 		for(register uint32_t i = BITS; i > 0; i--) {
 			// wait to start the bit, then set the pin high
-			while(VAL > next_mark);
-			next_mark = (VAL-TOTAL);
+			while(DUE_TIMER_VAL < next_mark);
+			next_mark = (DUE_TIMER_VAL+TOTAL);
 			*port = 1;
 
 			// how long we want to wait next depends on whether or not our bit is set to 1 or 0
 			if(b&0x80) {
 				// we're a 1, wait until there's less than T3 clocks left
-				while((VAL - next_mark) > (T3));
+				while((next_mark - DUE_TIMER_VAL) > (T3));
 			} else {
 				// we're a 0, wait until there's less than (T2+T3+slop) clocks left in this bit
-				while((VAL-next_mark) > (T2+T3+6+TADJUST+TADJUST));
+				while((next_mark - DUE_TIMER_VAL) > (T2+T3+6+TADJUST+TADJUST));
 			}
 			*port=0;
 			b <<= 1;
@@ -182,11 +92,9 @@ protected:
 	// gcc will use register Y for the this pointer.
 	static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
 		// Setup and start the clock
-		register volatile uint32_t *CTPTR asm("r6")= &SysTick->CTRL; FORCE_REFERENCE(CTPTR);
-		_LOAD = 0x00FFFFFF;
-		_VAL = 0;
-		_CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
-		_CTRL |= SysTick_CTRL_ENABLE_Msk;
+		TC_Configure(DUE_TIMER,DUE_TIMER_CHANNEL,TC_CMR_TCCLKS_TIMER_CLOCK1);
+		pmc_enable_periph_clk(DUE_TIMER_ID);
+		TC_Start(DUE_TIMER,DUE_TIMER_CHANNEL);
 
 		register data_ptr_t port asm("r7") = FastPinBB<DATA_PIN>::port(); FORCE_REFERENCE(port);
 		*port = 0;
@@ -195,10 +103,14 @@ protected:
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
-		// while(VAL < (TOTAL*10));
-		uint32_t next_mark = (VAL - (TOTAL));
+		uint32_t next_mark = (VAL + (TOTAL));
 		while(pixels.has(1)) {
 			pixels.stepDithering();
+
+			cli();
+			if(DUE_TIMER_VAL > next_mark) {
+				if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return DUE_TIMER_VAL; }
+			}
 
 			writeBits<8+XTRA0>(next_mark, port, b);
 
@@ -209,9 +121,11 @@ protected:
 			writeBits<8+XTRA0>(next_mark, port,b);
 
 			b = pixels.advanceAndLoadAndScale0();
+			sei();
 		};
 
-		return 0x00FFFFFF - _VAL;
+		TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL);
+		return DUE_TIMER_VAL;
 	}
 #endif
 };

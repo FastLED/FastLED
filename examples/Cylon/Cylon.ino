@@ -10,9 +10,11 @@
 #define CLOCK_PIN 13
 
 // Define the array of leds
-CRGB leds[40];
+CRGB leds[NUM_LEDS];
 
 void setup() { 
+	Serial.begin(57600);
+	Serial.println("resetting");
 	LEDS.addLeds<NEOPIXEL,DATA_PIN>(leds,NUM_LEDS);
 	LEDS.setBrightness(84);
 }
@@ -20,8 +22,8 @@ void setup() {
 void fadeall() { for(int i = 0; i < NUM_LEDS; i++) { leds[i].nscale8(250); } }
 
 void loop() { 
-	uint8_t hue = 0;
-	// Serial.print("x");
+	static uint8_t hue = 0;
+	Serial.print("x");
 	// First slide the led in one direction
 	for(int i = 0; i < NUM_LEDS; i++) {
 		// Set the i'th led to red 
@@ -32,8 +34,9 @@ void loop() {
 		// leds[i] = CRGB::Black;
 		fadeall();
 		// Wait a little bit before we loop around and do it again
-		delay(100);
+		delay(10);
 	}
+	Serial.print("x");
 
 	// Now go in the other direction.  
 	for(int i = (NUM_LEDS)-1; i >= 0; i--) {
@@ -45,6 +48,6 @@ void loop() {
 		// leds[i] = CRGB::Black;
 		fadeall();
 		// Wait a little bit before we loop around and do it again
-		delay(100);
+		delay(10);
 	}
 }
