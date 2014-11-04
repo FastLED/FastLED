@@ -127,7 +127,6 @@ protected:
 		TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL);
 		return DUE_TIMER_VAL;
 	}
-#endif
 };
 
 #endif
