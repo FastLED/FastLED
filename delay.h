@@ -113,47 +113,4 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP2;NOP
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)
 
 
-#if defined(FASTLED_TEENSY3)
-   extern volatile uint32_t systick_millis_count;
-#  define MS_COUNTER systick_millis_count
-#elif defined(__SAM3X8E__)
-	extern volatile uint32_t fuckit;
-#	define MS_COUNTER fuckit
-#else
-#  if defined(CORE_TEENSY)
-     extern volatile unsigned long timer0_millis_count;
-#    define MS_COUNTER timer0_millis_count
-#  else
-     extern volatile unsigned long timer0_millis;
-#    define MS_COUNTER timer0_millis
-#  endif
-#endif
-
-#ifdef __SAM3X8E__
-class SysClockSaver {
-	SysTick_Type m_Saved;
-public:
-	SysClockSaver(int newTimeValue) { save(newTimeValue); }
-	void save(int newTimeValue) { 
-		m_Saved.CTRL = SysTick->CTRL;
-		SysTick->CTRL &= ~(SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
-		m_Saved.LOAD = SysTick->LOAD;
-		m_Saved.VAL = SysTick->VAL;
-
-		SysTick->VAL = 0;
-		SysTick->LOAD = newTimeValue;
-		SysTick->CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
-		SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
-	}
-
-	void restore() { 
-		SysTick->CTRL &= ~(SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk);
-		SysTick->LOAD = m_Saved.LOAD;
-		SysTick->VAL = m_Saved.VAL;
-		SysTick->CTRL = m_Saved.CTRL;
-	}
-};
-
-#endif
-
 #endif
