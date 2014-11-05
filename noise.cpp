@@ -47,7 +47,7 @@ FL_PROGMEM static uint8_t const p[] = { 151,160,137,91,90,15,
 #define FADE(x) scale16(x,x)
 #define LERP(a,b,u) lerp15by16(a,b,u)
 #endif
-static int16_t __attribute__((always_inline))  grad16(uint8_t hash, int16_t x, int16_t y, int16_t z) {
+static int16_t inline __attribute__((always_inline))  grad16(uint8_t hash, int16_t x, int16_t y, int16_t z) {
 #if 0
   switch(hash & 0xF) {
     case  0: return (( x) + ( y))>>1;
@@ -78,7 +78,7 @@ static int16_t __attribute__((always_inline))  grad16(uint8_t hash, int16_t x, i
 #endif
 }
 
-static int16_t __attribute__((always_inline)) grad16(uint8_t hash, int16_t x, int16_t y) {
+static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_t x, int16_t y) {
   hash = hash & 7;
   int16_t u,v;
   if(hash < 4) { u = x; v = y; } else { u = y; v = x; }
@@ -88,7 +88,7 @@ static int16_t __attribute__((always_inline)) grad16(uint8_t hash, int16_t x, in
   return (u+v)>>1;
 }
 
-static int16_t __attribute__((always_inline)) grad16(uint8_t hash, int16_t x) {
+static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_t x) {
   hash = hash & 15;
   int16_t u,v;
   if(hash > 8) { u=x;v=x; }
@@ -100,7 +100,7 @@ static int16_t __attribute__((always_inline)) grad16(uint8_t hash, int16_t x) {
   return (u+v)>>1;
 }
 
-static int8_t  __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y, int8_t z) {
+static int8_t  inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y, int8_t z) {
 #if 0
   switch(hash & 0xF) {
     case  0: return (( x) + ( y))>>1;
@@ -131,7 +131,7 @@ static int8_t  __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8
 #endif
 }
 
-static int8_t __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y) {
+static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y) {
   hash = hash & 7;
   int8_t u,v;
   if(hash < 4) { u = x; v = y; } else { u = y; v = x; }
@@ -141,7 +141,7 @@ static int8_t __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_
   return (u+v)>>1;
 }
 
-static int8_t __attribute__((always_inline)) grad8(uint8_t hash, int8_t x) {
+static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x) {
   hash = hash & 15;
   int8_t u,v;
   if(hash > 8) { u=x;v=x; }
@@ -159,7 +159,7 @@ uint16_t logfade12(uint16_t val) {
   return scale16(val,val)>>4;
 }
 
-static int16_t __attribute__((always_inline)) lerp15by12( int16_t a, int16_t b, fract16 frac)
+static int16_t inline __attribute__((always_inline)) lerp15by12( int16_t a, int16_t b, fract16 frac)
 {
    //if(1) return (lerp(frac,a,b));
     int16_t result;
@@ -176,7 +176,7 @@ static int16_t __attribute__((always_inline)) lerp15by12( int16_t a, int16_t b, 
 }
 #endif
 
-static int8_t __attribute__((always_inline)) lerp7by8( int8_t a, int8_t b, fract8 frac)
+static int8_t inline __attribute__((always_inline)) lerp7by8( int8_t a, int8_t b, fract8 frac)
 {
     // int8_t delta = b - a;
     // int16_t prod = (uint16_t)delta * (uint16_t)frac;
