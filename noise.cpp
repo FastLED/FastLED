@@ -127,7 +127,7 @@ static int8_t  inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t 
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return (u+v)>>1;
+  return avg7(u,v);
 #endif
 }
 
@@ -138,7 +138,7 @@ static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return (u+v)>>1;
+  return avg7(u,v);
 }
 
 static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x) {
@@ -150,7 +150,7 @@ static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return (u+v)>>1;
+  return avg7(u,v);
 }
 
 
