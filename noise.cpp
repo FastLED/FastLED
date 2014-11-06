@@ -100,6 +100,29 @@ static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_
   return (u+v)>>1;
 }
 
+// selectBasedOnHashBit performs this:
+//   result = (hash & (1<<bitnumber)) ? a : b
+// but with an AVR asm version that's smaller and quicker than C
+// (and probably not worth including in lib8tion)
+static int8_t inline __attribute__((always_inline)) selectBasedOnHashBit(uint8_t hash, uint8_t bitnumber, int8_t a, int8_t b) {
+	int8_t result;
+#if !defined(__AVR__)
+	result = (hash & (1<<bitnumber)) ? a : b;
+#else
+	asm volatile(
+		"mov %[result],%[a]          \n\t"
+		"sbrs %[hash],%[bitnumber]   \n\t"
+		"mov %[result],%[b]          \n\t"
+		: [result] "=r" (result)
+		: [hash] "r" (hash), 
+		  [bitnumber] "M" (bitnumber),
+          [a] "r" (a), 
+		  [b] "r" (b)
+		);
+#endif
+	return result;
+}
+
 static int8_t  inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y, int8_t z) {
 #if 0
   switch(hash & 0xF) {
@@ -121,9 +144,28 @@ static int8_t  inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t 
     case 15: return ((-y) + (-z))>>1;
   }
 #else
+
   hash &= 0xF;
-  int8_t u = (hash&8)?y:x;
-  int8_t v = hash<4?y:hash==12||hash==14?x:z;
+
+  int8_t u, v;
+  //u = (hash&8)?y:x;
+  u = selectBasedOnHashBit( hash, 3, y, x);
+
+#if 1
+  v = hash<4?y:hash==12||hash==14?x:z;
+#else
+  // Verbose version for analysis; generates idenitical code.
+  if( hash < 4) { // 00 01 02 03 
+	  v = y;
+  } else {
+      if( hash==12 || hash==14) { // 0C 0E
+		  v = x;
+	  } else {
+		  v = z; // 04 05 06 07   08 09 0A 0B   0D  0F
+	  }
+  }
+#endif
+
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
@@ -131,22 +173,42 @@ static int8_t  inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t 
 #endif
 }
 
-static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y) {
-  hash = hash & 7;
+static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y) 
+{
+  // since the tests below can be done bit-wise on the bottom 
+  // three bits, there's no need to mask off the higher bits
+  //  hash = hash & 7;
+
   int8_t u,v;
-  if(hash < 4) { u = x; v = y; } else { u = y; v = x; }
+  if( hash & 4) {
+	  u = y; v = x; 
+  } else {
+	  u = x; v = y; 
+  }
+
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
   return avg7(u,v);
 }
 
-static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x) {
-  hash = hash & 15;
+static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x) 
+{
+  // since the tests below can be done bit-wise on the bottom 
+  // four bits, there's no need to mask off the higher bits
+  //	hash = hash & 15;
+
   int8_t u,v;
-  if(hash > 8) { u=x;v=x; }
-  else if(hash < 4) { u=x;v=1; }
-  else { u=1;v=x; }
+  if(hash & 8) { 
+	  u=x; v=x; 
+  } else {
+	if(hash & 4) { 
+		u=1; v=x; 
+	} else { 
+		u=x; v=1; 
+	}
+  }
+
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
