@@ -342,9 +342,9 @@ int8_t inoise8_raw(uint16_t x, uint16_t y, uint16_t z)
   uint8_t w = z;
 
   // Get a signed version of the above for the grad function
-  int8_t xx = (x>>1) & 0x7F;
-  int8_t yy = (y>>1) & 0x7F;
-  int8_t zz = (z>>1) & 0x7F;
+  int8_t xx = ((uint8_t)(x)>>1) & 0x7F;
+  int8_t yy = ((uint8_t)(y)>>1) & 0x7F;
+  int8_t zz = ((uint8_t)(z)>>1) & 0x7F;
   uint8_t N = 0x80;
 
   // u = FADE(u); v = FADE(v); w = FADE(w);
@@ -386,8 +386,8 @@ int8_t inoise8_raw(uint16_t x, uint16_t y)
   uint8_t v = y;
 
   // Get a signed version of the above for the grad function
-  int8_t xx = (x>>1) & 0x7F;
-  int8_t yy = (y>>1) & 0x7F;
+  int8_t xx = ((uint8_t)(x)>>1) & 0x7F;
+  int8_t yy = ((uint8_t)(y)>>1) & 0x7F;
   uint8_t N = 0x80;
 
   // u = FADE(u); v = FADE(v); w = FADE(w);
@@ -421,7 +421,7 @@ int8_t inoise8_raw(uint16_t x)
   uint8_t u = x;
 
   // Get a signed version of the above for the grad function
-  int8_t xx = (x>>1) & 0x7F;
+  int8_t xx = ((uint8_t)(x)>>1) & 0x7F;
   uint8_t N = 0x80;
 
   u = scale8(u,u);
