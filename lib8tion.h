@@ -197,6 +197,8 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define ADD8_C 1
 #define SUB8_C 1
 #define EASE8_C 1
+#define AVG8_C 1
+#define AVG7_C 1
 
 
 #elif defined(__AVR__)
@@ -209,6 +211,8 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define ABS8_C 0
 #define ADD8_C 0
 #define SUB8_C 0
+#define AVG8_C 0
+#define AVG7_C 0
 
 #define QADD8_AVRASM 1
 #define QADD7_AVRASM 1
@@ -216,6 +220,8 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define ABS8_AVRASM 1
 #define ADD8_AVRASM 1
 #define SUB8_AVRASM 1
+#define AVG8_AVRASM 1
+#define AVG7_AVRASM 1
 
 // Note: these require hardware MUL instruction
 //       -- sorry, ATtiny!
@@ -265,6 +271,8 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define ADD8_C 1
 #define SUB8_C 1
 #define EASE8_C 1
+#define AVG8_C 1
+#define AVG7_C 1
 
 #endif
 
@@ -462,6 +470,50 @@ LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 #error "No implementation for sub8 available."
 #endif
 }
+
+// avg8: Calculate an integer average of two unsigned
+//       8-bit integer values (uint8_t).
+//       Fractional results are rounded down, e.g. avg8(20,41) = 30
+LIB8STATIC uint8_t avg8( uint8_t i, uint8_t j)
+{
+#if AVG8_C == 1
+    return (i + j) >> 1;
+#elif AVG8_AVRASM == 1
+    asm volatile(
+         /* First, add j to i, 9th bit overflows into C flag */
+         "add %0, %1    \n\t"
+         /* Divide by two, moving C flag into high 8th bit */
+         "ror %0        \n\t"
+         : "+a" (i)
+         : "a"  (j) );
+    return i;
+#else
+#error "No implementation for avg8 available."
+#endif
+}
+
+
+// avg7: Calculate an integer average of two signed 7-bit
+//       integers (int8_t)
+//       If the first argument is even, result is rounded down.
+//       If the first argument is odd, result is result up.
+LIB8STATIC int8_t avg7( int8_t i, int8_t j)
+{
+#if AVG7_C == 1
+    return ((i + j) >> 1) + (i & 0x1);
+#elif AVG7_AVRASM == 1
+    asm volatile(
+                 "asr %1        \n\t"
+                 "asr %0        \n\t"
+                 "adc %0, %1    \n\t"
+                 : "+a" (i)
+                 : "a"  (j) );
+    return i;
+#else
+#error "No implementation for avg7 available."
+#endif
+}
+
 
 
 // scale8: scale one byte by a second one, which is treated as
