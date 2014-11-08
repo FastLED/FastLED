@@ -261,6 +261,9 @@ protected:
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
 
+				hi = *port | mask;
+				lo = *port & ~mask;
+
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
 				// to allow things to line back up.
