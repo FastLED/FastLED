@@ -327,8 +327,8 @@ class CRGBPalette16;
 class CRGBPalette256;
 class CHSVPalette16;
 class CHSVPalette256;
-typedef prog_uint32_t TProgmemRGBPalette16[16];
-typedef prog_uint32_t TProgmemHSVPalette16[16];
+typedef uint32_t TProgmemRGBPalette16[16];
+typedef uint32_t TProgmemHSVPalette16[16];
 #define TProgmemPalette16 TProgmemRGBPalette16 
 
 // Convert a 16-entry palette to a 256-entry palette
