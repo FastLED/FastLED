@@ -1,5 +1,4 @@
-IMPORTANT NOTE: If you are building for AVR based systems, please do not use any version of the arduino IDE 1.5.7 or greater yet. It messes with some of the asm output which will cause you problems.  The real issue is the compiler version, GCC 4.8.x introduces incompatabilities with the assembly code FastLED uses on the avr platfrom.  Note that some versions of Arduino 1.0.5, notably some linux versions, use gcc 4.8.x.
-
+IMPORTANT NOTE: If you are building for AVR based systems, it is possible that using any version of the arduino IDE 1.5.7 or later and/or GCC 4.8 may introduce some issues.  I believe I have fixed them, but if you run into issues using these platforms, please file an issue at http://fastled.io/issues - thank you!
 
 FastLED 3.0
 ===========

@@ -1,3 +1,9 @@
+3.0.1
+* possibly fix issues #67 and #90 by fixing gcc 4.8.x support
+
+3.0.1
+* fix issue #89 w/power management pin always being on
+
 FastLED3.0
 ==========
 
