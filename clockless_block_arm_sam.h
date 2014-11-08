@@ -124,22 +124,22 @@ public:
 
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
-			while(next_mark - DUE_TIMER_VAL) > (T2+T3+6));
+			while((next_mark - DUE_TIMER_VAL) > (T2+T3+6));
 			*FastPin<FIRST_PIN>::cport() = (~b2.bytes[7-i]) & PORT_MASK;
 
-			while((next_mark - DUE_TIMER_VAL) > T3);
+			while((next_mark - (DUE_TIMER_VAL)) > T3);
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
 
       b3.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 		}
 
     for(uint32_t i = LANES; i < 8; i++) {
-      while(VAL > next_mark);
+      while(DUE_TIMER_VAL > next_mark);
 
-      next_mark = VAL - (TOTAL-3);
+      next_mark = DUE_TIMER_VAL - (TOTAL-3);
       *FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
-      while(next_mark - DUE_TIMER_VAL) > (T2+T3+6));
+      while((next_mark - DUE_TIMER_VAL) > (T2+T3+6));
       *FastPin<FIRST_PIN>::cport() = (~b2.bytes[7-i]) & PORT_MASK;
 
       while((next_mark - DUE_TIMER_VAL) > T3);
@@ -164,7 +164,6 @@ public:
     pmc_enable_periph_clk(DUE_TIMER_ID);
     TC_Start(DUE_TIMER,DUE_TIMER_CHANNEL);
 
-		VAL = 0;
     cli();
 		uint32_t next_mark = (DUE_TIMER_VAL + (TOTAL));
 		while(nLeds--) {

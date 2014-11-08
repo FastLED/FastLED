@@ -103,7 +103,7 @@ protected:
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
-		uint32_t next_mark = (VAL + (TOTAL));
+		uint32_t next_mark = (DUE_TIMER_VAL + (TOTAL));
 		while(pixels.has(1)) {
 			pixels.stepDithering();
 
