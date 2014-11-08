@@ -10,7 +10,9 @@
 #define  FASTLED_VERSION 3000001
 #warning FastLED version 3.000.001  (Not really a warning, just telling you here.)
 
+#ifndef __PROG_TYPES_COMPAT__
 #define __PROG_TYPES_COMPAT__
+#endif
 
 #ifdef SmartMatrix_h
 #include<SmartMatrix.h>
