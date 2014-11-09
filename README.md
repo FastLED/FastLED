@@ -63,6 +63,7 @@ LPD6803, HL1606, and "595"-style shift registers are no longer supported by the 
 Right now the library is supported on a variety of arduino compatable platforms.  If it's ARM or AVR and uses the arduino software (or a modified version of it to build) then it is likely supported.  Note that we have a long list of upcoming platforms to support, so if you don't see what you're looking for here, ask, it may be on the roadmap (or may already be supported).  N.B. at the moment we are only supporting the stock compilers that ship with the arduino software.  Support for upgraded compilers, as well as using AVR studio and skipping the arduino entirely, should be coming in a near future release.
 
 * Arduino & compatibles - straight up arduino devices, uno, duo, leonardo, mega, nano, etc...
+* Arduino Yún
 * Adafruit Trinket & Gemma - Trinket Pro may be supported, but haven't tested to confirm yet
 * Teensy 2, Teensy++ 2, Teensy 3.1 - arduino compataible from pjrc.com with some extra goodies (note the teensy 3 is ARM, not AVR!)
 * Arduino Due and the digistump DigiX
