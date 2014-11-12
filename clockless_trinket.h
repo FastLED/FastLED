@@ -64,7 +64,7 @@ template<> __attribute__((always_inline)) inline void _dc<10>(register uint8_t &
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -243,24 +243,25 @@ protected:
 		uint8_t e2 = pixels.e[RO(2)];
 
 		uint8_t loopvar=0;
-		uint8_t lasttime = TCNT0;
+
+		TCCR0A |= 0x30;
+		OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
+		TIFR0 = 0x04;
 		{
 			while(count--)
 			{
-				lasttime = TCNT0;
-				sei();
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
 				// LOOP;
 				ADJDITHER2(d0,e0);
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
+
 				cli();
 
-				lasttime = (uint8_t)(TCNT0-lasttime);
-				if(lasttime > ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK)) {
+				if(TIFR0 & 0x04) {
 					sei();
-					// Serial.print("Overflow:"); Serial.print(lasttime); Serial.print(">"); Serial.println( ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
+					TCCR0A &= ~0x30;
 					return;
 				}
 				hi = *port | mask;
@@ -347,14 +348,15 @@ protected:
 				HI1 D1(1) QLO2(b2, 1) 				D2(0) 	LO1 D3(0)
 				HI1 D1(1) QLO2(b2, 0) 				D2(0) 	LO1 D3(0)
 #endif
-				// DONE
-				// D2(4) LO1 D3(0)
+				// set the counter mark
+				OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
+				TIFR0 = 0x04;
+				sei();
 			}
 		}
-		// save the d values
-		// d[0] = d0;
-		// d[1] = d1;
-		// d[2] = d2;
+
+		// stop using the clock juggler
+		TCCR0A &= ~0x30;
 	}
 
 #ifdef SUPPORT_ARGB
