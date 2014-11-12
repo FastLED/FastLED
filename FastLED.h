@@ -308,6 +308,15 @@ static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIf
 	CRGB *leds() { return (*this)[0].leds(); }
 };
 
+#ifdef FASTLED_AVR
+extern "C" {
+	unsigned long millis(void);
+unsigned long micros(void);
+void delay(unsigned long);
+void delayMicroseconds(unsigned int us);
+};
+#endif
+
 #define FastSPI_LED FastLED
 #define FastSPI_LED2 FastLED
 #ifndef LEDS
