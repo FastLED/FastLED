@@ -26,21 +26,29 @@
 #include<DMXSerial.h>
 #endif
 
+#include <stdint.h>
+
+#include "fastled_config.h"
+#include "led_sysdefs.h"
+
+#include "bitswap.h"
 #include "controller.h"
 #include "fastpin.h"
-#include "fastspi.h"
-#include "bitswap.h"
-#include "clockless.h"
+#include "fastspi_types.h"
+#include "./dmx.h"
+
+#include "platforms.h"
+
 #include "lib8tion.h"
 #include "hsv2rgb.h"
 #include "colorutils.h"
 #include "colorpalettes.h"
-#include "chipsets.h"
-#include "./dmx.h"
-#include "smartmatrix_t3.h"
+
 #include "noise.h"
 #include "power_mgt.h"
-#include "octows2811_controller.h"
+
+#include "fastspi.h"
+#include "chipsets.h"
 
 enum ESPIChipsets {
 	LPD8806,
@@ -324,5 +332,12 @@ void delayMicroseconds(unsigned int us);
 #endif
 
 extern CFastLED FastLED;
+
+// Warnings for undefined things
+#ifndef HAS_HARDWARE_PIN_SUPPORT
+#warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
+#define NO_HARDWARE_PIN_SUPPORT
+#endif
+
 
 #endif

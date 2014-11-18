@@ -1,11 +1,6 @@
  #ifndef __INC_BLOCK_CLOCKLESS_H
 #define __INC_BLOCK_CLOCKLESS_H
 
-#include "controller.h"
-#include "lib8tion.h"
-#include "led_sysdefs.h"
-#include "delay.h"
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point

@@ -1,11 +1,19 @@
 #ifndef __INC_FASTPIN_ARM_SAM_H
 #define __INC_FASTPIN_ARM_SAM_H
 
+#if defined(FORCE_SOFTWARE_PINS)
+#warning "Software pin support forced, pin access will be sloightly slower."
+#define NO_HARDWARE_PIN_SUPPORT
+#undef HAS_HARDWARE_PIN_SUPPORT
+
+#else
+
+
 /// Template definition for arduino due style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data register, set output register, clear output register, set data direction register
-template<uint8_t PIN, uint32_t _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PDDR> class _DUEPIN { 
+template<uint8_t PIN, uint32_t _MASK, typename _PDOR, typename _PSOR, typename _PCOR, typename _PDDR> class _DUEPIN {
 public:
 	typedef volatile uint32_t * port_ptr_t;
 	typedef uint32_t port_t;
@@ -18,7 +26,7 @@ public:
 	inline static void set(register port_t val) __attribute__ ((always_inline)) { _PDOR::r() = val; }
 
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle();  }
-	
+
 	inline static void toggle() __attribute__ ((always_inline)) { _PDOR::r() ^= _MASK; }
 
 	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
@@ -34,9 +42,9 @@ public:
 };
 
 
-/// Template definition for DUE  style ARM pins using bit banding, providing direct access to the various GPIO registers.  GCC 
+/// Template definition for DUE  style ARM pins using bit banding, providing direct access to the various GPIO registers.  GCC
 /// does a poor job of optimizing around these accesses so they are not being used just yet.
-template<uint8_t PIN, uint32_t _BIT, typename _PDOR, typename _PSOR, typename _PCOR, typename _PDDR> class _DUEPIN_BITBAND { 
+template<uint8_t PIN, uint32_t _BIT, typename _PDOR, typename _PSOR, typename _PCOR, typename _PDDR> class _DUEPIN_BITBAND {
 public:
 	typedef volatile uint32_t * port_ptr_t;
 	typedef uint32_t port_t;
@@ -49,7 +57,7 @@ public:
 	inline static void set(register port_t val) __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = val; }
 
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
-	
+
 	inline static void toggle() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() ^= 1; }
 
 	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi();  }
@@ -62,12 +70,18 @@ public:
 	inline static port_t mask() __attribute__ ((always_inline)) { return 1; }
 };
 
+#define GPIO_BITBAND_ADDR(reg, bit) (((uint32_t)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
+#define GPIO_BITBAND_PTR(reg, bit) ((uint32_t *)GPIO_BITBAND_ADDR((reg), (bit)))
+
+#define _R(T) struct __gen_struct_ ## T
+#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } \
+	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
 #define DUE_IO32(L) _RD32(REG_PIO ## L ## _ODSR); _RD32(REG_PIO ## L ## _SODR); _RD32(REG_PIO ## L ## _CODR); _RD32(REG_PIO ## L ## _OER);
 
 #define _DEFPIN_DUE(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN<PIN, 1 << BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
   																			_R(GPIO ## L ## _OER)> {}; \
   								   template<> class FastPinBB<PIN> : public _DUEPIN_BITBAND<PIN, BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
-  																			_R(GPIO ## L ## _OER)> {}; 
+  																			_R(GPIO ## L ## _OER)> {};
 
 #if defined(__SAM3X8E__)
 
@@ -113,5 +127,6 @@ _DEFPIN_DUE(110, 29, B); _DEFPIN_DUE(111, 30, B); _DEFPIN_DUE(112, 31, B); _DEFP
 
 #endif
 
+#endif // FORCE_SOFTWARE_PINS
 
-#endif
+#endif // __INC_FASTPIN_ARM_SAM_H

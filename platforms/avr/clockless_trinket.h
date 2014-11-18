@@ -3,7 +3,6 @@
 
 #include "controller.h"
 #include "lib8tion.h"
-#include "delay.h"
 #include <avr/interrupt.h> // for cli/se definitions
 
 #if defined(FASTLED_AVR)

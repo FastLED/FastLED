@@ -1,6 +1,14 @@
 #ifndef __FASTPIN_ARM_K20_H
 #define __FASTPIN_ARM_K20_H
 
+#if defined(FORCE_SOFTWARE_PINS)
+#warning "Software pin support forced, pin access will be sloightly slower."
+#define NO_HARDWARE_PIN_SUPPORT
+#undef HAS_HARDWARE_PIN_SUPPORT
+
+#else
+
+
 /// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
@@ -65,6 +73,7 @@ public:
 #define GPIO_BITBAND_ADDR(reg, bit) (((uint32_t)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
 #define GPIO_BITBAND_PTR(reg, bit) ((uint32_t *)GPIO_BITBAND_ADDR((reg), (bit)))
 
+#define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } \
 	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
 #define _IO32(L) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR);
@@ -104,4 +113,6 @@ _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 #define HAS_HARDWARE_PIN_SUPPORT
 #endif
 
-#endif
+#endif // FORCE_SOFTWARE_PINS
+
+#endif // __INC_FASTPIN_ARM_K20

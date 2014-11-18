@@ -6,4 +6,4 @@ FastLED 3.1 preview changes:
 * interrupt friendly code on teensy 3/3.1
 * interrupt friendly code on AVR
 * interrupt friendly code on the due
-
+* code re-org for future wider platform support

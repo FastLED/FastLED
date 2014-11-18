@@ -1,3 +1,7 @@
+#ifndef __INC_LED_SYSDEFS_H
+#error WTH?  led_sysdefs needs to be included first
+#endif
+
 #ifndef __INC_LIB8TION_H
 #define __INC_LIB8TION_H
 
@@ -109,7 +113,7 @@
    faster and five times smaller than Arduino's built-in
    generic 32-bit sqrt routine.
      sqrt16( uint16_t x ) == sqrt( x)
- 
+
  - Dimming and brightening functions for 8-bit
    light values.
      dim8_video( x)  == scale8_video( x, x)
@@ -145,7 +149,7 @@
    Sine wave beat generators can specify a low and
    high range for the output.  Sawtooth wave beat
    generators always range 0-255 or 0-65535.
-     beatsin8( BPM, low8, high8) 
+     beatsin8( BPM, low8, high8)
          = (sine(beatphase) * (high8-low8)) + low8
      beatsin16( BPM, low16, high16)
          = (sine(beatphase) * (high16-low16)) + low16
@@ -1679,16 +1683,16 @@ LIB8STATIC uint8_t sqrt16(uint16_t x)
     if( x <= 1) {
         return x;
     }
-    
+
     uint8_t low = 1; // lower bound
     uint8_t hi, mid;
-    
+
     if( x > 7904) {
         hi = 255;
     } else {
         hi = (x >> 5) + 8; // initial estimate for upper bound
     }
-    
+
     do {
         mid = (low + hi) >> 1;
         if ((uint16_t)(mid * mid) > x) {
@@ -1700,7 +1704,7 @@ LIB8STATIC uint8_t sqrt16(uint16_t x)
             low = mid + 1;
         }
     } while (hi >= low);
-    
+
     return low - 1;
 }
 
@@ -1796,7 +1800,7 @@ LIB8STATIC uint16_t beat16( accum88 beats_per_minute)
 {
     // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
     if( beats_per_minute < 256) beats_per_minute <<= 8;
-    
+
     // BPM is 'beats per minute', or 'beats per 60000ms'.
     // To avoid using the (slower) division operator, we
     // want to convert 'beats per 60000ms' to 'beats per 65536ms',

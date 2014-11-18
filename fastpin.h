@@ -3,7 +3,7 @@
 
 #include "led_sysdefs.h"
 
-#define NO_PIN 255 
+#define NO_PIN 255
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -18,13 +18,15 @@ public:
 	virtual bool isSelected() = 0;
 };
 
-class Pin : public Selectable { 
+#if defined(ARDUINO)
+
+class Pin : public Selectable {
 	volatile RwReg *mPort;
 	volatile RoReg *mInPort;
 	RwReg mPinMask;
 	uint8_t mPin;
 
-	void _init() { 
+	void _init() {
 		mPinMask = digitalPinToBitMask(mPin);
 		mPort = portOutputRegister(digitalPinToPort(mPin));
 		mInPort = portInputRegister(digitalPinToPort(mPin));
@@ -38,14 +40,14 @@ public:
 	inline void setOutput() { pinMode(mPin, OUTPUT); }
 	inline void setInput() { pinMode(mPin, INPUT); }
 
-	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; } 
+	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; }
 	inline void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
 
 	inline void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 	inline void toggle() __attribute__ ((always_inline)) { *mInPort = mPinMask; }
 
-	inline void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; } 
-	inline void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; } 
+	inline void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; }
+	inline void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; }
 	inline void set(register port_t val) __attribute__ ((always_inline)) { *mPort = val; }
 
 	inline void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
@@ -75,20 +77,20 @@ public:
 /// will provide pin level access on pretty much all arduino environments.  In addition, it includes some methods to help optimize access in
 /// various ways.  Namely, the versions of hi, lo, and fastset that take the port register as a passed in register variable (saving a global
 /// dereference), since these functions are aggressively inlined, that can help collapse out a lot of extraneous memory loads/dereferences.
-/// 
+///
 /// In addition, if, while writing a bunch of data to a pin, you know no other pins will be getting written to, you can get/cache a value of
 /// the pin's port register and use that to do a full set to the register.  This results in one being able to simply do a store to the register,
 /// vs. the load, and/or, and store that would be done normally.
 ///
 /// There are platform specific instantiations of this class that provide direct i/o register access to pins for much higher speed pin twiddling.
 ///
-/// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended, 
+/// Note that these classes are all static functions.  So the proper usage is Pin<13>::hi(); or such.  Instantiating objects is not recommended,
 /// as passing Pin objects around will likely -not- have the effect you're expecting.
-template<uint8_t PIN> class FastPin { 
+template<uint8_t PIN> class FastPin {
 	static RwReg sPinMask;
 	static volatile RwReg *sPort;
 	static volatile RoReg *sInPort;
-	static void _init() { 
+	static void _init() {
 		sPinMask = digitalPinToBitMask(PIN);
 		sPort = portOutputRegister(digitalPinToPort(PIN));
 		sInPort = portInputRegister(digitalPinToPort(PIN));
@@ -100,15 +102,15 @@ public:
 	inline static void setOutput() { _init(); pinMode(PIN, OUTPUT); }
 	inline static void setInput() { _init(); pinMode(PIN, INPUT); }
 
-	inline static void hi() __attribute__ ((always_inline)) { *sPort |= sPinMask; } 
+	inline static void hi() __attribute__ ((always_inline)) { *sPort |= sPinMask; }
 	inline static void lo() __attribute__ ((always_inline)) { *sPort &= ~sPinMask; }
 
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
 	inline static void toggle() __attribute__ ((always_inline)) { *sInPort = sPinMask; }
 
-	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= sPinMask; } 
-	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~sPinMask; } 
+	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= sPinMask; }
+	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~sPinMask; }
 	inline static void set(register port_t val) __attribute__ ((always_inline)) { *sPort = val; }
 
 	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
@@ -124,37 +126,11 @@ template<uint8_t PIN> volatile RwReg *FastPin<PIN>::sPort;
 template<uint8_t PIN> volatile RoReg *FastPin<PIN>::sInPort;
 
 template<uint8_t PIN> class FastPinBB : public FastPin<PIN> {};
-
+#endif // defined(ARDUINO)
 
 typedef volatile uint32_t & reg32_t;
 typedef volatile uint32_t * ptr_reg32_t;
 
 
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Pin definitions for AVR and ARM.  If there are pin definitions supplied below for the platform being 
-// built on, then much higher speed access will be possible, namely with direct GPIO register accesses.
-//
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-#if defined(FORCE_SOFTWARE_PINS)
-
-#warning "Softwrae pin support forced pin access will be slightly slower.  See fastpin.h for info."
-#define NO_HARDWARE_PIN_SUPPORT
-#undef HAS_HARDWARE_PIN_SUPPORT
-
-#else
-
-// We want hardware pin support, include the hardware pin header files
-#include "fastpin_avr.h"
-#include "fastpin_arm_k20.h"
-#include "fastpin_arm_sam.h"
-
-#ifndef HAS_HARDWARE_PIN_SUPPORT
-#warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
-#define NO_HARDWARE_PIN_SUPPORT
-#endif
-
-#endif
-
-#endif
+#endif // __INC_FASTPIN_H
