@@ -1796,7 +1796,7 @@ uint32_t get_millisecond_timer();
 #endif
 
 // beat16 generates a 16-bit 'sawtooth' wave at a given BPM
-LIB8STATIC uint16_t beat16( accum88 beats_per_minute)
+LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
 {
     // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
     if( beats_per_minute < 256) beats_per_minute <<= 8;
@@ -1811,21 +1811,22 @@ LIB8STATIC uint16_t beat16( accum88 beats_per_minute)
     // e.g. if you ask for "120 BPM", you'll get about "119.93".
     // If you need more precision than that, you can specify a
     // sixteen-bit BPM value in Q8.8 fixed-point (an 'accum88').
-    return ((GET_MILLIS) * beats_per_minute * 280) >> 16;
+    return (((GET_MILLIS) - timebase) * beats_per_minute * 280) >> 16;
 }
 
 // beat8 generates an 8-bit 'sawtooth' wave at a given BPM
-LIB8STATIC uint8_t beat8( accum88 beats_per_minute)
+LIB8STATIC uint8_t beat8( accum88 beats_per_minute, uint32_t timebase = 0)
 {
-    return beat16( beats_per_minute) >> 8;
+    return beat16( beats_per_minute, timebase) >> 8;
 }
 
 // beatsin16 generates a 16-bit sine wave at a given BPM,
 //           that oscillates within a given range.
-LIB8STATIC uint16_t beatsin16( accum88 beats_per_minute, uint16_t lowest = 0, uint16_t highest = 65535)
+LIB8STATIC uint16_t beatsin16( accum88 beats_per_minute, uint16_t lowest = 0, uint16_t highest = 65535,
+                               uint32_t timebase = 0, uint16_t phase_offset = 0)
 {
-    uint16_t beat = beat16( beats_per_minute);
-    uint16_t beatsin = (sin16( beat) + 32768);
+    uint16_t beat = beat16( beats_per_minute, timebase);
+    uint16_t beatsin = (sin16( beat + phase_offset) + 32768);
     uint16_t rangewidth = highest - lowest;
     uint16_t scaledbeat = scale16( beatsin, rangewidth);
     uint16_t result = lowest + scaledbeat;
@@ -1834,10 +1835,11 @@ LIB8STATIC uint16_t beatsin16( accum88 beats_per_minute, uint16_t lowest = 0, ui
 
 // beatsin8 generates an 8-bit sine wave at a given BPM,
 //           that oscillates within a given range.
-LIB8STATIC uint8_t beatsin8( accum88 beats_per_minute, uint8_t lowest = 0, uint8_t highest = 255)
+LIB8STATIC uint8_t beatsin8( accum88 beats_per_minute, uint8_t lowest = 0, uint8_t highest = 255,
+                            uint32_t timebase = 0, uint8_t phase_offset = 0)
 {
-    uint8_t beat = beat8( beats_per_minute);
-    uint8_t beatsin = sin8( beat);
+    uint8_t beat = beat8( beats_per_minute, timebase);
+    uint8_t beatsin = sin8( beat + phase_offset);
     uint8_t rangewidth = highest - lowest;
     uint8_t scaledbeat = scale8( beatsin, rangewidth);
     uint8_t result = lowest + scaledbeat;

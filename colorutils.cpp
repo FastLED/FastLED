@@ -206,6 +206,20 @@ void nscale8( CRGB* leds, uint16_t num_leds, uint8_t scale)
     }
 }
 
+void fadeUsingColor( CRGB* leds, uint16_t numLeds, const CRGB& colormask)
+{
+    uint8_t fr, fg, fb;
+    fr = colormask.r;
+    fg = colormask.g;
+    fb = colormask.b;
+    
+    for( uint16_t i = 0; i < numLeds; i++) {
+        leds[i].r = scale8_LEAVING_R1_DIRTY( leds[i].r, fr);
+        leds[i].g = scale8_LEAVING_R1_DIRTY( leds[i].g, fg);
+        leds[i].b = scale8                 ( leds[i].b, fb);
+    }
+}
+
 
 CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay )
 {
@@ -332,6 +346,79 @@ CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fra
         dest[i] = blend(src1[i], src2[i], amountOfsrc2, directionCode);
     }
     return dest;
+}
+
+
+
+// Forward declaration of the function "XY" which must be provided by
+// the application for use in two-dimensional filter functions.
+uint16_t XY( uint8_t, uint8_t);
+
+
+// blur1d: one-dimensional blur filter. Spreads light to 2 line neighbors.
+// blur2d: two-dimensional blur filter. Spreads light to 8 XY neighbors.
+//
+//           0 = no spread at all
+//          64 = moderate spreading
+//         172 = maximum smooth, even spreading
+//
+//         173..255 = wider spreading, but increasing flicker
+//
+//         Total light is NOT entirely conserved, so many repeated
+//         calls to 'blur' will also result in the light fading,
+//         eventually all the way to black; this is by design so that
+//         it can be used to (slowly) clear the LEDs to black.
+void blur1d( CRGB* leds, uint16_t numLeds, fract8 blur_amount)
+{
+    uint8_t keep = 255 - blur_amount;
+    uint8_t seep = blur_amount >> 1;
+    CRGB carryover = CRGB::Black;
+    for( uint16_t i = 0; i < numLeds; i++) {
+        CRGB cur = leds[i];
+        CRGB part = cur;
+        part.nscale8( seep);
+        cur.nscale8( keep);
+        cur += carryover;
+        if( i) leds[i-1] += part;
+        leds[i] = cur;
+        carryover = part;
+    }
+}
+
+void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
+{
+    blurRows(leds, width, height, blur_amount);
+    blurColumns(leds, width, height, blur_amount);
+}
+
+// blurRows: perform a blur1d on every row of a rectangular matrix
+void blurRows( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
+{
+    for( uint8_t row = 0; row < height; row++) {
+        CRGB* rowbase = leds + (row * width);
+        blur1d( rowbase, width, blur_amount);
+    }
+}
+
+// blurColumns: perform a blur1d on each column of a rectangular matrix
+void blurColumns(CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
+{
+    // blur columns
+    uint8_t keep = 255 - blur_amount;
+    uint8_t seep = blur_amount >> 1;
+    for( uint8_t col = 0; col < width; col++) {
+        CRGB carryover = CRGB::Black;
+        for( uint8_t i = 0; i < height; i++) {
+            CRGB cur = leds[XY(col,i)];
+            CRGB part = cur;
+            part.nscale8( seep);
+            cur.nscale8( keep);
+            cur += carryover;
+            if( i) leds[XY(col,i-1)] += part;
+            leds[XY(col,i)] = cur;
+            carryover = part;
+        }
+    }
 }
 
 
@@ -576,3 +663,4 @@ void SetupPartyColors(CRGBPalette16& pal)
     fill_gradient( pal, 8, CHSV( HUE_ORANGE,255,255), 15, CHSV(HUE_BLUE + 18,255,255), BACKWARD_HUES);
 }
 #endif
+

@@ -219,6 +219,19 @@ void fade_raw(      CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
 //           way down to black even if 'scale' is not zero.
 void nscale8(       CRGB* leds, uint16_t num_leds, uint8_t scale);
 
+// fadeUsingColor - scale down the brightness of an array of pixels,
+//                  as though it were seen through a transparent
+//                  filter with the specified color.
+//                  For example, if the colormask is
+//                    CRGB( 200, 100, 50)
+//                  then the pixels' red will be faded to 200/256ths,
+//                  their green to 100/256ths, and their blue to 50/256ths.
+//                  This particular example give a 'hot fade' look,
+//                  with white fading to yellow, then red, then black.
+//                  You can also use colormasks like CRGB::Blue to
+//                  zero out the red and green elements, leaving blue
+//                  (largely) the same.
+void fadeUsingColor( CRGB* leds, uint16_t numLeds, const CRGB& colormask);
 
 
 // Pixel blending
@@ -255,6 +268,27 @@ void  nblend( CRGB* existing, CRGB* overlay, uint16_t count, fract8 amountOfOver
 void  nblend( CHSV* existing, CHSV* overlay, uint16_t count, fract8 amountOfOverlay,
              TGradientDirectionCode directionCode = SHORTEST_HUES);
 
+
+// blur1d: one-dimensional blur filter. Spreads light to 2 line neighbors.
+// blur2d: two-dimensional blur filter. Spreads light to 8 XY neighbors.
+//
+//           0 = no spread at all
+//          64 = moderate spreading
+//         172 = maximum smooth, even spreading
+//
+//         173..255 = wider spreading, but increasing flicker
+//
+//         Total light is NOT entirely conserved, so many repeated
+//         calls to 'blur' will also result in the light fading,
+//         eventually all the way to black; this is by design so that
+//         it can be used to (slowly) clear the LEDs to black.
+void blur1d( CRGB* leds, uint16_t numLeds, fract8 blur_amount);
+void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount);
+
+// blurRows: perform a blur1d on every row of a rectangular matrix
+void blurRows( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount);
+// blurColumns: perform a blur1d on each column of a rectangular matrix
+void blurColumns(CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount);
 
 
 // CRGB HeatColor( uint8_t temperature)
