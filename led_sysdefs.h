@@ -7,6 +7,8 @@
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/led_sysdefs_arm_sam.h"
+#elif defined(__x86_64)
+#define FORCE_SOFTWARE_SPI
 #else
 // AVR platforms
 #include "platforms/avr/led_sysdefs_avr.h"

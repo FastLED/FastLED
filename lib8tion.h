@@ -168,7 +168,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define LIB8STATIC __attribute__ ((unused)) static inline
 
 #if !defined(__AVR__)
-#include <string.h>
+#include <cstring>
 // for memmove, memcpy, and memset if not defined here
 #endif
 

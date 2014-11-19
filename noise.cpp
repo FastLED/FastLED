@@ -1,4 +1,4 @@
-#include <FastLED.h>
+#include "FastLED.h"
 
 #ifdef FASTLED_AVR
 #include <avr/pgmspace.h>

@@ -7,6 +7,9 @@
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/fastled_arm_sam.h"
+#elif defined(__x86_64)
+#warning "__x86_64"
+#include "platforms/x86/fastled_x86.h"
 #else
 // AVR platforms
 #include "platforms/avr/fastled_avr.h"
