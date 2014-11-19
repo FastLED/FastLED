@@ -523,12 +523,11 @@ LIB8STATIC int8_t avg7( int8_t i, int8_t j)
 // scale8: scale one byte by a second one, which is treated as
 //         the numerator of a fraction whose denominator is 256
 //         In other words, it computes i * (scale / 256)
-//         4 clocks AVR, 2 clocks ARM
+//         4 clocks AVR with MUL, 2 clocks ARM
 LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1
-    return
-    ((int)i * (int)(scale) ) >> 8;
+    return ((uint16_t)i * (uint16_t)(scale) ) >> 8;
 #elif SCALE8_AVRASM == 1
 #if defined(LIB8_ATTINY)
     uint8_t work=0;
@@ -1110,8 +1109,8 @@ LIB8STATIC uint8_t brighten8_lin( uint8_t x )
 // A 16-bit PNRG good enough for LED animations
 
 // X(n+1) = (2053 * X(n)) + 13849)
-#define RAND16_2053  2053
-#define RAND16_13849 13849
+#define RAND16_2053  ((uint16_t)(2053))
+#define RAND16_13849 ((uint16_t)(13849))
 
 extern uint16_t rand16seed;// = RAND16_SEED;
 
@@ -1119,7 +1118,10 @@ extern uint16_t rand16seed;// = RAND16_SEED;
 LIB8STATIC uint8_t random8()
 {
     rand16seed = (rand16seed * RAND16_2053) + RAND16_13849;
-    return rand16seed;
+    // return the sum of the high and low bytes, for better
+    //  mixing and non-sequential correlation
+    return (uint8_t)(((uint8_t)(rand16seed & 0xFF)) +
+                     ((uint8_t)(rand16seed >> 8)));
 }
 
 LIB8STATIC uint16_t random16()
