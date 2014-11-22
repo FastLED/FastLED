@@ -1,3 +1,4 @@
+#define FASTLED_INTERNAL
 #define __PROG_TYPES_COMPAT__
 
 #include <stdint.h>

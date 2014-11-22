@@ -1,3 +1,4 @@
+#define FASTLED_INTERNAL
 #include "FastLED.h"
 
 #if defined(__SAM3X8E__)

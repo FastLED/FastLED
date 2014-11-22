@@ -1,3 +1,4 @@
+#define FASTLED_INTERNAL
 #include <stdint.h>
 
 #include "FastLED.h"
