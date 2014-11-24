@@ -18,4 +18,18 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #endif
 
 
+// Default to disallowing interrupts (may want to gate this on teensy2 vs. other arm platforms, since the
+// teensy2 has a good, fast millis interrupt implementation)
+#ifndef FASTLED_ALLOW_INTERRUPTS
+#define FASTLED_ALLOW_INTERRUPTS 0
+#endif
+
+#  if defined(CORE_TEENSY)
+extern volatile unsigned long timer0_millis_count;
+#    define MS_COUNTER timer0_millis_count
+#  else
+extern volatile unsigned long timer0_millis;
+#    define MS_COUNTER timer0_millis
+#  endif
+
 #endif

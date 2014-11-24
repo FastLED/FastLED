@@ -1,6 +1,7 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
+#if 0
 
 #if defined(FASTLED_AVR) && !defined(TEENSYDUINO) && !defined(LIB8_ATTINY)
 extern "C" {
@@ -230,3 +231,6 @@ void init()
 }
 };
 #endif
+
+#endif
+

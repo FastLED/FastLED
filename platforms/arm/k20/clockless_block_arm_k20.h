@@ -88,9 +88,9 @@ public:
 
 
 	typedef union {
-		uint8_t bytes[16];
-		uint16_t shorts[8];
-		uint32_t raw[4];
+		uint8_t bytes[12];
+		uint16_t shorts[6];
+		uint32_t raw[3];
 	} Lines;
 
 	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
@@ -132,11 +132,11 @@ public:
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
-
 			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+6));
 			if(LANES>8) {
 				*FastPin<FIRST_PIN>::cport() = ((~b2.shorts[i]) & PORT_MASK);
 			} else {
+				// b2.bytes[0] = 0;
 				*FastPin<FIRST_PIN>::cport() = ((~b2.bytes[7-i]) & PORT_MASK);
 			}
 
@@ -144,6 +144,21 @@ public:
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
 
 		}
+
+
+		// while(ARM_DWT_CYCCNT < next_mark);
+		// next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
+		// *FastPin<FIRST_PIN>::sport() = PORT_MASK;
+		//
+		// while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+6));
+		// if(LANES>8) {
+		// 	*FastPin<FIRST_PIN>::cport() = ((~b2.shorts[7]) & PORT_MASK);
+		// } else {
+		// 	*FastPin<FIRST_PIN>::cport() = PORT_MASK; // ((~b2.bytes[7-i]) & PORT_MASK);
+		// }
+		//
+		// while((next_mark - ARM_DWT_CYCCNT) > (T3));
+		// *FastPin<FIRST_PIN>::cport() = PORT_MASK;
 	}
 
 
@@ -165,15 +180,19 @@ public:
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
+		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		cli();
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+		#endif
 
 		while(nLeds--) {
+			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
 			// if interrupts took longer than 45µs, punt on the current frame
 			if(ARM_DWT_CYCCNT > next_mark) {
 				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-5)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
 			}
+			#endif
 			allpixels.stepDithering();
 
 			// Write first byte, read next byte
@@ -185,7 +204,9 @@ public:
 
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
+			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			sei();
+			#endif
 		};
 
 		return ARM_DWT_CYCCNT;
@@ -314,16 +335,21 @@ public:
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
+		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		cli();
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+		#endif
 
 		while(nLeds--) {
 			allpixels.stepDithering();
+			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
 			// if interrupts took longer than 45µs, punt on the current frame
 			if(ARM_DWT_CYCCNT > next_mark) {
 				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
 			}
+			#endif
+
 			// Write first byte, read next byte
 			writeBits<8+XTRA0,1>(next_mark, b0, allpixels);
 
@@ -333,7 +359,10 @@ public:
 
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
+
+			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			sei();
+			#endif
 		};
 
 		return ARM_DWT_CYCCNT;
