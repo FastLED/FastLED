@@ -1,7 +1,7 @@
 #ifndef __FASTPIN_ARM_K20_H
 #define __FASTPIN_ARM_K20_H
 
-#if defined(FORCE_SOFTWARE_PINS)
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
@@ -113,6 +113,6 @@ _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 #define HAS_HARDWARE_PIN_SUPPORT
 #endif
 
-#endif // FORCE_SOFTWARE_PINS
+#endif // FASTLED_FORCE_SOFTWARE_PINS
 
 #endif // __INC_FASTPIN_ARM_K20

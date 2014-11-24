@@ -1,8 +1,8 @@
 // Use if you want to force the software SPI subsystem to be used for some reason (generally, you don't)
-// #define FORCE_SOFTWARE_SPI
+// #define FASTLED_FORCE_SOFTWARE_SPI
 // Use if you want to force non-accelerated pin access (hint: you really don't, it breaks lots of things)
-// #define FORCE_SOFTWARE_SPI
-// #define FORCE_SOFTWARE_PINS
+// #define FASTLED_FORCE_SOFTWARE_SPI
+// #define FASTLED_FORCE_SOFTWARE_PINS
 #include "FastLED.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////

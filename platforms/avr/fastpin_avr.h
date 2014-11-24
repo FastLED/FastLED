@@ -1,7 +1,7 @@
 #ifndef __INC_FASTPIN_AVR_H
 #define __INC_FASTPIN_AVR_H
 
-#if defined(FORCE_SOFTWARE_PINS)
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
@@ -203,6 +203,6 @@ _DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_A
 
 #endif
 
-#endif // FORCE_SOFTWARE_PINS
+#endif // FASTLED_FORCE_SOFTWARE_PINS
 
 #endif // __INC_FASTPIN_AVR_H

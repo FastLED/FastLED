@@ -27,7 +27,7 @@ class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
-#ifndef FORCE_SOFTWARE_SPI
+#ifndef FASTLED_FORCE_SOFTWARE_SPI
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
