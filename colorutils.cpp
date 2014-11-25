@@ -268,7 +268,7 @@ CRGB blend( const CRGB& p1, const CRGB& p2, fract8 amountOfP2 )
 CRGB* blend( const CRGB* src1, const CRGB* src2, CRGB* dest, uint16_t count, fract8 amountOfsrc2 )
 {
     for( uint16_t i = count; i; i--) {
-        dest[i] = blend(src1[i], src2[i], amountOfsrc2);
+        dest[i-1] = blend(src1[i-1], src2[i-1], amountOfsrc2);
     }
     return dest;
 }
@@ -344,7 +344,7 @@ CHSV blend( const CHSV& p1, const CHSV& p2, fract8 amountOfP2, TGradientDirectio
 CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fract8 amountOfsrc2, TGradientDirectionCode directionCode )
 {
     for( uint16_t i = count; i; i--) {
-        dest[i] = blend(src1[i], src2[i], amountOfsrc2, directionCode);
+        dest[i-1] = blend(src1[i-1], src2[i-1], amountOfsrc2, directionCode);
     }
     return dest;
 }
