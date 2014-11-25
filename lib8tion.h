@@ -1419,13 +1419,29 @@ void * memset8 ( void * ptr, uint8_t value, uint16_t num ) __attribute__ ((noinl
 // linear interpolation, such as could be used for Perlin noise, etc.
 //
 
+// A note on the structure of the lerp functions:
+// The cases for b>a and b<=a are handled separately for
+// speed: without knowing the relative order of a and b,
+// the value (a-b) might be overflow the width of a or b,
+// and have to be promoted to a wider, slower type.
+// To avoid that, we separate the two cases, and are able
+// to do all the math in the same width as the arguments,
+// which is much faster and smaller on AVR.
+
 // linear interpolation between two unsigned 8-bit values,
 // with 8-bit fraction
 LIB8STATIC uint8_t lerp8by8( uint8_t a, uint8_t b, fract8 frac)
 {
-    uint8_t delta = b - a;
-    uint8_t scaled = scale8( delta, frac);
-    uint8_t result = a + scaled;
+    uint8_t result;
+    if( b > a) {
+        uint8_t delta = b - a;
+        uint8_t scaled = scale8( delta, frac);
+        result = a + scaled;
+    } else {
+        uint8_t delta = a - b;
+        uint8_t scaled = scale8( delta, frac);
+        result = a - scaled;
+    }
     return result;
 }
 
@@ -1433,22 +1449,18 @@ LIB8STATIC uint8_t lerp8by8( uint8_t a, uint8_t b, fract8 frac)
 // with 16-bit fraction
 LIB8STATIC uint16_t lerp16by16( uint16_t a, uint16_t b, fract16 frac)
 {
-    uint16_t delta = b - a;
-    uint32_t prod = (uint32_t)delta * (uint32_t)frac;
-    uint16_t scaled = prod >> 16;
-    uint16_t result = a + scaled;
+    uint16_t result;
+    if( b > a ) {
+        uint16_t delta = b - a;
+        uint32_t scaled = scale16(delta, frac);
+        result = a + scaled;
+    } else {
+        uint16_t delta = a - b;
+        uint16_t scaled = scale16( delta, frac);
+        result = a - scaled;
+    }
     return result;
 }
-
-
-// A note on the structure of lerp16by8 (and lerp15by8) :
-// The cases for b>a and b<=a are handled separately for
-// speed: without knowing the relative order of a and b,
-// the value (a-b) might be a signed 17-bit value, which
-// would have to be stored in a 32-bit signed int and
-// processed as such.  To avoid that, we separate the
-// two cases, and are able to do all the math with 16-bit
-// unsigned values, which is much faster and smaller on AVR.
 
 // linear interpolation between two unsigned 16-bit values,
 // with 8-bit fraction
