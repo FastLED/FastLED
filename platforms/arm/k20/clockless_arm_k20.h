@@ -97,17 +97,20 @@ protected:
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
+		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		cli();
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+		#endif
 
 		while(pixels.has(1)) {
 			pixels.stepDithering();
+			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
 			// if interrupts took longer than 45µs, punt on the current frame
 			if(ARM_DWT_CYCCNT > next_mark) {
 				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
 			}
-
+			#endif
 			// Write first byte, read next byte
 			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
 			b = pixels.loadAndScale1();
@@ -119,7 +122,9 @@ protected:
 			// Write third byte, read 1st byte of next pixel
 			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
 			b = pixels.advanceAndLoadAndScale0();
+			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			sei();
+			#endif
 		};
 
 		return ARM_DWT_CYCCNT;

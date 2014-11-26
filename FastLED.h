@@ -8,7 +8,9 @@
 #define str(s) #s
 
 #define  FASTLED_VERSION 3001000
+#ifndef FASTLED_INTERNAL
 #warning FastLED version 3001000  (Not really a warning, just telling you here.)
+#endif
 
 #ifndef __PROG_TYPES_COMPAT__
 #define __PROG_TYPES_COMPAT__

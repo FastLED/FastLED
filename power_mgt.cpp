@@ -1,3 +1,4 @@
+#define FASTLED_INTERNAL
 #include "FastLED.h"
 #include "power_mgt.h"
 

@@ -9,6 +9,11 @@
 #define INTERRUPT_THRESHOLD 1
 #endif
 
+// Default to allowing interrupts
+#ifndef FASTLED_ALLOW_INTERRUPTS
+#define FASTLED_ALLOW_INTERRUPTS 1
+#endif
+
 #if (F_CPU == 96000000)
 #define CLK_DBL 1
 #endif

@@ -104,6 +104,16 @@ protected:
 
 		showRGBInternal(pixels);
 
+		// Adjust the timer
+		#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
+		uint32_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+		if(microsTaken > 1024) {
+			MS_COUNTER += (microsTaken >> 10);
+		} else {
+			MS_COUNTER++;
+		}
+		#endif
+
 		sei();
 		mWait.mark();
 	}
@@ -243,9 +253,11 @@ protected:
 
 		uint8_t loopvar=0;
 
+		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		TCCR0A |= 0x30;
 		OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
 		TIFR0 = 0x04;
+		#endif
 		{
 			while(count--)
 			{
@@ -256,8 +268,8 @@ protected:
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
 
+				#if (FASTLED_ALLOW_INTERRUPTS == 1)
 				cli();
-
 				if(TIFR0 & 0x04) {
 					sei();
 					TCCR0A &= ~0x30;
@@ -265,6 +277,7 @@ protected:
 				}
 				hi = *port | mask;
 				lo = *port & ~mask;
+				#endif
 
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
@@ -347,15 +360,20 @@ protected:
 				HI1 D1(1) QLO2(b2, 1) 				D2(0) 	LO1 D3(0)
 				HI1 D1(1) QLO2(b2, 0) 				D2(0) 	LO1 D3(0)
 #endif
+
+				#if (FASTLED_ALLOW_INTERRUPTS == 1)
 				// set the counter mark
 				OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
 				TIFR0 = 0x04;
 				sei();
+				#endif
 			}
 		}
 
+		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		// stop using the clock juggler
 		TCCR0A &= ~0x30;
+		#endif
 	}
 
 #ifdef SUPPORT_ARGB

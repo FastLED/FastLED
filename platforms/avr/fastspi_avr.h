@@ -294,7 +294,7 @@ public:
 #endif
 
 #else
-// #define FORCE_SOFTWARE_SPI
+// #define FASTLED_FORCE_SOFTWARE_SPI
 #endif
 
 #endif

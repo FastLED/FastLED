@@ -159,16 +159,20 @@ public:
     pmc_enable_periph_clk(DUE_TIMER_ID);
     TC_Start(DUE_TIMER,DUE_TIMER_CHANNEL);
 
+    #if (FASTLED_ALLOW_INTERRUPTS == 1)
     cli();
+    #endif
 		uint32_t next_mark = (DUE_TIMER_VAL + (TOTAL));
 		while(nLeds--) {
       allpixels.stepDithering();
+      #if (FASTLED_ALLOW_INTERRUPTS == 1)
       cli();
       if(DUE_TIMER_VAL > next_mark) {
         if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) {
           sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return DUE_TIMER_VAL;
         }
       }
+      #endif
 
 			// Write first byte, read next byte
 			writeBits<8+XTRA0,1>(next_mark, b0, b1, allpixels);
@@ -179,7 +183,10 @@ public:
       allpixels.advanceData();
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b2, b0, allpixels);
+
+      #if (FASTLED_ALLOW_INTERRUPTS == 1)
       sei();
+      #endif
 		}
 
 		return DUE_TIMER_VAL;

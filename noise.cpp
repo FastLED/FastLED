@@ -1,3 +1,5 @@
+
+#define FASTLED_INTERNAL
 #include "FastLED.h"
 
 #ifdef FASTLED_AVR

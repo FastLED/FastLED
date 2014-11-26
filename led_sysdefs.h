@@ -1,6 +1,8 @@
 #ifndef __INC_LED_SYSDEFS_H
 #define __INC_LED_SYSDEFS_H
 
+#include "fastled_config.h"
+
 #if defined(__MK20DX128__) || defined(__MK20DX256__)
 // Include k20/T3 headers
 #include "platforms/arm/k20/led_sysdefs_arm_k20.h"

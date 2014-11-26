@@ -107,10 +107,12 @@ protected:
 		while(pixels.has(1)) {
 			pixels.stepDithering();
 
+			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
 			if(DUE_TIMER_VAL > next_mark) {
 				if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return DUE_TIMER_VAL; }
 			}
+			#endif
 
 			writeBits<8+XTRA0>(next_mark, port, b);
 
@@ -121,7 +123,9 @@ protected:
 			writeBits<8+XTRA0>(next_mark, port,b);
 
 			b = pixels.advanceAndLoadAndScale0();
+			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			sei();
+			#endif
 		};
 
 		TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL);
