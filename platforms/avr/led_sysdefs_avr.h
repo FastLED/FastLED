@@ -2,7 +2,6 @@
 #define __INC_LED_SYSDEFS_AVR_H
 
 #define FASTLED_AVR
-#define FASTLED_ACCURATE_CLOCK
 
 #ifndef INTERRUPT_THRESHOLD
 #define INTERRUPT_THRESHOLD 2
@@ -22,6 +21,10 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 // teensy2 has a good, fast millis interrupt implementation)
 #ifndef FASTLED_ALLOW_INTERRUPTS
 #define FASTLED_ALLOW_INTERRUPTS 0
+#endif
+
+#if FASTLED_ALLOW_INTERRUPTS == 1
+#define FASTLED_ACCURATE_CLOCK
 #endif
 
 #  if defined(CORE_TEENSY)

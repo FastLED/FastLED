@@ -3,7 +3,6 @@
 
 #define FASTLED_TEENSY3
 #define FASTLED_ARM
-#define FASTLED_ACCURATE_CLOCK
 
 #ifndef INTERRUPT_THRESHOLD
 #define INTERRUPT_THRESHOLD 1
@@ -12,6 +11,10 @@
 // Default to allowing interrupts
 #ifndef FASTLED_ALLOW_INTERRUPTS
 #define FASTLED_ALLOW_INTERRUPTS 1
+#endif
+
+#if FASTLED_ALLOW_INTERRUPTS == 1
+#define FASTLED_ACCURATE_CLOCK
 #endif
 
 #if (F_CPU == 96000000)
