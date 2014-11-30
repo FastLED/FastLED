@@ -38,9 +38,9 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
     CHSV hsv;
     hsv.hue = initialhue;
     hsv.val = 255;
-    hsv.sat = 255;
+    hsv.sat = 240;
     for( int i = 0; i < numToFill; i++) {
-        hsv2rgb_rainbow( hsv, pFirstLED[i]);
+        pFirstLED[i] = hsv;
         hsv.hue += deltahue;
     }
 }
@@ -52,7 +52,7 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
     CHSV hsv;
     hsv.hue = initialhue;
     hsv.val = 255;
-    hsv.sat = 255;
+    hsv.sat = 240;
     for( int i = 0; i < numToFill; i++) {
         targetArray[i] = hsv;
         hsv.hue += deltahue;
@@ -267,7 +267,7 @@ CRGB blend( const CRGB& p1, const CRGB& p2, fract8 amountOfP2 )
 
 CRGB* blend( const CRGB* src1, const CRGB* src2, CRGB* dest, uint16_t count, fract8 amountOfsrc2 )
 {
-    for( uint16_t i = count; i; i--) {
+    for( uint16_t i = 0; i < count; i++) {
         dest[i] = blend(src1[i], src2[i], amountOfsrc2);
     }
     return dest;
@@ -343,7 +343,7 @@ CHSV blend( const CHSV& p1, const CHSV& p2, fract8 amountOfP2, TGradientDirectio
 
 CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fract8 amountOfsrc2, TGradientDirectionCode directionCode )
 {
-    for( uint16_t i = count; i; i--) {
+    for( uint16_t i = 0; i < count; i++) {
         dest[i] = blend(src1[i], src2[i], amountOfsrc2, directionCode);
     }
     return dest;
@@ -353,7 +353,7 @@ CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fra
 
 // Forward declaration of the function "XY" which must be provided by
 // the application for use in two-dimensional filter functions.
-uint16_t XY( uint8_t, uint8_t);
+uint16_t XY( uint8_t, uint8_t);// __attribute__ ((weak));
 
 
 // blur1d: one-dimensional blur filter. Spreads light to 2 line neighbors.
