@@ -93,7 +93,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#define HAS_DMX_SIMPLE</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment">// note - dmx simple must be included before FastSPI for this code to be enabled</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>8_t DATA_PIN, EOrder RGB_ORDER = RGB&gt; <span class="keyword">class </span>DMXSimpleController : <span class="keyword">public</span> <a class="code" href="class_c_l_e_d_controller.html">CLEDController</a> {</div>
+<div class="line"><a name="l00010"></a><span class="lineno"><a class="line" href="class_d_m_x_simple_controller.html">   10</a></span>&#160;<span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>8_t DATA_PIN, EOrder RGB_ORDER = RGB&gt; <span class="keyword">class </span><a class="code" href="class_d_m_x_simple_controller.html">DMXSimpleController</a> : <span class="keyword">public</span> <a class="code" href="class_c_l_e_d_controller.html">CLEDController</a> {</div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;    <span class="comment">// initialize the LED controller</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> init() { DmxSimple.usePin(DATA_PIN); }</div>
@@ -140,7 +140,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="preprocessor">#ifdef DmxSerial_h</span></div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#include&lt;DMXSerial.h&gt;</span></div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="keyword">template</span> &lt;EOrder RGB_ORDER = RGB&gt; <span class="keyword">class </span>DMXSerialController : <span class="keyword">public</span> <a class="code" href="class_c_l_e_d_controller.html">CLEDController</a> {</div>
+<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="class_d_m_x_serial_controller.html">   57</a></span>&#160;<span class="keyword">template</span> &lt;EOrder RGB_ORDER = RGB&gt; <span class="keyword">class </span><a class="code" href="class_d_m_x_serial_controller.html">DMXSerialController</a> : <span class="keyword">public</span> <a class="code" href="class_c_l_e_d_controller.html">CLEDController</a> {</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="comment">// initialize the LED controller</span></div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> init() { DMXSerial.init(DMXController); }</div>
@@ -185,11 +185,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="struct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdef"><b>Definition:</b> pixeltypes.h:81</div></div>
-<div class="ttc" id="class_c_l_e_d_controller_html"><div class="ttname"><a href="class_c_l_e_d_controller.html">CLEDController</a></div><div class="ttdef"><b>Definition:</b> controller.h:32</div></div>
+<div class="ttc" id="class_c_l_e_d_controller_html"><div class="ttname"><a href="class_c_l_e_d_controller.html">CLEDController</a></div><div class="ttdoc">Base definition for an LED controller. </div><div class="ttdef"><b>Definition:</b> controller.h:32</div></div>
+<div class="ttc" id="class_d_m_x_simple_controller_html"><div class="ttname"><a href="class_d_m_x_simple_controller.html">DMXSimpleController</a></div><div class="ttdef"><b>Definition:</b> dmx.h:10</div></div>
+<div class="ttc" id="class_d_m_x_serial_controller_html"><div class="ttname"><a href="class_d_m_x_serial_controller.html">DMXSerialController</a></div><div class="ttdef"><b>Definition:</b> dmx.h:57</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 29 2014 22:13:42 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 30 2014 21:18:44 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>

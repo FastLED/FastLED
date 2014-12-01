@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['ucs1903',['UCS1903',['../class_u_c_s1903.html',1,'']]],
-  ['ucs1903b',['UCS1903B',['../class_u_c_s1903_b.html',1,'']]],
-  ['ucs1903bcontroller800khz',['UCS1903BController800Khz',['../class_u_c_s1903_b_controller800_khz.html',1,'']]],
-  ['ucs1903controller400khz',['UCS1903Controller400Khz',['../class_u_c_s1903_controller400_khz.html',1,'']]]
+  ['p9813controller',['P9813Controller',['../class_p9813_controller.html',1,'']]],
+  ['pin',['Pin',['../class_pin.html',1,'']]],
+  ['pixelcontroller',['PixelController',['../struct_pixel_controller.html',1,'']]]
 ];

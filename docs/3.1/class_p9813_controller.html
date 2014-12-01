@@ -97,7 +97,7 @@ Inheritance diagram for P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_
  <div class="center">
   <img src="class_p9813_controller.png" usemap="#P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;_map" alt=""/>
   <map id="P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;_map" name="P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;_map">
-<area href="class_c_l_e_d_controller.html" alt="CLEDController" shape="rect" coords="0,0,428,24"/>
+<area href="class_c_l_e_d_controller.html" title="Base definition for an LED controller. " alt="CLEDController" shape="rect" coords="0,0,428,24"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -125,6 +125,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>showColor</b> (const 
 <tr class="memitem:a06cfb05ad6e0f7982328928051f3f565 inherit pub_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a06cfb05ad6e0f7982328928051f3f565"></a>
 <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>next</b> ()</td></tr>
 <tr class="separator:a06cfb05ad6e0f7982328928051f3f565 inherit pub_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a55f6d5b215dc14f9473faea938b4c8 inherit pub_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4a55f6d5b215dc14f9473faea938b4c8"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>show</b> (const struct CARGB *data, int nLeds, uint8_t brightness)</td></tr>
+<tr class="separator:a4a55f6d5b215dc14f9473faea938b4c8 inherit pub_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b08378b29f92c5def65175ec5334037 inherit pub_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5b08378b29f92c5def65175ec5334037"></a>
 <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setLeds</b> (<a class="el" href="struct_c_r_g_b.html">CRGB</a> *data, int nLeds)</td></tr>
 <tr class="separator:a5b08378b29f92c5def65175ec5334037 inherit pub_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -176,6 +179,13 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>showColor</b>
 <tr class="memitem:aac4f48b0da93055c0da7285839c4ce81"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aac4f48b0da93055c0da7285839c4ce81"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>show</b> (const struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> *data, int nLeds, <a class="el" href="struct_c_r_g_b.html">CRGB</a> scale)</td></tr>
 <tr class="separator:aac4f48b0da93055c0da7285839c4ce81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac4f48b0da93055c0da7285839c4ce81"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aac4f48b0da93055c0da7285839c4ce81"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>show</b> (const struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> *data, int nLeds, <a class="el" href="struct_c_r_g_b.html">CRGB</a> scale)</td></tr>
+<tr class="separator:aac4f48b0da93055c0da7285839c4ce81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_class_c_l_e_d_controller"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_class_c_l_e_d_controller')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td></tr>
+<tr class="memitem:a3ae4f61fc85ef4609d65c14ca51434c4 inherit pro_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3ae4f61fc85ef4609d65c14ca51434c4"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>show</b> (const struct CARGB *data, int nLeds, <a class="el" href="struct_c_r_g_b.html">CRGB</a> scale)=0</td></tr>
+<tr class="separator:a3ae4f61fc85ef4609d65c14ca51434c4 inherit pro_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -216,7 +226,7 @@ static <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a> *&#
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 29 2014 22:13:42 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 30 2014 21:18:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>

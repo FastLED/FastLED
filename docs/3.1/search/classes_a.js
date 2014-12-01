@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['q',['q',['../classq.html',1,'']]]
+  ['multipixelcontroller',['MultiPixelController',['../struct_multi_pixel_controller.html',1,'']]]
 ];

@@ -104,7 +104,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#if defined(ARDUINO)</span></div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">class </span>Pin : <span class="keyword">public</span> <a class="code" href="class_selectable.html">Selectable</a> {</div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="class_pin.html">   23</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_pin.html">Pin</a> : <span class="keyword">public</span> <a class="code" href="class_selectable.html">Selectable</a> {</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keyword">volatile</span> RwReg *mPort;</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keyword">volatile</span> RoReg *mInPort;</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    RwReg mPinMask;</div>
@@ -116,7 +116,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        mInPort = portInputRegister(digitalPinToPort(mPin));</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    }</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    Pin(<span class="keywordtype">int</span> pin) : mPin(pin) { _init(); }</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <a class="code" href="class_pin.html">Pin</a>(<span class="keywordtype">int</span> pin) : mPin(pin) { _init(); }</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">typedef</span> <span class="keyword">volatile</span> RwReg * port_ptr_t;</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keyword">typedef</span> RwReg port_t;</div>
@@ -146,17 +146,17 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> isSelected() { <span class="keywordflow">return</span> (*mPort &amp; mPinMask) == mPinMask; }</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;};</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="keyword">class </span>OutputPin : <span class="keyword">public</span> Pin {</div>
+<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="class_output_pin.html">   65</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_output_pin.html">OutputPin</a> : <span class="keyword">public</span> <a class="code" href="class_pin.html">Pin</a> {</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    OutputPin(<span class="keywordtype">int</span> pin) : Pin(pin) { setOutput(); }</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <a class="code" href="class_output_pin.html">OutputPin</a>(<span class="keywordtype">int</span> pin) : <a class="code" href="class_pin.html">Pin</a>(pin) { setOutput(); }</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;};</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="keyword">class </span>InputPin : <span class="keyword">public</span> Pin {</div>
+<div class="line"><a name="l00070"></a><span class="lineno"><a class="line" href="class_input_pin.html">   70</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_input_pin.html">InputPin</a> : <span class="keyword">public</span> <a class="code" href="class_pin.html">Pin</a> {</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    InputPin(<span class="keywordtype">int</span> pin) : Pin(pin) { setInput(); }</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    <a class="code" href="class_input_pin.html">InputPin</a>(<span class="keywordtype">int</span> pin) : <a class="code" href="class_pin.html">Pin</a>(pin) { setInput(); }</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;};</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; <span class="keyword">class </span>FastPin {</div>
+<div class="line"><a name="l00089"></a><span class="lineno"><a class="line" href="class_fast_pin.html">   89</a></span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; <span class="keyword">class </span><a class="code" href="class_fast_pin.html">FastPin</a> {</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keyword">static</span> RwReg sPinMask;</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keyword">static</span> <span class="keyword">volatile</span> RwReg *sPort;</div>
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keyword">static</span> <span class="keyword">volatile</span> RoReg *sInPort;</div>
@@ -191,11 +191,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    <span class="keyword">static</span> port_t mask() __attribute__ ((always_inline)) { <span class="keywordflow">return</span> sPinMask; }</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;};</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; RwReg FastPin&lt;PIN&gt;::sPinMask;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; <span class="keyword">volatile</span> RwReg *FastPin&lt;PIN&gt;::sPort;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; <span class="keyword">volatile</span> RoReg *FastPin&lt;PIN&gt;::sInPort;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; RwReg <a class="code" href="class_fast_pin.html">FastPin&lt;PIN&gt;::sPinMask</a>;</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; <span class="keyword">volatile</span> RwReg *<a class="code" href="class_fast_pin.html">FastPin&lt;PIN&gt;::sPort</a>;</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; <span class="keyword">volatile</span> RoReg *<a class="code" href="class_fast_pin.html">FastPin&lt;PIN&gt;::sInPort</a>;</div>
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; <span class="keyword">class </span>FastPinBB : <span class="keyword">public</span> FastPin&lt;PIN&gt; {};</div>
+<div class="line"><a name="l00128"></a><span class="lineno"><a class="line" href="class_fast_pin_b_b.html">  128</a></span>&#160;<span class="keyword">template</span>&lt;u<span class="keywordtype">int</span>8_t PIN&gt; <span class="keyword">class </span><a class="code" href="class_fast_pin_b_b.html">FastPinBB</a> : <span class="keyword">public</span> <a class="code" href="class_fast_pin.html">FastPin</a>&lt;PIN&gt; {};</div>
 <div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="preprocessor">#endif // defined(ARDUINO)</span></div>
 <div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;</div>
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;<span class="keyword">typedef</span> <span class="keyword">volatile</span> uint32_t &amp; reg32_t;</div>
@@ -204,11 +204,16 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;</div>
 <div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;</div>
 <div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;<span class="preprocessor">#endif // __INC_FASTPIN_H</span></div>
+<div class="ttc" id="class_pin_html"><div class="ttname"><a href="class_pin.html">Pin</a></div><div class="ttdef"><b>Definition:</b> fastpin.h:23</div></div>
+<div class="ttc" id="class_output_pin_html"><div class="ttname"><a href="class_output_pin.html">OutputPin</a></div><div class="ttdef"><b>Definition:</b> fastpin.h:65</div></div>
+<div class="ttc" id="class_fast_pin_b_b_html"><div class="ttname"><a href="class_fast_pin_b_b.html">FastPinBB</a></div><div class="ttdef"><b>Definition:</b> fastpin.h:128</div></div>
 <div class="ttc" id="class_selectable_html"><div class="ttname"><a href="class_selectable.html">Selectable</a></div><div class="ttdef"><b>Definition:</b> fastpin.h:14</div></div>
+<div class="ttc" id="class_fast_pin_html"><div class="ttname"><a href="class_fast_pin.html">FastPin</a></div><div class="ttdoc">The simplest level of Pin class. </div><div class="ttdef"><b>Definition:</b> fastpin.h:89</div></div>
+<div class="ttc" id="class_input_pin_html"><div class="ttname"><a href="class_input_pin.html">InputPin</a></div><div class="ttdef"><b>Definition:</b> fastpin.h:70</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 29 2014 22:13:42 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 30 2014 21:18:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>

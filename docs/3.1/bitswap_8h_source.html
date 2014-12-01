@@ -89,7 +89,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#ifdef FASTLED_ARM</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment">// structure representing 8 bits of access</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="keyword">typedef</span> <span class="keyword">union </span>{</div>
+<div class="line"><a name="l00006"></a><span class="lineno"><a class="line" href="unionjust8bits.html">    6</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">union </span>{</div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;  uint8_t raw;</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;  <span class="keyword">struct </span>{</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;  uint32_t a0:1;</div>
@@ -101,10 +101,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;  uint32_t a6:1;</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;  uint32_t a7:1;</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;  };</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;} just8bits;</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;} <a class="code" href="unionjust8bits.html">just8bits</a>;</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">// structure representing 32 bits of access</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
+<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="structsub4.html">   21</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">struct </span>{</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  uint32_t a0:1;</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  uint32_t a1:1;</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  uint32_t a2:1;</div>
@@ -137,17 +137,17 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;  uint32_t d5:1;</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;  uint32_t d6:1;</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;  uint32_t d7:1;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;} sub4;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;} <a class="code" href="structsub4.html">sub4</a>;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="comment">// union containing a full 8 bytes to swap the bit orientation on</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="keyword">typedef</span> <span class="keyword">union </span>{</div>
+<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="unionbitswap__type.html">   57</a></span>&#160;<span class="keyword">typedef</span> <span class="keyword">union </span>{</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;  uint32_t word[2];</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;  uint8_t bytes[8];</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;  <span class="keyword">struct </span>{</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    sub4 a;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    sub4 b;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <a class="code" href="structsub4.html">sub4</a> a;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <a class="code" href="structsub4.html">sub4</a> b;</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  };</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;} bitswap_type;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;} <a class="code" href="unionbitswap__type.html">bitswap_type</a>;</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">#define SWAPSA(X,N) out.  X ## 0 = in.a.a ## N; \</span></div>
@@ -170,7 +170,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="preprocessor">  out.  X ## 7 = in.b.d ## N;</span></div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;__attribute__((always_inline)) inline <span class="keywordtype">void</span> swapbits8(bitswap_type in, bitswap_type &amp; out) {</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;__attribute__((always_inline)) inline <span class="keywordtype">void</span> swapbits8(<a class="code" href="unionbitswap__type.html">bitswap_type</a> in, <a class="code" href="unionbitswap__type.html">bitswap_type</a> &amp; out) {</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="comment">// SWAPS(a.a,7);</span></div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;  <span class="comment">// SWAPS(a.b,6);</span></div>
@@ -202,7 +202,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;  <span class="comment">// SWAPSB(b.d,0);</span></div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;</div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; 8; i++) {</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    just8bits work;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <a class="code" href="unionjust8bits.html">just8bits</a> work;</div>
 <div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    work.a3 = in.word[0] &gt;&gt; 31;</div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    work.a2 = in.word[0] &gt;&gt; 23;</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    work.a1 = in.word[0] &gt;&gt; 15;</div>
@@ -341,10 +341,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;}</div>
 <div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="unionjust8bits_html"><div class="ttname"><a href="unionjust8bits.html">just8bits</a></div><div class="ttdef"><b>Definition:</b> bitswap.h:6</div></div>
+<div class="ttc" id="structsub4_html"><div class="ttname"><a href="structsub4.html">sub4</a></div><div class="ttdef"><b>Definition:</b> bitswap.h:21</div></div>
+<div class="ttc" id="unionbitswap__type_html"><div class="ttname"><a href="unionbitswap__type.html">bitswap_type</a></div><div class="ttdef"><b>Definition:</b> bitswap.h:57</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 29 2014 22:13:42 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 30 2014 21:18:44 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>

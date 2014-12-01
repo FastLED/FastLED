@@ -92,6 +92,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
+<p>Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.  
+ <a href="class___d_u_e_p_i_n.html#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="fastpin__arm__stm32_8h_source.html">fastpin_arm_stm32.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
@@ -155,14 +158,15 @@ static bool&#160;</td><td class="memItemRight" valign="bottom"><b>isset</b> () _
 <div class="textblock"><h3>template&lt;uint8_t PIN, uint32_t _MASK, typename _ODR, typename _BSRR, typename _BRR&gt;<br />
 class _DUEPIN&lt; PIN, _MASK, _ODR, _BSRR, _BRR &gt;</h3>
 
-<p>Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers. Note that this uses the full port GPIO registers. The registers are data register(GPIOx_ODR), set output register (GPIOx_BSRR), clear output register (GPIOx_BRR), cheating and using "pinMode" to set output for now, need to write raw register versions of those </p>
+<p>Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers. </p>
+<p>Note that this uses the full port GPIO registers. The registers are data register(GPIOx_ODR), set output register (GPIOx_BSRR), clear output register (GPIOx_BRR), cheating and using "pinMode" to set output for now, need to write raw register versions of those </p>
 </div><hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="fastpin__arm__stm32_8h_source.html">fastpin_arm_stm32.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 29 2014 22:13:42 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 30 2014 21:18:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.8
 </small></address>
