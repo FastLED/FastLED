@@ -217,7 +217,7 @@ protected:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static void __attribute__ ((always_inline))  showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+	static void /*__attribute__ ((always_inline))*/  showRGBInternal(PixelController<RGB_ORDER> & pixels)  {
 		uint8_t *data = (uint8_t*)pixels.mData;
 		data_ptr_t port = FastPin<DATA_PIN>::port();
 		data_t mask = FastPin<DATA_PIN>::mask();
@@ -267,7 +267,7 @@ protected:
 				ADJDITHER2(d0,e0);
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
-
+				NOP;
 				#if (FASTLED_ALLOW_INTERRUPTS == 1)
 				cli();
 				if(TIFR0 & 0x04) {
