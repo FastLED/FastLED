@@ -121,6 +121,9 @@ void * memmove8 ( void * dst, void* src, uint16_t num )
 
 #endif /* AVR */
 
+
+
+
 #if 0
 // TEST / VERIFICATION CODE ONLY BELOW THIS POINT
 #include <Arduino.h>
