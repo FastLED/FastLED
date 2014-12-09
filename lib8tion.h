@@ -2057,5 +2057,7 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 #define EVERY_N_HOURS(N) EVERY_N_HOURS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
 #define EVERY_N_HOURS_I(NAME,N) static CEveryNHours NAME(N); if( NAME )
 
+#define CEveryNMilliseconds CEveryNMillis
+#define EVERY_N_MILLISECONDS(N) EVERY_N_MILLIS(N)
 
 #endif
