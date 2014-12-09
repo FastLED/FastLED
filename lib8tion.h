@@ -153,9 +153,15 @@
          = (sine(beatphase) * (high8-low8)) + low8
      beatsin16( BPM, low16, high16)
          = (sine(beatphase) * (high16-low16)) + low16
+     beatsin88( BPM88, low16, high16)
+         = (sine(beatphase) * (high16-low16)) + low16
      beat8( BPM)  = 8-bit repeating sawtooth wave
      beat16( BPM) = 16-bit repeating sawtooth wave
-
+     beat88( BPM88) = 16-bit repeating sawtooth wave
+   BPM is beats per minute in either simple form
+   e.g. 120, or Q8.8 fixed-point form.
+   BPM88 is beats per minute in ONLY Q8.8 fixed-point 
+   form.
 
 Lib8tion is pronounced like 'libation': lie-BAY-shun
 
@@ -1767,13 +1773,18 @@ typedef q<uint16_t, 12,4> q124;
 //                    per minute, rising from 0 to 65535, resetting to zero,
 //                    rising up again, etc.  The output of this function is
 //                    suitable for feeding directly into sin16 and cos16.
-//
+//       beat88( BPM88) is the same as beat16, except that the BPM88 argument
+//                    MUST be in Q8.8 fixed point format, e.g. 120BPM must
+//                    be specified as 120*256 = 30720.
 //       beatsin8( BPM, uint8_t low, uint8_t high) returns an 8-bit value that
 //                    rises and falls in a sine wave, 'BPM' times per minute,
 //                    between the values of 'low' and 'high'.
 //       beatsin16( BPM, uint16_t low, uint16_t high) returns a 16-bit value
 //                    that rises and falls in a sine wave, 'BPM' times per
 //                    minute, between the values of 'low' and 'high'.
+//       beatsin88( BPM88, ...) is the same as beatsin16, except that the
+//                    BPM88 argument MUST be in Q8.8 fixed point format,
+//                    e.g. 120BPM must be specified as 120*256 = 30720.
 //
 //  BPM can be supplied two ways.  The simpler way of specifying BPM is as
 //  a simple 8-bit integer from 1-255, (e.g., "120").
@@ -1782,6 +1793,7 @@ typedef q<uint16_t, 12,4> q124;
 //  an 8-bit fractional part.  The easiest way to construct this is to multiply
 //  a floating point BPM value (e.g. 120.3) by 256, (e.g. resulting in 30796
 //  in this case), and pass that as the 16-bit BPM argument.
+//  "BPM88" MUST always be specified in Q8.8 format.
 //
 //  Originally designed to make an entire animation project pulse with brightness.
 //  For that effect, add this line just above your existing call to "FastLED.show()":
@@ -1809,12 +1821,13 @@ uint32_t get_millisecond_timer();
 #define GET_MILLIS (get_millisecond_timer())
 #endif
 
-// beat16 generates a 16-bit 'sawtooth' wave at a given BPM
-LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
+// beat16 generates a 16-bit 'sawtooth' wave at a given BPM,
+//        with BPM specified in Q8.8 fixed-point format; e.g.
+//        for this function, 120 BPM MUST BE specified as
+//        120*256 = 30720.
+//        If you just want to specify "120", use beat16 or beat8.
+LIB8STATIC uint16_t beat88( accum88 beats_per_minute_88, uint32_t timebase = 0)
 {
-    // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
-    if( beats_per_minute < 256) beats_per_minute <<= 8;
-
     // BPM is 'beats per minute', or 'beats per 60000ms'.
     // To avoid using the (slower) division operator, we
     // want to convert 'beats per 60000ms' to 'beats per 65536ms',
@@ -1823,15 +1836,38 @@ LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
     // The ratio 65536:60000 is 279.620266667:256; we'll call it 280:256.
     // The conversion is accurate to about 0.05%, more or less,
     // e.g. if you ask for "120 BPM", you'll get about "119.93".
-    // If you need more precision than that, you can specify a
-    // sixteen-bit BPM value in Q8.8 fixed-point (an 'accum88').
-    return (((GET_MILLIS) - timebase) * beats_per_minute * 280) >> 16;
+    return (((GET_MILLIS) - timebase) * beats_per_minute_88 * 280) >> 16;
+}
+
+// beat16 generates a 16-bit 'sawtooth' wave at a given BPM
+LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
+{
+    // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
+    if( beats_per_minute < 256) beats_per_minute <<= 8;
+    return beat88(beats_per_minute);
 }
 
 // beat8 generates an 8-bit 'sawtooth' wave at a given BPM
 LIB8STATIC uint8_t beat8( accum88 beats_per_minute, uint32_t timebase = 0)
 {
     return beat16( beats_per_minute, timebase) >> 8;
+}
+
+// beatsin88 generates a 16-bit sine wave at a given BPM,
+//           that oscillates within a given range.
+//           For this function, BPM MUST BE SPECIFIED as
+//           a Q8.8 fixed-point value; e.g. 120BPM must be
+//           specified as 120*256 = 30720.
+//           If you just want to specify "120", use beatsin16 or beatsin8.
+LIB8STATIC uint16_t beatsin88( accum88 beats_per_minute_88, uint16_t lowest = 0, uint16_t highest = 65535,
+                              uint32_t timebase = 0, uint16_t phase_offset = 0)
+{
+    uint16_t beat = beat88( beats_per_minute_88, timebase);
+    uint16_t beatsin = (sin16( beat + phase_offset) + 32768);
+    uint16_t rangewidth = highest - lowest;
+    uint16_t scaledbeat = scale16( beatsin, rangewidth);
+    uint16_t result = lowest + scaledbeat;
+    return result;
 }
 
 // beatsin16 generates a 16-bit sine wave at a given BPM,
