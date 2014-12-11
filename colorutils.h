@@ -781,6 +781,11 @@ public:
 typedef enum { NOBLEND=0, BLEND=1 } TBlendType;
 
 CRGB ColorFromPalette( const CRGBPalette16& pal,
+                      uint8_t index,
+                      uint8_t brightness=255,
+                      TBlendType blendType=BLEND);
+
+CRGB ColorFromPalette( const TProgmemRGBPalette16& pal,
                        uint8_t index,
                        uint8_t brightness=255,
                        TBlendType blendType=BLEND);
