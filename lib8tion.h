@@ -153,9 +153,15 @@
          = (sine(beatphase) * (high8-low8)) + low8
      beatsin16( BPM, low16, high16)
          = (sine(beatphase) * (high16-low16)) + low16
+     beatsin88( BPM88, low16, high16)
+         = (sine(beatphase) * (high16-low16)) + low16
      beat8( BPM)  = 8-bit repeating sawtooth wave
      beat16( BPM) = 16-bit repeating sawtooth wave
-
+     beat88( BPM88) = 16-bit repeating sawtooth wave
+   BPM is beats per minute in either simple form
+   e.g. 120, or Q8.8 fixed-point form.
+   BPM88 is beats per minute in ONLY Q8.8 fixed-point 
+   form.
 
 Lib8tion is pronounced like 'libation': lie-BAY-shun
 
@@ -1767,13 +1773,18 @@ typedef q<uint16_t, 12,4> q124;
 //                    per minute, rising from 0 to 65535, resetting to zero,
 //                    rising up again, etc.  The output of this function is
 //                    suitable for feeding directly into sin16 and cos16.
-//
+//       beat88( BPM88) is the same as beat16, except that the BPM88 argument
+//                    MUST be in Q8.8 fixed point format, e.g. 120BPM must
+//                    be specified as 120*256 = 30720.
 //       beatsin8( BPM, uint8_t low, uint8_t high) returns an 8-bit value that
 //                    rises and falls in a sine wave, 'BPM' times per minute,
 //                    between the values of 'low' and 'high'.
 //       beatsin16( BPM, uint16_t low, uint16_t high) returns a 16-bit value
 //                    that rises and falls in a sine wave, 'BPM' times per
 //                    minute, between the values of 'low' and 'high'.
+//       beatsin88( BPM88, ...) is the same as beatsin16, except that the
+//                    BPM88 argument MUST be in Q8.8 fixed point format,
+//                    e.g. 120BPM must be specified as 120*256 = 30720.
 //
 //  BPM can be supplied two ways.  The simpler way of specifying BPM is as
 //  a simple 8-bit integer from 1-255, (e.g., "120").
@@ -1782,6 +1793,7 @@ typedef q<uint16_t, 12,4> q124;
 //  an 8-bit fractional part.  The easiest way to construct this is to multiply
 //  a floating point BPM value (e.g. 120.3) by 256, (e.g. resulting in 30796
 //  in this case), and pass that as the 16-bit BPM argument.
+//  "BPM88" MUST always be specified in Q8.8 format.
 //
 //  Originally designed to make an entire animation project pulse with brightness.
 //  For that effect, add this line just above your existing call to "FastLED.show()":
@@ -1803,18 +1815,19 @@ typedef q<uint16_t, 12,4> q124;
 #if defined(ARDUINO) && !defined(USE_GET_MILLISECOND_TIMER)
 // Forward declaration of Arduino function 'millis'.
 uint32_t millis();
-#define GET_MILLIS (millis())
+#define GET_MILLIS millis
 #else
 uint32_t get_millisecond_timer();
-#define GET_MILLIS (get_millisecond_timer())
+#define GET_MILLIS get_millisecond_timer
 #endif
 
-// beat16 generates a 16-bit 'sawtooth' wave at a given BPM
-LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
+// beat16 generates a 16-bit 'sawtooth' wave at a given BPM,
+//        with BPM specified in Q8.8 fixed-point format; e.g.
+//        for this function, 120 BPM MUST BE specified as
+//        120*256 = 30720.
+//        If you just want to specify "120", use beat16 or beat8.
+LIB8STATIC uint16_t beat88( accum88 beats_per_minute_88, uint32_t timebase = 0)
 {
-    // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
-    if( beats_per_minute < 256) beats_per_minute <<= 8;
-
     // BPM is 'beats per minute', or 'beats per 60000ms'.
     // To avoid using the (slower) division operator, we
     // want to convert 'beats per 60000ms' to 'beats per 65536ms',
@@ -1823,15 +1836,38 @@ LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
     // The ratio 65536:60000 is 279.620266667:256; we'll call it 280:256.
     // The conversion is accurate to about 0.05%, more or less,
     // e.g. if you ask for "120 BPM", you'll get about "119.93".
-    // If you need more precision than that, you can specify a
-    // sixteen-bit BPM value in Q8.8 fixed-point (an 'accum88').
-    return (((GET_MILLIS) - timebase) * beats_per_minute * 280) >> 16;
+    return (((GET_MILLIS()) - timebase) * beats_per_minute_88 * 280) >> 16;
+}
+
+// beat16 generates a 16-bit 'sawtooth' wave at a given BPM
+LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
+{
+    // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
+    if( beats_per_minute < 256) beats_per_minute <<= 8;
+    return beat88(beats_per_minute);
 }
 
 // beat8 generates an 8-bit 'sawtooth' wave at a given BPM
 LIB8STATIC uint8_t beat8( accum88 beats_per_minute, uint32_t timebase = 0)
 {
     return beat16( beats_per_minute, timebase) >> 8;
+}
+
+// beatsin88 generates a 16-bit sine wave at a given BPM,
+//           that oscillates within a given range.
+//           For this function, BPM MUST BE SPECIFIED as
+//           a Q8.8 fixed-point value; e.g. 120BPM must be
+//           specified as 120*256 = 30720.
+//           If you just want to specify "120", use beatsin16 or beatsin8.
+LIB8STATIC uint16_t beatsin88( accum88 beats_per_minute_88, uint16_t lowest = 0, uint16_t highest = 65535,
+                              uint32_t timebase = 0, uint16_t phase_offset = 0)
+{
+    uint16_t beat = beat88( beats_per_minute_88, timebase);
+    uint16_t beatsin = (sin16( beat + phase_offset) + 32768);
+    uint16_t rangewidth = highest - lowest;
+    uint16_t scaledbeat = scale16( beatsin, rangewidth);
+    uint16_t result = lowest + scaledbeat;
+    return result;
 }
 
 // beatsin16 generates a 16-bit sine wave at a given BPM,
@@ -1860,5 +1896,168 @@ LIB8STATIC uint8_t beatsin8( accum88 beats_per_minute, uint8_t lowest = 0, uint8
     return result;
 }
 
+
+// seconds16, minutes16, hours8
+//   functions to return the current seconds, minutes, or hours
+//   since boot time, in the specified width.  Used as part of
+//   the "every N time-periods" mechanism.
+
+LIB8STATIC uint16_t seconds16()
+{
+    uint32_t ms = GET_MILLIS();
+    uint16_t s16;
+    s16 = ms / 1000;
+    return s16;
+}
+
+LIB8STATIC uint16_t minutes16()
+{
+    uint32_t ms = GET_MILLIS();
+    uint16_t m16;
+    m16 = (ms / (60000L)) & 0xFFFF;
+    return m16;
+}
+
+LIB8STATIC uint8_t hours8()
+{
+    uint32_t ms = GET_MILLIS();
+    uint8_t h8;
+    h8 = (ms / (3600000L)) & 0xFF;
+    return h8;
+}
+
+
+// Helper routine to divide a 32-bit value by 1024, returning
+// only the low 16 bits. You'd think this would be just
+//   result = (in32 >> 10) & 0xFFFF;
+// and on ARM, that's what you want and all is well.
+// But on AVR that code turns into a loop that executes
+// a four-byte shift ten times: 40 shifts in all, plus loop
+// overhead. This routine gets exactly the same result with
+// just six shifts (vs 40), and no loop overhead.
+// Used to convert millis to 'binary seconds' aka bseconds:
+// one bsecond == 1024 millis.
+LIB8STATIC uint16_t div1024_32_16( uint32_t in32)
+{
+    uint16_t out16;
+#if defined(__AVR__)
+    asm volatile (
+                  "  lsr %D[in]  \n\t"
+                  "  ror %C[in]  \n\t"
+                  "  ror %B[in]  \n\t"
+                  "  lsr %D[in]  \n\t"
+                  "  ror %C[in]  \n\t"
+                  "  ror %B[in]  \n\t"
+                  "  mov %B[out],%C[in] \n\t"
+                  "  mov %A[out],%B[in] \n\t"
+                  : [in] "+r" (in32),
+                  [out] "=r" (out16)
+                  );
+#else
+    out16 = (in32 >> 10) & 0xFFFF;
+#endif
+    return out16;
+}
+
+// bseconds16 returns the current time-since-boot in
+// "binary seconds", which are actually 1024/1000 of a
+// second long.
+LIB8STATIC uint16_t bseconds16()
+{
+    uint32_t ms = GET_MILLIS();
+    uint16_t s16;
+    s16 = div1024_32_16( ms);
+    return s16;
+}
+
+
+// Classes to implement "Every N Milliseconds", "Every N Seconds",
+// "Every N Minutes", "Every N Hours", and "Every N BSeconds".
+#if 1
+#define INSTANTIATE_EVERY_N_TIME_PERIODS(NAME,TIMETYPE,TIMEGETTER) \
+class NAME {    \
+public: \
+    TIMETYPE mPrevTrigger;  \
+    TIMETYPE mPeriod;   \
+    \
+    NAME() { reset(); mPeriod = 1; }; \
+    NAME(TIMETYPE period) { reset(); setPeriod(period); };    \
+    void setPeriod( TIMETYPE period) { mPeriod = period; }; \
+    TIMETYPE getTime() { return (TIMETYPE)(TIMEGETTER()); };    \
+    TIMETYPE getPeriod() { return mPeriod; };   \
+    TIMETYPE getElapsed() { return getTime() - mPrevTrigger; }  \
+    TIMETYPE getRemaining() { return mPeriod - getElapsed(); }  \
+    TIMETYPE getLastTriggerTime() { return mPrevTrigger; }  \
+    bool ready() { \
+        bool isReady = (getElapsed() >= mPeriod);   \
+        if( isReady ) { reset(); }  \
+        return isReady; \
+    }   \
+    void reset() { mPrevTrigger = getTime(); }; \
+    void trigger() { mPrevTrigger = getTime() - mPeriod; }; \
+        \
+    operator bool() { return ready(); } \
+};
+INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMillis,uint32_t,GET_MILLIS);
+INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNSeconds,uint16_t,seconds16);
+INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNBSeconds,uint16_t,bseconds16);
+INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMinutes,uint16_t,minutes16);
+INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNHours,uint8_t,hours8);
+#else
+
+// Under C++11 rules, we would be allowed to use not-external
+// -linkage-type symbols as template arguments,
+// e.g., LIB8STATIC seconds16, and we'd be able to use these
+// templates as shown below.
+// However, under C++03 rules, we cannot do that, and thus we
+// have to resort to the preprocessor to 'instantiate' 'templates',
+// as handled above.
+template<typename timeType,timeType (*timeGetter)()>
+class CEveryNTimePeriods {
+public:
+    timeType mPrevTrigger;
+    timeType mPeriod;
+    
+    CEveryNTimePeriods() { reset(); mPeriod = 1; };
+    CEveryNTimePeriods(timeType period) { reset(); setPeriod(period); };
+    void setPeriod( timeType period) { mPeriod = period; };
+    timeType getTime() { return (timeType)(timeGetter()); };
+    timeType getPeriod() { return mPeriod; };
+    timeType getElapsed() { return getTime() - mPrevTrigger; }
+    timeType getRemaining() { return mPeriod - getElapsed(); }
+    timeType getLastTriggerTime() { return mPrevTrigger; }
+    bool ready() {
+        bool isReady = (getElapsed() >= mPeriod);
+        if( isReady ) { reset(); }
+        return isReady;
+    }
+    void reset() { mPrevTrigger = getTime(); };
+    void trigger() { mPrevTrigger = getTime() - mPeriod; };
+    
+    operator bool() { return ready(); }
+};
+typedef CEveryNTimePeriods<uint16_t,seconds16> CEveryNSeconds;
+typedef CEveryNTimePeriods<uint16_t,bseconds16> CEveryNBSeconds;
+typedef CEveryNTimePeriods<uint32_t,millis> CEveryNMillis;
+typedef CEveryNTimePeriods<uint16_t,minutes16> CEveryNMinutes;
+typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
+#endif
+
+
+#define CONCAT_HELPER( x, y ) x##y
+#define CONCAT_MACRO( x, y ) CONCAT_HELPER( x, y )
+#define EVERY_N_MILLIS(N) EVERY_N_MILLIS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
+#define EVERY_N_MILLIS_I(NAME,N) static CEveryNMillis NAME(N); if( NAME )
+#define EVERY_N_SECONDS(N) EVERY_N_SECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
+#define EVERY_N_SECONDS_I(NAME,N) static CEveryNSeconds NAME(N); if( NAME )
+#define EVERY_N_BSECONDS(N) EVERY_N_BSECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
+#define EVERY_N_BSECONDS_I(NAME,N) static CEveryNBSeconds NAME(N); if( NAME )
+#define EVERY_N_MINUTES(N) EVERY_N_MINUTES_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
+#define EVERY_N_MINUTES_I(NAME,N) static CEveryNMinutes NAME(N); if( NAME )
+#define EVERY_N_HOURS(N) EVERY_N_HOURS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
+#define EVERY_N_HOURS_I(NAME,N) static CEveryNHours NAME(N); if( NAME )
+
+#define CEveryNMilliseconds CEveryNMillis
+#define EVERY_N_MILLISECONDS(N) EVERY_N_MILLIS(N)
 
 #endif

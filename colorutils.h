@@ -781,6 +781,11 @@ public:
 typedef enum { NOBLEND=0, BLEND=1 } TBlendType;
 
 CRGB ColorFromPalette( const CRGBPalette16& pal,
+                      uint8_t index,
+                      uint8_t brightness=255,
+                      TBlendType blendType=BLEND);
+
+CRGB ColorFromPalette( const TProgmemRGBPalette16& pal,
                        uint8_t index,
                        uint8_t brightness=255,
                        TBlendType blendType=BLEND);
@@ -834,5 +839,41 @@ void map_data_into_colors_through_palette(
 		}
 	}
 }
+
+// nblendPaletteTowardPalette:
+//               Alter one palette by making it slightly more like
+//               a 'target palette', used for palette cross-fades.
+//
+//               It does this by comparing each of the R, G, and B channels
+//               of each entry in the current palette to the corresponding
+//               entry in the target palette and making small adjustments:
+//                 If the Red channel is too low, it will be increased.
+//                 If the Red channel is too high, it will be slightly reduced.
+//                 ... and likewise for Green and Blue channels.
+//
+//               Additionally, there are two significant visual improvements
+//               to this algorithm implemented here.  First is this:
+//                 When increasing a channel, it is stepped up by ONE.
+//                 When decreasing a channel, it is stepped down by TWO.
+//               Due to the way the eye perceives light, and the way colors
+//               are represented in RGB, this produces a more uniform apparent
+//               brightness when cross-fading between most palette colors.
+//
+//               The second visual tweak is limiting the number of changes
+//               that will be made to the palette at once.  If all the palette
+//               entries are changed at once, it can give a muddled appearance.
+//               However, if only a few palette entries are changed at once,
+//               you get a visually smoother transition: in the middle of the
+//               cross-fade your current palette will actually contain some
+//               colors from the old palette, a few blended colors, and some
+//               colors from the new palette.
+//               The maximum number of possible palette changes per call
+//               is 48 (sixteen color entries time three channels each).
+//               The default 'maximim number of changes' here is 12, meaning
+//               that only approximately a quarter of the palette entries
+//               will be changed per call.
+void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
+                                CRGBPalette16& targetPalette,
+                                uint8_t maxChanges=24);
 
 #endif
