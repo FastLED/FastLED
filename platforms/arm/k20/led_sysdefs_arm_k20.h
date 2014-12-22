@@ -31,4 +31,7 @@ typedef volatile       uint8_t RoReg; /**< Read only 8-bit register (volatile co
 typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
 #endif
 
+extern volatile uint32_t systick_millis_count;
+#  define MS_COUNTER systick_millis_count
+
 #endif

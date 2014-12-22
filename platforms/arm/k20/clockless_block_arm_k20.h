@@ -17,7 +17,7 @@
 
 #include "kinetis.h"
 
-template <uint8_t __LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
+template <uint8_t __LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
 class InlineBlockClocklessController : public CLEDController {
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
@@ -66,14 +66,26 @@ public:
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
 		MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		showRGBInternal(pixels,nLeds);
+		uint32_t clocks = showRGBInternal(pixels,nLeds);
+		#if FASTLED_ALLOW_INTTERUPTS == 0
+		// Adjust the timer
+		long microsTaken = CLKS_TO_MICROS(clocks);
+		MS_COUNTER += (1 + (microsTaken / 1000));
+		#endif
+
 		mWait.mark();
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
 		MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		showRGBInternal(pixels,nLeds);
+		uint32_t clocks = showRGBInternal(pixels,nLeds);
+		#if FASTLED_ALLOW_INTTERUPTS == 0
+		// Adjust the timer
+		long microsTaken = CLKS_TO_MICROS(clocks);
+		MS_COUNTER += (1 + (microsTaken / 1000));
+		#endif
+
 		mWait.mark();
 	}
 
@@ -81,7 +93,14 @@ public:
 	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
 		MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
-		showRGBInternal(pixels,nLeds);
+		uint32_t clocks = showRGBInternal(pixels,nLeds);
+
+		#if FASTLED_ALLOW_INTTERUPTS == 0
+		// Adjust the timer
+		long microsTaken = CLKS_TO_MICROS(clocks);
+		MS_COUNTER += (1 + (microsTaken / 1000));
+		#endif
+
 		mWait.mark();
 	}
 #endif
@@ -109,7 +128,7 @@ public:
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
-			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+6));
+			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+(2*(F_CPU/24000000))));
 			if(LANES>8) {
 				*FastPin<FIRST_PIN>::cport() = ((~b2.shorts[i]) & PORT_MASK);
 			} else {
@@ -120,7 +139,7 @@ public:
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
-			b.bytes[i+(LANES/2)] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
+			b.bytes[i+(LANES/2)] = pixels.template loadAndScale<PX>(pixels,i+(LANES/2),d,scale);
 		}
 
 		// if folks use an odd numnber of lanes, get the last byte's value here
@@ -132,7 +151,7 @@ public:
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
-			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+6));
+			while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+(2*(F_CPU/24000000))));
 			if(LANES>8) {
 				*FastPin<FIRST_PIN>::cport() = ((~b2.shorts[i]) & PORT_MASK);
 			} else {
@@ -180,10 +199,8 @@ public:
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
-		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		cli();
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
-		#endif
 
 		while(nLeds--) {
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
@@ -335,10 +352,8 @@ public:
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
-		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		cli();
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
-		#endif
 
 		while(nLeds--) {
 			allpixels.stepDithering();
@@ -364,6 +379,7 @@ public:
 			sei();
 			#endif
 		};
+		sei();
 
 		return ARM_DWT_CYCCNT;
 	}

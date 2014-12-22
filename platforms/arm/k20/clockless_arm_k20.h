@@ -99,9 +99,9 @@ protected:
 
 		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		cli();
-		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 		#endif
-
+		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+		
 		while(pixels.has(1)) {
 			pixels.stepDithering();
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
