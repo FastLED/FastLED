@@ -341,19 +341,19 @@ public:
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
 		#ifdef PORTA_FIRST_PIN
-				case WS2811_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef PORTB_FIRST_PIN
-				case WS2811_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef PORTC_FIRST_PIN
-				case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef PORTD_FIRST_PIN
-				case WS2811_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef HAS_PORTDC
-				case WS2811_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<16,NS(250), NS(510), NS(490), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<16,NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		}
 	}
