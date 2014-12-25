@@ -1,4 +1,5 @@
 FastLED 3.1 preview changes:
+* Added DOTSTAR definition for adafruit dotstar pixels (aka APA102)
 * 8-way parallel output on teensy 3, 3.1 (portc,portd), due/digix (porta, portb, portd)
 * 12-way parallel output on teensy 3, 3.1 (portc)
 * 16-way parallel output on teensy 3, 3.1 (portd & portd paired)
