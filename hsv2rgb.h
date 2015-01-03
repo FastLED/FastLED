@@ -46,7 +46,7 @@ void hsv2rgb_raw(const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
 #define HUE_MAX 191
 
 
-// hsv2rgb_approximate - recover _approximate_ HSV values from RGB.
+// rgb2hsv_approximate - recover _approximate_ HSV values from RGB.
 //
 //   NOTE 1: This function is a long-term work in process; expect
 //   results to change slightly over time as this function is
