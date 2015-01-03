@@ -213,7 +213,7 @@ void fadeUsingColor( CRGB* leds, uint16_t numLeds, const CRGB& colormask)
     fr = colormask.r;
     fg = colormask.g;
     fb = colormask.b;
-    
+
     for( uint16_t i = 0; i < numLeds; i++) {
         leds[i].r = scale8_LEAVING_R1_DIRTY( leds[i].r, fr);
         leds[i].g = scale8_LEAVING_R1_DIRTY( leds[i].g, fg);
@@ -327,6 +327,7 @@ CHSV& nblend( CHSV& existing, const CHSV& overlay, fract8 amountOfOverlay, TGrad
 
 void nblend( CHSV* existing, CHSV* overlay, uint16_t count, fract8 amountOfOverlay, TGradientDirectionCode directionCode )
 {
+    if(existing == overlay) return;
     for( uint16_t i = count; i; i--) {
         nblend( *existing, *overlay, amountOfOverlay, directionCode);
         existing++;
@@ -534,34 +535,34 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
 {
     uint8_t hi4 = index >> 4;
     uint8_t lo4 = index & 0x0F;
-    
+
     //  CRGB rgb1 = pal[ hi4];
     CRGB entry   =  pgm_read_dword_near( &(pal[0]) + hi4 );
 
     uint8_t red1   = entry.red;
     uint8_t green1 = entry.green;
     uint8_t blue1  = entry.blue;
-    
+
     uint8_t blend = lo4 && (blendType != NOBLEND);
-    
+
     if( blend ) {
-        
+
         if( hi4 == 15 ) {
             entry = pgm_read_dword_near( &(pal[0]) );
         } else {
             entry = pgm_read_dword_near( &(pal[1]) + hi4 );
         }
-        
+
         uint8_t f2 = lo4 << 4;
         uint8_t f1 = 256 - f2;
-        
+
         //    rgb1.nscale8(f1);
         red1   = scale8_LEAVING_R1_DIRTY( red1,   f1);
         green1 = scale8_LEAVING_R1_DIRTY( green1, f1);
         blue1  = scale8_LEAVING_R1_DIRTY( blue1,  f1);
-        
+
         //    cleanup_R1();
-        
+
         //    CRGB rgb2 = pal[ hi4];
         //    rgb2.nscale8(f2);
         uint8_t red2   = entry.red;
@@ -570,20 +571,20 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
         red2   = scale8_LEAVING_R1_DIRTY( red2,   f2);
         green2 = scale8_LEAVING_R1_DIRTY( green2, f2);
         blue2  = scale8_LEAVING_R1_DIRTY( blue2,  f2);
-        
+
         cleanup_R1();
-        
+
         // These sums can't overflow, so no qadd8 needed.
         red1   += red2;
         green1 += green2;
         blue1  += blue2;
-        
+
     }
-    
+
     if( brightness != 255) {
         nscale8x3_video( red1, green1, blue1, brightness);
     }
-    
+
     return CRGB( red1, green1, blue1);
 }
 
@@ -729,25 +730,25 @@ void nblendPaletteTowardPalette( CRGBPalette16& current, CRGBPalette16& target, 
     uint8_t* p1;
     uint8_t* p2;
     uint8_t  changes = 0;
-    
+
     p1 = (uint8_t*)current.entries;
     p2 = (uint8_t*)target.entries;
-    
+
     const uint8_t totalChannels = sizeof(CRGBPalette16);
     for( byte i = 0; i < totalChannels; i++) {
         // if the values are equal, no changes are needed
         if( p1[i] == p2[i] ) { continue; }
-        
+
         // if the current value is less than the target, increase it by one
         if( p1[i] < p2[i] ) { p1[i]++; changes++; }
-        
+
         // if the current value is greater than the target,
         // increase it by one (or two if it's still greater).
         if( p1[i] > p2[i] ) {
             p1[i]--; changes++;
             if( p1[i] > p2[i] ) { p1[i]--; }
         }
-        
+
         // if we've hit the maximum number of changes, exit
         if( changes >= maxChanges) { break; }
     }
