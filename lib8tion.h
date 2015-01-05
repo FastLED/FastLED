@@ -524,6 +524,58 @@ LIB8STATIC int8_t avg7( int8_t i, int8_t j)
 #endif
 }
 
+// mod8: Calculate the remainder of one unsigned 8-bit
+//       value divided by anoter, aka A % M.
+//       Implemented by repeated subtraction, which is
+//       very compact, and very fast if A is 'probably'
+//       less than M.  If A is a large multiple of M,
+//       the loop has to execute multiple times.  However,
+//       even in that case, the loop is only two
+//       instructions long on AVR, i.e., quick.
+LIB8STATIC uint8_t mod8( uint8_t a, uint8_t m)
+{
+#if defined(__AVR__)
+    asm volatile (
+                  "L_%=:  sub %[a],%[m]    \n\t"
+                  "       brcc L_%=        \n\t"
+                  "       add %[a],%[m]    \n\t"
+                  : [a] "+r" (a)
+                  : [m] "r"  (m)
+                  );
+#else
+    while( a >= m) a -= m;
+#endif
+    return a;
+}
+
+// addmod8: Add two numbers, and calculate the modulo
+//          of the sum and a third number, M.
+//          In other words, it returns (A+B) % M.
+//          It is designed as a compact mechanism for
+//          incrementing a 'mode' switch and wrapping
+//          around back to 'mode 0' when the switch
+//          goes past the end of the available range.
+//          e.g. if you have seven modes, this switches
+//          to the next one and wraps around if needed:
+//            mode = addmod8( mode, 1, 7);
+//          See 'mod8' for notes on performance.
+LIB8STATIC uint8_t addmod8( uint8_t a, uint8_t b, uint8_t m)
+{
+#if defined(__AVR__)
+    asm volatile (
+                  "       add %[a],%[b]    \n\t"
+                  "L_%=:  sub %[a],%[m]    \n\t"
+                  "       brcc L_%=        \n\t"
+                  "       add %[a],%[m]    \n\t"
+                  : [a] "+r" (a)
+                  : [b] "r"  (b), [m] "r" (m)
+                  );
+#else
+    a += b;
+    while( a >= m) a -= m;
+#endif
+    return a;
+}
 
 
 // scale8: scale one byte by a second one, which is treated as

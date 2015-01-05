@@ -474,3 +474,135 @@ void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds)
         hsv2rgb_spectrum(phsv[i], prgb[i]);
     }
 }
+
+
+
+#define FIXFRAC8(N,D) (((N)*256)/(D))
+
+// This function is only an approximation, and it is not
+// nearly as fast as the normal HSV-to-RGB conversion.
+// See extended notes in the .h file.
+CHSV rgb2hsv_approximate( const CRGB& rgb)
+{
+    byte r = rgb.r;
+    byte g = rgb.g;
+    byte b = rgb.b;
+    byte h, s, v;
+    
+    // find desaturation
+    byte desat = 255;
+    if( r < desat) desat = r;
+    if( g < desat) desat = g;
+    if( b < desat) desat = b;
+    
+    // remove saturation from all channels
+    r -= desat;
+    g -= desat;
+    b -= desat;
+    
+    // at least one channel is now zero
+    
+    // if all three channels are zero, we had a
+    // shade of gray.
+    
+    uint16_t total = r + g + b;
+    
+    if( total == 0) {
+        // we pick hue zero for no special reason
+        h = 0;
+        return CHSV( h, s, v);
+    }
+    
+    // since this wasn't a pure shade of gray,
+    // the interesting question is what hue is it
+    
+    // scale all channels up to a total of 255
+    if( total != 255) {
+        uint32_t scaleup = 65535 / (total);
+        r = ((uint32_t)(r) * scaleup) / 256;
+        g = ((uint32_t)(g) * scaleup) / 256;
+        b = ((uint32_t)(b) * scaleup) / 256;
+    }
+    
+    if( total > 255 ) {
+        v = 255;
+    } else {
+        v = qadd8(desat,total);
+        // undo 'dimming' of brightness
+        if( v != 255) v = sqrt16( v * 256);
+        // without lib8tion: float ... ew ... sqrt... double ew, or rather, ew ^ 0.5
+        // if( v != 255) v = (256.0 * sqrt( (float)(v) / 256.0));
+        
+    }
+    
+    // saturation is opposite of desaturation
+    s = 255 - desat;
+    if( v != 255) s = (s * 256) / v;
+    
+    // undo 'dimming' of saturation
+    if( s != 255 ) s = 255 - sqrt16( (255-s) * 256);
+    // without lib8tion: float ... ew ... sqrt... double ew, or rather, ew ^ 0.5
+    // if( s != 255 ) s = (255 - (256.0 * sqrt( (float)(255-s) / 256.0)));
+    
+    // start with which channel is highest
+    // (ties don't matter)
+    byte highest = r;
+    if( g > highest) highest = g;
+    if( b > highest) highest = b;
+    
+    if( highest == r ) {
+        // Red is highest.
+        // Hue could be Purple/Pink-Red,Red-Orange,Orange-Yellow
+        if( g == 0 ) {
+            // if green is zero, we're in Purple/Pink-Red
+            h = (HUE_PURPLE + HUE_PINK) / 2;
+            h += scale8( r - 128, FIXFRAC8(48,128));
+        } else if ( (r - g) > g) {
+            // if R-G > G then we're in Red-Orange
+            h = HUE_RED;
+            h += scale8( g, FIXFRAC8(32,85));
+        } else {
+            // R-G < G, we're in Orange-Yellow
+            h = HUE_ORANGE;
+            h += scale8( qsub8((g - 85) + (171 - r), 4), FIXFRAC8(32,85)); //221
+        }
+        
+    } else if ( highest == g) {
+        // Green is highest
+        // Hue could be Yellow-Green, Green-Aqua
+        if( b == 0) {
+            // if Blue is zero, we're in Yellow-Green
+            h = HUE_YELLOW;
+            h += scale8( qadd8( qadd8((g - 128), (128 - r)), 4), FIXFRAC8(32,255)); //
+        } else {
+            // if Blue is nonzero we're in Green-Aqua
+            if( (g-b) > b) {
+                h = HUE_GREEN;
+                h += scale8( b, FIXFRAC8(32,85));
+            } else {
+                h = HUE_AQUA;
+                h += scale8( b - 85, FIXFRAC8(8,42));
+            }
+        }
+        
+    } else /* highest == b */ {
+        // Blue is highest
+        // Hue could be Aqua/Blue-Blue, Blue-Purple, Purple-Pink
+        if( r == 0) {
+            // if red is zero, we're in Aqua/Blue-Blue
+            h = HUE_AQUA + ((HUE_BLUE - HUE_AQUA) / 4);
+            h += scale8( b - 128, FIXFRAC8(24,128));
+        } else if ( (b-r) > r) {
+            // B-R > R, we're in Blue-Purple
+            h = HUE_BLUE;
+            h += scale8( r, FIXFRAC8(32,85));
+        } else {
+            // B-R < R, we're in Purple-Pink
+            h = HUE_PURPLE;
+            h += scale8( r - 85, FIXFRAC8(32,85));
+        }
+    }
+    
+    h += 1;
+    return CHSV( h, s, v);
+}
