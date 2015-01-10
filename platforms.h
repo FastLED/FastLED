@@ -3,7 +3,9 @@
 
 #include "fastled_config.h"
 
-#if defined(__MK20DX128__) || defined(__MK20DX256__)
+#if defined(NRF51)
+#include "platforms/arm/nrf51/fastled_arm_nrf51.h"
+#elif defined(__MK20DX128__) || defined(__MK20DX256__)
 // Include k20/T3 headers
 #include "platforms/arm/k20/fastled_arm_k20.h"
 #elif defined(__SAM3X8E__)
