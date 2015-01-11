@@ -221,7 +221,7 @@ public:
         HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(1)];
-        HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(6);
+        HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(4);
         b = ~scale8(b2, scale.raw[RO(1)]);
         len--;
 
@@ -232,7 +232,7 @@ public:
         HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(2)];
-        HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(6);
+        HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(4);
 
         b = ~scale8(b2, scale.raw[RO(2)]);
         pdata += 3;
@@ -244,7 +244,7 @@ public:
         HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(0)];
-        HI2; DT1(4); BC2(0); DT2(2); LO2; SEI_CHK; sei(); DT3(11);
+        HI2; DT1(4); BC2(0); DT2(2); LO2; SEI_CHK; sei(); DT3(9);
 
         b = ~scale8(b2, scale.raw[RO(0)]);
         CLI_CHK;
