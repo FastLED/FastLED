@@ -174,45 +174,6 @@ public:
     LED_TIMER->TASKS_START = 1;
 
     SEI_CHK;
-    if(scale.raw[0] == 255 && scale.raw[1] == 255 && scale.raw[2] == 255) {
-      while(len >= 1) {
-
-        HI2; DT1(4); BC2A(7); DT2(2); LO2; LSB1; DT3(2);
-        HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(1)];
-        HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(4);
-        b = ~b2;
-        len--;
-
-        HI2; DT1(4); BC2(7); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(2)];
-        HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(4);
-        b = ~b2;
-        pdata += 3;
-
-        HI2; DT1(4); BC2(7); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(0)];
-        HI2; DT1(4); BC2(0); DT2(2); LO2; SEI_CHK; sei(); DT3(9);
-
-        b = ~b2;
-        CLI_CHK;
-        delaycycles<RAN2>();
-      };
-    } else {
       while(len >= 1) {
         HI2; DT1(4); BC2A(7); DT2(2); LO2; LSB1; DT3(2);
         HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
@@ -250,7 +211,6 @@ public:
         CLI_CHK;
         delaycycles<RAN2>();
       };
-    }
 
     LED_TIMER->TASKS_STOP = 1;
 
