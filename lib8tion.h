@@ -1896,7 +1896,7 @@ LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
 {
     // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
     if( beats_per_minute < 256) beats_per_minute <<= 8;
-    return beat88(beats_per_minute);
+    return beat88(beats_per_minute, timebase);
 }
 
 // beat8 generates an 8-bit 'sawtooth' wave at a given BPM
