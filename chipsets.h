@@ -209,13 +209,13 @@ class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER,
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = BGR, uint8_t SPI_SPEED = DATA_RATE_MHZ(48)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = BGR, uint8_t SPI_SPEED = DATA_RATE_MHZ(24)>
 class APA102Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
 	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
-	void endBoundary() { /*mSPI.writeWord(0xFFFF); mSPI.writeWord(0xFFFF); */}
+	void endBoundary(int nLeds) { int nBytes = (nLeds/16); do { mSPI.writeByte(0xFF); } while(nBytes--); }
 
 	inline void writeLed(uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
 		mSPI.writeByte(0xFF); mSPI.writeByte(b0); mSPI.writeByte(b1); mSPI.writeByte(b2);
@@ -240,11 +240,11 @@ protected:
 		mSPI.select();
 
 		startBoundary();
-		while(nLeds--) {
+		for(int i = 0; i < nLeds; i++) { 
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.stepDithering();
 		}
-		endBoundary();
+		endBoundary(nLeds);
 
 		mSPI.waitFully();
 		mSPI.release();
@@ -261,7 +261,7 @@ protected:
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		endBoundary();
+		endBoundary(nLeds);
 
 		mSPI.release();
 	}
@@ -278,7 +278,7 @@ protected:
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		endBoundary();
+		endBoundary(nLeds);
 
 		mSPI.release();
 	}
