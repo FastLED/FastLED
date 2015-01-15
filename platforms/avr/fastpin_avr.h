@@ -8,12 +8,7 @@
 
 #else
 
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#define AVR_PIN_CYCLES(_PIN) (((_PIN >= 62 ) || (_PIN>=42 && _PIN<=49) || (_PIN>=14 && _PIN <=17) || (_PIN>=6 && _PIN <=9)) ? 2 : 1)
-#else
-#define AVR_PIN_CYCLES(_PIN) ((_PIN >= 24) ? 2 : 1)
-#endif
-
+#define AVR_PIN_CYCLES(_PIN) ((((int)FastPin<_PIN>::port())-0x20 < 64) ? 1 : 2)
 
 /// Class definition for a Pin where we know the port registers at compile time for said pin.  This allows us to make
 /// a lot of optimizations, as the inlined hi/lo methods will devolve to a single io register write/bitset.
