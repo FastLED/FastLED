@@ -897,12 +897,12 @@ LIB8STATIC uint16_t scale16by8( uint16_t i, fract8 scale )
 #elif SCALE16BY8_AVRASM == 1
 LIB8STATIC uint16_t scale16by8( uint16_t i, fract8 scale )
 {
-    uint16_t result;
+    uint16_t result = 0;
     asm volatile(
          // result.A = HighByte(i.A x j )
          "  mul %A[i], %[scale]                 \n\t"
          "  mov %A[result], r1                  \n\t"
-         "  clr %B[result]                      \n\t"
+         //"  clr %B[result]                      \n\t"
 
          // result.A-B += i.B x j
          "  mul %B[i], %[scale]                 \n\t"
@@ -912,7 +912,7 @@ LIB8STATIC uint16_t scale16by8( uint16_t i, fract8 scale )
          // cleanup r1
          "  clr __zero_reg__                    \n\t"
 
-         : [result] "=r" (result)
+         : [result] "+r" (result)
          : [i] "r" (i), [scale] "r" (scale)
          : "r0", "r1"
          );
@@ -1896,7 +1896,7 @@ LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
 {
     // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
     if( beats_per_minute < 256) beats_per_minute <<= 8;
-    return beat88(beats_per_minute);
+    return beat88(beats_per_minute, timebase);
 }
 
 // beat8 generates an 8-bit 'sawtooth' wave at a given BPM

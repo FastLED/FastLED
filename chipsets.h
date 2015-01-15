@@ -209,13 +209,13 @@ class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER,
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = BGR, uint8_t SPI_SPEED = DATA_RATE_MHZ(48)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = BGR, uint8_t SPI_SPEED = DATA_RATE_MHZ(24)>
 class APA102Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
 	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
-	void endBoundary() { /*mSPI.writeWord(0xFFFF); mSPI.writeWord(0xFFFF); */}
+	void endBoundary(int nLeds) { int nBytes = (nLeds/16); do { mSPI.writeByte(0xFF); } while(nBytes--); }
 
 	inline void writeLed(uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
 		mSPI.writeByte(0xFF); mSPI.writeByte(b0); mSPI.writeByte(b1); mSPI.writeByte(b2);
@@ -240,11 +240,11 @@ protected:
 		mSPI.select();
 
 		startBoundary();
-		while(nLeds--) {
+		for(int i = 0; i < nLeds; i++) { 
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.stepDithering();
 		}
-		endBoundary();
+		endBoundary(nLeds);
 
 		mSPI.waitFully();
 		mSPI.release();
@@ -261,7 +261,7 @@ protected:
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		endBoundary();
+		endBoundary(nLeds);
 
 		mSPI.release();
 	}
@@ -278,7 +278,7 @@ protected:
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		endBoundary();
+		endBoundary(nLeds);
 
 		mSPI.release();
 	}
@@ -469,6 +469,9 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903BController800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 4 * FMUL, 4 * FMUL, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1904Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 3 * FMUL, 4 * FMUL, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
@@ -502,14 +505,21 @@ class GW6205Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
 #if NO_TIME(500, 1500, 500)
-#warning "Not enough clock cycles available for the UCS103@400khz"
+#warning "Not enough clock cycles available for the UCS1903@400khz"
 #endif
 
 // UCS1903B - 400ns, 450ns, 450ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903BController800Khz : public ClocklessController<DATA_PIN, NS(400), NS(450), NS(450), RGB_ORDER> {};
 #if NO_TIME(400, 450, 450)
-#warning "Not enough clock cycles available for the UCS103B@800khz"
+#warning "Not enough clock cycles available for the UCS1903B@800khz"
+#endif
+
+// UCS1904 - 400ns, 400ns, 450ns
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1904Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
+#if NO_TIME(400, 400, 450)
+#warning "Not enough clock cycles available for the UCS1904@800khz"
 #endif
 
 // TM1809 - 350ns, 350ns, 550ns
