@@ -63,6 +63,10 @@ template<> __attribute__((always_inline)) inline void _dc<10>(register uint8_t &
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
+static uint8_t gTimeErrorAccum256ths;
+#endif
+
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
@@ -105,14 +109,53 @@ protected:
 		showRGBInternal(pixels);
 
 		// Adjust the timer
-		#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-		uint32_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
-		if(microsTaken > 1024) {
-			MS_COUNTER += (microsTaken >> 10);
-		} else {
-			MS_COUNTER++;
-		}
-		#endif
+#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
+        uint32_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+
+        // adust for approximate observed actal runtime (as of January 2015)
+        // roughly 9.6 cycles per pixel, which is 0.6us/pixel at 16MHz
+        // microsTaken += nLeds * 0.6 * CLKS_TO_MICROS(16);
+        microsTaken += scale16by8(nLeds,(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
+        
+        // if less than 1000us, there is NO timer impact,
+        // this is because the ONE interrupt that might come in while interrupts
+        // are disabled is queued up, and it will be serviced as soon as
+        // interrupts are re-enabled.
+        // This actually should technically also account for the runtime of the
+        // interrupt handler itself, but we're just not going to worry about that.
+        if( microsTaken > 1000) {
+        
+            // Since up to one timer tick will be queued, we don't need
+            // to adjust the MS_COUNTER for that one.
+            microsTaken -= 1000;
+            
+            // Now convert microseconds to 256ths of a second, approximately like this:
+            // 250ths = (us/4)
+            // 256ths = 250ths * (263/256);
+            uint16_t x256ths = microsTaken >> 2;
+            x256ths += scale16by8(x256ths,7);
+            
+            x256ths += gTimeErrorAccum256ths;
+            MS_COUNTER += (x256ths >> 8);
+            gTimeErrorAccum256ths = x256ths & 0xFF;
+        }
+        
+#if 0
+        // For pixel counts of 30 and under at 16Mhz, no correction is necessary.
+        // For pixel counts of 15 and under at 8Mhz, no correction is necessary.
+        //
+        // This code, below, is smaller, and quicker clock correction, which drifts much
+        // more significantly, but is a few bytes smaller.  Presented here for consideration
+        // as an alternate on the ATtiny, which can't have more than about 150 pixels MAX
+        // anyway, meaning that microsTaken will never be more than about 4,500, which fits in
+        // a 16-bit variable.  The difference between /1000 and /1024 only starts showing
+        // up in the range of about 100 pixels, so many ATtiny projects won't even
+        // see a clock difference due to the approximation there.
+		uint16_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS((24) * (T1 + T2 + T3));
+        MS_COUNTER += (microsTaken >> 10);
+#endif
+
+#endif
 
 		sei();
 		mWait.mark();
