@@ -897,12 +897,12 @@ LIB8STATIC uint16_t scale16by8( uint16_t i, fract8 scale )
 #elif SCALE16BY8_AVRASM == 1
 LIB8STATIC uint16_t scale16by8( uint16_t i, fract8 scale )
 {
-    uint16_t result;
+    uint16_t result = 0;
     asm volatile(
          // result.A = HighByte(i.A x j )
          "  mul %A[i], %[scale]                 \n\t"
          "  mov %A[result], r1                  \n\t"
-         "  clr %B[result]                      \n\t"
+         //"  clr %B[result]                      \n\t"
 
          // result.A-B += i.B x j
          "  mul %B[i], %[scale]                 \n\t"
