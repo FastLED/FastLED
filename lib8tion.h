@@ -912,7 +912,7 @@ LIB8STATIC uint16_t scale16by8( uint16_t i, fract8 scale )
          // cleanup r1
          "  clr __zero_reg__                    \n\t"
 
-         : [result] "=r" (result)
+         : [result] "+r" (result)
          : [i] "r" (i), [scale] "r" (scale)
          : "r0", "r1"
          );
