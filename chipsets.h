@@ -469,6 +469,9 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903BController800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 4 * FMUL, 4 * FMUL, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1904Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 3 * FMUL, 4 * FMUL, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
@@ -502,14 +505,21 @@ class GW6205Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903Controller400Khz : public ClocklessController<DATA_PIN, NS(500), NS(1500), NS(500), RGB_ORDER> {};
 #if NO_TIME(500, 1500, 500)
-#warning "Not enough clock cycles available for the UCS103@400khz"
+#warning "Not enough clock cycles available for the UCS1903@400khz"
 #endif
 
 // UCS1903B - 400ns, 450ns, 450ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS1903BController800Khz : public ClocklessController<DATA_PIN, NS(400), NS(450), NS(450), RGB_ORDER> {};
 #if NO_TIME(400, 450, 450)
-#warning "Not enough clock cycles available for the UCS103B@800khz"
+#warning "Not enough clock cycles available for the UCS1903B@800khz"
+#endif
+
+// UCS1904 - 400ns, 400ns, 450ns
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1904Controller800Khz : public ClocklessController<DATA_PIN, NS(400), NS(400), NS(450), RGB_ORDER> {};
+#if NO_TIME(400, 400, 450)
+#warning "Not enough clock cycles available for the UCS1904@800khz"
 #endif
 
 // TM1809 - 350ns, 350ns, 550ns

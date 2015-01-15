@@ -72,6 +72,7 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1804 : public TM1809Control
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1803 : public TM1803Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903 : public UCS1903Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903B : public UCS1903BController800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1904 : public UCS1904Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
