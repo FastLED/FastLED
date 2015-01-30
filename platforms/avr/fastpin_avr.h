@@ -156,6 +156,10 @@ _DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AV
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+// PD3/PD5
+#define SPI_UART1_DATA 8
+#define SPI_UART1_CLOCK 23
+
 #elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)
 // teensy++ 2 defs
 
@@ -180,6 +184,11 @@ _DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F);
 #define SPI_SELECT 20
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
+
+// PD3/PD5
+#define SPI_UART1_DATA 3
+#define SPI_UART1_CLOCK 5
+
 
 #elif defined(__AVR_ATmega32U4__)
 
