@@ -1,4 +1,5 @@
 FastLED 3.1 preview changes:
+* UART in SPI mode support on AVR 
 * Support for using both hardware SPI pinsets on the Teensy 3.x - 11/13 and 7/14.
 * Added UCS1904 support
 * Better AVR cycle counting

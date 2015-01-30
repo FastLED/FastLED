@@ -51,6 +51,20 @@ class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public SAMHardwareSPIOutput<SP
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
+#if defined(SPI_UART0_DATA)
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI_UART0_DATA, SPI_UART0_CLOCK, SPI_SPEED> : public AVRUSART0SPIOutput<SPI_UART0_DATA, SPI_UART0_CLOCK, SPI_SPEED> {};
+
+#endif
+
+#if defined(SPI_UART1_DATA)
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> {};
+
+#endif
+
 #endif
 
 #else

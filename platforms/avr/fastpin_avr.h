@@ -83,6 +83,9 @@ _DEFPIN_AVR(16, 0x04, C); _DEFPIN_AVR(17, 0x08, C); _DEFPIN_AVR(18, 0x10, C); _D
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#define SPI_UART0_DATA 1
+#define SPI_UART0_CLOCK 4
+
 #elif defined(__AVR_ATmega1284P__)
 
 _IO(A); _IO(B); _IO(C); _IO(D);
@@ -195,6 +198,11 @@ _DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_A
 #define SPI_CLOCK 15
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
+
+// PD3/PD5
+// #define SPI_UART1_DATA 1
+// #define SPI_UART1_CLOCK 4
+
 
 #endif
 
