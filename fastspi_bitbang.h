@@ -112,20 +112,12 @@ public:
 	template <uint8_t BIT> __attribute__((always_inline, hot)) inline static void writeBit(uint8_t b) {
 		if(b & (1 << BIT)) {
 			FastPin<DATA_PIN>::hi();
-			if(SPI_SPEED < 3) {
-				FastPin<CLOCK_PIN>::strobe();
-			} else {
-				FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
-				FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
-			}
+			FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
+			FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
 		} else {
 			FastPin<DATA_PIN>::lo();
-			if(SPI_SPEED < 3) {
-				FastPin<CLOCK_PIN>::strobe();
-			} else {
-				FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
-				FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
-			}
+			FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
+			FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
 		}
 	}
 
