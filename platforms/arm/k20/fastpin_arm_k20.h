@@ -103,10 +103,8 @@ _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 #define SPI_CLOCK 13
 #define SPI1            (*(SPI_t *)0x4002D000)
 
-#if  defined(__MK20DX256__)
 #define SPI2_DATA 7
 #define SPI2_CLOCK 14
-#endif
 
 #define FASTLED_TEENSY3
 #define ARM_HARDWARE_SPI

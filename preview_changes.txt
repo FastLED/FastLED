@@ -1,10 +1,14 @@
 FastLED 3.1 preview changes:
+* Support for using both hardware SPI pinsets on the Teensy 3.x - 11/13 and 7/14.
+* Added UCS1904 support
+* Better AVR cycle counting
+* Split WS2812/WS2811 timings
 * Added DOTSTAR definition for adafruit dotstar pixels (aka APA102)
 * 8-way parallel output on teensy 3, 3.1 (portc,portd), due/digix (porta, portb, portd)
 * 12-way parallel output on teensy 3, 3.1 (portc)
 * 16-way parallel output on teensy 3, 3.1 (portd & portd paired)
 * refresh rate limiting
 * interrupt friendly code on teensy 3/3.1
-* interrupt friendly code on AVR
+* -interrupt friendly code on AVR- <-- disabled for now
 * interrupt friendly code on the due
 * code re-org for future wider platform support
