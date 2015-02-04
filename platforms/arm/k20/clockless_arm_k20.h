@@ -101,7 +101,7 @@ protected:
 		cli();
 		#endif
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
-		
+
 		while(pixels.has(1)) {
 			pixels.stepDithering();
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
@@ -110,6 +110,9 @@ protected:
 			if(ARM_DWT_CYCCNT > next_mark) {
 				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
 			}
+
+			hi = *port | FastPin<DATA_PIN>::mask();
+			lo = *port & ~FastPin<DATA_PIN>::mask();
 			#endif
 			// Write first byte, read next byte
 			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
