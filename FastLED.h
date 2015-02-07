@@ -65,6 +65,7 @@ enum ESPIChipsets {
 enum ESM { SMART_MATRIX };
 enum OWS2811 { OCTOWS2811 };
 
+#ifdef FASTLED_HAS_CLOCKLESS
 template<uint8_t DATA_PIN> class NEOPIXEL : public WS2812Controller800Khz<DATA_PIN, GRB> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1829 : public TM1829Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1809 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
@@ -87,11 +88,7 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class DMXSIMPLE : public DMXSimpleC
 #ifdef DmxSerial_h
 template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDER> {};
 #endif
-
-// template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(20)> class LPD8806 : public LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
-// template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(1)> class WS2801 : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
-// template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(15)> class P9813 : public P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
-// template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(16)> class SM16716 : public SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
+#endif
 
 enum EBlockChipsets {
 #ifdef PORTA_FIRST_PIN
@@ -215,6 +212,7 @@ public:
 #endif
 	//@}
 
+#ifdef FASTLED_HAS_CLOCKLESS
 	/// @name Adding 3-wire led controllers
 	//@{
 	/// Add a clockless (aka 3wire, also DMX) based CLEDController instance to the world.
@@ -261,7 +259,7 @@ public:
 	}
 	#endif
 	//@}
-
+#endif
 
 	/// @name Adding 3rd party library controllers
 	//@{
@@ -322,7 +320,7 @@ public:
 	//@}
 
 
-#ifdef HAS_BLOCKLESS
+#ifdef FASTLED_HAS_BLOCKLESS
 
 	/// @name adding parallel output controllers
   //@{

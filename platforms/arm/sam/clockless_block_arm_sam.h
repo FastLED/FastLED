@@ -12,7 +12,7 @@
 #if defined(__SAM3X8E__)
 #define PORT_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFF))
 
-#define HAS_BLOCKLESS 1
+#define FASTLED_HAS_BLOCKLESS 1
 
 #define PORTD_FIRST_PIN 25
 #define PORTA_FIRST_PIN 69

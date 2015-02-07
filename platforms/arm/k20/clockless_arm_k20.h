@@ -5,6 +5,8 @@
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
 
+#define FASTLED_HAS_CLOCKLESS 1
+
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;

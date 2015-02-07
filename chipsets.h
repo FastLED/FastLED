@@ -240,7 +240,7 @@ protected:
 		mSPI.select();
 
 		startBoundary();
-		for(int i = 0; i < nLeds; i++) { 
+		for(int i = 0; i < nLeds; i++) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.stepDithering();
 		}
@@ -444,6 +444,7 @@ protected:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifdef FASTLED_HAS_CLOCKLESS
 // We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
 // need the more tightly defined timeframes.
 #if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000) //  || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
@@ -570,6 +571,8 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER, 4> {};
 #if NO_TIME(200,400,200)
 #warning "Not enough clock cycles for LPD1886"
+#endif
+
 #endif
 
 #endif

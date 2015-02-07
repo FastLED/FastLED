@@ -14,6 +14,7 @@
 
 #define SCALE(S,V) scale8_video(S,V)
 // #define SCALE(S,V) scale8(S,V)
+#define FASTLED_HAS_CLOCKLESS 1
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
