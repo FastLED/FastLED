@@ -80,13 +80,13 @@ public:
 template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
 #define _IO32(L) _RD32(FGPIO ## L ## _PDOR); _RD32(FGPIO ## L ## _PSOR); _RD32(FGPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(FGPIO ## L ## _PDIR); _RD32(FGPIO ## L ## _PDDR);
 
-#define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
-_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; \
+#define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(FGPIO ## L ## _PDOR), _R(FGPIO ## L ## _PSOR), _R(FGPIO ## L ## _PCOR), \
+_R(GPIO ## L ## _PTOR), _R(FGPIO ## L ## _PDIR), _R(FGPIO ## L ## _PDDR)> {}; \
 /* template<> class FastPinBB<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
 _R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; */
 
 // Actual pin definitions
-#if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
+#if defined(FASTLED_TEENSYLC) && defined(CORE_TEENSY)
 
 _IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
 
@@ -101,13 +101,11 @@ _DEFPIN_ARM(24, 20, E); _DEFPIN_ARM(25, 21, E); _DEFPIN_ARM(26, 30, E);
 
 #define SPI_DATA 11
 #define SPI_CLOCK 13
-#define SPI1            (*(SPI_t *)0x4002D000)
+// #define SPI1            (*(SPI_t *)0x4002D000)
 
 #define SPI2_DATA 0
 #define SPI2_CLOCK 20
 
-#define FASTLED_TEENSY3
-#define ARM_HARDWARE_SPI
 #define HAS_HARDWARE_PIN_SUPPORT
 #endif
 

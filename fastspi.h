@@ -30,7 +30,7 @@ class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SP
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
-#if (defined(FASTLED_TEENSY3) || defined(FASTLED_TEENSYLC)) && defined(CORE_TEENSY)
+#if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
 
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
@@ -41,12 +41,23 @@ template<uint8_t SPI_SPEED>
 class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, 0x4002C000> {};
 #endif
 
+#elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, 0x40076000> {};
+
+#if defined(SPI2_DATA)
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, 0x40077000> {};
+#endif
+
 #elif defined(__SAM3X8E__)
 
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public SAMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
-#else
+#elif defined(AVR_HARDWARE_SPI)
 
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
