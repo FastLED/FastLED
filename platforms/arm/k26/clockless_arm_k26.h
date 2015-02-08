@@ -6,6 +6,9 @@
 #if defined(FASTLED_TEENSYLC)
 #define FASTLED_HAS_CLOCKLESS 1
 
+#define FASTLED_K26_TIMER_CNT FTM1_CNT
+#define FASTLED_K26_TIMER_SC FTM1_SC
+
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
   typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
@@ -55,28 +58,30 @@ protected:
 
   template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  {
     for(register uint32_t i = BITS-1; i > 0; i--) {
-      while(ARM_DWT_CYCCNT < next_mark);
-      next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+      while(!(FTM1_STATUS & 0x100));
+      FASTLED_K26_TIMER_CNT = 0;
+      FTM1_STATUS = 0x1FF;
       FastPin<DATA_PIN>::fastset(port, hi);
       if(b&0x80) {
-        while((next_mark - ARM_DWT_CYCCNT) > (T3+(2*(F_CPU/24000000))));
+        while(!(FTM1_STATUS & 0x02));
         FastPin<DATA_PIN>::fastset(port, lo);
       } else {
-        while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+(2*(F_CPU/24000000))));
+        while(!(FTM1_STATUS & 0x01));
         FastPin<DATA_PIN>::fastset(port, lo);
       }
       b <<= 1;
     }
 
-    while(ARM_DWT_CYCCNT < next_mark);
-    next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+    while(!(FTM1_STATUS & 0x100));
+    FASTLED_K26_TIMER_CNT = 0;
+    FTM1_STATUS = 0x1FF;
     FastPin<DATA_PIN>::fastset(port, hi);
 
     if(b&0x80) {
-      while((next_mark - ARM_DWT_CYCCNT) > (T3+(2*(F_CPU/24000000))));
+      while(!(FTM1_STATUS & 0x02));
       FastPin<DATA_PIN>::fastset(port, lo);
     } else {
-      while((next_mark - ARM_DWT_CYCCNT) > (T2+T3+(2*(F_CPU/24000000))));
+      while(!(FTM1_STATUS & 0x01));
       FastPin<DATA_PIN>::fastset(port, lo);
     }
   }
@@ -84,10 +89,6 @@ protected:
   // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
   // gcc will use register Y for the this pointer.
   static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
-    // Get access to the clock
-    ARM_DEMCR    |= ARM_DEMCR_TRCENA;
-    ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
-    ARM_DWT_CYCCNT = 0;
 
     register data_ptr_t port = FastPin<DATA_PIN>::port();
     register data_t hi = *port | FastPin<DATA_PIN>::mask();;
@@ -98,39 +99,63 @@ protected:
     pixels.preStepFirstByteDithering();
     register uint8_t b = pixels.loadAndScale0();
 
-    #if (FASTLED_ALLOW_INTERRUPTS == 1)
     cli();
-    #endif
-    uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
+    // Get access to the clock
+    FASTLED_K26_TIMER_SC = FTM_SC_PS(0) | FTM_SC_CLKS(0);
+    FTM1_CONF = 0;
 
+    // Clear the channel modes
+    FTM1_C0SC = 0;
+    FTM1_C1SC = 0;
+
+    // Set the channel values for T1
+    FTM1_C0SC = FTM_CSC_MSA | FTM_CSC_ELSB | FTM_CSC_ELSA;
+    FTM1_C0V = T1;
+
+    // Set the channel values for T1+T2
+    FTM1_C1SC = FTM_CSC_MSA | FTM_CSC_ELSB | FTM_CSC_ELSA;
+    FTM1_C1V = (T1+T2);
+
+    // Set the overflow for the full pixel
+    FTM1_MOD = (T1 + T2 + T3);
+
+    uint32_t next_mark = 0; //  + (T1+T2+T3);
+
+    pixels.stepDithering();
+
+    FASTLED_K26_TIMER_CNT = 0;
+    FTM1_STATUS = 0x1FF;
     while(pixels.has(1)) {
+      // #if (FASTLED_ALLOW_INTERRUPTS == 1)
+      // cli();
+      // // if interrupts took longer than 45µs, punt on the current frame
+      // if(ARM_DWT_CYCCNT > next_mark) {
+      //   if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
+      // }
+      // #endif
+
+      // Write first byte, read next byte
+      writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
+      b = pixels.loadAndScale1();
+
+      // Write second byte, read 3rd byte
+      writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
+      b = pixels.loadAndScale2();
+
+      // Write third byte, read 1st byte of next pixel
+      writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
+      b = pixels.advanceAndLoadAndScale0();
+      // #if (FASTLED_ALLOW_INTERRUPTS == 1)
+      // sei();
+      // #endif
       pixels.stepDithering();
-      #if (FASTLED_ALLOW_INTERRUPTS == 1)
-      cli();
-      // if interrupts took longer than 45µs, punt on the current frame
-      if(ARM_DWT_CYCCNT > next_mark) {
-        if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
-        }
-        #endif
-        // Write first byte, read next byte
-        writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
-        b = pixels.loadAndScale1();
+    };
 
-        // Write second byte, read 3rd byte
-        writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
-        b = pixels.loadAndScale2();
+    FASTLED_K26_TIMER_SC = 0;
+    sei();
+    return ARM_DWT_CYCCNT;
+  }
+};
+#endif
 
-        // Write third byte, read 1st byte of next pixel
-        writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
-        b = pixels.advanceAndLoadAndScale0();
-        #if (FASTLED_ALLOW_INTERRUPTS == 1)
-        sei();
-        #endif
-      };
-
-      return ARM_DWT_CYCCNT;
-    }
-  };
-  #endif
-
-  #endif
+#endif

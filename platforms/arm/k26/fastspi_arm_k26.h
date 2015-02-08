@@ -163,9 +163,9 @@ public:
   template <uint8_t BIT> inline static void writeBit(uint8_t b) { /* TODO */ }
 
   // write a byte out via SPI (returns immediately on writing register)
-  static void writeByte(uint8_t b) { wait(); SPIX.DL = b; }
+  static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPIX.DL = b; }
   // write a word out via SPI (returns immediately on writing register)
-  static void writeWord(uint16_t w) { writeByte(w>>8); writeByte(w & 0xFF); }
+  static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w & 0xFF); }
 
   // A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)
   static void writeBytesValueRaw(uint8_t value, int len) {

@@ -23,3 +23,7 @@ Explaining how the macros work and should be used is currently beyond the scope 
 == Porting fastspi.h ==
 
 This is where you define the low level interface to the hardware SPI system (including a writePixels method that does a bunch of housekeeping for writing led data).  Use the fastspi_nop.h file as a reference for the methods that need to be implemented.  There are ofteh other useful methods that can help with the internals of the SPI code, I recommend taking a look at how the various platforms implement their SPI classes.
+
+== Porting clockless.h ==
+
+This is where you define the code for the clockless controllers.  Across ARM platforms this will usually be fairly similar - though different arm platforms will have different clock sources that you can/should use.
