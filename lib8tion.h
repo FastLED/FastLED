@@ -5,6 +5,8 @@
 #ifndef __INC_LIB8TION_H
 #define __INC_LIB8TION_H
 
+FASTLED_NAMESPACE_BEGIN
+
 /*
 
  Fast, efficient 8-bit math functions specifically
@@ -2111,5 +2113,7 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 
 #define CEveryNMilliseconds CEveryNMillis
 #define EVERY_N_MILLISECONDS(N) EVERY_N_MILLIS(N)
+
+FASTLED_NAMESPACE_END
 
 #endif

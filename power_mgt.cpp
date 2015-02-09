@@ -2,6 +2,8 @@
 #include "FastLED.h"
 #include "power_mgt.h"
 
+FASTLED_USING_NAMESPACE
+
 //// POWER MANAGEMENT
 
 // These power usage values are approximate, and your exact readings

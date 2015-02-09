@@ -1,6 +1,8 @@
 #ifndef __INC_COLOR_H
 #define __INC_COLOR_H
 
+FASTLED_NAMESPACE_BEGIN
+
 // definitions for color correction and light temperatures
 
 typedef enum {
@@ -51,4 +53,7 @@ typedef enum {
    // Uncorrected temperature 0xFFFFFF
    UncorrectedTemperature=0xFFFFFF
 } ColorTemperature;
+
+FASTLED_NAMESPACE_END
+
 #endif

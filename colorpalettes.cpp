@@ -5,6 +5,8 @@
 #include "colorutils.h"
 #include "colorpalettes.h"
 
+FASTLED_USING_NAMESPACE
+
 // Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734
 #ifdef FASTLED_AVR
 #ifdef PROGMEM

@@ -1,6 +1,8 @@
 #ifndef __INC_NOISE_H
 #define __INC_NOISE_H
 
+FASTLED_NAMESPACE_BEGIN
+
 #if 0
 /// Class for accessing 16 bit noise.  Provides methods for setting origin, scale,
 /// frequency, alplitude, time, octave blurring
@@ -112,5 +114,7 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
 void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
             uint8_t octaves, uint32_t x, int xscale, uint32_t y, int yscale, uint32_t time,
             uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time, bool blend, uint16_t hue_shift=0);
+
+FASTLED_NAMESPACE_END
 
 #endif

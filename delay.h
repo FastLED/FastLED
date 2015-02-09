@@ -1,6 +1,8 @@
 #ifndef __INC_DELAY_H
 #define __INC_DELAY_H
 
+FASTLED_NAMESPACE_BEGIN
+
 // Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet
 // this should make sure that chipsets that have 
 template<int WAIT> class CMinWait {
@@ -112,5 +114,6 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP2;NOP
 //  Macro for making sure there's enough time available
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)
 
+FASTLED_NAMESPACE_END
 
 #endif

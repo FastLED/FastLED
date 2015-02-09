@@ -3,6 +3,7 @@
 
 #include "colorutils.h"
 
+FASTLED_NAMESPACE_BEGIN
 
 // Preset color schemes, such as they are.
 
@@ -39,4 +40,6 @@ extern const TProgmemRGBPalette16 PartyColors_p PROGMEM;
 // which looks wrong.
 extern const TProgmemRGBPalette16 HeatColors_p PROGMEM;
  
+FASTLED_NAMESPACE_END
+
 #endif

@@ -3,6 +3,8 @@
 
 #include "pixeltypes.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // DeepPixel controller class - takes data/clock/select pin values (N.B. should take an SPI definition?)
@@ -576,5 +578,7 @@ class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), N
 #endif
 
 #endif
+
+FASTLED_NAMESPACE_END
 
 #endif

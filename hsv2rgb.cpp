@@ -3,6 +3,8 @@
 
 #include "FastLED.h"
 
+FASTLED_USING_NAMESPACE
+
 // Functions to convert HSV colors to RGB colors.
 //
 //  The basically fall into two groups: spectra, and rainbows.

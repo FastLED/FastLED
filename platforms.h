@@ -12,6 +12,8 @@
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/fastled_arm_sam.h"
+#elif defined(STM32F10X_MD)
+#include "platforms/arm/stm32/fastled_arm_stm32.h"
 #else
 // AVR platforms
 #include "platforms/avr/fastled_avr.h"

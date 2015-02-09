@@ -5,6 +5,8 @@
 #include "pixeltypes.h"
 #include "color.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 #define RO(X) RGB_BYTE(RGB_ORDER, X)
 #define RGB_BYTE(RO,X) (((RO)>>(3*(2-(X)))) & 0x3)
 
@@ -540,5 +542,7 @@ struct MultiPixelController {
     __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }
     __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }
 };
+
+FASTLED_NAMESPACE_END
 
 #endif

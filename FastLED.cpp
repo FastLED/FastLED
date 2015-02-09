@@ -1,6 +1,8 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
+FASTLED_USING_NAMESPACE
+
 #if defined(__SAM3X8E__)
 volatile uint32_t fuckit;
 #endif

@@ -5,6 +5,8 @@
 #include "lib8tion.h"
 #include "color.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 struct CRGB;
 struct CHSV;
 
@@ -811,5 +813,6 @@ enum EOrder {
 	BGR=0210
 };
 
+FASTLED_NAMESPACE_END
 
 #endif

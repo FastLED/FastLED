@@ -52,6 +52,8 @@
 #include "fastspi.h"
 #include "chipsets.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 enum ESPIChipsets {
 	LPD8806,
 	WS2801,
@@ -463,5 +465,7 @@ extern CFastLED FastLED;
 #define NO_HARDWARE_PIN_SUPPORT
 #endif
 
+
+FASTLED_NAMESPACE_END
 
 #endif

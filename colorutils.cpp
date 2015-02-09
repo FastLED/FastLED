@@ -5,6 +5,7 @@
 
 #include "FastLED.h"
 
+FASTLED_USING_NAMESPACE
 
 
 
