@@ -15,7 +15,7 @@
 
 // Default to allowing interrupts
 #ifndef FASTLED_ALLOW_INTERRUPTS
-#define FASTLED_ALLOW_INTERRUPTS 1
+#define FASTLED_ALLOW_INTERRUPTS 0
 #endif
 
 #if FASTLED_ALLOW_INTERRUPTS == 1
@@ -23,8 +23,8 @@
 #endif
 
 // reuseing/abusing cli/sei defs for due
-// #define cli()  __disable_irq(); __disable_fault_irq();
-// #define sei() __enable_irq(); __enable_fault_irq();
+#define cli()  __disable_irq(); __disable_fault_irq();
+#define sei() __enable_irq(); __enable_fault_irq();
 
 // pgmspace definitions
 #define PROGMEM

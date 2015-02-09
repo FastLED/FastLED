@@ -10,7 +10,7 @@ FASTLED_NAMESPACE_BEGIN
 
 #else
 
-/// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
+/// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data output, set output, clear output, toggle output, input, and direction
