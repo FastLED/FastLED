@@ -35,7 +35,8 @@ public:
   inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
   inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = _MASK; }
-  inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = (_MASK<<16); }
+  inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BRR = _MASK; }
+  // inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = (_MASK<<16); }
   inline static void set(register port_t val) __attribute__ ((always_inline)) { _GPIO::r()->ODR = val; }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
