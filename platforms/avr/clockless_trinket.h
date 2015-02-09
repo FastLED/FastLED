@@ -5,6 +5,8 @@
 #include "lib8tion.h"
 #include <avr/interrupt.h> // for cli/se definitions
 
+FASTLED_NAMESPACE_BEGIN
+
 #if defined(FASTLED_AVR)
 
 // Scaling macro choice
@@ -429,5 +431,7 @@ protected:
 };
 
 #endif
+
+FASTLED_NAMESPACE_END
 
 #endif

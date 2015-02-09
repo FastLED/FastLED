@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_AVR_H
 #define __INC_FASTSPI_AVR_H
 
+FASTLED_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Hardware SPI support using USART registers and friends
@@ -494,5 +496,8 @@ public:
 #else
 // #define FASTLED_FORCE_SOFTWARE_SPI
 #endif
+
+FASTLED_NAMESPACE_END;
+
 
 #endif
