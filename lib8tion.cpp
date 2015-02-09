@@ -1,7 +1,8 @@
 #define FASTLED_INTERNAL
 #include <stdint.h>
+#include <FastLED.h>
 
-FASTLED_USING_NAMESPACE
+FASTLED_NAMESPACE_BEGIN
 
 #define RAND16_SEED  1337
 uint16_t rand16seed = RAND16_SEED;
@@ -152,7 +153,7 @@ void testmul8()
 {
     delay(5000);
     byte r, c;
-    
+
     Serial.println("mul8:");
     for( r = 0; r <= 20; r += 1) {
         Serial.print(r); Serial.print(" : ");
@@ -226,19 +227,19 @@ void testnscale8x3()
     byte r, g, b, sc;
     for( byte z = 0; z < 10; z++) {
         r = random8(); g = random8(); b = random8(); sc = random8();
-        
+
         Serial.print("nscale8x3_video( ");
         Serial.print(r); Serial.print(", ");
         Serial.print(g); Serial.print(", ");
         Serial.print(b); Serial.print(", ");
         Serial.print(sc); Serial.print(") = [ ");
-        
+
         nscale8x3_video( r, g, b, sc);
-        
+
         Serial.print(r); Serial.print(", ");
         Serial.print(g); Serial.print(", ");
         Serial.print(b); Serial.print("]");
-        
+
         Serial.println(' ');
     }
     Serial.println("done.");
@@ -246,3 +247,5 @@ void testnscale8x3()
 }
 
 #endif
+
+FASTLED_NAMESPACE_END

@@ -3,9 +3,9 @@
 
 #include "application.h"
 
-#define FASTLED_NAMESPACE_BEGIN namespace FastLED {
+#define FASTLED_NAMESPACE_BEGIN namespace NSFastLED {
 #define FASTLED_NAMESPACE_END }
-#define FASTLED_USING_NAMESPACE using namespace FastLED;
+#define FASTLED_USING_NAMESPACE using namespace NSFastLED;
 
 #define FASTLED_ARM
 

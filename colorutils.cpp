@@ -5,7 +5,7 @@
 
 #include "FastLED.h"
 
-FASTLED_USING_NAMESPACE
+FASTLED_NAMESPACE_BEGIN
 
 
 
@@ -754,3 +754,5 @@ void nblendPaletteTowardPalette( CRGBPalette16& current, CRGBPalette16& target, 
         if( changes >= maxChanges) { break; }
     }
 }
+
+FASTLED_NAMESPACE_END

@@ -1,11 +1,12 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
-FASTLED_USING_NAMESPACE
 
 #if defined(__SAM3X8E__)
 volatile uint32_t fuckit;
 #endif
+
+FASTLED_NAMESPACE_BEGIN
 
 void *pSmartMatrix = NULL;
 
@@ -236,3 +237,5 @@ namespace __cxxabiv1
 	}
 }
 #endif
+
+FASTLED_NAMESPACE_END

@@ -3,7 +3,7 @@
 
 #include "FastLED.h"
 
-FASTLED_USING_NAMESPACE
+FASTLED_NAMESPACE_BEGIN
 
 // Functions to convert HSV colors to RGB colors.
 //
@@ -607,3 +607,5 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
     h += 1;
     return CHSV( h, s, v);
 }
+
+FASTLED_NAMESPACE_END
