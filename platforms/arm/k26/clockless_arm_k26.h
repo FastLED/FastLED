@@ -4,6 +4,8 @@
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSYLC)
+FASTLED_NAMESPACE_BEGIN
+
 #define FASTLED_HAS_CLOCKLESS 1
 
 #define FASTLED_K26_TIMER_CNT FTM1_CNT
@@ -156,6 +158,8 @@ protected:
     return ARM_DWT_CYCCNT;
   }
 };
+FASTLED_NAMESPACE_END
+
 #endif
 
 #endif

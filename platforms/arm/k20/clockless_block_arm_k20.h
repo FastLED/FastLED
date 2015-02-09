@@ -17,6 +17,8 @@
 
 #include "kinetis.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 template <uint8_t __LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
 class InlineBlockClocklessController : public CLEDController {
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
@@ -384,6 +386,9 @@ public:
 		return ARM_DWT_CYCCNT;
 	}
 };
+
+FASTLED_NAMESPACE_END
+
 #endif
 
 #endif

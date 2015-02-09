@@ -1,6 +1,8 @@
  #ifndef __INC_BLOCK_CLOCKLESS_H
 #define __INC_BLOCK_CLOCKLESS_H
 
+FASTLED_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point
@@ -196,5 +198,7 @@ public:
 };
 
 #endif
+
+FASTLED_NAMESPACE_END
 
 #endif

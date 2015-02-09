@@ -1,6 +1,7 @@
 #ifndef __INC_FASTSPI_ARM_H
 #define __INC_FASTSPI_ARM_H
 
+FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
@@ -381,5 +382,7 @@ public:
 	}
 };
 #endif
+
+FASTLED_NAMESPACE_END
 
 #endif
