@@ -1866,7 +1866,7 @@ typedef q<uint16_t, 12,4> q124;
 // that provides similar functionality.
 // You can also force use of the get_millisecond_timer function
 // by #defining USE_GET_MILLISECOND_TIMER.
-#if defined(ARDUINO) && !defined(USE_GET_MILLISECOND_TIMER)
+#if (defined(ARDUINO) || defined(SPARK)) && !defined(USE_GET_MILLISECOND_TIMER)
 // Forward declaration of Arduino function 'millis'.
 uint32_t millis();
 #define GET_MILLIS millis
