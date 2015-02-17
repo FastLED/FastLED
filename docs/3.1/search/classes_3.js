@@ -1,7 +1,7 @@
 var searchData=
 [
+  ['ceveryntimeperiods',['CEveryNTimePeriods',['../class_c_every_n_time_periods.html',1,'']]],
   ['cfastled',['CFastLED',['../class_c_fast_l_e_d.html',1,'']]],
-  ['cfastnoise16',['CFastNoise16',['../class_c_fast_noise16.html',1,'']]],
   ['chsv',['CHSV',['../struct_c_h_s_v.html',1,'']]],
   ['chsvpalette16',['CHSVPalette16',['../class_c_h_s_v_palette16.html',1,'']]],
   ['chsvpalette256',['CHSVPalette256',['../class_c_h_s_v_palette256.html',1,'']]],

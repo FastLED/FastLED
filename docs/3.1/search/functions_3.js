@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['getbrightness',['getBrightness',['../class_c_fast_l_e_d.html#ac2615781ec12e025fb17cc0e66281716',1,'CFastLED']]],
-  ['getfps',['getFPS',['../class_c_fast_l_e_d.html#aa8c3ae3381e524ce30b181ffa23b83cd',1,'CFastLED']]]
+  ['delay',['delay',['../class_c_fast_l_e_d.html#a6819ff831058a710d4582dfc09817202',1,'CFastLED']]]
 ];

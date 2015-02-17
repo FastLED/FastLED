@@ -1,9 +1,10 @@
 var searchData=
 [
-  ['getbrightness',['getBrightness',['../class_c_fast_l_e_d.html#ac2615781ec12e025fb17cc0e66281716',1,'CFastLED']]],
-  ['getfps',['getFPS',['../class_c_fast_l_e_d.html#aa8c3ae3381e524ce30b181ffa23b83cd',1,'CFastLED']]],
-  ['gw6205',['GW6205',['../class_g_w6205.html',1,'']]],
-  ['gw6205_5f400',['GW6205_400',['../class_g_w6205__400.html',1,'']]],
-  ['gw6205controller400khz',['GW6205Controller400Khz',['../class_g_w6205_controller400_khz.html',1,'']]],
-  ['gw6205controller800khz',['GW6205Controller800Khz',['../class_g_w6205_controller800_khz.html',1,'']]]
+  ['fastpin',['FastPin',['../class_fast_pin.html',1,'']]],
+  ['fastpin_3c_20clock_5fpin_20_3e',['FastPin&lt; CLOCK_PIN &gt;',['../class_fast_pin.html',1,'']]],
+  ['fastpinbb',['FastPinBB',['../class_fast_pin_b_b.html',1,'']]],
+  ['fill_5fgradient',['fill_gradient',['../group___colorutils.html#ga3144bb2bb66aeed33e20f4fdd6cc1a98',1,'colorutils.h']]],
+  ['fill_5frainbow',['fill_rainbow',['../group___colorutils.html#gafcc7dac88e25736ebc49a9faf2a1c2e2',1,'fill_rainbow(struct CRGB *pFirstLED, int numToFill, uint8_t initialhue, uint8_t deltahue):&#160;colorutils.cpp'],['../group___colorutils.html#gac3052a230febda0693517ce9d12aa452',1,'fill_rainbow(struct CHSV *targetArray, int numToFill, uint8_t initialhue, uint8_t deltahue):&#160;colorutils.cpp'],['../group___colorutils.html#gafcc7dac88e25736ebc49a9faf2a1c2e2',1,'fill_rainbow(struct CRGB *pFirstLED, int numToFill, uint8_t initialhue, uint8_t deltahue=5):&#160;colorutils.cpp'],['../group___colorutils.html#gac3052a230febda0693517ce9d12aa452',1,'fill_rainbow(struct CHSV *targetArray, int numToFill, uint8_t initialhue, uint8_t deltahue=5):&#160;colorutils.cpp']]],
+  ['fill_5fsolid',['fill_solid',['../group___colorutils.html#gac84d8820fd175567ba66413dfb8bc63b',1,'fill_solid(struct CRGB *leds, int numToFill, const struct CRGB &amp;color):&#160;colorutils.cpp'],['../group___colorutils.html#gad1abf13328e8dd1c483a270af77b17ed',1,'fill_solid(struct CHSV *targetArray, int numToFill, const struct CHSV &amp;hsvColor):&#160;colorutils.cpp'],['../group___colorutils.html#gac84d8820fd175567ba66413dfb8bc63b',1,'fill_solid(struct CRGB *leds, int numToFill, const struct CRGB &amp;color):&#160;colorutils.cpp'],['../group___colorutils.html#gad1abf13328e8dd1c483a270af77b17ed',1,'fill_solid(struct CHSV *targetArray, int numToFill, const struct CHSV &amp;hsvColor):&#160;colorutils.cpp']]],
+  ['fastled3_2e0',['FastLED3.0',['../md_release_notes.html',1,'']]]
 ];

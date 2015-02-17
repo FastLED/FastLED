@@ -1,0 +1,32 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node2" href="$class_g_w6205_controller400_khz.html" title="GW6205Controller400Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,5,395,46"/>
+<area shape="rect" id="node4" href="$class_g_w6205_controller800_khz.html" title="GW6205Controller800Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,70,395,111"/>
+<area shape="rect" id="node6" href="$class_l_p_d1886_controller1250_khz.html" title="LPD1886Controller1250Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,135,395,177"/>
+<area shape="rect" id="node8" href="$class_t_m1803_controller400_khz.html" title="TM1803Controller400Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,201,395,242"/>
+<area shape="rect" id="node10" href="$class_t_m1809_controller800_khz.html" title="TM1809Controller800Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,266,395,307"/>
+<area shape="rect" id="node13" href="$class_t_m1829_controller1600_khz.html" title="TM1829Controller1600Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,331,395,373"/>
+<area shape="rect" id="node14" href="$class_t_m1829_controller800_khz.html" title="TM1829Controller800Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,397,395,438"/>
+<area shape="rect" id="node16" href="$class_u_c_s1903_b_controller800_khz.html" title="UCS1903BController800Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,462,395,503"/>
+<area shape="rect" id="node18" href="$class_u_c_s1903_controller400_khz.html" title="UCS1903Controller400Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,527,395,569"/>
+<area shape="rect" id="node20" href="$class_u_c_s1904_controller800_khz.html" title="UCS1904Controller800Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,593,395,634"/>
+<area shape="rect" id="node22" href="$class_w_s2811_controller400_khz.html" title="WS2811Controller400Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,658,395,699"/>
+<area shape="rect" id="node24" href="$class_w_s2811_controller800_khz.html" title="WS2811Controller800Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,723,395,765"/>
+<area shape="rect" id="node27" href="$class_w_s2812_controller800_khz.html" title="WS2812Controller800Khz\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="192,854,395,895"/>
+<area shape="rect" id="node30" href="$class_w_s2812_controller800_khz.html" title="WS2812Controller800Khz\l\&lt; DATA_PIN, GRB \&gt;" alt="" coords="205,949,381,990"/>
+<area shape="rect" id="node3" href="$class_g_w6205__400.html" title="GW6205_400\&lt; DATA_PIN,\l RGB_ORDER \&gt;" alt="" coords="445,5,630,46"/>
+<area shape="rect" id="node5" href="$class_g_w6205.html" title="GW6205\&lt; DATA_PIN, RGB\l_ORDER \&gt;" alt="" coords="443,70,631,111"/>
+<area shape="rect" id="node7" href="$class_l_p_d1886.html" title="LPD1886\&lt; DATA_PIN,\l RGB_ORDER \&gt;" alt="" coords="459,135,616,177"/>
+<area shape="rect" id="node9" href="$class_t_m1803.html" title="TM1803\&lt; DATA_PIN, RGB\l_ORDER \&gt;" alt="" coords="445,201,629,242"/>
+<area shape="rect" id="node11" href="$class_t_m1804.html" title="TM1804\&lt; DATA_PIN, RGB\l_ORDER \&gt;" alt="" coords="445,266,629,307"/>
+<area shape="rect" id="node12" href="$class_t_m1809.html" title="TM1809\&lt; DATA_PIN, RGB\l_ORDER \&gt;" alt="" coords="445,331,629,373"/>
+<area shape="rect" id="node15" href="$class_t_m1829.html" title="TM1829\&lt; DATA_PIN, RGB\l_ORDER \&gt;" alt="" coords="445,397,629,438"/>
+<area shape="rect" id="node17" href="$class_u_c_s1903_b.html" title="UCS1903B\&lt; DATA_PIN,\l RGB_ORDER \&gt;" alt="" coords="453,462,622,503"/>
+<area shape="rect" id="node19" href="$class_u_c_s1903.html" title="UCS1903\&lt; DATA_PIN,\l RGB_ORDER \&gt;" alt="" coords="457,527,617,569"/>
+<area shape="rect" id="node21" href="$class_u_c_s1904.html" title="UCS1904\&lt; DATA_PIN,\l RGB_ORDER \&gt;" alt="" coords="457,593,617,634"/>
+<area shape="rect" id="node23" href="$class_w_s2811__400.html" title="WS2811_400\&lt; DATA_PIN,\l RGB_ORDER \&gt;" alt="" coords="446,658,629,699"/>
+<area shape="rect" id="node25" href="$class_a_p_a104.html" title="APA104\&lt; DATA_PIN, RGB\l_ORDER \&gt;" alt="" coords="445,723,629,765"/>
+<area shape="rect" id="node26" href="$class_w_s2811.html" title="WS2811\&lt; DATA_PIN, RGB\l_ORDER \&gt;" alt="" coords="444,789,631,830"/>
+<area shape="rect" id="node28" href="$class_w_s2812.html" title="WS2812\&lt; DATA_PIN, RGB\l_ORDER \&gt;" alt="" coords="444,854,631,895"/>
+<area shape="rect" id="node29" href="$class_w_s2812_b.html" title="WS2812B\&lt; DATA_PIN,\l RGB_ORDER \&gt;" alt="" coords="456,919,619,961"/>
+<area shape="rect" id="node31" href="$class_n_e_o_p_i_x_e_l.html" title="NEOPIXEL\&lt; DATA_PIN \&gt;" alt="" coords="449,985,626,1012"/>
+</map>

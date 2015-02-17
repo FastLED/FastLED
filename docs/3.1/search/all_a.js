@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['multipixelcontroller',['MultiPixelController',['../struct_multi_pixel_controller.html',1,'']]]
+  ['just8bits',['just8bits',['../unionjust8bits.html',1,'']]]
 ];

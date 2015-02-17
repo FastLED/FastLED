@@ -1,12 +1,18 @@
 var searchData=
 [
-  ['ws2801controller',['WS2801Controller',['../class_w_s2801_controller.html',1,'']]],
-  ['ws2803controller',['WS2803Controller',['../class_w_s2803_controller.html',1,'']]],
-  ['ws2811',['WS2811',['../class_w_s2811.html',1,'']]],
-  ['ws2811_5f400',['WS2811_400',['../class_w_s2811__400.html',1,'']]],
-  ['ws2811controller400khz',['WS2811Controller400Khz',['../class_w_s2811_controller400_khz.html',1,'']]],
-  ['ws2811controller800khz',['WS2811Controller800Khz',['../class_w_s2811_controller800_khz.html',1,'']]],
-  ['ws2811controller800khz_3c_20data_5fpin_2c_20grb_20_3e',['WS2811Controller800Khz&lt; DATA_PIN, GRB &gt;',['../class_w_s2811_controller800_khz.html',1,'']]],
-  ['ws2812',['WS2812',['../class_w_s2812.html',1,'']]],
-  ['ws2812b',['WS2812B',['../class_w_s2812_b.html',1,'']]]
+  ['todo',['TODO',['../md__t_o_d_o.html',1,'']]],
+  ['tbytesforlong',['tBytesForLong',['../uniont_bytes_for_long.html',1,'']]],
+  ['tm1803',['TM1803',['../class_t_m1803.html',1,'']]],
+  ['tm1803controller400khz',['TM1803Controller400Khz',['../class_t_m1803_controller400_khz.html',1,'']]],
+  ['tm1804',['TM1804',['../class_t_m1804.html',1,'']]],
+  ['tm1809',['TM1809',['../class_t_m1809.html',1,'']]],
+  ['tm1809controller800khz',['TM1809Controller800Khz',['../class_t_m1809_controller800_khz.html',1,'']]],
+  ['tm1829',['TM1829',['../class_t_m1829.html',1,'']]],
+  ['tm1829controller1600khz',['TM1829Controller1600Khz',['../class_t_m1829_controller1600_khz.html',1,'']]],
+  ['tm1829controller800khz',['TM1829Controller800Khz',['../class_t_m1829_controller800_khz.html',1,'']]],
+  ['todo_20list',['Todo List',['../todo.html',1,'']]],
+  ['tungsten100w',['Tungsten100W',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a631a1e96b10db9220ab27d70a320ac48',1,'color.h']]],
+  ['tungsten40w',['Tungsten40W',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a8f4ad60002c8856dc1f153e2eaa2de91',1,'color.h']]],
+  ['typical8mmpixel',['Typical8mmPixel',['../group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8af617057397c2a4f89b4bf2783cdac24b',1,'color.h']]],
+  ['typicalsmd5050',['TypicalSMD5050',['../group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8ac52fe8e181ff3c39128664fba835eae3',1,'color.h']]]
 ];
