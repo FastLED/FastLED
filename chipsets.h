@@ -5,91 +5,15 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// DeepPixel controller class - takes data/clock/select pin values (N.B. should take an SPI definition?)
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(10)>
-class DeepPixelController : public CLEDController {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
-	SPI mSPI;
-
-	void writeStart() { mSPI.writeWord(0xFFFF); mSPI.writeWord(0xFFFF); }
-	void writeStop() { mSPI.writeWord(0x0000); mSPI.writeWord(0x0000); }
-
-	inline void writeLed(uint8_t r, uint8_t g, uint8_t b) __attribute__((always_inline)) {
-		mSPI.writeByte(0xFF); mSPI.writeByte(r); mSPI.writeByte(g); mSPI.writeByte(b);
-	}
-
-public:
-	DeepPixelController() {}
-
-	virtual void init() {
-		mSPI.init();
-	}
-
-	virtual void clearLeds(int nLeds) {
-		showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0));
-	}
-
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
-
-		mSPI.select();
-
-		writeStart();
-		while(nLeds--) {
-			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
-			pixels.stepDithering();
-		}
-		writeStop();
-
-		mSPI.waitFully();
-		mSPI.release();
-	}
-
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
-
-		mSPI.select();
-
-		writeStart();
-		for(int i = 0; i < nLeds; i++) {
-			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
-			pixels.advanceData();
-			pixels.stepDithering();
-		}
-		writeStop();
-
-		mSPI.release();
-	}
-
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds,, scale, getDither());
-
-		mSPI.select();
-
-		writeBoundary();
-		for(int i = 0; i < nLeds; i++) {
-			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
-			pixels.advanceData();
-			pixels.stepDithering();
-		}
-		writeBoundary();
-
-		mSPI.release();
-	}
-#endif
-};
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 // LPD8806 controller class - takes data/clock/select pin values (N.B. should take an SPI definition?)
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/// LPD8806 controller class.
+/// @tparam DATA_PIN the data pin for these leds
+/// @tparam CLOCK_PIN the clock pin for these leds
+/// @tparam RGB_ORDER the RGB ordering for these leds
+/// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(12)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(12) >
 class LPD8806Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
@@ -158,6 +82,11 @@ protected:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/// WS2801 controller class.
+/// @tparam DATA_PIN the data pin for these leds
+/// @tparam CLOCK_PIN the clock pin for these leds
+/// @tparam RGB_ORDER the RGB ordering for these leds
+/// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(1)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(1)>
 class WS2801Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
@@ -209,6 +138,11 @@ class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER,
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/// APA102 controller class.
+/// @tparam DATA_PIN the data pin for these leds
+/// @tparam CLOCK_PIN the clock pin for these leds
+/// @tparam RGB_ORDER the RGB ordering for these leds
+/// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(24)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = BGR, uint8_t SPI_SPEED = DATA_RATE_MHZ(24)>
 class APA102Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
@@ -240,7 +174,7 @@ protected:
 		mSPI.select();
 
 		startBoundary();
-		for(int i = 0; i < nLeds; i++) { 
+		for(int i = 0; i < nLeds; i++) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.stepDithering();
 		}
@@ -292,6 +226,11 @@ protected:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/// P9813 controller class.
+/// @tparam DATA_PIN the data pin for these leds
+/// @tparam CLOCK_PIN the clock pin for these leds
+/// @tparam RGB_ORDER the RGB ordering for these leds
+/// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(10)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(10)>
 class P9813Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
@@ -375,6 +314,11 @@ protected:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/// SM16716 controller class.
+/// @tparam DATA_PIN the data pin for these leds
+/// @tparam CLOCK_PIN the clock pin for these leds
+/// @tparam RGB_ORDER the RGB ordering for these leds
+/// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(16)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(16)>
 class SM16716Controller : public CLEDController {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
@@ -444,6 +388,9 @@ protected:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/// @name clockless controllers
+/// Provides timing definitions for the variety of clockless controllers supplied by the library.
+/// @{
 // We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
 // need the more tightly defined timeframes.
 #if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000) //  || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
@@ -573,5 +520,6 @@ class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), N
 #endif
 
 #endif
+///@}
 
 #endif

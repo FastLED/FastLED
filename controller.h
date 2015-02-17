@@ -132,7 +132,7 @@ public:
     /// get the dithering option currently set for this controller
     inline uint8_t getDither() { return m_DitherMode; }
 
-	/// the the color corrction to use for this controller, expressed as an rgb object 
+	/// the the color corrction to use for this controller, expressed as an rgb object
     CLEDController & setCorrection(CRGB correction) { m_ColorCorrection = correction; return *this; }
     /// set the color correction to use for this controller
     CLEDController & setCorrection(LEDColorCorrection correction) { m_ColorCorrection = correction; return *this; }
@@ -143,7 +143,7 @@ public:
     CLEDController & setTemperature(CRGB temperature) { m_ColorTemperature = temperature; return *this; }
     /// set the color temperature, aka white point, for this controller
     CLEDController & setTemperature(ColorTemperature temperature) { m_ColorTemperature = temperature; return *this; }
-    /// get the color temperature, aka whipe point, for this controller 
+    /// get the color temperature, aka whipe point, for this controller
     CRGB getTemperature() { return m_ColorTemperature; }
 
 	/// Get the combined brightness/color adjustment for this controller
@@ -195,15 +195,16 @@ struct PixelController {
             mAdvance = other.mAdvance;
             mLen = other.mLen;
         }
-        
-        
+
+
 		/// create a pixel controller for managing led data as it is being written out
-		//@param d the led data this controller is managing
-		//@param len the number of leds this controller is managing
-		//@param s the combined rgb scaling adjustment for the leds
-		//@param dither the dither mode for these pixels
-		//@param advance whether or not to walk through the array of data for each pixel, or just write out the first pixel len times
-		//@param skip whether or not there is extra data to skip when writing out led data, e.g. if passed in argb data
+    ///@{
+		///@param d the led data this controller is managing
+		///@param len the number of leds this controller is managing
+		///@param s the combined rgb scaling adjustment for the leds
+		///@param dither the dither mode for these pixels
+		///@param advance whether or not to walk through the array of data for each pixel, or just write out the first pixel len times
+		///@param skip whether or not there is extra data to skip when writing out led data, e.g. if passed in argb data
         PixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mScale(s) {
             enable_dithering(dither);
             mData += skip;
@@ -235,7 +236,8 @@ struct PixelController {
             mAdvance = 4;
         }
 #endif
-
+    ///@}
+    
 		/// initialize the binary dithering for this controller
         void init_binary_dithering() {
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
