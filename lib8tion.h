@@ -160,7 +160,7 @@
      beat88( BPM88) = 16-bit repeating sawtooth wave
    BPM is beats per minute in either simple form
    e.g. 120, or Q8.8 fixed-point form.
-   BPM88 is beats per minute in ONLY Q8.8 fixed-point 
+   BPM88 is beats per minute in ONLY Q8.8 fixed-point
    form.
 
 Lib8tion is pronounced like 'libation': lie-BAY-shun
@@ -178,7 +178,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 // for memmove, memcpy, and memset if not defined here
 #endif
 
-#if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
 #define LIB8_ATTINY 1
 #endif
 
@@ -2069,7 +2069,7 @@ class CEveryNTimePeriods {
 public:
     timeType mPrevTrigger;
     timeType mPeriod;
-    
+
     CEveryNTimePeriods() { reset(); mPeriod = 1; };
     CEveryNTimePeriods(timeType period) { reset(); setPeriod(period); };
     void setPeriod( timeType period) { mPeriod = period; };
@@ -2085,7 +2085,7 @@ public:
     }
     void reset() { mPrevTrigger = getTime(); };
     void trigger() { mPrevTrigger = getTime() - mPeriod; };
-    
+
     operator bool() { return ready(); }
 };
 typedef CEveryNTimePeriods<uint16_t,seconds16> CEveryNSeconds;
