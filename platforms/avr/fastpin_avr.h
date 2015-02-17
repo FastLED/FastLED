@@ -80,6 +80,11 @@ _DEFPIN_AVR( 12, 0x04, C); _DEFPIN_AVR( 13, 0x01, D); _DEFPIN_AVR( 14, 0x02, D);
 _DEFPIN_AVR( 16, 0x08, D); _DEFPIN_AVR( 17, 0x10, D); _DEFPIN_AVR( 18, 0x20, D); _DEFPIN_AVR( 19, 0x40, D);
 _DEFPIN_AVR( 20, 0x80, D);
 
+#define HAS_HARDWARE_PIN_SUPPORT 1
+#define SPI_DATA 2
+#define SPI_CLOCK 1
+#define AVR_HARDWARE_SPI 1
+
 #elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 // Accelerated port definitions for arduino avrs
 _IO(D); _IO(B); _IO(C);
