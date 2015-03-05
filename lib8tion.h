@@ -1745,6 +1745,30 @@ LIB8STATIC uint8_t cubicwave8(uint8_t in)
     return ease8InOutCubic( triwave8( in));
 }
 
+// squarewave8: square wave generator.  Useful for
+//           turning a one-byte ever-increasing value
+//           into a one-byte value that is either 0 or 255.
+//           The width of the output 'pulse' is
+//           determined by the pulsewidth argument:
+//           If pulsewidth is 255, output is always 255.
+//           If pulsewidth < 255, then
+//             if input < pulsewidth  then output is 255
+//             if input >= pulsewidth then output is 0
+//
+// 255   +--pulsewidth--+
+//  .    |              |
+//  0    0              +--------(256-pulsewidth)--------
+//
+LIB8STATIC uint8_t squarewave8( uint8_t in, uint8_t pulsewidth=128)
+{
+    if( in < pulsewidth || (pulsewidth == 255)) {
+        return 255;
+    } else {
+        return 0;
+    }
+}
+
+
 
 
 // sqrt16: square root for 16-bit integers
