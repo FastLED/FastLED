@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_NOP_H
 #define __INC_FASTSPI_NOP_H
 
+FASTLED_NAMESPACE_BEGIN
+
 // A nop/stub class, mostly to show the SPI methods that are needed/used by the various SPI chipset implementations.  Should
 // be used as a definition for the set of methods that the spi implementation classes should use (since C++ doesn't support the
 // idea of interfaces - it's possible this could be done with virtual classes, need to decide if i want that overhead)
@@ -50,5 +52,7 @@ public:
 	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) { /* TODO */ }
 
 };
+
+FASTLED_NAMESPACE_END
 
 #endif

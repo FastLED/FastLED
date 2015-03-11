@@ -1,8 +1,16 @@
 #ifndef __INC_BITSWAP_H
 #define __INC_BITSWAP_H
 
+FASTLED_NAMESPACE_BEGIN
+
+///@file bitswap.h
+///Functions for rotating bits/bytes
+
+///@defgroup Bitswap Bit swapping/rotate
+///Functions for doing a rotation of bits/bytes used by parallel output
+///@{
 #ifdef FASTLED_ARM
-// structure representing 8 bits of access
+/// structure representing 8 bits of access
 typedef union {
   uint8_t raw;
   struct {
@@ -17,7 +25,7 @@ typedef union {
   };
 } just8bits;
 
-// structure representing 32 bits of access
+/// structure representing 32 bits of access
 typedef struct {
   uint32_t a0:1;
   uint32_t a1:1;
@@ -53,7 +61,7 @@ typedef struct {
   uint32_t d7:1;
 } sub4;
 
-// union containing a full 8 bytes to swap the bit orientation on
+/// union containing a full 8 bytes to swap the bit orientation on
 typedef union {
   uint32_t word[2];
   uint8_t bytes[8];
@@ -84,6 +92,7 @@ typedef union {
   out.  X ## 7 = in.b.d ## N;
 
 
+/// Do an 8byte by 8bit rotation
 __attribute__((always_inline)) inline void swapbits8(bitswap_type in, bitswap_type & out) {
 
   // SWAPS(a.a,7);
@@ -131,6 +140,7 @@ __attribute__((always_inline)) inline void swapbits8(bitswap_type in, bitswap_ty
   }
 }
 
+/// Slow version of the 8 byte by 8 bit rotation
 __attribute__((always_inline)) inline void slowswap(unsigned char *A, unsigned char *B) {
 
   for(int row = 0; row < 7; row++) {
@@ -156,8 +166,8 @@ __attribute__((always_inline)) inline void slowswap(unsigned char *A, unsigned c
   }
 }
 
-// Simplified form of bits rotating function found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt - rotating
-// data into LSB for a faster write (the code using this data can happily walk the array backwards)
+/// Simplified form of bits rotating function.  Based on code found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt - rotating
+/// data into LSB for a faster write (the code using this data can happily walk the array backwards)
 __attribute__((always_inline)) inline void transpose8x1(unsigned char *A, unsigned char *B) {
   uint32_t x, y, t;
 
@@ -182,7 +192,7 @@ __attribute__((always_inline)) inline void transpose8x1(unsigned char *A, unsign
   *((uint32_t*)(B+4)) = x;
 }
 
-// Simplified form of bits rotating function found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt
+/// Simplified form of bits rotating function.  Based on code  found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt
 __attribute__((always_inline)) inline void transpose8x1_MSB(unsigned char *A, unsigned char *B) {
   uint32_t x, y, t;
 
@@ -214,7 +224,7 @@ __attribute__((always_inline)) inline void transpose8x1_MSB(unsigned char *A, un
   B[0] = x; /* */
 }
 
-// templated bit-rotating function based on code found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt
+/// templated bit-rotating function.   Based on code found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt
 template<int m, int n>
 __attribute__((always_inline)) inline void transpose8(unsigned char *A, unsigned char *B) {
   uint32_t x, y, t;
@@ -253,5 +263,10 @@ __attribute__((always_inline)) inline void transpose8(unsigned char *A, unsigned
   // B[0]=x>>24;    B[n]=x>>16;    B[2*n]=x>>8;  B[3*n]=x>>0;
   // B[4*n]=y>>24;  B[5*n]=y>>16;  B[6*n]=y>>8;  B[7*n]=y>>0;
 }
+
 #endif
+
+FASTLED_NAMESPACE_END
+
+///@}
 #endif

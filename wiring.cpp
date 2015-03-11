@@ -1,6 +1,8 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
+FASTLED_USING_NAMESPACE
+
 #if 0
 
 #if defined(FASTLED_AVR) && !defined(TEENSYDUINO) && !defined(LIB8_ATTINY)

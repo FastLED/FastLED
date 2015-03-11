@@ -6,6 +6,8 @@
 #define USE_PROGMEM
 #endif
 
+FASTLED_NAMESPACE_BEGIN
+
 // Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734
 #ifdef FASTLED_AVR
 #ifdef PROGMEM
@@ -115,9 +117,9 @@ static int8_t inline __attribute__((always_inline)) selectBasedOnHashBit(uint8_t
 		"sbrs %[hash],%[bitnumber]   \n\t"
 		"mov %[result],%[b]          \n\t"
 		: [result] "=r" (result)
-		: [hash] "r" (hash), 
+		: [hash] "r" (hash),
 		  [bitnumber] "M" (bitnumber),
-          [a] "r" (a), 
+          [a] "r" (a),
 		  [b] "r" (b)
 		);
 #endif
@@ -156,7 +158,7 @@ static int8_t  inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t 
   v = hash<4?y:hash==12||hash==14?x:z;
 #else
   // Verbose version for analysis; generates idenitical code.
-  if( hash < 4) { // 00 01 02 03 
+  if( hash < 4) { // 00 01 02 03
 	  v = y;
   } else {
       if( hash==12 || hash==14) { // 0C 0E
@@ -174,17 +176,17 @@ static int8_t  inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t 
 #endif
 }
 
-static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y) 
+static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x, int8_t y)
 {
-  // since the tests below can be done bit-wise on the bottom 
+  // since the tests below can be done bit-wise on the bottom
   // three bits, there's no need to mask off the higher bits
   //  hash = hash & 7;
 
   int8_t u,v;
   if( hash & 4) {
-	  u = y; v = x; 
+	  u = y; v = x;
   } else {
-	  u = x; v = y; 
+	  u = x; v = y;
   }
 
   if(hash&1) { u = -u; }
@@ -193,20 +195,20 @@ static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x
   return avg7(u,v);
 }
 
-static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x) 
+static int8_t inline __attribute__((always_inline)) grad8(uint8_t hash, int8_t x)
 {
-  // since the tests below can be done bit-wise on the bottom 
+  // since the tests below can be done bit-wise on the bottom
   // four bits, there's no need to mask off the higher bits
   //	hash = hash & 15;
 
   int8_t u,v;
-  if(hash & 8) { 
-	  u=x; v=x; 
+  if(hash & 8) {
+	  u=x; v=x;
   } else {
-	if(hash & 4) { 
-		u=1; v=x; 
-	} else { 
-		u=x; v=1; 
+	if(hash & 4) {
+		u=1; v=x;
+	} else {
+		u=x; v=1;
 	}
   }
 
@@ -757,3 +759,5 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
     }
   }
 }
+
+FASTLED_NAMESPACE_END

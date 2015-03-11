@@ -6,6 +6,8 @@
 
 #include "fastspi_bitbang.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 #if (CLK_DBL == 1)
 #define DATA_RATE_MHZ(X) (((F_CPU / 1000000L) / X)/2)
 #define DATA_RATE_KHZ(X) (((F_CPU / 1000L) / X)/2)
@@ -91,5 +93,7 @@ class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SP
 #else
 #warning "Forcing software SPI - no hardware SPI for you!"
 #endif
+
+FASTLED_NAMESPACE_END
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_ARM_K26_H
 #define __INC_FASTSPI_ARM_K26_h
 
+FASTLED_NAMESPACE_BEGIN
+
 template <int VAL> void getScalars(uint8_t & sppr, uint8_t & spr) {
   if(VAL > 4096) { sppr=7; spr=8; }
   else if(VAL > 3584) { sppr=6; spr=8; }
@@ -224,5 +226,7 @@ public:
   }
 
 };
+
+FASTLED_NAMESPACE_END
 
 #endif

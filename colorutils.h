@@ -1,27 +1,36 @@
 #ifndef __INC_COLORUTILS_H
 #define __INC_COLORUTILS_H
 
+#ifdef ARDUINO
 #include <avr/pgmspace.h>
+#endif
 
 #include "pixeltypes.h"
 
+FASTLED_NAMESPACE_BEGIN
+///@defgroup Colorutils Color utility functions
+///A variety of functions for working with color, palletes, and leds
+///@{
 
-// fill_solid -   fill a range of LEDs with a solid color
-//                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
-
+/// fill_solid -   fill a range of LEDs with a solid color
+///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
 void fill_solid( struct CRGB * leds, int numToFill,
                  const struct CRGB& color);
 
+/// fill_solid -   fill a range of LEDs with a solid color
+///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
 void fill_solid( struct CHSV* targetArray, int numToFill,
 				 const struct CHSV& hsvColor);
-                 
 
-// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
-//                full saturation and full value (brightness)
+
+/// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
+///                full saturation and full value (brightness)
 void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
                    uint8_t initialhue,
                    uint8_t deltahue = 5);
-                   
+
+/// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
+///                full saturation and full value (brightness)
 void fill_rainbow( struct CHSV * targetArray, int numToFill,
                    uint8_t initialhue,
                    uint8_t deltahue = 5);
@@ -43,11 +52,11 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
 //
 // fill_gradient can write the gradient colors EITHER
 //     (1) into an array of CRGBs (e.g., into leds[] array, or an RGB Palette)
-//   OR 
+//   OR
 //     (2) into an array of CHSVs (e.g. an HSV Palette).
 //
-//   In the case of writing into a CRGB array, the gradient is 
-//   computed in HSV space, and then HSV values are converted to RGB 
+//   In the case of writing into a CRGB array, the gradient is
+//   computed in HSV space, and then HSV values are converted to RGB
 //   as they're written into the RGB array.
 
 typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradientDirectionCode;
@@ -56,6 +65,28 @@ typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradi
 
 #define saccum87 int16_t
 
+/// fill_gradient - fill an array of colors with a smooth HSV gradient
+///                 between two specified HSV colors.
+///                 Since 'hue' is a value around a color wheel,
+///                 there are always two ways to sweep from one hue
+///                 to another.
+///                 This function lets you specify which way you want
+///                 the hue gradient to sweep around the color wheel:
+///                   FORWARD_HUES: hue always goes clockwise
+///                   BACKWARD_HUES: hue always goes counter-clockwise
+///                   SHORTEST_HUES: hue goes whichever way is shortest
+///                   LONGEST_HUES: hue goes whichever way is longest
+///                 The default is SHORTEST_HUES, as this is nearly
+///                 always what is wanted.
+///
+/// fill_gradient can write the gradient colors EITHER
+///     (1) into an array of CRGBs (e.g., into leds[] array, or an RGB Palette)
+///   OR
+///     (2) into an array of CHSVs (e.g. an HSV Palette).
+///
+///   In the case of writing into a CRGB array, the gradient is
+///   computed in HSV space, and then HSV values are converted to RGB
+///   as they're written into the RGB array.
 template <typename T>
 void fill_gradient( T* targetArray,
                     uint16_t startpos, CHSV startcolor,
@@ -71,7 +102,7 @@ void fill_gradient( T* targetArray,
         endcolor = startcolor;
         endpos = startpos;
     }
-    
+
     // If we're fading toward black (val=0) or white (sat=0),
     // then set the endhue to the starthue.
     // This lets us ramp smoothly to black or white, regardless
@@ -79,7 +110,7 @@ void fill_gradient( T* targetArray,
     if( endcolor.value == 0 || endcolor.saturation == 0) {
         endcolor.hue = startcolor.hue;
     }
-    
+
     // Similarly, if we're fading in from black (val=0) or white (sat=0)
     // then set the starthue to the endhue.
     // This lets us ramp smoothly up from black or white, regardless
@@ -87,30 +118,30 @@ void fill_gradient( T* targetArray,
     if( startcolor.value == 0 || startcolor.saturation == 0) {
         startcolor.hue = endcolor.hue;
     }
-    
+
     saccum87 huedistance87;
     saccum87 satdistance87;
     saccum87 valdistance87;
-    
+
     satdistance87 = (endcolor.sat - startcolor.sat) << 7;
     valdistance87 = (endcolor.val - startcolor.val) << 7;
-    
+
     uint8_t huedelta8 = endcolor.hue - startcolor.hue;
-    
+
     if( directionCode == SHORTEST_HUES ) {
         directionCode = FORWARD_HUES;
         if( huedelta8 > 127) {
             directionCode = BACKWARD_HUES;
         }
     }
-    
+
     if( directionCode == LONGEST_HUES ) {
         directionCode = FORWARD_HUES;
         if( huedelta8 < 128) {
             directionCode = BACKWARD_HUES;
         }
     }
-    
+
     if( directionCode == FORWARD_HUES) {
         huedistance87 = huedelta8 << 7;
     }
@@ -119,18 +150,18 @@ void fill_gradient( T* targetArray,
         huedistance87 = (uint8_t)(256 - huedelta8) << 7;
         huedistance87 = -huedistance87;
     }
-    
+
     uint16_t pixeldistance = endpos - startpos;
     int16_t divisor = pixeldistance ? pixeldistance : 1;
-    
+
     saccum87 huedelta87 = huedistance87 / divisor;
     saccum87 satdelta87 = satdistance87 / divisor;
     saccum87 valdelta87 = valdistance87 / divisor;
-    
+
     huedelta87 *= 2;
     satdelta87 *= 2;
     valdelta87 *= 2;
-    
+
     accum88 hue88 = startcolor.hue << 8;
     accum88 sat88 = startcolor.sat << 8;
     accum88 val88 = startcolor.val << 8;
@@ -146,7 +177,7 @@ void fill_gradient( T* targetArray,
 // Convenience functions to fill an array of colors with a
 // two-color, three-color, or four-color gradient
 template <typename T>
-void fill_gradient( T* targetArray, uint16_t numLeds, const CHSV& c1, const CHSV& c2, 
+void fill_gradient( T* targetArray, uint16_t numLeds, const CHSV& c1, const CHSV& c2,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
     uint16_t last = numLeds - 1;
@@ -154,8 +185,8 @@ void fill_gradient( T* targetArray, uint16_t numLeds, const CHSV& c1, const CHSV
 }
 
 template <typename T>
-void fill_gradient( T* targetArray, uint16_t numLeds, 
-					const CHSV& c1, const CHSV& c2, const CHSV& c3, 
+void fill_gradient( T* targetArray, uint16_t numLeds,
+					const CHSV& c1, const CHSV& c2, const CHSV& c3,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
     uint16_t half = (numLeds / 2);
@@ -165,8 +196,8 @@ void fill_gradient( T* targetArray, uint16_t numLeds,
 }
 
 template <typename T>
-void fill_gradient( T* targetArray, uint16_t numLeds, 
-					const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4, 
+void fill_gradient( T* targetArray, uint16_t numLeds,
+					const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
     uint16_t onethird = (numLeds / 3);
@@ -363,7 +394,7 @@ class CHSVPalette16;
 class CHSVPalette256;
 typedef uint32_t TProgmemRGBPalette16[16];
 typedef uint32_t TProgmemHSVPalette16[16];
-#define TProgmemPalette16 TProgmemRGBPalette16 
+#define TProgmemPalette16 TProgmemRGBPalette16
 
 // Convert a 16-entry palette to a 256-entry palette
 void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256);
@@ -383,7 +414,7 @@ public:
         entries[8]=c08; entries[9]=c09; entries[10]=c10; entries[11]=c11;
         entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
     };
-    
+
     CHSVPalette16( const CHSVPalette16& rhs)
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
@@ -393,7 +424,7 @@ public:
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
         return *this;
     }
-    
+
     CHSVPalette16( const TProgmemHSVPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
@@ -413,7 +444,7 @@ public:
         }
         return *this;
     }
-    
+
     inline CHSV& operator[] (uint8_t x) __attribute__((always_inline))
     {
         return entries[x];
@@ -422,7 +453,7 @@ public:
     {
         return entries[x];
     }
-    
+
     inline CHSV& operator[] (int x) __attribute__((always_inline))
     {
         return entries[(uint8_t)x];
@@ -431,12 +462,12 @@ public:
     {
         return entries[(uint8_t)x];
     }
-    
+
     operator CHSV*()
     {
         return &(entries[0]);
     }
-    
+
     CHSVPalette16( const CHSV& c1)
     {
         fill_solid( &(entries[0]), 16, c1);
@@ -453,7 +484,7 @@ public:
     {
         fill_gradient( &(entries[0]), 16, c1, c2, c3, c4);
     }
-    
+
 };
 
 class CHSVPalette256 {
@@ -469,7 +500,7 @@ public:
                           c08,c09,c10,c11,c12,c13,c14,c15);
         *this = p16;
     };
-    
+
     CHSVPalette256( const CHSVPalette256& rhs)
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
@@ -479,7 +510,7 @@ public:
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
         return *this;
     }
-    
+
     CHSVPalette256( const CHSVPalette16& rhs16)
     {
         UpscalePalette( rhs16, *this);
@@ -489,7 +520,7 @@ public:
         UpscalePalette( rhs16, *this);
         return *this;
     }
-    
+
     CHSVPalette256( const TProgmemRGBPalette16& rhs)
     {
         CHSVPalette16 p16(rhs);
@@ -501,7 +532,7 @@ public:
         *this = p16;
         return *this;
     }
-    
+
     inline CHSV& operator[] (uint8_t x) __attribute__((always_inline))
     {
         return entries[x];
@@ -510,7 +541,7 @@ public:
     {
         return entries[x];
     }
-    
+
     inline CHSV& operator[] (int x) __attribute__((always_inline))
     {
         return entries[(uint8_t)x];
@@ -524,7 +555,7 @@ public:
     {
         return &(entries[0]);
     }
-    
+
     CHSVPalette256( const CHSV& c1)
     {
       fill_solid( &(entries[0]), 256, c1);
@@ -557,7 +588,7 @@ public:
         entries[8]=c08; entries[9]=c09; entries[10]=c10; entries[11]=c11;
         entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
     };
-    
+
     CRGBPalette16( const CRGBPalette16& rhs)
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
@@ -567,13 +598,13 @@ public:
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
         return *this;
     }
-    
+
     CRGBPalette16( const CHSVPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
     		entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
         }
-    }    
+    }
     CRGBPalette16& operator=( const CHSVPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
@@ -595,7 +626,7 @@ public:
         }
         return *this;
     }
-    
+
     inline CRGB& operator[] (uint8_t x) __attribute__((always_inline))
     {
         return entries[x];
@@ -604,7 +635,7 @@ public:
     {
         return entries[x];
     }
-    
+
     inline CRGB& operator[] (int x) __attribute__((always_inline))
     {
         return entries[(uint8_t)x];
@@ -613,12 +644,12 @@ public:
     {
         return entries[(uint8_t)x];
     }
-    
+
     operator CRGB*()
     {
         return &(entries[0]);
     }
-    
+
     CRGBPalette16( const CHSV& c1)
     {
         fill_solid( &(entries[0]), 16, c1);
@@ -635,7 +666,7 @@ public:
     {
         fill_gradient( &(entries[0]), 16, c1, c2, c3, c4);
     }
-    
+
     CRGBPalette16( const CRGB& c1)
     {
         fill_solid( &(entries[0]), 16, c1);
@@ -652,7 +683,7 @@ public:
     {
         fill_gradient_RGB( &(entries[0]), 16, c1, c2, c3, c4);
     }
-    
+
 
 };
 
@@ -669,7 +700,7 @@ public:
                           c08,c09,c10,c11,c12,c13,c14,c15);
         *this = p16;
     };
-    
+
     CRGBPalette256( const CRGBPalette256& rhs)
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
@@ -679,7 +710,7 @@ public:
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
         return *this;
     }
-    
+
     CRGBPalette256( const CHSVPalette256& rhs)
     {
     	for( int i = 0; i < 256; i++) {
@@ -703,7 +734,7 @@ public:
         UpscalePalette( rhs16, *this);
         return *this;
     }
-    
+
     CRGBPalette256( const TProgmemRGBPalette16& rhs)
     {
         CRGBPalette16 p16(rhs);
@@ -715,7 +746,7 @@ public:
         *this = p16;
         return *this;
     }
-    
+
     inline CRGB& operator[] (uint8_t x) __attribute__((always_inline))
     {
         return entries[x];
@@ -724,7 +755,7 @@ public:
     {
         return entries[x];
     }
-    
+
     inline CRGB& operator[] (int x) __attribute__((always_inline))
     {
         return entries[(uint8_t)x];
@@ -738,7 +769,7 @@ public:
     {
         return &(entries[0]);
     }
-    
+
     CRGBPalette256( const CHSV& c1)
     {
         fill_solid( &(entries[0]), 256, c1);
@@ -755,7 +786,7 @@ public:
     {
         fill_gradient( &(entries[0]), 256, c1, c2, c3, c4);
     }
-    
+
     CRGBPalette256( const CRGB& c1)
     {
         fill_solid( &(entries[0]), 256, c1);
@@ -772,7 +803,7 @@ public:
     {
         fill_gradient_RGB( &(entries[0]), 256, c1, c2, c3, c4);
     }
-    
+
 };
 
 
@@ -807,7 +838,7 @@ CHSV ColorFromPalette( const CHSVPalette256& pal,
 
 
 // Fill a range of LEDs with a sequece of entryies from a palette
-template <typename PALETTE> 
+template <typename PALETTE>
 void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
                   const PALETTE& pal, uint8_t brightness, TBlendType blendType)
 {
@@ -819,12 +850,12 @@ void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
 }
 
 template <typename PALETTE>
-void map_data_into_colors_through_palette( 
-	uint8_t *dataArray, uint16_t dataCount, 
-	CRGB* targetColorArray, 
-	const PALETTE& pal, 
-	uint8_t brightness=255, 
-	uint8_t opacity=255, 
+void map_data_into_colors_through_palette(
+	uint8_t *dataArray, uint16_t dataCount,
+	CRGB* targetColorArray,
+	const PALETTE& pal,
+	uint8_t brightness=255,
+	uint8_t opacity=255,
 	TBlendType blendType=BLEND)
 {
 	for( uint16_t i = 0; i < dataCount; i++) {
@@ -876,4 +907,7 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
                                 CRGBPalette16& targetPalette,
                                 uint8_t maxChanges=24);
 
+FASTLED_NAMESPACE_END
+
+///@}
 #endif

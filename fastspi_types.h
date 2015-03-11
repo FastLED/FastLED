@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_TYPES_H
 #define __INC_FASTSPI_TYPES_H
 
+FASTLED_NAMESPACE_BEGIN
+
 // Some helper macros for getting at mis-ordered byte values
 #define SPI_B0 (RGB_BYTE0(RGB_ORDER) + (MASK_SKIP_BITS & SKIP))
 #define SPI_B1 (RGB_BYTE1(RGB_ORDER) + (MASK_SKIP_BITS & SKIP))
@@ -33,5 +35,7 @@ public:
 #define SPEED_DIV_128 128
 
 #define MAX_DATA_RATE 0
+
+FASTLED_NAMESPACE_END
 
 #endif

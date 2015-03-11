@@ -52,6 +52,9 @@
 #include "fastspi.h"
 #include "chipsets.h"
 
+FASTLED_NAMESPACE_BEGIN
+
+/// definitions for the spi chipset constants 
 enum ESPIChipsets {
 	LPD8806,
 	WS2801,
@@ -383,8 +386,11 @@ public:
 	/// Update all our controllers with the current led colors
 	void show() { show(m_Scale); }
 
+	/// clear the leds, optionally wiping the local array of data as well
+	/// @param writeData whether or not to write into the local data array as well
 	void clear(boolean writeData = false);
 
+	/// clear out the local data array
 	void clearData();
 
 	/// Set all leds on all controllers to the given color/scale
@@ -463,5 +469,7 @@ extern CFastLED FastLED;
 #define NO_HARDWARE_PIN_SUPPORT
 #endif
 
+
+FASTLED_NAMESPACE_END
 
 #endif

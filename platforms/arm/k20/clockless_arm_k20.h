@@ -1,6 +1,8 @@
 #ifndef __INC_CLOCKLESS_ARM_K20_H
 #define __INC_CLOCKLESS_ARM_K20_H
 
+FASTLED_NAMESPACE_BEGIN
+
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
@@ -99,9 +101,7 @@ protected:
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
-		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		cli();
-		#endif
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 
 		while(pixels.has(1)) {
@@ -132,9 +132,12 @@ protected:
 			#endif
 		};
 
+		sei();
 		return ARM_DWT_CYCCNT;
 	}
 };
 #endif
+
+FASTLED_NAMESPACE_END
 
 #endif

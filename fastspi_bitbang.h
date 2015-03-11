@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_BITBANG_H
 #define __INC_FASTSPI_BITBANG_H
 
+FASTLED_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Software SPI (aka bit-banging) support - with aggressive optimizations for when the clock and data pin are on the same port
@@ -344,5 +346,7 @@ public:
 		release();
 	}
 };
+
+FASTLED_NAMESPACE_END
 
 #endif

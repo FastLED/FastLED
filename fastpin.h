@@ -3,6 +3,8 @@
 
 #include "led_sysdefs.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 #define NO_PIN 255
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18,7 +20,7 @@ public:
 	virtual bool isSelected() = 0;
 };
 
-#if defined(ARDUINO)
+#if !defined(FASTLED_NO_PINMAP)
 
 class Pin : public Selectable {
 	volatile RwReg *mPort;
@@ -72,6 +74,66 @@ public:
 	InputPin(int pin) : Pin(pin) { setInput(); }
 };
 
+#else
+// This is the empty code version of the raw pin class, method bodies should be filled in to Do The Right Thing[tm] when making this
+// available on a new platform
+class Pin : public Selectable {
+	volatile RwReg *mPort;
+	volatile RoReg *mInPort;
+	RwReg mPinMask;
+	uint8_t mPin;
+
+	void _init() {
+		// TODO: fill in init on a new platform
+		mPinMask = 0;
+		mPort = NULL;
+		mInPort = NULL;
+	}
+public:
+	Pin(int pin) : mPin(pin) { _init(); }
+
+	void setPin(int pin) { mPin = pin; _init(); }
+
+	typedef volatile RwReg * port_ptr_t;
+	typedef RwReg port_t;
+
+	inline void setOutput() { /* TODO: Set pin output */ }
+	inline void setInput() { /* TODO: Set pin input */ }
+
+	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; }
+	inline void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
+
+	inline void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+	inline void toggle() __attribute__ ((always_inline)) { *mInPort = mPinMask; }
+
+	inline void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; }
+	inline void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; }
+	inline void set(register port_t val) __attribute__ ((always_inline)) { *mPort = val; }
+
+	inline void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
+
+	port_t hival() __attribute__ ((always_inline)) { return *mPort | mPinMask;  }
+	port_t loval() __attribute__ ((always_inline)) { return *mPort & ~mPinMask; }
+	port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
+	port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
+
+	virtual void select() { hi(); }
+	virtual void release() { lo(); }
+	virtual bool isSelected() { return (*mPort & mPinMask) == mPinMask; }
+};
+
+class OutputPin : public Pin {
+public:
+	OutputPin(int pin) : Pin(pin) { setOutput(); }
+};
+
+class InputPin : public Pin {
+public:
+	InputPin(int pin) : Pin(pin) { setInput(); }
+};
+
+#endif
+
 /// The simplest level of Pin class.  This relies on runtime functions durinig initialization to get the port/pin mask for the pin.  Most
 /// of the accesses involve references to these static globals that get set up.  This won't be the fastest set of pin operations, but it
 /// will provide pin level access on pretty much all arduino environments.  In addition, it includes some methods to help optimize access in
@@ -91,9 +153,11 @@ template<uint8_t PIN> class FastPin {
 	static volatile RwReg *sPort;
 	static volatile RoReg *sInPort;
 	static void _init() {
+#if !defined(FASTLED_NO_PINMAP)
 		sPinMask = digitalPinToBitMask(PIN);
 		sPort = portOutputRegister(digitalPinToPort(PIN));
 		sInPort = portInputRegister(digitalPinToPort(PIN));
+#endif
 	}
 public:
 	typedef volatile RwReg * port_ptr_t;
@@ -126,11 +190,10 @@ template<uint8_t PIN> volatile RwReg *FastPin<PIN>::sPort;
 template<uint8_t PIN> volatile RoReg *FastPin<PIN>::sInPort;
 
 template<uint8_t PIN> class FastPinBB : public FastPin<PIN> {};
-#endif // defined(ARDUINO)
 
 typedef volatile uint32_t & reg32_t;
 typedef volatile uint32_t * ptr_reg32_t;
 
-
+FASTLED_NAMESPACE_END
 
 #endif // __INC_FASTPIN_H
