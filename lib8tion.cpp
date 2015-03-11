@@ -1,6 +1,6 @@
 #define FASTLED_INTERNAL
 #include <stdint.h>
-#include <FastLED.h>
+#include "FastLED.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -56,7 +56,7 @@ void * memset8 ( void * ptr, uint8_t val, uint16_t num )
 
 
 //__attribute__ ((noinline))
-void * memcpy8 ( void * dst, void* src, uint16_t num )
+void * memcpy8 ( void * dst, const void* src, uint16_t num )
 {
     asm volatile(
          "  movw r30, %[src]        \n\t"
@@ -84,7 +84,7 @@ void * memcpy8 ( void * dst, void* src, uint16_t num )
 }
 
 //__attribute__ ((noinline))
-void * memmove8 ( void * dst, void* src, uint16_t num )
+void * memmove8 ( void * dst, const void* src, uint16_t num )
 {
     if( src > dst) {
         // if src > dst then we can use the forward-stepping memcpy8

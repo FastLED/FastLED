@@ -390,13 +390,11 @@ protected:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-<<<<<<< HEAD
 #ifdef FASTLED_HAS_CLOCKLESS
-=======
 /// @name clockless controllers
 /// Provides timing definitions for the variety of clockless controllers supplied by the library.
 /// @{
->>>>>>> c0c8f765f1b01655116cc0c95979203ba05c80ef
+
 // We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
 // need the more tightly defined timeframes.
 #if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000) //  || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
