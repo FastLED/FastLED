@@ -7,6 +7,7 @@
 
 #define LED_TIMER NRF_TIMER1
 #define FASTLED_NO_PINMAP
+#define FASTLED_HAS_CLOCKLESS
 
 #define FASTLED_ARM
 
