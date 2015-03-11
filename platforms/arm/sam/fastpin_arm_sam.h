@@ -1,6 +1,8 @@
 #ifndef __INC_FASTPIN_ARM_SAM_H
 #define __INC_FASTPIN_ARM_SAM_H
 
+FASTLED_NAMESPACE_BEGIN
+
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
@@ -128,5 +130,8 @@ _DEFPIN_DUE(110, 29, B); _DEFPIN_DUE(111, 30, B); _DEFPIN_DUE(112, 31, B); _DEFP
 #endif
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
+
+FASTLED_NAMESPACE_END
+
 
 #endif // __INC_FASTPIN_ARM_SAM_H

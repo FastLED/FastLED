@@ -1,6 +1,8 @@
 #ifndef __INC_FASTPIN_AVR_H
 #define __INC_FASTPIN_AVR_H
 
+FASTLED_NAMESPACE_BEGIN
+
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
@@ -66,6 +68,25 @@ _DEFPIN_AVR(8, 0x04, B); _DEFPIN_AVR(9, 0x02, B); _DEFPIN_AVR(10, 0x01, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(ARDUINO_HOODLOADER2) && (defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__))
+
+_IO(D); _IO(B); _IO(C);
+
+#define MAX_PIN 20
+
+_DEFPIN_AVR( 0, 0x01, B); _DEFPIN_AVR( 1, 0x02, B); _DEFPIN_AVR( 2, 0x04, B); _DEFPIN_AVR( 3, 0x08, B);
+_DEFPIN_AVR( 4, 0x10, B); _DEFPIN_AVR( 5, 0x20, B); _DEFPIN_AVR( 6, 0x40, B); _DEFPIN_AVR( 7, 0x80, B);
+
+_DEFPIN_AVR( 8, 0x80, C); _DEFPIN_AVR( 9, 0x40, C); _DEFPIN_AVR( 10, 0x20,C); _DEFPIN_AVR( 11, 0x10, C);
+_DEFPIN_AVR( 12, 0x04, C); _DEFPIN_AVR( 13, 0x01, D); _DEFPIN_AVR( 14, 0x02, D); _DEFPIN_AVR(15, 0x04, D);
+_DEFPIN_AVR( 16, 0x08, D); _DEFPIN_AVR( 17, 0x10, D); _DEFPIN_AVR( 18, 0x20, D); _DEFPIN_AVR( 19, 0x40, D);
+_DEFPIN_AVR( 20, 0x80, D);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+// #define SPI_DATA 2
+// #define SPI_CLOCK 1
+// #define AVR_HARDWARE_SPI 1
+
 #elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 // Accelerated port definitions for arduino avrs
 _IO(D); _IO(B); _IO(C);
@@ -82,6 +103,9 @@ _DEFPIN_AVR(16, 0x04, C); _DEFPIN_AVR(17, 0x08, C); _DEFPIN_AVR(18, 0x10, C); _D
 #define SPI_SELECT 10
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
+
+#define SPI_UART0_DATA 1
+#define SPI_UART0_CLOCK 4
 
 #elif defined(__AVR_ATmega1284P__)
 
@@ -153,6 +177,10 @@ _DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AV
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+// PD3/PD5
+#define SPI_UART1_DATA 8
+#define SPI_UART1_CLOCK 23
+
 #elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)
 // teensy++ 2 defs
 
@@ -178,6 +206,11 @@ _DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F);
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+// PD3/PD5
+#define SPI_UART1_DATA 3
+#define SPI_UART1_CLOCK 5
+
+
 #elif defined(__AVR_ATmega32U4__)
 
 // leonard defs
@@ -196,8 +229,15 @@ _DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_A
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+// PD3/PD5
+// #define SPI_UART1_DATA 1
+// #define SPI_UART1_CLOCK 4
+
+
 #endif
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
+
+FASTLED_NAMESPACE_END
 
 #endif // __INC_FASTPIN_AVR_H

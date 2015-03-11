@@ -3,6 +3,8 @@
 
 #include "led_sysdefs.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 #define NO_PIN 255
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,6 +194,6 @@ template<uint8_t PIN> class FastPinBB : public FastPin<PIN> {};
 typedef volatile uint32_t & reg32_t;
 typedef volatile uint32_t * ptr_reg32_t;
 
-
+FASTLED_NAMESPACE_END
 
 #endif // __INC_FASTPIN_H

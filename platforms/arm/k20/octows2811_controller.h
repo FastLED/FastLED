@@ -5,6 +5,8 @@
 
 // #include "OctoWS2811.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 template<EOrder RGB_ORDER = GRB>
 class COctoWS2811Controller : public CLEDController {
   OctoWS2811  *pocto;
@@ -85,6 +87,8 @@ public:
     pocto->show();
   }
 };
+
+FASTLED_NAMESPACE_END
 
 #endif
 

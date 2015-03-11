@@ -1,6 +1,8 @@
 #ifndef __FASTPIN_ARM_K20_H
 #define __FASTPIN_ARM_K20_H
 
+FASTLED_NAMESPACE_BEGIN
+
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
@@ -103,10 +105,8 @@ _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 #define SPI_CLOCK 13
 #define SPI1            (*(SPI_t *)0x4002D000)
 
-#if  defined(__MK20DX256__)
 #define SPI2_DATA 7
 #define SPI2_CLOCK 14
-#endif
 
 #define FASTLED_TEENSY3
 #define ARM_HARDWARE_SPI
@@ -114,5 +114,7 @@ _DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
 #endif
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
+
+FASTLED_NAMESPACE_END
 
 #endif // __INC_FASTPIN_ARM_K20

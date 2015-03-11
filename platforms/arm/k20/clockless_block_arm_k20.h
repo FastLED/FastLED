@@ -4,7 +4,7 @@
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
-#define HAS_BLOCKLESS 1
+#define FASTLED_HAS_BLOCKLESS 1
 
 #define PORTC_FIRST_PIN 15
 #define PORTD_FIRST_PIN 2
@@ -16,6 +16,8 @@
 #define LANES ((FIRST_PIN==2) ? MIN(__LANES,8) : MIN(__LANES,12))
 
 #include "kinetis.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 template <uint8_t __LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
 class InlineBlockClocklessController : public CLEDController {
@@ -384,6 +386,9 @@ public:
 		return ARM_DWT_CYCCNT;
 	}
 };
+
+FASTLED_NAMESPACE_END
+
 #endif
 
 #endif

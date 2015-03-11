@@ -8,9 +8,14 @@
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
 // Include k20/T3 headers
 #include "platforms/arm/k20/fastled_arm_k20.h"
+#elif defined(__MKL26Z64__)
+// Include k26/T-LC headers
+#include "platforms/arm/k26/fastled_arm_k26.h"
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/fastled_arm_sam.h"
+#elif defined(STM32F10X_MD)
+#include "platforms/arm/stm32/fastled_arm_stm32.h"
 #else
 // AVR platforms
 #include "platforms/avr/fastled_avr.h"

@@ -1,6 +1,8 @@
  #ifndef __INC_BLOCK_CLOCKLESS_H
 #define __INC_BLOCK_CLOCKLESS_H
 
+FASTLED_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point
@@ -12,7 +14,7 @@
 #if defined(__SAM3X8E__)
 #define PORT_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFF))
 
-#define HAS_BLOCKLESS 1
+#define FASTLED_HAS_BLOCKLESS 1
 
 #define PORTD_FIRST_PIN 25
 #define PORTA_FIRST_PIN 69
@@ -196,5 +198,7 @@ public:
 };
 
 #endif
+
+FASTLED_NAMESPACE_END
 
 #endif

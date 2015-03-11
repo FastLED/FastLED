@@ -3,6 +3,8 @@
 
 #include "pixeltypes.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 // Power Control setup functions
 //
 // Example:
@@ -43,6 +45,8 @@ uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds);
 
 uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32_t max_power_mW);
 
+FASTLED_NAMESPACE_END
 
 // POWER_MGT_H
+
 #endif

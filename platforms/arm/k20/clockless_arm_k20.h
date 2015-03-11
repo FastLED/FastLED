@@ -1,9 +1,13 @@
 #ifndef __INC_CLOCKLESS_ARM_K20_H
 #define __INC_CLOCKLESS_ARM_K20_H
 
+FASTLED_NAMESPACE_BEGIN
+
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
+
+#define FASTLED_HAS_CLOCKLESS 1
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CLEDController {
@@ -97,11 +101,9 @@ protected:
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
-		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		cli();
-		#endif
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
-		
+
 		while(pixels.has(1)) {
 			pixels.stepDithering();
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
@@ -110,6 +112,9 @@ protected:
 			if(ARM_DWT_CYCCNT > next_mark) {
 				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
 			}
+
+			hi = *port | FastPin<DATA_PIN>::mask();
+			lo = *port & ~FastPin<DATA_PIN>::mask();
 			#endif
 			// Write first byte, read next byte
 			writeBits<8+XTRA0>(next_mark, port, hi, lo, b);
@@ -127,9 +132,12 @@ protected:
 			#endif
 		};
 
+		sei();
 		return ARM_DWT_CYCCNT;
 	}
 };
 #endif
+
+FASTLED_NAMESPACE_END
 
 #endif

@@ -1,5 +1,7 @@
 #include "FastLED.h"
 
+FASTLED_USING_NAMESPACE
+
 // FastLED "100-lines-of-code" demo reel, showing just a few 
 // of the kinds of animation patterns you can quickly and easily 
 // compose using FastLED.  

@@ -5,6 +5,8 @@
 #include "lib8tion.h"
 #include <avr/interrupt.h> // for cli/se definitions
 
+FASTLED_NAMESPACE_BEGIN
+
 #if defined(FASTLED_AVR)
 
 // Scaling macro choice
@@ -66,6 +68,8 @@ template<> __attribute__((always_inline)) inline void _dc<10>(register uint8_t &
 #if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
 static uint8_t gTimeErrorAccum256ths;
 #endif
+
+#define FASTLED_HAS_CLOCKLESS 1
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CLEDController {
@@ -255,12 +259,15 @@ protected:
 // 2 cycles - jump out of the loop
 #define BRLOOP1 asm __volatile__("breq 2f" ASM_VARS );
 
+// NOP using the variables, forcing a move
+#define DNOP asm __volatile__("mov r0,r0" ASM_VARS);
+
 #define DADVANCE 3
 #define DUSE (0xFF - (DADVANCE-1))
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static void /*__attribute__ ((always_inline))*/  showRGBInternal(PixelController<RGB_ORDER> & pixels)  {
+	static void /*__attribute__((optimize("O0")))*/  /*__attribute__ ((always_inline))*/  showRGBInternal(PixelController<RGB_ORDER> & pixels)  {
 		uint8_t *data = (uint8_t*)pixels.mData;
 		data_ptr_t port = FastPin<DATA_PIN>::port();
 		data_t mask = FastPin<DATA_PIN>::mask();
@@ -302,7 +309,7 @@ protected:
 		TIFR0 = 0x04;
 		#endif
 		{
-			while(count--)
+			while(count)
 			{
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
@@ -310,6 +317,7 @@ protected:
 				ADJDITHER2(d0,e0);
 				ADJDITHER2(d1,e1);
 				ADJDITHER2(d2,e2);
+				count--;
 				NOP;
 				#if (FASTLED_ALLOW_INTERRUPTS == 1)
 				cli();
@@ -332,6 +340,7 @@ protected:
 				// we're cycling back around and doing the above for byte 0.
 #if TRINKET_SCALE
 				// Inline scaling - RGB ordering
+				DNOP
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2)
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d1)	D2(3)	LO1	SCALE12(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)
@@ -375,7 +384,7 @@ protected:
 					case 2: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
 					case 1: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
 				}
-				D3(12);
+				D3(13);
 #else
 				// no inline scaling - non-straight RGB ordering
 				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
@@ -427,5 +436,7 @@ protected:
 };
 
 #endif
+
+FASTLED_NAMESPACE_END
 
 #endif

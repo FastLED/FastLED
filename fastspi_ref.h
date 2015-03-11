@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_ARM_SAM_H
 #define __INC_FASTSPI_ARM_SAM_H
 
+FASTLED_NAMESPACE_BEGIN
+
 // A skeletal implementation of hardware SPI support.  Fill in the necessary code for init, waiting, and writing.  The rest of
 // the method implementations should provide a starting point, even if not hte most efficient to start with
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
@@ -94,5 +96,7 @@ public:
 		writeBytes3<0, DATA_NOP, RGB>(data, len, scale, advance, skip); 
 
 };
+
+FASTLED_NAMESPACE_END
 
 #endif

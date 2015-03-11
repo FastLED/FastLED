@@ -3,6 +3,8 @@
 
 #include "FastLED.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 // Functions to convert HSV colors to RGB colors.
 //
 //  The basically fall into two groups: spectra, and rainbows.
@@ -488,34 +490,33 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
     byte g = rgb.g;
     byte b = rgb.b;
     byte h, s, v;
-    
+
     // find desaturation
     byte desat = 255;
     if( r < desat) desat = r;
     if( g < desat) desat = g;
     if( b < desat) desat = b;
-    
+
     // remove saturation from all channels
     r -= desat;
     g -= desat;
     b -= desat;
-    
+
     // at least one channel is now zero
-    
+
     // if all three channels are zero, we had a
     // shade of gray.
-    
+
     uint16_t total = r + g + b;
-    
+
     if( total == 0) {
         // we pick hue zero for no special reason
-        h = 0;
-        return CHSV( h, s, v);
+        return CHSV( 0, 0, 0);
     }
-    
+
     // since this wasn't a pure shade of gray,
     // the interesting question is what hue is it
-    
+
     // scale all channels up to a total of 255
     if( total != 255) {
         uint32_t scaleup = 65535 / (total);
@@ -523,7 +524,7 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
         g = ((uint32_t)(g) * scaleup) / 256;
         b = ((uint32_t)(b) * scaleup) / 256;
     }
-    
+
     if( total > 255 ) {
         v = 255;
     } else {
@@ -532,24 +533,24 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
         if( v != 255) v = sqrt16( v * 256);
         // without lib8tion: float ... ew ... sqrt... double ew, or rather, ew ^ 0.5
         // if( v != 255) v = (256.0 * sqrt( (float)(v) / 256.0));
-        
+
     }
-    
+
     // saturation is opposite of desaturation
     s = 255 - desat;
     if( v != 255) s = (s * 256) / v;
-    
+
     // undo 'dimming' of saturation
     if( s != 255 ) s = 255 - sqrt16( (255-s) * 256);
     // without lib8tion: float ... ew ... sqrt... double ew, or rather, ew ^ 0.5
     // if( s != 255 ) s = (255 - (256.0 * sqrt( (float)(255-s) / 256.0)));
-    
+
     // start with which channel is highest
     // (ties don't matter)
     byte highest = r;
     if( g > highest) highest = g;
     if( b > highest) highest = b;
-    
+
     if( highest == r ) {
         // Red is highest.
         // Hue could be Purple/Pink-Red,Red-Orange,Orange-Yellow
@@ -566,7 +567,7 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
             h = HUE_ORANGE;
             h += scale8( qsub8((g - 85) + (171 - r), 4), FIXFRAC8(32,85)); //221
         }
-        
+
     } else if ( highest == g) {
         // Green is highest
         // Hue could be Yellow-Green, Green-Aqua
@@ -584,7 +585,7 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
                 h += scale8( b - 85, FIXFRAC8(8,42));
             }
         }
-        
+
     } else /* highest == b */ {
         // Blue is highest
         // Hue could be Aqua/Blue-Blue, Blue-Purple, Purple-Pink
@@ -602,7 +603,9 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
             h += scale8( r - 85, FIXFRAC8(32,85));
         }
     }
-    
+
     h += 1;
     return CHSV( h, s, v);
 }
+
+FASTLED_NAMESPACE_END

@@ -4,6 +4,8 @@
 #ifdef SmartMatrix_h
 #include<SmartMatrix.h>
 
+FASTLED_NAMESPACE_BEGIN
+
 extern SmartMatrix *pSmartMatrix;
 
 // note - dmx simple must be included before FastSPI for this code to be enabled
@@ -73,6 +75,8 @@ public:
   virtual void show(const struct CARGB *data, int nLeds, CRGB scale) = 0;
 #endif
 };
+
+FASTLED_NAMESPACE_END
 
 #endif
 
