@@ -68,6 +68,25 @@ _DEFPIN_AVR(8, 0x04, B); _DEFPIN_AVR(9, 0x02, B); _DEFPIN_AVR(10, 0x01, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(ARDUINO_HOODLOADER2) && (defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__))
+
+_IO(D); _IO(B); _IO(C);
+
+#define MAX_PIN 20
+
+_DEFPIN_AVR( 0, 0x01, B); _DEFPIN_AVR( 1, 0x02, B); _DEFPIN_AVR( 2, 0x04, B); _DEFPIN_AVR( 3, 0x08, B);
+_DEFPIN_AVR( 4, 0x10, B); _DEFPIN_AVR( 5, 0x20, B); _DEFPIN_AVR( 6, 0x40, B); _DEFPIN_AVR( 7, 0x80, B);
+
+_DEFPIN_AVR( 8, 0x80, C); _DEFPIN_AVR( 9, 0x40, C); _DEFPIN_AVR( 10, 0x20,C); _DEFPIN_AVR( 11, 0x10, C);
+_DEFPIN_AVR( 12, 0x04, C); _DEFPIN_AVR( 13, 0x01, D); _DEFPIN_AVR( 14, 0x02, D); _DEFPIN_AVR(15, 0x04, D);
+_DEFPIN_AVR( 16, 0x08, D); _DEFPIN_AVR( 17, 0x10, D); _DEFPIN_AVR( 18, 0x20, D); _DEFPIN_AVR( 19, 0x40, D);
+_DEFPIN_AVR( 20, 0x80, D);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+// #define SPI_DATA 2
+// #define SPI_CLOCK 1
+// #define AVR_HARDWARE_SPI 1
+
 #elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 // Accelerated port definitions for arduino avrs
 _IO(D); _IO(B); _IO(C);

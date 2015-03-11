@@ -180,7 +180,7 @@ public:
 		UBRR0 = 0;
 
 		/* Set MSPI mode of operation and SPI data mode 0. */
-		UCSR0C = (1<<UMSEL01)|(1<<UMSEL00)|(0<<UCPHA0)|(0<<UCPOL0);
+		UCSR0C = (1<<UMSEL01)|(1<<UMSEL00)/*|(0<<UCPHA0)*/|(0<<UCPOL0);
 		/* Enable receiver and transmitter. */
 		UCSR0B = (1<<RXEN0)|(1<<TXEN0);
 

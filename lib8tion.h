@@ -162,7 +162,7 @@ FASTLED_NAMESPACE_BEGIN
      beat88( BPM88) = 16-bit repeating sawtooth wave
    BPM is beats per minute in either simple form
    e.g. 120, or Q8.8 fixed-point form.
-   BPM88 is beats per minute in ONLY Q8.8 fixed-point 
+   BPM88 is beats per minute in ONLY Q8.8 fixed-point
    form.
 
 Lib8tion is pronounced like 'libation': lie-BAY-shun
@@ -180,7 +180,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 // for memmove, memcpy, and memset if not defined here
 #endif
 
-#if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
 #define LIB8_ATTINY 1
 #endif
 
@@ -1747,6 +1747,30 @@ LIB8STATIC uint8_t cubicwave8(uint8_t in)
     return ease8InOutCubic( triwave8( in));
 }
 
+// squarewave8: square wave generator.  Useful for
+//           turning a one-byte ever-increasing value
+//           into a one-byte value that is either 0 or 255.
+//           The width of the output 'pulse' is
+//           determined by the pulsewidth argument:
+//           If pulsewidth is 255, output is always 255.
+//           If pulsewidth < 255, then
+//             if input < pulsewidth  then output is 255
+//             if input >= pulsewidth then output is 0
+//
+// 255   +--pulsewidth--+
+//  .    |              |
+//  0    0              +--------(256-pulsewidth)--------
+//
+LIB8STATIC uint8_t squarewave8( uint8_t in, uint8_t pulsewidth=128)
+{
+    if( in < pulsewidth || (pulsewidth == 255)) {
+        return 255;
+    } else {
+        return 0;
+    }
+}
+
+
 
 
 // sqrt16: square root for 16-bit integers
@@ -2071,7 +2095,7 @@ class CEveryNTimePeriods {
 public:
     timeType mPrevTrigger;
     timeType mPeriod;
-    
+
     CEveryNTimePeriods() { reset(); mPeriod = 1; };
     CEveryNTimePeriods(timeType period) { reset(); setPeriod(period); };
     void setPeriod( timeType period) { mPeriod = period; };
@@ -2087,7 +2111,7 @@ public:
     }
     void reset() { mPrevTrigger = getTime(); };
     void trigger() { mPrevTrigger = getTime() - mPeriod; };
-    
+
     operator bool() { return ready(); }
 };
 typedef CEveryNTimePeriods<uint16_t,seconds16> CEveryNSeconds;

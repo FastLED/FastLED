@@ -8,23 +8,29 @@
 #include "pixeltypes.h"
 
 FASTLED_NAMESPACE_BEGIN
+///@defgroup Colorutils Color utility functions
+///A variety of functions for working with color, palletes, and leds
+///@{
 
-// fill_solid -   fill a range of LEDs with a solid color
-//                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
-
+/// fill_solid -   fill a range of LEDs with a solid color
+///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
 void fill_solid( struct CRGB * leds, int numToFill,
                  const struct CRGB& color);
 
+/// fill_solid -   fill a range of LEDs with a solid color
+///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
 void fill_solid( struct CHSV* targetArray, int numToFill,
 				 const struct CHSV& hsvColor);
 
 
-// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
-//                full saturation and full value (brightness)
+/// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
+///                full saturation and full value (brightness)
 void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
                    uint8_t initialhue,
                    uint8_t deltahue = 5);
 
+/// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
+///                full saturation and full value (brightness)
 void fill_rainbow( struct CHSV * targetArray, int numToFill,
                    uint8_t initialhue,
                    uint8_t deltahue = 5);
@@ -59,6 +65,28 @@ typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradi
 
 #define saccum87 int16_t
 
+/// fill_gradient - fill an array of colors with a smooth HSV gradient
+///                 between two specified HSV colors.
+///                 Since 'hue' is a value around a color wheel,
+///                 there are always two ways to sweep from one hue
+///                 to another.
+///                 This function lets you specify which way you want
+///                 the hue gradient to sweep around the color wheel:
+///                   FORWARD_HUES: hue always goes clockwise
+///                   BACKWARD_HUES: hue always goes counter-clockwise
+///                   SHORTEST_HUES: hue goes whichever way is shortest
+///                   LONGEST_HUES: hue goes whichever way is longest
+///                 The default is SHORTEST_HUES, as this is nearly
+///                 always what is wanted.
+///
+/// fill_gradient can write the gradient colors EITHER
+///     (1) into an array of CRGBs (e.g., into leds[] array, or an RGB Palette)
+///   OR
+///     (2) into an array of CHSVs (e.g. an HSV Palette).
+///
+///   In the case of writing into a CRGB array, the gradient is
+///   computed in HSV space, and then HSV values are converted to RGB
+///   as they're written into the RGB array.
 template <typename T>
 void fill_gradient( T* targetArray,
                     uint16_t startpos, CHSV startcolor,
@@ -879,7 +907,7 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
                                 CRGBPalette16& targetPalette,
                                 uint8_t maxChanges=24);
 
-
 FASTLED_NAMESPACE_END
 
+///@}
 #endif
