@@ -104,13 +104,13 @@ class ARMHardwareSPIOutput {
 	static inline void disable_pins(void) __attribute__((always_inline)) {
 		//serial_print("disable_pins\n");
 		if(_DATA_PIN == 11) {
-			CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
-			CORE_PIN12_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
-			CORE_PIN13_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+			CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
+			CORE_PIN12_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
+			CORE_PIN13_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
 		} else if(_DATA_PIN == 7) {
-			CORE_PIN7_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
-			CORE_PIN8_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
-			CORE_PIN14_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1);
+			CORE_PIN7_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
+			CORE_PIN8_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
+			CORE_PIN14_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
 		}
 }
 public:
@@ -213,7 +213,8 @@ public:
 		SPIX.MCR |= SPI_MCR_MSTR; // | SPI_MCR_CONT_SCKE);
 		SPIX.MCR &= ~(SPI_MCR_MDIS | SPI_MCR_HALT);
 
-		enable_pins();
+		// don't enable the pins until we're ready to write out!
+		// enable_pins();
 	}
 
 	static void waitFully() __attribute__((always_inline)) {
