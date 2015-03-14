@@ -6,7 +6,7 @@ FASTLED_NAMESPACE_BEGIN
 ///@defgroup ColorEnums Color correction/temperature
 /// definitions for color correction and light temperatures
 ///@{
->>>>>>> c0c8f765f1b01655116cc0c95979203ba05c80ef
+// >>>>>>> c0c8f765f1b01655116cc0c95979203ba05c80ef
 typedef enum {
    // Color correction starting points
 
