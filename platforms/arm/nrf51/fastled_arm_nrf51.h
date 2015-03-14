@@ -3,7 +3,7 @@
 
 // Include the k20 headers
 #include "bitswap.h"
-#include "delay.h"
+#include "fastled_delay.h"
 #include "fastpin_arm_nrf51.h"
 #include "fastspi_arm_nrf51.h"
 #include "clockless_arm_nrf51.h"

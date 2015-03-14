@@ -1,7 +1,7 @@
 #ifndef __INC_FASTSPI_BITBANG_H
 #define __INC_FASTSPI_BITBANG_H
 
-#include "delay.h"
+#include "fastled_delay.h"
 
 FASTLED_NAMESPACE_BEGIN
 

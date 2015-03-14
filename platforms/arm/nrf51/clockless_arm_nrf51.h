@@ -4,6 +4,7 @@
 #if defined(NRF51)
 
 #include "nrf51_bitfields.h"
+#define FASTLED_HAS_CLOCKLESS 1
 
 #define TADJUST 0
 #define TOTAL ( (T1+TADJUST) + (T2+TADJUST) + (T3+TADJUST) )
