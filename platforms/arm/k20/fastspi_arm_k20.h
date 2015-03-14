@@ -192,7 +192,7 @@ public:
 
 		// Enable SPI0 clock
 		uint32_t sim6 = SIM_SCGC6;
-		if((SPI_t*)pSPIX == &SPI0) {
+		if((SPI_t*)pSPIX == &KINETISK_SPI0) {
 			if (!(sim6 & SIM_SCGC6_SPI0)) {
 				//serial_print("init1\n");
 				SIM_SCGC6 = sim6 | SIM_SCGC6_SPI0;
