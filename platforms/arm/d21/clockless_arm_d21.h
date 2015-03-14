@@ -64,7 +64,7 @@ public:
   }
 #endif
 
-#define DT1(ADJ) delaycycles<T1-(ADJ+1)>();
+#define DT1(ADJ) delaycycles<T1-(ADJ+8)>();
 #define DT2(ADJ) delaycycles<T2-(ADJ+2)>();
 #define DT3(ADJ) delaycycles<((T3-ADJ))>();
 
