@@ -126,7 +126,7 @@ public:
 // #define VAL SysTick->VAL
 // #define VAL (volatile uint32_t)(*((uint32_t*)(SysTick_BASE + 8)))
 
-#define DT1(ADJ) delaycycles<T1-(ADJ-1)>();
+#define DT1(ADJ) delaycycles<T1-(ADJ+1)>();
 #define DT2(ADJ) delaycycles<T2-(ADJ+2)>();
 #define DT3(ADJ) delaycycles<((T3-ADJ))>();
 
@@ -196,14 +196,13 @@ public:
         HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(4);
 
         b = ~scale8(b2, scale.raw[RO(2)]);
-        pdata += 3;
 
         HI2; DT1(4); BC2(7); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
-        HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3);
+        HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3); pdata += 3;
         HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(0)];
         HI2; DT1(4); BC2(0); DT2(2); LO2; SEI_CHK; sei(); DT3(9);
 
