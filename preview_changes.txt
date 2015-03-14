@@ -13,3 +13,7 @@ FastLED 3.1 preview changes:
 * -interrupt friendly code on AVR- <-- disabled for now
 * interrupt friendly code on the due
 * code re-org for future wider platform support
+* Spark Core support
+* Teensy LC support
+* rfduino support
+
