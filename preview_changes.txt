@@ -16,4 +16,4 @@ FastLED 3.1 preview changes:
 * Spark Core support
 * Teensy LC support 
 * rfduino support (no dithering on clockless, no hardware spi yet) 
-* arduino zero support (no dithering on clockless, no hardware spi yet)
+* arduino zero support (no hardware spi yet)

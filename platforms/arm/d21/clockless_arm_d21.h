@@ -76,6 +76,9 @@ public:
 // #define BC2A(BIT) if(b&0x80) {} else { delaycycles<2>(); pGpio->OUTCLR = (1<<DATA_PIN); }
 #define LSB1 b <<= 1;
 
+// dither adjustment macro - should be kept in sync w/what's in stepDithering
+#define ADJDITHER2(D, E) D = E - D;
+
 
 // #define CLI_CHK cli(); if(NRF_RTC0->COUNTER > clk_max) { return 0; }
 // #define SEI_CHK clk_max = NRF_RTC0->COUNTER + 1; sei();
@@ -95,21 +98,34 @@ public:
     CRGB scale = pixels.mScale;
     register const uint8_t *pdata = pixels.mData;
 
+    uint8_t d0 = pixels.d[RO(0)];
+    uint8_t d1 = pixels.d[RO(1)];
+    uint8_t d2 = pixels.d[RO(2)];
+    uint8_t e0 = pixels.e[RO(0)];
+    uint8_t e1 = pixels.e[RO(1)];
+    uint8_t e2 = pixels.e[RO(2)];
+
 #define RAN 0
 #define RAN2 0
     register uint32_t b = ~scale8(pdata[RO(0)], scale.raw[RO(0)]);
+    ADJDITHER2(d0,e0);
+
     register uint32_t b2;
     int len = pixels.mLen;
 
     SEI_CHK;
     while(len >= 1) {
+      ADJDITHER2(d0,e0);
+      ADJDITHER2(d1,e1);
+      ADJDITHER2(d2,e2);
+
       HI2; DT1(4); BC2A(7); DT2(2); LO2; LSB1; DT3(2);
       HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
       HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
       HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
       HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(1)];
+      HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(1)];
+      HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(5); b2 = b2 ? qadd8(b2, d1) : 0;
       HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(4);
       b = ~scale8(b2, scale.raw[RO(1)]);
       len--;
@@ -119,8 +135,8 @@ public:
       HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
       HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
       HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(2)];
+      HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(2)];
+      HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(5); b2 = b2 ? qadd8(b2, d2) : 0;
       HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(4);
 
       b = ~scale8(b2, scale.raw[RO(2)]);
@@ -129,9 +145,9 @@ public:
       HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
       HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
       HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3); pdata += 3;
-      HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(0)];
+      HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(4); pdata += 3;
+      HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(0)];
+      HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(5); b2 = b2 ? qadd8(b2, d0) : 0;
       HI2; DT1(4); BC2(0); DT2(2); LO2; SEI_CHK; sei(); DT3(9);
 
       b = ~scale8(b2, scale.raw[RO(0)]);
