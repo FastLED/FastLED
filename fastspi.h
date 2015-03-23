@@ -41,6 +41,12 @@ class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SP
 
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, 0x4002C000> {};
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI2_CLOCK, SPI_SPEED, 0x4002C000> {};
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
 #endif
 
 #elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
