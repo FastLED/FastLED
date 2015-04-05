@@ -21,7 +21,7 @@ FASTLED_NAMESPACE_BEGIN
 // Variations on the functions in delay.h - w/a loop var passed in to preserve registers across calls by the optimizer/compiler
 template<int CYCLES> inline void _dc(register uint8_t & loopvar);
 
-template<int _LOOP, int PAD> inline void _dc_AVR(register uint8_t & loopvar) {
+template<int _LOOP, int PAD> __attribute__((always_inline)) inline void _dc_AVR(register uint8_t & loopvar) {
 	_dc<PAD>(loopvar);
 	// The convolution in here is to ensure that the state of the carry flag coming into the delay loop is preserved
 	asm __volatile__ (  "BRCS L_PC%=\n\t"
