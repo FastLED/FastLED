@@ -198,7 +198,7 @@ protected:
 			pixels.stepDithering();
 		}
 		endBoundary(nLeds);
-
+		mSPI.waitFully();
 		mSPI.release();
 	}
 
@@ -215,7 +215,7 @@ protected:
 			pixels.stepDithering();
 		}
 		endBoundary(nLeds);
-
+		mSPI.waitFully();
 		mSPI.release();
 	}
 #endif
