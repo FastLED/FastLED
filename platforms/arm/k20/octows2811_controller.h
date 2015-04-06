@@ -18,7 +18,7 @@ class COctoWS2811Controller : public CLEDController {
       framebuffer = (uint8_t*)malloc(nLeds * 8 * 3);
 
       // byte ordering is handled in show by the pixel controller
-      int config = WS211_RGB;
+      int config = WS2811_RGB;
       if(SLOW) {
         config |= WS2811_400kHz;
       }
