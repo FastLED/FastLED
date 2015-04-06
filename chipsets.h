@@ -55,6 +55,7 @@ public:
 		mSPI.select();
 		mSPI.writeBytesValueRaw(0x80, nLeds * 3);
 		mSPI.writeBytesValueRaw(0, ((nLeds*3+63)>>6));
+		mSPI.waitFully();
 		mSPI.release();
 	}
 
@@ -286,6 +287,7 @@ protected:
 			pixels.stepDithering();
 		}
 		writeBoundary();
+		mSPI.waitFully();
 
 		mSPI.release();
 	}
@@ -303,6 +305,7 @@ protected:
 			pixels.stepDithering();
 		}
 		writeBoundary();
+		mSPI.waitFully();
 
 		mSPI.release();
 	}
