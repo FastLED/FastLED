@@ -54,7 +54,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-/// definitions for the spi chipset constants 
+/// definitions for the spi chipset constants
 enum ESPIChipsets {
 	LPD8806,
 	WS2801,
@@ -66,7 +66,7 @@ enum ESPIChipsets {
 };
 
 enum ESM { SMART_MATRIX };
-enum OWS2811 { OCTOWS2811 };
+enum OWS2811 { OCTOWS2811,OCTOWS2811_400 };
 
 #ifdef FASTLED_HAS_CLOCKLESS
 template<uint8_t DATA_PIN> class NEOPIXEL : public WS2812Controller800Khz<DATA_PIN, GRB> {};
@@ -305,6 +305,7 @@ public:
 	{
 		switch(CHIPSET) {
 			case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case OCTOWS2811_400: { static COctoWS2811Controller<RGB_ORDER,true> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
