@@ -308,6 +308,7 @@ public:
 			pixels.stepDithering();
 		}
 		D::postBlock(len);
+		waitFully();
 		release();
 	}
 };
@@ -488,6 +489,7 @@ public:
 			pixels.stepDithering();
 		}
 		D::postBlock(len);
+		waitFully();
 		release();
 	}
 };
