@@ -809,17 +809,17 @@ public:
 
 
 
-typedef enum { NOBLEND=0, BLEND=1 } TBlendType;
+typedef enum { NOBLEND=0, LINEARBLEND=1 } TBlendType;
 
 CRGB ColorFromPalette( const CRGBPalette16& pal,
                       uint8_t index,
                       uint8_t brightness=255,
-                      TBlendType blendType=BLEND);
+                      TBlendType blendType=LINEARBLEND);
 
 CRGB ColorFromPalette( const TProgmemRGBPalette16& pal,
                        uint8_t index,
                        uint8_t brightness=255,
-                       TBlendType blendType=BLEND);
+                       TBlendType blendType=LINEARBLEND);
 
 CRGB ColorFromPalette( const CRGBPalette256& pal,
                        uint8_t index,
@@ -829,7 +829,7 @@ CRGB ColorFromPalette( const CRGBPalette256& pal,
 CHSV ColorFromPalette( const CHSVPalette16& pal,
                        uint8_t index,
                        uint8_t brightness=255,
-                       TBlendType blendType=BLEND);
+                       TBlendType blendType=LINEARBLEND);
 
 CHSV ColorFromPalette( const CHSVPalette256& pal,
                        uint8_t index,
@@ -856,7 +856,7 @@ void map_data_into_colors_through_palette(
 	const PALETTE& pal,
 	uint8_t brightness=255,
 	uint8_t opacity=255,
-	TBlendType blendType=BLEND)
+	TBlendType blendType=LINEARBLEND)
 {
 	for( uint16_t i = 0; i < dataCount; i++) {
 		uint8_t d = dataArray[i];
