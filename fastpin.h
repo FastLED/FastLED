@@ -139,7 +139,7 @@ typedef volatile uint32_t * ptr_reg32_t;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #if defined(FORCE_SOFTWARE_PINS)
 
-#warning "Softwrae pin support forced pin access will be slightly slower.  See fastpin.h for info."
+#warning "Software pin support forced pin access will be slightly slower.  See fastpin.h for info."
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
 
