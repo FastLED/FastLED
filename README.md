@@ -1,3 +1,5 @@
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FastLED/public)
+
 IMPORTANT NOTE: If you are building for AVR based systems, it is possible that using any version of the arduino IDE 1.5.7 or later and/or GCC 4.8 may introduce some issues.  I believe I have fixed them, but if you run into issues using these platforms, please file an issue at http://fastled.io/issues - thank you!  If you are building for the Due, Arduino 1.5.7 & later introduces issues that have currently been fixed on the FastLED 3.1 branch.
 
 FastLED 3.0
