@@ -43,7 +43,7 @@ public:
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-// Macros for k26 pin access/definition
+// Macros for kl26 pin access/definition
 #define GPIO_BITBAND_ADDR(reg, bit) (((uint32_t)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
 #define GPIO_BITBAND_PTR(reg, bit) ((uint32_t *)GPIO_BITBAND_ADDR((reg), (bit)))
 
