@@ -7,7 +7,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-template<EOrder RGB_ORDER = GRB>
+template<EOrder RGB_ORDER = GRB, boolean SLOW=false>
 class COctoWS2811Controller : public CLEDController {
   OctoWS2811  *pocto;
   uint8_t *drawbuffer,*framebuffer;
@@ -16,14 +16,15 @@ class COctoWS2811Controller : public CLEDController {
     if(pocto == NULL) {
       drawbuffer = (uint8_t*)malloc(nLeds * 8 * 3);
       framebuffer = (uint8_t*)malloc(nLeds * 8 * 3);
-      switch(RGB_ORDER) {
-        case RGB: pocto = new OctoWS2811(nLeds, framebuffer, drawbuffer, WS2811_RGB); break;
-        case RBG: pocto = new OctoWS2811(nLeds, framebuffer, drawbuffer, WS2811_RBG); break;
-        case GBR: pocto = new OctoWS2811(nLeds, framebuffer, drawbuffer, WS2811_GBR); break;
-        case GRB:
-        default:
-          pocto = new OctoWS2811(nLeds, framebuffer,drawbuffer, WS2811_GRB); break;
+
+      // byte ordering is handled in show by the pixel controller
+      int config = WS2811_RGB;
+      if(SLOW) {
+        config |= WS2811_400kHz;
       }
+
+      pocto = new OctoWS2811(nLeds, framebuffer, drawbuffer, config);
+
       pocto->begin();
     }
   }

@@ -1,5 +1,5 @@
-#ifndef __INC_FASTSPI_ARM_K26_H
-#define __INC_FASTSPI_ARM_K26_h
+#ifndef __INC_FASTSPI_ARM_KL26_H
+#define __INC_FASTSPI_ARM_KL26_h
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -87,19 +87,39 @@ class ARMHardwareSPIOutput {
   Selectable *m_pSelect;
 
   static inline void enable_pins(void) __attribute__((always_inline)) {
-    if(_DATA_PIN == 11) CORE_PIN11_CONFIG = PORT_PCR_MUX(2); // MOSI = 11 (PTC6)
-    if(_DATA_PIN == 0) CORE_PIN0_CONFIG = PORT_PCR_MUX(2);
-    // CORE_PIN12_CONFIG = PORT_PCR_MUX(2); // MISO = 12 (PTC7)
-    if(_CLOCK_PIN == 13) CORE_PIN13_CONFIG = PORT_PCR_MUX(2); // SCK  = 13 (PTC5)
-    if(_CLOCK_PIN == 20) CORE_PIN20_CONFIG = PORT_PCR_MUX(2);
+    switch(_DATA_PIN) {
+      case 0: CORE_PIN0_CONFIG =  PORT_PCR_MUX(2); break;
+      case 1: CORE_PIN1_CONFIG =  PORT_PCR_MUX(5); break;
+      case 7: CORE_PIN7_CONFIG =  PORT_PCR_MUX(2); break;
+      case 8: CORE_PIN8_CONFIG =  PORT_PCR_MUX(5); break;
+      case 11: CORE_PIN11_CONFIG =  PORT_PCR_MUX(2); break;
+      case 12: CORE_PIN12_CONFIG =  PORT_PCR_MUX(5); break;
+      case 21: CORE_PIN21_CONFIG =  PORT_PCR_MUX(2); break;
+    }
+
+    switch(_CLOCK_PIN) {
+      case 13: CORE_PIN13_CONFIG =  PORT_PCR_MUX(2); break;
+      case 14: CORE_PIN14_CONFIG =  PORT_PCR_MUX(2); break;
+      case 20: CORE_PIN20_CONFIG =  PORT_PCR_MUX(2); break;
+    }
   }
 
   static inline void disable_pins(void) __attribute((always_inline)) {
-    if(_DATA_PIN == 11) CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1);
-    if(_DATA_PIN == 0) CORE_PIN0_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1);
-    // CORE_PIN12_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1);
-    if(_CLOCK_PIN == 13) CORE_PIN13_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1);
-    if(_CLOCK_PIN == 20) CORE_PIN20_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1);
+    switch(_DATA_PIN) {
+      case 0: CORE_PIN0_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+      case 1: CORE_PIN1_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+      case 7: CORE_PIN7_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+      case 8: CORE_PIN8_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+      case 11: CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+      case 12: CORE_PIN12_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+      case 21: CORE_PIN21_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+    }
+
+    switch(_CLOCK_PIN) {
+      case 13: CORE_PIN13_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+      case 14: CORE_PIN14_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+      case 20: CORE_PIN20_CONFIG = PORT_PCR_SRE | PORT_PCR_MUX(1); break;
+    }
   }
 
   void setSPIRate() {

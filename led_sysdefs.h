@@ -9,8 +9,8 @@
 // Include k20/T3 headers
 #include "platforms/arm/k20/led_sysdefs_arm_k20.h"
 #elif defined(__MKL26Z64__)
-// Include k26/T-LC headers
-#include "platforms/arm/k26/led_sysdefs_arm_k26.h"
+// Include kl26/T-LC headers
+#include "platforms/arm/kl26/led_sysdefs_arm_kl26.h"
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/led_sysdefs_arm_sam.h"
@@ -29,7 +29,7 @@
 #define FASTLED_USING_NAMESPACE
 #endif
 
-// Arduino.h needed for convinience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
+// Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #ifdef ARDUINO
 #include<Arduino.h>
 #endif

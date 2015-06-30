@@ -55,6 +55,7 @@ public:
 		mSPI.select();
 		mSPI.writeBytesValueRaw(0x80, nLeds * 3);
 		mSPI.writeBytesValueRaw(0, ((nLeds*3+63)>>6));
+		mSPI.waitFully();
 		mSPI.release();
 	}
 
@@ -151,7 +152,7 @@ class APA102Controller : public CLEDController {
 	SPI mSPI;
 
 	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
-	void endBoundary(int nLeds) { int nBytes = (nLeds/64); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nBytes--); }
+	void endBoundary(int nLeds) { int nBytes = (nLeds/32); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nBytes--); }
 
 	inline void writeLed(uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
 		mSPI.writeByte(0xFF); mSPI.writeByte(b0); mSPI.writeByte(b1); mSPI.writeByte(b2);
@@ -198,7 +199,7 @@ protected:
 			pixels.stepDithering();
 		}
 		endBoundary(nLeds);
-
+		mSPI.waitFully();
 		mSPI.release();
 	}
 
@@ -215,7 +216,7 @@ protected:
 			pixels.stepDithering();
 		}
 		endBoundary(nLeds);
-
+		mSPI.waitFully();
 		mSPI.release();
 	}
 #endif
@@ -286,6 +287,7 @@ protected:
 			pixels.stepDithering();
 		}
 		writeBoundary();
+		mSPI.waitFully();
 
 		mSPI.release();
 	}
@@ -303,6 +305,7 @@ protected:
 			pixels.stepDithering();
 		}
 		writeBoundary();
+		mSPI.waitFully();
 
 		mSPI.release();
 	}

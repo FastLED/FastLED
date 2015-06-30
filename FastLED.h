@@ -54,7 +54,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-/// definitions for the spi chipset constants 
+/// definitions for the spi chipset constants
 enum ESPIChipsets {
 	LPD8806,
 	WS2801,
@@ -66,7 +66,7 @@ enum ESPIChipsets {
 };
 
 enum ESM { SMART_MATRIX };
-enum OWS2811 { OCTOWS2811 };
+enum OWS2811 { OCTOWS2811,OCTOWS2811_400 };
 
 #ifdef FASTLED_HAS_CLOCKLESS
 template<uint8_t DATA_PIN> class NEOPIXEL : public WS2812Controller800Khz<DATA_PIN, GRB> {};
@@ -96,18 +96,23 @@ template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDE
 enum EBlockChipsets {
 #ifdef PORTA_FIRST_PIN
 	WS2811_PORTA,
+	WS2811_400_PORTA,
 #endif
 #ifdef PORTB_FIRST_PIN
 	WS2811_PORTB,
+	WS2811_400_PORTB,
 #endif
 #ifdef PORTC_FIRST_PIN
 	WS2811_PORTC,
+	WS2811_400_PORTC,
 #endif
 #ifdef PORTD_FIRST_PIN
 	WS2811_PORTD,
+	WS2811_400_PORTD,
 #endif
 #ifdef HAS_PORTDC
 	WS2811_PORTDC,
+	WS2811_400_PORTDC,
 #endif
 };
 
@@ -300,6 +305,7 @@ public:
 	{
 		switch(CHIPSET) {
 			case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case OCTOWS2811_400: { static COctoWS2811Controller<RGB_ORDER,true> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -348,18 +354,23 @@ public:
 		switch(CHIPSET) {
 		#ifdef PORTA_FIRST_PIN
 				case WS2811_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef PORTB_FIRST_PIN
 				case WS2811_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef PORTC_FIRST_PIN
 				case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef PORTD_FIRST_PIN
 				case WS2811_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef HAS_PORTDC
 				case WS2811_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<16,NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<16,NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		}
 	}

@@ -93,30 +93,34 @@ class ARMHardwareSPIOutput {
 	// Borrowed from the teensy3 SPSR emulation code
 	static inline void enable_pins(void) __attribute__((always_inline)) {
 		//serial_print("enable_pins\n");
-		if(_DATA_PIN == 11) {
-			CORE_PIN11_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
-			CORE_PIN12_CONFIG = PORT_PCR_MUX(2);
-			CORE_PIN13_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
-		} else if(_DATA_PIN == 7) {
-			CORE_PIN7_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
-			CORE_PIN8_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2);
-			CORE_PIN14_CONFIG =  PORT_PCR_DSE | PORT_PCR_MUX(2);
+		switch(_DATA_PIN) {
+			case 7: CORE_PIN7_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); break;
+			// case 8: CORE_PIN8_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); break;
+			case 11: CORE_PIN11_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); break;
+			// case 12: CORE_PIN12_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); break;
+		}
+
+		switch(_CLOCK_PIN) {
+			case 13: CORE_PIN13_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); break;
+			case 14: CORE_PIN14_CONFIG = PORT_PCR_DSE | PORT_PCR_MUX(2); break;
 		}
 	}
 
 	// Borrowed from the teensy3 SPSR emulation code
 	static inline void disable_pins(void) __attribute__((always_inline)) {
-		//serial_print("disable_pins\n");
-		if(_DATA_PIN == 11) {
-			CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
-			CORE_PIN12_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
-			CORE_PIN13_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
-		} else if(_DATA_PIN == 7) {
-			CORE_PIN7_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
-			CORE_PIN8_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
-			CORE_PIN14_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(0);
+		switch(_DATA_PIN) {
+			case 7: CORE_PIN7_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1); break;
+			// case 8: CORE_PIN8_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1); break;
+			case 11: CORE_PIN11_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1); break;
+			// case 12: CORE_PIN12_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1); break;
 		}
-}
+
+		switch(_CLOCK_PIN) {
+			case 13: CORE_PIN13_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1); break;
+			case 14: CORE_PIN14_CONFIG = PORT_PCR_SRE | PORT_PCR_DSE | PORT_PCR_MUX(1); break;
+		}
+	}
+
 public:
 	ARMHardwareSPIOutput() { m_pSelect = NULL; }
 	ARMHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }

@@ -10,7 +10,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h> // for cli/se definitions
 
-// Define the rgister types
+// Define the register types
 #if defined(ARDUINO) // && ARDUINO < 150
 typedef volatile       uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
 typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
@@ -27,12 +27,14 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
-#  if defined(CORE_TEENSY)
+extern "C" {
+#  if defined(CORE_TEENSY) || defined(TEENSYDUINO)
 extern volatile unsigned long timer0_millis_count;
 #    define MS_COUNTER timer0_millis_count
 #  else
 extern volatile unsigned long timer0_millis;
 #    define MS_COUNTER timer0_millis
 #  endif
+};
 
 #endif

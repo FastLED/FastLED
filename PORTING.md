@@ -2,12 +2,12 @@
 
 == Setting up the basic files/folders ==
 
-* Create platform directory (e.g. platforms/arm/k26)
-* Create configuration header led_sysdefs_arm_k26.h:
+* Create platform directory (e.g. platforms/arm/kl26)
+* Create configuration header led_sysdefs_arm_kl26.h:
   * Define platform flags (like FASTLED_ARM/FASTLED_TEENSY)
   * Define configuration parameters re: interrupts, or clock doubling
   * Include extar system header files if needed
-* Create main platform include, fastled_arm_k26.h
+* Create main platform include, fastled_arm_kl26.h
   * Include the various other header files as needed
 * Modify led_sysdefs.h to conditionally include platform sysdefs header file
 * Modify platforms.h to conditionally include platform fastled header
