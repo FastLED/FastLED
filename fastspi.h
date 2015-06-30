@@ -68,7 +68,6 @@ DECLARE_SPI1(0,20);
 DECLARE_SPI1(1,20);
 DECLARE_SPI1(21,20);
 
-DECLARE_
 #elif defined(__SAM3X8E__)
 
 template<uint8_t SPI_SPEED>

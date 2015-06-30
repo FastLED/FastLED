@@ -10,7 +10,7 @@
 #include "platforms/arm/k20/fastled_arm_k20.h"
 #elif defined(__MKL26Z64__)
 // Include kl26/T-LC headers
-#include "platforms/arm/k26/fastled_arm_kl26.h"
+#include "platforms/arm/kl26/fastled_arm_kl26.h"
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/fastled_arm_sam.h"
