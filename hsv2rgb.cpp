@@ -305,11 +305,19 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     // offset8 = offset * 8
     uint8_t offset8 = offset;
     {
+#if defined(__AVR__)
+        // Left to its own devices, gcc turns "x <<= 3" into a loop
+        // It's much faster and smaller to just do three single-bit shifts
+        // So this business is to force that.
         offset8 <<= 1;
         asm volatile("");
         offset8 <<= 1;
         asm volatile("");
         offset8 <<= 1;
+#else
+        // On ARM and other non-AVR platforms, we just shift 3.
+        offset8 <<= 3;
+#endif
     }
 
     uint8_t third = scale8( offset8, (256 / 3));
