@@ -16,6 +16,8 @@
 #include "platforms/arm/sam/led_sysdefs_arm_sam.h"
 #elif defined(STM32F10X_MD)
 #include "platforms/arm/stm32/led_sysdefs_arm_stm32.h"
+#elif defined(__XTENSA__)
+#error "XTENSA-architecture microcontrollers are not supported."
 #else
 // AVR platforms
 #include "platforms/avr/led_sysdefs_avr.h"
