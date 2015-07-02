@@ -51,14 +51,22 @@ class SPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<S
 
 #elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
 
-template<uint8_t SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, 0x40076000> {};
+#define DECLARE_SPI0(__DATA,__CLOCK) template<uint8_t SPI_SPEED>\
+ class SPIOutput<__DATA, __CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<__DATA, __CLOCK, SPI_SPEED, 0x40076000> {};
+ #define DECLARE_SPI1(__DATA,__CLOCK) template<uint8_t SPI_SPEED>\
+  class SPIOutput<__DATA, __CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<__DATA, __CLOCK, SPI_SPEED, 0x40077000> {};
 
-#if defined(SPI2_DATA)
-
-template<uint8_t SPI_SPEED>
-class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, 0x40077000> {};
-#endif
+DECLARE_SPI0(7,13);
+DECLARE_SPI0(8,13);
+DECLARE_SPI0(11,13);
+DECLARE_SPI0(12,13);
+DECLARE_SPI0(7,14);
+DECLARE_SPI0(8,14);
+DECLARE_SPI0(11,14);
+DECLARE_SPI0(12,14);
+DECLARE_SPI1(0,20);
+DECLARE_SPI1(1,20);
+DECLARE_SPI1(21,20);
 
 #elif defined(__SAM3X8E__)
 

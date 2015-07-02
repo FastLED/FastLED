@@ -1,5 +1,5 @@
-#ifndef __FASTPIN_ARM_K20_H
-#define __FASTPIN_ARM_K20_H
+#ifndef __FASTPIN_ARM_KL26_H
+#define __FASTPIN_ARM_KL26_H
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -11,7 +11,7 @@ FASTLED_NAMESPACE_BEGIN
 #else
 
 
-/// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
+/// Template definition for teensy LC style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
 /// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
 /// The registers are data output, set output, clear output, toggle output, input, and direction
@@ -43,37 +43,7 @@ public:
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-#if 0
-/// Template definition for teensy 3.0 style ARM pins using bit banding, providing direct access to the various GPIO registers.  GCC
-/// does a poor job of optimizing around these accesses so they are not being used just yet.
-template<uint8_t PIN, int _BIT, typename _PDOR, typename _PSOR, typename _PCOR, typename _PTOR, typename _PDIR, typename _PDDR> class _ARMPIN_BITBAND {
-public:
-  typedef volatile uint32_t * port_ptr_t;
-  typedef uint32_t port_t;
-
-  inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
-  inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
-
-  inline static void hi() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = 1; }
-  inline static void lo() __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = 0; }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = val; }
-
-  inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
-
-  inline static void toggle() __attribute__ ((always_inline)) { *_PTOR::template rx<_BIT>() = 1; }
-
-  inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi();  }
-  inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *_PDOR::template rx<_BIT>() = val; }
-
-  inline static port_t hival() __attribute__ ((always_inline)) { return 1; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return 0; }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return _PDOR::template rx<_BIT>(); }
-  inline static port_t mask() __attribute__ ((always_inline)) { return 1; }
-};
-#endif
-
-// Macros for k20 pin access/definition
+// Macros for kl26 pin access/definition
 #define GPIO_BITBAND_ADDR(reg, bit) (((uint32_t)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)
 #define GPIO_BITBAND_PTR(reg, bit) ((uint32_t *)GPIO_BITBAND_ADDR((reg), (bit)))
 
