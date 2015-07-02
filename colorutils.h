@@ -1,7 +1,7 @@
 #ifndef __INC_COLORUTILS_H
 #define __INC_COLORUTILS_H
 
-#ifdef ARDUINO
+#ifdef __AVR__
 #include <avr/pgmspace.h>
 #endif
 
