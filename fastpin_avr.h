@@ -4,17 +4,21 @@
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 #define AVR_PIN_CYCLES(_PIN) (((_PIN >= 62 ) || (_PIN>=42 && _PIN<=49) || (_PIN>=14 && _PIN <=17) || (_PIN>=6 && _PIN <=9)) ? 2 : 1)
 #else
+// TODO (tim) correct these cycle adjustments if necessary.
+#if defined(__AVR_UC3B0512__)
+#define AVR_PIN_CYCLES(_PIN) (((_PIN >= 62 ) || (_PIN>=42 && _PIN<=49) || (_PIN>=14 && _PIN <=17) || (_PIN>=6 && _PIN <=9)) ? 2 : 1)
+#else
 #define AVR_PIN_CYCLES(_PIN) ((_PIN >= 24) ? 2 : 1)
 #endif
 
 
 /// Class definition for a Pin where we know the port registers at compile time for said pin.  This allows us to make
-/// a lot of optimizations, as the inlined hi/lo methods will devolve to a single io register write/bitset.  
-template<uint8_t PIN, uint8_t _MASK, typename _PORT, typename _DDR, typename _PIN> class _AVRPIN { 
+/// a lot of optimizations, as the inlined hi/lo methods will devolve to a single io register write/bitset.
+template<uint8_t PIN, uint8_t _MASK, typename _PORT, typename _DDR, typename _PIN> class _AVRPIN {
 public:
 	typedef volatile uint8_t * port_ptr_t;
 	typedef uint8_t port_t;
-	 
+
 	inline static void setOutput() { _DDR::r() |= _MASK; }
 	inline static void setInput() { _DDR::r() &= ~_MASK; }
 
@@ -23,7 +27,7 @@ public:
 	inline static void set(register uint8_t val) __attribute__ ((always_inline)) { _PORT::r() = val; }
 
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
-	
+
 	inline static void toggle() __attribute__ ((always_inline)) { _PIN::r() = _MASK; }
 
 	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
@@ -55,7 +59,7 @@ _DEFPIN_AVR(4, 0x10, B); _DEFPIN_AVR(5, 0x20, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) 
+#elif defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__)
 _IO(A); _IO(B);
 
 _DEFPIN_AVR(0, 0x01, A); _DEFPIN_AVR(1, 0x02, A); _DEFPIN_AVR(2, 0x04, A); _DEFPIN_AVR(3, 0x08, A);
@@ -100,30 +104,46 @@ _DEFPIN_AVR(28, 1<<6, C); _DEFPIN_AVR(29, 1<<7, C); _DEFPIN_AVR(30, 1<<4, D); _D
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(__AVR_UC3B0512__)
+// UC3 family, assuming function "A"
+
+_IO(A); _IO(B);
+
+#define MAX_PIN 3
+// TODO (tim): finish the rest of these...
+_DEFPIN_AVR(0, 1, A); _DEFPIN_AVR(0, 2, A); _DEFPIN_AVR(2, 4, A);
+_DEFPIN_AVR(3, 1<<14, A); _DEFPIN_AVR(4, 1<<15, A); _DEFPIN_AVR(5, 1<<16, A);
+// Function A
+#define SPI_DATA 3
+#define SPI_CLOCK 4
+#define SPI_SELECT 5
+#define AVR_HARDWARE_SPI 1
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 // megas
 
 _IO(A); _IO(B); _IO(C); _IO(D); _IO(E); _IO(F); _IO(G); _IO(H); _IO(J); _IO(K); _IO(L);
 
 #define MAX_PIN 69
-_DEFPIN_AVR(0, 1, E); _DEFPIN_AVR(1, 2, E); _DEFPIN_AVR(2, 16, E); _DEFPIN_AVR(3, 32, E); 
-_DEFPIN_AVR(4, 32, G); _DEFPIN_AVR(5, 8, E); _DEFPIN_AVR(6, 8, H); _DEFPIN_AVR(7, 16, H); 
-_DEFPIN_AVR(8, 32, H); _DEFPIN_AVR(9, 64, H); _DEFPIN_AVR(10, 16, B); _DEFPIN_AVR(11, 32, B); 
-_DEFPIN_AVR(12, 64, B); _DEFPIN_AVR(13, 128, B); _DEFPIN_AVR(14, 2, J); _DEFPIN_AVR(15, 1, J); 
-_DEFPIN_AVR(16, 2, H); _DEFPIN_AVR(17, 1, H); _DEFPIN_AVR(18, 8, D); _DEFPIN_AVR(19, 4, D); 
-_DEFPIN_AVR(20, 2, D); _DEFPIN_AVR(21, 1, D); _DEFPIN_AVR(22, 1, A); _DEFPIN_AVR(23, 2, A); 
-_DEFPIN_AVR(24, 4, A); _DEFPIN_AVR(25, 8, A); _DEFPIN_AVR(26, 16, A); _DEFPIN_AVR(27, 32, A); 
-_DEFPIN_AVR(28, 64, A); _DEFPIN_AVR(29, 128, A); _DEFPIN_AVR(30, 128, C); _DEFPIN_AVR(31, 64, C); 
-_DEFPIN_AVR(32, 32, C); _DEFPIN_AVR(33, 16, C); _DEFPIN_AVR(34, 8, C); _DEFPIN_AVR(35, 4, C); 
-_DEFPIN_AVR(36, 2, C); _DEFPIN_AVR(37, 1, C); _DEFPIN_AVR(38, 128, D); _DEFPIN_AVR(39, 4, G); 
-_DEFPIN_AVR(40, 2, G); _DEFPIN_AVR(41, 1, G); _DEFPIN_AVR(42, 128, L); _DEFPIN_AVR(43, 64, L); 
-_DEFPIN_AVR(44, 32, L); _DEFPIN_AVR(45, 16, L); _DEFPIN_AVR(46, 8, L); _DEFPIN_AVR(47, 4, L); 
-_DEFPIN_AVR(48, 2, L); _DEFPIN_AVR(49, 1, L); _DEFPIN_AVR(50, 8, B); _DEFPIN_AVR(51, 4, B); 
-_DEFPIN_AVR(52, 2, B); _DEFPIN_AVR(53, 1, B); _DEFPIN_AVR(54, 1, F); _DEFPIN_AVR(55, 2, F); 
-_DEFPIN_AVR(56, 4, F); _DEFPIN_AVR(57, 8, F); _DEFPIN_AVR(58, 16, F); _DEFPIN_AVR(59, 32, F); 
-_DEFPIN_AVR(60, 64, F); _DEFPIN_AVR(61, 128, F); _DEFPIN_AVR(62, 1, K); _DEFPIN_AVR(63, 2, K); 
-_DEFPIN_AVR(64, 4, K); _DEFPIN_AVR(65, 8, K); _DEFPIN_AVR(66, 16, K); _DEFPIN_AVR(67, 32, K); 
-_DEFPIN_AVR(68, 64, K); _DEFPIN_AVR(69, 128, K); 
+_DEFPIN_AVR(0, 1, E); _DEFPIN_AVR(1, 2, E); _DEFPIN_AVR(2, 16, E); _DEFPIN_AVR(3, 32, E);
+_DEFPIN_AVR(4, 32, G); _DEFPIN_AVR(5, 8, E); _DEFPIN_AVR(6, 8, H); _DEFPIN_AVR(7, 16, H);
+_DEFPIN_AVR(8, 32, H); _DEFPIN_AVR(9, 64, H); _DEFPIN_AVR(10, 16, B); _DEFPIN_AVR(11, 32, B);
+_DEFPIN_AVR(12, 64, B); _DEFPIN_AVR(13, 128, B); _DEFPIN_AVR(14, 2, J); _DEFPIN_AVR(15, 1, J);
+_DEFPIN_AVR(16, 2, H); _DEFPIN_AVR(17, 1, H); _DEFPIN_AVR(18, 8, D); _DEFPIN_AVR(19, 4, D);
+_DEFPIN_AVR(20, 2, D); _DEFPIN_AVR(21, 1, D); _DEFPIN_AVR(22, 1, A); _DEFPIN_AVR(23, 2, A);
+_DEFPIN_AVR(24, 4, A); _DEFPIN_AVR(25, 8, A); _DEFPIN_AVR(26, 16, A); _DEFPIN_AVR(27, 32, A);
+_DEFPIN_AVR(28, 64, A); _DEFPIN_AVR(29, 128, A); _DEFPIN_AVR(30, 128, C); _DEFPIN_AVR(31, 64, C);
+_DEFPIN_AVR(32, 32, C); _DEFPIN_AVR(33, 16, C); _DEFPIN_AVR(34, 8, C); _DEFPIN_AVR(35, 4, C);
+_DEFPIN_AVR(36, 2, C); _DEFPIN_AVR(37, 1, C); _DEFPIN_AVR(38, 128, D); _DEFPIN_AVR(39, 4, G);
+_DEFPIN_AVR(40, 2, G); _DEFPIN_AVR(41, 1, G); _DEFPIN_AVR(42, 128, L); _DEFPIN_AVR(43, 64, L);
+_DEFPIN_AVR(44, 32, L); _DEFPIN_AVR(45, 16, L); _DEFPIN_AVR(46, 8, L); _DEFPIN_AVR(47, 4, L);
+_DEFPIN_AVR(48, 2, L); _DEFPIN_AVR(49, 1, L); _DEFPIN_AVR(50, 8, B); _DEFPIN_AVR(51, 4, B);
+_DEFPIN_AVR(52, 2, B); _DEFPIN_AVR(53, 1, B); _DEFPIN_AVR(54, 1, F); _DEFPIN_AVR(55, 2, F);
+_DEFPIN_AVR(56, 4, F); _DEFPIN_AVR(57, 8, F); _DEFPIN_AVR(58, 16, F); _DEFPIN_AVR(59, 32, F);
+_DEFPIN_AVR(60, 64, F); _DEFPIN_AVR(61, 128, F); _DEFPIN_AVR(62, 1, K); _DEFPIN_AVR(63, 2, K);
+_DEFPIN_AVR(64, 4, K); _DEFPIN_AVR(65, 8, K); _DEFPIN_AVR(66, 16, K); _DEFPIN_AVR(67, 32, K);
+_DEFPIN_AVR(68, 64, K); _DEFPIN_AVR(69, 128, K);
 
 #define SPI_DATA 51
 #define SPI_CLOCK 52
@@ -135,15 +155,15 @@ _DEFPIN_AVR(68, 64, K); _DEFPIN_AVR(69, 128, K);
 #elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
 
 // teensy defs
-_IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
+_IO(B); _IO(C); _IO(D); _IO(E); _IO(F);
 
 #define MAX_PIN 23
-_DEFPIN_AVR(0, 1, B); _DEFPIN_AVR(1, 2, B); _DEFPIN_AVR(2, 4, B); _DEFPIN_AVR(3, 8, B); 
-_DEFPIN_AVR(4, 128, B); _DEFPIN_AVR(5, 1, D); _DEFPIN_AVR(6, 2, D); _DEFPIN_AVR(7, 4, D); 
-_DEFPIN_AVR(8, 8, D); _DEFPIN_AVR(9, 64, C); _DEFPIN_AVR(10, 128, C); _DEFPIN_AVR(11, 64, D); 
-_DEFPIN_AVR(12, 128, D); _DEFPIN_AVR(13, 16, B); _DEFPIN_AVR(14, 32, B); _DEFPIN_AVR(15, 64, B); 
-_DEFPIN_AVR(16, 128, F); _DEFPIN_AVR(17, 64, F); _DEFPIN_AVR(18, 32, F); _DEFPIN_AVR(19, 16, F); 
-_DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AVR(23, 32, D); 
+_DEFPIN_AVR(0, 1, B); _DEFPIN_AVR(1, 2, B); _DEFPIN_AVR(2, 4, B); _DEFPIN_AVR(3, 8, B);
+_DEFPIN_AVR(4, 128, B); _DEFPIN_AVR(5, 1, D); _DEFPIN_AVR(6, 2, D); _DEFPIN_AVR(7, 4, D);
+_DEFPIN_AVR(8, 8, D); _DEFPIN_AVR(9, 64, C); _DEFPIN_AVR(10, 128, C); _DEFPIN_AVR(11, 64, D);
+_DEFPIN_AVR(12, 128, D); _DEFPIN_AVR(13, 16, B); _DEFPIN_AVR(14, 32, B); _DEFPIN_AVR(15, 64, B);
+_DEFPIN_AVR(16, 128, F); _DEFPIN_AVR(17, 64, F); _DEFPIN_AVR(18, 32, F); _DEFPIN_AVR(19, 16, F);
+_DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AVR(23, 32, D);
 
 #define SPI_DATA 2
 #define SPI_CLOCK 1
@@ -154,21 +174,21 @@ _DEFPIN_AVR(20, 2, F); _DEFPIN_AVR(21, 1, F); _DEFPIN_AVR(22, 16, D); _DEFPIN_AV
 #elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)
 // teensy++ 2 defs
 
-_IO(A); _IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
+_IO(A); _IO(B); _IO(C); _IO(D); _IO(E); _IO(F);
 
 #define MAX_PIN 45
-_DEFPIN_AVR(0, 1, D); _DEFPIN_AVR(1, 2, D); _DEFPIN_AVR(2, 4, D); _DEFPIN_AVR(3, 8, D); 
-_DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 32, D); _DEFPIN_AVR(6, 64, D); _DEFPIN_AVR(7, 128, D); 
-_DEFPIN_AVR(8, 1, E); _DEFPIN_AVR(9, 2, E); _DEFPIN_AVR(10, 1, C); _DEFPIN_AVR(11, 2, C); 
-_DEFPIN_AVR(12, 4, C); _DEFPIN_AVR(13, 8, C); _DEFPIN_AVR(14, 16, C); _DEFPIN_AVR(15, 32, C); 
-_DEFPIN_AVR(16, 64, C); _DEFPIN_AVR(17, 128, C); _DEFPIN_AVR(18, 64, E); _DEFPIN_AVR(19, 128, E); 
-_DEFPIN_AVR(20, 1, B); _DEFPIN_AVR(21, 2, B); _DEFPIN_AVR(22, 4, B); _DEFPIN_AVR(23, 8, B); 
-_DEFPIN_AVR(24, 16, B); _DEFPIN_AVR(25, 32, B); _DEFPIN_AVR(26, 64, B); _DEFPIN_AVR(27, 128, B); 
-_DEFPIN_AVR(28, 1, A); _DEFPIN_AVR(29, 2, A); _DEFPIN_AVR(30, 4, A); _DEFPIN_AVR(31, 8, A); 
-_DEFPIN_AVR(32, 16, A); _DEFPIN_AVR(33, 32, A); _DEFPIN_AVR(34, 64, A); _DEFPIN_AVR(35, 128, A); 
-_DEFPIN_AVR(36, 16, E); _DEFPIN_AVR(37, 32, E); _DEFPIN_AVR(38, 1, F); _DEFPIN_AVR(39, 2, F); 
-_DEFPIN_AVR(40, 4, F); _DEFPIN_AVR(41, 8, F); _DEFPIN_AVR(42, 16, F); _DEFPIN_AVR(43, 32, F); 
-_DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F); 
+_DEFPIN_AVR(0, 1, D); _DEFPIN_AVR(1, 2, D); _DEFPIN_AVR(2, 4, D); _DEFPIN_AVR(3, 8, D);
+_DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 32, D); _DEFPIN_AVR(6, 64, D); _DEFPIN_AVR(7, 128, D);
+_DEFPIN_AVR(8, 1, E); _DEFPIN_AVR(9, 2, E); _DEFPIN_AVR(10, 1, C); _DEFPIN_AVR(11, 2, C);
+_DEFPIN_AVR(12, 4, C); _DEFPIN_AVR(13, 8, C); _DEFPIN_AVR(14, 16, C); _DEFPIN_AVR(15, 32, C);
+_DEFPIN_AVR(16, 64, C); _DEFPIN_AVR(17, 128, C); _DEFPIN_AVR(18, 64, E); _DEFPIN_AVR(19, 128, E);
+_DEFPIN_AVR(20, 1, B); _DEFPIN_AVR(21, 2, B); _DEFPIN_AVR(22, 4, B); _DEFPIN_AVR(23, 8, B);
+_DEFPIN_AVR(24, 16, B); _DEFPIN_AVR(25, 32, B); _DEFPIN_AVR(26, 64, B); _DEFPIN_AVR(27, 128, B);
+_DEFPIN_AVR(28, 1, A); _DEFPIN_AVR(29, 2, A); _DEFPIN_AVR(30, 4, A); _DEFPIN_AVR(31, 8, A);
+_DEFPIN_AVR(32, 16, A); _DEFPIN_AVR(33, 32, A); _DEFPIN_AVR(34, 64, A); _DEFPIN_AVR(35, 128, A);
+_DEFPIN_AVR(36, 16, E); _DEFPIN_AVR(37, 32, E); _DEFPIN_AVR(38, 1, F); _DEFPIN_AVR(39, 2, F);
+_DEFPIN_AVR(40, 4, F); _DEFPIN_AVR(41, 8, F); _DEFPIN_AVR(42, 16, F); _DEFPIN_AVR(43, 32, F);
+_DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F);
 
 #define SPI_DATA 22
 #define SPI_CLOCK 21
@@ -179,15 +199,15 @@ _DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F);
 #elif defined(__AVR_ATmega32U4__)
 
 // leonard defs
-_IO(B); _IO(C); _IO(D); _IO(E); _IO(F); 
+_IO(B); _IO(C); _IO(D); _IO(E); _IO(F);
 
 #define MAX_PIN 23
-_DEFPIN_AVR(0, 4, D); _DEFPIN_AVR(1, 8, D); _DEFPIN_AVR(2, 2, D); _DEFPIN_AVR(3, 1, D); 
-_DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 64, C); _DEFPIN_AVR(6, 128, D); _DEFPIN_AVR(7, 64, E); 
-_DEFPIN_AVR(8, 16, B); _DEFPIN_AVR(9, 32, B); _DEFPIN_AVR(10, 64, B); _DEFPIN_AVR(11, 128, B); 
-_DEFPIN_AVR(12, 64, D); _DEFPIN_AVR(13, 128, C); _DEFPIN_AVR(14, 8, B); _DEFPIN_AVR(15, 2, B); 
-_DEFPIN_AVR(16, 4, B); _DEFPIN_AVR(17, 1, B); _DEFPIN_AVR(18, 128, F); _DEFPIN_AVR(19, 64, F); 
-_DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_AVR(23, 1, F); 
+_DEFPIN_AVR(0, 4, D); _DEFPIN_AVR(1, 8, D); _DEFPIN_AVR(2, 2, D); _DEFPIN_AVR(3, 1, D);
+_DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 64, C); _DEFPIN_AVR(6, 128, D); _DEFPIN_AVR(7, 64, E);
+_DEFPIN_AVR(8, 16, B); _DEFPIN_AVR(9, 32, B); _DEFPIN_AVR(10, 64, B); _DEFPIN_AVR(11, 128, B);
+_DEFPIN_AVR(12, 64, D); _DEFPIN_AVR(13, 128, C); _DEFPIN_AVR(14, 8, B); _DEFPIN_AVR(15, 2, B);
+_DEFPIN_AVR(16, 4, B); _DEFPIN_AVR(17, 1, B); _DEFPIN_AVR(18, 128, F); _DEFPIN_AVR(19, 64, F);
+_DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_AVR(23, 1, F);
 
 #define SPI_DATA 16
 #define SPI_CLOCK 15
