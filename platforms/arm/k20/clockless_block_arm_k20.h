@@ -359,7 +359,7 @@ public:
 
 		while(nLeds--) {
 			allpixels.stepDithering();
-			#if (FASTLED_ALLOW_INTERRUPTS == 1)
+			#if 0 && (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
 			// if interrupts took longer than 45µs, punt on the current frame
 			if(ARM_DWT_CYCCNT > next_mark) {
@@ -377,7 +377,7 @@ public:
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
 
-			#if (FASTLED_ALLOW_INTERRUPTS == 1)
+			#if 0 && (FASTLED_ALLOW_INTERRUPTS == 1)
 			sei();
 			#endif
 		};
