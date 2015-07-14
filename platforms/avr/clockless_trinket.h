@@ -208,7 +208,7 @@ protected:
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
 				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
-				: /* clobber registers */
+				: "cc" /* clobber registers */
 
 
 // 1 cycle, write hi to the port
