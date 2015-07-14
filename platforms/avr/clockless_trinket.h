@@ -16,6 +16,12 @@ FASTLED_NAMESPACE_BEGIN
 #define DITHER 1
 #endif
 
+#if (F_CPU==8000000)
+#define FASTLED_SLOW_CLOCK_ADJUST _dc<1>(loopvar);
+#else
+#define FASTLED_SLOW_CLOCK_ADJUST
+#endif
+
 #define US_PER_TICK (64 / (F_CPU/1000000))
 
 // Variations on the functions in delay.h - w/a loop var passed in to preserve registers across calls by the optimizer/compiler
@@ -53,9 +59,11 @@ template<> __attribute__((always_inline)) inline void _dc<8>(register uint8_t & 
 template<> __attribute__((always_inline)) inline void _dc<9>(register uint8_t & loopvar) { _dc<5>(loopvar); _dc<4>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<10>(register uint8_t & loopvar) { _dc<6>(loopvar); _dc<4>(loopvar); }
 
-#define D1(ADJ) _dc<T1-(2+ADJ)>(loopvar); if(AVR_PIN_CYCLES(DATA_PIN)==1) _dc<1>(loopvar);
-#define D2(ADJ) _dc<T2-(2+ADJ)>(loopvar); if(AVR_PIN_CYCLES(DATA_PIN)==1) _dc<1>(loopvar);
-#define D3(ADJ) (T3-(2+ADJ)>0) ? _dc<T3-(2+ADJ)>(loopvar) : _dc<0>(loopvar); if(AVR_PIN_CYCLES(DATA_PIN)==1) _dc<1>(loopvar);
+#define DINTPIN(T,ADJ,PINADJ) (T-(PINADJ+ADJ)>0) ? _dc<T-(PINADJ+ADJ)>(loopvar) : _dc<0>(loopvar);
+#define DINT(T,ADJ) if(AVR_PIN_CYCLES(DATA_PIN)==1) { DINTPIN(T,ADJ,1) } else { DINTPIN(T,ADJ,2); }
+#define D1(ADJ) DINT(T1,ADJ)
+#define D2(ADJ) DINT(T2,ADJ)
+#define D3(ADJ) DINT(T3,ADJ)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -200,9 +208,9 @@ protected:
 // 2 cycles, sbrs on flipping the lne to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
 // load a byte from ram into the given var with the given offset
-#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]" ASM_VARS );
+#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]" ASM_VARS ); FASTLED_SLOW_CLOCK_ADJUST
 // 4 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var, clear carry
-#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc" ASM_VARS );
+#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc" ASM_VARS );  FASTLED_SLOW_CLOCK_ADJUST
 // 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
 #define SCALE02(B, N) asm __volatile__("sbrc %[s0], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
 #define SCALE12(B, N) asm __volatile__("sbrc %[s1], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
@@ -282,12 +290,10 @@ protected:
 		uint8_t b1 = 0;
 		uint8_t b2 = 0;
 
-		// Setup the pixel controller and load/scale the first byte
+		// Setup the pixel controller
 		pixels.preStepFirstByteDithering();
-		b0 = pixels.loadAndScale0();
 
 		// pull the dithering/adjustment values out of the pixels object for direct asm access
-
 		uint8_t advanceBy = pixels.advanceBy();
 		uint16_t count = pixels.mLen;
 
@@ -302,6 +308,25 @@ protected:
 		uint8_t e2 = pixels.e[RO(2)];
 
 		uint8_t loopvar=0;
+
+		// load/scale the first byte
+#if !defined(LIB8_ATTINY)
+		// we have a hardware multiply, can use loadAndScale0
+		b0 = pixels.loadAndScale0();
+#else
+		// no hardware multiply, we have to do our own mul by hand here, lest we incur a
+		// function call which will kill all of our register usage/allocations below
+		b0 = data[RO(0)];
+		{
+			LDSCL4(b0,O0) 	PRESCALEA2(d0)
+			PRESCALEB3(d0)	SCALE02(b0,0)
+			RORSC04(b0,1) 	ROR1(b0) CLC1
+			SCROR04(b0,2)		SCALE02(b0,3)
+			RORSC04(b0,4) 	ROR1(b0) CLC1
+			SCROR04(b0,5) 	SCALE02(b0,6)
+			RORSC04(b0,7) 	ROR1(b0) CLC1
+		}
+#endif
 
 		#if (FASTLED_ALLOW_INTERRUPTS == 1)
 		TCCR0A |= 0x30;
