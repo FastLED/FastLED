@@ -58,6 +58,16 @@ template<> __attribute__((always_inline)) inline void _dc<7>(register uint8_t & 
 template<> __attribute__((always_inline)) inline void _dc<8>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<9>(register uint8_t & loopvar) { _dc<5>(loopvar); _dc<4>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<10>(register uint8_t & loopvar) { _dc<6>(loopvar); _dc<4>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<11>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<1>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<12>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<2>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<13>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<3>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<14>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<4>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<15>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<5>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<16>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<6>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<17>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<7>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<18>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<8>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<19>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<9>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc<20>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<10>(loopvar); }
 
 #define DINTPIN(T,ADJ,PINADJ) (T-(PINADJ+ADJ)>0) ? _dc<T-(PINADJ+ADJ)>(loopvar) : _dc<0>(loopvar);
 #define DINT(T,ADJ) if(AVR_PIN_CYCLES(DATA_PIN)==1) { DINTPIN(T,ADJ,1) } else { DINTPIN(T,ADJ,2); }
