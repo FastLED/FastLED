@@ -17,7 +17,7 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 
 #if (F_CPU==8000000)
-#define FASTLED_SLOW_CLOCK_ADJUST _dc<1>(loopvar);
+#define FASTLED_SLOW_CLOCK_ADJUST "mov r0,r0\n\t"
 #else
 #define FASTLED_SLOW_CLOCK_ADJUST
 #endif
@@ -215,43 +215,58 @@ protected:
 #define HI1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
 #define LO1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[lo]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=lo; }
-// 2 cycles, sbrs on flipping the lne to lo if we're pushing out a 0
+
+// 2 cycles, sbrs on flipping the line to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
 // load a byte from ram into the given var with the given offset
-#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]" ASM_VARS ); FASTLED_SLOW_CLOCK_ADJUST
+#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]\n\t" FASTLED_SLOW_CLOCK_ADJUSTASM_VARS ); 
 // 4 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var, clear carry
-#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc" ASM_VARS );  FASTLED_SLOW_CLOCK_ADJUST
-// 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
-#define SCALE02(B, N) asm __volatile__("sbrc %[s0], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
-#define SCALE12(B, N) asm __volatile__("sbrc %[s1], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
-#define SCALE22(B, N) asm __volatile__("sbrc %[s2], " #N "\n\tadd %[" #B "], %[scale_base]" ASM_VARS );
+#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc\n\t" FASTLED_SLOW_CLOCK_ADJUST ASM_VARS ); 
 
+#if (DITHER==1) 
 // apply dithering value  before we do anything with scale_base
-#define PRESCALE4(D) if(DITHER) { asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\tbrcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\t" ASM_VARS); } \
-				      else { _dc<4>(loopvar); }
+#define PRESCALE4(D) asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\tbrcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\t" ASM_VARS);
 
 // Do the add for the prescale
-#define PRESCALEA2(D) if(DITHER) { asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\t" ASM_VARS); } \
-				      else { _dc<2>(loopvar); }
-// Do the clamp for the prescale, clear carry when we're done - NOTE: Must ensure carry flag state is preserved!
-#define PRESCALEB3(D) if(DITHER) { asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tCLC" ASM_VARS); } \
-				      else { _dc<3>(loopvar); }
+#define PRESCALEA2(D) asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\t" ASM_VARS);
 
+// Do the clamp for the prescale, clear carry when we're done - NOTE: Must ensure carry flag state is preserved!
+#define PRESCALEB3(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tCLC" ASM_VARS);
+
+#else
+#define PRESCALE4(D) _dc<4>(loopvar);
+#define PRESCALEA2(D) _dc<2>(loopvar);
+#define PRESCALEB3(D) _dc<3>(loopvar);
+#endif
+
+// 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
+#define _SCALE02(B, N) "sbrc %[s0], " #N "\n\tadd %[" #B "], %[scale_base]\n\t"
+#define _SCALE12(B, N) "sbrc %[s1], " #N "\n\tadd %[" #B "], %[scale_base]\n\t" 
+#define _SCALE22(B, N) "sbrc %[s2], " #N "\n\tadd %[" #B "], %[scale_base]\n\t" 
+#define SCALE02(B,N) asm __volatile__( _SCALE02(B,N) ASM_VARS);
+#define SCALE12(B,N) asm __volatile__( _SCALE12(B,N) ASM_VARS);
+#define SCALE22(B,N) asm __volatile__( _SCALE22(B,N) ASM_VARS);
 
 // 1 cycle - rotate right, pulling in from carry
-#define ROR1(B) asm __volatile__("ror %[" #B "]" ASM_VARS );
+#define _ROR1(B) "ror %[" #B "]\n\t" 
+#define ROR1(B) asm __volatile__( _ROR1(B) ASM_VARS);
+
 // 1 cycle, clear the carry bit
-#define CLC1 asm __volatile__("clc" ASM_VARS );
-// 1 cycle, move one register to another
-#define MOV1(B1, B2) asm __volatile__("mov %[" #B1 "], %[" #B2 "]" ASM_VARS );
+#define _CLC1 "clc\n\t" 
+#define CLC1 asm __volatile__( _CLC1 ASM_VARS );
+
+// 2 cycles, rortate right, pulling in from carry then clear the carry bit
+#define RORCLC2(B) asm __volatile__( _ROR1(B) _CLC1 ASM_VARS );
+
 // 4 cycles, rotate, clear carry, scale next bit
-#define RORSC04(B, N) ROR1(B) CLC1 SCALE02(B, N)
-#define RORSC14(B, N) ROR1(B) CLC1 SCALE12(B, N)
-#define RORSC24(B, N) ROR1(B) CLC1 SCALE22(B, N)
+#define RORSC04(B, N) asm __volatile__( _ROR1(B) _CLC1 _SCALE02(B, N) ASM_VARS );
+#define RORSC14(B, N) asm __volatile__( _ROR1(B) _CLC1 _SCALE12(B, N) ASM_VARS );
+#define RORSC24(B, N) asm __volatile__( _ROR1(B) _CLC1 _SCALE22(B, N) ASM_VARS );
+
 // 4 cycles, scale bit, rotate, clear carry
-#define SCROR04(B, N) SCALE02(B,N) ROR1(B) CLC1
-#define SCROR14(B, N) SCALE12(B,N) ROR1(B) CLC1
-#define SCROR24(B, N) SCALE22(B,N) ROR1(B) CLC1
+#define SCROR04(B, N) asm __volatile__( _SCALE02(B,N) _ROR1(B) _CLC1 ASM_VARS); 
+#define SCROR14(B, N) asm __volatile__( _SCALE12(B,N) _ROR1(B) _CLC1 ASM_VARS);
+#define SCROR24(B, N) asm __volatile__( _SCALE22(B,N) _ROR1(B) _CLC1 ASM_VARS);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Loop life cycle
@@ -269,7 +284,9 @@ protected:
 #define DONE asm __volatile__("2:" ASM_VARS );
 
 // 2 cycles - increment the data pointer
-#define IDATA2 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__"  ASM_VARS );
+#define IDATA2 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t"  ASM_VARS );
+#define IDATACLC3 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" _CLC1  ASM_VARS );
+
 // 2 cycles - decrement the counter
 #define DCOUNT2 asm __volatile__("sbiw %[count], 1" ASM_VARS );
 // 2 cycles - jump to the beginning of the loop
@@ -376,13 +393,13 @@ protected:
 #if TRINKET_SCALE
 				// Inline scaling - RGB ordering
 				DNOP
-				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2)
+				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2) 
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d1)	D2(3)	LO1	SCALE12(b1,0)	D3(2)
-				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)
+				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 RORCLC2(b1)		D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR14(b1,2)		D2(4)	LO1 SCALE12(b1,3)	D3(2)
-				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)
+				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)
-				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 ROR1(b1) CLC1	D3(2)
+				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 				D3(0)
 				switch(XTRA0) {
 					case 4: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
@@ -392,12 +409,12 @@ protected:
 				}
 				HI1 D1(1) QLO2(b1, 7) LDSCL4(b2,O2) 	D2(4)	LO1	PRESCALEA2(d2)	D3(2)
 				HI1	D1(1) QLO2(b1, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b2,0)	D3(2)
-				HI1 D1(1) QLO2(b1, 5) RORSC24(b2,1) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
+				HI1 D1(1) QLO2(b1, 5) RORSC24(b2,1) 	D2(4)	LO1 RORCLC2(b2) 	D3(2)
 				HI1 D1(1) QLO2(b1, 4) SCROR24(b2,2)		D2(4)	LO1 SCALE22(b2,3)	D3(2)
-				HI1 D1(1) QLO2(b1, 3) RORSC24(b2,4) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
+				HI1 D1(1) QLO2(b1, 3) RORSC24(b2,4) 	D2(4)	LO1 RORCLC2(b2) 	D3(2)
 				HI1 D1(1) QLO2(b1, 2) SCROR24(b2,5) 	D2(4)	LO1 SCALE22(b2,6)	D3(2)
-				HI1 D1(1) QLO2(b1, 1) RORSC24(b2,7) 	D2(4)	LO1 ROR1(b2) CLC1	D3(2)
-				HI1 D1(1) QLO2(b1, 0) IDATA2 CLC1		D2(3) 	LO1 				D3(0)
+				HI1 D1(1) QLO2(b1, 1) RORSC24(b2,7) 	D2(4)	LO1 RORCLC2(b2) 	D3(2)
+				HI1 D1(1) QLO2(b1, 0) IDATACLC3 		D2(3) 	LO1 				D3(0)
 				switch(XTRA0) {
 					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
 					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
@@ -406,11 +423,11 @@ protected:
 				}
 				HI1 D1(1) QLO2(b2, 7) LDSCL4(b0,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)
 				HI1	D1(1) QLO2(b2, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b0,0)	D3(2)
-				HI1 D1(1) QLO2(b2, 5) RORSC04(b0,1) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
+				HI1 D1(1) QLO2(b2, 5) RORSC04(b0,1) 	D2(4)	LO1 RORCLC2(b0) 	D3(2)
 				HI1 D1(1) QLO2(b2, 4) SCROR04(b0,2)		D2(4)	LO1 SCALE02(b0,3)	D3(2)
-				HI1 D1(1) QLO2(b2, 3) RORSC04(b0,4) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
+				HI1 D1(1) QLO2(b2, 3) RORSC04(b0,4) 	D2(4)	LO1 RORCLC2(b0)  	D3(2)
 				HI1 D1(1) QLO2(b2, 2) SCROR04(b0,5) 	D2(4)	LO1 SCALE02(b0,6)	D3(2)
-				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 ROR1(b0) CLC1	D3(2)
+				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 RORCLC2(b0) 	D3(2)
 				// HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2
 				HI1 D1(1) QLO2(b2, 0) 					D2(0) 	LO1
 				switch(XTRA0) {
