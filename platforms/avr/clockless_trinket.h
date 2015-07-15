@@ -187,16 +187,13 @@ protected:
 // The variables that our various asm statemetns use.  The same block of variables needs to be declared for
 // all the asm blocks because GCC is pretty stupid and it would clobber variables happily or optimize code away too aggressively
 #define ASM_VARS : /* write variables */				\
+				[loopvar] "+a" (loopvar),				\
 				[count] "+x" (count),					\
 				[data] "+z" (data),						\
 				[b0] "+a" (b0),							\
 				[b1] "+a" (b1),							\
 				[b2] "+a" (b2),							\
-				[scale_base] "+a" (scale_base),			\
-				[loopvar] "+a" (loopvar),				\
-				[d0] "+r" (d0),							\
-				[d1] "+r" (d1),							\
-				[d2] "+r" (d2)							\
+				[scale_base] "+a" (scale_base)			\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
 				[hi] "r" (hi),							\
@@ -204,6 +201,9 @@ protected:
 				[s0] "r" (s0),							\
 				[s1] "r" (s1),							\
 				[s2] "r" (s2),							\
+				[d0] "r" (d0),							\
+				[d1] "r" (d1),							\
+				[d2] "r" (d2),							\
 				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),		\
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
@@ -211,6 +211,7 @@ protected:
 				: "cc" /* clobber registers */
 
 
+// Note: the code in the else in HI1/LO1 will be turned into an sts (2 cycle, 2 word) opcode
 // 1 cycle, write hi to the port
 #define HI1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
@@ -243,9 +244,9 @@ protected:
 #define _SCALE02(B, N) "sbrc %[s0], " #N "\n\tadd %[" #B "], %[scale_base]\n\t"
 #define _SCALE12(B, N) "sbrc %[s1], " #N "\n\tadd %[" #B "], %[scale_base]\n\t" 
 #define _SCALE22(B, N) "sbrc %[s2], " #N "\n\tadd %[" #B "], %[scale_base]\n\t" 
-#define SCALE02(B,N) asm __volatile__( _SCALE02(B,N) ASM_VARS);
-#define SCALE12(B,N) asm __volatile__( _SCALE12(B,N) ASM_VARS);
-#define SCALE22(B,N) asm __volatile__( _SCALE22(B,N) ASM_VARS);
+#define SCALE02(B,N) asm __volatile__( _SCALE02(B,N) ASM_VARS );
+#define SCALE12(B,N) asm __volatile__( _SCALE12(B,N) ASM_VARS );
+#define SCALE22(B,N) asm __volatile__( _SCALE22(B,N) ASM_VARS );
 
 // 1 cycle - rotate right, pulling in from carry
 #define _ROR1(B) "ror %[" #B "]\n\t" 
@@ -264,9 +265,9 @@ protected:
 #define RORSC24(B, N) asm __volatile__( _ROR1(B) _CLC1 _SCALE22(B, N) ASM_VARS );
 
 // 4 cycles, scale bit, rotate, clear carry
-#define SCROR04(B, N) asm __volatile__( _SCALE02(B,N) _ROR1(B) _CLC1 ASM_VARS); 
-#define SCROR14(B, N) asm __volatile__( _SCALE12(B,N) _ROR1(B) _CLC1 ASM_VARS);
-#define SCROR24(B, N) asm __volatile__( _SCALE22(B,N) _ROR1(B) _CLC1 ASM_VARS);
+#define SCROR04(B, N) asm __volatile__( _SCALE02(B,N) _ROR1(B) _CLC1 ASM_VARS ); 
+#define SCROR14(B, N) asm __volatile__( _SCALE12(B,N) _ROR1(B) _CLC1 ASM_VARS );
+#define SCROR24(B, N) asm __volatile__( _SCALE22(B,N) _ROR1(B) _CLC1 ASM_VARS );
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Loop life cycle
@@ -431,10 +432,10 @@ protected:
 				// HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2
 				HI1 D1(1) QLO2(b2, 0) 					D2(0) 	LO1
 				switch(XTRA0) {
-					case 4: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
-					case 3: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
-					case 2: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
-					case 1: D3(0) HI1 D1(1) QLO2(b1,0) D2(0) LO1;
+					case 4: D3(0) HI1 D1(1) QLO2(b2,0) D2(0) LO1;
+					case 3: D3(0) HI1 D1(1) QLO2(b2,0) D2(0) LO1;
+					case 2: D3(0) HI1 D1(1) QLO2(b2,0) D2(0) LO1;
+					case 1: D3(0) HI1 D1(1) QLO2(b2,0) D2(0) LO1;
 				}
 				D3(13);
 #else
