@@ -219,7 +219,7 @@ protected:
 // 2 cycles, sbrs on flipping the line to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
 // load a byte from ram into the given var with the given offset
-#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]\n\t" FASTLED_SLOW_CLOCK_ADJUSTASM_VARS ); 
+#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]\n\t" FASTLED_SLOW_CLOCK_ADJUST ASM_VARS ); 
 // 4 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var, clear carry
 #define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc\n\t" FASTLED_SLOW_CLOCK_ADJUST ASM_VARS ); 
 
