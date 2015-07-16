@@ -190,15 +190,14 @@ protected:
 				[loopvar] "+a" (loopvar),				\
 				[count] "+x" (count),					\
 				[data] "+z" (data),						\
-				[b0] "+a" (b0),							\
 				[b1] "+a" (b1),							\
-				[b2] "+a" (b2),							\
 				[scale_base] "+a" (scale_base)			\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
+				[b0] "a" (b0),							\
 				[hi] "r" (hi),							\
 				[lo] "r" (lo),							\
-				[s0] "r" (s0),							\
+				[s0] "r" (s0),					  		\
 				[s1] "r" (s1),							\
 				[s2] "r" (s2),							\
 				[d0] "r" (d0),							\
@@ -282,11 +281,14 @@ protected:
 // define the beginning of the loop
 #define LOOP asm __volatile__("1:" ASM_VARS );
 // define the end of the loop
-#define DONE asm __volatile__("2:" ASM_VARS );
+#define DONE asm __volatile__("2:" ASM_VARS );grea
 
 // 2 cycles - increment the data pointer
 #define IDATA2 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t"  ASM_VARS );
 #define IDATACLC3 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" _CLC1  ASM_VARS );
+
+// 1 cycle mov
+#define MOV1(B1, B2) asm __volatile__("mov %[" #B1 "], %[" #B2 "]" ASM_VARS );
 
 // 2 cycles - decrement the counter
 #define DCOUNT2 asm __volatile__("sbiw %[count], 1" ASM_VARS );
@@ -314,9 +316,10 @@ protected:
 		data_t lo = *port & ~mask;
 		*port = lo;
 
+		// the byte currently being written out
 		uint8_t b0 = 0;
+		// the byte currently being worked on to write the next out
 		uint8_t b1 = 0;
-		uint8_t b2 = 0;
 
 		// Setup the pixel controller
 		pixels.preStepFirstByteDithering();
@@ -401,45 +404,50 @@ protected:
 				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
-				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 				D3(0)
+				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 	
 				switch(XTRA0) {
-					case 4: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-					case 3: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-					case 2: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-					case 1: HI1 D1(1) QLO2(b0,0) D2(0) LO1 D3(0);
-				}
-				HI1 D1(1) QLO2(b1, 7) LDSCL4(b2,O2) 	D2(4)	LO1	PRESCALEA2(d2)	D3(2)
-				HI1	D1(1) QLO2(b1, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b2,0)	D3(2)
-				HI1 D1(1) QLO2(b1, 5) RORSC24(b2,1) 	D2(4)	LO1 RORCLC2(b2) 	D3(2)
-				HI1 D1(1) QLO2(b1, 4) SCROR24(b2,2)		D2(4)	LO1 SCALE22(b2,3)	D3(2)
-				HI1 D1(1) QLO2(b1, 3) RORSC24(b2,4) 	D2(4)	LO1 RORCLC2(b2) 	D3(2)
-				HI1 D1(1) QLO2(b1, 2) SCROR24(b2,5) 	D2(4)	LO1 SCALE22(b2,6)	D3(2)
-				HI1 D1(1) QLO2(b1, 1) RORSC24(b2,7) 	D2(4)	LO1 RORCLC2(b2) 	D3(2)
-				HI1 D1(1) QLO2(b1, 0) IDATACLC3 		D2(3) 	LO1 				D3(0)
+					case 4: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 3: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 2: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 1: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+				} 
+				MOV1(b0,b1) D3(1)
+
+				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O2) 	D2(4)	LO1	PRESCALEA2(d2)	D3(2)
+				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b1,0)	D3(2)
+				HI1 D1(1) QLO2(b0, 5) RORSC24(b1,1) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
+				HI1 D1(1) QLO2(b0, 4) SCROR24(b1,2)		D2(4)	LO1 SCALE22(b1,3)	D3(2)
+				HI1 D1(1) QLO2(b0, 3) RORSC24(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
+				HI1 D1(1) QLO2(b0, 2) SCROR24(b1,5) 	D2(4)	LO1 SCALE22(b1,6)	D3(2)
+				HI1 D1(1) QLO2(b0, 1) RORSC24(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
+				HI1 D1(1) QLO2(b0, 0) IDATACLC3 		D2(3) 	LO1 				
 				switch(XTRA0) {
-					case 4: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 3: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 2: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-					case 1: HI1 D1(1) QLO2(b1,0) D2(0) LO1 D3(0);
-				}
-				HI1 D1(1) QLO2(b2, 7) LDSCL4(b0,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)
-				HI1	D1(1) QLO2(b2, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b0,0)	D3(2)
-				HI1 D1(1) QLO2(b2, 5) RORSC04(b0,1) 	D2(4)	LO1 RORCLC2(b0) 	D3(2)
-				HI1 D1(1) QLO2(b2, 4) SCROR04(b0,2)		D2(4)	LO1 SCALE02(b0,3)	D3(2)
-				HI1 D1(1) QLO2(b2, 3) RORSC04(b0,4) 	D2(4)	LO1 RORCLC2(b0)  	D3(2)
-				HI1 D1(1) QLO2(b2, 2) SCROR04(b0,5) 	D2(4)	LO1 SCALE02(b0,6)	D3(2)
-				HI1 D1(1) QLO2(b2, 1) RORSC04(b0,7) 	D2(4)	LO1 RORCLC2(b0) 	D3(2)
-				// HI1 D1(1) QLO2(b2, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2
-				HI1 D1(1) QLO2(b2, 0) 					D2(0) 	LO1
+					case 4: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 3: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 2: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 1: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+				} 
+				MOV1(b0,b1) D3(1)
+
+				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)
+				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b1,0)	D3(2)
+				HI1 D1(1) QLO2(b0, 5) RORSC04(b1,1) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
+				HI1 D1(1) QLO2(b0, 4) SCROR04(b1,2)		D2(4)	LO1 SCALE02(b1,3)	D3(2)
+				HI1 D1(1) QLO2(b0, 3) RORSC04(b1,4) 	D2(4)	LO1 RORCLC2(b1)  	D3(2)
+				HI1 D1(1) QLO2(b0, 2) SCROR04(b1,5) 	D2(4)	LO1 SCALE02(b1,6)	D3(2)
+				HI1 D1(1) QLO2(b0, 1) RORSC04(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
+				// HI1 D1(1) QLO2(b1, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2
+				HI1 D1(1) QLO2(b0, 0) 					D2(0) 	LO1
 				switch(XTRA0) {
-					case 4: D3(0) HI1 D1(1) QLO2(b2,0) D2(0) LO1;
-					case 3: D3(0) HI1 D1(1) QLO2(b2,0) D2(0) LO1;
-					case 2: D3(0) HI1 D1(1) QLO2(b2,0) D2(0) LO1;
-					case 1: D3(0) HI1 D1(1) QLO2(b2,0) D2(0) LO1;
-				}
-				D3(13);
+					case 4: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 3: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 2: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 1: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+				} 
+				MOV1(b0,b1) D3(13)
 #else
-				// no inline scaling - non-straight RGB ordering
+				// no inline scaling - non-straight RGB ordering -- no longer in line with the actual asm macros above, left for
+				// reference only
 				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
 				HI1 D1(1) QLO2(b0, 6) 				D2(0) 	LO1 D3(0)
 				HI1 D1(1) QLO2(b0, 5) 				D2(0) 	LO1 D3(0)
@@ -448,7 +456,7 @@ protected:
 				HI1 D1(1) QLO2(b0, 2) 				D2(0)	LO1 D3(0)
 				HI1 D1(1) QLO2(b0, 1) 				D2(0) 	LO1 D3(0)
 				HI1 D1(1) QLO2(b0, 0) 				D2(0) 	LO1 D3(0)
-				HI1	D1(1) QLO2(b1, 7) LD2(b2,O2) 	D2(2)	LO1 D3(0)
+				HI1	D1(1) QLO2(b1, 7) LD2(b1,O2) 	D2(2)	LO1 D3(0)
 				HI1 D1(1) QLO2(b1, 6) 				D2(0) 	LO1 D3(0)
 				HI1 D1(1) QLO2(b1, 5) 				D2(0) 	LO1 D3(0)
 				HI1 D1(1) QLO2(b1, 4) 				D2(0) 	LO1 D3(0)
@@ -456,14 +464,14 @@ protected:
 				HI1 D1(1) QLO2(b1, 2) 				D2(0) 	LO1 D3(0)
 				HI1 D1(1) QLO2(b1, 1) 				D2(0) 	LO1 D3(0)
 				HI1 D1(1) QLO2(b1, 0) IDATA2 		D2(2)	LO1 D3(0)
-				HI1	D1(1) QLO2(b2, 7) LD2(b0,O0) 	D2(2)	LO1 D3(0)
-				HI1 D1(1) QLO2(b2, 6) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b2, 5) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b2, 4) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b2, 3) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b2, 2) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b2, 1) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b2, 0) 				D2(0) 	LO1 D3(0)
+				HI1	D1(1) QLO2(b1, 7) LD2(b0,O0) 	D2(2)	LO1 D3(0)
+				HI1 D1(1) QLO2(b1, 6) 				D2(0) 	LO1 D3(0)
+				HI1 D1(1) QLO2(b1, 5) 				D2(0) 	LO1 D3(0)
+				HI1 D1(1) QLO2(b1, 4) 				D2(0) 	LO1 D3(0)
+				HI1 D1(1) QLO2(b1, 3) 				D2(0) 	LO1 D3(0)
+				HI1 D1(1) QLO2(b1, 2) 				D2(0) 	LO1 D3(0)
+				HI1 D1(1) QLO2(b1, 1) 				D2(0) 	LO1 D3(0)
+				HI1 D1(1) QLO2(b1, 0) 				D2(0) 	LO1 D3(0)
 #endif
 
 				#if (FASTLED_ALLOW_INTERRUPTS == 1)
