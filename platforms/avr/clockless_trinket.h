@@ -47,16 +47,16 @@ template<> __attribute__((always_inline)) inline void _dc<-4>(register uint8_t &
 template<> __attribute__((always_inline)) inline void _dc<-3>(register uint8_t & loopvar) {}
 template<> __attribute__((always_inline)) inline void _dc<-2>(register uint8_t & loopvar) {}
 template<> __attribute__((always_inline)) inline void _dc<-1>(register uint8_t & loopvar) {}
-template<> __attribute__((always_inline)) inline void _dc<0>(register uint8_t & loopvar) {}
-template<> __attribute__((always_inline)) inline void _dc<1>(register uint8_t & loopvar) {asm __volatile__("mov r0,r0":::);}
-template<> __attribute__((always_inline)) inline void _dc<2>(register uint8_t & loopvar) {asm __volatile__("rjmp .+0":::);}
-template<> __attribute__((always_inline)) inline void _dc<3>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<4>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<5>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<3>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<6>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); _dc<2>(loopvar);}
-template<> __attribute__((always_inline)) inline void _dc<7>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<8>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<9>(register uint8_t & loopvar) { _dc<5>(loopvar); _dc<4>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc< 0>(register uint8_t & loopvar) {}
+template<> __attribute__((always_inline)) inline void _dc< 1>(register uint8_t & loopvar) {asm __volatile__("mov r0,r0":::);}
+template<> __attribute__((always_inline)) inline void _dc< 2>(register uint8_t & loopvar) {asm __volatile__("rjmp .+0":::);}
+template<> __attribute__((always_inline)) inline void _dc< 3>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc< 4>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc< 5>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<3>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc< 6>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); _dc<2>(loopvar);}
+template<> __attribute__((always_inline)) inline void _dc< 7>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc< 8>(register uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }
+template<> __attribute__((always_inline)) inline void _dc< 9>(register uint8_t & loopvar) { _dc<5>(loopvar); _dc<4>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<10>(register uint8_t & loopvar) { _dc<6>(loopvar); _dc<4>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<11>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<1>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<12>(register uint8_t & loopvar) { _dc<10>(loopvar); _dc<2>(loopvar); }
