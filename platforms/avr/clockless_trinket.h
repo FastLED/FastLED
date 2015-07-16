@@ -17,7 +17,7 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 
 #if (F_CPU==8000000)
-#define FASTLED_SLOW_CLOCK_ADJUST "mov r0,r0\n\t"
+#define FASTLED_SLOW_CLOCK_ADJUST asm __volatile__ ("mov r0,r0\n\t");
 #else
 #define FASTLED_SLOW_CLOCK_ADJUST
 #endif
@@ -215,16 +215,16 @@ protected:
 
 // Note: the code in the else in HI1/LO1 will be turned into an sts (2 cycle, 2 word) opcode
 // 1 cycle, write hi to the port
-#define HI1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
+#define HI1 FASTLED_SLOW_CLOCK_ADJUST if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
 #define LO1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[lo]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=lo; }
 
 // 2 cycles, sbrs on flipping the line to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
 // load a byte from ram into the given var with the given offset
-#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]\n\t" FASTLED_SLOW_CLOCK_ADJUST ASM_VARS ); 
+#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]\n\t" ASM_VARS ); 
 // 4 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var, clear carry
-#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc\n\t" FASTLED_SLOW_CLOCK_ADJUST ASM_VARS ); 
+#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc\n\t" ASM_VARS ); 
 
 #if (DITHER==1) 
 // apply dithering value  before we do anything with scale_base
@@ -412,14 +412,14 @@ protected:
 				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
-				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 ADJDITHER2(d1,e1)	
+				HI1 D1(1) QLO2(b0, 0) 
 				switch(XTRA0) {
-					case 4: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
-					case 3: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
-					case 2: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
-					case 1: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 4: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
+					case 3: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
+					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
+					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 				} 
-				MOV1(b0,b1) D3(3)
+				ADJDITHER2(d1,e1) D2(2) LO1 MOV1(b0,b1) D3(1)
 
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O2) 	D2(4)	LO1	PRESCALEA2(d2)	D3(2)
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b1,0)	D3(2)
@@ -428,14 +428,14 @@ protected:
 				HI1 D1(1) QLO2(b0, 3) RORSC24(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR24(b1,5) 	D2(4)	LO1 SCALE22(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC24(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
-				HI1 D1(1) QLO2(b0, 0) IDATACLC3 		D2(3) 	LO1 ADJDITHER2(d2,e2)			
+				HI1 D1(1) QLO2(b0, 0) 			
 				switch(XTRA0) {
-					case 4: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
-					case 3: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
-					case 2: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
-					case 1: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 4: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
+					case 3: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
+					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
+					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 				} 
-				MOV1(b0,b1) D3(3)
+				IDATACLC3 MOV1(b0,b1) D2(4) LO1 ADJDITHER2(d2,e2) D3(2)
 
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b1,0)	D3(2)
@@ -444,7 +444,6 @@ protected:
 				HI1 D1(1) QLO2(b0, 3) RORSC04(b1,4) 	D2(4)	LO1 RORCLC2(b1)  	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR04(b1,5) 	D2(4)	LO1 SCALE02(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC04(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
-				// HI1 D1(1) QLO2(b1, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2
 				HI1 D1(1) QLO2(b0, 0) 	 
 				switch(XTRA0) {
 					case 4: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
