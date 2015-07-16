@@ -1,6 +1,8 @@
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FastLED/public)
+
 IMPORTANT NOTE: For AVR based systems, avr-gcc 4.8.x is supported, as is avr-gcc 4.3 and earlier.  There are known issues with avr-gcc 4.7 and timing based chipsets like the WS2812B.  If you are using a linux system make sure you are using avr-gcc 4.8.x not avr-gcc 4.7.x.
 
-FastLED 3.0
+FastLED 3.1
 ===========
 
 IMPORTANT NOTE:  If you are building for AVR based systems, please do not use any version of the arduino
