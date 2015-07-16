@@ -187,10 +187,13 @@ protected:
 // The variables that our various asm statemetns use.  The same block of variables needs to be declared for
 // all the asm blocks because GCC is pretty stupid and it would clobber variables happily or optimize code away too aggressively
 #define ASM_VARS : /* write variables */				\
-				[loopvar] "+a" (loopvar),				\
 				[count] "+x" (count),					\
 				[data] "+z" (data),						\
 				[b1] "+a" (b1),							\
+				[d0] "+r" (d0),							\
+				[d1] "+r" (d1),							\
+				[d2] "+r" (d2),							\
+				[loopvar] "+a" (loopvar),				\
 				[scale_base] "+a" (scale_base)			\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
@@ -200,9 +203,9 @@ protected:
 				[s0] "r" (s0),					  		\
 				[s1] "r" (s1),							\
 				[s2] "r" (s2),							\
-				[d0] "r" (d0),							\
-				[d1] "r" (d1),							\
-				[d2] "r" (d2),							\
+				[e0] "r" (e0),							\
+				[e1] "r" (e1),							\
+				[e2] "r" (e2),							\
 				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),		\
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
@@ -272,7 +275,8 @@ protected:
 // Loop life cycle
 
 // dither adjustment macro - should be kept in sync w/what's in stepDithering
-#define ADJDITHER2(D, E) D = E - D;
+// #define ADJDITHER2(D, E) D = E - D;
+#define ADJDITHER2(D, E) asm __volatile__ ("neg %[" #D "]\n\tadd %[" #D "],%[" #E "]\n\t" ASM_VARS); 
 
 // #define xstr(a) str(a)
 // #define str(a) #a
@@ -281,7 +285,7 @@ protected:
 // define the beginning of the loop
 #define LOOP asm __volatile__("1:" ASM_VARS );
 // define the end of the loop
-#define DONE asm __volatile__("2:" ASM_VARS );grea
+#define DONE asm __volatile__("2:" ASM_VARS );
 
 // 2 cycles - increment the data pointer
 #define IDATA2 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t"  ASM_VARS );
@@ -295,7 +299,10 @@ protected:
 // 2 cycles - jump to the beginning of the loop
 #define JMPLOOP2 asm __volatile__("rjmp 1b" ASM_VARS );
 // 2 cycles - jump out of the loop
-#define BRLOOP1 asm __volatile__("breq 2f" ASM_VARS );
+#define BRLOOP1 asm __volatile__("brne 3\n\trjmp 2f\n\t3:" ASM_VARS );
+
+// 5 cycles 2 sbiw, 3 for the breq/rjmp
+#define ENDLOOP5 asm __volatile__("sbiw %[count], 1\n\tbreq L_%=\n\trjmp 1b\n\tL_%=:\n\t" ASM_VARS);
 
 // NOP using the variables, forcing a move
 #define DNOP asm __volatile__("mov r0,r0" ASM_VARS);
@@ -359,32 +366,33 @@ protected:
 		}
 #endif
 
-		#if (FASTLED_ALLOW_INTERRUPTS == 1)
-		TCCR0A |= 0x30;
-		OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
-		TIFR0 = 0x04;
-		#endif
+		// #if (FASTLED_ALLOW_INTERRUPTS == 1)
+		// TCCR0A |= 0x30;
+		// OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
+		// TIFR0 = 0x04;
+		// #endif
 		{
-			while(count)
+			// while(--count)
 			{
 				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
 				// by the E values (see the definition )
-				// LOOP;
-				ADJDITHER2(d0,e0);
-				ADJDITHER2(d1,e1);
-				ADJDITHER2(d2,e2);
-				count--;
-				NOP;
-				#if (FASTLED_ALLOW_INTERRUPTS == 1)
-				cli();
-				if(TIFR0 & 0x04) {
-					sei();
-					TCCR0A &= ~0x30;
-					return;
-				}
-				hi = *port | mask;
-				lo = *port & ~mask;
-				#endif
+				DNOP;
+				LOOP;
+
+				// ADJDITHER2(d0,e0);
+				// ADJDITHER2(d1,e1);
+				// ADJDITHER2(d2,e2);
+				// NOP;
+				// #if (FASTLED_ALLOW_INTERRUPTS == 1)
+				// cli();
+				// if(TIFR0 & 0x04) {
+				// 	sei();
+				// 	TCCR0A &= ~0x30;
+				// 	return;
+				// }
+				// hi = *port | mask;
+				// lo = *port & ~mask;
+				// #endif
 
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
@@ -396,7 +404,7 @@ protected:
 				// we're cycling back around and doing the above for byte 0.
 #if TRINKET_SCALE
 				// Inline scaling - RGB ordering
-				DNOP
+				// DNOP
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2) 
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d1)	D2(3)	LO1	SCALE12(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 RORCLC2(b1)		D3(2)
@@ -404,14 +412,14 @@ protected:
 				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
-				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 	
+				HI1 D1(1) QLO2(b0, 0) 				 	D2(0)	LO1 ADJDITHER2(d1,e1)	
 				switch(XTRA0) {
 					case 4: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 					case 3: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 					case 2: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 					case 1: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 				} 
-				MOV1(b0,b1) D3(1)
+				MOV1(b0,b1) D3(3)
 
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O2) 	D2(4)	LO1	PRESCALEA2(d2)	D3(2)
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b1,0)	D3(2)
@@ -420,14 +428,14 @@ protected:
 				HI1 D1(1) QLO2(b0, 3) RORSC24(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR24(b1,5) 	D2(4)	LO1 SCALE22(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC24(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
-				HI1 D1(1) QLO2(b0, 0) IDATACLC3 		D2(3) 	LO1 				
+				HI1 D1(1) QLO2(b0, 0) IDATACLC3 		D2(3) 	LO1 ADJDITHER2(d2,e2)			
 				switch(XTRA0) {
 					case 4: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 					case 3: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 					case 2: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 					case 1: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 				} 
-				MOV1(b0,b1) D3(1)
+				MOV1(b0,b1) D3(3)
 
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b1,0)	D3(2)
@@ -437,14 +445,15 @@ protected:
 				HI1 D1(1) QLO2(b0, 2) SCROR04(b1,5) 	D2(4)	LO1 SCALE02(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC04(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				// HI1 D1(1) QLO2(b1, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2
-				HI1 D1(1) QLO2(b0, 0) 					D2(0) 	LO1
+				HI1 D1(1) QLO2(b0, 0) ADJDITHER2(d0,e0)	D2(2) 	LO1 
 				switch(XTRA0) {
 					case 4: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 					case 3: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 					case 2: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 					case 1: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
 				} 
-				MOV1(b0,b1) D3(13)
+				MOV1(b0,b1) D3(6)
+				ENDLOOP5
 #else
 				// no inline scaling - non-straight RGB ordering -- no longer in line with the actual asm macros above, left for
 				// reference only
@@ -474,13 +483,14 @@ protected:
 				HI1 D1(1) QLO2(b1, 0) 				D2(0) 	LO1 D3(0)
 #endif
 
-				#if (FASTLED_ALLOW_INTERRUPTS == 1)
-				// set the counter mark
-				OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
-				TIFR0 = 0x04;
-				sei();
-				#endif
+				// #if (FASTLED_ALLOW_INTERRUPTS == 1)
+				// // set the counter mark
+				// OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
+				// TIFR0 = 0x04;
+				// sei();
+				// #endif
 			}
+			DONE;
 		}
 
 		#if (FASTLED_ALLOW_INTERRUPTS == 1)
