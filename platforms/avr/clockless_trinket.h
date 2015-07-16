@@ -445,14 +445,14 @@ protected:
 				HI1 D1(1) QLO2(b0, 2) SCROR04(b1,5) 	D2(4)	LO1 SCALE02(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC04(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				// HI1 D1(1) QLO2(b1, 0) DCOUNT2 BRLOOP1 	D2(3) 	LO1 D3(2) JMPLOOP2
-				HI1 D1(1) QLO2(b0, 0) ADJDITHER2(d0,e0)	D2(2) 	LO1 
+				HI1 D1(1) QLO2(b0, 0) 	 
 				switch(XTRA0) {
-					case 4: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
-					case 3: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
-					case 2: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
-					case 1: D3(0) HI1 D1(1) QLO2(b0,0) D2(0) LO1
+					case 4: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
+					case 3: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
+					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
+					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 				} 
-				MOV1(b0,b1) D3(6)
+				ADJDITHER2(d0,e0) MOV1(b0,b1) D2(3) LO1 D3(6)
 				ENDLOOP5
 #else
 				// no inline scaling - non-straight RGB ordering -- no longer in line with the actual asm macros above, left for
