@@ -100,6 +100,8 @@ public:
 		FastPin<DATA_PIN>::setOutput();
 	}
 
+	virtual uint16_t getMaxRefreshRate() const { return 400; }
+
 	virtual void clearLeds(int nLeds) {
 		CRGB zeros(0,0,0);
 		showAdjTime((uint8_t*)&zeros, nLeds, zeros, false, 0);

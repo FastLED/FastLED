@@ -437,7 +437,8 @@ public:
 	/// call show faster than this rate will simply wait.  Defaults to 400Hz.  Set
 	/// to 0 to have no maximum rate.
 	/// @param refresh - maximum refresh rate in hz
-	void setMaxRefreshRate(uint16_t refresh);
+	/// @param constrain - constrain refresh rate to the slowest speed yet set 
+	void setMaxRefreshRate(uint16_t refresh, bool constrain=false);
 
 	/// for debugging, will keep track of time between calls to countFPS, and every
 	/// nFrames calls, it will update an internal counter for the current FPS.

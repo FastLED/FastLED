@@ -23,7 +23,6 @@ CFastLED::CFastLED() {
 	// m_nControllers = 0;
 	m_Scale = 255;
 	m_nFPS = 0;
-	setMaxRefreshRate(400);
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
@@ -34,6 +33,7 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 
 	pLed->init();
 	pLed->setLeds(data + nOffset, nLeds);
+	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
 	return *pLed;
 }
 
@@ -199,12 +199,18 @@ void CFastLED::countFPS(int nFrames) {
   }
 }
 
-void CFastLED::setMaxRefreshRate(uint16_t refresh) {
-		if(refresh > 0) {
-			m_nMinMicros = 1000000 / refresh;
-		} else {
-			m_nMinMicros = 0;
-		}
+void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
+  if(constrain) { 
+    // if we're constraining, the new value of m_nMinMicros _must_ be higher than previously (because we're only
+    // allowed to slow things down if constraining)
+    if(refresh > 0) { 
+      m_nMinMicros = ( (1000000/refresh) >  m_nMinMicros) ? (1000000/refresh) : m_nMinMicros;
+    }
+  } else if(refresh > 0) {
+    m_nMinMicros = 1000000 / refresh;
+  } else {
+    m_nMinMicros = 0;
+  }
 }
 
 
