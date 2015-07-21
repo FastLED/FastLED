@@ -396,9 +396,24 @@ typedef uint32_t TProgmemRGBPalette16[16];
 typedef uint32_t TProgmemHSVPalette16[16];
 #define TProgmemPalette16 TProgmemRGBPalette16
 
+typedef const uint8_t TProgmemRGBGradientPalette_byte ;
+typedef const TProgmemRGBGradientPalette_byte *TProgmemRGBGradientPalette_bytes;
+typedef union {
+    struct {
+        uint8_t index;
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+    };
+    uint32_t dword;
+    uint8_t  bytes[4];
+} TRGBGradientPaletteEntryUnion;
+
+
 // Convert a 16-entry palette to a 256-entry palette
 void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256);
 void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette256& destpal256);
+
 
 class CHSVPalette16 {
 public:
@@ -684,7 +699,33 @@ public:
         fill_gradient_RGB( &(entries[0]), 16, c1, c2, c3, c4);
     }
 
-
+    CRGBPalette16( TProgmemRGBGradientPalette_bytes progpal )
+    {
+        *this = progpal;
+    }
+    CRGBPalette16& operator=( TProgmemRGBGradientPalette_bytes progpal )
+    {
+        TRGBGradientPaletteEntryUnion* progent = (TRGBGradientPaletteEntryUnion*)(progpal);
+        TRGBGradientPaletteEntryUnion u;
+        u.dword = pgm_read_dword_near( progent);
+        CRGB rgbstart( u.r, u.g, u.b);
+        
+        int indexstart = 0;
+        uint8_t istart8 = 0;
+        uint8_t iend8 = 0;
+        while( indexstart < 255) {
+            progent++;
+            u.dword = pgm_read_dword_near( progent);
+            int indexend  = u.index;
+            CRGB rgbend( u.r, u.g, u.b);
+            istart8 = indexstart / 16;
+            iend8   = indexend   / 16;
+            fill_gradient_RGB( &(entries[0]), istart8, rgbstart, iend8, rgbend);
+            indexstart = indexend;
+            rgbstart = rgbend;
+        }
+        return *this;
+    }
 };
 
 class CRGBPalette256 {
@@ -804,6 +845,29 @@ public:
         fill_gradient_RGB( &(entries[0]), 256, c1, c2, c3, c4);
     }
 
+    CRGBPalette256( TProgmemRGBGradientPalette_bytes progpal )
+    {
+        *this = progpal;
+    }
+    CRGBPalette256& operator=( TProgmemRGBGradientPalette_bytes progpal )
+    {
+        TRGBGradientPaletteEntryUnion* progent = (TRGBGradientPaletteEntryUnion*)(progpal);
+        TRGBGradientPaletteEntryUnion u;
+        u.dword = pgm_read_dword_near( progent);
+        CRGB rgbstart( u.r, u.g, u.b);
+        
+        int indexstart = 0;
+        while( indexstart < 255) {
+            progent++;
+            u.dword = pgm_read_dword_near( progent);
+            int indexend  = u.index;
+            CRGB rgbend( u.r, u.g, u.b);
+            fill_gradient_RGB( &(entries[0]), indexstart, rgbstart, indexend, rgbend);
+            indexstart = indexend;
+            rgbstart = rgbend;
+        }
+        return *this;
+    }
 };
 
 
@@ -906,6 +970,56 @@ void map_data_into_colors_through_palette(
 void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
                                 CRGBPalette16& targetPalette,
                                 uint8_t maxChanges=24);
+
+
+
+
+//  You can also define a static RGB palette very compactly in terms of a series
+//  of connected color gradients.
+//  For example, if you want the first 3/4ths of the palette to be a slow
+//  gradient ramping from black to red, and then the remaining 1/4 of the
+//  palette to be a quicker ramp to white, you specify just three points: the
+//  starting black point (at index 0), the red midpoint (at index 192),
+//  and the final white point (at index 255).  It looks like this:
+//
+//    index:  0                                    192          255
+//            |----------r-r-r-rrrrrrrrRrRrRrRrRRRR-|-RRWRWWRWWW-|
+//    color: (0,0,0)                           (255,0,0)    (255,255,255)
+//
+//  Here's how you'd define that gradient palette:
+//
+//    DEFINE_GRADIENT_PALETTE( black_to_red_to_white_p ) {
+//          0,      0,  0,  0,    /* at index 0, black(0,0,0) */
+//        192,    255,  0,  0,    /* at index 192, red(255,0,0) */
+//        255,    255,255,255    /* at index 255, white(255,255,255) */
+//    };
+//
+//  This format is designed for compact storage.  The example palette here
+//  takes up just 12 bytes of PROGMEM (flash) storage, and zero bytes
+//  of SRAM when not currently in use.
+//
+//  To use one of these gradient palettes, simply assign it into a
+//  CRGBPalette16 or a CRGBPalette256, like this:
+//
+//    CRGBPalette16 pal = black_to_red_to_white_p;
+//
+//  When the assignment is made, the gradients are expanded out into
+//  either 16 or 256 palette entries, depending on the kind of palette
+//  object they're assigned to.
+//
+//  IMPORTANT NOTES & CAVEATS:
+//
+//  - The last 'index' position MUST BE 255!  Failure to end with
+//    index 255 will result in program hangs or crashes.
+//
+//  - At this point, these gradient palette definitions MUST BE
+//    stored in PROGMEM on AVR-based Arduinos.  If you use the
+//    DEFINE_GRADIENT_PALETTE macro, this is taken care of automatically.
+//
+
+#define DEFINE_GRADIENT_PALETTE(X) \
+  extern const TProgmemRGBGradientPalette_byte X[] PROGMEM =
+
 
 FASTLED_NAMESPACE_END
 
