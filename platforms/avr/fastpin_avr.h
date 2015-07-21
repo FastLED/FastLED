@@ -72,7 +72,7 @@ _DEFPIN_AVR(8, 0x04, B); _DEFPIN_AVR(9, 0x02, B); _DEFPIN_AVR(10, 0x01, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(__AVR_ATtiny167__)
+#elif defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__)
 _IO(A); _IO(B);
 
 #define MAX_PIN 15
