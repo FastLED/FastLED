@@ -538,7 +538,7 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
     uint8_t lo4 = index & 0x0F;
 
     //  CRGB rgb1 = pal[ hi4];
-    CRGB entry   =  pgm_read_dword_near( &(pal[0]) + hi4 );
+    CRGB entry   =  FL_PGM_READ_DWORD_NEAR( &(pal[0]) + hi4 );
 
     uint8_t red1   = entry.red;
     uint8_t green1 = entry.green;
@@ -549,9 +549,9 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
     if( blend ) {
 
         if( hi4 == 15 ) {
-            entry = pgm_read_dword_near( &(pal[0]) );
+            entry =   FL_PGM_READ_DWORD_NEAR( &(pal[0]) );
         } else {
-            entry = pgm_read_dword_near( &(pal[1]) + hi4 );
+            entry =   FL_PGM_READ_DWORD_NEAR( &(pal[1]) + hi4 );
         }
 
         uint8_t f2 = lo4 << 4;

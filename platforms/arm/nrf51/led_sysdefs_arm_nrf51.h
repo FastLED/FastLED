@@ -28,6 +28,12 @@ typedef uint8_t boolean;
 #define NO_PROGMEM
 #define NEED_CXX_BITS
 
+// Default to NOT using PROGMEM here
+#ifndef FASTLED_USE_PROGMEM
+#define FASTLED_USE_PROGMEM 0
+#endif
+
+
 #define cli()  __disable_irq();
 #define sei() __enable_irq();
 

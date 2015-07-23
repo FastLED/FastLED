@@ -1,28 +1,9 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
-#ifdef FASTLED_AVR
-#include <avr/pgmspace.h>
-#define USE_PROGMEM
-#endif
-
 FASTLED_NAMESPACE_BEGIN
 
-// Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734
-#ifdef FASTLED_AVR
-#ifdef PROGMEM
-#undef PROGMEM
-#define PROGMEM __attribute__((section(".progmem.data")))
-#endif
-#endif
-
-#ifdef USE_PROGMEM
-#define FL_PROGMEM PROGMEM
-#define P(x) pgm_read_byte_near(p + x)
-#else
-#define FL_PROGMEM
-#define P(x) p[(x)]
-#endif
+#define P(x) FL_PGM_READ_BYTE_NEAR(p + x)
 
 FL_PROGMEM static uint8_t const p[] = { 151,160,137,91,90,15,
    131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,

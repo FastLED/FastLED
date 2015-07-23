@@ -27,6 +27,13 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
+
+// Default to using PROGMEM here
+#ifndef FASTLED_USE_PROGMEM
+#define FASTLED_USE_PROGMEM 1
+#endif
+
+
 extern "C" {
 #  if defined(CORE_TEENSY) || defined(TEENSYDUINO)
 extern volatile unsigned long timer0_millis_count;

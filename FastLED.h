@@ -40,6 +40,7 @@
 #include "./dmx.h"
 
 #include "platforms.h"
+#include "fastled_progmem.h"
 
 #include "lib8tion.h"
 #include "hsv2rgb.h"

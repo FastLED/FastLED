@@ -7,15 +7,6 @@
 
 FASTLED_USING_NAMESPACE
 
-// Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734
-#ifdef FASTLED_AVR
-#ifdef PROGMEM
-#undef PROGMEM
-#define PROGMEM __attribute__((section(".progmem.data")))
-#endif
-#endif
-
-
 
 // Preset color schemes, such as they are.
 
@@ -26,7 +17,7 @@ FASTLED_USING_NAMESPACE
 // use each one, so you only 'pay for' those you actually use.
 
 
-extern const TProgmemRGBPalette16 CloudColors_p PROGMEM =
+extern const TProgmemRGBPalette16 CloudColors_p FL_PROGMEM =
 {
     CRGB::Blue,
     CRGB::DarkBlue,
@@ -49,7 +40,7 @@ extern const TProgmemRGBPalette16 CloudColors_p PROGMEM =
     CRGB::SkyBlue
 };
 
-extern const TProgmemRGBPalette16 LavaColors_p PROGMEM =
+extern const TProgmemRGBPalette16 LavaColors_p FL_PROGMEM =
 {
     CRGB::Black,
     CRGB::Maroon,
@@ -72,7 +63,7 @@ extern const TProgmemRGBPalette16 LavaColors_p PROGMEM =
 };
 
 
-extern const TProgmemRGBPalette16 OceanColors_p PROGMEM =
+extern const TProgmemRGBPalette16 OceanColors_p FL_PROGMEM =
 {
     CRGB::MidnightBlue,
     CRGB::DarkBlue,
@@ -95,7 +86,7 @@ extern const TProgmemRGBPalette16 OceanColors_p PROGMEM =
     CRGB::LightSkyBlue
 };
 
-extern const TProgmemRGBPalette16 ForestColors_p PROGMEM =
+extern const TProgmemRGBPalette16 ForestColors_p FL_PROGMEM =
 {
     CRGB::DarkGreen,
     CRGB::DarkGreen,
@@ -119,7 +110,7 @@ extern const TProgmemRGBPalette16 ForestColors_p PROGMEM =
 };
 
 /// HSV Rainbow
-extern const TProgmemRGBPalette16 RainbowColors_p PROGMEM =
+extern const TProgmemRGBPalette16 RainbowColors_p FL_PROGMEM =
 {
     0xFF0000, 0xD52A00, 0xAB5500, 0xAB7F00,
     0xABAB00, 0x56D500, 0x00FF00, 0x00D52A,
@@ -129,7 +120,7 @@ extern const TProgmemRGBPalette16 RainbowColors_p PROGMEM =
 
 /// HSV Rainbow colors with alternatating stripes of black
 #define RainbowStripesColors_p RainbowStripeColors_p
-extern const TProgmemRGBPalette16 RainbowStripeColors_p PROGMEM =
+extern const TProgmemRGBPalette16 RainbowStripeColors_p FL_PROGMEM =
 {
     0xFF0000, 0x000000, 0xAB5500, 0x000000,
     0xABAB00, 0x000000, 0x00FF00, 0x000000,
@@ -141,7 +132,7 @@ extern const TProgmemRGBPalette16 RainbowStripeColors_p PROGMEM =
 /// Basically, everything but the greens, which tend to make
 /// people's skin look unhealthy.  This palette is good for
 /// lighting at a club or party, where it'll be shining on people.
-extern const TProgmemRGBPalette16 PartyColors_p PROGMEM =
+extern const TProgmemRGBPalette16 PartyColors_p FL_PROGMEM =
 {
     0x5500AB, 0x84007C, 0xB5004B, 0xE5001B,
     0xE81700, 0xB84700, 0xAB7700, 0xABAB00,
@@ -155,7 +146,7 @@ extern const TProgmemRGBPalette16 PartyColors_p PROGMEM =
 /// the usual 0-255, as the last 15 colors will be
 /// 'wrapping around' from the hot end to the cold end,
 /// which looks wrong.
-extern const TProgmemRGBPalette16 HeatColors_p PROGMEM =
+extern const TProgmemRGBPalette16 HeatColors_p FL_PROGMEM =
 {
     0x000000,
     0x330000, 0x660000, 0x990000, 0xCC0000, 0xFF0000,

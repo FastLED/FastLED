@@ -1,9 +1,6 @@
 #ifndef __INC_COLORUTILS_H
 #define __INC_COLORUTILS_H
 
-#ifdef __AVR__
-#include <avr/pgmspace.h>
-#endif
 
 #include "pixeltypes.h"
 
@@ -443,7 +440,7 @@ public:
     CHSVPalette16( const TProgmemHSVPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
-            CRGB xyz   =  pgm_read_dword_near( rhs + i);
+            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
             entries[i].hue = xyz.red;
             entries[i].sat = xyz.green;
             entries[i].val = xyz.blue;
@@ -452,7 +449,7 @@ public:
     CHSVPalette16& operator=( const TProgmemHSVPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
-            CRGB xyz   =  pgm_read_dword_near( rhs + i);
+            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
             entries[i].hue = xyz.red;
             entries[i].sat = xyz.green;
             entries[i].val = xyz.blue;
@@ -631,13 +628,13 @@ public:
     CRGBPalette16( const TProgmemRGBPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
-            entries[i] =  pgm_read_dword_near( rhs + i);
+            entries[i] =  FL_PGM_READ_DWORD_NEAR( rhs + i);
         }
     }
     CRGBPalette16& operator=( const TProgmemRGBPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
-            entries[i] =  pgm_read_dword_near( rhs + i);
+            entries[i] =  FL_PGM_READ_DWORD_NEAR( rhs + i);
         }
         return *this;
     }
@@ -707,7 +704,7 @@ public:
     {
         TRGBGradientPaletteEntryUnion* progent = (TRGBGradientPaletteEntryUnion*)(progpal);
         TRGBGradientPaletteEntryUnion u;
-        u.dword = pgm_read_dword_near( progent);
+        u.dword = FL_PGM_READ_DWORD_NEAR( progent);
         CRGB rgbstart( u.r, u.g, u.b);
         
         int indexstart = 0;
@@ -715,7 +712,7 @@ public:
         uint8_t iend8 = 0;
         while( indexstart < 255) {
             progent++;
-            u.dword = pgm_read_dword_near( progent);
+            u.dword = FL_PGM_READ_DWORD_NEAR( progent);
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
             istart8 = indexstart / 16;
@@ -853,13 +850,13 @@ public:
     {
         TRGBGradientPaletteEntryUnion* progent = (TRGBGradientPaletteEntryUnion*)(progpal);
         TRGBGradientPaletteEntryUnion u;
-        u.dword = pgm_read_dword_near( progent);
+        u.dword = FL_PGM_READ_DWORD_NEAR( progent);
         CRGB rgbstart( u.r, u.g, u.b);
         
         int indexstart = 0;
         while( indexstart < 255) {
             progent++;
-            u.dword = pgm_read_dword_near( progent);
+            u.dword = FL_PGM_READ_DWORD_NEAR( progent);
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
             fill_gradient_RGB( &(entries[0]), indexstart, rgbstart, indexend, rgbend);
@@ -1018,7 +1015,7 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
 //
 
 #define DEFINE_GRADIENT_PALETTE(X) \
-  extern const TProgmemRGBGradientPalette_byte X[] PROGMEM =
+  extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
 
 
 FASTLED_NAMESPACE_END
