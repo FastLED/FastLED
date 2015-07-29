@@ -8,9 +8,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-#if (CLK_DBL == 1)
-#define DATA_RATE_MHZ(X) (((F_CPU / 1000000L) / X)/2)
-#define DATA_RATE_KHZ(X) (((F_CPU / 1000L) / X)/2)
+#if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
+#define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
+#define DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
 #else
 #define DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
 #define DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
