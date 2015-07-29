@@ -198,8 +198,8 @@ protected:
 
 		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
-			uint8_t b = pixels.loadAndScale0(); 
-			mSPI.writeWord(0xFF00 | b);		
+			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0(); 
+			mSPI.writeWord(b);		
 			uint16_t w = pixels.loadAndScale1() << 8; 
 			w |= pixels.loadAndScale2(); 
 			mSPI.writeWord(w);		
