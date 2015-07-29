@@ -178,7 +178,11 @@ protected:
 
 		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
-			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
+			uint8_t b = pixels.loadAndScale0(); 
+			mSPI.writeWord(0xFF00 | b);		
+			uint16_t w = pixels.loadAndScale1() << 8; 
+			w |= pixels.loadAndScale2(); 
+			mSPI.writeWord(w);		
 			pixels.stepDithering();
 		}
 		endBoundary(nLeds);
@@ -194,7 +198,11 @@ protected:
 
 		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
-			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
+			uint8_t b = pixels.loadAndScale0(); 
+			mSPI.writeWord(0xFF00 | b);		
+			uint16_t w = pixels.loadAndScale1() << 8; 
+			w |= pixels.loadAndScale2(); 
+			mSPI.writeWord(w);		
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
@@ -211,7 +219,10 @@ protected:
 
 		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
-			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
+			mSPI.writeByte(0xFF); 
+			uint8_t b = pixels.loadAndScale0(); mSPI.writeByte(b);		
+			b = pixels.loadAndScale1(); mSPI.writeByte(b);		
+			b = pixels.loadAndScale2(); mSPI.writeByte(b);		
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
