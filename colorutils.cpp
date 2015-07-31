@@ -736,7 +736,7 @@ void nblendPaletteTowardPalette( CRGBPalette16& current, CRGBPalette16& target, 
     p2 = (uint8_t*)target.entries;
 
     const uint8_t totalChannels = sizeof(CRGBPalette16);
-    for( byte i = 0; i < totalChannels; i++) {
+    for( uint8_t i = 0; i < totalChannels; i++) {
         // if the values are equal, no changes are needed
         if( p1[i] == p2[i] ) { continue; }
 
