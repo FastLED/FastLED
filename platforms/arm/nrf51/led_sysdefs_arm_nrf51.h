@@ -33,6 +33,9 @@ typedef uint8_t boolean;
 #define FASTLED_USE_PROGMEM 0
 #endif
 
+#ifndef FASTLED_ALLOW_INTERRUPTS
+#define FASTLED_ALLOW_INTERRUPTS 1
+#endif
 
 #define cli()  __disable_irq();
 #define sei() __enable_irq();

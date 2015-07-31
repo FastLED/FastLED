@@ -147,8 +147,15 @@ public:
 // #define SEI_CHK
 
 // don't allow more than 800 clocks (50µs) between leds
+#if (FASTLED_ALLOW_INTERRUPTS==1)
 #define SEI_CHK LED_TIMER->CC[0] = (WAIT_TIME * (F_CPU/1000000)); LED_TIMER->TASKS_CLEAR; LED_TIMER->EVENTS_COMPARE[0] = 0;
 #define CLI_CHK cli(); if(LED_TIMER->EVENTS_COMPARE[0]) { LED_TIMER->TASKS_STOP = 1; return 0; }
+#define INNER_SEI sei();
+#else
+#define SEI_CHK
+#define CLI_CHK
+#define INNER_SEI delaycycles<1>();
+#endif
 
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
   // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
@@ -174,6 +181,7 @@ public:
     LED_TIMER->BITMODE = TIMER_BITMODE_BITMODE_16Bit;
     LED_TIMER->SHORTS = TIMER_SHORTS_COMPARE0_CLEAR_Msk;
     LED_TIMER->TASKS_START = 1;
+
 
     SEI_CHK;
       while(len >= 1) {
@@ -206,7 +214,7 @@ public:
         HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
         HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(3); pdata += 3;
         HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(0)];
-        HI2; DT1(4); BC2(0); DT2(2); LO2; SEI_CHK; sei(); DT3(9);
+        HI2; DT1(4); BC2(0); DT2(2); LO2; SEI_CHK; INNER_SEI; DT3(9);
 
         b = ~scale8(b2, scale.raw[RO(0)]);
         CLI_CHK;
