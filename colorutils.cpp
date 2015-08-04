@@ -755,4 +755,38 @@ void nblendPaletteTowardPalette( CRGBPalette16& current, CRGBPalette16& target, 
     }
 }
 
+
+uint8_t applyGamma_video( uint8_t brightness, float gamma)
+{
+    float orig;
+    float adj;
+    orig = (float)(brightness) / (255.0);
+    adj =  pow( orig, gamma)   * (255.0);
+    uint8_t result = (uint8_t)(adj);
+    if( (brightness > 0) && (result == 0)) {
+        result = 1; // never gamma-adjust a positive number down to zero
+    }
+    return result;
+}
+
+CRGB applyGamma_video( const CRGB& orig, float gamma)
+{
+    CRGB adj;
+    adj.r = applyGamma_video( orig.r, gamma);
+    adj.g = applyGamma_video( orig.g, gamma);
+    adj.b = applyGamma_video( orig.b, gamma);
+    return adj;
+}
+
+CRGB applyGamma_video( const CRGB& orig, float gammaR, float gammaG, float gammaB)
+{
+    CRGB adj;
+    adj.r = applyGamma_video( orig.r, gammaR);
+    adj.g = applyGamma_video( orig.g, gammaG);
+    adj.b = applyGamma_video( orig.b, gammaB);
+    return adj;
+}
+
+
+
 FASTLED_NAMESPACE_END

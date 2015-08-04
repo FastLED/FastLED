@@ -407,6 +407,10 @@ typedef union {
     uint8_t  bytes[4];
 } TRGBGradientPaletteEntryUnion;
 
+typedef uint8_t TDynamicRGBGradientPalette_byte ;
+typedef const TDynamicRGBGradientPalette_byte *TDynamicRGBGradientPalette_bytes;
+typedef TDynamicRGBGradientPalette_bytes TDynamicRGBGradientPalettePtr;
+
 
 // Convert a 16-entry palette to a 256-entry palette
 void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256);
@@ -724,6 +728,30 @@ public:
         }
         return *this;
     }
+    CRGBPalette16& loadDynamicGradientPalette( TDynamicRGBGradientPalette_bytes gpal )
+    {
+        TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(gpal);
+        TRGBGradientPaletteEntryUnion u;
+        u = *ent;
+        CRGB rgbstart( u.r, u.g, u.b);
+        
+        int indexstart = 0;
+        uint8_t istart8 = 0;
+        uint8_t iend8 = 0;
+        while( indexstart < 255) {
+            ent++;
+            u = *ent;
+            int indexend  = u.index;
+            CRGB rgbend( u.r, u.g, u.b);
+            istart8 = indexstart / 16;
+            iend8   = indexend   / 16;
+            fill_gradient_RGB( &(entries[0]), istart8, rgbstart, iend8, rgbend);
+            indexstart = indexend;
+            rgbstart = rgbend;
+        }
+        return *this;
+    }
+
 };
 
 class CRGBPalette256 {
@@ -858,6 +886,25 @@ public:
         while( indexstart < 255) {
             progent++;
             u.dword = FL_PGM_READ_DWORD_NEAR( progent);
+            int indexend  = u.index;
+            CRGB rgbend( u.r, u.g, u.b);
+            fill_gradient_RGB( &(entries[0]), indexstart, rgbstart, indexend, rgbend);
+            indexstart = indexend;
+            rgbstart = rgbend;
+        }
+        return *this;
+    }
+    CRGBPalette256& loadDynamicGradientPalette( TDynamicRGBGradientPalette_bytes gpal )
+    {
+        TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(gpal);
+        TRGBGradientPaletteEntryUnion u;
+        u = *ent;
+        CRGB rgbstart( u.r, u.g, u.b);
+        
+        int indexstart = 0;
+        while( indexstart < 255) {
+            ent++;
+            u = *ent;
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
             fill_gradient_RGB( &(entries[0]), indexstart, rgbstart, indexend, rgbend);
@@ -1017,6 +1064,18 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
 
 #define DEFINE_GRADIENT_PALETTE(X) \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
+
+
+// Functions to apply gamma adjustments, either:
+// - a single gamma adjustment to a single scalar value,
+// - a single gamma adjustment to each channel of a CRGB color, or
+// - different gamma adjustments for each channel of a CRFB color.
+// Note that the gamma is specified as a traditional floating point value
+// e.g., "2.5", and as such these functions should not be called in
+// your innermost pixel loops.
+uint8_t applyGamma_video( uint8_t brightness, float gamma);
+CRGB    applyGamma_video( const CRGB& orig, float gamma);
+CRGB    applyGamma_video( const CRGB& orig, float gammaR, float gammaG, float gammaB);
 
 
 FASTLED_NAMESPACE_END
