@@ -395,6 +395,7 @@ typedef uint32_t TProgmemHSVPalette16[16];
 
 typedef const uint8_t TProgmemRGBGradientPalette_byte ;
 typedef const TProgmemRGBGradientPalette_byte *TProgmemRGBGradientPalette_bytes;
+typedef TProgmemRGBGradientPalette_bytes TProgmemRGBGradientPalettePtr;
 typedef union {
     struct {
         uint8_t index;

@@ -69,10 +69,10 @@ void fill_gradient_RGB( CRGB* leds,
     if( endpos < startpos ) {
         uint16_t t = endpos;
         CRGB tc = endcolor;
-        startpos = t;
-        startcolor = tc;
         endcolor = startcolor;
         endpos = startpos;
+        startpos = t;
+        startcolor = tc;
     }
 
     saccum87 rdistance87;
