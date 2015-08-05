@@ -1071,12 +1071,24 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
 // - a single gamma adjustment to a single scalar value,
 // - a single gamma adjustment to each channel of a CRGB color, or
 // - different gamma adjustments for each channel of a CRFB color.
+//
 // Note that the gamma is specified as a traditional floating point value
 // e.g., "2.5", and as such these functions should not be called in
-// your innermost pixel loops.
+// your innermost pixel loops, or in animations that are extremely
+// low on program storage space.  Nevertheless, if you need these
+// functions, here they are.
+//
+// Furthermore, bear in mind that CRGB leds have only eight bits
+// per channel of color resolution, and that very small, subtle shadings
+// may not be visible.
 uint8_t applyGamma_video( uint8_t brightness, float gamma);
 CRGB    applyGamma_video( const CRGB& orig, float gamma);
 CRGB    applyGamma_video( const CRGB& orig, float gammaR, float gammaG, float gammaB);
+// The "n" versions below modify their arguments in-place.
+CRGB&  napplyGamma_video( CRGB& rgb, float gamma);
+CRGB&  napplyGamma_video( CRGB& rgb, float gammaR, float gammaG, float gammaB);
+void   napplyGamma_video( CRGB* rgbarray, uint16_t count, float gamma);
+void   napplyGamma_video( CRGB* rgbarray, uint16_t count, float gammaR, float gammaG, float gammaB);
 
 
 FASTLED_NAMESPACE_END

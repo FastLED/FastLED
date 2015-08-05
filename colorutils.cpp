@@ -787,6 +787,31 @@ CRGB applyGamma_video( const CRGB& orig, float gammaR, float gammaG, float gamma
     return adj;
 }
 
+CRGB& napplyGamma_video( CRGB& rgb, float gamma)
+{
+    rgb = applyGamma_video( rgb, gamma);
+    return rgb;
+}
+
+CRGB& napplyGamma_video( CRGB& rgb, float gammaR, float gammaG, float gammaB)
+{
+    rgb = applyGamma_video( rgb, gammaR, gammaG, gammaB);
+    return rgb;
+}
+
+void napplyGamma_video( CRGB* rgbarray, uint16_t count, float gamma)
+{
+    for( uint16_t i = 0; i < count; i++) {
+        rgbarray[i] = applyGamma_video( rgbarray[i], gamma);
+    }
+}
+
+void napplyGamma_video( CRGB* rgbarray, uint16_t count, float gammaR, float gammaG, float gammaB)
+{
+    for( uint16_t i = 0; i < count; i++) {
+        rgbarray[i] = applyGamma_video( rgbarray[i], gammaR, gammaG, gammaB);
+    }
+}
 
 
 FASTLED_NAMESPACE_END
