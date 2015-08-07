@@ -8,6 +8,8 @@
 #define BRIGHTNESS  200
 #define FRAMES_PER_SECOND 60
 
+bool gReverseDirection = false;
+
 CRGB leds[NUM_LEDS];
 
 // Fire2012 with programmable Color Palette
@@ -149,7 +151,14 @@ void Fire2012WithPalette()
       // Scale the heat value from 0-255 down to 0-240
       // for best results with color palettes.
       byte colorindex = scale8( heat[j], 240);
-      leds[j] = ColorFromPalette( gPal, colorindex);
+      CRGB color = ColorFromPalette( gPal, colorindex);
+      int pixelnumber;
+      if( gReverseDirection ) {
+        pixelnumber = (NUM_LEDS-1) - j;
+      } else {
+        pixelnumber = j;
+      }
+      leds[pixelnumber] = color;
     }
 }
 
