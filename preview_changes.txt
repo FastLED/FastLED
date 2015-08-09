@@ -16,4 +16,5 @@ FastLED 3.1 preview changes:
 * Spark Core support
 * Teensy LC support
 * rfduino support
-
+* greatly improved clockless output for avr
+* greatly improved clockless output for arm m0 boards
