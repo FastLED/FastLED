@@ -936,8 +936,7 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
     return result;
 }
 #elif SCALE16_AVRASM == 1
-LIB8STATIC
-uint16_t scale16( uint16_t i, fract16 scale )
+LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
 {
     uint32_t result = 0;
     const uint8_t  zero = 0;
@@ -1091,14 +1090,12 @@ LIB8STATIC int8_t abs8( int8_t i)
 // sfract15ToFloat: conversion from sfract15 fixed point to
 //                  IEEE754 32-bit float.
 
-LIB8STATIC
-float sfract15ToFloat( sfract15 y)
+LIB8STATIC float sfract15ToFloat( sfract15 y)
 {
     return y / 32768.0;
 }
 
-LIB8STATIC
-sfract15 floatToSfract15( float f)
+LIB8STATIC sfract15 floatToSfract15( float f)
 {
     return f * 32768.0;
 }
@@ -1169,15 +1166,15 @@ LIB8STATIC uint8_t brighten8_lin( uint8_t x )
 // A 16-bit PNRG good enough for LED animations
 
 // X(n+1) = (2053 * X(n)) + 13849)
-#define RAND16_2053  ((uint16_t)(2053))
-#define RAND16_13849 ((uint16_t)(13849))
+#define FASTLED_RAND16_2053  ((uint16_t)(2053))
+#define FASTLED_RAND16_13849 ((uint16_t)(13849))
 
 extern uint16_t rand16seed;// = RAND16_SEED;
 
 
 LIB8STATIC uint8_t random8()
 {
-    rand16seed = (rand16seed * RAND16_2053) + RAND16_13849;
+    rand16seed = (rand16seed * FASTLED_RAND16_2053) + FASTLED_RAND16_13849;
     // return the sum of the high and low bytes, for better
     //  mixing and non-sequential correlation
     return (uint8_t)(((uint8_t)(rand16seed & 0xFF)) +
@@ -1186,7 +1183,7 @@ LIB8STATIC uint8_t random8()
 
 LIB8STATIC uint16_t random16()
 {
-    rand16seed = (rand16seed * RAND16_2053) + RAND16_13849;
+    rand16seed = (rand16seed * FASTLED_RAND16_2053) + FASTLED_RAND16_13849;
     return rand16seed;
 }
 
