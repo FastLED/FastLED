@@ -43,7 +43,10 @@ extern const TProgmemRGBPalette16 PartyColors_p FL_PROGMEM;
 /// 'wrapping around' from the hot end to the cold end,
 /// which looks wrong.
 extern const TProgmemRGBPalette16 HeatColors_p FL_PROGMEM;
- 
+
+
+DECLARE_GRADIENT_PALETTE( Rainbow_gp);
+
 FASTLED_NAMESPACE_END
 
 ///@}

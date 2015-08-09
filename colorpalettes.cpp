@@ -154,4 +154,21 @@ extern const TProgmemRGBPalette16 HeatColors_p FL_PROGMEM =
     0xFFFF33, 0xFFFF66, 0xFFFF99, 0xFFFFCC, 0xFFFFFF
 };
 
+
+// Gradient palette "Rainbow_gp",
+// provided for situations where you're going
+// to use a number of other gradient palettes, AND
+// you want a 'standard' FastLED rainbow as well.
+
+DEFINE_GRADIENT_PALETTE( Rainbow_gp ) {
+      0,  255,  0,  0, // Red
+     32,  171, 85,  0, // Orange
+     64,  171,171,  0, // Yellow
+     96,    0,255,  0, // Green
+    128,    0,171, 85, // Aqua
+    160,    0,  0,255, // Blue
+    192,   85,  0,171, // Purple
+    224,  171,  0, 85, // Pink
+    255,  255,  0,  0};// and back to Red
+
 #endif

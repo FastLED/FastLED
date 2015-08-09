@@ -1128,6 +1128,9 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
 #define DEFINE_GRADIENT_PALETTE(X) \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
 
+#define DECLARE_GRADIENT_PALETTE(X) \
+  extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM
+
 
 // Functions to apply gamma adjustments, either:
 // - a single gamma adjustment to a single scalar value,
