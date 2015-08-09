@@ -18,6 +18,8 @@
 #include "platforms/arm/stm32/fastled_arm_stm32.h"
 #elif defined(__SAMD21G18A__)
 #include "platforms/arm/d21/fastled_arm_d21.h"
+#elif defined(__XTENSA__)
+#error "XTENSA-architecture microcontrollers are not supported"
 #else
 // AVR platforms
 #include "platforms/avr/fastled_avr.h"

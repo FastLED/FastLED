@@ -27,12 +27,13 @@ public:
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#if defined(__arm__)
-# define NOP __asm__ __volatile__ ("nop\n");
-# define NOP2 __asm__ __volatile__ ("nop\n\tnop");
-#else
+// Default is now just 'nop', with special case for AVR
+#if defined(__AVR__)
 #  define NOP __asm__ __volatile__ ("cp r0,r0\n");
 #  define NOP2 __asm__ __volatile__ ("rjmp .+0");
+#else
+#  define NOP __asm__ __volatile__ ("nop\n");
+#  define NOP2 __asm__ __volatile__ ("nop\n\t nop\n");
 #endif
 
 // predeclaration to not upset the compiler
@@ -103,13 +104,11 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {NOP2;NOP
 
 // Macro to convert from nano-seconds to clocks and clocks to nano-seconds
 // #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
-#if 1 || (F_CPU < 96000000)
-#define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
+#define F_CPU_MHZ (F_CPU / 1000000L)
+
+// #define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
+#define NS(_NS) (((_NS * F_CPU_MHZ) + 999) / 1000)
 #define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 1000000L)
-#else
-#define NS(_NS) ( (_NS * (F_CPU / 2000000L))) / 1000
-#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 2000000L)
-#endif
 
 //  Macro for making sure there's enough time available
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)

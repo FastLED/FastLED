@@ -305,11 +305,19 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     // offset8 = offset * 8
     uint8_t offset8 = offset;
     {
+#if defined(__AVR__)
+        // Left to its own devices, gcc turns "x <<= 3" into a loop
+        // It's much faster and smaller to just do three single-bit shifts
+        // So this business is to force that.
         offset8 <<= 1;
         asm volatile("");
         offset8 <<= 1;
         asm volatile("");
         offset8 <<= 1;
+#else
+        // On ARM and other non-AVR platforms, we just shift 3.
+        offset8 <<= 3;
+#endif
     }
 
     uint8_t third = scale8( offset8, (256 / 3));
@@ -486,13 +494,13 @@ void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds)
 // See extended notes in the .h file.
 CHSV rgb2hsv_approximate( const CRGB& rgb)
 {
-    byte r = rgb.r;
-    byte g = rgb.g;
-    byte b = rgb.b;
-    byte h, s, v;
+    uint8_t r = rgb.r;
+    uint8_t g = rgb.g;
+    uint8_t b = rgb.b;
+    uint8_t h, s, v;
 
     // find desaturation
-    byte desat = 255;
+    uint8_t desat = 255;
     if( r < desat) desat = r;
     if( g < desat) desat = g;
     if( b < desat) desat = b;
@@ -557,7 +565,7 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
 
     // start with which channel is highest
     // (ties don't matter)
-    byte highest = r;
+    uint8_t highest = r;
     if( g > highest) highest = g;
     if( b > highest) highest = b;
 

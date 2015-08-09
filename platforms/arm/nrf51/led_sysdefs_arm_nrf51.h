@@ -10,6 +10,7 @@
 #define FASTLED_HAS_CLOCKLESS
 
 #define FASTLED_ARM
+#define FASTLED_ARM_M0
 
 #ifndef F_CPU
 #define F_CPU 16000000
@@ -27,6 +28,15 @@ typedef uint8_t boolean;
 #define PROGMEM
 #define NO_PROGMEM
 #define NEED_CXX_BITS
+
+// Default to NOT using PROGMEM here
+#ifndef FASTLED_USE_PROGMEM
+#define FASTLED_USE_PROGMEM 0
+#endif
+
+#ifndef FASTLED_ALLOW_INTERRUPTS
+#define FASTLED_ALLOW_INTERRUPTS 1
+#endif
 
 #define cli()  __disable_irq();
 #define sei() __enable_irq();

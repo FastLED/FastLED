@@ -22,6 +22,8 @@ public:
     mPort = FastPin<DATA_PIN>::port();
   }
 
+	virtual uint16_t getMaxRefreshRate() const { return 400; }
+
   virtual void clearLeds(int nLeds) {
     showColor(CRGB(0, 0, 0), nLeds, 0);
   }

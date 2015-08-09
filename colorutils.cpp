@@ -69,10 +69,10 @@ void fill_gradient_RGB( CRGB* leds,
     if( endpos < startpos ) {
         uint16_t t = endpos;
         CRGB tc = endcolor;
-        startpos = t;
-        startcolor = tc;
         endcolor = startcolor;
         endpos = startpos;
+        startpos = t;
+        startcolor = tc;
     }
 
     saccum87 rdistance87;
@@ -538,7 +538,7 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
     uint8_t lo4 = index & 0x0F;
 
     //  CRGB rgb1 = pal[ hi4];
-    CRGB entry   =  pgm_read_dword_near( &(pal[0]) + hi4 );
+    CRGB entry   =  FL_PGM_READ_DWORD_NEAR( &(pal[0]) + hi4 );
 
     uint8_t red1   = entry.red;
     uint8_t green1 = entry.green;
@@ -549,9 +549,9 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
     if( blend ) {
 
         if( hi4 == 15 ) {
-            entry = pgm_read_dword_near( &(pal[0]) );
+            entry =   FL_PGM_READ_DWORD_NEAR( &(pal[0]) );
         } else {
-            entry = pgm_read_dword_near( &(pal[1]) + hi4 );
+            entry =   FL_PGM_READ_DWORD_NEAR( &(pal[1]) + hi4 );
         }
 
         uint8_t f2 = lo4 << 4;
@@ -736,7 +736,7 @@ void nblendPaletteTowardPalette( CRGBPalette16& current, CRGBPalette16& target, 
     p2 = (uint8_t*)target.entries;
 
     const uint8_t totalChannels = sizeof(CRGBPalette16);
-    for( byte i = 0; i < totalChannels; i++) {
+    for( uint8_t i = 0; i < totalChannels; i++) {
         // if the values are equal, no changes are needed
         if( p1[i] == p2[i] ) { continue; }
 
@@ -754,5 +754,64 @@ void nblendPaletteTowardPalette( CRGBPalette16& current, CRGBPalette16& target, 
         if( changes >= maxChanges) { break; }
     }
 }
+
+
+uint8_t applyGamma_video( uint8_t brightness, float gamma)
+{
+    float orig;
+    float adj;
+    orig = (float)(brightness) / (255.0);
+    adj =  pow( orig, gamma)   * (255.0);
+    uint8_t result = (uint8_t)(adj);
+    if( (brightness > 0) && (result == 0)) {
+        result = 1; // never gamma-adjust a positive number down to zero
+    }
+    return result;
+}
+
+CRGB applyGamma_video( const CRGB& orig, float gamma)
+{
+    CRGB adj;
+    adj.r = applyGamma_video( orig.r, gamma);
+    adj.g = applyGamma_video( orig.g, gamma);
+    adj.b = applyGamma_video( orig.b, gamma);
+    return adj;
+}
+
+CRGB applyGamma_video( const CRGB& orig, float gammaR, float gammaG, float gammaB)
+{
+    CRGB adj;
+    adj.r = applyGamma_video( orig.r, gammaR);
+    adj.g = applyGamma_video( orig.g, gammaG);
+    adj.b = applyGamma_video( orig.b, gammaB);
+    return adj;
+}
+
+CRGB& napplyGamma_video( CRGB& rgb, float gamma)
+{
+    rgb = applyGamma_video( rgb, gamma);
+    return rgb;
+}
+
+CRGB& napplyGamma_video( CRGB& rgb, float gammaR, float gammaG, float gammaB)
+{
+    rgb = applyGamma_video( rgb, gammaR, gammaG, gammaB);
+    return rgb;
+}
+
+void napplyGamma_video( CRGB* rgbarray, uint16_t count, float gamma)
+{
+    for( uint16_t i = 0; i < count; i++) {
+        rgbarray[i] = applyGamma_video( rgbarray[i], gamma);
+    }
+}
+
+void napplyGamma_video( CRGB* rgbarray, uint16_t count, float gammaR, float gammaG, float gammaB)
+{
+    for( uint16_t i = 0; i < count; i++) {
+        rgbarray[i] = applyGamma_video( rgbarray[i], gammaR, gammaG, gammaB);
+    }
+}
+
 
 FASTLED_NAMESPACE_END

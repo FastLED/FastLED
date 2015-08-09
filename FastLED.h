@@ -40,6 +40,7 @@
 #include "./dmx.h"
 
 #include "platforms.h"
+#include "fastled_progmem.h"
 
 #include "lib8tion.h"
 #include "hsv2rgb.h"
@@ -434,10 +435,13 @@ public:
 	void setDither(uint8_t ditherMode = BINARY_DITHER);
 
 	/// Set the maximum refresh rate.  This is global for all leds.  Attempts to
-	/// call show faster than this rate will simply wait.  Defaults to 400Hz.  Set
-	/// to 0 to have no maximum rate.
+	/// call show faster than this rate will simply wait.  Note that the refresh rate
+	/// defaults to the slowest refresh rate of all the leds added through addLeds.  If
+	/// you wish to set/override this rate, be sure to call setMaxRefreshRate _after_ 
+	/// adding all of your leds.
 	/// @param refresh - maximum refresh rate in hz
-	void setMaxRefreshRate(uint16_t refresh);
+	/// @param constrain - constrain refresh rate to the slowest speed yet set 
+	void setMaxRefreshRate(uint16_t refresh, bool constrain=false);
 
 	/// for debugging, will keep track of time between calls to countFPS, and every
 	/// nFrames calls, it will update an internal counter for the current FPS.

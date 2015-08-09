@@ -1,17 +1,17 @@
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FastLED/public)
+
 IMPORTANT NOTE: For AVR based systems, avr-gcc 4.8.x is supported, as is avr-gcc 4.3 and earlier.  There are known issues with avr-gcc 4.7 and timing based chipsets like the WS2812B.  If you are using a linux system make sure you are using avr-gcc 4.8.x not avr-gcc 4.7.x.
 
-
-FastLED 3.0
+FastLED 3.1
 ===========
 
 IMPORTANT NOTE:  If you are building for AVR based systems, please do not use any version of the arduino
 IDE 1.5.7 or later yet.  It messes with some of the asm output which will cause you problems.
-
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
 sold by adafruit (Neopixel, LPD8806), Sparkfun (WS2801), and aliexpress.  In addition to writing to the
 leds, this library also includes a number of functions for high-performing 8bit math for manipulating
 your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while
-still keeping things as fast as possible.
+still keeping things as fast as possible.  Tested with Arduino up to 1.6.5 from arduino.cc.
 
 Quick note for people installing from GitHub repo zips, rename the folder FastLED before copying it to your Arduino/libraries folder.  Github likes putting -branchname into the name of the folder, which unfortunately, makes Arduino cranky!
 
@@ -43,7 +43,7 @@ How quickly can you get up and running with the library?  Here's a simple blink 
 Here's a list of all the LED chipsets are supported.  More details on the led chipsets are included *TODO: Link to wiki page*
 
 * Adafruit's DotStars - AKA the APA102
-* Adafruit's Neopixel - aka the WS2812B (also WS2811/WS2812, also suppored in lo-speed mode) - a 3 wire addressable led chipset
+* Adafruit's Neopixel - aka the WS2812B (also WS2811/WS2812, also supported in lo-speed mode) - a 3 wire addressable led chipset
 * TM1809/4 - 3 wire chipset, cheaply available on aliexpress.com
 * TM1803 - 3 wire chipset, sold by radio shack
 * UCS1903 - another 3 wire led chipset, cheap
@@ -64,7 +64,7 @@ LPD6803, HL1606, and "595"-style shift registers are no longer supported by the 
 
 Right now the library is supported on a variety of arduino compatable platforms.  If it's ARM or AVR and uses the arduino software (or a modified version of it to build) then it is likely supported.  Note that we have a long list of upcoming platforms to support, so if you don't see what you're looking for here, ask, it may be on the roadmap (or may already be supported).  N.B. at the moment we are only supporting the stock compilers that ship with the arduino software.  Support for upgraded compilers, as well as using AVR studio and skipping the arduino entirely, should be coming in a near future release.
 
-* Arduino & compatibles - straight up arduino devices, uno, duo, leonardo, mega, nano, etc... NOTE: On the mega, you can't use pins 42,43,44,45,46,47,48, and 49 with 3-wire chipsets.
+* Arduino & compatibles - straight up arduino devices, uno, duo, leonardo, mega, nano, etc... 
 * Adafruit Trinket & Gemma - Trinket Pro may be supported, but haven't tested to confirm yet
 * Teensy 2, Teensy++ 2, Teensy 3.0, Teensy 3.1, Teensy LC - arduino compataible from pjrc.com with some extra goodies (note the teensy 3 is ARM, not AVR!)
 * Arduino Due and the digistump DigiX

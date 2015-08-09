@@ -54,6 +54,8 @@ typedef volatile uint8_t & reg8_t;
 #if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny45__)
 _IO(B);
 
+#define MAX_PIN 5
+
 _DEFPIN_AVR(0, 0x01, B); _DEFPIN_AVR(1, 0x02, B); _DEFPIN_AVR(2, 0x04, B); _DEFPIN_AVR(3, 0x08, B);
 _DEFPIN_AVR(4, 0x10, B); _DEFPIN_AVR(5, 0x20, B);
 
@@ -62,12 +64,29 @@ _DEFPIN_AVR(4, 0x10, B); _DEFPIN_AVR(5, 0x20, B);
 #elif defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__)
 _IO(A); _IO(B);
 
+#define MAX_PIN 10
+
 _DEFPIN_AVR(0, 0x01, A); _DEFPIN_AVR(1, 0x02, A); _DEFPIN_AVR(2, 0x04, A); _DEFPIN_AVR(3, 0x08, A);
 _DEFPIN_AVR(4, 0x10, A); _DEFPIN_AVR(5, 0x20, A); _DEFPIN_AVR(6, 0x40, A); _DEFPIN_AVR(7, 0x80, A);
 _DEFPIN_AVR(8, 0x04, B); _DEFPIN_AVR(9, 0x02, B); _DEFPIN_AVR(10, 0x01, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__)
+_IO(A); _IO(B);
+
+#define MAX_PIN 15
+
+_DEFPIN_AVR(0, 0x01, A);  _DEFPIN_AVR(1, 0x02, A);   _DEFPIN_AVR(2, 0x04, A);  _DEFPIN_AVR(3, 0x08, A);
+_DEFPIN_AVR(4, 0x10, A);  _DEFPIN_AVR(5, 0x20, A);   _DEFPIN_AVR(6, 0x40, A);  _DEFPIN_AVR(7, 0x80, A);
+_DEFPIN_AVR(8, 0x01, B);  _DEFPIN_AVR(9, 0x02, B);   _DEFPIN_AVR(10, 0x04, B); _DEFPIN_AVR(11, 0x08, B);
+_DEFPIN_AVR(12, 0x10, B); _DEFPIN_AVR(13, 0x20, B); _DEFPIN_AVR(14, 0x40, B); _DEFPIN_AVR(15, 0x80, B);
+
+#define SPI_DATA 4
+#define SPI_CLOCK 5
+#define AVR_HARDWARE_SPI 1
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
 #elif defined(ARDUINO_HOODLOADER2) && (defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__))
 
 _IO(D); _IO(B); _IO(C);

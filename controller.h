@@ -170,6 +170,8 @@ public:
         return adj;
 #endif
     }
+
+    virtual uint16_t getMaxRefreshRate() const { return 0; }
 };
 
 /// Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
