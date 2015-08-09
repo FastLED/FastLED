@@ -1,13 +1,7 @@
 #ifndef __INC_CLOCKLESS_ARM_D21
 #define __INC_CLOCKLESS_ARM_D21
 
-#define TADJUST 0
-#define TOTAL ( (T1+TADJUST) + (T2+TADJUST) + (T3+TADJUST) )
-#define T1_MARK (TOTAL - (T1+TADJUST))
-#define T2_MARK (T1_MARK - (T2+TADJUST))
-
-#define SCALE(S,V) scale8_video(S,V)
-// #define SCALE(S,V) scale8(S,V)
+#include "platforms/arm/common/m0clockless.h"
 FASTLED_NAMESPACE_BEGIN
 #define FASTLED_HAS_CLOCKLESS 1
 
@@ -25,6 +19,8 @@ public:
     mPinMask = FastPinBB<DATA_PIN>::mask();
     mPort = FastPinBB<DATA_PIN>::port();
   }
+
+	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
   virtual void clearLeds(int nLeds) {
     showColor(CRGB(0, 0, 0), nLeds, 0);
@@ -64,98 +60,23 @@ public:
   }
 #endif
 
-#define DT1(ADJ) delaycycles<T1-(ADJ+8)>();
-#define DT2(ADJ) delaycycles<T2-(ADJ+2)>();
-#define DT3(ADJ) delaycycles<((T3-ADJ))>();
-
-#define HI2 FastPin<DATA_PIN>::hi();
-#define LO2 FastPin<DATA_PIN>::lo();
-#define BC2A(B) if(b&0x80) { FastPin<DATA_PIN>::lo(); }
-#define BC2(B) if(b&0x80) { FastPin<DATA_PIN>::lo(); }
-// #define BC2(BIT) if(b&0x80) {} else { pGpio->OUTCLR = (1<<DATA_PIN); }
-// #define BC2A(BIT) if(b&0x80) {} else { delaycycles<2>(); pGpio->OUTCLR = (1<<DATA_PIN); }
-#define LSB1 b <<= 1;
-
-// dither adjustment macro - should be kept in sync w/what's in stepDithering
-#define ADJDITHER2(D, E) D = E - D;
-
-
-// #define CLI_CHK cli(); if(NRF_RTC0->COUNTER > clk_max) { return 0; }
-// #define SEI_CHK clk_max = NRF_RTC0->COUNTER + 1; sei();
-#define CLI_CHK
-#define SEI_CHK
-
-// don't allow more than 800 clocks (50µs) between leds
-// #define SEI_CHK LED_TIMER->CC[0] = (WAIT_TIME * (F_CPU/1000000)); LED_TIMER->TASKS_CLEAR; LED_TIMER->EVENTS_COMPARE[0] = 0;
-// #define CLI_CHK cli(); if(LED_TIMER->EVENTS_COMPARE[0]) { LED_TIMER->TASKS_STOP = 1; return 0; }
-
-#define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
   // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
   // gcc will use register Y for the this pointer.
   static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
-    // Setup the pixel controller and load/scale the first byte
-    // pixels.preStepFirstByteDithering();
-    CRGB scale = pixels.mScale;
-    register const uint8_t *pdata = pixels.mData;
+    struct M0ClocklessData data;
+    data.d[0] = pixels.d[0];
+    data.d[1] = pixels.d[1];
+    data.d[2] = pixels.d[2];
+    data.s[0] = pixels.mScale[0];
+    data.s[1] = pixels.mScale[1];
+    data.s[2] = pixels.mScale[2];
+    data.e[0] = pixels.e[0];
+    data.e[1] = pixels.e[1];
+    data.e[2] = pixels.e[2];
+    data.adj = pixels.mAdvance;
 
-    uint8_t d0 = pixels.d[RO(0)];
-    uint8_t d1 = pixels.d[RO(1)];
-    uint8_t d2 = pixels.d[RO(2)];
-    uint8_t e0 = pixels.e[RO(0)];
-    uint8_t e1 = pixels.e[RO(1)];
-    uint8_t e2 = pixels.e[RO(2)];
-
-#define RAN 0
-#define RAN2 0
-    register uint32_t b = ~scale8(pdata[RO(0)], scale.raw[RO(0)]);
-    ADJDITHER2(d0,e0);
-
-    register uint32_t b2;
-    int len = pixels.mLen;
-
-    SEI_CHK;
-    while(len >= 1) {
-      ADJDITHER2(d0,e0);
-      ADJDITHER2(d1,e1);
-      ADJDITHER2(d2,e2);
-
-      HI2; DT1(4); BC2A(7); DT2(2); LO2; LSB1; DT3(2);
-      HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(1)];
-      HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(5); b2 = b2 ? qadd8(b2, d1) : 0;
-      HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(4);
-      b = ~scale8(b2, scale.raw[RO(1)]);
-      len--;
-
-      HI2; DT1(4); BC2(7); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(2)];
-      HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(5); b2 = b2 ? qadd8(b2, d2) : 0;
-      HI2; DT1(4); BC2(0); DT2(2); LO2; DT3(4);
-
-      b = ~scale8(b2, scale.raw[RO(2)]);
-
-      HI2; DT1(4); BC2(7); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(6); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(5); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(4); DT2(2); LO2; LSB1; DT3(3);
-      HI2; DT1(4); BC2(3); DT2(2); LO2; LSB1; DT3(4); pdata += 3;
-      HI2; DT1(4); BC2(2); DT2(2); LO2; LSB1; DT3(4); b2 = pdata[RO(0)];
-      HI2; DT1(4); BC2(1); DT2(2); LO2; LSB1; DT3(5); b2 = b2 ? qadd8(b2, d0) : 0;
-      HI2; DT1(4); BC2(0); DT2(2); LO2; SEI_CHK; sei(); DT3(9);
-
-      b = ~scale8(b2, scale.raw[RO(0)]);
-      CLI_CHK;
-      delaycycles<RAN2>();
-    };
-
-
+    typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
+    showLedData<8,4,T1,T2,T3,RGB_ORDER, WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
     return 0; // 0x00FFFFFF - _VAL;
   }
 
