@@ -10,6 +10,7 @@
 #define FASTLED_HAS_CLOCKLESS
 
 #define FASTLED_ARM
+#define FASTLED_ARM_M0
 
 #ifndef F_CPU
 #define F_CPU 16000000

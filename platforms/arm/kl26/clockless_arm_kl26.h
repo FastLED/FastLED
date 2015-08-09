@@ -76,7 +76,7 @@ public:
     data.adj = pixels.mAdvance;
 
     typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-    showLedData<4,8,T1,T2,T3,RGB_ORDER>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
+    showLedData<4,8,T1,T2,T3,RGB_ORDER, WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
     return 0; // 0x00FFFFFF - _VAL;
   }
 

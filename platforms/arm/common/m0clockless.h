@@ -136,14 +136,14 @@ switch(VALUE) { \
   case 120: { asm __volatile__ (".set " str(LABEL) ", 120\n\t"); break; } \
 }
 
-template<int HI_OFFSET, int LO_OFFSET, int T1, int T2, int T3, EOrder RGB_ORDER = RGB>void
+template<int HI_OFFSET, int LO_OFFSET, int T1, int T2, int T3, EOrder RGB_ORDER, int WAIT_TIME>int
 showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, uint32_t num_leds, struct M0ClocklessData *pData) {
   // Lo register variables
   register uint32_t scratch=0;
   register struct M0ClocklessData *base = pData;
   register volatile uint32_t *port = _port;
   register uint32_t d=0;
-  register uint32_t counter=num_leds*3;
+  register uint32_t counter=num_leds;
   register uint32_t bn=0;
   register uint32_t b=0;
   register uint32_t bitmask = _bitmask;
@@ -155,15 +155,13 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
   MK_LABELS(T2,T2);
   MK_LABELS(T3,T3);
 
-  // TODO: Make sure this toggles based on m0 support or not
-  #define M0P 1
   asm __volatile__ (
     ///////////////////////////////////////////////////////////////////////////
     //
     // asm macro definitions - used to assemble the clockless output
     //
     ".ifnotdef fl_delay_def;"
-#ifdef M0P
+#ifdef FASTLED_ARM_M0_PLUS
     "  .set fl_is_m0p, 1;"
     "  .macro m0pad;"
     "    nop;"
@@ -186,7 +184,7 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
     "      .rept (drem);"
     "        nop;"
     "      .endr;"
-    "      .if dcycle >= 0;"
+    "      .if dcycle > 0;"
     "        mov \\reg, #dcycle;"
     "        delayloop_\\@:;"
     "        sub \\reg, #1;"
@@ -199,9 +197,11 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
     "  .endm;"
 
     "  .macro mod_delay dtime,b1,b2,reg;"
-    "    .set dtime1, ( \\dtime - \\b1 );"
-    "    .set dtime2, ( dtime1 - \\b2 );"
-    "    fl_delay dtime2, \\reg;"
+    "    .set adj, (\\b1 + \\b2);"
+    "    .if adj < \\dtime;"
+    "      .set dtime2, (\\dtime - adj);"
+    "      fl_delay dtime2, \\reg;"
+    "    .endif;"
     "  .endm;"
 
     // check the bit and drop the line low if it isn't set
@@ -248,7 +248,7 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
     "      bcc dither5_1_\\@;"
     "      mvns \\bn, \\bn;"        // set the low 24bits ot 1's
     "      lsls \\bn, \\bn, #24;"   // move low 8 bits to the high bits
-    "      bcc dither5_1_\\@;"
+    "      dither5_1_\\@:;"
     "      nop;"                    // nop to keep timing in line
     "    .else;"
     "      adds \\bn, \\d;"         // do the add"
@@ -303,6 +303,31 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
     "  .endm;"
 
     " .endif;"
+  );
+
+#define M0_ASM_ARGS     :             \
+      [base] "+l" (base),             \
+      [bitmask] "+l" (bitmask),       \
+      [port] "+l" (port),             \
+      [leds] "+h" (leds),             \
+      [counter] "+l" (counter),       \
+      [scratch] "+l" (scratch),       \
+      [d] "+l" (d),                   \
+      [bn] "+l" (bn),                 \
+      [b] "+l" (b)                    \
+    :                                 \
+      [hi_off] "I" (HI_OFFSET),       \
+      [lo_off] "I" (LO_OFFSET),       \
+      [led0] "I" (RO(0)),             \
+      [led1] "I" (RO(1)),             \
+      [led2] "I" (RO(2)),             \
+      [scale0] "I" (3+RO(0)),         \
+      [scale1] "I" (3+RO(1)),         \
+      [scale2] "I" (3+RO(2)),         \
+      [e0] "I" (6+RO(0)),             \
+      [e1] "I" (6+RO(1)),             \
+      [e2] "I" (6+RO(2))              \
+    :
 
     /////////////////////////////////////////////////////////////////////////
     // now for some convinience macros to make building our lines a bit cleaner
@@ -323,7 +348,9 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
 #define CMPLOOP5        "  cmploop5 %[counter], loop_%=;"
 #define NOTHING         ""
 
-    // pre-load byte 0
+#if !(defined(SEI_CHK) && (FASTLED_ALLOW_INTERRUPTS == 1))
+    asm __volatile__ (
+      // pre-load byte 0
     LOADLEDS3(0) LOADDITHER7(0) DITHER5 SCALE4(0) ADJDITHER7(0) SWAPBBN1
 
     // loop over writing out the data
@@ -358,31 +385,54 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
       HI2 D1 QLO4 SWAPBBN1        D2(1) LO2 D3(5) CMPLOOP5
 
-    :
-      [base] "+l" (base),
-      [bitmask] "+l" (bitmask),
-      [port] "+l" (port),
-      [leds] "+h" (leds),
-      [counter] "+l" (counter),
-      [scratch] "+l" (scratch),
-      [d] "+l" (d),
-      [bn] "+l" (bn),
-      [b] "+l" (b)
-    :
-      [hi_off] "I" (HI_OFFSET),
-      [lo_off] "I" (LO_OFFSET),
-      [led0] "I" (RO(0)),
-      [led1] "I" (RO(1)),
-      [led2] "I" (RO(2)),
-      [scale0] "I" (3+RO(0)),
-      [scale1] "I" (3+RO(1)),
-      [scale2] "I" (3+RO(2)),
-      [e0] "I" (6+RO(0)),
-      [e1] "I" (6+RO(1)),
-      [e2] "I" (6+RO(2))
-    :
+      M0_ASM_ARGS
     );
+#else
+    asm __volatile__ (
+      // pre-load byte 0
+      LOADLEDS3(0) LOADDITHER7(0) DITHER5 SCALE4(0) ADJDITHER7(0) SWAPBBN1
+      M0_ASM_ARGS);
 
+    SEI_CHK
+    do {
+      CLI_CHK;
+      asm __volatile__ (
+      // Write out byte 0, prepping byte 1
+      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
+      HI2 D1 QLO4 LOADLEDS3(1)    D2(3) LO2 D3(0)
+      HI2 D1 QLO4 LOADDITHER7(1)  D2(7) LO2 D3(0)
+      HI2 D1 QLO4 DITHER5         D2(5) LO2 D3(0)
+      HI2 D1 QLO4 SCALE4(1)       D2(4) LO2 D3(0)
+      HI2 D1 QLO4 ADJDITHER7(1)   D2(7) LO2 D3(0)
+      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
+      HI2 D1 QLO4 SWAPBBN1        D2(1) LO2 D3(0)
+
+      // Write out byte 1, prepping byte 2
+      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
+      HI2 D1 QLO4 LOADLEDS3(2)    D2(3) LO2 D3(0)
+      HI2 D1 QLO4 LOADDITHER7(2)  D2(7) LO2 D3(0)
+      HI2 D1 QLO4 DITHER5         D2(5) LO2 D3(0)
+      HI2 D1 QLO4 SCALE4(2)       D2(4) LO2 D3(0)
+      HI2 D1 QLO4 ADJDITHER7(2)   D2(7) LO2 D3(0)
+      HI2 D1 QLO4 INCLEDS3        D2(3) LO2 D3(0)
+      HI2 D1 QLO4 SWAPBBN1        D2(1) LO2 D3(0)
+
+      // Write out byte 2, prepping byte 0
+      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
+      HI2 D1 QLO4 LOADLEDS3(0)    D2(3) LO2 D3(0)
+      HI2 D1 QLO4 LOADDITHER7(0)  D2(7) LO2 D3(0)
+      HI2 D1 QLO4 DITHER5         D2(5) LO2 D3(0)
+      HI2 D1 QLO4 SCALE4(0)       D2(4) LO2 D3(0)
+      HI2 D1 QLO4 ADJDITHER7(0)   D2(7) LO2 D3(0)
+      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
+      HI2 D1 QLO4 SWAPBBN1        D2(1) LO2 D3(5)
+
+      M0_ASM_ARGS
+      );
+      SEI_CHK; INNER_SEI;
+    } while(--counter);
+#endif
+    return num_leds;
 }
 
 #endif
