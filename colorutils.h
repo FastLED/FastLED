@@ -702,6 +702,29 @@ public:
         fill_gradient_RGB( &(entries[0]), 16, c1, c2, c3, c4);
     }
 
+    
+    // Gradient palettes are loaded into CRGB16Palettes in such a way
+    // that, if possible, every color represented in the gradient palette
+    // is also represented in the CRGBPalette16.
+    // For example, consider a gradient palette that is all black except
+    // for a single, one-element-wide (1/256th!) spike of red in the middle:
+    //     0,   0,0,0
+    //   124,   0,0,0
+    //   125, 255,0,0  // one 1/256th-palette-wide red stripe
+    //   126,   0,0,0
+    //   255,   0,0,0
+    // A naive conversion of this 256-element palette to a 16-element palette
+    // might accidentally completely eliminate the red spike, rendering the
+    // palette completely black.
+    // However, the conversions provided here would attempt to include a
+    // the red stripe in the output, more-or-less as faithfully as possible.
+    // So in this case, the resulting CRGBPalette16 palette would have a red
+    // stripe in the middle which was 1/16th of a palette wide -- the
+    // narrowest possible in a CRGBPalette16.
+    // This means that the relative width of stripes in a CRGBPalette16
+    // will be, by definition, different from the widths in the gradient
+    // palette.  This code attempts to preserve "all the colors", rather than
+    // the exact stripe widths at the expense of dropping some colors.
     CRGBPalette16( TProgmemRGBGradientPalette_bytes progpal )
     {
         *this = progpal;
@@ -710,6 +733,16 @@ public:
     {
         TRGBGradientPaletteEntryUnion* progent = (TRGBGradientPaletteEntryUnion*)(progpal);
         TRGBGradientPaletteEntryUnion u;
+        
+        // Count entries
+        uint8_t count = 0;
+        do {
+            u.dword = FL_PGM_READ_DWORD_NEAR(progent + count);
+            count++;;
+        } while ( u.index != 255);
+        
+        int8_t lastSlotUsed = -1;
+        
         u.dword = FL_PGM_READ_DWORD_NEAR( progent);
         CRGB rgbstart( u.r, u.g, u.b);
         
@@ -723,6 +756,15 @@ public:
             CRGB rgbend( u.r, u.g, u.b);
             istart8 = indexstart / 16;
             iend8   = indexend   / 16;
+            if( count < 16) {
+                if( (istart8 <= lastSlotUsed) && (lastSlotUsed < 15)) {
+                    istart8 = lastSlotUsed + 1;
+                    if( iend8 < istart8) {
+                        iend8 = istart8;
+                    }
+                }
+                lastSlotUsed = iend8;
+            }
             fill_gradient_RGB( &(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
@@ -733,6 +775,17 @@ public:
     {
         TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(gpal);
         TRGBGradientPaletteEntryUnion u;
+        
+        // Count entries
+        uint8_t count = 0;
+        do {
+            u = *(ent + count);
+            count++;;
+        } while ( u.index != 255);
+        
+        int8_t lastSlotUsed = -1;
+        
+
         u = *ent;
         CRGB rgbstart( u.r, u.g, u.b);
         
@@ -746,6 +799,15 @@ public:
             CRGB rgbend( u.r, u.g, u.b);
             istart8 = indexstart / 16;
             iend8   = indexend   / 16;
+            if( count < 16) {
+                if( (istart8 <= lastSlotUsed) && (lastSlotUsed < 15)) {
+                    istart8 = lastSlotUsed + 1;
+                    if( iend8 < istart8) {
+                        iend8 = istart8;
+                    }
+                }
+                lastSlotUsed = iend8;
+            }
             fill_gradient_RGB( &(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
