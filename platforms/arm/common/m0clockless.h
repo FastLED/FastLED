@@ -8,268 +8,6 @@ struct M0ClocklessData {
   uint8_t adj;
 };
 
-//
-// This macro is to get around some particular stupidisms with the intersection
-// of gcc's asm support and gas's macro engironment
-#define MK_LABELS(LABEL, VALUE) \
-switch(VALUE) { \
-  case 0: { asm __volatile__ (".set " str(LABEL) ", 0\n\t"); break; } \
-  case 1: { asm __volatile__ (".set " str(LABEL) ", 1\n\t"); break; } \
-  case 2: { asm __volatile__ (".set " str(LABEL) ", 2\n\t"); break; } \
-  case 3: { asm __volatile__ (".set " str(LABEL) ", 3\n\t"); break; } \
-  case 4: { asm __volatile__ (".set " str(LABEL) ", 4\n\t"); break; } \
-  case 5: { asm __volatile__ (".set " str(LABEL) ", 5\n\t"); break; } \
-  case 6: { asm __volatile__ (".set " str(LABEL) ", 6\n\t"); break; } \
-  case 7: { asm __volatile__ (".set " str(LABEL) ", 7\n\t"); break; } \
-  case 8: { asm __volatile__ (".set " str(LABEL) ", 8\n\t"); break; } \
-  case 9: { asm __volatile__ (".set " str(LABEL) ", 9\n\t"); break; } \
-  case 10: { asm __volatile__ (".set " str(LABEL) ", 10\n\t"); break; } \
-  case 11: { asm __volatile__ (".set " str(LABEL) ", 11\n\t"); break; } \
-  case 12: { asm __volatile__ (".set " str(LABEL) ", 12\n\t"); break; } \
-  case 13: { asm __volatile__ (".set " str(LABEL) ", 13\n\t"); break; } \
-  case 14: { asm __volatile__ (".set " str(LABEL) ", 14\n\t"); break; } \
-  case 15: { asm __volatile__ (".set " str(LABEL) ", 15\n\t"); break; } \
-  case 16: { asm __volatile__ (".set " str(LABEL) ", 16\n\t"); break; } \
-  case 17: { asm __volatile__ (".set " str(LABEL) ", 17\n\t"); break; } \
-  case 18: { asm __volatile__ (".set " str(LABEL) ", 18\n\t"); break; } \
-  case 19: { asm __volatile__ (".set " str(LABEL) ", 19\n\t"); break; } \
-  case 20: { asm __volatile__ (".set " str(LABEL) ", 20\n\t"); break; } \
-  case 21: { asm __volatile__ (".set " str(LABEL) ", 21\n\t"); break; } \
-  case 22: { asm __volatile__ (".set " str(LABEL) ", 22\n\t"); break; } \
-  case 23: { asm __volatile__ (".set " str(LABEL) ", 23\n\t"); break; } \
-  case 24: { asm __volatile__ (".set " str(LABEL) ", 24\n\t"); break; } \
-  case 25: { asm __volatile__ (".set " str(LABEL) ", 25\n\t"); break; } \
-  case 26: { asm __volatile__ (".set " str(LABEL) ", 26\n\t"); break; } \
-  case 27: { asm __volatile__ (".set " str(LABEL) ", 27\n\t"); break; } \
-  case 28: { asm __volatile__ (".set " str(LABEL) ", 28\n\t"); break; } \
-  case 29: { asm __volatile__ (".set " str(LABEL) ", 29\n\t"); break; } \
-  case 30: { asm __volatile__ (".set " str(LABEL) ", 30\n\t"); break; } \
-  case 31: { asm __volatile__ (".set " str(LABEL) ", 31\n\t"); break; } \
-  case 32: { asm __volatile__ (".set " str(LABEL) ", 32\n\t"); break; } \
-  case 33: { asm __volatile__ (".set " str(LABEL) ", 33\n\t"); break; } \
-  case 34: { asm __volatile__ (".set " str(LABEL) ", 34\n\t"); break; } \
-  case 35: { asm __volatile__ (".set " str(LABEL) ", 35\n\t"); break; } \
-  case 36: { asm __volatile__ (".set " str(LABEL) ", 36\n\t"); break; } \
-  case 37: { asm __volatile__ (".set " str(LABEL) ", 37\n\t"); break; } \
-  case 38: { asm __volatile__ (".set " str(LABEL) ", 38\n\t"); break; } \
-  case 39: { asm __volatile__ (".set " str(LABEL) ", 39\n\t"); break; } \
-  case 40: { asm __volatile__ (".set " str(LABEL) ", 40\n\t"); break; } \
-  case 41: { asm __volatile__ (".set " str(LABEL) ", 41\n\t"); break; } \
-  case 42: { asm __volatile__ (".set " str(LABEL) ", 42\n\t"); break; } \
-  case 43: { asm __volatile__ (".set " str(LABEL) ", 43\n\t"); break; } \
-  case 44: { asm __volatile__ (".set " str(LABEL) ", 44\n\t"); break; } \
-  case 45: { asm __volatile__ (".set " str(LABEL) ", 45\n\t"); break; } \
-  case 46: { asm __volatile__ (".set " str(LABEL) ", 46\n\t"); break; } \
-  case 47: { asm __volatile__ (".set " str(LABEL) ", 47\n\t"); break; } \
-  case 48: { asm __volatile__ (".set " str(LABEL) ", 48\n\t"); break; } \
-  case 49: { asm __volatile__ (".set " str(LABEL) ", 49\n\t"); break; } \
-  case 50: { asm __volatile__ (".set " str(LABEL) ", 50\n\t"); break; } \
-  case 51: { asm __volatile__ (".set " str(LABEL) ", 51\n\t"); break; } \
-  case 52: { asm __volatile__ (".set " str(LABEL) ", 52\n\t"); break; } \
-  case 53: { asm __volatile__ (".set " str(LABEL) ", 53\n\t"); break; } \
-  case 54: { asm __volatile__ (".set " str(LABEL) ", 54\n\t"); break; } \
-  case 55: { asm __volatile__ (".set " str(LABEL) ", 55\n\t"); break; } \
-  case 56: { asm __volatile__ (".set " str(LABEL) ", 56\n\t"); break; } \
-  case 57: { asm __volatile__ (".set " str(LABEL) ", 57\n\t"); break; } \
-  case 58: { asm __volatile__ (".set " str(LABEL) ", 58\n\t"); break; } \
-  case 59: { asm __volatile__ (".set " str(LABEL) ", 59\n\t"); break; } \
-  case 60: { asm __volatile__ (".set " str(LABEL) ", 60\n\t"); break; } \
-  case 61: { asm __volatile__ (".set " str(LABEL) ", 61\n\t"); break; } \
-  case 62: { asm __volatile__ (".set " str(LABEL) ", 62\n\t"); break; } \
-  case 63: { asm __volatile__ (".set " str(LABEL) ", 63\n\t"); break; } \
-  case 64: { asm __volatile__ (".set " str(LABEL) ", 64\n\t"); break; } \
-  case 65: { asm __volatile__ (".set " str(LABEL) ", 65\n\t"); break; } \
-  case 66: { asm __volatile__ (".set " str(LABEL) ", 66\n\t"); break; } \
-  case 67: { asm __volatile__ (".set " str(LABEL) ", 67\n\t"); break; } \
-  case 68: { asm __volatile__ (".set " str(LABEL) ", 68\n\t"); break; } \
-  case 69: { asm __volatile__ (".set " str(LABEL) ", 69\n\t"); break; } \
-  case 70: { asm __volatile__ (".set " str(LABEL) ", 70\n\t"); break; } \
-  case 71: { asm __volatile__ (".set " str(LABEL) ", 71\n\t"); break; } \
-  case 72: { asm __volatile__ (".set " str(LABEL) ", 72\n\t"); break; } \
-  case 73: { asm __volatile__ (".set " str(LABEL) ", 73\n\t"); break; } \
-  case 74: { asm __volatile__ (".set " str(LABEL) ", 74\n\t"); break; } \
-  case 75: { asm __volatile__ (".set " str(LABEL) ", 75\n\t"); break; } \
-  case 76: { asm __volatile__ (".set " str(LABEL) ", 76\n\t"); break; } \
-  case 77: { asm __volatile__ (".set " str(LABEL) ", 77\n\t"); break; } \
-  case 78: { asm __volatile__ (".set " str(LABEL) ", 78\n\t"); break; } \
-  case 79: { asm __volatile__ (".set " str(LABEL) ", 79\n\t"); break; } \
-  case 80: { asm __volatile__ (".set " str(LABEL) ", 80\n\t"); break; } \
-  case 81: { asm __volatile__ (".set " str(LABEL) ", 81\n\t"); break; } \
-  case 82: { asm __volatile__ (".set " str(LABEL) ", 82\n\t"); break; } \
-  case 83: { asm __volatile__ (".set " str(LABEL) ", 83\n\t"); break; } \
-  case 84: { asm __volatile__ (".set " str(LABEL) ", 84\n\t"); break; } \
-  case 85: { asm __volatile__ (".set " str(LABEL) ", 85\n\t"); break; } \
-  case 86: { asm __volatile__ (".set " str(LABEL) ", 86\n\t"); break; } \
-  case 87: { asm __volatile__ (".set " str(LABEL) ", 87\n\t"); break; } \
-  case 88: { asm __volatile__ (".set " str(LABEL) ", 88\n\t"); break; } \
-  case 89: { asm __volatile__ (".set " str(LABEL) ", 89\n\t"); break; } \
-  case 90: { asm __volatile__ (".set " str(LABEL) ", 90\n\t"); break; } \
-  case 91: { asm __volatile__ (".set " str(LABEL) ", 91\n\t"); break; } \
-  case 92: { asm __volatile__ (".set " str(LABEL) ", 92\n\t"); break; } \
-  case 93: { asm __volatile__ (".set " str(LABEL) ", 93\n\t"); break; } \
-  case 94: { asm __volatile__ (".set " str(LABEL) ", 94\n\t"); break; } \
-  case 95: { asm __volatile__ (".set " str(LABEL) ", 95\n\t"); break; } \
-  case 96: { asm __volatile__ (".set " str(LABEL) ", 96\n\t"); break; } \
-  case 97: { asm __volatile__ (".set " str(LABEL) ", 97\n\t"); break; } \
-  case 98: { asm __volatile__ (".set " str(LABEL) ", 98\n\t"); break; } \
-  case 99: { asm __volatile__ (".set " str(LABEL) ", 99\n\t"); break; } \
-  case 100: { asm __volatile__ (".set " str(LABEL) ", 100\n\t"); break; } \
-  case 101: { asm __volatile__ (".set " str(LABEL) ", 101\n\t"); break; } \
-  case 102: { asm __volatile__ (".set " str(LABEL) ", 102\n\t"); break; } \
-  case 103: { asm __volatile__ (".set " str(LABEL) ", 103\n\t"); break; } \
-  case 104: { asm __volatile__ (".set " str(LABEL) ", 104\n\t"); break; } \
-  case 105: { asm __volatile__ (".set " str(LABEL) ", 105\n\t"); break; } \
-  case 106: { asm __volatile__ (".set " str(LABEL) ", 106\n\t"); break; } \
-  case 107: { asm __volatile__ (".set " str(LABEL) ", 107\n\t"); break; } \
-  case 108: { asm __volatile__ (".set " str(LABEL) ", 108\n\t"); break; } \
-  case 109: { asm __volatile__ (".set " str(LABEL) ", 109\n\t"); break; } \
-  case 110: { asm __volatile__ (".set " str(LABEL) ", 110\n\t"); break; } \
-  case 111: { asm __volatile__ (".set " str(LABEL) ", 111\n\t"); break; } \
-  case 112: { asm __volatile__ (".set " str(LABEL) ", 112\n\t"); break; } \
-  case 113: { asm __volatile__ (".set " str(LABEL) ", 113\n\t"); break; } \
-  case 114: { asm __volatile__ (".set " str(LABEL) ", 114\n\t"); break; } \
-  case 115: { asm __volatile__ (".set " str(LABEL) ", 115\n\t"); break; } \
-  case 116: { asm __volatile__ (".set " str(LABEL) ", 116\n\t"); break; } \
-  case 117: { asm __volatile__ (".set " str(LABEL) ", 117\n\t"); break; } \
-  case 118: { asm __volatile__ (".set " str(LABEL) ", 118\n\t"); break; } \
-  case 119: { asm __volatile__ (".set " str(LABEL) ", 119\n\t"); break; } \
-  case 120: { asm __volatile__ (".set " str(LABEL) ", 120\n\t"); break; } \
-  case 121: { asm __volatile__ (".set " str(LABEL) ", 121\n\t"); break; } \
-  case 122: { asm __volatile__ (".set " str(LABEL) ", 122\n\t"); break; } \
-  case 123: { asm __volatile__ (".set " str(LABEL) ", 123\n\t"); break; } \
-  case 124: { asm __volatile__ (".set " str(LABEL) ", 124\n\t"); break; } \
-  case 125: { asm __volatile__ (".set " str(LABEL) ", 125\n\t"); break; } \
-  case 126: { asm __volatile__ (".set " str(LABEL) ", 126\n\t"); break; } \
-  case 127: { asm __volatile__ (".set " str(LABEL) ", 127\n\t"); break; } \
-  case 128: { asm __volatile__ (".set " str(LABEL) ", 128\n\t"); break; } \
-  case 129: { asm __volatile__ (".set " str(LABEL) ", 129\n\t"); break; } \
-  case 130: { asm __volatile__ (".set " str(LABEL) ", 130\n\t"); break; } \
-  case 131: { asm __volatile__ (".set " str(LABEL) ", 131\n\t"); break; } \
-  case 132: { asm __volatile__ (".set " str(LABEL) ", 132\n\t"); break; } \
-  case 133: { asm __volatile__ (".set " str(LABEL) ", 133\n\t"); break; } \
-  case 134: { asm __volatile__ (".set " str(LABEL) ", 134\n\t"); break; } \
-  case 135: { asm __volatile__ (".set " str(LABEL) ", 135\n\t"); break; } \
-  case 136: { asm __volatile__ (".set " str(LABEL) ", 136\n\t"); break; } \
-  case 137: { asm __volatile__ (".set " str(LABEL) ", 137\n\t"); break; } \
-  case 138: { asm __volatile__ (".set " str(LABEL) ", 138\n\t"); break; } \
-  case 139: { asm __volatile__ (".set " str(LABEL) ", 139\n\t"); break; } \
-  case 140: { asm __volatile__ (".set " str(LABEL) ", 140\n\t"); break; } \
-  case 141: { asm __volatile__ (".set " str(LABEL) ", 141\n\t"); break; } \
-  case 142: { asm __volatile__ (".set " str(LABEL) ", 142\n\t"); break; } \
-  case 143: { asm __volatile__ (".set " str(LABEL) ", 143\n\t"); break; } \
-  case 144: { asm __volatile__ (".set " str(LABEL) ", 144\n\t"); break; } \
-  case 145: { asm __volatile__ (".set " str(LABEL) ", 145\n\t"); break; } \
-  case 146: { asm __volatile__ (".set " str(LABEL) ", 146\n\t"); break; } \
-  case 147: { asm __volatile__ (".set " str(LABEL) ", 147\n\t"); break; } \
-  case 148: { asm __volatile__ (".set " str(LABEL) ", 148\n\t"); break; } \
-  case 149: { asm __volatile__ (".set " str(LABEL) ", 149\n\t"); break; } \
-  case 150: { asm __volatile__ (".set " str(LABEL) ", 150\n\t"); break; } \
-  case 151: { asm __volatile__ (".set " str(LABEL) ", 151\n\t"); break; } \
-  case 152: { asm __volatile__ (".set " str(LABEL) ", 152\n\t"); break; } \
-  case 153: { asm __volatile__ (".set " str(LABEL) ", 153\n\t"); break; } \
-  case 154: { asm __volatile__ (".set " str(LABEL) ", 154\n\t"); break; } \
-  case 155: { asm __volatile__ (".set " str(LABEL) ", 155\n\t"); break; } \
-  case 156: { asm __volatile__ (".set " str(LABEL) ", 156\n\t"); break; } \
-  case 157: { asm __volatile__ (".set " str(LABEL) ", 157\n\t"); break; } \
-  case 158: { asm __volatile__ (".set " str(LABEL) ", 158\n\t"); break; } \
-  case 159: { asm __volatile__ (".set " str(LABEL) ", 159\n\t"); break; } \
-  case 160: { asm __volatile__ (".set " str(LABEL) ", 160\n\t"); break; } \
-  case 161: { asm __volatile__ (".set " str(LABEL) ", 161\n\t"); break; } \
-  case 162: { asm __volatile__ (".set " str(LABEL) ", 162\n\t"); break; } \
-  case 163: { asm __volatile__ (".set " str(LABEL) ", 163\n\t"); break; } \
-  case 164: { asm __volatile__ (".set " str(LABEL) ", 164\n\t"); break; } \
-  case 165: { asm __volatile__ (".set " str(LABEL) ", 165\n\t"); break; } \
-  case 166: { asm __volatile__ (".set " str(LABEL) ", 166\n\t"); break; } \
-  case 167: { asm __volatile__ (".set " str(LABEL) ", 167\n\t"); break; } \
-  case 168: { asm __volatile__ (".set " str(LABEL) ", 168\n\t"); break; } \
-  case 169: { asm __volatile__ (".set " str(LABEL) ", 169\n\t"); break; } \
-  case 170: { asm __volatile__ (".set " str(LABEL) ", 170\n\t"); break; } \
-  case 171: { asm __volatile__ (".set " str(LABEL) ", 171\n\t"); break; } \
-  case 172: { asm __volatile__ (".set " str(LABEL) ", 172\n\t"); break; } \
-  case 173: { asm __volatile__ (".set " str(LABEL) ", 173\n\t"); break; } \
-  case 174: { asm __volatile__ (".set " str(LABEL) ", 174\n\t"); break; } \
-  case 175: { asm __volatile__ (".set " str(LABEL) ", 175\n\t"); break; } \
-  case 176: { asm __volatile__ (".set " str(LABEL) ", 176\n\t"); break; } \
-  case 177: { asm __volatile__ (".set " str(LABEL) ", 177\n\t"); break; } \
-  case 178: { asm __volatile__ (".set " str(LABEL) ", 178\n\t"); break; } \
-  case 179: { asm __volatile__ (".set " str(LABEL) ", 179\n\t"); break; } \
-  case 180: { asm __volatile__ (".set " str(LABEL) ", 180\n\t"); break; } \
-  case 181: { asm __volatile__ (".set " str(LABEL) ", 181\n\t"); break; } \
-  case 182: { asm __volatile__ (".set " str(LABEL) ", 182\n\t"); break; } \
-  case 183: { asm __volatile__ (".set " str(LABEL) ", 183\n\t"); break; } \
-  case 184: { asm __volatile__ (".set " str(LABEL) ", 184\n\t"); break; } \
-  case 185: { asm __volatile__ (".set " str(LABEL) ", 185\n\t"); break; } \
-  case 186: { asm __volatile__ (".set " str(LABEL) ", 186\n\t"); break; } \
-  case 187: { asm __volatile__ (".set " str(LABEL) ", 187\n\t"); break; } \
-  case 188: { asm __volatile__ (".set " str(LABEL) ", 188\n\t"); break; } \
-  case 189: { asm __volatile__ (".set " str(LABEL) ", 189\n\t"); break; } \
-  case 190: { asm __volatile__ (".set " str(LABEL) ", 190\n\t"); break; } \
-  case 191: { asm __volatile__ (".set " str(LABEL) ", 191\n\t"); break; } \
-  case 192: { asm __volatile__ (".set " str(LABEL) ", 192\n\t"); break; } \
-  case 193: { asm __volatile__ (".set " str(LABEL) ", 193\n\t"); break; } \
-  case 194: { asm __volatile__ (".set " str(LABEL) ", 194\n\t"); break; } \
-  case 195: { asm __volatile__ (".set " str(LABEL) ", 195\n\t"); break; } \
-  case 196: { asm __volatile__ (".set " str(LABEL) ", 196\n\t"); break; } \
-  case 197: { asm __volatile__ (".set " str(LABEL) ", 197\n\t"); break; } \
-  case 198: { asm __volatile__ (".set " str(LABEL) ", 198\n\t"); break; } \
-  case 199: { asm __volatile__ (".set " str(LABEL) ", 199\n\t"); break; } \
-  case 200: { asm __volatile__ (".set " str(LABEL) ", 200\n\t"); break; } \
-  case 201: { asm __volatile__ (".set " str(LABEL) ", 201\n\t"); break; } \
-  case 202: { asm __volatile__ (".set " str(LABEL) ", 202\n\t"); break; } \
-  case 203: { asm __volatile__ (".set " str(LABEL) ", 203\n\t"); break; } \
-  case 204: { asm __volatile__ (".set " str(LABEL) ", 204\n\t"); break; } \
-  case 205: { asm __volatile__ (".set " str(LABEL) ", 205\n\t"); break; } \
-  case 206: { asm __volatile__ (".set " str(LABEL) ", 206\n\t"); break; } \
-  case 207: { asm __volatile__ (".set " str(LABEL) ", 207\n\t"); break; } \
-  case 208: { asm __volatile__ (".set " str(LABEL) ", 208\n\t"); break; } \
-  case 209: { asm __volatile__ (".set " str(LABEL) ", 209\n\t"); break; } \
-  case 210: { asm __volatile__ (".set " str(LABEL) ", 210\n\t"); break; } \
-  case 211: { asm __volatile__ (".set " str(LABEL) ", 211\n\t"); break; } \
-  case 212: { asm __volatile__ (".set " str(LABEL) ", 212\n\t"); break; } \
-  case 213: { asm __volatile__ (".set " str(LABEL) ", 213\n\t"); break; } \
-  case 214: { asm __volatile__ (".set " str(LABEL) ", 214\n\t"); break; } \
-  case 215: { asm __volatile__ (".set " str(LABEL) ", 215\n\t"); break; } \
-  case 216: { asm __volatile__ (".set " str(LABEL) ", 216\n\t"); break; } \
-  case 217: { asm __volatile__ (".set " str(LABEL) ", 217\n\t"); break; } \
-  case 218: { asm __volatile__ (".set " str(LABEL) ", 218\n\t"); break; } \
-  case 219: { asm __volatile__ (".set " str(LABEL) ", 219\n\t"); break; } \
-  case 220: { asm __volatile__ (".set " str(LABEL) ", 220\n\t"); break; } \
-  case 221: { asm __volatile__ (".set " str(LABEL) ", 221\n\t"); break; } \
-  case 222: { asm __volatile__ (".set " str(LABEL) ", 222\n\t"); break; } \
-  case 223: { asm __volatile__ (".set " str(LABEL) ", 223\n\t"); break; } \
-  case 224: { asm __volatile__ (".set " str(LABEL) ", 224\n\t"); break; } \
-  case 225: { asm __volatile__ (".set " str(LABEL) ", 225\n\t"); break; } \
-  case 226: { asm __volatile__ (".set " str(LABEL) ", 226\n\t"); break; } \
-  case 227: { asm __volatile__ (".set " str(LABEL) ", 227\n\t"); break; } \
-  case 228: { asm __volatile__ (".set " str(LABEL) ", 228\n\t"); break; } \
-  case 229: { asm __volatile__ (".set " str(LABEL) ", 229\n\t"); break; } \
-  case 230: { asm __volatile__ (".set " str(LABEL) ", 230\n\t"); break; } \
-  case 231: { asm __volatile__ (".set " str(LABEL) ", 231\n\t"); break; } \
-  case 232: { asm __volatile__ (".set " str(LABEL) ", 232\n\t"); break; } \
-  case 233: { asm __volatile__ (".set " str(LABEL) ", 233\n\t"); break; } \
-  case 234: { asm __volatile__ (".set " str(LABEL) ", 234\n\t"); break; } \
-  case 235: { asm __volatile__ (".set " str(LABEL) ", 235\n\t"); break; } \
-  case 236: { asm __volatile__ (".set " str(LABEL) ", 236\n\t"); break; } \
-  case 237: { asm __volatile__ (".set " str(LABEL) ", 237\n\t"); break; } \
-  case 238: { asm __volatile__ (".set " str(LABEL) ", 238\n\t"); break; } \
-  case 239: { asm __volatile__ (".set " str(LABEL) ", 239\n\t"); break; } \
-  case 240: { asm __volatile__ (".set " str(LABEL) ", 240\n\t"); break; } \
-  case 241: { asm __volatile__ (".set " str(LABEL) ", 241\n\t"); break; } \
-  case 242: { asm __volatile__ (".set " str(LABEL) ", 242\n\t"); break; } \
-  case 243: { asm __volatile__ (".set " str(LABEL) ", 243\n\t"); break; } \
-  case 244: { asm __volatile__ (".set " str(LABEL) ", 244\n\t"); break; } \
-  case 245: { asm __volatile__ (".set " str(LABEL) ", 245\n\t"); break; } \
-  case 246: { asm __volatile__ (".set " str(LABEL) ", 246\n\t"); break; } \
-  case 247: { asm __volatile__ (".set " str(LABEL) ", 247\n\t"); break; } \
-  case 248: { asm __volatile__ (".set " str(LABEL) ", 248\n\t"); break; } \
-  case 249: { asm __volatile__ (".set " str(LABEL) ", 249\n\t"); break; } \
-  case 250: { asm __volatile__ (".set " str(LABEL) ", 250\n\t"); break; } \
-  case 251: { asm __volatile__ (".set " str(LABEL) ", 251\n\t"); break; } \
-  case 252: { asm __volatile__ (".set " str(LABEL) ", 252\n\t"); break; } \
-  case 253: { asm __volatile__ (".set " str(LABEL) ", 253\n\t"); break; } \
-  case 254: { asm __volatile__ (".set " str(LABEL) ", 254\n\t"); break; } \
-  case 255: { asm __volatile__ (".set " str(LABEL) ", 255\n\t"); break; } \
-}
 
 template<int HI_OFFSET, int LO_OFFSET, int T1, int T2, int T3, EOrder RGB_ORDER, int WAIT_TIME>int
 showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, uint32_t num_leds, struct M0ClocklessData *pData) {
@@ -285,10 +23,6 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
 
   // high register variable
   register const uint8_t *leds = _leds;
-
-  MK_LABELS(T1,T1);
-  MK_LABELS(T2,T2);
-  MK_LABELS(T3,T3);
 
   asm __volatile__ (
     ///////////////////////////////////////////////////////////////////////////
@@ -441,9 +175,6 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
   );
 
 #define M0_ASM_ARGS     :             \
-      [base] "+l" (base),             \
-      [bitmask] "+l" (bitmask),       \
-      [port] "+l" (port),             \
       [leds] "+h" (leds),             \
       [counter] "+l" (counter),       \
       [scratch] "+l" (scratch),       \
@@ -451,6 +182,9 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       [bn] "+l" (bn),                 \
       [b] "+l" (b)                    \
     :                                 \
+      [port] "l" (port),              \
+      [base] "l" (base),              \
+      [bitmask] "l" (bitmask),        \
       [hi_off] "I" (HI_OFFSET),       \
       [lo_off] "I" (LO_OFFSET),       \
       [led0] "I" (RO(0)),             \
@@ -461,19 +195,22 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       [scale2] "I" (3+RO(2)),         \
       [e0] "I" (6+RO(0)),             \
       [e1] "I" (6+RO(1)),             \
-      [e2] "I" (6+RO(2))              \
+      [e2] "I" (6+RO(2)),             \
+      [T1] "I" (T1),                  \
+      [T2] "I" (T2),                  \
+      [T3] "I" (T3)                   \
     :
 
     /////////////////////////////////////////////////////////////////////////
     // now for some convinience macros to make building our lines a bit cleaner
 #define LOOP            "  loop_%=:"
 #define HI2             "  qset2 %[bitmask], %[port], %[hi_off];"
-#define D1              "  mod_delay T1,2,0,%[scratch];"
+#define D1              "  mod_delay %c[T1],2,0,%[scratch];"
 #define QLO4            "  qlo4 %[b],%[bitmask],%[port], %[lo_off];"
 #define LOADLEDS3(X)    "  loadleds3 %[leds], %[bn], %[led" #X "] ,%[scratch];"
-#define D2(ADJ)         "  mod_delay T2,4," #ADJ ",%[scratch];"
+#define D2(ADJ)         "  mod_delay %c[T2],4," #ADJ ",%[scratch];"
 #define LO2             "  qset2 %[bitmask], %[port], %[lo_off];"
-#define D3(ADJ)         "  mod_delay T3,2," #ADJ ",%[scratch];"
+#define D3(ADJ)         "  mod_delay %c[T3],2," #ADJ ",%[scratch];"
 #define LOADDITHER7(X)  "  loaddither7 %[bn], %[d], %[base], %[led" #X "];"
 #define DITHER5         "  dither5 %[bn], %[d];"
 #define SCALE4(X)       "  scale4 %[bn], %[base], %[scale" #X "], %[scratch];"
