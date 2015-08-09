@@ -69,10 +69,10 @@ void fill_gradient_RGB( CRGB* leds,
     if( endpos < startpos ) {
         uint16_t t = endpos;
         CRGB tc = endcolor;
-        startpos = t;
-        startcolor = tc;
         endcolor = startcolor;
         endpos = startpos;
+        startpos = t;
+        startcolor = tc;
     }
 
     saccum87 rdistance87;
@@ -754,5 +754,64 @@ void nblendPaletteTowardPalette( CRGBPalette16& current, CRGBPalette16& target, 
         if( changes >= maxChanges) { break; }
     }
 }
+
+
+uint8_t applyGamma_video( uint8_t brightness, float gamma)
+{
+    float orig;
+    float adj;
+    orig = (float)(brightness) / (255.0);
+    adj =  pow( orig, gamma)   * (255.0);
+    uint8_t result = (uint8_t)(adj);
+    if( (brightness > 0) && (result == 0)) {
+        result = 1; // never gamma-adjust a positive number down to zero
+    }
+    return result;
+}
+
+CRGB applyGamma_video( const CRGB& orig, float gamma)
+{
+    CRGB adj;
+    adj.r = applyGamma_video( orig.r, gamma);
+    adj.g = applyGamma_video( orig.g, gamma);
+    adj.b = applyGamma_video( orig.b, gamma);
+    return adj;
+}
+
+CRGB applyGamma_video( const CRGB& orig, float gammaR, float gammaG, float gammaB)
+{
+    CRGB adj;
+    adj.r = applyGamma_video( orig.r, gammaR);
+    adj.g = applyGamma_video( orig.g, gammaG);
+    adj.b = applyGamma_video( orig.b, gammaB);
+    return adj;
+}
+
+CRGB& napplyGamma_video( CRGB& rgb, float gamma)
+{
+    rgb = applyGamma_video( rgb, gamma);
+    return rgb;
+}
+
+CRGB& napplyGamma_video( CRGB& rgb, float gammaR, float gammaG, float gammaB)
+{
+    rgb = applyGamma_video( rgb, gammaR, gammaG, gammaB);
+    return rgb;
+}
+
+void napplyGamma_video( CRGB* rgbarray, uint16_t count, float gamma)
+{
+    for( uint16_t i = 0; i < count; i++) {
+        rgbarray[i] = applyGamma_video( rgbarray[i], gamma);
+    }
+}
+
+void napplyGamma_video( CRGB* rgbarray, uint16_t count, float gammaR, float gammaG, float gammaB)
+{
+    for( uint16_t i = 0; i < count; i++) {
+        rgbarray[i] = applyGamma_video( rgbarray[i], gammaR, gammaG, gammaB);
+    }
+}
+
 
 FASTLED_NAMESPACE_END
