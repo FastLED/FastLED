@@ -379,19 +379,17 @@ typedef union {
 //
 // Note that anything involving a 'float' on AVR will be slower.
 
-// floatToSfract15: conversion from IEEE754 float in the range (-1,1)
-//                  to 16-bit fixed point.  Note that the extremes of
-//                  one and negative one are NOT representable.  The
-//                  representable range is basically
-//
-// sfract15ToFloat: conversion from sfract15 fixed point to
-//                  IEEE754 32-bit float.
-
+/// sfract15ToFloat: conversion from sfract15 fixed point to
+///                  IEEE754 32-bit float.
 LIB8STATIC float sfract15ToFloat( sfract15 y)
 {
     return y / 32768.0;
 }
 
+/// conversion from IEEE754 float in the range (-1,1)
+///                  to 16-bit fixed point.  Note that the extremes of
+///                  one and negative one are NOT representable.  The
+///                  representable range is basically
 LIB8STATIC sfract15 floatToSfract15( float f)
 {
     return f * 32768.0;
@@ -433,8 +431,8 @@ void * memset8 ( void * ptr, uint8_t value, uint16_t num ) __attribute__ ((noinl
 // to do all the math in the same width as the arguments,
 // which is much faster and smaller on AVR.
 
-// linear interpolation between two unsigned 8-bit values,
-// with 8-bit fraction
+/// linear interpolation between two unsigned 8-bit values,
+/// with 8-bit fraction
 LIB8STATIC uint8_t lerp8by8( uint8_t a, uint8_t b, fract8 frac)
 {
     uint8_t result;
@@ -450,8 +448,8 @@ LIB8STATIC uint8_t lerp8by8( uint8_t a, uint8_t b, fract8 frac)
     return result;
 }
 
-// linear interpolation between two unsigned 16-bit values,
-// with 16-bit fraction
+/// linear interpolation between two unsigned 16-bit values,
+/// with 16-bit fraction
 LIB8STATIC uint16_t lerp16by16( uint16_t a, uint16_t b, fract16 frac)
 {
     uint16_t result;
@@ -467,8 +465,8 @@ LIB8STATIC uint16_t lerp16by16( uint16_t a, uint16_t b, fract16 frac)
     return result;
 }
 
-// linear interpolation between two unsigned 16-bit values,
-// with 8-bit fraction
+/// linear interpolation between two unsigned 16-bit values,
+/// with 8-bit fraction
 LIB8STATIC uint16_t lerp16by8( uint16_t a, uint16_t b, fract8 frac)
 {
     uint16_t result;
@@ -484,8 +482,8 @@ LIB8STATIC uint16_t lerp16by8( uint16_t a, uint16_t b, fract8 frac)
     return result;
 }
 
-// linear interpolation between two signed 15-bit values,
-// with 8-bit fraction
+/// linear interpolation between two signed 15-bit values,
+/// with 8-bit fraction
 LIB8STATIC int16_t lerp15by8( int16_t a, int16_t b, fract8 frac)
 {
     int16_t result;
@@ -501,8 +499,8 @@ LIB8STATIC int16_t lerp15by8( int16_t a, int16_t b, fract8 frac)
     return result;
 }
 
-// linear interpolation between two signed 15-bit values,
-// with 8-bit fraction
+/// linear interpolation between two signed 15-bit values,
+/// with 8-bit fraction
 LIB8STATIC int16_t lerp15by16( int16_t a, int16_t b, fract16 frac)
 {
     int16_t result;
@@ -518,20 +516,23 @@ LIB8STATIC int16_t lerp15by16( int16_t a, int16_t b, fract16 frac)
     return result;
 }
 
-//  map8: map from one full-range 8-bit value into a narrower
-//        range of 8-bit values, possibly a range of hues.
-//
-//        E.g. map myValue into a hue in the range blue..purple..pink..red
-//        hue = map8( myValue, HUE_BLUE, HUE_RED);
-//
-//        Combines nicely with the waveform functions (like sin8, etc)
-//        to produce continuous hue gradients back and forth:
-//          hue = map8( sin8( myValue), HUE_BLUE, HUE_RED);
-//
-//        Mathematically simiar to lerp8by8, but arguments are more
-//        like Arduino's "map"; this function is similar to
-//          map( in, 0, 255, rangeStart, rangeEnd)
-//        but faster and specifically designed for 8-bit values.
+///  map8: map from one full-range 8-bit value into a narrower
+/// range of 8-bit values, possibly a range of hues.
+///
+/// E.g. map myValue into a hue in the range blue..purple..pink..red
+/// hue = map8( myValue, HUE_BLUE, HUE_RED);
+///
+/// Combines nicely with the waveform functions (like sin8, etc)
+/// to produce continuous hue gradients back and forth:
+///
+///          hue = map8( sin8( myValue), HUE_BLUE, HUE_RED);
+///
+/// Mathematically simiar to lerp8by8, but arguments are more
+/// like Arduino's "map"; this function is similar to
+///
+///          map( in, 0, 255, rangeStart, rangeEnd)
+///
+/// but faster and specifically designed for 8-bit values.
 LIB8STATIC uint8_t map8( uint8_t in, uint8_t rangeStart, uint8_t rangeEnd)
 {
     uint8_t rangeWidth = rangeEnd - rangeStart;
@@ -546,8 +547,8 @@ LIB8STATIC uint8_t map8( uint8_t in, uint8_t rangeStart, uint8_t rangeEnd)
 // easing functions; see http://easings.net
 //
 
-// ease8InOutQuad: 8-bit quadratic ease-in / ease-out function
-//                Takes around 13 cycles on AVR
+/// ease8InOutQuad: 8-bit quadratic ease-in / ease-out function
+///                Takes around 13 cycles on AVR
 LIB8STATIC uint8_t ease8InOutQuad( uint8_t i)
 {
     uint8_t j = i;
@@ -563,8 +564,8 @@ LIB8STATIC uint8_t ease8InOutQuad( uint8_t i)
 }
 
 
-// ease8InOutCubic: 8-bit cubic ease-in / ease-out function
-//                 Takes around 18 cycles on AVR
+/// ease8InOutCubic: 8-bit cubic ease-in / ease-out function
+///                 Takes around 18 cycles on AVR
 LIB8STATIC fract8 ease8InOutCubic( fract8 i)
 {
     uint8_t ii  = scale8_LEAVING_R1_DIRTY(  i, i);
@@ -585,13 +586,13 @@ LIB8STATIC fract8 ease8InOutCubic( fract8 i)
     return result;
 }
 
-// ease8InOutApprox: fast, rough 8-bit ease-in/ease-out function
-//                   shaped approximately like 'ease8InOutCubic',
-//                   it's never off by more than a couple of percent
-//                   from the actual cubic S-curve, and it executes
-//                   more than twice as fast.  Use when the cycles
-//                   are more important than visual smoothness.
-//                   Asm version takes around 7 cycles on AVR.
+/// ease8InOutApprox: fast, rough 8-bit ease-in/ease-out function
+///                   shaped approximately like 'ease8InOutCubic',
+///                   it's never off by more than a couple of percent
+///                   from the actual cubic S-curve, and it executes
+///                   more than twice as fast.  Use when the cycles
+///                   are more important than visual smoothness.
+///                   Asm version takes around 7 cycles on AVR.
 
 #if EASE8_C == 1
 LIB8STATIC fract8 ease8InOutApprox( fract8 i)
@@ -649,16 +650,16 @@ LIB8STATIC uint8_t ease8InOutApprox( fract8 i)
 
 
 
-// triwave8: triangle (sawtooth) wave generator.  Useful for
-//           turning a one-byte ever-increasing value into a
-//           one-byte value that oscillates up and down.
-//
-//           input         output
-//           0..127        0..254 (positive slope)
-//           128..255      254..0 (negative slope)
-//
-//           On AVR this function takes just three cycles.
-//
+/// triwave8: triangle (sawtooth) wave generator.  Useful for
+///           turning a one-byte ever-increasing value into a
+///           one-byte value that oscillates up and down.
+///
+///           input         output
+///           0..127        0..254 (positive slope)
+///           128..255      254..0 (negative slope)
+///
+/// On AVR this function takes just three cycles.
+///
 LIB8STATIC uint8_t triwave8(uint8_t in)
 {
     if( in & 0x80) {
@@ -678,34 +679,44 @@ LIB8STATIC uint8_t triwave8(uint8_t in)
 //           slightly different curve shapes.
 //
 
-// quadwave8: quadratic waveform generator.  Spends just a little more
-//            time at the limits than 'sine' does.
+/// quadwave8: quadratic waveform generator.  Spends just a little more
+///            time at the limits than 'sine' does.
 LIB8STATIC uint8_t quadwave8(uint8_t in)
 {
     return ease8InOutQuad( triwave8( in));
 }
 
-// cubicwave8: cubic waveform generator.  Spends visibly more time
-//             at the limits than 'sine' does.
+/// cubicwave8: cubic waveform generator.  Spends visibly more time
+///             at the limits than 'sine' does.
 LIB8STATIC uint8_t cubicwave8(uint8_t in)
 {
     return ease8InOutCubic( triwave8( in));
 }
 
-// squarewave8: square wave generator.  Useful for
-//           turning a one-byte ever-increasing value
-//           into a one-byte value that is either 0 or 255.
-//           The width of the output 'pulse' is
-//           determined by the pulsewidth argument:
-//           If pulsewidth is 255, output is always 255.
-//           If pulsewidth < 255, then
-//             if input < pulsewidth  then output is 255
-//             if input >= pulsewidth then output is 0
-//
-// 255   +--pulsewidth--+
-//  .    |              |
-//  0    0              +--------(256-pulsewidth)--------
-//
+/// squarewave8: square wave generator.  Useful for
+///           turning a one-byte ever-increasing value
+///           into a one-byte value that is either 0 or 255.
+///           The width of the output 'pulse' is
+///           determined by the pulsewidth argument:
+///
+///~~~
+///           If pulsewidth is 255, output is always 255.
+///           If pulsewidth < 255, then
+///             if input < pulsewidth  then output is 255
+///             if input >= pulsewidth then output is 0
+///~~~
+///
+/// the output looking like:
+///
+///~~~
+///     255   +--pulsewidth--+
+///      .    |              |
+///      0    0              +--------(256-pulsewidth)--------
+///~~~
+///
+/// @param in
+/// @param pulsewidth
+/// @returns square wave output
 LIB8STATIC uint8_t squarewave8( uint8_t in, uint8_t pulsewidth=128)
 {
     if( in < pulsewidth || (pulsewidth == 255)) {
@@ -812,10 +823,10 @@ uint32_t get_millisecond_timer();
 #endif
 
 // beat16 generates a 16-bit 'sawtooth' wave at a given BPM,
-//        with BPM specified in Q8.8 fixed-point format; e.g.
-//        for this function, 120 BPM MUST BE specified as
-//        120*256 = 30720.
-//        If you just want to specify "120", use beat16 or beat8.
+///        with BPM specified in Q8.8 fixed-point format; e.g.
+///        for this function, 120 BPM MUST BE specified as
+///        120*256 = 30720.
+///        If you just want to specify "120", use beat16 or beat8.
 LIB8STATIC uint16_t beat88( accum88 beats_per_minute_88, uint32_t timebase = 0)
 {
     // BPM is 'beats per minute', or 'beats per 60000ms'.
@@ -829,7 +840,7 @@ LIB8STATIC uint16_t beat88( accum88 beats_per_minute_88, uint32_t timebase = 0)
     return (((GET_MILLIS()) - timebase) * beats_per_minute_88 * 280) >> 16;
 }
 
-// beat16 generates a 16-bit 'sawtooth' wave at a given BPM
+/// beat16 generates a 16-bit 'sawtooth' wave at a given BPM
 LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
 {
     // Convert simple 8-bit BPM's to full Q8.8 accum88's if needed
@@ -837,18 +848,18 @@ LIB8STATIC uint16_t beat16( accum88 beats_per_minute, uint32_t timebase = 0)
     return beat88(beats_per_minute, timebase);
 }
 
-// beat8 generates an 8-bit 'sawtooth' wave at a given BPM
+/// beat8 generates an 8-bit 'sawtooth' wave at a given BPM
 LIB8STATIC uint8_t beat8( accum88 beats_per_minute, uint32_t timebase = 0)
 {
     return beat16( beats_per_minute, timebase) >> 8;
 }
 
-// beatsin88 generates a 16-bit sine wave at a given BPM,
-//           that oscillates within a given range.
-//           For this function, BPM MUST BE SPECIFIED as
-//           a Q8.8 fixed-point value; e.g. 120BPM must be
-//           specified as 120*256 = 30720.
-//           If you just want to specify "120", use beatsin16 or beatsin8.
+/// beatsin88 generates a 16-bit sine wave at a given BPM,
+///           that oscillates within a given range.
+///           For this function, BPM MUST BE SPECIFIED as
+///           a Q8.8 fixed-point value; e.g. 120BPM must be
+///           specified as 120*256 = 30720.
+///           If you just want to specify "120", use beatsin16 or beatsin8.
 LIB8STATIC uint16_t beatsin88( accum88 beats_per_minute_88, uint16_t lowest = 0, uint16_t highest = 65535,
                               uint32_t timebase = 0, uint16_t phase_offset = 0)
 {
@@ -860,8 +871,8 @@ LIB8STATIC uint16_t beatsin88( accum88 beats_per_minute_88, uint16_t lowest = 0,
     return result;
 }
 
-// beatsin16 generates a 16-bit sine wave at a given BPM,
-//           that oscillates within a given range.
+/// beatsin16 generates a 16-bit sine wave at a given BPM,
+///           that oscillates within a given range.
 LIB8STATIC uint16_t beatsin16( accum88 beats_per_minute, uint16_t lowest = 0, uint16_t highest = 65535,
                                uint32_t timebase = 0, uint16_t phase_offset = 0)
 {
@@ -873,8 +884,8 @@ LIB8STATIC uint16_t beatsin16( accum88 beats_per_minute, uint16_t lowest = 0, ui
     return result;
 }
 
-// beatsin8 generates an 8-bit sine wave at a given BPM,
-//           that oscillates within a given range.
+/// beatsin8 generates an 8-bit sine wave at a given BPM,
+///           that oscillates within a given range.
 LIB8STATIC uint8_t beatsin8( accum88 beats_per_minute, uint8_t lowest = 0, uint8_t highest = 255,
                             uint32_t timebase = 0, uint8_t phase_offset = 0)
 {
@@ -887,11 +898,8 @@ LIB8STATIC uint8_t beatsin8( accum88 beats_per_minute, uint8_t lowest = 0, uint8
 }
 
 
-// seconds16, minutes16, hours8
-//   functions to return the current seconds, minutes, or hours
-//   since boot time, in the specified width.  Used as part of
-//   the "every N time-periods" mechanism.
-
+/// Return the current seconds since boot in a 16-bit value.  Used as part of the
+/// "every N time-periods" mechanism
 LIB8STATIC uint16_t seconds16()
 {
     uint32_t ms = GET_MILLIS();
@@ -900,6 +908,8 @@ LIB8STATIC uint16_t seconds16()
     return s16;
 }
 
+/// Return the current minutes since boot in a 16-bit value.  Used as part of the
+/// "every N time-periods" mechanism
 LIB8STATIC uint16_t minutes16()
 {
     uint32_t ms = GET_MILLIS();
@@ -908,6 +918,8 @@ LIB8STATIC uint16_t minutes16()
     return m16;
 }
 
+/// Return the current hours since boot in an 8-bit value.  Used as part of the
+/// "every N time-periods" mechanism
 LIB8STATIC uint8_t hours8()
 {
     uint32_t ms = GET_MILLIS();
@@ -917,16 +929,16 @@ LIB8STATIC uint8_t hours8()
 }
 
 
-// Helper routine to divide a 32-bit value by 1024, returning
-// only the low 16 bits. You'd think this would be just
-//   result = (in32 >> 10) & 0xFFFF;
-// and on ARM, that's what you want and all is well.
-// But on AVR that code turns into a loop that executes
-// a four-byte shift ten times: 40 shifts in all, plus loop
-// overhead. This routine gets exactly the same result with
-// just six shifts (vs 40), and no loop overhead.
-// Used to convert millis to 'binary seconds' aka bseconds:
-// one bsecond == 1024 millis.
+/// Helper routine to divide a 32-bit value by 1024, returning
+/// only the low 16 bits. You'd think this would be just
+///   result = (in32 >> 10) & 0xFFFF;
+/// and on ARM, that's what you want and all is well.
+/// But on AVR that code turns into a loop that executes
+/// a four-byte shift ten times: 40 shifts in all, plus loop
+/// overhead. This routine gets exactly the same result with
+/// just six shifts (vs 40), and no loop overhead.
+/// Used to convert millis to 'binary seconds' aka bseconds:
+/// one bsecond == 1024 millis.
 LIB8STATIC uint16_t div1024_32_16( uint32_t in32)
 {
     uint16_t out16;
@@ -949,9 +961,9 @@ LIB8STATIC uint16_t div1024_32_16( uint32_t in32)
     return out16;
 }
 
-// bseconds16 returns the current time-since-boot in
-// "binary seconds", which are actually 1024/1000 of a
-// second long.
+/// bseconds16 returns the current time-since-boot in
+/// "binary seconds", which are actually 1024/1000 of a
+/// second long.
 LIB8STATIC uint16_t bseconds16()
 {
     uint32_t ms = GET_MILLIS();

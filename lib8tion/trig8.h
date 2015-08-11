@@ -12,6 +12,7 @@
 ///        On Arduino/AVR, the 16-bit approximation is more than
 ///        10X faster than floating point sin(x) and cos(x), while
 /// the 8-bit approximation is more than 20X faster.
+///@{
 
 #if defined(__AVR__)
 #define sin16 sin16_avr
