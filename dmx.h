@@ -6,6 +6,8 @@
 #include<DmxSimple.h>
 #define HAS_DMX_SIMPLE
 
+///@ingroup chipsets
+///@{
 FASTLED_NAMESPACE_BEGIN
 
 // note - dmx simple must be included before FastSPI for this code to be enabled
@@ -102,6 +104,7 @@ public:
 };
 
 FASTLED_NAMESPACE_END
+///@}
 
 #define HAS_DMX_SERIAL
 #endif

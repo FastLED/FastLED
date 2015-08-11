@@ -4,7 +4,13 @@
 #include "pixeltypes.h"
 
 FASTLED_NAMESPACE_BEGIN
+///@defgroup chipsets
+/// Implementations of CLEDController classes for various led chipsets.
+///
+///@{
 
+///@name Clocked chipsets - nominally SPI based these chipsets have a data and a clock line.
+///@{
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // LPD8806 controller class - takes data/clock/select pin values (N.B. should take an SPI definition?)
@@ -178,11 +184,11 @@ protected:
 
 		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
-			uint8_t b = pixels.loadAndScale0(); 
-			mSPI.writeWord(0xFF00 | b);		
-			uint16_t w = pixels.loadAndScale1() << 8; 
-			w |= pixels.loadAndScale2(); 
-			mSPI.writeWord(w);		
+			uint8_t b = pixels.loadAndScale0();
+			mSPI.writeWord(0xFF00 | b);
+			uint16_t w = pixels.loadAndScale1() << 8;
+			w |= pixels.loadAndScale2();
+			mSPI.writeWord(w);
 			pixels.stepDithering();
 		}
 		endBoundary(nLeds);
@@ -198,11 +204,11 @@ protected:
 
 		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
-			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0(); 
-			mSPI.writeWord(b);		
-			uint16_t w = pixels.loadAndScale1() << 8; 
-			w |= pixels.loadAndScale2(); 
-			mSPI.writeWord(w);		
+			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0();
+			mSPI.writeWord(b);
+			uint16_t w = pixels.loadAndScale1() << 8;
+			w |= pixels.loadAndScale2();
+			mSPI.writeWord(w);
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
@@ -219,10 +225,10 @@ protected:
 
 		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
-			mSPI.writeByte(0xFF); 
-			uint8_t b = pixels.loadAndScale0(); mSPI.writeByte(b);		
-			b = pixels.loadAndScale1(); mSPI.writeByte(b);		
-			b = pixels.loadAndScale2(); mSPI.writeByte(b);		
+			mSPI.writeByte(0xFF);
+			uint8_t b = pixels.loadAndScale0(); mSPI.writeByte(b);
+			b = pixels.loadAndScale1(); mSPI.writeByte(b);
+			b = pixels.loadAndScale2(); mSPI.writeByte(b);
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
@@ -397,7 +403,7 @@ protected:
 	}
 #endif
 };
-
+/// @}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Clockless template instantiations - see clockless.h for how the timing values are used
@@ -541,7 +547,7 @@ class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), N
 ///@}
 
 #endif
-
+///@}
 FASTLED_NAMESPACE_END
 
 #endif

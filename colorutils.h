@@ -64,18 +64,20 @@ typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradi
 #define saccum87 int16_t
 
 /// fill_gradient - fill an array of colors with a smooth HSV gradient
-///                 between two specified HSV colors.
-///                 Since 'hue' is a value around a color wheel,
-///                 there are always two ways to sweep from one hue
-///                 to another.
-///                 This function lets you specify which way you want
-///                 the hue gradient to sweep around the color wheel:
-///                   FORWARD_HUES: hue always goes clockwise
-///                   BACKWARD_HUES: hue always goes counter-clockwise
-///                   SHORTEST_HUES: hue goes whichever way is shortest
-///                   LONGEST_HUES: hue goes whichever way is longest
-///                 The default is SHORTEST_HUES, as this is nearly
-///                 always what is wanted.
+/// between two specified HSV colors.
+/// Since 'hue' is a value around a color wheel,
+/// there are always two ways to sweep from one hue
+/// to another.
+/// This function lets you specify which way you want
+/// the hue gradient to sweep around the color wheel:
+///
+///     FORWARD_HUES: hue always goes clockwise
+///     BACKWARD_HUES: hue always goes counter-clockwise
+///     SHORTEST_HUES: hue goes whichever way is shortest
+///     LONGEST_HUES: hue goes whichever way is longest
+///
+/// The default is SHORTEST_HUES, as this is nearly
+/// always what is wanted.
 ///
 /// fill_gradient can write the gradient colors EITHER
 ///     (1) into an array of CRGBs (e.g., into leds[] array, or an RGB Palette)
@@ -702,7 +704,7 @@ public:
         fill_gradient_RGB( &(entries[0]), 16, c1, c2, c3, c4);
     }
 
-    
+
     // Gradient palettes are loaded into CRGB16Palettes in such a way
     // that, if possible, every color represented in the gradient palette
     // is also represented in the CRGBPalette16.
@@ -733,19 +735,19 @@ public:
     {
         TRGBGradientPaletteEntryUnion* progent = (TRGBGradientPaletteEntryUnion*)(progpal);
         TRGBGradientPaletteEntryUnion u;
-        
+
         // Count entries
         uint8_t count = 0;
         do {
             u.dword = FL_PGM_READ_DWORD_NEAR(progent + count);
             count++;;
         } while ( u.index != 255);
-        
+
         int8_t lastSlotUsed = -1;
-        
+
         u.dword = FL_PGM_READ_DWORD_NEAR( progent);
         CRGB rgbstart( u.r, u.g, u.b);
-        
+
         int indexstart = 0;
         uint8_t istart8 = 0;
         uint8_t iend8 = 0;
@@ -775,20 +777,20 @@ public:
     {
         TRGBGradientPaletteEntryUnion* ent = (TRGBGradientPaletteEntryUnion*)(gpal);
         TRGBGradientPaletteEntryUnion u;
-        
+
         // Count entries
         uint8_t count = 0;
         do {
             u = *(ent + count);
             count++;;
         } while ( u.index != 255);
-        
+
         int8_t lastSlotUsed = -1;
-        
+
 
         u = *ent;
         CRGB rgbstart( u.r, u.g, u.b);
-        
+
         int indexstart = 0;
         uint8_t istart8 = 0;
         uint8_t iend8 = 0;
@@ -944,7 +946,7 @@ public:
         TRGBGradientPaletteEntryUnion u;
         u.dword = FL_PGM_READ_DWORD_NEAR( progent);
         CRGB rgbstart( u.r, u.g, u.b);
-        
+
         int indexstart = 0;
         while( indexstart < 255) {
             progent++;
@@ -963,7 +965,7 @@ public:
         TRGBGradientPaletteEntryUnion u;
         u = *ent;
         CRGB rgbstart( u.r, u.g, u.b);
-        
+
         int indexstart = 0;
         while( indexstart < 255) {
             ent++;

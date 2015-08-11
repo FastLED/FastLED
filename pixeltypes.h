@@ -10,11 +10,14 @@ FASTLED_NAMESPACE_BEGIN
 struct CRGB;
 struct CHSV;
 
-// Forward declaration of hsv2rgb_rainbow here,
-// to avoid circular dependencies.
+///@defgroup Pixeltypes CHSV and CRGB type definitions
+///@{
+
+/// Forward declaration of hsv2rgb_rainbow here,
+/// to avoid circular dependencies.
 extern void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb);
 
-
+/// Representation of an HSV pixel (hue, saturation, value (aka brightness)).
 struct CHSV {
     union {
 		struct {
@@ -69,6 +72,7 @@ struct CHSV {
     }
 };
 
+/// Pre-defined hue values for HSV objects
 typedef enum {
     HUE_RED = 0,
     HUE_ORANGE = 32,
@@ -80,6 +84,7 @@ typedef enum {
     HUE_PINK = 224
 } HSVHue;
 
+/// Representation of an RGB pixel (Red, Green, Blue)
 struct CRGB {
 	union {
 		struct {
@@ -540,7 +545,7 @@ struct CRGB {
         }
     }
 
-
+    /// Predefined RGB colors
     typedef enum {
         AliceBlue=0xF0F8FF,
         Amethyst=0x9966CC,
@@ -803,7 +808,9 @@ inline CRGB operator%( const CRGB& p1, uint8_t d)
 
 
 
-// Define RGB orderings
+/// RGB orderings, used when instantiating controllers to determine what
+/// order the controller should send RGB data out in, RGB being the default
+/// ordering.
 enum EOrder {
 	RGB=0012,
 	RBG=0021,
@@ -814,5 +821,6 @@ enum EOrder {
 };
 
 FASTLED_NAMESPACE_END
+///@}
 
 #endif
