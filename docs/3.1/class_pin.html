@@ -116,12 +116,75 @@ typedef volatile RwReg *&#160;</td><td class="memItemRight" valign="bottom"><b>p
 <tr class="memitem:aa0565bfc99cf3df826420f89304a7937"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa0565bfc99cf3df826420f89304a7937"></a>
 typedef RwReg&#160;</td><td class="memItemRight" valign="bottom"><b>port_t</b></td></tr>
 <tr class="separator:aa0565bfc99cf3df826420f89304a7937"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f8b180aa16d5a9e9af48a38dc1dca03"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8f8b180aa16d5a9e9af48a38dc1dca03"></a>
+typedef volatile RwReg *&#160;</td><td class="memItemRight" valign="bottom"><b>port_ptr_t</b></td></tr>
+<tr class="separator:a8f8b180aa16d5a9e9af48a38dc1dca03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0565bfc99cf3df826420f89304a7937"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa0565bfc99cf3df826420f89304a7937"></a>
+typedef RwReg&#160;</td><td class="memItemRight" valign="bottom"><b>port_t</b></td></tr>
+<tr class="separator:aa0565bfc99cf3df826420f89304a7937"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:acd4ade93d8a5831ea021e0fff857aad5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acd4ade93d8a5831ea021e0fff857aad5"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Pin</b> (int pin)</td></tr>
 <tr class="separator:acd4ade93d8a5831ea021e0fff857aad5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2309200ff683097b1aa8679ae3dc1e30"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2309200ff683097b1aa8679ae3dc1e30"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setOutput</b> ()</td></tr>
+<tr class="separator:a2309200ff683097b1aa8679ae3dc1e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b1c3fa3480cd4a57c065f2e8811543a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3b1c3fa3480cd4a57c065f2e8811543a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setInput</b> ()</td></tr>
+<tr class="separator:a3b1c3fa3480cd4a57c065f2e8811543a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3b2ecbaab2e22b18da807c7c5aa147a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad3b2ecbaab2e22b18da807c7c5aa147a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>hi</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:ad3b2ecbaab2e22b18da807c7c5aa147a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a575b9e3dbf144bb98fc14ee06e219f7d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a575b9e3dbf144bb98fc14ee06e219f7d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>lo</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a575b9e3dbf144bb98fc14ee06e219f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafa819baff64cf2a594a53fbff947f3e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aafa819baff64cf2a594a53fbff947f3e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>strobe</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:aafa819baff64cf2a594a53fbff947f3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a308662200bc1be2513c9ac65ddaa43b0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a308662200bc1be2513c9ac65ddaa43b0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>toggle</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a308662200bc1be2513c9ac65ddaa43b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36d9f8ffbfb6547a076039fd1761200a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a36d9f8ffbfb6547a076039fd1761200a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>hi</b> (register port_ptr_t port) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a36d9f8ffbfb6547a076039fd1761200a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8453327e641cbdc1413d0f5acf9d5195"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8453327e641cbdc1413d0f5acf9d5195"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>lo</b> (register port_ptr_t port) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a8453327e641cbdc1413d0f5acf9d5195"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf67a98d2bca9b9d27a3c24b8cc1a58b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abf67a98d2bca9b9d27a3c24b8cc1a58b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set</b> (register port_t val) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:abf67a98d2bca9b9d27a3c24b8cc1a58b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a063487a763fe9a6fa795265480311c7c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a063487a763fe9a6fa795265480311c7c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>fastset</b> (register port_ptr_t port, register port_t val) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a063487a763fe9a6fa795265480311c7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70597f67481a4368727ae7d692a6e434"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a70597f67481a4368727ae7d692a6e434"></a>
+port_t&#160;</td><td class="memItemRight" valign="bottom"><b>hival</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a70597f67481a4368727ae7d692a6e434"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91f5a6b9d254eab57c6baa4f3bce6518"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a91f5a6b9d254eab57c6baa4f3bce6518"></a>
+port_t&#160;</td><td class="memItemRight" valign="bottom"><b>loval</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a91f5a6b9d254eab57c6baa4f3bce6518"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab462ca53d0eda5e199e30886e6329142"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab462ca53d0eda5e199e30886e6329142"></a>
+port_ptr_t&#160;</td><td class="memItemRight" valign="bottom"><b>port</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:ab462ca53d0eda5e199e30886e6329142"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf184984e35f57f6f7f722736095f658"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abf184984e35f57f6f7f722736095f658"></a>
+port_t&#160;</td><td class="memItemRight" valign="bottom"><b>mask</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:abf184984e35f57f6f7f722736095f658"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7135576a0f7cd2df8d49af5a001c59c1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7135576a0f7cd2df8d49af5a001c59c1"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>select</b> ()</td></tr>
+<tr class="separator:a7135576a0f7cd2df8d49af5a001c59c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20dd599177993607a9839d80bb0927d7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a20dd599177993607a9839d80bb0927d7"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>release</b> ()</td></tr>
+<tr class="separator:a20dd599177993607a9839d80bb0927d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92a7f23de99162c63611556e346b1fcc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a92a7f23de99162c63611556e346b1fcc"></a>
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isSelected</b> ()</td></tr>
+<tr class="separator:a92a7f23de99162c63611556e346b1fcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd4ade93d8a5831ea021e0fff857aad5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acd4ade93d8a5831ea021e0fff857aad5"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Pin</b> (int pin)</td></tr>
+<tr class="separator:acd4ade93d8a5831ea021e0fff857aad5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeaddf413f38dd8e0cc6da9c84d372474"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aeaddf413f38dd8e0cc6da9c84d372474"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setPin</b> (int pin)</td></tr>
+<tr class="separator:aeaddf413f38dd8e0cc6da9c84d372474"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2309200ff683097b1aa8679ae3dc1e30"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2309200ff683097b1aa8679ae3dc1e30"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setOutput</b> ()</td></tr>
 <tr class="separator:a2309200ff683097b1aa8679ae3dc1e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,7 +243,7 @@ virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>isSelected</b
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Feb 16 2015 20:05:25 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 21:53:28 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

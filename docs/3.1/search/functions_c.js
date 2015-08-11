@@ -1,4 +1,10 @@
 var searchData=
 [
-  ['pixelcontroller',['PixelController',['../struct_pixel_controller.html#aec44f7bfc391ebf4874f678a994eff71',1,'PixelController::PixelController(const PixelController &amp;other)'],['../struct_pixel_controller.html#a81403c8810658d3c41cb210703bbfc00',1,'PixelController::PixelController(const uint8_t *d, int len, CRGB &amp;s, EDitherMode dither=BINARY_DITHER, bool advance=true, uint8_t skip=0)']]]
+  ['next',['next',['../class_c_l_e_d_controller.html#a06cfb05ad6e0f7982328928051f3f565',1,'CLEDController']]],
+  ['nscale8_5fleaving_5fr1_5fdirty',['nscale8_LEAVING_R1_DIRTY',['../group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80',1,'scale8.h']]],
+  ['nscale8_5fvideo_5fleaving_5fr1_5fdirty',['nscale8_video_LEAVING_R1_DIRTY',['../group___scaling.html#ga2a580fcaa010558218faae95d1936635',1,'scale8.h']]],
+  ['nscale8x2',['nscale8x2',['../group___scaling.html#ga6f419761a744efed4bae8875ac07aef0',1,'scale8.h']]],
+  ['nscale8x2_5fvideo',['nscale8x2_video',['../group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe',1,'scale8.h']]],
+  ['nscale8x3',['nscale8x3',['../group___scaling.html#ga39bf87e5526120889086cab19ac749b1',1,'scale8.h']]],
+  ['nscale8x3_5fvideo',['nscale8x3_video',['../group___scaling.html#ga700b7f510f32e8c91385093c436c27d9',1,'scale8.h']]]
 ];

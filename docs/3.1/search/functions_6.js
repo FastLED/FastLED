@@ -1,9 +1,6 @@
 var searchData=
 [
-  ['getadjustment',['getAdjustment',['../class_c_l_e_d_controller.html#af6173cca91ee446766cc15102990d7bb',1,'CLEDController']]],
-  ['getbrightness',['getBrightness',['../class_c_fast_l_e_d.html#ac2615781ec12e025fb17cc0e66281716',1,'CFastLED']]],
-  ['getcorrection',['getCorrection',['../class_c_l_e_d_controller.html#a168c661bb9b4a5dfc797b69d3900b26c',1,'CLEDController']]],
-  ['getdither',['getDither',['../class_c_l_e_d_controller.html#a676f705adf93898739a405b85150a3e7',1,'CLEDController']]],
-  ['getfps',['getFPS',['../class_c_fast_l_e_d.html#aa8c3ae3381e524ce30b181ffa23b83cd',1,'CFastLED']]],
-  ['gettemperature',['getTemperature',['../class_c_l_e_d_controller.html#afc94e9d029d7e59f56a4ab845f3de32d',1,'CLEDController']]]
+  ['fill_5fgradient',['fill_gradient',['../group___colorutils.html#ga3144bb2bb66aeed33e20f4fdd6cc1a98',1,'colorutils.h']]],
+  ['fill_5frainbow',['fill_rainbow',['../group___colorutils.html#gafcc7dac88e25736ebc49a9faf2a1c2e2',1,'fill_rainbow(struct CRGB *pFirstLED, int numToFill, uint8_t initialhue, uint8_t deltahue):&#160;colorutils.cpp'],['../group___colorutils.html#gac3052a230febda0693517ce9d12aa452',1,'fill_rainbow(struct CHSV *targetArray, int numToFill, uint8_t initialhue, uint8_t deltahue):&#160;colorutils.cpp'],['../group___colorutils.html#gafcc7dac88e25736ebc49a9faf2a1c2e2',1,'fill_rainbow(struct CRGB *pFirstLED, int numToFill, uint8_t initialhue, uint8_t deltahue=5):&#160;colorutils.cpp'],['../group___colorutils.html#gac3052a230febda0693517ce9d12aa452',1,'fill_rainbow(struct CHSV *targetArray, int numToFill, uint8_t initialhue, uint8_t deltahue=5):&#160;colorutils.cpp']]],
+  ['fill_5fsolid',['fill_solid',['../group___colorutils.html#gac84d8820fd175567ba66413dfb8bc63b',1,'fill_solid(struct CRGB *leds, int numToFill, const struct CRGB &amp;color):&#160;colorutils.cpp'],['../group___colorutils.html#gad1abf13328e8dd1c483a270af77b17ed',1,'fill_solid(struct CHSV *targetArray, int numToFill, const struct CHSV &amp;hsvColor):&#160;colorutils.cpp'],['../group___colorutils.html#gac84d8820fd175567ba66413dfb8bc63b',1,'fill_solid(struct CRGB *leds, int numToFill, const struct CRGB &amp;color):&#160;colorutils.cpp'],['../group___colorutils.html#gad1abf13328e8dd1c483a270af77b17ed',1,'fill_solid(struct CHSV *targetArray, int numToFill, const struct CHSV &amp;hsvColor):&#160;colorutils.cpp']]]
 ];

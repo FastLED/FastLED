@@ -139,9 +139,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a7ae5d3864df01101d82d242c123ffb36"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_fast_l_e_d.html#a7ae5d3864df01101d82d242c123ffb36">setDither</a> (uint8_t ditherMode=BINARY_DITHER)</td></tr>
 <tr class="memdesc:a7ae5d3864df01101d82d242c123ffb36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the dithering mode.  <a href="#a7ae5d3864df01101d82d242c123ffb36">More...</a><br /></td></tr>
 <tr class="separator:a7ae5d3864df01101d82d242c123ffb36"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09f4d61853d88482fa5824144c8127ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_fast_l_e_d.html#a09f4d61853d88482fa5824144c8127ed">setMaxRefreshRate</a> (uint16_t refresh)</td></tr>
-<tr class="memdesc:a09f4d61853d88482fa5824144c8127ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the maximum refresh rate.  <a href="#a09f4d61853d88482fa5824144c8127ed">More...</a><br /></td></tr>
-<tr class="separator:a09f4d61853d88482fa5824144c8127ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f39e8404db214bbd6a776f52a77d8b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_fast_l_e_d.html#a1f39e8404db214bbd6a776f52a77d8b1">setMaxRefreshRate</a> (uint16_t refresh, bool constrain=false)</td></tr>
+<tr class="memdesc:a1f39e8404db214bbd6a776f52a77d8b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the maximum refresh rate.  <a href="#a1f39e8404db214bbd6a776f52a77d8b1">More...</a><br /></td></tr>
+<tr class="separator:a1f39e8404db214bbd6a776f52a77d8b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61d27e179c9b68bde89d220aebc0de32"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_fast_l_e_d.html#a61d27e179c9b68bde89d220aebc0de32">countFPS</a> (int nFrames=25)</td></tr>
 <tr class="memdesc:a61d27e179c9b68bde89d220aebc0de32"><td class="mdescLeft">&#160;</td><td class="mdescRight">for debugging, will keep track of time between calls to countFPS, and every nFrames calls, it will update an internal counter for the current FPS.  <a href="#a61d27e179c9b68bde89d220aebc0de32">More...</a><br /></td></tr>
 <tr class="separator:a61d27e179c9b68bde89d220aebc0de32"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -826,7 +826,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 
 </div>
 </div>
-<a class="anchor" id="a09f4d61853d88482fa5824144c8127ed"></a>
+<a class="anchor" id="a1f39e8404db214bbd6a776f52a77d8b1"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -834,16 +834,27 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
           <td class="memname">void CFastLED::setMaxRefreshRate </td>
           <td>(</td>
           <td class="paramtype">uint16_t&#160;</td>
-          <td class="paramname"><em>refresh</em></td><td>)</td>
+          <td class="paramname"><em>refresh</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>constrain</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Set the maximum refresh rate. </p>
-<p>This is global for all leds. Attempts to call show faster than this rate will simply wait. Defaults to 400Hz. Set to 0 to have no maximum rate. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>This is global for all leds. Attempts to call show faster than this rate will simply wait. Note that the refresh rate defaults to the slowest refresh rate of all the leds added through addLeds. If you wish to set/override this rate, be sure to call setMaxRefreshRate <em>after</em> adding all of your leds. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">refresh</td><td>- maximum refresh rate in hz </td></tr>
+    <tr><td class="paramname">constrain</td><td>- constrain refresh rate to the slowest speed yet set </td></tr>
   </table>
   </dd>
 </dl>
@@ -998,7 +1009,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Feb 16 2015 20:05:25 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 21:53:28 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

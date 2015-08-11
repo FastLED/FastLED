@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['noise_20functions',['Noise functions',['../group___noise.html',1,'']]]
+  ['dimming_20and_20brightening_20functions',['Dimming and brightening functions',['../group___dimming.html',1,'']]]
 ];

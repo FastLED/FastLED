@@ -81,10 +81,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">README </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>IMPORTANT NOTE: For AVR based systems, avr-gcc 4.8.x is supported, as is avr-gcc 4.3 and earlier. There are known issues with avr-gcc 4.7 and timing based chipsets like the <a class="el" href="class_w_s2812_b.html">WS2812B</a>. If you are using a linux system make sure you are using avr-gcc 4.8.x not avr-gcc 4.7.x.</p>
-<h1>FastLED 3.0 </h1>
-<p>IMPORTANT NOTE: If you are building for AVR based systems, please do not use any version of the arduino IDE 1.5.7 or later yet. It messes with some of the asm output which will cause you problems.</p>
-<p>This is a library for easily &amp; efficiently controlling a wide variety of LED chipsets, like the ones sold by adafruit (Neopixel, LPD8806), Sparkfun (WS2801), and aliexpress. In addition to writing to the leds, this library also includes a number of functions for high-performing 8bit math for manipulating your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while still keeping things as fast as possible.</p>
+<div class="textblock"><p><a href="https://gitter.im/FastLED/public">![Gitter](https://badges.gitter.im/Join%20Chat.svg)</a></p>
+<p>IMPORTANT NOTE: For AVR based systems, avr-gcc 4.8.x is supported, as is avr-gcc 4.3 and earlier. There are known issues with avr-gcc 4.7 and timing based chipsets like the <a class="el" href="class_w_s2812_b.html">WS2812B</a>. If you are using a linux system make sure you are using avr-gcc 4.8.x not avr-gcc 4.7.x.</p>
+<h1>FastLED 3.1 </h1>
+<p>IMPORTANT NOTE: If you are building for AVR based systems, please do not use any version of the arduino IDE 1.5.7 or later yet. It messes with some of the asm output which will cause you problems. This is a library for easily &amp; efficiently controlling a wide variety of LED chipsets, like the ones sold by adafruit (Neopixel, LPD8806), Sparkfun (WS2801), and aliexpress. In addition to writing to the leds, this library also includes a number of functions for high-performing 8bit math for manipulating your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while still keeping things as fast as possible. Tested with Arduino up to 1.6.5 from arduino.cc.</p>
 <p>Quick note for people installing from GitHub repo zips, rename the folder FastLED before copying it to your Arduino/libraries folder. Github likes putting -branchname into the name of the folder, which unfortunately, makes Arduino cranky!</p>
 <p>We have multiple goals with this library:</p>
 <ul>
@@ -99,14 +99,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 #define NUM_LEDS 60
 CRGB leds[NUM_LEDS];
 void setup() { FastLED.addLeds&lt;NEOPIXEL, 6&gt;(leds, NUM_LEDS); }
-void loop() { 
-    leds[0] = CRGB::White; FastLED.show(); delay(30); 
+void loop() {
+    leds[0] = CRGB::White; FastLED.show(); delay(30);
     leds[0] = CRGB::Black; FastLED.show(); delay(30);
 }
 </pre><h2>Supported LED chipsets</h2>
 <p>Here's a list of all the LED chipsets are supported. More details on the led chipsets are included <em>TODO: Link to wiki page</em></p>
 <ul>
-<li>Adafruit's Neopixel - aka the <a class="el" href="class_w_s2812_b.html">WS2812B</a> (also WS2811/WS2812, also suppored in lo-speed mode) - a 3 wire addressable led chipset</li>
+<li>Adafruit's DotStars - AKA the APA102</li>
+<li>Adafruit's Neopixel - aka the <a class="el" href="class_w_s2812_b.html">WS2812B</a> (also WS2811/WS2812, also supported in lo-speed mode) - a 3 wire addressable led chipset</li>
 <li>TM1809/4 - 3 wire chipset, cheaply available on aliexpress.com</li>
 <li><a class="el" href="class_t_m1803.html">TM1803</a> - 3 wire chipset, sold by radio shack</li>
 <li><a class="el" href="class_u_c_s1903.html">UCS1903</a> - another 3 wire led chipset, cheap</li>
@@ -125,10 +126,12 @@ void loop() {
 <ul>
 <li>Arduino &amp; compatibles - straight up arduino devices, uno, duo, leonardo, mega, nano, etc...</li>
 <li>Adafruit Trinket &amp; Gemma - Trinket Pro may be supported, but haven't tested to confirm yet</li>
-<li>Teensy 2, Teensy++ 2, Teensy 3.1 - arduino compataible from pjrc.com with some extra goodies (note the teensy 3 is ARM, not AVR!)</li>
+<li>Teensy 2, Teensy++ 2, Teensy 3.0, Teensy 3.1, Teensy LC - arduino compataible from pjrc.com with some extra goodies (note the teensy 3 is ARM, not AVR!)</li>
 <li>Arduino Due and the digistump DigiX</li>
+<li>RFDuino</li>
+<li>SparkCore</li>
 </ul>
-<p>What types of platforms are we thinking about supporting in the future? Here's a short list: RFDuino, SparkCore, MSP430, ChipKit32, Maple, Beagleboard</p>
+<p>What types of platforms are we thinking about supporting in the future? Here's a short list: ChipKit32, Maple, Beagleboard</p>
 <h2>What about that name?</h2>
 <p>Wait, what happend to FastSPI_LED and FastSPI_LED2? The library was initially named FastSPI_LED because it was focused on very fast and efficient SPI access. However, since then, the library has expanded to support a number of LED chipsets that don't use SPI, as well as a number of math and utility functions for LED processing across the board. We decided that the name FastLED more accurately represents the totality of what the library provides, everything fast, for LEDs.</p>
 <h2>For more information</h2>
@@ -137,7 +140,7 @@ void loop() {
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Feb 16 2015 20:05:25 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 21:53:28 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>
