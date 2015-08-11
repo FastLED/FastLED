@@ -18,8 +18,6 @@ var searchData=
   ['color_20correction_2ftemperature',['Color correction/temperature',['../group___color_enums.html',1,'']]],
   ['colortemperature',['ColorTemperature',['../group___color_enums.html#ga251e9e8dc2c7b981786b71706522b2a9',1,'color.h']]],
   ['color_20utility_20functions',['Color utility functions',['../group___colorutils.html',1,'']]],
-  ['cos16',['cos16',['../group___trig.html#ga056952ebed39f55880bb353857b47075',1,'trig8.h']]],
-  ['cos8',['cos8',['../group___trig.html#ga4432f985c94f5bff715db402d767b0e8',1,'trig8.h']]],
   ['count',['count',['../class_c_fast_l_e_d.html#ae5730545ea18b1f5228172f9d246beb6',1,'CFastLED']]],
   ['countfps',['countFPS',['../class_c_fast_l_e_d.html#a61d27e179c9b68bde89d220aebc0de32',1,'CFastLED']]],
   ['crgb',['CRGB',['../struct_c_r_g_b.html',1,'']]],

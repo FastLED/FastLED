@@ -302,9 +302,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;    <span class="comment">// add one RGB to another, saturating at 0xFF for each channel</span></div>
 <div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    <span class="keyword">inline</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; operator+= (<span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; rhs )</div>
 <div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;    {</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;        r = qadd8( r, rhs.r);</div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;        g = qadd8( g, rhs.g);</div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;        b = qadd8( b, rhs.b);</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;        r = <a class="code" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>( r, rhs.r);</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;        g = <a class="code" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>( g, rhs.g);</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;        b = <a class="code" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>( b, rhs.b);</div>
 <div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
 <div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    }</div>
 <div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;</div>
@@ -314,9 +314,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    <span class="comment">// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)</span></div>
 <div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    <span class="keyword">inline</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; addToRGB (uint8_t d )</div>
 <div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    {</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;        r = qadd8( r, d);</div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;        g = qadd8( g, d);</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;        b = qadd8( b, d);</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;        r = <a class="code" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>( r, d);</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;        g = <a class="code" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>( g, d);</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;        b = <a class="code" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>( b, d);</div>
 <div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
 <div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;    }</div>
 <div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;</div>
@@ -838,9 +838,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00749"></a><span class="lineno">  749</span>&#160;<a class="code" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</div>
 <div class="line"><a name="l00750"></a><span class="lineno">  750</span>&#160;inline <a class="code" href="struct_c_r_g_b.html">CRGB</a> operator+( const <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; p1, const <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; p2)</div>
 <div class="line"><a name="l00751"></a><span class="lineno">  751</span>&#160;{</div>
-<div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>( qadd8( p1.r, p2.r),</div>
-<div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;                 qadd8( p1.g, p2.g),</div>
-<div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160;                 qadd8( p1.b, p2.b));</div>
+<div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>( <a class="code" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>( p1.r, p2.r),</div>
+<div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;                 <a class="code" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>( p1.g, p2.g),</div>
+<div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160;                 <a class="code" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>( p1.b, p2.b));</div>
 <div class="line"><a name="l00755"></a><span class="lineno">  755</span>&#160;}</div>
 <div class="line"><a name="l00756"></a><span class="lineno">  756</span>&#160;</div>
 <div class="line"><a name="l00757"></a><span class="lineno">  757</span>&#160;<a class="code" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</div>
@@ -905,21 +905,22 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00816"></a><span class="lineno">  816</span>&#160;FASTLED_NAMESPACE_END</div>
 <div class="line"><a name="l00817"></a><span class="lineno">  817</span>&#160;</div>
 <div class="line"><a name="l00818"></a><span class="lineno">  818</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="group___math_html_ga9d113e85065df7c9006704ea6b6dcda4"><div class="ttname"><a href="group___math.html#ga9d113e85065df7c9006704ea6b6dcda4">qmul8</a></div><div class="ttdeci">LIB8STATIC uint8_t qmul8(uint8_t i, uint8_t j)</div><div class="ttdoc">saturating 8x8 bit multiplication, with 8 bit result </div><div class="ttdef"><b>Definition:</b> math8.h:258</div></div>
+<div class="ttc" id="group___math_html_ga9d113e85065df7c9006704ea6b6dcda4"><div class="ttname"><a href="group___math.html#ga9d113e85065df7c9006704ea6b6dcda4">qmul8</a></div><div class="ttdeci">LIB8STATIC uint8_t qmul8(uint8_t i, uint8_t j)</div><div class="ttdoc">saturating 8x8 bit multiplication, with 8 bit result </div><div class="ttdef"><b>Definition:</b> math8.h:267</div></div>
 <div class="ttc" id="struct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdef"><b>Definition:</b> pixeltypes.h:83</div></div>
-<div class="ttc" id="group___math_html_gaaaa16f47aca46653d51793b1af177587"><div class="ttname"><a href="group___math.html#gaaaa16f47aca46653d51793b1af177587">qsub8</a></div><div class="ttdeci">LIB8STATIC uint8_t qsub8(uint8_t i, uint8_t j)</div><div class="ttdoc">subtract one byte from another, saturating at 0x00 </div><div class="ttdef"><b>Definition:</b> math8.h:77</div></div>
-<div class="ttc" id="group___scaling_html_ga700b7f510f32e8c91385093c436c27d9"><div class="ttname"><a href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x3_video(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> scale8.h:276</div></div>
-<div class="ttc" id="group___scaling_html_ga39579fcf09743f15545fe0b831ca313c"><div class="ttname"><a href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8 does not clean up the R1 register on AVR If you are doing several &#39;scale8&#39;s in...</div><div class="ttdef"><b>Definition:</b> scale8.h:115</div></div>
+<div class="ttc" id="group___math_html_gaaaa16f47aca46653d51793b1af177587"><div class="ttname"><a href="group___math.html#gaaaa16f47aca46653d51793b1af177587">qsub8</a></div><div class="ttdeci">LIB8STATIC uint8_t qsub8(uint8_t i, uint8_t j)</div><div class="ttdoc">subtract one byte from another, saturating at 0x00 </div><div class="ttdef"><b>Definition:</b> math8.h:86</div></div>
+<div class="ttc" id="group___math_html_ga38e9f9a8830353f9cbfecad7c8758b1f"><div class="ttname"><a href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a></div><div class="ttdeci">LIB8STATIC uint8_t qadd8(uint8_t i, uint8_t j)</div><div class="ttdoc">add one byte to another, saturating at 0xFF </div><div class="ttdef"><b>Definition:</b> math8.h:21</div></div>
+<div class="ttc" id="group___scaling_html_ga700b7f510f32e8c91385093c436c27d9"><div class="ttname"><a href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x3_video(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> scale8.h:282</div></div>
+<div class="ttc" id="group___scaling_html_ga39579fcf09743f15545fe0b831ca313c"><div class="ttname"><a href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8 does not clean up the R1 register on AVR If you are doing several &#39;scale8&#39;s in...</div><div class="ttdef"><b>Definition:</b> scale8.h:121</div></div>
 <div class="ttc" id="group___color_enums_html_gadf6bcba67c9573665af20788c4431ae8"><div class="ttname"><a href="group___color_enums.html#gadf6bcba67c9573665af20788c4431ae8">LEDColorCorrection</a></div><div class="ttdeci">LEDColorCorrection</div><div class="ttdef"><b>Definition:</b> color.h:9</div></div>
-<div class="ttc" id="group___scaling_html_ga572d0b441676c9d8ceb071fe8284b7e9"><div class="ttname"><a href="group___scaling.html#ga572d0b441676c9d8ceb071fe8284b7e9">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls. </div><div class="ttdef"><b>Definition:</b> scale8.h:238</div></div>
-<div class="ttc" id="group___scaling_html_ga39bf87e5526120889086cab19ac749b1"><div class="ttname"><a href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a></div><div class="ttdeci">LIB8STATIC void nscale8x3(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> scale8.h:253</div></div>
+<div class="ttc" id="group___scaling_html_ga572d0b441676c9d8ceb071fe8284b7e9"><div class="ttname"><a href="group___scaling.html#ga572d0b441676c9d8ceb071fe8284b7e9">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls. </div><div class="ttdef"><b>Definition:</b> scale8.h:244</div></div>
+<div class="ttc" id="group___scaling_html_ga39bf87e5526120889086cab19ac749b1"><div class="ttname"><a href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a></div><div class="ttdeci">LIB8STATIC void nscale8x3(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> scale8.h:259</div></div>
 <div class="ttc" id="group___color_enums_html_ga251e9e8dc2c7b981786b71706522b2a9"><div class="ttname"><a href="group___color_enums.html#ga251e9e8dc2c7b981786b71706522b2a9">ColorTemperature</a></div><div class="ttdeci">ColorTemperature</div><div class="ttdef"><b>Definition:</b> color.h:31</div></div>
 <div class="ttc" id="group___bitswap_html_ga01396a2e40133293c3badab349ac99f0"><div class="ttname"><a href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a></div><div class="ttdeci">__attribute__((always_inline)) bool operator</div><div class="ttdoc">Do an 8byte by 8bit rotation. </div><div class="ttdef"><b>Definition:</b> fastled_delay.h:82</div></div>
 <div class="ttc" id="struct_c_h_s_v_html"><div class="ttname"><a href="struct_c_h_s_v.html">CHSV</a></div><div class="ttdef"><b>Definition:</b> pixeltypes.h:18</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 21:53:28 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 22:21:16 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

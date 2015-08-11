@@ -84,7 +84,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!--header-->
 <div class="contents">
 
-<p>add one byte to another, saturating at 0xFF  
+<p>Fast, efficient 8-bit math functions specifically designed for high-performance LED programming.  
 <a href="#details">More...</a></p>
 <div class="dynheader">
 Collaboration diagram for Basic math operations:</div>
@@ -97,8 +97,8 @@ Collaboration diagram for Basic math operations:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga38e9f9a8830353f9cbfecad7c8758b1f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga38e9f9a8830353f9cbfecad7c8758b1f"></a>
-LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>qadd8</b> (uint8_t i, uint8_t j)</td></tr>
+<tr class="memitem:ga38e9f9a8830353f9cbfecad7c8758b1f"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a> (uint8_t i, uint8_t j)</td></tr>
+<tr class="memdesc:ga38e9f9a8830353f9cbfecad7c8758b1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">add one byte to another, saturating at 0xFF  <a href="#ga38e9f9a8830353f9cbfecad7c8758b1f">More...</a><br /></td></tr>
 <tr class="separator:ga38e9f9a8830353f9cbfecad7c8758b1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadf60ccff727f52078aecdd5873b6f0bc"><td class="memItemLeft" align="right" valign="top">LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___math.html#gadf60ccff727f52078aecdd5873b6f0bc">qadd7</a> (int8_t i, int8_t j)</td></tr>
 <tr class="memdesc:gadf60ccff727f52078aecdd5873b6f0bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add one byte to another, saturating at 0x7F.  <a href="#gadf60ccff727f52078aecdd5873b6f0bc">More...</a><br /></td></tr>
@@ -142,15 +142,8 @@ LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 <tr class="separator:ga66ecef97faa5f9b92c49766651c5afe9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>add one byte to another, saturating at 0xFF </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">i</td><td>- first byte to add </td></tr>
-    <tr><td class="paramname">j</td><td>- second byte to add </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the sum of i &amp; j, capped at 0xFF </dd></dl>
+<p>Fast, efficient 8-bit math functions specifically designed for high-performance LED programming. </p>
+<p>Because of the AVR(Arduino) and ARM assembly language implementations provided, using these functions often results in smaller and faster code than the equivalent program using plain "C" arithmetic and logic. </p>
 <h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="ga2bcd51c47538dbc933999382e272a7a7"></a>
 <div class="memitem">
@@ -310,6 +303,42 @@ LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 
 </div>
 </div>
+<a class="anchor" id="ga38e9f9a8830353f9cbfecad7c8758b1f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">LIB8STATIC uint8_t qadd8 </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>i</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>j</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>add one byte to another, saturating at 0xFF </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">i</td><td>- first byte to add </td></tr>
+    <tr><td class="paramname">j</td><td>- second byte to add </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the sum of i &amp; j, capped at 0xFF </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="ga9d113e85065df7c9006704ea6b6dcda4"></a>
 <div class="memitem">
 <div class="memproto">
@@ -389,7 +418,7 @@ LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 21:53:28 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 22:21:16 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>
