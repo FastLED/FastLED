@@ -4,23 +4,14 @@
 ///@ingroup lib8tion
 
 ///@defgroup Trig Fast trig functions
-///@{
-
-// sin16 & cos16:
-//        Fast 16-bit approximations of sin(x) & cos(x).
-//        Input angle is an unsigned int from 0-65535.
-//        Output is signed int from -32767 to 32767.
-//
-//        This approximation never varies more than 0.69%
-//        from the floating point value you'd get by doing
-//          float s = sin( x ) * 32767.0;
-//
-//        Don't use this approximation for calculating the
-//        trajectory of a rocket to Mars, but it's great
-//        for art projects and LED displays.
-//
-//        On Arduino/AVR, this approximation is more than
-//        10X faster than floating point sin(x) and cos(x)
+/// Fast 8 and 16-bit approximations of sin(x) and cos(x).
+///        Don't use these approximations for calculating the
+///        trajectory of a rocket to Mars, but they're great
+///        for art projects and LED displays.
+///
+///        On Arduino/AVR, the 16-bit approximation is more than
+///        10X faster than floating point sin(x) and cos(x), while
+/// the 8-bit approximation is more than 20X faster.
 
 #if defined(__AVR__)
 #define sin16 sin16_avr

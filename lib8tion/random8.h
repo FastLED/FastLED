@@ -3,7 +3,9 @@
 ///@ingroup lib8tion
 
 ///@defgroup Random Fast random number generators
-/// A 16-bit PNRG good enough for LED animations
+/// Fast 8- and 16- bit unsigned random numbers.
+///  Significantly faster than Arduino random(), but
+///  also somewhat less random.  You can add entropy.
 ///@{
 
 // X(n+1) = (2053 * X(n)) + 13849)

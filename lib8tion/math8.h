@@ -4,7 +4,16 @@
 ///@ingroup lib8tion
 
 ///@defgroup Math Basic math operations
+/// Fast, efficient 8-bit math functions specifically
+/// designed for high-performance LED programming.
+///
+/// Because of the AVR(Arduino) and ARM assembly language
+/// implementations provided, using these functions often
+/// results in smaller and faster code than the equivalent
+/// program using plain "C" arithmetic and logic.
 ///@{
+
+
 /// add one byte to another, saturating at 0xFF
 /// @param i - first byte to add
 /// @param j - second byte to add

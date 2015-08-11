@@ -4,7 +4,13 @@
 ///@ingroup lib8tion
 
 ///@defgroup Scaling Scaling functions
-///  for scaling 8 and 16 bit values, as well as dimming and brightening them
+/// Fast, efficient 8-bit scaling functions specifically
+/// designed for high-performance LED programming.
+///
+/// Because of the AVR(Arduino) and ARM assembly language
+/// implementations provided, using these functions often
+/// results in smaller and faster code than the equivalent
+/// program using plain "C" arithmetic and logic.
 ///@{
 
 ///  scale one byte by a second one, which is treated as
