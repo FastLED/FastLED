@@ -3,6 +3,7 @@ var searchData=
   ['carbonarc',['CarbonArc',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9aa9dab8ea30eb2a41c48956480b7014d1',1,'color.h']]],
   ['ceveryntimeperiods',['CEveryNTimePeriods',['../class_c_every_n_time_periods.html',1,'']]],
   ['cfastled',['CFastLED',['../class_c_fast_l_e_d.html',1,'']]],
+  ['chipsets',['Chipsets',['../group__chipsets.html',1,'']]],
   ['chsv',['CHSV',['../struct_c_h_s_v.html',1,'']]],
   ['chsvpalette16',['CHSVPalette16',['../class_c_h_s_v_palette16.html',1,'']]],
   ['chsvpalette256',['CHSVPalette256',['../class_c_h_s_v_palette256.html',1,'']]],
@@ -25,5 +26,6 @@ var searchData=
   ['crgb',['CRGB',['../struct_c_r_g_b.html',1,'']]],
   ['crgbpalette16',['CRGBPalette16',['../class_c_r_g_b_palette16.html',1,'']]],
   ['crgbpalette256',['CRGBPalette256',['../class_c_r_g_b_palette256.html',1,'']]],
-  ['cubicwave8',['cubicwave8',['../group__lib8tion.html#ga06b04a0cf955ec107d49b76e0cb35225',1,'lib8tion.h']]]
+  ['cubicwave8',['cubicwave8',['../group__lib8tion.html#ga06b04a0cf955ec107d49b76e0cb35225',1,'lib8tion.h']]],
+  ['chsv_20and_20crgb_20type_20definitions',['CHSV and CRGB type definitions',['../group___pixeltypes.html',1,'']]]
 ];

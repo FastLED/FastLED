@@ -102,8 +102,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">//</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">//                   NOTE: here hue is 0-255, not just 0-191</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keywordtype">void</span> hsv2rgb_rainbow( <span class="keyword">const</span> <span class="keyword">struct</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; hsv, <span class="keyword">struct</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; rgb);</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keywordtype">void</span> hsv2rgb_rainbow( <span class="keyword">const</span> <span class="keyword">struct</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>* phsv, <span class="keyword">struct</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a> * prgb, <span class="keywordtype">int</span> numLeds);</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group___pixeltypes.html#ga06ee0f21e1bf430ea547244f6ed4add8">hsv2rgb_rainbow</a>( <span class="keyword">const</span> <span class="keyword">struct</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; hsv, <span class="keyword">struct</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; rgb);</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group___pixeltypes.html#ga06ee0f21e1bf430ea547244f6ed4add8">hsv2rgb_rainbow</a>( <span class="keyword">const</span> <span class="keyword">struct</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>* phsv, <span class="keyword">struct</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a> * prgb, <span class="keywordtype">int</span> numLeds);</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#define HUE_MAX_RAINBOW 255</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
@@ -176,12 +176,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;FASTLED_NAMESPACE_END</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="struct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdef"><b>Definition:</b> pixeltypes.h:83</div></div>
-<div class="ttc" id="struct_c_h_s_v_html"><div class="ttname"><a href="struct_c_h_s_v.html">CHSV</a></div><div class="ttdef"><b>Definition:</b> pixeltypes.h:18</div></div>
+<div class="ttc" id="struct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue) </div><div class="ttdef"><b>Definition:</b> pixeltypes.h:88</div></div>
+<div class="ttc" id="group___pixeltypes_html_ga06ee0f21e1bf430ea547244f6ed4add8"><div class="ttname"><a href="group___pixeltypes.html#ga06ee0f21e1bf430ea547244f6ed4add8">hsv2rgb_rainbow</a></div><div class="ttdeci">void hsv2rgb_rainbow(const CHSV &amp;hsv, CRGB &amp;rgb)</div><div class="ttdoc">Forward declaration of hsv2rgb_rainbow here, to avoid circular dependencies. </div><div class="ttdef"><b>Definition:</b> hsv2rgb.cpp:277</div></div>
+<div class="ttc" id="struct_c_h_s_v_html"><div class="ttname"><a href="struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)). </div><div class="ttdef"><b>Definition:</b> pixeltypes.h:21</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 22:46:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 23:02:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

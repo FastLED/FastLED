@@ -357,16 +357,20 @@ template&lt;typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>fill_gradient - fill an array of colors with a smooth HSV gradient between two specified HSV colors. </p>
-<p>Since 'hue' is a value around a color wheel, there are always two ways to sweep from one hue to another. This function lets you specify which way you want the hue gradient to sweep around the color wheel: FORWARD_HUES: hue always goes clockwise BACKWARD_HUES: hue always goes counter-clockwise SHORTEST_HUES: hue goes whichever way is shortest LONGEST_HUES: hue goes whichever way is longest The default is SHORTEST_HUES, as this is nearly always what is wanted.</p>
+<p>Since 'hue' is a value around a color wheel, there are always two ways to sweep from one hue to another. This function lets you specify which way you want the hue gradient to sweep around the color wheel: </p><pre class="fragment">FORWARD_HUES: hue always goes clockwise
+BACKWARD_HUES: hue always goes counter-clockwise
+SHORTEST_HUES: hue goes whichever way is shortest
+LONGEST_HUES: hue goes whichever way is longest
+</pre><p>The default is SHORTEST_HUES, as this is nearly always what is wanted.</p>
 <p>fill_gradient can write the gradient colors EITHER (1) into an array of CRGBs (e.g., into leds[] array, or an RGB Palette) OR (2) into an array of CHSVs (e.g. an HSV Palette).</p>
-<p>In the case of writing into a <a class="el" href="struct_c_r_g_b.html">CRGB</a> array, the gradient is computed in HSV space, and then HSV values are converted to RGB as they're written into the RGB array. </p>
+<p>In the case of writing into a <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) ">CRGB</a> array, the gradient is computed in HSV space, and then HSV values are converted to RGB as they're written into the RGB array. </p>
 
 </div>
 </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 22:46:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 23:02:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

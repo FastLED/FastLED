@@ -91,13 +91,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="struct_c_r_g_b-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">CRGB Struct Reference</div>  </div>
+<div class="title">CRGB Struct Reference<div class="ingroups"><a class="el" href="group___pixeltypes.html">CHSV and CRGB type definitions</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Representation of an RGB pixel (Red, Green, Blue)  
+ <a href="struct_c_r_g_b.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:aeb40a08b7cb90c1e21bd408261558b99"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aeb40a08b7cb90c1e21bd408261558b99"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>HTMLColorCode</b> { <br />
+<tr class="memitem:gaeb40a08b7cb90c1e21bd408261558b99"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaeb40a08b7cb90c1e21bd408261558b99"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___pixeltypes.html#gaeb40a08b7cb90c1e21bd408261558b99">HTMLColorCode</a> { <br />
 &#160;&#160;<b>AliceBlue</b> =0xF0F8FF, 
 <b>Amethyst</b> =0x9966CC, 
 <b>AntiqueWhite</b> =0xFAEBD7, 
@@ -287,54 +292,55 @@ Public Types</h2></td></tr>
 <b>FairyLightNCC</b> =0xFF9D2A
 <br />
  }</td></tr>
-<tr class="separator:aeb40a08b7cb90c1e21bd408261558b99"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memdesc:gaeb40a08b7cb90c1e21bd408261558b99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predefined RGB colors. <br /></td></tr>
+<tr class="separator:gaeb40a08b7cb90c1e21bd408261558b99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a387c1484960be0f72a87c3369cdbba26"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a387c1484960be0f72a87c3369cdbba26"></a>
-uint8_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator[]</b> (uint8_t x) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+uint8_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator[]</b> (uint8_t x) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a387c1484960be0f72a87c3369cdbba26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa4a041a5ad28b9ffb3a69fa88a0bd635"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa4a041a5ad28b9ffb3a69fa88a0bd635"></a>
-const uint8_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator[]</b> (uint8_t x) const <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+const uint8_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator[]</b> (uint8_t x) const <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:aa4a041a5ad28b9ffb3a69fa88a0bd635"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac97afb676b3be14769ede58a55b1078a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac97afb676b3be14769ede58a55b1078a"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (uint8_t ir, uint8_t ig, uint8_t ib) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (uint8_t ir, uint8_t ig, uint8_t ib) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:ac97afb676b3be14769ede58a55b1078a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae912836f41dd2979ade6188ab0446fcf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae912836f41dd2979ade6188ab0446fcf"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (uint32_t colorcode) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (uint32_t colorcode) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:ae912836f41dd2979ade6188ab0446fcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d12a1fba2712ba1153f5b73da6a3e3d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7d12a1fba2712ba1153f5b73da6a3e3d"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (<a class="el" href="group___color_enums.html#gadf6bcba67c9573665af20788c4431ae8">LEDColorCorrection</a> colorcode) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (<a class="el" href="group___color_enums.html#gadf6bcba67c9573665af20788c4431ae8">LEDColorCorrection</a> colorcode) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a7d12a1fba2712ba1153f5b73da6a3e3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86a495b2fb767196fb6b9e1d202a97c8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a86a495b2fb767196fb6b9e1d202a97c8"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (<a class="el" href="group___color_enums.html#ga251e9e8dc2c7b981786b71706522b2a9">ColorTemperature</a> colorcode) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (<a class="el" href="group___color_enums.html#ga251e9e8dc2c7b981786b71706522b2a9">ColorTemperature</a> colorcode) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a86a495b2fb767196fb6b9e1d202a97c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6ac0b64fb80dde1dc28e74b60da00b82"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6ac0b64fb80dde1dc28e74b60da00b82"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;rhs) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;rhs) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a6ac0b64fb80dde1dc28e74b60da00b82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9edaa43d7f1d6777b543c08b14844f13"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9edaa43d7f1d6777b543c08b14844f13"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (const <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;rhs) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CRGB</b> (const <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;rhs) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a9edaa43d7f1d6777b543c08b14844f13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15ece8b6b3b8a54e61716cd2f0ecfd79"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a15ece8b6b3b8a54e61716cd2f0ecfd79"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;rhs) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;rhs) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a15ece8b6b3b8a54e61716cd2f0ecfd79"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a296fb2b628e6323d78fabcb6feee60ad"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a296fb2b628e6323d78fabcb6feee60ad"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const uint32_t colorcode) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const uint32_t colorcode) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a296fb2b628e6323d78fabcb6feee60ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a838b22bb1632166760934935a309e9d9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a838b22bb1632166760934935a309e9d9"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setRGB</b> (uint8_t nr, uint8_t ng, uint8_t nb) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setRGB</b> (uint8_t nr, uint8_t ng, uint8_t nb) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a838b22bb1632166760934935a309e9d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac53fdb8ec5dc5b8c16904d971106ad75"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac53fdb8ec5dc5b8c16904d971106ad75"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setHSV</b> (uint8_t hue, uint8_t sat, uint8_t val) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setHSV</b> (uint8_t hue, uint8_t sat, uint8_t val) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:ac53fdb8ec5dc5b8c16904d971106ad75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed04286b07335deede64d6de109a7312"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aed04286b07335deede64d6de109a7312"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setHue</b> (uint8_t hue) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setHue</b> (uint8_t hue) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:aed04286b07335deede64d6de109a7312"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a959221eefd8848005cf726d3acd7a1d0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a959221eefd8848005cf726d3acd7a1d0"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;rhs) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;rhs) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a959221eefd8848005cf726d3acd7a1d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aee58e5c4ced4d42332280252d7e516d5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aee58e5c4ced4d42332280252d7e516d5"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setColorCode</b> (uint32_t colorcode) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setColorCode</b> (uint32_t colorcode) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:aee58e5c4ced4d42332280252d7e516d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb47a8179f4124ba90c701b467e705ce"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adb47a8179f4124ba90c701b467e705ce"></a>
 <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator+=</b> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;rhs)</td></tr>
@@ -349,16 +355,16 @@ const uint8_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operat
 <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>subtractFromRGB</b> (uint8_t d)</td></tr>
 <tr class="separator:af5e0ce520027b5bc5b8aa106c113119c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a218446cd8788c0659c5ad2b4c16c425c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a218446cd8788c0659c5ad2b4c16c425c"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator--</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator--</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a218446cd8788c0659c5ad2b4c16c425c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afca6a189ce1da99d897f755b1ca16638"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afca6a189ce1da99d897f755b1ca16638"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator--</b> (int DUMMY_ARG) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator--</b> (int DUMMY_ARG) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:afca6a189ce1da99d897f755b1ca16638"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2a226518db12ea874e182a7d311c2e3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2a226518db12ea874e182a7d311c2e3"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator++</b> () <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator++</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:ac2a226518db12ea874e182a7d311c2e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c63d3f14b33017ff037309324d93169"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2c63d3f14b33017ff037309324d93169"></a>
-<a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator++</b> (int DUMMY_ARG) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator++</b> (int DUMMY_ARG) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a2c63d3f14b33017ff037309324d93169"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa630fb7918dc81f255525ee90152e62f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa630fb7918dc81f255525ee90152e62f"></a>
 <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator/=</b> (uint8_t d)</td></tr>
@@ -397,7 +403,7 @@ const uint8_t &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operat
 <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&amp;=</b> (uint8_t d)</td></tr>
 <tr class="separator:a29d80828c7e4dfc2107b38dd51496234"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa09bbdf1b04eac9fb792ca4cbf9fd74c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa09bbdf1b04eac9fb792ca4cbf9fd74c"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>operator bool</b> () const <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>operator bool</b> () const <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:aa09bbdf1b04eac9fb792ca4cbf9fd74c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af32e6bf80075fd5b3d8195fff790a036"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af32e6bf80075fd5b3d8195fff790a036"></a>
 <a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>operator-</b> ()</td></tr>
@@ -471,13 +477,15 @@ union {</td></tr>
 <tr class="memitem:a13feb5e21536c8f16ba7dcab8ba8a190"><td class="memItemLeft" valign="top">};&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
 <tr class="separator:a13feb5e21536c8f16ba7dcab8ba8a190"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Representation of an RGB pixel (Red, Green, Blue) </p>
+</div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li><a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 22:46:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 23:02:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

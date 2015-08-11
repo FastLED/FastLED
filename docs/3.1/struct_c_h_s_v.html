@@ -90,23 +90,28 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="struct_c_h_s_v-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">CHSV Struct Reference</div>  </div>
+<div class="title">CHSV Struct Reference<div class="ingroups"><a class="el" href="group___pixeltypes.html">CHSV and CRGB type definitions</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Representation of an HSV pixel (hue, saturation, value (aka brightness)).  
+ <a href="struct_c_h_s_v.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a1cae6431597acc31363c47748da6f32d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1cae6431597acc31363c47748da6f32d"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CHSV</b> (uint8_t ih, uint8_t is, uint8_t iv) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CHSV</b> (uint8_t ih, uint8_t is, uint8_t iv) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a1cae6431597acc31363c47748da6f32d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a077b49ca9dfa160ea6321e633efd7421"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a077b49ca9dfa160ea6321e633efd7421"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CHSV</b> (const <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;rhs) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>CHSV</b> (const <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;rhs) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a077b49ca9dfa160ea6321e633efd7421"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62abbb334cc9f4f839a133e949968297"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a62abbb334cc9f4f839a133e949968297"></a>
-<a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;rhs) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;rhs) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:a62abbb334cc9f4f839a133e949968297"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af43ae960c609ddb5ccde16693aec0a6b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af43ae960c609ddb5ccde16693aec0a6b"></a>
-<a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setHSV</b> (uint8_t ih, uint8_t is, uint8_t iv) <a class="el" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline))</td></tr>
+<a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>setHSV</b> (uint8_t ih, uint8_t is, uint8_t iv) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:af43ae960c609ddb5ccde16693aec0a6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
@@ -159,13 +164,15 @@ union {</td></tr>
 <tr class="memitem:a75981833b6ce61cc7fdcf1d7d816ec29"><td class="memItemLeft" valign="top">};&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
 <tr class="separator:a75981833b6ce61cc7fdcf1d7d816ec29"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Representation of an HSV pixel (hue, saturation, value (aka brightness)). </p>
+</div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li><a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 22:46:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 23:02:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>
