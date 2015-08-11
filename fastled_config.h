@@ -1,6 +1,9 @@
 #ifndef __INC_FASTLED_CONFIG_H
 #define __INC_FASTLED_CONFIG_H
 
+///@file fastled_config.h
+/// contains definitions that can be used to configure FastLED at compile time
+
 // Use this option only for debugging pin access and forcing software pin access.  Note that
 // software pin access only works in Arduino based environments.  Forces use of digitalWrite
 // methods for pin access vs. direct hardware port access

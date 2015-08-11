@@ -3,6 +3,9 @@
 
 #include "led_sysdefs.h"
 
+///@file fastpin.h
+/// Class base definitions for defining fast pin access
+
 FASTLED_NAMESPACE_BEGIN
 
 #define NO_PIN 255

@@ -1,6 +1,9 @@
 #ifndef __INC_FL_DELAY_H
 #define __INC_FL_DELAY_H
 
+///@file fastled_delay.h
+///Utility functions and classes for managing delaycycles
+
 FASTLED_NAMESPACE_BEGIN
 
 /// Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet

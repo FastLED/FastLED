@@ -1,8 +1,8 @@
 #ifndef __INC_FASTSPI_LED2_H
 #define __INC_FASTSPI_LED2_H
 
-// #define NO_CORRECTION 1
-// #define NO_DITHERING 1
+///@file FastLED.h
+/// central include file for FastLED, defines the CFastLED class/object
 
 #define xstr(s) str(s)
 #define str(s) #s
@@ -437,10 +437,10 @@ public:
 	/// Set the maximum refresh rate.  This is global for all leds.  Attempts to
 	/// call show faster than this rate will simply wait.  Note that the refresh rate
 	/// defaults to the slowest refresh rate of all the leds added through addLeds.  If
-	/// you wish to set/override this rate, be sure to call setMaxRefreshRate _after_ 
+	/// you wish to set/override this rate, be sure to call setMaxRefreshRate _after_
 	/// adding all of your leds.
 	/// @param refresh - maximum refresh rate in hz
-	/// @param constrain - constrain refresh rate to the slowest speed yet set 
+	/// @param constrain - constrain refresh rate to the slowest speed yet set
 	void setMaxRefreshRate(uint16_t refresh, bool constrain=false);
 
 	/// for debugging, will keep track of time between calls to countFPS, and every

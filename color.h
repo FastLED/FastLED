@@ -3,6 +3,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+///@file color.h
+/// contains definitions for color correction and temperature
 ///@defgroup ColorEnums Color correction/temperature
 /// definitions for color correction and light temperatures
 ///@{

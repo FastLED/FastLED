@@ -3,6 +3,9 @@
 
 #include "pixeltypes.h"
 
+///@file chipsets.h
+/// contains the bulk of the definitions for the various LED chipsets supported.
+
 FASTLED_NAMESPACE_BEGIN
 ///@defgroup chipsets
 /// Implementations of CLEDController classes for various led chipsets.

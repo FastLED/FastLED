@@ -1,6 +1,9 @@
 #ifndef __INC_CONTROLLER_H
 #define __INC_CONTROLLER_H
 
+///@file controller.h
+/// base definitions used by led controllers for writing out led data
+
 #include "led_sysdefs.h"
 #include "pixeltypes.h"
 #include "color.h"
@@ -241,7 +244,7 @@ struct PixelController {
         }
 #endif
     ///@}
-    
+
 		/// initialize the binary dithering for this controller
         void init_binary_dithering() {
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)

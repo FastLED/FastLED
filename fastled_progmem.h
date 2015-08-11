@@ -1,6 +1,9 @@
 #ifndef __INC_FL_PROGMEM_H
 #define __INC_FL_PROGMEM_H
 
+///@file fastled_progmem.h
+/// wrapper definitions to allow seamless use of PROGMEM in environmens that have it
+
 FASTLED_NAMESPACE_BEGIN
 
 // Compatibility layer for devices that do or don't

@@ -3,6 +3,9 @@
 
 #include "colorutils.h"
 
+///@file colorpalettes.h
+/// contains definitions for the predefined color palettes supplied by FastLED.
+
 FASTLED_NAMESPACE_BEGIN
 
 ///@defgroup Colorpalletes Pre-defined color palletes

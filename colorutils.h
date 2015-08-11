@@ -1,6 +1,8 @@
 #ifndef __INC_COLORUTILS_H
 #define __INC_COLORUTILS_H
 
+///@file colorutils.h
+/// functions for color fill, paletters, blending, and more
 
 #include "pixeltypes.h"
 #include "fastled_progmem.h"
