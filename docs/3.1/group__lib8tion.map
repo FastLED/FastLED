@@ -1,0 +1,6 @@
+<map id="Fast math functions" name="Fast math functions">
+<area shape="rect" id="node1" href="$group___math.html" title="add one byte to another, saturating at 0xFF " alt="" coords="193,5,346,32"/>
+<area shape="rect" id="node2" href="$group___random.html" title="A 16&#45;bit PNRG good enough for LED animations. " alt="" coords="197,57,342,98"/>
+<area shape="rect" id="node3" href="$group___trig.html" title="Fast trig functions" alt="" coords="206,123,333,149"/>
+<area shape="rect" id="node5" href="$group___scaling.html" title="for scaling 8 and 16 bit values, as well as dimming and brightening them " alt="" coords="208,173,331,200"/>
+</map>
