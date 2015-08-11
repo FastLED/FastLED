@@ -7,6 +7,7 @@ var searchData=
   ['dim8_5fvideo',['dim8_video',['../group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494',1,'scale8.h']]],
   ['dimming_20and_20brightening_20functions',['Dimming and brightening functions',['../group___dimming.html',1,'']]],
   ['directsunlight',['DirectSunlight',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a890e0555ad95071fa4391a5775a38621',1,'color.h']]],
+  ['div1024_5f32_5f16',['div1024_32_16',['../group__lib8tion.html#ga5f95d6e55b4986bd88f662528cef717e',1,'lib8tion.h']]],
   ['dmxserial',['DMXSERIAL',['../class_d_m_x_s_e_r_i_a_l.html',1,'']]],
   ['dmxserialcontroller',['DMXSerialController',['../class_d_m_x_serial_controller.html',1,'']]],
   ['dmxsimple',['DMXSIMPLE',['../class_d_m_x_s_i_m_p_l_e.html',1,'']]],
