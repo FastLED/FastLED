@@ -216,9 +216,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    satdelta87 *= 2;</div>
 <div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    valdelta87 *= 2;</div>
 <div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    accum88 hue88 = startcolor.hue &lt;&lt; 8;</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    accum88 sat88 = startcolor.sat &lt;&lt; 8;</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;    accum88 val88 = startcolor.val &lt;&lt; 8;</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    <a class="code" href="group__lib8tion.html#ga397f872082dbd788e04e8c6e443e563a">accum88</a> hue88 = startcolor.hue &lt;&lt; 8;</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    <a class="code" href="group__lib8tion.html#ga397f872082dbd788e04e8c6e443e563a">accum88</a> sat88 = startcolor.sat &lt;&lt; 8;</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;    <a class="code" href="group__lib8tion.html#ga397f872082dbd788e04e8c6e443e563a">accum88</a> val88 = startcolor.val &lt;&lt; 8;</div>
 <div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;    <span class="keywordflow">for</span>( uint16_t i = startpos; i &lt;= endpos; i++) {</div>
 <div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        targetArray[i] = <a class="code" href="struct_c_h_s_v.html">CHSV</a>( hue88 &gt;&gt; 8, sat88 &gt;&gt; 8, val88 &gt;&gt; 8);</div>
 <div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;        hue88 += huedelta87;</div>
@@ -323,9 +323,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;<span class="comment">//</span></div>
 <div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;<span class="comment">// blend - computes a new color blended some fraction of the way</span></div>
 <div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;<span class="comment">//         between two other colors.</span></div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;<a class="code" href="struct_c_r_g_b.html">CRGB</a>  blend( <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; p1, <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; p2, fract8 amountOfP2 );</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;<a class="code" href="struct_c_r_g_b.html">CRGB</a>  blend( <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; p1, <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; p2, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> amountOfP2 );</div>
 <div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;</div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;<a class="code" href="struct_c_h_s_v.html">CHSV</a>  blend( <span class="keyword">const</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; p1, <span class="keyword">const</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; p2, fract8 amountOfP2,</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;<a class="code" href="struct_c_h_s_v.html">CHSV</a>  blend( <span class="keyword">const</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; p1, <span class="keyword">const</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; p2, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> amountOfP2,</div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;            TGradientDirectionCode directionCode = SHORTEST_HUES );</div>
 <div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;</div>
 <div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;<span class="comment">// blend - computes a new color blended array of colors, each</span></div>
@@ -333,24 +333,24 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;<span class="comment">//         elements of two source arrays of colors.</span></div>
 <div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;<span class="comment">//         Useful for blending palettes.</span></div>
 <div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;<a class="code" href="struct_c_r_g_b.html">CRGB</a>* blend( <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* src1, <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* src2, <a class="code" href="struct_c_r_g_b.html">CRGB</a>* dest,</div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;             uint16_t count, fract8 amountOfsrc2 );</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;             uint16_t count, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> amountOfsrc2 );</div>
 <div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;</div>
 <div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;<a class="code" href="struct_c_h_s_v.html">CHSV</a>* blend( <span class="keyword">const</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>* src1, <span class="keyword">const</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>* src2, <a class="code" href="struct_c_h_s_v.html">CHSV</a>* dest,</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;            uint16_t count, fract8 amountOfsrc2,</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;            uint16_t count, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> amountOfsrc2,</div>
 <div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;            TGradientDirectionCode directionCode = SHORTEST_HUES );</div>
 <div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;</div>
 <div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;<span class="comment">// nblend - destructively modifies one color, blending</span></div>
 <div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;<span class="comment">//          in a given fraction of an overlay color</span></div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;<a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; nblend( <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; existing, <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; overlay, fract8 amountOfOverlay );</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;<a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; nblend( <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; existing, <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>&amp; overlay, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> amountOfOverlay );</div>
 <div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;<a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; nblend( <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; existing, <span class="keyword">const</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; overlay, fract8 amountOfOverlay,</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;<a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; nblend( <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; existing, <span class="keyword">const</span> <a class="code" href="struct_c_h_s_v.html">CHSV</a>&amp; overlay, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> amountOfOverlay,</div>
 <div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;             TGradientDirectionCode directionCode = SHORTEST_HUES );</div>
 <div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;</div>
 <div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;<span class="comment">// nblend - destructively blends a given fraction of</span></div>
 <div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;<span class="comment">//          a new color array into an existing color array</span></div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;<span class="keywordtype">void</span>  nblend( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* existing, <a class="code" href="struct_c_r_g_b.html">CRGB</a>* overlay, uint16_t count, fract8 amountOfOverlay);</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;<span class="keywordtype">void</span>  nblend( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* existing, <a class="code" href="struct_c_r_g_b.html">CRGB</a>* overlay, uint16_t count, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> amountOfOverlay);</div>
 <div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;</div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;<span class="keywordtype">void</span>  nblend( <a class="code" href="struct_c_h_s_v.html">CHSV</a>* existing, <a class="code" href="struct_c_h_s_v.html">CHSV</a>* overlay, uint16_t count, fract8 amountOfOverlay,</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;<span class="keywordtype">void</span>  nblend( <a class="code" href="struct_c_h_s_v.html">CHSV</a>* existing, <a class="code" href="struct_c_h_s_v.html">CHSV</a>* overlay, uint16_t count, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> amountOfOverlay,</div>
 <div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;             TGradientDirectionCode directionCode = SHORTEST_HUES);</div>
 <div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;</div>
 <div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;</div>
@@ -367,13 +367,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;<span class="comment">//         calls to &#39;blur&#39; will also result in the light fading,</span></div>
 <div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;<span class="comment">//         eventually all the way to black; this is by design so that</span></div>
 <div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;<span class="comment">//         it can be used to (slowly) clear the LEDs to black.</span></div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;<span class="keywordtype">void</span> blur1d( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint16_t numLeds, fract8 blur_amount);</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;<span class="keywordtype">void</span> blur2d( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint8_t width, uint8_t height, fract8 blur_amount);</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;<span class="keywordtype">void</span> blur1d( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint16_t numLeds, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> blur_amount);</div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;<span class="keywordtype">void</span> blur2d( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint8_t width, uint8_t height, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> blur_amount);</div>
 <div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;</div>
 <div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;<span class="comment">// blurRows: perform a blur1d on every row of a rectangular matrix</span></div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;<span class="keywordtype">void</span> blurRows( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint8_t width, uint8_t height, fract8 blur_amount);</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;<span class="keywordtype">void</span> blurRows( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint8_t width, uint8_t height, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> blur_amount);</div>
 <div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;<span class="comment">// blurColumns: perform a blur1d on each column of a rectangular matrix</span></div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;<span class="keywordtype">void</span> blurColumns(<a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint8_t width, uint8_t height, fract8 blur_amount);</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;<span class="keywordtype">void</span> blurColumns(<a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint8_t width, uint8_t height, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> blur_amount);</div>
 <div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;</div>
 <div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;</div>
 <div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;<span class="comment">// CRGB HeatColor( uint8_t temperature)</span></div>
@@ -1216,8 +1216,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l01160"></a><span class="lineno"> 1160</span>&#160;</div>
 <div class="line"><a name="l01162"></a><span class="lineno"> 1162</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="struct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdef"><b>Definition:</b> pixeltypes.h:83</div></div>
+<div class="ttc" id="group__lib8tion_html_ga397f872082dbd788e04e8c6e443e563a"><div class="ttname"><a href="group__lib8tion.html#ga397f872082dbd788e04e8c6e443e563a">accum88</a></div><div class="ttdeci">uint16_t accum88</div><div class="ttdoc">ANSI: unsigned short _Accum. 8 bits int, 8 bits fraction. </div><div class="ttdef"><b>Definition:</b> lib8tion.h:343</div></div>
 <div class="ttc" id="class_c_h_s_v_palette256_html"><div class="ttname"><a href="class_c_h_s_v_palette256.html">CHSVPalette256</a></div><div class="ttdef"><b>Definition:</b> colorutils.h:508</div></div>
 <div class="ttc" id="class_c_r_g_b_palette16_html"><div class="ttname"><a href="class_c_r_g_b_palette16.html">CRGBPalette16</a></div><div class="ttdef"><b>Definition:</b> colorutils.h:595</div></div>
+<div class="ttc" id="group__lib8tion_html_ga5d6d013429a5b8a09d564d6137217644"><div class="ttname"><a href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></div><div class="ttdeci">uint8_t fract8</div><div class="ttdoc">ANSI unsigned short _Fract. </div><div class="ttdef"><b>Definition:</b> lib8tion.h:324</div></div>
 <div class="ttc" id="group___colorutils_html_gafcc7dac88e25736ebc49a9faf2a1c2e2"><div class="ttname"><a href="group___colorutils.html#gafcc7dac88e25736ebc49a9faf2a1c2e2">fill_rainbow</a></div><div class="ttdeci">void fill_rainbow(struct CRGB *pFirstLED, int numToFill, uint8_t initialhue, uint8_t deltahue=5)</div><div class="ttdoc">fill_rainbow - fill a range of LEDs with a rainbow of colors, at full saturation and full value (brig...</div><div class="ttdef"><b>Definition:</b> colorutils.cpp:35</div></div>
 <div class="ttc" id="group___colorutils_html_ga3144bb2bb66aeed33e20f4fdd6cc1a98"><div class="ttname"><a href="group___colorutils.html#ga3144bb2bb66aeed33e20f4fdd6cc1a98">fill_gradient</a></div><div class="ttdeci">void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor, uint16_t endpos, CHSV endcolor, TGradientDirectionCode directionCode=SHORTEST_HUES)</div><div class="ttdoc">fill_gradient - fill an array of colors with a smooth HSV gradient between two specified HSV colors...</div><div class="ttdef"><b>Definition:</b> colorutils.h:89</div></div>
 <div class="ttc" id="class_c_h_s_v_palette16_html"><div class="ttname"><a href="class_c_h_s_v_palette16.html">CHSVPalette16</a></div><div class="ttdef"><b>Definition:</b> colorutils.h:421</div></div>
@@ -1229,7 +1231,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 22:39:55 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 22:46:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

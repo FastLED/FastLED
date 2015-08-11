@@ -96,7 +96,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
-<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">   20</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( uint8_t i, fract8 scale)</div>
+<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">   20</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( uint8_t i, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;{</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#if SCALE8_C == 1</span></div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="keywordflow">return</span> ((uint16_t)i * (uint16_t)(scale) ) &gt;&gt; 8;</div>
@@ -144,7 +144,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;}</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
-<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">   73</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a>( uint8_t i, fract8 scale)</div>
+<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">   73</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a>( uint8_t i, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;{</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor">#if SCALE8_C == 1 || defined(LIB8_ATTINY)</span></div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    uint8_t j = (((int)i * (<span class="keywordtype">int</span>)scale) &gt;&gt; 8) + ((i&amp;&amp;scale)?1:0);</div>
@@ -189,7 +189,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;}</div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;</div>
-<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">  121</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a>( uint8_t i, fract8 scale)</div>
+<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">  121</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a>( uint8_t i, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;{</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;<span class="preprocessor">#if SCALE8_C == 1</span></div>
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    <span class="keywordflow">return</span> ((<span class="keywordtype">int</span>)i * (<span class="keywordtype">int</span>)(scale) ) &gt;&gt; 8;</div>
@@ -214,7 +214,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;}</div>
 <div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;</div>
 <div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;</div>
-<div class="line"><a name="l00150"></a><span class="lineno"><a class="line" href="group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80">  150</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80">nscale8_LEAVING_R1_DIRTY</a>( uint8_t&amp; i, fract8 scale)</div>
+<div class="line"><a name="l00150"></a><span class="lineno"><a class="line" href="group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80">  150</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80">nscale8_LEAVING_R1_DIRTY</a>( uint8_t&amp; i, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;{</div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;<span class="preprocessor">#if SCALE8_C == 1</span></div>
 <div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    i = ((int)i * (<span class="keywordtype">int</span>)(scale) ) &gt;&gt; 8;</div>
@@ -236,7 +236,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;}</div>
 <div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;</div>
 <div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;</div>
-<div class="line"><a name="l00175"></a><span class="lineno"><a class="line" href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">  175</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">scale8_video_LEAVING_R1_DIRTY</a>( uint8_t i, fract8 scale)</div>
+<div class="line"><a name="l00175"></a><span class="lineno"><a class="line" href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">  175</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">scale8_video_LEAVING_R1_DIRTY</a>( uint8_t i, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;{</div>
 <div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="preprocessor">#if SCALE8_C == 1 || defined(LIB8_ATTINY)</span></div>
 <div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    uint8_t j = (((int)i * (<span class="keywordtype">int</span>)scale) &gt;&gt; 8) + ((i&amp;&amp;scale)?1:0);</div>
@@ -279,7 +279,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;}</div>
 <div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;</div>
-<div class="line"><a name="l00222"></a><span class="lineno"><a class="line" href="group___scaling.html#ga2a580fcaa010558218faae95d1936635">  222</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga2a580fcaa010558218faae95d1936635">nscale8_video_LEAVING_R1_DIRTY</a>( uint8_t &amp; i, fract8 scale)</div>
+<div class="line"><a name="l00222"></a><span class="lineno"><a class="line" href="group___scaling.html#ga2a580fcaa010558218faae95d1936635">  222</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga2a580fcaa010558218faae95d1936635">nscale8_video_LEAVING_R1_DIRTY</a>( uint8_t &amp; i, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;{</div>
 <div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;<span class="preprocessor">#if SCALE8_C == 1 || defined(LIB8_ATTINY)</span></div>
 <div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    i = (((int)i * (<span class="keywordtype">int</span>)scale) &gt;&gt; 8) + ((i&amp;&amp;scale)?1:0);</div>
@@ -310,7 +310,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;</div>
 <div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;</div>
 <div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;</div>
-<div class="line"><a name="l00259"></a><span class="lineno"><a class="line" href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">  259</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a>( uint8_t&amp; r, uint8_t&amp; g, uint8_t&amp; b, fract8 scale)</div>
+<div class="line"><a name="l00259"></a><span class="lineno"><a class="line" href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">  259</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a>( uint8_t&amp; r, uint8_t&amp; g, uint8_t&amp; b, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;{</div>
 <div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;<span class="preprocessor">#if SCALE8_C == 1</span></div>
 <div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    r = ((int)r * (<span class="keywordtype">int</span>)(scale) ) &gt;&gt; 8;</div>
@@ -326,7 +326,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;}</div>
 <div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;</div>
-<div class="line"><a name="l00282"></a><span class="lineno"><a class="line" href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">  282</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a>( uint8_t&amp; r, uint8_t&amp; g, uint8_t&amp; b, fract8 scale)</div>
+<div class="line"><a name="l00282"></a><span class="lineno"><a class="line" href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">  282</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a>( uint8_t&amp; r, uint8_t&amp; g, uint8_t&amp; b, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;{</div>
 <div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;<span class="preprocessor">#if SCALE8_C == 1</span></div>
 <div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;</div>
@@ -344,7 +344,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;}</div>
 <div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;</div>
 <div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;</div>
-<div class="line"><a name="l00305"></a><span class="lineno"><a class="line" href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">  305</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">nscale8x2</a>( uint8_t&amp; i, uint8_t&amp; j, fract8 scale)</div>
+<div class="line"><a name="l00305"></a><span class="lineno"><a class="line" href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">  305</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">nscale8x2</a>( uint8_t&amp; i, uint8_t&amp; j, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;{</div>
 <div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;<span class="preprocessor">#if SCALE8_C == 1</span></div>
 <div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;    i = ((int)i * (<span class="keywordtype">int</span>)(scale) ) &gt;&gt; 8;</div>
@@ -360,7 +360,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;</div>
 <div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;</div>
 <div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;</div>
-<div class="line"><a name="l00328"></a><span class="lineno"><a class="line" href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">  328</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">nscale8x2_video</a>( uint8_t&amp; i, uint8_t&amp; j, fract8 scale)</div>
+<div class="line"><a name="l00328"></a><span class="lineno"><a class="line" href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">  328</a></span>&#160;LIB8STATIC <span class="keywordtype">void</span> <a class="code" href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">nscale8x2_video</a>( uint8_t&amp; i, uint8_t&amp; j, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</div>
 <div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;{</div>
 <div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;<span class="preprocessor">#if SCALE8_C == 1</span></div>
 <div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;    uint8_t nonzeroscale = (scale != 0) ? 1 : 0;</div>
@@ -377,7 +377,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;</div>
 <div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;</div>
 <div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;</div>
-<div class="line"><a name="l00348"></a><span class="lineno"><a class="line" href="group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e">  348</a></span>&#160;LIB8STATIC uint16_t <a class="code" href="group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e">scale16by8</a>( uint16_t i, fract8 scale )</div>
+<div class="line"><a name="l00348"></a><span class="lineno"><a class="line" href="group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e">  348</a></span>&#160;LIB8STATIC uint16_t <a class="code" href="group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e">scale16by8</a>( uint16_t i, <a class="code" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale )</div>
 <div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;{</div>
 <div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;<span class="preprocessor">#if SCALE16BY8_C == 1</span></div>
 <div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;    uint16_t result;</div>
@@ -410,7 +410,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;}</div>
 <div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;</div>
 <div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;</div>
-<div class="line"><a name="l00384"></a><span class="lineno"><a class="line" href="group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">  384</a></span>&#160;LIB8STATIC uint16_t <a class="code" href="group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a>( uint16_t i, fract16 scale )</div>
+<div class="line"><a name="l00384"></a><span class="lineno"><a class="line" href="group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">  384</a></span>&#160;LIB8STATIC uint16_t <a class="code" href="group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a>( uint16_t i, <a class="code" href="group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5">fract16</a> scale )</div>
 <div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;{</div>
 <div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;<span class="preprocessor">  #if SCALE16_C == 1</span></div>
 <div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;    uint16_t result;</div>
@@ -521,6 +521,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="group___dimming_html_gae51352a3522bb8eae5e17dbee97aa1aa"><div class="ttname"><a href="group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa">dim8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_raw(uint8_t x)</div><div class="ttdoc">Adjust a scaling value for dimming. </div><div class="ttdef"><b>Definition:</b> scale8.h:460</div></div>
 <div class="ttc" id="group___dimming_html_ga094bda002b416c66e57521fc93878830"><div class="ttname"><a href="group___dimming.html#ga094bda002b416c66e57521fc93878830">brighten8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_lin(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> scale8.h:498</div></div>
 <div class="ttc" id="group___scaling_html_gab341cef8d46232269bb70092fed9eb75"><div class="ttname"><a href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">scale8_video_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8_video does not clean up the R1 register on AVR If you are doing several &#39;scale...</div><div class="ttdef"><b>Definition:</b> scale8.h:175</div></div>
+<div class="ttc" id="group__lib8tion_html_gaaf46b9f719ef3bdb574f8e967af6dbb5"><div class="ttname"><a href="group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5">fract16</a></div><div class="ttdeci">uint16_t fract16</div><div class="ttdoc">ANSI: unsigned _Fract. </div><div class="ttdef"><b>Definition:</b> lib8tion.h:332</div></div>
 <div class="ttc" id="group___scaling_html_ga6c160f8c36ce9b3c5eda68e4992010af"><div class="ttname"><a href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition:</b> scale8.h:20</div></div>
 <div class="ttc" id="group___dimming_html_ga3f94d2455e0aa92133f77af8747b5914"><div class="ttname"><a href="group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914">dim8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_lin(uint8_t x)</div><div class="ttdoc">Linear version of the dimming function that halves for values < 128. </div><div class="ttdef"><b>Definition:</b> scale8.h:472</div></div>
 <div class="ttc" id="group___scaling_html_ga4204edd4a3f8aac7124a10f1f5cfccfe"><div class="ttname"><a href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">nscale8x2_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x2_video(uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</div><div class="ttdoc">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demom...</div><div class="ttdef"><b>Definition:</b> scale8.h:328</div></div>
@@ -531,6 +532,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="group___dimming_html_gae8e36472a70f3016595048532d6c3a2d"><div class="ttname"><a href="group___dimming.html#gae8e36472a70f3016595048532d6c3a2d">brighten8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_raw(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> scale8.h:484</div></div>
 <div class="ttc" id="group___scaling_html_ga700b7f510f32e8c91385093c436c27d9"><div class="ttname"><a href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x3_video(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> scale8.h:282</div></div>
 <div class="ttc" id="group___dimming_html_gad21876a676bcf26c47f957faed23f9bb"><div class="ttname"><a href="group___dimming.html#gad21876a676bcf26c47f957faed23f9bb">brighten8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_video(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> scale8.h:491</div></div>
+<div class="ttc" id="group__lib8tion_html_ga5d6d013429a5b8a09d564d6137217644"><div class="ttname"><a href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></div><div class="ttdeci">uint8_t fract8</div><div class="ttdoc">ANSI unsigned short _Fract. </div><div class="ttdef"><b>Definition:</b> lib8tion.h:324</div></div>
 <div class="ttc" id="group___scaling_html_ga39579fcf09743f15545fe0b831ca313c"><div class="ttname"><a href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8 does not clean up the R1 register on AVR If you are doing several &#39;scale8&#39;s in...</div><div class="ttdef"><b>Definition:</b> scale8.h:121</div></div>
 <div class="ttc" id="group___scaling_html_ga572d0b441676c9d8ceb071fe8284b7e9"><div class="ttname"><a href="group___scaling.html#ga572d0b441676c9d8ceb071fe8284b7e9">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls. </div><div class="ttdef"><b>Definition:</b> scale8.h:244</div></div>
 <div class="ttc" id="group___scaling_html_ga6f419761a744efed4bae8875ac07aef0"><div class="ttname"><a href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">nscale8x2</a></div><div class="ttdeci">LIB8STATIC void nscale8x2(uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</div><div class="ttdoc">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demom...</div><div class="ttdef"><b>Definition:</b> scale8.h:305</div></div>
@@ -540,7 +542,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 22:39:55 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 22:46:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

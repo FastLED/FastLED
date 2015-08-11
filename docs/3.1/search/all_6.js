@@ -8,6 +8,8 @@ var searchData=
   ['fill_5fsolid',['fill_solid',['../group___colorutils.html#gac84d8820fd175567ba66413dfb8bc63b',1,'fill_solid(struct CRGB *leds, int numToFill, const struct CRGB &amp;color):&#160;colorutils.cpp'],['../group___colorutils.html#gad1abf13328e8dd1c483a270af77b17ed',1,'fill_solid(struct CHSV *targetArray, int numToFill, const struct CHSV &amp;hsvColor):&#160;colorutils.cpp'],['../group___colorutils.html#gac84d8820fd175567ba66413dfb8bc63b',1,'fill_solid(struct CRGB *leds, int numToFill, const struct CRGB &amp;color):&#160;colorutils.cpp'],['../group___colorutils.html#gad1abf13328e8dd1c483a270af77b17ed',1,'fill_solid(struct CHSV *targetArray, int numToFill, const struct CHSV &amp;hsvColor):&#160;colorutils.cpp']]],
   ['fl_5fprogmem',['FL_PROGMEM',['../group___colorpalletes.html#ga57a38373661043f74b292976e83c687b',1,'FL_PROGMEM():&#160;colorpalettes.cpp'],['../group___colorpalletes.html#ga57a38373661043f74b292976e83c687b',1,'FL_PROGMEM():&#160;colorpalettes.h']]],
   ['floattosfract15',['floatToSfract15',['../group__lib8tion.html#gaa2facbc0ec935e34c629aef43d6262c0',1,'lib8tion.h']]],
+  ['fract16',['fract16',['../group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5',1,'lib8tion.h']]],
+  ['fract8',['fract8',['../group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644',1,'lib8tion.h']]],
   ['fast_20math_20functions',['Fast math functions',['../group__lib8tion.html',1,'']]],
   ['fastled3_2e0',['FastLED3.0',['../md_release_notes.html',1,'']]],
   ['fast_20random_20number_20generators',['Fast random number generators',['../group___random.html',1,'']]],

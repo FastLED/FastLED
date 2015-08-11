@@ -98,44 +98,44 @@ Collaboration diagram for Scaling functions:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga6c160f8c36ce9b3c5eda68e4992010af"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga6c160f8c36ce9b3c5eda68e4992010af"></a>
-LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a> (uint8_t i, fract8 scale)</td></tr>
+LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a> (uint8_t i, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:ga6c160f8c36ce9b3c5eda68e4992010af"><td class="mdescLeft">&#160;</td><td class="mdescRight">scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is 256 In other words, it computes i * (scale / 256) 4 clocks AVR with MUL, 2 clocks ARM <br /></td></tr>
 <tr class="separator:ga6c160f8c36ce9b3c5eda68e4992010af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga333095ffa436c94d3e77ee9dc39da1c1"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a> (uint8_t i, fract8 scale)</td></tr>
+<tr class="memitem:ga333095ffa436c94d3e77ee9dc39da1c1"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a> (uint8_t i, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:ga333095ffa436c94d3e77ee9dc39da1c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">The "video" version of scale8 guarantees that the output will be only be zero if one or both of the inputs are zero.  <a href="#ga333095ffa436c94d3e77ee9dc39da1c1">More...</a><br /></td></tr>
 <tr class="separator:ga333095ffa436c94d3e77ee9dc39da1c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga39579fcf09743f15545fe0b831ca313c"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a> (uint8_t i, fract8 scale)</td></tr>
+<tr class="memitem:ga39579fcf09743f15545fe0b831ca313c"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a> (uint8_t i, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:ga39579fcf09743f15545fe0b831ca313c"><td class="mdescLeft">&#160;</td><td class="mdescRight">This version of scale8 does not clean up the R1 register on AVR If you are doing several 'scale8's in a row, use this, and then explicitly call cleanup_R1.  <a href="#ga39579fcf09743f15545fe0b831ca313c">More...</a><br /></td></tr>
 <tr class="separator:ga39579fcf09743f15545fe0b831ca313c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga5f6dde3d9398f4b389c96e759a3f7b80"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80">nscale8_LEAVING_R1_DIRTY</a> (uint8_t &amp;i, fract8 scale)</td></tr>
+<tr class="memitem:ga5f6dde3d9398f4b389c96e759a3f7b80"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80">nscale8_LEAVING_R1_DIRTY</a> (uint8_t &amp;i, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:ga5f6dde3d9398f4b389c96e759a3f7b80"><td class="mdescLeft">&#160;</td><td class="mdescRight">In place modifying version of scale8, also this version of nscale8 does not clean up the R1 register on AVR If you are doing several 'scale8's in a row, use this, and then explicitly call cleanup_R1.  <a href="#ga5f6dde3d9398f4b389c96e759a3f7b80">More...</a><br /></td></tr>
 <tr class="separator:ga5f6dde3d9398f4b389c96e759a3f7b80"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab341cef8d46232269bb70092fed9eb75"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">scale8_video_LEAVING_R1_DIRTY</a> (uint8_t i, fract8 scale)</td></tr>
+<tr class="memitem:gab341cef8d46232269bb70092fed9eb75"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">scale8_video_LEAVING_R1_DIRTY</a> (uint8_t i, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:gab341cef8d46232269bb70092fed9eb75"><td class="mdescLeft">&#160;</td><td class="mdescRight">This version of scale8_video does not clean up the R1 register on AVR If you are doing several 'scale8_video's in a row, use this, and then explicitly call cleanup_R1.  <a href="#gab341cef8d46232269bb70092fed9eb75">More...</a><br /></td></tr>
 <tr class="separator:gab341cef8d46232269bb70092fed9eb75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2a580fcaa010558218faae95d1936635"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga2a580fcaa010558218faae95d1936635">nscale8_video_LEAVING_R1_DIRTY</a> (uint8_t &amp;i, fract8 scale)</td></tr>
+<tr class="memitem:ga2a580fcaa010558218faae95d1936635"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga2a580fcaa010558218faae95d1936635">nscale8_video_LEAVING_R1_DIRTY</a> (uint8_t &amp;i, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:ga2a580fcaa010558218faae95d1936635"><td class="mdescLeft">&#160;</td><td class="mdescRight">In place modifying version of scale8_video, also this version of nscale8_video does not clean up the R1 register on AVR If you are doing several 'scale8_video's in a row, use this, and then explicitly call cleanup_R1.  <a href="#ga2a580fcaa010558218faae95d1936635">More...</a><br /></td></tr>
 <tr class="separator:ga2a580fcaa010558218faae95d1936635"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga572d0b441676c9d8ceb071fe8284b7e9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga572d0b441676c9d8ceb071fe8284b7e9"></a>
 LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga572d0b441676c9d8ceb071fe8284b7e9">cleanup_R1</a> ()</td></tr>
 <tr class="memdesc:ga572d0b441676c9d8ceb071fe8284b7e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls. <br /></td></tr>
 <tr class="separator:ga572d0b441676c9d8ceb071fe8284b7e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga39bf87e5526120889086cab19ac749b1"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a> (uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</td></tr>
+<tr class="memitem:ga39bf87e5526120889086cab19ac749b1"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a> (uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:ga39bf87e5526120889086cab19ac749b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose demominator is 256 In other words, it computes r,g,b * (scale / 256)  <a href="#ga39bf87e5526120889086cab19ac749b1">More...</a><br /></td></tr>
 <tr class="separator:ga39bf87e5526120889086cab19ac749b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga700b7f510f32e8c91385093c436c27d9"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a> (uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</td></tr>
+<tr class="memitem:ga700b7f510f32e8c91385093c436c27d9"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a> (uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:ga700b7f510f32e8c91385093c436c27d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose demominator is 256 In other words, it computes r,g,b * (scale / 256), ensuring that non-zero values passed in remain non zero, no matter how low the scale argument.  <a href="#ga700b7f510f32e8c91385093c436c27d9">More...</a><br /></td></tr>
 <tr class="separator:ga700b7f510f32e8c91385093c436c27d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga6f419761a744efed4bae8875ac07aef0"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">nscale8x2</a> (uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</td></tr>
+<tr class="memitem:ga6f419761a744efed4bae8875ac07aef0"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">nscale8x2</a> (uint8_t &amp;i, uint8_t &amp;j, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:ga6f419761a744efed4bae8875ac07aef0"><td class="mdescLeft">&#160;</td><td class="mdescRight">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demominator is 256 In other words, it computes i,j * (scale / 256)  <a href="#ga6f419761a744efed4bae8875ac07aef0">More...</a><br /></td></tr>
 <tr class="separator:ga6f419761a744efed4bae8875ac07aef0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga4204edd4a3f8aac7124a10f1f5cfccfe"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">nscale8x2_video</a> (uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</td></tr>
+<tr class="memitem:ga4204edd4a3f8aac7124a10f1f5cfccfe"><td class="memItemLeft" align="right" valign="top">LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">nscale8x2_video</a> (uint8_t &amp;i, uint8_t &amp;j, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:ga4204edd4a3f8aac7124a10f1f5cfccfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demominator is 256 In other words, it computes i,j * (scale / 256), ensuring that non-zero values passed in remain non zero, no matter how low the scale argument.  <a href="#ga4204edd4a3f8aac7124a10f1f5cfccfe">More...</a><br /></td></tr>
 <tr class="separator:ga4204edd4a3f8aac7124a10f1f5cfccfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf34fde0746c9c2e5ed44f9c437a2267e"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e">scale16by8</a> (uint16_t i, fract8 scale)</td></tr>
+<tr class="memitem:gaf34fde0746c9c2e5ed44f9c437a2267e"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e">scale16by8</a> (uint16_t i, <a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a> scale)</td></tr>
 <tr class="memdesc:gaf34fde0746c9c2e5ed44f9c437a2267e"><td class="mdescLeft">&#160;</td><td class="mdescRight">scale a 16-bit unsigned value by an 8-bit value, considered as numerator of a fraction whose denominator is 256.  <a href="#gaf34fde0746c9c2e5ed44f9c437a2267e">More...</a><br /></td></tr>
 <tr class="separator:gaf34fde0746c9c2e5ed44f9c437a2267e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1ff8ac00ad78e22acc7bb7445bfdb145"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a> (uint16_t i, fract16 scale)</td></tr>
+<tr class="memitem:ga1ff8ac00ad78e22acc7bb7445bfdb145"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a> (uint16_t i, <a class="el" href="group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5">fract16</a> scale)</td></tr>
 <tr class="memdesc:ga1ff8ac00ad78e22acc7bb7445bfdb145"><td class="mdescLeft">&#160;</td><td class="mdescRight">scale a 16-bit unsigned value by a 16-bit value, considered as numerator of a fraction whose denominator is 65536.  <a href="#ga1ff8ac00ad78e22acc7bb7445bfdb145">More...</a><br /></td></tr>
 <tr class="separator:ga1ff8ac00ad78e22acc7bb7445bfdb145"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -156,7 +156,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -184,7 +184,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -218,7 +218,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -253,7 +253,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -294,7 +294,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -335,7 +335,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -364,7 +364,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract16&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5">fract16</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -393,7 +393,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -422,7 +422,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -450,7 +450,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -479,7 +479,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">fract8&#160;</td>
+          <td class="paramtype"><a class="el" href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a>&#160;</td>
           <td class="paramname"><em>scale</em>&#160;</td>
         </tr>
         <tr>
@@ -497,7 +497,7 @@ LIB8STATIC void&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 22:39:55 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Aug 10 2015 22:46:45 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>
