@@ -47,12 +47,19 @@ fill_palette( leds, NUM_LEDS, index, 6, myPal);</pre>
 <pre>leds[i] = ColorFromPalette( myPal, index);</pre>
 	</div>
 
-<h2>Further Reading</h2>
-<p>All color palettes from cpt-city are "gradient palettes", which are discussed here: <a href="https://github.com/FastLED/FastLED/wiki/Gradient-color-palettes">Gradient color palettes</a>.</p>
+<h2>Going Further</h2>
+<ul>
+<li><p>All color palettes from cpt-city are "gradient palettes", which are discussed here: <a href="https://github.com/FastLED/FastLED/wiki/Gradient-color-palettes">Gradient color palettes</a>.  Because they are so compact, you can probably add dozens of color palettes to your FastLED animation without running out of program space.</li>
 	
-<p>If you want to cross-fade between one palette and another, check out this post, video, and sample code on G+: <a href="https://plus.googleapis.com/112916219338292742137/posts/FvLgYPF52Ma" target=_new>Color Palette Crossfades</a></p>
-	
+<li><p>If you want to cross-fade between one palette and another, check out this post, video, and sample code on G+: <a href="https://plus.googleapis.com/112916219338292742137/posts/FvLgYPF52Ma" target=_new>Color Palette Crossfades</a>
+</li>
+
+<li><p>cpt-city color palettes are converted to FastLED color palettes with an automatic gamma correction.  You can control the gamma, by appending "?gamma=2.2" (or other values) onto the cpt-city URL and then activating PaletteKnife.  Independent R, G, and B gammas can be specified with "?rgamma=2.5&ggamma=2.2&bgamma=2.7" (or other values).</li>
+</ul>
+<li><p>The maintainer of cpt-city has graciously said that FastLED developers are welcome to use PaletteKnife; please be courteous and gracious in return.  cpt-city is a fantastic resource, please treat it with respect and gratitude!</li>
+	<p>
 	<footer>
+	<p>
 			<!-- &copy; Company or Name |   Not required, but appreciated. <a href="http://minimalcss.com">Minimal</a> -->
 	</footer><!-- footer -->
 </div>
