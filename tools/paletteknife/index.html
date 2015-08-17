@@ -1,7 +1,60 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta http-equiv="refresh" content="0; url=http://fastled.io/" />
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>PaletteKnife for FastLED</title>
+	<meta name="description" content="Bookmarklet for importing cpt-city color palettes into FastLED sketches">
+
+	<link href="minimal.css" rel="stylesheet">
 </head>
 <body>
+<div class="container">
+	<header>
+		<div class="logo">PaletteKnife for FastLED</div>
+	</header>
+
+	<div class="row">
+	<h2>About</h2>
+		<p><img class="float-right" src="cpt-city-examples.png"></p>
+		<p>PaletteKnife lets you use thousands of high-quality color palettes from "<a href="http://soliton.vm.bytemark.co.uk/pub/cpt-city/" target=_new>cpt-city</a>" in your FastLED animations.</p>
+		
+<h2>Getting Started</h2>
+<p>A basic understanding of FastLED color palettes is absolutely required.
+<p>To get started with FastLED color palettes, run the FastLED "<a href="https://github.com/FastLED/FastLED/blob/master/examples/ColorPalette/ColorPalette.ino" target=_new>ColorPalette</a>" example, and review the included notes/comments to refresh your understanding of what FastLED color palettes are, and how to program with them.  If you skip this step, nothing that follows will make sense or work.  It's not too complicated, but there is no substitute for hands-on experience here.<p>
+<p>A second palette-use example, "<a href="https://github.com/FastLED/FastLED/blob/master/examples/Fire2012WithPalette/Fire2012WithPalette.ino" target=_new>Fire2012WithPalette</a>", is also included with FastLED.</p>
+
+	<h2>Installing PaletteKnife</h2>
+<p>Drag this bookmarklet into a browser toolbar: [<a href="javascript:(function(){s=document.createElement(%27script%27);s.type=%27text/javascript%27;s.src=%27http://fastled.io/tools/paletteknife/pk2.js?v=%27+parseInt(Math.random()*99999999);document.body.appendChild(s);})();">PaletteKnife</a>]</p>
+
+	<h2>Using PaletteKnife</h2>
+	<ol>
+	<li>Go to cpt-city here, <a href="http://soliton.vm.bytemark.co.uk/pub/cpt-city/" target=_new>http://soliton.vm.bytemark.co.uk/pub/cpt-city/</a></li>
+	<li>Find a palette you like, e.g. <a href="http://soliton.vm.bytemark.co.uk/pub/cpt-city/rc/tn/purplefly.png.index.html" target=_new>http://soliton.vm.bytemark.co.uk/pub/cpt-city/rc/tn/purplefly.png.index.html</a></li>
+<li>Click PaletteKnife in your toolbar.  If you get warnings, choose a different palette and try again.</li>
+<li>Copy the resulting code and paste it into your source file.</li>
+<li>Use your new color palette by name (e.g. "purplefly_gp") as you would any other FastLED pre-defined color palette (e.g. "RainbowColors_p").</li>
+
+	</ol>
+	<p>Example:</p>
+<pre>CRGBPalette16 myPal = purplefly_gp;</pre>
+<p>then</p>
+<pre>static uint8_t index = 0;
+index++;
+fill_palette( leds, NUM_LEDS, index, 6, myPal);</pre>
+<p>or</p>
+<pre>leds[i] = ColorFromPalette( myPal, index);</pre>
+	</div>
+
+<h2>Further Reading</h2>
+<p>All color palettes from cpt-city are "gradient palettes", which are discussed here: <a href="https://github.com/FastLED/FastLED/wiki/Gradient-color-palettes">Gradient color palettes</a>.</p>
+	
+<p>If you want to cross-fade between one palette and another, check out this post, video, and sample code on G+: <a href="https://plus.googleapis.com/112916219338292742137/posts/FvLgYPF52Ma" target=_new>Color Palette Crossfades</a></p>
+	
+	<footer>
+			<!-- &copy; Company or Name |   Not required, but appreciated. <a href="http://minimalcss.com">Minimal</a> -->
+	</footer><!-- footer -->
+</div>
 </body>
 </html>
