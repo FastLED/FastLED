@@ -400,7 +400,7 @@ struct CRGB {
         return retval;
     }
 
-#ifdef SmartMatrix_h
+#if (defined SmartMatrix_h || defined SmartMatrix3_h)
     operator rgb24() const {
       rgb24 ret;
       ret.red = r;
