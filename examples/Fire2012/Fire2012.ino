@@ -1,9 +1,8 @@
-#define FASTLED_ALLOW_INTERRUPTS 1 
 #include <FastLED.h>
 
 #define LED_PIN     5
 #define COLOR_ORDER GRB
-#define CHIPSET     WS2811_400
+#define CHIPSET     WS2811
 #define NUM_LEDS    30
 
 #define BRIGHTNESS  200
