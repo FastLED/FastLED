@@ -519,7 +519,7 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
 
     if( total == 0) {
         // we pick hue zero for no special reason
-        return CHSV( 0, 0, 0);
+        return CHSV( 0, 0, desat);
     }
 
     // since this wasn't a pure shade of gray,

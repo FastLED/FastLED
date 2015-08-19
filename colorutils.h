@@ -99,10 +99,10 @@ void fill_gradient( T* targetArray,
     if( endpos < startpos ) {
         uint16_t t = endpos;
         CHSV tc = endcolor;
-        startpos = t;
-        startcolor = tc;
         endcolor = startcolor;
         endpos = startpos;
+        startpos = t;
+        startcolor = tc;
     }
 
     // If we're fading toward black (val=0) or white (sat=0),
