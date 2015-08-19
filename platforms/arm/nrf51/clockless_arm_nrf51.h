@@ -47,6 +47,7 @@ public:
 
     // attempt to re-show a frame if we exit early because of interrupts.
     if(!showRGBInternal(pixels)) {
+      sei(); delayMicroseconds(WAIT_TIME); cli();
       showRGBInternal(pixels);
     }
 
@@ -60,6 +61,7 @@ public:
     cli();
 
     if(!showRGBInternal(pixels)) {
+      sei(); delayMicroseconds(WAIT_TIME); cli();
       showRGBInternal(pixels);
     }
 

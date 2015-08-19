@@ -1,8 +1,9 @@
+#define FASTLED_ALLOW_INTERRUPTS 1 
 #include <FastLED.h>
 
 #define LED_PIN     5
 #define COLOR_ORDER GRB
-#define CHIPSET     WS2811
+#define CHIPSET     WS2811_400
 #define NUM_LEDS    30
 
 #define BRIGHTNESS  200
@@ -21,7 +22,7 @@ void setup() {
 void loop()
 {
   // Add entropy to random number generator; we use a lot of it.
-  random16_add_entropy( random());
+  // random16_add_entropy( random());
 
   Fire2012(); // run simulation frame
   
