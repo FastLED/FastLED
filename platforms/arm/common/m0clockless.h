@@ -270,9 +270,7 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       LOADLEDS3(0) LOADDITHER7(0) DITHER5 SCALE4(0) ADJDITHER7(0) SWAPBBN1
       M0_ASM_ARGS);
 
-    SEI_CHK
     do {
-      CLI_CHK;
       asm __volatile__ (
       // Write out byte 0, prepping byte 1
       HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
@@ -306,8 +304,8 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
 
       M0_ASM_ARGS
       );
-      SEI_CHK; INNER_SEI;
-    } while(--counter);
+      SEI_CHK; INNER_SEI; --counter; CLI_CHK;
+    } while(counter);
 #endif
     return num_leds;
 }
