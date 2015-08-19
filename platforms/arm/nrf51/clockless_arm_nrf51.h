@@ -18,7 +18,7 @@
 
 
 #include "platforms/arm/common/m0clockless.h"
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 100>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 75>
 class ClocklessController : public CLEDController {
   typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
   typedef typename FastPinBB<DATA_PIN>::port_t data_t;
