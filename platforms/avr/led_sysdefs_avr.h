@@ -33,6 +33,11 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #define FASTLED_USE_PROGMEM 1
 #endif
 
+#if defined(ARDUINO_AVR_DIGISPARK) || defined(ARDUINO_AVR_DIGISPARKPRO)
+#ifndef NO_CORRECTION
+#define NO_CORRECTION 1
+#endif
+#endif
 
 extern "C" {
 #  if defined(CORE_TEENSY) || defined(TEENSYDUINO)
