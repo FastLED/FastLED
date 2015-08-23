@@ -9,6 +9,30 @@
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class NRF51SPIOutput {
 
+  struct saveData {
+    uint32_t sck;
+    uint32_t mosi;
+    uint32_t miso;
+    uint32_t freq;
+    uint32_t enable;
+  } mSavedData;
+
+  void saveSPIData() {
+    mSavedData.sck = NRF_SPI0->PSELSCK;
+    mSavedData.mosi = NRF_SPI0->PSELMOSI;
+    mSavedData.miso = NRF_SPI0->PSELMISO;
+    mSavedData.freq = NRF_SPI0->FREQUENCY;
+    mSavedData.enable = NRF_SPI0->ENABLE;
+  }
+
+  void restoreSPIData() {
+    NRF_SPI0->PSELSCK = mSavedData.sck;
+    NRF_SPI0->PSELMOSI = mSavedData.mosi;
+    NRF_SPI0->PSELMISO = mSavedData.miso;
+    NRF_SPI0->FREQUENCY = mSavedData.freq;
+    mSavedData.enable = NRF_SPI0->ENABLE;
+  }
+
 public:
   NRF51SPIOutput() { FastPin<_DATA_PIN>::setOutput(); FastPin<_CLOCK_PIN>::setOutput(); }
   NRF51SPIOutput(Selectable *pSelect) {  FastPin<_DATA_PIN>::setOutput(); FastPin<_CLOCK_PIN>::setOutput();  }
@@ -18,6 +42,8 @@ public:
 
   // initialize the SPI subssytem
   void init() {
+    FastPin<_DATA_PIN>::setOutput();
+    FastPin<_CLOCK_PIN>::setOutput();
     NRF_SPI0->PSELSCK = _CLOCK_PIN;
     NRF_SPI0->PSELMOSI = _DATA_PIN;
     NRF_SPI0->PSELMISO = 0xFFFFFFFF;
@@ -27,10 +53,10 @@ public:
   }
 
   // latch the CS select
-  void select() { /* TODO */ }
+  void select() { saveSPIData(); init(); }
 
   // release the CS select
-  void release() { /* TODO */ }
+  void release() { restoreSPIData(); }
 
   static bool shouldWait(bool wait = false) __attribute__((always_inline)) __attribute__((always_inline)) {
     static bool sWait=false;
@@ -52,18 +78,66 @@ public:
   void writeWord(uint16_t w) __attribute__((always_inline)){ writeByte(w>>8); writeByte(w & 0xFF);  }
 
   // A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)
-  static void writeBytesValueRaw(uint8_t value, int len) { /* TODO */ }
+  static void writeBytesValueRaw(uint8_t value, int len) { while(len--) { writeByte(value);  } }
 
   // A full cycle of writing a value for len bytes, including select, release, and waiting
-  void writeBytesValue(uint8_t value, int len) { /* TODO */ }
+  void writeBytesValue(uint8_t value, int len) {
+    select();
+    while(len--) {
+      writeByte(value);
+    }
+    waitFully();
+    release();
+  }
 
   // A full cycle of writing a raw block of data out, including select, release, and waiting
-  void writeBytes(uint8_t *data, int len) { /* TODO */ }
+  template<class D> void writeBytes(uint8_t *data, int len) {
+    uint8_t *end = data + len;
+    select();
+    while(data != end) {
+      writeByte(D::adjust(*data++));
+    }
+    D::postBlock(len);
+    waitFully();
+    release();
+  }
+
+  void writeBytes(uint8_t *data, int len) {
+    writeBytes<DATA_NOP>(data, len);
+  }
 
   // write a single bit out, which bit from the passed in byte is determined by template parameter
-  template <uint8_t BIT> inline static void writeBit(uint8_t b) { /* TODO */ }
+  template <uint8_t BIT> inline static void writeBit(uint8_t b) {
+    waitFully();
+    NRF_SPI0->ENABLE = 0;
+    if(b & 1<<BIT) {
+      FastPin<_DATA_PIN>::hi();
+    } else {
+      FastPin<_DATA_PIN>::lo();
+    }
+    FastPin<_CLOCK_PIN>::toggle();
+    FastPin<_CLOCK_PIN>::toggle();
+    NRF_SPI0->ENABLE = 1;
+  }
 
-  template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) { }
+  template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
+    select();
+    int len = pixels.mLen;
+    while(pixels.has(1)) {
+      if(FLAGS & FLAG_START_BIT) {
+				writeBit<0>(1);
+      }
+			writeByte(D::adjust(pixels.loadAndScale0()));
+			writeByte(D::adjust(pixels.loadAndScale1()));
+			writeByte(D::adjust(pixels.loadAndScale2()));
+
+			pixels.advanceData();
+			pixels.stepDithering();
+		}
+		D::postBlock(len);
+		waitFully();
+		release();
+  }
 
 };
 
