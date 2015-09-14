@@ -361,6 +361,15 @@ struct CRGB {
         return *this;
     }
 
+    inline CRGB scale8 (const CRGB & scaledown )
+    {
+        CRGB out;
+        out.r = scale8(r, scaledown.r);
+        out.g = scale8(g, scaledown.g);
+        out.b = scale8(b, scaledown.b);
+        return out;
+    }
+
     // fadeToBlackBy is a synonym for nscale8( ..., 255-fadefactor)
     inline CRGB& fadeToBlackBy (uint8_t fadefactor )
     {
