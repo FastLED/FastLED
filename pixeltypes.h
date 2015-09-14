@@ -350,6 +350,17 @@ struct CRGB {
         return *this;
     }
 
+    // scale down a RGB to N 256ths of it's current brightness, using
+    // 'plain math' dimming rules, which means that if the low light levels
+    // may dim all the way to 100% black.
+    inline CRGB& nscale8 (const CRGB & scaledown )
+    {
+        r = scale8(r, scaledown.r);
+        g = scale8(g, scaledown.g);
+        b = scale8(b, scaledown.b);
+        return *this;
+    }
+
     // fadeToBlackBy is a synonym for nscale8( ..., 255-fadefactor)
     inline CRGB& fadeToBlackBy (uint8_t fadefactor )
     {
