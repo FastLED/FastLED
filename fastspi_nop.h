@@ -30,7 +30,7 @@ public:
 	void waitFully();
 
 	/// not the most efficient mechanism in the world - but should be enough for sm16716 and friends
-	template <uint8_t BIT> inline static void writeBit(uint8_t b) { /* TODO */
+	template <uint8_t BIT> inline static void writeBit(uint8_t b) { /* TODO */ }
 
 	/// write a byte out via SPI (returns immediately on writing register)
 	void writeByte(uint8_t b) { /* TODO */ }
