@@ -1075,6 +1075,7 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 
 #define CEveryNMilliseconds CEveryNMillis
 #define EVERY_N_MILLISECONDS(N) EVERY_N_MILLIS(N)
+#define EVERY_N_MILLISECONDS_I(NAME,N) EVERY_N_MILLIS_I(NAME,N)
 
 FASTLED_NAMESPACE_END
 ///@}
