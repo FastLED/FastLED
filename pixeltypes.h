@@ -355,18 +355,18 @@ struct CRGB {
     // may dim all the way to 100% black.
     inline CRGB& nscale8 (const CRGB & scaledown )
     {
-        r = scale8(r, scaledown.r);
-        g = scale8(g, scaledown.g);
-        b = scale8(b, scaledown.b);
+        r = ::scale8(r, scaledown.r);
+        g = ::scale8(g, scaledown.g);
+        b = ::scale8(b, scaledown.b);
         return *this;
     }
 
     inline CRGB scale8 (const CRGB & scaledown )
     {
         CRGB out;
-        out.r = scale8(r, scaledown.r);
-        out.g = scale8(g, scaledown.g);
-        out.b = scale8(b, scaledown.b);
+        out.r = ::scale8(r, scaledown.r);
+        out.g = ::scale8(g, scaledown.g);
+        out.b = ::scale8(b, scaledown.b);
         return out;
     }
 
