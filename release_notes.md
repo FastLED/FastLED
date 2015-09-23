@@ -1,7 +1,22 @@
-3.0.1
+FastLED3.1.0
+============
+* Added support for the following platforms
+  * Arduino Zero
+  * Teensy LC
+  * RFDuino/nrf51822
+  * Spark Core
+* Major internal code reoganization
+* Started doxygen based documentation 
+* Lots of bug/performance fixes
+* Parallel output on various arm platforms
+* lots of new stuff
+
+FastLED3.0.2
+============
 * possibly fix issues #67 and #90 by fixing gcc 4.8.x support
 
-3.0.1
+FastLED3.0.1
+============
 * fix issue #89 w/power management pin always being on
 
 FastLED3.0
