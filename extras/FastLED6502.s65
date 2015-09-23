@@ -1,0 +1,633 @@
+/////////////////////////////////
+//
+//    FastLED6502
+//    by Mark Kriegsman
+//
+// Device driver and animation 
+// library for connecting addressable 
+// LED strips to an Apple II.
+// The full "FastLED" library is
+// available for Arduino and related
+// microcontrollers.
+//
+/////////////////////////////////
+//
+// HOST COMPATIBILITY:
+// Apples with 16-pin DIP "game ports"
+// are fully supported; Apples with only
+// 9-pin "game ports" are NOT supported.
+//
+//   Apple ][ fully supported
+//	 Apple ][+ fully supported
+//	 Apple //e fully supported
+//
+//	 Apple //c and //c+ NOT supported
+//    as they lack the required 16-pin
+//    DIP game port for digital I/O.
+//   
+//	 Apple //gs: 
+//    motherboard game port IS supported
+//    back panel connector NOT supported
+//    See Notes section below.
+//
+// C64, PET, VIC-20, Atari400/800, 
+// NES, SYM, KIM-1, and other 6502
+// systems are NOT supported at this
+// time, but porting should be
+// relatively easy for someone familiar
+// with each target platform.
+//
+//
+// LED STRIP COMPATIBILITY:
+// In general, "four-wire" (clocked) 
+// LED strips can be supported, but
+// "three-wire" (clockless) LED strips
+// cannot be supported.
+//
+//   APA102 tested & working
+//	 Adafruit DotStar tested & working
+//	 LPD8806 should work (untested)
+//	 WS2801 should work (untested)
+//
+// WS2811/WS2812/NeoPixel can NOT work
+// due to timing incompatibilities,
+// namely that the 1MHz Apple is far
+// too slow to drive them correctly.
+//
+//
+// USAGE - HARDWARE:
+// Connect an external power source to
+// +5 and GND on the LED strip.
+// Connect GND on the LED strip to GND
+// on the game port connector (pin 8)
+// Connect DATA IN on the LED strip to
+// pin 12, 13, or 14 on the game port.
+// Connect CLOCK IN on the LED strip to
+// pin 5 (preferred), 12, 13, or 14 on
+// the game port. Note: Apple //gs users
+// cannot use pin 5.
+//
+//
+// USAGE - SOFTWARE:
+// At build time provide definitions for
+//   CHIPSET, DATA_PIN, CLOCK_PIN,
+//   NUM_LEDS, & BRIGHTNESS.
+// Inside "Setup":
+//	 Store LED count into
+//     FastLED_NumPixels,
+//	 Store brightness into
+//     FastLED_Brightness
+// Inside "Loop":
+//	 Update the leds array, found in
+//     ledsR, ledsG, and ledsB
+//	 Call FastLED_Show
+//   Jump back to top of "Loop"
+//
+//
+// REFERENCE:
+// FastLED_Show:
+//   display led array on LED strip
+// FastLED_FillBlack: 
+//   fill led array to black
+// FastLED_FillSolid_RGB_AXY: 
+//   fill led array with RGB color
+// FastLED_FillSolid_Hue_X: 
+//   fill led array with solid HSV Hue
+// FastLED_Random8: 
+//   return a pseudorandom number in A
+// FastLED_FillRainbow_XY:
+//   fill led array with HSV rainbow
+//   starting at hue X, incrementing by
+//   huedelta Y each pixel.
+// FastLED_SetHue_XY:
+//   set pixel Y to HSV hue X
+// FastLED_Beat8:
+//   takes a speed increment in A, and
+//   returns a triangle wave in A.
+//
+//
+// NOTES:
+// For speed and size, there IS some
+//   self-modifying code in this
+//   library, so it cannot be burned
+//   into ROM without modification.
+// Brightness control only works on
+//   APA102 at this point.
+// Pin 15 is currently used as a
+//   'frame start' signal for protocol
+//   diagnostics - makes frames more 
+//   visible with an oscilloscope.
+// If Pin 5 is specified for the CLOCK
+//   output pin, FastLED6502 will
+//   automatically use the high speed
+//   C040STROBE signal for clock.  Note
+//   that the Apple //gs lacks this
+//   signal, even on the motherboard
+//   game port.
+// The Apple joystick/mouse port on the
+//   rear of the //c, //c+, and //gs
+//   can NOT be used for LED connections
+//   because it lacks the necessary
+//   digital output pins.
+// This library can drive 100 LED pixels
+//   at more than 30 frames per second.
+//
+//
+// VERSION HISTORY
+// 	2015-02-07 - first version, by MEK
+//	  assembled with xa65
+//      www.floodgap.com/retrotech/xa/
+
+
+/////////////////////////////////
+//
+// ENTRY POINT
+//
+
+FastLED_Entry
+		jsr FastLED_FillBlack
+		jmp Setup
+
+
+/////////////////////////////////
+//
+// FASTLED6502 GLOBALS
+//
+
+FastLED_NumPixels   	.byt NUM_LEDS
+FastLED_Brightness 		.byt BRIGHTNESS
+
+FastLED_RandomState		.byt 17
+FastLED_BeatState		.byt 0
+
+
+/////////////////////////////////
+//
+// API FUNCTIONS
+//
+
+FastLED_FillBlack
+		lda FastLED_NumPixels
+		pha
+		lda #255
+		sta FastLED_NumPixels
+		lda #0
+		tax
+		tay
+		jsr FastLED_FillSolid_RGB_AXY
+		jsr FastLED_Show
+		pla
+		sta FastLED_NumPixels
+		rts
+
+
+FastLED_FillRainbow_XY
+		sty rbHueDelta
+		ldy #0
+FR1
+		lda FastLED_RainbowR,x
+		sta ledsR,y
+		lda FastLED_RainbowG,x
+		sta ledsG,y
+		lda FastLED_RainbowB,x
+		sta ledsB,y
+	
+		txa
+		clc
+		adc rbHueDelta
+		tax
+	
+		iny
+		cpy FastLED_NumPixels
+		bne FR1
+		rts
+	
+rbHueDelta	.byt 0
+
+
+FastLED_SetHue_XY
+		lda FastLED_RainbowR,x
+		sta ledsR,y
+		lda FastLED_RainbowG,x
+		sta ledsG,y
+		lda FastLED_RainbowB,x
+		sta ledsB,y
+		rts		
+	
+	
+FastLED_FillSolid_RGB_AXY
+		sta ledsR
+		stx ledsG
+		sty ledsB
+		ldy #0
+FillSolidRGBAXY1
+		lda ledsR
+		sta ledsR,y
+		lda ledsG
+		sta ledsG,y
+		lda ledsB
+		sta ledsB,y
+		iny
+		cpy FastLED_NumPixels
+		bne FillSolidRGBAXY1
+		rts
+
+FastLED_FillSolid_Hue_X
+		ldy #0
+FillSolidHX1
+		lda FastLED_RainbowR,x
+		sta ledsR,y
+		lda FastLED_RainbowG,x
+		sta ledsG,y
+		lda FastLED_RainbowB,x
+		sta ledsB,y
+		iny
+		cpy FastLED_NumPixels
+		bne FillSolidHX1
+		rts
+
+
+; NOTE: USES SELF-MODIFYING CODE
+FastLED_Random8
+		inc Random8GetLo
+		bne Random8Get
+		inc Random8GetHi
+		bne Random8Get
+		lda #$F8
+		sta Random8GetHi
+		lda #03
+		sta Random8GetLo
+Random8Get 
+Random8GetLo = Random8Get + 1
+Random8GetHi = Random8Get + 2
+		lda $F803
+		adc FastLED_RandomState
+		sta FastLED_RandomState
+		rts
+
+
+FastLED_Beat8
+		clc
+		adc FastLED_BeatState
+		sta FastLED_BeatState
+		bit FastLED_BeatState
+		bmi FastLED_Beat8Neg
+		asl
+		rts		
+FastLED_Beat8Neg
+		lda #$ff
+		sec
+		sbc FastLED_BeatState
+		sbc FastLED_BeatState
+		rts
+
+
+FastLED_Show
+		jmp CHIPSET
+
+		
+/////////////////////////////////
+//
+// HARDWARE INTERFACING
+//
+
+PINOFF_BASE	=	PIN15OFF
+PINON_BASE	=	PIN15ON
+
+#define PINON(P) PINON_BASE+((15-P)*2)
+#define PINOFF(P) PINOFF_BASE+((15-P)*2)
+
+DATAOFF = PINOFF(DATA_PIN)
+DATAON  = PINON(DATA_PIN)
+CLKOFF  = PINOFF(CLOCK_PIN)
+CLKON   = PINON(CLOCK_PIN)
+
+// Special handling if CLOCK_PIN
+// is 5: the C040STROBE line.
+#if CLOCK_PIN = 5
+#define CLOCK_ON 	bit PIN5STROBE
+#define CLOCK_OFF
+#else
+#define CLOCK_ON 	bit CLKON
+#define CLOCK_OFF	bit CLKOFF
+#endif
+
+FRAMEON		= PINON(15)
+FRAMEOFF	= PINOFF(15)
+
+/////////////////////////////////
+APA102
+		bit FRAMEON
+		jsr FastLED_Send00
+		jsr FastLED_Send00
+		jsr FastLED_Send00
+		jsr FastLED_Send00
+
+		lda FastLED_Brightness
+		lsr
+		lsr
+		lsr
+		ora #$E0
+		tax
+	
+		ldy FastLED_NumPixels
+APA102PX	
+		txa
+		jsr FastLED_SendA
+		lda ledsB,y
+		jsr FastLED_SendA
+		lda ledsG,y
+		jsr FastLED_SendA
+		lda ledsR,y
+		jsr FastLED_SendA
+		dey
+		bne APA102PX
+
+		lda FastLED_NumPixels
+		lsr
+		lsr
+		lsr
+		lsr
+		lsr
+		lsr
+		tay
+		iny
+APA102CL
+		jsr FastLED_SendFF
+		jsr FastLED_Send00
+		jsr FastLED_Send00
+		jsr FastLED_Send00
+		dey
+		bne APA102CL
+		bit FRAMEOFF
+		rts
+
+/////////////////////////////////
+LPD8806
+		bit FRAMEON
+		ldy FastLED_NumPixels
+LPD8806PX	
+		lda ledsG,y
+		lsr
+		ora #$80
+		jsr FastLED_SendA
+		lda ledsR,y
+		lsr
+		ora #$80
+		jsr FastLED_SendA
+		lda ledsB,y
+		lsr
+		ora #$80
+		jsr FastLED_SendA
+		dey
+		bne LPD8806PX
+
+		bit FRAMEOFF
+		rts
+
+
+/////////////////////////////////
+WS2801
+		bit FRAMEON
+		ldy FastLED_NumPixels
+WS2801PX	
+		lda ledsG,y
+		jsr FastLED_SendA
+		lda ledsR,y
+		jsr FastLED_SendA
+		lda ledsB,y
+		jsr FastLED_SendA
+		dey
+		bne WS2801PX
+
+		bit FRAMEOFF
+		rts
+
+
+/////////////////////////////////
+FastLED_SendFF
+		bit DATAON
+		jmp FastLED_SendXX
+		;
+FastLED_Send00
+		bit DATAOFF	
+		;
+FastLED_SendXX
+		CLOCK_ON
+		CLOCK_OFF
+		CLOCK_ON
+		CLOCK_OFF
+	
+		CLOCK_ON
+		CLOCK_OFF
+		CLOCK_ON
+		CLOCK_OFF
+	
+		CLOCK_ON
+		CLOCK_OFF
+		CLOCK_ON
+		CLOCK_OFF
+	
+		CLOCK_ON
+		CLOCK_OFF
+		CLOCK_ON
+		CLOCK_OFF
+	
+		rts
+
+FastLED_SendA	
+		cmp #0
+		beq FastLED_Send00
+		cmp #$FF
+		beq FastLED_SendFF
+
+		asl
+		bcc S0x0
+S0x1	bit DATAON
+		bcs S0xK
+S0x0    bit DATAOFF
+S0xK	CLOCK_ON
+		CLOCK_OFF
+
+		asl
+		bcc S1x0
+S1x1	bit DATAON
+		bcs S1xK
+S1x0    bit DATAOFF
+S1xK	CLOCK_ON
+		CLOCK_OFF
+
+		asl
+		bcc S2x0
+S2x1	bit DATAON
+		bcs S2xK
+S2x0    bit DATAOFF
+S2xK	CLOCK_ON
+		CLOCK_OFF
+
+		asl
+		bcc S3x0
+S3x1	bit DATAON
+		bcs S3xK
+S3x0    bit DATAOFF
+S3xK	CLOCK_ON
+		CLOCK_OFF
+
+		asl
+		bcc S4x0
+S4x1	bit DATAON
+		bcs S4xK
+S4x0    bit DATAOFF
+S4xK	CLOCK_ON
+		CLOCK_OFF
+
+		asl
+		bcc S5x0
+S5x1	bit DATAON
+		bcs S5xK
+S5x0    bit DATAOFF
+S5xK	CLOCK_ON
+		CLOCK_OFF
+
+		asl
+		bcc S6x0
+S6x1	bit DATAON
+		bcs S6xK
+S6x0    bit DATAOFF
+S6xK	CLOCK_ON
+		CLOCK_OFF
+
+		asl
+		bcc S7x0
+S7x1	bit DATAON
+		bcs S7xK
+S7x0    bit DATAOFF
+S7xK	CLOCK_ON
+		CLOCK_OFF
+
+		rts
+
+
+/////////////////////////////////
+//
+// Force page allignment for speed
+// for leds array and Rainbow table
+//
+		.dsb 256-(* & $FF),0
+
+
+/////////////////////////////////
+//
+// LED ARRAY
+//
+
+ledsR	.dsb 256,0 
+ledsG	.dsb 256,0
+ledsB	.dsb 256,0
+		
+/////////////////////////////////
+//
+// HSV RAINBOW DEFINITION
+//
+// Generated directly from FastLED.
+//
+
+FastLED_RainbowR
+	.byt $FF,$FD,$FA,$F8,$F5,$F2,$F0,$ED
+	.byt $EA,$E8,$E5,$E2,$E0,$DD,$DA,$D8
+	.byt $D5,$D2,$D0,$CD,$CA,$C8,$C5,$C2
+	.byt $C0,$BD,$BA,$B8,$B5,$B2,$B0,$AD
+	.byt $AB,$AB,$AB,$AB,$AB,$AB,$AB,$AB
+	.byt $AB,$AB,$AB,$AB,$AB,$AB,$AB,$AB
+	.byt $AB,$AB,$AB,$AB,$AB,$AB,$AB,$AB
+	.byt $AB,$AB,$AB,$AB,$AB,$AB,$AB,$AB
+	.byt $AB,$A6,$A1,$9C,$96,$91,$8C,$86
+	.byt $81,$7C,$76,$71,$6C,$66,$61,$5C
+	.byt $56,$51,$4C,$47,$41,$3C,$37,$31
+	.byt $2C,$27,$21,$1C,$17,$11,$0C,$07
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$02,$05,$07,$0A,$0D,$0F,$12
+	.byt $15,$17,$1A,$1D,$1F,$22,$25,$27
+	.byt $2A,$2D,$2F,$32,$35,$37,$3A,$3D
+	.byt $3F,$42,$45,$47,$4A,$4D,$4F,$52
+	.byt $55,$57,$5A,$5C,$5F,$62,$64,$67
+	.byt $6A,$6C,$6F,$72,$74,$77,$7A,$7C
+	.byt $7F,$82,$84,$87,$8A,$8C,$8F,$92
+	.byt $94,$97,$9A,$9C,$9F,$A2,$A4,$A7
+	.byt $AB,$AD,$B0,$B2,$B5,$B8,$BA,$BD
+	.byt $C0,$C2,$C5,$C8,$CA,$CD,$D0,$D2
+	.byt $D5,$D8,$DA,$DD,$E0,$E2,$E5,$E8
+	.byt $EA,$ED,$F0,$F2,$F5,$F8,$FA,$FD
+FastLED_RainbowG
+	.byt $00,$02,$05,$07,$0A,$0D,$0F,$12
+	.byt $15,$17,$1A,$1D,$1F,$22,$25,$27
+	.byt $2A,$2D,$2F,$32,$35,$37,$3A,$3D
+	.byt $3F,$42,$45,$47,$4A,$4D,$4F,$52
+	.byt $55,$57,$5A,$5C,$5F,$62,$64,$67
+	.byt $6A,$6C,$6F,$72,$74,$77,$7A,$7C
+	.byt $7F,$82,$84,$87,$8A,$8C,$8F,$92
+	.byt $94,$97,$9A,$9C,$9F,$A2,$A4,$A7
+	.byt $AB,$AD,$B0,$B2,$B5,$B8,$BA,$BD
+	.byt $C0,$C2,$C5,$C8,$CA,$CD,$D0,$D2
+	.byt $D5,$D8,$DA,$DD,$E0,$E2,$E5,$E8
+	.byt $EA,$ED,$F0,$F2,$F5,$F8,$FA,$FD
+	.byt $FF,$FD,$FA,$F8,$F5,$F2,$F0,$ED
+	.byt $EA,$E8,$E5,$E2,$E0,$DD,$DA,$D8
+	.byt $D5,$D2,$D0,$CD,$CA,$C8,$C5,$C2
+	.byt $C0,$BD,$BA,$B8,$B5,$B2,$B0,$AD
+	.byt $AB,$A6,$A1,$9C,$96,$91,$8C,$86
+	.byt $81,$7C,$76,$71,$6C,$66,$61,$5C
+	.byt $56,$51,$4C,$47,$41,$3C,$37,$31
+	.byt $2C,$27,$21,$1C,$17,$11,$0C,$07
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+FastLED_RainbowB
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$00,$00,$00,$00,$00,$00,$00
+	.byt $00,$02,$05,$07,$0A,$0D,$0F,$12
+	.byt $15,$17,$1A,$1D,$1F,$22,$25,$27
+	.byt $2A,$2D,$2F,$32,$35,$37,$3A,$3D
+	.byt $3F,$42,$45,$47,$4A,$4D,$4F,$52
+	.byt $55,$5A,$5F,$64,$6A,$6F,$74,$7A
+	.byt $7F,$84,$8A,$8F,$94,$9A,$9F,$A4
+	.byt $AA,$AF,$B4,$B9,$BF,$C4,$C9,$CF
+	.byt $D4,$D9,$DF,$E4,$E9,$EF,$F4,$F9
+	.byt $FF,$FD,$FA,$F8,$F5,$F2,$F0,$ED
+	.byt $EA,$E8,$E5,$E2,$E0,$DD,$DA,$D8
+	.byt $D5,$D2,$D0,$CD,$CA,$C8,$C5,$C2
+	.byt $C0,$BD,$BA,$B8,$B5,$B2,$B0,$AD
+	.byt $AB,$A9,$A6,$A4,$A1,$9E,$9C,$99
+	.byt $96,$94,$91,$8E,$8C,$89,$86,$84
+	.byt $81,$7E,$7C,$79,$76,$74,$71,$6E
+	.byt $6C,$69,$66,$64,$61,$5E,$5C,$59
+	.byt $55,$53,$50,$4E,$4B,$48,$46,$43
+	.byt $40,$3E,$3B,$38,$36,$33,$30,$2E
+	.byt $2B,$28,$26,$23,$20,$1E,$1B,$18
+	.byt $16,$13,$10,$0E,$0B,$08,$06,$03

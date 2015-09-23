@@ -1,58 +1,41 @@
 #ifndef __INC_LED_SYSDEFS_H
 #define __INC_LED_SYSDEFS_H
 
-#if defined(__MK20DX128__) || defined(__MK20DX256__)
-#define FASTLED_TEENSY3
-#define FASTLED_ARM
-#if (F_CPU == 96000000)
-#define CLK_DBL 1
-#endif
+#include "fastled_config.h"
+
+#if defined(NRF51) || defined(__RFduino__)
+#include "platforms/arm/nrf51/led_sysdefs_arm_nrf51.h"
+#elif defined(__MK20DX128__) || defined(__MK20DX256__)
+// Include k20/T3 headers
+#include "platforms/arm/k20/led_sysdefs_arm_k20.h"
+#elif defined(__MKL26Z64__)
+// Include kl26/T-LC headers
+#include "platforms/arm/kl26/led_sysdefs_arm_kl26.h"
 #elif defined(__SAM3X8E__)
-#define FASTLED_ARM
+// Include sam/due headers
+#include "platforms/arm/sam/led_sysdefs_arm_sam.h"
+#elif defined(STM32F10X_MD)
+#include "platforms/arm/stm32/led_sysdefs_arm_stm32.h"
+#elif defined(__SAMD21G18A__)
+#include "platforms/arm/d21/led_sysdefs_arm_d21.h"
+#elif defined(__XTENSA__)
+#error "XTENSA-architecture microcontrollers are not supported."
 #else
-#define FASTLED_AVR
+// AVR platforms
+#include "platforms/avr/led_sysdefs_avr.h"
 #endif
 
-#ifndef CLK_DBL
-#define CLK_DBL 0
+#ifndef FASTLED_NAMESPACE_BEGIN
+#define FASTLED_NAMESPACE_BEGIN
+#define FASTLED_NAMESPACE_END
+#define FASTLED_USING_NAMESPACE
 #endif
 
-#if defined(FASTLED_AVR) || defined(FASTLED_TEENSY3)
-#include <avr/io.h>
-#include <avr/interrupt.h> // for cli/se definitions
-
-// Define the rgister types
-#if defined(ARDUINO) // && ARDUINO < 150
-typedef volatile       uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
-typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
-#endif
-
-#else
-// reuseing/abusing cli/sei defs for due
-#define cli()  __disable_irq(); __disable_fault_irq();
-#define sei() __enable_irq(); __enable_fault_irq();
-
-#endif
-
-#if 0
-#if defined(ARDUINO) && defined(FASTLED_AVR) && ARDUINO >= 157
-#error Arduion versions 1.5.7 and later not yet supported by FastLED for AVR
-#endif
-
-#if defined(ARDUINO) && defined (FASTLED_AVR) && (__GNUC__ == 4) && (__GNUC_MINOR__ > 7)
-#error gcc versions 4.8 and above are not yet supported by FastLED for AVR
-#endif
-#endif
-
-// Arduino.h needed for convinience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
+// Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
+#ifdef ARDUINO
 #include<Arduino.h>
-
-// Scaling macro choice
-#if defined(LIB8_ATTINY)
-#  define INLINE_SCALE(B, SCALE) delaycycles<3>()
-#  warning "No hardware multiply, inline brightness scaling disabled"
-#else
-#   define INLINE_SCALE(B, SCALE) B = scale8_video(B, SCALE)
 #endif
+
+#define CLKS_PER_US (F_CPU/1000000)
 
 #endif

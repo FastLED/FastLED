@@ -1,14 +1,16 @@
 #ifndef __INC_FASTSPI_LED2_H
 #define __INC_FASTSPI_LED2_H
 
-// #define NO_CORRECTION 1
-// #define NO_DITHERING 1
+///@file FastLED.h
+/// central include file for FastLED, defines the CFastLED class/object
 
 #define xstr(s) str(s)
 #define str(s) #s
 
-#define  FASTLED_VERSION 3000002
-#warning FastLED version 3.000.002  (Not really a warning, just telling you here.)
+#define  FASTLED_VERSION 3001000
+#ifndef FASTLED_INTERNAL
+#warning FastLED version 3.001.000  (Not really a warning, just telling you here.)
+#endif
 
 #ifndef __PROG_TYPES_COMPAT__
 #define __PROG_TYPES_COMPAT__
@@ -26,20 +28,34 @@
 #include<DMXSerial.h>
 #endif
 
+#include <stdint.h>
+
+#include "fastled_config.h"
+#include "led_sysdefs.h"
+
+#include "bitswap.h"
 #include "controller.h"
 #include "fastpin.h"
-#include "fastspi.h"
-#include "clockless.h"
+#include "fastspi_types.h"
+#include "./dmx.h"
+
+#include "platforms.h"
+#include "fastled_progmem.h"
+
 #include "lib8tion.h"
 #include "hsv2rgb.h"
 #include "colorutils.h"
 #include "colorpalettes.h"
-#include "chipsets.h"
-#include "./dmx.h"
-#include "smartmatrix_t3.h"
+
 #include "noise.h"
 #include "power_mgt.h"
 
+#include "fastspi.h"
+#include "chipsets.h"
+
+FASTLED_NAMESPACE_BEGIN
+
+/// definitions for the spi chipset constants
 enum ESPIChipsets {
 	LPD8806,
 	WS2801,
@@ -51,16 +67,19 @@ enum ESPIChipsets {
 };
 
 enum ESM { SMART_MATRIX };
+enum OWS2811 { OCTOWS2811,OCTOWS2811_400 };
 
-template<uint8_t DATA_PIN> class NEOPIXEL : public WS2811Controller800Khz<DATA_PIN, GRB> {};
+#ifdef FASTLED_HAS_CLOCKLESS
+template<uint8_t DATA_PIN> class NEOPIXEL : public WS2812Controller800Khz<DATA_PIN, GRB> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1829 : public TM1829Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1809 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1804 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1803 : public TM1803Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903 : public UCS1903Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903B : public UCS1903BController800Khz<DATA_PIN, RGB_ORDER> {};
-template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
-template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1904 : public UCS1904Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA104 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811_400 : public WS2811Controller400Khz<DATA_PIN, RGB_ORDER> {};
@@ -73,14 +92,29 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class DMXSIMPLE : public DMXSimpleC
 #ifdef DmxSerial_h
 template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDER> {};
 #endif
-
-// template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(20)> class LPD8806 : public LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
-// template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(1)> class WS2801 : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
-// template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(15)> class P9813 : public P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
-// template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(16)> class SM16716 : public SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
+#endif
 
 enum EBlockChipsets {
-	WS2811_PORTC
+#ifdef PORTA_FIRST_PIN
+	WS2811_PORTA,
+	WS2811_400_PORTA,
+#endif
+#ifdef PORTB_FIRST_PIN
+	WS2811_PORTB,
+	WS2811_400_PORTB,
+#endif
+#ifdef PORTC_FIRST_PIN
+	WS2811_PORTC,
+	WS2811_400_PORTC,
+#endif
+#ifdef PORTD_FIRST_PIN
+	WS2811_PORTD,
+	WS2811_400_PORTD,
+#endif
+#ifdef HAS_PORTDC
+	WS2811_PORTDC,
+	WS2811_400_PORTDC,
+#endif
 };
 
 #if defined(LIB8_ATTINY)
@@ -89,14 +123,63 @@ enum EBlockChipsets {
 #define NUM_CONTROLLERS 8
 #endif
 
+/// High level controller interface for FastLED.  This class manages controllers, global settings and trackings
+/// such as brightness, and refresh rates, and provides access functions for driving led data to controllers
+/// via the show/showColor/clear methods.
+/// @nosubgrouping
 class CFastLED {
 	// int m_nControllers;
-	uint8_t  m_Scale;
-	uint16_t m_nFPS;
+	uint8_t  m_Scale; 				///< The current global brightness scale setting
+	uint16_t m_nFPS;					///< Tracking for current FPS value
+	uint32_t m_nMinMicros;		///< minimum µs between frames, used for capping frame rates.
 public:
 	CFastLED();
 
+
+	/// Add a CLEDController instance to the world.  Exposed to the public to allow people to implement their own
+	/// CLEDController objects or instances.  There are two ways to call this method (as well as the other addLeds)
+	/// variations.  The first is with 3 arguments, in which case the arguments are the controller, a pointer to
+	/// led data, and the number of leds used by this controller.  The seocond is with 4 arguments, in which case
+	/// the first two arguments are the same, the third argument is an offset into the CRGB data where this controller's
+	/// CRGB data begins, and the fourth argument is the number of leds for this controller object.
+	/// @param pLed - the led controller being added
+	/// @param data - base point to an array of CRGB data structures
+	/// @param nLedsOrOffset - number of leds (3 argument version) or offset into the data array
+	/// @param nLedsIfOffset - number of leds (4 argument version)
+	/// @returns a reference to the added controller
 	static CLEDController &addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
+
+	/// @name Adding SPI based controllers
+  //@{
+	/// Add an SPI based  CLEDController instance to the world.
+	/// There are two ways to call this method (as well as the other addLeds)
+	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
+	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
+	/// CRGB data begins, and the third argument is the number of leds for this controller object.
+	///
+	/// This method also takes a 1 to 5 template parameters for identifying the specific chipset, data and clock pins,
+	/// RGB ordering, and SPI data rate
+	/// @param data - base point to an array of CRGB data structures
+	/// @param nLedsOrOffset - number of leds (3 argument version) or offset into the data array
+	/// @param nLedsIfOffset - number of leds (4 argument version)
+	/// @tparam CHIPSET - the chipset type
+	/// @tparam DATA_PIN - the optional data pin for the leds (if omitted, will default to the first hardware SPI MOSI pin)
+	/// @tparam CLOCK_PIN - the optional clock pin for the leds (if omitted, will default to the first hardware SPI clock pin)
+	/// @tparam RGB_ORDER - the rgb ordering for the leds (e.g. what order red, green, and blue data is written out in)
+	/// @tparam SPI_DATA_RATE - the data rate to drive the SPI clock at, defined using DATA_RATE_MHZ or DATA_RATE_KHZ macros
+	/// @returns a reference to the added controller
+	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint8_t SPI_DATA_RATE > CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		switch(CHIPSET) {
+			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case WS2803: { static WS2803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case DOTSTAR:
+			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+		}
+	}
 
 	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN > static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
@@ -122,18 +205,6 @@ public:
 		}
 	}
 
-	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint8_t SPI_DATA_RATE > CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		switch(CHIPSET) {
-			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case WS2803: { static WS2803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case DOTSTAR:
-			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-		}
-	}
-
 #ifdef SPI_DATA
 	template<ESPIChipsets CHIPSET> static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB>(data, nLedsOrOffset, nLedsIfOffset);
@@ -148,13 +219,27 @@ public:
 	}
 
 #endif
+	//@}
 
-	template<template<uint8_t DATA_PIN> class CHIPSET, uint8_t DATA_PIN>
-	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		static CHIPSET<DATA_PIN> c;
-		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
-	}
-
+#ifdef FASTLED_HAS_CLOCKLESS
+	/// @name Adding 3-wire led controllers
+	//@{
+	/// Add a clockless (aka 3wire, also DMX) based CLEDController instance to the world.
+	/// There are two ways to call this method (as well as the other addLeds)
+	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
+	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
+	/// CRGB data begins, and the third argument is the number of leds for this controller object.
+	///
+	/// This method also takes a 2 to 3 template parameters for identifying the specific chipset, data pin, and rgb ordering
+	/// RGB ordering, and SPI data rate
+	/// @param data - base point to an array of CRGB data structures
+	/// @param nLedsOrOffset - number of leds (3 argument version) or offset into the data array
+	/// @param nLedsIfOffset - number of leds (4 argument version)
+	/// @tparam CHIPSET - the chipset type (required)
+	/// @tparam DATA_PIN - the optional data pin for the leds (required)
+	/// @tparam RGB_ORDER - the rgb ordering for the leds (e.g. what order red, green, and blue data is written out in)
+	/// @returns a reference to the added controller
 	template<template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN, RGB_ORDER> c;
@@ -167,17 +252,71 @@ public:
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+	template<template<uint8_t DATA_PIN> class CHIPSET, uint8_t DATA_PIN>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		static CHIPSET<DATA_PIN> c;
+		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+	}
+
+	#ifdef FASTSPI_USE_DMX_SIMPLE
+	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER=RGB>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
+	{
+		switch(CHIPSET) {
+			case DMX: { static DMXController<DATA_PIN> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+		}
+	}
+	#endif
+	//@}
+#endif
+
+	/// @name Adding 3rd party library controllers
+	//@{
+	/// Add a 3rd party library based CLEDController instance to the world.
+	/// There are two ways to call this method (as well as the other addLeds)
+	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
+	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
+	/// CRGB data begins, and the third argument is the number of leds for this controller object. This class includes the SmartMatrix
+	/// and OctoWS2811 based controllers
+	///
+	/// This method also takes a 1 to 2 template parameters for identifying the specific chipset and rgb ordering
+	/// RGB ordering, and SPI data rate
+	/// @param data - base point to an array of CRGB data structures
+	/// @param nLedsOrOffset - number of leds (3 argument version) or offset into the data array
+	/// @param nLedsIfOffset - number of leds (4 argument version)
+	/// @tparam CHIPSET - the chipset type (required)
+	/// @tparam RGB_ORDER - the rgb ordering for the leds (e.g. what order red, green, and blue data is written out in)
+	/// @returns a reference to the added controller
+	template<template<EOrder RGB_ORDER> class CHIPSET, EOrder RGB_ORDER>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		static CHIPSET<RGB_ORDER> c;
+		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+	}
+
 	template<template<EOrder RGB_ORDER> class CHIPSET>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<RGB> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	template<template<EOrder RGB_ORDER> class CHIPSET, EOrder RGB_ORDER>
-	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		static CHIPSET<RGB_ORDER> c;
-		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+#ifdef USE_OCTOWS2811
+	template<OWS2811 CHIPSET, EOrder RGB_ORDER>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
+	{
+		switch(CHIPSET) {
+			case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case OCTOWS2811_400: { static COctoWS2811Controller<RGB_ORDER,true> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+		}
 	}
+
+	template<OWS2811 CHIPSET>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
+	{
+		return addLeds<CHIPSET,GRB>(data,nLedsOrOffset,nLedsIfOffset);
+	}
+
+#endif
 
 #ifdef SmartMatrix_h
 	template<ESM CHIPSET>
@@ -188,63 +327,164 @@ public:
 		}
 	}
 #endif
+	//@}
 
-#ifdef HAS_BLOCKLESS
-	template<EBlockChipsets CHIPSET, int NUM_LANES>
+
+#ifdef FASTLED_HAS_BLOCKLESS
+
+	/// @name adding parallel output controllers
+  //@{
+	/// Add a block based CLEDController instance to the world.
+	/// There are two ways to call this method (as well as the other addLeds)
+	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
+	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
+	/// CRGB data begins, and the third argument is the number of leds for this controller object.
+	///
+	/// This method also takes a 2 to 3 template parameters for identifying the specific chipset and rgb ordering
+	/// RGB ordering, and SPI data rate
+	/// @param data - base point to an array of CRGB data structures
+	/// @param nLedsOrOffset - number of leds (3 argument version) or offset into the data array
+	/// @param nLedsIfOffset - number of leds (4 argument version)
+	/// @tparam CHIPSET - the chipset/port type (required)
+	/// @tparam NUM_LANES - how many parallel lanes of output to write
+	/// @tparam RGB_ORDER - the rgb ordering for the leds (e.g. what order red, green, and blue data is written out in)
+	/// @returns a reference to the added controller
+	template<EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
-			case WS2811_PORTC: return addLeds(new BlockClocklessController<NUM_LANES, NS(350), NS(350), NS(550)>(), data, nLedsOrOffset, nLedsIfOffset);
+		#ifdef PORTA_FIRST_PIN
+				case WS2811_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+		#endif
+		#ifdef PORTB_FIRST_PIN
+				case WS2811_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+		#endif
+		#ifdef PORTC_FIRST_PIN
+				case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+		#endif
+		#ifdef PORTD_FIRST_PIN
+				case WS2811_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+		#endif
+		#ifdef HAS_PORTDC
+				case WS2811_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<16,NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<16,NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+		#endif
 		}
 	}
+
+	template<EBlockChipsets CHIPSET, int NUM_LANES>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		return addLeds<CHIPSET,NUM_LANES,GRB>(data,nLedsOrOffset,nLedsIfOffset);
+	}
+	//@}
 #endif
 
+	/// Set the global brightness scaling
+	/// @param scale a 0-255 value for how much to scale all leds before writing them out
 	void setBrightness(uint8_t scale) { m_Scale = scale; }
+
+	/// Get the current global brightness setting
+	/// @returns the current global brightness value
 	uint8_t getBrightness() { return m_Scale; }
 
 	/// Update all our controllers with the current led colors, using the passed in brightness
+	/// @param scale temporarily override the scale
 	void show(uint8_t scale);
 
 	/// Update all our controllers with the current led colors
 	void show() { show(m_Scale); }
 
+	/// clear the leds, optionally wiping the local array of data as well
+	/// @param writeData whether or not to write into the local data array as well
 	void clear(boolean writeData = false);
 
+	/// clear out the local data array
 	void clearData();
 
+	/// Set all leds on all controllers to the given color/scale
+	/// @param color what color to set the leds to
+	/// @param scale what brightness scale to show at
 	void showColor(const struct CRGB & color, uint8_t scale);
 
+	/// Set all leds on all controllers to the given color
+	/// @param color what color to set the leds to
 	void showColor(const struct CRGB & color) { showColor(color, m_Scale); }
 
+	/// Delay for the given number of milliseconds.  Provided to allow the library to be used on platforms
+	/// that don't have a delay function (to allow code to be more portable)
+	/// @param ms the number of milliseconds to pause for
 	void delay(unsigned long ms);
 
+	/// Set a global color temperature.  Sets the color temperature for all added led strips, overriding whatever
+	/// previous color temperature those controllers may have had
+	/// @param temp A CRGB structure describing the color temperature
 	void setTemperature(const struct CRGB & temp);
+
+	/// Set a global color correction.  Sets the color correction for all added led strips,
+	/// overriding whatever previous color correction those controllers may have had.
+	/// @param correction A CRGB structure describin the color correction.
 	void setCorrection(const struct CRGB & correction);
+
+	/// Set the dithering mode.  Sets the dithering mode for all added led strips, overriding
+	/// whatever previous dithering option those controllers may have had.
+	/// @param ditherMode - what type of dithering to use, either BINARY_DITHER or DISABLE_DITHER
 	void setDither(uint8_t ditherMode = BINARY_DITHER);
 
-	// for debugging, will keep track of time between calls to countFPS, and every
-	// nFrames calls, it will update an internal counter for the current FPS.
+	/// Set the maximum refresh rate.  This is global for all leds.  Attempts to
+	/// call show faster than this rate will simply wait.  Note that the refresh rate
+	/// defaults to the slowest refresh rate of all the leds added through addLeds.  If
+	/// you wish to set/override this rate, be sure to call setMaxRefreshRate _after_
+	/// adding all of your leds.
+	/// @param refresh - maximum refresh rate in hz
+	/// @param constrain - constrain refresh rate to the slowest speed yet set
+	void setMaxRefreshRate(uint16_t refresh, bool constrain=false);
+
+	/// for debugging, will keep track of time between calls to countFPS, and every
+	/// nFrames calls, it will update an internal counter for the current FPS.
+	/// @todo make this a rolling counter
+	/// @param nFrames - how many frames to time for determining FPS
 	void countFPS(int nFrames=25);
-	// Get the number of frames/second being written out
+
+	/// Get the number of frames/second being written out
+	/// @returns the most recently computed FPS value
 	uint16_t getFPS() { return m_nFPS; }
 
-    // returns the number of controllers (strips) that have been added with addLeds
+	/// Get how many controllers have been registered
+  /// @returns the number of controllers (strips) that have been added with addLeds
 	int count();
 
-    // returns the Nth controller
+	/// Get a reference to a registered controller
+  /// @returns a reference to the Nth controller
 	CLEDController & operator[](int x);
 
-    // Convenience functions for single-strip setups:
-
-    // returns the number of LEDs in the first strip
+	/// Get the number of leds in the first controller
+  /// @returns the number of LEDs in the first controller
 	int size() { return (*this)[0].size(); }
 
-    // returns pointer to the CRGB buffer for the first strip
+	/// Get a pointer to led data for the first controller
+  /// @returns pointer to the CRGB buffer for the first controller
 	CRGB *leds() { return (*this)[0].leds(); }
 };
 
-extern CFastLED & FastSPI_LED;
-extern CFastLED & FastSPI_LED2;
-extern CFastLED & FastLED;
-extern CFastLED LEDS;
+#define FastSPI_LED FastLED
+#define FastSPI_LED2 FastLED
+#ifndef LEDS
+#define LEDS FastLED
+#endif
+
+extern CFastLED FastLED;
+
+// Warnings for undefined things
+#ifndef HAS_HARDWARE_PIN_SUPPORT
+#warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
+#define NO_HARDWARE_PIN_SUPPORT
+#endif
+
+
+FASTLED_NAMESPACE_END
 
 #endif

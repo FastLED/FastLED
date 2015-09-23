@@ -1,18 +1,20 @@
+#define FASTLED_INTERNAL
 #include "FastLED.h"
+
 
 #if defined(__SAM3X8E__)
 volatile uint32_t fuckit;
 #endif
 
+FASTLED_NAMESPACE_BEGIN
+
 void *pSmartMatrix = NULL;
 
-CFastLED LEDS;
-CFastLED & FastSPI_LED = LEDS;
-CFastLED & FastSPI_LED2 = LEDS;
-CFastLED & FastLED = LEDS;
+CFastLED FastLED;
 
 CLEDController *CLEDController::m_pHead = NULL;
 CLEDController *CLEDController::m_pTail = NULL;
+static uint32_t lastshow = 0;
 
 // uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 
@@ -31,10 +33,15 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 
 	pLed->init();
 	pLed->setLeds(data + nOffset, nLeds);
+	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
 	return *pLed;
 }
 
 void CFastLED::show(uint8_t scale) {
+	// guard against showing too rapidly
+	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
+	lastshow = micros();
+
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		uint8_t d = pCur->getDither();
@@ -69,6 +76,9 @@ CLEDController & CFastLED::operator[](int x) {
 }
 
 void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
+	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
+	lastshow = micros();
+
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		uint8_t d = pCur->getDither();
@@ -98,7 +108,11 @@ void CFastLED::clearData() {
 void CFastLED::delay(unsigned long ms) {
 	unsigned long start = millis();
 	while((millis()-start) < ms) {
+#ifndef FASTLED_ACCURATE_CLOCK
+		// make sure to allow at least one ms to pass to ensure the clock moves
+		// forward
 		::delay(1);
+#endif
 		show();
 	}
 }
@@ -127,6 +141,48 @@ void CFastLED::setDither(uint8_t ditherMode)  {
 	}
 }
 
+//
+// template<int m, int n> void transpose8(unsigned char A[8], unsigned char B[8]) {
+// 	uint32_t x, y, t;
+//
+// 	// Load the array and pack it into x and y.
+//   	y = *(unsigned int*)(A);
+// 	x = *(unsigned int*)(A+4);
+//
+// 	// x = (A[0]<<24)   | (A[m]<<16)   | (A[2*m]<<8) | A[3*m];
+// 	// y = (A[4*m]<<24) | (A[5*m]<<16) | (A[6*m]<<8) | A[7*m];
+//
+        // // pre-transform x
+        // t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
+        // t = (x ^ (x >>14)) & 0x0000CCCC;  x = x ^ t ^ (t <<14);
+				//
+        // // pre-transform y
+        // t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
+        // t = (y ^ (y >>14)) & 0x0000CCCC;  y = y ^ t ^ (t <<14);
+				//
+        // // final transform
+        // t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
+        // y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
+        // x = t;
+//
+// 	B[7*n] = y; y >>= 8;
+// 	B[6*n] = y; y >>= 8;
+// 	B[5*n] = y; y >>= 8;
+// 	B[4*n] = y;
+//
+//   B[3*n] = x; x >>= 8;
+// 	B[2*n] = x; x >>= 8;
+// 	B[n] = x; x >>= 8;
+// 	B[0] = x;
+// 	// B[0]=x>>24;    B[n]=x>>16;    B[2*n]=x>>8;  B[3*n]=x>>0;
+// 	// B[4*n]=y>>24;  B[5*n]=y>>16;  B[6*n]=y>>8;  B[7*n]=y>>0;
+// }
+//
+// void transposeLines(Lines & out, Lines & in) {
+// 	transpose8<1,2>(in.bytes, out.bytes);
+// 	transpose8<1,2>(in.bytes + 8, out.bytes + 1);
+// }
+
 extern int noise_min;
 extern int noise_max;
 
@@ -142,3 +198,50 @@ void CFastLED::countFPS(int nFrames) {
     lastframe = millis();
   }
 }
+
+void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
+  if(constrain) { 
+    // if we're constraining, the new value of m_nMinMicros _must_ be higher than previously (because we're only
+    // allowed to slow things down if constraining)
+    if(refresh > 0) { 
+      m_nMinMicros = ( (1000000/refresh) >  m_nMinMicros) ? (1000000/refresh) : m_nMinMicros;
+    }
+  } else if(refresh > 0) {
+    m_nMinMicros = 1000000 / refresh;
+  } else {
+    m_nMinMicros = 0;
+  }
+}
+
+
+#ifdef NEED_CXX_BITS
+namespace __cxxabiv1
+{
+	extern "C" void __cxa_pure_virtual (void) {}
+	/* guard variables */
+
+	/* The ABI requires a 64-bit type.  */
+	__extension__ typedef int __guard __attribute__((mode(__DI__)));
+
+	extern "C" int __cxa_guard_acquire (__guard *);
+	extern "C" void __cxa_guard_release (__guard *);
+	extern "C" void __cxa_guard_abort (__guard *);
+
+	extern "C" int __cxa_guard_acquire (__guard *g)
+	{
+		return !*(char *)(g);
+	}
+
+	extern "C" void __cxa_guard_release (__guard *g)
+	{
+		*(char *)g = 1;
+	}
+
+	extern "C" void __cxa_guard_abort (__guard *)
+	{
+
+	}
+}
+#endif
+
+FASTLED_NAMESPACE_END

@@ -6,6 +6,10 @@
 #include<DmxSimple.h>
 #define HAS_DMX_SIMPLE
 
+///@ingroup chipsets
+///@{
+FASTLED_NAMESPACE_BEGIN
+
 // note - dmx simple must be included before FastSPI for this code to be enabled
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB> class DMXSimpleController : public CLEDController {
 public:
@@ -49,10 +53,14 @@ protected:
 #endif
 };
 
+FASTLED_NAMESPACE_END
+
 #endif
 
 #ifdef DmxSerial_h
 #include<DMXSerial.h>
+
+FASTLED_NAMESPACE_BEGIN
 
 template <EOrder RGB_ORDER = RGB> class DMXSerialController : public CLEDController {
 public:
@@ -94,6 +102,10 @@ public:
 	virtual void show(const struct CARGB *data, int nLeds, uint8_t scale = 255) = 0;
 #endif
 };
+
+FASTLED_NAMESPACE_END
+///@}
+
 #define HAS_DMX_SERIAL
 #endif
 

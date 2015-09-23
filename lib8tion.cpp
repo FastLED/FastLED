@@ -1,4 +1,8 @@
+#define FASTLED_INTERNAL
 #include <stdint.h>
+#include "FastLED.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 #define RAND16_SEED  1337
 uint16_t rand16seed = RAND16_SEED;
@@ -52,7 +56,7 @@ void * memset8 ( void * ptr, uint8_t val, uint16_t num )
 
 
 //__attribute__ ((noinline))
-void * memcpy8 ( void * dst, void* src, uint16_t num )
+void * memcpy8 ( void * dst, const void* src, uint16_t num )
 {
     asm volatile(
          "  movw r30, %[src]        \n\t"
@@ -80,7 +84,7 @@ void * memcpy8 ( void * dst, void* src, uint16_t num )
 }
 
 //__attribute__ ((noinline))
-void * memmove8 ( void * dst, void* src, uint16_t num )
+void * memmove8 ( void * dst, const void* src, uint16_t num )
 {
     if( src > dst) {
         // if src > dst then we can use the forward-stepping memcpy8
@@ -120,6 +124,9 @@ void * memmove8 ( void * dst, void* src, uint16_t num )
 
 #endif /* AVR */
 
+
+
+
 #if 0
 // TEST / VERIFICATION CODE ONLY BELOW THIS POINT
 #include <Arduino.h>
@@ -146,7 +153,7 @@ void testmul8()
 {
     delay(5000);
     byte r, c;
-    
+
     Serial.println("mul8:");
     for( r = 0; r <= 20; r += 1) {
         Serial.print(r); Serial.print(" : ");
@@ -220,19 +227,19 @@ void testnscale8x3()
     byte r, g, b, sc;
     for( byte z = 0; z < 10; z++) {
         r = random8(); g = random8(); b = random8(); sc = random8();
-        
+
         Serial.print("nscale8x3_video( ");
         Serial.print(r); Serial.print(", ");
         Serial.print(g); Serial.print(", ");
         Serial.print(b); Serial.print(", ");
         Serial.print(sc); Serial.print(") = [ ");
-        
+
         nscale8x3_video( r, g, b, sc);
-        
+
         Serial.print(r); Serial.print(", ");
         Serial.print(g); Serial.print(", ");
         Serial.print(b); Serial.print("]");
-        
+
         Serial.println(' ');
     }
     Serial.println("done.");
@@ -240,3 +247,5 @@ void testnscale8x3()
 }
 
 #endif
+
+FASTLED_NAMESPACE_END

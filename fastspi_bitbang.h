@@ -1,6 +1,10 @@
 #ifndef __INC_FASTSPI_BITBANG_H
 #define __INC_FASTSPI_BITBANG_H
 
+#include "fastled_delay.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Software SPI (aka bit-banging) support - with aggressive optimizations for when the clock and data pin are on the same port
@@ -112,20 +116,12 @@ public:
 	template <uint8_t BIT> __attribute__((always_inline, hot)) inline static void writeBit(uint8_t b) {
 		if(b & (1 << BIT)) {
 			FastPin<DATA_PIN>::hi();
-			if(SPI_SPEED < 3) {
-				FastPin<CLOCK_PIN>::strobe();
-			} else {
-				FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
-				FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
-			}
+			FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
+			FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
 		} else {
 			FastPin<DATA_PIN>::lo();
-			if(SPI_SPEED < 3) {
-				FastPin<CLOCK_PIN>::strobe();
-			} else {
-				FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
-				FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
-			}
+			FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
+			FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
 		}
 	}
 
@@ -352,5 +348,7 @@ public:
 		release();
 	}
 };
+
+FASTLED_NAMESPACE_END
 
 #endif

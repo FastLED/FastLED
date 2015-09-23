@@ -97,7 +97,7 @@ FastLED2
 * Enforce intra-frame timing for ws2801s
 * SM16716 support
 * Add #define FAST_SPI_INTERRUPTS_WRITE_PINS to make sure world is ok w/interrupts and SPI
-* Add #define FORCE_SOFTWARE_SPI for those times when you absolutely don't want to use hardware SPI, ev
+* Add #define FASTLED_FORCE_SOFTWARE_SPI for those times when you absolutely don't want to use hardware SPI, ev
 en if you're using the hardware SPI pins
 * Add pin definitions for the arduino megas - should fix ws2811 support
 * Add pin definitions for the leonardo - should fix spi support and pin mappings

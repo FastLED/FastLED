@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_ARM_SAM_H
 #define __INC_FASTSPI_ARM_SAM_H
 
+FASTLED_NAMESPACE_BEGIN
+
 // A skeletal implementation of hardware SPI support.  Fill in the necessary code for init, waiting, and writing.  The rest of
 // the method implementations should provide a starting point, even if not hte most efficient to start with
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
@@ -17,10 +19,10 @@ public:
 	void init() { /* TODO */ }
 
 	// latch the CS select
-	void inline select() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->select(); } } 
+	void inline select() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->select(); } }
 
-	// release the CS select 
-	void inline release() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->release(); } } 
+	// release the CS select
+	void inline release() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->release(); } }
 
 	// wait until all queued up data has been written
 	static void waitFully() { /* TODO */ }
@@ -34,7 +36,7 @@ public:
 	// A raw set of writing byte values, assumes setup/init/waiting done elsewhere
 	static void writeBytesValueRaw(uint8_t value, int len) {
 		while(len--) { writeByte(value); }
-	}	
+	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
 	void writeBytesValue(uint8_t value, int len) {
@@ -42,16 +44,16 @@ public:
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	template <class D> void writeBytes(register uint8_t *data, int len) { 
+	template <class D> void writeBytes(register uint8_t *data, int len) {
 		uint8_t *end = data + len;
 		select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
-		while(data != end) { 
+		while(data != end) {
 			writeByte(D::adjust(*data++));
 		}
 		D::postBlock(len);
 		waitFully();
-		release();	
+		release();
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
@@ -62,10 +64,10 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
 		select();
-		while(data != end) { 
-			if(FLAGS & FLAG_START_BIT) { 
+		while(data != end) {
+			if(FLAGS & FLAG_START_BIT) {
 				writeBit<0>(1);
 			}
 			writeByte(D::adjust(pixels.loadAndScale0()));
@@ -80,19 +82,8 @@ public:
 		release();
 	}
 
-	// template instantiations for writeBytes 3
-	template <uint8_t FLAGS, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<FLAGS, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
-	}
-	template <class D, EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<0, D, RGB_ORDER>(data, len, scale, advance, skip); 
-	}
-	template <EOrder RGB_ORDER> void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<0, DATA_NOP, RGB_ORDER>(data, len, scale, advance, skip); 
-	}
-	void writeBytes3(register uint8_t *data, int len, register CRGB scale, bool advance=true, uint8_t skip=0) { 
-		writeBytes3<0, DATA_NOP, RGB>(data, len, scale, advance, skip); 
-
 };
+
+FASTLED_NAMESPACE_END
 
 #endif

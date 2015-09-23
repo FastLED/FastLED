@@ -5,14 +5,19 @@
 #include "lib8tion.h"
 #include "color.h"
 
+FASTLED_NAMESPACE_BEGIN
+
 struct CRGB;
 struct CHSV;
 
-// Forward declaration of hsv2rgb_rainbow here,
-// to avoid circular dependencies.
+///@defgroup Pixeltypes CHSV and CRGB type definitions
+///@{
+
+/// Forward declaration of hsv2rgb_rainbow here,
+/// to avoid circular dependencies.
 extern void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb);
 
-
+/// Representation of an HSV pixel (hue, saturation, value (aka brightness)).
 struct CHSV {
     union {
 		struct {
@@ -67,6 +72,7 @@ struct CHSV {
     }
 };
 
+/// Pre-defined hue values for HSV objects
 typedef enum {
     HUE_RED = 0,
     HUE_ORANGE = 32,
@@ -78,6 +84,7 @@ typedef enum {
     HUE_PINK = 224
 } HSVHue;
 
+/// Representation of an RGB pixel (Red, Green, Blue)
 struct CRGB {
 	union {
 		struct {
@@ -343,6 +350,26 @@ struct CRGB {
         return *this;
     }
 
+    // scale down a RGB to N 256ths of it's current brightness, using
+    // 'plain math' dimming rules, which means that if the low light levels
+    // may dim all the way to 100% black.
+    inline CRGB& nscale8 (const CRGB & scaledown )
+    {
+        r = ::scale8(r, scaledown.r);
+        g = ::scale8(g, scaledown.g);
+        b = ::scale8(b, scaledown.b);
+        return *this;
+    }
+
+    inline CRGB scale8 (const CRGB & scaledown )
+    {
+        CRGB out;
+        out.r = ::scale8(r, scaledown.r);
+        out.g = ::scale8(g, scaledown.g);
+        out.b = ::scale8(b, scaledown.b);
+        return out;
+    }
+
     // fadeToBlackBy is a synonym for nscale8( ..., 255-fadefactor)
     inline CRGB& fadeToBlackBy (uint8_t fadefactor )
     {
@@ -398,7 +425,7 @@ struct CRGB {
         return retval;
     }
 
-#ifdef SmartMatrix_h
+#if (defined SmartMatrix_h || defined SmartMatrix3_h)
     operator rgb24() const {
       rgb24 ret;
       ret.red = r;
@@ -408,7 +435,7 @@ struct CRGB {
     }
 #endif
 
-    inline uint8_t getLuma ( )  {
+    inline uint8_t getLuma ( )  const {
         //Y' = 0.2126 R' + 0.7152 G' + 0.0722 B'
         //     54            183       18 (!)
 
@@ -419,7 +446,7 @@ struct CRGB {
         return luma;
     }
 
-    inline uint8_t getAverageLight( )  {
+    inline uint8_t getAverageLight( )  const {
         const uint8_t eightysix = 86;
         uint8_t avg = scale8_LEAVING_R1_DIRTY( r, eightysix) + \
         scale8_LEAVING_R1_DIRTY( g, eightysix) + \
@@ -460,6 +487,85 @@ struct CRGB {
       return ret;
     }
 
+    // getParity returns 0 or 1, depending on the
+    // lowest bit of the sum of the color components.
+    inline uint8_t getParity()
+    {
+        uint8_t sum = r + g + b;
+        return (sum & 0x01);
+    }
+
+    // setParity adjusts the color in the smallest
+    // way possible so that the parity of the color
+    // is now the desired value.  This allows you to
+    // 'hide' one bit of information in the color.
+    //
+    // Ideally, we find one color channel which already
+    // has data in it, and modify just that channel by one.
+    // We don't want to light up a channel that's black
+    // if we can avoid it, and if the pixel is 'grayscale',
+    // (meaning that R==G==B), we modify all three channels
+    // at once, to preserve the neutral hue.
+    //
+    // There's no such thing as a free lunch; in many cases
+    // this 'hidden bit' may actually be visible, but this
+    // code makes reasonable efforts to hide it as much
+    // as is reasonably possible.
+    //
+    // Also, an effort is made to have make it such that
+    // repeatedly setting the parity to different values
+    // will not cause the color to 'drift'.  Toggling
+    // the parity twice should generally result in the
+    // original color again.
+    //
+    inline void setParity( uint8_t parity)
+    {
+        uint8_t curparity = getParity();
+
+        if( parity == curparity) return;
+
+        if( parity ) {
+            // going 'up'
+            if( (b > 0) && (b < 255)) {
+                if( r == g && g == b) {
+                    r++;
+                    g++;
+                }
+                b++;
+            } else if( (r > 0) && (r < 255)) {
+                r++;
+            } else if( (g > 0) && (g < 255)) {
+                g++;
+            } else {
+                if( r == g && g == b) {
+                    r ^= 0x01;
+                    g ^= 0x01;
+                }
+                b ^= 0x01;
+            }
+        } else {
+            // going 'down'
+            if( b > 1) {
+                if( r == g && g == b) {
+                    r--;
+                    g--;
+                }
+                b--;
+            } else if( g > 1) {
+                g--;
+            } else if( r > 1) {
+                r--;
+            } else {
+                if( r == g && g == b) {
+                    r ^= 0x01;
+                    g ^= 0x01;
+                }
+                b ^= 0x01;
+            }
+        }
+    }
+
+    /// Predefined RGB colors
     typedef enum {
         AliceBlue=0xF0F8FF,
         Amethyst=0x9966CC,
@@ -608,9 +714,17 @@ struct CRGB {
         White=0xFFFFFF,
         WhiteSmoke=0xF5F5F5,
         Yellow=0xFFFF00,
-        YellowGreen=0x9ACD32
+        YellowGreen=0x9ACD32,
+
+        // LED RGB color that roughly approximates
+        // the color of incandescent fairy lights,
+        // assuming that you're using FastLED
+        // color correction on your LEDs (recommended).
+        FairyLight=0xFFE42D,
+        // If you are using no color correction, use this
+        FairyLightNCC=0xFF9D2A
+
     } HTMLColorCode;
-    // static uint32_t Squant;
 };
 
 
@@ -714,7 +828,9 @@ inline CRGB operator%( const CRGB& p1, uint8_t d)
 
 
 
-// Define RGB orderings
+/// RGB orderings, used when instantiating controllers to determine what
+/// order the controller should send RGB data out in, RGB being the default
+/// ordering.
 enum EOrder {
 	RGB=0012,
 	RBG=0021,
@@ -724,5 +840,7 @@ enum EOrder {
 	BGR=0210
 };
 
+FASTLED_NAMESPACE_END
+///@}
 
 #endif
