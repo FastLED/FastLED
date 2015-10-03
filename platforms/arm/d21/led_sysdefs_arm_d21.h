@@ -18,7 +18,7 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
-// reuseing/abusing cli/sei defs for due
+// reusing/abusing cli/sei defs for due
 #define cli()  __disable_irq();
 #define sei() __enable_irq();
 
