@@ -1,0 +1,17 @@
+{
+  "name": "FastLED",
+  "keywords": "strip, led",
+  "description": "FastLED is a fast, efficient, easy-to-use library for programming addressable LED strips and pixels such as WS2810, WS2811, LPD8806, Neopixel and more",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/FastLED/FastLED.git"
+  },
+  "authors":
+  {
+    "name": "Daniel Garcia",
+    "url": "https://github.com/focalintent"
+  },  
+  "frameworks": "arduino",
+  "platforms": "atmelavr"
+}
