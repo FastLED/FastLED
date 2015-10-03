@@ -265,7 +265,7 @@ struct CRGB {
     }
 
     // subtract a constant of '1' from each channel, saturating at 0x00
-    inline CRGB operator-- (int DUMMY_ARG)  __attribute__((always_inline))
+    inline CRGB operator-- (int )  __attribute__((always_inline))
     {
         CRGB retval(*this);
         --(*this);
@@ -280,7 +280,7 @@ struct CRGB {
     }
 
     // add a constant of '1' from each channel, saturating at 0xFF
-    inline CRGB operator++ (int DUMMY_ARG)  __attribute__((always_inline))
+    inline CRGB operator++ (int )  __attribute__((always_inline))
     {
         CRGB retval(*this);
         ++(*this);

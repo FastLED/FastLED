@@ -3,6 +3,9 @@
 
 #include "led_sysdefs.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+
 ///@file fastpin.h
 /// Class base definitions for defining fast pin access
 
@@ -198,5 +201,7 @@ typedef volatile uint32_t & reg32_t;
 typedef volatile uint32_t * ptr_reg32_t;
 
 FASTLED_NAMESPACE_END
+
+#pragma GCC diagnostic pop
 
 #endif // __INC_FASTPIN_H

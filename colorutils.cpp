@@ -692,7 +692,7 @@ CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t b
 
 CHSV ColorFromPalette( const struct CHSVPalette256& pal, uint8_t index, uint8_t brightness, TBlendType)
 {
-    CHSV hsv;// = *( &(pal[0]) + index );
+    CHSV hsv = *( &(pal[0]) + index );
 
     if( brightness != 255) {
         hsv.value = scale8_video( hsv.value, brightness);

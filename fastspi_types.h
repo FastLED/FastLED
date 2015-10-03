@@ -19,7 +19,7 @@ class DATA_NOP {
 public:
   static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data) { return data; }
   static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data, register uint8_t scale) { return scale8(data, scale); }
-  static __attribute__((always_inline)) inline void postBlock(int len) {}
+  static __attribute__((always_inline)) inline void postBlock(int /* len */) { }
 };
 
 #define FLAG_START_BIT 0x80
