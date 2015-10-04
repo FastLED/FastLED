@@ -3,6 +3,9 @@
 
 #ifdef NRF51
 
+#ifndef FASTLED_FORCE_SOFTWARE_SPI
+#define FASTLED_ALL_PINS_HARDWARE_SPI
+
 // A nop/stub class, mostly to show the SPI methods that are needed/used by the various SPI chipset implementations.  Should
 // be used as a definition for the set of methods that the spi implementation classes should use (since C++ doesn't support the
 // idea of interfaces - it's possible this could be done with virtual classes, need to decide if i want that overhead)
@@ -64,7 +67,7 @@ public:
   }
 
   // wait until all queued up data has been written
-  void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
+  static void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
   void wait() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
   // void waitFully() { while(NRF_SPI0->EVENTS_READY==0); NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
   // void wait() { while(NRF_SPI0->EVENTS_READY==0); NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
@@ -72,10 +75,10 @@ public:
   // write a byte out via SPI (returns immediately on writing register)
   // void writeByte(uint8_t b) { wait(); NRF_SPI0->TXD = b;  shouldWait(true); }
   // void writeByte(uint8_t b) __attribute__((always_inline)){ wait(); NRF_SPI0->TXD = b;  shouldWait(true);  }
-  void writeByte(uint8_t b) __attribute__((always_inline)) {  NRF_SPI0->EVENTS_READY=0; /*uint8_t x = NRF_SPI0->RXD;*/ NRF_SPI0->TXD = b; }
+  static void writeByte(uint8_t b) __attribute__((always_inline)) {  /*NRF_SPI0->EVENTS_READY=0; */ /*uint8_t x = NRF_SPI0->RXD;*/ NRF_SPI0->TXD = b; }
 
   // write a word out via SPI (returns immediately on writing register)
-  void writeWord(uint16_t w) __attribute__((always_inline)){ writeByte(w>>8); writeByte(w & 0xFF);  }
+  static void writeWord(uint16_t w) __attribute__((always_inline)){ writeByte(w>>8); writeByte(w & 0xFF);  }
 
   // A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)
   static void writeBytesValueRaw(uint8_t value, int len) { while(len--) { writeByte(value);  } }
@@ -141,6 +144,7 @@ public:
 
 };
 
+#endif
 #endif
 
 #endif
