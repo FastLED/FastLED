@@ -9,6 +9,8 @@
 #define INTERRUPT_THRESHOLD 1
 #endif
 
+#define FASTLED_SPI_BYTE_ONLY
+
 // Default to allowing interrupts
 #ifndef FASTLED_ALLOW_INTERRUPTS
 #define FASTLED_ALLOW_INTERRUPTS 1

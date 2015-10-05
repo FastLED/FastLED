@@ -187,11 +187,18 @@ protected:
 
 		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
-			uint8_t b = pixels.loadAndScale0();
-			mSPI.writeWord(0xFF00 | b);
+#ifdef FASTLED_SPI_BYTE_ONLY
+			mSPI.writeByte(0xFF);
+			mSPI.writeByte(pixels.loadAndScale0());
+			mSPI.writeByte(pixels.loadAndScale1());
+			mSPI.writeByte(pixels.loadAndScale2());
+#else
+			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0();
+			mSPI.writeWord(b);
 			uint16_t w = pixels.loadAndScale1() << 8;
 			w |= pixels.loadAndScale2();
 			mSPI.writeWord(w);
+#endif
 			pixels.stepDithering();
 		}
 		endBoundary(nLeds);
@@ -207,13 +214,20 @@ protected:
 
 		startBoundary();
 		for(int i = 0; i < nLeds; i++) {
+#ifdef FASTLED_SPI_BYTE_ONLY
+			mSPI.writeByte(0xFF);
+			mSPI.writeByte(pixels.loadAndScale0());
+			mSPI.writeByte(pixels.loadAndScale1());
+			mSPI.writeByte(pixels.loadAndScale2());
+#else
 			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0();
 			mSPI.writeWord(b);
 			uint16_t w = pixels.loadAndScale1() << 8;
 			w |= pixels.loadAndScale2();
 			mSPI.writeWord(w);
-			pixels.advanceData();
+#endif
 			pixels.stepDithering();
+			pixels.advanceData();
 		}
 		endBoundary(nLeds);
 		mSPI.waitFully();

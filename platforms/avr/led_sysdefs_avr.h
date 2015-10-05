@@ -7,6 +7,8 @@
 #define INTERRUPT_THRESHOLD 2
 #endif
 
+#define FASTLED_SPI_BYTE_ONLY
+
 #include <avr/io.h>
 #include <avr/interrupt.h> // for cli/se definitions
 

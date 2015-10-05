@@ -9,6 +9,8 @@
 #define FASTLED_NO_PINMAP
 #define FASTLED_HAS_CLOCKLESS
 
+#define FASTLED_SPI_BYTE_ONLY
+
 #define FASTLED_ARM
 #define FASTLED_ARM_M0
 
