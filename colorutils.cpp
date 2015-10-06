@@ -234,7 +234,7 @@ CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay )
         return existing;
     }
 
-    fract8 amountOfKeep = 256 - amountOfOverlay;
+    fract8 amountOfKeep = 255 - amountOfOverlay;
 
     existing.red   = scale8_LEAVING_R1_DIRTY( existing.red,   amountOfKeep)
                     + scale8_LEAVING_R1_DIRTY( overlay.red,    amountOfOverlay);
@@ -287,7 +287,7 @@ CHSV& nblend( CHSV& existing, const CHSV& overlay, fract8 amountOfOverlay, TGrad
         return existing;
     }
 
-    fract8 amountOfKeep = 256 - amountOfOverlay;
+    fract8 amountOfKeep = 255 - amountOfOverlay;
 
     uint8_t huedelta8 = overlay.hue - existing.hue;
 
@@ -498,7 +498,7 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
         }
 
         uint8_t f2 = lo4 << 4;
-        uint8_t f1 = 256 - f2;
+        uint8_t f1 = 255 - f2;
 
         //    rgb1.nscale8(f1);
         red1   = scale8_LEAVING_R1_DIRTY( red1,   f1);
@@ -555,7 +555,7 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
         }
 
         uint8_t f2 = lo4 << 4;
-        uint8_t f1 = 256 - f2;
+        uint8_t f1 = 255 - f2;
 
         //    rgb1.nscale8(f1);
         red1   = scale8_LEAVING_R1_DIRTY( red1,   f1);
@@ -630,7 +630,7 @@ CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t b
         }
 
         uint8_t f2 = lo4 << 4;
-        uint8_t f1 = 256 - f2;
+        uint8_t f1 = 255 - f2;
 
         uint8_t hue2  = entry->hue;
         uint8_t sat2  = entry->sat;
@@ -673,7 +673,7 @@ CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t b
         uint8_t deltaHue = (uint8_t)(hue2 - hue1);
         if( deltaHue & 0x80 ) {
           // go backwards
-          hue1 -= scale8( 256 - deltaHue, f2);
+          hue1 -= scale8( 255 - deltaHue, f2);
         } else {
           // go forwards
           hue1 += scale8( deltaHue, f2);
