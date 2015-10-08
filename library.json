@@ -1,7 +1,7 @@
 {
   "name": "FastLED",
-  "keywords": "leds,apa102,dotstar,neopixel,ws2812,noise,rgb,math,fast"
-  "description": "FastLED is a library for programming addressable rgb led strips (APA102/Dotstar, WS2812/Neopixel, LPD8806, and a dozen others) acting both as a driver and as a library for color management and fast math."
+  "keywords": "led,noise,rgb,math,fast",
+  "description": "FastLED is a library for programming addressable rgb led strips (APA102/Dotstar, WS2812/Neopixel, LPD8806, and a dozen others) acting both as a driver and as a library for color management and fast math.",
   "repository":
   {
     "type": "git",
