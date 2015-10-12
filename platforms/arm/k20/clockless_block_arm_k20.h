@@ -28,6 +28,8 @@ class InlineBlockClocklessController : public CLEDController {
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
 public:
+	virtual int size() { return m_nLeds * __LANES; }
+
 	virtual void init() {
 		if(FIRST_PIN == PORTC_FIRST_PIN) { // PORTC
 			switch(LANES) {

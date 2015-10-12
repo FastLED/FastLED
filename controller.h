@@ -124,7 +124,7 @@ public:
     }
 
     /// How many leds does this controller manage?
-    int size() { return m_nLeds; }
+    virtual int size() { return m_nLeds; }
 
     /// Pointer to the CRGB array for this controller
     CRGB* leds() { return m_Data; }

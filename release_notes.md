@@ -1,3 +1,9 @@
+FastLED3.1.1pre
+============
+* Enabled RFDuino/nrf51822 hardware SPI support
+* Fix edge case bug w/HSV palette blending 
+* Fix power management issue w/parallel output
+
 FastLED3.1.0
 ============
 * Added support for the following platforms
