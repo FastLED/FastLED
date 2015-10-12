@@ -361,7 +361,7 @@ struct CRGB {
         return *this;
     }
 
-    inline CRGB scale8 (const CRGB & scaledown )
+    inline CRGB scale8 (const CRGB & scaledown ) const
     {
         CRGB out;
         out.r = ::scale8(r, scaledown.r);
