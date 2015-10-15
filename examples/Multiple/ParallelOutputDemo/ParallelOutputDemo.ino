@@ -1,4 +1,4 @@
-#include<FastLED.h>
+#include <FastLED.h>
 
 #define NUM_LEDS_PER_STRIP 64
 // Note: this can be 12 if you're using a teensy 3 and don't mind soldering the pads on the back
