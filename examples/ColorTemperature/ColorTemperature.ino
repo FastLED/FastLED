@@ -1,19 +1,21 @@
 #include <FastLED.h>
 
-#define LED_PIN     3
-
-// Information about the LED strip itself
-#define NUM_LEDS    60
-#define CHIPSET     WS2811
-#define COLOR_ORDER GRB
-CRGB leds[NUM_LEDS];
+#define NUM_LEDS 60
+#define LED_TYPE NEOPIXEL
+#define DATA_PIN 3
+#define CLOCK_PIN 13
+#define COLOR_ORDER RGB
 
 #define BRIGHTNESS  128
+
+// Define the array of leds
+CRGB leds[NUM_LEDS];
+
 
 
 // FastLED v2.1 provides two color-management controls:
 //   (1) color correction settings for each LED strip, and
-//   (2) master control of the overall output 'color temperature' 
+//   (2) master control of the overall output 'color temperature'
 //
 // THIS EXAMPLE demonstrates the second, "color temperature" control.
 // It shows a simple rainbow animation first with one temperature profile,
@@ -25,7 +27,7 @@ CRGB leds[NUM_LEDS];
 // * Don't look directly at the LED pixels.  Shine the LEDs aganst
 //   a white wall, table, or piece of paper, and look at the reflected light.
 //
-// * If you watch it for a bit, and then walk away, and then come back 
+// * If you watch it for a bit, and then walk away, and then come back
 //   to it, you'll probably be able to "see" whether it's currently using
 //   the 'redder' or the 'bluer' temperature profile, even not counting
 //   the lowest 'indicator' pixel.
@@ -70,16 +72,23 @@ void loop()
   if( (secs % DISPLAYTIME) < BLACKTIME) {
     memset8( leds, 0, NUM_LEDS * sizeof(CRGB));
   }
-  
+
   FastLED.show();
   FastLED.delay(8);
 }
 
 void setup() {
   delay( 3000 ); // power-up safety delay
+
   // It's important to set the color correction for your LED strip here,
   // so that colors can be more accurately rendered through the 'temperature' profiles
-  FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
+  // Uncomment this line for a 3-Wire chipset
+  FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
+
+  // Uncomment this line for a SPI chipset
+  //FastLED.addLeds<LED_TYPE, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
+
+  // Uncomment this line for a SPI chipset with the data and clock pins specified
+  //FastLED.addLeds<LED_TYPE, DATA_PIN, CLOCK_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalSMD5050 );
   FastLED.setBrightness( BRIGHTNESS );
 }
-
