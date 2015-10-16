@@ -49,7 +49,7 @@ typedef volatile uint8_t & reg8_t;
 #define _R(T) struct __gen_struct_ ## T
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
 #define _IO(L) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L);
-#define _DEFPIN_AVR(_PIN, MASK, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, MASK, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
+#define _DEFPIN_AVR(_PIN, MASK, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, MASK, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> { constexpr static bool validpin() { return false; } };
 
 #if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny45__)
 _IO(B);
@@ -254,13 +254,13 @@ _DEFPIN_AVR(44, 64, F); _DEFPIN_AVR(45, 128, F);
 _IO(B); _IO(C); _IO(D); _IO(E); _IO(F);
 
 #define MAX_PIN 24
-_DEFPIN_AVR(0, 4, D); _DEFPIN_AVR(1, 8, D); _DEFPIN_AVR(2, 2, D); _DEFPIN_AVR(3, 1, D); 
-_DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 64, C); _DEFPIN_AVR(6, 128, D); _DEFPIN_AVR(7, 64, E); 
-_DEFPIN_AVR(8, 16, B); _DEFPIN_AVR(9, 32, B); _DEFPIN_AVR(10, 64, B); _DEFPIN_AVR(11, 128, B); 
-_DEFPIN_AVR(12, 64, D); _DEFPIN_AVR(13, 128, C); _DEFPIN_AVR(14, 8, B); _DEFPIN_AVR(15, 2, B); 
-_DEFPIN_AVR(16, 4, B); _DEFPIN_AVR(17, 1, B); _DEFPIN_AVR(18, 128, F); _DEFPIN_AVR(19, 64, F); 
-_DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_AVR(23, 1, F); 
- _DEFPIN_AVR(24, 32, D); 
+_DEFPIN_AVR(0, 4, D); _DEFPIN_AVR(1, 8, D); _DEFPIN_AVR(2, 2, D); _DEFPIN_AVR(3, 1, D);
+_DEFPIN_AVR(4, 16, D); _DEFPIN_AVR(5, 64, C); _DEFPIN_AVR(6, 128, D); _DEFPIN_AVR(7, 64, E);
+_DEFPIN_AVR(8, 16, B); _DEFPIN_AVR(9, 32, B); _DEFPIN_AVR(10, 64, B); _DEFPIN_AVR(11, 128, B);
+_DEFPIN_AVR(12, 64, D); _DEFPIN_AVR(13, 128, C); _DEFPIN_AVR(14, 8, B); _DEFPIN_AVR(15, 2, B);
+_DEFPIN_AVR(16, 4, B); _DEFPIN_AVR(17, 1, B); _DEFPIN_AVR(18, 128, F); _DEFPIN_AVR(19, 64, F);
+_DEFPIN_AVR(20, 32, F); _DEFPIN_AVR(21, 16, F); _DEFPIN_AVR(22, 2, F); _DEFPIN_AVR(23, 1, F);
+ _DEFPIN_AVR(24, 32, D);
 
 #define SPI_DATA 16
 #define SPI_CLOCK 15

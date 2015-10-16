@@ -98,7 +98,7 @@ public:
 };
 
 
-#define _DEFPIN_ARM(PIN) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << PIN> {};
+#define _DEFPIN_ARM(PIN) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << PIN> {  constexpr static bool validpin() { return false; } };
 #endif
 
 // Actual pin definitions

@@ -91,6 +91,8 @@ static uint8_t gTimeErrorAccum256ths;
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CLEDController {
+	static_assert(T1 >= 3 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
+
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
@@ -224,11 +226,11 @@ protected:
 // 2 cycles, sbrs on flipping the line to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
 // load a byte from ram into the given var with the given offset
-#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]\n\t" ASM_VARS ); 
+#define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]\n\t" ASM_VARS );
 // 4 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var, clear carry
-#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc\n\t" ASM_VARS ); 
+#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc\n\t" ASM_VARS );
 
-#if (DITHER==1) 
+#if (DITHER==1)
 // apply dithering value  before we do anything with scale_base
 #define PRESCALE4(D) asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\tbrcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\t" ASM_VARS);
 
@@ -246,18 +248,18 @@ protected:
 
 // 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
 #define _SCALE02(B, N) "sbrc %[s0], " #N "\n\tadd %[" #B "], %[scale_base]\n\t"
-#define _SCALE12(B, N) "sbrc %[s1], " #N "\n\tadd %[" #B "], %[scale_base]\n\t" 
-#define _SCALE22(B, N) "sbrc %[s2], " #N "\n\tadd %[" #B "], %[scale_base]\n\t" 
+#define _SCALE12(B, N) "sbrc %[s1], " #N "\n\tadd %[" #B "], %[scale_base]\n\t"
+#define _SCALE22(B, N) "sbrc %[s2], " #N "\n\tadd %[" #B "], %[scale_base]\n\t"
 #define SCALE02(B,N) asm __volatile__( _SCALE02(B,N) ASM_VARS );
 #define SCALE12(B,N) asm __volatile__( _SCALE12(B,N) ASM_VARS );
 #define SCALE22(B,N) asm __volatile__( _SCALE22(B,N) ASM_VARS );
 
 // 1 cycle - rotate right, pulling in from carry
-#define _ROR1(B) "ror %[" #B "]\n\t" 
+#define _ROR1(B) "ror %[" #B "]\n\t"
 #define ROR1(B) asm __volatile__( _ROR1(B) ASM_VARS);
 
 // 1 cycle, clear the carry bit
-#define _CLC1 "clc\n\t" 
+#define _CLC1 "clc\n\t"
 #define CLC1 asm __volatile__( _CLC1 ASM_VARS );
 
 // 2 cycles, rortate right, pulling in from carry then clear the carry bit
@@ -269,7 +271,7 @@ protected:
 #define RORSC24(B, N) asm __volatile__( _ROR1(B) _CLC1 _SCALE22(B, N) ASM_VARS );
 
 // 4 cycles, scale bit, rotate, clear carry
-#define SCROR04(B, N) asm __volatile__( _SCALE02(B,N) _ROR1(B) _CLC1 ASM_VARS ); 
+#define SCROR04(B, N) asm __volatile__( _SCALE02(B,N) _ROR1(B) _CLC1 ASM_VARS );
 #define SCROR14(B, N) asm __volatile__( _SCALE12(B,N) _ROR1(B) _CLC1 ASM_VARS );
 #define SCROR24(B, N) asm __volatile__( _SCALE22(B,N) _ROR1(B) _CLC1 ASM_VARS );
 
@@ -278,7 +280,7 @@ protected:
 
 // dither adjustment macro - should be kept in sync w/what's in stepDithering
 // #define ADJDITHER2(D, E) D = E - D;
-#define ADJDITHER2(D, E) asm __volatile__ ("neg %[" #D "]\n\tadd %[" #D "],%[" #E "]\n\t" ASM_VARS); 
+#define ADJDITHER2(D, E) asm __volatile__ ("neg %[" #D "]\n\tadd %[" #D "],%[" #E "]\n\t" ASM_VARS);
 
 // #define xstr(a) str(a)
 // #define str(a) #a
@@ -407,20 +409,20 @@ protected:
 #if TRINKET_SCALE
 				// Inline scaling - RGB ordering
 				// DNOP
-				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2) 
+				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2)
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d1)	D2(3)	LO1	SCALE12(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 RORCLC2(b1)		D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR14(b1,2)		D2(4)	LO1 SCALE12(b1,3)	D3(2)
 				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR14(b1,5) 	D2(4)	LO1 SCALE12(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC14(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
-				HI1 D1(1) QLO2(b0, 0) 
+				HI1 D1(1) QLO2(b0, 0)
 				switch(XTRA0) {
 					case 4: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 3: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
-				} 
+				}
 				ADJDITHER2(d1,e1) D2(2) LO1 MOV1(b0,b1) D3(1)
 
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O2) 	D2(4)	LO1	PRESCALEA2(d2)	D3(2)
@@ -430,13 +432,13 @@ protected:
 				HI1 D1(1) QLO2(b0, 3) RORSC24(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR24(b1,5) 	D2(4)	LO1 SCALE22(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC24(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
-				HI1 D1(1) QLO2(b0, 0) 			
+				HI1 D1(1) QLO2(b0, 0)
 				switch(XTRA0) {
 					case 4: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 3: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
-				} 
+				}
 				IDATACLC3 MOV1(b0,b1) D2(4) LO1 ADJDITHER2(d2,e2) D3(2)
 
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)
@@ -446,13 +448,13 @@ protected:
 				HI1 D1(1) QLO2(b0, 3) RORSC04(b1,4) 	D2(4)	LO1 RORCLC2(b1)  	D3(2)
 				HI1 D1(1) QLO2(b0, 2) SCROR04(b1,5) 	D2(4)	LO1 SCALE02(b1,6)	D3(2)
 				HI1 D1(1) QLO2(b0, 1) RORSC04(b1,7) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
-				HI1 D1(1) QLO2(b0, 0) 	 
+				HI1 D1(1) QLO2(b0, 0)
 				switch(XTRA0) {
 					case 4: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 3: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
-				} 
+				}
 				ADJDITHER2(d0,e0) MOV1(b0,b1) D2(3) LO1 D3(6)
 				ENDLOOP5
 #else

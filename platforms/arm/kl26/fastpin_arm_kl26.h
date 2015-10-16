@@ -53,7 +53,7 @@ template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() 
 #define _IO32(L) _RD32(FGPIO ## L ## _PDOR); _RD32(FGPIO ## L ## _PSOR); _RD32(FGPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(FGPIO ## L ## _PDIR); _RD32(FGPIO ## L ## _PDDR);
 
 #define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(FGPIO ## L ## _PDOR), _R(FGPIO ## L ## _PSOR), _R(FGPIO ## L ## _PCOR), \
-_R(GPIO ## L ## _PTOR), _R(FGPIO ## L ## _PDIR), _R(FGPIO ## L ## _PDDR)> {}; \
+_R(GPIO ## L ## _PTOR), _R(FGPIO ## L ## _PDIR), _R(FGPIO ## L ## _PDDR)> {  constexpr static bool validpin() { return false; }  }; \
 /* template<> class FastPinBB<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
 _R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; */
 

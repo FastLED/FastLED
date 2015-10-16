@@ -60,7 +60,7 @@ public:
 
 #define _IO32(L) _RD32(GPIO ## L)
 
-#define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
+#define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> { constexpr static bool validpin() { return false; } };
 
 // Actual pin definitions
 #if defined(SPARK)

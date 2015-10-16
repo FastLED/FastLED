@@ -3,6 +3,7 @@ FastLED3.1.1pre
 * Enabled RFDuino/nrf51822 hardware SPI support
 * Fix edge case bug w/HSV palette blending 
 * Fix power management issue w/parallel output
+* Use static_asserts for some more useful compile time errors around bad pins
 
 FastLED3.1.0
 ============

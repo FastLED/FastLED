@@ -30,6 +30,8 @@
 
 #include <stdint.h>
 
+#include "cpp_compat.h"
+
 #include "fastled_config.h"
 #include "led_sysdefs.h"
 
