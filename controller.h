@@ -354,7 +354,7 @@ struct PixelController {
 template<int LANES,int MASK, EOrder RGB_ORDER>
 struct MultiPixelController {
         const uint8_t *mData;
-        int mLen;
+        int mLen,mLenRemaining;
         uint8_t d[3];
         uint8_t e[3];
         CRGB mScale;
@@ -371,7 +371,7 @@ struct MultiPixelController {
             mData = other.mData;
             mScale = other.mScale;
             mAdvance = other.mAdvance;
-            mLen = other.mLen;
+            mLenRemaining = mLen = other.mLen;
             for(int i = 0; i < LANES; i++) { mOffsets[i] = other.mOffsets[i]; }
 
         }
@@ -384,20 +384,20 @@ struct MultiPixelController {
           }
         }
 
-        MultiPixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mScale(s) {
+        MultiPixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mData += skip;
             mAdvance = (advance) ? 3+skip : 0;
             initOffsets(len);
         }
 
-        MultiPixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mScale(s) {
+        MultiPixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 3;
             initOffsets(len);
         }
 
-        MultiPixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mScale(s) {
+        MultiPixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 0;
             initOffsets(len);
@@ -481,7 +481,7 @@ struct MultiPixelController {
 
         // Do we have n pixels left to process?
         __attribute__((always_inline)) inline bool has(int n) {
-            return mLen >= n;
+            return mLenRemaining >= n;
         }
 
         // toggle dithering enable
@@ -492,11 +492,13 @@ struct MultiPixelController {
             }
         }
 
+        __attribute__((always_inline)) inline int size() { return mLen; }
+        
         // get the amount to advance the pointer by
         __attribute__((always_inline)) inline int advanceBy() { return mAdvance; }
 
         // advance the data pointer forward, adjust position counter
-         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; mLen--;}
+         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; mLenRemaining--;}
 
         // step the dithering forward
          __attribute__((always_inline)) inline void stepDithering() {
@@ -537,6 +539,33 @@ struct MultiPixelController {
     __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }
     __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }
 };
+
+template<EOrder RGB_ORDER> class CPixelLEDController : public CLEDController {
+protected:
+  virtual void showPixels(PixelController<RGB_ORDER> & pixels) = 0;
+
+  /// set all the leds on the controller to a given color
+  ///@param data the crgb color to set the leds to
+  ///@param nLeds the numner of leds to set to this color
+  ///@param scale the rgb scaling value for outputting color
+  virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
+    PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
+    showPixels(pixels);
+  }
+
+/// write the passed in rgb data out to the leds managed by this controller
+///@param data the rgb data to write out to the strip
+///@param nLeds the number of leds being written out
+///@param scale the rgb scaling to apply to each led before writing it out
+  virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
+    PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
+    showPixels(pixels);
+  }
+
+public:
+  CPixelLEDController() : CLEDController() {}
+};
+
 
 FASTLED_NAMESPACE_END
 
