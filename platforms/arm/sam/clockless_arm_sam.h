@@ -56,16 +56,6 @@ protected:
 		mWait.mark();
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-		mWait.wait();
-		showRGBInternal(pixels);
-		sei();
-		mWait.mark();
-	}
-#endif
-
 
 	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register uint8_t & b) {
 		// Make sure we don't slot into a wrapping spot, this will delay up to 12.5µs for WS2812

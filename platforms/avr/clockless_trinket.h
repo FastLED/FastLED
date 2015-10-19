@@ -120,12 +120,6 @@ protected:
 		showAdjTime((uint8_t*)rgbdata, nLeds, scale, true, 0);
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-		showAdjTime((uint8_t*)rgbdata, nLeds, scale, true, 1);
-	}
-#endif
-
 	void showAdjTime(const uint8_t *data, int nLeds, CRGB & scale, bool advance, int skip) {
 		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither(), advance, skip);
 
@@ -502,11 +496,6 @@ protected:
 		#endif
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void showARGB(struct CARGB *data, int nLeds) {
-		// TODO: IMPLEMENTME
-	}
-#endif
 };
 
 #endif

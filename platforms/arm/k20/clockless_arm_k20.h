@@ -49,15 +49,6 @@ protected:
 		mWait.mark();
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-		mWait.wait();
-		showRGBInternal(pixels);
-		mWait.mark();
-	}
-#endif
-
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  {
 		for(register uint32_t i = BITS-1; i > 0; i--) {
 			while(ARM_DWT_CYCCNT < next_mark);

@@ -103,14 +103,6 @@ public:
 		mWait.mark();
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-		mWait.wait();
-		showRGBInternal(PixelController<RGB_ORDER>(rgbdata, nLeds, scale, getDither()));
-		mWait.mark();
-	}
-#endif
-
 	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b3, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
 		register Lines b2;
     transpose8x1(b.bytes,b2.bytes);

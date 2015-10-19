@@ -69,17 +69,6 @@ public:
     mWait.mark();
   }
 
-#ifdef SUPPORT_ARGB
-  virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-    mWait.wait();
-    cli();
-    showRGBInternal(pixels);
-    sei();
-    mWait.mark();
-  }
-#endif
-
   // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
   // gcc will use register Y for the this pointer.
   static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {

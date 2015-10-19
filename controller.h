@@ -58,10 +58,6 @@ protected:
 	///@param scale the rgb scaling to apply to each led before writing it out
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
 
-#ifdef SUPPORT_ARGB
-    // as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
-    virtual void show(const struct CARGB *data, int nLeds, CRGB scale) = 0;
-#endif
 public:
 	/// create an led controller object, add it to the chain of controllers
     CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
@@ -75,7 +71,7 @@ public:
 	virtual void init() = 0;
 
 	///clear out/zero out the given number of leds.
-	virtual void clearLeds(int nLeds) = 0;
+	virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black); }
 
     /// show function w/integer brightness, will scale for color correction and temperature
     void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
@@ -101,13 +97,6 @@ public:
     static CLEDController *head() { return m_pHead; }
     /// get the next controller in the chain after this one.  will return NULL at the end of the chain
     CLEDController *next() { return m_pNext; }
-
- #ifdef SUPPORT_ARGB
-    // as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
-    void show(const struct CARGB *data, int nLeds, uint8_t brightness) {
-        show(data, nLeds, getAdjustment(brightness))
-    }
-#endif
 
 	/// set the default array of leds to be used by this controller
     CLEDController & setLeds(CRGB *data, int nLeds) {
@@ -231,21 +220,6 @@ struct PixelController {
             mAdvance = 0;
         }
 
-#ifdef SUPPORT_ARGB
-        PixelController(const CARGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mScale(s) {
-            enable_dithering(dither);
-            // skip the A in CARGB
-            mData += 1;
-            mAdvance = 0;
-        }
-
-        PixelController(const CARGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mScale(s) {
-            enable_dithering(dither);
-            // skip the A in CARGB
-            mData += 1;
-            mAdvance = 4;
-        }
-#endif
     ///@}
 
 		/// initialize the binary dithering for this controller
@@ -428,24 +402,6 @@ struct MultiPixelController {
             mAdvance = 0;
             initOffsets(len);
         }
-
-#ifdef SUPPORT_ARGB
-        MultiPixelController(const CARGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mScale(s) {
-            enable_dithering(dither);
-            // skip the A in CARGB
-            mData += 1;
-            mAdvance = 0;
-            initOffsets(len);
-        }
-
-        MultiPixelController(const CARGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mScale(s) {
-            enable_dithering(dither);
-            // skip the A in CARGB
-            mData += 1;
-            mAdvance = 4;
-            initOffsets(len);
-        }
-#endif
 
         void init_binary_dithering() {
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)

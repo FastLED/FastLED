@@ -79,12 +79,6 @@ protected:
 		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *data, int nLeds, uint8_t scale) {
-		checkClear(nLeds);
-		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
-	}
-#endif
 };
 
 
@@ -132,13 +126,6 @@ protected:
 		mWaitDelay.mark();
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		mWaitDelay.wait();
-		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
-		mWaitDelay.mark();
-	}
-#endif
 };
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(25)>
@@ -234,26 +221,6 @@ protected:
 		mSPI.release();
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds,, scale, getDither());
-
-		mSPI.select();
-
-		startBoundary();
-		for(int i = 0; i < nLeds; i++) {
-			mSPI.writeByte(0xFF);
-			uint8_t b = pixels.loadAndScale0(); mSPI.writeByte(b);
-			b = pixels.loadAndScale1(); mSPI.writeByte(b);
-			b = pixels.loadAndScale2(); mSPI.writeByte(b);
-			pixels.advanceData();
-			pixels.stepDithering();
-		}
-		endBoundary(nLeds);
-		mSPI.waitFully();
-		mSPI.release();
-	}
-#endif
 };
 
 
@@ -326,24 +293,6 @@ protected:
 		mSPI.release();
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds,, scale, getDither());
-
-		mSPI.select();
-
-		writeBoundary();
-		for(int i = 0; i < nLeds; i++) {
-			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
-			pixels.advanceData();
-			pixels.stepDithering();
-		}
-		writeBoundary();
-		mSPI.waitFully();
-
-		mSPI.release();
-	}
-#endif
 };
 
 
@@ -408,17 +357,6 @@ protected:
 		writeHeader();
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *data, int nLeds, CRGB scale) {
-		mSPI.writeBytesValue(0, 6);
-		mSPI.template writeBit<0>(0);
-		mSPI.template writeBit<0>(0);
-
-		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
-		// of each triplet of bytes for rgb data
-		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
-	}
-#endif
 };
 /// @}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

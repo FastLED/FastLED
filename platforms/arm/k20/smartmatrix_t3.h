@@ -70,10 +70,6 @@ public:
 #endif
   }
 
-#ifdef SUPPORT_ARGB
-  // as above, but every 4th uint8_t is assumed to be alpha channel data, and will be skipped
-  virtual void show(const struct CARGB *data, int nLeds, CRGB scale) = 0;
-#endif
 };
 
 FASTLED_NAMESPACE_END

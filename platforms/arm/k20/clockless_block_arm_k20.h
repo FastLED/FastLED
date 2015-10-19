@@ -95,21 +95,6 @@ public:
 		mWait.mark();
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-		MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
-		mWait.wait();
-		uint32_t clocks = showRGBInternal(pixels,nLeds);
-
-		#if FASTLED_ALLOW_INTTERUPTS == 0
-		// Adjust the timer
-		long microsTaken = CLKS_TO_MICROS(clocks);
-		MS_COUNTER += (1 + (microsTaken / 1000));
-		#endif
-
-		mWait.mark();
-	}
-#endif
 
 
 	typedef union {
@@ -294,16 +279,6 @@ public:
 		showRGBInternal(pixels,nLeds);
 		mWait.mark();
 	}
-
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-		MultiPixelController<DLANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
-		mWait.wait();
-		showRGBInternal(pixels,nLeds);
-		mWait.mark();
-	}
-#endif
-
 
 	typedef union {
 		uint8_t bytes[16];
