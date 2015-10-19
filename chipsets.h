@@ -26,7 +26,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(12)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(12) >
-class LPD8806Controller : public CLEDController {
+class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 
 	class LPD8806_ADJUST {
@@ -40,45 +40,18 @@ class LPD8806Controller : public CLEDController {
 	};
 
 	SPI mSPI;
-	int mClearedLeds;
-
-	void checkClear(int nLeds) {
-		if(nLeds > mClearedLeds) {
-			clearLine(nLeds);
-			mClearedLeds = nLeds;
-		}
-	}
-
-	void clearLine(int nLeds) {
-		int n = ((nLeds*3  + 63) >> 6);
-		mSPI.writeBytesValue(0, n);
-	}
 public:
+
 	LPD8806Controller()  {}
 	virtual void init() {
 		mSPI.init();
-		mClearedLeds = 0;
-	}
-
-	virtual void clearLeds(int nLeds) {
-		mSPI.select();
-		mSPI.writeBytesValueRaw(0x80, nLeds * 3);
-		mSPI.writeBytesValueRaw(0, ((nLeds*3+63)>>6));
-		mSPI.waitFully();
-		mSPI.release();
 	}
 
 protected:
 
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(pixels);
 	}
-
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		// TODO rgb-ize scale
-		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
-	}
-
 };
 
 
@@ -94,7 +67,7 @@ protected:
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(1)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(1)>
-class WS2801Controller : public CLEDController {
+class WS2801Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 	CMinWait<1000>  mWaitDelay;
@@ -103,7 +76,7 @@ public:
 
 	virtual void init() {
 		mSPI.init();
-	    mWaitDelay.mark();
+	  mWaitDelay.mark();
 	}
 
 	virtual void clearLeds(int nLeds) {
@@ -114,18 +87,11 @@ public:
 
 protected:
 
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mWaitDelay.wait();
-		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
+		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(pixels);
 		mWaitDelay.mark();
 	}
-
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		mWaitDelay.wait();
-		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
-		mWaitDelay.mark();
-	}
-
 };
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(25)>
@@ -143,7 +109,7 @@ class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER,
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(24)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = BGR, uint8_t SPI_SPEED = DATA_RATE_MHZ(24)>
-class APA102Controller : public CLEDController {
+class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
@@ -161,46 +127,13 @@ public:
 		mSPI.init();
 	}
 
-	virtual void clearLeds(int nLeds) {
-		showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0));
-	}
-
 protected:
 
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
-
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
 		startBoundary();
-		for(int i = 0; i < nLeds; i++) {
-#ifdef FASTLED_SPI_BYTE_ONLY
-			mSPI.writeByte(0xFF);
-			mSPI.writeByte(pixels.loadAndScale0());
-			mSPI.writeByte(pixels.loadAndScale1());
-			mSPI.writeByte(pixels.loadAndScale2());
-#else
-			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0();
-			mSPI.writeWord(b);
-			uint16_t w = pixels.loadAndScale1() << 8;
-			w |= pixels.loadAndScale2();
-			mSPI.writeWord(w);
-#endif
-			pixels.stepDithering();
-		}
-		endBoundary(nLeds);
-
-		mSPI.waitFully();
-		mSPI.release();
-	}
-
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
-
-		mSPI.select();
-
-		startBoundary();
-		for(int i = 0; i < nLeds; i++) {
+		while(pixels.has(1)) {
 #ifdef FASTLED_SPI_BYTE_ONLY
 			mSPI.writeByte(0xFF);
 			mSPI.writeByte(pixels.loadAndScale0());
@@ -216,7 +149,7 @@ protected:
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
-		endBoundary(nLeds);
+		endBoundary(pixels.size());
 		mSPI.waitFully();
 		mSPI.release();
 	}
@@ -236,7 +169,7 @@ protected:
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(10)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(10)>
-class P9813Controller : public CLEDController {
+class P9813Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
@@ -254,35 +187,13 @@ public:
 		mSPI.init();
 	}
 
-	virtual void clearLeds(int nLeds) {
-		showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0));
-	}
-
 protected:
 
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
-
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
 		writeBoundary();
-		while(nLeds--) {
-			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
-			pixels.stepDithering();
-		}
-		writeBoundary();
-
-		mSPI.waitFully();
-		mSPI.release();
-	}
-
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
-
-		mSPI.select();
-
-		writeBoundary();
-		for(int i = 0; i < nLeds; i++) {
+		while(pixels.has(1)) {
 			writeLed(pixels.loadAndScale0(), pixels.loadAndScale1(), pixels.loadAndScale2());
 			pixels.advanceData();
 			pixels.stepDithering();
@@ -308,7 +219,7 @@ protected:
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(16)
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(16)>
-class SM16716Controller : public CLEDController {
+class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
@@ -329,31 +240,13 @@ public:
 		mSPI.init();
 	}
 
-	virtual void clearLeds(int nLeds) {
-		mSPI.select();
-		while(nLeds--) {
-			mSPI.template writeBit<0>(1);
-			mSPI.writeByte(0);
-			mSPI.writeByte(0);
-			mSPI.writeByte(0);
-		}
-		mSPI.waitFully();
-		mSPI.release();
-		writeHeader();
-	}
-
 protected:
 
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
-		writeHeader();
-	}
-
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		// writeHeader();
-		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>( PixelController<RGB_ORDER>(data, nLeds, scale, getDither()));
+		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>( pixels );
 		writeHeader();
 	}
 
