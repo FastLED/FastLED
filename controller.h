@@ -175,7 +175,7 @@ public:
 template<EOrder RGB_ORDER>
 struct PixelController {
         const uint8_t *mData;
-        int mLen;
+        int mLen,mLenRemaining;
         uint8_t d[3];
         uint8_t e[3];
         CRGB mScale;
@@ -193,6 +193,7 @@ struct PixelController {
             mScale = other.mScale;
             mAdvance = other.mAdvance;
             mLen = other.mLen;
+            mLenRemaining = other.mLenRemaining;
         }
 
 
@@ -204,18 +205,18 @@ struct PixelController {
 		///@param dither the dither mode for these pixels
 		///@param advance whether or not to walk through the array of data for each pixel, or just write out the first pixel len times
 		///@param skip whether or not there is extra data to skip when writing out led data, e.g. if passed in argb data
-        PixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mScale(s) {
+        PixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mData += skip;
             mAdvance = (advance) ? 3+skip : 0;
         }
 
-        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mScale(s) {
+        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 3;
         }
 
-        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mScale(s) {
+        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 0;
         }
@@ -301,7 +302,7 @@ struct PixelController {
 
         /// Do we have n pixels left to process?
         __attribute__((always_inline)) inline bool has(int n) {
-            return mLen >= n;
+            return mLenRemaining >= n;
         }
 
         /// toggle dithering enable
@@ -312,11 +313,12 @@ struct PixelController {
             }
         }
 
+        __attribute__((always_inline)) inline int size() { return mLen; }
         /// get the amount to advance the pointer by
         __attribute__((always_inline)) inline int advanceBy() { return mAdvance; }
 
         /// advance the data pointer forward, adjust position counter
-         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; mLen--;}
+         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; mLenRemaining--;}
 
         /// step the dithering forward
          __attribute__((always_inline)) inline void stepDithering() {
@@ -493,7 +495,7 @@ struct MultiPixelController {
         }
 
         __attribute__((always_inline)) inline int size() { return mLen; }
-        
+
         // get the amount to advance the pointer by
         __attribute__((always_inline)) inline int advanceBy() { return mAdvance; }
 
