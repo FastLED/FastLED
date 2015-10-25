@@ -489,6 +489,23 @@ public:
         return &(entries[0]);
     }
 
+    bool operator==( const CHSVPalette16 rhs)
+    {
+        const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
+        const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
+        if( p == q) return true;
+        for( uint8_t i = 0; i < (sizeof( entries)); i++) {
+            if( *p != *q) return false;
+            p++;
+            q++;
+        }
+        return true;
+    }
+    bool operator!=( const CHSVPalette16 rhs)
+    {
+        return !( *this == rhs);
+    }
+    
     CHSVPalette16( const CHSV& c1)
     {
         fill_solid( &(entries[0]), 16, c1);
@@ -577,6 +594,23 @@ public:
         return &(entries[0]);
     }
 
+    bool operator==( const CHSVPalette256 rhs)
+    {
+        const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
+        const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
+        if( p == q) return true;
+        for( uint16_t i = 0; i < (sizeof( entries)); i++) {
+            if( *p != *q) return false;
+            p++;
+            q++;
+        }
+        return true;
+    }
+    bool operator!=( const CHSVPalette256 rhs)
+    {
+        return !( *this == rhs);
+    }
+    
     CHSVPalette256( const CHSV& c1)
     {
       fill_solid( &(entries[0]), 256, c1);
@@ -648,6 +682,23 @@ public:
         return *this;
     }
 
+    bool operator==( const CRGBPalette16 rhs)
+    {
+        const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
+        const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
+        if( p == q) return true;
+        for( uint8_t i = 0; i < (sizeof( entries)); i++) {
+            if( *p != *q) return false;
+            p++;
+            q++;
+        }
+        return true;
+    }
+    bool operator!=( const CRGBPalette16 rhs)
+    {
+        return !( *this == rhs);
+    }
+    
     inline CRGB& operator[] (uint8_t x) __attribute__((always_inline))
     {
         return entries[x];
@@ -880,6 +931,23 @@ public:
         return *this;
     }
 
+    bool operator==( const CRGBPalette256 rhs)
+    {
+        const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
+        const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
+        if( p == q) return true;
+        for( uint16_t i = 0; i < (sizeof( entries)); i++) {
+            if( *p != *q) return false;
+            p++;
+            q++;
+        }
+        return true;
+    }
+    bool operator!=( const CRGBPalette256 rhs)
+    {
+        return !( *this == rhs);
+    }
+    
     inline CRGB& operator[] (uint8_t x) __attribute__((always_inline))
     {
         return entries[x];

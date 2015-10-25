@@ -550,7 +550,8 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
         // this part could probably use refinement/rethinking,
         // (but it doesn't overflow & wrap anymore)
         uint16_t s16;
-        s16 = (s * 256) / v;
+        s16 = (s * 256);
+        s16 /= v;
         if( s16 < 256) {
             s = s16;
         } else {
