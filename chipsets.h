@@ -477,6 +477,9 @@ class GW6205Controller400Khz : public ClocklessController<DATA_PIN, 6 * FMUL, 7 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 4 * FMUL, 4 * FMUL, RGB_ORDER, 4> {};
 
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {}; 
+
 #else
 // GW6205@400khz - 800ns, 800ns, 800ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
@@ -529,6 +532,9 @@ class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), N
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class SK6812Controller : public ClocklessController<DATA_PIN, NS(300), NS(300), NS(600), RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class PL9823Controller : public ClocklessController<DATA_PIN, NS(350), NS(1010), NS(350), RGB_ORDER> {}; 
 #endif
 ///@}
 
