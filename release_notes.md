@@ -4,6 +4,7 @@ FastLED3.1.1pre
 * Fix edge case bug w/HSV palette blending 
 * Fix power management issue w/parallel output
 * Use static_asserts for some more useful compile time errors around bad pins
+* Roll power management into FastLED.show/delay directly
 
 FastLED3.1.0
 ============
