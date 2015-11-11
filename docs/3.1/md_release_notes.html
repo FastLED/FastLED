@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.9.1"/>
-<title>FastLED: FastLED3.0</title>
+<title>FastLED: FastLED3.1.1pre</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -78,10 +78,41 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="headertitle">
-<div class="title">FastLED3.0 </div>  </div>
+<div class="title">FastLED3.1.1pre </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><ul>
+<li>Enabled RFDuino/nrf51822 hardware SPI support</li>
+<li>Fix edge case bug w/HSV palette blending</li>
+<li>Fix power management issue w/parallel output</li>
+<li>Use static_asserts for some more useful compile time errors around bad pins</li>
+<li>Roll power management into FastLED.show/delay directly</li>
+</ul>
+<h1>FastLED3.1.0 </h1>
+<ul>
+<li>Added support for the following platforms<ul>
+<li>Arduino Zero</li>
+<li>Teensy LC</li>
+<li>RFDuino/nrf51822</li>
+<li>Spark Core</li>
+</ul>
+</li>
+<li>Major internal code reoganization</li>
+<li>Started doxygen based documentation</li>
+<li>Lots of bug/performance fixes</li>
+<li>Parallel output on various arm platforms</li>
+<li>lots of new stuff</li>
+</ul>
+<h1>FastLED3.0.2 </h1>
+<ul>
+<li>possibly fix issues #67 and #90 by fixing gcc 4.8.x support</li>
+</ul>
+<h1>FastLED3.0.1 </h1>
+<ul>
+<li>fix issue #89 w/power management pin always being on</li>
+</ul>
+<h1>FastLED3.0 </h1>
+<ul>
 <li>Added support for the following platforms:<ul>
 <li>Arduino due</li>
 <li>Teensy 3.1</li>
@@ -197,7 +228,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 23:10:47 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

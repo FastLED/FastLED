@@ -95,7 +95,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">// A skeletal implementation of hardware SPI support.  Fill in the necessary code for init, waiting, and writing.  The rest of</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment">// the method implementations should provide a starting point, even if not hte most efficient to start with</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>8_t _DATA_PIN, u<span class="keywordtype">int</span>8_t _CLOCK_PIN, u<span class="keywordtype">int</span>8_t _SPI_CLOCK_DIVIDER&gt;</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">class </span>REFHardwareSPIOutput {</div>
+<div class="line"><a name="l00009"></a><span class="lineno"><a class="line" href="class_r_e_f_hardware_s_p_i_output.html">    9</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_r_e_f_hardware_s_p_i_output.html">REFHardwareSPIOutput</a> {</div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;    <a class="code" href="class_selectable.html">Selectable</a> *m_pSelect;</div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;    SAMHardwareSPIOutput() { m_pSelect = NULL; }</div>
@@ -108,10 +108,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <span class="keywordtype">void</span> init() { <span class="comment">/* TODO */</span> }</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="comment">// latch the CS select</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordtype">void</span> <span class="keyword">inline</span> select() <a class="code" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline)) { <span class="keywordflow">if</span>(m_pSelect != NULL) { m_pSelect-&gt;select(); } } </div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordtype">void</span> <span class="keyword">inline</span> select() <a class="code" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline)) { <span class="keywordflow">if</span>(m_pSelect != NULL) { m_pSelect-&gt;select(); } }</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="comment">// release the CS select </span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keywordtype">void</span> <span class="keyword">inline</span> release() <a class="code" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline)) { <span class="keywordflow">if</span>(m_pSelect != NULL) { m_pSelect-&gt;release(); } } </div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="comment">// release the CS select</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keywordtype">void</span> <span class="keyword">inline</span> release() <a class="code" href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a>((always_inline)) { <span class="keywordflow">if</span>(m_pSelect != NULL) { m_pSelect-&gt;release(); } }</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="comment">// wait until all queued up data has been written</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> waitFully() { <span class="comment">/* TODO */</span> }</div>
@@ -125,7 +125,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="comment">// A raw set of writing byte values, assumes setup/init/waiting done elsewhere</span></div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> writeBytesValueRaw(uint8_t value, <span class="keywordtype">int</span> len) {</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        <span class="keywordflow">while</span>(len--) { writeByte(value); }</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    }   </div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    }</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="comment">// A full cycle of writing a value for len bytes, including select, release, and waiting</span></div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordtype">void</span> writeBytesValue(uint8_t value, <span class="keywordtype">int</span> len) {</div>
@@ -133,16 +133,16 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    }</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="comment">// A full cycle of writing a value for len bytes, including select, release, and waiting</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> D&gt; <span class="keywordtype">void</span> writeBytes(<span class="keyword">register</span> uint8_t *data, <span class="keywordtype">int</span> len) { </div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> D&gt; <span class="keywordtype">void</span> writeBytes(<span class="keyword">register</span> uint8_t *data, <span class="keywordtype">int</span> len) {</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        uint8_t *end = data + len;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        select();</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="comment">// could be optimized to write 16bit words out instead of 8bit bytes</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keywordflow">while</span>(data != end) { </div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keywordflow">while</span>(data != end) {</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            writeByte(D::adjust(*data++));</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        }</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        D::postBlock(len);</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        waitFully();</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        release();  </div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        release();</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    }</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="comment">// A full cycle of writing a value for len bytes, including select, release, and waiting</span></div>
@@ -153,10 +153,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <span class="comment">// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template</span></div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="comment">// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>8_t FLAGS, <span class="keyword">class</span> D, EOrder RGB_ORDER&gt; <span class="keywordtype">void</span> writeBytes3(<span class="keyword">register</span> uint8_t *data, <span class="keywordtype">int</span> len, <span class="keyword">register</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a> scale, <span class="keywordtype">bool</span> advance=<span class="keyword">true</span>, uint8_t skip=0) {</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>8_t FLAGS, <span class="keyword">class</span> D, EOrder RGB_ORDER&gt; <span class="keywordtype">void</span> writePixels(<a class="code" href="struct_pixel_controller.html">PixelController&lt;RGB_ORDER&gt;</a> pixels) {</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        select();</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keywordflow">while</span>(data != end) { </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;            <span class="keywordflow">if</span>(FLAGS &amp; FLAG_START_BIT) { </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keywordflow">while</span>(data != end) {</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;            <span class="keywordflow">if</span>(FLAGS &amp; FLAG_START_BIT) {</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                writeBit&lt;0&gt;(1);</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;            }</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;            writeByte(D::adjust(pixels.loadAndScale0()));</div>
@@ -171,31 +171,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        release();</div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    }</div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="comment">// template instantiations for writeBytes 3</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    <span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>8_t FLAGS, EOrder RGB_ORDER&gt; <span class="keywordtype">void</span> writeBytes3(<span class="keyword">register</span> uint8_t *data, <span class="keywordtype">int</span> len, <span class="keyword">register</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a> scale, <span class="keywordtype">bool</span> advance=<span class="keyword">true</span>, uint8_t skip=0) { </div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        writeBytes3&lt;FLAGS, DATA_NOP, RGB_ORDER&gt;(data, len, scale, advance, skip); </div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    }</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">class</span> D, EOrder RGB_ORDER&gt; <span class="keywordtype">void</span> writeBytes3(<span class="keyword">register</span> uint8_t *data, <span class="keywordtype">int</span> len, <span class="keyword">register</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a> scale, <span class="keywordtype">bool</span> advance=<span class="keyword">true</span>, uint8_t skip=0) { </div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        writeBytes3&lt;0, D, RGB_ORDER&gt;(data, len, scale, advance, skip); </div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    }</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keyword">template</span> &lt;EOrder RGB_ORDER&gt; <span class="keywordtype">void</span> writeBytes3(<span class="keyword">register</span> uint8_t *data, <span class="keywordtype">int</span> len, <span class="keyword">register</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a> scale, <span class="keywordtype">bool</span> advance=<span class="keyword">true</span>, uint8_t skip=0) { </div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        writeBytes3&lt;0, DATA_NOP, RGB_ORDER&gt;(data, len, scale, advance, skip); </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    }</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keywordtype">void</span> writeBytes3(<span class="keyword">register</span> uint8_t *data, <span class="keywordtype">int</span> len, <span class="keyword">register</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a> scale, <span class="keywordtype">bool</span> advance=<span class="keyword">true</span>, uint8_t skip=0) { </div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        writeBytes3&lt;0, DATA_NOP, RGB&gt;(data, len, scale, advance, skip); </div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;};</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;FASTLED_NAMESPACE_END</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="struct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue) </div><div class="ttdef"><b>Definition:</b> pixeltypes.h:88</div></div>
-<div class="ttc" id="class_selectable_html"><div class="ttname"><a href="class_selectable.html">Selectable</a></div><div class="ttdef"><b>Definition:</b> fastpin.h:19</div></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;};</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;FASTLED_NAMESPACE_END</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="struct_pixel_controller_html"><div class="ttname"><a href="struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class. </div><div class="ttdef"><b>Definition:</b> controller.h:187</div></div>
+<div class="ttc" id="class_selectable_html"><div class="ttname"><a href="class_selectable.html">Selectable</a></div><div class="ttdef"><b>Definition:</b> fastpin.h:22</div></div>
 <div class="ttc" id="group___bitswap_html_ga01396a2e40133293c3badab349ac99f0"><div class="ttname"><a href="group___bitswap.html#ga01396a2e40133293c3badab349ac99f0">__attribute__</a></div><div class="ttdeci">__attribute__((always_inline)) inline void swapbits8(bitswap_type in</div><div class="ttdoc">Do an 8byte by 8bit rotation. </div><div class="ttdef"><b>Definition:</b> fastled_delay.h:85</div></div>
+<div class="ttc" id="class_r_e_f_hardware_s_p_i_output_html"><div class="ttname"><a href="class_r_e_f_hardware_s_p_i_output.html">REFHardwareSPIOutput</a></div><div class="ttdef"><b>Definition:</b> fastspi_ref.h:9</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 23:10:47 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

@@ -153,10 +153,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>show</b> (const struc
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a7b61c81e004c96ff670a2742057a5a52">clearLedData</a> ()</td></tr>
 <tr class="memdesc:a7b61c81e004c96ff670a2742057a5a52 inherit pub_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">zero out the led data managed by this controller <br /></td></tr>
 <tr class="separator:a7b61c81e004c96ff670a2742057a5a52 inherit pub_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8840496d231f1fe0fa640970dc14db08 inherit pub_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8840496d231f1fe0fa640970dc14db08"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a8840496d231f1fe0fa640970dc14db08">size</a> ()</td></tr>
-<tr class="memdesc:a8840496d231f1fe0fa640970dc14db08 inherit pub_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">How many leds does this controller manage? <br /></td></tr>
-<tr class="separator:a8840496d231f1fe0fa640970dc14db08 inherit pub_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63f75cf7e55cf8da46db5fd27110bb3e inherit pub_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a63f75cf7e55cf8da46db5fd27110bb3e"></a>
+virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a63f75cf7e55cf8da46db5fd27110bb3e">size</a> ()</td></tr>
+<tr class="memdesc:a63f75cf7e55cf8da46db5fd27110bb3e inherit pub_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">How many leds does this controller manage? <br /></td></tr>
+<tr class="separator:a63f75cf7e55cf8da46db5fd27110bb3e inherit pub_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e86c45c89ebfb7b21f9045790302399 inherit pub_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5e86c45c89ebfb7b21f9045790302399"></a>
 <a class="el" href="struct_c_r_g_b.html">CRGB</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a5e86c45c89ebfb7b21f9045790302399">leds</a> ()</td></tr>
 <tr class="memdesc:a5e86c45c89ebfb7b21f9045790302399 inherit pub_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pointer to the <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) ">CRGB</a> array for this controller. <br /></td></tr>
@@ -209,6 +209,9 @@ virtual uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>getMaxRef
 static <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a75a5a6ea50899409d875d72393323ca0">head</a> ()</td></tr>
 <tr class="memdesc:a75a5a6ea50899409d875d72393323ca0 inherit pub_static_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the first led controller in the chain of controllers <br /></td></tr>
 <tr class="separator:a75a5a6ea50899409d875d72393323ca0 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ad4ceb3bc9ae2efa11e50ffe4b140d4 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3ad4ceb3bc9ae2efa11e50ffe4b140d4"></a>
+static <a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>computeAdjustment</b> (uint8_t scale, const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;colorCorrection, const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;colorTemperature)</td></tr>
+<tr class="separator:a3ad4ceb3bc9ae2efa11e50ffe4b140d4 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_class_d_m_x_simple_controller"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_class_d_m_x_simple_controller')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_d_m_x_simple_controller.html">DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memitem:a3fb3a0501aae1d7a6aefb89f77168bd1 inherit pro_methods_class_d_m_x_simple_controller"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_d_m_x_simple_controller.html#a3fb3a0501aae1d7a6aefb89f77168bd1">showColor</a> (const struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;data, int nLeds, <a class="el" href="struct_c_r_g_b.html">CRGB</a> scale)</td></tr>
 <tr class="memdesc:a3fb3a0501aae1d7a6aefb89f77168bd1 inherit pro_methods_class_d_m_x_simple_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">set all the leds on the controller to a given color  <a href="#a3fb3a0501aae1d7a6aefb89f77168bd1">More...</a><br /></td></tr>
@@ -256,7 +259,7 @@ static <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a> *&#
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 23:10:47 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

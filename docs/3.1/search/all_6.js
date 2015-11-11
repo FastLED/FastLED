@@ -16,7 +16,7 @@ var searchData=
   ['fract16',['fract16',['../group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5',1,'lib8tion.h']]],
   ['fract8',['fract8',['../group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644',1,'lib8tion.h']]],
   ['fast_20math_20functions',['Fast math functions',['../group__lib8tion.html',1,'']]],
-  ['fastled3_2e0',['FastLED3.0',['../md_release_notes.html',1,'']]],
+  ['fastled3_2e1_2e1pre',['FastLED3.1.1pre',['../md_release_notes.html',1,'']]],
   ['fast_20random_20number_20generators',['Fast random number generators',['../group___random.html',1,'']]],
   ['fast_20trig_20functions',['Fast trig functions',['../group___trig.html',1,'']]]
 ];

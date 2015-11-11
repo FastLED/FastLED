@@ -114,9 +114,57 @@ typedef volatile RwReg *&#160;</td><td class="memItemRight" valign="bottom"><b>p
 <tr class="memitem:a23ad28734f9597c28afbba8b4bfcda09"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a23ad28734f9597c28afbba8b4bfcda09"></a>
 typedef RwReg&#160;</td><td class="memItemRight" valign="bottom"><b>port_t</b></td></tr>
 <tr class="separator:a23ad28734f9597c28afbba8b4bfcda09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f23acc7c8c6ce0c760745d32d14932f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9f23acc7c8c6ce0c760745d32d14932f"></a>
+typedef volatile RwReg *&#160;</td><td class="memItemRight" valign="bottom"><b>port_ptr_t</b></td></tr>
+<tr class="separator:a9f23acc7c8c6ce0c760745d32d14932f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23ad28734f9597c28afbba8b4bfcda09"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a23ad28734f9597c28afbba8b4bfcda09"></a>
+typedef RwReg&#160;</td><td class="memItemRight" valign="bottom"><b>port_t</b></td></tr>
+<tr class="separator:a23ad28734f9597c28afbba8b4bfcda09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ab4b349c1763a7565c3ee7b2de52a50c8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab4b349c1763a7565c3ee7b2de52a50c8"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>setOutput</b> ()</td></tr>
+<tr class="separator:ab4b349c1763a7565c3ee7b2de52a50c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0543e3ac851ca56f30150fbaf1a109d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af0543e3ac851ca56f30150fbaf1a109d"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>setInput</b> ()</td></tr>
+<tr class="separator:af0543e3ac851ca56f30150fbaf1a109d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7693f53f66b9b6f6e4ecbe03ad0fea6b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7693f53f66b9b6f6e4ecbe03ad0fea6b"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>hi</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a7693f53f66b9b6f6e4ecbe03ad0fea6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2321395038a879e2f1adccae8afce5b5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2321395038a879e2f1adccae8afce5b5"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>lo</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a2321395038a879e2f1adccae8afce5b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69b8d94e33ca56dfec3fa249affbac32"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a69b8d94e33ca56dfec3fa249affbac32"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>strobe</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a69b8d94e33ca56dfec3fa249affbac32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8de59c1701bd256fb9b25bd88f92bd61"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8de59c1701bd256fb9b25bd88f92bd61"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>toggle</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a8de59c1701bd256fb9b25bd88f92bd61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdb303c3de97f6b2a0b1ac5369dec87f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abdb303c3de97f6b2a0b1ac5369dec87f"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>hi</b> (register port_ptr_t port) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:abdb303c3de97f6b2a0b1ac5369dec87f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca5b2f25bbbd4fa61f435ff2577fb728"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aca5b2f25bbbd4fa61f435ff2577fb728"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>lo</b> (register port_ptr_t port) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:aca5b2f25bbbd4fa61f435ff2577fb728"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6416c88feed72cc5a59b012ad45902b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af6416c88feed72cc5a59b012ad45902b"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>set</b> (register port_t val) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:af6416c88feed72cc5a59b012ad45902b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af8bea00ff59320915271dace678c6e00"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af8bea00ff59320915271dace678c6e00"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>fastset</b> (register port_ptr_t port, register port_t val) <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:af8bea00ff59320915271dace678c6e00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab365936a660e1432e8c93eb4be01f7a6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab365936a660e1432e8c93eb4be01f7a6"></a>
+static port_t&#160;</td><td class="memItemRight" valign="bottom"><b>hival</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:ab365936a660e1432e8c93eb4be01f7a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1668395cdbe4f93d24e789fdc6501279"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1668395cdbe4f93d24e789fdc6501279"></a>
+static port_t&#160;</td><td class="memItemRight" valign="bottom"><b>loval</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:a1668395cdbe4f93d24e789fdc6501279"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5256244d2cb8e4404bcfec58e6c64f6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae5256244d2cb8e4404bcfec58e6c64f6"></a>
+static port_ptr_t&#160;</td><td class="memItemRight" valign="bottom"><b>port</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:ae5256244d2cb8e4404bcfec58e6c64f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace4b21f3980bbca6a4be16130053e8f3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ace4b21f3980bbca6a4be16130053e8f3"></a>
+static port_t&#160;</td><td class="memItemRight" valign="bottom"><b>mask</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
+<tr class="separator:ace4b21f3980bbca6a4be16130053e8f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4b349c1763a7565c3ee7b2de52a50c8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab4b349c1763a7565c3ee7b2de52a50c8"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>setOutput</b> ()</td></tr>
 <tr class="separator:ab4b349c1763a7565c3ee7b2de52a50c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -175,7 +223,7 @@ class FastPin&lt; PIN &gt;</h3>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 23:10:47 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

@@ -90,7 +90,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="#index_n"><span>n</span></a></li>
       <li><a href="#index_o"><span>o</span></a></li>
       <li><a href="#index_p"><span>p</span></a></li>
-      <li class="current"><a href="#index_s"><span>s</span></a></li>
+      <li><a href="#index_r"><span>r</span></a></li>
+      <li><a href="#index_s"><span>s</span></a></li>
+      <li class="current"><a href="#index_w"><span>w</span></a></li>
     </ul>
   </div>
 </div><!-- top -->
@@ -207,6 +209,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="class_d_m_x_serial_controller.html#a0cd937424d4f6eedb90acec81ca1fa27">DMXSerialController&lt; RGB_ORDER &gt;</a>
 , <a class="el" href="class_d_m_x_simple_controller.html#a251c7d09383870337853c360996871c3">DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;</a>
 , <a class="el" href="class_l_p_d8806_controller.html#abe5be69b938d0709cfc77fcf57c75608">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
+, <a class="el" href="class_n_o_p_s_p_i_output.html#ad9ff9bf62427b69e3bb578699e0ce561">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
 , <a class="el" href="class_p9813_controller.html#ad6fcb36b9378df660721ae24ed857b8a">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_s_m16716_controller.html#a1ba5a4e3f00b2235f278b9fb9aeb1591">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_w_s2801_controller.html#ad6187b68bccb831cd5cab3cffbd6bdb4">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
@@ -247,13 +250,23 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </ul>
 
 
+<h3><a class="anchor" id="index_r"></a>- r -</h3><ul>
+<li>release()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#a0599fbdf5e04a633d24ff17033443237">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
+</li>
+</ul>
+
+
 <h3><a class="anchor" id="index_s"></a>- s -</h3><ul>
+<li>select()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#ae07bb6f787879f28979cccec9ec4965d">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
+</li>
 <li>setBrightness()
 : <a class="el" href="class_c_fast_l_e_d.html#a730ba7d967e882b4b893689cf333b2eb">CFastLED</a>
 </li>
 <li>setCorrection()
 : <a class="el" href="class_c_fast_l_e_d.html#ad266c3e649cc12a6dc49a1e229acc282">CFastLED</a>
-, <a class="el" href="class_c_l_e_d_controller.html#a9620d0a629a6a3294c71f5f8dbfe91b8">CLEDController</a>
+, <a class="el" href="class_c_l_e_d_controller.html#a74c43977660742e8185fd666e5d66bf9">CLEDController</a>
 </li>
 <li>setDither()
 : <a class="el" href="class_c_fast_l_e_d.html#a7ae5d3864df01101d82d242c123ffb36">CFastLED</a>
@@ -262,8 +275,17 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <li>setLeds()
 : <a class="el" href="class_c_l_e_d_controller.html#a5b08378b29f92c5def65175ec5334037">CLEDController</a>
 </li>
+<li>setMaxPowerInMilliWatts()
+: <a class="el" href="class_c_fast_l_e_d.html#ab07d62cdec036af9ede70cbd06ece40f">CFastLED</a>
+</li>
+<li>setMaxPowerInVoltsAndMilliamps()
+: <a class="el" href="class_c_fast_l_e_d.html#a996375a3f4a7b8c096f87d8a93c2b196">CFastLED</a>
+</li>
 <li>setMaxRefreshRate()
 : <a class="el" href="class_c_fast_l_e_d.html#a1f39e8404db214bbd6a776f52a77d8b1">CFastLED</a>
+</li>
+<li>setSelect()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#a6fca9a7e475aecae123879044d33f195">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
 </li>
 <li>setTemperature()
 : <a class="el" href="class_c_fast_l_e_d.html#a28c2dfb0ec592db03f3063ade135f19f">CFastLED</a>
@@ -296,13 +318,41 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </li>
 <li>size()
 : <a class="el" href="class_c_fast_l_e_d.html#a18fba22754d2a1a206fc5db8d24a92d0">CFastLED</a>
-, <a class="el" href="class_c_l_e_d_controller.html#a8840496d231f1fe0fa640970dc14db08">CLEDController</a>
+, <a class="el" href="class_c_l_e_d_controller.html#a63f75cf7e55cf8da46db5fd27110bb3e">CLEDController</a>
+</li>
+</ul>
+
+
+<h3><a class="anchor" id="index_w"></a>- w -</h3><ul>
+<li>waitFully()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#a6d1c46106879fc835ad6ba8149b20068">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
+</li>
+<li>writeBit()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#a9b0cd7fa63b1cff86c61f796aa8a6637">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
+</li>
+<li>writeByte()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#af5485fc346e12c50480b969e5b242636">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
+</li>
+<li>writeBytes()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#a7b33548cfee1f5cda7a8a48fa45ee460">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
+</li>
+<li>writeBytesValue()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#a2f8e72323c827eb869b222b5a36ebbc1">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
+</li>
+<li>writeBytesValueRaw()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#a7c67ce1f9d44cfcac9b94fa9f097835f">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
+</li>
+<li>writePixels()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#aa192a8b0f727e7c9fc399e94532e287f">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
+</li>
+<li>writeWord()
+: <a class="el" href="class_n_o_p_s_p_i_output.html#a31ccabe3e4987751ad67a5d06e502df2">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
 </li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 23:10:47 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Nov 11 2015 15:10:37 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

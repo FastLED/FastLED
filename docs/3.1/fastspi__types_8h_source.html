@@ -102,7 +102,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;  <span class="keyword">static</span> __attribute__((always_inline)) <span class="keyword">inline</span> uint8_t adjust(<span class="keyword">register</span> uint8_t data) { <span class="keywordflow">return</span> data; }</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;  <span class="keyword">static</span> __attribute__((always_inline)) <span class="keyword">inline</span> uint8_t adjust(<span class="keyword">register</span> uint8_t data, <span class="keyword">register</span> uint8_t scale) { <span class="keywordflow">return</span> <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>(data, scale); }</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  <span class="keyword">static</span> __attribute__((always_inline)) <span class="keyword">inline</span> <span class="keywordtype">void</span> postBlock(<span class="keywordtype">int</span> len) {}</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  <span class="keyword">static</span> __attribute__((always_inline)) <span class="keyword">inline</span> <span class="keywordtype">void</span> postBlock(<span class="keywordtype">int</span> <span class="comment">/* len */</span>) { }</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;};</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="preprocessor">#define FLAG_START_BIT 0x80</span></div>
@@ -127,7 +127,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 23:10:47 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

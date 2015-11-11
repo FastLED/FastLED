@@ -107,6 +107,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ac2615781ec12e025fb17cc0e66281716"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_fast_l_e_d.html#ac2615781ec12e025fb17cc0e66281716">getBrightness</a> ()</td></tr>
 <tr class="memdesc:ac2615781ec12e025fb17cc0e66281716"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current global brightness setting.  <a href="#ac2615781ec12e025fb17cc0e66281716">More...</a><br /></td></tr>
 <tr class="separator:ac2615781ec12e025fb17cc0e66281716"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a996375a3f4a7b8c096f87d8a93c2b196"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_fast_l_e_d.html#a996375a3f4a7b8c096f87d8a93c2b196">setMaxPowerInVoltsAndMilliamps</a> (uint8_t volts, uint32_t milliamps)</td></tr>
+<tr class="memdesc:a996375a3f4a7b8c096f87d8a93c2b196"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the maximum power to be used, given in volts and milliamps.  <a href="#a996375a3f4a7b8c096f87d8a93c2b196">More...</a><br /></td></tr>
+<tr class="separator:a996375a3f4a7b8c096f87d8a93c2b196"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab07d62cdec036af9ede70cbd06ece40f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_fast_l_e_d.html#ab07d62cdec036af9ede70cbd06ece40f">setMaxPowerInMilliWatts</a> (uint32_t milliwatts)</td></tr>
+<tr class="memdesc:ab07d62cdec036af9ede70cbd06ece40f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the maximum power to be used, given in milliwatts.  <a href="#ab07d62cdec036af9ede70cbd06ece40f">More...</a><br /></td></tr>
+<tr class="separator:ab07d62cdec036af9ede70cbd06ece40f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83afdd1e2a21f33ac4f8d2610d6e331b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_fast_l_e_d.html#a83afdd1e2a21f33ac4f8d2610d6e331b">show</a> (uint8_t scale)</td></tr>
 <tr class="memdesc:a83afdd1e2a21f33ac4f8d2610d6e331b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update all our controllers with the current led colors, using the passed in brightness.  <a href="#a83afdd1e2a21f33ac4f8d2610d6e331b">More...</a><br /></td></tr>
 <tr class="separator:a83afdd1e2a21f33ac4f8d2610d6e331b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -826,6 +832,81 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="ab07d62cdec036af9ede70cbd06ece40f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CFastLED::setMaxPowerInMilliWatts </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>milliwatts</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the maximum power to be used, given in milliwatts. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">milliwatts</td><td>- the max power draw desired, in milliwatts </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a996375a3f4a7b8c096f87d8a93c2b196"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void CFastLED::setMaxPowerInVoltsAndMilliamps </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>volts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>milliamps</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set the maximum power to be used, given in volts and milliamps. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">volts</td><td>- how many volts the leds are being driven at (usually 5 or 12) </td></tr>
+    <tr><td class="paramname">milliamps</td><td>- the maximum milliamps of power draw you want </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a1f39e8404db214bbd6a776f52a77d8b1"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1009,7 +1090,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Mon Aug 10 2015 23:10:47 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>
