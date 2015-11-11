@@ -1,23 +1,21 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<urlset xmlns='http://www.sitemaps.org/schemas/sitemap/0.9'>
-    <url>
-        <loc>http://fastled.io/blog/blog/2014/01/10/first-post/</loc>
-        <lastmod>2014-01-10T04:03:25-08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://fastled.io/blog/blog/2014/01/13/fastled-2-released-slash/</loc>
-        <lastmod>2014-01-13T20:44:48-08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://fastled.io/blog/blog/archives/</loc>
-        <lastmod>2014-01-13T20:44:48-08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://fastled.io/blog/</loc>
-        <lastmod>2014-01-13T20:44:48-08:00</lastmod>
-    </url>
-    <url>
-        <loc>http://fastled.io/blog/robots.txt</loc>
-        <lastmod>2014-01-10T03:35:37-08:00</lastmod>
-    </url>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>http://fastled.io/blog/blog/2015/10/08/fastled-3-dot-1-released/</loc>
+    <lastmod>2015-10-08T10:09:32-07:00</lastmod>
+  </url>
+  <url>
+    <loc>http://fastled.io/blog/blog/2014/01/13/fastled-2-released-slash/</loc>
+    <lastmod>2014-01-13T20:42:49-08:00</lastmod>
+  </url>
+  <url>
+    <loc>http://fastled.io/blog/blog/2014/01/10/first-post/</loc>
+    <lastmod>2014-01-10T03:30:47-08:00</lastmod>
+  </url>
+  <url>
+    <loc>http://fastled.io/blog/blog/archives/</loc>
+  </url>
+  <url>
+    <loc>http://fastled.io/blog/</loc>
+  </url>
 </urlset>

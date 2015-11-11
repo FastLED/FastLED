@@ -4,7 +4,7 @@
   <title><![CDATA[FastLED]]></title>
   <link href="http://fastled.io/blog/atom.xml" rel="self"/>
   <link href="http://fastled.io/blog/"/>
-  <updated>2014-01-13T20:46:01-08:00</updated>
+  <updated>2015-10-08T10:22:34-07:00</updated>
   <id>http://fastled.io/blog/</id>
   <author>
     <name><![CDATA[FastLED]]></name>
@@ -12,6 +12,96 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[FastLED 3.1 Released]]></title>
+    <link href="http://fastled.io/blog/blog/2015/10/08/fastled-3-dot-1-released/"/>
+    <updated>2015-10-08T10:09:32-07:00</updated>
+    <id>http://fastled.io/blog/blog/2015/10/08/fastled-3-dot-1-released</id>
+    <content type="html"><![CDATA[<p>We&rsquo;re proud to announce the full release of FastLED version 3.1, an open source LED animation library for Arduino.</p>
+
+<p>Download the ZIP file here <a href="https://github.com/FastLED/FastLED/archive/v3.1.0.zip">https://github.com/FastLED/FastLED/archive/v3.1.0.zip</a> or update directly using git.</p>
+
+<p>In the eleven months since the last release, FastLED has become even more capable, even more compatible, and yes, even faster.  Here are some highlights of what&rsquo;s new in FastLED v3.1 over and above the 3.0 release:</p>
+
+<ul>
+<li>Support for even more microcontroller chips and boards</li>
+<li>High-performance parallel output on Arduino Due and Teensy 3.x</li>
+<li>Literally the fastest-possible driver for the Neopixel WS2812 family of LEDs on standard ATmega-based Arduinos</li>
+<li>New animation tools like periodic timers and color crossfades</li>
+</ul>
+
+
+<p>A big thanks goes out to the vibrant and growing FastLED community, who&rsquo;ve helped shape and refine this library, and who have built some absolutely amazing projects with it.  You rock.  Keep it up!</p>
+
+<p>Here&rsquo;s some more detail on what&rsquo;s in the FastLED v3.1 release:</p>
+
+<h2>New Microcontroller Support Added</h2>
+
+<ul>
+<li>Arduino Zero</li>
+<li>Teensy-LC</li>
+<li>RFDuino</li>
+<li>Sparkcore</li>
+<li>Many new AVR-based platforms</li>
+<li>Continued support for popular Arduino boards (Uno, Duo, Leonardo, Nano, Micro, etc.), the Adafruit Trinket, Gemma, and Flora, the Digistump DigiX, as well as PJRC Teensy 2, Teensy 3.0, and Teensy 3.1.</li>
+</ul>
+
+
+<h2>Continued LED Support </h2>
+
+<p>FastLED v3.1 continues support for more than a dozen popular addressable LEDs: NeoPixel, WS2811, WS2812, WS2812B, DotStar, APA102, APA104, GW6205/GW6205_400, P9813 Total Control Lighting LEDs, USC1903_400, Pixelmatix SmartMatrix, WS2801, LPD8806, LPD1886, TM1809, TM1804, TM1803, and SM16716!</p>
+
+<h2>New Library Features</h2>
+
+<ul>
+<li>Parallel output on multiple pins on Arduino Due, Teensy 3.0, and Teensy 3.1</li>
+<li>Interrupt processing supported on Arduino Due, Teensy 3.0, Teensy 3.1, even when using Neopixel WS2812 family LEDs (WS2811, WS2812, WS2812B)</li>
+<li>Improved SPI device sharing on the Teensy 3.0 and Teensy 3.1</li>
+<li>Refresh rate auto-capping for LEDs that have a maximum update speed (e.g. Neopixel WS2812 family)</li>
+<li>Support for Arduino 1.6.x IDE and gcc 4.8.1</li>
+<li>Literally the fastest output physically possible for Neopixel WS2812 family LEDs.</li>
+</ul>
+
+
+<h2>New Library Functions</h2>
+
+<ul>
+<li>Recurring event triggers EVERY_N_MILLISECONDS, EVERY_N_SECONDS, EVERY_N_MINUTES, and EVERY_N_HOURS</li>
+<li>Smooth crossfade between multiple color palettes</li>
+<li>Define color palettes as a series of connected gradients</li>
+<li>Recover approximate HSV color from RGB values with rgb2hsv_approximate</li>
+<li>Ability to store one bit of user data in a CRGB, often invisibly</li>
+<li>New named color &ldquo;FairyLight&rdquo; approximates incandescent holiday lights</li>
+<li>Additional new functions for color gamma correction</li>
+<li>Fast, compact routines for 8-bit average and modulo, and for 16-bit square root</li>
+<li>random8 is now much more random</li>
+</ul>
+
+
+<h2>Backward Compatibility</h2>
+
+<ul>
+<li>Everything in FastLED v3.1 should be backward compatible with FastLED v3.0, with one exception:</li>
+<li>We changed from the old symbol name &ldquo;BLEND&rdquo; to the new symbol name &ldquo;LINEARBLEND&rdquo; for ColorFromPalette, to avoid conflicts with another codebase.  Simply replace &ldquo;BLEND&rdquo; with &ldquo;LINEARBLEND&rdquo; and your code should compile and run as before.</li>
+</ul>
+
+
+<h2>And Also</h2>
+
+<ul>
+<li>New example &ldquo;DemoReel100&rdquo;: six animations in 100 lines of code</li>
+<li>Access to thousands of designer color palettes from cpt-city</li>
+<li>&ldquo;FastLED6502&rdquo; for Apple ][, ][+, //e, and //gs (unsupported!)</li>
+<li>Lots of code cleanup for improved maintainability, readability, and theoretical future sanity</li>
+<li>New and improved documentation</li>
+<li>And, as the apps say, &ldquo;bug fixes and performance improvements.&rdquo;</li>
+</ul>
+
+
+<p>-Daniel Garcia &amp; Mark Kriegsman, September 2015</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[FastLED v2.0 Released!]]></title>
