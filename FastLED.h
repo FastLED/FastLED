@@ -402,7 +402,7 @@ public:
 	uint8_t getBrightness() { return m_Scale; }
 
 	/// Set the maximum power to be used, given in volts and milliamps.
-	/// @param volts - how many volts the leds are being driven at (usually 5 or 12)
+	/// @param volts - how many volts the leds are being driven at (usually 5)
 	/// @param milliamps - the maximum milliamps of power draw you want
 	inline void setMaxPowerInVoltsAndMilliamps(uint8_t volts, uint32_t milliamps) { setMaxPowerInMilliWatts(volts * milliamps); }
 
