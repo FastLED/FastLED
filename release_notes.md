@@ -5,6 +5,8 @@ FastLED3.1.1pre
 * Fix power management issue w/parallel output
 * Use static_asserts for some more useful compile time errors around bad pins
 * Roll power management into FastLED.show/delay directly
+* Support for adafruit pixies on arduino type platforms that have SoftwareSerial
+  * TODO: support hardware serial on platforms that have it available
 
 FastLED3.1.0
 ============

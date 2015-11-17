@@ -71,6 +71,7 @@ enum ESPIChipsets {
 enum ESM { SMART_MATRIX };
 enum OWS2811 { OCTOWS2811,OCTOWS2811_400 };
 
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class Pixie : public PixieController<DATA_PIN, RGB_ORDER> {};
 #ifdef FASTLED_HAS_CLOCKLESS
 template<uint8_t DATA_PIN> class NEOPIXEL : public WS2812Controller800Khz<DATA_PIN, GRB> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1829 : public TM1829Controller800Khz<DATA_PIN, RGB_ORDER> {};
