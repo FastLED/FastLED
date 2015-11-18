@@ -26,7 +26,7 @@ FASTLED_NAMESPACE_BEGIN
 template<uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PixieController : public CLEDController {
 	SoftwareSerial Serial;
-	CMinWait<1000> mWait;
+	CMinWait<2000> mWait;
 public:
 	PixieController() : Serial(-1, DATA_PIN) {}
 
