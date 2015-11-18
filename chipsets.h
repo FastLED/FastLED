@@ -26,6 +26,7 @@ FASTLED_NAMESPACE_BEGIN
 template<uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PixieController : public CLEDController {
 	SoftwareSerial Serial;
+	CMinWait<1000> mWait;
 public:
 	PixieController() : Serial(-1, DATA_PIN) {}
 
@@ -33,11 +34,12 @@ public:
 
 protected:
 	virtual void init() {
-
 		Serial.begin(115200);
+		mWait.mark();
 	}
 
 	void show(PixelController<RGB_ORDER> & pixels) {
+		mWait.wait();
 		while(pixels.has(1)) {
 			uint8_t r = pixels.loadAndScale0();
 			Serial.write(r);
@@ -48,6 +50,7 @@ protected:
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
+		mWait.mark();
 	}
 
 	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
