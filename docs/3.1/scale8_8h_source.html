@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -67,6 +75,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('scale8_8h_source.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -81,11 +104,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_fbb9e787cf27434374136273d35a9c17.html">lib8tion</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">scale8.h</div>  </div>
@@ -518,33 +536,37 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;}</div>
 <div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;</div>
 <div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="group___dimming_html_gae51352a3522bb8eae5e17dbee97aa1aa"><div class="ttname"><a href="group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa">dim8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_raw(uint8_t x)</div><div class="ttdoc">Adjust a scaling value for dimming. </div><div class="ttdef"><b>Definition:</b> scale8.h:460</div></div>
-<div class="ttc" id="group___dimming_html_ga094bda002b416c66e57521fc93878830"><div class="ttname"><a href="group___dimming.html#ga094bda002b416c66e57521fc93878830">brighten8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_lin(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> scale8.h:498</div></div>
-<div class="ttc" id="group___scaling_html_gab341cef8d46232269bb70092fed9eb75"><div class="ttname"><a href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">scale8_video_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8_video does not clean up the R1 register on AVR If you are doing several &#39;scale...</div><div class="ttdef"><b>Definition:</b> scale8.h:175</div></div>
-<div class="ttc" id="group__lib8tion_html_gaaf46b9f719ef3bdb574f8e967af6dbb5"><div class="ttname"><a href="group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5">fract16</a></div><div class="ttdeci">uint16_t fract16</div><div class="ttdoc">ANSI: unsigned _Fract. </div><div class="ttdef"><b>Definition:</b> lib8tion.h:332</div></div>
-<div class="ttc" id="group___scaling_html_ga6c160f8c36ce9b3c5eda68e4992010af"><div class="ttname"><a href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition:</b> scale8.h:20</div></div>
-<div class="ttc" id="group___dimming_html_ga3f94d2455e0aa92133f77af8747b5914"><div class="ttname"><a href="group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914">dim8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_lin(uint8_t x)</div><div class="ttdoc">Linear version of the dimming function that halves for values < 128. </div><div class="ttdef"><b>Definition:</b> scale8.h:472</div></div>
-<div class="ttc" id="group___scaling_html_ga4204edd4a3f8aac7124a10f1f5cfccfe"><div class="ttname"><a href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">nscale8x2_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x2_video(uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</div><div class="ttdoc">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demom...</div><div class="ttdef"><b>Definition:</b> scale8.h:328</div></div>
-<div class="ttc" id="group___scaling_html_ga333095ffa436c94d3e77ee9dc39da1c1"><div class="ttname"><a href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_video(uint8_t i, fract8 scale)</div><div class="ttdoc">The "video" version of scale8 guarantees that the output will be only be zero if one or both of the i...</div><div class="ttdef"><b>Definition:</b> scale8.h:73</div></div>
-<div class="ttc" id="group___scaling_html_gaf34fde0746c9c2e5ed44f9c437a2267e"><div class="ttname"><a href="group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e">scale16by8</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16by8(uint16_t i, fract8 scale)</div><div class="ttdoc">scale a 16-bit unsigned value by an 8-bit value, considered as numerator of a fraction whose denomina...</div><div class="ttdef"><b>Definition:</b> scale8.h:348</div></div>
-<div class="ttc" id="group___scaling_html_ga5f6dde3d9398f4b389c96e759a3f7b80"><div class="ttname"><a href="group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80">nscale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC void nscale8_LEAVING_R1_DIRTY(uint8_t &amp;i, fract8 scale)</div><div class="ttdoc">In place modifying version of scale8, also this version of nscale8 does not clean up the R1 register ...</div><div class="ttdef"><b>Definition:</b> scale8.h:150</div></div>
-<div class="ttc" id="group___scaling_html_ga1ff8ac00ad78e22acc7bb7445bfdb145"><div class="ttname"><a href="group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale)</div><div class="ttdoc">scale a 16-bit unsigned value by a 16-bit value, considered as numerator of a fraction whose denomina...</div><div class="ttdef"><b>Definition:</b> scale8.h:384</div></div>
-<div class="ttc" id="group___dimming_html_gae8e36472a70f3016595048532d6c3a2d"><div class="ttname"><a href="group___dimming.html#gae8e36472a70f3016595048532d6c3a2d">brighten8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_raw(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> scale8.h:484</div></div>
-<div class="ttc" id="group___scaling_html_ga700b7f510f32e8c91385093c436c27d9"><div class="ttname"><a href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x3_video(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> scale8.h:282</div></div>
-<div class="ttc" id="group___dimming_html_gad21876a676bcf26c47f957faed23f9bb"><div class="ttname"><a href="group___dimming.html#gad21876a676bcf26c47f957faed23f9bb">brighten8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_video(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> scale8.h:491</div></div>
-<div class="ttc" id="group__lib8tion_html_ga5d6d013429a5b8a09d564d6137217644"><div class="ttname"><a href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></div><div class="ttdeci">uint8_t fract8</div><div class="ttdoc">ANSI unsigned short _Fract. </div><div class="ttdef"><b>Definition:</b> lib8tion.h:324</div></div>
-<div class="ttc" id="group___scaling_html_ga39579fcf09743f15545fe0b831ca313c"><div class="ttname"><a href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8 does not clean up the R1 register on AVR If you are doing several &#39;scale8&#39;s in...</div><div class="ttdef"><b>Definition:</b> scale8.h:121</div></div>
-<div class="ttc" id="group___scaling_html_ga572d0b441676c9d8ceb071fe8284b7e9"><div class="ttname"><a href="group___scaling.html#ga572d0b441676c9d8ceb071fe8284b7e9">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls. </div><div class="ttdef"><b>Definition:</b> scale8.h:244</div></div>
-<div class="ttc" id="group___scaling_html_ga6f419761a744efed4bae8875ac07aef0"><div class="ttname"><a href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">nscale8x2</a></div><div class="ttdeci">LIB8STATIC void nscale8x2(uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</div><div class="ttdoc">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demom...</div><div class="ttdef"><b>Definition:</b> scale8.h:305</div></div>
-<div class="ttc" id="group___scaling_html_ga2a580fcaa010558218faae95d1936635"><div class="ttname"><a href="group___scaling.html#ga2a580fcaa010558218faae95d1936635">nscale8_video_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC void nscale8_video_LEAVING_R1_DIRTY(uint8_t &amp;i, fract8 scale)</div><div class="ttdoc">In place modifying version of scale8_video, also this version of nscale8_video does not clean up the ...</div><div class="ttdef"><b>Definition:</b> scale8.h:222</div></div>
-<div class="ttc" id="group___scaling_html_ga39bf87e5526120889086cab19ac749b1"><div class="ttname"><a href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a></div><div class="ttdeci">LIB8STATIC void nscale8x3(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> scale8.h:259</div></div>
-<div class="ttc" id="group___dimming_html_ga40a13446a2022dc489be8b2a8f2fa494"><div class="ttname"><a href="group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494">dim8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_video(uint8_t x)</div><div class="ttdoc">Adjust a scaling value for dimming for video (value will never go below 1) </div><div class="ttdef"><b>Definition:</b> scale8.h:466</div></div>
+<div class="ttc" id="group___dimming_html_gae51352a3522bb8eae5e17dbee97aa1aa"><div class="ttname"><a href="group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa">dim8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_raw(uint8_t x)</div><div class="ttdoc">Adjust a scaling value for dimming. </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00460">scale8.h:460</a></div></div>
+<div class="ttc" id="group___dimming_html_ga094bda002b416c66e57521fc93878830"><div class="ttname"><a href="group___dimming.html#ga094bda002b416c66e57521fc93878830">brighten8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_lin(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00498">scale8.h:498</a></div></div>
+<div class="ttc" id="group___scaling_html_gab341cef8d46232269bb70092fed9eb75"><div class="ttname"><a href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">scale8_video_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8_video does not clean up the R1 register on AVR If you are doing several &#39;scale...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00175">scale8.h:175</a></div></div>
+<div class="ttc" id="group__lib8tion_html_gaaf46b9f719ef3bdb574f8e967af6dbb5"><div class="ttname"><a href="group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5">fract16</a></div><div class="ttdeci">uint16_t fract16</div><div class="ttdoc">ANSI: unsigned _Fract. </div><div class="ttdef"><b>Definition:</b> <a href="lib8tion_8h_source.html#l00332">lib8tion.h:332</a></div></div>
+<div class="ttc" id="group___scaling_html_ga6c160f8c36ce9b3c5eda68e4992010af"><div class="ttname"><a href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00020">scale8.h:20</a></div></div>
+<div class="ttc" id="group___dimming_html_ga3f94d2455e0aa92133f77af8747b5914"><div class="ttname"><a href="group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914">dim8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_lin(uint8_t x)</div><div class="ttdoc">Linear version of the dimming function that halves for values < 128. </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00472">scale8.h:472</a></div></div>
+<div class="ttc" id="group___scaling_html_ga4204edd4a3f8aac7124a10f1f5cfccfe"><div class="ttname"><a href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">nscale8x2_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x2_video(uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</div><div class="ttdoc">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demom...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00328">scale8.h:328</a></div></div>
+<div class="ttc" id="group___scaling_html_ga333095ffa436c94d3e77ee9dc39da1c1"><div class="ttname"><a href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_video(uint8_t i, fract8 scale)</div><div class="ttdoc">The "video" version of scale8 guarantees that the output will be only be zero if one or both of the i...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00073">scale8.h:73</a></div></div>
+<div class="ttc" id="group___scaling_html_gaf34fde0746c9c2e5ed44f9c437a2267e"><div class="ttname"><a href="group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e">scale16by8</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16by8(uint16_t i, fract8 scale)</div><div class="ttdoc">scale a 16-bit unsigned value by an 8-bit value, considered as numerator of a fraction whose denomina...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00348">scale8.h:348</a></div></div>
+<div class="ttc" id="group___scaling_html_ga5f6dde3d9398f4b389c96e759a3f7b80"><div class="ttname"><a href="group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80">nscale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC void nscale8_LEAVING_R1_DIRTY(uint8_t &amp;i, fract8 scale)</div><div class="ttdoc">In place modifying version of scale8, also this version of nscale8 does not clean up the R1 register ...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00150">scale8.h:150</a></div></div>
+<div class="ttc" id="group___scaling_html_ga1ff8ac00ad78e22acc7bb7445bfdb145"><div class="ttname"><a href="group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale)</div><div class="ttdoc">scale a 16-bit unsigned value by a 16-bit value, considered as numerator of a fraction whose denomina...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00384">scale8.h:384</a></div></div>
+<div class="ttc" id="group___dimming_html_gae8e36472a70f3016595048532d6c3a2d"><div class="ttname"><a href="group___dimming.html#gae8e36472a70f3016595048532d6c3a2d">brighten8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_raw(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00484">scale8.h:484</a></div></div>
+<div class="ttc" id="group___scaling_html_ga700b7f510f32e8c91385093c436c27d9"><div class="ttname"><a href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x3_video(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00282">scale8.h:282</a></div></div>
+<div class="ttc" id="group___dimming_html_gad21876a676bcf26c47f957faed23f9bb"><div class="ttname"><a href="group___dimming.html#gad21876a676bcf26c47f957faed23f9bb">brighten8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_video(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00491">scale8.h:491</a></div></div>
+<div class="ttc" id="group__lib8tion_html_ga5d6d013429a5b8a09d564d6137217644"><div class="ttname"><a href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></div><div class="ttdeci">uint8_t fract8</div><div class="ttdoc">ANSI unsigned short _Fract. </div><div class="ttdef"><b>Definition:</b> <a href="lib8tion_8h_source.html#l00324">lib8tion.h:324</a></div></div>
+<div class="ttc" id="group___scaling_html_ga39579fcf09743f15545fe0b831ca313c"><div class="ttname"><a href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8 does not clean up the R1 register on AVR If you are doing several &#39;scale8&#39;s in...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00121">scale8.h:121</a></div></div>
+<div class="ttc" id="group___scaling_html_ga572d0b441676c9d8ceb071fe8284b7e9"><div class="ttname"><a href="group___scaling.html#ga572d0b441676c9d8ceb071fe8284b7e9">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls. </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00244">scale8.h:244</a></div></div>
+<div class="ttc" id="group___scaling_html_ga6f419761a744efed4bae8875ac07aef0"><div class="ttname"><a href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">nscale8x2</a></div><div class="ttdeci">LIB8STATIC void nscale8x2(uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</div><div class="ttdoc">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demom...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00305">scale8.h:305</a></div></div>
+<div class="ttc" id="group___scaling_html_ga2a580fcaa010558218faae95d1936635"><div class="ttname"><a href="group___scaling.html#ga2a580fcaa010558218faae95d1936635">nscale8_video_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC void nscale8_video_LEAVING_R1_DIRTY(uint8_t &amp;i, fract8 scale)</div><div class="ttdoc">In place modifying version of scale8_video, also this version of nscale8_video does not clean up the ...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00222">scale8.h:222</a></div></div>
+<div class="ttc" id="group___scaling_html_ga39bf87e5526120889086cab19ac749b1"><div class="ttname"><a href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a></div><div class="ttdeci">LIB8STATIC void nscale8x3(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00259">scale8.h:259</a></div></div>
+<div class="ttc" id="group___dimming_html_ga40a13446a2022dc489be8b2a8f2fa494"><div class="ttname"><a href="group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494">dim8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_video(uint8_t x)</div><div class="ttdoc">Adjust a scaling value for dimming for video (value will never go below 1) </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00466">scale8.h:466</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_fbb9e787cf27434374136273d35a9c17.html">lib8tion</a></li><li class="navelem"><b>scale8.h</b></li>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

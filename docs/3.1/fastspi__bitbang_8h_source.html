@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -68,6 +76,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     </ul>
   </div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('fastspi__bitbang_8h_source.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -439,17 +461,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;FASTLED_NAMESPACE_END</div>
 <div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;</div>
 <div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="struct_pixel_controller_html"><div class="ttname"><a href="struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class. </div><div class="ttdef"><b>Definition:</b> controller.h:187</div></div>
-<div class="ttc" id="class_selectable_html"><div class="ttname"><a href="class_selectable.html">Selectable</a></div><div class="ttdef"><b>Definition:</b> fastpin.h:22</div></div>
-<div class="ttc" id="class_a_v_r_software_s_p_i_output_html"><div class="ttname"><a href="class_a_v_r_software_s_p_i_output.html">AVRSoftwareSPIOutput</a></div><div class="ttdef"><b>Definition:</b> fastspi_bitbang.h:17</div></div>
+<div class="ttc" id="struct_pixel_controller_html"><div class="ttname"><a href="struct_pixel_controller.html">PixelController</a></div><div class="ttdoc">Pixel controller class. </div><div class="ttdef"><b>Definition:</b> <a href="controller_8h_source.html#l00187">controller.h:187</a></div></div>
+<div class="ttc" id="class_selectable_html"><div class="ttname"><a href="class_selectable.html">Selectable</a></div><div class="ttdef"><b>Definition:</b> <a href="fastpin_8h_source.html#l00022">fastpin.h:22</a></div></div>
+<div class="ttc" id="class_a_v_r_software_s_p_i_output_html"><div class="ttname"><a href="class_a_v_r_software_s_p_i_output.html">AVRSoftwareSPIOutput</a></div><div class="ttdef"><b>Definition:</b> <a href="fastspi__bitbang_8h_source.html#l00017">fastspi_bitbang.h:17</a></div></div>
 <div class="ttc" id="fastled__delay_8h_html"><div class="ttname"><a href="fastled__delay_8h.html">fastled_delay.h</a></div><div class="ttdoc">Utility functions and classes for managing delaycycles. </div></div>
-<div class="ttc" id="class_fast_pin_html"><div class="ttname"><a href="class_fast_pin.html">FastPin</a></div><div class="ttdoc">The simplest level of Pin class. </div><div class="ttdef"><b>Definition:</b> fastpin.h:158</div></div>
+<div class="ttc" id="class_fast_pin_html"><div class="ttname"><a href="class_fast_pin.html">FastPin</a></div><div class="ttdoc">The simplest level of Pin class. </div><div class="ttdef"><b>Definition:</b> <a href="fastpin_8h_source.html#l00158">fastpin.h:158</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>fastspi_bitbang.h</b></li>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -67,6 +75,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('random8_8h_source.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -81,11 +104,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="dir_fbb9e787cf27434374136273d35a9c17.html">lib8tion</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">random8.h</div>  </div>
@@ -162,19 +180,23 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;</div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="group___random_html_ga6f2ab7e21aae59453832b2933632f016"><div class="ttname"><a href="group___random.html#ga6f2ab7e21aae59453832b2933632f016">rand16seed</a></div><div class="ttdeci">uint16_t rand16seed</div><div class="ttdoc">random number seed </div><div class="ttdef"><b>Definition:</b> lib8tion.cpp:8</div></div>
-<div class="ttc" id="group___random_html_ga95e371c2438843e0ed1ed83412b28c99"><div class="ttname"><a href="group___random.html#ga95e371c2438843e0ed1ed83412b28c99">random16_set_seed</a></div><div class="ttdeci">LIB8STATIC void random16_set_seed(uint16_t seed)</div><div class="ttdoc">Set the 16-bit seed used for the random number generator. </div><div class="ttdef"><b>Definition:</b> random8.h:75</div></div>
-<div class="ttc" id="group___scaling_html_ga6c160f8c36ce9b3c5eda68e4992010af"><div class="ttname"><a href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition:</b> scale8.h:20</div></div>
-<div class="ttc" id="group___random_html_ga4e63c74426f6516f28470dc1b814aefe"><div class="ttname"><a href="group___random.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a></div><div class="ttdeci">LIB8STATIC uint8_t random8()</div><div class="ttdoc">Generate an 8-bit random number. </div><div class="ttdef"><b>Definition:</b> random8.h:19</div></div>
-<div class="ttc" id="group___random_html_ga1078b2029a50e86c93ccf4e3e1d85e7d"><div class="ttname"><a href="group___random.html#ga1078b2029a50e86c93ccf4e3e1d85e7d">random16_add_entropy</a></div><div class="ttdeci">LIB8STATIC void random16_add_entropy(uint16_t entropy)</div><div class="ttdoc">Add entropy into the random number generator. </div><div class="ttdef"><b>Definition:</b> random8.h:87</div></div>
-<div class="ttc" id="group___random_html_ga860bc64bfca4ada980e70cf1e03dedd8"><div class="ttname"><a href="group___random.html#ga860bc64bfca4ada980e70cf1e03dedd8">random16_get_seed</a></div><div class="ttdeci">LIB8STATIC uint16_t random16_get_seed()</div><div class="ttdoc">Get the current seed value for the random number generator. </div><div class="ttdef"><b>Definition:</b> random8.h:81</div></div>
-<div class="ttc" id="group___random_html_ga17034d936ef716efe820e11c1df043b0"><div class="ttname"><a href="group___random.html#ga17034d936ef716efe820e11c1df043b0">random16</a></div><div class="ttdeci">LIB8STATIC uint16_t random16()</div><div class="ttdoc">Generate a 16 bit random number. </div><div class="ttdef"><b>Definition:</b> random8.h:29</div></div>
+<div class="ttc" id="group___random_html_ga6f2ab7e21aae59453832b2933632f016"><div class="ttname"><a href="group___random.html#ga6f2ab7e21aae59453832b2933632f016">rand16seed</a></div><div class="ttdeci">uint16_t rand16seed</div><div class="ttdoc">random number seed </div><div class="ttdef"><b>Definition:</b> <a href="lib8tion_8cpp_source.html#l00008">lib8tion.cpp:8</a></div></div>
+<div class="ttc" id="group___random_html_ga95e371c2438843e0ed1ed83412b28c99"><div class="ttname"><a href="group___random.html#ga95e371c2438843e0ed1ed83412b28c99">random16_set_seed</a></div><div class="ttdeci">LIB8STATIC void random16_set_seed(uint16_t seed)</div><div class="ttdoc">Set the 16-bit seed used for the random number generator. </div><div class="ttdef"><b>Definition:</b> <a href="random8_8h_source.html#l00075">random8.h:75</a></div></div>
+<div class="ttc" id="group___scaling_html_ga6c160f8c36ce9b3c5eda68e4992010af"><div class="ttname"><a href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00020">scale8.h:20</a></div></div>
+<div class="ttc" id="group___random_html_ga4e63c74426f6516f28470dc1b814aefe"><div class="ttname"><a href="group___random.html#ga4e63c74426f6516f28470dc1b814aefe">random8</a></div><div class="ttdeci">LIB8STATIC uint8_t random8()</div><div class="ttdoc">Generate an 8-bit random number. </div><div class="ttdef"><b>Definition:</b> <a href="random8_8h_source.html#l00019">random8.h:19</a></div></div>
+<div class="ttc" id="group___random_html_ga1078b2029a50e86c93ccf4e3e1d85e7d"><div class="ttname"><a href="group___random.html#ga1078b2029a50e86c93ccf4e3e1d85e7d">random16_add_entropy</a></div><div class="ttdeci">LIB8STATIC void random16_add_entropy(uint16_t entropy)</div><div class="ttdoc">Add entropy into the random number generator. </div><div class="ttdef"><b>Definition:</b> <a href="random8_8h_source.html#l00087">random8.h:87</a></div></div>
+<div class="ttc" id="group___random_html_ga860bc64bfca4ada980e70cf1e03dedd8"><div class="ttname"><a href="group___random.html#ga860bc64bfca4ada980e70cf1e03dedd8">random16_get_seed</a></div><div class="ttdeci">LIB8STATIC uint16_t random16_get_seed()</div><div class="ttdoc">Get the current seed value for the random number generator. </div><div class="ttdef"><b>Definition:</b> <a href="random8_8h_source.html#l00081">random8.h:81</a></div></div>
+<div class="ttc" id="group___random_html_ga17034d936ef716efe820e11c1df043b0"><div class="ttname"><a href="group___random.html#ga17034d936ef716efe820e11c1df043b0">random16</a></div><div class="ttdeci">LIB8STATIC uint16_t random16()</div><div class="ttdoc">Generate a 16 bit random number. </div><div class="ttdef"><b>Definition:</b> <a href="random8_8h_source.html#l00029">random8.h:29</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_fbb9e787cf27434374136273d35a9c17.html">lib8tion</a></li><li class="navelem"><b>random8.h</b></li>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

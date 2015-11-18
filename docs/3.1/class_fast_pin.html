@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -69,6 +77,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('class_fast_pin.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -83,7 +106,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
@@ -98,13 +120,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
  <a href="class_fast_pin.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="fastpin_8h_source.html">fastpin.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for FastPin&lt; PIN &gt;:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for FastPin&lt; PIN &gt;:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><img src="class_fast_pin__inherit__graph.png" border="0" usemap="#_fast_pin_3_01_p_i_n_01_4_inherit__map" alt="Inheritance graph"/></div>
 <map name="_fast_pin_3_01_p_i_n_01_4_inherit__map" id="_fast_pin_3_01_p_i_n_01_4_inherit__map">
 <area shape="rect" id="node2" href="class_fast_pin_b_b.html" title="FastPinBB\&lt; PIN \&gt;" alt="" coords="5,80,136,107"/></map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
@@ -217,15 +241,21 @@ class FastPin&lt; PIN &gt;</h3>
 <p>In addition, if, while writing a bunch of data to a pin, you know no other pins will be getting written to, you can get/cache a value of the pin's port register and use that to do a full set to the register. This results in one being able to simply do a store to the register, vs. the load, and/or, and store that would be done normally.</p>
 <p>There are platform specific instantiations of this class that provide direct i/o register access to pins for much higher speed pin twiddling.</p>
 <p>Note that these classes are all static functions. So the proper usage is Pin&lt;13&gt;::hi(); or such. Instantiating objects is not recommended, as passing <a class="el" href="class_pin.html">Pin</a> objects around will likely -not- have the effect you're expecting. </p>
+
+<p>Definition at line <a class="el" href="fastpin_8h_source.html#l00158">158</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
 </div><hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="fastpin_8h_source.html">fastpin.h</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="class_fast_pin.html">FastPin</a></li>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

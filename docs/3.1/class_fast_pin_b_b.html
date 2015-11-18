@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -69,6 +77,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('class_fast_pin_b_b.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -83,7 +106,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="class_fast_pin_b_b-members.html">List of all members</a>  </div>
@@ -91,20 +113,24 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">FastPinBB&lt; PIN &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="dynheader">
-Inheritance diagram for FastPinBB&lt; PIN &gt;:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for FastPinBB&lt; PIN &gt;:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><img src="class_fast_pin_b_b__inherit__graph.png" border="0" usemap="#_fast_pin_b_b_3_01_p_i_n_01_4_inherit__map" alt="Inheritance graph"/></div>
 <map name="_fast_pin_b_b_3_01_p_i_n_01_4_inherit__map" id="_fast_pin_b_b_3_01_p_i_n_01_4_inherit__map">
 <area shape="rect" id="node2" href="class_fast_pin.html" title="The simplest level of Pin class. " alt="" coords="15,5,127,32"/></map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
-<div class="dynheader">
-Collaboration diagram for FastPinBB&lt; PIN &gt;:</div>
-<div class="dyncontent">
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div id="dynsection-1" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="closed.png" alt="+"/> Collaboration diagram for FastPinBB&lt; PIN &gt;:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><img src="class_fast_pin_b_b__coll__graph.png" border="0" usemap="#_fast_pin_b_b_3_01_p_i_n_01_4_coll__map" alt="Collaboration graph"/></div>
 <map name="_fast_pin_b_b_3_01_p_i_n_01_4_coll__map" id="_fast_pin_b_b_3_01_p_i_n_01_4_coll__map">
 <area shape="rect" id="node2" href="class_fast_pin.html" title="The simplest level of Pin class. " alt="" coords="15,5,127,32"/></map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -207,15 +233,25 @@ static port_ptr_t&#160;</td><td class="memItemRight" valign="bottom"><b>port</b>
 static port_t&#160;</td><td class="memItemRight" valign="bottom"><b>mask</b> () <a class="el" href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a>((always_inline))</td></tr>
 <tr class="separator:ace4b21f3980bbca6a4be16130053e8f3 inherit pub_static_methods_class_fast_pin"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this class was generated from the following file:<ul>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><h3>template&lt;uint8_t PIN&gt;<br />
+class FastPinBB&lt; PIN &gt;</h3>
+
+
+<p>Definition at line <a class="el" href="fastpin_8h_source.html#l00236">236</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
 <li><a class="el" href="fastpin_8h_source.html">fastpin.h</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="class_fast_pin_b_b.html">FastPinBB</a></li>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

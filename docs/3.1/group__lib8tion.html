@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -62,6 +70,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     </ul>
   </div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('group__lib8tion.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -89,9 +111,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <p>A variety of functions for working with numbers.  
 <a href="#details">More...</a></p>
-<div class="dynheader">
-Collaboration diagram for Fast math functions:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Collaboration diagram for Fast math functions:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <center><table><tr><td><img src="group__lib8tion.png" border="0" alt="" usemap="#group____lib8tion"/>
 <map name="group____lib8tion" id="group____lib8tion">
 <area shape="rect" id="node1" href="group___math.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming..." alt="" coords="193,5,346,32"/><area shape="rect" id="node2" href="group___random.html" title="Fast 8&#45; and 16&#45; bit unsigned random numbers. " alt="" coords="197,57,342,98"/><area shape="rect" id="node3" href="group___trig.html" title="Fast 8 and 16&#45;bit approximations of sin(x) and cos(x). " alt="" coords="206,123,333,149"/><area shape="rect" id="node5" href="group___scaling.html" title="Fast, efficient 8&#45;bit scaling functions specifically designed for high&#45;performance LED programming..." alt="" coords="208,173,331,200"/></map>
@@ -330,6 +354,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <p>ANSI: unsigned _Fract. </p>
 <p>range is 0 to 0.99998474121 in steps of 0.00001525878 ANSI: unsigned _Fract </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00332">332</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ga5d6d013429a5b8a09d564d6137217644"></a>
@@ -344,6 +370,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 
 <p>ANSI unsigned short _Fract. </p>
 <p>range is 0 to 0.99609375 in steps of 0.00390625 ANSI: unsigned short _Fract </p>
+
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00324">324</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -360,6 +388,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <p>ANSI: signed _Fract. </p>
 <p>range is -0.99996948242 to 0.99996948242 in steps of 0.00003051757 ANSI: signed _Fract </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00336">336</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ga7d6219a7247ab1923ed623e7ae0f34ae"></a>
@@ -374,6 +404,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 
 <p>ANSI: signed short _Fract. </p>
 <p>range is -0.9921875 to 0.9921875 in steps of 0.0078125 ANSI: signed short _Fract </p>
+
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00328">328</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -404,6 +436,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 
 <p>with BPM specified in Q8.8 fixed-point format; e.g. </p>
 <p>for this function, 120 BPM MUST BE specified as 120*256 = 30720. If you just want to specify "120", use beat16 or beat8. </p>
+
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00844">844</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -451,6 +485,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 
 <p>beatsin16 generates a 16-bit sine wave at a given BPM, that oscillates within a given range. </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00890">890</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="gaecd7cbfc2640407cabf75afcc7d9ddf4"></a>
@@ -496,6 +532,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 </div><div class="memdoc">
 
 <p>beatsin8 generates an 8-bit sine wave at a given BPM, that oscillates within a given range. </p>
+
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00903">903</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -544,6 +582,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <p>beatsin88 generates a 16-bit sine wave at a given BPM, that oscillates within a given range. </p>
 <p>For this function, BPM MUST BE SPECIFIED as a Q8.8 fixed-point value; e.g. 120BPM must be specified as 120*256 = 30720. If you just want to specify "120", use beatsin16 or beatsin8. </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00877">877</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ga52659d1994f2f21eb05080c97417e93b"></a>
@@ -560,6 +600,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 </div><div class="memdoc">
 
 <p>bseconds16 returns the current time-since-boot in "binary seconds", which are actually 1024/1000 of a second long. </p>
+
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00981">981</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -580,6 +622,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <p>cubicwave8: cubic waveform generator. </p>
 <p>Spends visibly more time at the limits than 'sine' does. </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00701">701</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ga5f95d6e55b4986bd88f662528cef717e"></a>
@@ -598,6 +642,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 
 <p>Helper routine to divide a 32-bit value by 1024, returning only the low 16 bits. </p>
 <p>You'd think this would be just result = (in32 &gt;&gt; 10) &amp; 0xFFFF; and on ARM, that's what you want and all is well. But on AVR that code turns into a loop that executes a four-byte shift ten times: 40 shifts in all, plus loop overhead. This routine gets exactly the same result with just six shifts (vs 40), and no loop overhead. Used to convert millis to 'binary seconds' aka bseconds: one bsecond == 1024 millis. </p>
+
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00956">956</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -618,6 +664,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <p>ease8InOutApprox: fast, rough 8-bit ease-in/ease-out function shaped approximately like 'ease8InOutCubic', it's never off by more than a couple of percent from the actual cubic S-curve, and it executes more than twice as fast. </p>
 <p>Use when the cycles are more important than visual smoothness. Asm version takes around 7 cycles on AVR. </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00608">608</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="gaa2facbc0ec935e34c629aef43d6262c0"></a>
@@ -637,6 +685,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <p>conversion from IEEE754 float in the range (-1,1) to 16-bit fixed point. </p>
 <p>Note that the extremes of one and negative one are NOT representable. The representable range is basically </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00403">403</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ga837f5a688998f3340994613944e47d41"></a>
@@ -654,6 +704,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 
 <p>Return the current hours since boot in an 8-bit value. </p>
 <p>Used as part of the "every N time-periods" mechanism </p>
+
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00937">937</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -693,6 +745,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 </pre><p>Mathematically simiar to lerp8by8, but arguments are more like Arduino's "map"; this function is similar to </p><pre class="fragment">     map( in, 0, 255, rangeStart, rangeEnd)
 </pre><p>but faster and specifically designed for 8-bit values. </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00546">546</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ga223820399921e32ddf018a90223ff336"></a>
@@ -710,6 +764,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 
 <p>Return the current minutes since boot in a 16-bit value. </p>
 <p>Used as part of the "every N time-periods" mechanism </p>
+
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00927">927</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -730,6 +786,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <p>quadwave8: quadratic waveform generator. </p>
 <p>Spends just a little more time at the limits than 'sine' does. </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00694">694</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="gaa2abcee2fe76fafd7f3a2aeab03e3b69"></a>
@@ -748,6 +806,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <p>Return the current seconds since boot in a 16-bit value. </p>
 <p>Used as part of the "every N time-periods" mechanism </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00917">917</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="gab947c1150e3b9056cb91685a14270173"></a>
@@ -765,6 +825,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 </div><div class="memdoc">
 
 <p>sfract15ToFloat: conversion from sfract15 fixed point to IEEE754 32-bit float. </p>
+
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00394">394</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -811,6 +873,8 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>square wave output </dd></dl>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00730">730</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="gae9e011ff745ade1164ae77b0ef62bfac"></a>
@@ -832,14 +896,19 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <p>input output 0..127 0..254 (positive slope) 128..255 254..0 (negative slope)</p>
 <p>On AVR this function takes just three cycles. </p>
 
+<p>Definition at line <a class="el" href="lib8tion_8h_source.html#l00673">673</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+
 </div>
 </div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -68,6 +76,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     </ul>
   </div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('color_8h_source.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -134,26 +156,30 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;FASTLED_NAMESPACE_END</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="group___color_enums_html_ggadf6bcba67c9573665af20788c4431ae8af964ffff5f2977a60a83aa3f9f8b4368"><div class="ttname"><a href="group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8af964ffff5f2977a60a83aa3f9f8b4368">UncorrectedColor</a></div><div class="ttdoc">uncorrected color </div><div class="ttdef"><b>Definition:</b> color.h:28</div></div>
-<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9ac9a2b02351fcc9ad08ef4e2748530e76"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ac9a2b02351fcc9ad08ef4e2748530e76">HighNoonSun</a></div><div class="ttdoc">5400 Kelvin </div><div class="ttdef"><b>Definition:</b> color.h:49</div></div>
-<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9ae5ec76aa869b51e645e9f226dfee4b79"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ae5ec76aa869b51e645e9f226dfee4b79">Halogen</a></div><div class="ttdoc">3200 Kelvin </div><div class="ttdef"><b>Definition:</b> color.h:45</div></div>
-<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9a8f4ad60002c8856dc1f153e2eaa2de91"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a8f4ad60002c8856dc1f153e2eaa2de91">Tungsten40W</a></div><div class="ttdoc">2600 Kelvin </div><div class="ttdef"><b>Definition:</b> color.h:41</div></div>
-<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9a631a1e96b10db9220ab27d70a320ac48"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a631a1e96b10db9220ab27d70a320ac48">Tungsten100W</a></div><div class="ttdoc">2850 Kelvin </div><div class="ttdef"><b>Definition:</b> color.h:43</div></div>
-<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9ae3d35275ab8c374612bcfbcce732b39f"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ae3d35275ab8c374612bcfbcce732b39f">UncorrectedTemperature</a></div><div class="ttdoc">Uncorrected temperature 0xFFFFFF. </div><div class="ttdef"><b>Definition:</b> color.h:76</div></div>
-<div class="ttc" id="group___color_enums_html_ggadf6bcba67c9573665af20788c4431ae8ac52fe8e181ff3c39128664fba835eae3"><div class="ttname"><a href="group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8ac52fe8e181ff3c39128664fba835eae3">TypicalSMD5050</a></div><div class="ttdoc">typical values for SMD5050 LEDs </div><div class="ttdef"><b>Definition:</b> color.h:16</div></div>
-<div class="ttc" id="group___color_enums_html_gadf6bcba67c9573665af20788c4431ae8"><div class="ttname"><a href="group___color_enums.html#gadf6bcba67c9573665af20788c4431ae8">LEDColorCorrection</a></div><div class="ttdeci">LEDColorCorrection</div><div class="ttdef"><b>Definition:</b> color.h:11</div></div>
-<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9aa9dab8ea30eb2a41c48956480b7014d1"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9aa9dab8ea30eb2a41c48956480b7014d1">CarbonArc</a></div><div class="ttdoc">5200 Kelvin </div><div class="ttdef"><b>Definition:</b> color.h:47</div></div>
-<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9a890e0555ad95071fa4391a5775a38621"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a890e0555ad95071fa4391a5775a38621">DirectSunlight</a></div><div class="ttdoc">6000 Kelvin </div><div class="ttdef"><b>Definition:</b> color.h:51</div></div>
-<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9acb80944aa5bed3031b19f1e1101f6a9a"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9acb80944aa5bed3031b19f1e1101f6a9a">ClearBlueSky</a></div><div class="ttdoc">20000 Kelvin </div><div class="ttdef"><b>Definition:</b> color.h:55</div></div>
-<div class="ttc" id="group___color_enums_html_ga251e9e8dc2c7b981786b71706522b2a9"><div class="ttname"><a href="group___color_enums.html#ga251e9e8dc2c7b981786b71706522b2a9">ColorTemperature</a></div><div class="ttdeci">ColorTemperature</div><div class="ttdef"><b>Definition:</b> color.h:33</div></div>
-<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9ad0aebf757f0aa8fc45ba282bd25006f7"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ad0aebf757f0aa8fc45ba282bd25006f7">OvercastSky</a></div><div class="ttdoc">7000 Kelvin </div><div class="ttdef"><b>Definition:</b> color.h:53</div></div>
-<div class="ttc" id="group___color_enums_html_ggadf6bcba67c9573665af20788c4431ae8af617057397c2a4f89b4bf2783cdac24b"><div class="ttname"><a href="group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8af617057397c2a4f89b4bf2783cdac24b">Typical8mmPixel</a></div><div class="ttdoc">typical values for 8mm "pixels on a string" also for many through-hole &#39;T&#39; package LEDs ...</div><div class="ttdef"><b>Definition:</b> color.h:23</div></div>
+<div class="ttc" id="group___color_enums_html_ggadf6bcba67c9573665af20788c4431ae8af964ffff5f2977a60a83aa3f9f8b4368"><div class="ttname"><a href="group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8af964ffff5f2977a60a83aa3f9f8b4368">UncorrectedColor</a></div><div class="ttdoc">uncorrected color </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00028">color.h:28</a></div></div>
+<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9ac9a2b02351fcc9ad08ef4e2748530e76"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ac9a2b02351fcc9ad08ef4e2748530e76">HighNoonSun</a></div><div class="ttdoc">5400 Kelvin </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00049">color.h:49</a></div></div>
+<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9ae5ec76aa869b51e645e9f226dfee4b79"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ae5ec76aa869b51e645e9f226dfee4b79">Halogen</a></div><div class="ttdoc">3200 Kelvin </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00045">color.h:45</a></div></div>
+<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9a8f4ad60002c8856dc1f153e2eaa2de91"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a8f4ad60002c8856dc1f153e2eaa2de91">Tungsten40W</a></div><div class="ttdoc">2600 Kelvin </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00041">color.h:41</a></div></div>
+<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9a631a1e96b10db9220ab27d70a320ac48"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a631a1e96b10db9220ab27d70a320ac48">Tungsten100W</a></div><div class="ttdoc">2850 Kelvin </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00043">color.h:43</a></div></div>
+<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9ae3d35275ab8c374612bcfbcce732b39f"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ae3d35275ab8c374612bcfbcce732b39f">UncorrectedTemperature</a></div><div class="ttdoc">Uncorrected temperature 0xFFFFFF. </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00076">color.h:76</a></div></div>
+<div class="ttc" id="group___color_enums_html_ggadf6bcba67c9573665af20788c4431ae8ac52fe8e181ff3c39128664fba835eae3"><div class="ttname"><a href="group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8ac52fe8e181ff3c39128664fba835eae3">TypicalSMD5050</a></div><div class="ttdoc">typical values for SMD5050 LEDs </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00016">color.h:16</a></div></div>
+<div class="ttc" id="group___color_enums_html_gadf6bcba67c9573665af20788c4431ae8"><div class="ttname"><a href="group___color_enums.html#gadf6bcba67c9573665af20788c4431ae8">LEDColorCorrection</a></div><div class="ttdeci">LEDColorCorrection</div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00011">color.h:11</a></div></div>
+<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9aa9dab8ea30eb2a41c48956480b7014d1"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9aa9dab8ea30eb2a41c48956480b7014d1">CarbonArc</a></div><div class="ttdoc">5200 Kelvin </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00047">color.h:47</a></div></div>
+<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9a890e0555ad95071fa4391a5775a38621"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a890e0555ad95071fa4391a5775a38621">DirectSunlight</a></div><div class="ttdoc">6000 Kelvin </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00051">color.h:51</a></div></div>
+<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9acb80944aa5bed3031b19f1e1101f6a9a"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9acb80944aa5bed3031b19f1e1101f6a9a">ClearBlueSky</a></div><div class="ttdoc">20000 Kelvin </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00055">color.h:55</a></div></div>
+<div class="ttc" id="group___color_enums_html_ga251e9e8dc2c7b981786b71706522b2a9"><div class="ttname"><a href="group___color_enums.html#ga251e9e8dc2c7b981786b71706522b2a9">ColorTemperature</a></div><div class="ttdeci">ColorTemperature</div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00033">color.h:33</a></div></div>
+<div class="ttc" id="group___color_enums_html_gga251e9e8dc2c7b981786b71706522b2a9ad0aebf757f0aa8fc45ba282bd25006f7"><div class="ttname"><a href="group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ad0aebf757f0aa8fc45ba282bd25006f7">OvercastSky</a></div><div class="ttdoc">7000 Kelvin </div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00053">color.h:53</a></div></div>
+<div class="ttc" id="group___color_enums_html_ggadf6bcba67c9573665af20788c4431ae8af617057397c2a4f89b4bf2783cdac24b"><div class="ttname"><a href="group___color_enums.html#ggadf6bcba67c9573665af20788c4431ae8af617057397c2a4f89b4bf2783cdac24b">Typical8mmPixel</a></div><div class="ttdoc">typical values for 8mm "pixels on a string" also for many through-hole &#39;T&#39; package LEDs ...</div><div class="ttdef"><b>Definition:</b> <a href="color_8h_source.html#l00023">color.h:23</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:35 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="color_8h.html">color.h</a></li>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

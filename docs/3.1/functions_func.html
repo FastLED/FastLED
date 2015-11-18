@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -96,6 +104,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     </ul>
   </div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('functions_func.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -144,6 +166,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="class_d_m_x_simple_controller.html#a66deae70caf1d43a8692fff6540d1f1e">DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;</a>
 , <a class="el" href="class_l_p_d8806_controller.html#a7da0ecf67004256c83131406b2f4889e">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_p9813_controller.html#ac2fddaa8ac8860649da9865b58dca13c">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
+, <a class="el" href="class_pixie_controller.html#af56e4137870a8f2721f16afcc76db01c">PixieController&lt; DATA_PIN, RGB_ORDER &gt;</a>
 , <a class="el" href="class_s_m16716_controller.html#a89d3d5ef2239a9d452bc2478b0549ad8">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_w_s2801_controller.html#a867d4249b5921e0d717c6c21038bb11c">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 </li>
@@ -211,6 +234,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="class_l_p_d8806_controller.html#abe5be69b938d0709cfc77fcf57c75608">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_n_o_p_s_p_i_output.html#ad9ff9bf62427b69e3bb578699e0ce561">NOPSPIOutput&lt; _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER &gt;</a>
 , <a class="el" href="class_p9813_controller.html#ad6fcb36b9378df660721ae24ed857b8a">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
+, <a class="el" href="class_pixie_controller.html#a7a5495b64c479dbb5963f894e5a27118">PixieController&lt; DATA_PIN, RGB_ORDER &gt;</a>
 , <a class="el" href="class_s_m16716_controller.html#a1ba5a4e3f00b2235f278b9fb9aeb1591">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_w_s2801_controller.html#ad6187b68bccb831cd5cab3cffbd6bdb4">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 </li>
@@ -299,6 +323,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="class_d_m_x_simple_controller.html#a29df92ccb41090893fa3c49f22b47186">DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;</a>
 , <a class="el" href="class_l_p_d8806_controller.html#a31d4e01a823682556e26748193f722e5">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_p9813_controller.html#aac4f48b0da93055c0da7285839c4ce81">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
+, <a class="el" href="class_pixie_controller.html#a1ce5b1a38b79d2659d2610ec65f3d583">PixieController&lt; DATA_PIN, RGB_ORDER &gt;</a>
 , <a class="el" href="class_s_m16716_controller.html#a3d720053186fd61d6ad90d48cac3d57d">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_w_s2801_controller.html#a69fca4db95f5f60f27d7d1a8c7fa16a0">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 </li>
@@ -310,6 +335,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 , <a class="el" href="class_d_m_x_simple_controller.html#a3fb3a0501aae1d7a6aefb89f77168bd1">DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;</a>
 , <a class="el" href="class_l_p_d8806_controller.html#a4f6471eddcfe5445502b02f1f3179259">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_p9813_controller.html#ae60dbfc4d27c62448032c61e7730ec8a">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
+, <a class="el" href="class_pixie_controller.html#a9da14e8683ef6588d795d33eaba6da3f">PixieController&lt; DATA_PIN, RGB_ORDER &gt;</a>
 , <a class="el" href="class_s_m16716_controller.html#a7df8b8a34e0dc067c69aa056deca9677">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 , <a class="el" href="class_w_s2801_controller.html#a615609bf16dd4c8fcc9ccf286ca52501">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>
 </li>
@@ -350,11 +376,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:37 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:19 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

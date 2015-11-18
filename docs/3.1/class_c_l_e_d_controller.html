@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -69,6 +77,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('class_c_l_e_d_controller.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -83,7 +106,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -102,20 +124,24 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
  <a href="class_c_l_e_d_controller.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="controller_8h_source.html">controller.h</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for CLEDController:</div>
-<div class="dyncontent">
+<div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Inheritance diagram for CLEDController:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><img src="class_c_l_e_d_controller__inherit__graph.png" border="0" usemap="#_c_l_e_d_controller_inherit__map" alt="Inheritance graph"/></div>
 <map name="_c_l_e_d_controller_inherit__map" id="_c_l_e_d_controller_inherit__map">
-<area shape="rect" id="node2" href="class_a_p_a102_controller.html" title="APA102 controller class. " alt="" coords="171,5,402,61"/><area shape="rect" id="node3" href="class_d_m_x_serial_controller.html" title="DMXSerialController\l\&lt; RGB_ORDER \&gt;" alt="" coords="215,86,359,127"/><area shape="rect" id="node5" href="class_d_m_x_simple_controller.html" title="DMXSimpleController\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="185,151,388,193"/><area shape="rect" id="node7" href="class_l_p_d8806_controller.html" title="LPD8806 controller class. " alt="" coords="185,217,388,273"/><area shape="rect" id="node8" href="class_p9813_controller.html" title="P9813 controller class. " alt="" coords="201,297,372,353"/><area shape="rect" id="node9" href="class_s_m16716_controller.html" title="SM16716 controller class. " alt="" coords="185,377,388,433"/><area shape="rect" id="node10" href="class_w_s2801_controller.html" title="WS2801 controller class. " alt="" coords="171,457,402,513"/><area shape="rect" id="node4" href="class_d_m_x_s_e_r_i_a_l.html" title="DMXSERIAL\&lt; RGB_ORDER \&gt;" alt="" coords="463,93,670,120"/><area shape="rect" id="node6" href="class_d_m_x_s_i_m_p_l_e.html" title="DMXSIMPLE\&lt; DATA_PIN,\l RGB_ORDER \&gt;" alt="" coords="476,151,657,193"/><area shape="rect" id="node11" href="class_w_s2803_controller.html" title="WS2803Controller\&lt; DATA\l_PIN, CLOCK_PIN, RGB_ORDER,\l SPI_SPEED \&gt;" alt="" coords="451,457,682,513"/></map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
-<div class="dynheader">
-Collaboration diagram for CLEDController:</div>
-<div class="dyncontent">
+<area shape="rect" id="node2" href="class_a_p_a102_controller.html" title="APA102 controller class. " alt="" coords="171,5,402,61"/><area shape="rect" id="node3" href="class_d_m_x_serial_controller.html" title="DMXSerialController\l\&lt; RGB_ORDER \&gt;" alt="" coords="215,86,359,127"/><area shape="rect" id="node5" href="class_d_m_x_simple_controller.html" title="DMXSimpleController\l\&lt; DATA_PIN, RGB_ORDER \&gt;" alt="" coords="185,151,388,193"/><area shape="rect" id="node7" href="class_l_p_d8806_controller.html" title="LPD8806 controller class. " alt="" coords="185,217,388,273"/><area shape="rect" id="node8" href="class_p9813_controller.html" title="P9813 controller class. " alt="" coords="201,297,372,353"/><area shape="rect" id="node9" href="class_pixie_controller.html" title="Adafruit Pixie controller class. " alt="" coords="209,378,365,419"/><area shape="rect" id="node11" href="class_s_m16716_controller.html" title="SM16716 controller class. " alt="" coords="185,444,388,500"/><area shape="rect" id="node12" href="class_w_s2801_controller.html" title="WS2801 controller class. " alt="" coords="171,524,402,580"/><area shape="rect" id="node4" href="class_d_m_x_s_e_r_i_a_l.html" title="DMXSERIAL\&lt; RGB_ORDER \&gt;" alt="" coords="463,93,670,120"/><area shape="rect" id="node6" href="class_d_m_x_s_i_m_p_l_e.html" title="DMXSIMPLE\&lt; DATA_PIN,\l RGB_ORDER \&gt;" alt="" coords="476,151,657,193"/><area shape="rect" id="node10" href="class_p_i_x_i_e.html" title="PIXIE\&lt; DATA_PIN, RGB\l_ORDER \&gt;" alt="" coords="482,378,651,419"/><area shape="rect" id="node13" href="class_w_s2803_controller.html" title="WS2803Controller\&lt; DATA\l_PIN, CLOCK_PIN, RGB_ORDER,\l SPI_SPEED \&gt;" alt="" coords="451,524,682,580"/></map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div id="dynsection-1" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-1-trigger" src="closed.png" alt="+"/> Collaboration diagram for CLEDController:</div>
+<div id="dynsection-1-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-1-content" class="dyncontent" style="display:none;">
 <div class="center"><img src="class_c_l_e_d_controller__coll__graph.png" border="0" usemap="#_c_l_e_d_controller_coll__map" alt="Collaboration graph"/></div>
 <map name="_c_l_e_d_controller_coll__map" id="_c_l_e_d_controller_coll__map">
 <area shape="rect" id="node2" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) " alt="" coords="33,5,92,32"/></map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -275,6 +301,8 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>CFastLED</b></td></t
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base definition for an LED controller. </p>
 <p>Pretty much the methods that every LED controller object will make available. Note that the showARGB method is not impelemented for all controllers yet. Note also the methods for eventual checking of background writing of data (I'm looking at you, teensy 3.0 DMA controller!). If you want to pass LED controllers around to methods, make them references to this type, keeps your code saner. However, most people won't be seeing/using these objects directly at all </p>
+
+<p>Definition at line <a class="el" href="controller_8h_source.html#l00037">37</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="add284627121ffab140e083e84fadc37f"></a>
 <div class="memitem">
@@ -324,7 +352,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>CFastLED</b></td></t
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="class_s_m16716_controller.html#a3d720053186fd61d6ad90d48cac3d57d">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_p9813_controller.html#aac4f48b0da93055c0da7285839c4ce81">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_p9813_controller.html#aac4f48b0da93055c0da7285839c4ce81">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_a_p_a102_controller.html#a245148d2621eb73999ab673852c49332">APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_a_p_a102_controller.html#a245148d2621eb73999ab673852c49332">APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_w_s2801_controller.html#a69fca4db95f5f60f27d7d1a8c7fa16a0">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_w_s2801_controller.html#a69fca4db95f5f60f27d7d1a8c7fa16a0">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_d_m_x_serial_controller.html#a3f3f3e606e495fd1bdcfd25c6bed7fe1">DMXSerialController&lt; RGB_ORDER &gt;</a>, <a class="el" href="class_l_p_d8806_controller.html#a31d4e01a823682556e26748193f722e5">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, and <a class="el" href="class_d_m_x_simple_controller.html#a29df92ccb41090893fa3c49f22b47186">DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;</a>.</p>
+<p>Implemented in <a class="el" href="class_s_m16716_controller.html#a3d720053186fd61d6ad90d48cac3d57d">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_p9813_controller.html#aac4f48b0da93055c0da7285839c4ce81">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_p9813_controller.html#aac4f48b0da93055c0da7285839c4ce81">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_a_p_a102_controller.html#a245148d2621eb73999ab673852c49332">APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_a_p_a102_controller.html#a245148d2621eb73999ab673852c49332">APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_w_s2801_controller.html#a69fca4db95f5f60f27d7d1a8c7fa16a0">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_w_s2801_controller.html#a69fca4db95f5f60f27d7d1a8c7fa16a0">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_l_p_d8806_controller.html#a31d4e01a823682556e26748193f722e5">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_d_m_x_serial_controller.html#a3f3f3e606e495fd1bdcfd25c6bed7fe1">DMXSerialController&lt; RGB_ORDER &gt;</a>, <a class="el" href="class_pixie_controller.html#a1ce5b1a38b79d2659d2610ec65f3d583">PixieController&lt; DATA_PIN, RGB_ORDER &gt;</a>, <a class="el" href="class_pixie_controller.html#a1ce5b1a38b79d2659d2610ec65f3d583">PixieController&lt; DATA_PIN, RGB_ORDER &gt;</a>, and <a class="el" href="class_d_m_x_simple_controller.html#a29df92ccb41090893fa3c49f22b47186">DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;</a>.</p>
 
 </div>
 </div>
@@ -376,20 +404,24 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>CFastLED</b></td></t
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="class_s_m16716_controller.html#a7df8b8a34e0dc067c69aa056deca9677">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_p9813_controller.html#ae60dbfc4d27c62448032c61e7730ec8a">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_a_p_a102_controller.html#a0aa9f2896fe8b23554623fd3de0d5428">APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_w_s2801_controller.html#a615609bf16dd4c8fcc9ccf286ca52501">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_d_m_x_serial_controller.html#a3d6285e65af8862eb4b0d36d6d3df22b">DMXSerialController&lt; RGB_ORDER &gt;</a>, <a class="el" href="class_l_p_d8806_controller.html#a4f6471eddcfe5445502b02f1f3179259">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, and <a class="el" href="class_d_m_x_simple_controller.html#a3fb3a0501aae1d7a6aefb89f77168bd1">DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;</a>.</p>
+<p>Implemented in <a class="el" href="class_s_m16716_controller.html#a7df8b8a34e0dc067c69aa056deca9677">SM16716Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_p9813_controller.html#ae60dbfc4d27c62448032c61e7730ec8a">P9813Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_a_p_a102_controller.html#a0aa9f2896fe8b23554623fd3de0d5428">APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_w_s2801_controller.html#a615609bf16dd4c8fcc9ccf286ca52501">WS2801Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_l_p_d8806_controller.html#a4f6471eddcfe5445502b02f1f3179259">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a>, <a class="el" href="class_d_m_x_serial_controller.html#a3d6285e65af8862eb4b0d36d6d3df22b">DMXSerialController&lt; RGB_ORDER &gt;</a>, <a class="el" href="class_pixie_controller.html#a9da14e8683ef6588d795d33eaba6da3f">PixieController&lt; DATA_PIN, RGB_ORDER &gt;</a>, and <a class="el" href="class_d_m_x_simple_controller.html#a3fb3a0501aae1d7a6aefb89f77168bd1">DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li><a class="el" href="controller_8h_source.html">controller.h</a></li>
-<li>FastLED.cpp</li>
+<li><a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></li>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

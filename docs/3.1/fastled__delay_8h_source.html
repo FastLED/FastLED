@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -68,6 +76,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     </ul>
   </div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('fastled__delay_8h_source.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -202,14 +224,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;FASTLED_NAMESPACE_END</div>
 <div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;</div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="class_c_min_wait_html"><div class="ttname"><a href="class_c_min_wait.html">CMinWait</a></div><div class="ttdoc">Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not e...</div><div class="ttdef"><b>Definition:</b> fastled_delay.h:11</div></div>
-<div class="ttc" id="group___pixeltypes_html_gad47d9c821aeaaa0123d125a18ff961d5"><div class="ttname"><a href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a></div><div class="ttdeci">__attribute__((always_inline)) inline void delaycycles()</div><div class="ttdoc">Do an 8byte by 8bit rotation. </div><div class="ttdef"><b>Definition:</b> fastled_delay.h:65</div></div>
+<div class="ttc" id="class_c_min_wait_html"><div class="ttname"><a href="class_c_min_wait.html">CMinWait</a></div><div class="ttdoc">Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not e...</div><div class="ttdef"><b>Definition:</b> <a href="fastled__delay_8h_source.html#l00011">fastled_delay.h:11</a></div></div>
+<div class="ttc" id="group___pixeltypes_html_gad47d9c821aeaaa0123d125a18ff961d5"><div class="ttname"><a href="group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5">__attribute__</a></div><div class="ttdeci">__attribute__((always_inline)) inline void delaycycles()</div><div class="ttdoc">Do an 8byte by 8bit rotation. </div><div class="ttdef"><b>Definition:</b> <a href="fastled__delay_8h_source.html#l00065">fastled_delay.h:65</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated on Wed Nov 11 2015 15:10:36 for FastLED by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="fastled__delay_8h.html">fastled_delay.h</a></li>
+    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>
