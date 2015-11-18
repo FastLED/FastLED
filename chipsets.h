@@ -12,8 +12,13 @@ FASTLED_NAMESPACE_BEGIN
 ///
 ///@{
 
-#if defined(ARDUINO)
+#if defined(ARDUINO) //&& defined(SoftwareSerial_h)
+
+
+#if defined(SoftwareSerial_h)
 #include "SoftwareSerial.h"
+
+#define HAS_PIXIE
 
 /// Adafruit Pixie controller class
 /// @tparam DATAPIN the pin to write data out on
@@ -70,6 +75,7 @@ protected:
 // 		STREAM.begin(115200);
 // 	}
 // };
+#endif
 #endif
 
 ///@name Clocked chipsets - nominally SPI based these chipsets have a data and a clock line.
