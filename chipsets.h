@@ -38,7 +38,7 @@ protected:
 		mWait.mark();
 	}
 
-	void show(PixelController<RGB_ORDER> & pixels) {
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mWait.wait();
 		while(pixels.has(1)) {
 			uint8_t r = pixels.loadAndScale0();
@@ -53,22 +53,6 @@ protected:
 		mWait.mark();
 	}
 
-	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
-		show(pixels);
-	}
-
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
-		show(pixels);
-	}
-
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-		PixelController<RGB_ORDER> pixels(data, nLeds,, scale, getDither());
-		show(pixels);
-	}
-#endif
 };
 
 // template<SoftwareSerial & STREAM, EOrder RGB_ORDER = RGB>
