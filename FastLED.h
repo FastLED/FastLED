@@ -7,9 +7,9 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-#define  FASTLED_VERSION 3001000
+#define  FASTLED_VERSION 3001001
 #ifndef FASTLED_INTERNAL
-#warning FastLED version 3.001.000  (Not really a warning, just telling you here.)
+#warning FastLED version 3.001.001  (Not really a warning, just telling you here.)
 #endif
 
 #ifndef __PROG_TYPES_COMPAT__
@@ -71,9 +71,14 @@ enum ESPIChipsets {
 enum ESM { SMART_MATRIX };
 enum OWS2811 { OCTOWS2811,OCTOWS2811_400 };
 
+#ifdef HAS_PIXIE
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PIXIE : public PixieController<DATA_PIN, RGB_ORDER> {};
+#endif
+
 #ifdef FASTLED_HAS_CLOCKLESS
 template<uint8_t DATA_PIN> class NEOPIXEL : public WS2812Controller800Khz<DATA_PIN, GRB> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1829 : public TM1829Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1812 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1809 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1804 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1803 : public TM1803Controller400Khz<DATA_PIN, RGB_ORDER> {};
@@ -83,6 +88,7 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1904 : public UCS1904Contr
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6812 : public SK6812Controller<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PL9823 : public PL9823Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA104 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811_400 : public WS2811Controller400Khz<DATA_PIN, RGB_ORDER> {};
@@ -126,6 +132,8 @@ enum EBlockChipsets {
 #define NUM_CONTROLLERS 8
 #endif
 
+typedef uint8_t (*power_func)(uint8_t scale, uint32_t data);
+
 /// High level controller interface for FastLED.  This class manages controllers, global settings and trackings
 /// such as brightness, and refresh rates, and provides access functions for driving led data to controllers
 /// via the show/showColor/clear methods.
@@ -135,6 +143,9 @@ class CFastLED {
 	uint8_t  m_Scale; 				///< The current global brightness scale setting
 	uint16_t m_nFPS;					///< Tracking for current FPS value
 	uint32_t m_nMinMicros;		///< minimum µs between frames, used for capping frame rates.
+	uint32_t m_nPowerData;		///< max power use parameter
+	power_func m_pPowerFunc;	///< function for overriding brightness when using FastLED.show();
+
 public:
 	CFastLED();
 
@@ -393,6 +404,15 @@ public:
 	/// Get the current global brightness setting
 	/// @returns the current global brightness value
 	uint8_t getBrightness() { return m_Scale; }
+
+	/// Set the maximum power to be used, given in volts and milliamps.
+	/// @param volts - how many volts the leds are being driven at (usually 5)
+	/// @param milliamps - the maximum milliamps of power draw you want
+	inline void setMaxPowerInVoltsAndMilliamps(uint8_t volts, uint32_t milliamps) { setMaxPowerInMilliWatts(volts * milliamps); }
+
+	/// Set the maximum power to be used, given in milliwatts
+	/// @param milliwatts - the max power draw desired, in milliwatts
+	inline void setMaxPowerInMilliWatts(uint32_t milliwatts) { m_pPowerFunc = &calculate_max_brightness_for_power_mW; m_nPowerData = milliwatts; }
 
 	/// Update all our controllers with the current led colors, using the passed in brightness
 	/// @param scale temporarily override the scale

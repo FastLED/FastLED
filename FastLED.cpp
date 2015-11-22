@@ -23,6 +23,8 @@ CFastLED::CFastLED() {
 	// m_nControllers = 0;
 	m_Scale = 255;
 	m_nFPS = 0;
+	m_pPowerFunc = NULL;
+	m_nPowerData = 0xFFFFFFFF;
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
@@ -41,6 +43,11 @@ void CFastLED::show(uint8_t scale) {
 	// guard against showing too rapidly
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
+
+	// If we have a function for computing power, use it!
+	if(m_pPowerFunc) {
+		scale = (*m_pPowerFunc)(scale, m_nPowerData);
+	}
 
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
@@ -200,10 +207,10 @@ void CFastLED::countFPS(int nFrames) {
 }
 
 void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
-  if(constrain) { 
+  if(constrain) {
     // if we're constraining, the new value of m_nMinMicros _must_ be higher than previously (because we're only
     // allowed to slow things down if constraining)
-    if(refresh > 0) { 
+    if(refresh > 0) {
       m_nMinMicros = ( (1000000/refresh) >  m_nMinMicros) ? (1000000/refresh) : m_nMinMicros;
     }
   } else if(refresh > 0) {
@@ -213,6 +220,7 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
   }
 }
 
+extern "C" int atexit(void (* /*func*/ )()) { return 0; }
 
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1

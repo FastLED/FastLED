@@ -60,7 +60,7 @@ public:
 
 #define _IO32(L) _RD32(GPIO ## L)
 
-#define _DEFPIN_ARM(PIN, L, BIT) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, L> {  constexpr static bool validpin() { return false; } };
+#define _DEFPIN_ARM(PIN, L, BIT) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, L> {};
 
 // Actual pin definitions
 #if defined(ARDUINO_SAMD_ZERO)

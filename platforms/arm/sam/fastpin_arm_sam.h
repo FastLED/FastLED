@@ -81,9 +81,9 @@ public:
 #define DUE_IO32(L) _RD32(REG_PIO ## L ## _ODSR); _RD32(REG_PIO ## L ## _SODR); _RD32(REG_PIO ## L ## _CODR); _RD32(REG_PIO ## L ## _OER);
 
 #define _DEFPIN_DUE(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN<PIN, 1 << BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
-  																			_R(GPIO ## L ## _OER)> { constexpr static bool validpin() { return false; } }; \
+  																			_R(GPIO ## L ## _OER)> {}; \
   								   template<> class FastPinBB<PIN> : public _DUEPIN_BITBAND<PIN, BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
-  																			_R(GPIO ## L ## _OER)> { constexpr static bool validpin() { return false; } };
+  																			_R(GPIO ## L ## _OER)> {};
 
 #if defined(__SAM3X8E__)
 

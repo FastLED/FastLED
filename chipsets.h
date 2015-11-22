@@ -12,6 +12,75 @@ FASTLED_NAMESPACE_BEGIN
 ///
 ///@{
 
+#if defined(ARDUINO) //&& defined(SoftwareSerial_h)
+
+
+#if defined(SoftwareSerial_h)
+#include "SoftwareSerial.h"
+
+#define HAS_PIXIE
+
+/// Adafruit Pixie controller class
+/// @tparam DATAPIN the pin to write data out on
+/// @tparam RGB_ORDER the RGB ordering for the led data
+template<uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class PixieController : public CLEDController {
+	SoftwareSerial Serial;
+	CMinWait<2000> mWait;
+public:
+	PixieController() : Serial(-1, DATA_PIN) {}
+
+	virtual void clearLeds(int nLeds) { showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0)); };
+
+protected:
+	virtual void init() {
+		Serial.begin(115200);
+		mWait.mark();
+	}
+
+	void show(PixelController<RGB_ORDER> & pixels) {
+		mWait.wait();
+		while(pixels.has(1)) {
+			uint8_t r = pixels.loadAndScale0();
+			Serial.write(r);
+			uint8_t g = pixels.loadAndScale1();
+			Serial.write(g);
+			uint8_t b = pixels.loadAndScale2();
+			Serial.write(b);
+			pixels.advanceData();
+			pixels.stepDithering();
+		}
+		mWait.mark();
+	}
+
+	virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
+		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
+		show(pixels);
+	}
+
+	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
+		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
+		show(pixels);
+	}
+
+#ifdef SUPPORT_ARGB
+	virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
+		PixelController<RGB_ORDER> pixels(data, nLeds,, scale, getDither());
+		show(pixels);
+	}
+#endif
+};
+
+// template<SoftwareSerial & STREAM, EOrder RGB_ORDER = RGB>
+// class PixieController : public PixieBaseController<STREAM, RGB_ORDER> {
+// public:
+// 	virtual void init() {
+// 		STREAM.begin(115200);
+// 	}
+// };
+#endif
+#endif
+
 ///@name Clocked chipsets - nominally SPI based these chipsets have a data and a clock line.
 ///@{
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -308,6 +377,9 @@ class GW6205Controller400Khz : public ClocklessController<DATA_PIN, 6 * FMUL, 7 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 4 * FMUL, 4 * FMUL, RGB_ORDER, 4> {};
 
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
+
 #else
 // GW6205@400khz - 800ns, 800ns, 800ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
@@ -360,6 +432,9 @@ class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), N
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class SK6812Controller : public ClocklessController<DATA_PIN, NS(300), NS(300), NS(600), RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class PL9823Controller : public ClocklessController<DATA_PIN, NS(350), NS(1010), NS(350), RGB_ORDER> {};
 #endif
 ///@}
 
