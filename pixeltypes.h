@@ -183,6 +183,16 @@ struct CRGB {
         b = nb;
         return *this;
     }
+	
+	// allow assignment from CRGB boject 
+	// (for setting color in CRGB* array from CRGB object, because "=" operator doesn't work)
+	inline CRGB& setRGB (const CRGB& rhs)	__attribute__((always_inline))
+	{
+		r = rhs.r;
+		g = rhs.g;
+		b = rhs.b;
+		return *this;
+	}
 
     // allow assignment from H, S, and V
 	inline CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val) __attribute__((always_inline))
