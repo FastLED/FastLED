@@ -24,7 +24,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam DATAPIN the pin to write data out on
 /// @tparam RGB_ORDER the RGB ordering for the led data
 template<uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class PixieController : public CLEDController {
+class PixieController : public CPixelLEDController<RGB_ORDER> {
 	SoftwareSerial Serial;
 	CMinWait<2000> mWait;
 public:
