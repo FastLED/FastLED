@@ -91,7 +91,7 @@ static uint8_t gTimeErrorAccum256ths;
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CLEDController {
-	static_assert(T1 >= 3 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
+	static_assert(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
 
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
