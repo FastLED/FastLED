@@ -30,8 +30,6 @@ class PixieController : public CPixelLEDController<RGB_ORDER> {
 public:
 	PixieController() : Serial(-1, DATA_PIN) {}
 
-	virtual void clearLeds(int nLeds) { showColor(CRGB(0,0,0), nLeds, CRGB(0,0,0)); };
-
 protected:
 	virtual void init() {
 		Serial.begin(115200);
