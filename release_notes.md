@@ -7,6 +7,7 @@ FastLED3.1.1pre
 * Roll power management into FastLED.show/delay directly
 * Support for adafruit pixies on arduino type platforms that have SoftwareSerial
   * TODO: support hardware serial on platforms that have it available
+* Add UCS2903 timings
 
 FastLED3.1.0
 ============
