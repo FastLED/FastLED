@@ -13,6 +13,7 @@ class CRGBSet {
 
 public:
 
+  inline CRGBSet(const CRGBSet & other) : leds(other.leds), len(other.len), dir(other.dir) {}
   inline CRGBSet(CRGB *_leds, int _len) : leds(_leds), len(_len), dir(1) {}
 #ifdef ARM
   inline CRGBSet(CRGB *_leds, int _start, int _end) : leds(_leds), len(_end - _start), dir(0x01 | len>>31) { len += dir; }
@@ -25,7 +26,7 @@ public:
 
   /// is this set reversed?
   bool reversed() { return len < 0; }
-  
+
   /// access a single element in this set, just like an array operator
   inline CRGB & operator[](int x) { if(dir) { return leds[x]; } else { return leds[-x]; } }
 
