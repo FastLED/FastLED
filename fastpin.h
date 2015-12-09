@@ -36,8 +36,8 @@ class Pin : public Selectable {
 
 	void _init() {
 		mPinMask = digitalPinToBitMask(mPin);
-		mPort = portOutputRegister(digitalPinToPort(mPin));
-		mInPort = portInputRegister(digitalPinToPort(mPin));
+		mPort = (volatile RwReg*)portOutputRegister(digitalPinToPort(mPin));
+		mInPort = (volatile RoReg*)portInputRegister(digitalPinToPort(mPin));
 	}
 public:
 	Pin(int pin) : mPin(pin) { _init(); }
