@@ -45,8 +45,10 @@
 #include "fastled_progmem.h"
 
 #include "lib8tion.h"
+#include "pixeltypes.h"
 #include "hsv2rgb.h"
 #include "colorutils.h"
+#include "pixelset.h"
 #include "colorpalettes.h"
 
 #include "noise.h"
