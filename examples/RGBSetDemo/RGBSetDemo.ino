@@ -1,7 +1,7 @@
 #include<FastLED.h>
 #define NUM_LEDS 40
-CRGB rawleds[NUM_LEDS];
-CRGBSet leds(rawleds, NUM_LEDS);
+
+CRGBArray<NUM_LEDS> leds;
 
 void setup() { FastLED.addLeds<NEOPIXEL,6>(leds, NUM_LEDS); }
 

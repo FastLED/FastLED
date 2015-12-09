@@ -190,6 +190,16 @@ public:
   }
 };
 
+__attribute__((always_inline))
+inline CRGB *operator+(const CPixelSet & pixels, int offset) { return (CRGB*)pixels + offset; }
+
 typedef CPixelSet CRGBSet;
+
+template<int SIZE>
+class CRGBArray : public CPixelSet {
+  CRGB rawleds[SIZE];
+public:
+  CRGBArray() : CPixelSet(rawleds, SIZE) {}
+};
 
 #endif
