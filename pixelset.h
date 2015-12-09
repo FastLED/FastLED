@@ -108,7 +108,7 @@ public:
     if(dir >= 0) {
       ::fill_gradient(leds,len,startcolor, endcolor, directionCode);
     } else {
-      ::fill_gradient(leds + len + 1, (-len), startcolor, endcolor, directionCode);
+      ::fill_gradient(leds + len + 1, (-len), endcolor, startcolor, directionCode);
     }
     return *this;
   }
@@ -117,7 +117,7 @@ public:
     if(dir >= 0) {
       ::fill_gradient(leds, len, c1, c2, c3, directionCode);
     } else {
-      ::fill_gradient(leds + len + 1, -len, c1, c2, c3, directionCode);
+      ::fill_gradient(leds + len + 1, -len, c3, c2, c1, directionCode);
     }
     return *this;
   }
@@ -126,7 +126,7 @@ public:
     if(dir >= 0) {
       ::fill_gradient(leds, len, c1, c2, c3, c4, directionCode);
     } else {
-      ::fill_gradient(leds + len + 1, -len, c1, c2, c3, c4, directionCode);
+      ::fill_gradient(leds + len + 1, -len, c4, c3, c2, c1, directionCode);
     }
     return *this;
   }
@@ -135,7 +135,7 @@ public:
     if(dir >= 0) {
       ::fill_gradient_RGB(leds,len,startcolor, endcolor);
     } else {
-      ::fill_gradient_RGB(leds + len + 1, (-len), startcolor, endcolor);
+      ::fill_gradient_RGB(leds + len + 1, (-len), endcolor, startcolor);
     }
     return *this;
   }
@@ -144,7 +144,7 @@ public:
     if(dir >= 0) {
       ::fill_gradient_RGB(leds, len, c1, c2, c3);
     } else {
-      ::fill_gradient_RGB(leds + len + 1, -len, c1, c2, c3);
+      ::fill_gradient_RGB(leds + len + 1, -len, c3, c2, c1);
     }
     return *this;
   }
@@ -153,7 +153,7 @@ public:
     if(dir >= 0) {
       ::fill_gradient_RGB(leds, len, c1, c2, c3, c4);
     } else {
-      ::fill_gradient_RGB(leds + len + 1, -len, c1, c2, c3, c4);
+      ::fill_gradient_RGB(leds + len + 1, -len, c4, c3, c2, c1);
     }
     return *this;
   }
