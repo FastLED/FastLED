@@ -27,6 +27,13 @@ public:
   /// is this set reversed?
   bool reversed() { return len < 0; }
 
+  /// do these sets point to the same thing (note, this is different from the contents of the set being the same)
+  bool operator==(const CPixelSet rhs) { return leds == rhs.leds && len == rhs.len && dir == rhs.dir; }
+
+  /// do these sets point to the different things (note, this is different from the contents of the set being the same)
+  bool operator!=(const CPixelSet rhs) { return leds != rhs.leds || len != rhs.len || dir != rhs.dir; }
+
+
   /// access a single element in this set, just like an array operator
   inline CRGB & operator[](int x) { if(dir) { return leds[x]; } else { return leds[-x]; } }
 
@@ -188,6 +195,26 @@ public:
     }
     return *this;
   }
+
+  // TODO: Make this a fully specified/proper iterator
+  class pixelset_iterator {
+    CPixelSet & set;
+    int i;
+  public:
+    __attribute__((always_inline)) inline pixelset_iterator(CPixelSet & _set) : set(_set), i(set.len) {}
+    __attribute__((always_inline)) inline pixelset_iterator(CPixelSet & _set, int _i) : set(_set), i(_i) {}
+
+    __attribute__((always_inline)) inline pixelset_iterator& operator++() { i += set.dir; return *this; }
+    __attribute__((always_inline)) inline pixelset_iterator operator++(int) { pixelset_iterator tmp(set,i); i += set.dir; return tmp; }
+
+    __attribute__((always_inline)) inline bool operator==(pixelset_iterator & other) { return i == other.i && set==other.set; }
+    __attribute__((always_inline)) inline bool operator!=(pixelset_iterator & other) { return i != other.i || set != other.set; }
+
+    __attribute__((always_inline)) inline CRGB& operator*() { return set.leds[i]; }
+  };
+
+  pixelset_iterator begin() { return pixelset_iterator(*this, 0); }
+  pixelset_iterator end() { return pixelset_iterator(*this, len); }
 };
 
 __attribute__((always_inline))
