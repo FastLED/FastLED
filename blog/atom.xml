@@ -4,7 +4,7 @@
   <title><![CDATA[FastLED]]></title>
   <link href="http://fastled.io/blog/atom.xml" rel="self"/>
   <link href="http://fastled.io/blog/"/>
-  <updated>2015-10-08T10:22:34-07:00</updated>
+  <updated>2015-12-07T10:52:48-08:00</updated>
   <id>http://fastled.io/blog/</id>
   <author>
     <name><![CDATA[FastLED]]></name>
@@ -44,7 +44,7 @@
 <li>RFDuino</li>
 <li>Sparkcore</li>
 <li>Many new AVR-based platforms</li>
-<li>Continued support for popular Arduino boards (Uno, Duo, Leonardo, Nano, Micro, etc.), the Adafruit Trinket, Gemma, and Flora, the Digistump DigiX, as well as PJRC Teensy 2, Teensy 3.0, and Teensy 3.1.</li>
+<li>Continued support for popular Arduino boards (Uno, Due, Leonardo, Nano, Micro, etc.), the Adafruit Trinket, Gemma, and Flora, the Digistump DigiX, as well as PJRC Teensy 2, Teensy 3.0, and Teensy 3.1.</li>
 </ul>
 
 
