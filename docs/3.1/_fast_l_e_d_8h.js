@@ -10,6 +10,7 @@ var _fast_l_e_d_8h =
     [ "UCS1903", "class_u_c_s1903.html", null ],
     [ "UCS1903B", "class_u_c_s1903_b.html", null ],
     [ "UCS1904", "class_u_c_s1904.html", null ],
+    [ "UCS2903", "class_u_c_s2903.html", null ],
     [ "WS2812", "class_w_s2812.html", null ],
     [ "WS2812B", "class_w_s2812_b.html", null ],
     [ "SK6812", "class_s_k6812.html", null ],

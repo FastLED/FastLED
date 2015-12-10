@@ -1,5 +1,7 @@
 var searchData=
 [
+  ['fadelightby',['fadeLightBy',['../class_c_pixel_view.html#a0ef40ea240450afe6fdb7f4cf6a5b231',1,'CPixelView']]],
+  ['fadetoblackby',['fadeToBlackBy',['../class_c_pixel_view.html#a4861b6938f1cb9f8f885a9f3af13b8a9',1,'CPixelView']]],
   ['fastled_2eh',['FastLED.h',['../_fast_l_e_d_8h.html',1,'']]],
   ['fastled_5fconfig_2eh',['fastled_config.h',['../fastled__config_8h.html',1,'']]],
   ['fastled_5fdelay_2eh',['fastled_delay.h',['../fastled__delay_8h.html',1,'']]],

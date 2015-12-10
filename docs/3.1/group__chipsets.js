@@ -58,6 +58,7 @@ var group__chipsets =
     [ "UCS1903Controller400Khz", "class_u_c_s1903_controller400_khz.html", null ],
     [ "UCS1903BController800Khz", "class_u_c_s1903_b_controller800_khz.html", null ],
     [ "UCS1904Controller800Khz", "class_u_c_s1904_controller800_khz.html", null ],
+    [ "UCS2903Controller", "class_u_c_s2903_controller.html", null ],
     [ "TM1809Controller800Khz", "class_t_m1809_controller800_khz.html", null ],
     [ "TM1803Controller400Khz", "class_t_m1803_controller400_khz.html", null ],
     [ "TM1829Controller800Khz", "class_t_m1829_controller800_khz.html", null ],

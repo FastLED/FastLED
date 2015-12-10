@@ -143,8 +143,8 @@ $(document).ready(function(){initNavTree('fastpin_8h_source.html','');});
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">void</span> _init() {</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        mPinMask = digitalPinToBitMask(mPin);</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        mPort = portOutputRegister(digitalPinToPort(mPin));</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        mInPort = portInputRegister(digitalPinToPort(mPin));</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        mPort = (<span class="keyword">volatile</span> RwReg*)portOutputRegister(digitalPinToPort(mPin));</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        mInPort = (<span class="keyword">volatile</span> RoReg*)portInputRegister(digitalPinToPort(mPin));</div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    }</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <a class="code" href="class_pin.html">Pin</a>(<span class="keywordtype">int</span> pin) : mPin(pin) { _init(); }</div>
@@ -349,7 +349,7 @@ $(document).ready(function(){initNavTree('fastpin_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="fastpin_8h.html">fastpin.h</a></li>
-    <li class="footer">Generated on Wed Nov 18 2015 11:53:18 for FastLED by
+    <li class="footer">Generated on Thu Dec 10 2015 14:02:36 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

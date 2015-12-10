@@ -25,8 +25,9 @@ var searchData=
   ['sin16_5fc',['sin16_C',['../group___trig.html#ga0890962cb06b267617f4b06d7e9be5eb',1,'trig8.h']]],
   ['sin8_5favr',['sin8_avr',['../group___trig.html#ga6aa1f993cbbc427d80da1ee2ccca86e7',1,'trig8.h']]],
   ['sin8_5fc',['sin8_C',['../group___trig.html#ga46933a9b42921c6605588268d11f7c1e',1,'trig8.h']]],
-  ['size',['size',['../class_c_l_e_d_controller.html#a63f75cf7e55cf8da46db5fd27110bb3e',1,'CLEDController::size()'],['../class_c_fast_l_e_d.html#a18fba22754d2a1a206fc5db8d24a92d0',1,'CFastLED::size()']]],
+  ['size',['size',['../class_c_l_e_d_controller.html#a63f75cf7e55cf8da46db5fd27110bb3e',1,'CLEDController::size()'],['../class_c_fast_l_e_d.html#a18fba22754d2a1a206fc5db8d24a92d0',1,'CFastLED::size()'],['../class_c_pixel_view.html#afe3500651fc4eb5770aeb01728aa0a1e',1,'CPixelView::size()']]],
   ['sqrt16',['sqrt16',['../group___math.html#ga66ecef97faa5f9b92c49766651c5afe9',1,'math8.h']]],
   ['squarewave8',['squarewave8',['../group__lib8tion.html#ga17ae8fcfd9c485bb1120d908f836637a',1,'lib8tion.h']]],
-  ['sub8',['sub8',['../group___math.html#ga0c40c15ab5af36ddabded161941f2091',1,'math8.h']]]
+  ['sub8',['sub8',['../group___math.html#ga0c40c15ab5af36ddabded161941f2091',1,'math8.h']]],
+  ['subfromrgb',['subFromRGB',['../class_c_pixel_view.html#afb57aeebbd762d7ead044a12fd51f639',1,'CPixelView']]]
 ];

@@ -30,6 +30,7 @@ var files =
     [ "lib8tion.h", "lib8tion_8h_source.html", null ],
     [ "noise.cpp", "noise_8cpp_source.html", null ],
     [ "noise.h", "noise_8h.html", "noise_8h" ],
+    [ "pixelset.h", "pixelset_8h_source.html", null ],
     [ "pixeltypes.h", "pixeltypes_8h_source.html", null ],
     [ "platforms.h", "platforms_8h_source.html", null ],
     [ "power_mgt.cpp", "power__mgt_8cpp_source.html", null ],

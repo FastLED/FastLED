@@ -10,5 +10,6 @@ var searchData=
   ['cos8',['cos8',['../group___trig.html#ga4432f985c94f5bff715db402d767b0e8',1,'trig8.h']]],
   ['count',['count',['../class_c_fast_l_e_d.html#ae5730545ea18b1f5228172f9d246beb6',1,'CFastLED']]],
   ['countfps',['countFPS',['../class_c_fast_l_e_d.html#a61d27e179c9b68bde89d220aebc0de32',1,'CFastLED']]],
+  ['cpixelview',['CPixelView',['../class_c_pixel_view.html#afe22ceed228286280b4c6f7692db105a',1,'CPixelView::CPixelView(const CPixelView &amp;other)'],['../class_c_pixel_view.html#a051455d30c4390abd81bbb23182d22a8',1,'CPixelView::CPixelView(PIXEL_TYPE *_leds, int _len)'],['../class_c_pixel_view.html#ada24d4d93b849bc31aec124f682b836a',1,'CPixelView::CPixelView(PIXEL_TYPE *_leds, int _start, int _end)']]],
   ['cubicwave8',['cubicwave8',['../group__lib8tion.html#ga06b04a0cf955ec107d49b76e0cb35225',1,'lib8tion.h']]]
 ];
