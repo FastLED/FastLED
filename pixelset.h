@@ -151,7 +151,7 @@ public:
 
   // Color util functions
   inline CPixelSet & fill_solid(const CRGB & color) { *this = color; return *this; }
-  inline CPixelSet & fill_solid(const CHSV & color) { if(dir>0) { *this = color; return *this; }
+  inline CPixelSet & fill_solid(const CHSV & color) { if(dir>0) { *this = color; return *this; } }
 
   inline CPixelSet & fill_rainbow(uint8_t initialhue, uint8_t deltahue=5) {
     if(dir >= 0) {
