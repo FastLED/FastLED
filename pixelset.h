@@ -2,7 +2,8 @@
 #define __INC_PIXELSET_H
 
 /// Represents a set of CRGB led objects.  Provides the [] array operator, and works like a normal array in that case.
-/// This should be kept in sync with the set of functions provided by CRGB as well as functions in colorutils.
+/// This should be kept in sync with the set of functions provided by CRGB as well as functions in colorutils.  Note
+/// that a pixel set is a window into another set of led data, it is not its own set of led data.
 class CPixelSet {
 public:
   const int8_t  dir;
@@ -12,22 +13,35 @@ public:
 
 public:
 
+  /// PixelSet copy constructor
   inline CPixelSet(const CPixelSet & other) : leds(other.leds), len(other.len), dir(other.dir), end_pos(other.end_pos) {}
+
+  /// pixelset constructor for a pixel set starting at the given CRGB* and going for _len leds.  Note that the length
+  /// can be backwards, creating a PixelSet that walks backwards over the data
+  /// @param leds point to the raw led data
+  /// @param len how many leds in this set
   inline CPixelSet(CRGB *_leds, int _len) : leds(_leds), len(_len), dir(_len < 0 ? -1 : 1), end_pos(_leds + _len) {}
+
+  /// PixelSet constructor for the given set of leds, with start and end boundaries.  Note that start can be after
+  /// end, resulting in a set that will iterate backwards
+  /// @param leds point to the raw led data
+  /// @param start the start index of the leds for this array
+  /// @param end the end index of the leds for this array
   inline CPixelSet(CRGB *_leds, int _start, int _end) : leds(_leds), dir(((_end-_start)<0) ? -1 : 1), len((_end - _start) + dir), end_pos(_leds + len) {}
 
-  /// what's the size of this set?
+  /// Get the size of this set
+  /// @return the size of the set
   int size() { return abs(len); }
 
-  /// is this set reversed?
+  /// Whether or not this set goes backwards
+  /// @return whether or not the set is backwards
   bool reversed() { return len < 0; }
 
   /// do these sets point to the same thing (note, this is different from the contents of the set being the same)
-  bool operator==(const CPixelSet rhs) const { return leds == rhs.leds && len == rhs.len && dir == rhs.dir; }
+  bool operator==(const CPixelSet & rhs) const { return leds == rhs.leds && len == rhs.len && dir == rhs.dir; }
 
   /// do these sets point to the different things (note, this is different from the contents of the set being the same)
-  bool operator!=(const CPixelSet rhs) const { return leds != rhs.leds || len != rhs.len || dir != rhs.dir; }
-
+  bool operator!=(const CPixelSet & rhs) const { return leds != rhs.leds || len != rhs.len || dir != rhs.dir; }
 
   /// access a single element in this set, just like an array operator
   inline CRGB & operator[](int x) const { if(dir & 0x80) { return leds[-x]; } else { return leds[x]; } }
@@ -55,11 +69,13 @@ public:
     return *this;
   }
 
-  void dump() const {
-    Serial.print("len: "); Serial.print(len); Serial.print(", dir:"); Serial.print((int)dir);
-    Serial.print(", range:"); Serial.print((uint32_t)leds); Serial.print("-"); Serial.print((uint32_t)end_pos);
-    Serial.print(", diff:"); Serial.print((int32_t)(end_pos - leds));
- }
+
+ //  void dump() const {
+ //    Serial.print("len: "); Serial.print(len); Serial.print(", dir:"); Serial.print((int)dir);
+ //    Serial.print(", range:"); Serial.print((uint32_t)leds); Serial.print("-"); Serial.print((uint32_t)end_pos);
+ //    Serial.print(", diff:"); Serial.print((int32_t)(end_pos - leds));
+ // }
+
   /// Copy the contents of the passed in set to our set.  Note if one set is smaller than the other, only the
   /// smallest number of items will be copied over.
   inline CPixelSet & operator=(const CPixelSet & rhs) {
@@ -69,46 +85,73 @@ public:
     return *this;
   }
 
-  // modification/scaling operators
+  /// @name modification/scaling operators
+  //@{
+  /// Add the passed in value to r,g, b for all the pixels in this set
   inline CPixelSet & addToRGB(uint8_t inc) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) += inc; } return *this; }
+  /// Add every pixel in the other set to this set
   inline CPixelSet & operator+=(CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) += (*rhspixel); } return *this; }
 
+  /// Subtract the passed in value from r,g,b for all pixels in this set
   inline CPixelSet & subFromRGB(uint8_t inc) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) -= inc; } return *this; }
+  /// Subtract every pixel in the other set from this set
   inline CPixelSet & operator-=(CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) -= (*rhspixel); } return *this; }
 
+  /// Increment every pixel value in this set
   inline CPixelSet & operator++() { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)++; } return *this; }
+  /// Increment every pixel value in this set
   inline CPixelSet & operator++(int DUMMY_ARG) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)++; } return *this; }
 
+  /// Decrement every pixel value in this set
   inline CPixelSet & operator--() { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)--; } return *this; }
+  /// Decrement every pixel value in this set
   inline CPixelSet & operator--(int DUMMY_ARG) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)--; } return *this; }
 
+  /// Divide every led by the given value
   inline CPixelSet & operator/=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) /= d; } return *this; }
+  /// Shift every led in this set right by the given number of bits
   inline CPixelSet & operator>>=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) >>= d; } return *this; }
+  /// Multiply every led in this set by the given value
   inline CPixelSet & operator*=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) *= d; } return *this; }
 
+  /// Scale every led by the given scale
   inline CPixelSet & nscale8_video(uint8_t scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8_video(scaledown); } return *this;}
+  /// Scale down every led by the given scale
   inline CPixelSet & operator%=(uint8_t scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8_video(scaledown); } return *this; }
+  /// Fade every led down by the given scale
   inline CPixelSet & fadeLightBy(uint8_t fadefactor) { return nscale8_video(255 - fadefactor); }
 
+  /// Scale every led by the given scale
   inline CPixelSet & nscale8(uint8_t scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8(scaledown); } return *this; }
+  /// Scale every led by the given scale
   inline CPixelSet & nscale8(CRGB & scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8(scaledown); } return *this; }
+  /// Scale every led in this set by every led in the other set
   inline CPixelSet & nscale8(CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel).nscale8((*rhspixel)); } return *this; }
 
+  /// Fade every led down by the given scale
   inline CPixelSet & fadeToBlackBy(uint8_t fade) { return nscale8(255 - fade); }
 
+  /// Apply the CRGB |= operator to every pixel in this set with the given CRGB value (bringing each channel to the higher of the two values)
   inline CPixelSet & operator|=(const CRGB & rhs) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) |= rhs; } return *this; }
+  /// Apply the CRGB |= operator to every pixel in this set with every pixel in the passed in set
   inline CPixelSet & operator|=(const CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) |= (*rhspixel); } return *this; }
+  /// Apply the CRGB |= operator to every pixel in this set
   inline CPixelSet & operator|=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) |= d; } return *this; }
 
+  /// Apply the CRGB &= operator to every pixel in this set with the given CRGB value (bringing each channel down to the lower of the two values)
   inline CPixelSet & operator&=(const CRGB & rhs) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) &= rhs; } return *this; }
+  /// Apply the CRGB &= operator to every pixel in this set with every pixel in the passed in set
   inline CPixelSet & operator&=(const CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) &= (*rhspixel); } return *this; }
+  /// APply the CRGB &= operator to every pixel in this set with the passed in value
   inline CPixelSet & operator&=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) &= d; } return *this; }
+  //@}
 
+  /// Returns whether or not any leds in this set are non-zero
   inline operator bool() { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { if((*pixel)) return true; } return false; }
 
   // Color util functions
-  inline CPixelSet & fill_solid(const CRGB & color) { if(dir>0) { ::fill_solid(leds, len, color); } else { ::fill_solid(leds + len + 1, -len, color); } return *this; }
-  inline CPixelSet & fill_solid(const CHSV & color) { if(dir>0) { ::fill_solid(leds, len, color); } else { ::fill_solid(leds + len + 1, -len, color); } return *this; }
+  inline CPixelSet & fill_solid(const CRGB & color) { *this = color; return *this; }
+  inline CPixelSet & fill_solid(const CHSV & color) { if(dir>0) { *this = color; return *this; }
 
   inline CPixelSet & fill_rainbow(uint8_t initialhue, uint8_t deltahue=5) {
     if(dir >= 0) {
