@@ -5,7 +5,7 @@
 /// This should be kept in sync with the set of functions provided by CRGB as well as functions in colorutils.
 class CPixelSet {
 public:
-  const char  dir;
+  const int8_t  dir;
   const int   len;
   CRGB * const leds;
   CRGB * const end_pos;
@@ -55,6 +55,11 @@ public:
     return *this;
   }
 
+  void dump() const {
+    Serial.print("len: "); Serial.print(len); Serial.print(", dir:"); Serial.print((int)dir);
+    Serial.print(", range:"); Serial.print((uint32_t)leds); Serial.print("-"); Serial.print((uint32_t)end_pos);
+    Serial.print(", diff:"); Serial.print((int32_t)(end_pos - leds));
+ }
   /// Copy the contents of the passed in set to our set.  Note if one set is smaller than the other, only the
   /// smallest number of items will be copied over.
   inline CPixelSet & operator=(const CPixelSet & rhs) {
@@ -203,7 +208,7 @@ public:
   template <class T>
   class pixelset_iterator_base {
     T * leds;
-    const char dir;
+    const int8_t dir;
   public:
     __attribute__((always_inline)) inline pixelset_iterator_base(const pixelset_iterator_base & rhs) : leds(rhs.leds), dir(rhs.dir) {}
     __attribute__((always_inline)) inline pixelset_iterator_base(T * _leds, const char _dir) : leds(_leds), dir(_dir) {}
