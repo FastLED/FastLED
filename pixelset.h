@@ -1,25 +1,20 @@
 #ifndef __INC_PIXELSET_H
 #define __INC_PIXELSET_H
 
-#define FOREACH_RHS for(int i=0,j=0; i!=len && j != rhs.len; i+=dir,j+=rhs.dir)
-#define FOREACH for(int i=0; i != len; i += dir)
-
 /// Represents a set of CRGB led objects.  Provides the [] array operator, and works like a normal array in that case.
 /// This should be kept in sync with the set of functions provided by CRGB as well as functions in colorutils.
 class CPixelSet {
-  CRGB *leds;
-  int   len;
-  char  dir;
+public:
+  const char  dir;
+  const int   len;
+  CRGB * const leds;
+  CRGB * const end_pos;
 
 public:
 
-  inline CPixelSet(const CPixelSet & other) : leds(other.leds), len(other.len), dir(other.dir) {}
-  inline CPixelSet(CRGB *_leds, int _len) : leds(_leds), len(_len), dir(1) {}
-#ifdef ARM
-  inline CPixelSet(CRGB *_leds, int _start, int _end) : leds(_leds), len(_end - _start), dir(0x01 | len>>31) { len += dir; }
-#else
-  inline CPixelSet(CRGB *_leds, int _start, int _end) : leds(_leds), len(_end - _start) { dir = (len<0) ? -1 : 1; len += dir; }
-#endif
+  inline CPixelSet(const CPixelSet & other) : leds(other.leds), len(other.len), dir(other.dir), end_pos(other.end_pos) {}
+  inline CPixelSet(CRGB *_leds, int _len) : leds(_leds), len(_len), dir(_len < 0 ? -1 : 1), end_pos(_leds + _len) {}
+  inline CPixelSet(CRGB *_leds, int _start, int _end) : leds(_leds), dir(((_end-_start)<0) ? -1 : 1), len((_end - _start) + dir), end_pos(_leds + len) {}
 
   /// what's the size of this set?
   int size() { return abs(len); }
@@ -28,14 +23,14 @@ public:
   bool reversed() { return len < 0; }
 
   /// do these sets point to the same thing (note, this is different from the contents of the set being the same)
-  bool operator==(const CPixelSet rhs) { return leds == rhs.leds && len == rhs.len && dir == rhs.dir; }
+  bool operator==(const CPixelSet rhs) const { return leds == rhs.leds && len == rhs.len && dir == rhs.dir; }
 
   /// do these sets point to the different things (note, this is different from the contents of the set being the same)
-  bool operator!=(const CPixelSet rhs) { return leds != rhs.leds || len != rhs.len || dir != rhs.dir; }
+  bool operator!=(const CPixelSet rhs) const { return leds != rhs.leds || len != rhs.len || dir != rhs.dir; }
 
 
   /// access a single element in this set, just like an array operator
-  inline CRGB & operator[](int x) { if(dir) { return leds[x]; } else { return leds[-x]; } }
+  inline CRGB & operator[](int x) const { if(dir & 0x80) { return leds[-x]; } else { return leds[x]; } }
 
   /// Access an inclusive subset of the leds in this set.  Note that start can be greater than end, which will
   /// result in a reverse ordering for many functions (useful for mirroring)
@@ -55,52 +50,60 @@ public:
 
   /// Assign the passed in color to all elements in this set
   /// @param color the new color for the elements in the set
-  inline CPixelSet & operator=(const CRGB & color) { FOREACH { leds[i] = color; } return *this; }
+  inline CPixelSet & operator=(const CRGB & color) {
+    for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) = color; }
+    return *this;
+  }
 
   /// Copy the contents of the passed in set to our set.  Note if one set is smaller than the other, only the
   /// smallest number of items will be copied over.
-  inline CPixelSet & operator=(const CPixelSet & rhs) { FOREACH_RHS { leds[i] = rhs.leds[j]; } return *this; }
+  inline CPixelSet & operator=(const CPixelSet & rhs) {
+    for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) {
+      (*pixel) = (*rhspixel);
+    }
+    return *this;
+  }
 
   // modification/scaling operators
-  inline CPixelSet & addToRGB(uint8_t inc) { FOREACH { leds[i] += inc; } return *this; }
-  inline CPixelSet & operator+=(CPixelSet & rhs) { FOREACH_RHS { leds[i] += rhs.leds[j]; } return *this; }
+  inline CPixelSet & addToRGB(uint8_t inc) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) += inc; } return *this; }
+  inline CPixelSet & operator+=(CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) += (*rhspixel); } return *this; }
 
-  inline CPixelSet & subFromRGB(uint8_t inc) { FOREACH { leds[i] -= inc; } return *this; }
-  inline CPixelSet & operator-=(CPixelSet & rhs) { FOREACH_RHS { leds[i] -= rhs.leds[j]; } return *this; }
+  inline CPixelSet & subFromRGB(uint8_t inc) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) -= inc; } return *this; }
+  inline CPixelSet & operator-=(CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) -= (*rhspixel); } return *this; }
 
-  inline CPixelSet & operator++() { FOREACH { leds[i]++; } return *this; }
-  inline CPixelSet & operator++(int DUMMY_ARG) { FOREACH { leds[i]++; } return *this; }
+  inline CPixelSet & operator++() { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)++; } return *this; }
+  inline CPixelSet & operator++(int DUMMY_ARG) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)++; } return *this; }
 
-  inline CPixelSet & operator--() { FOREACH { leds[i]--; } return *this; }
-  inline CPixelSet & operator--(int DUMMY_ARG) { FOREACH { leds[i]--; } return *this; }
+  inline CPixelSet & operator--() { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)--; } return *this; }
+  inline CPixelSet & operator--(int DUMMY_ARG) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel)--; } return *this; }
 
-  inline CPixelSet & operator/=(uint8_t d) { FOREACH { leds[i] /= d; } return *this; }
-  inline CPixelSet & operator>>=(uint8_t d) { FOREACH { leds[i] >>= d; } return *this; }
-  inline CPixelSet & operator*=(uint8_t d) { FOREACH { leds[i] *= d; } return *this; }
+  inline CPixelSet & operator/=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) /= d; } return *this; }
+  inline CPixelSet & operator>>=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) >>= d; } return *this; }
+  inline CPixelSet & operator*=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) *= d; } return *this; }
 
-  inline CPixelSet & nscale8_video(uint8_t scaledown) { FOREACH { leds[i].nscale8_video(scaledown); } return *this;}
-  inline CPixelSet & operator%=(uint8_t scaledown) { FOREACH { leds[i].nscale8_video(scaledown); } return *this; }
+  inline CPixelSet & nscale8_video(uint8_t scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8_video(scaledown); } return *this;}
+  inline CPixelSet & operator%=(uint8_t scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8_video(scaledown); } return *this; }
   inline CPixelSet & fadeLightBy(uint8_t fadefactor) { return nscale8_video(255 - fadefactor); }
 
-  inline CPixelSet & nscale8(uint8_t scaledown) { FOREACH { leds[i].nscale8(scaledown); } return *this; }
-  inline CPixelSet & nscale8(CRGB & scaledown) { FOREACH { leds[i].nscale8(scaledown); } return *this; }
-  inline CPixelSet & nscale8(CPixelSet & rhs) { FOREACH_RHS { leds[i].nscale8(leds[j]); } return *this; }
+  inline CPixelSet & nscale8(uint8_t scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8(scaledown); } return *this; }
+  inline CPixelSet & nscale8(CRGB & scaledown) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel).nscale8(scaledown); } return *this; }
+  inline CPixelSet & nscale8(CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel).nscale8((*rhspixel)); } return *this; }
 
   inline CPixelSet & fadeToBlackBy(uint8_t fade) { return nscale8(255 - fade); }
 
-  inline CPixelSet & operator|=(const CRGB & rhs) { FOREACH { leds[i] |= rhs; } return *this; }
-  inline CPixelSet & operator|=(const CPixelSet & rhs) { FOREACH_RHS { leds[i] |= rhs.leds[j]; } return *this; }
-  inline CPixelSet & operator|=(uint8_t d) { FOREACH { leds[i] |= d; } return *this; }
+  inline CPixelSet & operator|=(const CRGB & rhs) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) |= rhs; } return *this; }
+  inline CPixelSet & operator|=(const CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) |= (*rhspixel); } return *this; }
+  inline CPixelSet & operator|=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) |= d; } return *this; }
 
-  inline CPixelSet & operator&=(const CRGB & rhs) { FOREACH { leds[i] &= rhs; } return *this; }
-  inline CPixelSet & operator&=(const CPixelSet & rhs) { FOREACH_RHS { leds[i] &= rhs.leds[j]; } return *this; }
-  inline CPixelSet & operator&=(uint8_t d) { FOREACH { leds[i] &= d; } return *this; }
+  inline CPixelSet & operator&=(const CRGB & rhs) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) &= rhs; } return *this; }
+  inline CPixelSet & operator&=(const CPixelSet & rhs) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { (*pixel) &= (*rhspixel); } return *this; }
+  inline CPixelSet & operator&=(uint8_t d) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { (*pixel) &= d; } return *this; }
 
-  inline operator bool() { FOREACH { if(leds[i]) return true; } return false; }
+  inline operator bool() { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { if((*pixel)) return true; } return false; }
 
   // Color util functions
-  inline CPixelSet & fill_solid(const CRGB & color) { if(dir) { ::fill_solid(leds, len, color); } else { ::fill_solid(leds + len + 1, -len, color); } return *this; }
-  inline CPixelSet & fill_solid(const CHSV & color) { if(dir) { ::fill_solid(leds, len, color); } else { ::fill_solid(leds + len + 1, -len, color); } return *this; }
+  inline CPixelSet & fill_solid(const CRGB & color) { if(dir>0) { ::fill_solid(leds, len, color); } else { ::fill_solid(leds + len + 1, -len, color); } return *this; }
+  inline CPixelSet & fill_solid(const CHSV & color) { if(dir>0) { ::fill_solid(leds, len, color); } else { ::fill_solid(leds + len + 1, -len, color); } return *this; }
 
   inline CPixelSet & fill_rainbow(uint8_t initialhue, uint8_t deltahue=5) {
     if(dir >= 0) {
@@ -165,8 +168,8 @@ public:
     return *this;
   }
 
-  inline CPixelSet & nblend(const CRGB & overlay, fract8 amountOfOverlay) { FOREACH { ::nblend(leds[i], overlay, amountOfOverlay); } return *this; }
-  inline CPixelSet & nblend(const CPixelSet & rhs, fract8 amountOfOverlay) { FOREACH_RHS { ::nblend(leds[i], rhs.leds[j], amountOfOverlay); } return *this; }
+  inline CPixelSet & nblend(const CRGB & overlay, fract8 amountOfOverlay) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { ::nblend((*pixel), overlay, amountOfOverlay); } return *this; }
+  inline CPixelSet & nblend(const CPixelSet & rhs, fract8 amountOfOverlay) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { ::nblend((*pixel), (*rhspixel), amountOfOverlay); } return *this; }
 
   // Note: only bringing in a 1d blur, not sure 2d blur makes sense when looking at sub arrays
   inline CPixelSet & blur1d(fract8 blur_amount) {
@@ -197,24 +200,34 @@ public:
   }
 
   // TODO: Make this a fully specified/proper iterator
-  class pixelset_iterator {
-    CPixelSet & set;
-    int i;
+  template <class T>
+  class pixelset_iterator_base {
+    T * leds;
+    const char dir;
   public:
-    __attribute__((always_inline)) inline pixelset_iterator(CPixelSet & _set) : set(_set), i(set.len) {}
-    __attribute__((always_inline)) inline pixelset_iterator(CPixelSet & _set, int _i) : set(_set), i(_i) {}
+    __attribute__((always_inline)) inline pixelset_iterator_base(const pixelset_iterator_base & rhs) : leds(rhs.leds), dir(rhs.dir) {}
+    __attribute__((always_inline)) inline pixelset_iterator_base(T * _leds, const char _dir) : leds(_leds), dir(_dir) {}
 
-    __attribute__((always_inline)) inline pixelset_iterator& operator++() { i += set.dir; return *this; }
-    __attribute__((always_inline)) inline pixelset_iterator operator++(int) { pixelset_iterator tmp(set,i); i += set.dir; return tmp; }
+    __attribute__((always_inline)) inline pixelset_iterator_base& operator++() { leds += dir; return *this; }
+    __attribute__((always_inline)) inline pixelset_iterator_base operator++(int) { pixelset_iterator_base tmp(*this); leds += dir; return tmp; }
 
-    __attribute__((always_inline)) inline bool operator==(pixelset_iterator & other) { return i == other.i && set==other.set; }
-    __attribute__((always_inline)) inline bool operator!=(pixelset_iterator & other) { return i != other.i || set != other.set; }
+    __attribute__((always_inline)) inline bool operator==(pixelset_iterator_base & other) const { return leds == other.leds; } // && set==other.set; }
+    __attribute__((always_inline)) inline bool operator!=(pixelset_iterator_base & other) const { return leds != other.leds; } // || set != other.set; }
 
-    __attribute__((always_inline)) inline CRGB& operator*() { return set.leds[i]; }
+    __attribute__((always_inline)) inline CRGB& operator*() const { return *leds; }
   };
 
-  pixelset_iterator begin() { return pixelset_iterator(*this, 0); }
-  pixelset_iterator end() { return pixelset_iterator(*this, len); }
+  typedef pixelset_iterator_base<CRGB> iterator;
+  typedef pixelset_iterator_base<const CRGB> const_iterator;
+
+  iterator begin() { return iterator(leds, dir); }
+  iterator end() { return iterator(end_pos, dir); }
+
+  iterator begin() const { return iterator(leds, dir); }
+  iterator end() const { return iterator(end_pos, dir); }
+
+  const_iterator cbegin() const { return const_iterator(leds, dir); }
+  const_iterator cend() const { return const_iterator(end_pos, dir); }
 };
 
 __attribute__((always_inline))
