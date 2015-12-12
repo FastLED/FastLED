@@ -8,6 +8,9 @@ FastLED3.1.1pre
 * Support for adafruit pixies on arduino type platforms that have SoftwareSerial
   * TODO: support hardware serial on platforms that have it available
 * Add UCS2903 timings
+* Preliminary CPixelView/CRGBSet code - more flexible treatment of groups of arrays 
+  * https://github.com/FastLED/FastLED/wiki/RGBSet-Reference
+
 
 FastLED3.1.0
 ============
