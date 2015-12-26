@@ -655,7 +655,7 @@ void fill_noise8(CRGB *leds, int num_leds,
 void fill_noise16(CRGB *leds, int num_leds,
             uint8_t octaves, uint16_t x, int scale,
             uint8_t hue_octaves, uint16_t hue_x, int hue_scale,
-            uint16_t time) {
+            uint16_t time, uint8_t hue_shift) {
   uint8_t V[num_leds];
   uint8_t H[num_leds];
 
@@ -666,7 +666,7 @@ void fill_noise16(CRGB *leds, int num_leds,
   fill_raw_noise8(H,num_leds,hue_octaves,hue_x,hue_scale,time);
 
   for(int i = 0; i < num_leds; i++) {
-    leds[i] = CHSV(H[i],255,V[i]);
+    leds[i] = CHSV(H[i] + hue_shift,255,V[i]);
   }
 }
 

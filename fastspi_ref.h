@@ -1,6 +1,9 @@
 #ifndef __INC_FASTSPI_ARM_SAM_H
 #define __INC_FASTSPI_ARM_SAM_H
 
+#if 0 // guard against the arduino ide idiotically including every header file
+#include "FastLED.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 // A skeletal implementation of hardware SPI support.  Fill in the necessary code for init, waiting, and writing.  The rest of
@@ -87,3 +90,6 @@ public:
 FASTLED_NAMESPACE_END
 
 #endif
+
+#endif
+

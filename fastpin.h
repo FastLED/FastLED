@@ -1,6 +1,8 @@
 #ifndef __INC_FASTPIN_H
 #define __INC_FASTPIN_H
 
+#include "FastLED.h"
+
 #include "led_sysdefs.h"
 
 #pragma GCC diagnostic push

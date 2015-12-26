@@ -1,9 +1,11 @@
+#ifndef __INC_LIB8TION_H
+#define __INC_LIB8TION_H
+
+#include "FastLED.h"
+
 #ifndef __INC_LED_SYSDEFS_H
 #error WTH?  led_sysdefs needs to be included first
 #endif
-
-#ifndef __INC_LIB8TION_H
-#define __INC_LIB8TION_H
 
 FASTLED_NAMESPACE_BEGIN
 

@@ -1,6 +1,8 @@
 #ifndef __INC_FASTLED_CONFIG_H
 #define __INC_FASTLED_CONFIG_H
 
+#include "FastLED.h"
+
 ///@file fastled_config.h
 /// contains definitions that can be used to configure FastLED at compile time
 

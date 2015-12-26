@@ -1,6 +1,7 @@
 #ifndef __INC_DMX_H
 #define __INC_DMX_H
 
+#include "FastLED.h"
 
 #ifdef DmxSimple_h
 #include<DmxSimple.h>

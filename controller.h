@@ -4,6 +4,7 @@
 ///@file controller.h
 /// base definitions used by led controllers for writing out led data
 
+#include "FastLED.h"
 #include "led_sysdefs.h"
 #include "pixeltypes.h"
 #include "color.h"
