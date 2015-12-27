@@ -475,18 +475,44 @@ CRGB HeatColor( uint8_t temperature)
 }
 
 
+// lsrX4: helper function to divide a number by 16, aka four LSR's.
+// On avr-gcc, "u8 >> 4" generates a loop, which is big, and slow.
+// merely forcing it to be four /=2's causes avr-gcc to emit
+// a SWAP instruction followed by an AND 0x0F, which is faster, and smaller.
+inline uint8_t lsrX4( uint8_t dividend) __attribute__((always_inline));
+inline uint8_t lsrX4( uint8_t dividend)
+{
+#if defined(__AVR__)
+    // 3548
+    dividend /= 2;
+    dividend /= 2;
+    dividend /= 2;
+    dividend /= 2;
+#else
+    dividend >>= 4;
+#endif
+    return dividend;
+}
+
 
 CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
-    uint8_t hi4 = index >> 4;
+    //      hi4 = index >> 4;
+    uint8_t hi4 = lsrX4(index);
     uint8_t lo4 = index & 0x0F;
 
-    //  CRGB rgb1 = pal[ hi4];
-    const CRGB* entry = &(pal[0]) + hi4;
+    // const CRGB* entry = &(pal[0]) + hi4;
+    // since hi4 is always 0..15, hi4 * sizeof(CRGB) can be a single-byte value,
+    // instead of the two byte 'int' that avr-gcc defaults to.
+    // So, we multiply hi4 X sizeof(CRGB), giving hi4XsizeofCRGB;
+    uint8_t hi4XsizeofCRGB = hi4 * sizeof(CRGB);
+    // We then add that to a base array pointer.
+    const CRGB* entry = (CRGB*)( (uint8_t*)(&(pal[0])) + hi4XsizeofCRGB);
+
     uint8_t red1   = entry->red;
     uint8_t green1 = entry->green;
     uint8_t blue1  = entry->blue;
-
+    
     uint8_t blend = lo4 && (blendType != NOBLEND);
 
     if( blend ) {
@@ -534,11 +560,12 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
 
 CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
-    uint8_t hi4 = index >> 4;
+    //      hi4 = index >> 4;
+    uint8_t hi4 = lsrX4(index);
     uint8_t lo4 = index & 0x0F;
 
-    //  CRGB rgb1 = pal[ hi4];
     CRGB entry   =  FL_PGM_READ_DWORD_NEAR( &(pal[0]) + hi4 );
+    
 
     uint8_t red1   = entry.red;
     uint8_t green1 = entry.green;
@@ -609,7 +636,8 @@ CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightn
 
 CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
-    uint8_t hi4 = index >> 4;
+    //      hi4 = index >> 4;
+    uint8_t hi4 = lsrX4(index);
     uint8_t lo4 = index & 0x0F;
 
     //  CRGB rgb1 = pal[ hi4];

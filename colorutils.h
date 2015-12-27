@@ -649,9 +649,18 @@ public:
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
     }
+    CRGBPalette16( const CRGB rhs[16])
+    {
+        memmove8( &(entries[0]), &(rhs[0]), sizeof( entries));
+    }
     CRGBPalette16& operator=( const CRGBPalette16& rhs)
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
+        return *this;
+    }
+    CRGBPalette16& operator=( const CRGB rhs[16])
+    {
+        memmove8( &(entries[0]), &(rhs[0]), sizeof( entries));
         return *this;
     }
 
@@ -661,10 +670,23 @@ public:
     		entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
         }
     }
+    CRGBPalette16( const CHSV rhs[16])
+    {
+        for( uint8_t i = 0; i < 16; i++) {
+            entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
+        }
+    }
     CRGBPalette16& operator=( const CHSVPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
     		entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
+        }
+        return *this;
+    }
+    CRGBPalette16& operator=( const CHSV rhs[16])
+    {
+        for( uint8_t i = 0; i < 16; i++) {
+            entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
         }
         return *this;
     }
@@ -890,9 +912,18 @@ public:
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
     }
+    CRGBPalette256( const CRGB rhs[256])
+    {
+        memmove8( &(entries[0]), &(rhs[0]), sizeof( entries));
+    }
     CRGBPalette256& operator=( const CRGBPalette256& rhs)
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof( entries));
+        return *this;
+    }
+    CRGBPalette256& operator=( const CRGB rhs[256])
+    {
+        memmove8( &(entries[0]), &(rhs[0]), sizeof( entries));
         return *this;
     }
 
@@ -902,11 +933,24 @@ public:
 	    	entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
     	}
     }
+    CRGBPalette256( const CHSV rhs[256])
+    {
+        for( int i = 0; i < 256; i++) {
+            entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
+        }
+    }
     CRGBPalette256& operator=( const CHSVPalette256& rhs)
     {
     	for( int i = 0; i < 256; i++) {
 	    	entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
     	}
+        return *this;
+    }
+    CRGBPalette256& operator=( const CHSV rhs[256])
+    {
+        for( int i = 0; i < 256; i++) {
+            entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
+        }
         return *this;
     }
 
@@ -1049,7 +1093,6 @@ public:
         return *this;
     }
 };
-
 
 
 
