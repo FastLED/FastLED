@@ -91,6 +91,7 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS2903 : public UCS2903Contr
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6812 : public SK6812Controller<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6822 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PL9823 : public PL9823Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA104 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
