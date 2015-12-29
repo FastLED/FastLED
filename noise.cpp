@@ -58,7 +58,7 @@ static int16_t inline __attribute__((always_inline))  grad16(uint8_t hash, int16
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return (u+v)>>1;
+  return avg15(u,v);
 #endif
 }
 
@@ -69,7 +69,7 @@ static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return (u+v)>>1;
+  return avg15(u,v);
 }
 
 static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_t x) {
@@ -81,7 +81,7 @@ static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return (u+v)>>1;
+  return avg15(u,v);
 }
 
 // selectBasedOnHashBit performs this:
