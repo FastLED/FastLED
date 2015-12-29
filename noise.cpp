@@ -20,6 +20,13 @@ FL_PROGMEM static uint8_t const p[] = { 151,160,137,91,90,15,
    138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180,151
    };
 
+
+#if FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW == 1
+#define AVG15(U,V) (((U)+(V)) >> 1)
+#else
+#define AVG15(U,V) (avg15((U),(V)))
+#endif
+
 //
 // #define FADE_12
 #define FADE_16
@@ -58,7 +65,7 @@ static int16_t inline __attribute__((always_inline))  grad16(uint8_t hash, int16
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return avg15(u,v);
+  return AVG15(u,v);
 #endif
 }
 
@@ -69,7 +76,7 @@ static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return avg15(u,v);
+  return AVG15(u,v);
 }
 
 static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_t x) {
@@ -81,7 +88,7 @@ static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return avg15(u,v);
+  return AVG15(u,v);
 }
 
 // selectBasedOnHashBit performs this:
