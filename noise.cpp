@@ -24,7 +24,31 @@ FL_PROGMEM static uint8_t const p[] = { 151,160,137,91,90,15,
 #if FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW == 1
 #define AVG15(U,V) (((U)+(V)) >> 1)
 #else
+// See if we should use the inlined avg15 for AVR with MUL instruction
+#if defined(__AVR__) && (LIB8_ATTINY == 0)
+#define AVG15(U,V) (avg15_inline_avr_mul((U),(V)))
+// inlined copy of avg15 for AVR with MUL instruction; cloned from math8.h
+// Forcing this inline in the 3-D 16bit noise produces a 12% speedup overall,
+// at a cost of just +8 bytes of net code size.
+static int16_t inline __attribute__((always_inline))  avg15_inline_avr_mul( int16_t i, int16_t j)
+{
+    asm volatile(
+                 /* first divide j by 2, throwing away lowest bit */
+                 "asr %B[j]          \n\t"
+                 "ror %A[j]          \n\t"
+                 /* now divide i by 2, with lowest bit going into C */
+                 "asr %B[i]          \n\t"
+                 "ror %A[i]          \n\t"
+                 /* add j + C to i */
+                 "adc %A[i], %A[j]   \n\t"
+                 "adc %B[i], %B[j]   \n\t"
+                 : [i] "+a" (i)
+                 : [j] "a"  (j) );
+    return i;
+}
+#else
 #define AVG15(U,V) (avg15((U),(V)))
+#endif
 #endif
 
 //
