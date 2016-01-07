@@ -388,8 +388,7 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
     result = ((uint32_t)(i) * (uint32_t)(scale)) / 65536;
     return result;
 #elif SCALE16_AVRASM == 1
-    uint32_t result = 0;
-    const uint8_t  zero = 0;
+    uint32_t result;
     asm volatile(
                  // result.A-B  = i.A x scale.A
                  "  mul %A[i], %A[scale]                 \n\t"
@@ -406,12 +405,26 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
                  // well, in case we want to use this code for
                  // a generic 16x16 multiply somewhere.
 
+                 : [result] "=r" (result)
+                 : [i] "r" (i),
+                   [scale] "r" (scale)
+                 : "r0", "r1"
+                 );
+
+    asm volatile(
                  // result.C-D  = i.B x scale.B
                  "  mul %B[i], %B[scale]                 \n\t"
                  //"  mov %C[result], r0                 \n\t"
                  //"  mov %D[result], r1                 \n\t"
                  "  movw %C[result], r0                   \n\t"
+                 : [result] "+r" (result)
+                 : [i] "r" (i),
+                   [scale] "r" (scale)
+                 : "r0", "r1"
+                 );
 
+    const uint8_t  zero = 0;
+    asm volatile(
                  // result.B-D += i.B x scale.A
                  "  mul %B[i], %A[scale]                 \n\t"
 
@@ -435,6 +448,7 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
                    [zero] "r" (zero)
                  : "r0", "r1"
                  );
+
     result = result >> 16;
     return result;
 #else
