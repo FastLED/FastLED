@@ -442,7 +442,8 @@ public:
 	void showColor(const struct CRGB & color) { showColor(color, m_Scale); }
 
 	/// Delay for the given number of milliseconds.  Provided to allow the library to be used on platforms
-	/// that don't have a delay function (to allow code to be more portable)
+	/// that don't have a delay function (to allow code to be more portable).  Note: this will call show
+ 	/// constantly to drive the dithering engine (and will call show at least once).
 	/// @param ms the number of milliseconds to pause for
 	void delay(unsigned long ms);
 
