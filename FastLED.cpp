@@ -125,7 +125,7 @@ void CFastLED::delay(unsigned long ms) {
 		yield();
 #endif
 	}
-	while((millis()-start) < ms) {
+	while((millis()-start) < ms);
 }
 
 void CFastLED::setTemperature(const struct CRGB & temp) {
