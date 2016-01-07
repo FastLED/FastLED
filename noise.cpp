@@ -297,7 +297,13 @@ uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z) {
   int32_t ans = inoise16_raw(x,y,z);
   ans = ans + 19052L;
   uint32_t pan = ans;
-  return (pan*220L)>>7;
+  // pan = (ans * 220L) >> 7.  That's the same as:
+  // pan = (ans * 440L) >> 8.  And this way avoids a 7X four-byte shift-loop on AVR.
+  // Identical math, except for the highest bit, which we don't care about anyway,
+  // since we're returning the 'middle' 16 out of a 32-bit value anyway.
+  pan *= 440L;
+  return (pan>>8);
+
   // // return scale16by8(pan,220)<<1;
   // return ((inoise16_raw(x,y,z)+19052)*220)>>7;
   // return scale16by8(inoise16_raw(x,y,z)+19052,220)<<1;
@@ -340,7 +346,13 @@ uint16_t inoise16(uint32_t x, uint32_t y) {
   int32_t ans = inoise16_raw(x,y);
   ans = ans + 17308L;
   uint32_t pan = ans;
-  return (pan*242L)>>7;
+  // pan = (ans * 242L) >> 7.  That's the same as:
+  // pan = (ans * 484L) >> 8.  And this way avoids a 7X four-byte shift-loop on AVR.
+  // Identical math, except for the highest bit, which we don't care about anyway,
+  // since we're returning the 'middle' 16 out of a 32-bit value anyway.
+  pan *= 484L;
+  return (pan>>8);
+    
   // return (uint32_t)(((int32_t)inoise16_raw(x,y)+(uint32_t)17308)*242)>>7;
   // return scale16by8(inoise16_raw(x,y)+17308,242)<<1;
 }
