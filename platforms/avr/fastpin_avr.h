@@ -30,9 +30,9 @@ public:
 
 	inline static void toggle() __attribute__ ((always_inline)) { _PIN::r() = _MASK; }
 
-	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-	inline static void fastset(register port_ptr_t port, register uint8_t val) __attribute__ ((always_inline)) { set(val); }
+	inline static void hi(register port_ptr_t /*port*/) __attribute__ ((always_inline)) { hi(); }
+	inline static void lo(register port_ptr_t /*port*/) __attribute__ ((always_inline)) { lo(); }
+	inline static void fastset(register port_ptr_t /*port*/, register uint8_t val) __attribute__ ((always_inline)) { set(val); }
 
 	inline static port_t hival() __attribute__ ((always_inline)) { return _PORT::r() | _MASK; }
 	inline static port_t loval() __attribute__ ((always_inline)) { return _PORT::r() & ~_MASK; }
