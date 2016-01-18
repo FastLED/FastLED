@@ -74,10 +74,12 @@ public:
 
 
   void dump() const {
+/**
     Serial.print("len: "); Serial.print(len); Serial.print(", dir:"); Serial.print((int)dir);
     Serial.print(", range:"); Serial.print((uint32_t)leds); Serial.print("-"); Serial.print((uint32_t)end_pos);
     Serial.print(", diff:"); Serial.print((int32_t)(end_pos - leds));
     Serial.println("");
+ **/
  }
 
   /// Copy the contents of the passed in set to our set.  Note if one set is smaller than the other, only the
