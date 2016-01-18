@@ -111,19 +111,19 @@ private:
 	}
 
 public:
-	#define SPI_DELAY delaycycles<1+((SPI_SPEED-2) / 2)>();
-	#define SPI_DELAY_HALF delaycycles<1+ ((SPI_SPEED-4) / 4)>();
+	#define SPI_DELAY delaycycles_min1<((SPI_SPEED-2) / 2)>();
+	#define SPI_DELAY_HALF delaycycles_min1<((SPI_SPEED-4) / 4)>();
 
 	// write the BIT'th bit out via spi, setting the data pin then strobing the clcok
 	template <uint8_t BIT> __attribute__((always_inline, hot)) inline static void writeBit(uint8_t b) {
 		if(b & (1 << BIT)) {
-			FastPin<DATA_PIN>::hi();
+			FastPin<DATA_PIN>::hi(); SPI_DELAY_HALF;
 			FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
-			FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
+			FastPin<CLOCK_PIN>::lo(); SPI_DELAY_HALF;
 		} else {
-			FastPin<DATA_PIN>::lo();
+			FastPin<DATA_PIN>::lo(); SPI_DELAY_HALF;
 			FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
-			FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
+			FastPin<CLOCK_PIN>::lo(); SPI_DELAY_HALF;
 		}
 	}
 
@@ -131,13 +131,13 @@ private:
 	// write the BIT'th bit out via spi, setting the data pin then strobing the clock, using the passed in pin registers to accelerate access if needed
 	template <uint8_t BIT> __attribute__((always_inline)) inline static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin) {
 		if(b & (1 << BIT)) {
-			FastPin<DATA_PIN>::hi(datapin);
+			FastPin<DATA_PIN>::hi(datapin); SPI_DELAY_HALF;
 			FastPin<CLOCK_PIN>::hi(clockpin); SPI_DELAY;
-			FastPin<CLOCK_PIN>::lo(clockpin); SPI_DELAY;
+			FastPin<CLOCK_PIN>::lo(clockpin); SPI_DELAY_HALF;
 		} else {
-			FastPin<DATA_PIN>::lo(datapin);
+			FastPin<DATA_PIN>::lo(datapin); SPI_DELAY_HALF;
 			FastPin<CLOCK_PIN>::hi(clockpin); SPI_DELAY;
-			FastPin<CLOCK_PIN>::lo(clockpin); SPI_DELAY;
+			FastPin<CLOCK_PIN>::lo(clockpin); SPI_DELAY_HALF;
 		}
 
 	}
@@ -148,14 +148,14 @@ private:
 													data_t hival, data_t loval, clock_t hiclock, clock_t loclock) {
 		// // only need to explicitly set clock hi if clock and data are on different ports
 		if(b & (1 << BIT)) {
-			FastPin<DATA_PIN>::fastset(datapin, hival);
+			FastPin<DATA_PIN>::fastset(datapin, hival); SPI_DELAY_HALF;
 			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); SPI_DELAY;
-			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); SPI_DELAY;
+			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); SPI_DELAY_HALF;
 		} else {
 			// NOP;
-			FastPin<DATA_PIN>::fastset(datapin, loval);
+			FastPin<DATA_PIN>::fastset(datapin, loval); SPI_DELAY_HALF;
 			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); SPI_DELAY;
-			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); SPI_DELAY;
+			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); SPI_DELAY_HALF;
 		}
 	}
 
