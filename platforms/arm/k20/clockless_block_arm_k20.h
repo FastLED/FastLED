@@ -70,7 +70,7 @@ public:
 
 	// set all the leds on the controller to a given color
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-		MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
+		MultiPixelController<RGB_ORDER,LANES,PORT_MASK> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
 		uint32_t clocks = showRGBInternal(pixels,nLeds);
 		#if FASTLED_ALLOW_INTTERUPTS == 0
@@ -83,7 +83,7 @@ public:
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-		MultiPixelController<LANES,PORT_MASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
+		MultiPixelController<RGB_ORDER,LANES,PORT_MASK> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
 		uint32_t clocks = showRGBInternal(pixels,nLeds);
 		#if FASTLED_ALLOW_INTTERUPTS == 0
@@ -103,7 +103,7 @@ public:
 		uint32_t raw[3];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , register uint32_t & b2)  {
 		register Lines b2;
 		if(LANES>8) {
 			transpose8<1,2>(b.bytes,b2.bytes);
@@ -175,7 +175,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-		static uint32_t showRGBInternal(MultiPixelController<LANES, PORT_MASK, RGB_ORDER> &allpixels, int nLeds) {
+		static uint32_t showRGBInternal(MultiPixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels, int nLeds) {
 		// Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
@@ -267,14 +267,14 @@ public:
 
 	// set all the leds on the controller to a given color
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-		MultiPixelController<DLANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
+		MultiPixelController<RGB_ORDER,DLANES,PMASK> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
 		showRGBInternal(pixels,nLeds);
 		mWait.mark();
 	}
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-		MultiPixelController<DLANES,PMASK,RGB_ORDER> pixels(rgbdata,nLeds, scale, getDither() );
+		MultiPixelController<RGB_ORDER,DLANES,PMASK> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
 		showRGBInternal(pixels,nLeds);
 		mWait.mark();
@@ -286,7 +286,7 @@ public:
 		uint32_t raw[4];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<DLANES, PMASK, RGB_ORDER> &pixels) { // , register uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, MultiPixelController<RGB_ORDER,DLANES, PMASK> &pixels) { // , register uint32_t & b2)  {
 		register Lines b2;
 		transpose8x1(b.bytes,b2.bytes);
 		transpose8x1(b.bytes+8,b2.bytes+8);
@@ -318,7 +318,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-		static uint32_t showRGBInternal(MultiPixelController<DLANES, PMASK, RGB_ORDER> &allpixels, int nLeds) {
+		static uint32_t showRGBInternal(MultiPixelController<RGB_ORDER,DLANES, PMASK> &allpixels, int nLeds) {
 		// Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;

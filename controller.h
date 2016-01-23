@@ -354,7 +354,7 @@ struct PixelController {
 // Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
 // support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will
 // centralize 8/12/16 conversions here as well.
-template<int LANES,int MASK, EOrder RGB_ORDER>
+template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF>
 struct MultiPixelController {
         const uint8_t *mData;
         int mLen,mLenRemaining;
