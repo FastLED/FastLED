@@ -131,12 +131,6 @@ public:
 	  mWaitDelay.mark();
 	}
 
-	virtual void clearLeds(int nLeds) {
-		mWaitDelay.wait();
-		mSPI.writeBytesValue(0, nLeds*3);
-		mWaitDelay.mark();
-	}
-
 protected:
 
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
