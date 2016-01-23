@@ -86,6 +86,11 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
+	// If we have a function for computing power, use it!
+	if(m_pPowerFunc) {
+		scale = (*m_pPowerFunc)(scale, m_nPowerData);
+	}
+
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		uint8_t d = pCur->getDither();
