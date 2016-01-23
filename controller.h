@@ -170,194 +170,11 @@ public:
     virtual uint16_t getMaxRefreshRate() const { return 0; }
 };
 
-#if 0
-/// Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
-/// support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will
-/// centralize 8/12/16 conversions here as well.
-template<EOrder RGB_ORDER>
-struct PixelController {
-        const uint8_t *mData;
-        int mLen,mLenRemaining;
-        uint8_t d[3];
-        uint8_t e[3];
-        CRGB mScale;
-        uint8_t mAdvance;
-
-		///copy constructor for the pixel controller object
-        PixelController(const PixelController & other) {
-            d[0] = other.d[0];
-            d[1] = other.d[1];
-            d[2] = other.d[2];
-            e[0] = other.e[0];
-            e[1] = other.e[1];
-            e[2] = other.e[2];
-            mData = other.mData;
-            mScale = other.mScale;
-            mAdvance = other.mAdvance;
-            mLen = other.mLen;
-            mLenRemaining = other.mLenRemaining;
-        }
-
-
-		/// create a pixel controller for managing led data as it is being written out
-    ///@{
-		///@param d the led data this controller is managing
-		///@param len the number of leds this controller is managing
-		///@param s the combined rgb scaling adjustment for the leds
-		///@param dither the dither mode for these pixels
-		///@param advance whether or not to walk through the array of data for each pixel, or just write out the first pixel len times
-		///@param skip whether or not there is extra data to skip when writing out led data, e.g. if passed in argb data
-        PixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
-            enable_dithering(dither);
-            mData += skip;
-            mAdvance = (advance) ? 3+skip : 0;
-        }
-
-        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
-            enable_dithering(dither);
-            mAdvance = 3;
-        }
-
-        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
-            enable_dithering(dither);
-            mAdvance = 0;
-        }
-
-    ///@}
-
-		/// initialize the binary dithering for this controller
-        void init_binary_dithering() {
-#if !defined(NO_DITHERING) || (NO_DITHERING != 1)
-
-            // Set 'virtual bits' of dithering to the highest level
-            // that is not likely to cause excessive flickering at
-            // low brightness levels + low update rates.
-            // These pre-set values are a little ambitious, since
-            // a 400Hz update rate for WS2811-family LEDs is only
-            // possible with 85 pixels or fewer.
-            // Once we have a 'number of milliseconds since last update'
-            // value available here, we can quickly calculate the correct
-            // number of 'virtual bits' on the fly with a couple of 'if'
-            // statements -- no division required.  At this point,
-            // the division is done at compile time, so there's no runtime
-            // cost, but the values are still hard-coded.
-#define MAX_LIKELY_UPDATE_RATE_HZ     400
-#define MIN_ACCEPTABLE_DITHER_RATE_HZ  50
-#define UPDATES_PER_FULL_DITHER_CYCLE (MAX_LIKELY_UPDATE_RATE_HZ / MIN_ACCEPTABLE_DITHER_RATE_HZ)
-#define RECOMMENDED_VIRTUAL_BITS ((UPDATES_PER_FULL_DITHER_CYCLE>1) + \
-                                  (UPDATES_PER_FULL_DITHER_CYCLE>2) + \
-                                  (UPDATES_PER_FULL_DITHER_CYCLE>4) + \
-                                  (UPDATES_PER_FULL_DITHER_CYCLE>8) + \
-                                  (UPDATES_PER_FULL_DITHER_CYCLE>16) + \
-                                  (UPDATES_PER_FULL_DITHER_CYCLE>32) + \
-                                  (UPDATES_PER_FULL_DITHER_CYCLE>64) + \
-                                  (UPDATES_PER_FULL_DITHER_CYCLE>128) )
-#define VIRTUAL_BITS RECOMMENDED_VIRTUAL_BITS
-
-            // R is the digther signal 'counter'.
-            static byte R = 0;
-            R++;
-
-            // R is wrapped around at 2^ditherBits,
-            // so if ditherBits is 2, R will cycle through (0,1,2,3)
-            byte ditherBits = VIRTUAL_BITS;
-            R &= (0x01 << ditherBits) - 1;
-
-            // Q is the "unscaled dither signal" itself.
-            // It's initialized to the reversed bits of R.
-            // If 'ditherBits' is 2, Q here will cycle through (0,128,64,192)
-            byte Q = 0;
-
-            // Reverse bits in a byte
-            {
-                if(R & 0x01) { Q |= 0x80; }
-                if(R & 0x02) { Q |= 0x40; }
-                if(R & 0x04) { Q |= 0x20; }
-                if(R & 0x08) { Q |= 0x10; }
-                if(R & 0x10) { Q |= 0x08; }
-                if(R & 0x20) { Q |= 0x04; }
-                if(R & 0x40) { Q |= 0x02; }
-                if(R & 0x80) { Q |= 0x01; }
-            }
-
-            // Now we adjust Q to fall in the center of each range,
-            // instead of at the start of the range.
-            // If ditherBits is 2, Q will be (0, 128, 64, 192) at first,
-            // and this adjustment makes it (31, 159, 95, 223).
-            if( ditherBits < 8) {
-                Q += 0x01 << (7 - ditherBits);
-            }
-
-            // D and E form the "scaled dither signal"
-            // which is added to pixel values to affect the
-            // actual dithering.
-
-            // Setup the initial D and E values
-            for(int i = 0; i < 3; i++) {
-                    byte s = mScale.raw[i];
-                    e[i] = s ? (256/s) + 1 : 0;
-                    d[i] = scale8(Q, e[i]);
-                    if(e[i]) e[i]--;
-            }
-#endif
-        }
-
-        /// Do we have n pixels left to process?
-        __attribute__((always_inline)) inline bool has(int n) {
-            return mLenRemaining >= n;
-        }
-
-        /// toggle dithering enable
-        void enable_dithering(EDitherMode dither) {
-            switch(dither) {
-                case BINARY_DITHER: init_binary_dithering(); break;
-                default: d[0]=d[1]=d[2]=e[0]=e[1]=e[2]=0; break;
-            }
-        }
-
-        __attribute__((always_inline)) inline int size() { return mLen; }
-        /// get the amount to advance the pointer by
-        __attribute__((always_inline)) inline int advanceBy() { return mAdvance; }
-
-        /// advance the data pointer forward, adjust position counter
-         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; mLenRemaining--;}
-
-        /// step the dithering forward
-         __attribute__((always_inline)) inline void stepDithering() {
-         		// IF UPDATING HERE, BE SURE TO UPDATE THE ASM VERSION IN
-         		// clockless_trinket.h!
-                d[0] = e[0] - d[0];
-                d[1] = e[1] - d[1];
-                d[2] = e[2] - d[2];
-        }
-
-        /// Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately
-        __attribute__((always_inline)) inline void preStepFirstByteDithering() {
-            d[RO(0)] = e[RO(0)] - d[RO(0)];
-        }
-
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { return pc.mData[RO(SLOT)]; }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & pc, uint8_t b) { return b ? qadd8(b, pc.d[RO(SLOT)]) : 0; }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
-
-        // composite shortcut functions for loading, dithering, and scaling
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(PixelController & pc) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc))); }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(PixelController & pc) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc); }
-
-		// Helper functions to get around gcc stupidities
-		__attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }
-		__attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }
-		__attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }
-		__attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }
-        __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }
-};
-#endif
-
 // Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
 // support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will
 // centralize 8/12/16 conversions here as well.
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF>
-struct MultiPixelController {
+struct PixelController {
         const uint8_t *mData;
         int mLen,mLenRemaining;
         uint8_t d[3];
@@ -366,7 +183,7 @@ struct MultiPixelController {
         int8_t mAdvance;
         int mOffsets[LANES];
 
-        MultiPixelController(const MultiPixelController & other) {
+        PixelController(const PixelController & other) {
             d[0] = other.d[0];
             d[1] = other.d[1];
             d[2] = other.d[2];
@@ -389,20 +206,20 @@ struct MultiPixelController {
           }
         }
 
-        MultiPixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mData += skip;
             mAdvance = (advance) ? 3+skip : 0;
             initOffsets(len);
         }
 
-        MultiPixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 3;
             initOffsets(len);
         }
 
-        MultiPixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 0;
             initOffsets(len);
@@ -519,26 +336,26 @@ struct MultiPixelController {
             d[RO(0)] = e[RO(0)] - d[RO(0)];
         }
 
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(MultiPixelController & pc) { return pc.mData[RO(SLOT)]; }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(MultiPixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { return pc.mData[RO(SLOT)]; }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
         
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(MultiPixelController & pc, uint8_t b) { return b ? qadd8(b, pc.d[RO(SLOT)]) : 0; }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(MultiPixelController & pc, uint8_t b, uint8_t d) { return b ? qadd8(b,d) : 0; }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & pc, uint8_t b) { return b ? qadd8(b, pc.d[RO(SLOT)]) : 0; }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & pc, uint8_t b, uint8_t d) { return b ? qadd8(b,d) : 0; }
         
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(MultiPixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(MultiPixelController & pc, uint8_t b, uint8_t scale) { return scale8(b, scale); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b, uint8_t scale) { return scale8(b, scale); }
 
         // composite shortcut functions for loading, dithering, and scaling
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc))); }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane))); }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane, uint8_t d, uint8_t scale) { return scale8(pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), d), scale); }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane, uint8_t scale) { return scale8(pc.loadByte<SLOT>(pc, lane), scale); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(PixelController & pc) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc))); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(PixelController & pc, int lane) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane))); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(PixelController & pc, int lane, uint8_t d, uint8_t scale) { return scale8(pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), d), scale); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(PixelController & pc, int lane, uint8_t scale) { return scale8(pc.loadByte<SLOT>(pc, lane), scale); }
 
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(MultiPixelController & pc) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc); }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(MultiPixelController & pc, int lane) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc, lane); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(PixelController & pc) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(PixelController & pc, int lane) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc, lane); }
 
-        template<int SLOT> __attribute__((always_inline)) inline static uint8_t getd(MultiPixelController & pc) { return pc.d[RO(SLOT)]; }
-        template<int SLOT> __attribute__((always_inline)) inline static uint8_t getscale(MultiPixelController & pc) { return pc.mScale.raw[RO(SLOT)]; }
+        template<int SLOT> __attribute__((always_inline)) inline static uint8_t getd(PixelController & pc) { return pc.d[RO(SLOT)]; }
+        template<int SLOT> __attribute__((always_inline)) inline static uint8_t getscale(PixelController & pc) { return pc.mScale.raw[RO(SLOT)]; }
 
         // Helper functions to get around gcc stupidities
         __attribute__((always_inline)) inline uint8_t loadAndScale0(int lane) { return loadAndScale<0>(*this, lane); }
@@ -553,8 +370,6 @@ struct MultiPixelController {
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }
 };
-
-template<EOrder RGB_ORDER> using PixelController = MultiPixelController<RGB_ORDER,1,0xFFFFFFFF>();
 
 template<EOrder RGB_ORDER> class CPixelLEDController : public CLEDController {
 protected:

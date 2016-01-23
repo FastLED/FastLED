@@ -86,7 +86,7 @@ public:
 
 	// set all the leds on the controller to a given color
 	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-    MultiPixelController<RGB_ORDER,LANES,PORT_MASK> pixels(rgbdata,nLeds, scale, getDither() );
+    PixelController<RGB_ORDER,LANES,PORT_MASK> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
     showRGBInternal(pixels, nLeds);
 		sei();
@@ -97,13 +97,13 @@ public:
 #define ADV_RGB if(maskbit & PORT_MASK) { rgbdata += nLeds; } maskbit <<= 1;
 
 	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-    MultiPixelController<RGB_ORDER,LANES,PORT_MASK> pixels(rgbdata,nLeds, scale, getDither() );
+    PixelController<RGB_ORDER,LANES,PORT_MASK> pixels(rgbdata,nLeds, scale, getDither() );
 		mWait.wait();
 		showRGBInternal(pixels, nLeds);
 		mWait.mark();
 	}
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b3, MultiPixelController<RGB_ORDER,LANES, PORT_MASK> &pixels) { // , register uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, Lines & b3, PixelController<RGB_ORDER,LANES, PORT_MASK> &pixels) { // , register uint32_t & b2)  {
 		register Lines b2;
     transpose8x1(b.bytes,b2.bytes);
 
@@ -141,7 +141,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static uint32_t showRGBInternal(MultiPixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels, int nLeds) {
+	static uint32_t showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels, int nLeds) {
 		// Serial.println("Entering show");
 		// Setup the pixel controller and load/scale the first byte
 		Lines b0,b1,b2;

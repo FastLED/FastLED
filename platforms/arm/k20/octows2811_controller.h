@@ -69,7 +69,7 @@ public:
 
   virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
     _init(nLeds);
-    MultiPixelController<RGB_ORDER,8,0xFF> pixels(rgbdata,nLeds, scale, getDither() );
+    PixelController<RGB_ORDER,8,0xFF> pixels(rgbdata,nLeds, scale, getDither() );
 
     uint8_t *pData = drawbuffer;
     while(nLeds--) {
