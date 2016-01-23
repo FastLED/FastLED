@@ -1,4 +1,9 @@
-FastLED3.1.1pre
+FastLED3.1.2pre
+===============
+
+* Add SK6822 timings
+
+FastLED3.1.1
 ============
 * Enabled RFDuino/nrf51822 hardware SPI support
 * Fix edge case bug w/HSV palette blending 
@@ -7,6 +12,10 @@ FastLED3.1.1pre
 * Roll power management into FastLED.show/delay directly
 * Support for adafruit pixies on arduino type platforms that have SoftwareSerial
   * TODO: support hardware serial on platforms that have it available
+* Add UCS2903 timings
+* Preliminary CPixelView/CRGBSet code - more flexible treatment of groups of arrays 
+  * https://github.com/FastLED/FastLED/wiki/RGBSet-Reference
+
 
 FastLED3.1.0
 ============

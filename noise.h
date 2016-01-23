@@ -1,6 +1,8 @@
 #ifndef __INC_NOISE_H
 #define __INC_NOISE_H
 
+#include "FastLED.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 ///@file noise.h
@@ -81,7 +83,7 @@ void fill_noise8(CRGB *leds, int num_leds,
 void fill_noise16(CRGB *leds, int num_leds,
             uint8_t octaves, uint16_t x, int scale,
             uint8_t hue_octaves, uint16_t hue_x, int hue_scale,
-            uint16_t time);
+            uint16_t time, uint8_t hue_shift=0);
 void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
             uint8_t octaves, uint16_t x, int xscale, uint16_t y, int yscale, uint16_t time,
             uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time,bool blend);

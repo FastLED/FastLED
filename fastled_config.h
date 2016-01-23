@@ -1,6 +1,8 @@
 #ifndef __INC_FASTLED_CONFIG_H
 #define __INC_FASTLED_CONFIG_H
 
+#include "FastLED.h"
+
 ///@file fastled_config.h
 /// contains definitions that can be used to configure FastLED at compile time
 
@@ -18,5 +20,13 @@
 // allow interrupts or 0 to disallow them.
 // #define FASTLED_ALLOW_INTERRUPTS 1
 // #define FASTLED_ALLOW_INTERRUPTS 0
+
+// Use this to allow some integer overflows/underflows in the inoise functions.
+// The original implementions allowed this, and had some discontinuties in the noise
+// output.  It's technically an implementation bug, and was fixed, but you may wish
+// to preserve the old look and feel of the inoise functions in your existing animations.
+// The default is 0:  NO overflow, and 'continuous' noise output, aka the fixed way.
+// #define FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW 0
+// #define FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW 1
 
 #endif

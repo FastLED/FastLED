@@ -114,14 +114,18 @@ void CFastLED::clearData() {
 
 void CFastLED::delay(unsigned long ms) {
 	unsigned long start = millis();
-	while((millis()-start) < ms) {
+        do { 
 #ifndef FASTLED_ACCURATE_CLOCK
 		// make sure to allow at least one ms to pass to ensure the clock moves
 		// forward
 		::delay(1);
 #endif
 		show();
+#if defined(ARDUINO) && (ARDUINO > 150)
+		yield();
+#endif
 	}
+	while((millis()-start) < ms);
 }
 
 void CFastLED::setTemperature(const struct CRGB & temp) {

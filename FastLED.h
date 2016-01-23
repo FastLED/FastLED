@@ -45,8 +45,10 @@
 #include "fastled_progmem.h"
 
 #include "lib8tion.h"
+#include "pixeltypes.h"
 #include "hsv2rgb.h"
 #include "colorutils.h"
+#include "pixelset.h"
 #include "colorpalettes.h"
 
 #include "noise.h"
@@ -85,9 +87,11 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class TM1803 : public TM1803Control
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903 : public UCS1903Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903B : public UCS1903BController800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1904 : public UCS1904Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS2903 : public UCS2903Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6812 : public SK6812Controller<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6822 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PL9823 : public PL9823Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA104 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
@@ -438,7 +442,8 @@ public:
 	void showColor(const struct CRGB & color) { showColor(color, m_Scale); }
 
 	/// Delay for the given number of milliseconds.  Provided to allow the library to be used on platforms
-	/// that don't have a delay function (to allow code to be more portable)
+	/// that don't have a delay function (to allow code to be more portable).  Note: this will call show
+ 	/// constantly to drive the dithering engine (and will call show at least once).
 	/// @param ms the number of milliseconds to pause for
 	void delay(unsigned long ms);
 

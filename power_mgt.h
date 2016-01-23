@@ -1,6 +1,8 @@
 #ifndef POWER_MGT_H
 #define POWER_MGT_H
 
+#include "FastLED.h"
+
 #include "pixeltypes.h"
 
 FASTLED_NAMESPACE_BEGIN

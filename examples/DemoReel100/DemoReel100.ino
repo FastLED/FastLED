@@ -11,7 +11,7 @@ FASTLED_USING_NAMESPACE
 //
 // -Mark Kriegsman, December 2014
 
-#if FASTLED_VERSION < 3001000
+#if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
 #warning "Requires FastLED 3.1 or later; check github for latest code."
 #endif
 

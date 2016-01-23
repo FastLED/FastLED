@@ -163,6 +163,31 @@ LIB8STATIC uint8_t avg8( uint8_t i, uint8_t j)
 #endif
 }
 
+/// Calculate an integer average of two unsigned
+///       16-bit integer values (uint16_t).
+///       Fractional results are rounded down, e.g. avg16(20,41) = 30
+LIB8STATIC uint16_t avg16( uint16_t i, uint16_t j)
+{
+#if AVG16_C == 1
+    return (uint32_t)((uint32_t)(i) + (uint32_t)(j)) >> 1;
+#elif AVG16_AVRASM == 1
+    asm volatile(
+                 /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
+                 "add %A[i], %A[j]    \n\t"
+                 /* Now, add C + jHi to iHi, 17th bit overflows into C flag */
+                 "adc %B[i], %B[j]    \n\t"
+                 /* Divide iHi by two, moving C flag into high 16th bit, old 9th bit now in C */
+                 "ror %B[i]        \n\t"
+                 /* Divide iLo by two, moving C flag into high 8th bit */
+                 "ror %A[i]        \n\t"
+                 : [i] "+a" (i)
+                 : [j] "a"  (j) );
+    return i;
+#else
+#error "No implementation for avg16 available."
+#endif
+}
+
 
 /// Calculate an integer average of two signed 7-bit
 ///       integers (int8_t)
@@ -184,6 +209,34 @@ LIB8STATIC int8_t avg7( int8_t i, int8_t j)
 #error "No implementation for avg7 available."
 #endif
 }
+
+/// Calculate an integer average of two signed 15-bit
+///       integers (int16_t)
+///       If the first argument is even, result is rounded down.
+///       If the first argument is odd, result is result up.
+LIB8STATIC int16_t avg15( int16_t i, int16_t j)
+{
+#if AVG15_C == 1
+    return ((int32_t)((int32_t)(i) + (int32_t)(j)) >> 1) + (i & 0x1);
+#elif AVG15_AVRASM == 1
+    asm volatile(
+                 /* first divide j by 2, throwing away lowest bit */
+                 "asr %B[j]          \n\t"
+                 "ror %A[j]          \n\t"
+                 /* now divide i by 2, with lowest bit going into C */
+                 "asr %B[i]          \n\t"
+                 "ror %A[i]          \n\t"
+                 /* add j + C to i */
+                 "adc %A[i], %A[j]   \n\t"
+                 "adc %B[i], %B[j]   \n\t"
+                 : [i] "+a" (i)
+                 : [j] "a"  (j) );
+    return i;
+#else
+#error "No implementation for avg15 available."
+#endif
+}
+
 
 ///       Calculate the remainder of one unsigned 8-bit
 ///       value divided by anoter, aka A % M.

@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_TYPES_H
 #define __INC_FASTSPI_TYPES_H
 
+#include "FastLED.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 // Some helper macros for getting at mis-ordered byte values

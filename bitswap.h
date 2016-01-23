@@ -1,6 +1,8 @@
 #ifndef __INC_BITSWAP_H
 #define __INC_BITSWAP_H
 
+#include "FastLED.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 ///@file bitswap.h
