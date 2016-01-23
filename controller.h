@@ -170,6 +170,7 @@ public:
     virtual uint16_t getMaxRefreshRate() const { return 0; }
 };
 
+#if 0
 /// Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
 /// support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will
 /// centralize 8/12/16 conversions here as well.
@@ -348,8 +349,9 @@ struct PixelController {
 		__attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }
 		__attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }
 		__attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }
-    __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }
+        __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }
 };
+#endif
 
 // Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
 // support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will
@@ -517,31 +519,42 @@ struct MultiPixelController {
             d[RO(0)] = e[RO(0)] - d[RO(0)];
         }
 
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(MultiPixelController & pc) { return pc.mData[RO(SLOT)]; }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(MultiPixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
+        
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(MultiPixelController & pc, uint8_t b) { return b ? qadd8(b, pc.d[RO(SLOT)]) : 0; }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(MultiPixelController & pc, uint8_t b, uint8_t d) { return b ? qadd8(b,d) : 0; }
+        
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(MultiPixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(MultiPixelController & pc, uint8_t b, uint8_t scale) { return scale8(b, scale); }
 
         // composite shortcut functions for loading, dithering, and scaling
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc))); }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane))); }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane, uint8_t d, uint8_t scale) { return scale8(pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), d), scale); }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(MultiPixelController & pc, int lane, uint8_t scale) { return scale8(pc.loadByte<SLOT>(pc, lane), scale); }
+
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(MultiPixelController & pc) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc); }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(MultiPixelController & pc, int lane) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc, lane); }
 
         template<int SLOT> __attribute__((always_inline)) inline static uint8_t getd(MultiPixelController & pc) { return pc.d[RO(SLOT)]; }
         template<int SLOT> __attribute__((always_inline)) inline static uint8_t getscale(MultiPixelController & pc) { return pc.mScale.raw[RO(SLOT)]; }
 
-    // Helper functions to get around gcc stupidities
-    __attribute__((always_inline)) inline uint8_t loadAndScale0(int lane) { return loadAndScale<0>(*this, lane); }
-    __attribute__((always_inline)) inline uint8_t loadAndScale1(int lane) { return loadAndScale<1>(*this, lane); }
-    __attribute__((always_inline)) inline uint8_t loadAndScale2(int lane) { return loadAndScale<2>(*this, lane); }
-    __attribute__((always_inline)) inline uint8_t loadAndScale0(int lane, uint8_t d, uint8_t scale) { return loadAndScale<0>(*this, lane, d, scale); }
-    __attribute__((always_inline)) inline uint8_t loadAndScale1(int lane, uint8_t d, uint8_t scale) { return loadAndScale<1>(*this, lane, d, scale); }
-    __attribute__((always_inline)) inline uint8_t loadAndScale2(int lane, uint8_t d, uint8_t scale) { return loadAndScale<2>(*this, lane, d, scale); }
-    __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }
-    __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }
+        // Helper functions to get around gcc stupidities
+        __attribute__((always_inline)) inline uint8_t loadAndScale0(int lane) { return loadAndScale<0>(*this, lane); }
+        __attribute__((always_inline)) inline uint8_t loadAndScale1(int lane) { return loadAndScale<1>(*this, lane); }
+        __attribute__((always_inline)) inline uint8_t loadAndScale2(int lane) { return loadAndScale<2>(*this, lane); }
+        __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }
+        __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }
+
+        __attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }
+        __attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }
+        __attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }
+        __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }
+        __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }
 };
+
+template<EOrder RGB_ORDER> using PixelController = MultiPixelController<RGB_ORDER,1,0xFFFFFFFF>();
 
 template<EOrder RGB_ORDER> class CPixelLEDController : public CLEDController {
 protected:
