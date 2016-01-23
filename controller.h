@@ -340,10 +340,10 @@ struct PixelController {
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
         
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & pc, uint8_t b) { return b ? qadd8(b, pc.d[RO(SLOT)]) : 0; }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & pc, uint8_t b, uint8_t d) { return b ? qadd8(b,d) : 0; }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & , uint8_t b, uint8_t d) { return b ? qadd8(b,d) : 0; }
         
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b, uint8_t scale) { return scale8(b, scale); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & , uint8_t b, uint8_t scale) { return scale8(b, scale); }
 
         // composite shortcut functions for loading, dithering, and scaling
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadAndScale(PixelController & pc) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc))); }
@@ -371,16 +371,16 @@ struct PixelController {
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }
 };
 
-template<EOrder RGB_ORDER> class CPixelLEDController : public CLEDController {
+template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
 protected:
-  virtual void showPixels(PixelController<RGB_ORDER> & pixels) = 0;
+  virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
 
   /// set all the leds on the controller to a given color
   ///@param data the crgb color to set the leds to
   ///@param nLeds the numner of leds to set to this color
   ///@param scale the rgb scaling value for outputting color
   virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
+    PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
     showPixels(pixels);
   }
 
@@ -389,7 +389,7 @@ protected:
 ///@param nLeds the number of leds being written out
 ///@param scale the rgb scaling to apply to each led before writing it out
   virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither());
+    PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
     showPixels(pixels);
   }
 
