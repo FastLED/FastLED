@@ -20,7 +20,11 @@ typedef uint8_t boolean;
 #endif
 
 #ifndef FASTLED_ALLOW_INTERRUPTS
-#define FASTLED_ALLOW_INTERRUPTS 0
+#define FASTLED_ALLOW_INTERRUPTS 1
+#define INTERRUPT_THRESHOLD 1
 #endif
 
 #define NEED_CXX_BITS
+
+// #define cli() os_intr_lock();
+// #define sei() os_intr_lock();

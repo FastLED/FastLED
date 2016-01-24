@@ -119,7 +119,7 @@ void CFastLED::clearData() {
 
 void CFastLED::delay(unsigned long ms) {
 	unsigned long start = millis();
-        do { 
+        do {
 #ifndef FASTLED_ACCURATE_CLOCK
 		// make sure to allow at least one ms to pass to ensure the clock moves
 		// forward
@@ -234,7 +234,10 @@ extern "C" int atexit(void (* /*func*/ )()) { return 0; }
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1
 {
+	#ifndef ESP8266
 	extern "C" void __cxa_pure_virtual (void) {}
+	#endif
+	
 	/* guard variables */
 
 	/* The ABI requires a 64-bit type.  */
