@@ -20,8 +20,8 @@
 #include "platforms/arm/stm32/led_sysdefs_arm_stm32.h"
 #elif defined(__SAMD21G18A__)
 #include "platforms/arm/d21/led_sysdefs_arm_d21.h"
-#elif defined(__XTENSA__)
-#error "XTENSA-architecture microcontrollers are not supported."
+#elif defined(ESP8266)
+#include "platforms/esp/8266/led_sysdefs_esp8266.h"
 #else
 // AVR platforms
 #include "platforms/avr/led_sysdefs_avr.h"
