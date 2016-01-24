@@ -2,6 +2,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// Info on reading cycle counter from https://github.com/kbeckmann/nodemcu-firmware/blob/ws2812-dual/app/modules/ws2812.c
 __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
   uint32_t cyc;
   __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
