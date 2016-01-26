@@ -6,6 +6,7 @@ FastLED3.1.2pre
 * Improvements to hsv2rgb, palette, and noise performance
 * Improvements to rgb2hsv accuracy
 * Fixed noise discontinuity 
+* Add wino board support
 
 
 FastLED3.1.1
