@@ -1,6 +1,6 @@
 #define USE_OCTOWS2811
-#include<OctoWS2811.h>
-#include<FastLED.h>
+#include <OctoWS2811.h>
+#include <FastLED.h>
 
 #define NUM_LEDS_PER_STRIP 64
 #define NUM_STRIPS 8
