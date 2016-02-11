@@ -36,6 +36,14 @@ void setup() {
   FastLED.setBrightness(BRIGHTNESS);
 }
 
+void rainbow();
+void rainbowWithGlitter();
+void confetti();
+void sinelon();
+void juggle();
+void bpm();
+void nextPattern();
+void addGlitter(fract8 chanceOfGlitter);
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])();
