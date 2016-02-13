@@ -141,9 +141,15 @@ LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="
 <tr class="memitem:ga6bfedf0473d4c3705e8feeb6a25b9ea5"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___math.html#ga6bfedf0473d4c3705e8feeb6a25b9ea5">avg8</a> (uint8_t i, uint8_t j)</td></tr>
 <tr class="memdesc:ga6bfedf0473d4c3705e8feeb6a25b9ea5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate an integer average of two unsigned 8-bit integer values (uint8_t).  <a href="#ga6bfedf0473d4c3705e8feeb6a25b9ea5">More...</a><br /></td></tr>
 <tr class="separator:ga6bfedf0473d4c3705e8feeb6a25b9ea5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac09b1bbea319b879bded54d129eb5358"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___math.html#gac09b1bbea319b879bded54d129eb5358">avg16</a> (uint16_t i, uint16_t j)</td></tr>
+<tr class="memdesc:gac09b1bbea319b879bded54d129eb5358"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate an integer average of two unsigned 16-bit integer values (uint16_t).  <a href="#gac09b1bbea319b879bded54d129eb5358">More...</a><br /></td></tr>
+<tr class="separator:gac09b1bbea319b879bded54d129eb5358"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga30558a835c484b418165909118e702b1"><td class="memItemLeft" align="right" valign="top">LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___math.html#ga30558a835c484b418165909118e702b1">avg7</a> (int8_t i, int8_t j)</td></tr>
 <tr class="memdesc:ga30558a835c484b418165909118e702b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate an integer average of two signed 7-bit integers (int8_t) If the first argument is even, result is rounded down.  <a href="#ga30558a835c484b418165909118e702b1">More...</a><br /></td></tr>
 <tr class="separator:ga30558a835c484b418165909118e702b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5873ff4e986c61d72cb291709190ed25"><td class="memItemLeft" align="right" valign="top">LIB8STATIC int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___math.html#ga5873ff4e986c61d72cb291709190ed25">avg15</a> (int16_t i, int16_t j)</td></tr>
+<tr class="memdesc:ga5873ff4e986c61d72cb291709190ed25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate an integer average of two signed 15-bit integers (int16_t) If the first argument is even, result is rounded down.  <a href="#ga5873ff4e986c61d72cb291709190ed25">More...</a><br /></td></tr>
+<tr class="separator:ga5873ff4e986c61d72cb291709190ed25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa5e80daec10cc13bf1eca8b125ee0e88"><td class="memItemLeft" align="right" valign="top">LIB8STATIC uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___math.html#gaa5e80daec10cc13bf1eca8b125ee0e88">mod8</a> (uint8_t a, uint8_t m)</td></tr>
 <tr class="memdesc:gaa5e80daec10cc13bf1eca8b125ee0e88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the remainder of one unsigned 8-bit value divided by anoter, aka A % M.  <a href="#gaa5e80daec10cc13bf1eca8b125ee0e88">More...</a><br /></td></tr>
 <tr class="separator:gaa5e80daec10cc13bf1eca8b125ee0e88"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -202,7 +208,69 @@ LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 <p>Add two numbers, and calculate the modulo of the sum and a third number, M. </p>
 <p>In other words, it returns (A+B) % M. It is designed as a compact mechanism for incrementing a 'mode' switch and wrapping around back to 'mode 0' when the switch goes past the end of the available range. e.g. if you have seven modes, this switches to the next one and wraps around if needed: mode = addmod8( mode, 1, 7); See 'mod8' for notes on performance. </p>
 
-<p>Definition at line <a class="el" href="math8_8h_source.html#l00223">223</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
+<p>Definition at line <a class="el" href="math8_8h_source.html#l00276">276</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ga5873ff4e986c61d72cb291709190ed25"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">LIB8STATIC int16_t avg15 </td>
+          <td>(</td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>i</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>j</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate an integer average of two signed 15-bit integers (int16_t) If the first argument is even, result is rounded down. </p>
+<p>If the first argument is odd, result is result up. </p>
+
+<p>Definition at line <a class="el" href="math8_8h_source.html#l00217">217</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="gac09b1bbea319b879bded54d129eb5358"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">LIB8STATIC uint16_t avg16 </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>i</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>j</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate an integer average of two unsigned 16-bit integer values (uint16_t). </p>
+<p>Fractional results are rounded down, e.g. avg16(20,41) = 30 </p>
+
+<p>Definition at line <a class="el" href="math8_8h_source.html#l00169">169</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
 
 </div>
 </div>
@@ -233,7 +301,7 @@ LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 <p>Calculate an integer average of two signed 7-bit integers (int8_t) If the first argument is even, result is rounded down. </p>
 <p>If the first argument is odd, result is result up. </p>
 
-<p>Definition at line <a class="el" href="math8_8h_source.html#l00171">171</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
+<p>Definition at line <a class="el" href="math8_8h_source.html#l00196">196</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
 
 </div>
 </div>
@@ -295,7 +363,7 @@ LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 <p>Calculate the remainder of one unsigned 8-bit value divided by anoter, aka A % M. </p>
 <p>Implemented by repeated subtraction, which is very compact, and very fast if A is 'probably' less than M. If A is a large multiple of M, the loop has to execute multiple times. However, even in that case, the loop is only two instructions long on AVR, i.e., quick. </p>
 
-<p>Definition at line <a class="el" href="math8_8h_source.html#l00196">196</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
+<p>Definition at line <a class="el" href="math8_8h_source.html#l00249">249</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
 
 </div>
 </div>
@@ -402,7 +470,7 @@ LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 <p>saturating 8x8 bit multiplication, with 8 bit result </p>
 <dl class="section return"><dt>Returns</dt><dd>the product of i * j, capping at 0xFF </dd></dl>
 
-<p>Definition at line <a class="el" href="math8_8h_source.html#l00267">267</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
+<p>Definition at line <a class="el" href="math8_8h_source.html#l00320">320</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
 
 </div>
 </div>
@@ -453,7 +521,7 @@ LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 
 <p>square root for 16-bit integers About three times faster and five times smaller than Arduino's general sqrt on AVR. </p>
 
-<p>Definition at line <a class="el" href="math8_8h_source.html#l00326">326</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
+<p>Definition at line <a class="el" href="math8_8h_source.html#l00379">379</a> of file <a class="el" href="math8_8h_source.html">math8.h</a>.</p>
 
 </div>
 </div>
@@ -462,7 +530,7 @@ LIB8STATIC int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Dec 10 2015 14:02:36 for FastLED by
+    <li class="footer">Generated on Sat Feb 13 2016 13:28:35 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

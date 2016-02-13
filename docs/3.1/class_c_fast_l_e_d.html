@@ -279,7 +279,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES&gt; </td></tr>
 <div class="textblock"><p>High level controller interface for FastLED. </p>
 <p>This class manages controllers, global settings and trackings such as brightness, and refresh rates, and provides access functions for driving led data to controllers via the show/showColor/clear methods. </p>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00144">144</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00145">145</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="afd7928d822589740af6e23b2d510cf3f"></a>
 <div class="memitem">
@@ -403,7 +403,7 @@ template&lt;ESPIChipsets CHIPSET, uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RG
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a reference to the added controller </dd></dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00189">189</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00190">190</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -467,7 +467,7 @@ template&lt;template&lt; uint8_t DATA_PIN, EOrder RGB_ORDER &gt; class CHIPSET, 
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a reference to the added controller </dd></dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00261">261</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00262">262</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -530,7 +530,7 @@ template&lt;template&lt; EOrder RGB_ORDER &gt; class CHIPSET, EOrder RGB_ORDER&g
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a reference to the added controller </dd></dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00309">309</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00310">310</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -594,7 +594,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a reference to the added controller </dd></dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00371">371</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00372">372</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -620,7 +620,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00100">100</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00105">105</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
 
 </div>
 </div>
@@ -667,7 +667,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 </dl>
 </dd></dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00196">196</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00205">205</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
 
 </div>
 </div>
@@ -686,14 +686,14 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 </div><div class="memdoc">
 
 <p>Delay for the given number of milliseconds. </p>
-<p>Provided to allow the library to be used on platforms that don't have a delay function (to allow code to be more portable) </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Provided to allow the library to be used on platforms that don't have a delay function (to allow code to be more portable). Note: this will call show constantly to drive the dithering engine (and will call show at least once). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">ms</td><td>the number of milliseconds to pause for </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00115">115</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00120">120</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
 
 </div>
 </div>
@@ -721,7 +721,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 <p>Get the current global brightness setting. </p>
 <dl class="section return"><dt>Returns</dt><dd>the current global brightness value </dd></dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00409">409</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00410">410</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -749,7 +749,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 <p>Get the number of frames/second being written out. </p>
 <dl class="section return"><dt>Returns</dt><dd>the most recently computed FPS value </dd></dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00480">480</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00482">482</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -777,7 +777,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 <p>Get a pointer to led data for the first controller. </p>
 <dl class="section return"><dt>Returns</dt><dd>pointer to the <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) ">CRGB</a> buffer for the first controller </dd></dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00496">496</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00498">498</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -832,7 +832,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00405">405</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00406">406</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -858,7 +858,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00135">135</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00144">144</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
 
 </div>
 </div>
@@ -884,7 +884,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00143">143</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00152">152</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
 
 </div>
 </div>
@@ -918,7 +918,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00418">418</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00419">419</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -963,7 +963,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00414">414</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00415">415</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -1000,7 +1000,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00209">209</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00218">218</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
 
 </div>
 </div>
@@ -1026,7 +1026,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00127">127</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8cpp_source.html#l00136">136</a> of file <a class="el" href="_fast_l_e_d_8cpp_source.html">FastLED.cpp</a>.</p>
 
 </div>
 </div>
@@ -1123,7 +1123,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00441">441</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00442">442</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -1151,7 +1151,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 <p>Get the number of leds in the first controller. </p>
 <dl class="section return"><dt>Returns</dt><dd>the number of LEDs in the first controller </dd></dl>
 
-<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00492">492</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p>Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00494">494</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -1165,7 +1165,7 @@ template&lt;EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_c_fast_l_e_d.html">CFastLED</a></li>
-    <li class="footer">Generated on Thu Dec 10 2015 14:02:36 for FastLED by
+    <li class="footer">Generated on Sat Feb 13 2016 13:28:35 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

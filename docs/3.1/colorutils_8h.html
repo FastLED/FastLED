@@ -130,6 +130,10 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_r_g_b_palette16.html">CRGBPalette16</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_h_s_v_palette32.html">CHSVPalette32</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_r_g_b_palette32.html">CRGBPalette32</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_r_g_b_palette256.html">CRGBPalette256</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -141,6 +145,12 @@ typedef uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>TProgmemR
 <tr class="memitem:ga68d7c7a5522fb7aa113e50351bd620d4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga68d7c7a5522fb7aa113e50351bd620d4"></a>
 typedef uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>TProgmemHSVPalette16</b>[16]</td></tr>
 <tr class="separator:ga68d7c7a5522fb7aa113e50351bd620d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0402dc727d6a118cf426da017ff42152"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga0402dc727d6a118cf426da017ff42152"></a>
+typedef uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>TProgmemRGBPalette32</b>[32]</td></tr>
+<tr class="separator:ga0402dc727d6a118cf426da017ff42152"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4173693bfea9b72f0f73085e9a7318a8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga4173693bfea9b72f0f73085e9a7318a8"></a>
+typedef uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>TProgmemHSVPalette32</b>[32]</td></tr>
+<tr class="separator:ga4173693bfea9b72f0f73085e9a7318a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5c6ee5f16c2e9dcea972adc5b582218c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga5c6ee5f16c2e9dcea972adc5b582218c"></a>
 typedef const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>TProgmemRGBGradientPalette_byte</b></td></tr>
 <tr class="separator:ga5c6ee5f16c2e9dcea972adc5b582218c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -285,6 +295,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>UpscalePalette</b> (c
 <tr class="memitem:gae2a0641902f28723263666a128995fef"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gae2a0641902f28723263666a128995fef"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>UpscalePalette</b> (const struct <a class="el" href="class_c_h_s_v_palette16.html">CHSVPalette16</a> &amp;srcpal16, struct <a class="el" href="class_c_h_s_v_palette256.html">CHSVPalette256</a> &amp;destpal256)</td></tr>
 <tr class="separator:gae2a0641902f28723263666a128995fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1916d32f04256f662ecb0f4d7cff6062"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga1916d32f04256f662ecb0f4d7cff6062"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>UpscalePalette</b> (const struct <a class="el" href="class_c_r_g_b_palette16.html">CRGBPalette16</a> &amp;srcpal16, struct <a class="el" href="class_c_r_g_b_palette32.html">CRGBPalette32</a> &amp;destpal32)</td></tr>
+<tr class="separator:ga1916d32f04256f662ecb0f4d7cff6062"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab247fdb68a0ed37779c7bc11b83f6f8a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gab247fdb68a0ed37779c7bc11b83f6f8a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>UpscalePalette</b> (const struct <a class="el" href="class_c_h_s_v_palette16.html">CHSVPalette16</a> &amp;srcpal16, struct <a class="el" href="class_c_h_s_v_palette32.html">CHSVPalette32</a> &amp;destpal32)</td></tr>
+<tr class="separator:gab247fdb68a0ed37779c7bc11b83f6f8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa91cec87978562a2b22709b47d02cdd7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaa91cec87978562a2b22709b47d02cdd7"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>UpscalePalette</b> (const struct <a class="el" href="class_c_r_g_b_palette32.html">CRGBPalette32</a> &amp;srcpal32, struct <a class="el" href="class_c_r_g_b_palette256.html">CRGBPalette256</a> &amp;destpal256)</td></tr>
+<tr class="separator:gaa91cec87978562a2b22709b47d02cdd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaeac1e2dbb61ff4b9f21dbed9cb0a1350"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaeac1e2dbb61ff4b9f21dbed9cb0a1350"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>UpscalePalette</b> (const struct <a class="el" href="class_c_h_s_v_palette32.html">CHSVPalette32</a> &amp;srcpal32, struct <a class="el" href="class_c_h_s_v_palette256.html">CHSVPalette256</a> &amp;destpal256)</td></tr>
+<tr class="separator:gaeac1e2dbb61ff4b9f21dbed9cb0a1350"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac46e65aff3dd6519b33e27f0998f17cd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gac46e65aff3dd6519b33e27f0998f17cd"></a>
 <a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ColorFromPalette</b> (const <a class="el" href="class_c_r_g_b_palette16.html">CRGBPalette16</a> &amp;pal, uint8_t index, uint8_t brightness=255, TBlendType blendType=LINEARBLEND)</td></tr>
 <tr class="separator:gac46e65aff3dd6519b33e27f0998f17cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -300,6 +322,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>UpscalePalette</b> (c
 <tr class="memitem:ga79c94ea554455e72eabab172cc15456f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga79c94ea554455e72eabab172cc15456f"></a>
 <a class="el" href="struct_c_h_s_v.html">CHSV</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ColorFromPalette</b> (const <a class="el" href="class_c_h_s_v_palette256.html">CHSVPalette256</a> &amp;pal, uint8_t index, uint8_t brightness=255, TBlendType blendType=NOBLEND)</td></tr>
 <tr class="separator:ga79c94ea554455e72eabab172cc15456f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae5e137a13a4b6145fe40007328d398f4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gae5e137a13a4b6145fe40007328d398f4"></a>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ColorFromPalette</b> (const <a class="el" href="class_c_r_g_b_palette32.html">CRGBPalette32</a> &amp;pal, uint8_t index, uint8_t brightness=255, TBlendType blendType=LINEARBLEND)</td></tr>
+<tr class="separator:gae5e137a13a4b6145fe40007328d398f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaea6bd3ab3ec62d88e2dcc7ab2486dcd4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="gaea6bd3ab3ec62d88e2dcc7ab2486dcd4"></a>
+<a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ColorFromPalette</b> (const TProgmemRGBPalette32 &amp;pal, uint8_t index, uint8_t brightness=255, TBlendType blendType=LINEARBLEND)</td></tr>
+<tr class="separator:gaea6bd3ab3ec62d88e2dcc7ab2486dcd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1684ed7eb860c68a915d03e94250e58a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ga1684ed7eb860c68a915d03e94250e58a"></a>
+<a class="el" href="struct_c_h_s_v.html">CHSV</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ColorFromPalette</b> (const <a class="el" href="class_c_h_s_v_palette32.html">CHSVPalette32</a> &amp;pal, uint8_t index, uint8_t brightness=255, TBlendType blendType=LINEARBLEND)</td></tr>
+<tr class="separator:ga1684ed7eb860c68a915d03e94250e58a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad6431776a18268d286d146158e25cb36"><td class="memTemplParams" colspan="2"><a class="anchor" id="gad6431776a18268d286d146158e25cb36"></a>
 template&lt;typename PALETTE &gt; </td></tr>
 <tr class="memitem:gad6431776a18268d286d146158e25cb36"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>fill_palette</b> (<a class="el" href="struct_c_r_g_b.html">CRGB</a> *L, uint16_t N, uint8_t startIndex, uint8_t incIndex, const PALETTE &amp;pal, uint8_t brightness, TBlendType blendType)</td></tr>
@@ -343,7 +374,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>napplyGamma_video</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="colorutils_8h.html">colorutils.h</a></li>
-    <li class="footer">Generated on Thu Dec 10 2015 14:02:36 for FastLED by
+    <li class="footer">Generated on Sat Feb 13 2016 13:28:34 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

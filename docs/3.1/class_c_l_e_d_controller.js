@@ -2,7 +2,7 @@ var class_c_l_e_d_controller =
 [
     [ "CLEDController", "class_c_l_e_d_controller.html#a8c560c6d171f117dfd19c0f2ec780a32", null ],
     [ "clearLedData", "class_c_l_e_d_controller.html#a7b61c81e004c96ff670a2742057a5a52", null ],
-    [ "clearLeds", "class_c_l_e_d_controller.html#adfa6601c84fefd733904b32ac98b6dae", null ],
+    [ "clearLeds", "class_c_l_e_d_controller.html#abd0f6ce4701e76ebc4b916e0a04134f2", null ],
     [ "getAdjustment", "class_c_l_e_d_controller.html#af6173cca91ee446766cc15102990d7bb", null ],
     [ "getCorrection", "class_c_l_e_d_controller.html#a168c661bb9b4a5dfc797b69d3900b26c", null ],
     [ "getDither", "class_c_l_e_d_controller.html#a676f705adf93898739a405b85150a3e7", null ],
@@ -19,9 +19,7 @@ var class_c_l_e_d_controller =
     [ "setTemperature", "class_c_l_e_d_controller.html#a69ac4a882bdc4a813ae957ddedb5a883", null ],
     [ "setTemperature", "class_c_l_e_d_controller.html#a1e6d35be39f9f67aacdb4709ea914ab4", null ],
     [ "show", "class_c_l_e_d_controller.html#add284627121ffab140e083e84fadc37f", null ],
-    [ "show", "class_c_l_e_d_controller.html#a3ae4f61fc85ef4609d65c14ca51434c4", null ],
     [ "show", "class_c_l_e_d_controller.html#abe990b9a65f5bff1f391cc5c28752abb", null ],
-    [ "show", "class_c_l_e_d_controller.html#a4a55f6d5b215dc14f9473faea938b4c8", null ],
     [ "showColor", "class_c_l_e_d_controller.html#a068fa50d8c7d31bd8537b731eea84c92", null ],
     [ "showColor", "class_c_l_e_d_controller.html#a253069a734075b298da65d59d6efbb3b", null ],
     [ "showColor", "class_c_l_e_d_controller.html#a4ccd149ab7282817041a1ae4e586a9d4", null ],

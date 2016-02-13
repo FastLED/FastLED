@@ -14,6 +14,7 @@ var _fast_l_e_d_8h =
     [ "WS2812", "class_w_s2812.html", null ],
     [ "WS2812B", "class_w_s2812_b.html", null ],
     [ "SK6812", "class_s_k6812.html", null ],
+    [ "SK6822", "class_s_k6822.html", null ],
     [ "PL9823", "class_p_l9823.html", null ],
     [ "WS2811", "class_w_s2811.html", null ],
     [ "APA104", "class_a_p_a104.html", null ],

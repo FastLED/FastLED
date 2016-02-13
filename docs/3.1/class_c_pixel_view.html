@@ -128,8 +128,6 @@ $(document).ready(function(){initNavTree('class_c_pixel_view.html','');});
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><img src="class_c_pixel_view__coll__graph.png" border="0" usemap="#_c_pixel_view_3_01_p_i_x_e_l___t_y_p_e_01_4_coll__map" alt="Collaboration graph"/></div>
-<map name="_c_pixel_view_3_01_p_i_x_e_l___t_y_p_e_01_4_coll__map" id="_c_pixel_view_3_01_p_i_x_e_l___t_y_p_e_01_4_coll__map">
-</map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
@@ -189,6 +187,8 @@ PIXEL_TYPE &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 <tr class="memitem:aa35b7eb6c9b8d2510df02af26db03f29"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_c_pixel_view.html">CPixelView</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_view.html#aa35b7eb6c9b8d2510df02af26db03f29">operator=</a> (const PIXEL_TYPE &amp;color)</td></tr>
 <tr class="memdesc:aa35b7eb6c9b8d2510df02af26db03f29"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assign the passed in color to all elements in this set.  <a href="#aa35b7eb6c9b8d2510df02af26db03f29">More...</a><br /></td></tr>
 <tr class="separator:aa35b7eb6c9b8d2510df02af26db03f29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f32c60d83428f27d3ec899442b82410"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_view.html#a1f32c60d83428f27d3ec899442b82410">dump</a> () const </td></tr>
+<tr class="separator:a1f32c60d83428f27d3ec899442b82410"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e7c2cf9a8dc476f9a92850d69b7c499"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_c_pixel_view.html">CPixelView</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_view.html#a3e7c2cf9a8dc476f9a92850d69b7c499">operator=</a> (const <a class="el" href="class_c_pixel_view.html">CPixelView</a> &amp;rhs)</td></tr>
 <tr class="memdesc:a3e7c2cf9a8dc476f9a92850d69b7c499"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the contents of the passed in set to our set.  <a href="#a3e7c2cf9a8dc476f9a92850d69b7c499">More...</a><br /></td></tr>
 <tr class="separator:a3e7c2cf9a8dc476f9a92850d69b7c499"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -376,7 +376,7 @@ class CPixelView&lt; PIXEL_TYPE &gt;</h3>
 <p>Represents a set of <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) ">CRGB</a> led objects. </p>
 <p>Provides the [] array operator, and works like a normal array in that case. This should be kept in sync with the set of functions provided by <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) ">CRGB</a> as well as functions in colorutils. Note that a pixel set is a window into another set of led data, it is not its own set of led data. </p>
 
-<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00008">8</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00010">10</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a051455d30c4390abd81bbb23182d22a8"></a>
 <div class="memitem">
@@ -421,7 +421,7 @@ template&lt;class PIXEL_TYPE&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00024">24</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00026">26</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
 
 </div>
 </div>
@@ -475,11 +475,39 @@ template&lt;class PIXEL_TYPE&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00031">31</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00033">33</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a1f32c60d83428f27d3ec899442b82410"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class PIXEL_TYPE&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="class_c_pixel_view.html">CPixelView</a>&lt; PIXEL_TYPE &gt;::dump </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Serial.print("len: "); Serial.print(len); Serial.print(", dir:"); Serial.print((int)dir); Serial.print(", range:"); Serial.print((uint32_t)leds); Serial.print("-"); Serial.print((uint32_t)end_pos); Serial.print(", diff:"); Serial.print((int32_t)(end_pos - leds)); Serial.println("");</p>
+
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00076">76</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="aa2b10d01a183235fcf62e50049c49dd4"></a>
 <div class="memitem">
 <div class="memproto">
@@ -523,7 +551,7 @@ template&lt;class PIXEL_TYPE&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00054">54</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00056">56</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
 
 </div>
 </div>
@@ -558,7 +586,7 @@ template&lt;class PIXEL_TYPE&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00061">61</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00063">63</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
 
 </div>
 </div>
@@ -594,7 +622,7 @@ template&lt;class PIXEL_TYPE&gt; </div>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00068">68</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00070">70</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
 
 </div>
 </div>
@@ -625,7 +653,7 @@ template&lt;class PIXEL_TYPE&gt; </div>
 <p>Copy the contents of the passed in set to our set. </p>
 <p>Note if one set is smaller than the other, only the smallest number of items will be copied over. </p>
 
-<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00082">82</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00087">87</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
 
 </div>
 </div>
@@ -655,7 +683,7 @@ template&lt;class PIXEL_TYPE&gt; </div>
 <p>Whether or not this set goes backwards. </p>
 <dl class="section return"><dt>Returns</dt><dd>whether or not the set is backwards </dd></dl>
 
-<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00039">39</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00041">41</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
 
 </div>
 </div>
@@ -685,7 +713,7 @@ template&lt;class PIXEL_TYPE&gt; </div>
 <p>Get the size of this set. </p>
 <dl class="section return"><dt>Returns</dt><dd>the size of the set </dd></dl>
 
-<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00035">35</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
+<p>Definition at line <a class="el" href="pixelset_8h_source.html#l00037">37</a> of file <a class="el" href="pixelset_8h_source.html">pixelset.h</a>.</p>
 
 </div>
 </div>
@@ -698,7 +726,7 @@ template&lt;class PIXEL_TYPE&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_c_pixel_view.html">CPixelView</a></li>
-    <li class="footer">Generated on Thu Dec 10 2015 14:02:36 for FastLED by
+    <li class="footer">Generated on Sat Feb 13 2016 13:28:35 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

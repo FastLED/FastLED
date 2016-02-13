@@ -10,6 +10,8 @@ var searchData=
   ['addtorgb',['addToRGB',['../class_c_pixel_view.html#a87abde19e76dfb9ae42971aa3384a50d',1,'CPixelView']]],
   ['apa102controller',['APA102Controller',['../class_a_p_a102_controller.html',1,'']]],
   ['apa104',['APA104',['../class_a_p_a104.html',1,'']]],
+  ['avg15',['avg15',['../group___math.html#ga5873ff4e986c61d72cb291709190ed25',1,'math8.h']]],
+  ['avg16',['avg16',['../group___math.html#gac09b1bbea319b879bded54d129eb5358',1,'math8.h']]],
   ['avg7',['avg7',['../group___math.html#ga30558a835c484b418165909118e702b1',1,'math8.h']]],
   ['avg8',['avg8',['../group___math.html#ga6bfedf0473d4c3705e8feeb6a25b9ea5',1,'math8.h']]],
   ['avrsoftwarespioutput',['AVRSoftwareSPIOutput',['../class_a_v_r_software_s_p_i_output.html',1,'']]],

@@ -435,135 +435,149 @@ $(document).ready(function(){initNavTree('scale8_8h_source.html','');});
 <div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;    result = ((uint32_t)(i) * (uint32_t)(scale)) / 65536;</div>
 <div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;    <span class="keywordflow">return</span> result;</div>
 <div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;<span class="preprocessor">#elif SCALE16_AVRASM == 1</span></div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    uint32_t result = 0;</div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;    <span class="keyword">const</span> uint8_t  zero = 0;</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;                 <span class="comment">// result.A-B  = i.A x scale.A</span></div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;                 <span class="stringliteral">&quot;  mul %A[i], %A[scale]                 \n\t&quot;</span></div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;                 <span class="comment">//  save results...</span></div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;                 <span class="comment">// basic idea:</span></div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;                 <span class="comment">//&quot;  mov %A[result], r0                 \n\t&quot;</span></div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;                 <span class="comment">//&quot;  mov %B[result], r1                 \n\t&quot;</span></div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;                 <span class="comment">// which can be written as...</span></div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                 <span class="stringliteral">&quot;  movw %A[result], r0                   \n\t&quot;</span></div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                 <span class="comment">// We actually need to do anything with r0,</span></div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;                 <span class="comment">// as result.A is never used again here, so we</span></div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;                 <span class="comment">// could just move the high byte, but movw is</span></div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                 <span class="comment">// one clock cycle, just like mov, so might as</span></div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;                 <span class="comment">// well, in case we want to use this code for</span></div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;                 <span class="comment">// a generic 16x16 multiply somewhere.</span></div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;</div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;                 <span class="comment">// result.C-D  = i.B x scale.B</span></div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;                 <span class="stringliteral">&quot;  mul %B[i], %B[scale]                 \n\t&quot;</span></div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                 <span class="comment">//&quot;  mov %C[result], r0                 \n\t&quot;</span></div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;                 <span class="comment">//&quot;  mov %D[result], r1                 \n\t&quot;</span></div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;                 <span class="stringliteral">&quot;  movw %C[result], r0                   \n\t&quot;</span></div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;                 <span class="comment">// result.B-D += i.B x scale.A</span></div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;                 <span class="stringliteral">&quot;  mul %B[i], %A[scale]                 \n\t&quot;</span></div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;                 <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                 <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;                 <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                 <span class="comment">// result.B-D += i.A x scale.B</span></div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;                 <span class="stringliteral">&quot;  mul %A[i], %B[scale]                 \n\t&quot;</span></div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;                 <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
-<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;                 <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;                 <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;</div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;                 <span class="comment">// cleanup r1</span></div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;                 <span class="stringliteral">&quot;  clr r1                               \n\t&quot;</span></div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;</div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;                 : [result] <span class="stringliteral">&quot;+r&quot;</span> (result)</div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;                 : [i] <span class="stringliteral">&quot;r&quot;</span> (i),</div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;                   [scale] <span class="stringliteral">&quot;r&quot;</span> (scale),</div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;                   [zero] <span class="stringliteral">&quot;r&quot;</span> (zero)</div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;                 : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span></div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;                 );</div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;    result = result &gt;&gt; 16;</div>
-<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;    <span class="keywordflow">return</span> result;</div>
-<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;<span class="preprocessor">#else</span></div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;<span class="preprocessor">    #error &quot;No implementation for scale16 available.&quot;</span></div>
-<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;}</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;</div>
-<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;</div>
-<div class="line"><a name="l00460"></a><span class="lineno"><a class="line" href="group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa">  460</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa">dim8_raw</a>( uint8_t x)</div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;{</div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( x, x);</div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;}</div>
-<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;</div>
-<div class="line"><a name="l00466"></a><span class="lineno"><a class="line" href="group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494">  466</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494">dim8_video</a>( uint8_t x)</div>
-<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;{</div>
-<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a>( x, x);</div>
-<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;}</div>
-<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;</div>
-<div class="line"><a name="l00472"></a><span class="lineno"><a class="line" href="group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914">  472</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914">dim8_lin</a>( uint8_t x )</div>
-<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;{</div>
-<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;    <span class="keywordflow">if</span>( x &amp; 0x80 ) {</div>
-<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;        x = <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( x, x);</div>
-<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;        x += 1;</div>
-<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;        x /= 2;</div>
-<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    }</div>
-<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;    <span class="keywordflow">return</span> x;</div>
-<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;}</div>
-<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;</div>
-<div class="line"><a name="l00484"></a><span class="lineno"><a class="line" href="group___dimming.html#gae8e36472a70f3016595048532d6c3a2d">  484</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#gae8e36472a70f3016595048532d6c3a2d">brighten8_raw</a>( uint8_t x)</div>
-<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;{</div>
-<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;    uint8_t ix = 255 - x;</div>
-<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;    <span class="keywordflow">return</span> 255 - <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( ix, ix);</div>
-<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;}</div>
-<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;</div>
-<div class="line"><a name="l00491"></a><span class="lineno"><a class="line" href="group___dimming.html#gad21876a676bcf26c47f957faed23f9bb">  491</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#gad21876a676bcf26c47f957faed23f9bb">brighten8_video</a>( uint8_t x)</div>
-<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;{</div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;    uint8_t ix = 255 - x;</div>
-<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;    <span class="keywordflow">return</span> 255 - <a class="code" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a>( ix, ix);</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    uint32_t result;</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;                 <span class="comment">// result.A-B  = i.A x scale.A</span></div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;                 <span class="stringliteral">&quot;  mul %A[i], %A[scale]                 \n\t&quot;</span></div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;                 <span class="comment">//  save results...</span></div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;                 <span class="comment">// basic idea:</span></div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;                 <span class="comment">//&quot;  mov %A[result], r0                 \n\t&quot;</span></div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;                 <span class="comment">//&quot;  mov %B[result], r1                 \n\t&quot;</span></div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;                 <span class="comment">// which can be written as...</span></div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;                 <span class="stringliteral">&quot;  movw %A[result], r0                   \n\t&quot;</span></div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                 <span class="comment">// We actually need to do anything with r0,</span></div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                 <span class="comment">// as result.A is never used again here, so we</span></div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;                 <span class="comment">// could just move the high byte, but movw is</span></div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;                 <span class="comment">// one clock cycle, just like mov, so might as</span></div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                 <span class="comment">// well, in case we want to use this code for</span></div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;                 <span class="comment">// a generic 16x16 multiply somewhere.</span></div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;                 : [result] <span class="stringliteral">&quot;=r&quot;</span> (result)</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;                 : [i] <span class="stringliteral">&quot;r&quot;</span> (i),</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;                   [scale] <span class="stringliteral">&quot;r&quot;</span> (scale)</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                 : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span></div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;                 );</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;                 <span class="comment">// result.C-D  = i.B x scale.B</span></div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;                 <span class="stringliteral">&quot;  mul %B[i], %B[scale]                 \n\t&quot;</span></div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;                 <span class="comment">//&quot;  mov %C[result], r0                 \n\t&quot;</span></div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;                 <span class="comment">//&quot;  mov %D[result], r1                 \n\t&quot;</span></div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                 <span class="stringliteral">&quot;  movw %C[result], r0                   \n\t&quot;</span></div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;                 : [result] <span class="stringliteral">&quot;+r&quot;</span> (result)</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;                 : [i] <span class="stringliteral">&quot;r&quot;</span> (i),</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                   [scale] <span class="stringliteral">&quot;r&quot;</span> (scale)</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;                 : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span></div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;                 );</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;    <span class="keyword">const</span> uint8_t  zero = 0;</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;    <span class="keyword">asm</span> <span class="keyword">volatile</span>(</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;                 <span class="comment">// result.B-D += i.B x scale.A</span></div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;                 <span class="stringliteral">&quot;  mul %B[i], %A[scale]                 \n\t&quot;</span></div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;                 <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;                 <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;                 <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;</div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;                 <span class="comment">// result.B-D += i.A x scale.B</span></div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;                 <span class="stringliteral">&quot;  mul %A[i], %B[scale]                 \n\t&quot;</span></div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;                 <span class="stringliteral">&quot;  add %B[result], r0                   \n\t&quot;</span></div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;                 <span class="stringliteral">&quot;  adc %C[result], r1                   \n\t&quot;</span></div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;                 <span class="stringliteral">&quot;  adc %D[result], %[zero]              \n\t&quot;</span></div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;                 <span class="comment">// cleanup r1</span></div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;                 <span class="stringliteral">&quot;  clr r1                               \n\t&quot;</span></div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;                 : [result] <span class="stringliteral">&quot;+r&quot;</span> (result)</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;                 : [i] <span class="stringliteral">&quot;r&quot;</span> (i),</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;                   [scale] <span class="stringliteral">&quot;r&quot;</span> (scale),</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;                   [zero] <span class="stringliteral">&quot;r&quot;</span> (zero)</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;                 : <span class="stringliteral">&quot;r0&quot;</span>, <span class="stringliteral">&quot;r1&quot;</span></div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;                 );</div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;</div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;    result = result &gt;&gt; 16;</div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;    <span class="keywordflow">return</span> result;</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;<span class="preprocessor">#else</span></div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;<span class="preprocessor">    #error &quot;No implementation for scale16 available.&quot;</span></div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;}</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;</div>
+<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;</div>
+<div class="line"><a name="l00474"></a><span class="lineno"><a class="line" href="group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa">  474</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa">dim8_raw</a>( uint8_t x)</div>
+<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;{</div>
+<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( x, x);</div>
+<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;}</div>
+<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;</div>
+<div class="line"><a name="l00480"></a><span class="lineno"><a class="line" href="group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494">  480</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494">dim8_video</a>( uint8_t x)</div>
+<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;{</div>
+<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a>( x, x);</div>
+<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;}</div>
+<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;</div>
+<div class="line"><a name="l00486"></a><span class="lineno"><a class="line" href="group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914">  486</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914">dim8_lin</a>( uint8_t x )</div>
+<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;{</div>
+<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;    <span class="keywordflow">if</span>( x &amp; 0x80 ) {</div>
+<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;        x = <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( x, x);</div>
+<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;        x += 1;</div>
+<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;        x /= 2;</div>
+<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;    }</div>
+<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;    <span class="keywordflow">return</span> x;</div>
 <div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;}</div>
 <div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;</div>
-<div class="line"><a name="l00498"></a><span class="lineno"><a class="line" href="group___dimming.html#ga094bda002b416c66e57521fc93878830">  498</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#ga094bda002b416c66e57521fc93878830">brighten8_lin</a>( uint8_t x )</div>
+<div class="line"><a name="l00498"></a><span class="lineno"><a class="line" href="group___dimming.html#gae8e36472a70f3016595048532d6c3a2d">  498</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#gae8e36472a70f3016595048532d6c3a2d">brighten8_raw</a>( uint8_t x)</div>
 <div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;{</div>
 <div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;    uint8_t ix = 255 - x;</div>
-<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;    <span class="keywordflow">if</span>( ix &amp; 0x80 ) {</div>
-<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;        ix = <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( ix, ix);</div>
-<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;        ix += 1;</div>
-<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;        ix /= 2;</div>
-<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;    }</div>
-<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;    <span class="keywordflow">return</span> 255 - ix;</div>
-<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;}</div>
-<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;</div>
-<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="group___dimming_html_gae51352a3522bb8eae5e17dbee97aa1aa"><div class="ttname"><a href="group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa">dim8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_raw(uint8_t x)</div><div class="ttdoc">Adjust a scaling value for dimming. </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00460">scale8.h:460</a></div></div>
-<div class="ttc" id="group___dimming_html_ga094bda002b416c66e57521fc93878830"><div class="ttname"><a href="group___dimming.html#ga094bda002b416c66e57521fc93878830">brighten8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_lin(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00498">scale8.h:498</a></div></div>
+<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;    <span class="keywordflow">return</span> 255 - <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( ix, ix);</div>
+<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;}</div>
+<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;</div>
+<div class="line"><a name="l00505"></a><span class="lineno"><a class="line" href="group___dimming.html#gad21876a676bcf26c47f957faed23f9bb">  505</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#gad21876a676bcf26c47f957faed23f9bb">brighten8_video</a>( uint8_t x)</div>
+<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;{</div>
+<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;    uint8_t ix = 255 - x;</div>
+<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;    <span class="keywordflow">return</span> 255 - <a class="code" href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a>( ix, ix);</div>
+<div class="line"><a name="l00509"></a><span class="lineno">  509</span>&#160;}</div>
+<div class="line"><a name="l00510"></a><span class="lineno">  510</span>&#160;</div>
+<div class="line"><a name="l00512"></a><span class="lineno"><a class="line" href="group___dimming.html#ga094bda002b416c66e57521fc93878830">  512</a></span>&#160;LIB8STATIC uint8_t <a class="code" href="group___dimming.html#ga094bda002b416c66e57521fc93878830">brighten8_lin</a>( uint8_t x )</div>
+<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;{</div>
+<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;    uint8_t ix = 255 - x;</div>
+<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;    <span class="keywordflow">if</span>( ix &amp; 0x80 ) {</div>
+<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;        ix = <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>( ix, ix);</div>
+<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;        ix += 1;</div>
+<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;        ix /= 2;</div>
+<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;    }</div>
+<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;    <span class="keywordflow">return</span> 255 - ix;</div>
+<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;}</div>
+<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;</div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="group___dimming_html_gae51352a3522bb8eae5e17dbee97aa1aa"><div class="ttname"><a href="group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa">dim8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_raw(uint8_t x)</div><div class="ttdoc">Adjust a scaling value for dimming. </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00474">scale8.h:474</a></div></div>
+<div class="ttc" id="group___dimming_html_ga094bda002b416c66e57521fc93878830"><div class="ttname"><a href="group___dimming.html#ga094bda002b416c66e57521fc93878830">brighten8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_lin(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00512">scale8.h:512</a></div></div>
 <div class="ttc" id="group___scaling_html_gab341cef8d46232269bb70092fed9eb75"><div class="ttname"><a href="group___scaling.html#gab341cef8d46232269bb70092fed9eb75">scale8_video_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8_video does not clean up the R1 register on AVR If you are doing several &#39;scale...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00175">scale8.h:175</a></div></div>
-<div class="ttc" id="group__lib8tion_html_gaaf46b9f719ef3bdb574f8e967af6dbb5"><div class="ttname"><a href="group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5">fract16</a></div><div class="ttdeci">uint16_t fract16</div><div class="ttdoc">ANSI: unsigned _Fract. </div><div class="ttdef"><b>Definition:</b> <a href="lib8tion_8h_source.html#l00332">lib8tion.h:332</a></div></div>
+<div class="ttc" id="group__lib8tion_html_gaaf46b9f719ef3bdb574f8e967af6dbb5"><div class="ttname"><a href="group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5">fract16</a></div><div class="ttdeci">uint16_t fract16</div><div class="ttdoc">ANSI: unsigned _Fract. </div><div class="ttdef"><b>Definition:</b> <a href="lib8tion_8h_source.html#l00342">lib8tion.h:342</a></div></div>
 <div class="ttc" id="group___scaling_html_ga6c160f8c36ce9b3c5eda68e4992010af"><div class="ttname"><a href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00020">scale8.h:20</a></div></div>
-<div class="ttc" id="group___dimming_html_ga3f94d2455e0aa92133f77af8747b5914"><div class="ttname"><a href="group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914">dim8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_lin(uint8_t x)</div><div class="ttdoc">Linear version of the dimming function that halves for values < 128. </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00472">scale8.h:472</a></div></div>
+<div class="ttc" id="group___dimming_html_ga3f94d2455e0aa92133f77af8747b5914"><div class="ttname"><a href="group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914">dim8_lin</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_lin(uint8_t x)</div><div class="ttdoc">Linear version of the dimming function that halves for values < 128. </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00486">scale8.h:486</a></div></div>
 <div class="ttc" id="group___scaling_html_ga4204edd4a3f8aac7124a10f1f5cfccfe"><div class="ttname"><a href="group___scaling.html#ga4204edd4a3f8aac7124a10f1f5cfccfe">nscale8x2_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x2_video(uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</div><div class="ttdoc">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demom...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00328">scale8.h:328</a></div></div>
 <div class="ttc" id="group___scaling_html_ga333095ffa436c94d3e77ee9dc39da1c1"><div class="ttname"><a href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_video(uint8_t i, fract8 scale)</div><div class="ttdoc">The "video" version of scale8 guarantees that the output will be only be zero if one or both of the i...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00073">scale8.h:73</a></div></div>
 <div class="ttc" id="group___scaling_html_gaf34fde0746c9c2e5ed44f9c437a2267e"><div class="ttname"><a href="group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e">scale16by8</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16by8(uint16_t i, fract8 scale)</div><div class="ttdoc">scale a 16-bit unsigned value by an 8-bit value, considered as numerator of a fraction whose denomina...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00348">scale8.h:348</a></div></div>
 <div class="ttc" id="group___scaling_html_ga5f6dde3d9398f4b389c96e759a3f7b80"><div class="ttname"><a href="group___scaling.html#ga5f6dde3d9398f4b389c96e759a3f7b80">nscale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC void nscale8_LEAVING_R1_DIRTY(uint8_t &amp;i, fract8 scale)</div><div class="ttdoc">In place modifying version of scale8, also this version of nscale8 does not clean up the R1 register ...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00150">scale8.h:150</a></div></div>
 <div class="ttc" id="group___scaling_html_ga1ff8ac00ad78e22acc7bb7445bfdb145"><div class="ttname"><a href="group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145">scale16</a></div><div class="ttdeci">LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale)</div><div class="ttdoc">scale a 16-bit unsigned value by a 16-bit value, considered as numerator of a fraction whose denomina...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00384">scale8.h:384</a></div></div>
-<div class="ttc" id="group___dimming_html_gae8e36472a70f3016595048532d6c3a2d"><div class="ttname"><a href="group___dimming.html#gae8e36472a70f3016595048532d6c3a2d">brighten8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_raw(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00484">scale8.h:484</a></div></div>
+<div class="ttc" id="group___dimming_html_gae8e36472a70f3016595048532d6c3a2d"><div class="ttname"><a href="group___dimming.html#gae8e36472a70f3016595048532d6c3a2d">brighten8_raw</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_raw(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00498">scale8.h:498</a></div></div>
 <div class="ttc" id="group___scaling_html_ga700b7f510f32e8c91385093c436c27d9"><div class="ttname"><a href="group___scaling.html#ga700b7f510f32e8c91385093c436c27d9">nscale8x3_video</a></div><div class="ttdeci">LIB8STATIC void nscale8x3_video(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00282">scale8.h:282</a></div></div>
-<div class="ttc" id="group___dimming_html_gad21876a676bcf26c47f957faed23f9bb"><div class="ttname"><a href="group___dimming.html#gad21876a676bcf26c47f957faed23f9bb">brighten8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_video(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00491">scale8.h:491</a></div></div>
-<div class="ttc" id="group__lib8tion_html_ga5d6d013429a5b8a09d564d6137217644"><div class="ttname"><a href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></div><div class="ttdeci">uint8_t fract8</div><div class="ttdoc">ANSI unsigned short _Fract. </div><div class="ttdef"><b>Definition:</b> <a href="lib8tion_8h_source.html#l00324">lib8tion.h:324</a></div></div>
+<div class="ttc" id="group___dimming_html_gad21876a676bcf26c47f957faed23f9bb"><div class="ttname"><a href="group___dimming.html#gad21876a676bcf26c47f957faed23f9bb">brighten8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t brighten8_video(uint8_t x)</div><div class="ttdoc">inverse of the dimming function, brighten a value </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00505">scale8.h:505</a></div></div>
+<div class="ttc" id="group__lib8tion_html_ga5d6d013429a5b8a09d564d6137217644"><div class="ttname"><a href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></div><div class="ttdeci">uint8_t fract8</div><div class="ttdoc">ANSI unsigned short _Fract. </div><div class="ttdef"><b>Definition:</b> <a href="lib8tion_8h_source.html#l00334">lib8tion.h:334</a></div></div>
 <div class="ttc" id="group___scaling_html_ga39579fcf09743f15545fe0b831ca313c"><div class="ttname"><a href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8 does not clean up the R1 register on AVR If you are doing several &#39;scale8&#39;s in...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00121">scale8.h:121</a></div></div>
 <div class="ttc" id="group___scaling_html_ga572d0b441676c9d8ceb071fe8284b7e9"><div class="ttname"><a href="group___scaling.html#ga572d0b441676c9d8ceb071fe8284b7e9">cleanup_R1</a></div><div class="ttdeci">LIB8STATIC void cleanup_R1()</div><div class="ttdoc">Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls. </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00244">scale8.h:244</a></div></div>
 <div class="ttc" id="group___scaling_html_ga6f419761a744efed4bae8875ac07aef0"><div class="ttname"><a href="group___scaling.html#ga6f419761a744efed4bae8875ac07aef0">nscale8x2</a></div><div class="ttdeci">LIB8STATIC void nscale8x2(uint8_t &amp;i, uint8_t &amp;j, fract8 scale)</div><div class="ttdoc">scale two one byte values by a third one, which is treated as the numerator of a fraction whose demom...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00305">scale8.h:305</a></div></div>
 <div class="ttc" id="group___scaling_html_ga2a580fcaa010558218faae95d1936635"><div class="ttname"><a href="group___scaling.html#ga2a580fcaa010558218faae95d1936635">nscale8_video_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC void nscale8_video_LEAVING_R1_DIRTY(uint8_t &amp;i, fract8 scale)</div><div class="ttdoc">In place modifying version of scale8_video, also this version of nscale8_video does not clean up the ...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00222">scale8.h:222</a></div></div>
 <div class="ttc" id="group___scaling_html_ga39bf87e5526120889086cab19ac749b1"><div class="ttname"><a href="group___scaling.html#ga39bf87e5526120889086cab19ac749b1">nscale8x3</a></div><div class="ttdeci">LIB8STATIC void nscale8x3(uint8_t &amp;r, uint8_t &amp;g, uint8_t &amp;b, fract8 scale)</div><div class="ttdoc">scale three one byte values by a fourth one, which is treated as the numerator of a fraction whose de...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00259">scale8.h:259</a></div></div>
-<div class="ttc" id="group___dimming_html_ga40a13446a2022dc489be8b2a8f2fa494"><div class="ttname"><a href="group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494">dim8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_video(uint8_t x)</div><div class="ttdoc">Adjust a scaling value for dimming for video (value will never go below 1) </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00466">scale8.h:466</a></div></div>
+<div class="ttc" id="group___dimming_html_ga40a13446a2022dc489be8b2a8f2fa494"><div class="ttname"><a href="group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494">dim8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t dim8_video(uint8_t x)</div><div class="ttdoc">Adjust a scaling value for dimming for video (value will never go below 1) </div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00480">scale8.h:480</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_fbb9e787cf27434374136273d35a9c17.html">lib8tion</a></li><li class="navelem"><b>scale8.h</b></li>
-    <li class="footer">Generated on Thu Dec 10 2015 14:02:36 for FastLED by
+    <li class="footer">Generated on Sat Feb 13 2016 13:28:34 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

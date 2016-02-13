@@ -1,17 +1,14 @@
 var searchData=
 [
-  ['selectable',['Selectable',['../class_selectable.html',1,'']]],
-  ['sk6812',['SK6812',['../class_s_k6812.html',1,'']]],
-  ['sk6812controller',['SK6812Controller',['../class_s_k6812_controller.html',1,'']]],
-  ['sm16716controller',['SM16716Controller',['../class_s_m16716_controller.html',1,'']]],
-  ['softwarespioutput',['SoftwareSPIOutput',['../class_software_s_p_i_output.html',1,'']]],
-  ['spioutput',['SPIOutput',['../class_s_p_i_output.html',1,'']]],
-  ['spioutput_3c_20data_5fpin_2c_20clock_5fpin_2c_20spi_5fspeed_20_3e',['SPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;',['../class_s_p_i_output.html',1,'']]],
-  ['spioutput_3c_20spi2_5fdata_2c_20spi2_5fclock_2c_20spi_5fspeed_20_3e',['SPIOutput&lt; SPI2_DATA, SPI2_CLOCK, SPI_SPEED &gt;',['../class_s_p_i_output_3_01_s_p_i2___d_a_t_a_00_01_s_p_i2___c_l_o_c_k_00_01_s_p_i___s_p_e_e_d_01_4.html',1,'']]],
-  ['spioutput_3c_20spi2_5fdata_2c_20spi_5fclock_2c_20spi_5fspeed_20_3e',['SPIOutput&lt; SPI2_DATA, SPI_CLOCK, SPI_SPEED &gt;',['../class_s_p_i_output_3_01_s_p_i2___d_a_t_a_00_01_s_p_i___c_l_o_c_k_00_01_s_p_i___s_p_e_e_d_01_4.html',1,'']]],
-  ['spioutput_3c_20spi_5fdata_2c_20spi2_5fclock_2c_20spi_5fspeed_20_3e',['SPIOutput&lt; SPI_DATA, SPI2_CLOCK, SPI_SPEED &gt;',['../class_s_p_i_output_3_01_s_p_i___d_a_t_a_00_01_s_p_i2___c_l_o_c_k_00_01_s_p_i___s_p_e_e_d_01_4.html',1,'']]],
-  ['spioutput_3c_20spi_5fdata_2c_20spi_5fclock_2c_20spi_5fspeed_20_3e',['SPIOutput&lt; SPI_DATA, SPI_CLOCK, SPI_SPEED &gt;',['../class_s_p_i_output_3_01_s_p_i___d_a_t_a_00_01_s_p_i___c_l_o_c_k_00_01_s_p_i___s_p_e_e_d_01_4.html',1,'']]],
-  ['spioutput_3c_20spi_5fuart0_5fdata_2c_20spi_5fuart0_5fclock_2c_20spi_5fspeed_20_3e',['SPIOutput&lt; SPI_UART0_DATA, SPI_UART0_CLOCK, SPI_SPEED &gt;',['../class_s_p_i_output_3_01_s_p_i___u_a_r_t0___d_a_t_a_00_01_s_p_i___u_a_r_t0___c_l_o_c_k_00_01_s_p_i___s_p_e_e_d_01_4.html',1,'']]],
-  ['spioutput_3c_20spi_5fuart1_5fdata_2c_20spi_5fuart1_5fclock_2c_20spi_5fspeed_20_3e',['SPIOutput&lt; SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED &gt;',['../class_s_p_i_output_3_01_s_p_i___u_a_r_t1___d_a_t_a_00_01_s_p_i___u_a_r_t1___c_l_o_c_k_00_01_s_p_i___s_p_e_e_d_01_4.html',1,'']]],
-  ['sub4',['sub4',['../structsub4.html',1,'']]]
+  ['tbytesforlong',['tBytesForLong',['../uniont_bytes_for_long.html',1,'']]],
+  ['tm1803',['TM1803',['../class_t_m1803.html',1,'']]],
+  ['tm1803controller400khz',['TM1803Controller400Khz',['../class_t_m1803_controller400_khz.html',1,'']]],
+  ['tm1804',['TM1804',['../class_t_m1804.html',1,'']]],
+  ['tm1809',['TM1809',['../class_t_m1809.html',1,'']]],
+  ['tm1809controller800khz',['TM1809Controller800Khz',['../class_t_m1809_controller800_khz.html',1,'']]],
+  ['tm1812',['TM1812',['../class_t_m1812.html',1,'']]],
+  ['tm1829',['TM1829',['../class_t_m1829.html',1,'']]],
+  ['tm1829controller1600khz',['TM1829Controller1600Khz',['../class_t_m1829_controller1600_khz.html',1,'']]],
+  ['tm1829controller800khz',['TM1829Controller800Khz',['../class_t_m1829_controller800_khz.html',1,'']]],
+  ['trgbgradientpaletteentryunion',['TRGBGradientPaletteEntryUnion',['../union_t_r_g_b_gradient_palette_entry_union.html',1,'']]]
 ];

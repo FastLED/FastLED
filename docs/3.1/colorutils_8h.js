@@ -4,10 +4,12 @@ var colorutils_8h =
     [ "TDynamicRGBGradientPalette_bytes", "group___colorutils.html#gae1c82c19302557ba92e9ce0ec2c9ed5b", null ],
     [ "TDynamicRGBGradientPalettePtr", "group___colorutils.html#ga8ca55222f4aaa94bba41171554225f75", null ],
     [ "TProgmemHSVPalette16", "group___colorutils.html#ga68d7c7a5522fb7aa113e50351bd620d4", null ],
+    [ "TProgmemHSVPalette32", "group___colorutils.html#ga4173693bfea9b72f0f73085e9a7318a8", null ],
     [ "TProgmemRGBGradientPalette_byte", "group___colorutils.html#ga5c6ee5f16c2e9dcea972adc5b582218c", null ],
     [ "TProgmemRGBGradientPalette_bytes", "group___colorutils.html#ga56cb3bce8ab7c903689192abedcc9699", null ],
     [ "TProgmemRGBGradientPalettePtr", "group___colorutils.html#gad07b6fd5973f3c9fc4a084b206aaeabd", null ],
     [ "TProgmemRGBPalette16", "group___colorutils.html#ga3ce4f8424098c820a739f95cf86d7663", null ],
+    [ "TProgmemRGBPalette32", "group___colorutils.html#ga0402dc727d6a118cf426da017ff42152", null ],
     [ "TBlendType", "group___colorutils.html#ga565c04e626af4a3ec44bf97edc607b4e", [
       [ "NOBLEND", "group___colorutils.html#gga565c04e626af4a3ec44bf97edc607b4ea754b67bead50dd3c843e930e9bfa2f00", null ],
       [ "LINEARBLEND", "group___colorutils.html#gga565c04e626af4a3ec44bf97edc607b4ea7a36ed58acc67878c9dd1b6a83910f06", null ]
@@ -34,6 +36,9 @@ var colorutils_8h =
     [ "ColorFromPalette", "group___colorutils.html#gaf65fa1b4fedbbd7b8054a71e1b6474b3", null ],
     [ "ColorFromPalette", "group___colorutils.html#gafdfc20fbf9b8e4b71e010a654ec27891", null ],
     [ "ColorFromPalette", "group___colorutils.html#ga79c94ea554455e72eabab172cc15456f", null ],
+    [ "ColorFromPalette", "group___colorutils.html#gae5e137a13a4b6145fe40007328d398f4", null ],
+    [ "ColorFromPalette", "group___colorutils.html#gaea6bd3ab3ec62d88e2dcc7ab2486dcd4", null ],
+    [ "ColorFromPalette", "group___colorutils.html#ga1684ed7eb860c68a915d03e94250e58a", null ],
     [ "fade_raw", "group___colorutils.html#gac020b03041306ed9c859bbdfebe943cf", null ],
     [ "fade_video", "group___colorutils.html#gaff656b0046fac0d40b8eb02941ce1755", null ],
     [ "fadeLightBy", "group___colorutils.html#gac1e25878d16efa6112d907738f525773", null ],
@@ -66,5 +71,9 @@ var colorutils_8h =
     [ "nscale8", "group___colorutils.html#gad0356fc313196732e7cd4e64f506f82b", null ],
     [ "nscale8_video", "group___colorutils.html#ga956be37436f2b9c06c99d24263ef8e83", null ],
     [ "UpscalePalette", "group___colorutils.html#gaea18108bf50282f20a0ecd4213b5ac8c", null ],
-    [ "UpscalePalette", "group___colorutils.html#gae2a0641902f28723263666a128995fef", null ]
+    [ "UpscalePalette", "group___colorutils.html#gae2a0641902f28723263666a128995fef", null ],
+    [ "UpscalePalette", "group___colorutils.html#ga1916d32f04256f662ecb0f4d7cff6062", null ],
+    [ "UpscalePalette", "group___colorutils.html#gab247fdb68a0ed37779c7bc11b83f6f8a", null ],
+    [ "UpscalePalette", "group___colorutils.html#gaa91cec87978562a2b22709b47d02cdd7", null ],
+    [ "UpscalePalette", "group___colorutils.html#gaeac1e2dbb61ff4b9f21dbed9cb0a1350", null ]
 ];

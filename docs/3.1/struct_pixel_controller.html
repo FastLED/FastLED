@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.9.1"/>
-<title>FastLED: PixelController&lt; RGB_ORDER &gt; Struct Template Reference</title>
+<title>FastLED: PixelController&lt; RGB_ORDER, LANES, MASK &gt; Struct Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -112,219 +112,205 @@ $(document).ready(function(){initNavTree('struct_pixel_controller.html','');});
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="struct_pixel_controller-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">PixelController&lt; RGB_ORDER &gt; Struct Template Reference</div>  </div>
+<div class="title">PixelController&lt; RGB_ORDER, LANES, MASK &gt; Struct Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-
-<p>Pixel controller class.  
- <a href="struct_pixel_controller.html#details">More...</a></p>
-
-<p><code>#include &lt;<a class="el" href="controller_8h_source.html">controller.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
-  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Collaboration diagram for PixelController&lt; RGB_ORDER &gt;:</div>
+  <img id="dynsection-0-trigger" src="closed.png" alt="+"/> Collaboration diagram for PixelController&lt; RGB_ORDER, LANES, MASK &gt;:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
 </div>
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
-<div class="center"><img src="struct_pixel_controller__coll__graph.png" border="0" usemap="#_pixel_controller_3_01_r_g_b___o_r_d_e_r_01_4_coll__map" alt="Collaboration graph"/></div>
-<map name="_pixel_controller_3_01_r_g_b___o_r_d_e_r_01_4_coll__map" id="_pixel_controller_3_01_r_g_b___o_r_d_e_r_01_4_coll__map">
-<area shape="rect" id="node2" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) " alt="" coords="50,5,109,32"/></map>
+<div class="center"><img src="struct_pixel_controller__coll__graph.png" border="0" usemap="#_pixel_controller_3_01_r_g_b___o_r_d_e_r_00_01_l_a_n_e_s_00_01_m_a_s_k_01_4_coll__map" alt="Collaboration graph"/></div>
+<map name="_pixel_controller_3_01_r_g_b___o_r_d_e_r_00_01_l_a_n_e_s_00_01_m_a_s_k_01_4_coll__map" id="_pixel_controller_3_01_r_g_b___o_r_d_e_r_00_01_l_a_n_e_s_00_01_m_a_s_k_01_4_coll__map">
+<area shape="rect" id="node2" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) " alt="" coords="67,5,127,32"/></map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aec44f7bfc391ebf4874f678a994eff71"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aec44f7bfc391ebf4874f678a994eff71"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html#aec44f7bfc391ebf4874f678a994eff71">PixelController</a> (const <a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;other)</td></tr>
-<tr class="memdesc:aec44f7bfc391ebf4874f678a994eff71"><td class="mdescLeft">&#160;</td><td class="mdescRight">copy constructor for the pixel controller object <br /></td></tr>
-<tr class="separator:aec44f7bfc391ebf4874f678a994eff71"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accb48b27c47c742a8b13f97ae1d82d32"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="accb48b27c47c742a8b13f97ae1d82d32"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html#accb48b27c47c742a8b13f97ae1d82d32">init_binary_dithering</a> ()</td></tr>
-<tr class="memdesc:accb48b27c47c742a8b13f97ae1d82d32"><td class="mdescLeft">&#160;</td><td class="mdescRight">initialize the binary dithering for this controller <br /></td></tr>
-<tr class="separator:accb48b27c47c742a8b13f97ae1d82d32"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a11aef85a0ef8a9276cd2e729d57aa49b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a11aef85a0ef8a9276cd2e729d57aa49b"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html#a11aef85a0ef8a9276cd2e729d57aa49b">__attribute__</a> ((always_inline)) inline bool has(int n)</td></tr>
-<tr class="memdesc:a11aef85a0ef8a9276cd2e729d57aa49b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do we have n pixels left to process? <br /></td></tr>
-<tr class="separator:a11aef85a0ef8a9276cd2e729d57aa49b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e923be6212346c5ae98f7731d74c2e3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3e923be6212346c5ae98f7731d74c2e3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html#a3e923be6212346c5ae98f7731d74c2e3">enable_dithering</a> (EDitherMode dither)</td></tr>
-<tr class="memdesc:a3e923be6212346c5ae98f7731d74c2e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">toggle dithering enable <br /></td></tr>
-<tr class="separator:a3e923be6212346c5ae98f7731d74c2e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afbe76a814e6bec02854dd4df167567b4"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afbe76a814e6bec02854dd4df167567b4"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html#afbe76a814e6bec02854dd4df167567b4">__attribute__</a> ((always_inline)) inline int advanceBy()</td></tr>
-<tr class="memdesc:afbe76a814e6bec02854dd4df167567b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the amount to advance the pointer by <br /></td></tr>
-<tr class="separator:afbe76a814e6bec02854dd4df167567b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a404558c7da7f3f6fae768bc45af9dc03"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a404558c7da7f3f6fae768bc45af9dc03"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html#a404558c7da7f3f6fae768bc45af9dc03">__attribute__</a> ((always_inline)) inline void advanceData()</td></tr>
-<tr class="memdesc:a404558c7da7f3f6fae768bc45af9dc03"><td class="mdescLeft">&#160;</td><td class="mdescRight">advance the data pointer forward, adjust position counter <br /></td></tr>
-<tr class="separator:a404558c7da7f3f6fae768bc45af9dc03"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a900493d7e9e345d0cb6e602186151e73"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a900493d7e9e345d0cb6e602186151e73"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html#a900493d7e9e345d0cb6e602186151e73">__attribute__</a> ((always_inline)) inline void stepDithering()</td></tr>
-<tr class="memdesc:a900493d7e9e345d0cb6e602186151e73"><td class="mdescLeft">&#160;</td><td class="mdescRight">step the dithering forward <br /></td></tr>
-<tr class="separator:a900493d7e9e345d0cb6e602186151e73"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9b0bc80097821046dbda7bbbf38dd7df"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9b0bc80097821046dbda7bbbf38dd7df"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html#a9b0bc80097821046dbda7bbbf38dd7df">__attribute__</a> ((always_inline)) inline void preStepFirstByteDithering()</td></tr>
-<tr class="memdesc:a9b0bc80097821046dbda7bbbf38dd7df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately. <br /></td></tr>
-<tr class="separator:a9b0bc80097821046dbda7bbbf38dd7df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33c4de106c80a9a3933811b557d5dee5"><td class="memTemplParams" colspan="2"><a class="anchor" id="a33c4de106c80a9a3933811b557d5dee5"></a>
-template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a33c4de106c80a9a3933811b557d5dee5"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t loadByte(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
-<tr class="separator:a33c4de106c80a9a3933811b557d5dee5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5faf76b184df3d0093fec384bf37df1b"><td class="memTemplParams" colspan="2"><a class="anchor" id="a5faf76b184df3d0093fec384bf37df1b"></a>
-template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a5faf76b184df3d0093fec384bf37df1b"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t dither(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc</td></tr>
-<tr class="separator:a5faf76b184df3d0093fec384bf37df1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aacbf92a326415e94748f1e1f053e565c"><td class="memTemplParams" colspan="2"><a class="anchor" id="aacbf92a326415e94748f1e1f053e565c"></a>
-template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:aacbf92a326415e94748f1e1f053e565c"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t scale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc</td></tr>
-<tr class="separator:aacbf92a326415e94748f1e1f053e565c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af96ec8426561793f6f95ccbeef68767d"><td class="memTemplParams" colspan="2"><a class="anchor" id="af96ec8426561793f6f95ccbeef68767d"></a>
-template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:af96ec8426561793f6f95ccbeef68767d"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t loadAndScale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
-<tr class="separator:af96ec8426561793f6f95ccbeef68767d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f1aec11829806f13924a36827a41736"><td class="memTemplParams" colspan="2"><a class="anchor" id="a7f1aec11829806f13924a36827a41736"></a>
-template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a7f1aec11829806f13924a36827a41736"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t advanceAndLoadAndScale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
-<tr class="separator:a7f1aec11829806f13924a36827a41736"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4b13583d00a99418f6088638c542100"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa4b13583d00a99418f6088638c542100"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t loadAndScale0()</td></tr>
-<tr class="separator:aa4b13583d00a99418f6088638c542100"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b413825c12904d3f04d812ad960d037"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4b413825c12904d3f04d812ad960d037"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t loadAndScale1()</td></tr>
-<tr class="separator:a4b413825c12904d3f04d812ad960d037"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f97ce4b173c2f17d9bf9702d6dec7fe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3f97ce4b173c2f17d9bf9702d6dec7fe"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t loadAndScale2()</td></tr>
-<tr class="separator:a3f97ce4b173c2f17d9bf9702d6dec7fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a880a808e9b20cf6e4dd8c09e7b33cdbb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a880a808e9b20cf6e4dd8c09e7b33cdbb"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t advanceAndLoadAndScale0()</td></tr>
-<tr class="separator:a880a808e9b20cf6e4dd8c09e7b33cdbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a649f80d1b1aff0eaa5915434262075b7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a649f80d1b1aff0eaa5915434262075b7"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0()</td></tr>
-<tr class="separator:a649f80d1b1aff0eaa5915434262075b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader"></div></td></tr>
-<tr class="memitem:a81403c8810658d3c41cb210703bbfc00"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html#a81403c8810658d3c41cb210703bbfc00">PixelController</a> (const uint8_t *d, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, EDitherMode dither=BINARY_DITHER, bool advance=true, uint8_t skip=0)</td></tr>
-<tr class="memdesc:a81403c8810658d3c41cb210703bbfc00"><td class="mdescLeft">&#160;</td><td class="mdescRight">create a pixel controller for managing led data as it is being written out  <a href="#a81403c8810658d3c41cb210703bbfc00">More...</a><br /></td></tr>
-<tr class="separator:a81403c8810658d3c41cb210703bbfc00"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9cd0843d8305cbd78b4d9597ed9b2081"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9cd0843d8305cbd78b4d9597ed9b2081"></a>
+<tr class="memitem:ae44229e20fb4ba4473b057dcda87122e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae44229e20fb4ba4473b057dcda87122e"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>PixelController</b> (const <a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;other)</td></tr>
+<tr class="separator:ae44229e20fb4ba4473b057dcda87122e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a358944f031ee8b8536d2f48ca670de77"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a358944f031ee8b8536d2f48ca670de77"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>initOffsets</b> (int len)</td></tr>
+<tr class="separator:a358944f031ee8b8536d2f48ca670de77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85acf3ef47eaeaa6723b7cf5ea4f071d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a85acf3ef47eaeaa6723b7cf5ea4f071d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>PixelController</b> (const uint8_t *d, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, EDitherMode dither=BINARY_DITHER, bool advance=true, uint8_t skip=0)</td></tr>
+<tr class="separator:a85acf3ef47eaeaa6723b7cf5ea4f071d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5631b8132087ca68008d85a891c82d2b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5631b8132087ca68008d85a891c82d2b"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>PixelController</b> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> *d, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, EDitherMode dither=BINARY_DITHER)</td></tr>
-<tr class="separator:a9cd0843d8305cbd78b4d9597ed9b2081"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a22aa861b047d60d43c5937eda51c7ec8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a22aa861b047d60d43c5937eda51c7ec8"></a>
+<tr class="separator:a5631b8132087ca68008d85a891c82d2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a802a3dadccd652a9f1db490f7ba64655"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a802a3dadccd652a9f1db490f7ba64655"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>PixelController</b> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;d, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, EDitherMode dither=BINARY_DITHER)</td></tr>
-<tr class="separator:a22aa861b047d60d43c5937eda51c7ec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aae50dffd933b8e1505315b7d2797a219"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aae50dffd933b8e1505315b7d2797a219"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>PixelController</b> (const CARGB &amp;d, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, EDitherMode dither=BINARY_DITHER)</td></tr>
-<tr class="separator:aae50dffd933b8e1505315b7d2797a219"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab13ac71f27f83c847c836c3f9854a062"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab13ac71f27f83c847c836c3f9854a062"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>PixelController</b> (const CARGB *d, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, EDitherMode dither=BINARY_DITHER)</td></tr>
-<tr class="separator:ab13ac71f27f83c847c836c3f9854a062"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a802a3dadccd652a9f1db490f7ba64655"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a8441da873d3a094c15c337b34d3e43"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2a8441da873d3a094c15c337b34d3e43"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>init_binary_dithering</b> ()</td></tr>
+<tr class="separator:a2a8441da873d3a094c15c337b34d3e43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16d32039be01c47dc83bc3445d5d6b27"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a16d32039be01c47dc83bc3445d5d6b27"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline bool has(int n)</td></tr>
+<tr class="separator:a16d32039be01c47dc83bc3445d5d6b27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa86847022436988b28343a76bab0db4c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa86847022436988b28343a76bab0db4c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_dithering</b> (EDitherMode dither)</td></tr>
+<tr class="separator:aa86847022436988b28343a76bab0db4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8c6cc3afd672eb983f0e450412c41ab"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab8c6cc3afd672eb983f0e450412c41ab"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline int size()</td></tr>
+<tr class="separator:ab8c6cc3afd672eb983f0e450412c41ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93ca22b517d8773e8cf2c134e037656e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a93ca22b517d8773e8cf2c134e037656e"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline int advanceBy()</td></tr>
+<tr class="separator:a93ca22b517d8773e8cf2c134e037656e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e2edbee638944aacc0c330700259fc2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7e2edbee638944aacc0c330700259fc2"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline void advanceData()</td></tr>
+<tr class="separator:a7e2edbee638944aacc0c330700259fc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22d6434dc71ac5129f4e0fd43c0f12ee"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a22d6434dc71ac5129f4e0fd43c0f12ee"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline void stepDithering()</td></tr>
+<tr class="separator:a22d6434dc71ac5129f4e0fd43c0f12ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed9847b7a8e1b9c220995c33fdac8be1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aed9847b7a8e1b9c220995c33fdac8be1"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline void preStepFirstByteDithering()</td></tr>
+<tr class="separator:aed9847b7a8e1b9c220995c33fdac8be1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a952aea61541fe652dd88701f34623d86"><td class="memTemplParams" colspan="2"><a class="anchor" id="a952aea61541fe652dd88701f34623d86"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a952aea61541fe652dd88701f34623d86"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t loadByte(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="separator:a952aea61541fe652dd88701f34623d86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabaf168a65316323011e850b52aaf5d1"><td class="memTemplParams" colspan="2"><a class="anchor" id="aabaf168a65316323011e850b52aaf5d1"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:aabaf168a65316323011e850b52aaf5d1"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t loadByte(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc</td></tr>
+<tr class="separator:aabaf168a65316323011e850b52aaf5d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29beeff954233b9cf8a7f8df951d4dac"><td class="memTemplParams" colspan="2"><a class="anchor" id="a29beeff954233b9cf8a7f8df951d4dac"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a29beeff954233b9cf8a7f8df951d4dac"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t dither(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc</td></tr>
+<tr class="separator:a29beeff954233b9cf8a7f8df951d4dac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8b82f2b0304f423b5954f71f7fe70da"><td class="memTemplParams" colspan="2"><a class="anchor" id="ae8b82f2b0304f423b5954f71f7fe70da"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:ae8b82f2b0304f423b5954f71f7fe70da"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t dither(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;</td></tr>
+<tr class="separator:ae8b82f2b0304f423b5954f71f7fe70da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21e8c0ac9427f1b1e6e5517581ef86b6"><td class="memTemplParams" colspan="2"><a class="anchor" id="a21e8c0ac9427f1b1e6e5517581ef86b6"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a21e8c0ac9427f1b1e6e5517581ef86b6"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t scale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc</td></tr>
+<tr class="separator:a21e8c0ac9427f1b1e6e5517581ef86b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66ddba664c4b6b4bfc6968a5fa332981"><td class="memTemplParams" colspan="2"><a class="anchor" id="a66ddba664c4b6b4bfc6968a5fa332981"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a66ddba664c4b6b4bfc6968a5fa332981"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t scale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;</td></tr>
+<tr class="separator:a66ddba664c4b6b4bfc6968a5fa332981"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b9ed10c5cb92344f482ec9cb5291bb5"><td class="memTemplParams" colspan="2"><a class="anchor" id="a4b9ed10c5cb92344f482ec9cb5291bb5"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a4b9ed10c5cb92344f482ec9cb5291bb5"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t loadAndScale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="separator:a4b9ed10c5cb92344f482ec9cb5291bb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ba4ffda92340e8af5b5c14917e82e38"><td class="memTemplParams" colspan="2"><a class="anchor" id="a0ba4ffda92340e8af5b5c14917e82e38"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a0ba4ffda92340e8af5b5c14917e82e38"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t loadAndScale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc</td></tr>
+<tr class="separator:a0ba4ffda92340e8af5b5c14917e82e38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ba4ffda92340e8af5b5c14917e82e38"><td class="memTemplParams" colspan="2"><a class="anchor" id="a0ba4ffda92340e8af5b5c14917e82e38"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a0ba4ffda92340e8af5b5c14917e82e38"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t loadAndScale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc</td></tr>
+<tr class="separator:a0ba4ffda92340e8af5b5c14917e82e38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ba4ffda92340e8af5b5c14917e82e38"><td class="memTemplParams" colspan="2"><a class="anchor" id="a0ba4ffda92340e8af5b5c14917e82e38"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a0ba4ffda92340e8af5b5c14917e82e38"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t loadAndScale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc</td></tr>
+<tr class="separator:a0ba4ffda92340e8af5b5c14917e82e38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a147cb63da3c1b6d53d90858db39b9bc4"><td class="memTemplParams" colspan="2"><a class="anchor" id="a147cb63da3c1b6d53d90858db39b9bc4"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a147cb63da3c1b6d53d90858db39b9bc4"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t advanceAndLoadAndScale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="separator:a147cb63da3c1b6d53d90858db39b9bc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a564bd9ea03fd6247e02d0c847f89082c"><td class="memTemplParams" colspan="2"><a class="anchor" id="a564bd9ea03fd6247e02d0c847f89082c"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a564bd9ea03fd6247e02d0c847f89082c"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t advanceAndLoadAndScale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc</td></tr>
+<tr class="separator:a564bd9ea03fd6247e02d0c847f89082c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac43a466314a3aeb4ec78582b1d61c3a2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac43a466314a3aeb4ec78582b1d61c3a2"></a>
+return pc&#160;</td><td class="memItemRight" valign="bottom"><b>loadAndScale</b> (pc, lane)</td></tr>
+<tr class="separator:ac43a466314a3aeb4ec78582b1d61c3a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad24fcf47a4e75f105990ffb1b663b694"><td class="memTemplParams" colspan="2"><a class="anchor" id="ad24fcf47a4e75f105990ffb1b663b694"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:ad24fcf47a4e75f105990ffb1b663b694"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t getd(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="separator:ad24fcf47a4e75f105990ffb1b663b694"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a787a13655480d5c363f17147a09929"><td class="memTemplParams" colspan="2"><a class="anchor" id="a2a787a13655480d5c363f17147a09929"></a>
+template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a2a787a13655480d5c363f17147a09929"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline static uint8_t getscale(<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="separator:a2a787a13655480d5c363f17147a09929"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0dc0b7dea6953d9b183831d0b82557c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af0dc0b7dea6953d9b183831d0b82557c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t loadAndScale0(int lane)</td></tr>
+<tr class="separator:af0dc0b7dea6953d9b183831d0b82557c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1eb4eccf2c92e7a818a756abe62e745e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1eb4eccf2c92e7a818a756abe62e745e"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t loadAndScale1(int lane)</td></tr>
+<tr class="separator:a1eb4eccf2c92e7a818a756abe62e745e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add4088b8193b526ee1f90cafba718cbb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="add4088b8193b526ee1f90cafba718cbb"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t loadAndScale2(int lane)</td></tr>
+<tr class="separator:add4088b8193b526ee1f90cafba718cbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe0ed605c37888899329dcf20f371a86"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afe0ed605c37888899329dcf20f371a86"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane)</td></tr>
+<tr class="separator:afe0ed605c37888899329dcf20f371a86"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12ada103e6a5ffb6eac939ea63e881e5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a12ada103e6a5ffb6eac939ea63e881e5"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane)</td></tr>
+<tr class="separator:a12ada103e6a5ffb6eac939ea63e881e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53537a46cfbb83f10c9b26044ac96f5e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a53537a46cfbb83f10c9b26044ac96f5e"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t loadAndScale0()</td></tr>
+<tr class="separator:a53537a46cfbb83f10c9b26044ac96f5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaefb6aa81ccbec86a682c6c9ee233d73"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aaefb6aa81ccbec86a682c6c9ee233d73"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t loadAndScale1()</td></tr>
+<tr class="separator:aaefb6aa81ccbec86a682c6c9ee233d73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a8f661276ae24be964cacc9ff7fb9cf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4a8f661276ae24be964cacc9ff7fb9cf"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t loadAndScale2()</td></tr>
+<tr class="separator:a4a8f661276ae24be964cacc9ff7fb9cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae39136bd50c7747ae29b986da1b11646"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae39136bd50c7747ae29b986da1b11646"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t advanceAndLoadAndScale0()</td></tr>
+<tr class="separator:ae39136bd50c7747ae29b986da1b11646"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a261471135b391617f6470eaea8681139"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a261471135b391617f6470eaea8681139"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>__attribute__</b> ((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0()</td></tr>
+<tr class="separator:a261471135b391617f6470eaea8681139"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a40d956bed201260a641c11e935fdff42"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a40d956bed201260a641c11e935fdff42"></a>
+<tr class="memitem:a54bedae9117a19b242b73682c5d1a182"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a54bedae9117a19b242b73682c5d1a182"></a>
 const uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><b>mData</b></td></tr>
-<tr class="separator:a40d956bed201260a641c11e935fdff42"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0641ad95fffe0a165b9f2ba1953393b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac0641ad95fffe0a165b9f2ba1953393b"></a>
+<tr class="separator:a54bedae9117a19b242b73682c5d1a182"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e1491364f944af0eee408fc8dffef58"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6e1491364f944af0eee408fc8dffef58"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>mLen</b></td></tr>
-<tr class="separator:ac0641ad95fffe0a165b9f2ba1953393b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a265a7697099e35c4a4a548984eb84032"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a265a7697099e35c4a4a548984eb84032"></a>
+<tr class="separator:a6e1491364f944af0eee408fc8dffef58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a329cebe498f2d119cf10e0e6a7b5f7c5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a329cebe498f2d119cf10e0e6a7b5f7c5"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>mLenRemaining</b></td></tr>
+<tr class="separator:a329cebe498f2d119cf10e0e6a7b5f7c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a576c3a3eac363fb83e475e142bbe586d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a576c3a3eac363fb83e475e142bbe586d"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>d</b> [3]</td></tr>
-<tr class="separator:a265a7697099e35c4a4a548984eb84032"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4adb6e0bc116f2b25780afec889bd88"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad4adb6e0bc116f2b25780afec889bd88"></a>
+<tr class="separator:a576c3a3eac363fb83e475e142bbe586d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ba367b1689ad3fc6c1cac3174faf341"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9ba367b1689ad3fc6c1cac3174faf341"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>e</b> [3]</td></tr>
-<tr class="separator:ad4adb6e0bc116f2b25780afec889bd88"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc5438b06f84610a0fe20418c0f30290"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abc5438b06f84610a0fe20418c0f30290"></a>
+<tr class="separator:a9ba367b1689ad3fc6c1cac3174faf341"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c8fa28fd867a4048796b4f88146d332"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9c8fa28fd867a4048796b4f88146d332"></a>
 <a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><b>mScale</b></td></tr>
-<tr class="separator:abc5438b06f84610a0fe20418c0f30290"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0441a5caab1fd894613be45fc5cc74ad"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0441a5caab1fd894613be45fc5cc74ad"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>mAdvance</b></td></tr>
-<tr class="separator:a0441a5caab1fd894613be45fc5cc74ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59c41a4f80039f205f172c275e3c508f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a59c41a4f80039f205f172c275e3c508f"></a>
+<tr class="separator:a9c8fa28fd867a4048796b4f88146d332"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f4eb594a337bc3a739e65b2a1e5c401"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0f4eb594a337bc3a739e65b2a1e5c401"></a>
+int8_t&#160;</td><td class="memItemRight" valign="bottom"><b>mAdvance</b></td></tr>
+<tr class="separator:a0f4eb594a337bc3a739e65b2a1e5c401"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ea77404f9ea28134291af923a79c82f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5ea77404f9ea28134291af923a79c82f"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>mOffsets</b> [LANES]</td></tr>
+<tr class="separator:a5ea77404f9ea28134291af923a79c82f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41bf3d91b9cf0269ae08b47eb86d5387"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a41bf3d91b9cf0269ae08b47eb86d5387"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>lane</b> { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]</td></tr>
+<tr class="separator:a41bf3d91b9cf0269ae08b47eb86d5387"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30f6c6e3dbb3d9ea1f148a4d77f221b5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a30f6c6e3dbb3d9ea1f148a4d77f221b5"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>b</b> { return b ? <a class="el" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>(b, pc.d[RO(SLOT)]) : 0</td></tr>
-<tr class="separator:a59c41a4f80039f205f172c275e3c508f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a30f6c6e3dbb3d9ea1f148a4d77f221b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad90b3914752258965fc1a18b3ffadebb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad90b3914752258965fc1a18b3ffadebb"></a>
+uint8_t uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>d</b> { return b ? <a class="el" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>(b,d) : 0</td></tr>
+<tr class="separator:ad90b3914752258965fc1a18b3ffadebb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b5452230608de2816669c6e2e6772d9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7b5452230608de2816669c6e2e6772d9"></a>
+uint8_t uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>scale</b> { return <a class="el" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>(b, scale)</td></tr>
+<tr class="separator:a7b5452230608de2816669c6e2e6772d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa685641133594892cad325ccc0bd031c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa685641133594892cad325ccc0bd031c"></a>
+int uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>d</b></td></tr>
+<tr class="separator:aa685641133594892cad325ccc0bd031c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92d6838d1c476c583302276b4d30dc0f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a92d6838d1c476c583302276b4d30dc0f"></a>
+int uint8_t uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>scale</b> { return <a class="el" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>(pc.dither&lt;SLOT&gt;(pc, pc.loadByte&lt;SLOT&gt;(pc, lane), d), scale)</td></tr>
+<tr class="separator:a92d6838d1c476c583302276b4d30dc0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a981df5be1edbd7caca3fc061f975e5a7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a981df5be1edbd7caca3fc061f975e5a7"></a>
+int uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>scale</b> { return <a class="el" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>(pc.loadByte&lt;SLOT&gt;(pc, lane), scale)</td></tr>
+<tr class="separator:a981df5be1edbd7caca3fc061f975e5a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;EOrder RGB_ORDER&gt;<br />
-struct PixelController&lt; RGB_ORDER &gt;</h3>
+<div class="textblock"><h3>template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt;<br />
+struct PixelController&lt; RGB_ORDER, LANES, MASK &gt;</h3>
 
-<p>Pixel controller class. </p>
-<p>This is the class that we use to centralize pixel access in a block of data, including support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will centralize 8/12/16 conversions here as well. </p>
 
-<p>Definition at line <a class="el" href="controller_8h_source.html#l00187">187</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a81403c8810658d3c41cb210703bbfc00"></a>
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;EOrder RGB_ORDER&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER &gt;::<a class="el" href="struct_pixel_controller.html">PixelController</a> </td>
-          <td>(</td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>d</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>len</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">EDitherMode&#160;</td>
-          <td class="paramname"><em>dither</em> = <code>BINARY_DITHER</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>advance</em> = <code>true</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>skip</em> = <code>0</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>create a pixel controller for managing led data as it is being written out </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">d</td><td>the led data this controller is managing </td></tr>
-    <tr><td class="paramname">len</td><td>the number of leds this controller is managing </td></tr>
-    <tr><td class="paramname">s</td><td>the combined rgb scaling adjustment for the leds </td></tr>
-    <tr><td class="paramname">dither</td><td>the dither mode for these pixels </td></tr>
-    <tr><td class="paramname">advance</td><td>whether or not to walk through the array of data for each pixel, or just write out the first pixel len times </td></tr>
-    <tr><td class="paramname">skip</td><td>whether or not there is extra data to skip when writing out led data, e.g. if passed in argb data </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p>Definition at line <a class="el" href="controller_8h_source.html#l00218">218</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<p>Definition at line <a class="el" href="controller_8h_source.html#l00177">177</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+</div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li><a class="el" href="controller_8h_source.html">controller.h</a></li>
 </ul>
 </div><!-- contents -->
@@ -333,7 +319,7 @@ template&lt;EOrder RGB_ORDER&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="struct_pixel_controller.html">PixelController</a></li>
-    <li class="footer">Generated on Thu Dec 10 2015 14:02:37 for FastLED by
+    <li class="footer">Generated on Sat Feb 13 2016 13:28:37 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

@@ -3,7 +3,7 @@ var NAVTREE =
   [ "FastLED", "index.html", [
     [ "PORTING", "md__p_o_r_t_i_n_g.html", null ],
     [ "README", "md__r_e_a_d_m_e.html", null ],
-    [ "FastLED3.1.1pre", "md_release_notes.html", null ],
+    [ "FastLED3.1.2pre", "md_release_notes.html", null ],
     [ "Todo List", "todo.html", null ],
     [ "Modules", "modules.html", "modules" ],
     [ "Classes", null, [
@@ -32,10 +32,10 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_fast_l_e_d_8cpp_source.html",
-"class_c_r_g_b_palette16.html#a4ee47d64732750b038bec307f56b491d",
-"fastled__config_8h.html",
-"group___pixeltypes.html#ggaeb40a08b7cb90c1e21bd408261558b99a3b48c8058f1b90d745a5c94bdb38fc23",
-"struct_c_r_g_b.html#a8bb881dd011552b412af2845562b0df3"
+"class_c_pixel_view.html#afe3500651fc4eb5770aeb01728aa0a1e",
+"class_t_m1829_controller800_khz.html",
+"group___noise.html#gaa521ccca6038d7b5e881fe2e8f35d3bc",
+"md_release_notes.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

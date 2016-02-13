@@ -3,6 +3,8 @@ var group___math =
     [ "abs8", "group___math.html#ga4bf8996c4a130e96521495d4a1395a01", null ],
     [ "add8", "group___math.html#ga9f1f93145ca1955562b7f50f5db96ac1", null ],
     [ "addmod8", "group___math.html#ga2bcd51c47538dbc933999382e272a7a7", null ],
+    [ "avg15", "group___math.html#ga5873ff4e986c61d72cb291709190ed25", null ],
+    [ "avg16", "group___math.html#gac09b1bbea319b879bded54d129eb5358", null ],
     [ "avg7", "group___math.html#ga30558a835c484b418165909118e702b1", null ],
     [ "avg8", "group___math.html#ga6bfedf0473d4c3705e8feeb6a25b9ea5", null ],
     [ "mod8", "group___math.html#gaa5e80daec10cc13bf1eca8b125ee0e88", null ],

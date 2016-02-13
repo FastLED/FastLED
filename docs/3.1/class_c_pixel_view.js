@@ -12,6 +12,7 @@ var class_c_pixel_view =
     [ "blur1d", "class_c_pixel_view.html#a9814a52e2de74315d073a7de9e20a0f7", null ],
     [ "cbegin", "class_c_pixel_view.html#aa33cb777acc46071c85cbe42cbfc9270", null ],
     [ "cend", "class_c_pixel_view.html#a9abaa0edf2f8ab01159dbe308e37bdec", null ],
+    [ "dump", "class_c_pixel_view.html#a1f32c60d83428f27d3ec899442b82410", null ],
     [ "end", "class_c_pixel_view.html#a5492e41e8b06dc599ab81b465c4236ed", null ],
     [ "end", "class_c_pixel_view.html#aca5b4326ae86d90d2e8248f855623e82", null ],
     [ "fadeLightBy", "class_c_pixel_view.html#a0ef40ea240450afe6fdb7f4cf6a5b231", null ],
