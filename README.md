@@ -71,7 +71,8 @@ Right now the library is supported on a variety of arduino compatable platforms.
 * RFDuino
 * SparkCore
 * Arduino Zero 
-* ESP8266 w/Arduino Core
+* ESP8266 using the arduino board definitions from http://arduino.esp8266.com/stable/package_esp8266com_index.json
+* The wino board - http://wino-board.com
 
 What types of platforms are we thinking about supporting in the future?  Here's a short list:  ChipKit32, Maple, Beagleboard
 

@@ -90,8 +90,8 @@ static uint8_t gTimeErrorAccum256ths;
 #define FASTLED_HAS_CLOCKLESS 1
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
-class ClocklessController : public CLEDController {
-	static_assert(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
+class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+	static_assert(T1 >= 3 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
 
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -104,30 +104,9 @@ public:
 
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
-	virtual void clearLeds(int nLeds) {
-		CRGB zeros(0,0,0);
-		showAdjTime((uint8_t*)&zeros, nLeds, zeros, false, 0);
-	}
-
 protected:
 
-	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-		showAdjTime((uint8_t*)&rgbdata, nLeds, scale, false, 0);
-	}
-
-	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-		showAdjTime((uint8_t*)rgbdata, nLeds, scale, true, 0);
-	}
-
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-		showAdjTime((uint8_t*)rgbdata, nLeds, scale, true, 1);
-	}
-#endif
-
-	void showAdjTime(const uint8_t *data, int nLeds, CRGB & scale, bool advance, int skip) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither(), advance, skip);
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 
 		mWait.wait();
 		cli();
@@ -136,12 +115,12 @@ protected:
 
 		// Adjust the timer
 #if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-        uint32_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
 
         // adust for approximate observed actal runtime (as of January 2015)
         // roughly 9.6 cycles per pixel, which is 0.6us/pixel at 16MHz
         // microsTaken += nLeds * 0.6 * CLKS_TO_MICROS(16);
-        microsTaken += scale16by8(nLeds,(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
+        microsTaken += scale16by8(pixels.size(),(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
 
         // if less than 1000us, there is NO timer impact,
         // this is because the ONE interrupt that might come in while interrupts
@@ -502,11 +481,6 @@ protected:
 		#endif
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void showARGB(struct CARGB *data, int nLeds) {
-		// TODO: IMPLEMENTME
-	}
-#endif
 };
 
 #endif
