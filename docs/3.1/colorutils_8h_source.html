@@ -1652,8 +1652,8 @@ $(document).ready(function(){initNavTree('colorutils_8h_source.html','');});
 <div class="line"><a name="l01578"></a><span class="lineno"> 1578</span>&#160;        <span class="keywordflow">if</span>( opacity == 255 ) {</div>
 <div class="line"><a name="l01579"></a><span class="lineno"> 1579</span>&#160;            targetColorArray[i] = rgb;</div>
 <div class="line"><a name="l01580"></a><span class="lineno"> 1580</span>&#160;        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l01581"></a><span class="lineno"> 1581</span>&#160;            targetColorArray[i].nscale8( 256 - opacity);</div>
-<div class="line"><a name="l01582"></a><span class="lineno"> 1582</span>&#160;            rgb.nscale8_video( opacity);</div>
+<div class="line"><a name="l01581"></a><span class="lineno"> 1581</span>&#160;            targetColorArray[i].<a class="code" href="struct_c_r_g_b.html#aa80fd3b2990b00a963aa009a3c4d095a">nscale8</a>( 256 - opacity);</div>
+<div class="line"><a name="l01582"></a><span class="lineno"> 1582</span>&#160;            rgb.<a class="code" href="struct_c_r_g_b.html#a8bb881dd011552b412af2845562b0df3">nscale8_video</a>( opacity);</div>
 <div class="line"><a name="l01583"></a><span class="lineno"> 1583</span>&#160;            targetColorArray[i] += rgb;</div>
 <div class="line"><a name="l01584"></a><span class="lineno"> 1584</span>&#160;        }</div>
 <div class="line"><a name="l01585"></a><span class="lineno"> 1585</span>&#160;    }</div>
@@ -1781,7 +1781,9 @@ $(document).ready(function(){initNavTree('colorutils_8h_source.html','');});
 <div class="ttc" id="class_c_h_s_v_palette256_html"><div class="ttname"><a href="class_c_h_s_v_palette256.html">CHSVPalette256</a></div><div class="ttdef"><b>Definition:</b> <a href="colorutils_8h_source.html#l00542">colorutils.h:542</a></div></div>
 <div class="ttc" id="class_c_r_g_b_palette16_html"><div class="ttname"><a href="class_c_r_g_b_palette16.html">CRGBPalette16</a></div><div class="ttdef"><b>Definition:</b> <a href="colorutils_8h_source.html#l00646">colorutils.h:646</a></div></div>
 <div class="ttc" id="group__lib8tion_html_ga5d6d013429a5b8a09d564d6137217644"><div class="ttname"><a href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></div><div class="ttdeci">uint8_t fract8</div><div class="ttdoc">ANSI unsigned short _Fract. </div><div class="ttdef"><b>Definition:</b> <a href="lib8tion_8h_source.html#l00334">lib8tion.h:334</a></div></div>
+<div class="ttc" id="struct_c_r_g_b_html_a8bb881dd011552b412af2845562b0df3"><div class="ttname"><a href="struct_c_r_g_b.html#a8bb881dd011552b412af2845562b0df3">CRGB::nscale8_video</a></div><div class="ttdeci">CRGB &amp; nscale8_video(uint8_t scaledown)</div><div class="ttdoc">scale down a RGB to N 256ths of it&#39;s current brightness, using &#39;video&#39; dimming rules, which means that unless the scale factor is ZERO each channel is guaranteed NOT to dim down to zero. </div><div class="ttdef"><b>Definition:</b> <a href="pixeltypes_8h_source.html#l00329">pixeltypes.h:329</a></div></div>
 <div class="ttc" id="group___colorutils_html_gafcc7dac88e25736ebc49a9faf2a1c2e2"><div class="ttname"><a href="group___colorutils.html#gafcc7dac88e25736ebc49a9faf2a1c2e2">fill_rainbow</a></div><div class="ttdeci">void fill_rainbow(struct CRGB *pFirstLED, int numToFill, uint8_t initialhue, uint8_t deltahue=5)</div><div class="ttdoc">fill_rainbow - fill a range of LEDs with a rainbow of colors, at full saturation and full value (brig...</div><div class="ttdef"><b>Definition:</b> <a href="colorutils_8cpp_source.html#l00035">colorutils.cpp:35</a></div></div>
+<div class="ttc" id="struct_c_r_g_b_html_aa80fd3b2990b00a963aa009a3c4d095a"><div class="ttname"><a href="struct_c_r_g_b.html#aa80fd3b2990b00a963aa009a3c4d095a">CRGB::nscale8</a></div><div class="ttdeci">CRGB &amp; nscale8(uint8_t scaledown)</div><div class="ttdoc">scale down a RGB to N 256ths of it&#39;s current brightness, using &#39;plain math&#39; dimming rules...</div><div class="ttdef"><b>Definition:</b> <a href="pixeltypes_8h_source.html#l00353">pixeltypes.h:353</a></div></div>
 <div class="ttc" id="group___colorutils_html_ga3144bb2bb66aeed33e20f4fdd6cc1a98"><div class="ttname"><a href="group___colorutils.html#ga3144bb2bb66aeed33e20f4fdd6cc1a98">fill_gradient</a></div><div class="ttdeci">void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor, uint16_t endpos, CHSV endcolor, TGradientDirectionCode directionCode=SHORTEST_HUES)</div><div class="ttdoc">fill_gradient - fill an array of colors with a smooth HSV gradient between two specified HSV colors...</div><div class="ttdef"><b>Definition:</b> <a href="colorutils_8h_source.html#l00094">colorutils.h:94</a></div></div>
 <div class="ttc" id="_fast_l_e_d_8h_html"><div class="ttname"><a href="_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object </div></div>
 <div class="ttc" id="class_c_h_s_v_palette32_html"><div class="ttname"><a href="class_c_h_s_v_palette32.html">CHSVPalette32</a></div><div class="ttdef"><b>Definition:</b> <a href="colorutils_8h_source.html#l00912">colorutils.h:912</a></div></div>
@@ -1799,7 +1801,7 @@ $(document).ready(function(){initNavTree('colorutils_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="colorutils_8h.html">colorutils.h</a></li>
-    <li class="footer">Generated on Sat Feb 13 2016 13:28:34 for FastLED by
+    <li class="footer">Generated on Tue Feb 16 2016 11:42:44 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

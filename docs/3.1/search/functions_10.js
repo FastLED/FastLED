@@ -2,19 +2,24 @@ var searchData=
 [
   ['scale16',['scale16',['../group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145',1,'scale8.h']]],
   ['scale16by8',['scale16by8',['../group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e',1,'scale8.h']]],
-  ['scale8',['scale8',['../group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af',1,'scale8.h']]],
+  ['scale8',['scale8',['../struct_c_r_g_b.html#a5b80746e55da30c6a1dad63b3edd5fd4',1,'CRGB::scale8()'],['../group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af',1,'scale8():&#160;scale8.h']]],
   ['scale8_5fleaving_5fr1_5fdirty',['scale8_LEAVING_R1_DIRTY',['../group___scaling.html#ga39579fcf09743f15545fe0b831ca313c',1,'scale8.h']]],
   ['scale8_5fvideo',['scale8_video',['../group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1',1,'scale8.h']]],
   ['scale8_5fvideo_5fleaving_5fr1_5fdirty',['scale8_video_LEAVING_R1_DIRTY',['../group___scaling.html#gab341cef8d46232269bb70092fed9eb75',1,'scale8.h']]],
   ['seconds16',['seconds16',['../group__lib8tion.html#gaa2abcee2fe76fafd7f3a2aeab03e3b69',1,'lib8tion.h']]],
   ['select',['select',['../class_n_o_p_s_p_i_output.html#ae07bb6f787879f28979cccec9ec4965d',1,'NOPSPIOutput']]],
   ['setbrightness',['setBrightness',['../class_c_fast_l_e_d.html#a730ba7d967e882b4b893689cf333b2eb',1,'CFastLED']]],
+  ['setcolorcode',['setColorCode',['../struct_c_r_g_b.html#aee58e5c4ced4d42332280252d7e516d5',1,'CRGB']]],
   ['setcorrection',['setCorrection',['../class_c_l_e_d_controller.html#a9620d0a629a6a3294c71f5f8dbfe91b8',1,'CLEDController::setCorrection(CRGB correction)'],['../class_c_l_e_d_controller.html#a74c43977660742e8185fd666e5d66bf9',1,'CLEDController::setCorrection(LEDColorCorrection correction)'],['../class_c_fast_l_e_d.html#ad266c3e649cc12a6dc49a1e229acc282',1,'CFastLED::setCorrection()']]],
   ['setdither',['setDither',['../class_c_l_e_d_controller.html#a0703d15ea35deaf94eed59ae27bc3517',1,'CLEDController::setDither()'],['../class_c_fast_l_e_d.html#a7ae5d3864df01101d82d242c123ffb36',1,'CFastLED::setDither()']]],
+  ['sethsv',['setHSV',['../struct_c_r_g_b.html#ac53fdb8ec5dc5b8c16904d971106ad75',1,'CRGB']]],
+  ['sethue',['setHue',['../struct_c_r_g_b.html#aed04286b07335deede64d6de109a7312',1,'CRGB']]],
   ['setleds',['setLeds',['../class_c_l_e_d_controller.html#a5b08378b29f92c5def65175ec5334037',1,'CLEDController']]],
   ['setmaxpowerinmilliwatts',['setMaxPowerInMilliWatts',['../class_c_fast_l_e_d.html#ab07d62cdec036af9ede70cbd06ece40f',1,'CFastLED']]],
   ['setmaxpowerinvoltsandmilliamps',['setMaxPowerInVoltsAndMilliamps',['../class_c_fast_l_e_d.html#a996375a3f4a7b8c096f87d8a93c2b196',1,'CFastLED']]],
   ['setmaxrefreshrate',['setMaxRefreshRate',['../class_c_fast_l_e_d.html#a1f39e8404db214bbd6a776f52a77d8b1',1,'CFastLED']]],
+  ['setparity',['setParity',['../struct_c_r_g_b.html#acbcfc8af29d32eb9af1711ee92b60727',1,'CRGB']]],
+  ['setrgb',['setRGB',['../struct_c_r_g_b.html#a838b22bb1632166760934935a309e9d9',1,'CRGB']]],
   ['setselect',['setSelect',['../class_n_o_p_s_p_i_output.html#a6fca9a7e475aecae123879044d33f195',1,'NOPSPIOutput']]],
   ['settemperature',['setTemperature',['../class_c_l_e_d_controller.html#a69ac4a882bdc4a813ae957ddedb5a883',1,'CLEDController::setTemperature(CRGB temperature)'],['../class_c_l_e_d_controller.html#a1e6d35be39f9f67aacdb4709ea914ab4',1,'CLEDController::setTemperature(ColorTemperature temperature)'],['../class_c_fast_l_e_d.html#a28c2dfb0ec592db03f3063ade135f19f',1,'CFastLED::setTemperature()']]],
   ['sfract15tofloat',['sfract15ToFloat',['../group__lib8tion.html#gab947c1150e3b9056cb91685a14270173',1,'lib8tion.h']]],
@@ -29,5 +34,6 @@ var searchData=
   ['sqrt16',['sqrt16',['../group___math.html#ga66ecef97faa5f9b92c49766651c5afe9',1,'math8.h']]],
   ['squarewave8',['squarewave8',['../group__lib8tion.html#ga17ae8fcfd9c485bb1120d908f836637a',1,'lib8tion.h']]],
   ['sub8',['sub8',['../group___math.html#ga0c40c15ab5af36ddabded161941f2091',1,'math8.h']]],
-  ['subfromrgb',['subFromRGB',['../class_c_pixel_view.html#afb57aeebbd762d7ead044a12fd51f639',1,'CPixelView']]]
+  ['subfromrgb',['subFromRGB',['../class_c_pixel_view.html#afb57aeebbd762d7ead044a12fd51f639',1,'CPixelView']]],
+  ['subtractfromrgb',['subtractFromRGB',['../struct_c_r_g_b.html#af5e0ce520027b5bc5b8aa106c113119c',1,'CRGB']]]
 ];

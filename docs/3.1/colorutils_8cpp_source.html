@@ -282,7 +282,7 @@ $(document).ready(function(){initNavTree('colorutils_8cpp_source.html','');});
 <div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;<span class="keywordtype">void</span> nscale8_video( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint16_t num_leds, uint8_t scale)</div>
 <div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;{</div>
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    <span class="keywordflow">for</span>( uint16_t i = 0; i &lt; num_leds; i++) {</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;        leds[i].nscale8_video( scale);</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;        leds[i].<a class="code" href="struct_c_r_g_b.html#a8bb881dd011552b412af2845562b0df3">nscale8_video</a>( scale);</div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    }</div>
 <div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;}</div>
 <div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;</div>
@@ -315,7 +315,7 @@ $(document).ready(function(){initNavTree('colorutils_8cpp_source.html','');});
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;<span class="keywordtype">void</span> nscale8( <a class="code" href="struct_c_r_g_b.html">CRGB</a>* leds, uint16_t num_leds, uint8_t scale)</div>
 <div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;{</div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    <span class="keywordflow">for</span>( uint16_t i = 0; i &lt; num_leds; i++) {</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;        leds[i].nscale8( scale);</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;        leds[i].<a class="code" href="struct_c_r_g_b.html#aa80fd3b2990b00a963aa009a3c4d095a">nscale8</a>( scale);</div>
 <div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    }</div>
 <div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;}</div>
 <div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;</div>
@@ -490,8 +490,8 @@ $(document).ready(function(){initNavTree('colorutils_8cpp_source.html','');});
 <div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;    <span class="keywordflow">for</span>( uint16_t i = 0; i &lt; numLeds; i++) {</div>
 <div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;        <a class="code" href="struct_c_r_g_b.html">CRGB</a> cur = leds[i];</div>
 <div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;        <a class="code" href="struct_c_r_g_b.html">CRGB</a> part = cur;</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;        part.nscale8( seep);</div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;        cur.nscale8( keep);</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;        part.<a class="code" href="struct_c_r_g_b.html#aa80fd3b2990b00a963aa009a3c4d095a">nscale8</a>( seep);</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;        cur.<a class="code" href="struct_c_r_g_b.html#aa80fd3b2990b00a963aa009a3c4d095a">nscale8</a>( keep);</div>
 <div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;        cur += carryover;</div>
 <div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;        <span class="keywordflow">if</span>( i) leds[i-1] += part;</div>
 <div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;        leds[i] = cur;</div>
@@ -525,8 +525,8 @@ $(document).ready(function(){initNavTree('colorutils_8cpp_source.html','');});
 <div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;        <span class="keywordflow">for</span>( uint8_t i = 0; i &lt; height; i++) {</div>
 <div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;            <a class="code" href="struct_c_r_g_b.html">CRGB</a> cur = leds[XY(col,i)];</div>
 <div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;            <a class="code" href="struct_c_r_g_b.html">CRGB</a> part = cur;</div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;            part.nscale8( seep);</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;            cur.nscale8( keep);</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;            part.<a class="code" href="struct_c_r_g_b.html#aa80fd3b2990b00a963aa009a3c4d095a">nscale8</a>( seep);</div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;            cur.<a class="code" href="struct_c_r_g_b.html#aa80fd3b2990b00a963aa009a3c4d095a">nscale8</a>( keep);</div>
 <div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;            cur += carryover;</div>
 <div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;            <span class="keywordflow">if</span>( i) leds[XY(col,i-1)] += part;</div>
 <div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;            leds[XY(col,i)] = cur;</div>
@@ -1247,8 +1247,10 @@ $(document).ready(function(){initNavTree('colorutils_8cpp_source.html','');});
 <div class="ttc" id="group___scaling_html_ga333095ffa436c94d3e77ee9dc39da1c1"><div class="ttname"><a href="group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1">scale8_video</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_video(uint8_t i, fract8 scale)</div><div class="ttdoc">The "video" version of scale8 guarantees that the output will be only be zero if one or both of the i...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00073">scale8.h:73</a></div></div>
 <div class="ttc" id="class_c_r_g_b_palette16_html"><div class="ttname"><a href="class_c_r_g_b_palette16.html">CRGBPalette16</a></div><div class="ttdef"><b>Definition:</b> <a href="colorutils_8h_source.html#l00646">colorutils.h:646</a></div></div>
 <div class="ttc" id="group__lib8tion_html_ga5d6d013429a5b8a09d564d6137217644"><div class="ttname"><a href="group__lib8tion.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></div><div class="ttdeci">uint8_t fract8</div><div class="ttdoc">ANSI unsigned short _Fract. </div><div class="ttdef"><b>Definition:</b> <a href="lib8tion_8h_source.html#l00334">lib8tion.h:334</a></div></div>
+<div class="ttc" id="struct_c_r_g_b_html_a8bb881dd011552b412af2845562b0df3"><div class="ttname"><a href="struct_c_r_g_b.html#a8bb881dd011552b412af2845562b0df3">CRGB::nscale8_video</a></div><div class="ttdeci">CRGB &amp; nscale8_video(uint8_t scaledown)</div><div class="ttdoc">scale down a RGB to N 256ths of it&#39;s current brightness, using &#39;video&#39; dimming rules, which means that unless the scale factor is ZERO each channel is guaranteed NOT to dim down to zero. </div><div class="ttdef"><b>Definition:</b> <a href="pixeltypes_8h_source.html#l00329">pixeltypes.h:329</a></div></div>
 <div class="ttc" id="group___colorutils_html_gafcc7dac88e25736ebc49a9faf2a1c2e2"><div class="ttname"><a href="group___colorutils.html#gafcc7dac88e25736ebc49a9faf2a1c2e2">fill_rainbow</a></div><div class="ttdeci">void fill_rainbow(struct CRGB *pFirstLED, int numToFill, uint8_t initialhue, uint8_t deltahue)</div><div class="ttdoc">fill_rainbow - fill a range of LEDs with a rainbow of colors, at full saturation and full value (brig...</div><div class="ttdef"><b>Definition:</b> <a href="colorutils_8cpp_source.html#l00035">colorutils.cpp:35</a></div></div>
 <div class="ttc" id="group___scaling_html_ga39579fcf09743f15545fe0b831ca313c"><div class="ttname"><a href="group___scaling.html#ga39579fcf09743f15545fe0b831ca313c">scale8_LEAVING_R1_DIRTY</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i, fract8 scale)</div><div class="ttdoc">This version of scale8 does not clean up the R1 register on AVR If you are doing several &#39;scale8&#39;s in...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00121">scale8.h:121</a></div></div>
+<div class="ttc" id="struct_c_r_g_b_html_aa80fd3b2990b00a963aa009a3c4d095a"><div class="ttname"><a href="struct_c_r_g_b.html#aa80fd3b2990b00a963aa009a3c4d095a">CRGB::nscale8</a></div><div class="ttdeci">CRGB &amp; nscale8(uint8_t scaledown)</div><div class="ttdoc">scale down a RGB to N 256ths of it&#39;s current brightness, using &#39;plain math&#39; dimming rules...</div><div class="ttdef"><b>Definition:</b> <a href="pixeltypes_8h_source.html#l00353">pixeltypes.h:353</a></div></div>
 <div class="ttc" id="group___colorutils_html_ga3144bb2bb66aeed33e20f4fdd6cc1a98"><div class="ttname"><a href="group___colorutils.html#ga3144bb2bb66aeed33e20f4fdd6cc1a98">fill_gradient</a></div><div class="ttdeci">void fill_gradient(T *targetArray, uint16_t startpos, CHSV startcolor, uint16_t endpos, CHSV endcolor, TGradientDirectionCode directionCode=SHORTEST_HUES)</div><div class="ttdoc">fill_gradient - fill an array of colors with a smooth HSV gradient between two specified HSV colors...</div><div class="ttdef"><b>Definition:</b> <a href="colorutils_8h_source.html#l00094">colorutils.h:94</a></div></div>
 <div class="ttc" id="_fast_l_e_d_8h_html"><div class="ttname"><a href="_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object </div></div>
 <div class="ttc" id="class_c_h_s_v_palette32_html"><div class="ttname"><a href="class_c_h_s_v_palette32.html">CHSVPalette32</a></div><div class="ttdef"><b>Definition:</b> <a href="colorutils_8h_source.html#l00912">colorutils.h:912</a></div></div>
@@ -1264,7 +1266,7 @@ $(document).ready(function(){initNavTree('colorutils_8cpp_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>colorutils.cpp</b></li>
-    <li class="footer">Generated on Sat Feb 13 2016 13:28:34 for FastLED by
+    <li class="footer">Generated on Tue Feb 16 2016 11:42:44 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

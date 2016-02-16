@@ -233,7 +233,7 @@ $(document).ready(function(){initNavTree('chipsets_8h_source.html','');});
 <div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="comment">// APA102 definition - takes data/clock/select pin values (N.B. should take an SPI definition?)</span></div>
 <div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;<span class="comment">//</span></div>
 <div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>8_t DATA_PIN, u<span class="keywordtype">int</span>8_t CLOCK_PIN, EOrder RGB_ORDER = BGR, u<span class="keywordtype">int</span>8_t SPI_SPEED = DATA_RATE_MHZ(24)&gt;</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="keyword">template</span> &lt;u<span class="keywordtype">int</span>8_t DATA_PIN, u<span class="keywordtype">int</span>8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, u<span class="keywordtype">int</span>8_t SPI_SPEED = DATA_RATE_MHZ(24)&gt;</div>
 <div class="line"><a name="l00158"></a><span class="lineno"><a class="line" href="class_a_p_a102_controller.html">  158</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_a_p_a102_controller.html">APA102Controller</a> : <span class="keyword">public</span> <a class="code" href="class_c_pixel_l_e_d_controller.html">CPixelLEDController</a>&lt;RGB_ORDER&gt; {</div>
 <div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    <span class="keyword">typedef</span> <a class="code" href="class_s_p_i_output.html">SPIOutput&lt;DATA_PIN, CLOCK_PIN, SPI_SPEED&gt;</a> SPI;</div>
 <div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    SPI mSPI;</div>
@@ -532,7 +532,7 @@ $(document).ready(function(){initNavTree('chipsets_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="chipsets_8h.html">chipsets.h</a></li>
-    <li class="footer">Generated on Sat Feb 13 2016 13:28:34 for FastLED by
+    <li class="footer">Generated on Tue Feb 16 2016 11:42:44 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

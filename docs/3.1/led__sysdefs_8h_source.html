@@ -129,7 +129,7 @@ $(document).ready(function(){initNavTree('led__sysdefs_8h_source.html','');});
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &quot;platforms/arm/sam/led_sysdefs_arm_sam.h&quot;</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="preprocessor">#elif defined(STM32F10X_MD)</span></div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &quot;platforms/arm/stm32/led_sysdefs_arm_stm32.h&quot;</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#elif defined(__SAMD21G18A__)</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#elif defined(__SAMD21G18A__) || defined(__SAMD21E17A__)</span></div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &quot;platforms/arm/d21/led_sysdefs_arm_d21.h&quot;</span></div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#elif defined(ESP8266)</span></div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">#include &quot;platforms/esp/8266/led_sysdefs_esp8266.h&quot;</span></div>
@@ -160,7 +160,7 @@ $(document).ready(function(){initNavTree('led__sysdefs_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>led_sysdefs.h</b></li>
-    <li class="footer">Generated on Sat Feb 13 2016 13:28:34 for FastLED by
+    <li class="footer">Generated on Tue Feb 16 2016 11:42:44 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

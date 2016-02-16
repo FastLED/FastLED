@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['fadelightby',['fadeLightBy',['../class_c_pixel_view.html#a0ef40ea240450afe6fdb7f4cf6a5b231',1,'CPixelView']]],
-  ['fadetoblackby',['fadeToBlackBy',['../class_c_pixel_view.html#a4861b6938f1cb9f8f885a9f3af13b8a9',1,'CPixelView']]],
+  ['fadelightby',['fadeLightBy',['../class_c_pixel_view.html#a0ef40ea240450afe6fdb7f4cf6a5b231',1,'CPixelView::fadeLightBy()'],['../struct_c_r_g_b.html#a9eeb8fc616c7a50805b8146baffef8fd',1,'CRGB::fadeLightBy()']]],
+  ['fadetoblackby',['fadeToBlackBy',['../class_c_pixel_view.html#a4861b6938f1cb9f8f885a9f3af13b8a9',1,'CPixelView::fadeToBlackBy()'],['../struct_c_r_g_b.html#ab49109cf2ec532c643d4998f03cf16c7',1,'CRGB::fadeToBlackBy()']]],
   ['fastled_2eh',['FastLED.h',['../_fast_l_e_d_8h.html',1,'']]],
   ['fastled_5fconfig_2eh',['fastled_config.h',['../fastled__config_8h.html',1,'']]],
   ['fastled_5fdelay_2eh',['fastled_delay.h',['../fastled__delay_8h.html',1,'']]],
