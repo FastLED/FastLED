@@ -20,7 +20,11 @@
 LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1
+#if (FASTLED_SCALE8_FIXED == 1)
+    return (((uint16_t)i) * (1+(uint16_t)(scale))) >> 8;
+#else
     return ((uint16_t)i * (uint16_t)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
 #if defined(LIB8_ATTINY)
     uint8_t work=0;
@@ -121,7 +125,11 @@ LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
 LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1
+#if (FASTLED_SCALE8_FIXED == 1)
+    return (((uint16_t)i) * ((uint16_t)(scale)+1)) >> 8;
+#else
     return ((int)i * (int)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
     asm volatile(
          /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
@@ -150,7 +158,11 @@ LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale)
 {
 #if SCALE8_C == 1
+#if (FASTLED_SCALE8_FIXED == 1)
+    i = (((uint16_t)i) * ((uint16_t)(scale)+1)) >> 8;
+#else
     i = ((int)i * (int)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
     asm volatile(
          /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
@@ -259,9 +271,16 @@ LIB8STATIC void cleanup_R1()
 LIB8STATIC void nscale8x3( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scale)
 {
 #if SCALE8_C == 1
+#if (FASTLED_SCALE8_FIXED == 1)
+    uint16_t scale_fixed = scale + 1;
+    r = (((uint16_t)r) * scale_fixed) >> 8;
+    g = (((uint16_t)g) * scale_fixed) >> 8;
+    b = (((uint16_t)b) * scale_fixed) >> 8;
+#else
     r = ((int)r * (int)(scale) ) >> 8;
     g = ((int)g * (int)(scale) ) >> 8;
     b = ((int)b * (int)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
     r = scale8_LEAVING_R1_DIRTY(r, scale);
     g = scale8_LEAVING_R1_DIRTY(g, scale);
@@ -305,8 +324,14 @@ LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scal
 LIB8STATIC void nscale8x2( uint8_t& i, uint8_t& j, fract8 scale)
 {
 #if SCALE8_C == 1
-    i = ((int)i * (int)(scale) ) >> 8;
-    j = ((int)j * (int)(scale) ) >> 8;
+#if FASTLED_SCALE8_FIXED == 1
+    uint16_t scale_fixed = scale + 1;
+    i = (((uint16_t)i) * scale_fixed ) >> 8;
+    j = (((uint16_t)j) * scale_fixed ) >> 8;
+#else
+    i = ((uint16_t)i * (uint16_t)(scale) ) >> 8;
+    j = ((uint16_t)j * (uint16_t)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
     i = scale8_LEAVING_R1_DIRTY(i, scale);
     j = scale8_LEAVING_R1_DIRTY(j, scale);
@@ -349,7 +374,11 @@ LIB8STATIC uint16_t scale16by8( uint16_t i, fract8 scale )
 {
 #if SCALE16BY8_C == 1
     uint16_t result;
+#if FASTLED_SCALE8_FIXED == 1
+    result = (i * (1+((uint16_t)scale))) >> 8;
+#else
     result = (i * scale) / 256;
+#endif
     return result;
 #elif SCALE16BY8_AVRASM == 1
     uint16_t result = 0;
@@ -385,7 +414,11 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
 {
   #if SCALE16_C == 1
     uint16_t result;
+#if FASTLED_SCALE8_FIXED == 1
+result = ((uint32_t)(i) * (1+(uint32_t)(scale))) / 65536;
+#else
     result = ((uint32_t)(i) * (uint32_t)(scale)) / 65536;
+#endif
     return result;
 #elif SCALE16_AVRASM == 1
     uint32_t result;
