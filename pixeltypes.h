@@ -461,10 +461,14 @@ struct CRGB {
 
     /// Get the average of the R, G, and B values
     inline uint8_t getAverageLight( )  const {
-        const uint8_t eightysix = 86;
-        uint8_t avg = scale8_LEAVING_R1_DIRTY( r, eightysix) + \
-        scale8_LEAVING_R1_DIRTY( g, eightysix) + \
-        scale8_LEAVING_R1_DIRTY( b, eightysix);
+#if FASTLED_SCALE8_FIXED == 1
+        const uint8_t eightyfive = 85;
+#else
+        const uint8_t eightyfive = 86;
+#endif
+        uint8_t avg = scale8_LEAVING_R1_DIRTY( r, eightyfive) + \
+        scale8_LEAVING_R1_DIRTY( g, eightyfive) + \
+        scale8_LEAVING_R1_DIRTY( b, eightyfive);
         cleanup_R1();
         return avg;
     }
