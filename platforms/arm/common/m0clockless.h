@@ -3,9 +3,10 @@
 
 struct M0ClocklessData {
   uint8_t d[3];
-  uint8_t s[3];
   uint8_t e[3];
   uint8_t adj;
+  uint8_t pad;
+  uint8_t s[3];
 };
 
 
@@ -23,7 +24,11 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
 
   // high register variable
   register const uint8_t *leds = _leds;
-
+#ifdef FASTLED_SCALE8_FIXED
+  pData->s[0]++;
+  pData->s[1]++;
+  pData->s[2]++;
+#endif
   asm __volatile__ (
     ///////////////////////////////////////////////////////////////////////////
     //
@@ -133,7 +138,7 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
 
     // Do our scaling
     "  .macro scale4 bn, base, scale, scratch;"
-    "    ldrb \\scratch, [\\base, \\scale];"
+    "    ldr \\scratch, [\\base, \\scale];"
     "    lsr \\bn, \\bn, #24;"                  // bring bn back down to its low 8 bits
     "    mul \\bn, \\scratch;"                  // do the multiply
     "  .endm;"
@@ -154,9 +159,9 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
     "    strb \\d, [\\base, \\rled];"                 // save d
     "  .endm;"
 
-    // increment the led pointer (base+9 has what we're incrementing by)
+    // increment the led pointer (base+6 has what we're incrementing by)
     "  .macro incleds3   leds, base, scratch;"
-    "    ldrb \\scratch, [\\base, #9];"               // load incremen
+    "    ldrb \\scratch, [\\base, #6];"               // load incremen
     "    add \\leds, \\leds, \\scratch;"              // update leds pointer
     "  .endm;"
 
@@ -190,12 +195,12 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       [led0] "I" (RO(0)),             \
       [led1] "I" (RO(1)),             \
       [led2] "I" (RO(2)),             \
-      [scale0] "I" (3+RO(0)),         \
-      [scale1] "I" (3+RO(1)),         \
-      [scale2] "I" (3+RO(2)),         \
-      [e0] "I" (6+RO(0)),             \
-      [e1] "I" (6+RO(1)),             \
-      [e2] "I" (6+RO(2)),             \
+      [e0] "I" (3+RO(0)),             \
+      [e1] "I" (3+RO(1)),             \
+      [e2] "I" (3+RO(2)),             \
+      [scale0] "I" (4*(2+RO(0))),         \
+      [scale1] "I" (4*(2+RO(1))),         \
+      [scale2] "I" (4*(2+RO(2))),         \
       [T1] "I" (T1),                  \
       [T2] "I" (T2),                  \
       [T3] "I" (T3)                   \
