@@ -363,10 +363,10 @@ protected:
 		uint8_t loopvar=0;
 
 		// load/scale the first byte
-#if !defined(LIB8_ATTINY)
-		// we have a hardware multiply, can use loadAndScale0
-		b0 = pixels.loadAndScale0();
-#else
+// #if !defined(LIB8_ATTINY)
+// 		// we have a hardware multiply, can use loadAndScale0
+// 		b0 = pixels.loadAndScale0();
+// #else
 		// no hardware multiply, we have to do our own mul by hand here, lest we incur a
 		// function call which will kill all of our register usage/allocations below
 		b0 = data[RO(0)];
@@ -380,7 +380,7 @@ protected:
 			RORSC04(b0,7) 	ROR1(b0) CLC1
 			MOV_ADDDE04(b0,b0,d0,e0)
 		}
-#endif
+// #endif
 
 		// #if (FASTLED_ALLOW_INTERRUPTS == 1)
 		// TCCR0A |= 0x30;
@@ -456,7 +456,6 @@ protected:
 				// we have to do both halves of updating d2 here - negating it (in the
 				// MOV_NEGD24 macro) and then adding E back into it
 				MOV_NEGD24(b0,b1,d2) D2(4) LO1 ADDDE1(d2,e2) D3(1)
-
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)
 				HI1	D1(1) QLO2(b0, 6) PRESCALEB4(d0)	D2(4)	LO1	SCALE02(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC04(b1,1) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
