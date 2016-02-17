@@ -549,10 +549,25 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
         if( brightness ) {
             brightness++; // adjust for rounding
             // Now, since brightness is nonzero, we don't need the full scale8_video logic;
-            // we can just to scale8 and then add one to all nonzero inputs.
-            if( red1 )   { red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);     red1++; }
-            if( green1 ) { green1 = scale8_LEAVING_R1_DIRTY( green1, brightness); green1++; }
-            if( blue1 )  { blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);   blue1++; }
+            // we can just to scale8 and then add one (unless scale8 fixed) to all nonzero inputs.
+            if( red1 )   {
+                red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                red1++;
+#endif
+            }
+            if( green1 ) {
+                green1 = scale8_LEAVING_R1_DIRTY( green1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                green1++;
+#endif
+            }
+            if( blue1 )  {
+                blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                blue1++;
+#endif
+            }
             cleanup_R1();
         } else {
             red1 = 0;
@@ -612,10 +627,25 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
         if( brightness ) {
             brightness++; // adjust for rounding
             // Now, since brightness is nonzero, we don't need the full scale8_video logic;
-            // we can just to scale8 and then add one to all nonzero inputs.
-            if( red1 )   { red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);     red1++; }
-            if( green1 ) { green1 = scale8_LEAVING_R1_DIRTY( green1, brightness); green1++; }
-            if( blue1 )  { blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);   blue1++; }
+            // we can just to scale8 and then add one (unless scale8 fixed) to all nonzero inputs.
+            if( red1 )   {
+                red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                red1++;
+#endif
+            }
+            if( green1 ) {
+                green1 = scale8_LEAVING_R1_DIRTY( green1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                green1++;
+#endif
+            }
+            if( blue1 )  {
+                blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                blue1++;
+#endif
+            }
             cleanup_R1();
         } else {
             red1 = 0;
@@ -688,10 +718,25 @@ CRGB ColorFromPalette( const CRGBPalette32& pal, uint8_t index, uint8_t brightne
         if( brightness ) {
             brightness++; // adjust for rounding
             // Now, since brightness is nonzero, we don't need the full scale8_video logic;
-            // we can just to scale8 and then add one to all nonzero inputs.
-            if( red1 )   { red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);     red1++; }
-            if( green1 ) { green1 = scale8_LEAVING_R1_DIRTY( green1, brightness); green1++; }
-            if( blue1 )  { blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);   blue1++; }
+            // we can just to scale8 and then add one (unless scale8 fixed) to all nonzero inputs.
+            if( red1 )   {
+                red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                red1++;
+#endif
+            }
+            if( green1 ) {
+                green1 = scale8_LEAVING_R1_DIRTY( green1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                green1++;
+#endif
+            }
+            if( blue1 )  {
+                blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                blue1++;
+#endif
+            }
             cleanup_R1();
         } else {
             red1 = 0;
@@ -757,10 +802,25 @@ CRGB ColorFromPalette( const TProgmemRGBPalette32& pal, uint8_t index, uint8_t b
         if( brightness ) {
             brightness++; // adjust for rounding
             // Now, since brightness is nonzero, we don't need the full scale8_video logic;
-            // we can just to scale8 and then add one to all nonzero inputs.
-            if( red1 )   { red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);     red1++; }
-            if( green1 ) { green1 = scale8_LEAVING_R1_DIRTY( green1, brightness); green1++; }
-            if( blue1 )  { blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);   blue1++; }
+            // we can just to scale8 and then add one (unless scale8 fixed) to all nonzero inputs.
+            if( red1 )   {
+                red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                red1++;
+#endif
+            }
+            if( green1 ) {
+                green1 = scale8_LEAVING_R1_DIRTY( green1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                green1++;
+#endif
+            }
+            if( blue1 )  {
+                blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);
+#if !(FASTLED_SCALE8_FIXED==1)
+                blue1++;
+#endif
+            }
             cleanup_R1();
         } else {
             red1 = 0;
