@@ -296,6 +296,9 @@ struct PixelController {
                     byte s = mScale.raw[i];
                     e[i] = s ? (256/s) + 1 : 0;
                     d[i] = scale8(Q, e[i]);
+#if (FASTLED_SCALE8_FIXED == 1)
+                    if(d[i]) (d[i]--);
+#endif
                     if(e[i]) e[i]--;
             }
 #endif
@@ -338,10 +341,10 @@ struct PixelController {
 
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { return pc.mData[RO(SLOT)]; }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
-        
+
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & pc, uint8_t b) { return b ? qadd8(b, pc.d[RO(SLOT)]) : 0; }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & , uint8_t b, uint8_t d) { return b ? qadd8(b,d) : 0; }
-        
+
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & , uint8_t b, uint8_t scale) { return scale8(b, scale); }
 
