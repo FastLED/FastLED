@@ -286,7 +286,7 @@ protected:
 #define MOV1(B1, B2) asm __volatile__(_MOV1 ASM_VARS );
 
 // 3 cycle mov - skip if scale fix is happening
-#ifdef FASTLED_SCALE8_FIXED
+#if (FASTLED_SCALE8_FIXED == 1)
 #define _MOV_FIX03(B1, B2) "mov %[" #B1 "], %[scale_base]\n\tcpse %[s0], __zero_reg__\n\t" _MOV1(B1, B2)
 #define _MOV_FIX13(B1, B2) "mov %[" #B1 "], %[scale_base]\n\tcpse %[s1], __zero_reg__\n\t" _MOV1(B1, B2)
 #define _MOV_FIX23(B1, B2) "mov %[" #B1 "], %[scale_base]\n\tcpse %[s2], __zero_reg__\n\t" _MOV1(B1, B2)
@@ -349,7 +349,7 @@ protected:
 		uint8_t s0 = pixels.mScale.raw[RO(0)];
 		uint8_t s1 = pixels.mScale.raw[RO(1)];
 		uint8_t s2 = pixels.mScale.raw[RO(2)];
-#ifdef FASTLED_SCALE8_FIXED
+#if (FASTLED_SCALE8_FIXED==1)
 		s0++; s1++; s2++;
 #endif
 		uint8_t d0 = pixels.d[RO(0)];
