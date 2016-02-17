@@ -440,9 +440,15 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
             r = 255; b = 255; g = 255;
         } else {
             //nscale8x3_video( r, g, b, sat);
+#if (FASTLED_SCALE8_FIXED==1)
+            if( r ) r = scale8_LEAVING_R1_DIRTY( r, sat);
+            if( g ) g = scale8_LEAVING_R1_DIRTY( g, sat);
+            if( b ) b = scale8_LEAVING_R1_DIRTY( b, sat);
+#else
             if( r ) r = scale8_LEAVING_R1_DIRTY( r, sat) + 1;
             if( g ) g = scale8_LEAVING_R1_DIRTY( g, sat) + 1;
             if( b ) b = scale8_LEAVING_R1_DIRTY( b, sat) + 1;
+#endif
             cleanup_R1();
             
             uint8_t desat = 255 - sat;
@@ -463,9 +469,15 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
             r=0; g=0; b=0;
         } else {
             // nscale8x3_video( r, g, b, val);
+#if (FASTLED_SCALE8_FIXED==1)
+            if( r ) r = scale8_LEAVING_R1_DIRTY( r, val);
+            if( g ) g = scale8_LEAVING_R1_DIRTY( g, val);
+            if( b ) b = scale8_LEAVING_R1_DIRTY( b, val);
+#else
             if( r ) r = scale8_LEAVING_R1_DIRTY( r, val) + 1;
             if( g ) g = scale8_LEAVING_R1_DIRTY( g, val) + 1;
             if( b ) b = scale8_LEAVING_R1_DIRTY( b, val) + 1;
+#endif
             cleanup_R1();
         }
     }
