@@ -17,7 +17,7 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 
 #if (F_CPU==8000000)
-#define FASTLED_SLOW_CLOCK_ADJUST asm __volatile__ ("mov r0,r0\n\t");
+#define FASTLED_SLOW_CLOCK_ADJUST // asm __volatile__ ("mov r0,r0\n\t");
 #else
 #define FASTLED_SLOW_CLOCK_ADJUST
 #endif
@@ -91,7 +91,7 @@ static uint8_t gTimeErrorAccum256ths;
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-	static_assert(T1 >= 3 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
+	static_assert(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
 
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -217,7 +217,10 @@ protected:
 #define PRESCALEA2(D) asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\t" ASM_VARS);
 
 // Do the clamp for the prescale, clear carry when we're done - NOTE: Must ensure carry flag state is preserved!
-#define PRESCALEB3(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tCLC" ASM_VARS);
+#define PRESCALEB4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tneg %[" #D "]\n\tCLC" ASM_VARS);
+
+// Clamp for prescale, increment data, since we won't ever wrap 65k, this also effectively clears carry for us
+#define PSBIDATA4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tadd %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" ASM_VARS);
 
 #else
 #define PRESCALE4(D) _dc<4>(loopvar);
@@ -259,7 +262,10 @@ protected:
 
 // dither adjustment macro - should be kept in sync w/what's in stepDithering
 // #define ADJDITHER2(D, E) D = E - D;
-#define ADJDITHER2(D, E) asm __volatile__ ("neg %[" #D "]\n\tadd %[" #D "],%[" #E "]\n\t" ASM_VARS);
+#define _NEGD1(D) "neg %[" #D "]\n\t"
+#define _ADJD1(D,E) "add %[" #D "], %[" #E "]\n\t"
+#define ADJDITHER2(D, E) asm __volatile__ ( _NEGD1(D) _ADJD1(D, E) ASM_VARS);
+#define ADDDE1(D, E) asm __volatile__ ( _ADJD1(D, E) ASM_VARS );
 
 // #define xstr(a) str(a)
 // #define str(a) #a
@@ -275,7 +281,29 @@ protected:
 #define IDATACLC3 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" _CLC1  ASM_VARS );
 
 // 1 cycle mov
-#define MOV1(B1, B2) asm __volatile__("mov %[" #B1 "], %[" #B2 "]" ASM_VARS );
+#define _MOV1(B1, B2) "mov %[" #B1 "], %[" #B2 "]\n\t"
+
+#define MOV1(B1, B2) asm __volatile__(_MOV1 ASM_VARS );
+
+// 3 cycle mov - skip if scale fix is happening
+#ifdef FASTLED_SCALE8_FIXED
+#define _MOV_FIX03(B1, B2) "mov %[" #B1 "], %[scale_base]\n\tcpse %[s0], __zero_reg__\n\t" _MOV1(B1, B2)
+#define _MOV_FIX13(B1, B2) "mov %[" #B1 "], %[scale_base]\n\tcpse %[s1], __zero_reg__\n\t" _MOV1(B1, B2)
+#define _MOV_FIX23(B1, B2) "mov %[" #B1 "], %[scale_base]\n\tcpse %[s2], __zero_reg__\n\t" _MOV1(B1, B2)
+#else
+// if we haven't fixed scale8, just do the move and nop the 2 cycles that would be used to
+// do the fixed adjustment
+#define _MOV_FIX03(B1, B2) _MOV1(B1, B2) "rjmp .+0\n\t"
+#define _MOV_FIX13(B1, B2) _MOV1(B1, B2) "rjmp .+0\n\t"
+#define _MOV_FIX23(B1, B2) _MOV1(B1, B2) "rjmp .+0\n\t"
+#endif
+
+// 3 cycle mov + negate D for dither adjustment
+#define MOV_NEGD04(B1, B2, D) asm __volatile( _MOV_FIX03(B1, B2) _NEGD1(D) ASM_VARS );
+#define MOV_ADDDE04(B1, B2, D, E) asm __volatile( _MOV_FIX03(B1, B2) _ADJD1(D, E) ASM_VARS );
+#define MOV_NEGD14(B1, B2, D) asm __volatile( _MOV_FIX13(B1, B2) _NEGD1(D) ASM_VARS );
+#define MOV_ADDDE14(B1, B2, D, E) asm __volatile( _MOV_FIX13(B1, B2) _ADJD1(D, E) ASM_VARS );
+#define MOV_NEGD24(B1, B2, D) asm __volatile( _MOV_FIX23(B1, B2) _NEGD1(D) ASM_VARS );
 
 // 2 cycles - decrement the counter
 #define DCOUNT2 asm __volatile__("sbiw %[count], 1" ASM_VARS );
@@ -321,6 +349,9 @@ protected:
 		uint8_t s0 = pixels.mScale.raw[RO(0)];
 		uint8_t s1 = pixels.mScale.raw[RO(1)];
 		uint8_t s2 = pixels.mScale.raw[RO(2)];
+#ifdef FASTLED_SCALE8_FIXED
+		s0++; s1++; s2++;
+#endif
 		uint8_t d0 = pixels.d[RO(0)];
 		uint8_t d1 = pixels.d[RO(1)];
 		uint8_t d2 = pixels.d[RO(2)];
@@ -340,12 +371,13 @@ protected:
 		b0 = data[RO(0)];
 		{
 			LDSCL4(b0,O0) 	PRESCALEA2(d0)
-			PRESCALEB3(d0)	SCALE02(b0,0)
+			PRESCALEB4(d0)	SCALE02(b0,0)
 			RORSC04(b0,1) 	ROR1(b0) CLC1
 			SCROR04(b0,2)		SCALE02(b0,3)
 			RORSC04(b0,4) 	ROR1(b0) CLC1
 			SCROR04(b0,5) 	SCALE02(b0,6)
 			RORSC04(b0,7) 	ROR1(b0) CLC1
+			MOV_ADDDE04(b0,b0,d0,e0)
 		}
 #endif
 
@@ -389,7 +421,7 @@ protected:
 				// Inline scaling - RGB ordering
 				// DNOP
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2)
-				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d1)	D2(3)	LO1	SCALE12(b1,0)	D3(2)
+				HI1	D1(1) QLO2(b0, 6) PRESCALEB4(d1)	D2(4)	LO1	SCALE12(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 RORCLC2(b1)		D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR14(b1,2)		D2(4)	LO1 SCALE12(b1,3)	D3(2)
 				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
@@ -402,10 +434,10 @@ protected:
 					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 				}
-				ADJDITHER2(d1,e1) D2(2) LO1 MOV1(b0,b1) D3(1)
+				MOV_ADDDE14(b0,b1,d1,e1) D2(4) LO1 D3(0)
 
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O2) 	D2(4)	LO1	PRESCALEA2(d2)	D3(2)
-				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b1,0)	D3(2)
+				HI1	D1(1) QLO2(b0, 6) PSBIDATA4(d2)		D2(4)	LO1	SCALE22(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC24(b1,1) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR24(b1,2)		D2(4)	LO1 SCALE22(b1,3)	D3(2)
 				HI1 D1(1) QLO2(b0, 3) RORSC24(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
@@ -418,10 +450,14 @@ protected:
 					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 				}
-				IDATACLC3 MOV1(b0,b1) D2(4) LO1 ADJDITHER2(d2,e2) D3(2)
+
+				// Because Prescale on the middle byte also increments the data counter,
+				// we have to do both halves of updating d2 here - negating it (in the
+				// MOV_NEGD24 macro) and then adding E back into it
+				MOV_NEGD24(b0,b1,d2) D2(4) LO1 ADDDE1(d2,e2) D3(1)
 
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)
-				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b1,0)	D3(2)
+				HI1	D1(1) QLO2(b0, 6) PRESCALEB4(d0)	D2(4)	LO1	SCALE02(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC04(b1,1) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR04(b1,2)		D2(4)	LO1 SCALE02(b1,3)	D3(2)
 				HI1 D1(1) QLO2(b0, 3) RORSC04(b1,4) 	D2(4)	LO1 RORCLC2(b1)  	D3(2)
@@ -434,7 +470,7 @@ protected:
 					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 				}
-				ADJDITHER2(d0,e0) MOV1(b0,b1) D2(3) LO1 D3(6)
+				MOV_ADDDE04(b0,b1,d0,e0) D2(4) LO1 D3(5)
 				ENDLOOP5
 #else
 				// no inline scaling - non-straight RGB ordering -- no longer in line with the actual asm macros above, left for
