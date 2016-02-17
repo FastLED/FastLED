@@ -225,7 +225,8 @@ protected:
 #else
 #define PRESCALE4(D) _dc<4>(loopvar);
 #define PRESCALEA2(D) _dc<2>(loopvar);
-#define PRESCALEB3(D) _dc<3>(loopvar);
+#define PRESCALEB4(D) _dc<4>(loopvar);
+#define PSBIDATA4(D) asm __volatile__( "add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\trjmp .+0\n\t" ASM_VARS );
 #endif
 
 // 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
