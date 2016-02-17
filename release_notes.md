@@ -7,6 +7,7 @@ FastLED3.1.2pre
 * Improvements to rgb2hsv accuracy
 * Fixed noise discontinuity 
 * Add wino board support
+* Fix scale8 (so now, scale8(255,255) == 255, not 254!)
 
 
 FastLED3.1.1

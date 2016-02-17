@@ -34,6 +34,7 @@
 // fix is enabled by default.  However, if for some reason you have code that is not
 // working right as a result of this (e.g. code that was expecting the old scale8 behavior)
 // you can disable it here
+
 #define FASTLED_SCALE8_FIXED 1
 // define FASTLED_SCALE8_FIXED 0
 
