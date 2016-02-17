@@ -27,10 +27,19 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
 #endif
 #elif SCALE8_AVRASM == 1
 #if defined(LIB8_ATTINY)
+#if (FASTLED_SCALE8_FIXED == 1)
+    uint8_t work=i;
+#else
     uint8_t work=0;
+#endif
     uint8_t cnt=0x80;
     asm volatile(
-        "LOOP_%=:                             \n\t"
+#if (FASTLED_SCALE8_FIXED == 1)
+        "  inc %[scale]                 \n\t"
+        "  breq DONE_%=                 \n\t"
+        "  clr %[work]                  \n\t"
+#endif
+        "LOOP_%=:                       \n\t"
         /*"  sbrc %[scale], 0             \n\t"
         "  add %[work], %[i]            \n\t"
         "  ror %[work]                  \n\t"
@@ -41,7 +50,8 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
         "  ror %[work]                  \n\t"
         "  lsr %[scale]                 \n\t"
         "  lsr %[cnt]                   \n\t"
-        "brcc LOOP_%="
+        "brcc LOOP_%=                   \n\t"
+        "DONE_%=:                       \n\t"
         : [work] "+r" (work), [cnt] "+r" (cnt)
         : [scale] "r" (scale), [i] "r" (i)
         :
@@ -49,11 +59,22 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
     return work;
 #else
     asm volatile(
+#if (FASTLED_SCALE8_FIXED==1)
+        // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
+        "mul %0, %1          \n\t"
+        // Add i to r0, possibly setting the carry flag
+        "add r0, %0         \n\t"
+        // load the immediate 0 into i (note, this does _not_ touch any flags)
+        "ldi %0, 0x00       \n\t"
+        // walk and chew gum at the same time
+        "adc %0, r1          \n\t"
+#else
          /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
          "mul %0, %1          \n\t"
          /* Move the high 8-bits of the product (r1) back to i */
          "mov %0, r1          \n\t"
          /* Restore r1 to "0"; it's expected to always be that */
+#endif
          "clr __zero_reg__    \n\t"
 
          : "+a" (i)      /* writes to i */
@@ -132,10 +153,21 @@ LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 #endif
 #elif SCALE8_AVRASM == 1
     asm volatile(
+      #if (FASTLED_SCALE8_FIXED==1)
+              // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
+              "mul %0, %1          \n\t"
+              // Add i to r0, possibly setting the carry flag
+              "add r0, %0         \n\t"
+              // load the immediate 0 into i (note, this does _not_ touch any flags)
+              "ldi %0, 0x00       \n\t"
+              // walk and chew gum at the same time
+              "adc %0, r1          \n\t"
+      #else
          /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
          "mul %0, %1    \n\t"
          /* Move the high 8-bits of the product (r1) back to i */
          "mov %0, r1    \n\t"
+      #endif
          /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */
          /* "clr __zero_reg__    \n\t" */
 
@@ -165,10 +197,21 @@ LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale)
 #endif
 #elif SCALE8_AVRASM == 1
     asm volatile(
+      #if (FASTLED_SCALE8_FIXED==1)
+              // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
+              "mul %0, %1          \n\t"
+              // Add i to r0, possibly setting the carry flag
+              "add r0, %0         \n\t"
+              // load the immediate 0 into i (note, this does _not_ touch any flags)
+              "ldi %0, 0x00       \n\t"
+              // walk and chew gum at the same time
+              "adc %0, r1          \n\t"
+      #else
          /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
          "mul %0, %1    \n\t"
          /* Move the high 8-bits of the product (r1) back to i */
          "mov %0, r1    \n\t"
+      #endif
          /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF */
          /* "clr __zero_reg__    \n\t" */
 
@@ -415,7 +458,7 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
   #if SCALE16_C == 1
     uint16_t result;
 #if FASTLED_SCALE8_FIXED == 1
-result = ((uint32_t)(i) * (1+(uint32_t)(scale))) / 65536;
+    result = ((uint32_t)(i) * (1+(uint32_t)(scale))) / 65536;
 #else
     result = ((uint32_t)(i) * (uint32_t)(scale)) / 65536;
 #endif
