@@ -284,7 +284,7 @@ protected:
 // 1 cycle mov
 #define _MOV1(B1, B2) "mov %[" #B1 "], %[" #B2 "]\n\t"
 
-#define MOV1(B1, B2) asm __volatile__(_MOV1 ASM_VARS );
+#define MOV1(B1, B2) asm __volatile__( _MOV1(B1,B2) ASM_VARS );
 
 // 3 cycle mov - skip if scale fix is happening
 #if (FASTLED_SCALE8_FIXED == 1)
@@ -378,7 +378,8 @@ protected:
 			RORSC04(b0,4) 	ROR1(b0) CLC1
 			SCROR04(b0,5) 	SCALE02(b0,6)
 			RORSC04(b0,7) 	ROR1(b0) CLC1
-			MOV_ADDDE04(b0,b0,d0,e0)
+			MOV_ADDDE04(b1,b0,d0,e0)
+			MOV1(b0,b1)
 		}
 // #endif
 
