@@ -362,13 +362,7 @@ protected:
 
 		uint8_t loopvar=0;
 
-		// load/scale the first byte
-// #if !defined(LIB8_ATTINY)
-// 		// we have a hardware multiply, can use loadAndScale0
-// 		b0 = pixels.loadAndScale0();
-// #else
-		// no hardware multiply, we have to do our own mul by hand here, lest we incur a
-		// function call which will kill all of our register usage/allocations below
+		// This has to be done in asm to keep gcc from messing up the asm code further down
 		b0 = data[RO(0)];
 		{
 			LDSCL4(b0,O0) 	PRESCALEA2(d0)
@@ -381,35 +375,13 @@ protected:
 			MOV_ADDDE04(b1,b0,d0,e0)
 			MOV1(b0,b1)
 		}
-// #endif
 
-		// #if (FASTLED_ALLOW_INTERRUPTS == 1)
-		// TCCR0A |= 0x30;
-		// OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
-		// TIFR0 = 0x04;
-		// #endif
 		{
 			// while(--count)
 			{
-				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
-				// by the E values (see the definition )
+				// Loop beginning
 				DNOP;
 				LOOP;
-
-				// ADJDITHER2(d0,e0);
-				// ADJDITHER2(d1,e1);
-				// ADJDITHER2(d2,e2);
-				// NOP;
-				// #if (FASTLED_ALLOW_INTERRUPTS == 1)
-				// cli();
-				// if(TIFR0 & 0x04) {
-				// 	sei();
-				// 	TCCR0A &= ~0x30;
-				// 	return;
-				// }
-				// hi = *port | mask;
-				// lo = *port & ~mask;
-				// #endif
 
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
@@ -419,7 +391,7 @@ protected:
 				// then scaling it using 8 cycles of shift/add interleaved in between writing the bits
 				// out.  When doing byte 1, we're doing the above for byte 2.  When we're doing byte 2,
 				// we're cycling back around and doing the above for byte 0.
-#if TRINKET_SCALE
+
 				// Inline scaling - RGB ordering
 				// DNOP
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2)
@@ -473,41 +445,6 @@ protected:
 				}
 				MOV_ADDDE04(b0,b1,d0,e0) D2(4) LO1 D3(5)
 				ENDLOOP5
-#else
-				// no inline scaling - non-straight RGB ordering -- no longer in line with the actual asm macros above, left for
-				// reference only
-				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 6) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 5) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 4) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 3) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 2) 				D2(0)	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 1) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 0) 				D2(0) 	LO1 D3(0)
-				HI1	D1(1) QLO2(b1, 7) LD2(b1,O2) 	D2(2)	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 6) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 5) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 4) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 3) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 2) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 1) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 0) IDATA2 		D2(2)	LO1 D3(0)
-				HI1	D1(1) QLO2(b1, 7) LD2(b0,O0) 	D2(2)	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 6) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 5) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 4) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 3) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 2) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 1) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 0) 				D2(0) 	LO1 D3(0)
-#endif
-
-				// #if (FASTLED_ALLOW_INTERRUPTS == 1)
-				// // set the counter mark
-				// OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
-				// TIFR0 = 0x04;
-				// sei();
-				// #endif
 			}
 			DONE;
 		}
