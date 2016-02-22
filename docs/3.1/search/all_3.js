@@ -9,7 +9,7 @@ var searchData=
   ['chsvpalette16',['CHSVPalette16',['../class_c_h_s_v_palette16.html',1,'']]],
   ['chsvpalette256',['CHSVPalette256',['../class_c_h_s_v_palette256.html',1,'']]],
   ['chsvpalette32',['CHSVPalette32',['../class_c_h_s_v_palette32.html',1,'']]],
-  ['cleanup_5fr1',['cleanup_R1',['../group___scaling.html#ga572d0b441676c9d8ceb071fe8284b7e9',1,'scale8.h']]],
+  ['cleanup_5fr1',['cleanup_R1',['../group___scaling.html#ga3fade00fb4cf5b937b973128198a7a79',1,'scale8.h']]],
   ['clear',['clear',['../class_c_fast_l_e_d.html#a042989511cbc42390620bedc196ea956',1,'CFastLED']]],
   ['clearbluesky',['ClearBlueSky',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9acb80944aa5bed3031b19f1e1101f6a9a',1,'color.h']]],
   ['cleardata',['clearData',['../class_c_fast_l_e_d.html#ac4f613f1b3e618528dca3189df88ce80',1,'CFastLED']]],

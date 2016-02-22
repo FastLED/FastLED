@@ -1,7 +1,7 @@
 var searchData=
 [
   ['chsv',['CHSV',['../struct_c_h_s_v.html#acf5b316e91b4a7758057e0fd7cd3863e',1,'CHSV::CHSV() __attribute__((always_inline))'],['../struct_c_h_s_v.html#a1cae6431597acc31363c47748da6f32d',1,'CHSV::CHSV(uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))'],['../struct_c_h_s_v.html#a077b49ca9dfa160ea6321e633efd7421',1,'CHSV::CHSV(const CHSV &amp;rhs) __attribute__((always_inline))']]],
-  ['cleanup_5fr1',['cleanup_R1',['../group___scaling.html#ga572d0b441676c9d8ceb071fe8284b7e9',1,'scale8.h']]],
+  ['cleanup_5fr1',['cleanup_R1',['../group___scaling.html#ga3fade00fb4cf5b937b973128198a7a79',1,'scale8.h']]],
   ['clear',['clear',['../class_c_fast_l_e_d.html#a042989511cbc42390620bedc196ea956',1,'CFastLED']]],
   ['cleardata',['clearData',['../class_c_fast_l_e_d.html#ac4f613f1b3e618528dca3189df88ce80',1,'CFastLED']]],
   ['clearleddata',['clearLedData',['../class_c_l_e_d_controller.html#a7b61c81e004c96ff670a2742057a5a52',1,'CLEDController']]],

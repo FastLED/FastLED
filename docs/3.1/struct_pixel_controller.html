@@ -286,22 +286,22 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>mOffsets</b> [LANES]</
 int&#160;</td><td class="memItemRight" valign="bottom"><b>lane</b> { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]</td></tr>
 <tr class="separator:a41bf3d91b9cf0269ae08b47eb86d5387"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30f6c6e3dbb3d9ea1f148a4d77f221b5"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a30f6c6e3dbb3d9ea1f148a4d77f221b5"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>b</b> { return b ? <a class="el" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>(b, pc.d[RO(SLOT)]) : 0</td></tr>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>b</b> { return b ? <a class="el" href="group___math.html#ga07133b3085824d0fcd4f5086d286c4b5">qadd8</a>(b, pc.d[RO(SLOT)]) : 0</td></tr>
 <tr class="separator:a30f6c6e3dbb3d9ea1f148a4d77f221b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad90b3914752258965fc1a18b3ffadebb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad90b3914752258965fc1a18b3ffadebb"></a>
-uint8_t uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>d</b> { return b ? <a class="el" href="group___math.html#ga38e9f9a8830353f9cbfecad7c8758b1f">qadd8</a>(b,d) : 0</td></tr>
+uint8_t uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>d</b> { return b ? <a class="el" href="group___math.html#ga07133b3085824d0fcd4f5086d286c4b5">qadd8</a>(b,d) : 0</td></tr>
 <tr class="separator:ad90b3914752258965fc1a18b3ffadebb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b5452230608de2816669c6e2e6772d9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7b5452230608de2816669c6e2e6772d9"></a>
-uint8_t uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>scale</b> { return <a class="el" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>(b, scale)</td></tr>
+uint8_t uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>scale</b> { return <a class="el" href="group___scaling.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(b, scale)</td></tr>
 <tr class="separator:a7b5452230608de2816669c6e2e6772d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa685641133594892cad325ccc0bd031c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa685641133594892cad325ccc0bd031c"></a>
 int uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>d</b></td></tr>
 <tr class="separator:aa685641133594892cad325ccc0bd031c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92d6838d1c476c583302276b4d30dc0f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a92d6838d1c476c583302276b4d30dc0f"></a>
-int uint8_t uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>scale</b> { return <a class="el" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>(pc.dither&lt;SLOT&gt;(pc, pc.loadByte&lt;SLOT&gt;(pc, lane), d), scale)</td></tr>
+int uint8_t uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>scale</b> { return <a class="el" href="group___scaling.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(pc.dither&lt;SLOT&gt;(pc, pc.loadByte&lt;SLOT&gt;(pc, lane), d), scale)</td></tr>
 <tr class="separator:a92d6838d1c476c583302276b4d30dc0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a981df5be1edbd7caca3fc061f975e5a7"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a981df5be1edbd7caca3fc061f975e5a7"></a>
-int uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>scale</b> { return <a class="el" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>(pc.loadByte&lt;SLOT&gt;(pc, lane), scale)</td></tr>
+int uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>scale</b> { return <a class="el" href="group___scaling.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(pc.loadByte&lt;SLOT&gt;(pc, lane), scale)</td></tr>
 <tr class="separator:a981df5be1edbd7caca3fc061f975e5a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -319,7 +319,7 @@ struct PixelController&lt; RGB_ORDER, LANES, MASK &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="struct_pixel_controller.html">PixelController</a></li>
-    <li class="footer">Generated on Tue Feb 16 2016 11:42:45 for FastLED by
+    <li class="footer">Generated on Sun Feb 21 2016 18:44:45 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

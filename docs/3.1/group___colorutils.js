@@ -175,9 +175,26 @@ var group___colorutils =
       [ "operator[]", "class_c_r_g_b_palette256.html#aed56d2958abee33002ef25cb00e3044c", null ],
       [ "entries", "class_c_r_g_b_palette256.html#a3279636490301d45a05adfcbc8a7b4da", null ]
     ] ],
+    [ "blend", "group___colorutils.html#ga4f06b4423f71f77346aaf5dabe7dd05c", null ],
+    [ "blend", "group___colorutils.html#gabea64e23b31132c325ea0c1fef0d3f13", null ],
+    [ "blur1d", "group___colorutils.html#gaacf0416f9e0438f23f92d0df6c338ea3", null ],
+    [ "blurColumns", "group___colorutils.html#gacb40363ff285a5d816a1cf3096e27c14", null ],
+    [ "blurRows", "group___colorutils.html#ga3dbf22d8f71f7a0b54bbfaaf1ef7b44b", null ],
+    [ "fadeLightBy", "group___colorutils.html#gac1e25878d16efa6112d907738f525773", null ],
+    [ "fadeToBlackBy", "group___colorutils.html#ga404d163d8a422cee2df2baac4151ca98", null ],
+    [ "fadeUsingColor", "group___colorutils.html#gae8c0a05b75034b4a2cae20ddc70ec15f", null ],
     [ "fill_gradient", "group___colorutils.html#ga3144bb2bb66aeed33e20f4fdd6cc1a98", null ],
+    [ "fill_gradient", "group___colorutils.html#gace693b077794f9b6aa80875fdd550a68", null ],
+    [ "fill_gradient", "group___colorutils.html#ga3a46ed6b7043382df172d7501785033c", null ],
+    [ "fill_gradient", "group___colorutils.html#ga396996c5e505e459b418330f4386f779", null ],
+    [ "fill_gradient_RGB", "group___colorutils.html#ga6afaa1f712186a4b67445f69871cad88", null ],
     [ "fill_rainbow", "group___colorutils.html#gafcc7dac88e25736ebc49a9faf2a1c2e2", null ],
     [ "fill_rainbow", "group___colorutils.html#gac3052a230febda0693517ce9d12aa452", null ],
     [ "fill_solid", "group___colorutils.html#gac84d8820fd175567ba66413dfb8bc63b", null ],
-    [ "fill_solid", "group___colorutils.html#gad1abf13328e8dd1c483a270af77b17ed", null ]
+    [ "fill_solid", "group___colorutils.html#gad1abf13328e8dd1c483a270af77b17ed", null ],
+    [ "HeatColor", "group___colorutils.html#gac5c6b83ec07d310385a430f9f0336530", null ],
+    [ "nblend", "group___colorutils.html#ga9ddce40dda09fb46db19c55368baf335", null ],
+    [ "nblend", "group___colorutils.html#ga63e89e8505c65e973218d1638dda3b04", null ],
+    [ "nscale8", "group___colorutils.html#gad0356fc313196732e7cd4e64f506f82b", null ],
+    [ "nscale8_video", "group___colorutils.html#ga956be37436f2b9c06c99d24263ef8e83", null ]
 ];

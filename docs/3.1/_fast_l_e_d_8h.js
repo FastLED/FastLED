@@ -29,14 +29,19 @@ var _fast_l_e_d_8h =
     [ "EBlockChipsets", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cc", [
       [ "WS2811_PORTA", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca3dfc7701edddb060c7b1c166160e2e84", null ],
       [ "WS2811_400_PORTA", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7ccafbcade0e99741c06ac2cacd685715ec6", null ],
+      [ "TM1803_PORTA", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca4c08d6e7c60ed66ee9f91d5eb9692ac7", null ],
       [ "WS2811_PORTB", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7ccabd56ee06e4f5bb956bedee08d951f5b0", null ],
       [ "WS2811_400_PORTB", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca761693d3688d51ca70f4d03180c707bd", null ],
+      [ "TM1803_PORTB", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7ccad006a676a09197f25abb18f0dd3980b2", null ],
       [ "WS2811_PORTC", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca63e38749845ba1f5ca0ac78eba46e768", null ],
       [ "WS2811_400_PORTC", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca2c5f26c9459dd07fa1694cd23bc2963f", null ],
+      [ "TM1803_PORTC", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca343e7d7baa263ab8cc0de7c628b3952a", null ],
       [ "WS2811_PORTD", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca133d6dc3225ca299a492d7017e723927", null ],
       [ "WS2811_400_PORTD", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca7340313aebbca22bd20a85a4255cb521", null ],
+      [ "TM1803_PORTD", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca943fb4be631f1432c13e09b7e41e72c6", null ],
       [ "WS2811_PORTDC", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7cca1d2ab9b2bb2985fb877371be83773f7b", null ],
-      [ "WS2811_400_PORTDC", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7ccad5e8729d5e8682741a2b4d806501d7c3", null ]
+      [ "WS2811_400_PORTDC", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7ccad5e8729d5e8682741a2b4d806501d7c3", null ],
+      [ "TM1803_PORTDC", "_fast_l_e_d_8h.html#adcf22542128a12d8c3c304777422c7ccaac7596c20850a4fca6ef5f2d77f6b2b4", null ]
     ] ],
     [ "ESM", "_fast_l_e_d_8h.html#ac8839f06bbcecd0dc5bde0a94510a657", [
       [ "SMART_MATRIX", "_fast_l_e_d_8h.html#ac8839f06bbcecd0dc5bde0a94510a657aad6c1549c0bf19cdf4ca4838d761987e", null ]

@@ -125,7 +125,7 @@ $(document).ready(function(){initNavTree('fastspi__types_8h_source.html','');});
 <div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="class_d_a_t_a___n_o_p.html">   20</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_d_a_t_a___n_o_p.html">DATA_NOP</a> {</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;  <span class="keyword">static</span> __attribute__((always_inline)) <span class="keyword">inline</span> uint8_t adjust(<span class="keyword">register</span> uint8_t data) { <span class="keywordflow">return</span> data; }</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  <span class="keyword">static</span> __attribute__((always_inline)) <span class="keyword">inline</span> uint8_t adjust(<span class="keyword">register</span> uint8_t data, <span class="keyword">register</span> uint8_t scale) { <span class="keywordflow">return</span> <a class="code" href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a>(data, scale); }</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;  <span class="keyword">static</span> __attribute__((always_inline)) <span class="keyword">inline</span> uint8_t adjust(<span class="keyword">register</span> uint8_t data, <span class="keyword">register</span> uint8_t scale) { <span class="keywordflow">return</span> <a class="code" href="group___scaling.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a>(data, scale); }</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;  <span class="keyword">static</span> __attribute__((always_inline)) <span class="keyword">inline</span> <span class="keywordtype">void</span> postBlock(<span class="keywordtype">int</span> <span class="comment">/* len */</span>) { }</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;};</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
@@ -146,16 +146,16 @@ $(document).ready(function(){initNavTree('fastspi__types_8h_source.html','');});
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;FASTLED_NAMESPACE_END</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="group___scaling_html_ga6c160f8c36ce9b3c5eda68e4992010af"><div class="ttname"><a href="group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af">scale8</a></div><div class="ttdeci">LIB8STATIC uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00020">scale8.h:20</a></div></div>
 <div class="ttc" id="class_d_a_t_a___n_o_p_html"><div class="ttname"><a href="class_d_a_t_a___n_o_p.html">DATA_NOP</a></div><div class="ttdoc">Some of the SPI controllers will need to perform a transform on each byte before doing anyting with i...</div><div class="ttdef"><b>Definition:</b> <a href="fastspi__types_8h_source.html#l00020">fastspi_types.h:20</a></div></div>
 <div class="ttc" id="_fast_l_e_d_8h_html"><div class="ttname"><a href="_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object </div></div>
+<div class="ttc" id="group___scaling_html_gad7535ccda9c92470c4e6ee0265585555"><div class="ttname"><a href="group___scaling.html#gad7535ccda9c92470c4e6ee0265585555">scale8</a></div><div class="ttdeci">LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale)</div><div class="ttdoc">scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...</div><div class="ttdef"><b>Definition:</b> <a href="scale8_8h_source.html#l00020">scale8.h:20</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>fastspi_types.h</b></li>
-    <li class="footer">Generated on Tue Feb 16 2016 11:42:44 for FastLED by
+    <li class="footer">Generated on Sun Feb 21 2016 18:44:44 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

@@ -1,11 +1,11 @@
 var searchData=
 [
   ['scale16',['scale16',['../group___scaling.html#ga1ff8ac00ad78e22acc7bb7445bfdb145',1,'scale8.h']]],
-  ['scale16by8',['scale16by8',['../group___scaling.html#gaf34fde0746c9c2e5ed44f9c437a2267e',1,'scale8.h']]],
-  ['scale8',['scale8',['../struct_c_r_g_b.html#a5b80746e55da30c6a1dad63b3edd5fd4',1,'CRGB::scale8()'],['../group___scaling.html#ga6c160f8c36ce9b3c5eda68e4992010af',1,'scale8():&#160;scale8.h']]],
-  ['scale8_5fleaving_5fr1_5fdirty',['scale8_LEAVING_R1_DIRTY',['../group___scaling.html#ga39579fcf09743f15545fe0b831ca313c',1,'scale8.h']]],
-  ['scale8_5fvideo',['scale8_video',['../group___scaling.html#ga333095ffa436c94d3e77ee9dc39da1c1',1,'scale8.h']]],
-  ['scale8_5fvideo_5fleaving_5fr1_5fdirty',['scale8_video_LEAVING_R1_DIRTY',['../group___scaling.html#gab341cef8d46232269bb70092fed9eb75',1,'scale8.h']]],
+  ['scale16by8',['scale16by8',['../group___scaling.html#gaa51d5b048c2a4a20a00bddcdc257daaf',1,'scale8.h']]],
+  ['scale8',['scale8',['../struct_c_r_g_b.html#a5b80746e55da30c6a1dad63b3edd5fd4',1,'CRGB::scale8()'],['../group___scaling.html#gad7535ccda9c92470c4e6ee0265585555',1,'scale8():&#160;scale8.h']]],
+  ['scale8_5fleaving_5fr1_5fdirty',['scale8_LEAVING_R1_DIRTY',['../group___scaling.html#ga7386235cada3aca429b189681d2ec56d',1,'scale8.h']]],
+  ['scale8_5fvideo',['scale8_video',['../group___scaling.html#ga628b417ea1507e3447cdf5f308d9b6d5',1,'scale8.h']]],
+  ['scale8_5fvideo_5fleaving_5fr1_5fdirty',['scale8_video_LEAVING_R1_DIRTY',['../group___scaling.html#gaf8e0821f34434cd6bfed4a16a895da23',1,'scale8.h']]],
   ['seconds16',['seconds16',['../group__lib8tion.html#gaa2abcee2fe76fafd7f3a2aeab03e3b69',1,'lib8tion.h']]],
   ['select',['select',['../class_n_o_p_s_p_i_output.html#ae07bb6f787879f28979cccec9ec4965d',1,'NOPSPIOutput']]],
   ['setbrightness',['setBrightness',['../class_c_fast_l_e_d.html#a730ba7d967e882b4b893689cf333b2eb',1,'CFastLED']]],
@@ -33,7 +33,7 @@ var searchData=
   ['size',['size',['../class_c_l_e_d_controller.html#a63f75cf7e55cf8da46db5fd27110bb3e',1,'CLEDController::size()'],['../class_c_fast_l_e_d.html#a18fba22754d2a1a206fc5db8d24a92d0',1,'CFastLED::size()'],['../class_c_pixel_view.html#afe3500651fc4eb5770aeb01728aa0a1e',1,'CPixelView::size()']]],
   ['sqrt16',['sqrt16',['../group___math.html#ga66ecef97faa5f9b92c49766651c5afe9',1,'math8.h']]],
   ['squarewave8',['squarewave8',['../group__lib8tion.html#ga17ae8fcfd9c485bb1120d908f836637a',1,'lib8tion.h']]],
-  ['sub8',['sub8',['../group___math.html#ga0c40c15ab5af36ddabded161941f2091',1,'math8.h']]],
+  ['sub8',['sub8',['../group___math.html#gad2d87829a6327876eed4482aa515dfa9',1,'math8.h']]],
   ['subfromrgb',['subFromRGB',['../class_c_pixel_view.html#afb57aeebbd762d7ead044a12fd51f639',1,'CPixelView']]],
   ['subtractfromrgb',['subtractFromRGB',['../struct_c_r_g_b.html#af5e0ce520027b5bc5b8aa106c113119c',1,'CRGB']]]
 ];
