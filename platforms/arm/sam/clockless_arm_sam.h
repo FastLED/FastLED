@@ -78,7 +78,7 @@ protected:
 
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		register uint8_t b = pixels.loadAndScale0();
+		uint8_t b = pixels.loadAndScale0();
 
 		uint32_t next_mark = (DUE_TIMER_VAL + (TOTAL));
 		while(pixels.has(1)) {
