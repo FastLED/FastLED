@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_BITBANG_H
 #define __INC_FASTSPI_BITBANG_H
 
+#include "FastLED.h"
+
 #include "fastled_delay.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -109,20 +111,26 @@ private:
 	}
 
 public:
-	#define SPI_DELAY delaycycles<1+((SPI_SPEED-2) / 2)>();
-	#define SPI_DELAY_HALF delaycycles<1+ ((SPI_SPEED-4) / 4)>();
+
+	// We want to make sure that the clock pulse is held high for a nininum of 35ns.
+	#define MIN_DELAY (NS(35) - 3)
+
+  #define CLOCK_HI_DELAY delaycycles<MIN_DELAY>(); delaycycles<(((SPI_SPEED-6) / 2) - MIN_DELAY)>();
+	#define CLOCK_LO_DELAY delaycycles<(((SPI_SPEED-6) / 4))>();
 
 	// write the BIT'th bit out via spi, setting the data pin then strobing the clcok
 	template <uint8_t BIT> __attribute__((always_inline, hot)) inline static void writeBit(uint8_t b) {
+		//cli();
 		if(b & (1 << BIT)) {
 			FastPin<DATA_PIN>::hi();
-			FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
-			FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
+			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+			FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
 		} else {
 			FastPin<DATA_PIN>::lo();
-			FastPin<CLOCK_PIN>::hi(); SPI_DELAY;
-			FastPin<CLOCK_PIN>::lo(); SPI_DELAY;
+			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+			FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
 		}
+		//sei();
 	}
 
 private:
@@ -130,12 +138,12 @@ private:
 	template <uint8_t BIT> __attribute__((always_inline)) inline static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin) {
 		if(b & (1 << BIT)) {
 			FastPin<DATA_PIN>::hi(datapin);
-			FastPin<CLOCK_PIN>::hi(clockpin); SPI_DELAY;
-			FastPin<CLOCK_PIN>::lo(clockpin); SPI_DELAY;
+			FastPin<CLOCK_PIN>::hi(clockpin); CLOCK_HI_DELAY;
+			FastPin<CLOCK_PIN>::lo(clockpin); CLOCK_LO_DELAY;
 		} else {
 			FastPin<DATA_PIN>::lo(datapin);
-			FastPin<CLOCK_PIN>::hi(clockpin); SPI_DELAY;
-			FastPin<CLOCK_PIN>::lo(clockpin); SPI_DELAY;
+			FastPin<CLOCK_PIN>::hi(clockpin); CLOCK_HI_DELAY;
+			FastPin<CLOCK_PIN>::lo(clockpin); CLOCK_LO_DELAY;
 		}
 
 	}
@@ -147,13 +155,13 @@ private:
 		// // only need to explicitly set clock hi if clock and data are on different ports
 		if(b & (1 << BIT)) {
 			FastPin<DATA_PIN>::fastset(datapin, hival);
-			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); SPI_DELAY;
-			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); SPI_DELAY;
+			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
+			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
 		} else {
 			// NOP;
 			FastPin<DATA_PIN>::fastset(datapin, loval);
-			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); SPI_DELAY;
-			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); SPI_DELAY;
+			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
+			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
 		}
 	}
 
@@ -166,14 +174,14 @@ private:
 		writeBit<BIT>(b);
 #else
 		if(b & (1 << BIT)) {
-			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY_HALF;
-			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclockhi); SPI_DELAY;
-			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); SPI_DELAY_HALF;
+			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo);
+			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclockhi); CLOCK_HI_DELAY;
+			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); CLOCK_LO_DELAY;
 		} else {
 			// NOP;
-			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY_HALF;
-			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclockhi); SPI_DELAY;
-			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); SPI_DELAY_HALF;
+			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo);
+			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclockhi); CLOCK_HI_DELAY;
+			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); CLOCK_LO_DELAY;
 		}
 #endif
 	}

@@ -17,7 +17,7 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 
 #if (F_CPU==8000000)
-#define FASTLED_SLOW_CLOCK_ADJUST asm __volatile__ ("mov r0,r0\n\t");
+#define FASTLED_SLOW_CLOCK_ADJUST // asm __volatile__ ("mov r0,r0\n\t");
 #else
 #define FASTLED_SLOW_CLOCK_ADJUST
 #endif
@@ -90,8 +90,8 @@ static uint8_t gTimeErrorAccum256ths;
 #define FASTLED_HAS_CLOCKLESS 1
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
-class ClocklessController : public CLEDController {
-	static_assert(T1 >= 3 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
+class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+	static_assert(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
 
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -104,30 +104,9 @@ public:
 
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
-	virtual void clearLeds(int nLeds) {
-		CRGB zeros(0,0,0);
-		showAdjTime((uint8_t*)&zeros, nLeds, zeros, false, 0);
-	}
-
 protected:
 
-	// set all the leds on the controller to a given color
-	virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-		showAdjTime((uint8_t*)&rgbdata, nLeds, scale, false, 0);
-	}
-
-	virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-		showAdjTime((uint8_t*)rgbdata, nLeds, scale, true, 0);
-	}
-
-#ifdef SUPPORT_ARGB
-	virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-		showAdjTime((uint8_t*)rgbdata, nLeds, scale, true, 1);
-	}
-#endif
-
-	void showAdjTime(const uint8_t *data, int nLeds, CRGB & scale, bool advance, int skip) {
-		PixelController<RGB_ORDER> pixels(data, nLeds, scale, getDither(), advance, skip);
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 
 		mWait.wait();
 		cli();
@@ -136,12 +115,12 @@ protected:
 
 		// Adjust the timer
 #if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-        uint32_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
 
         // adust for approximate observed actal runtime (as of January 2015)
         // roughly 9.6 cycles per pixel, which is 0.6us/pixel at 16MHz
         // microsTaken += nLeds * 0.6 * CLKS_TO_MICROS(16);
-        microsTaken += scale16by8(nLeds,(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
+        microsTaken += scale16by8(pixels.size(),(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
 
         // if less than 1000us, there is NO timer impact,
         // this is because the ONE interrupt that might come in while interrupts
@@ -238,12 +217,16 @@ protected:
 #define PRESCALEA2(D) asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\t" ASM_VARS);
 
 // Do the clamp for the prescale, clear carry when we're done - NOTE: Must ensure carry flag state is preserved!
-#define PRESCALEB3(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tCLC" ASM_VARS);
+#define PRESCALEB4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tneg %[" #D "]\n\tCLC" ASM_VARS);
+
+// Clamp for prescale, increment data, since we won't ever wrap 65k, this also effectively clears carry for us
+#define PSBIDATA4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tadd %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" ASM_VARS);
 
 #else
 #define PRESCALE4(D) _dc<4>(loopvar);
 #define PRESCALEA2(D) _dc<2>(loopvar);
-#define PRESCALEB3(D) _dc<3>(loopvar);
+#define PRESCALEB4(D) _dc<4>(loopvar);
+#define PSBIDATA4(D) asm __volatile__( "add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\trjmp .+0\n\t" ASM_VARS );
 #endif
 
 // 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
@@ -280,7 +263,10 @@ protected:
 
 // dither adjustment macro - should be kept in sync w/what's in stepDithering
 // #define ADJDITHER2(D, E) D = E - D;
-#define ADJDITHER2(D, E) asm __volatile__ ("neg %[" #D "]\n\tadd %[" #D "],%[" #E "]\n\t" ASM_VARS);
+#define _NEGD1(D) "neg %[" #D "]\n\t"
+#define _ADJD1(D,E) "add %[" #D "], %[" #E "]\n\t"
+#define ADJDITHER2(D, E) asm __volatile__ ( _NEGD1(D) _ADJD1(D, E) ASM_VARS);
+#define ADDDE1(D, E) asm __volatile__ ( _ADJD1(D, E) ASM_VARS );
 
 // #define xstr(a) str(a)
 // #define str(a) #a
@@ -296,7 +282,29 @@ protected:
 #define IDATACLC3 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" _CLC1  ASM_VARS );
 
 // 1 cycle mov
-#define MOV1(B1, B2) asm __volatile__("mov %[" #B1 "], %[" #B2 "]" ASM_VARS );
+#define _MOV1(B1, B2) "mov %[" #B1 "], %[" #B2 "]\n\t"
+
+#define MOV1(B1, B2) asm __volatile__( _MOV1(B1,B2) ASM_VARS );
+
+// 3 cycle mov - skip if scale fix is happening
+#if (FASTLED_SCALE8_FIXED == 1)
+#define _MOV_FIX03(B1, B2) "mov %[" #B1 "], %[scale_base]\n\tcpse %[s0], __zero_reg__\n\t" _MOV1(B1, B2)
+#define _MOV_FIX13(B1, B2) "mov %[" #B1 "], %[scale_base]\n\tcpse %[s1], __zero_reg__\n\t" _MOV1(B1, B2)
+#define _MOV_FIX23(B1, B2) "mov %[" #B1 "], %[scale_base]\n\tcpse %[s2], __zero_reg__\n\t" _MOV1(B1, B2)
+#else
+// if we haven't fixed scale8, just do the move and nop the 2 cycles that would be used to
+// do the fixed adjustment
+#define _MOV_FIX03(B1, B2) _MOV1(B1, B2) "rjmp .+0\n\t"
+#define _MOV_FIX13(B1, B2) _MOV1(B1, B2) "rjmp .+0\n\t"
+#define _MOV_FIX23(B1, B2) _MOV1(B1, B2) "rjmp .+0\n\t"
+#endif
+
+// 3 cycle mov + negate D for dither adjustment
+#define MOV_NEGD04(B1, B2, D) asm __volatile( _MOV_FIX03(B1, B2) _NEGD1(D) ASM_VARS );
+#define MOV_ADDDE04(B1, B2, D, E) asm __volatile( _MOV_FIX03(B1, B2) _ADJD1(D, E) ASM_VARS );
+#define MOV_NEGD14(B1, B2, D) asm __volatile( _MOV_FIX13(B1, B2) _NEGD1(D) ASM_VARS );
+#define MOV_ADDDE14(B1, B2, D, E) asm __volatile( _MOV_FIX13(B1, B2) _ADJD1(D, E) ASM_VARS );
+#define MOV_NEGD24(B1, B2, D) asm __volatile( _MOV_FIX23(B1, B2) _NEGD1(D) ASM_VARS );
 
 // 2 cycles - decrement the counter
 #define DCOUNT2 asm __volatile__("sbiw %[count], 1" ASM_VARS );
@@ -342,6 +350,9 @@ protected:
 		uint8_t s0 = pixels.mScale.raw[RO(0)];
 		uint8_t s1 = pixels.mScale.raw[RO(1)];
 		uint8_t s2 = pixels.mScale.raw[RO(2)];
+#if (FASTLED_SCALE8_FIXED==1)
+		s0++; s1++; s2++;
+#endif
 		uint8_t d0 = pixels.d[RO(0)];
 		uint8_t d1 = pixels.d[RO(1)];
 		uint8_t d2 = pixels.d[RO(2)];
@@ -351,52 +362,26 @@ protected:
 
 		uint8_t loopvar=0;
 
-		// load/scale the first byte
-#if !defined(LIB8_ATTINY)
-		// we have a hardware multiply, can use loadAndScale0
-		b0 = pixels.loadAndScale0();
-#else
-		// no hardware multiply, we have to do our own mul by hand here, lest we incur a
-		// function call which will kill all of our register usage/allocations below
+		// This has to be done in asm to keep gcc from messing up the asm code further down
 		b0 = data[RO(0)];
 		{
 			LDSCL4(b0,O0) 	PRESCALEA2(d0)
-			PRESCALEB3(d0)	SCALE02(b0,0)
+			PRESCALEB4(d0)	SCALE02(b0,0)
 			RORSC04(b0,1) 	ROR1(b0) CLC1
 			SCROR04(b0,2)		SCALE02(b0,3)
 			RORSC04(b0,4) 	ROR1(b0) CLC1
 			SCROR04(b0,5) 	SCALE02(b0,6)
 			RORSC04(b0,7) 	ROR1(b0) CLC1
+			MOV_ADDDE04(b1,b0,d0,e0)
+			MOV1(b0,b1)
 		}
-#endif
 
-		// #if (FASTLED_ALLOW_INTERRUPTS == 1)
-		// TCCR0A |= 0x30;
-		// OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
-		// TIFR0 = 0x04;
-		// #endif
 		{
 			// while(--count)
 			{
-				// Loop beginning, does some stuff that's outside of the pixel write cycle, namely incrementing d0-2 and masking off
-				// by the E values (see the definition )
+				// Loop beginning
 				DNOP;
 				LOOP;
-
-				// ADJDITHER2(d0,e0);
-				// ADJDITHER2(d1,e1);
-				// ADJDITHER2(d2,e2);
-				// NOP;
-				// #if (FASTLED_ALLOW_INTERRUPTS == 1)
-				// cli();
-				// if(TIFR0 & 0x04) {
-				// 	sei();
-				// 	TCCR0A &= ~0x30;
-				// 	return;
-				// }
-				// hi = *port | mask;
-				// lo = *port & ~mask;
-				// #endif
 
 				// Sum of the clock counts across each row should be 10 for 8Mhz, WS2811
 				// The values in the D1/D2/D3 indicate how many cycles the previous column takes
@@ -406,11 +391,11 @@ protected:
 				// then scaling it using 8 cycles of shift/add interleaved in between writing the bits
 				// out.  When doing byte 1, we're doing the above for byte 2.  When we're doing byte 2,
 				// we're cycling back around and doing the above for byte 0.
-#if TRINKET_SCALE
+
 				// Inline scaling - RGB ordering
 				// DNOP
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	D2(4)	LO1	PRESCALEA2(d1)	D3(2)
-				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d1)	D2(3)	LO1	SCALE12(b1,0)	D3(2)
+				HI1	D1(1) QLO2(b0, 6) PRESCALEB4(d1)	D2(4)	LO1	SCALE12(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC14(b1,1) 	D2(4)	LO1 RORCLC2(b1)		D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR14(b1,2)		D2(4)	LO1 SCALE12(b1,3)	D3(2)
 				HI1 D1(1) QLO2(b0, 3) RORSC14(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
@@ -423,10 +408,10 @@ protected:
 					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 				}
-				ADJDITHER2(d1,e1) D2(2) LO1 MOV1(b0,b1) D3(1)
+				MOV_ADDDE14(b0,b1,d1,e1) D2(4) LO1 D3(0)
 
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O2) 	D2(4)	LO1	PRESCALEA2(d2)	D3(2)
-				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d2)	D2(3)	LO1	SCALE22(b1,0)	D3(2)
+				HI1	D1(1) QLO2(b0, 6) PSBIDATA4(d2)		D2(4)	LO1	SCALE22(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC24(b1,1) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR24(b1,2)		D2(4)	LO1 SCALE22(b1,3)	D3(2)
 				HI1 D1(1) QLO2(b0, 3) RORSC24(b1,4) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
@@ -439,10 +424,13 @@ protected:
 					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 				}
-				IDATACLC3 MOV1(b0,b1) D2(4) LO1 ADJDITHER2(d2,e2) D3(2)
 
+				// Because Prescale on the middle byte also increments the data counter,
+				// we have to do both halves of updating d2 here - negating it (in the
+				// MOV_NEGD24 macro) and then adding E back into it
+				MOV_NEGD24(b0,b1,d2) D2(4) LO1 ADDDE1(d2,e2) D3(1)
 				HI1 D1(1) QLO2(b0, 7) LDSCL4(b1,O0) 	D2(4)	LO1	PRESCALEA2(d0)	D3(2)
-				HI1	D1(1) QLO2(b0, 6) PRESCALEB3(d0)	D2(3)	LO1	SCALE02(b1,0)	D3(2)
+				HI1	D1(1) QLO2(b0, 6) PRESCALEB4(d0)	D2(4)	LO1	SCALE02(b1,0)	D3(2)
 				HI1 D1(1) QLO2(b0, 5) RORSC04(b1,1) 	D2(4)	LO1 RORCLC2(b1) 	D3(2)
 				HI1 D1(1) QLO2(b0, 4) SCROR04(b1,2)		D2(4)	LO1 SCALE02(b1,3)	D3(2)
 				HI1 D1(1) QLO2(b0, 3) RORSC04(b1,4) 	D2(4)	LO1 RORCLC2(b1)  	D3(2)
@@ -455,43 +443,8 @@ protected:
 					case 2: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 					case 1: D2(0) LO1 D3(0) HI1 D1(1) QLO2(b0,0)
 				}
-				ADJDITHER2(d0,e0) MOV1(b0,b1) D2(3) LO1 D3(6)
+				MOV_ADDDE04(b0,b1,d0,e0) D2(4) LO1 D3(5)
 				ENDLOOP5
-#else
-				// no inline scaling - non-straight RGB ordering -- no longer in line with the actual asm macros above, left for
-				// reference only
-				HI1	D1(1) QLO2(b0, 7) LD2(b1,O1)	D2(2)	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 6) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 5) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 4) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 3) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 2) 				D2(0)	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 1) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b0, 0) 				D2(0) 	LO1 D3(0)
-				HI1	D1(1) QLO2(b1, 7) LD2(b1,O2) 	D2(2)	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 6) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 5) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 4) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 3) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 2) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 1) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 0) IDATA2 		D2(2)	LO1 D3(0)
-				HI1	D1(1) QLO2(b1, 7) LD2(b0,O0) 	D2(2)	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 6) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 5) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 4) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 3) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 2) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 1) 				D2(0) 	LO1 D3(0)
-				HI1 D1(1) QLO2(b1, 0) 				D2(0) 	LO1 D3(0)
-#endif
-
-				// #if (FASTLED_ALLOW_INTERRUPTS == 1)
-				// // set the counter mark
-				// OCR0B = (uint8_t)(TCNT0 + ((WAIT_TIME-INTERRUPT_THRESHOLD)/US_PER_TICK));
-				// TIFR0 = 0x04;
-				// sei();
-				// #endif
 			}
 			DONE;
 		}
@@ -502,11 +455,6 @@ protected:
 		#endif
 	}
 
-#ifdef SUPPORT_ARGB
-	virtual void showARGB(struct CARGB *data, int nLeds) {
-		// TODO: IMPLEMENTME
-	}
-#endif
 };
 
 #endif

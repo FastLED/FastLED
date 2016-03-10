@@ -17,16 +17,29 @@
 ///  the numerator of a fraction whose denominator is 256
 ///  In other words, it computes i * (scale / 256)
 ///  4 clocks AVR with MUL, 2 clocks ARM
-LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
+LIB8STATIC_ALWAYS_INLINE uint8_t scale8( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1
+#if (FASTLED_SCALE8_FIXED == 1)
+    return (((uint16_t)i) * (1+(uint16_t)(scale))) >> 8;
+#else
     return ((uint16_t)i * (uint16_t)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
 #if defined(LIB8_ATTINY)
+#if (FASTLED_SCALE8_FIXED == 1)
+    uint8_t work=i;
+#else
     uint8_t work=0;
+#endif
     uint8_t cnt=0x80;
     asm volatile(
-        "LOOP_%=:                             \n\t"
+#if (FASTLED_SCALE8_FIXED == 1)
+        "  inc %[scale]                 \n\t"
+        "  breq DONE_%=                 \n\t"
+        "  clr %[work]                  \n\t"
+#endif
+        "LOOP_%=:                       \n\t"
         /*"  sbrc %[scale], 0             \n\t"
         "  add %[work], %[i]            \n\t"
         "  ror %[work]                  \n\t"
@@ -37,7 +50,8 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
         "  ror %[work]                  \n\t"
         "  lsr %[scale]                 \n\t"
         "  lsr %[cnt]                   \n\t"
-        "brcc LOOP_%="
+        "brcc LOOP_%=                   \n\t"
+        "DONE_%=:                       \n\t"
         : [work] "+r" (work), [cnt] "+r" (cnt)
         : [scale] "r" (scale), [i] "r" (i)
         :
@@ -45,11 +59,22 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
     return work;
 #else
     asm volatile(
+#if (FASTLED_SCALE8_FIXED==1)
+        // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
+        "mul %0, %1          \n\t"
+        // Add i to r0, possibly setting the carry flag
+        "add r0, %0         \n\t"
+        // load the immediate 0 into i (note, this does _not_ touch any flags)
+        "ldi %0, 0x00       \n\t"
+        // walk and chew gum at the same time
+        "adc %0, r1          \n\t"
+#else
          /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
          "mul %0, %1          \n\t"
          /* Move the high 8-bits of the product (r1) back to i */
          "mov %0, r1          \n\t"
          /* Restore r1 to "0"; it's expected to always be that */
+#endif
          "clr __zero_reg__    \n\t"
 
          : "+a" (i)      /* writes to i */
@@ -70,7 +95,7 @@ LIB8STATIC uint8_t scale8( uint8_t i, fract8 scale)
 ///  inputs are non-zero, the output is guaranteed to be non-zero.
 ///  This makes for better 'video'/LED dimming, at the cost of
 ///  several additional cycles.
-LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
+LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1 || defined(LIB8_ATTINY)
     uint8_t j = (((int)i * (int)scale) >> 8) + ((i&&scale)?1:0);
@@ -118,16 +143,31 @@ LIB8STATIC uint8_t scale8_video( uint8_t i, fract8 scale)
 /// This version of scale8 does not clean up the R1 register on AVR
 /// If you are doing several 'scale8's in a row, use this, and
 /// then explicitly call cleanup_R1.
-LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
+LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1
+#if (FASTLED_SCALE8_FIXED == 1)
+    return (((uint16_t)i) * ((uint16_t)(scale)+1)) >> 8;
+#else
     return ((int)i * (int)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
     asm volatile(
+      #if (FASTLED_SCALE8_FIXED==1)
+              // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
+              "mul %0, %1          \n\t"
+              // Add i to r0, possibly setting the carry flag
+              "add r0, %0         \n\t"
+              // load the immediate 0 into i (note, this does _not_ touch any flags)
+              "ldi %0, 0x00       \n\t"
+              // walk and chew gum at the same time
+              "adc %0, r1          \n\t"
+      #else
          /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
          "mul %0, %1    \n\t"
          /* Move the high 8-bits of the product (r1) back to i */
          "mov %0, r1    \n\t"
+      #endif
          /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */
          /* "clr __zero_reg__    \n\t" */
 
@@ -147,16 +187,31 @@ LIB8STATIC uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 /// If you are doing several 'scale8's in a row, use this, and
 /// then explicitly call cleanup_R1.
 
-LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale)
+LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale)
 {
 #if SCALE8_C == 1
+#if (FASTLED_SCALE8_FIXED == 1)
+    i = (((uint16_t)i) * ((uint16_t)(scale)+1)) >> 8;
+#else
     i = ((int)i * (int)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
     asm volatile(
+      #if (FASTLED_SCALE8_FIXED==1)
+              // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
+              "mul %0, %1          \n\t"
+              // Add i to r0, possibly setting the carry flag
+              "add r0, %0         \n\t"
+              // load the immediate 0 into i (note, this does _not_ touch any flags)
+              "ldi %0, 0x00       \n\t"
+              // walk and chew gum at the same time
+              "adc %0, r1          \n\t"
+      #else
          /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
          "mul %0, %1    \n\t"
          /* Move the high 8-bits of the product (r1) back to i */
          "mov %0, r1    \n\t"
+      #endif
          /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF */
          /* "clr __zero_reg__    \n\t" */
 
@@ -172,7 +227,7 @@ LIB8STATIC void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale)
 /// This version of scale8_video does not clean up the R1 register on AVR
 /// If you are doing several 'scale8_video's in a row, use this, and
 /// then explicitly call cleanup_R1.
-LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
+LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1 || defined(LIB8_ATTINY)
     uint8_t j = (((int)i * (int)scale) >> 8) + ((i&&scale)?1:0);
@@ -219,7 +274,7 @@ LIB8STATIC uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 /// does not clean up the R1 register on AVR
 /// If you are doing several 'scale8_video's in a row, use this, and
 /// then explicitly call cleanup_R1.
-LIB8STATIC void nscale8_video_LEAVING_R1_DIRTY( uint8_t & i, fract8 scale)
+LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY( uint8_t & i, fract8 scale)
 {
 #if SCALE8_C == 1 || defined(LIB8_ATTINY)
     i = (((int)i * (int)scale) >> 8) + ((i&&scale)?1:0);
@@ -241,7 +296,7 @@ LIB8STATIC void nscale8_video_LEAVING_R1_DIRTY( uint8_t & i, fract8 scale)
 }
 
 /// Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls
-LIB8STATIC void cleanup_R1()
+LIB8STATIC_ALWAYS_INLINE void cleanup_R1()
 {
 #if CLEANUP_R1_AVRASM == 1
     // Restore r1 to "0"; it's expected to always be that
@@ -259,9 +314,16 @@ LIB8STATIC void cleanup_R1()
 LIB8STATIC void nscale8x3( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scale)
 {
 #if SCALE8_C == 1
+#if (FASTLED_SCALE8_FIXED == 1)
+    uint16_t scale_fixed = scale + 1;
+    r = (((uint16_t)r) * scale_fixed) >> 8;
+    g = (((uint16_t)g) * scale_fixed) >> 8;
+    b = (((uint16_t)b) * scale_fixed) >> 8;
+#else
     r = ((int)r * (int)(scale) ) >> 8;
     g = ((int)g * (int)(scale) ) >> 8;
     b = ((int)b * (int)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
     r = scale8_LEAVING_R1_DIRTY(r, scale);
     g = scale8_LEAVING_R1_DIRTY(g, scale);
@@ -305,8 +367,14 @@ LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scal
 LIB8STATIC void nscale8x2( uint8_t& i, uint8_t& j, fract8 scale)
 {
 #if SCALE8_C == 1
-    i = ((int)i * (int)(scale) ) >> 8;
-    j = ((int)j * (int)(scale) ) >> 8;
+#if FASTLED_SCALE8_FIXED == 1
+    uint16_t scale_fixed = scale + 1;
+    i = (((uint16_t)i) * scale_fixed ) >> 8;
+    j = (((uint16_t)j) * scale_fixed ) >> 8;
+#else
+    i = ((uint16_t)i * (uint16_t)(scale) ) >> 8;
+    j = ((uint16_t)j * (uint16_t)(scale) ) >> 8;
+#endif
 #elif SCALE8_AVRASM == 1
     i = scale8_LEAVING_R1_DIRTY(i, scale);
     j = scale8_LEAVING_R1_DIRTY(j, scale);
@@ -345,11 +413,15 @@ LIB8STATIC void nscale8x2_video( uint8_t& i, uint8_t& j, fract8 scale)
 ///         considered as numerator of a fraction whose denominator
 ///         is 256. In other words, it computes i * (scale / 256)
 
-LIB8STATIC uint16_t scale16by8( uint16_t i, fract8 scale )
+LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8( uint16_t i, fract8 scale )
 {
 #if SCALE16BY8_C == 1
     uint16_t result;
+#if FASTLED_SCALE8_FIXED == 1
+    result = (i * (1+((uint16_t)scale))) >> 8;
+#else
     result = (i * scale) / 256;
+#endif
     return result;
 #elif SCALE16BY8_AVRASM == 1
     uint16_t result = 0;
@@ -385,11 +457,14 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
 {
   #if SCALE16_C == 1
     uint16_t result;
+#if FASTLED_SCALE8_FIXED == 1
+    result = ((uint32_t)(i) * (1+(uint32_t)(scale))) / 65536;
+#else
     result = ((uint32_t)(i) * (uint32_t)(scale)) / 65536;
+#endif
     return result;
 #elif SCALE16_AVRASM == 1
-    uint32_t result = 0;
-    const uint8_t  zero = 0;
+    uint32_t result;
     asm volatile(
                  // result.A-B  = i.A x scale.A
                  "  mul %A[i], %A[scale]                 \n\t"
@@ -406,12 +481,26 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
                  // well, in case we want to use this code for
                  // a generic 16x16 multiply somewhere.
 
+                 : [result] "=r" (result)
+                 : [i] "r" (i),
+                   [scale] "r" (scale)
+                 : "r0", "r1"
+                 );
+
+    asm volatile(
                  // result.C-D  = i.B x scale.B
                  "  mul %B[i], %B[scale]                 \n\t"
                  //"  mov %C[result], r0                 \n\t"
                  //"  mov %D[result], r1                 \n\t"
                  "  movw %C[result], r0                   \n\t"
+                 : [result] "+r" (result)
+                 : [i] "r" (i),
+                   [scale] "r" (scale)
+                 : "r0", "r1"
+                 );
 
+    const uint8_t  zero = 0;
+    asm volatile(
                  // result.B-D += i.B x scale.A
                  "  mul %B[i], %A[scale]                 \n\t"
 
@@ -435,6 +524,7 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
                    [zero] "r" (zero)
                  : "r0", "r1"
                  );
+
     result = result >> 16;
     return result;
 #else

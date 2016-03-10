@@ -1,9 +1,11 @@
+#ifndef __INC_LIB8TION_H
+#define __INC_LIB8TION_H
+
+#include "FastLED.h"
+
 #ifndef __INC_LED_SYSDEFS_H
 #error WTH?  led_sysdefs needs to be included first
 #endif
-
-#ifndef __INC_LIB8TION_H
-#define __INC_LIB8TION_H
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -174,6 +176,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #include <stdint.h>
 
 #define LIB8STATIC __attribute__ ((unused)) static inline
+#define LIB8STATIC_ALWAYS_INLINE __attribute__ ((always_inline)) static inline
 
 #if !defined(__AVR__)
 #include <string.h>
@@ -211,6 +214,8 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define EASE8_C 1
 #define AVG8_C 1
 #define AVG7_C 1
+#define AVG16_C 1
+#define AVG15_C 1
 
 
 #elif defined(__AVR__)
@@ -225,6 +230,8 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define SUB8_C 0
 #define AVG8_C 0
 #define AVG7_C 0
+#define AVG16_C 0
+#define AVG15_C 0
 
 #define QADD8_AVRASM 1
 #define QADD7_AVRASM 1
@@ -234,6 +241,8 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define SUB8_AVRASM 1
 #define AVG8_AVRASM 1
 #define AVG7_AVRASM 1
+#define AVG16_AVRASM 1
+#define AVG15_AVRASM 1
 
 // Note: these require hardware MUL instruction
 //       -- sorry, ATtiny!
@@ -285,6 +294,8 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define EASE8_C 1
 #define AVG8_C 1
 #define AVG7_C 1
+#define AVG16_C 1
+#define AVG15_C 1
 
 #endif
 
@@ -827,9 +838,9 @@ typedef q<uint16_t, 12,4> q124;
 // that provides similar functionality.
 // You can also force use of the get_millisecond_timer function
 // by #defining USE_GET_MILLISECOND_TIMER.
-#if (defined(ARDUINO) || defined(SPARK)) && !defined(USE_GET_MILLISECOND_TIMER)
+#if (defined(ARDUINO) || defined(SPARK) || defined(FASTLED_HAS_MILLIS)) && !defined(USE_GET_MILLISECOND_TIMER)
 // Forward declaration of Arduino function 'millis'.
-uint32_t millis();
+//uint32_t millis();
 #define GET_MILLIS millis
 #else
 uint32_t get_millisecond_timer();

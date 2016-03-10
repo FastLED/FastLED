@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_H
 #define __INC_FASTSPI_H
 
+#include "FastLED.h"
+
 #include "controller.h"
 #include "lib8tion.h"
 

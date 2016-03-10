@@ -1,6 +1,10 @@
 #ifndef __INC_FASTSPI_NOP_H
 #define __INC_FASTSPI_NOP_H
 
+#if 0 // Guard against the arduino ide idiotically including every header file
+
+#include "FastLED.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 /// A nop/stub class, mostly to show the SPI methods that are needed/used by the various SPI chipset implementations.  Should
@@ -56,4 +60,5 @@ public:
 
 FASTLED_NAMESPACE_END
 
+#endif
 #endif

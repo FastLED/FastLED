@@ -18,7 +18,7 @@
 /// @param i - first byte to add
 /// @param j - second byte to add
 /// @returns the sum of i & j, capped at 0xFF
-LIB8STATIC uint8_t qadd8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t qadd8( uint8_t i, uint8_t j)
 {
 #if QADD8_C == 1
     unsigned int t = i + j;
@@ -51,7 +51,7 @@ LIB8STATIC uint8_t qadd8( uint8_t i, uint8_t j)
 /// @param i - first byte to add
 /// @param j - second byte to add
 /// @returns the sum of i & j, capped at 0xFF
-LIB8STATIC int8_t qadd7( int8_t i, int8_t j)
+LIB8STATIC_ALWAYS_INLINE int8_t qadd7( int8_t i, int8_t j)
 {
 #if QADD7_C == 1
     int16_t t = i + j;
@@ -83,7 +83,7 @@ LIB8STATIC int8_t qadd7( int8_t i, int8_t j)
 
 /// subtract one byte from another, saturating at 0x00
 /// @returns i - j with a floor of 0
-LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t qsub8( uint8_t i, uint8_t j)
 {
 #if QSUB8_C == 1
     int t = i - j;
@@ -112,7 +112,7 @@ LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
 }
 
 /// add one byte to another, with one byte result
-LIB8STATIC uint8_t add8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t add8( uint8_t i, uint8_t j)
 {
 #if ADD8_C == 1
     int t = i + j;
@@ -128,7 +128,7 @@ LIB8STATIC uint8_t add8( uint8_t i, uint8_t j)
 
 
 /// subtract one byte from another, 8-bit result
-LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t sub8( uint8_t i, uint8_t j)
 {
 #if SUB8_C == 1
     int t = i - j;
@@ -145,7 +145,7 @@ LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 /// Calculate an integer average of two unsigned
 ///       8-bit integer values (uint8_t).
 ///       Fractional results are rounded down, e.g. avg8(20,41) = 30
-LIB8STATIC uint8_t avg8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t avg8( uint8_t i, uint8_t j)
 {
 #if AVG8_C == 1
     return (i + j) >> 1;
@@ -163,12 +163,37 @@ LIB8STATIC uint8_t avg8( uint8_t i, uint8_t j)
 #endif
 }
 
+/// Calculate an integer average of two unsigned
+///       16-bit integer values (uint16_t).
+///       Fractional results are rounded down, e.g. avg16(20,41) = 30
+LIB8STATIC_ALWAYS_INLINE uint16_t avg16( uint16_t i, uint16_t j)
+{
+#if AVG16_C == 1
+    return (uint32_t)((uint32_t)(i) + (uint32_t)(j)) >> 1;
+#elif AVG16_AVRASM == 1
+    asm volatile(
+                 /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
+                 "add %A[i], %A[j]    \n\t"
+                 /* Now, add C + jHi to iHi, 17th bit overflows into C flag */
+                 "adc %B[i], %B[j]    \n\t"
+                 /* Divide iHi by two, moving C flag into high 16th bit, old 9th bit now in C */
+                 "ror %B[i]        \n\t"
+                 /* Divide iLo by two, moving C flag into high 8th bit */
+                 "ror %A[i]        \n\t"
+                 : [i] "+a" (i)
+                 : [j] "a"  (j) );
+    return i;
+#else
+#error "No implementation for avg16 available."
+#endif
+}
+
 
 /// Calculate an integer average of two signed 7-bit
 ///       integers (int8_t)
 ///       If the first argument is even, result is rounded down.
 ///       If the first argument is odd, result is result up.
-LIB8STATIC int8_t avg7( int8_t i, int8_t j)
+LIB8STATIC_ALWAYS_INLINE int8_t avg7( int8_t i, int8_t j)
 {
 #if AVG7_C == 1
     return ((i + j) >> 1) + (i & 0x1);
@@ -185,6 +210,34 @@ LIB8STATIC int8_t avg7( int8_t i, int8_t j)
 #endif
 }
 
+/// Calculate an integer average of two signed 15-bit
+///       integers (int16_t)
+///       If the first argument is even, result is rounded down.
+///       If the first argument is odd, result is result up.
+LIB8STATIC_ALWAYS_INLINE int16_t avg15( int16_t i, int16_t j)
+{
+#if AVG15_C == 1
+    return ((int32_t)((int32_t)(i) + (int32_t)(j)) >> 1) + (i & 0x1);
+#elif AVG15_AVRASM == 1
+    asm volatile(
+                 /* first divide j by 2, throwing away lowest bit */
+                 "asr %B[j]          \n\t"
+                 "ror %A[j]          \n\t"
+                 /* now divide i by 2, with lowest bit going into C */
+                 "asr %B[i]          \n\t"
+                 "ror %A[i]          \n\t"
+                 /* add j + C to i */
+                 "adc %A[i], %A[j]   \n\t"
+                 "adc %B[i], %B[j]   \n\t"
+                 : [i] "+a" (i)
+                 : [j] "a"  (j) );
+    return i;
+#else
+#error "No implementation for avg15 available."
+#endif
+}
+
+
 ///       Calculate the remainder of one unsigned 8-bit
 ///       value divided by anoter, aka A % M.
 ///       Implemented by repeated subtraction, which is
@@ -193,7 +246,7 @@ LIB8STATIC int8_t avg7( int8_t i, int8_t j)
 ///       the loop has to execute multiple times.  However,
 ///       even in that case, the loop is only two
 ///       instructions long on AVR, i.e., quick.
-LIB8STATIC uint8_t mod8( uint8_t a, uint8_t m)
+LIB8STATIC_ALWAYS_INLINE uint8_t mod8( uint8_t a, uint8_t m)
 {
 #if defined(__AVR__)
     asm volatile (
@@ -219,7 +272,7 @@ LIB8STATIC uint8_t mod8( uint8_t a, uint8_t m)
 ///          e.g. if you have seven modes, this switches
 ///          to the next one and wraps around if needed:
 ///            mode = addmod8( mode, 1, 7);
-///          See 'mod8' for notes on performance.
+///LIB8STATIC_ALWAYS_INLINESee 'mod8' for notes on performance.
 LIB8STATIC uint8_t addmod8( uint8_t a, uint8_t b, uint8_t m)
 {
 #if defined(__AVR__)
@@ -239,7 +292,7 @@ LIB8STATIC uint8_t addmod8( uint8_t a, uint8_t b, uint8_t m)
 }
 
 /// 8x8 bit multiplication, with 8 bit result
-LIB8STATIC uint8_t mul8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t mul8( uint8_t i, uint8_t j)
 {
 #if MUL8_C == 1
     return ((int)i * (int)(j) ) & 0xFF;
@@ -264,7 +317,7 @@ LIB8STATIC uint8_t mul8( uint8_t i, uint8_t j)
 
 /// saturating 8x8 bit multiplication, with 8 bit result
 /// @returns the product of i * j, capping at 0xFF
-LIB8STATIC uint8_t qmul8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t qmul8( uint8_t i, uint8_t j)
 {
 #if QMUL8_C == 1
     int p = ((int)i * (int)(j) );
@@ -298,7 +351,7 @@ LIB8STATIC uint8_t qmul8( uint8_t i, uint8_t j)
 
 
 /// take abs() of a signed 8-bit uint8_t
-LIB8STATIC int8_t abs8( int8_t i)
+LIB8STATIC_ALWAYS_INLINE int8_t abs8( int8_t i)
 {
 #if ABS8_C == 1
     if( i < 0) i = -i;

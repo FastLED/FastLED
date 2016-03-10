@@ -1,6 +1,8 @@
 #ifndef __INC_PLATFORMS_H
 #define __INC_PLATFORMS_H
 
+#include "FastLED.h"
+
 #include "fastled_config.h"
 
 #if defined(NRF51)
@@ -16,10 +18,10 @@
 #include "platforms/arm/sam/fastled_arm_sam.h"
 #elif defined(STM32F10X_MD)
 #include "platforms/arm/stm32/fastled_arm_stm32.h"
-#elif defined(__SAMD21G18A__)
+#elif defined(__SAMD21G18A__) || defined(__SAMD21E17A__)
 #include "platforms/arm/d21/fastled_arm_d21.h"
-#elif defined(__XTENSA__)
-#error "XTENSA-architecture microcontrollers are not supported"
+#elif defined(ESP8266)
+#include "platforms/esp/8266/fastled_esp8266.h"
 #else
 // AVR platforms
 #include "platforms/avr/fastled_avr.h"

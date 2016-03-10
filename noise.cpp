@@ -20,6 +20,37 @@ FL_PROGMEM static uint8_t const p[] = { 151,160,137,91,90,15,
    138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180,151
    };
 
+
+#if FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW == 1
+#define AVG15(U,V) (((U)+(V)) >> 1)
+#else
+// See if we should use the inlined avg15 for AVR with MUL instruction
+#if defined(__AVR__) && (LIB8_ATTINY == 0)
+#define AVG15(U,V) (avg15_inline_avr_mul((U),(V)))
+// inlined copy of avg15 for AVR with MUL instruction; cloned from math8.h
+// Forcing this inline in the 3-D 16bit noise produces a 12% speedup overall,
+// at a cost of just +8 bytes of net code size.
+static int16_t inline __attribute__((always_inline))  avg15_inline_avr_mul( int16_t i, int16_t j)
+{
+    asm volatile(
+                 /* first divide j by 2, throwing away lowest bit */
+                 "asr %B[j]          \n\t"
+                 "ror %A[j]          \n\t"
+                 /* now divide i by 2, with lowest bit going into C */
+                 "asr %B[i]          \n\t"
+                 "ror %A[i]          \n\t"
+                 /* add j + C to i */
+                 "adc %A[i], %A[j]   \n\t"
+                 "adc %B[i], %B[j]   \n\t"
+                 : [i] "+a" (i)
+                 : [j] "a"  (j) );
+    return i;
+}
+#else
+#define AVG15(U,V) (avg15((U),(V)))
+#endif
+#endif
+
 //
 // #define FADE_12
 #define FADE_16
@@ -58,7 +89,7 @@ static int16_t inline __attribute__((always_inline))  grad16(uint8_t hash, int16
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return (u+v)>>1;
+  return AVG15(u,v);
 #endif
 }
 
@@ -69,7 +100,7 @@ static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return (u+v)>>1;
+  return AVG15(u,v);
 }
 
 static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_t x) {
@@ -81,7 +112,7 @@ static int16_t inline __attribute__((always_inline)) grad16(uint8_t hash, int16_
   if(hash&1) { u = -u; }
   if(hash&2) { v = -v; }
 
-  return (u+v)>>1;
+  return AVG15(u,v);
 }
 
 // selectBasedOnHashBit performs this:
@@ -290,7 +321,13 @@ uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z) {
   int32_t ans = inoise16_raw(x,y,z);
   ans = ans + 19052L;
   uint32_t pan = ans;
-  return (pan*220L)>>7;
+  // pan = (ans * 220L) >> 7.  That's the same as:
+  // pan = (ans * 440L) >> 8.  And this way avoids a 7X four-byte shift-loop on AVR.
+  // Identical math, except for the highest bit, which we don't care about anyway,
+  // since we're returning the 'middle' 16 out of a 32-bit value anyway.
+  pan *= 440L;
+  return (pan>>8);
+
   // // return scale16by8(pan,220)<<1;
   // return ((inoise16_raw(x,y,z)+19052)*220)>>7;
   // return scale16by8(inoise16_raw(x,y,z)+19052,220)<<1;
@@ -333,7 +370,13 @@ uint16_t inoise16(uint32_t x, uint32_t y) {
   int32_t ans = inoise16_raw(x,y);
   ans = ans + 17308L;
   uint32_t pan = ans;
-  return (pan*242L)>>7;
+  // pan = (ans * 242L) >> 7.  That's the same as:
+  // pan = (ans * 484L) >> 8.  And this way avoids a 7X four-byte shift-loop on AVR.
+  // Identical math, except for the highest bit, which we don't care about anyway,
+  // since we're returning the 'middle' 16 out of a 32-bit value anyway.
+  pan *= 484L;
+  return (pan>>8);
+    
   // return (uint32_t)(((int32_t)inoise16_raw(x,y)+(uint32_t)17308)*242)>>7;
   // return scale16by8(inoise16_raw(x,y)+17308,242)<<1;
 }
@@ -655,7 +698,7 @@ void fill_noise8(CRGB *leds, int num_leds,
 void fill_noise16(CRGB *leds, int num_leds,
             uint8_t octaves, uint16_t x, int scale,
             uint8_t hue_octaves, uint16_t hue_x, int hue_scale,
-            uint16_t time) {
+            uint16_t time, uint8_t hue_shift) {
   uint8_t V[num_leds];
   uint8_t H[num_leds];
 
@@ -666,7 +709,7 @@ void fill_noise16(CRGB *leds, int num_leds,
   fill_raw_noise8(H,num_leds,hue_octaves,hue_x,hue_scale,time);
 
   for(int i = 0; i < num_leds; i++) {
-    leds[i] = CHSV(H[i],255,V[i]);
+    leds[i] = CHSV(H[i] + hue_shift,255,V[i]);
   }
 }
 
