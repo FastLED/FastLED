@@ -1026,6 +1026,7 @@ public: \
     operator bool() { return ready(); } \
 };
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMillis,uint32_t,GET_MILLIS);
+INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMicros,uint32_t,micros);
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNSeconds,uint16_t,seconds16);
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNBSeconds,uint16_t,bseconds16);
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMinutes,uint16_t,minutes16);
@@ -1066,6 +1067,7 @@ public:
 typedef CEveryNTimePeriods<uint16_t,seconds16> CEveryNSeconds;
 typedef CEveryNTimePeriods<uint16_t,bseconds16> CEveryNBSeconds;
 typedef CEveryNTimePeriods<uint32_t,GET_MILLIS> CEveryNMillis;
+typedef CEveryNTimePeriods<uint32_t,micros> CEveryNMicros;
 typedef CEveryNTimePeriods<uint16_t,minutes16> CEveryNMinutes;
 typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 #endif
@@ -1075,6 +1077,8 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 #define CONCAT_MACRO( x, y ) CONCAT_HELPER( x, y )
 #define EVERY_N_MILLIS(N) EVERY_N_MILLIS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
 #define EVERY_N_MILLIS_I(NAME,N) static CEveryNMillis NAME(N); if( NAME )
+#define EVERY_N_MICROS(N) EVERY_N_MICROS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
+#define EVERY_N_MICROS_I(NAME,N) static CEveryNMicros NAME(N); if( NAME )
 #define EVERY_N_SECONDS(N) EVERY_N_SECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
 #define EVERY_N_SECONDS_I(NAME,N) static CEveryNSeconds NAME(N); if( NAME )
 #define EVERY_N_BSECONDS(N) EVERY_N_BSECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
@@ -1087,6 +1091,9 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 #define CEveryNMilliseconds CEveryNMillis
 #define EVERY_N_MILLISECONDS(N) EVERY_N_MILLIS(N)
 #define EVERY_N_MILLISECONDS_I(NAME,N) EVERY_N_MILLIS_I(NAME,N)
+#define CEveryNMicroseconds CEveryNMicros
+#define EVERY_N_MICROSECONDS(N) EVERY_N_MICROS(N)
+#define EVERY_N_MICROSECONDS_I(NAME,N) EVERY_N_MICROS_I(NAME,N)
 
 FASTLED_NAMESPACE_END
 ///@}
