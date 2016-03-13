@@ -1016,8 +1016,9 @@ public: \
     TIMETYPE getRemaining() { return mPeriod - getElapsed(); }  \
     TIMETYPE getLastTriggerTime() { return mPrevTrigger; }  \
     bool ready() { \
-        bool isReady = (getElapsed() >= mPeriod);   \
-        if( isReady ) { reset(); }  \
+        TIMETYPE time = getTime(); \
+        bool isReady = ((time - mPrevTrigger) >= mPeriod); \
+        if( isReady ) { mPrevTrigger = time; } \
         return isReady; \
     }   \
     TIMETYPE intervals(){ \
@@ -1062,8 +1063,9 @@ public:
     timeType getRemaining() { return mPeriod - getElapsed(); }
     timeType getLastTriggerTime() { return mPrevTrigger; }
     bool ready() {
-        bool isReady = (getElapsed() >= mPeriod);
-        if( isReady ) { reset(); }
+        timeType time = getTime();
+        bool isReady = ((time - mPrevTrigger) >= mPeriod);
+        if( isReady ) { mPrevTrigger = time; }
         return isReady;
     }
     timeType intervals(){
