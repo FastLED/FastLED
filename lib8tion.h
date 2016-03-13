@@ -1020,6 +1020,13 @@ public: \
         if( isReady ) { reset(); }  \
         return isReady; \
     }   \
+    TIMETYPE intervals(){ \
+      TIMETYPE elapsed = getElapsed(); \
+      TIMETYPE intervals = elapsed / mPeriod; \
+      elapsed -= elapsed % mPeriod; \
+      mPrevTrigger += elapsed; \
+      return intervals; \
+    } \
     void reset() { mPrevTrigger = getTime(); }; \
     void trigger() { mPrevTrigger = getTime() - mPeriod; }; \
         \
@@ -1058,6 +1065,13 @@ public:
         bool isReady = (getElapsed() >= mPeriod);
         if( isReady ) { reset(); }
         return isReady;
+    }
+    timeType intervals(){
+      timeType elapsed = getElapsed();
+      timeType intervals = elapsed / mPeriod;
+      elapsed -= elapsed % mPeriod;
+      mPrevTrigger += elapsed;
+      return intervals;
     }
     void reset() { mPrevTrigger = getTime(); };
     void trigger() { mPrevTrigger = getTime() - mPeriod; };
