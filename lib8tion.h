@@ -1000,7 +1000,7 @@ LIB8STATIC uint16_t bseconds16()
 
 // Classes to implement "Every N Milliseconds", "Every N Seconds",
 // "Every N Minutes", "Every N Hours", and "Every N BSeconds".
-#if 1
+#if __cplusplus < 201103
 #define INSTANTIATE_EVERY_N_TIME_PERIODS(NAME,TIMETYPE,TIMEGETTER) \
 class NAME {    \
 public: \
