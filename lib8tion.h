@@ -1065,7 +1065,7 @@ public:
 };
 typedef CEveryNTimePeriods<uint16_t,seconds16> CEveryNSeconds;
 typedef CEveryNTimePeriods<uint16_t,bseconds16> CEveryNBSeconds;
-typedef CEveryNTimePeriods<uint32_t,millis> CEveryNMillis;
+typedef CEveryNTimePeriods<uint32_t,GET_MILLIS> CEveryNMillis;
 typedef CEveryNTimePeriods<uint16_t,minutes16> CEveryNMinutes;
 typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 #endif
