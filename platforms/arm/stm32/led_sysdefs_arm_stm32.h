@@ -13,7 +13,7 @@
 #define INTERRUPT_THRESHOLD 1
 #endif
 
-// Default to allowing interrupts
+// Default to NOT allowing interrupts
 #ifndef FASTLED_ALLOW_INTERRUPTS
 #define FASTLED_ALLOW_INTERRUPTS 0
 #endif

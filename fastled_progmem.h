@@ -2,7 +2,7 @@
 #define __INC_FL_PROGMEM_H
 
 ///@file fastled_progmem.h
-/// wrapper definitions to allow seamless use of PROGMEM in environmens that have it
+/// wrapper definitions to allow seamless use of PROGMEM in environments that have it
 
 FASTLED_NAMESPACE_BEGIN
 
