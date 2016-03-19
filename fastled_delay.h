@@ -1,6 +1,8 @@
 #ifndef __INC_FL_DELAY_H
 #define __INC_FL_DELAY_H
 
+#include "FastLED.h"
+
 ///@file fastled_delay.h
 ///Utility functions and classes for managing delaycycles
 
@@ -41,6 +43,11 @@ public:
 
 // predeclaration to not upset the compiler
 template<int CYCLES> inline void delaycycles();
+template<int CYCLES> inline void delaycycles_min1() {
+  delaycycles<1>();
+  delaycycles<CYCLES-1>();
+}
+
 
 // TODO: ARM version of _delaycycles_
 
@@ -90,6 +97,10 @@ template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 
 // pre-instantiations for values small enough to not need the loop, as well as sanity holders
 // for some negative values.
+template<> __attribute__((always_inline)) inline void delaycycles<-10>() {}
+template<> __attribute__((always_inline)) inline void delaycycles<-9>() {}
+template<> __attribute__((always_inline)) inline void delaycycles<-8>() {}
+template<> __attribute__((always_inline)) inline void delaycycles<-7>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-6>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-5>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-4>() {}

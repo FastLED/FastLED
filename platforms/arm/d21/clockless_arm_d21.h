@@ -6,7 +6,7 @@ FASTLED_NAMESPACE_BEGIN
 #define FASTLED_HAS_CLOCKLESS 1
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
-class ClocklessController : public CLEDController {
+class ClocklessController : public CPixelLEDController<RGB_ORDER> {
   typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
   typedef typename FastPinBB<DATA_PIN>::port_t data_t;
 
@@ -22,43 +22,13 @@ public:
 
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
-  virtual void clearLeds(int nLeds) {
-    showColor(CRGB(0, 0, 0), nLeds, 0);
-  }
-
-  // set all the leds on the controller to a given color
-  virtual void showColor(const struct CRGB & rgbdata, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-    mWait.wait();
-    cli();
-
-    showRGBInternal(pixels);
-
-    sei();
-    mWait.mark();
-  }
-
-  virtual void show(const struct CRGB *rgbdata, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
-    mWait.wait();
-    cli();
-
-    showRGBInternal(pixels);
-
-    sei();
-    mWait.mark();
-  }
-
-#ifdef SUPPORT_ARGB
-  virtual void show(const struct CARGB *rgbdata, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER> pixels(rgbdata, nLeds, scale, getDither());
+  virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
     mWait.wait();
     cli();
     showRGBInternal(pixels);
     sei();
     mWait.mark();
   }
-#endif
 
   // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
   // gcc will use register Y for the this pointer.

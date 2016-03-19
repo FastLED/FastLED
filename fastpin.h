@@ -1,6 +1,8 @@
 #ifndef __INC_FASTPIN_H
 #define __INC_FASTPIN_H
 
+#include "FastLED.h"
+
 #include "led_sysdefs.h"
 
 #pragma GCC diagnostic push
@@ -36,8 +38,8 @@ class Pin : public Selectable {
 
 	void _init() {
 		mPinMask = digitalPinToBitMask(mPin);
-		mPort = portOutputRegister(digitalPinToPort(mPin));
-		mInPort = portInputRegister(digitalPinToPort(mPin));
+		mPort = (volatile RwReg*)portOutputRegister(digitalPinToPort(mPin));
+		mInPort = (volatile RoReg*)portInputRegister(digitalPinToPort(mPin));
 	}
 public:
 	Pin(int pin) : mPin(pin) { _init(); }
