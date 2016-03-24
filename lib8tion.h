@@ -750,7 +750,7 @@ LIB8STATIC uint8_t squarewave8( uint8_t in, uint8_t pulsewidth=128)
 
 
 
-/// Template class for represneting fractional ints.
+/// Template class for representing fractional ints.
 template<class T, int F, int I> class q {
   T i:I;
   T f:F;
@@ -761,7 +761,7 @@ public:
   uint16_t operator*(uint16_t v) { return (v*i) + ((v*f)>>F); }
   int32_t operator*(int32_t v) { return (v*i) + ((v*f)>>F); }
   int16_t operator*(int16_t v) { return (v*i) + ((v*f)>>F); }
-#ifdef FASTLED_ARM
+#if defined(FASTLED_ARM) && !defined(__TI_COMPILER_VERSION__)	//TI compiler defines int as int32_t, so throws repeat func compiler error
   int operator*(int v) { return (v*i) + ((v*f)>>F); }
 #endif
 };
@@ -770,7 +770,7 @@ template<class T, int F, int I> static uint32_t operator*(uint32_t v, q<T,F,I> &
 template<class T, int F, int I> static uint16_t operator*(uint16_t v, q<T,F,I> & q) { return q * v; }
 template<class T, int F, int I> static int32_t operator*(int32_t v, q<T,F,I> & q) { return q * v; }
 template<class T, int F, int I> static int16_t operator*(int16_t v, q<T,F,I> & q) { return q * v; }
-#ifdef FASTLED_ARM
+#if defined(FASTLED_ARM) && !defined(__TI_COMPILER_VERSION__)	//TI compiler defines int as int32_t, so throws repeat func compiler error
 template<class T, int F, int I> static int operator*(int v, q<T,F,I> & q) { return q * v; }
 #endif
 
