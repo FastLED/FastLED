@@ -22,6 +22,8 @@
 #include "platforms/arm/d21/led_sysdefs_arm_d21.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/led_sysdefs_esp8266.h"
+#elif defined(CC3200) || defined(cc3200)
+#include "platforms/arm/cc3200/led_sysdefs_arm_cc3200.h"
 #else
 // AVR platforms
 #include "platforms/avr/led_sysdefs_avr.h"
@@ -36,6 +38,8 @@
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #ifdef ARDUINO
 #include<Arduino.h>
+#else 
+#warning Arduino library not included. Might cause incompatibility with some files. If having compiler errors, include it.
 #endif
 
 #define CLKS_PER_US (F_CPU/1000000)
