@@ -37,7 +37,7 @@ LIB8STATIC uint16_t random16()
 LIB8STATIC uint8_t random8(uint8_t lim)
 {
     uint8_t r = random8();
-    r = scale8( r, lim);
+    r = (r*lim) >> 8;
     return r;
 }
 
