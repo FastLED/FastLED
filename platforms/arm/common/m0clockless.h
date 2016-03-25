@@ -6,7 +6,7 @@ struct M0ClocklessData {
   uint8_t e[3];
   uint8_t adj;
   uint8_t pad;
-  uint8_t s[3];
+  uint32_t s[3];
 };
 
 
