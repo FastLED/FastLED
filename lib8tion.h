@@ -306,7 +306,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 
 ///////////////////////////////////////////////////////////////////////
 //
-// typdefs for fixed-point fractional types.
+// typedefs for fixed-point fractional types.
 //
 // sfract7 should be interpreted as signed 128ths.
 // fract8 should be interpreted as unsigned 256ths.
