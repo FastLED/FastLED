@@ -1,6 +1,9 @@
 #ifndef __FASTPIN_ARM_CC3200_H
 #define __FASTPIN_ARM_CC3200_H
 
+#include "hw_gpio.h"
+#include "hw_memmap.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
@@ -8,8 +11,11 @@ FASTLED_NAMESPACE_BEGIN
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
 
-#else
-
+#else //FASTLED_FORCE_SOFTWARE_PINS
+	
+#if !defined(GPIO_O_GPIO_DATA) || !defined(GPIOA0_BASE)
+#warning ERROR: HWGPIO Not included. Try including hw_memmap.h and/or hw_gpio.h
+#endif
 //sets the register base from a port number. assumes hw_memmap.h included before this lib
 //#define ULREG(P) ((P <= 3) ? (GPIOA0_BASE + 0x00001000*P) : GPIOA4_BASE)	//Returns the base reg address of the requested GPIO port
 
@@ -51,30 +57,30 @@ public:
 
 //couldn't get the following macros to work, so see below for long-form declarations
 #define _R(L, T) struct __gen_struct_A ## L ## _ ## T
-//#define _RD32(L, R) struct __gen_struct_A ## L ## _ ## R { static __attribute__((always_inline)) inline reg32_t r() { return GPIOA ## L ## _BASE + R ; } \	//returns the address, port(P) + offset (R)
+//#define _RD32(L, R) struct __gen_struct_A ## L ## _ ## R { static __attribute__((always_inline)) inline reg32_t r() { return GPIOA ## L ## _BASE + R ; } };	//returns the address, port(P) + offset (R)
 //#define _IO32(L) _RD32(L, GPIO_O_GPIO_DATA); _RD32(L, GPIO_O_GPIO_DIR);
 //CC3200 uses a special method to bitmask. Essentially, the address bits 9:2 specify the mask, and written value specifies desired value
 
 //NOTE: could simplify to only PIN, but not sure PIN/8 will provide [0, 1, ..., 4]
 #define _DEFPIN_ARM(PIN, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, (1 << (PIN % 8)), \
-_R(L, GPIO_O_GPIO_DATA), _R(L, GPIO_O_GPIO_DIR)> {};
+_R(L, GPIO_O_GPIO_DATA), _R(L, GPIO_O_GPIO_DIR)> {}
 
 // Actual pin definitions
 #if defined(FASTLED_CC3200)
 //defines data structs for Ports A0-A4 (A4 is only available on CC3200 with GPIO32)
 
 //_IO32(0); _IO32(1); _IO32(2); _IO32(3); _IO32(4);
-struct __gen_struct_A0_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA0_BASE + GPIO_O_GPIO_DATA; }
-struct __gen_struct_A0_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA0_BASE + GPIO_O_GPIO_DIR; }
-struct __gen_struct_A1_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA1_BASE + GPIO_O_GPIO_DATA; }
-struct __gen_struct_A1_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA1_BASE + GPIO_O_GPIO_DIR; }
-struct __gen_struct_A2_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA2_BASE + GPIO_O_GPIO_DATA; }
-struct __gen_struct_A2_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA2_BASE + GPIO_O_GPIO_DIR; }
-struct __gen_struct_A3_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA3_BASE + GPIO_O_GPIO_DATA; }
-struct __gen_struct_A3_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA3_BASE + GPIO_O_GPIO_DIR; }
+struct __gen_struct_A0_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA0_BASE + GPIO_O_GPIO_DATA; }};
+struct __gen_struct_A0_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA0_BASE + GPIO_O_GPIO_DIR; }};
+struct __gen_struct_A1_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA1_BASE + GPIO_O_GPIO_DATA; }};
+struct __gen_struct_A1_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA1_BASE + GPIO_O_GPIO_DIR; }};
+struct __gen_struct_A2_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA2_BASE + GPIO_O_GPIO_DATA; }};
+struct __gen_struct_A2_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA2_BASE + GPIO_O_GPIO_DIR; }};
+struct __gen_struct_A3_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA3_BASE + GPIO_O_GPIO_DATA; }};
+struct __gen_struct_A3_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA3_BASE + GPIO_O_GPIO_DIR; }};
 
 #define MAX_PIN 27
-//_DEFPIN_ARM(0, 0); 	_DEFPIN_ARM(1, 0);	_DEFPIN_ARM(2, 0);	_DEFPIN_ARM(3, 0);
+_DEFPIN_ARM(0, 0); 	_DEFPIN_ARM(1, 0);	_DEFPIN_ARM(2, 0);	_DEFPIN_ARM(3, 0);
 _DEFPIN_ARM(4, 0); 	_DEFPIN_ARM(5, 0);	_DEFPIN_ARM(6, 0);	_DEFPIN_ARM(7, 0);
 _DEFPIN_ARM(8, 1); 	_DEFPIN_ARM(9, 1);	_DEFPIN_ARM(10, 1);	_DEFPIN_ARM(11, 1);
 _DEFPIN_ARM(12, 1);	_DEFPIN_ARM(13, 1);	_DEFPIN_ARM(14, 1);	_DEFPIN_ARM(15, 1);
