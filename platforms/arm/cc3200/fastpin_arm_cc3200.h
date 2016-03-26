@@ -88,6 +88,7 @@ _DEFPIN_ARM(31, 3);	_DEFPIN_ARM(32, 4);
 #define SPI_DATA 7		//pin 7 on CC3200mod. Same on CC3200. Assuming default mux. MOSI
 #define SPI_CLOCK 5		//pin 5 on CC3200mod. Same on CC3200. Assuming default mux
 
+#define HAS_HARDWARE_PIN_SUPPORT
 #endif
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
