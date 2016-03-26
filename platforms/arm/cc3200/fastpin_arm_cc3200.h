@@ -12,13 +12,13 @@ FASTLED_NAMESPACE_BEGIN
 #undef HAS_HARDWARE_PIN_SUPPORT
 
 #else //FASTLED_FORCE_SOFTWARE_PINS
-	
+
 #if !defined(GPIO_O_GPIO_DATA) || !defined(GPIOA0_BASE)
 #warning ERROR: HWGPIO Not included. Try including hw_memmap.h and/or hw_gpio.h
 #endif
 //sets the register base from a port number. assumes hw_memmap.h included before this lib
 //#define ULREG(P) ((P <= 3) ? (GPIOA0_BASE + 0x00001000*P) : GPIOA4_BASE)	//Returns the base reg address of the requested GPIO port
-
+#define ADDRESSREF(A) (*(volatile uint32_t *)(A))
 
 /// Template definition for Teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the individual port GPIO registers.  In theory, in some way, bit-band register access -should- be faster. However, in previous versions (i.e. Teensy LC)
@@ -70,14 +70,16 @@ _R(L, GPIO_O_GPIO_DATA), _R(L, GPIO_O_GPIO_DIR)> {}
 //defines data structs for Ports A0-A4 (A4 is only available on CC3200 with GPIO32)
 
 //_IO32(0); _IO32(1); _IO32(2); _IO32(3); _IO32(4);
-struct __gen_struct_A0_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA0_BASE + GPIO_O_GPIO_DATA; }};
-struct __gen_struct_A0_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA0_BASE + GPIO_O_GPIO_DIR; }};
-struct __gen_struct_A1_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA1_BASE + GPIO_O_GPIO_DATA; }};
-struct __gen_struct_A1_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA1_BASE + GPIO_O_GPIO_DIR; }};
-struct __gen_struct_A2_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA2_BASE + GPIO_O_GPIO_DATA; }};
-struct __gen_struct_A2_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA2_BASE + GPIO_O_GPIO_DIR; }};
-struct __gen_struct_A3_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA3_BASE + GPIO_O_GPIO_DATA; }};
-struct __gen_struct_A3_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return GPIOA3_BASE + GPIO_O_GPIO_DIR; }};
+struct __gen_struct_A0_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA0_BASE + GPIO_O_GPIO_DATA); }};
+struct __gen_struct_A0_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA0_BASE + GPIO_O_GPIO_DIR); }};
+struct __gen_struct_A1_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA1_BASE + GPIO_O_GPIO_DATA); }};
+struct __gen_struct_A1_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA1_BASE + GPIO_O_GPIO_DIR); }};
+struct __gen_struct_A2_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA2_BASE + GPIO_O_GPIO_DATA); }};
+struct __gen_struct_A2_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA2_BASE + GPIO_O_GPIO_DIR); }};
+struct __gen_struct_A3_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA3_BASE + GPIO_O_GPIO_DATA); }};
+struct __gen_struct_A3_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA3_BASE + GPIO_O_GPIO_DIR); }};
+
+
 
 #define MAX_PIN 27
 _DEFPIN_ARM(0, 0); 	_DEFPIN_ARM(1, 0);	_DEFPIN_ARM(2, 0);	_DEFPIN_ARM(3, 0);
