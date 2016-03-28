@@ -34,7 +34,9 @@ typedef bool boolean;
 #else
 typedef uint8_t boolean;
 #define false 0
+#ifndef true
 #define true (!false)
+#endif	//true
 #endif
 
 //random Arduino functions & vars

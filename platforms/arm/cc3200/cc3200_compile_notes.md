@@ -11,6 +11,7 @@ Please compile this with the GNU GCC compiler. A few requirements to set it up:
 			[path to CC3200 SDK]\driverlib
 			[path to CC3200 SDK]\example\common
 			[path to CC3200 SDK]\inc
+			[path to FastLED library]
 	Change the compiler flags/defines
 		We will need to change some compiler flags to get the ones we want and need for proper compilation. This config has been validated, others may or may not work.
 		Use the Project Explorer menu at the left: click "Show Build Settings." In the left pane, open the GNU Compiler dropdown, and select the "Optimization" page.

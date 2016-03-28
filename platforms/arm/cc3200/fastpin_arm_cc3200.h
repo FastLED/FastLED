@@ -1,7 +1,7 @@
 #ifndef __FASTPIN_ARM_CC3200_H
 #define __FASTPIN_ARM_CC3200_H
 
-#include "hw_gpio.h"
+#include "hw_gpio.h"	//from CC3200 SDK. Check your includes if you can't find it.
 #include "hw_memmap.h"
 
 FASTLED_NAMESPACE_BEGIN
