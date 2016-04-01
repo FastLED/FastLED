@@ -1,11 +1,19 @@
-For the CC3200, this was designed to use the CC3200 drivers & includes with the TI Code Composer Studio.
+*For the CC3200, this was designed to use the CC3200 drivers & includes with the TI Code Composer Studio.*
 
-Please compile this with the GNU GCC compiler. A few requirements to set it up:
-	Create a new configuration for GNU GCC compiler (instead of TI Compiler).
+*Please compile this with the GNU GCC compiler.* 
+#GCC Setup Requirements:#
+
+* Create a new configuration for GNU GCC compiler (instead of TI Compiler).
 		Use the Project Explorer menu at the left: click "Show Build Settings." In the left pane, select CCS General. If CC3200 isn't already selected, select "Wireless Connectivity MCUs" from the variant dropdown, then CC3200 to its right. Under compiler version, select GNU (the compiler with the highest version number).
-	Make sure to use the g++ compiler. There's some quirks that don't seem to resolve well with the C (GCC) compiler
-		To do this, use the Project Explorer menu at the left: click "Show Build Settings." Click the "Variables" or "Build Variables" tab. Click the checkbox at the bottom to "Show system variables". Double-click the "CG_TOOL_GCC" to change the variable value. Modify the file that it is referring to, to end with g++.exe from gcc.exe. So it should end with "arm-none-eabi-g++.exe"
-	Add Include Directories
+
+* Make sure to use the g++ compiler. There's some quirks that don't seem to resolve well with the C (GCC) compiler
+
+	1. To do this, use the Project Explorer menu at the left: click "Show Build Settings."
+	2. Click the "Variables" or "Build Variables" tab. 
+	3. Click the checkbox at the bottom to "Show system variables".
+	4. Double-click the "CG_TOOL_GCC" to change the variable value. Modify the file that it is referring to, to end with g++.exe from gcc.exe. So it should end with "arm-none-eabi-g++.exe"
+
+* Add Include Directories
 		You will need the core CC3200 libraries (included in the TI CC3200 SDK) to ensure proper compilation
 		Use the Project Explorer menu at the left: click "Show Build Settings." In the "GNU Compiler" dropdown in the left pane, select Directories. In the main box, use the Add Directory (the plus button) to add the following directories (browse to them as needed):
 			[path to CC3200 SDK]\driverlib
