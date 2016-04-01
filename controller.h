@@ -31,7 +31,7 @@ typedef uint8_t EDitherMode;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Base definition for an LED controller.  Pretty much the methods that every LED controller object will make available.
-/// Note that the showARGB method is not impelemented for all controllers yet.   Note also the methods for eventual checking
+/// Note that the showARGB method is not implemented for all controllers yet.   Note also the methods for eventual checking
 /// of background writing of data (I'm looking at you, teensy 3.0 DMA controller!).  If you want to pass LED controllers around
 /// to methods, make them references to this type, keeps your code saner.  However, most people won't be seeing/using these objects
 /// directly at all

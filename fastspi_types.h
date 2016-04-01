@@ -12,11 +12,11 @@ FASTLED_NAMESPACE_BEGIN
 #define SPI_ADVANCE (3 + (MASK_SKIP_BITS & SKIP))
 
 /// Some of the SPI controllers will need to perform a transform on each byte before doing
-/// anyting with it.  Creating a class of this form and passing it in as a template parameter to
+/// anything with it.  Creating a class of this form and passing it in as a template parameter to
 /// writeBytes/writeBytes3 below will ensure that the body of this method will get called on every
 /// byte worked on.  Recommendation, make the adjust method aggressively inlined.
 ///
-/// TODO: Convinience macro for building these
+/// TODO: Convenience macro for building these
 class DATA_NOP {
 public:
   static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data) { return data; }
