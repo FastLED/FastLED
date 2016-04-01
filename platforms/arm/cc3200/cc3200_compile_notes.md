@@ -21,4 +21,25 @@ Please compile this with the GNU GCC compiler. A few requirements to set it up:
 			In the "Define Symbols" window, click the "Add..." button to add symbols. Add a symbol called "CC3200"
 		Click the miscellaneous page on the left tab
 			In the bottom half of the page that opens, double-click the line beginning "-std=", and set it to "-std=c++11"
-Check if needed:			Add a new flag with the value "-fpermissive"
+
+Linker:
+	Add CC3200 linker script
+		Using the Project explorer menu at the left, click "Show Build Settings." In the left pane, open the GNU Linker dropdown, and select "Libraries"
+		In the "Linker Command Files" section, add a new script. The path to the script is [Path to FastLED]\platforms\arm\cc3200\extras\cc3200link.ld
+	Add Linker search directories
+		Driverlib, etc
+		In the same window, in the "Library search path" section, add the following library paths:
+			"${CG_TOOL_SEARCH_PATH}": Click add, then "Variables...", then choose "${CG_TOOL_SEARCH_PATH}"
+			"${CG_GCC_SEARCH_PATH}": Click add, then "Variables...", then choose "${CG_GCC_SEARCH_PATH}"
+			Driverlib directory: Click add, then "Variables...", then choose "${CC3200_SDK_ROOT}". In the text box, append "\driverlib\gcc\exe" after the SDK Root variable.
+	Add libdriver.a (Driver library)
+		In the same window, in the "Libraries" section, ensure that the only two files are "driver" and "c". If one doesn't exist, add either "driver" or "c" to the field.
+	Add flag specs=nosys.specs
+		In the left pane, navigate to "Miscellaneous" under the "GNU Linker" dropdown.
+		In the main window, under the "Other flags" field, add the flag "--specs=nosys.specs"
+	Use gcc version of startup: startup_gcc.c
+		Import the startup file into the project
+			In the main window, right click the file and select "Add files..."
+			Navigate to [Path to FastLED]\platforms\arm\cc3200\extras\, and select "startup_gcc.c"
+	Mod relocator/blinky.ld to include __bss_start__ & end (that is, end of heap)
+		If you have errors related to __bss_start__, end, or other variables, change the Linker script to the "cc3200link.ld" file mentioned above

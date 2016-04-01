@@ -26,13 +26,14 @@
 #define F_CPU 80000000
 #endif
 
-// Get some system include files
+
 //#include <avr/io.h>
 //#include <avr/interrupt.h> // for cli/se definitions
-#include "arduino_compat_cc3200.h"
+
 
 // Define the register types
 #if !defined(ARDUINO) || defined(__TI_COMPILER_VERSION__) || defined(ccs) // && ARDUINO < 150
+#include "arduino_compat_cc3200.h"	// Get Arduino compatibility system include files
 typedef volatile uint32_t RoReg; /**< Read only 32-bit register (volatile const unsigned int) */
 typedef volatile uint32_t RwReg; /**< Read-Write 32-bit register (volatile unsigned int) */
 #endif
