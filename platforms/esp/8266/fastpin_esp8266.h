@@ -8,7 +8,7 @@ public:
   typedef volatile uint32_t * port_ptr_t;
   typedef uint32_t port_t;
 
-  inline static void setOutput() { pinMode(PIN, OUTPUT); }
+  inline static void setOutput() { GPES = MASK; } // pinMode(PIN, OUTPUT); }
   inline static void setInput() { pinMode(PIN, INPUT); }
 
   inline static void hi() __attribute__ ((always_inline)) { if(PIN < 16) { GPOS = MASK; } else { GP16O |= MASK; } }
@@ -26,6 +26,8 @@ public:
   inline static port_t hival() __attribute__ ((always_inline)) { if (PIN<16) { return GPO | MASK;  } else { return GP16O | MASK; } }
   inline static port_t loval() __attribute__ ((always_inline)) { if (PIN<16) { return GPO & ~MASK; } else { return GP16O & ~MASK; } }
   inline static port_ptr_t port() __attribute__ ((always_inline)) { if(PIN<16) { return &GPO; } else { return &GP16O; } }
+  inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &GPOS; } // there is no GP160 support for this
+	inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &GPOC; }
   inline static port_t mask() __attribute__ ((always_inline)) { return MASK; }
 
   inline static bool isset() __attribute__ ((always_inline)) { return (PIN < 16) ? (GPO & MASK) : (GP16O & MASK); }

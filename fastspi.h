@@ -105,8 +105,10 @@ class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SP
 #endif
 
 #else
-#warning "No hardware SPI pins defined.  All SPI access will default to bitbanged output"
 
+#if !defined(FASTLED_INTERNAL)
+#warning "No hardware SPI pins defined.  All SPI access will default to bitbanged output"
+#endif
 #endif
 
 // #if defined(USART_DATA) && defined(USART_CLOCK)
