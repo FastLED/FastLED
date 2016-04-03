@@ -1,6 +1,21 @@
-*For the CC3200, this was designed to use the CC3200 drivers & includes with the TI Code Composer Studio.*
+*For the CC3200, this was originally designed to use the CC3200 drivers & includes with the TI Code Composer Studio. However, due to some errors as of 4/3/16, decided to compile using Energia libraries instead. Think errors have to do with Energia's makefile process vs normal GCC compile*
 
-*Please compile this with the GNU GCC compiler.* 
+#Compiling w/ Energia & CCS#
+
+This project can be compiled in Code Composer Studio most easily using the Energia import
+
+##Requirements##
+
+* Download CCS (Code Composer Studio)
+* Download Energia (version 13+)
+* Download FastLED-CC3200 library. Move into folder _[User Path]/Documents/Energia/libraries/_
+
+##Importing Sketch/Example##
+
+* Within CCS, go to File->Import->Energia->Energia Sketch or Example
+* If prompted, provide the Energia install directory.
+* Select the chosen sketch. I recommend FirstLight, found in the _FastLED/examples_ folder
+
 #GCC Setup Requirements:#
 
 ##Compiler##
