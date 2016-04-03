@@ -162,7 +162,7 @@ public:
 	/// Add a CLEDController instance to the world.  Exposed to the public to allow people to implement their own
 	/// CLEDController objects or instances.  There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 3 arguments, in which case the arguments are the controller, a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 4 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 4 arguments, in which case
 	/// the first two arguments are the same, the third argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the fourth argument is the number of leds for this controller object.
 	/// @param pLed - the led controller being added
