@@ -15,6 +15,7 @@ This project can be compiled in Code Composer Studio most easily using the Energ
 * Within CCS, go to File->Import->Energia->Energia Sketch or Example
 * If prompted, provide the Energia install directory.
 * Select the chosen sketch. I recommend FirstLight, found in the _FastLED/examples_ folder
+* In the "Project Explorer" pane on the left, right-click on "lpcc3200_FastLED" and click Properties. In the left pane, select Built->GNU Compiler->Symbols, and in the "Define symbols" pane add the symbol "CC3200"
 
 #GCC Setup Requirements:#
 
