@@ -70,6 +70,7 @@ Right now the library is supported on a variety of arduino compatible platforms.
 * Arduino Zero 
 * ESP8266 using the arduino board definitions from http://arduino.esp8266.com/stable/package_esp8266com_index.json
 * The wino board - http://wino-board.com
+* The TI CC3200 Wi-Fi enabled microcontroller
 
 What types of platforms are we thinking about supporting in the future?  Here's a short list:  ChipKit32, Maple, Beagleboard
 
