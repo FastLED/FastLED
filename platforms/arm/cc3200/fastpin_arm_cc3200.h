@@ -55,7 +55,7 @@ public:
 
 // Macros for CC3200 pin access/definition
 #ifndef HWREGB
-#warn HW_types.h is not included
+#warning HW_types.h is not included
 #endif
 
 //couldn't get the following macros to work, so see below for long-form declarations
@@ -96,8 +96,9 @@ _DEFPIN_ARM(30, 3);
 
 _DEFPIN_ARM(31, 3);	_DEFPIN_ARM(32, 4);
 
-#define SPI_DATA 7		//pin 7 on CC3200mod. Same on CC3200. Assuming default mux. MOSI
-#define SPI_CLOCK 5		//pin 5 on CC3200mod. Same on CC3200. Assuming default mux
+//TODO: CHECK THESE VALUES. Only uncomment if fastspi_arm_cc3200 is finished.
+//#define SPI_DATA 7		//pin 7 on CC3200mod. Same on CC3200. Assuming default mux. MOSI
+//#define SPI_CLOCK 5		//pin 5 on CC3200mod. Same on CC3200. Assuming default mux
 
 #define HAS_HARDWARE_PIN_SUPPORT
 #endif
