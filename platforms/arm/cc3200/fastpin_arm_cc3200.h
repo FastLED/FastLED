@@ -1,8 +1,8 @@
 #ifndef __FASTPIN_ARM_CC3200_H
 #define __FASTPIN_ARM_CC3200_H
 
-#include "hw_gpio.h"	//from CC3200 SDK. Check your includes if you can't find it.
-#include "hw_memmap.h"
+#include <inc/hw_gpio.h>	//from CC3200 Energia library. Check your includes if you can't find it.
+#include <inc/hw_memmap.h>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -14,7 +14,7 @@ FASTLED_NAMESPACE_BEGIN
 #else //FASTLED_FORCE_SOFTWARE_PINS
 
 #if !defined(GPIO_O_GPIO_DATA) || !defined(GPIOA0_BASE)
-#warning ERROR: HWGPIO Not included. Try including hw_memmap.h and/or hw_gpio.h
+#error ERROR: HWGPIO Not included. Try including hw_memmap.h and/or hw_gpio.h
 #endif
 //sets the register base from a port number. assumes hw_memmap.h included before this lib
 //#define ULREG(P) ((P <= 3) ? (GPIOA0_BASE + 0x00001000*P) : GPIOA4_BASE)	//Returns the base reg address of the requested GPIO port
@@ -45,7 +45,7 @@ public:
 
   inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
   inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *(port + (val << 2)) = 0xFF; }
 
   inline static port_t hival() __attribute__ ((always_inline)) { return HWREG(_PDOR::r()) | _MASK; }
   inline static port_t loval() __attribute__ ((always_inline)) { return HWREG(_PDOR::r()) & ~(_MASK); }
@@ -53,7 +53,10 @@ public:
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-//deleted reference to Teensy LC Bitbanded access. won't be using bitbanded access for CC3200
+// Macros for CC3200 pin access/definition
+#ifndef HWREGB
+#warn HW_types.h is not included
+#endif
 
 //couldn't get the following macros to work, so see below for long-form declarations
 #define _R(L, T) struct __gen_struct_A ## L ## _ ## T

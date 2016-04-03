@@ -1,5 +1,6 @@
-#ifndef __INC_ARDUINO_COMPAT_CC3200_h
-#define __INC_ARDUINO_COMPAT_CC3200_h
+#ifndef __INC_ARDUINO_COMPAT_CC3200_H
+#define __INC_ARDUINO_COMPAT_CC3200_H
+#ifndef ENERGIA	//Energia libraries will be included, ignore this file
 
 #include "systick.h"
 #include "hw_nvic.h"
@@ -13,8 +14,8 @@
 #define MSBFIRST	1
 #define _BV(n)		(1<<(n))
 #define CHANGE		4
-#define FALLING		2
-#define RISING		3
+#define FALLING		3
+#define RISING		2
 
 // Arduino compatibility macros
 #define digitalPinToPort(pin) (pin)
@@ -168,4 +169,5 @@ void SysTickIntHandler(void){
 	}
 }
 
-#endif
+#endif //ENERGIA
+#endif //__INC_ARDUINO_COMPAT_CC3200_h
