@@ -96,10 +96,13 @@ _DEFPIN_ARM(30, 3);
 
 _DEFPIN_ARM(31, 3);	_DEFPIN_ARM(32, 4);
 
-//TODO: CHECK THESE VALUES. Only uncomment if fastspi_arm_cc3200 is finished.
-//#define SPI_DATA 7		//pin 7 on CC3200mod. Same on CC3200. Assuming default mux. MOSI
-//#define SPI_CLOCK 5		//pin 5 on CC3200mod. Same on CC3200. Assuming default mux
+//note: these are pin values (referring to the pads on the CC3200 (non-module). These are not GPIO pins.
+#define SPI_DATA 7		//pin 7 on CC3200mod, or GPIO14. Same on CC3200. One of two possible muxes, other is SPI2_DATA. MOSI
+#define SPI_CLOCK 5		//pin 5 on CC3200mod, or GPIO16. Same on CC3200. One of two possible muxes, other is SPI2_CLOCK
+#define SPI2_DATA 52	//pin 52, GPIO32. Not present on CC3200mod.
+#define SPI2_CLOCK 45	//pin 45, GPIO31. Not present on CC3200mod.
 
+#define ARM_HARDWARE_SPI
 #define HAS_HARDWARE_PIN_SUPPORT
 #endif
 

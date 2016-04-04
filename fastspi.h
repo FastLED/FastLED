@@ -10,9 +10,13 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-#if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
+//Note: these macros define the clock rate divider, not the actual data speed
+#if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)	//Teensy3 & CC3200 use ~40 MHz crystal clocks, so the divider maxes out at them
 #define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
 #define DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
+#elif defined(FASTLED_CC3200) && (F_CPU > 40000000)
+#define DATA_RATE_MHZ(X) (((40000000L / 1000000L) / X))
+#define DATA_RATE_KHZ(X) (((40000000L / 1000L) / X))
 #else
 #define DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
 #define DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
@@ -26,6 +30,7 @@ FASTLED_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+#warning FASTLED_ALL_PINS_HARDWARE_SPI not defined, you won't be able to use any hardware SPI support
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
@@ -42,12 +47,13 @@ class SPIOutput : public NRF51SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDE
 
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
-#if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
+//These MCUs offer multiple pin mux configs, so they need a templated class for every combination of SPI clock/data pin
+#if (defined(FASTLED_TEENSY3) || defined(FASTLED_CC3200)) && defined(ARM_HARDWARE_SPI)
 
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
 
-#if defined(SPI2_DATA)
+#if defined(SPI2_DATA) && defined(SPI2_CLOCK)
 
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, 0x4002C000> {};
