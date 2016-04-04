@@ -30,7 +30,7 @@ FASTLED_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-#warning FASTLED_ALL_PINS_HARDWARE_SPI not defined, you won't be able to use any hardware SPI support
+#warning "FASTLED_ALL_PINS_HARDWARE_SPI not defined, no hardware SPI support"
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
@@ -47,8 +47,8 @@ class SPIOutput : public NRF51SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDE
 
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
-//These MCUs offer multiple pin mux configs, so they need a templated class for every combination of SPI clock/data pin
-#if (defined(FASTLED_TEENSY3) || defined(FASTLED_CC3200)) && defined(ARM_HARDWARE_SPI)
+
+#if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
 
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
@@ -89,6 +89,24 @@ DECLARE_SPI1(21,20);
 template<uint8_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public SAMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
+//CC3200 MCUs offer multiple pin mux configs, so they need a templated class for every combination of SPI clock/data pin
+#elif defined(FASTLED_CC3200) && defined(ARM_HARDWARE_SPI)
+template<uint8_t SPI_SPEED>\
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
+
+#if defined(SPI2_DATA) && defined(SPI2_CLOCK)
+
+template<uint8_t SPI_SPEED>\
+class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> {};
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI2_CLOCK, SPI_SPEED> {};
+
+template<uint8_t SPI_SPEED>
+class SPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED> {};
+#endif	//SPI2_DATA & SPI2_CLOCK
+
+
 #elif defined(AVR_HARDWARE_SPI)
 
 template<uint8_t SPI_SPEED>
@@ -122,7 +140,7 @@ class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SP
 // class AVRSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> {};
 // #endif
 
-#else
+#else	//FASTLED_FORCE_SOFTWARE_SPI
 #warning "Forcing software SPI - no hardware SPI for you!"
 #endif
 

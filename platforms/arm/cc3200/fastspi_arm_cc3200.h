@@ -1,7 +1,13 @@
 #ifndef __INC_FASTSPI_ARM_CC3200_h
 #define __INC_FASTSPI_ARM_CC3200_h
 
+#ifndef FASTLED_FORCE_SOFTWARE_SPI
+#define FASTLED_ALL_PINS_HARDWARE_SPI
 FASTLED_NAMESPACE_BEGIN
+
+#include "driverlib/rom_map.h"
+#include "driverlib/prcm.h"
+#include "driverlib/spi.h"
 
 #define ARM_HARDWARE_SPI
 
@@ -12,7 +18,7 @@ class ARMHardwareSPIOutput {
   static inline void enable_pins(void) __attribute__((always_inline)) {
     //converts the _SPI_CLOCK_DIVIDER into a bit rate, which is then converted back to divider in SPIConfigSetExpClock func
 	//A little roundabout, but needed to maintain compatibility, unfortunately. If changed macro in fastspi.h, would affect SoftwareSPI as well
-	unsigned long spibitrate = (MAP_PRCMPeripheralClockGet(PRCM_GSPI)/_SPI_CLOCK_DIVIDER);	
+	unsigned long spibitrate = ((MAP_PRCMPeripheralClockGet(PRCM_GSPI))/(_SPI_CLOCK_DIVIDER));	
 	
 	//TODO: Determine if just want to run SPI at max value of 48 MHz. Defaults to 24 MHz w/ APA102
 	
@@ -30,7 +36,7 @@ class ARMHardwareSPIOutput {
 	//Soft reset SPI module
 	MAP_SPIReset(GSPI_BASE);
 	MAP_SPIConfigSetExpClk(GSPI_BASE,MAP_PRCMPeripheralClockGet(PRCM_GSPI), \
-		_SPI_CLOCK_DIVIDER, SPI_MODE_MASTER, SPI_SUB_MODE_0, \
+		spibitrate, SPI_MODE_MASTER, SPI_SUB_MODE_0, \
 		(SPI_SW_CTRL_CS | SPI_4PIN_MODE | SPI_TURBO_OFF | SPI_CS_ACTIVELOW | SPI_WL_8));	
 	//Configure SPI for 24 MHz, Master, Mode 0, and a bunch of flags
 	//Force 8 bit words
@@ -41,13 +47,13 @@ class ARMHardwareSPIOutput {
   static inline void disable_pins(void) __attribute((always_inline)) {
     MAP_SPIDisable(GSPI_BASE);
 	switch(_DATA_PIN) {
-      case 7: MAP_PinTypeGPIO(PIN_07, PIN_MODE_0); break;
-      case 52: MAP_PinTypeGPIO(PIN_52, PIN_MODE_0); break;
+      case 7: MAP_PinTypeGPIO(PIN_07, PIN_MODE_0, false); break;
+      case 52: MAP_PinTypeGPIO(PIN_52, PIN_MODE_0, false); break;
     }
 
     switch(_CLOCK_PIN) {
-		case 5: MAP_PinTypeGPIO(PIN_05, PIN_MODE_0); break;
-		case 45: MAP_PinTypeGPIO(PIN_45, PIN_MODE_0); break;
+		case 5: MAP_PinTypeGPIO(PIN_05, PIN_MODE_0, false); break;
+		case 45: MAP_PinTypeGPIO(PIN_45, PIN_MODE_0, false); break;
     }
   }
 
@@ -64,7 +70,7 @@ public:
     FastPin<_CLOCK_PIN>::setOutput();
 	
 	//Enable clock to SPI module
-	MAP_PRCMPeripheralClockEnable(PRCM_GSPI, PRCM_RUN_MODE_CLOCK);	//Set SPI to internal clock source
+	MAP_PRCMPeripheralClkEnable(PRCM_GSPI, PRCM_RUN_MODE_CLK);	//Set SPI to internal clock source
   }
 
   // latch the CS select
@@ -152,4 +158,6 @@ public:
 
 FASTLED_NAMESPACE_END
 
-#endif
+#endif //FASTLED_FORCE_SOFTWARE_SPI
+
+#endif //__INC_FASTSPI_ARM_CC3200_h
