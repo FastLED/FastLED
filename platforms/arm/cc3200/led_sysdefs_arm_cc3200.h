@@ -10,7 +10,6 @@
 #define FASTLED_NO_PINMAP
 
 #define FASTLED_SPI_BYTE_ONLY //for SPI, only send 1 byte at a time
-#define FASTLED_ALL_PINS_HARDWARE_SPI
 
 #ifndef INTERRUPT_THRESHOLD
 #define INTERRUPT_THRESHOLD 1

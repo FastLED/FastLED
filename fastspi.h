@@ -30,7 +30,6 @@ FASTLED_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-#warning "FASTLED_ALL_PINS_HARDWARE_SPI not defined, no hardware SPI support"
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
