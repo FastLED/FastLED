@@ -16,73 +16,58 @@ FASTLED_NAMESPACE_BEGIN
 #if !defined(GPIO_O_GPIO_DATA) || !defined(GPIOA0_BASE)
 #error ERROR: HWGPIO Not included. Try including hw_memmap.h and/or hw_gpio.h
 #endif
-//sets the register base from a port number. assumes hw_memmap.h included before this lib
-//#define ULREG(P) ((P <= 3) ? (GPIOA0_BASE + 0x00001000*P) : GPIOA4_BASE)	//Returns the base reg address of the requested GPIO port
-#define ADDRESSREF(A) (*(volatile uint32_t *)(A))
 
-/// Template definition for Teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
+/// Template definition for CC3200 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the individual port GPIO registers.  In theory, in some way, bit-band register access -should- be faster. However, in previous versions (i.e. Teensy LC)
 /// something about the way gcc does register allocation results in the bit-band code being slower.  This is good enough for my purposes - DRR
 /// The registers are data output, set output, clear output, toggle output, input, and direction
 //Best if already initialized by pinmux tool, but just confirms the PINMUX settings anyways.
 
 //CC3200 uses a special method to bitmask data reg. Essentially, the address bits 9:2 specify the mask, and written value specifies desired value
-template<uint8_t PIN, uint32_t _MASK, typename _PDOR, typename _PDIR> class _ARMPIN {
+template<uint8_t PIN, uint32_t _MASK, typename _REGBASE> class _ARMPIN {
 public:
   typedef volatile uint32_t * port_ptr_t;
   typedef uint32_t port_t;
 
-  inline static void setOutput() { HWREG(_PDIR::r()) |= _MASK; } //ignoring MUX config.
-  inline static void setInput() { HWREG(_PDIR::r()) &= ~(_MASK); } 
+  inline static void setOutput() { MAP_GPIODirModeSet(_REGBASE::r(), _MASK, GPIO_DIR_MODE_OUT); } //ignoring MUX config.
+  inline static void setInput() { MAP_GPIODirModeSet(_REGBASE::r(), _MASK, GPIO_DIR_MODE_IN); }
 
-  inline static void hi() __attribute__ ((always_inline)) { HWREG(_PDOR::r() + (_MASK << 2)) = 0xFF; }
-  inline static void lo() __attribute__ ((always_inline)) { HWREG(_PDOR::r() + (_MASK << 2)) = 0x00; }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { HWREG(_PDOR::r() + (0x3FC)) = val; }
+  inline static void hi() __attribute__ ((always_inline)) { MAP_GPIOPinWrite(_REGBASE::r(), _MASK, 0xFF); }
+  inline static void lo() __attribute__ ((always_inline)) { MAP_GPIOPinWrite(_REGBASE::r(), _MASK, 0x00); }
+  inline static void set(register port_t val) __attribute__ ((always_inline)) { MAP_GPIOPinWrite(_REGBASE::r(), 0xFF, val & 0xFF); }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { HWREG(_PDOR::r() + (_MASK << 2)) ^= _MASK; }
+  inline static void toggle() __attribute__ ((always_inline)) { HWREG(_REGBASE::r() + (_MASK << 2)) ^= _MASK; }
 
   inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
   inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
   inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *(port + (val << 2)) = 0xFF; }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { return HWREG(_PDOR::r()) | _MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return HWREG(_PDOR::r()) & ~(_MASK); }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_PDOR::r(); }
+  inline static port_t hival() __attribute__ ((always_inline)) { return HWREG(_REGBASE::r() + (0xFF << 2)) | _MASK; }
+  inline static port_t loval() __attribute__ ((always_inline)) { return HWREG(_REGBASE::r() + (0xFF << 2)) & ~(_MASK); }
+  inline static port_ptr_t port() __attribute__ ((always_inline)) { return (port_ptr_t)_REGBASE::r(); }
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
 // Macros for CC3200 pin access/definition
 #ifndef HWREGB
-#warning HW_types.h is not included
+#warning "HW_types.h is not included"
 #endif
 
 //couldn't get the following macros to work, so see below for long-form declarations
-#define _R(L, T) struct __gen_struct_A ## L ## _ ## T
-//#define _RD32(L, R) struct __gen_struct_A ## L ## _ ## R { static __attribute__((always_inline)) inline reg32_t r() { return GPIOA ## L ## _BASE + R ; } };	//returns the address, port(P) + offset (R)
-//#define _IO32(L) _RD32(L, GPIO_O_GPIO_DATA); _RD32(L, GPIO_O_GPIO_DIR);
-//CC3200 uses a special method to bitmask. Essentially, the address bits 9:2 specify the mask, and written value specifies desired value
+#define _R(L) struct __gen_struct_A ## L ## _BASE
+//returns the address using class::r()
+#define _RD32(L) struct __gen_struct_A ## L ## _BASE  { static __attribute__((always_inline)) inline uint32_t r() { return GPIOA ## L ## _BASE; } };
 
 //NOTE: could simplify to only PIN, but not sure PIN/8 will provide [0, 1, ..., 4]
-#define _DEFPIN_ARM(PIN, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, (1 << (PIN % 8)), \
-_R(L, GPIO_O_GPIO_DATA), _R(L, GPIO_O_GPIO_DIR)> {}
+#define _DEFPIN_ARM(PIN, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, (1 << (PIN % 8)), _R(L)> {}
 
 // Actual pin definitions
 #if defined(FASTLED_CC3200)
 //defines data structs for Ports A0-A4 (A4 is only available on CC3200 with GPIO32)
 
-//_IO32(0); _IO32(1); _IO32(2); _IO32(3); _IO32(4);
-struct __gen_struct_A0_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA0_BASE + GPIO_O_GPIO_DATA); }};
-struct __gen_struct_A0_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA0_BASE + GPIO_O_GPIO_DIR); }};
-struct __gen_struct_A1_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA1_BASE + GPIO_O_GPIO_DATA); }};
-struct __gen_struct_A1_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA1_BASE + GPIO_O_GPIO_DIR); }};
-struct __gen_struct_A2_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA2_BASE + GPIO_O_GPIO_DATA); }};
-struct __gen_struct_A2_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA2_BASE + GPIO_O_GPIO_DIR); }};
-struct __gen_struct_A3_GPIO_O_GPIO_DATA{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA3_BASE + GPIO_O_GPIO_DATA); }};
-struct __gen_struct_A3_GPIO_O_GPIO_DIR{ static __attribute__((always_inline)) inline reg32_t r() { return ADDRESSREF(GPIOA3_BASE + GPIO_O_GPIO_DIR); }};
-
-
+_RD32(0); _RD32(1); _RD32(2); _RD32(3); _RD32(4);
 
 #define MAX_PIN 27
 _DEFPIN_ARM(0, 0); 	_DEFPIN_ARM(1, 0);	_DEFPIN_ARM(2, 0);	_DEFPIN_ARM(3, 0);
