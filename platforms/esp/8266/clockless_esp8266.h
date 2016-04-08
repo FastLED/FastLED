@@ -31,12 +31,12 @@ public:
 protected:
 
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-    mWait.wait();
+    // mWait.wait();
     if(!showRGBInternal(pixels)) {
       sei(); delayMicroseconds(WAIT_TIME); cli();
       showRGBInternal(pixels);
     }
-    mWait.mark();
+    // mWait.mark();
   }
 
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register uint8_t b)  {
