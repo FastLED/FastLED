@@ -32,9 +32,9 @@ public:
   inline static void setOutput() { MAP_GPIODirModeSet(_REGBASE::r(), _MASK, GPIO_DIR_MODE_OUT); } //ignoring MUX config.
   inline static void setInput() { MAP_GPIODirModeSet(_REGBASE::r(), _MASK, GPIO_DIR_MODE_IN); }
 
-  inline static void hi() __attribute__ ((always_inline)) { MAP_GPIOPinWrite(_REGBASE::r(), _MASK, 0xFF); }
-  inline static void lo() __attribute__ ((always_inline)) { MAP_GPIOPinWrite(_REGBASE::r(), _MASK, 0x00); }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { MAP_GPIOPinWrite(_REGBASE::r(), 0xFF, val & 0xFF); }
+  inline static void hi() __attribute__ ((always_inline)) { HWREG(_REGBASE::r() + (_MASK << 2)) = 0xFF; }
+  inline static void lo() __attribute__ ((always_inline)) { HWREG(_REGBASE::r() + (_MASK << 2)) = 0x00; }
+  inline static void set(register port_t val) __attribute__ ((always_inline)) { HWREG(_REGBASE::r() + (0xFF << 2)) = (val & 0xFF); }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
