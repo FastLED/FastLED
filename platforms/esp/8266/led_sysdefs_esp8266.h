@@ -21,7 +21,7 @@ typedef uint8_t boolean;
 
 #ifndef FASTLED_ALLOW_INTERRUPTS
 #define FASTLED_ALLOW_INTERRUPTS 1
-#define INTERRUPT_THRESHOLD 1
+#define INTERRUPT_THRESHOLD 0
 #endif
 
 #define NEED_CXX_BITS
