@@ -33,22 +33,25 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
     // mWait.wait();
     if(!showRGBInternal(pixels)) {
-      sei(); delayMicroseconds(WAIT_TIME); cli();
+      os_intr_unlock();
+      delayMicroseconds(WAIT_TIME);
+      os_intr_lock();
       showRGBInternal(pixels);
     }
     // mWait.mark();
   }
 
+#define _ESP_ADJ (-3)
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register uint8_t b)  {
 		for(register uint32_t i = BITS; i > 0; i--) {
 			while(__clock_cycles() < next_mark);
-			next_mark = __clock_cycles() + (T1+T2+T3);
+			next_mark = __clock_cycles() + (T1+T2+T3 + _ESP_ADJ);
       FastPin<DATA_PIN>::hi();
 			if(b&0x80) {
-				while((next_mark - __clock_cycles()) > (T3 - 3));
+				while((next_mark - __clock_cycles()) > (T3 + _ESP_ADJ));
         FastPin<DATA_PIN>::lo();
 			} else {
-				while((next_mark - __clock_cycles()) > (T2+T3 - 3));
+				while((next_mark - __clock_cycles()) > (T2+T3 + _ESP_ADJ));
 
         FastPin<DATA_PIN>::lo();
 			}
@@ -70,14 +73,14 @@ protected:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static uint32_t ICACHE_RAM_ATTR showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+	static uint32_t ICACHE_RAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
 		os_intr_lock();
     uint32_t start = __clock_cycles();
-		uint32_t next_mark = start + (T1+T2+T3);
+		uint32_t next_mark = start + (T1+T2+T3 + _ESP_ADJ);
 		while(pixels.has(1)) {
 			pixels.stepDithering();
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
