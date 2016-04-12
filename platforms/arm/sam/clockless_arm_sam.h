@@ -35,7 +35,10 @@ protected:
 
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mWait.wait();
-		showRGBInternal(pixels);
+		if(!showRGBInternal(pixels)) {
+      sei(); delayMicroseconds(WAIT_TIME); cli();
+      showRGBInternal(pixels);
+    }
 		mWait.mark();
 	}
 
@@ -67,7 +70,7 @@ protected:
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-	static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+	static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup and start the clock
 		TC_Configure(DUE_TIMER,DUE_TIMER_CHANNEL,TC_CMR_TCCLKS_TIMER_CLOCK1);
 		pmc_enable_periph_clk(DUE_TIMER_ID);
@@ -87,7 +90,7 @@ protected:
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
 			if(DUE_TIMER_VAL > next_mark) {
-				if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return DUE_TIMER_VAL; }
+				if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return 0; }
 			}
 			#endif
 

@@ -344,7 +344,7 @@ class UCS1904Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 3
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS2903Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 6 * FMUL, 2 * FMUL, RGB_ORDER> {};
- 
+
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
