@@ -28,7 +28,10 @@ protected:
 
   virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
     mWait.wait();
-    showRGBInternal(pixels);
+    if(!showRGBInternal(pixels)) {
+      sei(); delayMicroseconds(WAIT_TIME); cli();
+      showRGBInternal(pixels);
+    }
     mWait.mark();
   }
 
@@ -64,7 +67,7 @@ protected:
 
   // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
   // gcc will use register Y for the this pointer.
-  static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+  static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
     // Get access to the clock
     CoreDebug->DEMCR  |= CoreDebug_DEMCR_TRCENA_Msk;
     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
@@ -90,7 +93,7 @@ protected:
       cli();
       // if interrupts took longer than 45µs, punt on the current frame
       if(DWT->CYCCNT > next_mark) {
-        if((DWT->CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return DWT->CYCCNT; }
+        if((DWT->CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return 0; }
       }
 
       hi = *port | FastPin<DATA_PIN>::mask();
