@@ -41,7 +41,7 @@ protected:
     // mWait.mark();
   }
 
-#define _ESP_ADJ (-3)
+#define _ESP_ADJ (6)
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register uint8_t b)  {
 		for(register uint32_t i = BITS; i > 0; i--) {
 			while(__clock_cycles() < next_mark);
@@ -51,7 +51,7 @@ protected:
 				while((next_mark - __clock_cycles()) > (T3 + _ESP_ADJ));
         FastPin<DATA_PIN>::lo();
 			} else {
-				while((next_mark - __clock_cycles()) > (T2+T3 + _ESP_ADJ));
+				while((next_mark - __clock_cycles()) > (T2+T3 + 40));
 
         FastPin<DATA_PIN>::lo();
 			}
