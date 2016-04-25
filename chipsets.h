@@ -373,6 +373,10 @@ protected:
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER, 4> {};
 
+// LPD1886
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER> {};
+
 // WS2811@800khz 2 clocks, 5 clocks, 3 clocks
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2812Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
@@ -472,6 +476,10 @@ class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, NS(100), NS
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER, 4> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER, 4> {};
+
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class SK6822Controller : public ClocklessController<DATA_PIN, NS(375), NS(1000), NS(375), RGB_ORDER> {};
