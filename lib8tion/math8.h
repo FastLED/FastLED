@@ -47,15 +47,16 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qadd8( uint8_t i, uint8_t j)
 #endif
 }
 
-/// Add one byte to another, saturating at 0x7F
+/// Add one byte to another, saturating at 0x7F / 0x80
 /// @param i - first byte to add
 /// @param j - second byte to add
-/// @returns the sum of i & j, capped at 0xFF
+/// @returns the sum of i & j, capped at 0x7F / 0x80
 LIB8STATIC_ALWAYS_INLINE int8_t qadd7( int8_t i, int8_t j)
 {
-#if QADD7_C == 1
+#if QADD7_C == 1 || 1
     int16_t t = i + j;
-    if( t > 127) t = 127;
+    if(t > 127) t = 127;
+    if(t < -128) t = -128;
     return t;
 #elif QADD7_AVRASM == 1
     asm volatile(
