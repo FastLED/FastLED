@@ -169,7 +169,7 @@ public:
 	/// Add a CLEDController instance to the world.  Exposed to the public to allow people to implement their own
 	/// CLEDController objects or instances.  There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 3 arguments, in which case the arguments are the controller, a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 4 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 4 arguments, in which case
 	/// the first two arguments are the same, the third argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the fourth argument is the number of leds for this controller object.
 	/// @param pLed - the led controller being added
@@ -184,7 +184,7 @@ public:
 	/// Add an SPI based  CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
@@ -260,7 +260,7 @@ public:
 	/// Add a clockless (aka 3wire, also DMX) based CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
@@ -308,7 +308,7 @@ public:
 	/// Add a 3rd party library based CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object. This class includes the SmartMatrix
 	/// and OctoWS2811 based controllers
@@ -370,7 +370,7 @@ public:
 	/// Add a block based CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
@@ -533,7 +533,7 @@ extern CFastLED FastLED;
 
 // Warnings for undefined things
 #ifndef HAS_HARDWARE_PIN_SUPPORT
-#warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
+#warning "No pin/port mappings found, pin access will be slightly slower. See fastpin.h for info."
 #define NO_HARDWARE_PIN_SUPPORT
 #endif
 
