@@ -67,6 +67,7 @@ enum ESPIChipsets {
 	SM16716,
 	P9813,
 	APA102,
+	SK9822,
 	DOTSTAR
 };
 
@@ -99,6 +100,7 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811_400 : public WS2811Con
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class GW6205 : public GW6205Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class GW6205_400 : public GW6205Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class LPD1886 : public LPD1886Controller1250Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class LPD1886_8BIT : public LPD1886Controller1250Khz_8bit<DATA_PIN, RGB_ORDER> {};
 #ifdef DmxSimple_h
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class DMXSIMPLE : public DMXSimpleController<DATA_PIN, RGB_ORDER> {};
 #endif
@@ -167,7 +169,7 @@ public:
 	/// Add a CLEDController instance to the world.  Exposed to the public to allow people to implement their own
 	/// CLEDController objects or instances.  There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 3 arguments, in which case the arguments are the controller, a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 4 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 4 arguments, in which case
 	/// the first two arguments are the same, the third argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the fourth argument is the number of leds for this controller object.
 	/// @param pLed - the led controller being added
@@ -182,7 +184,7 @@ public:
 	/// Add an SPI based  CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
@@ -206,6 +208,7 @@ public:
 			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case DOTSTAR:
 			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SK9822: { static SK9822Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -218,6 +221,7 @@ public:
 			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case DOTSTAR:
 			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SK9822: { static SK9822Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -230,6 +234,7 @@ public:
 			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case DOTSTAR:
 			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SK9822: { static SK9822Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -255,7 +260,7 @@ public:
 	/// Add a clockless (aka 3wire, also DMX) based CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
@@ -303,7 +308,7 @@ public:
 	/// Add a 3rd party library based CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object. This class includes the SmartMatrix
 	/// and OctoWS2811 based controllers
@@ -365,7 +370,7 @@ public:
 	/// Add a block based CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
@@ -528,7 +533,7 @@ extern CFastLED FastLED;
 
 // Warnings for undefined things
 #ifndef HAS_HARDWARE_PIN_SUPPORT
-#warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
+#warning "No pin/port mappings found, pin access will be slightly slower. See fastpin.h for info."
 #define NO_HARDWARE_PIN_SUPPORT
 #endif
 
