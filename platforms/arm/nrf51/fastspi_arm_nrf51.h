@@ -75,7 +75,7 @@ public:
   // write a byte out via SPI (returns immediately on writing register)
   // void writeByte(uint8_t b) { wait(); NRF_SPI0->TXD = b;  shouldWait(true); }
   // void writeByte(uint8_t b) __attribute__((always_inline)){ wait(); NRF_SPI0->TXD = b;  shouldWait(true);  }
-  static void writeByte(uint32_t b) __attribute__((always_inline)) {  /*NRF_SPI0->EVENTS_READY=0; */ /*uint8_t x = NRF_SPI0->RXD;*/ NRF_SPI0->TXD = b; }
+  static void writeByte(uint8_t b) __attribute__((always_inline)) {  /*NRF_SPI0->EVENTS_READY=0; */ /*uint8_t x = NRF_SPI0->RXD;*/ NRF_SPI0->TXD = b; }
 
   // write a word out via SPI (returns immediately on writing register)
   static void writeWord(uint16_t w) __attribute__((always_inline)){ writeByte(w>>8); writeByte(w & 0xFF);  }
