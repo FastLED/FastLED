@@ -182,9 +182,9 @@ protected:
 		while(pixels.has(1)) {
 #ifdef FASTLED_SPI_BYTE_ONLY
 			mSPI.writeByte(0xFF);
-			mSPI.writeByte(pixels.loadAndScale0());
-			mSPI.writeByte(pixels.loadAndScale1());
-			mSPI.writeByte(pixels.loadAndScale2());
+			mSPI.writeByte(0xFF & pixels.loadAndScale0());
+			mSPI.writeByte(0xFF & pixels.loadAndScale1());
+			mSPI.writeByte(0xFF & pixels.loadAndScale2());
 #else
 			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0();
 			mSPI.writeWord(b);
