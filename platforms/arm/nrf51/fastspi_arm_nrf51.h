@@ -67,10 +67,8 @@ public:
   }
 
   // wait until all queued up data has been written
-  static void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
+  static void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
   void wait() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
-  // void waitFully() { while(NRF_SPI0->EVENTS_READY==0); NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
-  // void wait() { while(NRF_SPI0->EVENTS_READY==0); NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
 
   // write a byte out via SPI (next byte can be after a short delay on writing register; need to clear EVENTS_READY a.k.a. disable the EVENTS_READY interrupt)
   static void writeByte(uint32_t b) __attribute__((always_inline)) {  NRF_SPI0->TXD = b; NRF_SPI0->INTENCLR; }
