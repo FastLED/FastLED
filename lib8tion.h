@@ -1029,6 +1029,8 @@ public: \
     }   \
     TIMETYPE intervals(){ \
       TIMETYPE elapsed = getElapsed(); \
+      if(!mPeriod) \
+        return -1; \
       TIMETYPE intervals = elapsed / mPeriod; \
       elapsed -= elapsed % mPeriod; \
       mPrevTrigger += elapsed; \
@@ -1076,6 +1078,8 @@ public:
     }
     timeType intervals(){
       timeType elapsed = getElapsed();
+      if(!mPeriod)
+        return -1;
       timeType intervals = elapsed / mPeriod;
       elapsed -= elapsed % mPeriod;
       mPrevTrigger += elapsed;
