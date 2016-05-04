@@ -8,6 +8,6 @@ var modules =
     [ "Dimming and brightening functions", "group___dimming.html", "group___dimming" ],
     [ "Fast math functions", "group__lib8tion.html", "group__lib8tion" ],
     [ "Noise functions", "group___noise.html", "group___noise" ],
-    [ "Power management functions", "group___power.html", null ],
+    [ "Power management functions", "group___power.html", "group___power" ],
     [ "Pre-defined color palletes", "group___colorpalletes.html", "group___colorpalletes" ]
 ];

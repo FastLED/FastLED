@@ -118,58 +118,66 @@ $(document).ready(function(){initNavTree('power__mgt_8h_source.html','');});
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;FASTLED_NAMESPACE_BEGIN</div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">// Power Control setup functions</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">//</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">// Example:</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">//  set_max_power_in_volts_and_milliamps( 5, 400);</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment">//</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keywordtype">void</span> set_max_power_in_volts_and_milliamps( uint8_t volts, uint32_t milliamps);</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keywordtype">void</span> set_max_power_in_milliwatts( uint32_t powerInmW);</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keywordtype">void</span> set_max_power_indicator_LED( uint8_t pinNumber); <span class="comment">// zero = no indicator LED</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">// Power Control setup functions</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">// Example:</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment">//  set_max_power_in_volts_and_milliamps( 5, 400);</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group___power.html#ga8db01f418cbff03a8d51caa528e44e0d">set_max_power_in_volts_and_milliamps</a>( uint8_t volts, uint32_t milliamps);</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group___power.html#ga07198890442df25532c1beaafb093648">set_max_power_in_milliwatts</a>( uint32_t powerInmW);</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group___power.html#ga9c2ec1f940a152838ac6083ead3a9bcd">set_max_power_indicator_LED</a>( uint8_t pinNumber); <span class="comment">// zero = no indicator LED</span></div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="comment">// Power Control &#39;show&#39; and &#39;delay&#39; functions</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="comment">//</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment">// These are drop-in replacements for FastLED.show() and FastLED.delay()</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">// In order to use these, you have to actually replace your calls to</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="comment">// FastLED.show() and FastLED.delay() with these two functions.</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">//</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">// Example:</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="comment">//     // was: FastLED.show();</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment">//     // now is:</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">//     show_at_max_brightness_for_power();</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="comment">//</span></div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keywordtype">void</span> show_at_max_brightness_for_power();</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="keywordtype">void</span> delay_at_max_brightness_for_power( uint16_t ms);</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="comment">// Power Control &#39;show&#39; and &#39;delay&#39; functions</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">// These are drop-in replacements for FastLED.show() and FastLED.delay()</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="comment">// In order to use these, you have to actually replace your calls to</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">// FastLED.show() and FastLED.delay() with these two functions.</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="comment">// Example:</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment">//     // was: FastLED.show();</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">//     // now is:</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="comment">//     show_at_max_brightness_for_power();</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group___power.html#ga510b6ca1ea6da7f0f89dcf353f19ffde">show_at_max_brightness_for_power</a>();</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="keywordtype">void</span> <a class="code" href="group___power.html#ga555e128ef46e371cb5774c1fe3320728">delay_at_max_brightness_for_power</a>( uint16_t ms);</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">// Power Control internal helper functions</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;uint32_t calculate_unscaled_power_mW( <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* ledbuffer, uint16_t numLeds);</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;uint8_t calculate_max_brightness_for_power_mW(<span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW);</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;uint8_t calculate_max_brightness_for_power_vmA(<span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA);</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32_t max_power_mW);</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;FASTLED_NAMESPACE_END</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment">// POWER_MGT_H</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment">// Power Control internal helper functions</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;uint32_t <a class="code" href="group___power.html#ga594568be6aba941c635193a6d46f715e">calculate_unscaled_power_mW</a>( <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* ledbuffer, uint16_t numLeds);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;uint8_t <a class="code" href="group___power.html#gafff15ebb8adee6a6c76fd46eb980397c">calculate_max_brightness_for_power_mW</a>(<span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW);</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;uint8_t <a class="code" href="group___power.html#gab519e78baab1cfbaf62663c48c1c2f35">calculate_max_brightness_for_power_vmA</a>(<span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;uint8_t  <a class="code" href="group___power.html#gafff15ebb8adee6a6c76fd46eb980397c">calculate_max_brightness_for_power_mW</a>( uint8_t target_brightness, uint32_t max_power_mW);</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;FASTLED_NAMESPACE_END</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment">// POWER_MGT_H</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="struct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue) </div><div class="ttdef"><b>Definition:</b> <a href="pixeltypes_8h_source.html#l00090">pixeltypes.h:90</a></div></div>
+<div class="ttc" id="group___power_html_gab519e78baab1cfbaf62663c48c1c2f35"><div class="ttname"><a href="group___power.html#gab519e78baab1cfbaf62663c48c1c2f35">calculate_max_brightness_for_power_vmA</a></div><div class="ttdeci">uint8_t calculate_max_brightness_for_power_vmA(const CRGB *ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA)</div><div class="ttdoc">calculate_max_brightness_for_power_mW tells you the highest brightness level you can use and still st...</div><div class="ttdef"><b>Definition:</b> <a href="power__mgt_8cpp_source.html#l00080">power_mgt.cpp:80</a></div></div>
+<div class="ttc" id="group___power_html_ga8db01f418cbff03a8d51caa528e44e0d"><div class="ttname"><a href="group___power.html#ga8db01f418cbff03a8d51caa528e44e0d">set_max_power_in_volts_and_milliamps</a></div><div class="ttdeci">void set_max_power_in_volts_and_milliamps(uint8_t volts, uint32_t milliamps)</div><div class="ttdoc">Set the maximum power used in milliamps for a given voltage. </div><div class="ttdef"><b>Definition:</b> <a href="power__mgt_8cpp_source.html#l00164">power_mgt.cpp:164</a></div></div>
+<div class="ttc" id="group___power_html_ga555e128ef46e371cb5774c1fe3320728"><div class="ttname"><a href="group___power.html#ga555e128ef46e371cb5774c1fe3320728">delay_at_max_brightness_for_power</a></div><div class="ttdeci">void delay_at_max_brightness_for_power(uint16_t ms)</div><div class="ttdoc">Similar to FastLED.delay, but pre-adjusts brightness to keep below the power threshold. </div><div class="ttdef"><b>Definition:</b> <a href="power__mgt_8cpp_source.html#l00180">power_mgt.cpp:180</a></div></div>
+<div class="ttc" id="group___power_html_ga9c2ec1f940a152838ac6083ead3a9bcd"><div class="ttname"><a href="group___power.html#ga9c2ec1f940a152838ac6083ead3a9bcd">set_max_power_indicator_LED</a></div><div class="ttdeci">void set_max_power_indicator_LED(uint8_t pinNumber)</div><div class="ttdoc">Select a ping with an led that will be flashed to indicate that power management is pulling down the ...</div><div class="ttdef"><b>Definition:</b> <a href="power__mgt_8cpp_source.html#l00159">power_mgt.cpp:159</a></div></div>
+<div class="ttc" id="group___power_html_gafff15ebb8adee6a6c76fd46eb980397c"><div class="ttname"><a href="group___power.html#gafff15ebb8adee6a6c76fd46eb980397c">calculate_max_brightness_for_power_mW</a></div><div class="ttdeci">uint8_t calculate_max_brightness_for_power_mW(const CRGB *ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW)</div><div class="ttdoc">calculate_max_brightness_for_power_mW tells you the highest brightness level you can use and still st...</div><div class="ttdef"><b>Definition:</b> <a href="power__mgt_8cpp_source.html#l00084">power_mgt.cpp:84</a></div></div>
+<div class="ttc" id="group___power_html_ga594568be6aba941c635193a6d46f715e"><div class="ttname"><a href="group___power.html#ga594568be6aba941c635193a6d46f715e">calculate_unscaled_power_mW</a></div><div class="ttdeci">uint32_t calculate_unscaled_power_mW(const CRGB *ledbuffer, uint16_t numLeds)</div><div class="ttdoc">calculate_unscaled_power_mW tells you how many milliwatts the current LED data would draw at brightne...</div><div class="ttdef"><b>Definition:</b> <a href="power__mgt_8cpp_source.html#l00050">power_mgt.cpp:50</a></div></div>
 <div class="ttc" id="_fast_l_e_d_8h_html"><div class="ttname"><a href="_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object </div></div>
+<div class="ttc" id="group___power_html_ga510b6ca1ea6da7f0f89dcf353f19ffde"><div class="ttname"><a href="group___power.html#ga510b6ca1ea6da7f0f89dcf353f19ffde">show_at_max_brightness_for_power</a></div><div class="ttdeci">void show_at_max_brightness_for_power()</div><div class="ttdoc">Similar to FastLED.show, but pre-adjusts brightness to keep below the power threshold. </div><div class="ttdef"><b>Definition:</b> <a href="power__mgt_8cpp_source.html#l00174">power_mgt.cpp:174</a></div></div>
+<div class="ttc" id="group___power_html_ga07198890442df25532c1beaafb093648"><div class="ttname"><a href="group___power.html#ga07198890442df25532c1beaafb093648">set_max_power_in_milliwatts</a></div><div class="ttdeci">void set_max_power_in_milliwatts(uint32_t powerInmW)</div><div class="ttdoc">Set the maximum power used in watts. </div><div class="ttdef"><b>Definition:</b> <a href="power__mgt_8cpp_source.html#l00169">power_mgt.cpp:169</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>power_mgt.h</b></li>
-    <li class="footer">Generated on Wed May 4 2016 15:55:04 for FastLED by
+    <li class="footer">Generated on Wed May 4 2016 15:56:52 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

@@ -9,7 +9,7 @@ var indexSectionsWithContent =
   6: "cehl",
   7: "cdhotu",
   8: "bcdfnps",
-  9: "fprt"
+  9: "dfprt"
 };
 
 var indexSectionNames =
