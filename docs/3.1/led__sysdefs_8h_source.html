@@ -116,7 +116,7 @@ $(document).ready(function(){initNavTree('led__sysdefs_8h_source.html','');});
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="fastled__config_8h.html">fastled_config.h</a>&quot;</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#if defined(NRF51) || defined(__RFduino__)</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#if defined(NRF51) || defined(__RFduino__) || defined (__Simblee__)</span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &quot;platforms/arm/nrf51/led_sysdefs_arm_nrf51.h&quot;</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#elif defined(__MK20DX128__) || defined(__MK20DX256__)</span></div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">// Include k20/T3 headers</span></div>
@@ -160,7 +160,7 @@ $(document).ready(function(){initNavTree('led__sysdefs_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>led_sysdefs.h</b></li>
-    <li class="footer">Generated on Sun Feb 21 2016 18:44:44 for FastLED by
+    <li class="footer">Generated on Wed May 4 2016 15:55:04 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

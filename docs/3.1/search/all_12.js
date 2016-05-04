@@ -42,6 +42,7 @@ var searchData=
   ['sk6812controller',['SK6812Controller',['../class_s_k6812_controller.html',1,'']]],
   ['sk6822',['SK6822',['../class_s_k6822.html',1,'']]],
   ['sk6822controller',['SK6822Controller',['../class_s_k6822_controller.html',1,'']]],
+  ['sk9822controller',['SK9822Controller',['../class_s_k9822_controller.html',1,'']]],
   ['sm16716controller',['SM16716Controller',['../class_s_m16716_controller.html',1,'']]],
   ['softwarespioutput',['SoftwareSPIOutput',['../class_software_s_p_i_output.html',1,'']]],
   ['spioutput',['SPIOutput',['../class_s_p_i_output.html',1,'']]],

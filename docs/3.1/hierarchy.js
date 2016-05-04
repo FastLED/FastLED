@@ -43,6 +43,7 @@ var hierarchy =
         [ "PixieController< DATA_PIN, RGB_ORDER >", "class_pixie_controller.html", [
           [ "PIXIE< DATA_PIN, RGB_ORDER >", "class_p_i_x_i_e.html", null ]
         ] ],
+        [ "SK9822Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller.html", null ],
         [ "SM16716Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_m16716_controller.html", null ],
         [ "WS2801Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_w_s2801_controller.html", [
           [ "WS2803Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_w_s2803_controller.html", null ]
@@ -62,6 +63,10 @@ var hierarchy =
         [ "LPD1886< DATA_PIN, RGB_ORDER >", "class_l_p_d1886.html", null ]
       ] ],
       [ "LPD1886Controller1250Khz< DATA_PIN, RGB_ORDER >", "class_l_p_d1886_controller1250_khz.html", null ],
+      [ "LPD1886Controller1250Khz_8bit< DATA_PIN, RGB_ORDER >", "class_l_p_d1886_controller1250_khz__8bit.html", [
+        [ "LPD1886_8BIT< DATA_PIN, RGB_ORDER >", "class_l_p_d1886__8_b_i_t.html", null ]
+      ] ],
+      [ "LPD1886Controller1250Khz_8bit< DATA_PIN, RGB_ORDER >", "class_l_p_d1886_controller1250_khz__8bit.html", null ],
       [ "PL9823Controller< DATA_PIN, RGB_ORDER >", "class_p_l9823_controller.html", [
         [ "PL9823< DATA_PIN, RGB_ORDER >", "class_p_l9823.html", null ]
       ] ],

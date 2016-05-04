@@ -10,6 +10,8 @@ var searchData=
   ['lerp8',['lerp8',['../struct_c_r_g_b.html#ab29249e850cfb300590408edcbcf5704',1,'CRGB']]],
   ['lerp8by8',['lerp8by8',['../group__lib8tion.html#ga62ed4425400bc4140902347dc54ffb72',1,'lib8tion.h']]],
   ['lpd1886',['LPD1886',['../class_l_p_d1886.html',1,'']]],
+  ['lpd1886_5f8bit',['LPD1886_8BIT',['../class_l_p_d1886__8_b_i_t.html',1,'']]],
   ['lpd1886controller1250khz',['LPD1886Controller1250Khz',['../class_l_p_d1886_controller1250_khz.html',1,'']]],
+  ['lpd1886controller1250khz_5f8bit',['LPD1886Controller1250Khz_8bit',['../class_l_p_d1886_controller1250_khz__8bit.html',1,'']]],
   ['lpd8806controller',['LPD8806Controller',['../class_l_p_d8806_controller.html',1,'']]]
 ];

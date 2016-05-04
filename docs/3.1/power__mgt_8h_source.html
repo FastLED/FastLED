@@ -151,12 +151,16 @@ $(document).ready(function(){initNavTree('power__mgt_8h_source.html','');});
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;uint32_t calculate_unscaled_power_mW( <span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* ledbuffer, uint16_t numLeds);</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32_t max_power_mW);</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;FASTLED_NAMESPACE_END</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment">// POWER_MGT_H</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;uint8_t calculate_max_brightness_for_power_mW(<span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW);</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;uint8_t calculate_max_brightness_for_power_vmA(<span class="keyword">const</span> <a class="code" href="struct_c_r_g_b.html">CRGB</a>* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32_t max_power_mW);</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;FASTLED_NAMESPACE_END</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment">// POWER_MGT_H</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="struct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue) </div><div class="ttdef"><b>Definition:</b> <a href="pixeltypes_8h_source.html#l00090">pixeltypes.h:90</a></div></div>
 <div class="ttc" id="_fast_l_e_d_8h_html"><div class="ttname"><a href="_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object </div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -165,7 +169,7 @@ $(document).ready(function(){initNavTree('power__mgt_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>power_mgt.h</b></li>
-    <li class="footer">Generated on Sun Feb 21 2016 18:44:44 for FastLED by
+    <li class="footer">Generated on Wed May 4 2016 15:55:04 for FastLED by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.9.1 </li>
   </ul>

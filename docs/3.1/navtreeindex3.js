@@ -1,10 +1,5 @@
 var NAVTREEINDEX3 =
 {
-"group___math.html#gaa3beb6c31141a13c1a047b926d065ca2":[4,6,0,7],
-"group___math.html#gad2d87829a6327876eed4482aa515dfa9":[4,6,0,14],
-"group___math.html#gad7af6a5b49aef34ab79e850ddb7d7911":[4,6,0,5],
-"group___math.html#gae261576a4c8155d6c0ba8615b2d2ecb3":[4,6,0,12],
-"group___math.html#gaf170916b55c493ea038c1d96b338e059":[4,6,0,8],
 "group___noise.html":[4,7],
 "group___noise.html#ga1e4dba9289b03333697e70d4b7f3b006":[6,0,29,9],
 "group___noise.html#ga2a41b0b6fc438305e9fc35307fcd641d":[6,0,29,4],
@@ -32,9 +27,9 @@ var NAVTREEINDEX3 =
 "group___pixeltypes.html":[4,1],
 "group___pixeltypes.html#ga06ee0f21e1bf430ea547244f6ed4add8":[4,1,5],
 "group___pixeltypes.html#ga6585ae9f9a54e6a1fcb7c5f985931fb3":[4,1,2],
-"group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5":[6,0,14,1],
-"group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5":[6,0,14,2],
 "group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5":[4,1,4],
+"group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5":[6,0,14,2],
+"group___pixeltypes.html#gad47d9c821aeaaa0123d125a18ff961d5":[6,0,14,1],
 "group___pixeltypes.html#gaeb40a08b7cb90c1e21bd408261558b99":[4,1,3],
 "group___pixeltypes.html#gaeb40a08b7cb90c1e21bd408261558b99":[4,1,1,0],
 "group___pixeltypes.html#ggaeb40a08b7cb90c1e21bd408261558b99a0172663a3691565c4012ce5997d880c7":[4,1,1,0,25],
@@ -249,5 +244,10 @@ var NAVTREEINDEX3 =
 "group__lib8tion.html#gaa2abcee2fe76fafd7f3a2aeab03e3b69":[4,6,43],
 "group__lib8tion.html#gaa2facbc0ec935e34c629aef43d6262c0":[4,6,33],
 "group__lib8tion.html#gaa46e5de1c4c27833359e7a97a18c839b":[4,6,24],
-"group__lib8tion.html#gaacea0eaea98a065dfa08bb1c147c52a1":[4,6,36]
+"group__lib8tion.html#gaacea0eaea98a065dfa08bb1c147c52a1":[4,6,36],
+"group__lib8tion.html#gaaf46b9f719ef3bdb574f8e967af6dbb5":[4,6,10],
+"group__lib8tion.html#gab947c1150e3b9056cb91685a14270173":[4,6,44],
+"group__lib8tion.html#gad2dad84f67c8a4cc6d4c92e2c7d3e89f":[4,6,17],
+"group__lib8tion.html#gad4b09aba4e188e14d3e71d1c9f77f1a5":[4,6,35],
+"group__lib8tion.html#gad5dca0e1248b916799dde6dc44ef369b":[4,6,15]
 };

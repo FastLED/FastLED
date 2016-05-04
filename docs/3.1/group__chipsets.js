@@ -21,6 +21,11 @@ var group__chipsets =
       [ "init", "class_a_p_a102_controller.html#a0e875981e076baf9cd1c5e7599b83cd0", null ],
       [ "showPixels", "class_a_p_a102_controller.html#a8ec545837b1622df6c4805f853eae3c1", null ]
     ] ],
+    [ "SK9822Controller", "class_s_k9822_controller.html", [
+      [ "SK9822Controller", "class_s_k9822_controller.html#aa5ea18078e404b02bce532efacadf6fd", null ],
+      [ "init", "class_s_k9822_controller.html#af20dd5d2ce5509ed11a57dba2f2a929f", null ],
+      [ "showPixels", "class_s_k9822_controller.html#a3b6cbfe067f59b473ccf3024be065ada", null ]
+    ] ],
     [ "P9813Controller", "class_p9813_controller.html", [
       [ "P9813Controller", "class_p9813_controller.html#ab65e07a30e5e59e8bdcb4a9f3b794201", null ],
       [ "init", "class_p9813_controller.html#ad6fcb36b9378df660721ae24ed857b8a", null ],
@@ -32,6 +37,7 @@ var group__chipsets =
       [ "showPixels", "class_s_m16716_controller.html#a2b68d483e7422d26d31586ca7791d7af", null ]
     ] ],
     [ "LPD1886Controller1250Khz", "class_l_p_d1886_controller1250_khz.html", null ],
+    [ "LPD1886Controller1250Khz_8bit", "class_l_p_d1886_controller1250_khz__8bit.html", null ],
     [ "WS2812Controller800Khz", "class_w_s2812_controller800_khz.html", null ],
     [ "WS2811Controller800Khz", "class_w_s2811_controller800_khz.html", null ],
     [ "WS2811Controller400Khz", "class_w_s2811_controller400_khz.html", null ],
