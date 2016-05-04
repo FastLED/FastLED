@@ -1019,8 +1019,14 @@ public: \
     TIMETYPE getTime() { return (TIMETYPE)(TIMEGETTER()); };    \
     TIMETYPE getPeriod() { return mPeriod; };   \
     TIMETYPE getElapsed() { return getTime() - mPrevTrigger; }  \
-    TIMETYPE getRemaining() { return mPeriod - getElapsed(); }  \
-    TIMETYPE getLastTriggerTime() { return mPrevTrigger; }  \
+    TIMETYPE getRemaining() { \
+        TIMETYPE elapsed = getElapsed(); \
+        if(elapsed >= mPeriod) { \
+            return 0; \
+        } \
+        return mPeriod - elapsed; \
+    } \
+    TIMETYPE getLastTriggerTime() { return mPrevTrigger; } \
     bool ready() { \
         TIMETYPE time = getTime(); \
         bool isReady = ((time - mPrevTrigger) >= mPeriod); \
@@ -1068,7 +1074,13 @@ public:
     timeType getTime() { return (timeType)(timeGetter()); };
     timeType getPeriod() { return mPeriod; };
     timeType getElapsed() { return getTime() - mPrevTrigger; }
-    timeType getRemaining() { return mPeriod - getElapsed(); }
+    timeType getRemaining() {
+        timeType elapsed = getElapsed();
+        if(elapsed >= mPeriod) {
+            return 0;
+        }
+        return mPeriod - elapsed;
+    }
     timeType getLastTriggerTime() { return mPrevTrigger; }
     bool ready() {
         timeType time = getTime();
