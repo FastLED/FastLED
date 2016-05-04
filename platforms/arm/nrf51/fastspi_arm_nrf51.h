@@ -71,7 +71,7 @@ public:
   void wait() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
 
   // write a byte out via SPI (next byte can be after a short delay on writing register; need to clear EVENTS_READY a.k.a. disable the EVENTS_READY interrupt)
-  static void writeByte(uint32_t b) __attribute__((always_inline)) {  NRF_SPI0->TXD = b; NRF_SPI0->INTENCLR; }
+  static void writeByte(uint32_t b) __attribute__((always_inline)) {  NRF_SPI0->TXD = b; waitFully();}
 
   // write a word out via SPI (returns immediately on writing register)
   static void writeWord(uint32_t w) __attribute__((always_inline)){ writeByte(w>>8); writeByte(w & 0xFF);  }
