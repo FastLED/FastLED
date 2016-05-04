@@ -77,6 +77,22 @@ uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) 
 }
 
 
+uint8_t calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA) {
+	return calculate_max_brightness_for_power_mW(ledbuffer, numLeds, target_brightness, max_power_V * max_power_mA);
+}
+
+uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW) {
+ 	uint32_t total_mW = calculate_unscaled_power_mW( ledbuffer, numLeds);
+
+	uint32_t requested_power_mW = ((uint32_t)total_mW * target_brightness) / 256;
+
+	uint8_t recommended_brightness = target_brightness;
+	if(requested_power_mW > max_power_mW) { 
+    		recommended_brightness = (uint32_t)((uint8_t)(target_brightness) * (uint32_t)(max_power_mW)) / ((uint32_t)(requested_power_mW));
+	}
+
+	return recommended_brightness;
+}
 
 // sets brightness to
 //  - no more than target_brightness
