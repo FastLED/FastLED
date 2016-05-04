@@ -66,7 +66,11 @@ public:
     return sWait; // if(sWait) { sWait = wait; return true; } else { sWait = wait; return false; }
   }
 
+<<<<<<< HEAD
   // wait until all queued up data has been written and then clear the RXD interrupts hold
+=======
+  // wait until all queued up data has been written
+>>>>>>> 09856e11fa28ea444a0ae82a81ab0c4af82438a1
   static void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
   void wait() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
 
