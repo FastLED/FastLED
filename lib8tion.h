@@ -1034,9 +1034,9 @@ public: \
         return isReady; \
     }   \
     TIMETYPE frames(){ \
-      TIMETYPE elapsed = getElapsed(); \
       if(!mPeriod) \
         return -1; \
+      TIMETYPE elapsed = getElapsed(); \
       TIMETYPE frames = elapsed / mPeriod; \
       elapsed -= elapsed % mPeriod; \
       mPrevTrigger += elapsed; \
@@ -1089,9 +1089,9 @@ public:
         return isReady;
     }
     timeType frames(){
-      timeType elapsed = getElapsed();
       if(!mPeriod)
         return -1;
+      timeType elapsed = getElapsed();
       timeType frames = elapsed / mPeriod;
       elapsed -= elapsed % mPeriod;
       mPrevTrigger += elapsed;
