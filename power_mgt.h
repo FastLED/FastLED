@@ -9,6 +9,7 @@ FASTLED_NAMESPACE_BEGIN
 
 ///@defgroup Power Power management functions
 /// functions used to limit the amount of power used by FastLED
+///@{
 
 // Power Control setup functions
 //
