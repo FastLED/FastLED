@@ -1042,6 +1042,11 @@ public: \
       mPrevTrigger += elapsed; \
       return frames; \
     } \
+    TIMETYPE frame(){ \
+      if(!mPeriod) \
+        return -1; \
+      return getTime() / mPeriod; \
+    } \
     void reset() { mPrevTrigger = getTime(); }; \
     void trigger() { mPrevTrigger = getTime() - mPeriod; }; \
         \
@@ -1096,6 +1101,11 @@ public:
       elapsed -= elapsed % mPeriod;
       mPrevTrigger += elapsed;
       return frames;
+    }
+    timeType frame(){
+      if(!mPeriod)
+        return -1;
+      return getTime() / mPeriod;
     }
     void reset() { mPrevTrigger = getTime(); };
     void trigger() { mPrevTrigger = getTime() - mPeriod; };
