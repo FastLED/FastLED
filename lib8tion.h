@@ -1033,14 +1033,14 @@ public: \
         if( isReady ) { mPrevTrigger = time; } \
         return isReady; \
     }   \
-    TIMETYPE intervals(){ \
+    TIMETYPE frames(){ \
       TIMETYPE elapsed = getElapsed(); \
       if(!mPeriod) \
         return -1; \
-      TIMETYPE intervals = elapsed / mPeriod; \
+      TIMETYPE frames = elapsed / mPeriod; \
       elapsed -= elapsed % mPeriod; \
       mPrevTrigger += elapsed; \
-      return intervals; \
+      return frames; \
     } \
     void reset() { mPrevTrigger = getTime(); }; \
     void trigger() { mPrevTrigger = getTime() - mPeriod; }; \
@@ -1088,14 +1088,14 @@ public:
         if( isReady ) { mPrevTrigger = time; }
         return isReady;
     }
-    timeType intervals(){
+    timeType frames(){
       timeType elapsed = getElapsed();
       if(!mPeriod)
         return -1;
-      timeType intervals = elapsed / mPeriod;
+      timeType frames = elapsed / mPeriod;
       elapsed -= elapsed % mPeriod;
       mPrevTrigger += elapsed;
-      return intervals;
+      return frames;
     }
     void reset() { mPrevTrigger = getTime(); };
     void trigger() { mPrevTrigger = getTime() - mPeriod; };
