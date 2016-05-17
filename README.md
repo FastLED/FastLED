@@ -70,8 +70,8 @@ Right now the library is supported on a variety of arduino compatable platforms.
 * Arduino Due and the digistump DigiX
 * RFDuino
 * SparkCore
-* Arduino Zero 
-* ESP8266 using the arduino board definitions from http://arduino.esp8266.com/stable/package_esp8266com_index.json
+* Arduino Zero
+* ESP8266 using the arduino board definitions from http://arduino.esp8266.com/stable/package_esp8266com_index.json - please be sure to also read https://github.com/FastLED/FastLED/wiki/ESP8266-notes for information specific to the 8266.
 * The wino board - http://wino-board.com
 
 What types of platforms are we thinking about supporting in the future?  Here's a short list:  ChipKit32, Maple, Beagleboard
