@@ -63,19 +63,15 @@ public:
 
   static bool shouldWait(bool wait = false) __attribute__((always_inline)) __attribute__((always_inline)) {
     static bool sWait=false;
-    return false; // if(sWait) { sWait = wait; return true; } else { sWait = wait; return false; }
+    return sWait; // if(sWait) { sWait = wait; return true; } else { sWait = wait; return false; }
   }
 
-  // wait until all queued up data has been written
-  static void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
-  void wait() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
-  // void waitFully() { while(NRF_SPI0->EVENTS_READY==0); NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
-  // void wait() { while(NRF_SPI0->EVENTS_READY==0); NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
+  // wait until all queued up data has been written and then clear the RXD interrupts hold
+  static void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
+  void wait() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
 
-  // write a byte out via SPI (returns immediately on writing register)
-  // void writeByte(uint8_t b) { wait(); NRF_SPI0->TXD = b;  shouldWait(true); }
-  // void writeByte(uint8_t b) __attribute__((always_inline)){ wait(); NRF_SPI0->TXD = b;  shouldWait(true);  }
-  static void writeByte(uint32_t b) __attribute__((always_inline)) {  /*NRF_SPI0->EVENTS_READY=0; */ /*uint8_t x = NRF_SPI0->RXD;*/ NRF_SPI0->TXD = b; }
+  // write a byte out via SPI (next byte can be after a short delay on writing register; need to clear EVENTS_READY a.k.a. disable the EVENTS_READY interrupt)
+  static void writeByte(uint32_t b) __attribute__((always_inline)) {  NRF_SPI0->TXD = b; waitFully();}
 
   // write a word out via SPI (returns immediately on writing register)
   static void writeWord(uint32_t w) __attribute__((always_inline)){ writeByte(w>>8); writeByte(w & 0xFF);  }
