@@ -34,7 +34,7 @@ protected:
     // mWait.wait();
     if(!showRGBInternal(pixels)) {
       os_intr_unlock();
-      delayMicroseconds(WAIT_TIME);
+      delayMicroseconds(WAIT_TIME * 10);
       os_intr_lock();
       showRGBInternal(pixels);
     }
