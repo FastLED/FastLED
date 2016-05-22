@@ -9,7 +9,7 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
   return cyc;
 }
 
-#ifndef FASTLED_INTERRUPT_RETRY_COUNT 
+#ifndef FASTLED_INTERRUPT_RETRY_COUNT
 #define FASTLED_INTERRUPT_RETRY_COUNT 2
 #endif
 
@@ -46,34 +46,23 @@ protected:
     // mWait.mark();
   }
 
-#define _ESP_ADJ (6)
-	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register uint8_t b)  {
-		for(register uint32_t i = BITS; i > 0; i--) {
-			while(__clock_cycles() < next_mark);
+#define _ESP_ADJ (0)
+#define _ESP_ADJ2 (0)
+
+	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register uint32_t b)  {
+    b = ~b; b <<= 24;
+    for(register uint32_t i = BITS; i > 0; i--) {
+      while((int32_t)(next_mark - __clock_cycles()) > 0);
 			next_mark = __clock_cycles() + (T1+T2+T3 + _ESP_ADJ);
       FastPin<DATA_PIN>::hi();
-			if(b&0x80) {
-				while((next_mark - __clock_cycles()) > (T3 + _ESP_ADJ));
-        FastPin<DATA_PIN>::lo();
-			} else {
-				while((next_mark - __clock_cycles()) > (T2+T3 + 40));
 
-        FastPin<DATA_PIN>::lo();
-			}
-			b <<= 1;
+      while((int32_t)(next_mark - __clock_cycles()) > (T2+T3 + _ESP_ADJ2));
+      if(b & 0x80000000L) { FastPin<DATA_PIN>::lo(); }
+      b <<= 1;
+
+      while((int32_t)(next_mark - __clock_cycles()) > (T3 + _ESP_ADJ));
+      FastPin<DATA_PIN>::lo();
 		}
-
-		// while(__clock_cycles() < next_mark);
-		// next_mark = __clock_cycles() + (T1+T2+T3);
-    // FastPin<DATA_PIN>::hi();
-    //
-		// if(b&0x80) {
-		// 	while((next_mark - __clock_cycles()) > (T3+(2*(F_CPU/24000000))));
-    //   FastPin<DATA_PIN>::lo();
-		// } else {
-		// 	while((next_mark - __clock_cycles()) > (T2+T3+(2*(F_CPU/24000000))));
-    //   FastPin<DATA_PIN>::lo();
-		// }
 	}
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
@@ -81,20 +70,12 @@ protected:
 	static uint32_t ICACHE_RAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		register uint8_t b = pixels.loadAndScale0();
-
+		register uint32_t b = pixels.loadAndScale0();
+    pixels.preStepFirstByteDithering();
 		os_intr_lock();
     uint32_t start = __clock_cycles();
 		uint32_t next_mark = start + (T1+T2+T3 + _ESP_ADJ);
 		while(pixels.has(1)) {
-			pixels.stepDithering();
-			#if (FASTLED_ALLOW_INTERRUPTS == 1)
-			os_intr_lock();
-			// if interrupts took longer than 45µs, punt on the current frame
-			if(__clock_cycles() > next_mark) {
-				if((__clock_cycles()-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return 0; }
-			}
-			#endif
 			// Write first byte, read next byte
 			writeBits<8+XTRA0>(next_mark, b);
 			b = pixels.loadAndScale1();
@@ -106,8 +87,19 @@ protected:
 			// Write third byte, read 1st byte of next pixel
 			writeBits<8+XTRA0>(next_mark, b);
       b = pixels.advanceAndLoadAndScale0();
+
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			os_intr_unlock();
+			#endif
+
+      pixels.stepDithering();
+
+			#if (FASTLED_ALLOW_INTERRUPTS == 1)
+			os_intr_lock();
+			// if interrupts took longer than 45µs, punt on the current frame
+			if((int32_t)(__clock_cycles()-next_mark) > 0) {
+				if((int32_t)(__clock_cycles()-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return 0; }
+			}
 			#endif
 		};
 
