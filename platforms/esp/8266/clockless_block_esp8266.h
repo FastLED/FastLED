@@ -80,7 +80,7 @@ public:
 
 #define ESP_ADJUST 0 // (2*(F_CPU/24000000))
 #define ESP_ADJUST2 0
-  template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , register uint32_t & b2)  {
+  template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , register uint32_t & b2)  {
 	  Lines b2 = b;
 		transpose8x1_noinline(b.bytes,b2.bytes);
 
@@ -88,28 +88,28 @@ public:
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
 		for(register uint32_t i = 0; i < USED_LANES; i++) {
-			while((int32_t)(next_mark - __clock_cycles()) > 0);
-			next_mark = __clock_cycles() + (T1+T2+T3) + ESP_ADJUST;
+			while((__clock_cycles() - last_mark) < (T1+T2+T3));
+			last_mark = __clock_cycles();
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK << FIRST_PIN;
 
-			while((int32_t)(next_mark - __clock_cycles()) > (T2+T3+ESP_ADJUST2));
+			while((__clock_cycles() - last_mark) < T1);
 			*FastPin<FIRST_PIN>::cport() = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << FIRST_PIN;
 
-			while((int32_t)(next_mark - __clock_cycles()) > (T3 + ESP_ADJUST));
+			while((__clock_cycles() - last_mark) < (T1+T2));
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK << FIRST_PIN;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 		}
 
 		for(register uint32_t i = USED_LANES; i < 8; i++) {
-			while((int32_t)(next_mark - __clock_cycles()) > 0);
-			next_mark = __clock_cycles() + (T1+T2+T3) + ESP_ADJUST;
+			while((__clock_cycles() - last_mark) < (T1+T2+T3));
+			last_mark = __clock_cycles() + (T1+T2+T3) + ESP_ADJUST;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK << FIRST_PIN;
 
-			while((int32_t)(next_mark - __clock_cycles()) > (T2+T3+ESP_ADJUST2));
+			while((__clock_cycles() - last_mark) < T1);
 			*FastPin<FIRST_PIN>::cport() = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << FIRST_PIN;
 
-			while((int32_t)(next_mark - __clock_cycles()) > (T3 + ESP_ADJUST));
+			while((__clock_cycles() - last_mark) < (T1+T2));
 			*FastPin<FIRST_PIN>::cport() = PORT_MASK << FIRST_PIN;
 		}
 	}
@@ -128,18 +128,18 @@ public:
 
 		os_intr_lock();
 		uint32_t _start = __clock_cycles();
-		uint32_t next_mark = _start;
+		uint32_t last_mark = _start;
 
 		while(allpixels.has(1)) {
 			// Write first byte, read next byte
-			writeBits<8+XTRA0,1>(next_mark, b0, allpixels);
+			writeBits<8+XTRA0,1>(last_mark, b0, allpixels);
 
 			// Write second byte, read 3rd byte
-			writeBits<8+XTRA0,2>(next_mark, b0, allpixels);
+			writeBits<8+XTRA0,2>(last_mark, b0, allpixels);
 			allpixels.advanceData();
 
 			// Write third byte
-			writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
+			writeBits<8+XTRA0,0>(last_mark, b0, allpixels);
 
       #if (FASTLED_ALLOW_INTERRUPTS == 1)
 			os_intr_unlock();
@@ -150,8 +150,8 @@ public:
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
       os_intr_lock();
 			// if interrupts took longer than 45µs, punt on the current frame
-			if((int32_t)(__clock_cycles()-next_mark) > 0) {
-				if((int32_t)(__clock_cycles()-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { os_intr_unlock(); return 0; }
+			if((int32_t)(__clock_cycles()-last_mark) > 0) {
+				if((int32_t)(__clock_cycles()-last_mark) > (T1+T2+T3+((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US))) { os_intr_unlock(); return 0; }
 			}
 			#endif
 		};
