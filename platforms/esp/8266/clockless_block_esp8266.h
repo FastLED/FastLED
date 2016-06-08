@@ -25,12 +25,11 @@ public:
 	virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) {
 		// mWait.wait();
 		/*uint32_t clocks = */
-		int cnt=2;
+		int cnt=FASTLED_INTERRUPT_RETRY_COUNT;
 		while(!showRGBInternal(pixels) && cnt--) {
       os_intr_unlock();
       delayMicroseconds(WAIT_TIME * 10);
       os_intr_lock();
-      showRGBInternal(pixels);
     }
 		// #if FASTLED_ALLOW_INTTERUPTS == 0
 		// Adjust the timer

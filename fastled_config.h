@@ -38,4 +38,11 @@
 #define FASTLED_SCALE8_FIXED 1
 // define FASTLED_SCALE8_FIXED 0
 
+// Use this to determine how many times FastLED will attempt to re-transmit a frame if interrupted
+// for too long by interrupts.
+#ifndef FASTLED_INTERRUPT_RETRY_COUNT
+#define FASTLED_INTERRUPT_RETRY_COUNT 2
+#endif
+
+
 #endif

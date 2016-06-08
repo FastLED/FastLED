@@ -9,10 +9,6 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
   return cyc;
 }
 
-#ifndef FASTLED_INTERRUPT_RETRY_COUNT
-#define FASTLED_INTERRUPT_RETRY_COUNT 2
-#endif
-
 #define FASTLED_HAS_CLOCKLESS 1
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
@@ -37,11 +33,10 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
     // mWait.wait();
 		int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
-    while(!showRGBInternal(pixels) && cnt--) {
+    while((showRGBInternal(pixels)==0) && cnt--) {
       os_intr_unlock();
-      delayMicroseconds(WAIT_TIME * 20);
+      delayMicroseconds(WAIT_TIME);
       os_intr_lock();
-      showRGBInternal(pixels);
     }
     // mWait.mark();
   }
