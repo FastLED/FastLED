@@ -2,6 +2,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+extern uint32_t _frame_cnt;
+extern uint32_t _retry_cnt;
+#endif
+
 // Info on reading cycle counter from https://github.com/kbeckmann/nodemcu-firmware/blob/ws2812-dual/app/modules/ws2812.c
 __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
   uint32_t cyc;
@@ -34,6 +39,9 @@ protected:
     // mWait.wait();
 		int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
     while((showRGBInternal(pixels)==0) && cnt--) {
+      #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+      _retry_cnt++;
+      #endif
       os_intr_unlock();
       delayMicroseconds(WAIT_TIME);
       os_intr_lock();
@@ -99,6 +107,9 @@ protected:
 		};
 
 		os_intr_unlock();
+    #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+    _frame_cnt++;
+    #endif
 		return __clock_cycles() - start;
 	}
 };

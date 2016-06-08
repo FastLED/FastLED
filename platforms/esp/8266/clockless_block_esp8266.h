@@ -2,14 +2,19 @@
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
 #define FASTLED_HAS_BLOCKLESS 1
-#define PORTA_FIRST_PIN 0
 
 #define PORT_MASK (((1<<LANES)-1) & 0x0000FFFFL)
 #define MIN(X,Y) (((X)<(Y)) ? (X):(Y))
-#define USED_LANES (MIN(LANES,16))
-#define LAST_PIN (FIRST_PIN + USED_LANES - 1)
+#define USED_LANES (MIN(LANES,4))
+#define REAL_FIRST_PIN 12
+#define LAST_PIN (12 + USED_LANES - 1)
 
 FASTLED_NAMESPACE_BEGIN
+
+#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+extern uint32_t _frame_cnt;
+extern uint32_t _retry_cnt;
+#endif
 
 template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
@@ -28,6 +33,9 @@ public:
 		int cnt=FASTLED_INTERRUPT_RETRY_COUNT;
 		while(!showRGBInternal(pixels) && cnt--) {
       os_intr_unlock();
+			#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+			_retry_cnt++;
+			#endif
       delayMicroseconds(WAIT_TIME * 10);
       os_intr_lock();
     }
@@ -41,24 +49,14 @@ public:
 	}
 
   template<int PIN> static void initPin() {
-    if(PIN >= FIRST_PIN && PIN <= LAST_PIN) {
-      FastPin<PIN>::setOutput();
+    if(PIN >= REAL_FIRST_PIN && PIN <= LAST_PIN) {
+			_ESPPIN<PIN, 1<<(PIN & 0xFF)>::setOutput();
+      // FastPin<PIN>::setOutput();
     }
   }
 
   virtual void init() {
-    // initPin<0>();
-    // initPin<1>();
-    // initPin<2>();
-    // initPin<3>();
-    // initPin<4>();
-    // initPin<5>();
-    // initPin<6>();
-    // initPin<7>();
-    // initPin<8>();
-    // initPin<9>();
-    // initPin<10>();
-    // initPin<11>();
+		// Only supportd on pins 12-15
     initPin<12>();
     initPin<13>();
     initPin<14>();
@@ -87,29 +85,31 @@ public:
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
 		for(register uint32_t i = 0; i < USED_LANES; i++) {
-			while((__clock_cycles() - last_mark) < (T1+T2+T3));
+			while((__clock_cycles() - last_mark) < (T1+T2+T3+6));
 			last_mark = __clock_cycles();
-			*FastPin<FIRST_PIN>::sport() = PORT_MASK << FIRST_PIN;
+			*FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
 
+			uint32_t nword = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << REAL_FIRST_PIN;
 			while((__clock_cycles() - last_mark) < T1);
-			*FastPin<FIRST_PIN>::cport() = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << FIRST_PIN;
+			*FastPin<FIRST_PIN>::cport() = nword;
 
 			while((__clock_cycles() - last_mark) < (T1+T2));
-			*FastPin<FIRST_PIN>::cport() = PORT_MASK << FIRST_PIN;
+			*FastPin<FIRST_PIN>::cport() = PORT_MASK << REAL_FIRST_PIN;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 		}
 
 		for(register uint32_t i = USED_LANES; i < 8; i++) {
-			while((__clock_cycles() - last_mark) < (T1+T2+T3));
-			last_mark = __clock_cycles() + (T1+T2+T3) + ESP_ADJUST;
-			*FastPin<FIRST_PIN>::sport() = PORT_MASK << FIRST_PIN;
+			while((__clock_cycles() - last_mark) < (T1+T2+T3+6));
+			last_mark = __clock_cycles();
+			*FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
 
+			uint32_t nword = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << REAL_FIRST_PIN;
 			while((__clock_cycles() - last_mark) < T1);
-			*FastPin<FIRST_PIN>::cport() = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << FIRST_PIN;
+			*FastPin<FIRST_PIN>::cport() = nword;
 
 			while((__clock_cycles() - last_mark) < (T1+T2));
-			*FastPin<FIRST_PIN>::cport() = PORT_MASK << FIRST_PIN;
+			*FastPin<FIRST_PIN>::cport() = PORT_MASK << REAL_FIRST_PIN;
 		}
 	}
 
@@ -156,6 +156,9 @@ public:
 		};
 
     os_intr_unlock();
+		#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+		_frame_cnt++;
+		#endif
     return __clock_cycles() - _start;
 	}
 };
