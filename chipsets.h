@@ -478,7 +478,7 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER, 4> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER, 4> {};
+class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER> {};
 
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
