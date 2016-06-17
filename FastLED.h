@@ -98,6 +98,7 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903B : public UCS1903BCon
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1904 : public UCS1904Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS2903 : public UCS2903Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2852 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6812 : public SK6812Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6822 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};
@@ -459,8 +460,8 @@ public:
 	/// Update all our controllers with the current led colors
 	void show() { show(m_Scale); }
 
-	/// clear the leds, optionally wiping the local array of data as well
-	/// @param writeData whether or not to write into the local data array as well
+	/// clear the leds, wiping the local array of data, optionally black out the leds as well
+	/// @param writeData whether or not to write out to the leds as well
 	void clear(boolean writeData = false);
 
 	/// clear out the local data array
