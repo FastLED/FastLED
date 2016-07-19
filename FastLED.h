@@ -351,6 +351,7 @@ public:
 		switch(CHIPSET) {
 			case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case OCTOWS2811_400: { static COctoWS2811Controller<RGB_ORDER,true> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+      case OCTOWS2813: { static COctoWS2811Controller<RGB_ORDER,true> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
