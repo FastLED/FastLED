@@ -7,9 +7,17 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
+#if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+#define FASTLED_HAS_PRAGMA_MESSAGE
+#endif
+
 #define  FASTLED_VERSION 3001001
 #ifndef FASTLED_INTERNAL
-#warning FastLED version 3.001.001  (Not really a warning, just telling you here.)
+#  ifdef FASTLED_HAS_PRAGMA_MESSAGE
+#    pragma message "FastLED version 3.001.001"
+#  else
+#    warning FastLED version 3.001.001  (Not really a warning, just telling you here.)
+#  endif
 #endif
 
 #ifndef __PROG_TYPES_COMPAT__
@@ -90,9 +98,11 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903B : public UCS1903BCon
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1904 : public UCS1904Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS2903 : public UCS2903Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2852 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6812 : public SK6812Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6822 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA106 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PL9823 : public PL9823Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA104 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
@@ -450,8 +460,8 @@ public:
 	/// Update all our controllers with the current led colors
 	void show() { show(m_Scale); }
 
-	/// clear the leds, optionally wiping the local array of data as well
-	/// @param writeData whether or not to write into the local data array as well
+	/// clear the leds, wiping the local array of data, optionally black out the leds as well
+	/// @param writeData whether or not to write out to the leds as well
 	void clear(boolean writeData = false);
 
 	/// clear out the local data array
