@@ -42,7 +42,7 @@ How quickly can you get up and running with the library?  Here's a simple blink 
 Here's a list of all the LED chipsets are supported.  More details on the led chipsets are included *TODO: Link to wiki page*
 
 * Adafruit's DotStars - AKA the APA102
-* Adafruit's Neopixel - aka the WS2812B (also WS2811/WS2812, also supported in lo-speed mode) - a 3 wire addressable led chipset
+* Adafruit's Neopixel - aka the WS2812B (also WS2811/WS2812/WS2813, also supported in lo-speed mode) - a 3 wire addressable led chipset
 * TM1809/4 - 3 wire chipset, cheaply available on aliexpress.com
 * TM1803 - 3 wire chipset, sold by radio shack
 * UCS1903 - another 3 wire led chipset, cheap
