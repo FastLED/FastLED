@@ -85,12 +85,12 @@ public:
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
 		for(register uint32_t i = 0; i < USED_LANES; i++) {
-			while((__clock_cycles() - last_mark) < (T1+T2+T3+6));
+			while((__clock_cycles() - last_mark) < (T1+T2+T3));
 			last_mark = __clock_cycles();
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
 
 			uint32_t nword = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << REAL_FIRST_PIN;
-			while((__clock_cycles() - last_mark) < T1);
+			while((__clock_cycles() - last_mark) < (T1-6));
 			*FastPin<FIRST_PIN>::cport() = nword;
 
 			while((__clock_cycles() - last_mark) < (T1+T2));
@@ -100,12 +100,12 @@ public:
 		}
 
 		for(register uint32_t i = USED_LANES; i < 8; i++) {
-			while((__clock_cycles() - last_mark) < (T1+T2+T3+6));
+			while((__clock_cycles() - last_mark) < (T1+T2+T3));
 			last_mark = __clock_cycles();
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
 
 			uint32_t nword = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << REAL_FIRST_PIN;
-			while((__clock_cycles() - last_mark) < T1);
+			while((__clock_cycles() - last_mark) < (T1-6));
 			*FastPin<FIRST_PIN>::cport() = nword;
 
 			while((__clock_cycles() - last_mark) < (T1+T2));
