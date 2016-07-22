@@ -349,12 +349,8 @@ public:
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
 		switch(CHIPSET) {
-			case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
-<<<<<<< HEAD
+			case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER,WS2811_800kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case OCTOWS2811_400: { static COctoWS2811Controller<RGB_ORDER,WS2811_400kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
-=======
-			case OCTOWS2811_400: { static COctoWS2811Controller<RGB_ORDER,true> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
->>>>>>> a88d1a99c84e53188bacb92de4c01c2cf450dbe3
       case OCTOWS2813: { static COctoWS2811Controller<RGB_ORDER,WS2813_800kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
