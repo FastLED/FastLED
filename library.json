@@ -21,5 +21,18 @@
     }
   ],  
   "frameworks": "arduino",
-  "platforms": "atmelavr,atmelsam,freescalekinetis,nordicnrf51,nxplpc,ststm32,teensy"
+  "platforms": "atmelavr,atmelsam,freescalekinetis,nordicnrf51,nxplpc,ststm32,teensy",
+  "export": {
+    "exclude": [
+      "docs",
+      "extras"
+    ]
+  },
+  "build": {
+    "srcFilter": [
+      "+<*.c>",
+      "+<*.cpp>",
+      "+<*.h>"
+    ]
+  }  
 }
