@@ -37,7 +37,7 @@ class ARMHardwareSPIOutput {
 	MAP_SPIReset(GSPI_BASE);
 	MAP_SPIConfigSetExpClk(GSPI_BASE,MAP_PRCMPeripheralClockGet(PRCM_GSPI), \
 		spibitrate, SPI_MODE_MASTER, SPI_SUB_MODE_0, \
-		(SPI_SW_CTRL_CS | SPI_4PIN_MODE | SPI_TURBO_OFF | SPI_CS_ACTIVELOW | SPI_WL_8));	
+		(SPI_SW_CTRL_CS | SPI_3PIN_MODE | SPI_TURBO_OFF | SPI_CS_ACTIVELOW | SPI_WL_8));
 	//Configure SPI for 24 MHz, Master, Mode 0, and a bunch of flags
 	//Force 8 bit words
 	MAP_SPIEnable(GSPI_BASE);
@@ -119,7 +119,7 @@ public:
   template <class D> void writeBytes(register uint8_t *data, int len) {
     uint8_t *end = data + len;
     select();
-    // could be optimized to write 16bit words out instead of 8bit bytes
+    //TODO: could be optimized to write 16bit words out instead of 8bit bytes
     while(data != end) {
       writeByte(D::adjust(*data++));
     }

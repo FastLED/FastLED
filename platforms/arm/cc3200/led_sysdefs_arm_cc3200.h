@@ -25,7 +25,7 @@
 #endif
 
 #ifndef F_CPU
-#define F_CPU 80000000
+#define F_CPU 80000000L
 #endif
 
 
