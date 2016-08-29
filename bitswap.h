@@ -168,6 +168,8 @@ __attribute__((always_inline)) inline void slowswap(unsigned char *A, unsigned c
   }
 }
 
+void transpose8x1_noinline(unsigned char *A, unsigned char *B);
+
 /// Simplified form of bits rotating function.  Based on code found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt - rotating
 /// data into LSB for a faster write (the code using this data can happily walk the array backwards)
 __attribute__((always_inline)) inline void transpose8x1(unsigned char *A, unsigned char *B) {
