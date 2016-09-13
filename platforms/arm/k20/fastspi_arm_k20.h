@@ -277,10 +277,13 @@ public:
 
 	static void waitFully() __attribute__((always_inline)) {
 		// Wait for the last byte to get shifted into the register
+		cli();
 		while( (SPIX.SR & 0xF000) > 0) {
 			// reset the TCF flag
 			SPIX.SR |= SPI_SR_TCF;
 		}
+		sei();
+		
 		// wait for the TCF flag to get set
 		while (!(SPIX.SR & SPI_SR_TCF));
 		SPIX.SR |= (SPI_SR_TCF | SPI_SR_EOQF);
@@ -308,6 +311,7 @@ public:
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
 			((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
 			SPI_PUSHR_CTAS(1) | (w & 0xFFFF);
+			SPIX.SR |= SPI_SR_TCF;
 			if(WAIT_STATE == POST) { wait(); }
 		}
 
@@ -316,23 +320,24 @@ public:
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
 			((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
 			SPI_PUSHR_CTAS(0) | (b & 0xFF);
+			SPIX.SR |= SPI_SR_TCF;
 			if(WAIT_STATE == POST) { wait(); }
 		}
 	};
 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { wait(); SPIX.PUSHR = SPI_PUSHR_CTAS(1) | (w & 0xFFFF); }
-	static void writeWordNoWait(uint16_t w) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CTAS(1) | (w & 0xFFFF); }
+	static void writeWord(uint16_t w) __attribute__((always_inline)) { wait(); SPIX.PUSHR = SPI_PUSHR_CTAS(1) | (w & 0xFFFF); SPIX.SR |= SPI_SR_TCF;}
+	static void writeWordNoWait(uint16_t w) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CTAS(1) | (w & 0xFFFF); SPIX.SR |= SPI_SR_TCF;}
 
-	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPIX.PUSHR = SPI_PUSHR_CTAS(0) | (b & 0xFF); }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CTAS(0) | (b & 0xFF); wait(); }
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CTAS(0) | (b & 0xFF); }
+	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPIX.PUSHR = SPI_PUSHR_CTAS(0) | (b & 0xFF); SPIX.SR |= SPI_SR_TCF;}
+	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CTAS(0) | (b & 0xFF);SPIX.SR |= SPI_SR_TCF; wait(); }
+	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CTAS(0) | (b & 0xFF); SPIX.SR |= SPI_SR_TCF;}
 
-	static void writeWordCont(uint16_t w) __attribute__((always_inline)) { wait(); SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(1) | (w & 0xFFFF); }
-	static void writeWordContNoWait(uint16_t w) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(1) | (w & 0xFFFF); }
+	static void writeWordCont(uint16_t w) __attribute__((always_inline)) { wait(); SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(1) | (w & 0xFFFF); SPIX.SR |= SPI_SR_TCF;}
+	static void writeWordContNoWait(uint16_t w) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(1) | (w & 0xFFFF); SPIX.SR |= SPI_SR_TCF;}
 
-	static void writeByteCont(uint8_t b) __attribute__((always_inline)) { wait(); SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); }
-	static void writeByteContPostWait(uint8_t b) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); wait(); }
-	static void writeByteContNoWait(uint8_t b) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); }
+	static void writeByteCont(uint8_t b) __attribute__((always_inline)) { wait(); SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); SPIX.SR |= SPI_SR_TCF;}
+	static void writeByteContPostWait(uint8_t b) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); SPIX.SR |= SPI_SR_TCF;wait(); }
+	static void writeByteContNoWait(uint8_t b) __attribute__((always_inline)) { SPIX.PUSHR = SPI_PUSHR_CONT | SPI_PUSHR_CTAS(0) | (b & 0xFF); SPIX.SR |= SPI_SR_TCF;}
 
 	// not the most efficient mechanism in the world - but should be enough for sm16716 and friends
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
