@@ -1,4 +1,4 @@
-FastLED3.1.2pre
+FastLED3.1.3
 ===============
 
 * Add SK6822 timings
