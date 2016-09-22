@@ -80,7 +80,7 @@ enum ESPIChipsets {
 };
 
 enum ESM { SMART_MATRIX };
-enum OWS2811 { OCTOWS2811,OCTOWS2811_400 };
+enum OWS2811 { OCTOWS2811,OCTOWS2811_400, OCTOWS2813};
 
 #ifdef HAS_PIXIE
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PIXIE : public PixieController<DATA_PIN, RGB_ORDER> {};
