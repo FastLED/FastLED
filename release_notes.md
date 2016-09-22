@@ -1,3 +1,6 @@
+3.1.4
+* fix digispark avr build issue
+
 FastLED3.1.3
 ===============
 
