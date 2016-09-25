@@ -1,8 +1,10 @@
 #ifndef __FASTPIN_ARM_CC3200_H
 #define __FASTPIN_ARM_CC3200_H
 
-#include <inc/hw_gpio.h>	//from CC3200 Energia library. Check your includes if you can't find it.
-#include <inc/hw_memmap.h>
+#include "extras/inc/hw_types.h"
+#include "extras/inc/hw_gpio.h"	//from CC3200 Energia library. Check your includes if you can't find it.
+#include "extras/inc/hw_memmap.h"
+#include "extras/driverlib/gpio.h"
 
 FASTLED_NAMESPACE_BEGIN
 

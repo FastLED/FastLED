@@ -2,6 +2,7 @@
 #define __PROG_TYPES_COMPAT__
 
 #include <stdint.h>
+#include <math.h>
 
 #include "FastLED.h"
 

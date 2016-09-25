@@ -1,9 +1,17 @@
 #ifndef __INC_ARDUINO_COMPAT_CC3200_H
 #define __INC_ARDUINO_COMPAT_CC3200_H
+
 #ifndef ENERGIA	//Energia libraries will be included, ignore this file
 
-#include "systick.h"
-#include "hw_nvic.h"
+//following 2 libs are from $(CC3200_SDK)/driverlib/
+#include "extras/driverlib/systick.h"
+#include "extras/driverlib/rom_map.h"
+
+//following includes are from $(CC3200_SDK)/inc/
+#include "extras/inc/hw_nvic.h"
+#include "extras/inc/hw_gpio.h"
+#include "extras/inc/hw_types.h"
+
 
 #define HIGH		1
 #define LOW			0
@@ -41,17 +49,17 @@ typedef uint8_t boolean;
 #endif
 
 //random Arduino functions & vars
-#define PI 3.1415926535897932384626433832795
-#define HALF_PI 1.5707963267948966192313216916398
-#define TWO_PI 6.283185307179586476925286766559
-#define DEG_TO_RAD 0.017453292519943295769236907684886
-#define RAD_TO_DEG 57.295779513082320876798154814105
+#define PI 			3.1415926535897932384626433832795
+#define HALF_PI 	1.5707963267948966192313216916398
+#define TWO_PI 		6.283185307179586476925286766559
+#define DEG_TO_RAD 	0.017453292519943295769236907684886
+#define RAD_TO_DEG 	57.295779513082320876798154814105
 
 #ifndef M_PI
-#define M_PI 3.1415926535897932384626433832795
+#define M_PI 		3.1415926535897932384626433832795
 #endif
 #ifndef M_SQRT2
-#define M_SQRT2 1.4142135623730950488016887
+#define M_SQRT2 	1.4142135623730950488016887
 #endif
 
 //replace stdlib abs if it's already defined. Not sure why arduino does this, but...
@@ -59,34 +67,54 @@ typedef uint8_t boolean;
 #undef abs
 #endif
 //NOTE: the auto keyword is specific to C++11, if compiling using C instead use typeof(x) instead
-#define abs(x) ({ \
-  auto _x = (x); \
-  (_x > 0) ? _x : -_x; \
-})
-#define min(a, b) ({ \
-  auto _a = (a); \
-  auto _b = (b); \
-  (_a < _b) ? _a : _b; \
-})
-#define max(a, b) ({ \
-  auto _a = (a); \
-  auto _b = (b); \
-  (_a > _b) ? _a : _b; \
-})
-#define abs(x) ({ \
-  auto _x = (x); \
-  (_x > 0) ? _x : -_x; \
-})
-#define constrain(amt, low, high) ({ \
-  auto _amt = (amt); \
-  auto _low = (low); \
-  auto _high = (high); \
-  (_amt < _low) ? _low : ((_amt > _high) ? _high : _amt); \
-})
+#ifdef __cplusplus
+template <class T> inline T abs(const T& val)
+{
+	return (val < 0) ? (-val) : val;
+}
+template <class T> inline T min(const T& val1, const T& val2)
+{
+	return (val1 < val2) ? val1 : val2;
+}
+template <class T> inline T max(const T& val1, const T& val2)
+{
+	return (val1 > val2) ? val1 : val2;
+}
+template <class T> inline T constrain(const T& amt, const T& low, const T& high)
+{
+	return (amt < low) ? low : ((amt > high) ? high : amt); 
+}
+
 #define round(x) ({ \
   auto _x = (x); \
   (_x>=0) ? (long)(_x+0.5) : (long)(_x-0.5); \
 })
+#else //compiling w/ C
+#define abs(x) ({ \
+  typeof(x) _x = (x); \
+  (_x > 0) ? _x : -_x; \
+})
+#define min(a, b) ({ \
+  typeof(a) _a = (a); \
+  typeof(b) _b = (b); \
+  (_a < _b) ? _a : _b; \
+})
+#define max(a, b) ({ \
+  typeof(a) _a = (a); \
+  typeof(b) _b = (b); \
+  (_a > _b) ? _a : _b; \
+})
+#define constrain(amt, low, high) ({ \
+  typeof(amt) _amt = (amt); \
+  typeof(low) _low = (low); \
+  typeof(high) _high = (high); \
+  (_amt < _low) ? _low : ((_amt > _high) ? _high : _amt); \
+})
+#define round(x) ({ \
+  typeof(x) _x = (x); \
+  (_x>=0) ? (long)(_x+0.5) : (long)(_x-0.5); \
+})
+#endif //__cplusplus (for typeof/auto confusion)
 #define radians(deg) ((deg)*DEG_TO_RAD)
 #define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ({ \

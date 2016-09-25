@@ -36,8 +36,9 @@ static const uint8_t gDark_mW  =  1 * 5; //  1mA @ 5v =  5mW
 //  static const uint8_t gBlue_mW  = 100;
 //  static const uint8_t gDark_mW  =  12;
 
-
+#ifndef POWER_LED
 #define POWER_LED 1
+#endif
 #define POWER_DEBUG_PRINT 0
 
 

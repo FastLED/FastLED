@@ -28,10 +28,14 @@
 #define F_CPU 80000000L
 #endif
 
+//power LED display for power_mgt.c
+#ifndef POWER_LED
+#define POWER_LED 0
+#endif
 
 //#include <avr/io.h>
 //#include <avr/interrupt.h> // for cli/se definitions
-
+#include "extras/inc/hw_gpio.h"
 
 // Define the register types
 #if defined(ENERGIA) || !defined(__TI_COMPILER_VERSION__) || defined(ccs) // && ARDUINO < 150
