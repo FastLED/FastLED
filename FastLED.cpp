@@ -129,7 +129,7 @@ void CFastLED::delay(unsigned long ms) {
 		::delay(1);
 #endif
 		show();
-#if defined(ARDUINO) && (ARDUINO > 150) && !defined(IS_BEAN)
+#if defined(ARDUINO) && (ARDUINO > 150) && !defined(IS_BEAN) && !defined (ARDUINO_AVR_DIGISPARK)
 		yield();
 #endif
 	}

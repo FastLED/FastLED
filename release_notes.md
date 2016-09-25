@@ -1,4 +1,7 @@
-FastLED3.1.2pre
+3.1.4
+* fix digispark avr build issue
+
+FastLED3.1.3
 ===============
 
 * Add SK6822 timings

@@ -11,12 +11,12 @@
 #define FASTLED_HAS_PRAGMA_MESSAGE
 #endif
 
-#define  FASTLED_VERSION 3001001
+#define  FASTLED_VERSION 3001003
 #ifndef FASTLED_INTERNAL
 #  ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#    pragma message "FastLED version 3.001.001"
+#    pragma message "FastLED version 3.001.003"
 #  else
-#    warning FastLED version 3.001.001  (Not really a warning, just telling you here.)
+#    warning FastLED version 3.001.003  (Not really a warning, just telling you here.)
 #  endif
 #endif
 
@@ -80,7 +80,7 @@ enum ESPIChipsets {
 };
 
 enum ESM { SMART_MATRIX };
-enum OWS2811 { OCTOWS2811,OCTOWS2811_400 };
+enum OWS2811 { OCTOWS2811,OCTOWS2811_400, OCTOWS2813};
 
 #ifdef HAS_PIXIE
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PIXIE : public PixieController<DATA_PIN, RGB_ORDER> {};
