@@ -3,14 +3,29 @@
 
 #ifndef ENERGIA	//Energia libraries will be included, ignore this file
 
-//following 2 libs are from $(CC3200_SDK)/driverlib/
-#include "extras/driverlib/systick.h"
-#include "extras/driverlib/rom_map.h"
+#pragma message "Including Arduino compatibility functions"
+
+//C Standard libraries
+#include <stdint.h>
+#include <stdlib.h>
+
+//#include "led_sysdefs_arm_cc3200.h"
 
 //following includes are from $(CC3200_SDK)/inc/
 #include "extras/inc/hw_nvic.h"
 #include "extras/inc/hw_gpio.h"
 #include "extras/inc/hw_types.h"
+#include "extras/inc/hw_ints.h"
+#include "extras/inc/hw_timer.h"
+
+//following 2 libs are from $(CC3200_SDK)/driverlib/
+#include "extras/driverlib/rom_map.h"
+#include "extras/driverlib/systick.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 
 #define HIGH		1
@@ -67,6 +82,7 @@ typedef uint8_t boolean;
 #undef abs
 #endif
 //NOTE: the auto keyword is specific to C++11, if compiling using C instead use typeof(x) instead
+#if 0
 #ifdef __cplusplus
 template <class T> inline T abs(const T& val)
 {
@@ -115,87 +131,32 @@ template <class T> inline T constrain(const T& amt, const T& low, const T& high)
   (_x>=0) ? (long)(_x+0.5) : (long)(_x-0.5); \
 })
 #endif //__cplusplus (for typeof/auto confusion)
+#endif //0. Testing other def of arduino funcs
+
+#if 1
+#define min(a,b) ((a)<(b)?(a):(b))
+#define max(a,b) ((a)>(b)?(a):(b))
+#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+#define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
+#endif	//1. Other def of arduino funcs
+
 #define radians(deg) ((deg)*DEG_TO_RAD)
 #define degrees(rad) ((rad)*RAD_TO_DEG)
-#define sq(x) ({ \
-  typeof(x) _x = (x); \
-  _x * _x; \
-})
+#define sq(x) (x * x)
 #define sei() __enable_irq()
 #define cli() __disable_irq()
 #define interrupts() __enable_irq()
 #define noInterrupts() __disable_irq()
 
 //forward declarations for timing functions. Timing functions taken from Energia library "wiring.c"
-static void (*SysTickCbFuncs[8])(uint32_t ui32TimeMS);
 void delay(uint32_t milliseconds);
 void sleep(uint32_t milliseconds);
 void sleepSeconds(uint32_t seconds);
 void suspend(void);
-extern volatile boolean stay_asleep;
 
-#define SYSTICKMS               (1000 / SYSTICKHZ)
-#define SYSTICKHZ               1000
-
-static unsigned long milliseconds = 0;
-#define SYSTICK_INT_PRIORITY    0x80
-
-unsigned long micros(void){
-	return (milliseconds * 1000) + ( ((F_CPU / SYSTICKHZ) - MAP_SysTickValueGet()) / (F_CPU/1000000));
+#ifdef __cplusplus
 }
-
-unsigned long millis(void){
-	return milliseconds;
-}
-
-void delayMicroseconds(unsigned int us){
-	// Systick timer rolls over every 1000000/SYSTICKHZ microseconds 
-	if (us > (1000000UL / SYSTICKHZ - 1)) {
-		delay(us / 1000);  // delay milliseconds
-		us = us % 1000;     // handle remainder of delay
-	};
-
-	// 24 bit timer - mask off undefined bits
-	unsigned long startTime = HWREG(NVIC_ST_CURRENT) & NVIC_ST_CURRENT_M;
-
-	unsigned long ticks = (unsigned long)us * (F_CPU/1000000UL);
-	volatile unsigned long elapsedTime;
-
-	if (ticks > startTime) {
-		ticks = (ticks + (NVIC_ST_CURRENT_M - (unsigned long)F_CPU / SYSTICKHZ)) & NVIC_ST_CURRENT_M;
-	}
-
-	do {
-		elapsedTime = (startTime-(HWREG(NVIC_ST_CURRENT) & NVIC_ST_CURRENT_M )) & NVIC_ST_CURRENT_M;
-	} while(elapsedTime <= ticks);
-}
-
-void delay(uint32_t millis){
-	unsigned long i;
-	for(i=0; i<millis*2; i++){
-		delayMicroseconds(500);
-	}
-}
-
-void registerSysTickCb(void (*userFunc)(uint32_t)){
-	uint8_t i;
-	for (i=0; i<8; i++) {
-		if(!SysTickCbFuncs[i]) {
-			SysTickCbFuncs[i] = userFunc;
-			break;
-		}
-	}
-}
-
-void SysTickIntHandler(void){
-	milliseconds++;
-
-	uint8_t i;
-	for (i=0; i<8; i++) {
-		if (SysTickCbFuncs[i])
-			SysTickCbFuncs[i](SYSTICKMS);
-	}
-}
+#endif
 
 #endif //ENERGIA
 #endif //__INC_ARDUINO_COMPAT_CC3200_h
