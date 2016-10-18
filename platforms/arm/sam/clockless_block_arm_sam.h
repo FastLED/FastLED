@@ -162,9 +162,8 @@ public:
     }
 
     for(uint32_t i = LANES; i < 8; i++) {
-      while(DUE_TIMER_VAL > next_mark);
-
-      next_mark = DUE_TIMER_VAL - (TOTAL-3);
+      while(DUE_TIMER_VAL < next_mark);
+      next_mark = (DUE_TIMER_VAL+TOTAL);
       *FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
       while((next_mark - DUE_TIMER_VAL) > (T2+T3+6));
