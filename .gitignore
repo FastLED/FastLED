@@ -1,4 +1,5 @@
 html/
+*.gch
 /FastLED.vcxproj.filters
 /FastLED.vcxproj
 /FastLED.sln
