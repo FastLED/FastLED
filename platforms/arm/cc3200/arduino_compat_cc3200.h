@@ -149,10 +149,14 @@ template <class T> inline T constrain(const T& amt, const T& low, const T& high)
 #define noInterrupts() __disable_irq()
 
 //forward declarations for timing functions. Timing functions taken from Energia library "wiring.c"
+unsigned long micros(void);
+unsigned long millis(void);
 void delay(uint32_t milliseconds);
 void sleep(uint32_t milliseconds);
 void sleepSeconds(uint32_t seconds);
 void suspend(void);
+void registerSysTickCb(void (*userFunc)(uint32_t));
+void SysTickIntHandler(void);
 
 #ifdef __cplusplus
 }
