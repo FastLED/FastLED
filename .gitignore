@@ -1,9 +1,8 @@
 html/
 *.gch
-/FastLED.vcxproj.filters
-/FastLED.vcxproj
-/FastLED.sln
-/.vs/FastLED/v14
+/*.vcxproj*
+/*.sln
+/.vs
 /__vm
 /Release/FastLED.log
-/FastLED.vcxproj.user
+/FastLEDlib.ino
