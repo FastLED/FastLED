@@ -1,8 +1,2 @@
 html/
 *.gch
-/*.vcxproj*
-/*.sln
-/.vs
-/__vm
-/Release/FastLED.log
-/FastLEDlib.ino
