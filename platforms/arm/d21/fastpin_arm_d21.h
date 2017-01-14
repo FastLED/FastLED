@@ -4,7 +4,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
-#warning "Software pin support forced, pin access will be sloightly slower."
+#warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
 
@@ -133,6 +133,13 @@ _DEFPIN_ARM( 20, 0,  6); _DEFPIN_ARM( 21, 0,  7);
 #define SPI_CLOCK 9
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ARDUINO_GEMMA_M0)
+
+#define MAX_PIN 3
+_DEFPIN_ARM(  0, 0,  8); _DEFPIN_ARM(  1, 0,  2); _DEFPIN_ARM(  2, 0,  9);
+
+#define HAS_HARDWARE_PIN_SUPPORT 0
 
 #endif
 
