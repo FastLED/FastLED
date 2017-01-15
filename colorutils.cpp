@@ -444,7 +444,7 @@ CRGB HeatColor( uint8_t temperature)
     // Scale 'heat' down from 0-255 to 0-191,
     // which can then be easily divided into three
     // equal 'thirds' of 64 units each.
-    uint8_t t192 = scale8_video( temperature, 192);
+    uint8_t t192 = scale8_video( temperature, 191);
 
     // calculate a value that ramps up from
     // zero to 255 in each 'third' of the scale.
