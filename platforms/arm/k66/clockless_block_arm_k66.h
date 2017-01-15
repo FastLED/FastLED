@@ -3,6 +3,7 @@
 
 //
 // unmodified from k20 code
+// TODO: check if PORTB can be used from bit 16-23 (byte 3)? -> 24-Way Parallel?
 //
 
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1

@@ -112,7 +112,6 @@ _DEFPIN_ARM(60,  2, E); _DEFPIN_ARM(61,  3, E); _DEFPIN_ARM(62,  4, E); _DEFPIN_
 
 #define SPI_DATA 11
 #define SPI_CLOCK 13
-#define SPI1            (*(SPI_t *)0x4002D000)
 
 #define SPI2_DATA 7
 #define SPI2_CLOCK 14
