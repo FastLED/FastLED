@@ -1,6 +1,8 @@
 #ifndef __INC_LIB8TION_MATH_H
 #define __INC_LIB8TION_MATH_H
 
+#include "scale8.h"
+
 ///@ingroup lib8tion
 
 ///@defgroup Math Basic math operations
@@ -405,6 +407,50 @@ LIB8STATIC uint8_t sqrt16(uint16_t x)
 
     return low - 1;
 }
+
+/// blend a variable proproportion(0-255) of one byte to another
+/// @param a - the starting byte value
+/// @param b - the byte value to blend toward
+/// @param amountOfB - the proportion (0-255) of b to blend
+/// @returns a byte value between a and b, inclusive
+#if (FASTLED_BLEND_FIXED == 1)
+LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
+{
+    uint16_t partial;
+    uint8_t result;
+    
+    uint8_t amountOfA = 255 - amountOfB;
+    
+    partial = (a * amountOfA);
+#if (FASTLED_SCALE8_FIXED == 1)
+    partial += a;
+#endif
+    
+    partial += (b * amountOfB);
+#if (FASTLED_SCALE8_FIXED == 1)
+    partial += b;
+#endif
+    
+    result = partial >> 8;
+    
+    return result;
+}
+
+#else
+LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
+{
+    // This version loses precision in the integer math
+    // and can actually return results outside of the range
+    // from a to b.  Its use is not recommended.
+    uint8_t result;
+    uint8_t amountOfA = 255 - amountOfB;
+    result = scale8_LEAVING_R1_DIRTY( a, amountOfA)
+           + scale8_LEAVING_R1_DIRTY( b, amountOfB);
+    cleanup_R1();
+    return result;
+}
+#endif
+
 
 ///@}
 #endif
