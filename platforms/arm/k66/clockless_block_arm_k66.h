@@ -1,31 +1,29 @@
 #ifndef __INC_BLOCK_CLOCKLESS_ARM_K66_H
 #define __INC_BLOCK_CLOCKLESS_ARM_K66_H
 
-//
-// unmodified from k20 code
-// TODO: check if PORTB can be used from bit 16-23 (byte 3)? -> 24-Way Parallel?
-//
-
-// Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
+// Definition for a single channel clockless controller for the k66 family of chips, like that used in the teensy 3.6
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
 #define FASTLED_HAS_BLOCKLESS 1
 
+#define PORTB_FIRST_PIN 0
 #define PORTC_FIRST_PIN 15
 #define PORTD_FIRST_PIN 2
 #define HAS_PORTDC 1
 
-#define PORT_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFFF))
+#define LANE_MASK (((1<<LANES)-1) & ((FIRST_PIN==2) ? 0xFF : 0xFFF))
+#define PORT_SHIFT(P) ((P) << ((FIRST_PIN==0) ? 16 : 0))
+#define PORT_MASK PORT_SHIFT(LANE_MASK)
 
 #define MIN(X,Y) (((X)<(Y)) ? (X):(Y))
-#define USED_LANES ((FIRST_PIN==2) ? MIN(LANES,8) : MIN(LANES,12))
+#define USED_LANES ((FIRST_PIN!=15) ? MIN(LANES,8) : MIN(LANES,12))
 
 #include "kinetis.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
-class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
+class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, LANE_MASK> {
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
@@ -35,7 +33,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
 
-	virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) { 
+	virtual void showPixels(PixelController<RGB_ORDER, LANES, LANE_MASK> & pixels) { 
 		mWait.wait();
 		uint32_t clocks = showRGBInternal(pixels);
 		#if FASTLED_ALLOW_INTTERUPTS == 0
@@ -74,6 +72,17 @@ public:
 				case 2: FastPin<14>::setOutput();
 				case 1: FastPin<2>::setOutput();
 			}
+		} else if (FIRST_PIN == PORTB_FIRST_PIN) { // PORTB
+			switch (USED_LANES) {
+				case 8: FastPin<45>::setOutput();
+				case 7: FastPin<44>::setOutput();
+				case 6: FastPin<46>::setOutput();
+				case 5: FastPin<43>::setOutput();
+				case 4: FastPin<30>::setOutput();
+				case 3: FastPin<29>::setOutput();
+				case 2: FastPin<1>::setOutput();
+				case 1: FastPin<0>::setOutput();
+			}
 		}
 		mPinMask = FastPin<FIRST_PIN>::mask();
 		mPort = FastPin<FIRST_PIN>::port();
@@ -87,7 +96,7 @@ public:
 		uint32_t raw[3];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , register uint32_t & b2)  {
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register Lines & b, PixelController<RGB_ORDER, LANES, LANE_MASK> &pixels) { // , register uint32_t & b2)  {
 		register Lines b2;
 		if(USED_LANES>8) {
 			transpose8<1,2>(b.bytes,b2.bytes);
@@ -107,7 +116,7 @@ public:
 			if(USED_LANES>8) {
 				*FastPin<FIRST_PIN>::cport() = ((~b2.shorts[i]) & PORT_MASK);
 			} else {
-				*FastPin<FIRST_PIN>::cport() = ((~b2.bytes[7-i]) & PORT_MASK);
+				*FastPin<FIRST_PIN>::cport() = (PORT_SHIFT(~b2.bytes[7-i]) & PORT_MASK);
 			}
 
 			while((next_mark - ARM_DWT_CYCCNT) > (T3));
@@ -131,7 +140,7 @@ public:
 				*FastPin<FIRST_PIN>::cport() = ((~b2.shorts[i]) & PORT_MASK);
 			} else {
 				// b2.bytes[0] = 0;
-				*FastPin<FIRST_PIN>::cport() = ((~b2.bytes[7-i]) & PORT_MASK);
+				*FastPin<FIRST_PIN>::cport() = (PORT_SHIFT(~b2.bytes[7-i]) & PORT_MASK);
 			}
 
 			while((next_mark - ARM_DWT_CYCCNT) > (T3));
@@ -144,7 +153,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-		static uint32_t showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) {
+		static uint32_t showRGBInternal(PixelController<RGB_ORDER, LANES, LANE_MASK> &allpixels) {
 		// Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
