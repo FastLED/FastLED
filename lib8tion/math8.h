@@ -128,6 +128,25 @@ LIB8STATIC_ALWAYS_INLINE uint8_t add8( uint8_t i, uint8_t j)
 #endif
 }
 
+/// add one byte to another, with one byte result
+LIB8STATIC_ALWAYS_INLINE uint16_t add8to16( uint8_t i, uint16_t j)
+{
+#if ADD8_C == 1
+    uint16_t t = i + j;
+    return t;
+#elif ADD8_AVRASM == 1
+    // Add i(one byte) to j(two bytes)
+    asm volatile( "add %A[j], %[i]              \n\t"
+                  "adc %B[j], __zero_reg__      \n\t"
+                 : [j] "+a" (j)
+                 : [i] "a"  (i)
+                 );
+    return i;
+#else
+#error "No implementation for add8to16 available."
+#endif
+}
+
 
 /// subtract one byte from another, 8-bit result
 LIB8STATIC_ALWAYS_INLINE uint8_t sub8( uint8_t i, uint8_t j)
@@ -414,8 +433,9 @@ LIB8STATIC uint8_t sqrt16(uint16_t x)
 /// @param amountOfB - the proportion (0-255) of b to blend
 /// @returns a byte value between a and b, inclusive
 #if (FASTLED_BLEND_FIXED == 1)
-LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
+LIB8STATIC_ALWAYS_INLINE uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
 {
+#if BLEND8_C == 1
     uint16_t partial;
     uint8_t result;
     
@@ -424,16 +444,63 @@ LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
     partial = (a * amountOfA);
 #if (FASTLED_SCALE8_FIXED == 1)
     partial += a;
+    //partial = add8to16( a, partial);
 #endif
     
     partial += (b * amountOfB);
 #if (FASTLED_SCALE8_FIXED == 1)
     partial += b;
+    //partial = add8to16( b, partial);
 #endif
     
     result = partial >> 8;
     
     return result;
+
+#elif BLEND8_AVRASM == 1
+    uint16_t partial;
+    uint8_t result;
+
+    asm volatile (
+        /* partial = b * amountOfB */
+        "  mul %[b], %[amountOfB]        \n\t"
+        "  movw %A[partial], r0          \n\t"
+
+        /* amountOfB (aka amountOfA) = 255 - amountOfB */
+        "  com %[amountOfB]              \n\t"
+
+        /* partial += a * amountOfB (aka amountOfA) */
+        "  mul %[a], %[amountOfB]        \n\t"
+
+        "  add %A[partial], r0           \n\t"
+        "  adc %B[partial], r1           \n\t"
+                  
+        "  clr __zero_reg__              \n\t"
+                  
+#if (FASTLED_SCALE8_FIXED == 1)
+        /* partial += a */
+        "  add %A[partial], %[a]         \n\t"
+        "  adc %B[partial], __zero_reg__ \n\t"
+                  
+        // partial += b
+        "  add %A[partial], %[b]         \n\t"
+        "  adc %B[partial], __zero_reg__ \n\t"
+#endif
+                  
+        : [partial] "=r" (partial),
+          [amountOfB] "+a" (amountOfB)
+        : [a] "a" (a),
+          [b] "a" (b)
+        : "r0", "r1"
+    );
+    
+    result = partial >> 8;
+    
+    return result;
+    
+#else
+#error "No implementation for blend8 available."
+#endif
 }
 
 #else

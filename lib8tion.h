@@ -216,6 +216,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define AVG7_C 1
 #define AVG16_C 1
 #define AVG15_C 1
+#define BLEND8_C 1
 
 
 #elif defined(__AVR__)
@@ -253,6 +254,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define MUL8_C 0
 #define QMUL8_C 0
 #define EASE8_C 0
+#define BLEND8_C 0
 #define SCALE8_AVRASM 1
 #define SCALE16BY8_AVRASM 1
 #define SCALE16_AVRASM 1
@@ -260,6 +262,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define QMUL8_AVRASM 1
 #define EASE8_AVRASM 1
 #define CLEANUP_R1_AVRASM 1
+#define BLEND8_AVRASM 1
 #else
 // On ATtiny, we just use C implementations
 #define SCALE8_C 1
@@ -268,12 +271,14 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define MUL8_C 1
 #define QMUL8_C 1
 #define EASE8_C 1
+#define BLEND8_C 1
 #define SCALE8_AVRASM 0
 #define SCALE16BY8_AVRASM 0
 #define SCALE16_AVRASM 0
 #define MUL8_AVRASM 0
 #define QMUL8_AVRASM 0
 #define EASE8_AVRASM 0
+#define BLEND8_AVRASM 0
 #endif
 
 #else
@@ -296,6 +301,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define AVG7_C 1
 #define AVG16_C 1
 #define AVG15_C 1
+#define BLEND8_C 1
 
 #endif
 
