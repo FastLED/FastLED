@@ -433,7 +433,7 @@ LIB8STATIC uint8_t sqrt16(uint16_t x)
 /// @param amountOfB - the proportion (0-255) of b to blend
 /// @returns a byte value between a and b, inclusive
 #if (FASTLED_BLEND_FIXED == 1)
-LIB8STATIC_ALWAYS_INLINE uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
+LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
 {
 #if BLEND8_C == 1
     uint16_t partial;
