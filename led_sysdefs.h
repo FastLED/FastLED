@@ -25,6 +25,8 @@
 #include "platforms/arm/d21/led_sysdefs_arm_d21.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/led_sysdefs_esp8266.h"
+#elif defined(__linux__)
+#include "platforms/unix/linux/led_sysdefs_linux.h"
 #else
 // AVR platforms
 #include "platforms/avr/led_sysdefs_avr.h"

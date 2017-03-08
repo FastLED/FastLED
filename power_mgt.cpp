@@ -36,8 +36,11 @@ static const uint8_t gDark_mW  =  1 * 5; //  1mA @ 5v =  5mW
 //  static const uint8_t gBlue_mW  = 100;
 //  static const uint8_t gDark_mW  =  12;
 
-
+#if defined(FASTLED_UNIX)
+#define POWER_LED 0
+#else
 #define POWER_LED 1
+#endif
 #define POWER_DEBUG_PRINT 0
 
 
@@ -87,7 +90,7 @@ uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t nu
 	uint32_t requested_power_mW = ((uint32_t)total_mW * target_brightness) / 256;
 
 	uint8_t recommended_brightness = target_brightness;
-	if(requested_power_mW > max_power_mW) { 
+	if(requested_power_mW > max_power_mW) {
     		recommended_brightness = (uint32_t)((uint8_t)(target_brightness) * (uint32_t)(max_power_mW)) / ((uint32_t)(requested_power_mW));
 	}
 

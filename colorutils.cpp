@@ -252,7 +252,7 @@ CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay )
     existing.green = blend8( existing.green, overlay.green, amountOfOverlay);
     existing.blue  = blend8( existing.blue,  overlay.blue,  amountOfOverlay);
 #endif
-    
+
     return existing;
 }
 
@@ -363,7 +363,11 @@ CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fra
 
 // Forward declaration of the function "XY" which must be provided by
 // the application for use in two-dimensional filter functions.
+#if defined(FASTLED_UNIX)
+uint16_t XY( uint8_t, uint8_t) __attribute__ ((weak));
+#else
 uint16_t XY( uint8_t, uint8_t);// __attribute__ ((weak));
+#endif
 
 
 // blur1d: one-dimensional blur filter. Spreads light to 2 line neighbors.
@@ -507,7 +511,7 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
     //      hi4 = index >> 4;
     uint8_t hi4 = lsrX4(index);
     uint8_t lo4 = index & 0x0F;
-    
+
     // const CRGB* entry = &(pal[0]) + hi4;
     // since hi4 is always 0..15, hi4 * sizeof(CRGB) can be a single-byte value,
     // instead of the two byte 'int' that avr-gcc defaults to.
@@ -515,25 +519,25 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
     uint8_t hi4XsizeofCRGB = hi4 * sizeof(CRGB);
     // We then add that to a base array pointer.
     const CRGB* entry = (CRGB*)( (uint8_t*)(&(pal[0])) + hi4XsizeofCRGB);
-    
+
     uint8_t blend = lo4 && (blendType != NOBLEND);
-    
+
     uint8_t red1   = entry->red;
     uint8_t green1 = entry->green;
     uint8_t blue1  = entry->blue;
-    
-    
+
+
     if( blend ) {
-        
+
         if( hi4 == 15 ) {
             entry = &(pal[0]);
         } else {
             entry++;
         }
-        
+
         uint8_t f2 = lo4 << 4;
         uint8_t f1 = 255 - f2;
-        
+
         //    rgb1.nscale8(f1);
         uint8_t red2   = entry->red;
         red1   = scale8_LEAVING_R1_DIRTY( red1,   f1);
@@ -549,10 +553,10 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
         blue1  = scale8_LEAVING_R1_DIRTY( blue1,  f1);
         blue2  = scale8_LEAVING_R1_DIRTY( blue2,  f2);
         blue1  += blue2;
-        
+
         cleanup_R1();
     }
-    
+
     if( brightness != 255) {
         if( brightness ) {
             brightness++; // adjust for rounding
@@ -583,7 +587,7 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
             blue1 = 0;
         }
     }
-    
+
     return CRGB( red1, green1, blue1);
 }
 
@@ -594,7 +598,7 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
     uint8_t lo4 = index & 0x0F;
 
     CRGB entry   =  FL_PGM_READ_DWORD_NEAR( &(pal[0]) + hi4 );
-    
+
 
     uint8_t red1   = entry.red;
     uint8_t green1 = entry.green;
@@ -677,7 +681,7 @@ CRGB ColorFromPalette( const CRGBPalette32& pal, uint8_t index, uint8_t brightne
     hi5 >>= 3;
 #endif
     uint8_t lo3 = index & 0x07;
-    
+
     // const CRGB* entry = &(pal[0]) + hi5;
     // since hi5 is always 0..31, hi4 * sizeof(CRGB) can be a single-byte value,
     // instead of the two byte 'int' that avr-gcc defaults to.
@@ -685,43 +689,43 @@ CRGB ColorFromPalette( const CRGBPalette32& pal, uint8_t index, uint8_t brightne
     uint8_t hi5XsizeofCRGB = hi5 * sizeof(CRGB);
     // We then add that to a base array pointer.
     const CRGB* entry = (CRGB*)( (uint8_t*)(&(pal[0])) + hi5XsizeofCRGB);
-    
+
     uint8_t red1   = entry->red;
     uint8_t green1 = entry->green;
     uint8_t blue1  = entry->blue;
-    
+
     uint8_t blend = lo3 && (blendType != NOBLEND);
-    
+
     if( blend ) {
-        
+
         if( hi5 == 31 ) {
             entry = &(pal[0]);
         } else {
             entry++;
         }
-        
+
         uint8_t f2 = lo3 << 5;
         uint8_t f1 = 255 - f2;
-        
+
         uint8_t red2   = entry->red;
         red1   = scale8_LEAVING_R1_DIRTY( red1,   f1);
         red2   = scale8_LEAVING_R1_DIRTY( red2,   f2);
         red1   += red2;
-        
+
         uint8_t green2 = entry->green;
         green1 = scale8_LEAVING_R1_DIRTY( green1, f1);
         green2 = scale8_LEAVING_R1_DIRTY( green2, f2);
         green1 += green2;
-        
+
         uint8_t blue2  = entry->blue;
         blue1  = scale8_LEAVING_R1_DIRTY( blue1,  f1);
         blue2  = scale8_LEAVING_R1_DIRTY( blue2,  f2);
         blue1  += blue2;
 
         cleanup_R1();
-        
+
     }
-    
+
     if( brightness != 255) {
         if( brightness ) {
             brightness++; // adjust for rounding
@@ -752,7 +756,7 @@ CRGB ColorFromPalette( const CRGBPalette32& pal, uint8_t index, uint8_t brightne
             blue1 = 0;
         }
     }
-    
+
     return CRGB( red1, green1, blue1);
 }
 
@@ -768,44 +772,44 @@ CRGB ColorFromPalette( const TProgmemRGBPalette32& pal, uint8_t index, uint8_t b
     hi5 >>= 3;
 #endif
     uint8_t lo3 = index & 0x07;
-    
+
     CRGB entry = FL_PGM_READ_DWORD_NEAR( &(pal[0]) + hi5);
-    
+
     uint8_t red1   = entry.red;
     uint8_t green1 = entry.green;
     uint8_t blue1  = entry.blue;
-    
+
     uint8_t blend = lo3 && (blendType != NOBLEND);
-    
+
     if( blend ) {
-        
+
         if( hi5 == 31 ) {
             entry =   FL_PGM_READ_DWORD_NEAR( &(pal[0]) );
         } else {
             entry =   FL_PGM_READ_DWORD_NEAR( &(pal[1]) + hi5 );
         }
-        
+
         uint8_t f2 = lo3 << 5;
         uint8_t f1 = 255 - f2;
-        
+
         uint8_t red2   = entry.red;
         red1   = scale8_LEAVING_R1_DIRTY( red1,   f1);
         red2   = scale8_LEAVING_R1_DIRTY( red2,   f2);
         red1   += red2;
-        
+
         uint8_t green2 = entry.green;
         green1 = scale8_LEAVING_R1_DIRTY( green1, f1);
         green2 = scale8_LEAVING_R1_DIRTY( green2, f2);
         green1 += green2;
-        
+
         uint8_t blue2  = entry.blue;
         blue1  = scale8_LEAVING_R1_DIRTY( blue1,  f1);
         blue2  = scale8_LEAVING_R1_DIRTY( blue2,  f2);
         blue1  += blue2;
-        
+
         cleanup_R1();
     }
-    
+
     if( brightness != 255) {
         if( brightness ) {
             brightness++; // adjust for rounding
@@ -836,7 +840,7 @@ CRGB ColorFromPalette( const TProgmemRGBPalette32& pal, uint8_t index, uint8_t b
             blue1 = 0;
         }
     }
-    
+
     return CRGB( red1, green1, blue1);
 }
 
@@ -957,31 +961,31 @@ CHSV ColorFromPalette( const struct CHSVPalette32& pal, uint8_t index, uint8_t b
     hi5 >>= 3;
 #endif
     uint8_t lo3 = index & 0x07;
-    
+
     uint8_t hi5XsizeofCHSV = hi5 * sizeof(CHSV);
     const CHSV* entry = (CHSV*)( (uint8_t*)(&(pal[0])) + hi5XsizeofCHSV);
-    
+
     uint8_t hue1   = entry->hue;
     uint8_t sat1   = entry->sat;
     uint8_t val1   = entry->val;
-    
+
     uint8_t blend = lo3 && (blendType != NOBLEND);
-    
+
     if( blend ) {
-        
+
         if( hi5 == 31 ) {
             entry = &(pal[0]);
         } else {
             entry++;
         }
-        
+
         uint8_t f2 = lo3 << 5;
         uint8_t f1 = 255 - f2;
-        
+
         uint8_t hue2  = entry->hue;
         uint8_t sat2  = entry->sat;
         uint8_t val2  = entry->val;
-        
+
         // Now some special casing for blending to or from
         // either black or white.  Black and white don't have
         // proper 'hue' of their own, so when ramping from
@@ -990,32 +994,32 @@ CHSV ColorFromPalette( const struct CHSVPalette32& pal, uint8_t index, uint8_t b
         // of the other color, so that you get the expected
         // brightness or saturation ramp, with hue staying
         // constant:
-        
+
         // If we are starting from white (sat=0)
         // or black (val=0), adopt the target hue.
         if( sat1 == 0 || val1 == 0) {
             hue1 = hue2;
         }
-        
+
         // If we are ending at white (sat=0)
         // or black (val=0), adopt the starting hue.
         if( sat2 == 0 || val2 == 0) {
             hue2 = hue1;
         }
-        
-        
+
+
         sat1  = scale8_LEAVING_R1_DIRTY( sat1, f1);
         val1  = scale8_LEAVING_R1_DIRTY( val1, f1);
-        
+
         sat2  = scale8_LEAVING_R1_DIRTY( sat2, f2);
         val2  = scale8_LEAVING_R1_DIRTY( val2, f2);
-        
+
         //    cleanup_R1();
-        
+
         // These sums can't overflow, so no qadd8 needed.
         sat1  += sat2;
         val1  += val2;
-        
+
         uint8_t deltaHue = (uint8_t)(hue2 - hue1);
         if( deltaHue & 0x80 ) {
             // go backwards
@@ -1024,14 +1028,14 @@ CHSV ColorFromPalette( const struct CHSVPalette32& pal, uint8_t index, uint8_t b
             // go forwards
             hue1 += scale8( deltaHue, f2);
         }
-        
+
         cleanup_R1();
     }
-    
+
     if( brightness != 255) {
         val1 = scale8_video( val1, brightness);
     }
-    
+
     return CHSV( hue1, sat1, val1);
 }
 

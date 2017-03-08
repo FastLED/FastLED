@@ -122,7 +122,22 @@ void CFastLED::clearData() {
 
 void CFastLED::delay(unsigned long ms) {
 	unsigned long start = millis();
-        do {
+#ifdef FASTLED_UNIX
+	unsigned long elapse;
+
+	show();
+	elapse = (millis() - start);
+
+	if (elapse >= ms)
+		return;
+
+	elapse = ms - elapse;
+    struct timespec ts;
+    ts.tv_sec = elapse / 1000;
+    ts.tv_nsec = (elapse % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+#else
+    do {
 #ifndef FASTLED_ACCURATE_CLOCK
 		// make sure to allow at least one ms to pass to ensure the clock moves
 		// forward
@@ -134,6 +149,7 @@ void CFastLED::delay(unsigned long ms) {
 #endif
 	}
 	while((millis()-start) < ms);
+#endif
 }
 
 void CFastLED::setTemperature(const struct CRGB & temp) {
@@ -232,7 +248,9 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
   }
 }
 
+#if !defined(FASTLED_UNIX)
 extern "C" int atexit(void (* /*func*/ )()) { return 0; }
+#endif
 
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1

@@ -1,0 +1,63 @@
+QUIET ?= 1
+ifeq ($(QUIET),1)
+  AD=@
+else
+  AD=
+endif
+
+MAJOR := 3
+MINOR := 1
+VERSION := $(MAJOR).$(MINOR)
+PREFIX := /usr/local
+
+SRC = $(wildcard *.cpp)
+
+OBJDIR = objs
+OBJS = $(SRC:%.cpp=$(OBJDIR)/%.o)
+DEPENDENCIES = $(OBJS:%.o=%.d)
+
+INCLUDE_PATHS=-I.
+
+LIBNAME = fastled
+
+CC      = g++
+CFLAGS += -std=gnu++11 -O3 -fPIC  -g -ffunction-sections -fdata-sections $(INCLUDE_PATHS)
+TARGETLIB = lib$(LIBNAME).so
+TARGETLIBVERS = lib$(LIBNAME).so.$(VERSION)
+
+.PHONY: clean
+
+all: $(TARGETLIB)
+
+build: $(TARGETLIB)
+
+clean:
+	rm -rf $(OBJDIR) $(TARGETLIB)
+
+$(OBJS): | $(OBJDIR)
+
+$(OBJDIR):
+	mkdir -p $@
+
+$(OBJDIR)/%.o: %.cpp
+	@echo "Compiling $<"
+	$(AD)$(CC) -c $(CFLAGS) -o $@ $<
+
+$(TARGETLIB): $(OBJS)
+	@echo "Linking $(TARGET_LIB)"
+	$(CC) -shared -Wl,-soname,lib$(LIBNAME).so.$(MAJOR) -o $@ $(OBJS)
+
+install: $(TARGETLIB)
+	mkdir -p $(PREFIX)/lib $(PREFIX)/include/FastLED
+	cp $(TARGETLIB) $(PREFIX)/lib/$(TARGETLIBVERS)
+	-rm -f $(PREFIX)/lib/$(TARGETLIB)
+	ln -s $(PREFIX)/lib/$(TARGETLIBVERS) $(PREFIX)/lib/$(TARGETLIB)
+	ldconfig
+	find *.h lib8tion platforms -name \*.h -print | cpio -pudm $(PREFIX)/include/FastLED
+	@echo "Installation successful!"
+
+uninstall:
+	rm -f $(PREFIX)/lib/$(TARGETLIB)
+	rm -rf $(PREFIX)/include/FastLED
+
+-include $(DEPENDENCIES)
