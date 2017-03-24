@@ -1668,9 +1668,11 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
 //
 
 #define DEFINE_GRADIENT_PALETTE(X) \
+  FL_ALIGN_PROGMEM \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
 
 #define DECLARE_GRADIENT_PALETTE(X) \
+  FL_ALIGN_PROGMEM \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM
 
 
