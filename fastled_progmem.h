@@ -63,6 +63,19 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 
 
+// On some platforms, most notably ARM M0, unaligned access
+// to 'PROGMEM' for multibyte values (eg read dword) is
+// not allowed and causes a crash.  This macro can help
+// force 4-byte alignment as needed.  The FastLED gradient
+// palette code uses 'read dword', and now uses this macro
+// to make sure that gradient palettes are 4-byte aligned.
+#ifdef FASTLED_ARM
+#define FL_ALIGN_PROGMEM  __attribute__ ((aligned (4)))
+#else
+#define FL_ALIGN_PROGMEM
+#endif
+
+
 FASTLED_NAMESPACE_END
 
 #endif

@@ -825,7 +825,7 @@ public:
         TRGBGradientPaletteEntryUnion u;
 
         // Count entries
-        uint8_t count = 0;
+        uint16_t count = 0;
         do {
             u.dword = FL_PGM_READ_DWORD_NEAR(progent + count);
             count++;;
@@ -867,7 +867,7 @@ public:
         TRGBGradientPaletteEntryUnion u;
 
         // Count entries
-        uint8_t count = 0;
+        uint16_t count = 0;
         do {
             u = *(ent + count);
             count++;;
@@ -1222,7 +1222,7 @@ public:
         TRGBGradientPaletteEntryUnion u;
         
         // Count entries
-        uint8_t count = 0;
+        uint16_t count = 0;
         do {
             u.dword = FL_PGM_READ_DWORD_NEAR(progent + count);
             count++;;
@@ -1264,7 +1264,7 @@ public:
         TRGBGradientPaletteEntryUnion u;
         
         // Count entries
-        uint8_t count = 0;
+        uint16_t count = 0;
         do {
             u = *(ent + count);
             count++;;
@@ -1668,9 +1668,11 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
 //
 
 #define DEFINE_GRADIENT_PALETTE(X) \
+  FL_ALIGN_PROGMEM \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
 
 #define DECLARE_GRADIENT_PALETTE(X) \
+  FL_ALIGN_PROGMEM \
   extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM
 
 

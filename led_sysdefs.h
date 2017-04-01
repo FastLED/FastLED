@@ -10,6 +10,9 @@
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
 // Include k20/T3 headers
 #include "platforms/arm/k20/led_sysdefs_arm_k20.h"
+#elif defined(__MK66FX1M0__)
+// Include k66/T3.6 headers
+#include "platforms/arm/k66/led_sysdefs_arm_k66.h"
 #elif defined(__MKL26Z64__)
 // Include kl26/T-LC headers
 #include "platforms/arm/kl26/led_sysdefs_arm_kl26.h"
@@ -18,7 +21,7 @@
 #include "platforms/arm/sam/led_sysdefs_arm_sam.h"
 #elif defined(STM32F10X_MD)
 #include "platforms/arm/stm32/led_sysdefs_arm_stm32.h"
-#elif defined(__SAMD21G18A__) || defined(__SAMD21E17A__)
+#elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__)
 #include "platforms/arm/d21/led_sysdefs_arm_d21.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/led_sysdefs_esp8266.h"

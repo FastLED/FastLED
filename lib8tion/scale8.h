@@ -424,6 +424,34 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8( uint16_t i, fract8 scale )
 #endif
     return result;
 #elif SCALE16BY8_AVRASM == 1
+#if FASTLED_SCALE8_FIXED == 1
+    uint16_t result = 0;
+    asm volatile(
+                 // result.A = HighByte( (i.A x scale) + i.A )
+                 "  mul %A[i], %[scale]                 \n\t"
+                 "  add r0, %A[i]                       \n\t"
+            //   "  adc r1, [zero]                      \n\t"
+            //   "  mov %A[result], r1                  \n\t"
+                 "  adc %A[result], r1                  \n\t"
+                 
+                 // result.A-B += i.B x scale
+                 "  mul %B[i], %[scale]                 \n\t"
+                 "  add %A[result], r0                  \n\t"
+                 "  adc %B[result], r1                  \n\t"
+
+                 // cleanup r1
+                 "  clr __zero_reg__                    \n\t"
+                 
+                 // result.A-B += i.B
+                 "  add %A[result], %B[i]               \n\t"
+                 "  adc %B[result], __zero_reg__        \n\t"
+
+                 : [result] "+r" (result)
+                 : [i] "r" (i), [scale] "r" (scale)
+                 : "r0", "r1"
+                 );
+    return result;
+#else
     uint16_t result = 0;
     asm volatile(
          // result.A = HighByte(i.A x j )
@@ -444,6 +472,7 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8( uint16_t i, fract8 scale )
          : "r0", "r1"
          );
     return result;
+#endif
 #else
     #error "No implementation for scale16by8 available."
 #endif
@@ -464,6 +493,14 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
 #endif
     return result;
 #elif SCALE16_AVRASM == 1
+#if FASTLED_SCALE8_FIXED == 1
+    // implemented sort of like
+    //   result = ((i * scale) + i ) / 65536
+    //
+    // why not like this, you may ask?
+    //   result = (i * (scale+1)) / 65536
+    // the answer is that if scale is 65535, then scale+1
+    // will be zero, which is not what we want.
     uint32_t result;
     asm volatile(
                  // result.A-B  = i.A x scale.A
@@ -474,7 +511,80 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
                  //"  mov %B[result], r1                 \n\t"
                  // which can be written as...
                  "  movw %A[result], r0                   \n\t"
-                 // We actually need to do anything with r0,
+                 // Because we're going to add i.A-B to
+                 // result.A-D, we DO need to keep both
+                 // the r0 and r1 portions of the product
+                 // UNlike in the 'unfixed scale8' version.
+                 // So the movw here is needed.
+                 : [result] "=r" (result)
+                 : [i] "r" (i),
+                 [scale] "r" (scale)
+                 : "r0", "r1"
+                 );
+    
+    asm volatile(
+                 // result.C-D  = i.B x scale.B
+                 "  mul %B[i], %B[scale]                 \n\t"
+                 //"  mov %C[result], r0                 \n\t"
+                 //"  mov %D[result], r1                 \n\t"
+                 "  movw %C[result], r0                   \n\t"
+                 : [result] "+r" (result)
+                 : [i] "r" (i),
+                 [scale] "r" (scale)
+                 : "r0", "r1"
+                 );
+    
+    const uint8_t  zero = 0;
+    asm volatile(
+                 // result.B-D += i.B x scale.A
+                 "  mul %B[i], %A[scale]                 \n\t"
+                 
+                 "  add %B[result], r0                   \n\t"
+                 "  adc %C[result], r1                   \n\t"
+                 "  adc %D[result], %[zero]              \n\t"
+                 
+                 // result.B-D += i.A x scale.B
+                 "  mul %A[i], %B[scale]                 \n\t"
+                 
+                 "  add %B[result], r0                   \n\t"
+                 "  adc %C[result], r1                   \n\t"
+                 "  adc %D[result], %[zero]              \n\t"
+                 
+                 // cleanup r1
+                 "  clr r1                               \n\t"
+                 
+                 : [result] "+r" (result)
+                 : [i] "r" (i),
+                 [scale] "r" (scale),
+                 [zero] "r" (zero)
+                 : "r0", "r1"
+                 );
+
+    asm volatile(
+                 // result.A-D += i.A-B
+                 "  add %A[result], %A[i]                \n\t"
+                 "  adc %B[result], %B[i]                \n\t"
+                 "  adc %C[result], %[zero]              \n\t"
+                 "  adc %D[result], %[zero]              \n\t"
+                 : [result] "+r" (result)
+                 : [i] "r" (i),
+                 [zero] "r" (zero)
+                 );
+    
+    result = result >> 16;
+    return result;
+#else
+    uint32_t result;
+    asm volatile(
+                 // result.A-B  = i.A x scale.A
+                 "  mul %A[i], %A[scale]                 \n\t"
+                 //  save results...
+                 // basic idea:
+                 //"  mov %A[result], r0                 \n\t"
+                 //"  mov %B[result], r1                 \n\t"
+                 // which can be written as...
+                 "  movw %A[result], r0                   \n\t"
+                 // We actually don't need to do anything with r0,
                  // as result.A is never used again here, so we
                  // could just move the high byte, but movw is
                  // one clock cycle, just like mov, so might as
@@ -527,6 +637,7 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
 
     result = result >> 16;
     return result;
+#endif
 #else
     #error "No implementation for scale16 available."
 #endif
