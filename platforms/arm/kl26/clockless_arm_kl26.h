@@ -20,15 +20,18 @@ public:
     mPort = FastPinBB<DATA_PIN>::port();
   }
 
-	virtual uint16_t getMaxRefreshRate() const { return 400; }
+  virtual uint16_t getMaxRefreshRate() const { return 400; }
 
   virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
     mWait.wait();
     cli();
-    if(!showRGBInternal(pixels)) {
+    uint32_t clocks = showRGBInternal(pixels);
+    if(!clocks) {
       sei(); delayMicroseconds(WAIT_TIME); cli();
-      showRGBInternal(pixels);
+      clocks = showRGBInternal(pixels);
     }
+    long microsTaken = CLKS_TO_MICROS(clocks * ((T1 + T2 + T3) * 24));
+    MS_COUNTER += (microsTaken / 1000);
     sei();
     mWait.mark();
   }
@@ -59,4 +62,4 @@ public:
 FASTLED_NAMESPACE_END
 
 
-#endif // __INC_CLOCKLESS_ARM_D21
+#endif // __INC_CLOCKLESS_ARM_KL26
