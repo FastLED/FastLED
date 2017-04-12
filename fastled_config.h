@@ -33,10 +33,18 @@
 // had a problem where scale8(255,255) would give you 254.  This is now fixed, and that
 // fix is enabled by default.  However, if for some reason you have code that is not
 // working right as a result of this (e.g. code that was expecting the old scale8 behavior)
-// you can disable it here
-
+// you can disable it here.
 #define FASTLED_SCALE8_FIXED 1
-// define FASTLED_SCALE8_FIXED 0
+// #define FASTLED_SCALE8_FIXED 0
+
+// Use this toggle whether to use 'fixed' FastLED pixel blending, including ColorFromPalette.
+// The prior pixel blend functions had integer-rounding math errors that led to
+// small errors being inadvertently added to the low bits of blended colors, including colors
+// retrieved from color palettes using LINEAR_BLEND.  This is now fixed, and the
+// fix is enabled by default.  However, if for some reason you wish to run with the old
+// blending, including the integer rounding and color errors, you can disable the bugfix here.
+#define FASTLED_BLEND_FIXED 1
+// #define FASTLED_BLEND_FIXED 0
 
 // Use this to determine how many times FastLED will attempt to re-transmit a frame if interrupted
 // for too long by interrupts.

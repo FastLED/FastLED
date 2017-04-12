@@ -30,7 +30,7 @@ typedef union {
 #define T1_MARK (TOTAL - (T1+TADJUST))
 #define T2_MARK (T1_MARK - (T2+TADJUST))
 template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
-class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, 0xFF> {
+class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
@@ -81,7 +81,7 @@ public:
 
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
-  virtual void showPixels(PixelController<RGB_ORDER, LANES, 0xFF> & pixels) {
+  virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) {
     mWait.wait();
     showRGBInternal(pixels);
     sei();
@@ -90,7 +90,7 @@ public:
 
 	static uint32_t showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) {
 		// Serial.println("Entering show");
-		
+
     int nLeds = allpixels.mLen;
 
     // Setup the pixel controller and load/scale the first byte
@@ -162,9 +162,8 @@ public:
     }
 
     for(uint32_t i = LANES; i < 8; i++) {
-      while(DUE_TIMER_VAL > next_mark);
-
-      next_mark = DUE_TIMER_VAL - (TOTAL-3);
+      while(DUE_TIMER_VAL < next_mark);
+      next_mark = (DUE_TIMER_VAL+TOTAL);
       *FastPin<FIRST_PIN>::sport() = PORT_MASK;
 
       while((next_mark - DUE_TIMER_VAL) > (T2+T3+6));
