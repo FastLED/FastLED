@@ -52,15 +52,11 @@ public:
   }
 
   virtual void init() {
-		// Only supportd on pins 12-15
-    initPin<12>();
-    initPin<13>();
-    initPin<14>();
-    initPin<15>();
-    initPin<4>();
-    initPin<5>();
+		void (* funcs[])() ={initPin<12>, initPin<13>, initPin<14>, initPin<15>, initPin<4>, initPin<5>};
 
-		// Serial.print("Mask is "); Serial.println(PORT_MASK);
+		for (uint8_t i = 0; i < USED_LANES; ++i) {
+			funcs[i]();
+		}
   }
 
   virtual uint16_t getMaxRefreshRate() const { return 400; }
