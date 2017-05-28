@@ -582,7 +582,7 @@ LIB8STATIC uint8_t ease8InOutQuad( uint8_t i)
     if( j & 0x80 ) {
         j = 255 - j;
     }
-    uint8_t jj  = scale8(  j, (j+1));
+    uint8_t jj  = scale8(  j, j);
     uint8_t jj2 = jj << 1;
     if( i & 0x80 ) {
         jj2 = 255 - jj2;
