@@ -3,11 +3,12 @@
 
 #define FASTLED_HAS_BLOCKLESS 1
 
-#define PORT_MASK (((1<<LANES)-1) & 0x0000FFFFL)
+#define FIX_BITS(bits) (((bits & 0x0fL) << 12) | (bits & 0x30))
+
 #define MIN(X,Y) (((X)<(Y)) ? (X):(Y))
-#define USED_LANES (MIN(LANES,4))
-#define REAL_FIRST_PIN 12
-#define LAST_PIN (12 + USED_LANES - 1)
+#define USED_LANES (MIN(LANES, 6))
+#define PORT_MASK (((1 << USED_LANES)-1) & 0x0000FFFFL)
+#define PIN_MASK FIX_BITS(PORT_MASK)
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -21,8 +22,6 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
-	data_t mPinMask;
-	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
@@ -49,22 +48,15 @@ public:
 	}
 
   template<int PIN> static void initPin() {
-    if(PIN >= REAL_FIRST_PIN && PIN <= LAST_PIN) {
 			_ESPPIN<PIN, 1<<(PIN & 0xFF)>::setOutput();
-      // FastPin<PIN>::setOutput();
-    }
   }
 
   virtual void init() {
-		// Only supportd on pins 12-15
-    initPin<12>();
-    initPin<13>();
-    initPin<14>();
-    initPin<15>();
-    mPinMask = FastPin<FIRST_PIN>::mask();
-    mPort = FastPin<FIRST_PIN>::port();
+		void (* funcs[])() ={initPin<12>, initPin<13>, initPin<14>, initPin<15>, initPin<4>, initPin<5>};
 
-		// Serial.print("Mask is "); Serial.println(PORT_MASK);
+		for (uint8_t i = 0; i < USED_LANES; ++i) {
+			funcs[i]();
+		}
   }
 
   virtual uint16_t getMaxRefreshRate() const { return 400; }
@@ -87,14 +79,14 @@ public:
 		for(register uint32_t i = 0; i < USED_LANES; i++) {
 			while((__clock_cycles() - last_mark) < (T1+T2+T3));
 			last_mark = __clock_cycles();
-			*FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
+			*FastPin<FIRST_PIN>::sport() = PIN_MASK;
 
-			uint32_t nword = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << REAL_FIRST_PIN;
+			uint32_t nword = (uint32_t)(~b2.bytes[7-i]);
 			while((__clock_cycles() - last_mark) < (T1-6));
-			*FastPin<FIRST_PIN>::cport() = nword;
+			*FastPin<FIRST_PIN>::cport() = FIX_BITS(nword);
 
 			while((__clock_cycles() - last_mark) < (T1+T2));
-			*FastPin<FIRST_PIN>::cport() = PORT_MASK << REAL_FIRST_PIN;
+			*FastPin<FIRST_PIN>::cport() = PIN_MASK;
 
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 		}
@@ -102,14 +94,14 @@ public:
 		for(register uint32_t i = USED_LANES; i < 8; i++) {
 			while((__clock_cycles() - last_mark) < (T1+T2+T3));
 			last_mark = __clock_cycles();
-			*FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
+			*FastPin<FIRST_PIN>::sport() = PIN_MASK;
 
-			uint32_t nword = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << REAL_FIRST_PIN;
+			uint32_t nword = (uint32_t)(~b2.bytes[7-i]);
 			while((__clock_cycles() - last_mark) < (T1-6));
-			*FastPin<FIRST_PIN>::cport() = nword;
+			*FastPin<FIRST_PIN>::cport() = FIX_BITS(nword);
 
 			while((__clock_cycles() - last_mark) < (T1+T2));
-			*FastPin<FIRST_PIN>::cport() = PORT_MASK << REAL_FIRST_PIN;
+			*FastPin<FIRST_PIN>::cport() = PIN_MASK;
 		}
 	}
 
