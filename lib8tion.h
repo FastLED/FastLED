@@ -183,7 +183,13 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 // for memmove, memcpy, and memset if not defined here
 #endif
 
-#if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__)
+#if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || \
+defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || \
+defined(__AVR_AT90USB82__) || defined(__AVR_ATtiny24__) || \
+defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || \
+defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || \
+defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny167__) \
+|| defined(__AVR_ATtiny87__)
 #define LIB8_ATTINY 1
 #endif
 
@@ -1036,7 +1042,7 @@ LIB8STATIC uint16_t bseconds16()
 
 // Classes to implement "Every N Milliseconds", "Every N Seconds",
 // "Every N Minutes", "Every N Hours", and "Every N BSeconds".
-#if 1
+#if __cplusplus < 201103
 #define INSTANTIATE_EVERY_N_TIME_PERIODS(NAME,TIMETYPE,TIMEGETTER) \
 class NAME {    \
 public: \
@@ -1049,19 +1055,41 @@ public: \
     TIMETYPE getTime() { return (TIMETYPE)(TIMEGETTER()); };    \
     TIMETYPE getPeriod() { return mPeriod; };   \
     TIMETYPE getElapsed() { return getTime() - mPrevTrigger; }  \
-    TIMETYPE getRemaining() { return mPeriod - getElapsed(); }  \
-    TIMETYPE getLastTriggerTime() { return mPrevTrigger; }  \
+    TIMETYPE getRemaining() { \
+        TIMETYPE elapsed = getElapsed(); \
+        if(elapsed >= mPeriod) { \
+            return 0; \
+        } \
+        return mPeriod - elapsed; \
+    } \
+    TIMETYPE getLastTriggerTime() { return mPrevTrigger; } \
     bool ready() { \
-        bool isReady = (getElapsed() >= mPeriod);   \
-        if( isReady ) { reset(); }  \
+        TIMETYPE time = getTime(); \
+        bool isReady = ((time - mPrevTrigger) >= mPeriod); \
+        if( isReady ) { mPrevTrigger = time; } \
         return isReady; \
     }   \
+    TIMETYPE frames(){ \
+      if(!mPeriod) \
+        return -1; \
+      TIMETYPE elapsed = getElapsed(); \
+      TIMETYPE frames = elapsed / mPeriod; \
+      elapsed -= elapsed % mPeriod; \
+      mPrevTrigger += elapsed; \
+      return frames; \
+    } \
+    TIMETYPE frame(){ \
+      if(!mPeriod) \
+        return -1; \
+      return getTime() / mPeriod; \
+    } \
     void reset() { mPrevTrigger = getTime(); }; \
     void trigger() { mPrevTrigger = getTime() - mPeriod; }; \
         \
     operator bool() { return ready(); } \
 };
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMillis,uint32_t,GET_MILLIS);
+INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMicros,uint32_t,micros);
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNSeconds,uint16_t,seconds16);
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNBSeconds,uint16_t,bseconds16);
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMinutes,uint16_t,minutes16);
@@ -1087,12 +1115,33 @@ public:
     timeType getTime() { return (timeType)(timeGetter()); };
     timeType getPeriod() { return mPeriod; };
     timeType getElapsed() { return getTime() - mPrevTrigger; }
-    timeType getRemaining() { return mPeriod - getElapsed(); }
+    timeType getRemaining() {
+        timeType elapsed = getElapsed();
+        if(elapsed >= mPeriod) {
+            return 0;
+        }
+        return mPeriod - elapsed;
+    }
     timeType getLastTriggerTime() { return mPrevTrigger; }
     bool ready() {
-        bool isReady = (getElapsed() >= mPeriod);
-        if( isReady ) { reset(); }
+        timeType time = getTime();
+        bool isReady = ((time - mPrevTrigger) >= mPeriod);
+        if( isReady ) { mPrevTrigger = time; }
         return isReady;
+    }
+    timeType frames(){
+      if(!mPeriod)
+        return -1;
+      timeType elapsed = getElapsed();
+      timeType frames = elapsed / mPeriod;
+      elapsed -= elapsed % mPeriod;
+      mPrevTrigger += elapsed;
+      return frames;
+    }
+    timeType frame(){
+      if(!mPeriod)
+        return -1;
+      return getTime() / mPeriod;
     }
     void reset() { mPrevTrigger = getTime(); };
     void trigger() { mPrevTrigger = getTime() - mPeriod; };
@@ -1101,7 +1150,8 @@ public:
 };
 typedef CEveryNTimePeriods<uint16_t,seconds16> CEveryNSeconds;
 typedef CEveryNTimePeriods<uint16_t,bseconds16> CEveryNBSeconds;
-typedef CEveryNTimePeriods<uint32_t,millis> CEveryNMillis;
+typedef CEveryNTimePeriods<uint32_t,GET_MILLIS> CEveryNMillis;
+typedef CEveryNTimePeriods<uint32_t,micros> CEveryNMicros;
 typedef CEveryNTimePeriods<uint16_t,minutes16> CEveryNMinutes;
 typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 #endif
@@ -1111,6 +1161,8 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 #define CONCAT_MACRO( x, y ) CONCAT_HELPER( x, y )
 #define EVERY_N_MILLIS(N) EVERY_N_MILLIS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
 #define EVERY_N_MILLIS_I(NAME,N) static CEveryNMillis NAME(N); if( NAME )
+#define EVERY_N_MICROS(N) EVERY_N_MICROS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
+#define EVERY_N_MICROS_I(NAME,N) static CEveryNMicros NAME(N); if( NAME )
 #define EVERY_N_SECONDS(N) EVERY_N_SECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
 #define EVERY_N_SECONDS_I(NAME,N) static CEveryNSeconds NAME(N); if( NAME )
 #define EVERY_N_BSECONDS(N) EVERY_N_BSECONDS_I(CONCAT_MACRO(PER, __COUNTER__ ),N)
@@ -1123,6 +1175,9 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 #define CEveryNMilliseconds CEveryNMillis
 #define EVERY_N_MILLISECONDS(N) EVERY_N_MILLIS(N)
 #define EVERY_N_MILLISECONDS_I(NAME,N) EVERY_N_MILLIS_I(NAME,N)
+#define CEveryNMicroseconds CEveryNMicros
+#define EVERY_N_MICROSECONDS(N) EVERY_N_MICROS(N)
+#define EVERY_N_MICROSECONDS_I(NAME,N) EVERY_N_MICROS_I(NAME,N)
 
 FASTLED_NAMESPACE_END
 ///@}
