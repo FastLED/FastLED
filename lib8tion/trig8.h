@@ -195,7 +195,7 @@ LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
                  "andi %[xr1], 0xF0         \n\t"
                  "or   %[mx], %[xr1]        \n\t"
                  : [mx] "=d" (mx), [xr1] "=d" (xr1)
-                 : [m16] "d" (m16), [secoffset] "d" (secoffset)
+                 : [m16] "r" (m16), [secoffset] "r" (secoffset)
                  );
 
     int8_t y = mx + b;
