@@ -26,11 +26,13 @@ class ARMHardwareSPIOutput {
 	switch(_DATA_PIN) {
 		case 7: MAP_PinTypeSPI(PIN_07, PIN_MODE_7); break;
 		case 52: MAP_PinTypeSPI(PIN_52, PIN_MODE_8); break;
+		default: UART_PRINT("Error: Wrong data pin tried to enable SPI. Use pin 7 or 52.");
     }
 
     switch(_CLOCK_PIN) {
 		case 5: MAP_PinTypeSPI(PIN_05, PIN_MODE_7); break;
 		case 45: MAP_PinTypeSPI(PIN_45, PIN_MODE_7); break;
+		default: UART_PRINT("Error: Wrong clock pin tried to enable SPI. Use Pin 5 or 45.")
     }
 	
 	//Soft reset SPI module
