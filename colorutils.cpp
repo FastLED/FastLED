@@ -26,6 +26,15 @@ void fill_solid( struct CHSV * targetArray, int numToFill,
 }
 
 
+void fill_solid( struct CRGB * leds, int offset, int numToFill,
+                 const struct CRGB& color)
+{
+    for( int i = 0; i < numToFill; i++) {
+        leds[offset+i] = color;
+    }
+}
+
+
 // void fill_solid( struct CRGB* targetArray, int numToFill,
 // 				 const struct CHSV& hsvColor)
 // {
@@ -59,6 +68,21 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
         hsv.hue += deltahue;
     }
 }
+
+void fill_rainbow( struct CRGB * pFirstLED, int offset, int numToFill,
+                  uint8_t initialhue,
+                  uint8_t deltahue )
+{
+    CHSV hsv;
+    hsv.hue = initialhue;
+    hsv.val = 255;
+    hsv.sat = 240;
+    for( int i = 0; i < numToFill; i++) {
+        pFirstLED[i+offset] = hsv;
+        hsv.hue += deltahue;
+    }
+}
+
 
 
 void fill_gradient_RGB( CRGB* leds,
@@ -191,6 +215,13 @@ void fadeToBlackBy( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
     nscale8( leds, num_leds, 255 - fadeBy);
 }
 
+void fadeToBlackBy( CRGB* leds,uint16_t offset, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8( leds,offset, num_leds, 255 - fadeBy);
+
+}
+
+
 void fade_raw( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
 {
     nscale8( leds, num_leds, 255 - fadeBy);
@@ -205,6 +236,13 @@ void nscale8( CRGB* leds, uint16_t num_leds, uint8_t scale)
 {
     for( uint16_t i = 0; i < num_leds; i++) {
         leds[i].nscale8( scale);
+    }
+}
+
+void nscale8( CRGB* leds, uint16_t offset, uint16_t num_leds, uint8_t scale)
+{
+    for( uint16_t i = 0; i < num_leds; i++) {
+        leds[offset+i].nscale8( scale);
     }
 }
 

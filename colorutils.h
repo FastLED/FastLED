@@ -18,11 +18,16 @@ FASTLED_NAMESPACE_BEGIN
 void fill_solid( struct CRGB * leds, int numToFill,
                  const struct CRGB& color);
 
+
 /// fill_solid -   fill a range of LEDs with a solid color
 ///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
 void fill_solid( struct CHSV* targetArray, int numToFill,
 				 const struct CHSV& hsvColor);
 
+/// fill_solid -   fill a part of an LED array (offset + number to fill ) with a solid color
+///                Example: fill_solid( leds, offset, NUM_LEDS, CRGB(50,0,200));
+void fill_solid( struct CRGB * leds, int offset, int numToFill, 
+                 const struct CRGB& color);
 
 /// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
 ///                full saturation and full value (brightness)
@@ -36,6 +41,11 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
                    uint8_t initialhue,
                    uint8_t deltahue = 5);
 
+// fill_rainbow - fill a part of an LED array ( not the whole strip ) with a rainbow of colors,
+//                full saturatyion and full value
+void fill_rainbow( struct CRGB * pFirstLED, int offset, int numToFill, 
+                  uint8_t initialhue,  
+                  uint8_t deltahue );
 
 // fill_gradient - fill an array of colors with a smooth HSV gradient
 //                 between two specified HSV colors.
@@ -245,13 +255,20 @@ void nscale8_video( CRGB* leds, uint16_t num_leds, uint8_t scale);
 //                              functions will eventually fade all
 //                              the way to black.
 //                              (The two names are synonyms.)
-void fadeToBlackBy( CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
+void fadeToBlackBy( CRGB* leds, uint16_t num_leds, uint8_t fadeBy); 
+
+// fade part of an led array with black colors. 
+void fadeToBlackBy( CRGB* leds, uint16_t offset, uint16_t num_leds, uint8_t fadeBy);
 void fade_raw(      CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
 
 // nscale8 - scale down the brightness of an array of pixels
 //           all at once.  This function can scale pixels all the
 //           way down to black even if 'scale' is not zero.
 void nscale8(       CRGB* leds, uint16_t num_leds, uint8_t scale);
+
+
+// scale brigthness of an led array LED array ( from offset until num_leds) 
+void nscale8( CRGB* leds,uint16_t offset, uint16_t num_leds, uint8_t scale);
 
 // fadeUsingColor - scale down the brightness of an array of pixels,
 //                  as though it were seen through a transparent
