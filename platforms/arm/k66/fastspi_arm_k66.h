@@ -285,13 +285,19 @@ public:
 
 	static void waitFully() __attribute__((always_inline)) {
 		// Wait for the last byte to get shifted into the register
-		cli();
-		while( (SPIX.SR & 0xF000) > 0) {
-			// reset the TCF flag
-			SPIX.SR |= SPI_SR_TCF;
-		}
-		sei();
-		
+		bool empty = false;
+
+		do {
+			cli();
+			if ((SPIX.SR & 0xF000) > 0) {
+				// reset the TCF flag
+				SPIX.SR |= SPI_SR_TCF;
+			} else {
+				empty = true;
+			}
+			sei();
+		} while (!empty);
+
 		// wait for the TCF flag to get set
 		while (!(SPIX.SR & SPI_SR_TCF));
 		SPIX.SR |= (SPI_SR_TCF | SPI_SR_EOQF);
