@@ -43,7 +43,10 @@
 #include "fastled_config.h"
 #include "led_sysdefs.h"
 
+// Utility functions
+#include "fastled_delay.h"
 #include "bitswap.h"
+
 #include "controller.h"
 #include "fastpin.h"
 #include "fastspi_types.h"
