@@ -479,7 +479,7 @@ public:
 
 	/// clear the leds, wiping the local array of data, optionally black out the leds as well
 	/// @param writeData whether or not to write out to the leds as well
-	void clear(boolean writeData = false);
+	void clear(bool writeData = false);
 
 	/// clear out the local data array
 	void clearData();
