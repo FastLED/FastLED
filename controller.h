@@ -8,6 +8,7 @@
 #include "led_sysdefs.h"
 #include "pixeltypes.h"
 #include "color.h"
+#include <stddef.h>
 
 FASTLED_NAMESPACE_BEGIN
 
