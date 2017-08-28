@@ -2,7 +2,6 @@
 #define __INC_FASTSPI_ARM_CC3200_h
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
-#define FASTLED_ALL_PINS_HARDWARE_SPI
 FASTLED_NAMESPACE_BEGIN
 
 #include "driverlib/rom_map.h"
