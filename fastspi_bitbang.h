@@ -158,7 +158,7 @@ private:
 			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
 			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
 		} else {
-			// NOP;
+			// FL_NOP;
 			FastPin<DATA_PIN>::fastset(datapin, loval);
 			FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
 			FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
@@ -178,7 +178,7 @@ private:
 			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclockhi); CLOCK_HI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); CLOCK_LO_DELAY;
 		} else {
-			// NOP;
+			// FL_NOP;
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo);
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclockhi); CLOCK_HI_DELAY;
 			FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); CLOCK_LO_DELAY;

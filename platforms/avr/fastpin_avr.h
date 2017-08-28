@@ -4,7 +4,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
-#warning "Software pin support forced, pin access will be sloightly slower."
+#warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
 
@@ -58,6 +58,17 @@ _IO(B);
 
 _DEFPIN_AVR(0, 0x01, B); _DEFPIN_AVR(1, 0x02, B); _DEFPIN_AVR(2, 0x04, B); _DEFPIN_AVR(3, 0x08, B);
 _DEFPIN_AVR(4, 0x10, B); _DEFPIN_AVR(5, 0x20, B);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__)
+#define MAX_PIN 11
+_IO(A); _IO(B);
+
+_DEFPIN_AVR(0, 0x01, B); _DEFPIN_AVR(1, 0x02, B); _DEFPIN_AVR(2, 0x04, B);
+_DEFPIN_AVR(3, 0x80, A); _DEFPIN_AVR(4, 0x40, A); _DEFPIN_AVR(5, 0x20, A);
+_DEFPIN_AVR(6, 0x10, A); _DEFPIN_AVR(7, 0x08, A); _DEFPIN_AVR(8, 0x04, A);
+_DEFPIN_AVR(9, 0x02, A); _DEFPIN_AVR(10, 0x01, A); _DEFPIN_AVR(11, 0x08, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 

@@ -129,9 +129,7 @@ void CFastLED::delay(unsigned long ms) {
 		::delay(1);
 #endif
 		show();
-#if defined(ARDUINO) && (ARDUINO > 150) && !defined(IS_BEAN) && !defined (ARDUINO_AVR_DIGISPARK)
 		yield();
-#endif
 	}
 	while((millis()-start) < ms);
 }
@@ -233,6 +231,10 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
 }
 
 extern "C" int atexit(void (* /*func*/ )()) { return 0; }
+
+#ifdef FASTLED_NEEDS_YIELD
+extern "C" void yield(void) { }
+#endif
 
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1

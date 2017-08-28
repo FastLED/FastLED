@@ -18,11 +18,11 @@
         "type": "git",
         "url": "https://github.com/FastLED/FastLED.git"
     },
-    "version": "3.1.4",
+    "version": "3.1.6",
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
-    "platforms": "atmelavr,atmelsam,freescalekinetis,nordicnrf51,nxplpc,ststm32,teensy",
+    "platforms": "atmelavr,atmelsam,freescalekinetis,nordicnrf51,nxplpc,ststm32,teensy,esp8266,esp32",
     "examples": [
         "examples/*/*.ino",
         "examples/*/*/*.ino"

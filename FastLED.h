@@ -11,12 +11,12 @@
 #define FASTLED_HAS_PRAGMA_MESSAGE
 #endif
 
-#define  FASTLED_VERSION 3001005
+#define FASTLED_VERSION 3001006
 #ifndef FASTLED_INTERNAL
 #  ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#    pragma message "FastLED version 3.001.005"
+#    pragma message "FastLED version 3.001.006"
 #  else
-#    warning FastLED version 3.001.005  (Not really a warning, just telling you here.)
+#    warning FastLED version 3.001.006  (Not really a warning, just telling you here.)
 #  endif
 #endif
 
@@ -43,7 +43,10 @@
 #include "fastled_config.h"
 #include "led_sysdefs.h"
 
+// Utility functions
+#include "fastled_delay.h"
 #include "bitswap.h"
+
 #include "controller.h"
 #include "fastpin.h"
 #include "fastspi_types.h"
@@ -356,7 +359,9 @@ public:
 		switch(CHIPSET) {
 			case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER,WS2811_800kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
 			case OCTOWS2811_400: { static COctoWS2811Controller<RGB_ORDER,WS2811_400kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+#ifdef WS2813_800kHz
       case OCTOWS2813: { static COctoWS2811Controller<RGB_ORDER,WS2813_800kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+#endif
 		}
 	}
 

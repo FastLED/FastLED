@@ -25,8 +25,13 @@
 #include "platforms/arm/d21/fastled_arm_d21.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/fastled_esp8266.h"
+<<<<<<< HEAD
 #elif defined(CC3200)
 #include "platforms/arm/cc3200/fastled_arm_cc3200.h"
+=======
+#elif defined(ESP32)
+#include "platforms/esp/32/fastled_esp32.h"
+>>>>>>> refs/remotes/FastLED/master
 #else
 // AVR platforms
 #include "platforms/avr/fastled_avr.h"
