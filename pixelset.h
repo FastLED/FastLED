@@ -3,6 +3,10 @@
 
 #include "FastLED.h"
 
+#ifndef abs
+#include "stdlib.h"
+#endif
+
 /// Represents a set of CRGB led objects.  Provides the [] array operator, and works like a normal array in that case.
 /// This should be kept in sync with the set of functions provided by CRGB as well as functions in colorutils.  Note
 /// that a pixel set is a window into another set of led data, it is not its own set of led data.
