@@ -230,7 +230,9 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
   }
 }
 
+#ifndef ESP32
 extern "C" int atexit(void (* /*func*/ )()) { return 0; }
+#endif
 
 #ifdef FASTLED_NEEDS_YIELD
 extern "C" void yield(void) { }
@@ -239,7 +241,7 @@ extern "C" void yield(void) { }
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1
 {
-	#ifndef ESP8266
+	#if !(defined(ESP8266) || defined(ESP32))
 	extern "C" void __cxa_pure_virtual (void) {}
 	#endif
 
