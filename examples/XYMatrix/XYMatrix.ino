@@ -121,7 +121,7 @@ uint16_t XY( uint8_t x, uint8_t y)
 // it, "leds_plus_safety_pixel".  Then declare "leds" as a pointer to
 // that array, but starting with the 2nd element (id=1) of that array: 
 //    CRGB leds_with_safety_pixel[41];
-//    const CRGB* leds( leds_plus_safety_pixel + 1);
+//    CRGB* const leds( leds_plus_safety_pixel + 1);
 // Then you use the "leds" array as you normally would.
 // Now "leds[0..N]" are aliases for "leds_plus_safety_pixel[1..(N+1)]",
 // AND leds[-1] is now a legitimate and safe alias for leds_plus_safety_pixel[0].
@@ -150,7 +150,7 @@ uint16_t XY( uint8_t x, uint8_t y)
 
 #define NUM_LEDS (kMatrixWidth * kMatrixHeight)
 CRGB leds_plus_safety_pixel[ NUM_LEDS + 1];
-CRGB* leds( leds_plus_safety_pixel + 1);
+CRGB* const leds( leds_plus_safety_pixel + 1);
 
 uint16_t XYsafe( uint8_t x, uint8_t y)
 {
@@ -194,4 +194,3 @@ void setup() {
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalSMD5050);
   FastLED.setBrightness( BRIGHTNESS );
 }
-

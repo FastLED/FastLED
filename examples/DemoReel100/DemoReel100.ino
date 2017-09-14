@@ -1,5 +1,7 @@
 #include "FastLED.h"
 
+FASTLED_USING_NAMESPACE
+
 // FastLED "100-lines-of-code" demo reel, showing just a few 
 // of the kinds of animation patterns you can quickly and easily 
 // compose using FastLED.  
@@ -9,8 +11,8 @@
 //
 // -Mark Kriegsman, December 2014
 
-#if FASTLED_VERSION < 3001000
-#error "Requires FastLED 3.1 or later; check github for latest code."
+#if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
+#warning "Requires FastLED 3.1 or later; check github for latest code."
 #endif
 
 #define DATA_PIN    3

@@ -1,6 +1,10 @@
 #ifndef __INC_FASTSPI_TYPES_H
 #define __INC_FASTSPI_TYPES_H
 
+#include "FastLED.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 // Some helper macros for getting at mis-ordered byte values
 #define SPI_B0 (RGB_BYTE0(RGB_ORDER) + (MASK_SKIP_BITS & SKIP))
 #define SPI_B1 (RGB_BYTE1(RGB_ORDER) + (MASK_SKIP_BITS & SKIP))
@@ -17,7 +21,7 @@ class DATA_NOP {
 public:
   static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data) { return data; }
   static __attribute__((always_inline)) inline uint8_t adjust(register uint8_t data, register uint8_t scale) { return scale8(data, scale); }
-  static __attribute__((always_inline)) inline void postBlock(int len) {}
+  static __attribute__((always_inline)) inline void postBlock(int /* len */) { }
 };
 
 #define FLAG_START_BIT 0x80
@@ -33,5 +37,7 @@ public:
 #define SPEED_DIV_128 128
 
 #define MAX_DATA_RATE 0
+
+FASTLED_NAMESPACE_END
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_AVR_H
 #define __INC_FASTSPI_AVR_H
 
+FASTLED_NAMESPACE_BEGIN
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Hardware SPI support using USART registers and friends
@@ -178,7 +180,7 @@ public:
 		UBRR0 = 0;
 
 		/* Set MSPI mode of operation and SPI data mode 0. */
-		UCSR0C = (1<<UMSEL01)|(1<<UMSEL00)|(0<<UCPHA0)|(0<<UCPOL0);
+		UCSR0C = (1<<UMSEL01)|(1<<UMSEL00)/*|(0<<UCPHA0)*/|(0<<UCPOL0);
 		/* Enable receiver and transmitter. */
 		UCSR0B = (1<<RXEN0)|(1<<TXEN0);
 
@@ -306,6 +308,7 @@ public:
 			pixels.stepDithering();
 		}
 		D::postBlock(len);
+		waitFully();
 		release();
 	}
 };
@@ -486,6 +489,7 @@ public:
 			pixels.stepDithering();
 		}
 		D::postBlock(len);
+		waitFully();
 		release();
 	}
 };
@@ -494,5 +498,8 @@ public:
 #else
 // #define FASTLED_FORCE_SOFTWARE_SPI
 #endif
+
+FASTLED_NAMESPACE_END;
+
 
 #endif

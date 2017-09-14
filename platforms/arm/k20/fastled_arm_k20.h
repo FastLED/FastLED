@@ -3,7 +3,7 @@
 
 // Include the k20 headers
 #include "bitswap.h"
-#include "delay.h"
+#include "fastled_delay.h"
 #include "fastpin_arm_k20.h"
 #include "fastspi_arm_k20.h"
 #include "octows2811_controller.h"
