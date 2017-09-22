@@ -20,19 +20,25 @@ public:
     mPort = FastPinBB<DATA_PIN>::port();
   }
 
-	virtual uint16_t getMaxRefreshRate() const { return 400; }
+  virtual uint16_t getMaxRefreshRate() const { return 400; }
 
   virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
     mWait.wait();
     cli();
-    showRGBInternal(pixels);
+    uint32_t clocks = showRGBInternal(pixels);
+    if(!clocks) {
+      sei(); delayMicroseconds(WAIT_TIME); cli();
+      clocks = showRGBInternal(pixels);
+    }
+    long microsTaken = CLKS_TO_MICROS(clocks * ((T1 + T2 + T3) * 24));
+    MS_COUNTER += (microsTaken / 1000);
     sei();
     mWait.mark();
   }
 
   // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
   // gcc will use register Y for the this pointer.
-  static uint32_t showRGBInternal(PixelController<RGB_ORDER> & pixels) {
+  static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
     struct M0ClocklessData data;
     data.d[0] = pixels.d[0];
     data.d[1] = pixels.d[1];
@@ -46,8 +52,8 @@ public:
     data.adj = pixels.mAdvance;
 
     typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-    showLedData<4,8,T1,T2,T3,RGB_ORDER, WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
-    return 0; // 0x00FFFFFF - _VAL;
+    return showLedData<4,8,T1,T2,T3,RGB_ORDER, WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
+    // return 0; // 0x00FFFFFF - _VAL;
   }
 
 
@@ -56,4 +62,4 @@ public:
 FASTLED_NAMESPACE_END
 
 
-#endif // __INC_CLOCKLESS_ARM_D21
+#endif // __INC_CLOCKLESS_ARM_KL26

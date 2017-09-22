@@ -256,7 +256,7 @@ void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb)
 void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb)
 {
     CHSV hsv2(hsv);
-    hsv2.hue = scale8( hsv2.hue, 192);
+    hsv2.hue = scale8( hsv2.hue, 191);
     hsv2rgb_raw(hsv2, rgb);
 }
 

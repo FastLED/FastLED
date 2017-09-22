@@ -9,6 +9,7 @@ FASTLED_NAMESPACE_BEGIN
 
 ///@defgroup Power Power management functions
 /// functions used to limit the amount of power used by FastLED
+///@{
 
 // Power Control setup functions
 //
@@ -56,6 +57,22 @@ void delay_at_max_brightness_for_power( uint16_t ms);
 ///   LED data would draw at brightness = 255.
 ///
 uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds);
+
+/// calculate_max_brightness_for_power_mW tells you the highest brightness
+///   level you can use and still stay under the specified power budget for 
+///   a given set of leds.  It takes a pointer to an array of CRGB objects, a
+///   count, a 'target brightness' which is the brightness you'd ideally like
+///   to use, and the max power draw desired in milliwatts.  The result from 
+///   this function will be no higher than the target_brightess you supply, but may be lower.
+uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW);
+
+/// calculate_max_brightness_for_power_mW tells you the highest brightness
+///   level you can use and still stay under the specified power budget for 
+///   a given set of leds.  It takes a pointer to an array of CRGB objects, a
+///   count, a 'target brightness' which is the brightness you'd ideally like
+///   to use, and the max power in volts and milliamps.  The result from this 
+///   function will be no higher than the target_brightess you supply, but may be lower.
+uint8_t calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA);
 
 /// calculate_max_brightness_for_power_mW tells you the highest brightness
 ///   level you can use and still stay under the specified power budget.  It

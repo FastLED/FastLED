@@ -153,14 +153,14 @@ class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER,
 /// @tparam DATA_PIN the data pin for these leds
 /// @tparam CLOCK_PIN the clock pin for these leds
 /// @tparam RGB_ORDER the RGB ordering for these leds
-/// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(24)
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(24)>
+/// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(12)
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(12)>
 class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
 	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
-	void endBoundary(int nLeds) { int nBytes = (nLeds/32); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nBytes--); }
+	void endBoundary(int nLeds) { int nDWords = (nLeds/32); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nDWords--); }
 
 	inline void writeLed(uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
 		mSPI.writeByte(0xFF); mSPI.writeByte(b0); mSPI.writeByte(b1); mSPI.writeByte(b2);
@@ -201,6 +201,62 @@ protected:
 	}
 
 };
+
+/// SK9822 controller class.
+/// @tparam DATA_PIN the data pin for these leds
+/// @tparam CLOCK_PIN the clock pin for these leds
+/// @tparam RGB_ORDER the RGB ordering for these leds
+/// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(24)
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(24)>
+class SK9822Controller : public CPixelLEDController<RGB_ORDER> {
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	SPI mSPI;
+
+	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
+	void endBoundary(int nLeds) { int nLongWords = (nLeds/32); do { mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nLongWords--); }
+
+	inline void writeLed(uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
+		mSPI.writeByte(0xFF); mSPI.writeByte(b0); mSPI.writeByte(b1); mSPI.writeByte(b2);
+	}
+
+public:
+	SK9822Controller() {}
+
+	virtual void init() {
+		mSPI.init();
+	}
+
+protected:
+
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+		mSPI.select();
+
+		startBoundary();
+		while(pixels.has(1)) {
+#ifdef FASTLED_SPI_BYTE_ONLY
+			mSPI.writeByte(0xFF);
+			mSPI.writeByte(pixels.loadAndScale0());
+			mSPI.writeByte(pixels.loadAndScale1());
+			mSPI.writeByte(pixels.loadAndScale2());
+#else
+			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0();
+			mSPI.writeWord(b);
+			uint16_t w = pixels.loadAndScale1() << 8;
+			w |= pixels.loadAndScale2();
+			mSPI.writeWord(w);
+#endif
+			pixels.stepDithering();
+			pixels.advanceData();
+		}
+
+		endBoundary(pixels.size());
+
+		mSPI.waitFully();
+		mSPI.release();
+	}
+
+};
+
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -317,12 +373,19 @@ protected:
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER, 4> {};
 
+// LPD1886
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER> {};
+
 // WS2811@800khz 2 clocks, 5 clocks, 3 clocks
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2812Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>                                                             //not tested
+class WS2813Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 10 * FMUL, 6 * FMUL, RGB_ORDER> {};
@@ -344,7 +407,7 @@ class UCS1904Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 3
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS2903Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 6 * FMUL, 2 * FMUL, RGB_ORDER> {};
- 
+
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
@@ -396,6 +459,10 @@ class TM1809Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(640), RGB_ORDER> {};
 
+// WS2813 - 320ns, 320ns, 640ns
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2813Controller : public ClocklessController<DATA_PIN, NS(320), NS(320), NS(640), RGB_ORDER> {};
+
 // WS2812 - 250ns, 625ns, 375ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2812Controller800Khz : public ClocklessController<DATA_PIN, NS(250), NS(625), NS(375), RGB_ORDER> {};
@@ -416,6 +483,10 @@ class TM1829Controller1600Khz : public ClocklessController<DATA_PIN, NS(100), NS
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER, 4> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, NS(200), NS(400), NS(200), RGB_ORDER> {};
+
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class SK6822Controller : public ClocklessController<DATA_PIN, NS(375), NS(1000), NS(375), RGB_ORDER> {};

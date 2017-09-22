@@ -16,6 +16,9 @@ CLEDController *CLEDController::m_pHead = NULL;
 CLEDController *CLEDController::m_pTail = NULL;
 static uint32_t lastshow = 0;
 
+uint32_t _frame_cnt=0;
+uint32_t _retry_cnt=0;
+
 // uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 
 CFastLED::CFastLED() {
@@ -126,9 +129,7 @@ void CFastLED::delay(unsigned long ms) {
 		::delay(1);
 #endif
 		show();
-#if defined(ARDUINO) && (ARDUINO > 150)
 		yield();
-#endif
 	}
 	while((millis()-start) < ms);
 }
@@ -231,21 +232,25 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
 
 extern "C" int atexit(void (* /*func*/ )()) { return 0; }
 
+#ifdef FASTLED_NEEDS_YIELD
+extern "C" void yield(void) { }
+#endif
+
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1
 {
 	#ifndef ESP8266
 	extern "C" void __cxa_pure_virtual (void) {}
 	#endif
-	
+
 	/* guard variables */
 
 	/* The ABI requires a 64-bit type.  */
 	__extension__ typedef int __guard __attribute__((mode(__DI__)));
 
-	extern "C" int __cxa_guard_acquire (__guard *);
-	extern "C" void __cxa_guard_release (__guard *);
-	extern "C" void __cxa_guard_abort (__guard *);
+	extern "C" int __cxa_guard_acquire (__guard *) __attribute__((weak));
+	extern "C" void __cxa_guard_release (__guard *) __attribute__((weak));
+	extern "C" void __cxa_guard_abort (__guard *) __attribute__((weak));
 
 	extern "C" int __cxa_guard_acquire (__guard *g)
 	{

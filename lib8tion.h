@@ -176,16 +176,12 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #include <stdint.h>
 
 #define LIB8STATIC __attribute__ ((unused)) static inline
+#define LIB8STATIC_ALWAYS_INLINE __attribute__ ((always_inline)) static inline
 
 #if !defined(__AVR__)
 #include <string.h>
 // for memmove, memcpy, and memset if not defined here
 #endif
-
-#if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__)
-#define LIB8_ATTINY 1
-#endif
-
 
 #if defined(__arm__)
 
@@ -215,6 +211,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define AVG7_C 1
 #define AVG16_C 1
 #define AVG15_C 1
+#define BLEND8_C 1
 
 
 #elif defined(__AVR__)
@@ -252,6 +249,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define MUL8_C 0
 #define QMUL8_C 0
 #define EASE8_C 0
+#define BLEND8_C 0
 #define SCALE8_AVRASM 1
 #define SCALE16BY8_AVRASM 1
 #define SCALE16_AVRASM 1
@@ -259,6 +257,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define QMUL8_AVRASM 1
 #define EASE8_AVRASM 1
 #define CLEANUP_R1_AVRASM 1
+#define BLEND8_AVRASM 1
 #else
 // On ATtiny, we just use C implementations
 #define SCALE8_C 1
@@ -267,12 +266,14 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define MUL8_C 1
 #define QMUL8_C 1
 #define EASE8_C 1
+#define BLEND8_C 1
 #define SCALE8_AVRASM 0
 #define SCALE16BY8_AVRASM 0
 #define SCALE16_AVRASM 0
 #define MUL8_AVRASM 0
 #define QMUL8_AVRASM 0
 #define EASE8_AVRASM 0
+#define BLEND8_AVRASM 0
 #endif
 
 #else
@@ -295,6 +296,7 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define AVG7_C 1
 #define AVG16_C 1
 #define AVG15_C 1
+#define BLEND8_C 1
 
 #endif
 
@@ -569,19 +571,49 @@ LIB8STATIC uint8_t map8( uint8_t in, uint8_t rangeStart, uint8_t rangeEnd)
 
 /// ease8InOutQuad: 8-bit quadratic ease-in / ease-out function
 ///                Takes around 13 cycles on AVR
+#if EASE8_C == 1
 LIB8STATIC uint8_t ease8InOutQuad( uint8_t i)
 {
     uint8_t j = i;
     if( j & 0x80 ) {
         j = 255 - j;
     }
-    uint8_t jj  = scale8(  j, (j+1));
+    uint8_t jj  = scale8(  j, j);
     uint8_t jj2 = jj << 1;
     if( i & 0x80 ) {
         jj2 = 255 - jj2;
     }
     return jj2;
 }
+
+#elif EASE8_AVRASM == 1
+// This AVR asm version of ease8InOutQuad preserves one more
+// low-bit of precision than the C version, and is also slightly
+// smaller and faster.
+LIB8STATIC uint8_t ease8InOutQuad(uint8_t val) {
+    uint8_t j=val;
+    asm volatile (
+      "sbrc %[val], 7 \n"
+      "com %[j]       \n"
+      "mul %[j], %[j] \n"
+      "add r0, %[j]   \n"
+      "ldi %[j], 0    \n"
+      "adc %[j], r1   \n"
+      "lsl r0         \n" // carry = high bit of low byte of mul product
+      "rol %[j]       \n" // j = (j * 2) + carry // preserve add'l bit of precision
+      "sbrc %[val], 7 \n"
+      "com %[j]       \n"
+      "clr __zero_reg__   \n"
+      : [j] "+a" (j)
+      : [val] "a" (val)
+      : "r0", "r1"
+      );
+    return j;
+}
+
+#else
+#error "No implementation for ease8InOutQuad available."
+#endif
 
 
 /// ease8InOutCubic: 8-bit cubic ease-in / ease-out function

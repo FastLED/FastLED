@@ -6,7 +6,7 @@ struct M0ClocklessData {
   uint8_t e[3];
   uint8_t adj;
   uint8_t pad;
-  uint8_t s[3];
+  uint32_t s[3];
 };
 
 
@@ -294,11 +294,11 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       HI2 D1 QLO4 DITHER5         D2(5) LO2 D3(0)
       HI2 D1 QLO4 SCALE4(2)       D2(4) LO2 D3(0)
       HI2 D1 QLO4 ADJDITHER7(2)   D2(7) LO2 D3(0)
-      HI2 D1 QLO4 INCLEDS3        D2(3) LO2 D3(0)
+      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
       HI2 D1 QLO4 SWAPBBN1        D2(1) LO2 D3(0)
 
       // Write out byte 2, prepping byte 0
-      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
+      HI2 D1 QLO4 INCLEDS3        D2(3) LO2 D3(0)
       HI2 D1 QLO4 LOADLEDS3(0)    D2(3) LO2 D3(0)
       HI2 D1 QLO4 LOADDITHER7(0)  D2(7) LO2 D3(0)
       HI2 D1 QLO4 DITHER5         D2(5) LO2 D3(0)

@@ -4,7 +4,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
-#warning "Software pin support forced, pin access will be sloightly slower."
+#warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
 #undef HAS_HARDWARE_PIN_SUPPORT
 
@@ -58,6 +58,17 @@ _IO(B);
 
 _DEFPIN_AVR(0, 0x01, B); _DEFPIN_AVR(1, 0x02, B); _DEFPIN_AVR(2, 0x04, B); _DEFPIN_AVR(3, 0x08, B);
 _DEFPIN_AVR(4, 0x10, B); _DEFPIN_AVR(5, 0x20, B);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__)
+#define MAX_PIN 11
+_IO(A); _IO(B);
+
+_DEFPIN_AVR(0, 0x01, B); _DEFPIN_AVR(1, 0x02, B); _DEFPIN_AVR(2, 0x04, B);
+_DEFPIN_AVR(3, 0x80, A); _DEFPIN_AVR(4, 0x40, A); _DEFPIN_AVR(5, 0x20, A);
+_DEFPIN_AVR(6, 0x10, A); _DEFPIN_AVR(7, 0x08, A); _DEFPIN_AVR(8, 0x04, A);
+_DEFPIN_AVR(9, 0x02, A); _DEFPIN_AVR(10, 0x01, A); _DEFPIN_AVR(11, 0x08, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
@@ -124,6 +135,29 @@ _DEFPIN_AVR( 20, 0x80, D);
 // #define SPI_CLOCK 1
 // #define AVR_HARDWARE_SPI 1
 
+#elif defined(IS_BEAN)
+
+// Accelerated port definitions for arduino avrs
+_IO(D); _IO(B); _IO(C);
+
+#define MAX_PIN 19
+_DEFPIN_AVR( 0, 0x40, D); _DEFPIN_AVR( 1, 0x02, B); _DEFPIN_AVR( 2, 0x04, B); _DEFPIN_AVR( 3, 0x08, B);
+_DEFPIN_AVR( 4, 0x10, B); _DEFPIN_AVR( 5, 0x20, B); _DEFPIN_AVR( 6, 0x01, D); _DEFPIN_AVR( 7, 0x80, D);
+_DEFPIN_AVR( 8, 0x01, B); _DEFPIN_AVR( 9, 0x02, D); _DEFPIN_AVR(10, 0x04, D); _DEFPIN_AVR(11, 0x08, D);
+_DEFPIN_AVR(12, 0x10, D); _DEFPIN_AVR(13, 0x20, D); _DEFPIN_AVR(14, 0x01, C); _DEFPIN_AVR(15, 0x02, C);
+_DEFPIN_AVR(16, 0x04, C); _DEFPIN_AVR(17, 0x08, C); _DEFPIN_AVR(18, 0x10, C); _DEFPIN_AVR(19, 0x20, C);
+
+#define SPI_DATA 3
+#define SPI_CLOCK 5
+#define SPI_SELECT 2
+#define AVR_HARDWARE_SPI 1
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#ifndef __AVR_ATmega8__
+#define SPI_UART0_DATA 9
+#define SPI_UART0_CLOCK 12
+#endif
+
 #elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega8__)
 // Accelerated port definitions for arduino avrs
 _IO(D); _IO(B); _IO(C);
@@ -168,18 +202,18 @@ _DEFPIN_AVR(28, 1<<4, A); _DEFPIN_AVR(29, 1<<5, A); _DEFPIN_AVR(30, 1<<6, A); _D
 
 #elif  defined(__AVR_ATmega128RFA1__) || defined(__AVR_ATmega256RFR2__)
 
-// AKA the Pinoccio 
+// AKA the Pinoccio
 
 _IO(A); _IO(B); _IO(C); _IO(D); _IO(E); _IO(F);
 
-_DEFPIN_AVR( 0, 1<<0, E); _DEFPIN_AVR( 1, 1<<1, E); _DEFPIN_AVR( 2, 1<<7, B); _DEFPIN_AVR( 3, 1<<3, E); 
-_DEFPIN_AVR( 4, 1<<4, E); _DEFPIN_AVR( 5, 1<<5, E); _DEFPIN_AVR( 6, 1<<2, E); _DEFPIN_AVR( 7, 1<<6, E); 
-_DEFPIN_AVR( 8, 1<<5, D); _DEFPIN_AVR( 9, 1<<0, B); _DEFPIN_AVR(10, 1<<2, B); _DEFPIN_AVR(11, 1<<3, B); 
-_DEFPIN_AVR(12, 1<<1, B); _DEFPIN_AVR(13, 1<<2, D); _DEFPIN_AVR(14, 1<<3, D); _DEFPIN_AVR(15, 1<<0, D); 
-_DEFPIN_AVR(16, 1<<1, D); _DEFPIN_AVR(17, 1<<4, D); _DEFPIN_AVR(18, 1<<7, E); _DEFPIN_AVR(19, 1<<6, D); 
-_DEFPIN_AVR(20, 1<<7, D); _DEFPIN_AVR(21, 1<<4, B); _DEFPIN_AVR(22, 1<<5, B); _DEFPIN_AVR(23, 1<<6, B); 
-_DEFPIN_AVR(24, 1<<0, F); _DEFPIN_AVR(25, 1<<1, F); _DEFPIN_AVR(26, 1<<2, F); _DEFPIN_AVR(27, 1<<3, F); 
-_DEFPIN_AVR(28, 1<<4, F); _DEFPIN_AVR(29, 1<<5, F); _DEFPIN_AVR(30, 1<<6, F); _DEFPIN_AVR(31, 1<<7, F); 
+_DEFPIN_AVR( 0, 1<<0, E); _DEFPIN_AVR( 1, 1<<1, E); _DEFPIN_AVR( 2, 1<<7, B); _DEFPIN_AVR( 3, 1<<3, E);
+_DEFPIN_AVR( 4, 1<<4, E); _DEFPIN_AVR( 5, 1<<5, E); _DEFPIN_AVR( 6, 1<<2, E); _DEFPIN_AVR( 7, 1<<6, E);
+_DEFPIN_AVR( 8, 1<<5, D); _DEFPIN_AVR( 9, 1<<0, B); _DEFPIN_AVR(10, 1<<2, B); _DEFPIN_AVR(11, 1<<3, B);
+_DEFPIN_AVR(12, 1<<1, B); _DEFPIN_AVR(13, 1<<2, D); _DEFPIN_AVR(14, 1<<3, D); _DEFPIN_AVR(15, 1<<0, D);
+_DEFPIN_AVR(16, 1<<1, D); _DEFPIN_AVR(17, 1<<4, D); _DEFPIN_AVR(18, 1<<7, E); _DEFPIN_AVR(19, 1<<6, D);
+_DEFPIN_AVR(20, 1<<7, D); _DEFPIN_AVR(21, 1<<4, B); _DEFPIN_AVR(22, 1<<5, B); _DEFPIN_AVR(23, 1<<6, B);
+_DEFPIN_AVR(24, 1<<0, F); _DEFPIN_AVR(25, 1<<1, F); _DEFPIN_AVR(26, 1<<2, F); _DEFPIN_AVR(27, 1<<3, F);
+_DEFPIN_AVR(28, 1<<4, F); _DEFPIN_AVR(29, 1<<5, F); _DEFPIN_AVR(30, 1<<6, F); _DEFPIN_AVR(31, 1<<7, F);
 
 #define SPI_DATA 10
 #define SPI_CLOCK 12

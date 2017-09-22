@@ -295,6 +295,7 @@ class CRGBArray : public CPixelView<CRGB> {
   CRGB rawleds[SIZE];
 public:
   CRGBArray() : CPixelView<CRGB>(rawleds, SIZE) {}
+  using CPixelView::operator=;
 };
 
 #endif

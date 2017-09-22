@@ -41,10 +41,12 @@ FASTLED_NAMESPACE_BEGIN
 #define FL_PGM_READ_DWORD_NEAR(x) (pgm_read_dword_near(x))
 
 // Workaround for http://gcc.gnu.org/bugzilla/show_bug.cgi?id=34734
+#if __GNUC__ < 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ < 6))
 #ifdef FASTLED_AVR
 #ifdef PROGMEM
 #undef PROGMEM
 #define PROGMEM __attribute__((section(".progmem.data")))
+#endif
 #endif
 #endif
 
@@ -58,6 +60,19 @@ FASTLED_NAMESPACE_BEGIN
 #define FL_PGM_READ_WORD_NEAR(x)  (*((const uint16_t*)(x)))
 #define FL_PGM_READ_DWORD_NEAR(x) (*((const uint32_t*)(x)))
 
+#endif
+
+
+// On some platforms, most notably ARM M0, unaligned access
+// to 'PROGMEM' for multibyte values (eg read dword) is
+// not allowed and causes a crash.  This macro can help
+// force 4-byte alignment as needed.  The FastLED gradient
+// palette code uses 'read dword', and now uses this macro
+// to make sure that gradient palettes are 4-byte aligned.
+#ifdef FASTLED_ARM
+#define FL_ALIGN_PROGMEM  __attribute__ ((aligned (4)))
+#else
+#define FL_ALIGN_PROGMEM
 #endif
 
 

@@ -59,26 +59,26 @@ public:
   void select() { saveSPIData(); init(); }
 
   // release the CS select
-  void release() { restoreSPIData(); }
+  void release() { shouldWait(); restoreSPIData(); }
 
   static bool shouldWait(bool wait = false) __attribute__((always_inline)) __attribute__((always_inline)) {
-    static bool sWait=false;
-    return false; // if(sWait) { sWait = wait; return true; } else { sWait = wait; return false; }
+    // static bool sWait=false;
+    // bool oldWait = sWait;
+    // sWait = wait;
+    // never going to bother with waiting since we're always running the spi clock at max speed on the rfduino
+    // TODO: When we set clock rate, implement/fix waiting properly, otherwise the world hangs up
+    return false;
   }
-
+  
   // wait until all queued up data has been written
-  static void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
-  void wait() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
-  // void waitFully() { while(NRF_SPI0->EVENTS_READY==0); NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
-  // void wait() { while(NRF_SPI0->EVENTS_READY==0); NRF_SPI0->EVENTS_READY=0; uint8_t b = NRF_SPI0->RXD; }
+  static void waitFully() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
+  static void wait() __attribute__((always_inline)){ if(shouldWait()) { while(NRF_SPI0->EVENTS_READY==0); } NRF_SPI0->INTENCLR; }
 
   // write a byte out via SPI (returns immediately on writing register)
-  // void writeByte(uint8_t b) { wait(); NRF_SPI0->TXD = b;  shouldWait(true); }
-  // void writeByte(uint8_t b) __attribute__((always_inline)){ wait(); NRF_SPI0->TXD = b;  shouldWait(true);  }
-  static void writeByte(uint32_t b) __attribute__((always_inline)) {  /*NRF_SPI0->EVENTS_READY=0; */ /*uint8_t x = NRF_SPI0->RXD;*/ NRF_SPI0->TXD = b; }
+  static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); NRF_SPI0->TXD = b; NRF_SPI0->INTENCLR; shouldWait(true); }
 
   // write a word out via SPI (returns immediately on writing register)
-  static void writeWord(uint32_t w) __attribute__((always_inline)){ writeByte(w>>8); writeByte(w & 0xFF);  }
+  static void writeWord(uint16_t w) __attribute__((always_inline)){ writeByte(w>>8); writeByte(w & 0xFF);  }
 
   // A raw set of writing byte values, assumes setup/init/waiting done elsewhere (static for use by adjustment classes)
   static void writeBytesValueRaw(uint8_t value, int len) { while(len--) { writeByte(value);  } }

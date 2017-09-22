@@ -1,6 +1,8 @@
 #ifndef __INC_LIB8TION_MATH_H
 #define __INC_LIB8TION_MATH_H
 
+#include "scale8.h"
+
 ///@ingroup lib8tion
 
 ///@defgroup Math Basic math operations
@@ -18,7 +20,7 @@
 /// @param i - first byte to add
 /// @param j - second byte to add
 /// @returns the sum of i & j, capped at 0xFF
-LIB8STATIC uint8_t qadd8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t qadd8( uint8_t i, uint8_t j)
 {
 #if QADD8_C == 1
     unsigned int t = i + j;
@@ -51,7 +53,7 @@ LIB8STATIC uint8_t qadd8( uint8_t i, uint8_t j)
 /// @param i - first byte to add
 /// @param j - second byte to add
 /// @returns the sum of i & j, capped at 0xFF
-LIB8STATIC int8_t qadd7( int8_t i, int8_t j)
+LIB8STATIC_ALWAYS_INLINE int8_t qadd7( int8_t i, int8_t j)
 {
 #if QADD7_C == 1
     int16_t t = i + j;
@@ -83,7 +85,7 @@ LIB8STATIC int8_t qadd7( int8_t i, int8_t j)
 
 /// subtract one byte from another, saturating at 0x00
 /// @returns i - j with a floor of 0
-LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t qsub8( uint8_t i, uint8_t j)
 {
 #if QSUB8_C == 1
     int t = i - j;
@@ -112,7 +114,7 @@ LIB8STATIC uint8_t qsub8( uint8_t i, uint8_t j)
 }
 
 /// add one byte to another, with one byte result
-LIB8STATIC uint8_t add8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t add8( uint8_t i, uint8_t j)
 {
 #if ADD8_C == 1
     int t = i + j;
@@ -126,9 +128,28 @@ LIB8STATIC uint8_t add8( uint8_t i, uint8_t j)
 #endif
 }
 
+/// add one byte to another, with one byte result
+LIB8STATIC_ALWAYS_INLINE uint16_t add8to16( uint8_t i, uint16_t j)
+{
+#if ADD8_C == 1
+    uint16_t t = i + j;
+    return t;
+#elif ADD8_AVRASM == 1
+    // Add i(one byte) to j(two bytes)
+    asm volatile( "add %A[j], %[i]              \n\t"
+                  "adc %B[j], __zero_reg__      \n\t"
+                 : [j] "+a" (j)
+                 : [i] "a"  (i)
+                 );
+    return i;
+#else
+#error "No implementation for add8to16 available."
+#endif
+}
+
 
 /// subtract one byte from another, 8-bit result
-LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t sub8( uint8_t i, uint8_t j)
 {
 #if SUB8_C == 1
     int t = i - j;
@@ -145,7 +166,7 @@ LIB8STATIC uint8_t sub8( uint8_t i, uint8_t j)
 /// Calculate an integer average of two unsigned
 ///       8-bit integer values (uint8_t).
 ///       Fractional results are rounded down, e.g. avg8(20,41) = 30
-LIB8STATIC uint8_t avg8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t avg8( uint8_t i, uint8_t j)
 {
 #if AVG8_C == 1
     return (i + j) >> 1;
@@ -166,7 +187,7 @@ LIB8STATIC uint8_t avg8( uint8_t i, uint8_t j)
 /// Calculate an integer average of two unsigned
 ///       16-bit integer values (uint16_t).
 ///       Fractional results are rounded down, e.g. avg16(20,41) = 30
-LIB8STATIC uint16_t avg16( uint16_t i, uint16_t j)
+LIB8STATIC_ALWAYS_INLINE uint16_t avg16( uint16_t i, uint16_t j)
 {
 #if AVG16_C == 1
     return (uint32_t)((uint32_t)(i) + (uint32_t)(j)) >> 1;
@@ -193,7 +214,7 @@ LIB8STATIC uint16_t avg16( uint16_t i, uint16_t j)
 ///       integers (int8_t)
 ///       If the first argument is even, result is rounded down.
 ///       If the first argument is odd, result is result up.
-LIB8STATIC int8_t avg7( int8_t i, int8_t j)
+LIB8STATIC_ALWAYS_INLINE int8_t avg7( int8_t i, int8_t j)
 {
 #if AVG7_C == 1
     return ((i + j) >> 1) + (i & 0x1);
@@ -214,7 +235,7 @@ LIB8STATIC int8_t avg7( int8_t i, int8_t j)
 ///       integers (int16_t)
 ///       If the first argument is even, result is rounded down.
 ///       If the first argument is odd, result is result up.
-LIB8STATIC int16_t avg15( int16_t i, int16_t j)
+LIB8STATIC_ALWAYS_INLINE int16_t avg15( int16_t i, int16_t j)
 {
 #if AVG15_C == 1
     return ((int32_t)((int32_t)(i) + (int32_t)(j)) >> 1) + (i & 0x1);
@@ -246,7 +267,7 @@ LIB8STATIC int16_t avg15( int16_t i, int16_t j)
 ///       the loop has to execute multiple times.  However,
 ///       even in that case, the loop is only two
 ///       instructions long on AVR, i.e., quick.
-LIB8STATIC uint8_t mod8( uint8_t a, uint8_t m)
+LIB8STATIC_ALWAYS_INLINE uint8_t mod8( uint8_t a, uint8_t m)
 {
 #if defined(__AVR__)
     asm volatile (
@@ -272,7 +293,7 @@ LIB8STATIC uint8_t mod8( uint8_t a, uint8_t m)
 ///          e.g. if you have seven modes, this switches
 ///          to the next one and wraps around if needed:
 ///            mode = addmod8( mode, 1, 7);
-///          See 'mod8' for notes on performance.
+///LIB8STATIC_ALWAYS_INLINESee 'mod8' for notes on performance.
 LIB8STATIC uint8_t addmod8( uint8_t a, uint8_t b, uint8_t m)
 {
 #if defined(__AVR__)
@@ -292,7 +313,7 @@ LIB8STATIC uint8_t addmod8( uint8_t a, uint8_t b, uint8_t m)
 }
 
 /// 8x8 bit multiplication, with 8 bit result
-LIB8STATIC uint8_t mul8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t mul8( uint8_t i, uint8_t j)
 {
 #if MUL8_C == 1
     return ((int)i * (int)(j) ) & 0xFF;
@@ -317,7 +338,7 @@ LIB8STATIC uint8_t mul8( uint8_t i, uint8_t j)
 
 /// saturating 8x8 bit multiplication, with 8 bit result
 /// @returns the product of i * j, capping at 0xFF
-LIB8STATIC uint8_t qmul8( uint8_t i, uint8_t j)
+LIB8STATIC_ALWAYS_INLINE uint8_t qmul8( uint8_t i, uint8_t j)
 {
 #if QMUL8_C == 1
     int p = ((int)i * (int)(j) );
@@ -351,7 +372,7 @@ LIB8STATIC uint8_t qmul8( uint8_t i, uint8_t j)
 
 
 /// take abs() of a signed 8-bit uint8_t
-LIB8STATIC int8_t abs8( int8_t i)
+LIB8STATIC_ALWAYS_INLINE int8_t abs8( int8_t i)
 {
 #if ABS8_C == 1
     if( i < 0) i = -i;
@@ -405,6 +426,98 @@ LIB8STATIC uint8_t sqrt16(uint16_t x)
 
     return low - 1;
 }
+
+/// blend a variable proproportion(0-255) of one byte to another
+/// @param a - the starting byte value
+/// @param b - the byte value to blend toward
+/// @param amountOfB - the proportion (0-255) of b to blend
+/// @returns a byte value between a and b, inclusive
+#if (FASTLED_BLEND_FIXED == 1)
+LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
+{
+#if BLEND8_C == 1
+    uint16_t partial;
+    uint8_t result;
+    
+    uint8_t amountOfA = 255 - amountOfB;
+    
+    partial = (a * amountOfA);
+#if (FASTLED_SCALE8_FIXED == 1)
+    partial += a;
+    //partial = add8to16( a, partial);
+#endif
+    
+    partial += (b * amountOfB);
+#if (FASTLED_SCALE8_FIXED == 1)
+    partial += b;
+    //partial = add8to16( b, partial);
+#endif
+    
+    result = partial >> 8;
+    
+    return result;
+
+#elif BLEND8_AVRASM == 1
+    uint16_t partial;
+    uint8_t result;
+
+    asm volatile (
+        /* partial = b * amountOfB */
+        "  mul %[b], %[amountOfB]        \n\t"
+        "  movw %A[partial], r0          \n\t"
+
+        /* amountOfB (aka amountOfA) = 255 - amountOfB */
+        "  com %[amountOfB]              \n\t"
+
+        /* partial += a * amountOfB (aka amountOfA) */
+        "  mul %[a], %[amountOfB]        \n\t"
+
+        "  add %A[partial], r0           \n\t"
+        "  adc %B[partial], r1           \n\t"
+                  
+        "  clr __zero_reg__              \n\t"
+                  
+#if (FASTLED_SCALE8_FIXED == 1)
+        /* partial += a */
+        "  add %A[partial], %[a]         \n\t"
+        "  adc %B[partial], __zero_reg__ \n\t"
+                  
+        // partial += b
+        "  add %A[partial], %[b]         \n\t"
+        "  adc %B[partial], __zero_reg__ \n\t"
+#endif
+                  
+        : [partial] "=r" (partial),
+          [amountOfB] "+a" (amountOfB)
+        : [a] "a" (a),
+          [b] "a" (b)
+        : "r0", "r1"
+    );
+    
+    result = partial >> 8;
+    
+    return result;
+    
+#else
+#error "No implementation for blend8 available."
+#endif
+}
+
+#else
+LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
+{
+    // This version loses precision in the integer math
+    // and can actually return results outside of the range
+    // from a to b.  Its use is not recommended.
+    uint8_t result;
+    uint8_t amountOfA = 255 - amountOfB;
+    result = scale8_LEAVING_R1_DIRTY( a, amountOfA)
+           + scale8_LEAVING_R1_DIRTY( b, amountOfB);
+    cleanup_R1();
+    return result;
+}
+#endif
+
 
 ///@}
 #endif

@@ -11,7 +11,7 @@ FASTLED_NAMESPACE_BEGIN
 ///@defgroup Bitswap Bit swapping/rotate
 ///Functions for doing a rotation of bits/bytes used by parallel output
 ///@{
-#ifdef FASTLED_ARM
+#if defined(FASTLED_ARM) || defined(FASTLED_ESP8266)
 /// structure representing 8 bits of access
 typedef union {
   uint8_t raw;
@@ -167,6 +167,8 @@ __attribute__((always_inline)) inline void slowswap(unsigned char *A, unsigned c
     // B[0] |= (x & 0x01) << row; x >>= 1;
   }
 }
+
+void transpose8x1_noinline(unsigned char *A, unsigned char *B);
 
 /// Simplified form of bits rotating function.  Based on code found here - http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt - rotating
 /// data into LSB for a faster write (the code using this data can happily walk the array backwards)

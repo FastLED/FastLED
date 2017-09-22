@@ -7,9 +7,17 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-#define  FASTLED_VERSION 3001001
+#if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
+#define FASTLED_HAS_PRAGMA_MESSAGE
+#endif
+
+#define FASTLED_VERSION 3001006
 #ifndef FASTLED_INTERNAL
-#warning FastLED version 3.001.001  (Not really a warning, just telling you here.)
+#  ifdef FASTLED_HAS_PRAGMA_MESSAGE
+#    pragma message "FastLED version 3.001.006"
+#  else
+#    warning FastLED version 3.001.006  (Not really a warning, just telling you here.)
+#  endif
 #endif
 
 #ifndef __PROG_TYPES_COMPAT__
@@ -35,7 +43,10 @@
 #include "fastled_config.h"
 #include "led_sysdefs.h"
 
+// Utility functions
+#include "fastled_delay.h"
 #include "bitswap.h"
+
 #include "controller.h"
 #include "fastpin.h"
 #include "fastspi_types.h"
@@ -67,11 +78,12 @@ enum ESPIChipsets {
 	SM16716,
 	P9813,
 	APA102,
+	SK9822,
 	DOTSTAR
 };
 
 enum ESM { SMART_MATRIX };
-enum OWS2811 { OCTOWS2811,OCTOWS2811_400 };
+enum OWS2811 { OCTOWS2811,OCTOWS2811_400, OCTOWS2813};
 
 #ifdef HAS_PIXIE
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PIXIE : public PixieController<DATA_PIN, RGB_ORDER> {};
@@ -89,16 +101,20 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1903B : public UCS1903BCon
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS1904 : public UCS1904Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class UCS2903 : public UCS2903Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2852 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6812 : public SK6812Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6822 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA106 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PL9823 : public PL9823Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2813 : public WS2813Controller<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA104 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811_400 : public WS2811Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class GW6205 : public GW6205Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class GW6205_400 : public GW6205Controller400Khz<DATA_PIN, RGB_ORDER> {};
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class LPD1886 : public LPD1886Controller1250Khz<DATA_PIN, RGB_ORDER> {};
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class LPD1886_8BIT : public LPD1886Controller1250Khz_8bit<DATA_PIN, RGB_ORDER> {};
 #ifdef DmxSimple_h
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class DMXSIMPLE : public DMXSimpleController<DATA_PIN, RGB_ORDER> {};
 #endif
@@ -110,28 +126,38 @@ template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDE
 enum EBlockChipsets {
 #ifdef PORTA_FIRST_PIN
 	WS2811_PORTA,
+	WS2813_PORTA,
 	WS2811_400_PORTA,
 	TM1803_PORTA,
+	UCS1903_PORTA,
 #endif
 #ifdef PORTB_FIRST_PIN
 	WS2811_PORTB,
+	WS2813_PORTB,
 	WS2811_400_PORTB,
 	TM1803_PORTB,
+	UCS1903_PORTB,
 #endif
 #ifdef PORTC_FIRST_PIN
 	WS2811_PORTC,
+	WS2813_PORTC,
 	WS2811_400_PORTC,
 	TM1803_PORTC,
+	UCS1903_PORTC,
 #endif
 #ifdef PORTD_FIRST_PIN
 	WS2811_PORTD,
+	WS2813_PORTD,
 	WS2811_400_PORTD,
 	TM1803_PORTD,
+	UCS1903_PORTD,
 #endif
 #ifdef HAS_PORTDC
 	WS2811_PORTDC,
+	WS2813_PORTDC,
 	WS2811_400_PORTDC,
 	TM1803_PORTDC,
+	UCS1903_PORTDC,
 #endif
 };
 
@@ -162,7 +188,7 @@ public:
 	/// Add a CLEDController instance to the world.  Exposed to the public to allow people to implement their own
 	/// CLEDController objects or instances.  There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 3 arguments, in which case the arguments are the controller, a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 4 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 4 arguments, in which case
 	/// the first two arguments are the same, the third argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the fourth argument is the number of leds for this controller object.
 	/// @param pLed - the led controller being added
@@ -177,7 +203,7 @@ public:
 	/// Add an SPI based  CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
@@ -201,6 +227,7 @@ public:
 			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case DOTSTAR:
 			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SK9822: { static SK9822Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -213,6 +240,7 @@ public:
 			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case DOTSTAR:
 			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SK9822: { static SK9822Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -225,6 +253,7 @@ public:
 			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 			case DOTSTAR:
 			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
+			case SK9822: { static SK9822Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
 		}
 	}
 
@@ -250,7 +279,7 @@ public:
 	/// Add a clockless (aka 3wire, also DMX) based CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
@@ -298,7 +327,7 @@ public:
 	/// Add a 3rd party library based CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object. This class includes the SmartMatrix
 	/// and OctoWS2811 based controllers
@@ -328,8 +357,11 @@ public:
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
 		switch(CHIPSET) {
-			case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
-			case OCTOWS2811_400: { static COctoWS2811Controller<RGB_ORDER,true> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case OCTOWS2811: { static COctoWS2811Controller<RGB_ORDER,WS2811_800kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+			case OCTOWS2811_400: { static COctoWS2811Controller<RGB_ORDER,WS2811_400kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+#ifdef WS2813_800kHz
+      case OCTOWS2813: { static COctoWS2811Controller<RGB_ORDER,WS2813_800kHz> controller; return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset); }
+#endif
 		}
 	}
 
@@ -360,7 +392,7 @@ public:
 	/// Add a block based CLEDController instance to the world.
 	/// There are two ways to call this method (as well as the other addLeds)
 	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
-	/// led data, and the number of leds used by this controller.  The seocond is with 3 arguments, in which case
+	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
@@ -379,27 +411,37 @@ public:
 		#ifdef PORTA_FIRST_PIN
 				case WS2811_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 				case WS2811_400_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+        case WS2813_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER, 0, false, 300>(), data, nLedsOrOffset, nLedsIfOffset);
 				case TM1803_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(700), NS(1100), NS(700), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case UCS1903_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTA_FIRST_PIN, NS(500), NS(1500), NS(500), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef PORTB_FIRST_PIN
 				case WS2811_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 				case WS2811_400_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-				case TM1803_PORTA: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(700), NS(1100), NS(700), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+        case WS2813_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER, 0, false, 300>(), data, nLedsOrOffset, nLedsIfOffset);
+				case TM1803_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(700), NS(1100), NS(700), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case UCS1903_PORTB: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTB_FIRST_PIN, NS(500), NS(1500), NS(500), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef PORTC_FIRST_PIN
 				case WS2811_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 				case WS2811_400_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+        case WS2813_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER, 0, false, 300>(), data, nLedsOrOffset, nLedsIfOffset);
 				case TM1803_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(700), NS(1100), NS(700), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case UCS1903_PORTC: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTC_FIRST_PIN, NS(500), NS(1500), NS(500), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef PORTD_FIRST_PIN
 				case WS2811_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 				case WS2811_400_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+        case WS2813_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(320), NS(320), NS(640), RGB_ORDER, 0, false, 300>(), data, nLedsOrOffset, nLedsIfOffset);
 				case TM1803_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(700), NS(1100), NS(700), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case UCS1903_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, NS(500), NS(1500), NS(500), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef HAS_PORTDC
 				case WS2811_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES,NS(320), NS(320), NS(640), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 				case WS2811_400_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES,NS(800), NS(800), NS(900), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-				case TM1803_PORTDC: return addLeds(new InlineBlockClocklessController<NUM_LANES, NS(700), NS(1100), NS(700), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+        case WS2813_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES, NS(320), NS(320), NS(640), RGB_ORDER, 0, false, 300>(), data, nLedsOrOffset, nLedsIfOffset);
+				case TM1803_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES, NS(700), NS(1100), NS(700), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case UCS1903_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES, NS(500), NS(1500), NS(500), RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		}
 	}
@@ -435,8 +477,8 @@ public:
 	/// Update all our controllers with the current led colors
 	void show() { show(m_Scale); }
 
-	/// clear the leds, optionally wiping the local array of data as well
-	/// @param writeData whether or not to write into the local data array as well
+	/// clear the leds, wiping the local array of data, optionally black out the leds as well
+	/// @param writeData whether or not to write out to the leds as well
 	void clear(boolean writeData = false);
 
 	/// clear out the local data array
@@ -518,7 +560,7 @@ extern CFastLED FastLED;
 
 // Warnings for undefined things
 #ifndef HAS_HARDWARE_PIN_SUPPORT
-#warning "No pin/port mappings found, pin access will be slightly slower.  See fastpin.h for info."
+#warning "No pin/port mappings found, pin access will be slightly slower. See fastpin.h for info."
 #define NO_HARDWARE_PIN_SUPPORT
 #endif
 
