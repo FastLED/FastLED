@@ -43,13 +43,8 @@ protected:
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 	    _retry_cnt++;
 #endif
-	    ets_intr_unlock();
-	    // interrupts();
 	    delayMicroseconds(WAIT_TIME);
-	    ets_intr_lock();
-	    // noInterrupts();
 	}
-	// ets_intr_unlock();
 	mWait.mark();
     }
 
@@ -79,11 +74,19 @@ protected:
 	pixels.preStepFirstByteDithering();
 	register uint32_t b = pixels.loadAndScale0();
 	pixels.preStepFirstByteDithering();
+
+#if (FASTLED_ALLOW_INTERRUPTS == 0)
 	ets_intr_lock();
-	// noInterrupts();
+#endif
+
 	uint32_t start = __clock_cycles();
 	uint32_t last_mark = start;
 	while(pixels.has(1)) {
+
+#if (FASTLED_ALLOW_INTERRUPTS == 1)
+	    ets_intr_lock();
+#endif
+
 	    // Write first byte, read next byte
 	    writeBits<8+XTRA0>(last_mark, b);
 	    b = pixels.loadAndScale1();
@@ -96,15 +99,10 @@ protected:
 	    writeBits<8+XTRA0>(last_mark, b);
 	    b = pixels.advanceAndLoadAndScale0();
 	    
-#if (FASTLED_ALLOW_INTERRUPTS == 1)
-	    ets_intr_unlock();
-	    // interrupts();
-#endif
-	    
 	    pixels.stepDithering();
 	    
 #if (FASTLED_ALLOW_INTERRUPTS == 1)
-	    ets_intr_lock();
+	    ets_intr_unlock();
 	    // noInterrupts();
 	    // if interrupts took longer than 45µs, punt on the current frame
 	    if((int32_t)(__clock_cycles()-last_mark) > 0) {
@@ -113,8 +111,10 @@ protected:
 #endif
 	};
 
+#if (FASTLED_ALLOW_INTERRUPTS == 0)
 	ets_intr_unlock();
-	// interrupts();
+#endif
+
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 	_frame_cnt++;
 #endif
