@@ -20,7 +20,7 @@ typedef bool boolean;
 #endif
 
 #ifndef FASTLED_ALLOW_INTERRUPTS
-# define FASTLED_ALLOW_INTERRUPTS 1
+# define FASTLED_ALLOW_INTERRUPTS 0
 # define INTERRUPT_THRESHOLD 0
 #endif
 
