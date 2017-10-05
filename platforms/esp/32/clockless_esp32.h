@@ -9,16 +9,13 @@ extern uint32_t _retry_cnt;
 
 #include <driver/rmt.h>
 
-// RMT Clock source is @ 80 MHz. Dividing it by 8 gives us 10 MHz frequency, or 100ns period.
-#define LED_STRIP_RMT_CLK_DIV (8)
+// RMT Clock source is @ 80 MHz. Dividing it by 4 gives us 20 MHz frequency, or 50ns period.
+#define LED_STRIP_RMT_CLK_DIV  4   /* 8 still seems to work, but timings become marginal */
+#define RMT_DURATION_NS       12.5 /* minimum time of a single RMT duration based on clock ns */
 
-/****************************
-        WS2812 Timing
-****************************/
-#define LED_STRIP_RMT_TICKS_BIT_1_HIGH_WS2812 9 // 900ns (900ns +/- 150ns per datasheet)
-#define LED_STRIP_RMT_TICKS_BIT_1_LOW_WS2812  3 // 300ns (350ns +/- 150ns per datasheet)
-#define LED_STRIP_RMT_TICKS_BIT_0_HIGH_WS2812 3 // 300ns (350ns +/- 150ns per datasheet)
-#define LED_STRIP_RMT_TICKS_BIT_0_LOW_WS2812  9 // 900ns (900ns +/- 150ns per datasheet)
+// These macros help us convert from ESP32 clock cycles to RMT "ticks"
+#define PERIOD  50  /* RMT_DURATION_NS * LED_STRIP_RMT_CLK_DIV */
+#define TO_NS(_CLKS) (((((long)(_CLKS)) * 1000 - 999) / F_CPU_MHZ))
 
 // Info on reading cycle counter from https://github.com/kbeckmann/nodemcu-firmware/blob/ws2812-dual/app/modules/ws2812.c
 __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
@@ -39,6 +36,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     data_ptr_t mPort;
     CMinWait<WAIT_TIME> mWait;
 
+    uint16_t T0H, T1H, T0L, T1L;
     rmt_channel_t LED_RMT_CHANNEL;
     rmt_config_t mRMT_config;
     
@@ -49,6 +47,13 @@ public:
 	FastPin<DATA_PIN>::setOutput();
 	mPinMask = FastPin<DATA_PIN>::mask();
 	mPort = FastPin<DATA_PIN>::port();
+
+	// -- Compute the timing values
+	//    We are converting from ESP32 clock cycles (~4ns) to RMT peripheral ticks (12.5ns)
+	T0H = TO_NS(T1) / PERIOD;
+	T1H = TO_NS(T1 + T2) / PERIOD;
+	T0L = TO_NS(T2 + T3) / PERIOD;
+	T1L = TO_NS(T3) / PERIOD;
 
 	mRMT_config.rmt_mode = RMT_MODE_TX;
 	mRMT_config.channel = LED_RMT_CHANNEL;
@@ -100,17 +105,17 @@ protected:
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
 
-    __attribute__ ((always_inline)) inline static void convertBit(rmt_item32_t * item, register uint32_t b) {
+    __attribute__ ((always_inline)) inline void convertBit(rmt_item32_t * item, register uint32_t b) {
 	if (b & 0x80000000L) {
 	    item->level0 = 1;
-	    item->duration0 = LED_STRIP_RMT_TICKS_BIT_1_HIGH_WS2812;
+	    item->duration0 = T1H; // LED_STRIP_RMT_TICKS_BIT_1_HIGH_WS2812;
 	    item->level1 = 0;
-	    item->duration1 = LED_STRIP_RMT_TICKS_BIT_1_LOW_WS2812;
+	    item->duration1 = T1L; // LED_STRIP_RMT_TICKS_BIT_1_LOW_WS2812;
 	} else {
 	    item->level0 = 1;
-	    item->duration0 = LED_STRIP_RMT_TICKS_BIT_0_HIGH_WS2812;
+	    item->duration0 = T0H; // LED_STRIP_RMT_TICKS_BIT_0_HIGH_WS2812;
 	    item->level1 = 0;
-	    item->duration1 = LED_STRIP_RMT_TICKS_BIT_0_LOW_WS2812;
+	    item->duration1 = T0L; // LED_STRIP_RMT_TICKS_BIT_0_LOW_WS2812;
 	}
     }
     
@@ -119,7 +124,7 @@ protected:
 	// -- Allocate the RMT buffer (this should really only be done once)
 	int num_rmt_items = (pixels.size() * 3 * 8);
 	rmt_item32_t * rmt_items = (rmt_item32_t*) malloc(sizeof(rmt_item32_t) * num_rmt_items);
-	int cur_item = 0;
+	rmt_item32_t * cur_item = & rmt_items[0];
 	
 	// Setup the pixel controller and load/scale the first byte
 	pixels.preStepFirstByteDithering();
@@ -132,7 +137,7 @@ protected:
 	    // Write first byte, read next byte
 	    b <<= 24;
 	    for (register uint32_t i = 8; i > 0; i--) {
-		convertBit(&rmt_items[cur_item], b);
+		convertBit(cur_item, b);
 		cur_item++;
 		b <<= 1;
 	    }		
@@ -141,7 +146,7 @@ protected:
 	    // Write second byte, read 3rd byte
 	    b <<= 24;
 	    for (register uint32_t i = 8; i > 0; i--) {
-		convertBit(&rmt_items[cur_item], b);
+		convertBit(cur_item, b);
 		cur_item++;
 		b <<= 1;
 	    }		
@@ -150,7 +155,7 @@ protected:
 	    // Write third byte, read 1st byte of next pixel
 	    b <<= 24;
 	    for (register uint32_t i = 8; i > 0; i--) {
-		convertBit(&rmt_items[cur_item], b);
+		convertBit(cur_item, b);
 		cur_item++;
 		b <<= 1;
 	    }		
