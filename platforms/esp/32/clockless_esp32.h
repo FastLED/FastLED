@@ -17,6 +17,11 @@ extern uint32_t _retry_cnt;
 #define PERIOD  50  /* RMT_DURATION_NS * LED_STRIP_RMT_CLK_DIV */
 #define TO_NS(_CLKS) (((((long)(_CLKS)) * 1000 - 999) / F_CPU_MHZ))
 
+#define RMT_MAX_WAIT 100  // Should really figure out how many ticks in 45us
+#define RMT_ITEMS_SIZE (20 * 3 * 8)  // Number of RMT items for 20 pixels -- 1840 bytes
+
+static int Next_RMT_Channel = 0;
+
 // Info on reading cycle counter from https://github.com/kbeckmann/nodemcu-firmware/blob/ws2812-dual/app/modules/ws2812.c
 __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
   uint32_t cyc;
@@ -36,13 +41,19 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     data_ptr_t mPort;
     CMinWait<WAIT_TIME> mWait;
 
-    uint16_t T0H, T1H, T0L, T1L;
-    rmt_channel_t LED_RMT_CHANNEL;
-    rmt_config_t mRMT_config;
-    
+    uint16_t mT0H, mT1H, mT0L, mT1L;
+    rmt_channel_t mLED_RMT_CHANNEL;
+    rmt_config_t mRMT_config;    
+    rmt_item32_t mRMT_items[RMT_ITEMS_SIZE];
+
 public:
     virtual void init() {
-	LED_RMT_CHANNEL = RMT_CHANNEL_0;
+	// -- Assign RMT channels sequentially
+	if (Next_RMT_Channel > 7) {
+	    Serial.println("ERROR: Not enough RMT channels!");
+	}
+	mLED_RMT_CHANNEL = (rmt_channel_t) Next_RMT_Channel;
+	Next_RMT_Channel++;
 
 	FastPin<DATA_PIN>::setOutput();
 	mPinMask = FastPin<DATA_PIN>::mask();
@@ -50,13 +61,14 @@ public:
 
 	// -- Compute the timing values
 	//    We are converting from ESP32 clock cycles (~4ns) to RMT peripheral ticks (12.5ns)
-	T0H = TO_NS(T1) / PERIOD;
-	T1H = TO_NS(T1 + T2) / PERIOD;
-	T0L = TO_NS(T2 + T3) / PERIOD;
-	T1L = TO_NS(T3) / PERIOD;
+	mT0H = TO_NS(T1) / PERIOD;
+	mT1H = TO_NS(T1 + T2) / PERIOD;
+	mT0L = TO_NS(T2 + T3) / PERIOD;
+	mT1L = TO_NS(T3) / PERIOD;
 
+	// -- Set up the RMT peripheral
 	mRMT_config.rmt_mode = RMT_MODE_TX;
-	mRMT_config.channel = LED_RMT_CHANNEL;
+	mRMT_config.channel = mLED_RMT_CHANNEL;
 	mRMT_config.clk_div = LED_STRIP_RMT_CLK_DIV;
 	mRMT_config.gpio_num = (gpio_num_t) DATA_PIN;
 	mRMT_config.mem_block_num = 1;
@@ -83,9 +95,6 @@ public:
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
-    // rmt_item32_t * rmt_items = 0;
-    // size_t num_rmt_items;
-
 protected:
 
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
@@ -105,73 +114,97 @@ protected:
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
 
-    __attribute__ ((always_inline)) inline void convertBit(rmt_item32_t * item, register uint32_t b) {
+    // -- convertBit
+    //    Translate a single bit into an RMT signal entry using the given timing variables
+    __attribute__ ((always_inline)) 
+    inline void convertBit(rmt_item32_t * item, register uint32_t b) 
+    {
 	if (b & 0x80000000L) {
 	    item->level0 = 1;
-	    item->duration0 = T1H; // LED_STRIP_RMT_TICKS_BIT_1_HIGH_WS2812;
+	    item->duration0 = mT1H; // LED_STRIP_RMT_TICKS_BIT_1_HIGH_WS2812;
 	    item->level1 = 0;
-	    item->duration1 = T1L; // LED_STRIP_RMT_TICKS_BIT_1_LOW_WS2812;
+	    item->duration1 = mT1L; // LED_STRIP_RMT_TICKS_BIT_1_LOW_WS2812;
 	} else {
 	    item->level0 = 1;
-	    item->duration0 = T0H; // LED_STRIP_RMT_TICKS_BIT_0_HIGH_WS2812;
+	    item->duration0 = mT0H; // LED_STRIP_RMT_TICKS_BIT_0_HIGH_WS2812;
 	    item->level1 = 0;
-	    item->duration1 = T0L; // LED_STRIP_RMT_TICKS_BIT_0_LOW_WS2812;
+	    item->duration1 = mT0L; // LED_STRIP_RMT_TICKS_BIT_0_LOW_WS2812;
 	}
     }
     
     uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
 	
-	// -- Allocate the RMT buffer (this should really only be done once)
-	int num_rmt_items = (pixels.size() * 3 * 8);
-	rmt_item32_t * rmt_items = (rmt_item32_t*) malloc(sizeof(rmt_item32_t) * num_rmt_items);
-	rmt_item32_t * cur_item = & rmt_items[0];
-	
+	int start_item = 0;
+	rmt_item32_t * cur_item = & mRMT_items[0];
+
 	// Setup the pixel controller and load/scale the first byte
 	pixels.preStepFirstByteDithering();
 	register uint32_t b = pixels.loadAndScale0();
 	pixels.preStepFirstByteDithering();
 
 	uint32_t start = __clock_cycles();
-	while(pixels.has(1)) {
+	while (pixels.has(1)) {
 
-	    // Write first byte, read next byte
-	    b <<= 24;
-	    for (register uint32_t i = 8; i > 0; i--) {
-		convertBit(cur_item, b);
-		cur_item++;
-		b <<= 1;
-	    }		
-	    b = pixels.loadAndScale1();
+	    // -- Prepare a chunk of RMT items for no more than 10 pixels
+	    int num_items = 0;
+	    while (pixels.has(1) && (num_items < (RMT_ITEMS_SIZE/2))) {
+
+		// Write first byte, read next byte
+		b <<= 24;
+		for (register uint32_t i = 8; i > 0; i--) {
+		    convertBit(cur_item, b);
+		    cur_item++;
+		    num_items++;
+		    b <<= 1;
+		}
+		b = pixels.loadAndScale1();
 	    
-	    // Write second byte, read 3rd byte
-	    b <<= 24;
-	    for (register uint32_t i = 8; i > 0; i--) {
-		convertBit(cur_item, b);
-		cur_item++;
-		b <<= 1;
-	    }		
-	    b = pixels.loadAndScale2();
+		// Write second byte, read 3rd byte
+		b <<= 24;
+		for (register uint32_t i = 8; i > 0; i--) {
+		    convertBit(cur_item, b);
+		    cur_item++;
+		    num_items++;
+		    b <<= 1;
+		}
+		b = pixels.loadAndScale2();
 	    
-	    // Write third byte, read 1st byte of next pixel
-	    b <<= 24;
-	    for (register uint32_t i = 8; i > 0; i--) {
-		convertBit(cur_item, b);
-		cur_item++;
-		b <<= 1;
-	    }		
-	    b = pixels.advanceAndLoadAndScale0();
+		// Write third byte, read 1st byte of next pixel
+		b <<= 24;
+		for (register uint32_t i = 8; i > 0; i--) {
+		    convertBit(cur_item, b);
+		    cur_item++;
+		    num_items++;
+		    b <<= 1;
+		}
+		b = pixels.advanceAndLoadAndScale0();
 	    
-	    pixels.stepDithering();
-	    
-	};
+		pixels.stepDithering();   
+	    }
+
+	    // -- Wait for the previous chunk of 10 items to finish
+	    rmt_wait_tx_done(mLED_RMT_CHANNEL, RMT_MAX_WAIT);
+
+	    // -- Send the new chunk
+	    rmt_write_items(mLED_RMT_CHANNEL, &mRMT_items[start_item], num_items, false);
+
+	    // -- Shift the window foward to compute the next chunk, wrapping around
+            //    as necessary
+	    start_item += num_items;
+	    if (start_item >= RMT_ITEMS_SIZE) start_item = 0;
+	    cur_item = & mRMT_items[start_item];
+	}
 
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 	_frame_cnt++;
 #endif
 
 	// -- Now, actually send the bits!
-	rmt_write_items(LED_RMT_CHANNEL, rmt_items, num_rmt_items, true);
-	free(rmt_items);
+	// rmt_write_items(mLED_RMT_CHANNEL, rmt_items, num_rmt_items, true);
+	// free(rmt_items);
+
+	// -- Wait for the last chunk of values to be sent
+	rmt_wait_tx_done(mLED_RMT_CHANNEL, RMT_MAX_WAIT);
 	
 	return __clock_cycles() - start;
     }
