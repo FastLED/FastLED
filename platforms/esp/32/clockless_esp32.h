@@ -7,6 +7,19 @@ extern uint32_t _frame_cnt;
 extern uint32_t _retry_cnt;
 #endif
 
+#include <driver/rmt.h>
+
+// RMT Clock source is @ 80 MHz. Dividing it by 8 gives us 10 MHz frequency, or 100ns period.
+#define LED_STRIP_RMT_CLK_DIV (8)
+
+/****************************
+        WS2812 Timing
+****************************/
+#define LED_STRIP_RMT_TICKS_BIT_1_HIGH_WS2812 9 // 900ns (900ns +/- 150ns per datasheet)
+#define LED_STRIP_RMT_TICKS_BIT_1_LOW_WS2812  3 // 300ns (350ns +/- 150ns per datasheet)
+#define LED_STRIP_RMT_TICKS_BIT_0_HIGH_WS2812 3 // 300ns (350ns +/- 150ns per datasheet)
+#define LED_STRIP_RMT_TICKS_BIT_0_LOW_WS2812  9 // 900ns (900ns +/- 150ns per datasheet)
+
 // Info on reading cycle counter from https://github.com/kbeckmann/nodemcu-firmware/blob/ws2812-dual/app/modules/ws2812.c
 __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
   uint32_t cyc;
@@ -25,14 +38,48 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     data_t mPinMask;
     data_ptr_t mPort;
     CMinWait<WAIT_TIME> mWait;
+
+    rmt_channel_t LED_RMT_CHANNEL;
+    rmt_config_t mRMT_config;
+    
 public:
     virtual void init() {
+	LED_RMT_CHANNEL = RMT_CHANNEL_0;
+
 	FastPin<DATA_PIN>::setOutput();
 	mPinMask = FastPin<DATA_PIN>::mask();
 	mPort = FastPin<DATA_PIN>::port();
+
+	mRMT_config.rmt_mode = RMT_MODE_TX;
+	mRMT_config.channel = LED_RMT_CHANNEL;
+	mRMT_config.clk_div = LED_STRIP_RMT_CLK_DIV;
+	mRMT_config.gpio_num = (gpio_num_t) DATA_PIN;
+	mRMT_config.mem_block_num = 1;
+
+	mRMT_config.tx_config.loop_en = false;
+	mRMT_config.tx_config.carrier_freq_hz = 100; // Not used, but has to be set to avoid divide by 0 err
+	mRMT_config.tx_config.carrier_duty_percent = 50;
+	mRMT_config.tx_config.carrier_level = RMT_CARRIER_LEVEL_LOW;
+	mRMT_config.tx_config.carrier_en = false;
+	mRMT_config.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
+	mRMT_config.tx_config.idle_output_en = true;
+
+	esp_err_t cfg_ok = rmt_config(&mRMT_config);
+	if (cfg_ok != ESP_OK) {
+	    Serial.println("RMT config failed");
+	    return;
+	}
+	esp_err_t install_ok = rmt_driver_install(mRMT_config.channel, 0, 0);
+	if (install_ok != ESP_OK) {
+	    Serial.println("RMT driver install failed");
+	    return;
+	}
     }
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
+
+    // rmt_item32_t * rmt_items = 0;
+    // size_t num_rmt_items;
 
 protected:
 
@@ -43,15 +90,88 @@ protected:
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 	    _retry_cnt++;
 #endif
-	    ets_intr_unlock();
+	    // ets_intr_unlock();
 	    delayMicroseconds(WAIT_TIME);
-	    ets_intr_lock();
+	    // ets_intr_lock();
 	}
 	mWait.mark();
     }
 
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
+
+    __attribute__ ((always_inline)) inline static void convertBit(rmt_item32_t * item, register uint32_t b) {
+	if (b & 0x80000000L) {
+	    item->level0 = 1;
+	    item->duration0 = LED_STRIP_RMT_TICKS_BIT_1_HIGH_WS2812;
+	    item->level1 = 0;
+	    item->duration1 = LED_STRIP_RMT_TICKS_BIT_1_LOW_WS2812;
+	} else {
+	    item->level0 = 1;
+	    item->duration0 = LED_STRIP_RMT_TICKS_BIT_0_HIGH_WS2812;
+	    item->level1 = 0;
+	    item->duration1 = LED_STRIP_RMT_TICKS_BIT_0_LOW_WS2812;
+	}
+    }
+    
+    uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
+	
+	// -- Allocate the RMT buffer (this should really only be done once)
+	int num_rmt_items = (pixels.size() * 3 * 8);
+	rmt_item32_t * rmt_items = (rmt_item32_t*) malloc(sizeof(rmt_item32_t) * num_rmt_items);
+	int cur_item = 0;
+	
+	// Setup the pixel controller and load/scale the first byte
+	pixels.preStepFirstByteDithering();
+	register uint32_t b = pixels.loadAndScale0();
+	pixels.preStepFirstByteDithering();
+
+	uint32_t start = __clock_cycles();
+	while(pixels.has(1)) {
+
+	    // Write first byte, read next byte
+	    b <<= 24;
+	    for (register uint32_t i = 8; i > 0; i--) {
+		convertBit(&rmt_items[cur_item], b);
+		cur_item++;
+		b <<= 1;
+	    }		
+	    b = pixels.loadAndScale1();
+	    
+	    // Write second byte, read 3rd byte
+	    b <<= 24;
+	    for (register uint32_t i = 8; i > 0; i--) {
+		convertBit(&rmt_items[cur_item], b);
+		cur_item++;
+		b <<= 1;
+	    }		
+	    b = pixels.loadAndScale2();
+	    
+	    // Write third byte, read 1st byte of next pixel
+	    b <<= 24;
+	    for (register uint32_t i = 8; i > 0; i--) {
+		convertBit(&rmt_items[cur_item], b);
+		cur_item++;
+		b <<= 1;
+	    }		
+	    b = pixels.advanceAndLoadAndScale0();
+	    
+	    pixels.stepDithering();
+	    
+	};
+
+#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+	_frame_cnt++;
+#endif
+
+	// -- Now, actually send the bits!
+	rmt_write_items(LED_RMT_CHANNEL, rmt_items, num_rmt_items, true);
+	free(rmt_items);
+	
+	return __clock_cycles() - start;
+    }
+
+    // -------------- OLD VERSION -------------------------------
 
     template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register uint32_t b) {
 	b = ~b; b <<= 24;
@@ -71,7 +191,7 @@ protected:
 
     // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
     // gcc will use register Y for the this pointer.
-    static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
+    static uint32_t showRGBInternalOLD(PixelController<RGB_ORDER> pixels) {
 	// Setup the pixel controller and load/scale the first byte
 	pixels.preStepFirstByteDithering();
 	register uint32_t b = pixels.loadAndScale0();
