@@ -187,13 +187,21 @@ protected:
     void copyToRmtBlock_half()
     {
 	// -- Fill half of the RMT pulse buffer
-	//    The buffer holds MAX_PULSES*2 total items, so this loop converts as many pixels
-	//    as can fit in MAX_PULSES items. In our case, each pixel consists of three bytes,
-	//    each bit turns into one pulse item. So, MAX_PULSES is four bytes, or 1 1/3 of
-	//    a pixel. The member variable mCurPulse keeps track of which of the 64 items we
-	//    are writing, and it wraps around as necessary. When we run out of pixel data,
-	//    just fill the remaining items with zero pulses.
 
+	//    The buffer holds 64 total pulse items, so this loop converts
+	//    as many pixels as can fit in half of the buffer (MAX_PULSES =
+	//    32 items). In our case, each pixel consists of three bytes,
+	//    each bit turns into one pulse item -- 24 items per pixel. So,
+	//    each half of the buffer can hold 1 and 1/3 of a pixel.
+
+	//    The member variable mCurPulse keeps track of which of the 64
+	//    items we are writing. During the first call to this method it
+	//    fills 0-31; in the second call it fills 32-63, and then wraps
+	//    back around to zero.
+
+	//    When we run out of pixel data, just fill the remaining items
+	//    with zero pulses.
+	
 	uint16_t pulse_count = 0;
 	uint32_t byteval;
 	while (local_pixels->has(1) && pulse_count < MAX_PULSES) {
