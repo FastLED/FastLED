@@ -1,283 +1,243 @@
+/*
+ * Integration into FastLED ClocklessController 2017 Thomas Basler
+ *
+ * Modifications Copyright (c) 2017 Martin F. Falatic
+ *
+ * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
+ * http://insentricity.com *
+ *
+ */
+/*
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 #pragma once
 
 FASTLED_NAMESPACE_BEGIN
 
-#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-extern uint32_t _frame_cnt;
-extern uint32_t _retry_cnt;
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#include <driver/rmt.h>
+#include "esp32-hal.h"
+#include "esp_intr.h"
+#include "driver/gpio.h"
+#include "driver/rmt.h"
+#include "driver/periph_ctrl.h"
+#include "freertos/semphr.h"
+#include "soc/rmt_struct.h"
 
-// RMT Clock source is @ 80 MHz. Dividing it by 4 gives us 20 MHz frequency, or 50ns period.
-#define LED_STRIP_RMT_CLK_DIV  4   /* 8 still seems to work, but timings become marginal */
-#define RMT_DURATION_NS       12.5 /* minimum time of a single RMT duration based on clock ns */
+#include "esp_log.h"
 
-// These macros help us convert from ESP32 clock cycles to RMT "ticks"
-#define PERIOD  50  /* RMT_DURATION_NS * LED_STRIP_RMT_CLK_DIV */
-#define TO_NS(_CLKS) (((((long)(_CLKS)) * 1000 - 999) / F_CPU_MHZ))
-
-#define RMT_MAX_WAIT 100  // Should really figure out how many ticks in 45us
-#define RMT_ITEMS_SIZE (20 * 3 * 8)  // Number of RMT items for 20 pixels -- 1840 bytes
-
-static int Next_RMT_Channel = 0;
-
-// Info on reading cycle counter from https://github.com/kbeckmann/nodemcu-firmware/blob/ws2812-dual/app/modules/ws2812.c
-__attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
-  uint32_t cyc;
-  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
-  return cyc;
+#ifdef __cplusplus
 }
+#endif
+
+#define DIVIDER             4 /* 8 still seems to work, but timings become marginal */
+#define MAX_PULSES         32 /* A channel has a 64 "pulse" buffer - we use half per pass */
+#define RMT_DURATION_NS  12.5 /* minimum time of a single RMT duration based on clock ns */
+
+#define CLKS_TO_NS(_CLKS) ((((long)(_CLKS)) * 1000 - 999) / F_CPU_MHZ)
 
 #define FASTLED_HAS_CLOCKLESS 1
 
+static uint8_t rmt_channels_used = 0;
+
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
-class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+class ClocklessController : public CPixelLEDController<RGB_ORDER>
+{
+    rmt_item32_t mZero;
+    rmt_item32_t mOne;
 
-    typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
-    typedef typename FastPin<DATA_PIN>::port_t data_t;
-
-    data_t mPinMask;
-    data_ptr_t mPort;
-    CMinWait<WAIT_TIME> mWait;
-
-    uint16_t mT0H, mT1H, mT0L, mT1L;
-    rmt_channel_t mLED_RMT_CHANNEL;
-    rmt_config_t mRMT_config;    
-    rmt_item32_t mRMT_items[RMT_ITEMS_SIZE];
+    rmt_channel_t mRMT_channel;
+    xSemaphoreHandle mTX_sem = NULL;
+    intr_handle_t mRMT_intr_handle = NULL;
+    
+    PixelController<RGB_ORDER> *local_pixels  = NULL;
+    uint16_t mRGB_channel;
+    uint16_t mCurPulse;
 
 public:
-    virtual void init() {
-	// -- Assign RMT channels sequentially
-	if (Next_RMT_Channel > 7) {
-	    Serial.println("ERROR: Not enough RMT channels!");
+
+    virtual void init()
+    {
+	// TRS = 50000;
+
+	// -- Precompute rmt items corresponding to a zero bit and a one bit
+	//    according to the timing values given in the template instantiation
+	mOne.level0 = 1;
+	mOne.duration0 = CLKS_TO_NS(T1 + T2) / (RMT_DURATION_NS * DIVIDER);
+	mOne.level1 = 0;
+	mOne.duration1 = CLKS_TO_NS(T3) / (RMT_DURATION_NS * DIVIDER);
+
+	mZero.level0 = 1;
+	mZero.duration0 = CLKS_TO_NS(T1) / (RMT_DURATION_NS * DIVIDER);
+	mZero.level1 = 0;
+	mZero.duration1 = CLKS_TO_NS(T2 + T3) / (RMT_DURATION_NS * DIVIDER);
+
+	// -- Sequentially assign RMT channels -- at most 8
+	mRMT_channel =  (rmt_channel_t) rmt_channels_used++;
+	if (mRMT_channel > 7) {
+	    assert("Only 8 RMT Channels are allowed");
 	}
-	mLED_RMT_CHANNEL = (rmt_channel_t) Next_RMT_Channel;
-	Next_RMT_Channel++;
 
-	FastPin<DATA_PIN>::setOutput();
-	mPinMask = FastPin<DATA_PIN>::mask();
-	mPort = FastPin<DATA_PIN>::port();
+	ESP_LOGI("fastled", "RMT Channel Init: %d", mRMT_channel);
 
-	// -- Compute the timing values
-	//    We are converting from ESP32 clock cycles (~4ns) to RMT peripheral ticks (12.5ns)
-	mT0H = TO_NS(T1) / PERIOD;
-	mT1H = TO_NS(T1 + T2) / PERIOD;
-	mT0L = TO_NS(T2 + T3) / PERIOD;
-	mT1L = TO_NS(T3) / PERIOD;
+	// -- RMT set up magic
+	DPORT_SET_PERI_REG_MASK(DPORT_PERIP_CLK_EN_REG, DPORT_RMT_CLK_EN);
+	DPORT_CLEAR_PERI_REG_MASK(DPORT_PERIP_RST_EN_REG, DPORT_RMT_RST);
 
-	// -- Set up the RMT peripheral
-	mRMT_config.rmt_mode = RMT_MODE_TX;
-	mRMT_config.channel = mLED_RMT_CHANNEL;
-	mRMT_config.clk_div = LED_STRIP_RMT_CLK_DIV;
-	mRMT_config.gpio_num = (gpio_num_t) DATA_PIN;
-	mRMT_config.mem_block_num = 1;
+	rmt_set_pin(static_cast<rmt_channel_t>(mRMT_channel),
+		    RMT_MODE_TX,
+		    static_cast<gpio_num_t>(DATA_PIN));
 
-	mRMT_config.tx_config.loop_en = false;
-	mRMT_config.tx_config.carrier_freq_hz = 100; // Not used, but has to be set to avoid divide by 0 err
-	mRMT_config.tx_config.carrier_duty_percent = 50;
-	mRMT_config.tx_config.carrier_level = RMT_CARRIER_LEVEL_LOW;
-	mRMT_config.tx_config.carrier_en = false;
-	mRMT_config.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
-	mRMT_config.tx_config.idle_output_en = true;
-
-	esp_err_t cfg_ok = rmt_config(&mRMT_config);
-	if (cfg_ok != ESP_OK) {
-	    Serial.println("RMT config failed");
-	    return;
-	}
-	esp_err_t install_ok = rmt_driver_install(mRMT_config.channel, 0, 0);
-	if (install_ok != ESP_OK) {
-	    Serial.println("RMT driver install failed");
-	    return;
-	}
+	RMT.apb_conf.fifo_mask = 1;  //enable memory access, instead of FIFO mode.
+	RMT.apb_conf.mem_tx_wrap_en = 1; //wrap around when hitting end of buffer
+	
+	RMT.conf_ch[mRMT_channel].conf0.div_cnt = DIVIDER;
+	RMT.conf_ch[mRMT_channel].conf0.mem_size = 1;
+	RMT.conf_ch[mRMT_channel].conf0.carrier_en = 0;
+	RMT.conf_ch[mRMT_channel].conf0.carrier_out_lv = 1;
+	RMT.conf_ch[mRMT_channel].conf0.mem_pd = 0;
+	RMT.conf_ch[mRMT_channel].conf1.rx_en = 0;
+	RMT.conf_ch[mRMT_channel].conf1.mem_owner = 0;
+	RMT.conf_ch[mRMT_channel].conf1.tx_conti_mode = 0;    //loop back mode.
+	RMT.conf_ch[mRMT_channel].conf1.ref_always_on = 1;    // use apb clock: 80M
+	RMT.conf_ch[mRMT_channel].conf1.idle_out_en = 1;
+	RMT.conf_ch[mRMT_channel].conf1.idle_out_lv = 0;
+		
+	RMT.tx_lim_ch[mRMT_channel].limit = MAX_PULSES;
+	
+	RMT.int_ena.val |= BIT(24 + mRMT_channel); // set ch*_tx_thr_event
+	RMT.int_ena.val |= BIT(mRMT_channel * 3); // set ch*_tx_end
     }
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
 
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-	mWait.wait();
-	int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
-	while((showRGBInternal(pixels)==0) && cnt--) {
-#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-	    _retry_cnt++;
-#endif
-	    // ets_intr_unlock();
-	    delayMicroseconds(WAIT_TIME);
-	    // ets_intr_lock();
-	}
-	mWait.mark();
-    }
-
-#define _ESP_ADJ (0)
-#define _ESP_ADJ2 (0)
-
-    // -- convertBit
-    //    Translate a single bit into an RMT signal entry using the given timing variables
-    __attribute__ ((always_inline)) 
-    inline void convertBit(rmt_item32_t * item, register uint32_t b) 
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels)
     {
-	if (b & 0x80000000L) {
-	    item->level0 = 1;
-	    item->duration0 = mT1H; // LED_STRIP_RMT_TICKS_BIT_1_HIGH_WS2812;
-	    item->level1 = 0;
-	    item->duration1 = mT1L; // LED_STRIP_RMT_TICKS_BIT_1_LOW_WS2812;
-	} else {
-	    item->level0 = 1;
-	    item->duration0 = mT0H; // LED_STRIP_RMT_TICKS_BIT_0_HIGH_WS2812;
-	    item->level1 = 0;
-	    item->duration1 = mT0L; // LED_STRIP_RMT_TICKS_BIT_0_LOW_WS2812;
+	esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, handleInterrupt, this, &mRMT_intr_handle);
+
+	// -- Initialize the local state, save a pointer to the pixel data
+	local_pixels = &pixels;
+	mCurPulse = 0;
+	mRGB_channel = 0;
+		
+	// -- Fill both halves of the buffer
+	copyToRmtBlock_half();
+	copyToRmtBlock_half();
+
+	mTX_sem = xSemaphoreCreateBinary();
+
+	// -- Start the RMT TX operationb
+	RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
+	RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
+
+	// -- Block until done
+	xSemaphoreTake(mTX_sem, portMAX_DELAY);
+
+	// -- When we get here, all of the data has been sent
+	vSemaphoreDelete(mTX_sem);
+	mTX_sem = NULL;
+
+	esp_intr_free(mRMT_intr_handle);
+    }
+
+    static void handleInterrupt(void *arg)
+    {
+	ClocklessController* c = static_cast<ClocklessController*>(arg);
+	rmt_channel_t rmt_channel = c->mRMT_channel;
+
+	portBASE_TYPE xHigherPriorityTaskWoken  = 0;
+
+	if (RMT.int_st.val & BIT(24 + rmt_channel)) { // check if ch*_tx_thr_event is set
+	    // -- Interrupt is telling us the RMT is ready for the next set of pulses
+	    c->copyToRmtBlock_half();
+	    RMT.int_clr.val |= BIT(24 + rmt_channel); // set ch*_tx_thr_event
+	}
+	else if ((RMT.int_st.val & BIT(rmt_channel * 3)) && c->mTX_sem) { // check if ch*_tx_end is set
+	    // -- Interrupt is telling us the RMT is done -- release the semaphore
+	    xSemaphoreGiveFromISR(c->mTX_sem, &xHigherPriorityTaskWoken);
+	    RMT.int_clr.val |= BIT(rmt_channel * 3); // set ch*_tx_end
+
+	    if (xHigherPriorityTaskWoken == pdTRUE) {
+		portYIELD_FROM_ISR();
+	    }
 	}
     }
-    
-    uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
-	
-	int start_item = 0;
-	rmt_item32_t * cur_item = & mRMT_items[0];
 
-	// Setup the pixel controller and load/scale the first byte
-	pixels.preStepFirstByteDithering();
-	register uint32_t b = pixels.loadAndScale0();
-	pixels.preStepFirstByteDithering();
+    void copyToRmtBlock_half()
+    {
+	// -- Fill half of the RMT pulse buffer
+	//    The buffer holds MAX_PULSES*2 total items, so this loop converts as many pixels
+	//    as can fit in MAX_PULSES items. In our case, each pixel consists of three bytes,
+	//    each bit turns into one pulse item. So, MAX_PULSES is four bytes, or 1 1/3 of
+	//    a pixel. The member variable mCurPulse keeps track of which of the 64 items we
+	//    are writing, and it wraps around as necessary. When we run out of pixel data,
+	//    just fill the remaining items with zero pulses.
 
-	uint32_t start = __clock_cycles();
-	while (pixels.has(1)) {
-
-	    // -- Prepare a chunk of RMT items for no more than 10 pixels
-	    int num_items = 0;
-	    while (pixels.has(1) && (num_items < (RMT_ITEMS_SIZE/2))) {
-
-		// Write first byte, read next byte
-		b <<= 24;
-		for (register uint32_t i = 8; i > 0; i--) {
-		    convertBit(cur_item, b);
-		    cur_item++;
-		    num_items++;
-		    b <<= 1;
-		}
-		b = pixels.loadAndScale1();
-	    
-		// Write second byte, read 3rd byte
-		b <<= 24;
-		for (register uint32_t i = 8; i > 0; i--) {
-		    convertBit(cur_item, b);
-		    cur_item++;
-		    num_items++;
-		    b <<= 1;
-		}
-		b = pixels.loadAndScale2();
-	    
-		// Write third byte, read 1st byte of next pixel
-		b <<= 24;
-		for (register uint32_t i = 8; i > 0; i--) {
-		    convertBit(cur_item, b);
-		    cur_item++;
-		    num_items++;
-		    b <<= 1;
-		}
-		b = pixels.advanceAndLoadAndScale0();
-	    
-		pixels.stepDithering();   
+	uint16_t pulse_count = 0;
+	uint32_t byteval;
+	while (local_pixels->has(1) && pulse_count < MAX_PULSES) {
+	    // -- Cycle through the R,G, and B values in the right order
+	    switch (mRGB_channel) {
+	    case 0:
+		byteval = local_pixels->loadAndScale0();
+		mRGB_channel = 1;
+		break;
+	    case 1:
+		byteval = local_pixels->loadAndScale1();
+		mRGB_channel = 2;
+		break;
+	    case 2:
+		byteval = local_pixels->loadAndScale2();
+		local_pixels->advanceData();
+		local_pixels->stepDithering();
+		mRGB_channel = 0;
+		break;
+	    default:
+		break;
 	    }
 
-	    // -- Wait for the previous chunk of 10 items to finish
-	    rmt_wait_tx_done(mLED_RMT_CHANNEL, RMT_MAX_WAIT);
-
-	    // -- Send the new chunk
-	    rmt_write_items(mLED_RMT_CHANNEL, &mRMT_items[start_item], num_items, false);
-
-	    // -- Shift the window foward to compute the next chunk, wrapping around
-            //    as necessary
-	    start_item += num_items;
-	    if (start_item >= RMT_ITEMS_SIZE) start_item = 0;
-	    cur_item = & mRMT_items[start_item];
-	}
-
-#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-	_frame_cnt++;
-#endif
-
-	// -- Now, actually send the bits!
-	// rmt_write_items(mLED_RMT_CHANNEL, rmt_items, num_rmt_items, true);
-	// free(rmt_items);
-
-	// -- Wait for the last chunk of values to be sent
-	rmt_wait_tx_done(mLED_RMT_CHANNEL, RMT_MAX_WAIT);
-	
-	return __clock_cycles() - start;
-    }
-
-    // -------------- OLD VERSION -------------------------------
-
-    template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register uint32_t b) {
-	b = ~b; b <<= 24;
-	for(register uint32_t i = BITS; i > 0; i--) {
-	    while((__clock_cycles() - last_mark) < (T1+T2+T3));
-	    last_mark = __clock_cycles();
-	    FastPin<DATA_PIN>::hi();
-	    
-	    while((__clock_cycles() - last_mark) < T1);
-	    if(b & 0x80000000L) { FastPin<DATA_PIN>::lo(); }
-	    b <<= 1;
-	    
-	    while((__clock_cycles() - last_mark) < (T1+T2));
-	    FastPin<DATA_PIN>::lo();
-	}
-    }
-
-    // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
-    // gcc will use register Y for the this pointer.
-    static uint32_t showRGBInternalOLD(PixelController<RGB_ORDER> pixels) {
-	// Setup the pixel controller and load/scale the first byte
-	pixels.preStepFirstByteDithering();
-	register uint32_t b = pixels.loadAndScale0();
-	pixels.preStepFirstByteDithering();
-
-	ets_intr_lock();
-
-	uint32_t start = __clock_cycles();
-	uint32_t last_mark = start;
-	while(pixels.has(1)) {
-
-	    // Write first byte, read next byte
-	    writeBits<8+XTRA0>(last_mark, b);
-	    b = pixels.loadAndScale1();
-	    
-	    // Write second byte, read 3rd byte
-	    writeBits<8+XTRA0>(last_mark, b);
-	    b = pixels.loadAndScale2();
-	    
-	    // Write third byte, read 1st byte of next pixel
-	    writeBits<8+XTRA0>(last_mark, b);
-	    b = pixels.advanceAndLoadAndScale0();
-	    
-#if (FASTLED_ALLOW_INTERRUPTS == 1)
-	    ets_intr_unlock();	    
-#endif
-
-	    pixels.stepDithering();
-	    
-#if (FASTLED_ALLOW_INTERRUPTS == 1)
-	    ets_intr_lock();
-	    // if interrupts took longer than 45µs, punt on the current frame
-	    if((int32_t)(__clock_cycles()-last_mark) > 0) {
-		if((int32_t)(__clock_cycles()-last_mark) > (T1+T2+T3+((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US))) {
-		    ets_intr_unlock();
-		    return 0; 
-		}
+	    byteval <<= 24;
+	    // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the rmt_item32_t value corresponding to the buffered bit value
+	    for (register uint32_t j = 0; j < 8; j++) {
+		uint32_t val = (byteval & 0x80000000L) ? mOne.val : mZero.val;
+		RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
+		byteval <<= 1;
+		mCurPulse++;
+		pulse_count++;
 	    }
-#endif
-	};
+	}
+	
+	// -- Fill the remaining items with zero pulses
+	while (pulse_count < MAX_PULSES) {
+	    RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
+	    mCurPulse++;
+	    pulse_count++;
+	}
 
-	ets_intr_unlock();
-
-#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-	_frame_cnt++;
-#endif
-
-	return __clock_cycles() - start;
+	// -- When we have filled the back half the buffer, reset the position to the first half
+	if (mCurPulse >= MAX_PULSES*2)
+	    mCurPulse = 0;
     }
 };
 
