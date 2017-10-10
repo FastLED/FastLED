@@ -82,7 +82,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     intr_handle_t mRMT_intr_handle = NULL;
     
     PixelController<RGB_ORDER> *local_pixels  = NULL;
-    uint16_t mRGB_channel;
+    uint8_t mRGB_channel;
     uint16_t mCurPulse;
 
 public:
@@ -219,7 +219,7 @@ protected:
 	//    with zero pulses.
 	
 	uint16_t pulse_count = 0;
-	uint32_t byteval;
+	uint32_t byteval = 0;
 	while (local_pixels->has(1) && pulse_count < MAX_PULSES) {
 	    // -- Cycle through the R,G, and B values in the right order
 	    switch (mRGB_channel) {
