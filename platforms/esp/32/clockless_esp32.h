@@ -95,17 +95,17 @@ public:
 	//    according to the timing values given in the template instantiation
 	// T1H
 	mOne.level0 = 1;
-	mOne.duration0 = TO_RMT_CYCLES(T1+T2); // 900
+	mOne.duration0 = TO_RMT_CYCLES(T1+T2);
 	// T1L
 	mOne.level1 = 0;
-	mOne.duration1 = TO_RMT_CYCLES(T3); // 600
+	mOne.duration1 = TO_RMT_CYCLES(T3);
 
 	// T0H
 	mZero.level0 = 1;
-	mZero.duration0 = TO_RMT_CYCLES(T1); // 400
+	mZero.duration0 = TO_RMT_CYCLES(T1);
 	// T0L
 	mZero.level1 = 0;
-	mZero.duration1 = TO_RMT_CYCLES(T2 + T3); // 900
+	mZero.duration1 = TO_RMT_CYCLES(T2 + T3);
 
 	// -- Sequentially assign RMT channels -- at most 8
 	mRMT_channel =  (rmt_channel_t) rmt_channels_used++;
