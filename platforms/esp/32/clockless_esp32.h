@@ -49,13 +49,25 @@ extern "C" {
 }
 #endif
 
+#define FASTLED_HAS_CLOCKLESS 1
+
+// -- Configuration constants
 #define DIVIDER             4 /* 8 still seems to work, but timings become marginal */
 #define MAX_PULSES         32 /* A channel has a 64 "pulse" buffer - we use half per pass */
 #define RMT_DURATION_NS  12.5 /* minimum time of a single RMT duration based on clock ns */
 
-#define CLKS_TO_NS(_CLKS) ((((long)(_CLKS)) * 1000 - 999) / F_CPU_MHZ)
+// -- Convert ESP32 cycles back into nanoseconds
+#define ESPCLKS_TO_NS(_CLKS) (((long)(_CLKS) * 1000L) / F_CPU_MHZ)
 
-#define FASTLED_HAS_CLOCKLESS 1
+// -- Convert nanoseconds into RMT cycles
+#define F_CPU_RMT       (  80000000L)
+#define NS_PER_SEC      (1000000000L)
+#define CYCLES_PER_SEC  (F_CPU_RMT/DIVIDER)
+#define NS_PER_CYCLE    ( NS_PER_SEC / CYCLES_PER_SEC )
+#define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
+
+// -- Convert ESP32 cycles to RMT cycles
+#define TO_RMT_CYCLES(_CLKS) NS_TO_CYCLES(ESPCLKS_TO_NS(_CLKS))
 
 static uint8_t rmt_channels_used = 0;
 
@@ -81,15 +93,19 @@ public:
 
 	// -- Precompute rmt items corresponding to a zero bit and a one bit
 	//    according to the timing values given in the template instantiation
+	// T1H
 	mOne.level0 = 1;
-	mOne.duration0 = CLKS_TO_NS(T1 + T2) / (RMT_DURATION_NS * DIVIDER);
+	mOne.duration0 = TO_RMT_CYCLES(T1+T2); // 900
+	// T1L
 	mOne.level1 = 0;
-	mOne.duration1 = CLKS_TO_NS(T3) / (RMT_DURATION_NS * DIVIDER);
+	mOne.duration1 = TO_RMT_CYCLES(T3); // 600
 
+	// T0H
 	mZero.level0 = 1;
-	mZero.duration0 = CLKS_TO_NS(T1) / (RMT_DURATION_NS * DIVIDER);
+	mZero.duration0 = TO_RMT_CYCLES(T1); // 400
+	// T0L
 	mZero.level1 = 0;
-	mZero.duration1 = CLKS_TO_NS(T2 + T3) / (RMT_DURATION_NS * DIVIDER);
+	mZero.duration1 = TO_RMT_CYCLES(T2 + T3); // 900
 
 	// -- Sequentially assign RMT channels -- at most 8
 	mRMT_channel =  (rmt_channel_t) rmt_channels_used++;
