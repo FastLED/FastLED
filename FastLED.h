@@ -84,6 +84,7 @@ enum ESPIChipsets {
 
 enum ESM { SMART_MATRIX };
 enum OWS2811 { OCTOWS2811,OCTOWS2811_400, OCTOWS2813};
+enum SWS2812 { WS2812SERIAL };
 
 #ifdef HAS_PIXIE
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PIXIE : public PixieController<DATA_PIN, RGB_ORDER> {};
@@ -371,6 +372,15 @@ public:
 		return addLeds<CHIPSET,GRB>(data,nLedsOrOffset,nLedsIfOffset);
 	}
 
+#endif
+
+#ifdef USE_WS2812SERIAL
+	template<SWS2812 CHIPSET, int DATA_PIN, EOrder RGB_ORDER>
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
+	{
+		static CWS2812SerialController<DATA_PIN,RGB_ORDER> controller;
+		return addLeds(&controller, data, nLedsOrOffset, nLedsIfOffset);
+	}
 #endif
 
 #ifdef SmartMatrix_h
