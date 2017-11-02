@@ -1,5 +1,5 @@
 
-#include <FastSPI_LED2.h>
+#include <FastSPI_LED.h>
 
 const char *getPort(void *portPtr) {
 #ifdef PORTA
