@@ -2,6 +2,7 @@
  * Integration into FastLED ClocklessController 2017 Thomas Basler
  *
  * Modifications Copyright (c) 2017 Martin F. Falatic
+ * and Samuel Z. Guyer
  *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com *
