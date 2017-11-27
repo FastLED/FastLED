@@ -4,6 +4,7 @@
 #include "FastLED.h"
 
 #include "led_sysdefs.h"
+#include <stddef.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"

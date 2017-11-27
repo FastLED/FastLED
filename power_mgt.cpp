@@ -125,7 +125,7 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32
     if( requested_power_mW < max_power_mW) {
 #if POWER_LED > 0
         if( gMaxPowerIndicatorLEDPinNumber ) {
-            digitalWrite(gMaxPowerIndicatorLEDPinNumber, LOW);   // turn the LED off
+            Pin(gMaxPowerIndicatorLEDPinNumber).lo(); // turn the LED off
         }
 #endif
 #if POWER_DEBUG_PRINT == 1
@@ -148,7 +148,7 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32
 
 #if POWER_LED > 0
     if( gMaxPowerIndicatorLEDPinNumber ) {
-        digitalWrite( gMaxPowerIndicatorLEDPinNumber, HIGH);   // turn the LED on
+        Pin(gMaxPowerIndicatorLEDPinNumber).hi(); // turn the LED on
     }
 #endif
 

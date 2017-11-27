@@ -1,5 +1,6 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
+#include <string.h>
 
 FASTLED_NAMESPACE_BEGIN
 
