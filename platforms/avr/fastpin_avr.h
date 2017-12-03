@@ -21,6 +21,7 @@ public:
 
 	inline static void setOutput() { _DDR::r() |= _MASK; }
 	inline static void setInput() { _DDR::r() &= ~_MASK; }
+    inline static void setInputPullup() { setInput(); hi(); }
 
 	inline static void hi() __attribute__ ((always_inline)) { _PORT::r() |= _MASK; }
 	inline static void lo() __attribute__ ((always_inline)) { _PORT::r() &= ~_MASK; }
@@ -29,6 +30,8 @@ public:
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
 	inline static void toggle() __attribute__ ((always_inline)) { _PIN::r() = _MASK; }
+
+    inline static bool get() __attribute__ ((always_inline)) { return _PIN::r() & _MASK; }
 
 	inline static void hi(register port_ptr_t /*port*/) __attribute__ ((always_inline)) { hi(); }
 	inline static void lo(register port_ptr_t /*port*/) __attribute__ ((always_inline)) { lo(); }
