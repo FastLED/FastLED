@@ -237,7 +237,7 @@ extern "C" int atexit(void (* /*func*/ )()) { return 0; }
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1
 {
-	#ifndef ESP8266
+	#if !defined(ESP8266) && !defined(ESP32)
 	extern "C" void __cxa_pure_virtual (void) {}
 	#endif
 
