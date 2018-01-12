@@ -1,3 +1,11 @@
+3.1.7
+* Added support for Adafruit Circuit Playground Express (Thanks to Lady Ada)
+* Improved support for Adafruit Gemma and Trinket m0 (Thanks to Lady Ada)
+* Added support for PJRC's WS2812Serial (Thanks to Paul Stoffregen)
+* Added support for ATmega328 non-picopower hardware pins (Thanks to John Whittington)
+* Fixes for ESP32 support (Thanks to Daniel Tullemans)
+* 'Makefile' compilation fix (Thanks to Nico Hood)
+
 3.1.6
 * Preliminary support for esp32
 * Variety of random bug fixes
