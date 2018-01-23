@@ -85,6 +85,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     PixelController<RGB_ORDER> *local_pixels  = NULL;
     uint8_t mRGB_channel;
     uint16_t mCurPulse;
+    CMinWait<WAIT_TIME> mWait;
 
 public:
 
@@ -151,6 +152,7 @@ protected:
 
     virtual void showPixels(PixelController<RGB_ORDER> & pixels)
     {
+        mWait.wait();
 	esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, handleInterrupt, this, &mRMT_intr_handle);
 
 	// -- Initialize the local state, save a pointer to the pixel data
@@ -176,6 +178,7 @@ protected:
 	mTX_sem = NULL;
 
 	esp_intr_free(mRMT_intr_handle);
+	mWait.mark();
     }
 
     static void handleInterrupt(void *arg)
