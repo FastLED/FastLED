@@ -43,6 +43,9 @@ extern "C" {
 #  if defined(CORE_TEENSY) || defined(TEENSYDUINO)
 extern volatile unsigned long timer0_millis_count;
 #    define MS_COUNTER timer0_millis_count
+#  elif defined(ATTINY_CORE)
+extern volatile unsigned long millis_timer_millis;
+#    define MS_COUNTER millis_timer_millis
 #  else
 extern volatile unsigned long timer0_millis;
 #    define MS_COUNTER timer0_millis
