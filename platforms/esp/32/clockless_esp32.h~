@@ -2,7 +2,6 @@
  * Integration into FastLED ClocklessController 2017 Thomas Basler
  *
  * Modifications Copyright (c) 2017 Martin F. Falatic
- * and Samuel Z. Guyer
  *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com *
@@ -50,17 +49,12 @@ extern "C" {
 }
 #endif
 
-__attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
-  uint32_t cyc;
-  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
-  return cyc;
-}
-
 #define FASTLED_HAS_CLOCKLESS 1
 
 // -- Configuration constants
-#define DIVIDER             2 /* 4, 8 still seem to work, but timings become marginal */
+#define DIVIDER             4 /* 8 still seems to work, but timings become marginal */
 #define MAX_PULSES         32 /* A channel has a 64 "pulse" buffer - we use half per pass */
+#define RMT_DURATION_NS  12.5 /* minimum time of a single RMT duration based on clock ns */
 
 // -- Convert ESP32 cycles back into nanoseconds
 #define ESPCLKS_TO_NS(_CLKS) (((long)(_CLKS) * 1000L) / F_CPU_MHZ)
@@ -86,19 +80,17 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     rmt_channel_t mRMT_channel;
     xSemaphoreHandle mTX_sem = NULL;
     intr_handle_t mRMT_intr_handle = NULL;
-
-    // TRS = 50000;
-    uint16_t m_ResetDuration = NS_TO_CYCLES(50000);
     
     PixelController<RGB_ORDER> *local_pixels  = NULL;
     uint8_t mRGB_channel;
     uint16_t mCurPulse;
-    CMinWait<WAIT_TIME> mWait;
 
 public:
 
     virtual void init()
     {
+	// TRS = 50000;
+
 	// -- Precompute rmt items corresponding to a zero bit and a one bit
 	//    according to the timing values given in the template instantiation
 	// T1H
@@ -147,10 +139,9 @@ public:
 	RMT.conf_ch[mRMT_channel].conf1.idle_out_lv = 0;
 		
 	RMT.tx_lim_ch[mRMT_channel].limit = MAX_PULSES;
-
-	// -- Allocate the interrupt, but don't enable it now
-	//    TBD: when do we deallocate it?
-	esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, handleInterrupt, this, &mRMT_intr_handle);
+	
+	RMT.int_ena.val |= BIT(24 + mRMT_channel); // set ch*_tx_thr_event
+	RMT.int_ena.val |= BIT(mRMT_channel * 3); // set ch*_tx_end
     }
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
@@ -159,20 +150,16 @@ protected:
 
     virtual void showPixels(PixelController<RGB_ORDER> & pixels)
     {
-        mWait.wait();
+	esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, handleInterrupt, this, &mRMT_intr_handle);
 
 	// -- Initialize the local state, save a pointer to the pixel data
 	local_pixels = &pixels;
 	mCurPulse = 0;
 	mRGB_channel = 0;
-
+		
 	// -- Fill both halves of the buffer
 	copyToRmtBlock_half();
 	copyToRmtBlock_half();
-
-	// -- Turn on the interrupts
-	RMT.int_ena.val |= BIT(mRMT_channel * 3);
-	RMT.int_ena.val |= BIT(mRMT_channel + 24);
 
 	mTX_sem = xSemaphoreCreateBinary();
 
@@ -183,16 +170,11 @@ protected:
 	// -- Block until done
 	xSemaphoreTake(mTX_sem, portMAX_DELAY);
 
-	// -- Turn off the interrupts
-	RMT.int_ena.val &= ~(BIT(mRMT_channel * 3));
-	RMT.int_ena.val &= ~(BIT(mRMT_channel + 24));
-
 	// -- When we get here, all of the data has been sent
 	vSemaphoreDelete(mTX_sem);
 	mTX_sem = NULL;
 
-	// esp_intr_free(mRMT_intr_handle);
-	mWait.mark();
+	esp_intr_free(mRMT_intr_handle);
     }
 
     static void handleInterrupt(void *arg)
@@ -235,6 +217,7 @@ protected:
 
 	//    When we run out of pixel data, just fill the remaining items
 	//    with zero pulses.
+	
 	uint16_t pulse_count = 0;
 	uint32_t byteval = 0;
 	while (local_pixels->has(1) && pulse_count < MAX_PULSES) {
@@ -269,18 +252,11 @@ protected:
 	    }
 	}
 	
-	// -- At the end, stretch out the last pulse to signal to the strip
-        //    that we're done
-	if ( ! local_pixels->has(1)) {
-	    RMTMEM.chan[mRMT_channel].data32[mCurPulse-1].duration1 = m_ResetDuration;
-
-	    // -- And fill the remaining items with zero pulses. The zero values triggers
-	    //    the tx_done interrupt.
-	    while (pulse_count < MAX_PULSES) {
-		RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
-		mCurPulse++;
-		pulse_count++;
-	    }
+	// -- Fill the remaining items with zero pulses
+	while (pulse_count < MAX_PULSES) {
+	    RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
+	    mCurPulse++;
+	    pulse_count++;
 	}
 
 	// -- When we have filled the back half the buffer, reset the position to the first half
