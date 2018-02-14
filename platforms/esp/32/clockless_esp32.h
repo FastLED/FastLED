@@ -2,7 +2,8 @@
  * Integration into FastLED ClocklessController 2017 Thomas Basler
  *
  * Modifications Copyright (c) 2017 Martin F. Falatic
- * and Samuel Z. Guyer
+ *
+ * Modifications Copyright (c) 2018 Samuel Z. Guyer
  *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com *
@@ -79,10 +80,11 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define RMT_RESET_DURATION NS_TO_CYCLES(50000)
 
 // -- Global information for the interrupt handler
-static void * gControllers[8];
+static CLEDController * gControllers[8];
+typedef void (*RefillDispatcher_t)(uint8_t);
+static RefillDispatcher_t gRefillFunctions[8];
 static intr_handle_t gRMT_intr_handle;
 static uint8_t gNext_channel;
-
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
@@ -132,6 +134,7 @@ public:
         // -- Save this controller object, indexed by the RMT channel
         //    This allows us to get the pointer inside the interrupt handler
         gControllers[mRMT_channel] = this;
+	gRefillFunctions[mRMT_channel] = &refillDispatcher;
 
         ESP_LOGI("fastled", "RMT Channel Init: %d", mRMT_channel);
 
@@ -177,9 +180,12 @@ protected:
         fillHalfRMTBuffer();
         fillHalfRMTBuffer();
 
-        // -- Allocate the interrupt if we have not done so yet
+        // -- Allocate the interrupt if we have not done so yet. This
+        // -- interrupt handler must work for all different kinds of
+        // -- strips, so it delegates to the refill function for each
+        // -- specific instantiation of ClocklessController.
         if (gRMT_intr_handle == NULL)
-            esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, handleInterrupt, 0, &gRMT_intr_handle);
+            esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, interruptHandler, 0, &gRMT_intr_handle);
 
         // -- Turn on the interrupts
         rmt_set_tx_intr_en(mRMT_channel, true);
@@ -197,7 +203,7 @@ protected:
         mWait.mark();
     }
 
-    static void handleInterrupt(void *arg)
+    static void interruptHandler(void *arg)
     {
         // -- The basic structure of this code is borrowed from the
         //    interrupt handler in esp-idf/components/driver/rmt.c
@@ -227,12 +233,18 @@ protected:
                 //    fill the next half and continue.
                 if(intr_st & (BIT(i))) {
                     channel = i - 24;
-                    ClocklessController * controller = static_cast<ClocklessController*>(gControllers[channel]);
-                    controller->fillHalfRMTBuffer();
+		    // -- Look up the appropriate refill dispatcher and call it
+		    (gRefillFunctions[channel])(channel);
                     RMT.int_clr.val = BIT(i);
                 }
             }
         }
+    }
+
+    static void refillDispatcher(uint8_t channel)
+    {
+	ClocklessController * controller = static_cast<ClocklessController*>(gControllers[channel]);
+	controller->fillHalfRMTBuffer();
     }
 
     void fillHalfRMTBuffer()
