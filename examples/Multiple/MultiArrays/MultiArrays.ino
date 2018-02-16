@@ -2,7 +2,7 @@
 // using multiple controllers.  In this example, we're going to set up three NEOPIXEL strips on three
 // different pins, each strip getting its own CRGB array to be played with
 
-#include "FastLED.h"
+#include <FastLED.h>
 
 #define NUM_LEDS_PER_STRIP 60
 CRGB redLeds[NUM_LEDS_PER_STRIP];

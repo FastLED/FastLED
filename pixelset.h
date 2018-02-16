@@ -4,7 +4,7 @@
 #include "FastLED.h"
 
 #ifndef abs
-#include "stdlib.h"
+#include <stdlib.h>
 #endif
 
 /// Represents a set of CRGB led objects.  Provides the [] array operator, and works like a normal array in that case.

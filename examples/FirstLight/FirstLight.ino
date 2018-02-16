@@ -3,7 +3,7 @@
 // Use if you want to force non-accelerated pin access (hint: you really don't, it breaks lots of things)
 // #define FASTLED_FORCE_SOFTWARE_SPI
 // #define FASTLED_FORCE_SOFTWARE_PINS
-#include "FastLED.h"
+#include <FastLED.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //

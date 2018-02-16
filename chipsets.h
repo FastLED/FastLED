@@ -17,7 +17,7 @@ FASTLED_NAMESPACE_BEGIN
 
 
 #if defined(SoftwareSerial_h)
-#include "SoftwareSerial.h"
+#include <SoftwareSerial.h>
 
 #define HAS_PIXIE
 

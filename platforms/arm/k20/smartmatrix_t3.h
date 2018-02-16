@@ -2,7 +2,7 @@
 #define __INC_SMARTMATRIX_T3_H
 
 #ifdef SmartMatrix_h
-#include<SmartMatrix.h>
+#include <SmartMatrix.h>
 
 FASTLED_NAMESPACE_BEGIN
 
