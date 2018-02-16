@@ -1,7 +1,7 @@
 #ifndef __INC_CLOCKLESS_ARM_KL26
 #define __INC_CLOCKLESS_ARM_KL26
 
-#include "platforms/arm/common/m0clockless.h"
+#include "../common/m0clockless.h"
 FASTLED_NAMESPACE_BEGIN
 #define FASTLED_HAS_CLOCKLESS 1
 
