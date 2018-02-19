@@ -39,7 +39,6 @@ static TaskHandle_t userTaskHandle = 0;
 void FastLEDshowESP32()
 {
     if (userTaskHandle == 0) {
-        const TickType_t xMaxBlockTime = pdMS_TO_TICKS( 200 );
         // -- Store the handle of the current task, so that the show task can
         //    notify it when it's done
         userTaskHandle = xTaskGetCurrentTaskHandle();
@@ -48,6 +47,7 @@ void FastLEDshowESP32()
         xTaskNotifyGive(FastLEDshowTaskHandle);
 
         // -- Wait to be notified that it's done
+        const TickType_t xMaxBlockTime = pdMS_TO_TICKS( 200 );
         ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
         userTaskHandle = 0;
     }
@@ -58,11 +58,10 @@ void FastLEDshowESP32()
  */
 void FastLEDshowTask(void *pvParameters)
 {
-    const TickType_t xMaxBlockTime = pdMS_TO_TICKS( 500 );
     // -- Run forever...
     for(;;) {
         // -- Wait for the trigger
-        ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
         // -- Do the show (synchronously)
         FastLED.show();
