@@ -5,6 +5,64 @@
  *
  * Modifications Copyright (c) 2018 Samuel Z. Guyer
  *
+ * ESP32 support is provided using the RMT peripheral device -- a unit
+ * on the chip designed specifically for generating (and receiving)
+ * precisely-timed digital signals. Nominally for use in infrared
+ * remote controls, we use it to generate the signals for clockless
+ * LED strips. The main advantage of using the RMT device is that,
+ * once programmed, it generates the signal asynchronously, allowing
+ * the CPU to continue executing other code. It is also not vulnerable
+ * to interrupts or other timing problems that could disrupt the signal.
+ *
+ * The implementation strategy is borrowed from previous work and from
+ * the RMT support built into the ESP32 IDF. The RMT device has 8
+ * channels, which can be programmed independently with sequences of
+ * high/low bits. Memory for each channel is limited, however, so in
+ * order to send a long sequence of bits, we need to continuously
+ * refill the buffer until all the data is sent. To do this, we fill
+ * half the buffer and then set an interrupt to go off when that half
+ * is sent. Then we refill that half while the second half is being
+ * sent. This strategy effectively overlaps computation (by the CPU)
+ * and communication (by the RMT).
+ *
+ * PARALLEL vs SERIAL
+ *
+ * By default, this driver sends the data for all LED strips in
+ * parallel. We get parallelism essentially for free because the RMT
+ * is an independent processing unit. It only interrupts the CPU when
+ * it needs more data to send, and the CPU is fast enough to keep all
+ * 8 channels filled.
+ *
+ * However, there may be cases where you want serial output -- that
+ * is, you want to send the data for each strip before moving on to
+ * the next one. The performance will be much lower, limiting the
+ * framerate. To force serial output, add this directive before you
+ * include FastLED.h:
+ *
+ *      #define FASTLED_RMT_SERIAL_OUTPUT
+ *
+ * OTHER RMT APPLICATIONS
+ *
+ * The default FastLED driver takes over control of the RMT
+ * interrupts, making it hard to use the RMT device for other
+ * (non-FastLED) purposes. You can change it's behavior to use the ESP
+ * core driver instead, allowing other RMT applications to
+ * co-exist. To switch to this mode, add the following directive
+ * before you include FastLED.h:
+ *
+ *      #define FASTLED_RMT_CORE_DRIVER
+ *
+ * There is a performance penalty for using this mode. We need to
+ * compute the RMT signal for the entire LED strip ahead of time,
+ * rather than overlapping it with communication. We also need a large
+ * buffer to hold the signal specification. Each bit of pixel data is
+ * represented by a 32-bit pulse specification, so it is a 32X blow-up
+ * in memory use.
+ *
+ * This driver assigns channels to LED strips sequentially starting at
+ * zero. So, for other RMT applications make sure to choose a channel
+ * at the higher end to avoid collisions.
+ *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com *
  *
