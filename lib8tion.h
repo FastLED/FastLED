@@ -183,11 +183,6 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 // for memmove, memcpy, and memset if not defined here
 #endif
 
-#if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__)
-#define LIB8_ATTINY 1
-#endif
-
-
 #if defined(__arm__)
 
 #if defined(FASTLED_TEENSY3)

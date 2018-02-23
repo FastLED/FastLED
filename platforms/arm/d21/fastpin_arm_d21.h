@@ -63,7 +63,18 @@ public:
 #define _DEFPIN_ARM(PIN, L, BIT) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, L> {};
 
 // Actual pin definitions
-#if defined(ARDUINO_SAMD_ZERO)
+#if defined(ARDUINO_SAMD_CIRCUITPLAYGROUND_EXPRESS)
+
+#define MAX_PIN 17
+_DEFPIN_ARM( 8,1,23);
+_DEFPIN_ARM( 0,1, 9); _DEFPIN_ARM( 1,1, 8); _DEFPIN_ARM( 2,1, 2); _DEFPIN_ARM( 3,1, 3);
+_DEFPIN_ARM( 6,0, 5); _DEFPIN_ARM( 9,0, 6); _DEFPIN_ARM(10,0, 7); _DEFPIN_ARM(12,0, 2);
+_DEFPIN_ARM(A6,1, 9); _DEFPIN_ARM(A7,1, 8); _DEFPIN_ARM(A5,1, 2); _DEFPIN_ARM(A4,1, 3);
+_DEFPIN_ARM(A1,0, 5); _DEFPIN_ARM(A2,0, 6); _DEFPIN_ARM(A3,0, 7); _DEFPIN_ARM(A0,0, 2);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ARDUINO_SAMD_ZERO)
 
 #define MAX_PIN 42
 _DEFPIN_ARM( 0,0,10); _DEFPIN_ARM( 1,0,11); _DEFPIN_ARM( 2,0, 8); _DEFPIN_ARM( 3,0, 9);
@@ -137,9 +148,20 @@ _DEFPIN_ARM( 20, 0,  6); _DEFPIN_ARM( 21, 0,  7);
 #elif defined(ARDUINO_GEMMA_M0)
 
 #define MAX_PIN 3
-_DEFPIN_ARM(  0, 0,  8); _DEFPIN_ARM(  1, 0,  2); _DEFPIN_ARM(  2, 0,  9);
+_DEFPIN_ARM( 0, 0, 4); _DEFPIN_ARM( 1, 0, 2); _DEFPIN_ARM( 2, 0, 5);
 
-#define HAS_HARDWARE_PIN_SUPPORT 0
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ADAFRUIT_TRINKET_M0)
+
+#define MAX_PIN 5
+_DEFPIN_ARM( 0, 0, 8); _DEFPIN_ARM( 1, 0, 2); _DEFPIN_ARM( 2, 0, 9);
+_DEFPIN_ARM( 3, 0, 7); _DEFPIN_ARM( 4, 0, 6);
+
+#define SPI_DATA  4
+#define SPI_CLOCK 3
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
 
 #endif
 

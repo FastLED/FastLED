@@ -13,10 +13,8 @@
 #include <avr/interrupt.h> // for cli/se definitions
 
 // Define the register types
-#if defined(ARDUINO) // && ARDUINO < 150
 typedef volatile       uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
 typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
-#endif
 
 
 // Default to disallowing interrupts (may want to gate this on teensy2 vs. other arm platforms, since the
@@ -45,10 +43,25 @@ extern "C" {
 #  if defined(CORE_TEENSY) || defined(TEENSYDUINO)
 extern volatile unsigned long timer0_millis_count;
 #    define MS_COUNTER timer0_millis_count
+#  elif defined(ATTINY_CORE)
+extern volatile unsigned long millis_timer_millis;
+#    define MS_COUNTER millis_timer_millis
 #  else
 extern volatile unsigned long timer0_millis;
 #    define MS_COUNTER timer0_millis
 #  endif
 };
 
+// special defs for the tiny environments
+#if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtinyX41__)
+#define LIB8_ATTINY 1
+#define FASTLED_NEEDS_YIELD
+#endif
+
+#if defined(ARDUINO) && (ARDUINO > 150) && !defined(IS_BEAN) && !defined (ARDUINO_AVR_DIGISPARK) && !defined (LIB8_TINY)
+// don't need YIELD defined by the library 
+#else 
+#define FASTLED_NEEDS_YIELD
+extern "C" void yield();
+#endif
 #endif

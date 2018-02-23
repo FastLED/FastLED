@@ -8,6 +8,7 @@
 #include "led_sysdefs.h"
 #include "pixeltypes.h"
 #include "color.h"
+#include <stddef.h>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -254,18 +255,18 @@ struct PixelController {
 #define VIRTUAL_BITS RECOMMENDED_VIRTUAL_BITS
 
             // R is the digther signal 'counter'.
-            static byte R = 0;
+            static uint8_t R = 0;
             R++;
 
             // R is wrapped around at 2^ditherBits,
             // so if ditherBits is 2, R will cycle through (0,1,2,3)
-            byte ditherBits = VIRTUAL_BITS;
+            uint8_t ditherBits = VIRTUAL_BITS;
             R &= (0x01 << ditherBits) - 1;
 
             // Q is the "unscaled dither signal" itself.
             // It's initialized to the reversed bits of R.
             // If 'ditherBits' is 2, Q here will cycle through (0,128,64,192)
-            byte Q = 0;
+            uint8_t Q = 0;
 
             // Reverse bits in a byte
             {
@@ -293,7 +294,7 @@ struct PixelController {
 
             // Setup the initial D and E values
             for(int i = 0; i < 3; i++) {
-                    byte s = mScale.raw[i];
+                    uint8_t s = mScale.raw[i];
                     e[i] = s ? (256/s) + 1 : 0;
                     d[i] = scale8(Q, e[i]);
 #if (FASTLED_SCALE8_FIXED == 1)

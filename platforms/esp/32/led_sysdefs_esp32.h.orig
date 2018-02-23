@@ -20,7 +20,11 @@ typedef bool boolean;
 #endif
 
 #ifndef FASTLED_ALLOW_INTERRUPTS
+<<<<<<< HEAD
+# define FASTLED_ALLOW_INTERRUPTS 0
+=======
 # define FASTLED_ALLOW_INTERRUPTS 1
+>>>>>>> upstream/master
 # define INTERRUPT_THRESHOLD 0
 #endif
 
