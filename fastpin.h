@@ -238,6 +238,21 @@ public:
 
 #endif
 
+template<uint8_t PIN> class FastOutputPin : public FastPin<PIN> {
+public:
+	FastOutputPin(void) { this->setOutput(); }
+};
+
+template<uint8_t PIN> class FastInputPin : public FastPin<PIN> {
+public:
+	FastInputPin(void) { this->setInput(); }
+};
+
+template<uint8_t PIN> class FastInputPullupPin : public FastPin<PIN> {
+public:
+	FastInputPullupPin(void) { this->setInputPullup(); }
+};
+
 template<uint8_t PIN> class FastPinBB : public FastPin<PIN> {};
 
 typedef volatile uint32_t & reg32_t;
