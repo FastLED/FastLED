@@ -1,8 +1,8 @@
 #ifndef __INC_CLOCKLESS_TRINKET_H
 #define __INC_CLOCKLESS_TRINKET_H
 
-#include "controller.h"
-#include "lib8tion.h"
+#include "../../controller.h"
+#include "../../lib8tion.h"
 #include <avr/interrupt.h> // for cli/se definitions
 
 FASTLED_NAMESPACE_BEGIN
