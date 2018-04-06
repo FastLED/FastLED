@@ -149,7 +149,7 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 
 // -- Global counter of channels used
 //    Each FastLED.addLeds uses the next consecutive channel
-static uint8_t gNextChannel = 0;
+static uint8_t gNextChannel = 1;
 
 // -- Global information for the interrupt handler
 //    Information is indexed by the RMT channel, so we can get it 
@@ -332,6 +332,9 @@ protected:
                     gTX_sem = xSemaphoreCreateBinary();
                     xSemaphoreGive(gTX_sem);
                 }
+                if (gNumShowing == 1) {
+                    xSemaphoreGive(gTX_sem);
+                }
             }
 
             // -- Initialize the local state, save a pointer to the pixel
@@ -386,7 +389,7 @@ protected:
             gNumShowing = 0;
         }
 
-        mWait.mark();
+        //mWait.mark();
     }
 
     static IRAM_ATTR void interruptHandler(void *arg)
@@ -401,34 +404,34 @@ protected:
             int tx_done_bit = channel * 3;
             int tx_next_bit = channel + 24;
 
-            if (gRefillFunctions[channel]) {
-                if (intr_st & BIT(tx_done_bit)) {
-                    // -- Transmission is complete on this channel
-                    RMT.int_clr.val |= BIT(tx_done_bit);
-                    gNumDone++;
+            if (intr_st & BIT(tx_done_bit)) {
+                // -- Transmission is complete on this channel
+                RMT.int_clr.val |= BIT(tx_done_bit);
+		if (gRefillFunctions[channel]) {
+		    gNumDone++;
 
-                    if (FASTLED_RMT_SERIAL_OUTPUT) {
-                        // -- Serial mode: unblock the call to showPixels for this strip
-                        ClocklessController * controller = static_cast<ClocklessController*>(gControllers[channel]);
-                        xSemaphoreGiveFromISR(controller->mTX_sem, &HPTaskAwoken);
-                    } else {
-                        // -- Parallel mode: unblock the global semaphore when all strips are done
-                        if (gNumDone == gNumControllers)
-                            xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
-                    }
+		    if (FASTLED_RMT_SERIAL_OUTPUT) {
+			// -- Serial mode: unblock the call to showPixels for this strip
+			ClocklessController * controller = static_cast<ClocklessController*>(gControllers[channel]);
+			xSemaphoreGiveFromISR(controller->mTX_sem, &HPTaskAwoken);
+		    } else {
+			// -- Parallel mode: unblock the global semaphore when all strips are done
+			if (gNumDone == gNumControllers)
+			    xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+		    }
+		}
 
-                    if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
-                }
-
-                if (intr_st & BIT(tx_next_bit)) {
-                    // -- More to send on this channel: call the appropriate refill function
-                    //    Note that we refill the half of the buffer that we just finished,
-                    //    allowing the other half to proceed.
-                    RMT.int_clr.val |= BIT(tx_next_bit);
-                    (gRefillFunctions[channel])(channel);
-                }
+                if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
             }
-        }
+
+            if (intr_st & BIT(tx_next_bit)) {
+                // -- More to send on this channel: call the appropriate refill function
+                //    Note that we refill the half of the buffer that we just finished,
+                //    allowing the other half to proceed.
+                RMT.int_clr.val |= BIT(tx_next_bit);
+                (gRefillFunctions[channel])(channel);
+            }
+	}
     }
 
     /* Refill the RMT buffer
@@ -465,6 +468,10 @@ protected:
         uint32_t one_val = mOne.val;
         uint32_t zero_val = mZero.val;
         bool done_strip = false;
+
+	if (gNumDone == gNumControllers) {
+	    if (mPixels->has(1)) ;
+	}
 
         while (pulse_count < MAX_PULSES) {
             if (! mPixels->has(1)) {
@@ -507,7 +514,6 @@ protected:
         // -- At the end, stretch out the last pulse to signal to the strip
         //    that we're done
         if (done_strip) {
-	    // AAAAAGGGG Integer underflow!!!
             // RMTMEM.chan[mRMT_channel].data32[mCurPulse-1].duration1 = RMT_RESET_DURATION;
 
             // -- And fill the remaining items with zero pulses. The zero values triggers
