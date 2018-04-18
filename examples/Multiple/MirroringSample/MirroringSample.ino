@@ -2,7 +2,7 @@
 // using multiple controllers.  In this example, we're going to set up four NEOPIXEL strips on four
 // different pins, and show the same thing on all four of them, a simple bouncing dot/cyclon type pattern
 
-#include "FastLED.h"
+#include <FastLED.h>
 
 #define NUM_LEDS_PER_STRIP 60
 CRGB leds[NUM_LEDS_PER_STRIP];
