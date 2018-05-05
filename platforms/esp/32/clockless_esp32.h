@@ -222,12 +222,12 @@ protected:
 
     void initRMT()
     {
-	for (int i = 0; i < 8; i++) {
+	for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
 	    gOnChannel[i] = NULL;
 
 	    // -- RMT configuration for transmission
 	    rmt_config_t rmt_tx;
-	    rmt_tx.channel = rmt_channel_t(rmt_channel_t(i));
+	    rmt_tx.channel = rmt_channel_t(i);
 	    rmt_tx.rmt_mode = RMT_MODE_TX;
 	    rmt_tx.gpio_num = mPin;  // The particular pin will be assigned later
 	    rmt_tx.mem_block_num = 1;
@@ -241,10 +241,14 @@ protected:
 	    // -- Apply the configuration
 	    rmt_config(&rmt_tx);
 
-	    // -- Set up the RMT to send 1/2 of the pulse buffer and then
-	    //    generate an interrupt. When we get this interrupt we
-	    //    fill the other half in preparation (kind of like double-buffering)
-	    rmt_set_tx_thr_intr_en(rmt_channel_t(i), true, MAX_PULSES);
+	    if (FASTLED_RMT_BUILTIN_DRIVER) {
+		rmt_driver_install(rmt_channel_t(i), 0, 0);
+	    } else {
+		// -- Set up the RMT to send 1/2 of the pulse buffer and then
+		//    generate an interrupt. When we get this interrupt we
+		//    fill the other half in preparation (kind of like double-buffering)
+		rmt_set_tx_thr_intr_en(rmt_channel_t(i), true, MAX_PULSES);
+	    }
 	}
 
 	// -- Create a semaphore to block execution until all the controllers are done
@@ -253,12 +257,14 @@ protected:
 	    xSemaphoreGive(gTX_sem);
 	}
 		
-	// -- Allocate the interrupt if we have not done so yet. This
-	//    interrupt handler must work for all different kinds of
-	//    strips, so it delegates to the refill function for each
-	//    specific instantiation of ClocklessController.
-	if (gRMT_intr_handle == NULL)
-	    esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, interruptHandler, 0, &gRMT_intr_handle);
+	if ( ! FASTLED_RMT_BUILTIN_DRIVER) {
+	    // -- Allocate the interrupt if we have not done so yet. This
+	    //    interrupt handler must work for all different kinds of
+	    //    strips, so it delegates to the refill function for each
+	    //    specific instantiation of ClocklessController.
+	    if (gRMT_intr_handle == NULL)
+		esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, interruptHandler, 0, &gRMT_intr_handle);
+	}
 
 	gInitialized = true;
     }
