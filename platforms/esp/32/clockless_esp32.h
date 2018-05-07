@@ -16,9 +16,9 @@
  *
  * The implementation strategy is borrowed from previous work and from
  * the RMT support built into the ESP32 IDF. The RMT device has 8
- * channels, which can be programmed independently with sequences of
- * high/low bits. Memory for each channel is limited, however, so in
- * order to send a long sequence of bits, we need to continuously
+ * channels, which can be programmed independently to send sequences
+ * of high/low bits. Memory for each channel is limited, however, so
+ * in order to send a long sequence of bits, we need to continuously
  * refill the buffer until all the data is sent. To do this, we fill
  * half the buffer and then set an interrupt to go off when that half
  * is sent. Then we refill that half while the second half is being
@@ -30,9 +30,9 @@
  * to channels on the fly, queuing up controllers as necessary until a
  * channel is free. The main showPixels routine just fires off the
  * first 8 controllers; the interrupt handler starts new controllers
- * asynchronously as previous ones finish. So, for example, it should
- * be able to send the data for 8 controllers at once, but 16
- * controllers would take approximately twice as much time.
+ * asynchronously as previous ones finish. So, for example, it can
+ * send the data for 8 controllers simultaneously, but 16 controllers
+ * would take approximately twice as much time.
  *
  * There is a #define that allows a program to control the total
  * number of channels that the driver is allowed to use. It defaults
@@ -43,8 +43,8 @@
  *
  * OTHER RMT APPLICATIONS
  *
- * The default FastLED driver takes over control of the RMT
- * interrupts, making it hard to use the RMT device for other
+ * The default FastLED driver takes over control of the RMT interrupt
+ * handler, making it hard to use the RMT device for other
  * (non-FastLED) purposes. You can change it's behavior to use the ESP
  * core driver instead, allowing other RMT applications to
  * co-exist. To switch to this mode, add the following directive
@@ -139,14 +139,19 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define FASTLED_RMT_BUILTIN_DRIVER false
 #endif
 
-// -- Array of all controllers
-static CLEDController * gControllers[32];
+// -- Max number of controllers we can support
+#ifndef FASTLED_RMT_MAX_CONTROLLERS
+#define FASTLED_RMT_MAX_CONTROLLERS 32
+#endif
 
 // -- Number of RMT channels to use (up to 8)
 //    Redefine this value to 1 to force serial output
 #ifndef FASTLED_RMT_MAX_CHANNELS
 #define FASTLED_RMT_MAX_CHANNELS 8
 #endif
+
+// -- Array of all controllers
+static CLEDController * gControllers[FASTLED_RMT_MAX_CONTROLLERS];
 
 // -- Current set of active controllers, indexed by the RMT
 //    channel assigned to them.
@@ -157,7 +162,7 @@ static int gNumStarted = 0;
 static int gNumDone = 0;
 static int gNext = 0;
 
-static intr_handle_t gRMT_intr_handle;
+static intr_handle_t gRMT_intr_handle = NULL;
 
 // -- Global semaphore for the whole show process
 //    Semaphore is not given until all data has been sent
@@ -169,26 +174,25 @@ template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
     // -- RMT has 8 channels, numbered 0 to 7
-    rmt_channel_t mRMT_channel;
+    rmt_channel_t  mRMT_channel;
 
     // -- Store the GPIO pin
-    gpio_num_t mPin;
+    gpio_num_t     mPin;
 
-    // -- Timing values for zero and one bits
-    rmt_item32_t mZero;
-    rmt_item32_t mOne;
+    // -- Timing values for zero and one bits, derived from T1, T2, and T3
+    rmt_item32_t   mZero;
+    rmt_item32_t   mOne;
 
     // -- State information for keeping track of where we are in the pixel data
     PixelController<RGB_ORDER> * mPixels = NULL;
-    void * mPixelSpace = NULL;
-    uint8_t mRGB_channel;
-    uint16_t mCurPulse;
-    CMinWait<WAIT_TIME> mWait;
+    void *         mPixelSpace = NULL;
+    uint8_t        mRGB_channel;
+    uint16_t       mCurPulse;
 
     // -- Buffer to hold all of the pulses. For the version that uses
     //    the RMT driver built into the ESP core.
     rmt_item32_t * mBuffer;
-    uint16_t mBufferSize;
+    uint16_t       mBufferSize;
 
 public:
 
@@ -222,6 +226,9 @@ protected:
 
     void initRMT()
     {
+	// -- Only need to do this once
+	if (gInitialized) return;
+
 	for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
 	    gOnChannel[i] = NULL;
 
@@ -273,8 +280,7 @@ protected:
     {
 	if (gNumStarted == 0) {
 	    // -- First controller: make sure everything is set up
-	    if (! gInitialized) initRMT();
-
+	    initRMT();
 	    xSemaphoreTake(gTX_sem, portMAX_DELAY);
 	}
 
@@ -283,9 +289,7 @@ protected:
 	//    variable in the calling function, and this data structure
 	//    needs to outlive this call to showPixels.
 
-	if (mPixels != NULL) 
-	    delete mPixels;
-
+	if (mPixels != NULL) delete mPixels;
 	mPixels = new PixelController<RGB_ORDER>(pixels);
 	
 	// -- Keep track of the number of strips we've seen
@@ -397,7 +401,7 @@ protected:
         uint32_t intr_st = RMT.int_st.val;
         uint8_t channel;
 
-        for (channel = 0; channel < 8; channel++) {
+        for (channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; channel++) {
             int tx_done_bit = channel * 3;
             int tx_next_bit = channel + 24;
 
