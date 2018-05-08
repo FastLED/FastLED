@@ -34,6 +34,12 @@ public:
 
 // Default is now just 'nop', with special case for AVR
 
+// ESP32 core has it's own definition of NOP, so undef it first
+#ifdef ESP32
+#undef NOP
+#undef NOP2
+#endif
+
 #if defined(__AVR__)
 #  define FL_NOP __asm__ __volatile__ ("cp r0,r0\n");
 #  define FL_NOP2 __asm__ __volatile__ ("rjmp .+0");
