@@ -147,8 +147,9 @@ _DEFPIN_ARM( 20, 0,  6); _DEFPIN_ARM( 21, 0,  7);
 
 #elif defined(ARDUINO_GEMMA_M0)
 
-#define MAX_PIN 3
-_DEFPIN_ARM( 0, 0, 4); _DEFPIN_ARM( 1, 0, 2); _DEFPIN_ARM( 2, 0, 5);
+#define MAX_PIN 4
+_DEFPIN_ARM( 0, 0, 4); _DEFPIN_ARM( 1, 0, 2); _DEFPIN_ARM( 2, 0, 5); 
+_DEFPIN_ARM( 3, 0, 0); _DEFPIN_ARM( 4, 0, 1);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
