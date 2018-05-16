@@ -52,6 +52,15 @@ static int16_t inline __attribute__((always_inline))  avg15_inline_avr_mul( int1
 #endif
 #endif
 
+// See fastled_config.h for notes on this; 
+// "#define FASTLED_NOISE_FIXED 1" is the correct value
+#if FASTLED_NOISE_FIXED == 0
+#define EASE8(x)  (FADE(x) )
+#define EASE16(x) (FADE(x) )
+#else
+#define EASE8(x)  (ease8InOutQuad(x) )
+#define EASE16(x) (ease16InOutQuad(x))
+#endif
 //
 // #define FADE_12
 #define FADE_16
@@ -300,8 +309,7 @@ int16_t inoise16_raw(uint32_t x, uint32_t y, uint32_t z)
   int16_t zz = (w >> 1) & 0x7FFF;
   uint16_t N = 0x8000L;
 
-  u = FADE(u); v = FADE(v); w = FADE(w);
-
+  u = EASE16(u); v = EASE16(v); w = EASE16(w);
 
   // skip the log fade adjustment for the moment, otherwise here we would
   // adjust fade values for u,v,w
@@ -357,7 +365,7 @@ int16_t inoise16_raw(uint32_t x, uint32_t y)
   int16_t yy = (v >> 1) & 0x7FFF;
   uint16_t N = 0x8000L;
 
-  u = FADE(u); v = FADE(v);
+  u = EASE16(u); v = EASE16(v);
 
   int16_t X1 = LERP(grad16(P(AA), xx, yy), grad16(P(BA), xx - N, yy), u);
   int16_t X2 = LERP(grad16(P(AB), xx, yy-N), grad16(P(BB), xx - N, yy - N), u);
@@ -400,7 +408,7 @@ int16_t inoise16_raw(uint32_t x)
   int16_t xx = (u >> 1) & 0x7FFF;
   uint16_t N = 0x8000L;
 
-  u = FADE(u);
+  u = EASE16(u);
 
   int16_t ans = LERP(grad16(P(AA), xx), grad16(P(BA), xx - N), u);
 
@@ -437,9 +445,8 @@ int8_t inoise8_raw(uint16_t x, uint16_t y, uint16_t z)
   int8_t zz = ((uint8_t)(z)>>1) & 0x7F;
   uint8_t N = 0x80;
 
-  // u = FADE(u); v = FADE(v); w = FADE(w);
-  u = scale8_LEAVING_R1_DIRTY(u,u); v = scale8_LEAVING_R1_DIRTY(v,v); w = scale8(w,w);
-
+  u = EASE8(u); v = EASE8(v); w = EASE8(w);
+    
   int8_t X1 = lerp7by8(grad8(P(AA), xx, yy, zz), grad8(P(BA), xx - N, yy, zz), u);
   int8_t X2 = lerp7by8(grad8(P(AB), xx, yy-N, zz), grad8(P(BB), xx - N, yy - N, zz), u);
   int8_t X3 = lerp7by8(grad8(P(AA+1), xx, yy, zz-N), grad8(P(BA+1), xx - N, yy, zz-N), u);
@@ -480,9 +487,8 @@ int8_t inoise8_raw(uint16_t x, uint16_t y)
   int8_t yy = ((uint8_t)(y)>>1) & 0x7F;
   uint8_t N = 0x80;
 
-  // u = FADE(u); v = FADE(v); w = FADE(w);
-  u = scale8_LEAVING_R1_DIRTY(u,u); v = scale8(v,v);
-
+  u = EASE8(u); v = EASE8(v);
+  
   int8_t X1 = lerp7by8(grad8(P(AA), xx, yy), grad8(P(BA), xx - N, yy), u);
   int8_t X2 = lerp7by8(grad8(P(AB), xx, yy-N), grad8(P(BB), xx - N, yy - N), u);
 
@@ -492,8 +498,13 @@ int8_t inoise8_raw(uint16_t x, uint16_t y)
   // return scale8((70+(ans)),234)<<1;
 }
 
+
+
 uint8_t inoise8(uint16_t x, uint16_t y) {
   return scale8(69+inoise8_raw(x,y),237)<<1;
+//    int8_t n = inoise8_raw( x, y);
+//    uint8_t ans = qadd8( n, n);
+//    return ans;
 }
 
 int8_t inoise8_raw(uint16_t x)
@@ -514,8 +525,8 @@ int8_t inoise8_raw(uint16_t x)
   int8_t xx = ((uint8_t)(x)>>1) & 0x7F;
   uint8_t N = 0x80;
 
-  u = scale8(u,u);
-
+  u = EASE8( u);
+  
   int8_t ans = lerp7by8(grad8(P(AA), xx), grad8(P(BA), xx - N), u);
 
   return ans;
@@ -523,7 +534,16 @@ int8_t inoise8_raw(uint16_t x)
 }
 
 uint8_t inoise8(uint16_t x) {
-  return scale8(69+inoise8_raw(x), 255)<<1;
+//    return scale8(69+inoise8_raw(x), 255)<<1;
+    int8_t n = inoise8_raw(x);
+    
+    //uint8_t ans = scale8(69+n, 255)<<1;
+    //if( n <  -64) n = -64;
+    //if( n > 63 ) n = 63;
+    
+    uint8_t ans = qadd8(n,n);
+    
+    return ans;
 }
 
 // struct q44 {
