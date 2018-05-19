@@ -461,7 +461,11 @@ int8_t inoise8_raw(uint16_t x, uint16_t y, uint16_t z)
 }
 
 uint8_t inoise8(uint16_t x, uint16_t y, uint16_t z) {
-  return scale8(76+(inoise8_raw(x,y,z)),215)<<1;
+//  return scale8(76+(inoise8_raw(x,y,z)),215)<<1;
+    int8_t n = inoise8_raw( x, y, z);  // -64..+64
+    n+= 64;                            //   0..128
+    uint8_t ans = qadd8( n, n);        //   0..255
+    return ans;
 }
 
 int8_t inoise8_raw(uint16_t x, uint16_t y)
@@ -501,12 +505,14 @@ int8_t inoise8_raw(uint16_t x, uint16_t y)
 
 
 uint8_t inoise8(uint16_t x, uint16_t y) {
-  return scale8(69+inoise8_raw(x,y),237)<<1;
-//    int8_t n = inoise8_raw( x, y);
-//    uint8_t ans = qadd8( n, n);
-//    return ans;
+  //return scale8(69+inoise8_raw(x,y),237)<<1;
+    int8_t n = inoise8_raw( x, y);  // -64..+64
+    n+= 64;                         //   0..128
+    uint8_t ans = qadd8( n, n);     //   0..255
+    return ans;
 }
 
+// output range = -64 .. +64
 int8_t inoise8_raw(uint16_t x)
 {
   // Find the unit cube containing the point
@@ -530,19 +536,12 @@ int8_t inoise8_raw(uint16_t x)
   int8_t ans = lerp7by8(grad8(P(AA), xx), grad8(P(BA), xx - N), u);
 
   return ans;
-  // return scale8((70+(ans)),234)<<1;
 }
 
 uint8_t inoise8(uint16_t x) {
-//    return scale8(69+inoise8_raw(x), 255)<<1;
-    int8_t n = inoise8_raw(x);
-    
-    //uint8_t ans = scale8(69+n, 255)<<1;
-    //if( n <  -64) n = -64;
-    //if( n > 63 ) n = 63;
-    
-    uint8_t ans = qadd8(n,n);
-    
+    int8_t n = inoise8_raw(x);    //-64..+64
+    n += 64;                      // 0..128
+    uint8_t ans = qadd8(n,n);     // 0..255
     return ans;
 }
 
