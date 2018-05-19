@@ -604,7 +604,7 @@ LIB8STATIC uint8_t ease8InOutQuad(uint8_t val) {
       "sbrc %[val], 7 \n"
       "com %[j]       \n"
       "clr __zero_reg__   \n"
-      : [j] "+a" (j)
+      : [j] "+&a" (j)
       : [val] "a" (val)
       : "r0", "r1"
       );
@@ -706,7 +706,7 @@ LIB8STATIC uint8_t ease8InOutApprox( fract8 i)
 
         "Ldone_%=:               \n\t"
 
-        : [i] "+a" (i)
+        : [i] "+&a" (i)
         :
         : "r0", "r1"
         );
