@@ -179,6 +179,9 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     // -- Store the GPIO pin
     gpio_num_t     mPin;
 
+    // -- This instantiation forces a check on the pin choice
+    FastPin<DATA_PIN> mFastPin;
+
     // -- Timing values for zero and one bits, derived from T1, T2, and T3
     rmt_item32_t   mZero;
     rmt_item32_t   mOne;
@@ -453,6 +456,11 @@ protected:
 
         while (pulse_count < MAX_PULSES) {
             if (! mPixels->has(1)) {
+		if (mCurPulse > 0) {
+		    // -- Extend the last pulse to force the strip to latch. Honestly, I'm not
+                    //    sure if this is really necessary.
+		    // RMTMEM.chan[mRMT_channel].data32[mCurPulse-1].duration1 = RMT_RESET_DURATION;
+		}
                 done_strip = true;
                 break;
             }
@@ -487,9 +495,6 @@ protected:
                 mCurPulse++;
                 pulse_count++;
             }
-
-	    if (done_strip)
-		RMTMEM.chan[mRMT_channel].data32[mCurPulse-1].duration1 = RMT_RESET_DURATION;
         }
         
         if (done_strip) {
