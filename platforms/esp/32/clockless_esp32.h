@@ -217,10 +217,10 @@ public:
         mZero.level1 = 0;
         mZero.duration1 = TO_RMT_CYCLES(T2 + T3);
 
-	gControllers[gNumControllers] = this;
+        gControllers[gNumControllers] = this;
         gNumControllers++;
 
-	mPin = gpio_num_t(DATA_PIN);
+        mPin = gpio_num_t(DATA_PIN);
     }
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
@@ -229,98 +229,98 @@ protected:
 
     void initRMT()
     {
-	// -- Only need to do this once
-	if (gInitialized) return;
+        // -- Only need to do this once
+        if (gInitialized) return;
 
-	for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
-	    gOnChannel[i] = NULL;
+        for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
+            gOnChannel[i] = NULL;
 
-	    // -- RMT configuration for transmission
-	    rmt_config_t rmt_tx;
-	    rmt_tx.channel = rmt_channel_t(i);
-	    rmt_tx.rmt_mode = RMT_MODE_TX;
-	    rmt_tx.gpio_num = mPin;  // The particular pin will be assigned later
-	    rmt_tx.mem_block_num = 1;
-	    rmt_tx.clk_div = DIVIDER;
-	    rmt_tx.tx_config.loop_en = false;
-	    rmt_tx.tx_config.carrier_level = RMT_CARRIER_LEVEL_LOW;
-	    rmt_tx.tx_config.carrier_en = false;
-	    rmt_tx.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
-	    rmt_tx.tx_config.idle_output_en = true;
-		
-	    // -- Apply the configuration
-	    rmt_config(&rmt_tx);
+            // -- RMT configuration for transmission
+            rmt_config_t rmt_tx;
+            rmt_tx.channel = rmt_channel_t(i);
+            rmt_tx.rmt_mode = RMT_MODE_TX;
+            rmt_tx.gpio_num = mPin;  // The particular pin will be assigned later
+            rmt_tx.mem_block_num = 1;
+            rmt_tx.clk_div = DIVIDER;
+            rmt_tx.tx_config.loop_en = false;
+            rmt_tx.tx_config.carrier_level = RMT_CARRIER_LEVEL_LOW;
+            rmt_tx.tx_config.carrier_en = false;
+            rmt_tx.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
+            rmt_tx.tx_config.idle_output_en = true;
+                
+            // -- Apply the configuration
+            rmt_config(&rmt_tx);
 
-	    if (FASTLED_RMT_BUILTIN_DRIVER) {
-		rmt_driver_install(rmt_channel_t(i), 0, 0);
-	    } else {
-		// -- Set up the RMT to send 1/2 of the pulse buffer and then
-		//    generate an interrupt. When we get this interrupt we
-		//    fill the other half in preparation (kind of like double-buffering)
-		rmt_set_tx_thr_intr_en(rmt_channel_t(i), true, MAX_PULSES);
-	    }
-	}
+            if (FASTLED_RMT_BUILTIN_DRIVER) {
+                rmt_driver_install(rmt_channel_t(i), 0, 0);
+            } else {
+                // -- Set up the RMT to send 1/2 of the pulse buffer and then
+                //    generate an interrupt. When we get this interrupt we
+                //    fill the other half in preparation (kind of like double-buffering)
+                rmt_set_tx_thr_intr_en(rmt_channel_t(i), true, MAX_PULSES);
+            }
+        }
 
-	// -- Create a semaphore to block execution until all the controllers are done
-	if (gTX_sem == NULL) {
-	    gTX_sem = xSemaphoreCreateBinary();
-	    xSemaphoreGive(gTX_sem);
-	}
-		
-	if ( ! FASTLED_RMT_BUILTIN_DRIVER) {
-	    // -- Allocate the interrupt if we have not done so yet. This
-	    //    interrupt handler must work for all different kinds of
-	    //    strips, so it delegates to the refill function for each
-	    //    specific instantiation of ClocklessController.
-	    if (gRMT_intr_handle == NULL)
-		esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, interruptHandler, 0, &gRMT_intr_handle);
-	}
+        // -- Create a semaphore to block execution until all the controllers are done
+        if (gTX_sem == NULL) {
+            gTX_sem = xSemaphoreCreateBinary();
+            xSemaphoreGive(gTX_sem);
+        }
+                
+        if ( ! FASTLED_RMT_BUILTIN_DRIVER) {
+            // -- Allocate the interrupt if we have not done so yet. This
+            //    interrupt handler must work for all different kinds of
+            //    strips, so it delegates to the refill function for each
+            //    specific instantiation of ClocklessController.
+            if (gRMT_intr_handle == NULL)
+                esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, interruptHandler, 0, &gRMT_intr_handle);
+        }
 
-	gInitialized = true;
+        gInitialized = true;
     }
 
     virtual void showPixels(PixelController<RGB_ORDER> & pixels)
     {
-	if (gNumStarted == 0) {
-	    // -- First controller: make sure everything is set up
-	    initRMT();
-	    xSemaphoreTake(gTX_sem, portMAX_DELAY);
-	}
+        if (gNumStarted == 0) {
+            // -- First controller: make sure everything is set up
+            initRMT();
+            xSemaphoreTake(gTX_sem, portMAX_DELAY);
+        }
 
-	// -- Initialize the local state, save a pointer to the pixel
-	//    data. We need to make a copy because pixels is a local
-	//    variable in the calling function, and this data structure
-	//    needs to outlive this call to showPixels.
+        // -- Initialize the local state, save a pointer to the pixel
+        //    data. We need to make a copy because pixels is a local
+        //    variable in the calling function, and this data structure
+        //    needs to outlive this call to showPixels.
 
-	if (mPixels != NULL) delete mPixels;
-	mPixels = new PixelController<RGB_ORDER>(pixels);
-	
-	// -- Keep track of the number of strips we've seen
-	gNumStarted++;
+        if (mPixels != NULL) delete mPixels;
+        mPixels = new PixelController<RGB_ORDER>(pixels);
+        
+        // -- Keep track of the number of strips we've seen
+        gNumStarted++;
 
-	// -- The last call to showPixels is the one responsible for doing
-	//    all of the actual worl
-	if (gNumStarted == gNumControllers) {
-	    gNext = 0;
+        // -- The last call to showPixels is the one responsible for doing
+        //    all of the actual worl
+        if (gNumStarted == gNumControllers) {
+            gNext = 0;
 
-	    // -- First, fill all the available channels
-	    int channel = 0;
-	    while (channel < FASTLED_RMT_MAX_CHANNELS && gNext < gNumControllers) {
-		startNext(channel);
-		channel++;
-	    }
+            // -- First, fill all the available channels
+            int channel = 0;
+            while (channel < FASTLED_RMT_MAX_CHANNELS && gNext < gNumControllers) {
+                startNext(channel);
+                channel++;
+            }
 
-	    // -- Wait here while the rest of the data is sent. The interrupt handler
-	    //    will keep refilling the RMT buffers until it is all sent; then it
-	    //    gives the semaphore back.
-	    xSemaphoreTake(gTX_sem, portMAX_DELAY);
-	    xSemaphoreGive(gTX_sem);
+            // -- Wait here while the rest of the data is sent. The interrupt handler
+            //    will keep refilling the RMT buffers until it is all sent; then it
+            //    gives the semaphore back.
+            xSemaphoreTake(gTX_sem, portMAX_DELAY);
+            xSemaphoreGive(gTX_sem);
 
-	    // -- Reset the counters
-	    gNumStarted = 0;
-	    gNumDone = 0;
-	    gNext = 0;
-	}
+            // -- Reset the counters
+            gNumStarted = 0;
+            gNumDone = 0;
+            gNext = 0;
+        }
     }
 
     // -- Start up the next controller
@@ -328,73 +328,73 @@ protected:
     //    startOnChannel method of the given controller.
     static void startNext(int channel)
     {
-	if (gNext < gNumControllers) {
-	    ClocklessController * pController = static_cast<ClocklessController*>(gControllers[gNext]);
-	    pController->startOnChannel(channel);
-	    gNext++;
-	}
+        if (gNext < gNumControllers) {
+            ClocklessController * pController = static_cast<ClocklessController*>(gControllers[gNext]);
+            pController->startOnChannel(channel);
+            gNext++;
+        }
     }
 
     virtual void startOnChannel(int channel)
     {
-	// -- Assign this channel and configure the RMT
-	mRMT_channel = rmt_channel_t(channel);
+        // -- Assign this channel and configure the RMT
+        mRMT_channel = rmt_channel_t(channel);
 
-	// -- Store a reference to this controller, so we can get it
-	//    inside the interrupt handler
-	gOnChannel[channel] = this;
+        // -- Store a reference to this controller, so we can get it
+        //    inside the interrupt handler
+        gOnChannel[channel] = this;
 
-	// -- Assign the pin to this channel
-	rmt_set_pin(mRMT_channel, RMT_MODE_TX, mPin);
+        // -- Assign the pin to this channel
+        rmt_set_pin(mRMT_channel, RMT_MODE_TX, mPin);
 
-	if (FASTLED_RMT_BUILTIN_DRIVER) {
-	    // -- Use the built-in RMT driver to send all the data in one shot
-	    rmt_register_tx_end_callback(doneOnChannel, 0);
-	    writeAllRMTItems();
-	} else {
-	    // -- Use our custom driver to send the data incrementally
+        if (FASTLED_RMT_BUILTIN_DRIVER) {
+            // -- Use the built-in RMT driver to send all the data in one shot
+            rmt_register_tx_end_callback(doneOnChannel, 0);
+            writeAllRMTItems();
+        } else {
+            // -- Use our custom driver to send the data incrementally
 
-	    // -- Turn on the interrupts
-	    rmt_set_tx_intr_en(mRMT_channel, true);
-	
-	    // -- Initialize the counters that keep track of where we are in
-	    //    the pixel data.
-	    mCurPulse = 0;
-	    mRGB_channel = 0;
+            // -- Turn on the interrupts
+            rmt_set_tx_intr_en(mRMT_channel, true);
+        
+            // -- Initialize the counters that keep track of where we are in
+            //    the pixel data.
+            mCurPulse = 0;
+            mRGB_channel = 0;
 
-	    // -- Fill both halves of the buffer
-	    fillHalfRMTBuffer();
-	    fillHalfRMTBuffer();
+            // -- Fill both halves of the buffer
+            fillHalfRMTBuffer();
+            fillHalfRMTBuffer();
 
-	    // -- Turn on the interrupts
-	    rmt_set_tx_intr_en(mRMT_channel, true);
-	    
-	    // -- Start the RMT TX operation
-	    rmt_tx_start(mRMT_channel, true);
-	}
+            // -- Turn on the interrupts
+            rmt_set_tx_intr_en(mRMT_channel, true);
+            
+            // -- Start the RMT TX operation
+            rmt_tx_start(mRMT_channel, true);
+        }
     }
 
     static void doneOnChannel(rmt_channel_t channel, void * arg)
     {
-	ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
+        ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
         portBASE_TYPE HPTaskAwoken = 0;
 
-	// -- Turn off output on the pin
-	gpio_matrix_out(controller->mPin, 0x100, 0, 0);
+        // -- Turn off output on the pin
+        gpio_matrix_out(controller->mPin, 0x100, 0, 0);
 
-	gOnChannel[channel] = NULL;
-	gNumDone++;
+        gOnChannel[channel] = NULL;
+        gNumDone++;
 
-	if (gNumDone == gNumControllers) {
-	    // -- If this is the last controller, signal that we are all done
-	    xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
-	    if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
-	} else {
-	    // -- Otherwise, if there are still controllers waiting, then
-	    //    start the next one on this channel
-	    if (gNext < gNumControllers)
-		startNext(channel);
-	}
+        if (gNumDone == gNumControllers) {
+            // -- If this is the last controller, signal that we are all done
+            xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+            if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
+        } else {
+            // -- Otherwise, if there are still controllers waiting, then
+            //    start the next one on this channel
+            if (gNext < gNumControllers)
+                startNext(channel);
+        }
     }
     
     static IRAM_ATTR void interruptHandler(void *arg)
@@ -410,21 +410,21 @@ protected:
 
             if (gOnChannel[channel] != NULL) {
 
-		ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
+                ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
 
-		// -- More to send on this channel
+                // -- More to send on this channel
                 if (intr_st & BIT(tx_next_bit)) {
-		    RMT.int_clr.val |= BIT(tx_next_bit);
+                    RMT.int_clr.val |= BIT(tx_next_bit);
 
                     // -- Refill the half of the buffer that we just finished,
                     //    allowing the other half to proceed.
-		    controller->fillHalfRMTBuffer();
+                    controller->fillHalfRMTBuffer();
                 }
 
-		// -- Transmission is complete on this channel
+                // -- Transmission is complete on this channel
                 if (intr_st & BIT(tx_done_bit)) {
                     RMT.int_clr.val |= BIT(tx_done_bit);
-		    doneOnChannel(rmt_channel_t(channel), 0);
+                    doneOnChannel(rmt_channel_t(channel), 0);
                 }
             }
         }
@@ -456,11 +456,11 @@ protected:
 
         while (pulse_count < MAX_PULSES) {
             if (! mPixels->has(1)) {
-		if (mCurPulse > 0) {
-		    // -- Extend the last pulse to force the strip to latch. Honestly, I'm not
+                if (mCurPulse > 0) {
+                    // -- Extend the last pulse to force the strip to latch. Honestly, I'm not
                     //    sure if this is really necessary.
-		    // RMTMEM.chan[mRMT_channel].data32[mCurPulse-1].duration1 = RMT_RESET_DURATION;
-		}
+                    // RMTMEM.chan[mRMT_channel].data32[mCurPulse-1].duration1 = RMT_RESET_DURATION;
+                }
                 done_strip = true;
                 break;
             }
@@ -516,7 +516,7 @@ protected:
     {
         // -- Compute the pulse values for the whole strip at once.
         //    Requires a large buffer
-	mBufferSize = mPixels->size() * 3 * 8;
+        mBufferSize = mPixels->size() * 3 * 8;
 
         // TODO: need a specific number here
         if (mBuffer == NULL) {
@@ -560,7 +560,7 @@ protected:
         mBuffer[mCurPulse-1].duration1 = RMT_RESET_DURATION;
         assert(mCurPulse == mBufferSize);
 
-	rmt_write_items(mRMT_channel, mBuffer, mBufferSize, false);
+        rmt_write_items(mRMT_channel, mBuffer, mBufferSize, false);
     }
 };
 
