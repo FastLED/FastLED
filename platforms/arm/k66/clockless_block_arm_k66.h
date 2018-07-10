@@ -18,7 +18,7 @@
 #define MIN(X,Y) (((X)<(Y)) ? (X):(Y))
 #define USED_LANES ((FIRST_PIN!=15) ? MIN(LANES,8) : MIN(LANES,12))
 
-#include "kinetis.h"
+#include <kinetis.h>
 
 FASTLED_NAMESPACE_BEGIN
 

@@ -40,7 +40,7 @@
 
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #ifdef ARDUINO
-#include<Arduino.h>
+#include <Arduino.h>
 #endif
 
 #define CLKS_PER_US (F_CPU/1000000)
