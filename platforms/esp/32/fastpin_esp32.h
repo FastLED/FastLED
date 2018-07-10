@@ -13,12 +13,12 @@ public:
 
   inline static void hi() __attribute__ ((always_inline)) { 
       if (PIN < 32) GPIO.out_w1ts = MASK;
-      else if(PIN < 34) GPIO.out1_w1ts.val = MASK;
+      else GPIO.out1_w1ts.val = MASK;
   }
 
   inline static void lo() __attribute__ ((always_inline)) {
       if (PIN < 32) GPIO.out_w1tc = MASK;
-      else if(PIN < 34) GPIO.out1_w1tc.val = MASK;
+      else GPIO.out1_w1tc.val = MASK;
   }
 
   inline static void set(register port_t val) __attribute__ ((always_inline)) {
@@ -28,26 +28,28 @@ public:
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) {  }
+  inline static void toggle() __attribute__ ((always_inline)) { if(PIN < 32) { GPIO.out ^= MASK; } else { GPIO.out1.val ^=MASK; } }
 
   inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
   inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
   inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
 
   inline static port_t hival() __attribute__ ((always_inline)) { return MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return MASK; }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return 0; }
+  inline static port_t loval() __attribute__ ((always_inline)) { return ~MASK; }
+
+  inline static port_ptr_t port() __attribute__ ((always_inline)) {
+      if (PIN < 32) return &GPIO.out;
+      else return &GPIO.out1.val;
+  }
 
   inline static port_ptr_t sport() __attribute__ ((always_inline)) { 
       if (PIN < 32) return &GPIO.out_w1ts;
-      else if(PIN < 34) return &GPIO.out1_w1ts.val;
-      else return 0;
+      else return &GPIO.out1_w1ts.val;
   }
 
   inline static port_ptr_t cport() __attribute__ ((always_inline)) {
       if (PIN < 32) return &GPIO.out_w1tc;
-      else if(PIN < 34) return &GPIO.out1_w1tc.val;
-      else return 0;
+      else return &GPIO.out1_w1tc.val;
   }
 
   inline static port_t mask() __attribute__ ((always_inline)) { return MASK; }
