@@ -61,9 +61,9 @@ public:
 #define _DEFPIN_32_33_ESP32(PIN) template<> class FastPin<PIN> : public _ESPPIN<PIN, ((uint32_t)1 << (PIN-32))> {};
 
 _DEFPIN_ESP32(0);
-// _DEFPIN_ESP32(1); Using TX causes flashiness when uploading
+_DEFPIN_ESP32(1); // WARNING: Using TX causes flashiness when uploading
 _DEFPIN_ESP32(2); 
-// _DEFPIN_ESP32(3); Using RX causes flashiness when uploading
+_DEFPIN_ESP32(3); // WARNING: Using RX causes flashiness when uploading
 _DEFPIN_ESP32(4);
 _DEFPIN_ESP32(5);
 
