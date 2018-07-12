@@ -22,20 +22,30 @@ public:
   }
 
   inline static void set(register port_t val) __attribute__ ((always_inline)) {
-      if (val) hi();
-      else lo();
+      if (PIN < 32) GPIO.out = val;
+      else GPIO.out1.val = val;
   }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { if(PIN < 32) { GPIO.out ^= MASK; } else { GPIO.out1.val ^=MASK; } }
+  inline static void toggle() __attribute__ ((always_inline)) { 
+      if(PIN < 32) { GPIO.out ^= MASK; } 
+      else { GPIO.out1.val ^=MASK; } 
+  }
 
   inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
   inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
   inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { return MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return ~MASK; }
+  inline static port_t hival() __attribute__ ((always_inline)) {
+      if (PIN < 32) return GPIO.out | MASK;
+      else return GPIO.out1.val | MASK;
+  }
+
+  inline static port_t loval() __attribute__ ((always_inline)) {
+      if (PIN < 32) return GPIO.out & ~MASK;
+      else return GPIO.out1.val & ~MASK;
+  }
 
   inline static port_ptr_t port() __attribute__ ((always_inline)) {
       if (PIN < 32) return &GPIO.out;
@@ -54,7 +64,10 @@ public:
 
   inline static port_t mask() __attribute__ ((always_inline)) { return MASK; }
 
-  inline static bool isset() __attribute__ ((always_inline)) { return (0x004 & MASK); }
+  inline static bool isset() __attribute__ ((always_inline)) {
+      if (PIN < 32) return GPIO.out & MASK;
+      else return GPIO.out1.val & MASK;
+  }
 };
 
 #define _DEFPIN_ESP32(PIN)  template<> class FastPin<PIN> : public _ESPPIN<PIN, ((uint32_t)1 << PIN)> {};
