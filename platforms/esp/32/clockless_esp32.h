@@ -187,10 +187,13 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     rmt_item32_t   mOne;
 
     // -- State information for keeping track of where we are in the pixel data
-    PixelController<RGB_ORDER> * mPixels = NULL;
-    void *         mPixelSpace = NULL;
+    //PixelController<RGB_ORDER> * mPixels = NULL;
     uint8_t        mRGB_channel;
     uint16_t       mCurPulse;
+
+    uint8_t *      mPixelData = NULL;
+    int            mSize = 0;
+    int            mCur;
 
     // -- Buffer to hold all of the pulses. For the version that uses
     //    the RMT driver built into the ESP core.
@@ -279,6 +282,24 @@ protected:
         gInitialized = true;
     }
 
+    void copyPixels(PixelController<RGB_ORDER> & pixels)
+    {
+        if (mPixelData == NULL) {
+            mSize = pixels.size() * 3;
+            mPixelData = (uint8_t *) malloc( mSize);
+        }
+
+        int cur = 0;
+        while (pixels.has(1)) {
+            // -- Cycle through the R,G, and B values in the right order
+            mPixelData[cur++] = pixels.loadAndScale0();
+            mPixelData[cur++] = pixels.loadAndScale1();
+            mPixelData[cur++] = pixels.loadAndScale2();
+            pixels.advanceData();
+            pixels.stepDithering();
+        }
+    }
+
     virtual void showPixels(PixelController<RGB_ORDER> & pixels)
     {
         if (gNumStarted == 0) {
@@ -292,9 +313,10 @@ protected:
         //    variable in the calling function, and this data structure
         //    needs to outlive this call to showPixels.
 
-        if (mPixels != NULL) delete mPixels;
-        mPixels = new PixelController<RGB_ORDER>(pixels);
-        
+        //if (mPixels != NULL) delete mPixels;
+        //mPixels = new PixelController<RGB_ORDER>(pixels);
+        copyPixels(pixels);
+
         // -- Keep track of the number of strips we've seen
         gNumStarted++;
 
@@ -350,7 +372,7 @@ protected:
         if (FASTLED_RMT_BUILTIN_DRIVER) {
             // -- Use the built-in RMT driver to send all the data in one shot
             rmt_register_tx_end_callback(doneOnChannel, 0);
-            writeAllRMTItems();
+            // writeAllRMTItems();
         } else {
             // -- Use our custom driver to send the data incrementally
 
@@ -361,6 +383,7 @@ protected:
             //    the pixel data.
             mCurPulse = 0;
             mRGB_channel = 0;
+            mCur = 0;
 
             // -- Fill both halves of the buffer
             fillHalfRMTBuffer();
@@ -430,6 +453,41 @@ protected:
         }
     }
 
+    virtual void fillHalfRMTBuffer()
+    {
+        uint32_t one_val = mOne.val;
+        uint32_t zero_val = mZero.val;
+
+        int pulses = 0;
+        uint32_t byteval;
+        while (pulses < 32 && mCur < mSize) {
+            byteval = mPixelData[mCur++];
+            byteval <<= 24;
+            // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
+            // rmt_item32_t value corresponding to the buffered bit value
+            for (register uint32_t j = 0; j < 8; j++) {
+                uint32_t val = (byteval & 0x80000000L) ? one_val : zero_val;
+                RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
+                byteval <<= 1;
+                mCurPulse++;
+                pulses++;
+            }
+        }
+
+        if (mCur == mSize) {
+            while (pulses < 32) {
+                RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
+                mCurPulse++;
+                pulses++;
+            }
+        }
+        
+        // -- When we have filled the back half the buffer, reset the position to the first half
+        if (mCurPulse >= MAX_PULSES*2)
+            mCurPulse = 0;
+    }
+
+    /*
     virtual void fillHalfRMTBuffer()
     {
         // -- Fill half of the RMT pulse buffer
@@ -562,6 +620,7 @@ protected:
 
         rmt_write_items(mRMT_channel, mBuffer, mBufferSize, false);
     }
+    */
 };
 
 FASTLED_NAMESPACE_END
