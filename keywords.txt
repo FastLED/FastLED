@@ -9,6 +9,7 @@
 CFastLED	KEYWORD1
 CHSV	KEYWORD1
 CRGB	KEYWORD1
+CRGBArray	KEYWORD1
 LEDS	KEYWORD1
 FastLED	KEYWORD1
 FastPin	KEYWORD1
@@ -34,10 +35,14 @@ setBrightness	KEYWORD2
 getBrightness	KEYWORD2
 show	KEYWORD2
 clear	KEYWORD2
+clearData	KEYWORD2
 showColor	KEYWORD2
 setTemperature	KEYWORD2
 setCorrection	KEYWORD2
 setDither	KEYWORD2
+setMaxPowerInMilliWatts	KEYWORD2
+setMaxPowerInVoltsAndMilliamps	KEYWORD2
+setMaxRefreshRate	KEYWORD2
 countFPS	KEYWORD2
 getFPS	KEYWORD2
 
