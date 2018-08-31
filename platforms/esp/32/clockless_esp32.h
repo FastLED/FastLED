@@ -462,6 +462,8 @@ protected:
     //    controller is done until we look it up.
     static void doneOnChannel(rmt_channel_t channel, void * arg)
     {
+        if (channel >= FASTLED_RMT_MAX_CHANNELS) return;
+
         ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
         portBASE_TYPE HPTaskAwoken = 0;
 
