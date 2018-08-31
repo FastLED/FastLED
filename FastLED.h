@@ -4,9 +4,6 @@
 ///@file FastLED.h
 /// central include file for FastLED, defines the CFastLED class/object
 
-#define xstr(s) str(s)
-#define str(s) #s
-
 #if (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4)
 #define FASTLED_HAS_PRAGMA_MESSAGE
 #endif
