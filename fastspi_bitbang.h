@@ -123,6 +123,9 @@ public:
 		//cli();
 		if(b & (1 << BIT)) {
 			FastPin<DATA_PIN>::hi();
+#ifdef ESP32
+			FastPin<CLOCK_PIN>::lo(); // kick a different register, block premature optimizations?
+#endif
 			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
 			FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
 		} else {
