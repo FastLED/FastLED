@@ -1,3 +1,11 @@
+FastLED 3.2.1
+=============
+* ATmega644P support
+* Adafruit Hallowwing (Thanks to Lady Ada)
+* Improved STM 32 support
+* Some user contributed cleanups 
+* ESP32 APA102 output fix
+
 FastLED3.2
 ==========
 * ESP32 support with improved output and parallel output options (thanks Sam Guyer!)
