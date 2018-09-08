@@ -25,7 +25,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h> // for cli/se definitions
 
-// Define the rgister types
+// Define the register types
 #if defined(ARDUINO) // && ARDUINO < 150
 typedef volatile       uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
 typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
@@ -33,5 +33,14 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 
 extern volatile uint32_t systick_millis_count;
 #  define MS_COUNTER systick_millis_count
+
+
+// Default to using PROGMEM, since TEENSY3 provides it
+// even though all it does is ignore it.  Just being
+// conservative here in case TEENSY3 changes.
+#ifndef FASTLED_USE_PROGMEM
+#define FASTLED_USE_PROGMEM 1
+#endif
+
 
 #endif

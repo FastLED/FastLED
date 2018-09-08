@@ -8,6 +8,8 @@
 #define BRIGHTNESS  200
 #define FRAMES_PER_SECOND 60
 
+bool gReverseDirection = false;
+
 CRGB leds[NUM_LEDS];
 
 void setup() {
@@ -19,7 +21,7 @@ void setup() {
 void loop()
 {
   // Add entropy to random number generator; we use a lot of it.
-  random16_add_entropy( random());
+  // random16_add_entropy( random());
 
   Fire2012(); // run simulation frame
   
@@ -90,7 +92,14 @@ void Fire2012()
 
     // Step 4.  Map from heat cells to LED colors
     for( int j = 0; j < NUM_LEDS; j++) {
-        leds[j] = HeatColor( heat[j]);
+      CRGB color = HeatColor( heat[j]);
+      int pixelnumber;
+      if( gReverseDirection ) {
+        pixelnumber = (NUM_LEDS-1) - j;
+      } else {
+        pixelnumber = j;
+      }
+      leds[pixelnumber] = color;
     }
 }
 

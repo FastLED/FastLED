@@ -1,4 +1,6 @@
-#include "FastLED.h"
+#include <FastLED.h>
+
+FASTLED_USING_NAMESPACE
 
 // FastLED "100-lines-of-code" demo reel, showing just a few 
 // of the kinds of animation patterns you can quickly and easily 
@@ -9,8 +11,8 @@
 //
 // -Mark Kriegsman, December 2014
 
-#if FASTLED_VERSION < 3001000
-#error "Requires FastLED 3.1 or later; check github for latest code."
+#if defined(FASTLED_VERSION) && (FASTLED_VERSION < 3001000)
+#warning "Requires FastLED 3.1 or later; check github for latest code."
 #endif
 
 #define DATA_PIN    3
@@ -97,7 +99,7 @@ void sinelon()
 {
   // a colored dot sweeping back and forth, with fading trails
   fadeToBlackBy( leds, NUM_LEDS, 20);
-  int pos = beatsin16(13,0,NUM_LEDS);
+  int pos = beatsin16( 13, 0, NUM_LEDS-1 );
   leds[pos] += CHSV( gHue, 255, 192);
 }
 
@@ -117,7 +119,7 @@ void juggle() {
   fadeToBlackBy( leds, NUM_LEDS, 20);
   byte dothue = 0;
   for( int i = 0; i < 8; i++) {
-    leds[beatsin16(i+7,0,NUM_LEDS)] |= CHSV(dothue, 200, 255);
+    leds[beatsin16( i+7, 0, NUM_LEDS-1 )] |= CHSV(dothue, 200, 255);
     dothue += 32;
   }
 }

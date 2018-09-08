@@ -1,4 +1,4 @@
-#include "FastLED.h"
+#include <FastLED.h>
 
 // How many leds in your strip?
 #define NUM_LEDS 64 
@@ -15,7 +15,7 @@ CRGB leds[NUM_LEDS];
 void setup() { 
 	Serial.begin(57600);
 	Serial.println("resetting");
-	LEDS.addLeds<NEOPIXEL,DATA_PIN>(leds,NUM_LEDS);
+	LEDS.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS);
 	LEDS.setBrightness(84);
 }
 

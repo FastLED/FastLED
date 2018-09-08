@@ -1,9 +1,12 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
+
 #if defined(__SAM3X8E__)
 volatile uint32_t fuckit;
 #endif
+
+FASTLED_NAMESPACE_BEGIN
 
 void *pSmartMatrix = NULL;
 
@@ -13,6 +16,9 @@ CLEDController *CLEDController::m_pHead = NULL;
 CLEDController *CLEDController::m_pTail = NULL;
 static uint32_t lastshow = 0;
 
+uint32_t _frame_cnt=0;
+uint32_t _retry_cnt=0;
+
 // uint32_t CRGB::Squant = ((uint32_t)((__TIME__[4]-'0') * 28))<<16 | ((__TIME__[6]-'0')*50)<<8 | ((__TIME__[7]-'0')*28);
 
 CFastLED::CFastLED() {
@@ -20,7 +26,8 @@ CFastLED::CFastLED() {
 	// m_nControllers = 0;
 	m_Scale = 255;
 	m_nFPS = 0;
-	setMaxRefreshRate(400);
+	m_pPowerFunc = NULL;
+	m_nPowerData = 0xFFFFFFFF;
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
@@ -31,6 +38,7 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 
 	pLed->init();
 	pLed->setLeds(data + nOffset, nLeds);
+	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
 	return *pLed;
 }
 
@@ -38,6 +46,11 @@ void CFastLED::show(uint8_t scale) {
 	// guard against showing too rapidly
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
+
+	// If we have a function for computing power, use it!
+	if(m_pPowerFunc) {
+		scale = (*m_pPowerFunc)(scale, m_nPowerData);
+	}
 
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
@@ -76,6 +89,11 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
+	// If we have a function for computing power, use it!
+	if(m_pPowerFunc) {
+		scale = (*m_pPowerFunc)(scale, m_nPowerData);
+	}
+
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		uint8_t d = pCur->getDither();
@@ -87,7 +105,7 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 	countFPS();
 }
 
-void CFastLED::clear(boolean writeData) {
+void CFastLED::clear(bool writeData) {
 	if(writeData) {
 		showColor(CRGB(0,0,0), 0);
 	}
@@ -104,14 +122,16 @@ void CFastLED::clearData() {
 
 void CFastLED::delay(unsigned long ms) {
 	unsigned long start = millis();
-	while((millis()-start) < ms) {
+        do {
 #ifndef FASTLED_ACCURATE_CLOCK
 		// make sure to allow at least one ms to pass to ensure the clock moves
 		// forward
 		::delay(1);
 #endif
 		show();
+		yield();
 	}
+	while((millis()-start) < ms);
 }
 
 void CFastLED::setTemperature(const struct CRGB & temp) {
@@ -196,27 +216,41 @@ void CFastLED::countFPS(int nFrames) {
   }
 }
 
-void CFastLED::setMaxRefreshRate(uint16_t refresh) {
-		if(refresh > 0) {
-			m_nMinMicros = 1000000 / refresh;
-		} else {
-			m_nMinMicros = 0;
-		}
+void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
+  if(constrain) {
+    // if we're constraining, the new value of m_nMinMicros _must_ be higher than previously (because we're only
+    // allowed to slow things down if constraining)
+    if(refresh > 0) {
+      m_nMinMicros = ( (1000000/refresh) >  m_nMinMicros) ? (1000000/refresh) : m_nMinMicros;
+    }
+  } else if(refresh > 0) {
+    m_nMinMicros = 1000000 / refresh;
+  } else {
+    m_nMinMicros = 0;
+  }
 }
 
+extern "C" int atexit(void (* /*func*/ )()) { return 0; }
+
+#ifdef FASTLED_NEEDS_YIELD
+extern "C" void yield(void) { }
+#endif
 
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1
 {
+	#if !defined(ESP8266) && !defined(ESP32)
 	extern "C" void __cxa_pure_virtual (void) {}
+	#endif
+
 	/* guard variables */
 
 	/* The ABI requires a 64-bit type.  */
 	__extension__ typedef int __guard __attribute__((mode(__DI__)));
 
-	extern "C" int __cxa_guard_acquire (__guard *);
-	extern "C" void __cxa_guard_release (__guard *);
-	extern "C" void __cxa_guard_abort (__guard *);
+	extern "C" int __cxa_guard_acquire (__guard *) __attribute__((weak));
+	extern "C" void __cxa_guard_release (__guard *) __attribute__((weak));
+	extern "C" void __cxa_guard_abort (__guard *) __attribute__((weak));
 
 	extern "C" int __cxa_guard_acquire (__guard *g)
 	{
@@ -234,3 +268,5 @@ namespace __cxxabiv1
 	}
 }
 #endif
+
+FASTLED_NAMESPACE_END

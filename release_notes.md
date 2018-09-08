@@ -1,3 +1,86 @@
+FastLED3.2
+==========
+* ESP32 support with improved output and parallel output options (thanks Sam Guyer!)
+* various minor contributed fixes
+
+FastLED 3.1.8
+============= 
+* Added support for Adafruit Circuit Playground Express (Thanks to Lady Ada)
+* Improved support for Adafruit Gemma and Trinket m0 (Thanks to Lady Ada)
+* Added support for PJRC's WS2812Serial (Thanks to Paul Stoffregen)
+* Added support for ATmega328 non-picopower hardware pins (Thanks to John Whittington)
+* Fixes for ESP32 support (Thanks to Daniel Tullemans)
+* 'Makefile' compilation fix (Thanks to Nico Hood)
+
+FastLED 3.1.7 (skipped)
+=======================
+
+FastLED 3.1.6
+=============
+* Preliminary support for esp32
+* Variety of random bug fixes
+* 6-channel parallel output for the esp8266
+* Race condition fixes for teensy hardware SPI
+* Preliminary teensy 3.6 support
+* Various fixes falling out from "fixing" scale 8 adjustments
+* Add gemma m0 support (thanks @ladyada!)
+
+FastLED 3.1.5
+=============
+* Fix due parallel output build issue
+
+FastLED 3.1.4
+=============
+* fix digispark avr build issue
+
+FastLED3.1.3
+===============
+
+* Add SK6822 timings
+* Add ESP8266 support - note, only tested w/the arduino esp8266 build environment 
+* Improvements to hsv2rgb, palette, and noise performance
+* Improvements to rgb2hsv accuracy
+* Fixed noise discontinuity 
+* Add wino board support
+* Fix scale8 (so now, scale8(255,255) == 255, not 254!)
+* Add ESP8266 parallel output support 
+
+
+FastLED3.1.1
+============
+* Enabled RFDuino/nrf51822 hardware SPI support
+* Fix edge case bug w/HSV palette blending 
+* Fix power management issue w/parallel output
+* Use static_asserts for some more useful compile time errors around bad pins
+* Roll power management into FastLED.show/delay directly
+* Support for adafruit pixies on arduino type platforms that have SoftwareSerial
+  * TODO: support hardware serial on platforms that have it available
+* Add UCS2903 timings
+* Preliminary CPixelView/CRGBSet code - more flexible treatment of groups of arrays 
+  * https://github.com/FastLED/FastLED/wiki/RGBSet-Reference
+
+
+FastLED3.1.0
+============
+* Added support for the following platforms
+  * Arduino Zero
+  * Teensy LC
+  * RFDuino/nrf51822
+  * Spark Core
+* Major internal code reoganization
+* Started doxygen based documentation 
+* Lots of bug/performance fixes
+* Parallel output on various arm platforms
+* lots of new stuff
+
+FastLED3.0.2
+============
+* possibly fix issues #67 and #90 by fixing gcc 4.8.x support
+
+FastLED3.0.1
+============
+* fix issue #89 w/power management pin always being on
+
 FastLED3.0
 ==========
 
