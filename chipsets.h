@@ -189,30 +189,19 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
+		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
+#if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
+		const uint16_t maxBrightness = 0x1F;
+		uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
+		s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
+		s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
+		s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
+#else
+		const uint8_t brightness = 0x1F;
+#endif
+
 		startBoundary();
 		while (pixels.has(1)) {
-			uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
-#if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
-			uint8_t brightness = 0x20;
-			uint8_t s = s0 | s1 | s2;
-			while (!(s & 0x80) && (brightness != 1)) {
-				s <<= 1;
-				brightness >>= 1;
-				s0 <<= 1; ++s0;
-				s1 <<= 1; ++s1;
-				s2 <<= 1; ++s2;
-			}
-			if (brightness == 0x20)
-				brightness = 0x1F;
-#elif FASTLED_USE_GLOBAL_BRIGHTNESS == 2
-			const uint16_t maxBrightness = 0x1F;
-			uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
-			s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
-			s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
-			s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
-#else
-			const uint8_t brightness = 0x1F;
-#endif
 			writeLed(brightness, pixels.loadAndScale0(0, s0), pixels.loadAndScale1(0, s1), pixels.loadAndScale2(0, s2));
 			pixels.stepDithering();
 			pixels.advanceData();
@@ -265,30 +254,19 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
+		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
+#if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
+		const uint16_t maxBrightness = 0x1F;
+		uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
+		s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
+		s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
+		s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
+#else
+		const uint8_t brightness = 0x1F;
+#endif
+
 		startBoundary();
 		while (pixels.has(1)) {
-			uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
-#if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
-			uint8_t brightness = 0x20;
-			uint8_t s = s0 | s1 | s2;
-			while (!(s & 0x80) && (brightness != 1)) {
-				s <<= 1;
-				brightness >>= 1;
-				s0 <<= 1; ++s0;
-				s1 <<= 1; ++s1;
-				s2 <<= 1; ++s2;
-			}
-			if (brightness == 0x20)
-				brightness = 0x1F;
-#elif FASTLED_USE_GLOBAL_BRIGHTNESS == 2
-			const uint16_t maxBrightness = 0x1F;
-			uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
-			s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
-			s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
-			s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
-#else
-			const uint8_t brightness = 0x1F;
-#endif
 			writeLed(brightness, pixels.loadAndScale0(0, s0), pixels.loadAndScale1(0, s1), pixels.loadAndScale2(0, s2));
 			pixels.stepDithering();
 			pixels.advanceData();
