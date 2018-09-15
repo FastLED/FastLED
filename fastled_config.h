@@ -61,5 +61,11 @@
 #define FASTLED_INTERRUPT_RETRY_COUNT 2
 #endif
 
+// Use this toggle to enable global brightness in contollers that support is (ADA102 and SK9822).
+// It changes how color scaling works and uses global brightness before scaling down color values.
+// This enable much more accurate color control on low brightness settings.
+// Value 1 means faster bit operations but only uses 6 extra brightness levels (powers of 2).
+// Value 2 means slightly slower math operations but it uses all 31 brightness levels.
+//#define FASTLED_USE_GLOBAL_BRIGHTNESS 2
 
 #endif
