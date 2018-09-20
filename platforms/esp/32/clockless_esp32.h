@@ -49,7 +49,7 @@
  * co-exist. To switch to this mode, add the following directive
  * before you include FastLED.h:
  *
- *      #define FASTLED_RMT_BUILTIN_DRIVER
+ *      #define FASTLED_RMT_BUILTIN_DRIVER 1
  *
  * There may be a performance penalty for using this mode. We need to
  * compute the RMT signal for the entire LED strip ahead of time,
