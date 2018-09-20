@@ -162,8 +162,19 @@ class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
 	void endBoundary(int nLeds) { int nDWords = (nLeds/32); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nDWords--); }
 
-	inline void writeLed(uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
-		mSPI.writeByte(0xFF); mSPI.writeByte(b0); mSPI.writeByte(b1); mSPI.writeByte(b2);
+	inline void writeLed(uint8_t brightness, uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
+#ifdef FASTLED_SPI_BYTE_ONLY
+		mSPI.writeByte(0xE0 | brightness);
+		mSPI.writeByte(b0);
+		mSPI.writeByte(b1);
+		mSPI.writeByte(b2);
+#else
+		uint16_t b = 0xE000 | (brightness << 8) | (uint16_t)b0;
+		mSPI.writeWord(b);
+		uint16_t w = b1 << 8;
+		w |= b2;
+		mSPI.writeWord(w);
+#endif
 	}
 
 public:
@@ -178,24 +189,25 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
-		startBoundary();
-		while(pixels.has(1)) {
-#ifdef FASTLED_SPI_BYTE_ONLY
-			mSPI.writeByte(0xFF);
-			mSPI.writeByte(pixels.loadAndScale0());
-			mSPI.writeByte(pixels.loadAndScale1());
-			mSPI.writeByte(pixels.loadAndScale2());
+		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
+#if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
+		const uint16_t maxBrightness = 0x1F;
+		uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
+		s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
+		s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
+		s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
 #else
-			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0();
-			mSPI.writeWord(b);
-			uint16_t w = pixels.loadAndScale1() << 8;
-			w |= pixels.loadAndScale2();
-			mSPI.writeWord(w);
+		const uint8_t brightness = 0x1F;
 #endif
+
+		startBoundary();
+		while (pixels.has(1)) {
+			writeLed(brightness, pixels.loadAndScale0(0, s0), pixels.loadAndScale1(0, s1), pixels.loadAndScale2(0, s2));
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
 		endBoundary(pixels.size());
+
 		mSPI.waitFully();
 		mSPI.release();
 	}
@@ -215,8 +227,19 @@ class SK9822Controller : public CPixelLEDController<RGB_ORDER> {
 	void startBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
 	void endBoundary(int nLeds) { int nLongWords = (nLeds/32); do { mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nLongWords--); }
 
-	inline void writeLed(uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
-		mSPI.writeByte(0xFF); mSPI.writeByte(b0); mSPI.writeByte(b1); mSPI.writeByte(b2);
+	inline void writeLed(uint8_t brightness, uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
+#ifdef FASTLED_SPI_BYTE_ONLY
+		mSPI.writeByte(0xE0 | brightness);
+		mSPI.writeByte(b0);
+		mSPI.writeByte(b1);
+		mSPI.writeByte(b2);
+#else
+		uint16_t b = 0xE000 | (brightness << 8) | (uint16_t)b0;
+		mSPI.writeWord(b);
+		uint16_t w = b1 << 8;
+		w |= b2;
+		mSPI.writeWord(w);
+#endif
 	}
 
 public:
@@ -231,24 +254,23 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
-		startBoundary();
-		while(pixels.has(1)) {
-#ifdef FASTLED_SPI_BYTE_ONLY
-			mSPI.writeByte(0xFF);
-			mSPI.writeByte(pixels.loadAndScale0());
-			mSPI.writeByte(pixels.loadAndScale1());
-			mSPI.writeByte(pixels.loadAndScale2());
+		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
+#if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
+		const uint16_t maxBrightness = 0x1F;
+		uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
+		s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
+		s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
+		s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
 #else
-			uint16_t b = 0xFF00 | (uint16_t)pixels.loadAndScale0();
-			mSPI.writeWord(b);
-			uint16_t w = pixels.loadAndScale1() << 8;
-			w |= pixels.loadAndScale2();
-			mSPI.writeWord(w);
+		const uint8_t brightness = 0x1F;
 #endif
+
+		startBoundary();
+		while (pixels.has(1)) {
+			writeLed(brightness, pixels.loadAndScale0(0, s0), pixels.loadAndScale1(0, s1), pixels.loadAndScale2(0, s2));
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
-
 		endBoundary(pixels.size());
 
 		mSPI.waitFully();
