@@ -192,10 +192,10 @@ protected:
 		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
 #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
 		const uint16_t maxBrightness = 0x1F;
-		uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
-		s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
-		s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
-		s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
+		uint16_t brightness = ((((uint16_t)max(max(s0, s1), s2) + 1) * maxBrightness - 1) >> 8) + 1;
+		s0 = (maxBrightness * s0 + (brightness >> 1)) / brightness;
+		s1 = (maxBrightness * s1 + (brightness >> 1)) / brightness;
+		s2 = (maxBrightness * s2 + (brightness >> 1)) / brightness;
 #else
 		const uint8_t brightness = 0x1F;
 #endif
@@ -257,10 +257,10 @@ protected:
 		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
 #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
 		const uint16_t maxBrightness = 0x1F;
-		uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
-		s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
-		s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
-		s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
+		uint16_t brightness = ((((uint16_t)max(max(s0, s1), s2) + 1) * maxBrightness - 1) >> 8) + 1;
+		s0 = (maxBrightness * s0 + (brightness >> 1)) / brightness;
+		s1 = (maxBrightness * s1 + (brightness >> 1)) / brightness;
+		s2 = (maxBrightness * s2 + (brightness >> 1)) / brightness;
 #else
 		const uint8_t brightness = 0x1F;
 #endif
