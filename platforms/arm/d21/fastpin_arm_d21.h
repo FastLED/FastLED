@@ -34,24 +34,23 @@ public:
   inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
   inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
-  inline static void hi() __attribute__ ((always_inline)) { PORT->Group[_GRP].OUTSET.reg = _MASK; }
-  inline static void lo() __attribute__ ((always_inline)) { PORT->Group[_GRP].OUTCLR.reg = _MASK; }
-  // inline static void lo() __attribute__ ((always_inline)) { PORT->Group[_GRP].BSRR = (_MASK<<16); }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { PORT->Group[_GRP].OUT.reg = val; }
+  inline static void hi() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTSET.reg = _MASK; }
+  inline static void lo() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTCLR.reg = _MASK; }
+  inline static void set(register port_t val) __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUT.reg = val; }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { PORT->Group[_GRP].OUTTGL.reg = _MASK; }
+  inline static void toggle() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTTGL.reg = _MASK; }
 
   inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
   inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
   inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { return PORT->Group[_GRP].OUT.reg | _MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return PORT->Group[_GRP].OUT.reg & ~_MASK; }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return &PORT->Group[_GRP].OUT.reg; }
-  inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &PORT->Group[_GRP].OUTSET.reg; }
-  inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &PORT->Group[_GRP].OUTCLR.reg; }
+  inline static port_t hival() __attribute__ ((always_inline)) { return PORT_IOBUS->Group[_GRP].OUT.reg | _MASK; }
+  inline static port_t loval() __attribute__ ((always_inline)) { return PORT_IOBUS->Group[_GRP].OUT.reg & ~_MASK; }
+  inline static port_ptr_t port() __attribute__ ((always_inline)) { return &PORT_IOBUS->Group[_GRP].OUT.reg; }
+  inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &PORT_IOBUS->Group[_GRP].OUTSET.reg; }
+  inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &PORT_IOBUS->Group[_GRP].OUTCLR.reg; }
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
