@@ -522,6 +522,21 @@ class PL9823Controller : public ClocklessController<DATA_PIN, NS(350), NS(1010),
 ///@}
 
 #endif
+
+/// Dummy controller class - doesn't output any data.
+/// Useful as a placeholder or when adding a new platform.
+/// @tparam RGB_ORDER the RGB ordering for the led data
+template<EOrder RGB_ORDER = RGB>
+class DummyController : public CPixelLEDController<RGB_ORDER> {
+public:
+	DummyController() {}
+
+protected:
+	virtual void init() {}
+
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {}
+};
+
 ///@}
 FASTLED_NAMESPACE_END
 

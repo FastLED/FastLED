@@ -121,6 +121,8 @@ template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDE
 #endif
 #endif
 
+template<EOrder RGB_ORDER> class DUMMY : public DummyController<RGB_ORDER> {};
+
 enum EBlockChipsets {
 #ifdef PORTA_FIRST_PIN
 	WS2811_PORTA,
