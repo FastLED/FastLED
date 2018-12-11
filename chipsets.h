@@ -537,6 +537,61 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {}
 };
 
+
+#ifdef __unix__
+#include "pngserver.hpp"
+
+#define HAS_WEB
+
+/// Helper for WebController: we need exactly one PngServer per port;
+/// this provides a template class container for that.
+template<uint16_t PORT>
+class PortHolder {
+public:
+	static PngServer m_png_server;
+};
+
+template<uint16_t PORT>
+PngServer PortHolder<PORT>::m_png_server(PORT);
+
+/// Web controller class - sends data to a browser via WebSockets.
+/// @tparam PORT the port number to listen on
+/// @tparam INDEX the image index (0-based) to display to
+template<uint16_t PORT, uint8_t INDEX>
+class WebController : public CPixelLEDController<RGB> {
+	/// One PNG server per PORT, to listen on that port.
+	static PortHolder<PORT> m_port_holder;
+
+public:
+	WebController() {
+		m_port_holder.m_png_server.register_image(INDEX);
+	}
+
+protected:
+	virtual void init() {
+		// Safe because spawn_thread is idempotent - only one thread
+		// will be started per PORT.
+		m_port_holder.m_png_server.spawn_thread();
+	}
+
+	virtual void showPixels(PixelController<RGB> & pixels) {
+		size_t width = pixels.size();
+		uint8_t buf[3 * width];
+		size_t i = 0;
+		while(pixels.has(1)) {
+			buf[i++] = PngServer::sRGB_from_linear(pixels.loadAndScale0());
+			buf[i++] = PngServer::sRGB_from_linear(pixels.loadAndScale1());
+			buf[i++] = PngServer::sRGB_from_linear(pixels.loadAndScale2());
+			pixels.advanceData();
+			pixels.stepDithering();
+		}
+
+		m_port_holder.m_png_server.send_image(INDEX, width, buf);
+	}
+};
+
+#endif
+
 ///@}
 FASTLED_NAMESPACE_END
 

@@ -55,6 +55,7 @@ Here's a list of all the LED chipsets are supported.  More details on the led ch
 * DMX - send rgb data out over DMX using arduino DMX libraries
 * SmartMatrix panels - needs the SmartMatrix library - https://github.com/pixelmatix/SmartMatrix
 * Dummy - no output, useful as a placeholder or when developing a new platform
+* Web - output to a web browser instead of LEDs, for testing (requires Unix platform)
 
 
 LPD6803, HL1606, and "595"-style shift registers are no longer supported by the library.  The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.
