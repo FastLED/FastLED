@@ -236,6 +236,40 @@ extern "C" int atexit(void (* /*func*/ )()) { return 0; }
 extern "C" void yield(void) { }
 #endif
 
+#if defined(FASTLED_NEEDS_MICROS) || defined(FASTLED_NEEDS_MILLIS)
+static struct timespec fastled_ts0;
+static bool fastled_ts0_set = false;
+volatile unsigned long timer0_millis_offset = 0;
+#endif
+
+#ifdef FASTLED_NEEDS_MICROS
+unsigned long micros() {
+    if (!fastled_ts0_set) {
+        clock_gettime(CLOCK_MONOTONIC, &fastled_ts0);
+        fastled_ts0_set = true;
+    }
+
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    return (ts.tv_sec - fastled_ts0.tv_sec) * 1000000UL + (ts.tv_nsec - fastled_ts0.tv_nsec) / 1000UL + 1000UL * timer0_millis_offset;
+}
+#endif
+
+#ifdef FASTLED_NEEDS_MILLIS
+unsigned long millis() {
+    if (!fastled_ts0_set) {
+        clock_gettime(CLOCK_MONOTONIC, &fastled_ts0);
+        fastled_ts0_set = true;
+    }
+
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+
+    return (ts.tv_sec - fastled_ts0.tv_sec) * 1000UL + (ts.tv_nsec - fastled_ts0.tv_nsec) / 1000000UL + timer0_millis_offset;
+}
+#endif
+
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1
 {
