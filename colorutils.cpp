@@ -364,7 +364,10 @@ CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fra
 
 // Forward declaration of the function "XY" which must be provided by
 // the application for use in two-dimensional filter functions.
-uint16_t XY( uint8_t, uint8_t);// __attribute__ ((weak));
+#ifdef __GNUC__
+__attribute__ ((weak))
+#endif
+uint16_t XY( uint8_t, uint8_t);
 
 
 // blur1d: one-dimensional blur filter. Spreads light to 2 line neighbors.
