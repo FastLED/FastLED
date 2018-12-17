@@ -294,6 +294,7 @@ CRGB::YellowGreen	KEYWORD2
 #######################################
 
 # Chipsets
+LPD6803	LITERAL1
 LPD8806	LITERAL1
 WS2801	LITERAL1
 WS2803	LITERAL1

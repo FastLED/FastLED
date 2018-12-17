@@ -54,9 +54,10 @@ Here's a list of all the LED chipsets are supported.  More details on the led ch
 * P9813 - aka Cool Neon's Total Control Lighting
 * DMX - send rgb data out over DMX using arduino DMX libraries
 * SmartMatrix panels - needs the SmartMatrix library - https://github.com/pixelmatix/SmartMatrix
+* LPD6803 - SPI based chpiset, chip CMODE pin must be set to 1 (inside oscillator mode)
 
 
-LPD6803, HL1606, and "595"-style shift registers are no longer supported by the library.  The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.
+HL1606, and "595"-style shift registers are no longer supported by the library.  The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.
 
 
 ## Supported platforms

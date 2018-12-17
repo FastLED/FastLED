@@ -143,6 +143,53 @@ protected:
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(25)>
 class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
 
+/// LPD6803 controller class (LPD1101).
+/// 16 bit (1 bit - const "1", 5 bit - red, 5 bit - green, 5 bit blue).
+/// In chip CMODE pin must be set to 1 (inside oscillator mode).
+/// Datasheet: https://cdn-shop.adafruit.com/datasheets/LPD6803.pdf
+/// @tparam DATA_PIN the data pin for these leds
+/// @tparam CLOCK_PIN the clock pin for these leds
+/// @tparam RGB_ORDER the RGB ordering for these leds
+/// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(12)
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(12)>
+class LPD6803Controller : public CPixelLEDController<RGB_ORDER> {
+	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	SPI mSPI;
+
+	void startBoundary() { mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); }
+
+public:
+	LPD6803Controller() {}
+
+	virtual void init() {
+		mSPI.init();
+	}
+
+protected:
+
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+		mSPI.select();
+
+		startBoundary();
+		while(pixels.has(1)) {
+            register uint16_t command;
+            command = 0x8000;
+            command |= (pixels.loadAndScale0() & 0xF8) << 7; // red is the high 5 bits
+            command |= (pixels.loadAndScale1() & 0xF8) << 2; // green is the middle 5 bits
+			mSPI.writeByte((command >> 8) & 0xFF);
+            command |= pixels.loadAndScale2() >> 3 ; // blue is the low 5 bits
+			mSPI.writeByte(command & 0xFF);
+
+			pixels.stepDithering();
+			pixels.advanceData();
+		}
+		//endBoundary(pixels.size());
+		mSPI.waitFully();
+		mSPI.release();
+	}
+
+};
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // APA102 definition - takes data/clock/select pin values (N.B. should take an SPI definition?)
@@ -271,6 +318,7 @@ protected:
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
+
 		endBoundary(pixels.size());
 
 		mSPI.waitFully();
