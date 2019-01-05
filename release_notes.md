@@ -1,4 +1,18 @@
-3.1.8 
+FastLED 3.2.1
+=============
+* ATmega644P support
+* Adafruit Hallowwing (Thanks to Lady Ada)
+* Improved STM 32 support
+* Some user contributed cleanups 
+* ESP32 APA102 output fix
+
+FastLED3.2
+==========
+* ESP32 support with improved output and parallel output options (thanks Sam Guyer!)
+* various minor contributed fixes
+
+FastLED 3.1.8
+============= 
 * Added support for Adafruit Circuit Playground Express (Thanks to Lady Ada)
 * Improved support for Adafruit Gemma and Trinket m0 (Thanks to Lady Ada)
 * Added support for PJRC's WS2812Serial (Thanks to Paul Stoffregen)
@@ -6,9 +20,11 @@
 * Fixes for ESP32 support (Thanks to Daniel Tullemans)
 * 'Makefile' compilation fix (Thanks to Nico Hood)
 
-3.1.7 (skipped)
+FastLED 3.1.7 (skipped)
+=======================
 
-3.1.6
+FastLED 3.1.6
+=============
 * Preliminary support for esp32
 * Variety of random bug fixes
 * 6-channel parallel output for the esp8266
@@ -17,10 +33,12 @@
 * Various fixes falling out from "fixing" scale 8 adjustments
 * Add gemma m0 support (thanks @ladyada!)
 
-3.1.5
+FastLED 3.1.5
+=============
 * Fix due parallel output build issue
 
-3.1.4
+FastLED 3.1.4
+=============
 * fix digispark avr build issue
 
 FastLED3.1.3

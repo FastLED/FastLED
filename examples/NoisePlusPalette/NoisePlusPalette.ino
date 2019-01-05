@@ -1,4 +1,4 @@
-#include<FastLED.h>
+#include <FastLED.h>
 
 #define LED_PIN     3
 #define BRIGHTNESS  96

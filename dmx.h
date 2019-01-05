@@ -4,7 +4,7 @@
 #include "FastLED.h"
 
 #ifdef DmxSimple_h
-#include<DmxSimple.h>
+#include <DmxSimple.h>
 #define HAS_DMX_SIMPLE
 
 ///@ingroup chipsets
@@ -35,7 +35,7 @@ FASTLED_NAMESPACE_END
 #endif
 
 #ifdef DmxSerial_h
-#include<DMXSerial.h>
+#include <DMXSerial.h>
 
 FASTLED_NAMESPACE_BEGIN
 

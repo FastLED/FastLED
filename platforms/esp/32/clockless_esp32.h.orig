@@ -1,8 +1,9 @@
 /*
- * Integration into FastLED ClocklessController
- * Copyright (c) 2018 Samuel Z. Guyer
- * Copyright (c) 2017 Thomas Basler
- * Copyright (c) 2017 Martin F. Falatic
+ * Integration into FastLED ClocklessController 2017 Thomas Basler
+ *
+ * Modifications Copyright (c) 2017 Martin F. Falatic
+ *
+ * Modifications Copyright (c) 2018 Samuel Z. Guyer
  *
  * ESP32 support is provided using the RMT peripheral device -- a unit
  * on the chip designed specifically for generating (and receiving)
@@ -49,7 +50,7 @@
  * co-exist. To switch to this mode, add the following directive
  * before you include FastLED.h:
  *
- *      #define FASTLED_RMT_BUILTIN_DRIVER 1
+ *      #define FASTLED_RMT_BUILTIN_DRIVER
  *
  * There may be a performance penalty for using this mode. We need to
  * compute the RMT signal for the entire LED strip ahead of time,
@@ -177,6 +178,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
 
     // -- Store the GPIO pin
     gpio_num_t     mPin;
+<<<<<<< HEAD
 
     // -- This instantiation forces a check on the pin choice
     FastPin<DATA_PIN> mFastPin;
@@ -185,10 +187,17 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     rmt_item32_t   mZero;
     rmt_item32_t   mOne;
 
+=======
+
+    // -- Timing values for zero and one bits, derived from T1, T2, and T3
+    rmt_item32_t   mZero;
+    rmt_item32_t   mOne;
+
+>>>>>>> upstream/master
     // -- State information for keeping track of where we are in the pixel data
-    uint8_t *      mPixelData = NULL;
-    int            mSize = 0;
-    int            mCurByte;
+    PixelController<RGB_ORDER> * mPixels = NULL;
+    void *         mPixelSpace = NULL;
+    uint8_t        mRGB_channel;
     uint16_t       mCurPulse;
 
     // -- Buffer to hold all of the pulses. For the version that uses
@@ -198,7 +207,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
 
 public:
 
-    void init()
+    virtual void init()
     {
         // -- Precompute rmt items corresponding to a zero bit and a one bit
         //    according to the timing values given in the template instantiation
@@ -216,10 +225,17 @@ public:
         mZero.level1 = 0;
         mZero.duration1 = TO_RMT_CYCLES(T2 + T3);
 
+<<<<<<< HEAD
         gControllers[gNumControllers] = this;
         gNumControllers++;
 
         mPin = gpio_num_t(DATA_PIN);
+=======
+	gControllers[gNumControllers] = this;
+        gNumControllers++;
+
+	mPin = gpio_num_t(DATA_PIN);
+>>>>>>> upstream/master
     }
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
@@ -228,6 +244,7 @@ protected:
 
     void initRMT()
     {
+<<<<<<< HEAD
         // -- Only need to do this once
         if (gInitialized) return;
 
@@ -278,8 +295,6 @@ protected:
         gInitialized = true;
     }
 
-    // -- Show pixels
-    //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER> & pixels)
     {
         if (gNumStarted == 0) {
@@ -293,13 +308,9 @@ protected:
         //    variable in the calling function, and this data structure
         //    needs to outlive this call to showPixels.
 
-        //if (mPixels != NULL) delete mPixels;
-        //mPixels = new PixelController<RGB_ORDER>(pixels);
-        if (FASTLED_RMT_BUILTIN_DRIVER)
-            convertAllPixelData(pixels);
-        else
-            copyPixelData(pixels);
-
+        if (mPixels != NULL) delete mPixels;
+        mPixels = new PixelController<RGB_ORDER>(pixels);
+        
         // -- Keep track of the number of strips we've seen
         gNumStarted++;
 
@@ -328,81 +339,9 @@ protected:
         }
     }
 
-    // -- Copy pixel data
-    //    Make a safe copy of the pixel data, so that the FastLED show
-    //    function can continue to the next controller while the RMT
-    //    device starts sending this data asynchronously.
-    virtual void copyPixelData(PixelController<RGB_ORDER> & pixels)
-    {
-        // -- Make sure we have a buffer of the right size
-        //    (3 bytes per pixel)
-        int size_needed = pixels.size() * 3;
-        if (size_needed > mSize) {
-            if (mPixelData != NULL) free(mPixelData);
-            mSize = size_needed;
-            mPixelData = (uint8_t *) malloc( mSize);
-        }
-
-        // -- Cycle through the R,G, and B values in the right order,
-        //    storing the resulting raw pixel data in the buffer.
-        int cur = 0;
-        while (pixels.has(1)) {
-            mPixelData[cur++] = pixels.loadAndScale0();
-            mPixelData[cur++] = pixels.loadAndScale1();
-            mPixelData[cur++] = pixels.loadAndScale2();
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
-    }
-
-    // -- Convert all pixels to RMT pulses
-    //    This function is only used when the user chooses to use the
-    //    built-in RMT driver, which needs all of the RMT pulses
-    //    up-front.
-    virtual void convertAllPixelData(PixelController<RGB_ORDER> & pixels)
-    {
-        // -- Compute the pulse values for the whole strip at once.
-        //    Requires a large buffer
-        mBufferSize = pixels.size() * 3 * 8;
-
-        if (mBuffer == NULL) {
-            mBuffer = (rmt_item32_t *) calloc( mBufferSize, sizeof(rmt_item32_t));
-        }
-
-        // -- Cycle through the R,G, and B values in the right order,
-        //    storing the pulses in the big buffer
-        mCurPulse = 0;
-        int cur = 0;
-        uint32_t byteval;
-        while (pixels.has(1)) {
-            byteval = pixels.loadAndScale0();
-            convertByte(byteval);
-            byteval = pixels.loadAndScale1();
-            convertByte(byteval);
-            byteval = pixels.loadAndScale2();
-            convertByte(byteval);
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
-
-        mBuffer[mCurPulse-1].duration1 = RMT_RESET_DURATION;
-        assert(mCurPulse == mBufferSize);
-    }
-
-    void convertByte(uint32_t byteval)
-    {
-        // -- Write one byte's worth of RMT pulses to the big buffer
-        byteval <<= 24;
-        for (register uint32_t j = 0; j < 8; j++) {
-            mBuffer[mCurPulse] = (byteval & 0x80000000L) ? mOne : mZero;
-            byteval <<= 1;
-            mCurPulse++;
-        }
-    }
-
     // -- Start up the next controller
-    //    This method is static so that it can dispatch to the
-    //    appropriate startOnChannel method of the given controller.
+    //    This method is static so that it can dispatch to the appropriate
+    //    startOnChannel method of the given controller.
     static void startNext(int channel)
     {
         if (gNext < gNumControllers) {
@@ -412,10 +351,7 @@ protected:
         }
     }
 
-    // -- Start this controller on the given channel
-    //    This function just initiates the RMT write; it does not wait
-    //    for it to finish.
-    void startOnChannel(int channel)
+    virtual void startOnChannel(int channel)
     {
         // -- Assign this channel and configure the RMT
         mRMT_channel = rmt_channel_t(channel);
@@ -430,7 +366,7 @@ protected:
         if (FASTLED_RMT_BUILTIN_DRIVER) {
             // -- Use the built-in RMT driver to send all the data in one shot
             rmt_register_tx_end_callback(doneOnChannel, 0);
-            rmt_write_items(mRMT_channel, mBuffer, mBufferSize, false);
+            writeAllRMTItems();
         } else {
             // -- Use our custom driver to send the data incrementally
 
@@ -440,7 +376,7 @@ protected:
             // -- Initialize the counters that keep track of where we are in
             //    the pixel data.
             mCurPulse = 0;
-            mCurByte = 0;
+            mRGB_channel = 0;
 
             // -- Fill both halves of the buffer
             fillHalfRMTBuffer();
@@ -454,16 +390,8 @@ protected:
         }
     }
 
-    // -- A controller is done 
-    //    This function is called when a controller finishes writing
-    //    its data. It is called either by the custom interrupt
-    //    handler (below), or as a callback from the built-in
-    //    interrupt handler. It is static because we don't know which
-    //    controller is done until we look it up.
     static void doneOnChannel(rmt_channel_t channel, void * arg)
     {
-        if (channel >= FASTLED_RMT_MAX_CHANNELS) return;
-
         ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
         portBASE_TYPE HPTaskAwoken = 0;
 
@@ -483,12 +411,176 @@ protected:
             if (gNext < gNumControllers)
                 startNext(channel);
         }
+=======
+	// -- Only need to do this once
+	if (gInitialized) return;
+
+	for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
+	    gOnChannel[i] = NULL;
+
+	    // -- RMT configuration for transmission
+	    rmt_config_t rmt_tx;
+	    rmt_tx.channel = rmt_channel_t(i);
+	    rmt_tx.rmt_mode = RMT_MODE_TX;
+	    rmt_tx.gpio_num = mPin;  // The particular pin will be assigned later
+	    rmt_tx.mem_block_num = 1;
+	    rmt_tx.clk_div = DIVIDER;
+	    rmt_tx.tx_config.loop_en = false;
+	    rmt_tx.tx_config.carrier_level = RMT_CARRIER_LEVEL_LOW;
+	    rmt_tx.tx_config.carrier_en = false;
+	    rmt_tx.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
+	    rmt_tx.tx_config.idle_output_en = true;
+		
+	    // -- Apply the configuration
+	    rmt_config(&rmt_tx);
+
+	    if (FASTLED_RMT_BUILTIN_DRIVER) {
+		rmt_driver_install(rmt_channel_t(i), 0, 0);
+	    } else {
+		// -- Set up the RMT to send 1/2 of the pulse buffer and then
+		//    generate an interrupt. When we get this interrupt we
+		//    fill the other half in preparation (kind of like double-buffering)
+		rmt_set_tx_thr_intr_en(rmt_channel_t(i), true, MAX_PULSES);
+	    }
+	}
+
+	// -- Create a semaphore to block execution until all the controllers are done
+	if (gTX_sem == NULL) {
+	    gTX_sem = xSemaphoreCreateBinary();
+	    xSemaphoreGive(gTX_sem);
+	}
+		
+	if ( ! FASTLED_RMT_BUILTIN_DRIVER) {
+	    // -- Allocate the interrupt if we have not done so yet. This
+	    //    interrupt handler must work for all different kinds of
+	    //    strips, so it delegates to the refill function for each
+	    //    specific instantiation of ClocklessController.
+	    if (gRMT_intr_handle == NULL)
+		esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, interruptHandler, 0, &gRMT_intr_handle);
+	}
+
+	gInitialized = true;
+    }
+
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels)
+    {
+	if (gNumStarted == 0) {
+	    // -- First controller: make sure everything is set up
+	    initRMT();
+	    xSemaphoreTake(gTX_sem, portMAX_DELAY);
+	}
+
+	// -- Initialize the local state, save a pointer to the pixel
+	//    data. We need to make a copy because pixels is a local
+	//    variable in the calling function, and this data structure
+	//    needs to outlive this call to showPixels.
+
+	if (mPixels != NULL) delete mPixels;
+	mPixels = new PixelController<RGB_ORDER>(pixels);
+	
+	// -- Keep track of the number of strips we've seen
+	gNumStarted++;
+
+	// -- The last call to showPixels is the one responsible for doing
+	//    all of the actual worl
+	if (gNumStarted == gNumControllers) {
+	    gNext = 0;
+
+	    // -- First, fill all the available channels
+	    int channel = 0;
+	    while (channel < FASTLED_RMT_MAX_CHANNELS && gNext < gNumControllers) {
+		startNext(channel);
+		channel++;
+	    }
+
+	    // -- Wait here while the rest of the data is sent. The interrupt handler
+	    //    will keep refilling the RMT buffers until it is all sent; then it
+	    //    gives the semaphore back.
+	    xSemaphoreTake(gTX_sem, portMAX_DELAY);
+	    xSemaphoreGive(gTX_sem);
+
+	    // -- Reset the counters
+	    gNumStarted = 0;
+	    gNumDone = 0;
+	    gNext = 0;
+	}
+    }
+
+    // -- Start up the next controller
+    //    This method is static so that it can dispatch to the appropriate
+    //    startOnChannel method of the given controller.
+    static void startNext(int channel)
+    {
+	if (gNext < gNumControllers) {
+	    ClocklessController * pController = static_cast<ClocklessController*>(gControllers[gNext]);
+	    pController->startOnChannel(channel);
+	    gNext++;
+	}
+    }
+
+    virtual void startOnChannel(int channel)
+    {
+	// -- Assign this channel and configure the RMT
+	mRMT_channel = rmt_channel_t(channel);
+
+	// -- Store a reference to this controller, so we can get it
+	//    inside the interrupt handler
+	gOnChannel[channel] = this;
+
+	// -- Assign the pin to this channel
+	rmt_set_pin(mRMT_channel, RMT_MODE_TX, mPin);
+
+	if (FASTLED_RMT_BUILTIN_DRIVER) {
+	    // -- Use the built-in RMT driver to send all the data in one shot
+	    rmt_register_tx_end_callback(doneOnChannel, 0);
+	    writeAllRMTItems();
+	} else {
+	    // -- Use our custom driver to send the data incrementally
+
+	    // -- Turn on the interrupts
+	    rmt_set_tx_intr_en(mRMT_channel, true);
+	
+	    // -- Initialize the counters that keep track of where we are in
+	    //    the pixel data.
+	    mCurPulse = 0;
+	    mRGB_channel = 0;
+
+	    // -- Fill both halves of the buffer
+	    fillHalfRMTBuffer();
+	    fillHalfRMTBuffer();
+
+	    // -- Turn on the interrupts
+	    rmt_set_tx_intr_en(mRMT_channel, true);
+	    
+	    // -- Start the RMT TX operation
+	    rmt_tx_start(mRMT_channel, true);
+	}
+    }
+
+    static void doneOnChannel(rmt_channel_t channel, void * arg)
+    {
+	ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
+        portBASE_TYPE HPTaskAwoken = 0;
+
+	// -- Turn off output on the pin
+	gpio_matrix_out(controller->mPin, 0x100, 0, 0);
+
+	gOnChannel[channel] = NULL;
+	gNumDone++;
+
+	if (gNumDone == gNumControllers) {
+	    // -- If this is the last controller, signal that we are all done
+	    xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+	    if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
+	} else {
+	    // -- Otherwise, if there are still controllers waiting, then
+	    //    start the next one on this channel
+	    if (gNext < gNumControllers)
+		startNext(channel);
+	}
+>>>>>>> upstream/master
     }
     
-    // -- Custom interrupt handler
-    //    This interrupt handler handles two cases: a controller is
-    //    done writing its data, or a controller needs to fill the
-    //    next half of the RMT buffer with data.
     static IRAM_ATTR void interruptHandler(void *arg)
     {
         // -- The basic structure of this code is borrowed from the
@@ -502,42 +594,102 @@ protected:
 
             if (gOnChannel[channel] != NULL) {
 
+<<<<<<< HEAD
+                ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
+
                 // -- More to send on this channel
                 if (intr_st & BIT(tx_next_bit)) {
                     RMT.int_clr.val |= BIT(tx_next_bit);
-                    
+
                     // -- Refill the half of the buffer that we just finished,
                     //    allowing the other half to proceed.
-                    ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
                     controller->fillHalfRMTBuffer();
-                } else {
-                    // -- Transmission is complete on this channel
-                    if (intr_st & BIT(tx_done_bit)) {
-                        RMT.int_clr.val |= BIT(tx_done_bit);
-                        doneOnChannel(rmt_channel_t(channel), 0);
-                    }
+                }
+
+                // -- Transmission is complete on this channel
+                if (intr_st & BIT(tx_done_bit)) {
+                    RMT.int_clr.val |= BIT(tx_done_bit);
+                    doneOnChannel(rmt_channel_t(channel), 0);
+=======
+		ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
+
+		// -- More to send on this channel
+                if (intr_st & BIT(tx_next_bit)) {
+		    RMT.int_clr.val |= BIT(tx_next_bit);
+
+                    // -- Refill the half of the buffer that we just finished,
+                    //    allowing the other half to proceed.
+		    controller->fillHalfRMTBuffer();
+                }
+
+		// -- Transmission is complete on this channel
+                if (intr_st & BIT(tx_done_bit)) {
+                    RMT.int_clr.val |= BIT(tx_done_bit);
+		    doneOnChannel(rmt_channel_t(channel), 0);
+>>>>>>> upstream/master
                 }
             }
         }
     }
 
-    // -- Fill the RMT buffer
-    //    This function fills the next 32 slots in the RMT write
-    //    buffer with pixel data. It also handles the case where the
-    //    pixel data is exhausted, so we need to fill the RMT buffer
-    //    with zeros to signal that it's done.
-    void fillHalfRMTBuffer()
+    virtual void fillHalfRMTBuffer()
     {
+        // -- Fill half of the RMT pulse buffer
+
+        //    The buffer holds 64 total pulse items, so this loop converts
+        //    as many pixels as can fit in half of the buffer (MAX_PULSES =
+        //    32 items). In our case, each pixel consists of three bytes,
+        //    each bit turns into one pulse item -- 24 items per pixel. So,
+        //    each half of the buffer can hold 1 and 1/3 of a pixel.
+
+        //    The member variable mCurPulse keeps track of which of the 64
+        //    items we are writing. During the first call to this method it
+        //    fills 0-31; in the second call it fills 32-63, and then wraps
+        //    back around to zero.
+
+        //    When we run out of pixel data, just fill the remaining items
+        //    with zero pulses.
+
+        uint16_t pulse_count = 0; // Ranges from 0-31 (half a buffer)
+        uint32_t byteval = 0;
         uint32_t one_val = mOne.val;
         uint32_t zero_val = mZero.val;
+        bool done_strip = false;
 
-        // -- Convert (up to) 32 bits of the raw pixel data into
-        //    into RMT pulses that encode the zeros and ones.
-        int pulses = 0;
-        uint32_t byteval;
-        while (pulses < 32 && mCurByte < mSize) {
-            // -- Get one byte
-            byteval = mPixelData[mCurByte++];
+        while (pulse_count < MAX_PULSES) {
+            if (! mPixels->has(1)) {
+<<<<<<< HEAD
+                if (mCurPulse > 0) {
+                    // -- Extend the last pulse to force the strip to latch. Honestly, I'm not
+                    //    sure if this is really necessary.
+                    // RMTMEM.chan[mRMT_channel].data32[mCurPulse-1].duration1 = RMT_RESET_DURATION;
+                }
+=======
+>>>>>>> upstream/master
+                done_strip = true;
+                break;
+            }
+
+            // -- Cycle through the R,G, and B values in the right order
+            switch (mRGB_channel) {
+            case 0:
+                byteval = mPixels->loadAndScale0();
+                mRGB_channel = 1;
+                break;
+            case 1:
+                byteval = mPixels->loadAndScale1();
+                mRGB_channel = 2;
+                break;
+            case 2:
+                byteval = mPixels->loadAndScale2();
+                mPixels->advanceData();
+                mPixels->stepDithering();
+                mRGB_channel = 0;
+                break;
+            default:
+                break;
+            }
+
             byteval <<= 24;
             // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
             // rmt_item32_t value corresponding to the buffered bit value
@@ -546,23 +698,88 @@ protected:
                 RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
                 byteval <<= 1;
                 mCurPulse++;
+                pulse_count++;
             }
-            pulses += 8;
-        }
+<<<<<<< HEAD
+=======
 
-        // -- When we reach the end of the pixel data, fill the rest of the
-        //    RMT buffer with 0's, which signals to the device that we're done.
-        if (mCurByte == mSize) {
-            while (pulses < 32) {
-                RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
-                mCurPulse++;
-                pulses++;
-            }
+	    if (done_strip)
+		RMTMEM.chan[mRMT_channel].data32[mCurPulse-1].duration1 = RMT_RESET_DURATION;
+>>>>>>> upstream/master
         }
         
+        if (done_strip) {
+            // -- And fill the remaining items with zero pulses. The zero values triggers
+            //    the tx_done interrupt.
+            while (pulse_count < MAX_PULSES) {
+                RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
+                mCurPulse++;
+                pulse_count++;
+            }
+        }
+
         // -- When we have filled the back half the buffer, reset the position to the first half
         if (mCurPulse >= MAX_PULSES*2)
             mCurPulse = 0;
+    }
+
+    virtual void writeAllRMTItems()
+    {
+        // -- Compute the pulse values for the whole strip at once.
+        //    Requires a large buffer
+<<<<<<< HEAD
+        mBufferSize = mPixels->size() * 3 * 8;
+=======
+	mBufferSize = mPixels->size() * 3 * 8;
+>>>>>>> upstream/master
+
+        // TODO: need a specific number here
+        if (mBuffer == NULL) {
+            mBuffer = (rmt_item32_t *) calloc( mBufferSize, sizeof(rmt_item32_t));
+        }
+
+        mCurPulse = 0;
+        mRGB_channel = 0;
+        uint32_t byteval = 0;
+        while (mPixels->has(1)) {
+            // -- Cycle through the R,G, and B values in the right order
+            switch (mRGB_channel) {
+            case 0:
+                byteval = mPixels->loadAndScale0();
+                mRGB_channel = 1;
+                break;
+            case 1:
+                byteval = mPixels->loadAndScale1();
+                mRGB_channel = 2;
+                break;
+            case 2:
+                byteval = mPixels->loadAndScale2();
+                mPixels->advanceData();
+                mPixels->stepDithering();
+                mRGB_channel = 0;
+                break;
+            default:
+                break;
+            }
+
+            byteval <<= 24;
+            // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
+            // rmt_item32_t value corresponding to the buffered bit value
+            for (register uint32_t j = 0; j < 8; j++) {
+                mBuffer[mCurPulse] = (byteval & 0x80000000L) ? mOne : mZero;
+                byteval <<= 1;
+                mCurPulse++;
+            }
+        }
+
+        mBuffer[mCurPulse-1].duration1 = RMT_RESET_DURATION;
+        assert(mCurPulse == mBufferSize);
+
+<<<<<<< HEAD
+        rmt_write_items(mRMT_channel, mBuffer, mBufferSize, false);
+=======
+	rmt_write_items(mRMT_channel, mBuffer, mBufferSize, false);
+>>>>>>> upstream/master
     }
 };
 

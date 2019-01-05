@@ -19,9 +19,9 @@
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/led_sysdefs_arm_sam.h"
-#elif defined(STM32F10X_MD)
+#elif defined(STM32F10X_MD) || defined(__STM32F1__)
 #include "platforms/arm/stm32/led_sysdefs_arm_stm32.h"
-#elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__)
+#elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__) || defined(__SAMD51G19A__)
 #include "platforms/arm/d21/led_sysdefs_arm_d21.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/led_sysdefs_esp8266.h"
@@ -40,7 +40,7 @@
 
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #ifdef ARDUINO
-#include<Arduino.h>
+#include <Arduino.h>
 #endif
 
 #define CLKS_PER_US (F_CPU/1000000)

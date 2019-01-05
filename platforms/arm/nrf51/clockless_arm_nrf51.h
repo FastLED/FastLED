@@ -3,7 +3,7 @@
 
 #if defined(NRF51)
 
-#include "nrf51_bitfields.h"
+#include <nrf51_bitfields.h>
 #define FASTLED_HAS_CLOCKLESS 1
 
 #if (FASTLED_ALLOW_INTERRUPTS==1)

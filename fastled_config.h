@@ -46,11 +46,24 @@
 #define FASTLED_BLEND_FIXED 1
 // #define FASTLED_BLEND_FIXED 0
 
+// Use this toggle whether to use 'fixed' FastLED 8- and 16-bit noise functions.
+// The prior noise functions had some math errors that led to 'discontinuities' in the
+// output, which by definition should be smooth and continuous.  The bug led to 
+// noise function output that had 'edges' and glitches in it.  This is now fixed, and the
+// fix is enabled by default.  However, if for some reason you wish to run with the old
+// noise code, including the glitches, you can disable the bugfix here.
+#define FASTLED_NOISE_FIXED 1
+//#define FASTLED_NOISE_FIXED 0
+
 // Use this to determine how many times FastLED will attempt to re-transmit a frame if interrupted
 // for too long by interrupts.
 #ifndef FASTLED_INTERRUPT_RETRY_COUNT
 #define FASTLED_INTERRUPT_RETRY_COUNT 2
 #endif
 
+// Use this toggle to enable global brightness in contollers that support is (ADA102 and SK9822).
+// It changes how color scaling works and uses global brightness before scaling down color values.
+// This enable much more accurate color control on low brightness settings.
+//#define FASTLED_USE_GLOBAL_BRIGHTNESS 1
 
 #endif

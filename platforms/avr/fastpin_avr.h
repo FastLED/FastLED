@@ -180,7 +180,7 @@ _DEFPIN_AVR(16, 0x04, C); _DEFPIN_AVR(17, 0x08, C); _DEFPIN_AVR(18, 0x10, C); _D
 #define SPI_UART0_CLOCK 4
 #endif
 
-#elif defined(__AVR_ATmega1284P__)
+#elif defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega644P__)
 
 _IO(A); _IO(B); _IO(C); _IO(D);
 
