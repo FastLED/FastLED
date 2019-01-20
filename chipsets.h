@@ -439,6 +439,11 @@ protected:
 // need the more tightly defined timeframes.
 #if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000) //  || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
 #define FMUL (F_CPU/8000000)
+
+// GE8822
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GE8822Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, 4> {};
+
 // LPD1886
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER, 4> {};
@@ -497,6 +502,10 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 #else
+// GE8822 - 350ns 660ns 350ns
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GE8822Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(660), NS(350), RGB_ORDER, 4> {};
+
 // GW6205@400khz - 800ns, 800ns, 800ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class GW6205Controller400Khz : public ClocklessController<DATA_PIN, NS(800), NS(800), NS(800), RGB_ORDER, 4> {};
