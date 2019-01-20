@@ -26,4 +26,17 @@
     "build": {
         "libArchive": false
     }    
+    "export": {
+        "exclude": [
+            "docs",
+            "extras"
+        ]
+    },
+    "build": {
+        "srcFilter": [
+            "+<*.c>",
+            "+<*.cpp>",
+            "+<*.h>"
+        ]
+    } 
 }
