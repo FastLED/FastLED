@@ -1,3 +1,12 @@
+FastLED 3.2.2
+=============
+
+* Perf tweak for SAMD21
+* LPD6803 support
+* Add atmega328pb support
+* Variety of minor bug/correctness/typo fixes
+* Added SM16703, GE8822, GS1903
+
 FastLED 3.2.1
 =============
 * ATmega644P support
