@@ -25,7 +25,7 @@
     "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32",
     "build": {
         "libArchive": false
-    }    
+    },    
     "export": {
         "exclude": [
             "docs",
