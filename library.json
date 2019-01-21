@@ -22,10 +22,7 @@
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
-    "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32",
-    "build": {
-        "libArchive": false
-    },    
+    "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32",   
     "export": {
         "exclude": [
             "docs",
@@ -37,6 +34,7 @@
             "+<*.c>",
             "+<*.cpp>",
             "+<*.h>"
-        ]
+        ],
+        "libArchive": false
     } 
 }
