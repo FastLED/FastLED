@@ -1,3 +1,8 @@
+FastLED 3.2.4
+=============
+
+* fix builds for WAV boards
+
 FastLED 3.2.2
 =============
 
