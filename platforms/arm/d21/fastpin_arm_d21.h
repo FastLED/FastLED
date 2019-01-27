@@ -172,7 +172,7 @@ _DEFPIN_ARM( 20, 0,  6); _DEFPIN_ARM( 21, 0,  7);
 #elif defined(ARDUINO_GEMMA_M0)
 
 #define MAX_PIN 4
-_DEFPIN_ARM( 0, 0, 4); _DEFPIN_ARM( 1, 0, 2); _DEFPIN_ARM( 2, 0, 5); 
+_DEFPIN_ARM( 0, 0, 4); _DEFPIN_ARM( 1, 0, 2); _DEFPIN_ARM( 2, 0, 5);
 _DEFPIN_ARM( 3, 0, 0); _DEFPIN_ARM( 4, 0, 1);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
@@ -185,27 +185,6 @@ _DEFPIN_ARM( 3, 0, 7); _DEFPIN_ARM( 4, 0, 6); _DEFPIN_ARM( 7, 0, 0); _DEFPIN_ARM
 
 #define SPI_DATA  4
 #define SPI_CLOCK 3
-
-#define HAS_HARDWARE_PIN_SUPPORT 1
-
-#elif defined(ADAFRUIT_ITSYBITSY_M4_EXPRESS)
-
-#define MAX_PIN 19
-// D0-D13, including D6+D8 (DotStar CLK + DATA)
-_DEFPIN_ARM( 0, 0, 16); _DEFPIN_ARM( 1, 0, 17); _DEFPIN_ARM( 2, 0,  7); _DEFPIN_ARM( 3, 1, 22);
-_DEFPIN_ARM( 4, 0, 14); _DEFPIN_ARM( 5, 0, 15); _DEFPIN_ARM( 6, 1,  2); _DEFPIN_ARM( 7, 0, 18);
-_DEFPIN_ARM( 8, 1,  3); _DEFPIN_ARM( 9, 0, 19); _DEFPIN_ARM(10, 0, 20); _DEFPIN_ARM(11, 0, 21);
-_DEFPIN_ARM(12, 0, 23); _DEFPIN_ARM(13, 0, 22);
-// A0-A5
-_DEFPIN_ARM(14, 0,  2); _DEFPIN_ARM(15, 0,  5); _DEFPIN_ARM(16, 1,  8); _DEFPIN_ARM(17, 1,  9);
-_DEFPIN_ARM(18, 0,  4); _DEFPIN_ARM(19, 0,  6); /* A6 is present in variant.h but couldn't find it on the schematic */
-// SDA/SCL
-_DEFPIN_ARM(21, 0, 12); _DEFPIN_ARM(22, 0, 13);
-// MISO/SCK/MOSI
-_DEFPIN_ARM(23, 1, 23); _DEFPIN_ARM(24, 0,  1); _DEFPIN_ARM(25, 0,  0);
-
-#define SPI_DATA 25
-#define SPI_CLOCK 24
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
