@@ -1,3 +1,8 @@
+FastLED 3.2.5
+=============
+
+* Fix for SAMD51 based boards (a SAMD21 optimization broke the D51 builds, now D51 is a separate platform)
+
 FastLED 3.2.4
 =============
 
