@@ -338,6 +338,7 @@ LIB8STATIC uint8_t submod8( uint8_t a, uint8_t b, uint8_t m)
     a -= b;
     while( a >= m) a -= m;
 #endif
+    return a;
 }
 
 /// 8x8 bit multiplication, with 8 bit result
