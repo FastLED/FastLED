@@ -55,7 +55,7 @@ typedef volatile uint8_t & reg8_t;
 _IO(B);
 
 #if defined(__AVR_ATtiny25__)
-#pragma message 'ATtiny25 has very limited storage. This library could use up to more than 100% of its flash size'
+#pragma message "ATtiny25 has very limited storage. This library could use up to more than 100% of its flash size"
 #endif
 
 #define MAX_PIN 5
