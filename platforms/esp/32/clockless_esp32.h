@@ -372,7 +372,6 @@ protected:
         // -- Cycle through the R,G, and B values in the right order,
         //    storing the pulses in the big buffer
         mCurPulse = 0;
-        int cur = 0;
         uint32_t byteval;
         while (pixels.has(1)) {
             byteval = pixels.loadAndScale0();
