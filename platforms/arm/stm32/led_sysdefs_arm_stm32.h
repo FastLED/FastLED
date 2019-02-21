@@ -1,9 +1,9 @@
 #ifndef __INC_LED_SYSDEFS_ARM_SAM_H
 #define __INC_LED_SYSDEFS_ARM_SAM_H
 
-#include <application.h>
-
 #if defined(STM32F10X_MD)
+
+ #include <application.h>
 
  #define FASTLED_NAMESPACE_BEGIN namespace NSFastLED {
  #define FASTLED_NAMESPACE_END }
