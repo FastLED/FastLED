@@ -51,8 +51,12 @@ typedef volatile uint8_t & reg8_t;
 #define _IO(L) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L);
 #define _DEFPIN_AVR(_PIN, MASK, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, MASK, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
 
-#if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny45__)
+#if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny25__)
 _IO(B);
+
+#if defined(__AVR_ATtiny25__)
+#pragma message "ATtiny25 has very limited storage. This library could use up to more than 100% of its flash size"
+#endif
 
 #define MAX_PIN 5
 
@@ -80,7 +84,7 @@ _IO(A); _IO(B);
 _DEFPIN_AVR(0, 0x01, B); _DEFPIN_AVR(1, 0x02, B); _DEFPIN_AVR(2, 0x04, B);
 _DEFPIN_AVR(3, 0x80, A); _DEFPIN_AVR(4, 0x40, A); _DEFPIN_AVR(5, 0x20, A);
 
-#elif defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__)
+#elif defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) 
 _IO(A); _IO(B);
 
 #define MAX_PIN 10
