@@ -278,34 +278,34 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
     do {
       asm __volatile__ (
       // Write out byte 0, prepping byte 1
-      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
-      HI2 D1 QLO4 LOADLEDS3(1)    D2(3) LO2 D3(0)
-      HI2 D1 QLO4 LOADDITHER7(1)  D2(7) LO2 D3(0)
-      HI2 D1 QLO4 DITHER5         D2(5) LO2 D3(0)
-      HI2 D1 QLO4 SCALE4(1)       D2(4) LO2 D3(0)
-      HI2 D1 QLO4 ADJDITHER7(1)   D2(7) LO2 D3(0)
-      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
-      HI2 D1 QLO4 SWAPBBN1        D2(1) LO2 D3(0)
+      HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
+      HI2 _D1 QLO4 LOADLEDS3(1)    _D2(3) LO2 _D3(0)
+      HI2 _D1 QLO4 LOADDITHER7(1)  _D2(7) LO2 _D3(0)
+      HI2 _D1 QLO4 DITHER5         _D2(5) LO2 _D3(0)
+      HI2 _D1 QLO4 SCALE4(1)       _D2(4) LO2 _D3(0)
+      HI2 _D1 QLO4 ADJDITHER7(1)   _D2(7) LO2 _D3(0)
+      HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
+      HI2 _D1 QLO4 SWAPBBN1        _D2(1) LO2 _D3(0)
 
       // Write out byte 1, prepping byte 2
-      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
-      HI2 D1 QLO4 LOADLEDS3(2)    D2(3) LO2 D3(0)
-      HI2 D1 QLO4 LOADDITHER7(2)  D2(7) LO2 D3(0)
-      HI2 D1 QLO4 DITHER5         D2(5) LO2 D3(0)
-      HI2 D1 QLO4 SCALE4(2)       D2(4) LO2 D3(0)
-      HI2 D1 QLO4 ADJDITHER7(2)   D2(7) LO2 D3(0)
-      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
-      HI2 D1 QLO4 SWAPBBN1        D2(1) LO2 D3(0)
+      HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
+      HI2 _D1 QLO4 LOADLEDS3(2)    _D2(3) LO2 _D3(0)
+      HI2 _D1 QLO4 LOADDITHER7(2)  _D2(7) LO2 _D3(0)
+      HI2 _D1 QLO4 DITHER5         _D2(5) LO2 _D3(0)
+      HI2 _D1 QLO4 SCALE4(2)       _D2(4) LO2 _D3(0)
+      HI2 _D1 QLO4 ADJDITHER7(2)   _D2(7) LO2 _D3(0)
+      HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
+      HI2 _D1 QLO4 SWAPBBN1        _D2(1) LO2 _D3(0)
 
       // Write out byte 2, prepping byte 0
-      HI2 D1 QLO4 INCLEDS3        D2(3) LO2 D3(0)
-      HI2 D1 QLO4 LOADLEDS3(0)    D2(3) LO2 D3(0)
-      HI2 D1 QLO4 LOADDITHER7(0)  D2(7) LO2 D3(0)
-      HI2 D1 QLO4 DITHER5         D2(5) LO2 D3(0)
-      HI2 D1 QLO4 SCALE4(0)       D2(4) LO2 D3(0)
-      HI2 D1 QLO4 ADJDITHER7(0)   D2(7) LO2 D3(0)
-      HI2 D1 QLO4 NOTHING         D2(0) LO2 D3(0)
-      HI2 D1 QLO4 SWAPBBN1        D2(1) LO2 D3(5)
+      HI2 _D1 QLO4 INCLEDS3        _D2(3) LO2 _D3(0)
+      HI2 _D1 QLO4 LOADLEDS3(0)    _D2(3) LO2 _D3(0)
+      HI2 _D1 QLO4 LOADDITHER7(0)  _D2(7) LO2 _D3(0)
+      HI2 _D1 QLO4 DITHER5         _D2(5) LO2 _D3(0)
+      HI2 _D1 QLO4 SCALE4(0)       _D2(4) LO2 _D3(0)
+      HI2 _D1 QLO4 ADJDITHER7(0)   _D2(7) LO2 _D3(0)
+      HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
+      HI2 _D1 QLO4 SWAPBBN1        _D2(1) LO2 _D3(5)
 
       M0_ASM_ARGS
       );
