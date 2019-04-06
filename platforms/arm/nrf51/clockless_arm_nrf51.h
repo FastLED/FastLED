@@ -7,13 +7,23 @@
 #define FASTLED_HAS_CLOCKLESS 1
 
 #if (FASTLED_ALLOW_INTERRUPTS==1)
-#define SEI_CHK LED_TIMER->CC[0] = (WAIT_TIME * (F_CPU/1000000)); LED_TIMER->TASKS_CLEAR; LED_TIMER->EVENTS_COMPARE[0] = 0;
-#define CLI_CHK cli(); if(LED_TIMER->EVENTS_COMPARE[0]) { LED_TIMER->TASKS_STOP = 1; return 0; }
-#define INNER_SEI sei();
+    #define SEI_CHK do {\
+        LED_TIMER->CC[0] = (WAIT_TIME * (F_CPU/1000000));\
+        LED_TIMER->TASKS_CLEAR;\
+        LED_TIMER->EVENTS_COMPARE[0] = 0;\
+    } while(0)
+    #define CLI_CHK do {\
+        cli();
+        if(LED_TIMER->EVENTS_COMPARE[0]) {\
+            LED_TIMER->TASKS_STOP = 1;\
+            return 0;\
+        }\
+    } while (0)
+    #define INNER_SEI sei()
 #else
-#define SEI_CHK
-#define CLI_CHK
-#define INNER_SEI delaycycles<1>();
+    #define SEI_CHK
+    #define CLI_CHK
+    #define INNER_SEI delaycycles<1>();
 #endif
 
 
