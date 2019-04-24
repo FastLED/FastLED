@@ -7,6 +7,8 @@
 
 #if defined(NRF51) || defined(__RFduino__) || defined (__Simblee__)
 #include "platforms/arm/nrf51/led_sysdefs_arm_nrf51.h"
+#elif defined(NRF52_SERIES)
+#include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
 // Include k20/T3 headers
 #include "platforms/arm/k20/led_sysdefs_arm_k20.h"
