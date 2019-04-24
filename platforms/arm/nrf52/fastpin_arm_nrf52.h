@@ -10,6 +10,9 @@
     #define FASTLED_NRF52_INLINE_ATTRIBUTE __attribute__((always_inline)) inline
 #endif
 
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+
 /*
 //
 // Background:
@@ -93,13 +96,33 @@ struct __generated_struct_NRF_P1 {
 
 
 // The actual class template can then use a typename, for what is essentially a constexpr NRF_GPIO_Type*
-template <uint32_t _MASK, typename _PORT> class _ARMPIN  {
+template <uint32_t _MASK, typename _PORT, uint8_t _PORT_NUMBER, uint8_t _PIN_NUMBER> class _ARMPIN  {
 public:
   typedef volatile uint32_t * port_ptr_t;
   typedef uint32_t port_t;
 
-  FASTLED_NRF52_INLINE_ATTRIBUTE static void       setOutput() { _PORT::r()->DIRSET = _MASK;            } // sets _MASK in the SET   DIRECTION register (set to output)
-  FASTLED_NRF52_INLINE_ATTRIBUTE static void       setInput()  { _PORT::r()->DIRCLR = _MASK;            } // sets _MASK in the CLEAR DIRECTION register (set to input)
+  FASTLED_NRF52_INLINE_ATTRIBUTE static void       setOutput() {
+    // OK for this to be more than one instruction, as unusual to quickly switch input/output modes
+    nrf_gpio_cfg(
+        nrfx_pin(),
+        NRF_GPIO_PIN_DIR_OUTPUT,        // set pin as output
+        NRF_GPIO_PIN_INPUT_DISCONNECT,  // disconnect the input buffering
+        NRF_GPIO_PIN_NOPULL,            // neither pull-up nor pull-down resistors enabled
+        NRF_GPIO_PIN_H0H1,              // high drive mode required for faster speeds
+        NRF_GPIO_PIN_NOSENSE            // pin sense level disabled
+        );
+  }
+  FASTLED_NRF52_INLINE_ATTRIBUTE static void       setInput()  {
+    // OK for this to be more than one instruction, as unusual to quickly switch input/output modes
+    nrf_gpio_cfg(
+        nrfx_pin(),
+        NRF_GPIO_PIN_DIR_INPUT,         // set pin as input
+        NRF_GPIO_PIN_INPUT_DISCONNECT,  // disconnect the input buffering
+        NRF_GPIO_PIN_NOPULL,            // neither pull-up nor pull-down resistors enabled
+        NRF_GPIO_PIN_H0H1,              // high drive mode required for faster speeds
+        NRF_GPIO_PIN_NOSENSE            // pin sense level disabled
+        );
+  }
   FASTLED_NRF52_INLINE_ATTRIBUTE static void       hi()        { _PORT::r()->OUTSET = _MASK;            } // sets _MASK in the SET   OUTPUT register (output set high)
   FASTLED_NRF52_INLINE_ATTRIBUTE static void       lo()        { _PORT::r()->OUTCLR = _MASK;            } // sets _MASK in the CLEAR OUTPUT register (output set low)
   FASTLED_NRF52_INLINE_ATTRIBUTE static void       toggle()    { _PORT::r()->OUT ^= _MASK;              } // toggles _MASK bits in the OUTPUT GPIO port directly
@@ -110,10 +133,161 @@ public:
   FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t cport()     { return &(_PORT::r()->OUTCLR);          } // gets raw pointer to SET   DIRECTION GPIO port
   FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t sport()     { return &(_PORT::r()->OUTSET);          } // gets raw pointer to CLEAR DIRECTION GPIO port
   FASTLED_NRF52_INLINE_ATTRIBUTE static port_t     mask()      { return _MASK;                          } // gets the value of _MASK
-  FASTLED_NRF52_INLINE_ATTRIBUTE static void hi(register port_ptr_t port) { hi();  } // sets _MASK in the SET   OUTPUT register (output set high)
-  FASTLED_NRF52_INLINE_ATTRIBUTE static void lo(register port_ptr_t port) { lo();  } // sets _MASK in the CLEAR OUTPUT register (output set low)
-  FASTLED_NRF52_INLINE_ATTRIBUTE static void set(register port_t val    ) { _PORT::r()->OUT = val; }
+  FASTLED_NRF52_INLINE_ATTRIBUTE static void hi (register port_ptr_t port) { hi();                      } // sets _MASK in the SET   OUTPUT register (output set high)
+  FASTLED_NRF52_INLINE_ATTRIBUTE static void lo (register port_ptr_t port) { lo();                      } // sets _MASK in the CLEAR OUTPUT register (output set low)
+  FASTLED_NRF52_INLINE_ATTRIBUTE static void set(register port_t     val ) { _PORT::r()->OUT = val;     } // sets entire port's value (optimization used by FastLED)
   FASTLED_NRF52_INLINE_ATTRIBUTE static void fastset(register port_ptr_t port, register port_t val) { *port = val; }
+
+  constexpr static bool LowSpeedOnlyRecommended() {
+    // only allow one function body.
+    #undef _FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT
+
+    // unique cases for each board / processor package / module?
+    #if defined(NRF52810_XXAA) && defined(NRF52810_PACKAGE_QFN48)
+        #if defined(_FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT)
+            #error "Multiple board match"
+        #endif
+        #define _FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT 1
+        static_assert(_PORT_NUMBER == 0, "nRF52810 only has one port");
+        return (
+            (_PIN_NUMBER == 25) ||
+            (_PIN_NUMBER == 26) ||
+            (_PIN_NUMBER == 27) ||
+            (_PIN_NUMBER == 28) ||
+            (_PIN_NUMBER == 29)
+            );
+    #endif
+    #if defined(NRF52810_XXAA) && defined(NRF52810_PACKAGE_QFN32)
+        #if defined(_FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT)
+            #error "Multiple board match"
+        #endif
+        #define _FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT 1
+        static_assert(_PORT_NUMBER == 0, "nRF52810 only has one port");
+        if (_PORT_NUMBER == 0) {
+            if (
+                (_PIN_NUMBER == 26) ||
+                (_PIN_NUMBER == 27)
+                ) {
+                return true;
+            }
+        }
+        return false;
+    #endif
+    #if defined(NRF52832_XXAA) || defined(NRF52832_XXAB)
+        #if defined(_FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT)
+            #error "Multiple board match"
+        #endif
+        #define _FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT 1
+        static_assert(_PORT_NUMBER == 0, "nRF52832 only has one port");
+        // data sheets shows the same pins in both QFN48 and WLCSP package
+        // are recommended as low-speed only:
+        return (
+            (_PIN_NUMBER == 22) ||
+            (_PIN_NUMBER == 23) ||
+            (_PIN_NUMBER == 24) ||
+            (_PIN_NUMBER == 25) ||
+            (_PIN_NUMBER == 26) ||
+            (_PIN_NUMBER == 27) ||
+            (_PIN_NUMBER == 28) ||
+            (_PIN_NUMBER == 29) ||
+            (_PIN_NUMBER == 30) ||
+            (_PIN_NUMBER == 31)
+            );
+    #endif
+    #if defined(NRF52840_XXAA) && defined(NRF52840_PACKAGE_aQFN73)
+        #if defined(_FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT)
+            #error "Multiple board match"
+        #endif
+        #define _FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT 1
+        static_assert(_PORT_NUMBER == 0 || _PORT_NUMBER == 1, "nRF52840 only has two ports");
+        return
+            (
+                (
+                    (_PORT_NUMBER == 0) &&
+                    (
+                        (_PIN_NUMBER ==  2) ||
+                        (_PIN_NUMBER ==  3) ||
+                        (_PIN_NUMBER ==  9) ||
+                        (_PIN_NUMBER == 10) ||
+                        (_PIN_NUMBER == 11) ||
+                        (_PIN_NUMBER == 12) ||
+                        (_PIN_NUMBER == 14) ||
+                        (_PIN_NUMBER == 28) ||
+                        (_PIN_NUMBER == 29) ||
+                        (_PIN_NUMBER == 30) ||
+                        (_PIN_NUMBER == 31)
+                    )
+                )
+                ||
+                (
+                    (_PORT_NUMBER == 1) &&
+                    (
+                        (_PIN_NUMBER ==  2) ||
+                        (_PIN_NUMBER ==  3) ||
+                        (_PIN_NUMBER ==  4) ||
+                        (_PIN_NUMBER ==  5) ||
+                        (_PIN_NUMBER ==  6) ||
+                        (_PIN_NUMBER ==  7) ||
+                        (_PIN_NUMBER == 10) ||
+                        (_PIN_NUMBER == 13) ||
+                        (_PIN_NUMBER == 15)
+                    )
+                )
+            );
+    #endif
+    #if false && defined(NRF52840_XXAA) && (defined(NRF52840_PACKAGE_aQFN73) || defined(ARDUINO_NRF52840_FEATHER))
+        // Adafruit nRF52840 feather uses RAYTAC MDBT50Q module, which is aQFN73
+        // See https://cdn-learn.adafruit.com/assets/assets/000/068/544/original/Raytac_MDBT50Q.pdf
+        #if defined(_FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT)
+            #error "Multiple board match"
+        #endif
+        #define _FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT 1
+        static_assert(_PORT_NUMBER == 0 || _PORT_NUMBER == 1, "nRF52840 only has two ports");
+        return
+            (
+                (
+                    (_PORT_NUMBER == 0) &&
+                    (
+                        (_PIN_NUMBER ==  2) ||
+                        (_PIN_NUMBER ==  3) ||
+                        (_PIN_NUMBER ==  9) ||
+                        (_PIN_NUMBER == 10) ||
+                        (_PIN_NUMBER == 28) ||
+                        (_PIN_NUMBER == 29) ||
+                        (_PIN_NUMBER == 30) ||
+                        (_PIN_NUMBER == 31)
+                    )
+                )
+                ||
+                (
+                    (_PORT_NUMBER == 1) &&
+                    (
+                        (_PIN_NUMBER ==  1) ||
+                        (_PIN_NUMBER ==  2) ||
+                        (_PIN_NUMBER ==  3) ||
+                        (_PIN_NUMBER ==  4) ||
+                        (_PIN_NUMBER ==  5) ||
+                        (_PIN_NUMBER ==  6) ||
+                        (_PIN_NUMBER ==  7) ||
+                        (_PIN_NUMBER == 10) ||
+                        (_PIN_NUMBER == 11) ||
+                        (_PIN_NUMBER == 12) ||
+                        (_PIN_NUMBER == 13) ||
+                        (_PIN_NUMBER == 14) ||
+                        (_PIN_NUMBER == 15)
+                    )
+                )
+            );
+    #endif
+    #if !defined(_FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT)
+        #warning "Unknown board / package, ... caller must pins support high-speed"
+        return false; // choosing default to be FALSE, to allow users to ATTEMPT to use high-speed on pins where support is not known
+    #endif
+  }
+  // Expose the port / pin number as properties (e.g., for setting up SPI)
+  FASTLED_NRF52_INLINE_ATTRIBUTE static uint8_t    nrfx_pin()          { return NRF_GPIO_PIN_MAP(_PORT_NUMBER, _PIN_NUMBER); }
+  FASTLED_NRF52_INLINE_ATTRIBUTE static uint8_t    board_port_number() { return _PORT_NUMBER; }
+  FASTLED_NRF52_INLINE_ATTRIBUTE static uint8_t    board_pin_number()  { return _PIN_NUMBER;  }
 };
 
 //
@@ -128,33 +302,38 @@ public:
 //     _DEFPIN_ARM(47, 1, 47);
 //
 
-#define _DEFPIN_ARM_IDENTITY_P0(ARDUINO_PIN) \
-    template<> class FastPin<ARDUINO_PIN> :  \
-    public _ARMPIN<                          \
-        1u << (ARDUINO_PIN & 31u),           \
-        __generated_struct_NRF_P0            \
-        >                                    \
+#define _DEFPIN_ARM_IDENTITY_P0(ARDUINO_PIN)      \
+    template<> class FastPin<ARDUINO_PIN> :       \
+    public _ARMPIN<                               \
+        1u << (ARDUINO_PIN & 31u),                \
+        __generated_struct_NRF_P0,                \
+        0,                                        \
+        (ARDUINO_PIN & 31u) + 0                   \
+        >                                         \
     {}
 
-#define _DEFPIN_ARM_IDENTITY_P1(ARDUINO_PIN) \
-    template<> class FastPin<ARDUINO_PIN> :  \
-    public _ARMPIN<                          \
-        1u << (ARDUINO_PIN & 31u),           \
-        __generated_struct_NRF_P1            \
-        >                                    \
+#define _DEFPIN_ARM_IDENTITY_P1(ARDUINO_PIN)      \
+    template<> class FastPin<ARDUINO_PIN> :       \
+    public _ARMPIN<                               \
+        1u << (ARDUINO_PIN & 31u),                \
+        __generated_struct_NRF_P1,                \
+        1,                                        \
+        (ARDUINO_PIN & 31u) + 32                  \
+        >                                         \
     {}
 
 #define _DEFPIN_ARM(ARDUINO_PIN, BOARD_PORT, BOARD_PIN)  \
     template<> class FastPin<ARDUINO_PIN> :              \
     public _ARMPIN<                                      \
         1u << (BOARD_PIN & 31u),                         \
-        __generated_struct_NRF_P ## BOARD_PORT           \
+        __generated_struct_NRF_P ## BOARD_PORT,          \
+        (BOARD_PIN / 32),                                \
+        BOARD_PIN & 31u                                  \
         >                                                \
     {}
 
 // The actual pin definitions are in a separate header file...
 #include "fastpin_arm_nrf52_variants.h"
 
-#define HAS_HARDWARE_PIN_SUPPORT
 
 #endif // #ifndef __FASTPIN_ARM_NRF52_H
