@@ -1,66 +1,5 @@
 /*
- * Integration into FastLED ClocklessController
- * Copyright (c) 2018 Samuel Z. Guyer
- * Copyright (c) 2017 Thomas Basler
- * Copyright (c) 2017 Martin F. Falatic
  *
- * ESP32 support is provided using the RMT peripheral device -- a unit
- * on the chip designed specifically for generating (and receiving)
- * precisely-timed digital signals. Nominally for use in infrared
- * remote controls, we use it to generate the signals for clockless
- * LED strips. The main advantage of using the RMT device is that,
- * once programmed, it generates the signal asynchronously, allowing
- * the CPU to continue executing other code. It is also not vulnerable
- * to interrupts or other timing problems that could disrupt the signal.
- *
- * The implementation strategy is borrowed from previous work and from
- * the RMT support built into the ESP32 IDF. The RMT device has 8
- * channels, which can be programmed independently to send sequences
- * of high/low bits. Memory for each channel is limited, however, so
- * in order to send a long sequence of bits, we need to continuously
- * refill the buffer until all the data is sent. To do this, we fill
- * half the buffer and then set an interrupt to go off when that half
- * is sent. Then we refill that half while the second half is being
- * sent. This strategy effectively overlaps computation (by the CPU)
- * and communication (by the RMT).
- *
- * Since the RMT device only has 8 channels, we need a strategy to
- * allow more than 8 LED controllers. Our driver assigns controllers
- * to channels on the fly, queuing up controllers as necessary until a
- * channel is free. The main showPixels routine just fires off the
- * first 8 controllers; the interrupt handler starts new controllers
- * asynchronously as previous ones finish. So, for example, it can
- * send the data for 8 controllers simultaneously, but 16 controllers
- * would take approximately twice as much time.
- *
- * There is a #define that allows a program to control the total
- * number of channels that the driver is allowed to use. It defaults
- * to 8 -- use all the channels. Setting it to 1, for example, results
- * in fully serial output:
- *
- *     #define FASTLED_RMT_MAX_CHANNELS 1
- *
- * OTHER RMT APPLICATIONS
- *
- * The default FastLED driver takes over control of the RMT interrupt
- * handler, making it hard to use the RMT device for other
- * (non-FastLED) purposes. You can change it's behavior to use the ESP
- * core driver instead, allowing other RMT applications to
- * co-exist. To switch to this mode, add the following directive
- * before you include FastLED.h:
- *
- *      #define FASTLED_RMT_BUILTIN_DRIVER
- *
- * There may be a performance penalty for using this mode. We need to
- * compute the RMT signal for the entire LED strip ahead of time,
- * rather than overlapping it with communication. We also need a large
- * buffer to hold the signal specification. Each bit of pixel data is
- * represented by a 32-bit pulse specification, so it is a 32X blow-up
- * in memory use.
- *
- *
- * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
- * http://insentricity.com *
  *
  */
 /*
@@ -91,14 +30,16 @@ FASTLED_NAMESPACE_BEGIN
 extern "C" {
 #endif
 
-#include "esp32-hal.h"
-#include "esp_intr.h"
+#include "esp_heap_caps.h"
+#include "soc/soc.h"
+#include "soc/gpio_sig_map.h"
+#include "soc/i2s_reg.h"
+#include "soc/i2s_struct.h"
+#include "soc/io_mux_reg.h"
 #include "driver/gpio.h"
-#include "driver/rmt.h"
 #include "driver/periph_ctrl.h"
-#include "freertos/semphr.h"
-#include "soc/rmt_struct.h"
-
+#include "rom/lldesc.h"
+#include "esp_intr.h"
 #include "esp_log.h"
 
 #ifdef __cplusplus
@@ -112,10 +53,20 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 }
 
 #define FASTLED_HAS_CLOCKLESS 1
+#define NUM_COLOR_CHANNELS 3
 
-// -- Configuration constants
-#define DIVIDER             2 /* 4, 8 still seem to work, but timings become marginal */
-#define MAX_PULSES         32 /* A channel has a 64 "pulse" buffer - we use half per pass */
+// -- Choose which I2S device to use
+#ifndef I2S_DEVICE
+#define I2S_DEVICE 0
+#endif
+
+// -- Max number of controllers we can support
+#ifndef FASTLED_I2S_MAX_CONTROLLERS
+#define FASTLED_I2S_MAX_CONTROLLERS 24
+#endif
+
+// -- I2S clock
+#define I2S_BASE_CLK (1600000000L)
 
 // -- Convert ESP32 cycles back into nanoseconds
 #define ESPCLKS_TO_NS(_CLKS) (((long)(_CLKS) * 1000L) / F_CPU_MHZ)
@@ -127,53 +78,43 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define NS_PER_CYCLE    ( NS_PER_SEC / CYCLES_PER_SEC )
 #define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
 
-// -- Convert ESP32 cycles to RMT cycles
-#define TO_RMT_CYCLES(_CLKS) NS_TO_CYCLES(ESPCLKS_TO_NS(_CLKS))    
-
-// -- Number of cycles to signal the strip to latch
-#define RMT_RESET_DURATION NS_TO_CYCLES(50000)
-
-// -- Core or custom driver
-#ifndef FASTLED_RMT_BUILTIN_DRIVER
-#define FASTLED_RMT_BUILTIN_DRIVER false
-#endif
-
-// -- Max number of controllers we can support
-#ifndef FASTLED_RMT_MAX_CONTROLLERS
-#define FASTLED_RMT_MAX_CONTROLLERS 32
-#endif
-
-// -- Number of RMT channels to use (up to 8)
-//    Redefine this value to 1 to force serial output
-#ifndef FASTLED_RMT_MAX_CHANNELS
-#define FASTLED_RMT_MAX_CHANNELS 8
-#endif
-
 // -- Array of all controllers
-static CLEDController * gControllers[FASTLED_RMT_MAX_CONTROLLERS];
-
-// -- Current set of active controllers, indexed by the RMT
-//    channel assigned to them.
-static CLEDController * gOnChannel[FASTLED_RMT_MAX_CHANNELS];
-
+static CLEDController * gControllers[FASTLED_I2S_MAX_CONTROLLERS];
 static int gNumControllers = 0;
 static int gNumStarted = 0;
-static int gNumDone = 0;
-static int gNext = 0;
-
-static intr_handle_t gRMT_intr_handle = NULL;
 
 // -- Global semaphore for the whole show process
 //    Semaphore is not given until all data has been sent
 static xSemaphoreHandle gTX_sem = NULL;
 
+// -- I2S global configuration stuff
 static bool gInitialized = false;
+
+static intr_handle_t gI2S_intr_handle = NULL;
+
+static i2s_dev_t * i2s;          // A pointer to the memory-mapped structure: I2S0 or I2S1
+static int i2s_base_pin_index;   // I2S goes to these pins until we remap them using the GPIO matrix
+
+// --- I2S DMA buffers
+struct DMABuffer {
+    lldesc_t descriptor;
+    uint8_t * buffer;
+};
+
+#define NUM_DMA_BUFFERS 2
+static DMABuffer * dmaBuffers[NUM_DMA_BUFFERS];
+
+// -- Counters to track progress
+static int gCurBuffer = 0;
+static int gCurPixel = 0;
+static int gPixelsSent = 0;
+static int gMaxPixels = 0;
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
-    // -- RMT has 8 channels, numbered 0 to 7
-    rmt_channel_t  mRMT_channel;
+    // -- The index of this controller in the global gControllers array
+    int            m_index;
 
     // -- Store the GPIO pin
     gpio_num_t     mPin;
@@ -181,27 +122,20 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     // -- This instantiation forces a check on the pin choice
     FastPin<DATA_PIN> mFastPin;
 
-    // -- Timing values for zero and one bits, derived from T1, T2, and T3
-    rmt_item32_t   mZero;
-    rmt_item32_t   mOne;
-
-    // -- State information for keeping track of where we are in the pixel data
-    uint8_t *      mPixelData = NULL;
+    // -- State information for keeping track of where we are in the
+    //    pixel data. For the I2S driver, it is more convenient to
+    //    store the data for each channel in a separate array.
+    uint8_t *      mPixelData[NUM_COLOR_CHANNELS];
     int            mSize = 0;
-    int            mCurByte;
-    uint16_t       mCurPulse;
-
-    // -- Buffer to hold all of the pulses. For the version that uses
-    //    the RMT driver built into the ESP core.
-    rmt_item32_t * mBuffer;
-    uint16_t       mBufferSize;
 
 public:
 
     void init()
     {
-        // -- Precompute rmt items corresponding to a zero bit and a one bit
-        //    according to the timing values given in the template instantiation
+        i2sInit();
+        
+        // TBD: Precompute the bit patterns based on the I2S sample rate
+        /*
         // T1H
         mOne.level0 = 1;
         mOne.duration0 = TO_RMT_CYCLES(T1+T2);
@@ -215,50 +149,157 @@ public:
         // T0L
         mZero.level1 = 0;
         mZero.duration1 = TO_RMT_CYCLES(T2 + T3);
+        */
 
         gControllers[gNumControllers] = this;
+        m_index = gNumControllers;
         gNumControllers++;
 
+        // -- Set up the pin We have to do two things: configure the
+        //    actual GPIO pin, and route the output from the default
+        //    pin (determined by the I2S device) to the pin we
+        //    want. We compute the default pin using the index of this
+        //    controller in the array. This order is crucial because
+        //    the bits must go into the DMA buffer in the same order.
         mPin = gpio_num_t(DATA_PIN);
+
+        PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[DATA_PIN], PIN_FUNC_GPIO);
+        gpio_set_direction(mPin, (gpio_mode_t)GPIO_MODE_DEF_OUTPUT);
+        pinMode(mPin,OUTPUT);
+        gpio_matrix_out(mPin, i2s_base_pin_index + m_index, false, false);
+
+        for (int i = 0; i < NUM_COLOR_CHANNELS; i++) {
+            mPixelData[i] = 0;
+        }
+
+        /*
+        Serial.print("Init controller ");
+        Serial.print(m_index);
+        Serial.print(" on pin ");
+        Serial.print(mPin);
+        Serial.print(" I2S signal ");
+        Serial.print(i2s_base_pin_index + m_index);
+        Serial.println();
+        */
     }
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
 
-    void initRMT()
+    static DMABuffer * allocateDMABuffer(int bytes)
+    {
+        DMABuffer * b = (DMABuffer *)heap_caps_malloc(sizeof(DMABuffer), MALLOC_CAP_DMA);
+
+        b->buffer = (uint8_t *)heap_caps_malloc(bytes, MALLOC_CAP_DMA);
+        memset(b->buffer, 0, bytes);
+
+        b->descriptor.length = bytes;
+        b->descriptor.size = bytes;
+        b->descriptor.owner = 1;
+        b->descriptor.sosf = 1;
+        b->descriptor.buf = b->buffer;
+        b->descriptor.offset = 0;
+        b->descriptor.empty = 0;
+        b->descriptor.eof = 1;
+        b->descriptor.qe.stqe_next = 0;
+
+        return b;
+    }
+
+    static void i2sInit()
     {
         // -- Only need to do this once
         if (gInitialized) return;
 
-        for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
-            gOnChannel[i] = NULL;
-
-            // -- RMT configuration for transmission
-            rmt_config_t rmt_tx;
-            rmt_tx.channel = rmt_channel_t(i);
-            rmt_tx.rmt_mode = RMT_MODE_TX;
-            rmt_tx.gpio_num = mPin;  // The particular pin will be assigned later
-            rmt_tx.mem_block_num = 1;
-            rmt_tx.clk_div = DIVIDER;
-            rmt_tx.tx_config.loop_en = false;
-            rmt_tx.tx_config.carrier_level = RMT_CARRIER_LEVEL_LOW;
-            rmt_tx.tx_config.carrier_en = false;
-            rmt_tx.tx_config.idle_level = RMT_IDLE_LEVEL_LOW;
-            rmt_tx.tx_config.idle_output_en = true;
-                
-            // -- Apply the configuration
-            rmt_config(&rmt_tx);
-
-            if (FASTLED_RMT_BUILTIN_DRIVER) {
-                rmt_driver_install(rmt_channel_t(i), 0, 0);
-            } else {
-                // -- Set up the RMT to send 1/2 of the pulse buffer and then
-                //    generate an interrupt. When we get this interrupt we
-                //    fill the other half in preparation (kind of like double-buffering)
-                rmt_set_tx_thr_intr_en(rmt_channel_t(i), true, MAX_PULSES);
-            }
+        // -- Choose whether to use I2S device 0 or device 1
+        //    Set up the various device-specific parameters
+        int interruptSource;
+        if (I2S_DEVICE == 0) {
+            i2s = &I2S0;
+            periph_module_enable(PERIPH_I2S0_MODULE);
+            interruptSource = ETS_I2S0_INTR_SOURCE;
+            i2s_base_pin_index = I2S0O_DATA_OUT0_IDX;
+        } else {
+            i2s = &I2S1;
+            periph_module_enable(PERIPH_I2S1_MODULE);
+            interruptSource = ETS_I2S1_INTR_SOURCE;
+            i2s_base_pin_index = I2S1O_DATA_OUT0_IDX;
         }
+
+        // -- Reset i2s
+        i2s->conf.tx_reset = 1;
+        i2s->conf.tx_reset = 0;
+        i2s->conf.rx_reset = 1;
+        i2s->conf.rx_reset = 0;
+
+        // -- Reset DMA
+        i2s->lc_conf.in_rst = 1;
+        i2s->lc_conf.in_rst = 0;
+        i2s->lc_conf.out_rst = 1;
+        i2s->lc_conf.out_rst = 0;
+
+        // -- Reset FIFO (Do we need this?)
+        i2s->conf.rx_fifo_reset = 1;
+        i2s->conf.rx_fifo_reset = 0;
+        i2s->conf.tx_fifo_reset = 1;
+        i2s->conf.tx_fifo_reset = 0;
+
+        // -- Main configuration 
+        i2s->conf.tx_msb_right = 1;
+        i2s->conf.tx_mono = 0;
+        i2s->conf.tx_short_sync = 0;
+        i2s->conf.tx_msb_shift = 0;
+        i2s->conf.tx_right_first = 1; // 0;//1;
+        i2s->conf.tx_slave_mod = 0;
+
+        // -- Set parallel mode
+        i2s->conf2.val = 0;
+        i2s->conf2.lcd_en = 1;
+        i2s->conf2.lcd_tx_wrx2_en = 0; // 0 for 16 or 32 parallel output
+        i2s->conf2.lcd_tx_sdx2_en = 0; // HN
+
+        // -- Set up the clock rate and sampling
+        i2s->sample_rate_conf.val = 0;
+        i2s->sample_rate_conf.tx_bits_mod = 32; // Number of parallel bits/pins
+        i2s->sample_rate_conf.tx_bck_div_num = 1;
+        i2s->clkm_conf.val = 0;
+        i2s->clkm_conf.clka_en = 0;
+
+        // -- Data clock is computed as Base/(div_num + (div_b/div_a))
+        //    Base is 80Mhz, so 80/(25 + 0/1) = 3.2Mhz
+        //    One cycle is 312.5ns
+        i2s->clkm_conf.clkm_div_a = 1;
+        i2s->clkm_conf.clkm_div_b = 0;
+        i2s->clkm_conf.clkm_div_num = 25;
+    
+        i2s->fifo_conf.val = 0;
+        i2s->fifo_conf.tx_fifo_mod_force_en = 1;
+        i2s->fifo_conf.tx_fifo_mod = 3;  // 32-bit single channel data
+        i2s->fifo_conf.tx_data_num = 32; // fifo length
+        i2s->fifo_conf.dscr_en = 1;      // fifo will use dma
+
+        i2s->conf1.val = 0;
+        i2s->conf1.tx_stop_en = 0;
+        i2s->conf1.tx_pcm_bypass = 1;
+
+        i2s->conf_chan.val = 0;
+        i2s->conf_chan.tx_chan_mod = 1; // Mono mode, with tx_msb_right = 1, everything goes to right-channel
+
+        i2s->timing.val = 0;
+
+        // -- Allocate two DMA buffers
+        dmaBuffers[0] = allocateDMABuffer(32 * NUM_COLOR_CHANNELS * 4);
+        dmaBuffers[1] = allocateDMABuffer(32 * NUM_COLOR_CHANNELS * 4);
+
+        // -- Arrange them as a circularly linked list
+        dmaBuffers[0]->descriptor.qe.stqe_next = &(dmaBuffers[1]->descriptor);
+        dmaBuffers[1]->descriptor.qe.stqe_next = &(dmaBuffers[0]->descriptor);
+
+        //allocate disabled i2s interrupt
+        SET_PERI_REG_BITS(I2S_INT_ENA_REG(I2S_DEVICE), I2S_OUT_EOF_INT_ENA_V, 1, I2S_OUT_EOF_INT_ENA_S);
+        esp_err_t e = esp_intr_alloc(interruptSource, 0, // ESP_INTR_FLAG_INTRDISABLED | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_IRAM,
+                       &interruptHandler, 0, &gI2S_intr_handle);
 
         // -- Create a semaphore to block execution until all the controllers are done
         if (gTX_sem == NULL) {
@@ -266,15 +307,7 @@ protected:
             xSemaphoreGive(gTX_sem);
         }
                 
-        if ( ! FASTLED_RMT_BUILTIN_DRIVER) {
-            // -- Allocate the interrupt if we have not done so yet. This
-            //    interrupt handler must work for all different kinds of
-            //    strips, so it delegates to the refill function for each
-            //    specific instantiation of ClocklessController.
-            if (gRMT_intr_handle == NULL)
-                esp_intr_alloc(ETS_RMT_INTR_SOURCE, 0, interruptHandler, 0, &gRMT_intr_handle);
-        }
-
+        // Serial.println("Init I2S");
         gInitialized = true;
     }
 
@@ -284,36 +317,33 @@ protected:
     {
         if (gNumStarted == 0) {
             // -- First controller: make sure everything is set up
-            initRMT();
             xSemaphoreTake(gTX_sem, portMAX_DELAY);
         }
 
         // -- Initialize the local state, save a pointer to the pixel
         //    data. We need to make a copy because pixels is a local
         //    variable in the calling function, and this data structure
-        //    needs to outlive this call to showPixels.
-
-        //if (mPixels != NULL) delete mPixels;
-        //mPixels = new PixelController<RGB_ORDER>(pixels);
-        if (FASTLED_RMT_BUILTIN_DRIVER)
-            convertAllPixelData(pixels);
-        else
-            copyPixelData(pixels);
+        //    needs to outlive this call to showPixels.]
+        copyPixelData(pixels);
 
         // -- Keep track of the number of strips we've seen
         gNumStarted++;
 
-        // -- The last call to showPixels is the one responsible for doing
-        //    all of the actual worl
-        if (gNumStarted == gNumControllers) {
-            gNext = 0;
+        // Serial.print("Show pixels ");
+        // Serial.println(gNumStarted);
 
-            // -- First, fill all the available channels
-            int channel = 0;
-            while (channel < FASTLED_RMT_MAX_CHANNELS && gNext < gNumControllers) {
-                startNext(channel);
-                channel++;
-            }
+        // -- The last call to showPixels is the one responsible for doing
+        //    all of the actual work
+        if (gNumStarted == gNumControllers) {
+            gCurPixel = 0;
+            gCurBuffer = 0;
+            gPixelsSent = 0;
+
+            // -- Prefill both buffers
+            fillBuffer();
+            fillBuffer();
+
+            i2sStart();
 
             // -- Wait here while the rest of the data is sent. The interrupt handler
             //    will keep refilling the RMT buffers until it is all sent; then it
@@ -321,10 +351,11 @@ protected:
             xSemaphoreTake(gTX_sem, portMAX_DELAY);
             xSemaphoreGive(gTX_sem);
 
+            i2sStop();
+            // Serial.println("...done");
+
             // -- Reset the counters
             gNumStarted = 0;
-            gNumDone = 0;
-            gNext = 0;
         }
     }
 
@@ -336,231 +367,301 @@ protected:
     {
         // -- Make sure we have a buffer of the right size
         //    (3 bytes per pixel)
-        int size_needed = pixels.size() * 3;
+        int size_needed = pixels.size();
         if (size_needed > mSize) {
-            if (mPixelData != NULL) free(mPixelData);
             mSize = size_needed;
-            mPixelData = (uint8_t *) malloc( mSize);
+            for (int i = 0; i < NUM_COLOR_CHANNELS; i++) {
+                if (mPixelData[i] != NULL) free(mPixelData[i]);
+                mPixelData[i] = (uint8_t *) malloc( mSize);
+            }
+
+            if (gMaxPixels < mSize)
+                gMaxPixels = mSize;
         }
 
         // -- Cycle through the R,G, and B values in the right order,
         //    storing the resulting raw pixel data in the buffer.
         int cur = 0;
         while (pixels.has(1)) {
-            mPixelData[cur++] = pixels.loadAndScale0();
-            mPixelData[cur++] = pixels.loadAndScale1();
-            mPixelData[cur++] = pixels.loadAndScale2();
+            mPixelData[0][cur] = pixels.loadAndScale0();
+            mPixelData[1][cur] = pixels.loadAndScale1();
+            mPixelData[2][cur] = pixels.loadAndScale2();
             pixels.advanceData();
             pixels.stepDithering();
+            cur++;
         }
     }
 
-    // -- Convert all pixels to RMT pulses
-    //    This function is only used when the user chooses to use the
-    //    built-in RMT driver, which needs all of the RMT pulses
-    //    up-front.
-    virtual void convertAllPixelData(PixelController<RGB_ORDER> & pixels)
-    {
-        // -- Compute the pulse values for the whole strip at once.
-        //    Requires a large buffer
-        mBufferSize = pixels.size() * 3 * 8;
-
-        if (mBuffer == NULL) {
-            mBuffer = (rmt_item32_t *) calloc( mBufferSize, sizeof(rmt_item32_t));
-        }
-
-        // -- Cycle through the R,G, and B values in the right order,
-        //    storing the pulses in the big buffer
-        mCurPulse = 0;
-        int cur = 0;
-        uint32_t byteval;
-        while (pixels.has(1)) {
-            byteval = pixels.loadAndScale0();
-            convertByte(byteval);
-            byteval = pixels.loadAndScale1();
-            convertByte(byteval);
-            byteval = pixels.loadAndScale2();
-            convertByte(byteval);
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
-
-        mBuffer[mCurPulse-1].duration1 = RMT_RESET_DURATION;
-        assert(mCurPulse == mBufferSize);
-    }
-
-    void convertByte(uint32_t byteval)
-    {
-        // -- Write one byte's worth of RMT pulses to the big buffer
-        byteval <<= 24;
-        for (register uint32_t j = 0; j < 8; j++) {
-            mBuffer[mCurPulse] = (byteval & 0x80000000L) ? mOne : mZero;
-            byteval <<= 1;
-            mCurPulse++;
-        }
-    }
-
-    // -- Start up the next controller
-    //    This method is static so that it can dispatch to the
-    //    appropriate startOnChannel method of the given controller.
-    static void startNext(int channel)
-    {
-        if (gNext < gNumControllers) {
-            ClocklessController * pController = static_cast<ClocklessController*>(gControllers[gNext]);
-            pController->startOnChannel(channel);
-            gNext++;
-        }
-    }
-
-    // -- Start this controller on the given channel
-    //    This function just initiates the RMT write; it does not wait
-    //    for it to finish.
-    void startOnChannel(int channel)
-    {
-        // -- Assign this channel and configure the RMT
-        mRMT_channel = rmt_channel_t(channel);
-
-        // -- Store a reference to this controller, so we can get it
-        //    inside the interrupt handler
-        gOnChannel[channel] = this;
-
-        // -- Assign the pin to this channel
-        rmt_set_pin(mRMT_channel, RMT_MODE_TX, mPin);
-
-        if (FASTLED_RMT_BUILTIN_DRIVER) {
-            // -- Use the built-in RMT driver to send all the data in one shot
-            rmt_register_tx_end_callback(doneOnChannel, 0);
-            rmt_write_items(mRMT_channel, mBuffer, mBufferSize, false);
-        } else {
-            // -- Use our custom driver to send the data incrementally
-
-            // -- Turn on the interrupts
-            rmt_set_tx_intr_en(mRMT_channel, true);
-        
-            // -- Initialize the counters that keep track of where we are in
-            //    the pixel data.
-            mCurPulse = 0;
-            mCurByte = 0;
-
-            // -- Fill both halves of the buffer
-            fillHalfRMTBuffer();
-            fillHalfRMTBuffer();
-
-            // -- Turn on the interrupts
-            rmt_set_tx_intr_en(mRMT_channel, true);
-            
-            // -- Start the RMT TX operation
-            rmt_tx_start(mRMT_channel, true);
-        }
-    }
-
-    // -- A controller is done 
-    //    This function is called when a controller finishes writing
-    //    its data. It is called either by the custom interrupt
-    //    handler (below), or as a callback from the built-in
-    //    interrupt handler. It is static because we don't know which
-    //    controller is done until we look it up.
-    static void doneOnChannel(rmt_channel_t channel, void * arg)
-    {
-        ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
-        portBASE_TYPE HPTaskAwoken = 0;
-
-        // -- Turn off output on the pin
-        gpio_matrix_out(controller->mPin, 0x100, 0, 0);
-
-        gOnChannel[channel] = NULL;
-        gNumDone++;
-
-        if (gNumDone == gNumControllers) {
-            // -- If this is the last controller, signal that we are all done
-            xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
-            if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
-        } else {
-            // -- Otherwise, if there are still controllers waiting, then
-            //    start the next one on this channel
-            if (gNext < gNumControllers)
-                startNext(channel);
-        }
-    }
-    
     // -- Custom interrupt handler
-    //    This interrupt handler handles two cases: a controller is
-    //    done writing its data, or a controller needs to fill the
-    //    next half of the RMT buffer with data.
     static IRAM_ATTR void interruptHandler(void *arg)
     {
-        // -- The basic structure of this code is borrowed from the
-        //    interrupt handler in esp-idf/components/driver/rmt.c
-        uint32_t intr_st = RMT.int_st.val;
-        uint8_t channel;
+        if (i2s->int_st.out_eof) {
+            i2s->int_clr.val = i2s->int_raw.val;
 
-        for (channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; channel++) {
-            int tx_done_bit = channel * 3;
-            int tx_next_bit = channel + 24;
-
-            if (gOnChannel[channel] != NULL) {
-
-                // -- More to send on this channel
-                if (intr_st & BIT(tx_next_bit)) {
-                    RMT.int_clr.val |= BIT(tx_next_bit);
-                    
-                    // -- Refill the half of the buffer that we just finished,
-                    //    allowing the other half to proceed.
-                    ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
-                    controller->fillHalfRMTBuffer();
-                } else {
-                    // -- Transmission is complete on this channel
-                    if (intr_st & BIT(tx_done_bit)) {
-                        RMT.int_clr.val |= BIT(tx_done_bit);
-                        doneOnChannel(rmt_channel_t(channel), 0);
-                    }
+            gPixelsSent++;
+            if (gCurPixel < gMaxPixels) {
+                fillBuffer();
+            } else {
+                if (gPixelsSent == gMaxPixels) {
+                    portBASE_TYPE HPTaskAwoken = 0;
+                    xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+                    if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
                 }
             }
         }
     }
 
-    // -- Fill the RMT buffer
-    //    This function fills the next 32 slots in the RMT write
-    //    buffer with pixel data. It also handles the case where the
-    //    pixel data is exhausted, so we need to fill the RMT buffer
-    //    with zeros to signal that it's done.
-    void fillHalfRMTBuffer()
+    static void fillBuffer()
     {
-        uint32_t one_val = mOne.val;
-        uint32_t zero_val = mZero.val;
+        int pixel_num = gCurPixel;
+        gCurPixel++;
 
-        // -- Convert (up to) 32 bits of the raw pixel data into
-        //    into RMT pulses that encode the zeros and ones.
-        int pulses = 0;
-        uint32_t byteval;
-        while (pulses < 32 && mCurByte < mSize) {
-            // -- Get one byte
-            byteval = mPixelData[mCurByte++];
-            byteval <<= 24;
-            // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
-            // rmt_item32_t value corresponding to the buffered bit value
-            for (register uint32_t j = 0; j < 8; j++) {
-                uint32_t val = (byteval & 0x80000000L) ? one_val : zero_val;
-                RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
-                byteval <<= 1;
-                mCurPulse++;
-            }
-            pulses += 8;
-        }
+        volatile uint32_t * buf = (uint32_t *) dmaBuffers[gCurBuffer]->buffer;
+        gCurBuffer = (gCurBuffer + 1) % NUM_DMA_BUFFERS;
+        // Serial.print("Fill "); Serial.print((uint32_t)buf); Serial.println();
 
-        // -- When we reach the end of the pixel data, fill the rest of the
-        //    RMT buffer with 0's, which signals to the device that we're done.
-        if (mCurByte == mSize) {
-            while (pulses < 32) {
-                RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
-                mCurPulse++;
-                pulses++;
+        uint8_t pixels[NUM_COLOR_CHANNELS][32];
+        memset(pixels, 0, NUM_COLOR_CHANNELS * 32);
+
+        // -- Get the requested pixel from each controller. Store the
+        //    data for each color channel in a separate array.
+        for (int i = 0; i < gNumControllers; i++) {
+            for (int j = 0; j < NUM_COLOR_CHANNELS; j++) {
+                ClocklessController * pController = static_cast<ClocklessController*>(gControllers[i]);
+                pixels[j][23-i] = pController->mPixelData[j][pixel_num];
             }
         }
+
+        // -- Transpose and encode the pixel data for the DMA buffer
+        uint8_t bits[NUM_COLOR_CHANNELS][8][4];
+
+        for (int channel = 0; channel < NUM_COLOR_CHANNELS; channel++) {
+            // -- Tranpose each array: all the bit 7's, then all the bit 6's, ...
+            // transpose24x1_noinline(pixels[channel], bits[channel]);
+            transpose32(pixels[channel], & (bits[channel][0][0]) );
+
+            // -- Create the bit pattern in the actual DMA buffer. Each
+            //    bit in the data turns into 4 bits in the output. Those
+            //    four bits encode the timing of the signal to the LED
+            //    strip. The I2S device is set up so that each pulse is
+            //    312.5ns. Therefore, we can form the zero and one bit
+            //    timing for the WS2812 with the following bit patterns:
+            //
+            //    Zero bit: T0H is around 300-400ns, so we send 1000 (high for 312.5, low for the rest)
+            //    One bit:  T1H is around 700-900ns, so we send 1110 (high for 937.5)
         
-        // -- When we have filled the back half the buffer, reset the position to the first half
-        if (mCurPulse >= MAX_PULSES*2)
-            mCurPulse = 0;
+            // Serial.print("Channel: "); Serial.println(channel);
+            for (int bitnum = 0; bitnum < 8; bitnum++) {
+                uint8_t * row = (uint8_t *) & (bits[channel][bitnum][0]);
+                uint32_t bit =  (row[0] << 24) | (row[1] << 16) | (row[2] << 8) | row[3];
+                // bit = bit >> 23;
+                // bit = bit << 1;
+                /*
+                Serial.print(bitnum); Serial.print(": ");
+                uint32_t bt = bit;
+                for (int k = 0; k < 32; k++) {
+                    if (bt & 0x80000000) Serial.print("1");
+                    else Serial.print("0");
+                    bt = bt << 1;
+                }
+                Serial.println();
+                */
+                // -- Now form the four-bit pattern: we can do this by
+                //    duplicating the bit we computed, and adding a 1
+                //    at the front and a zero at the back: 1bb0
+                buf[channel*32 + bitnum*4]   = 0xFFFFFFFF;
+                buf[channel*32 + bitnum*4+1] = bit;
+                buf[channel*32 + bitnum*4+2] = bit;
+                buf[channel*32 + bitnum*4+3] = 0x00000000;
+            }
+        }
+    }
+
+    static void transpose32(uint8_t * pixels, uint8_t * bits)
+    {
+        transpose8rS32(& pixels[0],  1, 4, & bits[0]);
+        transpose8rS32(& pixels[8],  1, 4, & bits[1]);
+        transpose8rS32(& pixels[16], 1, 4, & bits[2]);
+        //transpose8rS32(& pixels[24], 1, 4, & bits[3]);
+        /*
+        Serial.println("Pixels:");
+        for (int m = 0; m < 24; m++) {
+            Serial.print(m); Serial.print(": ");
+            uint8_t bt = pixels[m];
+            for (int k = 0; k < 8; k++) {
+                if (bt & 0x80) Serial.print("1");
+                else Serial.print("0");
+                bt = bt << 1;
+            }
+            Serial.println();
+        }
+
+        Serial.println("Bits:");
+        for (int bitnum = 0; bitnum < 8; bitnum++) {
+            Serial.print(bitnum); Serial.print(": ");
+            for (int w = 0; w < 4; w++) {
+                uint8_t bt = bits[ bitnum*4 + w ];
+                for (int k = 0; k < 8; k++) {
+                    if (bt & 0x80) Serial.print("1");
+                    else Serial.print("0");
+                    bt = bt << 1;
+                }
+                Serial.print(" ");
+            }
+            Serial.println();
+        }
+        */
+    }
+
+    static void transpose8rS32(uint8_t * A, int m, int n, uint8_t * B) 
+    {
+        uint32_t x, y, t;
+
+        // Load the array and pack it into x and y.
+
+        x = (A[0]<<24)   | (A[m]<<16)   | (A[2*m]<<8) | A[3*m];
+        y = (A[4*m]<<24) | (A[5*m]<<16) | (A[6*m]<<8) | A[7*m];
+
+        t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
+        t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
+
+        t = (x ^ (x >>14)) & 0x0000CCCC;  x = x ^ t ^ (t <<14);
+        t = (y ^ (y >>14)) & 0x0000CCCC;  y = y ^ t ^ (t <<14);
+
+        t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
+        y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
+        x = t;
+
+        B[0]=x>>24;    B[n]=x>>16;    B[2*n]=x>>8;  B[3*n]=x;
+        B[4*n]=y>>24;  B[5*n]=y>>16;  B[6*n]=y>>8;  B[7*n]=y;
+    }
+
+    /** Transpose 24 * 8 bits --> 8 * 24 bits
+     *
+     *  Important notes: the result is actually 8 * 32 bits, where
+     *  each set of bits only occupy the low 24 bits. As with other
+     *  transpose functions, the sets of bits are also in reverse
+     *  order from what we want -- that is, the least significant bit
+     *  (the bit we want to send first) is actually the last set
+     *  (index 7).
+     *
+     **/
+    static void transpose24x1_noinline(unsigned char *A, uint32_t *B) 
+    {
+        uint32_t  x, y, x1,y1,t,x2,y2;
+        
+        y = *(unsigned int*)(A);
+        x = *(unsigned int*)(A+4);
+        y1 = *(unsigned int*)(A+8);
+        x1 = *(unsigned int*)(A+12);
+        
+        y2 = *(unsigned int*)(A+16);
+        x2 = *(unsigned int*)(A+20);
+        
+        
+        // pre-transform x
+        t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
+        t = (x ^ (x >>14)) & 0x0000CCCC;  x = x ^ t ^ (t <<14);
+        
+        t = (x1 ^ (x1 >> 7)) & 0x00AA00AA;  x1 = x1 ^ t ^ (t << 7);
+        t = (x1 ^ (x1 >>14)) & 0x0000CCCC;  x1 = x1 ^ t ^ (t <<14);
+        
+        t = (x2 ^ (x2 >> 7)) & 0x00AA00AA;  x2 = x2 ^ t ^ (t << 7);
+        t = (x2 ^ (x2 >>14)) & 0x0000CCCC;  x2 = x2 ^ t ^ (t <<14);
+        
+        // pre-transform y
+        t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
+        t = (y ^ (y >>14)) & 0x0000CCCC;  y = y ^ t ^ (t <<14);
+        
+        t = (y1 ^ (y1 >> 7)) & 0x00AA00AA;  y1 = y1 ^ t ^ (t << 7);
+        t = (y1 ^ (y1 >>14)) & 0x0000CCCC;  y1 = y1 ^ t ^ (t <<14);
+        
+        t = (y2 ^ (y2 >> 7)) & 0x00AA00AA;  y2 = y2 ^ t ^ (t << 7);
+        t = (y2 ^ (y2 >>14)) & 0x0000CCCC;  y2 = y2 ^ t ^ (t <<14);
+        
+        // final transform
+        t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
+        y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
+        x = t;
+        
+        t = (x1 & 0xF0F0F0F0) | ((y1 >> 4) & 0x0F0F0F0F);
+        y1 = ((x1 << 4) & 0xF0F0F0F0) | (y1 & 0x0F0F0F0F);
+        x1 = t;
+        
+        t = (x2 & 0xF0F0F0F0) | ((y2 >> 4) & 0x0F0F0F0F);
+        y2 = ((x2 << 4) & 0xF0F0F0F0) | (y2 & 0x0F0F0F0F);
+        x2 = t;
+        
+        *((uint32_t*)B)     = (uint32_t)(  (y &       0xff)       | ((y1 &       0xff) <<8)  | ((y2 &       0xff) <<16) );
+        *((uint32_t*)(B+1)) = (uint32_t)( ((y &     0xff00) >>8)  |  (y1 &     0xff00)       | ((y2 &     0xff00) <<8)  );
+        *((uint32_t*)(B+2)) = (uint32_t)( ((y &   0xff0000) >>16) | ((y1 &   0xff0000) >>8)  |  (y2 &   0xff0000)       );
+        *((uint32_t*)(B+3)) = (uint32_t)( ((y & 0xff000000) >>24) | ((y1 & 0xff000000) >>16) | ((y2 & 0xff000000) >> 8) );
+        
+        *((uint32_t*)(B+4)) = (uint32_t)(  (x &       0xff)       | ((x1 &       0xff) <<8)  | ((x2 &       0xff) <<16) );
+        *((uint32_t*)(B+5)) = (uint32_t)( ((x &     0xff00) >>8)  |  (x1 &     0xff00)       | ((x2 &     0xff00) <<8)  );
+        *((uint32_t*)(B+6)) = (uint32_t)( ((x &   0xff0000) >>16) | ((x1 &   0xff0000) >>8)  |  (x2 &   0xff0000)       );
+        *((uint32_t*)(B+7)) = (uint32_t)( ((x & 0xff000000) >>24) | ((x1 & 0xff000000) >>16) | ((x2 & 0xff000000) >> 8) );
+    }
+
+
+    /** Start I2S transmission
+     */
+    static void i2sStart()
+    {
+        // esp_intr_disable(gI2S_intr_handle);
+        // Serial.println("I2S start");
+        i2sReset();
+        //Serial.println(dmaBuffers[0]->sampleCount());
+        i2s->lc_conf.val=I2S_OUT_DATA_BURST_EN | I2S_OUTDSCR_BURST_EN | I2S_OUT_DATA_BURST_EN;
+        i2s->out_link.addr = (uint32_t) & (dmaBuffers[0]->descriptor);
+        i2s->out_link.start = 1;
+        ////vTaskDelay(5);
+        i2s->int_clr.val = i2s->int_raw.val;
+        // //vTaskDelay(5);
+        i2s->int_ena.out_dscr_err = 1;
+        //enable interrupt
+        ////vTaskDelay(5);
+        esp_intr_enable(gI2S_intr_handle);
+        // //vTaskDelay(5);
+        i2s->int_ena.val = 0;
+        i2s->int_ena.out_eof = 1;
+
+        //start transmission
+        i2s->conf.tx_start = 1;
+    }
+
+    static void i2sReset()
+    {
+        // Serial.println("I2S reset");
+        const unsigned long lc_conf_reset_flags = I2S_IN_RST_M | I2S_OUT_RST_M | I2S_AHBM_RST_M | I2S_AHBM_FIFO_RST_M;
+        i2s->lc_conf.val |= lc_conf_reset_flags;
+        i2s->lc_conf.val &= ~lc_conf_reset_flags;
+
+        const uint32_t conf_reset_flags = I2S_RX_RESET_M | I2S_RX_FIFO_RESET_M | I2S_TX_RESET_M | I2S_TX_FIFO_RESET_M;
+        i2s->conf.val |= conf_reset_flags;
+        i2s->conf.val &= ~conf_reset_flags;
+        //while (i2s->state.rx_fifo_reset_back)
+        //    ;
+        /*
+        static void dma_reset(i2s_dev_t *dev) {
+            dev->lc_conf.in_rst=1; dev->lc_conf.in_rst=0;
+            dev->lc_conf.out_rst=1; dev->lc_conf.out_rst=0;
+        }
+
+        static void fifo_reset(i2s_dev_t *dev) {
+            dev->conf.rx_fifo_reset=1; dev->conf.rx_fifo_reset=0;
+            dev->conf.tx_fifo_reset=1; dev->conf.tx_fifo_reset=0;
+        }
+        */
+    }
+
+    static void i2sStop()
+    {
+        // Serial.println("I2S stop");
+        esp_intr_disable(gI2S_intr_handle);
+        i2sReset();
+        i2s->conf.rx_start = 0;
+        i2s->conf.tx_start = 0;
     }
 };
 
