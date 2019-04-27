@@ -66,17 +66,15 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #endif
 
 // -- I2S clock
-#define I2S_BASE_CLK (1600000000L)
+#define I2S_BASE_CLK (800000000L)
 
 // -- Convert ESP32 cycles back into nanoseconds
 #define ESPCLKS_TO_NS(_CLKS) (((long)(_CLKS) * 1000L) / F_CPU_MHZ)
 
-// -- Convert nanoseconds into RMT cycles
-#define F_CPU_RMT       (  80000000L)
-#define NS_PER_SEC      (1000000000L)
-#define CYCLES_PER_SEC  (F_CPU_RMT/DIVIDER)
-#define NS_PER_CYCLE    ( NS_PER_SEC / CYCLES_PER_SEC )
-#define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
+// -- I2S bit encoding
+//    For now, this stuff is hard-coded
+#define FASTLED_I2S_CLOCK_DIVIDER     10  // 80MHz --> 8MHz
+#define FASTLED_I2S_NS_PER_PULSE     125  // == 125ns per cycle
 
 // -- Array of all controllers
 static CLEDController * gControllers[FASTLED_I2S_MAX_CONTROLLERS];
@@ -104,11 +102,25 @@ struct DMABuffer {
 #define NUM_DMA_BUFFERS 2
 static DMABuffer * dmaBuffers[NUM_DMA_BUFFERS];
 
+// -- Bit patterns
+//    We configure the I2S data clock so that each pulse is
+//    125ns. Depending on the kind of LED we compute a pattern of
+//    pulses that match the timing. For example, a "1" bit for the
+//    WS2812 consists of 700-900ns high, followed by 300-500ns
+//    low. Using 125ns per pulse, we can send a "1" bit using this
+//    pattern: 1111111000 (a total of 10 bits, or 1250ns)
+//
+//    For now, we require all strips to be the same chipset, so these
+//    are global variables.
+
+static int      gPulsesPerBit = 0;
+static uint32_t gOneBit[10] = {0,0,0,0,0,0,0,0,0,0};
+static uint32_t gZeroBit[10]  = {0,0,0,0,0,0,0,0,0,0};
+
 // -- Counters to track progress
 static int gCurBuffer = 0;
-static int gCurPixel = 0;
-static int gPixelsSent = 0;
-static int gMaxPixels = 0;
+static bool gDoneFilling = false;
+static bool gDoneSending = false;
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
@@ -122,11 +134,8 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     // -- This instantiation forces a check on the pin choice
     FastPin<DATA_PIN> mFastPin;
 
-    // -- State information for keeping track of where we are in the
-    //    pixel data. For the I2S driver, it is more convenient to
-    //    store the data for each channel in a separate array.
-    uint8_t *      mPixelData[NUM_COLOR_CHANNELS];
-    int            mSize = 0;
+    // -- Save the pixel controller
+    PixelController<RGB_ORDER> * mPixels;
 
 public:
 
@@ -134,22 +143,9 @@ public:
     {
         i2sInit();
         
-        // TBD: Precompute the bit patterns based on the I2S sample rate
-        /*
-        // T1H
-        mOne.level0 = 1;
-        mOne.duration0 = TO_RMT_CYCLES(T1+T2);
-        // T1L
-        mOne.level1 = 0;
-        mOne.duration1 = TO_RMT_CYCLES(T3);
-
-        // T0H
-        mZero.level0 = 1;
-        mZero.duration0 = TO_RMT_CYCLES(T1);
-        // T0L
-        mZero.level1 = 0;
-        mZero.duration1 = TO_RMT_CYCLES(T2 + T3);
-        */
+        // -- Allocate space to save the pixel controller
+        //    during parallel output
+        mPixels = (PixelController<RGB_ORDER> *) malloc(sizeof(PixelController<RGB_ORDER>));
 
         gControllers[gNumControllers] = this;
         m_index = gNumControllers;
@@ -167,25 +163,47 @@ public:
         gpio_set_direction(mPin, (gpio_mode_t)GPIO_MODE_DEF_OUTPUT);
         pinMode(mPin,OUTPUT);
         gpio_matrix_out(mPin, i2s_base_pin_index + m_index, false, false);
-
-        for (int i = 0; i < NUM_COLOR_CHANNELS; i++) {
-            mPixelData[i] = 0;
-        }
-
-        /*
-        Serial.print("Init controller ");
-        Serial.print(m_index);
-        Serial.print(" on pin ");
-        Serial.print(mPin);
-        Serial.print(" I2S signal ");
-        Serial.print(i2s_base_pin_index + m_index);
-        Serial.println();
-        */
     }
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
+
+    static void initBitPatterns()
+    {
+        // Precompute the bit patterns based on the I2S sample rate
+        uint32_t T1ns = ESPCLKS_TO_NS(T1);
+        uint32_t T2ns = ESPCLKS_TO_NS(T2);
+        uint32_t T3ns = ESPCLKS_TO_NS(T3);
+
+        gPulsesPerBit = (T1ns + T2ns + T3ns)/FASTLED_I2S_NS_PER_PULSE;
+
+        Serial.print("Pulses per bit: "); Serial.println(gPulsesPerBit);
+
+        int ones_for_one  = (T1ns + T2ns)/FASTLED_I2S_NS_PER_PULSE;
+        Serial.print("One bit:  "); Serial.print(ones_for_one); Serial.println(" 1 bits");
+        int i = 0;
+        while ( i < ones_for_one ) {
+            gOneBit[i] = 0xFFFFFF00;
+            i++;
+        }
+        while ( i < gPulsesPerBit ) {
+            gOneBit[i] = 0x00000000;
+            i++;
+        }
+
+        int ones_for_zero = (T1ns)/FASTLED_I2S_NS_PER_PULSE;
+        Serial.print("Zero bit: "); Serial.print(ones_for_zero); Serial.println(" 1 bits");
+        i = 0;
+        while ( i < ones_for_zero ) {
+            gZeroBit[i] = 0xFFFFFF00;
+            i++;
+        }
+        while ( i < gPulsesPerBit ) {
+            gZeroBit[i] = 0x00000000;
+            i++;
+        }
+    }
 
     static DMABuffer * allocateDMABuffer(int bytes)
     {
@@ -211,6 +229,9 @@ protected:
     {
         // -- Only need to do this once
         if (gInitialized) return;
+
+        // -- Construct the bit patterns for ones and zeros
+        initBitPatterns();
 
         // -- Choose whether to use I2S device 0 or device 1
         //    Set up the various device-specific parameters
@@ -267,11 +288,11 @@ protected:
         i2s->clkm_conf.clka_en = 0;
 
         // -- Data clock is computed as Base/(div_num + (div_b/div_a))
-        //    Base is 80Mhz, so 80/(25 + 0/1) = 3.2Mhz
-        //    One cycle is 312.5ns
+        //    Base is 80Mhz, so 80/(10 + 0/1) = 8Mhz
+        //    One cycle is 125ns
         i2s->clkm_conf.clkm_div_a = 1;
         i2s->clkm_conf.clkm_div_b = 0;
-        i2s->clkm_conf.clkm_div_num = 25;
+        i2s->clkm_conf.clkm_div_num = FASTLED_I2S_CLOCK_DIVIDER;
     
         i2s->fifo_conf.val = 0;
         i2s->fifo_conf.tx_fifo_mod_force_en = 1;
@@ -289,8 +310,8 @@ protected:
         i2s->timing.val = 0;
 
         // -- Allocate two DMA buffers
-        dmaBuffers[0] = allocateDMABuffer(32 * NUM_COLOR_CHANNELS * 4);
-        dmaBuffers[1] = allocateDMABuffer(32 * NUM_COLOR_CHANNELS * 4);
+        dmaBuffers[0] = allocateDMABuffer(32 * NUM_COLOR_CHANNELS * gPulsesPerBit);
+        dmaBuffers[1] = allocateDMABuffer(32 * NUM_COLOR_CHANNELS * gPulsesPerBit);
 
         // -- Arrange them as a circularly linked list
         dmaBuffers[0]->descriptor.qe.stqe_next = &(dmaBuffers[1]->descriptor);
@@ -324,7 +345,7 @@ protected:
         //    data. We need to make a copy because pixels is a local
         //    variable in the calling function, and this data structure
         //    needs to outlive this call to showPixels.]
-        copyPixelData(pixels);
+        (*mPixels) = pixels;
 
         // -- Keep track of the number of strips we've seen
         gNumStarted++;
@@ -335,9 +356,9 @@ protected:
         // -- The last call to showPixels is the one responsible for doing
         //    all of the actual work
         if (gNumStarted == gNumControllers) {
-            gCurPixel = 0;
             gCurBuffer = 0;
-            gPixelsSent = 0;
+            gDoneFilling = false;
+            gDoneSending = false;
 
             // -- Prefill both buffers
             fillBuffer();
@@ -363,6 +384,7 @@ protected:
     //    Make a safe copy of the pixel data, so that the FastLED show
     //    function can continue to the next controller while the RMT
     //    device starts sending this data asynchronously.
+    /*
     virtual void copyPixelData(PixelController<RGB_ORDER> & pixels)
     {
         // -- Make sure we have a buffer of the right size
@@ -383,14 +405,10 @@ protected:
         //    storing the resulting raw pixel data in the buffer.
         int cur = 0;
         while (pixels.has(1)) {
-            mPixelData[0][cur] = pixels.loadAndScale0();
-            mPixelData[1][cur] = pixels.loadAndScale1();
-            mPixelData[2][cur] = pixels.loadAndScale2();
-            pixels.advanceData();
-            pixels.stepDithering();
             cur++;
         }
     }
+    */
 
     // -- Custom interrupt handler
     static IRAM_ATTR void interruptHandler(void *arg)
@@ -398,11 +416,12 @@ protected:
         if (i2s->int_st.out_eof) {
             i2s->int_clr.val = i2s->int_raw.val;
 
-            gPixelsSent++;
-            if (gCurPixel < gMaxPixels) {
+            if ( ! gDoneFilling) {
                 fillBuffer();
             } else {
-                if (gPixelsSent == gMaxPixels) {
+                if ( ! gDoneSending) {
+                    gDoneSending = true;
+                } else {
                     portBASE_TYPE HPTaskAwoken = 0;
                     xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
                     if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
@@ -413,9 +432,6 @@ protected:
 
     static void fillBuffer()
     {
-        int pixel_num = gCurPixel;
-        gCurPixel++;
-
         volatile uint32_t * buf = (uint32_t *) dmaBuffers[gCurBuffer]->buffer;
         gCurBuffer = (gCurBuffer + 1) % NUM_DMA_BUFFERS;
         // Serial.print("Fill "); Serial.print((uint32_t)buf); Serial.println();
@@ -425,37 +441,52 @@ protected:
 
         // -- Get the requested pixel from each controller. Store the
         //    data for each color channel in a separate array.
+        uint32_t has_data_mask = 0;
         for (int i = 0; i < gNumControllers; i++) {
-            for (int j = 0; j < NUM_COLOR_CHANNELS; j++) {
-                ClocklessController * pController = static_cast<ClocklessController*>(gControllers[i]);
-                pixels[j][23-i] = pController->mPixelData[j][pixel_num];
+            int bit_index = 23-i;
+            ClocklessController * pController = static_cast<ClocklessController*>(gControllers[i]);
+            if (pController->mPixels->has(1)) {
+                pixels[0][bit_index] = pController->mPixels->loadAndScale0();
+                pixels[1][bit_index] = pController->mPixels->loadAndScale1();
+                pixels[2][bit_index] = pController->mPixels->loadAndScale2();
+                pController->mPixels->advanceData();
+                pController->mPixels->stepDithering();
+
+                // -- Record that this controller still has data to send
+                has_data_mask |= (1 << bit_index);
+                /*
+                if (i == 0) {
+                    Serial.print("Pixel: "); 
+                    Serial.print(pixels[0][bit_index]); Serial.print(" ");
+                    Serial.print(pixels[1][bit_index]); Serial.print(" ");
+                    Serial.print(pixels[2][bit_index]);
+                    Serial.println();
+                }
+                */
             }
+        }
+
+        if (has_data_mask == 0) {
+            gDoneFilling = true;
+            return;
         }
 
         // -- Transpose and encode the pixel data for the DMA buffer
         uint8_t bits[NUM_COLOR_CHANNELS][8][4];
 
+        int buf_index = 0;
+
         for (int channel = 0; channel < NUM_COLOR_CHANNELS; channel++) {
+
             // -- Tranpose each array: all the bit 7's, then all the bit 6's, ...
             // transpose24x1_noinline(pixels[channel], bits[channel]);
             transpose32(pixels[channel], & (bits[channel][0][0]) );
 
-            // -- Create the bit pattern in the actual DMA buffer. Each
-            //    bit in the data turns into 4 bits in the output. Those
-            //    four bits encode the timing of the signal to the LED
-            //    strip. The I2S device is set up so that each pulse is
-            //    312.5ns. Therefore, we can form the zero and one bit
-            //    timing for the WS2812 with the following bit patterns:
-            //
-            //    Zero bit: T0H is around 300-400ns, so we send 1000 (high for 312.5, low for the rest)
-            //    One bit:  T1H is around 700-900ns, so we send 1110 (high for 937.5)
-        
-            // Serial.print("Channel: "); Serial.println(channel);
+            //Serial.print("Channel: "); Serial.print(channel); Serial.print(" ");
             for (int bitnum = 0; bitnum < 8; bitnum++) {
                 uint8_t * row = (uint8_t *) & (bits[channel][bitnum][0]);
                 uint32_t bit =  (row[0] << 24) | (row[1] << 16) | (row[2] << 8) | row[3];
-                // bit = bit >> 23;
-                // bit = bit << 1;
+
                 /*
                 Serial.print(bitnum); Serial.print(": ");
                 uint32_t bt = bit;
@@ -466,14 +497,24 @@ protected:
                 }
                 Serial.println();
                 */
+
+                for (int pulse_num = 0; pulse_num < gPulsesPerBit; pulse_num++) {
+                    buf[buf_index++] = /*has_data_mask &*/ (bit & gOneBit[pulse_num]) | (~bit & gZeroBit[pulse_num]);
+                    //if (buf[buf_index-1] & 0x100) Serial.print("1");
+                    //else Serial.print("0");
+                }
+                //Serial.print(" ");
                 // -- Now form the four-bit pattern: we can do this by
                 //    duplicating the bit we computed, and adding a 1
                 //    at the front and a zero at the back: 1bb0
+                /*
                 buf[channel*32 + bitnum*4]   = 0xFFFFFFFF;
                 buf[channel*32 + bitnum*4+1] = bit;
                 buf[channel*32 + bitnum*4+2] = bit;
                 buf[channel*32 + bitnum*4+3] = 0x00000000;
+                */
             }
+            //Serial.println();
         }
     }
 
