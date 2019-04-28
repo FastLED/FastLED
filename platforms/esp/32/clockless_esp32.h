@@ -73,8 +73,8 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 
 // -- I2S bit encoding
 //    For now, this stuff is hard-coded
-#define FASTLED_I2S_CLOCK_DIVIDER     10  // 80MHz --> 8MHz
-#define FASTLED_I2S_NS_PER_PULSE     125  // == 125ns per cycle
+#define FASTLED_I2S_CLOCK_DIVIDER   25     //   10  // 80MHz --> 8MHz
+#define FASTLED_I2S_NS_PER_PULSE   312.5   //  125  // == 125ns per cycle
 
 // -- Array of all controllers
 static CLEDController * gControllers[FASTLED_I2S_MAX_CONTROLLERS];
@@ -176,12 +176,19 @@ protected:
         uint32_t T2ns = ESPCLKS_TO_NS(T2);
         uint32_t T3ns = ESPCLKS_TO_NS(T3);
 
+        Serial.print("T1 = "); Serial.print(T1); Serial.print(" ns "); Serial.println(T1ns);
+        Serial.print("T2 = "); Serial.print(T2); Serial.print(" ns "); Serial.println(T2ns);
+        Serial.print("T3 = "); Serial.print(T3); Serial.print(" ns "); Serial.println(T3ns);
+
         gPulsesPerBit = (T1ns + T2ns + T3ns)/FASTLED_I2S_NS_PER_PULSE;
 
         Serial.print("Pulses per bit: "); Serial.println(gPulsesPerBit);
 
-        int ones_for_one  = (T1ns + T2ns)/FASTLED_I2S_NS_PER_PULSE;
-        Serial.print("One bit:  "); Serial.print(ones_for_one); Serial.println(" 1 bits");
+        int ones_for_one  = ((T1ns + T2ns - 1)/FASTLED_I2S_NS_PER_PULSE) + 1;
+        Serial.print("One bit:  target "); 
+        Serial.print(T1ns+T2ns); Serial.print("ns --- "); 
+        Serial.print(ones_for_one); Serial.print(" 1 bits");
+        Serial.print(" = "); Serial.print(ones_for_one * FASTLED_I2S_NS_PER_PULSE); Serial.println("ns");
         int i = 0;
         while ( i < ones_for_one ) {
             gOneBit[i] = 0xFFFFFF00;
@@ -192,8 +199,11 @@ protected:
             i++;
         }
 
-        int ones_for_zero = (T1ns)/FASTLED_I2S_NS_PER_PULSE;
-        Serial.print("Zero bit: "); Serial.print(ones_for_zero); Serial.println(" 1 bits");
+        int ones_for_zero = ((T1ns - 1)/FASTLED_I2S_NS_PER_PULSE) + 1;
+        Serial.print("Zero bit:  target "); 
+        Serial.print(T1ns); Serial.print("ns --- "); 
+        Serial.print(ones_for_zero); Serial.print(" 1 bits");
+        Serial.print(" = "); Serial.print(ones_for_zero * FASTLED_I2S_NS_PER_PULSE); Serial.println("ns");
         i = 0;
         while ( i < ones_for_zero ) {
             gZeroBit[i] = 0xFFFFFF00;
@@ -436,8 +446,8 @@ protected:
         gCurBuffer = (gCurBuffer + 1) % NUM_DMA_BUFFERS;
         // Serial.print("Fill "); Serial.print((uint32_t)buf); Serial.println();
 
-        uint8_t pixels[NUM_COLOR_CHANNELS][32];
-        memset(pixels, 0, NUM_COLOR_CHANNELS * 32);
+        static uint8_t pixels[NUM_COLOR_CHANNELS][32];
+        // memset(pixels, 0, NUM_COLOR_CHANNELS * 32);
 
         // -- Get the requested pixel from each controller. Store the
         //    data for each color channel in a separate array.
@@ -472,7 +482,7 @@ protected:
         }
 
         // -- Transpose and encode the pixel data for the DMA buffer
-        uint8_t bits[NUM_COLOR_CHANNELS][8][4];
+        static uint8_t bits[NUM_COLOR_CHANNELS][8][4];
 
         int buf_index = 0;
 
