@@ -120,7 +120,11 @@ static uint32_t gZeroBit[10]  = {0,0,0,0,0,0,0,0,0,0};
 // -- Counters to track progress
 static int gCurBuffer = 0;
 static bool gDoneFilling = false;
-static bool gDoneSending = false;
+
+// -- Temp buffers for pixels and bits being formatted for DMA
+static uint8_t gPixelRow[NUM_COLOR_CHANNELS][32];
+static uint8_t gPixelBits[NUM_COLOR_CHANNELS][8][4];
+
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
@@ -213,6 +217,9 @@ protected:
             gZeroBit[i] = 0x00000000;
             i++;
         }
+
+        memset(gPixelRow, 0, NUM_COLOR_CHANNELS * 32);
+        memset(gPixelBits, 0, NUM_COLOR_CHANNELS * 32);
     }
 
     static DMABuffer * allocateDMABuffer(int bytes)
@@ -258,23 +265,10 @@ protected:
             i2s_base_pin_index = I2S1O_DATA_OUT0_IDX;
         }
 
-        // -- Reset i2s
-        i2s->conf.tx_reset = 1;
-        i2s->conf.tx_reset = 0;
-        i2s->conf.rx_reset = 1;
-        i2s->conf.rx_reset = 0;
-
-        // -- Reset DMA
-        i2s->lc_conf.in_rst = 1;
-        i2s->lc_conf.in_rst = 0;
-        i2s->lc_conf.out_rst = 1;
-        i2s->lc_conf.out_rst = 0;
-
-        // -- Reset FIFO (Do we need this?)
-        i2s->conf.rx_fifo_reset = 1;
-        i2s->conf.rx_fifo_reset = 0;
-        i2s->conf.tx_fifo_reset = 1;
-        i2s->conf.tx_fifo_reset = 0;
+        // -- Reset everything
+        i2sReset();
+        i2sReset_DMA();
+        i2sReset_FIFO();
 
         // -- Main configuration 
         i2s->conf.tx_msb_right = 1;
@@ -327,10 +321,10 @@ protected:
         dmaBuffers[0]->descriptor.qe.stqe_next = &(dmaBuffers[1]->descriptor);
         dmaBuffers[1]->descriptor.qe.stqe_next = &(dmaBuffers[0]->descriptor);
 
-        //allocate disabled i2s interrupt
+        // -- Allocate i2s interrupt
         SET_PERI_REG_BITS(I2S_INT_ENA_REG(I2S_DEVICE), I2S_OUT_EOF_INT_ENA_V, 1, I2S_OUT_EOF_INT_ENA_S);
-        esp_err_t e = esp_intr_alloc(interruptSource, 0, // ESP_INTR_FLAG_INTRDISABLED | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_IRAM,
-                       &interruptHandler, 0, &gI2S_intr_handle);
+        esp_err_t e = esp_intr_alloc(interruptSource, 0, // ESP_INTR_FLAG_INTRDISABLED | ESP_INTR_FLAG_LEVEL3,
+                                     &interruptHandler, 0, &gI2S_intr_handle);
 
         // -- Create a semaphore to block execution until all the controllers are done
         if (gTX_sem == NULL) {
@@ -354,7 +348,7 @@ protected:
         // -- Initialize the local state, save a pointer to the pixel
         //    data. We need to make a copy because pixels is a local
         //    variable in the calling function, and this data structure
-        //    needs to outlive this call to showPixels.]
+        //    needs to outlive this call to showPixels.
         (*mPixels) = pixels;
 
         // -- Keep track of the number of strips we've seen
@@ -368,7 +362,6 @@ protected:
         if (gNumStarted == gNumControllers) {
             gCurBuffer = 0;
             gDoneFilling = false;
-            gDoneSending = false;
 
             // -- Prefill both buffers
             fillBuffer();
@@ -383,42 +376,11 @@ protected:
             xSemaphoreGive(gTX_sem);
 
             i2sStop();
-            // Serial.println("...done");
 
             // -- Reset the counters
             gNumStarted = 0;
         }
     }
-
-    // -- Copy pixel data
-    //    Make a safe copy of the pixel data, so that the FastLED show
-    //    function can continue to the next controller while the RMT
-    //    device starts sending this data asynchronously.
-    /*
-    virtual void copyPixelData(PixelController<RGB_ORDER> & pixels)
-    {
-        // -- Make sure we have a buffer of the right size
-        //    (3 bytes per pixel)
-        int size_needed = pixels.size();
-        if (size_needed > mSize) {
-            mSize = size_needed;
-            for (int i = 0; i < NUM_COLOR_CHANNELS; i++) {
-                if (mPixelData[i] != NULL) free(mPixelData[i]);
-                mPixelData[i] = (uint8_t *) malloc( mSize);
-            }
-
-            if (gMaxPixels < mSize)
-                gMaxPixels = mSize;
-        }
-
-        // -- Cycle through the R,G, and B values in the right order,
-        //    storing the resulting raw pixel data in the buffer.
-        int cur = 0;
-        while (pixels.has(1)) {
-            cur++;
-        }
-    }
-    */
 
     // -- Custom interrupt handler
     static IRAM_ATTR void interruptHandler(void *arg)
@@ -429,13 +391,9 @@ protected:
             if ( ! gDoneFilling) {
                 fillBuffer();
             } else {
-                if ( ! gDoneSending) {
-                    gDoneSending = true;
-                } else {
-                    portBASE_TYPE HPTaskAwoken = 0;
-                    xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
-                    if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
-                }
+                portBASE_TYPE HPTaskAwoken = 0;
+                xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+                if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
             }
         }
     }
@@ -444,35 +402,25 @@ protected:
     {
         volatile uint32_t * buf = (uint32_t *) dmaBuffers[gCurBuffer]->buffer;
         gCurBuffer = (gCurBuffer + 1) % NUM_DMA_BUFFERS;
-        // Serial.print("Fill "); Serial.print((uint32_t)buf); Serial.println();
-
-        static uint8_t pixels[NUM_COLOR_CHANNELS][32];
-        // memset(pixels, 0, NUM_COLOR_CHANNELS * 32);
 
         // -- Get the requested pixel from each controller. Store the
         //    data for each color channel in a separate array.
         uint32_t has_data_mask = 0;
         for (int i = 0; i < gNumControllers; i++) {
+            // -- Store the pixels in reverse controller order starting at index 23
+            //    This causes the bits to come out in the right position after we
+            //    transpose them.
             int bit_index = 23-i;
             ClocklessController * pController = static_cast<ClocklessController*>(gControllers[i]);
             if (pController->mPixels->has(1)) {
-                pixels[0][bit_index] = pController->mPixels->loadAndScale0();
-                pixels[1][bit_index] = pController->mPixels->loadAndScale1();
-                pixels[2][bit_index] = pController->mPixels->loadAndScale2();
+                gPixelRow[0][bit_index] = pController->mPixels->loadAndScale0();
+                gPixelRow[1][bit_index] = pController->mPixels->loadAndScale1();
+                gPixelRow[2][bit_index] = pController->mPixels->loadAndScale2();
                 pController->mPixels->advanceData();
                 pController->mPixels->stepDithering();
 
                 // -- Record that this controller still has data to send
-                has_data_mask |= (1 << bit_index);
-                /*
-                if (i == 0) {
-                    Serial.print("Pixel: "); 
-                    Serial.print(pixels[0][bit_index]); Serial.print(" ");
-                    Serial.print(pixels[1][bit_index]); Serial.print(" ");
-                    Serial.print(pixels[2][bit_index]);
-                    Serial.println();
-                }
-                */
+                has_data_mask |= (1 << (i+8));
             }
         }
 
@@ -482,20 +430,16 @@ protected:
         }
 
         // -- Transpose and encode the pixel data for the DMA buffer
-        static uint8_t bits[NUM_COLOR_CHANNELS][8][4];
-
         int buf_index = 0;
-
         for (int channel = 0; channel < NUM_COLOR_CHANNELS; channel++) {
 
             // -- Tranpose each array: all the bit 7's, then all the bit 6's, ...
-            // transpose24x1_noinline(pixels[channel], bits[channel]);
-            transpose32(pixels[channel], & (bits[channel][0][0]) );
+            transpose32(gPixelRow[channel], gPixelBits[channel][0] );
 
             //Serial.print("Channel: "); Serial.print(channel); Serial.print(" ");
             for (int bitnum = 0; bitnum < 8; bitnum++) {
-                uint8_t * row = (uint8_t *) & (bits[channel][bitnum][0]);
-                uint32_t bit =  (row[0] << 24) | (row[1] << 16) | (row[2] << 8) | row[3];
+                uint8_t * row = (uint8_t *) (gPixelBits[channel][bitnum]);
+                uint32_t bit = (row[0] << 24) | (row[1] << 16) | (row[2] << 8) | row[3];
 
                 /*
                 Serial.print(bitnum); Serial.print(": ");
@@ -509,22 +453,11 @@ protected:
                 */
 
                 for (int pulse_num = 0; pulse_num < gPulsesPerBit; pulse_num++) {
-                    buf[buf_index++] = /*has_data_mask &*/ (bit & gOneBit[pulse_num]) | (~bit & gZeroBit[pulse_num]);
+                    buf[buf_index++] = has_data_mask & ( (bit & gOneBit[pulse_num]) | (~bit & gZeroBit[pulse_num]) );
                     //if (buf[buf_index-1] & 0x100) Serial.print("1");
                     //else Serial.print("0");
                 }
-                //Serial.print(" ");
-                // -- Now form the four-bit pattern: we can do this by
-                //    duplicating the bit we computed, and adding a 1
-                //    at the front and a zero at the back: 1bb0
-                /*
-                buf[channel*32 + bitnum*4]   = 0xFFFFFFFF;
-                buf[channel*32 + bitnum*4+1] = bit;
-                buf[channel*32 + bitnum*4+2] = bit;
-                buf[channel*32 + bitnum*4+3] = 0x00000000;
-                */
             }
-            //Serial.println();
         }
     }
 
@@ -534,34 +467,6 @@ protected:
         transpose8rS32(& pixels[8],  1, 4, & bits[1]);
         transpose8rS32(& pixels[16], 1, 4, & bits[2]);
         //transpose8rS32(& pixels[24], 1, 4, & bits[3]);
-        /*
-        Serial.println("Pixels:");
-        for (int m = 0; m < 24; m++) {
-            Serial.print(m); Serial.print(": ");
-            uint8_t bt = pixels[m];
-            for (int k = 0; k < 8; k++) {
-                if (bt & 0x80) Serial.print("1");
-                else Serial.print("0");
-                bt = bt << 1;
-            }
-            Serial.println();
-        }
-
-        Serial.println("Bits:");
-        for (int bitnum = 0; bitnum < 8; bitnum++) {
-            Serial.print(bitnum); Serial.print(": ");
-            for (int w = 0; w < 4; w++) {
-                uint8_t bt = bits[ bitnum*4 + w ];
-                for (int k = 0; k < 8; k++) {
-                    if (bt & 0x80) Serial.print("1");
-                    else Serial.print("0");
-                    bt = bt << 1;
-                }
-                Serial.print(" ");
-            }
-            Serial.println();
-        }
-        */
     }
 
     static void transpose8rS32(uint8_t * A, int m, int n, uint8_t * B) 
@@ -586,74 +491,6 @@ protected:
         B[0]=x>>24;    B[n]=x>>16;    B[2*n]=x>>8;  B[3*n]=x;
         B[4*n]=y>>24;  B[5*n]=y>>16;  B[6*n]=y>>8;  B[7*n]=y;
     }
-
-    /** Transpose 24 * 8 bits --> 8 * 24 bits
-     *
-     *  Important notes: the result is actually 8 * 32 bits, where
-     *  each set of bits only occupy the low 24 bits. As with other
-     *  transpose functions, the sets of bits are also in reverse
-     *  order from what we want -- that is, the least significant bit
-     *  (the bit we want to send first) is actually the last set
-     *  (index 7).
-     *
-     **/
-    static void transpose24x1_noinline(unsigned char *A, uint32_t *B) 
-    {
-        uint32_t  x, y, x1,y1,t,x2,y2;
-        
-        y = *(unsigned int*)(A);
-        x = *(unsigned int*)(A+4);
-        y1 = *(unsigned int*)(A+8);
-        x1 = *(unsigned int*)(A+12);
-        
-        y2 = *(unsigned int*)(A+16);
-        x2 = *(unsigned int*)(A+20);
-        
-        
-        // pre-transform x
-        t = (x ^ (x >> 7)) & 0x00AA00AA;  x = x ^ t ^ (t << 7);
-        t = (x ^ (x >>14)) & 0x0000CCCC;  x = x ^ t ^ (t <<14);
-        
-        t = (x1 ^ (x1 >> 7)) & 0x00AA00AA;  x1 = x1 ^ t ^ (t << 7);
-        t = (x1 ^ (x1 >>14)) & 0x0000CCCC;  x1 = x1 ^ t ^ (t <<14);
-        
-        t = (x2 ^ (x2 >> 7)) & 0x00AA00AA;  x2 = x2 ^ t ^ (t << 7);
-        t = (x2 ^ (x2 >>14)) & 0x0000CCCC;  x2 = x2 ^ t ^ (t <<14);
-        
-        // pre-transform y
-        t = (y ^ (y >> 7)) & 0x00AA00AA;  y = y ^ t ^ (t << 7);
-        t = (y ^ (y >>14)) & 0x0000CCCC;  y = y ^ t ^ (t <<14);
-        
-        t = (y1 ^ (y1 >> 7)) & 0x00AA00AA;  y1 = y1 ^ t ^ (t << 7);
-        t = (y1 ^ (y1 >>14)) & 0x0000CCCC;  y1 = y1 ^ t ^ (t <<14);
-        
-        t = (y2 ^ (y2 >> 7)) & 0x00AA00AA;  y2 = y2 ^ t ^ (t << 7);
-        t = (y2 ^ (y2 >>14)) & 0x0000CCCC;  y2 = y2 ^ t ^ (t <<14);
-        
-        // final transform
-        t = (x & 0xF0F0F0F0) | ((y >> 4) & 0x0F0F0F0F);
-        y = ((x << 4) & 0xF0F0F0F0) | (y & 0x0F0F0F0F);
-        x = t;
-        
-        t = (x1 & 0xF0F0F0F0) | ((y1 >> 4) & 0x0F0F0F0F);
-        y1 = ((x1 << 4) & 0xF0F0F0F0) | (y1 & 0x0F0F0F0F);
-        x1 = t;
-        
-        t = (x2 & 0xF0F0F0F0) | ((y2 >> 4) & 0x0F0F0F0F);
-        y2 = ((x2 << 4) & 0xF0F0F0F0) | (y2 & 0x0F0F0F0F);
-        x2 = t;
-        
-        *((uint32_t*)B)     = (uint32_t)(  (y &       0xff)       | ((y1 &       0xff) <<8)  | ((y2 &       0xff) <<16) );
-        *((uint32_t*)(B+1)) = (uint32_t)( ((y &     0xff00) >>8)  |  (y1 &     0xff00)       | ((y2 &     0xff00) <<8)  );
-        *((uint32_t*)(B+2)) = (uint32_t)( ((y &   0xff0000) >>16) | ((y1 &   0xff0000) >>8)  |  (y2 &   0xff0000)       );
-        *((uint32_t*)(B+3)) = (uint32_t)( ((y & 0xff000000) >>24) | ((y1 & 0xff000000) >>16) | ((y2 & 0xff000000) >> 8) );
-        
-        *((uint32_t*)(B+4)) = (uint32_t)(  (x &       0xff)       | ((x1 &       0xff) <<8)  | ((x2 &       0xff) <<16) );
-        *((uint32_t*)(B+5)) = (uint32_t)( ((x &     0xff00) >>8)  |  (x1 &     0xff00)       | ((x2 &     0xff00) <<8)  );
-        *((uint32_t*)(B+6)) = (uint32_t)( ((x &   0xff0000) >>16) | ((x1 &   0xff0000) >>8)  |  (x2 &   0xff0000)       );
-        *((uint32_t*)(B+7)) = (uint32_t)( ((x & 0xff000000) >>24) | ((x1 & 0xff000000) >>16) | ((x2 & 0xff000000) >> 8) );
-    }
-
 
     /** Start I2S transmission
      */
@@ -691,19 +528,18 @@ protected:
         const uint32_t conf_reset_flags = I2S_RX_RESET_M | I2S_RX_FIFO_RESET_M | I2S_TX_RESET_M | I2S_TX_FIFO_RESET_M;
         i2s->conf.val |= conf_reset_flags;
         i2s->conf.val &= ~conf_reset_flags;
-        //while (i2s->state.rx_fifo_reset_back)
-        //    ;
-        /*
-        static void dma_reset(i2s_dev_t *dev) {
-            dev->lc_conf.in_rst=1; dev->lc_conf.in_rst=0;
-            dev->lc_conf.out_rst=1; dev->lc_conf.out_rst=0;
-        }
+    }
 
-        static void fifo_reset(i2s_dev_t *dev) {
-            dev->conf.rx_fifo_reset=1; dev->conf.rx_fifo_reset=0;
-            dev->conf.tx_fifo_reset=1; dev->conf.tx_fifo_reset=0;
-        }
-        */
+    static void i2sReset_DMA()
+    {
+        i2s->lc_conf.in_rst=1; i2s->lc_conf.in_rst=0;
+        i2s->lc_conf.out_rst=1; i2s->lc_conf.out_rst=0;
+    }
+
+    static void i2sReset_FIFO()
+    {
+        i2s->conf.rx_fifo_reset=1; i2s->conf.rx_fifo_reset=0;
+        i2s->conf.tx_fifo_reset=1; i2s->conf.tx_fifo_reset=0;
     }
 
     static void i2sStop()
