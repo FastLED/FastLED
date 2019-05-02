@@ -112,6 +112,7 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 }
 
 #define FASTLED_HAS_CLOCKLESS 1
+#define NUM_COLOR_CHANNELS 3
 
 // -- Configuration constants
 #define DIVIDER             2 /* 4, 8 still seem to work, but timings become marginal */
@@ -185,10 +186,9 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     rmt_item32_t   mZero;
     rmt_item32_t   mOne;
 
-    // -- State information for keeping track of where we are in the pixel data
-    uint8_t *      mPixelData = NULL;
-    int            mSize = 0;
-    int            mCurByte;
+    // -- Save the pixel controller
+    PixelController<RGB_ORDER> * mPixels;
+    int            mCurColor;
     uint16_t       mCurPulse;
 
     // -- Buffer to hold all of the pulses. For the version that uses
@@ -200,6 +200,10 @@ public:
 
     void init()
     {
+        // -- Allocate space to save the pixel controller
+        //    during parallel output
+        mPixels = (PixelController<RGB_ORDER> *) malloc(sizeof(PixelController<RGB_ORDER>));
+        
         // -- Precompute rmt items corresponding to a zero bit and a one bit
         //    according to the timing values given in the template instantiation
         // T1H
@@ -288,17 +292,15 @@ protected:
             xSemaphoreTake(gTX_sem, portMAX_DELAY);
         }
 
-        // -- Initialize the local state, save a pointer to the pixel
-        //    data. We need to make a copy because pixels is a local
-        //    variable in the calling function, and this data structure
-        //    needs to outlive this call to showPixels.
-
-        //if (mPixels != NULL) delete mPixels;
-        //mPixels = new PixelController<RGB_ORDER>(pixels);
         if (FASTLED_RMT_BUILTIN_DRIVER)
             convertAllPixelData(pixels);
-        else
-            copyPixelData(pixels);
+        else {
+            // -- Initialize the local state, save a pointer to the pixel
+            //    data. We need to make a copy because pixels is a local
+            //    variable in the calling function, and this data structure
+            //    needs to outlive this call to showPixels.
+            (*mPixels) = pixels;
+        }        
 
         // -- Keep track of the number of strips we've seen
         gNumStarted++;
@@ -325,33 +327,6 @@ protected:
             gNumStarted = 0;
             gNumDone = 0;
             gNext = 0;
-        }
-    }
-
-    // -- Copy pixel data
-    //    Make a safe copy of the pixel data, so that the FastLED show
-    //    function can continue to the next controller while the RMT
-    //    device starts sending this data asynchronously.
-    virtual void copyPixelData(PixelController<RGB_ORDER> & pixels)
-    {
-        // -- Make sure we have a buffer of the right size
-        //    (3 bytes per pixel)
-        int size_needed = pixels.size() * 3;
-        if (size_needed > mSize) {
-            if (mPixelData != NULL) free(mPixelData);
-            mSize = size_needed;
-            mPixelData = (uint8_t *) malloc( mSize);
-        }
-
-        // -- Cycle through the R,G, and B values in the right order,
-        //    storing the resulting raw pixel data in the buffer.
-        int cur = 0;
-        while (pixels.has(1)) {
-            mPixelData[cur++] = pixels.loadAndScale0();
-            mPixelData[cur++] = pixels.loadAndScale1();
-            mPixelData[cur++] = pixels.loadAndScale2();
-            pixels.advanceData();
-            pixels.stepDithering();
         }
     }
 
@@ -440,7 +415,7 @@ protected:
             // -- Initialize the counters that keep track of where we are in
             //    the pixel data.
             mCurPulse = 0;
-            mCurByte = 0;
+            mCurColor = 0;
 
             // -- Fill both halves of the buffer
             fillHalfRMTBuffer();
@@ -519,6 +494,33 @@ protected:
         }
     }
 
+    uint8_t getNextByte()
+    {
+        uint8_t byte;
+
+        // -- Cycle through the color channels
+        switch (mCurColor) {
+        case 0: 
+            byte = mPixels->loadAndScale0();
+            break;
+        case 1: 
+            byte = mPixels->loadAndScale0();
+            break;
+        case 2: 
+            byte = mPixels->loadAndScale0();
+            mPixels->advanceData();
+            mPixels->stepDithering();
+            break;
+        default:
+            // -- This is bad!
+            byte = 0;
+        }
+
+        mCurColor = (mCurColor + 1) % NUM_COLOR_CHANNELS;
+
+        return byte;
+    }
+
     // -- Fill the RMT buffer
     //    This function fills the next 32 slots in the RMT write
     //    buffer with pixel data. It also handles the case where the
@@ -533,9 +535,9 @@ protected:
         //    into RMT pulses that encode the zeros and ones.
         int pulses = 0;
         uint32_t byteval;
-        while (pulses < 32 && mCurByte < mSize) {
+        while (pulses < 32 && mPixels->has(1)) {
             // -- Get one byte
-            byteval = mPixelData[mCurByte++];
+            byteval = getNextByte();
             byteval <<= 24;
             // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
             // rmt_item32_t value corresponding to the buffered bit value
@@ -550,7 +552,7 @@ protected:
 
         // -- When we reach the end of the pixel data, fill the rest of the
         //    RMT buffer with 0's, which signals to the device that we're done.
-        if (mCurByte == mSize) {
+        if ( ! mPixels->has(1) ) {
             while (pulses < 32) {
                 RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
                 mCurPulse++;
