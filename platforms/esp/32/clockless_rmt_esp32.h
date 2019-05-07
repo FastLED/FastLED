@@ -504,10 +504,10 @@ protected:
             byte = mPixels->loadAndScale0();
             break;
         case 1: 
-            byte = mPixels->loadAndScale0();
+            byte = mPixels->loadAndScale1();
             break;
         case 2: 
-            byte = mPixels->loadAndScale0();
+            byte = mPixels->loadAndScale2();
             mPixels->advanceData();
             mPixels->stepDithering();
             break;
