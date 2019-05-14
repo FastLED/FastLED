@@ -53,7 +53,7 @@ protected:
 #define _ESP_ADJ2 (0)
 
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register uint32_t b)  {
-    b = ~b; b <<= 24;
+    b <<= 24; b = ~b;
     for(register uint32_t i = BITS; i > 0; i--) {
       while((__clock_cycles() - last_mark) < (T1+T2+T3));
 			last_mark = __clock_cycles();

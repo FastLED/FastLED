@@ -312,6 +312,35 @@ LIB8STATIC uint8_t addmod8( uint8_t a, uint8_t b, uint8_t m)
     return a;
 }
 
+///          Subtract two numbers, and calculate the modulo
+///          of the difference and a third number, M.
+///          In other words, it returns (A-B) % M.
+///          It is designed as a compact mechanism for
+///          incrementing a 'mode' switch and wrapping
+///          around back to 'mode 0' when the switch
+///          goes past the end of the available range.
+///          e.g. if you have seven modes, this switches
+///          to the next one and wraps around if needed:
+///            mode = addmod8( mode, 1, 7);
+///LIB8STATIC_ALWAYS_INLINESee 'mod8' for notes on performance.
+LIB8STATIC uint8_t submod8( uint8_t a, uint8_t b, uint8_t m)
+{
+#if defined(__AVR__)
+    asm volatile (
+                  "       sub %[a],%[b]    \n\t"
+                  "L_%=:  sub %[a],%[m]    \n\t"
+                  "       brcc L_%=        \n\t"
+                  "       add %[a],%[m]    \n\t"
+                  : [a] "+r" (a)
+                  : [b] "r"  (b), [m] "r" (m)
+                  );
+#else
+    a -= b;
+    while( a >= m) a -= m;
+#endif
+    return a;
+}
+
 /// 8x8 bit multiplication, with 8 bit result
 LIB8STATIC_ALWAYS_INLINE uint8_t mul8( uint8_t i, uint8_t j)
 {

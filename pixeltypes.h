@@ -478,10 +478,14 @@ struct CRGB {
         uint8_t max = red;
         if( green > max) max = green;
         if( blue > max) max = blue;
-        uint16_t factor = ((uint16_t)(limit) * 256) / max;
-        red =   (red   * factor) / 256;
-        green = (green * factor) / 256;
-        blue =  (blue  * factor) / 256;
+        
+        // stop div/0 when color is black
+        if(max > 0) {
+            uint16_t factor = ((uint16_t)(limit) * 256) / max;
+            red =   (red   * factor) / 256;
+            green = (green * factor) / 256;
+            blue =  (blue  * factor) / 256;
+        }
     }
 
     /// return a new CRGB object after performing a linear interpolation between this object and the passed in object

@@ -123,12 +123,24 @@ public:
 		//cli();
 		if(b & (1 << BIT)) {
 			FastPin<DATA_PIN>::hi();
+#ifdef ESP32
+			// try to ensure we never have adjacent write opcodes to the same register
+			FastPin<CLOCK_PIN>::lo();
+			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY; 
+			FastPin<CLOCK_PIN>::toggle(); CLOCK_LO_DELAY; 
+#else
 			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
 			FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+#endif
 		} else {
 			FastPin<DATA_PIN>::lo();
 			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+#ifdef ESP32
+			// try to ensure we never have adjacent write opcodes to the same register
+			FastPin<CLOCK_PIN>::toggle(); CLOCK_HI_DELAY; 
+#else
 			FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+#endif
 		}
 		//sei();
 	}

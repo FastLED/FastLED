@@ -1,8 +1,9 @@
-#ifndef __INC_LED_SYSDEFS_ARM_D21_H
-#define __INC_LED_SYSDEFS_ARM_D21_H
+#ifndef __INC_LED_SYSDEFS_ARM_D51_H
+#define __INC_LED_SYSDEFS_ARM_D51_H
 
 
 #define FASTLED_ARM
+// Note this is an M4, not an M0+, but this enables the shared m0clockless.h
 #define FASTLED_ARM_M0_PLUS
 
 #ifndef INTERRUPT_THRESHOLD
@@ -11,7 +12,7 @@
 
 // Default to allowing interrupts
 #ifndef FASTLED_ALLOW_INTERRUPTS
-#define FASTLED_ALLOW_INTERRUPTS 1
+#define FASTLED_ALLOW_INTERRUPTS 0
 #endif
 
 #if FASTLED_ALLOW_INTERRUPTS == 1
