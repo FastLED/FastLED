@@ -259,16 +259,16 @@ protected:
     static void initBitPatterns()
     {
         // Precompute the bit patterns based on the I2S sample rate
-        Serial.println("Setting up fastled using I2S");
+        // Serial.println("Setting up fastled using I2S");
 
         // -- First, convert back to ns from CPU clocks
         uint32_t T1ns = ESPCLKS_TO_NS(T1);
         uint32_t T2ns = ESPCLKS_TO_NS(T2);
         uint32_t T3ns = ESPCLKS_TO_NS(T3);
         
-        Serial.print("T1 = "); Serial.print(T1); Serial.print(" ns "); Serial.println(T1ns);
-        Serial.print("T2 = "); Serial.print(T2); Serial.print(" ns "); Serial.println(T2ns);
-        Serial.print("T3 = "); Serial.print(T3); Serial.print(" ns "); Serial.println(T3ns);
+        // Serial.print("T1 = "); Serial.print(T1); Serial.print(" ns "); Serial.println(T1ns);
+        // Serial.print("T2 = "); Serial.print(T2); Serial.print(" ns "); Serial.println(T2ns);
+        // Serial.print("T3 = "); Serial.print(T3); Serial.print(" ns "); Serial.println(T3ns);
         
         /*
          We calculate the best pcgd to the timing
@@ -284,7 +284,7 @@ protected:
         if(smallest>T3)
             smallest=T3;
         double freq=(double)1/(double)(T1ns + T2ns + T3ns);
-        Serial.printf("chipset frequency:%f Khz\n", 1000000L*freq);
+        // Serial.printf("chipset frequency:%f Khz\n", 1000000L*freq);
        // Serial.printf("smallest %d\n",smallest);
         int pgc_=1;
         int precision=0;
@@ -297,8 +297,8 @@ protected:
             //Serial.printf("%d %d\n",pgc_,(a+b+c)/pgc_);
         }
         pgc_=pgcd(smallest,precision,T1,T2,T3);
-        Serial.printf("pgcd %d precision:%d\n",pgc_,precision);
-        Serial.printf("nb pulse per bit:%d\n",T1/pgc_ +T2/pgc_ +T3/pgc_);
+        // Serial.printf("pgcd %d precision:%d\n",pgc_,precision);
+        // Serial.printf("nb pulse per bit:%d\n",T1/pgc_ +T2/pgc_ +T3/pgc_);
         gPulsesPerBit=(int)T1/pgc_ +(int)T2/pgc_ +(int)T3/pgc_;
         /*
          we calculate the duration of one pulse nd htre base frequency of the led
@@ -309,7 +309,7 @@ protected:
          */
 
         freq=1000000000L*freq*gPulsesPerBit;
-        Serial.printf("needed frequency (nbpiulse per bit)*(chispset frequency):%f Mhz\n",freq/1000000);
+        // Serial.printf("needed frequency (nbpiulse per bit)*(chispset frequency):%f Mhz\n",freq/1000000);
         
         /*
          we do calculate the needed N a and b
@@ -362,9 +362,9 @@ protected:
         //Serial.printf("freq %f %f\n",freq,I2S_BASE_CLK/(CLOCK_DIVIDER_N+(double)CLOCK_DIVIDER_B/CLOCK_DIVIDER_A));
         freq=1/(CLOCK_DIVIDER_N+(double)CLOCK_DIVIDER_B/CLOCK_DIVIDER_A);
         freq=freq*I2S_BASE_CLK;
-        Serial.printf("calculted for i2s frequency:%f Mhz N:%d B:%d A:%d\n",freq/1000000,CLOCK_DIVIDER_N,CLOCK_DIVIDER_B,CLOCK_DIVIDER_A);
+        // Serial.printf("calculted for i2s frequency:%f Mhz N:%d B:%d A:%d\n",freq/1000000,CLOCK_DIVIDER_N,CLOCK_DIVIDER_B,CLOCK_DIVIDER_A);
         double pulseduration=1000000000/freq;
-        Serial.printf("Pulse duration: %f ns\n",pulseduration);
+        // Serial.printf("Pulse duration: %f ns\n",pulseduration);
         // gPulsesPerBit = (T1ns + T2ns + T3ns)/FASTLED_I2S_NS_PER_PULSE;
         
         //Serial.print("Pulses per bit: "); Serial.println(gPulsesPerBit);
@@ -375,7 +375,7 @@ protected:
         //Serial.print(T1ns+T2ns); Serial.print("ns --- ");
         //Serial.print(ones_for_one); Serial.print(" 1 bits");
         //Serial.print(" = "); Serial.print(ones_for_one * FASTLED_I2S_NS_PER_PULSE); Serial.println("ns");
-        Serial.printf("one bit : target %d  ns --- %d  pulses 1 bit = %f ns\n",T1ns+T2ns,ones_for_one ,ones_for_one*pulseduration);
+        // Serial.printf("one bit : target %d  ns --- %d  pulses 1 bit = %f ns\n",T1ns+T2ns,ones_for_one ,ones_for_one*pulseduration);
         
         
         int i = 0;
@@ -394,7 +394,7 @@ protected:
        // Serial.print(T1ns); Serial.print("ns --- ");
         //Serial.print(ones_for_zero); Serial.print(" 1 bits");
         //Serial.print(" = "); Serial.print(ones_for_zero * FASTLED_I2S_NS_PER_PULSE); Serial.println("ns");
-        Serial.printf("Zero bit : target %d ns --- %d pulses  1 bit =   %f ns\n",T1ns,ones_for_zero ,ones_for_zero*pulseduration);
+        // Serial.printf("Zero bit : target %d ns --- %d pulses  1 bit =   %f ns\n",T1ns,ones_for_zero ,ones_for_zero*pulseduration);
         i = 0;
         while ( i < ones_for_zero ) {
             gZeroBit[i] = 0xFFFFFF00;
