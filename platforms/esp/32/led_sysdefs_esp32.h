@@ -12,7 +12,7 @@
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
 typedef unsigned long prog_uint32_t;
-typedef bool boolean;
+
 
 // Default to NOT using PROGMEM here
 #ifndef FASTLED_USE_PROGMEM
