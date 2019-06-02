@@ -477,7 +477,7 @@ LIB8STATIC uint16_t lerp16by16( uint16_t a, uint16_t b, fract16 frac)
     uint16_t result;
     if( b > a ) {
         uint16_t delta = b - a;
-        uint32_t scaled = scale16(delta, frac);
+        uint16_t scaled = scale16(delta, frac);
         result = a + scaled;
     } else {
         uint16_t delta = a - b;

@@ -18,12 +18,23 @@
         "type": "git",
         "url": "https://github.com/FastLED/FastLED.git"
     },
-    "version": "3.2.1",
+    "version": "3.2.6",
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
-    "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32",
+    "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32",   
+    "export": {
+        "exclude": [
+            "docs",
+            "extras"
+        ]
+    },
     "build": {
+        "srcFilter": [
+            "+<*.c>",
+            "+<*.cpp>",
+            "+<*.h>"
+        ],
         "libArchive": false
-    }    
+    } 
 }

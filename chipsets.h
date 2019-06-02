@@ -239,10 +239,10 @@ protected:
 		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
 #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
 		const uint16_t maxBrightness = 0x1F;
-		uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
-		s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
-		s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
-		s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
+		uint16_t brightness = ((((uint16_t)max(max(s0, s1), s2) + 1) * maxBrightness - 1) >> 8) + 1;
+		s0 = (maxBrightness * s0 + (brightness >> 1)) / brightness;
+		s1 = (maxBrightness * s1 + (brightness >> 1)) / brightness;
+		s2 = (maxBrightness * s2 + (brightness >> 1)) / brightness;
 #else
 		const uint8_t brightness = 0x1F;
 #endif
@@ -304,10 +304,10 @@ protected:
 		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
 #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
 		const uint16_t maxBrightness = 0x1F;
-		uint16_t brightness = (max(max(s0, s1), s2) * maxBrightness >> 8) + 1;
-		s0 = ((uint16_t)s0 + 1) * maxBrightness / brightness - 1;
-		s1 = ((uint16_t)s1 + 1) * maxBrightness / brightness - 1;
-		s2 = ((uint16_t)s2 + 1) * maxBrightness / brightness - 1;
+		uint16_t brightness = ((((uint16_t)max(max(s0, s1), s2) + 1) * maxBrightness - 1) >> 8) + 1;
+		s0 = (maxBrightness * s0 + (brightness >> 1)) / brightness;
+		s1 = (maxBrightness * s1 + (brightness >> 1)) / brightness;
+		s2 = (maxBrightness * s2 + (brightness >> 1)) / brightness;
 #else
 		const uint8_t brightness = 0x1F;
 #endif
@@ -439,6 +439,11 @@ protected:
 // need the more tightly defined timeframes.
 #if (F_CPU == 8000000 || F_CPU == 16000000 || F_CPU == 24000000) //  || F_CPU == 48000000 || F_CPU == 96000000) // 125ns/clock
 #define FMUL (F_CPU/8000000)
+
+// GE8822
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GE8822Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, 4> {};
+
 // LPD1886
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class LPD1886Controller1250Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 3 * FMUL, 2 * FMUL, RGB_ORDER, 4> {};
@@ -462,6 +467,9 @@ class WS2811Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 10
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class SK6822Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class SM16703Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class SK6812Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 3 * FMUL, 4 * FMUL, RGB_ORDER> {};
@@ -497,6 +505,10 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 #else
+// GE8822 - 350ns 660ns 350ns
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class GE8822Controller800Khz : public ClocklessController<DATA_PIN, NS(350), NS(660), NS(350), RGB_ORDER, 4> {};
+
 // GW6205@400khz - 800ns, 800ns, 800ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class GW6205Controller400Khz : public ClocklessController<DATA_PIN, NS(800), NS(800), NS(800), RGB_ORDER, 4> {};
@@ -563,6 +575,9 @@ class SK6822Controller : public ClocklessController<DATA_PIN, NS(375), NS(1000),
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class SK6812Controller : public ClocklessController<DATA_PIN, NS(300), NS(300), NS(600), RGB_ORDER> {};
+
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class SM16703Controller : public ClocklessController<DATA_PIN, NS(300), NS(600), NS(300), RGB_ORDER> {};
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PL9823Controller : public ClocklessController<DATA_PIN, NS(350), NS(1010), NS(350), RGB_ORDER> {};
