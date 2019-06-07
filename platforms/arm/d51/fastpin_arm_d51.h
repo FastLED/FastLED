@@ -75,7 +75,8 @@ _DEFPIN_ARM(14, 0,  2); _DEFPIN_ARM(15, 0,  5); _DEFPIN_ARM(16, 1,  8); _DEFPIN_
 _DEFPIN_ARM(18, 0,  4); _DEFPIN_ARM(19, 0,  6); /* A6 is present in variant.h but couldn't find it on the schematic */
 // SDA/SCL
 _DEFPIN_ARM(21, 0, 12); _DEFPIN_ARM(22, 0, 13);
-// MISO/SCK/MOSI
+
+// 23..25  MISO/SCK/MOSI
 _DEFPIN_ARM(23, 1, 23); _DEFPIN_ARM(24, 0,  1); _DEFPIN_ARM(25, 0,  0);
 
 #define SPI_DATA 25
@@ -83,6 +84,26 @@ _DEFPIN_ARM(23, 1, 23); _DEFPIN_ARM(24, 0,  1); _DEFPIN_ARM(25, 0,  0);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(ADAFRUIT_FEATHER_M4_EXPRESS)
+
+#define MAX_PIN 19
+// D0-D13, including D8 (neopixel)  no pins 2 3
+_DEFPIN_ARM( 0, 1, 17); _DEFPIN_ARM( 1, 1, 16);
+_DEFPIN_ARM( 4, 0, 14); _DEFPIN_ARM( 5, 0, 16); _DEFPIN_ARM( 6, 0,  18);
+_DEFPIN_ARM( 8, 1,  3); _DEFPIN_ARM( 9, 0, 19); _DEFPIN_ARM(10, 0, 20); _DEFPIN_ARM(11, 0, 21);
+_DEFPIN_ARM(12, 0, 22); _DEFPIN_ARM(13, 0, 23);
+// A0-A5
+_DEFPIN_ARM(14, 0,  2); _DEFPIN_ARM(15, 0,  5); _DEFPIN_ARM(16, 1,  8); _DEFPIN_ARM(17, 1,  9);
+_DEFPIN_ARM(18, 0,  4); _DEFPIN_ARM(19, 0,  6); /* A6 is present in variant.h but couldn't find it on the schematic */
+// SDA/SCL
+_DEFPIN_ARM(21, 0, 12); _DEFPIN_ARM(22, 0, 13);
+// 23..25  MISO/MOSI/SCK
+_DEFPIN_ARM(23, 1, 22); _DEFPIN_ARM(24, 1,  23); _DEFPIN_ARM(25, 0,  17);
+
+#define SPI_DATA 24
+#define SPI_CLOCK 25
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
 #endif
 
 
