@@ -521,10 +521,10 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 #else
-    
+
 // Similar to NS() macro, this calculates the number of cycles for
 // the clockless chipset (which may differ from CPU cycles)
-#define C_NS(_NS) (((_NS * ((CLOCKLESS_FREQUENCY / 1000000L) + 999) / 1000)
+#define C_NS(_NS) (_NS * ((CLOCKLESS_FREQUENCY / 1000000L) + 999) / 1000)
 
 // GE8822 - 350ns 660ns 350ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
