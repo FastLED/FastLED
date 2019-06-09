@@ -1,4 +1,4 @@
-FastLED 3.2.8
+FastLED 3.2.9
 =============
 * Update ItsyBitsy support
 * Remove conflicting types courtesy of an esp8266 framework update
