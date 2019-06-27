@@ -7,6 +7,8 @@
 
 #if defined(NRF51)
 #include "platforms/arm/nrf51/fastled_arm_nrf51.h"
+#elif defined(NRF52_SERIES)
+#include "platforms/arm/nrf52/fastled_arm_nrf52.h"
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
 // Include k20/T3 headers
 #include "platforms/arm/k20/fastled_arm_k20.h"
@@ -23,7 +25,7 @@
 #include "platforms/arm/stm32/fastled_arm_stm32.h"
 #elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__)
 #include "platforms/arm/d21/fastled_arm_d21.h"
-#elif defined(__SAMD51G19A__)
+#elif defined(__SAMD51G19A__) || defined(__SAMD51J19A__)
 #include "platforms/arm/d51/fastled_arm_d51.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/fastled_esp8266.h"

@@ -8,12 +8,12 @@
 #define FASTLED_HAS_PRAGMA_MESSAGE
 #endif
 
-#define FASTLED_VERSION 3002006
+#define FASTLED_VERSION 3002009
 #ifndef FASTLED_INTERNAL
 #  ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#    pragma message "FastLED version 3.002.006"
+#    pragma message "FastLED version 3.002.009"
 #  else
-#    warning FastLED version 3.002.006  (Not really a warning, just telling you here.)
+#    warning FastLED version 3.002.009  (Not really a warning, just telling you here.)
 #  endif
 #endif
 
