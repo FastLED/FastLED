@@ -526,7 +526,7 @@ protected:
     //    buffer with pixel data. It also handles the case where the
     //    pixel data is exhausted, so we need to fill the RMT buffer
     //    with zeros to signal that it's done.
-    void IRAM_ATTR fillHalfRMTBuffer()
+    virtual void IRAM_ATTR fillHalfRMTBuffer()
     {
         uint32_t one_val = mOne.val;
         uint32_t zero_val = mZero.val;
