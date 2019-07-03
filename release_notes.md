@@ -1,3 +1,9 @@
+FastLED 3.2.10
+==============
+* Adafruit Metro M4 Airlift support
+* Arduino Nano 33 IOT preliminary definitions
+* Bug fixes
+
 FastLED 3.2.9
 =============
 * Update ItsyBitsy support
