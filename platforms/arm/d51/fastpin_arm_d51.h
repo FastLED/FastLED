@@ -85,7 +85,7 @@ _DEFPIN_ARM(23, 1, 23); _DEFPIN_ARM(24, 0,  1); _DEFPIN_ARM(25, 0,  0);
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
 // Actual pin definitions
-#if defined(ADAFRUIT_METRO_M4_AIRLIFT_LITE)
+#elif defined(ADAFRUIT_METRO_M4_AIRLIFT_LITE)
 
 #define MAX_PIN 20
 // D0-D13, including D6+D8 (DotStar CLK + DATA)
