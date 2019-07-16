@@ -73,13 +73,13 @@
 
 // manually define two structures, to avoid fighting with preprocessor macros
 struct __generated_struct_NRF_P0 {
-    FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static NRF_GPIO_Type * r() {
-        return NRF_P0;
+    FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static uintptr_t r() {
+        return NRF_P0_BASE;
     }
 };
 struct __generated_struct_NRF_P1 {
-    FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static NRF_GPIO_Type * r() {
-        return NRF_P1;
+    FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static uintptr_t r() {
+        return NRF_P1_BASE;
     }
 };
 
@@ -112,19 +112,19 @@ public:
         NRF_GPIO_PIN_NOSENSE            // pin sense level disabled
         );
   }
-  FASTLED_NRF52_INLINE_ATTRIBUTE static void       hi()        { _PORT::r()->OUTSET = _MASK;            } // sets _MASK in the SET   OUTPUT register (output set high)
-  FASTLED_NRF52_INLINE_ATTRIBUTE static void       lo()        { _PORT::r()->OUTCLR = _MASK;            } // sets _MASK in the CLEAR OUTPUT register (output set low)
-  FASTLED_NRF52_INLINE_ATTRIBUTE static void       toggle()    { _PORT::r()->OUT ^= _MASK;              } // toggles _MASK bits in the OUTPUT GPIO port directly
+  FASTLED_NRF52_INLINE_ATTRIBUTE static void       hi()        { (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUTSET = _MASK;            } // sets _MASK in the SET   OUTPUT register (output set high)
+  FASTLED_NRF52_INLINE_ATTRIBUTE static void       lo()        { (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUTCLR = _MASK;            } // sets _MASK in the CLEAR OUTPUT register (output set low)
+  FASTLED_NRF52_INLINE_ATTRIBUTE static void       toggle()    { (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUT ^= _MASK;              } // toggles _MASK bits in the OUTPUT GPIO port directly
   FASTLED_NRF52_INLINE_ATTRIBUTE static void       strobe()    { toggle();     toggle();                } // BUGBUG -- Is this used by FastLED?  Without knowing (for example) SPI Speed?
-  FASTLED_NRF52_INLINE_ATTRIBUTE static port_t     hival()     { return _PORT::r()->OUT | _MASK;        } // sets all _MASK bit(s) in the OUTPUT GPIO port to 1
-  FASTLED_NRF52_INLINE_ATTRIBUTE static port_t     loval()     { return _PORT::r()->OUT & ~_MASK;       } // sets all _MASK bit(s) in the OUTPUT GPIO port to 0
-  FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t port()      { return &(_PORT::r()->OUT);             } // gets raw pointer to OUTPUT          GPIO port
-  FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t cport()     { return &(_PORT::r()->OUTCLR);          } // gets raw pointer to SET   DIRECTION GPIO port
-  FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t sport()     { return &(_PORT::r()->OUTSET);          } // gets raw pointer to CLEAR DIRECTION GPIO port
+  FASTLED_NRF52_INLINE_ATTRIBUTE static port_t     hival()     { return (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUT | _MASK;        } // sets all _MASK bit(s) in the OUTPUT GPIO port to 1
+  FASTLED_NRF52_INLINE_ATTRIBUTE static port_t     loval()     { return (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUT & ~_MASK;       } // sets all _MASK bit(s) in the OUTPUT GPIO port to 0
+  FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t port()      { return &((reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUT);             } // gets raw pointer to OUTPUT          GPIO port
+  FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t cport()     { return &((reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUTCLR);          } // gets raw pointer to SET   DIRECTION GPIO port
+  FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t sport()     { return &((reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUTSET);          } // gets raw pointer to CLEAR DIRECTION GPIO port
   FASTLED_NRF52_INLINE_ATTRIBUTE static port_t     mask()      { return _MASK;                          } // gets the value of _MASK
   FASTLED_NRF52_INLINE_ATTRIBUTE static void hi (register port_ptr_t port) { hi();                      } // sets _MASK in the SET   OUTPUT register (output set high)
   FASTLED_NRF52_INLINE_ATTRIBUTE static void lo (register port_ptr_t port) { lo();                      } // sets _MASK in the CLEAR OUTPUT register (output set low)
-  FASTLED_NRF52_INLINE_ATTRIBUTE static void set(register port_t     val ) { _PORT::r()->OUT = val;     } // sets entire port's value (optimization used by FastLED)
+  FASTLED_NRF52_INLINE_ATTRIBUTE static void set(register port_t     val ) { (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUT = val;     } // sets entire port's value (optimization used by FastLED)
   FASTLED_NRF52_INLINE_ATTRIBUTE static void fastset(register port_ptr_t port, register port_t val) { *port = val; }
   constexpr                      static uint32_t   nrf_pin2() { return NRF_GPIO_PIN_MAP(_PORT_NUMBER, _PIN_NUMBER); }
   constexpr                      static bool       LowSpeedOnlyRecommended() {
@@ -269,7 +269,7 @@ public:
             );
     #endif
     #if !defined(_FASTLED_NRF52_LOW_SPEED_ONLY_BOARD_DETECT)
-        #warning "Unknown board / package, ... caller must pins support high-speed"
+        #warning "Unknown board / package, ... caller must determine pins that support high-speed"
         return false; // choosing default to be FALSE, to allow users to ATTEMPT to use high-speed on pins where support is not known
     #endif
   }
