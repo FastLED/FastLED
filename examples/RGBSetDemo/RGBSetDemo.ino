@@ -1,9 +1,12 @@
 #include <FastLED.h>
 #define NUM_LEDS 40
 
+#define NEOPIXEL_PIN 3
+
+
 CRGBArray<NUM_LEDS> leds;
 
-void setup() { FastLED.addLeds<NEOPIXEL,6>(leds, NUM_LEDS); }
+void setup() { FastLED.addLeds<NEOPIXEL,NEOPIXEL_PIN>(leds, NUM_LEDS); }
 
 void loop(){ 
   static uint8_t hue;

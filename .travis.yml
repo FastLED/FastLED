@@ -1,0 +1,49 @@
+language: c
+
+python:
+    - '3.7'
+
+cache:
+  directories:
+    - ~/arduino_ide
+    - ~/.arduino15/packages/
+
+git:
+  depth: false
+  quiet: true
+
+env:
+  global:
+    - PATH=/opt/python/3.7.1/bin:$PATH
+    - ARDUINO_LIBRARY_NAME="FastLED"
+  matrix:
+    - platforms="uno gemma zero due"
+    - platforms="esp32 esp8266"
+    - platforms="trinket m4"
+    - platforms="stm32 nrf52840"
+
+matrix:
+  # allow build to be marked as finished when required rows done... remaining rows will still continue
+  # this is necessary if setting any 'allow_failures:' values in the matrix
+  fast_finish: true
+
+before_script:
+  # export some travis-ci functions that are useful for folding output
+  - export -f travis_nanoseconds
+  - export -f travis_fold
+  - export -f travis_time_start
+  - export -f travis_time_finish
+
+before_install:
+  - source $TRAVIS_BUILD_DIR/extras/CI/install.sh
+
+install:
+# Example to install other libraries that your project might need
+#   - arduino --install-library "FastLED"
+
+script:
+  - build_platform
+
+# Generate and deploy documentation
+# after_success:
+#  - source <(curl -SLs  https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/doxy_gen_and_deploy.sh)

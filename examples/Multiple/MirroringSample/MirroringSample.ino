@@ -7,20 +7,25 @@
 #define NUM_LEDS_PER_STRIP 60
 CRGB leds[NUM_LEDS_PER_STRIP];
 
+#define NEOPIXEL_FIRST_PIN  2
+#define NEOPIXEL_SECOND_PIN 3
+#define NEOPIXEL_THIRD_PIN  4
+
+
 // For mirroring strips, all the "special" stuff happens just in setup.  We
 // just addLeds multiple times, once for each strip
 void setup() {
   // tell FastLED there's 60 NEOPIXEL leds on pin 4
-  FastLED.addLeds<NEOPIXEL, 4>(leds, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<NEOPIXEL, NEOPIXEL_FIRST_PIN>(leds, NUM_LEDS_PER_STRIP);
 
   // tell FastLED there's 60 NEOPIXEL leds on pin 5
-  FastLED.addLeds<NEOPIXEL, 5>(leds, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<NEOPIXEL, NEOPIXEL_SECOND_PIN>(leds, NUM_LEDS_PER_STRIP);
 
   // tell FastLED there's 60 NEOPIXEL leds on pin 6
-  FastLED.addLeds<NEOPIXEL, 6>(leds, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<NEOPIXEL, NEOPIXEL_THIRD_PIN>(leds, NUM_LEDS_PER_STRIP);
 
-  // tell FastLED there's 60 NEOPIXEL leds on pin 7
-  FastLED.addLeds<NEOPIXEL, 7>(leds, NUM_LEDS_PER_STRIP);
+  //// tell FastLED there's 60 NEOPIXEL leds on pin 7
+  //FastLED.addLeds<NEOPIXEL, 7>(leds, NUM_LEDS_PER_STRIP);
 }
 
 void loop() {

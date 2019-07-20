@@ -1,0 +1,25 @@
+In file included from /home/travis/arduino_ide/libraries/fastled/FastLED.h:48:0,
+                 from /home/travis/build/henrygab/FastLED/examples/BuildVerificationHelper/BuildVerificationHelper.ino:1:
+
+/home/travis/arduino_ide/libraries/fastled/fastpin.h: In instantiation of 'class FastPin<7u>':
+/home/travis/arduino_ide/libraries/fastled/fastspi_bitbang.h:22:49:   required from 'class AVRSoftwareSPIOutput<7u, 5u, 6u>'
+/home/travis/arduino_ide/libraries/fastled/fastspi.h:30:7:   required from 'class SPIOutput<7u, 5u, 6u>'
+/home/travis/arduino_ide/libraries/fastled/chipsets.h:157:6:   required from 'class LPD6803Controller<7u, 5u, (EOrder)10u, 6u>'
+/home/travis/arduino_ide/libraries/fastled/FastLED.h:253:77:   required from 'static CLEDController& CFastLED::addLeds(CRGB*, int, int) [with ESPIChipsets CHIPSET = (ESPIChipsets)0u; unsigned char DATA_PIN = 7u; unsigned char CLOCK_PIN = 5u; EOrder RGB_ORDER = (EOrder)10u]'
+/home/travis/arduino_ide/libraries/fastled/FastLED.h:271:93:   required from 'static CLEDController& CFastLED::addLeds(CRGB*, int, int) [with ESPIChipsets CHIPSET = (ESPIChipsets)0u; EOrder RGB_ORDER = (EOrder)10u]'
+/home/travis/build/henrygab/FastLED/examples/BuildVerificationHelper/BuildVerificationHelper.ino:64:52:   required from here
+
+/home/travis/arduino_ide/libraries/fastled/fastpin.h:207:2: error: static assertion failed: Invalid pin specified
+  static_assert(validpin(), "Invalid pin specified");
+  ^
+
+/home/travis/arduino_ide/libraries/fastled/fastpin.h: In instantiation of 'class FastPin<5u>':
+/home/travis/arduino_ide/libraries/fastled/fastspi_bitbang.h:23:50:   required from 'class AVRSoftwareSPIOutput<7u, 5u, 6u>'
+/home/travis/arduino_ide/libraries/fastled/fastspi.h:30:7:   required from 'class SPIOutput<7u, 5u, 6u>'
+/home/travis/arduino_ide/libraries/fastled/chipsets.h:157:6:   required from 'class LPD6803Controller<7u, 5u, (EOrder)10u, 6u>'
+/home/travis/arduino_ide/libraries/fastled/FastLED.h:253:77:   required from 'static CLEDController& CFastLED::addLeds(CRGB*, int, int) [with ESPIChipsets CHIPSET = (ESPIChipsets)0u; unsigned char DATA_PIN = 7u; unsigned char CLOCK_PIN = 5u; EOrder RGB_ORDER = (EOrder)10u]'
+/home/travis/arduino_ide/libraries/fastled/FastLED.h:271:93:   required from 'static CLEDController& CFastLED::addLeds(CRGB*, int, int) [with ESPIChipsets CHIPSET = (ESPIChipsets)0u; EOrder RGB_ORDER = (EOrder)10u]'
+/home/travis/build/henrygab/FastLED/examples/BuildVerificationHelper/BuildVerificationHelper.ino:64:52:   required from here
+
+/home/travis/arduino_ide/libraries/fastled/fastpin.h:207:2: error: static assertion failed: Invalid pin specified
+exit status 1
