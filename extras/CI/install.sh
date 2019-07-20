@@ -1052,7 +1052,7 @@ function internal_build_platforms {
       printf "${VT_LGREEN}PASSED: [$succeeded_key]${VT_NORMAL}\n"
     done # for failure_key in samples_failed
     for failure_key in "${!samples_failed[@]}"; do
-      log_build_error "${failure_key}]" "${samples_failed[$failure_key]}"
+      log_build_error "${failure_key}]" "${samples_failed[$failure_key]}\n"
       printf "${VT_LPURPLE}FAILED: [$failure_key]${VT_NORMAL}\n"
       return_value=$(( $return_value | 32 ))
     done # for failure_key in samples_failed
