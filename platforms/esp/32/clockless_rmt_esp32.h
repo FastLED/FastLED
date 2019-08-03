@@ -131,8 +131,8 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 // -- Convert ESP32 cycles to RMT cycles
 #define TO_RMT_CYCLES(_CLKS) NS_TO_CYCLES(ESPCLKS_TO_NS(_CLKS))    
 
+// -- NEW: Just convert directly from CPU cycles to RMT cycles
 #define RMT_CYCLES_PER_ESP_CYCLE (F_CPU / CYCLES_PER_SEC)
-// #define ESP_TO_RMT_CYCLES(n) TO_RMT_CYCLES(n)
 #define ESP_TO_RMT_CYCLES(n) ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
 
 // -- Number of cycles to signal the strip to latch
@@ -550,7 +550,7 @@ protected:
             for (register uint32_t j = 0; j < 8; j++) {
                 uint32_t val = (byteval & 0x80000000L) ? one_val : zero_val;
                 * mRMT_mem_ptr++ = val;
-                // RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
+                // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
                 byteval <<= 1;
                 mCurPulse++;
             }
@@ -562,7 +562,7 @@ protected:
         if ( ! mPixels->has(1) ) {
             while (pulses < 32) {
                 * mRMT_mem_ptr++ = 0;
-                // RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
+                // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
                 mCurPulse++;
                 pulses++;
             }
