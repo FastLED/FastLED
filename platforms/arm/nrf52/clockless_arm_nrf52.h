@@ -46,7 +46,7 @@ private:
     // may as well be static, as can only attach one LED string per _DATA_PIN....
     static uint16_t s_SequenceBuffer[_PWM_BUFFER_COUNT];
     static uint16_t s_SequenceBufferValidElements;
-    static uint32_t s_SequenceBufferInUse;
+    static volatile uint32_t s_SequenceBufferInUse;
     static CMinWait<_WAIT_TIME_MICROSECONDS> mWait;  // ensure data has time to latch
 
     FASTLED_NRF52_INLINE_ATTRIBUTE static void startPwmPlayback_InitializePinState() {
@@ -302,7 +302,7 @@ public:
 template <uint8_t _DATA_PIN, int _T1, int _T2, int _T3, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
 uint16_t ClocklessController<_DATA_PIN, _T1, _T2, _T3, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBufferValidElements = 0;
 template <uint8_t _DATA_PIN, int _T1, int _T2, int _T3, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
-uint32_t ClocklessController<_DATA_PIN, _T1, _T2, _T3, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBufferInUse = 0;
+uint32_t volatile ClocklessController<_DATA_PIN, _T1, _T2, _T3, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBufferInUse = 0;
 template <uint8_t _DATA_PIN, int _T1, int _T2, int _T3, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
 uint16_t ClocklessController<_DATA_PIN, _T1, _T2, _T3, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBuffer[_PWM_BUFFER_COUNT];
 template <uint8_t _DATA_PIN, int _T1, int _T2, int _T3, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
