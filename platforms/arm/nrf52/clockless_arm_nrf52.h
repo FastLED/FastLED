@@ -123,6 +123,18 @@ private:
     FASTLED_NRF52_INLINE_ATTRIBUTE static void startPwmPlayback_StartTask(NRF_PWM_Type * pwm) {
         nrf_pwm_task_trigger(pwm, NRF_PWM_TASK_SEQSTART0);
     }
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void spinAcquireSequenceBuffer() {
+        while (!tryAcquireSequenceBuffer());
+    }
+    FASTLED_NRF52_INLINE_ATTRIBUTE static bool tryAcquireSequenceBuffer() {
+        return __sync_bool_compare_and_swap(&s_SequenceBufferInUse, 0, 1);
+    }
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void releaseSequenceBuffer() {
+        uint32_t tmp = __sync_val_compare_and_swap(&s_SequenceBufferInUse, 1, 0);
+        if (tmp != 1) {
+            // TODO: Error / Assert / log ?
+        }
+    }
 
 public:
     static void isr_handler() {
@@ -135,7 +147,7 @@ public:
             nrf_pwm_event_clear(pwm,NRF_PWM_EVENT_STOPPED);
 
             // mark the sequence as no longer in use -- pointer, comparator, exchange value
-            __sync_fetch_and_and(&s_SequenceBufferInUse, 0);
+            releaseSequenceBuffer();
             // prevent further interrupts from PWM events
             nrf_pwm_int_set(pwm, 0);
             // disable PWM interrupts - None of the PWM IRQs are shared
@@ -161,7 +173,7 @@ public:
 
     virtual void showPixels(PixelController<_RGB_ORDER> & pixels) {
         // wait for the only sequence buffer to become available
-        while (s_SequenceBufferInUse != 0);
+        spinAcquireSequenceBuffer();
         prepareSequenceBuffers(pixels);
         mWait.wait(); // ensure min time between updates
         startPwmPlayback(s_SequenceBufferValidElements);
