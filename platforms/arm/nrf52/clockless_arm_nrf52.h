@@ -146,6 +146,8 @@ public:
         if (nrf_pwm_event_check(pwm,NRF_PWM_EVENT_STOPPED)) {
             nrf_pwm_event_clear(pwm,NRF_PWM_EVENT_STOPPED);
 
+            // update the minimum time to next call
+            mWait.mark();
             // mark the sequence as no longer in use -- pointer, comparator, exchange value
             releaseSequenceBuffer();
             // prevent further interrupts from PWM events
@@ -175,7 +177,8 @@ public:
         // wait for the only sequence buffer to become available
         spinAcquireSequenceBuffer();
         prepareSequenceBuffers(pixels);
-        mWait.wait(); // ensure min time between updates
+        // ensure any prior data had time to latch
+        mWait.wait();
         startPwmPlayback(s_SequenceBufferValidElements);
         return;
     }
