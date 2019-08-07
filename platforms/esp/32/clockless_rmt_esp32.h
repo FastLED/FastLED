@@ -118,25 +118,16 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define DIVIDER             2 /* 4, 8 still seem to work, but timings become marginal */
 #define MAX_PULSES         32 /* A channel has a 64 "pulse" buffer - we use half per pass */
 
-// -- Convert ESP32 cycles back into nanoseconds
-#define ESPCLKS_TO_NS(_CLKS) (((long)(_CLKS) * 1000L) / F_CPU_MHZ)
-
-// -- Convert nanoseconds into RMT cycles
-#define F_CPU_RMT       (  80000000L)
-#define NS_PER_SEC      (1000000000L)
-#define CYCLES_PER_SEC  (F_CPU_RMT/DIVIDER)
-#define NS_PER_CYCLE    ( NS_PER_SEC / CYCLES_PER_SEC )
-#define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
-
-// -- Convert ESP32 cycles to RMT cycles
-#define TO_RMT_CYCLES(_CLKS) NS_TO_CYCLES(ESPCLKS_TO_NS(_CLKS))    
-
-// -- NEW: Just convert directly from CPU cycles to RMT cycles
-#define RMT_CYCLES_PER_ESP_CYCLE (F_CPU / CYCLES_PER_SEC)
-#define ESP_TO_RMT_CYCLES(n) ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
+// -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
+#define F_CPU_RMT                   (  80000000L)
+#define RMT_CYCLES_PER_SEC          (F_CPU_RMT/DIVIDER)
+#define RMT_CYCLES_PER_ESP_CYCLE    (F_CPU / RMT_CYCLES_PER_SEC)
+#define ESP_TO_RMT_CYCLES(n)        ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
 
 // -- Number of cycles to signal the strip to latch
-#define RMT_RESET_DURATION NS_TO_CYCLES(50000)
+#define NS_PER_CYCLE                ( 1000000000L / RMT_CYCLES_PER_SEC )
+#define NS_TO_CYCLES(n)             ( (n) / NS_PER_CYCLE )
+#define RMT_RESET_DURATION          NS_TO_CYCLES(50000)
 
 // -- Core or custom driver
 #ifndef FASTLED_RMT_BUILTIN_DRIVER
