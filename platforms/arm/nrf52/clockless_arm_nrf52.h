@@ -156,6 +156,11 @@ public:
         FASTLED_NRF52_DEBUGPRINT("    T0H == %d", _T0H);
         FASTLED_NRF52_DEBUGPRINT("    T1H == %d", _T1H);
         FASTLED_NRF52_DEBUGPRINT("    TOP == %d\n", _TOP);
+        // to avoid pin initialization from causing first LED to have invalid color,
+        // call mWait.mark() to ensure data latches before color data gets sent.
+        startPwmPlayback_InitializePinState();
+        mWait.mark();
+
     }
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
