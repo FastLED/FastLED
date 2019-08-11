@@ -21,7 +21,7 @@
      */
 
     /// SPI_CLOCK_DIVIDER is number of CPU clock cycles per SPI transmission bit?
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
     class NRF52SPIOutput {
 
     private:
@@ -325,13 +325,13 @@
 
     // Static member definition and initialization using templates.
     // see https://stackoverflow.com/questions/3229883/static-member-initialization-in-a-class-template#answer-3229919
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
     bool NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_InUse = false;
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
     bool NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_NeedToWait = false;
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
     uint8_t NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_BufferIndex = 0;
-    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+    template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
     uint8_t NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_Buffer[2][2] = {{0,0},{0,0}};
 
 #endif // #ifndef FASTLED_FORCE_SOFTWARE_SPI

@@ -15,7 +15,7 @@ FASTLED_NAMESPACE_BEGIN
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SPI_SPEED>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class AVRSoftwareSPIOutput {
 	// The data types for pointers to the pin port - typedef'd here from the Pin definition because on avr these
 	// are pointers to 8 bit values, while on arm they are 32 bit
