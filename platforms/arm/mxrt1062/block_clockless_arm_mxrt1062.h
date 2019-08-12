@@ -88,11 +88,8 @@ public:
       if(m_bitOffsets[i] > m_nHighBit) { m_nHighBit = m_bitOffsets[i]; }
     }
 
-    m_nOutBlocks = (m_nHighBit - m_nLowBit + 8)/8;
+    m_nOutBlocks = (m_nHighBit + 8)/8;
 
-    for(int i = 0; i < m_nActualLanes; i++) {
-      m_bitOffsets[i] -= m_nLowBit;
-    }
   }
 
 
@@ -120,12 +117,10 @@ public:
 
   template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(register uint32_t & next_mark, register _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) {
     _outlines b2;
-    switch(m_nOutBlocks) {
-      case 3: transpose8x1_noinline(b.bg[3], b2.bg[3]);
-      case 2: transpose8x1_noinline(b.bg[2], b2.bg[2]);
-      case 1: transpose8x1_noinline(b.bg[1], b2.bg[1]);
-      case 0: transpose8x1_noinline(b.bg[0], b2.bg[0]);
-    }
+    transpose8x1(b.bg[3], b2.bg[3]);
+    transpose8x1(b.bg[2], b2.bg[2]);
+    transpose8x1(b.bg[1], b2.bg[1]);
+    transpose8x1(b.bg[0], b2.bg[0]);
 
     register uint8_t d = pixels.template getd<PX>(pixels);
     register uint8_t scale = pixels.template getscale<PX>(pixels);
@@ -138,8 +133,6 @@ public:
       *FastPin<FIRST_PIN>::sport() = m_nWriteMask;
 
       uint32_t out = (b2.bg[3][i] << 24) | (b2.bg[2][i] << 16) | (b2.bg[1][i] << 8) | b2.bg[0][i];
-
-      out <<= m_nLowBit;
 
       while((next_mark - ARM_DWT_CYCCNT) > m_offsets[1]);
       *FastPin<FIRST_PIN>::cport() = ((~out) & m_nWriteMask);
@@ -170,8 +163,8 @@ public:
 
     cli();
     m_offsets[0] = _FASTLED_NS_TO_DWT(T1+T2+T3);
-    m_offsets[1] = _FASTLED_NS_TO_DWT(T3);
-    m_offsets[2] = _FASTLED_NS_TO_DWT(T2+T3);
+    m_offsets[1] = _FASTLED_NS_TO_DWT(T2+T3);
+    m_offsets[2] = _FASTLED_NS_TO_DWT(T3);
     uint32_t wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD));
 
     uint32_t next_mark = ARM_DWT_CYCCNT + m_offsets[0];
