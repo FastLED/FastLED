@@ -398,10 +398,15 @@ class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
 	void writeHeader() {
 		// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)
 		mSPI.select();
-		mSPI.writeBytesValueRaw(0, 6);
+		mSPI.template writeBit<0>(0);
+		mSPI.writeByte(0);
+		mSPI.writeByte(0);
+		mSPI.writeByte(0);
+		mSPI.template writeBit<0>(0);
+		mSPI.writeByte(0);
+		mSPI.writeByte(0);
+		mSPI.writeByte(0);
 		mSPI.waitFully();
-		mSPI.template writeBit<0>(0);
-		mSPI.template writeBit<0>(0);
 		mSPI.release();
 	}
 
@@ -524,7 +529,13 @@ class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL
 
 // Similar to NS() macro, this calculates the number of cycles for
 // the clockless chipset (which may differ from CPU cycles)
+
+#ifdef FASTLED_TEENSY4
+// just use raw nanosecond values for the teensy4
+#define C_NS(_NS) _NS
+#else
 #define C_NS(_NS) (((_NS * ((CLOCKLESS_FREQUENCY / 1000000L)) + 999)) / 1000)
+#endif
 
 // GE8822 - 350ns 660ns 350ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
