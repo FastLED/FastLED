@@ -1,3 +1,7 @@
+FastLED 3.2.11
+==============
+* Preliminary Teensy 4 support
+
 FastLED 3.2.10
 ==============
 * Adafruit Metro M4 Airlift support

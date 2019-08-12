@@ -13,6 +13,10 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
 #define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
 #define DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
+#elif defined(FASTLED_TEENSY4) // && (ARM_HARDWARE_SPI)
+// just use clocks
+#define DATA_RATE_MHZ(X) (1000000 * (X))
+#define DATA_RATE_KHZ(X) (1000 * (X))
 #else
 #define DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
 #define DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
@@ -63,6 +67,17 @@ class SPIOutput<SPI_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<S
 template<uint32_t SPI_SPEED>
 class SPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
 #endif
+
+#elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
+
+template<uint32_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public Teesy4HardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, SPI, 0> {};
+
+template<uint32_t SPI_SPEED>
+class SPIOutput<SPI1_DATA, SPI_CLOCK, SPI_SPEED> : public Teesy4HardwareSPIOutput<SPI1_DATA, SPI1_CLOCK, SPI_SPEED, SPI1, 1> {};
+
+template<uint32_t SPI_SPEED>
+class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public Teesy4HardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, SPI2, 2> {};
 
 #elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
 
