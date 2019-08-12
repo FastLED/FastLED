@@ -19,7 +19,18 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
+	uint32_t off[3];
+
 public:
+	static constexpr int __DATA_PIN() { return DATA_PIN; }
+	static constexpr int __T1() { return T1; }
+	static constexpr int __T2() { return T2; }
+	static constexpr int __T3() { return T3; }
+	static constexpr EOrder __RGB_ORDER() { return RGB_ORDER; }
+	static constexpr int __XTRA0() { return XTRA0; }
+	static constexpr bool __FLIP() { return FLIP; }
+	static constexpr int __WAIT_TIME() { return WAIT_TIME; }
+
 	virtual void init() {
 		FastPin<DATA_PIN>::setOutput();
 		mPinMask = FastPin<DATA_PIN>::mask();
@@ -38,46 +49,48 @@ protected:
     mWait.mark();
   }
 
-	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register uint32_t off1, register uint32_t off2, register uint32_t off3, register uint32_t & b)  {
+	template<int BITS> __attribute__ ((always_inline)) inline void writeBits(register uint32_t & next_mark, register uint32_t & b)  {
 		for(register uint32_t i = BITS-1; i > 0; i--) {
 			while(ARM_DWT_CYCCNT < next_mark);
-			next_mark = ARM_DWT_CYCCNT + off1;
+			next_mark = ARM_DWT_CYCCNT + off[0];
 			FastPin<DATA_PIN>::hi();
 			if(b&0x80) {
-				while((next_mark - ARM_DWT_CYCCNT) > off2);
+				while((next_mark - ARM_DWT_CYCCNT) > off[1]);
 				FastPin<DATA_PIN>::lo();
 			} else {
-				while((next_mark - ARM_DWT_CYCCNT) > off3);
+				while((next_mark - ARM_DWT_CYCCNT) > off[2]);
 				FastPin<DATA_PIN>::lo();
 			}
 			b <<= 1;
 		}
 
 		while(ARM_DWT_CYCCNT < next_mark);
-		next_mark = ARM_DWT_CYCCNT + off1;
+		next_mark = ARM_DWT_CYCCNT + off[1];
 		FastPin<DATA_PIN>::hi();
 
 		if(b&0x80) {
-			while((next_mark - ARM_DWT_CYCCNT) > off2);
+			while((next_mark - ARM_DWT_CYCCNT) > off[2]);
 			FastPin<DATA_PIN>::lo();
 		} else {
-			while((next_mark - ARM_DWT_CYCCNT) > off3);
+			while((next_mark - ARM_DWT_CYCCNT) > off[2]);
 			FastPin<DATA_PIN>::lo();
 		}
 	}
 
 	uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
+		uint32_t start = ARM_DWT_CYCCNT;
+
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
 		register uint32_t b = pixels.loadAndScale0();
 
 		cli();
-    uint32_t off1 = _FASTLED_NS_TO_DWT(T1+T2+T3);
-    uint32_t off2 = _FASTLED_NS_TO_DWT(T3);
-    uint32_t off3 = _FASTLED_NS_TO_DWT(T2+T3);
+    off[0] = _FASTLED_NS_TO_DWT(T1+T2+T3);
+    off[1] = _FASTLED_NS_TO_DWT(T3);
+    off[2] = _FASTLED_NS_TO_DWT(T2+T3);
     uint32_t wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD));
 
-    uint32_t next_mark = ARM_DWT_CYCCNT + off1;
+    uint32_t next_mark = ARM_DWT_CYCCNT + off[0];
 
 		while(pixels.has(1)) {
 			pixels.stepDithering();
@@ -85,19 +98,19 @@ protected:
 			cli();
 			// if interrupts took longer than 45µs, punt on the current frame
 			if(ARM_DWT_CYCCNT > next_mark) {
-				if((ARM_DWT_CYCCNT-next_mark) > wait_off) { sei(); return 0; }
+				if((ARM_DWT_CYCCNT-next_mark) > wait_off) { sei(); return ARM_DWT_CYCCNT - start; }
 			}
 			#endif
 			// Write first byte, read next byte
-			writeBits<8+XTRA0>(next_mark, off1, off2, off3, b);
+			writeBits<8+XTRA0>(next_mark, b);
 			b = pixels.loadAndScale1();
 
 			// Write second byte, read 3rd byte
-			writeBits<8+XTRA0>(next_mark, off1, off2, off3, b);
+			writeBits<8+XTRA0>(next_mark, b);
 			b = pixels.loadAndScale2();
 
 			// Write third byte, read 1st byte of next pixel
-			writeBits<8+XTRA0>(next_mark, off1, off2, off3, b);
+			writeBits<8+XTRA0>(next_mark, b);
 			b = pixels.advanceAndLoadAndScale0();
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			sei();
@@ -105,7 +118,7 @@ protected:
 		};
 
 		sei();
-		return ARM_DWT_CYCCNT;
+		return ARM_DWT_CYCCNT - start;
 	}
 };
 #endif
