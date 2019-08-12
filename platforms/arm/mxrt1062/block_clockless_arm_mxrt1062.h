@@ -129,16 +129,18 @@ public:
     for(uint32_t i = 8; i > 0;) {
       i--;
       while(ARM_DWT_CYCCNT < next_mark);
-      next_mark = ARM_DWT_CYCCNT + m_offsets[0];
       *FastPin<FIRST_PIN>::sport() = m_nWriteMask;
+      next_mark = ARM_DWT_CYCCNT + m_offsets[0];
 
       uint32_t out = (b2.bg[3][i] << 24) | (b2.bg[2][i] << 16) | (b2.bg[1][i] << 8) | b2.bg[0][i];
 
+      out = ((~out) & m_nWriteMask);
       while((next_mark - ARM_DWT_CYCCNT) > m_offsets[1]);
-      *FastPin<FIRST_PIN>::cport() = ((~out) & m_nWriteMask);
+      *FastPin<FIRST_PIN>::cport() = out;
 
+      out = m_nWriteMask;
       while((next_mark - ARM_DWT_CYCCNT) > m_offsets[2]);
-      *FastPin<FIRST_PIN>::cport() = m_nWriteMask;
+      *FastPin<FIRST_PIN>::cport() = out;
 
       // Read and store up to two bytes
       if (x < m_nActualLanes) {
