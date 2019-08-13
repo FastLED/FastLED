@@ -1,6 +1,9 @@
-FastLED 3.2.11
+FastLED 3.3.0
 ==============
 * Preliminary Teensy 4 support
+* Fix #861 - power computation for OctoWS2811
+* keywords and other minor changes for compilers (#854, #845)
+* Fix some nrf52 issues (#856), #840
 
 FastLED 3.2.10
 ==============
