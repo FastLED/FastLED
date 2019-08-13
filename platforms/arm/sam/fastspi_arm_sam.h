@@ -6,7 +6,7 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(__SAM3X8E__)
 #define m_SPI ((Spi*)SPI0)
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SAMHardwareSPIOutput {
 	Selectable *m_pSelect;
 
