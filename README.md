@@ -4,7 +4,7 @@
 IMPORTANT NOTE: For AVR based systems, avr-gcc 4.8.x is supported and tested.  This means Arduino 1.6.5 and later.
 
 
-FastLED 3.2
+FastLED 3.3
 ===========
 
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
@@ -68,13 +68,14 @@ Right now the library is supported on a variety of arduino compatable platforms.
 * Arduino & compatibles - straight up arduino devices, uno, duo, leonardo, mega, nano, etc...
 * Arduino Yún
 * Adafruit Trinket & Gemma - Trinket Pro may be supported, but haven't tested to confirm yet
-* Teensy 2, Teensy++ 2, Teensy 3.0, Teensy 3.1/3.2, Teensy LC - arduino compataible from pjrc.com with some extra goodies (note the teensy 3, 3.1, and LC are ARM, not AVR!)
+* Teensy 2, Teensy++ 2, Teensy 3.0, Teensy 3.1/3.2, Teensy LC, Teensy 3.5, Teensy 3.6, and Teensy 4.0 - arduino compataible from pjrc.com with some extra goodies (note the teensy 3, 3.1, and LC are ARM, not AVR!)
 * Arduino Due and the digistump DigiX
 * RFDuino
 * SparkCore
 * Arduino Zero
 * ESP8266 using the arduino board definitions from http://arduino.esp8266.com/stable/package_esp8266com_index.json - please be sure to also read https://github.com/FastLED/FastLED/wiki/ESP8266-notes for information specific to the 8266.
 * The wino board - http://wino-board.com
+* ESP32 based boards
 
 What types of platforms are we thinking about supporting in the future?  Here's a short list:  ChipKit32, Maple, Beagleboard
 
