@@ -9,7 +9,7 @@ FASTLED_NAMESPACE_BEGIN
 
 #define __FL_T4_MASK ((1<<(LANES))-1)
 template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
-class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, __FL_T4_MASK> {
+class FlexibleInlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, __FL_T4_MASK> {
 
   uint8_t m_bitOffsets[16];
   uint8_t m_nActualLanes;
@@ -202,6 +202,10 @@ public:
   }
 };
 
+template<template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, int NUM_LANES, EOrder RGB_ORDER=GRB>
+class __FIBCC : public FlexibleInlineBlockClocklessController<NUM_LANES,DATA_PIN,CHIPSET<DATA_PIN,RGB_ORDER>::__T1(),CHIPSET<DATA_PIN,RGB_ORDER>::__T2(),CHIPSET<DATA_PIN,RGB_ORDER>::__T3(),RGB_ORDER,CHIPSET<DATA_PIN,RGB_ORDER>::__XTRA0(),CHIPSET<DATA_PIN,RGB_ORDER>::__FLIP(),CHIPSET<DATA_PIN,RGB_ORDER>::__WAIT_TIME()> {};
+
+#define __FASTLED_HAS_FIBCC 1
 #endif //defined(FASTLED_TEENSY4)
 
 FASTLED_NAMESPACE_END

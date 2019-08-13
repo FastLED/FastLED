@@ -315,6 +315,14 @@ public:
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+#if defined(__FASTLED_HAS_FIBCC) && (__FASTLED_HAS_FIBCC == 1)
+  template<uint8_t NUM_LANES, template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER=RGB>
+  static CLEDController &addLeds(struct CRGB *data, int nLeds) {
+    static __FIBCC<CHIPSET, DATA_PIN, NUM_LANES, RGB_ORDER> c;
+    return addLeds(&c, data, nLeds);
+  }
+#endif
+
 	#ifdef FASTSPI_USE_DMX_SIMPLE
 	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER=RGB>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
