@@ -56,22 +56,44 @@ public:
 };
 
 #if defined(STM32F10X_MD)
- #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
- #define _FL_IO(L) _RD32(GPIO ## L)
+  #define _R(T) struct __gen_struct_ ## T
+  #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
+  #define _FL_IO(L,C) _RD32(GPIO ## L);  __FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
 #elif defined(__STM32F1__)
- #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline gpio_reg_map* r() { return T->regs; } };
- #define _FL_IO(L) _RD32(GPIO ## L)
+  #define _R(T) struct __gen_struct_ ## T
+  #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline gpio_reg_map* r() { return T->regs; } };
+  #define _FL_IO(L,C) _RD32(GPIO ## L); __FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
 #else
  #error "Platform not supported"
 #endif
 
-#define _R(T) struct __gen_struct_ ## T
 #define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
+
+#ifdef GPIOA
+_FL_IO(A,0);
+#endif
+#ifdef GPIOB
+_FL_IO(B,1);
+#endif
+#ifdef GPIOC
+_FL_IO(C,2);
+#endif
+#ifdef GPIOD
+_FL_IO(D,3);
+#endif
+#ifdef GPIOE
+_FL_IO(E,4);
+#endif
+#ifdef GPIOF
+_FL_IO(F,5);
+#endif
+#ifdef GPIOG
+_FL_IO(G,6);
+#endif
 
 // Actual pin definitions
 #if defined(SPARK) // Sparkfun STM32F103 based board
 
-_FL_IO(A); _FL_IO(B); _FL_IO(C); _FL_IO(D); _FL_IO(E); _FL_IO(F); _FL_IO(G);
 
 
 #define MAX_PIN 19
@@ -105,8 +127,6 @@ _FL_DEFPIN(19, 2, A);
 #endif // SPARK
 
 #if defined(__STM32F1__) // Generic STM32F103 aka "Blue Pill"
-
-_FL_IO(A); _FL_IO(B); _FL_IO(C);
 
 #define MAX_PIN 46
 

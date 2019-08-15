@@ -48,11 +48,54 @@ public:
 typedef volatile uint8_t & reg8_t;
 #define _R(T) struct __gen_struct_ ## T
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
-#define _FL_IO(L) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L);
+#define _FL_IO(L,C) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L); _FL_DEFINE_PORT3(L, C, _R(PORT ## L));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
 
+// Pre-do all the port definitions
+#ifdef PORTA
+  _FL_IO(A,0)
+#endif
+#ifdef PORTB
+  _FL_IO(B,1)
+#endif
+#ifdef PORTC
+  _FL_IO(C,2)
+#endif
+#ifdef PORTD
+  _FL_IO(D,3)
+#endif
+#ifdef PORTE
+  _FL_IO(E,4)
+#endif
+#ifdef PORTF
+  _FL_IO(F,5)
+#endif
+#ifdef PORTG
+  _FL_IO(G,6)
+#endif
+#ifdef PORTH
+  _FL_IO(H,7)
+#endif
+#ifdef PORTI
+  _FL_IO(I,8)
+#endif
+#ifdef PORTJ
+  _FL_IO(J,9)
+#endif
+#ifdef PORTK
+  _FL_IO(K,10)
+#endif
+#ifdef PORTL
+  _FL_IO(L,11)
+#endif
+#ifdef PORTM
+  _FL_IO(M,12)
+#endif
+#ifdef PORTN
+  _FL_IO(N,13)
+#endif
+
 #if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny25__)
-_FL_IO(B);
 
 #if defined(__AVR_ATtiny25__)
 #pragma message "ATtiny25 has very limited storage. This library could use up to more than 100% of its flash size"
@@ -67,7 +110,6 @@ _FL_DEFPIN(4, 4, B); _FL_DEFPIN(5, 5, B);
 
 #elif defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__)
 #define MAX_PIN 11
-_FL_IO(A); _FL_IO(B);
 
 _FL_DEFPIN(0, 0, B); _FL_DEFPIN(1, 1, B); _FL_DEFPIN(2, 2, B);
 _FL_DEFPIN(3, 7, A); _FL_DEFPIN(4, 6, A); _FL_DEFPIN(5, 5, A);
@@ -79,13 +121,11 @@ _FL_DEFPIN(9, 1, A); _FL_DEFPIN(10, 0, A); _FL_DEFPIN(11, 3, B);
 #elif defined(ARDUINO_AVR_DIGISPARK) // digispark pin layout
 #define MAX_PIN 5
 #define HAS_HARDWARE_PIN_SUPPORT 1
-_FL_IO(A); _FL_IO(B);
 
 _FL_DEFPIN(0, 0, B); _FL_DEFPIN(1, 1, B); _FL_DEFPIN(2, 2, B);
 _FL_DEFPIN(3, 7, A); _FL_DEFPIN(4, 6, A); _FL_DEFPIN(5, 5, A);
 
 #elif defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
-_FL_IO(A); _FL_IO(B);
 
 #define MAX_PIN 10
 
@@ -97,7 +137,6 @@ _FL_DEFPIN(8, 2, B); _FL_DEFPIN(9, 1, B); _FL_DEFPIN(10, 0, B);
 
 #elif defined(ARDUINO_AVR_DIGISPARKPRO)
 
-_FL_IO(A); _FL_IO(B);
 #define MAX_PIN 12
 
 _FL_DEFPIN(0, 0, B); _FL_DEFPIN(1, 1, B); _FL_DEFPIN(2, 2, B); _FL_DEFPIN(3, 5, B);
@@ -106,7 +145,6 @@ _FL_DEFPIN(8, 2, A); _FL_DEFPIN(9, 3, A); _FL_DEFPIN(10, 4, A); _FL_DEFPIN(11, 5
 _FL_DEFPIN(12, 6, A);
 
 #elif defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__)
-_FL_IO(A); _FL_IO(B);
 
 #define MAX_PIN 15
 
@@ -121,8 +159,6 @@ _FL_DEFPIN(12, 4, B); _FL_DEFPIN(13, 5, B); _FL_DEFPIN(14, 6, B); _FL_DEFPIN(15,
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 #elif defined(ARDUINO_HOODLOADER2) && (defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__)) || defined(__AVR_AT90USB82__) || defined(__AVR_AT90USB162__)
-
-_FL_IO(D); _FL_IO(B); _FL_IO(C);
 
 #define MAX_PIN 20
 
@@ -140,9 +176,6 @@ _FL_DEFPIN( 20, 7, D);
 // #define AVR_HARDWARE_SPI 1
 
 #elif defined(IS_BEAN)
-
-// Accelerated port definitions for arduino avrs
-_FL_IO(D); _FL_IO(B); _FL_IO(C);
 
 #define MAX_PIN 19
 _FL_DEFPIN( 0, 6, D); _FL_DEFPIN( 1, 1, B); _FL_DEFPIN( 2, 2, B); _FL_DEFPIN( 3, 3, B);
@@ -163,8 +196,6 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 #endif
 
 #elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328PB__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega8__)
-// Accelerated port definitions for arduino avrs
-_FL_IO(D); _FL_IO(B); _FL_IO(C);
 
 #define MAX_PIN 19
 _FL_DEFPIN( 0, 0, D); _FL_DEFPIN( 1, 1, D); _FL_DEFPIN( 2, 2, D); _FL_DEFPIN( 3, 3, D);
@@ -186,8 +217,6 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 
 #elif defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega644P__)
 
-_FL_IO(A); _FL_IO(B); _FL_IO(C); _FL_IO(D);
-
 #define MAX_PIN 31
 _FL_DEFPIN(0, 0, B); _FL_DEFPIN(1, 1, B); _FL_DEFPIN(2, 2, B); _FL_DEFPIN(3, 3, B);
 _FL_DEFPIN(4, 4, B); _FL_DEFPIN(5, 5, B); _FL_DEFPIN(6, 6, B); _FL_DEFPIN(7, 7, B);
@@ -207,9 +236,6 @@ _FL_DEFPIN(28, 4, A); _FL_DEFPIN(29, 5, A); _FL_DEFPIN(30, 6, A); _FL_DEFPIN(31,
 #elif  defined(__AVR_ATmega128RFA1__) || defined(__AVR_ATmega256RFR2__)
 
 // AKA the Pinoccio
-
-_FL_IO(A); _FL_IO(B); _FL_IO(C); _FL_IO(D); _FL_IO(E); _FL_IO(F);
-
 _FL_DEFPIN( 0, 0, E); _FL_DEFPIN( 1, 1, E); _FL_DEFPIN( 2, 7, B); _FL_DEFPIN( 3, 3, E);
 _FL_DEFPIN( 4, 4, E); _FL_DEFPIN( 5, 5, E); _FL_DEFPIN( 6, 2, E); _FL_DEFPIN( 7, 6, E);
 _FL_DEFPIN( 8, 5, D); _FL_DEFPIN( 9, 0, B); _FL_DEFPIN(10, 2, B); _FL_DEFPIN(11, 3, B);
@@ -228,9 +254,6 @@ _FL_DEFPIN(28, 4, F); _FL_DEFPIN(29, 5, F); _FL_DEFPIN(30, 6, F); _FL_DEFPIN(31,
 
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 // megas
-
-_FL_IO(A); _FL_IO(B); _FL_IO(C); _FL_IO(D); _FL_IO(E); _FL_IO(F); _FL_IO(G); _FL_IO(H); _FL_IO(J); _FL_IO(K); _FL_IO(L);
-
 #define MAX_PIN 69
 _FL_DEFPIN(0, 0, E); _FL_DEFPIN(1, 1, E); _FL_DEFPIN(2, 4, E); _FL_DEFPIN(3, 5, E);
 _FL_DEFPIN(4, 5, G); _FL_DEFPIN(5, 3, E); _FL_DEFPIN(6, 3, H); _FL_DEFPIN(7, 4, H);
@@ -261,8 +284,6 @@ _FL_DEFPIN(68, 6, K); _FL_DEFPIN(69, 7, K);
 #elif defined(__AVR_ATmega32U4__) && defined(CORE_TEENSY)
 
 // teensy defs
-_FL_IO(B); _FL_IO(C); _FL_IO(D); _FL_IO(E); _FL_IO(F);
-
 #define MAX_PIN 23
 _FL_DEFPIN(0, 0, B); _FL_DEFPIN(1, 1, B); _FL_DEFPIN(2, 2, B); _FL_DEFPIN(3, 3, B);
 _FL_DEFPIN(4, 7, B); _FL_DEFPIN(5, 0, D); _FL_DEFPIN(6, 1, D); _FL_DEFPIN(7, 2, D);
@@ -283,9 +304,6 @@ _FL_DEFPIN(20, 1, F); _FL_DEFPIN(21, 0, F); _FL_DEFPIN(22, 4, D); _FL_DEFPIN(23,
 
 #elif defined(__AVR_AT90USB646__) || defined(__AVR_AT90USB1286__)
 // teensy++ 2 defs
-
-_FL_IO(A); _FL_IO(B); _FL_IO(C); _FL_IO(D); _FL_IO(E); _FL_IO(F);
-
 #define MAX_PIN 45
 _FL_DEFPIN(0, 0, D); _FL_DEFPIN(1, 1, D); _FL_DEFPIN(2, 2, D); _FL_DEFPIN(3, 3, D);
 _FL_DEFPIN(4, 4, D); _FL_DEFPIN(5, 5, D); _FL_DEFPIN(6, 6, D); _FL_DEFPIN(7, 7, D);
@@ -314,8 +332,6 @@ _FL_DEFPIN(44, 6, F); _FL_DEFPIN(45, 7, F);
 #elif defined(__AVR_ATmega32U4__)
 
 // leonard defs
-_FL_IO(B); _FL_IO(C); _FL_IO(D); _FL_IO(E); _FL_IO(F);
-
 #define MAX_PIN 30
 _FL_DEFPIN(0, 2, D); _FL_DEFPIN(1, 3, D); _FL_DEFPIN(2, 1, D); _FL_DEFPIN(3, 0, D);
 _FL_DEFPIN(4, 4, D); _FL_DEFPIN(5, 6, C); _FL_DEFPIN(6, 7, D); _FL_DEFPIN(7, 6, E);

@@ -78,19 +78,20 @@ public:
 #define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } \
 	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
-#define _FL_IO(L) _RD32(REG_PIO ## L ## _ODSR); _RD32(REG_PIO ## L ## _SODR); _RD32(REG_PIO ## L ## _CODR); _RD32(REG_PIO ## L ## _OER);
+#define _FL_IO(L,C) _RD32(REG_PIO ## L ## _ODSR); _RD32(REG_PIO ## L ## _SODR); _RD32(REG_PIO ## L ## _CODR); _RD32(REG_PIO ## L ## _OER); _FL_DEFINE_PORT3(L, C, _R(REG_PIO ## L ## _ODSR));
 
 #define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN<PIN, 1 << BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
   																			_R(GPIO ## L ## _OER)> {}; \
   								   template<> class FastPinBB<PIN> : public _DUEPIN_BITBAND<PIN, BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
   																			_R(GPIO ## L ## _OER)> {};
 
+_FL_IO(A,0);
+_FL_IO(B,1);
+_FL_IO(C,2);
+_FL_IO(D,3);
+
 #if defined(__SAM3X8E__)
 
-_FL_IO(A);
-_FL_IO(B);
-_FL_IO(C);
-_FL_IO(D);
 
 #define MAX_PIN 78
 _FL_DEFPIN(0, 8, A); _FL_DEFPIN(1, 9, A); _FL_DEFPIN(2, 25, B); _FL_DEFPIN(3, 28, C);

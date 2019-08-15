@@ -78,17 +78,17 @@ public:
 #define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } \
 	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
-#define _FL_IO(L) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR);
+#define _FL_IO(L,C) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR); _FL_DEFINE_PORT3(L,C,_R(GPIO ## L ## _PDOR));
 
 #define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
 																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; \
 									template<> class FastPinBB<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
  																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {};
 
+_FL_IO(A,0); _FL_IO(B,1); _FL_IO(C,2); _FL_IO(D,3); _FL_IO(E,4);
+
 // Actual pin definitions
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
-
-_FL_IO(A); _FL_IO(B); _FL_IO(C); _FL_IO(D); _FL_IO(E);
 
 #define MAX_PIN 63
 _FL_DEFPIN( 0, 16, B); _FL_DEFPIN( 1, 17, B); _FL_DEFPIN( 2,  0, D); _FL_DEFPIN( 3, 12, A);
