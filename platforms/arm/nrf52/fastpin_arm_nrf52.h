@@ -1,13 +1,13 @@
 #ifndef __FASTPIN_ARM_NRF52_H
 #define __FASTPIN_ARM_NRF52_H
 
-    
+
 /*
 //
 // Background:
 // ===========
 // the nRF52 has more than 32 ports, and thus must support
-// two distinct GPIO port registers.  
+// two distinct GPIO port registers.
 //
 // For the nRF52 series, the structure to control the port is
 // `NRF_GPIO_Type`, with separate addresses mapped for set, clear, etc.
@@ -18,18 +18,18 @@
 //     #define NRF_P0        ((NRF_GPIO_Type*)NRF_P0_BASE)
 //     #define NRF_P1        ((NRF_GPIO_Type*)NRF_P1_BASE)
 //
-// Therefore, ideally, the _DEFPIN_ARM() macro would simply
+// Therefore, ideally, the _FL_DEFPIN() macro would simply
 // conditionally pass either NRF_P0 or NRF_P1 to the underlying
 // FastPin<> template class class.
 //
 // The "pin" provided to the FastLED<> template (and which
-// the _DEFPIN_ARM() macro specializes for valid pins) is NOT
+// the _FL_DEFPIN() macro specializes for valid pins) is NOT
 // the microcontroller port.pin, but the Arduino digital pin.
 // Some boards have an identity mapping (e.g., nRF52832 Feather)
-// but most do not.  Therefore, the _DEFPIN_ARM() macro
+// but most do not.  Therefore, the _FL_DEFPIN() macro
 // must translate the Arduino pin to the mcu port.pin.
 //
-// 
+//
 // Difficulties:
 // =============
 // The goal is to avoid any such lookups, using compile-time
@@ -281,16 +281,16 @@ public:
 //
 // BOARD_PIN can be either the pin portion of a port.pin, or the combined NRF_GPIO_PIN_MAP() number.
 // For example both the following two defines refer to P1.15 (pin 47) as Arduino pin 3:
-//     _DEFPIN_ARM(3, 1, 15);
-//     _DEFPIN_ARM(3, 1, 47);
+//     _FL_DEFPIN(3, 15, 1);
+//     _FL_DEFPIN(3, 47, 1);
 //
 // Similarly, the following defines are all equivalent:
 //     _DEFPIN_ARM_IDENTITY_P1(47);
-//     _DEFPIN_ARM(47, 1, 15);
-//     _DEFPIN_ARM(47, 1, 47);
+//     _FL_DEFPIN(47, 15, 1);
+//     _FL_DEFPIN(47, 47, 1);
 //
 
-#define _DEFPIN_ARM(ARDUINO_PIN, BOARD_PORT, BOARD_PIN)  \
+#define FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)    \
     template<> class FastPin<ARDUINO_PIN> :              \
     public _ARMPIN<                                      \
         1u << (BOARD_PIN & 31u),                         \
