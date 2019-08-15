@@ -32,9 +32,13 @@
 #include "platforms/esp/8266/led_sysdefs_esp8266.h"
 #elif defined(ESP32)
 #include "platforms/esp/32/led_sysdefs_esp32.h"
-#else
-// AVR platforms
+#elif defined(ARDUINO_ARCH_AVR)
 #include "platforms/avr/led_sysdefs_avr.h"
+#elif defined(ARDUINO_ARCH_MEGAAVR)
+#include "platforms/avrmega/led_sysdefs_avrmega.h"
+#else
+#error No platform definitions found, stoping compilation.
+#include <stophere>
 #endif
 
 #ifndef FASTLED_NAMESPACE_BEGIN

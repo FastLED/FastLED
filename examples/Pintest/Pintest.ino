@@ -146,14 +146,14 @@ template<uint8_t PIN> void PrintPins() {
 
 	const char *pinport = GetPinPort((void*)systemThinksPortIs);
 	if (pinport) {
-		Serial.print("__FL_DEFPIN("); Serial.print(PIN);
+		Serial.print("_FL_DEFPIN("); Serial.print(PIN);
 		Serial.print(","); Serial.print(maskBit);
 		Serial.print(","); Serial.print(pinport);
 		Serial.print("); ");
 		pcount++;
 		if(pcount == 4) { pcount = 0; Serial.println(""); }
 	} else {
-		// Serial.print("Not found for pin "); Serial.println(PIN);
+		Serial.print("Not found for pin "); Serial.println(PIN);
 	}
 }
 
@@ -178,7 +178,7 @@ template<> void PrintPins<0>() {
 int counter = 0;
 void setup() {
 	delay(5000);
-    Serial.begin(38400);
+    Serial.begin(115200);
     Serial.println("resetting!");
 }
 

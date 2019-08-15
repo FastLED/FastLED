@@ -7,7 +7,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-#if defined(FASTLED_AVR)
+#if defined(FASTLED_AVR) || defined(FASTLED_AVRMEGA)
 
 // Scaling macro choice
 #ifndef TRINKET_SCALE

@@ -34,9 +34,10 @@
 #include "platforms/esp/8266/fastled_esp8266.h"
 #elif defined(ESP32)
 #include "platforms/esp/32/fastled_esp32.h"
-#else
-// AVR platforms
+#elif defined(ARDUINO_ARCH_AVR)
 #include "platforms/avr/fastled_avr.h"
+#elif defined(ARDUINO_ARCH_MEGAAVR)
+#include "platforms/avrmega/fastled_avrmega.h"
 #endif
 
 #endif
