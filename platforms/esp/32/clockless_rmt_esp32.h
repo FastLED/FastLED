@@ -118,21 +118,16 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define DIVIDER             2 /* 4, 8 still seem to work, but timings become marginal */
 #define MAX_PULSES         32 /* A channel has a 64 "pulse" buffer - we use half per pass */
 
-// -- Convert ESP32 cycles back into nanoseconds
-#define ESPCLKS_TO_NS(_CLKS) (((long)(_CLKS) * 1000L) / F_CPU_MHZ)
-
-// -- Convert nanoseconds into RMT cycles
-#define F_CPU_RMT       (  80000000L)
-#define NS_PER_SEC      (1000000000L)
-#define CYCLES_PER_SEC  (F_CPU_RMT/DIVIDER)
-#define NS_PER_CYCLE    ( NS_PER_SEC / CYCLES_PER_SEC )
-#define NS_TO_CYCLES(n) ( (n) / NS_PER_CYCLE )
-
-// -- Convert ESP32 cycles to RMT cycles
-#define TO_RMT_CYCLES(_CLKS) NS_TO_CYCLES(ESPCLKS_TO_NS(_CLKS))    
+// -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
+#define F_CPU_RMT                   (  80000000L)
+#define RMT_CYCLES_PER_SEC          (F_CPU_RMT/DIVIDER)
+#define RMT_CYCLES_PER_ESP_CYCLE    (F_CPU / RMT_CYCLES_PER_SEC)
+#define ESP_TO_RMT_CYCLES(n)        ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
 
 // -- Number of cycles to signal the strip to latch
-#define RMT_RESET_DURATION NS_TO_CYCLES(50000)
+#define NS_PER_CYCLE                ( 1000000000L / RMT_CYCLES_PER_SEC )
+#define NS_TO_CYCLES(n)             ( (n) / NS_PER_CYCLE )
+#define RMT_RESET_DURATION          NS_TO_CYCLES(50000)
 
 // -- Core or custom driver
 #ifndef FASTLED_RMT_BUILTIN_DRIVER
@@ -190,6 +185,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     PixelController<RGB_ORDER> * mPixels;
     int            mCurColor;
     uint16_t       mCurPulse;
+    volatile uint32_t * mRMT_mem_ptr;
 
     // -- Buffer to hold all of the pulses. For the version that uses
     //    the RMT driver built into the ESP core.
@@ -208,17 +204,17 @@ public:
         //    according to the timing values given in the template instantiation
         // T1H
         mOne.level0 = 1;
-        mOne.duration0 = TO_RMT_CYCLES(T1+T2);
+        mOne.duration0 = ESP_TO_RMT_CYCLES(T1+T2); // TO_RMT_CYCLES(T1+T2);
         // T1L
         mOne.level1 = 0;
-        mOne.duration1 = TO_RMT_CYCLES(T3);
+        mOne.duration1 = ESP_TO_RMT_CYCLES(T3); // TO_RMT_CYCLES(T3);
 
         // T0H
         mZero.level0 = 1;
-        mZero.duration0 = TO_RMT_CYCLES(T1);
+        mZero.duration0 = ESP_TO_RMT_CYCLES(T1); // TO_RMT_CYCLES(T1);
         // T0L
         mZero.level1 = 0;
-        mZero.duration1 = TO_RMT_CYCLES(T2 + T3);
+        mZero.duration1 = ESP_TO_RMT_CYCLES(T2+T3); // TO_RMT_CYCLES(T2 + T3);
 
         gControllers[gNumControllers] = this;
         gNumControllers++;
@@ -414,6 +410,7 @@ protected:
         
             // -- Initialize the counters that keep track of where we are in
             //    the pixel data.
+            mRMT_mem_ptr = & (RMTMEM.chan[mRMT_channel].data32[0].val);
             mCurPulse = 0;
             mCurColor = 0;
 
@@ -494,7 +491,7 @@ protected:
         }
     }
 
-    uint8_t IRAM_ATTR getNextByte()
+    uint8_t IRAM_ATTR getNextByte() __attribute__ ((always_inline))
     {
         uint8_t byte;
 
@@ -543,7 +540,8 @@ protected:
             // rmt_item32_t value corresponding to the buffered bit value
             for (register uint32_t j = 0; j < 8; j++) {
                 uint32_t val = (byteval & 0x80000000L) ? one_val : zero_val;
-                RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
+                * mRMT_mem_ptr++ = val;
+                // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
                 byteval <<= 1;
                 mCurPulse++;
             }
@@ -554,15 +552,18 @@ protected:
         //    RMT buffer with 0's, which signals to the device that we're done.
         if ( ! mPixels->has(1) ) {
             while (pulses < 32) {
-                RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
+                * mRMT_mem_ptr++ = 0;
+                // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
                 mCurPulse++;
                 pulses++;
             }
         }
         
         // -- When we have filled the back half the buffer, reset the position to the first half
-        if (mCurPulse >= MAX_PULSES*2)
+        if (mCurPulse >= MAX_PULSES*2) {
+            mRMT_mem_ptr = & (RMTMEM.chan[mRMT_channel].data32[0].val);
             mCurPulse = 0;
+        }            
     }
 };
 
