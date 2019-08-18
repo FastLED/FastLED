@@ -1,3 +1,9 @@
+FastLED 3.3.1
+=============
+
+* Fix teensy build issue 
+* Bring in sam's RMT timing fix
+
 FastLED 3.3.0
 ==============
 * Preliminary Teensy 4 support
