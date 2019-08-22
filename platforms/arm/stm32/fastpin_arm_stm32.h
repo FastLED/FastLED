@@ -55,7 +55,7 @@ public:
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-#if defined(STM32F10X_MD)
+#if defined(STM32F10X_MD) || defined(STM32F1xx)
  #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
  #define _IO32(L) _RD32(GPIO ## L)
 #elif defined(__STM32F1__)
@@ -150,6 +150,51 @@ _DEFPIN_ARM(4, 15, C);
 #define HAS_HARDWARE_PIN_SUPPORT
 
 #endif // __STM32F1__
+
+#if defined(STM32F1xx)
+_IO32(A); _IO32(B); _IO32(C);
+
+#define MAX_PIN 46
+
+_DEFPIN_ARM(10, 0, A);	// PA0 - PA7
+_DEFPIN_ARM(11, 1, A);
+_DEFPIN_ARM(12, 2, A);
+_DEFPIN_ARM(13, 3, A);
+_DEFPIN_ARM(14, 4, A);
+_DEFPIN_ARM(15, 5, A);
+_DEFPIN_ARM(16, 6, A);
+_DEFPIN_ARM(17, 7, A);
+_DEFPIN_ARM(29, 8, A);	// PA8 - PA15
+_DEFPIN_ARM(30, 9, A);
+_DEFPIN_ARM(31, 10, A);
+_DEFPIN_ARM(32, 11, A);
+_DEFPIN_ARM(33, 12, A);
+_DEFPIN_ARM(34, 13, A);
+_DEFPIN_ARM(37, 14, A);
+_DEFPIN_ARM(38, 15, A);
+
+_DEFPIN_ARM(18, 0, B);	// PB0 - PB11
+_DEFPIN_ARM(19, 1, B);
+_DEFPIN_ARM(20, 2, B);
+_DEFPIN_ARM(39, 3, B);
+_DEFPIN_ARM(40, 4, B);
+_DEFPIN_ARM(41, 5, B);
+_DEFPIN_ARM(42, 6, B);
+_DEFPIN_ARM(43, 7, B);
+_DEFPIN_ARM(45, 8, B);
+_DEFPIN_ARM(46, 9, B);
+_DEFPIN_ARM(21, 10, B);
+_DEFPIN_ARM(22, 11, B);
+
+_DEFPIN_ARM(2, 13, C);	// PC13 - PC15
+_DEFPIN_ARM(3, 14, C);
+_DEFPIN_ARM(4, 15, C);
+
+#define SPI_DATA PA7
+#define SPI_CLOCK PA5
+
+#define HAS_HARDWARE_PIN_SUPPORT
+#endif // STM32F1xx
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 

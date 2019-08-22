@@ -17,6 +17,9 @@ FASTLED_NAMESPACE_BEGIN
 // just use clocks
 #define DATA_RATE_MHZ(X) (1000000 * (X))
 #define DATA_RATE_KHZ(X) (1000 * (X))
+#elif defined(STM32F1xx)
+#define DATA_RATE_MHZ(X) ((CPU_F / 1000000L) / X)
+#define DATA_RATE_KHZ(X) ((CPU_F / 1000L) / X)
 #else
 #define DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
 #define DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)

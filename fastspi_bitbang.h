@@ -113,7 +113,7 @@ private:
 public:
 
 	// We want to make sure that the clock pulse is held high for a nininum of 35ns.
-#if defined(FASTLED_TEENSY4)
+#if defined(FASTLED_TEENSY4) 
 	#define DELAY_NS (1000 / (SPI_SPEED/1000000))
 	#define CLOCK_HI_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
 	#define CLOCK_LO_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);

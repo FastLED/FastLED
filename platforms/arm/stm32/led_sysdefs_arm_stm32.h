@@ -1,7 +1,7 @@
 #ifndef __INC_LED_SYSDEFS_ARM_SAM_H
 #define __INC_LED_SYSDEFS_ARM_SAM_H
 
-#if defined(STM32F10X_MD)
+#if defined(STM32F10X_MD) 
 
  #include <application.h>
 
@@ -19,6 +19,11 @@
 
  #define cli() nvic_globalirq_disable()
  #define sei() nvic_globalirq_enable()
+ 
+// Support for official STM32duino 
+#elif defined(STM32F1xx)
+ #define cli()  __disable_irq(); 
+ #define sei() __enable_irq(); 
 
 #else
  #error "Platform not supported"
@@ -55,7 +60,11 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 
 #define FASTLED_NO_PINMAP
 
-#ifndef F_CPU
+#if !defined(F_CPU) && !defined(STM32F1xx)
  #define F_CPU 72000000
+#else
+ /* Workaround for STM32duino Core.
+    Because F_CPU is defined in stm32_def.h */
+ #define CPU_F 72000000
 #endif
 #endif
