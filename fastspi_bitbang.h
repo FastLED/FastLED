@@ -118,10 +118,10 @@ public:
 	#define CLOCK_HI_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
 	#define CLOCK_LO_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
 #else
-	#define MIN_DELAY (NS(35) - 3)
+	#define MIN_DELAY ((NS(35)>3) ? (NS(35) - 3) : 1)
 
-	#define CLOCK_HI_DELAY do { delaycycles<MIN_DELAY>(); delaycycles<(((SPI_SPEED-6) / 2) - MIN_DELAY)>(); } while(0);
-	#define CLOCK_LO_DELAY do { delaycycles<(((SPI_SPEED-6) / 4))>(); } while(0);
+	#define CLOCK_HI_DELAY do { delaycycles<MIN_DELAY>(); delaycycles<((SPI_SPEED > 10) ? (((SPI_SPEED-6) / 2) - MIN_DELAY) : (SPI_SPEED))>(); } while(0);
+	#define CLOCK_LO_DELAY do { delaycycles<((SPI_SPEED > 10) ? ((SPI_SPEED-6) / 2) : (SPI_SPEED))>(); } while(0);
 #endif
 
 	// write the BIT'th bit out via spi, setting the data pin then strobing the clcok

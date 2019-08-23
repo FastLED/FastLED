@@ -1,3 +1,8 @@
+FastLED 3.3.2pre
+=============
+
+* Fix APA102 compile error #870 
+
 FastLED 3.3.1
 =============
 
