@@ -108,41 +108,48 @@ _DEFPIN_ARM(19, 2, A);
 
 _IO32(A); _IO32(B); _IO32(C);
 
-#define MAX_PIN 46
+#define MAX_PIN 34 // Max number of mapped pins.
 
-_DEFPIN_ARM(10, 0, A);	// PA0 - PA7
-_DEFPIN_ARM(11, 1, A);
-_DEFPIN_ARM(12, 2, A);
-_DEFPIN_ARM(13, 3, A);
-_DEFPIN_ARM(14, 4, A);
-_DEFPIN_ARM(15, 5, A);
-_DEFPIN_ARM(16, 6, A);
-_DEFPIN_ARM(17, 7, A);
-_DEFPIN_ARM(29, 8, A);	// PA8 - PA15
-_DEFPIN_ARM(30, 9, A);
-_DEFPIN_ARM(31, 10, A);
-_DEFPIN_ARM(32, 11, A);
-_DEFPIN_ARM(33, 12, A);
-_DEFPIN_ARM(34, 13, A);
-_DEFPIN_ARM(37, 14, A);
-_DEFPIN_ARM(38, 15, A);
+_DEFPIN_ARM(11, 0, A);	// PA0 - PA7
+_DEFPIN_ARM(10, 1, A);
+_DEFPIN_ARM(9, 2, A);
+_DEFPIN_ARM(8, 3, A);
+_DEFPIN_ARM(7, 4, A);
+_DEFPIN_ARM(6, 5, A);
+_DEFPIN_ARM(5, 6, A);
+_DEFPIN_ARM(4, 7, A);   // Note some schematics have this pin as A17 - typo should be A7
 
-_DEFPIN_ARM(18, 0, B);	// PB0 - PB11
-_DEFPIN_ARM(19, 1, B);
-_DEFPIN_ARM(20, 2, B);
-_DEFPIN_ARM(39, 3, B);
-_DEFPIN_ARM(40, 4, B);
-_DEFPIN_ARM(41, 5, B);
-_DEFPIN_ARM(42, 6, B);
-_DEFPIN_ARM(43, 7, B);
-_DEFPIN_ARM(45, 8, B);
-_DEFPIN_ARM(46, 9, B);
-_DEFPIN_ARM(21, 10, B);
-_DEFPIN_ARM(22, 11, B);
+_DEFPIN_ARM(27, 8, A);	// PA8 - PA15
+_DEFPIN_ARM(26, 9, A);
+_DEFPIN_ARM(25, 10, A);
+_DEFPIN_ARM(24, 11, A);
+_DEFPIN_ARM(23, 12, A);
+_DEFPIN_ARM(22, 13, A);
+_DEFPIN_ARM(21, 14, A);
+_DEFPIN_ARM(20, 15, A);
 
-_DEFPIN_ARM(2, 13, C);	// PC13 - PC15
-_DEFPIN_ARM(3, 14, C);
-_DEFPIN_ARM(4, 15, C);
+_DEFPIN_ARM(3, 0, B);	// PB0 - PB11
+_DEFPIN_ARM(33, 1, B);  // LED on Maple Mini
+_DEFPIN_ARM(2, 2, B);
+_DEFPIN_ARM(19, 3, B);
+_DEFPIN_ARM(18, 4, B);
+_DEFPIN_ARM(17, 5, B);
+_DEFPIN_ARM(16, 6, B);
+_DEFPIN_ARM(15, 7, B);
+_DEFPIN_ARM(32, 8, B);  // Button on Maple Mini
+//_DEFPIN_ARM(34, 9, B);  // PB9 is not connected on Maple Mini
+_DEFPIN_ARM(1, 10, B);
+_DEFPIN_ARM(0, 11, B);
+_DEFPIN_ARM(31, 12, B);
+_DEFPIN_ARM(30, 13, B);
+_DEFPIN_ARM(29, 14, B);
+_DEFPIN_ARM(28, 15, B);
+
+
+_DEFPIN_ARM(14, 13, C);	// PC13 - PC15
+_DEFPIN_ARM(13, 14, C);
+_DEFPIN_ARM(12, 15, C);
+
 
 #define SPI_DATA BOARD_SPI1_MOSI_PIN
 #define SPI_CLOCK BOARD_SPI1_SCK_PIN
