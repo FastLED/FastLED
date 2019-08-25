@@ -94,12 +94,12 @@ template<uint8_t PIN> void CheckPin()
 {
 	CheckPin<PIN - 1>();
 
-	RwReg *systemThinksPortIs = portOutputRegister(digitalPinToPort(PIN));
+	void *systemThinksPortIs = (void*)portOutputRegister(digitalPinToPort(PIN));
 	RwReg systemThinksMaskIs = digitalPinToBitMask(PIN);
 
 	Serial.print("Pin "); Serial.print(PIN); Serial.print(": Port ");
 
-	if(systemThinksPortIs == FastPin<PIN>::port()) {
+	if(systemThinksPortIs == (void*)FastPin<PIN>::port()) {
 		Serial.print("valid & mask ");
 	} else {
 		Serial.print("invalid, is "); Serial.print(getPort((void*)FastPin<PIN>::port())); Serial.print(" should be ");
@@ -114,8 +114,68 @@ template<uint8_t PIN> void CheckPin()
 	}
 }
 
-template<> void CheckPin<-1> () {}
+template<> void CheckPin<255> () {}
 
+
+template<uint8_t _PORT> const char *_GetPinPort(void *ptr) {
+	if (__FL_PORT_INFO<_PORT>::hasPort() && (ptr == (void*)__FL_PORT_INFO<_PORT>::portAddr())) {
+		return __FL_PORT_INFO<_PORT>::portName();
+	} else {
+		return _GetPinPort<_PORT - 1>(ptr);
+	}
+}
+template<> const char *_GetPinPort<-1>(void *ptr) {
+	return NULL;
+}
+
+const char *GetPinPort(void *ptr) {
+	return _GetPinPort<'Z'>(ptr);
+}
+
+static uint8_t pcount = 0;
+
+
+template<uint8_t PIN> void PrintPins() {
+	PrintPins<PIN - 1>();
+
+	RwReg *systemThinksPortIs = portOutputRegister(digitalPinToPort(PIN));
+	RwReg systemThinksMaskIs = digitalPinToBitMask(PIN);
+
+	int maskBit = 0;
+	while(systemThinksMaskIs > 1) { systemThinksMaskIs >>= 1; maskBit++; }
+
+	const char *pinport = GetPinPort((void*)systemThinksPortIs);
+	if (pinport) {
+		Serial.print("__FL_DEFPIN("); Serial.print(PIN);
+		Serial.print(","); Serial.print(maskBit);
+		Serial.print(","); Serial.print(pinport);
+		Serial.print("); ");
+		pcount++;
+		if(pcount == 4) { pcount = 0; Serial.println(""); }
+	} else {
+		// Serial.print("Not found for pin "); Serial.println(PIN);
+	}
+}
+
+template<> void PrintPins<0>() {
+	RwReg *systemThinksPortIs = portOutputRegister(digitalPinToPort(0));
+	RwReg systemThinksMaskIs = digitalPinToBitMask(0);
+
+	int maskBit = 0;
+	while(systemThinksMaskIs > 1) { systemThinksMaskIs >>= 1; maskBit++; }
+
+	const char *pinport = GetPinPort((void*)systemThinksPortIs);
+	if (pinport) {
+		Serial.print("__FL_DEFPIN("); Serial.print(0);
+		Serial.print(","); Serial.print(maskBit);
+		Serial.print(","); Serial.print(pinport);
+		Serial.print("); ");
+		pcount++;
+		if(pcount == 4) { pcount = 0; Serial.println(""); }
+	}
+}
+
+int counter = 0;
 void setup() {
 	delay(5000);
     Serial.begin(38400);
@@ -123,8 +183,17 @@ void setup() {
 }
 
 void loop() {
-	CheckPin<MAX_PIN>();
-	delay(100000);
+	Serial.println(counter);
 
-	Serial.print("GPIO_1_DR is: "); Serial.print(getPort((void*)&(GPIO1_DR)));
+#ifdef MAX_PIN
+	CheckPin<MAX_PIN>();
+#endif
+
+	Serial.println("-----");
+#ifdef NUM_DIGITAL_PINS
+	PrintPins<NUM_DIGITAL_PINS>();
+#endif
+	Serial.println("------");
+
+	delay(100000);
 }

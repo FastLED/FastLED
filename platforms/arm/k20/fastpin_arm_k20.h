@@ -78,28 +78,28 @@ public:
 #define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } \
 	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
-#define _IO32(L) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR);
+#define _FL_IO(L,C) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR); _FL_DEFINE_PORT3(L,C,_R(GPIO ## L ## _PDOR));
 
-#define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
 																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; \
 									template<> class FastPinBB<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
  																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {};
 
 // Actual pin definitions
+_FL_IO(A,0); _FL_IO(B,1); _FL_IO(C,2); _FL_IO(D,3); _FL_IO(E,4);
+
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
-_IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
-
 #define MAX_PIN 33
-_DEFPIN_ARM(0, 16, B); _DEFPIN_ARM(1, 17, B); _DEFPIN_ARM(2, 0, D); _DEFPIN_ARM(3, 12, A);
-_DEFPIN_ARM(4, 13, A); _DEFPIN_ARM(5, 7, D); _DEFPIN_ARM(6, 4, D); _DEFPIN_ARM(7, 2, D);
-_DEFPIN_ARM(8, 3, D); _DEFPIN_ARM(9, 3, C); _DEFPIN_ARM(10, 4, C); _DEFPIN_ARM(11, 6, C);
-_DEFPIN_ARM(12, 7, C); _DEFPIN_ARM(13, 5, C); _DEFPIN_ARM(14, 1, D); _DEFPIN_ARM(15, 0, C);
-_DEFPIN_ARM(16, 0, B); _DEFPIN_ARM(17, 1, B); _DEFPIN_ARM(18, 3, B); _DEFPIN_ARM(19, 2, B);
-_DEFPIN_ARM(20, 5, D); _DEFPIN_ARM(21, 6, D); _DEFPIN_ARM(22, 1, C); _DEFPIN_ARM(23, 2, C);
-_DEFPIN_ARM(24, 5, A); _DEFPIN_ARM(25, 19, B); _DEFPIN_ARM(26, 1, E); _DEFPIN_ARM(27, 9, C);
-_DEFPIN_ARM(28, 8, C); _DEFPIN_ARM(29, 10, C); _DEFPIN_ARM(30, 11, C); _DEFPIN_ARM(31, 0, E);
-_DEFPIN_ARM(32, 18, B); _DEFPIN_ARM(33, 4, A);
+_FL_DEFPIN(0, 16, B); _FL_DEFPIN(1, 17, B); _FL_DEFPIN(2, 0, D); _FL_DEFPIN(3, 12, A);
+_FL_DEFPIN(4, 13, A); _FL_DEFPIN(5, 7, D); _FL_DEFPIN(6, 4, D); _FL_DEFPIN(7, 2, D);
+_FL_DEFPIN(8, 3, D); _FL_DEFPIN(9, 3, C); _FL_DEFPIN(10, 4, C); _FL_DEFPIN(11, 6, C);
+_FL_DEFPIN(12, 7, C); _FL_DEFPIN(13, 5, C); _FL_DEFPIN(14, 1, D); _FL_DEFPIN(15, 0, C);
+_FL_DEFPIN(16, 0, B); _FL_DEFPIN(17, 1, B); _FL_DEFPIN(18, 3, B); _FL_DEFPIN(19, 2, B);
+_FL_DEFPIN(20, 5, D); _FL_DEFPIN(21, 6, D); _FL_DEFPIN(22, 1, C); _FL_DEFPIN(23, 2, C);
+_FL_DEFPIN(24, 5, A); _FL_DEFPIN(25, 19, B); _FL_DEFPIN(26, 1, E); _FL_DEFPIN(27, 9, C);
+_FL_DEFPIN(28, 8, C); _FL_DEFPIN(29, 10, C); _FL_DEFPIN(30, 11, C); _FL_DEFPIN(31, 0, E);
+_FL_DEFPIN(32, 18, B); _FL_DEFPIN(33, 4, A);
 
 #define SPI_DATA 11
 #define SPI_CLOCK 13
