@@ -1,7 +1,9 @@
-FastLED 3.3.2pre
+FastLED 3.3.2
 =============
 
 * Fix APA102 compile error #870 
+* Normalize pin definition macros so that we can have an .ino file that can be used to output what pin/port mappings should be for a platform
+* Add defnition for ATmega32
 
 FastLED 3.3.1
 =============

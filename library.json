@@ -18,7 +18,7 @@
         "type": "git",
         "url": "https://github.com/FastLED/FastLED.git"
     },
-    "version": "3.3.1",
+    "version": "3.3.2",
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
