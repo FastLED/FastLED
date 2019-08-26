@@ -58,11 +58,11 @@ public:
 #if defined(STM32F10X_MD)
   #define _R(T) struct __gen_struct_ ## T
   #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
-  #define _FL_IO(L,C) _RD32(GPIO ## L);  __FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
+  #define _FL_IO(L,C) _RD32(GPIO ## L);  _FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
 #elif defined(__STM32F1__)
   #define _R(T) struct __gen_struct_ ## T
   #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline gpio_reg_map* r() { return T->regs; } };
-  #define _FL_IO(L,C) _RD32(GPIO ## L); __FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
+  #define _FL_IO(L,C) _RD32(GPIO ## L); _FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
 #else
  #error "Platform not supported"
 #endif
