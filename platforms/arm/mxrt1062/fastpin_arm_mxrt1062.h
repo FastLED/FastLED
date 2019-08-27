@@ -45,30 +45,30 @@ public:
 
 #define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } };
-#define _IO32(L) _RD32(GPIO ## L ## _DR); _RD32(GPIO ## L ## _DR_SET); _RD32(GPIO ## L ## _DR_CLEAR); _RD32(GPIO ## L ## _DR_TOGGLE);
+#define _FL_IO(L) _RD32(GPIO ## L ## _DR); _RD32(GPIO ## L ## _DR_SET); _RD32(GPIO ## L ## _DR_CLEAR); _RD32(GPIO ## L ## _DR_TOGGLE); _FL_DEFINE_PORT(L, _R(GPIO ## L ## _DR));
 
 // From the teensy core - it looks like there's the "default set" of port registers at GPIO1-5 - but then there
 // are a mirrored set for GPIO1-4 at GPIO6-9, which in the teensy core is referred to as "fast" - while the pin definitiosn
 // at https://forum.pjrc.com/threads/54711-Teensy-4-0-First-Beta-Test?p=193716&viewfull=1#post193716
 // refer to GPIO1-4, we're going to use GPIO6-9 in the definitions below because the fast registers are what
 // the teensy core is using internally
-#define _DEFPIN_T4(PIN, L, BIT) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L ## _DR), _R(GPIO ## L ## _DR_SET), _R(GPIO ## L ## _DR_CLEAR), _R(GPIO ## L ## _DR_TOGGLE)> {};
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L ## _DR), _R(GPIO ## L ## _DR_SET), _R(GPIO ## L ## _DR_CLEAR), _R(GPIO ## L ## _DR_TOGGLE)> {};
 
 #if defined(FASTLED_TEENSY4) && defined(CORE_TEENSY)
-_IO32(1); _IO32(2); _IO32(3); _IO32(4); _IO32(5);
-_IO32(6); _IO32(7); _IO32(8); _IO32(9);
+_FL_IO(1); _FL_IO(2); _FL_IO(3); _FL_IO(4); _FL_IO(5);
+_FL_IO(6); _FL_IO(7); _FL_IO(8); _FL_IO(9);
 
 #define MAX_PIN 39
-_DEFPIN_T4( 0,6, 3); _DEFPIN_T4( 1,6, 2); _DEFPIN_T4( 2,9, 4); _DEFPIN_T4( 3,9, 5);
-_DEFPIN_T4( 4,9, 6); _DEFPIN_T4( 5,9, 8); _DEFPIN_T4( 6,7,10); _DEFPIN_T4( 7,7,17);
-_DEFPIN_T4( 8,7,16); _DEFPIN_T4( 9,7,11); _DEFPIN_T4(10,7, 0); _DEFPIN_T4(11,7, 2);
-_DEFPIN_T4(12,7, 1); _DEFPIN_T4(13,7, 3); _DEFPIN_T4(14,6,18); _DEFPIN_T4(15,6,19);
-_DEFPIN_T4(16,6,23); _DEFPIN_T4(17,6,22); _DEFPIN_T4(18,6,17); _DEFPIN_T4(19,6,16);
-_DEFPIN_T4(20,6,26); _DEFPIN_T4(21,6,27); _DEFPIN_T4(22,6,24); _DEFPIN_T4(23,6,25);
-_DEFPIN_T4(24,6,12); _DEFPIN_T4(25,6,13); _DEFPIN_T4(26,6,30); _DEFPIN_T4(27,6,31);
-_DEFPIN_T4(28,8,18); _DEFPIN_T4(29,9,31); _DEFPIN_T4(30,8,23); _DEFPIN_T4(31,8,22);
-_DEFPIN_T4(32,7,12); _DEFPIN_T4(33,9, 7); _DEFPIN_T4(34,8,15); _DEFPIN_T4(35,8,14);
-_DEFPIN_T4(36,8,13); _DEFPIN_T4(37,8,12); _DEFPIN_T4(38,8,17); _DEFPIN_T4(39,8,16);
+_FL_DEFPIN( 0, 3,6); _FL_DEFPIN( 1, 2,6); _FL_DEFPIN( 2, 4,9); _FL_DEFPIN( 3, 5,9);
+_FL_DEFPIN( 4, 6,9); _FL_DEFPIN( 5, 8,9); _FL_DEFPIN( 6,10,7); _FL_DEFPIN( 7,17,7);
+_FL_DEFPIN( 8,16,7); _FL_DEFPIN( 9,11,7); _FL_DEFPIN(10, 0,7); _FL_DEFPIN(11, 2,7);
+_FL_DEFPIN(12, 1,7); _FL_DEFPIN(13, 3,7); _FL_DEFPIN(14,18,6); _FL_DEFPIN(15,19,6);
+_FL_DEFPIN(16,23,6); _FL_DEFPIN(17,22,6); _FL_DEFPIN(18,17,6); _FL_DEFPIN(19,16,6);
+_FL_DEFPIN(20,26,6); _FL_DEFPIN(21,27,6); _FL_DEFPIN(22,24,6); _FL_DEFPIN(23,25,6);
+_FL_DEFPIN(24,12,6); _FL_DEFPIN(25,13,6); _FL_DEFPIN(26,30,6); _FL_DEFPIN(27,31,6);
+_FL_DEFPIN(28,18,8); _FL_DEFPIN(29,31,9); _FL_DEFPIN(30,23,8); _FL_DEFPIN(31,22,8);
+_FL_DEFPIN(32,12,7); _FL_DEFPIN(33, 7,9); _FL_DEFPIN(34,15,8); _FL_DEFPIN(35,14,8);
+_FL_DEFPIN(36,13,8); _FL_DEFPIN(37,12,8); _FL_DEFPIN(38,17,8); _FL_DEFPIN(39,16,8);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 

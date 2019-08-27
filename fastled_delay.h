@@ -125,20 +125,11 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {FL_NOP2;
 
 // Macro to convert from nano-seconds to clocks and clocks to nano-seconds
 // #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
-#if defined(STM32F1xx)
-#define F_CPU_MHZ (CPU_F / 1000000L)
-#else
 #define F_CPU_MHZ (F_CPU / 1000000L)
-#endif
 
 // #define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
 #define NS(_NS) (((_NS * F_CPU_MHZ) + 999) / 1000)
-
-#if defined(STM32F1xx)
-#define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (CPU_F / 1000000L)
-#else
 #define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 1000000L)
-#endif
 
 //  Macro for making sure there's enough time available
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)

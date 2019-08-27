@@ -35,7 +35,6 @@
 #else
 // AVR platforms
 #include "platforms/avr/led_sysdefs_avr.h"
-
 #endif
 
 #ifndef FASTLED_NAMESPACE_BEGIN

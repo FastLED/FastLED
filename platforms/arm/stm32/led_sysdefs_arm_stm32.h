@@ -1,35 +1,18 @@
 #ifndef __INC_LED_SYSDEFS_ARM_SAM_H
 #define __INC_LED_SYSDEFS_ARM_SAM_H
 
-#if defined(STM32F10X_MD) 
+#if defined(STM32F10X_MD) || defined (__STM32F1__)
+#include "variants/defs/stm32f103_legacy.h"
 
- #include <application.h>
-
- #define FASTLED_NAMESPACE_BEGIN namespace NSFastLED {
- #define FASTLED_NAMESPACE_END }
- #define FASTLED_USING_NAMESPACE using namespace NSFastLED;
-
- // reusing/abusing cli/sei defs for due
- #define cli()  __disable_irq(); __disable_fault_irq();
- #define sei() __enable_irq(); __enable_fault_irq();
-
-#elif defined (__STM32F1__)
-
- #include "cm3_regs.h"
-
- #define cli() nvic_globalirq_disable()
- #define sei() nvic_globalirq_enable()
- 
-// Support for official STM32duino 
 #elif defined(STM32F1xx)
- #define cli()  __disable_irq(); 
- #define sei() __enable_irq(); 
+#include "variants/defs/stm32f103.h"
 
 #else
  #error "Platform not supported"
 #endif
 
 #define FASTLED_ARM
+#define FASTLED_NO_PINMAP
 
 #ifndef INTERRUPT_THRESHOLD
 #define INTERRUPT_THRESHOLD 1
@@ -58,13 +41,4 @@
 typedef volatile       uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
 typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
 
-#define FASTLED_NO_PINMAP
-
-#if !defined(F_CPU) && !defined(STM32F1xx)
- #define F_CPU 72000000
-#else
- /* Workaround for STM32duino Core.
-    Because F_CPU is defined in stm32_def.h */
- #define CPU_F 72000000
-#endif
-#endif
+#endif // __INC_LED_SYSDEFS_ARM_SAM_H

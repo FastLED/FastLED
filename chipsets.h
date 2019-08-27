@@ -533,8 +533,6 @@ class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL
 #ifdef FASTLED_TEENSY4
 // just use raw nanosecond values for the teensy4
 #define C_NS(_NS) _NS
-#elif defined(STM32F1xx)
-#define C_NS(_NS) (((_NS * ((CPU_F / 1000000L)) + 999)) / 1000)
 #else
 #define C_NS(_NS) (((_NS * ((CLOCKLESS_FREQUENCY / 1000000L)) + 999)) / 1000)
 #endif

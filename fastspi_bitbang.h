@@ -113,15 +113,15 @@ private:
 public:
 
 	// We want to make sure that the clock pulse is held high for a nininum of 35ns.
-#if defined(FASTLED_TEENSY4) 
+#if defined(FASTLED_TEENSY4)
 	#define DELAY_NS (1000 / (SPI_SPEED/1000000))
 	#define CLOCK_HI_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
 	#define CLOCK_LO_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
 #else
-	#define MIN_DELAY (NS(35) - 3)
+	#define MIN_DELAY ((NS(35)>3) ? (NS(35) - 3) : 1)
 
-	#define CLOCK_HI_DELAY do { delaycycles<MIN_DELAY>(); delaycycles<(((SPI_SPEED-6) / 2) - MIN_DELAY)>(); } while(0);
-	#define CLOCK_LO_DELAY do { delaycycles<(((SPI_SPEED-6) / 4))>(); } while(0);
+	#define CLOCK_HI_DELAY do { delaycycles<MIN_DELAY>(); delaycycles<((SPI_SPEED > 10) ? (((SPI_SPEED-6) / 2) - MIN_DELAY) : (SPI_SPEED))>(); } while(0);
+	#define CLOCK_LO_DELAY do { delaycycles<((SPI_SPEED > 10) ? ((SPI_SPEED-6) / 2) : (SPI_SPEED))>(); } while(0);
 #endif
 
 	// write the BIT'th bit out via spi, setting the data pin then strobing the clcok
