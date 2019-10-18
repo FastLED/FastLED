@@ -64,7 +64,7 @@ public:
   /// Not sure i want this? inline CPixelView operator()(int end) { return CPixelView(leds, 0, end); }
 
   /// Return the reverse ordering of this set
-  inline CPixelView operator-() { return CPixelView(leds + len - dir, len - dir, 0); }
+  inline CPixelView operator-() { return CPixelView(leds, len - dir, 0); }
 
   /// Return a pointer to the first element in this set
   inline operator PIXEL_TYPE* () const { return leds; }
