@@ -215,7 +215,7 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 #define SPI_UART0_CLOCK 4
 #endif
 
-#elif defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega644P__)  || defined(__AVR_ATmega32__)
+#elif defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega32__) || defined(__AVR_ATmega16__)
 
 #define MAX_PIN 31
 _FL_DEFPIN(0, 0, B); _FL_DEFPIN(1, 1, B); _FL_DEFPIN(2, 2, B); _FL_DEFPIN(3, 3, B);
