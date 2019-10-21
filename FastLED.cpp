@@ -210,7 +210,8 @@ void CFastLED::countFPS(int nFrames) {
   if(br++ >= nFrames) {
 		uint32_t now = millis();
 		now -= lastframe;
-		m_nFPS = (br * 1000) / now;
+	  	//the max function ensures there will never be a value of 0 for now, as pointed out in issue #881 - it should only cause inaccuracies past 1000FPS, which is huge
+		m_nFPS = (br * 1000) / max(now,1); 
     br = 0;
     lastframe = millis();
   }
