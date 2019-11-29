@@ -66,7 +66,7 @@ void loop() {
     leds[3] = CRGB(0,0,255);
     leds[4] = CRGB(0,0,255);
     leds[5] = CRGB(0,0,255);
-    leds[6] = CRGB(0,0,0);
+    
     FastLED.show();
     delay(1000);
 }
