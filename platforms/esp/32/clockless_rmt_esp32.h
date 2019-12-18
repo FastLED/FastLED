@@ -114,6 +114,13 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define FASTLED_HAS_CLOCKLESS 1
 #define NUM_COLOR_CHANNELS 3
 
+// -- Set to true to print debugging information about timing
+//    Useful for finding out if timing is being messed up by other things
+//    on the processor (WiFi, for example)
+#ifndef FASTLED_RMT_SHOW_TIMER
+#define FASTLED_RMT_SHOW_TIMER false
+#endif
+
 // -- Configuration constants
 #define DIVIDER             2 /* 4, 8 still seem to work, but timings become marginal */
 #define MAX_PULSES         32 /* A channel has a 64 "pulse" buffer - we use half per pass */
@@ -192,6 +199,11 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     rmt_item32_t * mBuffer;
     uint16_t       mBufferSize;
 
+    // -- Timing information for debugging
+    uint32_t       mLastFillTime;
+    uint32_t       mTotalTime;
+    uint32_t       mTimeCount;
+
 public:
 
     void init()
@@ -228,9 +240,6 @@ protected:
 
     void initRMT()
     {
-        // -- Only need to do this once
-        if (gInitialized) return;
-
         for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
             gOnChannel[i] = NULL;
 
@@ -278,13 +287,47 @@ protected:
         gInitialized = true;
     }
 
+    virtual void IRAM_ATTR initTimer()
+    {
+        mLastFillTime = 0;
+        mTotalTime = 0;
+        mTimeCount = 0;
+    }
+
+    virtual void IRAM_ATTR updateTimer()
+    {
+        uint32_t current = __clock_cycles();
+        if (mLastFillTime != 0) {
+            mTotalTime += (current - mLastFillTime);
+            mTimeCount++;
+        }
+        mLastFillTime = current;
+    }
+
+    virtual void IRAM_ATTR printTimer()
+    {
+        if (mTimeCount > 0) {
+            uint32_t ave = mTotalTime / mTimeCount;
+            Serial.print("Controller on pin ");
+            Serial.print(mPin);
+            Serial.print(" : ");
+            Serial.print(ave);
+            Serial.print(" cycles per fill with ");
+            Serial.print(mTimeCount);
+            Serial.println(" fills");
+        }
+    }
+
     // -- Show pixels
     //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels)
+    virtual void IRAM_ATTR showPixels(PixelController<RGB_ORDER> & pixels)
     {
         if (gNumStarted == 0) {
             // -- First controller: make sure everything is set up
-            initRMT();
+            // -- Only need to do this once
+            if ( ! gInitialized) {
+                initRMT();
+            }
             xSemaphoreTake(gTX_sem, portMAX_DELAY);
         }
 
@@ -296,7 +339,10 @@ protected:
             //    variable in the calling function, and this data structure
             //    needs to outlive this call to showPixels.
             (*mPixels) = pixels;
-        }        
+        }
+
+        // -- Keep track of timing between buffer fills, for debugging
+        initTimer();
 
         // -- Keep track of the number of strips we've seen
         gNumStarted++;
@@ -318,6 +364,13 @@ protected:
             //    gives the semaphore back.
             xSemaphoreTake(gTX_sem, portMAX_DELAY);
             xSemaphoreGive(gTX_sem);
+
+            if (FASTLED_RMT_SHOW_TIMER) {
+                for (int i = 0; i < gNumControllers; i++) {
+                    ClocklessController * pController = static_cast<ClocklessController*>(gControllers[i]);
+                    pController->printTimer();
+                }
+            }
 
             // -- Reset the counters
             gNumStarted = 0;
@@ -417,6 +470,7 @@ protected:
             // -- Fill both halves of the buffer
             fillHalfRMTBuffer();
             fillHalfRMTBuffer();
+            updateTimer();
 
             // -- Turn on the interrupts
             rmt_set_tx_intr_en(mRMT_channel, true);
@@ -432,7 +486,7 @@ protected:
     //    handler (below), or as a callback from the built-in
     //    interrupt handler. It is static because we don't know which
     //    controller is done until we look it up.
-    static void doneOnChannel(rmt_channel_t channel, void * arg)
+    static void IRAM_ATTR doneOnChannel(rmt_channel_t channel, void * arg)
     {
         ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
         portBASE_TYPE HPTaskAwoken = 0;
@@ -479,6 +533,7 @@ protected:
                     // -- Refill the half of the buffer that we just finished,
                     //    allowing the other half to proceed.
                     ClocklessController * controller = static_cast<ClocklessController*>(gOnChannel[channel]);
+                    controller->updateTimer();
                     controller->fillHalfRMTBuffer();
                 } else {
                     // -- Transmission is complete on this channel
@@ -513,7 +568,8 @@ protected:
             byte = 0;
         }
 
-        mCurColor = (mCurColor + 1) % NUM_COLOR_CHANNELS;
+        mCurColor++;
+        if (mCurColor == NUM_COLOR_CHANNELS) mCurColor = 0;
 
         return byte;
     }
@@ -563,7 +619,7 @@ protected:
         if (mCurPulse >= MAX_PULSES*2) {
             mRMT_mem_ptr = & (RMTMEM.chan[mRMT_channel].data32[0].val);
             mCurPulse = 0;
-        }            
+        }
     }
 };
 
