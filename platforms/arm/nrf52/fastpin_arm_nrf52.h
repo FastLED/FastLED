@@ -290,7 +290,7 @@ public:
 //     _FL_DEFPIN(47, 47, 1);
 //
 
-#define FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)    \
+#define _FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)    \
     template<> class FastPin<ARDUINO_PIN> :              \
     public _ARMPIN<                                      \
         1u << (BOARD_PIN & 31u),                         \
