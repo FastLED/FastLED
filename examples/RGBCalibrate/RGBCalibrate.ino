@@ -23,7 +23,7 @@
 //
 //////////////////////////////////////////////////
 
-#define NUM_LEDS 6
+#define NUM_LEDS 7
 
 // Data pin that led data will be written out over
 #define DATA_PIN 6
