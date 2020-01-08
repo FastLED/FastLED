@@ -59,48 +59,48 @@
     #define MAX_PIN (33u) // 34 if wanting to use NFC1 test point
 
     // Arduino pins 0..7
-    _DEFPIN_ARM( 0, 0, 25); // D0  is P0.25 -- UART TX
-    //_DEFPIN_ARM( 1, 0, 24); // D1  is P0.24 -- UART RX
-    _DEFPIN_ARM( 2, 0, 10); // D2  is P0.10 -- NFC2
-    _DEFPIN_ARM( 3, 1, 47); // D3  is P1.15 -- PIN_LED1 (red)
-    _DEFPIN_ARM( 4, 1, 42); // D4  is P1.10 -- PIN_LED2 (blue)
-    _DEFPIN_ARM( 5, 1, 40); // D5  is P1.08 -- SPI/SS
-    _DEFPIN_ARM( 6, 0,  7); // D6  is P0.07
-    _DEFPIN_ARM( 7, 1, 34); // D7  is P1.02 -- PIN_DFU (Button)
+    _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 -- UART TX
+    //_FL_DEFPIN( 1, 24, 0); // D1  is P0.24 -- UART RX
+    _FL_DEFPIN( 2, 10, 0); // D2  is P0.10 -- NFC2
+    _FL_DEFPIN( 3, 47, 1); // D3  is P1.15 -- PIN_LED1 (red)
+    _FL_DEFPIN( 4, 42, 1); // D4  is P1.10 -- PIN_LED2 (blue)
+    _FL_DEFPIN( 5, 40, 1); // D5  is P1.08 -- SPI/SS
+    _FL_DEFPIN( 6,  7, 0); // D6  is P0.07
+    _FL_DEFPIN( 7, 34, 1); // D7  is P1.02 -- PIN_DFU (Button)
     
     // Arduino pins 8..15
-    _DEFPIN_ARM( 8, 0, 16); // D8  is P0.16 -- PIN_NEOPIXEL
-    _DEFPIN_ARM( 9, 0, 26); // D9  is P0.26
-    _DEFPIN_ARM(10, 0, 27); // D10 is P0.27
-    _DEFPIN_ARM(11, 0,  6); // D11 is P0.06
-    _DEFPIN_ARM(12, 0,  8); // D12 is P0.08
-    _DEFPIN_ARM(13, 1, 41); // D13 is P1.09
-    _DEFPIN_ARM(14, 0,  4); // D14 is P0.04 -- A0
-    _DEFPIN_ARM(15, 0,  5); // D15 is P0.05 -- A1
+    _FL_DEFPIN( 8, 16, 0); // D8  is P0.16 -- PIN_NEOPIXEL
+    _FL_DEFPIN( 9, 26, 0); // D9  is P0.26
+    _FL_DEFPIN(10, 27, 0); // D10 is P0.27
+    _FL_DEFPIN(11,  6, 0); // D11 is P0.06
+    _FL_DEFPIN(12,  8, 0); // D12 is P0.08
+    _FL_DEFPIN(13, 41, 1); // D13 is P1.09
+    _FL_DEFPIN(14,  4, 0); // D14 is P0.04 -- A0
+    _FL_DEFPIN(15,  5, 0); // D15 is P0.05 -- A1
 
     // Arduino pins 16..23
-    _DEFPIN_ARM(16, 0, 30); // D16 is P0.30 -- A2
-    _DEFPIN_ARM(17, 0, 28); // D17 is P0.28 -- A3
-    _DEFPIN_ARM(18, 0,  2); // D18 is P0.02 -- A4
-    _DEFPIN_ARM(19, 0,  3); // D19 is P0.03 -- A5
-    //_DEFPIN_ARM(20, 0, 29); // D20 is P0.29 -- A6 -- Connected to battery!
-    //_DEFPIN_ARM(21, 0, 31); // D21 is P0.31 -- A7 -- AREF
-    _DEFPIN_ARM(22, 0, 12); // D22 is P0.12 -- SDA
-    _DEFPIN_ARM(23, 0, 11); // D23 is P0.11 -- SCL
+    _FL_DEFPIN(16, 30, 0); // D16 is P0.30 -- A2
+    _FL_DEFPIN(17, 28, 0); // D17 is P0.28 -- A3
+    _FL_DEFPIN(18,  2, 0); // D18 is P0.02 -- A4
+    _FL_DEFPIN(19,  3, 0); // D19 is P0.03 -- A5
+    //_FL_DEFPIN(20, 29, 0); // D20 is P0.29 -- A6 -- Connected to battery!
+    //_FL_DEFPIN(21, 31, 0); // D21 is P0.31 -- A7 -- AREF
+    _FL_DEFPIN(22, 12, 0); // D22 is P0.12 -- SDA
+    _FL_DEFPIN(23, 11, 0); // D23 is P0.11 -- SCL
 
     // Arduino pins 24..31
-    _DEFPIN_ARM(24, 0, 15); // D24 is P0.15 -- PIN_SPI_MISO
-    _DEFPIN_ARM(25, 0, 13); // D25 is P0.13 -- PIN_SPI_MOSI
-    _DEFPIN_ARM(26, 0, 14); // D26 is P0.14 -- PIN_SPI_SCK
-    //_DEFPIN_ARM(27, 0, 19); // D27 is P0.19 -- PIN_QSPI_SCK
-    //_DEFPIN_ARM(28, 0, 20); // D28 is P0.20 -- PIN_QSPI_CS
-    //_DEFPIN_ARM(29, 0, 17); // D29 is P0.17 -- PIN_QSPI_DATA0
-    //_DEFPIN_ARM(30, 0, 22); // D30 is P0.22 -- PIN_QSPI_DATA1
-    //_DEFPIN_ARM(31, 0, 23); // D31 is P0.23 -- PIN_QSPI_DATA2
+    _FL_DEFPIN(24, 15, 0); // D24 is P0.15 -- PIN_SPI_MISO
+    _FL_DEFPIN(25, 13, 0); // D25 is P0.13 -- PIN_SPI_MOSI
+    _FL_DEFPIN(26, 14, 0); // D26 is P0.14 -- PIN_SPI_SCK
+    //_FL_DEFPIN(27, 19, 0); // D27 is P0.19 -- PIN_QSPI_SCK
+    //_FL_DEFPIN(28, 20, 0); // D28 is P0.20 -- PIN_QSPI_CS
+    //_FL_DEFPIN(29, 17, 0); // D29 is P0.17 -- PIN_QSPI_DATA0
+    //_FL_DEFPIN(30, 22, 0); // D30 is P0.22 -- PIN_QSPI_DATA1
+    //_FL_DEFPIN(31, 23, 0); // D31 is P0.23 -- PIN_QSPI_DATA2
 
     // Arduino pins 32..34
-    //_DEFPIN_ARM(32, 0, 21); // D32 is P0.21 -- PIN_QSPI_DATA3
-    //_DEFPIN_ARM(33, 0,  9); // D33 is NFC1, only accessible via test point
+    //_FL_DEFPIN(32, 21, 0); // D32 is P0.21 -- PIN_QSPI_DATA3
+    //_FL_DEFPIN(33,  9, 0); // D33 is NFC1, only accessible via test point
 #endif // defined (ARDUINO_NRF52840_FEATHER)
 
 // Adafruit Bluefruit nRF52840 Metro Express
@@ -113,46 +113,46 @@
     #endif
     #warning "Adafruit Bluefruit nRF52840 Metro Express is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
 
-    _DEFPIN_ARM( 0, 0, 25); // D0  is P0.25 (UART TX)
-    _DEFPIN_ARM( 1, 0, 24); // D1  is P0.24 (UART RX)
-    _DEFPIN_ARM( 2, 1, 10); // D2  is P1.10 
-    _DEFPIN_ARM( 3, 1,  4); // D3  is P1.04 
-    _DEFPIN_ARM( 4, 1, 11); // D4  is P1.11 
-    _DEFPIN_ARM( 5, 1, 12); // D5  is P1.12 
-    _DEFPIN_ARM( 6, 1, 14); // D6  is P1.14
-    _DEFPIN_ARM( 7, 0, 26); // D7  is P0.26
-    _DEFPIN_ARM( 8, 0, 27); // D8  is P0.27
-    _DEFPIN_ARM( 9, 0, 12); // D9  is P0.12
-    _DEFPIN_ARM(10, 0,  6); // D10 is P0.06 
-    _DEFPIN_ARM(11, 0,  8); // D11 is P0.08 
-    _DEFPIN_ARM(12, 1,  9); // D12 is P1.09 
-    _DEFPIN_ARM(13, 0, 14); // D13 is P0.14 
-    _DEFPIN_ARM(14, 0,  4); // D14 is P0.04 (A0)
-    _DEFPIN_ARM(15, 0,  5); // D15 is P0.05 (A1)
-    _DEFPIN_ARM(16, 0, 28); // D16 is P0.28 (A2)
-    _DEFPIN_ARM(17, 0, 30); // D17 is P0.30 (A3)
-    _DEFPIN_ARM(18, 0,  2); // D18 is P0.02 (A4)
-    _DEFPIN_ARM(19, 0,  3); // D19 is P0.03 (A5)
-    _DEFPIN_ARM(20, 0, 29); // D20 is P0.29 (A6, battery)
-    _DEFPIN_ARM(21, 0, 31); // D21 is P0.31 (A7, ARef)
-    _DEFPIN_ARM(22, 0, 15); // D22 is P0.15 (SDA)
-    _DEFPIN_ARM(23, 0, 16); // D23 is P0.16 (SCL)
-    _DEFPIN_ARM(24, 0, 11); // D24 is P0.11 (SPI MISO)
-    _DEFPIN_ARM(25, 1,  8); // D25 is P1.08 (SPI MOSI)
-    _DEFPIN_ARM(26, 0,  7); // D26 is P0.07 (SPI SCK )
-    //_DEFPIN_ARM(27, 0, 19); // D27 is P0.19 (QSPI CLK   )
-    //_DEFPIN_ARM(28, 0, 20); // D28 is P0.20 (QSPI CS    )
-    //_DEFPIN_ARM(29, 0, 17); // D29 is P0.17 (QSPI Data 0)
-    //_DEFPIN_ARM(30, 0, 23); // D30 is P0.23 (QSPI Data 1)
-    //_DEFPIN_ARM(31, 0, 22); // D31 is P0.22 (QSPI Data 2)
-    //_DEFPIN_ARM(32, 0, 21); // D32 is P0.21 (QSPI Data 3)
-    _DEFPIN_ARM(33, 1, 13); // D33 is P1.13 LED1
-    _DEFPIN_ARM(34, 1, 15); // D34 is P1.15 LED2
-    _DEFPIN_ARM(35, 0, 13); // D35 is P0.13 NeoPixel
-    _DEFPIN_ARM(36, 1,  0); // D36 is P1.02 Switch
-    _DEFPIN_ARM(37, 1,  0); // D37 is P1.00 SWO/DFU
-    _DEFPIN_ARM(38, 0,  9); // D38 is P0.09 NFC1
-    _DEFPIN_ARM(39, 0, 10); // D39 is P0.10 NFC2
+    _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 (UART TX)
+    _FL_DEFPIN( 1, 24, 0); // D1  is P0.24 (UART RX)
+    _FL_DEFPIN( 2, 10, 1); // D2  is P1.10 
+    _FL_DEFPIN( 3,  4, 1); // D3  is P1.04 
+    _FL_DEFPIN( 4, 11, 1); // D4  is P1.11 
+    _FL_DEFPIN( 5, 12, 1); // D5  is P1.12 
+    _FL_DEFPIN( 6, 14, 1); // D6  is P1.14
+    _FL_DEFPIN( 7, 26, 0); // D7  is P0.26
+    _FL_DEFPIN( 8, 27, 0); // D8  is P0.27
+    _FL_DEFPIN( 9, 12, 0); // D9  is P0.12
+    _FL_DEFPIN(10,  6, 0); // D10 is P0.06 
+    _FL_DEFPIN(11,  8, 0); // D11 is P0.08 
+    _FL_DEFPIN(12,  9, 1); // D12 is P1.09 
+    _FL_DEFPIN(13, 14, 0); // D13 is P0.14 
+    _FL_DEFPIN(14,  4, 0); // D14 is P0.04 (A0)
+    _FL_DEFPIN(15,  5, 0); // D15 is P0.05 (A1)
+    _FL_DEFPIN(16, 28, 0); // D16 is P0.28 (A2)
+    _FL_DEFPIN(17, 30, 0); // D17 is P0.30 (A3)
+    _FL_DEFPIN(18,  2, 0); // D18 is P0.02 (A4)
+    _FL_DEFPIN(19,  3, 0); // D19 is P0.03 (A5)
+    _FL_DEFPIN(20, 29, 0); // D20 is P0.29 (A6, battery)
+    _FL_DEFPIN(21, 31, 0); // D21 is P0.31 (A7, ARef)
+    _FL_DEFPIN(22, 15, 0); // D22 is P0.15 (SDA)
+    _FL_DEFPIN(23, 16, 0); // D23 is P0.16 (SCL)
+    _FL_DEFPIN(24, 11, 0); // D24 is P0.11 (SPI MISO)
+    _FL_DEFPIN(25,  8, 1); // D25 is P1.08 (SPI MOSI)
+    _FL_DEFPIN(26,  7, 0); // D26 is P0.07 (SPI SCK )
+    //_FL_DEFPIN(27, 19, 0); // D27 is P0.19 (QSPI CLK   )
+    //_FL_DEFPIN(28, 20, 0); // D28 is P0.20 (QSPI CS    )
+    //_FL_DEFPIN(29, 17, 0); // D29 is P0.17 (QSPI Data 0)
+    //_FL_DEFPIN(30, 23, 0); // D30 is P0.23 (QSPI Data 1)
+    //_FL_DEFPIN(31, 22, 0); // D31 is P0.22 (QSPI Data 2)
+    //_FL_DEFPIN(32, 21, 0); // D32 is P0.21 (QSPI Data 3)
+    _FL_DEFPIN(33, 13, 1); // D33 is P1.13 LED1
+    _FL_DEFPIN(34, 15, 1); // D34 is P1.15 LED2
+    _FL_DEFPIN(35, 13, 0); // D35 is P0.13 NeoPixel
+    _FL_DEFPIN(36,  0, 1); // D36 is P1.02 Switch
+    _FL_DEFPIN(37,  0, 1); // D37 is P1.00 SWO/DFU
+    _FL_DEFPIN(38,  9, 0); // D38 is P0.09 NFC1
+    _FL_DEFPIN(39, 10, 0); // D39 is P0.10 NFC2
 #endif // defined (ARDUINO_NRF52840_METRO)
 
 // Adafruit Bluefruit on nRF52840DK PCA10056
@@ -169,52 +169,52 @@
         /* pca10056_schematic_and_pcb.pdf
            Page 3 shows the Arduino Pin to GPIO Px.xx mapping
         */
-        _DEFPIN_ARM( 0, 1,  1); // D0  is P1.01 
-        _DEFPIN_ARM( 1, 1,  2); // D1  is P1.02 
-        _DEFPIN_ARM( 2, 1,  3); // D2  is P1.03
-        _DEFPIN_ARM( 3, 1,  4); // D3  is P1.04 
-        _DEFPIN_ARM( 4, 1,  5); // D4  is P1.05 
-        _DEFPIN_ARM( 5, 1,  6); // D5  is P1.06 
-        _DEFPIN_ARM( 6, 1,  7); // D6  is P1.07 (BUTTON1 option)
-        _DEFPIN_ARM( 7, 1,  8); // D7  is P1.08 (BUTTON2 option)
-        _DEFPIN_ARM( 8, 1, 10); // D8  is P1.10 
-        _DEFPIN_ARM( 9, 1, 11); // D9  is P1.11 
-        _DEFPIN_ARM(10, 1, 12); // D10 is P1.12 
-        _DEFPIN_ARM(11, 1, 13); // D11 is P1.13 
-        _DEFPIN_ARM(12, 1, 14); // D12 is P1.14
-        _DEFPIN_ARM(13, 1, 15); // D13 is P1.15 
-        _DEFPIN_ARM(14, 0,  0); // D14 is P0.00 (if SB4 bridged)
-        _DEFPIN_ARM(15, 0,  1); // D15 is P0.01 (if SB3 bridged)
-        _DEFPIN_ARM(16, 0,  5); // D16 is P0.05 (aka AIN3, aka UART RTS)
-        _DEFPIN_ARM(17, 0,  6); // D17 is P0.06 (UART TxD)
-        _DEFPIN_ARM(18, 0,  7); // D18 is P0.07 (UART CTS default)
-        _DEFPIN_ARM(19, 0,  8); // D19 is P0.08 (UART RxD)
-        _DEFPIN_ARM(20, 0,  9); // D20 is P0.09 (NFC1)
-        _DEFPIN_ARM(21, 0, 10); // D21 is P0.10 (NFC2)
-        _DEFPIN_ARM(22, 0, 11); // D22 is P0.11 (TRACEDATA2 / BUTTON1 default)
-        _DEFPIN_ARM(23, 0, 12); // D23 is P0.12 (TRACEDATA1 / BUTTON2 default)
-        _DEFPIN_ARM(24, 0, 13); // D24 is P0.13 (LED1)
-        _DEFPIN_ARM(25, 0, 14); // D25 is P0.14 (LED2)
-        _DEFPIN_ARM(26, 0, 15); // D26 is P0.15 (LED3)
-        _DEFPIN_ARM(27, 0, 16); // D27 is P0.16 (LED4)
-        _DEFPIN_ARM(28, 0, 17); // D28 is P0.17 (QSPI !CS , unless SB13 cut)
-        // _DEFPIN_ARM(29, 0, 18); // D29 is P0.18 (RESET)
-        _DEFPIN_ARM(30, 0, 19); // D30 is P0.19 (QSPI CLK , unless SB11 cut)
-        _DEFPIN_ARM(31, 0, 20); // D31 is P0.20 (QSPI DIO0, unless SB12 cut)
-        _DEFPIN_ARM(32, 0, 21); // D32 is P0.21 (QSPI DIO1, unless SB14 cut)
-        _DEFPIN_ARM(33, 0, 22); // D33 is P0.22 (QSPI DIO2, unless SB15 cut)
-        _DEFPIN_ARM(34, 0, 23); // D34 is P0.23 (QSPI DIO3, unless SB10 cut)
-        _DEFPIN_ARM(35, 0, 24); // D35 is P0.24 (BUTTON3)
-        _DEFPIN_ARM(36, 0, 25); // D36 is P0.25 (BUTTON4)
-        _DEFPIN_ARM(37, 1, 00); // D37 is P1.00 (TRACEDATA0 / SWO)
-        _DEFPIN_ARM(38, 1, 09); // D38 is P1.09 (TRACEDATA3)
-        //_DEFPIN_ARM(??, 0,  2); // D?? is P0.02 (AREF, aka AIN0)
-        //_DEFPIN_ARM(??, 0,  3); // D?? is P0.03 (A0,   aka AIN1)
-        //_DEFPIN_ARM(??, 0,  4); // D?? is P0.04 (A1,   aka AIN2, aka UART CTS option)
-        //_DEFPIN_ARM(??, 0, 28); // D?? is P0.28 (A2,   aka AIN4)
-        //_DEFPIN_ARM(??, 0, 29); // D?? is P0.29 (A3,   aka AIN5)
-        //_DEFPIN_ARM(??, 0, 30); // D?? is P0.30 (A4,   aka AIN6)
-        //_DEFPIN_ARM(??, 0, 31); // D?? is P0.31 (A5,   aka AIN7)
+        _FL_DEFPIN( 0,  1, 1); // D0  is P1.01 
+        _FL_DEFPIN( 1,  2, 1); // D1  is P1.02 
+        _FL_DEFPIN( 2,  3, 1); // D2  is P1.03
+        _FL_DEFPIN( 3,  4, 1); // D3  is P1.04 
+        _FL_DEFPIN( 4,  5, 1); // D4  is P1.05 
+        _FL_DEFPIN( 5,  6, 1); // D5  is P1.06 
+        _FL_DEFPIN( 6,  7, 1); // D6  is P1.07 (BUTTON1 option)
+        _FL_DEFPIN( 7,  8, 1); // D7  is P1.08 (BUTTON2 option)
+        _FL_DEFPIN( 8, 10, 1); // D8  is P1.10 
+        _FL_DEFPIN( 9, 11, 1); // D9  is P1.11 
+        _FL_DEFPIN(10, 12, 1); // D10 is P1.12 
+        _FL_DEFPIN(11, 13, 1); // D11 is P1.13 
+        _FL_DEFPIN(12, 14, 1); // D12 is P1.14
+        _FL_DEFPIN(13, 15, 1); // D13 is P1.15 
+        _FL_DEFPIN(14,  0, 0); // D14 is P0.00 (if SB4 bridged)
+        _FL_DEFPIN(15,  1, 0); // D15 is P0.01 (if SB3 bridged)
+        _FL_DEFPIN(16,  5, 0); // D16 is P0.05 (aka AIN3, aka UART RTS)
+        _FL_DEFPIN(17,  6, 0); // D17 is P0.06 (UART TxD)
+        _FL_DEFPIN(18,  7, 0); // D18 is P0.07 (UART CTS default)
+        _FL_DEFPIN(19,  8, 0); // D19 is P0.08 (UART RxD)
+        _FL_DEFPIN(20,  9, 0); // D20 is P0.09 (NFC1)
+        _FL_DEFPIN(21, 10, 0); // D21 is P0.10 (NFC2)
+        _FL_DEFPIN(22, 11, 0); // D22 is P0.11 (TRACEDATA2 / BUTTON1 default)
+        _FL_DEFPIN(23, 12, 0); // D23 is P0.12 (TRACEDATA1 / BUTTON2 default)
+        _FL_DEFPIN(24, 13, 0); // D24 is P0.13 (LED1)
+        _FL_DEFPIN(25, 14, 0); // D25 is P0.14 (LED2)
+        _FL_DEFPIN(26, 15, 0); // D26 is P0.15 (LED3)
+        _FL_DEFPIN(27, 16, 0); // D27 is P0.16 (LED4)
+        _FL_DEFPIN(28, 17, 0); // D28 is P0.17 (QSPI !CS , unless SB13 cut)
+        // _FL_DEFPIN(29, 18, 0); // D29 is P0.18 (RESET)
+        _FL_DEFPIN(30, 19, 0); // D30 is P0.19 (QSPI CLK , unless SB11 cut)
+        _FL_DEFPIN(31, 20, 0); // D31 is P0.20 (QSPI DIO0, unless SB12 cut)
+        _FL_DEFPIN(32, 21, 0); // D32 is P0.21 (QSPI DIO1, unless SB14 cut)
+        _FL_DEFPIN(33, 22, 0); // D33 is P0.22 (QSPI DIO2, unless SB15 cut)
+        _FL_DEFPIN(34, 23, 0); // D34 is P0.23 (QSPI DIO3, unless SB10 cut)
+        _FL_DEFPIN(35, 24, 0); // D35 is P0.24 (BUTTON3)
+        _FL_DEFPIN(36, 25, 0); // D36 is P0.25 (BUTTON4)
+        _FL_DEFPIN(37, 00, 1); // D37 is P1.00 (TRACEDATA0 / SWO)
+        _FL_DEFPIN(38, 09, 1); // D38 is P1.09 (TRACEDATA3)
+        //_FL_DEFPIN(??,  2, 0); // D?? is P0.02 (AREF, aka AIN0)
+        //_FL_DEFPIN(??,  3, 0); // D?? is P0.03 (A0,   aka AIN1)
+        //_FL_DEFPIN(??,  4, 0); // D?? is P0.04 (A1,   aka AIN2, aka UART CTS option)
+        //_FL_DEFPIN(??, 28, 0); // D?? is P0.28 (A2,   aka AIN4)
+        //_FL_DEFPIN(??, 29, 0); // D?? is P0.29 (A3,   aka AIN5)
+        //_FL_DEFPIN(??, 30, 0); // D?? is P0.30 (A4,   aka AIN6)
+        //_FL_DEFPIN(??, 31, 0); // D?? is P0.31 (A5,   aka AIN7)
 
     #else
         /* 48 pins, defined using natural mapping in Adafruit's variant.cpp (!) */
@@ -279,33 +279,33 @@
     #endif
     #warning "Electronut labs bluey is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
 
-    _DEFPIN_ARM( 0, 0, 26); // D0  is P0.26
-    _DEFPIN_ARM( 1, 0, 27); // D1  is P0.27
-    _DEFPIN_ARM( 2, 0, 22); // D2  is P0.22 (SPI SS  )
-    _DEFPIN_ARM( 3, 0, 23); // D3  is P0.23 (SPI MOSI)
-    _DEFPIN_ARM( 4, 0, 24); // D4  is P0.24 (SPI MISO, also A3)
-    _DEFPIN_ARM( 5, 0, 25); // D5  is P0.25 (SPI SCK )
-    _DEFPIN_ARM( 6, 0, 16); // D6  is P0.16 (Button)
-    _DEFPIN_ARM( 7, 0, 19); // D7  is P0.19 (R)
-    _DEFPIN_ARM( 8, 0, 18); // D8  is P0.18 (G)
-    _DEFPIN_ARM( 9, 0, 17); // D9  is P0.17 (B)
-    _DEFPIN_ARM(10, 0, 11); // D10 is P0.11 (SCL)
-    _DEFPIN_ARM(11, 0, 12); // D11 is P0.12 (DRDYn)
-    _DEFPIN_ARM(12, 0, 13); // D12 is P0.13 (SDA)
-    _DEFPIN_ARM(13, 0, 14); // D13 is P0.17 (INT)
-    _DEFPIN_ARM(14, 0, 15); // D14 is P0.15 (INT1)
-    _DEFPIN_ARM(15, 0, 20); // D15 is P0.20 (INT2)
-    _DEFPIN_ARM(16, 0,  2); // D16 is P0.02 (A0)
-    _DEFPIN_ARM(17, 0,  3); // D17 is P0.03 (A1)
-    _DEFPIN_ARM(18, 0,  4); // D18 is P0.04 (A2)
-    _DEFPIN_ARM(19, 0, 24); // D19 is P0.24 (A3, also D4/SPI MISO) -- is this right?
-    _DEFPIN_ARM(20, 0, 29); // D20 is P0.29 (A4)
-    _DEFPIN_ARM(21, 0, 30); // D21 is P0.30 (A5)
-    _DEFPIN_ARM(22, 0, 31); // D22 is P0.31 (A6)
-    _DEFPIN_ARM(23, 0,  8); // D23 is P0.08 (RX)
-    _DEFPIN_ARM(24, 0,  6); // D24 is P0.06 (TX)
-    _DEFPIN_ARM(25, 0,  5); // D25 is P0.05 (RTS)
-    _DEFPIN_ARM(26, 0,  7); // D26 is P0.07 (CTS)
+    _FL_DEFPIN( 0, 26, 0); // D0  is P0.26
+    _FL_DEFPIN( 1, 27, 0); // D1  is P0.27
+    _FL_DEFPIN( 2, 22, 0); // D2  is P0.22 (SPI SS  )
+    _FL_DEFPIN( 3, 23, 0); // D3  is P0.23 (SPI MOSI)
+    _FL_DEFPIN( 4, 24, 0); // D4  is P0.24 (SPI MISO, also A3)
+    _FL_DEFPIN( 5, 25, 0); // D5  is P0.25 (SPI SCK )
+    _FL_DEFPIN( 6, 16, 0); // D6  is P0.16 (Button)
+    _FL_DEFPIN( 7, 19, 0); // D7  is P0.19 (R)
+    _FL_DEFPIN( 8, 18, 0); // D8  is P0.18 (G)
+    _FL_DEFPIN( 9, 17, 0); // D9  is P0.17 (B)
+    _FL_DEFPIN(10, 11, 0); // D10 is P0.11 (SCL)
+    _FL_DEFPIN(11, 12, 0); // D11 is P0.12 (DRDYn)
+    _FL_DEFPIN(12, 13, 0); // D12 is P0.13 (SDA)
+    _FL_DEFPIN(13, 14, 0); // D13 is P0.17 (INT)
+    _FL_DEFPIN(14, 15, 0); // D14 is P0.15 (INT1)
+    _FL_DEFPIN(15, 20, 0); // D15 is P0.20 (INT2)
+    _FL_DEFPIN(16,  2, 0); // D16 is P0.02 (A0)
+    _FL_DEFPIN(17,  3, 0); // D17 is P0.03 (A1)
+    _FL_DEFPIN(18,  4, 0); // D18 is P0.04 (A2)
+    _FL_DEFPIN(19, 24, 0); // D19 is P0.24 (A3, also D4/SPI MISO) -- is this right?
+    _FL_DEFPIN(20, 29, 0); // D20 is P0.29 (A4)
+    _FL_DEFPIN(21, 30, 0); // D21 is P0.30 (A5)
+    _FL_DEFPIN(22, 31, 0); // D22 is P0.31 (A6)
+    _FL_DEFPIN(23,  8, 0); // D23 is P0.08 (RX)
+    _FL_DEFPIN(24,  6, 0); // D24 is P0.06 (TX)
+    _FL_DEFPIN(25,  5, 0); // D25 is P0.05 (RTS)
+    _FL_DEFPIN(26,  7, 0); // D26 is P0.07 (CTS)
 #endif // defined(ARDUINO_ELECTRONUT_BLUEY)
 
 // Electronut labs hackaBLE
@@ -317,33 +317,33 @@
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
     #warning "Electronut labs hackaBLE is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
-    _DEFPIN_ARM( 0, 0, 14); // D0  is P0.14 (RX)
-    _DEFPIN_ARM( 1, 0, 13); // D1  is P0.13 (TX)
-    _DEFPIN_ARM( 2, 0, 12); // D2  is P0.12
-    _DEFPIN_ARM( 3, 0, 11); // D3  is P0.11 (SPI MOSI)
-    _DEFPIN_ARM( 4, 0,  8); // D4  is P0.08 (SPI MISO)
-    _DEFPIN_ARM( 5, 0,  7); // D5  is P0.07 (SPI SCK )
-    _DEFPIN_ARM( 6, 0,  6); // D6  is P0.06
-    _DEFPIN_ARM( 7, 0, 27); // D7  is P0.27
-    _DEFPIN_ARM( 8, 0, 26); // D8  is P0.26
-    _DEFPIN_ARM( 9, 0, 25); // D9  is P0.25
-    _DEFPIN_ARM(10, 0,  5); // D10 is P0.05 (A3)
-    _DEFPIN_ARM(11, 0,  4); // D11 is P0.04 (A2)
-    _DEFPIN_ARM(12, 0,  3); // D12 is P0.03 (A1)
-    _DEFPIN_ARM(13, 0,  2); // D13 is P0.02 (A0 / AREF)
-    _DEFPIN_ARM(14, 0, 23); // D14 is P0.23
-    _DEFPIN_ARM(15, 0, 22); // D15 is P0.22
-    _DEFPIN_ARM(16, 0, 18); // D16 is P0.18
-    _DEFPIN_ARM(17, 0, 16); // D17 is P0.16
-    _DEFPIN_ARM(18, 0, 15); // D18 is P0.15
-    _DEFPIN_ARM(19, 0, 24); // D19 is P0.24
-    _DEFPIN_ARM(20, 0, 28); // D20 is P0.28 (A4)
-    _DEFPIN_ARM(21, 0, 29); // D21 is P0.29 (A5)
-    _DEFPIN_ARM(22, 0, 30); // D22 is P0.30 (A6)
-    _DEFPIN_ARM(23, 0, 31); // D23 is P0.31 (A7)
-    _DEFPIN_ARM(24, 0, 19); // D24 is P0.19 (RED LED)
-    _DEFPIN_ARM(25, 0, 20); // D25 is P0.20 (GREEN LED)
-    _DEFPIN_ARM(26, 0, 17); // D26 is P0.17 (BLUE LED)
+    _FL_DEFPIN( 0, 14, 0); // D0  is P0.14 (RX)
+    _FL_DEFPIN( 1, 13, 0); // D1  is P0.13 (TX)
+    _FL_DEFPIN( 2, 12, 0); // D2  is P0.12
+    _FL_DEFPIN( 3, 11, 0); // D3  is P0.11 (SPI MOSI)
+    _FL_DEFPIN( 4,  8, 0); // D4  is P0.08 (SPI MISO)
+    _FL_DEFPIN( 5,  7, 0); // D5  is P0.07 (SPI SCK )
+    _FL_DEFPIN( 6,  6, 0); // D6  is P0.06
+    _FL_DEFPIN( 7, 27, 0); // D7  is P0.27
+    _FL_DEFPIN( 8, 26, 0); // D8  is P0.26
+    _FL_DEFPIN( 9, 25, 0); // D9  is P0.25
+    _FL_DEFPIN(10,  5, 0); // D10 is P0.05 (A3)
+    _FL_DEFPIN(11,  4, 0); // D11 is P0.04 (A2)
+    _FL_DEFPIN(12,  3, 0); // D12 is P0.03 (A1)
+    _FL_DEFPIN(13,  2, 0); // D13 is P0.02 (A0 / AREF)
+    _FL_DEFPIN(14, 23, 0); // D14 is P0.23
+    _FL_DEFPIN(15, 22, 0); // D15 is P0.22
+    _FL_DEFPIN(16, 18, 0); // D16 is P0.18
+    _FL_DEFPIN(17, 16, 0); // D17 is P0.16
+    _FL_DEFPIN(18, 15, 0); // D18 is P0.15
+    _FL_DEFPIN(19, 24, 0); // D19 is P0.24
+    _FL_DEFPIN(20, 28, 0); // D20 is P0.28 (A4)
+    _FL_DEFPIN(21, 29, 0); // D21 is P0.29 (A5)
+    _FL_DEFPIN(22, 30, 0); // D22 is P0.30 (A6)
+    _FL_DEFPIN(23, 31, 0); // D23 is P0.31 (A7)
+    _FL_DEFPIN(24, 19, 0); // D24 is P0.19 (RED LED)
+    _FL_DEFPIN(25, 20, 0); // D25 is P0.20 (GREEN LED)
+    _FL_DEFPIN(26, 17, 0); // D26 is P0.17 (BLUE LED)
 #endif // defined(ARDUINO_ELECTRONUT_HACKABLE)
 
 // Electronut labs hackaBLE_v2
@@ -399,31 +399,31 @@
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
     #warning "RedBear Blend 2 is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
-    _DEFPIN_ARM( 0, 0, 11); // D0  is P0.11
-    _DEFPIN_ARM( 1, 0, 12); // D1  is P0.12
-    _DEFPIN_ARM( 2, 0, 13); // D2  is P0.13
-    _DEFPIN_ARM( 3, 0, 14); // D3  is P0.14
-    _DEFPIN_ARM( 4, 0, 15); // D4  is P0.15
-    _DEFPIN_ARM( 5, 0, 16); // D5  is P0.16
-    _DEFPIN_ARM( 6, 0, 17); // D6  is P0.17
-    _DEFPIN_ARM( 7, 0, 18); // D7  is P0.18
-    _DEFPIN_ARM( 8, 0, 19); // D8  is P0.19
-    _DEFPIN_ARM( 9, 0, 20); // D9  is P0.20
-    _DEFPIN_ARM(10, 0, 22); // D10 is P0.22 (SPI SS  )
-    _DEFPIN_ARM(11, 0, 23); // D11 is P0.23 (SPI MOSI)
-    _DEFPIN_ARM(12, 0, 24); // D12 is P0.24 (SPI MISO)
-    _DEFPIN_ARM(13, 0, 25); // D13 is P0.25 (SPI SCK / LED)
-    _DEFPIN_ARM(14, 0,  3); // D14 is P0.03 (A0)
-    _DEFPIN_ARM(15, 0,  4); // D15 is P0.04 (A1)
-    _DEFPIN_ARM(16, 0, 28); // D16 is P0.28 (A2)
-    _DEFPIN_ARM(17, 0, 29); // D17 is P0.29 (A3)
-    _DEFPIN_ARM(18, 0, 30); // D18 is P0.30 (A4)
-    _DEFPIN_ARM(19, 0, 31); // D19 is P0.31 (A5)
-    _DEFPIN_ARM(20, 0, 26); // D20 is P0.26 (SDA)
-    _DEFPIN_ARM(21, 0, 27); // D21 is P0.27 (SCL)
-    _DEFPIN_ARM(22, 0,  8); // D22 is P0.08 (RX)
-    _DEFPIN_ARM(23, 0,  6); // D23 is P0.06 (TX)
-    _DEFPIN_ARM(24, 0,  2); // D24 is P0.02 (AREF)
+    _FL_DEFPIN( 0, 11, 0); // D0  is P0.11
+    _FL_DEFPIN( 1, 12, 0); // D1  is P0.12
+    _FL_DEFPIN( 2, 13, 0); // D2  is P0.13
+    _FL_DEFPIN( 3, 14, 0); // D3  is P0.14
+    _FL_DEFPIN( 4, 15, 0); // D4  is P0.15
+    _FL_DEFPIN( 5, 16, 0); // D5  is P0.16
+    _FL_DEFPIN( 6, 17, 0); // D6  is P0.17
+    _FL_DEFPIN( 7, 18, 0); // D7  is P0.18
+    _FL_DEFPIN( 8, 19, 0); // D8  is P0.19
+    _FL_DEFPIN( 9, 20, 0); // D9  is P0.20
+    _FL_DEFPIN(10, 22, 0); // D10 is P0.22 (SPI SS  )
+    _FL_DEFPIN(11, 23, 0); // D11 is P0.23 (SPI MOSI)
+    _FL_DEFPIN(12, 24, 0); // D12 is P0.24 (SPI MISO)
+    _FL_DEFPIN(13, 25, 0); // D13 is P0.25 (SPI SCK / LED)
+    _FL_DEFPIN(14,  3, 0); // D14 is P0.03 (A0)
+    _FL_DEFPIN(15,  4, 0); // D15 is P0.04 (A1)
+    _FL_DEFPIN(16, 28, 0); // D16 is P0.28 (A2)
+    _FL_DEFPIN(17, 29, 0); // D17 is P0.29 (A3)
+    _FL_DEFPIN(18, 30, 0); // D18 is P0.30 (A4)
+    _FL_DEFPIN(19, 31, 0); // D19 is P0.31 (A5)
+    _FL_DEFPIN(20, 26, 0); // D20 is P0.26 (SDA)
+    _FL_DEFPIN(21, 27, 0); // D21 is P0.27 (SCL)
+    _FL_DEFPIN(22,  8, 0); // D22 is P0.08 (RX)
+    _FL_DEFPIN(23,  6, 0); // D23 is P0.06 (TX)
+    _FL_DEFPIN(24,  2, 0); // D24 is P0.02 (AREF)
 #endif // defined(ARDUINO_RB_BLEND_2)
 
 // RedBear BLE Nano 2
@@ -435,18 +435,18 @@
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
     #warning "RedBear BLE Nano 2 is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
-    _DEFPIN_ARM( 0, 0, 30); // D0  is P0.30 (A0 / RX)
-    _DEFPIN_ARM( 1, 0, 29); // D1  is P0.29 (A1 / TX)
-    _DEFPIN_ARM( 2, 0, 28); // D2  is P0.28 (A2 / SDA)
-    _DEFPIN_ARM( 3, 0,  2); // D3  is P0.02 (A3 / SCL)
-    _DEFPIN_ARM( 4, 0,  5); // D4  is P0.05 (A4)
-    _DEFPIN_ARM( 5, 0,  4); // D5  is P0.04 (A5)
-    _DEFPIN_ARM( 6, 0,  3); // D6  is P0.03 (SPI SS  )
-    _DEFPIN_ARM( 7, 0,  6); // D7  is P0.06 (SPI MOSI)
-    _DEFPIN_ARM( 8, 0,  7); // D8  is P0.07 (SPI MISO)
-    _DEFPIN_ARM( 9, 0,  8); // D9  is P0.08 (SPI SCK )
-    // _DEFPIN_ARM(10, 0, 21); // D10 is P0.21 (RESET)
-    _DEFPIN_ARM(13, 0, 11); // D11 is P0.11 (LED)
+    _FL_DEFPIN( 0, 30, 0); // D0  is P0.30 (A0 / RX)
+    _FL_DEFPIN( 1, 29, 0); // D1  is P0.29 (A1 / TX)
+    _FL_DEFPIN( 2, 28, 0); // D2  is P0.28 (A2 / SDA)
+    _FL_DEFPIN( 3,  2, 0); // D3  is P0.02 (A3 / SCL)
+    _FL_DEFPIN( 4,  5, 0); // D4  is P0.05 (A4)
+    _FL_DEFPIN( 5,  4, 0); // D5  is P0.04 (A5)
+    _FL_DEFPIN( 6,  3, 0); // D6  is P0.03 (SPI SS  )
+    _FL_DEFPIN( 7,  6, 0); // D7  is P0.06 (SPI MOSI)
+    _FL_DEFPIN( 8,  7, 0); // D8  is P0.07 (SPI MISO)
+    _FL_DEFPIN( 9,  8, 0); // D9  is P0.08 (SPI SCK )
+    // _FL_DEFPIN(10, 21, 0); // D10 is P0.21 (RESET)
+    _FL_DEFPIN(13, 11, 0); // D11 is P0.11 (LED)
 #endif // defined(ARDUINO_RB_BLE_NANO_2)
 
 // Nordic Semiconductor nRF52 DK
@@ -458,32 +458,32 @@
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
     #warning "Nordic Semiconductor nRF52 DK is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
-    _DEFPIN_ARM( 0, 0, 11); // D0  is P0.11
-    _DEFPIN_ARM( 1, 0, 12); // D1  is P0.12
-    _DEFPIN_ARM( 2, 0, 13); // D2  is P0.13 (BUTTON1)
-    _DEFPIN_ARM( 3, 0, 14); // D3  is P0.14 (BUTTON2)
-    _DEFPIN_ARM( 4, 0, 15); // D4  is P0.15 (BUTTON3)
-    _DEFPIN_ARM( 5, 0, 16); // D5  is P0.16 (BUTTON4)
-    _DEFPIN_ARM( 6, 0, 17); // D6  is P0.17 (LED1)
-    _DEFPIN_ARM( 7, 0, 18); // D7  is P0.18 (LED2)
-    _DEFPIN_ARM( 8, 0, 19); // D8  is P0.19 (LED3)
-    _DEFPIN_ARM( 9, 0, 20); // D9  is P0.20 (LED4)
-    _DEFPIN_ARM(10, 0, 22); // D10 is P0.22 (SPI SS  )
-    _DEFPIN_ARM(11, 0, 23); // D11 is P0.23 (SPI MOSI)
-    _DEFPIN_ARM(12, 0, 24); // D12 is P0.24 (SPI MISO)
-    _DEFPIN_ARM(13, 0, 25); // D13 is P0.25 (SPI SCK / LED)
-    _DEFPIN_ARM(14, 0,  3); // D14 is P0.03 (A0)
-    _DEFPIN_ARM(15, 0,  4); // D15 is P0.04 (A1)
-    _DEFPIN_ARM(16, 0, 28); // D16 is P0.28 (A2)
-    _DEFPIN_ARM(17, 0, 29); // D17 is P0.29 (A3)
-    _DEFPIN_ARM(18, 0, 30); // D18 is P0.30 (A4)
-    _DEFPIN_ARM(19, 0, 31); // D19 is P0.31 (A5)
-    _DEFPIN_ARM(20, 0,  5); // D20 is P0.05 (A6)
-    _DEFPIN_ARM(21, 0,  2); // D21 is P0.02 (A7 / AREF)
-    _DEFPIN_ARM(22, 0, 26); // D22 is P0.26 (SDA)
-    _DEFPIN_ARM(23, 0, 27); // D23 is P0.27 (SCL)
-    _DEFPIN_ARM(24, 0,  8); // D24 is P0.08 (RX)
-    _DEFPIN_ARM(25, 0,  6); // D25 is P0.06 (TX)
+    _FL_DEFPIN( 0, 11, 0); // D0  is P0.11
+    _FL_DEFPIN( 1, 12, 0); // D1  is P0.12
+    _FL_DEFPIN( 2, 13, 0); // D2  is P0.13 (BUTTON1)
+    _FL_DEFPIN( 3, 14, 0); // D3  is P0.14 (BUTTON2)
+    _FL_DEFPIN( 4, 15, 0); // D4  is P0.15 (BUTTON3)
+    _FL_DEFPIN( 5, 16, 0); // D5  is P0.16 (BUTTON4)
+    _FL_DEFPIN( 6, 17, 0); // D6  is P0.17 (LED1)
+    _FL_DEFPIN( 7, 18, 0); // D7  is P0.18 (LED2)
+    _FL_DEFPIN( 8, 19, 0); // D8  is P0.19 (LED3)
+    _FL_DEFPIN( 9, 20, 0); // D9  is P0.20 (LED4)
+    _FL_DEFPIN(10, 22, 0); // D10 is P0.22 (SPI SS  )
+    _FL_DEFPIN(11, 23, 0); // D11 is P0.23 (SPI MOSI)
+    _FL_DEFPIN(12, 24, 0); // D12 is P0.24 (SPI MISO)
+    _FL_DEFPIN(13, 25, 0); // D13 is P0.25 (SPI SCK / LED)
+    _FL_DEFPIN(14,  3, 0); // D14 is P0.03 (A0)
+    _FL_DEFPIN(15,  4, 0); // D15 is P0.04 (A1)
+    _FL_DEFPIN(16, 28, 0); // D16 is P0.28 (A2)
+    _FL_DEFPIN(17, 29, 0); // D17 is P0.29 (A3)
+    _FL_DEFPIN(18, 30, 0); // D18 is P0.30 (A4)
+    _FL_DEFPIN(19, 31, 0); // D19 is P0.31 (A5)
+    _FL_DEFPIN(20,  5, 0); // D20 is P0.05 (A6)
+    _FL_DEFPIN(21,  2, 0); // D21 is P0.02 (A7 / AREF)
+    _FL_DEFPIN(22, 26, 0); // D22 is P0.26 (SDA)
+    _FL_DEFPIN(23, 27, 0); // D23 is P0.27 (SCL)
+    _FL_DEFPIN(24,  8, 0); // D24 is P0.08 (RX)
+    _FL_DEFPIN(25,  6, 0); // D25 is P0.06 (TX)
 #endif // defined(ARDUINO_NRF52_DK)
 
 // Taida Century nRF52 mini board
@@ -495,38 +495,38 @@
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
     #warning "Taida Century nRF52 mini board is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
-    //_DEFPIN_ARM( 0, 0, 25); // D0  is P0.xx (near radio!)
-    //_DEFPIN_ARM( 1, 0, 26); // D1  is P0.xx (near radio!)
-    //_DEFPIN_ARM( 2, 0, 27); // D2  is P0.xx (near radio!)
-    //_DEFPIN_ARM( 3, 0, 28); // D3  is P0.xx (near radio!)
-    //_DEFPIN_ARM( 4, 0, 29); // D4  is P0.xx (Not connected, near radio!)
-    //_DEFPIN_ARM( 5, 0, 30); // D5  is P0.xx (LED1, near radio!)
-    //_DEFPIN_ARM( 6, 0, 31); // D6  is P0.xx (LED2, near radio!)
-    _DEFPIN_ARM( 7, 0,  2); // D7  is P0.xx (SDA)
-    _DEFPIN_ARM( 8, 0,  3); // D8  is P0.xx (SCL)
-    _DEFPIN_ARM( 9, 0,  4); // D9  is P0.xx (BUTTON1 / NFC1)
-    _DEFPIN_ARM(10, 0,  5); // D10 is P0.xx
-    //_DEFPIN_ARM(11, 0,  0); // D11 is P0.xx (Not connected)
-    //_DEFPIN_ARM(12, 0,  1); // D12 is P0.xx (Not connected)
-    _DEFPIN_ARM(13, 0,  6); // D13 is P0.xx
-    _DEFPIN_ARM(14, 0,  7); // D14 is P0.xx
-    _DEFPIN_ARM(15, 0,  8); // D15 is P0.xx
-    //_DEFPIN_ARM(16, 0,  9); // D16 is P0.xx (Not connected)
-    //_DEFPIN_ARM(17, 0, 10); // D17 is P0.xx (NFC2, Not connected)
-    _DEFPIN_ARM(18, 0, 11); // D18 is P0.xx (RXD)
-    _DEFPIN_ARM(19, 0, 12); // D19 is P0.xx (TXD)
-    _DEFPIN_ARM(20, 0, 13); // D20 is P0.xx (SPI SS  )
-    _DEFPIN_ARM(21, 0, 14); // D21 is P0.xx (SPI MISO)
-    _DEFPIN_ARM(22, 0, 15); // D22 is P0.xx (SPI MOSI)
-    _DEFPIN_ARM(23, 0, 16); // D23 is P0.xx (SPI SCK )
-    _DEFPIN_ARM(24, 0, 17); // D24 is P0.xx (A0)
-    _DEFPIN_ARM(25, 0, 18); // D25 is P0.xx (A1)
-    _DEFPIN_ARM(26, 0, 19); // D26 is P0.xx (A2)
-    _DEFPIN_ARM(27, 0, 20); // D27 is P0.xx (A3)
-    //_DEFPIN_ARM(28, 0, 22); // D28 is P0.xx (A4, near radio!)
-    //_DEFPIN_ARM(29, 0, 23); // D29 is P0.xx (A5, near radio!)
-    _DEFPIN_ARM(30, 0, 24); // D30 is P0.xx
-    // _DEFPIN_ARM(31, 0, 21); // D31 is P0.21 (RESET)
+    //_FL_DEFPIN( 0, 25, 0); // D0  is P0.xx (near radio!)
+    //_FL_DEFPIN( 1, 26, 0); // D1  is P0.xx (near radio!)
+    //_FL_DEFPIN( 2, 27, 0); // D2  is P0.xx (near radio!)
+    //_FL_DEFPIN( 3, 28, 0); // D3  is P0.xx (near radio!)
+    //_FL_DEFPIN( 4, 29, 0); // D4  is P0.xx (Not connected, near radio!)
+    //_FL_DEFPIN( 5, 30, 0); // D5  is P0.xx (LED1, near radio!)
+    //_FL_DEFPIN( 6, 31, 0); // D6  is P0.xx (LED2, near radio!)
+    _FL_DEFPIN( 7,  2, 0); // D7  is P0.xx (SDA)
+    _FL_DEFPIN( 8,  3, 0); // D8  is P0.xx (SCL)
+    _FL_DEFPIN( 9,  4, 0); // D9  is P0.xx (BUTTON1 / NFC1)
+    _FL_DEFPIN(10,  5, 0); // D10 is P0.xx
+    //_FL_DEFPIN(11,  0, 0); // D11 is P0.xx (Not connected)
+    //_FL_DEFPIN(12,  1, 0); // D12 is P0.xx (Not connected)
+    _FL_DEFPIN(13,  6, 0); // D13 is P0.xx
+    _FL_DEFPIN(14,  7, 0); // D14 is P0.xx
+    _FL_DEFPIN(15,  8, 0); // D15 is P0.xx
+    //_FL_DEFPIN(16,  9, 0); // D16 is P0.xx (Not connected)
+    //_FL_DEFPIN(17, 10, 0); // D17 is P0.xx (NFC2, Not connected)
+    _FL_DEFPIN(18, 11, 0); // D18 is P0.xx (RXD)
+    _FL_DEFPIN(19, 12, 0); // D19 is P0.xx (TXD)
+    _FL_DEFPIN(20, 13, 0); // D20 is P0.xx (SPI SS  )
+    _FL_DEFPIN(21, 14, 0); // D21 is P0.xx (SPI MISO)
+    _FL_DEFPIN(22, 15, 0); // D22 is P0.xx (SPI MOSI)
+    _FL_DEFPIN(23, 16, 0); // D23 is P0.xx (SPI SCK )
+    _FL_DEFPIN(24, 17, 0); // D24 is P0.xx (A0)
+    _FL_DEFPIN(25, 18, 0); // D25 is P0.xx (A1)
+    _FL_DEFPIN(26, 19, 0); // D26 is P0.xx (A2)
+    _FL_DEFPIN(27, 20, 0); // D27 is P0.xx (A3)
+    //_FL_DEFPIN(28, 22, 0); // D28 is P0.xx (A4, near radio!)
+    //_FL_DEFPIN(29, 23, 0); // D29 is P0.xx (A5, near radio!)
+    _FL_DEFPIN(30, 24, 0); // D30 is P0.xx
+    // _FL_DEFPIN(31, 21, 0); // D31 is P0.21 (RESET)
 #endif // defined(ARDUINO_STCT_NRF52_minidev)
 
 // Generic nRF52832

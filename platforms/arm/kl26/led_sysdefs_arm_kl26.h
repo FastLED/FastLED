@@ -13,7 +13,7 @@
 
 // Default to allowing interrupts
 #ifndef FASTLED_ALLOW_INTERRUPTS
-#define FASTLED_ALLOW_INTERRUPTS 1
+// #define FASTLED_ALLOW_INTERRUPTS 1
 #endif
 
 #if FASTLED_ALLOW_INTERRUPTS == 1

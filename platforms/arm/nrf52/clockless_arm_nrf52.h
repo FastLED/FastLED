@@ -46,7 +46,7 @@ private:
     // may as well be static, as can only attach one LED string per _DATA_PIN....
     static uint16_t s_SequenceBuffer[_PWM_BUFFER_COUNT];
     static uint16_t s_SequenceBufferValidElements;
-    static uint32_t s_SequenceBufferInUse;
+    static volatile uint32_t s_SequenceBufferInUse;
     static CMinWait<_WAIT_TIME_MICROSECONDS> mWait;  // ensure data has time to latch
 
     FASTLED_NRF52_INLINE_ATTRIBUTE static void startPwmPlayback_InitializePinState() {
@@ -123,6 +123,18 @@ private:
     FASTLED_NRF52_INLINE_ATTRIBUTE static void startPwmPlayback_StartTask(NRF_PWM_Type * pwm) {
         nrf_pwm_task_trigger(pwm, NRF_PWM_TASK_SEQSTART0);
     }
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void spinAcquireSequenceBuffer() {
+        while (!tryAcquireSequenceBuffer());
+    }
+    FASTLED_NRF52_INLINE_ATTRIBUTE static bool tryAcquireSequenceBuffer() {
+        return __sync_bool_compare_and_swap(&s_SequenceBufferInUse, 0, 1);
+    }
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void releaseSequenceBuffer() {
+        uint32_t tmp = __sync_val_compare_and_swap(&s_SequenceBufferInUse, 1, 0);
+        if (tmp != 1) {
+            // TODO: Error / Assert / log ?
+        }
+    }
 
 public:
     static void isr_handler() {
@@ -134,8 +146,10 @@ public:
         if (nrf_pwm_event_check(pwm,NRF_PWM_EVENT_STOPPED)) {
             nrf_pwm_event_clear(pwm,NRF_PWM_EVENT_STOPPED);
 
+            // update the minimum time to next call
+            mWait.mark();
             // mark the sequence as no longer in use -- pointer, comparator, exchange value
-            __sync_fetch_and_and(&s_SequenceBufferInUse, 0);
+            releaseSequenceBuffer();
             // prevent further interrupts from PWM events
             nrf_pwm_int_set(pwm, 0);
             // disable PWM interrupts - None of the PWM IRQs are shared
@@ -156,14 +170,20 @@ public:
         FASTLED_NRF52_DEBUGPRINT("    T0H == %d", _T0H);
         FASTLED_NRF52_DEBUGPRINT("    T1H == %d", _T1H);
         FASTLED_NRF52_DEBUGPRINT("    TOP == %d\n", _TOP);
+        // to avoid pin initialization from causing first LED to have invalid color,
+        // call mWait.mark() to ensure data latches before color data gets sent.
+        startPwmPlayback_InitializePinState();
+        mWait.mark();
+
     }
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
     virtual void showPixels(PixelController<_RGB_ORDER> & pixels) {
         // wait for the only sequence buffer to become available
-        while (s_SequenceBufferInUse != 0);
+        spinAcquireSequenceBuffer();
         prepareSequenceBuffers(pixels);
-        mWait.wait(); // ensure min time between updates
+        // ensure any prior data had time to latch
+        mWait.wait();
         startPwmPlayback(s_SequenceBufferValidElements);
         return;
     }
@@ -302,7 +322,7 @@ public:
 template <uint8_t _DATA_PIN, int _T1, int _T2, int _T3, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
 uint16_t ClocklessController<_DATA_PIN, _T1, _T2, _T3, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBufferValidElements = 0;
 template <uint8_t _DATA_PIN, int _T1, int _T2, int _T3, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
-uint32_t ClocklessController<_DATA_PIN, _T1, _T2, _T3, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBufferInUse = 0;
+uint32_t volatile ClocklessController<_DATA_PIN, _T1, _T2, _T3, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBufferInUse = 0;
 template <uint8_t _DATA_PIN, int _T1, int _T2, int _T3, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
 uint16_t ClocklessController<_DATA_PIN, _T1, _T2, _T3, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBuffer[_PWM_BUFFER_COUNT];
 template <uint8_t _DATA_PIN, int _T1, int _T2, int _T3, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>

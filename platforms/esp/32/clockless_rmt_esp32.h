@@ -123,8 +123,12 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 
 // -- Configuration constants
 #define DIVIDER             2 /* 4, 8 still seem to work, but timings become marginal */
+<<<<<<< HEAD
 #define MAX_PULSES         64 /* A channel has a 64 "pulse" buffer */
 #define PULSES_PER_FILL    24 /* One pixel's worth of pulses */
+=======
+#define MAX_PULSES         32 /* A channel has a 64 "pulse" buffer - we use half per pass */
+>>>>>>> upstream/master
 
 // -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
 #define F_CPU_RMT                   (  80000000L)
@@ -503,6 +507,7 @@ protected:
         }
     }
 
+<<<<<<< HEAD
     // -- Fill RMT buffer
     //    Puts one pixel's worth of data into the next 24 slots in the RMT memory
     void IRAM_ATTR fillNext()
@@ -555,6 +560,8 @@ protected:
     }
 
     // NO LONGER USED
+=======
+>>>>>>> upstream/master
     uint8_t IRAM_ATTR getNextByte() __attribute__ ((always_inline))
     {
         uint8_t byte;
@@ -590,7 +597,7 @@ protected:
     //    buffer with pixel data. It also handles the case where the
     //    pixel data is exhausted, so we need to fill the RMT buffer
     //    with zeros to signal that it's done.
-    void IRAM_ATTR fillHalfRMTBuffer()
+    virtual void IRAM_ATTR fillHalfRMTBuffer()
     {
         uint32_t one_val = mOne.val;
         uint32_t zero_val = mZero.val;
@@ -648,10 +655,17 @@ protected:
         }
         
         // -- When we have filled the back half the buffer, reset the position to the first half
+<<<<<<< HEAD
         if (mCurPulse == MAX_PULSES) {
             mRMT_mem_ptr = & (RMTMEM.chan[mRMT_channel].data32[0].val);
             mCurPulse = 0;
         }
+=======
+        if (mCurPulse >= MAX_PULSES*2) {
+            mRMT_mem_ptr = & (RMTMEM.chan[mRMT_channel].data32[0].val);
+            mCurPulse = 0;
+        }            
+>>>>>>> upstream/master
     }
 };
 

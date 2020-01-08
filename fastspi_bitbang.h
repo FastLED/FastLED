@@ -15,7 +15,7 @@ FASTLED_NAMESPACE_BEGIN
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint8_t SPI_SPEED>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class AVRSoftwareSPIOutput {
 	// The data types for pointers to the pin port - typedef'd here from the Pin definition because on avr these
 	// are pointers to 8 bit values, while on arm they are 32 bit
@@ -113,10 +113,16 @@ private:
 public:
 
 	// We want to make sure that the clock pulse is held high for a nininum of 35ns.
-	#define MIN_DELAY (NS(35) - 3)
+#if defined(FASTLED_TEENSY4)
+	#define DELAY_NS (1000 / (SPI_SPEED/1000000))
+	#define CLOCK_HI_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
+	#define CLOCK_LO_DELAY do { delayNanoseconds((DELAY_NS/4)); } while(0);
+#else
+	#define MIN_DELAY ((NS(35)>3) ? (NS(35) - 3) : 1)
 
-  #define CLOCK_HI_DELAY delaycycles<MIN_DELAY>(); delaycycles<(((SPI_SPEED-6) / 2) - MIN_DELAY)>();
-	#define CLOCK_LO_DELAY delaycycles<(((SPI_SPEED-6) / 4))>();
+	#define CLOCK_HI_DELAY do { delaycycles<MIN_DELAY>(); delaycycles<((SPI_SPEED > 10) ? (((SPI_SPEED-6) / 2) - MIN_DELAY) : (SPI_SPEED))>(); } while(0);
+	#define CLOCK_LO_DELAY do { delaycycles<((SPI_SPEED > 10) ? ((SPI_SPEED-6) / 2) : (SPI_SPEED))>(); } while(0);
+#endif
 
 	// write the BIT'th bit out via spi, setting the data pin then strobing the clcok
 	template <uint8_t BIT> __attribute__((always_inline, hot)) inline static void writeBit(uint8_t b) {
@@ -126,8 +132,8 @@ public:
 #ifdef ESP32
 			// try to ensure we never have adjacent write opcodes to the same register
 			FastPin<CLOCK_PIN>::lo();
-			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY; 
-			FastPin<CLOCK_PIN>::toggle(); CLOCK_LO_DELAY; 
+			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+			FastPin<CLOCK_PIN>::toggle(); CLOCK_LO_DELAY;
 #else
 			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
 			FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
@@ -137,7 +143,7 @@ public:
 			FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
 #ifdef ESP32
 			// try to ensure we never have adjacent write opcodes to the same register
-			FastPin<CLOCK_PIN>::toggle(); CLOCK_HI_DELAY; 
+			FastPin<CLOCK_PIN>::toggle(); CLOCK_HI_DELAY;
 #else
 			FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
 #endif

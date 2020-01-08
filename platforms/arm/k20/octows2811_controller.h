@@ -28,7 +28,7 @@ class COctoWS2811Controller : public CPixelLEDController<RGB_ORDER, 8, 0xFF> {
   }
 public:
   COctoWS2811Controller() { pocto = NULL; }
-
+  virtual int size() { return CLEDController::size() * 8; }
 
   virtual void init() { /* do nothing yet */ }
 

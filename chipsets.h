@@ -77,7 +77,7 @@ protected:
 /// @tparam CLOCK_PIN the clock pin for these leds
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(12)
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint8_t SPI_SPEED = DATA_RATE_MHZ(12) >
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint32_t SPI_SPEED = DATA_RATE_MHZ(12) >
 class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 
@@ -118,7 +118,7 @@ protected:
 /// @tparam CLOCK_PIN the clock pin for these leds
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(1)
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(1)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(1)>
 class WS2801Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -140,7 +140,7 @@ protected:
 	}
 };
 
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(25)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(25)>
 class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED> {};
 
 /// LPD6803 controller class (LPD1101).
@@ -151,7 +151,7 @@ class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER,
 /// @tparam CLOCK_PIN the clock pin for these leds
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(12)
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(12)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(12)>
 class LPD6803Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -201,7 +201,7 @@ protected:
 /// @tparam CLOCK_PIN the clock pin for these leds
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(12)
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(12)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(12)>
 class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -266,7 +266,7 @@ protected:
 /// @tparam CLOCK_PIN the clock pin for these leds
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(24)
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(24)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(24)>
 class SK9822Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -340,7 +340,7 @@ protected:
 /// @tparam CLOCK_PIN the clock pin for these leds
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(10)
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(10)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(10)>
 class P9813Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -390,7 +390,7 @@ protected:
 /// @tparam CLOCK_PIN the clock pin for these leds
 /// @tparam RGB_ORDER the RGB ordering for these leds
 /// @tparam SPI_SPEED the clock divider used for these leds.  Set using the DATA_RATE_MHZ/DATA_RATE_KHZ macros.  Defaults to DATA_RATE_MHZ(16)
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint8_t SPI_SPEED = DATA_RATE_MHZ(16)>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(16)>
 class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
@@ -398,10 +398,15 @@ class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
 	void writeHeader() {
 		// Write out 50 zeros to the spi line (6 blocks of 8 followed by two single bit writes)
 		mSPI.select();
-		mSPI.writeBytesValueRaw(0, 6);
+		mSPI.template writeBit<0>(0);
+		mSPI.writeByte(0);
+		mSPI.writeByte(0);
+		mSPI.writeByte(0);
+		mSPI.template writeBit<0>(0);
+		mSPI.writeByte(0);
+		mSPI.writeByte(0);
+		mSPI.writeByte(0);
 		mSPI.waitFully();
-		mSPI.template writeBit<0>(0);
-		mSPI.template writeBit<0>(0);
 		mSPI.release();
 	}
 
@@ -524,7 +529,13 @@ class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL
 
 // Similar to NS() macro, this calculates the number of cycles for
 // the clockless chipset (which may differ from CPU cycles)
+
+#ifdef FASTLED_TEENSY4
+// just use raw nanosecond values for the teensy4
+#define C_NS(_NS) _NS
+#else
 #define C_NS(_NS) (((_NS * ((CLOCKLESS_FREQUENCY / 1000000L)) + 999)) / 1000)
+#endif
 
 // GE8822 - 350ns 660ns 350ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>

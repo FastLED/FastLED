@@ -20,7 +20,7 @@ FASTLED_NAMESPACE_BEGIN
 #define UCPHA1 1
 #endif
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class AVRUSART1SPIOutput {
 	Selectable *m_pSelect;
 
@@ -167,7 +167,7 @@ public:
 #endif
 
 #if defined(UBRR0)
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class AVRUSART0SPIOutput {
 	Selectable *m_pSelect;
 
@@ -329,7 +329,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class AVRHardwareSPIOutput {
 	Selectable *m_pSelect;
 	bool mWait;
@@ -506,7 +506,7 @@ public:
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class AVRHardwareSPIOutput {
 	Selectable *m_pSelect;
 	bool mWait;

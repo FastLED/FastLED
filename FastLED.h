@@ -8,12 +8,12 @@
 #define FASTLED_HAS_PRAGMA_MESSAGE
 #endif
 
-#define FASTLED_VERSION 3002009
+#define FASTLED_VERSION 3003002
 #ifndef FASTLED_INTERNAL
 #  ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#    pragma message "FastLED version 3.002.009"
+#    pragma message "FastLED version 3.003.002"
 #  else
-#    warning FastLED version 3.002.009  (Not really a warning, just telling you here.)
+#    warning FastLED version 3.003.002  (Not really a warning, just telling you here.)
 #  endif
 #endif
 
@@ -314,6 +314,14 @@ public:
 		static CHIPSET<DATA_PIN> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
+
+#if defined(__FASTLED_HAS_FIBCC) && (__FASTLED_HAS_FIBCC == 1)
+  template<uint8_t NUM_LANES, template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER=RGB>
+  static CLEDController &addLeds(struct CRGB *data, int nLeds) {
+    static __FIBCC<CHIPSET, DATA_PIN, NUM_LANES, RGB_ORDER> c;
+    return addLeds(&c, data, nLeds);
+  }
+#endif
 
 	#ifdef FASTSPI_USE_DMX_SIMPLE
 	template<EClocklessChipsets CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER=RGB>

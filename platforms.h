@@ -18,6 +18,9 @@
 #elif defined(__MKL26Z64__)
 // Include kl26/T-LC headers
 #include "platforms/arm/kl26/fastled_arm_kl26.h"
+#elif defined(__IMXRT1062__)
+// teensy4
+#include "platforms/arm/mxrt1062/fastled_arm_mxrt1062.h"
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/fastled_arm_sam.h"
