@@ -171,17 +171,17 @@ _FL_DEFPIN( 20,  6, 0); _FL_DEFPIN( 21,  7, 0);
 
 #elif defined(ARDUINO_SAMD_NANO_33_IOT)
 
-#define MAX_PIN 25
-_FL_DEFPIN(  0, 11, 0); _FL_DEFPIN(  1, 10, 0); _FL_DEFPIN(  2, 14, 0); _FL_DEFPIN(  3,  9, 0);
-_FL_DEFPIN(  4,  8, 0); _FL_DEFPIN(  5, 15, 0); _FL_DEFPIN(  6, 20, 0); _FL_DEFPIN(  7, 21, 0);
-_FL_DEFPIN(  8,  6, 0); _FL_DEFPIN(  9,  7, 0); _FL_DEFPIN( 10, 18, 0); _FL_DEFPIN( 11, 16, 0);
-_FL_DEFPIN( 12, 19, 0); _FL_DEFPIN( 13, 17, 0); _FL_DEFPIN( 14,  2, 0); _FL_DEFPIN( 15,  8, 1);
-_FL_DEFPIN( 16,  9, 1); _FL_DEFPIN( 17,  4, 0); _FL_DEFPIN( 18,  5, 0); _FL_DEFPIN( 19,  2, 1);
-_FL_DEFPIN( 20, 22, 0); _FL_DEFPIN( 21, 23, 0); _FL_DEFPIN( 22, 12, 0); _FL_DEFPIN( 23, 10, 1);
-_FL_DEFPIN( 24, 11, 1);
+#define MAX_PIN 26
+_FL_DEFPIN(  0, 23, 1); _FL_DEFPIN(  1, 22, 1); _FL_DEFPIN(  2, 10, 1); _FL_DEFPIN(  3, 11, 1);
+_FL_DEFPIN(  4,  7, 0); _FL_DEFPIN(  5,  5, 0); _FL_DEFPIN(  6,  4, 0); _FL_DEFPIN(  7,  6, 0);
+_FL_DEFPIN(  8, 18, 0); _FL_DEFPIN(  9, 20, 0); _FL_DEFPIN( 10, 21, 0); _FL_DEFPIN( 11, 16, 0);
+_FL_DEFPIN( 12, 19, 0); _FL_DEFPIN( 13, 17, 0); _FL_DEFPIN( 14,  2, 0); _FL_DEFPIN( 15,  2, 1);
+_FL_DEFPIN( 16, 11, 1); _FL_DEFPIN( 17, 10, 0); _FL_DEFPIN( 18,  8, 1); _FL_DEFPIN( 19,  9, 1);
+_FL_DEFPIN( 20,  9, 0); _FL_DEFPIN( 21,  3, 1); _FL_DEFPIN( 22, 12, 0); _FL_DEFPIN( 23, 13, 0);
+_FL_DEFPIN( 24, 14, 0); _FL_DEFPIN( 25, 15, 0);
 
-#define SPI_DATA 23
-#define SPI_CLOCK 24
+#define SPI_DATA 22
+#define SPI_CLOCK 25
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
