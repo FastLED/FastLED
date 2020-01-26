@@ -21,11 +21,11 @@ FASTLED_NAMESPACE_BEGIN
 /// @deprecated - use FastLED.setMaxPowerInVoltsAndMilliamps()
 void set_max_power_in_volts_and_milliamps( uint8_t volts, uint32_t milliamps);
 /// Set the maximum power used in watts
+/// @deprecated - use FastLED.setMaxPowerInMilliWatts
 void set_max_power_in_milliwatts( uint32_t powerInmW);
 
-/// Select a ping with an led that will be flashed to indicate that power management
+/// Select a pin with an led that will be flashed to indicate that power management
 /// is pulling down the brightness
-/// @deprecated - use FastLED.setMaxPowerInMilliWatts
 void set_max_power_indicator_LED( uint8_t pinNumber); // zero = no indicator LED
 
 
