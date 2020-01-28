@@ -32,9 +32,22 @@
 #include "platforms/esp/8266/led_sysdefs_esp8266.h"
 #elif defined(ESP32)
 #include "platforms/esp/32/led_sysdefs_esp32.h"
-#else
+#elif defined(__AVR__)
 // AVR platforms
 #include "platforms/avr/led_sysdefs_avr.h"
+#else
+//
+// We got here because we don't recognize the platform that you're
+// trying to compile for: it's not AVR, or an ESP or ARM that we recognize.
+//
+// If you're reading this because you got the error below,
+// and if this new platform is just a minor variant of an
+// existing supported ARM platform, you may be able to add
+// a new 'defined(XXX)' selector in the apporpriate code above.
+//
+// If this platform is a new microcontroller, see "PORTING.md".
+//
+#error "This platform isn't recognized by FastLED... yet.  See comments in FastLED/led_sysdefs.h for options."
 #endif
 
 #ifndef FASTLED_NAMESPACE_BEGIN
