@@ -322,6 +322,9 @@ protected:
 #define DADVANCE 3
 #define DUSE (0xFF - (DADVANCE-1))
 
+// Silence compiler warnings about switch/case that is explicitly intended to fall through.
+#define FL_FALLTHROUGH __attribute__ ((fallthrough));
+
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
 	static void /*__attribute__((optimize("O0")))*/  /*__attribute__ ((always_inline))*/  showRGBInternal(PixelController<RGB_ORDER> & pixels)  {
@@ -403,9 +406,9 @@ protected:
 				HI1 _D1(1) QLO2(b0, 1) RORSC14(b1,7) 	_D2(4)	LO1 RORCLC2(b1) 	_D3(2)
 				HI1 _D1(1) QLO2(b0, 0)
 				switch(XTRA0) {
-					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
-					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
-					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
+					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
 					case 1: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
 				}
 				MOV_ADDDE14(b0,b1,d1,e1) _D2(4) LO1 _D3(0)
@@ -419,9 +422,9 @@ protected:
 				HI1 _D1(1) QLO2(b0, 1) RORSC24(b1,7) 	_D2(4)	LO1 RORCLC2(b1) 	_D3(2)
 				HI1 _D1(1) QLO2(b0, 0)
 				switch(XTRA0) {
-					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
-					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
-					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
+					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
 					case 1: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
 				}
 
@@ -438,9 +441,9 @@ protected:
 				HI1 _D1(1) QLO2(b0, 1) RORSC04(b1,7) 	_D2(4)	LO1 RORCLC2(b1) 	_D3(2)
 				HI1 _D1(1) QLO2(b0, 0)
 				switch(XTRA0) {
-					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
-					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
-					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
+					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
 					case 1: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
 				}
 				MOV_ADDDE04(b0,b1,d0,e0) _D2(4) LO1 _D3(5)
