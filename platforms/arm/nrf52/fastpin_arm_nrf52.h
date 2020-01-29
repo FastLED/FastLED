@@ -77,11 +77,14 @@ struct __generated_struct_NRF_P0 {
         return NRF_P0_BASE;
     }
 };
+// Not all NRF52 chips have two ports.  Only define if P1 is present.
+#if defined(NRF_P1_BASE)
 struct __generated_struct_NRF_P1 {
     FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static uintptr_t r() {
         return NRF_P1_BASE;
     }
 };
+#endif
 
 
 // The actual class template can then use a typename, for what is essentially a constexpr NRF_GPIO_Type*
