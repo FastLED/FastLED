@@ -208,9 +208,12 @@ void CFastLED::countFPS(int nFrames) {
   static uint32_t lastframe = 0; // millis();
 
   if(br++ >= nFrames) {
-		uint32_t now = millis();
-		now -= lastframe;
-		m_nFPS = (br * 1000) / now;
+      uint32_t now = millis();
+      now -= lastframe;
+      if( now == 0 ) {
+          now = 1; // prevent division by zero below
+      }
+      m_nFPS = (br * 1000) / now;
     br = 0;
     lastframe = millis();
   }
