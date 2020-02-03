@@ -323,7 +323,11 @@ protected:
 #define DUSE (0xFF - (DADVANCE-1))
 
 // Silence compiler warnings about switch/case that is explicitly intended to fall through.
-#define FL_FALLTHROUGH __attribute__ ((fallthrough));
+#if defined(__GNUC__) && __GNUC__ >= 7
+ #define FL_FALLTHROUGH __attribute__ ((fallthrough));
+#else
+ #define FL_FALLTHROUGH ((void)0);
+#endif /* __GNUC__ >= 7 */
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
