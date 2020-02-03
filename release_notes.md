@@ -1,3 +1,13 @@
+FastLED 3.3.3
+=============
+
+* Improved support for ESP32, Teensy4, ATmega16, nRF52, and ARM STM32.  
+* Added animation examples: "TwinkleFox" holiday lights, "Pride2015" moving rainbows, and "Pacifica" gentle ocean waves 
+* Fixed a few bugs including a rare divide-by-zero crash
+* Cleaned up code and examples a bit
+* Said our sad farwells to FastLED founder Daniel Garcia, who we lost in a tragic accident on September 2nd, 2019.  Dan's beautiful code and warm kindness have been at the heart of the library, and our community, for ten years.  FastLED will continue with help from all across the FastLED world, and Dan's spirit will be with us whenever the lights shine and glow.  Thank you, Dan, for everything.
+
+
 FastLED 3.3.2
 =============
 
