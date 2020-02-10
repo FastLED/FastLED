@@ -64,7 +64,7 @@
  *      this from happening, define this flag. It will force flash
  *      operations to wait until the show() is done.
  *
- * #define FASTLED_ESP32_FLASH_LOCK
+ * #define FASTLED_ESP32_FLASH_LOCK 1
  *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com *
@@ -308,7 +308,7 @@ protected:
             }
             xSemaphoreTake(gTX_sem, portMAX_DELAY);
 
-#ifdef FASTLED_ESP32_FLASH_LOCK
+#if FASTLED_ESP32_FLASH_LOCK == 1
             // -- Make sure no flash operations happen right now
             spi_flash_op_lock();
 #endif
@@ -361,7 +361,7 @@ protected:
             gNumDone = 0;
             gNext = 0;
 
-#ifdef FASTLED_ESP32_FLASH_LOCK
+#if FASTLED_ESP32_FLASH_LOCK == 1
             // -- Release the lock on flash operations
             spi_flash_op_unlock();
 #endif
