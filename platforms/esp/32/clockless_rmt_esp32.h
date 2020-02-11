@@ -58,6 +58,13 @@
  * represented by a 32-bit pulse specification, so it is a 32X blow-up
  * in memory use.
  *
+ * NEW: Use of Flash memory on the ESP32 can interfere with the timing
+ *      of pixel output. The ESP-IDF system code disables all other
+ *      code running on *either* core during these operation. To prevent
+ *      this from happening, define this flag. It will force flash
+ *      operations to wait until the show() is done.
+ *
+ * #define FASTLED_ESP32_FLASH_LOCK 1
  *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com *
@@ -100,6 +107,9 @@ extern "C" {
 #include "soc/rmt_struct.h"
 
 #include "esp_log.h"
+
+extern void spi_flash_op_lock(void);
+extern void spi_flash_op_unlock(void);
 
 #ifdef __cplusplus
 }
@@ -200,6 +210,9 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     rmt_item32_t * mBuffer;
     uint16_t       mBufferSize;
 
+    // -- Make sure we can't call show() too quickly
+    CMinWait<50>   mWait;
+
 public:
 
     void init()
@@ -294,6 +307,11 @@ protected:
                 initRMT();
             }
             xSemaphoreTake(gTX_sem, portMAX_DELAY);
+
+#if FASTLED_ESP32_FLASH_LOCK == 1
+            // -- Make sure no flash operations happen right now
+            spi_flash_op_lock();
+#endif
         }
 
         if (FASTLED_RMT_BUILTIN_DRIVER)
@@ -321,6 +339,9 @@ protected:
                 channel++;
             }
 
+            // -- Make sure it's been at least 50ms since last show
+            mWait.wait();
+
             // -- Start them all
             for (int i = 0; i < channel; i++) {
                 ClocklessController * pController = static_cast<ClocklessController*>(gControllers[i]);
@@ -333,10 +354,17 @@ protected:
             xSemaphoreTake(gTX_sem, portMAX_DELAY);
             xSemaphoreGive(gTX_sem);
 
+            mWait.mark();
+
             // -- Reset the counters
             gNumStarted = 0;
             gNumDone = 0;
             gNext = 0;
+
+#if FASTLED_ESP32_FLASH_LOCK == 1
+            // -- Release the lock on flash operations
+            spi_flash_op_unlock();
+#endif
         }
     }
 
