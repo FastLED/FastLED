@@ -16,16 +16,39 @@ env:
   global:
     - PATH=/opt/python/3.7.1/bin:$PATH
     - ARDUINO_LIBRARY_NAME="FastLED"
-  matrix:
-    - platforms="uno gemma zero due"
-    - platforms="esp32 esp8266"
-    - platforms="trinket m4"
-    - platforms="stm32 nrf52840"
+  jobs:
+    # empty env required, else allow_failures will SILENTY IGNORE matching against env...
+    - 
 
-matrix:
-  # allow build to be marked as finished when required rows done... remaining rows will still continue
-  # this is necessary if setting any 'allow_failures:' values in the matrix
+jobs:
+  # `fast_finish` allows immediate report of success when
+  # required jobs complete, even while jobs under `allow_failures`
+  # to continue building...
   fast_finish: true
+  include:
+    - name: "uno"
+      env:  platforms="uno"
+    - name: "gemma"
+      env:  platforms="gemma"
+    - name: "zero"
+      env:  platforms="zero"
+    - name: "due"
+      env:  platforms="due"
+    - name: "esp32"
+      env:  platforms="esp32"
+    - name: "esp8266"
+      env:  platforms="esp8266"
+    - name: "trinket"
+      env:  platforms="trinket"
+    - name: "m4"
+      env:  platforms="m4"
+    - name: "stm32"
+      env:  platforms="stm32"
+    - name: "nrf52840"
+      env:  platforms="nrf52840"
+  allow_failures:
+    - name: "stm32"
+      env:  platforms="stm32"
 
 before_script:
   # export some travis-ci functions that are useful for folding output
@@ -35,11 +58,13 @@ before_script:
   - export -f travis_time_finish
 
 before_install:
-  - source $TRAVIS_BUILD_DIR/extras/CI/install.sh
+  ## Example to install other libraries that your project might need
+  #- arduino --install-library "FastLED"
 
 install:
-# Example to install other libraries that your project might need
-#   - arduino --install-library "FastLED"
+  # Sourcing of the script runs only once per job...
+  # 
+  - source $TRAVIS_BUILD_DIR/extras/CI/install.sh
 
 script:
   - build_platform
