@@ -39,7 +39,7 @@ void setup() {
 
     // Uncomment/edit one of the following lines for your leds arrangement.
 
-     // ## Clockless types ##
+    // ## Clockless types ##
     // FastLED.addLeds<SM16703, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<TM1829, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<TM1812, DATA_PIN, RGB>(leds, NUM_LEDS);
@@ -59,7 +59,7 @@ void setup() {
     // FastLED.addLeds<APA106, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<PL9823, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<SK6822, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<WS2813, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<APA104, DATA_PIN, RGB>(leds, NUM_LEDS);
