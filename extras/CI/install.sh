@@ -53,7 +53,7 @@ function internal_require_minimum_bash_version() {
 }
 internal_require_minimum_bash_version 4 3
 if [[ $? -eq 0 ]]; then
-  printf "BASH VERSION < 4.3: ${BASH_VERSION}" >&2
+  printf "BASH VERSION < 4.3: %s\n" "${BASH_VERSION}" >&2
   $ret 1
 fi
 
@@ -126,24 +126,24 @@ fi
 
 function internal_declare_colors {
   # define readonly, global colors
-  declare -rg VT_GREY='\033[1;30m'    # bold/bright + black
-  declare -rg VT_GRAY='\033[1;30m'    # bold/bright + black
-  declare -rg VT_RED='\033[0;31m'     # normal      + red
-  declare -rg VT_LRED='\033[1;31m'    # bold/bright + red
-  declare -rg VT_GREEN='\033[0;32m'   # normal      + green
-  declare -rg VT_LGREEN='\033[1;32m'  # bold/bright + green
-  declare -rg VT_ORANGE='\033[0;33m'  # normal      + yellow
-  declare -rg VT_YELLOW='\033[1;33m'  # bold/bright + yellow
-  declare -rg VT_BLUE='\033[0;34m'    # normal      + blue
-  declare -rg VT_LBLUE='\033[1;34m'   # bold/bright + blue
-  declare -rg VT_PURPLE='\033[0;35m'  # normal      + magenta
-  declare -rg VT_LPURPLE='\033[1;35m' # bold/bright + magenta
-  declare -rg VT_CYAN='\033[0;36m'    # normal      + cyan
-  declare -rg VT_LCYAN='\033[1;36m'   # bold/bright + cyan
-  declare -rg VT_LGREY='\033[0;37m'   # normal      + light grey
-  declare -rg VT_LGRAY='\033[0;37m'   # normal      + light gray
-  declare -rg VT_WHITE='\033[1;37m'   # bold/bright + light grey/gray
-  declare -rg VT_NORMAL='\033[0m'     # normal
+  declare -rg    VT_GREY='\033[1;30m'    # bold/bright + black
+  declare -rg    VT_GRAY='\033[1;30m'    # bold/bright + black
+  declare -rg     VT_RED='\033[0;31m'    # normal      + red
+  declare -rg    VT_LRED='\033[1;31m'    # bold/bright + red
+  declare -rg   VT_GREEN='\033[0;32m'    # normal      + green
+  declare -rg  VT_LGREEN='\033[1;32m'    # bold/bright + green
+  declare -rg  VT_ORANGE='\033[0;33m'    # normal      + yellow
+  declare -rg  VT_YELLOW='\033[1;33m'    # bold/bright + yellow
+  declare -rg    VT_BLUE='\033[0;34m'    # normal      + blue
+  declare -rg   VT_LBLUE='\033[1;34m'    # bold/bright + blue
+  declare -rg  VT_PURPLE='\033[0;35m'    # normal      + magenta
+  declare -rg VT_LPURPLE='\033[1;35m'    # bold/bright + magenta
+  declare -rg    VT_CYAN='\033[0;36m'    # normal      + cyan
+  declare -rg   VT_LCYAN='\033[1;36m'    # bold/bright + cyan
+  declare -rg   VT_LGREY='\033[0;37m'    # normal      + light grey
+  declare -rg   VT_LGRAY='\033[0;37m'    # normal      + light gray
+  declare -rg   VT_WHITE='\033[1;37m'    # bold/bright + light grey/gray
+  declare -rg  VT_NORMAL='\033[0m'       # normal
 }
 internal_declare_colors
 
@@ -211,9 +211,9 @@ function log_section_header {
   if [[ ! $(log_check 2) ]]; then
     printf "${VT_YELLOW}\n"
     printf "%5d: ########################################################################\n" "${BASH_LINENO[0]}"
-    printf "%5d: ${1}\n" "${BASH_LINENO[0]}"
+    printf "%5d: %s\n" "${BASH_LINENO[0]}" "${1}"
     printf "%5d: ########################################################################\n" "${BASH_LINENO[0]}"
-    printf "${VT_NORMAL}\n"
+    printf "${VT_NORMAL}\n" 
   fi
   return 0
 }
@@ -226,7 +226,7 @@ function log_error {
   return 0
 }
 function log_progress {
-  log_check 2 && printf "${VT_YELLOW}%5d: %8s: ${FUNCNAME[1]}() ${1}${VT_NORMAL}\n" ${BASH_LINENO[0]} "PROGRESS"
+  log_check 2 && printf "${VT_YELLOW}%5d: %8s: %s ${1}${VT_NORMAL}\n" "${BASH_LINENO[0]}" "PROGRESS" "${FUNCNAME[1]}()"
   return 0
 }
 function log_warning {
@@ -244,9 +244,9 @@ function log_verbose {
 function log_build_error {
   if [[ ! $(log_check 1) ]]; then
     log_start_fold "FAIL: ${1}"
-    printf "${VT_LPURPLE}%5d: BUILD FAILED: [${1}]\n"     "${BASH_LINENO[0]}"
+    printf "${VT_LPURPLE}%5d: BUILD FAILED: [%s]\n"     "${BASH_LINENO[0]}" "${1}"
     printf "%5d: ----------------------------------------------------------------------\n" "${BASH_LINENO[0]}"
-    printf "${VT_LRED}${2}${VT_LPURPLE}\n"
+    printf "${VT_LRED}%s${VT_LPURPLE}\n" "${2}"
     printf "%5d: ----------------------------------------------------------------------{$VT_NORMAL}\n" "${BASH_LINENO[0]}"
     log_end_fold "FAIL: ${1}"
   fi
@@ -269,7 +269,7 @@ function log_action_succeeded {
 }
 function log_action_may_be_cached {
   if [[ ! $(log_check 2) ]]; then
-    printf "${VT_LCYAN}cached (or failed) ${1}${VT_NORMAL}\n"
+    printf "${VT_LCYAN}cached (or failed) %s${VT_NORMAL}\n" "${1}"
   fi
 }
 
@@ -284,7 +284,7 @@ function internal_encode_fold_section_name {
   modifiedName="${modifiedName/%_/''}"
   if [[ -z "$modifiedName" ]]; then
     # fatal error ... exit
-    printf "FATAL INTERNAL ERROR: invalid fold section name: '${sectionName}'\n"
+    printf "FATAL INTERNAL ERROR: invalid fold section name: '%s'\n" "${sectionName}"
     return 1
   fi
   sectionNameRef="$modifiedName"
@@ -299,11 +299,11 @@ function log_start_fold {
 
   my_fold_sections+=("$sectionName")
   if [[ "$disable_folding" -ne 0 ]]; then
-    printf "ignoring fold start b/c disabled: ${sectionName}\n"
+    printf "ignoring fold start b/c disabled: %s\n" "${sectionName}"
   else
-    printf "travis_fold:start:${sectionName}\n"
+    printf "travis_fold:start:%s\n"  "${sectionName}"
   fi
-  printf "${VT_YELLOW}%5d: %s\n" ${BASH_LINENO[0]} "${originalName}"
+  printf "${VT_YELLOW}%5d: %s\n" "${BASH_LINENO[0]}" "${originalName}"
 
   return 0
 }
@@ -315,7 +315,7 @@ function log_end_fold {
   internal_encode_fold_section_name sectionName
 
   if [[ "${#my_fold_sections}" -eq 0 ]]; then
-    printf "fold error: nothing left to close, requested: ${sectionName}\n"
+    printf "fold error: nothing left to close, requested: %s\n" "${sectionName}"
     return 1
   fi
 
@@ -332,16 +332,16 @@ function log_end_fold {
   # This script currently implements choice "C"
   if [[ "$sectionName" != "$toMatch" ]]; then
     # disable future folds, then close all existing folds, and return error
-    printf "FAILED TO MATCH: ${sectionName} != ${toMatch}\n"
+    printf "FAILED TO MATCH: %s != %s\n" "${sectionName}" "${toMatch}"
     log_close_all_folds
     disable_folding=1
     return 1
   fi
 
   if [[ "$disable_folding" -ne 0 ]]; then
-    printf "ignoring fold close b/c disabled: ${sectionName}\n"
+    printf "ignoring fold close b/c disabled: %s\n" "${sectionName}"
   else
-    printf "travis_fold:end:${sectionName}\n"
+    printf "travis_fold:end:%s\n" "${sectionName}"
   fi
   unset 'my_fold_sections[-1]'
   return 0
@@ -1042,18 +1042,18 @@ function internal_build_platforms {
     log_end_fold "Build [${p_key}]"
   done # for p_board in to_build
 
-  printf "RESULTS: ${#samples[@]}, ${VT_LGREEN}${#samples_succeeded[@]} suceeded"
+  printf "RESULTS: %s, ${VT_LGREEN}%s suceeded" "${#samples[@]}" "${#samples_succeeded[@]}"
   if [[ ${#samples_failed[@]} -eq 0 ]]; then
     printf " / 0 failures"
   else
 
-    printf " / ${VT_LRED}${#samples_failed[@]} failures"
+    printf " / ${VT_LRED}%s failures"  "${#samples_failed[@]}"
     for succeeded_key in "${samples_succeeded[@]}"; do
-      printf "${VT_LGREEN}PASSED: [$succeeded_key]${VT_NORMAL}\n"
+      printf "${VT_LGREEN}PASSED: [%s]${VT_NORMAL}\n"  "$succeeded_key"
     done # for failure_key in samples_failed
     for failure_key in "${!samples_failed[@]}"; do
-      log_build_error "${failure_key}]" "${samples_failed[$failure_key]}\n"
-      printf "${VT_LPURPLE}FAILED: [$failure_key]${VT_NORMAL}\n"
+      log_build_error "[${failure_key}]" "${samples_failed[$failure_key]}\n"
+      printf "${VT_LPURPLE}FAILED: [%s]${VT_NORMAL}\n" "$failure_key"
       return_value=$(( $return_value | 32 ))
     done # for failure_key in samples_failed
 
