@@ -58,6 +58,9 @@ before_script:
   - export -f travis_time_finish
 
 before_install:
+  # Firewall all mDNS / Bonjour traffic -- else Arduino build logs are noisy
+  - sudo iptables --insert INPUT  --jump DROP --protocol udp --dport 5353  -m comment --comment "silently drop all 5353/udp input"
+  - sudo iptables --insert INPUT  --jump DROP --destination 224.0.0.251    -m comment --comment "silently drop all mDNS ipv4 broadcast"
   ## Example to install other libraries that your project might need
   #- arduino --install-library "FastLED"
 
