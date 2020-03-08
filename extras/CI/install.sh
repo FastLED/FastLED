@@ -1047,12 +1047,12 @@ function internal_build_platforms {
     printf " / 0 failures"
   else
 
-    printf " / ${VT_LRED}%s failures"  "${#samples_failed[@]}"
+    printf " / ${VT_LRED}%s failures\n"  "${#samples_failed[@]}"
     for succeeded_key in "${samples_succeeded[@]}"; do
       printf "${VT_LGREEN}PASSED: [%s]${VT_NORMAL}\n"  "$succeeded_key"
     done # for failure_key in samples_failed
     for failure_key in "${!samples_failed[@]}"; do
-      log_build_error "[${failure_key}]" "${samples_failed[$failure_key]}\n"
+      log_build_error "${failure_key}" "${samples_failed[$failure_key]}\n"
       printf "${VT_LPURPLE}FAILED: [%s]${VT_NORMAL}\n" "$failure_key"
       return_value=$(( $return_value | 32 ))
     done # for failure_key in samples_failed
@@ -1089,10 +1089,16 @@ if [[ $__ -ne 0 ]]; then
 fi
 
 if [[ $INSTALL_SH_SOURCED -ne 1 ]]; then
-  platforms="uno gemma zero due"  build_platform
-  platforms="esp32 esp8266"       build_platform
-  platforms="trinket m4"          build_platform
-  platforms="stm32 nrf52840"      build_platform
+  platforms="uno"       build_platform
+  platforms="gemma"     build_platform
+  platforms="zero"      build_platform
+  platforms="due"       build_platform
+  platforms="esp32"     build_platform
+  platforms="esp8266"   build_platform
+  platforms="trinket"   build_platform
+  platforms="m4"        build_platform
+  platforms="stm32"     build_platform
+  platforms="nrf52840"  build_platform
 fi
 
 $ret ${__} 
