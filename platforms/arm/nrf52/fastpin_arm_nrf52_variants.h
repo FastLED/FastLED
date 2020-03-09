@@ -156,6 +156,55 @@
     _FL_DEFPIN(39, 10, 0); // D39 is P0.10 NFC2
 #endif // defined (ARDUINO_NRF52840_METRO)
 
+// Adafruit Circuit Playground Bluefruit
+// From https://www.adafruit.com/package_adafruit_index.json
+#if defined (ARDUINO_NRF52840_CIRCUITPLAY)
+    #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
+        #error "Cannot define more than one board at a time"
+    #else
+        #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
+    #endif
+    #warning "Adafruit Circuit Playground Bluefruit is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+
+    _FL_DEFPIN( 0, 30, 0); // D0  is P0.30 (GPIO D0  / A6 / UART RX)
+    _FL_DEFPIN( 1, 24, 0); // D1  is P0.14 (GPIO D1  / A7 / UART TX)
+    _FL_DEFPIN( 2,  5, 0); // D2  is P0.05 (GPIO D2  / A5 / SDA)
+    _FL_DEFPIN( 3,  4, 0); // D3  is P0.04 (GPIO D3  / A4 / SCL)
+    _FL_DEFPIN( 4,  2, 1); // D4  is P1.02 (GPIO D4  / Left Button)
+    _FL_DEFPIN( 5, 15, 1); // D5  is P1.15 (GPIO D5  / Right button)
+    _FL_DEFPIN( 6,  2, 0); // D6  is P0.02 (GPIO D6  / A1)
+    _FL_DEFPIN( 7,  6, 1); // D7  is P1.06 (GPIO D7  / Slide Switch)
+    _FL_DEFPIN( 8, 13, 0); // D8  is P0.13 (GPIO D8  / NeoPixels)
+    _FL_DEFPIN( 9, 29, 0); // D9  is P0.29 (GPIO D9  / A2)
+    _FL_DEFPIN(10,  3, 0); // D10 is P0.03 (GPIO D10 / A3)
+    _FL_DEFPIN(11,  4, 1); // D11 is P1.04 (GPIO D11 / Speaker Shutdown)
+    _FL_DEFPIN(12, 26, 0); // D12 is P0.26 (GPIO D12 / A0 / Audio Out)
+    _FL_DEFPIN(13, 14, 1); // D13 is P1.14 (GPIO D13 / Red LED)
+
+    // Yes, these are the same pins, listed a second time
+    // because they are defined as distinct pins in the pin mapping
+    // No, I don't know why this was thought to be a good idea by Hathach.
+    _FL_DEFPIN(14, 26, 0); // A0  is P0.26 (GPIO D12 / A0 / Audio Out)
+    _FL_DEFPIN(15,  2, 0); // A1  is P0.02 (GPIO D6  / A1)
+    _FL_DEFPIN(16, 29, 0); // A2  is P0.29 (GPIO D9  / A2)
+    _FL_DEFPIN(17,  3, 0); // A3  is P0.03 (GPIO D10 / A3)
+    _FL_DEFPIN(18,  4, 0); // A4  is P0.04 (GPIO D3  / A4 / SCL)
+    _FL_DEFPIN(19,  5, 0); // A5  is P0.05 (GPIO D2  / A5 / SDA)
+    _FL_DEFPIN(20, 30, 0); // A6  is P0.30 (GPIO D0  / A6 / UART RX)
+    _FL_DEFPIN(21, 24, 0); // A7  is P0.14 (GPIO D1  / A7 / UART TX)
+
+    // Other pins
+    _FL_DEFPIN(22, 28, 0); // A8  is P0.28 (Light Sensor)
+    _FL_DEFPIN(23, 31, 0); // A9  is P0.31 (Thermistor Sensor)
+    _FL_DEFPIN(24, 16, 0); //     is P0.16 (PDM DAT)
+    _FL_DEFPIN(25, 17, 0); //     is P0.17 (PDM CLK)
+    _FL_DEFPIN(26, 12, 1); //     is P1.12 (LIS SCL)
+    _FL_DEFPIN(27, 13, 1); //     is P1.13 (LIS IRQ)
+    _FL_DEFPIN(28, 10, 1); //     is P1.10 (LIS SDA)
+    _FL_DEFPIN(36,  6, 0); // D36 is P0.06 (?? Neopixel  / Sensor switch ??)
+#endif // defined (ARDUINO_NRF52840_CIRCUITPLAY)
+
+
 // Adafruit Bluefruit on nRF52840DK PCA10056
 // From https://www.adafruit.com/package_adafruit_index.json
 #if defined (ARDUINO_NRF52840_PCA10056)
