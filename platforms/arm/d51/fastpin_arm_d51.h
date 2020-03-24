@@ -57,32 +57,76 @@ public:
 #define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile PortGroup * r() { return T; } };
 
-#define _IO32(L) _RD32(GPIO ## L)
+#define _FL_IO(L) _RD32(GPIO ## L)
 
-#define _DEFPIN_ARM(PIN, L, BIT) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, L> {};
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, L> {};
 
 // Actual pin definitions
 #if defined(ADAFRUIT_ITSYBITSY_M4_EXPRESS)
 
 #define MAX_PIN 19
 // D0-D13, including D6+D8 (DotStar CLK + DATA)
-_DEFPIN_ARM( 0, 0, 16); _DEFPIN_ARM( 1, 0, 17); _DEFPIN_ARM( 2, 0,  7); _DEFPIN_ARM( 3, 1, 22);
-_DEFPIN_ARM( 4, 0, 14); _DEFPIN_ARM( 5, 0, 15); _DEFPIN_ARM( 6, 1,  2); _DEFPIN_ARM( 7, 0, 18);
-_DEFPIN_ARM( 8, 1,  3); _DEFPIN_ARM( 9, 0, 19); _DEFPIN_ARM(10, 0, 20); _DEFPIN_ARM(11, 0, 21);
-_DEFPIN_ARM(12, 0, 23); _DEFPIN_ARM(13, 0, 22);
+_FL_DEFPIN( 0, 16, 0); _FL_DEFPIN( 1, 17, 0); _FL_DEFPIN( 2,  7, 0); _FL_DEFPIN( 3, 22, 1);
+_FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 15, 0); _FL_DEFPIN( 6,  2, 1); _FL_DEFPIN( 7, 18, 0);
+_FL_DEFPIN( 8,  3, 1); _FL_DEFPIN( 9, 19, 0); _FL_DEFPIN(10, 20, 0); _FL_DEFPIN(11, 21, 0);
+_FL_DEFPIN(12, 23, 0); _FL_DEFPIN(13, 22, 0);
 // A0-A5
-_DEFPIN_ARM(14, 0,  2); _DEFPIN_ARM(15, 0,  5); _DEFPIN_ARM(16, 1,  8); _DEFPIN_ARM(17, 1,  9);
-_DEFPIN_ARM(18, 0,  4); _DEFPIN_ARM(19, 0,  6); /* A6 is present in variant.h but couldn't find it on the schematic */
+_FL_DEFPIN(14,  2, 0); _FL_DEFPIN(15,  5, 0); _FL_DEFPIN(16,  8, 1); _FL_DEFPIN(17,  9, 1);
+_FL_DEFPIN(18,  4, 0); _FL_DEFPIN(19,  6, 0); /* A6 is present in variant.h but couldn't find it on the schematic */
 // SDA/SCL
-_DEFPIN_ARM(21, 0, 12); _DEFPIN_ARM(22, 0, 13);
-// MISO/SCK/MOSI
-_DEFPIN_ARM(23, 1, 23); _DEFPIN_ARM(24, 0,  1); _DEFPIN_ARM(25, 0,  0);
+_FL_DEFPIN(21, 12, 0); _FL_DEFPIN(22, 13, 0);
+
+// 23..25  MISO/SCK/MOSI
+_FL_DEFPIN(23, 23, 1); _FL_DEFPIN(24,  1, 0); _FL_DEFPIN(25,  0, 0);
 
 #define SPI_DATA 25
 #define SPI_CLOCK 24
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+// Actual pin definitions
+#elif defined(ADAFRUIT_METRO_M4_AIRLIFT_LITE)
+
+#define MAX_PIN 20
+// D0-D13, including D6+D8 (DotStar CLK + DATA)
+_FL_DEFPIN( 0, 23, 0); _FL_DEFPIN( 1, 22, 0); _FL_DEFPIN( 2,  17, 1); _FL_DEFPIN( 3, 16, 1);
+_FL_DEFPIN( 4, 13, 1); _FL_DEFPIN( 5, 14, 1); _FL_DEFPIN( 6,  15, 1); _FL_DEFPIN( 7, 12, 1);
+_FL_DEFPIN( 8,  21, 0); _FL_DEFPIN( 9, 20, 0); _FL_DEFPIN(10, 18, 0); _FL_DEFPIN(11, 19, 0);
+_FL_DEFPIN(12, 17, 0); _FL_DEFPIN(13, 16, 0);
+// A0-A5
+_FL_DEFPIN(14,  2, 0); _FL_DEFPIN(15,  5, 0); _FL_DEFPIN(16,  6, 0); _FL_DEFPIN(17,  0, 1);
+_FL_DEFPIN(18,  8, 1); _FL_DEFPIN(19,  9, 1);
+// SDA/SCL
+_FL_DEFPIN(22, 2, 1); _FL_DEFPIN(23, 3, 1);
+
+// 23..25  MISO/SCK/MOSI
+_FL_DEFPIN(24, 14, 0); _FL_DEFPIN(25,  13, 0); _FL_DEFPIN(26,  12, 0);
+
+#define SPI_DATA 26
+#define SPI_CLOCK 25
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ADAFRUIT_FEATHER_M4_EXPRESS)
+
+#define MAX_PIN 19
+// D0-D13, including D8 (neopixel)  no pins 2 3
+_FL_DEFPIN( 0, 17, 1); _FL_DEFPIN( 1, 16, 1);
+_FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 16, 0); _FL_DEFPIN( 6,  18, 0);
+_FL_DEFPIN( 8,  3, 1); _FL_DEFPIN( 9, 19, 0); _FL_DEFPIN(10, 20, 0); _FL_DEFPIN(11, 21, 0);
+_FL_DEFPIN(12, 22, 0); _FL_DEFPIN(13, 23, 0);
+// A0-A5
+_FL_DEFPIN(14,  2, 0); _FL_DEFPIN(15,  5, 0); _FL_DEFPIN(16,  8, 1); _FL_DEFPIN(17,  9, 1);
+_FL_DEFPIN(18,  4, 0); _FL_DEFPIN(19,  6, 0); /* A6 is present in variant.h but couldn't find it on the schematic */
+// SDA/SCL
+_FL_DEFPIN(21, 12, 0); _FL_DEFPIN(22, 13, 0);
+// 23..25  MISO/MOSI/SCK
+_FL_DEFPIN(23, 22, 1); _FL_DEFPIN(24,  23, 1); _FL_DEFPIN(25,  17, 0);
+
+#define SPI_DATA 24
+#define SPI_CLOCK 25
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
 #endif
 
 

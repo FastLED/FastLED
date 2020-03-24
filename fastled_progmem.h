@@ -69,7 +69,7 @@ FASTLED_NAMESPACE_BEGIN
 // force 4-byte alignment as needed.  The FastLED gradient
 // palette code uses 'read dword', and now uses this macro
 // to make sure that gradient palettes are 4-byte aligned.
-#if defined(FASTLED_ARM) || defined(ESP32)
+#if defined(FASTLED_ARM) || defined(ESP32) || defined(ESP8266)
 #define FL_ALIGN_PROGMEM  __attribute__ ((aligned (4)))
 #else
 #define FL_ALIGN_PROGMEM

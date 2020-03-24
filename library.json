@@ -12,17 +12,32 @@
             "name": "Mark Kriegsman",
             "url": "https://github.com/kriegsman",
             "maintainer": true
+        },
+        {
+            "name": "Sam Guyer",
+            "url": "https://github.com/samguyer",
+            "maintainer": true
+        },
+        {
+            "name": "Jason Coon",
+            "url": "https://github.com/jasoncoon",
+            "maintainer": true
+        },
+        {
+            "name": "Josh Huber",
+            "url": "https://github.com/uberjay",
+            "maintainer": true
         }
     ],
     "repository": {
         "type": "git",
         "url": "https://github.com/FastLED/FastLED.git"
     },
-    "version": "3.2.6",
+    "version": "3.3.3",
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
-    "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32",   
+    "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32, nordicnrf52",
     "export": {
         "exclude": [
             "docs",
@@ -36,5 +51,5 @@
             "+<*.h>"
         ],
         "libArchive": false
-    } 
+    }
 }

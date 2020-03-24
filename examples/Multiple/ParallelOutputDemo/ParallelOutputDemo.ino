@@ -1,6 +1,6 @@
 #include <FastLED.h>
 
-#define NUM_LEDS_PER_STRIP 64
+#define NUM_LEDS_PER_STRIP 16
 // Note: this can be 12 if you're using a teensy 3 and don't mind soldering the pads on the back
 #define NUM_STRIPS 16
 
@@ -17,15 +17,24 @@ CRGB leds[NUM_STRIPS * NUM_LEDS_PER_STRIP];
 // WS2811_PORTD: 25,26,27,28,14,15,29,11
 //
 
+
+// IBCC<WS2811, 1, 16> outputs;
+
 void setup() {
+  delay(5000);
+  Serial.begin(57600);
+  Serial.println("Starting...");
   // LEDS.addLeds<WS2811_PORTA,NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
   // LEDS.addLeds<WS2811_PORTB,NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
   // LEDS.addLeds<WS2811_PORTD,NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP).setCorrection(TypicalLEDStrip);
   LEDS.addLeds<WS2811_PORTDC,NUM_STRIPS>(leds, NUM_LEDS_PER_STRIP);
-  LEDS.setBrightness(32);
+
+  // Teensy 4 parallel output example
+  // LEDS.addLeds<NUM_STRIPS, WS2811, 1>(leds,NUM_LEDS_PER_STRIP);
 }
 
 void loop() {
+  Serial.println("Loop....");
   static uint8_t hue = 0;
   for(int i = 0; i < NUM_STRIPS; i++) {
     for(int j = 0; j < NUM_LEDS_PER_STRIP; j++) {
@@ -43,5 +52,5 @@ void loop() {
   hue++;
 
   LEDS.show();
-  LEDS.delay(10);
+  // LEDS.delay(100);
 }

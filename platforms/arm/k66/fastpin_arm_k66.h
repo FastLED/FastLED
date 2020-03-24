@@ -78,35 +78,35 @@ public:
 #define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } \
 	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
-#define _IO32(L) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR);
+#define _FL_IO(L,C) _RD32(GPIO ## L ## _PDOR); _RD32(GPIO ## L ## _PSOR); _RD32(GPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(GPIO ## L ## _PDIR); _RD32(GPIO ## L ## _PDDR); _FL_DEFINE_PORT3(L,C,_R(GPIO ## L ## _PDOR));
 
-#define _DEFPIN_ARM(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
 																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; \
 									template<> class FastPinBB<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO ## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), \
  																			_R(GPIO ## L ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {};
 
+_FL_IO(A,0); _FL_IO(B,1); _FL_IO(C,2); _FL_IO(D,3); _FL_IO(E,4);
+
 // Actual pin definitions
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
-_IO32(A); _IO32(B); _IO32(C); _IO32(D); _IO32(E);
-
 #define MAX_PIN 63
-_DEFPIN_ARM( 0, 16, B); _DEFPIN_ARM( 1, 17, B); _DEFPIN_ARM( 2,  0, D); _DEFPIN_ARM( 3, 12, A);
-_DEFPIN_ARM( 4, 13, A); _DEFPIN_ARM( 5,  7, D); _DEFPIN_ARM( 6,  4, D); _DEFPIN_ARM( 7,  2, D);
-_DEFPIN_ARM( 8,  3, D); _DEFPIN_ARM( 9,  3, C); _DEFPIN_ARM(10,  4, C); _DEFPIN_ARM(11,  6, C);
-_DEFPIN_ARM(12,  7, C); _DEFPIN_ARM(13,  5, C); _DEFPIN_ARM(14,  1, D); _DEFPIN_ARM(15,  0, C);
-_DEFPIN_ARM(16,  0, B); _DEFPIN_ARM(17,  1, B); _DEFPIN_ARM(18,  3, B); _DEFPIN_ARM(19,  2, B);
-_DEFPIN_ARM(20,  5, D); _DEFPIN_ARM(21,  6, D); _DEFPIN_ARM(22,  1, C); _DEFPIN_ARM(23,  2, C);
-_DEFPIN_ARM(24, 26, E); _DEFPIN_ARM(25,  5, A); _DEFPIN_ARM(26, 14, A); _DEFPIN_ARM(27, 15, A);
-_DEFPIN_ARM(28, 16, A); _DEFPIN_ARM(29, 18, B); _DEFPIN_ARM(30, 19, B); _DEFPIN_ARM(31, 10, B);
-_DEFPIN_ARM(32, 11, B); _DEFPIN_ARM(33, 24, E); _DEFPIN_ARM(34, 25, E); _DEFPIN_ARM(35,  8, C);
-_DEFPIN_ARM(36,  9, C); _DEFPIN_ARM(37, 10, C); _DEFPIN_ARM(38, 11, C); _DEFPIN_ARM(39, 17, A);
-_DEFPIN_ARM(40, 28, A); _DEFPIN_ARM(41, 29, A); _DEFPIN_ARM(42, 26, A); _DEFPIN_ARM(43, 20, B);
-_DEFPIN_ARM(44, 22, B); _DEFPIN_ARM(45, 23, B); _DEFPIN_ARM(46, 21, B); _DEFPIN_ARM(47,  8, D);
-_DEFPIN_ARM(48,  9, D); _DEFPIN_ARM(49,  4, B); _DEFPIN_ARM(50,  5, B); _DEFPIN_ARM(51, 14, D);
-_DEFPIN_ARM(52, 13, D); _DEFPIN_ARM(53, 12, D); _DEFPIN_ARM(54, 15, D); _DEFPIN_ARM(55, 11, D);
-_DEFPIN_ARM(56, 10, E); _DEFPIN_ARM(57, 11, E); _DEFPIN_ARM(58,  0, E); _DEFPIN_ARM(59,  1, E);
-_DEFPIN_ARM(60,  2, E); _DEFPIN_ARM(61,  3, E); _DEFPIN_ARM(62,  4, E); _DEFPIN_ARM(63,  5, E);
+_FL_DEFPIN( 0, 16, B); _FL_DEFPIN( 1, 17, B); _FL_DEFPIN( 2,  0, D); _FL_DEFPIN( 3, 12, A);
+_FL_DEFPIN( 4, 13, A); _FL_DEFPIN( 5,  7, D); _FL_DEFPIN( 6,  4, D); _FL_DEFPIN( 7,  2, D);
+_FL_DEFPIN( 8,  3, D); _FL_DEFPIN( 9,  3, C); _FL_DEFPIN(10,  4, C); _FL_DEFPIN(11,  6, C);
+_FL_DEFPIN(12,  7, C); _FL_DEFPIN(13,  5, C); _FL_DEFPIN(14,  1, D); _FL_DEFPIN(15,  0, C);
+_FL_DEFPIN(16,  0, B); _FL_DEFPIN(17,  1, B); _FL_DEFPIN(18,  3, B); _FL_DEFPIN(19,  2, B);
+_FL_DEFPIN(20,  5, D); _FL_DEFPIN(21,  6, D); _FL_DEFPIN(22,  1, C); _FL_DEFPIN(23,  2, C);
+_FL_DEFPIN(24, 26, E); _FL_DEFPIN(25,  5, A); _FL_DEFPIN(26, 14, A); _FL_DEFPIN(27, 15, A);
+_FL_DEFPIN(28, 16, A); _FL_DEFPIN(29, 18, B); _FL_DEFPIN(30, 19, B); _FL_DEFPIN(31, 10, B);
+_FL_DEFPIN(32, 11, B); _FL_DEFPIN(33, 24, E); _FL_DEFPIN(34, 25, E); _FL_DEFPIN(35,  8, C);
+_FL_DEFPIN(36,  9, C); _FL_DEFPIN(37, 10, C); _FL_DEFPIN(38, 11, C); _FL_DEFPIN(39, 17, A);
+_FL_DEFPIN(40, 28, A); _FL_DEFPIN(41, 29, A); _FL_DEFPIN(42, 26, A); _FL_DEFPIN(43, 20, B);
+_FL_DEFPIN(44, 22, B); _FL_DEFPIN(45, 23, B); _FL_DEFPIN(46, 21, B); _FL_DEFPIN(47,  8, D);
+_FL_DEFPIN(48,  9, D); _FL_DEFPIN(49,  4, B); _FL_DEFPIN(50,  5, B); _FL_DEFPIN(51, 14, D);
+_FL_DEFPIN(52, 13, D); _FL_DEFPIN(53, 12, D); _FL_DEFPIN(54, 15, D); _FL_DEFPIN(55, 11, D);
+_FL_DEFPIN(56, 10, E); _FL_DEFPIN(57, 11, E); _FL_DEFPIN(58,  0, E); _FL_DEFPIN(59,  1, E);
+_FL_DEFPIN(60,  2, E); _FL_DEFPIN(61,  3, E); _FL_DEFPIN(62,  4, E); _FL_DEFPIN(63,  5, E);
 
 
 

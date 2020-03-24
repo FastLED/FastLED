@@ -82,7 +82,7 @@ template <int VAL> void getScalars(uint8_t & sppr, uint8_t & spr) {
 #define SPIX (*(KINETISL_SPI_t*)pSPIX)
 #define ARM_HARDWARE_SPI
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER, uint32_t pSPIX>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER, uint32_t pSPIX>
 class ARMHardwareSPIOutput {
   Selectable *m_pSelect;
 

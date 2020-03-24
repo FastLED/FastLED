@@ -13,6 +13,10 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
 #define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
 #define DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
+#elif defined(FASTLED_TEENSY4) // && (ARM_HARDWARE_SPI)
+// just use clocks
+#define DATA_RATE_MHZ(X) (1000000 * (X))
+#define DATA_RATE_KHZ(X) (1000 * (X))
 #else
 #define DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
 #define DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
@@ -26,44 +30,60 @@ FASTLED_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
 #if defined(NRF51) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER>
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public NRF51SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+#endif
+
+#if defined(NRF52_SERIES) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+class SPIOutput : public NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
 #if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
 
-template<uint8_t SPI_SPEED>
+template<uint32_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
 
 #if defined(SPI2_DATA)
 
-template<uint8_t SPI_SPEED>
+template<uint32_t SPI_SPEED>
 class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, 0x4002C000> {};
 
-template<uint8_t SPI_SPEED>
+template<uint32_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI2_CLOCK, SPI_SPEED, 0x4002C000> {};
 
-template<uint8_t SPI_SPEED>
+template<uint32_t SPI_SPEED>
 class SPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
 #endif
 
+#elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
+
+template<uint32_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public Teesy4HardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, SPI, 0> {};
+
+template<uint32_t SPI_SPEED>
+class SPIOutput<SPI1_DATA, SPI_CLOCK, SPI_SPEED> : public Teesy4HardwareSPIOutput<SPI1_DATA, SPI1_CLOCK, SPI_SPEED, SPI1, 1> {};
+
+template<uint32_t SPI_SPEED>
+class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public Teesy4HardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, SPI2, 2> {};
+
 #elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
 
-#define DECLARE_SPI0(__DATA,__CLOCK) template<uint8_t SPI_SPEED>\
+#define DECLARE_SPI0(__DATA,__CLOCK) template<uint32_t SPI_SPEED>\
  class SPIOutput<__DATA, __CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<__DATA, __CLOCK, SPI_SPEED, 0x40076000> {};
- #define DECLARE_SPI1(__DATA,__CLOCK) template<uint8_t SPI_SPEED>\
+ #define DECLARE_SPI1(__DATA,__CLOCK) template<uint32_t SPI_SPEED>\
   class SPIOutput<__DATA, __CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<__DATA, __CLOCK, SPI_SPEED, 0x40077000> {};
 
 DECLARE_SPI0(7,13);
@@ -80,24 +100,24 @@ DECLARE_SPI1(21,20);
 
 #elif defined(__SAM3X8E__)
 
-template<uint8_t SPI_SPEED>
+template<uint32_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public SAMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
 #elif defined(AVR_HARDWARE_SPI)
 
-template<uint8_t SPI_SPEED>
+template<uint32_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
 
 #if defined(SPI_UART0_DATA)
 
-template<uint8_t SPI_SPEED>
+template<uint32_t SPI_SPEED>
 class SPIOutput<SPI_UART0_DATA, SPI_UART0_CLOCK, SPI_SPEED> : public AVRUSART0SPIOutput<SPI_UART0_DATA, SPI_UART0_CLOCK, SPI_SPEED> {};
 
 #endif
 
 #if defined(SPI_UART1_DATA)
 
-template<uint8_t SPI_SPEED>
+template<uint32_t SPI_SPEED>
 class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> {};
 
 #endif
@@ -115,7 +135,7 @@ class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SP
 #endif
 
 // #if defined(USART_DATA) && defined(USART_CLOCK)
-// template<uint8_t SPI_SPEED>
+// template<uint32_t SPI_SPEED>
 // class AVRSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> {};
 // #endif
 

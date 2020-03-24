@@ -94,7 +94,7 @@ template <int VAL> void getScalars(uint32_t & preScalar, uint32_t & scalar, uint
 
 #define SPIX (*(SPI_t*)pSPIX)
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint8_t _SPI_CLOCK_DIVIDER, uint32_t pSPIX>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER, uint32_t pSPIX>
 class ARMHardwareSPIOutput {
 	Selectable *m_pSelect;
 	SPIState gState;

@@ -11,7 +11,7 @@ public:
   inline static void setOutput() { pinMode(PIN, OUTPUT); }
   inline static void setInput() { pinMode(PIN, INPUT); }
 
-  inline static void hi() __attribute__ ((always_inline)) { 
+  inline static void hi() __attribute__ ((always_inline)) {
       if (PIN < 32) GPIO.out_w1ts = MASK;
       else GPIO.out1_w1ts.val = MASK;
   }
@@ -28,9 +28,9 @@ public:
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { 
-      if(PIN < 32) { GPIO.out ^= MASK; } 
-      else { GPIO.out1.val ^=MASK; } 
+  inline static void toggle() __attribute__ ((always_inline)) {
+      if(PIN < 32) { GPIO.out ^= MASK; }
+      else { GPIO.out1.val ^=MASK; }
   }
 
   inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
@@ -52,7 +52,7 @@ public:
       else return &GPIO.out1.val;
   }
 
-  inline static port_ptr_t sport() __attribute__ ((always_inline)) { 
+  inline static port_ptr_t sport() __attribute__ ((always_inline)) {
       if (PIN < 32) return &GPIO.out_w1ts;
       else return &GPIO.out1_w1ts.val;
   }
@@ -70,46 +70,45 @@ public:
   }
 };
 
-#define _DEFPIN_ESP32(PIN)  template<> class FastPin<PIN> : public _ESPPIN<PIN, ((uint32_t)1 << PIN)> {};
-#define _DEFPIN_32_33_ESP32(PIN) template<> class FastPin<PIN> : public _ESPPIN<PIN, ((uint32_t)1 << (PIN-32))> {};
+#define _FL_DEFPIN(PIN)  template<> class FastPin<PIN> : public _ESPPIN<PIN, ((PIN<32)?((uint32_t)1 << PIN):((uint32_t)1 << (PIN-32)))> {};
 
-_DEFPIN_ESP32(0);
-_DEFPIN_ESP32(1); // WARNING: Using TX causes flashiness when uploading
-_DEFPIN_ESP32(2); 
-_DEFPIN_ESP32(3); // WARNING: Using RX causes flashiness when uploading
-_DEFPIN_ESP32(4);
-_DEFPIN_ESP32(5);
+_FL_DEFPIN(0);
+_FL_DEFPIN(1); // WARNING: Using TX causes flashiness when uploading
+_FL_DEFPIN(2);
+_FL_DEFPIN(3); // WARNING: Using RX causes flashiness when uploading
+_FL_DEFPIN(4);
+_FL_DEFPIN(5);
 
 // -- These pins are not safe to use:
-// _DEFPIN_ESP32(6,6); _DEFPIN_ESP32(7,7); _DEFPIN_ESP32(8,8); 
-// _DEFPIN_ESP32(9,9); _DEFPIN_ESP32(10,10); _DEFPIN_ESP32(11,11); 
+// _FL_DEFPIN(6,6); _FL_DEFPIN(7,7); _FL_DEFPIN(8,8);
+// _FL_DEFPIN(9,9); _FL_DEFPIN(10,10); _FL_DEFPIN(11,11);
 
-_DEFPIN_ESP32(12);
-_DEFPIN_ESP32(13);
-_DEFPIN_ESP32(14);
-_DEFPIN_ESP32(15);
-_DEFPIN_ESP32(16);
-_DEFPIN_ESP32(17);
-_DEFPIN_ESP32(18);
-_DEFPIN_ESP32(19);
+_FL_DEFPIN(12);
+_FL_DEFPIN(13);
+_FL_DEFPIN(14);
+_FL_DEFPIN(15);
+_FL_DEFPIN(16);
+_FL_DEFPIN(17);
+_FL_DEFPIN(18);
+_FL_DEFPIN(19);
 
-// No pin 20 : _DEFPIN_ESP32(20,20); 
+// No pin 20 : _FL_DEFPIN(20,20);
 
-_DEFPIN_ESP32(21); // Works, but note that GPIO21 is I2C SDA
-_DEFPIN_ESP32(22); // Works, but note that GPIO22 is I2C SCL
-_DEFPIN_ESP32(23); 
+_FL_DEFPIN(21); // Works, but note that GPIO21 is I2C SDA
+_FL_DEFPIN(22); // Works, but note that GPIO22 is I2C SCL
+_FL_DEFPIN(23);
 
-// No pin 24 : _DEFPIN_ESP32(24,24); 
+// No pin 24 : _FL_DEFPIN(24,24);
 
-_DEFPIN_ESP32(25);
-_DEFPIN_ESP32(26);
-_DEFPIN_ESP32(27); 
+_FL_DEFPIN(25);
+_FL_DEFPIN(26);
+_FL_DEFPIN(27);
 
-// No pin 28-31: _DEFPIN_ESP32(28,28); _DEFPIN_ESP32(29,29); _DEFPIN_ESP32(30,30); _DEFPIN_ESP32(31,31);
+// No pin 28-31: _FL_DEFPIN(28,28); _FL_DEFPIN(29,29); _FL_DEFPIN(30,30); _FL_DEFPIN(31,31);
 
 // Need special handling for pins > 31
-_DEFPIN_32_33_ESP32(32); 
-_DEFPIN_32_33_ESP32(33);
+_FL_DEFPIN(32);
+_FL_DEFPIN(33);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 

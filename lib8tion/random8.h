@@ -12,13 +12,19 @@
 #define FASTLED_RAND16_2053  ((uint16_t)(2053))
 #define FASTLED_RAND16_13849 ((uint16_t)(13849))
 
+#if defined(LIB8_ATTINY)
+#define APPLY_FASTLED_RAND16_2053(x) (x << 11) + (x << 2) + x
+#else
+#define APPLY_FASTLED_RAND16_2053(x) (x * FASTLED_RAND16_2053)
+#endif
+
 /// random number seed
 extern uint16_t rand16seed;// = RAND16_SEED;
 
 /// Generate an 8-bit random number
 LIB8STATIC uint8_t random8()
 {
-    rand16seed = (rand16seed * FASTLED_RAND16_2053) + FASTLED_RAND16_13849;
+    rand16seed = APPLY_FASTLED_RAND16_2053(rand16seed) + FASTLED_RAND16_13849;
     // return the sum of the high and low bytes, for better
     //  mixing and non-sequential correlation
     return (uint8_t)(((uint8_t)(rand16seed & 0xFF)) +
@@ -28,7 +34,7 @@ LIB8STATIC uint8_t random8()
 /// Generate a 16 bit random number
 LIB8STATIC uint16_t random16()
 {
-    rand16seed = (rand16seed * FASTLED_RAND16_2053) + FASTLED_RAND16_13849;
+    rand16seed = APPLY_FASTLED_RAND16_2053(rand16seed) + FASTLED_RAND16_13849;
     return rand16seed;
 }
 
