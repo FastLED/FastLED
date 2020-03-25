@@ -167,7 +167,7 @@ protected:
 	}
 #define USE_ASM_MACROS
 
-// The variables that our various asm statemetns use.  The same block of variables needs to be declared for
+// The variables that our various asm statements use.  The same block of variables needs to be declared for
 // all the asm blocks because GCC is pretty stupid and it would clobber variables happily or optimize code away too aggressively
 #define ASM_VARS : /* write variables */				\
 				[count] "+x" (count),					\
