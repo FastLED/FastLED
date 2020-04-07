@@ -3,6 +3,5 @@
 
 #include "fastpin_apollo3.h"
 //#include "fastspi_apollo3.h"
-//#include "clockless_apollo3.h"
 
 #endif
