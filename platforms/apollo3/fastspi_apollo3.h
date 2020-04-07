@@ -1,0 +1,18 @@
+#ifndef __INC_FASTSPI_APOLLO3_H
+#define __INC_FASTSPI_APOLLO3_H
+
+FASTLED_NAMESPACE_BEGIN
+
+#if defined(AVR_HARDWARE_SPI)
+
+
+#else
+	
+// #define FASTLED_FORCE_SOFTWARE_SPI
+
+#endif
+
+FASTLED_NAMESPACE_END;
+
+
+#endif
