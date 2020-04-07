@@ -51,7 +51,12 @@ class SPIOutput : public NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDE
 
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
-#if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
+#if defined(FASTLED_APOLLO3)
+
+template<uint32_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public APOLLO3HardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
+
+#elif defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
 
 template<uint32_t SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
