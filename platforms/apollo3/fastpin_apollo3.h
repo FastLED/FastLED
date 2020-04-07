@@ -82,9 +82,10 @@ _FL_DEFPIN(15); _FL_DEFPIN(16); _FL_DEFPIN(17); _FL_DEFPIN(18); _FL_DEFPIN(19);
 _FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23); _FL_DEFPIN(24);
 _FL_DEFPIN(25); _FL_DEFPIN(26); _FL_DEFPIN(27); _FL_DEFPIN(28); _FL_DEFPIN(29);
 _FL_DEFPIN(30); _FL_DEFPIN(31);
-
-#define SPI_DATA  MOSI
-#define SPI_CLOCK SCK
+//These two lines are commented out as dedicates SPI support using fastShiftOut produces
+//glitchy results that is slower than bit banging. TO DO: implement 'proper' SPI functionality
+//#define SPI_DATA MOSI
+//#define SPI_CLOCK SCK
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
@@ -97,8 +98,10 @@ _FL_DEFPIN(10); _FL_DEFPIN(11); _FL_DEFPIN(12); _FL_DEFPIN(13); _FL_DEFPIN(14);
 _FL_DEFPIN(15); _FL_DEFPIN(16); _FL_DEFPIN(17); _FL_DEFPIN(18); _FL_DEFPIN(19);
 _FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23);
 
-#define SPI_DATA  MOSI
-#define SPI_CLOCK SCK
+//These two lines are commented out as dedicates SPI support using fastShiftOut produces
+//glitchy results that is slower than bit banging. TO DO: implement 'proper' SPI functionality
+//#define SPI_DATA MOSI
+//#define SPI_CLOCK SCK
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
@@ -112,8 +115,10 @@ _FL_DEFPIN(15); _FL_DEFPIN(16); _FL_DEFPIN(17); _FL_DEFPIN(18); _FL_DEFPIN(19);
 _FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23); _FL_DEFPIN(24);
 _FL_DEFPIN(25); _FL_DEFPIN(26); _FL_DEFPIN(27); _FL_DEFPIN(28);
 
-#define SPI_DATA  MOSI
-#define SPI_CLOCK SCK
+//These two lines are commented out as dedicates SPI support using fastShiftOut produces
+//glitchy results that is slower than bit banging. TO DO: implement 'proper' SPI functionality
+//#define SPI_DATA MOSI
+//#define SPI_CLOCK SCK
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
@@ -133,8 +138,10 @@ _FL_DEFPIN(35); _FL_DEFPIN(36); _FL_DEFPIN(37); _FL_DEFPIN(38); _FL_DEFPIN(39);
 _FL_DEFPIN(40); _FL_DEFPIN(41); _FL_DEFPIN(42); _FL_DEFPIN(43); _FL_DEFPIN(44);
 _FL_DEFPIN(45); _FL_DEFPIN(47); _FL_DEFPIN(48); _FL_DEFPIN(49);
 
-#define SPI_DATA  MOSI
-#define SPI_CLOCK SCK
+//These two lines are commented out as dedicates SPI support using fastShiftOut produces
+//glitchy results that is slower than bit banging. TO DO: implement 'proper' SPI functionality
+//#define SPI_DATA MOSI
+//#define SPI_CLOCK SCK
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 

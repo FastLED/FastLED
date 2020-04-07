@@ -1,7 +1,7 @@
 #ifndef __INC_FASTSPI_APOLLO3_H
 #define __INC_FASTSPI_APOLLO3_H
 
-//#include "FastLED.h"
+#include "FastLED.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -11,15 +11,13 @@ class APOLLO3HardwareSPIOutput {
 
 public:
 	APOLLO3HardwareSPIOutput() { m_pSelect = NULL; }
-	APOLLO3HArdwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
+	APOLLO3HardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 
 	// set the object representing the selectable
-	void setSelect(Selectable *pSelect) { /* TODO */ }
+	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
 	// initialize the SPI subssytem
 	void init() {
-		pinMode(_DATA_PIN, OUTPUT); am_hal_gpio_fastgpio_enable(_DATA_PIN);
-		pinMode(_CLOCK_PIN, OUTPUT); am_hal_gpio_fastgpio_enable(_CLOCK_PIN);
 		//enableBurstMode(); //Optional. Go to 96MHz. Roughly doubles the speed of shiftOut and fastShiftOut
 		enableFastShift(_DATA_PIN, _CLOCK_PIN);
 	}
@@ -40,8 +38,8 @@ public:
 
 	// write a word out via SPI (returns immediately on writing register)
 	static void writeWord(uint16_t w) {
-		writeByte((uint8_t)((w >> 8) && 0xff));
-		writeByte((uint8_t)(w && 0xff));
+		writeByte((uint8_t)((w >> 8) & 0xff));
+		writeByte((uint8_t)(w & 0xff));
 	}
 
 	// A raw set of writing byte values, assumes setup/init/waiting done elsewhere
@@ -51,20 +49,22 @@ public:
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
 	void writeBytesValue(uint8_t value, int len) {
-		select(); writeBytesValueRaw(value, len); release();
+		//select();
+		writeBytesValueRaw(value, len);
+		//release();
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
 	template <class D> void writeBytes(register uint8_t *data, int len) {
 		uint8_t *end = data + len;
-		select();
+		//select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
 		while(data != end) {
 			writeByte(D::adjust(*data++));
 		}
 		D::postBlock(len);
-		waitFully();
-		release();
+		//waitFully();
+		//release();
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
@@ -72,7 +72,7 @@ public:
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
-		waitFully();
+		//waitFully();
 		if(b & (1 << BIT)) {
 			FastPin<_DATA_PIN>::hi();
 		} else {
@@ -86,30 +86,29 @@ public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
 	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
-		select();
+		//select();
 
-		int len = pixels.mLen; // unused?
+		int len = pixels.mLen;
 
-		if(FLAGS & FLAG_START_BIT) {
-			while(pixels.has(1)) {
+		//select();
+		while(pixels.has(1)) {
+			if(FLAGS & FLAG_START_BIT) {
 				writeBit<0>(1);
 				writeByte(D::adjust(pixels.loadAndScale0()));
 				writeByte(D::adjust(pixels.loadAndScale1()));
 				writeByte(D::adjust(pixels.loadAndScale2()));
-				pixels.advanceData();
-				pixels.stepDithering();
-			}
-		} else {
-			while(pixels.has(1)) {
+			} else {
 				writeByte(D::adjust(pixels.loadAndScale0()));
 				writeByte(D::adjust(pixels.loadAndScale1()));
 				writeByte(D::adjust(pixels.loadAndScale2()));
-				pixels.advanceData();
-				pixels.stepDithering();
 			}
+
+			pixels.advanceData();
+			pixels.stepDithering();
 		}
 		D::postBlock(len);
-		release();
+		//waitFully();
+		//release();
 	}
 
 };
