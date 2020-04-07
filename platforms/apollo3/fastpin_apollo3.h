@@ -16,20 +16,20 @@ public:
   typedef volatile uint32_t * port_ptr_t;
   typedef uint32_t port_t;
 
-  inline static void setOutput() { pinMode(PIN, OUTPUT); }
-  inline static void setInput() { pinMode(PIN, INPUT); }
+  inline static void setOutput() { pinMode(PIN, OUTPUT); am_hal_gpio_fastgpio_enable(PIN); }
+  inline static void setInput() { am_hal_gpio_fastgpio_disable(PIN); pinMode(PIN, INPUT); }
 
-  inline static void hi() __attribute__ ((always_inline)) { digitalWrite(PIN, HIGH); }
-  inline static void lo() __attribute__ ((always_inline)) { digitalWrite(PIN, LOW); }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { digitalWrite(PIN, val); }
+  inline static void hi() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_set(PIN); } // { digitalWrite(PIN, HIGH); }
+  inline static void lo() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_clr(PIN); } // { digitalWrite(PIN, LOW); }
+  inline static void set(register port_t val) __attribute__ ((always_inline)) { if(val) { am_hal_gpio_fastgpio_set(PIN); } else { am_hal_gpio_fastgpio_clr(PIN); } } // { digitalWrite(PIN, val); }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { if(digitalRead(PIN)) { lo(); } else { hi(); } }
+  inline static void toggle() __attribute__ ((always_inline)) { if( am_hal_gpio_fastgpio_read(PIN)) { lo(); } else { hi(); } }
 
   inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
   inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { digitalWrite(PIN, val); }
+  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { set(val); }
 
   inline static port_t hival() __attribute__ ((always_inline)) { return 0; }
   inline static port_t loval() __attribute__ ((always_inline)) { return 0; }
