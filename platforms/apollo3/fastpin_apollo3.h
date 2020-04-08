@@ -19,9 +19,9 @@ public:
   inline static void setOutput() { pinMode(PIN, OUTPUT); am_hal_gpio_fastgpio_enable(PIN); }
   inline static void setInput() { am_hal_gpio_fastgpio_disable(PIN); pinMode(PIN, INPUT); }
 
-  inline static void hi() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_set(PIN); } // { digitalWrite(PIN, HIGH); }
-  inline static void lo() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_clr(PIN); } // { digitalWrite(PIN, LOW); }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { if(val) { am_hal_gpio_fastgpio_set(PIN); } else { am_hal_gpio_fastgpio_clr(PIN); } } // { digitalWrite(PIN, val); }
+  inline static void hi() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_set(PIN); }
+  inline static void lo() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_clr(PIN); }
+  inline static void set(register port_t val) __attribute__ ((always_inline)) { if(val) { am_hal_gpio_fastgpio_set(PIN); } else { am_hal_gpio_fastgpio_clr(PIN); } }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
