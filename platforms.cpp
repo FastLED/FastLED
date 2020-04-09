@@ -34,21 +34,5 @@
 
 #endif // defined(NRF52_SERIES)
 
-// ISR for the APOLLO3 SysTick
-#if defined(FASTLED_APOLLO3)
-
-  // SysTick Interrupt Service Routine
-  #ifdef __cplusplus
-    extern "C" {
-  #endif
-    void SysTick_Handler(void) {
-      // We don't actually need to do anything in the ISR. There just needs to be one!
-    }
-  #ifdef __cplusplus
-    }
-  #endif
-
-#endif // defined(FASTLED_APOLLO3)
-
 // FASTLED_NAMESPACE_BEGIN
 // FASTLED_NAMESPACE_END
