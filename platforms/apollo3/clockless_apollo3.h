@@ -5,14 +5,14 @@ FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_APOLLO3)
 
-//#include "ap3_analog.h"
-#include "am_hal_systick.h"
-
-#ifndef SYSTICK_MAX_TICKS
-#define SYSTICK_MAX_TICKS ((1 << 24)-1)
-#endif
-
 #define FASTLED_HAS_CLOCKLESS 1
+
+#define DO_RGBW // Uncomment this line to enable support for (e.g.) SK6812RGBW that need extra white bits
+
+#ifdef DO_RGBW
+// Set all the white LEDs to this level. (What were you expecting for free!? ;-)
+#define WHITE_LEVEL 1
+#endif
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
@@ -23,62 +23,96 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 
 public:
 	virtual void init() {
+		// Initialize everything
+		// This is _very_ SparkFun Artemis / Ambiq Micro Apollo3 Blue specific!
+
+		// Configure DATA_PIN for FastGPIO (settings are in fastpin_apollo3.h)
 		FastPin<DATA_PIN>::setOutput();
     FastPin<DATA_PIN>::lo();
-    am_hal_clkgen_control(AM_HAL_CLKGEN_CONTROL_SYSCLK_MAX, 0);
-    am_hal_systick_load(0x00FFFFFF);
-    am_hal_systick_int_enable();
-    am_hal_interrupt_master_enable();
-    am_hal_systick_start();
+
+		// Make sure the system clock is running at the full 48MHz
+	  am_hal_clkgen_control(AM_HAL_CLKGEN_CONTROL_SYSCLK_MAX, 0);
+
+	  // Make sure interrupts are enabled
+	  am_hal_interrupt_master_enable();
+
+	  // Enable SysTick Interrupts in the NVIC
+	  NVIC_EnableIRQ(SysTick_IRQn);
+
+		// SysTick is 24-bit and counts down (not up)
+
+	  // Stop the SysTick (just in case it is already running).
+	  // This clears the ENABLE bit in the SysTick Control and Status Register (SYST_CSR).
+	  // In Ambiq naming convention: the control register is SysTick->CTRL
+	  am_hal_systick_stop();
+
+	  // Call SysTick_Config
+	  // This is defined in core_cm4.h
+	  // It loads the specified LOAD value into the SysTick Reload Value Register (SYST_RVR)
+	  // In Ambiq naming convention: the reload register is SysTick->LOAD
+	  // It sets the SysTick interrupt priority
+	  // It clears the SysTick Current Value Register (SYST_CVR)
+	  // In Ambiq naming convention: the current value register is SysTick->VAL
+	  // Finally it sets these bits in the SysTick Control and Status Register (SYST_CSR):
+	  // CLKSOURCE: SysTick uses the processor clock
+	  // TICKINT: When the count reaches zero, the SysTick exception (interrupt) is changed to pending
+	  // ENABLE: Enables the counter
+	  // SysTick_Config returns 0 if successful. 1 indicates a failure (the LOAD value was invalid).
+	  SysTick_Config(0xFFFFFFUL); // The LOAD value needs to be 24-bit
 	}
 
-  // extern "C" void am_systick_isr(void)
-  // {
-  //   am_hal_systick_reset();
-  // }
+	virtual uint16_t getMaxRefreshRate() const { return 400; } // This can probably be increased?
 
-	virtual uint16_t getMaxRefreshRate() const { return 400; }
+	static void SysTick_Handler(void) {
+		// We don't actually need to do anything in the ISR. There just needs to be one!
+	}
 
 protected:
 
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-    //mWait.wait();
+    mWait.wait();
 		if(!showRGBInternal(pixels)) {
-      //sei(); delayMicroseconds(WAIT_TIME); cli();
-      //showRGBInternal(pixels);
+      sei(); delayMicroseconds(WAIT_TIME); cli();
+      showRGBInternal(pixels);
     }
-    //mWait.mark();
+    mWait.mark();
   }
 
+	// SysTick counts down not up and is 24-bit, so let's ex-or it so it appears to count up
+	#define am_hal_systick_count_inverted() (am_hal_systick_count() ^ 0xFFFFFF)
+
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register uint8_t & b)  {
-		for(register uint32_t i = BITS-1; i > 0; i--) {
-      while(am_hal_systick_count() < next_mark);
-      next_mark = am_hal_systick_count() + 10;//(T1+T2+T3);
-      //if (next_mark > SYSTICK_MAX_TICKS) { next_mark = next_mark - SYSTICK_MAX_TICKS; }
+		// SysTick counts down (not up) and is 24-bit
+		for(register uint32_t i = BITS-1; i > 0; i--) { // We could speed this up by using Bit Banding
+      while(am_hal_systick_count_inverted() < next_mark);
+      next_mark = (am_hal_systick_count_inverted() + T1+T2+T3) & 0xFFFFFF;
+			// (This will glitch when next_mark would normally exceed 0xFFFFFF)
       FastPin<DATA_PIN>::hi();
 			if(b&0x80) {
-        while((next_mark - am_hal_systick_count()) > 5);//(T3+(200*(F_CPU/24000000))));
+        while((next_mark - am_hal_systick_count_inverted()) > (T3));//+(2*(F_CPU/24000000))));
         FastPin<DATA_PIN>::lo();
 			} else {
-        while((next_mark - am_hal_systick_count()) > 7);//(T2+T3+(200*(F_CPU/24000000))));
+        while((next_mark - am_hal_systick_count_inverted()) > (T2+T3));//+(2*(F_CPU/24000000))));
         FastPin<DATA_PIN>::lo();
 			}
 			b <<= 1;
 		}
 
-    while(am_hal_systick_count() < next_mark);
-    next_mark = am_hal_systick_count() + 10;//(T1+T2+T3);
-    //if (next_mark > SYSTICK_MAX_TICKS) { next_mark = next_mark - SYSTICK_MAX_TICKS; }
+    while(am_hal_systick_count_inverted() < next_mark);
+    next_mark = (am_hal_systick_count_inverted() + T1+T2+T3) & 0xFFFFFF;
+		// (This will glitch when next_mark would normally exceed 0xFFFFFF)
     FastPin<DATA_PIN>::hi();
     if(b&0x80) {
-      while((next_mark - am_hal_systick_count()) > 5);//(T3+(200*(F_CPU/24000000))));
+      while((next_mark - am_hal_systick_count_inverted()) > (T3));//+(2*(F_CPU/24000000))));
       FastPin<DATA_PIN>::lo();
     } else {
-      while((next_mark - am_hal_systick_count()) > 7);//(T2+T3+(200*(F_CPU/24000000))));
+      while((next_mark - am_hal_systick_count_inverted()) > (T2+T3));//+(2*(F_CPU/24000000))));
       FastPin<DATA_PIN>::lo();
     }
 	}
 
+	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
+	// gcc will use register Y for the this pointer.
 	static uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
     FastPin<DATA_PIN>::lo();
 
@@ -86,18 +120,23 @@ protected:
 		pixels.preStepFirstByteDithering();
 		register uint8_t b = pixels.loadAndScale0();
 
+		// The SysTick ISR appears not be working so let's manually reload the SysTick VAL
+		//am_hal_systick_load(0xFFFFFF);
+
 		cli();
-    register uint32_t next_mark = am_hal_systick_count() + 10;//(T1+T2+T3);
-    if (next_mark > SYSTICK_MAX_TICKS) { next_mark = next_mark - SYSTICK_MAX_TICKS; }
+		// Calculate next_mark (the time of the next DATA_PIN transition)
+		// SysTick counts down (not up) and is 24-bit so let's use the inverted version and mask it to 24 bits
+		// (This will glitch when next_mark would normally exceed 0xFFFFFF)
+    register uint32_t next_mark = (am_hal_systick_count_inverted() + T1+T2+T3) & 0xFFFFFF;
 
 		while(pixels.has(1)) {
 			pixels.stepDithering();
 
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
-      // if interrupts took longer than 45µs, punt on the current frame
-			if(am_hal_systick_count() > next_mark) {
-				if((am_hal_systick_count() - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return 0; }
+			if(am_hal_systick_count_inverted() > next_mark) { // Have we already missed the next_mark?
+				// If we have exceeded next_mark by an excessive amount, then bail (return 0)
+				if((am_hal_systick_count_inverted() - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return 0; }
 			}
 			#endif
 
@@ -113,13 +152,19 @@ protected:
 			writeBits<8+XTRA0>(next_mark, b);
 			b = pixels.advanceAndLoadAndScale0();
 
+			// Write the extra white bits if the RGBW strip needs them
+			#ifdef DO_RGBW
+			register uint8_t white_level = WHITE_LEVEL;
+			writeBits<8+XTRA0>(next_mark, white_level);
+			#endif
+
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			sei();
 			#endif
 		};
 
 		sei();
-		return (am_hal_systick_count());
+		return (am_hal_systick_count_inverted());
 	}
 
 };

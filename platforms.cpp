@@ -15,7 +15,7 @@
     #ifdef __cplusplus
         extern "C" {
     #endif
-            // NOTE: Update platforms.cpp in root of FastLED library if this changes        
+            // NOTE: Update platforms.cpp in root of FastLED library if this changes
             #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE0)
                 void PWM0_IRQHandler(void) { isrCount++; PWM_Arbiter<0>::isr_handler(); }
             #endif
@@ -34,7 +34,21 @@
 
 #endif // defined(NRF52_SERIES)
 
+// ISR for the APOLLO3 SysTick
+#if defined(FASTLED_APOLLO3)
 
+  // SysTick Interrupt Service Routine
+  #ifdef __cplusplus
+    extern "C" {
+  #endif
+    void SysTick_Handler(void) {
+      // We don't actually need to do anything in the ISR. There just needs to be one!
+    }
+  #ifdef __cplusplus
+    }
+  #endif
+
+#endif // defined(FASTLED_APOLLO3)
 
 // FASTLED_NAMESPACE_BEGIN
 // FASTLED_NAMESPACE_END
