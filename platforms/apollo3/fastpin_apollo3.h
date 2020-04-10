@@ -82,10 +82,12 @@ _FL_DEFPIN(15); _FL_DEFPIN(16); _FL_DEFPIN(17); _FL_DEFPIN(18); _FL_DEFPIN(19);
 _FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23); _FL_DEFPIN(24);
 _FL_DEFPIN(25); _FL_DEFPIN(26); _FL_DEFPIN(27); _FL_DEFPIN(28); _FL_DEFPIN(29);
 _FL_DEFPIN(30); _FL_DEFPIN(31);
-//These two lines are commented out as dedicates SPI support using fastShiftOut produces
-//glitchy results that is slower than bit banging. TO DO: implement 'proper' SPI functionality
-//#define SPI_DATA MOSI
-//#define SPI_CLOCK SCK
+
+//The Artemis RedBoard has 4 SPI ports defined by default
+//TO DO: implement multiple SPI functionality
+//#define AP3_FASTLED_SPI_IOM 0
+#define SPI_DATA MOSI
+#define SPI_CLOCK SCK
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
@@ -98,10 +100,9 @@ _FL_DEFPIN(10); _FL_DEFPIN(11); _FL_DEFPIN(12); _FL_DEFPIN(13); _FL_DEFPIN(14);
 _FL_DEFPIN(15); _FL_DEFPIN(16); _FL_DEFPIN(17); _FL_DEFPIN(18); _FL_DEFPIN(19);
 _FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23);
 
-//These two lines are commented out as dedicates SPI support using fastShiftOut produces
-//glitchy results that is slower than bit banging. TO DO: implement 'proper' SPI functionality
-//#define SPI_DATA MOSI
-//#define SPI_CLOCK SCK
+//#define AP3_FASTLED_SPI_IOM 0
+#define SPI_DATA MOSI
+#define SPI_CLOCK SCK
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
@@ -115,14 +116,33 @@ _FL_DEFPIN(15); _FL_DEFPIN(16); _FL_DEFPIN(17); _FL_DEFPIN(18); _FL_DEFPIN(19);
 _FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23); _FL_DEFPIN(24);
 _FL_DEFPIN(25); _FL_DEFPIN(26); _FL_DEFPIN(27); _FL_DEFPIN(28);
 
-//These two lines are commented out as dedicates SPI support using fastShiftOut produces
-//glitchy results that is slower than bit banging. TO DO: implement 'proper' SPI functionality
-//#define SPI_DATA MOSI
-//#define SPI_CLOCK SCK
+//#define AP3_FASTLED_SPI_IOM 0
+#define SPI_DATA MOSI
+#define SPI_CLOCK SCK
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(ARDUINO_AM_AP3_SFE_BB_ARTEMIS_ATP) || defined(ARDUINO_SFE_ARTEMIS)
+#elif defined(ARDUINO_AM_AP3_SFE_BB_ARTEMIS_ATP)
+
+#define MAX_PIN 50 // AP3_VARIANT_NUM_PINS
+_FL_DEFPIN(0); _FL_DEFPIN(1); _FL_DEFPIN(2); _FL_DEFPIN(3); _FL_DEFPIN(4);
+_FL_DEFPIN(5); _FL_DEFPIN(6); _FL_DEFPIN(7); _FL_DEFPIN(8); _FL_DEFPIN(9);
+_FL_DEFPIN(10); _FL_DEFPIN(11); _FL_DEFPIN(12); _FL_DEFPIN(13); _FL_DEFPIN(14);
+_FL_DEFPIN(15); _FL_DEFPIN(16); _FL_DEFPIN(17); _FL_DEFPIN(18); _FL_DEFPIN(19);
+_FL_DEFPIN(20); _FL_DEFPIN(21); _FL_DEFPIN(22); _FL_DEFPIN(23); _FL_DEFPIN(24);
+_FL_DEFPIN(25); _FL_DEFPIN(26); _FL_DEFPIN(27); _FL_DEFPIN(28); _FL_DEFPIN(29);
+_FL_DEFPIN(31); _FL_DEFPIN(32); _FL_DEFPIN(33); _FL_DEFPIN(34);
+_FL_DEFPIN(35); _FL_DEFPIN(36); _FL_DEFPIN(37); _FL_DEFPIN(38); _FL_DEFPIN(39);
+_FL_DEFPIN(40); _FL_DEFPIN(41); _FL_DEFPIN(42); _FL_DEFPIN(43); _FL_DEFPIN(44);
+_FL_DEFPIN(45); _FL_DEFPIN(47); _FL_DEFPIN(48); _FL_DEFPIN(49);
+
+//#define AP3_FASTLED_SPI_IOM 0
+#define SPI_DATA MOSI
+#define SPI_CLOCK SCK
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ARDUINO_SFE_ARTEMIS)
 
 #define MAX_PIN 50 // AP3_VARIANT_NUM_PINS
 // Pin definitions taken from (e.g.) C:\Users\...\AppData\Local\Arduino15\packages\SparkFun\hardware\apollo3\1.0.30\variants\redboard_artemis_atp\config\variant.cpp
@@ -138,10 +158,9 @@ _FL_DEFPIN(35); _FL_DEFPIN(36); _FL_DEFPIN(37); _FL_DEFPIN(38); _FL_DEFPIN(39);
 _FL_DEFPIN(40); _FL_DEFPIN(41); _FL_DEFPIN(42); _FL_DEFPIN(43); _FL_DEFPIN(44);
 _FL_DEFPIN(45); _FL_DEFPIN(47); _FL_DEFPIN(48); _FL_DEFPIN(49);
 
-//These two lines are commented out as dedicates SPI support using fastShiftOut produces
-//glitchy results that is slower than bit banging. TO DO: implement 'proper' SPI functionality
-//#define SPI_DATA MOSI
-//#define SPI_CLOCK SCK
+//The Artemis module has all six SPI ports defined by default _but_
+//does not assign pins for them.
+//TO DO: implement multiple SPI functionality with correct pin mapping
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
