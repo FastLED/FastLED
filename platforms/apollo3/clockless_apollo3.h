@@ -70,7 +70,7 @@ public:
 	  SysTick_Config(0xFFFFFFUL); // The LOAD value needs to be 24-bit
 	}
 
-	virtual uint16_t getMaxRefreshRate() const { return 400; } // This can probably be increased?
+	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
 

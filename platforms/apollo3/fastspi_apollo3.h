@@ -1,15 +1,19 @@
 #ifndef __INC_FASTSPI_APOLLO3_H
 #define __INC_FASTSPI_APOLLO3_H
 
+// This is the implementation of fastspi for the Apollo3.
+// It uses fastgpio instead of actual SPI, which means you can use it on all pins.
+// It can run slightly faster than the default fastpin (bit banging).
+
 #include "FastLED.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_APOLLO3)
 
-#include <SPI.h>
+#define FASTLED_ALL_PINS_HARDWARE_SPI
 
-template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t SPI_CLOCK_SPEED>
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class APOLLO3HardwareSPIOutput {
 	Selectable *m_pSelect;
 
@@ -20,37 +24,33 @@ public:
 	// set the object representing the selectable
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
-	// initialize the SPI subssytem
+	// initialize the pins for fastgpio
 	void init() {
-		//enableBurstMode(); //Optional. Go to 96MHz. Roughly doubles the speed of shiftOut and fastShiftOut
 		pinMode(_DATA_PIN, OUTPUT);
 		pinMode(_CLOCK_PIN, OUTPUT);
 		am_hal_gpio_fastgpio_enable(_DATA_PIN);
 		am_hal_gpio_fastgpio_enable(_CLOCK_PIN);
-		SPI.begin();
 	}
 
 	// latch the CS select
-	void inline select() __attribute__((always_inline)) {
-		// Begin the SPI transaction
-		// We want CPOL/CKP to be 0 and CPHA to be 0 so we need SPI Mode 0
-		SPI.beginTransaction(SPISettings((F_CPU/SPI_CLOCK_SPEED), MSBFIRST, AM_HAL_IOM_SPI_MODE_0));
-		if(m_pSelect != NULL) { m_pSelect->select(); }
-	}
+	void inline select() { /* TODO */ }
 
 	// release the CS select
-	void inline release() {
-		if(m_pSelect != NULL) { m_pSelect->release(); }
-		SPI.endTransaction();
-	}
+	void inline release() { /* TODO */ }
 
 	// wait until all queued up data has been written
 	static void waitFully() { /* TODO */ }
 
-	// write a byte out via SPI (returns immediately on writing register)
+	// write a byte as bits
 	static void writeByte(uint8_t b) {
-		//fastShiftOut(_DATA_PIN, _CLOCK_PIN, MSBFIRST, b);
-		SPI.transferOut(&b,1);
+		writeBit<7>(b);
+		writeBit<6>(b);
+		writeBit<5>(b);
+		writeBit<4>(b);
+		writeBit<3>(b);
+		writeBit<2>(b);
+		writeBit<1>(b);
+		writeBit<0>(b);
 	}
 
 	// write a word out via SPI (returns immediately on writing register)
@@ -91,18 +91,15 @@ public:
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
 		//waitFully();
 		if(b & (1 << BIT)) {
-			//digitalWrite(_DATA_PIN, HIGH); //FastPin<_DATA_PIN>::hi();
 			am_hal_gpio_fastgpio_set(_DATA_PIN);
 		} else {
-			//digitalWrite(_DATA_PIN, LOW); //FastPin<_DATA_PIN>::lo();
 			am_hal_gpio_fastgpio_clr(_DATA_PIN);
 		}
 
-		//digitalWrite(_CLOCK_PIN, HIGH);
-		//digitalWrite(_CLOCK_PIN, LOW);
 		am_hal_gpio_fastgpio_set(_CLOCK_PIN);
-		__NOP();
+		for (int16_t d = (_SPI_CLOCK_DIVIDER >> 1); d > 0; d--) { __NOP(); }
 		am_hal_gpio_fastgpio_clr(_CLOCK_PIN);
+		for (int16_t d = ((_SPI_CLOCK_DIVIDER >> 1) - 1); d > 0; d--) { __NOP(); }
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
@@ -112,18 +109,13 @@ public:
 
 		int len = pixels.mLen;
 
-		//select();
 		while(pixels.has(1)) {
 			if(FLAGS & FLAG_START_BIT) {
 				writeBit<0>(1);
-				writeByte(D::adjust(pixels.loadAndScale0()));
-				writeByte(D::adjust(pixels.loadAndScale1()));
-				writeByte(D::adjust(pixels.loadAndScale2()));
-			} else {
-				writeByte(D::adjust(pixels.loadAndScale0()));
-				writeByte(D::adjust(pixels.loadAndScale1()));
-				writeByte(D::adjust(pixels.loadAndScale2()));
 			}
+			writeByte(D::adjust(pixels.loadAndScale0()));
+			writeByte(D::adjust(pixels.loadAndScale1()));
+			writeByte(D::adjust(pixels.loadAndScale2()));
 
 			pixels.advanceData();
 			pixels.stepDithering();
