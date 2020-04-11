@@ -15,7 +15,7 @@
     #ifdef __cplusplus
         extern "C" {
     #endif
-            // NOTE: Update platforms.cpp in root of FastLED library if this changes
+            // NOTE: Update platforms.cpp in root of FastLED library if this changes        
             #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE0)
                 void PWM0_IRQHandler(void) { isrCount++; PWM_Arbiter<0>::isr_handler(); }
             #endif
@@ -33,6 +33,8 @@
     #endif
 
 #endif // defined(NRF52_SERIES)
+
+
 
 // FASTLED_NAMESPACE_BEGIN
 // FASTLED_NAMESPACE_END

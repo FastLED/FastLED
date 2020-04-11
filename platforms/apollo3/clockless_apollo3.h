@@ -5,6 +5,9 @@ FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_APOLLO3)
 
+// Clockless support for the SparkFun Artemis / Ambiq Micro Apollo3 Blue
+// Uses SysTick to govern the pulse timing
+
 //*****************************************************************************
 //
 // Code taken from Ambiq Micro's am_hal_systick.c
@@ -33,7 +36,6 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 public:
 	virtual void init() {
 		// Initialize everything
-		// This is _very_ SparkFun Artemis / Ambiq Micro Apollo3 Blue specific!
 
 		// Configure DATA_PIN for FastGPIO (settings are in fastpin_apollo3.h)
 		FastPin<DATA_PIN>::setOutput();
