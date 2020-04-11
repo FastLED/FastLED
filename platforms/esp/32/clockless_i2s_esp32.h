@@ -213,7 +213,7 @@ public:
         
         gControllers[gNumControllers] = this;
         int my_index = gNumControllers;
-        gNumControllers++;
+        ++gNumControllers;
         
         // -- Set up the pin We have to do two things: configure the
         //    actual GPIO pin, and route the output from the default
@@ -235,7 +235,7 @@ protected:
    static int pgcd(int smallest,int precision,int a,int b,int c)
     {
         int pgc_=1;
-        for( int i=smallest;i>0;i--)
+        for( int i=smallest;i>0;--i)
         {
             
             if( a%i<=precision && b%i<=precision && c%i<=precision)
@@ -293,7 +293,7 @@ protected:
         //Serial.printf("%f\n",I2S_MAX_CLK/(1000000000L*freq));
         while(pgc_==1 ||  (T1/pgc_ +T2/pgc_ +T3/pgc_)>I2S_MAX_PULSE_PER_BIT) //while(pgc_==1 ||  (T1/pgc_ +T2/pgc_ +T3/pgc_)>I2S_MAX_CLK/(1000000000L*freq))
         {
-            precision++;
+            ++precision;
             pgc_=pgcd(smallest,precision,T1,T2,T3);
             //Serial.printf("%d %d\n",pgc_,(a+b+c)/pgc_);
         }
@@ -327,9 +327,9 @@ protected:
         int b=0;
         CLOCK_DIVIDER_A=1;
         CLOCK_DIVIDER_B=0;
-        for(a=1;a<64;a++)
+        for(a=1;a<64;++a)
         {
-            for(b=0;b<a;b++)
+            for(b=0;b<a;++b)
             {
                 //printf("%d %d %f %f %f\n",b,a,v,(double)v*(double)a,fabsf(v-(double)b/a));
                 if(fabsf(v-(double)b/a) <= prec/2)
@@ -356,7 +356,7 @@ protected:
         {
             CLOCK_DIVIDER_A=1;
             CLOCK_DIVIDER_B=0;
-            CLOCK_DIVIDER_N++;
+            ++CLOCK_DIVIDER_N;
         }
         
         //printf("%d %d %f %f %d\n",CLOCK_DIVIDER_B,CLOCK_DIVIDER_A,(double)CLOCK_DIVIDER_B/CLOCK_DIVIDER_A,v,CLOCK_DIVIDER_N);
@@ -382,11 +382,11 @@ protected:
         int i = 0;
         while ( i < ones_for_one ) {
             gOneBit[i] = 0xFFFFFF00;
-            i++;
+            ++i;
         }
         while ( i < gPulsesPerBit ) {
             gOneBit[i] = 0x00000000;
-            i++;
+            ++i;
         }
         
         //int ones_for_zero = ((T1ns - 1)/FASTLED_I2S_NS_PER_PULSE) + 1;
@@ -399,11 +399,11 @@ protected:
         i = 0;
         while ( i < ones_for_zero ) {
             gZeroBit[i] = 0xFFFFFF00;
-            i++;
+            ++i;
         }
         while ( i < gPulsesPerBit ) {
             gZeroBit[i] = 0x00000000;
-            i++;
+            ++i;
         }
         
         memset(gPixelRow, 0, NUM_COLOR_CHANNELS * 32);
@@ -531,13 +531,13 @@ protected:
      */
     static void empty( uint32_t *buf)
     {
-        for(int i=0;i<8*NUM_COLOR_CHANNELS;i++)
+        for(int i=0;i<8*NUM_COLOR_CHANNELS;++i)
         {
             int offset=gPulsesPerBit*i;
-            for(int j=0;j<ones_for_zero;j++)
+            for(int j=0;j<ones_for_zero;++j)
                 buf[offset+j]=0xffffffff;
             
-            for(int j=ones_for_one;j<gPulsesPerBit;j++)
+            for(int j=ones_for_one;j<gPulsesPerBit;++j)
                 buf[offset+j]=0;
         }
     }
@@ -558,7 +558,7 @@ protected:
         (*mPixels) = pixels;
         
         // -- Keep track of the number of strips we've seen
-        gNumStarted++;
+        ++gNumStarted;
 
         // Serial.print("Show pixels ");
         // Serial.println(gNumStarted);
@@ -626,7 +626,7 @@ protected:
         // -- Get the requested pixel from each controller. Store the
         //    data for each color channel in a separate array.
         uint32_t has_data_mask = 0;
-        for (int i = 0; i < gNumControllers; i++) {
+        for (int i = 0; i < gNumControllers; ++i) {
             // -- Store the pixels in reverse controller order starting at index 23
             //    This causes the bits to come out in the right position after we
             //    transpose them.
@@ -652,24 +652,24 @@ protected:
         
         // -- Transpose and encode the pixel data for the DMA buffer
         // int buf_index = 0;
-        for (int channel = 0; channel < NUM_COLOR_CHANNELS; channel++) {
+        for (int channel = 0; channel < NUM_COLOR_CHANNELS; ++channel) {
             
             // -- Tranpose each array: all the bit 7's, then all the bit 6's, ...
             transpose32(gPixelRow[channel], gPixelBits[channel][0] );
             
             //Serial.print("Channel: "); Serial.print(channel); Serial.print(" ");
-            for (int bitnum = 0; bitnum < 8; bitnum++) {
+            for (int bitnum = 0; bitnum < 8; ++bitnum) {
                 uint8_t * row = (uint8_t *) (gPixelBits[channel][bitnum]);
                 uint32_t bit = (row[0] << 24) | (row[1] << 16) | (row[2] << 8) | row[3];
                 
-                /* SZG: More general, but too slow:
-                for (int pulse_num = 0; pulse_num < gPulsesPerBit; pulse_num++) {
-                    buf[buf_index++] = has_data_mask & ( (bit & gOneBit[pulse_num]) | (~bit & gZeroBit[pulse_num]) );
-                }
-                */
+               /* SZG: More general, but too slow:
+                    for (int pulse_num = 0; pulse_num < gPulsesPerBit; ++pulse_num) {
+                        buf[buf_index++] = has_data_mask & ( (bit & gOneBit[pulse_num]) | (~bit & gZeroBit[pulse_num]) );
+                     }
+               */
 
                 // -- Only fill in the pulses that are different between the "0" and "1" encodings
-                for(int pulse_num = ones_for_zero; pulse_num < ones_for_one; pulse_num++) {
+                for(int pulse_num = ones_for_zero; pulse_num < ones_for_one; ++pulse_num) {
                     buf[bitnum*gPulsesPerBit+channel*8*gPulsesPerBit+pulse_num] = has_data_mask & bit;
                 }
             }

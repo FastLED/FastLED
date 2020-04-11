@@ -60,7 +60,7 @@ uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) 
         red32   += *p++;
         green32 += *p++;
         blue32  += *p++;
-        count--;
+        --count;
     }
 
     red32   *= gRed_mW;

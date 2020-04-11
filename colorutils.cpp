@@ -13,7 +13,7 @@ FASTLED_NAMESPACE_BEGIN
 void fill_solid( struct CRGB * leds, int numToFill,
                  const struct CRGB& color)
 {
-    for( int i = 0; i < numToFill; i++) {
+    for( int i = 0; i < numToFill; ++i) {
         leds[i] = color;
     }
 }
@@ -21,7 +21,7 @@ void fill_solid( struct CRGB * leds, int numToFill,
 void fill_solid( struct CHSV * targetArray, int numToFill,
                  const struct CHSV& hsvColor)
 {
-    for( int i = 0; i < numToFill; i++) {
+    for( int i = 0; i < numToFill; ++i) {
         targetArray[i] = hsvColor;
     }
 }
@@ -41,7 +41,7 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
     hsv.hue = initialhue;
     hsv.val = 255;
     hsv.sat = 240;
-    for( int i = 0; i < numToFill; i++) {
+    for( int i = 0; i < numToFill; ++i) {
         pFirstLED[i] = hsv;
         hsv.hue += deltahue;
     }
@@ -55,7 +55,7 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
     hsv.hue = initialhue;
     hsv.val = 255;
     hsv.sat = 240;
-    for( int i = 0; i < numToFill; i++) {
+    for( int i = 0; i < numToFill; ++i) {
         targetArray[i] = hsv;
         hsv.hue += deltahue;
     }
@@ -98,7 +98,7 @@ void fill_gradient_RGB( CRGB* leds,
     accum88 r88 = startcolor.r << 8;
     accum88 g88 = startcolor.g << 8;
     accum88 b88 = startcolor.b << 8;
-    for( uint16_t i = startpos; i <= endpos; i++) {
+    for( uint16_t i = startpos; i <= endpos; ++i) {
         leds[i] = CRGB( r88 >> 8, g88 >> 8, b88 >> 8);
         r88 += rdelta87;
         g88 += gdelta87;
@@ -171,7 +171,7 @@ void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB
 
 void nscale8_video( CRGB* leds, uint16_t num_leds, uint8_t scale)
 {
-    for( uint16_t i = 0; i < num_leds; i++) {
+    for( uint16_t i = 0; i < num_leds; ++i) {
         leds[i].nscale8_video( scale);
     }
 }
@@ -204,7 +204,7 @@ void nscale8_raw( CRGB* leds, uint16_t num_leds, uint8_t scale)
 
 void nscale8( CRGB* leds, uint16_t num_leds, uint8_t scale)
 {
-    for( uint16_t i = 0; i < num_leds; i++) {
+    for( uint16_t i = 0; i < num_leds; ++i) {
         leds[i].nscale8( scale);
     }
 }
@@ -216,7 +216,7 @@ void fadeUsingColor( CRGB* leds, uint16_t numLeds, const CRGB& colormask)
     fg = colormask.g;
     fb = colormask.b;
 
-    for( uint16_t i = 0; i < numLeds; i++) {
+    for( uint16_t i = 0; i < numLeds; ++i) {
         leds[i].r = scale8_LEAVING_R1_DIRTY( leds[i].r, fr);
         leds[i].g = scale8_LEAVING_R1_DIRTY( leds[i].g, fg);
         leds[i].b = scale8                 ( leds[i].b, fb);
@@ -261,10 +261,10 @@ CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay )
 
 void nblend( CRGB* existing, CRGB* overlay, uint16_t count, fract8 amountOfOverlay)
 {
-    for( uint16_t i = count; i; i--) {
+    for( uint16_t i = count; i; --i) {
         nblend( *existing, *overlay, amountOfOverlay);
-        existing++;
-        overlay++;
+        ++existing;
+        ++overlay;
     }
 }
 
@@ -277,7 +277,7 @@ CRGB blend( const CRGB& p1, const CRGB& p2, fract8 amountOfP2 )
 
 CRGB* blend( const CRGB* src1, const CRGB* src2, CRGB* dest, uint16_t count, fract8 amountOfsrc2 )
 {
-    for( uint16_t i = 0; i < count; i++) {
+    for( uint16_t i = 0; i < count; ++i) {
         dest[i] = blend(src1[i], src2[i], amountOfsrc2);
     }
     return dest;
@@ -338,10 +338,10 @@ CHSV& nblend( CHSV& existing, const CHSV& overlay, fract8 amountOfOverlay, TGrad
 void nblend( CHSV* existing, CHSV* overlay, uint16_t count, fract8 amountOfOverlay, TGradientDirectionCode directionCode )
 {
     if(existing == overlay) return;
-    for( uint16_t i = count; i; i--) {
+    for( uint16_t i = count; i; --i) {
         nblend( *existing, *overlay, amountOfOverlay, directionCode);
-        existing++;
-        overlay++;
+        ++existing;
+        ++overlay;
     }
 }
 
@@ -354,7 +354,7 @@ CHSV blend( const CHSV& p1, const CHSV& p2, fract8 amountOfP2, TGradientDirectio
 
 CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fract8 amountOfsrc2, TGradientDirectionCode directionCode )
 {
-    for( uint16_t i = 0; i < count; i++) {
+    for( uint16_t i = 0; i < count; ++i) {
         dest[i] = blend(src1[i], src2[i], amountOfsrc2, directionCode);
     }
     return dest;
@@ -385,7 +385,7 @@ void blur1d( CRGB* leds, uint16_t numLeds, fract8 blur_amount)
     uint8_t keep = 255 - blur_amount;
     uint8_t seep = blur_amount >> 1;
     CRGB carryover = CRGB::Black;
-    for( uint16_t i = 0; i < numLeds; i++) {
+    for( uint16_t i = 0; i < numLeds; ++i) {
         CRGB cur = leds[i];
         CRGB part = cur;
         part.nscale8( seep);
@@ -406,7 +406,7 @@ void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
 // blurRows: perform a blur1d on every row of a rectangular matrix
 void blurRows( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
 {
-    for( uint8_t row = 0; row < height; row++) {
+    for( uint8_t row = 0; row < height; ++row) {
         CRGB* rowbase = leds + (row * width);
         blur1d( rowbase, width, blur_amount);
     }
@@ -418,9 +418,9 @@ void blurColumns(CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
     // blur columns
     uint8_t keep = 255 - blur_amount;
     uint8_t seep = blur_amount >> 1;
-    for( uint8_t col = 0; col < width; col++) {
+    for( uint8_t col = 0; col < width; ++col) {
         CRGB carryover = CRGB::Black;
-        for( uint8_t i = 0; i < height; i++) {
+        for( uint8_t i = 0; i < height; ++i) {
             CRGB cur = leds[XY(col,i)];
             CRGB part = cur;
             part.nscale8( seep);
@@ -529,7 +529,7 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
         if( hi4 == 15 ) {
             entry = &(pal[0]);
         } else {
-            entry++;
+            ++entry;
         }
         
         uint8_t f2 = lo4 << 4;
@@ -556,25 +556,25 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
     
     if( brightness != 255) {
         if( brightness ) {
-            brightness++; // adjust for rounding
+            ++brightness; // adjust for rounding
             // Now, since brightness is nonzero, we don't need the full scale8_video logic;
             // we can just to scale8 and then add one (unless scale8 fixed) to all nonzero inputs.
             if( red1 )   {
                 red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                red1++;
+                ++red1;
 #endif
             }
             if( green1 ) {
                 green1 = scale8_LEAVING_R1_DIRTY( green1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                green1++;
+                ++green1;
 #endif
             }
             if( blue1 )  {
                 blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                blue1++;
+                ++blue1;
 #endif
             }
             cleanup_R1();
@@ -634,25 +634,25 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
 
     if( brightness != 255) {
         if( brightness ) {
-            brightness++; // adjust for rounding
+            ++brightness; // adjust for rounding
             // Now, since brightness is nonzero, we don't need the full scale8_video logic;
             // we can just to scale8 and then add one (unless scale8 fixed) to all nonzero inputs.
             if( red1 )   {
                 red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                red1++;
+                ++red1;
 #endif
             }
             if( green1 ) {
                 green1 = scale8_LEAVING_R1_DIRTY( green1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                green1++;
+                ++green1;
 #endif
             }
             if( blue1 )  {
                 blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                blue1++;
+                ++blue1;
 #endif
             }
             cleanup_R1();
@@ -698,7 +698,7 @@ CRGB ColorFromPalette( const CRGBPalette32& pal, uint8_t index, uint8_t brightne
         if( hi5 == 31 ) {
             entry = &(pal[0]);
         } else {
-            entry++;
+            ++entry;
         }
         
         uint8_t f2 = lo3 << 5;
@@ -725,25 +725,25 @@ CRGB ColorFromPalette( const CRGBPalette32& pal, uint8_t index, uint8_t brightne
     
     if( brightness != 255) {
         if( brightness ) {
-            brightness++; // adjust for rounding
+            ++brightness; // adjust for rounding
             // Now, since brightness is nonzero, we don't need the full scale8_video logic;
             // we can just to scale8 and then add one (unless scale8 fixed) to all nonzero inputs.
             if( red1 )   {
                 red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                red1++;
+                ++red1;
 #endif
             }
             if( green1 ) {
                 green1 = scale8_LEAVING_R1_DIRTY( green1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                green1++;
+                ++green1;
 #endif
             }
             if( blue1 )  {
                 blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                blue1++;
+                ++blue1;
 #endif
             }
             cleanup_R1();
@@ -809,25 +809,25 @@ CRGB ColorFromPalette( const TProgmemRGBPalette32& pal, uint8_t index, uint8_t b
     
     if( brightness != 255) {
         if( brightness ) {
-            brightness++; // adjust for rounding
+            ++brightness; // adjust for rounding
             // Now, since brightness is nonzero, we don't need the full scale8_video logic;
             // we can just to scale8 and then add one (unless scale8 fixed) to all nonzero inputs.
             if( red1 )   {
                 red1 = scale8_LEAVING_R1_DIRTY( red1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                red1++;
+                ++red1;
 #endif
             }
             if( green1 ) {
                 green1 = scale8_LEAVING_R1_DIRTY( green1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                green1++;
+                ++green1;
 #endif
             }
             if( blue1 )  {
                 blue1 = scale8_LEAVING_R1_DIRTY( blue1, brightness);
 #if !(FASTLED_SCALE8_FIXED==1)
-                blue1++;
+                ++blue1;
 #endif
             }
             cleanup_R1();
@@ -852,7 +852,7 @@ CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightn
     uint8_t blue  = entry->blue;
 
     if( brightness != 255) {
-        brightness++; // adjust for rounding
+        ++brightness; // adjust for rounding
         red   = scale8_video_LEAVING_R1_DIRTY( red,   brightness);
         green = scale8_video_LEAVING_R1_DIRTY( green, brightness);
         blue  = scale8_video_LEAVING_R1_DIRTY( blue,  brightness);
@@ -883,7 +883,7 @@ CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t b
         if( hi4 == 15 ) {
             entry = &(pal[0]);
         } else {
-            entry++;
+            ++entry;
         }
 
         uint8_t f2 = lo4 << 4;
@@ -973,7 +973,7 @@ CHSV ColorFromPalette( const struct CHSVPalette32& pal, uint8_t index, uint8_t b
         if( hi5 == 31 ) {
             entry = &(pal[0]);
         } else {
-            entry++;
+            ++entry;
         }
         
         uint8_t f2 = lo3 << 5;
@@ -1050,14 +1050,14 @@ CHSV ColorFromPalette( const struct CHSVPalette256& pal, uint8_t index, uint8_t 
 
 void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256)
 {
-    for( int i = 0; i < 256; i++) {
+    for( int i = 0; i < 256; ++i) {
         destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
     }
 }
 
 void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette256& destpal256)
 {
-    for( int i = 0; i < 256; i++) {
+    for( int i = 0; i < 256; ++i) {
         destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
     }
 }
@@ -1065,7 +1065,7 @@ void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette256&
 
 void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette32& destpal32)
 {
-    for( uint8_t i = 0; i < 16; i++) {
+    for( uint8_t i = 0; i < 16; ++i) {
         uint8_t j = i * 2;
         destpal32[j+0] = srcpal16[i];
         destpal32[j+1] = srcpal16[i];
@@ -1074,7 +1074,7 @@ void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette32& 
 
 void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette32& destpal32)
 {
-    for( uint8_t i = 0; i < 16; i++) {
+    for( uint8_t i = 0; i < 16; ++i) {
         uint8_t j = i * 2;
         destpal32[j+0] = srcpal16[i];
         destpal32[j+1] = srcpal16[i];
@@ -1083,14 +1083,14 @@ void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette32& 
 
 void UpscalePalette(const struct CRGBPalette32& srcpal32, struct CRGBPalette256& destpal256)
 {
-    for( int i = 0; i < 256; i++) {
+    for( int i = 0; i < 256; ++i) {
         destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal32, i);
     }
 }
 
 void UpscalePalette(const struct CHSVPalette32& srcpal32, struct CHSVPalette256& destpal256)
 {
-    for( int i = 0; i < 256; i++) {
+    for( int i = 0; i < 256; ++i) {
         destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal32, i);
     }
 }
@@ -1117,18 +1117,18 @@ void nblendPaletteTowardPalette( CRGBPalette16& current, CRGBPalette16& target, 
     p2 = (uint8_t*)target.entries;
 
     const uint8_t totalChannels = sizeof(CRGBPalette16);
-    for( uint8_t i = 0; i < totalChannels; i++) {
+    for( uint8_t i = 0; i < totalChannels; ++i) {
         // if the values are equal, no changes are needed
         if( p1[i] == p2[i] ) { continue; }
 
         // if the current value is less than the target, increase it by one
-        if( p1[i] < p2[i] ) { p1[i]++; changes++; }
+        if( p1[i] < p2[i] ) { ++p1[i]; ++changes; }
 
         // if the current value is greater than the target,
         // increase it by one (or two if it's still greater).
         if( p1[i] > p2[i] ) {
-            p1[i]--; changes++;
-            if( p1[i] > p2[i] ) { p1[i]--; }
+            --p1[i]; ++changes;
+            if( p1[i] > p2[i] ) { --p1[i]; }
         }
 
         // if we've hit the maximum number of changes, exit
@@ -1182,14 +1182,14 @@ CRGB& napplyGamma_video( CRGB& rgb, float gammaR, float gammaG, float gammaB)
 
 void napplyGamma_video( CRGB* rgbarray, uint16_t count, float gamma)
 {
-    for( uint16_t i = 0; i < count; i++) {
+    for( uint16_t i = 0; i < count; ++i) {
         rgbarray[i] = applyGamma_video( rgbarray[i], gamma);
     }
 }
 
 void napplyGamma_video( CRGB* rgbarray, uint16_t count, float gammaR, float gammaG, float gammaB)
 {
-    for( uint16_t i = 0; i < count; i++) {
+    for( uint16_t i = 0; i < count; ++i) {
         rgbarray[i] = applyGamma_video( rgbarray[i], gammaR, gammaG, gammaB);
     }
 }

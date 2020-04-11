@@ -169,7 +169,7 @@ LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
     offset &= 0x3F; // 0..63
 
     uint8_t secoffset  = offset & 0x0F; // 0..15
-    if( theta & 0x40) secoffset++;
+    if( theta & 0x40) ++secoffset;
 
     uint8_t m16; uint8_t b;
 
@@ -179,7 +179,7 @@ LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
     const uint8_t* p = b_m16_interleave;
     p += s2;
     b   = *p;
-    p++;
+    ++p;
     m16 = *p;
 
     uint8_t mx;
@@ -223,14 +223,14 @@ LIB8STATIC uint8_t sin8_C( uint8_t theta)
     offset &= 0x3F; // 0..63
 
     uint8_t secoffset  = offset & 0x0F; // 0..15
-    if( theta & 0x40) secoffset++;
+    if( theta & 0x40) ++secoffset;
 
     uint8_t section = offset >> 4; // 0..3
     uint8_t s2 = section * 2;
     const uint8_t* p = b_m16_interleave;
     p += s2;
     uint8_t b   =  *p;
-    p++;
+    ++p;
     uint8_t m16 =  *p;
 
     uint8_t mx = (m16 * secoffset) >> 4;

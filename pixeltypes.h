@@ -538,14 +538,14 @@ struct CRGB {
             // going 'up'
             if( (b > 0) && (b < 255)) {
                 if( r == g && g == b) {
-                    r++;
-                    g++;
+                    ++r;
+                    ++g;
                 }
-                b++;
+                ++b;
             } else if( (r > 0) && (r < 255)) {
-                r++;
+                ++r;
             } else if( (g > 0) && (g < 255)) {
-                g++;
+                ++g;
             } else {
                 if( r == g && g == b) {
                     r ^= 0x01;
@@ -557,14 +557,14 @@ struct CRGB {
             // going 'down'
             if( b > 1) {
                 if( r == g && g == b) {
-                    r--;
-                    g--;
+                    --r;
+                    --g;
                 }
-                b--;
+                --b;
             } else if( g > 1) {
-                g--;
+                --g;
             } else if( r > 1) {
-                r--;
+                --r;
             } else {
                 if( r == g && g == b) {
                     r ^= 0x01;

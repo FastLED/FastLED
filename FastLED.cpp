@@ -67,7 +67,7 @@ int CFastLED::count() {
     int x = 0;
 	CLEDController *pCur = CLEDController::head();
 	while( pCur) {
-        x++;
+        ++x;
 		pCur = pCur->next();
 	}
     return x;

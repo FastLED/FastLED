@@ -62,7 +62,7 @@ void FillLEDsFromPaletteColors( uint8_t colorIndex)
 {
     uint8_t brightness = 255;
     
-    for( int i = 0; i < NUM_LEDS; i++) {
+    for( int i = 0; i < NUM_LEDS; ++i) {
         leds[i] = ColorFromPalette( currentPalette, colorIndex, brightness, currentBlending);
         colorIndex += 3;
     }
@@ -101,7 +101,7 @@ void ChangePalettePeriodically()
 // This function fills the palette with totally random colors.
 void SetupTotallyRandomPalette()
 {
-    for( int i = 0; i < 16; i++) {
+    for( int i = 0; i < 16; ++i) {
         currentPalette[i] = CHSV( random8(), 255, random8());
     }
 }

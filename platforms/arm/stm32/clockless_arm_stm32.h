@@ -38,7 +38,7 @@ protected:
 #define _CYCCNT (*(volatile uint32_t*)(0xE0001004UL))
 
     template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  {
-        for(register uint32_t i = BITS-1; i > 0; i--) {
+        for(register uint32_t i = BITS-1; i > 0; --i) {
             while(_CYCCNT < (T1+T2+T3-20));
             FastPin<DATA_PIN>::fastset(port, hi);
             _CYCCNT = 4;

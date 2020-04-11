@@ -565,8 +565,8 @@ uint8_t inoise8(uint16_t x) {
 void fill_raw_noise8(uint8_t *pData, uint8_t num_points, uint8_t octaves, uint16_t x, int scale, uint16_t time) {
   uint32_t _xx = x;
   uint32_t scx = scale;
-  for(int o = 0; o < octaves; o++) {
-    for(int i = 0,xx=_xx; i < num_points; i++, xx+=scx) {
+  for(int o = 0; o < octaves; ++o) {
+    for(int i = 0,xx=_xx; i < num_points; ++i, xx+=scx) {
           pData[i] = qadd8(pData[i],inoise8(xx,time)>>o);
     }
 
@@ -578,8 +578,8 @@ void fill_raw_noise8(uint8_t *pData, uint8_t num_points, uint8_t octaves, uint16
 void fill_raw_noise16into8(uint8_t *pData, uint8_t num_points, uint8_t octaves, uint32_t x, int scale, uint32_t time) {
   uint32_t _xx = x;
   uint32_t scx = scale;
-  for(int o = 0; o < octaves; o++) {
-    for(int i = 0,xx=_xx; i < num_points; i++, xx+=scx) {
+  for(int o = 0; o < octaves; ++o) {
+    for(int i = 0,xx=_xx; i < num_points; ++i, xx+=scx) {
       uint32_t accum = (inoise16(xx,time))>>o;
       accum += (pData[i]<<8);
       if(accum > 65535) { accum = 65535; }
@@ -604,19 +604,19 @@ void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q
 
   fract8 invamp = 255-amplitude;
   uint16_t xx = x;
-  for(int i = 0; i < height; i++, y+=scaley) {
+  for(int i = 0; i < height; ++i, y+=scaley) {
     uint8_t *pRow = pData + (i*width);
     xx = x;
-    for(int j = 0; j < width; j++, xx+=scalex) {
+    for(int j = 0; j < width; ++j, xx+=scalex) {
       uint8_t noise_base = inoise8(xx,y,time);
       noise_base = (0x80 & noise_base) ? (noise_base - 127) : (127 - noise_base);
       noise_base = scale8(noise_base<<1,amplitude);
       if(skip == 1) {
         pRow[j] = scale8(pRow[j],invamp) + noise_base;
       } else {
-        for(int ii = i; ii<(i+skip) && ii<height; ii++) {
+        for(int ii = i; ii<(i+skip) && ii<height; ++ii) {
           uint8_t *pRow = pData + (ii*width);
-          for(int jj=j; jj<(j+skip) && jj<width; jj++) {
+          for(int jj=j; jj<(j+skip) && jj<width; ++jj) {
             pRow[jj] = scale8(pRow[jj],invamp) + noise_base;
           }
         }
@@ -649,9 +649,9 @@ void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves,
       if(skip==1) {
         pRow[j] = scale16(pRow[j],invamp) + noise_base;
       } else {
-        for(int ii = i; ii<(i+skip) && ii<height; ii++) {
+        for(int ii = i; ii<(i+skip) && ii<height; ++ii) {
           uint16_t *pRow = pData + (ii*width);
-          for(int jj=j; jj<(j+skip) && jj<width; jj++) {
+          for(int jj=j; jj<(j+skip) && jj<width; ++jj) {
             pRow[jj] = scale16(pRow[jj],invamp) + noise_base;
           }
         }
@@ -685,9 +685,9 @@ void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octa
       if(skip==1) {
         pRow[j] = qadd8(scale8(pRow[j],invamp),noise_base);
       } else {
-        for(int ii = i; ii<(i+skip) && ii<height; ii++) {
+        for(int ii = i; ii<(i+skip) && ii<height; ++ii) {
           uint8_t *pRow = pData + (ii*width);
-          for(int jj=j; jj<(j+skip) && jj<width; jj++) {
+          for(int jj=j; jj<(j+skip) && jj<width; ++jj) {
             pRow[jj] = scale8(pRow[jj],invamp) + noise_base;
           }
         }
@@ -713,7 +713,7 @@ void fill_noise8(CRGB *leds, int num_leds,
   fill_raw_noise8(V,num_leds,octaves,x,scale,time);
   fill_raw_noise8(H,num_leds,hue_octaves,hue_x,hue_scale,time);
 
-  for(int i = 0; i < num_leds; i++) {
+  for(int i = 0; i < num_leds; ++i) {
     leds[i] = CHSV(H[i],255,V[i]);
   }
 }
@@ -731,7 +731,7 @@ void fill_noise16(CRGB *leds, int num_leds,
   fill_raw_noise16into8(V,num_leds,octaves,x,scale,time);
   fill_raw_noise8(H,num_leds,hue_octaves,hue_x,hue_scale,time);
 
-  for(int i = 0; i < num_leds; i++) {
+  for(int i = 0; i < num_leds; ++i) {
     leds[i] = CHSV(H[i] + hue_shift,255,V[i]);
   }
 }
@@ -750,9 +750,9 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
 
   int w1 = width-1;
   int h1 = height-1;
-  for(int i = 0; i < height; i++) {
+  for(int i = 0; i < height; ++i) {
     int wb = i*width;
-    for(int j = 0; j < width; j++) {
+    for(int j = 0; j < width; ++j) {
       CRGB led(CHSV(H[h1-i][w1-j],255,V[i][j]));
 
       int pos = j;
@@ -788,9 +788,9 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
   int h1 = height-1;
   hue_shift >>= 8;
 
-  for(int i = 0; i < height; i++) {
+  for(int i = 0; i < height; ++i) {
     int wb = i*width;
-    for(int j = 0; j < width; j++) {
+    for(int j = 0; j < width; ++j) {
       CRGB led(CHSV(hue_shift + (H[h1-i][w1-j]),196,V[i][j]));
 
       int pos = j;
