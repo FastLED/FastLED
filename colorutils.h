@@ -468,33 +468,6 @@ public:
         return *this;
     }
 
-    // ColorPalette( const CHSVPalette16& rhs)
-    // {
-    //     for( uint8_t i = 0; i < 16; ++i) {
-    // 		entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
-    //     }
-    // }
-    // TColorPalette( const CHSV rhs[16])
-    // {
-    //     for( uint8_t i = 0; i < 16; ++i) {
-    //         entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
-    //     }
-    // }
-    // ColorPalette& operator=( const CHSVPalette16& rhs)
-    // {
-    //     for( uint8_t i = 0; i < 16; ++i) {
-    // 		entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
-    //     }
-    //     return *this;
-    // }
-    // TColorPalette& operator=( const CHSV rhs[16])
-    // {
-    //     for( uint8_t i = 0; i < 16; ++i) {
-    //         entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
-    //     }
-    //     return *this;
-    // }
-
     bool operator==( const TColorPalette rhs)
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
@@ -534,23 +507,6 @@ public:
     {
         return &(entries[0]);
     }
-/*
-    ColorPalette( const CHSV& c1)
-    {
-        fill_solid( &(entries[0]), size, c1);
-    }
-    ColorPalette( const CHSV& c1, const CHSV& c2)
-    {
-        fill_gradient( &(entries[0]), size, c1, c2);
-    }
-    ColorPalette( const CHSV& c1, const CHSV& c2, const CHSV& c3)
-    {
-        fill_gradient( &(entries[0]), size, c1, c2, c3);
-    }
-    ColorPalette( const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4)
-    {
-        fill_gradient( &(entries[0]), size, c1, c2, c3, c4);
-    }*/
 
     TColorPalette( const TColor& c1)
     {
@@ -570,6 +526,64 @@ public:
     }
 };
 
+template <int size>
+class CRGBPalette : public TColorPalette<CRGB,size>
+{
+public:
+    CRGBPalette() {}; // needed to compile for unknown reason
+    using TColorPalette<CRGB,size>::TColorPalette;
+    using TColorPalette<CRGB,size>::operator=;
+    using TColorPalette<CRGB,size>::operator==;
+    using TColorPalette<CRGB,size>::operator!=;
+    using TColorPalette<CRGB,size>::operator[];
+    using TColorPalette<CRGB,size>::operator CRGB *;
+    
+    CRGBPalette(const TColorPalette<CHSV,size> &rhs)
+    {
+         for( uint8_t i = 0; i < size; i++) {
+    		this->entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
+        }
+    }
+    CRGBPalette( const CHSV rhs[size])
+    {
+        for( uint8_t i = 0; i < size; i++) {
+            this->entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
+        }
+    }
+
+    CRGBPalette& operator=( const TColorPalette<CHSV,size>& rhs)
+    {
+        for( uint8_t i = 0; i < size; i++) {
+    		this->entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
+        }
+        return *this;
+    }
+    CRGBPalette& operator=( const CHSV rhs[size])
+    {
+        for( uint8_t i = 0; i < size; i++) {
+            this->entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
+        }
+        return *this;
+    }
+
+    CRGBPalette( const CHSV& c1)
+    {
+        fill_solid( &(this->entries[0]), size, c1);
+    }
+    CRGBPalette( const CHSV& c1, const CHSV& c2)
+    {
+        fill_gradient( &(this->entries[0]), size, c1, c2);
+    }
+    CRGBPalette( const CHSV& c1, const CHSV& c2, const CHSV& c3)
+    {
+        fill_gradient( &(this->entries[0]), size, c1, c2, c3);
+    }
+    CRGBPalette( const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4)
+    {
+        fill_gradient( &(this->entries[0]), size, c1, c2, c3, c4);
+    }
+};
+
 class CHSVPalette16 : public TColorPalette<CHSV,16> {
 public:
     using TColorPalette<CHSV,16>::TColorPalette;
@@ -578,6 +592,7 @@ public:
     using TColorPalette<CHSV,16>::operator!=;
     using TColorPalette<CHSV,16>::operator[];
     using TColorPalette<CHSV,16>::operator CHSV *;
+
     CHSVPalette16( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
                     const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
                     const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
@@ -609,7 +624,6 @@ public:
         return *this;
     }
 };
-
 
 class CHSVPalette32: public TColorPalette<CHSV,32> {
 public:
@@ -694,16 +708,16 @@ public:
     }
 };
 
-class CRGBPalette16 : public TColorPalette<CRGB,16>
+class CRGBPalette16 : public CRGBPalette<16>
 {
 public:
-    using TColorPalette<CRGB,16>::TColorPalette;
-    using TColorPalette<CRGB,16>::operator=;
-    using TColorPalette<CRGB,16>::operator==;
-    using TColorPalette<CRGB,16>::operator!=;
-    using TColorPalette<CRGB,16>::operator[];
-    using TColorPalette<CRGB,16>::operator CRGB *;
-
+    using CRGBPalette<16>::CRGBPalette;
+    using CRGBPalette<16>::operator=;
+    using CRGBPalette<16>::operator==;
+    using CRGBPalette<16>::operator!=;
+    using CRGBPalette<16>::operator[];
+    using CRGBPalette<16>::operator CRGB *;
+    
     CRGBPalette16( const CRGB& c00,const CRGB& c01,const CRGB& c02,const CRGB& c03,
                     const CRGB& c04,const CRGB& c05,const CRGB& c06,const CRGB& c07,
                     const CRGB& c08,const CRGB& c09,const CRGB& c10,const CRGB& c11,
@@ -842,15 +856,15 @@ public:
     }
 };
 
-class CRGBPalette32 : public TColorPalette<CRGB,32>
+class CRGBPalette32 : public CRGBPalette<32>
 {
 public:
-    using TColorPalette<CRGB,32>::TColorPalette;
-    using TColorPalette<CRGB,32>::operator=;
-    using TColorPalette<CRGB,32>::operator==;
-    using TColorPalette<CRGB,32>::operator!=;
-    using TColorPalette<CRGB,32>::operator[];
-    using TColorPalette<CRGB,32>::operator CRGB *;
+    using CRGBPalette<32>::CRGBPalette;
+    using CRGBPalette<32>::operator=;
+    using CRGBPalette<32>::operator==;
+    using CRGBPalette<32>::operator!=;
+    using CRGBPalette<32>::operator[];
+    using CRGBPalette<32>::operator CRGB *;
     
     CRGBPalette32( const CRGB& c00,const CRGB& c01,const CRGB& c02,const CRGB& c03,
                   const CRGB& c04,const CRGB& c05,const CRGB& c06,const CRGB& c07,
@@ -1001,15 +1015,15 @@ public:
 };
 
 
-class CRGBPalette256 : public TColorPalette<CRGB,256>
+class CRGBPalette256 : public CRGBPalette<256>
 {
 public:
-    using TColorPalette<CRGB,256>::TColorPalette;
-    using TColorPalette<CRGB,256>::operator=;
-    using TColorPalette<CRGB,256>::operator==;
-    using TColorPalette<CRGB,256>::operator!=;
-    using TColorPalette<CRGB,256>::operator[];
-    using TColorPalette<CRGB,256>::operator CRGB *;
+    using CRGBPalette<256>::CRGBPalette;
+    using CRGBPalette<256>::operator=;
+    using CRGBPalette<256>::operator==;
+    using CRGBPalette<256>::operator!=;
+    using CRGBPalette<256>::operator[];
+    using CRGBPalette<256>::operator CRGB *;
 
     CRGBPalette256( const CRGB& c00,const CRGB& c01,const CRGB& c02,const CRGB& c03,
                   const CRGB& c04,const CRGB& c05,const CRGB& c06,const CRGB& c07,
