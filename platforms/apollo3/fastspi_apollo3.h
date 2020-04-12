@@ -97,9 +97,9 @@ public:
 		}
 
 		am_hal_gpio_fastgpio_set(_CLOCK_PIN);
-		for (int16_t d = (_SPI_CLOCK_DIVIDER >> 1); d > 0; d--) { __NOP(); }
+		for (uint32_t d = (_SPI_CLOCK_DIVIDER >> 1); d > 0; d--) { __NOP(); }
 		am_hal_gpio_fastgpio_clr(_CLOCK_PIN);
-		for (int16_t d = ((_SPI_CLOCK_DIVIDER >> 1) - 1); d > 0; d--) { __NOP(); }
+		for (uint32_t d = (_SPI_CLOCK_DIVIDER >> 1); d > 0; d--) { __NOP(); }
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
