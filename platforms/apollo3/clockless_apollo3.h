@@ -26,7 +26,7 @@ __attribute__ ((always_inline)) inline static uint32_t __am_hal_systick_count() 
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
+template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -44,7 +44,7 @@ public:
 		// Make sure the system clock is running at the full 48MHz
 	  am_hal_clkgen_control(AM_HAL_CLKGEN_CONTROL_SYSCLK_MAX, 0);
 
-	  // Make sure interrupts are enabled
+		// Make sure interrupts are enabled
 	  //am_hal_interrupt_master_enable();
 
 	  // Enable SysTick Interrupts in the NVIC

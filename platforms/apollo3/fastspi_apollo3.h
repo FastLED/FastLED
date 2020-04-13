@@ -26,10 +26,10 @@ public:
 
 	// initialize the pins for fastgpio
 	void init() {
-		pinMode(_DATA_PIN, OUTPUT);
-		pinMode(_CLOCK_PIN, OUTPUT);
-		am_hal_gpio_fastgpio_enable(_DATA_PIN);
-		am_hal_gpio_fastgpio_enable(_CLOCK_PIN);
+		FastPin<_CLOCK_PIN>::setOutput();
+		FastPin<_CLOCK_PIN>::lo();
+		FastPin<_DATA_PIN>::setOutput();
+		FastPin<_DATA_PIN>::lo();
 	}
 
 	// latch the CS select
@@ -91,14 +91,14 @@ public:
 	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
 		//waitFully();
 		if(b & (1 << BIT)) {
-			am_hal_gpio_fastgpio_set(_DATA_PIN);
+			FastPin<_DATA_PIN>::hi();
 		} else {
-			am_hal_gpio_fastgpio_clr(_DATA_PIN);
+			FastPin<_DATA_PIN>::lo();
 		}
 
-		am_hal_gpio_fastgpio_set(_CLOCK_PIN);
+		FastPin<_CLOCK_PIN>::hi();
 		for (uint32_t d = (_SPI_CLOCK_DIVIDER >> 1); d > 0; d--) { __NOP(); }
-		am_hal_gpio_fastgpio_clr(_CLOCK_PIN);
+		FastPin<_CLOCK_PIN>::lo();
 		for (uint32_t d = (_SPI_CLOCK_DIVIDER >> 1); d > 0; d--) { __NOP(); }
 	}
 
