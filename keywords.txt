@@ -128,7 +128,6 @@ fadeToBlackBy	KEYWORD2
 fade_raw	KEYWORD2
 fade_video	KEYWORD2
 fill_gradient	KEYWORD2
-fill_gradient_RGB	KEYWORD2
 fill_palette	KEYWORD2
 fill_rainbow	KEYWORD2
 fill_solid	KEYWORD2

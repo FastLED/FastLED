@@ -15,50 +15,39 @@ FASTLED_NAMESPACE_BEGIN
 
 /// fill_solid -   fill a range of LEDs with a solid color
 ///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
-void fill_solid( struct CRGB * leds, int numToFill,
-                 const struct CRGB& color);
+inline void fill_solid(CRGB *target, int numTarget, const CRGB& color)
+{
+    for (int i{0}; i < numTarget; ++i)
+        target[i] = color;
+}
 
 /// fill_solid -   fill a range of LEDs with a solid color
-///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
-void fill_solid( struct CHSV* targetArray, int numToFill,
-				 const struct CHSV& hsvColor);
+///                Example: fill_solid( leds, NUM_LEDS, CHSV(50,0,200));
+inline void fill_solid(CHSV *target, int numTarget, const CHSV& color)
+{
+    for (int i{0}; i < numTarget; ++i)
+        target[i] = color;
+}
 
 
 /// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
 ///                full saturation and full value (brightness)
-void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
+template<typename TColor>
+void fill_rainbow( TColor * pFirstLED, int numToFill,
                    uint8_t initialhue,
-                   uint8_t deltahue = 5);
-
-/// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
-///                full saturation and full value (brightness)
-void fill_rainbow( struct CHSV * targetArray, int numToFill,
-                   uint8_t initialhue,
-                   uint8_t deltahue = 5);
-
-
-// fill_gradient - fill an array of colors with a smooth HSV gradient
-//                 between two specified HSV colors.
-//                 Since 'hue' is a value around a color wheel,
-//                 there are always two ways to sweep from one hue
-//                 to another.
-//                 This function lets you specify which way you want
-//                 the hue gradient to sweep around the color wheel:
-//                   FORWARD_HUES: hue always goes clockwise
-//                   BACKWARD_HUES: hue always goes counter-clockwise
-//                   SHORTEST_HUES: hue goes whichever way is shortest
-//                   LONGEST_HUES: hue goes whichever way is longest
-//                 The default is SHORTEST_HUES, as this is nearly
-//                 always what is wanted.
-//
-// fill_gradient can write the gradient colors EITHER
-//     (1) into an array of CRGBs (e.g., into leds[] array, or an RGB Palette)
-//   OR
-//     (2) into an array of CHSVs (e.g. an HSV Palette).
-//
-//   In the case of writing into a CRGB array, the gradient is
-//   computed in HSV space, and then HSV values are converted to RGB
-//   as they're written into the RGB array.
+                   uint8_t deltahue = 5)
+                   {
+                    CHSV hsv;
+                        hsv.hue = initialhue;
+                        hsv.val = 255;
+                        hsv.sat = 255;
+                        for( int i = 0; i < numToFill; ++i) {
+                            pFirstLED[i] = hsv;
+                            hsv.hue += deltahue;
+                        }
+                   }
+template void fill_rainbow(CRGB * pFirstLED, int numToFill, uint8_t initialhue, uint8_t deltahue);
+template void fill_rainbow(CHSV * pFirstLED, int numToFill, uint8_t initialhue, uint8_t deltahue);
 
 typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradientDirectionCode;
 
@@ -211,22 +200,17 @@ void fill_gradient( T* targetArray, uint16_t numLeds,
     fill_gradient( targetArray, twothirds, c3,      last, c4, directionCode);
 }
 
-// convenience synonym
-#define fill_gradient_HSV fill_gradient
-
-
-// fill_gradient_RGB - fill a range of LEDs with a smooth RGB gradient
+// fill_gradient - fill a range of LEDs with a smooth RGB gradient
 //                     between two specified RGB colors.
 //                     Unlike HSV, there is no 'color wheel' in RGB space,
 //                     and therefore there's only one 'direction' for the
 //                     gradient to go, and no 'direction code' is needed.
-void fill_gradient_RGB( CRGB* leds,
+void fill_gradient( CRGB* leds,
                        uint16_t startpos, CRGB startcolor,
                        uint16_t endpos,   CRGB endcolor );
-void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2);
-void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3);
-void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4);
-
+void fill_gradient( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2);
+void fill_gradient( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3);
+void fill_gradient( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4);
 
 // fadeLightBy and fade_video - reduce the brightness of an array
 //                              of pixels all at once.  Guaranteed
@@ -514,15 +498,15 @@ public:
     }
     TColorPalette( const TColor& c1, const TColor& c2)
     {
-        fill_gradient_RGB( &(entries[0]), size, c1, c2);
+        fill_gradient( &(entries[0]), size, c1, c2);
     }
     TColorPalette( const TColor& c1, const TColor& c2, const TColor& c3)
     {
-        fill_gradient_RGB( &(entries[0]), size, c1, c2, c3);
+        fill_gradient( &(entries[0]), size, c1, c2, c3);
     }
     TColorPalette( const TColor& c1, const TColor& c2, const TColor& c3, const TColor& c4)
     {
-        fill_gradient_RGB( &(entries[0]), size, c1, c2, c3, c4);
+        fill_gradient( &(entries[0]), size, c1, c2, c3, c4);
     }
 };
 
@@ -805,7 +789,7 @@ public:
                 }
                 lastSlotUsed = iend8;
             }
-            fill_gradient_RGB( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
+            fill_gradient( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -848,7 +832,7 @@ public:
                 }
                 lastSlotUsed = iend8;
             }
-            fill_gradient_RGB( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
+            fill_gradient( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -963,7 +947,7 @@ public:
                 }
                 lastSlotUsed = iend8;
             }
-            fill_gradient_RGB( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
+            fill_gradient( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -1006,14 +990,13 @@ public:
                 }
                 lastSlotUsed = iend8;
             }
-            fill_gradient_RGB( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
+            fill_gradient( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
         return *this;
     }
 };
-
 
 class CRGBPalette256 : public CRGBPalette<256>
 {
@@ -1072,7 +1055,7 @@ public:
             u.dword = FL_PGM_READ_DWORD_NEAR( progent);
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
-            fill_gradient_RGB( &(this->entries[0]), indexstart, rgbstart, indexend, rgbend);
+            fill_gradient( &(this->entries[0]), indexstart, rgbstart, indexend, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -1091,7 +1074,7 @@ public:
             u = *ent;
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
-            fill_gradient_RGB( &(this->entries[0]), indexstart, rgbstart, indexend, rgbend);
+            fill_gradient( &(this->entries[0]), indexstart, rgbstart, indexend, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }

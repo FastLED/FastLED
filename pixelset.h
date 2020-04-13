@@ -201,27 +201,27 @@ public:
 
   inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & startcolor, const PIXEL_TYPE & endcolor, TGradientDirectionCode directionCode  = SHORTEST_HUES) {
     if(dir >= 0) {
-      ::fill_gradient_RGB(leds,len,startcolor, endcolor);
+      ::fill_gradient(leds,len,startcolor, endcolor);
     } else {
-      ::fill_gradient_RGB(leds + len + 1, (-len), endcolor, startcolor);
+      ::fill_gradient(leds + len + 1, (-len), endcolor, startcolor);
     }
     return *this;
   }
 
   inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & c1, const PIXEL_TYPE & c2, const PIXEL_TYPE &  c3) {
     if(dir >= 0) {
-      ::fill_gradient_RGB(leds, len, c1, c2, c3);
+      ::fill_gradient(leds, len, c1, c2, c3);
     } else {
-      ::fill_gradient_RGB(leds + len + 1, -len, c3, c2, c1);
+      ::fill_gradient(leds + len + 1, -len, c3, c2, c1);
     }
     return *this;
   }
 
   inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & c1, const PIXEL_TYPE & c2, const PIXEL_TYPE & c3, const PIXEL_TYPE & c4) {
     if(dir >= 0) {
-      ::fill_gradient_RGB(leds, len, c1, c2, c3, c4);
+      ::fill_gradient(leds, len, c1, c2, c3, c4);
     } else {
-      ::fill_gradient_RGB(leds + len + 1, -len, c4, c3, c2, c1);
+      ::fill_gradient(leds + len + 1, -len, c4, c3, c2, c1);
     }
     return *this;
   }
