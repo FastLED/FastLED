@@ -457,7 +457,7 @@ public:
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
         if( p == q) return true;
-        for( uint8_t i = 0; i < size; ++i) {
+        for( uint16_t i = 0; i < size; ++i) {
             if( *p != *q) return false;
             ++p;
             ++q;
@@ -524,27 +524,27 @@ public:
     
     CRGBPalette(const TColorPalette<CHSV,size> &rhs)
     {
-         for( uint8_t i = 0; i < size; i++) {
+         for( uint16_t i = 0; i < size; i++) {
     		this->entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
         }
     }
     CRGBPalette( const CHSV rhs[size])
     {
-        for( uint8_t i = 0; i < size; i++) {
+        for( uint16_t i = 0; i < size; i++) {
             this->entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
         }
     }
 
     CRGBPalette& operator=( const TColorPalette<CHSV,size>& rhs)
     {
-        for( uint8_t i = 0; i < size; i++) {
+        for( uint16_t i = 0; i < size; i++) {
     		this->entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
         }
         return *this;
     }
     CRGBPalette& operator=( const CHSV rhs[size])
     {
-        for( uint8_t i = 0; i < size; i++) {
+        for( uint16_t i = 0; i < size; i++) {
             this->entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
         }
         return *this;
