@@ -426,7 +426,7 @@ class TColorPalette
 {
 public:
     TColor entries[size];
-    TColorPalette() {};
+    TColorPalette() = default;
     TColorPalette( const TColor& c00,const TColor& c01,const TColor& c02,const TColor& c03,
                     const TColor& c04,const TColor& c05,const TColor& c06,const TColor& c07,
                     const TColor& c08,const TColor& c09,const TColor& c10,const TColor& c11,
@@ -514,7 +514,7 @@ template <int size>
 class CRGBPalette : public TColorPalette<CRGB,size>
 {
 public:
-    CRGBPalette() {}; // needed to compile for unknown reason
+    CRGBPalette() = default; // needed to compile for unknown reason
     using TColorPalette<CRGB,size>::TColorPalette;
     using TColorPalette<CRGB,size>::operator=;
     using TColorPalette<CRGB,size>::operator==;
@@ -570,6 +570,7 @@ public:
 
 class CHSVPalette16 : public TColorPalette<CHSV,16> {
 public:
+    CHSVPalette16() = default; // needed to compile for unknown reason
     using TColorPalette<CHSV,16>::TColorPalette;
     using TColorPalette<CHSV,16>::operator=;
     using TColorPalette<CHSV,16>::operator==;
@@ -611,6 +612,7 @@ public:
 
 class CHSVPalette32: public TColorPalette<CHSV,32> {
 public:
+    CHSVPalette32() = default; // needed to compile for unknown reason
     using TColorPalette<CHSV,32>::TColorPalette;
     using TColorPalette<CHSV,32>::operator=;
     using TColorPalette<CHSV,32>::operator==;
@@ -653,6 +655,7 @@ public:
 
 class CHSVPalette256 : public TColorPalette<CHSV,256> {
 public:
+    CHSVPalette256() = default; // needed to compile for unknown reason
     using TColorPalette<CHSV,256>::TColorPalette;
     using TColorPalette<CHSV,256>::operator=;
     using TColorPalette<CHSV,256>::operator==;
@@ -695,6 +698,7 @@ public:
 class CRGBPalette16 : public CRGBPalette<16>
 {
 public:
+    CRGBPalette16() = default; // needed to compile for unknown reason
     using CRGBPalette<16>::CRGBPalette;
     using CRGBPalette<16>::operator=;
     using CRGBPalette<16>::operator==;
@@ -843,6 +847,7 @@ public:
 class CRGBPalette32 : public CRGBPalette<32>
 {
 public:
+    CRGBPalette32() = default; // needed to compile for unknown reason
     using CRGBPalette<32>::CRGBPalette;
     using CRGBPalette<32>::operator=;
     using CRGBPalette<32>::operator==;
@@ -1001,6 +1006,7 @@ public:
 class CRGBPalette256 : public CRGBPalette<256>
 {
 public:
+    CRGBPalette256() = default; // needed to compile for unknown reason
     using CRGBPalette<256>::CRGBPalette;
     using CRGBPalette<256>::operator=;
     using CRGBPalette<256>::operator==;
