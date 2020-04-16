@@ -1026,6 +1026,16 @@ public:
         }
     };
 
+    CHSVPalette32( const CHSVPalette16& rhs16)
+    {
+        UpscalePalette( rhs16, *this);
+    }
+    CHSVPalette32& operator=( const CHSVPalette16& rhs16)
+    {
+        UpscalePalette( rhs16, *this);
+        return *this;
+    }
+
     CHSVPalette32( const TProgmemHSVPalette32& rhs)
     {
         for( uint8_t i = 0; i < 32; ++i) {
@@ -1073,6 +1083,16 @@ public:
     CHSVPalette256& operator=( const CHSVPalette16& rhs16)
     {
         UpscalePalette( rhs16, *this);
+        return *this;
+    }
+
+    CHSVPalette256( const CHSVPalette32& rhs32)
+    {
+        UpscalePalette( rhs32, *this);
+    }
+    CHSVPalette256& operator=( const CHSVPalette32& rhs32)
+    {
+        UpscalePalette( rhs32, *this);
         return *this;
     }
 
