@@ -568,133 +568,6 @@ public:
     }
 };
 
-class CHSVPalette16 : public TColorPalette<CHSV,16> {
-public:
-    CHSVPalette16() = default; // needed to compile for unknown reason
-    using TColorPalette<CHSV,16>::TColorPalette;
-    using TColorPalette<CHSV,16>::operator=;
-    using TColorPalette<CHSV,16>::operator==;
-    using TColorPalette<CHSV,16>::operator!=;
-    using TColorPalette<CHSV,16>::operator[];
-    using TColorPalette<CHSV,16>::operator CHSV *;
-
-    CHSVPalette16( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
-                    const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
-                    const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
-                    const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
-    {
-        entries[0]=c00; entries[1]=c01; entries[2]=c02; entries[3]=c03;
-        entries[4]=c04; entries[5]=c05; entries[6]=c06; entries[7]=c07;
-        entries[8]=c08; entries[9]=c09; entries[10]=c10; entries[11]=c11;
-        entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
-    };
-
-    CHSVPalette16( const TProgmemHSVPalette16& rhs)
-    {
-        for( uint8_t i = 0; i < 16; ++i) {
-            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
-            entries[i].hue = xyz.red;
-            entries[i].sat = xyz.green;
-            entries[i].val = xyz.blue;
-        }
-    }
-    CHSVPalette16& operator=( const TProgmemHSVPalette16& rhs)
-    {
-        for( uint8_t i = 0; i < 16; ++i) {
-            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
-            entries[i].hue = xyz.red;
-            entries[i].sat = xyz.green;
-            entries[i].val = xyz.blue;
-        }
-        return *this;
-    }
-};
-
-class CHSVPalette32: public TColorPalette<CHSV,32> {
-public:
-    CHSVPalette32() = default; // needed to compile for unknown reason
-    using TColorPalette<CHSV,32>::TColorPalette;
-    using TColorPalette<CHSV,32>::operator=;
-    using TColorPalette<CHSV,32>::operator==;
-    using TColorPalette<CHSV,32>::operator!=;
-    using TColorPalette<CHSV,32>::operator[];
-    using TColorPalette<CHSV,32>::operator CHSV *;
-    CHSVPalette32( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
-                  const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
-                  const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
-                  const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
-    {
-        for( uint8_t i = 0; i < 2; ++i) {
-            entries[0+i]=c00; entries[2+i]=c01; entries[4+i]=c02; entries[6+i]=c03;
-            entries[8+i]=c04; entries[10+i]=c05; entries[12+i]=c06; entries[14+i]=c07;
-            entries[16+i]=c08; entries[18+i]=c09; entries[20+i]=c10; entries[22+i]=c11;
-            entries[24+i]=c12; entries[26+i]=c13; entries[28+i]=c14; entries[30+i]=c15;
-        }
-    };
-
-    CHSVPalette32( const TProgmemHSVPalette32& rhs)
-    {
-        for( uint8_t i = 0; i < 32; ++i) {
-            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
-            entries[i].hue = xyz.red;
-            entries[i].sat = xyz.green;
-            entries[i].val = xyz.blue;
-        }
-    }
-    CHSVPalette32& operator=( const TProgmemHSVPalette32& rhs)
-    {
-        for( uint8_t i = 0; i < 32; ++i) {
-            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
-            entries[i].hue = xyz.red;
-            entries[i].sat = xyz.green;
-            entries[i].val = xyz.blue;
-        }
-        return *this;
-    }
-};
-
-class CHSVPalette256 : public TColorPalette<CHSV,256> {
-public:
-    CHSVPalette256() = default; // needed to compile for unknown reason
-    using TColorPalette<CHSV,256>::TColorPalette;
-    using TColorPalette<CHSV,256>::operator=;
-    using TColorPalette<CHSV,256>::operator==;
-    using TColorPalette<CHSV,256>::operator!=;
-    using TColorPalette<CHSV,256>::operator[];
-    using TColorPalette<CHSV,256>::operator CHSV *;
-    CHSVPalette256( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
-                  const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
-                  const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
-                  const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
-    {
-        CHSVPalette16 p16(c00,c01,c02,c03,c04,c05,c06,c07,
-                          c08,c09,c10,c11,c12,c13,c14,c15);
-        *this = p16;
-    };
-
-    CHSVPalette256( const CHSVPalette16& rhs16)
-    {
-        UpscalePalette( rhs16, *this);
-    }
-    CHSVPalette256& operator=( const CHSVPalette16& rhs16)
-    {
-        UpscalePalette( rhs16, *this);
-        return *this;
-    }
-
-    CHSVPalette256( const TProgmemRGBPalette16& rhs)
-    {
-        CHSVPalette16 p16(rhs);
-        *this = p16;
-    }
-    CHSVPalette256& operator=( const TProgmemRGBPalette16& rhs)
-    {
-        CHSVPalette16 p16(rhs);
-        *this = p16;
-        return *this;
-    }
-};
-
 class CRGBPalette16 : public CRGBPalette<16>
 {
 public:
@@ -1087,6 +960,135 @@ public:
         return *this;
     }
 };
+
+
+class CHSVPalette16 : public TColorPalette<CHSV,16> {
+public:
+    CHSVPalette16() = default; // needed to compile for unknown reason
+    using TColorPalette<CHSV,16>::TColorPalette;
+    using TColorPalette<CHSV,16>::operator=;
+    using TColorPalette<CHSV,16>::operator==;
+    using TColorPalette<CHSV,16>::operator!=;
+    using TColorPalette<CHSV,16>::operator[];
+    using TColorPalette<CHSV,16>::operator CHSV *;
+
+    CHSVPalette16( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
+                    const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
+                    const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
+                    const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
+    {
+        entries[0]=c00; entries[1]=c01; entries[2]=c02; entries[3]=c03;
+        entries[4]=c04; entries[5]=c05; entries[6]=c06; entries[7]=c07;
+        entries[8]=c08; entries[9]=c09; entries[10]=c10; entries[11]=c11;
+        entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
+    };
+
+    CHSVPalette16( const TProgmemHSVPalette16& rhs)
+    {
+        for( uint8_t i = 0; i < 16; ++i) {
+            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            entries[i].hue = xyz.red;
+            entries[i].sat = xyz.green;
+            entries[i].val = xyz.blue;
+        }
+    }
+    CHSVPalette16& operator=( const TProgmemHSVPalette16& rhs)
+    {
+        for( uint8_t i = 0; i < 16; ++i) {
+            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            entries[i].hue = xyz.red;
+            entries[i].sat = xyz.green;
+            entries[i].val = xyz.blue;
+        }
+        return *this;
+    }
+};
+
+class CHSVPalette32: public TColorPalette<CHSV,32> {
+public:
+    CHSVPalette32() = default; // needed to compile for unknown reason
+    using TColorPalette<CHSV,32>::TColorPalette;
+    using TColorPalette<CHSV,32>::operator=;
+    using TColorPalette<CHSV,32>::operator==;
+    using TColorPalette<CHSV,32>::operator!=;
+    using TColorPalette<CHSV,32>::operator[];
+    using TColorPalette<CHSV,32>::operator CHSV *;
+    CHSVPalette32( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
+                  const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
+                  const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
+                  const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
+    {
+        for( uint8_t i = 0; i < 2; ++i) {
+            entries[0+i]=c00; entries[2+i]=c01; entries[4+i]=c02; entries[6+i]=c03;
+            entries[8+i]=c04; entries[10+i]=c05; entries[12+i]=c06; entries[14+i]=c07;
+            entries[16+i]=c08; entries[18+i]=c09; entries[20+i]=c10; entries[22+i]=c11;
+            entries[24+i]=c12; entries[26+i]=c13; entries[28+i]=c14; entries[30+i]=c15;
+        }
+    };
+
+    CHSVPalette32( const TProgmemHSVPalette32& rhs)
+    {
+        for( uint8_t i = 0; i < 32; ++i) {
+            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            entries[i].hue = xyz.red;
+            entries[i].sat = xyz.green;
+            entries[i].val = xyz.blue;
+        }
+    }
+    CHSVPalette32& operator=( const TProgmemHSVPalette32& rhs)
+    {
+        for( uint8_t i = 0; i < 32; ++i) {
+            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            entries[i].hue = xyz.red;
+            entries[i].sat = xyz.green;
+            entries[i].val = xyz.blue;
+        }
+        return *this;
+    }
+};
+
+class CHSVPalette256 : public TColorPalette<CHSV,256> {
+public:
+    CHSVPalette256() = default; // needed to compile for unknown reason
+    using TColorPalette<CHSV,256>::TColorPalette;
+    using TColorPalette<CHSV,256>::operator=;
+    using TColorPalette<CHSV,256>::operator==;
+    using TColorPalette<CHSV,256>::operator!=;
+    using TColorPalette<CHSV,256>::operator[];
+    using TColorPalette<CHSV,256>::operator CHSV *;
+    CHSVPalette256( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
+                  const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
+                  const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
+                  const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
+    {
+        CHSVPalette16 p16(c00,c01,c02,c03,c04,c05,c06,c07,
+                          c08,c09,c10,c11,c12,c13,c14,c15);
+        *this = p16;
+    };
+
+    CHSVPalette256( const CHSVPalette16& rhs16)
+    {
+        UpscalePalette( rhs16, *this);
+    }
+    CHSVPalette256& operator=( const CHSVPalette16& rhs16)
+    {
+        UpscalePalette( rhs16, *this);
+        return *this;
+    }
+
+    CHSVPalette256( const TProgmemRGBPalette16& rhs)
+    {
+        CHSVPalette16 p16(rhs);
+        *this = p16;
+    }
+    CHSVPalette256& operator=( const TProgmemRGBPalette16& rhs)
+    {
+        CHSVPalette16 p16(rhs);
+        *this = p16;
+        return *this;
+    }
+};
+
 
 typedef enum { NOBLEND=0, LINEARBLEND=1 } TBlendType;
 
