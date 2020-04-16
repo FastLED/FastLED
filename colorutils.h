@@ -452,19 +452,19 @@ public:
         return *this;
     }
 
-    bool operator==( const TColorPalette rhs)
+    bool operator==( const TColorPalette &rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
         if( p == q) return true;
-        for( uint16_t i = 0; i < size; ++i) {
+        for( uint16_t i = 0; i < sizeof(this->entries); ++i) {
             if( *p != *q) return false;
             ++p;
             ++q;
         }
         return true;
     }
-    bool operator!=( const TColorPalette rhs)
+    bool operator!=( const TColorPalette &rhs) const
     {
         return !( *this == rhs);
     }
