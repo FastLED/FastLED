@@ -828,7 +828,7 @@ public:
         uint16_t count = 0;
         do {
             u.dword = FL_PGM_READ_DWORD_NEAR(progent + count);
-            ++count;;
+            ++count;
         } while ( u.index != 255);
 
         int8_t lastSlotUsed = -1;
@@ -870,7 +870,7 @@ public:
         uint16_t count = 0;
         do {
             u = *(ent + count);
-            ++count;;
+            ++count;
         } while ( u.index != 255);
 
         int8_t lastSlotUsed = -1;
@@ -1225,7 +1225,7 @@ public:
         uint16_t count = 0;
         do {
             u.dword = FL_PGM_READ_DWORD_NEAR(progent + count);
-            ++count;;
+            ++count;
         } while ( u.index != 255);
         
         int8_t lastSlotUsed = -1;
@@ -1267,7 +1267,7 @@ public:
         uint16_t count = 0;
         do {
             u = *(ent + count);
-            ++count;;
+            ++count;
         } while ( u.index != 255);
         
         int8_t lastSlotUsed = -1;

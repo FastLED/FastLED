@@ -74,8 +74,8 @@ protected:
 		ARM_DWT_CYCCNT = 0;
 
 		register data_ptr_t port = FastPin<DATA_PIN>::port();
-		register data_t hi = *port | FastPin<DATA_PIN>::mask();;
-		register data_t lo = *port & ~FastPin<DATA_PIN>::mask();;
+		register data_t hi = *port | FastPin<DATA_PIN>::mask();
+		register data_t lo = *port & ~FastPin<DATA_PIN>::mask();
 		*port = lo;
 
 		// Setup the pixel controller and load/scale the first byte
