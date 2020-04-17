@@ -993,56 +993,6 @@ CHSV ColorFromPalette( const struct CHSVPalette256& pal, uint8_t index, uint8_t 
     return hsv;
 }
 
-
-void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256)
-{
-    for( int i = 0; i < 256; ++i) {
-        destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
-    }
-}
-
-void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette256& destpal256)
-{
-    for( int i = 0; i < 256; ++i) {
-        destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal16, i);
-    }
-}
-
-
-void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette32& destpal32)
-{
-    for( uint8_t i = 0; i < 16; ++i) {
-        uint8_t j = i * 2;
-        destpal32[j+0] = srcpal16[i];
-        destpal32[j+1] = srcpal16[i];
-    }
-}
-
-void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette32& destpal32)
-{
-    for( uint8_t i = 0; i < 16; ++i) {
-        uint8_t j = i * 2;
-        destpal32[j+0] = srcpal16[i];
-        destpal32[j+1] = srcpal16[i];
-    }
-}
-
-void UpscalePalette(const struct CRGBPalette32& srcpal32, struct CRGBPalette256& destpal256)
-{
-    for( int i = 0; i < 256; ++i) {
-        destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal32, i);
-    }
-}
-
-void UpscalePalette(const struct CHSVPalette32& srcpal32, struct CHSVPalette256& destpal256)
-{
-    for( int i = 0; i < 256; ++i) {
-        destpal256[(uint8_t)(i)] = ColorFromPalette( srcpal32, i);
-    }
-}
-
-
-
 #if 0
 // replaced by PartyColors_p
 void SetupPartyColors(CRGBPalette16& pal)

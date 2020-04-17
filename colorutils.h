@@ -407,18 +407,39 @@ typedef uint8_t TDynamicRGBGradientPalette_byte ;
 typedef const TDynamicRGBGradientPalette_byte *TDynamicRGBGradientPalette_bytes;
 typedef TDynamicRGBGradientPalette_bytes TDynamicRGBGradientPalettePtr;
 
-// Convert a 16-entry palette to a 256-entry palette
-void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256);
-void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette256& destpal256);
+// Fast upscaling functions for palettes, similarities to noblend
+template <typename TSRCPalette, typename TDESTPalette>
+void UpscalePalette(const TSRCPalette &srcpal, TDESTPalette &destpal)
+{
+    constexpr uint16_t srcsize{static_cast<uint16_t>(sizeof(srcpal.entries)/sizeof(srcpal.entries[0]))};
+    constexpr uint16_t destsize{static_cast<uint16_t>(sizeof(destpal.entries)/sizeof(destpal.entries[0]))};
+    constexpr uint16_t steps{destsize/srcsize};
+    for (uint16_t i{0}; i < srcsize; ++i)
+        for (uint16_t j{0}; j < steps; ++j)
+            destpal[i+j] = srcpal[i];
+}
+template void UpscalePalette(const CRGBPalette16 &srcpal, CRGBPalette32 &destpal);
+template void UpscalePalette(const CRGBPalette16 &srcpal, CRGBPalette256 &destpal);
+template void UpscalePalette(const CRGBPalette32 &srcpal, CRGBPalette256 &destpal);
+template void UpscalePalette(const CHSVPalette16 &srcpal, CHSVPalette32 &destpal);
+template void UpscalePalette(const CHSVPalette16 &srcpal, CHSVPalette256 &destpal);
+template void UpscalePalette(const CHSVPalette32 &srcpal, CHSVPalette256 &destpal);
 
-// Convert a 16-entry palette to a 32-entry palette
-void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette32& destpal32);
-void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette32& destpal32);
-
-// Convert a 32-entry palette to a 256-entry palette
-void UpscalePalette(const struct CRGBPalette32& srcpal32, struct CRGBPalette256& destpal256);
-void UpscalePalette(const struct CHSVPalette32& srcpal32, struct CHSVPalette256& destpal256);
-
+// High res upscaling function for palettes
+// as ColorFromPalette only takes uint8_t limit the destsize to 256
+template <typename TSRCPalette, typename TDESTPalette>
+void UpscalePaletteInterpolated(const TSRCPalette &srcpal, TDESTPalette &destpal)
+{
+    constexpr uint16_t size{static_cast<uint16_t>(sizeof(destpal.entries)/sizeof(destpal.entries[0]))};
+    for (uint16_t i{0}; i < size; ++i)
+        destpal[i] = ColorFromPalette(srcpal, static_cast<uint8_t>(i));
+}
+template void UpscalePaletteInterpolated(const CRGBPalette16 &srcpal, CRGBPalette32 &destpal);
+template void UpscalePaletteInterpolated(const CRGBPalette16 &srcpal, CRGBPalette256 &destpal);
+template void UpscalePaletteInterpolated(const CRGBPalette32 &srcpal, CRGBPalette256 &destpal);
+template void UpscalePaletteInterpolated(const CHSVPalette16 &srcpal, CHSVPalette32 &destpal);
+template void UpscalePaletteInterpolated(const CHSVPalette16 &srcpal, CHSVPalette256 &destpal);
+template void UpscalePaletteInterpolated(const CHSVPalette32 &srcpal, CHSVPalette256 &destpal);
 
 template<typename TColor, int size>
 class TColorPalette
@@ -921,21 +942,21 @@ public:
 
     CRGBPalette256( const CRGBPalette16& rhs16)
     {
-        UpscalePalette( rhs16, *this);
+        UpscalePaletteInterpolated( rhs16, *this);
     }
     CRGBPalette256& operator=( const CRGBPalette16& rhs16)
     {
-        UpscalePalette( rhs16, *this);
+        UpscalePaletteInterpolated( rhs16, *this);
         return *this;
     }
 
     CRGBPalette256( const CRGBPalette32& rhs32)
     {
-        UpscalePalette( rhs32, *this);
+        UpscalePaletteInterpolated( rhs32, *this);
     }
     CRGBPalette256& operator=( const CRGBPalette32& rhs32)
     {
-        UpscalePalette( rhs32, *this);
+        UpscalePaletteInterpolated( rhs32, *this);
         return *this;
     }
 
@@ -1141,21 +1162,21 @@ public:
 
     CHSVPalette256( const CHSVPalette16& rhs16)
     {
-        UpscalePalette( rhs16, *this);
+        UpscalePaletteInterpolated( rhs16, *this);
     }
     CHSVPalette256& operator=( const CHSVPalette16& rhs16)
     {
-        UpscalePalette( rhs16, *this);
+        UpscalePaletteInterpolated( rhs16, *this);
         return *this;
     }
 
     CHSVPalette256( const CHSVPalette32& rhs32)
     {
-        UpscalePalette( rhs32, *this);
+        UpscalePaletteInterpolated( rhs32, *this);
     }
     CHSVPalette256& operator=( const CHSVPalette32& rhs32)
     {
-        UpscalePalette( rhs32, *this);
+        UpscalePaletteInterpolated( rhs32, *this);
         return *this;
     }
 
