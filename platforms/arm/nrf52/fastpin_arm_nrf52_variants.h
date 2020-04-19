@@ -56,8 +56,6 @@
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
 
-    #define MAX_PIN (33u) // 34 if wanting to use NFC1 test point
-
     // Arduino pins 0..7
     _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 -- UART TX
     //_FL_DEFPIN( 1, 24, 0); // D1  is P0.24 -- UART RX
@@ -163,11 +161,12 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Adafruit Bluefruit on nRF52840DK PCA10056 is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
     
     #if defined(USE_ARDUINO_PIN_NUMBERING)
-        /* pca10056_schematic_and_pcb.pdf
-           Page 3 shows the Arduino Pin to GPIO Px.xx mapping
+        #error "Define of `USE_ARDUINO_PIN_NUMBERING` has known errors in pin mapping -- select different mapping"
+    #elif defined(USE_ARDUINO_UNO_R3_HEADER_PIN_NUMBERING)
+        /* The following allows defining and using the FastPin<> templates,
+           using the Arduino UNO R3 connector pin definitions.
         */
         _FL_DEFPIN( 0,  1, 1); // D0  is P1.01 
         _FL_DEFPIN( 1,  2, 1); // D1  is P1.02 
@@ -183,40 +182,78 @@
         _FL_DEFPIN(11, 13, 1); // D11 is P1.13 
         _FL_DEFPIN(12, 14, 1); // D12 is P1.14
         _FL_DEFPIN(13, 15, 1); // D13 is P1.15 
-        _FL_DEFPIN(14,  0, 0); // D14 is P0.00 (if SB4 bridged)
-        _FL_DEFPIN(15,  1, 0); // D15 is P0.01 (if SB3 bridged)
-        _FL_DEFPIN(16,  5, 0); // D16 is P0.05 (aka AIN3, aka UART RTS)
-        _FL_DEFPIN(17,  6, 0); // D17 is P0.06 (UART TxD)
-        _FL_DEFPIN(18,  7, 0); // D18 is P0.07 (UART CTS default)
-        _FL_DEFPIN(19,  8, 0); // D19 is P0.08 (UART RxD)
-        _FL_DEFPIN(20,  9, 0); // D20 is P0.09 (NFC1)
-        _FL_DEFPIN(21, 10, 0); // D21 is P0.10 (NFC2)
-        _FL_DEFPIN(22, 11, 0); // D22 is P0.11 (TRACEDATA2 / BUTTON1 default)
-        _FL_DEFPIN(23, 12, 0); // D23 is P0.12 (TRACEDATA1 / BUTTON2 default)
-        _FL_DEFPIN(24, 13, 0); // D24 is P0.13 (LED1)
-        _FL_DEFPIN(25, 14, 0); // D25 is P0.14 (LED2)
-        _FL_DEFPIN(26, 15, 0); // D26 is P0.15 (LED3)
-        _FL_DEFPIN(27, 16, 0); // D27 is P0.16 (LED4)
-        _FL_DEFPIN(28, 17, 0); // D28 is P0.17 (QSPI !CS , unless SB13 cut)
-        // _FL_DEFPIN(29, 18, 0); // D29 is P0.18 (RESET)
-        _FL_DEFPIN(30, 19, 0); // D30 is P0.19 (QSPI CLK , unless SB11 cut)
-        _FL_DEFPIN(31, 20, 0); // D31 is P0.20 (QSPI DIO0, unless SB12 cut)
-        _FL_DEFPIN(32, 21, 0); // D32 is P0.21 (QSPI DIO1, unless SB14 cut)
-        _FL_DEFPIN(33, 22, 0); // D33 is P0.22 (QSPI DIO2, unless SB15 cut)
-        _FL_DEFPIN(34, 23, 0); // D34 is P0.23 (QSPI DIO3, unless SB10 cut)
-        _FL_DEFPIN(35, 24, 0); // D35 is P0.24 (BUTTON3)
-        _FL_DEFPIN(36, 25, 0); // D36 is P0.25 (BUTTON4)
-        _FL_DEFPIN(37, 00, 1); // D37 is P1.00 (TRACEDATA0 / SWO)
-        _FL_DEFPIN(38, 09, 1); // D38 is P1.09 (TRACEDATA3)
-        //_FL_DEFPIN(??,  2, 0); // D?? is P0.02 (AREF, aka AIN0)
-        //_FL_DEFPIN(??,  3, 0); // D?? is P0.03 (A0,   aka AIN1)
-        //_FL_DEFPIN(??,  4, 0); // D?? is P0.04 (A1,   aka AIN2, aka UART CTS option)
-        //_FL_DEFPIN(??, 28, 0); // D?? is P0.28 (A2,   aka AIN4)
-        //_FL_DEFPIN(??, 29, 0); // D?? is P0.29 (A3,   aka AIN5)
-        //_FL_DEFPIN(??, 30, 0); // D?? is P0.30 (A4,   aka AIN6)
-        //_FL_DEFPIN(??, 31, 0); // D?? is P0.31 (A5,   aka AIN7)
+        // Arduino UNO uses pins D14..D19 to map to header pins A0..A5
+        // AREF has no equivalent digital pin map on Arduino, would be P0.02
+        _FL_DEFPIN(14,  3, 0); // D14 / A0 is P0.03
+        _FL_DEFPIN(15,  4, 0); // D15 / A1 is P0.04
+        _FL_DEFPIN(16, 28, 0); // D16 / A2 is P0.28
+        _FL_DEFPIN(17, 29, 0); // D17 / A3 is P0.29
+        // Cannot determine which pin on PCA10056 would be intended solely from UNO R3 digital pin number
+        //_FL_DEFPIN(18, 30, 0); // D18 could be one of two pins: A4 would be P0.30, SDA would be P0.26
+        //_FL_DEFPIN(19, 31, 0); // D19 could be one of two pins: A5 would be P0.31, SCL would be P0.27
+    #elif defined(USE_ARDUINO_MEGA_2560_REV3_HEADER_PIN_NUMBERING)
+        /* The following allows defining and using the FastPin<> templates,
+           using the Arduino UNO R3 connector pin definitions.
+        */
+        _FL_DEFPIN( 0,  1, 1); // D0  is P1.01
+        _FL_DEFPIN( 1,  2, 1); // D1  is P1.02
+        _FL_DEFPIN( 2,  3, 1); // D2  is P1.03
+        _FL_DEFPIN( 3,  4, 1); // D3  is P1.04
+        _FL_DEFPIN( 4,  5, 1); // D4  is P1.05
+        _FL_DEFPIN( 5,  6, 1); // D5  is P1.06
+        _FL_DEFPIN( 6,  7, 1); // D6  is P1.07 (BUTTON1 option)
+        _FL_DEFPIN( 7,  8, 1); // D7  is P1.08 (BUTTON2 option)
+        _FL_DEFPIN( 8, 10, 1); // D8  is P1.10
+        _FL_DEFPIN( 9, 11, 1); // D9  is P1.11
+        _FL_DEFPIN(10, 12, 1); // D10 is P1.12
+        _FL_DEFPIN(11, 13, 1); // D11 is P1.13
+        _FL_DEFPIN(12, 14, 1); // D12 is P1.14
+        _FL_DEFPIN(13, 15, 1); // D13 is P1.15
 
-    #else
+        // Arduino MEGA 2560 has additional digital pins on lower digital header
+        _FL_DEFPIN(14, 10, 0); // D14 is P0.10
+        _FL_DEFPIN(15,  9, 0); // D15 is P0.09
+        _FL_DEFPIN(16,  8, 0); // D16 is P0.08
+        _FL_DEFPIN(17,  7, 0); // D17 is P0.07
+        _FL_DEFPIN(18,  6, 0); // D14 is P0.06
+        _FL_DEFPIN(19,  5, 0); // D15 is P0.05
+        // Cannot determine which pin on PCA10056 would be intended solely from UNO MEGA 2560 digital pin number
+        //_FL_DEFPIN(20,  1, 0); // D20 could be one of two pins: D20 on lower header would be P0.01, SDA would be P0.26
+        //_FL_DEFPIN(21,  0, 0); // D21 could be one of two pins: D21 on lower header would be P0.00, SCL would be P0.27
+
+        // Arduino MEGA 2560 has D22-D53 exposed on perpendicular two-row header
+        // PCA10056 has support for D22-D38 via a 2x19 header at that location (D39 is GND on PCA10056)
+        _FL_DEFPIN(22, 11, 0); // D22 is P0.11
+        _FL_DEFPIN(23, 12, 0); // D23 is P0.12
+        _FL_DEFPIN(24, 13, 0); // D24 is P0.13
+        _FL_DEFPIN(25, 14, 0); // D25 is P0.14
+        _FL_DEFPIN(26, 15, 0); // D26 is P0.15
+        _FL_DEFPIN(27, 16, 0); // D27 is P0.16
+        // _FL_DEFPIN(28, 17, 0); // D28 is P0.17 (QSPI !CS )
+        // _FL_DEFPIN(29, 18, 0); // D29 is P0.18 (RESET)
+        // _FL_DEFPIN(30, 19, 0); // D30 is P0.19 (QSPI CLK)
+        // _FL_DEFPIN(31, 20, 0); // D31 is P0.20 (QSPI DIO0)
+        // _FL_DEFPIN(32, 21, 0); // D32 is P0.21 (QSPI DIO1)
+        // _FL_DEFPIN(33, 22, 0); // D33 is P0.22 (QSPI DIO2)
+        // _FL_DEFPIN(34, 23, 0); // D34 is P0.23 (QSPI DIO3)
+        _FL_DEFPIN(35, 24, 0); // D35 is P0.24
+        _FL_DEFPIN(36, 25, 0); // D36 is P0.25
+        _FL_DEFPIN(37,  0, 1); // D37 is P1.00
+        _FL_DEFPIN(38,  9, 1); // D38 is P1.09
+        // _FL_DEFPIN(39, , 0); // D39 is P0.
+
+
+        // Arduino MEGA 2560 uses pins D54..D59 to map to header pins A0..A5
+        // (it also has D60..D69 for A6..A15, which have no corresponding header on PCA10056)
+        // AREF has no equivalent digital pin map on Arduino, would be P0.02
+        _FL_DEFPIN(54,  3, 0); // D54 / A0 is P0.03
+        _FL_DEFPIN(55,  4, 0); // D55 / A1 is P0.04
+        _FL_DEFPIN(56, 28, 0); // D56 / A2 is P0.28
+        _FL_DEFPIN(57, 29, 0); // D57 / A3 is P0.29
+        _FL_DEFPIN(58, 30, 0); // D58 / A4 is P0.30
+        _FL_DEFPIN(59, 31, 0); // D59 / A5 is P0.31
+
+    #else // identity mapping of arduino pin to port/pin
         /* 48 pins, defined using natural mapping in Adafruit's variant.cpp (!) */
         _DEFPIN_ARM_IDENTITY_P0( 0); // P0.00 (XL1 .. ensure SB4 bridged, SB2 cut)
         _DEFPIN_ARM_IDENTITY_P0( 1); // P0.01 (XL2 .. ensure SB3 bridged, SB1 cut)
