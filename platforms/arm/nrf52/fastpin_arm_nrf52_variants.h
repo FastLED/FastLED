@@ -12,7 +12,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Adafruit Bluefruit nRF52832 Feather is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Adafruit Bluefruit nRF52832 Feather is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
     _DEFPIN_ARM_IDENTITY_P0( 0); // xtal 1
     _DEFPIN_ARM_IDENTITY_P0( 1); // xtal 2
     _DEFPIN_ARM_IDENTITY_P0( 2); // a0
@@ -109,8 +111,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Adafruit Bluefruit nRF52840 Metro Express is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
-
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Adafruit Bluefruit nRF52840 Metro Express is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
     _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 (UART TX)
     _FL_DEFPIN( 1, 24, 0); // D1  is P0.24 (UART RX)
     _FL_DEFPIN( 2, 10, 1); // D2  is P1.10 
@@ -164,7 +167,7 @@
     
     #if defined(USE_ARDUINO_PIN_NUMBERING)
         #error "Define of `USE_ARDUINO_PIN_NUMBERING` has known errors in pin mapping -- select different mapping"
-    #elif defined(USE_ARDUINO_UNO_R3_HEADER_PIN_NUMBERING)
+    #elif defined(FASTLED_NRF52_USE_ARDUINO_UNO_R3_HEADER_PIN_NUMBERING)
         /* The following allows defining and using the FastPin<> templates,
            using the Arduino UNO R3 connector pin definitions.
         */
@@ -191,7 +194,7 @@
         // Cannot determine which pin on PCA10056 would be intended solely from UNO R3 digital pin number
         //_FL_DEFPIN(18, 30, 0); // D18 could be one of two pins: A4 would be P0.30, SDA would be P0.26
         //_FL_DEFPIN(19, 31, 0); // D19 could be one of two pins: A5 would be P0.31, SCL would be P0.27
-    #elif defined(USE_ARDUINO_MEGA_2560_REV3_HEADER_PIN_NUMBERING)
+    #elif defined(FASTLED_NRF52_USE_ARDUINO_MEGA_2560_REV3_HEADER_PIN_NUMBERING)
         /* The following allows defining and using the FastPin<> templates,
            using the Arduino UNO R3 connector pin definitions.
         */
@@ -314,8 +317,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Electronut labs bluey is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
-
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Electronut labs bluey is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
     _FL_DEFPIN( 0, 26, 0); // D0  is P0.26
     _FL_DEFPIN( 1, 27, 0); // D1  is P0.27
     _FL_DEFPIN( 2, 22, 0); // D2  is P0.22 (SPI SS  )
@@ -353,7 +357,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Electronut labs hackaBLE is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Electronut labs hackaBLE is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
     _FL_DEFPIN( 0, 14, 0); // D0  is P0.14 (RX)
     _FL_DEFPIN( 1, 13, 0); // D1  is P0.13 (TX)
     _FL_DEFPIN( 2, 12, 0); // D2  is P0.12
@@ -392,7 +398,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Electronut labs hackaBLE_v2 is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Electronut labs hackaBLE_v2 is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
     _DEFPIN_ARM_IDENTITY_P0( 0); // P0.00
     _DEFPIN_ARM_IDENTITY_P0( 1); // P0.01
     _DEFPIN_ARM_IDENTITY_P0( 2); // P0.02 (A0 / SDA / AREF)
@@ -435,7 +443,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "RedBear Blend 2 is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "RedBear Blend 2 is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
     _FL_DEFPIN( 0, 11, 0); // D0  is P0.11
     _FL_DEFPIN( 1, 12, 0); // D1  is P0.12
     _FL_DEFPIN( 2, 13, 0); // D2  is P0.13
@@ -471,7 +481,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "RedBear BLE Nano 2 is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "RedBear BLE Nano 2 is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
     _FL_DEFPIN( 0, 30, 0); // D0  is P0.30 (A0 / RX)
     _FL_DEFPIN( 1, 29, 0); // D1  is P0.29 (A1 / TX)
     _FL_DEFPIN( 2, 28, 0); // D2  is P0.28 (A2 / SDA)
@@ -494,7 +506,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Nordic Semiconductor nRF52 DK is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Nordic Semiconductor nRF52 DK is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
     _FL_DEFPIN( 0, 11, 0); // D0  is P0.11
     _FL_DEFPIN( 1, 12, 0); // D1  is P0.12
     _FL_DEFPIN( 2, 13, 0); // D2  is P0.13 (BUTTON1)
@@ -531,7 +545,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Taida Century nRF52 mini board is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Taida Century nRF52 mini board is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
     //_FL_DEFPIN( 0, 25, 0); // D0  is P0.xx (near radio!)
     //_FL_DEFPIN( 1, 26, 0); // D1  is P0.xx (near radio!)
     //_FL_DEFPIN( 2, 27, 0); // D2  is P0.xx (near radio!)
@@ -568,15 +584,15 @@
 
 // Generic nRF52832
 // See https://github.com/sandeepmistry/arduino-nRF5/blob/master/boards.txt
-#if defined(ARDUINO_GENERIC) && (\
-    defined(NRF52832_XXAA) || defined(NRF52832_XXAB)\
-    )
+#if defined(ARDUINO_GENERIC) && (  defined(NRF52832_XXAA) || defined(NRF52832_XXAB)  )
     #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
         #error "Cannot define more than one board at a time"
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Using `generic` NRF52832 board is an untested configuration -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Using `generic` NRF52832 board is an untested configuration -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
 
     _DEFPIN_ARM_IDENTITY_P0( 0); // P0.00 (    UART RX
     _DEFPIN_ARM_IDENTITY_P0( 1); // P0.01 (A0, UART TX)
