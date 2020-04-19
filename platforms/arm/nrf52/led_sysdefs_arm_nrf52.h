@@ -47,11 +47,12 @@ typedef __IO uint32_t RwReg;
 #define sei()  __enable_irq()
 
 #define FASTLED_NRF52_DEBUGPRINT(format, ...)
-//#define FASTLED_NRF52_DEBUGPRINT(format, ...)\
-//    do {\
-//        FastLED_NRF52_DebugPrint(format, ##__VA_ARGS__);\
-//    } while(0);
-
+/*
+#define FASTLED_NRF52_DEBUGPRINT(format, ...)\
+    do {\
+        FastLED_NRF52_DebugPrint(format, ##__VA_ARGS__);\
+    } while(0);
+*/
 
 
 
