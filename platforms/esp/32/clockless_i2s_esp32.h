@@ -510,8 +510,8 @@ protected:
        
         // -- Allocate i2s interrupt
         SET_PERI_REG_BITS(I2S_INT_ENA_REG(I2S_DEVICE), I2S_OUT_EOF_INT_ENA_V, 1, I2S_OUT_EOF_INT_ENA_S);
-        esp_err_t e = esp_intr_alloc(interruptSource, 0, // ESP_INTR_FLAG_INTRDISABLED | ESP_INTR_FLAG_LEVEL3,
-                                     &interruptHandler, 0, &gI2S_intr_handle);
+        esp_intr_alloc(interruptSource, 0, // ESP_INTR_FLAG_INTRDISABLED | ESP_INTR_FLAG_LEVEL3,
+                       &interruptHandler, 0, &gI2S_intr_handle);
         
         // -- Create a semaphore to block execution until all the controllers are done
         if (gTX_sem == NULL) {
