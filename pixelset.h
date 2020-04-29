@@ -199,7 +199,7 @@ public:
     return *this;
   }
 
-  inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & startcolor, const PIXEL_TYPE & endcolor, TGradientDirectionCode directionCode  = SHORTEST_HUES) {
+  inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & startcolor, const PIXEL_TYPE & endcolor) {
     if(dir >= 0) {
       ::fill_gradient(leds,len,startcolor, endcolor);
     } else {
