@@ -317,7 +317,9 @@
     #else
         #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
     #endif
-    #warning "Adafruit ItsyBitsy nRF52840 Express is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Adafruit ItsyBitsy nRF52840 Express is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
 
     //  [D0 .. D13] (digital)
     _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 (UART RX)
