@@ -52,7 +52,6 @@ template void fill_rainbow(CHSV * pFirstLED, int numToFill, uint8_t initialhue, 
 typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradientDirectionCode;
 
 
-
 #define saccum87 int16_t
 
 /// fill_gradient - fill an array of colors with a smooth HSV gradient
@@ -469,20 +468,20 @@ public:
         return !( *this == rhs);
     }
     
-    inline TColor& operator[] (uint8_t x) __attribute__((always_inline))
+    inline TColor& operator[] (const uint8_t x) __attribute__((always_inline))
     {
         return entries[x];
     }
-    inline const TColor& operator[] (uint8_t x) const __attribute__((always_inline))
+    inline const TColor& operator[] (const uint8_t x) const __attribute__((always_inline))
     {
         return entries[x];
     }
 
-    inline TColor& operator[] (int x) __attribute__((always_inline))
+    inline TColor& operator[] (const int x) __attribute__((always_inline))
     {
         return entries[(uint8_t)x];
     }
-    inline const TColor& operator[] (int x) const __attribute__((always_inline))
+    inline const TColor& operator[] (const int x) const __attribute__((always_inline))
     {
         return entries[(uint8_t)x];
     }
