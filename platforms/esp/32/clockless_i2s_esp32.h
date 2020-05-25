@@ -199,7 +199,10 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     // -- Save the pixel controller
     PixelController<RGB_ORDER> * mPixels;
     
-public:
+    // -- Make sure we can't call show() too quickly
+    CMinWait<50>   mWait;
+
+ public:
 
     void init()
     {
@@ -574,6 +577,9 @@ protected:
             fillBuffer();
             fillBuffer();
             
+            // -- Make sure it's been at least 50ms since last show
+            mWait.wait();
+
             i2sStart();
             
             // -- Wait here while the rest of the data is sent. The interrupt handler
@@ -584,6 +590,8 @@ protected:
             
             i2sStop();
             
+            mWait.mark();
+
             // -- Reset the counters
             gNumStarted = 0;
         }
