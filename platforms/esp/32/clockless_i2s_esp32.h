@@ -363,7 +363,7 @@ protected:
         freq=1/(CLOCK_DIVIDER_N+(double)CLOCK_DIVIDER_B/CLOCK_DIVIDER_A);
         freq=freq*I2S_BASE_CLK;
         // Serial.printf("calculted for i2s frequency:%f Mhz N:%d B:%d A:%d\n",freq/1000000,CLOCK_DIVIDER_N,CLOCK_DIVIDER_B,CLOCK_DIVIDER_A);
-        double pulseduration=1000000000/freq;
+        // double pulseduration=1000000000/freq;
         // Serial.printf("Pulse duration: %f ns\n",pulseduration);
         // gPulsesPerBit = (T1ns + T2ns + T3ns)/FASTLED_I2S_NS_PER_PULSE;
         
@@ -510,8 +510,8 @@ protected:
        
         // -- Allocate i2s interrupt
         SET_PERI_REG_BITS(I2S_INT_ENA_REG(I2S_DEVICE), I2S_OUT_EOF_INT_ENA_V, 1, I2S_OUT_EOF_INT_ENA_S);
-        esp_err_t e = esp_intr_alloc(interruptSource, 0, // ESP_INTR_FLAG_INTRDISABLED | ESP_INTR_FLAG_LEVEL3,
-                                     &interruptHandler, 0, &gI2S_intr_handle);
+        esp_intr_alloc(interruptSource, 0, // ESP_INTR_FLAG_INTRDISABLED | ESP_INTR_FLAG_LEVEL3,
+                       &interruptHandler, 0, &gI2S_intr_handle);
         
         // -- Create a semaphore to block execution until all the controllers are done
         if (gTX_sem == NULL) {
@@ -645,7 +645,7 @@ protected:
         }
         
         // -- Transpose and encode the pixel data for the DMA buffer
-        int buf_index = 0;
+        // int buf_index = 0;
         for (int channel = 0; channel < NUM_COLOR_CHANNELS; channel++) {
             
             // -- Tranpose each array: all the bit 7's, then all the bit 6's, ...

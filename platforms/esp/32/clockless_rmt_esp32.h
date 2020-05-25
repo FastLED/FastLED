@@ -481,8 +481,12 @@ protected:
 
         if (gNumDone == gNumControllers) {
             // -- If this is the last controller, signal that we are all done
-            xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
-            if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
+            if (FASTLED_RMT_BUILTIN_DRIVER) {
+                xSemaphoreGive(gTX_sem);
+            } else {
+                xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+                if (HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
+            }
         } else {
             // -- Otherwise, if there are still controllers waiting, then
             //    start the next one on this channel
