@@ -38,6 +38,8 @@ public:
     FastPin<DATA_PIN>::lo();
 	}
 
+  virtual uint16_t getMaxRefreshRate() const { return 400; }
+
 protected:
 
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
