@@ -309,6 +309,62 @@
     #endif
 #endif // defined (ARDUINO_NRF52840_PCA10056)
 
+// Adafruit ItsyBitsy nRF52840 Express
+// From https://www.adafruit.com/package_adafruit_index.json
+#if defined (ARDUINO_NRF52_ITSYBITSY)
+    #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
+        #error "Cannot define more than one board at a time"
+    #else
+        #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
+    #endif
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "Adafruit ItsyBitsy nRF52840 Express is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
+
+    //  [D0 .. D13] (digital)
+    _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 (UART RX)
+    _FL_DEFPIN( 1, 24, 0); // D1  is P0.24 (UART TX)
+    _FL_DEFPIN( 2,  2, 1); // D2  is P1.02
+    _FL_DEFPIN( 3,  6, 0); // D3  is P0.06 LED
+    _FL_DEFPIN( 4, 29, 0); // D4  is P0.29 Button
+    _FL_DEFPIN( 5, 27, 0); // D5  is P0.27
+    _FL_DEFPIN( 6,  9, 1); // D6  is P1.09 (DotStar Clock)
+    _FL_DEFPIN( 7,  8, 1); // D7  is P1.08
+    _FL_DEFPIN( 8,  8, 0); // D8  is P0.08 (DotStar Data)
+    _FL_DEFPIN( 9,  7, 0); // D9  is P0.07
+    _FL_DEFPIN(10,  5, 0); // D10 is P0.05
+    _FL_DEFPIN(11, 26, 0); // D11 is P0.26
+    _FL_DEFPIN(12, 11, 0); // D12 is P0.11
+    _FL_DEFPIN(13, 12, 0); // D13 is P0.12
+
+    //  [D14 .. D20] (analog [A0 .. A6])
+    _FL_DEFPIN(14,  4, 0); // D14 is P0.04 (A0)
+    _FL_DEFPIN(15, 30, 0); // D15 is P0.30 (A1)
+    _FL_DEFPIN(16, 28, 0); // D16 is P0.28 (A2)
+    _FL_DEFPIN(17, 31, 0); // D17 is P0.31 (A3)
+    _FL_DEFPIN(18,  2, 0); // D18 is P0.02 (A4)
+    _FL_DEFPIN(19,  3, 0); // D19 is P0.03 (A5)
+    _FL_DEFPIN(20,  5, 0); // D20 is P0.05 (A6/D10)
+
+    //  [D21 .. D22] (I2C)
+    _FL_DEFPIN(21, 16, 0); // D21 is P0.16 (SDA)
+    _FL_DEFPIN(22, 14, 0); // D22 is P0.14 (SCL)
+
+    //  [D23 .. D25] (SPI)
+    _FL_DEFPIN(23, 20, 0); // D23 is P0.20 (SPI MISO)
+    _FL_DEFPIN(24, 15, 0); // D24 is P0.15 (SPI MOSI)
+    _FL_DEFPIN(25, 13, 0); // D25 is P0.13 (SPI SCK )
+
+    //  [D26 .. D31] (QSPI)
+    _FL_DEFPIN(26, 19, 0); // D26 is P0.19 (QSPI CLK)
+    _FL_DEFPIN(27, 23, 0); // D27 is P0.23 (QSPI CS)
+    _FL_DEFPIN(28, 21, 0); // D28 is P0.21 (QSPI Data 0)
+    _FL_DEFPIN(29, 22, 0); // D29 is P0.22 (QSPI Data 1)
+    _FL_DEFPIN(30,  0, 1); // D30 is P1.00 (QSPI Data 2)
+    _FL_DEFPIN(31, 17, 0); // D31 is P0.17 (QSPI Data 3)
+
+#endif // defined (ARDUINO_NRF52_ITSYBITSY)
+
 // Electronut labs bluey
 // See https://github.com/sandeepmistry/arduino-nRF5/blob/master/variants/bluey/variant.cpp
 #if defined(ARDUINO_ELECTRONUT_BLUEY)
