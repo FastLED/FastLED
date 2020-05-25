@@ -97,6 +97,17 @@ _FL_DEFPIN(17,  4, 0);   _FL_DEFPIN(18,  5, 0);   _FL_DEFPIN(19, 6, 0);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(SEEED_XIAO_M0)
+
+#define MAX_PIN 10
+_FL_DEFPIN( 0, 2,0); _FL_DEFPIN( 1, 4,0); _FL_DEFPIN( 2,10,0); _FL_DEFPIN( 3,11,0);
+_FL_DEFPIN( 4, 8,0); _FL_DEFPIN( 5, 9,0); _FL_DEFPIN( 6, 8,1); _FL_DEFPIN( 7, 9,1);
+_FL_DEFPIN( 8, 7,0); _FL_DEFPIN( 9, 5,0); _FL_DEFPIN(10, 6,0);
+
+#define SPI_DATA 9
+#define SPI_CLOCK 8
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
 
 #elif defined(ARDUINO_SAMD_ZERO)
 
