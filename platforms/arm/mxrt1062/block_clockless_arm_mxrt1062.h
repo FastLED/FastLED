@@ -92,6 +92,7 @@ public:
 
   }
 
+  virtual uint16_t getMaxRefreshRate() const { return 400; }
 
   virtual void showPixels(PixelController<RGB_ORDER, LANES, __FL_T4_MASK> & pixels) {
 		mWait.wait();
