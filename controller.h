@@ -50,7 +50,7 @@ protected:
 
     /// set all the leds on the controller to a given color
     ///@param data the crgb color to set the leds to
-    ///@param nLeds the numner of leds to set to this color
+    ///@param nLeds the number of leds to set to this color
     ///@param scale the rgb scaling value for outputting color
     virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
 
@@ -388,28 +388,28 @@ struct PixelController {
 
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
 protected:
-  virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
+    virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
 
-  /// set all the leds on the controller to a given color
-  ///@param data the crgb color to set the leds to
-  ///@param nLeds the numner of leds to set to this color
-  ///@param scale the rgb scaling value for outputting color
-  virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-    showPixels(pixels);
-  }
+    /// set all the leds on the controller to a given color
+    ///@param data the crgb color to set the leds to
+    ///@param nLeds the numner of leds to set to this color
+    ///@param scale the rgb scaling value for outputting color
+    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+        showPixels(pixels);
+    }
 
-/// write the passed in rgb data out to the leds managed by this controller
-///@param data the rgb data to write out to the strip
-///@param nLeds the number of leds being written out
-///@param scale the rgb scaling to apply to each led before writing it out
-  virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-    showPixels(pixels);
-  }
+    /// write the passed in rgb data out to the leds managed by this controller
+    ///@param data the rgb data to write out to the strip
+    ///@param nLeds the number of leds being written out
+    ///@param scale the rgb scaling to apply to each led before writing it out
+    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+        showPixels(pixels);
+    }
 
 public:
-  CPixelLEDController() : CLEDController() {}
+    CPixelLEDController() : CLEDController() {}
 };
 
 

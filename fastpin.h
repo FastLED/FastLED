@@ -42,6 +42,7 @@ class Pin : public Selectable {
 		mPort = (volatile RwReg*)portOutputRegister(digitalPinToPort(mPin));
 		mInPort = (volatile RoReg*)portInputRegister(digitalPinToPort(mPin));
 	}
+
 public:
 	Pin(int pin) : mPin(pin) { _init(); }
 
@@ -98,6 +99,7 @@ class Pin : public Selectable {
 		mPort = NULL;
 		mInPort = NULL;
 	}
+
 public:
 	Pin(int pin) : mPin(pin) { _init(); }
 
@@ -169,6 +171,7 @@ template<uint8_t PIN> class FastPin {
 		sInPort = portInputRegister(digitalPinToPort(PIN));
 #endif
 	}
+
 public:
 	typedef volatile RwReg * port_ptr_t;
 	typedef RwReg port_t;
@@ -206,8 +209,8 @@ template<uint8_t PIN> class FastPin {
 
 	static_assert(validpin(), "Invalid pin specified");
 
-	static void _init() {
-	}
+	static void _init() { }
+
 public:
 	typedef volatile RwReg * port_ptr_t;
 	typedef RwReg port_t;
@@ -253,15 +256,17 @@ template<uint8_t port> struct __FL_PORT_INFO {
 // are numeric in nature, e.g. GPIO0, GPIO1.  Use _FL_DEFINE_PORT3 for ports that are letters.
 // The first parameter will be the letter, the second parameter will be an integer/counter of smoe kind
 // (this is because attempts to turn macro parameters into character constants break in some compilers)
-#define _FL_DEFINE_PORT(L, BASE) template<> struct __FL_PORT_INFO<L> { static bool hasPort() { return 1; } \
-										static const char *portName() { return #L; } \
-										typedef BASE __t_baseType;  \
-										static const void *portAddr() { return (void*)&__t_baseType::r(); } };
+#define _FL_DEFINE_PORT(L, BASE) template<> struct __FL_PORT_INFO<L> { \
+	static bool hasPort() { return 1; } \
+	static const char *portName() { return #L; } \
+	typedef BASE __t_baseType;  \
+	static const void *portAddr() { return (void*)&__t_baseType::r(); } };
 
-#define _FL_DEFINE_PORT3(L, LC, BASE) template<> struct __FL_PORT_INFO<LC> { static bool hasPort() { return 1; } \
-										static const char *portName() { return #L; } \
-										typedef BASE __t_baseType;  \
-										static const void *portAddr() { return (void*)&__t_baseType::r(); } };
+#define _FL_DEFINE_PORT3(L, LC, BASE) template<> struct __FL_PORT_INFO<LC> { \
+	static bool hasPort() { return 1; } \
+	static const char *portName() { return #L; } \
+	typedef BASE __t_baseType;  \
+	static const void *portAddr() { return (void*)&__t_baseType::r(); } };
 
 FASTLED_NAMESPACE_END
 

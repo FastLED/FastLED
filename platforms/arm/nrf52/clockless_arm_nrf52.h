@@ -15,7 +15,6 @@
 // NOTE: Update platforms.cpp in root of FastLED library if this changes
 #define FASTLED_NRF52_PWM_ID 0
 
-
 extern uint32_t isrCount;
 
 

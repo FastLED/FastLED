@@ -11,30 +11,29 @@ FASTLED_NAMESPACE_BEGIN
 #else
 
 template<uint8_t PIN, uint8_t PAD> class _APOLLO3PIN {
-
 public:
-  typedef volatile uint32_t * port_ptr_t;
-  typedef uint32_t port_t;
+    typedef volatile uint32_t * port_ptr_t;
+    typedef uint32_t port_t;
 
-  inline static void setOutput() { pinMode(PIN, OUTPUT); am_hal_gpio_fastgpio_enable(PAD); }
-  inline static void setInput() { am_hal_gpio_fastgpio_disable(PAD); pinMode(PIN, INPUT); }
+    inline static void setOutput() { pinMode(PIN, OUTPUT); am_hal_gpio_fastgpio_enable(PAD); }
+    inline static void setInput() { am_hal_gpio_fastgpio_disable(PAD); pinMode(PIN, INPUT); }
 
-  inline static void hi() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_set(PAD); }
-  inline static void lo() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_clr(PAD); }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { if(val) { am_hal_gpio_fastgpio_set(PAD); } else { am_hal_gpio_fastgpio_clr(PAD); } }
+    inline static void hi() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_set(PAD); }
+    inline static void lo() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_clr(PAD); }
+    inline static void set(register port_t val) __attribute__ ((always_inline)) { if(val) { am_hal_gpio_fastgpio_set(PAD); } else { am_hal_gpio_fastgpio_clr(PAD); } }
 
-  inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+    inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { if( am_hal_gpio_fastgpio_read(PAD)) { lo(); } else { hi(); } }
+    inline static void toggle() __attribute__ ((always_inline)) { if( am_hal_gpio_fastgpio_read(PAD)) { lo(); } else { hi(); } }
 
-  inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-  inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { set(val); }
+    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { set(val); }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { return 0; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return 0; }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return NULL; }
-  inline static port_t mask() __attribute__ ((always_inline)) { return 0; }
+    inline static port_t hival() __attribute__ ((always_inline)) { return 0; }
+    inline static port_t loval() __attribute__ ((always_inline)) { return 0; }
+    inline static port_ptr_t port() __attribute__ ((always_inline)) { return NULL; }
+    inline static port_t mask() __attribute__ ((always_inline)) { return 0; }
 };
 
 // For the Apollo3 we need to define both the pin number and the associated pad

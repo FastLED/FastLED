@@ -317,10 +317,10 @@ struct CRGB {
     /// right shift each of the channels by a constant
     inline CRGB& operator>>= (uint8_t d)
     {
-      r >>= d;
-      g >>= d;
-      b >>= d;
-      return *this;
+        r >>= d;
+        g >>= d;
+        b >>= d;
+        return *this;
     }
 
     /// multiply each of the channels by a constant,
@@ -450,11 +450,11 @@ struct CRGB {
 
 #if (defined SmartMatrix_h || defined SmartMatrix3_h)
     operator rgb24() const {
-      rgb24 ret;
-      ret.red = r;
-      ret.green = g;
-      ret.blue = b;
-      return ret;
+        rgb24 ret;
+        ret.red = r;
+        ret.green = g;
+        ret.blue = b;
+        return ret;
     }
 #endif
 
@@ -503,25 +503,25 @@ struct CRGB {
     /// return a new CRGB object after performing a linear interpolation between this object and the passed in object
     inline CRGB lerp8( const CRGB& other, fract8 frac) const
     {
-      CRGB ret;
+        CRGB ret;
 
-      ret.r = lerp8by8(r,other.r,frac);
-      ret.g = lerp8by8(g,other.g,frac);
-      ret.b = lerp8by8(b,other.b,frac);
+        ret.r = lerp8by8(r,other.r,frac);
+        ret.g = lerp8by8(g,other.g,frac);
+        ret.b = lerp8by8(b,other.b,frac);
 
-      return ret;
+        return ret;
     }
 
     /// return a new CRGB object after performing a linear interpolation between this object and the passed in object
     inline CRGB lerp16( const CRGB& other, fract16 frac) const
     {
-      CRGB ret;
+        CRGB ret;
 
-      ret.r = lerp16by16(r<<8,other.r<<8,frac)>>8;
-      ret.g = lerp16by16(g<<8,other.g<<8,frac)>>8;
-      ret.b = lerp16by16(b<<8,other.b<<8,frac)>>8;
+        ret.r = lerp16by16(r<<8,other.r<<8,frac)>>8;
+        ret.g = lerp16by16(g<<8,other.g<<8,frac)>>8;
+        ret.b = lerp16by16(b<<8,other.b<<8,frac)>>8;
 
-      return ret;
+        return ret;
     }
 
     /// getParity returns 0 or 1, depending on the

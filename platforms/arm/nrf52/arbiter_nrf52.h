@@ -36,7 +36,6 @@ static_assert(FASTLED_NRF52_PWM_INSTANCE_COUNT > 0, "Instance count must be grea
 
 template <uint32_t _PWM_ID>
 class PWM_Arbiter {
-
 private:
     static_assert(_PWM_ID < 32, "PWM_ID over 31 breaks current arbitration bitmask");
     //const  uint32_t _ACQUIRE_MASK =             (1u << _PWM_ID) ;

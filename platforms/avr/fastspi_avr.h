@@ -187,7 +187,6 @@ public:
 		FastPin<_CLOCK_PIN>::setOutput();
 		FastPin<_DATA_PIN>::setOutput();
 
-
 		// must be done last, see page 206
 		setSPIRate();
 	}
@@ -249,12 +248,12 @@ public:
 		setSPIRate();
 	}
 
-		void release() {
-			if(m_pSelect != NULL) {
-				m_pSelect->release();
-			}
-			disable_pins();
+	void release() {
+		if(m_pSelect != NULL) {
+			m_pSelect->release();
 		}
+		disable_pins();
+	}
 
 	static void writeBytesValueRaw(uint8_t value, int len) {
 		while(len--) {
@@ -333,6 +332,7 @@ template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class AVRHardwareSPIOutput {
 	Selectable *m_pSelect;
 	bool mWait;
+
 public:
 	AVRHardwareSPIOutput() { m_pSelect = NULL; mWait = false;}
 	AVRHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
@@ -510,6 +510,7 @@ template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class AVRHardwareSPIOutput {
 	Selectable *m_pSelect;
 	bool mWait;
+
 public:
 	AVRHardwareSPIOutput() { m_pSelect = NULL; mWait = false;}
 	AVRHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }

@@ -31,8 +31,8 @@ CFastLED::CFastLED() {
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
-									   struct CRGB *data,
-									   int nLedsOrOffset, int nLedsIfOffset) {
+								  struct CRGB *data,
+								  int nLedsOrOffset, int nLedsIfOffset) {
 	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 	int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
 
@@ -204,33 +204,33 @@ extern int noise_min;
 extern int noise_max;
 
 void CFastLED::countFPS(int nFrames) {
-  static int br = 0;
-  static uint32_t lastframe = 0; // millis();
+	static int br = 0;
+	static uint32_t lastframe = 0; // millis();
 
-  if(br++ >= nFrames) {
-      uint32_t now = millis();
-      now -= lastframe;
-      if( now == 0 ) {
-          now = 1; // prevent division by zero below
-      }
-      m_nFPS = (br * 1000) / now;
-    br = 0;
-    lastframe = millis();
-  }
+	if(br++ >= nFrames) {
+		uint32_t now = millis();
+		now -= lastframe;
+		if(now == 0) {
+			now = 1; // prevent division by zero below
+		}
+		m_nFPS = (br * 1000) / now;
+		br = 0;
+		lastframe = millis();
+	}
 }
 
 void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
-  if(constrain) {
-    // if we're constraining, the new value of m_nMinMicros _must_ be higher than previously (because we're only
-    // allowed to slow things down if constraining)
-    if(refresh > 0) {
-      m_nMinMicros = ( (1000000/refresh) >  m_nMinMicros) ? (1000000/refresh) : m_nMinMicros;
-    }
-  } else if(refresh > 0) {
-    m_nMinMicros = 1000000 / refresh;
-  } else {
-    m_nMinMicros = 0;
-  }
+	if(constrain) {
+		// if we're constraining, the new value of m_nMinMicros _must_ be higher than previously (because we're only
+		// allowed to slow things down if constraining)
+		if(refresh > 0) {
+			m_nMinMicros = ((1000000 / refresh) > m_nMinMicros) ? (1000000 / refresh) : m_nMinMicros;
+		}
+	} else if(refresh > 0) {
+		m_nMinMicros = 1000000 / refresh;
+	} else {
+		m_nMinMicros = 0;
+	}
 }
 
 extern "C" int atexit(void (* /*func*/ )()) { return 0; }

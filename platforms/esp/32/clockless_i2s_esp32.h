@@ -171,8 +171,8 @@ static DMABuffer * dmaBuffers[NUM_DMA_BUFFERS];
 //    are global variables.
 
 static int      gPulsesPerBit = 0;
-static uint32_t gOneBit[40] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-static uint32_t gZeroBit[40]  = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static uint32_t gOneBit[40]  = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static uint32_t gZeroBit[40] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 // -- Counters to track progress
 static int gCurBuffer = 0;
@@ -202,8 +202,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     // -- Make sure we can't call show() too quickly
     CMinWait<50>   mWait;
 
- public:
-
+public:
     void init()
     {
         i2sInit();
@@ -233,7 +232,6 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     virtual uint16_t getMaxRefreshRate() const { return 400; }
     
 protected:
-   
    static int pgcd(int smallest,int precision,int a,int b,int c)
     {
         int pgc_=1;
@@ -393,8 +391,8 @@ protected:
         
         //int ones_for_zero = ((T1ns - 1)/FASTLED_I2S_NS_PER_PULSE) + 1;
         ones_for_zero =T1/pgc_  ;
-       // Serial.print("Zero bit:  target ");
-       // Serial.print(T1ns); Serial.print("ns --- ");
+        // Serial.print("Zero bit:  target ");
+        // Serial.print(T1ns); Serial.print("ns --- ");
         //Serial.print(ones_for_zero); Serial.print(" 1 bits");
         //Serial.print(" = "); Serial.print(ones_for_zero * FASTLED_I2S_NS_PER_PULSE); Serial.println("ns");
         // Serial.printf("Zero bit : target %d ns --- %d pulses  1 bit =   %f ns\n",T1ns,ones_for_zero ,ones_for_zero*pulseduration);
@@ -664,11 +662,11 @@ protected:
                 uint8_t * row = (uint8_t *) (gPixelBits[channel][bitnum]);
                 uint32_t bit = (row[0] << 24) | (row[1] << 16) | (row[2] << 8) | row[3];
                 
-               /* SZG: More general, but too slow:
-                    for (int pulse_num = 0; pulse_num < gPulsesPerBit; pulse_num++) {
-                        buf[buf_index++] = has_data_mask & ( (bit & gOneBit[pulse_num]) | (~bit & gZeroBit[pulse_num]) );
-                     }
-               */
+                /* SZG: More general, but too slow:
+                for (int pulse_num = 0; pulse_num < gPulsesPerBit; pulse_num++) {
+                    buf[buf_index++] = has_data_mask & ( (bit & gOneBit[pulse_num]) | (~bit & gZeroBit[pulse_num]) );
+                }
+                */
 
                 // -- Only fill in the pulses that are different between the "0" and "1" encodings
                 for(int pulse_num = ones_for_zero; pulse_num < ones_for_one; pulse_num++) {

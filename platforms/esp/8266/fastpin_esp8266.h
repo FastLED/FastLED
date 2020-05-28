@@ -3,43 +3,42 @@
 FASTLED_NAMESPACE_BEGIN
 
 struct FASTLED_ESP_IO {
-  volatile uint32_t _GPO;
-  volatile uint32_t _GPOS;
-  volatile uint32_t _GPOC;
+    volatile uint32_t _GPO;
+    volatile uint32_t _GPOS;
+    volatile uint32_t _GPOC;
 };
 
 #define _GPB (*(FASTLED_ESP_IO*)(0x60000000+(0x300)))
 
 
 template<uint8_t PIN, uint32_t MASK> class _ESPPIN {
-
 public:
-  typedef volatile uint32_t * port_ptr_t;
-  typedef uint32_t port_t;
+    typedef volatile uint32_t * port_ptr_t;
+    typedef uint32_t port_t;
 
-  inline static void setOutput() { pinMode(PIN, OUTPUT); }
-  inline static void setInput() { pinMode(PIN, INPUT); }
+    inline static void setOutput() { pinMode(PIN, OUTPUT); }
+    inline static void setInput() { pinMode(PIN, INPUT); }
 
-  inline static void hi() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOS = MASK; } else { GP16O |= MASK; } }
-  inline static void lo() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOC = MASK; } else { GP16O &= ~MASK; } }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO = val; } else { GP16O = val; }}
+    inline static void hi() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOS = MASK; } else { GP16O |= MASK; } }
+    inline static void lo() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOC = MASK; } else { GP16O &= ~MASK; } }
+    inline static void set(register port_t val) __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO = val; } else { GP16O = val; }}
 
-  inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+    inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO ^= MASK; } else { GP16O ^= MASK; } }
+    inline static void toggle() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO ^= MASK; } else { GP16O ^= MASK; } }
 
-  inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-  inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { if (PIN<16) { return GPO | MASK;  } else { return GP16O | MASK; } }
-  inline static port_t loval() __attribute__ ((always_inline)) { if (PIN<16) { return GPO & ~MASK; } else { return GP16O & ~MASK; } }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { if(PIN<16) { return &_GPB._GPO; } else { return &GP16O; } }
-  inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPB._GPOS; } // there is no GP160 support for this
-	inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPB._GPOC; }
-  inline static port_t mask() __attribute__ ((always_inline)) { return MASK; }
+    inline static port_t hival() __attribute__ ((always_inline)) { if (PIN<16) { return GPO | MASK;  } else { return GP16O | MASK; } }
+    inline static port_t loval() __attribute__ ((always_inline)) { if (PIN<16) { return GPO & ~MASK; } else { return GP16O & ~MASK; } }
+    inline static port_ptr_t port() __attribute__ ((always_inline)) { if(PIN<16) { return &_GPB._GPO; } else { return &GP16O; } }
+    inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPB._GPOS; } // there is no GP160 support for this
+    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPB._GPOC; }
+    inline static port_t mask() __attribute__ ((always_inline)) { return MASK; }
 
-  inline static bool isset() __attribute__ ((always_inline)) { return (PIN < 16) ? (GPO & MASK) : (GP16O & MASK); }
+    inline static bool isset() __attribute__ ((always_inline)) { return (PIN < 16) ? (GPO & MASK) : (GP16O & MASK); }
 };
 
 #define _FL_DEFPIN(PIN, REAL_PIN) template<> class FastPin<PIN> : public _ESPPIN<REAL_PIN, (1<<(REAL_PIN & 0xFF))> {};

@@ -214,7 +214,6 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     CMinWait<50>   mWait;
 
 public:
-
     void init()
     {
         // -- Allocate space to save the pixel controller
@@ -246,7 +245,6 @@ public:
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
-
     void initRMT()
     {
         for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {

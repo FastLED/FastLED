@@ -29,6 +29,7 @@ template<int VAL, int BIT> class BitWork {
 public:
 	static int highestBit() __attribute__((always_inline)) { return (VAL & 1 << BIT) ? BIT : BitWork<VAL, BIT-1>::highestBit(); }
 };
+
 template<int VAL> class BitWork<VAL, 0> {
 public:
 	static int highestBit() __attribute__((always_inline)) { return 0; }
@@ -246,7 +247,6 @@ public:
 	ARMHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
-
 	void init() {
 		// set the pins to output
 		FastPin<_DATA_PIN>::setOutput();
@@ -316,8 +316,8 @@ public:
 			if(WAIT_STATE == PRE) { wait(); }
 			cli();
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
-			((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
-			SPI_PUSHR_CTAS(1) | (w & 0xFFFF);
+						 ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
+						 SPI_PUSHR_CTAS(1) | (w & 0xFFFF);
 			SPIX.SR |= SPI_SR_TCF;
 			sei();
 			if(WAIT_STATE == POST) { wait(); }
@@ -327,8 +327,8 @@ public:
 			if(WAIT_STATE == PRE) { wait(); }
 			cli();
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
-			((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
-			SPI_PUSHR_CTAS(0) | (b & 0xFF);
+						 ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
+						 SPI_PUSHR_CTAS(0) | (b & 0xFF);
 			SPIX.SR |= SPI_SR_TCF;
 			sei();
 			if(WAIT_STATE == POST) { wait(); }

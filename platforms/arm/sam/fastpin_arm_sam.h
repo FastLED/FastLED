@@ -92,7 +92,6 @@ _FL_IO(D,3);
 
 #if defined(__SAM3X8E__)
 
-
 #define MAX_PIN 78
 _FL_DEFPIN(0, 8, A); _FL_DEFPIN(1, 9, A); _FL_DEFPIN(2, 25, B); _FL_DEFPIN(3, 28, C);
 _FL_DEFPIN(4, 26, C); _FL_DEFPIN(5, 25, C); _FL_DEFPIN(6, 24, C); _FL_DEFPIN(7, 23, C);

@@ -825,20 +825,20 @@ LIB8STATIC uint8_t squarewave8( uint8_t in, uint8_t pulsewidth=128)
 
 /// Template class for represneting fractional ints.
 template<class T, int F, int I> class q {
-  T i:I;
-  T f:F;
+    T i:I;
+    T f:F;
 public:
-  q(float fx) { i = fx; f = (fx-i) * (1<<F); }
-  q(uint8_t _i, uint8_t _f) {i=_i; f=_f; }
-  uint32_t operator*(uint32_t v) { return (v*i) + ((v*f)>>F); }
-  uint16_t operator*(uint16_t v) { return (v*i) + ((v*f)>>F); }
-  int32_t operator*(int32_t v) { return (v*i) + ((v*f)>>F); }
-  int16_t operator*(int16_t v) { return (v*i) + ((v*f)>>F); }
+    q(float fx) { i = fx; f = (fx-i) * (1<<F); }
+    q(uint8_t _i, uint8_t _f) {i=_i; f=_f; }
+    uint32_t operator*(uint32_t v) { return (v*i) + ((v*f)>>F); }
+    uint16_t operator*(uint16_t v) { return (v*i) + ((v*f)>>F); }
+    int32_t operator*(int32_t v) { return (v*i) + ((v*f)>>F); }
+    int16_t operator*(int16_t v) { return (v*i) + ((v*f)>>F); }
 #ifdef FASTLED_ARM
-  int operator*(int v) { return (v*i) + ((v*f)>>F); }
+    int operator*(int v) { return (v*i) + ((v*f)>>F); }
 #endif
 #ifdef FASTLED_APOLLO3
-  int operator*(int v) { return (v*i) + ((v*f)>>F); }
+    int operator*(int v) { return (v*i) + ((v*f)>>F); }
 #endif
 };
 
@@ -1048,17 +1048,17 @@ LIB8STATIC uint16_t div1024_32_16( uint32_t in32)
     uint16_t out16;
 #if defined(__AVR__)
     asm volatile (
-                  "  lsr %D[in]  \n\t"
-                  "  ror %C[in]  \n\t"
-                  "  ror %B[in]  \n\t"
-                  "  lsr %D[in]  \n\t"
-                  "  ror %C[in]  \n\t"
-                  "  ror %B[in]  \n\t"
-                  "  mov %B[out],%C[in] \n\t"
-                  "  mov %A[out],%B[in] \n\t"
-                  : [in] "+r" (in32),
-                  [out] "=r" (out16)
-                  );
+        "  lsr %D[in]  \n\t"
+        "  ror %C[in]  \n\t"
+        "  ror %B[in]  \n\t"
+        "  lsr %D[in]  \n\t"
+        "  ror %C[in]  \n\t"
+        "  ror %B[in]  \n\t"
+        "  mov %B[out],%C[in] \n\t"
+        "  mov %A[out],%B[in] \n\t"
+        : [in] "+r" (in32),
+        [out] "=r" (out16)
+    );
 #else
     out16 = (in32 >> 10) & 0xFFFF;
 #endif

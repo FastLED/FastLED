@@ -97,6 +97,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual void init() {
 		FastPin<DATA_PIN>::setOutput();
@@ -105,7 +106,6 @@ public:
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 
 		mWait.wait();
