@@ -453,10 +453,10 @@ public:
 
     bool operator==( const TColorPalette &rhs) const
     {
-        const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
+        const uint8_t* p = (const uint8_t*)(&(entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
         if( p == q) return true;
-        for( uint16_t i = 0; i < sizeof(this->entries); ++i) {
+        for( uint16_t i = 0; i < sizeof(entries); ++i) {
             if( *p != *q) return false;
             ++p;
             ++q;
@@ -520,50 +520,51 @@ public:
     using TColorPalette<CRGB,size>::operator!=;
     using TColorPalette<CRGB,size>::operator[];
     using TColorPalette<CRGB,size>::operator CRGB *;
+    using TColorPalette<CRGB,size>::entries;
     
     CRGBPalette(const TColorPalette<CHSV,size> &rhs)
     {
          for( uint16_t i = 0; i < size; i++) {
-    		this->entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
+    		entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
         }
     }
     CRGBPalette( const CHSV rhs[size])
     {
         for( uint16_t i = 0; i < size; i++) {
-            this->entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
+            entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
         }
     }
 
     CRGBPalette& operator=( const TColorPalette<CHSV,size>& rhs)
     {
         for( uint16_t i = 0; i < size; i++) {
-    		this->entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
+    		entries[i] = rhs.entries[i]; // implicit HSV-to-RGB conversion
         }
         return *this;
     }
     CRGBPalette& operator=( const CHSV rhs[size])
     {
         for( uint16_t i = 0; i < size; i++) {
-            this->entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
+            entries[i] = rhs[i]; // implicit HSV-to-RGB conversion
         }
         return *this;
     }
 
     CRGBPalette( const CHSV& c1)
     {
-        fill_solid( &(this->entries[0]), size, c1);
+        fill_solid( &(entries[0]), size, c1);
     }
     CRGBPalette( const CHSV& c1, const CHSV& c2)
     {
-        fill_gradient( &(this->entries[0]), size, c1, c2);
+        fill_gradient( &(entries[0]), size, c1, c2);
     }
     CRGBPalette( const CHSV& c1, const CHSV& c2, const CHSV& c3)
     {
-        fill_gradient( &(this->entries[0]), size, c1, c2, c3);
+        fill_gradient( &(entries[0]), size, c1, c2, c3);
     }
     CRGBPalette( const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4)
     {
-        fill_gradient( &(this->entries[0]), size, c1, c2, c3, c4);
+        fill_gradient( &(entries[0]), size, c1, c2, c3, c4);
     }
 };
 
@@ -577,28 +578,29 @@ public:
     using CRGBPalette<16>::operator!=;
     using CRGBPalette<16>::operator[];
     using CRGBPalette<16>::operator CRGB *;
+    using CRGBPalette<16>::entries;
     
     CRGBPalette16( const CRGB& c00,const CRGB& c01,const CRGB& c02,const CRGB& c03,
                     const CRGB& c04,const CRGB& c05,const CRGB& c06,const CRGB& c07,
                     const CRGB& c08,const CRGB& c09,const CRGB& c10,const CRGB& c11,
                     const CRGB& c12,const CRGB& c13,const CRGB& c14,const CRGB& c15 )
     {
-        this->entries[0]=c00; this->entries[1]=c01; this->entries[2]=c02; this->entries[3]=c03;
-        this->entries[4]=c04; this->entries[5]=c05; this->entries[6]=c06; this->entries[7]=c07;
-        this->entries[8]=c08; this->entries[9]=c09; this->entries[10]=c10; this->entries[11]=c11;
-        this->entries[12]=c12; this->entries[13]=c13; this->entries[14]=c14; this->entries[15]=c15;
+        entries[0]=c00; entries[1]=c01; entries[2]=c02; entries[3]=c03;
+        entries[4]=c04; entries[5]=c05; entries[6]=c06; entries[7]=c07;
+        entries[8]=c08; entries[9]=c09; entries[10]=c10; entries[11]=c11;
+        entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
     };
 
     CRGBPalette16( const TProgmemRGBPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
-            this->entries[i] =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            entries[i] =  FL_PGM_READ_DWORD_NEAR( rhs + i);
         }
     }
     CRGBPalette16& operator=( const TProgmemRGBPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; i++) {
-            this->entries[i] =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            entries[i] =  FL_PGM_READ_DWORD_NEAR( rhs + i);
         }
         return *this;
     }
@@ -665,7 +667,7 @@ public:
                 }
                 lastSlotUsed = iend8;
             }
-            fill_gradient( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
+            fill_gradient( &(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -708,7 +710,7 @@ public:
                 }
                 lastSlotUsed = iend8;
             }
-            fill_gradient( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
+            fill_gradient( &(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -726,6 +728,7 @@ public:
     using CRGBPalette<32>::operator!=;
     using CRGBPalette<32>::operator[];
     using CRGBPalette<32>::operator CRGB *;
+    using CRGBPalette<32>::entries;
     
     CRGBPalette32( const CRGB& c00,const CRGB& c01,const CRGB& c02,const CRGB& c03,
                   const CRGB& c04,const CRGB& c05,const CRGB& c06,const CRGB& c07,
@@ -733,10 +736,10 @@ public:
                   const CRGB& c12,const CRGB& c13,const CRGB& c14,const CRGB& c15 )
     {
         for( uint8_t i = 0; i < 2; i++) {
-            this->entries[0+i]=c00; this->entries[2+i]=c01; this->entries[4+i]=c02; this->entries[6+i]=c03;
-            this->entries[8+i]=c04; this->entries[10+i]=c05; this->entries[12+i]=c06; this->entries[14+i]=c07;
-            this->entries[16+i]=c08; this->entries[18+i]=c09; this->entries[20+i]=c10; this->entries[22+i]=c11;
-            this->entries[24+i]=c12; this->entries[26+i]=c13; this->entries[28+i]=c14; this->entries[30+i]=c15;
+            entries[0+i]=c00; entries[2+i]=c01; entries[4+i]=c02; entries[6+i]=c03;
+            entries[8+i]=c04; entries[10+i]=c05; entries[12+i]=c06; entries[14+i]=c07;
+            entries[16+i]=c08; entries[18+i]=c09; entries[20+i]=c10; entries[22+i]=c11;
+            entries[24+i]=c12; entries[26+i]=c13; entries[28+i]=c14; entries[30+i]=c15;
         }
     };
 
@@ -824,7 +827,7 @@ public:
                 }
                 lastSlotUsed = iend8;
             }
-            fill_gradient( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
+            fill_gradient( &(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -867,7 +870,7 @@ public:
                 }
                 lastSlotUsed = iend8;
             }
-            fill_gradient( &(this->entries[0]), istart8, rgbstart, iend8, rgbend);
+            fill_gradient( &(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -885,6 +888,7 @@ public:
     using CRGBPalette<256>::operator!=;
     using CRGBPalette<256>::operator[];
     using CRGBPalette<256>::operator CRGB *;
+    using CRGBPalette<256>::entries;
 
     CRGBPalette256( const CRGB& c00,const CRGB& c01,const CRGB& c02,const CRGB& c03,
                   const CRGB& c04,const CRGB& c05,const CRGB& c06,const CRGB& c07,
@@ -933,7 +937,7 @@ public:
             u.dword = FL_PGM_READ_DWORD_NEAR( progent);
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
-            fill_gradient( &(this->entries[0]), indexstart, rgbstart, indexend, rgbend);
+            fill_gradient( &(entries[0]), indexstart, rgbstart, indexend, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -952,7 +956,7 @@ public:
             u = *ent;
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
-            fill_gradient( &(this->entries[0]), indexstart, rgbstart, indexend, rgbend);
+            fill_gradient( &(entries[0]), indexstart, rgbstart, indexend, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
         }
@@ -970,6 +974,7 @@ public:
     using TColorPalette<CHSV,16>::operator!=;
     using TColorPalette<CHSV,16>::operator[];
     using TColorPalette<CHSV,16>::operator CHSV *;
+    using TColorPalette<CHSV,16>::entries;
 
     CHSVPalette16( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
                     const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
@@ -1012,6 +1017,8 @@ public:
     using TColorPalette<CHSV,32>::operator!=;
     using TColorPalette<CHSV,32>::operator[];
     using TColorPalette<CHSV,32>::operator CHSV *;
+    using TColorPalette<CHSV,32>::entries;
+
     CHSVPalette32( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
                   const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
                   const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
@@ -1065,6 +1072,8 @@ public:
     using TColorPalette<CHSV,256>::operator!=;
     using TColorPalette<CHSV,256>::operator[];
     using TColorPalette<CHSV,256>::operator CHSV *;
+    using TColorPalette<CHSV,256>::entries;
+
     CHSVPalette256( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
                   const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
                   const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
