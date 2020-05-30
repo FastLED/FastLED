@@ -432,18 +432,9 @@ public:
                     const TColor& c12,const TColor& c13,const TColor& c14,const TColor& c15 )
     {};
 
-    TColorPalette( const TColorPalette& rhs)
-    {
-        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
-    }
     TColorPalette( const TColor rhs[size])
     {
         memmove8( &(entries[0]), &(rhs[0]), sizeof(entries));
-    }
-    TColorPalette& operator=( const TColorPalette& rhs)
-    {
-        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
-        return *this;
     }
     TColorPalette& operator=( const TColor rhs[size])
     {
@@ -590,6 +581,18 @@ public:
         entries[8]=c08; entries[9]=c09; entries[10]=c10; entries[11]=c11;
         entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
     };
+
+    CRGBPalette16( const CRGBPalette16& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+    }    
+    CRGBPalette16& operator=( const CRGBPalette16& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+        return *this;
+    }
+
+    ~CRGBPalette16() = default;
 
     CRGBPalette16( const TProgmemRGBPalette16& rhs)
     {
@@ -742,6 +745,18 @@ public:
             entries[24+i]=c12; entries[26+i]=c13; entries[28+i]=c14; entries[30+i]=c15;
         }
     };
+
+    CRGBPalette32( const CRGBPalette32& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+    }    
+    CRGBPalette32& operator=( const CRGBPalette32& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+        return *this;
+    }
+    
+    ~CRGBPalette32() = default;
 
     CRGBPalette32( const CRGBPalette16& rhs16)
     {
@@ -900,6 +915,18 @@ public:
         *this = p16;
     };
 
+    CRGBPalette256( const CRGBPalette256& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+    }    
+    CRGBPalette256& operator=( const CRGBPalette256& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+        return *this;
+    }
+
+    ~CRGBPalette256() = default;
+
     CRGBPalette256( const CRGBPalette16& rhs16)
     {
         UpscalePalette( rhs16, *this);
@@ -987,6 +1014,18 @@ public:
         entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
     };
 
+    CHSVPalette16( const CHSVPalette16& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+    }    
+    CHSVPalette16& operator=( const CHSVPalette16& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+        return *this;
+    }
+
+    ~CHSVPalette16() = default;
+
     CHSVPalette16( const TProgmemHSVPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; ++i) {
@@ -1031,6 +1070,18 @@ public:
             entries[24+i]=c12; entries[26+i]=c13; entries[28+i]=c14; entries[30+i]=c15;
         }
     };
+
+    CHSVPalette32( const CHSVPalette32& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+    }    
+    CHSVPalette32& operator=( const CHSVPalette32& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+        return *this;
+    }
+
+    ~CHSVPalette32() = default;
 
     CHSVPalette32( const CHSVPalette16& rhs16)
     {
@@ -1083,6 +1134,18 @@ public:
                           c08,c09,c10,c11,c12,c13,c14,c15);
         *this = p16;
     };
+
+    CHSVPalette256( const CHSVPalette256& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+    }    
+    CHSVPalette256& operator=( const CHSVPalette256& rhs)
+    {
+        memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
+        return *this;
+    }
+
+    ~CHSVPalette256() = default;
 
     CHSVPalette256( const CHSVPalette16& rhs16)
     {
