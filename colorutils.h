@@ -652,15 +652,13 @@ public:
         CRGB rgbstart( u.r, u.g, u.b);
 
         int indexstart = 0;
-        uint8_t istart8 = 0;
-        uint8_t iend8 = 0;
         while( indexstart < 255) {
             ++progent;
             u.dword = FL_PGM_READ_DWORD_NEAR( progent);
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
-            istart8 = indexstart / 16;
-            iend8   = indexend   / 16;
+            uint8_t istart8 = indexstart / 16;
+            uint8_t iend8   = indexend   / 16;
             if( count < 16) {
                 if( (istart8 <= lastSlotUsed) && (lastSlotUsed < 15)) {
                     istart8 = lastSlotUsed + 1;
@@ -695,15 +693,13 @@ public:
         CRGB rgbstart( u.r, u.g, u.b);
 
         int indexstart = 0;
-        uint8_t istart8 = 0;
-        uint8_t iend8 = 0;
         while( indexstart < 255) {
             ++ent;
             u = *ent;
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
-            istart8 = indexstart / 16;
-            iend8   = indexend   / 16;
+            uint8_t istart8 = indexstart / 16;
+            uint8_t iend8   = indexend   / 16;
             if( count < 16) {
                 if( (istart8 <= lastSlotUsed) && (lastSlotUsed < 15)) {
                     istart8 = lastSlotUsed + 1;
@@ -824,15 +820,13 @@ public:
         CRGB rgbstart( u.r, u.g, u.b);
         
         int indexstart = 0;
-        uint8_t istart8 = 0;
-        uint8_t iend8 = 0;
         while( indexstart < 255) {
             ++progent;
             u.dword = FL_PGM_READ_DWORD_NEAR( progent);
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
-            istart8 = indexstart / 8;
-            iend8   = indexend   / 8;
+            uint8_t istart8 = indexstart / 8;
+            uint8_t iend8   = indexend   / 8;
             if( count < 16) {
                 if( (istart8 <= lastSlotUsed) && (lastSlotUsed < 31)) {
                     istart8 = lastSlotUsed + 1;
@@ -867,15 +861,13 @@ public:
         CRGB rgbstart( u.r, u.g, u.b);
         
         int indexstart = 0;
-        uint8_t istart8 = 0;
-        uint8_t iend8 = 0;
         while( indexstart < 255) {
             ++ent;
             u = *ent;
             int indexend  = u.index;
             CRGB rgbend( u.r, u.g, u.b);
-            istart8 = indexstart / 8;
-            iend8   = indexend   / 8;
+            uint8_t istart8 = indexstart / 8;
+            uint8_t iend8   = indexend   / 8;
             if( count < 16) {
                 if( (istart8 <= lastSlotUsed) && (lastSlotUsed < 31)) {
                     istart8 = lastSlotUsed + 1;
