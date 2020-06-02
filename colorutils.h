@@ -409,37 +409,24 @@ typedef TDynamicRGBGradientPalette_bytes TDynamicRGBGradientPalettePtr;
 
 // Fast upscaling functions for palettes, similarities to noblend
 template <typename TSRCPalette, typename TDESTPalette>
-void UpscalePalette(const TSRCPalette &srcpal, TDESTPalette &destpal)
-{
-    constexpr uint16_t srcsize{static_cast<uint16_t>(sizeof(srcpal.entries)/sizeof(srcpal.entries[0]))};
-    constexpr uint16_t destsize{static_cast<uint16_t>(sizeof(destpal.entries)/sizeof(destpal.entries[0]))};
-    constexpr uint16_t steps{destsize/srcsize};
-    for (uint16_t i{0}; i < srcsize; ++i)
-        for (uint16_t j{0}; j < steps; ++j)
-            destpal[i+j] = srcpal[i];
-}
-template void UpscalePalette(const CRGBPalette16 &srcpal, CRGBPalette32 &destpal);
-template void UpscalePalette(const CRGBPalette16 &srcpal, CRGBPalette256 &destpal);
-template void UpscalePalette(const CRGBPalette32 &srcpal, CRGBPalette256 &destpal);
-template void UpscalePalette(const CHSVPalette16 &srcpal, CHSVPalette32 &destpal);
-template void UpscalePalette(const CHSVPalette16 &srcpal, CHSVPalette256 &destpal);
-template void UpscalePalette(const CHSVPalette32 &srcpal, CHSVPalette256 &destpal);
+void UpscalePalette(const TSRCPalette &srcpal, TDESTPalette &destpal);
+extern template void UpscalePalette(const CRGBPalette16 &srcpal, CRGBPalette32 &destpal);
+extern template void UpscalePalette(const CRGBPalette16 &srcpal, CRGBPalette256 &destpal);
+extern template void UpscalePalette(const CRGBPalette32 &srcpal, CRGBPalette256 &destpal);
+extern template void UpscalePalette(const CHSVPalette16 &srcpal, CHSVPalette32 &destpal);
+extern template void UpscalePalette(const CHSVPalette16 &srcpal, CHSVPalette256 &destpal);
+extern template void UpscalePalette(const CHSVPalette32 &srcpal, CHSVPalette256 &destpal);
 
 // High res upscaling function for palettes
 // as ColorFromPalette only takes uint8_t limit the destsize to 256
 template <typename TSRCPalette, typename TDESTPalette>
-void UpscalePaletteInterpolated(const TSRCPalette &srcpal, TDESTPalette &destpal)
-{
-    constexpr uint16_t size{static_cast<uint16_t>(sizeof(destpal.entries)/sizeof(destpal.entries[0]))};
-    for (uint16_t i{0}; i < size; ++i)
-        destpal[i] = ColorFromPalette(srcpal, static_cast<uint8_t>(i));
-}
-template void UpscalePaletteInterpolated(const CRGBPalette16 &srcpal, CRGBPalette32 &destpal);
-template void UpscalePaletteInterpolated(const CRGBPalette16 &srcpal, CRGBPalette256 &destpal);
-template void UpscalePaletteInterpolated(const CRGBPalette32 &srcpal, CRGBPalette256 &destpal);
-template void UpscalePaletteInterpolated(const CHSVPalette16 &srcpal, CHSVPalette32 &destpal);
-template void UpscalePaletteInterpolated(const CHSVPalette16 &srcpal, CHSVPalette256 &destpal);
-template void UpscalePaletteInterpolated(const CHSVPalette32 &srcpal, CHSVPalette256 &destpal);
+void UpscalePaletteInterpolated(const TSRCPalette &srcpal, TDESTPalette &destpal);
+extern template void UpscalePaletteInterpolated(const CRGBPalette16 &srcpal, CRGBPalette32 &destpal);
+extern template void UpscalePaletteInterpolated(const CRGBPalette16 &srcpal, CRGBPalette256 &destpal);
+extern template void UpscalePaletteInterpolated(const CRGBPalette32 &srcpal, CRGBPalette256 &destpal);
+extern template void UpscalePaletteInterpolated(const CHSVPalette16 &srcpal, CHSVPalette32 &destpal);
+extern template void UpscalePaletteInterpolated(const CHSVPalette16 &srcpal, CHSVPalette256 &destpal);
+extern template void UpscalePaletteInterpolated(const CHSVPalette32 &srcpal, CHSVPalette256 &destpal);
 
 template<typename TColor, int size>
 class TColorPalette
