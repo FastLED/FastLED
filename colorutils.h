@@ -1123,12 +1123,12 @@ public:
         return *this;
     }
 
-    CHSVPalette256( const TProgmemRGBPalette16& rhs)
+    CHSVPalette256( const TProgmemHSVPalette16& rhs)
     {
         CHSVPalette16 p16(rhs);
         *this = p16;
     }
-    CHSVPalette256& operator=( const TProgmemRGBPalette16& rhs)
+    CHSVPalette256& operator=( const TProgmemHSVPalette16& rhs)
     {
         CHSVPalette16 p16(rhs);
         *this = p16;
