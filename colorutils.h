@@ -438,7 +438,31 @@ public:
                     const TColor& c04,const TColor& c05,const TColor& c06,const TColor& c07,
                     const TColor& c08,const TColor& c09,const TColor& c10,const TColor& c11,
                     const TColor& c12,const TColor& c13,const TColor& c14,const TColor& c15 )
-    {};
+    {
+        if (size == 16)
+        {
+            entries[0]= c00; entries[1]= c01; entries[2]= c02; entries[3]= c03;
+            entries[4]= c04; entries[5]= c05; entries[6]= c06; entries[7]= c07;
+            entries[8]= c08; entries[9]= c09; entries[10]=c10; entries[11]=c11;
+            entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
+        }
+        else if (size == 32)
+        {
+            for( uint8_t i = 0; i < 2; i++) 
+            {
+                entries[0+i]= c00; entries[2+i]= c01; entries[4+i]= c02; entries[6+i]= c03;
+                entries[8+i]= c04; entries[10+i]=c05; entries[12+i]=c06; entries[14+i]=c07;
+                entries[16+i]=c08; entries[18+i]=c09; entries[20+i]=c10; entries[22+i]=c11;
+                entries[24+i]=c12; entries[26+i]=c13; entries[28+i]=c14; entries[30+i]=c15;
+            }
+        }
+        else 
+        {
+            TColorPalette<TColor,16> p16( c00,c01,c02,c03,c04,c05,c06,c07,
+                                        c08,c09,c10,c11,c12,c13,c14,c15);
+            *this = p16;
+        }
+    };
 
     TColorPalette( const TColor rhs[size])
     {
@@ -578,17 +602,6 @@ public:
     using CRGBPalette<16>::operator[];
     using CRGBPalette<16>::operator CRGB *;
     using CRGBPalette<16>::entries;
-    
-    CRGBPalette16( const CRGB& c00,const CRGB& c01,const CRGB& c02,const CRGB& c03,
-                    const CRGB& c04,const CRGB& c05,const CRGB& c06,const CRGB& c07,
-                    const CRGB& c08,const CRGB& c09,const CRGB& c10,const CRGB& c11,
-                    const CRGB& c12,const CRGB& c13,const CRGB& c14,const CRGB& c15 )
-    {
-        entries[0]=c00; entries[1]=c01; entries[2]=c02; entries[3]=c03;
-        entries[4]=c04; entries[5]=c05; entries[6]=c06; entries[7]=c07;
-        entries[8]=c08; entries[9]=c09; entries[10]=c10; entries[11]=c11;
-        entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
-    };
 
     CRGBPalette16( const CRGBPalette16& rhs)
     {
@@ -736,19 +749,6 @@ public:
     using CRGBPalette<32>::operator[];
     using CRGBPalette<32>::operator CRGB *;
     using CRGBPalette<32>::entries;
-    
-    CRGBPalette32( const CRGB& c00,const CRGB& c01,const CRGB& c02,const CRGB& c03,
-                  const CRGB& c04,const CRGB& c05,const CRGB& c06,const CRGB& c07,
-                  const CRGB& c08,const CRGB& c09,const CRGB& c10,const CRGB& c11,
-                  const CRGB& c12,const CRGB& c13,const CRGB& c14,const CRGB& c15 )
-    {
-        for( uint8_t i = 0; i < 2; i++) {
-            entries[0+i]=c00; entries[2+i]=c01; entries[4+i]=c02; entries[6+i]=c03;
-            entries[8+i]=c04; entries[10+i]=c05; entries[12+i]=c06; entries[14+i]=c07;
-            entries[16+i]=c08; entries[18+i]=c09; entries[20+i]=c10; entries[22+i]=c11;
-            entries[24+i]=c12; entries[26+i]=c13; entries[28+i]=c14; entries[30+i]=c15;
-        }
-    };
 
     CRGBPalette32( const CRGBPalette32& rhs)
     {
@@ -905,16 +905,6 @@ public:
     using CRGBPalette<256>::operator CRGB *;
     using CRGBPalette<256>::entries;
 
-    CRGBPalette256( const CRGB& c00,const CRGB& c01,const CRGB& c02,const CRGB& c03,
-                  const CRGB& c04,const CRGB& c05,const CRGB& c06,const CRGB& c07,
-                  const CRGB& c08,const CRGB& c09,const CRGB& c10,const CRGB& c11,
-                  const CRGB& c12,const CRGB& c13,const CRGB& c14,const CRGB& c15 )
-    {
-        CRGBPalette16 p16(c00,c01,c02,c03,c04,c05,c06,c07,
-                          c08,c09,c10,c11,c12,c13,c14,c15);
-        *this = p16;
-    };
-
     CRGBPalette256( const CRGBPalette256& rhs)
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
@@ -1003,17 +993,6 @@ public:
     using TColorPalette<CHSV,16>::operator CHSV *;
     using TColorPalette<CHSV,16>::entries;
 
-    CHSVPalette16( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
-                    const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
-                    const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
-                    const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
-    {
-        entries[0]=c00; entries[1]=c01; entries[2]=c02; entries[3]=c03;
-        entries[4]=c04; entries[5]=c05; entries[6]=c06; entries[7]=c07;
-        entries[8]=c08; entries[9]=c09; entries[10]=c10; entries[11]=c11;
-        entries[12]=c12; entries[13]=c13; entries[14]=c14; entries[15]=c15;
-    };
-
     CHSVPalette16( const CHSVPalette16& rhs)
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
@@ -1057,19 +1036,6 @@ public:
     using TColorPalette<CHSV,32>::operator[];
     using TColorPalette<CHSV,32>::operator CHSV *;
     using TColorPalette<CHSV,32>::entries;
-
-    CHSVPalette32( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
-                  const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
-                  const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
-                  const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
-    {
-        for( uint8_t i = 0; i < 2; ++i) {
-            entries[0+i]=c00; entries[2+i]=c01; entries[4+i]=c02; entries[6+i]=c03;
-            entries[8+i]=c04; entries[10+i]=c05; entries[12+i]=c06; entries[14+i]=c07;
-            entries[16+i]=c08; entries[18+i]=c09; entries[20+i]=c10; entries[22+i]=c11;
-            entries[24+i]=c12; entries[26+i]=c13; entries[28+i]=c14; entries[30+i]=c15;
-        }
-    };
 
     CHSVPalette32( const CHSVPalette32& rhs)
     {
@@ -1124,16 +1090,6 @@ public:
     using TColorPalette<CHSV,256>::operator[];
     using TColorPalette<CHSV,256>::operator CHSV *;
     using TColorPalette<CHSV,256>::entries;
-
-    CHSVPalette256( const CHSV& c00,const CHSV& c01,const CHSV& c02,const CHSV& c03,
-                  const CHSV& c04,const CHSV& c05,const CHSV& c06,const CHSV& c07,
-                  const CHSV& c08,const CHSV& c09,const CHSV& c10,const CHSV& c11,
-                  const CHSV& c12,const CHSV& c13,const CHSV& c14,const CHSV& c15 )
-    {
-        CHSVPalette16 p16(c00,c01,c02,c03,c04,c05,c06,c07,
-                          c08,c09,c10,c11,c12,c13,c14,c15);
-        *this = p16;
-    };
 
     CHSVPalette256( const CHSVPalette256& rhs)
     {
