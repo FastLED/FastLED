@@ -603,7 +603,7 @@ public:
     using CRGBPalette<16>::operator CRGB *;
     using CRGBPalette<16>::entries;
 
-    CRGBPalette16( const CRGBPalette16& rhs)
+    CRGBPalette16( const CRGBPalette16& rhs) : CRGBPalette<16>()
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
     }    
@@ -750,7 +750,7 @@ public:
     using CRGBPalette<32>::operator CRGB *;
     using CRGBPalette<32>::entries;
 
-    CRGBPalette32( const CRGBPalette32& rhs)
+    CRGBPalette32( const CRGBPalette32& rhs) : CRGBPalette<32>()
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
     }    
@@ -905,7 +905,7 @@ public:
     using CRGBPalette<256>::operator CRGB *;
     using CRGBPalette<256>::entries;
 
-    CRGBPalette256( const CRGBPalette256& rhs)
+    CRGBPalette256( const CRGBPalette256& rhs) : CRGBPalette<256>()
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
     }    
@@ -993,7 +993,7 @@ public:
     using TColorPalette<CHSV,16>::operator CHSV *;
     using TColorPalette<CHSV,16>::entries;
 
-    CHSVPalette16( const CHSVPalette16& rhs)
+    CHSVPalette16( const CHSVPalette16& rhs) : TColorPalette<CHSV,16>()
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
     }    
@@ -1037,7 +1037,7 @@ public:
     using TColorPalette<CHSV,32>::operator CHSV *;
     using TColorPalette<CHSV,32>::entries;
 
-    CHSVPalette32( const CHSVPalette32& rhs)
+    CHSVPalette32( const CHSVPalette32& rhs) : TColorPalette<CHSV,32>()
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
     }    
@@ -1091,7 +1091,7 @@ public:
     using TColorPalette<CHSV,256>::operator CHSV *;
     using TColorPalette<CHSV,256>::entries;
 
-    CHSVPalette256( const CHSVPalette256& rhs)
+    CHSVPalette256( const CHSVPalette256& rhs) : TColorPalette<CHSV,256>()
     {
         memmove8( &(entries[0]), &(rhs.entries[0]), sizeof(entries));
     }    
