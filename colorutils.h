@@ -536,7 +536,7 @@ template <int size>
 class CRGBPalette : public TColorPalette<CRGB,size>
 {
 public:
-    CRGBPalette() = default; // inheritance and using do not inherit a default constructor
+    CRGBPalette() = default; 
     using TColorPalette<CRGB,size>::TColorPalette;
     using TColorPalette<CRGB,size>::operator=;
     using TColorPalette<CRGB,size>::operator==;
@@ -594,7 +594,7 @@ public:
 class CRGBPalette16 : public CRGBPalette<16>
 {
 public:
-    CRGBPalette16() = default; // inheritance and using do not inherit a default constructor
+    CRGBPalette16() = default; 
     using CRGBPalette<16>::CRGBPalette;
     using CRGBPalette<16>::operator=;
     using CRGBPalette<16>::operator==;
@@ -741,7 +741,7 @@ public:
 class CRGBPalette32 : public CRGBPalette<32>
 {
 public:
-    CRGBPalette32() = default; // inheritance and using do not inherit a default constructor
+    CRGBPalette32() = default; 
     using CRGBPalette<32>::CRGBPalette;
     using CRGBPalette<32>::operator=;
     using CRGBPalette<32>::operator==;
@@ -896,7 +896,7 @@ public:
 class CRGBPalette256 : public CRGBPalette<256>
 {
 public:
-    CRGBPalette256() = default; // inheritance and using do not inherit a default constructor
+    CRGBPalette256() = default; 
     using CRGBPalette<256>::CRGBPalette;
     using CRGBPalette<256>::operator=;
     using CRGBPalette<256>::operator==;
@@ -984,7 +984,7 @@ public:
 
 class CHSVPalette16 : public TColorPalette<CHSV,16> {
 public:
-    CHSVPalette16() = default; // inheritance and using do not inherit a default constructor
+    CHSVPalette16() = default; 
     using TColorPalette<CHSV,16>::TColorPalette;
     using TColorPalette<CHSV,16>::operator=;
     using TColorPalette<CHSV,16>::operator==;
@@ -1028,7 +1028,7 @@ public:
 
 class CHSVPalette32: public TColorPalette<CHSV,32> {
 public:
-    CHSVPalette32() = default; // inheritance and using do not inherit a default constructor
+    CHSVPalette32() = default; 
     using TColorPalette<CHSV,32>::TColorPalette;
     using TColorPalette<CHSV,32>::operator=;
     using TColorPalette<CHSV,32>::operator==;
@@ -1082,7 +1082,7 @@ public:
 
 class CHSVPalette256 : public TColorPalette<CHSV,256> {
 public:
-    CHSVPalette256() = default; // inheritance and using do not inherit a default constructor
+    CHSVPalette256() = default; 
     using TColorPalette<CHSV,256>::TColorPalette;
     using TColorPalette<CHSV,256>::operator=;
     using TColorPalette<CHSV,256>::operator==;
