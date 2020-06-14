@@ -8,6 +8,8 @@
 class ESP32RMTController;
 
 // -- Array of all controllers
+//    This array is filled at the time controllers are registered 
+//    (Usually when the sketch calls addLeds)
 static ESP32RMTController * gControllers[FASTLED_RMT_MAX_CONTROLLERS];
 
 // -- Current set of active controllers, indexed by the RMT
@@ -28,7 +30,13 @@ static xSemaphoreHandle gTX_sem = NULL;
 static bool gInitialized = false;
 
 ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3)
-    : mPixelData(0), mSize(0), mCur(0), mWhichHalf(0)
+    : mPixelData(0), 
+      mSize(0), 
+      mCur(0), 
+      mWhichHalf(0),
+      mBuffer(0),
+      mBufferSize(0),
+      mCurPulse(0)
 {
     // -- Precompute rmt items corresponding to a zero bit and a one bit
     //    according to the timing values given in the template instantiation

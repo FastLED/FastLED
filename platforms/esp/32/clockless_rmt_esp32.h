@@ -1,6 +1,6 @@
 /*
  * Integration into FastLED ClocklessController
- * Copyright (c) 2018 Samuel Z. Guyer
+ * Copyright (c) 2018,2019,2020 Samuel Z. Guyer
  * Copyright (c) 2017 Thomas Basler
  * Copyright (c) 2017 Martin F. Falatic
  *
@@ -66,6 +66,20 @@
  *
  * #define FASTLED_ESP32_FLASH_LOCK 1
  *
+ * NEW (June 2020): The RMT controller has been split into two
+ *      classes: ClocklessController, which is an instantiation of the
+ *      FastLED CPixelLEDController template, and ESP32RMTController,
+ *      which just handles driving the RMT peripheral. One benefit of
+ *      this design is that ESP32RMTContoller is not a template, so
+ *      its methods can be marked with the IRAM_ATTR and end up in
+ *      IRAM memory. Another benefit is that all of the color channel
+ *      processing is done up-front, in the templated class, so we
+ *      can fill the RMT buffers more quickly.
+ *
+ *      IN THEORY, this design would also allow FastLED.show() to 
+ *      send the data while the program continues to prepare the next
+ *      frame of data.
+ *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com *
  *
@@ -124,12 +138,13 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define FASTLED_HAS_CLOCKLESS 1
 #define NUM_COLOR_CHANNELS 3
 
+// NOT CURRENTLY IMPLEMENTED:
 // -- Set to true to print debugging information about timing
 //    Useful for finding out if timing is being messed up by other things
 //    on the processor (WiFi, for example)
-#ifndef FASTLED_RMT_SHOW_TIMER
-#define FASTLED_RMT_SHOW_TIMER false
-#endif
+//#ifndef FASTLED_RMT_SHOW_TIMER
+//#define FASTLED_RMT_SHOW_TIMER false
+//#endif
 
 // -- Configuration constants
 #define DIVIDER             2 /* 4, 8 still seem to work, but timings become marginal */
