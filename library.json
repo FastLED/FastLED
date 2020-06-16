@@ -48,7 +48,8 @@
         "srcFilter": [
             "+<*.c>",
             "+<*.cpp>",
-            "+<*.h>"
+            "+<*.h>",
+            "+<platforms/esp/32/*.cpp>"
         ],
         "libArchive": false
     }
