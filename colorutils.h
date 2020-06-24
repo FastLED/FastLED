@@ -772,15 +772,29 @@ public:
         return *this;
     }
     
+    CRGBPalette32( const TProgmemRGBPalette16& rhs)
+    {
+        CRGBPalette16 p16(rhs);
+        *this = p16;
+    }
+    CRGBPalette32& operator=( const TProgmemRGBPalette16& rhs)
+    {
+        CRGBPalette16 p16(rhs);
+        *this = p16;
+        return *this;
+    }
+
     CRGBPalette32( const TProgmemRGBPalette32& rhs)
     {
-        CRGBPalette32 p32(rhs);
-        *this = p32;
+        for( uint8_t i = 0; i < 32; i++) {
+            entries[i] =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+        }
     }
     CRGBPalette32& operator=( const TProgmemRGBPalette32& rhs)
     {
-        CRGBPalette32 p32(rhs);
-        *this = p32;
+        for( uint8_t i = 0; i < 32; i++) {
+            entries[i] =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+        }
         return *this;
     }
     
@@ -936,6 +950,30 @@ public:
         UpscalePaletteInterpolated( rhs32, *this);
         return *this;
     }
+    
+    CRGBPalette256( const TProgmemRGBPalette16& rhs)
+    {
+        CRGBPalette16 p16(rhs);
+        *this = p16;
+    }
+    CRGBPalette256& operator=( const TProgmemRGBPalette16& rhs)
+    {
+        CRGBPalette16 p16(rhs);
+        *this = p16;
+        return *this;
+    }
+        
+    CRGBPalette256( const TProgmemRGBPalette32& rhs)
+    {
+        CRGBPalette32 p32(rhs);
+        *this = p32;
+    }
+    CRGBPalette256& operator=( const TProgmemRGBPalette32& rhs)
+    {
+        CRGBPalette32 p32(rhs);
+        *this = p32;
+        return *this;
+    }
 
     CRGBPalette256( TProgmemRGBGradientPalette_bytes progpal )
     {
@@ -1059,6 +1097,19 @@ public:
         return *this;
     }
 
+    CHSVPalette32( const TProgmemHSVPalette16& rhs)
+    {
+        CHSVPalette16 p16(rhs);
+        *this = p16;
+    }
+
+    CHSVPalette32& operator=( const TProgmemHSVPalette16& rhs)
+    {
+        CHSVPalette16 p16(rhs);
+        *this = p16;
+        return *this;
+    }
+
     CHSVPalette32( const TProgmemHSVPalette32& rhs)
     {
         for( uint8_t i = 0; i < 32; ++i) {
@@ -1132,6 +1183,18 @@ public:
     {
         CHSVPalette16 p16(rhs);
         *this = p16;
+        return *this;
+    }
+
+    CHSVPalette256( const TProgmemHSVPalette32& rhs)
+    {
+        CHSVPalette32 p32(rhs);
+        *this = p32;
+    }
+    CHSVPalette256& operator=( const TProgmemHSVPalette32& rhs)
+    {
+        CHSVPalette32 p32(rhs);
+        *this = p32;
         return *this;
     }
 };
