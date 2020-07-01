@@ -3,11 +3,47 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// An attempt to use harware spi on ESP32
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+ * ESP32 Hardware SPI Driver
+ *
+ * Copyright (c) 2020 Nick Wallace
+ * Derived from code for ESP8266 hardware SPI by Benoit Anastay and .
+ * 
+ * This hardware SPI implementation can drive clocked LEDs from either the
+ * VSPI or HSPI bus (aka SPI2 & SPI3). No support is provided for SPI1, because it is 
+ * shared among devices and the cache for data (code) in the Flash as well as the PSRAM.
+ *
+ * To enable the hardware SPI driver, add the following line *before* including
+ * FastLED.h:
+ *
+ * #define FASTLED_ALL_PINS_HARDWARE_SPI
+ *
+ * This driver uses the VSPI bus by default (GPIO 18, 19, 23, & 5). To use the 
+ * HSPI bus (GPIO 14, 12, 13, & 15) add the following line *before* including
+ * FastLED.h:
+ * 
+ * #define FASTLED_ESP32_SPI_BUS HSPI
+ * 
+ */
+/*
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 #ifndef FASTLED_ESP32_SPI_BUS
     #define FASTLED_ESP32_SPI_BUS VSPI
