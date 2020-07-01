@@ -7,7 +7,7 @@ FASTLED_NAMESPACE_BEGIN
  * ESP32 Hardware SPI Driver
  *
  * Copyright (c) 2020 Nick Wallace
- * Derived from code for ESP8266 hardware SPI by Benoit Anastay and .
+ * Derived from code for ESP8266 hardware SPI by Benoit Anastay.
  * 
  * This hardware SPI implementation can drive clocked LEDs from either the
  * VSPI or HSPI bus (aka SPI2 & SPI3). No support is provided for SPI1, because it is 
