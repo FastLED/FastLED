@@ -206,14 +206,14 @@ template<uint8_t PIN> class FastPin {
 
 	static_assert(validpin(), "Invalid pin specified");
 
-	static void _init() {
-	}
+	static void _init() { }
 public:
 	typedef volatile RwReg * port_ptr_t;
 	typedef RwReg port_t;
 
 	inline static void setOutput() { }
 	inline static void setInput() { }
+    inline static void setInputPullup() { }
 
 	inline static void hi() __attribute__ ((always_inline)) { }
 	inline static void lo() __attribute__ ((always_inline)) { }
@@ -221,6 +221,8 @@ public:
 	inline static void strobe() __attribute__ ((always_inline)) { }
 
 	inline static void toggle() __attribute__ ((always_inline)) { }
+
+    inline static bool get() __attribute__ ((always_inline)) { return false; }
 
 	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { }
 	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { }
@@ -235,6 +237,21 @@ public:
 };
 
 #endif
+
+template<uint8_t PIN> class FastOutputPin : public FastPin<PIN> {
+public:
+	FastOutputPin(void) { this->setOutput(); }
+};
+
+template<uint8_t PIN> class FastInputPin : public FastPin<PIN> {
+public:
+	FastInputPin(void) { this->setInput(); }
+};
+
+template<uint8_t PIN> class FastInputPullupPin : public FastPin<PIN> {
+public:
+	FastInputPullupPin(void) { this->setInputPullup(); }
+};
 
 template<uint8_t PIN> class FastPinBB : public FastPin<PIN> {};
 
