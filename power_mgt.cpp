@@ -22,6 +22,7 @@ FASTLED_NAMESPACE_BEGIN
 // for changing these on the fly, but it saves codespace and RAM to have them
 // be compile-time constants.
 
+constexpr float POWER_EXPONENENT = 0.75; // 50% pwm will result in 0.5^0.75 = 59.4% of power usage
 static const uint8_t gRed_mW   = 16 * 5; // 16mA @ 5v = 80mW
 static const uint8_t gGreen_mW = 11 * 5; // 11mA @ 5v = 55mW
 static const uint8_t gBlue_mW  = 15 * 5; // 15mA @ 5v = 75mW
@@ -57,9 +58,9 @@ uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) 
 
     // This loop might benefit from an AVR assembly version -MEK
     while( count) {
-        red32   += *p++;
-        green32 += *p++;
-        blue32  += *p++;
+        red32   += pow(*p++, POWER_EXPONENENT) * pow(256, 1 - POWER_EXPONENENT);
+        green32 += pow(*p++, POWER_EXPONENENT) * pow(256, 1 - POWER_EXPONENENT);
+        blue32  += pow(*p++, POWER_EXPONENENT) * pow(256, 1 - POWER_EXPONENENT);
         count--;
     }
 
@@ -99,6 +100,8 @@ uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t nu
 //  - no more than max_mW milliwatts
 uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32_t max_power_mW)
 {
+    target_brightness = pow(target_brightness, POWER_EXPONENENT) * pow(256, 1 - POWER_EXPONENENT);
+
     uint32_t total_mW = gMCU_mW;
 
     CLEDController *pCur = CLEDController::head();
@@ -131,10 +134,10 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32
 #if POWER_DEBUG_PRINT == 1
         Serial.print("demand is under the limit");
 #endif
-        return target_brightness;
+        return pow(target_brightness / pow(256, 1 - POWER_EXPONENENT), 1.f/POWER_EXPONENENT);
     }
 
-    uint8_t recommended_brightness = (uint32_t)((uint8_t)(target_brightness) * (uint32_t)(max_power_mW)) / ((uint32_t)(requested_power_mW));
+    uint8_t recommended_brightness = (uint32_t)(target_brightness * max_power_mW) / requested_power_mW;
 #if POWER_DEBUG_PRINT == 1
     Serial.print("recommended brightness # = ");
     Serial.println( recommended_brightness);
@@ -152,7 +155,7 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32
     }
 #endif
 
-    return recommended_brightness;
+    return pow(recommended_brightness / pow(256, 1 - POWER_EXPONENENT), 1.f/POWER_EXPONENENT);
 }
 
 
