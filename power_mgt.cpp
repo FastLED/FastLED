@@ -24,10 +24,10 @@ FASTLED_NAMESPACE_BEGIN
 // be compile-time constants.
 
 constexpr float POWER_EXPONENENT = 0.77; // 50% pwm will result in 0.5^0.75 = 58.6% of power usage
-static const uint8_t gRed_mW   = 26; // 16mA @ 5v = 80mW
-static const uint8_t gGreen_mW = 16; // 11mA @ 5v = 55mW
-static const uint8_t gBlue_mW  = 26; // 15mA @ 5v = 75mW
-static const uint8_t gDark_mW  = 6; //  1mA @ 5v =  5mW
+static const uint8_t gRed_mW   = 16 * 5; // 16mA @ 5v = 80mW
+static const uint8_t gGreen_mW = 11 * 5; // 11mA @ 5v = 55mW
+static const uint8_t gBlue_mW  = 15 * 5; // 15mA @ 5v = 75mW
+static const uint8_t gDark_mW  =  1 * 5; //  1mA @ 5v =  5mW
 
 // Alternate calibration by RAtkins via pre-PSU wattage measurments;
 // these are all probably about 20%-25% too high due to PSU heat losses,
