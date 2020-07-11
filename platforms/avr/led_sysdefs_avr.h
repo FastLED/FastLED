@@ -52,6 +52,11 @@ extern volatile unsigned long timer0_millis;
 #  endif
 };
 
+// special defs for mega environments
+#if defined(__AVR_ATmega4809__)
+    volatile unsigned long timer0_millis = 0;
+#endif
+
 // special defs for the tiny environments
 #if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__) || defined(__AVR_ATtinyX41__) || defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__)
 #define LIB8_ATTINY 1

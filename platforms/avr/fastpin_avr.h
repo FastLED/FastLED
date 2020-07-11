@@ -48,8 +48,17 @@ public:
 typedef volatile uint8_t & reg8_t;
 #define _R(T) struct __gen_struct_ ## T
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
+
+// Register name equivalent (using flat names)
+#if defined(AVR_ATtinyxy7) || defined(AVR_ATtinyxy6) || defined(AVR_ATtinyxy4) || defined(AVR_ATtinyxy2) || defined(__AVR_ATmega4809__)
+// ATtiny series 0/1 and ATmega series 0
+#define _FL_IO(L,C) _RD8(PORT ## L ## _DIR); _RD8(PORT ## L ## _OUT); _RD8(PORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(PORT ## L ## _OUT));
+#define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L ## _OUT), _R(PORT ## L ## _DIR), _R(PORT ## L ## _IN)> {};
+#else
+// Others
 #define _FL_IO(L,C) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L); _FL_DEFINE_PORT3(L, C, _R(PORT ## L));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
+#endif
 
 // Pre-do all the port definitions
 #ifdef PORTA
@@ -194,6 +203,26 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 #define SPI_UART0_DATA 9
 #define SPI_UART0_CLOCK 12
 #endif
+
+#elif defined(__AVR_ATmega4809__)
+
+#define MAX_PIN 21
+_FL_DEFPIN(0, 4, C); _FL_DEFPIN(1, 5, C); _FL_DEFPIN(2, 0, A); _FL_DEFPIN(3, 5, F);
+_FL_DEFPIN(4, 6, C); _FL_DEFPIN(5, 2, B); _FL_DEFPIN(6, 4, F); _FL_DEFPIN(7, 1, A);
+_FL_DEFPIN(8, 3, E); _FL_DEFPIN(9, 0, B); _FL_DEFPIN(10, 1, B); _FL_DEFPIN(11, 0, E);
+_FL_DEFPIN(12, 1, E); _FL_DEFPIN(13, 2, E); _FL_DEFPIN(14, 3, D); _FL_DEFPIN(15, 2, D);
+_FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19, 3, A);
+_FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D);
+
+// To confirm for the SPI interfaces
+//#define SPI_DATA 18
+//#define SPI_CLOCK 13
+//#define SPI_SELECT 19
+//#define AVR_HARDWARE_SPI 1
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+//#define SPI_UART0_DATA 1
+//#define SPI_UART0_CLOCK 4
 
 #elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328PB__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega8__)
 
