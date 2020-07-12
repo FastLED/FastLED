@@ -235,6 +235,7 @@ void ESP32RMTController::startOnChannel(int channel)
 //    Setting this RMT flag is what actually kicks off the peripheral
 void ESP32RMTController::tx_start()
 {
+    // dev->conf_ch[channel].conf1.tx_start = 1;
     rmt_tx_start(mRMT_channel, true);
 }
 
@@ -250,7 +251,8 @@ void ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
     portBASE_TYPE HPTaskAwoken = 0;
 
     // -- Turn off output on the pin
-    gpio_matrix_out(pController->mPin, 0x100, 0, 0);
+    // SZG: Do I really need to do this?
+    // gpio_matrix_out(pController->mPin, 0x100, 0, 0);
 
     gOnChannel[channel] = NULL;
     gNumDone++;
