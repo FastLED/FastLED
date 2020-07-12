@@ -67,21 +67,21 @@ static uint8_t gMaxPowerIndicatorLEDPinNumber = 0; // default = Arduino onboard 
 
 // if defined, use linear power scaling.
 #ifdef FASTLED_POWER_SCALING_FAST
-constexpr uint8_t getPowerValue(uint8_t brightness) {
+inline uint8_t getPowerValue(uint8_t brightness) {
     return brightness;
 }
-constexpr uint8_t getReversePowerValue(uint8_t brightness_scaled) {
+inline uint8_t getReversePowerValue(uint8_t brightness_scaled) {
     return brightness_scaled;
 }
 void setupPowerScaleTable() {}
 #else
 #define calcPowerValue(brightness) static_cast<uint8_t>(pow(brightness, POWER_EXPONENENT) * pow(256, 1 - POWER_EXPONENENT))
-constexpr uint8_t getReversePowerValue(uint8_t brightness_scaled) {
+inline uint8_t getReversePowerValue(uint8_t brightness_scaled) {
     return static_cast<uint8_t>(pow(brightness_scaled / pow(256, 1 - POWER_EXPONENENT), 1.f/POWER_EXPONENENT));
 }
 // if defined, compute power value each time.
 #ifdef FASTLED_POWER_SCALING_COMPUTE
-constexpr uint8_t getPowerValue(uint8_t brightness) {
+inline uint8_t getPowerValue(uint8_t brightness) {
     return calcPowerValue(brightness);
 }
 void setupPowerScaleTable() {}
@@ -98,7 +98,7 @@ void setupPowerScaleTable() {
     } while (i++ < 255);
 }
 
-uint8_t getPowerValue(uint8_t brightness) {
+inline uint8_t getPowerValue(uint8_t brightness) {
     return *(powerScaleTable + brightness);
 }
 #endif // !FASTLED_POWER_SCALING_COMPUTE
