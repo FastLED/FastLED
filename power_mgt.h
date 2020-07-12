@@ -29,6 +29,11 @@ void set_max_power_in_milliwatts( uint32_t powerInmW);
 void set_max_power_indicator_LED( uint8_t pinNumber); // zero = no indicator LED
 
 
+// MUST be called before calling m_pPowerFunc.
+void setupPowerScaleTable();
+
+
+
 // Power Control 'show' and 'delay' functions
 //
 // These are drop-in replacements for FastLED.show() and FastLED.delay()
