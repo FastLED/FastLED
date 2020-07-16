@@ -20,6 +20,15 @@
  #define cli() nvic_globalirq_disable()
  #define sei() nvic_globalirq_enable()
 
+#elif defined (STM32F103xB)
+ #if defined(F_CPU)
+  // FastLED needs F_CPU to be a compile-time constant, but STMduino derives it at run-time
+  #undef F_CPU
+ #endif
+ // reusing/abusing cli/sei defs for Due
+ #define cli()  __disable_irq(); __disable_fault_irq();
+ #define sei() __enable_irq(); __enable_fault_irq();
+
 #else
  #error "Platform not supported"
 #endif
@@ -41,7 +50,9 @@
 
 // pgmspace definitions
 #define PROGMEM
-#define pgm_read_dword(addr) (*(const unsigned long *)(addr))
+#if !defined(STM32F103xB)
+ #define pgm_read_dword(addr) (*(const unsigned long *)(addr))
+#endif
 #define pgm_read_dword_near(addr) pgm_read_dword(addr)
 
 // Default to NOT using PROGMEM here

@@ -59,6 +59,10 @@ public:
   #define _R(T) struct __gen_struct_ ## T
   #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
   #define _FL_IO(L,C) _RD32(GPIO ## L);  _FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
+#elif defined(STM32F103xB)
+  #define _R(T) struct __gen_struct_ ## T
+  #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
+  #define _FL_IO(L,C) _RD32(GPIO ## L);  _FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
 #elif defined(__STM32F1__)
   #define _R(T) struct __gen_struct_ ## T
   #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline gpio_reg_map* r() { return T->regs; } };
@@ -126,7 +130,7 @@ _FL_DEFPIN(19, 2, A);
 
 #endif // SPARK
 
-#if defined(__STM32F1__) // Generic STM32F103 aka "Blue Pill"
+#if defined(__STM32F1__) || defined(STM32F103xB) // Generic STM32F103 aka "Blue Pill"
 
 #define MAX_PIN 46
 
@@ -164,12 +168,17 @@ _FL_DEFPIN(2, 13, C);	// PC13 - PC15
 _FL_DEFPIN(3, 14, C);
 _FL_DEFPIN(4, 15, C);
 
-#define SPI_DATA BOARD_SPI1_MOSI_PIN
-#define SPI_CLOCK BOARD_SPI1_SCK_PIN
+#if defined(__STM32F1__)
+ #define SPI_DATA BOARD_SPI1_MOSI_PIN
+ #define SPI_CLOCK BOARD_SPI1_SCK_PIN
+#else
+ #define SPI_DATA 17
+ #define SPI_CLOCK 15
+#endif
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
-#endif // __STM32F1__
+#endif // __STM32F1__ || STM32F103xB
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 
