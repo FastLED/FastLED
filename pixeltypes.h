@@ -51,9 +51,7 @@ struct CHSV {
     }
 
     /// default values are UNITIALIZED
-    inline CHSV() __attribute__((always_inline))
-    {
-    }
+    inline CHSV() __attribute__((always_inline)) = default;
 
     /// allow construction from H, S, V
     inline CHSV( uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
@@ -120,9 +118,7 @@ struct CRGB {
     }
 
     // default values are UNINITIALIZED
-	inline CRGB() __attribute__((always_inline))
-    {
-    }
+    inline CRGB() __attribute__((always_inline)) = default;
 
     /// allow construction from R, G, B
     inline CRGB( uint8_t ir, uint8_t ig, uint8_t ib)  __attribute__((always_inline))
