@@ -62,20 +62,9 @@ struct CHSV {
     }
 
     /// allow copy construction
-    inline CHSV(const CHSV& rhs) __attribute__((always_inline))
-    {
-        h = rhs.h;
-        s = rhs.s;
-        v = rhs.v;
-    }
+    inline CHSV(const CHSV& rhs) __attribute__((always_inline)) = default;
 
-    inline CHSV& operator= (const CHSV& rhs) __attribute__((always_inline))
-    {
-        h = rhs.h;
-        s = rhs.s;
-        v = rhs.v;
-        return *this;
-    }
+    inline CHSV& operator= (const CHSV& rhs) __attribute__((always_inline)) = default;
 
     inline CHSV& setHSV(uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
     {
@@ -162,12 +151,7 @@ struct CRGB {
     }
 
     /// allow copy construction
-	inline CRGB(const CRGB& rhs) __attribute__((always_inline))
-    {
-        r = rhs.r;
-        g = rhs.g;
-        b = rhs.b;
-    }
+	inline CRGB(const CRGB& rhs) __attribute__((always_inline)) = default;
 
     /// allow construction from HSV color
 	inline CRGB(const CHSV& rhs) __attribute__((always_inline))
@@ -176,13 +160,7 @@ struct CRGB {
     }
 
     /// allow assignment from one RGB struct to another
-	inline CRGB& operator= (const CRGB& rhs) __attribute__((always_inline))
-    {
-        r = rhs.r;
-        g = rhs.g;
-        b = rhs.b;
-        return *this;
-    }
+	inline CRGB& operator= (const CRGB& rhs) __attribute__((always_inline)) = default;
 
     /// allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
 	inline CRGB& operator= (const uint32_t colorcode) __attribute__((always_inline))
