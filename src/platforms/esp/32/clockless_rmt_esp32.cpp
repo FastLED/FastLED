@@ -366,7 +366,7 @@ void ESP32RMTController::initPulseBuffer(int size_in_bytes)
 {
     if (mBuffer == 0) {
         // -- Each byte has 8 bits, each bit needs a 32-bit RMT item
-        int size = size_in_bytes * 8 * 4;
+        mBufferSize size = size_in_bytes * 8 * 4;
 
         mBuffer = (rmt_item32_t *) calloc( mBufferSize, sizeof(rmt_item32_t));
     }
