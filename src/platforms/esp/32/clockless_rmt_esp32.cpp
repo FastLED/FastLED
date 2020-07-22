@@ -16,6 +16,12 @@ static ESP32RMTController * gControllers[FASTLED_RMT_MAX_CONTROLLERS];
 //    channel assigned to them.
 static ESP32RMTController * gOnChannel[FASTLED_RMT_MAX_CHANNELS];
 
+// -- Channels that need a buffer refill
+static bool gRefillChannel[FASTLED_RMT_MAX_CHANNELS];
+
+// -- Channels that are done
+static bool gDoneChannel[FASTLED_RMT_MAX_CHANNELS];
+
 static int gNumControllers = 0;
 static int gNumStarted = 0;
 static int gNumDone = 0;
@@ -28,6 +34,12 @@ static intr_handle_t gRMT_intr_handle = NULL;
 static xSemaphoreHandle gTX_sem = NULL;
 
 static bool gInitialized = false;
+
+// -- Timing stuff
+static uint32_t gTiming[500];
+static int gTimeIndex;
+static uint32_t gLastTime;
+ 
 
 ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3)
     : mPixelData(0), 
@@ -132,6 +144,11 @@ void ESP32RMTController::showPixels()
         ESP32RMTController::init();
         xSemaphoreTake(gTX_sem, portMAX_DELAY);
 
+        for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
+            gRefillChannel[i] = false;
+            gDoneChannel[i] = false;
+        }
+
 #if FASTLED_ESP32_FLASH_LOCK == 1
         // -- Make sure no flash operations happen right now
         spi_flash_op_lock();
@@ -145,6 +162,10 @@ void ESP32RMTController::showPixels()
     //    all of the actual worl
     if (gNumStarted == gNumControllers) {
         gNext = 0;
+
+#if FASTLED_ESP32_SHOWTIMING == 1
+        gTimeIndex = 0;
+#endif
 
         // -- First, fill all the available channels
         int channel = 0;
@@ -160,13 +181,32 @@ void ESP32RMTController::showPixels()
         for (int i = 0; i < channel; i++) {
             ESP32RMTController * pController = gControllers[i];
             pController->tx_start();
+#if FASTLED_ESP32_SHOWTIMING == 1
+            gLastTime = __clock_cycles();
+#endif
         }
 
-        // -- Wait here while the rest of the data is sent. The interrupt handler
-        //    will keep refilling the RMT buffers until it is all sent; then it
-        //    gives the semaphore back.
-        xSemaphoreTake(gTX_sem, portMAX_DELAY);
-        xSemaphoreGive(gTX_sem);
+        bool all_done = false;
+        do {
+            xSemaphoreTake(gTX_sem, portMAX_DELAY);
+
+            for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
+                if (gRefillChannel[i]) {
+                    gOnChannel[i]->fillNext();
+                    gRefillChannel[i] = false;
+                }
+
+                if (gDoneChannel[i]) {
+                    doneOnChannel(rmt_channel_t(i), 0);
+                    if (gNumDone == gNumControllers) {
+                        all_done = true;
+                    }
+                    gDoneChannel[i] = false;
+                }
+            }
+
+            xSemaphoreGive(gTX_sem);
+        } while ( ! all_done);
 
         mWait.mark();
 
@@ -180,6 +220,16 @@ void ESP32RMTController::showPixels()
         spi_flash_op_unlock();
 #endif
     }
+
+#if FASTLED_ESP32_SHOWTIMING == 1
+    for (int i = 0; i < gTimeIndex; i++) {
+        if (gTiming[i] > 10000) {
+            Serial.print(i);
+            Serial.print(" ");
+            Serial.println(gTiming[i]);
+        }
+    }
+#endif
 }
 
 // -- Start up the next controller
@@ -248,7 +298,6 @@ void ESP32RMTController::tx_start()
 void ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
 {
     ESP32RMTController * pController = gOnChannel[channel];
-    portBASE_TYPE HPTaskAwoken = 0;
 
     // -- Turn off output on the pin
     // SZG: Do I really need to do this?
@@ -261,9 +310,6 @@ void ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
         // -- If this is the last controller, signal that we are all done
         if (FASTLED_RMT_BUILTIN_DRIVER) {
             xSemaphoreGive(gTX_sem);
-        } else {
-            xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
-            if (HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
         }
     } else {
         // -- Otherwise, if there are still controllers waiting, then
@@ -286,6 +332,13 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
     uint32_t intr_st = RMT.int_st.val;
     uint8_t channel;
 
+#if FASTLED_ESP32_SHOWTIMING == 1
+    uint32_t curt = __clock_cycles();
+    gTiming[gTimeIndex++] = curt - gLastTime;
+    gLastTime = curt;
+#endif
+
+    bool stuff_to_do = false;
     for (channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; channel++) {
         int tx_done_bit = channel * 3;
         int tx_next_bit = channel + 24;
@@ -296,18 +349,23 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
             // -- More to send on this channel
             if (intr_st & BIT(tx_next_bit)) {
                 RMT.int_clr.val |= BIT(tx_next_bit);
-                    
-                // -- Refill the half of the buffer that we just finished,
-                //    allowing the other half to proceed.
-                pController->fillNext();
+                gRefillChannel[channel] = true;
+                stuff_to_do = true;
             } else {
                 // -- Transmission is complete on this channel
                 if (intr_st & BIT(tx_done_bit)) {
                     RMT.int_clr.val |= BIT(tx_done_bit);
-                    doneOnChannel(rmt_channel_t(channel), 0);
+                    gDoneChannel[channel] = true;
+                    stuff_to_do = true;
                 }
             }
         }
+    }
+
+    if (stuff_to_do) {
+        portBASE_TYPE HPTaskAwoken = 0;
+        xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+        if (HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
     }
 }
 
