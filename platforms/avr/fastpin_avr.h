@@ -204,6 +204,26 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 #define SPI_UART0_CLOCK 12
 #endif
 
+#elif defined(ARDUINO_AVR_NANO_EVERY)
+
+#define MAX_PIN 22
+_FL_DEFPIN(0, 5, C); _FL_DEFPIN(1, 4, C); _FL_DEFPIN(2, 0, A); _FL_DEFPIN(3, 5, F);
+_FL_DEFPIN(4, 6, C); _FL_DEFPIN(5, 2, B); _FL_DEFPIN(6, 4, F); _FL_DEFPIN(7, 1, A);
+_FL_DEFPIN(8, 3, E); _FL_DEFPIN(9, 0, B); _FL_DEFPIN(10, 1, B); _FL_DEFPIN(11, 0, E);
+_FL_DEFPIN(12, 1, E); _FL_DEFPIN(13, 2, E); _FL_DEFPIN(14, 3, D); _FL_DEFPIN(15, 2, D);
+_FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19, 3, A);
+_FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D); _FL_DEFPIN(22, 2, A);
+
+// To confirm for the SPI interfaces
+//#define SPI_DATA 18
+//#define SPI_CLOCK 13
+//#define SPI_SELECT 19
+//#define AVR_HARDWARE_SPI 1
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+//#define SPI_UART0_DATA 1
+//#define SPI_UART0_CLOCK 4
+
 #elif defined(__AVR_ATmega4809__)
 
 #define MAX_PIN 21
