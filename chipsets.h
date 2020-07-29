@@ -16,7 +16,7 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(ARDUINO) //&& defined(SoftwareSerial_h)
 
 
-#if defined(SoftwareSerial_h)
+#if defined(SoftwareSerial_h) || defined(__SoftwareSerial_h)
 #include <SoftwareSerial.h>
 
 #define HAS_PIXIE
