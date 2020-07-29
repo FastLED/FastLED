@@ -490,7 +490,7 @@ public:
 
 	/// Set the maximum power to be used, given in milliwatts
 	/// @param milliwatts - the max power draw desired, in milliwatts
-	inline void setMaxPowerInMilliWatts(uint32_t milliwatts) { m_pPowerFunc = &calculate_max_brightness_for_power_mW; m_nPowerData = milliwatts; }
+	inline void setMaxPowerInMilliWatts(uint32_t milliwatts) { setupPowerScaleTable(); m_pPowerFunc = &calculate_max_brightness_for_power_mW; m_nPowerData = milliwatts; }
 
 	/// Update all our controllers with the current led colors, using the passed in brightness
 	/// @param scale temporarily override the scale
