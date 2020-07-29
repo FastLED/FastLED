@@ -49,6 +49,41 @@
     _DEFPIN_ARM_IDENTITY_P0(31); // A7
 #endif // defined (ARDUINO_NRF52832_FEATHER) 
 
+// Adafruit Circuit Playground Bluefruit
+// From https://www.adafruit.com/package_adafruit_index.json
+#if defined (ARDUINO_NRF52840_CIRCUITPLAY)
+    #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
+        #error "Cannot define more than one board at a time"
+    #else
+        #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
+    #endif
+
+    // This board is a bit of a mess ... as it defines
+    // multiple arduino pins to map to a single Port/Pin
+    // combination.
+
+    // Use PIN_NEOPIXEL (D8) for the ten built-in neopixels
+    _FL_DEFPIN( 8, 13, 0); // P0.13 -- D8 / Neopixels
+
+    // PIN_A0 is connect to an amplifier, and thus *might*
+    // not be suitable for use with FastLED.
+    // Do not enable this pin until can confirm
+    // signal integrity from this pin.
+    //
+    // NOTE: it might also be possible if first disable
+    //       the amp using D11 ("speaker shutdown" pin)
+    //
+    // _FL_DEFPIN(14, 26, 0); // P0.26 -- A0   / D12  / Audio Out
+    _FL_DEFPIN(15,  2, 0);    // P0.02 -- A1   /  D6
+    _FL_DEFPIN(16, 29, 0);    // P0.29 -- A2   /  D9
+    _FL_DEFPIN(17,  3, 0);    // P0.03 -- A3   / D10
+    _FL_DEFPIN(18,  4, 0);    // P0.04 -- A4   /  D3  / SCL
+    _FL_DEFPIN(19,  5, 0);    // P0.05 -- A5   /  D2  / SDA
+    _FL_DEFPIN(20, 30, 0);    // P0.30 -- A6   /  D0  / UART RX
+    _FL_DEFPIN(21, 14, 0);    // P0.14 -- AREF /  D1  / UART TX
+
+#endif
+
 // Adafruit Bluefruit nRF52840 Feather Express
 // From https://www.adafruit.com/package_adafruit_index.json
 #if defined (ARDUINO_NRF52840_FEATHER)
