@@ -17,6 +17,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual void init() {
 		FastPin<DATA_PIN>::setOutput();
@@ -27,15 +28,14 @@ public:
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-    mWait.wait();
+		mWait.wait();
 		if(!showRGBInternal(pixels)) {
-      sei(); delayMicroseconds(WAIT_TIME); cli();
-      showRGBInternal(pixels);
-    }
-    mWait.mark();
-  }
+			sei(); delayMicroseconds(WAIT_TIME); cli();
+			showRGBInternal(pixels);
+		}
+		mWait.mark();
+	}
 
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  {
 		for(register uint32_t i = BITS-1; i > 0; i--) {

@@ -161,10 +161,10 @@ LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
     uint8_t offset = theta;
 
     asm volatile(
-                 "sbrc %[theta],6         \n\t"
-                 "com  %[offset]           \n\t"
-                 : [theta] "+r" (theta), [offset] "+r" (offset)
-                 );
+        "sbrc %[theta],6         \n\t"
+        "com  %[offset]           \n\t"
+        : [theta] "+r" (theta), [offset] "+r" (offset)
+    );
 
     offset &= 0x3F; // 0..63
 
@@ -185,18 +185,18 @@ LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
     uint8_t mx;
     uint8_t xr1;
     asm volatile(
-                 "mul %[m16],%[secoffset]   \n\t"
-                 "mov %[mx],r0              \n\t"
-                 "mov %[xr1],r1             \n\t"
-                 "eor  r1, r1               \n\t"
-                 "swap %[mx]                \n\t"
-                 "andi %[mx],0x0F           \n\t"
-                 "swap %[xr1]               \n\t"
-                 "andi %[xr1], 0xF0         \n\t"
-                 "or   %[mx], %[xr1]        \n\t"
-                 : [mx] "=d" (mx), [xr1] "=d" (xr1)
-                 : [m16] "d" (m16), [secoffset] "d" (secoffset)
-                 );
+        "mul %[m16],%[secoffset]   \n\t"
+        "mov %[mx],r0              \n\t"
+        "mov %[xr1],r1             \n\t"
+        "eor  r1, r1               \n\t"
+        "swap %[mx]                \n\t"
+        "andi %[mx],0x0F           \n\t"
+        "swap %[xr1]               \n\t"
+        "andi %[xr1], 0xF0         \n\t"
+        "or   %[mx], %[xr1]        \n\t"
+        : [mx] "=d" (mx), [xr1] "=d" (xr1)
+        : [m16] "d" (m16), [secoffset] "d" (secoffset)
+    );
 
     int8_t y = mx + b;
     if( theta & 0x80 ) y = -y;

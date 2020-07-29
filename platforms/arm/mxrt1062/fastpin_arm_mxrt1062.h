@@ -39,7 +39,7 @@ public:
 	inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO_DR_SET::r(); }
 	inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO_DR_CLEAR::r(); }
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
-  inline static uint32_t pinbit() __attribute__ ((always_inline)) { return _BIT; }
+	inline static uint32_t pinbit() __attribute__ ((always_inline)) { return _BIT; }
 };
 
 

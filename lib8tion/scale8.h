@@ -55,7 +55,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8( uint8_t i, fract8 scale)
         : [work] "+r" (work), [cnt] "+r" (cnt)
         : [scale] "r" (scale), [i] "r" (i)
         :
-      );
+    );
     return work;
 #else
     asm volatile(
@@ -69,18 +69,18 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8( uint8_t i, fract8 scale)
         // walk and chew gum at the same time
         "adc %0, r1          \n\t"
 #else
-         /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
-         "mul %0, %1          \n\t"
-         /* Move the high 8-bits of the product (r1) back to i */
-         "mov %0, r1          \n\t"
-         /* Restore r1 to "0"; it's expected to always be that */
+        /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
+        "mul %0, %1          \n\t"
+        /* Move the high 8-bits of the product (r1) back to i */
+        "mov %0, r1          \n\t"
+        /* Restore r1 to "0"; it's expected to always be that */
 #endif
-         "clr __zero_reg__    \n\t"
+        "clr __zero_reg__    \n\t"
 
-         : "+a" (i)      /* writes to i */
-         : "a"  (scale)  /* uses scale */
-         : "r0", "r1"    /* clobbers r0, r1 */ );
-
+        : "+a" (i)      /* writes to i */
+        : "a"  (scale)  /* uses scale */
+        : "r0", "r1"    /* clobbers r0, r1 */
+    );
     /* Return the result */
     return i;
 #endif
@@ -115,8 +115,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video( uint8_t i, fract8 scale)
         "L_%=: \n\t"
         : [j] "+a" (j)
         : [i] "a" (i), [scale] "a" (scale)
-        : "r0", "r1");
-
+        : "r0", "r1"
+    );
     return j;
     // uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
     // asm volatile(
@@ -127,11 +127,9 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video( uint8_t i, fract8 scale)
     //      "      add %0, %2       \n"
     //      "      clr __zero_reg__ \n"
     //      "L_%=:                  \n"
-
     //      : "+a" (i)
     //      : "a" (scale), "a" (nonzeroscale)
     //      : "r0", "r1");
-
     // // Return the result
     // return i;
 #else
@@ -153,28 +151,27 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scal
 #endif
 #elif SCALE8_AVRASM == 1
     asm volatile(
-      #if (FASTLED_SCALE8_FIXED==1)
-              // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
-              "mul %0, %1          \n\t"
-              // Add i to r0, possibly setting the carry flag
-              "add r0, %0         \n\t"
-              // load the immediate 0 into i (note, this does _not_ touch any flags)
-              "ldi %0, 0x00       \n\t"
-              // walk and chew gum at the same time
-              "adc %0, r1          \n\t"
-      #else
-         /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
-         "mul %0, %1    \n\t"
-         /* Move the high 8-bits of the product (r1) back to i */
-         "mov %0, r1    \n\t"
-      #endif
-         /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */
-         /* "clr __zero_reg__    \n\t" */
-
-         : "+a" (i)      /* writes to i */
-         : "a"  (scale)  /* uses scale */
-         : "r0", "r1"    /* clobbers r0, r1 */ );
-
+#if (FASTLED_SCALE8_FIXED==1)
+        // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
+        "mul %0, %1          \n\t"
+        // Add i to r0, possibly setting the carry flag
+        "add r0, %0         \n\t"
+        // load the immediate 0 into i (note, this does _not_ touch any flags)
+        "ldi %0, 0x00       \n\t"
+        // walk and chew gum at the same time
+        "adc %0, r1          \n\t"
+#else
+        /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
+        "mul %0, %1    \n\t"
+        /* Move the high 8-bits of the product (r1) back to i */
+        "mov %0, r1    \n\t"
+#endif
+        /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */
+        /* "clr __zero_reg__    \n\t" */
+        : "+a" (i)      /* writes to i */
+        : "a"  (scale)  /* uses scale */
+        : "r0", "r1"    /* clobbers r0, r1 */
+    );
     // Return the result
     return i;
 #else
@@ -197,27 +194,28 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale
 #endif
 #elif SCALE8_AVRASM == 1
     asm volatile(
-      #if (FASTLED_SCALE8_FIXED==1)
-              // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
-              "mul %0, %1          \n\t"
-              // Add i to r0, possibly setting the carry flag
-              "add r0, %0         \n\t"
-              // load the immediate 0 into i (note, this does _not_ touch any flags)
-              "ldi %0, 0x00       \n\t"
-              // walk and chew gum at the same time
-              "adc %0, r1          \n\t"
-      #else
-         /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
-         "mul %0, %1    \n\t"
-         /* Move the high 8-bits of the product (r1) back to i */
-         "mov %0, r1    \n\t"
-      #endif
-         /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF */
-         /* "clr __zero_reg__    \n\t" */
+#if (FASTLED_SCALE8_FIXED==1)
+        // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
+        "mul %0, %1          \n\t"
+        // Add i to r0, possibly setting the carry flag
+        "add r0, %0         \n\t"
+        // load the immediate 0 into i (note, this does _not_ touch any flags)
+        "ldi %0, 0x00       \n\t"
+        // walk and chew gum at the same time
+        "adc %0, r1          \n\t"
+#else
+        /* Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0 */
+        "mul %0, %1    \n\t"
+        /* Move the high 8-bits of the product (r1) back to i */
+        "mov %0, r1    \n\t"
+#endif
+        /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF */
+        /* "clr __zero_reg__    \n\t" */
 
-         : "+a" (i)      /* writes to i */
-         : "a"  (scale)  /* uses scale */
-         : "r0", "r1"    /* clobbers r0, r1 */ );
+        : "+a" (i)      /* writes to i */
+        : "a"  (scale)  /* uses scale */
+        : "r0", "r1"    /* clobbers r0, r1 */
+    );
 #else
 #error "No implementation for nscale8_LEAVING_R1_DIRTY available."
 #endif
@@ -246,8 +244,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract
         "L_%=: \n\t"
         : [j] "+a" (j)
         : [i] "a" (i), [scale] "a" (scale)
-        : "r0", "r1");
-
+        : "r0", "r1"
+    );
     return j;
     // uint8_t nonzeroscale = (scale != 0) ? 1 : 0;
     // asm volatile(
@@ -258,11 +256,9 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract
     //      "      add %0, %2       \n"
     //      "      clr __zero_reg__ \n"
     //      "L_%=:                  \n"
-
     //      : "+a" (i)
     //      : "a" (scale), "a" (nonzeroscale)
     //      : "r0", "r1");
-
     // // Return the result
     // return i;
 #else
@@ -289,7 +285,8 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY( uint8_t & i, fract
         "L_%=: \n\t"
         : [i] "+a" (i)
         : [scale] "a" (scale)
-        : "r0", "r1");
+        : "r0", "r1"
+    );
 #else
 #error "No implementation for scale8_video_LEAVING_R1_DIRTY available."
 #endif
@@ -427,50 +424,50 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8( uint16_t i, fract8 scale )
 #if FASTLED_SCALE8_FIXED == 1
     uint16_t result = 0;
     asm volatile(
-                 // result.A = HighByte( (i.A x scale) + i.A )
-                 "  mul %A[i], %[scale]                 \n\t"
-                 "  add r0, %A[i]                       \n\t"
-            //   "  adc r1, [zero]                      \n\t"
-            //   "  mov %A[result], r1                  \n\t"
-                 "  adc %A[result], r1                  \n\t"
-                 
-                 // result.A-B += i.B x scale
-                 "  mul %B[i], %[scale]                 \n\t"
-                 "  add %A[result], r0                  \n\t"
-                 "  adc %B[result], r1                  \n\t"
+        // result.A = HighByte( (i.A x scale) + i.A )
+        "  mul %A[i], %[scale]                 \n\t"
+        "  add r0, %A[i]                       \n\t"
+        //   "  adc r1, [zero]                      \n\t"
+        //   "  mov %A[result], r1                  \n\t"
+        "  adc %A[result], r1                  \n\t"
+        
+        // result.A-B += i.B x scale
+        "  mul %B[i], %[scale]                 \n\t"
+        "  add %A[result], r0                  \n\t"
+        "  adc %B[result], r1                  \n\t"
 
-                 // cleanup r1
-                 "  clr __zero_reg__                    \n\t"
-                 
-                 // result.A-B += i.B
-                 "  add %A[result], %B[i]               \n\t"
-                 "  adc %B[result], __zero_reg__        \n\t"
+        // cleanup r1
+        "  clr __zero_reg__                    \n\t"
+        
+        // result.A-B += i.B
+        "  add %A[result], %B[i]               \n\t"
+        "  adc %B[result], __zero_reg__        \n\t"
 
-                 : [result] "+r" (result)
-                 : [i] "r" (i), [scale] "r" (scale)
-                 : "r0", "r1"
-                 );
+        : [result] "+r" (result)
+        : [i] "r" (i), [scale] "r" (scale)
+        : "r0", "r1"
+    );
     return result;
 #else
     uint16_t result = 0;
     asm volatile(
-         // result.A = HighByte(i.A x j )
-         "  mul %A[i], %[scale]                 \n\t"
-         "  mov %A[result], r1                  \n\t"
-         //"  clr %B[result]                      \n\t"
+        // result.A = HighByte(i.A x j )
+        "  mul %A[i], %[scale]                 \n\t"
+        "  mov %A[result], r1                  \n\t"
+        //"  clr %B[result]                      \n\t"
 
-         // result.A-B += i.B x j
-         "  mul %B[i], %[scale]                 \n\t"
-         "  add %A[result], r0                  \n\t"
-         "  adc %B[result], r1                  \n\t"
+        // result.A-B += i.B x j
+        "  mul %B[i], %[scale]                 \n\t"
+        "  add %A[result], r0                  \n\t"
+        "  adc %B[result], r1                  \n\t"
 
-         // cleanup r1
-         "  clr __zero_reg__                    \n\t"
+        // cleanup r1
+        "  clr __zero_reg__                    \n\t"
 
-         : [result] "+r" (result)
-         : [i] "r" (i), [scale] "r" (scale)
-         : "r0", "r1"
-         );
+        : [result] "+r" (result)
+        : [i] "r" (i), [scale] "r" (scale)
+        : "r0", "r1"
+    );
     return result;
 #endif
 #else
@@ -503,137 +500,137 @@ LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
     // will be zero, which is not what we want.
     uint32_t result;
     asm volatile(
-                 // result.A-B  = i.A x scale.A
-                 "  mul %A[i], %A[scale]                 \n\t"
-                 //  save results...
-                 // basic idea:
-                 //"  mov %A[result], r0                 \n\t"
-                 //"  mov %B[result], r1                 \n\t"
-                 // which can be written as...
-                 "  movw %A[result], r0                   \n\t"
-                 // Because we're going to add i.A-B to
-                 // result.A-D, we DO need to keep both
-                 // the r0 and r1 portions of the product
-                 // UNlike in the 'unfixed scale8' version.
-                 // So the movw here is needed.
-                 : [result] "=r" (result)
-                 : [i] "r" (i),
-                 [scale] "r" (scale)
-                 : "r0", "r1"
-                 );
+        // result.A-B  = i.A x scale.A
+        "  mul %A[i], %A[scale]                 \n\t"
+        //  save results...
+        // basic idea:
+        //"  mov %A[result], r0                 \n\t"
+        //"  mov %B[result], r1                 \n\t"
+        // which can be written as...
+        "  movw %A[result], r0                   \n\t"
+        // Because we're going to add i.A-B to
+        // result.A-D, we DO need to keep both
+        // the r0 and r1 portions of the product
+        // UNlike in the 'unfixed scale8' version.
+        // So the movw here is needed.
+        : [result] "=r" (result)
+        : [i] "r" (i),
+        [scale] "r" (scale)
+        : "r0", "r1"
+    );
     
     asm volatile(
-                 // result.C-D  = i.B x scale.B
-                 "  mul %B[i], %B[scale]                 \n\t"
-                 //"  mov %C[result], r0                 \n\t"
-                 //"  mov %D[result], r1                 \n\t"
-                 "  movw %C[result], r0                   \n\t"
-                 : [result] "+r" (result)
-                 : [i] "r" (i),
-                 [scale] "r" (scale)
-                 : "r0", "r1"
-                 );
-    
-    const uint8_t  zero = 0;
-    asm volatile(
-                 // result.B-D += i.B x scale.A
-                 "  mul %B[i], %A[scale]                 \n\t"
-                 
-                 "  add %B[result], r0                   \n\t"
-                 "  adc %C[result], r1                   \n\t"
-                 "  adc %D[result], %[zero]              \n\t"
-                 
-                 // result.B-D += i.A x scale.B
-                 "  mul %A[i], %B[scale]                 \n\t"
-                 
-                 "  add %B[result], r0                   \n\t"
-                 "  adc %C[result], r1                   \n\t"
-                 "  adc %D[result], %[zero]              \n\t"
-                 
-                 // cleanup r1
-                 "  clr r1                               \n\t"
-                 
-                 : [result] "+r" (result)
-                 : [i] "r" (i),
-                 [scale] "r" (scale),
-                 [zero] "r" (zero)
-                 : "r0", "r1"
-                 );
+        // result.C-D  = i.B x scale.B
+        "  mul %B[i], %B[scale]                 \n\t"
+        //"  mov %C[result], r0                 \n\t"
+        //"  mov %D[result], r1                 \n\t"
+        "  movw %C[result], r0                   \n\t"
+        : [result] "+r" (result)
+        : [i] "r" (i),
+        [scale] "r" (scale)
+        : "r0", "r1"
+);
+
+const uint8_t  zero = 0;
+asm volatile(
+        // result.B-D += i.B x scale.A
+        "  mul %B[i], %A[scale]                 \n\t"
+        
+        "  add %B[result], r0                   \n\t"
+        "  adc %C[result], r1                   \n\t"
+        "  adc %D[result], %[zero]              \n\t"
+        
+        // result.B-D += i.A x scale.B
+        "  mul %A[i], %B[scale]                 \n\t"
+        
+        "  add %B[result], r0                   \n\t"
+        "  adc %C[result], r1                   \n\t"
+        "  adc %D[result], %[zero]              \n\t"
+        
+        // cleanup r1
+        "  clr r1                               \n\t"
+        
+        : [result] "+r" (result)
+        : [i] "r" (i),
+        [scale] "r" (scale),
+        [zero] "r" (zero)
+        : "r0", "r1"
+    );
 
     asm volatile(
-                 // result.A-D += i.A-B
-                 "  add %A[result], %A[i]                \n\t"
-                 "  adc %B[result], %B[i]                \n\t"
-                 "  adc %C[result], %[zero]              \n\t"
-                 "  adc %D[result], %[zero]              \n\t"
-                 : [result] "+r" (result)
-                 : [i] "r" (i),
-                 [zero] "r" (zero)
-                 );
+        // result.A-D += i.A-B
+        "  add %A[result], %A[i]                \n\t"
+        "  adc %B[result], %B[i]                \n\t"
+        "  adc %C[result], %[zero]              \n\t"
+        "  adc %D[result], %[zero]              \n\t"
+        : [result] "+r" (result)
+        : [i] "r" (i),
+        [zero] "r" (zero)
+    );
     
     result = result >> 16;
     return result;
 #else
     uint32_t result;
     asm volatile(
-                 // result.A-B  = i.A x scale.A
-                 "  mul %A[i], %A[scale]                 \n\t"
-                 //  save results...
-                 // basic idea:
-                 //"  mov %A[result], r0                 \n\t"
-                 //"  mov %B[result], r1                 \n\t"
-                 // which can be written as...
-                 "  movw %A[result], r0                   \n\t"
-                 // We actually don't need to do anything with r0,
-                 // as result.A is never used again here, so we
-                 // could just move the high byte, but movw is
-                 // one clock cycle, just like mov, so might as
-                 // well, in case we want to use this code for
-                 // a generic 16x16 multiply somewhere.
+        // result.A-B  = i.A x scale.A
+        "  mul %A[i], %A[scale]                 \n\t"
+        //  save results...
+        // basic idea:
+        //"  mov %A[result], r0                 \n\t"
+        //"  mov %B[result], r1                 \n\t"
+        // which can be written as...
+        "  movw %A[result], r0                   \n\t"
+        // We actually don't need to do anything with r0,
+        // as result.A is never used again here, so we
+        // could just move the high byte, but movw is
+        // one clock cycle, just like mov, so might as
+        // well, in case we want to use this code for
+        // a generic 16x16 multiply somewhere.
 
-                 : [result] "=r" (result)
-                 : [i] "r" (i),
-                   [scale] "r" (scale)
-                 : "r0", "r1"
-                 );
+        : [result] "=r" (result)
+        : [i] "r" (i),
+        [scale] "r" (scale)
+        : "r0", "r1"
+    );
 
     asm volatile(
-                 // result.C-D  = i.B x scale.B
-                 "  mul %B[i], %B[scale]                 \n\t"
-                 //"  mov %C[result], r0                 \n\t"
-                 //"  mov %D[result], r1                 \n\t"
-                 "  movw %C[result], r0                   \n\t"
-                 : [result] "+r" (result)
-                 : [i] "r" (i),
-                   [scale] "r" (scale)
-                 : "r0", "r1"
-                 );
+        // result.C-D  = i.B x scale.B
+        "  mul %B[i], %B[scale]                 \n\t"
+        //"  mov %C[result], r0                 \n\t"
+        //"  mov %D[result], r1                 \n\t"
+        "  movw %C[result], r0                   \n\t"
+        : [result] "+r" (result)
+        : [i] "r" (i),
+        [scale] "r" (scale)
+        : "r0", "r1"
+    );
 
     const uint8_t  zero = 0;
     asm volatile(
-                 // result.B-D += i.B x scale.A
-                 "  mul %B[i], %A[scale]                 \n\t"
+        // result.B-D += i.B x scale.A
+        "  mul %B[i], %A[scale]                 \n\t"
 
-                 "  add %B[result], r0                   \n\t"
-                 "  adc %C[result], r1                   \n\t"
-                 "  adc %D[result], %[zero]              \n\t"
+        "  add %B[result], r0                   \n\t"
+        "  adc %C[result], r1                   \n\t"
+        "  adc %D[result], %[zero]              \n\t"
 
-                 // result.B-D += i.A x scale.B
-                 "  mul %A[i], %B[scale]                 \n\t"
+        // result.B-D += i.A x scale.B
+        "  mul %A[i], %B[scale]                 \n\t"
 
-                 "  add %B[result], r0                   \n\t"
-                 "  adc %C[result], r1                   \n\t"
-                 "  adc %D[result], %[zero]              \n\t"
+        "  add %B[result], r0                   \n\t"
+        "  adc %C[result], r1                   \n\t"
+        "  adc %D[result], %[zero]              \n\t"
 
-                 // cleanup r1
-                 "  clr r1                               \n\t"
+        // cleanup r1
+        "  clr r1                               \n\t"
 
-                 : [result] "+r" (result)
-                 : [i] "r" (i),
-                   [scale] "r" (scale),
-                   [zero] "r" (zero)
-                 : "r0", "r1"
-                 );
+        : [result] "+r" (result)
+        : [i] "r" (i),
+        [scale] "r" (scale),
+        [zero] "r" (zero)
+        : "r0", "r1"
+    );
 
     result = result >> 16;
     return result;

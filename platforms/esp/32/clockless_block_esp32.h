@@ -24,6 +24,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
     data_t mPinMask;
     data_ptr_t mPort;
     CMinWait<WAIT_TIME> mWait;
+
 public:
     virtual int size() { return CLEDController::size() * LANES; }
 

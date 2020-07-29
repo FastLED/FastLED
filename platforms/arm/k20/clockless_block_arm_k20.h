@@ -27,6 +27,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
 
@@ -197,6 +198,7 @@ class SixteenWayInlineBlockClocklessController : public CPixelLEDController<RGB_
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual void init() {
 		static_assert(LANES <= 16, "Maximum of 16 lanes for Teensy parallel controllers!");

@@ -203,6 +203,7 @@ private:
 		}
 #endif
 	}
+
 public:
 
 	// select the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move select responsibility out of the SPI classes

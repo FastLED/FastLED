@@ -12,6 +12,7 @@ FASTLED_NAMESPACE_BEGIN
 /// this should make sure that chipsets that have
 template<int WAIT> class CMinWait {
 	uint16_t mLastMicros;
+
 public:
 	CMinWait() { mLastMicros = 0; }
 
@@ -51,8 +52,8 @@ public:
 // predeclaration to not upset the compiler
 template<int CYCLES> inline void delaycycles();
 template<int CYCLES> inline void delaycycles_min1() {
-  delaycycles<1>();
-  delaycycles<CYCLES-1>();
+	delaycycles<1>();
+	delaycycles<CYCLES-1>();
 }
 
 

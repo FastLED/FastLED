@@ -9,28 +9,28 @@
 #if 0
 template<uint8_t PIN, uint32_t _MASK, typename _DIRSET, typename _DIRCLR, typename _OUTSET, typename _OUTCLR, typename _OUT> class _ARMPIN {
 public:
-  typedef volatile uint32_t * port_ptr_t;
-  typedef uint32_t port_t;
+    typedef volatile uint32_t * port_ptr_t;
+    typedef uint32_t port_t;
 
-  inline static void setOutput() { _DIRSET::r() = _MASK; }
-  inline static void setInput() { _DIRCLR::r() = _MASK; }
+    inline static void setOutput() { _DIRSET::r() = _MASK; }
+    inline static void setInput() { _DIRCLR::r() = _MASK; }
 
-  inline static void hi() __attribute__ ((always_inline)) { _OUTSET::r() = _MASK; }
-  inline static void lo() __attribute__ ((always_inline)) { _OUTCLR::r() = _MASK; }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { _OUT::r() = val; }
+    inline static void hi() __attribute__ ((always_inline)) { _OUTSET::r() = _MASK; }
+    inline static void lo() __attribute__ ((always_inline)) { _OUTCLR::r() = _MASK; }
+    inline static void set(register port_t val) __attribute__ ((always_inline)) { _OUT::r() = val; }
 
-  inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+    inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { _OUT::r() ^= _MASK; }
+    inline static void toggle() __attribute__ ((always_inline)) { _OUT::r() ^= _MASK; }
 
-  inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-  inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { return _OUT::r() | _MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return _OUT::r() & ~_MASK; }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_OUT::r(); }
-  inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+    inline static port_t hival() __attribute__ ((always_inline)) { return _OUT::r() | _MASK; }
+    inline static port_t loval() __attribute__ ((always_inline)) { return _OUT::r() & ~_MASK; }
+    inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_OUT::r(); }
+    inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
 #define ADDR(X) *(volatile uint32_t*)X
@@ -50,20 +50,20 @@ _RD32_NRF(NR_OUTCLR);
 _RD32_NRF(NR_OUT);
 
 #define _FL_DEFPIN(PIN) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << PIN, \
-  _R(NR_DIRSET), _R(NR_DIRCLR), _R(NR_OUTSET), _R(NR_OUTCLR), _R(NR_OUT)> {};
+    _R(NR_DIRSET), _R(NR_DIRCLR), _R(NR_OUTSET), _R(NR_OUTCLR), _R(NR_OUT)> {};
 #else
 
 typedef struct {                                    /*!< GPIO Structure                                                        */
-  // __I  uint32_t  RESERVED0[321];
-  __IO uint32_t  OUT;                               /*!< Write GPIO port.                                                      */
-  __IO uint32_t  OUTSET;                            /*!< Set individual bits in GPIO port.                                     */
-  __IO uint32_t  OUTCLR;                            /*!< Clear individual bits in GPIO port.                                   */
-  __I  uint32_t  IN;                                /*!< Read GPIO port.                                                       */
-  __IO uint32_t  DIR;                               /*!< Direction of GPIO pins.                                               */
-  __IO uint32_t  DIRSET;                            /*!< DIR set register.                                                     */
-  __IO uint32_t  DIRCLR;                            /*!< DIR clear register.                                                   */
-  __I  uint32_t  RESERVED1[120];
-  __IO uint32_t  PIN_CNF[32];                       /*!< Configuration of GPIO pins.                                           */
+    // __I  uint32_t  RESERVED0[321];
+    __IO uint32_t  OUT;                               /*!< Write GPIO port.                                                      */
+    __IO uint32_t  OUTSET;                            /*!< Set individual bits in GPIO port.                                     */
+    __IO uint32_t  OUTCLR;                            /*!< Clear individual bits in GPIO port.                                   */
+    __I  uint32_t  IN;                                /*!< Read GPIO port.                                                       */
+    __IO uint32_t  DIR;                               /*!< Direction of GPIO pins.                                               */
+    __IO uint32_t  DIRSET;                            /*!< DIR set register.                                                     */
+    __IO uint32_t  DIRCLR;                            /*!< DIR clear register.                                                   */
+    __I  uint32_t  RESERVED1[120];
+    __IO uint32_t  PIN_CNF[32];                       /*!< Configuration of GPIO pins.                                           */
 } FL_NRF_GPIO_Type;
 
 #define FL_NRF_GPIO_BASE                   0x50000504UL
@@ -71,30 +71,30 @@ typedef struct {                                    /*!< GPIO Structure         
 
 template<uint8_t PIN, uint32_t _MASK> class _ARMPIN {
 public:
-  typedef volatile uint32_t * port_ptr_t;
-  typedef uint32_t port_t;
+    typedef volatile uint32_t * port_ptr_t;
+    typedef uint32_t port_t;
 
-  inline static void setOutput() { FL_NRF_GPIO->DIRSET = _MASK; }
-  inline static void setInput() { FL_NRF_GPIO->DIRCLR = _MASK; }
+    inline static void setOutput() { FL_NRF_GPIO->DIRSET = _MASK; }
+    inline static void setInput() { FL_NRF_GPIO->DIRCLR = _MASK; }
 
-  inline static void hi() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUTSET = _MASK; }
-  inline static void lo() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUTCLR= _MASK; }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT = val; }
+    inline static void hi() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUTSET = _MASK; }
+    inline static void lo() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUTCLR= _MASK; }
+    inline static void set(register port_t val) __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT = val; }
 
-  inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+    inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT ^= _MASK; }
+    inline static void toggle() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT ^= _MASK; }
 
-  inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-  inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { return FL_NRF_GPIO->OUT | _MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return FL_NRF_GPIO->OUT & ~_MASK; }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return &FL_NRF_GPIO->OUT; }
-  inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+    inline static port_t hival() __attribute__ ((always_inline)) { return FL_NRF_GPIO->OUT | _MASK; }
+    inline static port_t loval() __attribute__ ((always_inline)) { return FL_NRF_GPIO->OUT & ~_MASK; }
+    inline static port_ptr_t port() __attribute__ ((always_inline)) { return &FL_NRF_GPIO->OUT; }
+    inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 
-  inline static bool isset() __attribute__ ((always_inline)) { return (FL_NRF_GPIO->IN & _MASK) != 0; }
+    inline static bool isset() __attribute__ ((always_inline)) { return (FL_NRF_GPIO->IN & _MASK) != 0; }
 };
 
 

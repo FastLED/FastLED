@@ -28,18 +28,19 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qadd8( uint8_t i, uint8_t j)
     return t;
 #elif QADD8_AVRASM == 1
     asm volatile(
-         /* First, add j to i, conditioning the C flag */
-         "add %0, %1    \n\t"
+        /* First, add j to i, conditioning the C flag */
+        "add %0, %1    \n\t"
 
-         /* Now test the C flag.
-           If C is clear, we branch around a load of 0xFF into i.
-           If C is set, we go ahead and load 0xFF into i.
-         */
-         "brcc L_%=     \n\t"
-         "ldi %0, 0xFF  \n\t"
-         "L_%=: "
-         : "+a" (i)
-         : "a"  (j) );
+        /* Now test the C flag.
+        If C is clear, we branch around a load of 0xFF into i.
+        If C is set, we go ahead and load 0xFF into i.
+        */
+        "brcc L_%=     \n\t"
+        "ldi %0, 0xFF  \n\t"
+        "L_%=: "
+        : "+a" (i)
+        : "a"  (j)
+    );
     return i;
 #elif QADD8_ARM_DSP_ASM == 1
     asm volatile( "uqadd8 %0, %0, %1" : "+r" (i) : "r" (j));
@@ -61,19 +62,19 @@ LIB8STATIC_ALWAYS_INLINE int8_t qadd7( int8_t i, int8_t j)
     return t;
 #elif QADD7_AVRASM == 1
     asm volatile(
-         /* First, add j to i, conditioning the V flag */
-         "add %0, %1    \n\t"
+        /* First, add j to i, conditioning the V flag */
+        "add %0, %1    \n\t"
 
-         /* Now test the V flag.
-          If V is clear, we branch around a load of 0x7F into i.
-          If V is set, we go ahead and load 0x7F into i.
-          */
-         "brvc L_%=     \n\t"
-         "ldi %0, 0x7F  \n\t"
-         "L_%=: "
-         : "+a" (i)
-         : "a"  (j) );
-
+        /* Now test the V flag.
+        If V is clear, we branch around a load of 0x7F into i.
+        If V is set, we go ahead and load 0x7F into i.
+        */
+        "brvc L_%=     \n\t"
+        "ldi %0, 0x7F  \n\t"
+        "L_%=: "
+        : "+a" (i)
+        : "a"  (j)
+    );
     return i;
 #elif QADD7_ARM_DSP_ASM == 1
     asm volatile( "qadd8 %0, %0, %1" : "+r" (i) : "r" (j));
@@ -94,19 +95,19 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qsub8( uint8_t i, uint8_t j)
 #elif QSUB8_AVRASM == 1
 
     asm volatile(
-         /* First, subtract j from i, conditioning the C flag */
-         "sub %0, %1    \n\t"
+        /* First, subtract j from i, conditioning the C flag */
+        "sub %0, %1    \n\t"
 
-         /* Now test the C flag.
-          If C is clear, we branch around a load of 0x00 into i.
-          If C is set, we go ahead and load 0x00 into i.
-          */
-         "brcc L_%=     \n\t"
-         "ldi %0, 0x00  \n\t"
-         "L_%=: "
-         : "+a" (i)
-         : "a"  (j) );
-
+        /* Now test the C flag.
+        If C is clear, we branch around a load of 0x00 into i.
+        If C is set, we go ahead and load 0x00 into i.
+        */
+        "brcc L_%=     \n\t"
+        "ldi %0, 0x00  \n\t"
+        "L_%=: "
+        : "+a" (i)
+        : "a"  (j)
+    );
     return i;
 #else
 #error "No implementation for qsub8 available."
@@ -136,11 +137,12 @@ LIB8STATIC_ALWAYS_INLINE uint16_t add8to16( uint8_t i, uint16_t j)
     return t;
 #elif ADD8_AVRASM == 1
     // Add i(one byte) to j(two bytes)
-    asm volatile( "add %A[j], %[i]              \n\t"
-                  "adc %B[j], __zero_reg__      \n\t"
-                 : [j] "+a" (j)
-                 : [i] "a"  (i)
-                 );
+    asm volatile(
+        "add %A[j], %[i]              \n\t"
+        "adc %B[j], __zero_reg__      \n\t"
+        : [j] "+a" (j)
+        : [i] "a"  (i)
+    );
     return i;
 #else
 #error "No implementation for add8to16 available."
@@ -172,12 +174,13 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8( uint8_t i, uint8_t j)
     return (i + j) >> 1;
 #elif AVG8_AVRASM == 1
     asm volatile(
-         /* First, add j to i, 9th bit overflows into C flag */
-         "add %0, %1    \n\t"
-         /* Divide by two, moving C flag into high 8th bit */
-         "ror %0        \n\t"
-         : "+a" (i)
-         : "a"  (j) );
+        /* First, add j to i, 9th bit overflows into C flag */
+        "add %0, %1    \n\t"
+        /* Divide by two, moving C flag into high 8th bit */
+        "ror %0        \n\t"
+        : "+a" (i)
+        : "a"  (j)
+    );
     return i;
 #else
 #error "No implementation for avg8 available."
@@ -193,16 +196,17 @@ LIB8STATIC_ALWAYS_INLINE uint16_t avg16( uint16_t i, uint16_t j)
     return (uint32_t)((uint32_t)(i) + (uint32_t)(j)) >> 1;
 #elif AVG16_AVRASM == 1
     asm volatile(
-                 /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
-                 "add %A[i], %A[j]    \n\t"
-                 /* Now, add C + jHi to iHi, 17th bit overflows into C flag */
-                 "adc %B[i], %B[j]    \n\t"
-                 /* Divide iHi by two, moving C flag into high 16th bit, old 9th bit now in C */
-                 "ror %B[i]        \n\t"
-                 /* Divide iLo by two, moving C flag into high 8th bit */
-                 "ror %A[i]        \n\t"
-                 : [i] "+a" (i)
-                 : [j] "a"  (j) );
+        /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
+        "add %A[i], %A[j]    \n\t"
+        /* Now, add C + jHi to iHi, 17th bit overflows into C flag */
+        "adc %B[i], %B[j]    \n\t"
+        /* Divide iHi by two, moving C flag into high 16th bit, old 9th bit now in C */
+        "ror %B[i]        \n\t"
+        /* Divide iLo by two, moving C flag into high 8th bit */
+        "ror %A[i]        \n\t"
+        : [i] "+a" (i)
+        : [j] "a"  (j)
+    );
     return i;
 #else
 #error "No implementation for avg16 available."
@@ -220,11 +224,12 @@ LIB8STATIC_ALWAYS_INLINE int8_t avg7( int8_t i, int8_t j)
     return ((i + j) >> 1) + (i & 0x1);
 #elif AVG7_AVRASM == 1
     asm volatile(
-                 "asr %1        \n\t"
-                 "asr %0        \n\t"
-                 "adc %0, %1    \n\t"
-                 : "+a" (i)
-                 : "a"  (j) );
+        "asr %1        \n\t"
+        "asr %0        \n\t"
+        "adc %0, %1    \n\t"
+        : "+a" (i)
+        : "a"  (j)
+    );
     return i;
 #else
 #error "No implementation for avg7 available."
@@ -241,17 +246,18 @@ LIB8STATIC_ALWAYS_INLINE int16_t avg15( int16_t i, int16_t j)
     return ((int32_t)((int32_t)(i) + (int32_t)(j)) >> 1) + (i & 0x1);
 #elif AVG15_AVRASM == 1
     asm volatile(
-                 /* first divide j by 2, throwing away lowest bit */
-                 "asr %B[j]          \n\t"
-                 "ror %A[j]          \n\t"
-                 /* now divide i by 2, with lowest bit going into C */
-                 "asr %B[i]          \n\t"
-                 "ror %A[i]          \n\t"
-                 /* add j + C to i */
-                 "adc %A[i], %A[j]   \n\t"
-                 "adc %B[i], %B[j]   \n\t"
-                 : [i] "+a" (i)
-                 : [j] "a"  (j) );
+        /* first divide j by 2, throwing away lowest bit */
+        "asr %B[j]          \n\t"
+        "ror %A[j]          \n\t"
+        /* now divide i by 2, with lowest bit going into C */
+        "asr %B[i]          \n\t"
+        "ror %A[i]          \n\t"
+        /* add j + C to i */
+        "adc %A[i], %A[j]   \n\t"
+        "adc %B[i], %B[j]   \n\t"
+        : [i] "+a" (i)
+        : [j] "a"  (j)
+    );
     return i;
 #else
 #error "No implementation for avg15 available."
@@ -271,12 +277,12 @@ LIB8STATIC_ALWAYS_INLINE uint8_t mod8( uint8_t a, uint8_t m)
 {
 #if defined(__AVR__)
     asm volatile (
-                  "L_%=:  sub %[a],%[m]    \n\t"
-                  "       brcc L_%=        \n\t"
-                  "       add %[a],%[m]    \n\t"
-                  : [a] "+r" (a)
-                  : [m] "r"  (m)
-                  );
+        "L_%=:  sub %[a],%[m]    \n\t"
+        "       brcc L_%=        \n\t"
+        "       add %[a],%[m]    \n\t"
+        : [a] "+r" (a)
+        : [m] "r"  (m)
+    );
 #else
     while( a >= m) a -= m;
 #endif
@@ -298,13 +304,13 @@ LIB8STATIC uint8_t addmod8( uint8_t a, uint8_t b, uint8_t m)
 {
 #if defined(__AVR__)
     asm volatile (
-                  "       add %[a],%[b]    \n\t"
-                  "L_%=:  sub %[a],%[m]    \n\t"
-                  "       brcc L_%=        \n\t"
-                  "       add %[a],%[m]    \n\t"
-                  : [a] "+r" (a)
-                  : [b] "r"  (b), [m] "r" (m)
-                  );
+        "       add %[a],%[b]    \n\t"
+        "L_%=:  sub %[a],%[m]    \n\t"
+        "       brcc L_%=        \n\t"
+        "       add %[a],%[m]    \n\t"
+        : [a] "+r" (a)
+        : [b] "r"  (b), [m] "r" (m)
+    );
 #else
     a += b;
     while( a >= m) a -= m;
@@ -327,13 +333,13 @@ LIB8STATIC uint8_t submod8( uint8_t a, uint8_t b, uint8_t m)
 {
 #if defined(__AVR__)
     asm volatile (
-                  "       sub %[a],%[b]    \n\t"
-                  "L_%=:  sub %[a],%[m]    \n\t"
-                  "       brcc L_%=        \n\t"
-                  "       add %[a],%[m]    \n\t"
-                  : [a] "+r" (a)
-                  : [b] "r"  (b), [m] "r" (m)
-                  );
+        "       sub %[a],%[b]    \n\t"
+        "L_%=:  sub %[a],%[m]    \n\t"
+        "       brcc L_%=        \n\t"
+        "       add %[a],%[m]    \n\t"
+        : [a] "+r" (a)
+        : [b] "r"  (b), [m] "r" (m)
+    );
 #else
     a -= b;
     while( a >= m) a -= m;
@@ -348,16 +354,16 @@ LIB8STATIC_ALWAYS_INLINE uint8_t mul8( uint8_t i, uint8_t j)
     return ((int)i * (int)(j) ) & 0xFF;
 #elif MUL8_AVRASM == 1
     asm volatile(
-         /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
-         "mul %0, %1          \n\t"
-         /* Extract the LOW 8-bits (r0) */
-         "mov %0, r0          \n\t"
-         /* Restore r1 to "0"; it's expected to always be that */
-         "clr __zero_reg__    \n\t"
-         : "+a" (i)
-         : "a"  (j)
-         : "r0", "r1");
-
+        /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
+        "mul %0, %1          \n\t"
+        /* Extract the LOW 8-bits (r0) */
+        "mov %0, r0          \n\t"
+        /* Restore r1 to "0"; it's expected to always be that */
+        "clr __zero_reg__    \n\t"
+        : "+a" (i)
+        : "a"  (j)
+        : "r0", "r1"
+    );
     return i;
 #else
 #error "No implementation for mul8 available."
@@ -375,24 +381,24 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qmul8( uint8_t i, uint8_t j)
     return p;
 #elif QMUL8_AVRASM == 1
     asm volatile(
-                 /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
-                 "  mul %0, %1          \n\t"
-                 /* If high byte of result is zero, all is well. */
-                 "  tst r1              \n\t"
-                 "  breq Lnospill_%=    \n\t"
-                 /* If high byte of result > 0, saturate low byte to 0xFF */
-                 "  ldi %0,0xFF         \n\t"
-                 "  rjmp Ldone_%=       \n\t"
-                 "Lnospill_%=:          \n\t"
-                 /* Extract the LOW 8-bits (r0) */
-                 "  mov %0, r0          \n\t"
-                 "Ldone_%=:             \n\t"
-                 /* Restore r1 to "0"; it's expected to always be that */
-                 "  clr __zero_reg__    \n\t"
-                 : "+a" (i)
-                 : "a"  (j)
-                 : "r0", "r1");
-
+        /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
+        "  mul %0, %1          \n\t"
+        /* If high byte of result is zero, all is well. */
+        "  tst r1              \n\t"
+        "  breq Lnospill_%=    \n\t"
+        /* If high byte of result > 0, saturate low byte to 0xFF */
+        "  ldi %0,0xFF         \n\t"
+        "  rjmp Ldone_%=       \n\t"
+        "Lnospill_%=:          \n\t"
+        /* Extract the LOW 8-bits (r0) */
+        "  mov %0, r0          \n\t"
+        "Ldone_%=:             \n\t"
+        /* Restore r1 to "0"; it's expected to always be that */
+        "  clr __zero_reg__    \n\t"
+        : "+a" (i)
+        : "a"  (j)
+        : "r0", "r1"
+    );
     return i;
 #else
 #error "No implementation for qmul8 available."
@@ -407,16 +413,15 @@ LIB8STATIC_ALWAYS_INLINE int8_t abs8( int8_t i)
     if( i < 0) i = -i;
     return i;
 #elif ABS8_AVRASM == 1
-
-
     asm volatile(
-         /* First, check the high bit, and prepare to skip if it's clear */
-         "sbrc %0, 7 \n"
+        /* First, check the high bit, and prepare to skip if it's clear */
+        "sbrc %0, 7 \n"
 
-         /* Negate the value */
-         "neg %0     \n"
+        /* Negate the value */
+        "neg %0     \n"
 
-         : "+r" (i) : "r" (i) );
+        : "+r" (i) : "r" (i)
+    );
     return i;
 #else
 #error "No implementation for abs8 available."
