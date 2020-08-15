@@ -193,12 +193,13 @@ private:
     rmt_item32_t   mOne;
 
     // -- Pixel data
-    uint8_t *      mPixelData;
+    uint32_t *     mPixelData;
     int            mSize;
     int            mCur;
 
     // -- RMT memory
     volatile uint32_t * mRMT_mem_ptr;
+    volatile uint32_t * mRMT_mem_start;
     int                 mWhichHalf;
 
     // -- Buffer to hold all of the pulses. For the version that uses
@@ -207,9 +208,6 @@ private:
     uint16_t       mBufferSize;
     int            mCurPulse;
 
-    // -- Make sure we can't call show() too quickly
-    CMinWait<50>   mWait;
-
 public:
 
     // -- Constructor
@@ -217,8 +215,8 @@ public:
     //    member variables.
     ESP32RMTController(int DATA_PIN, int T1, int T2, int T3);
 
-    // -- Getters and setters for use in ClocklessController
-    uint8_t * getPixelData(int size_in_bytes);
+    // -- Get or create the pixel data buffer
+    uint32_t * getPixelBuffer(int size_in_bytes);
 
     // -- Initialize RMT subsystem
     //    This only needs to be done once
@@ -303,25 +301,49 @@ protected:
     //    This method loads all of the pixel data into a separate buffer for use by
     //    by the RMT driver. Copying does two important jobs: it fixes the color
     //    order for the pixels, and it performs the scaling/adjusting ahead of time.
+    //    It also packs the bytes into 32 bit chunks with the right bit order.
     void loadPixelData(PixelController<RGB_ORDER> & pixels)
     {
         // -- Make sure the buffer is allocated
-        int size = pixels.size() * 3;
-        uint8_t * pData = mRMTController.getPixelData(size);
+        int size_in_bytes = pixels.size() * 3;
+        uint32_t * pData = mRMTController.getPixelBuffer(size_in_bytes);
 
         // -- Read out the pixel data using the pixel controller methods that
         //    perform the scaling and adjustments 
         int count = 0;
+        int which = 0;
         while (pixels.has(1)) {
-            *pData++ = pixels.loadAndScale0();
-            *pData++ = pixels.loadAndScale1();
-            *pData++ = pixels.loadAndScale2();
-            pixels.advanceData();
-            pixels.stepDithering();
-            count += 3;
-        }
+            // -- Get the next four bytes of data
+            uint8_t four[4] = {0,0,0,0};
+            for (int i = 0; i < 4; i++) {
+                switch (which) {
+                case 0: 
+                    four[i] = pixels.loadAndScale0();
+                    break;
+                case 1:
+                    four[i] = pixels.loadAndScale1();
+                    break;
+                case 2:
+                    four[i] = pixels.loadAndScale2();
+                    pixels.advanceData();
+                    pixels.stepDithering();
+                    break;
+                }
+                // -- Move to the next color
+                which++;
+                if (which > 2) which = 0;
 
-        assert(count == size);
+                // -- Stop if there's no more data
+                if ( ! pixels.has(1)) break;
+            }
+
+            // -- Pack the four bytes into a 32-bit value with the right bit order
+            uint8_t a = four[0];
+            uint8_t b = four[1];
+            uint8_t c = four[2];
+            uint8_t d = four[3];
+            pData[count++] = a << 24 | b << 16 | c << 8 | d;
+        }
     }
 
     // -- Show pixels
