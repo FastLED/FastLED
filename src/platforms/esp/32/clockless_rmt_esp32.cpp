@@ -32,13 +32,9 @@ CMinWait<50>   gWait;
 
 static bool gInitialized = false;
 
-// -- Bailout metric
-//    Keep track of how long it's been between buffer fills, and
-//    bail out on showing them if there's a big gap
-static uint32_t gLastFill[8];
-
 // -- SZG: For debugging purposes
 #if FASTLED_ESP32_SHOWTIMING == 1
+static uint32_t gLastFill[8];
 static int gTooSlow[8];
 static uint32_t gTotalTime[8];
 #endif
@@ -269,8 +265,8 @@ void ESP32RMTController::startOnChannel(int channel)
         mWhichHalf = 0;
 
         // -- Fill both halves of the RMT buffer (a totaly of 64 bits of pixel data)
-        fillNext();
-        fillNext();
+        fillNext(false);
+        fillNext(false);
 
         // -- Turn on the interrupts
         rmt_set_tx_intr_en(mRMT_channel, true);
@@ -285,9 +281,10 @@ void ESP32RMTController::startOnChannel(int channel)
 void ESP32RMTController::tx_start()
 {
     rmt_tx_start(mRMT_channel, true);
-    gLastFill[mRMT_channel] = __clock_cycles();
+    mLastFill = __clock_cycles();
 
 #if FASTLED_ESP32_SHOWTIMING == 1
+    gLastFill[mRMT_channel] = __clock_cycles();
     gTooSlow[mRMT_channel] = 0;
     gTotalTime[mRMT_channel] = 0;
 #endif
@@ -334,7 +331,9 @@ void ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
 //    next half of the RMT buffer with data.
 void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 {
+#if FASTLED_ESP32_SHOWTIMING == 1
     uint32_t now = __clock_cycles();
+#endif
 
     // -- The basic structure of this code is borrowed from the
     //    interrupt handler in esp-idf/components/driver/rmt.c
@@ -351,14 +350,10 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
             if (intr_st & BIT(tx_next_bit)) {
                 // -- More to send on this channel
                 RMT.int_clr.val |= BIT(tx_next_bit);
-                uint32_t delta = (now - gLastFill[channel]);
-                if (delta > pController->getMaxCyclesPerFill()) {
-                    doneOnChannel(rmt_channel_t(channel), 0);
-                } else {
-                    pController->fillNext();
-                }
+                pController->fillNext(true);
 
 #if FASTLED_ESP32_SHOWTIMING == 1
+                uint32_t delta = (now - gLastFill[channel]);
                 if (delta > C_NS(50500)) {
                     gTooSlow[channel]++;
                 }
@@ -384,8 +379,23 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 //    Puts 32 bits of pixel data into the next 32 slots in the RMT memory
 //    Each data bit is represented by a 32-bit RMT item that specifies how
 //    long to hold the signal high, followed by how long to hold it low.
-void IRAM_ATTR ESP32RMTController::fillNext()
+void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
 {
+    uint32_t now = __clock_cycles();
+    if (check_time) {
+        if (now > mLastFill) {
+            uint32_t delta = (now - mLastFill);
+            if (delta > mMaxCyclesPerFill) {
+                Serial.print(delta);
+                Serial.print(" BAIL ");
+                Serial.println(mCur);
+                mCur = mSize;
+                rmt_tx_stop(mRMT_channel);
+            }
+        }
+    }
+    mLastFill = now;
+
     if (mCur < mSize) {
         // -- Get the zero and one values into local variables
         register uint32_t one_val = mOne.val;

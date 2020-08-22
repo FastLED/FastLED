@@ -196,6 +196,7 @@ private:
     //    Each strip should get an interrupt roughly at this interval
     uint32_t       mCyclesPerFill;
     uint32_t       mMaxCyclesPerFill;
+    uint32_t       mLastFill;
 
     // -- Pixel data
     uint32_t *     mPixelData;
@@ -266,7 +267,7 @@ public:
     //    Puts 32 bits of pixel data into the next 32 slots in the RMT memory
     //    Each data bit is represented by a 32-bit RMT item that specifies how
     //    long to hold the signal high, followed by how long to hold it low.
-    void IRAM_ATTR fillNext();
+    void IRAM_ATTR fillNext(bool check_time);
 
     // -- Init pulse buffer
     //    Set up the buffer that will hold all of the pulse items for this
