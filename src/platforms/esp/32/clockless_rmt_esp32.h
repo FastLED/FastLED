@@ -192,6 +192,11 @@ private:
     rmt_item32_t   mZero;
     rmt_item32_t   mOne;
 
+    // -- Total expected time to send 32 bits
+    //    Each strip should get an interrupt roughly at this interval
+    uint32_t       mCyclesPerFill;
+    uint32_t       mMaxCyclesPerFill;
+
     // -- Pixel data
     uint32_t *     mPixelData;
     int            mSize;
@@ -214,6 +219,9 @@ public:
     //    Mainly just stores the template parameters from the LEDController as
     //    member variables.
     ESP32RMTController(int DATA_PIN, int T1, int T2, int T3);
+
+    // -- Get max cycles per fill
+    uint32_t IRAM_ATTR getMaxCyclesPerFill() const { return mMaxCyclesPerFill; }
 
     // -- Get or create the pixel data buffer
     uint32_t * getPixelBuffer(int size_in_bytes);

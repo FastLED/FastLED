@@ -32,9 +32,13 @@ CMinWait<50>   gWait;
 
 static bool gInitialized = false;
 
+// -- Bailout metric
+//    Keep track of how long it's been between buffer fills, and
+//    bail out on showing them if there's a big gap
+static uint32_t gLastFill[8];
+
 // -- SZG: For debugging purposes
 #if FASTLED_ESP32_SHOWTIMING == 1
-static uint32_t gLastFill[8];
 static int gTooSlow[8];
 static uint32_t gTotalTime[8];
 #endif
@@ -66,6 +70,13 @@ ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3)
 
     gControllers[gNumControllers] = this;
     gNumControllers++;
+
+    // -- Expected number of CPU cycles between buffer fills
+    mCyclesPerFill = (T1 + T2 + T3) * PULSES_PER_FILL;
+
+    // -- If there is ever an interval greater than 1.5 times
+    //    the expected time, then bail out.
+    mMaxCyclesPerFill = mCyclesPerFill + mCyclesPerFill/2;
 
     mPin = gpio_num_t(DATA_PIN);
 }
@@ -274,9 +285,9 @@ void ESP32RMTController::startOnChannel(int channel)
 void ESP32RMTController::tx_start()
 {
     rmt_tx_start(mRMT_channel, true);
+    gLastFill[mRMT_channel] = __clock_cycles();
 
 #if FASTLED_ESP32_SHOWTIMING == 1
-    gLastFill[mRMT_channel] = __clock_cycles();
     gTooSlow[mRMT_channel] = 0;
     gTotalTime[mRMT_channel] = 0;
 #endif
@@ -323,9 +334,7 @@ void ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
 //    next half of the RMT buffer with data.
 void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 {
-#if FASTLED_ESP32_SHOWTIMING == 1
     uint32_t now = __clock_cycles();
-#endif
 
     // -- The basic structure of this code is borrowed from the
     //    interrupt handler in esp-idf/components/driver/rmt.c
@@ -342,10 +351,14 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
             if (intr_st & BIT(tx_next_bit)) {
                 // -- More to send on this channel
                 RMT.int_clr.val |= BIT(tx_next_bit);
-                pController->fillNext();
+                uint32_t delta = (now - gLastFill[channel]);
+                if (delta > pController->getMaxCyclesPerFill()) {
+                    doneOnChannel(rmt_channel_t(channel), 0);
+                } else {
+                    pController->fillNext();
+                }
 
 #if FASTLED_ESP32_SHOWTIMING == 1
-                uint32_t delta = (now - gLastFill[channel]);
                 if (delta > C_NS(50500)) {
                     gTooSlow[channel]++;
                 }
