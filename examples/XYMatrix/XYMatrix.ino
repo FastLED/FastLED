@@ -30,6 +30,7 @@ const uint8_t kMatrixHeight = 16;
 
 // Param for different pixel layouts
 const bool    kMatrixSerpentineLayout = true;
+const bool    kMatrixVertical = false;
 // Set 'kMatrixSerpentineLayout' to false if your pixels are 
 // laid out all running the same way, like this:
 //
@@ -88,17 +89,29 @@ uint16_t XY( uint8_t x, uint8_t y)
   uint16_t i;
   
   if( kMatrixSerpentineLayout == false) {
-    i = (y * kMatrixWidth) + x;
+    if (kMatrixVertical == false) {
+      i = (y * kMatrixWidth) + x;
+    } else {
+      i = kMatrixHeight * (kMatrixWidth - (x+1))+y;
+    }
   }
 
   if( kMatrixSerpentineLayout == true) {
-    if( y & 0x01) {
-      // Odd rows run backwards
-      uint8_t reverseX = (kMatrixWidth - 1) - x;
-      i = (y * kMatrixWidth) + reverseX;
-    } else {
-      // Even rows run forwards
-      i = (y * kMatrixWidth) + x;
+    if (kMatrixVertical == false) {
+      if( y & 0x01) {
+        // Odd rows run backwards
+        uint8_t reverseX = (kMatrixWidth - 1) - x;
+        i = (y * kMatrixWidth) + reverseX;
+      } else {
+        // Even rows run forwards
+        i = (y * kMatrixWidth) + x;
+      }
+    } else { // vertical positioning
+      if ( x & 0x01) {
+        i = kMatrixHeight * (kMatrixWidth - (x+1))+y;
+      } else {
+        i = kMatrixHeight * (kMatrixWidth - x) - (y+1);
+      }
     }
   }
   
