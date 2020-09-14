@@ -147,9 +147,20 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 //#endif
 
 // -- Configuration constants
-#define DIVIDER             2 /* 4, 8 still seem to work, but timings become marginal */
-#define MAX_PULSES         64 /* A channel has a 64 "pulse" buffer */
-#define PULSES_PER_FILL    32 /* Half of the channel buffer */
+#define DIVIDER       2 /* 4, 8 still seem to work, but timings become marginal */
+
+// -- RMT memory configuration
+//    By default we use two memory blocks for each RMT channel instead of 1. The
+//    reason is that one memory block is only 64 bits, which causes the refill
+//    interrupt to fire too often. When combined with WiFi, this leads to conflicts
+//    between interrupts and weird flashy effects on the LEDs. Special thanks to
+//    Brian Bulkowski for finding this problem and developing a fix.
+#ifndef FASTLED_RMT_MEM_BLOCKS
+#define FASTLED_RMT_MEM_BLOCKS 2
+#endif
+
+#define MAX_PULSES         (64 * FASTLED_RMT_MEM_BLOCKS) /* One block has a 64 "pulse" buffer */
+#define PULSES_PER_FILL    (MAX_PULSES / 2)              /* Half of the channel buffer */
 
 // -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
 #define F_CPU_RMT                   (  80000000L)
@@ -172,10 +183,10 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define FASTLED_RMT_MAX_CONTROLLERS 32
 #endif
 
-// -- Number of RMT channels to use (up to 8)
+// -- Number of RMT channels to use (up to 8, but 4 by default)
 //    Redefine this value to 1 to force serial output
 #ifndef FASTLED_RMT_MAX_CHANNELS
-#define FASTLED_RMT_MAX_CHANNELS 8
+#define FASTLED_RMT_MAX_CHANNELS (8/FASTLED_RMT_MEM_BLOCKS)
 #endif
 
 class ESP32RMTController
@@ -267,6 +278,8 @@ public:
     //    Puts 32 bits of pixel data into the next 32 slots in the RMT memory
     //    Each data bit is represented by a 32-bit RMT item that specifies how
     //    long to hold the signal high, followed by how long to hold it low.
+    //    NOTE: Now the default is to use 128-bit buffers, so half a buffer is
+    //          is 64 bits. See FASTLED_RMT_MEM_BLOCKS
     void IRAM_ATTR fillNext(bool check_time);
 
     // -- Init pulse buffer

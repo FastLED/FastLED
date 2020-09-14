@@ -32,13 +32,6 @@ CMinWait<50>   gWait;
 
 static bool gInitialized = false;
 
-// -- SZG: For debugging purposes
-#if FASTLED_ESP32_SHOWTIMING == 1
-static uint32_t gLastFill[8];
-static int gTooSlow[8];
-static uint32_t gTotalTime[8];
-#endif
-
 ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3)
     : mPixelData(0), 
       mSize(0), 
@@ -103,7 +96,7 @@ void ESP32RMTController::init()
         rmt_tx.channel = rmt_channel_t(i);
         rmt_tx.rmt_mode = RMT_MODE_TX;
         rmt_tx.gpio_num = gpio_num_t(0);  // The particular pin will be assigned later
-        rmt_tx.mem_block_num = 1;
+        rmt_tx.mem_block_num = FASTLED_RMT_MEM_BLOCKS;
         rmt_tx.clk_div = DIVIDER;
         rmt_tx.tx_config.loop_en = false;
         rmt_tx.tx_config.carrier_level = RMT_CARRIER_LEVEL_LOW;
@@ -171,20 +164,13 @@ void ESP32RMTController::showPixels()
         int channel = 0;
         while (channel < FASTLED_RMT_MAX_CHANNELS && gNext < gNumControllers) {
             ESP32RMTController::startNext(channel);
-            channel++;
+            // -- Important: when we use more than one memory block, we need to
+            //    skip the channels that would otherwise overlap in memory.
+            channel += FASTLED_RMT_MEM_BLOCKS;
         }
 
         // -- Make sure it's been at least 50us since last show
         gWait.wait();
-
-        // -- Start them all
-        /* This turns out to be a bad idea. We don't want all of the interrupts
-           coming in at the same time.
-        for (int i = 0; i < channel; i++) {
-            ESP32RMTController * pController = gControllers[i];
-            pController->tx_start();
-        }
-        */
 
         // -- Wait here while the data is sent. The interrupt handler
         //    will keep refilling the RMT buffers until it is all
@@ -203,21 +189,6 @@ void ESP32RMTController::showPixels()
 #if FASTLED_ESP32_FLASH_LOCK == 1
         // -- Release the lock on flash operations
         spi_flash_op_unlock();
-#endif
-
-#if FASTLED_ESP32_SHOWTIMING == 1
-        // uint32_t expected = (2080000L / (1000000000L/F_CPU));
-        for (int i = 0; i < gNumControllers; i++) {
-            if (gTooSlow[i] > 0) {
-                Serial.print("Channel ");
-                Serial.print(i);
-                Serial.print(" total time ");
-                Serial.print(gTotalTime[i]);
-                Serial.print(" too slow ");
-                Serial.print(gTooSlow[i]);
-                Serial.println();
-            }
-        }
 #endif
 
     }
@@ -282,12 +253,6 @@ void ESP32RMTController::tx_start()
 {
     rmt_tx_start(mRMT_channel, true);
     mLastFill = __clock_cycles();
-
-#if FASTLED_ESP32_SHOWTIMING == 1
-    gLastFill[mRMT_channel] = __clock_cycles();
-    gTooSlow[mRMT_channel] = 0;
-    gTotalTime[mRMT_channel] = 0;
-#endif
 }
 
 // -- A controller is done 
@@ -331,10 +296,6 @@ void ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
 //    next half of the RMT buffer with data.
 void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 {
-#if FASTLED_ESP32_SHOWTIMING == 1
-    uint32_t now = __clock_cycles();
-#endif
-
     // -- The basic structure of this code is borrowed from the
     //    interrupt handler in esp-idf/components/driver/rmt.c
     uint32_t intr_st = RMT.int_st.val;
@@ -351,23 +312,10 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
                 // -- More to send on this channel
                 RMT.int_clr.val |= BIT(tx_next_bit);
                 pController->fillNext(true);
-
-#if FASTLED_ESP32_SHOWTIMING == 1
-                uint32_t delta = (now - gLastFill[channel]);
-                if (delta > C_NS(50500)) {
-                    gTooSlow[channel]++;
-                }
-                gTotalTime[channel] += delta;
-                gLastFill[channel] = now;
-#endif
             } else {
                 // -- Transmission is complete on this channel
                 if (intr_st & BIT(tx_done_bit)) {
                     RMT.int_clr.val |= BIT(tx_done_bit);
-#if FASTLED_ESP32_SHOWTIMING == 1
-                    uint32_t delta = (now - gLastFill[channel]);
-                    gTotalTime[channel] += delta;
-#endif
                     doneOnChannel(rmt_channel_t(channel), 0);
                 }
             }
@@ -386,52 +334,55 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
         if (now > mLastFill) {
             uint32_t delta = (now - mLastFill);
             if (delta > mMaxCyclesPerFill) {
-                //Serial.print(delta);
-                //Serial.print(" BAIL ");
-                //Serial.println(mCur);
+                Serial.print(delta);
+                Serial.print(" BAIL ");
+                Serial.println(mCur);
                 mCur = mSize;
-                //rmt_tx_stop(mRMT_channel);
+                rmt_tx_stop(mRMT_channel);
             }
         }
     }
     mLastFill = now;
 
-    if (mCur < mSize) {
-        // -- Get the zero and one values into local variables
-        register uint32_t one_val = mOne.val;
-        register uint32_t zero_val = mZero.val;
+    // -- Get the zero and one values into local variables
+    register uint32_t one_val = mOne.val;
+    register uint32_t zero_val = mZero.val;
 
-        // -- Use locals for speed
-        volatile register uint32_t * pItem =  mRMT_mem_ptr;
+    // -- Use locals for speed
+    volatile register uint32_t * pItem =  mRMT_mem_ptr;
 
-        // -- Get the next four bytes of pixel data
-        register uint32_t pixeldata = mPixelData[mCur];
-        mCur++;
+    for (register int i = 0; i < PULSES_PER_FILL/32; i++) {
+        if (mCur < mSize) {
+
+            // -- Get the next four bytes of pixel data
+            register uint32_t pixeldata = mPixelData[mCur];
+            mCur++;
             
-        // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
-        // rmt_item32_t value corresponding to the buffered bit value
-        for (register uint32_t j = 0; j < PULSES_PER_FILL; j++) {
-            *pItem++ = (pixeldata & 0x80000000L) ? one_val : zero_val;
-            // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
+            // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
+            // rmt_item32_t value corresponding to the buffered bit value
+            for (register uint32_t j = 0; j < 32; j++) {
+                *pItem++ = (pixeldata & 0x80000000L) ? one_val : zero_val;
+                // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
 
-            pixeldata <<= 1;
-        }
-
-        // -- Flip to the other half, resetting the pointer if necessary
-        mWhichHalf++;
-        if (mWhichHalf == 2) {
-            pItem = mRMT_mem_start;
-            mWhichHalf = 0;
-        }
-
-        // -- Store the new pointer back into the object
-        mRMT_mem_ptr = pItem;
-    } else {
-        // -- No more data; signal to the RMT we are done
-        for (uint32_t j = 0; j < PULSES_PER_FILL; j++) {
-            * mRMT_mem_ptr++ = 0;
+                pixeldata <<= 1;
+            }
+        } else {
+            // -- No more data; signal to the RMT we are done
+            for (uint32_t j = 0; j < 32; j++) {
+                * mRMT_mem_ptr++ = 0;
+            }
         }
     }
+
+    // -- Flip to the other half, resetting the pointer if necessary
+    mWhichHalf++;
+    if (mWhichHalf == 2) {
+        pItem = mRMT_mem_start;
+        mWhichHalf = 0;
+    }
+
+    // -- Store the new pointer back into the object
+    mRMT_mem_ptr = pItem;
 }
 
 // -- Init pulse buffer
