@@ -44,31 +44,11 @@ FASTLED_NAMESPACE_BEGIN
 //   http://www.codeproject.com/Articles/9207/An-HSB-RGBA-colour-picker
 
 
-
-
-
-void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb);
-void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb);
-
-#if defined(__AVR__) && !defined( LIB8_ATTINY )
-void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
-{
-    hsv2rgb_raw_avr( hsv, rgb);
-}
-#else
-void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
-{
-    hsv2rgb_raw_C( hsv, rgb);
-}
-#endif
-
-
-
 #define APPLY_DIMMING(X) (X)
 #define HSV_SECTION_6 (0x20)
 #define HSV_SECTION_3 (0x40)
 
-void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb)
+__attribute__((always_inline)) static inline void hsv2rgb_raw_C(const struct CHSV &hsv, struct CRGB &rgb)
 {
     // Convert hue, saturation and brightness ( HSV/HSB ) to RGB
     // "Dimming" is used on saturation and brightness to make
@@ -154,10 +134,8 @@ void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb)
     }
 }
 
-
-
 #if defined(__AVR__) && !defined( LIB8_ATTINY )
-void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb)
+__attribute__((always_inline)) static inline void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb)
 {
     uint8_t hue, saturation, value;
 
@@ -252,6 +230,15 @@ void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb)
 // End of AVR asm implementation
 
 #endif
+
+void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
+{
+#if defined(__AVR__) && !defined( LIB8_ATTINY )
+    hsv2rgb_raw_avr( hsv, rgb);
+#else
+    hsv2rgb_raw_C( hsv, rgb);
+#endif
+}
 
 void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb)
 {
