@@ -42,7 +42,10 @@ FASTLED_NAMESPACE_BEGIN
 //   http://www.kasperkamperman.com/blog/arduino/arduino-programming-hsb-to-rgb/
 //  which in turn was was based on Windows C code from "nico80"
 //   http://www.codeproject.com/Articles/9207/An-HSB-RGBA-colour-picker
-
+//
+//  *_exact functions implemented from wikipedia and rapidtables:
+//  https://www.rapidtables.com/convert/color/hsv-to-rgb.html
+//  https://www.rapidtables.com/convert/color/rgb-to-hsv.html
 
 #define APPLY_DIMMING(X) (X)
 #define HSV_SECTION_6 (0x20)
@@ -502,7 +505,91 @@ void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds)
     }
 }
 
+template <typename T>
+T _abs(const T &t)
+{
+    if (t < 0)
+        return -t;
+    return t;
+}
 
+void hsv2rgb_precise(const CHSV &hsv, CRGB &rgb)
+{
+    const uint8_t h{hsv.h};
+    const uint8_t s{hsv.s};
+    const uint8_t v{hsv.v};
+
+    const uint8_t C = static_cast<uint16_t>(v) * static_cast<uint16_t>(s) / static_cast<uint16_t>(255);
+
+    const uint8_t hi = 6 * h / 255 + 1;
+    const uint8_t X = C * (256 - _abs(static_cast<int16_t>(6 * h) % 512 - 256)) / 255;
+
+    const uint8_t m = v - C;
+
+    if (0 <= hi && hi <= 1)
+        rgb = CRGB(C + m, X + m, 0 + m);
+    else if (1 < hi && hi <= 2)
+        rgb = CRGB(X + m, C + m, 0 + m);
+    else if (2 < hi && hi <= 3)
+        rgb = CRGB(0 + m, C + m, X + m);
+    else if (3 < hi && hi <= 4)
+        rgb = CRGB(0 + m, X + m, C + m);
+    else if (4 < hi && hi <= 5)
+        rgb = CRGB(X + m, 0 + m, C + m);
+    else if (5 < hi && hi <= 7)
+        rgb = CRGB(C + m, 0 + m, X + m);
+    else
+        rgb = CRGB(0, 0, 0);
+}
+
+void hsv2rgb_precise(const CHSV *phsv, CRGB *prgb, int numLeds)
+{
+    for (int i = 0; i < numLeds; ++i)
+    {
+        hsv2rgb_precise(phsv[i], prgb[i]);
+    }
+}
+
+CHSV rgb2hsv_precise(const CRGB &rgb)
+{
+    const uint8_t &r{rgb.r};
+    const uint8_t &g{rgb.g};
+    const uint8_t &b{rgb.b};
+
+    uint8_t min{r};
+    uint8_t max{r};
+    if (g < min)
+        min = g;
+    if (b < min)
+        min = b;
+    if (g > max)
+        max = g;
+    if (b > max)
+        max = b;
+
+    const uint8_t d_{static_cast<uint8_t>(max - min)};
+    const uint8_t d{d_ ? d_ : static_cast<uint8_t>(1)};
+
+    uint8_t h = 0;
+    if (max == r)
+        h = (static_cast<int32_t>(g - b) * 255 / d) / 6;
+    else if (max == g)
+        h = 85 + (static_cast<int32_t>(b - r) * 255 / d) / 6;
+    else if (max == b)
+        h = 170 + (static_cast<int32_t>(r - g) * 255 / d) / 6;
+
+    const uint8_t s = max == 0 ? 0 : static_cast<uint16_t>(255) * static_cast<uint16_t>(d) / static_cast<uint16_t>(max);
+
+    return CHSV(h, s, max);
+}
+
+void rgb2hsv_precise(const CRGB *prgb, CHSV *phsv, int numLeds)
+{
+    for (int i = 0; i < numLeds; ++i)
+    {
+        phsv[i] = rgb2hsv_precise(prgb[i]);
+    }
+}
 
 #define FIXFRAC8(N,D) (((N)*256)/(D))
 
