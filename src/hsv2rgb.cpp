@@ -522,7 +522,7 @@ void hsv2rgb_precise(const CHSV &hsv, CRGB &rgb)
     const uint8_t C = static_cast<uint16_t>(v) * static_cast<uint16_t>(s) / static_cast<uint16_t>(255);
 
     const uint8_t hi = 6 * h / 255 + 1;
-    const uint8_t X = C * (256 - _abs(static_cast<int16_t>(6 * h) % 512 - 256)) / 255;
+    const uint8_t X = C * (255 - _abs(static_cast<int16_t>(6 * h) % 510 - 255)) / 255;
 
     const uint8_t m = v - C;
 
