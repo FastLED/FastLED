@@ -1047,6 +1047,86 @@ CHSV ColorFromPalette( const struct CHSVPalette256& pal, uint8_t index, uint8_t 
     return hsv;
 }
 
+CRGB ColorFromPalette(const TProgmemRGBGradientPalette_byte &progpal, uint8_t index, uint8_t brightness, TBlendType blendType)
+{
+	TRGBGradientPaletteEntryUnion u, u1; // initiate 2 vars of needed colors
+	uint8_t count = 0;
+	do
+	{
+		count += 4U;
+		u1.dword = FL_PGM_READ_DWORD_NEAR(&progpal + count);		 // count the end color
+	} while (u1.index < index);																 // if index of this entity is grater than our index (or equal 255) then stop do
+	u.dword = FL_PGM_READ_DWORD_NEAR(&progpal + (count - 4U)); // previous entity is the start color
+
+	uint8_t red1 = u.r; // remenber the start color
+	uint8_t green1 = u.g;
+	uint8_t blue1 = u.b;
+
+	if (blendType) // blending routine
+	{
+		uint16_t range = u1.index - u.index + 1U;					 // rescale calculation
+		uint16_t low = (uint16_t)256U * (index - u.index); // this calculation is not optimal by uses cpp division...
+		uint8_t f2 = low / range;													 // but it allows you to achieve the implementation of this function
+		uint8_t f1 = ~f2;																	 // <- more faster and more resource-intensive function than 255-f2 (a tiny cent saves a dollar)
+																											 // vvv	then the repeated code from a similar function
+		uint8_t red2 = u1.r;
+		red1 = scale8_LEAVING_R1_DIRTY(red1, f1);
+		red2 = scale8_LEAVING_R1_DIRTY(red2, f2);
+		red1 += red2;
+
+		uint8_t green2 = u1.g;
+		green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
+		green2 = scale8_LEAVING_R1_DIRTY(green2, f2);
+		green1 += green2;
+
+		uint8_t blue2 = u1.b;
+		blue1 = scale8_LEAVING_R1_DIRTY(blue1, f1);
+		blue2 = scale8_LEAVING_R1_DIRTY(blue2, f2);
+		blue1 += blue2;
+
+		cleanup_R1();
+	}
+
+	if (brightness != 255)
+	{
+		if (brightness)
+		{
+			brightness++; // adjust for rounding
+			// Now, since brightness is nonzero, we don't need the full scale8_video logic;
+			// we can just to scale8 and then add one (unless scale8 fixed) to all nonzero inputs.
+			if (red1)
+			{
+				red1 = scale8_LEAVING_R1_DIRTY(red1, brightness);
+#if !(FASTLED_SCALE8_FIXED == 1)
+				red1++;
+#endif
+			}
+			if (green1)
+			{
+				green1 = scale8_LEAVING_R1_DIRTY(green1, brightness);
+#if !(FASTLED_SCALE8_FIXED == 1)
+				green1++;
+#endif
+			}
+			if (blue1)
+			{
+				blue1 = scale8_LEAVING_R1_DIRTY(blue1, brightness);
+#if !(FASTLED_SCALE8_FIXED == 1)
+				blue1++;
+#endif
+			}
+			cleanup_R1();
+		}
+		else
+		{
+			red1 = 0;
+			green1 = 0;
+			blue1 = 0;
+		}
+	}
+
+	return CRGB(red1, green1, blue1);
+}
 
 void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256)
 {
