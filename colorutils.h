@@ -1550,6 +1550,11 @@ CHSV ColorFromPalette( const CHSVPalette32& pal,
                       uint8_t brightness=255,
                       TBlendType blendType=LINEARBLEND);
 
+CRGB ColorFromPalette( const TProgmemRGBGradientPalette_byte &progpal,
+                      uint8_t index,
+                      uint8_t brightness=255,
+                      TBlendType blendType=LINEARBLEND);
+
 
 // Fill a range of LEDs with a sequece of entryies from a palette
 template <typename PALETTE>
