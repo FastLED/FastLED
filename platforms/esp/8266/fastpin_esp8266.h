@@ -19,8 +19,8 @@ public:
     inline static void setOutput() { pinMode(PIN, OUTPUT); }
     inline static void setInput() { pinMode(PIN, INPUT); }
 
-    inline static void hi() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOS = MASK; } else { GP16O |= MASK; } }
-    inline static void lo() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOC = MASK; } else { GP16O &= ~MASK; } }
+    inline static void hi() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOS = MASK; } else { GP16O = 1; } }
+    inline static void lo() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOC = MASK; } else { GP16O = 0; } }
     inline static void set(register port_t val) __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO = val; } else { GP16O = val; }}
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
