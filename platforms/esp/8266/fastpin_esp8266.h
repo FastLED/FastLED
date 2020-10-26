@@ -41,7 +41,7 @@ public:
     inline static bool isset() __attribute__ ((always_inline)) { return (PIN < 16) ? (GPO & MASK) : (GP16O & MASK); }
 };
 
-#define _FL_DEFPIN(PIN, REAL_PIN) template<> class FastPin<PIN> : public _ESPPIN<REAL_PIN, (1<<(REAL_PIN & 0xFF))> {};
+#define _FL_DEFPIN(PIN, REAL_PIN) template<> class FastPin<PIN> : public _ESPPIN<REAL_PIN, (1<<(REAL_PIN & 0x0F))> {};
 
 
 #ifdef FASTLED_ESP8266_RAW_PIN_ORDER
