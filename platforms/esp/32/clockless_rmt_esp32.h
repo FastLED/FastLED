@@ -538,8 +538,6 @@ protected:
     void IRAM_ATTR fillNext()
     {
         if (mPixels->has(1)) {
-            uint32_t t1 = __clock_cycles();
-            
             uint32_t one_val = mOne.val;
             uint32_t zero_val = mZero.val;
 
