@@ -1510,6 +1510,7 @@ public:
 
 typedef enum { NOBLEND=0, LINEARBLEND=1 } TBlendType;
 
+// Functions to retrieve single colors
 CRGB ColorFromPalette( const CRGBPalette16& pal,
                       uint8_t index,
                       uint8_t brightness=255,
@@ -1519,6 +1520,12 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal,
                        uint8_t index,
                        uint8_t brightness=255,
                        TBlendType blendType=LINEARBLEND);
+
+// 8-bit interpolating version of ColorFromPalette for 16-color compact palettes.
+CRGB ColorFromPaletteExtended( const CRGBPalette16& pal,
+                               uint16_t index,
+                               uint8_t brightness=255,
+                               TBlendType blendType=BLEND);
 
 CRGB ColorFromPalette( const CRGBPalette256& pal,
                        uint8_t index,
