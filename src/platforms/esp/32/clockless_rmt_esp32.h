@@ -222,7 +222,7 @@ private:
     // -- Buffer to hold all of the pulses. For the version that uses
     //    the RMT driver built into the ESP core.
     rmt_item32_t * mBuffer;
-    uint16_t       mBufferSize;
+    uint16_t       mBufferSize; // bytes
     int            mCurPulse;
 
 public:
