@@ -160,6 +160,9 @@ void ESP32RMTController::showPixels()
         // -- This Take always succeeds immediately
         xSemaphoreTake(gTX_sem, portMAX_DELAY);
 
+        // -- Make sure it's been at least 50us since last show
+        gWait.wait();
+
         // -- First, fill all the available channels
         int channel = 0;
         while (channel < FASTLED_RMT_MAX_CHANNELS && gNext < gNumControllers) {
@@ -168,9 +171,6 @@ void ESP32RMTController::showPixels()
             //    skip the channels that would otherwise overlap in memory.
             channel += FASTLED_RMT_MEM_BLOCKS;
         }
-
-        // -- Make sure it's been at least 50us since last show
-        gWait.wait();
 
         // -- Wait here while the data is sent. The interrupt handler
         //    will keep refilling the RMT buffers until it is all
@@ -234,6 +234,7 @@ void ESP32RMTController::startOnChannel(int channel)
         mRMT_mem_ptr = mRMT_mem_start;
         mCur = 0;
         mWhichHalf = 0;
+        mLastFill = 0;
 
         // -- Fill both halves of the RMT buffer (a totaly of 64 bits of pixel data)
         fillNext(false);
@@ -267,7 +268,10 @@ void ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
 
     // -- Turn off output on the pin
     // SZG: Do I really need to do this?
-    // gpio_matrix_out(pController->mPin, 0x100, 0, 0);
+    gpio_matrix_out(pController->mPin, 0x100, 0, 0);
+
+    // -- Turn off the interrupts
+    rmt_set_tx_intr_en(channel, false);
 
     gOnChannel[channel] = NULL;
     gNumDone++;
@@ -310,8 +314,8 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
         if (pController != NULL) {
             if (intr_st & BIT(tx_next_bit)) {
                 // -- More to send on this channel
-                RMT.int_clr.val |= BIT(tx_next_bit);
                 pController->fillNext(true);
+                RMT.int_clr.val |= BIT(tx_next_bit);
             } else {
                 // -- Transmission is complete on this channel
                 if (intr_st & BIT(tx_done_bit)) {
@@ -331,7 +335,7 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
 {
     uint32_t now = __clock_cycles();
     if (check_time) {
-        if (now > mLastFill) {
+        if (mLastFill != 0 and now > mLastFill) {
             uint32_t delta = (now - mLastFill);
             if (delta > mMaxCyclesPerFill) {
                 Serial.print(delta);
