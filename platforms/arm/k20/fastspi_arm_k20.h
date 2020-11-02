@@ -87,7 +87,7 @@ template <int VAL> void getScalars(uint32_t & preScalar, uint32_t & scalar, uint
 
 			dbl = 0;
 			if(scalar == 0) { dbl = 1; }
-			else if(scalar < 3) { scalar--; }
+			else if(scalar < 3) { --scalar; }
 		}
 	}
 	return;

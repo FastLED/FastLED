@@ -237,7 +237,7 @@ public:
         mZero.duration1 = ESP_TO_RMT_CYCLES(T2+T3); // TO_RMT_CYCLES(T2 + T3);
 
         gControllers[gNumControllers] = this;
-        gNumControllers++;
+        ++gNumControllers;
 
         mPin = gpio_num_t(DATA_PIN);
     }
@@ -247,7 +247,7 @@ public:
 protected:
     void initRMT()
     {
-        for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; i++) {
+        for (int i = 0; i < FASTLED_RMT_MAX_CHANNELS; ++i) {
             gOnChannel[i] = NULL;
 
             // -- RMT configuration for transmission
@@ -323,7 +323,7 @@ protected:
         }
 
         // -- Keep track of the number of strips we've seen
-        gNumStarted++;
+        ++gNumStarted;
 
         // -- The last call to showPixels is the one responsible for doing
         //    all of the actual worl
@@ -334,14 +334,14 @@ protected:
             int channel = 0;
             while (channel < FASTLED_RMT_MAX_CHANNELS && gNext < gNumControllers) {
                 startNext(channel);
-                channel++;
+                ++channel;
             }
 
             // -- Make sure it's been at least 50ms since last show
             mWait.wait();
 
             // -- Start them all
-            for (int i = 0; i < channel; i++) {
+            for (int i = 0; i < channel; ++i) {
                 ClocklessController * pController = static_cast<ClocklessController*>(gControllers[i]);
                 rmt_tx_start(pController->mRMT_channel, true);
             }
@@ -404,10 +404,10 @@ protected:
     {
         // -- Write one byte's worth of RMT pulses to the big buffer
         byteval <<= 24;
-        for (register uint32_t j = 0; j < 8; j++) {
+        for (register uint32_t j = 0; j < 8; ++j) {
             mBuffer[mCurPulse] = (byteval & 0x80000000L) ? mOne : mZero;
             byteval <<= 1;
-            mCurPulse++;
+            ++mCurPulse;
         }
     }
 
@@ -419,7 +419,7 @@ protected:
         if (gNext < gNumControllers) {
             ClocklessController * pController = static_cast<ClocklessController*>(gControllers[gNext]);
             pController->startOnChannel(channel);
-            gNext++;
+            ++gNext;
         }
     }
 
@@ -475,7 +475,7 @@ protected:
         gpio_matrix_out(controller->mPin, 0x100, 0, 0);
 
         gOnChannel[channel] = NULL;
-        gNumDone++;
+        ++gNumDone;
 
         if (gNumDone == gNumControllers) {
             // -- If this is the last controller, signal that we are all done
@@ -508,7 +508,7 @@ protected:
         uint32_t intr_st = RMT.int_st.val;
         uint8_t channel;
 
-        for (channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; channel++) {
+        for (channel = 0; channel < FASTLED_RMT_MAX_CHANNELS; ++channel) {
             int tx_done_bit = channel * 3;
             int tx_next_bit = channel + 24;
 
@@ -557,13 +557,13 @@ protected:
             
             // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
             // rmt_item32_t value corresponding to the buffered bit value
-            for (register uint32_t j = 0; j < 24; j++) {
+            for (register uint32_t j = 0; j < 24; ++j) {
                 uint32_t val = (pixel & 0x80000000L) ? one_val : zero_val;
                 *pItem++ = val;
                 // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
 
                 pixel <<= 1;
-                curPulse++;
+                ++curPulse;
 
                 if (curPulse == MAX_PULSES) {
                     pItem = & (RMTMEM.chan[mRMT_channel].data32[0].val);
@@ -576,7 +576,7 @@ protected:
             mRMT_mem_ptr = pItem;
         } else {
             // -- No more data; signal to the RMT we are done
-            for (uint32_t j = 0; j < 8; j++) {
+            for (uint32_t j = 0; j < 8; ++j) {
                 * mRMT_mem_ptr++ = 0;
             }
         }   
@@ -605,7 +605,7 @@ protected:
             byte = 0;
         }
 
-        mCurColor++;
+        ++mCurColor;
         if (mCurColor == NUM_COLOR_CHANNELS) mCurColor = 0;
 
         return byte;
@@ -647,19 +647,19 @@ protected:
                 byteval = 0;
             }
 
-            mCurColor++;
+            ++mCurColor;
             if (mCurColor == NUM_COLOR_CHANNELS) mCurColor = 0;
         
             // byteval = getNextByte();
             byteval <<= 24;
             // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
             // rmt_item32_t value corresponding to the buffered bit value
-            for (register uint32_t j = 0; j < 8; j++) {
+            for (register uint32_t j = 0; j < 8; ++j) {
                 uint32_t val = (byteval & 0x80000000L) ? one_val : zero_val;
                 * mRMT_mem_ptr++ = val;
                 // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
                 byteval <<= 1;
-                mCurPulse++;
+                ++mCurPulse;
             }
             pulses += 8;
         }
@@ -670,8 +670,8 @@ protected:
             while (pulses < 32) {
                 * mRMT_mem_ptr++ = 0;
                 // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = 0;
-                mCurPulse++;
-                pulses++;
+                ++mCurPulse;
+                ++pulses;
             }
         }
         

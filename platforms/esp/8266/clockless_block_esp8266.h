@@ -34,7 +34,7 @@ public:
 		while(!showRGBInternal(pixels) && cnt--) {
       		os_intr_unlock();
 			#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-			_retry_cnt++;
+			++_retry_cnt;
 			#endif
 			delayMicroseconds(WAIT_TIME * 10);
 			os_intr_lock();
@@ -77,7 +77,7 @@ public:
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(register uint32_t i = 0; i < USED_LANES; i++) {
+		for(register uint32_t i = 0; i < USED_LANES; ++i) {
 			while((__clock_cycles() - last_mark) < (T1+T2+T3));
 			last_mark = __clock_cycles();
 			*FastPin<FIRST_PIN>::sport() = PIN_MASK;
@@ -92,7 +92,7 @@ public:
 			b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 		}
 
-		for(register uint32_t i = USED_LANES; i < 8; i++) {
+		for(register uint32_t i = USED_LANES; i < 8; ++i) {
 			while((__clock_cycles() - last_mark) < (T1+T2+T3));
 			last_mark = __clock_cycles();
 			*FastPin<FIRST_PIN>::sport() = PIN_MASK;
@@ -113,7 +113,7 @@ public:
 		// Setup the pixel controller and load/scale the first byte
 		Lines b0;
 
-		for(int i = 0; i < USED_LANES; i++) {
+		for(int i = 0; i < USED_LANES; ++i) {
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 		allpixels.preStepFirstByteDithering();
@@ -150,7 +150,7 @@ public:
 
 		os_intr_unlock();
 		#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-		_frame_cnt++;
+		++_frame_cnt;
 		#endif
 		return __clock_cycles() - _start;
 	}

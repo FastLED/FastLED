@@ -9,9 +9,9 @@ extern uint32_t _retry_cnt;
 
 // Info on reading cycle counter from https://github.com/kbeckmann/nodemcu-firmware/blob/ws2812-dual/app/modules/ws2812.c
 __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
-	uint32_t cyc;
-	__asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
-	return cyc;
+  uint32_t cyc;
+  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
+  return cyc;
 }
 
 #define FASTLED_HAS_CLOCKLESS 1
@@ -24,7 +24,6 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
-
 public:
 	virtual void init() {
 		FastPin<DATA_PIN>::setOutput();
@@ -35,36 +34,37 @@ public:
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
+
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-	// mWait.wait();
-	int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
-	while((showRGBInternal(pixels)==0) && cnt--) {
-		#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-		_retry_cnt++;
-		#endif
-		os_intr_unlock();
-		delayMicroseconds(WAIT_TIME);
-		os_intr_lock();
-	}
-	// mWait.mark();
+    // mWait.wait();
+		int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
+    while((showRGBInternal(pixels)==0) && cnt--) {
+      #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+      ++_retry_cnt;
+      #endif
+      os_intr_unlock();
+      delayMicroseconds(WAIT_TIME);
+      os_intr_lock();
+    }
+    // mWait.mark();
   }
 
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
 
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register uint32_t b)  {
-		b <<= 24; b = ~b;
-		for(register uint32_t i = BITS; i > 0; i--) {
-			while((__clock_cycles() - last_mark) < (T1+T2+T3));
+    b <<= 24; b = ~b;
+    for(register uint32_t i = BITS; i > 0; --i) {
+      while((__clock_cycles() - last_mark) < (T1+T2+T3));
 			last_mark = __clock_cycles();
-			FastPin<DATA_PIN>::hi();
+      FastPin<DATA_PIN>::hi();
 
-			while((__clock_cycles() - last_mark) < T1);
-			if(b & 0x80000000L) { FastPin<DATA_PIN>::lo(); }
-			b <<= 1;
+      while((__clock_cycles() - last_mark) < T1);
+      if(b & 0x80000000L) { FastPin<DATA_PIN>::lo(); }
+      b <<= 1;
 
-			while((__clock_cycles() - last_mark) < (T1+T2));
-			FastPin<DATA_PIN>::lo();
+      while((__clock_cycles() - last_mark) < (T1+T2));
+      FastPin<DATA_PIN>::lo();
 		}
 	}
 
@@ -74,9 +74,9 @@ protected:
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
 		register uint32_t b = pixels.loadAndScale0();
-    	pixels.preStepFirstByteDithering();
+    pixels.preStepFirstByteDithering();
 		os_intr_lock();
-    	uint32_t start = __clock_cycles();
+    uint32_t start = __clock_cycles();
 		uint32_t last_mark = start;
 		while(pixels.has(1)) {
 			// Write first byte, read next byte
@@ -89,13 +89,13 @@ protected:
 
 			// Write third byte, read 1st byte of next pixel
 			writeBits<8+XTRA0>(last_mark, b);
-      		b = pixels.advanceAndLoadAndScale0();
+      b = pixels.advanceAndLoadAndScale0();
 
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			os_intr_unlock();
 			#endif
 
-      		pixels.stepDithering();
+      pixels.stepDithering();
 
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			os_intr_lock();
@@ -107,9 +107,9 @@ protected:
 		};
 
 		os_intr_unlock();
-		#ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-		_frame_cnt++;
-		#endif
+    #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+    ++_frame_cnt;
+    #endif
 		return __clock_cycles() - start;
 	}
 };

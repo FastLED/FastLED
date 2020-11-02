@@ -126,7 +126,7 @@ __attribute__((always_inline)) inline void swapbits8(bitswap_type in, bitswap_ty
   // SWAPSB(b.c,1);
   // SWAPSB(b.d,0);
 
-  for(int i = 0; i < 8; i++) {
+  for(int i = 0; i < 8; ++i) {
     just8bits work;
     work.a3 = in.word[0] >> 31;
     work.a2 = in.word[0] >> 23;
@@ -145,7 +145,7 @@ __attribute__((always_inline)) inline void swapbits8(bitswap_type in, bitswap_ty
 /// Slow version of the 8 byte by 8 bit rotation
 __attribute__((always_inline)) inline void slowswap(unsigned char *A, unsigned char *B) {
 
-  for(int row = 0; row < 7; row++) {
+  for(int row = 0; row < 7; ++row) {
     uint8_t x = A[row];
 
     uint8_t bit = (1<<row);

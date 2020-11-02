@@ -496,19 +496,19 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
 
 
 void hsv2rgb_raw(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
-    for(int i = 0; i < numLeds; i++) {
+    for(int i = 0; i < numLeds; ++i) {
         hsv2rgb_raw(phsv[i], prgb[i]);
     }
 }
 
 void hsv2rgb_rainbow( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
-    for(int i = 0; i < numLeds; i++) {
+    for(int i = 0; i < numLeds; ++i) {
         hsv2rgb_rainbow(phsv[i], prgb[i]);
     }
 }
 
 void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
-    for(int i = 0; i < numLeds; i++) {
+    for(int i = 0; i < numLeds; ++i) {
         hsv2rgb_spectrum(phsv[i], prgb[i]);
     }
 }

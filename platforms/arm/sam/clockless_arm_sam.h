@@ -48,7 +48,7 @@ protected:
 		// while(VAL < (TOTAL*10)) { bShift=true; }
 		// if(bShift) { next_mark = (VAL-TOTAL); };
 
-		for(register uint32_t i = BITS; i > 0; i--) {
+		for(register uint32_t i = BITS; i > 0; --i) {
 			// wait to start the bit, then set the pin high
 			while(DUE_TIMER_VAL < next_mark);
 			next_mark = (DUE_TIMER_VAL+TOTAL);
