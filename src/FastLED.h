@@ -316,11 +316,11 @@ public:
 	}
 
 #if defined(__FASTLED_HAS_FIBCC) && (__FASTLED_HAS_FIBCC == 1)
-  template<uint8_t NUM_LANES, template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER=RGB>
-  static CLEDController &addLeds(struct CRGB *data, int nLeds) {
-    static __FIBCC<CHIPSET, DATA_PIN, NUM_LANES, RGB_ORDER> c;
-    return addLeds(&c, data, nLeds);
-  }
+	template<uint8_t NUM_LANES, template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER=RGB>
+	static CLEDController &addLeds(struct CRGB *data, int nLeds) {
+		static __FIBCC<CHIPSET, DATA_PIN, NUM_LANES, RGB_ORDER> c;
+		return addLeds(&c, data, nLeds);
+	}
 #endif
 
 	#ifdef FASTSPI_USE_DMX_SIMPLE
@@ -556,19 +556,19 @@ public:
 	uint16_t getFPS() { return m_nFPS; }
 
 	/// Get how many controllers have been registered
-  /// @returns the number of controllers (strips) that have been added with addLeds
+	/// @returns the number of controllers (strips) that have been added with addLeds
 	int count();
 
 	/// Get a reference to a registered controller
-  /// @returns a reference to the Nth controller
+	/// @returns a reference to the Nth controller
 	CLEDController & operator[](int x);
 
 	/// Get the number of leds in the first controller
-  /// @returns the number of LEDs in the first controller
+	/// @returns the number of LEDs in the first controller
 	int size() { return (*this)[0].size(); }
 
 	/// Get a pointer to led data for the first controller
-  /// @returns pointer to the CRGB buffer for the first controller
+	/// @returns pointer to the CRGB buffer for the first controller
 	CRGB *leds() { return (*this)[0].leds(); }
 };
 

@@ -11,6 +11,7 @@ FASTLED_NAMESPACE_BEGIN
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class REFHardwareSPIOutput {
 	Selectable *m_pSelect;
+
 public:
 	SAMHardwareSPIOutput() { m_pSelect = NULL; }
 	SAMHArdwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }

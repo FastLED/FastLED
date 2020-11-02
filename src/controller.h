@@ -50,7 +50,7 @@ protected:
 
     /// set all the leds on the controller to a given color
     ///@param data the crgb color to set the leds to
-    ///@param nLeds the numner of leds to set to this color
+    ///@param nLeds the number of leds to set to this color
     ///@param scale the rgb scaling value for outputting color
     virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
 
@@ -154,7 +154,7 @@ public:
               CRGB adj(0,0,0);
 
               if(scale > 0) {
-                  for(uint8_t i = 0; i < 3; i++) {
+                  for(uint8_t i = 0; i < 3; ++i) {
                       uint8_t cc = colorCorrection.raw[i];
                       uint8_t ct = colorTemperature.raw[i];
                       if(cc > 0 && ct > 0) {
@@ -195,13 +195,13 @@ struct PixelController {
             mScale = other.mScale;
             mAdvance = other.mAdvance;
             mLenRemaining = mLen = other.mLen;
-            for(int i = 0; i < LANES; i++) { mOffsets[i] = other.mOffsets[i]; }
+            for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
 
         }
 
         void initOffsets(int len) {
           int nOffset = 0;
-          for(int i = 0; i < LANES; i++) {
+          for(int i = 0; i < LANES; ++i) {
             mOffsets[i] = nOffset;
             if((1<<i) & MASK) { nOffset += (len * mAdvance); }
           }
@@ -256,7 +256,7 @@ struct PixelController {
 
             // R is the digther signal 'counter'.
             static uint8_t R = 0;
-            R++;
+            ++R;
 
             // R is wrapped around at 2^ditherBits,
             // so if ditherBits is 2, R will cycle through (0,1,2,3)
@@ -293,14 +293,14 @@ struct PixelController {
             // actual dithering.
 
             // Setup the initial D and E values
-            for(int i = 0; i < 3; i++) {
+            for(int i = 0; i < 3; ++i) {
                     uint8_t s = mScale.raw[i];
                     e[i] = s ? (256/s) + 1 : 0;
                     d[i] = scale8(Q, e[i]);
 #if (FASTLED_SCALE8_FIXED == 1)
-                    if(d[i]) (d[i]--);
+                    if(d[i]) (--d[i]);
 #endif
-                    if(e[i]) e[i]--;
+                    if(e[i]) --e[i];
             }
 #endif
         }
@@ -324,7 +324,7 @@ struct PixelController {
         __attribute__((always_inline)) inline int advanceBy() { return mAdvance; }
 
         // advance the data pointer forward, adjust position counter
-         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; mLenRemaining--;}
+         __attribute__((always_inline)) inline void advanceData() { mData += mAdvance; --mLenRemaining;}
 
         // step the dithering forward
          __attribute__((always_inline)) inline void stepDithering() {
@@ -388,28 +388,28 @@ struct PixelController {
 
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
 protected:
-  virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
+    virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
 
-  /// set all the leds on the controller to a given color
-  ///@param data the crgb color to set the leds to
-  ///@param nLeds the numner of leds to set to this color
-  ///@param scale the rgb scaling value for outputting color
-  virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-    showPixels(pixels);
-  }
+    /// set all the leds on the controller to a given color
+    ///@param data the crgb color to set the leds to
+    ///@param nLeds the numner of leds to set to this color
+    ///@param scale the rgb scaling value for outputting color
+    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+        showPixels(pixels);
+    }
 
-/// write the passed in rgb data out to the leds managed by this controller
-///@param data the rgb data to write out to the strip
-///@param nLeds the number of leds being written out
-///@param scale the rgb scaling to apply to each led before writing it out
-  virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-    PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-    showPixels(pixels);
-  }
+    /// write the passed in rgb data out to the leds managed by this controller
+    ///@param data the rgb data to write out to the strip
+    ///@param nLeds the number of leds being written out
+    ///@param scale the rgb scaling to apply to each led before writing it out
+    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+        showPixels(pixels);
+    }
 
 public:
-  CPixelLEDController() : CLEDController() {}
+    CPixelLEDController() : CLEDController() {}
 };
 
 

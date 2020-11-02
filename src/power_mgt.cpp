@@ -60,7 +60,7 @@ uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) 
         red32   += *p++;
         green32 += *p++;
         blue32  += *p++;
-        count--;
+        --count;
     }
 
     red32   *= gRed_mW;
@@ -88,7 +88,7 @@ uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t nu
 
 	uint8_t recommended_brightness = target_brightness;
 	if(requested_power_mW > max_power_mW) { 
-    		recommended_brightness = (uint32_t)((uint8_t)(target_brightness) * (uint32_t)(max_power_mW)) / ((uint32_t)(requested_power_mW));
+        recommended_brightness = (uint32_t)((uint8_t)(target_brightness) * (uint32_t)(max_power_mW)) / ((uint32_t)(requested_power_mW));
 	}
 
 	return recommended_brightness;
@@ -163,23 +163,23 @@ void set_max_power_indicator_LED( uint8_t pinNumber)
 
 void set_max_power_in_volts_and_milliamps( uint8_t volts, uint32_t milliamps)
 {
-  FastLED.setMaxPowerInVoltsAndMilliamps(volts, milliamps);
+    FastLED.setMaxPowerInVoltsAndMilliamps(volts, milliamps);
 }
 
 void set_max_power_in_milliwatts( uint32_t powerInmW)
 {
-  FastLED.setMaxPowerInMilliWatts(powerInmW);
+    FastLED.setMaxPowerInMilliWatts(powerInmW);
 }
 
 void show_at_max_brightness_for_power()
 {
-  // power management usage is now in FastLED.show, no need for this function
-  FastLED.show();
+    // power management usage is now in FastLED.show, no need for this function
+    FastLED.show();
 }
 
 void delay_at_max_brightness_for_power( uint16_t ms)
 {
-  FastLED.delay(ms);
+    FastLED.delay(ms);
 }
 
 FASTLED_NAMESPACE_END

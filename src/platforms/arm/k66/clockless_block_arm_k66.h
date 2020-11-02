@@ -30,6 +30,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
 
@@ -107,7 +108,7 @@ public:
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(register uint32_t i = 0; i < (USED_LANES/2); i++) {
+		for(register uint32_t i = 0; i < (USED_LANES/2); ++i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
@@ -131,7 +132,7 @@ public:
 			b.bytes[USED_LANES-1] = pixels.template loadAndScale<PX>(pixels,USED_LANES-1,d,scale);
 		}
 
-		for(register uint32_t i = USED_LANES/2; i < 8; i++) {
+		for(register uint32_t i = USED_LANES/2; i < 8; ++i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
@@ -153,7 +154,7 @@ public:
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-		static uint32_t showRGBInternal(PixelController<RGB_ORDER, LANES, LANE_MASK> &allpixels) {
+	static uint32_t showRGBInternal(PixelController<RGB_ORDER, LANES, LANE_MASK> &allpixels) {
 		// Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
@@ -164,7 +165,7 @@ public:
 		register Lines b0;
 
 		allpixels.preStepFirstByteDithering();
-		for(int i = 0; i < USED_LANES; i++) {
+		for(int i = 0; i < USED_LANES; ++i) {
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
@@ -211,6 +212,7 @@ class SixteenWayInlineBlockClocklessController : public CPixelLEDController<RGB_
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual void init() {
 		static_assert(LANES <= 16, "Maximum of 16 lanes for Teensy parallel controllers!");
@@ -242,11 +244,11 @@ public:
 	virtual void showPixels(PixelController<RGB_ORDER, LANES, PMASK> & pixels) { 
 		mWait.wait();
 		uint32_t clocks = showRGBInternal(pixels);
-		#if FASTLED_ALLOW_INTERRUPTS == 0
+	#if FASTLED_ALLOW_INTERRUPTS == 0
 		// Adjust the timer
 		long microsTaken = CLKS_TO_MICROS(clocks);
 		MS_COUNTER += (1 + (microsTaken / 1000));
-		#endif
+	#endif
 
 		mWait.mark();
 	}
@@ -264,7 +266,7 @@ public:
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(register uint32_t i = 0; (i < LANES) && (i < 8); i++) {
+		for(register uint32_t i = 0; (i < LANES) && (i < 8); ++i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<PORTD_FIRST_PIN>::sport() = PMASK_LO;
@@ -286,10 +288,9 @@ public:
 	}
 
 
-
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
 	// gcc will use register Y for the this pointer.
-		static uint32_t showRGBInternal(PixelController<RGB_ORDER,LANES, PMASK> &allpixels) {
+	static uint32_t showRGBInternal(PixelController<RGB_ORDER,LANES, PMASK> &allpixels) {
 		// Get access to the clock
 		ARM_DEMCR    |= ARM_DEMCR_TRCENA;
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
@@ -300,7 +301,7 @@ public:
 		register Lines b0;
 
 		allpixels.preStepFirstByteDithering();
-		for(int i = 0; i < LANES; i++) {
+		for(int i = 0; i < LANES; ++i) {
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
@@ -309,13 +310,15 @@ public:
 
 		while(allpixels.has(1)) {
 			allpixels.stepDithering();
-			#if 0 && (FASTLED_ALLOW_INTERRUPTS == 1)
+		#if 0 && (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
 			// if interrupts took longer than 45µs, punt on the current frame
 			if(ARM_DWT_CYCCNT > next_mark) {
-				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); return ARM_DWT_CYCCNT; }
+				if((ARM_DWT_CYCCNT-next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) {
+					sei();
+					return ARM_DWT_CYCCNT; }
 			}
-			#endif
+		#endif
 
 			// Write first byte, read next byte
 			writeBits<8+XTRA0,1>(next_mark, b0, allpixels);
@@ -327,9 +330,9 @@ public:
 			// Write third byte
 			writeBits<8+XTRA0,0>(next_mark, b0, allpixels);
 
-			#if 0 && (FASTLED_ALLOW_INTERRUPTS == 1)
+		#if 0 && (FASTLED_ALLOW_INTERRUPTS == 1)
 			sei();
-			#endif
+		#endif
 		};
 		sei();
 

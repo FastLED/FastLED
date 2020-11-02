@@ -23,7 +23,6 @@
     /// SPI_CLOCK_DIVIDER is number of CPU clock cycles per SPI transmission bit?
     template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
     class NRF52SPIOutput {
-
     private:
         // static variables -- always using same SPIM instance
         static bool s_InUse;

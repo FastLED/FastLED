@@ -17,41 +17,41 @@ FASTLED_NAMESPACE_BEGIN
 
 template<uint8_t PIN, uint8_t _BIT, uint32_t _MASK, int _GRP> class _ARMPIN {
 public:
-  typedef volatile uint32_t * port_ptr_t;
-  typedef uint32_t port_t;
+    typedef volatile uint32_t * port_ptr_t;
+    typedef uint32_t port_t;
 
-  #if 0
-  inline static void setOutput() {
-    if(_BIT<8) {
-      _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4));
-    } else {
-      _CRH::r() = (_CRH::r() & (0xF << ((_BIT-8)*4))) | (0x1 << ((_BIT-8)*4));
+    #if 0
+    inline static void setOutput() {
+        if(_BIT<8) {
+            _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4));
+        } else {
+            _CRH::r() = (_CRH::r() & (0xF << ((_BIT-8)*4))) | (0x1 << ((_BIT-8)*4));
+        }
     }
-  }
-  inline static void setInput() { /* TODO */ } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
-  #endif
+    inline static void setInput() { /* TODO */ } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+    #endif
 
-  inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
-  inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+    inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
+    inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
-  inline static void hi() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTSET.reg = _MASK; }
-  inline static void lo() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTCLR.reg = _MASK; }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUT.reg = val; }
+    inline static void hi() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTSET.reg = _MASK; }
+    inline static void lo() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTCLR.reg = _MASK; }
+    inline static void set(register port_t val) __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUT.reg = val; }
 
-  inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
+    inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-  inline static void toggle() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTTGL.reg = _MASK; }
+    inline static void toggle() __attribute__ ((always_inline)) { PORT_IOBUS->Group[_GRP].OUTTGL.reg = _MASK; }
 
-  inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-  inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { return PORT_IOBUS->Group[_GRP].OUT.reg | _MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return PORT_IOBUS->Group[_GRP].OUT.reg & ~_MASK; }
-  inline static port_ptr_t port() __attribute__ ((always_inline)) { return &PORT_IOBUS->Group[_GRP].OUT.reg; }
-  inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &PORT_IOBUS->Group[_GRP].OUTSET.reg; }
-  inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &PORT_IOBUS->Group[_GRP].OUTCLR.reg; }
-  inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+    inline static port_t hival() __attribute__ ((always_inline)) { return PORT_IOBUS->Group[_GRP].OUT.reg | _MASK; }
+    inline static port_t loval() __attribute__ ((always_inline)) { return PORT_IOBUS->Group[_GRP].OUT.reg & ~_MASK; }
+    inline static port_ptr_t port() __attribute__ ((always_inline)) { return &PORT_IOBUS->Group[_GRP].OUT.reg; }
+    inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &PORT_IOBUS->Group[_GRP].OUTSET.reg; }
+    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &PORT_IOBUS->Group[_GRP].OUTCLR.reg; }
+    inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
 #define _R(T) struct __gen_struct_ ## T
@@ -214,6 +214,19 @@ _FL_DEFPIN( 3, 7, 0); _FL_DEFPIN( 4, 6, 0); _FL_DEFPIN( 7, 0, 0); _FL_DEFPIN( 8,
 #define SPI_CLOCK 3
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ADAFRUIT_QTPY_M0)
+
+#define MAX_PIN 10
+_FL_DEFPIN( 0, 2, 0); _FL_DEFPIN( 1, 3, 0); _FL_DEFPIN( 2, 4, 0); _FL_DEFPIN( 3, 5, 0);
+_FL_DEFPIN( 4, 16, 0); _FL_DEFPIN( 5, 17, 0); _FL_DEFPIN( 6, 6, 0); _FL_DEFPIN( 7, 7, 0);
+_FL_DEFPIN( 8, 11, 0); _FL_DEFPIN( 9, 9, 0); _FL_DEFPIN( 10, 10, 0);
+
+#define SPI_DATA  10
+#define SPI_CLOCK 8
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
 
 #elif defined(ADAFRUIT_ITSYBITSY_M0)
 

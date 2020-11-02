@@ -22,6 +22,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual void init() {
 		FastPinBB<DATA_PIN>::setOutput();
@@ -32,15 +33,14 @@ public:
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
-
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-		mWait.wait();
-		if(!showRGBInternal(pixels)) {
-      sei(); delayMicroseconds(WAIT_TIME); cli();
-      showRGBInternal(pixels);
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+        mWait.wait();
+        if(!showRGBInternal(pixels)) {
+            sei(); delayMicroseconds(WAIT_TIME); cli();
+            showRGBInternal(pixels);
+        }
+        mWait.mark();
     }
-		mWait.mark();
-	}
 
 	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register uint8_t & b) {
 		// Make sure we don't slot into a wrapping spot, this will delay up to 12.5µs for WS2812
@@ -48,7 +48,7 @@ protected:
 		// while(VAL < (TOTAL*10)) { bShift=true; }
 		// if(bShift) { next_mark = (VAL-TOTAL); };
 
-		for(register uint32_t i = BITS; i > 0; i--) {
+		for(register uint32_t i = BITS; i > 0; --i) {
 			// wait to start the bit, then set the pin high
 			while(DUE_TIMER_VAL < next_mark);
 			next_mark = (DUE_TIMER_VAL+TOTAL);
@@ -90,7 +90,9 @@ protected:
 			#if (FASTLED_ALLOW_INTERRUPTS == 1)
 			cli();
 			if(DUE_TIMER_VAL > next_mark) {
-				if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) { sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return 0; }
+				if((DUE_TIMER_VAL - next_mark) > ((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US)) {
+                    sei(); TC_Stop(DUE_TIMER,DUE_TIMER_CHANNEL); return 0;
+                }
 			}
 			#endif
 

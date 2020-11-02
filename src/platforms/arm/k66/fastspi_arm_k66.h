@@ -37,6 +37,7 @@ template<int VAL, int BIT> class BitWork {
 public:
 	static int highestBit() __attribute__((always_inline)) { return (VAL & 1 << BIT) ? BIT : BitWork<VAL, BIT-1>::highestBit(); }
 };
+
 template<int VAL> class BitWork<VAL, 0> {
 public:
 	static int highestBit() __attribute__((always_inline)) { return 0; }
@@ -94,7 +95,7 @@ template <int VAL> void getScalars(uint32_t & preScalar, uint32_t & scalar, uint
 
 			dbl = 0;
 			if(scalar == 0) { dbl = 1; }
-			else if(scalar < 3) { scalar--; }
+			else if(scalar < 3) { --scalar; }
 		}
 	}
 	return;
@@ -248,7 +249,6 @@ class ARMHardwareSPIOutput {
 		// CORE_PIN14_CONFIG = gState.pins[3];
 	}
 
-
 public:
 	ARMHardwareSPIOutput() { m_pSelect = NULL; }
 	ARMHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
@@ -323,8 +323,8 @@ public:
 		static void writeWord(uint16_t w) __attribute__((always_inline)) {
 			if(WAIT_STATE == PRE) { wait(); }
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
-			((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
-			SPI_PUSHR_CTAS(1) | (w & 0xFFFF);
+						 ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
+						 SPI_PUSHR_CTAS(1) | (w & 0xFFFF);
 			SPIX.SR |= SPI_SR_TCF;
 			if(WAIT_STATE == POST) { wait(); }
 		}
@@ -332,8 +332,8 @@ public:
 		static void writeByte(uint8_t b) __attribute__((always_inline)) {
 			if(WAIT_STATE == PRE) { wait(); }
 			SPIX.PUSHR = ((LAST_STATE == LAST) ? SPI_PUSHR_EOQ : 0) |
-			((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
-			SPI_PUSHR_CTAS(0) | (b & 0xFF);
+						 ((CONT_STATE == CONT) ? SPI_PUSHR_CONT : 0) |
+						 SPI_PUSHR_CTAS(0) | (b & 0xFF);
 			SPIX.SR |= SPI_SR_TCF;
 			if(WAIT_STATE == POST) { wait(); }
 		}

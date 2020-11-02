@@ -31,7 +31,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
-  CMinWait<WAIT_TIME> mWait;
+  	CMinWait<WAIT_TIME> mWait;
 
 public:
 	virtual void init() {
@@ -39,86 +39,85 @@ public:
 
 		// Configure DATA_PIN for FastGPIO (settings are in fastpin_apollo3.h)
 		FastPin<DATA_PIN>::setOutput();
-    FastPin<DATA_PIN>::lo();
+		FastPin<DATA_PIN>::lo();
 
 		// Make sure the system clock is running at the full 48MHz
-	  am_hal_clkgen_control(AM_HAL_CLKGEN_CONTROL_SYSCLK_MAX, 0);
+		am_hal_clkgen_control(AM_HAL_CLKGEN_CONTROL_SYSCLK_MAX, 0);
 
 		// Make sure interrupts are enabled
-	  //am_hal_interrupt_master_enable();
+		//am_hal_interrupt_master_enable();
 
-	  // Enable SysTick Interrupts in the NVIC
-	  //NVIC_EnableIRQ(SysTick_IRQn);
+		// Enable SysTick Interrupts in the NVIC
+		//NVIC_EnableIRQ(SysTick_IRQn);
 
 		// SysTick is 24-bit and counts down (not up)
 
-	  // Stop the SysTick (just in case it is already running).
-	  // This clears the ENABLE bit in the SysTick Control and Status Register (SYST_CSR).
-	  // In Ambiq naming convention, the control register is SysTick->CTRL
-	  am_hal_systick_stop();
+		// Stop the SysTick (just in case it is already running).
+		// This clears the ENABLE bit in the SysTick Control and Status Register (SYST_CSR).
+		// In Ambiq naming convention, the control register is SysTick->CTRL
+		am_hal_systick_stop();
 
-	  // Call SysTick_Config
-	  // This is defined in core_cm4.h
-	  // It loads the specified LOAD value into the SysTick Reload Value Register (SYST_RVR)
-	  // In Ambiq naming convention, the reload register is SysTick->LOAD
-	  // It sets the SysTick interrupt priority
-	  // It clears the SysTick Current Value Register (SYST_CVR)
-	  // In Ambiq naming convention, the current value register is SysTick->VAL
-	  // Finally it sets these bits in the SysTick Control and Status Register (SYST_CSR):
-	  // CLKSOURCE: SysTick uses the processor clock
-	  // TICKINT: When the count reaches zero, the SysTick exception (interrupt) is changed to pending
-	  // ENABLE: Enables the counter
-	  // SysTick_Config returns 0 if successful. 1 indicates a failure (the LOAD value was invalid).
-	  SysTick_Config(0xFFFFFFUL); // The LOAD value needs to be 24-bit
+		// Call SysTick_Config
+		// This is defined in core_cm4.h
+		// It loads the specified LOAD value into the SysTick Reload Value Register (SYST_RVR)
+		// In Ambiq naming convention, the reload register is SysTick->LOAD
+		// It sets the SysTick interrupt priority
+		// It clears the SysTick Current Value Register (SYST_CVR)
+		// In Ambiq naming convention, the current value register is SysTick->VAL
+		// Finally it sets these bits in the SysTick Control and Status Register (SYST_CSR):
+		// CLKSOURCE: SysTick uses the processor clock
+		// TICKINT: When the count reaches zero, the SysTick exception (interrupt) is changed to pending
+		// ENABLE: Enables the counter
+		// SysTick_Config returns 0 if successful. 1 indicates a failure (the LOAD value was invalid).
+		SysTick_Config(0xFFFFFFUL); // The LOAD value needs to be 24-bit
 	}
 
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-    mWait.wait();
+    	mWait.wait();
 		if(!showRGBInternal(pixels)) {
-      sei(); delayMicroseconds(WAIT_TIME); cli();
-      showRGBInternal(pixels);
-    }
-    mWait.mark();
-  }
+			sei(); delayMicroseconds(WAIT_TIME); cli();
+			showRGBInternal(pixels);
+   		}
+    	mWait.mark();
+ 	}
 
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register uint8_t & b)  {
 		// SysTick counts down (not up) and is 24-bit
 		for(register uint32_t i = BITS-1; i > 0; i--) { // We could speed this up by using Bit Banding
-      while(__am_hal_systick_count() > next_mark) { ; } // Wait for the remainder of this cycle to complete
-			// Calculate next_mark (the time of the next DATA_PIN transition) by subtracting T1+T2+T3
-			// SysTick counts down (not up) and is 24-bit
-			next_mark = (__am_hal_systick_count() - (T1+T2+T3)) & 0xFFFFFFUL;
-			FastPin<DATA_PIN>::hi();
-			if(b&0x80) {
-				// "1 code" = longer pulse width
-	      while((__am_hal_systick_count() - next_mark) > (T3+(3*(F_CPU/24000000)))) { ; }
-        FastPin<DATA_PIN>::lo();
-			} else {
-				// "0 code" = shorter pulse width
-	      while((__am_hal_systick_count() - next_mark) > (T2+T3+(4*(F_CPU/24000000)))) { ; }
-        FastPin<DATA_PIN>::lo();
-			}
-			b <<= 1;
+			while(__am_hal_systick_count() > next_mark) { ; } // Wait for the remainder of this cycle to complete
+				// Calculate next_mark (the time of the next DATA_PIN transition) by subtracting T1+T2+T3
+				// SysTick counts down (not up) and is 24-bit
+				next_mark = (__am_hal_systick_count() - (T1+T2+T3)) & 0xFFFFFFUL;
+				FastPin<DATA_PIN>::hi();
+				if(b&0x80) {
+					// "1 code" = longer pulse width
+					while((__am_hal_systick_count() - next_mark) > (T3+(3*(F_CPU/24000000)))) { ; }
+					FastPin<DATA_PIN>::lo();
+				} else {
+					// "0 code" = shorter pulse width
+					while((__am_hal_systick_count() - next_mark) > (T2+T3+(4*(F_CPU/24000000)))) { ; }
+					FastPin<DATA_PIN>::lo();
+				}
+				b <<= 1;
 		}
 
-    while(__am_hal_systick_count() > next_mark) { ; }// Wait for the remainder of this cycle to complete
+		while(__am_hal_systick_count() > next_mark) { ; }// Wait for the remainder of this cycle to complete
 		// Calculate next_mark (the time of the next DATA_PIN transition) by subtracting T1+T2+T3
 		// SysTick counts down (not up) and is 24-bit
 		next_mark = (__am_hal_systick_count() - (T1+T2+T3)) & 0xFFFFFFUL;
 		FastPin<DATA_PIN>::hi();
-    if(b&0x80) {
+		if(b&0x80) {
 			// "1 code" = longer pulse width
-      while((__am_hal_systick_count() - next_mark) > (T3+(2*(F_CPU/24000000)))) { ; }
-      FastPin<DATA_PIN>::lo();
-    } else {
+			while((__am_hal_systick_count() - next_mark) > (T3+(2*(F_CPU/24000000)))) { ; }
+			FastPin<DATA_PIN>::lo();
+		} else {
 			// "0 code" = shorter pulse width
-      while((__am_hal_systick_count() - next_mark) > (T2+T3+(4*(F_CPU/24000000)))) { ; }
-      FastPin<DATA_PIN>::lo();
-    }
+			while((__am_hal_systick_count() - next_mark) > (T2+T3+(4*(F_CPU/24000000)))) { ; }
+			FastPin<DATA_PIN>::lo();
+		}
 	}
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then

@@ -27,6 +27,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
 
@@ -93,7 +94,7 @@ public:
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(register uint32_t i = 0; i < (USED_LANES/2); i++) {
+		for(register uint32_t i = 0; i < (USED_LANES/2); ++i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
@@ -117,7 +118,7 @@ public:
 			b.bytes[USED_LANES-1] = pixels.template loadAndScale<PX>(pixels,USED_LANES-1,d,scale);
 		}
 
-		for(register uint32_t i = USED_LANES/2; i < 8; i++) {
+		for(register uint32_t i = USED_LANES/2; i < 8; ++i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
@@ -150,7 +151,7 @@ public:
 		register Lines b0;
 
 		allpixels.preStepFirstByteDithering();
-		for(int i = 0; i < USED_LANES; i++) {
+		for(int i = 0; i < USED_LANES; ++i) {
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 
@@ -197,6 +198,7 @@ class SixteenWayInlineBlockClocklessController : public CPixelLEDController<RGB_
 	data_t mPinMask;
 	data_ptr_t mPort;
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual void init() {
 		static_assert(LANES <= 16, "Maximum of 16 lanes for Teensy parallel controllers!");
@@ -250,7 +252,7 @@ public:
 		register uint8_t d = pixels.template getd<PX>(pixels);
 		register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(register uint32_t i = 0; (i < LANES) && (i < 8); i++) {
+		for(register uint32_t i = 0; (i < LANES) && (i < 8); ++i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<PORTD_FIRST_PIN>::sport() = PMASK_LO;
@@ -286,7 +288,7 @@ public:
 		register Lines b0;
 
 		allpixels.preStepFirstByteDithering();
-		for(int i = 0; i < LANES; i++) {
+		for(int i = 0; i < LANES; ++i) {
 			b0.bytes[i] = allpixels.loadAndScale0(i);
 		}
 

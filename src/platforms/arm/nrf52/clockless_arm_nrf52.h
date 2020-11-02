@@ -15,7 +15,6 @@
 // NOTE: Update platforms.cpp in root of FastLED library if this changes
 #define FASTLED_NRF52_PWM_ID 0
 
-
 extern uint32_t isrCount;
 
 
@@ -207,45 +206,45 @@ public:
 
         while (pixels.has(1) && (remainingSequenceElements >= _BITS_PER_PIXEL)) {
             uint8_t b0 = pixels.loadAndScale0();
-            WriteBitToSequence<7>(b0, e); e++;
-            WriteBitToSequence<6>(b0, e); e++;
-            WriteBitToSequence<5>(b0, e); e++;
-            WriteBitToSequence<4>(b0, e); e++;
-            WriteBitToSequence<3>(b0, e); e++;
-            WriteBitToSequence<2>(b0, e); e++;
-            WriteBitToSequence<1>(b0, e); e++;
-            WriteBitToSequence<0>(b0, e); e++;
+            WriteBitToSequence<7>(b0, e); ++e;
+            WriteBitToSequence<6>(b0, e); ++e;
+            WriteBitToSequence<5>(b0, e); ++e;
+            WriteBitToSequence<4>(b0, e); ++e;
+            WriteBitToSequence<3>(b0, e); ++e;
+            WriteBitToSequence<2>(b0, e); ++e;
+            WriteBitToSequence<1>(b0, e); ++e;
+            WriteBitToSequence<0>(b0, e); ++e;
             if (_XTRA0 > 0) {
-                for (int i = 0; i < _XTRA0; i++) {
-                    WriteBitToSequence<0>(0,e); e++;
+                for (int i = 0; i < _XTRA0; ++i) {
+                    WriteBitToSequence<0>(0,e); ++e;
                 }
             }
             uint8_t b1 = pixels.loadAndScale1();
-            WriteBitToSequence<7>(b1, e); e++;
-            WriteBitToSequence<6>(b1, e); e++;
-            WriteBitToSequence<5>(b1, e); e++;
-            WriteBitToSequence<4>(b1, e); e++;
-            WriteBitToSequence<3>(b1, e); e++;
-            WriteBitToSequence<2>(b1, e); e++;
-            WriteBitToSequence<1>(b1, e); e++;
-            WriteBitToSequence<0>(b1, e); e++;
+            WriteBitToSequence<7>(b1, e); ++e;
+            WriteBitToSequence<6>(b1, e); ++e;
+            WriteBitToSequence<5>(b1, e); ++e;
+            WriteBitToSequence<4>(b1, e); ++e;
+            WriteBitToSequence<3>(b1, e); ++e;
+            WriteBitToSequence<2>(b1, e); ++e;
+            WriteBitToSequence<1>(b1, e); ++e;
+            WriteBitToSequence<0>(b1, e); ++e;
             if (_XTRA0 > 0) {
-                for (int i = 0; i < _XTRA0; i++) {
-                    WriteBitToSequence<0>(0,e); e++;
+                for (int i = 0; i < _XTRA0; ++i) {
+                    WriteBitToSequence<0>(0,e); ++e;
                 }
             }
             uint8_t b2 = pixels.loadAndScale2();
-            WriteBitToSequence<7>(b2, e); e++;
-            WriteBitToSequence<6>(b2, e); e++;
-            WriteBitToSequence<5>(b2, e); e++;
-            WriteBitToSequence<4>(b2, e); e++;
-            WriteBitToSequence<3>(b2, e); e++;
-            WriteBitToSequence<2>(b2, e); e++;
-            WriteBitToSequence<1>(b2, e); e++;
-            WriteBitToSequence<0>(b2, e); e++;
+            WriteBitToSequence<7>(b2, e); ++e;
+            WriteBitToSequence<6>(b2, e); ++e;
+            WriteBitToSequence<5>(b2, e); ++e;
+            WriteBitToSequence<4>(b2, e); ++e;
+            WriteBitToSequence<3>(b2, e); ++e;
+            WriteBitToSequence<2>(b2, e); ++e;
+            WriteBitToSequence<1>(b2, e); ++e;
+            WriteBitToSequence<0>(b2, e); ++e;
             if (_XTRA0 > 0) {
-                for (int i = 0; i < _XTRA0; i++) {
-                    WriteBitToSequence<0>(0,e); e++;
+                for (int i = 0; i < _XTRA0; ++i) {
+                    WriteBitToSequence<0>(0,e); ++e;
                 }
             }
 
@@ -292,22 +291,22 @@ public:
         uint8_t  * nextByte    = arrayOfBytes;
         for (uint16_t bytesRemain = bytesToSend;
             (remainingSequenceElements >= 8) && (bytesRemain > 0);
-            bytesRemain--,
+            --bytesRemain,
             remainingSequenceElements     -= 8,
             s_SequenceBufferValidElements += 8
             ) {
             uint8_t b = *nextByte;
-            WriteBitToSequence<7,false>(b, e); e++;
-            WriteBitToSequence<6,false>(b, e); e++;
-            WriteBitToSequence<5,false>(b, e); e++;
-            WriteBitToSequence<4,false>(b, e); e++;
-            WriteBitToSequence<3,false>(b, e); e++;
-            WriteBitToSequence<2,false>(b, e); e++;
-            WriteBitToSequence<1,false>(b, e); e++;
-            WriteBitToSequence<0,false>(b, e); e++;
+            WriteBitToSequence<7,false>(b, e); ++e;
+            WriteBitToSequence<6,false>(b, e); ++e;
+            WriteBitToSequence<5,false>(b, e); ++e;
+            WriteBitToSequence<4,false>(b, e); ++e;
+            WriteBitToSequence<3,false>(b, e); ++e;
+            WriteBitToSequence<2,false>(b, e); ++e;
+            WriteBitToSequence<1,false>(b, e); ++e;
+            WriteBitToSequence<0,false>(b, e); ++e;
             if (_XTRA0 > 0) {
-                for (int i = 0; i < _XTRA0; i++) {
-                    WriteBitToSequence<0,_FLIP>(0,e); e++;
+                for (int i = 0; i < _XTRA0; ++i) {
+                    WriteBitToSequence<0,_FLIP>(0,e); ++e;
                 }
             }
         }

@@ -17,16 +17,16 @@
     #endif
             // NOTE: Update platforms.cpp in root of FastLED library if this changes        
             #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE0)
-                void PWM0_IRQHandler(void) { isrCount++; PWM_Arbiter<0>::isr_handler(); }
+                void PWM0_IRQHandler(void) { ++isrCount; PWM_Arbiter<0>::isr_handler(); }
             #endif
             #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE1)
-                void PWM1_IRQHandler(void) { isrCount++; PWM_Arbiter<1>::isr_handler(); }
+                void PWM1_IRQHandler(void) { ++isrCount; PWM_Arbiter<1>::isr_handler(); }
             #endif
             #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE2)
-                void PWM2_IRQHandler(void) { isrCount++; PWM_Arbiter<2>::isr_handler(); }
+                void PWM2_IRQHandler(void) { ++isrCount; PWM_Arbiter<2>::isr_handler(); }
             #endif
             #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE3)
-                void PWM3_IRQHandler(void) { isrCount++; PWM_Arbiter<3>::isr_handler(); }
+                void PWM3_IRQHandler(void) { ++isrCount; PWM_Arbiter<3>::isr_handler(); }
             #endif
     #ifdef __cplusplus
         }

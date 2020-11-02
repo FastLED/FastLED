@@ -51,9 +51,7 @@ struct CHSV {
     }
 
     /// default values are UNITIALIZED
-    inline CHSV() __attribute__((always_inline))
-    {
-    }
+    inline CHSV() __attribute__((always_inline)) = default;
 
     /// allow construction from H, S, V
     inline CHSV( uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
@@ -62,20 +60,9 @@ struct CHSV {
     }
 
     /// allow copy construction
-    inline CHSV(const CHSV& rhs) __attribute__((always_inline))
-    {
-        h = rhs.h;
-        s = rhs.s;
-        v = rhs.v;
-    }
+    inline CHSV(const CHSV& rhs) __attribute__((always_inline)) = default;
 
-    inline CHSV& operator= (const CHSV& rhs) __attribute__((always_inline))
-    {
-        h = rhs.h;
-        s = rhs.s;
-        v = rhs.v;
-        return *this;
-    }
+    inline CHSV& operator= (const CHSV& rhs) __attribute__((always_inline)) = default;
 
     inline CHSV& setHSV(uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
     {
@@ -131,9 +118,7 @@ struct CRGB {
     }
 
     // default values are UNINITIALIZED
-	inline CRGB() __attribute__((always_inline))
-    {
-    }
+    inline CRGB() __attribute__((always_inline)) = default;
 
     /// allow construction from R, G, B
     inline CRGB( uint8_t ir, uint8_t ig, uint8_t ib)  __attribute__((always_inline))
@@ -162,13 +147,7 @@ struct CRGB {
     }
 
     /// allow copy construction
-	inline CRGB(const CRGB& rhs) __attribute__((always_inline))
-    {
-        r = rhs.r;
-        g = rhs.g;
-        b = rhs.b;
-    }
-
+	inline CRGB(const CRGB& rhs) __attribute__((always_inline)) = default;
     /// allow construction from HSV color
 	inline CRGB(const CHSV& rhs) __attribute__((always_inline))
     {
@@ -176,13 +155,7 @@ struct CRGB {
     }
 
     /// allow assignment from one RGB struct to another
-	inline CRGB& operator= (const CRGB& rhs) __attribute__((always_inline))
-    {
-        r = rhs.r;
-        g = rhs.g;
-        b = rhs.b;
-        return *this;
-    }
+	inline CRGB& operator= (const CRGB& rhs) __attribute__((always_inline)) = default;
 
     /// allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
 	inline CRGB& operator= (const uint32_t colorcode) __attribute__((always_inline))
@@ -317,10 +290,10 @@ struct CRGB {
     /// right shift each of the channels by a constant
     inline CRGB& operator>>= (uint8_t d)
     {
-      r >>= d;
-      g >>= d;
-      b >>= d;
-      return *this;
+        r >>= d;
+        g >>= d;
+        b >>= d;
+        return *this;
     }
 
     /// multiply each of the channels by a constant,
@@ -450,11 +423,11 @@ struct CRGB {
 
 #if (defined SmartMatrix_h || defined SmartMatrix3_h)
     operator rgb24() const {
-      rgb24 ret;
-      ret.red = r;
-      ret.green = g;
-      ret.blue = b;
-      return ret;
+        rgb24 ret;
+        ret.red = r;
+        ret.green = g;
+        ret.blue = b;
+        return ret;
     }
 #endif
 
@@ -503,25 +476,25 @@ struct CRGB {
     /// return a new CRGB object after performing a linear interpolation between this object and the passed in object
     inline CRGB lerp8( const CRGB& other, fract8 frac) const
     {
-      CRGB ret;
+        CRGB ret;
 
-      ret.r = lerp8by8(r,other.r,frac);
-      ret.g = lerp8by8(g,other.g,frac);
-      ret.b = lerp8by8(b,other.b,frac);
+        ret.r = lerp8by8(r,other.r,frac);
+        ret.g = lerp8by8(g,other.g,frac);
+        ret.b = lerp8by8(b,other.b,frac);
 
-      return ret;
+        return ret;
     }
 
     /// return a new CRGB object after performing a linear interpolation between this object and the passed in object
     inline CRGB lerp16( const CRGB& other, fract16 frac) const
     {
-      CRGB ret;
+        CRGB ret;
 
-      ret.r = lerp16by16(r<<8,other.r<<8,frac)>>8;
-      ret.g = lerp16by16(g<<8,other.g<<8,frac)>>8;
-      ret.b = lerp16by16(b<<8,other.b<<8,frac)>>8;
+        ret.r = lerp16by16(r<<8,other.r<<8,frac)>>8;
+        ret.g = lerp16by16(g<<8,other.g<<8,frac)>>8;
+        ret.b = lerp16by16(b<<8,other.b<<8,frac)>>8;
 
-      return ret;
+        return ret;
     }
 
     /// getParity returns 0 or 1, depending on the
@@ -565,14 +538,14 @@ struct CRGB {
             // going 'up'
             if( (b > 0) && (b < 255)) {
                 if( r == g && g == b) {
-                    r++;
-                    g++;
+                    ++r;
+                    ++g;
                 }
-                b++;
+                ++b;
             } else if( (r > 0) && (r < 255)) {
-                r++;
+                ++r;
             } else if( (g > 0) && (g < 255)) {
-                g++;
+                ++g;
             } else {
                 if( r == g && g == b) {
                     r ^= 0x01;
@@ -584,14 +557,14 @@ struct CRGB {
             // going 'down'
             if( b > 1) {
                 if( r == g && g == b) {
-                    r--;
-                    g--;
+                    --r;
+                    --g;
                 }
-                b--;
+                --b;
             } else if( g > 1) {
-                g--;
+                --g;
             } else if( r > 1) {
-                r--;
+                --r;
             } else {
                 if( r == g && g == b) {
                     r ^= 0x01;

@@ -49,7 +49,11 @@ template<> __attribute__((always_inline)) inline void _dc<-2>(register uint8_t &
 template<> __attribute__((always_inline)) inline void _dc<-1>(register uint8_t & ) {}
 template<> __attribute__((always_inline)) inline void _dc< 0>(register uint8_t & ) {}
 template<> __attribute__((always_inline)) inline void _dc< 1>(register uint8_t & ) {asm __volatile__("mov r0,r0":::);}
+#if defined(__LGT8F__) 
+template<> __attribute__((always_inline)) inline void _dc< 2>(register uint8_t & loopvar) { _dc<1>(loopvar); _dc<1>(loopvar); }
+#else
 template<> __attribute__((always_inline)) inline void _dc< 2>(register uint8_t & ) {asm __volatile__("rjmp .+0":::);}
+#endif
 template<> __attribute__((always_inline)) inline void _dc< 3>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc< 4>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc< 5>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<3>(loopvar); }
@@ -97,6 +101,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
 	CMinWait<WAIT_TIME> mWait;
+
 public:
 	virtual void init() {
 		FastPin<DATA_PIN>::setOutput();
@@ -105,7 +110,6 @@ public:
 	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 
 		mWait.wait();
@@ -167,6 +171,12 @@ protected:
 	}
 #define USE_ASM_MACROS
 
+#if defined(__AVR_ATmega4809__)
+#define ASM_VAR_PORT "r" (((PORT_t*)FastPin<DATA_PIN>::port())->OUT)
+#else
+#define ASM_VAR_PORT "M" (FastPin<DATA_PIN>::port() - 0x20)
+#endif
+
 // The variables that our various asm statements use.  The same block of variables needs to be declared for
 // all the asm blocks because GCC is pretty stupid and it would clobber variables happily or optimize code away too aggressively
 #define ASM_VARS : /* write variables */				\
@@ -189,13 +199,11 @@ protected:
 				[e0] "r" (e0),							\
 				[e1] "r" (e1),							\
 				[e2] "r" (e2),							\
-				[PORT] "M" (FastPin<DATA_PIN>::port()-0x20),		\
+				[PORT] ASM_VAR_PORT,                    \
 				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
 				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
 				: "cc" /* clobber registers */
-
-
 // Note: the code in the else in HI1/LO1 will be turned into an sts (2 cycle, 2 word) opcode
 // 1 cycle, write hi to the port
 #define HI1 FASTLED_SLOW_CLOCK_ADJUST if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
@@ -323,10 +331,10 @@ protected:
 #define DUSE (0xFF - (DADVANCE-1))
 
 // Silence compiler warnings about switch/case that is explicitly intended to fall through.
-//#define FL_FALLTHROUGH __attribute__ ((fallthrough));
+#define FL_FALLTHROUGH __attribute__ ((fallthrough));
 
-// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
-// gcc will use register Y for the this pointer.
+	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
+	// gcc will use register Y for the this pointer.
 	static void /*__attribute__((optimize("O0")))*/  /*__attribute__ ((always_inline))*/  showRGBInternal(PixelController<RGB_ORDER> & pixels)  {
 		uint8_t *data = (uint8_t*)pixels.mData;
 		data_ptr_t port = FastPin<DATA_PIN>::port();
@@ -406,9 +414,9 @@ protected:
 				HI1 _D1(1) QLO2(b0, 1) RORSC14(b1,7) 	_D2(4)	LO1 RORCLC2(b1) 	_D3(2)
 				HI1 _D1(1) QLO2(b0, 0)
 				switch(XTRA0) {
-					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  /* fall through */
+					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
 					case 1: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
 				}
 				MOV_ADDDE14(b0,b1,d1,e1) _D2(4) LO1 _D3(0)
@@ -422,9 +430,9 @@ protected:
 				HI1 _D1(1) QLO2(b0, 1) RORSC24(b1,7) 	_D2(4)	LO1 RORCLC2(b1) 	_D3(2)
 				HI1 _D1(1) QLO2(b0, 0)
 				switch(XTRA0) {
-					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  /* fall through */
+					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
 					case 1: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
 				}
 
@@ -441,9 +449,9 @@ protected:
 				HI1 _D1(1) QLO2(b0, 1) RORSC04(b1,7) 	_D2(4)	LO1 RORCLC2(b1) 	_D3(2)
 				HI1 _D1(1) QLO2(b0, 0)
 				switch(XTRA0) {
-					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  /* fall through */
+					case 4: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 3: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
+					case 2: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)  FL_FALLTHROUGH
 					case 1: _D2(0) LO1 _D3(0) HI1 _D1(1) QLO2(b0,0)
 				}
 				MOV_ADDDE04(b0,b1,d0,e0) _D2(4) LO1 _D3(5)

@@ -3,7 +3,6 @@
 FASTLED_NAMESPACE_BEGIN
 
 template<uint8_t PIN, uint32_t MASK> class _ESPPIN {
-
 public:
   typedef volatile uint32_t * port_ptr_t;
   typedef uint32_t port_t;

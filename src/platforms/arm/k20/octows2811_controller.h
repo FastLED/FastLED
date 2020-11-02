@@ -44,11 +44,11 @@ public:
     while(pixels.has(1)) {
       Lines b;
 
-      for(int i = 0; i < 8; i++) { b.bytes[i] = pixels.loadAndScale0(i); }
+      for(int i = 0; i < 8; ++i) { b.bytes[i] = pixels.loadAndScale0(i); }
       transpose8x1_MSB(b.bytes,pData); pData += 8;
-      for(int i = 0; i < 8; i++) { b.bytes[i] = pixels.loadAndScale1(i); }
+      for(int i = 0; i < 8; ++i) { b.bytes[i] = pixels.loadAndScale1(i); }
       transpose8x1_MSB(b.bytes,pData); pData += 8;
-      for(int i = 0; i < 8; i++) { b.bytes[i] = pixels.loadAndScale2(i); }
+      for(int i = 0; i < 8; ++i) { b.bytes[i] = pixels.loadAndScale2(i); }
       transpose8x1_MSB(b.bytes,pData); pData += 8;
       pixels.stepDithering();
       pixels.advanceData();

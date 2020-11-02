@@ -25,9 +25,9 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
   // high register variable
   register const uint8_t *leds = _leds;
 #if (FASTLED_SCALE8_FIXED == 1)
-  pData->s[0]++;
-  pData->s[1]++;
-  pData->s[2]++;
+  ++pData->s[0];
+  ++pData->s[1];
+  ++pData->s[2];
 #endif
   asm __volatile__ (
     ///////////////////////////////////////////////////////////////////////////

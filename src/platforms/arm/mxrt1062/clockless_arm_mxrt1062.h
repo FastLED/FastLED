@@ -35,24 +35,23 @@ public:
 		FastPin<DATA_PIN>::setOutput();
 		mPinMask = FastPin<DATA_PIN>::mask();
 		mPort = FastPin<DATA_PIN>::port();
-    FastPin<DATA_PIN>::lo();
+    	FastPin<DATA_PIN>::lo();
 	}
 
-  virtual uint16_t getMaxRefreshRate() const { return 400; }
+	virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-    mWait.wait();
+    	mWait.wait();
 		if(!showRGBInternal(pixels)) {
-      sei(); delayMicroseconds(WAIT_TIME); cli();
-      showRGBInternal(pixels);
-    }
-    mWait.mark();
-  }
+      		sei(); delayMicroseconds(WAIT_TIME); cli();
+      		showRGBInternal(pixels);
+    	}
+    	mWait.mark();
+  	}
 
 	template<int BITS> __attribute__ ((always_inline)) inline void writeBits(register uint32_t & next_mark, register uint32_t & b)  {
-		for(register uint32_t i = BITS-1; i > 0; i--) {
+		for(register uint32_t i = BITS-1; i > 0; --i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + off[0];
 			FastPin<DATA_PIN>::hi();
@@ -87,12 +86,14 @@ protected:
 		register uint32_t b = pixels.loadAndScale0();
 
 		cli();
-    off[0] = _FASTLED_NS_TO_DWT(T1+T2+T3);
-    off[1] = _FASTLED_NS_TO_DWT(T2+T3);
-		off[2] = _FASTLED_NS_TO_DWT(T3);
-    uint32_t wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD));
 
-    uint32_t next_mark = ARM_DWT_CYCCNT + off[0];
+		off[0] = _FASTLED_NS_TO_DWT(T1+T2+T3);
+		off[1] = _FASTLED_NS_TO_DWT(T2+T3);
+		off[2] = _FASTLED_NS_TO_DWT(T3);
+
+    	uint32_t wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD));
+
+    	uint32_t next_mark = ARM_DWT_CYCCNT + off[0];
 
 		while(pixels.has(1)) {
 			pixels.stepDithering();

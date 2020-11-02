@@ -16,7 +16,7 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(ARDUINO) //&& defined(SoftwareSerial_h)
 
 
-#if defined(SoftwareSerial_h)
+#if defined(SoftwareSerial_h) || defined(__SoftwareSerial_h)
 #include <SoftwareSerial.h>
 
 #define HAS_PIXIE
@@ -28,6 +28,7 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PixieController : public CPixelLEDController<RGB_ORDER> {
 	SoftwareSerial Serial;
 	CMinWait<2000> mWait;
+
 public:
 	PixieController() : Serial(-1, DATA_PIN) {}
 
@@ -92,8 +93,8 @@ class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
 	};
 
 	SPI mSPI;
-public:
 
+public:
 	LPD8806Controller()  {}
 	virtual void init() {
 		mSPI.init();
@@ -123,6 +124,7 @@ class WS2801Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 	CMinWait<1000>  mWaitDelay;
+
 public:
 	WS2801Controller() {}
 
@@ -132,7 +134,6 @@ public:
 	}
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mWaitDelay.wait();
 		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(pixels);
@@ -166,7 +167,6 @@ public:
 	}
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
@@ -232,7 +232,6 @@ public:
 	}
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
@@ -297,7 +296,6 @@ public:
 	}
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
@@ -360,7 +358,6 @@ public:
 	}
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
@@ -418,7 +415,6 @@ public:
 	}
 
 protected:
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
@@ -458,7 +454,7 @@ protected:
 
 // We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
 // need the more tightly defined timeframes.
-#if (CLOCKLESS_FREQUENCY == 8000000 || CLOCKLESS_FREQUENCY == 16000000 || CLOCKLESS_FREQUENCY == 24000000) //  || CLOCKLESS_FREQUENCY == 48000000 || CLOCKLESS_FREQUENCY == 96000000) // 125ns/clock
+#if defined(__LGT8F__) || (CLOCKLESS_FREQUENCY == 8000000 || CLOCKLESS_FREQUENCY == 16000000 || CLOCKLESS_FREQUENCY == 24000000) //  || CLOCKLESS_FREQUENCY == 48000000 || CLOCKLESS_FREQUENCY == 96000000) // 125ns/clock
 #define FMUL (CLOCKLESS_FREQUENCY/8000000)
 
 // GE8822

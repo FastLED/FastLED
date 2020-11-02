@@ -40,7 +40,7 @@ protected:
 		int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
     while((showRGBInternal(pixels)==0) && cnt--) {
       #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-      _retry_cnt++;
+      ++_retry_cnt;
       #endif
       os_intr_unlock();
       delayMicroseconds(WAIT_TIME);
@@ -54,7 +54,7 @@ protected:
 
 	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register uint32_t b)  {
     b <<= 24; b = ~b;
-    for(register uint32_t i = BITS; i > 0; i--) {
+    for(register uint32_t i = BITS; i > 0; --i) {
       while((__clock_cycles() - last_mark) < (T1+T2+T3));
 			last_mark = __clock_cycles();
       FastPin<DATA_PIN>::hi();
@@ -108,7 +108,7 @@ protected:
 
 		os_intr_unlock();
     #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-    _frame_cnt++;
+    ++_frame_cnt;
     #endif
 		return __clock_cycles() - start;
 	}
