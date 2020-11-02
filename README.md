@@ -11,7 +11,7 @@ This is a library for easily & efficiently controlling a wide variety of LED chi
 sold by adafruit (Neopixel, DotStar, LPD8806), Sparkfun (WS2801), and aliexpress.  In addition to writing to the
 leds, this library also includes a number of functions for high-performing 8bit math for manipulating
 your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while
-still keeping things as fast as possible.  Tested with Arduino up to 1.6.5 from arduino.cc.
+still keeping things as fast as possible. Tested with Arduino up to 1.6.5 from arduino.cc.
 
 Quick note for people installing from GitHub repo zips, rename the folder FastLED before copying it to your Arduino/libraries folder.  Github likes putting -branchname into the name of the folder, which unfortunately, makes Arduino cranky!
 
