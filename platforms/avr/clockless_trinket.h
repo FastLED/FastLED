@@ -49,7 +49,11 @@ template<> __attribute__((always_inline)) inline void _dc<-2>(register uint8_t &
 template<> __attribute__((always_inline)) inline void _dc<-1>(register uint8_t & ) {}
 template<> __attribute__((always_inline)) inline void _dc< 0>(register uint8_t & ) {}
 template<> __attribute__((always_inline)) inline void _dc< 1>(register uint8_t & ) {asm __volatile__("mov r0,r0":::);}
+#if defined(__LGT8F__) 
+template<> __attribute__((always_inline)) inline void _dc< 2>(register uint8_t & loopvar) { _dc<1>(loopvar); _dc<1>(loopvar); }
+#else
 template<> __attribute__((always_inline)) inline void _dc< 2>(register uint8_t & ) {asm __volatile__("rjmp .+0":::);}
+#endif
 template<> __attribute__((always_inline)) inline void _dc< 3>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc< 4>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc< 5>(register uint8_t & loopvar) { _dc<2>(loopvar); _dc<3>(loopvar); }
