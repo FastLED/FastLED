@@ -52,7 +52,6 @@ void hsv2rgb_raw(const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
 // hsv2rgb_precise -  convert hsv color to rgb
 //                  more accurate color conversion
 //                  slower than all other hsv2rgb functions
-//                  should result more accurate color conversion
 void hsv2rgb_precise(const CHSV &hsv, CRGB &rgb);
 void hsv2rgb_precise(CHSV *phsv, const CRGB *prgb, int numLeds);
 
@@ -60,7 +59,7 @@ void hsv2rgb_precise(CHSV *phsv, const CRGB *prgb, int numLeds);
 //                  more accurate color conversion
 //                  speed depends on architecture (8 bit vs 32 bit)
 //                  as well as the color that was put in.
-//                  using an arduino nano (8 bit) this is slower than 
+//                  using an arduino nano (8 bit) this is slower than
 //                  rgb2hsv_approximate.
 //                  using an esp32 (32 bit) this function is faster than
 //                  rgb2hsv_approximate.
