@@ -1,4 +1,5 @@
 *.gch
+*~
 /.vscode
 /docs/html
 /docs/latex
