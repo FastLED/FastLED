@@ -156,15 +156,9 @@ public:
         _outlines b0;
         uint32_t start = ARM_DWT_CYCCNT;
 
-<<<<<<< HEAD
-        for(int i = 0; i < m_nActualLanes; i++) {
+        for(int i = 0; i < m_nActualLanes; ++i) {
             b0.bytes[m_bitOffsets[i]] = allpixels.loadAndScale0(i);
         }
-=======
-    for(int i = 0; i < m_nActualLanes; ++i) {
-      b0.bytes[m_bitOffsets[i]] = allpixels.loadAndScale0(i);
-    }
->>>>>>> use prefix notation for ++ and -- where possible
 
         cli();
 
