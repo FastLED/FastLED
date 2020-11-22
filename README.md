@@ -48,7 +48,7 @@ Here's a list of all the LED chipsets are supported.  More details on the led ch
 * TM1803 - 3 wire chipset, sold by radio shack
 * UCS1903 - another 3 wire led chipset, cheap
 * GW6205 - another 3 wire led chipset
-* LPD8806 - SPI based chpiset, very high speed
+* LPD8806 - SPI based chipset, very high speed
 * WS2801 - SPI based chipset, cheap and widely available
 * SM16716 - SPI based chipset
 * APA102 - SPI based chipset
