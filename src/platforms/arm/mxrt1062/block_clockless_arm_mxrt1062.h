@@ -115,39 +115,41 @@ public:
 
 
   template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(register uint32_t & next_mark, register _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) {
-    _outlines b2;
-    transpose8x1(b.bg[3], b2.bg[3]);
-    transpose8x1(b.bg[2], b2.bg[2]);
-    transpose8x1(b.bg[1], b2.bg[1]);
-    transpose8x1(b.bg[0], b2.bg[0]);
+        _outlines b2;
+        transpose8x1(b.bg[3], b2.bg[3]);
+        transpose8x1(b.bg[2], b2.bg[2]);
+        transpose8x1(b.bg[1], b2.bg[1]);
+        transpose8x1(b.bg[0], b2.bg[0]);
 
-    register uint8_t d = pixels.template getd<PX>(pixels);
-    register uint8_t scale = pixels.template getscale<PX>(pixels);
+        register uint8_t d = pixels.template getd<PX>(pixels);
+        register uint8_t scale = pixels.template getscale<PX>(pixels);
 
-    int x = 0;
-    for(uint32_t i = 8; i > 0;) {
-      --i;
-      while(ARM_DWT_CYCCNT < next_mark);
-      *FastPin<FIRST_PIN>::sport() = m_nWriteMask;
-      next_mark = ARM_DWT_CYCCNT + m_offsets[0];
+        int x = 0;
+        for(uint32_t i = 8; i > 0;) {
+            --i;
+            while(ARM_DWT_CYCCNT < next_mark);
+            *FastPin<FIRST_PIN>::sport() = m_nWriteMask;
+            next_mark = ARM_DWT_CYCCNT + m_offsets[0];
 
-      uint32_t out = (b2.bg[3][i] << 24) | (b2.bg[2][i] << 16) | (b2.bg[1][i] << 8) | b2.bg[0][i];
+            uint32_t out = (b2.bg[3][i] << 24) | (b2.bg[2][i] << 16) | (b2.bg[1][i] << 8) | b2.bg[0][i];
 
-      out = ((~out) & m_nWriteMask);
-      while((next_mark - ARM_DWT_CYCCNT) > m_offsets[1]);
-      *FastPin<FIRST_PIN>::cport() = out;
+            out = ((~out) & m_nWriteMask);
+            while((next_mark - ARM_DWT_CYCCNT) > m_offsets[1]);
+            *FastPin<FIRST_PIN>::cport() = out;
 
-      out = m_nWriteMask;
-      while((next_mark - ARM_DWT_CYCCNT) > m_offsets[2]);
-      *FastPin<FIRST_PIN>::cport() = out;
+            out = m_nWriteMask;
+            while((next_mark - ARM_DWT_CYCCNT) > m_offsets[2]);
+            *FastPin<FIRST_PIN>::cport() = out;
 
-      // Read and store up to two bytes
-      if (x < m_nActualLanes) {
-        b.bytes[m_bitOffsets[x]] = pixels.template loadAndScale<PX>(pixels,x,d,scale);
-        ++x;
-        if (x < m_nActualLanes) {
-          b.bytes[m_bitOffsets[x]] = pixels.template loadAndScale<PX>(pixels,x,d,scale);
-          ++x;
+            // Read and store up to two bytes
+            if (x < m_nActualLanes) {
+                b.bytes[m_bitOffsets[x]] = pixels.template loadAndScale<PX>(pixels, x, d, scale);
+                ++x;
+                if (x < m_nActualLanes) {
+                    b.bytes[m_bitOffsets[x]] = pixels.template loadAndScale<PX>(pixels, x, d, scale);
+                    ++x;
+                }
+            }
         }
     }
 
