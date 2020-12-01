@@ -373,7 +373,7 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
         } else {
             // -- No more data; signal to the RMT we are done
             for (uint32_t j = 0; j < 32; j++) {
-                * mRMT_mem_ptr++ = 0;
+                *pItem++ = 0;
             }
         }
     }
