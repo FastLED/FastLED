@@ -252,7 +252,8 @@ void ESP32RMTController::startOnChannel(int channel)
 //    Setting this RMT flag is what actually kicks off the peripheral
 void ESP32RMTController::tx_start()
 {
-    rmt_tx_start(mRMT_channel, true);
+    //rmt_tx_start(mRMT_channel, true);
+    RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
     mLastFill = __clock_cycles();
 }
 
@@ -271,7 +272,9 @@ void ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
     gpio_matrix_out(pController->mPin, 0x100, 0, 0);
 
     // -- Turn off the interrupts
-    rmt_set_tx_intr_en(channel, false);
+    // rmt_set_tx_intr_en(channel, false);
+    RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
+    RMT.int_ena.val |= (enable << (mRMT_channel * 3));
 
     gOnChannel[channel] = NULL;
     gNumDone++;
