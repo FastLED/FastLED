@@ -273,8 +273,8 @@ void ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
 
     // -- Turn off the interrupts
     // rmt_set_tx_intr_en(channel, false);
-    RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
-    RMT.int_ena.val |= (enable << (mRMT_channel * 3));
+    RMT.int_ena.val &= ~(1 << (channel * 3));
+    // Not needed: RMT.int_ena.val |= (false << (mRMT_channel * 3));
 
     gOnChannel[channel] = NULL;
     gNumDone++;
