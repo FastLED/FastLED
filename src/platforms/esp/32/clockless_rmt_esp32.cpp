@@ -252,8 +252,8 @@ void ESP32RMTController::startOnChannel(int channel)
 //    Setting this RMT flag is what actually kicks off the peripheral
 void ESP32RMTController::tx_start()
 {
-    //rmt_tx_start(mRMT_channel, true);
-    RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
+    rmt_tx_start(mRMT_channel, true);
+    //RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
     mLastFill = __clock_cycles();
 }
 
