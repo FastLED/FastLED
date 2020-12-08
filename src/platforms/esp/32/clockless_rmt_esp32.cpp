@@ -341,11 +341,11 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
         if (mLastFill != 0 and now > mLastFill) {
             uint32_t delta = (now - mLastFill);
             if (delta > mMaxCyclesPerFill) {
-                Serial.print(delta);
-                Serial.print(" BAIL ");
-                Serial.println(mCur);
+                // Serial.print(delta);
+                // Serial.print(" BAIL ");
+                // Serial.println(mCur);
                 mCur = mSize;
-                rmt_tx_stop(mRMT_channel);
+                // rmt_tx_stop(mRMT_channel);
             }
         }
     }
