@@ -84,7 +84,7 @@ uint32_t * ESP32RMTController::getPixelBuffer(int size_in_bytes)
 
 // -- Initialize RMT subsystem
 //    This only needs to be done once
-void ESP32RMTController::init()
+void ESP32RMTController::init(gpio_num_t pin)
 {
     if (gInitialized) return;
 
@@ -95,7 +95,7 @@ void ESP32RMTController::init()
         rmt_config_t rmt_tx;
         rmt_tx.channel = rmt_channel_t(i);
         rmt_tx.rmt_mode = RMT_MODE_TX;
-        rmt_tx.gpio_num = gpio_num_t(0);  // The particular pin will be assigned later
+        rmt_tx.gpio_num = pin;  // The particular pin will be assigned later
         rmt_tx.mem_block_num = FASTLED_RMT_MEM_BLOCKS;
         rmt_tx.clk_div = DIVIDER;
         rmt_tx.tx_config.loop_en = false;
@@ -141,7 +141,7 @@ void IRAM_ATTR ESP32RMTController::showPixels()
 {
     if (gNumStarted == 0) {
         // -- First controller: make sure everything is set up
-        ESP32RMTController::init();
+        ESP32RMTController::init(mPin);
 
 #if FASTLED_ESP32_FLASH_LOCK == 1
         // -- Make sure no flash operations happen right now
