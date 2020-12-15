@@ -239,8 +239,9 @@ public:
     uint32_t * getPixelBuffer(int size_in_bytes);
 
     // -- Initialize RMT subsystem
-    //    This only needs to be done once
-    static void init();
+    //    This only needs to be done once. The particular pin is not important,
+    //    because we need to configure the RMT channels on the fly.
+    static void init(gpio_num_t pin);
 
     // -- Show this string of pixels
     //    This is the main entry point for the pixel controller
