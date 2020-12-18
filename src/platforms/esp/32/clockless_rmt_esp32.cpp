@@ -358,6 +358,7 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
                 RMT.conf_ch[mRMT_channel].conf1.tx_start = 0;
                 RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
                 RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
+                mCur = mSize; // Just to make sure
                 return;
             }
         }
