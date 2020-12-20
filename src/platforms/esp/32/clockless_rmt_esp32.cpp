@@ -353,13 +353,15 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
                 // Serial.println(mCur);
                 // rmt_tx_stop(mRMT_channel);
                 // Inline the code for rmt_tx_stop, so it can be placed in IRAM
+                /** -- Go back to the original strategy of just setting mCur = mSize
+                       and letting the regular 'stop' process happen
                 * mRMT_mem_start = 0;
                 RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
                 RMT.conf_ch[mRMT_channel].conf1.tx_start = 0;
                 RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
                 RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
-                mCur = mSize; // Just to make sure
-                return;
+                */
+                mCur = mSize;
             }
         }
     }
@@ -388,10 +390,9 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
                 pixeldata <<= 1;
             }
         } else {
-            // -- No more data; signal to the RMT we are done
-            for (uint32_t j = 0; j < 32; j++) {
-                *pItem++ = 0;
-            }
+            // -- No more data; signal to the RMT we are done by filling the
+            //    rest of the buffer with zeros
+            *pItem++ = 0;
         }
     }
 
