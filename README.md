@@ -4,7 +4,7 @@
 IMPORTANT NOTE: For AVR based systems, avr-gcc 4.8.x is supported and tested.  This means Arduino 1.6.5 and later.
 
 
-FastLED 3.3
+FastLED 3.4
 ===========
 
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
