@@ -403,12 +403,28 @@ void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
     blurColumns(leds, width, height, blur_amount);
 }
 
-// blurRows: perform a blur1d on every row of a rectangular matrix
 void blurRows( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
 {
-    for( uint8_t row = 0; row < height; ++row) {
+/*    for( uint8_t row = 0; row < height; row++) {
         CRGB* rowbase = leds + (row * width);
         blur1d( rowbase, width, blur_amount);
+    }
+*/
+    // blur rows same as columns, for irregular matrix
+    uint8_t keep = 255 - blur_amount;
+    uint8_t seep = blur_amount >> 1;
+    for( uint8_t row = 0; row < height; row++) {
+        CRGB carryover = CRGB::Black;
+        for( uint8_t i = 0; i < width; i++) {
+            CRGB cur = leds[XY(i,row)];
+            CRGB part = cur;
+            part.nscale8( seep);
+            cur.nscale8( keep);
+            cur += carryover;
+            if( i) leds[XY(i-1,row)] += part;
+            leds[XY(i,row)] = cur;
+            carryover = part;
+        }
     }
 }
 
