@@ -1,0 +1,77 @@
+language: c
+
+python:
+    - '3.7'
+
+cache:
+  directories:
+    - ~/arduino_ide
+    - ~/.arduino15/packages/
+
+git:
+  depth: false
+  quiet: true
+
+env:
+  global:
+    - PATH=/opt/python/3.7.1/bin:$PATH
+    - ARDUINO_LIBRARY_NAME="FastLED"
+  jobs:
+    # empty env required, else allow_failures will SILENTY IGNORE matching against env...
+    - 
+
+jobs:
+  # `fast_finish` allows immediate report of success when
+  # required jobs complete, even while jobs under `allow_failures`
+  # to continue building...
+  fast_finish: true
+  include:
+    - name: "gemma"
+      env:  platforms="gemma"
+    - name: "esp32"
+      env:  platforms="esp32"
+    - name: "esp8266"
+      env:  platforms="esp8266"
+    - name: "nrf52840"
+      env:  platforms="nrf52840"
+    - name: "zero"
+      env:  platforms="zero"
+    - name: "m4"
+      env:  platforms="m4"
+    - name: "uno"
+      env:  platforms="uno"
+    - name: "due"
+      env:  platforms="due"
+    - name: "trinket"
+      env:  platforms="trinket"
+    - name: "stm32"
+      env:  platforms="stm32"
+  allow_failures:
+    - name: "stm32"
+      env:  platforms="stm32"
+
+before_script:
+  # export some travis-ci functions that are useful for folding output
+  - export -f travis_nanoseconds
+  - export -f travis_fold
+  - export -f travis_time_start
+  - export -f travis_time_finish
+
+before_install:
+  # Firewall all mDNS / Bonjour traffic -- else Arduino build logs are noisy
+  - sudo iptables --insert INPUT  --jump DROP --protocol udp --dport 5353  -m comment --comment "silently drop all 5353/udp input"
+  - sudo iptables --insert INPUT  --jump DROP --destination 224.0.0.251    -m comment --comment "silently drop all mDNS ipv4 broadcast"
+  ## Example to install other libraries that your project might need
+  #- arduino --install-library "FastLED"
+
+install:
+  # Sourcing of the script runs only once per job...
+  # 
+  - source $TRAVIS_BUILD_DIR/extras/CI/install.sh
+
+script:
+  - build_platform
+
+# Generate and deploy documentation
+# after_success:
+#  - source <(curl -SLs  https://raw.githubusercontent.com/adafruit/travis-ci-arduino/master/doxy_gen_and_deploy.sh)

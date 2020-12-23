@@ -2,7 +2,7 @@
 
 #define kMatrixWidth  16
 #define kMatrixHeight 16
-
+#define PIN_FOR_LEDS   3
 #define NUM_LEDS (kMatrixWidth * kMatrixHeight)
 // Param for different pixel layouts
 #define kMatrixSerpentineLayout  true
@@ -61,7 +61,7 @@ void setup() {
   Serial.println("resetting!");
 
   delay(3000);
-  LEDS.addLeds<WS2811,6,GRB>(leds,NUM_LEDS);
+  LEDS.addLeds<WS2811,PIN_FOR_LEDS,GRB>(leds,NUM_LEDS);
   LEDS.setBrightness(96);
 
   hxy = (uint32_t)((uint32_t)random16() << 16) + (uint32_t)random16();

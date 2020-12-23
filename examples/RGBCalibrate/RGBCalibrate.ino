@@ -23,12 +23,11 @@
 //
 //////////////////////////////////////////////////
 
-#define NUM_LEDS 7
+#define NUM_LEDS 7 
 
 // For led chips like WS2812, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
 // ground, and power), like the LPD8806 define both DATA_PIN and CLOCK_PIN
-// Clock pin only needed for SPI based chipsets when not using hardware SPI
 #define DATA_PIN 3
 #define CLOCK_PIN 13
 
@@ -39,6 +38,7 @@ void setup() {
     delay(2000);
 
     // Uncomment/edit one of the following lines for your leds arrangement.
+
     // ## Clockless types ##
     // FastLED.addLeds<SM16703, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<TM1829, DATA_PIN, RGB>(leds, NUM_LEDS);
@@ -59,7 +59,8 @@ void setup() {
     // FastLED.addLeds<APA106, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<PL9823, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<SK6822, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2811, DATA_PIN, RGB>(leds, NUM_LEDS);
+    // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<WS2813, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<APA104, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<WS2811_400, DATA_PIN, RGB>(leds, NUM_LEDS);

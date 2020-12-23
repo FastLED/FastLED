@@ -1,4 +1,5 @@
 #include <FastLED.h>
+#define LED_PIN     2
 
 //
 // Mark's xy coordinate mapping code.  See the XYMatrix for more information on it.
@@ -69,7 +70,7 @@ void setup() {
   // Serial.begin(38400);
   // Serial.println("resetting!");
   delay(3000);
-  LEDS.addLeds<WS2811,5,RGB>(leds,NUM_LEDS);
+  LEDS.addLeds<WS2811,LED_PIN,RGB>(leds,NUM_LEDS);
   LEDS.setBrightness(96);
 
   // Initialize our coordinates to some random values

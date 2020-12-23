@@ -4,7 +4,11 @@
 
 #include <FastLED.h>
 
+#define NEOPIXEL_FIRST_PIN  2
+#define NEOPIXEL_SECOND_PIN 3
+#define NEOPIXEL_THIRD_PIN  4
 #define NUM_LEDS_PER_STRIP 60
+
 CRGB redLeds[NUM_LEDS_PER_STRIP];
 CRGB greenLeds[NUM_LEDS_PER_STRIP];
 CRGB blueLeds[NUM_LEDS_PER_STRIP];
@@ -13,13 +17,13 @@ CRGB blueLeds[NUM_LEDS_PER_STRIP];
 // just addLeds multiple times, once for each strip
 void setup() {
   // tell FastLED there's 60 NEOPIXEL leds on pin 10
-  FastLED.addLeds<NEOPIXEL, 10>(redLeds, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<NEOPIXEL, NEOPIXEL_FIRST_PIN>(redLeds, NUM_LEDS_PER_STRIP);
 
   // tell FastLED there's 60 NEOPIXEL leds on pin 11
-  FastLED.addLeds<NEOPIXEL, 11>(greenLeds, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<NEOPIXEL, NEOPIXEL_SECOND_PIN>(greenLeds, NUM_LEDS_PER_STRIP);
 
   // tell FastLED there's 60 NEOPIXEL leds on pin 12
-  FastLED.addLeds<NEOPIXEL, 12>(blueLeds, NUM_LEDS_PER_STRIP);
+  FastLED.addLeds<NEOPIXEL, NEOPIXEL_THIRD_PIN>(blueLeds, NUM_LEDS_PER_STRIP);
 
 }
 

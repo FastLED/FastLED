@@ -1,6 +1,6 @@
 #include <FastLED.h>
 
-#define LED_PIN     5
+#define LED_PIN     2
 #define COLOR_ORDER GRB
 #define CHIPSET     WS2811
 #define NUM_LEDS    30
@@ -65,7 +65,7 @@ void setup() {
 void loop()
 {
   // Add entropy to random number generator; we use a lot of it.
-  random16_add_entropy( random());
+  random16_add_entropy( random(0, 0xFFFF) );
 
   // Fourth, the most sophisticated: this one sets up a new palette every
   // time through the loop, based on a hue that changes every time.
