@@ -69,7 +69,7 @@ void setup() {
   // Serial.begin(38400);
   // Serial.println("resetting!");
   delay(3000);
-  LEDS.addLeds<WS2811,5,RGB>(leds,NUM_LEDS);
+  LEDS.addLeds<WS2811,2,RGB>(leds,NUM_LEDS);
   LEDS.setBrightness(96);
 
   // Initialize our coordinates to some random values
