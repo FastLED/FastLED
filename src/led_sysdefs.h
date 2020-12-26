@@ -5,7 +5,9 @@
 
 #include "fastled_config.h"
 
-#if defined(NRF51) || defined(__RFduino__) || defined (__Simblee__)
+#if defined(FASTLED_NO_MCU)
+#include "platforms/no_mcu/led_sysdefs_no_mcu.h"
+#elif defined(NRF51) || defined(__RFduino__) || defined (__Simblee__)
 #include "platforms/arm/nrf51/led_sysdefs_arm_nrf51.h"
 #elif defined(NRF52_SERIES)
 #include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"

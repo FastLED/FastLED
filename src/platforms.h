@@ -5,7 +5,9 @@
 
 #include "fastled_config.h"
 
-#if defined(NRF51)
+#if defined(FASTLED_NO_MCU)
+// nothing to do
+#elif defined(NRF51)
 #include "platforms/arm/nrf51/fastled_arm_nrf51.h"
 #elif defined(NRF52_SERIES)
 #include "platforms/arm/nrf52/fastled_arm_nrf52.h"
