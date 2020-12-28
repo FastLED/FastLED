@@ -1,6 +1,8 @@
 
 #ifdef ESP32
 
+#ifndef FASTLED_ESP32_I2S
+
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
@@ -434,4 +436,6 @@ void ESP32RMTController::convertByte(uint32_t byteval)
     }
 }
 
-#endif
+#endif // ! FASTLED_ESP32_I2S
+
+#endif // ESP32
