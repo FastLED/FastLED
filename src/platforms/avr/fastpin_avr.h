@@ -215,14 +215,11 @@ _FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19,
 _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D); _FL_DEFPIN(22, 2, A);
 
 // To confirm for the SPI interfaces
-//#define SPI_DATA 18
-//#define SPI_CLOCK 13
-//#define SPI_SELECT 19
-//#define AVR_HARDWARE_SPI 1
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPI_SELECT 8
+#define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
-
-//#define SPI_UART0_DATA 1
-//#define SPI_UART0_CLOCK 4
 
 #elif defined(__AVR_ATmega4809__)
 

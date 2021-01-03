@@ -314,6 +314,165 @@ public:
 
 #endif
 
+#if defined(SPI0_CTRLA)
+
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+class AVRHardwareSPIOutput {
+	Selectable *m_pSelect;
+
+public:
+	AVRHardwareSPIOutput() { m_pSelect = NULL; }
+	AVRHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
+	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
+
+	void init() {
+		FastPin<_CLOCK_PIN>::setOutput();
+		FastPin<_DATA_PIN>::setOutput();
+
+		// Arduino Nano Every documentation lists SPI pins in ALT2 portmux position
+		PORTMUX_TWISPIROUTEA = PORTMUX_SPI01_bm;
+
+		// Set SPI master mode and clock scaler.
+		SPI0_CTRLA = SPI_MASTER_bm;
+		if(_SPI_CLOCK_DIVIDER >= 128) { SPI0_CTRLA |= SPI_PRESC1_bm|SPI_PRESC0_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 64) { SPI0_CTRLA |= SPI_PRESC1_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 32) { SPI0_CTRLA |= SPI_PRESC1_bm|SPI_CLK2X_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 16) { SPI0_CTRLA |= SPI_PRESC0_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 8) { SPI0_CTRLA |= SPI_PRESC0_bm|SPI_CLK2X_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 4) { /* default rate */ }
+		else { SPI0_CTRLA |= SPI_CLK2X_bm; }
+
+		// Set mode 0 and disable slave select.
+		SPI0_CTRLB = SPI_SSD_bm;
+
+		// Enable SPI.
+		SPI0_CTRLA |= SPI_ENABLE_bm;
+	}
+
+	void setSPIRate() {
+		SPI0_CTRLA &= ~ ( (1<<SPI_PRESC1_bp)|(1<<SPI_PRESC0_bp)|(1<<SPI_CLK2X_bp) ); // clear pre-scaler and clock multiplier bits
+
+		if(_SPI_CLOCK_DIVIDER >= 128) { SPI0_CTRLA |= SPI_PRESC1_bm|SPI_PRESC0_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 64) { SPI0_CTRLA |= SPI_PRESC1_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 32) { SPI0_CTRLA |= SPI_PRESC1_bm|SPI_CLK2X_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 16) { SPI0_CTRLA |= SPI_PRESC0_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 8) { SPI0_CTRLA |= SPI_PRESC0_bm|SPI_CLK2X_bm; }
+		else if (_SPI_CLOCK_DIVIDER >= 4) { /* default rate */ }
+		else { SPI0_CTRLA |= SPI_CLK2X_bm; }
+	}
+
+	static void stop() {
+		SPI0_CTRLA &= ~(SPI_ENABLE_bm);
+	}
+
+	static bool shouldWait(bool wait = false) __attribute__((always_inline)) {
+		static bool sWait=false;
+		if(sWait) {
+			sWait = wait; return true;
+		} else {
+			sWait = wait; return false;
+		}
+	}
+	static void wait() __attribute__((always_inline)) {
+		if(shouldWait()) {
+			while(!(SPI0_INTFLAGS & SPI_IF_bm));
+		}
+	}
+	static void waitFully() __attribute__((always_inline)) { wait(); }
+
+	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+
+	static void writeByte(uint8_t b) __attribute__((always_inline)) { wait(); SPI0_DATA=b;  shouldWait(true); }
+	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { SPI0_DATA=b; shouldWait(true); wait(); }
+	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { SPI0_DATA=b; shouldWait(true); }
+
+
+	template <uint8_t BIT> inline static void writeBit(uint8_t b) {
+		if(b && (1 << BIT)) {
+			FastPin<_DATA_PIN>::hi();
+		} else {
+			FastPin<_DATA_PIN>::lo();
+		}
+
+		FastPin<_CLOCK_PIN>::hi();
+		FastPin<_CLOCK_PIN>::lo();
+	}
+
+	void enable_pins() { }
+	void disable_pins() { }
+
+	void select() {
+		if(m_pSelect != NULL) {
+			m_pSelect->select();
+		}
+		enable_pins();
+		setSPIRate();
+	}
+
+	void release() {
+		if(m_pSelect != NULL) {
+			m_pSelect->release();
+		}
+		disable_pins();
+	}
+
+	static void writeBytesValueRaw(uint8_t value, int len) {
+		while(len--) {
+			writeByte(value);
+		}
+	}
+
+	void writeBytesValue(uint8_t value, int len) {
+		//setSPIRate();
+		select();
+		while(len--) {
+			writeByte(value);
+		}
+		release();
+	}
+
+	// Write a block of n uint8_ts out
+	template <class D> void writeBytes(register uint8_t *data, int len) {
+		//setSPIRate();
+		uint8_t *end = data + len;
+		select();
+		while(data != end) {
+			// a slight touch of delay here helps optimize the timing of the status register check loop (not used on ARM)
+			writeByte(D::adjust(*data++)); delaycycles<3>();
+		}
+		release();
+	}
+
+	void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+
+	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
+	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
+		//setSPIRate();
+		int len = pixels.mLen;
+
+		select();
+		while(pixels.has(1)) {
+			if(FLAGS & FLAG_START_BIT) {
+				writeBit<0>(1);
+				writeBytePostWait(D::adjust(pixels.loadAndScale0()));
+				writeBytePostWait(D::adjust(pixels.loadAndScale1()));
+				writeBytePostWait(D::adjust(pixels.loadAndScale2()));
+			} else {
+				writeByte(D::adjust(pixels.loadAndScale0()));
+				writeByte(D::adjust(pixels.loadAndScale1()));
+				writeByte(D::adjust(pixels.loadAndScale2()));
+			}
+
+			pixels.advanceData();
+			pixels.stepDithering();
+		}
+		D::postBlock(len);
+		release();
+	}
+};
+
+#endif
 
 #if defined(SPSR)
 
