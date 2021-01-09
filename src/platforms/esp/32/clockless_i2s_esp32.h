@@ -103,7 +103,13 @@ extern "C" {
 #include "driver/gpio.h"
 #include "driver/periph_ctrl.h"
 #include "rom/lldesc.h"
+#include "esp_system.h" // Load ESP_IDF_VERSION_MAJOR if exists
+// ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
+#include "esp_intr_alloc.h"
+#else
 #include "esp_intr.h"
+#endif
 #include "esp_log.h"
     
 #ifdef __cplusplus

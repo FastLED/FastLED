@@ -113,7 +113,12 @@ extern "C" {
 #endif
 
 #include "esp32-hal.h"
+// ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
+#include "esp_intr_alloc.h"
+#else
 #include "esp_intr.h"
+#endif
 #include "driver/gpio.h"
 #include "driver/rmt.h"
 #include "driver/periph_ctrl.h"
