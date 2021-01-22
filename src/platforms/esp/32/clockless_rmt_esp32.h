@@ -188,9 +188,13 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define FASTLED_RMT_MAX_CONTROLLERS 32
 #endif
 
-// -- Max RMT channel (default to 8)
+// -- Max RMT channel (default to 8 on ESP32 and 4 on ESP32-S2)
 #ifndef FASTLED_RMT_MAX_CHANNELS
+#ifdef CONFIG_IDF_TARGET_ESP32S2
+#define FASTLED_RMT_MAX_CHANNELS 4
+#else
 #define FASTLED_RMT_MAX_CHANNELS 8
+#endif
 #endif
 
 class ESP32RMTController
