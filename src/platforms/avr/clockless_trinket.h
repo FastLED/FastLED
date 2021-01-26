@@ -171,7 +171,7 @@ protected:
 	}
 #define USE_ASM_MACROS
 
-#if defined(__AVR_ATmega4809__)
+#if defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__) || defined(__AVR_ATmega4809__)
 #define ASM_VAR_PORT "r" (((PORT_t*)FastPin<DATA_PIN>::port())->OUT)
 #else
 #define ASM_VAR_PORT "M" (FastPin<DATA_PIN>::port() - 0x20)
