@@ -259,11 +259,11 @@ _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D);
 #pragma message "ATtiny2YZ or ATtiny4YZ have very limited storage. This library could use up to more than 100% of its flash size"
 
 #elif defined(__AVR_ATtinyxy4__)
-
+// Fixed error compiling for ATtiny1604/1614
 #define MAX_PIN 12
 _FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
-_FL_DEFPIN( 4, 3, B); _FL_DEFPIN( 5, 2, B); _FL_DEFPIN( 6, 1, B); _FL_DEFPIN( 7, 0, B);
-_FL_DEFPIN( 8, 1, A); _FL_DEFPIN( 8, 2, A); _FL_DEFPIN(10, 3, A); _FL_DEFPIN(11, 0, A);
+_FL_DEFPIN( 4, 3, B); _FL_DEFPIN( 5, 2, B); _FL_DEFPIN( 6, 1, B); _FL_DEFPIN( 7, 0, B); 
+_FL_DEFPIN( 8, 1, A); _FL_DEFPIN( 9, 2, A); _FL_DEFPIN(10, 3, A); _FL_DEFPIN(11, 0, A);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
