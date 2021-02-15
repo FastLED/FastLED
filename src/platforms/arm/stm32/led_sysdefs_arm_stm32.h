@@ -1,7 +1,7 @@
 #ifndef __INC_LED_SYSDEFS_ARM_SAM_H
 #define __INC_LED_SYSDEFS_ARM_SAM_H
 
-#if defined(STM32F10X_MD)
+#if defined(STM32F10X_MD) || defined(STM32F2XX)
 
 #include <application.h>
 
@@ -55,7 +55,16 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 
 #define FASTLED_NO_PINMAP
 
-#ifndef F_CPU
+#if defined(STM32F2XX)
+#define F_CPU 120000000
+#else
 #define F_CPU 72000000
 #endif
+
+#if defined(STM32F2XX)
+// Photon doesn't provide yield
+#define FASTLED_NEEDS_YIELD
+extern "C" void yield();
 #endif
+
+#endif // defined(STM32F10X_MD) || defined(STM32F2XX)

@@ -35,9 +35,14 @@ public:
     inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
     inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
+#if defined(STM32F2XX)
+    inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRRL = _MASK; }
+    inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRRH = _MASK; }
+#else
     inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BRR = _MASK; }
     // inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = (_MASK<<16); }
+#endif
     inline static void set(register port_t val) __attribute__ ((always_inline)) { _GPIO::r()->ODR = val; }
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
@@ -51,24 +56,36 @@ public:
     inline static port_t hival() __attribute__ ((always_inline)) { return _GPIO::r()->ODR | _MASK; }
     inline static port_t loval() __attribute__ ((always_inline)) { return _GPIO::r()->ODR & ~_MASK; }
     inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_GPIO::r()->ODR; }
+
+#if defined(STM32F2XX)
+    inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRRL; }
+    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRRH; }
+#else
     inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRR; }
     inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BRR; }
+#endif
+
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-#if defined(STM32F10X_MD)
+
 #define _R(T) struct __gen_struct_ ## T
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
+
+#if defined(STM32F10X_MD)
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
 #define _FL_IO(L,C) _RD32(GPIO ## L);  _FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
+
 #elif defined(__STM32F1__)
-#define _R(T) struct __gen_struct_ ## T
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline gpio_reg_map* r() { return T->regs; } };
-#define _FL_IO(L,C) _RD32(GPIO ## L); _FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
+#define _FL_IO(L,C) _RD32(GPIO ## L);  _FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
+
+#elif defined(STM32F2XX)
+#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
+#define _FL_IO(L,C) _RD32(GPIO ## L);
 #else
 #error "Platform not supported"
 #endif
-
-#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
 
 #ifdef GPIOA
 _FL_IO(A,0);
@@ -93,7 +110,36 @@ _FL_IO(G,6);
 #endif
 
 // Actual pin definitions
-#if defined(SPARK) // Sparkfun STM32F103 based board
+#if defined(STM32F2XX) // Photon Particle
+
+// https://github.com/focalintent/FastLED-Sparkcore/blob/master/firmware/fastpin_arm_stm32.h
+#define MAX_PIN 20
+_FL_DEFPIN(0, 7, B);
+_FL_DEFPIN(1, 6, B);
+_FL_DEFPIN(2, 5, B);
+_FL_DEFPIN(3, 4, B);
+_FL_DEFPIN(4, 3, B);
+_FL_DEFPIN(5, 15, A);
+_FL_DEFPIN(6, 14, A);
+_FL_DEFPIN(7, 13, A);
+_FL_DEFPIN(10, 5, C);
+_FL_DEFPIN(11, 3, C);
+_FL_DEFPIN(12, 2, C);
+_FL_DEFPIN(13, 5, A);
+_FL_DEFPIN(14, 6, A);
+_FL_DEFPIN(15, 7, A);
+_FL_DEFPIN(16, 4, A);
+_FL_DEFPIN(17, 0, A);
+_FL_DEFPIN(18, 10, A);
+_FL_DEFPIN(19, 9, A);
+_FL_DEFPIN(20, 7, C);
+
+#define SPI_DATA 15
+#define SPI_CLOCK 13
+
+#define HAS_HARDWARE_PIN_SUPPORT
+
+#elif defined(SPARK) // Sparkfun STM32F103 based board
 
 #define MAX_PIN 19
 _FL_DEFPIN(0, 7, B);
@@ -122,9 +168,7 @@ _FL_DEFPIN(19, 2, A);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
-#endif // SPARK
-
-#if defined(__STM32F1__) // Generic STM32F103 aka "Blue Pill"
+#elif defined(__STM32F1__) // Generic STM32F103 aka "Blue Pill"
 
 #define MAX_PIN 46
 
