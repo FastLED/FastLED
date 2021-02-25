@@ -231,11 +231,10 @@ _FL_DEFPIN(12, 1, E); _FL_DEFPIN(13, 2, E); _FL_DEFPIN(14, 3, D); _FL_DEFPIN(15,
 _FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19, 3, A);
 _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D);
 
-// To confirm for the SPI interfaces
-//#define SPI_DATA 18
-//#define SPI_CLOCK 13
-//#define SPI_SELECT 19
-//#define AVR_HARDWARE_SPI 1
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPI_SELECT 8
+#define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
 //#define SPI_UART0_DATA 1
