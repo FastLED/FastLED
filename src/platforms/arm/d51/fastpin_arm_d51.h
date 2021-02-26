@@ -136,12 +136,12 @@ _FL_DEFPIN( 0,  8, 1); _FL_DEFPIN( 1,  9, 1); _FL_DEFPIN( 2,  7, 0); _FL_DEFPIN(
 _FL_DEFPIN( 4,  5, 1); _FL_DEFPIN( 5,  6, 1); _FL_DEFPIN( 6,  4, 0); _FL_DEFPIN( 7,  7, 1);
 _FL_DEFPIN( 8,  6, 0);
 // SDA/SCL
-_FL_DEFPIN(21, 17, 0); _FL_DEFPIN(22, 16, 0);
-// 23..25  MISO/MOSI/SCK
-_FL_DEFPIN(23, 0, 1); _FL_DEFPIN(24, 2, 1); _FL_DEFPIN(25, 3, 1);
+_FL_DEFPIN(12, 17, 0); _FL_DEFPIN(13, 16, 0);
+// match GPIO pin nubers 9..11  MISO/MOSI/SCK
+_FL_DEFPIN(9, 0, 1); _FL_DEFPIN(10, 2, 1); _FL_DEFPIN(11, 3, 1);
 
-#define SPI_DATA 24
-#define SPI_CLOCK 25
+#define SPI_DATA 10
+#define SPI_CLOCK 11
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
