@@ -60,7 +60,7 @@ typedef volatile uint8_t & reg8_t;
 
 #elif defined(__AVR_ATmega4809__)
 
-
+// Leverage VPORTs instead of PORTs for faster access
 #define _FL_IO(L,C) _RD8(VPORT ## L ## _DIR); _RD8(VPORT ## L ## _OUT); _RD8(VPORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(VPORT ## L ## _OUT));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(VPORT ## L ## _OUT), _R(VPORT ## L ## _DIR), _R(VPORT ## L ## _IN)> {};
 
