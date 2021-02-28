@@ -3,8 +3,6 @@
 
 
 #define FASTLED_ARM
-// Note this is an M4, not an M0+, but this enables the shared m0clockless.h
-#define FASTLED_ARM_M0_PLUS
 
 #ifndef INTERRUPT_THRESHOLD
 #define INTERRUPT_THRESHOLD 1
@@ -12,7 +10,7 @@
 
 // Default to allowing interrupts
 #ifndef FASTLED_ALLOW_INTERRUPTS
-#define FASTLED_ALLOW_INTERRUPTS 0
+#define FASTLED_ALLOW_INTERRUPTS 1
 #endif
 
 #if FASTLED_ALLOW_INTERRUPTS == 1
