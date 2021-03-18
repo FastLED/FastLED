@@ -7,6 +7,13 @@ FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_HAS_CLOCKLESS 1
 
+#if defined(STM32F2XX)
+// The photon runs faster than the others
+#define ADJ 8
+#else
+#define ADJ 20
+#endif
+
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
@@ -23,7 +30,7 @@ public:
         mPort = FastPin<DATA_PIN>::port();
     }
 
-  	virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
@@ -39,28 +46,28 @@ protected:
 
     template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  {
         for(register uint32_t i = BITS-1; i > 0; --i) {
-            while(_CYCCNT < (T1+T2+T3-20));
+            while(_CYCCNT < (T1+T2+T3-ADJ));
             FastPin<DATA_PIN>::fastset(port, hi);
             _CYCCNT = 4;
             if(b&0x80) {
-                while(_CYCCNT < (T1+T2-20));
+                while(_CYCCNT < (T1+T2-ADJ));
                 FastPin<DATA_PIN>::fastset(port, lo);
             } else {
-                while(_CYCCNT < (T1-10));
+                while(_CYCCNT < (T1-ADJ/2));
                 FastPin<DATA_PIN>::fastset(port, lo);
             }
             b <<= 1;
         }
 
-        while(_CYCCNT < (T1+T2+T3-20));
+        while(_CYCCNT < (T1+T2+T3-ADJ));
         FastPin<DATA_PIN>::fastset(port, hi);
         _CYCCNT = 4;
 
         if(b&0x80) {
-            while(_CYCCNT < (T1+T2-20));
+            while(_CYCCNT < (T1+T2-ADJ));
             FastPin<DATA_PIN>::fastset(port, lo);
         } else {
-            while(_CYCCNT < (T1-10));
+            while(_CYCCNT < (T1-ADJ/2));
             FastPin<DATA_PIN>::fastset(port, lo);
         }
     }

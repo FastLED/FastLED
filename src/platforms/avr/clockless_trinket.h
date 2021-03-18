@@ -172,7 +172,8 @@ protected:
 #define USE_ASM_MACROS
 
 #if defined(__AVR_ATmega4809__)
-#define ASM_VAR_PORT "r" (((PORT_t*)FastPin<DATA_PIN>::port())->OUT)
+// Not used - place holder so existing ASM_VARS macro can remain the same
+#define ASM_VAR_PORT "r" (*FastPin<DATA_PIN>::port())
 #else
 #define ASM_VAR_PORT "M" (FastPin<DATA_PIN>::port() - 0x20)
 #endif
@@ -204,11 +205,23 @@ protected:
 				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
 				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
 				: "cc" /* clobber registers */
-// Note: the code in the else in HI1/LO1 will be turned into an sts (2 cycle, 2 word) opcode
+
+#if defined(__AVR_ATmega4809__)
+
+// 1 cycle, write hi to the port
+#define HI1 do {*FastPin<DATA_PIN>::port()=hi;} while(0);
+// 1 cycle, write lo to the port
+#define LO1 do {*FastPin<DATA_PIN>::port()=lo;} while(0);
+
+#else
+
+// Note: the code in the else in HI1/LO1 will be turned into an sts (2 cycle, 2 word)
 // 1 cycle, write hi to the port
 #define HI1 FASTLED_SLOW_CLOCK_ADJUST if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
 #define LO1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[lo]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=lo; }
+
+#endif
 
 // 2 cycles, sbrs on flipping the line to lo if we're pushing out a 0
 #define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;

@@ -328,7 +328,11 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 
     for (channel = 0; channel < gMaxChannel; channel++) {
         int tx_done_bit = channel * 3;
+        #ifdef CONFIG_IDF_TARGET_ESP32S2
+        int tx_next_bit = channel + 12;
+        #else
         int tx_next_bit = channel + 24;
+        #endif
 
         ESP32RMTController * pController = gOnChannel[channel];
         if (pController != NULL) {
