@@ -442,19 +442,17 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
         } else {
             //nscale8x3_video( r, g, b, sat);
 #if (FASTLED_SCALE8_FIXED==1)
-            if( r ) r = scale8_LEAVING_R1_DIRTY( r, sat);
-            if( g ) g = scale8_LEAVING_R1_DIRTY( g, sat);
-            if( b ) b = scale8_LEAVING_R1_DIRTY( b, sat);
-#else
-            if( r ) r = scale8_LEAVING_R1_DIRTY( r, sat) + 1;
-            if( g ) g = scale8_LEAVING_R1_DIRTY( g, sat) + 1;
-            if( b ) b = scale8_LEAVING_R1_DIRTY( b, sat) + 1;
-#endif
+            r = scale8_LEAVING_R1_DIRTY( r, sat);
+            g = scale8_LEAVING_R1_DIRTY( g, sat);
+            b = scale8_LEAVING_R1_DIRTY( b, sat);
             cleanup_R1();
-            
+#else
+            if( r ) r = scale8( r, sat) + 1;
+            if( g ) g = scale8( g, sat) + 1;
+            if( b ) b = scale8( b, sat) + 1;
+#endif
             uint8_t desat = 255 - sat;
             desat = scale8( desat, desat);
-            
             uint8_t brightness_floor = desat;
             r += brightness_floor;
             g += brightness_floor;
@@ -471,15 +469,15 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
         } else {
             // nscale8x3_video( r, g, b, val);
 #if (FASTLED_SCALE8_FIXED==1)
-            if( r ) r = scale8_LEAVING_R1_DIRTY( r, val);
-            if( g ) g = scale8_LEAVING_R1_DIRTY( g, val);
-            if( b ) b = scale8_LEAVING_R1_DIRTY( b, val);
-#else
-            if( r ) r = scale8_LEAVING_R1_DIRTY( r, val) + 1;
-            if( g ) g = scale8_LEAVING_R1_DIRTY( g, val) + 1;
-            if( b ) b = scale8_LEAVING_R1_DIRTY( b, val) + 1;
-#endif
+            r = scale8_LEAVING_R1_DIRTY( r, val);
+            g = scale8_LEAVING_R1_DIRTY( g, val);
+            b = scale8_LEAVING_R1_DIRTY( b, val);
             cleanup_R1();
+#else
+            if( r ) r = scale8( r, val) + 1;
+            if( g ) g = scale8( g, val) + 1;
+            if( b ) b = scale8( b, val) + 1;
+#endif
         }
     }
     
