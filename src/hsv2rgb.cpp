@@ -440,19 +440,23 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
         if( sat == 0) {
             r = 255; b = 255; g = 255;
         } else {
+            uint8_t desat = 255 - sat;
+            desat = scale8_video( desat, desat);
+
+            uint8_t satscale = 255 - desat;
+            //satscale = sat; // uncomment to revert to pre-2021 saturation behavior
+
             //nscale8x3_video( r, g, b, sat);
 #if (FASTLED_SCALE8_FIXED==1)
-            r = scale8_LEAVING_R1_DIRTY( r, sat);
-            g = scale8_LEAVING_R1_DIRTY( g, sat);
-            b = scale8_LEAVING_R1_DIRTY( b, sat);
+            r = scale8_LEAVING_R1_DIRTY( r, satscale);
+            g = scale8_LEAVING_R1_DIRTY( g, satscale);
+            b = scale8_LEAVING_R1_DIRTY( b, satscale);
             cleanup_R1();
 #else
-            if( r ) r = scale8( r, sat) + 1;
-            if( g ) g = scale8( g, sat) + 1;
-            if( b ) b = scale8( b, sat) + 1;
+            if( r ) r = scale8( r, satscale) + 1;
+            if( g ) g = scale8( g, satscale) + 1;
+            if( b ) b = scale8( b, satscale) + 1;
 #endif
-            uint8_t desat = 255 - sat;
-            desat = scale8( desat, desat);
             uint8_t brightness_floor = desat;
             r += brightness_floor;
             g += brightness_floor;
