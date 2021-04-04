@@ -5,8 +5,11 @@
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 
+// Params for width and height
 const uint8_t kMatrixWidth  = 16;
 const uint8_t kMatrixHeight = 16;
+
+// Param for different pixel layouts
 const bool    kMatrixSerpentineLayout = true;
 
 

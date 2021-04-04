@@ -5,15 +5,17 @@
 //
 
 // Params for width and height
-const uint16_t kMatrixWidth = 16;
-const uint16_t kMatrixHeight = 16;
+const uint8_t kMatrixWidth = 16;
+const uint8_t kMatrixHeight = 16;
+
 #define MAX_DIMENSION ((kMatrixWidth>kMatrixHeight) ? kMatrixWidth : kMatrixHeight)
 #define NUM_LEDS (kMatrixWidth * kMatrixHeight)
+
 // Param for different pixel layouts
 const bool    kMatrixSerpentineLayout = true;
 
 
-uint16_t XY( uint16_t x, uint16_t y)
+uint16_t XY( uint8_t x, uint8_t y)
 {
   uint16_t i;
 
@@ -24,7 +26,7 @@ uint16_t XY( uint16_t x, uint16_t y)
   if( kMatrixSerpentineLayout == true) {
     if( y & 0x01) {
       // Odd rows run backwards
-      uint16_t reverseX = (kMatrixWidth - 1) - x;
+      uint8_t reverseX = (kMatrixWidth - 1) - x;
       i = (y * kMatrixWidth) + reverseX;
     } else {
       // Even rows run forwards

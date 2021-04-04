@@ -1,9 +1,11 @@
 #include <FastLED.h>
 
-#define kMatrixWidth  16
-#define kMatrixHeight 16
+// Params for width and height
+const uint8_t kMatrixWidth = 16;
+const uint8_t kMatrixHeight = 16;
 
 #define NUM_LEDS (kMatrixWidth * kMatrixHeight)
+
 // Param for different pixel layouts
 #define kMatrixSerpentineLayout  true
 
