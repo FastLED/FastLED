@@ -25,8 +25,8 @@
 
 
 // Params for width and height
-const uint8_t kMatrixWidth = 16;
-const uint8_t kMatrixHeight = 16;
+const uint16_t kMatrixWidth = 16;
+const uint16_t kMatrixHeight = 16;
 
 // Param for different pixel layouts
 const bool    kMatrixSerpentineLayout = true;
@@ -74,8 +74,8 @@ const bool    kMatrixVertical = false;
 //
 // Use the "XY" function like this:
 //
-//    for( uint8_t x = 0; x < kMatrixWidth; x++) {
-//      for( uint8_t y = 0; y < kMatrixHeight; y++) {
+//    for( uint16_t x = 0; x < kMatrixWidth; x++) {
+//      for( uint16_t y = 0; y < kMatrixHeight; y++) {
 //      
 //        // Here's the x, y to 'led index' in action: 
 //        leds[ XY( x, y) ] = CHSV( random8(), 255, 255);
@@ -84,7 +84,7 @@ const bool    kMatrixVertical = false;
 //    }
 //
 //
-uint16_t XY( uint8_t x, uint8_t y)
+uint16_t XY( uint16_t x, uint16_t y)
 {
   uint16_t i;
   
@@ -100,7 +100,7 @@ uint16_t XY( uint8_t x, uint8_t y)
     if (kMatrixVertical == false) {
       if( y & 0x01) {
         // Odd rows run backwards
-        uint8_t reverseX = (kMatrixWidth - 1) - x;
+        uint16_t reverseX = (kMatrixWidth - 1) - x;
         i = (y * kMatrixWidth) + reverseX;
       } else {
         // Even rows run forwards
@@ -165,7 +165,7 @@ uint16_t XY( uint8_t x, uint8_t y)
 CRGB leds_plus_safety_pixel[ NUM_LEDS + 1];
 CRGB* const leds( leds_plus_safety_pixel + 1);
 
-uint16_t XYsafe( uint8_t x, uint8_t y)
+uint16_t XYsafe( uint16_t x, uint16_t y)
 {
   if( x >= kMatrixWidth) return -1;
   if( y >= kMatrixHeight) return -1;
@@ -189,13 +189,13 @@ void loop()
     FastLED.show();
 }
 
-void DrawOneFrame( byte startHue8, int8_t yHueDelta8, int8_t xHueDelta8)
+void DrawOneFrame( uint8_t startHue8, int8_t yHueDelta8, int8_t xHueDelta8)
 {
-  byte lineStartHue = startHue8;
-  for( byte y = 0; y < kMatrixHeight; y++) {
+  uint8_t lineStartHue = startHue8;
+  for( uint16_t y = 0; y < kMatrixHeight; y++) {
     lineStartHue += yHueDelta8;
-    byte pixelHue = lineStartHue;      
-    for( byte x = 0; x < kMatrixWidth; x++) {
+    uint8_t pixelHue = lineStartHue;      
+    for( uint16_t x = 0; x < kMatrixWidth; x++) {
       pixelHue += xHueDelta8;
       leds[ XY(x, y)]  = CHSV( pixelHue, 255, 255);
     }
