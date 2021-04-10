@@ -11,8 +11,8 @@ CRGB leds[NUM_STRIPS * NUM_LEDS_PER_STRIP];
 // OctoWS2811: 2,14,7,8,6,20,21,5
 
 void setup() {
-  LEDS.addLeds<OCTOWS2811>(leds, NUM_LEDS_PER_STRIP);
-  LEDS.setBrightness(32);
+  FastLED.addLeds<OCTOWS2811>(leds, NUM_LEDS_PER_STRIP);
+  FastLED.setBrightness(32);
 }
 
 void loop() {
@@ -32,6 +32,6 @@ void loop() {
 
   hue++;
 
-  LEDS.show();
-  LEDS.delay(10);
+  FastLED.show();
+  FastLED.delay(10);
 }

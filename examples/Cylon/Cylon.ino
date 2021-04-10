@@ -15,8 +15,8 @@ CRGB leds[NUM_LEDS];
 void setup() { 
 	Serial.begin(57600);
 	Serial.println("resetting");
-	LEDS.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS);
-	LEDS.setBrightness(84);
+	FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS);
+	FastLED.setBrightness(84);
 }
 
 void fadeall() { for(int i = 0; i < NUM_LEDS; i++) { leds[i].nscale8(250); } }
