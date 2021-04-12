@@ -86,7 +86,9 @@
 
 #pragma once
 
+#ifndef FASTLED_INTERNAL
 #pragma message "NOTE: ESP32 support using I2S parallel driver. All strips must use the same chipset"
+#endif
 
 FASTLED_NAMESPACE_BEGIN
 
