@@ -113,7 +113,12 @@ extern "C" {
 #endif
 
 #include "esp32-hal.h"
+// ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
+#include "esp_intr_alloc.h"
+#else
 #include "esp_intr.h"
+#endif
 #include "driver/gpio.h"
 #include "driver/rmt.h"
 #include "driver/periph_ctrl.h"
@@ -183,9 +188,13 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define FASTLED_RMT_MAX_CONTROLLERS 32
 #endif
 
-// -- Max RMT channel (default to 8)
+// -- Max RMT channel (default to 8 on ESP32 and 4 on ESP32-S2)
 #ifndef FASTLED_RMT_MAX_CHANNELS
+#ifdef CONFIG_IDF_TARGET_ESP32S2
+#define FASTLED_RMT_MAX_CHANNELS 4
+#else
 #define FASTLED_RMT_MAX_CHANNELS 8
+#endif
 #endif
 
 class ESP32RMTController

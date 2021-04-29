@@ -37,6 +37,7 @@ public:
 	inline static port_t hival() __attribute__ ((always_inline)) { return _PORT::r() | _MASK; }
 	inline static port_t loval() __attribute__ ((always_inline)) { return _PORT::r() & ~_MASK; }
 	inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_PORT::r(); }
+
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
@@ -46,15 +47,25 @@ public:
 /// a custom type for each GPIO register with a single, static, aggressively inlined function that returns that specific GPIO register.  A similar
 /// trick is used a bit further below for the ARM GPIO registers (of which there are far more than on AVR!)
 typedef volatile uint8_t & reg8_t;
+
 #define _R(T) struct __gen_struct_ ## T
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
 
 // Register name equivalent (using flat names)
-#if defined(AVR_ATtinyxy7) || defined(AVR_ATtinyxy6) || defined(AVR_ATtinyxy4) || defined(AVR_ATtinyxy2) || defined(__AVR_ATmega4809__)
+#if defined(AVR_ATtinyxy7) || defined(AVR_ATtinyxy6) || defined(AVR_ATtinyxy4) || defined(AVR_ATtinyxy2)
+
 // ATtiny series 0/1 and ATmega series 0
 #define _FL_IO(L,C) _RD8(PORT ## L ## _DIR); _RD8(PORT ## L ## _OUT); _RD8(PORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(PORT ## L ## _OUT));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L ## _OUT), _R(PORT ## L ## _DIR), _R(PORT ## L ## _IN)> {};
+
+#elif defined(__AVR_ATmega4809__)
+
+// Leverage VPORTs instead of PORTs for faster access
+#define _FL_IO(L,C) _RD8(VPORT ## L ## _DIR); _RD8(VPORT ## L ## _OUT); _RD8(VPORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(VPORT ## L ## _OUT));
+#define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(VPORT ## L ## _OUT), _R(VPORT ## L ## _DIR), _R(VPORT ## L ## _IN)> {};
+
 #else
+
 // Others
 #define _FL_IO(L,C) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L); _FL_DEFINE_PORT3(L, C, _R(PORT ## L));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
@@ -215,14 +226,11 @@ _FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19,
 _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D); _FL_DEFPIN(22, 2, A);
 
 // To confirm for the SPI interfaces
-//#define SPI_DATA 18
-//#define SPI_CLOCK 13
-//#define SPI_SELECT 19
-//#define AVR_HARDWARE_SPI 1
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPI_SELECT 8
+#define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
-
-//#define SPI_UART0_DATA 1
-//#define SPI_UART0_CLOCK 4
 
 #elif defined(__AVR_ATmega4809__)
 
@@ -234,11 +242,10 @@ _FL_DEFPIN(12, 1, E); _FL_DEFPIN(13, 2, E); _FL_DEFPIN(14, 3, D); _FL_DEFPIN(15,
 _FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19, 3, A);
 _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D);
 
-// To confirm for the SPI interfaces
-//#define SPI_DATA 18
-//#define SPI_CLOCK 13
-//#define SPI_SELECT 19
-//#define AVR_HARDWARE_SPI 1
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPI_SELECT 8
+#define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
 //#define SPI_UART0_DATA 1

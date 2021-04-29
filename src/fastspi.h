@@ -127,6 +127,11 @@ class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SP
 
 #endif
 
+#elif defined(ARDUNIO_CORE_SPI)
+
+template<uint32_t SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ArdunioCoreSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, SPI> {};
+
 #endif
 
 #else

@@ -59,7 +59,7 @@ public:
 
 #define _FL_IO(L) _RD32(GPIO ## L)
 
-#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, L> {};
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1ul << BIT, L> {};
 
 // Actual pin definitions
 #if defined(ADAFRUIT_ITSYBITSY_M4_EXPRESS)
@@ -127,6 +127,57 @@ _FL_DEFPIN(23, 22, 1); _FL_DEFPIN(24,  23, 1); _FL_DEFPIN(25,  17, 0);
 #define SPI_CLOCK 25
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(SEEED_WIO_TERMINAL)
+
+#define MAX_PIN 9
+// D0/A0-D8/A8
+_FL_DEFPIN( 0,  8, 1); _FL_DEFPIN( 1,  9, 1); _FL_DEFPIN( 2,  7, 0); _FL_DEFPIN( 3,  4, 1);
+_FL_DEFPIN( 4,  5, 1); _FL_DEFPIN( 5,  6, 1); _FL_DEFPIN( 6,  4, 0); _FL_DEFPIN( 7,  7, 1);
+_FL_DEFPIN( 8,  6, 0);
+// SDA/SCL
+_FL_DEFPIN(12, 17, 0); _FL_DEFPIN(13, 16, 0);
+// match GPIO pin nubers 9..11  MISO/MOSI/SCK
+_FL_DEFPIN(PIN_SPI_MISO, 0, 1); _FL_DEFPIN(PIN_SPI_MOSI, 2, 1); _FL_DEFPIN(PIN_SPI_SCK, 3, 1);
+
+#define SPI_DATA PIN_SPI_MOSI
+#define SPI_CLOCK PIN_SPI_SCK
+
+#define ARDUNIO_CORE_SPI
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ADAFRUIT_MATRIXPORTAL_M4_EXPRESS)
+
+#define MAX_PIN 21
+// 0/1 - SERCOM/UART (Serial1)
+_FL_DEFPIN( 0,  1, 0); _FL_DEFPIN( 1,  0, 0);
+// 2..3 buttons
+_FL_DEFPIN( 2, 22, 1); _FL_DEFPIN( 3, 23, 1);
+// 4 neopixel
+_FL_DEFPIN( 4, 23, 0);
+// SDA/SCL
+_FL_DEFPIN( 5, 31, 1); _FL_DEFPIN( 6, 30, 1);
+// 7..12 RGBRGB pins
+_FL_DEFPIN( 7,  0, 1); _FL_DEFPIN( 8,  1, 1); _FL_DEFPIN( 9,  2, 1); _FL_DEFPIN(10,  3, 1);
+_FL_DEFPIN(11,  4, 1); _FL_DEFPIN(12,  5, 1);
+// 13 LED
+_FL_DEFPIN(13, 14, 0);
+// 14..21  Control pins
+_FL_DEFPIN(14,  6, 1); _FL_DEFPIN(15, 14, 1); _FL_DEFPIN(16, 12, 1); _FL_DEFPIN(17,  7, 1);
+_FL_DEFPIN(18,  8, 1); _FL_DEFPIN(19,  9, 1); _FL_DEFPIN(20, 15, 1); _FL_DEFPIN(21, 13, 1);
+// 22..26 Analog pins
+_FL_DEFPIN(22,  2, 1); _FL_DEFPIN(23,  5, 1); _FL_DEFPIN(24,  4, 1); _FL_DEFPIN(25,  6, 1);
+_FL_DEFPIN(26,  7, 1);
+// 34..36 ESP SPI
+_FL_DEFPIN(34, 16, 0); _FL_DEFPIN(35, 17, 0); _FL_DEFPIN(36, 19, 0); 
+// 48..50 external SPI #2 on sercom 0
+_FL_DEFPIN(48,  5, 0); _FL_DEFPIN(49,  4, 0); _FL_DEFPIN(50,  7, 0); 
+
+#define SPI_DATA 4
+#define SPI_CLOCK 7
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
 #endif
 
 

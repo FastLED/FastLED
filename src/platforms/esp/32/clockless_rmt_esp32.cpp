@@ -1,6 +1,8 @@
 
 #ifdef ESP32
 
+#ifndef FASTLED_ESP32_I2S
+
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
@@ -331,10 +333,13 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
     uint32_t intr_st = RMT.int_st.val;
     uint8_t channel;
 
-    bool stuff_to_do = false;
     for (channel = 0; channel < gMaxChannel; channel++) {
         int tx_done_bit = channel * 3;
+        #ifdef CONFIG_IDF_TARGET_ESP32S2
+        int tx_next_bit = channel + 12;
+        #else
         int tx_next_bit = channel + 24;
+        #endif
 
         ESP32RMTController * pController = gOnChannel[channel];
         if (pController != NULL) {
@@ -450,4 +455,6 @@ void ESP32RMTController::convertByte(uint32_t byteval)
     }
 }
 
-#endif
+#endif // ! FASTLED_ESP32_I2S
+
+#endif // ESP32

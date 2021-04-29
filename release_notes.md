@@ -1,3 +1,18 @@
+FastLED 3.4.0
+=============
+
+* Improved reliability on ESP32 when wifi is active
+* Merged in contributed support for Adafruit boards: QT Py SAMD21, Circuit Playground Express,  Circuit Playground Bluefruit, and ItsyBitsy nRF52840 Express
+* Merged in contributed support for SparkFun Artemis boards
+* Merged in contributed support for Arduino Nano Every / Arduino Uno Wifi Rev. 2
+* Merged in contributed support for Seeedstudio Odyssey and XIAO boards
+* Merged in contributed support for AVR chips ATmega1284, ATmega4809, and LGT8F328
+* XYMatrix example now supports 90-degree rotated orientation
+* Moved source code files into "src" subdirectory
+* Many small code cleanups and bug fixes
+* Released December 2020, with many thanks to everyone contributing to FastLED!
+
+
 FastLED 3.3.3
 =============
 

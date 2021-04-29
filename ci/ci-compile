@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# compile FastLED examples with platformio for various boards. This script
+# is usually run by the CI, but can also be run locally. Only dependency
+# is platformio.
+#
+# usage:
+#   [BOARDS=boards] [EXAMPLES=examples] ./ci-compile
+#
+# e.g.
+#  $ ./compile-ci   
+#         - compile all board/examples combinations
+#
+#  $ BOARDS="esp32 esp01" EXAMPLES=Blink ./compile-ci 
+#         - compile only Blink example for the esp32 and esp8266 platforms
+#                                              
+set -eou pipefail
+
+# List of examples that will be compiled by default
+EXAMPLES=${EXAMPLES:-"Blink ColorPalette ColorTemperature Cylon DemoReel100
+    Fire2012  FirstLight  Multiple/MultipleStripsInOneArray
+    Multiple/ArrayOfLedArrays Noise NoisePlayground NoisePlusPalette Pacifica
+    Pride2015 RGBCalibrate RGBSetDemo TwinkleFox XYMatrix"}
+
+# list of boards to compile for by default
+BOARDS=${BOARDS:-"uno esp32dev esp01 yun digix teensy30"}
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+BOARD_OPTS=$(for b in $BOARDS; do echo -n "--board $b "; done)
+
+cd "$DIR/.."
+
+for d in $EXAMPLES ; do 
+  echo "*** building example $d for $BOARDS ***"
+  pio ci $BOARD_OPTS --lib=src "examples/$d/"*ino
+done

@@ -1,9 +1,11 @@
 #include <FastLED.h>
 
-#define kMatrixWidth  16
-#define kMatrixHeight 16
+// Params for width and height
+const uint8_t kMatrixWidth = 16;
+const uint8_t kMatrixHeight = 16;
 
 #define NUM_LEDS (kMatrixWidth * kMatrixHeight)
+
 // Param for different pixel layouts
 #define kMatrixSerpentineLayout  true
 
@@ -37,11 +39,11 @@ int y_speed=1111;
 
 void loop() {
   // fill the led array 2/16-bit noise values
-  fill_2dnoise16(LEDS.leds(), kMatrixWidth, kMatrixHeight, kMatrixSerpentineLayout,
+  fill_2dnoise16(leds, kMatrixWidth, kMatrixHeight, kMatrixSerpentineLayout,
                 octaves,x,xscale,y,yscale,v_time,
                 hue_octaves,hxy,hue_scale,hxy,hue_scale,hue_time, false);
 
-  LEDS.show();
+  FastLED.show();
 
   // adjust the intra-frame time values
   x += x_speed;
@@ -61,8 +63,8 @@ void setup() {
   Serial.println("resetting!");
 
   delay(3000);
-  LEDS.addLeds<WS2811,6,GRB>(leds,NUM_LEDS);
-  LEDS.setBrightness(96);
+  FastLED.addLeds<WS2811,2,GRB>(leds,NUM_LEDS);
+  FastLED.setBrightness(96);
 
   hxy = (uint32_t)((uint32_t)random16() << 16) + (uint32_t)random16();
   x = (uint32_t)((uint32_t)random16() << 16) + (uint32_t)random16();

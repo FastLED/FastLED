@@ -7,8 +7,10 @@
 // Params for width and height
 const uint8_t kMatrixWidth = 16;
 const uint8_t kMatrixHeight = 16;
+
 #define MAX_DIMENSION ((kMatrixWidth>kMatrixHeight) ? kMatrixWidth : kMatrixHeight)
 #define NUM_LEDS (kMatrixWidth * kMatrixHeight)
+
 // Param for different pixel layouts
 const bool    kMatrixSerpentineLayout = true;
 
@@ -62,15 +64,15 @@ uint16_t speed = 20; // a nice starting speed, mixes well with a scale of 100
 uint16_t scale = 311;
 
 // This is the array that we keep our computed noise values in
-uint8_t noise[MAX_DIMENSION][MAX_DIMENSION];
+uint16_t noise[MAX_DIMENSION][MAX_DIMENSION];
 
 void setup() {
   // uncomment the following lines if you want to see FPS count information
   // Serial.begin(38400);
   // Serial.println("resetting!");
   delay(3000);
-  LEDS.addLeds<WS2811,5,RGB>(leds,NUM_LEDS);
-  LEDS.setBrightness(96);
+  FastLED.addLeds<WS2811,2,RGB>(leds,NUM_LEDS);
+  FastLED.setBrightness(96);
 
   // Initialize our coordinates to some random values
   x = random16();
@@ -107,6 +109,6 @@ void loop() {
   }
   ihue+=1;
 
-  LEDS.show();
+  FastLED.show();
   // delay(10);
 }

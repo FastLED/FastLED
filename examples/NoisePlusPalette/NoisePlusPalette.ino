@@ -5,8 +5,11 @@
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
 
+// Params for width and height
 const uint8_t kMatrixWidth  = 16;
 const uint8_t kMatrixHeight = 16;
+
+// Param for different pixel layouts
 const bool    kMatrixSerpentineLayout = true;
 
 
@@ -67,8 +70,8 @@ uint8_t       colorLoop = 1;
 
 void setup() {
   delay(3000);
-  LEDS.addLeds<LED_TYPE,LED_PIN,COLOR_ORDER>(leds,NUM_LEDS);
-  LEDS.setBrightness(BRIGHTNESS);
+  FastLED.addLeds<LED_TYPE,LED_PIN,COLOR_ORDER>(leds,NUM_LEDS);
+  FastLED.setBrightness(BRIGHTNESS);
 
   // Initialize our coordinates to some random values
   x = random16();
@@ -163,7 +166,7 @@ void loop() {
   // using the current palette
   mapNoiseToLEDsUsingPalette();
 
-  LEDS.show();
+  FastLED.show();
   // delay(10);
 }
 
