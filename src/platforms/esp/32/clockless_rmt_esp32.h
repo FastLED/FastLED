@@ -221,6 +221,7 @@ private:
     uint8_t *      mPixelData;
     int            mSize;
     int            mCur;
+    int            mBufSize;
 
     // -- RMT memory
     volatile uint32_t * mRMT_mem_ptr;
