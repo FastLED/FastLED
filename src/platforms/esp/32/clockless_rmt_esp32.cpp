@@ -84,10 +84,17 @@ ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int
 //    the PixelController object until show is called.
 uint8_t * ESP32RMTController::getPixelBuffer(int size_in_bytes)
 {
+    // -- Free the old buffer if it will be too small
+    if (mPixelData != 0 and mSize < size_in_bytes) {
+        free(mPixelData);
+        mPixelData = 0;
+    }
+
     if (mPixelData == 0) {
         mSize = size_in_bytes;
         mPixelData = (uint8_t *) malloc(mSize);
     }
+
     return mPixelData;
 }
 
