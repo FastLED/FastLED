@@ -353,6 +353,14 @@ struct CRGB {
     }
 
     /// return a CRGB object that is a scaled down version of this object
+    inline CRGB scale8 (uint8_t scaledown ) const
+    {
+        CRGB out = *this;
+        nscale8x3( out.r, out.g, out.b, scaledown);
+        return out;
+    }
+
+    /// return a CRGB object that is a scaled down version of this object
     inline CRGB scale8 (const CRGB & scaledown ) const
     {
         CRGB out;
