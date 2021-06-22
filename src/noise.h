@@ -52,6 +52,17 @@ extern int8_t inoise8_raw(uint16_t x, uint16_t y);
 extern int8_t inoise8_raw(uint16_t x);
 ///@}
 
+/// @name 32 bit simplex noise functions
+///@{
+/// 32 bit, fixed point implementation of simplex noise functions.
+/// The inputs are 19.12 fixed-point value. The result covers the full
+/// range of an int16_t so is a 0.15 fixed-point value.
+int16_t snoise16(int32_t x);
+int16_t snoise16(int32_t x, int32_t y);
+int16_t snoise16(int32_t x, int32_t y, int32_t z);
+int16_t snoise16(int32_t x, int32_t y, int32_t z, int32_t w);
+///@}
+
 ///@name raw fill functions
 ///@{
 /// Raw noise fill functions - fill into a 1d or 2d array of 8-bit values using either 8-bit noise or 16-bit noise
