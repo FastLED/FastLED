@@ -28,7 +28,7 @@ public:
 	virtual int size() { return CLEDController::size() * LANES; }
 
 	virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) {
-		// mWait.wait();
+		mWait.wait();
 		/*uint32_t clocks = */
 		int cnt=FASTLED_INTERRUPT_RETRY_COUNT;
 		while(!showRGBInternal(pixels) && cnt--) {
@@ -45,7 +45,7 @@ public:
 		// MS_COUNTER += (1 + (microsTaken / 1000));
 		// #endif
 
-		// mWait.mark();
+		mWait.mark();
 	}
 
 	template<int PIN> static void initPin() {

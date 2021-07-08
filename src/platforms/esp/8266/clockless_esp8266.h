@@ -36,7 +36,7 @@ public:
 protected:
 
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-    // mWait.wait();
+    mWait.wait();
 		int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
     while((showRGBInternal(pixels)==0) && cnt--) {
       #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
@@ -46,13 +46,13 @@ protected:
       delayMicroseconds(WAIT_TIME);
       os_intr_lock();
     }
-    // mWait.mark();
+    mWait.mark();
   }
 
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
 
-	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register uint32_t b)  {
+	template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(register uint32_t & last_mark, register uint32_t b)  {
     b <<= 24; b = ~b;
     for(register uint32_t i = BITS; i > 0; --i) {
       while((__clock_cycles() - last_mark) < (T1+T2+T3));
@@ -65,7 +65,17 @@ protected:
 
       while((__clock_cycles() - last_mark) < (T1+T2));
       FastPin<DATA_PIN>::lo();
+
+			// even with interrupts disabled, the NMI interupt seems to cause
+			// timing issues here. abort the frame if one bit took to long. if the
+			// last of the 24 bits has been sent already, it is too late
+			// this fixes the flickering first pixel that started to occur with
+			// framework version 3.0.0
+			if ((__clock_cycles() - last_mark) >= (T1 + T2 + T3 - 5)) {
+				return true;
+			}
 		}
+		return false;
 	}
 
 	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
@@ -75,38 +85,56 @@ protected:
 		pixels.preStepFirstByteDithering();
 		register uint32_t b = pixels.loadAndScale0();
     pixels.preStepFirstByteDithering();
-		os_intr_lock();
-    uint32_t start = __clock_cycles();
-		uint32_t last_mark = start;
-		while(pixels.has(1)) {
-			// Write first byte, read next byte
-			writeBits<8+XTRA0>(last_mark, b);
-			b = pixels.loadAndScale1();
+		uint32_t start;
+		{
+			struct Lock {
+				Lock() {
+					os_intr_lock();
+				}
+				~Lock() {
+					os_intr_unlock();
+				}
+			};
 
-			// Write second byte, read 3rd byte
-			writeBits<8+XTRA0>(last_mark, b);
-			b = pixels.loadAndScale2();
+			start = __clock_cycles();
+			uint32_t last_mark = start;
+			while(pixels.has(1)) {
+				// Write first byte, read next byte
+				if (writeBits<8+XTRA0>(last_mark, b)) {
+					return 0;
+				}
+				b = pixels.loadAndScale1();
 
-			// Write third byte, read 1st byte of next pixel
-			writeBits<8+XTRA0>(last_mark, b);
-      b = pixels.advanceAndLoadAndScale0();
+				// Write second byte, read 3rd byte
+				if (writeBits<8+XTRA0>(last_mark, b)) {
+					return 0;
+				}
+				b = pixels.loadAndScale2();
 
-			#if (FASTLED_ALLOW_INTERRUPTS == 1)
-			os_intr_unlock();
-			#endif
+				// Write third byte, read 1st byte of next pixel
+				if (writeBits<8+XTRA0>(last_mark, b)) {
+					return 0;
+				}
 
-      pixels.stepDithering();
+				#if (FASTLED_ALLOW_INTERRUPTS == 1)
+				os_intr_unlock();
+				#endif
 
-			#if (FASTLED_ALLOW_INTERRUPTS == 1)
-			os_intr_lock();
-			// if interrupts took longer than 45µs, punt on the current frame
-			if((int32_t)(__clock_cycles()-last_mark) > 0) {
-				if((int32_t)(__clock_cycles()-last_mark) > (T1+T2+T3+((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US))) { sei(); return 0; }
-			}
-			#endif
-		};
+				b = pixels.advanceAndLoadAndScale0();
+				pixels.stepDithering();
 
-		os_intr_unlock();
+				#if (FASTLED_ALLOW_INTERRUPTS == 1)
+				os_intr_lock();
+				// if interrupts took longer than 45µs, punt on the current frame
+				if((int32_t)(__clock_cycles()-last_mark) > 0) {
+					if((int32_t)(__clock_cycles()-last_mark) > (T1+T2+T3+((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US))) {
+						return 0;
+					}
+				}
+				#endif
+			};
+		}
+
     #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
     ++_frame_cnt;
     #endif
