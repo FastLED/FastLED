@@ -72,6 +72,9 @@ protected:
 			// this fixes the flickering first pixel that started to occur with
 			// framework version 3.0.0
 			if ((__clock_cycles() - last_mark) >= (T1 + T2 + T3 - 5)) {
+				os_intr_unlock();
+				delayMicroseconds(WAIT_TIME);
+				os_intr_lock();
 				return true;
 			}
 		}
