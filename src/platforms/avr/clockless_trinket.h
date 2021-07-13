@@ -406,31 +406,31 @@ protected:
 				// Inline scaling - RGB ordering
 				// DNOP
 				
-				cli(); HI1 _D1(1) QLO2(b0, 7) LDSCL4(b1,O1) 	_D2(4)	LO1	sei();	PRESCALEA2(d1)	_D3(2) 
-				cli(); HI1 _D1(1) QLO2(b0, 6) PRESCALEB4(d1)	_D2(4)	LO1	sei();	SCALE12(b1,0)	_D3(2) 
-				cli(); HI1 _D1(1) QLO2(b0, 5) RORSC14(b1,1) 	_D2(4)	LO1 sei();	RORCLC2(b1)		_D3(2) 
-				cli(); HI1 _D1(1) QLO2(b0, 4) SCROR14(b1,2)		_D2(4)	LO1 sei();	SCALE12(b1,3)	_D3(2) 
-				cli(); HI1 _D1(1) QLO2(b0, 3) RORSC14(b1,4) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(2) 
-				cli(); HI1 _D1(1) QLO2(b0, 2) SCROR14(b1,5) 	_D2(4)	LO1 sei();	SCALE12(b1,6)	_D3(2) 
-				cli(); HI1 _D1(1) QLO2(b0, 1) RORSC14(b1,7) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(2) 
-				cli(); HI1 _D1(1) QLO2(b0, 0)
+				cli(); HI1 _D1(2) QLO2(b0, 7) LDSCL4(b1,O1) 	_D2(4)	LO1	sei();	PRESCALEA2(d1)	_D3(3) 
+				cli(); HI1 _D1(2) QLO2(b0, 6) PRESCALEB4(d1)	_D2(4)	LO1	sei();	SCALE12(b1,0)	_D3(3) 
+				cli(); HI1 _D1(2) QLO2(b0, 5) RORSC14(b1,1) 	_D2(4)	LO1 sei();	RORCLC2(b1)		_D3(3) 
+				cli(); HI1 _D1(2) QLO2(b0, 4) SCROR14(b1,2)		_D2(4)	LO1 sei();	SCALE12(b1,3)	_D3(3) 
+				cli(); HI1 _D1(2) QLO2(b0, 3) RORSC14(b1,4) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(3) 
+				cli(); HI1 _D1(2) QLO2(b0, 2) SCROR14(b1,5) 	_D2(4)	LO1 sei();	SCALE12(b1,6)	_D3(3) 
+				cli(); HI1 _D1(2) QLO2(b0, 1) RORSC14(b1,7) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(3) 
+				cli(); HI1 _D1(2) QLO2(b0, 0)
 				switch(XTRA0) {
 					case 4: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
 					case 3: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
 					case 2: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
 					case 1: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)
 				}
-				MOV_ADDDE14(b0,b1,d1,e1) _D2(4) LO1 sei(); _D3(0) 
+				MOV_ADDDE14(b0,b1,d1,e1) _D2(4) LO1 sei(); _D3(2) 
 				
 
-				cli(); HI1 _D1(1) QLO2(b0, 7) LDSCL4(b1,O2) 	_D2(4)	LO1	sei();	PRESCALEA2(d2)	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 6) PSBIDATA4(d2)		_D2(4)	LO1	sei();	SCALE22(b1,0)	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 5) RORSC24(b1,1) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 4) SCROR24(b1,2)		_D2(4)	LO1 sei();	SCALE22(b1,3)	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 3) RORSC24(b1,4) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 2) SCROR24(b1,5) 	_D2(4)	LO1 sei();	SCALE22(b1,6)	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 1) RORSC24(b1,7) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 0)
+				cli(); HI1 _D1(2) QLO2(b0, 7) LDSCL4(b1,O2) 	_D2(4)	LO1	sei();	PRESCALEA2(d2)	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 6) PSBIDATA4(d2)		_D2(4)	LO1	sei();	SCALE22(b1,0)	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 5) RORSC24(b1,1) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 4) SCROR24(b1,2)		_D2(4)	LO1 sei();	SCALE22(b1,3)	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 3) RORSC24(b1,4) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 2) SCROR24(b1,5) 	_D2(4)	LO1 sei();	SCALE22(b1,6)	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 1) RORSC24(b1,7) 	_D2(4)	LO1 sei();	RORCLC2(b1) 	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 0)
 				switch(XTRA0) {
 					case 4: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
 					case 3: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
@@ -441,22 +441,22 @@ protected:
 				// Because Prescale on the middle byte also increments the data counter,
 				// we have to do both halves of updating d2 here - negating it (in the
 				// MOV_NEGD24 macro) and then adding E back into it
-				MOV_NEGD24(b0,b1,d2) _D2(4) LO1 sei(); ADDDE1(d2,e2) _D3(1)
-				cli(); HI1 _D1(1) QLO2(b0, 7) LDSCL4(b1,O0) 	_D2(4)	LO1 sei();	PRESCALEA2(d0)	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 6) PRESCALEB4(d0)	_D2(4)	LO1 sei();	SCALE02(b1,0)	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 5) RORSC04(b1,1) 	_D2(4)	LO1 sei(); RORCLC2(b1) 	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 4) SCROR04(b1,2)		_D2(4)	LO1 sei(); SCALE02(b1,3)	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 3) RORSC04(b1,4) 	_D2(4)	LO1 sei(); RORCLC2(b1)  	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 2) SCROR04(b1,5) 	_D2(4)	LO1 sei(); SCALE02(b1,6)	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 1) RORSC04(b1,7) 	_D2(4)	LO1 sei(); RORCLC2(b1) 	_D3(2)
-				cli(); HI1 _D1(1) QLO2(b0, 0)
+				MOV_NEGD24(b0,b1,d2) _D2(4) LO1 sei(); ADDDE1(d2,e2) _D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 7) LDSCL4(b1,O0) 	_D2(4)	LO1 sei();	PRESCALEA2(d0)	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 6) PRESCALEB4(d0)	_D2(4)	LO1 sei();	SCALE02(b1,0)	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 5) RORSC04(b1,1) 	_D2(4)	LO1 sei(); RORCLC2(b1) 	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 4) SCROR04(b1,2)		_D2(4)	LO1 sei(); SCALE02(b1,3)	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 3) RORSC04(b1,4) 	_D2(4)	LO1 sei(); RORCLC2(b1)  	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 2) SCROR04(b1,5) 	_D2(4)	LO1 sei(); SCALE02(b1,6)	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 1) RORSC04(b1,7) 	_D2(4)	LO1 sei(); RORCLC2(b1) 	_D3(3)
+				cli(); HI1 _D1(2) QLO2(b0, 0)
 				switch(XTRA0) {
 					case 4: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
 					case 3: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
 					case 2: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
 					case 1: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)
 				}
-				MOV_ADDDE04(b0,b1,d0,e0) _D2(4) LO1 sei(); _D3(5)
+				MOV_ADDDE04(b0,b1,d0,e0) _D2(4) LO1 sei(); _D3(2)
 				ENDLOOP5
 			}
 			DONE;
