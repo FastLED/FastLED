@@ -59,6 +59,7 @@ protected:
 	///@param nLeds the number of leds being written out
 	///@param scale the rgb scaling to apply to each led before writing it out
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
+    virtual void show2(const struct CRGB *data, int nLeds, CRGB scale, const struct CRGB *data2, int nLeds2, CRGB scale2) = 0;
 
 public:
 	/// create an led controller object, add it to the chain of controllers
@@ -78,6 +79,11 @@ public:
     /// show function w/integer brightness, will scale for color correction and temperature
     void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
         show(data, nLeds, getAdjustment(brightness));
+    }
+
+    /// show function w/integer brightness, will scale for color correction and temperature
+    void show2(const struct CRGB *data, int nLeds, uint8_t brightness, const struct CRGB *data2, int nLeds2, uint8_t brightness2) {
+        show2(data, nLeds, getAdjustment(brightness), data2, nLeds2, getAdjustment(brightness2));
     }
 
     /// show function w/integer brightness, will scale for color correction and temperature
@@ -406,6 +412,13 @@ protected:
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
         PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
         showPixels(pixels);
+    }
+
+    virtual void show2(const struct CRGB *data, int nLeds, CRGB scale, const struct CRGB *data2, int nLeds2, CRGB scale2) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+        showPixels(pixels);
+        PixelController<RGB_ORDER, LANES, MASK> pixels2(data2, nLeds2, scale2, getDither());
+        showPixels(pixels2);
     }
 
 public:
