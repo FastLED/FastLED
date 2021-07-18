@@ -17,6 +17,7 @@ class FlexibleInlineBlockClocklessController : public CPixelLEDController<RGB_OR
     uint32_t m_nWriteMask;
     uint8_t m_nOutBlocks;
     uint32_t m_offsets[3];
+    uint32_t MS_COUNTER;
     CMinWait<WAIT_TIME> mWait;
 
 public:
@@ -40,6 +41,7 @@ public:
         m_nLowBit = 33;
         m_nHighBit = 0;
         m_nWriteMask = 0;
+	MS_COUNTER = 0;
 
         // setup the bits and data tracking for parallel output
         switch(FIRST_PIN) {
