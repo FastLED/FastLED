@@ -41,7 +41,7 @@ How quickly can you get up and running with the library?  Here's a simple blink 
 
 ## Supported LED chipsets
 
-Here's a list of all the LED chipsets are supported.  More details on the led chipsets are included *TODO: Link to wiki page*
+Here's a list of all the LED chipsets are supported.  More details on the led chipsets are included [on our wiki page](https://github.com/FastLED/FastLED/wiki/Chipset-reference)
 
 * Adafruit's DotStars - AKA the APA102
 * Adafruit's Neopixel - aka the WS2812B (also WS2811/WS2812/WS2813, also supported in lo-speed mode) - a 3 wire addressable led chipset
