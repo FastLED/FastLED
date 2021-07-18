@@ -420,7 +420,7 @@ struct CRGB {
     }
 
     /// invert each channel
-    inline CRGB operator- ()
+    inline CRGB operator- () const
     {
         CRGB retval;
         retval.r = 255 - r;
