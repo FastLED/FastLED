@@ -15,7 +15,7 @@ const bool    kMatrixSerpentineLayout = true;
 
 // This example combines two features of FastLED to produce a remarkable range of
 // effects from a relatively small amount of code.  This example combines FastLED's 
-// color palette lookup functions with FastLED's Perlin/simplex noise generator, and
+// color palette lookup functions with FastLED's Perlin noise generator, and
 // the combination is extremely powerful.
 //
 // You might want to look at the "ColorPalette" and "Noise" examples separately
