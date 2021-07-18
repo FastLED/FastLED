@@ -148,7 +148,7 @@ public:
     }
 
     static CRGB computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const CRGB & colorTemperature) {
-      #if defined(NO_CORRECTION) && (NO_CORRECTION==1)
+      #if defined(NO_COLOR_CORRECTION) && (NO_COLOR_CORRECTION==1)
               return CRGB(scale,scale,scale);
       #else
               CRGB adj(0,0,0);
