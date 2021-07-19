@@ -8,6 +8,8 @@
 
 #include "fastspi_bitbang.h"
 
+#include "fastspi_esp8266.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
@@ -38,6 +40,11 @@ template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
+
+#if defined(ESP8266_SPI)
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+class SPIOutput : public ESP8266SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+#endif
 
 #if defined(NRF51) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
