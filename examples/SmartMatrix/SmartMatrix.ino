@@ -63,8 +63,8 @@ void setup() {
   // Serial.begin(38400);
   // Serial.println("resetting!");
   delay(3000);
-  LEDS.addLeds<SMART_MATRIX>(leds,NUM_LEDS);
-  LEDS.setBrightness(96);
+  FastLED.addLeds<SMART_MATRIX>(leds,NUM_LEDS);
+  FastLED.setBrightness(96);
 
   // Initialize our coordinates to some random values
   x = random16();
@@ -116,6 +116,6 @@ void loop() {
   pSmartMatrix->fillCircle(circlex % 32,circley % 32,6,CRGB(CHSV(ihue+128,255,255)));
   circlex += random16(2);
   circley += random16(2);
-  LEDS.show();
+  FastLED.show();
   // delay(10);
 }

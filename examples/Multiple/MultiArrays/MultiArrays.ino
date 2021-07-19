@@ -33,7 +33,7 @@ void loop() {
     // clear our current dot before we move on
     redLeds[i] = CRGB::Black;
     greenLeds[i] = CRGB::Black;
-    blueLeds[i] = CRGB::Blue;
+    blueLeds[i] = CRGB::Black;
     delay(100);
   }
 
@@ -46,7 +46,7 @@ void loop() {
     // clear our current dot before we move on
     redLeds[i] = CRGB::Black;
     greenLeds[i] = CRGB::Black;
-    blueLeds[i] = CRGB::Blue;
+    blueLeds[i] = CRGB::Black;
     delay(100);
   }
 }

@@ -1,6 +1,7 @@
-=New platform porting guide=
+New platform porting guide
+==========================
 
-== Fast porting for a new board on existing hardware ==
+# Fast porting for a new board on existing hardware
 
 Sometimes "porting" FastLED simply consists of supplying new pin definitions for the given platform.  For example, platforms/avr/fastpin_avr.h contains various pin definitions for all the AVR variant chipsets/boards that FastLED supports.  Defining a set of pins involves setting up a set of definitions - for example here's one full set from the avr fastpin file:
 
@@ -26,7 +27,7 @@ The ```_FL_IO``` macro is used to define the port registers for the platform whi
 
 The ```HAS_HARDWARE_PIN_SUPPORT``` define tells the rest of the FastLED library that there is hardware pin support available.  There may be other platform specific defines for things like hardware SPI ports and such.
 
-== Setting up the basic files/folders ==
+## Setting up the basic files/folders
 
 * Create platform directory (e.g. platforms/arm/kl26)
 * Create configuration header led_sysdefs_arm_kl26.h:
@@ -38,7 +39,7 @@ The ```HAS_HARDWARE_PIN_SUPPORT``` define tells the rest of the FastLED library 
 * Modify led_sysdefs.h to conditionally include platform sysdefs header file
 * Modify platforms.h to conditionally include platform fastled header
 
-== Porting fastpin.h ==
+## Porting fastpin.h
 
 The heart of the FastLED library is the fast pin accesss.  This is a templated class that provides 1-2 cycle pin access, bypassing digital write and other such things.  As such, this will usually be the first bit of the library that you will want to port when moving to a new platform.  Once you have FastPIN up and running then you can do some basic work like testing toggles or running bit-bang'd SPI output.
 
@@ -46,10 +47,10 @@ There's two low level FastPin classes.  There's the base FastPIN template class,
 
 Explaining how the macros work and should be used is currently beyond the scope of this document.
 
-== Porting fastspi.h ==
+## Porting fastspi.h
 
 This is where you define the low level interface to the hardware SPI system (including a writePixels method that does a bunch of housekeeping for writing led data).  Use the fastspi_nop.h file as a reference for the methods that need to be implemented.  There are ofteh other useful methods that can help with the internals of the SPI code, I recommend taking a look at how the various platforms implement their SPI classes.
 
-== Porting clockless.h ==
+## Porting clockless.h
 
 This is where you define the code for the clockless controllers.  Across ARM platforms this will usually be fairly similar - though different arm platforms will have different clock sources that you can/should use.

@@ -1,0 +1,28 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+name: build
+jobs:
+
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: install python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: install platformio
+        run: |
+          pip install platformio==5.0.3
+
+      - name: build FastLED examples
+        run: ./ci/ci-compile

@@ -15,7 +15,7 @@
 //             No error checking is performed on the ranges of x and y.
 //
 //     XYsafe(x,y) takes x and y coordinates and returns an LED index number,
-//             for use like this:  leds[ XY(x,y) ] == CRGB::Red;
+//             for use like this:  leds[ XYsafe(x,y) ] == CRGB::Red;
 //             Error checking IS performed on the ranges of x and y, and an
 //             index of "-1" is returned.  Special instructions below
 //             explain how to use this without having to do your own error
@@ -30,6 +30,8 @@ const uint8_t kMatrixHeight = 16;
 
 // Param for different pixel layouts
 const bool    kMatrixSerpentineLayout = true;
+const bool    kMatrixVertical = false;
+
 // Set 'kMatrixSerpentineLayout' to false if your pixels are 
 // laid out all running the same way, like this:
 //
@@ -88,17 +90,29 @@ uint16_t XY( uint8_t x, uint8_t y)
   uint16_t i;
   
   if( kMatrixSerpentineLayout == false) {
-    i = (y * kMatrixWidth) + x;
+    if (kMatrixVertical == false) {
+      i = (y * kMatrixWidth) + x;
+    } else {
+      i = kMatrixHeight * (kMatrixWidth - (x+1))+y;
+    }
   }
 
   if( kMatrixSerpentineLayout == true) {
-    if( y & 0x01) {
-      // Odd rows run backwards
-      uint8_t reverseX = (kMatrixWidth - 1) - x;
-      i = (y * kMatrixWidth) + reverseX;
-    } else {
-      // Even rows run forwards
-      i = (y * kMatrixWidth) + x;
+    if (kMatrixVertical == false) {
+      if( y & 0x01) {
+        // Odd rows run backwards
+        uint8_t reverseX = (kMatrixWidth - 1) - x;
+        i = (y * kMatrixWidth) + reverseX;
+      } else {
+        // Even rows run forwards
+        i = (y * kMatrixWidth) + x;
+      }
+    } else { // vertical positioning
+      if ( x & 0x01) {
+        i = kMatrixHeight * (kMatrixWidth - (x+1))+y;
+      } else {
+        i = kMatrixHeight * (kMatrixWidth - x) - (y+1);
+      }
     }
   }
   
@@ -176,13 +190,13 @@ void loop()
     FastLED.show();
 }
 
-void DrawOneFrame( byte startHue8, int8_t yHueDelta8, int8_t xHueDelta8)
+void DrawOneFrame( uint8_t startHue8, int8_t yHueDelta8, int8_t xHueDelta8)
 {
-  byte lineStartHue = startHue8;
-  for( byte y = 0; y < kMatrixHeight; y++) {
+  uint8_t lineStartHue = startHue8;
+  for( uint8_t y = 0; y < kMatrixHeight; y++) {
     lineStartHue += yHueDelta8;
-    byte pixelHue = lineStartHue;      
-    for( byte x = 0; x < kMatrixWidth; x++) {
+    uint8_t pixelHue = lineStartHue;      
+    for( uint8_t x = 0; x < kMatrixWidth; x++) {
       pixelHue += xHueDelta8;
       leds[ XY(x, y)]  = CHSV( pixelHue, 255, 255);
     }
