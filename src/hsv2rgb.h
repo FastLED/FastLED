@@ -49,6 +49,25 @@ void hsv2rgb_raw(const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
 #define HUE_MAX 191
 
 
+// hsv2rgb_precise -  convert hsv color to rgb
+//                  more accurate color conversion
+//                  slower than all other hsv2rgb functions
+void hsv2rgb_precise(const CHSV &hsv, CRGB &rgb);
+void hsv2rgb_precise(CHSV *phsv, const CRGB *prgb, int numLeds);
+
+// rgb2hsv_precise -  convert rgb color to hsv
+//                  more accurate color conversion
+//                  speed depends on architecture (8 bit vs 32 bit)
+//                  as well as the color that was put in.
+//                  using an arduino nano (8 bit) this is slower than
+//                  rgb2hsv_approximate.
+//                  using an esp32 (32 bit) this function is faster than
+//                  rgb2hsv_approximate.
+//                  but this is faster on an arduino nano, when the
+//                  input colors smallest value is at least 1
+CHSV rgb2hsv_precise(const CRGB &rgb);
+void rgb2hsv_precise(const CRGB *prgb, CHSV *phsv, int numLeds);
+
 // rgb2hsv_approximate - recover _approximate_ HSV values from RGB.
 //
 //   NOTE 1: This function is a long-term work in process; expect
