@@ -14,6 +14,7 @@ FASTLED_NAMESPACE_BEGIN
 
 #else
 
+// warning: set and fastset are not thread-safe! use with caution!
 template<uint PIN, uint32_t _MASK> class _RP2040PIN {
 public:
   typedef volatile uint32_t * port_ptr_t;
@@ -34,8 +35,8 @@ public:
   inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
   inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-  inline static port_t hival() __attribute__ ((always_inline)) { return sio_hw->gpio_in | _MASK; }
-  inline static port_t loval() __attribute__ ((always_inline)) { return sio_hw->gpio_in & ~_MASK; }
+  inline static port_t hival() __attribute__ ((always_inline)) { return sio_hw->gpio_out | _MASK; }
+  inline static port_t loval() __attribute__ ((always_inline)) { return sio_hw->gpio_out & ~_MASK; }
   inline static port_ptr_t port() __attribute__ ((always_inline)) { return &sio_hw->gpio_out; }
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
