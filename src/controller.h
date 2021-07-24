@@ -59,7 +59,8 @@ protected:
 	///@param nLeds the number of leds being written out
 	///@param scale the rgb scaling to apply to each led before writing it out
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
-    virtual void show2(const struct CRGB *data, int nLeds, CRGB scale, const struct CRGB *data2, int nLeds2, CRGB scale2) = 0;
+    // virtual void show2(const struct CRGB *data, int nLeds, CRGB scale, const struct CRGB *data2, int nLeds2, CRGB scale2) = 0;
+    virtual void showN(const struct CRGB **data, int **nLeds, CRGB scale, uint8_t N) = 0;
 
 public:
 	/// create an led controller object, add it to the chain of controllers
@@ -81,9 +82,14 @@ public:
         show(data, nLeds, getAdjustment(brightness));
     }
 
+    // /// show function w/integer brightness, will scale for color correction and temperature
+    // void show2(const struct CRGB *data, int nLeds, uint8_t brightness, const struct CRGB *data2, int nLeds2, uint8_t brightness2) {
+    //     show2(data, nLeds, getAdjustment(brightness), data2, nLeds2, getAdjustment(brightness2));
+    // }
+
     /// show function w/integer brightness, will scale for color correction and temperature
-    void show2(const struct CRGB *data, int nLeds, uint8_t brightness, const struct CRGB *data2, int nLeds2, uint8_t brightness2) {
-        show2(data, nLeds, getAdjustment(brightness), data2, nLeds2, getAdjustment(brightness2));
+    void showN(const struct CRGB **data, int **nLeds, uint8_t brightness, uint8_t N) {
+        showN(data, nLeds, getAdjustment(brightness), N);
     }
 
     /// show function w/integer brightness, will scale for color correction and temperature
@@ -414,11 +420,28 @@ protected:
         showPixels(pixels);
     }
 
-    virtual void show2(const struct CRGB *data, int nLeds, CRGB scale, const struct CRGB *data2, int nLeds2, CRGB scale2) {
-        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-        showPixels(pixels);
-        PixelController<RGB_ORDER, LANES, MASK> pixels2(data2, nLeds2, scale2, getDither());
-        showPixels(pixels2);
+    // virtual void show2(const struct CRGB *data, int nLeds, CRGB scale, const struct CRGB *data2, int nLeds2, CRGB scale2) {
+    //     PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+    //     showPixels(pixels);
+    //     PixelController<RGB_ORDER, LANES, MASK> pixels2(data2, nLeds2, scale2, getDither());
+    //     showPixels(pixels2);
+    // }
+
+    virtual void showN(const struct CRGB **data, int **nLeds, CRGB scale, uint8_t N) {
+        uint8_t dither = getDither();
+
+        PixelController<RGB_ORDER, LANES, MASK> **controllers = new PixelController<RGB_ORDER, LANES, MASK>*[N];
+
+        for (uint8_t i=0; i<N; i++) {
+            controllers[i] = new PixelController<RGB_ORDER, LANES, MASK> (data[i], nLeds[i], scale, dither);
+        }
+        for (uint8_t i=0; i<N; i++) {
+            showPixels(*controllers[i]);
+        }
+        for (uint8_t i=0; i<N; i++) {
+            delete controllers[i];
+        }
+        delete [] controllers;
     }
 
 public:
