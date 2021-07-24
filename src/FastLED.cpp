@@ -60,7 +60,7 @@ void CFastLED::show(uint8_t scale) {
 		pCur->setDither(d);
 		pCur = pCur->next();
 	}
-	//countFPS();
+	countFPS();
 }
 
 int CFastLED::count() {
