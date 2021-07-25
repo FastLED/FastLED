@@ -60,7 +60,7 @@ protected:
 	///@param scale the rgb scaling to apply to each led before writing it out
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
     // virtual void show2(const struct CRGB *data, int nLeds, CRGB scale, const struct CRGB *data2, int nLeds2, CRGB scale2) = 0;
-    virtual void showN(const struct CRGB **data, int **nLeds, CRGB scale, uint8_t N) = 0;
+    virtual void showN(const struct CRGB **data, int *nLeds, CRGB scale, uint8_t N) = 0;
 
 public:
 	/// create an led controller object, add it to the chain of controllers
@@ -88,7 +88,7 @@ public:
     // }
 
     /// show function w/integer brightness, will scale for color correction and temperature
-    void showN(const struct CRGB **data, int **nLeds, uint8_t brightness, uint8_t N) {
+    void showN(const struct CRGB **data, int *nLeds, uint8_t brightness, uint8_t N) {
         showN(data, nLeds, getAdjustment(brightness), N);
     }
 
@@ -427,21 +427,16 @@ protected:
     //     showPixels(pixels2);
     // }
 
-    virtual void showN(const struct CRGB **data, int **nLeds, CRGB scale, uint8_t N) {
+    virtual void showN(const struct CRGB **data, int *nLeds, CRGB scale, uint8_t N) {
         uint8_t dither = getDither();
+        PixelController<RGB_ORDER, LANES, MASK> pixels(&data[0][0], 1, scale, dither);
 
-        PixelController<RGB_ORDER, LANES, MASK> **controllers = new PixelController<RGB_ORDER, LANES, MASK>*[N];
-
         for (uint8_t i=0; i<N; i++) {
-            controllers[i] = new PixelController<RGB_ORDER, LANES, MASK> (data[i], nLeds[i], scale, dither);
+            pixels.mLen = nLeds[i];
+            pixels.mLenRemaining = nLeds[i];
+            pixels.mData = (uint8_t *)(&data[i][0]);
+            showPixels(pixels);
         }
-        for (uint8_t i=0; i<N; i++) {
-            showPixels(*controllers[i]);
-        }
-        for (uint8_t i=0; i<N; i++) {
-            delete controllers[i];
-        }
-        delete [] controllers;
     }
 
 public:
