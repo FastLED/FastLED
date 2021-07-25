@@ -121,7 +121,10 @@ protected:
 #endif
 		//cli();
 
-		showRGBInternal(pixels);
+
+		if(pixels.mLen > 0) {
+			showRGBInternal(pixels);
+		}
 
 		// Adjust the timer
 #if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
