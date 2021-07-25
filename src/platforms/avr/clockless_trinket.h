@@ -100,7 +100,11 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
+
+#ifndef NO_MINIMUM_WAIT
+	// Minimum wait interferes with the showN() functionality and isn't necessary if you're keeping your own framerate.
 	CMinWait<WAIT_TIME> mWait;
+#endif
 
 public:
 	virtual void init() {
@@ -112,7 +116,9 @@ public:
 protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 
+#ifndef NO_MINIMUM_WAIT
 		mWait.wait();
+#endif
 		//cli();
 
 		showRGBInternal(pixels);
@@ -167,7 +173,9 @@ protected:
 #endif
 
 		//sei();
+#ifndef NO_MINIMUM_WAIT
 		mWait.mark();
+#endif
 	}
 #define USE_ASM_MACROS
 

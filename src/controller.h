@@ -428,7 +428,7 @@ protected:
     // }
 
     virtual void showN(const struct CRGB **data, int *nLeds, CRGB scale, uint8_t N) {
-        uint8_t dither = getDither();
+        const uint8_t dither = getDither();
         PixelController<RGB_ORDER, LANES, MASK> pixels(&data[0][0], 1, scale, dither);
 
         for (uint8_t i=0; i<N; i++) {
