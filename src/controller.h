@@ -432,10 +432,12 @@ protected:
         PixelController<RGB_ORDER, LANES, MASK> pixels(&data[0][0], 1, scale, dither);
 
         for (uint8_t i=0; i<N; i++) {
-            pixels.mLen = nLeds[i];
-            pixels.mLenRemaining = nLeds[i];
-            pixels.mData = (uint8_t *)(&data[i][0]);
-            showPixels(pixels);
+            if(nLeds[i]) {
+                pixels.mLen = nLeds[i];
+                pixels.mLenRemaining = nLeds[i];
+                pixels.mData = (uint8_t *)(&data[i][0]);
+                showPixels(pixels);
+            }
         }
     }
 
