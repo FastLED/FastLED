@@ -59,8 +59,8 @@ protected:
 	///@param nLeds the number of leds being written out
 	///@param scale the rgb scaling to apply to each led before writing it out
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
-    // virtual void show2(const struct CRGB *data, int nLeds, CRGB scale, const struct CRGB *data2, int nLeds2, CRGB scale2) = 0;
-    virtual void showN(const struct CRGB **data, int *nLeds, CRGB scale, uint8_t N) = 0;
+    virtual void show2(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, CRGB scale) = 0;
+    virtual void show3(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, const struct CRGB *data3, int nLeds3, CRGB scale) = 0;
 
 public:
 	/// create an led controller object, add it to the chain of controllers
@@ -82,14 +82,12 @@ public:
         show(data, nLeds, getAdjustment(brightness));
     }
 
-    // /// show function w/integer brightness, will scale for color correction and temperature
-    // void show2(const struct CRGB *data, int nLeds, uint8_t brightness, const struct CRGB *data2, int nLeds2, uint8_t brightness2) {
-    //     show2(data, nLeds, getAdjustment(brightness), data2, nLeds2, getAdjustment(brightness2));
-    // }
+    void show2(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, uint8_t brightness) {
+        show2(data, nLeds, data2, nLeds2, getAdjustment(brightness));
+    }
 
-    /// show function w/integer brightness, will scale for color correction and temperature
-    void showN(const struct CRGB **data, int *nLeds, uint8_t brightness, uint8_t N) {
-        showN(data, nLeds, getAdjustment(brightness), N);
+    void show3(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, const struct CRGB *data3, int nLeds3, uint8_t brightness) {
+        show3(data, nLeds, data2, nLeds2, data3, nLeds3, getAdjustment(brightness));
     }
 
     /// show function w/integer brightness, will scale for color correction and temperature
@@ -401,6 +399,8 @@ struct PixelController {
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
 protected:
     virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
+    virtual void showPixels2(PixelController<RGB_ORDER,LANES,MASK> & pixels, const struct CRGB * data2, int nLeds2) = 0;
+    virtual void showPixels3(PixelController<RGB_ORDER,LANES,MASK> & pixels, const struct CRGB * data2, int nLeds2, const struct CRGB * data3, int nLeds3) = 0;
 
     /// set all the leds on the controller to a given color
     ///@param data the crgb color to set the leds to
@@ -420,105 +420,17 @@ protected:
         showPixels(pixels);
     }
 
-    // virtual void show2(const struct CRGB *data, int nLeds, CRGB scale, const struct CRGB *data2, int nLeds2, CRGB scale2) {
-    //     PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-    //     showPixels(pixels);
-    //     PixelController<RGB_ORDER, LANES, MASK> pixels2(data2, nLeds2, scale2, getDither());
-    //     showPixels(pixels2);
-    // }
-
-    virtual void showN(const struct CRGB **data, int *nLeds, CRGB scale, uint8_t N) {
-        const uint8_t dither = getDither();
-        PixelController<RGB_ORDER, LANES, MASK> *pixels7;
-        PixelController<RGB_ORDER, LANES, MASK> *pixels6;
-        PixelController<RGB_ORDER, LANES, MASK> *pixels5;
-        PixelController<RGB_ORDER, LANES, MASK> *pixels4;
-        PixelController<RGB_ORDER, LANES, MASK> *pixels3;
-        PixelController<RGB_ORDER, LANES, MASK> *pixels2;
-        PixelController<RGB_ORDER, LANES, MASK> *pixels1;
-        PixelController<RGB_ORDER, LANES, MASK> *pixels0;
-
-        switch(N) {
-            // these fall through on purpose
-            case 8:
-                pixels7 = new PixelController<RGB_ORDER, LANES, MASK>(&data[7][0], nLeds[7], scale, dither);
-            case 7:
-                pixels6 = new PixelController<RGB_ORDER, LANES, MASK>(&data[6][0], nLeds[6], scale, dither);
-            case 6:
-                pixels5 = new PixelController<RGB_ORDER, LANES, MASK>(&data[5][0], nLeds[5], scale, dither);
-            case 5:
-                pixels4 = new PixelController<RGB_ORDER, LANES, MASK>(&data[4][0], nLeds[4], scale, dither);
-            case 4:
-                pixels3 = new PixelController<RGB_ORDER, LANES, MASK>(&data[3][0], nLeds[3], scale, dither);
-            case 3:
-                pixels2 = new PixelController<RGB_ORDER, LANES, MASK>(&data[2][0], nLeds[2], scale, dither);
-            case 2:
-                pixels1 = new PixelController<RGB_ORDER, LANES, MASK>(&data[1][0], nLeds[1], scale, dither);
-            case 1:
-                pixels0 = new PixelController<RGB_ORDER, LANES, MASK>(&data[0][0], nLeds[0], scale, dither);
-
-                break;
-
-            default:
-                // not ideal
-                pixels0 = new PixelController<RGB_ORDER, LANES, MASK>(&data[0][0], nLeds[0], scale, dither);
-                for (uint8_t i=0; i<N; i++) {
-                    pixels0->mLen = nLeds[i];
-                    // pixels.mLenRemaining = nLeds[i];
-                    // pixels.mData = my_data[i];
-                    pixels0->mData = (uint8_t *)(data[i]);
-                    showPixels(*pixels0);
-                }
-                break;
-        }
-
-        switch(N) {
-            // these fall through on purpose
-            case 8:
-                if(pixels7->mLen) showPixels(*pixels7);
-            case 7:
-                if(pixels6->mLen)  showPixels(*pixels6);
-            case 6:
-                if(pixels5->mLen)  showPixels(*pixels5);
-            case 5:
-                if(pixels4->mLen)  showPixels(*pixels4);
-            case 4:
-                if(pixels3->mLen)  showPixels(*pixels3);
-            case 3:
-                if(pixels2->mLen)  showPixels(*pixels2);
-            case 2:
-                if(pixels1->mLen)  showPixels(*pixels1);
-            case 1:
-                if(pixels0->mLen)  showPixels(*pixels0);
-
-            default:
-                break;
-        }
-
-        switch(N) {
-            // these fall through on purpose
-            case 8:
-                delete pixels7;
-            case 7:
-                delete pixels6;
-            case 6:
-                delete pixels5;
-            case 5:
-                delete pixels4;
-            case 4:
-                delete pixels3;
-            case 3:
-                delete pixels2;
-            case 2:
-                delete pixels1;
-            case 1:
-            default:
-                delete pixels0;
-                break;
-        }        
+   virtual void show2(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, CRGB scale) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+        showPixels2(pixels, data2, nLeds2);
     }
 
-public:
+   virtual void show3(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, const struct CRGB *data3, int nLeds3, CRGB scale) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+        showPixels3(pixels, data2, nLeds2, data3, nLeds3);
+    }
+
+ public:
     CPixelLEDController() : CLEDController() {}
 };
 

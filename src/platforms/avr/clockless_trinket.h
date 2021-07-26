@@ -119,8 +119,6 @@ protected:
 #ifdef NO_MINIMUM_WAIT
 		mWait.wait();
 #endif
-		//cli();
-
 
 		if(pixels.mLen > 0) {
 			showRGBInternal(pixels);
@@ -175,7 +173,85 @@ protected:
 
 #endif
 
-		//sei();
+#ifdef NO_MINIMUM_WAIT
+		mWait.mark();
+#endif
+	}
+
+	virtual void showPixels2(PixelController<RGB_ORDER> & pixels, const struct CRGB * data2, int nLeds2) {
+
+#ifdef NO_MINIMUM_WAIT
+		mWait.wait();
+#endif
+
+		if(pixels.mLen > 0) {
+			showRGBInternal(pixels);
+		}
+
+		pixels.mData = (uint8_t *)data2;
+		pixels.mLen = nLeds2;
+
+		if(pixels.mLen > 0) {
+			showRGBInternal(pixels);
+		}
+
+
+#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
+	        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+	        microsTaken += scale16by8(pixels.size(),(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
+	        if( microsTaken > 1000) {
+	            microsTaken -= 1000;
+	            uint16_t x256ths = microsTaken >> 2;
+	            x256ths += scale16by8(x256ths,7);
+	            x256ths += gTimeErrorAccum256ths;
+	            MS_COUNTER += (x256ths >> 8);
+	            gTimeErrorAccum256ths = x256ths & 0xFF;
+	        }
+#endif
+
+#ifdef NO_MINIMUM_WAIT
+		mWait.mark();
+#endif
+	}
+
+	virtual void showPixels3(PixelController<RGB_ORDER> & pixels, const struct CRGB * data2, int nLeds2, const struct CRGB * data3, int nLeds3) {
+
+#ifdef NO_MINIMUM_WAIT
+		mWait.wait();
+#endif
+
+		if(pixels.mLen > 0) {
+			showRGBInternal(pixels);
+		}
+
+		pixels.mData = (uint8_t *)data2;
+		pixels.mLen = nLeds2;
+
+		if(pixels.mLen > 0) {
+			showRGBInternal(pixels);
+		}
+
+		pixels.mData = (uint8_t *)data3;
+		pixels.mLen = nLeds3;
+
+		if(pixels.mLen > 0) {
+			showRGBInternal(pixels);
+		}
+
+
+#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
+        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+        microsTaken += scale16by8(pixels.size(),(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
+        if( microsTaken > 1000) {
+            microsTaken -= 1000;
+            uint16_t x256ths = microsTaken >> 2;
+            x256ths += scale16by8(x256ths,7);
+            x256ths += gTimeErrorAccum256ths;
+            MS_COUNTER += (x256ths >> 8);
+            gTimeErrorAccum256ths = x256ths & 0xFF;
+        }
+#endif
+
 #ifdef NO_MINIMUM_WAIT
 		mWait.mark();
 #endif
