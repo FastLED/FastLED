@@ -197,16 +197,16 @@ protected:
 
 
 #if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-	        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
-	        microsTaken += scale16by8(pixels.size(),(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
-	        if( microsTaken > 1000) {
-	            microsTaken -= 1000;
-	            uint16_t x256ths = microsTaken >> 2;
-	            x256ths += scale16by8(x256ths,7);
-	            x256ths += gTimeErrorAccum256ths;
-	            MS_COUNTER += (x256ths >> 8);
-	            gTimeErrorAccum256ths = x256ths & 0xFF;
-	        }
+        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+        microsTaken += scale16by8(pixels.size(),(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
+        if( microsTaken > 1000) {
+            microsTaken -= 1000;
+            uint16_t x256ths = microsTaken >> 2;
+            x256ths += scale16by8(x256ths,7);
+            x256ths += gTimeErrorAccum256ths;
+            MS_COUNTER += (x256ths >> 8);
+            gTimeErrorAccum256ths = x256ths & 0xFF;
+        }
 #endif
 
 #ifdef NO_MINIMUM_WAIT
@@ -256,6 +256,43 @@ protected:
 		mWait.mark();
 #endif
 	}
+
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels, const struct PixelCommand *command) {
+
+#ifdef NO_MINIMUM_WAIT
+		mWait.wait();
+#endif
+
+		do {
+			pixels.mData = (uint8_t *)command->leds;
+			pixels.mLen = command->length;
+			pixels.mAdvance = command->skip;
+			if(pixels.mLen > 0) {
+				showRGBInternal(pixels);
+			}
+		} while(command = command->next);
+
+
+		// Adjust the timer
+#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
+        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+        microsTaken += scale16by8(pixels.size(),(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
+        if( microsTaken > 1000) {
+            microsTaken -= 1000;
+            uint16_t x256ths = microsTaken >> 2;
+            x256ths += scale16by8(x256ths,7);
+            x256ths += gTimeErrorAccum256ths;
+            MS_COUNTER += (x256ths >> 8);
+            gTimeErrorAccum256ths = x256ths & 0xFF;
+        }
+#endif
+
+#ifdef NO_MINIMUM_WAIT
+		mWait.mark();
+#endif
+	}
+
+
 #define USE_ASM_MACROS
 
 #if defined(__AVR_ATmega4809__)
@@ -276,7 +313,8 @@ protected:
 				[loopvar] "+a" (loopvar),				\
 				[scale_base] "+a" (scale_base)			\
 				: /* use variables */					\
-				[ADV] "r" (advanceBy),					\
+				[ADV] "r" ((-advanceBy & 0xFF)),					\
+				[ADVU] "r" ((-advanceBy & 0xFF00) >> 8),					\
 				[b0] "a" (b0),							\
 				[hi] "r" (hi),							\
 				[lo] "r" (lo),							\
@@ -286,10 +324,7 @@ protected:
 				[e0] "r" (e0),							\
 				[e1] "r" (e1),							\
 				[e2] "r" (e2),							\
-				[PORT] ASM_VAR_PORT,                    \
-				[O0] "M" (RGB_BYTE0(RGB_ORDER)),		\
-				[O1] "M" (RGB_BYTE1(RGB_ORDER)),		\
-				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
+				[PORT] ASM_VAR_PORT                     \
 				: "cc" /* clobber registers */
 // Note: the code in the else in HI1/LO1 will be turned into an sts (2 cycle, 2 word) opcode
 // 1 cycle, write hi to the port
@@ -302,7 +337,21 @@ protected:
 // load a byte from ram into the given var with the given offset
 #define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]\n\t" ASM_VARS );
 // 4 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var, clear carry
-#define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc\n\t" ASM_VARS );
+// #define LDSCL4(B,O) asm __volatile__("ldd %[scale_base], Z + %[" #O "]\n\tclr %[" #B "]\n\tclc\n\t" ASM_VARS );
+
+// implementation of LDSCL4() which doesn't use unnecessary ASM vars (so we can use them for something else)
+// however, for performance, we rely on the compiler optimising away the two out of three cases which don't apply. don't compile with -O0 ...
+#define LDSCL4(B,O) /*
+*/; if(O==0) { asm __volatile__("ldd %[scale_base], Z + 0\n\tclr %[" #B "]\n\tclc\n\t" ASM_VARS ); }/*
+*/; if(O==1) { asm __volatile__("ldd %[scale_base], Z + 1\n\tclr %[" #B "]\n\tclc\n\t" ASM_VARS ); }/*
+*/; if(O==2) { asm __volatile__("ldd %[scale_base], Z + 2\n\tclr %[" #B "]\n\tclc\n\t" ASM_VARS ); }
+
+// // load a byte from ram into the given var with the given offset
+#define LD2(B,O) /*
+*/; if(O==0) { asm __volatile__("ldd %[" #B "], Z + 0\n\t" ASM_VARS );/*
+*/; if(O==1) { asm __volatile__("ldd %[" #B "], Z + 1\n\t" ASM_VARS );/*
+*/; if(O==2) { asm __volatile__("ldd %[" #B "], Z + 2\n\t" ASM_VARS );
+
 
 #if (DITHER==1)
 // apply dithering value  before we do anything with scale_base
@@ -315,13 +364,13 @@ protected:
 #define PRESCALEB4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tneg %[" #D "]\n\tCLC" ASM_VARS);
 
 // Clamp for prescale, increment data, since we won't ever wrap 65k, this also effectively clears carry for us
-#define PSBIDATA4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tadd %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" ASM_VARS);
+#define PSBIDATA4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tsub %A[data], %[ADV]\n\tsbc %B[data], %[ADVU]\n\t" ASM_VARS);
 
 #else
 #define PRESCALE4(D) _dc<4>(loopvar);
 #define PRESCALEA2(D) _dc<2>(loopvar);
 #define PRESCALEB4(D) _dc<4>(loopvar);
-#define PSBIDATA4(D) asm __volatile__( "add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\trjmp .+0\n\t" ASM_VARS );
+#define PSBIDATA4(D) asm __volatile__( "sub %A[data], %[ADV]\n\tsbc %B[data], %[ADVU]\n\trjmp .+0\n\t" ASM_VARS );
 #endif
 
 // 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
@@ -373,8 +422,8 @@ protected:
 #define DONE asm __volatile__("2:" ASM_VARS );
 
 // 2 cycles - increment the data pointer
-#define IDATA2 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t"  ASM_VARS );
-#define IDATACLC3 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" _CLC1  ASM_VARS );
+#define IDATA2 asm __volatile__("sub %A[data], %[ADV]\n\tsbc %B[data], %[ADVU]\n\t"  ASM_VARS );
+#define IDATACLC3 asm __volatile__("sub %A[data], %[ADV]\n\tsbc %B[data], %[ADVU]\n\t" _CLC1  ASM_VARS );
 
 // 1 cycle mov
 #define _MOV1(B1, B2) "mov %[" #B1 "], %[" #B2 "]\n\t"
@@ -442,7 +491,7 @@ protected:
 		pixels.preStepFirstByteDithering();
 
 		// pull the dithering/adjustment values out of the pixels object for direct asm access
-		uint8_t advanceBy = pixels.advanceBy();
+		int8_t advanceBy = pixels.advanceBy();
 		uint16_t count = pixels.mLen;
 
 		uint8_t s0 = pixels.mScale.raw[RO(0)];
@@ -463,7 +512,7 @@ protected:
 		// This has to be done in asm to keep gcc from messing up the asm code further down
 		b0 = data[RO(0)];
 		{
-			LDSCL4(b0,O0) 	PRESCALEA2(d0)
+			LDSCL4(b0,RGB_BYTE0(RGB_ORDER)) 	PRESCALEA2(d0)
 			PRESCALEB4(d0)	SCALE02(b0,0)
 			RORSC04(b0,1) 	ROR1(b0) CLC1
 			SCROR04(b0,2)		SCALE02(b0,3)
@@ -493,7 +542,7 @@ protected:
 				// Inline scaling - RGB ordering
 				// DNOP
 				
-				cli(); HI1 _D1(3) QLO2(b0, 7) sei(); LDSCL4(b1,O1) 	_D2(6)	LO1	PRESCALEA2(d1)	_D3(3) 
+				cli(); HI1 _D1(3) QLO2(b0, 7) sei(); LDSCL4(b1,RGB_BYTE1(RGB_ORDER)) 	_D2(6)	LO1	PRESCALEA2(d1)	_D3(3) 
 				cli(); HI1 _D1(3) QLO2(b0, 6) sei(); PRESCALEB4(d1)	_D2(6)	LO1	SCALE12(b1,0)	_D3(3) 
 				cli(); HI1 _D1(3) QLO2(b0, 5) sei(); RORSC14(b1,1) 	_D2(6)	LO1 	RORCLC2(b1)	_D3(3) 
 				cli(); HI1 _D1(3) QLO2(b0, 4) sei(); SCROR14(b1,2)	_D2(6)	LO1 	SCALE12(b1,3)	_D3(3) 
@@ -510,7 +559,7 @@ protected:
 				MOV_ADDDE14(b0,b1,d1,e1) _D2(6) LO1  _D3(2) 
 				
 
-				cli(); HI1 _D1(3) QLO2(b0, 7) sei(); LDSCL4(b1,O2) 	_D2(6)	LO1 PRESCALEA2(d2)	_D3(3)
+				cli(); HI1 _D1(3) QLO2(b0, 7) sei(); LDSCL4(b1,RGB_BYTE2(RGB_ORDER)) 	_D2(6)	LO1 PRESCALEA2(d2)	_D3(3)
 				cli(); HI1 _D1(3) QLO2(b0, 6) sei(); PSBIDATA4(d2)	_D2(6)	LO1 SCALE22(b1,0)	_D3(3)
 				cli(); HI1 _D1(3) QLO2(b0, 5) sei(); RORSC24(b1,1) 	_D2(6)	LO1 RORCLC2(b1) 	_D3(3)
 				cli(); HI1 _D1(3) QLO2(b0, 4) sei(); SCROR24(b1,2)	_D2(6)	LO1 SCALE22(b1,3)	_D3(3)
@@ -529,7 +578,7 @@ protected:
 				// we have to do both halves of updating d2 here - negating it (in the
 				// MOV_NEGD24 macro) and then adding E back into it
 				MOV_NEGD24(b0,b1,d2) _D2(5) LO1  ADDDE1(d2,e2) _D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 7) sei(); LDSCL4(b1,O0) 	_D2(6)	LO1 PRESCALEA2(d0)	_D3(3)
+				cli(); HI1 _D1(3) QLO2(b0, 7) sei(); LDSCL4(b1,RGB_BYTE0(RGB_ORDER)) 	_D2(6)	LO1 PRESCALEA2(d0)	_D3(3)
 				cli(); HI1 _D1(3) QLO2(b0, 6) sei(); PRESCALEB4(d0)	_D2(6)	LO1 SCALE02(b1,0)	_D3(3)
 				cli(); HI1 _D1(3) QLO2(b0, 5) sei(); RORSC04(b1,1) 	_D2(6)	LO1 RORCLC2(b1) 	_D3(3)
 				cli(); HI1 _D1(3) QLO2(b0, 4) sei(); SCROR04(b1,2)	_D2(6)	LO1 SCALE02(b1,3)	_D3(3)

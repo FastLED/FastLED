@@ -12,6 +12,13 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+struct PixelCommand {
+    const CRGB *leds;
+    const PixelCommand *next;
+    uint8_t length;
+    int8_t skip;
+};
+
 #define RO(X) RGB_BYTE(RGB_ORDER, X)
 #define RGB_BYTE(RO,X) (((RO)>>(3*(2-(X)))) & 0x3)
 
@@ -62,6 +69,8 @@ protected:
     virtual void show2(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, CRGB scale) = 0;
     virtual void show3(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, const struct CRGB *data3, int nLeds3, CRGB scale) = 0;
 
+    virtual void show(const struct PixelCommand *command, CRGB scale) = 0;
+
 public:
 	/// create an led controller object, add it to the chain of controllers
     CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
@@ -89,6 +98,12 @@ public:
     void show3(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, const struct CRGB *data3, int nLeds3, uint8_t brightness) {
         show3(data, nLeds, data2, nLeds2, data3, nLeds3, getAdjustment(brightness));
     }
+
+    /// show function w/integer brightness, will scale for color correction and temperature
+    void show(const struct PixelCommand *command, uint8_t brightness) {
+        show(command, getAdjustment(brightness));
+    }
+
 
     /// show function w/integer brightness, will scale for color correction and temperature
     void showColor(const struct CRGB &data, int nLeds, uint8_t brightness) {
@@ -401,6 +416,7 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
     virtual void showPixels2(PixelController<RGB_ORDER,LANES,MASK> & pixels, const struct CRGB * data2, int nLeds2) = 0;
     virtual void showPixels3(PixelController<RGB_ORDER,LANES,MASK> & pixels, const struct CRGB * data2, int nLeds2, const struct CRGB * data3, int nLeds3) = 0;
+    virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels, const struct PixelCommand *command) = 0;
 
     /// set all the leds on the controller to a given color
     ///@param data the crgb color to set the leds to
@@ -430,10 +446,15 @@ protected:
         showPixels3(pixels, data2, nLeds2, data3, nLeds3);
     }
 
+    virtual void show(const struct PixelCommand *command, CRGB scale) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels((CRGB *)NULL, 0, scale, getDither());
+        showPixels(pixels, command);
+    }
+
+
  public:
     CPixelLEDController() : CLEDController() {}
 };
-
 
 FASTLED_NAMESPACE_END
 
