@@ -102,7 +102,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 
 
 #ifdef NO_MINIMUM_WAIT
-	// Minimum wait interferes with the showN() functionality and isn't necessary if you're keeping your own framerate.
+	// Minimum wait interferes with the PixelCommand functionality and isn't necessary if you're keeping your own framerate.
 	CMinWait<WAIT_TIME> mWait;
 #endif
 
@@ -178,85 +178,6 @@ protected:
 #endif
 	}
 
-	virtual void showPixels2(PixelController<RGB_ORDER> & pixels, const struct CRGB * data2, int nLeds2) {
-
-#ifdef NO_MINIMUM_WAIT
-		mWait.wait();
-#endif
-
-		if(pixels.mLen > 0) {
-			showRGBInternal(pixels);
-		}
-
-		pixels.mData = (uint8_t *)data2;
-		pixels.mLen = nLeds2;
-
-		if(pixels.mLen > 0) {
-			showRGBInternal(pixels);
-		}
-
-
-#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
-        microsTaken += scale16by8(pixels.size(),(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
-        if( microsTaken > 1000) {
-            microsTaken -= 1000;
-            uint16_t x256ths = microsTaken >> 2;
-            x256ths += scale16by8(x256ths,7);
-            x256ths += gTimeErrorAccum256ths;
-            MS_COUNTER += (x256ths >> 8);
-            gTimeErrorAccum256ths = x256ths & 0xFF;
-        }
-#endif
-
-#ifdef NO_MINIMUM_WAIT
-		mWait.mark();
-#endif
-	}
-
-	virtual void showPixels3(PixelController<RGB_ORDER> & pixels, const struct CRGB * data2, int nLeds2, const struct CRGB * data3, int nLeds3) {
-
-#ifdef NO_MINIMUM_WAIT
-		mWait.wait();
-#endif
-
-		if(pixels.mLen > 0) {
-			showRGBInternal(pixels);
-		}
-
-		pixels.mData = (uint8_t *)data2;
-		pixels.mLen = nLeds2;
-
-		if(pixels.mLen > 0) {
-			showRGBInternal(pixels);
-		}
-
-		pixels.mData = (uint8_t *)data3;
-		pixels.mLen = nLeds3;
-
-		if(pixels.mLen > 0) {
-			showRGBInternal(pixels);
-		}
-
-
-#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
-        microsTaken += scale16by8(pixels.size(),(0.6 * 256) + 1) * CLKS_TO_MICROS(16);
-        if( microsTaken > 1000) {
-            microsTaken -= 1000;
-            uint16_t x256ths = microsTaken >> 2;
-            x256ths += scale16by8(x256ths,7);
-            x256ths += gTimeErrorAccum256ths;
-            MS_COUNTER += (x256ths >> 8);
-            gTimeErrorAccum256ths = x256ths & 0xFF;
-        }
-#endif
-
-#ifdef NO_MINIMUM_WAIT
-		mWait.mark();
-#endif
-	}
-
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels, const struct PixelCommand *command) {
 
 #ifdef NO_MINIMUM_WAIT
@@ -313,8 +234,8 @@ protected:
 				[loopvar] "+a" (loopvar),				\
 				[scale_base] "+a" (scale_base)			\
 				: /* use variables */					\
-				[ADV] "r" ((-advanceBy & 0xFF)),					\
-				[ADVU] "r" ((-advanceBy & 0xFF00) >> 8),					\
+				[ADV] "r" ((-advanceBy & 0xFF)),		\
+				[ADVU] "r" ((-advanceBy & 0xFF00) >> 8),\
 				[b0] "a" (b0),							\
 				[hi] "r" (hi),							\
 				[lo] "r" (lo),							\
@@ -542,57 +463,57 @@ protected:
 				// Inline scaling - RGB ordering
 				// DNOP
 				
-				cli(); HI1 _D1(3) QLO2(b0, 7) sei(); LDSCL4(b1,RGB_BYTE1(RGB_ORDER)) 	_D2(6)	LO1	PRESCALEA2(d1)	_D3(3) 
-				cli(); HI1 _D1(3) QLO2(b0, 6) sei(); PRESCALEB4(d1)	_D2(6)	LO1	SCALE12(b1,0)	_D3(3) 
-				cli(); HI1 _D1(3) QLO2(b0, 5) sei(); RORSC14(b1,1) 	_D2(6)	LO1 	RORCLC2(b1)	_D3(3) 
-				cli(); HI1 _D1(3) QLO2(b0, 4) sei(); SCROR14(b1,2)	_D2(6)	LO1 	SCALE12(b1,3)	_D3(3) 
-				cli(); HI1 _D1(3) QLO2(b0, 3) sei(); RORSC14(b1,4) 	_D2(6)	LO1 	RORCLC2(b1) 	_D3(3) 
-				cli(); HI1 _D1(3) QLO2(b0, 2) sei(); SCROR14(b1,5) 	_D2(6)	LO1 	SCALE12(b1,6)	_D3(3) 
-				cli(); HI1 _D1(3) QLO2(b0, 1) sei(); RORSC14(b1,7) 	_D2(6)	LO1 	RORCLC2(b1) 	_D3(3) 
-				cli(); HI1 _D1(3) QLO2(b0, 0) sei(); 
+				cli(); HI1 _D1(2) QLO2(b0, 7) sei(); LDSCL4(b1,RGB_BYTE1(RGB_ORDER)) 	_D2(5)	LO1	PRESCALEA2(d1)	_D3(2) 
+				cli(); HI1 _D1(2) QLO2(b0, 6) sei(); PRESCALEB4(d1)	_D2(5)	LO1	SCALE12(b1,0)	_D3(2) 
+				cli(); HI1 _D1(2) QLO2(b0, 5) sei(); RORSC14(b1,1) 	_D2(5)	LO1 	RORCLC2(b1)	_D3(2) 
+				cli(); HI1 _D1(2) QLO2(b0, 4) sei(); SCROR14(b1,2)	_D2(5)	LO1 	SCALE12(b1,3)	_D3(2) 
+				cli(); HI1 _D1(2) QLO2(b0, 3) sei(); RORSC14(b1,4) 	_D2(5)	LO1 	RORCLC2(b1) 	_D3(2) 
+				cli(); HI1 _D1(2) QLO2(b0, 2) sei(); SCROR14(b1,5) 	_D2(5)	LO1 	SCALE12(b1,6)	_D3(2) 
+				cli(); HI1 _D1(2) QLO2(b0, 1) sei(); RORSC14(b1,7) 	_D2(5)	LO1 	RORCLC2(b1) 	_D3(2) 
+				cli(); HI1 _D1(2) QLO2(b0, 0) sei(); 
 				switch(XTRA0) {
-					case 4: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 3: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 2: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 1: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)
+					case 4: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei(); /* fall through */
+					case 3: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei(); /* fall through */
+					case 2: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei(); /* fall through */
+					case 1: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei();
 				}
-				MOV_ADDDE14(b0,b1,d1,e1) _D2(6) LO1  _D3(2) 
+				MOV_ADDDE14(b0,b1,d1,e1) _D2(5) LO1  _D3(0) 
 				
 
-				cli(); HI1 _D1(3) QLO2(b0, 7) sei(); LDSCL4(b1,RGB_BYTE2(RGB_ORDER)) 	_D2(6)	LO1 PRESCALEA2(d2)	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 6) sei(); PSBIDATA4(d2)	_D2(6)	LO1 SCALE22(b1,0)	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 5) sei(); RORSC24(b1,1) 	_D2(6)	LO1 RORCLC2(b1) 	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 4) sei(); SCROR24(b1,2)	_D2(6)	LO1 SCALE22(b1,3)	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 3) sei(); RORSC24(b1,4) 	_D2(6)	LO1 RORCLC2(b1) 	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 2) sei(); SCROR24(b1,5) 	_D2(6)	LO1 SCALE22(b1,6)	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 1) sei(); RORSC24(b1,7) 	_D2(6)	LO1 RORCLC2(b1) 	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 0) sei();
+				cli(); HI1 _D1(2) QLO2(b0, 7) sei(); LDSCL4(b1,RGB_BYTE2(RGB_ORDER)) 	_D2(5)	LO1 PRESCALEA2(d2)	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 6) sei(); PSBIDATA4(d2)	_D2(5)	LO1 SCALE22(b1,0)	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 5) sei(); RORSC24(b1,1) 	_D2(5)	LO1 RORCLC2(b1) 	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 4) sei(); SCROR24(b1,2)	_D2(5)	LO1 SCALE22(b1,3)	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 3) sei(); RORSC24(b1,4) 	_D2(5)	LO1 RORCLC2(b1) 	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 2) sei(); SCROR24(b1,5) 	_D2(5)	LO1 SCALE22(b1,6)	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 1) sei(); RORSC24(b1,7) 	_D2(5)	LO1 RORCLC2(b1) 	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 0) sei();
 				switch(XTRA0) {
-					case 4: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 3: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 2: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 1: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)
+					case 4: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei(); /* fall through */
+					case 3: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei(); /* fall through */
+					case 2: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei(); /* fall through */
+					case 1: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei();
 				}
 
 				// Because Prescale on the middle byte also increments the data counter,
 				// we have to do both halves of updating d2 here - negating it (in the
 				// MOV_NEGD24 macro) and then adding E back into it
-				MOV_NEGD24(b0,b1,d2) _D2(5) LO1  ADDDE1(d2,e2) _D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 7) sei(); LDSCL4(b1,RGB_BYTE0(RGB_ORDER)) 	_D2(6)	LO1 PRESCALEA2(d0)	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 6) sei(); PRESCALEB4(d0)	_D2(6)	LO1 SCALE02(b1,0)	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 5) sei(); RORSC04(b1,1) 	_D2(6)	LO1 RORCLC2(b1) 	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 4) sei(); SCROR04(b1,2)	_D2(6)	LO1 SCALE02(b1,3)	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 3) sei(); RORSC04(b1,4) 	_D2(6)	LO1 RORCLC2(b1)  	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 2) sei(); SCROR04(b1,5) 	_D2(6)	LO1 SCALE02(b1,6)	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 1) sei(); RORSC04(b1,7) 	_D2(6)	LO1 RORCLC2(b1) 	_D3(3)
-				cli(); HI1 _D1(3) QLO2(b0, 0) sei();
+				MOV_NEGD24(b0,b1,d2) _D2(5) LO1  ADDDE1(d2,e2) _D3(1)
+				cli(); HI1 _D1(2) QLO2(b0, 7) sei(); LDSCL4(b1,RGB_BYTE0(RGB_ORDER)) 	_D2(5)	LO1 PRESCALEA2(d0)	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 6) sei(); PRESCALEB4(d0)	_D2(5)	LO1 SCALE02(b1,0)	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 5) sei(); RORSC04(b1,1) 	_D2(5)	LO1 RORCLC2(b1) 	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 4) sei(); SCROR04(b1,2)	_D2(5)	LO1 SCALE02(b1,3)	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 3) sei(); RORSC04(b1,4) 	_D2(5)	LO1 RORCLC2(b1)  	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 2) sei(); SCROR04(b1,5) 	_D2(5)	LO1 SCALE02(b1,6)	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 1) sei(); RORSC04(b1,7) 	_D2(5)	LO1 RORCLC2(b1) 	_D3(2)
+				cli(); HI1 _D1(2) QLO2(b0, 0) sei();
 				switch(XTRA0) {
-					case 4: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 3: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 2: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)  /* fall through */
-					case 1: _D2(0) LO1 sei(); _D3(0) cli(); HI1 _D1(1) QLO2(b0,0)
+					case 4: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei(); /* fall through */
+					case 3: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei(); /* fall through */
+					case 2: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei(); /* fall through */
+					case 1: _D2(1) LO1 _D3(0) cli(); HI1 _D1(2) QLO2(b0,0) sei();
 				}
-				MOV_ADDDE04(b0,b1,d0,e0) _D2(6) LO1  _D3(2)
+				MOV_ADDDE04(b0,b1,d0,e0) _D2(5) LO1  _D3(0)
 				ENDLOOP5
 			}
 			DONE;

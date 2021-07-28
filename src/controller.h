@@ -66,9 +66,6 @@ protected:
 	///@param nLeds the number of leds being written out
 	///@param scale the rgb scaling to apply to each led before writing it out
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
-    virtual void show2(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, CRGB scale) = 0;
-    virtual void show3(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, const struct CRGB *data3, int nLeds3, CRGB scale) = 0;
-
     virtual void show(const struct PixelCommand *command, CRGB scale) = 0;
 
 public:
@@ -91,19 +88,9 @@ public:
         show(data, nLeds, getAdjustment(brightness));
     }
 
-    void show2(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, uint8_t brightness) {
-        show2(data, nLeds, data2, nLeds2, getAdjustment(brightness));
-    }
-
-    void show3(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, const struct CRGB *data3, int nLeds3, uint8_t brightness) {
-        show3(data, nLeds, data2, nLeds2, data3, nLeds3, getAdjustment(brightness));
-    }
-
-    /// show function w/integer brightness, will scale for color correction and temperature
     void show(const struct PixelCommand *command, uint8_t brightness) {
         show(command, getAdjustment(brightness));
     }
-
 
     /// show function w/integer brightness, will scale for color correction and temperature
     void showColor(const struct CRGB &data, int nLeds, uint8_t brightness) {
@@ -414,8 +401,6 @@ struct PixelController {
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
 protected:
     virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
-    virtual void showPixels2(PixelController<RGB_ORDER,LANES,MASK> & pixels, const struct CRGB * data2, int nLeds2) = 0;
-    virtual void showPixels3(PixelController<RGB_ORDER,LANES,MASK> & pixels, const struct CRGB * data2, int nLeds2, const struct CRGB * data3, int nLeds3) = 0;
     virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels, const struct PixelCommand *command) = 0;
 
     /// set all the leds on the controller to a given color
@@ -434,16 +419,6 @@ protected:
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
         PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
         showPixels(pixels);
-    }
-
-   virtual void show2(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, CRGB scale) {
-        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-        showPixels2(pixels, data2, nLeds2);
-    }
-
-   virtual void show3(const struct CRGB *data, int nLeds, const struct CRGB *data2, int nLeds2, const struct CRGB *data3, int nLeds3, CRGB scale) {
-        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
-        showPixels3(pixels, data2, nLeds2, data3, nLeds3);
     }
 
     virtual void show(const struct PixelCommand *command, CRGB scale) {
