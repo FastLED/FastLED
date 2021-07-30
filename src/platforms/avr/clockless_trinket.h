@@ -35,9 +35,15 @@ FASTLED_NAMESPACE_BEGIN
 // this signal pulse short.
 // 
 // Beware: even with FASTLED_ALLOW_INTERRUPTS enabled, you must ensure that your interrupt handlers are *very* fast. If they take
-// longer than about ~6000ns, which is roughly 90 clock cycles on a 16MHz AVR, the strip will latch partway through rendering, and
-// you will see big glitches. If you are using multiple timers with interrupts, you can set them out of phase so they only fire
-// one at a time.
+// longer than 5µs, which is 80 clock cycles on a 16MHz AVR, the strip might latch partway through rendering, and you will see big
+// glitches.
+// 
+// Remember to account for the interrupt overhead when writing your ISR. This accounts for at least 10 cycles, often 20+.
+//
+// If you are using multiple timers with interrupts, you can set them out of phase so they only fire one at a time. 
+//
+// TODO: it would be possible to support longer interrupts providing that they only fire during the "on" pulse - holding the
+//       signal high indefinitely will never latch, although it would affect the framerate. Maybe the subject of a future PR…
 //
 // See https://wp.josh.com/2014/05/13/ws2812-neopixels-are-not-so-finicky-once-you-get-to-know-them/ for more information on the
 // tolerances.
