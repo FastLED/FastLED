@@ -31,11 +31,13 @@ FASTLED_NAMESPACE_BEGIN
 // condition that the shortest pulse in the specification (representing a 0 bit) is kept under a certain length. After exceeding
 // that length it would be interpreted as a 1, causing a glitch. 
 // 
-// If you set FASTLED_ALLOW_INTERRUPTS to 1, interrupts will only be enabled when necessary to keep this short pulse short.
+// If you set FASTLED_ALLOW_INTERRUPTS to 1, interrupts will only be disabled for a few cycles at a time, when necessary to keep
+// this signal pulse short.
 // 
 // Beware: even with FASTLED_ALLOW_INTERRUPTS enabled, you must ensure that your interrupt handlers are *very* fast. If they take
 // longer than about ~6000ns, which is roughly 90 clock cycles on a 16MHz AVR, the strip will latch partway through rendering, and
-// you will see big glitches.
+// you will see big glitches. If you are using multiple timers with interrupts, you can set them out of phase so they only fire
+// one at a time.
 //
 // See https://wp.josh.com/2014/05/13/ws2812-neopixels-are-not-so-finicky-once-you-get-to-know-them/ for more information on the
 // tolerances.
