@@ -407,7 +407,7 @@ protected:
         PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds < 0 ? -nLeds : nLeds, scale, getDither());
         if(nLeds < 0) {
             // nLeds < 0 implies that we want to show them in reverse
-            pixels.mAdvance = -3;
+            pixels.mAdvance = -pixels.mAdvance;
         }
         showPixels(pixels);
     }
