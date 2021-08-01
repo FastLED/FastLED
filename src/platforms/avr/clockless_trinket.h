@@ -87,9 +87,9 @@ template<> __attribute__((always_inline)) inline void _dc<20>(register uint8_t &
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if (FASTLED_ALLOW_INTERRUPTS == 1) && defined(NO_CORRECTION) && (NO_CORRECTION == 1) && !(defined(NO_CLOCK_CORRECTION))
-#	warning In older versions of FastLED defining NO_CORRECTION 1 would mistakenly turn off color correction as well as clock correction.
-#	warning As clock correction is unnecessary with FASTLED_ALLOW_INTERRUPTS 1, you should define NO_CLOCK_CORRECTION 1 instead.
+#if ((FASTLED_ALLOW_INTERRUPTS == 1) && defined(NO_CORRECTION) && (NO_CORRECTION == 1) && !(defined(NO_CLOCK_CORRECTION)))
+#	pragma message "In older versions of FastLED defining NO_CORRECTION 1 would mistakenly turn off color correction as well as clock correction."
+#	pragma message "Clock correction is unnecessary with FASTLED_ALLOW_INTERRUPTS 1. define NO_CLOCK_CORRECTION 1 to fix this warning."
 #	define NO_CLOCK_CORRECTION 1
 #endif
 
