@@ -1,9 +1,12 @@
 #ifndef __INC_CLOCKLESS_ARM_RP2040
 #define __INC_CLOCKLESS_ARM_RP2040
 
+#include "hardware/structs/sio.h"
+#include "../common/m0clockless.h"
+
+#if FASTLED_RP2040_CLOCKLESS_PIO
 #include "hardware/clocks.h"
 #include "hardware/dma.h"
-
 // compiler throws a warning about comparison that is always true
 // silence that so users don't see it
 #pragma GCC diagnostic push
@@ -12,6 +15,7 @@
 #pragma GCC diagnostic pop
 
 #include "pio_gen.h"
+#endif
 
 /*
  * This clockless implementation uses RP2040's PIO feature to perform
@@ -36,6 +40,7 @@
 FASTLED_NAMESPACE_BEGIN
 #define FASTLED_HAS_CLOCKLESS 1
 
+#if FASTLED_RP2040_CLOCKLESS_PIO
 static CMinWait<0> *dma_chan_waits[NUM_DMA_CHANNELS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static inline void __isr clockless_dma_complete_handler() {
     for (unsigned int i = 0; i < NUM_DMA_CHANNELS; i++) {
@@ -48,12 +53,17 @@ static inline void __isr clockless_dma_complete_handler() {
     }
 }
 static bool clockless_isr_installed = false;
+#endif
 
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 50>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+#if FASTLED_RP2040_CLOCKLESS_PIO
     int dma_channel = -1;
     void *dma_buf = nullptr;
     size_t dma_buf_size = 0;
+    
+    float pio_clock_multiplier;
+    int T1_mult, T2_mult, T3_mult;
     
     // increase wait time by time taken to send 4 words (to flush PIO TX buffer)
     CMinWait<WAIT_TIME + ( ((T1 + T2 + T3) * 32 * 4) / (CLOCKLESS_FREQUENCY / 1000000) )> mWait;
@@ -97,9 +107,35 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
         
         return BITS;
     }
+#else
+    CMinWait<WAIT_TIME> mWait;
+#endif
 public:
     virtual void init() {
+#if FASTLED_RP2040_CLOCKLESS_PIO
         if (dma_channel != -1) return; // maybe init was called twice somehow? not sure if possible
+#endif
+        
+        // start by configuring pin as output for blocking fallback
+        FastPin<DATA_PIN>::setOutput();
+        
+#if FASTLED_RP2040_CLOCKLESS_PIO
+        // convert from input timebase to one that the PIO program can handle
+        int max_t = T1 > T2 ? T1 : T2;
+        max_t = T3 > max_t ? T3 : max_t;
+        
+        if (max_t > CLOCKLESS_PIO_MAX_TIME_PERIOD) {
+            pio_clock_multiplier = (float)CLOCKLESS_PIO_MAX_TIME_PERIOD / max_t;
+            T1_mult = pio_clock_multiplier * T1;
+            T2_mult = pio_clock_multiplier * T2;
+            T3_mult = pio_clock_multiplier * T3;
+        }
+        else {
+            pio_clock_multiplier = 1.f;
+            T1_mult = T1;
+            T2_mult = T2;
+            T3_mult = T3;
+        }
         
         PIO pio;
         int sm;
@@ -107,14 +143,14 @@ public:
         
         // find an unclaimed PIO state machine and upload the clockless program if possible
         // there's two PIO instances, each with four state machines, so this should usually work out fine
-        static PIO pios[NUM_PIOS] = { pio0, pio1 };
+        const PIO pios[NUM_PIOS] = { pio0, pio1 };
         // iterate over PIO instances
         for (unsigned int i = 0; i < NUM_PIOS; i++) {
             pio = pios[i];
             sm = pio_claim_unused_sm(pio, false); // claim a state machine
             if (sm == -1) continue; // skip this PIO if no unused sm
             
-            offset = add_clockless_pio_program(pio, T1, T2, T3);
+            offset = add_clockless_pio_program(pio, T1_mult, T2_mult, T3_mult);
             if (offset == -1) {
                 pio_sm_unclaim(pio, sm); // unclaim the state machine and skip this PIO
                 continue;                // if program couldn't be added
@@ -142,7 +178,7 @@ public:
         // which seems like it won't actually benefit us
         // sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
         
-        float div = clock_get_hz(clk_sys) / CLOCKLESS_FREQUENCY;
+        float div = clock_get_hz(clk_sys) / (pio_clock_multiplier * CLOCKLESS_FREQUENCY);
         sm_config_set_clkdiv(&c, div);
         
         pio_sm_init(pio, sm, offset, &c);
@@ -176,12 +212,17 @@ public:
             clockless_isr_installed = true;
         }
         dma_channel_set_irq0_enabled(dma_channel, true);
+#endif // FASTLED_RP2040_CLOCKLESS_PIO
     }
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-        if (dma_channel == -1) return; // setup failed
+#if FASTLED_RP2040_CLOCKLESS_PIO
+        if (dma_channel == -1) { // setup failed, so fall back to a blocking implementation
+            showRGBBlocking(pixels);
+            return;
+        }
         
         // wait for past transfer to finish
         // call when previous pixels are done will run without blocking,
@@ -196,8 +237,14 @@ public:
         mWait.wait();
         
         showRGBInternal(pixels);
+#else
+        mWait.wait();
+        showRGBBlocking(pixels);
+        mWait.mark();
+#endif
     }
 
+#if FASTLED_RP2040_CLOCKLESS_PIO
     void showRGBInternal(PixelController<RGB_ORDER> pixels) {
         size_t req_buf_size = (pixels.mLen * 3 * (8+XTRA0) + 31) / 32;
         
@@ -241,6 +288,30 @@ public:
         };
         
         do_dma_transfer(dma_channel, dma_buf, req_buf_size);
+    }
+#endif // FASTLED_RP2040_CLOCKLESS_PIO
+    
+    void showRGBBlocking(PixelController<RGB_ORDER> pixels) {
+        struct M0ClocklessData data;
+        data.d[0] = pixels.d[0];
+        data.d[1] = pixels.d[1];
+        data.d[2] = pixels.d[2];
+        data.s[0] = pixels.mScale[0];
+        data.s[1] = pixels.mScale[1];
+        data.s[2] = pixels.mScale[2];
+        data.e[0] = pixels.e[0];
+        data.e[1] = pixels.e[1];
+        data.e[2] = pixels.e[2];
+        data.adj = pixels.mAdvance;
+
+        typedef FastPin<DATA_PIN> pin;
+        volatile uint32_t *portBase = &sio_hw->gpio_out;
+        const int portSetOff = (uint32_t)&sio_hw->gpio_set - (uint32_t)&sio_hw->gpio_out;
+        const int portClrOff = (uint32_t)&sio_hw->gpio_clr - (uint32_t)&sio_hw->gpio_out;
+        
+        cli();
+        showLedData<portSetOff, portClrOff, T1, T2, T3, RGB_ORDER, WAIT_TIME>(portBase, pin::mask(), pixels.mData, pixels.mLen, &data);
+        sei();
     }
 
 };

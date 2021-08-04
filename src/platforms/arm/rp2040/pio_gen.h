@@ -46,6 +46,9 @@
 #define CLOCKLESS_PIO_WRAP_TARGET 0
 #define CLOCKLESS_PIO_WRAP 3
 
+// we have 4 bits to store delay in instruction encoding with one sideset bit, but we can accept up to 16 because 1 is always subtracted first
+#define CLOCKLESS_PIO_MAX_TIME_PERIOD (1 << (5 - CLOCKLESS_PIO_SIDESET_COUNT))
+
 static inline int add_clockless_pio_program(PIO pio, int T1, int T2, int T3) {
     pio_instr clockless_pio_instr[] = {
         // wrap_target

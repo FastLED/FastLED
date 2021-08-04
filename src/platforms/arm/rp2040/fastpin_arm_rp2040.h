@@ -38,6 +38,8 @@ public:
   inline static port_t hival() __attribute__ ((always_inline)) { return sio_hw->gpio_out | _MASK; }
   inline static port_t loval() __attribute__ ((always_inline)) { return sio_hw->gpio_out & ~_MASK; }
   inline static port_ptr_t port() __attribute__ ((always_inline)) { return &sio_hw->gpio_out; }
+  inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &sio_hw->gpio_set; }
+  inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &sio_hw->gpio_clr; }
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
