@@ -42,9 +42,7 @@ protected:
       #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
       ++_retry_cnt;
       #endif
-      os_intr_unlock();
       delayMicroseconds(WAIT_TIME);
-      os_intr_lock();
     }
     mWait.mark();
   }
