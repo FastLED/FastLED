@@ -11,37 +11,9 @@
  * set from other code.
  * Otherwise, this is quite similar to what would be output by pioasm, with the
  * additional step of adding the program to a state machine integrated.
- * 
- * 
- * The PIO program is copied from pico-examples, which uses a 3-clause BSD license:
- * 
- * Copyright 2020 (c) 2020 Raspberry Pi (Trading) Ltd.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
- * following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following
- *    disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
- *    disclaimer in the documentation and/or other materials provided with the distribution.
- * 
- * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define CLOCKLESS_PIO_SIDESET_COUNT 1
-
-#define CLOCKLESS_PIO_BITLOOP_ADR 0
-#define CLOCKLESS_PIO_DOZERO_ADR 3
+#define CLOCKLESS_PIO_SIDESET_COUNT 0
 
 #define CLOCKLESS_PIO_WRAP_TARGET 0
 #define CLOCKLESS_PIO_WRAP 3
@@ -52,13 +24,14 @@
 static inline int add_clockless_pio_program(PIO pio, int T1, int T2, int T3) {
     pio_instr clockless_pio_instr[] = {
         // wrap_target
-        // bitloop
-        (pio_instr)(PIO_INSTR_OUT | PIO_OUT_DST_X | PIO_OUT_CNT(1) | PIO_SIDESET(0, CLOCKLESS_PIO_SIDESET_COUNT) | PIO_DELAY(T3 - 1, CLOCKLESS_PIO_SIDESET_COUNT)),
-        (pio_instr)(PIO_INSTR_JMP | PIO_JMP_CND_NOT_X | PIO_JMP_ADR(CLOCKLESS_PIO_DOZERO_ADR) | PIO_SIDESET(1, CLOCKLESS_PIO_SIDESET_COUNT) | PIO_DELAY(T1 - 1, CLOCKLESS_PIO_SIDESET_COUNT)),
-        // do_one
-        (pio_instr)(PIO_INSTR_JMP | PIO_JMP_CND_ALWAYS | PIO_JMP_ADR(CLOCKLESS_PIO_BITLOOP_ADR) | PIO_SIDESET(1, CLOCKLESS_PIO_SIDESET_COUNT) | PIO_DELAY(T2 - 1, CLOCKLESS_PIO_SIDESET_COUNT)),
-        // do_zero
-        (pio_instr)(PIO_NOP | PIO_SIDESET(0, CLOCKLESS_PIO_SIDESET_COUNT) | PIO_DELAY(T2 - 1, CLOCKLESS_PIO_SIDESET_COUNT)),
+        // out x, 1; read next bit to x
+        (pio_instr)(PIO_INSTR_OUT | PIO_OUT_DST_X | PIO_OUT_CNT(1)),
+        // set pins, 1 [T1 - 1]; set output high for T1
+        (pio_instr)(PIO_INSTR_SET | PIO_SET_DST_PINS | PIO_SET_DATA(1) | PIO_DELAY(T1 - 1, CLOCKLESS_PIO_SIDESET_COUNT)),
+        // mov pins, x [T2 - 1]; set output to X for T2
+        (pio_instr)(PIO_INSTR_MOV | PIO_MOV_DST_PINS | PIO_MOV_SRC_X | PIO_DELAY(T2 - 1, CLOCKLESS_PIO_SIDESET_COUNT)),
+        // set pins, 0 [T3 - 2] // set output low for T3 (minus two because we'll also read next bit using one instruction during this time)
+        (pio_instr)(PIO_INSTR_SET | PIO_SET_DST_PINS | PIO_SET_DATA(0) | PIO_DELAY(T3 - 2, CLOCKLESS_PIO_SIDESET_COUNT)),
         // wrap
     };
     

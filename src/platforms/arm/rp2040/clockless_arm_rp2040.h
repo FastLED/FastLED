@@ -171,7 +171,8 @@ public:
         pio_sm_set_consecutive_pindirs(pio, sm, DATA_PIN, 1, true);
         
         pio_sm_config c = clockless_pio_program_get_default_config(offset);
-        sm_config_set_sideset_pins(&c, DATA_PIN);
+        sm_config_set_set_pins(&c, DATA_PIN, 1);
+        sm_config_set_out_pins(&c, DATA_PIN, 1);
         sm_config_set_out_shift(&c, false, true, 32);
         
         // uncommenting this makes the FIFO 8 words long,
