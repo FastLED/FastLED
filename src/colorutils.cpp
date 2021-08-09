@@ -62,6 +62,45 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
 }
 
 
+void fill_rainbow_endless(struct CRGB* targetArray, int numToFill, uint8_t initialhue)
+{
+    if (numToFill == 0) return;  // avoiding div/0
+
+    CHSV hsv;
+    hsv.hue = initialhue;
+    hsv.val = 255;
+    hsv.sat = 240;
+
+    const uint16_t hueChange = 65536 / (uint16_t)numToFill;  // hue change for each LED, * 256 for precision
+    uint16_t hueOffset = 0;  // offset for hue value, with precision (*256)
+
+    for (int i = 0; i < numToFill; ++i) {
+        targetArray[i] = hsv;
+        hueOffset += hueChange;  // increase precise offset
+        hsv.hue = initialhue + (uint8_t)(hueOffset >> 8);  // assign new hue with precise offset (as 8-bit)
+    }
+}
+
+void fill_rainbow_endless(struct CHSV* targetArray, int numToFill, uint8_t initialhue)
+{
+    if (numToFill == 0) return;  // avoiding div/0
+
+    CHSV hsv;
+    hsv.hue = initialhue;
+    hsv.val = 255;
+    hsv.sat = 240;
+
+    const uint16_t hueChange = 65536 / (uint16_t)numToFill;  // hue change for each LED, * 256 for precision
+    uint16_t hueOffset = 0;  // offset for hue value, with precision (*256)
+
+    for (int i = 0; i < numToFill; ++i) {
+        targetArray[i] = hsv;
+        hueOffset += hueChange;  // increase precise offset
+        hsv.hue = initialhue + (uint8_t)(hueOffset >> 8);  // assign new hue with precise offset (as 8-bit)
+    }
+}
+
+
 void fill_gradient_RGB( CRGB* leds,
                    uint16_t startpos, CRGB startcolor,
                    uint16_t endpos,   CRGB endcolor )

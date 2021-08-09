@@ -37,6 +37,21 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
                    uint8_t deltahue = 5);
 
 
+/// fill_rainbow_endless - fill a range of LEDs with a rainbow of colors, at
+///                        full saturation and full value (brightness),
+///                        so that the hues are continuous between the end
+///                        of the strip and the beginning
+void fill_rainbow_endless(struct CRGB* targetArray, int numToFill,
+                          uint8_t initialhue);
+
+/// fill_rainbow_endless - fill a range of LEDs with a rainbow of colors, at
+///                        full saturation and full value (brightness),
+///                        so that the hues are continuous between the end
+///                        of the strip and the beginning
+void fill_rainbow_endless(struct CHSV* targetArray, int numToFill,
+                          uint8_t initialhue);
+
+
 // fill_gradient - fill an array of colors with a smooth HSV gradient
 //                 between two specified HSV colors.
 //                 Since 'hue' is a value around a color wheel,
