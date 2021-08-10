@@ -56,10 +56,10 @@ protected:
 			next_mark = ARM_DWT_CYCCNT + off[0];
 			FastPin<DATA_PIN>::hi();
 			if(b&0x80) {
-				while((next_mark - ARM_DWT_CYCCNT) > off[1]);
+				while((next_mark - ARM_DWT_CYCCNT) > off[2]);
 				FastPin<DATA_PIN>::lo();
 			} else {
-				while((next_mark - ARM_DWT_CYCCNT) > off[2]);
+				while((next_mark - ARM_DWT_CYCCNT) > off[1]);
 				FastPin<DATA_PIN>::lo();
 			}
 			b <<= 1;
@@ -73,7 +73,7 @@ protected:
 			while((next_mark - ARM_DWT_CYCCNT) > off[2]);
 			FastPin<DATA_PIN>::lo();
 		} else {
-			while((next_mark - ARM_DWT_CYCCNT) > off[2]);
+			while((next_mark - ARM_DWT_CYCCNT) > off[1]);
 			FastPin<DATA_PIN>::lo();
 		}
 	}
