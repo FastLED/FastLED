@@ -66,7 +66,7 @@ protected:
 		}
 
 		while(ARM_DWT_CYCCNT < next_mark);
-		next_mark = ARM_DWT_CYCCNT + off[1];
+		next_mark = ARM_DWT_CYCCNT + off[0];
 		FastPin<DATA_PIN>::hi();
 
 		if(b&0x80) {
