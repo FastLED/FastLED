@@ -10,6 +10,12 @@ name: build
 jobs:
 
   build:
+    strategy:
+      matrix:
+        platforms: [uno, esp32dev, esp01, yun, digix, teensy30]
+
+    env:
+      BOARDS: ${{ matrix.platforms }}
     runs-on: ubuntu-20.04
     steps:
       - name: checkout code
