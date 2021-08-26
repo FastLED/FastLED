@@ -495,6 +495,38 @@ LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
     uint16_t partial;
     uint8_t result;
 
+#if (FASTLED_SCALE8_FIXED == 1)
+
+    // with SCALE8_FIXED, the algorithm above is:
+    // result = A*(255-amountOfB) + A + B*(amountOfB) + B
+
+    // however, we can rearrange that to:
+    // result = 256*A + B - A*amountOfB + B*amountOfB
+
+    // 1 or 2 cycles depending on how the compiler optimises
+    partial = (a << 8) + b;
+
+    // 7 cycles
+    asm volatile (
+        "  mul %[a], %[amountOfB]        \n\t"
+        "  sub %A[partial], r0           \n\t"
+        "  sbc %B[partial], r1           \n\t"
+        "  mul %[b], %[amountOfB]        \n\t"
+        "  add %A[partial], r0           \n\t"
+        "  adc %B[partial], r1           \n\t"
+        "  clr __zero_reg__              \n\t"
+        : [partial] "+r" (partial)
+        : [amountOfB] "r" (amountOfB),
+          [a] "r" (a),
+          [b] "r" (b)
+        : "r0", "r1"
+    );
+
+#else
+
+    // non-SCALE8-fixed version
+
+    // 7 cycles
     asm volatile (
         /* partial = b * amountOfB */
         "  mul %[b], %[amountOfB]        \n\t"
@@ -510,23 +542,15 @@ LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
         "  adc %B[partial], r1           \n\t"
                   
         "  clr __zero_reg__              \n\t"
-                  
-#if (FASTLED_SCALE8_FIXED == 1)
-        /* partial += a */
-        "  add %A[partial], %[a]         \n\t"
-        "  adc %B[partial], __zero_reg__ \n\t"
-                  
-        // partial += b
-        "  add %A[partial], %[b]         \n\t"
-        "  adc %B[partial], __zero_reg__ \n\t"
-#endif
-                  
+                        
         : [partial] "=r" (partial),
           [amountOfB] "+a" (amountOfB)
         : [a] "a" (a),
           [b] "a" (b)
         : "r0", "r1"
     );
+
+#endif
     
     result = partial >> 8;
     
