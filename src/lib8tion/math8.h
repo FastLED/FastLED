@@ -504,7 +504,7 @@ LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
     // result = 256*A + B - A*amountOfB + B*amountOfB
 
     // 1 or 2 cycles depending on how the compiler optimises
-    partial = (a << 8) + b;
+    partial = (a << 8) | b;
 
     // 7 cycles
     asm volatile (
