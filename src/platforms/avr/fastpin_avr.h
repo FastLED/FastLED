@@ -68,7 +68,7 @@ typedef volatile uint8_t & reg8_t;
 
 #else
 
-// Others
+// Others AVR platforms
 #define _FL_IO(L,C) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L); _FL_DEFINE_PORT3(L, C, _R(PORT ## L));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
 
@@ -259,7 +259,6 @@ _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D);
 #pragma message "ATtiny2YZ or ATtiny4YZ have very limited storage. This library could use up to more than 100% of its flash size"
 
 #elif defined(__AVR_ATtinyxy4__)
-// Fixed error compiling for ATtiny1604/1614
 #define MAX_PIN 12
 _FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
 _FL_DEFPIN( 4, 3, B); _FL_DEFPIN( 5, 2, B); _FL_DEFPIN( 6, 1, B); _FL_DEFPIN( 7, 0, B); 

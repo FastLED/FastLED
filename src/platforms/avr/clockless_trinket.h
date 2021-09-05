@@ -171,14 +171,21 @@ protected:
 	}
 #define USE_ASM_MACROS
 
+
 #if defined(__AVR_ATmega4809__)
 // Not used - place holder so existing ASM_VARS macro can remain the same
 #define ASM_VAR_PORT "r" (*FastPin<DATA_PIN>::port())
+
 #elif defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__)
+// Probably unused - place holder so existing ASM_VARS macro can remain the same
 #define ASM_VAR_PORT "r" (((PORT_t*)FastPin<DATA_PIN>::port())->OUT)
+
 #else
+// existing ASM_VARS macro for other AVR platforms
 #define ASM_VAR_PORT "M" (FastPin<DATA_PIN>::port() - 0x20)
+
 #endif // ASM_VAR_PORT
+
 
 // The variables that our various asm statements use.  The same block of variables needs to be declared for
 // all the asm blocks because GCC is pretty stupid and it would clobber variables happily or optimize code away too aggressively
