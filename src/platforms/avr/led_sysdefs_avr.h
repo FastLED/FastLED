@@ -46,7 +46,10 @@ extern volatile unsigned long timer0_millis_count;
 #  elif defined(ATTINY_CORE)
 extern volatile unsigned long millis_timer_millis;
 #    define MS_COUNTER millis_timer_millis
-#  elif defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__) || defined(__AVR_ATmega4809__)
+#  elif defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__)
+extern volatile unsigned long timer_millis;
+#    define MS_COUNTER timer_millis
+#  elif defined(__AVR_ATmega4809__)
 extern volatile unsigned long timer_millis;
 #    define MS_COUNTER timer_millis
 #  else
