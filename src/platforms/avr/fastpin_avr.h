@@ -257,25 +257,6 @@ _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D); _FL_DEFPIN(22, 2, A);
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#elif defined(__AVR_ATmega4809__)
-
-#define MAX_PIN 21
-_FL_DEFPIN(0, 4, C); _FL_DEFPIN(1, 5, C); _FL_DEFPIN(2, 0, A); _FL_DEFPIN(3, 5, F);
-_FL_DEFPIN(4, 6, C); _FL_DEFPIN(5, 2, B); _FL_DEFPIN(6, 4, F); _FL_DEFPIN(7, 1, A);
-_FL_DEFPIN(8, 3, E); _FL_DEFPIN(9, 0, B); _FL_DEFPIN(10, 1, B); _FL_DEFPIN(11, 0, E);
-_FL_DEFPIN(12, 1, E); _FL_DEFPIN(13, 2, E); _FL_DEFPIN(14, 3, D); _FL_DEFPIN(15, 2, D);
-_FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19, 3, A);
-_FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D);
-
-#define SPI_DATA 11
-#define SPI_CLOCK 13
-#define SPI_SELECT 8
-#define AVR_HARDWARE_SPI 1
-#define HAS_HARDWARE_PIN_SUPPORT 1
-
-//#define SPI_UART0_DATA 1
-//#define SPI_UART0_CLOCK 4
-
 #elif defined(__AVR_ATtiny202__) || defined(__AVR_ATtiny204__) || defined(__AVR_ATtiny212__) || defined(__AVR_ATtiny214__)  || defined(__AVR_ATtiny402__) || defined(__AVR_ATtiny404__) || defined(__AVR_ATtiny406__) || defined(__AVR_ATtiny407__) || defined(__AVR_ATtiny412__) || defined(__AVR_ATtiny414__) || defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny417__)
 #pragma message "ATtiny2YZ or ATtiny4YZ have very limited storage. This library could use up to more than 100% of its flash size"
 
@@ -309,6 +290,25 @@ _FL_DEFPIN(16, 4, C); _FL_DEFPIN(17, 5, C); _FL_DEFPIN(18, 1, A); _FL_DEFPIN(19,
 _FL_DEFPIN(20, 3, A); _FL_DEFPIN(21, 0, A);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(__AVR_ATmega4809__)
+
+#define MAX_PIN 21
+_FL_DEFPIN(0, 4, C); _FL_DEFPIN(1, 5, C); _FL_DEFPIN(2, 0, A); _FL_DEFPIN(3, 5, F);
+_FL_DEFPIN(4, 6, C); _FL_DEFPIN(5, 2, B); _FL_DEFPIN(6, 4, F); _FL_DEFPIN(7, 1, A);
+_FL_DEFPIN(8, 3, E); _FL_DEFPIN(9, 0, B); _FL_DEFPIN(10, 1, B); _FL_DEFPIN(11, 0, E);
+_FL_DEFPIN(12, 1, E); _FL_DEFPIN(13, 2, E); _FL_DEFPIN(14, 3, D); _FL_DEFPIN(15, 2, D);
+_FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19, 3, A);
+_FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D);
+
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPI_SELECT 8
+#define AVR_HARDWARE_SPI 1
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+//#define SPI_UART0_DATA 1
+//#define SPI_UART0_CLOCK 4
 
 
 #elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328PB__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega8__)
