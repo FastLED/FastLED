@@ -562,10 +562,11 @@ public:
 	/// Get a reference to a registered controller
 	/// @returns a reference to the Nth controller
 	CLEDController & operator[](int x);
+	const CLEDController & operator[](int x) const;
 
 	/// Get the number of leds in the first controller
 	/// @returns the number of LEDs in the first controller
-	int size() { return (*this)[0].size(); }
+	int size() const { return (*this)[0].size(); }
 
 	/// Get a pointer to led data for the first controller
 	/// @returns pointer to the CRGB buffer for the first controller

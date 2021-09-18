@@ -39,14 +39,126 @@ typedef uint8_t EDitherMode;
 class CLEDController {
 protected:
     friend class CFastLED;
-    CRGB *m_Data;
-    CLEDController *m_pNext;
-    CRGB m_ColorCorrection;
-    CRGB m_ColorTemperature;
-    EDitherMode m_DitherMode;
-    int m_nLeds;
-    static CLEDController *m_pHead;
-    static CLEDController *m_pTail;
+    CRGB *m_Data = nullptr;
+    CLEDController *m_pNext = nullptr;
+    CRGB m_ColorCorrection = UncorrectedColor;
+    CRGB m_ColorTemperature = UncorrectedTemperature;
+    EDitherMode m_DitherMode = BINARY_DITHER;
+    int m_nLeds = 0;
+
+    ///
+    ///@brief CLEDControllerList implements the list of CLEDControllers (global)
+    ///
+    ///@warning Size limited to 255 controllers, do not insert more, or the size() function won't work correctly
+    ///
+    struct CLEDControllerList {
+        CLEDController* m_pHead = nullptr;
+        CLEDController* m_pTail = nullptr;
+        uint8_t m_size = 0U;
+
+        ///
+        ///@brief Add ptr to the list
+        ///
+        ///@param ptr controller to add
+        ///
+        void push(CLEDController* ptr) {
+            ptr->m_pNext = nullptr;
+            if (m_pHead == nullptr) {
+                m_pHead = ptr;
+            } else if (m_pTail != nullptr) {
+                m_pTail->m_pNext = ptr;
+            }
+            m_pTail = ptr;
+            ++m_size;
+        }
+
+        ///
+        ///@brief Size of the list
+        ///
+        ///@return uint8_t list size
+        ///
+        uint8_t size() const { return m_size; }
+
+        ///
+        ///@brief Access the CLEDController at index x
+        ///
+        ///@param x index
+        ///@return CLEDController& controller at index x or head if x >= size()
+        ///
+        CLEDController& operator[](int x) {
+            if (x >= size()) { return *m_pHead; }
+            // already checked if index x is out of range
+            // can skip checking against end iterator
+            auto it = begin();
+            for (; x != 0; ++it, --x) {}
+            return *it;
+        }
+
+        ///
+        ///@brief Access the CLEDController at index x
+        ///
+        ///@param x index
+        ///@return const CLEDController& controller at index x or head if x >= size()
+        ///
+        const CLEDController& operator[](int x) const {
+            if (x >= m_size) { return *m_pHead; }
+            // already checked if index x is out of range
+            // can skip checking against end iterator
+            auto it = begin();
+            for (; x != 0; ++it, --x) {}
+            return *it;
+        }
+
+        ///
+        ///@brief Iterator implementation for CLEDControllerList satisfying LegacyInputIterator requirements
+        ///
+        ///@tparam T value type
+        ///
+        template <typename T>
+        class iterator_impl {
+        public:
+            using value_type = T;
+            using reference = value_type&;
+            using pointer = value_type*;
+            using difference_type = ptrdiff_t;
+            // using iterator_category = std::input_iterator_tag; // tags not available
+
+            explicit iterator_impl(T* p) : ptr(p) {}
+
+            T& operator*() { return *ptr; }
+            const T& operator*() const { return *ptr; }
+            T* operator->() { return ptr; }
+            const T* operator->() const { return ptr; }
+
+            iterator_impl& operator++() {
+                ptr = ptr->next();
+                return *this;
+            }
+            iterator_impl operator++(int) & {
+                auto prev(*this);
+                ++(*this);
+                return prev;
+            }
+
+            friend bool operator==(const iterator_impl& lhs, const iterator_impl& rhs) { return lhs.ptr == rhs.ptr; }
+            friend bool operator!=(const iterator_impl& lhs, const iterator_impl& rhs) { return !(lhs == rhs); }
+
+        private:
+            T* ptr = nullptr;
+        };
+
+        using iterator = iterator_impl<CLEDController>;
+        using const_iterator = iterator_impl<const CLEDController>;
+
+        iterator begin() { return iterator(m_pHead); }
+        iterator end() { return iterator(nullptr); }
+        const_iterator begin() const { return const_iterator(m_pHead); }
+        const_iterator end() const { return const_iterator(nullptr); }
+        const_iterator cbegin() const { return begin(); }
+        const_iterator cend() const { return begin(); }
+    };
+
+    static CLEDControllerList list_;
 
     /// set all the leds on the controller to a given color
     ///@param data the crgb color to set the leds to
@@ -62,11 +174,8 @@ protected:
 
 public:
 	/// create an led controller object, add it to the chain of controllers
-    CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
-        m_pNext = NULL;
-        if(m_pHead==NULL) { m_pHead = this; }
-        if(m_pTail != NULL) { m_pTail->m_pNext = this; }
-        m_pTail = this;
+    CLEDController() {
+        list_.push(this);
     }
 
 	///initialize the LED controller
@@ -96,11 +205,14 @@ public:
     }
 
     /// get the first led controller in the chain of controllers
-    static CLEDController *head() { return m_pHead; }
-    /// get the next controller in the chain after this one.  will return NULL at the end of the chain
+    static CLEDController *head() { return list_.m_pHead; }
+    /// get the next controller in the chain after this one.  will return nullptr at the end of the chain
     CLEDController *next() { return m_pNext; }
+    const CLEDController *next() const { return m_pNext; }
 
-	/// set the default array of leds to be used by this controller
+    static CLEDControllerList &list() { return list_; }
+
+    /// set the default array of leds to be used by this controller
     CLEDController & setLeds(CRGB *data, int nLeds) {
         m_Data = data;
         m_nLeds = nLeds;
@@ -115,13 +227,15 @@ public:
     }
 
     /// How many leds does this controller manage?
-    virtual int size() { return m_nLeds; }
+    virtual int size() const { return m_nLeds; }
 
     /// Pointer to the CRGB array for this controller
     CRGB* leds() { return m_Data; }
+    const CRGB* leds() const { return m_Data; }
 
     /// Reference to the n'th item in the controller
     CRGB &operator[](int x) { return m_Data[x]; }
+    const CRGB &operator[](int x) const { return m_Data[x]; }
 
 	/// set the dithering mode for this controller to use
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }

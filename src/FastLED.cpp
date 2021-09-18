@@ -12,9 +12,9 @@ void *pSmartMatrix = NULL;
 
 CFastLED FastLED;
 
-CLEDController *CLEDController::m_pHead = NULL;
-CLEDController *CLEDController::m_pTail = NULL;
 static uint32_t lastshow = 0;
+
+CLEDController::CLEDControllerList CLEDController::list_{};
 
 uint32_t _frame_cnt=0;
 uint32_t _retry_cnt=0;
@@ -43,66 +43,52 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 }
 
 void CFastLED::show(uint8_t scale) {
-	// guard against showing too rapidly
-	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
-	lastshow = micros();
+    // guard against showing too rapidly
+    while (m_nMinMicros && ((micros() - lastshow) < m_nMinMicros));
+    lastshow = micros();
 
-	// If we have a function for computing power, use it!
-	if(m_pPowerFunc) {
-		scale = (*m_pPowerFunc)(scale, m_nPowerData);
-	}
+    // If we have a function for computing power, use it!
+    if (m_pPowerFunc) {
+        scale = (*m_pPowerFunc)(scale, m_nPowerData);
+    }
 
-	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		uint8_t d = pCur->getDither();
-		if(m_nFPS < 100) { pCur->setDither(0); }
-		pCur->showLeds(scale);
-		pCur->setDither(d);
-		pCur = pCur->next();
-	}
-	countFPS();
+    for (auto& cur : CLEDController::list()) {
+        uint8_t d = cur.getDither();
+        if (m_nFPS < 100) { cur.setDither(0); }
+        cur.showLeds(scale);
+        cur.setDither(d);
+    }
+    countFPS();
 }
 
 int CFastLED::count() {
-    int x = 0;
-	CLEDController *pCur = CLEDController::head();
-	while( pCur) {
-        ++x;
-		pCur = pCur->next();
-	}
-    return x;
+    return CLEDController::list().size();
 }
 
-CLEDController & CFastLED::operator[](int x) {
-	CLEDController *pCur = CLEDController::head();
-	while(x-- && pCur) {
-		pCur = pCur->next();
-	}
-	if(pCur == NULL) {
-		return *(CLEDController::head());
-	} else {
-		return *pCur;
-	}
+CLEDController& CFastLED::operator[](int x) {
+    return CLEDController::list()[x];
 }
 
-void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
-	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
-	lastshow = micros();
+const CLEDController& CFastLED::operator[](int x) const {
+    return CLEDController::list()[x];
+}
 
-	// If we have a function for computing power, use it!
-	if(m_pPowerFunc) {
-		scale = (*m_pPowerFunc)(scale, m_nPowerData);
-	}
+void CFastLED::showColor(const struct CRGB& color, uint8_t scale) {
+    while (m_nMinMicros && ((micros() - lastshow) < m_nMinMicros)) ;
+    lastshow = micros();
 
-	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		uint8_t d = pCur->getDither();
-		if(m_nFPS < 100) { pCur->setDither(0); }
-		pCur->showColor(color, scale);
-		pCur->setDither(d);
-		pCur = pCur->next();
-	}
-	countFPS();
+    // If we have a function for computing power, use it!
+    if (m_pPowerFunc) {
+        scale = (*m_pPowerFunc)(scale, m_nPowerData);
+    }
+
+    for (auto& cur : CLEDController::list()) {
+        uint8_t d = cur.getDither();
+        if (m_nFPS < 100) { cur.setDither(0); }
+        cur.showColor(color, scale);
+        cur.setDither(d);
+    }
+    countFPS();
 }
 
 void CFastLED::clear(bool writeData) {
@@ -113,11 +99,9 @@ void CFastLED::clear(bool writeData) {
 }
 
 void CFastLED::clearData() {
-	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		pCur->clearLedData();
-		pCur = pCur->next();
-	}
+    for (auto& cur : CLEDController::list()) {
+        cur.clearLedData();
+    }
 }
 
 void CFastLED::delay(unsigned long ms) {
@@ -134,28 +118,22 @@ void CFastLED::delay(unsigned long ms) {
 	while((millis()-start) < ms);
 }
 
-void CFastLED::setTemperature(const struct CRGB & temp) {
-	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		pCur->setTemperature(temp);
-		pCur = pCur->next();
-	}
+void CFastLED::setTemperature(const struct CRGB& temp) {
+    for (auto& cur : CLEDController::list()) {
+        cur.setTemperature(temp);
+    }
 }
 
-void CFastLED::setCorrection(const struct CRGB & correction) {
-	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		pCur->setCorrection(correction);
-		pCur = pCur->next();
-	}
+void CFastLED::setCorrection(const struct CRGB& correction) {
+    for (auto& cur : CLEDController::list()) {
+        cur.setCorrection(correction);
+    }
 }
 
-void CFastLED::setDither(uint8_t ditherMode)  {
-	CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-		pCur->setDither(ditherMode);
-		pCur = pCur->next();
-	}
+void CFastLED::setDither(uint8_t ditherMode) {
+    for (auto& cur : CLEDController::list()) {
+        cur.setDither(ditherMode);
+    }
 }
 
 //

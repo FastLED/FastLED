@@ -39,7 +39,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 	CMinWait<WAIT_TIME> mWait;
 
 public:
-	virtual int size() { return CLEDController::size() * LANES; }
+	int size() const override { return CLEDController::size() * LANES; }
 	virtual void init() {
         static_assert(LANES <= 8, "Maximum of 8 lanes for Due parallel controllers!");
         if(FIRST_PIN == PORTA_FIRST_PIN) {

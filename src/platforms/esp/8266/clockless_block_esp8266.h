@@ -25,7 +25,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 	CMinWait<WAIT_TIME> mWait;
 
 public:
-	virtual int size() { return CLEDController::size() * LANES; }
+	int size() const override { return CLEDController::size() * LANES; }
 
 	virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) {
 		mWait.wait();

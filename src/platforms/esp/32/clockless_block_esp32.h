@@ -26,7 +26,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
     CMinWait<WAIT_TIME> mWait;
 
 public:
-    virtual int size() { return CLEDController::size() * LANES; }
+    int size() const override { return CLEDController::size() * LANES; }
 
     virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) {
 	// mWait.wait();
@@ -45,7 +45,7 @@ public:
 	// long microsTaken = CLKS_TO_MICROS(clocks);
 	// MS_COUNTER += (1 + (microsTaken / 1000));
 	// #endif
-	
+
 	// mWait.mark();
     }
 
@@ -65,12 +65,12 @@ public:
 	initPin<15>();
 	mPinMask = FastPin<FIRST_PIN>::mask();
 	mPort = FastPin<FIRST_PIN>::port();
-	
+
 	// Serial.print("Mask is "); Serial.println(PORT_MASK);
     }
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
-    
+
     typedef union {
 	uint8_t bytes[8];
 	uint16_t shorts[4];
@@ -82,22 +82,22 @@ public:
     template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , register uint32_t & b2)  {
 	Lines b2 = b;
 	transpose8x1_noinline(b.bytes,b2.bytes);
-	
+
 	register uint8_t d = pixels.template getd<PX>(pixels);
 	register uint8_t scale = pixels.template getscale<PX>(pixels);
-	
+
 	for(register uint32_t i = 0; i < USED_LANES; ++i) {
 	    while((__clock_cycles() - last_mark) < (T1+T2+T3));
 	    last_mark = __clock_cycles();
 	    *FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
-	    
+
 	    uint32_t nword = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << REAL_FIRST_PIN;
 	    while((__clock_cycles() - last_mark) < (T1-6));
 	    *FastPin<FIRST_PIN>::cport() = nword;
-	    
+
 	    while((__clock_cycles() - last_mark) < (T1+T2));
 	    *FastPin<FIRST_PIN>::cport() = PORT_MASK << REAL_FIRST_PIN;
-	    
+
 	    b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 	}
 
@@ -105,11 +105,11 @@ public:
 	    while((__clock_cycles() - last_mark) < (T1+T2+T3));
 	    last_mark = __clock_cycles();
 	    *FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
-	    
+
 	    uint32_t nword = ((uint32_t)(~b2.bytes[7-i]) & PORT_MASK) << REAL_FIRST_PIN;
 	    while((__clock_cycles() - last_mark) < (T1-6));
 	    *FastPin<FIRST_PIN>::cport() = nword;
-	    
+
 	    while((__clock_cycles() - last_mark) < (T1+T2));
 	    *FastPin<FIRST_PIN>::cport() = PORT_MASK << REAL_FIRST_PIN;
 	}
@@ -118,36 +118,36 @@ public:
     // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
     // gcc will use register Y for the this pointer.
     static uint32_t showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) {
-	
+
 	// Setup the pixel controller and load/scale the first byte
 	Lines b0;
-	
+
 	for(int i = 0; i < USED_LANES; ++i) {
 	    b0.bytes[i] = allpixels.loadAndScale0(i);
 	}
 	allpixels.preStepFirstByteDithering();
-	
+
 	ets_intr_lock();
 	uint32_t _start = __clock_cycles();
 	uint32_t last_mark = _start;
-	
+
 	while(allpixels.has(1)) {
 	    // Write first byte, read next byte
 	    writeBits<8+XTRA0,1>(last_mark, b0, allpixels);
-	    
+
 	    // Write second byte, read 3rd byte
 	    writeBits<8+XTRA0,2>(last_mark, b0, allpixels);
 	    allpixels.advanceData();
-	    
+
 	    // Write third byte
 	    writeBits<8+XTRA0,0>(last_mark, b0, allpixels);
-	    
+
 #if (FASTLED_ALLOW_INTERRUPTS == 1)
 	    ets_intr_unlock();
 #endif
-	    
+
 	    allpixels.stepDithering();
-	    
+
 #if (FASTLED_ALLOW_INTERRUPTS == 1)
 	    ets_intr_lock();
 	    // if interrupts took longer than 45µs, punt on the current frame
@@ -156,7 +156,7 @@ public:
 	    }
 #endif
 	};
-	
+
 	ets_intr_unlock();
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 	++_frame_cnt;

@@ -21,7 +21,7 @@ class FlexibleInlineBlockClocklessController : public CPixelLEDController<RGB_OR
     CMinWait<WAIT_TIME> mWait;
 
 public:
-    virtual int size() { return CLEDController::size() * m_nActualLanes; }
+    int size() const override { return CLEDController::size() * m_nActualLanes; }
 
     // For each pin, if we've hit our lane count, break, otherwise set the pin to output,
     // store the bit offset in our offset array, add this pin to the write mask, and if this
