@@ -7,7 +7,7 @@ FASTLED_NAMESPACE_BEGIN
 #include <SPI.h>
 
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_RATE, SPIClass & _SPIObject, int _SPI_INDEX>
-class Teesy4HardwareSPIOutput {
+class Teensy4HardwareSPIOutput {
 	Selectable *m_pSelect;
 	uint32_t  m_bitCount;
 	uint32_t m_bitData;
@@ -23,8 +23,8 @@ class Teesy4HardwareSPIOutput {
 	}
 
 public:
-	Teesy4HardwareSPIOutput() { m_pSelect = NULL; m_bitCount = 0;}
-	Teesy4HardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; m_bitCount = 0;}
+	Teensy4HardwareSPIOutput() { m_pSelect = NULL; m_bitCount = 0;}
+	Teensy4HardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; m_bitCount = 0;}
 
 	// set the object representing the selectable -- ignore for now
 	void setSelect(Selectable *pSelect) { /* TODO */ }
