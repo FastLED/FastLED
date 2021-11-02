@@ -29,5 +29,3 @@ typedef unsigned long prog_uint32_t;
 // These can be overridden
 #   define FASTLED_ESP32_RAW_PIN_ORDER
 
-// #define cli() os_intr_lock();
-// #define sei() os_intr_lock();
