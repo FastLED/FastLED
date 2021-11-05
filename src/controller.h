@@ -13,11 +13,12 @@
 FASTLED_NAMESPACE_BEGIN
 
 #define RO(X) RGB_BYTE(RGB_ORDER, X)
-#define RGB_BYTE(RO,X) (((RO)>>(3*(2-(X)))) & 0x3)
+#define RGB_BYTE(RO,X) (((RO)>>(3*(3-(X)))) & 0x3)
 
-#define RGB_BYTE0(RO) ((RO>>6) & 0x3)
-#define RGB_BYTE1(RO) ((RO>>3) & 0x3)
-#define RGB_BYTE2(RO) ((RO) & 0x3)
+#define RGB_BYTE0(RO) ((RO>>9) & 0x3)
+#define RGB_BYTE1(RO) ((RO>>6) & 0x3)
+#define RGB_BYTE2(RO) ((RO>>3) & 0x3)
+#define RGB_BYTE3(RO) ((RO) & 0x3)
 
 #define MAX_PIXEL_SIZE 4
 
@@ -57,14 +58,14 @@ protected:
     ///@param scale the rgb scaling value for outputting color
     virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
 
-	/// write the passed in rgb data out to the leds managed by this controller
-	///@param data the rgb data to write out to the strip
-	///@param nLeds the number of leds being written out
-	///@param scale the rgb scaling to apply to each led before writing it out
+    /// write the passed in rgb data out to the leds managed by this controller
+    ///@param data the rgb data to write out to the strip
+    ///@param nLeds the number of leds being written out
+    ///@param scale the rgb scaling to apply to each led before writing it out
     virtual void show(const uint8_t *data, int pixelSize, int nLeds, CRGB scale) = 0;
 
 public:
-	/// create an led controller object, add it to the chain of controllers
+    /// create an led controller object, add it to the chain of controllers
     CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
         m_pNext = NULL;
         if(m_pHead==NULL) { m_pHead = this; }
@@ -72,11 +73,11 @@ public:
         m_pTail = this;
     }
 
-	///initialize the LED controller
-	virtual void init() = 0;
+    ///initialize the LED controller
+    virtual void init() = 0;
 
-	///clear out/zero out the given number of leds.
-	virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black); }
+    ///clear out/zero out the given number of leds.
+    virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black); }
 
     /// show function w/integer brightness, will scale for color correction and temperature
     void show(const uint8_t *data, int pixelSize, int nLeds, uint8_t brightness) {
@@ -93,7 +94,7 @@ public:
         show(m_Data, m_pixelSize, m_nLeds, getAdjustment(brightness));
     }
 
-	/// show the given color on the led strip
+    /// show the given color on the led strip
     void showColor(const struct CRGB & data, uint8_t brightness=255) {
         showColor(data, m_nLeds, getAdjustment(brightness));
     }
@@ -103,7 +104,7 @@ public:
     /// get the next controller in the chain after this one.  will return NULL at the end of the chain
     CLEDController *next() { return m_pNext; }
 
-	/// set the default array of leds to be used by this controller
+    /// set the default array of leds to be used by this controller
     CLEDController & setLeds(CRGB *data, int nLeds) {
         m_Data = (uint8_t*)data;
         m_pixelSize = 3;
@@ -119,7 +120,7 @@ public:
         return *this;
     }
 
-	/// zero out the led data managed by this controller
+    /// zero out the led data managed by this controller
     void clearLedData() {
         if(m_Data) {
             memset8((void*)m_Data, 0, sizeof(struct CRGB) * m_nLeds);
@@ -138,26 +139,26 @@ public:
     /// Reference to the n'th item in the controller
     CRGB &operator[](int x) { return *(CRGB*)(m_Data[x * m_pixelSize]); }
 
-	/// set the dithering mode for this controller to use
+    /// set the dithering mode for this controller to use
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
     /// get the dithering option currently set for this controller
     inline uint8_t getDither() { return m_DitherMode; }
 
-	/// the the color corrction to use for this controller, expressed as an rgb object
+    /// the the color corrction to use for this controller, expressed as an rgb object
     CLEDController & setCorrection(CRGB correction) { m_ColorCorrection = correction; return *this; }
     /// set the color correction to use for this controller
     CLEDController & setCorrection(LEDColorCorrection correction) { m_ColorCorrection = correction; return *this; }
     /// get the correction value used by this controller
     CRGB getCorrection() { return m_ColorCorrection; }
 
-	/// set the color temperature, aka white point, for this controller
+    /// set the color temperature, aka white point, for this controller
     CLEDController & setTemperature(CRGB temperature) { m_ColorTemperature = temperature; return *this; }
     /// set the color temperature, aka white point, for this controller
     CLEDController & setTemperature(ColorTemperature temperature) { m_ColorTemperature = temperature; return *this; }
     /// get the color temperature, aka whipe point, for this controller
     CRGB getTemperature() { return m_ColorTemperature; }
 
-	/// Get the combined brightness/color adjustment for this controller
+    /// Get the combined brightness/color adjustment for this controller
     CRGB getAdjustment(uint8_t scale) {
         return computeAdjustment(scale, m_ColorCorrection, m_ColorTemperature);
     }
