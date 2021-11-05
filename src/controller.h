@@ -19,6 +19,8 @@ FASTLED_NAMESPACE_BEGIN
 #define RGB_BYTE1(RO) ((RO>>3) & 0x3)
 #define RGB_BYTE2(RO) ((RO) & 0x3)
 
+#define MAX_PIXEL_SIZE 4
+
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
 #define DISABLE_DITHER 0x00
@@ -39,7 +41,8 @@ typedef uint8_t EDitherMode;
 class CLEDController {
 protected:
     friend class CFastLED;
-    CRGB *m_Data;
+    uint8_t *m_Data;
+    uint8_t m_pixelSize;
     CLEDController *m_pNext;
     CRGB m_ColorCorrection;
     CRGB m_ColorTemperature;
@@ -58,7 +61,7 @@ protected:
 	///@param data the rgb data to write out to the strip
 	///@param nLeds the number of leds being written out
 	///@param scale the rgb scaling to apply to each led before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
+    virtual void show(const uint8_t *data, int pixelSize, int nLeds, CRGB scale) = 0;
 
 public:
 	/// create an led controller object, add it to the chain of controllers
@@ -76,8 +79,8 @@ public:
 	virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black); }
 
     /// show function w/integer brightness, will scale for color correction and temperature
-    void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
-        show(data, nLeds, getAdjustment(brightness));
+    void show(const uint8_t *data, int pixelSize, int nLeds, uint8_t brightness) {
+        show(data, pixelSize, nLeds, getAdjustment(brightness));
     }
 
     /// show function w/integer brightness, will scale for color correction and temperature
@@ -87,7 +90,7 @@ public:
 
     /// show function using the "attached to this controller" led data
     void showLeds(uint8_t brightness=255) {
-        show(m_Data, m_nLeds, getAdjustment(brightness));
+        show(m_Data, m_pixelSize, m_nLeds, getAdjustment(brightness));
     }
 
 	/// show the given color on the led strip
@@ -102,7 +105,16 @@ public:
 
 	/// set the default array of leds to be used by this controller
     CLEDController & setLeds(CRGB *data, int nLeds) {
-        m_Data = data;
+        m_Data = (uint8_t*)data;
+        m_pixelSize = 3;
+        m_nLeds = nLeds;
+        return *this;
+    }
+
+    /// set the default array of leds to be used by this controller
+    CLEDController & setLeds(CRGBW *data, int nLeds) {
+        m_Data = (uint8_t*)data;
+        m_pixelSize = 4;
         m_nLeds = nLeds;
         return *this;
     }
@@ -118,10 +130,13 @@ public:
     virtual int size() { return m_nLeds; }
 
     /// Pointer to the CRGB array for this controller
-    CRGB* leds() { return m_Data; }
+    uint8_t* leds() { return m_Data; }
+
+    /// Pointer to the CRGB array for this controller
+    uint8_t pixelSize() { return m_pixelSize; }
 
     /// Reference to the n'th item in the controller
-    CRGB &operator[](int x) { return m_Data[x]; }
+    CRGB &operator[](int x) { return *(CRGB*)(m_Data[x * m_pixelSize]); }
 
 	/// set the dithering mode for this controller to use
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
@@ -177,10 +192,10 @@ public:
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF>
 struct PixelController {
         const uint8_t *mData;
-        int mLen,mLenRemaining;
-        uint8_t d[3];
-        uint8_t e[3];
-        CRGB mScale;
+        int mPixelSize,mLen,mLenRemaining;
+        uint8_t d[MAX_PIXEL_SIZE];
+        uint8_t e[MAX_PIXEL_SIZE];
+        uint    mScale[MAX_PIXEL_SIZE];
         int8_t mAdvance;
         int mOffsets[LANES];
 
@@ -188,11 +203,17 @@ struct PixelController {
             d[0] = other.d[0];
             d[1] = other.d[1];
             d[2] = other.d[2];
+            d[3] = other.d[3];
             e[0] = other.e[0];
             e[1] = other.e[1];
             e[2] = other.e[2];
+            e[3] = other.e[3];
+            mScale[0] = other.mScale[0];
+            mScale[1] = other.mScale[1];
+            mScale[2] = other.mScale[2];
+            mScale[3] = other.mScale[3];
             mData = other.mData;
-            mScale = other.mScale;
+            mPixelSize = other.mPixelSize;
             mAdvance = other.mAdvance;
             mLenRemaining = mLen = other.mLen;
             for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
@@ -207,21 +228,27 @@ struct PixelController {
           }
         }
 
-        PixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(const uint8_t *d, int pixelSize, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len) {
             enable_dithering(dither);
+            memcpy( mScale, &s, sizeof(CRGB) );
             mData += skip;
+            mPixelSize = pixelSize;
             mAdvance = (advance) ? 3+skip : 0;
             initOffsets(len);
         }
 
-        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len) {
             enable_dithering(dither);
+            memcpy( mScale, &s, sizeof(CRGB) );
+            mPixelSize = 3;
             mAdvance = 3;
             initOffsets(len);
         }
 
-        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len) {
             enable_dithering(dither);
+            memcpy( mScale, &s, sizeof(CRGB) );
+            mPixelSize = 3;
             mAdvance = 0;
             initOffsets(len);
         }
@@ -293,8 +320,8 @@ struct PixelController {
             // actual dithering.
 
             // Setup the initial D and E values
-            for(int i = 0; i < 3; ++i) {
-                    uint8_t s = mScale.raw[i];
+            for(int i = 0; i < MAX_PIXEL_SIZE; ++i) {
+                    uint8_t s = mScale[i];
                     e[i] = s ? (256/s) + 1 : 0;
                     d[i] = scale8(Q, e[i]);
 #if (FASTLED_SCALE8_FIXED == 1)
@@ -346,7 +373,7 @@ struct PixelController {
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & pc, uint8_t b) { return b ? qadd8(b, pc.d[RO(SLOT)]) : 0; }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & , uint8_t b, uint8_t d) { return b ? qadd8(b,d) : 0; }
 
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale[RO(SLOT)]); }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & , uint8_t b, uint8_t scale) { return scale8(b, scale); }
 
         // composite shortcut functions for loading, dithering, and scaling
@@ -360,30 +387,34 @@ struct PixelController {
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t advanceAndLoadAndScale(PixelController & pc, int lane, uint8_t scale) { pc.advanceData(); return pc.loadAndScale<SLOT>(pc, lane, scale); }
 
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t getd(PixelController & pc) { return pc.d[RO(SLOT)]; }
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t getscale(PixelController & pc) { return pc.mScale.raw[RO(SLOT)]; }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t getscale(PixelController & pc) { return pc.mScale[RO(SLOT)]; }
 
         // Helper functions to get around gcc stupidities
         __attribute__((always_inline)) inline uint8_t loadAndScale0(int lane, uint8_t scale) { return loadAndScale<0>(*this, lane, scale); }
         __attribute__((always_inline)) inline uint8_t loadAndScale1(int lane, uint8_t scale) { return loadAndScale<1>(*this, lane, scale); }
         __attribute__((always_inline)) inline uint8_t loadAndScale2(int lane, uint8_t scale) { return loadAndScale<2>(*this, lane, scale); }
+        __attribute__((always_inline)) inline uint8_t loadAndScale3(int lane, uint8_t scale) { return loadAndScale<3>(*this, lane, scale); }
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane, uint8_t scale) { return advanceAndLoadAndScale<0>(*this, lane, scale); }
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane, uint8_t scale) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane, scale); }
 
         __attribute__((always_inline)) inline uint8_t loadAndScale0(int lane) { return loadAndScale<0>(*this, lane); }
         __attribute__((always_inline)) inline uint8_t loadAndScale1(int lane) { return loadAndScale<1>(*this, lane); }
         __attribute__((always_inline)) inline uint8_t loadAndScale2(int lane) { return loadAndScale<2>(*this, lane); }
+        __attribute__((always_inline)) inline uint8_t loadAndScale3(int lane) { return loadAndScale<3>(*this, lane); }
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }
 
         __attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }
         __attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }
         __attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }
+        __attribute__((always_inline)) inline uint8_t loadAndScale3() { return loadAndScale<3>(*this); }
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }
 
         __attribute__((always_inline)) inline uint8_t getScale0() { return getscale<0>(*this); }
         __attribute__((always_inline)) inline uint8_t getScale1() { return getscale<1>(*this); }
         __attribute__((always_inline)) inline uint8_t getScale2() { return getscale<2>(*this); }
+        __attribute__((always_inline)) inline uint8_t getScale3() { return getscale<3>(*this); }
 };
 
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
@@ -403,8 +434,8 @@ protected:
     ///@param data the rgb data to write out to the strip
     ///@param nLeds the number of leds being written out
     ///@param scale the rgb scaling to apply to each led before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+    virtual void show(const uint8_t *data, int pixelSize, int nLeds, CRGB scale) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, pixelSize, nLeds, scale, getDither());
         showPixels(pixels);
     }
 

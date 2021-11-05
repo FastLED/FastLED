@@ -3,3 +3,5 @@
 /.vscode
 /docs/html
 /docs/latex
+
+*.pri

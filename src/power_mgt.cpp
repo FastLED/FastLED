@@ -26,6 +26,10 @@ static const uint8_t gRed_mW   = 16 * 5; // 16mA @ 5v = 80mW
 static const uint8_t gGreen_mW = 11 * 5; // 11mA @ 5v = 55mW
 static const uint8_t gBlue_mW  = 15 * 5; // 15mA @ 5v = 75mW
 static const uint8_t gDark_mW  =  1 * 5; //  1mA @ 5v =  5mW
+static const uint8_t gPixel_my[4] = {gRed_mW,
+                                    gGreen_mW,
+                                    gBlue_mW,
+                                    50};
 
 // Alternate calibration by RAtkins via pre-PSU wattage measurments;
 // these are all probably about 20%-25% too high due to PSU heat losses,
@@ -47,42 +51,43 @@ static const uint8_t gMCU_mW  =  25 * 5; // 25mA @ 5v = 125 mW
 static uint8_t  gMaxPowerIndicatorLEDPinNumber = 0; // default = Arduino onboard LED pin.  set to zero to skip this.
 
 
-uint32_t calculate_unscaled_power_mW( const CRGB* ledbuffer, uint16_t numLeds ) //25354
+uint32_t calculate_unscaled_power_mW( const uint8_t* ledbuffer, uint8_t pixelSize, uint16_t numLeds ) //25354
 {
-    uint32_t red32 = 0, green32 = 0, blue32 = 0;
-    const CRGB* firstled = &(ledbuffer[0]);
-    uint8_t* p = (uint8_t*)(firstled);
+    uint32_t pixelData[pixelSize];
+    memset((void*)pixelData, 0, sizeof(uint32_t) * 4);
+    uint8_t* p = (uint8_t*)(ledbuffer);
 
     uint16_t count = numLeds;
 
     // This loop might benefit from an AVR assembly version -MEK
     while( count) {
-        red32   += *p++;
-        green32 += *p++;
-        blue32  += *p++;
+        for( int i = 0 ; i < pixelSize ; ++i )
+        {
+            pixelData[i]   += *p++;
+        }
         --count;
     }
 
-    red32   *= gRed_mW;
-    green32 *= gGreen_mW;
-    blue32  *= gBlue_mW;
+    uint32_t total(0);
+    for( int i = 0 ; i < pixelSize ; ++i )
+    {
+        pixelData[i]   *= gPixel_my[i];
+        pixelData[i] >>= 8;
+        total += pixelData[i];
+    }
 
-    red32   >>= 8;
-    green32 >>= 8;
-    blue32  >>= 8;
-
-    uint32_t total = red32 + green32 + blue32 + (gDark_mW * numLeds);
+    total += (gDark_mW * numLeds);
 
     return total;
 }
 
 
-uint8_t calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA) {
-	return calculate_max_brightness_for_power_mW(ledbuffer, numLeds, target_brightness, max_power_V * max_power_mA);
+uint8_t calculate_max_brightness_for_power_vmA(const uint8_t* ledbuffer, uint8_t pixelSize, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_V, uint32_t max_power_mA) {
+    return calculate_max_brightness_for_power_mW(ledbuffer, pixelSize, numLeds, target_brightness, max_power_V * max_power_mA);
 }
 
-uint8_t calculate_max_brightness_for_power_mW(const CRGB* ledbuffer, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW) {
- 	uint32_t total_mW = calculate_unscaled_power_mW( ledbuffer, numLeds);
+uint8_t calculate_max_brightness_for_power_mW(const uint8_t* ledbuffer, uint8_t pixelSize, uint16_t numLeds, uint8_t target_brightness, uint32_t max_power_mW) {
+    uint32_t total_mW = calculate_unscaled_power_mW( ledbuffer, pixelSize, numLeds);
 
 	uint32_t requested_power_mW = ((uint32_t)total_mW * target_brightness) / 256;
 
@@ -103,7 +108,7 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32
 
     CLEDController *pCur = CLEDController::head();
 	while(pCur) {
-        total_mW += calculate_unscaled_power_mW( pCur->leds(), pCur->size());
+        total_mW += calculate_unscaled_power_mW( pCur->leds(), pCur->pixelSize(), pCur->size());
 		pCur = pCur->next();
 	}
 

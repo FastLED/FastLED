@@ -371,9 +371,9 @@ protected:
 		uint8_t advanceBy = pixels.advanceBy();
 		uint16_t count = pixels.mLen;
 
-		uint8_t s0 = pixels.mScale.raw[RO(0)];
-		uint8_t s1 = pixels.mScale.raw[RO(1)];
-		uint8_t s2 = pixels.mScale.raw[RO(2)];
+        uint8_t s0 = pixels.mScale[RO(0)];
+        uint8_t s1 = pixels.mScale[RO(1)];
+        uint8_t s2 = pixels.mScale[RO(2)];
 #if (FASTLED_SCALE8_FIXED==1)
 		s0++; s1++; s2++;
 #endif
