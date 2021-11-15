@@ -240,7 +240,11 @@ void IRAM_ATTR ESP32RMTController::startOnChannel(int channel)
     gOnChannel[channel] = this;
 
     // -- Assign the pin to this channel
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
+    rmt_set_gpio(mRMT_channel, RMT_MODE_TX, mPin, false);
+#else
     rmt_set_pin(mRMT_channel, RMT_MODE_TX, mPin);
+#endif
 
     if (FASTLED_RMT_BUILTIN_DRIVER) {
         // -- Use the built-in RMT driver to send all the data in one shot
@@ -275,11 +279,46 @@ void IRAM_ATTR ESP32RMTController::tx_start()
 {
     // rmt_tx_start(mRMT_channel, true);
     // Inline the code for rmt_tx_start, so it can be placed in IRAM
+#if CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32H2
+    // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
+    RMT.tx_conf[mRMT_channel].mem_rd_rst = 1;
+    RMT.tx_conf[mRMT_channel].mem_rd_rst = 0;
+    RMT.tx_conf[mRMT_channel].mem_rst = 1;
+    RMT.tx_conf[mRMT_channel].mem_rst = 0;
+    // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
+    RMT.int_clr.val = (1 << (mRMT_channel));
+    // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
+    RMT.int_ena.val |= (1 << mRMT_channel);
+    // rmt_ll_tx_start(&RMT, mRMT_channel)
+    RMT.tx_conf[mRMT_channel].conf_update = 1;
+    RMT.tx_conf[mRMT_channel].tx_start = 1;
+#elif CONFIG_IDF_TARGET_ESP32S3
+    // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
+    RMT.chnconf0[mRMT_channel].mem_rd_rst_n = 1;
+    RMT.chnconf0[mRMT_channel].mem_rd_rst_n = 0;
+    RMT.chnconf0[mRMT_channel].apb_mem_rst_n = 1;
+    RMT.chnconf0[mRMT_channel].apb_mem_rst_n = 0;
+    // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
+    RMT.int_clr.val = (1 << (mRMT_channel));
+    // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
+    RMT.int_ena.val |= (1 << mRMT_channel);
+    // rmt_ll_tx_start(&RMT, mRMT_channel)
+    RMT.chnconf0[mRMT_channel].conf_update_n = 1;
+    RMT.chnconf0[mRMT_channel].tx_start_n = 1;
+#elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+    // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
     RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
     RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
+    // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
+    RMT.int_clr.val = (1 << (mRMT_channel * 3));
+    // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
     RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
     RMT.int_ena.val |= (1 << (mRMT_channel * 3));
+    // rmt_ll_tx_start(&RMT, mRMT_channel)
     RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
+#else
+    #error Not yet implemented for unknown ESP32 target
+#endif
     mLastFill = __clock_cycles();
 }
 
@@ -299,10 +338,51 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
 
     // -- Turn off the interrupts
     // rmt_set_tx_intr_en(channel, false);
-    // Inline the code for rmt_tx_stop, so it can be placed in IRAM
+
+    // Inline the code for rmt_set_tx_intr_en(channel, false) and rmt_tx_stop, so it can be placed in IRAM
+#if CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32H2
+    // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
+    RMT.int_ena.val &= ~(1 << channel);
+    // rmt_ll_tx_stop(&RMT, channel)
+    RMT.tx_conf[channel].tx_stop = 1;
+    RMT.tx_conf[channel].conf_update = 1;
+    // rmt_ll_tx_reset_pointer(&RMT, channel)
+    RMT.tx_conf[channel].mem_rd_rst = 1;
+    RMT.tx_conf[channel].mem_rd_rst = 0;
+    RMT.tx_conf[channel].mem_rst = 1;
+    RMT.tx_conf[channel].mem_rst = 0;
+#elif CONFIG_IDF_TARGET_ESP32S3
+    // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
+    RMT.int_ena.val &= ~(1 << channel);
+    // rmt_ll_tx_stop(&RMT, channel)
+    RMT.chnconf0[channel].tx_stop_n = 1;
+    RMT.chnconf0[channel].conf_update_n = 1;
+    // rmt_ll_tx_reset_pointer(&RMT, channel)
+    RMT.chnconf0[channel].mem_rd_rst_n = 1;
+    RMT.chnconf0[channel].mem_rd_rst_n = 0;
+    RMT.chnconf0[channel].apb_mem_rst_n = 1;
+    RMT.chnconf0[channel].apb_mem_rst_n = 0;
+#elif CONFIG_IDF_TARGET_ESP32S2
+    // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
     RMT.int_ena.val &= ~(1 << (channel * 3));
+    // rmt_ll_tx_stop(&RMT, channel)
+    RMT.conf_ch[channel].conf1.tx_stop = 1;
+    // rmt_ll_tx_reset_pointer(&RMT, channel)
     RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
     RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
+#elif CONFIG_IDF_TARGET_ESP32
+    // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
+    RMT.int_ena.val &= ~(1 << (channel * 3));
+    // rmt_ll_tx_stop(&RMT, channel)
+    RMT.conf_ch[channel].conf1.tx_start = 0;
+    RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
+    RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
+    // rmt_ll_tx_reset_pointer(&RMT, channel)
+    // RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
+    // RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
+#else
+    #error Not yet implemented for unknown ESP32 target
+#endif
 
     gOnChannel[channel] = NULL;
     gNumDone++;
@@ -337,11 +417,17 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
     uint8_t channel;
 
     for (channel = 0; channel < gMaxChannel; channel++) {
+        #if CONFIG_IDF_TARGET_ESP32S2
         int tx_done_bit = channel * 3;
-        #ifdef CONFIG_IDF_TARGET_ESP32S2
         int tx_next_bit = channel + 12;
-        #else
+        #elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32H2
+        int tx_done_bit = channel;
+        int tx_next_bit = channel + 8;
+        #elif CONFIG_IDF_TARGET_ESP32
+        int tx_done_bit = channel * 3;
         int tx_next_bit = channel + 24;
+        #else
+        #error Not yet implemented for unknown ESP32 target
         #endif
 
         ESP32RMTController * pController = gOnChannel[channel];

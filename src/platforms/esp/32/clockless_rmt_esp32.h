@@ -136,7 +136,11 @@ extern void spi_flash_op_unlock(void);
 
 __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
   uint32_t cyc;
+#ifdef FASTLED_XTENSA
   __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
+#else
+  cyc = cpu_hal_get_cycle_count();
+#endif
   return cyc;
 }
 
@@ -164,11 +168,23 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define FASTLED_RMT_MEM_BLOCKS 2
 #endif
 
-#define MAX_PULSES         (64 * FASTLED_RMT_MEM_BLOCKS) /* One block has a 64 "pulse" buffer */
+// 64 for ESP32, ESP32S2
+// 48 for ESP32S3, ESP32C3, ESP32H2
+#ifndef FASTLED_RMT_MEM_WORDS_PER_CHANNEL
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
+#define FASTLED_RMT_MEM_WORDS_PER_CHANNEL SOC_RMT_MEM_WORDS_PER_CHANNEL
+#else
+// ESP32 value (only chip variant supported on older IDF)
+#define FASTLED_RMT_MEM_WORDS_PER_CHANNEL 64 
+#endif 
+#endif
+
+#define MAX_PULSES (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS)
 #define PULSES_PER_FILL    (MAX_PULSES / 2)              /* Half of the channel buffer */
 
 // -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
-#define F_CPU_RMT                   (  80000000L)
+// RMT Clock is typically APB CLK, which is 80MHz on most devices, but 40MHz on ESP32-H2
+#define F_CPU_RMT                   (  APB_CLK_FREQ )
 #define RMT_CYCLES_PER_SEC          (F_CPU_RMT/DIVIDER)
 #define RMT_CYCLES_PER_ESP_CYCLE    (F_CPU / RMT_CYCLES_PER_SEC)
 #define ESP_TO_RMT_CYCLES(n)        ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
@@ -188,12 +204,17 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #define FASTLED_RMT_MAX_CONTROLLERS 32
 #endif
 
-// -- Max RMT channel (default to 8 on ESP32 and 4 on ESP32-S2)
+// -- Max RMT TX channel
 #ifndef FASTLED_RMT_MAX_CHANNELS
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
+// 8 for (ESP32)  4 for (ESP32S2, ESP32S3)  2 for (ESP32C3, ESP32H2)
+#define FASTLED_RMT_MAX_CHANNELS SOC_RMT_TX_CANDIDATES_PER_GROUP
+#else
 #ifdef CONFIG_IDF_TARGET_ESP32S2
 #define FASTLED_RMT_MAX_CHANNELS 4
 #else
 #define FASTLED_RMT_MAX_CHANNELS 8
+#endif
 #endif
 #endif
 
