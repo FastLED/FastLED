@@ -316,8 +316,8 @@ private:
     // -- The actual controller object for ESP32
     ESP32RMTController mRMTController;
 
-    // -- This instantiation forces a check on the pin choice
-    FastPin<DATA_PIN> mFastPin;
+    // -- Verify that the pin is valid
+    static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
 
 public:
 

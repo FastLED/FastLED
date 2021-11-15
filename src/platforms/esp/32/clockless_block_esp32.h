@@ -21,7 +21,10 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
     typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
-    data_t mPinMask;
+	// Verify that the pin is valid
+	static_assert(FastPin<FIRST_PIN>::validpin(), "Invalid pin specified");
+
+	data_t mPinMask;
     data_ptr_t mPort;
     CMinWait<WAIT_TIME> mWait;
 
