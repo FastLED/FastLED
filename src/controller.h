@@ -91,6 +91,8 @@ public:
 
     /// show function using the "attached to this controller" led data
     void showLeds(uint8_t brightness=255) {
+//        Serial.print("showLeds() - brightness: ");
+//        Serial.println(brightness);
         show(m_Data, m_pixelSize, m_nLeds, getAdjustment(brightness));
     }
 
@@ -231,16 +233,20 @@ struct PixelController {
 
         PixelController(const uint8_t *d, int pixelSize, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len) {
             enable_dithering(dither);
-            memcpy( mScale, &s, sizeof(CRGB) );
+            mScale[0] = s.r;
+            mScale[1] = s.g;
+            mScale[2] = s.b;
             mData += skip;
             mPixelSize = pixelSize;
-            mAdvance = (advance) ? 3+skip : 0;
+            mAdvance = (advance) ? pixelSize+skip : 0;
             initOffsets(len);
         }
 
         PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len) {
             enable_dithering(dither);
-            memcpy( mScale, &s, sizeof(CRGB) );
+            mScale[0] = s.r;
+            mScale[1] = s.g;
+            mScale[2] = s.b;
             mPixelSize = 3;
             mAdvance = 3;
             initOffsets(len);
@@ -248,7 +254,9 @@ struct PixelController {
 
         PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len) {
             enable_dithering(dither);
-            memcpy( mScale, &s, sizeof(CRGB) );
+            mScale[0] = s.r;
+            mScale[1] = s.g;
+            mScale[2] = s.b;
             mPixelSize = 3;
             mAdvance = 0;
             initOffsets(len);
@@ -333,6 +341,10 @@ struct PixelController {
 #endif
         }
 
+        __attribute__((always_inline)) inline uint8_t pixelSize() const {
+            return mPixelSize;
+        }
+
         // Do we have n pixels left to process?
         __attribute__((always_inline)) inline bool has(int n) {
             return mLenRemaining >= n;
@@ -342,7 +354,7 @@ struct PixelController {
         void enable_dithering(EDitherMode dither) {
             switch(dither) {
                 case BINARY_DITHER: init_binary_dithering(); break;
-                default: d[0]=d[1]=d[2]=e[0]=e[1]=e[2]=0; break;
+                default: d[0]=d[1]=d[2]=d[3]=e[0]=e[1]=e[2]=e[3]=0; break;
             }
         }
 
@@ -361,6 +373,7 @@ struct PixelController {
                 d[0] = e[0] - d[0];
                 d[1] = e[1] - d[1];
                 d[2] = e[2] - d[2];
+                d[3] = e[3] - d[3];
         }
 
         // Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately
@@ -368,13 +381,20 @@ struct PixelController {
             d[RO(0)] = e[RO(0)] - d[RO(0)];
         }
 
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { return pc.mData[RO(SLOT)]; }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { int index = RO(SLOT);
+//                                                                                                                  Serial.print("loadByte - SLOT: ");
+//                                                                                                                  Serial.print(SLOT);
+//                                                                                                                  Serial.print(", index: ");
+//                                                                                                                  Serial.print(index);
+                                                                                                                  return pc.mData[index]; }
+
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
 
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & pc, uint8_t b) { return b ? qadd8(b, pc.d[RO(SLOT)]) : 0; }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t dither(PixelController & , uint8_t b, uint8_t d) { return b ? qadd8(b,d) : 0; }
 
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale[RO(SLOT)]); }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { uint8_t scaleOut(scale8(b, pc.mScale[RO(SLOT)]));
+                                                                                                                          return scaleOut; }
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & , uint8_t b, uint8_t scale) { return scale8(b, scale); }
 
         // composite shortcut functions for loading, dithering, and scaling
@@ -405,6 +425,8 @@ struct PixelController {
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }
 
+        template<int SLOT>
+        __attribute__((always_inline)) inline uint8_t loadAndScale() { return loadAndScale<SLOT>(*this); }
         __attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }
         __attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }
         __attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }
@@ -436,6 +458,13 @@ protected:
     ///@param nLeds the number of leds being written out
     ///@param scale the rgb scaling to apply to each led before writing it out
     virtual void show(const uint8_t *data, int pixelSize, int nLeds, CRGB scale) {
+        // Serial.print("scale - R: ");
+        // Serial.print(scale.r);
+        // Serial.print(", G: ");
+        // Serial.print(scale.g);
+        // Serial.print(", B: ");
+        // Serial.println(scale.b);
+
         PixelController<RGB_ORDER, LANES, MASK> pixels(data, pixelSize, nLeds, scale, getDither());
         showPixels(pixels);
     }

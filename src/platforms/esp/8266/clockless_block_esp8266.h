@@ -27,7 +27,7 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 public:
 	virtual int size() { return CLEDController::size() * LANES; }
 
-	virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) {
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) {
 		mWait.wait();
 		/*uint32_t clocks = */
 		int cnt=FASTLED_INTERRUPT_RETRY_COUNT;

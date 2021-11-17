@@ -26,6 +26,31 @@ void fill_solid( struct CHSV * targetArray, int numToFill,
     }
 }
 
+void fill_solid(uint8_t* targetArray, uint8_t pixelSize, int numToFill, const CRGB& colour)
+{
+//    Serial.print("fill_Solid - pixelSize: ");
+//    Serial.print(pixelSize);
+//    Serial.print(", numToFill: ");
+//    Serial.println(numToFill);
+
+    uint8_t* pCurrentPixel(targetArray);
+    for( int i = 0; i < numToFill; ++i) {
+        CRGB& targetPixel = *(CRGB*)pCurrentPixel;
+        targetPixel = colour;
+        pCurrentPixel += pixelSize;
+    }
+}
+
+void fill_solid(uint8_t* targetArray, uint8_t pixelSize, int numToFill, const struct CRGBW& colour)
+{
+    uint8_t* pCurrentPixel(targetArray);
+    for( int i = 0; i < numToFill; ++i) {
+        CRGBW& targetPixel = *(CRGBW*)pCurrentPixel;
+        targetPixel = colour;
+        pCurrentPixel += pixelSize;
+    }
+}
+
 
 // void fill_solid( struct CRGB* targetArray, int numToFill,
 // 				 const struct CHSV& hsvColor)

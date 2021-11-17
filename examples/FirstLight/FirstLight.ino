@@ -23,7 +23,7 @@
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
 // ground, and power), like the LPD8806 define both DATA_PIN and CLOCK_PIN
 // Clock pin only needed for SPI based chipsets when not using hardware SPI
-#define DATA_PIN 4
+#define DATA_PIN 2
 #define CLOCK_PIN 13
 
 // This is an array of leds.  One item for each led in your strip.
@@ -38,6 +38,28 @@ void setup() {
     while (!Serial);
 	// sanity check delay - allows reprogramming if accidently blowing power w/leds
    	delay(2000);
+
+    Serial.println("setup()");
+    Serial.print("EOrder GRB - value: ");
+    Serial.print(GRB);
+    Serial.print(", r: ");
+    Serial.print(RGB_BYTE(GRB, 0));
+    Serial.print(", g: ");
+    Serial.print(RGB_BYTE(GRB, 1));
+    Serial.print(", b: ");
+    Serial.println(RGB_BYTE(GRB, 2));
+
+    Serial.println("setup()");
+    Serial.print("EOrder RGBW - value: ");
+    Serial.print(RGBW);
+    Serial.print(", r: ");
+    Serial.print(RGB_BYTE(RGBW, 0));
+    Serial.print(", g: ");
+    Serial.print(RGB_BYTE(RGBW, 1));
+    Serial.print(", b: ");
+    Serial.print(RGB_BYTE(RGBW, 2));
+    Serial.print(", w: ");
+    Serial.println(RGB_BYTE(RGBW, 3));
 
     // Uncomment/edit one of the following lines for your leds arrangement.
     // ## Clockless types ##

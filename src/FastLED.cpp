@@ -39,7 +39,18 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	pLed->init();
 	pLed->setLeds(data + nOffset, nLeds);
 	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
-	return *pLed;
+    return *pLed;
+}
+
+CLEDController& CFastLED::addLeds(CLEDController* pLed, CRGBW* data, int nLedsOrOffset, int nLedsIfOffset)
+{
+    int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
+    int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
+
+    pLed->init();
+    pLed->setLeds(data + nOffset, nLeds);
+    FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
+    return *pLed;
 }
 
 void CFastLED::show(uint8_t scale) {

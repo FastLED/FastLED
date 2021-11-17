@@ -149,6 +149,9 @@ struct CRGB {
 
     /// allow copy construction
     inline CRGB(const CRGB& rhs) __attribute__((always_inline)) = default;
+
+    inline CRGB(const CRGBW& rhs) __attribute__((always_inline));
+
     /// allow construction from HSV color
     inline CRGB(const CHSV& rhs) __attribute__((always_inline))
     {
@@ -157,6 +160,9 @@ struct CRGB {
 
     /// allow assignment from one RGB struct to another
     inline CRGB& operator= (const CRGB& rhs) __attribute__((always_inline)) = default;
+
+    /// allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
+    inline CRGB& operator= (const CRGBW& rhs) __attribute__((always_inline));
 
     /// allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     inline CRGB& operator= (const uint32_t colorcode) __attribute__((always_inline))
@@ -787,7 +793,13 @@ struct CRGBW {
 
     /// allow construction from R, G, B
     inline CRGBW( uint8_t ir, uint8_t ig, uint8_t ib)  __attribute__((always_inline))
-        : r(ir), g(ig), b(ib)
+        : r(ir), g(ig), b(ib), w(0)
+    {
+    }
+
+    /// allow construction from R, G, B
+    inline CRGBW( uint8_t ir, uint8_t ig, uint8_t ib, uint8_t iw)  __attribute__((always_inline))
+        : r(ir), g(ig), b(ib), w(iw)
     {
     }
 
@@ -1367,7 +1379,20 @@ inline CRGB operator%( const CRGB& p1, uint8_t d)
     return retval;
 }
 
+inline CRGB::CRGB( const CRGBW& rhs )
+{
+    r = rhs.r;
+    g = rhs.g;
+    b = rhs.b;
+}
 
+inline CRGB& CRGB::operator=( const CRGBW& rhs )
+{
+    r = rhs.r;
+    g = rhs.g;
+    b = rhs.b;
+    return *this;
+}
 
 /// RGB orderings, used when instantiating controllers to determine what
 /// order the controller should send RGB data out in, RGB being the default

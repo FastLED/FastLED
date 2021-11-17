@@ -35,7 +35,7 @@ public:
 
 protected:
 
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
     mWait.wait();
 		int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
     while((showRGBInternal(pixels)==0) && cnt--) {
@@ -50,11 +50,11 @@ protected:
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
 
-	template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(register uint32_t & last_mark, register uint32_t b)  {
+    template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(register uint32_t & last_mark, register uint32_t b)  {
     b <<= 24; b = ~b;
     for(register uint32_t i = BITS; i > 0; --i) {
       while((__clock_cycles() - last_mark) < (T1+T2+T3));
-			last_mark = __clock_cycles();
+            last_mark = __clock_cycles();
       FastPin<DATA_PIN>::hi();
 
       while((__clock_cycles() - last_mark) < T1);
@@ -64,23 +64,23 @@ protected:
       while((__clock_cycles() - last_mark) < (T1+T2));
       FastPin<DATA_PIN>::lo();
 
-			// even with interrupts disabled, the NMI interupt seems to cause
-			// timing issues here. abort the frame if one bit took to long. if the
-			// last of the 24 bits has been sent already, it is too late
-			// this fixes the flickering first pixel that started to occur with
-			// framework version 3.0.0
-			if ((__clock_cycles() - last_mark) >= (T1 + T2 + T3 - 5)) {
-				return true;
-			}
-		}
-		return false;
-	}
+            // even with interrupts disabled, the NMI interupt seems to cause
+            // timing issues here. abort the frame if one bit took to long. if the
+            // last of the 24 bits has been sent already, it is too late
+            // this fixes the flickering first pixel that started to occur with
+            // framework version 3.0.0
+            if ((__clock_cycles() - last_mark) >= (T1 + T2 + T3 - 5)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
 	static uint32_t ICACHE_RAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		register uint32_t b = pixels.loadAndScale0();
+        register uint32_t b = pixels.loadAndScale0();
 		pixels.preStepFirstByteDithering();
 		uint32_t start;
 		
@@ -108,23 +108,33 @@ protected:
 
 			start = __clock_cycles();
 			uint32_t last_mark = start;
-			while(pixels.has(1)) {
-				// Write first byte, read next byte
-				if (writeBits<8+XTRA0>(last_mark, b)) {
-					return 0;
-				}
-				b = pixels.loadAndScale1();
+            while(pixels.has(1)) {
+                // Write first byte, read next byte
+                if (writeBits<8+XTRA0>(last_mark, b)) {
+                    return 0;
+                }
+                b = pixels.loadAndScale1();
 
-				// Write second byte, read 3rd byte
-				if (writeBits<8+XTRA0>(last_mark, b)) {
-					return 0;
-				}
-				b = pixels.loadAndScale2();
+                // Write second byte, read 3rd byte
+                if (writeBits<8+XTRA0>(last_mark, b)) {
+                    return 0;
+                }
+                b = pixels.loadAndScale2();
 
-				// Write third byte, read 1st byte of next pixel
-				if (writeBits<8+XTRA0>(last_mark, b)) {
-					return 0;
-				}
+                // Write third byte, read 1st byte of next pixel
+                if (writeBits<8+XTRA0>(last_mark, b)) {
+                    return 0;
+                }
+
+                if( pixels.pixelSize() == 4 )
+                {
+                    b = pixels.loadAndScale3();
+
+                    // Write third byte, read 1st byte of next pixel
+                    if (writeBits<8+XTRA0>(last_mark, b)) {
+                        return 0;
+                    }
+                }
 
 				#if (FASTLED_ALLOW_INTERRUPTS == 1)
 				intlock.Unlock();

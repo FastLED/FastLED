@@ -19,9 +19,14 @@
 ///  4 clocks AVR with MUL, 2 clocks ARM
 LIB8STATIC_ALWAYS_INLINE uint8_t scale8( uint8_t i, fract8 scale)
 {
+//    Serial.print(", scaleIn: ");
+//    Serial.print(scale);
 #if SCALE8_C == 1
 #if (FASTLED_SCALE8_FIXED == 1)
-    return (((uint16_t)i) * (1+(uint16_t)(scale))) >> 8;
+    uint8_t scaleOut((((uint16_t)i) * (1+(uint16_t)(scale))) >> 8);
+//    Serial.print(", scaleOut: ");
+//    Serial.println(scaleOut);
+    return scaleOut;
 #else
     return ((uint16_t)i * (uint16_t)(scale) ) >> 8;
 #endif

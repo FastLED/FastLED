@@ -340,6 +340,7 @@ protected:
     //    It also packs the bytes into 32 bit chunks with the right bit order.
     void loadPixelData(PixelController<RGB_ORDER> & pixels)
     {
+        // Serial.println("loadPixelData()");
         // -- Make sure the buffer is allocated
         int size_in_bytes = pixels.size() * 3;
         uint8_t * pData = mRMTController.getPixelBuffer(size_in_bytes);
@@ -349,6 +350,10 @@ protected:
             *pData++ = pixels.loadAndScale0();
             *pData++ = pixels.loadAndScale1();
             *pData++ = pixels.loadAndScale2();
+            if( pixels.pixelSize() == 4 )
+            {
+                *pData++ = pixels.loadAndScale3();
+            }
             pixels.advanceData();
             pixels.stepDithering();
         }
