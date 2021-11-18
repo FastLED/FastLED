@@ -38,6 +38,7 @@
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
     "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32, nordicnrf52",
+    "headers": "FastLED.h",
     "export": {
         "exclude": [
             "docs",
