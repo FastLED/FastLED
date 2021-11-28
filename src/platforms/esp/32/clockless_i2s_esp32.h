@@ -459,7 +459,7 @@ protected:
             periph_module_enable(PERIPH_I2S1_MODULE);
             interruptSource = ETS_I2S1_INTR_SOURCE;
             i2s_base_pin_index = I2S1O_DATA_OUT0_IDX;
-        #endif
+        }
         
         // -- Reset everything
         i2sReset();
