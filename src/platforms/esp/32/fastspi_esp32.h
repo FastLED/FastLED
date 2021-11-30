@@ -68,6 +68,10 @@ class ESP32SPIOutput {
 	Selectable 	*m_pSelect;
 
 public:
+	// Verify that the pins are valid
+	static_assert(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
+	static_assert(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
+
 	ESP32SPIOutput() { m_pSelect = NULL; }
 	ESP32SPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }

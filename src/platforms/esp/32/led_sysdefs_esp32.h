@@ -1,10 +1,18 @@
 #pragma once
-
+#include "esp32-hal.h"
 #ifndef ESP32
 #define ESP32
 #endif
 
 #define FASTLED_ESP32
+
+#if CONFIG_IDF_TARGET_ARCH_RISCV
+#define FASTLED_RISCV
+#endif
+
+#if CONFIG_IDF_TARGET_ARCH_XTENSA || CONFIG_XTENSA_IMPL
+#define FASTLED_XTENSA
+#endif
 
 // Use system millis timer
 #define FASTLED_HAS_MILLIS
