@@ -363,6 +363,9 @@ struct PixelController {
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t getscale(PixelController & pc) { return pc.mScale.raw[RO(SLOT)]; }
 
         // Helper functions to get around gcc stupidities
+        __attribute__((always_inline)) inline uint8_t loadByte0() { return loadByte<0>(*this); }
+        __attribute__((always_inline)) inline uint8_t loadByte1() { return loadByte<1>(*this); }
+        __attribute__((always_inline)) inline uint8_t loadByte2() { return loadByte<2>(*this); }
         __attribute__((always_inline)) inline uint8_t loadAndScale0(int lane, uint8_t scale) { return loadAndScale<0>(*this, lane, scale); }
         __attribute__((always_inline)) inline uint8_t loadAndScale1(int lane, uint8_t scale) { return loadAndScale<1>(*this, lane, scale); }
         __attribute__((always_inline)) inline uint8_t loadAndScale2(int lane, uint8_t scale) { return loadAndScale<2>(*this, lane, scale); }

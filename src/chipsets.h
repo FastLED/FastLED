@@ -2,6 +2,7 @@
 #define __INC_CHIPSETS_H
 
 #include "FastLED.h"
+#include "lightness_lut.h"
 #include "pixeltypes.h"
 
 ///@file chipsets.h
@@ -242,13 +243,74 @@ protected:
 		s0 = (maxBrightness * s0 + (brightness >> 1)) / brightness;
 		s1 = (maxBrightness * s1 + (brightness >> 1)) / brightness;
 		s2 = (maxBrightness * s2 + (brightness >> 1)) / brightness;
+#elif FASTLED_USE_GLOBAL_BRIGHTNESS == 2
+		// Calculate the lightness lookup table for each channel.
+		lutr.init(s0);
+		if (s0 == s1) {
+			lutg.init(lutr);
+		} else {
+			lutg.init(s1);
+		}
+		if (s0 == s2) {
+			lutb.init(lutr);
+		} else if (s1 == s2) {
+			lutb.init(lutg);
+		} else {
+			lutb.init(s2);
+		}
 #else
 		const uint8_t brightness = 0x1F;
 #endif
 
 		startBoundary();
 		while (pixels.has(1)) {
+#if FASTLED_USE_GLOBAL_BRIGHTNESS == 2
+			// On this device, we can get 13 bits of range by using both global 5 bits
+			// PWM and the per channel 8 bits PWM.
+			//
+			// Each channel duty cycle ramps from 100% to 1/(31*255) == 1/7905.
+			//
+			// The goal is to use intensity != 0x1f as much as possible since the
+			// global PWM has a lower frequency than the per channel one.
+			//
+			// To use the full range, we need to discard PixelController's scaling
+			// support since we do not need it.
+			//
+			// Convert each channel to a range between 0 and 7905 using a non-linear
+			// look up table (LUT). This is because the human eye perception is
+			// non-linear.
+			const uint16_t lr = lutr.data[pixels.loadByte0()];
+			const uint16_t lg = lutg.data[pixels.loadByte1()];
+			const uint16_t lb = lutb.data[pixels.loadByte2()];
+			const uint16_t m = lr | lg | lb;
+			// Maps the computed colors on a range [0, 255*31] back to global
+			// intensity + per channel intensity.
+			uint8_t brightness, pr, pb, pg;
+			if (m <= 255) {
+				brightness = 1;
+				pr = uint8_t(lr);
+				pg = uint8_t(lg);
+				pb = uint8_t(lb);
+			} else if (m <= 511) {
+				brightness = 2;
+				pr = uint8_t(lr>>1);
+				pg = uint8_t(lg>>1);
+				pb = uint8_t(lb>>1);
+			} else if (m <= 1023) {
+				brightness = 4;
+				pr = uint8_t((lr+2)>>2);
+				pg = uint8_t((lg+2)>>2);
+				pb = uint8_t((lb+2)>>2);
+			} else {
+				brightness = 0x1f;
+				pr = uint8_t((lr+15)/31);
+				pg = uint8_t((lg+15)/31);
+				pb = uint8_t((lb+15)/31);
+			}
+			writeLed(brightness, pr, pg, pb);
+#else
 			writeLed(brightness, pixels.loadAndScale0(0, s0), pixels.loadAndScale1(0, s1), pixels.loadAndScale2(0, s2));
+#endif
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
@@ -258,6 +320,11 @@ protected:
 		mSPI.release();
 	}
 
+#if FASTLED_USE_GLOBAL_BRIGHTNESS == 2
+	LightnessLUT<255*31> lutr;
+	LightnessLUT<255*31> lutg;
+	LightnessLUT<255*31> lutb;
+#endif
 };
 
 /// SK9822 controller class.
@@ -300,7 +367,7 @@ protected:
 		mSPI.select();
 
 		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
-#if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
+#if FASTLED_USE_GLOBAL_BRIGHTNESS
 		const uint16_t maxBrightness = 0x1F;
 		uint16_t brightness = ((((uint16_t)max(max(s0, s1), s2) + 1) * maxBrightness - 1) >> 8) + 1;
 		s0 = (maxBrightness * s0 + (brightness >> 1)) / brightness;
@@ -323,6 +390,11 @@ protected:
 		mSPI.release();
 	}
 
+#if FASTLED_USE_GLOBAL_BRIGHTNESS == 2
+	LightnessLUT<255*31> lutr;
+	LightnessLUT<255*31> lutg;
+	LightnessLUT<255*31> lutb;
+#endif
 };
 
 

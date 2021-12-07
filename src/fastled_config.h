@@ -64,6 +64,9 @@
 // Use this toggle to enable global brightness in contollers that support is (ADA102 and SK9822).
 // It changes how color scaling works and uses global brightness before scaling down color values.
 // This enable much more accurate color control on low brightness settings.
-//#define FASTLED_USE_GLOBAL_BRIGHTNESS 1
+// Use value 1 for using global brightness in a linear way.
+// Use value 2 for using human perception lightness, which increases the dynamic
+// range by orders of magnitude.
+//#define FASTLED_USE_GLOBAL_BRIGHTNESS 2
 
 #endif
