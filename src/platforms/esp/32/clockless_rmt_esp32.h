@@ -80,6 +80,13 @@
  *      send the data while the program continues to prepare the next
  *      frame of data.
  *
+ * #define FASTLED_RMT_SERIAL_DEBUG 1
+ *
+ * NEW (Oct 2021): If set enabled (Set to 1), output errorcodes to
+ *      Serial for debugging if not ESP_OK. Might be useful to find
+ *      bugs or problems with GPIO PINS.
+ *
+ *
  * Based on public domain code created 19 Nov 2016 by Chris Osborn <fozztexx@fozztexx.com>
  * http://insentricity.com *
  *
@@ -154,6 +161,16 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 //#ifndef FASTLED_RMT_SHOW_TIMER
 //#define FASTLED_RMT_SHOW_TIMER false
 //#endif
+
+#ifndef FASTLED_RMT_SERIAL_DEBUG
+#define FASTLED_RMT_SERIAL_DEBUG 0
+#endif
+
+#if FASTLED_RMT_SERIAL_DEBUG == 1
+#define FASTLED_DEBUG(format, errcode, ...) if (errcode != ESP_OK) { Serial.printf(PSTR("FASTLED: " format "\n"), errcode, ##__VA_ARGS__); }
+#else
+#define FASTLED_DEBUG(format, ...)
+#endif
 
 // -- Configuration constants
 #define DIVIDER       2 /* 4, 8 still seem to work, but timings become marginal */

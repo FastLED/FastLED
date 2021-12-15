@@ -108,12 +108,14 @@ uint8_t * ESP32RMTController::getPixelBuffer(int size_in_bytes)
 void ESP32RMTController::init(gpio_num_t pin)
 {
     if (gInitialized) return;
+    esp_err_t espErr = ESP_OK;
 
     for (int i = 0; i < gMaxChannel; i += gMemBlocks) {
         gOnChannel[i] = NULL;
 
         // -- RMT configuration for transmission
         rmt_config_t rmt_tx;
+        memset(&rmt_tx, 0, sizeof(rmt_config_t));
         rmt_tx.channel = rmt_channel_t(i);
         rmt_tx.rmt_mode = RMT_MODE_TX;
         rmt_tx.gpio_num = pin;
@@ -126,7 +128,8 @@ void ESP32RMTController::init(gpio_num_t pin)
         rmt_tx.tx_config.idle_output_en = true;
 
         // -- Apply the configuration
-        rmt_config(&rmt_tx);
+        espErr = rmt_config(&rmt_tx);
+        FASTLED_DEBUG("rmt_config result: %d", espErr);
 
         if (FASTLED_RMT_BUILTIN_DRIVER) {
             rmt_driver_install(rmt_channel_t(i), 0, 0);
@@ -134,7 +137,8 @@ void ESP32RMTController::init(gpio_num_t pin)
             // -- Set up the RMT to send 32 bits of the pulse buffer and then
             //    generate an interrupt. When we get this interrupt we
             //    fill the other part in preparation (like double-buffering)
-            rmt_set_tx_thr_intr_en(rmt_channel_t(i), true, PULSES_PER_FILL);
+            espErr = rmt_set_tx_thr_intr_en(rmt_channel_t(i), true, PULSES_PER_FILL);
+            FASTLED_DEBUG("rmt_set_tx_thr_intr_en result: %d", espErr);
         }
     }
 
@@ -232,6 +236,7 @@ void IRAM_ATTR ESP32RMTController::startNext(int channel)
 //    for it to finish.
 void IRAM_ATTR ESP32RMTController::startOnChannel(int channel)
 {
+    esp_err_t espErr = ESP_OK;
     // -- Assign this channel and configure the RMT
     mRMT_channel = rmt_channel_t(channel);
 
@@ -241,9 +246,11 @@ void IRAM_ATTR ESP32RMTController::startOnChannel(int channel)
 
     // -- Assign the pin to this channel
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
-    rmt_set_gpio(mRMT_channel, RMT_MODE_TX, mPin, false);
+    espErr = rmt_set_gpio(mRMT_channel, RMT_MODE_TX, mPin, false);
+    FASTLED_DEBUG("rmt_set_gpio result: %d", espErr);
 #else
-    rmt_set_pin(mRMT_channel, RMT_MODE_TX, mPin);
+    espErr = rmt_set_pin(mRMT_channel, RMT_MODE_TX, mPin);
+    FASTLED_DEBUG("rrmt_set_pin result: %d", espErr);
 #endif
 
     if (FASTLED_RMT_BUILTIN_DRIVER) {
@@ -266,7 +273,8 @@ void IRAM_ATTR ESP32RMTController::startOnChannel(int channel)
         fillNext(false);
 
         // -- Turn on the interrupts
-        rmt_set_tx_intr_en(mRMT_channel, true);
+        espErr = rmt_set_tx_intr_en(mRMT_channel, true);
+        FASTLED_DEBUG("rmt_set_tx_intr_en result: %d", espErr);
 
         // -- Kick off the transmission
         tx_start();
