@@ -83,6 +83,16 @@ LIB8STATIC void random16_set_seed( uint16_t seed)
     rand16seed = seed;
 }
 
+/// Sample some noise from a floating ADC pin to set the seed used for the random number generator
+LIB8STATIC void random16_seed_from_adc( uint16_t pin)
+{
+	// sample the floating pin 16 times. Every time, take the last (most noisy) bit and set one bit of rand16seed. 
+	for( uint8_t i=0; i<16; i++ )
+	{
+		rand16seed += ( (analogRead( pin ) & 0x01) << i );
+	}
+}
+
 /// Get the current seed value for the random number generator
 LIB8STATIC uint16_t random16_get_seed()
 {
