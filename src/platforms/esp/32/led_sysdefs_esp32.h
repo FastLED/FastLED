@@ -8,17 +8,10 @@
 
 #if CONFIG_IDF_TARGET_ARCH_RISCV
 #define FASTLED_RISCV
-#else
-#define FASTLED_XTENSA
 #endif
 
-// Handling for older versions of ESP32 Arduino core
-#if !defined(ESP_IDF_VERSION)
-// Older versions of ESP_IDF only supported ESP32
-#define CONFIG_IDF_TARGET_ESP32 1
-// Define missing version macros.  Hard code older version 3.0 since actual version is unknown
-#define ESP_IDF_VERSION_VAL(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
-#define ESP_IDF_VERSION ESP_IDF_VERSION_VAL(3, 0, 0)
+#if CONFIG_IDF_TARGET_ARCH_XTENSA || CONFIG_XTENSA_IMPL
+#define FASTLED_XTENSA
 #endif
 
 // Use system millis timer

@@ -463,9 +463,9 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
 {
     uint32_t now = __clock_cycles();
     if (check_time) {
-        if (mLastFill != 0) {
-            int32_t delta = (now - mLastFill);
-            if (delta > (int32_t)mMaxCyclesPerFill) {
+        if (mLastFill != 0 and now > mLastFill) {
+            uint32_t delta = (now - mLastFill);
+            if (delta > mMaxCyclesPerFill) {
                 // Serial.print(delta);
                 // Serial.print(" BAIL ");
                 // Serial.println(mCur);
