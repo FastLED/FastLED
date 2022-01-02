@@ -39,10 +39,10 @@ public:
 
     uint32_t index = 0;
     while (pixels.has(1)) {
-      for (uint32_t i = 0; i < 8; i++) {
-        uint8_t r = pixels.loadAndScale0(i);
-        uint8_t g = pixels.loadAndScale1(i);
-        uint8_t b = pixels.loadAndScale2(i);
+      for (int lane = 0; lane < 8; lane++) {
+        uint8_t r = pixels.loadAndScale0(lane);
+        uint8_t g = pixels.loadAndScale1(lane);
+        uint8_t b = pixels.loadAndScale2(lane);
         pocto->setPixel(index, r, g, b);
         index += size;
       }
