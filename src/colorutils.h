@@ -42,14 +42,14 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
 ///                         so that the hues are continuous between the end
 ///                         of the strip and the beginning
 void fill_rainbow_circular(struct CRGB* targetArray, int numToFill,
-                          uint8_t initialhue);
+                          uint8_t initialhue, bool reversed=false);
 
 /// fill_rainbow_circular - fill a range of LEDs with a rainbow of colors, at
 ///                         full saturation and full value (brightness),
 ///                         so that the hues are continuous between the end
 ///                         of the strip and the beginning
 void fill_rainbow_circular(struct CHSV* targetArray, int numToFill,
-                          uint8_t initialhue);
+                          uint8_t initialhue, bool reversed=false);
 
 
 // fill_gradient - fill an array of colors with a smooth HSV gradient
@@ -1582,7 +1582,8 @@ void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
 // the entire palette smoothly covers the range of LEDs
 template <typename PALETTE>
 void fill_palette_circular(CRGB* L, uint16_t N, uint8_t startIndex,
-                           const PALETTE& pal, uint8_t brightness=255, TBlendType blendType=LINEARBLEND)
+                           const PALETTE& pal, uint8_t brightness=255, TBlendType blendType=LINEARBLEND,
+                           bool reversed=false)
 {
     if (N == 0) return;  // avoiding div/0
 
@@ -1591,7 +1592,8 @@ void fill_palette_circular(CRGB* L, uint16_t N, uint8_t startIndex,
  
    for (uint16_t i = 0; i < N; ++i) {
         L[i] = ColorFromPalette(pal, (colorIndex >> 8), brightness, blendType);
-        colorIndex += colorChange;
+        if (reversed) colorIndex -= colorChange;
+        else colorIndex += colorChange;
     }
 }
 

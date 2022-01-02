@@ -62,7 +62,7 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
 }
 
 
-void fill_rainbow_circular(struct CRGB* targetArray, int numToFill, uint8_t initialhue)
+void fill_rainbow_circular(struct CRGB* targetArray, int numToFill, uint8_t initialhue, bool reversed)
 {
     if (numToFill == 0) return;  // avoiding div/0
 
@@ -76,12 +76,13 @@ void fill_rainbow_circular(struct CRGB* targetArray, int numToFill, uint8_t init
 
     for (int i = 0; i < numToFill; ++i) {
         targetArray[i] = hsv;
-        hueOffset += hueChange;  // increase precise offset
+        if (reversed) hueOffset -= hueChange;
+        else hueOffset += hueChange;
         hsv.hue = initialhue + (uint8_t)(hueOffset >> 8);  // assign new hue with precise offset (as 8-bit)
     }
 }
 
-void fill_rainbow_circular(struct CHSV* targetArray, int numToFill, uint8_t initialhue)
+void fill_rainbow_circular(struct CHSV* targetArray, int numToFill, uint8_t initialhue, bool reversed)
 {
     if (numToFill == 0) return;  // avoiding div/0
 
@@ -95,7 +96,8 @@ void fill_rainbow_circular(struct CHSV* targetArray, int numToFill, uint8_t init
 
     for (int i = 0; i < numToFill; ++i) {
         targetArray[i] = hsv;
-        hueOffset += hueChange;  // increase precise offset
+        if (reversed) hueOffset -= hueChange;
+        else hueOffset += hueChange;
         hsv.hue = initialhue + (uint8_t)(hueOffset >> 8);  // assign new hue with precise offset (as 8-bit)
     }
 }
