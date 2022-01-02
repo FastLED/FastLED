@@ -122,7 +122,9 @@ protected:
 		mWait.wait();
 		cli();
 
-		showRGBInternal(pixels);
+		if(pixels.mLen > 0) {
+			showRGBInternal(pixels);
+		}
 
 		// Adjust the timer
 #if (!defined(NO_CLOCK_CORRECTION) || (NO_CLOCK_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
