@@ -1586,7 +1586,7 @@ void fill_palette_circular(CRGB* L, uint16_t N, uint8_t startIndex,
 {
     if (N == 0) return;  // avoiding div/0
 
-    const uint16_t colorChange = 65536 / N;              // color change for each LED, * 256 for precision
+    const uint16_t colorChange = 65535 / N;              // color change for each LED, * 256 for precision
     uint16_t colorIndex = ((uint16_t) startIndex) << 8;  // offset for color index, with precision (*256)
  
    for (uint16_t i = 0; i < N; ++i) {

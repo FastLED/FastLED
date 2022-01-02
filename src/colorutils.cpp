@@ -71,7 +71,7 @@ void fill_rainbow_circular(struct CRGB* targetArray, int numToFill, uint8_t init
     hsv.val = 255;
     hsv.sat = 240;
 
-    const uint16_t hueChange = 65536 / (uint16_t)numToFill;  // hue change for each LED, * 256 for precision
+    const uint16_t hueChange = 65535 / (uint16_t)numToFill;  // hue change for each LED, * 256 for precision (256 * 256 - 1)
     uint16_t hueOffset = 0;  // offset for hue value, with precision (*256)
 
     for (int i = 0; i < numToFill; ++i) {
@@ -90,7 +90,7 @@ void fill_rainbow_circular(struct CHSV* targetArray, int numToFill, uint8_t init
     hsv.val = 255;
     hsv.sat = 240;
 
-    const uint16_t hueChange = 65536 / (uint16_t)numToFill;  // hue change for each LED, * 256 for precision
+    const uint16_t hueChange = 65535 / (uint16_t) numToFill;  // hue change for each LED, * 256 for precision (256 * 256 - 1)
     uint16_t hueOffset = 0;  // offset for hue value, with precision (*256)
 
     for (int i = 0; i < numToFill; ++i) {
