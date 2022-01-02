@@ -1569,7 +1569,7 @@ CHSV ColorFromPalette( const CHSVPalette32& pal,
 // Fill a range of LEDs with a sequence of entries from a palette
 template <typename PALETTE>
 void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
-                  const PALETTE& pal, uint8_t brightness, TBlendType blendType)
+                  const PALETTE& pal, uint8_t brightness=255, TBlendType blendType=LINEARBLEND)
 {
     uint8_t colorIndex = startIndex;
     for( uint16_t i = 0; i < N; ++i) {
@@ -1582,7 +1582,7 @@ void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
 // the entire palette smoothly covers the range of LEDs
 template <typename PALETTE>
 void fill_palette_circular(CRGB* L, uint16_t N, uint8_t startIndex,
-                           const PALETTE& pal, uint8_t brightness, TBlendType blendType)
+                           const PALETTE& pal, uint8_t brightness=255, TBlendType blendType=LINEARBLEND)
 {
     if (N == 0) return;  // avoiding div/0
 
