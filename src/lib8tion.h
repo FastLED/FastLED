@@ -834,10 +834,7 @@ public:
     uint16_t operator*(uint16_t v) { return (v*i) + ((v*f)>>F); }
     int32_t operator*(int32_t v) { return (v*i) + ((v*f)>>F); }
     int16_t operator*(int16_t v) { return (v*i) + ((v*f)>>F); }
-#ifdef FASTLED_ARM
-    int operator*(int v) { return (v*i) + ((v*f)>>F); }
-#endif
-#ifdef FASTLED_APOLLO3
+#if defined(FASTLED_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
     int operator*(int v) { return (v*i) + ((v*f)>>F); }
 #endif
 };
@@ -846,10 +843,7 @@ template<class T, int F, int I> static uint32_t operator*(uint32_t v, q<T,F,I> &
 template<class T, int F, int I> static uint16_t operator*(uint16_t v, q<T,F,I> & q) { return q * v; }
 template<class T, int F, int I> static int32_t operator*(int32_t v, q<T,F,I> & q) { return q * v; }
 template<class T, int F, int I> static int16_t operator*(int16_t v, q<T,F,I> & q) { return q * v; }
-#ifdef FASTLED_ARM
-template<class T, int F, int I> static int operator*(int v, q<T,F,I> & q) { return q * v; }
-#endif
-#ifdef FASTLED_APOLLO3
+#if defined(FASTLED_ARM) | defined(FASTLED_RISCV) | defined(FASTLED_APOLLO3)
 template<class T, int F, int I> static int operator*(int v, q<T,F,I> & q) { return q * v; }
 #endif
 
