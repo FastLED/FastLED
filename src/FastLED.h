@@ -9,7 +9,7 @@
 #endif
 
 #define FASTLED_VERSION 3004000
-#if !defined(FASTLED_INTERNAL) || defined(FASTLED_NO_VERSION_MESSAGE)
+#if defined(FASTLED_SHOW_VERSION_MESSAGE)
 #  ifdef FASTLED_HAS_PRAGMA_MESSAGE
 #    pragma message "FastLED version 3.004.000"
 #  else
