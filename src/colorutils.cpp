@@ -62,7 +62,7 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
 }
 
 
-void fill_rainbow_endless(struct CRGB* targetArray, int numToFill, uint8_t initialhue)
+void fill_rainbow_circular(struct CRGB* targetArray, int numToFill, uint8_t initialhue)
 {
     if (numToFill == 0) return;  // avoiding div/0
 
@@ -81,7 +81,7 @@ void fill_rainbow_endless(struct CRGB* targetArray, int numToFill, uint8_t initi
     }
 }
 
-void fill_rainbow_endless(struct CHSV* targetArray, int numToFill, uint8_t initialhue)
+void fill_rainbow_circular(struct CHSV* targetArray, int numToFill, uint8_t initialhue)
 {
     if (numToFill == 0) return;  // avoiding div/0
 
