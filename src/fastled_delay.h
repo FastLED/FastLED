@@ -8,6 +8,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+
+#if (!defined(NO_MINIMUM_WAIT) || (NO_MINIMUM_WAIT==0))
+
 /// Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet
 /// this should make sure that chipsets that have
 template<int WAIT> class CMinWait {
@@ -25,6 +28,18 @@ public:
 
 	void mark() { mLastMicros = micros() & 0xFFFF; }
 };
+
+#else
+
+// if you keep your own FPS (and therefore don't call show() too quickly for pixels to latch), you may not want a minimum wait.
+template<int WAIT> class CMinWait {
+public:
+	CMinWait() { }
+	void wait() { }
+	void mark() {}
+};
+
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
