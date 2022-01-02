@@ -56,24 +56,24 @@ protected:
 			next_mark = ARM_DWT_CYCCNT + off[0];
 			FastPin<DATA_PIN>::hi();
 			if(b&0x80) {
-				while((next_mark - ARM_DWT_CYCCNT) > off[1]);
+				while((next_mark - ARM_DWT_CYCCNT) > off[2]);
 				FastPin<DATA_PIN>::lo();
 			} else {
-				while((next_mark - ARM_DWT_CYCCNT) > off[2]);
+				while((next_mark - ARM_DWT_CYCCNT) > off[1]);
 				FastPin<DATA_PIN>::lo();
 			}
 			b <<= 1;
 		}
 
 		while(ARM_DWT_CYCCNT < next_mark);
-		next_mark = ARM_DWT_CYCCNT + off[1];
+		next_mark = ARM_DWT_CYCCNT + off[0];
 		FastPin<DATA_PIN>::hi();
 
 		if(b&0x80) {
 			while((next_mark - ARM_DWT_CYCCNT) > off[2]);
 			FastPin<DATA_PIN>::lo();
 		} else {
-			while((next_mark - ARM_DWT_CYCCNT) > off[2]);
+			while((next_mark - ARM_DWT_CYCCNT) > off[1]);
 			FastPin<DATA_PIN>::lo();
 		}
 	}
@@ -91,7 +91,7 @@ protected:
 		off[1] = _FASTLED_NS_TO_DWT(T2+T3);
 		off[2] = _FASTLED_NS_TO_DWT(T3);
 
-    	uint32_t wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD));
+	uint32_t wait_off = _FASTLED_NS_TO_DWT((WAIT_TIME-INTERRUPT_THRESHOLD)*1000);
 
     	uint32_t next_mark = ARM_DWT_CYCCNT + off[0];
 
