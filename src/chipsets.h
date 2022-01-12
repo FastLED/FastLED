@@ -158,6 +158,7 @@ class LPD6803Controller : public CPixelLEDController<RGB_ORDER> {
 	SPI mSPI;
 
 	void startBoundary() { mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); }
+	void endBoundary(int nLeds) { int nDWords = (nLeds/32); do { mSPI.writeByte(0xFF); mSPI.writeByte(0x00); mSPI.writeByte(0x00); mSPI.writeByte(0x00); } while(nDWords--); }
 
 public:
 	LPD6803Controller() {}
@@ -183,7 +184,7 @@ protected:
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
-		//endBoundary(pixels.size());
+		endBoundary(pixels.size());
 		mSPI.waitFully();
 		mSPI.release();
 	}
