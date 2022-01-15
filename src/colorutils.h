@@ -36,6 +36,25 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
                    uint8_t initialhue,
                    uint8_t deltahue = 5);
 
+/// fill_rainbow<T> - fill a range of LEDs with a rainbow of colors, at
+///                   full saturation and full value (brightness).
+///                   T type must support `operator[]`.
+template <typename T>
+void fill_rainbow( T& map,
+                   size_t startPos, size_t numToFill,
+                   uint8_t initialhue, uint8_t deltahue=5)
+{
+    CHSV hsv;
+    hsv.hue = initialhue;
+    hsv.val = 255;
+    hsv.sat = 240;
+    size_t end = startPos + numToFill;
+    for (size_t i = startPos; i < end; ++i) {
+        map[i] = hsv; // this is the only part that differs per template parameter
+        hsv.hue += deltahue;
+    }
+}
+
 
 // fill_gradient - fill an array of colors with a smooth HSV gradient
 //                 between two specified HSV colors.
