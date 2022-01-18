@@ -28,6 +28,16 @@ inline void fill_solid( T& leds, int numToFill, const struct CRGB& color)
 {
     fill_solid2(leds, 0, numToFill, color);
 }
+template<>
+inline void fill_solid( CRGB* leds, int numToFill, const struct CRGB& color)
+{
+    fill_solid2(leds, 0, numToFill, color);
+}
+template<>
+inline void fill_solid( CHSV* leds, int numToFill, const struct CRGB& color)
+{
+    fill_solid2(leds, 0, numToFill, color);
+}
 
 /// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
 ///                full saturation and full value (brightness)
