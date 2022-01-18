@@ -19,12 +19,27 @@ template<typename T>
 void fill_solid2( T leds, size_t startPos, size_t numToFill, const struct CRGB& color)
 {
     size_t end = startPos + numToFill;
+    // TODO: convert from CRGB to CHSV only once, if T takes CHSV?
+    for( size_t i = startPos; i < end; ++i) {
+        leds[i] = color;
+    }
+}
+template<typename T>
+void fill_solid2( T leds, size_t startPos, size_t numToFill, const struct CHSV& color)
+{
+    size_t end = startPos + numToFill;
+    // TODO: convert from CHSV to CRGB only once, if T takes CRGB?
     for( size_t i = startPos; i < end; ++i) {
         leds[i] = color;
     }
 }
 template<typename T>
 void fill_solid( T leds, int numToFill, const struct CRGB& color)
+{
+    fill_solid2(leds, 0, numToFill, color);
+}
+template<typename T>
+void fill_solid( T leds, int numToFill, const struct CHSV& color)
 {
     fill_solid2(leds, 0, numToFill, color);
 }
