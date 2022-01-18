@@ -19,7 +19,7 @@ void validate_colorutils() {
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   fill_solid2(leds, 0, NUM_LEDS, CRGB::Green);
 
-  const CRGB colorMask { 0x7F, 0x3F, 0xBF }; // somewhat random color
+  const CRGB colormask { 0x7F, 0x3F, 0xBF }; // somewhat random color
   const CHSV gradients_HSV[4] {
     { HUE_ORANGE, 255, 255 },
     { HUE_AQUA,   255, 255 },
