@@ -16,16 +16,16 @@ FASTLED_NAMESPACE_BEGIN
 /// fill_solid -   fill a range of LEDs with a solid color
 ///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
 template<typename T>
-void fill_solid2( T leds, size_t startPos, size_t numToFill, const struct CRGB& color)
+void fill_solid2( T leds, int startPos, int numToFill, const struct CRGB& color)
 {
-    size_t end = startPos + numToFill;
+    int end = startPos + numToFill;
     // TODO: convert from CRGB to CHSV only once, if T takes CHSV?
-    for( size_t i = startPos; i < end; ++i) {
+    for( int i = startPos; i < end; ++i) {
         leds[i] = color;
     }
 }
 template<typename T>
-void fill_solid2( T leds, size_t startPos, size_t numToFill, const struct CHSV& color)
+void fill_solid2( T leds, int startPos, int numToFill, const struct CHSV& color)
 {
     size_t end = startPos + numToFill;
     // TODO: convert from CHSV to CRGB only once, if T takes CRGB?
@@ -63,15 +63,15 @@ void fill_solid( T leds, int numToFill, const struct CHSV& color)
 ///                   T type must support `operator[]`.
 template <typename T>
 void fill_rainbow2( T leds,
-                    size_t startPos, size_t numToFill,
+                    int startPos, int numToFill,
                     uint8_t initialhue, uint8_t deltahue=5)
 {
     CHSV hsv;
     hsv.hue = initialhue;
     hsv.val = 255;
     hsv.sat = 240;
-    size_t end = startPos + numToFill;
-    for (size_t i = startPos; i < end; ++i) {
+    int end = startPos + numToFill;
+    for (int i = startPos; i < end; ++i) {
         leds[i] = hsv; // this is the only part that differs per template parameter
         hsv.hue += deltahue;
     }
