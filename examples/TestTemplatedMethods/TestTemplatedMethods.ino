@@ -18,9 +18,30 @@ void validate_colorutils() {
 
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   fill_solid2(leds, 0, NUM_LEDS, CRGB::Green);
-  
-  // fill_gradient() -- four versions of this function
-  // fill_gradient_RGB() -- four versions of this function
+
+  CHSV gradients_HSV[4] {
+    { HUE_ORANGE, 255, 255 },
+    { HUE_AQUA,   255, 255 },
+    { HUE_BLUE,   255, 255 },
+    { HUE_PINK,   255, 255 }
+  };
+  CRGB gradients_RGB[4] {
+    { 255,   0,   0 },
+    {   0, 255, 255 },
+    { 255, 255,   0 },
+    {   0,   0, 255 },
+  };
+
+  fill_gradient(leds, 0, gradients_HSV[0], NUM_LEDS-1, gradients_HSV[1]);
+  fill_gradient(leds, NUM_LEDS, gradients_HSV[0], gradients_HSV[1]);
+  fill_gradient(leds, NUM_LEDS, gradients_HSV[0], gradients_HSV[1], gradients_HSV[2]);
+  fill_gradient(leds, NUM_LEDS, gradients_HSV[0], gradients_HSV[1], gradients_HSV[2], gradients_HSV[3]);
+
+  fill_gradient_RGB(leds, 0, gradients_RGB[0], NUM_LEDS-1, gradients_RGB[1]);
+  fill_gradient_RGB(leds, NUM_LEDS, gradients_RGB[0], gradients_RGB[1]);
+  fill_gradient_RGB(leds, NUM_LEDS, gradients_RGB[0], gradients_RGB[1], gradients_RGB[2]);
+  fill_gradient_RGB(leds, NUM_LEDS, gradients_RGB[0], gradients_RGB[1], gradients_RGB[2], gradients_RGB[3]);
+
   // fadeUsingColor()
   // blend()
   // nblend()
