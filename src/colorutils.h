@@ -337,17 +337,31 @@ void fill_gradient_RGB( T leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2
     fill_gradient_RGB( leds, twothirds, c3,      last, c4);
 }
 
+// nscale8_video - scale down the brightness of an array of pixels
+//                 all at once.  Guaranteed to never scale a pixel
+//                 all the way down to black, unless 'scale' is zero.
+template <typename T>
+void nscale8_video( T leds, uint16_t num_leds, uint8_t scale)
+{
+    for( uint16_t i = 0; i < num_leds; ++i) {
+        leds[i].nscale8_video( scale);
+    }
+}
+
 // fadeLightBy and fade_video - reduce the brightness of an array
 //                              of pixels all at once.  Guaranteed
 //                              to never fade all the way to black.
 //                              (The two names are synonyms.)
-void fadeLightBy(   CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
-void fade_video(    CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
-
-// nscale8_video - scale down the brightness of an array of pixels
-//                 all at once.  Guaranteed to never scale a pixel
-//                 all the way down to black, unless 'scale' is zero.
-void nscale8_video( CRGB* leds, uint16_t num_leds, uint8_t scale);
+template <typename T>
+void fadeLightBy(T leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8_video( leds, num_leds, 255 - fadeBy);
+}
+template <typename T>
+void fade_video(T leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8_video( leds, num_leds, 255 - fadeBy);
+}
 
 // fadeToBlackBy and fade_raw - reduce the brightness of an array
 //                              of pixels all at once.  These
