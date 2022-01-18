@@ -16,7 +16,7 @@ FASTLED_NAMESPACE_BEGIN
 /// fill_solid -   fill a range of LEDs with a solid color
 ///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
 template<typename T>
-void fill_solid2( T& leds, size_t startPos, size_t numToFill, const struct CRGB& color)
+void fill_solid2( T leds, size_t startPos, size_t numToFill, const struct CRGB& color)
 {
     size_t end = startPos + numToFill;
     for( size_t i = startPos; i < end; ++i) {
@@ -24,20 +24,22 @@ void fill_solid2( T& leds, size_t startPos, size_t numToFill, const struct CRGB&
     }
 }
 template<typename T>
-inline void fill_solid( T& leds, int numToFill, const struct CRGB& color)
+void fill_solid( T leds, int numToFill, const struct CRGB& color)
 {
     fill_solid2(leds, 0, numToFill, color);
 }
-template<>
-inline void fill_solid( CRGB* leds, int numToFill, const struct CRGB& color)
-{
-    fill_solid2(leds, 0, numToFill, color);
-}
-template<>
-inline void fill_solid( CHSV* leds, int numToFill, const struct CRGB& color)
-{
-    fill_solid2(leds, 0, numToFill, color);
-}
+// template<>
+// void fill_solid( CRGB* leds, int numToFill, const struct CRGB& color)
+// {
+//     fill_solid2(leds, 0, numToFill, color);
+// }
+// template<>
+// void fill_solid( CHSV* leds, int numToFill, const struct CRGB& color)
+// {
+//     fill_solid2(leds, 0, numToFill, color);
+// }
+
+
 
 /// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
 ///                full saturation and full value (brightness)
@@ -60,7 +62,7 @@ void fill_rainbow2( T& leds,
     }
 }
 template <typename T>
-inline void fill_rainbow( T& leds,
+void fill_rainbow( T& leds,
                           int numToFill,
                           uint8_t initialhue, uint8_t deltahue = 5)
 {
