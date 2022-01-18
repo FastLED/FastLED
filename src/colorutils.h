@@ -390,8 +390,6 @@ void fade_raw( T leds, uint16_t num_leds, uint8_t fadeBy)
     nscale8( leds, num_leds, 255 - fadeBy);
 }
 
-
-
 // fadeUsingColor - scale down the brightness of an array of pixels,
 //                  as though it were seen through a transparent
 //                  filter with the specified color.
@@ -404,7 +402,22 @@ void fade_raw( T leds, uint16_t num_leds, uint8_t fadeBy)
 //                  You can also use colormasks like CRGB::Blue to
 //                  zero out the red and green elements, leaving blue
 //                  (largely) the same.
-void fadeUsingColor( CRGB* leds, uint16_t numLeds, const CRGB& colormask);
+template <typename T>
+void fadeUsingColor( T leds, uint16_t numLeds, const CRGB& colormask)
+{
+    uint8_t fr, fg, fb;
+    fr = colormask.r;
+    fg = colormask.g;
+    fb = colormask.b;
+
+    for( uint16_t i = 0; i < numLeds; ++i) {
+        leds[i].r = scale8_LEAVING_R1_DIRTY( leds[i].r, fr);
+        leds[i].g = scale8_LEAVING_R1_DIRTY( leds[i].g, fg);
+        leds[i].b = scale8                 ( leds[i].b, fb);
+    }
+}
+
+
 
 
 // Pixel blending

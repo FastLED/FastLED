@@ -8,24 +8,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-
-
-
-void fadeUsingColor( CRGB* leds, uint16_t numLeds, const CRGB& colormask)
-{
-    uint8_t fr, fg, fb;
-    fr = colormask.r;
-    fg = colormask.g;
-    fb = colormask.b;
-
-    for( uint16_t i = 0; i < numLeds; ++i) {
-        leds[i].r = scale8_LEAVING_R1_DIRTY( leds[i].r, fr);
-        leds[i].g = scale8_LEAVING_R1_DIRTY( leds[i].g, fg);
-        leds[i].b = scale8                 ( leds[i].b, fb);
-    }
-}
-
-
 CRGB& nblend( CRGB& existing, const CRGB& overlay, fract8 amountOfOverlay )
 {
     if( amountOfOverlay == 0) {

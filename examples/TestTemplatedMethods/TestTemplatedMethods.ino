@@ -19,13 +19,14 @@ void validate_colorutils() {
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   fill_solid2(leds, 0, NUM_LEDS, CRGB::Green);
 
-  CHSV gradients_HSV[4] {
+  const CRGB colorMask { 0x7F, 0x3F, 0xBF }; // somewhat random color
+  const CHSV gradients_HSV[4] {
     { HUE_ORANGE, 255, 255 },
     { HUE_AQUA,   255, 255 },
     { HUE_BLUE,   255, 255 },
     { HUE_PINK,   255, 255 }
   };
-  CRGB gradients_RGB[4] {
+  const CRGB gradients_RGB[4] {
     { 255,   0,   0 },
     {   0, 255, 255 },
     { 255, 255,   0 },
@@ -42,15 +43,14 @@ void validate_colorutils() {
   fill_gradient_RGB(leds, NUM_LEDS, gradients_RGB[0], gradients_RGB[1], gradients_RGB[2]);
   fill_gradient_RGB(leds, NUM_LEDS, gradients_RGB[0], gradients_RGB[1], gradients_RGB[2], gradients_RGB[3]);
 
-  fill_solid   (leds, NUM_LEDS, CRGB::White);  nscale8_video(leds, NUM_LEDS,  32);
-  fill_solid   (leds, NUM_LEDS, CRGB::White);  fadeLightBy  (leds, NUM_LEDS,  64);
-  fill_solid   (leds, NUM_LEDS, CRGB::White);  fade_video   (leds, NUM_LEDS, 128);
+  fill_solid       (leds, NUM_LEDS, CRGB::White);  nscale8_video (leds, NUM_LEDS,  32);
+  fill_solid       (leds, NUM_LEDS, CRGB::White);  fadeLightBy   (leds, NUM_LEDS,  64);
+  fill_solid       (leds, NUM_LEDS, CRGB::White);  fade_video    (leds, NUM_LEDS, 128);
+  fill_solid       (leds, NUM_LEDS, CRGB::White);  nscale8       (leds, NUM_LEDS,  32);
+  fill_solid       (leds, NUM_LEDS, CRGB::White);  fadeToBlackBy (leds, NUM_LEDS,  64);
+  fill_solid       (leds, NUM_LEDS, CRGB::White);  fade_raw      (leds, NUM_LEDS, 128);
+  fill_solid       (leds, NUM_LEDS, CRGB::White);  fadeUsingColor(leds, NUM_LEDS, colormask);
 
-  fill_solid   (leds, NUM_LEDS, CRGB::White);  nscale8      (leds, NUM_LEDS,  32);
-  fill_solid   (leds, NUM_LEDS, CRGB::White);  fadeToBlackBy(leds, NUM_LEDS,  64);
-  fill_solid   (leds, NUM_LEDS, CRGB::White);  fade_raw     (leds, NUM_LEDS, 128);
-
-  // fadeUsingColor()
   // blend()
   // nblend()
   // blur1d()
