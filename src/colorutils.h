@@ -33,22 +33,23 @@ void fill_solid2( T& leds, int startPos, int numToFill, const struct CHSV& color
         leds[i] = color;
     }
 }
-template<typename T>
-void fill_solid( T& leds, int numToFill, const struct CRGB& color)
-{
-    fill_solid2(leds, 0, numToFill, color);
-}
-template<typename T>
-void fill_solid( T& leds, int numToFill, const struct CHSV& color)
-{
-    fill_solid2(leds, 0, numToFill, color);
-}
-template<>
+
+// template <typename T>
+// void fill_solid( T& leds, int numToFill, const struct CRGB& color)
+// {
+//     fill_solid2(leds, 0, numToFill, color);
+// }
+// template <typename T>
+// void fill_solid( T& leds, int numToFill, const struct CHSV& color)
+// {
+//     fill_solid2(leds, 0, numToFill, color);
+// }
+inline // template <>
 void fill_solid( CRGB* leds, int numToFill, const struct CRGB& color)
 {
     fill_solid2(leds, 0, numToFill, color);
 }
-template<>
+inline // template <>
 void fill_solid( CHSV* leds, int numToFill, const struct CHSV& color)
 {
     fill_solid2(leds, 0, numToFill, color);
