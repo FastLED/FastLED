@@ -20,7 +20,7 @@ set -eou pipefail
 EXAMPLES=${EXAMPLES:-"Blink ColorPalette ColorTemperature Cylon DemoReel100
     Fire2012  FirstLight  Multiple/MultipleStripsInOneArray
     Multiple/ArrayOfLedArrays Noise NoisePlayground NoisePlusPalette Pacifica
-    Pride2015 RGBCalibrate RGBSetDemo TwinkleFox XYMatrix"}
+    Pride2015 RGBCalibrate RGBSetDemo TestTemplatedMethods TwinkleFox XYMatrix"}
 
 # list of boards to compile for by default
 BOARDS=${BOARDS:-"uno esp32dev esp01 yun digix teensy30"}
