@@ -13,8 +13,9 @@ FASTLED_NAMESPACE_BEGIN
 ///A variety of functions for working with color, palletes, and leds
 ///@{
 
-/// fill_solid -   fill a range of LEDs with a solid color
-///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
+/// fill_solid<T> - fill a range of LEDs with a solid color
+///                 Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
+///                 T type must be pointer to array, or support `operator[]`.
 template<typename T>
 void fill_solid2( T& leds, int startPos, int numToFill, const struct CRGB& color)
 {
@@ -44,11 +45,12 @@ void fill_solid( T& leds, int numToFill, const struct CHSV& color)
     fill_solid2(leds, 0, numToFill, color);
 }
 
-/// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
-///                full saturation and full value (brightness)
+/// fill_rainbow2<T> - fill a range of LEDs with a rainbow of colors, at
+///                    full saturation and full value (brightness)
+///                    T type must be pointer to array, or support `operator[]`.
 /// fill_rainbow<T> - fill a range of LEDs with a rainbow of colors, at
 ///                   full saturation and full value (brightness).
-///                   T type must support `operator[]`.
+///                   T type must be pointer to array, or support `operator[]`.
 template <typename T>
 void fill_rainbow2( T leds,
                     int startPos, int numToFill,
@@ -64,7 +66,13 @@ void fill_rainbow2( T leds,
         hsv.hue += deltahue;
     }
 }
-inline // template <typename T>
+/// fill_rainbow<T> - fill a range of LEDs with a rainbow of colors, at
+///                   full saturation and full value (brightness)
+///                   T type must be pointer to array, or support `operator[]`.
+/// fill_rainbow<T> - fill a range of LEDs with a rainbow of colors, at
+///                   full saturation and full value (brightness).
+///                   T type must be pointer to array, or support `operator[]`.
+template <typename T>
 void fill_rainbow( T leds,
                    int numToFill,
                    uint8_t initialhue, uint8_t deltahue = 5)
