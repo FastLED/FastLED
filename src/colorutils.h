@@ -33,29 +33,16 @@ void fill_solid2( T& leds, int startPos, int numToFill, const struct CHSV& color
         leds[i] = color;
     }
 }
-
-// template <typename T>
-// void fill_solid( T& leds, int numToFill, const struct CRGB& color)
-// {
-//     fill_solid2(leds, 0, numToFill, color);
-// }
-// template <typename T>
-// void fill_solid( T& leds, int numToFill, const struct CHSV& color)
-// {
-//     fill_solid2(leds, 0, numToFill, color);
-// }
-inline // template <>
-void fill_solid( CRGB* leds, int numToFill, const struct CRGB& color)
+template <typename T>
+void fill_solid( T& leds, int numToFill, const struct CRGB& color)
 {
     fill_solid2(leds, 0, numToFill, color);
 }
-inline // template <>
-void fill_solid( CHSV* leds, int numToFill, const struct CHSV& color)
+template <typename T>
+void fill_solid( T& leds, int numToFill, const struct CHSV& color)
 {
     fill_solid2(leds, 0, numToFill, color);
 }
-
-
 
 /// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
 ///                full saturation and full value (brightness)
@@ -77,7 +64,7 @@ void fill_rainbow2( T leds,
         hsv.hue += deltahue;
     }
 }
-template <typename T>
+inline // template <typename T>
 void fill_rainbow( T leds,
                    int numToFill,
                    uint8_t initialhue, uint8_t deltahue = 5)
