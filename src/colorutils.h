@@ -47,7 +47,7 @@ void fill_solid( T leds, int numToFill, const struct CRGB& color)
 ///                   full saturation and full value (brightness).
 ///                   T type must support `operator[]`.
 template <typename T>
-void fill_rainbow2( T& leds,
+void fill_rainbow2( T leds,
                     size_t startPos, size_t numToFill,
                     uint8_t initialhue, uint8_t deltahue=5)
 {
@@ -62,9 +62,9 @@ void fill_rainbow2( T& leds,
     }
 }
 template <typename T>
-void fill_rainbow( T& leds,
-                          int numToFill,
-                          uint8_t initialhue, uint8_t deltahue = 5)
+void fill_rainbow( T leds,
+                   int numToFill,
+                   uint8_t initialhue, uint8_t deltahue = 5)
 {
     fill_rainbow2(leds, 0, numToFill, initialhue, deltahue);
 }
@@ -124,7 +124,7 @@ typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradi
 ///   computed in HSV space, and then HSV values are converted to RGB
 ///   as they're written into the RGB array.
 template <typename T>
-void fill_gradient( T* leds,
+void fill_gradient( T leds,
                     uint16_t startpos, CHSV startcolor,
                     uint16_t endpos,   CHSV endcolor,
                     TGradientDirectionCode directionCode  = SHORTEST_HUES )
@@ -213,7 +213,7 @@ void fill_gradient( T* leds,
 // Convenience functions to fill an array of colors with a
 // two-color, three-color, or four-color gradient
 template <typename T>
-void fill_gradient( T* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2,
+void fill_gradient( T leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
     uint16_t last = numLeds - 1;
@@ -221,7 +221,7 @@ void fill_gradient( T* leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2,
 }
 
 template <typename T>
-void fill_gradient( T* leds, uint16_t numLeds,
+void fill_gradient( T leds, uint16_t numLeds,
 					const CHSV& c1, const CHSV& c2, const CHSV& c3,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
@@ -232,7 +232,7 @@ void fill_gradient( T* leds, uint16_t numLeds,
 }
 
 template <typename T>
-void fill_gradient( T* leds, uint16_t numLeds,
+void fill_gradient( T leds, uint16_t numLeds,
 					const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
@@ -254,7 +254,7 @@ void fill_gradient( T* leds, uint16_t numLeds,
 //                     and therefore there's only one 'direction' for the
 //                     gradient to go, and no 'direction code' is needed.
 template <typename T>
-void fill_gradient_RGB( T& leds,
+void fill_gradient_RGB( T leds,
                    uint16_t startpos, CRGB startcolor,
                    uint16_t endpos,   CRGB endcolor )
 {
@@ -298,13 +298,13 @@ void fill_gradient_RGB( T& leds,
     }
 }
 template <typename T>
-void fill_gradient_RGB( T& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2)
+void fill_gradient_RGB( T leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2)
 {
     uint16_t last = numLeds - 1;
     fill_gradient_RGB( leds, 0, c1, last, c2);
 }
 template <typename T>
-void fill_gradient_RGB( T& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3)
+void fill_gradient_RGB( T leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3)
 {
     uint16_t half = (numLeds / 2);
     uint16_t last = numLeds - 1;
@@ -312,7 +312,7 @@ void fill_gradient_RGB( T& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c
     fill_gradient_RGB( leds, half, c2, last, c3);
 }
 template <typename T>
-void fill_gradient_RGB( T& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
+void fill_gradient_RGB( T leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
 {
     uint16_t onethird = (numLeds / 3);
     uint16_t twothirds = ((numLeds * 2) / 3);
