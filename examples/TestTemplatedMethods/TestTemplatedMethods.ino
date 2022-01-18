@@ -42,10 +42,13 @@ void validate_colorutils() {
   fill_gradient_RGB(leds, NUM_LEDS, gradients_RGB[0], gradients_RGB[1], gradients_RGB[2]);
   fill_gradient_RGB(leds, NUM_LEDS, gradients_RGB[0], gradients_RGB[1], gradients_RGB[2], gradients_RGB[3]);
 
-  fill_solid(leds, NUM_LEDS, CRGB::White);
-  nscale8_video(leds, NUM_LEDS, 32);
-  fadeLightBy(leds, NUM_LEDS, 128);
-  fadeLightBy(leds, NUM_LEDS, 128);
+  fill_solid   (leds, NUM_LEDS, CRGB::White);  nscale8_video(leds, NUM_LEDS,  32);
+  fill_solid   (leds, NUM_LEDS, CRGB::White);  fadeLightBy  (leds, NUM_LEDS,  64);
+  fill_solid   (leds, NUM_LEDS, CRGB::White);  fade_video   (leds, NUM_LEDS, 128);
+
+  fill_solid   (leds, NUM_LEDS, CRGB::White);  nscale8      (leds, NUM_LEDS,  32);
+  fill_solid   (leds, NUM_LEDS, CRGB::White);  fadeToBlackBy(leds, NUM_LEDS,  64);
+  fill_solid   (leds, NUM_LEDS, CRGB::White);  fade_raw     (leds, NUM_LEDS, 128);
 
   // fadeUsingColor()
   // blend()

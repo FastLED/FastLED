@@ -10,27 +10,6 @@ FASTLED_NAMESPACE_BEGIN
 
 
 
-void fadeToBlackBy( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
-{
-    nscale8( leds, num_leds, 255 - fadeBy);
-}
-
-void fade_raw( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
-{
-    nscale8( leds, num_leds, 255 - fadeBy);
-}
-
-void nscale8_raw( CRGB* leds, uint16_t num_leds, uint8_t scale)
-{
-    nscale8( leds, num_leds, scale);
-}
-
-void nscale8( CRGB* leds, uint16_t num_leds, uint8_t scale)
-{
-    for( uint16_t i = 0; i < num_leds; ++i) {
-        leds[i].nscale8( scale);
-    }
-}
 
 void fadeUsingColor( CRGB* leds, uint16_t numLeds, const CRGB& colormask)
 {

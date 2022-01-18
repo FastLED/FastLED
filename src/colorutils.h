@@ -363,18 +363,34 @@ void fade_video(T leds, uint16_t num_leds, uint8_t fadeBy)
     nscale8_video( leds, num_leds, 255 - fadeBy);
 }
 
+// nscale8 - scale down the brightness of an array of pixels
+//           all at once.  This function can scale pixels all the
+//           way down to black even if 'scale' is not zero.
+template <typename T>
+void nscale8( T leds, uint16_t num_leds, uint8_t scale)
+{
+    for( uint16_t i = 0; i < num_leds; ++i) {
+        leds[i].nscale8( scale);
+    }
+}
+
 // fadeToBlackBy and fade_raw - reduce the brightness of an array
 //                              of pixels all at once.  These
 //                              functions will eventually fade all
 //                              the way to black.
 //                              (The two names are synonyms.)
-void fadeToBlackBy( CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
-void fade_raw(      CRGB* leds, uint16_t num_leds, uint8_t fadeBy);
+template <typename T>
+void fadeToBlackBy( T leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8( leds, num_leds, 255 - fadeBy);
+}
+template <typename T>
+void fade_raw( T leds, uint16_t num_leds, uint8_t fadeBy)
+{
+    nscale8( leds, num_leds, 255 - fadeBy);
+}
 
-// nscale8 - scale down the brightness of an array of pixels
-//           all at once.  This function can scale pixels all the
-//           way down to black even if 'scale' is not zero.
-void nscale8(       CRGB* leds, uint16_t num_leds, uint8_t scale);
+
 
 // fadeUsingColor - scale down the brightness of an array of pixels,
 //                  as though it were seen through a transparent
