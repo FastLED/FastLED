@@ -13,13 +13,6 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        board:
-          - uno
-          - esp32dev
-          - esp01
-          - yun
-          - digix
-          - teensy30
         example:
           - Blink
           - ColorPalette
@@ -40,18 +33,40 @@ jobs:
           - TestTemplatedMethods
           - TwinkleFox
           - XYMatrix
+
     steps:
       - name: checkout code
         uses: actions/checkout@v2
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v2
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
       - name: install python
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
+# NOTE: PlatformIO recommends NOT explicitly listing the python version
 
       - name: install platformio
         run: |
+          python -m pip install --upgrade pip
           pip install platformio==5.0.3
+# NOTE: PlatformIO recommends NOT explicitly listing the PIO version:
+#         pip install --upgrade platformio          
 
       - name: build example
-        run: pio ci --board ${{ matrix.board }} --lib=src "examples/${{ matrix.example }}/*.ino"
+        run: pio ci --lib=src --board uno --board teensy30 --board digix --board yun --board esp32dev --board esp01 
+        env:
+          PLATFORMIO_CI_SRC:  "examples/${{ matrix.example }}/*.ino"
+
