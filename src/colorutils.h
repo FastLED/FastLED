@@ -8,6 +8,43 @@
 #include "pixeltypes.h"
 #include "fastled_progmem.h"
 
+// To be moved into cpp_compat.h
+namespace NSFastLED { namespace _details {
+
+    // this is all compile-time goodness, for better template metaprogramming
+    // none of these items should ever see the light of day
+    // implementation here is necessary because AVR does not include any part
+    // of std namespace, including compile-time things such as <type_traits>.
+
+    template<class T, T v>
+    struct integral_constant {
+        static constexpr T value = v;
+        using value_type = T;
+        using type = integral_constant; // using injected-class-name
+        constexpr operator value_type() const noexcept { return value; }
+        constexpr value_type operator()() const noexcept { return value; } // since c++14
+    };
+
+    typedef integral_constant<bool, true>  true_type;
+    typedef integral_constant<bool, false> false_type;
+
+    template<typename T> struct is_lvalue_reference     : false_type {};
+    template<typename T> struct is_lvalue_reference<T&> : true_type {};
+
+    // "just enough" implementation of std::forward()
+    template <class T> T&& forward(typename remove_reference<T>::type& t) noexcept {
+        return static_cast<T&&>(t);
+    }
+    template <class T> T&& forward(typename remove_reference<T>::type&& t) noexcept {
+        static_assert(!is_lvalue_reference<T>::value, "");
+        return static_cast<T&&>(t);
+    }
+}}
+
+
+
+
+
 FASTLED_NAMESPACE_BEGIN
 ///@defgroup Colorutils Color utility functions
 ///A variety of functions for working with color, palletes, and leds
@@ -17,7 +54,7 @@ FASTLED_NAMESPACE_BEGIN
 ///                 Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
 ///                 T type must be pointer to array, or support `operator[]`.
 template<typename T>
-void fill_solid2( T& leds, int startPos, int numToFill, const struct CRGB& color)
+void fill_solid2( T&& leds, int startPos, int numToFill, const struct CRGB& color)
 {
     int end = startPos + numToFill;
     // TODO: convert from CRGB to CHSV only once, if T takes CHSV?
@@ -26,7 +63,7 @@ void fill_solid2( T& leds, int startPos, int numToFill, const struct CRGB& color
     }
 }
 template<typename T>
-void fill_solid2( T& leds, int startPos, int numToFill, const struct CHSV& color)
+void fill_solid2( T&& leds, int startPos, int numToFill, const struct CHSV& color)
 {
     size_t end = startPos + numToFill;
     // TODO: convert from CHSV to CRGB only once, if T takes CRGB?
@@ -35,15 +72,16 @@ void fill_solid2( T& leds, int startPos, int numToFill, const struct CHSV& color
     }
 }
 template <typename T>
-void fill_solid( T& leds, int numToFill, const struct CRGB& color)
+void fill_solid( T&& leds, int numToFill, const struct CRGB& color)
 {
-    fill_solid2(leds, 0, numToFill, color);
+    fill_solid2(NSFastLED::_details::forward<leds>, 0, numToFill, color);
 }
 template <typename T>
-void fill_solid( T& leds, int numToFill, const struct CHSV& color)
+void fill_solid( T&& leds, int numToFill, const struct CHSV& color)
 {
-    fill_solid2(leds, 0, numToFill, color);
+    fill_solid2(NSFastLED::_details::forward<leds>, 0, numToFill, color);
 }
+
 
 /// fill_rainbow2<T> - fill a range of LEDs with a rainbow of colors, at
 ///                    full saturation and full value (brightness)
@@ -52,7 +90,7 @@ void fill_solid( T& leds, int numToFill, const struct CHSV& color)
 ///                   full saturation and full value (brightness).
 ///                   T type must be pointer to array, or support `operator[]`.
 template <typename T>
-void fill_rainbow2( T leds,
+void fill_rainbow2( T&& leds,
                     int startPos, int numToFill,
                     uint8_t initialhue, uint8_t deltahue=5)
 {
@@ -73,27 +111,27 @@ void fill_rainbow2( T leds,
 ///                   full saturation and full value (brightness).
 ///                   T type must be pointer to array, or support `operator[]`.
 template <typename T>
-void fill_rainbow( T leds,
+void fill_rainbow( T&& leds,
                    int numToFill,
                    uint8_t initialhue, uint8_t deltahue = 5)
 {
-    fill_rainbow2(leds, 0, numToFill, initialhue, deltahue);
+    fill_rainbow2(NSFastLED::_details::forward<leds>, 0, numToFill, initialhue, deltahue);
 }
 
 
-// fill_gradient - fill an array of colors with a smooth HSV gradient
-//                 between two specified HSV colors.
-//                 Since 'hue' is a value around a color wheel,
-//                 there are always two ways to sweep from one hue
-//                 to another.
-//                 This function lets you specify which way you want
-//                 the hue gradient to sweep around the color wheel:
-//                   FORWARD_HUES: hue always goes clockwise
-//                   BACKWARD_HUES: hue always goes counter-clockwise
-//                   SHORTEST_HUES: hue goes whichever way is shortest
-//                   LONGEST_HUES: hue goes whichever way is longest
-//                 The default is SHORTEST_HUES, as this is nearly
-//                 always what is wanted.
+// fill_gradient<T> - fill an array of colors with a smooth HSV gradient
+//                    between two specified HSV colors.
+//                    Since 'hue' is a value around a color wheel,
+//                    there are always two ways to sweep from one hue
+//                    to another.
+//                    This function lets you specify which way you want
+//                    the hue gradient to sweep around the color wheel:
+//                      FORWARD_HUES: hue always goes clockwise
+//                      BACKWARD_HUES: hue always goes counter-clockwise
+//                      SHORTEST_HUES: hue goes whichever way is shortest
+//                      LONGEST_HUES: hue goes whichever way is longest
+//                    The default is SHORTEST_HUES, as this is nearly
+//                    always what is wanted.
 //
 // fill_gradient can write the gradient colors EITHER
 //     (1) into an array of CRGBs (e.g., into leds[] array, or an RGB Palette)
@@ -135,7 +173,7 @@ typedef enum { FORWARD_HUES, BACKWARD_HUES, SHORTEST_HUES, LONGEST_HUES } TGradi
 ///   computed in HSV space, and then HSV values are converted to RGB
 ///   as they're written into the RGB array.
 template <typename T>
-void fill_gradient( T leds,
+void fill_gradient( T&& leds,
                     uint16_t startpos, CHSV startcolor,
                     uint16_t endpos,   CHSV endcolor,
                     TGradientDirectionCode directionCode  = SHORTEST_HUES )
@@ -224,35 +262,35 @@ void fill_gradient( T leds,
 // Convenience functions to fill an array of colors with a
 // two-color, three-color, or four-color gradient
 template <typename T>
-void fill_gradient( T leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2,
+void fill_gradient( T&& leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
     uint16_t last = numLeds - 1;
-    fill_gradient( leds, 0, c1, last, c2, directionCode);
+    fill_gradient( NSFastLED::_details::forward<leds>, 0, c1, last, c2, directionCode);
 }
 
 template <typename T>
-void fill_gradient( T leds, uint16_t numLeds,
+void fill_gradient( T&& leds, uint16_t numLeds,
 					const CHSV& c1, const CHSV& c2, const CHSV& c3,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
     uint16_t half = (numLeds / 2);
     uint16_t last = numLeds - 1;
-    fill_gradient( leds,    0, c1, half, c2, directionCode);
-    fill_gradient( leds, half, c2, last, c3, directionCode);
+    fill_gradient( NSFastLED::_details::forward<leds>,    0, c1, half, c2, directionCode);
+    fill_gradient( NSFastLED::_details::forward<leds>, half, c2, last, c3, directionCode);
 }
 
 template <typename T>
-void fill_gradient( T leds, uint16_t numLeds,
+void fill_gradient( T&& leds, uint16_t numLeds,
 					const CHSV& c1, const CHSV& c2, const CHSV& c3, const CHSV& c4,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
     uint16_t onethird = (numLeds / 3);
     uint16_t twothirds = ((numLeds * 2) / 3);
     uint16_t last = numLeds - 1;
-    fill_gradient( leds,         0, c1,  onethird, c2, directionCode);
-    fill_gradient( leds,  onethird, c2, twothirds, c3, directionCode);
-    fill_gradient( leds, twothirds, c3,      last, c4, directionCode);
+    fill_gradient( NSFastLED::_details::forward<leds>,         0, c1,  onethird, c2, directionCode);
+    fill_gradient( NSFastLED::_details::forward<leds>,  onethird, c2, twothirds, c3, directionCode);
+    fill_gradient( NSFastLED::_details::forward<leds>, twothirds, c3,      last, c4, directionCode);
 }
 
 // convenience synonym
@@ -265,7 +303,7 @@ void fill_gradient( T leds, uint16_t numLeds,
 //                     and therefore there's only one 'direction' for the
 //                     gradient to go, and no 'direction code' is needed.
 template <typename T>
-void fill_gradient_RGB( T leds,
+void fill_gradient_RGB( T&& leds,
                    uint16_t startpos, CRGB startcolor,
                    uint16_t endpos,   CRGB endcolor )
 {
@@ -309,35 +347,35 @@ void fill_gradient_RGB( T leds,
     }
 }
 template <typename T>
-void fill_gradient_RGB( T leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2)
+void fill_gradient_RGB( T&& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2)
 {
     uint16_t last = numLeds - 1;
-    fill_gradient_RGB( leds, 0, c1, last, c2);
+    fill_gradient_RGB( NSFastLED::_details::forward<leds>, 0, c1, last, c2);
 }
 template <typename T>
-void fill_gradient_RGB( T leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3)
+void fill_gradient_RGB( T&& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3)
 {
     uint16_t half = (numLeds / 2);
     uint16_t last = numLeds - 1;
-    fill_gradient_RGB( leds,    0, c1, half, c2);
-    fill_gradient_RGB( leds, half, c2, last, c3);
+    fill_gradient_RGB( NSFastLED::_details::forward<leds>,    0, c1, half, c2);
+    fill_gradient_RGB( NSFastLED::_details::forward<leds>, half, c2, last, c3);
 }
 template <typename T>
-void fill_gradient_RGB( T leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
+void fill_gradient_RGB( T&& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
 {
     uint16_t onethird = (numLeds / 3);
     uint16_t twothirds = ((numLeds * 2) / 3);
     uint16_t last = numLeds - 1;
-    fill_gradient_RGB( leds,         0, c1,  onethird, c2);
-    fill_gradient_RGB( leds,  onethird, c2, twothirds, c3);
-    fill_gradient_RGB( leds, twothirds, c3,      last, c4);
+    fill_gradient_RGB( NSFastLED::_details::forward<leds>,         0, c1,  onethird, c2);
+    fill_gradient_RGB( NSFastLED::_details::forward<leds>,  onethird, c2, twothirds, c3);
+    fill_gradient_RGB( NSFastLED::_details::forward<leds>, twothirds, c3,      last, c4);
 }
 
 // nscale8_video - scale down the brightness of an array of pixels
 //                 all at once.  Guaranteed to never scale a pixel
 //                 all the way down to black, unless 'scale' is zero.
 template <typename T>
-void nscale8_video( T leds, uint16_t num_leds, uint8_t scale)
+void nscale8_video( T&& leds, uint16_t num_leds, uint8_t scale)
 {
     for( uint16_t i = 0; i < num_leds; ++i) {
         leds[i].nscale8_video( scale);
@@ -349,21 +387,21 @@ void nscale8_video( T leds, uint16_t num_leds, uint8_t scale)
 //                              to never fade all the way to black.
 //                              (The two names are synonyms.)
 template <typename T>
-void fadeLightBy(T leds, uint16_t num_leds, uint8_t fadeBy)
+void fadeLightBy(T&& leds, uint16_t num_leds, uint8_t fadeBy)
 {
-    nscale8_video( leds, num_leds, 255 - fadeBy);
+    nscale8_video( NSFastLED::_details::forward<leds>, num_leds, 255 - fadeBy);
 }
 template <typename T>
-void fade_video(T leds, uint16_t num_leds, uint8_t fadeBy)
+void fade_video(T&& leds, uint16_t num_leds, uint8_t fadeBy)
 {
-    nscale8_video( leds, num_leds, 255 - fadeBy);
+    nscale8_video( NSFastLED::_details::forward<leds>, num_leds, 255 - fadeBy);
 }
 
 // nscale8 - scale down the brightness of an array of pixels
 //           all at once.  This function can scale pixels all the
 //           way down to black even if 'scale' is not zero.
 template <typename T>
-void nscale8( T leds, uint16_t num_leds, uint8_t scale)
+void nscale8( T&& leds, uint16_t num_leds, uint8_t scale)
 {
     for( uint16_t i = 0; i < num_leds; ++i) {
         leds[i].nscale8( scale);
@@ -376,14 +414,14 @@ void nscale8( T leds, uint16_t num_leds, uint8_t scale)
 //                              the way to black.
 //                              (The two names are synonyms.)
 template <typename T>
-void fadeToBlackBy( T leds, uint16_t num_leds, uint8_t fadeBy)
+void fadeToBlackBy( T&& leds, uint16_t num_leds, uint8_t fadeBy)
 {
-    nscale8( leds, num_leds, 255 - fadeBy);
+    nscale8( NSFastLED::_details::forward<leds>, num_leds, 255 - fadeBy);
 }
 template <typename T>
-void fade_raw( T leds, uint16_t num_leds, uint8_t fadeBy)
+void fade_raw( T&& leds, uint16_t num_leds, uint8_t fadeBy)
 {
-    nscale8( leds, num_leds, 255 - fadeBy);
+    nscale8( NSFastLED::_details::forward<leds>, num_leds, 255 - fadeBy);
 }
 
 // fadeUsingColor - scale down the brightness of an array of pixels,
@@ -399,7 +437,7 @@ void fade_raw( T leds, uint16_t num_leds, uint8_t fadeBy)
 //                  zero out the red and green elements, leaving blue
 //                  (largely) the same.
 template <typename T>
-void fadeUsingColor( T leds, uint16_t numLeds, const CRGB& colormask)
+void fadeUsingColor( T&& leds, uint16_t numLeds, const CRGB& colormask)
 {
     uint8_t fr, fg, fb;
     fr = colormask.r;
@@ -412,7 +450,6 @@ void fadeUsingColor( T leds, uint16_t numLeds, const CRGB& colormask)
         leds[i].b = scale8                 ( leds[i].b, fb);
     }
 }
-
 
 
 
