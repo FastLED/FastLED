@@ -48,7 +48,7 @@ namespace NSFastLED { namespace _details {
         static_assert(!is_lvalue_reference<T>::value, "");
         return static_cast<T&&>(t);
     }
-}} // namespace NSFastLED::_Details
+}} // namespace NSFastLED::_details
 
 
 
@@ -83,7 +83,7 @@ void fill_solid2( T&& leds, int startPos, int numToFill, const struct CHSV& colo
 template <typename T>
 void fill_solid( T&& leds, int numToFill, const struct CRGB& color)
 {
-    fill_solid2(NSFastLED::_Details::forward<leds>, 0, numToFill, color);
+    fill_solid2(NSFastLED::_details::forward<leds>, 0, numToFill, color);
 }
 template <typename T>
 void fill_solid( T&& leds, int numToFill, const struct CHSV& color)
