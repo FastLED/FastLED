@@ -83,12 +83,12 @@ void fill_solid2( T&& leds, int startPos, int numToFill, const struct CHSV& colo
 template <typename T>
 void fill_solid( T&& leds, int numToFill, const struct CRGB& color)
 {
-    fill_solid2(NSFastLED::_details::forward<leds>, 0, numToFill, color);
+    fill_solid2(NSFastLED::_details::forward(leds), 0, numToFill, color);
 }
 template <typename T>
 void fill_solid( T&& leds, int numToFill, const struct CHSV& color)
 {
-    fill_solid2(NSFastLED::_details::forward<leds>, 0, numToFill, color);
+    fill_solid2(NSFastLED::_details::forward(leds), 0, numToFill, color);
 }
 
 
@@ -124,7 +124,7 @@ void fill_rainbow( T&& leds,
                    int numToFill,
                    uint8_t initialhue, uint8_t deltahue = 5)
 {
-    fill_rainbow2(NSFastLED::_details::forward<leds>, 0, numToFill, initialhue, deltahue);
+    fill_rainbow2(NSFastLED::_details::forward(leds), 0, numToFill, initialhue, deltahue);
 }
 
 
@@ -275,7 +275,7 @@ void fill_gradient( T&& leds, uint16_t numLeds, const CHSV& c1, const CHSV& c2,
 					TGradientDirectionCode directionCode = SHORTEST_HUES )
 {
     uint16_t last = numLeds - 1;
-    fill_gradient( NSFastLED::_details::forward<leds>, 0, c1, last, c2, directionCode);
+    fill_gradient( NSFastLED::_details::forward(leds), 0, c1, last, c2, directionCode);
 }
 
 template <typename T>
@@ -285,8 +285,8 @@ void fill_gradient( T&& leds, uint16_t numLeds,
 {
     uint16_t half = (numLeds / 2);
     uint16_t last = numLeds - 1;
-    fill_gradient( NSFastLED::_details::forward<leds>,    0, c1, half, c2, directionCode);
-    fill_gradient( NSFastLED::_details::forward<leds>, half, c2, last, c3, directionCode);
+    fill_gradient( NSFastLED::_details::forward(leds),    0, c1, half, c2, directionCode);
+    fill_gradient( NSFastLED::_details::forward(leds), half, c2, last, c3, directionCode);
 }
 
 template <typename T>
@@ -297,9 +297,9 @@ void fill_gradient( T&& leds, uint16_t numLeds,
     uint16_t onethird = (numLeds / 3);
     uint16_t twothirds = ((numLeds * 2) / 3);
     uint16_t last = numLeds - 1;
-    fill_gradient( NSFastLED::_details::forward<leds>,         0, c1,  onethird, c2, directionCode);
-    fill_gradient( NSFastLED::_details::forward<leds>,  onethird, c2, twothirds, c3, directionCode);
-    fill_gradient( NSFastLED::_details::forward<leds>, twothirds, c3,      last, c4, directionCode);
+    fill_gradient( NSFastLED::_details::forward(leds),         0, c1,  onethird, c2, directionCode);
+    fill_gradient( NSFastLED::_details::forward(leds),  onethird, c2, twothirds, c3, directionCode);
+    fill_gradient( NSFastLED::_details::forward(leds), twothirds, c3,      last, c4, directionCode);
 }
 
 // convenience synonym
@@ -359,15 +359,15 @@ template <typename T>
 void fill_gradient_RGB( T&& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2)
 {
     uint16_t last = numLeds - 1;
-    fill_gradient_RGB( NSFastLED::_details::forward<leds>, 0, c1, last, c2);
+    fill_gradient_RGB( NSFastLED::_details::forward(leds), 0, c1, last, c2);
 }
 template <typename T>
 void fill_gradient_RGB( T&& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3)
 {
     uint16_t half = (numLeds / 2);
     uint16_t last = numLeds - 1;
-    fill_gradient_RGB( NSFastLED::_details::forward<leds>,    0, c1, half, c2);
-    fill_gradient_RGB( NSFastLED::_details::forward<leds>, half, c2, last, c3);
+    fill_gradient_RGB( NSFastLED::_details::forward(leds),    0, c1, half, c2);
+    fill_gradient_RGB( NSFastLED::_details::forward(leds), half, c2, last, c3);
 }
 template <typename T>
 void fill_gradient_RGB( T&& leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3, const CRGB& c4)
@@ -375,9 +375,9 @@ void fill_gradient_RGB( T&& leds, uint16_t numLeds, const CRGB& c1, const CRGB& 
     uint16_t onethird = (numLeds / 3);
     uint16_t twothirds = ((numLeds * 2) / 3);
     uint16_t last = numLeds - 1;
-    fill_gradient_RGB( NSFastLED::_details::forward<leds>,         0, c1,  onethird, c2);
-    fill_gradient_RGB( NSFastLED::_details::forward<leds>,  onethird, c2, twothirds, c3);
-    fill_gradient_RGB( NSFastLED::_details::forward<leds>, twothirds, c3,      last, c4);
+    fill_gradient_RGB( NSFastLED::_details::forward(leds),         0, c1,  onethird, c2);
+    fill_gradient_RGB( NSFastLED::_details::forward(leds),  onethird, c2, twothirds, c3);
+    fill_gradient_RGB( NSFastLED::_details::forward(leds), twothirds, c3,      last, c4);
 }
 
 // nscale8_video - scale down the brightness of an array of pixels
@@ -398,12 +398,12 @@ void nscale8_video( T&& leds, uint16_t num_leds, uint8_t scale)
 template <typename T>
 void fadeLightBy(T&& leds, uint16_t num_leds, uint8_t fadeBy)
 {
-    nscale8_video( NSFastLED::_details::forward<leds>, num_leds, 255 - fadeBy);
+    nscale8_video( NSFastLED::_details::forward(leds), num_leds, 255 - fadeBy);
 }
 template <typename T>
 void fade_video(T&& leds, uint16_t num_leds, uint8_t fadeBy)
 {
-    nscale8_video( NSFastLED::_details::forward<leds>, num_leds, 255 - fadeBy);
+    nscale8_video( NSFastLED::_details::forward(leds), num_leds, 255 - fadeBy);
 }
 
 // nscale8 - scale down the brightness of an array of pixels
@@ -425,12 +425,12 @@ void nscale8( T&& leds, uint16_t num_leds, uint8_t scale)
 template <typename T>
 void fadeToBlackBy( T&& leds, uint16_t num_leds, uint8_t fadeBy)
 {
-    nscale8( NSFastLED::_details::forward<leds>, num_leds, 255 - fadeBy);
+    nscale8( NSFastLED::_details::forward(leds), num_leds, 255 - fadeBy);
 }
 template <typename T>
 void fade_raw( T&& leds, uint16_t num_leds, uint8_t fadeBy)
 {
-    nscale8( NSFastLED::_details::forward<leds>, num_leds, 255 - fadeBy);
+    nscale8( NSFastLED::_details::forward(leds), num_leds, 255 - fadeBy);
 }
 
 // fadeUsingColor - scale down the brightness of an array of pixels,
