@@ -16,9 +16,12 @@ namespace NSFastLED { namespace _details {
     // implementation here is necessary because AVR does not include any part
     // of std namespace, including compile-time things such as <type_traits>.
 
-    template<typename T> struct remove_reference      {typedef T type;};
-    template<typename T> struct remove_reference<T&>  {typedef T type;};
-    template<typename T> struct remove_reference<T&&> {typedef T type;};
+    template<typename T> struct remove_reference            {typedef       T type;};
+    template<typename T> struct remove_reference<      T&>  {typedef       T type;};
+    template<typename T> struct remove_reference<      T&&> {typedef       T type;};
+    template<typename T> struct remove_reference<const T>   {typedef const T type;};
+    template<typename T> struct remove_reference<const T&>  {typedef const T type;};
+    template<typename T> struct remove_reference<const T&&> {typedef const T type;};
 
     template<class T, T v>
     struct integral_constant {
@@ -45,7 +48,7 @@ namespace NSFastLED { namespace _details {
         static_assert(!is_lvalue_reference<T>::value, "");
         return static_cast<T&&>(t);
     }
-}}
+}} // namespace NSFastLED::_Details
 
 
 
@@ -80,7 +83,7 @@ void fill_solid2( T&& leds, int startPos, int numToFill, const struct CHSV& colo
 template <typename T>
 void fill_solid( T&& leds, int numToFill, const struct CRGB& color)
 {
-    fill_solid2(NSFastLED::_details::forward<leds>, 0, numToFill, color);
+    fill_solid2(NSFastLED::_Details::forward<leds>, 0, numToFill, color);
 }
 template <typename T>
 void fill_solid( T&& leds, int numToFill, const struct CHSV& color)
