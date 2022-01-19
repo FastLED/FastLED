@@ -16,6 +16,10 @@ namespace NSFastLED { namespace _details {
     // implementation here is necessary because AVR does not include any part
     // of std namespace, including compile-time things such as <type_traits>.
 
+    template<typename T> struct remove_reference      {typedef T type;};
+    template<typename T> struct remove_reference<T&>  {typedef T type;};
+    template<typename T> struct remove_reference<T&&> {typedef T type;};
+
     template<class T, T v>
     struct integral_constant {
         static constexpr T value = v;
@@ -29,13 +33,15 @@ namespace NSFastLED { namespace _details {
     typedef integral_constant<bool, false> false_type;
 
     template<typename T> struct is_lvalue_reference     : false_type {};
-    template<typename T> struct is_lvalue_reference<T&> : true_type {};
+    template<typename T> struct is_lvalue_reference<T&> : true_type  {};
 
     // "just enough" implementation of std::forward()
-    template <class T> T&& forward(typename remove_reference<T>::type& t) noexcept {
+    template <typename T>
+    constexpr T&& forward(typename remove_reference<T>::type& t) noexcept {
         return static_cast<T&&>(t);
     }
-    template <class T> T&& forward(typename remove_reference<T>::type&& t) noexcept {
+    template <typename T>
+    constexpr T&& forward(typename remove_reference<T>::type&& t) noexcept {
         static_assert(!is_lvalue_reference<T>::value, "");
         return static_cast<T&&>(t);
     }
