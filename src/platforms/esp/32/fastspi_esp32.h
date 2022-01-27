@@ -3,6 +3,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+#include <SPI.h>
+
 /*
  * ESP32 Hardware SPI Driver
  *
@@ -49,8 +51,6 @@ FASTLED_NAMESPACE_BEGIN
     #define FASTLED_ESP32_SPI_BUS VSPI
 #endif
 
-SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
-
 #if FASTLED_ESP32_SPI_BUS == VSPI
     static uint8_t spiClk = 18;
     static uint8_t spiMiso = 19;
@@ -65,6 +65,7 @@ SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class ESP32SPIOutput {
+    SPIClass m_ledSPI;
 	Selectable 	*m_pSelect;
 
 public:
@@ -72,14 +73,18 @@ public:
 	static_assert(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
 	static_assert(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
 
-	ESP32SPIOutput() { m_pSelect = NULL; }
-	ESP32SPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
+	ESP32SPIOutput() :
+	  m_ledSPI(FASTLED_ESP32_SPI_BUS),
+	  m_pSelect(nullptr) {}
+	ESP32SPIOutput(Selectable *pSelect) :
+	  m_ledSPI(FASTLED_ESP32_SPI_BUS),
+	  m_pSelect(pSelect) {}
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
 	void init() {
 		// set the pins to output and make sure the select is released (which apparently means hi?  This is a bit
 		// confusing to me)
-		ledSPI.begin(spiClk, spiMiso, spiMosi, spiCs);
+		m_ledSPI.begin(spiClk, spiMiso, spiMosi, spiCs);
 		release();
 	}
 
@@ -96,8 +101,8 @@ public:
 	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
 	// naive writeByte implelentation, simply calls writeBit on the 8 bits in the byte.
-	static void writeByte(uint8_t b) {
-		ledSPI.transfer(b);
+	void writeByte(uint8_t b) {
+		m_ledSPI.transfer(b);
 	}
 
 public:
@@ -105,26 +110,26 @@ public:
 	// select the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move select responsibility out of the SPI classes
 	// entirely, make it up to the caller to remember to lock/select the line?)
 	void select() { 
-		ledSPI.beginTransaction(SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0));
+		m_ledSPI.beginTransaction(SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0));
 		if(m_pSelect != NULL) { m_pSelect->select(); } 
 	} 
 
 	// release the SPI line
 	void release() { 
 		if(m_pSelect != NULL) { m_pSelect->release(); } 
-		ledSPI.endTransaction();
+		m_ledSPI.endTransaction();
 	}
 
-	// Write out len bytes of the given value out over ledSPI.  Useful for quickly flushing, say, a line of 0's down the line.
+	// Write out len bytes of the given value out over m_ledSPI.  Useful for quickly flushing, say, a line of 0's down the line.
 	void writeBytesValue(uint8_t value, int len) {
 		select();
 		writeBytesValueRaw(value, len);
 		release();
 	}
 
-	static void writeBytesValueRaw(uint8_t value, int len) {
+	void writeBytesValueRaw(uint8_t value, int len) {
 		while(len--) {
-			ledSPI.transfer(value); 
+			m_ledSPI.transfer(value); 
 		}
 	}
 
@@ -145,7 +150,7 @@ public:
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline void writeBit(uint8_t b) {
-		ledSPI.transfer(b);
+		m_ledSPI.transfer(b);
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
