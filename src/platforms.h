@@ -36,6 +36,9 @@
 #include "platforms/esp/32/fastled_esp32.h"
 #elif defined(ARDUINO_ARCH_APOLLO3)
 #include "platforms/apollo3/fastled_apollo3.h"
+#elif defined(__x86_64__) // FIXME: Review decision: Repeat the defined from led_sysdefs.h or use FASTLED_STUB_IMPL which is defined at this point
+// stub platform for testing (on cpu)
+#include "platforms/stub/fastled_stub.h"
 #else
 // AVR platforms
 #include "platforms/avr/fastled_avr.h"

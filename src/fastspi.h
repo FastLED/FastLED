@@ -59,6 +59,11 @@ template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public ESP32SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
+#if defined(FASTLED_STUB_IMPL)
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+class SPIOutput : public StubSPIOutput {};
+#endif
+
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
 #if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
