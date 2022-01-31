@@ -1,3 +1,6 @@
+/* This example demos a rectangular LED matrix with moving noise. 
+   It requires the SmartMatrix library in addition to FastLED. This is only available on Teensyy boards at the moment.
+*/
 #include <SmartMatrix.h>
 #include <FastLED.h>
 
