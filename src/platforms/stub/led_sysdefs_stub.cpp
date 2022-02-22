@@ -1,5 +1,7 @@
 #include "led_sysdefs_stub.h"
 
+#if defined(FASTLED_STUB_IMPL)
+
 #include <chrono>
 #include <thread>
 
@@ -18,3 +20,5 @@ uint32_t micros() {
 void delay(int ms) {
     std::this_thread::sleep_for (std::chrono::milliseconds(ms));
 }
+
+#endif // defined(FASTLED_STUB_IMPL)

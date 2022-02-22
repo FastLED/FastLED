@@ -1,6 +1,8 @@
 #ifndef __INC_LED_SYSDEFS_STUB_H
 #define __INC_LED_SYSDEFS_STUB_H
 
+#if defined(__x86_64__)
+
 #define FASTLED_STUB_IMPL
 
 #include <stdint.h>
@@ -33,5 +35,7 @@ extern "C" {
     void delay(int ms);
     void yield(void);
 }
+
+#endif // defined(__x86_64__)
 
 #endif // __INC_LED_SYSDEFS_STUB_H
