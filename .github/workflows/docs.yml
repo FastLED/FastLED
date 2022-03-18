@@ -15,10 +15,11 @@ jobs:
       - name: Fetch Repository Reference Info
         id: repo-info
         run: |
+          git fetch --prune --unshallow --tags
           RELEASE_TAG=${{ github.event.release.tag_name }}
           LATEST_TAG=$(git tag | grep -E '^[0-9]' | sort -V | tail -1)
           GIT_SHA_SHORT=$(sed 's/\(.\{7\}\).*/\1/' <<< "$GITHUB_SHA")
-          PROJECT_NUMBER=$LATEST_TAG
+          PROJECT_NUMBER=${RELEASE_TAG:-${LATEST_TAG:-$GIT_SHA_SHORT}}
           COMMIT_MSG=$PROJECT_NUMBER
           if [ "$PROJECT_NUMBER" != "$GIT_SHA_SHORT" ]; then COMMIT_MSG+=" ($GITHUB_SHA)"; fi
           echo "The project number is \"$PROJECT_NUMBER\" and the commit message is \"$COMMIT_MSG\""
