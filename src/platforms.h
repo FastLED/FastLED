@@ -5,6 +5,9 @@
 
 #include "fastled_config.h"
 
+/// @file platforms.h
+/// Determines which platforms headers to include
+
 #if defined(NRF51)
 #include "platforms/arm/nrf51/fastled_arm_nrf51.h"
 #elif defined(NRF52_SERIES)
