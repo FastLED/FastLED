@@ -15,18 +15,18 @@ FASTLED_NAMESPACE_BEGIN
 
 /// fill_solid -   fill a range of LEDs with a solid color
 ///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
-void fill_solid( struct CRGB * leds, int numToFill,
+void fill_solid( struct CRGB * targetArray, int numToFill,
                  const struct CRGB& color);
 
 /// fill_solid -   fill a range of LEDs with a solid color
 ///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
 void fill_solid( struct CHSV* targetArray, int numToFill,
-				 const struct CHSV& hsvColor);
+				 const struct CHSV& color);
 
 
 /// fill_rainbow - fill a range of LEDs with a rainbow of colors, at
 ///                full saturation and full value (brightness)
-void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
+void fill_rainbow( struct CRGB * targetArray, int numToFill,
                    uint8_t initialhue,
                    uint8_t deltahue = 5);
 

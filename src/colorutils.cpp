@@ -10,19 +10,19 @@ FASTLED_NAMESPACE_BEGIN
 
 
 
-void fill_solid( struct CRGB * leds, int numToFill,
+void fill_solid( struct CRGB * targetArray, int numToFill,
                  const struct CRGB& color)
 {
     for( int i = 0; i < numToFill; ++i) {
-        leds[i] = color;
+        targetArray[i] = color;
     }
 }
 
 void fill_solid( struct CHSV * targetArray, int numToFill,
-                 const struct CHSV& hsvColor)
+                 const struct CHSV& color)
 {
     for( int i = 0; i < numToFill; ++i) {
-        targetArray[i] = hsvColor;
+        targetArray[i] = color;
     }
 }
 
@@ -33,7 +33,7 @@ void fill_solid( struct CHSV * targetArray, int numToFill,
 // 	fill_solid<CRGB>( targetArray, numToFill, (CRGB) hsvColor);
 // }
 
-void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
+void fill_rainbow( struct CRGB * targetArray, int numToFill,
                   uint8_t initialhue,
                   uint8_t deltahue )
 {
@@ -42,7 +42,7 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
     hsv.val = 255;
     hsv.sat = 240;
     for( int i = 0; i < numToFill; ++i) {
-        pFirstLED[i] = hsv;
+        targetArray[i] = hsv;
         hsv.hue += deltahue;
     }
 }
