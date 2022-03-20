@@ -15,7 +15,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @{
 
 
-/// @defgroup PowerSetup Power Control Setup Functions
+/// @name Power Control Setup Functions
 /// Functions to initialize the power control system
 /// @{
 
@@ -35,12 +35,12 @@ void set_max_power_indicator_LED( uint8_t pinNumber); // zero = no indicator LED
 /// @} PowerSetup
 
 
-/// @defgroup PowerShowDelay Power Control 'show()' and 'delay()' Functions
+/// @name Power Control 'show()' and 'delay()' Functions
 /// Power-limiting replacements of `show()` and `delay()`. 
 /// These are drop-in replacements for CFastLED::show() and CFastLED::delay().
 /// In order to use these, you have to actually replace your calls to
 /// CFastLED::show() and CFastLED::delay() with these two functions.
-/// @deprecated These functions are deprecated via [6ebcb64](https://github.com/FastLED/FastLED/commit/6ebcb6436273cc9a9dc91733af8dfd1fedde6d60),
+/// @deprecated These functions are deprecated as of [6ebcb64](https://github.com/FastLED/FastLED/commit/6ebcb6436273cc9a9dc91733af8dfd1fedde6d60),
 /// circa 2015. Do not use them for new programs.
 /// @{
 
@@ -56,7 +56,7 @@ void delay_at_max_brightness_for_power( uint16_t ms);
 /// @} PowerShowDelay
 
 
-/// @defgroup PowerInternal Power Control Internal Helper Functions
+/// @name Power Control Internal Helper Functions
 /// Internal helper functions for power control.
 /// @{
 
@@ -89,7 +89,7 @@ uint8_t calculate_max_brightness_for_power_vmA(const CRGB* ledbuffer, uint16_t n
 
 /// Determines the highest brightness level you can use and still stay under
 /// the specified power budget for all sets of LEDs. 
-/// Unlike the other @ref PowerInternal which use a pointer to a
+/// Unlike the other internal power functions which use a pointer to a
 /// specific set of LED data, this function uses the ::CFastLED linked list
 /// of LED controllers and their attached data.
 /// @param target_brightness the brightness you'd ideally like to use
