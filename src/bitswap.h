@@ -4,13 +4,11 @@
 #include "FastLED.h"
 
 /// @file bitswap.h
-/// Functions for rotating bits/bytes
+/// Functions for doing a rotation of bits/bytes used by parallel output
 
 FASTLED_NAMESPACE_BEGIN
 
-/// @defgroup Bitswap Bit Swapping/Rotate
-/// Functions for doing a rotation of bits/bytes used by parallel output
-/// @{
+
 #if defined(FASTLED_ARM) || defined(FASTLED_ESP8266) || defined(FASTLED_DOXYGEN)
 /// Structure representing 8 bits of access
 typedef union {
@@ -288,8 +286,6 @@ __attribute__((always_inline)) inline void transpose8(unsigned char *A, unsigned
 }
 
 #endif
-
-/// @} Bitswap
 
 FASTLED_NAMESPACE_END
 
