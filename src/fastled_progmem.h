@@ -32,8 +32,6 @@ FASTLED_NAMESPACE_BEGIN
 /// If FASTLED_USE_PROGMEM is 1, we'll map FL_PROGMEM
 /// and the FL_PGM_* accessors to the Arduino equivalents.
 
-/// @def FASTLED_INCLUDE_PGMSPACE
-/// Used to determine whether to include the `avr/pgmspace.h` header
 
 #if FASTLED_USE_PROGMEM == 1
 #ifndef FASTLED_INCLUDE_PGMSPACE
