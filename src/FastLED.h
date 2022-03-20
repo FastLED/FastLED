@@ -90,8 +90,18 @@ enum ESPIChipsets {
 	DOTSTAR   ///< APA102 LED chipset alias
 };
 
+/// Smart Matrix Library controller type
+/// @see https://github.com/pixelmatix/SmartMatrix
 enum ESM { SMART_MATRIX };
+
+/// Octo WS2811 LED Library controller types
+/// @see https://www.pjrc.com/teensy/td_libs_OctoWS2811.html
+/// @see https://github.com/PaulStoffregen/OctoWS2811
 enum OWS2811 { OCTOWS2811,OCTOWS2811_400, OCTOWS2813};
+
+/// WS2812Serial Library controller type
+/// @see https://www.pjrc.com/non-blocking-ws2812-led-library/
+/// @see https://github.com/PaulStoffregen/WS2812Serial
 enum SWS2812 { WS2812SERIAL };
 
 #ifdef HAS_PIXIE
@@ -140,6 +150,7 @@ template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDE
 /// @}
 
 
+/// Blockless output port enum
 enum EBlockChipsets {
 #ifdef PORTA_FIRST_PIN
 	WS2811_PORTA,
@@ -219,24 +230,22 @@ public:
 	/// the first two arguments are the same, the third argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the fourth argument is the number of leds for this controller object.
 	/// @param pLed the led controller being added
-	/// @param data base point to an array of CRGB data structures
+	/// @param data base pointer to an array of CRGB data structures
 	/// @param nLedsOrOffset number of leds (3 argument version) or offset into the data array
 	/// @param nLedsIfOffset number of leds (4 argument version)
 	/// @returns a reference to the added controller
 	static CLEDController &addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
 
-	/// @name Adding SPI based controllers
-	/// @{
+	/// @name Adding SPI-based controllers
 	/// Add an SPI based CLEDController instance to the world.
+	///
 	/// There are two ways to call this method (as well as the other addLeds() 
-	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
+	/// variations).  The first is with 2 arguments, in which case the arguments are  a pointer to
 	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
-	/// This method also takes 1 to 5 template parameters for identifying the specific chipset, data and clock pins,
-	/// RGB ordering, and SPI data rate
-	/// @param data base point to an array of CRGB data structures
+	/// @param data base pointer to an array of CRGB data structures
 	/// @param nLedsOrOffset number of leds (3 argument version) or offset into the data array
 	/// @param nLedsIfOffset number of leds (4 argument version)
 	/// @tparam CHIPSET the chipset type
@@ -245,6 +254,9 @@ public:
 	/// @tparam RGB_ORDER the rgb ordering for the leds (e.g. what order red, green, and blue data is written out in)
 	/// @tparam SPI_DATA_RATE the data rate to drive the SPI clock at, defined using DATA_RATE_MHZ or DATA_RATE_KHZ macros
 	/// @returns a reference to the added controller
+	/// @{
+
+	/// Add an SPI based CLEDController instance to the world.
 	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint32_t SPI_DATA_RATE > CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
 			case LPD6803: { static LPD6803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
@@ -259,6 +271,7 @@ public:
 		}
 	}
 
+	/// Add an SPI based CLEDController instance to the world.
 	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN > static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
 			case LPD6803: { static LPD6803Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
@@ -273,6 +286,7 @@ public:
 		}
 	}
 
+	/// Add an SPI based CLEDController instance to the world.
 	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER > static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
 			case LPD6803: { static LPD6803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
@@ -301,12 +315,12 @@ public:
 	}
 
 #endif
-	/// @}
+	/// @} Adding SPI based controllers
 
 #ifdef FASTLED_HAS_CLOCKLESS
 	/// @name Adding 3-wire led controllers
-	/// @{
 	/// Add a clockless (aka 3-wire, also DMX) based CLEDController instance to the world.
+	///
 	/// There are two ways to call this method (as well as the other addLeds()
 	/// variations). The first is with 2 arguments, in which case the arguments are  a pointer to
 	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
@@ -315,25 +329,31 @@ public:
 	///
 	/// This method also takes 2 to 3 template parameters for identifying the specific chipset, data pin,
 	/// RGB ordering, and SPI data rate
-	/// @param data base point to an array of CRGB data structures
+	///
+	/// @param data base pointer to an array of CRGB data structures
 	/// @param nLedsOrOffset number of leds (3 argument version) or offset into the data array
 	/// @param nLedsIfOffset number of leds (4 argument version)
 	/// @tparam CHIPSET the chipset type (required)
 	/// @tparam DATA_PIN the data pin for the leds (required)
 	/// @tparam RGB_ORDER the rgb ordering for the leds (e.g. what order red, green, and blue data is written out in)
 	/// @returns a reference to the added controller
+	/// @{
+
+	/// Add a clockless based CLEDController instance to the world.
 	template<template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN, RGB_ORDER> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+	/// Add a clockless based CLEDController instance to the world.
 	template<template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN, RGB> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+	/// Add a clockless based CLEDController instance to the world.
 	template<template<uint8_t DATA_PIN> class CHIPSET, uint8_t DATA_PIN>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN> c;
@@ -357,14 +377,14 @@ public:
 		}
 	}
 	#endif
-	/// @}
+	/// @} Adding 3-wire led controllers
 #endif
 
 	/// @name Adding 3rd party library controllers
-	/// @{
 	/// Add a 3rd party library based CLEDController instance to the world.
-	/// There are two ways to call this method (as well as the other addLeds)
-	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
+	///
+	/// There are two ways to call this method (as well as the other addLeds()
+	/// variations).  The first is with 2 arguments, in which case the arguments are  a pointer to
 	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object. This class includes the SmartMatrix
@@ -372,18 +392,23 @@ public:
 	///
 	/// This method also takes 1 to 2 template parameters for identifying the specific chipset and
 	/// RGB ordering.
-	/// @param data base point to an array of CRGB data structures
+	///
+	/// @param data base pointer to an array of CRGB data structures
 	/// @param nLedsOrOffset number of leds (3 argument version) or offset into the data array
 	/// @param nLedsIfOffset number of leds (4 argument version)
 	/// @tparam CHIPSET the chipset type (required)
 	/// @tparam RGB_ORDER the rgb ordering for the leds (e.g. what order red, green, and blue data is written out in)
 	/// @returns a reference to the added controller
+	/// @{
+
+	/// Add a 3rd party library based CLEDController instance to the world.
 	template<template<EOrder RGB_ORDER> class CHIPSET, EOrder RGB_ORDER>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<RGB_ORDER> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
+	/// Add a 3rd party library based CLEDController instance to the world.
 	template<template<EOrder RGB_ORDER> class CHIPSET>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<RGB> c;
@@ -391,6 +416,9 @@ public:
 	}
 
 #ifdef USE_OCTOWS2811
+	/// Add a OCTOWS2811 based CLEDController instance to the world.
+	/// @see https://www.pjrc.com/teensy/td_libs_OctoWS2811.html
+	/// @see https://github.com/PaulStoffregen/OctoWS2811
 	template<OWS2811 CHIPSET, EOrder RGB_ORDER>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
@@ -403,6 +431,9 @@ public:
 		}
 	}
 
+	/// Add a OCTOWS2811 library based CLEDController instance to the world.
+	/// @see https://www.pjrc.com/teensy/td_libs_OctoWS2811.html
+	/// @see https://github.com/PaulStoffregen/OctoWS2811
 	template<OWS2811 CHIPSET>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
@@ -412,6 +443,9 @@ public:
 #endif
 
 #ifdef USE_WS2812SERIAL
+	/// Add a WS2812Serial library based CLEDController instance to the world.
+	/// @see https://www.pjrc.com/non-blocking-ws2812-led-library/
+	/// @see https://github.com/PaulStoffregen/WS2812Serial
 	template<SWS2812 CHIPSET, int DATA_PIN, EOrder RGB_ORDER>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
@@ -421,6 +455,8 @@ public:
 #endif
 
 #ifdef SmartMatrix_h
+	/// Add a SmartMatrix library based CLEDController instance to the world.
+	/// @see https://github.com/pixelmatix/SmartMatrix
 	template<ESM CHIPSET>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
@@ -429,29 +465,33 @@ public:
 		}
 	}
 #endif
-	/// @}
+	/// @} Adding 3rd party library controllers
 
 
 #ifdef FASTLED_HAS_BLOCKLESS
 
 	/// @name Adding parallel output controllers
-	/// @{
 	/// Add a block based CLEDController instance to the world.
-	/// There are two ways to call this method (as well as the other addLeds)
-	/// variations.  The first is with 2 arguments, in which case the arguments are  a pointer to
+	///
+	/// There are two ways to call this method (as well as the other addLeds()
+	/// variations).  The first is with 2 arguments, in which case the arguments are  a pointer to
 	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
 	/// CRGB data begins, and the third argument is the number of leds for this controller object.
 	///
 	/// This method also takes a 2 to 3 template parameters for identifying the specific chipset and rgb ordering
 	/// RGB ordering, and SPI data rate
-	/// @param data base point to an array of CRGB data structures
+	///
+	/// @param data base pointer to an array of CRGB data structures
 	/// @param nLedsOrOffset number of leds (3 argument version) or offset into the data array
 	/// @param nLedsIfOffset number of leds (4 argument version)
 	/// @tparam CHIPSET the chipset/port type (required)
 	/// @tparam NUM_LANES how many parallel lanes of output to write
 	/// @tparam RGB_ORDER the rgb ordering for the leds (e.g. what order red, green, and blue data is written out in)
 	/// @returns a reference to the added controller
+	/// @{
+
+	/// Add a block based parallel output CLEDController instance to the world.
 	template<EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
@@ -493,11 +533,12 @@ public:
 		}
 	}
 
+	/// Add a block based parallel output CLEDController instance to the world.
 	template<EBlockChipsets CHIPSET, int NUM_LANES>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		return addLeds<CHIPSET,NUM_LANES,GRB>(data,nLedsOrOffset,nLedsIfOffset);
 	}
-	/// @}
+	/// @} Adding parallel output controllers
 #endif
 
 	/// Set the global brightness scaling

@@ -493,6 +493,8 @@ struct CRGB {
     }
 
 #if (defined SmartMatrix_h || defined SmartMatrix3_h)
+    /// Convert to an rgb24 object, used with the SmartMatrix library
+    /// @see https://github.com/pixelmatix/SmartMatrix
     operator rgb24() const {
         rgb24 ret;
         ret.red = r;
