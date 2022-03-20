@@ -80,7 +80,7 @@
 // They're commented out above and repeated here so the Doxygen parser
 // will be able to find them. They will not affect your own configuration, 
 // and you do *NOT* need to modify them.
-#ifdef DOXYGEN
+#ifdef FASTLED_DOXYGEN
 #define FASTLED_FORCE_SOFTWARE_PINS
 #define FASTLED_FORCE_SOFTWARE_SPI
 #define FASTLED_ALLOW_INTERRUPTS
