@@ -449,7 +449,8 @@ void blurColumns(CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount);
 /// spectrum, but it's surprisingly close, and it's fast and small.
 CRGB HeatColor( uint8_t temperature);
 
-/// @}
+/// @} ColorFills
+/// @} ColorUtils
 
 
 /// @defgroup ColorPalettes Color Palettes
@@ -2163,5 +2164,4 @@ void   napplyGamma_video( CRGB* rgbarray, uint16_t count, float gammaR, float ga
 
 FASTLED_NAMESPACE_END
 
-///@}
 #endif
