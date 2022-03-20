@@ -298,25 +298,31 @@ struct PixelController {
             initOffsets(len);
         }
 
-        /// Set up the values for binary dithering
-        void init_binary_dithering() {
+
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
 
-            // Set 'virtual bits' of dithering to the highest level
-            // that is not likely to cause excessive flickering at
-            // low brightness levels + low update rates.
-            // These pre-set values are a little ambitious, since
-            // a 400Hz update rate for WS2811-family LEDs is only
-            // possible with 85 pixels or fewer.
-            // Once we have a 'number of milliseconds since last update'
-            // value available here, we can quickly calculate the correct
-            // number of 'virtual bits' on the fly with a couple of 'if'
-            // statements -- no division required.  At this point,
-            // the division is done at compile time, so there's no runtime
-            // cost, but the values are still hard-coded.
+/// Predicted max update rate, in Hertz
 #define MAX_LIKELY_UPDATE_RATE_HZ     400
+
+/// Minimum acceptable dithering rate, in Hertz
 #define MIN_ACCEPTABLE_DITHER_RATE_HZ  50
+
+/// The number of updates in a single dither cycle
 #define UPDATES_PER_FULL_DITHER_CYCLE (MAX_LIKELY_UPDATE_RATE_HZ / MIN_ACCEPTABLE_DITHER_RATE_HZ)
+
+/// Set 'virtual bits' of dithering to the highest level
+/// that is not likely to cause excessive flickering at
+/// low brightness levels + low update rates.  
+/// These pre-set values are a little ambitious, since
+/// a 400Hz update rate for WS2811-family LEDs is only
+/// possible with 85 pixels or fewer.
+/// Once we have a 'number of milliseconds since last update'
+/// value available here, we can quickly calculate the correct
+/// number of 'virtual bits' on the fly with a couple of 'if'
+/// statements -- no division required.  At this point,
+/// the division is done at compile time, so there's no runtime
+/// cost, but the values are still hard-coded.
+/// @todo Can these macros be replaced with constants scoped to PixelController::init_binary_dithering()?
 #define RECOMMENDED_VIRTUAL_BITS ((UPDATES_PER_FULL_DITHER_CYCLE>1) + \
                                   (UPDATES_PER_FULL_DITHER_CYCLE>2) + \
                                   (UPDATES_PER_FULL_DITHER_CYCLE>4) + \
@@ -325,8 +331,16 @@ struct PixelController {
                                   (UPDATES_PER_FULL_DITHER_CYCLE>32) + \
                                   (UPDATES_PER_FULL_DITHER_CYCLE>64) + \
                                   (UPDATES_PER_FULL_DITHER_CYCLE>128) )
+
+/// Alias for RECOMMENDED_VIRTUAL_BITS
 #define VIRTUAL_BITS RECOMMENDED_VIRTUAL_BITS
 
+#endif
+
+
+        /// Set up the values for binary dithering
+        void init_binary_dithering() {
+#if !defined(NO_DITHERING) || (NO_DITHERING != 1)
             // R is the digther signal 'counter'.
             static uint8_t R = 0;
             ++R;
