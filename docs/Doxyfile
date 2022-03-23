@@ -2244,6 +2244,9 @@ INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = FASTLED_DOXYGEN \
                          FASTLED_HAS_CLOCKLESS \
                          FASTLED_HAS_BLOCKLESS \
+                         USE_OCTOWS2811 \
+                         USE_WS2812SERIAL \
+                         SmartMatrix_h \
                          __attribute__((always_inline)):= \
                          FL_PROGMEM:=
 
