@@ -63,7 +63,7 @@ typedef enum {
 #define saccum87 int16_t
 
 
-/// Fill an array with a smooth HSV gradient between two specified HSV colors. 
+/// Fill a range of LEDs with a smooth HSV gradient between two HSV colors. 
 /// This function can write the gradient colors either:
 ///
 ///   1. Into an array of CRGBs (e.g., an leds[] array, or a CRGB palette)
@@ -165,7 +165,7 @@ void fill_gradient( T* targetArray,
 }
 
 
-/// Two color version of fill_gradient()
+/// Fill a range of LEDs with a smooth HSV gradient between two HSV colors. 
 /// @see fill_gradient()
 /// @param targetArray a pointer to the color array to fill
 /// @param numLeds the number of LEDs to fill
@@ -180,7 +180,7 @@ void fill_gradient( T* targetArray, uint16_t numLeds, const CHSV& c1, const CHSV
     fill_gradient( targetArray, 0, c1, last, c2, directionCode);
 }
 
-/// Three color version of fill_gradient()
+/// Fill a range of LEDs with a smooth HSV gradient between three HSV colors. 
 /// @see fill_gradient()
 /// @param targetArray a pointer to the color array to fill
 /// @param numLeds the number of LEDs to fill
@@ -199,7 +199,7 @@ void fill_gradient( T* targetArray, uint16_t numLeds,
     fill_gradient( targetArray, half, c2, last, c3, directionCode);
 }
 
-/// Four color version of fill_gradient()
+/// Fill a range of LEDs with a smooth HSV gradient between four HSV colors. 
 /// @see fill_gradient()
 /// @param targetArray a pointer to the color array to fill
 /// @param numLeds the number of LEDs to fill
@@ -225,7 +225,7 @@ void fill_gradient( T* targetArray, uint16_t numLeds,
 #define fill_gradient_HSV fill_gradient
 
 
-/// Fill a range of LEDs with a smooth RGB gradient between two specified RGB colors. 
+/// Fill a range of LEDs with a smooth RGB gradient between two RGB colors. 
 /// Unlike HSV, there is no "color wheel" in RGB space, and therefore there's only one
 /// "direction" for the gradient to go. This means there's no TGradientDirectionCode
 /// parameter for direction.
@@ -238,7 +238,7 @@ void fill_gradient_RGB( CRGB* leds,
                        uint16_t startpos, CRGB startcolor,
                        uint16_t endpos,   CRGB endcolor );
 
-/// Two color version of fill_gradient_RGB().
+/// Fill a range of LEDs with a smooth RGB gradient between two RGB colors. 
 /// @see fill_gradient_RGB()
 /// @param leds a pointer to the LED array to fill
 /// @param numLeds the number of LEDs to fill
@@ -246,7 +246,7 @@ void fill_gradient_RGB( CRGB* leds,
 /// @param c2 the end color for the gradient
 void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2);
 
-/// Three color version of fill_gradient_RGB().
+/// Fill a range of LEDs with a smooth RGB gradient between three RGB colors. 
 /// @see fill_gradient_RGB()
 /// @param leds a pointer to the LED array to fill
 /// @param numLeds the number of LEDs to fill
@@ -255,7 +255,7 @@ void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB
 /// @param c3 the end color for the gradient
 void fill_gradient_RGB( CRGB* leds, uint16_t numLeds, const CRGB& c1, const CRGB& c2, const CRGB& c3);
 
-/// Four color version of fill_gradient_RGB().
+/// Fill a range of LEDs with a smooth RGB gradient between four RGB colors. 
 /// @see fill_gradient_RGB()
 /// @param leds a pointer to the LED array to fill
 /// @param numLeds the number of LEDs to fill

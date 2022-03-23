@@ -205,7 +205,7 @@ public:
         return *this;
     }
 
-    /// Fill all of the LEDs with a smooth HSV gradient between two specified HSV colors.
+    /// Fill all of the LEDs with a smooth HSV gradient between two HSV colors. 
     /// @param startcolor the starting color in the gradient
     /// @param endcolor the end color for the gradient
     /// @param directionCode the direction to travel around the color wheel
@@ -219,7 +219,7 @@ public:
         return *this;
     }
 
-    /// Fill all of the LEDs with a smooth HSV gradient between three specified HSV colors.
+    /// Fill all of the LEDs with a smooth HSV gradient between three HSV colors. 
     /// @param c1 the starting color in the gradient
     /// @param c2 the middle color for the gradient
     /// @param c3 the end color for the gradient
@@ -234,7 +234,7 @@ public:
         return *this;
     }
 
-    /// Fill all of the LEDs with a smooth HSV gradient between four specified HSV colors.
+    /// Fill all of the LEDs with a smooth HSV gradient between four HSV colors. 
     /// @param c1 the starting color in the gradient
     /// @param c2 the first middle color for the gradient
     /// @param c3 the second middle color for the gradient
@@ -250,7 +250,7 @@ public:
         return *this;
     }
 
-    /// Fill all of the LEDs with a smooth RGB gradient between two specified RGB colors
+    /// Fill all of the LEDs with a smooth RGB gradient between two RGB colors. 
     /// @param startcolor the starting color in the gradient
     /// @param endcolor the end color for the gradient
     /// @param directionCode the direction to travel around the color wheel
@@ -264,7 +264,7 @@ public:
         return *this;
     }
 
-    /// Fill all of the LEDs with a smooth RGB gradient between three specified RGB colors
+    /// Fill all of the LEDs with a smooth RGB gradient between three RGB colors. 
     /// @param c1 the starting color in the gradient
     /// @param c2 the middle color for the gradient
     /// @param c3 the end color for the gradient
@@ -278,7 +278,7 @@ public:
         return *this;
     }
 
-    /// Fill all of the LEDs with a smooth RGB gradient between four specified RGB colors
+    /// Fill all of the LEDs with a smooth RGB gradient between four RGB colors. 
     /// @param c1 the starting color in the gradient
     /// @param c2 the first middle color for the gradient
     /// @param c3 the second middle color for the gradient
