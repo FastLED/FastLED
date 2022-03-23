@@ -933,12 +933,12 @@ inline CRGB operator%( const CRGB& p1, uint8_t d)
 /// Within this enum, the red channel is 0, the green channel is 1, and the
 /// blue chanel is 2.
 enum EOrder {
-	RGB=0012,  ///< Red,   Green, Blue
-	RBG=0021,  ///< Red,   Blue,  Green
-	GRB=0102,  ///< Green, Red,   Blue
-	GBR=0120,  ///< Green, Blue,  Red
-	BRG=0201,  ///< Blue,  Red,   Green
-	BGR=0210   ///< Blue,  Green, Red
+	RGB=0012,  ///< Red,   Green, Blue  (0012)
+	RBG=0021,  ///< Red,   Blue,  Green (0021)
+	GRB=0102,  ///< Green, Red,   Blue  (0102)
+	GBR=0120,  ///< Green, Blue,  Red   (0120)
+	BRG=0201,  ///< Blue,  Red,   Green (0201)
+	BGR=0210   ///< Blue,  Green, Red   (0210)
 };
 
 FASTLED_NAMESPACE_END
