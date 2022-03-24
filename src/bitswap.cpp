@@ -1,4 +1,9 @@
+/// @file bitswap.cpp
+/// Functions for doing a rotation of bits/bytes used by parallel output
+
+/// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
+
 #include "FastLED.h"
 
 void transpose8x1_noinline(unsigned char *A, unsigned char *B) {
