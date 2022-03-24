@@ -1,6 +1,9 @@
 #define FASTLED_INTERNAL
 #define __PROG_TYPES_COMPAT__
 
+/// @file colorutils.cpp
+/// Utility functions for color fill, palettes, blending, and more
+
 #include <stdint.h>
 #include <math.h>
 
@@ -197,6 +200,8 @@ void fade_raw( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
     nscale8( leds, num_leds, 255 - fadeBy);
 }
 
+/// Unused alias of nscale8(CRGB*, uint16_t, uint8_t)
+/// @todo Remove or add declaration? This is not listed in the colorutils.h header.
 void nscale8_raw( CRGB* leds, uint16_t num_leds, uint8_t scale)
 {
     nscale8( leds, num_leds, scale);
@@ -362,8 +367,8 @@ CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fra
 
 
 
-// Forward declaration of the function "XY" which must be provided by
-// the application for use in two-dimensional filter functions.
+/// Forward declaration of the function "XY" which must be provided by
+/// the application for use in two-dimensional filter functions.
 uint16_t XY( uint8_t, uint8_t);// __attribute__ ((weak));
 
 
@@ -500,10 +505,10 @@ CRGB HeatColor( uint8_t temperature)
 }
 
 
-// lsrX4: helper function to divide a number by 16, aka four LSR's.
-// On avr-gcc, "u8 >> 4" generates a loop, which is big, and slow.
-// merely forcing it to be four /=2's causes avr-gcc to emit
-// a SWAP instruction followed by an AND 0x0F, which is faster, and smaller.
+/// Helper function to divide a number by 16, aka four logical shift right (LSR)'s. 
+/// On avr-gcc, "u8 >> 4" generates a loop, which is big, and slow.
+/// merely forcing it to be four /=2's causes avr-gcc to emit
+/// a SWAP instruction followed by an AND 0x0F, which is faster, and smaller.
 inline uint8_t lsrX4( uint8_t dividend) __attribute__((always_inline));
 inline uint8_t lsrX4( uint8_t dividend)
 {
