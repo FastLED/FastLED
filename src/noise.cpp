@@ -1,9 +1,14 @@
+/// @file noise.cpp
+/// Functions to generate and fill arrays with noise.
+
+/// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 #include <string.h>
 
 FASTLED_NAMESPACE_BEGIN
 
+/// Reads a single byte from the p array
 #define P(x) FL_PGM_READ_BYTE_NEAR(p + x)
 
 FL_PROGMEM static uint8_t const p[] = {
@@ -24,6 +29,10 @@ FL_PROGMEM static uint8_t const p[] = {
     184,  84, 204, 176, 115, 121,  50,  45, 127,   4, 150, 254, 138, 236, 205,  93,
     222, 114,  67,  29,  24,  72, 243, 141, 128, 195,  78,  66, 215,  61, 156, 180,
     151};
+
+
+// Start Doxygen define hiding
+/// @cond
 
 #if FASTLED_NOISE_ALLOW_AVERAGE_TO_OVERFLOW == 1
 #define AVG15(U,V) (((U)+(V)) >> 1)
@@ -75,6 +84,10 @@ static int16_t inline __attribute__((always_inline))  avg15_inline_avr_mul( int1
 #define FADE(x) scale16(x,x)
 #define LERP(a,b,u) lerp15by16(a,b,u)
 #endif
+
+// end Doxygen define hiding
+/// @endcond
+
 static int16_t inline __attribute__((always_inline))  grad16(uint8_t hash, int16_t x, int16_t y, int16_t z) {
 #if 0
     switch(hash & 0xF) {
@@ -591,6 +604,20 @@ void fill_raw_noise16into8(uint8_t *pData, uint8_t num_points, uint8_t octaves, 
   }
 }
 
+/// Fill a 2D 8-bit buffer with noise, using inoise8() 
+/// @param pData the array of data to fill with noise values
+/// @param width the width of the 2D buffer
+/// @param height the height of the 2D buffer
+/// @param octaves the number of octaves to use for noise. More octaves = more noise.
+/// @param freq44 starting octave frequency
+/// @param amplitude noise amplitude
+/// @param skip how many noise maps to skip over, incremented recursively per octave
+/// @param x x-axis coordinate on noise map (1D)
+/// @param scalex the scale (distance) between x points when filling in noise
+/// @param y y-axis coordinate on noise map (2D)
+/// @param scaley the scale (distance) between y points when filling in noise
+/// @param time the time position for the noise field
+/// @todo Why isn't this declared in the header (noise.h)?
 void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint16_t x, int scalex, uint16_t y, int scaley, uint16_t time) {
   if(octaves > 1) {
     fill_raw_2dnoise8(pData, width, height, octaves-1, freq44, amplitude, skip+1, x*freq44, freq44 * scalex, y*freq44, freq44 * scaley, time);
@@ -660,7 +687,11 @@ void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves,
   }
 }
 
+/// Unused
+/// @todo Remove?
 int32_t nmin=11111110;
+/// Unused
+/// @todo Remove?
 int32_t nmax=0;
 
 void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint32_t x, int scalex, uint32_t y, int scaley, uint32_t time) {
