@@ -2097,7 +2097,18 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
 
 /// @defgroup GammaFuncs Gamma Adjustment Functions
 /// Functions for applying gamma adjustments to LED data. 
-/// Either: 
+///
+/// Gamma correction tries to compensate for the non-linear
+/// manner in which humans perceive light and color. Gamma
+/// correction is applied using the following expression:
+///   @code{.cpp}
+///   output = pow(input / 255.0, gamma) * 255.0;
+///   @endcode
+///
+/// Larger gamma values result in darker images that have more contrast.
+/// Lower gamma values result in lighter images with less contrast.
+///
+/// These functions apply either: 
 ///  * a single gamma adjustment to a single scalar value
 ///  * a single gamma adjustment to each channel of a CRGB color, or
 ///  * different gamma adjustments for each channel of a CRGB color
@@ -2111,6 +2122,9 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
 /// Furthermore, bear in mind that CRGB LEDs have only eight bits
 /// per channel of color resolution, and that very small, subtle shadings
 /// may not be visible.
+///
+/// @see @ref Dimming
+/// @see https://en.wikipedia.org/wiki/Gamma_correction
 /// @{
 
 /// Applies a gamma adjustment to a color channel
