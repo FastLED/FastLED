@@ -1,3 +1,7 @@
+/// @file hsv2rgb.cpp
+/// Functions to convert from the HSV colorspace to the RGB colorspace
+
+/// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 #include <stdint.h>
 
@@ -5,8 +9,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-
+/// HSV to RGB implementation in raw C, platform independent
 void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb);
+/// HSV to RGB implementation in raw C, for the AVR platform only
 void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb);
 
 #if defined(__AVR__) && !defined( LIB8_ATTINY )
@@ -22,9 +27,15 @@ void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
 #endif
 
 
-
+/// Apply dimming compensation to values
 #define APPLY_DIMMING(X) (X)
+
+/// Divide the color wheel into eight sections, 32 elements each
+/// @todo Unused. Remove?
 #define HSV_SECTION_6 (0x20)
+
+/// Divide the color wheel into four sections, 64 elements each
+/// @todo I believe this is mis-named, and should be HSV_SECTION_4
 #define HSV_SECTION_3 (0x40)
 
 void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb)
@@ -220,19 +231,22 @@ void hsv2rgb_spectrum( const struct CHSV& hsv, CRGB& rgb)
 }
 
 
-// Sometimes the compiler will do clever things to reduce
-// code size that result in a net slowdown, if it thinks that
-// a variable is not used in a certain location.
-// This macro does its best to convince the compiler that
-// the variable is used in this location, to help control
-// code motion and de-duplication that would result in a slowdown.
+/// Force a variable reference to avoid compiler over-optimization. 
+/// Sometimes the compiler will do clever things to reduce
+/// code size that result in a net slowdown, if it thinks that
+/// a variable is not used in a certain location.
+/// This macro does its best to convince the compiler that
+/// the variable is used in this location, to help control
+/// code motion and de-duplication that would result in a slowdown.
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
 
 
+/// @cond
 #define K255 255
 #define K171 171
 #define K170 170
 #define K85  85
+/// @endcond
 
 void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
 {
@@ -475,7 +489,7 @@ void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds)
 }
 
 
-
+/// Convert a fractional input into a constant
 #define FIXFRAC8(N,D) (((N)*256)/(D))
 
 // This function is only an approximation, and it is not
