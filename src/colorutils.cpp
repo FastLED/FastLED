@@ -879,7 +879,7 @@ CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightn
 }
 
 
-CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
+CHSV ColorFromPalette( const CHSVPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
     //      hi4 = index >> 4;
     uint8_t hi4 = lsrX4(index);
@@ -963,7 +963,7 @@ CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t b
 }
 
 
-CHSV ColorFromPalette( const struct CHSVPalette32& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
+CHSV ColorFromPalette( const CHSVPalette32& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
     uint8_t hi5 = index;
 #if defined(__AVR__)
@@ -1052,7 +1052,7 @@ CHSV ColorFromPalette( const struct CHSVPalette32& pal, uint8_t index, uint8_t b
     return CHSV( hue1, sat1, val1);
 }
 
-CHSV ColorFromPalette( const struct CHSVPalette256& pal, uint8_t index, uint8_t brightness, TBlendType)
+CHSV ColorFromPalette( const CHSVPalette256& pal, uint8_t index, uint8_t brightness, TBlendType)
 {
     CHSV hsv = *( &(pal[0]) + index );
 
