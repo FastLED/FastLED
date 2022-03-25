@@ -20,11 +20,11 @@ FASTLED_NAMESPACE_BEGIN
 /// @{
 
 /// Set the maximum power used in milliamps for a given voltage
-/// @deprecated - use CFastLED::setMaxPowerInVoltsAndMilliamps()
+/// @deprecated Use CFastLED::setMaxPowerInVoltsAndMilliamps()
 void set_max_power_in_volts_and_milliamps( uint8_t volts, uint32_t milliamps);
 
 /// Set the maximum power used in watts
-/// @deprecated - use CFastLED::setMaxPowerInMilliWatts
+/// @deprecated Use CFastLED::setMaxPowerInMilliWatts
 void set_max_power_in_milliwatts( uint32_t powerInmW);
 
 /// Select a pin with an LED that will be flashed to indicate that power management
@@ -42,15 +42,16 @@ void set_max_power_indicator_LED( uint8_t pinNumber); // zero = no indicator LED
 /// CFastLED::show() and CFastLED::delay() with these two functions.
 /// @deprecated These functions are deprecated as of [6ebcb64](https://github.com/FastLED/FastLED/commit/6ebcb6436273cc9a9dc91733af8dfd1fedde6d60),
 /// circa 2015. Do not use them for new programs.
+///
 /// @{
 
 /// Similar to CFastLED::show(), but pre-adjusts brightness to keep
 /// below the power threshold.
-/// @deprecated this has now been moved to CFastLED::show())
+/// @deprecated This is now a part of CFastLED::show()
 void show_at_max_brightness_for_power();
 /// Similar to CFastLED::delay(), but pre-adjusts brightness to keep below the power
 /// threshold.
-/// @deprecated this has now been rolled into CFastLED::delay()
+/// @deprecated This is now a part of CFastLED::delay()
 void delay_at_max_brightness_for_power( uint16_t ms);
 
 /// @} PowerShowDelay
