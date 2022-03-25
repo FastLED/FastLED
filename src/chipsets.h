@@ -450,8 +450,11 @@ protected:
 //
 
 #ifdef FASTLED_HAS_CLOCKLESS
-/// @defgroup ClocklessControllers Clockless Controllers
-/// Provides timing definitions for the variety of clockless controllers supplied by the library.
+/// @defgroup ClocklessChipsets Clockless Chipsets
+/// These chipsets have only a single data line. 
+///
+/// The clockless chipset controllers use the same base class
+/// and the same protocol, but with varying timing periods.
 ///
 /// These controllers have 3 control points in their cycle for each bit:
 ///   @code
@@ -465,6 +468,8 @@ protected:
 ///
 /// For 8MHz/16MHz/24MHz frequencies, these values are also guaranteed
 /// to be integral multiples of an 8MHz clock (125ns increments).
+///
+/// @note The base class, ClocklessController, is platform-specific.
 /// @{
 
 // Allow clock that clockless controller is based on to have different
@@ -478,7 +483,7 @@ protected:
 #if defined(__LGT8F__) || (CLOCKLESS_FREQUENCY == 8000000 || CLOCKLESS_FREQUENCY == 16000000 || CLOCKLESS_FREQUENCY == 24000000) || defined(FASTLED_DOXYGEN) //  || CLOCKLESS_FREQUENCY == 48000000 || CLOCKLESS_FREQUENCY == 96000000) // 125ns/clock
 
 /// Frequency multiplier for each clockless data interval.
-/// @see Notes in @ref ClocklessControllers
+/// @see Notes in @ref ClocklessChipsets
 #define FMUL (CLOCKLESS_FREQUENCY/8000000)
 
 /// GE8822 controller class.
@@ -670,7 +675,7 @@ class SM16703Controller : public ClocklessController<DATA_PIN, C_NS(300), C_NS(6
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PL9823Controller : public ClocklessController<DATA_PIN, C_NS(350), C_NS(1010), C_NS(350), RGB_ORDER> {};
 #endif
-/// @} ClocklessControllers
+/// @} ClocklessChipsets
 
 #endif
 /// @} Chipsets
