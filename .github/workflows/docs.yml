@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: docs
       - name: Fetch Repository Reference Info
         id: repo-info
         run: |
