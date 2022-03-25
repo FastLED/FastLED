@@ -11,6 +11,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @name Byte Re-Order Macros
 /// Some helper macros for getting at mis-ordered byte values.
 /// @todo Unused. Remove?
+///
 /// @{
 
 /// Get SPI byte 0 offset

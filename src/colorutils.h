@@ -524,7 +524,9 @@ CRGB HeatColor( uint8_t temperature);
 
 /// @defgroup PaletteClasses Palette Classes
 /// Class definitions for color palettes. 
-/// @todo Reorder these class definitions in ascending order of entries
+/// @todo For documentation purposes it would be nice to reorder these
+///        definitions by type and in ascending number of entries.
+///
 /// @{
 
 class CRGBPalette16;
@@ -2031,7 +2033,7 @@ void map_data_into_colors_through_palette(
 /// only half of the palette entries can be changed per call.
 /// @warning The palette passed as `currentPalette` will be modified! Be sure
 /// to make a copy beforehand if needed.
-/// @todo shouldn't the `targetPalette` be `const`?
+/// @todo Shouldn't the `targetPalette` be `const`?
 void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
                                 CRGBPalette16& targetPalette,
                                 uint8_t maxChanges=24);

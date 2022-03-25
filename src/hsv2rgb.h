@@ -50,7 +50,7 @@
 /// Adafruit's "Wheel" function, discussed [here](http://forums.adafruit.com/viewtopic.php?f=47&t=22483)
 /// is also of the "constant apparent brightness" variety.
 ///
-/// @todo: provide the "maximum brightness no matter what" variation.
+/// @todo Provide the "maximum brightness no matter what" variation.
 ///
 /// @see [Some good, clear Arduino C code from Kasper Kamperman](http://www.kasperkamperman.com/blog/arduino/arduino-programming-hsb-to-rgb/),
 /// which in turn [was based on Windows C code from "nico80"](http://www.codeproject.com/Articles/9207/An-HSB-RGBA-colour-picker)

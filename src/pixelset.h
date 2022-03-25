@@ -352,7 +352,7 @@ public:
 
     /// Iterator helper class for CPixelView
     /// @tparam the type of the LED array data
-    /// @todo: Make this a fully specified/proper iterator
+    /// @todo Make this a fully specified/proper iterator
     template <class T>
     class pixelset_iterator_base {
         T * leds;          ///< pointer to LED array

@@ -201,7 +201,7 @@ void fade_raw( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
 }
 
 /// Unused alias of nscale8(CRGB*, uint16_t, uint8_t)
-/// @todo Remove or add declaration? This is not listed in the colorutils.h header.
+/// @todo Remove this or add a declaration? This is not listed in the colorutils.h header.
 void nscale8_raw( CRGB* leds, uint16_t num_leds, uint8_t scale)
 {
     nscale8( leds, num_leds, scale);

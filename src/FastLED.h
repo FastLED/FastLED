@@ -621,7 +621,7 @@ public:
 
 	/// For debugging, this will keep track of time between calls to countFPS(). Every
 	/// `nFrames` calls, it will update an internal counter for the current FPS.
-	/// @todo make this a rolling counter
+	/// @todo Make this a rolling counter
 	/// @param nFrames how many frames to time for determining FPS
 	void countFPS(int nFrames=25);
 
