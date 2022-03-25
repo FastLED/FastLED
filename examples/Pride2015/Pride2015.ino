@@ -1,3 +1,7 @@
+/// @file    Pride2015.ino
+/// @brief   Animated, ever-changing rainbows.
+/// @example Pride2015.ino
+
 #include "FastLED.h"
 
 // Pride2015

@@ -1,3 +1,7 @@
+/// @file    SmartMatrix.ino
+/// @brief   Demonstrates how to use FastLED with the SmartMatrix library
+/// @example SmartMatrix.ino
+
 #include <SmartMatrix.h>
 #include <FastLED.h>
 
