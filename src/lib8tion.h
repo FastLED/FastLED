@@ -469,9 +469,7 @@ LIB8STATIC float sfract15ToFloat( sfract15 y)
 
 /// Conversion from IEEE754 float in the range (-1,1) to 16-bit fixed point (::sfract15).
 /// @note The extremes of one and negative one are NOT representable! The
-/// representable range is basically
-/// @todo This comment was commited without being completed ([34074fb](https://github.com/FastLED/FastLED/commit/34074fbc46ff68a871dab0f4485b2bfb9b6c20e7)).
-///       What *are* the limits of the representable range?
+/// representable range is 0.99996948242 to -0.99996948242, in steps of 0.00003051757.
 LIB8STATIC sfract15 floatToSfract15( float f)
 {
     return f * 32768.0;
