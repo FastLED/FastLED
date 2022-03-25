@@ -70,13 +70,13 @@ protected:
     static CLEDController *m_pHead;  ///< pointer to the first LED controller in the linked list
     static CLEDController *m_pTail;  ///< pointer to the last LED controller in the linked list
 
-    /// Set all the LEDs on the controller to a given color
+    /// Set all the LEDs to a given color. 
     /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs to set to this color
     /// @param scale the rgb scaling value for outputting color
     virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
 
-    /// Write the passed in rgb data out to the LEDs managed by this controller
+    /// Write the passed in RGB data out to the LEDs managed by this controller. 
     /// @param data the rgb data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale the rgb scaling to apply to each led before writing it out
@@ -98,33 +98,40 @@ public:
     /// @param nLeds the number of LEDs to clear
     virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black); }
 
-    /// show() function w/integer brightness, will scale for color correction and temperature
-    /// Can accept LED data not attached to this controller.
+    /// @copybrief show(const struct CRGB*, int, CRGB)
+    ///
+    /// Will scale for color correction and temperature. Can accept LED data not attached to this controller.
     /// @param data the LED data to write to the strip
     /// @param nLeds the number of LEDs in the data array
     /// @param brightness the brightness of the LEDs
+    /// @see show(const struct CRGB*, int, CRGB)
     void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
         show(data, nLeds, getAdjustment(brightness));
     }
 
-    /// showColor() function w/integer brightness, will scale for color correction and temperature
-    /// Can accept LED data not attached to this controller.
-    /// @param data the LED data to write to the strip
+    /// @copybrief showColor(const struct CRGB&, int, CRGB)
+    ///
+    /// Will scale for color correction and temperature. Can accept LED data not attached to this controller.
+    /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs in the data array
     /// @param brightness the brightness of the LEDs
+    /// @see showColor(const struct CRGB&, int, CRGB)
     void showColor(const struct CRGB &data, int nLeds, uint8_t brightness) {
         showColor(data, nLeds, getAdjustment(brightness));
     }
 
-    /// show() function using the "attached to this controller" LED data
+    /// Write the data to the LEDs managed by this controller
     /// @param brightness the brightness of the LEDs
+    /// @see show(const struct CRGB*, int, uint8_t)
     void showLeds(uint8_t brightness=255) {
         show(m_Data, m_nLeds, getAdjustment(brightness));
     }
 
-    /// showColor() function using the "attached to this controller" LED data
+    /// @copybrief showColor(const struct CRGB&, int, CRGB)
+    ///
     /// @param data the CRGB color to set the LEDs to
     /// @param brightness the brightness of the LEDs
+    /// @see showColor(const struct CRGB&, int, CRGB)
     void showColor(const struct CRGB & data, uint8_t brightness=255) {
         showColor(data, m_nLeds, getAdjustment(brightness));
     }
