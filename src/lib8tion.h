@@ -456,8 +456,8 @@ typedef union {
 
 ///////////////////////////////////////////////////////////////////////
 ///
-/// @name Float-to-Fixed and Fixed-to-Float Conversions
-///
+/// @defgroup FloatConversions Float-to-Fixed and Fixed-to-Float Conversions
+/// Functions to convert between floating point and fixed point types. 
 /// @note Anything involving a "float" on AVR will be slower.
 /// @{
 
@@ -475,15 +475,15 @@ LIB8STATIC sfract15 floatToSfract15( float f)
     return f * 32768.0;
 }
 
-/// @}
+/// @} FloatConversions
 
 
 
 ///////////////////////////////////////////////////////////////////////
 ///
-/// @name Fast Memory Functions for AVR
-///   Alternatives to memmove, memcpy, and memset that are
-///   faster on AVR than standard avr-libc 1.8
+/// @defgroup FastMemory Fast Memory Functions for AVR
+/// Alternatives to memmove, memcpy, and memset that are
+/// faster on AVR than standard avr-libc 1.8. 
 /// @{
 
 #if defined(__AVR__) || defined(FASTLED_DOXYGEN)
@@ -499,12 +499,12 @@ void * memset8 ( void * ptr, uint8_t value, uint16_t num ) __attribute__ ((noinl
 #define memset8 memset
 #endif
 
-/// @}
+/// @} FastMemory
 
 
 ///////////////////////////////////////////////////////////////////////
 ///
-/// @name Linear Interpolation
+/// @defgroup LinearInterpolation Linear Interpolation
 /// Fast linear interpolation functions, such as could be used for Perlin noise, etc.
 ///
 /// A note on the structure of the lerp functions:
@@ -631,12 +631,12 @@ LIB8STATIC uint8_t map8( uint8_t in, uint8_t rangeStart, uint8_t rangeEnd)
     return out;
 }
 
-/// @}
+/// @} LinearInterpolation
 
 
 ///////////////////////////////////////////////////////////////////////
 ///
-/// @name Easing Functions 
+/// @defgroup Easing Easing Functions 
 /// Specify the rate of change of a parameter over time.
 /// @see http://easings.net
 /// @{
@@ -788,13 +788,13 @@ LIB8STATIC uint8_t ease8InOutApprox( fract8 i)
 #error "No implementation for ease8 available."
 #endif
 
-/// @}
+/// @} Easing
 
 
 ///////////////////////////////////////////////////////////////////////
 ///
-/// @name Waveform Generators
-/// Wave generation functions.
+/// @defgroup WaveformGenerators Waveform Generators
+/// General purpose wave generator functions.
 ///
 /// @{
 
@@ -875,7 +875,7 @@ LIB8STATIC uint8_t squarewave8( uint8_t in, uint8_t pulsewidth=128)
     }
 }
 
-/// @}
+/// @} WaveformGenerators
 
 
 
@@ -967,7 +967,7 @@ uint32_t get_millisecond_timer();
 
 ///////////////////////////////////////////////////////////////////////
 ///
-/// @defgroup BeatGenerators Beat Generators
+/// @defgroup BeatGenerators Waveform Beat Generators
 /// Waveform generators that reset at a given number
 /// of "beats per minute" (BPM).
 ///
@@ -1285,16 +1285,16 @@ public:
 /// Create the CEveryNMillis class for millisecond intervals
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMillis,uint32_t,GET_MILLIS);
 
-/// Create the CEveryNSeconds class for second timing
+/// Create the CEveryNSeconds class for second intervals
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNSeconds,uint16_t,seconds16);
 
-/// Create the CEveryNBSeconds class for bsecond timing
+/// Create the CEveryNBSeconds class for bsecond intervals
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNBSeconds,uint16_t,bseconds16);
 
-/// Create the CEveryNMinutes class for minutes timing
+/// Create the CEveryNMinutes class for minutes intervals
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNMinutes,uint16_t,minutes16);
 
-/// Create the CEveryNHours class for hours timing
+/// Create the CEveryNHours class for hours intervals
 INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNHours,uint8_t,hours8);
 
 /// Alias for CEveryNMillis

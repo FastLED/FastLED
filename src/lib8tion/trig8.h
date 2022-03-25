@@ -9,7 +9,7 @@
 /// @{
 
 /// @defgroup Trig Fast Trigonometry Functions
-/// Fast 8 and 16-bit approximations of sin(x) and cos(x). 
+/// Fast 8-bit and 16-bit approximations of sin(x) and cos(x). 
 ///
 /// Don't use these approximations for calculating the
 /// trajectory of a rocket to Mars, but they're great
