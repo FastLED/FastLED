@@ -1,19 +1,42 @@
-#ifndef __INC_FASTSPI_ESP8266_H
-#define __INC_FASTSPI_ESP8266_H
-
-#include "FastLED.h"
-
-#include "fastled_delay.h"
-
-#include<SPI.h>
+#pragma once
+#pragma message "ESP32 Hardware SPI support added"
 
 FASTLED_NAMESPACE_BEGIN
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// An attempt to use harware spi on ESP8266
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+ * ESP8266 Hardware SPI Driver
+ *
+ * Copyright (c) 2022 Benoit Anastay
+ * Rewrote based on Nick Wallace, ESP32 integration.
+ * 
+ *
+ * To enable the hardware SPI driver, add the following line *before* including
+ * FastLED.h:
+ *
+ * #define FASTLED_ALL_PINS_HARDWARE_SPI
+ *
+ * This driver uses the SPI bus (GPIO D5 & D7). 
+ * 
+ */
+/*
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class ESP8266SPIOutput {
