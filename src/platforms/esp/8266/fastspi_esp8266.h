@@ -1,5 +1,7 @@
 #pragma once
-#pragma message "ESP32 Hardware SPI support added"
+#pragma message "ESP8266 Hardware SPI support added"
+
+#include <SPI.h>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -141,5 +143,3 @@ public:
 };
 
 FASTLED_NAMESPACE_END
-
-#endif
