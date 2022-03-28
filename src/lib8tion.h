@@ -33,7 +33,7 @@ FASTLED_NAMESPACE_BEGIN
      qsub8( i, j) == MAX( (i - j), 0 )
 
  - Saturating signed 8-bit ("7-bit") add.
-     qadd7( i, j) == MIN( (i + j), 0x7F)
+     qadd7( i, j) == MAX( MIN( (i + j), 0x7F), -0x80)
 
 
  - Scaling (down) of unsigned 8- and 16- bit values.
@@ -99,7 +99,7 @@ FASTLED_NAMESPACE_BEGIN
 
 
  - Fast 8-bit "easing in/out" function.
-     ease8InOutCubic(x) == 3(x^i) - 2(x^3)
+     ease8InOutCubic(x) == 3(x^2) - 2(x^3)
      ease8InOutApprox(x) ==
        faster, rougher, approximation of cubic easing
      ease8InOutQuad(x) == quadratic (vs cubic) easing
@@ -732,9 +732,9 @@ LIB8STATIC uint8_t ease8InOutApprox( fract8 i)
 
         "Ldone_%=:               \n\t"
 
-        : [i] "+&a" (i)
+        : [i] "+a" (i)
         :
-        : "r0", "r1"
+        : "r0"
         );
     return i;
 }
@@ -744,7 +744,7 @@ LIB8STATIC uint8_t ease8InOutApprox( fract8 i)
 
 
 
-/// triwave8: triangle (sawtooth) wave generator.  Useful for
+/// triwave8: triangle wave generator.  Useful for
 ///           turning a one-byte ever-increasing value into a
 ///           one-byte value that oscillates up and down.
 ///
