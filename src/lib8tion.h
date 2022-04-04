@@ -208,8 +208,10 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define SUB8_C 1
 #define EASE8_C 1
 #define AVG8_C 1
+#define AVG8R_C 1
 #define AVG7_C 1
 #define AVG16_C 1
+#define AVG16R_C 1
 #define AVG15_C 1
 #define BLEND8_C 1
 
@@ -231,8 +233,10 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define SUB8_C 1
 #define EASE8_C 1
 #define AVG8_C 1
+#define AVG8R_C 1
 #define AVG7_C 1
 #define AVG16_C 1
+#define AVG16R_C 1
 #define AVG15_C 1
 #define BLEND8_C 1
 
@@ -249,8 +253,10 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define ADD8_C 0
 #define SUB8_C 0
 #define AVG8_C 0
+#define AVG8R_C 0
 #define AVG7_C 0
 #define AVG16_C 0
+#define AVG16R_C 0
 #define AVG15_C 0
 
 #define QADD8_AVRASM 1
@@ -260,8 +266,10 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define ADD8_AVRASM 1
 #define SUB8_AVRASM 1
 #define AVG8_AVRASM 1
+#define AVG8R_AVRASM 1
 #define AVG7_AVRASM 1
 #define AVG16_AVRASM 1
+#define AVG16R_AVRASM 1
 #define AVG15_AVRASM 1
 
 // Note: these require hardware MUL instruction
@@ -319,8 +327,10 @@ Lib8tion is pronounced like 'libation': lie-BAY-shun
 #define SUB8_C 1
 #define EASE8_C 1
 #define AVG8_C 1
+#define AVG8R_C 1
 #define AVG7_C 1
 #define AVG16_C 1
+#define AVG16R_C 1
 #define AVG15_C 1
 #define BLEND8_C 1
 

@@ -59,26 +59,23 @@ LIB8STATIC_ALWAYS_INLINE int8_t qadd7( int8_t i, int8_t j)
 #if QADD7_C == 1
     int16_t t = i + j;
     if( t > 127) t = 127;
-    if( t < -128) t = -128;
+    else if( t < -128) t = -128;
     return t;
 #elif QADD7_AVRASM == 1
     asm volatile(
-        /* First, add j to i, conditioning the V flag */
+        /* First, add j to i, conditioning the V and C flags */
         "add %0, %1    \n\t"
 
         /* Now test the V flag.
-        If V is clear, we are done.
-        If V is set, we assume that result is positive and load 0x7F into i.
+        If V is clear, we branch to end.
+        If V is set, we go ahead and load 0x7F into i.
         */
         "brvc L_%=     \n\t"
         "ldi %0, 0x7F  \n\t"
 
-        /* Now test the S flag.
-        If S is clear, our assumption is right.
-        If S is set, we load 0x80 into i.
-        */
-        "brge L_%=     \n\t"
-        "ldi %0, 0x80  \n\t"
+        /* When both numbers are negative, C is set.
+        Adding it to make result negative. */
+        "adc %0, __zero_reg__\n\t"
         "L_%=: "
         : "+a" (i)
         : "a"  (j)
@@ -196,30 +193,6 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8( uint8_t i, uint8_t j)
 }
 
 /// Calculate an integer average of two unsigned
-///       8-bit integer values (uint8_t).
-///       Fractional results are rounded up, e.g. avg8(20,41) = 31
-LIB8STATIC_ALWAYS_INLINE uint8_t avg8r( uint8_t i, uint8_t j)
-{
-#if AVG8_C == 1
-    return (i + j + 1) >> 1;
-#elif AVG8_AVRASM == 1
-    asm volatile(
-        /* First, add j to i, 9th bit overflows into C flag */
-        "add %0, %1          \n\t"
-        /* Divide by two, moving C flag into high 8th bit, old 1st bit now in C */
-        "ror %0              \n\t"
-        /* Add C flag */
-        "adc %0, __zero_reg__\n\t"
-        : "+a" (i)
-        : "a"  (j)
-    );
-    return i;
-#else
-#error "No implementation for avg8r available."
-#endif
-}
-
-/// Calculate an integer average of two unsigned
 ///       16-bit integer values (uint16_t).
 ///       Fractional results are rounded down, e.g. avg16(20,41) = 30
 LIB8STATIC_ALWAYS_INLINE uint16_t avg16( uint16_t i, uint16_t j)
@@ -246,13 +219,37 @@ LIB8STATIC_ALWAYS_INLINE uint16_t avg16( uint16_t i, uint16_t j)
 }
 
 /// Calculate an integer average of two unsigned
+///       8-bit integer values (uint8_t).
+///       Fractional results are rounded up, e.g. avg8r(20,41) = 31
+LIB8STATIC_ALWAYS_INLINE uint8_t avg8r( uint8_t i, uint8_t j)
+{
+#if AVG8R_C == 1
+    return (i + j + 1) >> 1;
+#elif AVG8R_AVRASM == 1
+    asm volatile(
+        /* First, add j to i, 9th bit overflows into C flag */
+        "add %0, %1          \n\t"
+        /* Divide by two, moving C flag into high 8th bit, old 1st bit now in C */
+        "ror %0              \n\t"
+        /* Add C flag */
+        "adc %0, __zero_reg__\n\t"
+        : "+a" (i)
+        : "a"  (j)
+    );
+    return i;
+#else
+#error "No implementation for avg8r available."
+#endif
+}
+
+/// Calculate an integer average of two unsigned
 ///       16-bit integer values (uint16_t).
-///       Fractional results are rounded up, e.g. avg16(20,41) = 31
+///       Fractional results are rounded up, e.g. avg16r(20,41) = 31
 LIB8STATIC_ALWAYS_INLINE uint16_t avg16r( uint16_t i, uint16_t j)
 {
-#if AVG16_C == 1
+#if AVG16R_C == 1
     return (uint32_t)((uint32_t)(i) + (uint32_t)(j) + 1) >> 1;
-#elif AVG16_AVRASM == 1
+#elif AVG16R_AVRASM == 1
     asm volatile(
         /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
         "add %A[i], %A[j]    \n\t"
@@ -430,7 +427,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t mul8( uint8_t i, uint8_t j)
 LIB8STATIC_ALWAYS_INLINE uint8_t qmul8( uint8_t i, uint8_t j)
 {
 #if QMUL8_C == 1
-    int p = ((int)i * (int)(j) );
+    unsigned p = (unsigned)i * (unsigned)j;
     if( p > 255) p = 255;
     return p;
 #elif QMUL8_AVRASM == 1
@@ -513,7 +510,7 @@ LIB8STATIC uint8_t sqrt16(uint16_t x)
     return low - 1;
 }
 
-/// blend a variable proproportion(0-255) of one byte to another
+/// blend a variable proportion(0-255) of one byte to another
 /// @param a - the starting byte value
 /// @param b - the byte value to blend toward
 /// @param amountOfB - the proportion (0-255) of b to blend
