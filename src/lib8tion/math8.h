@@ -53,7 +53,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qadd8( uint8_t i, uint8_t j)
 /// Add one byte to another, saturating at 0x7F and -0x80
 /// @param i - first byte to add
 /// @param j - second byte to add
-/// @returns the sum of i & j, capped at 0xFF and -0x80
+/// @returns the sum of i & j, capped at 0x7F and -0x80
 LIB8STATIC_ALWAYS_INLINE int8_t qadd7( int8_t i, int8_t j)
 {
 #if QADD7_C == 1
