@@ -47,6 +47,21 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
                    uint8_t deltahue = 5);
 
 
+/// fill_rainbow_circular - fill a range of LEDs with a rainbow of colors, at
+///                         full saturation and full value (brightness),
+///                         so that the hues are continuous between the end
+///                         of the strip and the beginning
+void fill_rainbow_circular(struct CRGB* targetArray, int numToFill,
+                          uint8_t initialhue, bool reversed=false);
+
+/// fill_rainbow_circular - fill a range of LEDs with a rainbow of colors, at
+///                         full saturation and full value (brightness),
+///                         so that the hues are continuous between the end
+///                         of the strip and the beginning
+void fill_rainbow_circular(struct CHSV* targetArray, int numToFill,
+                          uint8_t initialhue, bool reversed=false);
+
+
 /// Hue direction for calculating fill gradients. 
 /// Since "hue" is a value around a color wheel, there are always two directions
 /// to sweep from one hue to another.
@@ -1946,12 +1961,32 @@ CHSV ColorFromPalette( const CHSVPalette32& pal,
 /// or blend linearly between palette entries (LINEARBLEND)
 template <typename PALETTE>
 void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
-                  const PALETTE& pal, uint8_t brightness, TBlendType blendType)
+                  const PALETTE& pal, uint8_t brightness=255, TBlendType blendType=LINEARBLEND)
 {
     uint8_t colorIndex = startIndex;
     for( uint16_t i = 0; i < N; ++i) {
         L[i] = ColorFromPalette( pal, colorIndex, brightness, blendType);
         colorIndex += incIndex;
+    }
+}
+
+
+// Fill a range of LEDs with a sequence of entries from a palette, so that
+// the entire palette smoothly covers the range of LEDs
+template <typename PALETTE>
+void fill_palette_circular(CRGB* L, uint16_t N, uint8_t startIndex,
+                           const PALETTE& pal, uint8_t brightness=255, TBlendType blendType=LINEARBLEND,
+                           bool reversed=false)
+{
+    if (N == 0) return;  // avoiding div/0
+
+    const uint16_t colorChange = 65535 / N;              // color change for each LED, * 256 for precision
+    uint16_t colorIndex = ((uint16_t) startIndex) << 8;  // offset for color index, with precision (*256)
+ 
+   for (uint16_t i = 0; i < N; ++i) {
+        L[i] = ColorFromPalette(pal, (colorIndex >> 8), brightness, blendType);
+        if (reversed) colorIndex -= colorChange;
+        else colorIndex += colorChange;
     }
 }
 
