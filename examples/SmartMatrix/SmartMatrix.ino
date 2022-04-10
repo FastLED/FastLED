@@ -2,6 +2,11 @@
 /// @brief   Demonstrates how to use FastLED with the SmartMatrix library
 /// @example SmartMatrix.ino
 
+/* This example demos a rectangular LED matrix with moving noise. 
+   It requires the SmartMatrix library in addition to FastLED. 
+   This SmartMatrix library is only available on Teensy boards at the moment.
+   It can be found at https://github.com/pixelmatix/SmartMatrix
+*/
 #include <SmartMatrix.h>
 #include <FastLED.h>
 
