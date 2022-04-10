@@ -47,17 +47,18 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
                    uint8_t deltahue = 5);
 
 
-/// fill_rainbow_circular - fill a range of LEDs with a rainbow of colors, at
-///                         full saturation and full value (brightness),
-///                         so that the hues are continuous between the end
-///                         of the strip and the beginning
+/// Fill a range of LEDs with a rainbow of colors, so that the hues
+/// are continuous between the end of the strip and the beginning. 
+/// The colors making up the rainbow are at full saturation and full
+/// value (brightness).
+/// @param targetArray a pointer to the LED array to fill
+/// @param numToFill the number of LEDs to fill in the array
+/// @param initialhue the starting hue for the rainbow
+/// @param reversed whether to progress through the rainbow hues backwards
 void fill_rainbow_circular(struct CRGB* targetArray, int numToFill,
                           uint8_t initialhue, bool reversed=false);
 
-/// fill_rainbow_circular - fill a range of LEDs with a rainbow of colors, at
-///                         full saturation and full value (brightness),
-///                         so that the hues are continuous between the end
-///                         of the strip and the beginning
+/// @copydoc fill_rainbow_circular()
 void fill_rainbow_circular(struct CHSV* targetArray, int numToFill,
                           uint8_t initialhue, bool reversed=false);
 
@@ -1971,8 +1972,17 @@ void fill_palette(CRGB* L, uint16_t N, uint8_t startIndex, uint8_t incIndex,
 }
 
 
-// Fill a range of LEDs with a sequence of entries from a palette, so that
-// the entire palette smoothly covers the range of LEDs
+/// Fill a range of LEDs with a sequence of entries from a palette, so that
+/// the entire palette smoothly covers the range of LEDs. 
+/// @tparam PALETTE the type of the palette used (auto-deduced)
+/// @param L pointer to the LED array to fill
+/// @param N number of LEDs to fill in the array
+/// @param startIndex the starting color index in the palette
+/// @param pal the color palette to pull colors from
+/// @param brightness brightness value used to scale the resulting color
+/// @param blendType whether to take the palette entries directly (NOBLEND)
+/// or blend linearly between palette entries (LINEARBLEND)
+/// @param reversed whether to progress through the palette backwards
 template <typename PALETTE>
 void fill_palette_circular(CRGB* L, uint16_t N, uint8_t startIndex,
                            const PALETTE& pal, uint8_t brightness=255, TBlendType blendType=LINEARBLEND,
