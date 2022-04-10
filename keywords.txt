@@ -130,7 +130,9 @@ fade_video	KEYWORD2
 fill_gradient	KEYWORD2
 fill_gradient_RGB	KEYWORD2
 fill_palette	KEYWORD2
+fill_palette_circular	KEYWORD2
 fill_rainbow	KEYWORD2
+fill_rainbow_circular	KEYWORD2
 fill_solid	KEYWORD2
 map_data_into_colors_through_palette	KEYWORD2
 nblend	KEYWORD2
