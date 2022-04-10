@@ -190,7 +190,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t sub8( uint8_t i, uint8_t j)
 }
 
 /// Calculate an integer average of two unsigned
-/// 8-bit integer values (uint8_t). 
+/// 8-bit integer values (uint8_t), rounded down. 
 /// Fractional results are rounded down, e.g. avg8(20,41) = 30
 /// @param i first value to average
 /// @param j second value to average
@@ -215,7 +215,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8( uint8_t i, uint8_t j)
 }
 
 /// Calculate an integer average of two unsigned
-/// 16-bit integer values (uint16_t). 
+/// 16-bit integer values (uint16_t), rounded down. 
 /// Fractional results are rounded down, e.g. avg16(20,41) = 30
 /// @param i first value to average
 /// @param j second value to average
@@ -244,7 +244,7 @@ LIB8STATIC_ALWAYS_INLINE uint16_t avg16( uint16_t i, uint16_t j)
 }
 
 /// Calculate an integer average of two unsigned
-/// 8-bit integer values (uint8_t). 
+/// 8-bit integer values (uint8_t), rounded up. 
 /// Fractional results are rounded up, e.g. avg8r(20,41) = 31
 /// @param i first value to average
 /// @param j second value to average
@@ -271,7 +271,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8r( uint8_t i, uint8_t j)
 }
 
 /// Calculate an integer average of two unsigned
-/// 16-bit integer values (uint16_t). 
+/// 16-bit integer values (uint16_t), rounded up. 
 /// Fractional results are rounded up, e.g. avg16r(20,41) = 31
 /// @param i first value to average
 /// @param j second value to average
