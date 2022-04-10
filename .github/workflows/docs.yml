@@ -35,7 +35,7 @@ jobs:
 
       - name: Install Themes
         env:
-          DOXYGEN_AWESOME_VERSION: 2.0.2
+          DOXYGEN_AWESOME_VERSION: 2.0.3
         working-directory: ./docs
         run: |
           git clone --depth 1 -b v${{ env.DOXYGEN_AWESOME_VERSION }} https://github.com/jothepro/doxygen-awesome-css
