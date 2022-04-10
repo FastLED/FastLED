@@ -101,11 +101,9 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint32
 {
     uint32_t total_mW = gMCU_mW;
 
-    CLEDController *pCur = CLEDController::head();
-	while(pCur) {
-        total_mW += calculate_unscaled_power_mW( pCur->leds(), pCur->size());
-		pCur = pCur->next();
-	}
+    for (const auto& cur : CLEDController::list()) {
+        total_mW += calculate_unscaled_power_mW(cur.leds(), cur.size());
+    }
 
 #if POWER_DEBUG_PRINT == 1
     Serial.print("power demand at full brightness mW = ");

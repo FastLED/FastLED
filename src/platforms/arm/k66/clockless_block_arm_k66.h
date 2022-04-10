@@ -32,9 +32,9 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
 	CMinWait<WAIT_TIME> mWait;
 
 public:
-	virtual int size() { return CLEDController::size() * LANES; }
+	int size() const override { return CLEDController::size() * LANES; }
 
-	virtual void showPixels(PixelController<RGB_ORDER, LANES, LANE_MASK> & pixels) { 
+	virtual void showPixels(PixelController<RGB_ORDER, LANES, LANE_MASK> & pixels) {
 		mWait.wait();
 		uint32_t clocks = showRGBInternal(pixels);
 		#if FASTLED_ALLOW_INTERRUPTS == 0
@@ -241,7 +241,7 @@ public:
 		}
 	}
 
-	virtual void showPixels(PixelController<RGB_ORDER, LANES, PMASK> & pixels) { 
+	virtual void showPixels(PixelController<RGB_ORDER, LANES, PMASK> & pixels) {
 		mWait.wait();
 		uint32_t clocks = showRGBInternal(pixels);
 	#if FASTLED_ALLOW_INTERRUPTS == 0
