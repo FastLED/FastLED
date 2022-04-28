@@ -1,0 +1,37 @@
+name: Build docs via Doxygen and publish to gh-pages
+on:
+  release:
+    types: [published]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate Docs
+        run: |
+          git fetch
+          git checkout origin/master
+
+          cd docs
+          sed -i -E 's/(PROJECT_NUMBER\s*=\s*).*/\1${{ github.event.release.tag_name }}/g' Doxyfile
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git commit Doxyfile -m "Update release version in Doxyfile"
+          git push origin HEAD:master
+
+          sudo apt install doxygen
+          doxygen Doxyfile
+      - name: Deploy Docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./docs/html
+          destination_dir: docs/
+          keep_files: true
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          full_commit_message: Update docs for ${{ github.event.release.tag_name }}
