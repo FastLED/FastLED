@@ -13,7 +13,7 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
 #define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
 #define DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
-#elif defined(FASTLED_TEENSY4) || (defined(ESP32) && defined(FASTLED_ALL_PINS_HARDWARE_SPI))
+#elif defined(FASTLED_TEENSY4) || (defined(ESP32) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)) || (defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI))
 // just use clocks
 #define DATA_RATE_MHZ(X) (1000000 * (X))
 #define DATA_RATE_KHZ(X) (1000 * (X))
@@ -59,6 +59,11 @@ template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public ESP32SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
+#if defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+class SPIOutput : public ESP8266SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+#endif
+
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
 #if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
@@ -81,13 +86,13 @@ class SPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<S
 #elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
 
 template<uint32_t SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public Teesy4HardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, SPI, 0> {};
+class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public Teensy4HardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, SPI, 0> {};
 
 template<uint32_t SPI_SPEED>
-class SPIOutput<SPI1_DATA, SPI_CLOCK, SPI_SPEED> : public Teesy4HardwareSPIOutput<SPI1_DATA, SPI1_CLOCK, SPI_SPEED, SPI1, 1> {};
+class SPIOutput<SPI1_DATA, SPI_CLOCK, SPI_SPEED> : public Teensy4HardwareSPIOutput<SPI1_DATA, SPI1_CLOCK, SPI_SPEED, SPI1, 1> {};
 
 template<uint32_t SPI_SPEED>
-class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public Teesy4HardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, SPI2, 2> {};
+class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public Teensy4HardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, SPI2, 2> {};
 
 #elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
 

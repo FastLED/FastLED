@@ -1,3 +1,16 @@
+FastLED 3.5.0
+=============
+This release incorporates dozens of valuable improvements from FastLED contributors, tested and explored by the world-wide FastLED community of artists, creators, and developers.  Thank you for all of your time, energy, and help!  Here are some of the most significant changes in FastLED 3.5.0: 
+* Greatly improved ESP32 and ESP8266 support
+* Improved board support for Teensy 4, Adafruit MatrixPortal M4, Arduino Nano Every, Partical Photon, and Seeed Wio Terminal
+* Improved and/or sped up: sin8, cos8, blend8, blur2d, scale8, Perlin/simplex noise
+* Improved HSV colors are smoother, richer, and brighter in fill_rainbow and elsewhere
+* Modernized and cleaned up the FastLED examples
+* Added github CI integration to help with automated testing
+* Added a Code of Conduct from https://www.contributor-covenant.org/
+* Released January 2022, with many thanks to FastLED contributors and the FastLED community!  
+
+
 FastLED 3.4.0
 =============
 
@@ -11,6 +24,9 @@ FastLED 3.4.0
 * Moved source code files into "src" subdirectory
 * Many small code cleanups and bug fixes
 * Released December 2020, with many thanks to everyone contributing to FastLED!
+
+We also want to note here that in 2020, Github named FastLED one of the 'Greatest Hits' of Open Source software, and preserved an archived copy of FastLED in the Arctic Code Vault, the Bodleian Library at Oxford University, the Bibliotheca Alexandrina (the Library of Alexandria), and the Stanford University Libraries.  https://archiveprogram.github.com/greatest-hits/
+
 
 
 FastLED 3.3.3

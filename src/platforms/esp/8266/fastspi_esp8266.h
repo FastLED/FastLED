@@ -1,28 +1,23 @@
 #pragma once
-#pragma message "ESP32 Hardware SPI support added"
+#pragma message "ESP8266 Hardware SPI support added"
+
+#include <SPI.h>
 
 FASTLED_NAMESPACE_BEGIN
 
 /*
- * ESP32 Hardware SPI Driver
+ * ESP8266 Hardware SPI Driver
  *
- * Copyright (c) 2020 Nick Wallace
- * Derived from code for ESP8266 hardware SPI by Benoit Anastay.
+ * Copyright (c) 2022 Benoit Anastay
+ * Rewrote based on Nick Wallace, ESP32 integration.
  * 
- * This hardware SPI implementation can drive clocked LEDs from either the
- * VSPI or HSPI bus (aka SPI2 & SPI3). No support is provided for SPI1, because it is 
- * shared among devices and the cache for data (code) in the Flash as well as the PSRAM.
  *
  * To enable the hardware SPI driver, add the following line *before* including
  * FastLED.h:
  *
  * #define FASTLED_ALL_PINS_HARDWARE_SPI
  *
- * This driver uses the VSPI bus by default (GPIO 18, 19, 23, & 5). To use the 
- * HSPI bus (GPIO 14, 12, 13, & 15) add the following line *before* including
- * FastLED.h:
- * 
- * #define FASTLED_ESP32_SPI_BUS HSPI
+ * This driver uses the SPI bus (GPIO D5 & D7). 
  * 
  */
 /*
@@ -45,41 +40,19 @@ FASTLED_NAMESPACE_BEGIN
  * THE SOFTWARE.
  */
 
-#ifndef FASTLED_ESP32_SPI_BUS
-    #define FASTLED_ESP32_SPI_BUS VSPI
-#endif
-
-SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
-
-#if FASTLED_ESP32_SPI_BUS == VSPI
-    static uint8_t spiClk = 18;
-    static uint8_t spiMiso = 19;
-    static uint8_t spiMosi = 23;
-    static uint8_t spiCs = 5;
-#elif FASTLED_ESP32_SPI_BUS == HSPI
-    static uint8_t spiClk = 14;
-    static uint8_t spiMiso = 12;
-    static uint8_t spiMosi = 13;
-    static uint8_t spiCs = 15;
-#endif
-
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
-class ESP32SPIOutput {
+class ESP8266SPIOutput {
 	Selectable 	*m_pSelect;
 
 public:
-	// Verify that the pins are valid
-	static_assert(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
-	static_assert(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
-
-	ESP32SPIOutput() { m_pSelect = NULL; }
-	ESP32SPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
+	ESP8266SPIOutput() { m_pSelect = NULL; }
+	ESP8266SPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
 	void init() {
 		// set the pins to output and make sure the select is released (which apparently means hi?  This is a bit
 		// confusing to me)
-		ledSPI.begin(spiClk, spiMiso, spiMosi, spiCs);
+		SPI.begin();
 		release();
 	}
 
@@ -97,7 +70,7 @@ public:
 
 	// naive writeByte implelentation, simply calls writeBit on the 8 bits in the byte.
 	static void writeByte(uint8_t b) {
-		ledSPI.transfer(b);
+		SPI.transfer(b);
 	}
 
 public:
@@ -105,17 +78,17 @@ public:
 	// select the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move select responsibility out of the SPI classes
 	// entirely, make it up to the caller to remember to lock/select the line?)
 	void select() { 
-		ledSPI.beginTransaction(SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0));
+		SPI.beginTransaction(SPISettings(3200000, MSBFIRST, SPI_MODE0));
 		if(m_pSelect != NULL) { m_pSelect->select(); } 
 	} 
 
 	// release the SPI line
 	void release() { 
 		if(m_pSelect != NULL) { m_pSelect->release(); } 
-		ledSPI.endTransaction();
+		SPI.endTransaction();
 	}
 
-	// Write out len bytes of the given value out over ledSPI.  Useful for quickly flushing, say, a line of 0's down the line.
+	// Write out len bytes of the given value out over SPI.  Useful for quickly flushing, say, a line of 0's down the line.
 	void writeBytesValue(uint8_t value, int len) {
 		select();
 		writeBytesValueRaw(value, len);
@@ -124,7 +97,7 @@ public:
 
 	static void writeBytesValueRaw(uint8_t value, int len) {
 		while(len--) {
-			ledSPI.transfer(value); 
+			SPI.transfer(value); 
 		}
 	}
 
@@ -145,7 +118,7 @@ public:
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline void writeBit(uint8_t b) {
-		ledSPI.transfer(b);
+		SPI.transfer(b);
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template

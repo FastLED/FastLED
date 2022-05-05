@@ -87,7 +87,14 @@ template<> __attribute__((always_inline)) inline void _dc<20>(register uint8_t &
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
+#if ((FASTLED_ALLOW_INTERRUPTS == 0) && defined(NO_CORRECTION) && (NO_CORRECTION == 1) && !(defined(NO_CLOCK_CORRECTION)))
+// we hit this if you were trying to turn off clock correction without also trying to enable interrupts.
+#	pragma message "In older versions of FastLED defining NO_CORRECTION 1 would mistakenly turn off color correction as well as clock correction."
+#	pragma message "define NO_CLOCK_CORRECTION 1 to fix this warning."
+#	define NO_CLOCK_CORRECTION 1
+#endif
+
+#if (!defined(NO_CLOCK_CORRECTION) || (NO_CLOCK_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
 static uint8_t gTimeErrorAccum256ths;
 #endif
 
@@ -115,10 +122,12 @@ protected:
 		mWait.wait();
 		cli();
 
-		showRGBInternal(pixels);
+		if(pixels.mLen > 0) {
+			showRGBInternal(pixels);
+		}
 
 		// Adjust the timer
-#if (!defined(NO_CORRECTION) || (NO_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
+#if (!defined(NO_CLOCK_CORRECTION) || (NO_CLOCK_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
         uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
 
         // adust for approximate observed actal runtime (as of January 2015)
@@ -241,13 +250,13 @@ protected:
 #define PRESCALEB4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tneg %[" #D "]\n\tCLC" ASM_VARS);
 
 // Clamp for prescale, increment data, since we won't ever wrap 65k, this also effectively clears carry for us
-#define PSBIDATA4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tadd %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" ASM_VARS);
+#define PSBIDATA4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tadd %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]\n\t" ASM_VARS);
 
 #else
 #define PRESCALE4(D) _dc<4>(loopvar);
 #define PRESCALEA2(D) _dc<2>(loopvar);
 #define PRESCALEB4(D) _dc<4>(loopvar);
-#define PSBIDATA4(D) asm __volatile__( "add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\trjmp .+0\n\t" ASM_VARS );
+#define PSBIDATA4(D) asm __volatile__( "add %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]\n\trjmp .+0\n\t" ASM_VARS );
 #endif
 
 // 2 cycles - perform one step of the scaling (if a given bit is set in scale, add scale-base to the scratch space)
@@ -299,8 +308,8 @@ protected:
 #define DONE asm __volatile__("2:" ASM_VARS );
 
 // 2 cycles - increment the data pointer
-#define IDATA2 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t"  ASM_VARS );
-#define IDATACLC3 asm __volatile__("add %A[data], %[ADV]\n\tadc %B[data], __zero_reg__\n\t" _CLC1  ASM_VARS );
+#define IDATA2 asm __volatile__("add %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]\n\t"  ASM_VARS );
+#define IDATACLC3 asm __volatile__("add %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]\n\t" _CLC1  ASM_VARS );
 
 // 1 cycle mov
 #define _MOV1(B1, B2) "mov %[" #B1 "], %[" #B2 "]\n\t"
@@ -368,7 +377,9 @@ protected:
 		pixels.preStepFirstByteDithering();
 
 		// pull the dithering/adjustment values out of the pixels object for direct asm access
-		uint8_t advanceBy = pixels.advanceBy();
+
+		// even though advanceBy is only an int8, we cast it to int16 for sign extension in case it's negative.
+		int16_t advanceBy = pixels.advanceBy();
 		uint16_t count = pixels.mLen;
 
 		uint8_t s0 = pixels.mScale.raw[RO(0)];
@@ -473,10 +484,6 @@ protected:
 			DONE;
 		}
 
-		#if (FASTLED_ALLOW_INTERRUPTS == 1)
-		// stop using the clock juggler
-		TCCR0A &= ~0x30;
-		#endif
 	}
 
 };
