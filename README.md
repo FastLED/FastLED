@@ -2,7 +2,7 @@
 
 You will need to have the [Adafruit_ZeroDMA](https://github.com/adafruit/Adafruit_ZeroDMA) library.
 
-To enable DMA add `#define FASTLED_ARM_M0_DMA` to the top of your project before `#include FastLED`.
+To enable DMA add `#define FASTLED_ARM_M0_DMA` to the top of your project before `#include <FastLED.h>`.
 
 See [src/platforms/arm/d21/dma_pins.h](src/platforms/arm/d21/dma_pins.h) for supported boards and SERCOM pins.
 
