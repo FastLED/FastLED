@@ -1,3 +1,17 @@
+** This fork allows FastLED to use M0/SAMD21's DMA to handle showing pixels. **
+
+To enable DMA add `#define FASTLED_ARM_M0_DMA` to the top of your project before `#include FastLED`.
+
+See [src/platforms/arm/d21/dma_pins.h](src/platforms/arm/d21/dma_pins.h) for supported boards and pins.
+
+Typically MOSI is available on every supported board.
+
+This is a quick port of [Adafruit_NeoPixel_ZeroDMA](https://github.com/adafruit/Adafruit_NeoPixel_ZeroDMA) but to work with FastLED.
+Using DMA allows for interrupts to be used without any flickering issues.
+DMA uses a lot more memory because of how the buffer is expanded to meet the 800kHz.
+
+===========
+
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FastLED/public)
 [![arduino-library-badge](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED)
 ![build status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)
