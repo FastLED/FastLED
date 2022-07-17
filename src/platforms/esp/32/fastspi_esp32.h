@@ -45,11 +45,14 @@ FASTLED_NAMESPACE_BEGIN
  * THE SOFTWARE.
  */
 
+#include<SPI.h>
+
 #ifndef FASTLED_ESP32_SPI_BUS
     #define FASTLED_ESP32_SPI_BUS VSPI
 #endif
 
-SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
+static SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
+
 
 #if FASTLED_ESP32_SPI_BUS == VSPI
     static uint8_t spiClk = 18;
@@ -61,6 +64,11 @@ SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
     static uint8_t spiMiso = 12;
     static uint8_t spiMosi = 13;
     static uint8_t spiCs = 15;
+#elif FASTLED_ESP32_SPI_BUS == FSPI  // ESP32S2 has FSPI and can map to arbitrary pins
+    #define spiMosi DATA_PIN
+    #define spiClk CLOCK_PIN
+    #define spiMiso -1
+    #define spiCs -1
 #endif
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
