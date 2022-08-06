@@ -52,7 +52,7 @@ public:
 // at https://forum.pjrc.com/threads/54711-Teensy-4-0-First-Beta-Test?p=193716&viewfull=1#post193716
 // refer to GPIO1-4, we're going to use GPIO6-9 in the definitions below because the fast registers are what
 // the teensy core is using internally
-#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L ## _DR), _R(GPIO ## L ## _DR_SET), _R(GPIO ## L ## _DR_CLEAR), _R(GPIO ## L ## _DR_TOGGLE)> {};
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1U << BIT, _R(GPIO ## L ## _DR), _R(GPIO ## L ## _DR_SET), _R(GPIO ## L ## _DR_CLEAR), _R(GPIO ## L ## _DR_TOGGLE)> {};
 
 #if defined(FASTLED_TEENSY4) && defined(CORE_TEENSY)
 _FL_IO(1); _FL_IO(2); _FL_IO(3); _FL_IO(4); _FL_IO(5);
