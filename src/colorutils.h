@@ -518,7 +518,7 @@ public:
         return &(entries[0]);
     }
 
-    bool operator==( const CHSVPalette16 rhs)
+    bool operator==( const CHSVPalette16 rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -530,7 +530,7 @@ public:
         }
         return true;
     }
-    bool operator!=( const CHSVPalette16 rhs)
+    bool operator!=( const CHSVPalette16 rhs) const
     {
         return !( *this == rhs);
     }
@@ -623,7 +623,7 @@ public:
         return &(entries[0]);
     }
 
-    bool operator==( const CHSVPalette256 rhs)
+    bool operator==( const CHSVPalette256 rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -635,7 +635,7 @@ public:
         }
         return true;
     }
-    bool operator!=( const CHSVPalette256 rhs)
+    bool operator!=( const CHSVPalette256 rhs) const
     {
         return !( *this == rhs);
     }
@@ -733,7 +733,7 @@ public:
         return *this;
     }
 
-    bool operator==( const CRGBPalette16 rhs)
+    bool operator==( const CRGBPalette16 rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -745,7 +745,7 @@ public:
         }
         return true;
     }
-    bool operator!=( const CRGBPalette16 rhs)
+    bool operator!=( const CRGBPalette16 rhs) const
     {
         return !( *this == rhs);
     }
@@ -994,7 +994,7 @@ public:
         return &(entries[0]);
     }
     
-    bool operator==( const CHSVPalette32 rhs)
+    bool operator==( const CHSVPalette32 rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -1006,7 +1006,7 @@ public:
         }
         return true;
     }
-    bool operator!=( const CHSVPalette32 rhs)
+    bool operator!=( const CHSVPalette32 rhs) const
     {
         return !( *this == rhs);
     }
@@ -1107,7 +1107,7 @@ public:
         return *this;
     }
     
-    bool operator==( const CRGBPalette32 rhs)
+    bool operator==( const CRGBPalette32 rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -1119,7 +1119,7 @@ public:
         }
         return true;
     }
-    bool operator!=( const CRGBPalette32 rhs)
+    bool operator!=( const CRGBPalette32 rhs) const
     {
         return !( *this == rhs);
     }
@@ -1403,7 +1403,7 @@ public:
         return *this;
     }
 
-    bool operator==( const CRGBPalette256 rhs)
+    bool operator==( const CRGBPalette256 rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -1415,7 +1415,7 @@ public:
         }
         return true;
     }
-    bool operator!=( const CRGBPalette256 rhs)
+    bool operator!=( const CRGBPalette256 rhs) const
     {
         return !( *this == rhs);
     }
