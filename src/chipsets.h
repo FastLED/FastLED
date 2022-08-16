@@ -85,7 +85,7 @@ class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
 	class LPD8806_ADJUST {
 	public:
 		// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
-		__attribute__((always_inline)) inline static uint8_t adjust(register uint8_t data) { return ((data>>1) | 0x80) + ((data && (data<254)) & 0x01); }
+		__attribute__((always_inline)) inline static uint8_t adjust(REGISTER uint8_t data) { return ((data>>1) | 0x80) + ((data && (data<254)) & 0x01); }
 		__attribute__((always_inline)) inline static void postBlock(int len) {
 			SPI::writeBytesValueRaw(0, ((len*3+63)>>6));
 		}
@@ -172,7 +172,7 @@ protected:
 
 		startBoundary();
 		while(pixels.has(1)) {
-            register uint16_t command;
+            REGISTER uint16_t command;
             command = 0x8000;
             command |= (pixels.loadAndScale0() & 0xF8) << 7; // red is the high 5 bits
             command |= (pixels.loadAndScale1() & 0xF8) << 2; // green is the middle 5 bits
@@ -346,7 +346,7 @@ class P9813Controller : public CPixelLEDController<RGB_ORDER> {
 	void writeBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
 
 	inline void writeLed(uint8_t r, uint8_t g, uint8_t b) __attribute__((always_inline)) {
-		register uint8_t top = 0xC0 | ((~b & 0xC0) >> 2) | ((~g & 0xC0) >> 4) | ((~r & 0xC0) >> 6);
+		REGISTER uint8_t top = 0xC0 | ((~b & 0xC0) >> 2) | ((~g & 0xC0) >> 4) | ((~r & 0xC0) >> 6);
 		mSPI.writeByte(top); mSPI.writeByte(b); mSPI.writeByte(g); mSPI.writeByte(r);
 	}
 

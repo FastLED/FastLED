@@ -44,8 +44,8 @@ protected:
 
 #define _CYCCNT (*(volatile uint32_t*)(0xE0001004UL))
 
-    template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & next_mark, register data_ptr_t port, register data_t hi, register data_t lo, register uint8_t & b)  {
-        for(register uint32_t i = BITS-1; i > 0; --i) {
+    template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(REGISTER uint32_t & next_mark, REGISTER data_ptr_t port, REGISTER data_t hi, REGISTER data_t lo, REGISTER uint8_t & b)  {
+        for(REGISTER uint32_t i = BITS-1; i > 0; --i) {
             while(_CYCCNT < (T1+T2+T3-ADJ));
             FastPin<DATA_PIN>::fastset(port, hi);
             _CYCCNT = 4;
@@ -80,14 +80,14 @@ protected:
         DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
         DWT->CYCCNT = 0;
 
-        register data_ptr_t port = FastPin<DATA_PIN>::port();
-        register data_t hi = *port | FastPin<DATA_PIN>::mask();;
-        register data_t lo = *port & ~FastPin<DATA_PIN>::mask();;
+        REGISTER data_ptr_t port = FastPin<DATA_PIN>::port();
+        REGISTER data_t hi = *port | FastPin<DATA_PIN>::mask();;
+        REGISTER data_t lo = *port & ~FastPin<DATA_PIN>::mask();;
         *port = lo;
 
         // Setup the pixel controller and load/scale the first byte
         pixels.preStepFirstByteDithering();
-        register uint8_t b = pixels.loadAndScale0();
+        REGISTER uint8_t b = pixels.loadAndScale0();
 
         cli();
 

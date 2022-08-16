@@ -13,4 +13,10 @@
 // things that we can turn on if we're in a C++11 environment
 #endif
 
+#if __cplusplus < 201703L
+#define REGISTER register
+#else
+#define REGISTER
+#endif
+
 #endif
