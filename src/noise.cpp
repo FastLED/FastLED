@@ -705,6 +705,8 @@ void fill_noise8(CRGB *leds, int num_leds,
             uint8_t hue_octaves, uint16_t hue_x, int hue_scale,
             uint16_t time) {
 
+    if (num_leds <= 0) return;
+
     for (int j = 0; j < num_leds; j += 255) {
         const int LedsRemaining = num_leds - j;
         const int LedsPer = LedsRemaining > 255 ? 255 : LedsRemaining;  // limit to 255 max
@@ -728,6 +730,8 @@ void fill_noise16(CRGB *leds, int num_leds,
             uint8_t octaves, uint16_t x, int scale,
             uint8_t hue_octaves, uint16_t hue_x, int hue_scale,
             uint16_t time, uint8_t hue_shift) {
+
+    if (num_leds <= 0) return;
 
     for (int j = 0; j < num_leds; j += 255) {
         const int LedsRemaining = num_leds - j;
