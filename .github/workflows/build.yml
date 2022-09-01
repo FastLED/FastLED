@@ -22,7 +22,7 @@ jobs:
 
       - name: install platformio
         run: |
-          pip install platformio==5.0.3
+          pip install platformio==6.1.4
 
       - name: build FastLED examples
         run: ./ci/ci-compile
