@@ -1,3 +1,7 @@
+/// @file    ColorTemperature.ino
+/// @brief   Demonstrates how to use @ref ColorTemperature based color correction
+/// @example ColorTemperature.ino
+
 #include <FastLED.h>
 
 #define LED_PIN     3
@@ -11,7 +15,7 @@ CRGB leds[NUM_LEDS];
 #define BRIGHTNESS  128
 
 
-// FastLED v2.1 provides two color-management controls:
+// FastLED provides two color-management controls:
 //   (1) color correction settings for each LED strip, and
 //   (2) master control of the overall output 'color temperature' 
 //

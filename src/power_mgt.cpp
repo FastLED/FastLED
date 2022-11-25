@@ -1,31 +1,37 @@
+/// @file power_mgt.cpp
+/// Functions to limit the power used by FastLED
+
+/// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 #include "power_mgt.h"
 
 FASTLED_NAMESPACE_BEGIN
 
-//// POWER MANAGEMENT
+// POWER MANAGEMENT
 
-// These power usage values are approximate, and your exact readings
-// will be slightly (10%?) different from these.
-//
-// They were arrived at by actually measuing the power draw of a number
-// of different LED strips, and a bunch of closed-loop-feedback testing
-// to make sure that if we USE these values, we stay at or under
-// the target power consumption.
-// Actual power consumption is much, much more complicated and has
-// to include things like voltage drop, etc., etc.
-// However, this is good enough for most cases, and almost certainly better
-// than no power management at all.
-//
-// You're welcome to adjust these values as needed; there may eventually be an API
-// for changing these on the fly, but it saves codespace and RAM to have them
-// be compile-time constants.
-
-static const uint8_t gRed_mW   = 16 * 5; // 16mA @ 5v = 80mW
-static const uint8_t gGreen_mW = 11 * 5; // 11mA @ 5v = 55mW
-static const uint8_t gBlue_mW  = 15 * 5; // 15mA @ 5v = 75mW
-static const uint8_t gDark_mW  =  1 * 5; //  1mA @ 5v =  5mW
+/// @name Power Usage Values
+/// These power usage values are approximate, and your exact readings
+/// will be slightly (10%?) different from these.
+///
+/// They were arrived at by actually measuing the power draw of a number
+/// of different LED strips, and a bunch of closed-loop-feedback testing
+/// to make sure that if we USE these values, we stay at or under
+/// the target power consumption.
+/// Actual power consumption is much, much more complicated and has
+/// to include things like voltage drop, etc., etc.
+/// However, this is good enough for most cases, and almost certainly better
+/// than no power management at all.
+///
+/// You're welcome to adjust these values as needed; there may eventually be an API
+/// for changing these on the fly, but it saves codespace and RAM to have them
+/// be compile-time constants.
+/// @{
+static const uint8_t gRed_mW   = 16 * 5; ///< 16mA @ 5v = 80mW
+static const uint8_t gGreen_mW = 11 * 5; ///< 11mA @ 5v = 55mW
+static const uint8_t gBlue_mW  = 15 * 5; ///< 15mA @ 5v = 75mW
+static const uint8_t gDark_mW  =  1 * 5; ///<  1mA @ 5v =  5mW
+/// @}
 
 // Alternate calibration by RAtkins via pre-PSU wattage measurments;
 // these are all probably about 20%-25% too high due to PSU heat losses,
@@ -37,7 +43,11 @@ static const uint8_t gDark_mW  =  1 * 5; //  1mA @ 5v =  5mW
 //  static const uint8_t gDark_mW  =  12;
 
 
+/// Debug Option: Set to 1 to enable the power limiting LED
+/// @see set_max_power_indicator_LED()
 #define POWER_LED 1
+
+/// Debug Option: Set to enable Serial debug statements for power limit functions
 #define POWER_DEBUG_PRINT 0
 
 

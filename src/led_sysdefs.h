@@ -5,6 +5,9 @@
 
 #include "fastled_config.h"
 
+/// @file led_sysdefs.h
+/// Determines which platform system definitions to include
+
 #if defined(NRF51) || defined(__RFduino__) || defined (__Simblee__)
 #include "platforms/arm/nrf51/led_sysdefs_arm_nrf51.h"
 #elif defined(NRF52_SERIES)
@@ -56,8 +59,11 @@
 #endif
 
 #ifndef FASTLED_NAMESPACE_BEGIN
+/// Start of the FastLED namespace
 #define FASTLED_NAMESPACE_BEGIN
+/// End of the FastLED namespace
 #define FASTLED_NAMESPACE_END
+/// "Using" directive for the namespace
 #define FASTLED_USING_NAMESPACE
 #endif
 
@@ -66,6 +72,8 @@
 #include <Arduino.h>
 #endif
 
+/// Clock cycles per microsecond. 
+/// Calculated using the F_CPU preprocessor define
 #define CLKS_PER_US (F_CPU/1000000)
 
 #endif
