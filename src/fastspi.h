@@ -1,3 +1,6 @@
+/// @file fastspi.h
+/// Serial peripheral interface (SPI) definitions per platform
+
 #ifndef __INC_FASTSPI_H
 #define __INC_FASTSPI_H
 
@@ -18,7 +21,9 @@ FASTLED_NAMESPACE_BEGIN
 #define DATA_RATE_MHZ(X) (1000000 * (X))
 #define DATA_RATE_KHZ(X) (1000 * (X))
 #else
+/// Convert data rate from megahertz (MHz) to clock cycles per bit
 #define DATA_RATE_MHZ(X) ((F_CPU / 1000000L) / X)
+/// Convert data rate from kilohertz (KHz) to clock cycles per bit
 #define DATA_RATE_KHZ(X) ((F_CPU / 1000L) / X)
 #endif
 
@@ -30,10 +35,12 @@ FASTLED_NAMESPACE_BEGIN
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #if !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+/// Hardware SPI output
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
+/// Software SPI output
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 

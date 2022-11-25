@@ -3,22 +3,25 @@
 
 #include "FastLED.h"
 
-///@file fastled_delay.h
-///Utility functions and classes for managing delaycycles
+/// @file fastled_delay.h
+/// Utility functions and classes for managing delay cycles
 
 FASTLED_NAMESPACE_BEGIN
 
 
 #if (!defined(NO_MINIMUM_WAIT) || (NO_MINIMUM_WAIT==0))
 
-/// Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet
-/// this should make sure that chipsets that have
+/// Class to ensure that a minimum amount of time has kicked since the last time run - and delay if not enough time has passed yet. 
+/// @tparam WAIT The amount of time to wait, in microseconds
 template<int WAIT> class CMinWait {
+	/// Timestamp of the last time this was run, in microseconds
 	uint16_t mLastMicros;
 
 public:
+	/// Constructor
 	CMinWait() { mLastMicros = 0; }
 
+	/// Blocking delay until WAIT time since mark() has passed
 	void wait() {
 		uint16_t diff;
 		do {
@@ -26,6 +29,7 @@ public:
 		} while(diff < WAIT);
 	}
 
+	/// Reset the timestamp that marks the start of the wait period
 	void mark() { mLastMicros = micros() & 0xFFFF; }
 };
 
@@ -43,10 +47,10 @@ public:
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-//
-// Clock cycle counted delay loop
-//
-////////////////////////////////////////////////////////////////////////////////////////////
+///
+/// @name Clock cycle counted delay loop
+///
+/// @{
 
 // Default is now just 'nop', with special case for AVR
 
@@ -60,12 +64,22 @@ public:
 #  define FL_NOP __asm__ __volatile__ ("cp r0,r0\n");
 #  define FL_NOP2 __asm__ __volatile__ ("rjmp .+0");
 #else
+/// Single no operation ("no-op") instruction for delay
 #  define FL_NOP __asm__ __volatile__ ("nop\n");
+/// Double no operation ("no-op") instruction for delay
 #  define FL_NOP2 __asm__ __volatile__ ("nop\n\t nop\n");
 #endif
 
 // predeclaration to not upset the compiler
+
+
+/// Delay N clock cycles. 
+/// @tparam CYCLES the number of clock cycles to delay
+/// @note No delay is applied if CYCLES is less than or equal to zero.
 template<int CYCLES> inline void delaycycles();
+
+/// A variant of ::delaycycles that will always delay
+/// at least one cycle.
 template<int CYCLES> inline void delaycycles_min1() {
 	delaycycles<1>();
 	delaycycles<CYCLES-1>();
@@ -120,6 +134,9 @@ template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 
 // pre-instantiations for values small enough to not need the loop, as well as sanity holders
 // for some negative values.
+
+// These are hidden from Doxygen because they match the expected behavior of the class. 
+/// @cond
 template<> __attribute__((always_inline)) inline void delaycycles<-10>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-9>() {}
 template<> __attribute__((always_inline)) inline void delaycycles<-8>() {}
@@ -136,19 +153,31 @@ template<> __attribute__((always_inline)) inline void delaycycles<2>() {FL_NOP2;
 template<> __attribute__((always_inline)) inline void delaycycles<3>() {FL_NOP;FL_NOP2;}
 template<> __attribute__((always_inline)) inline void delaycycles<4>() {FL_NOP2;FL_NOP2;}
 template<> __attribute__((always_inline)) inline void delaycycles<5>() {FL_NOP2;FL_NOP2;FL_NOP;}
+/// @endcond
 
-// Some timing related macros/definitions
+/// @}
+
+
+/// @name Some timing related macros/definitions
+/// @{
 
 // Macro to convert from nano-seconds to clocks and clocks to nano-seconds
 // #define NS(_NS) (_NS / (1000 / (F_CPU / 1000000L)))
+
+/// CPU speed, in megahertz (MHz)
 #define F_CPU_MHZ (F_CPU / 1000000L)
 
 // #define NS(_NS) ( (_NS * (F_CPU / 1000000L))) / 1000
+
+/// Convert from nanoseconds to number of clock cycles 
 #define NS(_NS) (((_NS * F_CPU_MHZ) + 999) / 1000)
+/// Convert from number of clock cycles to microseconds 
 #define CLKS_TO_MICROS(_CLKS) ((long)(_CLKS)) / (F_CPU / 1000000L)
 
-//  Macro for making sure there's enough time available
+/// Macro for making sure there's enough time available
 #define NO_TIME(A, B, C) (NS(A) < 3 || NS(B) < 3 || NS(C) < 6)
+
+/// @}
 
 FASTLED_NAMESPACE_END
 

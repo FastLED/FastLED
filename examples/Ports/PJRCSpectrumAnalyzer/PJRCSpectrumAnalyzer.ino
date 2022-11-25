@@ -1,3 +1,7 @@
+/// @file    PJRCSpectrumAnalyzer.ino
+/// @brief   Creates an impressive LED light show to music input on the Teensy
+/// @example PJRCSpectrumAnalyzer.ino
+
 // LED Audio Spectrum Analyzer Display
 //
 // Creates an impressive LED light show to music input

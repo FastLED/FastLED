@@ -1,9 +1,14 @@
 #ifndef __INC_LIB8TION_SCALE_H
 #define __INC_LIB8TION_SCALE_H
 
-///@ingroup lib8tion
+/// @file scale8.h
+/// Fast, efficient 8-bit scaling functions specifically
+/// designed for high-performance LED programming. 
 
-///@defgroup Scaling Scaling functions
+/// @addtogroup lib8tion
+/// @{
+
+/// @defgroup Scaling Scaling Functions
 /// Fast, efficient 8-bit scaling functions specifically
 /// designed for high-performance LED programming.
 ///
@@ -11,12 +16,17 @@
 /// implementations provided, using these functions often
 /// results in smaller and faster code than the equivalent
 /// program using plain "C" arithmetic and logic.
-///@{
+/// @{
 
-///  scale one byte by a second one, which is treated as
-///  the numerator of a fraction whose denominator is 256
-///  In other words, it computes i * (scale / 256)
-///  4 clocks AVR with MUL, 2 clocks ARM
+
+/// Scale one byte by a second one, which is treated as
+/// the numerator of a fraction whose denominator is 256. 
+///
+/// In other words, it computes i * (scale / 256)
+/// @param i input value to scale
+/// @param scale scale factor, in n/256 units
+/// @returns scaled value
+/// @note Takes 4 clocks on AVR with MUL, 2 clocks on ARM
 LIB8STATIC_ALWAYS_INLINE uint8_t scale8( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1
@@ -90,11 +100,15 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8( uint8_t i, fract8 scale)
 }
 
 
-///  The "video" version of scale8 guarantees that the output will
-///  be only be zero if one or both of the inputs are zero.  If both
-///  inputs are non-zero, the output is guaranteed to be non-zero.
-///  This makes for better 'video'/LED dimming, at the cost of
-///  several additional cycles.
+/// The "video" version of scale8() guarantees that the output will
+/// be only be zero if one or both of the inputs are zero. 
+/// If both inputs are non-zero, the output is guaranteed to be non-zero.  
+/// This makes for better "video"/LED dimming, at the cost of
+/// several additional cycles.
+/// @param i input value to scale
+/// @param scale scale factor, in n/256 units
+/// @returns scaled value
+/// @see scale8()
 LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1 || defined(LIB8_ATTINY)
@@ -138,9 +152,20 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video( uint8_t i, fract8 scale)
 }
 
 
-/// This version of scale8 does not clean up the R1 register on AVR
-/// If you are doing several 'scale8's in a row, use this, and
-/// then explicitly call cleanup_R1.
+/// @defgroup ScalingDirty Scaling Functions that Leave R1 Dirty
+/// These functions are more efficient for scaling multiple
+/// bytes at once, but require calling cleanup_R1() afterwards.
+/// @{
+
+
+/// This version of scale8() does not clean up the R1 register on AVR. 
+/// If you are doing several "scale8()'s" in a row, use this, and
+/// then explicitly call cleanup_R1().
+/// @warning You **MUST** call cleanup_R1() after using this function!
+/// @param i input value to scale
+/// @param scale scale factor, in n/256 units
+/// @returns scaled value
+/// @see scale8()
 LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1
@@ -179,11 +204,15 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scal
 #endif
 }
 
-/// In place modifying version of scale8, also this version of nscale8 does not
-/// clean up the R1 register on AVR
-/// If you are doing several 'scale8's in a row, use this, and
-/// then explicitly call cleanup_R1.
-
+/// In place modifying version of scale8() that does not clean up the R1 register on AVR. 
+/// If you are doing several "scale8()'s" in a row, use this, and
+/// then explicitly call cleanup_R1().
+/// @warning You **MUST** call cleanup_R1() after using this function!
+/// @par
+/// @warning This function always modifies its arguments in place!
+/// @param i input value to scale
+/// @param scale scale factor, in n/256 units
+/// @see scale8()
 LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale)
 {
 #if SCALE8_C == 1
@@ -222,9 +251,14 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale
 }
 
 
-/// This version of scale8_video does not clean up the R1 register on AVR
-/// If you are doing several 'scale8_video's in a row, use this, and
-/// then explicitly call cleanup_R1.
+/// This version of scale8_video() does not clean up the R1 register on AVR. 
+/// If you are doing several "scale8_video()'s" in a row, use this, and
+/// then explicitly call cleanup_R1().
+/// @warning You **MUST** call cleanup_R1() after using this function!
+/// @param i input value to scale
+/// @param scale scale factor, in n/256 units
+/// @returns scaled value
+/// @see scale8_video()
 LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract8 scale)
 {
 #if SCALE8_C == 1 || defined(LIB8_ATTINY)
@@ -266,10 +300,15 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract
 #endif
 }
 
-/// In place modifying version of scale8_video, also this version of nscale8_video
-/// does not clean up the R1 register on AVR
-/// If you are doing several 'scale8_video's in a row, use this, and
-/// then explicitly call cleanup_R1.
+/// In place modifying version of scale8_video() that does not clean up the R1 register on AVR. 
+/// If you are doing several "scale8_video()'s" in a row, use this, and
+/// then explicitly call cleanup_R1().
+/// @warning You **MUST** call cleanup_R1() after using this function!
+/// @par
+/// @warning This function always modifies its arguments in place!
+/// @param i input value to scale
+/// @param scale scale factor, in n/256 units
+/// @see scale8_video()
 LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY( uint8_t & i, fract8 scale)
 {
 #if SCALE8_C == 1 || defined(LIB8_ATTINY)
@@ -293,6 +332,7 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY( uint8_t & i, fract
 }
 
 /// Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls
+/// @ingroup ScalingDirty
 LIB8STATIC_ALWAYS_INLINE void cleanup_R1()
 {
 #if CLEANUP_R1_AVRASM == 1
@@ -301,13 +341,19 @@ LIB8STATIC_ALWAYS_INLINE void cleanup_R1()
 #endif
 }
 
+/// @} ScalingDirty
 
-/// scale three one byte values by a fourth one, which is treated as
-///         the numerator of a fraction whose demominator is 256
-///         In other words, it computes r,g,b * (scale / 256)
+
+/// Scale three one-byte values by a fourth one, which is treated as
+/// the numerator of a fraction whose demominator is 256. 
 ///
-///         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
-
+/// In other words, it computes r,g,b * (scale / 256)
+///
+/// @warning This function always modifies its arguments in place!
+/// @param r first value to scale
+/// @param g second value to scale
+/// @param b third value to scale
+/// @param scale scale factor, in n/256 units
 LIB8STATIC void nscale8x3( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scale)
 {
 #if SCALE8_C == 1
@@ -331,13 +377,18 @@ LIB8STATIC void nscale8x3( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scale)
 #endif
 }
 
-/// scale three one byte values by a fourth one, which is treated as
-///         the numerator of a fraction whose demominator is 256
-///         In other words, it computes r,g,b * (scale / 256), ensuring
-/// that non-zero values passed in remain non zero, no matter how low the scale
+/// Scale three one-byte values by a fourth one, which is treated as
+/// the numerator of a fraction whose demominator is 256. 
+///
+/// In other words, it computes r,g,b * (scale / 256), ensuring
+/// that non-zero values passed in remain non-zero, no matter how low the scale
 /// argument.
 ///
-///         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
+/// @warning This function always modifies its arguments in place!
+/// @param r first value to scale
+/// @param g second value to scale
+/// @param b third value to scale
+/// @param scale scale factor, in n/256 units
 LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scale)
 {
 #if SCALE8_C == 1
@@ -355,12 +406,15 @@ LIB8STATIC void nscale8x3_video( uint8_t& r, uint8_t& g, uint8_t& b, fract8 scal
 #endif
 }
 
-///  scale two one byte values by a third one, which is treated as
-///         the numerator of a fraction whose demominator is 256
-///         In other words, it computes i,j * (scale / 256)
+/// Scale two one-byte values by a third one, which is treated as
+/// the numerator of a fraction whose demominator is 256.
 ///
-///         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
-
+/// In other words, it computes i,j * (scale / 256).
+///
+/// @warning This function always modifies its arguments in place!
+/// @param i first value to scale
+/// @param j second value to scale
+/// @param scale scale factor, in n/256 units
 LIB8STATIC void nscale8x2( uint8_t& i, uint8_t& j, fract8 scale)
 {
 #if SCALE8_C == 1
@@ -381,15 +435,17 @@ LIB8STATIC void nscale8x2( uint8_t& i, uint8_t& j, fract8 scale)
 #endif
 }
 
-///  scale two one byte values by a third one, which is treated as
-///         the numerator of a fraction whose demominator is 256
-///         In other words, it computes i,j * (scale / 256), ensuring
+/// Scale two one-byte values by a third one, which is treated as
+/// the numerator of a fraction whose demominator is 256. 
+///
+/// In other words, it computes i,j * (scale / 256), ensuring
 /// that non-zero values passed in remain non zero, no matter how low the scale
 /// argument.
 ///
-///         THIS FUNCTION ALWAYS MODIFIES ITS ARGUMENTS IN PLACE
-
-
+/// @warning This function always modifies its arguments in place!
+/// @param i first value to scale
+/// @param j second value to scale
+/// @param scale scale factor, in n/256 units
 LIB8STATIC void nscale8x2_video( uint8_t& i, uint8_t& j, fract8 scale)
 {
 #if SCALE8_C == 1
@@ -406,10 +462,13 @@ LIB8STATIC void nscale8x2_video( uint8_t& i, uint8_t& j, fract8 scale)
 }
 
 
-/// scale a 16-bit unsigned value by an 8-bit value,
-///         considered as numerator of a fraction whose denominator
-///         is 256. In other words, it computes i * (scale / 256)
-
+/// Scale a 16-bit unsigned value by an 8-bit value, which is treated
+/// as the numerator of a fraction whose denominator is 256.
+///
+/// In other words, it computes i * (scale / 256)
+/// @param i input value to scale
+/// @param scale scale factor, in n/256 units
+/// @returns scaled value
 LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8( uint16_t i, fract8 scale )
 {
 #if SCALE16BY8_C == 1
@@ -475,10 +534,12 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8( uint16_t i, fract8 scale )
 #endif
 }
 
-/// scale a 16-bit unsigned value by a 16-bit value,
-///         considered as numerator of a fraction whose denominator
-///         is 65536. In other words, it computes i * (scale / 65536)
-
+/// Scale a 16-bit unsigned value by an 16-bit value, which is treated
+/// as the numerator of a fraction whose denominator is 65536. 
+/// In other words, it computes i * (scale / 65536)
+/// @param i input value to scale
+/// @param scale scale factor, in n/65536 units
+/// @returns scaled value
 LIB8STATIC uint16_t scale16( uint16_t i, fract16 scale )
 {
   #if SCALE16_C == 1
@@ -639,28 +700,34 @@ asm volatile(
     #error "No implementation for scale16 available."
 #endif
 }
-///@}
+/// @} Scaling
 
-///@defgroup Dimming Dimming and brightening functions
-///
-/// Dimming and brightening functions
+
+/// @defgroup Dimming Dimming and Brightening Functions
+/// Functions to dim or brighten data.
 ///
 /// The eye does not respond in a linear way to light.
 /// High speed PWM'd LEDs at 50% duty cycle appear far
-/// brighter then the 'half as bright' you might expect.
+/// brighter then the "half as bright" you might expect.
 ///
-/// If you want your midpoint brightness leve (128) to
-/// appear half as bright as 'full' brightness (255), you
-/// have to apply a 'dimming function'.
-///@{
+/// If you want your midpoint brightness LEDs (128) to
+/// appear half as bright as "full" brightness (255), you
+/// have to apply a "dimming function".
+///
+/// @note These are approximations of gamma correction with
+///       a gamma value of 2.0. 
+/// @see @ref GammaFuncs
+/// @{
 
-/// Adjust a scaling value for dimming
+/// Adjust a scaling value for dimming. 
+/// @see scale8()
 LIB8STATIC uint8_t dim8_raw( uint8_t x)
 {
     return scale8( x, x);
 }
 
 /// Adjust a scaling value for dimming for video (value will never go below 1)
+/// @see scale8_video()
 LIB8STATIC uint8_t dim8_video( uint8_t x)
 {
     return scale8_video( x, x);
@@ -678,21 +745,21 @@ LIB8STATIC uint8_t dim8_lin( uint8_t x )
     return x;
 }
 
-/// inverse of the dimming function, brighten a value
+/// Brighten a value (inverse of dim8_raw())
 LIB8STATIC uint8_t brighten8_raw( uint8_t x)
 {
     uint8_t ix = 255 - x;
     return 255 - scale8( ix, ix);
 }
 
-/// inverse of the dimming function, brighten a value
+/// Brighten a value (inverse of dim8_video())
 LIB8STATIC uint8_t brighten8_video( uint8_t x)
 {
     uint8_t ix = 255 - x;
     return 255 - scale8_video( ix, ix);
 }
 
-/// inverse of the dimming function, brighten a value
+/// Brighten a value (inverse of dim8_lin())
 LIB8STATIC uint8_t brighten8_lin( uint8_t x )
 {
     uint8_t ix = 255 - x;
@@ -705,5 +772,7 @@ LIB8STATIC uint8_t brighten8_lin( uint8_t x )
     return 255 - ix;
 }
 
-///@}
+/// @} Dimming
+/// @} lib8tion
+
 #endif

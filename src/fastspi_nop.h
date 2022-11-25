@@ -1,7 +1,11 @@
+/// @file fastspi_nop.h
+/// Example of a NOP/stub class to show the SPI methods required by a chipset implementation
+/// @note Example for developers. Not a functional part of the library.
+
 #ifndef __INC_FASTSPI_NOP_H
 #define __INC_FASTSPI_NOP_H
 
-#if 0 // Guard against the arduino ide idiotically including every header file
+#if FASTLED_DOXYGEN // Guard against the arduino ide idiotically including every header file
 
 #include "FastLED.h"
 
@@ -15,7 +19,10 @@ class NOPSPIOutput {
 	Selectable *m_pSelect;
 
 public:
+	/// Default Constructor
 	NOPSPIOutput() { m_pSelect = NULL; }
+
+	/// Constructor with selectable
 	NOPSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 
 	/// set the object representing the selectable
