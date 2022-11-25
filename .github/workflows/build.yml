@@ -1,4 +1,5 @@
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -10,19 +11,19 @@ name: build
 jobs:
 
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: install python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
+          python-version: '3.10'
 
       - name: install platformio
         run: |
-          pip install platformio==5.0.3
+          pip install platformio==6.1.4
 
       - name: build FastLED examples
         run: ./ci/ci-compile
