@@ -1,26 +1,35 @@
 #ifndef __INC_LIB8TION_TRIG_H
 #define __INC_LIB8TION_TRIG_H
 
-///@ingroup lib8tion
+/// @file trig8.h
+/// Fast, efficient 8-bit trigonometry functions specifically
+/// designed for high-performance LED programming. 
 
-///@defgroup Trig Fast trig functions
-/// Fast 8 and 16-bit approximations of sin(x) and cos(x).
-///        Don't use these approximations for calculating the
-///        trajectory of a rocket to Mars, but they're great
-///        for art projects and LED displays.
+/// @ingroup lib8tion
+/// @{
+
+/// @defgroup Trig Fast Trigonometry Functions
+/// Fast 8-bit and 16-bit approximations of sin(x) and cos(x). 
 ///
-///        On Arduino/AVR, the 16-bit approximation is more than
-///        10X faster than floating point sin(x) and cos(x), while
+/// Don't use these approximations for calculating the
+/// trajectory of a rocket to Mars, but they're great
+/// for art projects and LED displays.
+///
+/// On Arduino/AVR, the 16-bit approximation is more than
+/// 10X faster than floating point sin(x) and cos(x), while
 /// the 8-bit approximation is more than 20X faster.
-///@{
+/// @{
 
 #if defined(__AVR__)
+
+/// Platform-independent alias of the fast sin implementation
 #define sin16 sin16_avr
 
 /// Fast 16-bit approximation of sin(x). This approximation never varies more than
 /// 0.69% from the floating point value you'd get by doing
-///
-///     float s = sin(x) * 32767.0;
+///    @code{.cpp}
+///    float s = sin(x) * 32767.0;
+///    @endcode
 ///
 /// @param theta input angle from 0-65535
 /// @returns sin of theta, value between -32767 to 32767.
@@ -76,12 +85,15 @@ LIB8STATIC int16_t sin16_avr( uint16_t theta )
 }
 
 #else 
+
+/// Platform-independent alias of the fast sin implementation
 #define sin16 sin16_C
 
 /// Fast 16-bit approximation of sin(x). This approximation never varies more than
 /// 0.69% from the floating point value you'd get by doing
-///
-///     float s = sin(x) * 32767.0;
+///    @code{.cpp}
+///    float s = sin(x) * 32767.0;
+///    @endcode
 ///
 /// @param theta input angle from 0-65535
 /// @returns sin of theta, value between -32767 to 32767.
@@ -113,43 +125,33 @@ LIB8STATIC int16_t sin16_C( uint16_t theta )
 
 /// Fast 16-bit approximation of cos(x). This approximation never varies more than
 /// 0.69% from the floating point value you'd get by doing
-///
-///     float s = cos(x) * 32767.0;
+///    @code{.cpp}
+///    float s = cos(x) * 32767.0;
+///    @endcode
 ///
 /// @param theta input angle from 0-65535
-/// @returns sin of theta, value between -32767 to 32767.
+/// @returns cos of theta, value between -32767 to 32767.
 LIB8STATIC int16_t cos16( uint16_t theta)
 {
     return sin16( theta + 16384);
 }
 
 ///////////////////////////////////////////////////////////////////////
+// sin8() and cos8() 
+// Fast 8-bit approximations of sin(x) & cos(x).
 
-// sin8 & cos8
-//        Fast 8-bit approximations of sin(x) & cos(x).
-//        Input angle is an unsigned int from 0-255.
-//        Output is an unsigned int from 0 to 255.
-//
-//        This approximation can vary to to 2%
-//        from the floating point value you'd get by doing
-//          float s = (sin( x ) * 128.0) + 128;
-//
-//        Don't use this approximation for calculating the
-//        "real" trigonometric calculations, but it's great
-//        for art projects and LED displays.
-//
-//        On Arduino/AVR, this approximation is more than
-//        20X faster than floating point sin(x) and cos(x)
-//
+/// Pre-calculated lookup table used in sin8() and cos8() functions
 const uint8_t b_m16_interleave[] = { 0, 49, 49, 41, 90, 27, 117, 10 };
 
 #if defined(__AVR__) && !defined(LIB8_ATTINY)
+/// Platform-independent alias of the fast sin implementation
 #define sin8 sin8_avr
 
 /// Fast 8-bit approximation of sin(x). This approximation never varies more than
 /// 2% from the floating point value you'd get by doing
-///
-///     float s = (sin(x) * 128.0) + 128;
+///   @code{.cpp}
+///   float s = (sin(x) * 128.0) + 128;
+///   @endcode
 ///
 /// @param theta input angle from 0-255
 /// @returns sin of theta, value between 0 and 255
@@ -204,12 +206,15 @@ LIB8STATIC uint8_t  sin8_avr( uint8_t theta)
 }
 
 #else
+
+/// Platform-independent alias of the fast sin implementation
 #define sin8 sin8_C
 
 /// Fast 8-bit approximation of sin(x). This approximation never varies more than
 /// 2% from the floating point value you'd get by doing
-///
-///     float s = (sin(x) * 128.0) + 128;
+///   @code{.cpp}
+///   float s = (sin(x) * 128.0) + 128;
+///   @endcode
 ///
 /// @param theta input angle from 0-255
 /// @returns sin of theta, value between 0 and 255
@@ -246,15 +251,18 @@ LIB8STATIC uint8_t sin8_C( uint8_t theta)
 
 /// Fast 8-bit approximation of cos(x). This approximation never varies more than
 /// 2% from the floating point value you'd get by doing
-///
-///     float s = (cos(x) * 128.0) + 128;
+///   @code{.cpp}
+///   float s = (cos(x) * 128.0) + 128;
+///   @endcode
 ///
 /// @param theta input angle from 0-255
-/// @returns sin of theta, value between 0 and 255
+/// @returns cos of theta, value between 0 and 255
 LIB8STATIC uint8_t cos8( uint8_t theta)
 {
     return sin8( theta + 64);
 }
 
-///@}
+/// @} Trig
+/// @} lib8tion
+
 #endif
