@@ -1,3 +1,7 @@
+/// @file    NoisePlusPalette.ino
+/// @brief   Demonstrates how to mix noise generation with color palettes on a 2D LED matrix
+/// @example NoisePlusPalette.ino
+
 #include <FastLED.h>
 
 #define LED_PIN     3

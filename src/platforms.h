@@ -5,6 +5,9 @@
 
 #include "fastled_config.h"
 
+/// @file platforms.h
+/// Determines which platforms headers to include
+
 #if defined(NRF51)
 #include "platforms/arm/nrf51/fastled_arm_nrf51.h"
 #elif defined(NRF52_SERIES)
@@ -30,6 +33,9 @@
 #include "platforms/arm/d21/fastled_arm_d21.h"
 #elif defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAMD51P19A__)
 #include "platforms/arm/d51/fastled_arm_d51.h"
+#elif defined(ARDUINO_ARCH_RP2040) // not sure a pico-sdk define for this
+// RP2040 (Raspberry Pi Pico etc)
+#include "platforms/arm/rp2040/fastled_arm_rp2040.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/fastled_esp8266.h"
 #elif defined(ESP32)

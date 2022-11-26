@@ -1,3 +1,7 @@
+/// @file    Fire2012.ino
+/// @brief   Simple one-dimensional fire animation
+/// @example Fire2012.ino
+
 #include <FastLED.h>
 
 #define LED_PIN     5

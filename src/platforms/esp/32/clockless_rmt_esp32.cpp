@@ -158,6 +158,7 @@ void ESP32RMTController::init(gpio_num_t pin)
     }
 
     gInitialized = true;
+    (void)espErr;
 }
 
 // -- Show this string of pixels
@@ -279,6 +280,7 @@ void IRAM_ATTR ESP32RMTController::startOnChannel(int channel)
         // -- Kick off the transmission
         tx_start();
     }
+    (void)espErr;
 }
 
 // -- Start RMT transmission

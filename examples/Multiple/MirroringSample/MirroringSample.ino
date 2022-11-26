@@ -1,3 +1,7 @@
+/// @file    MirroringSample.ino
+/// @brief   Demonstrates how to use multiple LED strips, each with the same data
+/// @example MirroringSample.ino
+
 // MirroringSample - see https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples for more info on
 // using multiple controllers.  In this example, we're going to set up four NEOPIXEL strips on four
 // different pins, and show the same thing on all four of them, a simple bouncing dot/cyclon type pattern
