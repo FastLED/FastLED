@@ -477,7 +477,7 @@ struct CRGB {
     }
 
     /// This allows testing a CRGB for zero-ness
-    inline operator bool() const __attribute__((always_inline))
+    inline explicit operator bool() const __attribute__((always_inline))
     {
         return r || g || b;
     }
