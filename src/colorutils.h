@@ -715,7 +715,7 @@ public:
     }
 
     /// Check if two palettes have the same color entries
-    bool operator==( const CHSVPalette16 rhs) const
+    bool operator==( const CHSVPalette16 &rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -729,7 +729,7 @@ public:
     }
 
     /// Check if two palettes do not have the same color entries
-    bool operator!=( const CHSVPalette16 rhs) const
+    bool operator!=( const CHSVPalette16 &rhs) const
     {
         return !( *this == rhs);
     }
@@ -859,7 +859,7 @@ public:
     }
 
     /// @copydoc CHSVPalette16::operator==
-    bool operator==( const CHSVPalette256 rhs) const
+    bool operator==( const CHSVPalette256 &rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -873,7 +873,7 @@ public:
     }
 
     /// @copydoc CHSVPalette16::operator!=
-    bool operator!=( const CHSVPalette256 rhs) const
+    bool operator!=( const CHSVPalette256 &rhs) const
     {
         return !( *this == rhs);
     }
@@ -991,7 +991,7 @@ public:
     }
 
     /// @copydoc CHSVPalette16::operator==
-    bool operator==( const CRGBPalette16 rhs) const
+    bool operator==( const CRGBPalette16 &rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -1004,7 +1004,7 @@ public:
         return true;
     }
     /// @copydoc CHSVPalette16::operator!=
-    bool operator!=( const CRGBPalette16 rhs) const
+    bool operator!=( const CRGBPalette16 &rhs) const
     {
         return !( *this == rhs);
     }
@@ -1291,7 +1291,7 @@ public:
     }
 
     /// @copydoc CHSVPalette16::operator==
-    bool operator==( const CHSVPalette32 rhs) const
+    bool operator==( const CHSVPalette32 &rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -1304,7 +1304,7 @@ public:
         return true;
     }
     /// @copydoc CHSVPalette16::operator!=
-    bool operator!=( const CHSVPalette32 rhs) const
+    bool operator!=( const CHSVPalette32 &rhs) const
     {
         return !( *this == rhs);
     }
@@ -1429,7 +1429,7 @@ public:
     }
 
     /// @copydoc CRGBPalette16::operator==
-    bool operator==( const CRGBPalette32 rhs) const
+    bool operator==( const CRGBPalette32 &rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -1442,7 +1442,7 @@ public:
         return true;
     }
     /// @copydoc CRGBPalette16::operator!=
-    bool operator!=( const CRGBPalette32 rhs) const
+    bool operator!=( const CRGBPalette32 &rhs) const
     {
         return !( *this == rhs);
     }
@@ -1745,7 +1745,7 @@ public:
     }
 
     /// @copydoc CRGBPalette16::operator==
-    bool operator==( const CRGBPalette256 rhs) const
+    bool operator==( const CRGBPalette256 &rhs) const
     {
         const uint8_t* p = (const uint8_t*)(&(this->entries[0]));
         const uint8_t* q = (const uint8_t*)(&(rhs.entries[0]));
@@ -1758,7 +1758,7 @@ public:
         return true;
     }
     /// @copydoc CRGBPalette16::operator!=
-    bool operator!=( const CRGBPalette256 rhs) const
+    bool operator!=( const CRGBPalette256 &rhs) const
     {
         return !( *this == rhs);
     }
