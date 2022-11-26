@@ -1889,8 +1889,9 @@ public:
 
 /// Color interpolation options for palette
 typedef enum {
-    NOBLEND=0,     ///< No interpolation between palette entries
-    LINEARBLEND=1  ///< Linear interpolation between palette entries
+    NOBLEND=0,            ///< No interpolation between palette entries
+    LINEARBLEND=1,        ///< Linear interpolation between palette entries, with wrap-around from end to the beginning again
+    LINEARBLEND_NOWRAP=2  ///< Linear interpolation between palette entries, but no wrap-around
 } TBlendType;
 
 /// Get a color from a palette. 
