@@ -76,19 +76,19 @@ public:
 
 	/// Set the same pin on another port to `HIGH`
 	/// @param port the port to modify
-	inline void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; }
+	inline void hi(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; }
 	/// Set the same pin on another port to `LOW`
 	/// @param port the port to modify
-	inline void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; }
+	inline void lo(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; }
 	/// Set the state of the output register
 	/// @param val the state to set the output register to
 	/// @note This function is not limited to the current pin! It modifies the entire register.
-	inline void set(register port_t val) __attribute__ ((always_inline)) { *mPort = val; }
+	inline void set(REGISTER port_t val) __attribute__ ((always_inline)) { *mPort = val; }
 
 	/// Set the state of a port
 	/// @param port the port to modify
 	/// @param val the state to set the port to
-	inline void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
+	inline void fastset(REGISTER port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
 
 	/// Gets the state of the port with this pin `HIGH`
 	port_t hival() __attribute__ ((always_inline)) { return *mPort | mPinMask;  }
@@ -154,11 +154,11 @@ public:
 	inline void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 	inline void toggle() __attribute__ ((always_inline)) { *mInPort = mPinMask; }
 
-	inline void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; }
-	inline void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; }
-	inline void set(register port_t val) __attribute__ ((always_inline)) { *mPort = val; }
+	inline void hi(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port |= mPinMask; }
+	inline void lo(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~mPinMask; }
+	inline void set(REGISTER port_t val) __attribute__ ((always_inline)) { *mPort = val; }
 
-	inline void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
+	inline void fastset(REGISTER port_ptr_t port, REGISTER port_t val) __attribute__ ((always_inline)) { *port  = val; }
 
 	port_t hival() __attribute__ ((always_inline)) { return *mPort | mPinMask;  }
 	port_t loval() __attribute__ ((always_inline)) { return *mPort & ~mPinMask; }
@@ -229,15 +229,15 @@ public:
 	/// @copydoc Pin::toggle()
 	inline static void toggle() __attribute__ ((always_inline)) { *sInPort = sPinMask; }
 
-	/// @copydoc Pin::hi(register port_ptr_t)
-	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { *port |= sPinMask; }
-	/// @copydoc Pin::lo(register port_ptr_t)
-	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~sPinMask; }
-	/// @copydoc Pin::set(register port_t)
-	inline static void set(register port_t val) __attribute__ ((always_inline)) { *sPort = val; }
+	/// @copydoc Pin::hi(REGISTER port_ptr_t)
+	inline static void hi(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port |= sPinMask; }
+	/// @copydoc Pin::lo(REGISTER port_ptr_t)
+	inline static void lo(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { *port &= ~sPinMask; }
+	/// @copydoc Pin::set(REGISTER port_t)
+	inline static void set(REGISTER port_t val) __attribute__ ((always_inline)) { *sPort = val; }
 
 	/// @copydoc Pin::fastset()
-	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
+	inline static void fastset(REGISTER port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
 
 	/// @copydoc Pin::hival()
 	static port_t hival() __attribute__ ((always_inline)) { return *sPort | sPinMask;  }
@@ -282,15 +282,15 @@ public:
 	/// @copydoc Pin::toggle()
 	inline static void toggle() __attribute__ ((always_inline)) { }
 
-	/// @copydoc Pin::hi(register port_ptr_t)
-	inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { }
-	/// @copydoc Pin::lo(register port_ptr_t)
-	inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { }
-	/// @copydoc Pin::set(register port_t)
-	inline static void set(register port_t val) __attribute__ ((always_inline)) { }
+	/// @copydoc Pin::hi(REGISTER port_ptr_t)
+	inline static void hi(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { }
+	/// @copydoc Pin::lo(REGISTER port_ptr_t)
+	inline static void lo(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { }
+	/// @copydoc Pin::set(REGISTER port_t)
+	inline static void set(REGISTER port_t val) __attribute__ ((always_inline)) { }
 
 	/// @copydoc Pin::fastset()
-	inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { }
+	inline static void fastset(REGISTER port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { }
 
 	/// @copydoc Pin::hival()
 	static port_t hival() __attribute__ ((always_inline)) { return 0; }
