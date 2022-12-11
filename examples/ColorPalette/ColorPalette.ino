@@ -1,3 +1,7 @@
+/// @file    ColorPalette.ino
+/// @brief   Demonstrates how to use @ref ColorPalettes
+/// @example ColorPalette.ino
+
 #include <FastLED.h>
 
 #define LED_PIN     5

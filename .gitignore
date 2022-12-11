@@ -3,4 +3,4 @@
 /.vscode
 /docs/html
 /docs/latex
-build
+/docs/doxygen-awesome-css
