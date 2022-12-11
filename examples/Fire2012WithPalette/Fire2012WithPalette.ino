@@ -1,3 +1,7 @@
+/// @file    Fire2012WithPalette.ino
+/// @brief   Simple one-dimensional fire animation with a programmable color palette
+/// @example Fire2012WithPalette.ino
+
 #include <FastLED.h>
 
 #define LED_PIN     5

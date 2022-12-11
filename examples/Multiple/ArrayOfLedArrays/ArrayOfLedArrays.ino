@@ -1,3 +1,7 @@
+/// @file    ArrayOfLedArrays.ino
+/// @brief   Set up three LED strips, all running from an array of arrays
+/// @example ArrayOfLedArrays.ino
+
 // ArrayOfLedArrays - see https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples for more info on
 // using multiple controllers.  In this example, we're going to set up three NEOPIXEL strips on three
 // different pins, each strip getting its own CRGB array to be played with, only this time they're going

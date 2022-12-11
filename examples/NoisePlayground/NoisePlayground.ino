@@ -1,3 +1,7 @@
+/// @file    NoisePlayground.ino
+/// @brief   Demonstrates how to use noise generation on a 2D LED matrix
+/// @example NoisePlayground.ino
+
 #include <FastLED.h>
 
 // Params for width and height

@@ -1,3 +1,6 @@
+/// @file    Pintest.ino
+/// @brief   Checks available pin outputs (for debugging)
+/// @example Pintest.ino
 
 #include <FastLED.h>
 

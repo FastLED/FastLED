@@ -1,3 +1,7 @@
+/// @file    OctoWS2811Demo.ino
+/// @brief   Demonstrates how to use OctoWS2811 output
+/// @example OctoWS2811Demo.ino
+
 #define USE_OCTOWS2811
 #include <OctoWS2811.h>
 #include <FastLED.h>
