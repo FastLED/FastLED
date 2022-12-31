@@ -29,6 +29,7 @@
     #undef REGISTER
   #endif
 #define REGISTER
+  Okay
 #endif
 
 #endif
