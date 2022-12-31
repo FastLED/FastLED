@@ -23,13 +23,12 @@
 
 #if __cplusplus < 201703L
 #define REGISTER register
- warning oepsy this should be called
 #else
   #ifdef REGISTER
     #undef REGISTER
   #endif
 #define REGISTER
-  warning Okay, this is good
+
 #endif
 
 #endif
