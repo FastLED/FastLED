@@ -23,7 +23,11 @@
 
 #if __cplusplus < 201703L
 #define REGISTER register
+ oepsy
 #else
+  #ifdef REGISTER
+    #undef REGISTER
+  #endif
 #define REGISTER
 #endif
 
