@@ -237,7 +237,7 @@ public:
 	inline static void set(REGISTER port_t val) __attribute__ ((always_inline)) { *sPort = val; }
 
 	/// @copydoc Pin::fastset()
-	inline static void fastset(REGISTER port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
+	inline static void fastset(REGISTER port_ptr_t port, REGISTER port_t val) __attribute__ ((always_inline)) { *port  = val; }
 
 	/// @copydoc Pin::hival()
 	static port_t hival() __attribute__ ((always_inline)) { return *sPort | sPinMask;  }
