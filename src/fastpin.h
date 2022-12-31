@@ -88,7 +88,7 @@ public:
 	/// Set the state of a port
 	/// @param port the port to modify
 	/// @param val the state to set the port to
-	inline void fastset(REGISTER port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port  = val; }
+	inline void fastset(REGISTER port_ptr_t port, REGISTER port_t val) __attribute__ ((always_inline)) { *port  = val; }
 
 	/// Gets the state of the port with this pin `HIGH`
 	port_t hival() __attribute__ ((always_inline)) { return *mPort | mPinMask;  }
@@ -290,7 +290,7 @@ public:
 	inline static void set(REGISTER port_t val) __attribute__ ((always_inline)) { }
 
 	/// @copydoc Pin::fastset()
-	inline static void fastset(REGISTER port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { }
+	inline static void fastset(REGISTER port_ptr_t port, REGISTER port_t val) __attribute__ ((always_inline)) { }
 
 	/// @copydoc Pin::hival()
 	static port_t hival() __attribute__ ((always_inline)) { return 0; }
