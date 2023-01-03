@@ -79,7 +79,7 @@ protected:
 	}
 
 
-	static uint32_t ICACHE_RAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
+	static uint32_t IRAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
 		REGISTER uint32_t b = pixels.loadAndScale0();
