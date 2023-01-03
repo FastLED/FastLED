@@ -28,10 +28,7 @@
     #undef REGISTER
   #endif
 #define REGISTER
-  #ifdef ICACHE_RAM_ATTR
-    #undef ICACHE_RAM_ATTR
-  #endif
-#define ICACHE_RAM_ATTR IRAM_ATTR
+
 #endif
 
 #endif
