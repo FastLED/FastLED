@@ -125,10 +125,10 @@ public:
     FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t cport()     { return &((reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUTCLR);          } // gets raw pointer to SET   DIRECTION GPIO port
     FASTLED_NRF52_INLINE_ATTRIBUTE static port_ptr_t sport()     { return &((reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUTSET);          } // gets raw pointer to CLEAR DIRECTION GPIO port
     FASTLED_NRF52_INLINE_ATTRIBUTE static port_t     mask()      { return _MASK;                          } // gets the value of _MASK
-    FASTLED_NRF52_INLINE_ATTRIBUTE static void hi (REGISTER port_ptr_t port) { hi();                      } // sets _MASK in the SET   OUTPUT register (output set high)
-    FASTLED_NRF52_INLINE_ATTRIBUTE static void lo (REGISTER port_ptr_t port) { lo();                      } // sets _MASK in the CLEAR OUTPUT register (output set low)
-    FASTLED_NRF52_INLINE_ATTRIBUTE static void set(REGISTER port_t     val ) { (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUT = val;     } // sets entire port's value (optimization used by FastLED)
-    FASTLED_NRF52_INLINE_ATTRIBUTE static void fastset(REGISTER port_ptr_t port, REGISTER port_t val) { *port = val; }
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void hi (FASTLED_REGISTER port_ptr_t port) { hi();                      } // sets _MASK in the SET   OUTPUT register (output set high)
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void lo (FASTLED_REGISTER port_ptr_t port) { lo();                      } // sets _MASK in the CLEAR OUTPUT register (output set low)
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void set(FASTLED_REGISTER port_t     val ) { (reinterpret_cast<NRF_GPIO_Type*>(_PORT::r()))->OUT = val;     } // sets entire port's value (optimization used by FastLED)
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) { *port = val; }
     constexpr                      static uint32_t   nrf_pin2() { return NRF_GPIO_PIN_MAP(_PORT_NUMBER, _PIN_NUMBER); }
     constexpr                      static bool       LowSpeedOnlyRecommended() {
         // Caller must always determine if high speed use if allowed on a given pin,

@@ -22,12 +22,12 @@
 #endif
 
 #if __cplusplus < 201703L
-#define REGISTER register
+#define FASTLED_REGISTER register
 #else
-  #ifdef REGISTER
-    #undef REGISTER
+  #ifdef FASTLED_REGISTER
+    #undef FASTLED_REGISTER
   #endif
-#define REGISTER
+#define FASTLED_REGISTER
 
 #endif
 

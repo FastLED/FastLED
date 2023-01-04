@@ -84,9 +84,9 @@ protected:
     	mWait.mark();
  	}
 
-	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(REGISTER uint32_t & next_mark, REGISTER uint8_t & b)  {
+	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER uint8_t & b)  {
 		// SysTick counts down (not up) and is 24-bit
-		for(REGISTER uint32_t i = BITS-1; i > 0; i--) { // We could speed this up by using Bit Banding
+		for(FASTLED_REGISTER uint32_t i = BITS-1; i > 0; i--) { // We could speed this up by using Bit Banding
 			while(__am_hal_systick_count() > next_mark) { ; } // Wait for the remainder of this cycle to complete
 				// Calculate next_mark (the time of the next DATA_PIN transition) by subtracting T1+T2+T3
 				// SysTick counts down (not up) and is 24-bit
@@ -126,14 +126,14 @@ protected:
 
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		REGISTER uint8_t b = pixels.loadAndScale0();
+		FASTLED_REGISTER uint8_t b = pixels.loadAndScale0();
 
 		cli();
 
 		// Calculate next_mark (the time of the next DATA_PIN transition) by subtracting T1+T2+T3
 		// SysTick counts down (not up) and is 24-bit
 		// The subtraction could underflow (wrap round) so let's mask the result to 24 bits
-		REGISTER uint32_t next_mark = (__am_hal_systick_count() - (T1+T2+T3)) & 0xFFFFFFUL;
+		FASTLED_REGISTER uint32_t next_mark = (__am_hal_systick_count() - (T1+T2+T3)) & 0xFFFFFFUL;
 
 		while(pixels.has(1)) { // Keep going for as long as we have pixels
 			pixels.stepDithering();

@@ -116,15 +116,15 @@ public:
   } _outlines;
 
 
-  template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(REGISTER uint32_t & next_mark, REGISTER _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) {
+  template<int BITS,int PX> __attribute__ ((always_inline)) inline void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER _outlines & b, PixelController<RGB_ORDER, LANES, __FL_T4_MASK> &pixels) {
         _outlines b2;
         transpose8x1(b.bg[3], b2.bg[3]);
         transpose8x1(b.bg[2], b2.bg[2]);
         transpose8x1(b.bg[1], b2.bg[1]);
         transpose8x1(b.bg[0], b2.bg[0]);
 
-        REGISTER uint8_t d = pixels.template getd<PX>(pixels);
-        REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
+        FASTLED_REGISTER uint8_t d = pixels.template getd<PX>(pixels);
+        FASTLED_REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
 
         int x = 0;
         for(uint32_t i = 8; i > 0;) {
