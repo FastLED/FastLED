@@ -41,7 +41,7 @@ public:
     /// @param data input byte
     /// @param scale scale value
     /// @returns input byte rescaled using ::scale8(uint8_t, uint8_t)
-    static __attribute__((always_inline)) inline uint8_t adjust(REGISTER uint8_t data, register uint8_t scale) { return scale8(data, scale); }
+    static __attribute__((always_inline)) inline uint8_t adjust(REGISTER uint8_t data, REGISTER uint8_t scale) { return scale8(data, scale); }
 
     /// Hook called after a block of data is written to the output. 
     /// In this dummy version, no action is performed.
