@@ -135,6 +135,8 @@ template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6812 : public SK6812Control
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class SK6822 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};                     ///< SK6822 controller class. @copydetails SK6822Controller
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA106 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};                     ///< APA106 controller class. @copydetails SK6822Controller
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class PL9823 : public PL9823Controller<DATA_PIN, RGB_ORDER> {};                     ///< @copydoc PL9823Controller
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class DP1903 : public DP1903Controller800Khz<DATA_PIN, RGB_ORDER> {};				 ///< @copydoc DP1903Controller800Khz
+template<uint8_t DATA_PIN, EOrder RGB_ORDER> class DP1903_400 : public DP1903Controller400Khz<DATA_PIN, RGB_ORDER> {};			 ///< @copydoc DP1903Controller400Khz
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};               ///< @copydoc WS2811Controller800Khz
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class WS2813 : public WS2813Controller<DATA_PIN, RGB_ORDER> {};                     ///< @copydoc WS2813Controller
 template<uint8_t DATA_PIN, EOrder RGB_ORDER> class APA104 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};               ///< APA104 controller class. @copydetails WS2811Controller800Khz
@@ -246,7 +248,7 @@ public:
 	/// @name Adding SPI-based controllers
 	/// Add an SPI based CLEDController instance to the world.
 	///
-	/// There are two ways to call this method (as well as the other addLeds() 
+	/// There are two ways to call this method (as well as the other addLeds()
 	/// variations).  The first is with 2 arguments, in which case the arguments are  a pointer to
 	/// led data, and the number of leds used by this controller.  The second is with 3 arguments, in which case
 	/// the first  argument is the same, the second argument is an offset into the CRGB data where this controller's
@@ -590,7 +592,7 @@ public:
 	void showColor(const struct CRGB & color) { showColor(color, m_Scale); }
 
 	/// Delay for the given number of milliseconds.  Provided to allow the library to be used on platforms
-	/// that don't have a delay function (to allow code to be more portable). 
+	/// that don't have a delay function (to allow code to be more portable).
 	/// @note This will call show() constantly to drive the dithering engine (and will call show() at least once).
 	/// @param ms the number of milliseconds to pause for
 	void delay(unsigned long ms);
