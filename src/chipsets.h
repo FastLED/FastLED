@@ -452,7 +452,7 @@ protected:
 
 #ifdef FASTLED_HAS_CLOCKLESS
 /// @defgroup ClocklessChipsets Clockless Chipsets
-/// These chipsets have only a single data line.
+/// These chipsets have only a single data line. 
 ///
 /// The clockless chipset controllers use the same base class
 /// and the same protocol, but with varying timing periods.
@@ -465,7 +465,7 @@ protected:
 ///   At T=T1+T2+T3 : the cycle is concluded (next bit can be sent)
 ///   @endcode
 ///
-/// The units used for T1, T2, and T3 is nanoseconds.
+/// The units used for T1, T2, and T3 is nanoseconds.  
 ///
 /// For 8MHz/16MHz/24MHz frequencies, these values are also guaranteed
 /// to be integral multiples of an 8MHz clock (125ns increments).
@@ -630,14 +630,6 @@ class UCS2903Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(7
 // TM1809 - 350ns, 350ns, 550ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, C_NS(350), C_NS(350), C_NS(450), RGB_ORDER> {};
-
-// DP1903 - 250ns, 1000ns, 250ns
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class DP1903Controller800Khz : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1000), C_NS(250), RGB_ORDER> {};
-
-// DP1903@400khz - 500ns, 2000ns, 500ns
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
-class DP1903Controller400Khz : public ClocklessController<DATA_PIN, C_NS(500), C_NS(2000), C_NS(500), RGB_ORDER> {};
 
 // WS2811 - 320ns, 320ns, 640ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
