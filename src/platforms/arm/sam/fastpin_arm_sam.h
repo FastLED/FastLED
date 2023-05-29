@@ -80,7 +80,7 @@ public:
 	template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
 #define _FL_IO(L,C) _RD32(REG_PIO ## L ## _ODSR); _RD32(REG_PIO ## L ## _SODR); _RD32(REG_PIO ## L ## _CODR); _RD32(REG_PIO ## L ## _OER); _FL_DEFINE_PORT3(L, C, _R(REG_PIO ## L ## _ODSR));
 
-#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN<PIN, 1 << BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _DUEPIN<PIN, 1U << BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
   																			_R(GPIO ## L ## _OER)> {}; \
   								   template<> class FastPinBB<PIN> : public _DUEPIN_BITBAND<PIN, BIT, _R(REG_PIO ## L ## _ODSR), _R(REG_PIO ## L ## _SODR), _R(REG_PIO ## L ## _CODR), \
   																			_R(GPIO ## L ## _OER)> {};
