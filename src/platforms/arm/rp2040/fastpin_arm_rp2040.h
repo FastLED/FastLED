@@ -25,15 +25,15 @@ public:
 
   inline static void hi() __attribute__ ((always_inline)) { sio_hw->gpio_set = _MASK; }
   inline static void lo() __attribute__ ((always_inline)) { sio_hw->gpio_clr = _MASK; }
-  inline static void set(register port_t val) __attribute__ ((always_inline)) { sio_hw->gpio_out = val; }
+  inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { sio_hw->gpio_out = val; }
 
   inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
   inline static void toggle() __attribute__ ((always_inline)) { sio_hw->gpio_togl = _MASK; }
 
-  inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-  inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-  inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+  inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+  inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+  inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
   inline static port_t hival() __attribute__ ((always_inline)) { return sio_hw->gpio_out | _MASK; }
   inline static port_t loval() __attribute__ ((always_inline)) { return sio_hw->gpio_out & ~_MASK; }

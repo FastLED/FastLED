@@ -42,13 +42,13 @@ protected:
         mWait.mark();
     }
 
-	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(REGISTER uint32_t & next_mark, REGISTER data_ptr_t port, REGISTER uint8_t & b) {
+	template<int BITS>  __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER uint8_t & b) {
 		// Make sure we don't slot into a wrapping spot, this will delay up to 12.5µs for WS2812
 		// bool bShift=0;
 		// while(VAL < (TOTAL*10)) { bShift=true; }
 		// if(bShift) { next_mark = (VAL-TOTAL); };
 
-		for(REGISTER uint32_t i = BITS; i > 0; --i) {
+		for(FASTLED_REGISTER uint32_t i = BITS; i > 0; --i) {
 			// wait to start the bit, then set the pin high
 			while(DUE_TIMER_VAL < next_mark);
 			next_mark = (DUE_TIMER_VAL+TOTAL);
@@ -76,7 +76,7 @@ protected:
 		pmc_enable_periph_clk(DUE_TIMER_ID);
 		TC_Start(DUE_TIMER,DUE_TIMER_CHANNEL);
 
-		REGISTER data_ptr_t port asm("r7") = FastPinBB<DATA_PIN>::port(); FORCE_REFERENCE(port);
+		FASTLED_REGISTER data_ptr_t port asm("r7") = FastPinBB<DATA_PIN>::port(); FORCE_REFERENCE(port);
 		*port = 0;
 
 		// Setup the pixel controller and load/scale the first byte

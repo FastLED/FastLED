@@ -37,8 +37,8 @@ protected:
 		mWait.mark();
 	}
 
-	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(REGISTER uint32_t & next_mark, REGISTER data_ptr_t port, REGISTER data_t hi, REGISTER data_t lo, REGISTER uint8_t & b)  {
-		for(REGISTER uint32_t i = BITS-1; i > 0; --i) {
+	template<int BITS> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER data_ptr_t port, FASTLED_REGISTER data_t hi, FASTLED_REGISTER data_t lo, FASTLED_REGISTER uint8_t & b)  {
+		for(FASTLED_REGISTER uint32_t i = BITS-1; i > 0; --i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);
 			FastPin<DATA_PIN>::fastset(port, hi);
@@ -73,14 +73,14 @@ protected:
 		ARM_DWT_CTRL |= ARM_DWT_CTRL_CYCCNTENA;
 		ARM_DWT_CYCCNT = 0;
 
-		REGISTER data_ptr_t port = FastPin<DATA_PIN>::port();
-		REGISTER data_t hi = *port | FastPin<DATA_PIN>::mask();
-		REGISTER data_t lo = *port & ~FastPin<DATA_PIN>::mask();
+		FASTLED_REGISTER data_ptr_t port = FastPin<DATA_PIN>::port();
+		FASTLED_REGISTER data_t hi = *port | FastPin<DATA_PIN>::mask();
+		FASTLED_REGISTER data_t lo = *port & ~FastPin<DATA_PIN>::mask();
 		*port = lo;
 
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		REGISTER uint8_t b = pixels.loadAndScale0();
+		FASTLED_REGISTER uint8_t b = pixels.loadAndScale0();
 
 		cli();
 		uint32_t next_mark = ARM_DWT_CYCCNT + (T1+T2+T3);

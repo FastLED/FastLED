@@ -83,18 +83,18 @@ public:
 		uint32_t raw[3];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(REGISTER uint32_t & next_mark, REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , REGISTER uint32_t & b2)  {
-		REGISTER Lines b2;
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
+		FASTLED_REGISTER Lines b2;
 		if(USED_LANES>8) {
 			transpose8<1,2>(b.bytes,b2.bytes);
 			transpose8<1,2>(b.bytes+8,b2.bytes+1);
 		} else {
 			transpose8x1(b.bytes,b2.bytes);
 		}
-		REGISTER uint8_t d = pixels.template getd<PX>(pixels);
-		REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
+		FASTLED_REGISTER uint8_t d = pixels.template getd<PX>(pixels);
+		FASTLED_REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(REGISTER uint32_t i = 0; i < (USED_LANES/2); ++i) {
+		for(FASTLED_REGISTER uint32_t i = 0; i < (USED_LANES/2); ++i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
@@ -118,7 +118,7 @@ public:
 			b.bytes[USED_LANES-1] = pixels.template loadAndScale<PX>(pixels,USED_LANES-1,d,scale);
 		}
 
-		for(REGISTER uint32_t i = USED_LANES/2; i < 8; ++i) {
+		for(FASTLED_REGISTER uint32_t i = USED_LANES/2; i < 8; ++i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<FIRST_PIN>::sport() = PORT_MASK;
@@ -148,7 +148,7 @@ public:
 
 		// Setup the pixel controller and load/scale the first byte
 		allpixels.preStepFirstByteDithering();
-		REGISTER Lines b0;
+		FASTLED_REGISTER Lines b0;
 
 		allpixels.preStepFirstByteDithering();
 		for(int i = 0; i < USED_LANES; ++i) {
@@ -245,14 +245,14 @@ public:
 		uint32_t raw[4];
 	} Lines;
 
-	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(REGISTER uint32_t & next_mark, REGISTER Lines & b, PixelController<RGB_ORDER,LANES, PMASK> &pixels) { // , REGISTER uint32_t & b2)  {
-		REGISTER Lines b2;
+	template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER,LANES, PMASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
+		FASTLED_REGISTER Lines b2;
 		transpose8x1(b.bytes,b2.bytes);
 		transpose8x1(b.bytes+8,b2.bytes+8);
-		REGISTER uint8_t d = pixels.template getd<PX>(pixels);
-		REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
+		FASTLED_REGISTER uint8_t d = pixels.template getd<PX>(pixels);
+		FASTLED_REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
 
-		for(REGISTER uint32_t i = 0; (i < LANES) && (i < 8); ++i) {
+		for(FASTLED_REGISTER uint32_t i = 0; (i < LANES) && (i < 8); ++i) {
 			while(ARM_DWT_CYCCNT < next_mark);
 			next_mark = ARM_DWT_CYCCNT + (T1+T2+T3)-3;
 			*FastPin<PORTD_FIRST_PIN>::sport() = PMASK_LO;
@@ -285,7 +285,7 @@ public:
 
 		// Setup the pixel controller and load/scale the first byte
 		allpixels.preStepFirstByteDithering();
-		REGISTER Lines b0;
+		FASTLED_REGISTER Lines b0;
 
 		allpixels.preStepFirstByteDithering();
 		for(int i = 0; i < LANES; ++i) {

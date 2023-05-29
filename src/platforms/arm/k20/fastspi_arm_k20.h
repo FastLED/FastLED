@@ -389,7 +389,7 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		uint8_t *end = data + len;
 		select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
@@ -401,7 +401,7 @@ public:
 		release();
 	}
 
-	void writeBytes(REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping

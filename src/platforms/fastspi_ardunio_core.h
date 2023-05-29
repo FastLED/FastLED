@@ -53,7 +53,7 @@ public:
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	template <class D> void writeBytes(REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		uint8_t *end = data + len;
 		select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
@@ -66,7 +66,7 @@ public:
 	}
 
 	// A full cycle of writing a value for len bytes, including select, release, and waiting
-	void writeBytes(REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline void writeBit(uint8_t b) {

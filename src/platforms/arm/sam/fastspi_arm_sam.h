@@ -19,7 +19,7 @@ class SAMHardwareSPIOutput {
 	void disableSPI() { m_SPI->SPI_CR = SPI_CR_SPIDIS; }
 	void resetSPI() { m_SPI->SPI_CR = SPI_CR_SWRST; }
 
-	static inline void readyTransferBits(REGISTER uint32_t bits) {
+	static inline void readyTransferBits(FASTLED_REGISTER uint32_t bits) {
 		bits -= 8;
 		// don't change the number of transfer bits while data is still being transferred from TDR to the shift register
 		waitForEmpty();
@@ -98,7 +98,7 @@ public:
 		select(); writeBytesValueRaw(value, len); release();
 	}
 
-	template <class D> void writeBytes(REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		uint8_t *end = data + len;
 		select();
 		// could be optimized to write 16bit words out instead of 8bit bytes
@@ -110,7 +110,7 @@ public:
 		release();
 	}
 
-	void writeBytes(REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	// not the most efficient mechanism in the world - but should be enough for sm16716 and friends

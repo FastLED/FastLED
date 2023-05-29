@@ -21,15 +21,15 @@ public:
 
     inline static void hi() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOS = MASK; } else { GP16O = 1; } }
     inline static void lo() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPOC = MASK; } else { GP16O = 0; } }
-    inline static void set(REGISTER port_t val) __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO = val; } else { GP16O = val; }}
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO = val; } else { GP16O = val; }}
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
     inline static void toggle() __attribute__ ((always_inline)) { if(PIN < 16) { _GPB._GPO ^= MASK; } else { GP16O ^= MASK; } }
 
-    inline static void hi(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(REGISTER port_ptr_t port, REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
     inline static port_t hival() __attribute__ ((always_inline)) { if (PIN<16) { return GPO | MASK;  } else { return GP16O | MASK; } }
     inline static port_t loval() __attribute__ ((always_inline)) { if (PIN<16) { return GPO & ~MASK; } else { return GP16O & ~MASK; } }

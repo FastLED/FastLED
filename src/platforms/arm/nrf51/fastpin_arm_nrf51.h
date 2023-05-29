@@ -17,15 +17,15 @@ public:
 
     inline static void hi() __attribute__ ((always_inline)) { _OUTSET::r() = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { _OUTCLR::r() = _MASK; }
-    inline static void set(REGISTER port_t val) __attribute__ ((always_inline)) { _OUT::r() = val; }
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { _OUT::r() = val; }
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
     inline static void toggle() __attribute__ ((always_inline)) { _OUT::r() ^= _MASK; }
 
-    inline static void hi(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(REGISTER port_ptr_t port, REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
     inline static port_t hival() __attribute__ ((always_inline)) { return _OUT::r() | _MASK; }
     inline static port_t loval() __attribute__ ((always_inline)) { return _OUT::r() & ~_MASK; }
@@ -79,15 +79,15 @@ public:
 
     inline static void hi() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUTSET = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUTCLR= _MASK; }
-    inline static void set(REGISTER port_t val) __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT = val; }
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT = val; }
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
     inline static void toggle() __attribute__ ((always_inline)) { FL_NRF_GPIO->OUT ^= _MASK; }
 
-    inline static void hi(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(REGISTER port_ptr_t port, REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
     inline static port_t hival() __attribute__ ((always_inline)) { return FL_NRF_GPIO->OUT | _MASK; }
     inline static port_t loval() __attribute__ ((always_inline)) { return FL_NRF_GPIO->OUT & ~_MASK; }

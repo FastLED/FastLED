@@ -138,7 +138,7 @@ public:
 
 	// write a block of len uint8_ts out.  Need to type this better so that explicit casts into the call aren't required.
 	// note that this template version takes a class parameter for a per-byte modifier to the data.
-	template <class D> void writeBytes(REGISTER uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		select();
 		uint8_t *end = data + len;
 		while(data != end) {
@@ -149,7 +149,7 @@ public:
 	}
 
 	// default version of writing a block of data out to the SPI port, with no data modifications being made
-	void writeBytes(REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline void writeBit(uint8_t b) {

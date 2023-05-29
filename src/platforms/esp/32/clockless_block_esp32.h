@@ -82,14 +82,14 @@ public:
 
 #define ESP_ADJUST 0 // (2*(F_CPU/24000000))
 #define ESP_ADJUST2 0
-    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(REGISTER uint32_t & last_mark, REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , REGISTER uint32_t & b2)  {
+    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & last_mark, FASTLED_REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
 	Lines b2 = b;
 	transpose8x1_noinline(b.bytes,b2.bytes);
 	
-	REGISTER uint8_t d = pixels.template getd<PX>(pixels);
-	REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
+	FASTLED_REGISTER uint8_t d = pixels.template getd<PX>(pixels);
+	FASTLED_REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
 	
-	for(REGISTER uint32_t i = 0; i < USED_LANES; ++i) {
+	for(FASTLED_REGISTER uint32_t i = 0; i < USED_LANES; ++i) {
 	    while((__clock_cycles() - last_mark) < (T1+T2+T3));
 	    last_mark = __clock_cycles();
 	    *FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
@@ -104,7 +104,7 @@ public:
 	    b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 	}
 
-	for(REGISTER uint32_t i = USED_LANES; i < 8; ++i) {
+	for(FASTLED_REGISTER uint32_t i = USED_LANES; i < 8; ++i) {
 	    while((__clock_cycles() - last_mark) < (T1+T2+T3));
 	    last_mark = __clock_cycles();
 	    *FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
