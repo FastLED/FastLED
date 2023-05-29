@@ -835,6 +835,18 @@ inline __attribute__((always_inline)) bool operator!= (const CRGB& lhs, const CR
     return !(lhs == rhs);
 }
 
+/// Check if two CHSV objects have the same color data
+inline __attribute__((always_inline)) bool operator== (const CHSV& lhs, const CHSV& rhs)
+{
+    return (lhs.h == rhs.h) && (lhs.s == rhs.s) && (lhs.v == rhs.v);
+}
+
+/// Check if two CHSV objects do *not* have the same color data
+inline __attribute__((always_inline)) bool operator!= (const CHSV& lhs, const CHSV& rhs)
+{
+    return !(lhs == rhs);
+}
+
 /// Check if the sum of the color channels in one CRGB object is less than another
 inline __attribute__((always_inline)) bool operator< (const CRGB& lhs, const CRGB& rhs)
 {

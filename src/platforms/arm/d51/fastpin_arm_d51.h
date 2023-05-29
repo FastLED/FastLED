@@ -107,6 +107,27 @@ _FL_DEFPIN(24, 14, 0); _FL_DEFPIN(25,  13, 0); _FL_DEFPIN(26,  12, 0);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(ADAFRUIT_FEATHER_M4_CAN)
+
+#define MAX_PIN 19
+// D0-D13, including D8 (neopixel)  no pins 2 3
+_FL_DEFPIN( 0, 17, 1); _FL_DEFPIN( 1, 16, 1);
+_FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 16, 0); _FL_DEFPIN( 6,  18, 0);
+_FL_DEFPIN( 7,  3, 1); _FL_DEFPIN( 8,  2, 1); _FL_DEFPIN( 9, 19, 0); _FL_DEFPIN(10, 20, 0); _FL_DEFPIN(11, 21, 0);
+_FL_DEFPIN(12, 22, 0); _FL_DEFPIN(13, 23, 0);
+// A0-A5
+_FL_DEFPIN(14,  2, 0); _FL_DEFPIN(15,  5, 0); _FL_DEFPIN(16,  8, 1); _FL_DEFPIN(17,  9, 1);
+_FL_DEFPIN(18,  4, 0); _FL_DEFPIN(19,  6, 0); /* A6 is present in variant.h but couldn't find it on the schematic */
+// SDA/SCL
+_FL_DEFPIN(21, 12, 0); _FL_DEFPIN(22, 13, 0);
+// 23..25  MISO/MOSI/SCK
+_FL_DEFPIN(23, 22, 1); _FL_DEFPIN(24,  23, 1); _FL_DEFPIN(25,  17, 0);
+
+#define SPI_DATA 24
+#define SPI_CLOCK 25
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
 #elif defined(ADAFRUIT_FEATHER_M4_EXPRESS)
 
 #define MAX_PIN 19
