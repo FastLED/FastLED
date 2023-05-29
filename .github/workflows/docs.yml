@@ -9,7 +9,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Fetch Repository Reference Info
         id: repo-info
         run: |
@@ -21,8 +21,8 @@ jobs:
           COMMIT_MSG=$PROJECT_NUMBER
           if [ "$PROJECT_NUMBER" != "$GIT_SHA_SHORT" ]; then COMMIT_MSG+=" ($GITHUB_SHA)"; fi
           echo "The project number is \"$PROJECT_NUMBER\" and the commit message is \"$COMMIT_MSG\""
-          echo "::set-output name=project-number::$PROJECT_NUMBER"
-          echo "::set-output name=commit-message::$COMMIT_MSG"
+          echo "project-number=$PROJECT_NUMBER" >> $GITHUB_OUTPUT
+          echo "commit-message=$COMMIT_MSG" >> $GITHUB_OUTPUT
 
       - name: Install Doxygen
         env: 
