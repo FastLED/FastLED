@@ -53,8 +53,13 @@ protected:
 	template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(REGISTER uint32_t & last_mark, REGISTER uint32_t b)  {
     b <<= 24; b = ~b;
     for(REGISTER uint32_t i = BITS; i > 0; --i) {
-      while((__clock_cycles() - last_mark) < (T1+T2+T3));
-			last_mark = __clock_cycles();
+      while((__clock_cycles() - last_mark) < (T1+T2+T3)) {
+        // the current compiler does like just a ; to end of THIS while loop
+        // altrough this change make no sense because below are more of the same while loops without
+		// compiler warning.
+		;
+	  }
+	  last_mark = __clock_cycles();
       FastPin<DATA_PIN>::hi();
 
       while((__clock_cycles() - last_mark) < T1);
