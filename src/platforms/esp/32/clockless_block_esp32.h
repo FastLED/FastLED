@@ -21,7 +21,10 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
     typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
-    data_t mPinMask;
+	// Verify that the pin is valid
+	static_assert(FastPin<FIRST_PIN>::validpin(), "Invalid pin specified");
+
+	data_t mPinMask;
     data_ptr_t mPort;
     CMinWait<WAIT_TIME> mWait;
 
@@ -79,14 +82,14 @@ public:
 
 #define ESP_ADJUST 0 // (2*(F_CPU/24000000))
 #define ESP_ADJUST2 0
-    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(register uint32_t & last_mark, register Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , register uint32_t & b2)  {
+    template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(REGISTER uint32_t & last_mark, REGISTER Lines & b, PixelController<RGB_ORDER, LANES, PORT_MASK> &pixels) { // , REGISTER uint32_t & b2)  {
 	Lines b2 = b;
 	transpose8x1_noinline(b.bytes,b2.bytes);
 	
-	register uint8_t d = pixels.template getd<PX>(pixels);
-	register uint8_t scale = pixels.template getscale<PX>(pixels);
+	REGISTER uint8_t d = pixels.template getd<PX>(pixels);
+	REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);
 	
-	for(register uint32_t i = 0; i < USED_LANES; ++i) {
+	for(REGISTER uint32_t i = 0; i < USED_LANES; ++i) {
 	    while((__clock_cycles() - last_mark) < (T1+T2+T3));
 	    last_mark = __clock_cycles();
 	    *FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;
@@ -101,7 +104,7 @@ public:
 	    b.bytes[i] = pixels.template loadAndScale<PX>(pixels,i,d,scale);
 	}
 
-	for(register uint32_t i = USED_LANES; i < 8; ++i) {
+	for(REGISTER uint32_t i = USED_LANES; i < 8; ++i) {
 	    while((__clock_cycles() - last_mark) < (T1+T2+T3));
 	    last_mark = __clock_cycles();
 	    *FastPin<FIRST_PIN>::sport() = PORT_MASK << REAL_FIRST_PIN;

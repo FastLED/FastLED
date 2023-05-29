@@ -1,3 +1,7 @@
+/// @file hsv2rgb.cpp
+/// Functions to convert from the HSV colorspace to the RGB colorspace
+
+/// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 #include <stdint.h>
 
@@ -5,49 +9,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-// Functions to convert HSV colors to RGB colors.
-//
-//  The basically fall into two groups: spectra, and rainbows.
-//  Spectra and rainbows are not the same thing.  Wikipedia has a good
-//  illustration here
-//   http://upload.wikimedia.org/wikipedia/commons/f/f6/Prism_compare_rainbow_01.png
-//  from this article
-//   http://en.wikipedia.org/wiki/Rainbow#Number_of_colours_in_spectrum_or_rainbow
-//  that shows a 'spectrum' and a 'rainbow' side by side.  Among other
-//  differences, you'll see that a 'rainbow' has much more yellow than
-//  a plain spectrum.  "Classic" LED color washes are spectrum based, and
-//  usually show very little yellow.
-//
-//  Wikipedia's page on HSV color space, with pseudocode for conversion
-//  to RGB color space
-//   http://en.wikipedia.org/wiki/HSL_and_HSV
-//  Note that their conversion algorithm, which is (naturally) very popular
-//  is in the "maximum brightness at any given hue" style, vs the "uniform
-//  brightness for all hues" style.
-//
-//  You can't have both; either purple is the same brightness as red, e.g
-//    red = #FF0000 and purple = #800080 -> same "total light" output
-//  OR purple is 'as bright as it can be', e.g.
-//    red = #FF0000 and purple = #FF00FF -> purple is much brighter than red.
-//  The colorspace conversions here try to keep the apparent brightness
-//  constant even as the hue varies.
-//
-//  Adafruit's "Wheel" function, discussed here
-//   http://forums.adafruit.com/viewtopic.php?f=47&t=22483
-//  is also of the "constant apparent brightness" variety.
-//
-//  TODO: provide the 'maximum brightness no matter what' variation.
-//
-//  See also some good, clear Arduino C code from Kasper Kamperman
-//   http://www.kasperkamperman.com/blog/arduino/arduino-programming-hsb-to-rgb/
-//  which in turn was was based on Windows C code from "nico80"
-//   http://www.codeproject.com/Articles/9207/An-HSB-RGBA-colour-picker
-
-
-
-
-
+/// HSV to RGB implementation in raw C, platform independent
 void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb);
+/// HSV to RGB implementation in raw C, for the AVR platform only
 void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb);
 
 #if defined(__AVR__) && !defined( LIB8_ATTINY )
@@ -63,9 +27,15 @@ void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
 #endif
 
 
-
+/// Apply dimming compensation to values
 #define APPLY_DIMMING(X) (X)
+
+/// Divide the color wheel into eight sections, 32 elements each
+/// @todo Unused. Remove?
 #define HSV_SECTION_6 (0x20)
+
+/// Divide the color wheel into four sections, 64 elements each
+/// @todo I believe this is mis-named, and should be HSV_SECTION_4
 #define HSV_SECTION_3 (0x40)
 
 void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb)
@@ -253,7 +223,7 @@ void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb)
 
 #endif
 
-void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb)
+void hsv2rgb_spectrum( const struct CHSV& hsv, CRGB& rgb)
 {
     CHSV hsv2(hsv);
     hsv2.hue = scale8( hsv2.hue, 191);
@@ -261,19 +231,22 @@ void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb)
 }
 
 
-// Sometimes the compiler will do clever things to reduce
-// code size that result in a net slowdown, if it thinks that
-// a variable is not used in a certain location.
-// This macro does its best to convince the compiler that
-// the variable is used in this location, to help control
-// code motion and de-duplication that would result in a slowdown.
+/// Force a variable reference to avoid compiler over-optimization. 
+/// Sometimes the compiler will do clever things to reduce
+/// code size that result in a net slowdown, if it thinks that
+/// a variable is not used in a certain location.
+/// This macro does its best to convince the compiler that
+/// the variable is used in this location, to help control
+/// code motion and de-duplication that would result in a slowdown.
 #define FORCE_REFERENCE(var)  asm volatile( "" : : "r" (var) )
 
 
+/// @cond
 #define K255 255
 #define K171 171
 #define K170 170
 #define K85  85
+/// @endcond
 
 void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
 {
@@ -516,7 +489,7 @@ void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds)
 }
 
 
-
+/// Convert a fractional input into a constant
 #define FIXFRAC8(N,D) (((N)*256)/(D))
 
 // This function is only an approximation, and it is not

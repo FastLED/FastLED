@@ -201,8 +201,8 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER>
     // -- Store the GPIO pin
     gpio_num_t     mPin;
     
-    // -- This instantiation forces a check on the pin choice
-    FastPin<DATA_PIN> mFastPin;
+    // -- Verify that the pin is valid
+    static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
     
     // -- Save the pixel controller
     PixelController<RGB_ORDER> * mPixels;

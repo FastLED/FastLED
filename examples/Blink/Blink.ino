@@ -1,3 +1,7 @@
+/// @file    Blink.ino
+/// @brief   Blink the first LED of an LED strip
+/// @example Blink.ino
+
 #include <FastLED.h>
 
 // How many leds in your strip?

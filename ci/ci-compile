@@ -8,12 +8,12 @@
 #   [BOARDS=boards] [EXAMPLES=examples] ./ci-compile
 #
 # e.g.
-#  $ ./compile-ci   
+#  $ ./compile-ci
 #         - compile all board/examples combinations
 #
-#  $ BOARDS="esp32 esp01" EXAMPLES=Blink ./compile-ci 
+#  $ BOARDS="esp32 esp01" EXAMPLES=Blink ./compile-ci
 #         - compile only Blink example for the esp32 and esp8266 platforms
-#                                              
+#
 set -eou pipefail
 
 # List of examples that will be compiled by default
@@ -30,7 +30,9 @@ BOARD_OPTS=$(for b in $BOARDS; do echo -n "--board $b "; done)
 
 cd "$DIR/.."
 
-for d in $EXAMPLES ; do 
+export PLATFORMIO_EXTRA_SCRIPTS="pre:lib/ci/ci-flags.py"
+
+for d in $EXAMPLES ; do
   echo "*** building example $d for $BOARDS ***"
-  pio ci $BOARD_OPTS --lib=src "examples/$d/"*ino
+  pio ci $BOARD_OPTS --lib=ci --lib=src "examples/$d/"*ino
 done
