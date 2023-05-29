@@ -513,6 +513,16 @@ class WS2812Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
+/// DP1903 controller class @ 800 KHz.
+/// @copydetails WS2812Controller800Khz
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class DP1903Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMUL, 2 * FMUL, RGB_ORDER> {};
+
+/// DP1903 controller class @ 400 KHz.
+/// @copydetails WS2812Controller800Khz
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class DP1903Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 16 * FMUL, 4 * FMUL, RGB_ORDER> {};
+
 /// WS2813 controller class.
 /// @copydetails WS2812Controller800Khz
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>                                                             //not tested
