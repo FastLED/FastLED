@@ -128,6 +128,23 @@ _FL_DEFPIN(4, 4, B); _FL_DEFPIN(5, 5, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(__AVR_ATtiny48__) || defined(__AVR_ATtiny88__)
+
+#define MAX_PIN 27
+_FL_DEFPIN( 0, 0, D); _FL_DEFPIN( 1, 1, D); _FL_DEFPIN( 2, 2, D); _FL_DEFPIN( 3, 3, D);
+_FL_DEFPIN( 4, 4, D); _FL_DEFPIN( 5, 5, D); _FL_DEFPIN( 6, 6, D); _FL_DEFPIN( 7, 7, D);
+_FL_DEFPIN( 8, 0, B); _FL_DEFPIN( 9, 1, B); _FL_DEFPIN(10, 2, B); _FL_DEFPIN(11, 3, B);
+_FL_DEFPIN(12, 4, B); _FL_DEFPIN(13, 5, B); _FL_DEFPIN(14, 7, B); _FL_DEFPIN(15, 2, A);
+_FL_DEFPIN(16, 3, A); _FL_DEFPIN(17, 0, A); _FL_DEFPIN(18, 1, A); _FL_DEFPIN(19, 0, C);
+_FL_DEFPIN(20, 1, C); _FL_DEFPIN(21, 2, C); _FL_DEFPIN(22, 3, C); _FL_DEFPIN(23, 4, C);
+_FL_DEFPIN(24, 5, C); _FL_DEFPIN(25, 7, C);
+
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPI_SELECT 10
+#define AVR_HARDWARE_SPI 1
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
 #elif defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__)
 #define MAX_PIN 11
 
