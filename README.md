@@ -49,7 +49,6 @@ Here's a list of all the LED chipsets are supported.  More details on the LED ch
 * TM1809/4 - 3 wire chipset, cheaply available on aliexpress.com
 * TM1803 - 3 wire chipset, sold by RadioShack
 * UCS1903 - another 3 wire LED chipset, cheap
-* DP1903 - another 3 wire LED chipset, cheap
 * GW6205 - another 3 wire LED chipset
 * LPD8806 - SPI based chipset, very high speed
 * WS2801 - SPI based chipset, cheap and widely available
