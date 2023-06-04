@@ -1,3 +1,4 @@
++[![Build Status](https://travis-ci.org/FastLED/FastLED.svg)](https://travis-ci.org/FastLED/FastLED)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FastLED/public)
 [![arduino-library-badge](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED)
 ![build status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)

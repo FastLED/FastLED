@@ -1,0 +1,37 @@
+language: python
+python:
+    - "2.7"
+
+env:
+    - PLATFORMIO_CI_SRC=examples/AnalogOutput/AnalogOutput.ino
+    - PLATFORMIO_CI_SRC=examples/Blink/Blink.ino
+    - PLATFORMIO_CI_SRC=examples/ColorPalette/ColorPalette.ino
+    - PLATFORMIO_CI_SRC=examples/ColorTemperature/ColorTemperature.ino
+    - PLATFORMIO_CI_SRC=examples/Cylon/Cylon.ino
+    - PLATFORMIO_CI_SRC=examples/DemoReel100/DemoReel100.ino
+    - PLATFORMIO_CI_SRC=examples/Fire2012/Fire2012.ino
+    - PLATFORMIO_CI_SRC=examples/Fire2012WithPalette/Fire2012WithPalette.ino
+    - PLATFORMIO_CI_SRC=examples/FirstLight/FirstLight.ino
+    - PLATFORMIO_CI_SRC=examples/Multiple/ArrayOfLedArrays/ArrayOfLedArrays.ino
+    - PLATFORMIO_CI_SRC=examples/Multiple/MirroringSample/MirroringSample.ino
+    - PLATFORMIO_CI_SRC=examples/Multiple/MultiArrays/MultiArrays.ino
+    - PLATFORMIO_CI_SRC=examples/Multiple/MultipleStripsInOneArray/MultipleStripsInOneArray.ino
+    - PLATFORMIO_CI_SRC=examples/Multiple/OctoWS2811Demo/OctoWS2811Demo.ino
+    - PLATFORMIO_CI_SRC=examples/Multiple/ParallelOutputDemo/ParallelOutputDemo.ino
+    - PLATFORMIO_CI_SRC=examples/Noise/Noise.ino
+    - PLATFORMIO_CI_SRC=examples/NoisePlayground/NoisePlayground.ino
+    - PLATFORMIO_CI_SRC=examples/NoisePlusPalette/NoisePlusPalette.ino
+    - PLATFORMIO_CI_SRC=examples/Pintest/Pintest.ino
+    - PLATFORMIO_CI_SRC=examples/Ports/PJRCSpectrumAnalyzer/PJRCSpectrumAnalyzer.ino
+    - PLATFORMIO_CI_SRC=examples/RGBCalibrate/RGBCalibrate.ino
+    - PLATFORMIO_CI_SRC=examples/SmartMatrix/SmartMatrix.ino
+    - PLATFORMIO_CI_SRC=examples/XYMatrix/XYMatrix.ino
+
+install:
+    - python -c "$(curl -fsSL https://raw.githubusercontent.com/platformio/platformio/master/scripts/get-platformio.py)"
+
+    # http://platformio.org/#!/lib/show/69/OctoWS2811
+    - platformio lib install 69
+
+script:
+    - platformio ci --lib="." --board=uno --board=teensy31 --board=due
