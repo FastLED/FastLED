@@ -9,7 +9,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Fetch Repository Reference Info
         id: repo-info
         run: |
@@ -21,21 +21,20 @@ jobs:
           COMMIT_MSG=$PROJECT_NUMBER
           if [ "$PROJECT_NUMBER" != "$GIT_SHA_SHORT" ]; then COMMIT_MSG+=" ($GITHUB_SHA)"; fi
           echo "The project number is \"$PROJECT_NUMBER\" and the commit message is \"$COMMIT_MSG\""
-          echo "::set-output name=project-number::$PROJECT_NUMBER"
-          echo "::set-output name=commit-message::$COMMIT_MSG"
+          echo "project-number=$PROJECT_NUMBER" >> $GITHUB_OUTPUT
+          echo "commit-message=$COMMIT_MSG" >> $GITHUB_OUTPUT
 
       - name: Install Doxygen
         env: 
-          DOXYGEN_VERSION: 1.9.3
+          DOXYGEN_VERSION: 1.9.7
         run: |
           wget -q https://www.doxygen.nl/files/doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
           tar -xf doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
           cd doxygen-${{ env.DOXYGEN_VERSION }} && sudo make install
-          sudo apt-get install libclang1-9 libclang-cpp9
 
       - name: Install Themes
         env:
-          DOXYGEN_AWESOME_VERSION: 2.0.3
+          DOXYGEN_AWESOME_VERSION: 2.2.0
         working-directory: ./docs
         run: |
           git clone --depth 1 -b v${{ env.DOXYGEN_AWESOME_VERSION }} https://github.com/jothepro/doxygen-awesome-css
