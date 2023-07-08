@@ -343,8 +343,10 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
     ESP32RMTController * pController = gOnChannel[channel];
 
     // -- Turn off output on the pin
-    // SZG: Do I really need to do this?
-    gpio_matrix_out(pController->mPin, 0x100, 0, 0);
+    //    Otherwise the pin will stay connected to the RMT controller,
+    //    and if the same RMT controller is used for another output
+    //    pin the RMT output will be routed to both pins.
+    gpio_matrix_out(pController->mPin, SIG_GPIO_OUT_IDX, 0, 0);
 
     // -- Turn off the interrupts
     // rmt_set_tx_intr_en(channel, false);
