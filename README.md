@@ -3,7 +3,7 @@
 [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
 [![Reddit](https://img.shields.io/badge/reddit-Community-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
-FastLED 3.6
+FastLED
 ===========
 
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
