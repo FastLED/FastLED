@@ -11,8 +11,6 @@ LEDs, this library also includes a number of functions for high-performing 8-bit
 your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while
 still keeping things as fast as possible.
 
-Quick note for people installing from GitHub repo zips, rename the folder "FastLED" before copying it to your Arduino/libraries folder.  GitHub likes putting `-branchname` into the name of the folder, which unfortunately makes Arduino cranky!
-
 We have multiple goals with this library:
 
 * Quick start for new developers - hook up your LEDs and go, no need to think about specifics of the LED chipsets being used
