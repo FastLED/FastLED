@@ -1,12 +1,9 @@
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/FastLED/public)
-[![arduino-library-badge](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED)
-![build status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)
-
-IMPORTANT NOTE: For AVR based systems, avr-gcc 4.8.x is supported and tested.  This means Arduino 1.6.5 and later.
-
-
-FastLED 3.6
+FastLED
 ===========
+[![arduino-library-badge](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED)
+[![build status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build.yml)
+[![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
+[![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
 sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress.  In addition to writing to the
@@ -14,21 +11,18 @@ LEDs, this library also includes a number of functions for high-performing 8-bit
 your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while
 still keeping things as fast as possible.
 
-Quick note for people installing from GitHub repo zips, rename the folder "FastLED" before copying it to your Arduino/libraries folder.  GitHub likes putting `-branchname` into the name of the folder, which unfortunately makes Arduino cranky!
-
 We have multiple goals with this library:
 
 * Quick start for new developers - hook up your LEDs and go, no need to think about specifics of the LED chipsets being used
 * Zero pain switching LED chipsets - you get some new LEDs that the library supports, just change the definition of LEDs you're using, et. voila!  Your code is running with the new LEDs.
 * High performance - with features like zero cost global brightness scaling, high performance 8-bit math for RGB manipulation, and some of the fastest bit-bang'd SPI support around, FastLED wants to keep as many CPU cycles available for your LED patterns as possible
 
-## Getting Help
+## Getting Started
 
-If you need help with using the library, please consider going to the reddit community first, which is at http://fastled.io/r (or https://reddit.com/r/FastLED). There are thousands of great people in that group and many times you will get a quicker answer to your question there, as you will be likely to run into other people who have had the same issue.  If you run into bugs with the library (compilation failures, the library doing the wrong thing), or if you'd like to request that we support a particular platform or LED chipset, then please open an issue at http://fastled.io/issues and we will try to figure out what is going wrong.
-
-## Simple Example
+Install the library using either [the .zip file from the latest release](https://github.com/FastLED/FastLED/releases/latest/) or by searching for "FastLED" in the libraries manager of the Arduino IDE. [See the Arduino documentation on how to install libraries for more information.](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries)
 
 How quickly can you get up and running with the library?  Here's a simple blink program:
+
 ```cpp
 #include <FastLED.h>
 #define NUM_LEDS 60
@@ -39,6 +33,14 @@ void loop() {
 	leds[0] = CRGB::Black; FastLED.show(); delay(30);
 }
 ```
+
+## Help and Support
+
+If you need help with using the library, please consider visiting the Reddit community at https://reddit.com/r/FastLED. There are thousands of knowledgeable FastLED users in that group and a plethora of solutions in the post history.
+
+If you are looking for documentation on how something in the library works, please see the Doxygen documentation online at http://fastled.io/docs.
+
+If you run into bugs with the library, or if you'd like to request support for a particular platform or LED chipset, please submit an issue at http://fastled.io/issues.
 
 ## Supported LED Chipsets
 
