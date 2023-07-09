@@ -36,9 +36,13 @@ void loop() {
 }
 ```
 
-## Getting Help
+## Help and Support
 
-If you need help with using the library, please consider going to the reddit community first, which is at http://fastled.io/r (or https://reddit.com/r/FastLED). There are thousands of great people in that group and many times you will get a quicker answer to your question there, as you will be likely to run into other people who have had the same issue.  If you run into bugs with the library (compilation failures, the library doing the wrong thing), or if you'd like to request that we support a particular platform or LED chipset, then please open an issue at http://fastled.io/issues and we will try to figure out what is going wrong.
+If you need help with using the library, please consider visiting the Reddit community at https://reddit.com/r/FastLED. There are thousands of knowledgeable FastLED users in that group and a plethora of solutions in the post history.
+
+If you are looking for documentation on how something in the library works, please see the Doxygen documentation online at http://fastled.io/docs.
+
+If you run into bugs with the library, or if you'd like to request support for a particular platform or LED chipset, please submit an issue at http://fastled.io/issues.
 
 ## Supported LED Chipsets
 
