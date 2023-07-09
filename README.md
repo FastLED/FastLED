@@ -3,9 +3,6 @@
 [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
 [![Reddit](https://img.shields.io/badge/reddit-Community-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
-IMPORTANT NOTE: For AVR based systems, avr-gcc 4.8.x is supported and tested.  This means Arduino 1.6.5 and later.
-
-
 FastLED 3.6
 ===========
 
