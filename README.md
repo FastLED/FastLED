@@ -1,7 +1,7 @@
 FastLED
 ===========
 [![arduino-library-badge](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED)
-[![build status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](../../actions/workflows/build.yml)
+[![build status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build.yml)
 [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
 [![Reddit](https://img.shields.io/badge/reddit-Community-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
