@@ -25,14 +25,12 @@
 var NAVTREE =
 [
   [ "FastLED", "index.html", [
-    [ "FastLED 3.6", "index.html#autotoc_md0", [
-      [ "Getting Help", "index.html#autotoc_md1", null ],
-      [ "Simple Example", "index.html#autotoc_md2", null ],
-      [ "Supported LED Chipsets", "index.html#autotoc_md3", null ],
-      [ "Supported Platforms", "index.html#autotoc_md4", null ],
-      [ "What about that name?", "index.html#autotoc_md5", null ],
-      [ "For more information", "index.html#autotoc_md6", null ]
-    ] ],
+    [ "Getting Started", "index.html#autotoc_md0", null ],
+    [ "Help and Support", "index.html#autotoc_md1", null ],
+    [ "Supported LED Chipsets", "index.html#autotoc_md2", null ],
+    [ "Supported Platforms", "index.html#autotoc_md3", null ],
+    [ "What about that name?", "index.html#autotoc_md4", null ],
+    [ "For more information", "index.html#autotoc_md5", null ],
     [ "Todo List", "todo.html", null ],
     [ "Deprecated List", "deprecated.html", null ],
     [ "Modules", "modules.html", "modules" ],
@@ -72,8 +70,8 @@ var NAVTREEINDEX =
 "class_l_p_d1886__8_b_i_t.html",
 "fastspi__types_8h.html#afe32f8062c70f2114bd3a7adb55a4be3",
 "group___math.html#ga162169ac0c2d1f3d01eaff8f32e1b415",
-"noise_8h.html",
-"struct_pixel_controller.html"
+"noise_8h_source.html",
+"struct_pixel_controller.html#a0f4eb594a337bc3a739e65b2a1e5c401"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
