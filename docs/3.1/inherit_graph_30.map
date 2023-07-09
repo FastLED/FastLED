@@ -1,6 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$class_a_v_r_software_s_p_i_output.html" title="AVRSoftwareSPIOutput\l\&lt; _DATA_PIN, _CLOCK_PIN,\l _SPI_CLOCK_DIVIDER \&gt;" alt="" coords="5,79,205,135"/>
-<area shape="rect" id="node2" href="$class_software_s_p_i_output.html" title="SoftwareSPIOutput\&lt;\l _DATA_PIN, _CLOCK_PIN,\l _SPI_CLOCK_DIVIDER \&gt;" alt="" coords="257,5,449,61"/>
-<area shape="rect" id="node3" href="$class_s_p_i_output.html" title="SPIOutput\&lt; _DATA_PIN,\l _CLOCK_PIN, _SPI_CLOCK\l_DIVIDER \&gt;" alt="" coords="254,152,453,208"/>
-<area shape="rect" id="node4" href="$class_s_p_i_output.html" title="SPIOutput\&lt; DATA_PIN,\l CLOCK_PIN, SPI_SPEED \&gt;" alt="" coords="256,86,451,127"/>
-</map>

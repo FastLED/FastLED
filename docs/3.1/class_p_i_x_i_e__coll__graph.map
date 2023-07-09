@@ -1,6 +1,0 @@
-<map id="PIXIE&lt; DATA_PIN, RGB_ORDER &gt;" name="PIXIE&lt; DATA_PIN, RGB_ORDER &gt;">
-<area shape="rect" id="node2" href="$class_pixie_controller.html" title="Adafruit Pixie controller class. " alt="" coords="11,313,167,354"/>
-<area shape="rect" id="node3" href="$class_c_pixel_l_e_d_controller.html" title="CPixelLEDController\l\&lt; RGB_ORDER \&gt;" alt="" coords="17,219,161,261"/>
-<area shape="rect" id="node4" href="$class_c_l_e_d_controller.html" title="Base definition for an LED controller. " alt="" coords="31,133,147,160"/>
-<area shape="rect" id="node5" href="$struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) " alt="" coords="59,5,119,32"/>
-</map>

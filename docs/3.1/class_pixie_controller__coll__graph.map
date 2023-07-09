@@ -1,5 +1,0 @@
-<map id="PixieController&lt; DATA_PIN, RGB_ORDER &gt;" name="PixieController&lt; DATA_PIN, RGB_ORDER &gt;">
-<area shape="rect" id="node2" href="$class_c_pixel_l_e_d_controller.html" title="CPixelLEDController\l\&lt; RGB_ORDER \&gt;" alt="" coords="11,219,155,261"/>
-<area shape="rect" id="node3" href="$class_c_l_e_d_controller.html" title="Base definition for an LED controller. " alt="" coords="25,133,140,160"/>
-<area shape="rect" id="node4" href="$struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) " alt="" coords="53,5,112,32"/>
-</map>

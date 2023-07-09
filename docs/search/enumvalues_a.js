@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['magenta_0',['Magenta',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a4319e9df38ed37c77991e51518753196',1,'CRGB']]],
+  ['maroon_1',['Maroon',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99afcc79b4c1ead3f48f5ff558ea99cd249',1,'CRGB']]],
+  ['mediumaquamarine_2',['MediumAquamarine',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a4952cd86e07fb99d946f4808457c519d',1,'CRGB']]],
+  ['mediumblue_3',['MediumBlue',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99abd4dbc44172977567e109347c9a44c2c',1,'CRGB']]],
+  ['mediumorchid_4',['MediumOrchid',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a24200e1d2fb791755d46fd2cd70ab346',1,'CRGB']]],
+  ['mediumpurple_5',['MediumPurple',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99acbd1ff36eae4f20102d15df8a2f532ab',1,'CRGB']]],
+  ['mediumseagreen_6',['MediumSeaGreen',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99aa1edcc938df74e896b6147a8319ae6da',1,'CRGB']]],
+  ['mediumslateblue_7',['MediumSlateBlue',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a5ffe4b11dce362d016ed11a0ee127cdd',1,'CRGB']]],
+  ['mediumspringgreen_8',['MediumSpringGreen',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a28800a3fc919bb59078464b5283e2d2f',1,'CRGB']]],
+  ['mediumturquoise_9',['MediumTurquoise',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a9d64193329dbdb785fc9f9806f60004d',1,'CRGB']]],
+  ['mediumvioletred_10',['MediumVioletRed',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a0d8283dd35c5082c7f8d5522c66ad67d',1,'CRGB']]],
+  ['mercuryvapor_11',['MercuryVapor',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9afd80de5fdb01de99f8844addb6bf70a0',1,'color.h']]],
+  ['metalhalide_12',['MetalHalide',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ace317f70f7c78232341cf59f08fa46b0',1,'color.h']]],
+  ['midnightblue_13',['MidnightBlue',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a8630379d27a5d3926a5b71c60cdc8f0b',1,'CRGB']]],
+  ['mintcream_14',['MintCream',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99af495225396cfbca8f6244439103fc929',1,'CRGB']]],
+  ['mistyrose_15',['MistyRose',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a395a758056a1da19afe3c9ebf5d565a1',1,'CRGB']]],
+  ['moccasin_16',['Moccasin',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a1cd587f3a235fce04d15c5115c63f291',1,'CRGB']]]
+];

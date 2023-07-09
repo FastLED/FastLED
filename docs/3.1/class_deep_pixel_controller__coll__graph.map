@@ -1,4 +1,0 @@
-<map id="DeepPixelController&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;" name="DeepPixelController&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;">
-<area shape="rect" id="node2" href="$class_c_l_e_d_controller.html" title="Base definition for an LED controller. " alt="" coords="49,133,164,160"/>
-<area shape="rect" id="node3" href="$struct_c_r_g_b.html" title="CRGB" alt="" coords="77,5,136,32"/>
-</map>

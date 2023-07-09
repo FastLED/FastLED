@@ -1,5 +1,0 @@
-<map id="APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;" name="APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;">
-<area shape="rect" id="node2" href="$class_c_pixel_l_e_d_controller.html" title="CPixelLEDController\l\&lt; RGB_ORDER \&gt;" alt="" coords="48,219,192,261"/>
-<area shape="rect" id="node3" href="$class_c_l_e_d_controller.html" title="Base definition for an LED controller. " alt="" coords="62,133,177,160"/>
-<area shape="rect" id="node4" href="$struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) " alt="" coords="90,5,149,32"/>
-</map>

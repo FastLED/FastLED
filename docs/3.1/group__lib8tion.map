@@ -1,6 +1,0 @@
-<map id="Fast math functions" name="Fast math functions">
-<area shape="rect" id="node1" href="$group___math.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming..." alt="" coords="193,5,346,32"/>
-<area shape="rect" id="node2" href="$group___random.html" title="Fast 8&#45; and 16&#45; bit unsigned random numbers. " alt="" coords="197,57,342,98"/>
-<area shape="rect" id="node3" href="$group___trig.html" title="Fast 8 and 16&#45;bit approximations of sin(x) and cos(x). " alt="" coords="206,123,333,149"/>
-<area shape="rect" id="node5" href="$group___scaling.html" title="Fast, efficient 8&#45;bit scaling functions specifically designed for high&#45;performance LED programming..." alt="" coords="208,173,331,200"/>
-</map>

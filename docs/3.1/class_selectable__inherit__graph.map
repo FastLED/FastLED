@@ -1,5 +1,0 @@
-<map id="Selectable" name="Selectable">
-<area shape="rect" id="node2" href="$class_pin.html" title="Pin" alt="" coords="69,80,109,107"/>
-<area shape="rect" id="node3" href="$class_input_pin.html" title="InputPin" alt="" coords="5,155,75,181"/>
-<area shape="rect" id="node4" href="$class_output_pin.html" title="OutputPin" alt="" coords="99,155,180,181"/>
-</map>

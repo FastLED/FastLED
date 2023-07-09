@@ -1,5 +1,0 @@
-<map id="WS2803Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;" name="WS2803Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;">
-<area shape="rect" id="node2" href="$class_w_s2801_controller.html" title="WS2801 controller class. " alt="" coords="5,171,235,227"/>
-<area shape="rect" id="node3" href="$class_c_pixel_l_e_d_controller.html" title="CPixelLEDController\l\&lt; RGB_ORDER \&gt;" alt="" coords="48,81,192,122"/>
-<area shape="rect" id="node4" href="$class_c_l_e_d_controller.html" title="Base definition for an LED controller. " alt="" coords="62,5,177,32"/>
-</map>

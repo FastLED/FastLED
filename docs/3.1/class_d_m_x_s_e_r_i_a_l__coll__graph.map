@@ -1,6 +1,0 @@
-<map id="DMXSERIAL&lt; RGB_ORDER &gt;" name="DMXSERIAL&lt; RGB_ORDER &gt;">
-<area shape="rect" id="node2" href="$class_d_m_x_serial_controller.html" title="DMXSerialController\l\&lt; RGB_ORDER \&gt;" alt="" coords="36,313,180,354"/>
-<area shape="rect" id="node3" href="$class_c_pixel_l_e_d_controller.html" title="CPixelLEDController\l\&lt; RGB_ORDER \&gt;" alt="" coords="36,219,180,261"/>
-<area shape="rect" id="node4" href="$class_c_l_e_d_controller.html" title="Base definition for an LED controller. " alt="" coords="50,133,165,160"/>
-<area shape="rect" id="node5" href="$struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue) " alt="" coords="78,5,137,32"/>
-</map>
