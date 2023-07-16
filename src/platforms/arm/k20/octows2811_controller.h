@@ -13,18 +13,35 @@ class COctoWS2811Controller : public CPixelLEDController<RGB_ORDER, 8, 0xFF> {
   uint8_t *drawbuffer = nullptr;
   uint8_t *framebuffer = nullptr;
 
+  bool tryToAllocate = true;
+
   void _init(int nLeds) {
-    if (pocto == nullptr) {
-      drawbuffer = static_cast<uint8_t *>(malloc(nLeds * 8 * 3));
+    if (pocto == nullptr && tryToAllocate) {
+      // Allocate the draw buffer second in case the malloc fails,
+      // because it can technically be NULL. In other words,
+      // prioritize allocating the frame buffer.
       framebuffer = static_cast<uint8_t *>(malloc(nLeds * 8 * 3));
 
-      // byte ordering is handled in show by the pixel controller
-      int config = WS2811_RGB;
-      config |= CHIP;
+      if (framebuffer != nullptr) {
+        drawbuffer = static_cast<uint8_t *>(malloc(nLeds * 8 * 3));
+        // Note: A NULL draw buffer is okay
 
-      pocto = new OctoWS2811(nLeds, framebuffer, drawbuffer, config);
+        // byte ordering is handled in show by the pixel controller
+        int config = WS2811_RGB;
+        config |= CHIP;
 
-      pocto->begin();
+        pocto = new OctoWS2811(nLeds, framebuffer, drawbuffer, config);
+
+        if (pocto != nullptr) {
+          pocto->begin();
+        } else {
+          // Don't try to allocate again
+          tryToAllocate = false;
+        }
+      } else {
+        // Don't try to allocate again
+        tryToAllocate = false;
+      }
     }
   }
 public:
@@ -41,6 +58,9 @@ public:
 
   virtual void showPixels(PixelController<RGB_ORDER, 8, 0xFF> & pixels) {
     _init(pixels.size());
+    if (pocto == nullptr) {
+      return;
+    }
 
     uint8_t *pData = drawbuffer;
     while(pixels.has(1)) {
