@@ -46,6 +46,8 @@
 #elif defined(ARDUINO_ARCH_APOLLO3)
 // Apollo3 platforms (e.g. the Ambiq Micro Apollo3 Blue as used by the SparkFun Artemis platforms)
 #include "platforms/apollo3/led_sysdefs_apollo3.h"
+#elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(ARDUINO_ARCH_RENESAS_PORTENTA)
+#include "platforms/arm/renesas/led_sysdef_arm_renesas.h"
 #else
 //
 // We got here because we don't recognize the platform that you're
