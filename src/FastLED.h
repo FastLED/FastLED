@@ -43,6 +43,10 @@
 #include <DMXSerial.h>
 #endif
 
+#ifdef USE_OCTOWS2811
+#include <OctoWS2811.h>
+#endif
+
 #include <stdint.h>
 
 #include "cpp_compat.h"
