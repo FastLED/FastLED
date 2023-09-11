@@ -19,7 +19,7 @@
 // disallow), overriding the default on platforms that support this.  Set the value to 1 to
 // allow interrupts or 0 to disallow them.
 // #define FASTLED_ALLOW_INTERRUPTS 1
-#define FASTLED_ALLOW_INTERRUPTS 0
+// #define FASTLED_ALLOW_INTERRUPTS 0
 
 // Use this to allow some integer overflows/underflows in the inoise functions.
 // The original implementions allowed this, and had some discontinuties in the noise
@@ -58,7 +58,7 @@
 // Use this to determine how many times FastLED will attempt to re-transmit a frame if interrupted
 // for too long by interrupts.
 #ifndef FASTLED_INTERRUPT_RETRY_COUNT
-#define FASTLED_INTERRUPT_RETRY_COUNT 2
+#define FASTLED_INTERRUPT_RETRY_COUNT 3
 #endif
 
 // Use this toggle to enable global brightness in contollers that support is (ADA102 and SK9822).

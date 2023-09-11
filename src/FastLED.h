@@ -362,15 +362,17 @@ public:
 	/// @returns a reference to the added controller
 	template<template<EOrder RGB_ORDER> class CHIPSET, EOrder RGB_ORDER>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+        Serial.println("addLeds<>() - CRGB");
 		static CHIPSET<RGB_ORDER> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	template<template<EOrder RGB_ORDER> class CHIPSET>
     static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+        Serial.println("addLeds<>() - CRGB");
 		static CHIPSET<RGB> c;
         return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
-	}
+    }
 
 #ifdef USE_OCTOWS2811
 	template<OWS2811 CHIPSET, EOrder RGB_ORDER>

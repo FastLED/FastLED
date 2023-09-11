@@ -378,13 +378,18 @@ protected:
     //    It also packs the bytes into 32 bit chunks with the right bit order.
     void loadPixelData(PixelController<RGB_ORDER> & pixels)
     {
-        // Serial.println("loadPixelData()");
+        Serial.print("loadPixelData() - pixelSize: ");
+        Serial.print(pixels.pixelSize());
+        Serial.print(", size: ");
+        Serial.println(pixels.size());
         // -- Make sure the buffer is allocated
-        int size_in_bytes = pixels.size() * 3;
+        int size_in_bytes = pixels.size() * pixels.pixelSize();
         uint8_t * pData = mRMTController.getPixelBuffer(size_in_bytes);
 
         // -- This might be faster
         while (pixels.has(1)) {
+            Serial.print("loadPixelData() - pixels remaining: ");
+            Serial.println(pixels.mLenRemaining);
             *pData++ = pixels.loadAndScale0();
             *pData++ = pixels.loadAndScale1();
             *pData++ = pixels.loadAndScale2();
@@ -395,12 +400,14 @@ protected:
             pixels.advanceData();
             pixels.stepDithering();
         }
+        //Serial.print("loadPixelData() - finished");
     }
 
     // -- Show pixels
     //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER> & pixels)
     {
+        //Serial.println("showPixels() - 11");
         if (FASTLED_RMT_BUILTIN_DRIVER) {
             convertAllPixelData(pixels);
         } else {
@@ -416,6 +423,7 @@ protected:
     //    up-front.
     void convertAllPixelData(PixelController<RGB_ORDER> & pixels)
     {
+        Serial.println("convertAllPixelData()");
         // -- Make sure the data buffer is allocated
         mRMTController.initPulseBuffer(pixels.size() * 3);
 

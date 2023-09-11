@@ -81,6 +81,7 @@ public:
 
     /// show function w/integer brightness, will scale for color correction and temperature
     void show(const uint8_t *data, int pixelSize, int nLeds, uint8_t brightness) {
+        Serial.println("CLEDController::show");
         show(data, pixelSize, nLeds, getAdjustment(brightness));
     }
 
@@ -91,7 +92,7 @@ public:
 
     /// show function using the "attached to this controller" led data
     void showLeds(uint8_t brightness=255) {
-//        Serial.print("showLeds() - brightness: ");
+        Serial.print("showLeds() - brightness: ");
 //        Serial.println(brightness);
         show(m_Data, m_pixelSize, m_nLeds, getAdjustment(brightness));
     }
@@ -382,10 +383,10 @@ struct PixelController {
         }
 
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { int index = RO(SLOT);
-//                                                                                                                  Serial.print("loadByte - SLOT: ");
-//                                                                                                                  Serial.print(SLOT);
-//                                                                                                                  Serial.print(", index: ");
-//                                                                                                                  Serial.print(index);
+                                                                                                                  Serial.print("loadByte - SLOT: ");
+                                                                                                                  Serial.print(SLOT);
+                                                                                                                  Serial.print(", index: ");
+                                                                                                                  Serial.print(index);
                                                                                                                   return pc.mData[index]; }
 
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
