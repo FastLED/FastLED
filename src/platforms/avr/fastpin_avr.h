@@ -24,15 +24,15 @@ public:
 
 	inline static void hi() __attribute__ ((always_inline)) { _PORT::r() |= _MASK; }
 	inline static void lo() __attribute__ ((always_inline)) { _PORT::r() &= ~_MASK; }
-	inline static void set(register uint8_t val) __attribute__ ((always_inline)) { _PORT::r() = val; }
+	inline static void set(FASTLED_REGISTER uint8_t val) __attribute__ ((always_inline)) { _PORT::r() = val; }
 
 	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
 	inline static void toggle() __attribute__ ((always_inline)) { _PIN::r() = _MASK; }
 
-	inline static void hi(register port_ptr_t /*port*/) __attribute__ ((always_inline)) { hi(); }
-	inline static void lo(register port_ptr_t /*port*/) __attribute__ ((always_inline)) { lo(); }
-	inline static void fastset(register port_ptr_t /*port*/, register uint8_t val) __attribute__ ((always_inline)) { set(val); }
+	inline static void hi(FASTLED_REGISTER port_ptr_t /*port*/) __attribute__ ((always_inline)) { hi(); }
+	inline static void lo(FASTLED_REGISTER port_ptr_t /*port*/) __attribute__ ((always_inline)) { lo(); }
+	inline static void fastset(FASTLED_REGISTER port_ptr_t /*port*/, FASTLED_REGISTER uint8_t val) __attribute__ ((always_inline)) { set(val); }
 
 	inline static port_t hival() __attribute__ ((always_inline)) { return _PORT::r() | _MASK; }
 	inline static port_t loval() __attribute__ ((always_inline)) { return _PORT::r() & ~_MASK; }
@@ -126,6 +126,23 @@ typedef volatile uint8_t & reg8_t;
 _FL_DEFPIN(0, 0, B); _FL_DEFPIN(1, 1, B); _FL_DEFPIN(2, 2, B); _FL_DEFPIN(3, 3, B);
 _FL_DEFPIN(4, 4, B); _FL_DEFPIN(5, 5, B);
 
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(__AVR_ATtiny48__) || defined(__AVR_ATtiny88__)
+
+#define MAX_PIN 27
+_FL_DEFPIN( 0, 0, D); _FL_DEFPIN( 1, 1, D); _FL_DEFPIN( 2, 2, D); _FL_DEFPIN( 3, 3, D);
+_FL_DEFPIN( 4, 4, D); _FL_DEFPIN( 5, 5, D); _FL_DEFPIN( 6, 6, D); _FL_DEFPIN( 7, 7, D);
+_FL_DEFPIN( 8, 0, B); _FL_DEFPIN( 9, 1, B); _FL_DEFPIN(10, 2, B); _FL_DEFPIN(11, 3, B);
+_FL_DEFPIN(12, 4, B); _FL_DEFPIN(13, 5, B); _FL_DEFPIN(14, 7, B); _FL_DEFPIN(15, 2, A);
+_FL_DEFPIN(16, 3, A); _FL_DEFPIN(17, 0, A); _FL_DEFPIN(18, 1, A); _FL_DEFPIN(19, 0, C);
+_FL_DEFPIN(20, 1, C); _FL_DEFPIN(21, 2, C); _FL_DEFPIN(22, 3, C); _FL_DEFPIN(23, 4, C);
+_FL_DEFPIN(24, 5, C); _FL_DEFPIN(25, 7, C);
+
+#define SPI_DATA 11
+#define SPI_CLOCK 13
+#define SPI_SELECT 10
+#define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
 #elif defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__)
@@ -406,6 +423,33 @@ _FL_DEFPIN(28, 6, B); _FL_DEFPIN(29, 6, D); _FL_DEFPIN(30, 5, D);
 // PD3/PD5
 #define SPI_UART1_DATA 1
 #define SPI_UART1_CLOCK 30
+
+
+#elif defined(__AVR_ATmega128__)
+
+// FROM: https://github.com/FastLED/FastLED/issues/1223 @eag77
+#define MAX_PIN 52
+_FL_DEFPIN( 0, 0, E); _FL_DEFPIN( 1, 1, E); _FL_DEFPIN( 2, 2, E); _FL_DEFPIN( 3, 3, E);
+_FL_DEFPIN( 4, 4, E); _FL_DEFPIN( 5, 5, E); _FL_DEFPIN( 6, 6, E); _FL_DEFPIN( 7, 7, E);
+_FL_DEFPIN( 8, 0, B); _FL_DEFPIN( 9, 1, B); _FL_DEFPIN(10, 2, B); _FL_DEFPIN(11, 3, B);
+_FL_DEFPIN(12, 4, B); _FL_DEFPIN(13, 5, B); _FL_DEFPIN(14, 6, B); _FL_DEFPIN(15, 7, B);
+_FL_DEFPIN(16, 3, G); _FL_DEFPIN(17, 4, G); _FL_DEFPIN(18, 0, D); _FL_DEFPIN(19, 1, D);
+_FL_DEFPIN(20, 2, D); _FL_DEFPIN(21, 3, D); _FL_DEFPIN(22, 4, D); _FL_DEFPIN(23, 5, D);
+_FL_DEFPIN(24, 6, D); _FL_DEFPIN(25, 7, D); _FL_DEFPIN(26, 0, G); _FL_DEFPIN(27, 1, G);
+_FL_DEFPIN(28, 0, C); _FL_DEFPIN(29, 1, C); _FL_DEFPIN(30, 2, C); _FL_DEFPIN(31, 3, C);
+_FL_DEFPIN(32, 4, C); _FL_DEFPIN(33, 5, C); _FL_DEFPIN(34, 6, C); _FL_DEFPIN(35, 7, C);
+_FL_DEFPIN(36, 2, G); _FL_DEFPIN(37, 7, A); _FL_DEFPIN(38, 6, A); _FL_DEFPIN(39, 5, A);
+_FL_DEFPIN(40, 4, A); _FL_DEFPIN(41, 3, A); _FL_DEFPIN(42, 2, A); _FL_DEFPIN(43, 1, A);
+_FL_DEFPIN(44, 0, A); _FL_DEFPIN(45, 0, F); _FL_DEFPIN(46, 1, F); _FL_DEFPIN(47, 2, F);
+_FL_DEFPIN(48, 3, F); _FL_DEFPIN(49, 4, F); _FL_DEFPIN(50, 5, F); _FL_DEFPIN(51, 6, F);
+_FL_DEFPIN(52, 7, F);
+
+#define SPI_DATA 10
+#define SPI_CLOCK 9
+#define SPI_SELECT 8
+
+#define AVR_HARDWARE_SPI 1
+#define HAS_HARDWARE_PIN_SUPPORT 1
 
 
 #endif

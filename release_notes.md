@@ -1,3 +1,30 @@
+FastLED 3.6.0
+=============
+This release incorporates valuable improvements from FastLED contributors, tested and explored by the world-wide FastLED community of artists, creators, and developers.  Thank you for all of your time, energy, and help!  Here are some of the most significant changes in FastLED 3.6.0: 
+* Greatly improved support for ESP32 and ESP8266
+* Expanded and improved board support including Teensy4, Adafruit M4 CAN Express and Grand Central M4, RP2040, ATtiny48/88, Arduino MKRZero, and various other AVR and ARM boards
+* Added support for DP1903 LEDs
+* Added fill_rainbow_circular and fill_palette_circular functions to draw a full rainbow or other color palette on a circular ring of LEDs
+* Added a non-wrapping mode for ColorFromPalette, "LINEARBLEND_NOWRAP"
+* No more "register" compiler warnings
+* Bug fixes and performance improvements, including in lib8tion and noise functions
+* We are expanding the FastLED team to help the library grow, evolve, and flourish
+* Released May 2023, with deepest thanks to all the FastLED community members around the world!
+
+
+FastLED 3.5.0
+=============
+This release incorporates dozens of valuable improvements from FastLED contributors, tested and explored by the world-wide FastLED community of artists, creators, and developers.  Thank you for all of your time, energy, and help!  Here are some of the most significant changes in FastLED 3.5.0: 
+* Greatly improved ESP32 and ESP8266 support
+* Improved board support for Teensy 4, Adafruit MatrixPortal M4, Arduino Nano Every, Particle Photon, and Seeed Wio Terminal
+* Improved and/or sped up: sin8, cos8, blend8, blur2d, scale8, Perlin/simplex noise
+* Improved HSV colors are smoother, richer, and brighter in fill_rainbow and elsewhere
+* Modernized and cleaned up the FastLED examples
+* Added github CI integration to help with automated testing
+* Added a Code of Conduct from https://www.contributor-covenant.org/
+* Released January 2022, with many thanks to FastLED contributors and the FastLED community!  
+
+
 FastLED 3.4.0
 =============
 
@@ -11,6 +38,9 @@ FastLED 3.4.0
 * Moved source code files into "src" subdirectory
 * Many small code cleanups and bug fixes
 * Released December 2020, with many thanks to everyone contributing to FastLED!
+
+We also want to note here that in 2020, Github named FastLED one of the 'Greatest Hits' of Open Source software, and preserved an archived copy of FastLED in the Arctic Code Vault, the Bodleian Library at Oxford University, the Bibliotheca Alexandrina (the Library of Alexandria), and the Stanford University Libraries.  https://archiveprogram.github.com/greatest-hits/
+
 
 
 FastLED 3.3.3

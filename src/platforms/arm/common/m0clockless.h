@@ -13,17 +13,17 @@ struct M0ClocklessData {
 template<int HI_OFFSET, int LO_OFFSET, int T1, int T2, int T3, EOrder RGB_ORDER, int WAIT_TIME>int
 showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, uint32_t num_leds, struct M0ClocklessData *pData) {
   // Lo register variables
-  register uint32_t scratch=0;
-  register struct M0ClocklessData *base = pData;
-  register volatile uint32_t *port = _port;
-  register uint32_t d=0;
-  register uint32_t counter=num_leds;
-  register uint32_t bn=0;
-  register uint32_t b=0;
-  register uint32_t bitmask = _bitmask;
+  FASTLED_REGISTER uint32_t scratch=0;
+  FASTLED_REGISTER struct M0ClocklessData *base = pData;
+  FASTLED_REGISTER volatile uint32_t *port = _port;
+  FASTLED_REGISTER uint32_t d=0;
+  FASTLED_REGISTER uint32_t counter=num_leds;
+  FASTLED_REGISTER uint32_t bn=0;
+  FASTLED_REGISTER uint32_t b=0;
+  FASTLED_REGISTER uint32_t bitmask = _bitmask;
 
   // high register variable
-  register const uint8_t *leds = _leds;
+  FASTLED_REGISTER const uint8_t *leds = _leds;
 #if (FASTLED_SCALE8_FIXED == 1)
   ++pData->s[0];
   ++pData->s[1];

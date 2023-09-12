@@ -36,15 +36,15 @@ public:
 
     inline static void hi() __attribute__ ((always_inline)) { PORT->Group[_GRP].OUTSET.reg = _MASK; }
     inline static void lo() __attribute__ ((always_inline)) { PORT->Group[_GRP].OUTCLR.reg = _MASK; }
-    inline static void set(register port_t val) __attribute__ ((always_inline)) { PORT->Group[_GRP].OUT.reg = val; }
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { PORT->Group[_GRP].OUT.reg = val; }
 
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
     inline static void toggle() __attribute__ ((always_inline)) { PORT->Group[_GRP].OUTTGL.reg = _MASK; }
 
-    inline static void hi(register port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
-    inline static void lo(register port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
-    inline static void fastset(register port_ptr_t port, register port_t val) __attribute__ ((always_inline)) { *port = val; }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
     inline static port_t hival() __attribute__ ((always_inline)) { return PORT->Group[_GRP].OUT.reg | _MASK; }
     inline static port_t loval() __attribute__ ((always_inline)) { return PORT->Group[_GRP].OUT.reg & ~_MASK; }
@@ -103,6 +103,27 @@ _FL_DEFPIN(22, 2, 1); _FL_DEFPIN(23, 3, 1);
 _FL_DEFPIN(24, 14, 0); _FL_DEFPIN(25,  13, 0); _FL_DEFPIN(26,  12, 0);
 
 #define SPI_DATA 26
+#define SPI_CLOCK 25
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ADAFRUIT_FEATHER_M4_CAN)
+
+#define MAX_PIN 19
+// D0-D13, including D8 (neopixel)  no pins 2 3
+_FL_DEFPIN( 0, 17, 1); _FL_DEFPIN( 1, 16, 1);
+_FL_DEFPIN( 4, 14, 0); _FL_DEFPIN( 5, 16, 0); _FL_DEFPIN( 6,  18, 0);
+_FL_DEFPIN( 7,  3, 1); _FL_DEFPIN( 8,  2, 1); _FL_DEFPIN( 9, 19, 0); _FL_DEFPIN(10, 20, 0); _FL_DEFPIN(11, 21, 0);
+_FL_DEFPIN(12, 22, 0); _FL_DEFPIN(13, 23, 0);
+// A0-A5
+_FL_DEFPIN(14,  2, 0); _FL_DEFPIN(15,  5, 0); _FL_DEFPIN(16,  8, 1); _FL_DEFPIN(17,  9, 1);
+_FL_DEFPIN(18,  4, 0); _FL_DEFPIN(19,  6, 0); /* A6 is present in variant.h but couldn't find it on the schematic */
+// SDA/SCL
+_FL_DEFPIN(21, 12, 0); _FL_DEFPIN(22, 13, 0);
+// 23..25  MISO/MOSI/SCK
+_FL_DEFPIN(23, 22, 1); _FL_DEFPIN(24,  23, 1); _FL_DEFPIN(25,  17, 0);
+
+#define SPI_DATA 24
 #define SPI_CLOCK 25
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
@@ -175,6 +196,33 @@ _FL_DEFPIN(48,  5, 0); _FL_DEFPIN(49,  4, 0); _FL_DEFPIN(50,  7, 0);
 
 #define SPI_DATA 4
 #define SPI_CLOCK 7
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(ADAFRUIT_GRAND_CENTRAL_M4)
+
+#define MAX_PIN 54
+// D0..D7
+_FL_DEFPIN( 0, 25, 1); _FL_DEFPIN( 1, 24, 1); _FL_DEFPIN( 2, 18, 2); _FL_DEFPIN( 3, 19, 2);
+_FL_DEFPIN( 4, 20, 2); _FL_DEFPIN( 5, 21, 2); _FL_DEFPIN( 6, 20, 3); _FL_DEFPIN( 7, 21, 3);
+// D8..D13
+_FL_DEFPIN( 8, 18, 1); _FL_DEFPIN( 9,  2, 1); _FL_DEFPIN(10, 22, 1);
+_FL_DEFPIN(11, 23, 1); _FL_DEFPIN(12,  0, 1); _FL_DEFPIN(13,  1, 0);
+// D14..D21
+_FL_DEFPIN(14, 16, 1); _FL_DEFPIN(15, 17, 1); _FL_DEFPIN(16, 22, 2); _FL_DEFPIN(17, 23, 2);
+_FL_DEFPIN(18, 12, 1); _FL_DEFPIN(19, 13, 1); _FL_DEFPIN(20, 20, 1); _FL_DEFPIN(21, 21, 1);
+// D22..D53
+_FL_DEFPIN(22, 12, 3); _FL_DEFPIN(23, 15, 0); _FL_DEFPIN(24, 17, 2); _FL_DEFPIN(25, 16, 2);
+_FL_DEFPIN(26, 12, 0); _FL_DEFPIN(27, 13, 0); _FL_DEFPIN(28, 14, 0); _FL_DEFPIN(29, 19, 1);
+_FL_DEFPIN(30, 23, 0); _FL_DEFPIN(31, 22, 0); _FL_DEFPIN(32, 21, 0); _FL_DEFPIN(33, 20, 0);
+_FL_DEFPIN(34, 19, 0); _FL_DEFPIN(35, 18, 0); _FL_DEFPIN(36, 17, 0); _FL_DEFPIN(37, 16, 0);
+_FL_DEFPIN(38, 15, 1); _FL_DEFPIN(39, 14, 1); _FL_DEFPIN(40, 13, 2); _FL_DEFPIN(41, 12, 2);
+_FL_DEFPIN(42, 15, 2); _FL_DEFPIN(43, 14, 2); _FL_DEFPIN(44, 11, 2); _FL_DEFPIN(45, 10, 2);
+_FL_DEFPIN(46,  6, 2); _FL_DEFPIN(47,  7, 2); _FL_DEFPIN(48,  4, 2); _FL_DEFPIN(49,  5, 2);
+_FL_DEFPIN(50, 11, 3); _FL_DEFPIN(51,  8, 3); _FL_DEFPIN(52,  9, 3); _FL_DEFPIN(53, 10, 3);
+
+#define SPI_DATA 51
+#define SPI_CLOCK 52
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 

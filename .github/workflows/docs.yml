@@ -1,0 +1,57 @@
+name: docs
+
+on:
+  workflow_dispatch:
+  release:
+    types: released
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Fetch Repository Reference Info
+        id: repo-info
+        run: |
+          git fetch --prune --unshallow --tags
+          RELEASE_TAG=${{ github.event.release.tag_name }}
+          LATEST_TAG=$(git tag | grep -E '^[0-9]' | sort -V | tail -1)
+          GIT_SHA_SHORT=$(sed 's/\(.\{7\}\).*/\1/' <<< "$GITHUB_SHA")
+          PROJECT_NUMBER=${RELEASE_TAG:-${LATEST_TAG:-$GIT_SHA_SHORT}}
+          COMMIT_MSG=$PROJECT_NUMBER
+          if [ "$PROJECT_NUMBER" != "$GIT_SHA_SHORT" ]; then COMMIT_MSG+=" ($GITHUB_SHA)"; fi
+          echo "The project number is \"$PROJECT_NUMBER\" and the commit message is \"$COMMIT_MSG\""
+          echo "project-number=$PROJECT_NUMBER" >> $GITHUB_OUTPUT
+          echo "commit-message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+
+      - name: Install Doxygen
+        env: 
+          DOXYGEN_VERSION: 1.9.7
+        run: |
+          wget -q https://www.doxygen.nl/files/doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
+          tar -xf doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
+          cd doxygen-${{ env.DOXYGEN_VERSION }} && sudo make install
+
+      - name: Install Themes
+        env:
+          DOXYGEN_AWESOME_VERSION: 2.2.0
+        working-directory: ./docs
+        run: |
+          git clone --depth 1 -b v${{ env.DOXYGEN_AWESOME_VERSION }} https://github.com/jothepro/doxygen-awesome-css
+
+      - name: Generate Docs
+        working-directory: ./docs
+        run: |
+          sed -i -E 's/(PROJECT_NUMBER\s*=\s*).*/\1 ${{ steps.repo-info.outputs.project-number }}/g' Doxyfile
+          doxygen Doxyfile
+
+      - name: Deploy Docs
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./docs/html
+          destination_dir: docs
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          full_commit_message: Update docs for ${{ steps.repo-info.outputs.commit-message }}

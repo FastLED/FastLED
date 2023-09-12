@@ -1,3 +1,7 @@
+/// @file    FirstLight.ino
+/// @brief   Animate a white dot moving along a strip of LEDs
+/// @example FirstLight.ino
+
 // Use if you want to force the software SPI subsystem to be used for some reason (generally, you don't)
 // #define FASTLED_FORCE_SOFTWARE_SPI
 // Use if you want to force non-accelerated pin access (hint: you really don't, it breaks lots of things)

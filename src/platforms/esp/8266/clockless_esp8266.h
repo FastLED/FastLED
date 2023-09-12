@@ -50,11 +50,16 @@ protected:
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
 
-    template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(register uint32_t & last_mark, register uint32_t b)  {
+	template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(FASTLED_REGISTER uint32_t & last_mark, FASTLED_REGISTER uint32_t b)  {
     b <<= 24; b = ~b;
-    for(register uint32_t i = BITS; i > 0; --i) {
-      while((__clock_cycles() - last_mark) < (T1+T2+T3));
-            last_mark = __clock_cycles();
+    for(FASTLED_REGISTER uint32_t i = BITS; i > 0; --i) {
+      while((__clock_cycles() - last_mark) < (T1+T2+T3)) {
+        // the current compiler does like just a ; to end of THIS while loop
+        // although this change make no sense because below are more of the same while loops without
+		    // compiler warning.
+		    ;
+	  }
+	  last_mark = __clock_cycles();
       FastPin<DATA_PIN>::hi();
 
       while((__clock_cycles() - last_mark) < T1);
@@ -77,10 +82,10 @@ protected:
     }
 
 
-	static uint32_t ICACHE_RAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
+	static uint32_t IRAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-        register uint32_t b = pixels.loadAndScale0();
+		FASTLED_REGISTER uint32_t b = pixels.loadAndScale0();
 		pixels.preStepFirstByteDithering();
 		uint32_t start;
 		

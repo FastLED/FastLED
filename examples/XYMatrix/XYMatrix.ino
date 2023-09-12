@@ -1,3 +1,7 @@
+/// @file    XYMatrix.ino
+/// @brief   Demonstrates how to use an XY position helper function with a 2D matrix
+/// @example XYMatrix.ino
+
 #include <FastLED.h>
 
 #define LED_PIN  3

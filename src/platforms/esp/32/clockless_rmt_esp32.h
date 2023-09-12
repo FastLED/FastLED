@@ -169,7 +169,7 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 #if FASTLED_RMT_SERIAL_DEBUG == 1
 #define FASTLED_DEBUG(format, errcode, ...) if (errcode != ESP_OK) { Serial.printf(PSTR("FASTLED: " format "\n"), errcode, ##__VA_ARGS__); }
 #else
-#define FASTLED_DEBUG(format, ...)
+#define FASTLED_DEBUG(format, errcode, ...) (void) errcode;
 #endif
 
 // -- Configuration constants
