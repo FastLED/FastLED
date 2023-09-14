@@ -32,7 +32,6 @@ public:
     virtual int size() { return CLEDController::size() * LANES; }
 
     virtual void showPixels(PixelController<RGB_ORDER, LANES, PORT_MASK> & pixels) {
-        Serial.println("showPixels() - 1");
 	// mWait.wait();
 	/*uint32_t clocks = */
 	int cnt=FASTLED_INTERRUPT_RETRY_COUNT;
@@ -122,8 +121,7 @@ public:
     // This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
     // gcc will use register Y for the this pointer.
     static uint32_t showRGBInternal(PixelController<RGB_ORDER, LANES, PORT_MASK> &allpixels) {
-
-        Serial.println("showRGBInternal");
+	
 	// Setup the pixel controller and load/scale the first byte
 	Lines b0;
 	

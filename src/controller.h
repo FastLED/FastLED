@@ -26,18 +26,17 @@ FASTLED_NAMESPACE_BEGIN
 /// @param X the byte's position in the output (0-2)
 /// @returns the color channel for that byte (0 = red, 1 = green, 2 = blue)
 /// @see EOrder
-#define RGB_BYTE(RO,X) (((RO)>>(3*(3-(X)))) & 0x3)
+#define RGB_BYTE(RO,X) (((RO)>>(3*(2-(X)))) & 0x3)
 
 /// Gets the color channel for byte 0.
 /// @see RGB_BYTE(RO,X)
-#define RGB_BYTE0(RO) ((RO>>9) & 0x3)
+#define RGB_BYTE0(RO) ((RO>>6) & 0x3)
 /// Gets the color channel for byte 1.
 /// @see RGB_BYTE(RO,X)
-#define RGB_BYTE1(RO) ((RO>>6) & 0x3)
+#define RGB_BYTE1(RO) ((RO>>3) & 0x3)
 /// Gets the color channel for byte 2.
 /// @see RGB_BYTE(RO,X)
-#define RGB_BYTE2(RO) ((RO>>3) & 0x3)
-#define RGB_BYTE3(RO) ((RO) & 0x3)
+#define RGB_BYTE2(RO) ((RO) & 0x3)
 
 #define MAX_PIXEL_SIZE 4
 
@@ -65,7 +64,7 @@ class CLEDController {
 protected:
     friend class CFastLED;
     uint8_t *m_Data;           ///< pointer to the LED data used by this controller
-    uint8_t m_pixelSize;
+    uint8_t m_pixelSize = 3;
     CLEDController *m_pNext;   ///< pointer to the next LED controller in the linked list
     CRGB m_ColorCorrection;    ///< CRGB object representing the color correction to apply to the strip on show()  @see setCorrection
     CRGB m_ColorTemperature;   ///< CRGB object representing the color temperature to apply to the strip on show() @see setTemperature
@@ -522,10 +521,12 @@ struct PixelController {
         /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
         /// @param pc reference to the pixel controller
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { int index = RO(SLOT);
-                                                                                                                  Serial.print("loadByte - SLOT: ");
+                                                                                                                  Serial.print("loadByte - ORDER: ");
+                                                                                                                  Serial.print(RGB_ORDER);
+                                                                                                                  Serial.print(", SLOT: ");
                                                                                                                   Serial.print(SLOT);
                                                                                                                   Serial.print(", index: ");
-                                                                                                                  Serial.print(index);
+                                                                                                                  Serial.println(index);
                                                                                                                   return pc.mData[index]; }
 
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
@@ -645,8 +646,6 @@ struct PixelController {
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc advanceAndLoadAndScale0(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc stepAdvanceAndLoadAndScale0(int, uint8_t)
 
-        template<int SLOT>
-        __attribute__((always_inline)) inline uint8_t loadAndScale() { return loadAndScale<SLOT>(*this); }
         __attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }  ///< @copydoc loadAndScale0(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }  ///< @copydoc loadAndScale1(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }  ///< @copydoc loadAndScale2(int, uint8_t)

@@ -42,7 +42,6 @@ protected:
 
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-        Serial.println("showPixels() - 1");
 		mWait.wait();
 		while(pixels.has(1)) {
 			uint8_t r = pixels.loadAndScale0();
@@ -110,7 +109,6 @@ protected:
 
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-        Serial.println("showPixels() - 2");
 		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(pixels);
 	}
 };
@@ -146,7 +144,6 @@ protected:
 
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-        Serial.println("showPixels() - 3");
 		mWaitDelay.wait();
 		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(pixels);
 		mWaitDelay.mark();
@@ -184,7 +181,6 @@ public:
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-        Serial.println("showPixels() - 4");
 		mSPI.select();
 
 		startBoundary();
@@ -251,7 +247,6 @@ public:
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-        Serial.println("showPixels() - 5");
 		mSPI.select();
 
 		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
@@ -317,7 +312,6 @@ public:
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-        Serial.println("showPixels() - 6");
 		mSPI.select();
 
 		uint8_t s0 = pixels.getScale0(), s1 = pixels.getScale1(), s2 = pixels.getScale2();
@@ -380,8 +374,7 @@ public:
 
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-        Serial.println("showPixels() - 7");
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
 
 		writeBoundary();
@@ -440,7 +433,6 @@ public:
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-        Serial.println("showPixels() - 8");
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		// writeHeader();

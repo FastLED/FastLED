@@ -422,18 +422,16 @@ public:
 	/// Add a 3rd party library based CLEDController instance to the world.
 	template<template<EOrder RGB_ORDER> class CHIPSET, EOrder RGB_ORDER>
 	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-        Serial.println("addLeds<>() - CRGB");
 		static CHIPSET<RGB_ORDER> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add a 3rd party library based CLEDController instance to the world.
 	template<template<EOrder RGB_ORDER> class CHIPSET>
-    static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-        Serial.println("addLeds<>() - CRGB");
+	static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<RGB> c;
-        return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
-    }
+		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+	}
 
 #ifdef USE_OCTOWS2811
 	/// Add a OCTOWS2811 based CLEDController instance to the world.
@@ -596,7 +594,7 @@ public:
 	/// Set all leds on all controllers to the given color/scale.
 	/// @param color what color to set the leds to
 	/// @param scale what brightness scale to show at
-    void showColor(const struct CRGB & color, uint8_t scale);
+	void showColor(const struct CRGB & color, uint8_t scale);
 
 	/// Set all leds on all controllers to the given color
 	/// @param color what color to set the leds to

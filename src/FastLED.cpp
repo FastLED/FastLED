@@ -42,9 +42,10 @@ CFastLED::CFastLED() {
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
 								  struct CRGB *data,
                                   int nLedsOrOffset, int nLedsIfOffset) {
-    Serial.println("addLeds() - CRGB");
 	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 	int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
+    Serial.print("addLeds() - CRGB - nLeds: ");
+    Serial.println(nLeds);
 
 	pLed->init();
 	pLed->setLeds(data + nOffset, nLeds);
