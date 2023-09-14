@@ -247,6 +247,8 @@ public:
 	/// @returns a reference to the added controller
 	static CLEDController &addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
 
+    static CLEDController &addLeds(CLEDController *pLed, struct CRGBW *data, int nLedsOrOffset, int nLedsIfOffset = 0);
+
 	/// @name Adding SPI-based controllers
 	/// Add an SPI based CLEDController instance to the world.
 	///
@@ -356,6 +358,11 @@ public:
 		static CHIPSET<DATA_PIN, RGB_ORDER> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
+    template<template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, EOrder RGB_ORDER>
+    static CLEDController &addLeds(struct CRGBW *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+        static CHIPSET<DATA_PIN, RGB_ORDER> c;
+        return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+    }
 
 	/// Add a clockless based CLEDController instance to the world.
 	template<template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN>
@@ -647,7 +654,7 @@ public:
 
 	/// Get a pointer to led data for the first controller
 	/// @returns pointer to the CRGB buffer for the first controller
-	CRGB *leds() { return (*this)[0].leds(); }
+    uint8_t *leds() { return (*this)[0].leds(); }
 };
 
 /// Alias of the FastLED instance for legacy purposes

@@ -38,6 +38,8 @@ FASTLED_NAMESPACE_BEGIN
 /// @see RGB_BYTE(RO,X)
 #define RGB_BYTE2(RO) ((RO) & 0x3)
 
+#define MAX_PIXEL_SIZE 4
+
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
 /// Disable dithering
@@ -61,7 +63,8 @@ typedef uint8_t EDitherMode;
 class CLEDController {
 protected:
     friend class CFastLED;
-    CRGB *m_Data;              ///< pointer to the LED data used by this controller
+    uint8_t *m_Data;           ///< pointer to the LED data used by this controller
+    uint8_t m_pixelSize = 3;
     CLEDController *m_pNext;   ///< pointer to the next LED controller in the linked list
     CRGB m_ColorCorrection;    ///< CRGB object representing the color correction to apply to the strip on show()  @see setCorrection
     CRGB m_ColorTemperature;   ///< CRGB object representing the color temperature to apply to the strip on show() @see setTemperature
@@ -80,10 +83,10 @@ protected:
     /// @param data the rgb data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale the rgb scaling to apply to each led before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
+    virtual void show(const uint8_t *data, int pixelSize, int nLeds, CRGB scale) = 0;
 
 public:
-    /// Create an led controller object, add it to the chain of controllers
+	/// create an led controller object, add it to the chain of controllers
     CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
         m_pNext = NULL;
         if(m_pHead==NULL) { m_pHead = this; }
@@ -105,8 +108,9 @@ public:
     /// @param nLeds the number of LEDs in the data array
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, CRGB)
-    void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
-        show(data, nLeds, getAdjustment(brightness));
+    void show(const uint8_t *data, int pixelSize, int nLeds, uint8_t brightness) {
+        Serial.println("CLEDController::show");
+        show(data, pixelSize, nLeds, getAdjustment(brightness));
     }
 
     /// @copybrief showColor(const struct CRGB&, int, CRGB)
@@ -124,7 +128,9 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, uint8_t)
     void showLeds(uint8_t brightness=255) {
-        show(m_Data, m_nLeds, getAdjustment(brightness));
+        Serial.print("showLeds() - brightness: ");
+//        Serial.println(brightness);
+        show(m_Data, m_pixelSize, m_nLeds, getAdjustment(brightness));
     }
 
     /// @copybrief showColor(const struct CRGB&, int, CRGB)
@@ -148,7 +154,16 @@ public:
     /// @param data pointer to the LED data
     /// @param nLeds the number of LEDs in the LED data
     CLEDController & setLeds(CRGB *data, int nLeds) {
-        m_Data = data;
+        m_Data = (uint8_t*)data;
+        m_pixelSize = 3;
+        m_nLeds = nLeds;
+        return *this;
+    }
+
+    /// set the default array of leds to be used by this controller
+    CLEDController & setLeds(CRGBW *data, int nLeds) {
+        m_Data = (uint8_t*)data;
+        m_pixelSize = 4;
         m_nLeds = nLeds;
         return *this;
     }
@@ -170,14 +185,17 @@ public:
 
     /// Pointer to the CRGB array for this controller
     /// @returns CLEDController::m_Data
-    CRGB* leds() { return m_Data; }
+    uint8_t* leds() { return m_Data; }
+
+    /// Pointer to the CRGB array for this controller
+    uint8_t pixelSize() { return m_pixelSize; }
 
     /// Reference to the n'th LED managed by the controller
     /// @param x the LED number to retrieve
     /// @returns reference to CLEDController::m_Data[x]
-    CRGB &operator[](int x) { return m_Data[x]; }
+    CRGB &operator[](int x) { return *(CRGB*)(m_Data[x * m_pixelSize]); }
 
-    /// Set the dithering mode for this controller to use
+	/// set the dithering mode for this controller to use
     /// @param ditherMode the dithering mode to set
     /// @returns a reference to the controller
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
@@ -257,14 +275,15 @@ public:
 /// @tparam MASK bitmask for the output lanes
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF>
 struct PixelController {
-        const uint8_t *mData;    ///< pointer to the underlying LED data
-        int mLen;                ///< number of LEDs in the data for one lane
-        int mLenRemaining;       ///< counter for the number of LEDs left to process
-        uint8_t d[3];            ///< values for the scaled dither signal @see init_binary_dithering()
-        uint8_t e[3];            ///< values for the scaled dither signal @see init_binary_dithering()
-        CRGB mScale;             ///< the per-channel scale values, provided by a color correction function such as CLEDController::computeAdjustment()
-        int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
-        int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
+        const uint8_t *mData;           ///< pointer to the underlying LED data
+        int mPixelSize;
+		int mLen;                       ///< number of LEDs in the data for one lane
+		int mLenRemaining;              ///< counter for the number of LEDs left to process
+        uint8_t d[MAX_PIXEL_SIZE];      ///< values for the scaled dither signal @see init_binary_dithering()
+        uint8_t e[MAX_PIXEL_SIZE];      ///< values for the scaled dither signal @see init_binary_dithering()
+        uint    mScale[MAX_PIXEL_SIZE]; ///< the per-channel scale values, provided by a color correction function such as CLEDController::computeAdjustment()
+        int8_t mAdvance;                ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
+        int mOffsets[LANES];            ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
 
         /// Copy constructor
         /// @param other the object to copy 
@@ -272,11 +291,17 @@ struct PixelController {
             d[0] = other.d[0];
             d[1] = other.d[1];
             d[2] = other.d[2];
+            d[3] = other.d[3];
             e[0] = other.e[0];
             e[1] = other.e[1];
             e[2] = other.e[2];
+            e[3] = other.e[3];
+            mScale[0] = other.mScale[0];
+            mScale[1] = other.mScale[1];
+            mScale[2] = other.mScale[2];
+            mScale[3] = other.mScale[3];
             mData = other.mData;
-            mScale = other.mScale;
+            mPixelSize = other.mPixelSize;
             mAdvance = other.mAdvance;
             mLenRemaining = mLen = other.mLen;
             for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
@@ -299,10 +324,14 @@ struct PixelController {
         /// @param dither dither setting for the LEDs
         /// @param advance whether the pointer (d) should advance per LED
         /// @param skip if the pointer is advancing, how many bytes to skip in addition to 3
-        PixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(const uint8_t *d, int pixelSize, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len) {
             enable_dithering(dither);
+            mScale[0] = s.r;
+            mScale[1] = s.g;
+            mScale[2] = s.b;
             mData += skip;
-            mAdvance = (advance) ? 3+skip : 0;
+            mPixelSize = pixelSize;
+            mAdvance = (advance) ? pixelSize+skip : 0;
             initOffsets(len);
         }
 
@@ -311,8 +340,12 @@ struct PixelController {
         /// @param len length of the LED data
         /// @param s LED scale values, as CRGB struct
         /// @param dither dither setting for the LEDs
-        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len) {
             enable_dithering(dither);
+            mScale[0] = s.r;
+            mScale[1] = s.g;
+            mScale[2] = s.b;
+            mPixelSize = 3;
             mAdvance = 3;
             initOffsets(len);
         }
@@ -322,8 +355,12 @@ struct PixelController {
         /// @param len length of the LED data
         /// @param s LED scale values, as CRGB struct
         /// @param dither dither setting for the LEDs
-        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len) {
             enable_dithering(dither);
+            mScale[0] = s.r;
+            mScale[1] = s.g;
+            mScale[2] = s.b;
+            mPixelSize = 3;
             mAdvance = 0;
             initOffsets(len);
         }
@@ -410,8 +447,8 @@ struct PixelController {
             // actual dithering.
 
             // Setup the initial D and E values
-            for(int i = 0; i < 3; ++i) {
-                    uint8_t s = mScale.raw[i];
+            for(int i = 0; i < MAX_PIXEL_SIZE; ++i) {
+                    uint8_t s = mScale[i];
                     e[i] = s ? (256/s) + 1 : 0;
                     d[i] = scale8(Q, e[i]);
 #if (FASTLED_SCALE8_FIXED == 1)
@@ -420,6 +457,10 @@ struct PixelController {
                     if(e[i]) --e[i];
             }
 #endif
+        }
+
+        __attribute__((always_inline)) inline uint8_t pixelSize() const {
+            return mPixelSize;
         }
 
         /// Do we have n pixels left to process?
@@ -437,7 +478,7 @@ struct PixelController {
         void enable_dithering(EDitherMode dither) {
             switch(dither) {
                 case BINARY_DITHER: init_binary_dithering(); break;
-                default: d[0]=d[1]=d[2]=e[0]=e[1]=e[2]=0; break;
+                default: d[0]=d[1]=d[2]=d[3]=e[0]=e[1]=e[2]=e[3]=0; break;
             }
         }
 
@@ -464,6 +505,7 @@ struct PixelController {
                 d[0] = e[0] - d[0];
                 d[1] = e[1] - d[1];
                 d[2] = e[2] - d[2];
+                d[3] = e[3] - d[3];
         }
 
         /// Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately
@@ -478,11 +520,15 @@ struct PixelController {
         /// Read a byte of LED data
         /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
         /// @param pc reference to the pixel controller
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { return pc.mData[RO(SLOT)]; }
-        /// Read a byte of LED data for parallel output
-        /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
-        /// @param pc reference to the pixel controller
-        /// @param lane the parallel output lane to read the byte for
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc) { int index = RO(SLOT);
+                                                                                                                  Serial.print("loadByte - ORDER: ");
+                                                                                                                  Serial.print(RGB_ORDER);
+                                                                                                                  Serial.print(", SLOT: ");
+                                                                                                                  Serial.print(SLOT);
+                                                                                                                  Serial.print(", index: ");
+                                                                                                                  Serial.println(index);
+                                                                                                                  return pc.mData[index]; }
+
         template<int SLOT>  __attribute__((always_inline)) inline static uint8_t loadByte(PixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
 
         /// Calculate a dither value using the per-channel dither data
@@ -502,8 +548,8 @@ struct PixelController {
         /// @param pc reference to the pixel controller
         /// @param b the color byte to scale
         /// @see PixelController::mScale
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
-        /// Scale a value
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t scale(PixelController & pc, uint8_t b) { uint8_t scaleOut(scale8(b, pc.mScale[RO(SLOT)]));
+                                                                                                                          return scaleOut; }
         /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
         /// @param b the byte to scale
         /// @param scale the scale value
@@ -578,7 +624,7 @@ struct PixelController {
         /// @param pc reference to the pixel controller
         /// @returns scale data for the given channel
         /// @see PixelController::mScale
-        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t getscale(PixelController & pc) { return pc.mScale.raw[RO(SLOT)]; }
+        template<int SLOT>  __attribute__((always_inline)) inline static uint8_t getscale(PixelController & pc) { return pc.mScale[RO(SLOT)]; }
 
         /// @} Data retrieval functions
 
@@ -589,24 +635,28 @@ struct PixelController {
         __attribute__((always_inline)) inline uint8_t loadAndScale0(int lane, uint8_t scale) { return loadAndScale<0>(*this, lane, scale); }  ///< non-template alias of loadAndScale<0>()
         __attribute__((always_inline)) inline uint8_t loadAndScale1(int lane, uint8_t scale) { return loadAndScale<1>(*this, lane, scale); }  ///< non-template alias of loadAndScale<1>()
         __attribute__((always_inline)) inline uint8_t loadAndScale2(int lane, uint8_t scale) { return loadAndScale<2>(*this, lane, scale); }  ///< non-template alias of loadAndScale<2>()
+        __attribute__((always_inline)) inline uint8_t loadAndScale3(int lane, uint8_t scale) { return loadAndScale<3>(*this, lane, scale); }
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane, uint8_t scale) { return advanceAndLoadAndScale<0>(*this, lane, scale); }  ///< non-template alias of advanceAndLoadAndScale<0>()
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane, uint8_t scale) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane, scale); }  ///< stepDithering() and advanceAndLoadAndScale0()
 
         __attribute__((always_inline)) inline uint8_t loadAndScale0(int lane) { return loadAndScale<0>(*this, lane); }  ///< @copydoc loadAndScale0(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t loadAndScale1(int lane) { return loadAndScale<1>(*this, lane); }  ///< @copydoc loadAndScale1(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t loadAndScale2(int lane) { return loadAndScale<2>(*this, lane); }  ///< @copydoc loadAndScale2(int, uint8_t)
+        __attribute__((always_inline)) inline uint8_t loadAndScale3(int lane) { return loadAndScale<3>(*this, lane); }
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc advanceAndLoadAndScale0(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc stepAdvanceAndLoadAndScale0(int, uint8_t)
 
         __attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }  ///< @copydoc loadAndScale0(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }  ///< @copydoc loadAndScale1(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }  ///< @copydoc loadAndScale2(int, uint8_t)
+        __attribute__((always_inline)) inline uint8_t loadAndScale3() { return loadAndScale<3>(*this); }
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0() { return advanceAndLoadAndScale<0>(*this); }  ///< @copydoc advanceAndLoadAndScale0(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0() { stepDithering(); return advanceAndLoadAndScale<0>(*this); }  ///< @copydoc stepAdvanceAndLoadAndScale0(int, uint8_t)
 
         __attribute__((always_inline)) inline uint8_t getScale0() { return getscale<0>(*this); }  ///< non-template alias of getscale<0>()
         __attribute__((always_inline)) inline uint8_t getScale1() { return getscale<1>(*this); }  ///< non-template alias of getscale<1>()
         __attribute__((always_inline)) inline uint8_t getScale2() { return getscale<2>(*this); }  ///< non-template alias of getscale<2>()
+        __attribute__((always_inline)) inline uint8_t getScale3() { return getscale<3>(*this); }
 };
 
 /// Template extension of the CLEDController class
@@ -632,8 +682,15 @@ protected:
     /// @param data the RGB data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale the RGB scaling to apply to each LED before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds < 0 ? -nLeds : nLeds, scale, getDither());
+    virtual void show(const uint8_t* data, int pixelSize, int nLeds, CRGB scale) {
+        // Serial.print("scale - R: ");
+        // Serial.print(scale.r);
+        // Serial.print(", G: ");
+        // Serial.print(scale.g);
+        // Serial.print(", B: ");
+        // Serial.println(scale.b);
+
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, pixelSize, nLeds < 0 ? -nLeds : nLeds, scale, getDither());
         if(nLeds < 0) {
             // nLeds < 0 implies that we want to show them in reverse
             pixels.mAdvance = -pixels.mAdvance;

@@ -35,54 +35,56 @@ public:
 
 protected:
 
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-    mWait.wait();
-		int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
-    while((showRGBInternal(pixels)==0) && cnt--) {
-      #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
-      ++_retry_cnt;
-      #endif
-      delayMicroseconds(WAIT_TIME);
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+        mWait.wait();
+        int cnt = FASTLED_INTERRUPT_RETRY_COUNT;
+        while((showRGBInternal(pixels)==0) && cnt--) {
+            #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
+            ++_retry_cnt;
+            #endif
+            delayMicroseconds(WAIT_TIME);
+        }
+        mWait.mark();
     }
-    mWait.mark();
-  }
 
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
 
-	template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(FASTLED_REGISTER uint32_t & last_mark, FASTLED_REGISTER uint32_t b)  {
-    b <<= 24; b = ~b;
-    for(FASTLED_REGISTER uint32_t i = BITS; i > 0; --i) {
-      while((__clock_cycles() - last_mark) < (T1+T2+T3)) {
-        // the current compiler does like just a ; to end of THIS while loop
-        // although this change make no sense because below are more of the same while loops without
-		    // compiler warning.
-		    ;
-	  }
-	  last_mark = __clock_cycles();
-      FastPin<DATA_PIN>::hi();
+    template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(FASTLED_REGISTER uint32_t & last_mark, FASTLED_REGISTER uint32_t b) {
+        b <<= 24; b = ~b;
+        for(FASTLED_REGISTER uint32_t i = BITS; i > 0; --i) {
+            while((__clock_cycles() - last_mark) < (T1+T2+T3)) {
+            // the current compiler does like just a ; to end of THIS while loop
+            // although this change make no sense because below are more of the same while loops without
+                // compiler warning.
+                ;
+            }
+            last_mark = __clock_cycles();
+            FastPin<DATA_PIN>::hi();
 
-      while((__clock_cycles() - last_mark) < T1);
-      if(b & 0x80000000L) { FastPin<DATA_PIN>::lo(); }
-      b <<= 1;
+            while((__clock_cycles() - last_mark) < T1);
+            if(b & 0x80000000L) { FastPin<DATA_PIN>::lo(); }
+            b <<= 1;
 
-      while((__clock_cycles() - last_mark) < (T1+T2));
-      FastPin<DATA_PIN>::lo();
+            while((__clock_cycles() - last_mark) < (T1+T2));
+            FastPin<DATA_PIN>::lo();
 
-			// even with interrupts disabled, the NMI interupt seems to cause
-			// timing issues here. abort the frame if one bit took to long. if the
-			// last of the 24 bits has been sent already, it is too late
-			// this fixes the flickering first pixel that started to occur with
-			// framework version 3.0.0
-			if ((__clock_cycles() - last_mark) >= (T1 + T2 + T3 - 5)) {
-				return true;
-			}
-		}
+                // even with interrupts disabled, the NMI interupt seems to cause
+                // timing issues here. abort the frame if one bit took to long. if the
+                // last of the 24 bits has been sent already, it is too late
+                // this fixes the flickering first pixel that started to occur with
+                // framework version 3.0.0
+                if ((__clock_cycles() - last_mark) >= (T1 + T2 + T3 - 5)) {
+                    return true;
+                }
+            }
 		return false;
 	}
 
 
 	static uint32_t IRAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
+        Serial.println("showRGBInternal");
+
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
 		FASTLED_REGISTER uint32_t b = pixels.loadAndScale0();
@@ -116,20 +118,34 @@ protected:
 			while(pixels.has(1)) {
 				// Write first byte, read next byte
 				if (writeBits<8+XTRA0>(last_mark, b)) {
+                    Serial.println("showRGBInternal - 1");
 					return 0;
 				}
 				b = pixels.loadAndScale1();
 
 				// Write second byte, read 3rd byte
 				if (writeBits<8+XTRA0>(last_mark, b)) {
+                    Serial.println("showRGBInternal - 2");
 					return 0;
 				}
 				b = pixels.loadAndScale2();
 
 				// Write third byte, read 1st byte of next pixel
 				if (writeBits<8+XTRA0>(last_mark, b)) {
+                    Serial.println("showRGBInternal - 3");
 					return 0;
 				}
+
+                if( pixels.pixelSize() == 4 )
+                {
+                    b = pixels.loadAndScale3();
+
+                    // Write third byte, read 1st byte of next pixel
+                    if (writeBits<8+XTRA0>(last_mark, b)) {
+                        Serial.println("showRGBInternal - 4");
+                        return 0;
+                    }
+                }
 
 				#if (FASTLED_ALLOW_INTERRUPTS == 1)
 				intlock.Unlock();
@@ -143,6 +159,7 @@ protected:
 				// if interrupts took longer than 45µs, punt on the current frame
 				if((int32_t)(__clock_cycles()-last_mark) > 0) {
 					if((int32_t)(__clock_cycles()-last_mark) > (T1+T2+T3+((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US))) {
+                        Serial.println("showRGBInternal - 5");
 						return 0;
 					}
 				}

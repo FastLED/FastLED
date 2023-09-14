@@ -29,6 +29,16 @@ void fill_solid( struct CRGB * targetArray, int numToFill,
 void fill_solid( struct CHSV* targetArray, int numToFill,
 				 const struct CHSV& color);
 
+/// fill_solid -   fill a range of LEDs with a solid color
+///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
+void fill_solid(uint8_t* targetArray, uint8_t pixelSize, int numToFill,
+                 const struct CRGB& colour);
+
+/// fill_solid -   fill a range of LEDs with a solid color
+///                Example: fill_solid( leds, NUM_LEDS, CRGB(50,0,200));
+void fill_solid(uint8_t* targetArray, uint8_t pixelSize, int numToFill,
+                 const struct CRGBW& colour);
+
 
 /// Fill a range of LEDs with a rainbow of colors. 
 /// The colors making up the rainbow are at full saturation and full
