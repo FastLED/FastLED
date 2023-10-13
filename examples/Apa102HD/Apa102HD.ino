@@ -1,21 +1,38 @@
 /// @file    Apa102HD.ino
 /// @brief   Example showing how to use the APA102HD gamma correction.
 ///
-///          We will draw a linear ramp between APA102HD which does it's
-///          own gamma correction at the driver level, and the software
-///          version of gamma correction, which used to be the status quo.
+///          In this example we compare two strips of LEDs.
+///          One strip is in HD mode, the other is in software gamma mode.
 ///
-///          Why do we love gamma correction? It produces a better picture
-///          that matches how our eye sees light. It's the standard lighting
-///          method for your monitor or TVs for example and gives these
-///          devices the range to produce very bright and very dim lights.
-/// @example Apa102HD.ino
+///          Each strip is a linear ramp of brightnesses, from 0 to 255.
+///          Showcasing all the different brightnesses.
+///
+///          Why do we love gamma correction? Gamma correction more closely
+///          matches how humans see light. Led values are measured in fractions
+///          of max power output (1/255, 2/255, etc.), while humans see light
+///          in a logarithmic way. Gamma correction converts to this eye friendly
+///          curve. Gamma correction wants a LED with a high bit depth. The APA102
+///          gives us the standard 3 components (red, green, blue) with 8 bits each, it
+///          *also* has a 5 bit brightness component. This gives us a total of 13 bits,
+///          which allows us to achieve a higher dynamic range. This means deeper fades.
+///
+///          Example:
+///            CRGB leds[NUM_LEDS] = {0};
+///            void setup() {
+///              FastLED.addLeds<
+///                APA102HD, // <--- This selects HD mode.
+///                STRIP_0_DATA_PIN,
+///                STRIP_0_CLOCK_PIN,
+///                RGB
+///              >(leds, NUM_LEDS);
+///            }
+
 
 #include <Arduino.h>
 #include <FastLED.h>
 #include <lib8tion.h>
 
-#define NUM_LEDS  256
+#define NUM_LEDS  20
 // uint8_t DATA_PIN, uint8_t CLOCK_PIN,
 #define STRIP_0_DATA_PIN 1
 #define STRIP_0_CLOCK_PIN 2
@@ -54,15 +71,12 @@ uint8_t wrap_8bit(int i) {
 }
 
 void loop() {
-    // Draw a a linear ramp of brightnesses, showcasing the difference
-    // between the two gamma correction modes. APA102HD should have far
-    // greater range of brightnesses. Gamma correction mode in software
-    // will have about 25% of the dimmest lights truncated to 0 brightness!
+    // Draw a a linear ramp of brightnesses to showcase the difference between
+    // the HD and non-HD mode.
     for (int i = 0; i < NUM_LEDS; i++) {
-        // Make sure the i value is always in 8 bit range.
-        uint8_t brightness = wrap_8bit(i);
+        uint8_t brightness = map(i, 0, NUM_LEDS - 1, 0, 255);
         CRGB c(brightness, brightness, brightness);  // Just make a shade of white.
-        leds_hd[i] = c;  // The APA102HD leds are set to ungamma corrected values.
+        leds_hd[i] = c;  // The APA102HD leds do their own gamma correction.
         CRGB c_gamma_corrected = software_gamma(c);
         leds[i] = c_gamma_corrected;  // Set the software gamma corrected
                                       // values to the other strip.
