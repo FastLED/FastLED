@@ -33,7 +33,7 @@ void five_bit_hd_gamma_bitshift(
     // Note: we only get 5 levels of brightness
     uint8_t v8 = 31;
 
-    uint16_t nominator = 1;
+    uint16_t numerator = 1;
     uint16_t denominator = 1;
     const uint32_t r16_const = r16;
     const uint32_t g16_const = g16;
@@ -54,7 +54,7 @@ void five_bit_hd_gamma_bitshift(
         if (b16_const * 31 > max_value) {
           break;
         }
-        nominator = 31;
+        numerator = 31;
         denominator = 15;
         v8 = 15;
 
@@ -68,7 +68,7 @@ void five_bit_hd_gamma_bitshift(
         if (b16_const * 31 * 15 > max_value) {
           break;
         }
-        nominator = 31 * 15;
+        numerator = 31 * 15;
         denominator = 15 * 7;
         v8 = 7;
 
@@ -82,7 +82,7 @@ void five_bit_hd_gamma_bitshift(
         if (b16_const * 31 * 15 * 7 > max_value) {
           break;
         }
-        nominator = 31 * 15 * 7;
+        numerator = 31 * 15 * 7;
         denominator = 15 * 7 * 3;
         v8 = 3;
 
@@ -96,13 +96,13 @@ void five_bit_hd_gamma_bitshift(
         if (b16_const * 31 * 15 * 7 * 3 > max_value) {
           break;
         }
-        nominator = 31 * 15 * 7 * 3;
+        numerator = 31 * 15 * 7 * 3;
         v8 = 1;
     } while(false);
 
-    r16 = uint16_t(r16_const * nominator / denominator);
-    g16 = uint16_t(g16_const * nominator / denominator);
-    b16 = uint16_t(b16_const * nominator / denominator);
+    r16 = uint16_t(r16_const * numerator / denominator);
+    g16 = uint16_t(g16_const * numerator / denominator);
+    b16 = uint16_t(b16_const * numerator / denominator);
 
     // Step 4: Conversion Back to 8-bit.
     uint8_t r8_final = (r8 == 255 && uint8_t(r16 >> 8) >= 254) ? 255 : uint8_t(r16 >> 8);
