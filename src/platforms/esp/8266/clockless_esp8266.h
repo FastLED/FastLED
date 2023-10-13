@@ -54,19 +54,20 @@ protected:
     b <<= 24; b = ~b;
     for(FASTLED_REGISTER uint32_t i = BITS; i > 0; --i) {
       while((__clock_cycles() - last_mark) < (T1+T2+T3)) {
-        // the current compiler does like just a ; to end of THIS while loop
-        // although this change make no sense because below are more of the same while loops without
-		    // compiler warning.
-		    ;
-	  }
-	  last_mark = __clock_cycles();
+            ;
+      }
+      last_mark = __clock_cycles();
       FastPin<DATA_PIN>::hi();
 
-      while((__clock_cycles() - last_mark) < T1);
+      while((__clock_cycles() - last_mark) < T1) {
+            ;
+      }
       if(b & 0x80000000L) { FastPin<DATA_PIN>::lo(); }
       b <<= 1;
 
-      while((__clock_cycles() - last_mark) < (T1+T2));
+      while((__clock_cycles() - last_mark) < (T1+T2)) {
+            ;
+      }
       FastPin<DATA_PIN>::lo();
 
 			// even with interrupts disabled, the NMI interupt seems to cause
