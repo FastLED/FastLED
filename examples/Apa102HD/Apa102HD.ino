@@ -27,6 +27,7 @@ void setup() {
     delay(500); // power-up safety delay
     FastLED.addLeds<APA102HD, 1, 2, RGB>(leds_hd, NUM_LEDS);
     FastLED.addLeds<APA102, 3, 4, RGB>(leds, NUM_LEDS);
+    FastLED.addLeds<DOTSTARHD, 1, 2, RGB>(leds_hd, NUM_LEDS);  // compile test.
 }
 
 void loop() {
