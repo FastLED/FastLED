@@ -192,10 +192,10 @@ struct CRGB {
     }
 
     /// Allow copy construction
-    constexpr CRGB(const CRGB& rhs) __attribute__((always_inline)) = default;
+    inline CRGB(const CRGB& rhs) __attribute__((always_inline)) = default;
 
     /// Allow construction from a CHSV color
-    constexpr CRGB(const CHSV& rhs) __attribute__((always_inline))
+    inline CRGB(const CHSV& rhs) __attribute__((always_inline))
     {
         hsv2rgb_rainbow( rhs, *this);
     }
