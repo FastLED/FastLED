@@ -28,28 +28,28 @@ struct CHSV {
     union {
         struct {
             union {
-                /// Color hue.
+                /// Color hue. 
                 /// This is an 8-bit value representing an angle around
                 /// the color wheel. Where 0 is 0°, and 255 is 358°.
                 uint8_t hue;
                 uint8_t h;  ///< @copydoc hue
             };
             union {
-                /// Color saturation.
+                /// Color saturation. 
                 /// This is an 8-bit value representing a percentage.
                 uint8_t saturation;
                 uint8_t sat;  ///< @copydoc saturation
                 uint8_t s;    ///< @copydoc saturation
             };
             union {
-                /// Color value (brightness).
+                /// Color value (brightness). 
                 /// This is an 8-bit value representing a percentage.
                 uint8_t value;
                 uint8_t val;  ///< @copydoc value
                 uint8_t v;    ///< @copydoc value
             };
         };
-        /// Access the hue, saturation, and value data as an array.
+        /// Access the hue, saturation, and value data as an array. 
         /// Where:
         /// * `raw[0]` is the hue
         /// * `raw[1]` is the saturation
@@ -60,42 +60,42 @@ struct CHSV {
     /// Array access operator to index into the CHSV object
     /// @param x the index to retrieve (0-2)
     /// @returns the CHSV::raw value for the given index
-    constexpr uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
+    inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
     {
         return raw[x];
     }
 
     /// @copydoc operator[]
-    constexpr const uint8_t& operator[] (uint8_t x) const __attribute__((always_inline))
+    inline const uint8_t& operator[] (uint8_t x) const __attribute__((always_inline))
     {
         return raw[x];
     }
 
     /// Default constructor
     /// @warning Default values are UNITIALIZED!
-    constexpr CHSV() __attribute__((always_inline)) = default;
+    inline CHSV() __attribute__((always_inline)) = default;
 
     /// Allow construction from hue, saturation, and value
     /// @param ih input hue
     /// @param is input saturation
     /// @param iv input value
-    constexpr CHSV( uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
+    inline CHSV( uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
         : h(ih), s(is), v(iv)
     {
     }
 
     /// Allow copy construction
-    constexpr CHSV(const CHSV& rhs) __attribute__((always_inline)) = default;
+    inline CHSV(const CHSV& rhs) __attribute__((always_inline)) = default;
 
     /// Allow copy construction
-    constexpr CHSV& operator= (const CHSV& rhs) __attribute__((always_inline)) = default;
+    inline CHSV& operator= (const CHSV& rhs) __attribute__((always_inline)) = default;
 
     /// Assign new HSV values
     /// @param ih input hue
     /// @param is input saturation
     /// @param iv input value
     /// @returns reference to the CHSV object
-    constexpr CHSV& setHSV(uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
+    inline CHSV& setHSV(uint8_t ih, uint8_t is, uint8_t iv) __attribute__((always_inline))
     {
         h = ih;
         s = is;
@@ -133,7 +133,7 @@ struct CRGB {
                 uint8_t blue;  ///< @copydoc b
             };
         };
-        /// Access the red, green, and blue data as an array.
+        /// Access the red, green, and blue data as an array. 
         /// Where:
         /// * `raw[0]` is the red value
         /// * `raw[1]` is the green value
@@ -144,7 +144,7 @@ struct CRGB {
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
     /// @returns the CRGB::raw value for the given index
-    constexpr uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
+    inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
     {
         return raw[x];
     }
@@ -152,34 +152,34 @@ struct CRGB {
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
     /// @returns the CRGB::raw value for the given index
-    constexpr const uint8_t& operator[] (uint8_t x) const __attribute__((always_inline))
+    inline const uint8_t& operator[] (uint8_t x) const __attribute__((always_inline))
     {
         return raw[x];
     }
 
     /// Default constructor
     /// @warning Default values are UNITIALIZED!
-    constexpr CRGB() __attribute__((always_inline)) = default;
+    inline CRGB() __attribute__((always_inline)) = default;
 
     /// Allow construction from red, green, and blue
     /// @param ir input red value
     /// @param ig input green value
     /// @param ib input blue value
-    constexpr CRGB(uint8_t ir, uint8_t ig, uint8_t ib)  __attribute__((always_inline))
+    inline CRGB( uint8_t ir, uint8_t ig, uint8_t ib)  __attribute__((always_inline))
         : r(ir), g(ig), b(ib)
     {
     }
 
     /// Allow construction from 32-bit (really 24-bit) bit 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    constexpr CRGB(uint32_t colorcode)  __attribute__((always_inline))
+    inline CRGB( uint32_t colorcode)  __attribute__((always_inline))
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
 
     /// Allow construction from a LEDColorCorrection enum
     /// @param colorcode an LEDColorCorrect enumeration value
-    constexpr CRGB(LEDColorCorrection colorcode) __attribute__((always_inline))
+    inline CRGB( LEDColorCorrection colorcode) __attribute__((always_inline))
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
 
@@ -187,27 +187,27 @@ struct CRGB {
 
     /// Allow construction from a ColorTemperature enum
     /// @param colorcode an ColorTemperature enumeration value
-    constexpr CRGB(ColorTemperature colorcode) __attribute__((always_inline))
+    inline CRGB( ColorTemperature colorcode) __attribute__((always_inline))
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
 
     }
 
     /// Allow copy construction
-    constexpr CRGB(const CRGB& rhs) __attribute__((always_inline)) = default;
+    inline CRGB(const CRGB& rhs) __attribute__((always_inline)) = default;
 
     /// Allow construction from a CHSV color
-    constexpr CRGB(const CHSV& rhs) __attribute__((always_inline))
+    inline CRGB(const CHSV& rhs) __attribute__((always_inline))
     {
         hsv2rgb_rainbow( rhs, *this);
     }
 
     /// Allow assignment from one RGB struct to another
-    constexpr CRGB& operator= (const CRGB& rhs) __attribute__((always_inline)) = default;
+    inline CRGB& operator= (const CRGB& rhs) __attribute__((always_inline)) = default;
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    constexpr CRGB& operator= (const uint32_t colorcode) __attribute__((always_inline))
+    inline CRGB& operator= (const uint32_t colorcode) __attribute__((always_inline))
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -219,7 +219,7 @@ struct CRGB {
     /// @param nr new red value
     /// @param ng new green value
     /// @param nb new blue value
-    constexpr CRGB& setRGB (uint8_t nr, uint8_t ng, uint8_t nb) __attribute__((always_inline))
+    inline CRGB& setRGB (uint8_t nr, uint8_t ng, uint8_t nb) __attribute__((always_inline))
     {
         r = nr;
         g = ng;
@@ -231,23 +231,23 @@ struct CRGB {
     /// @param hue color hue
     /// @param sat color saturation
     /// @param val color value (brightness)
-    constexpr CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val) __attribute__((always_inline))
+    inline CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val) __attribute__((always_inline))
     {
         hsv2rgb_rainbow( CHSV(hue, sat, val), *this);
         return *this;
     }
 
-    /// Allow assignment from just a hue.
+    /// Allow assignment from just a hue. 
     /// Saturation and value (brightness) are set automatically to max.
     /// @param hue color hue
-    constexpr CRGB& setHue (uint8_t hue) __attribute__((always_inline))
+    inline CRGB& setHue (uint8_t hue) __attribute__((always_inline))
     {
         hsv2rgb_rainbow( CHSV(hue, 255, 255), *this);
         return *this;
     }
 
     /// Allow assignment from HSV color
-    constexpr CRGB& operator= (const CHSV& rhs) __attribute__((always_inline))
+    inline CRGB& operator= (const CHSV& rhs) __attribute__((always_inline))
     {
         hsv2rgb_rainbow( rhs, *this);
         return *this;
@@ -255,7 +255,7 @@ struct CRGB {
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    constexpr CRGB& setColorCode (uint32_t colorcode) __attribute__((always_inline))
+    inline CRGB& setColorCode (uint32_t colorcode) __attribute__((always_inline))
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -265,7 +265,7 @@ struct CRGB {
 
 
     /// Add one CRGB to another, saturating at 0xFF for each channel
-    constexpr CRGB& operator+= (const CRGB& rhs )
+    inline CRGB& operator+= (const CRGB& rhs )
     {
         r = qadd8( r, rhs.r);
         g = qadd8( g, rhs.g);
@@ -273,11 +273,11 @@ struct CRGB {
         return *this;
     }
 
-    /// Add a constant to each channel, saturating at 0xFF.
+    /// Add a constant to each channel, saturating at 0xFF. 
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
     /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
-    constexpr CRGB& addToRGB (uint8_t d )
+    inline CRGB& addToRGB (uint8_t d )
     {
         r = qadd8( r, d);
         g = qadd8( g, d);
@@ -286,7 +286,7 @@ struct CRGB {
     }
 
     /// Subtract one CRGB from another, saturating at 0x00 for each channel
-    constexpr CRGB& operator-= (const CRGB& rhs )
+    inline CRGB& operator-= (const CRGB& rhs )
     {
         r = qsub8( r, rhs.r);
         g = qsub8( g, rhs.g);
@@ -294,11 +294,11 @@ struct CRGB {
         return *this;
     }
 
-    /// Subtract a constant from each channel, saturating at 0x00.
+    /// Subtract a constant from each channel, saturating at 0x00. 
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
     /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
-    constexpr CRGB& subtractFromRGB(uint8_t d )
+    inline CRGB& subtractFromRGB(uint8_t d )
     {
         r = qsub8( r, d);
         g = qsub8( g, d);
@@ -307,14 +307,14 @@ struct CRGB {
     }
 
     /// Subtract a constant of '1' from each channel, saturating at 0x00
-    constexpr CRGB& operator-- ()  __attribute__((always_inline))
+    inline CRGB& operator-- ()  __attribute__((always_inline))
     {
         subtractFromRGB(1);
         return *this;
     }
 
     /// @copydoc operator--
-    constexpr CRGB operator-- (int )  __attribute__((always_inline))
+    inline CRGB operator-- (int )  __attribute__((always_inline))
     {
         CRGB retval(*this);
         --(*this);
@@ -322,14 +322,14 @@ struct CRGB {
     }
 
     /// Add a constant of '1' from each channel, saturating at 0xFF
-    constexpr CRGB& operator++ ()  __attribute__((always_inline))
+    inline CRGB& operator++ ()  __attribute__((always_inline))
     {
         addToRGB(1);
         return *this;
     }
 
     /// @copydoc operator++
-    constexpr CRGB operator++ (int )  __attribute__((always_inline))
+    inline CRGB operator++ (int )  __attribute__((always_inline))
     {
         CRGB retval(*this);
         ++(*this);
@@ -337,7 +337,7 @@ struct CRGB {
     }
 
     /// Divide each of the channels by a constant
-    constexpr CRGB& operator/= (uint8_t d )
+    inline CRGB& operator/= (uint8_t d )
     {
         r /= d;
         g /= d;
@@ -346,7 +346,7 @@ struct CRGB {
     }
 
     /// Right shift each of the channels by a constant
-    constexpr CRGB& operator>>= (uint8_t d)
+    inline CRGB& operator>>= (uint8_t d)
     {
         r >>= d;
         g >>= d;
@@ -356,7 +356,7 @@ struct CRGB {
 
     /// Multiply each of the channels by a constant,
     /// saturating each channel at 0xFF.
-    constexpr CRGB& operator*= (uint8_t d )
+    inline CRGB& operator*= (uint8_t d )
     {
         r = qmul8( r, d);
         g = qmul8( g, d);
@@ -370,7 +370,7 @@ struct CRGB {
     /// nonzero, it'll stay nonzero, even if that means the hue shifts a little
     /// at low brightness levels.
     /// @see nscale8x3_video
-    constexpr CRGB& nscale8_video (uint8_t scaledown )
+    inline CRGB& nscale8_video (uint8_t scaledown )
     {
         nscale8x3_video( r, g, b, scaledown);
         return *this;
@@ -378,7 +378,7 @@ struct CRGB {
 
     /// %= is a synonym for nscale8_video().  Think of it is scaling down
     /// by "a percentage"
-    constexpr CRGB& operator%= (uint8_t scaledown )
+    inline CRGB& operator%= (uint8_t scaledown )
     {
         nscale8x3_video( r, g, b, scaledown);
         return *this;
@@ -386,7 +386,7 @@ struct CRGB {
 
     /// fadeLightBy is a synonym for nscale8_video(), as a fade instead of a scale
     /// @param fadefactor the amount to fade, sent to nscale8_video() as (255 - fadefactor)
-    constexpr CRGB& fadeLightBy (uint8_t fadefactor )
+    inline CRGB& fadeLightBy (uint8_t fadefactor )
     {
         nscale8x3_video( r, g, b, 255 - fadefactor);
         return *this;
@@ -396,7 +396,7 @@ struct CRGB {
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light
     /// levels may dim all the way to 100% black.
     /// @see nscale8x3
-    constexpr CRGB& nscale8 (uint8_t scaledown )
+    inline CRGB& nscale8 (uint8_t scaledown )
     {
         nscale8x3( r, g, b, scaledown);
         return *this;
@@ -406,7 +406,7 @@ struct CRGB {
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light
     /// levels may dim all the way to 100% black.
     /// @see ::scale8
-    constexpr CRGB& nscale8 (const CRGB & scaledown )
+    inline CRGB& nscale8 (const CRGB & scaledown )
     {
         r = ::scale8(r, scaledown.r);
         g = ::scale8(g, scaledown.g);
@@ -415,7 +415,7 @@ struct CRGB {
     }
 
     /// Return a CRGB object that is a scaled down version of this object
-    constexpr CRGB scale8 (uint8_t scaledown ) const
+    inline CRGB scale8 (uint8_t scaledown ) const
     {
         CRGB out = *this;
         nscale8x3( out.r, out.g, out.b, scaledown);
@@ -423,7 +423,7 @@ struct CRGB {
     }
 
     /// Return a CRGB object that is a scaled down version of this object
-    constexpr CRGB scale8 (const CRGB & scaledown ) const
+    inline CRGB scale8 (const CRGB & scaledown ) const
     {
         CRGB out;
         out.r = ::scale8(r, scaledown.r);
@@ -434,14 +434,14 @@ struct CRGB {
 
     /// fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale
     /// @param fadefactor the amount to fade, sent to nscale8() as (255 - fadefactor)
-    constexpr CRGB& fadeToBlackBy (uint8_t fadefactor )
+    inline CRGB& fadeToBlackBy (uint8_t fadefactor )
     {
         nscale8x3( r, g, b, 255 - fadefactor);
         return *this;
     }
 
     /// "or" operator brings each channel up to the higher of the two values
-    constexpr CRGB& operator|= (const CRGB& rhs )
+    inline CRGB& operator|= (const CRGB& rhs )
     {
         if( rhs.r > r) r = rhs.r;
         if( rhs.g > g) g = rhs.g;
@@ -450,7 +450,7 @@ struct CRGB {
     }
 
     /// @copydoc operator|=
-    constexpr CRGB& operator|= (uint8_t d )
+    inline CRGB& operator|= (uint8_t d )
     {
         if( d > r) r = d;
         if( d > g) g = d;
@@ -459,7 +459,7 @@ struct CRGB {
     }
 
     /// "and" operator brings each channel down to the lower of the two values
-    constexpr CRGB& operator&= (const CRGB& rhs )
+    inline CRGB& operator&= (const CRGB& rhs )
     {
         if( rhs.r < r) r = rhs.r;
         if( rhs.g < g) g = rhs.g;
@@ -468,7 +468,7 @@ struct CRGB {
     }
 
     /// @copydoc operator&=
-    constexpr CRGB& operator&= (uint8_t d )
+    inline CRGB& operator&= (uint8_t d )
     {
         if( d < r) r = d;
         if( d < g) g = d;
@@ -477,13 +477,13 @@ struct CRGB {
     }
 
     /// This allows testing a CRGB for zero-ness
-    constexpr explicit operator bool() const __attribute__((always_inline))
+    inline explicit operator bool() const __attribute__((always_inline))
     {
         return r || g || b;
     }
 
     /// Converts a CRGB to a 32-bit color having an alpha of 255.
-    constexpr explicit operator uint32_t() const
+    inline explicit operator uint32_t() const
     {
         return uint32_t{0xff000000} |
                (uint32_t{r} << 16) |
@@ -492,7 +492,7 @@ struct CRGB {
     }
 
     /// Invert each channel
-    constexpr CRGB operator- () const
+    inline CRGB operator- () const
     {
         CRGB retval;
         retval.r = 255 - r;
@@ -515,7 +515,7 @@ struct CRGB {
 
     /// Get the "luma" of a CRGB object. In other words, roughly how much
     /// light the CRGB pixel is putting out (from 0 to 255).
-    constexpr uint8_t getLuma ( )  const {
+    inline uint8_t getLuma ( )  const {
         //Y' = 0.2126 R' + 0.7152 G' + 0.0722 B'
         //     54            183       18 (!)
 
@@ -527,7 +527,7 @@ struct CRGB {
     }
 
     /// Get the average of the R, G, and B values
-    constexpr uint8_t getAverageLight( )  const {
+    inline uint8_t getAverageLight( )  const {
 #if FASTLED_SCALE8_FIXED == 1
         const uint8_t eightyfive = 85;
 #else
@@ -540,12 +540,12 @@ struct CRGB {
         return avg;
     }
 
-    /// Maximize the brightness of this CRGB object.
+    /// Maximize the brightness of this CRGB object. 
     /// This makes the individual color channels as bright as possible
     /// while keeping the same value differences between channels.
     /// @note This does not keep the same ratios between channels,
     /// just the same difference in absolute values.
-    constexpr void maximizeBrightness( uint8_t limit = 255 )  {
+    inline void maximizeBrightness( uint8_t limit = 255 )  {
         uint8_t max = red;
         if( green > max) max = green;
         if( blue > max) max = blue;
@@ -560,7 +560,7 @@ struct CRGB {
     }
 
     /// Return a new CRGB object after performing a linear interpolation between this object and the passed in object
-    constexpr CRGB lerp8( const CRGB& other, fract8 frac) const
+    inline CRGB lerp8( const CRGB& other, fract8 frac) const
     {
         CRGB ret;
 
@@ -572,7 +572,7 @@ struct CRGB {
     }
 
     /// @copydoc lerp8
-    constexpr CRGB lerp16( const CRGB& other, fract16 frac) const
+    inline CRGB lerp16( const CRGB& other, fract16 frac) const
     {
         CRGB ret;
 
@@ -584,14 +584,14 @@ struct CRGB {
     }
 
     /// Returns 0 or 1, depending on the lowest bit of the sum of the color components.
-    constexpr uint8_t getParity()
+    inline uint8_t getParity()
     {
         uint8_t sum = r + g + b;
         return (sum & 0x01);
     }
 
     /// Adjusts the color in the smallest way possible
-    /// so that the parity of the coloris now the desired value.
+    /// so that the parity of the coloris now the desired value. 
     /// This allows you to "hide" one bit of information in the color.
     ///
     /// Ideally, we find one color channel which already
@@ -612,7 +612,7 @@ struct CRGB {
     /// the parity twice should generally result in the
     /// original color again.
     ///
-    constexpr void setParity( uint8_t parity)
+    inline void setParity( uint8_t parity)
     {
         uint8_t curparity = getParity();
 
@@ -824,31 +824,31 @@ struct CRGB {
 
 
 /// Check if two CRGB objects have the same color data
-constexpr __attribute__((always_inline)) bool operator== (const CRGB& lhs, const CRGB& rhs)
+inline __attribute__((always_inline)) bool operator== (const CRGB& lhs, const CRGB& rhs)
 {
     return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b);
 }
 
 /// Check if two CRGB objects do *not* have the same color data
-constexpr __attribute__((always_inline)) bool operator!= (const CRGB& lhs, const CRGB& rhs)
+inline __attribute__((always_inline)) bool operator!= (const CRGB& lhs, const CRGB& rhs)
 {
     return !(lhs == rhs);
 }
 
 /// Check if two CHSV objects have the same color data
-constexpr __attribute__((always_inline)) bool operator== (const CHSV& lhs, const CHSV& rhs)
+inline __attribute__((always_inline)) bool operator== (const CHSV& lhs, const CHSV& rhs)
 {
     return (lhs.h == rhs.h) && (lhs.s == rhs.s) && (lhs.v == rhs.v);
 }
 
 /// Check if two CHSV objects do *not* have the same color data
-constexpr __attribute__((always_inline)) bool operator!= (const CHSV& lhs, const CHSV& rhs)
+inline __attribute__((always_inline)) bool operator!= (const CHSV& lhs, const CHSV& rhs)
 {
     return !(lhs == rhs);
 }
 
 /// Check if the sum of the color channels in one CRGB object is less than another
-constexpr __attribute__((always_inline)) bool operator< (const CRGB& lhs, const CRGB& rhs)
+inline __attribute__((always_inline)) bool operator< (const CRGB& lhs, const CRGB& rhs)
 {
     uint16_t sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -857,7 +857,7 @@ constexpr __attribute__((always_inline)) bool operator< (const CRGB& lhs, const 
 }
 
 /// Check if the sum of the color channels in one CRGB object is greater than another
-constexpr __attribute__((always_inline)) bool operator> (const CRGB& lhs, const CRGB& rhs)
+inline __attribute__((always_inline)) bool operator> (const CRGB& lhs, const CRGB& rhs)
 {
     uint16_t sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -866,7 +866,7 @@ constexpr __attribute__((always_inline)) bool operator> (const CRGB& lhs, const 
 }
 
 /// Check if the sum of the color channels in one CRGB object is greater than or equal to another
-constexpr __attribute__((always_inline)) bool operator>= (const CRGB& lhs, const CRGB& rhs)
+inline __attribute__((always_inline)) bool operator>= (const CRGB& lhs, const CRGB& rhs)
 {
     uint16_t sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -875,7 +875,7 @@ constexpr __attribute__((always_inline)) bool operator>= (const CRGB& lhs, const
 }
 
 /// Check if the sum of the color channels in one CRGB object is less than or equal to another
-constexpr __attribute__((always_inline)) bool operator<= (const CRGB& lhs, const CRGB& rhs)
+inline __attribute__((always_inline)) bool operator<= (const CRGB& lhs, const CRGB& rhs)
 {
     uint16_t sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -886,7 +886,7 @@ constexpr __attribute__((always_inline)) bool operator<= (const CRGB& lhs, const
 
 /// @copydoc CRGB::operator+=
 __attribute__((always_inline))
-constexpr CRGB operator+( const CRGB& p1, const CRGB& p2)
+inline CRGB operator+( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( qadd8( p1.r, p2.r),
                  qadd8( p1.g, p2.g),
@@ -895,7 +895,7 @@ constexpr CRGB operator+( const CRGB& p1, const CRGB& p2)
 
 /// @copydoc CRGB::operator-=
 __attribute__((always_inline))
-constexpr CRGB operator-( const CRGB& p1, const CRGB& p2)
+inline CRGB operator-( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( qsub8( p1.r, p2.r),
                  qsub8( p1.g, p2.g),
@@ -904,7 +904,7 @@ constexpr CRGB operator-( const CRGB& p1, const CRGB& p2)
 
 /// @copydoc CRGB::operator*=
 __attribute__((always_inline))
-constexpr CRGB operator*( const CRGB& p1, uint8_t d)
+inline CRGB operator*( const CRGB& p1, uint8_t d)
 {
     return CRGB( qmul8( p1.r, d),
                  qmul8( p1.g, d),
@@ -913,7 +913,7 @@ constexpr CRGB operator*( const CRGB& p1, uint8_t d)
 
 /// @copydoc CRGB::operator/=
 __attribute__((always_inline))
-constexpr CRGB operator/( const CRGB& p1, uint8_t d)
+inline CRGB operator/( const CRGB& p1, uint8_t d)
 {
     return CRGB( p1.r/d, p1.g/d, p1.b/d);
 }
@@ -921,7 +921,7 @@ constexpr CRGB operator/( const CRGB& p1, uint8_t d)
 
 /// Combine two CRGB objects, taking the smallest value of each channel
 __attribute__((always_inline))
-constexpr CRGB operator&( const CRGB& p1, const CRGB& p2)
+inline CRGB operator&( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( p1.r < p2.r ? p1.r : p2.r,
                  p1.g < p2.g ? p1.g : p2.g,
@@ -930,7 +930,7 @@ constexpr CRGB operator&( const CRGB& p1, const CRGB& p2)
 
 /// Combine two CRGB objects, taking the largest value of each channel
 __attribute__((always_inline))
-constexpr CRGB operator|( const CRGB& p1, const CRGB& p2)
+inline CRGB operator|( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( p1.r > p2.r ? p1.r : p2.r,
                  p1.g > p2.g ? p1.g : p2.g,
@@ -939,7 +939,7 @@ constexpr CRGB operator|( const CRGB& p1, const CRGB& p2)
 
 /// Scale using CRGB::nscale8_video()
 __attribute__((always_inline))
-constexpr CRGB operator%( const CRGB& p1, uint8_t d)
+inline CRGB operator%( const CRGB& p1, uint8_t d)
 {
     CRGB retval( p1);
     retval.nscale8_video( d);
@@ -950,7 +950,7 @@ constexpr CRGB operator%( const CRGB& p1, uint8_t d)
 
 /// RGB color channel orderings, used when instantiating controllers to determine
 /// what order the controller should send data out in. The default ordering
-/// is RGB.
+/// is RGB. 
 /// Within this enum, the red channel is 0, the green channel is 1, and the
 /// blue chanel is 2.
 enum EOrder {
