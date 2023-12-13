@@ -18,6 +18,7 @@ enum FiveBitGammaCorrectionMode {
 //  FASTLED_NAMESPACE_BEGIN
 //  void five_bit_hd_gamma_bitshift(
 //      uint8_t r8, uint8_t g8, uint8_t b8,
+//      uint8_t r8_scale, uint8_t g8_scale, uint8_t b8_scale,
 //      uint8_t* out_r8,
 //      uint8_t* out_g8,
 //      uint8_t* out_b8,
@@ -27,6 +28,7 @@ enum FiveBitGammaCorrectionMode {
 //  FASTLED_NAMESPACE_END
 void five_bit_hd_gamma_bitshift(
     uint8_t r8, uint8_t g8, uint8_t b8,
+    uint8_t r8_scale, uint8_t g8_scale, uint8_t b8_scale,
     uint8_t* out_r8,
     uint8_t* out_g8,
     uint8_t* out_b8,
