@@ -6,6 +6,8 @@
 #include "FastLED.h"
 #include <string.h>
 
+// Compiler throws a warning about stack usage possibly being unbounded even
+// though bounds are checked, silence that so users don't see it
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstack-usage="
 
