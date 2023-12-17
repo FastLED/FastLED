@@ -2,7 +2,10 @@
 #define __INC_CLOCKLESS_ARM_RP2040
 
 #include "hardware/structs/sio.h"
+
+#if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK || !FASTLED_RP2040_CLOCKLESS_PIO
 #include "../common/m0clockless.h"
+#endif
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
 #include "hardware/clocks.h"
@@ -221,7 +224,9 @@ public:
     virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 #if FASTLED_RP2040_CLOCKLESS_PIO
         if (dma_channel == -1) { // setup failed, so fall back to a blocking implementation
+#if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK
             showRGBBlocking(pixels);
+#endif
             return;
         }
         
@@ -292,6 +297,7 @@ public:
     }
 #endif // FASTLED_RP2040_CLOCKLESS_PIO
     
+#if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK
     void showRGBBlocking(PixelController<RGB_ORDER> pixels) {
         struct M0ClocklessData data;
         data.d[0] = pixels.d[0];
@@ -314,6 +320,7 @@ public:
         showLedData<portSetOff, portClrOff, T1, T2, T3, RGB_ORDER, WAIT_TIME>(portBase, pin::mask(), pixels.mData, pixels.mLen, &data);
         sei();
     }
+#endif
 
 };
 
