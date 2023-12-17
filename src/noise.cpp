@@ -6,6 +6,9 @@
 #include "FastLED.h"
 #include <string.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstack-usage="
+
 FASTLED_NAMESPACE_BEGIN
 
 /// Reads a single byte from the p array
@@ -855,3 +858,5 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
 }
 
 FASTLED_NAMESPACE_END
+
+#pragma GCC diagnostic push
