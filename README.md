@@ -56,6 +56,7 @@ Here's a list of all the LED chipsets are supported.  More details on the LED ch
 * WS2801 - SPI based chipset, cheap and widely available
 * SM16716 - SPI based chipset
 * APA102 - SPI based chipset
+  * APA102HD - Same as APA102 but with a high definition gamma correction function applied at the driver level.
 * P9813 - aka Cool Neon's Total Control Lighting
 * DMX - send rgb data out over DMX using Arduino DMX libraries
 * SmartMatrix panels - needs the SmartMatrix library (https://github.com/pixelmatix/SmartMatrix)

@@ -336,28 +336,28 @@ private:
 
 	inline void showPixelsGammaBitShift(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
-		uint8_t s0, s1, s2, global_brightness;
-		getGlobalBrightnessAndScalingFactors(pixels, &s0, &s1, &s2, &global_brightness);
+		uint8_t r_scale = pixels.getScale0();
+		uint8_t g_scale = pixels.getScale1();
+		uint8_t b_scale = pixels.getScale2();
 		startBoundary();
 		while (pixels.has(1)) {
-			uint8_t r = pixels.loadAndScale0(0, s0);
-			uint8_t g = pixels.loadAndScale1(0, s1);
-			uint8_t b = pixels.loadAndScale2(0, s2);
+			// Load raw uncorrected r,g,b values.
+			uint8_t r = pixels.loadAndScale0(0, 0xFF);
+			uint8_t g = pixels.loadAndScale1(0, 0xFF);
+			uint8_t b = pixels.loadAndScale2(0, 0xFF);
 			uint8_t brightness = 0;
-			five_bit_hd_gamma_bitshift(r, g, b, &r, &g, &b, &brightness);
-			if (global_brightness >= 0x1F) {
-				// 5-bit mix.
-				brightness = static_cast<uint8_t>(
-					(uint16_t(brightness) * global_brightness)
-					/ 0x1F
-				);
+			if ((r | g | b) != 0) {
+				// Compute the gamma correction for non black pixels.
+				five_bit_hd_gamma_bitshift(
+					r, g, b,
+					r_scale, g_scale, b_scale,  // Post-gamma scale.
+					&r, &g, &b, &brightness);
 			}
 			writeLed(brightness, r, g, b);
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
 		endBoundary(pixels.size());
-
 		mSPI.waitFully();
 		mSPI.release();
 	}
