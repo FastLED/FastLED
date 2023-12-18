@@ -1,0 +1,13 @@
+{
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.profiles.windows": {
+        "Git Bash": {
+            "path": "C:\\Program Files\\Git\\bin\\bash.exe"
+        }
+    },
+    "files.eol": "\n", // Unix
+    "editor.tabSize": 2,
+    "editor.insertSpaces": false,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": false
+}
