@@ -55,8 +55,8 @@ static int16_t inline __attribute__((always_inline))  avg15_inline_avr_mul( int1
                  /* add j + C to i */
                  "adc %A[i], %A[j]   \n\t"
                  "adc %B[i], %B[j]   \n\t"
-                 : [i] "+a" (i)
-                 : [j] "a"  (j) );
+                 : [i] "+r" (i)
+                 : [j] "r"  (j) );
     return i;
 }
 #else
