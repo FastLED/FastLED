@@ -55,15 +55,15 @@ static SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
 
 
 #if FASTLED_ESP32_SPI_BUS == VSPI
-    static uint8_t spiClk = 18;
-    static uint8_t spiMiso = 19;
-    static uint8_t spiMosi = 23;
-    static uint8_t spiCs = 5;
+    static int8_t spiClk = 18;
+    static int8_t spiMiso = 19;
+    static int8_t spiMosi = 23;
+    static int8_t spiCs = 5;
 #elif FASTLED_ESP32_SPI_BUS == HSPI
-    static uint8_t spiClk = 14;
-    static uint8_t spiMiso = 12;
-    static uint8_t spiMosi = 13;
-    static uint8_t spiCs = 15;
+    static int8_t spiClk = 14;
+    static int8_t spiMiso = 12;
+    static int8_t spiMosi = 13;
+    static int8_t spiCs = 15;
 #elif FASTLED_ESP32_SPI_BUS == FSPI  // ESP32S2 can re-route to arbitrary pins
     #define spiMosi DATA_PIN
     #define spiClk CLOCK_PIN
