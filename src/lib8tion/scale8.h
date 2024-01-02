@@ -471,6 +471,9 @@ LIB8STATIC void nscale8x2_video( uint8_t& i, uint8_t& j, fract8 scale)
 /// @returns scaled value
 LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8( uint16_t i, fract8 scale )
 {
+    if (scale == 0) {
+			return 0;  // Fixes non zero output when scale == 0 and FASTLED_SCALE8_FIXED==1
+		}
 #if SCALE16BY8_C == 1
     uint16_t result;
 #if FASTLED_SCALE8_FIXED == 1
