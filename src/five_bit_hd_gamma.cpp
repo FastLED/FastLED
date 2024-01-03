@@ -11,10 +11,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-
+#ifndef FASTLED_FIVE_BIT_HD_GAMMA_BITSHIFT_FUNCTION_OVERRIDE
 #ifndef FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 // Fast a memory efficient gamma=2 function.
-__attribute__((weak)) 
 void five_bit_hd_gamma_function(
   uint8_t r8, uint8_t g8, uint8_t b8,
   uint16_t* r16, uint16_t* g16, uint16_t* b16) {
@@ -50,17 +49,19 @@ static const uint16_t PROGMEM _gamma_2_8[256] = {
     57199, 57816, 58436, 59061, 59690, 60323, 60960, 61601, 62246, 62896, 63549,
     64207, 64869, 65535};
 
-__attribute__((weak)) void five_bit_hd_gamma_function(uint8_t r8, uint8_t g8,
-                                                      uint8_t b8, uint16_t *r16,
-                                                      uint16_t *g16,
-                                                      uint16_t *b16) {
+void five_bit_hd_gamma_function(uint8_t r8, uint8_t g8,
+                                uint8_t b8, uint16_t *r16,
+                                uint16_t *g16,
+                                uint16_t *b16) {
   *r16 = _gamma_2_8[r8];
   *g16 = _gamma_2_8[g8];
   *b16 = _gamma_2_8[b8];
 }
-#endif
+#endif  // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
+#endif  // FASTLED_FIVE_BIT_HD_GAMMA_BITSHIFT_FUNCTION_OVERRIDE
 
-__attribute__((weak))
+#ifndef FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
+
 void five_bit_hd_gamma_bitshift(
     uint8_t r8, uint8_t g8, uint8_t b8,
     uint8_t r8_scale, uint8_t g8_scale, uint8_t b8_scale,
@@ -182,5 +183,7 @@ void five_bit_hd_gamma_bitshift(
     *out_b8 = b8_final;
     *out_power_5bit = v8;
 }
+
+#endif // FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
 
 FASTLED_NAMESPACE_END
