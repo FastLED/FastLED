@@ -21,9 +21,9 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: install platformio
+      - name: Install platformio build dependencies
         run: |
-          pip install platformio==6.1.4
+          pip install -r ci/requirements.txt
 
-      - name: build FastLED examples
-        run: ./ci/ci-compile
+      - name: Build FastLED examples
+        run: python ./ci/ci-compile.py
