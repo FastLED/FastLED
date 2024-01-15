@@ -28,28 +28,28 @@ struct CHSV {
     union {
         struct {
             union {
-                /// Color hue. 
+                /// Color hue.
                 /// This is an 8-bit value representing an angle around
                 /// the color wheel. Where 0 is 0°, and 255 is 358°.
                 uint8_t hue;
                 uint8_t h;  ///< @copydoc hue
             };
             union {
-                /// Color saturation. 
+                /// Color saturation.
                 /// This is an 8-bit value representing a percentage.
                 uint8_t saturation;
                 uint8_t sat;  ///< @copydoc saturation
                 uint8_t s;    ///< @copydoc saturation
             };
             union {
-                /// Color value (brightness). 
+                /// Color value (brightness).
                 /// This is an 8-bit value representing a percentage.
                 uint8_t value;
                 uint8_t val;  ///< @copydoc value
                 uint8_t v;    ///< @copydoc value
             };
         };
-        /// Access the hue, saturation, and value data as an array. 
+        /// Access the hue, saturation, and value data as an array.
         /// Where:
         /// * `raw[0]` is the hue
         /// * `raw[1]` is the saturation
@@ -133,7 +133,7 @@ struct CRGB {
                 uint8_t blue;  ///< @copydoc b
             };
         };
-        /// Access the red, green, and blue data as an array. 
+        /// Access the red, green, and blue data as an array.
         /// Where:
         /// * `raw[0]` is the red value
         /// * `raw[1]` is the green value
@@ -165,32 +165,30 @@ struct CRGB {
     /// @param ir input red value
     /// @param ig input green value
     /// @param ib input blue value
-    inline CRGB( uint8_t ir, uint8_t ig, uint8_t ib)  __attribute__((always_inline))
+    constexpr CRGB(uint8_t ir, uint8_t ig, uint8_t ib)  __attribute__((always_inline))
         : r(ir), g(ig), b(ib)
     {
     }
 
     /// Allow construction from 32-bit (really 24-bit) bit 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    inline CRGB( uint32_t colorcode)  __attribute__((always_inline))
+    constexpr CRGB(uint32_t colorcode)  __attribute__((always_inline))
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
 
     /// Allow construction from a LEDColorCorrection enum
     /// @param colorcode an LEDColorCorrect enumeration value
-    inline CRGB( LEDColorCorrection colorcode) __attribute__((always_inline))
+    constexpr CRGB(LEDColorCorrection colorcode) __attribute__((always_inline))
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
-
     }
 
     /// Allow construction from a ColorTemperature enum
     /// @param colorcode an ColorTemperature enumeration value
-    inline CRGB( ColorTemperature colorcode) __attribute__((always_inline))
+    constexpr CRGB(ColorTemperature colorcode) __attribute__((always_inline))
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
-
     }
 
     /// Allow copy construction
@@ -237,7 +235,7 @@ struct CRGB {
         return *this;
     }
 
-    /// Allow assignment from just a hue. 
+    /// Allow assignment from just a hue.
     /// Saturation and value (brightness) are set automatically to max.
     /// @param hue color hue
     inline CRGB& setHue (uint8_t hue) __attribute__((always_inline))
@@ -273,7 +271,7 @@ struct CRGB {
         return *this;
     }
 
-    /// Add a constant to each channel, saturating at 0xFF. 
+    /// Add a constant to each channel, saturating at 0xFF.
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
     /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
@@ -294,7 +292,7 @@ struct CRGB {
         return *this;
     }
 
-    /// Subtract a constant from each channel, saturating at 0x00. 
+    /// Subtract a constant from each channel, saturating at 0x00.
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
     /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
@@ -540,7 +538,7 @@ struct CRGB {
         return avg;
     }
 
-    /// Maximize the brightness of this CRGB object. 
+    /// Maximize the brightness of this CRGB object.
     /// This makes the individual color channels as bright as possible
     /// while keeping the same value differences between channels.
     /// @note This does not keep the same ratios between channels,
@@ -591,7 +589,7 @@ struct CRGB {
     }
 
     /// Adjusts the color in the smallest way possible
-    /// so that the parity of the coloris now the desired value. 
+    /// so that the parity of the coloris now the desired value.
     /// This allows you to "hide" one bit of information in the color.
     ///
     /// Ideally, we find one color channel which already
@@ -950,7 +948,7 @@ inline CRGB operator%( const CRGB& p1, uint8_t d)
 
 /// RGB color channel orderings, used when instantiating controllers to determine
 /// what order the controller should send data out in. The default ordering
-/// is RGB. 
+/// is RGB.
 /// Within this enum, the red channel is 0, the green channel is 1, and the
 /// blue chanel is 2.
 enum EOrder {
