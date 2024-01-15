@@ -3,6 +3,12 @@
 
 #include "hardware/sync.h"
 
+// Explicitly include Arduino.h here so any framework-specific defines take
+// priority.
+#ifdef ARDUINO
+#include <Arduino.h>
+#endif
+
 #define FASTLED_ARM
 #define FASTLED_ARM_M0_PLUS
 
@@ -83,8 +89,10 @@ typedef volatile uint32_t RwReg;
 #define PICO_DEFAULT_SPI_CSN_PIN 17
 #endif
 
+#if !defined(cli) && !defined(sei)
 static uint32_t saved_interrupt_status;
 #define cli() (saved_interrupt_status = save_and_disable_interrupts())
 #define sei() (restore_interrupts(saved_interrupt_status))
+#endif
 
 #endif // __INC_LED_SYSDEFS_ARM_RP2040_H
