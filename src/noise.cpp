@@ -6,6 +6,11 @@
 #include "FastLED.h"
 #include <string.h>
 
+// Compiler throws a warning about stack usage possibly being unbounded even
+// though bounds are checked, silence that so users don't see it
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstack-usage="
+
 FASTLED_NAMESPACE_BEGIN
 
 /// Reads a single byte from the p array
@@ -855,3 +860,5 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
 }
 
 FASTLED_NAMESPACE_END
+
+#pragma GCC diagnostic pop
