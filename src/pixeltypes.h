@@ -19,9 +19,10 @@ struct CHSV;
 /// @brief Structs that hold pixel color data
 /// @{
 
-/// Forward declaration of hsv2rgb_rainbow here,
+/// Forward declaration of hsv2rgb_rainbow and hsv2rbg_spectrum here,
 /// to avoid circular dependencies.
 extern void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb);
+extern void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb);
 
 /// Representation of an HSV pixel (hue, saturation, value (aka brightness)).
 struct CHSV {
@@ -197,7 +198,11 @@ struct CRGB {
     /// Allow construction from a CHSV color
     inline CRGB(const CHSV& rhs) __attribute__((always_inline))
     {
+        #if defined (FASTLED_USE_HSV2RGB_SPECTRUM)
+        hsv2rgb_spectrum( rhs, *this);
+        #else
         hsv2rgb_rainbow( rhs, *this);
+        #endif
     }
 
     /// Allow assignment from one RGB struct to another
@@ -231,7 +236,11 @@ struct CRGB {
     /// @param val color value (brightness)
     inline CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val) __attribute__((always_inline))
     {
+        #if defined (FASTLED_USE_HSV2RGB_SPECTRUM)
+        hsv2rgb_spectrum( CHSV(hue, sat, val), *this);
+        #else
         hsv2rgb_rainbow( CHSV(hue, sat, val), *this);
+        #endif
         return *this;
     }
 
@@ -240,14 +249,22 @@ struct CRGB {
     /// @param hue color hue
     inline CRGB& setHue (uint8_t hue) __attribute__((always_inline))
     {
+        #if defined (FASTLED_USE_HSV2RGB_SPECTRUM)
+        hsv2rgb_spectrum( CHSV(hue, 255, 255), *this);
+        #else
         hsv2rgb_rainbow( CHSV(hue, 255, 255), *this);
+        #endif
         return *this;
     }
 
     /// Allow assignment from HSV color
     inline CRGB& operator= (const CHSV& rhs) __attribute__((always_inline))
     {
+        #if defined (FASTLED_USE_HSV2RGB_SPECTRUM)
+        hsv2rgb_spectrum( rhs, *this);
+        #else
         hsv2rgb_rainbow( rhs, *this);
+        #endif
         return *this;
     }
 
