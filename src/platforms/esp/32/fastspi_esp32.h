@@ -53,24 +53,33 @@ FASTLED_NAMESPACE_BEGIN
 
 static SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
 
-
+#if CONFIG_IDF_TARGET_ESP32S3
+#pragma message "S3 Mode, you tell me the pins, I use them!"
+#define spiMosi DATA_PIN
+#define spiClk CLOCK_PIN
+#define spiMiso -1
+#define spiCs -1
+#else
 #if FASTLED_ESP32_SPI_BUS == VSPI
+#pragma message "VSPI"
     static int8_t spiClk = 18;
     static int8_t spiMiso = 19;
     static int8_t spiMosi = 23;
     static int8_t spiCs = 5;
 #elif FASTLED_ESP32_SPI_BUS == HSPI
-    static int8_t spiClk = 14;
-    static int8_t spiMiso = 12;
-    static int8_t spiMosi = 13;
-    static int8_t spiCs = 15;
-#elif FASTLED_ESP32_SPI_BUS == FSPI  // ESP32S2 can re-route to arbitrary pins
-    #define spiMosi DATA_PIN
-    #define spiClk CLOCK_PIN
-    #define spiMiso -1
-    #define spiCs -1
+#pragma message "HSPI"
+static int8_t spiClk = 14;
+static int8_t spiMiso = 12;
+static int8_t spiMosi = 13;
+static int8_t spiCs = 15;
+#elif FASTLED_ESP32_SPI_BUS == FSPI // ESP32S2 can re-route to arbitrary pins
+#pragma message "FSPI"
+#define spiMosi DATA_PIN
+#define spiClk CLOCK_PIN
+#define spiMiso -1
+#define spiCs -1
 #endif
-
+#endif // CONFIG_IDF_TARGET_ESP32S3
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class ESP32SPIOutput {
 	Selectable 	*m_pSelect;
