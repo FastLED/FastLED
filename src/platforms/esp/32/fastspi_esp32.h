@@ -47,40 +47,47 @@ FASTLED_NAMESPACE_BEGIN
 
 #include <SPI.h>
 
+// Conditional compilation for ESP32-S3 to utilize its flexible SPI capabilities
+#if CONFIG_IDF_TARGET_ESP32S3
+#pragma message "Targeting ESP32S3, which has better SPI support. Configuring for flexible pin assignment."
+#undef FASTLED_ESP32_SPI_BUS
+#define FASTLED_ESP32_SPI_BUS FSPI
+// Define SPI pins, assuming DATA_PIN and CLOCK_PIN are user-defined for maximum flexibility
+#define spiMosi DATA_PIN
+#define spiClk CLOCK_PIN
+// MISO and CS are not used in LED output, set to -1
+#define spiMiso -1
+#define spiCs -1
+#else // Configuration for other ESP32 variants
 #ifndef FASTLED_ESP32_SPI_BUS
 #define FASTLED_ESP32_SPI_BUS VSPI
 #endif
 
-static SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
-
-#if CONFIG_IDF_TARGET_ESP32S3
-#pragma message "Targeting ESP32S3, which has better SPI support. You tell me the pins, I'll use them!"
-// ESP32S3 seem to do away with the whole FSPI/VSPI/HSPI concept and just went with numbered SPI
-#define spiMosi DATA_PIN
-#define spiClk CLOCK_PIN
-#define spiMiso -1
-#define spiCs -1
-#else
+// Default pin assignments for VSPI and HSPI
 #if FASTLED_ESP32_SPI_BUS == VSPI
-#pragma message "VSPI"
+#pragma message "VSPI selected"
 static int8_t spiClk = 18;
 static int8_t spiMiso = 19;
 static int8_t spiMosi = 23;
 static int8_t spiCs = 5;
 #elif FASTLED_ESP32_SPI_BUS == HSPI
-#pragma message "HSPI"
+#pragma message "HSPI selected"
 static int8_t spiClk = 14;
 static int8_t spiMiso = 12;
 static int8_t spiMosi = 13;
 static int8_t spiCs = 15;
-#elif FASTLED_ESP32_SPI_BUS == FSPI // ESP32S2 can re-route to arbitrary pins
-#pragma message "FSPI"
+#elif FASTLED_ESP32_SPI_BUS == FSPI
+#pragma message "FSPI for flexible pin routing on some ESP32 chips"
 #define spiMosi DATA_PIN
 #define spiClk CLOCK_PIN
+// MISO and CS are not used in LED output, set to -1
 #define spiMiso -1
 #define spiCs -1
 #endif
-#endif // CONFIG_IDF_TARGET_ESP32S3
+#endif
+
+static SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
+
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED> class ESP32SPIOutput
 {
     Selectable *m_pSelect;
