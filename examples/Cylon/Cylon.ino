@@ -1,3 +1,7 @@
+/// @file    Cylon.ino
+/// @brief   An animation that moves a single LED back and forth (Larson Scanner effect)
+/// @example Cylon.ino
+
 #include <FastLED.h>
 
 // How many leds in your strip?

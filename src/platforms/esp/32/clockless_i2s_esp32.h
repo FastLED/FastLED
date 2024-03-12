@@ -65,6 +65,19 @@
  * can automatically start on the next buffer.
  */
 /*
+ * The implementation uses two DMA buffers by default. To increase the 
+ * number of DMA buffers set the preprocessor definition 
+ * 
+ * FASTLED_ESP32_I2S_NUM_DMA_BUFFERS 
+ *
+ * to a value between 2 and 16. Increasing the buffer to 4 by adding
+ *
+ * #define FASTLED_ESP32_I2S_NUM_DMA_BUFFERS 4 
+ *
+ * solves flicker issues in combination with interrupts triggered by 
+ * other code parts.
+ */ 
+/*
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -171,7 +184,19 @@ struct DMABuffer {
     uint8_t * buffer;
 };
 
+// override default NUM_DMA_BUFFERS if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS 
+// is defined and has a valid value
+#if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS>2
+#if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS>16
+#error invalid value for FASTLED_ESP32_I2S_NUM_DMA_BUFFERS
+#endif
+#define NUM_DMA_BUFFERS FASTLED_ESP32_I2S_NUM_DMA_BUFFERS
+// for counting DMA buffers currently in use
+static int gCntBuffer = 0;        
+#else
 #define NUM_DMA_BUFFERS 2
+#endif
+
 static DMABuffer * dmaBuffers[NUM_DMA_BUFFERS];
 
 // -- Bit patterns
@@ -509,13 +534,16 @@ protected:
         
         i2s->timing.val = 0;
         
-        // -- Allocate two DMA buffers
-        dmaBuffers[0] = allocateDMABuffer(32 * NUM_COLOR_CHANNELS * gPulsesPerBit);
-        dmaBuffers[1] = allocateDMABuffer(32 * NUM_COLOR_CHANNELS * gPulsesPerBit);
-        
+        // -- Allocate DMA buffers
+        for (int i=0;i<NUM_DMA_BUFFERS;i++)
+        {
+          dmaBuffers[i] = allocateDMABuffer(32 * NUM_COLOR_CHANNELS * gPulsesPerBit);
+        }
         // -- Arrange them as a circularly linked list
-        dmaBuffers[0]->descriptor.qe.stqe_next = &(dmaBuffers[1]->descriptor);
-        dmaBuffers[1]->descriptor.qe.stqe_next = &(dmaBuffers[0]->descriptor);
+        for (int i=0;i<NUM_DMA_BUFFERS;i++)
+        {
+          dmaBuffers[i]->descriptor.qe.stqe_next = &(dmaBuffers[(i+1)%NUM_DMA_BUFFERS]->descriptor);
+        }
        
         // -- Allocate i2s interrupt
         SET_PERI_REG_BITS(I2S_INT_ENA_REG(I2S_DEVICE), I2S_OUT_EOF_INT_ENA_V, 1, I2S_OUT_EOF_INT_ENA_S);
@@ -574,16 +602,22 @@ protected:
         // -- The last call to showPixels is the one responsible for doing
         //    all of the actual work
         if (gNumStarted == gNumControllers) {
-            empty((uint32_t*)dmaBuffers[0]->buffer);
-            empty((uint32_t*)dmaBuffers[1]->buffer);
+            for (int i=0;i<NUM_DMA_BUFFERS;i++)
+            {
+              empty((uint32_t*)dmaBuffers[i]->buffer);
+            }
             gCurBuffer = 0;
             gDoneFilling = false;
+#if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS>2
+            // reset buffer counter (sometimes this value != 0 after last send, why?)
+            gCntBuffer = 0;
+#endif            
             
-            // -- Prefill both buffers
-            fillBuffer();
-            fillBuffer();
+            // -- Prefill all buffers
+            for (int i=0;i<NUM_DMA_BUFFERS; i++)
+                fillBuffer();
             
-            // -- Make sure it's been at least 50ms since last show
+            // -- Make sure it's been at least 50us since last show
             mWait.wait();
 
             i2sStart();
@@ -608,13 +642,21 @@ protected:
     {
         if (i2s->int_st.out_eof) {
             i2s->int_clr.val = i2s->int_raw.val;
-            
+#if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS>2
+            gCntBuffer--;
+#endif            
             if ( ! gDoneFilling) {
                 fillBuffer();
             } else {
-                portBASE_TYPE HPTaskAwoken = 0;
-                xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
-                if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
+#if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS>2
+                // release semaphore only if all DMA buffers have been sent
+                if (gCntBuffer==0)
+#endif                  
+                {
+                    portBASE_TYPE HPTaskAwoken = 0;
+                    xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
+                    if(HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
+                }
             }
         }
     }
@@ -657,7 +699,9 @@ protected:
             gDoneFilling = true;
             return;
         }
-        
+#if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS>2
+        gCntBuffer++;
+#endif        
         // -- Transpose and encode the pixel data for the DMA buffer
         // int buf_index = 0;
         for (int channel = 0; channel < NUM_COLOR_CHANNELS; ++channel) {

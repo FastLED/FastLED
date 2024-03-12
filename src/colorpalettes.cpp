@@ -1,22 +1,35 @@
 #ifndef __INC_COLORPALETTES_H
+/// Include guard
 #define __INC_COLORPALETTES_H
+
+/// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
+
 #include "FastLED.h"
 #include "colorutils.h"
 #include "colorpalettes.h"
 
 FASTLED_USING_NAMESPACE
 
+/// @file colorpalettes.cpp
+/// Definitions for the predefined color palettes supplied by FastLED.
+/// @note The documentation is in the source file instead of the header
+/// because it allows Doxygen to automatically inline the values that
+/// make up each palette.
 
-// Preset color schemes, such as they are.
+/// @addtogroup ColorPalettes
+/// @{
 
-// These schemes are all declared as "PROGMEM", meaning
-// that they won't take up SRAM on AVR chips until used.
-// Furthermore, the compiler won't even include these
-// in your PROGMEM (flash) storage unless you specifically
-// use each one, so you only 'pay for' those you actually use.
+/// @defgroup PredefinedPalettes Predefined Color Palettes
+/// Stock color palettes, only included when used. 
+/// These palettes are all declared as `PROGMEM`, meaning
+/// that they won't take up SRAM on AVR chips until used.
+/// Furthermore, the compiler won't even include these
+/// in your PROGMEM (flash) storage unless you specifically
+/// use each one, so you only "pay for" those you actually use.
+/// @{
 
-
+/// Cloudy color palette
 extern const TProgmemRGBPalette16 CloudColors_p FL_PROGMEM =
 {
     CRGB::Blue,
@@ -40,6 +53,7 @@ extern const TProgmemRGBPalette16 CloudColors_p FL_PROGMEM =
     CRGB::SkyBlue
 };
 
+/// Lava color palette
 extern const TProgmemRGBPalette16 LavaColors_p FL_PROGMEM =
 {
     CRGB::Black,
@@ -47,6 +61,7 @@ extern const TProgmemRGBPalette16 LavaColors_p FL_PROGMEM =
     CRGB::Black,
     CRGB::Maroon,
 
+    CRGB::DarkRed,
     CRGB::DarkRed,
     CRGB::Maroon,
     CRGB::DarkRed,
@@ -63,6 +78,7 @@ extern const TProgmemRGBPalette16 LavaColors_p FL_PROGMEM =
 };
 
 
+/// Ocean colors, blues and whites
 extern const TProgmemRGBPalette16 OceanColors_p FL_PROGMEM =
 {
     CRGB::MidnightBlue,
@@ -86,6 +102,7 @@ extern const TProgmemRGBPalette16 OceanColors_p FL_PROGMEM =
     CRGB::LightSkyBlue
 };
 
+/// Forest colors, greens
 extern const TProgmemRGBPalette16 ForestColors_p FL_PROGMEM =
 {
     CRGB::DarkGreen,
@@ -118,8 +135,10 @@ extern const TProgmemRGBPalette16 RainbowColors_p FL_PROGMEM =
     0x5500AB, 0x7F0081, 0xAB0055, 0xD5002B
 };
 
-/// HSV Rainbow colors with alternatating stripes of black
+/// Alias of RainbowStripeColors_p
 #define RainbowStripesColors_p RainbowStripeColors_p
+
+/// HSV Rainbow colors with alternatating stripes of black
 extern const TProgmemRGBPalette16 RainbowStripeColors_p FL_PROGMEM =
 {
     0xFF0000, 0x000000, 0xAB5500, 0x000000,
@@ -128,7 +147,7 @@ extern const TProgmemRGBPalette16 RainbowStripeColors_p FL_PROGMEM =
     0x5500AB, 0x000000, 0xAB0055, 0x000000
 };
 
-/// HSV color ramp: blue purple ping red orange yellow (and back)
+/// HSV color ramp: blue, purple, pink, red, orange, yellow (and back). 
 /// Basically, everything but the greens, which tend to make
 /// people's skin look unhealthy.  This palette is good for
 /// lighting at a club or party, where it'll be shining on people.
@@ -141,10 +160,10 @@ extern const TProgmemRGBPalette16 PartyColors_p FL_PROGMEM =
 };
 
 /// Approximate "black body radiation" palette, akin to
-/// the FastLED 'HeatColor' function.
-/// Recommend that you use values 0-240 rather than
+/// the FastLED HeatColor() function. 
+/// It's recommended that you use values 0-240 rather than
 /// the usual 0-255, as the last 15 colors will be
-/// 'wrapping around' from the hot end to the cold end,
+/// "wrapping around" from the hot end to the cold end,
 /// which looks wrong.
 extern const TProgmemRGBPalette16 HeatColors_p FL_PROGMEM =
 {
@@ -155,11 +174,9 @@ extern const TProgmemRGBPalette16 HeatColors_p FL_PROGMEM =
 };
 
 
-// Gradient palette "Rainbow_gp",
-// provided for situations where you're going
-// to use a number of other gradient palettes, AND
-// you want a 'standard' FastLED rainbow as well.
-
+/// Rainbow gradient.  Provided for situations where you're going
+/// to use a number of other gradient palettes, AND you want a
+/// "standard" FastLED rainbow as well.
 DEFINE_GRADIENT_PALETTE( Rainbow_gp ) {
       0,  255,    0,    0, // Red
      32,  171,   85,    0, // Orange
@@ -170,5 +187,8 @@ DEFINE_GRADIENT_PALETTE( Rainbow_gp ) {
     192,   85,    0,  171, // Purple
     224,  171,    0,   85, // Pink
     255,  255,    0,    0};// and back to Red
+
+/// @}
+/// @}
 
 #endif

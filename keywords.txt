@@ -16,6 +16,8 @@ FastPin	KEYWORD1
 FastSPI	KEYWORD1
 FastSPI_LED2	KEYWORD1
 
+CLEDController	KEYWORD1
+
 CRGBPalette16	KEYWORD1
 CRGBPalette256	KEYWORD1
 CHSVPalette16	KEYWORD1
@@ -24,6 +26,21 @@ CHSVPalette16	KEYWORD1
 CHSVPalette256	KEYWORD1
 CRGBPalette16	KEYWORD1
 CRGBPalette256	KEYWORD1
+
+TProgmemPalette16	KEYWORD1
+TProgmemPalette32	KEYWORD1
+TDynamicRGBGradientPalette_byte	KEYWORD1
+TDynamicRGBGradientPalette_bytes	KEYWORD1
+TDynamicRGBGradientPalettePtr	KEYWORD1
+TProgmemHSVPalette16	KEYWORD1
+TProgmemHSVPalette32	KEYWORD1
+TProgmemRGBGradientPalette_byte	KEYWORD1
+TProgmemRGBGradientPalette_bytes	KEYWORD1
+TProgmemRGBGradientPalettePtr	KEYWORD1
+TProgmemRGBPalette16	KEYWORD1
+TProgmemRGBPalette32	KEYWORD1
+
+TBlendType	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -45,6 +62,11 @@ setMaxPowerInVoltsAndMilliamps	KEYWORD2
 setMaxRefreshRate	KEYWORD2
 countFPS	KEYWORD2
 getFPS	KEYWORD2
+size	KEYWORD2
+
+# CLEDController Methods
+showColor	KEYWORD2
+showLeds	KEYWORD2
 
 # Noise methods
 inoise16_raw	KEYWORD2
@@ -116,6 +138,32 @@ cubicwave8	KEYWORD2
 sqrt16	KEYWORD2
 blend8	KEYWORD2
 
+# Beat Generators
+beat88	KEYWORD2
+beat16	KEYWORD2
+beat8	KEYWORD2
+beatsin88	KEYWORD2
+beatsin16	KEYWORD2
+beatsin8	KEYWORD2
+
+# Timekeeping
+seconds16	KEYWORD2
+minutes16	KEYWORD2
+hours8	KEYWORD2
+bseconds16	KEYWORD2
+EVERY_N_MILLIS	KEYWORD2
+EVERY_N_MILLIS_I	KEYWORD2
+EVERY_N_MILLISECONDS	KEYWORD2
+EVERY_N_MILLISECONDS_I	KEYWORD2
+EVERY_N_SECONDS	KEYWORD2
+EVERY_N_SECONDS_I	KEYWORD2
+EVERY_N_BSECONDS	KEYWORD2
+EVERY_N_BSECONDS_I	KEYWORD2
+EVERY_N_MINUTES	KEYWORD2
+EVERY_N_MINUTES_I	KEYWORD2
+EVERY_N_HOURS	KEYWORD2
+EVERY_N_HOURS_I	KEYWORD2
+
 # Color util methods
 blend	KEYWORD2
 nblend	KEYWORD2
@@ -130,7 +178,9 @@ fade_video	KEYWORD2
 fill_gradient	KEYWORD2
 fill_gradient_RGB	KEYWORD2
 fill_palette	KEYWORD2
+fill_palette_circular	KEYWORD2
 fill_rainbow	KEYWORD2
+fill_rainbow_circular	KEYWORD2
 fill_solid	KEYWORD2
 map_data_into_colors_through_palette	KEYWORD2
 nblend	KEYWORD2
@@ -143,6 +193,10 @@ hsv2rgb_spectrum	KEYWORD2
 hsv2rgb_raw	KEYWORD2
 fill_solid	KEYWORD2
 fill_rainbow	KEYWORD2
+
+# Gamma Correction
+applyGamma_video	KEYWORD2
+napplyGamma_video	KEYWORD2
 
 # Colors
 CRGB::AliceBlue	KEYWORD2
@@ -171,6 +225,7 @@ CRGB::DarkBlue	KEYWORD2
 CRGB::DarkCyan	KEYWORD2
 CRGB::DarkGoldenrod	KEYWORD2
 CRGB::DarkGray	KEYWORD2
+CRGB::DarkGrey	KEYWORD2
 CRGB::DarkGreen	KEYWORD2
 CRGB::DarkKhaki	KEYWORD2
 CRGB::DarkMagenta	KEYWORD2
@@ -182,11 +237,13 @@ CRGB::DarkSalmon	KEYWORD2
 CRGB::DarkSeaGreen	KEYWORD2
 CRGB::DarkSlateBlue	KEYWORD2
 CRGB::DarkSlateGray	KEYWORD2
+CRGB::DarkSlateGrey	KEYWORD2
 CRGB::DarkTurquoise	KEYWORD2
 CRGB::DarkViolet	KEYWORD2
 CRGB::DeepPink	KEYWORD2
 CRGB::DeepSkyBlue	KEYWORD2
 CRGB::DimGray	KEYWORD2
+CRGB::DimGrey	KEYWORD2
 CRGB::DodgerBlue	KEYWORD2
 CRGB::FireBrick	KEYWORD2
 CRGB::FloralWhite	KEYWORD2
@@ -197,6 +254,7 @@ CRGB::GhostWhite	KEYWORD2
 CRGB::Gold	KEYWORD2
 CRGB::Goldenrod	KEYWORD2
 CRGB::Gray	KEYWORD2
+CRGB::Grey	KEYWORD2
 CRGB::Green	KEYWORD2
 CRGB::GreenYellow	KEYWORD2
 CRGB::Honeydew	KEYWORD2
@@ -220,6 +278,7 @@ CRGB::LightSalmon	KEYWORD2
 CRGB::LightSeaGreen	KEYWORD2
 CRGB::LightSkyBlue	KEYWORD2
 CRGB::LightSlateGray	KEYWORD2
+CRGB::LightSlateGrey	KEYWORD2
 CRGB::LightSteelBlue	KEYWORD2
 CRGB::LightYellow	KEYWORD2
 CRGB::Lime	KEYWORD2
@@ -273,6 +332,7 @@ CRGB::Silver	KEYWORD2
 CRGB::SkyBlue	KEYWORD2
 CRGB::SlateBlue	KEYWORD2
 CRGB::SlateGray	KEYWORD2
+CRGB::SlateGrey	KEYWORD2
 CRGB::Snow	KEYWORD2
 CRGB::SpringGreen	KEYWORD2
 CRGB::SteelBlue	KEYWORD2
@@ -287,7 +347,11 @@ CRGB::White	KEYWORD2
 CRGB::WhiteSmoke	KEYWORD2
 CRGB::Yellow	KEYWORD2
 CRGB::YellowGreen	KEYWORD2
+CRGB::FairyLight	KEYWORD2
+CRGB::FairyLightNCC	KEYWORD2
 
+# Color Palettes
+DEFINE_GRADIENT_PALETTE	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
@@ -393,3 +457,14 @@ SHORTEST_HUES	LITERAL1
 LONGEST_HUES	LITERAL1
 LINEARBLEND	LITERAL1
 NOBLEND	LITERAL1
+
+# Predefined Color Palettes
+Rainbow_gp	LITERAL1
+CloudColors_p	LITERAL1
+LavaColors_p	LITERAL1
+OceanColors_p	LITERAL1
+ForestColors_p	LITERAL1
+RainbowColors_p	LITERAL1
+RainbowStripeColors_p	LITERAL1
+PartyColors_p	LITERAL1
+HeatColors_p	LITERAL1

@@ -1,3 +1,7 @@
+/// @file    Noise.ino
+/// @brief   Demonstrates how to use noise generation on a 2D LED matrix
+/// @example Noise.ino
+
 #include <FastLED.h>
 
 //
