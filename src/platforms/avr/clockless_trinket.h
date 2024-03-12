@@ -35,7 +35,7 @@ template<int _LOOP, int PAD> __attribute__((always_inline)) inline void _dc_AVR(
 						"L_PC%=: LDI %[loopvar], %[_LOOP]\n\tLL_%=: DEC %[loopvar]\n\t BRNE LL_%=\n\tBSET 0\n\t"
 						"L_DONE%=:\n\t"
 						:
-							[loopvar] "+a" (loopvar) : [_LOOP] "M" (_LOOP) : );
+							[loopvar] "+d" (loopvar) : [_LOOP] "M" (_LOOP) : );
 }
 
 template<int CYCLES> __attribute__((always_inline)) inline void _dc(FASTLED_REGISTER uint8_t & loopvar) {
@@ -192,7 +192,7 @@ protected:
 #define ASM_VARS : /* write variables */				\
 				[count] "+x" (count),					\
 				[data] "+z" (data),						\
-				[b1] "+a" (b1),							\
+				[b1] "+d" (b1),							\
 				[d0] "+r" (d0),							\
 				[d1] "+r" (d1),							\
 				[d2] "+r" (d2),							\
@@ -200,7 +200,7 @@ protected:
 				[scale_base] "+a" (scale_base)			\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
-				[b0] "a" (b0),							\
+				[b0] "d" (b0),							\
 				[hi] "r" (hi),							\
 				[lo] "r" (lo),							\
 				[s0] "r" (s0),					  		\

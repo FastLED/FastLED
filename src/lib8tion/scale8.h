@@ -87,8 +87,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8( uint8_t i, fract8 scale)
 #endif
         "clr __zero_reg__    \n\t"
 
-        : "+a" (i)      /* writes to i */
-        : "a"  (scale)  /* uses scale */
+        : "+d" (i)      /* writes to i; r16-r31, restricted by ldi */
+        : "r"  (scale)  /* uses scale */
         : "r0", "r1"    /* clobbers r0, r1 */
     );
     /* Return the result */
@@ -127,8 +127,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video( uint8_t i, fract8 scale)
         "  cpse %[scale], r1\n\t"
         "  subi %[j], 0xFF\n\t"
         "L_%=: \n\t"
-        : [j] "+a" (j)
-        : [i] "a" (i), [scale] "a" (scale)
+        : [j] "+d" (j) // r16-r31, restricted by subi
+        : [i] "r" (i), [scale] "r" (scale)
         : "r0", "r1"
     );
     return j;
@@ -193,8 +193,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY( uint8_t i, fract8 scal
 #endif
         /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */
         /* "clr __zero_reg__    \n\t" */
-        : "+a" (i)      /* writes to i */
-        : "a"  (scale)  /* uses scale */
+        : "+d" (i)      /* writes to i; r16-r31, restricted by ldi */
+        : "r"  (scale)  /* uses scale */
         : "r0", "r1"    /* clobbers r0, r1 */
     );
     // Return the result
@@ -241,8 +241,8 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY( uint8_t& i, fract8 scale
         /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF */
         /* "clr __zero_reg__    \n\t" */
 
-        : "+a" (i)      /* writes to i */
-        : "a"  (scale)  /* uses scale */
+        : "+d" (i)      /* writes to i; r16-r31, restricted by ldi */
+        : "r"  (scale)  /* uses scale */
         : "r0", "r1"    /* clobbers r0, r1 */
     );
 #else
@@ -276,8 +276,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY( uint8_t i, fract
         "  breq L_%=\n\t"
         "  subi %[j], 0xFF\n\t"
         "L_%=: \n\t"
-        : [j] "+a" (j)
-        : [i] "a" (i), [scale] "a" (scale)
+        : [j] "+d" (j) // r16-r31, restricted by subi
+        : [i] "r" (i), [scale] "r" (scale)
         : "r0", "r1"
     );
     return j;
@@ -322,8 +322,8 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY( uint8_t & i, fract
         "  breq L_%=\n\t"
         "  subi %[i], 0xFF\n\t"
         "L_%=: \n\t"
-        : [i] "+a" (i)
-        : [scale] "a" (scale)
+        : [i] "+d" (i) // r16-r31, restricted by subi
+        : [scale] "r" (scale)
         : "r0", "r1"
     );
 #else

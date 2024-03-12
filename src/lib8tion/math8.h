@@ -43,8 +43,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qadd8( uint8_t i, uint8_t j)
         "brcc L_%=     \n\t"
         "ldi %0, 0xFF  \n\t"
         "L_%=: "
-        : "+a" (i)
-        : "a"  (j)
+        : "+d" (i) // r16-r31, restricted by ldi
+        : "r"  (j)
     );
     return i;
 #elif QADD8_ARM_DSP_ASM == 1
@@ -82,8 +82,8 @@ LIB8STATIC_ALWAYS_INLINE int8_t qadd7( int8_t i, int8_t j)
         Adding it to make result negative. */
         "adc %0, __zero_reg__\n\t"
         "L_%=: "
-        : "+a" (i)
-        : "a"  (j)
+        : "+d" (i) // r16-r31, restricted by ldi
+        : "r"  (j)
     );
     return i;
 #elif QADD7_ARM_DSP_ASM == 1
@@ -117,8 +117,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qsub8( uint8_t i, uint8_t j)
         "brcc L_%=     \n\t"
         "ldi %0, 0x00  \n\t"
         "L_%=: "
-        : "+a" (i)
-        : "a"  (j)
+        : "+d" (i) // r16-r31, restricted by ldi
+        : "r"  (j)
     );
     return i;
 #else
@@ -138,7 +138,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t add8( uint8_t i, uint8_t j)
     return t;
 #elif ADD8_AVRASM == 1
     // Add j to i, period.
-    asm volatile( "add %0, %1" : "+a" (i) : "a" (j));
+    asm volatile( "add %0, %1" : "+r" (i) : "r" (j));
     return i;
 #else
 #error "No implementation for add8 available."
@@ -160,8 +160,8 @@ LIB8STATIC_ALWAYS_INLINE uint16_t add8to16( uint8_t i, uint16_t j)
     asm volatile(
         "add %A[j], %[i]              \n\t"
         "adc %B[j], __zero_reg__      \n\t"
-        : [j] "+a" (j)
-        : [i] "a"  (i)
+        : [j] "+r" (j)
+        : [i] "r"  (i)
     );
     return i;
 #else
@@ -182,7 +182,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t sub8( uint8_t i, uint8_t j)
     return t;
 #elif SUB8_AVRASM == 1
     // Subtract j from i, period.
-    asm volatile( "sub %0, %1" : "+a" (i) : "a" (j));
+    asm volatile( "sub %0, %1" : "+r" (i) : "r" (j));
     return i;
 #else
 #error "No implementation for sub8 available."
@@ -205,8 +205,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8( uint8_t i, uint8_t j)
         "add %0, %1    \n\t"
         /* Divide by two, moving C flag into high 8th bit */
         "ror %0        \n\t"
-        : "+a" (i)
-        : "a"  (j)
+        : "+r" (i)
+        : "r"  (j)
     );
     return i;
 #else
@@ -234,8 +234,8 @@ LIB8STATIC_ALWAYS_INLINE uint16_t avg16( uint16_t i, uint16_t j)
         "ror %B[i]        \n\t"
         /* Divide iLo by two, moving C flag into high 8th bit */
         "ror %A[i]        \n\t"
-        : [i] "+a" (i)
-        : [j] "a"  (j)
+        : [i] "+r" (i)
+        : [j] "r"  (j)
     );
     return i;
 #else
@@ -261,8 +261,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8r( uint8_t i, uint8_t j)
         "ror %0              \n\t"
         /* Add C flag */
         "adc %0, __zero_reg__\n\t"
-        : "+a" (i)
-        : "a"  (j)
+        : "+r" (i)
+        : "r"  (j)
     );
     return i;
 #else
@@ -293,8 +293,8 @@ LIB8STATIC_ALWAYS_INLINE uint16_t avg16r( uint16_t i, uint16_t j)
         /* Add C flag */
         "adc %A[i], __zero_reg__\n\t"
         "adc %B[i], __zero_reg__\n\t"
-        : [i] "+a" (i)
-        : [j] "a"  (j)
+        : [i] "+r" (i)
+        : [j] "r"  (j)
     );
     return i;
 #else
@@ -319,8 +319,8 @@ LIB8STATIC_ALWAYS_INLINE int8_t avg7( int8_t i, int8_t j)
         "asr %1        \n\t"
         "asr %0        \n\t"
         "adc %0, %1    \n\t"
-        : "+a" (i)
-        : "a"  (j)
+        : "+r" (i)
+        : "r"  (j)
     );
     return i;
 #else
@@ -350,8 +350,8 @@ LIB8STATIC_ALWAYS_INLINE int16_t avg15( int16_t i, int16_t j)
         /* add j + C to i */
         "adc %A[i], %A[j]   \n\t"
         "adc %B[i], %B[j]   \n\t"
-        : [i] "+a" (i)
-        : [j] "a"  (j)
+        : [i] "+r" (i)
+        : [j] "r"  (j)
     );
     return i;
 #else
@@ -474,8 +474,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t mul8( uint8_t i, uint8_t j)
         "mov %0, r0          \n\t"
         /* Restore r1 to "0"; it's expected to always be that */
         "clr __zero_reg__    \n\t"
-        : "+a" (i)
-        : "a"  (j)
+        : "+r" (i)
+        : "r"  (j)
         : "r0", "r1"
     );
     return i;
@@ -509,8 +509,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qmul8( uint8_t i, uint8_t j)
         "Lnospill_%=:          \n\t"
         /* Restore r1 to "0"; it's expected to always be that */
         "  clr __zero_reg__    \n\t"
-        : "+a" (i)
-        : "a"  (j)
+        : "+d" (i) // r16-r31, restricted by ldi
+        : "r"  (j)
         : "r0", "r1"
     );
     return i;
@@ -671,9 +671,9 @@ LIB8STATIC uint8_t blend8( uint8_t a, uint8_t b, uint8_t amountOfB)
         "  clr __zero_reg__              \n\t"
                         
         : [partial] "=r" (partial),
-          [amountOfB] "+a" (amountOfB)
-        : [a] "a" (a),
-          [b] "a" (b)
+          [amountOfB] "+r" (amountOfB)
+        : [a] "r" (a),
+          [b] "r" (b)
         : "r0", "r1"
     );
 
