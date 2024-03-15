@@ -4,3 +4,5 @@
 /docs/latex
 /docs/doxygen-awesome-css
 .build/
+build/
+components/
