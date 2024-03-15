@@ -49,8 +49,18 @@ FASTLED_NAMESPACE_BEGIN
 
 #include<SPI.h>
 
-#ifndef FASTLED_ESP32_SPI_BUS
-    #define FASTLED_ESP32_SPI_BUS VSPI
+// Conditional compilation for ESP32-S3 to utilize its flexible SPI capabilities
+#if CONFIG_IDF_TARGET_ESP32S3
+	#pragma message "Targeting ESP32S3, which has better SPI support. Configuring for flexible pin assignment."
+	#undef FASTLED_ESP32_SPI_BUS
+	// I *think* we have to "fake" being FSPI... there might be a better way to do this.
+	// whatever the case, this "tricks" the pin assignment defines below into using DATA_PIN & CLOCK_PIN
+	#define FASTLED_ESP32_SPI_BUS FSPI
+#else // Configuration for other ESP32 variants
+	#ifndef FASTLED_ESP32_SPI_BUS
+	#pragma message "Setting ESP32 SPI bus to VSPI by default"
+	#define FASTLED_ESP32_SPI_BUS VSPI
+	#endif
 #endif
 
 #if FASTLED_ESP32_SPI_BUS == VSPI
