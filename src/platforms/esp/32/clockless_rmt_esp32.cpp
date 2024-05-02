@@ -27,7 +27,11 @@ static intr_handle_t gRMT_intr_handle = NULL;
 
 // -- Global semaphore for the whole show process
 //    Semaphore is not given until all data has been sent
+#if tskKERNEL_VERSION_MAJOR >= 7
+static SemaphoreHandle_t gTX_sem = NULL;
+#else 
 static xSemaphoreHandle gTX_sem = NULL;
+#endif
 
 // -- Make sure we can't call show() too quickly
 CMinWait<50>   gWait;
@@ -38,6 +42,21 @@ static bool gInitialized = false;
 int ESP32RMTController::gMaxChannel;
 int ESP32RMTController::gMemBlocks;
 
+#if ESP_IDF_VERSION_MAJOR >= 5
+
+// for gpio_matrix_out
+#include <rom/gpio.h>
+
+// copied from rmt_private.h with slight changes to match the idf 4.x syntax
+typedef struct {
+    struct {
+        rmt_item32_t data32[SOC_RMT_MEM_WORDS_PER_CHANNEL];
+    } chan[SOC_RMT_CHANNELS_PER_GROUP];
+} rmt_block_mem_t;
+
+// RMTMEM address is declared in <target>.peripherals.ld
+extern rmt_block_mem_t RMTMEM;
+#endif
 
 ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, int memBlocks)
     : mPixelData(0), 
