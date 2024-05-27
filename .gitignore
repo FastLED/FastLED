@@ -3,4 +3,19 @@
 /docs/html
 /docs/latex
 /docs/doxygen-awesome-css
+components/
+
+# Build outputs
 .build/
+build/
+out/
+
+# Misc
+.DS_Store
+Thumbs.db
+
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+.platformio/
