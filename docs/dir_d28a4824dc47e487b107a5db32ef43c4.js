@@ -1,6 +1,7 @@
 var dir_d28a4824dc47e487b107a5db32ef43c4 =
 [
     [ "AnalogOutput", "dir_8bb4b718726ef6bb146f349e752b8dbd.html", "dir_8bb4b718726ef6bb146f349e752b8dbd" ],
+    [ "Apa102HD", "dir_444f6549ff4d6964f399c8619651b3db.html", "dir_444f6549ff4d6964f399c8619651b3db" ],
     [ "Blink", "dir_05dd8b05715c4ed4a1c3d13c1176049b.html", "dir_05dd8b05715c4ed4a1c3d13c1176049b" ],
     [ "ColorPalette", "dir_3e530362afb4b56ed6ea6cf0a9ae71af.html", "dir_3e530362afb4b56ed6ea6cf0a9ae71af" ],
     [ "ColorTemperature", "dir_f14b3bf61e57ddcd04abb3082cceefb6.html", "dir_f14b3bf61e57ddcd04abb3082cceefb6" ],

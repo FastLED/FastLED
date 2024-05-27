@@ -34,7 +34,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.6.0</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.0</span>
    </div>
   </td>
  </tr>
@@ -99,8 +99,6 @@ $(document).ready(function(){initNavTree('class_s_k9822_controller.html',''); in
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="class_s_k9822_controller-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">SK9822Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt; Class Template Reference<div class="ingroups"><a class="el" href="group___chipsets.html">LED Chipset Controllers</a> &raquo; <a class="el" href="group___clocked_chipsets.html">Clocked Chipsets</a></div></div></div>
 </div><!--header-->
@@ -108,7 +106,7 @@ $(document).ready(function(){initNavTree('class_s_k9822_controller.html',''); in
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, <a class="el" href="group___pixel_types.html#ga3c26d076773aa0f331d3066b46dbc6a4">EOrder</a> RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(24)&gt;<br />
 class SK9822Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</div><p>SK9822 controller class. </p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
+<p>It's exactly the same as the <a class="el" href="class_a_p_a102_controller.html" title="APA102 controller class.">APA102Controller</a> protocol but with a different END_FRAME and default SPI_SPEED. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">DATA_PIN</td><td>the data pin for these LEDs </td></tr>
     <tr><td class="paramname">CLOCK_PIN</td><td>the clock pin for these LEDs </td></tr>
@@ -118,7 +116,7 @@ class SK9822Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</div><
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00283">283</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00396">396</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="chipsets_8h_source.html">chipsets.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -129,16 +127,18 @@ class SK9822Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</div><
  <div class="center">
   <img src="class_s_k9822_controller.png" usemap="#SK9822Controller_3C_20DATA_5FPIN_2C_20CLOCK_5FPIN_2C_20RGB_5FORDER_2C_20SPI_5FSPEED_20_3E_map" alt=""/>
   <map id="SK9822Controller_3C_20DATA_5FPIN_2C_20CLOCK_5FPIN_2C_20RGB_5FORDER_2C_20SPI_5FSPEED_20_3E_map" name="SK9822Controller_3C_20DATA_5FPIN_2C_20CLOCK_5FPIN_2C_20RGB_5FORDER_2C_20SPI_5FSPEED_20_3E_map">
-<area href="class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;" shape="rect" coords="0,56,436,80"/>
-<area href="class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="CLEDController" shape="rect" coords="0,0,436,24"/>
+<area href="class_a_p_a102_controller.html" title="APA102 controller class." alt="APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED, GAMMA_CORRECTION_MODE, START_FRAME, END_FRAME &gt;" shape="rect" coords="0,112,825,136"/>
+<area href="class_c_pixel_l_e_d_controller.html" title="Template extension of the CLEDController class." alt="CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;" shape="rect" coords="0,56,825,80"/>
+<area href="class_c_l_e_d_controller.html" title="Base definition for an LED controller." alt="CLEDController" shape="rect" coords="0,0,825,24"/>
   </map>
 </div></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:af20dd5d2ce5509ed11a57dba2f2a929f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_k9822_controller.html#af20dd5d2ce5509ed11a57dba2f2a929f">init</a> ()</td></tr>
-<tr class="memdesc:af20dd5d2ce5509ed11a57dba2f2a929f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the LED controller.  <br /></td></tr>
-<tr class="separator:af20dd5d2ce5509ed11a57dba2f2a929f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_methods_class_a_p_a102_controller"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_a_p_a102_controller')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_a_p_a102_controller.html">APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED, GAMMA_CORRECTION_MODE, START_FRAME, END_FRAME &gt;</a></td></tr>
+<tr class="memitem:af354f0751a07151be963a6bc8093f6ef inherit pub_methods_class_a_p_a102_controller"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_a_p_a102_controller.html#af354f0751a07151be963a6bc8093f6ef">init</a> ()</td></tr>
+<tr class="memdesc:af354f0751a07151be963a6bc8093f6ef inherit pub_methods_class_a_p_a102_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the LED controller.  <br /></td></tr>
+<tr class="separator:af354f0751a07151be963a6bc8093f6ef inherit pub_methods_class_a_p_a102_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_c_pixel_l_e_d_controller"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_c_pixel_l_e_d_controller')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_c_pixel_l_e_d_controller.html">CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;</a></td></tr>
 <tr class="memitem:a3070b1d4c6771e886472ac5b94c38cf8 inherit pub_methods_class_c_pixel_l_e_d_controller"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_l_e_d_controller.html#a3070b1d4c6771e886472ac5b94c38cf8">lanes</a> ()</td></tr>
 <tr class="memdesc:a3070b1d4c6771e886472ac5b94c38cf8 inherit pub_methods_class_c_pixel_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of lanes of the Controller.  <br /></td></tr>
@@ -216,12 +216,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a44d20f088426191c82919c9cdbc63a35 inherit pub_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top">virtual uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a44d20f088426191c82919c9cdbc63a35">getMaxRefreshRate</a> () const</td></tr>
 <tr class="memdesc:a44d20f088426191c82919c9cdbc63a35 inherit pub_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the maximum possible refresh rate of the strip.  <br /></td></tr>
 <tr class="separator:a44d20f088426191c82919c9cdbc63a35 inherit pub_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
-Protected Member Functions</h2></td></tr>
-<tr class="memitem:a3b6cbfe067f59b473ccf3024be065ada"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_s_k9822_controller.html#a3b6cbfe067f59b473ccf3024be065ada">showPixels</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER &gt; &amp;pixels)</td></tr>
-<tr class="memdesc:a3b6cbfe067f59b473ccf3024be065ada"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send the LED data to the strip.    <br /></td></tr>
-<tr class="separator:a3b6cbfe067f59b473ccf3024be065ada"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_static_methods_class_c_l_e_d_controller"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_class_c_l_e_d_controller')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td></tr>
+<tr class="memitem:a8b412ff1fd4833d0db63a175d40a2ee0 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a8b412ff1fd4833d0db63a175d40a2ee0">head</a> ()</td></tr>
+<tr class="memdesc:a8b412ff1fd4833d0db63a175d40a2ee0 inherit pub_static_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the first LED controller in the linked list of controllers.  <br /></td></tr>
+<tr class="separator:a8b412ff1fd4833d0db63a175d40a2ee0 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ad4ceb3bc9ae2efa11e50ffe4b140d4 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a3ad4ceb3bc9ae2efa11e50ffe4b140d4">computeAdjustment</a> (uint8_t scale, const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;colorCorrection, const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;colorTemperature)</td></tr>
+<tr class="memdesc:a3ad4ceb3bc9ae2efa11e50ffe4b140d4 inherit pub_static_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the combined color adjustment to the LEDs at a given scale, color correction, and color temperature.  <br /></td></tr>
+<tr class="separator:a3ad4ceb3bc9ae2efa11e50ffe4b140d4 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_class_a_p_a102_controller"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_class_a_p_a102_controller')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_a_p_a102_controller.html">APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED, GAMMA_CORRECTION_MODE, START_FRAME, END_FRAME &gt;</a></td></tr>
+<tr class="memitem:a22100c3d881c1ebce41b9772e821b89c inherit pro_methods_class_a_p_a102_controller"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_a_p_a102_controller.html#a22100c3d881c1ebce41b9772e821b89c">showPixels</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER &gt; &amp;pixels)</td></tr>
+<tr class="memdesc:a22100c3d881c1ebce41b9772e821b89c inherit pro_methods_class_a_p_a102_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send the LED data to the strip.    <br /></td></tr>
+<tr class="separator:a22100c3d881c1ebce41b9772e821b89c inherit pro_methods_class_a_p_a102_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_class_c_pixel_l_e_d_controller"><td colspan="2" onclick="javascript:toggleInherit('pro_methods_class_c_pixel_l_e_d_controller')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_c_pixel_l_e_d_controller.html">CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;</a></td></tr>
 <tr class="memitem:a1ab7248c894ba95c3a71665f5bed2a17 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_l_e_d_controller.html#a1ab7248c894ba95c3a71665f5bed2a17">showPixels</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;pixels)=0</td></tr>
 <tr class="memdesc:a1ab7248c894ba95c3a71665f5bed2a17 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send the LED data to the strip.  <br /></td></tr>
@@ -238,16 +243,6 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:add284627121ffab140e083e84fadc37f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#add284627121ffab140e083e84fadc37f">show</a> (const struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> *data, int nLeds, <a class="el" href="struct_c_r_g_b.html">CRGB</a> scale)=0</td></tr>
 <tr class="memdesc:add284627121ffab140e083e84fadc37f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the passed in RGB data out to the LEDs managed by this controller.  <br /></td></tr>
 <tr class="separator:add284627121ffab140e083e84fadc37f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
-<tr class="inherit_header pub_static_methods_class_c_l_e_d_controller"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_class_c_l_e_d_controller')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td></tr>
-<tr class="memitem:a8b412ff1fd4833d0db63a175d40a2ee0 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a8b412ff1fd4833d0db63a175d40a2ee0">head</a> ()</td></tr>
-<tr class="memdesc:a8b412ff1fd4833d0db63a175d40a2ee0 inherit pub_static_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the first LED controller in the linked list of controllers.  <br /></td></tr>
-<tr class="separator:a8b412ff1fd4833d0db63a175d40a2ee0 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ad4ceb3bc9ae2efa11e50ffe4b140d4 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a3ad4ceb3bc9ae2efa11e50ffe4b140d4">computeAdjustment</a> (uint8_t scale, const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;colorCorrection, const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;colorTemperature)</td></tr>
-<tr class="memdesc:a3ad4ceb3bc9ae2efa11e50ffe4b140d4 inherit pub_static_methods_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the combined color adjustment to the LEDs at a given scale, color correction, and color temperature.  <br /></td></tr>
-<tr class="separator:a3ad4ceb3bc9ae2efa11e50ffe4b140d4 inherit pub_static_methods_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_c_l_e_d_controller"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_class_c_l_e_d_controller')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td></tr>
 <tr class="memitem:a4672f8f1e93d5df90685cb62c4ebbe0e inherit pro_attribs_class_c_l_e_d_controller"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_c_r_g_b.html">CRGB</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html#a4672f8f1e93d5df90685cb62c4ebbe0e">m_Data</a></td></tr>
 <tr class="memdesc:a4672f8f1e93d5df90685cb62c4ebbe0e inherit pro_attribs_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">pointer to the LED data used by this controller  <br /></td></tr>
@@ -275,108 +270,6 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memdesc:aba5aa24458cb37f0f5e6b18a74408a47 inherit pro_static_attribs_class_c_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">pointer to the last LED controller in the linked list  <br /></td></tr>
 <tr class="separator:aba5aa24458cb37f0f5e6b18a74408a47 inherit pro_static_attribs_class_c_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aa5ea18078e404b02bce532efacadf6fd" name="aa5ea18078e404b02bce532efacadf6fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa5ea18078e404b02bce532efacadf6fd">&#9670;&#160;</a></span>SK9822Controller()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, <a class="el" href="group___pixel_types.html#ga3c26d076773aa0f331d3066b46dbc6a4">EOrder</a> RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(24)&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="class_s_k9822_controller.html">SK9822Controller</a>&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;<a class="el" href="class_s_k9822_controller.html">::SK9822Controller</a> </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00306">306</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
-
-</div>
-</div>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a id="af20dd5d2ce5509ed11a57dba2f2a929f" name="af20dd5d2ce5509ed11a57dba2f2a929f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af20dd5d2ce5509ed11a57dba2f2a929f">&#9670;&#160;</a></span>init()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, <a class="el" href="group___pixel_types.html#ga3c26d076773aa0f331d3066b46dbc6a4">EOrder</a> RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(24)&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void <a class="el" href="class_s_k9822_controller.html">SK9822Controller</a>&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;::init </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Initialize the LED controller. </p>
-
-<p>Implements <a class="el" href="class_c_l_e_d_controller.html#af877a15a5ec452780fbd1d359b8a9913">CLEDController</a>.</p>
-
-<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00308">308</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
-
-</div>
-</div>
-<a id="a3b6cbfe067f59b473ccf3024be065ada" name="a3b6cbfe067f59b473ccf3024be065ada"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3b6cbfe067f59b473ccf3024be065ada">&#9670;&#160;</a></span>showPixels()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, <a class="el" href="group___pixel_types.html#ga3c26d076773aa0f331d3066b46dbc6a4">EOrder</a> RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(24)&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void <a class="el" href="class_s_k9822_controller.html">SK9822Controller</a>&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;::showPixels </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER &gt; &amp;&#160;</td>
-          <td class="paramname"><em>pixels</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Send the LED data to the strip.   </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">pixels</td><td>the <a class="el" href="struct_pixel_controller.html" title="Pixel controller class.">PixelController</a> object for the LED data   </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00314">314</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
-
-</div>
-</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>/home/runner/work/FastLED/FastLED/src/<a class="el" href="chipsets_8h_source.html">chipsets.h</a></li>
 </ul>
@@ -387,7 +280,7 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, <a class="el" href="group___pix
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_s_k9822_controller.html">SK9822Controller</a></li>
-    <li class="footer">Generated on Sun Jul 9 2023 20:14:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated on Mon May 27 2024 17:24:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 <!-- ... -->

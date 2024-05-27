@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['q_0',['q',['../classq.html',1,'']]]
+  ['qfx_0',['qfx',['../classqfx.html',1,'']]]
 ];

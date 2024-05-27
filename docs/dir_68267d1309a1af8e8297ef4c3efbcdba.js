@@ -24,6 +24,8 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
     [ "fastspi_nop.h", "fastspi__nop_8h.html", "fastspi__nop_8h" ],
     [ "fastspi_ref.h", "fastspi__ref_8h.html", "fastspi__ref_8h" ],
     [ "fastspi_types.h", "fastspi__types_8h.html", "fastspi__types_8h" ],
+    [ "five_bit_hd_gamma.cpp", "five__bit__hd__gamma_8cpp_source.html", null ],
+    [ "five_bit_hd_gamma.h", "five__bit__hd__gamma_8h_source.html", null ],
     [ "hsv2rgb.cpp", "hsv2rgb_8cpp.html", "hsv2rgb_8cpp" ],
     [ "hsv2rgb.h", "hsv2rgb_8h.html", "hsv2rgb_8h" ],
     [ "led_sysdefs.h", "led__sysdefs_8h.html", "led__sysdefs_8h" ],

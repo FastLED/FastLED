@@ -25,5 +25,6 @@ var searchData=
   ['dimgrey_22',['DimGrey',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99acc56fb672d5ce34230c171fb1f61a432',1,'CRGB']]],
   ['directsunlight_23',['DirectSunlight',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a890e0555ad95071fa4391a5775a38621',1,'color.h']]],
   ['dodgerblue_24',['DodgerBlue',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a4d4b1fe189751d43e1912bd090a1af76',1,'CRGB']]],
-  ['dotstar_25',['DOTSTAR',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926aa38c183e00af9030ff455d2ae0e1d5c3',1,'FastLED.h']]]
+  ['dotstar_25',['DOTSTAR',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926aa38c183e00af9030ff455d2ae0e1d5c3',1,'FastLED.h']]],
+  ['dotstarhd_26',['DOTSTARHD',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926ad74c74695186923a5bac9867ec57e281',1,'FastLED.h']]]
 ];

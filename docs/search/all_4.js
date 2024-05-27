@@ -61,8 +61,9 @@ var searchData=
   ['dmxsimplecontroller_3c_20data_5fpin_2c_20rgb_5forder_20_3e_58',['DMXSimpleController&lt; DATA_PIN, RGB_ORDER &gt;',['../class_d_m_x_simple_controller.html',1,'']]],
   ['dodgerblue_59',['DodgerBlue',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a4d4b1fe189751d43e1912bd090a1af76',1,'CRGB']]],
   ['dotstar_60',['DOTSTAR',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926aa38c183e00af9030ff455d2ae0e1d5c3',1,'FastLED.h']]],
-  ['dp1903controller400khz_61',['DP1903Controller400Khz',['../class_d_p1903_controller400_khz.html',1,'']]],
-  ['dp1903controller800khz_62',['DP1903Controller800Khz',['../class_d_p1903_controller800_khz.html',1,'']]],
-  ['dump_63',['dump',['../class_c_pixel_view.html#a7c48be778df95d36399eeaa4e9164cda',1,'CPixelView']]],
-  ['dword_64',['dword',['../union_t_r_g_b_gradient_palette_entry_union.html#a2d804a8e4f58e9aa7d65f456f69d904b',1,'TRGBGradientPaletteEntryUnion']]]
+  ['dotstarhd_61',['DOTSTARHD',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926ad74c74695186923a5bac9867ec57e281',1,'FastLED.h']]],
+  ['dp1903controller400khz_62',['DP1903Controller400Khz',['../class_d_p1903_controller400_khz.html',1,'']]],
+  ['dp1903controller800khz_63',['DP1903Controller800Khz',['../class_d_p1903_controller800_khz.html',1,'']]],
+  ['dump_64',['dump',['../class_c_pixel_view.html#a7c48be778df95d36399eeaa4e9164cda',1,'CPixelView']]],
+  ['dword_65',['dword',['../union_t_r_g_b_gradient_palette_entry_union.html#a2d804a8e4f58e9aa7d65f456f69d904b',1,'TRGBGradientPaletteEntryUnion']]]
 ];

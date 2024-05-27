@@ -34,7 +34,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.6.0</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.0</span>
    </div>
   </td>
  </tr>
@@ -112,6 +112,7 @@ $(document).ready(function(){initNavTree('_fast_l_e_d_8h.html',''); initResizabl
 
 <p class="definition">Definition in file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 </div><div class="textblock"><code>#include &lt;SmartMatrix.h&gt;</code><br />
+<code>#include &lt;OctoWS2811.h&gt;</code><br />
 <code>#include &lt;stdint.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="cpp__compat_8h_source.html">cpp_compat.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="fastled__config_8h_source.html">fastled_config.h</a>&quot;</code><br />
@@ -235,7 +236,7 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a2f9de4cfbd302323305a4ad0e99167f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_fast_l_e_d_8h.html#a2f9de4cfbd302323305a4ad0e99167f4">FASTLED_VERSION</a>&#160;&#160;&#160;3006000</td></tr>
+<tr class="memitem:a2f9de4cfbd302323305a4ad0e99167f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_fast_l_e_d_8h.html#a2f9de4cfbd302323305a4ad0e99167f4">FASTLED_VERSION</a>&#160;&#160;&#160;3007000</td></tr>
 <tr class="memdesc:a2f9de4cfbd302323305a4ad0e99167f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current FastLED version number, as an integer.  <br /></td></tr>
 <tr class="separator:a2f9de4cfbd302323305a4ad0e99167f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00167d1f0bf80faa62c6d8952f540f82"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_fast_l_e_d_8h.html#a00167d1f0bf80faa62c6d8952f540f82">__PROG_TYPES_COMPAT__</a></td></tr>
@@ -273,7 +274,10 @@ Enumerations</h2></td></tr>
 , <a class="el" href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a>
 , <a class="el" href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926a4084a8d1074bd46a82ca4a5fabf982cb">SK9822</a>
 , <br />
-&#160;&#160;<a class="el" href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926aa38c183e00af9030ff455d2ae0e1d5c3">DOTSTAR</a>
+&#160;&#160;<a class="el" href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926a3b67cd8706aa03d1d3e662a6199a87e2">SK9822HD</a>
+, <a class="el" href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926aa38c183e00af9030ff455d2ae0e1d5c3">DOTSTAR</a>
+, <a class="el" href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926ad74c74695186923a5bac9867ec57e281">DOTSTARHD</a>
+, <a class="el" href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926a00c730f7303410e1a5a22376b2f12d8f">APA102HD</a>
 <br />
  }</td></tr>
 <tr class="memdesc:ac06549dc4a351e2c8f1dda8ae81f7926"><td class="mdescLeft">&#160;</td><td class="mdescRight">LED chipsets with SPI interface.  <a href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926">More...</a><br /></td></tr>
@@ -330,13 +334,13 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define FASTLED_VERSION&#160;&#160;&#160;3006000</td>
+          <td class="memname">#define FASTLED_VERSION&#160;&#160;&#160;3007000</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Current FastLED version number, as an integer. </p>
-<p>E.g. 3006000 for version "3.6.0", with:</p><ul>
+<p>E.g. 3007000 for version "3.7.0", with:</p><ul>
 <li>1 digit for the major version</li>
 <li>3 digits for the minor version</li>
 <li>3 digits for the patch version </li>
@@ -360,7 +364,7 @@ Variables</h2></td></tr>
 
 <p>Alias of the FastLED instance for legacy purposes. </p>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00650">650</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00666">666</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -378,7 +382,7 @@ Variables</h2></td></tr>
 
 <p>Alias of the FastLED instance for legacy purposes. </p>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00652">652</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00668">668</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -397,7 +401,7 @@ Variables</h2></td></tr>
 <p>If no pin/port mappings are found, sends a warning message to the user during compilation. </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="fastpin_8h.html" title="Class base definitions for defining fast pin access.">fastpin.h</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00666">666</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00682">682</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -416,7 +420,7 @@ Variables</h2></td></tr>
 <p>Unknown NUM_CONTROLLERS definition. </p>
 <p>Unused elsewhere in the library? </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Remove? </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00204">204</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00211">211</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -443,7 +447,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the brightness scale, limited to max power </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00213">213</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00220">220</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -462,7 +466,7 @@ Variables</h2></td></tr>
 
 <p>Blockless output port enum. </p>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00161">161</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00168">168</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -481,7 +485,7 @@ Variables</h2></td></tr>
 <p>Smart Matrix Library controller type. </p>
 <dl class="section see"><dt>See also</dt><dd><a href="https://github.com/pixelmatix/SmartMatrix">https://github.com/pixelmatix/SmartMatrix</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00095">95</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00102">102</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -515,11 +519,17 @@ Variables</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="ac06549dc4a351e2c8f1dda8ae81f7926a4084a8d1074bd46a82ca4a5fabf982cb" name="ac06549dc4a351e2c8f1dda8ae81f7926a4084a8d1074bd46a82ca4a5fabf982cb"></a>SK9822&#160;</td><td class="fielddoc"><p>SK9822 LED chipset. </p>
 </td></tr>
+<tr><td class="fieldname"><a id="ac06549dc4a351e2c8f1dda8ae81f7926a3b67cd8706aa03d1d3e662a6199a87e2" name="ac06549dc4a351e2c8f1dda8ae81f7926a3b67cd8706aa03d1d3e662a6199a87e2"></a>SK9822HD&#160;</td><td class="fielddoc"><p>SK9822 LED chipset with 5-bit gamma correction. </p>
+</td></tr>
 <tr><td class="fieldname"><a id="ac06549dc4a351e2c8f1dda8ae81f7926aa38c183e00af9030ff455d2ae0e1d5c3" name="ac06549dc4a351e2c8f1dda8ae81f7926aa38c183e00af9030ff455d2ae0e1d5c3"></a>DOTSTAR&#160;</td><td class="fielddoc"><p>APA102 LED chipset alias. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac06549dc4a351e2c8f1dda8ae81f7926ad74c74695186923a5bac9867ec57e281" name="ac06549dc4a351e2c8f1dda8ae81f7926ad74c74695186923a5bac9867ec57e281"></a>DOTSTARHD&#160;</td><td class="fielddoc"><p>APA102HD LED chipset alias. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ac06549dc4a351e2c8f1dda8ae81f7926a00c730f7303410e1a5a22376b2f12d8f" name="ac06549dc4a351e2c8f1dda8ae81f7926a00c730f7303410e1a5a22376b2f12d8f"></a>APA102HD&#160;</td><td class="fielddoc"><p>APA102 LED chipset with 5-bit gamma correction. </p>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00081">81</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00085">85</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -540,7 +550,7 @@ Variables</h2></td></tr>
 <dd>
 <a href="https://github.com/PaulStoffregen/OctoWS2811">https://github.com/PaulStoffregen/OctoWS2811</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00100">100</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00107">107</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -561,7 +571,7 @@ Variables</h2></td></tr>
 <dd>
 <a href="https://github.com/PaulStoffregen/WS2812Serial">https://github.com/PaulStoffregen/WS2812Serial</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00105">105</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00112">112</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -599,7 +609,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="_fast_l_e_d_8h.html">FastLED.h</a></li>
-    <li class="footer">Generated on Sun Jul 9 2023 20:14:32 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated on Mon May 27 2024 17:24:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 <!-- ... -->

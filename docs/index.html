@@ -34,7 +34,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.6.0</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.0</span>
    </div>
   </td>
  </tr>
@@ -125,10 +125,10 @@ Getting Started</h1>
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
 <div class="ttc" id="aclass_c_fast_l_e_d_html_a83afdd1e2a21f33ac4f8d2610d6e331b"><div class="ttname"><a href="class_c_fast_l_e_d.html#a83afdd1e2a21f33ac4f8d2610d6e331b">CFastLED::show</a></div><div class="ttdeci">void show(uint8_t scale)</div><div class="ttdoc">Update all our controllers with the current led colors, using the passed in brightness.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00054">FastLED.cpp:54</a></div></div>
 <div class="ttc" id="aclass_c_fast_l_e_d_html_afd7928d822589740af6e23b2d510cf3f"><div class="ttname"><a href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">CFastLED::addLeds</a></div><div class="ttdeci">static CLEDController &amp; addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset=0)</div><div class="ttdoc">Add a CLEDController instance to the world.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00042">FastLED.cpp:42</a></div></div>
-<div class="ttc" id="aclass_n_e_o_p_i_x_e_l_html"><div class="ttname"><a href="class_n_e_o_p_i_x_e_l.html">NEOPIXEL</a></div><div class="ttdoc">LED controller for WS2812 LEDs with GRB color order.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8h_source.html#l00119">FastLED.h:119</a></div></div>
+<div class="ttc" id="aclass_n_e_o_p_i_x_e_l_html"><div class="ttname"><a href="class_n_e_o_p_i_x_e_l.html">NEOPIXEL</a></div><div class="ttdoc">LED controller for WS2812 LEDs with GRB color order.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8h_source.html#l00126">FastLED.h:126</a></div></div>
 <div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00120">pixeltypes.h:120</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce">CRGB::White</a></div><div class="ttdeci">@ White</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00808">pixeltypes.h:808</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00672">pixeltypes.h:672</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce">CRGB::White</a></div><div class="ttdeci">@ White</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00806">pixeltypes.h:806</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00670">pixeltypes.h:670</a></div></div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md1"></a>
 Help and Support</h1>
 <p>If you need help with using the library, please consider visiting the Reddit community at <a href="https://reddit.com/r/FastLED">https://reddit.com/r/FastLED</a>. There are thousands of knowledgeable FastLED users in that group and a plethora of solutions in the post history.</p>
@@ -147,7 +147,10 @@ Supported LED Chipsets</h1>
 <li>LPD8806 - SPI based chipset, very high speed</li>
 <li>WS2801 - SPI based chipset, cheap and widely available</li>
 <li>SM16716 - SPI based chipset</li>
-<li>APA102 - SPI based chipset</li>
+<li>APA102 - SPI based chipset<ul>
+<li>APA102HD - Same as APA102 but with a high definition gamma correction function applied at the driver level.</li>
+</ul>
+</li>
 <li>P9813 - aka Cool Neon's Total Control Lighting</li>
 <li>DMX - send rgb data out over DMX using Arduino DMX libraries</li>
 <li>SmartMatrix panels - needs the SmartMatrix library (<a href="https://github.com/pixelmatix/SmartMatrix">https://github.com/pixelmatix/SmartMatrix</a>)</li>
@@ -171,10 +174,13 @@ Supported Platforms</h1>
 <li>ESP32 based boards</li>
 </ul>
 <p>What types of platforms are we thinking about supporting in the future? Here's a short list: ChipKit32, Maple, Beagleboard</p>
-<h1><a class="anchor" id="autotoc_md4"></a>
+<h2><a class="anchor" id="autotoc_md4"></a>
+Porting FastLED to a new platform</h2>
+<p>Information on porting FastLED can be found in the file PORTING.md.</p>
+<h1><a class="anchor" id="autotoc_md5"></a>
 What about that name?</h1>
 <p>Wait, what happened to FastSPI_LED and FastSPI_LED2? The library was initially named FastSPI_LED because it was focused on very fast and efficient SPI access. However, since then, the library has expanded to support a number of LED chipsets that don't use SPI, as well as a number of math and utility functions for LED processing across the board. We decided that the name FastLED more accurately represents the totality of what the library provides, everything fast, for LEDs.</p>
-<h1><a class="anchor" id="autotoc_md5"></a>
+<h1><a class="anchor" id="autotoc_md6"></a>
 For more information</h1>
 <p>Check out the official site <a href="http://fastled.io">http://fastled.io</a> for links to documentation, issues, and news</p>
 <p><em>TODO</em> - get candy </p>
@@ -185,7 +191,7 @@ For more information</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jul 9 2023 20:14:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated on Mon May 27 2024 17:24:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 <!-- ... -->

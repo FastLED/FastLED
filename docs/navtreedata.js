@@ -28,9 +28,11 @@ var NAVTREE =
     [ "Getting Started", "index.html#autotoc_md0", null ],
     [ "Help and Support", "index.html#autotoc_md1", null ],
     [ "Supported LED Chipsets", "index.html#autotoc_md2", null ],
-    [ "Supported Platforms", "index.html#autotoc_md3", null ],
-    [ "What about that name?", "index.html#autotoc_md4", null ],
-    [ "For more information", "index.html#autotoc_md5", null ],
+    [ "Supported Platforms", "index.html#autotoc_md3", [
+      [ "Porting FastLED to a new platform", "index.html#autotoc_md4", null ]
+    ] ],
+    [ "What about that name?", "index.html#autotoc_md5", null ],
+    [ "For more information", "index.html#autotoc_md6", null ],
     [ "Todo List", "todo.html", null ],
     [ "Deprecated List", "deprecated.html", null ],
     [ "Modules", "modules.html", "modules" ],
@@ -66,12 +68,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_analog_output_8ino-example.html",
-"class_c_h_s_v_palette32.html#aca812404b1b407150305352722fd5769",
-"class_l_p_d1886__8_b_i_t.html",
-"fastspi__types_8h.html#afe32f8062c70f2114bd3a7adb55a4be3",
-"group___math.html#ga162169ac0c2d1f3d01eaff8f32e1b415",
-"noise_8h_source.html",
-"struct_pixel_controller.html#a0f4eb594a337bc3a739e65b2a1e5c401"
+"class_c_h_s_v_palette32.html#a7f6c1b130de1db2558b2db69a000dec2",
+"class_g_w6205__400.html",
+"fastspi__types_8h.html#a902b229144afd589cd405eb9d339aae3",
+"group___linear_interpolation.html#ga62ed4425400bc4140902347dc54ffb72",
+"modules.html",
+"struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99afcc79b4c1ead3f48f5ff558ea99cd249"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -6,7 +6,6 @@ var hierarchy =
       [ "SPIOutput< DATA_PIN, CLOCK_PIN, SPI_SPEED >", "class_s_p_i_output.html", null ],
       [ "SPIOutput< DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(12) >", "class_s_p_i_output.html", null ],
       [ "SPIOutput< DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(10) >", "class_s_p_i_output.html", null ],
-      [ "SPIOutput< DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(24) >", "class_s_p_i_output.html", null ],
       [ "SPIOutput< DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(16) >", "class_s_p_i_output.html", null ],
       [ "SPIOutput< DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(1) >", "class_s_p_i_output.html", null ],
       [ "SPIOutput< _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER >", "class_s_p_i_output.html", null ],
@@ -22,6 +21,9 @@ var hierarchy =
     [ "CLEDController", "class_c_l_e_d_controller.html", [
       [ "CPixelLEDController< RGB >", "class_c_pixel_l_e_d_controller.html", null ],
       [ "CPixelLEDController< RGB_ORDER, LANES, MASK >", "class_c_pixel_l_e_d_controller.html", [
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_BitShift, uint32_t(0x00000000), uint32_t(0x00000000)>", "class_a_p_a102_controller.html", null ],
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_Null, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", null ],
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_BitShift, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", null ],
         [ "DMXSerialController< RGB_ORDER >", "class_d_m_x_serial_controller.html", [
           [ "DMXSERIAL< RGB_ORDER >", "class_d_m_x_s_e_r_i_a_l.html", null ]
         ] ],
@@ -29,13 +31,16 @@ var hierarchy =
           [ "DMXSIMPLE< DATA_PIN, RGB_ORDER >", "class_d_m_x_s_i_m_p_l_e.html", null ]
         ] ],
         [ "WS2801Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(25) >", "class_w_s2801_controller.html", null ],
-        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_a_p_a102_controller.html", null ],
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED, GAMMA_CORRECTION_MODE, START_FRAME, END_FRAME >", "class_a_p_a102_controller.html", [
+          [ "APA102ControllerHD< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_a_p_a102_controller_h_d.html", null ],
+          [ "SK9822Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller.html", null ],
+          [ "SK9822ControllerHD< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller_h_d.html", null ]
+        ] ],
         [ "DMXSerialController< RGB_ORDER >", "class_d_m_x_serial_controller.html", null ],
         [ "DMXSimpleController< DATA_PIN, RGB_ORDER >", "class_d_m_x_simple_controller.html", null ],
         [ "LPD6803Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_l_p_d6803_controller.html", null ],
         [ "LPD8806Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_l_p_d8806_controller.html", null ],
         [ "P9813Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_p9813_controller.html", null ],
-        [ "SK9822Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller.html", null ],
         [ "SM16716Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_m16716_controller.html", null ],
         [ "WS2801Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_w_s2801_controller.html", [
           [ "WS2803Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_w_s2803_controller.html", null ]
@@ -155,7 +160,7 @@ var hierarchy =
     [ "NOPSPIOutput< _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER >", "class_n_o_p_s_p_i_output.html", null ],
     [ "PixelController< RGB_ORDER, LANES, MASK >", "struct_pixel_controller.html", null ],
     [ "CPixelView< PIXEL_TYPE >::pixelset_iterator_base< T >", "class_c_pixel_view_1_1pixelset__iterator__base.html", null ],
-    [ "q< T, F, I >", "classq.html", null ],
+    [ "qfx< T, F, I >", "classqfx.html", null ],
     [ "REFHardwareSPIOutput< _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER >", "class_r_e_f_hardware_s_p_i_output.html", null ],
     [ "Selectable", "class_selectable.html", [
       [ "Pin", "class_pin.html", [
