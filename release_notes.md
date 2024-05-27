@@ -1,3 +1,13 @@
+FastLED 3.7.0
+=============
+This release incorporates valuable improvements from FastLED contributors, tested and explored by the world-wide FastLED community of artists, creators, and developers.  Thank you for all of your time, energy, and help!  Here are some of the most significant changes in FastLED 3.7.0:
+* Support for ESP-IDF version 5.x on ESP32 and ESP8266
+* Improved support for new boards including UNO r4, Adafruit Grand Central Metro M4, SparkFun Thing Plus, RP2040, Portenta C33, and others.  We also added a pointer to the PORTING.md document to help streamline additional porting; if you’re porting to a new microcontroller, PORTING.md is the place to start.
+* New gamma correction capability for APA102 and SK9822 LEDs
+* Bug fixes and performances improvements, including faster smaller code on AVR, fewer compiler warnings, and  faster build times
+* Released May 2024, with heartfelt thanks to all the FastLED community members around the world!
+
+
 FastLED 3.6.0
 =============
 This release incorporates valuable improvements from FastLED contributors, tested and explored by the world-wide FastLED community of artists, creators, and developers.  Thank you for all of your time, energy, and help!  Here are some of the most significant changes in FastLED 3.6.0: 
