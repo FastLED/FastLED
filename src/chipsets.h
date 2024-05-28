@@ -363,6 +363,11 @@ private:
 	}
 };
 
+/// APA102 high definition controller class.
+/// @tparam DATA_PIN the data pin for these LEDs
+/// @tparam CLOCK_PIN the clock pin for these LEDs
+/// @tparam RGB_ORDER the RGB ordering for these LEDs
+/// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(24)
 template <
 	uint8_t DATA_PIN,
 	uint8_t CLOCK_PIN,
