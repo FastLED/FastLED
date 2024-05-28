@@ -26,7 +26,7 @@ jobs:
 
       - name: Install Doxygen
         env: 
-          DOXYGEN_VERSION: 1.9.7
+          DOXYGEN_VERSION: 1.11.0
         run: |
           wget -q https://www.doxygen.nl/files/doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
           tar -xf doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
