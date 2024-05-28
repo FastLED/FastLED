@@ -24,7 +24,6 @@ FASTLED_NAMESPACE_BEGIN
 // included without a defined platform
 #ifdef FASTLED_DOXYGEN
 #define FASTLED_USE_PROGMEM 1
-#define FL_ALIGN_PROGMEM  __attribute__ ((aligned (4)))
 #endif
 
 /// @def FASTLED_USE_PROGMEM
@@ -33,7 +32,7 @@ FASTLED_NAMESPACE_BEGIN
 /// and the FL_PGM_* accessors to the Arduino equivalents.
 
 
-#if FASTLED_USE_PROGMEM == 1
+#if (FASTLED_USE_PROGMEM == 1) || defined(FASTLED_DOXYGEN)
 #ifndef FASTLED_INCLUDE_PGMSPACE
 #define FASTLED_INCLUDE_PGMSPACE 1
 #endif
@@ -96,7 +95,7 @@ FASTLED_NAMESPACE_BEGIN
 /// palette code uses 'read dword', and now uses this macro
 /// to make sure that gradient palettes are 4-byte aligned.
 
-#if defined(FASTLED_ARM) || defined(ESP32) || defined(ESP8266)
+#if defined(FASTLED_ARM) || defined(ESP32) || defined(ESP8266) || defined(FASTLED_DOXYGEN)
 #define FL_ALIGN_PROGMEM  __attribute__ ((aligned (4)))
 #else
 #define FL_ALIGN_PROGMEM

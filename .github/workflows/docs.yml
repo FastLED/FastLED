@@ -9,7 +9,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Fetch Repository Reference Info
         id: repo-info
         run: |
@@ -26,7 +26,7 @@ jobs:
 
       - name: Install Doxygen
         env: 
-          DOXYGEN_VERSION: 1.9.7
+          DOXYGEN_VERSION: 1.11.0
         run: |
           wget -q https://www.doxygen.nl/files/doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
           tar -xf doxygen-${{ env.DOXYGEN_VERSION }}.linux.bin.tar.gz
@@ -34,7 +34,7 @@ jobs:
 
       - name: Install Themes
         env:
-          DOXYGEN_AWESOME_VERSION: 2.2.0
+          DOXYGEN_AWESOME_VERSION: 2.3.3
         working-directory: ./docs
         run: |
           git clone --depth 1 -b v${{ env.DOXYGEN_AWESOME_VERSION }} https://github.com/jothepro/doxygen-awesome-css
@@ -46,7 +46,7 @@ jobs:
           doxygen Doxyfile
 
       - name: Deploy Docs
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages

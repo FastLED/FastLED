@@ -37,7 +37,7 @@ public:
     /// In this dummy version, no adjustment is made.
     static __attribute__((always_inline)) inline uint8_t adjust(FASTLED_REGISTER uint8_t data) { return data; }
 
-    /// @copybrief adjust(register uint8_t)
+    /// @copybrief adjust(FASTLED_REGISTER uint8_t)
     /// @param data input byte
     /// @param scale scale value
     /// @returns input byte rescaled using ::scale8(uint8_t, uint8_t)
