@@ -243,6 +243,20 @@ _FL_DEFPIN( 41, 0, 1) //APA102 Data
 
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(ADAFRUIT_PIXELTRINKEY_M0)
+
+#define MAX_PIN 5
+_FL_DEFPIN( 0, 2, 0); // D0
+_FL_DEFPIN( 1, 1, 0); // D1 (Internal NeoPixel)
+_FL_DEFPIN( 2, 4, 0); // D2 (MOSI)
+_FL_DEFPIN( 3, 5, 0); // D3 (SCK)
+_FL_DEFPIN( 4, 6, 0); // D4 (MISO)
+
+#define SPI_DATA  2
+#define SPI_CLOCK 3
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
 #elif defined(ARDUINO_SAMD_ZERO)
 
 #define MAX_PIN 42
