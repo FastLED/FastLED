@@ -6,7 +6,7 @@ FastLED
 [![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
-sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress.  In addition to writing to the
+sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), Würth Elektronik and AliExpress.  In addition to writing to the
 LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating
 your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while
 still keeping things as fast as possible.
@@ -56,11 +56,12 @@ Here's a list of all the LED chipsets are supported.  More details on the LED ch
 * WS2801 - SPI based chipset, cheap and widely available
 * SM16716 - SPI based chipset
 * APA102 - SPI based chipset
-  * APA102HD - Same as APA102 but with a high definition gamma correction function applied at the driver level.
+* APA102HD - Same as APA102 but with a high definition gamma correction function applied at the driver level.
 * P9813 - aka Cool Neon's Total Control Lighting
 * DMX - send rgb data out over DMX using Arduino DMX libraries
 * SmartMatrix panels - needs the SmartMatrix library (https://github.com/pixelmatix/SmartMatrix)
 * LPD6803 - SPI based chpiset, chip CMODE pin must be set to 1 (inside oscillator mode)
+* Würth Elektronik IC LEDs (also 1315050930002 / 1313210530000 / 1312020030000)
 
 HL1606, and "595"-style shift registers are no longer supported by the library.  The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.
 
