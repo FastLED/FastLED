@@ -41,15 +41,15 @@ function adjustGamma( orig, gamma)
 
 
 var origurl = document.location.href;
-//"http://soliton.vm.bytemark.co.uk/pub/cpt-city/dca/tn/alarm.p1.0.2.png.index.html";
+//"http://seaviewsensing.com/pub/cpt-city/dca/tn/alarm.p1.0.2.png.index.html";
 
 // origurl = //document.location.href;
 var url2 = origurl.replace( "/tn/", "/");
 var url3 = url2.replace( ".png.index.html", ".c3g");
 
-var onSite = url3.indexOf("http://soliton.vm.bytemark.co.uk/");
+var onSite = url3.indexOf("http://seaviewsensing.com/");
 if( onSite != 0) {
-    window.location.href="http://soliton.vm.bytemark.co.uk/pub/cpt-city/";
+    window.location.href="http://seaviewsensing.com/pub/cpt-city/";
     //return;
 }
 
@@ -187,7 +187,7 @@ if( onSite == 0) {
     i.src = url3;
     document.body.appendChild(i);
 } else {
-    window.location.href="http://soliton.vm.bytemark.co.uk/pub/cpt-city/";
+    window.location.href="http://seaviewsensing.com/pub/cpt-city/";
 }
 cursor_clear();
 //alert(stdout);
