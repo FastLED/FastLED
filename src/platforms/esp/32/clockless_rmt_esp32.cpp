@@ -58,6 +58,15 @@ typedef struct {
 extern rmt_block_mem_t RMTMEM;
 #endif
 
+
+void IRAM_ATTR GiveGTX_sem()
+{
+    if (gTX_sem != NULL)
+        {
+        xSemaphoreGive(gTX_sem);
+        }
+}
+
 ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, int memBlocks)
     : mPixelData(0), 
       mSize(0), 
@@ -198,7 +207,7 @@ void IRAM_ATTR ESP32RMTController::showPixels()
     gNumStarted++;
 
     // -- The last call to showPixels is the one responsible for doing
-    //    all of the actual worl
+    //    all of the actual work
     if (gNumStarted == gNumControllers) {
         gNext = 0;
 
@@ -220,7 +229,7 @@ void IRAM_ATTR ESP32RMTController::showPixels()
         // -- Wait here while the data is sent. The interrupt handler
         //    will keep refilling the RMT buffers until it is all
         //    done; then it gives the semaphore back.
-        xSemaphoreTake(gTX_sem, portMAX_DELAY);
+        xSemaphoreTake(gTX_sem, FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM);
         xSemaphoreGive(gTX_sem);
 
         // -- Make sure we don't call showPixels too quickly
