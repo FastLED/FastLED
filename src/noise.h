@@ -102,6 +102,18 @@ extern int8_t inoise8_raw(uint16_t x);
 /// @} NoiseGeneration
 
 
+/// @name 32 bit simplex noise functions
+///@{
+/// 32 bit, fixed point implementation of simplex noise functions.
+/// The inputs are 20.12 fixed-point value. The result covers the full
+/// range of a uint16_t averaging around 32768.
+uint16_t snoise16(uint32_t x);
+uint16_t snoise16(uint32_t x, uint32_t y);
+uint16_t snoise16(uint32_t x, uint32_t y, uint32_t z);
+uint16_t snoise16(uint32_t x, uint32_t y, uint32_t z, uint32_t w);
+///@}
+
+
 
 /// @defgroup NoiseFill Noise Fill Functions
 /// Functions to fill a buffer with noise data.
