@@ -1,24 +1,26 @@
-FastLED Release howto
+# FastLED Release howto
 
-Pushing a fastled release, the short version, last updated May 2024
+*Pushing a fastled release, the short version, last updated May 2024*
 
 Edit these files to update the version number
-library.json 
-library.properties 
-FastLED.h 
-README.md 
-Doxyfile
+  * library.json 
+  * library.properties 
+  * FastLED.h 
+  * README.md 
+  * Doxyfile
 
 Edit this file with release notes and version number.
-release_notes.md 
+  * release_notes.md
+
 Release notes should list highlight changes (not necessarily all minor bug fixes) and thank people for their help. 
 
-Git commands to commit and tag release 
+Git commands to commit and tag release'
+```bash
 $ git commit -m "Rev 3.2.10 to add a couple more platform defs and bug fixes" . 
 $ git tag 3.2.10 master 
 $ git push 
 $ git push origin 3.2.10 
-
+```
 
 Then use the GitHub UI to make a new “Release”
 
