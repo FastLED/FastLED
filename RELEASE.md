@@ -2,12 +2,19 @@
 
 *Pushing a fastled release, the short version, last updated May 2024*
 
+## Example
+
+https://github.com/FastLED/FastLED/commit/4444758ffaf853ba4f8deb973532548c9c1ee231
+
+## How to
+
 Edit these files to update the version number
   * library.json 
   * library.properties 
   * FastLED.h 
   * README.md 
   * Doxyfile
+
 
 Edit this file with release notes and version number.
   * release_notes.md
