@@ -2,10 +2,10 @@ FastLED 3.7.1
 =============
 This is a bug fix release
   * https://github.com/FastLED/FastLED/commit/85650d9eda459df20ea966b85d48b84053c2c604
-		* Addresses compiler issues related ESP32-S3 and the RMT legacy driver in ArduinoIDE 2.3.2 update which now includes the ESP-IDF 5.1.
-		* Note that this is a compiler fix *only* and was simple. If the community reports additional problems we will release a bugfix to address it.
+    * Addresses compiler issues related ESP32-S3 and the RMT legacy driver in ArduinoIDE 2.3.2 update which now includes the ESP-IDF 5.1.
+    * Note that this is a compiler fix *only* and was simple. If the community reports additional problems we will release a bugfix to address it.
   * https://github.com/FastLED/FastLED/commit/e0a34180c5ad1512aa39f6b6c0987119535d39e8
-	  * Work around for ESP32 halt when writing WS2812 LEDS under massive load. It appears there was an underflow condition in a critical ISR to refill the RMT buffer that did not give back to a semaphore. Subsequent calls to `show()` would then block forever. We now given a max timeout so that in the worse case scenario there will be a momentary hang of `portMAX_DELAY`.
+    * Work around for ESP32 halt when writing WS2812 LEDS under massive load. It appears there was an underflow condition in a critical ISR to refill the RMT buffer that did not give back to a semaphore. Subsequent calls to `show()` would then block forever. We now given a max timeout so that in the worse case scenario there will be a momentary hang of `portMAX_DELAY`.
 
 
 FastLED 3.7.0
