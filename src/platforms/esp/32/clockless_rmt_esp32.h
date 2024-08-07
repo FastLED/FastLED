@@ -137,6 +137,8 @@ extern "C" {
 extern void spi_flash_op_lock(void);
 extern void spi_flash_op_unlock(void);
 
+extern void IRAM_ATTR GiveGTX_sem();
+
 #ifdef __cplusplus
 }
 #endif
@@ -183,6 +185,23 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 //    Brian Bulkowski for finding this problem and developing a fix.
 #ifndef FASTLED_RMT_MEM_BLOCKS
 #define FASTLED_RMT_MEM_BLOCKS 2
+#endif
+
+// @davidlmorris 2024-08-03
+// This is work-around for the issue of random fastLed freezes randomly sometimes minutes
+// but usually hours after the start, probably caused by interrupts 
+// being swallowed by the system so that the gTX_sem semaphore is never released
+// by the RMT interrupt handler causing FastLED.Show() never to return.
+
+// The default is never return (or max ticks aka portMAX_DELAY).  
+// To resolve this we need to set a maximum time to hold the semaphore.
+// For example: To wait a maximum of two seconds (enough time for the Esp32 to have sorted 
+// itself out and fast enough that it probably won't be greatly noticed by the audience)
+// use:
+// # define FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM (2000/portTICK_PERIOD_MS)
+// (Place this in your code directly before the first call to FastLED.h)
+#ifndef FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM  
+#define FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM (portMAX_DELAY)
 #endif
 
 // 64 for ESP32, ESP32S2
