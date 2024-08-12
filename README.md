@@ -22,9 +22,11 @@ We have multiple goals with this library:
 
 ### PlatformIO
 
-We've created a custom repo you can try out to start your projects. This repo is *backwards compatible with the Arduino IDE*.
+We've created a custom repo you can try out to start your projects. This repo is designed to be used with VSCode + PlatformIO but is also *backwards compatible with the Arduino IDE*.
 
-PlatformIO is generally viewed as a much better coding experience than the Arduino IDE because you get auto completion tools like intellisense and CoPilot. PlatformIO is an extension to VSCode. Anything you can do in Arduino IDE you can pretty much do with PlatformIO.
+Why PlatformIO? PlatformIO is an extension to VSCode and is generally viewed as a much better experience than the Arduino IDE. You get auto completion tools like intellisense and CoPilot and the ability to install tools like crash decoding. Anything you can do in Arduino IDE you can do with PlatformIO.
+
+Get starter here:
 
 https://github.com/FastLED/PlatformIO-Starter
 
