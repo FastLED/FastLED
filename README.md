@@ -26,7 +26,7 @@ We've created a custom repo you can try out to start your projects. This repo is
 
 Why PlatformIO? PlatformIO is an extension to VSCode and is generally viewed as a much better experience than the Arduino IDE. You get auto completion tools like intellisense and CoPilot and the ability to install tools like crash decoding. Anything you can do in Arduino IDE you can do with PlatformIO.
 
-Get starter here:
+Get started here:
 
 https://github.com/FastLED/PlatformIO-Starter
 
