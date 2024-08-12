@@ -20,6 +20,14 @@ We have multiple goals with this library:
 
 ## Getting Started
 
+### PlatformIO
+
+We've created a custom repo you can try out to start your projects. PlatformIO is generally viewed as a much better coding experience than the ArduinoIDE because you get auto completion tools like intellesense and CoPilot. PlatformIO is an extension to VSCode. Anything you can do in ArduinoIDE you can pretty much do with PlatformIO.
+
+https://github.com/FastLED/PlatformIO-Starter
+
+### ArduinoIDE
+
 Install the library using either [the .zip file from the latest release](https://github.com/FastLED/FastLED/releases/latest/) or by searching for "FastLED" in the libraries manager of the Arduino IDE. [See the Arduino documentation on how to install libraries for more information.](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries)
 
 How quickly can you get up and running with the library?  Here's a simple blink program:
