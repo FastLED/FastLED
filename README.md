@@ -32,7 +32,7 @@ https://github.com/FastLED/PlatformIO-Starter
 
 ### ArduinoIDE
 
-When running the Arduino IDE you need to do the additional installation step of installing FastLED in the global Arduino IDE package manager:
+When running the Arduino IDE you need to do the additional installation step of installing FastLED in the global Arduino IDE package manager.
 
 Install the library using either [the .zip file from the latest release](https://github.com/FastLED/FastLED/releases/latest/) or by searching for "FastLED" in the libraries manager of the Arduino IDE. [See the Arduino documentation on how to install libraries for more information.](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries)
 
