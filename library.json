@@ -27,13 +27,18 @@
             "name": "Josh Huber",
             "url": "https://github.com/uberjay",
             "maintainer": true
-        }
+        },
+				{
+					  "name": "Zach Vorhies",
+						"url": "https://github.com/zackees",
+						"maintainer": true
+				}
     ],
     "repository": {
         "type": "git",
         "url": "https://github.com/FastLED/FastLED.git"
     },
-    "version": "3.7.1",
+    "version": "3.7.2",
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",

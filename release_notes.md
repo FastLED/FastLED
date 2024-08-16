@@ -1,3 +1,12 @@
+FastLED 3.7.2
+=============
+This is a feature enhancement release
+  * https://github.com/FastLED/FastLED/commit/cbfede210fcf90bcec6bbc6eee7e9fbd6256fdd1
+    * fill_gradient() now has higher precision for non __AVR__ boards.
+		* Fixes: https://github.com/FastLED/FastLED/issues/1658
+			* Thanks https://github.com/sutaburosu for the fix.
+
+
 FastLED 3.7.1
 =============
 This is a bug fix release
