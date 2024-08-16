@@ -8,6 +8,14 @@
 #include "pixeltypes.h"
 #include "fastled_progmem.h"
 
+#if !defined(FASTLED_USE_32_BIT_GRADIENT_FILL)
+  #if defined(__AVR__)
+    #define FASTLED_USE_32_BIT_GRADIENT_FILL 0
+  #else
+    #define FASTLED_USE_32_BIT_GRADIENT_FILL 1
+  #endif
+#endif
+
 FASTLED_NAMESPACE_BEGIN
 
 /// @defgroup ColorUtils Color Utility Functions
@@ -160,7 +168,30 @@ void fill_gradient( T* targetArray,
 
     uint16_t pixeldistance = endpos - startpos;
     int16_t divisor = pixeldistance ? pixeldistance : 1;
+    
+    #if FASTLED_USE_32_BIT_GRADIENT_FILL
+    // Use higher precision 32 bit math for new micros.
+    int32_t huedelta823 = (huedistance87 * 65536) / divisor;
+    int32_t satdelta823 = (satdistance87 * 65536) / divisor;
+    int32_t valdelta823 = (valdistance87 * 65536) / divisor;
 
+    huedelta823 *= 2;
+    satdelta823 *= 2;
+    valdelta823 *= 2;
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wshift-count-overflow"
+    uint32_t hue824 = startcolor.hue << 24;
+    uint32_t sat824 = startcolor.sat << 24;
+    uint32_t val824 = startcolor.val << 24;
+		#pragma GCC diagnostic pop
+    for( uint16_t i = startpos; i <= endpos; ++i) {
+        targetArray[i] = CHSV( hue824 >> 24, sat824 >> 24, val824 >> 24);
+        hue824 += huedelta823;
+        sat824 += satdelta823;
+        val824 += valdelta823;
+    }
+    #else
+    // Use 8-bit math for older micros.
     saccum87 huedelta87 = huedistance87 / divisor;
     saccum87 satdelta87 = satdistance87 / divisor;
     saccum87 valdelta87 = valdistance87 / divisor;
@@ -178,6 +209,7 @@ void fill_gradient( T* targetArray,
         sat88 += satdelta87;
         val88 += valdelta87;
     }
+    #endif  // defined(__AVR__)
 }
 
 
