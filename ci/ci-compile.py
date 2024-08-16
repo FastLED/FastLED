@@ -13,8 +13,8 @@ from pathlib import Path
 from threading import Lock
 
 ERROR_HAPPENED = False
-FIRST_JOB_LOCK = Lock()
-IS_GITHUB = "GITHUB_WORKFLOW" in os.environ
+FIRST_BUILD_LOCK = Lock()
+USE_FIRST_BUILD_LOCK = "GITHUB_WORKFLOW" in os.environ
 
 
 EXAMPLES = [
@@ -96,8 +96,8 @@ def process_queue(board: str, examples: list[str]):
         if ERROR_HAPPENED:
             return True
         locked_print(f"\n*** Building examples for board {board} ***")
-        if is_first and IS_GITHUB:
-            with FIRST_JOB_LOCK:
+        if is_first and USE_FIRST_BUILD_LOCK:
+            with FIRST_BUILD_LOCK:
                 # Github runners are memory limited and the first job is the most
                 # memory intensive since all the artifacts are being generated in parallel.
                 success = compile_for_board_and_example(board, example)
