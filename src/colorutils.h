@@ -161,22 +161,22 @@ void fill_gradient( T* targetArray,
     uint16_t pixeldistance = endpos - startpos;
     int16_t divisor = pixeldistance ? pixeldistance : 1;
 
-    saccum87 huedelta87 = huedistance87 / divisor;
-    saccum87 satdelta87 = satdistance87 / divisor;
-    saccum87 valdelta87 = valdistance87 / divisor;
+    int32_t huedelta823 = (huedistance87 * 65536) / divisor;
+    int32_t satdelta823 = (satdistance87 * 65536) / divisor;
+    int32_t valdelta823 = (valdistance87 * 65536) / divisor;
 
-    huedelta87 *= 2;
-    satdelta87 *= 2;
-    valdelta87 *= 2;
+    huedelta823 *= 2;
+    satdelta823 *= 2;
+    valdelta823 *= 2;
 
-    accum88 hue88 = startcolor.hue << 8;
-    accum88 sat88 = startcolor.sat << 8;
-    accum88 val88 = startcolor.val << 8;
+    uint32_t hue824 = startcolor.hue << 24;
+    uint32_t sat824 = startcolor.sat << 24;
+    uint32_t val824 = startcolor.val << 24;
     for( uint16_t i = startpos; i <= endpos; ++i) {
-        targetArray[i] = CHSV( hue88 >> 8, sat88 >> 8, val88 >> 8);
-        hue88 += huedelta87;
-        sat88 += satdelta87;
-        val88 += valdelta87;
+        targetArray[i] = CHSV( hue824 >> 24, sat824 >> 24, val824 >> 24);
+        hue824 += huedelta823;
+        sat824 += satdelta823;
+        val824 += valdelta823;
     }
 }
 
