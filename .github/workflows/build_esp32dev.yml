@@ -4,6 +4,10 @@ on:
       branches:
         - master
 
+    pull_request:
+      branches:
+        - master
+
 name: esp32dev
 jobs:
 
