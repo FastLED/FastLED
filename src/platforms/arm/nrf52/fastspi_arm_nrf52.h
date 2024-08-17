@@ -299,7 +299,7 @@
         }
 
         /// write out pixel data from the given PixelController object, including select, release, and waiting
-        template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
+        template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
             select();
             int len = pixels.mLen;
             // TODO: If user indicates a pre-allocated double-buffer,
