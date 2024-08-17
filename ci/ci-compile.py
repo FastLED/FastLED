@@ -52,7 +52,7 @@ BOARDS = [
     "esp32dev",
     "esp01",  # ESP8266
     "esp32-c3-devkitm-1",
-    #"esp32-c6-devkitc-1", # doesn't work yet.
+    # "esp32-c6-devkitc-1", # doesn't work yet.
     "esp32-s3-devkitc-1",
     "yun",
     "digix",
@@ -60,11 +60,11 @@ BOARDS = [
 ]
 
 CUSTOM_PROJECT_OPTIONS = {
-    #"esp32dev": f"platform={ESP32_IDF_5_1}",
+    "esp32dev": f"platform={ESP32_IDF_5_1}",
     #"esp01": f"platform={ESP32_IDF_5_1}",
-    #"esp32-c3-devkitm-1": f"platform={ESP32_IDF_5_1}",
-    #"esp32-c6-devkitc-1": f"platform={ESP32_IDF_5_1}",
-    #"esp32-s3-devkitc-1": f"platform={ESP32_IDF_5_1}",
+    "esp32-c3-devkitm-1": f"platform={ESP32_IDF_5_1}",
+    "esp32-c6-devkitc-1": f"platform={ESP32_IDF_5_1}",
+    "esp32-s3-devkitc-1": f"platform={ESP32_IDF_5_1}",
 }
 
 ERROR_HAPPENED = False
@@ -107,9 +107,6 @@ def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
         f"--build-dir={builddir}",
         f"examples/{example}/*ino",
     ]
-    custom_project_options = CUSTOM_PROJECT_OPTIONS.get(board)
-    if custom_project_options:
-        cmd_list.append(f'--project-option={custom_project_options}')
     result = subprocess.run(
         cmd_list,
         stdout=subprocess.PIPE,
@@ -125,7 +122,7 @@ def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
     locked_print(f"*** Finished building example {example} for board {board} ***")
     return True, result.stdout
 
-def create_build_dir(board: str) -> tuple[bool, str]:
+def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     locked_print(f"*** Initializing environment for board {board} ***")
     builddir = Path(".build") / board
@@ -141,9 +138,8 @@ def create_build_dir(board: str) -> tuple[bool, str]:
         "--board",
         board,
     ]
-    custom_project_options = CUSTOM_PROJECT_OPTIONS.get(board)
-    if custom_project_options:
-        cmd_list.append(f'--project-option={custom_project_options}')
+    if project_options:
+        cmd_list.append(f'--project-option={project_options}')
     result = subprocess.run(
         cmd_list,
         stdout=subprocess.PIPE,
@@ -195,18 +191,16 @@ def parse_args():
 
 def run(boards: list[str], examples: list[str]) -> int:
     start_time = time.time()
-    # Validate input
-    num_cpus = min(cpu_count(), len(boards))
     # Necessary to create the first project alone, so that the necessary root directories
     # are created and the subsequent projects can be created in parallel.
-    create_build_dir(boards[0])
+    create_build_dir(boards[0], CUSTOM_PROJECT_OPTIONS.get(boards[0]))
     # This is not memory/cpu bound but is instead network bound so we can run one thread
     # per board to speed up the process.
     parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(boards)
     # Initialize the build directories for all boards
     with concurrent.futures.ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
         future_to_board = {
-            executor.submit(create_build_dir, board): board
+            executor.submit(create_build_dir, board, CUSTOM_PROJECT_OPTIONS.get(board)): board
             for board in boards
         }
         for future in concurrent.futures.as_completed(future_to_board):
@@ -223,6 +217,7 @@ def run(boards: list[str], examples: list[str]) -> int:
     locked_print("\nAll build directories initialized.")
     errors: list[str] = []
     # Run the compilation process
+    num_cpus = max(1, min(cpu_count(), len(boards)))
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
             executor.submit(compile_examples, board, examples): board
