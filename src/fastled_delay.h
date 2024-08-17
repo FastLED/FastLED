@@ -191,40 +191,6 @@ template<> __attribute__((always_inline)) inline void delaycycles<4294966398>() 
 /// @}
 
 
-
-// New delaycycles implementation
-template<cycle_t CYCLES>
-__attribute__((always_inline)) inline void delaycycles();
-
-template<cycle_t CYCLES, bool isEven>
-struct DelayHelper {
-    static inline void delay();
-};
-
-template<cycle_t CYCLES>
-struct DelayHelper<CYCLES, true> {
-    static inline void delay() {
-        delaycycles<CYCLES/2>();
-        delaycycles<CYCLES/2>();
-    }
-};
-
-template<cycle_t CYCLES>
-struct DelayHelper<CYCLES, false> {
-    static inline void delay() {
-        delaycycles<CYCLES/2>();
-        delaycycles<CYCLES/2>();
-        FL_NOP;
-    }
-};
-
-template<cycle_t CYCLES>
-__attribute__((always_inline)) inline void delaycycles() {
-    DelayHelper<CYCLES, (CYCLES % 2 == 0)>::delay();
-}
-
-
-
 /// @name Some timing related macros/definitions
 /// @{
 
