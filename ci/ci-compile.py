@@ -202,7 +202,7 @@ def run(boards: list[str], examples: list[str]) -> int:
     create_build_dir(boards[0])
     # This is not memory/cpu bound but is instead network bound so we can run one thread
     # per board to speed up the process.
-    parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(BOARDS)
+    parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(boards)
     # Initialize the build directories for all boards
     with concurrent.futures.ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
         future_to_board = {
@@ -226,7 +226,7 @@ def run(boards: list[str], examples: list[str]) -> int:
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
             executor.submit(compile_examples, board, examples): board
-            for board in BOARDS
+            for board in boards
         }
         for future in concurrent.futures.as_completed(future_to_board):
             board = future_to_board[future]
