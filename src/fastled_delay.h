@@ -165,7 +165,7 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {FL_NOP2;
 template<> __attribute__((always_inline)) inline void delaycycles<4294966398>() {
 	// specialization for a gigantic amount of cycles, apparently this is needed
 	// or esp32 will blow the stack with cycles = 4294966398.
-	const uint32_t termination = 4294966398 / 10
+	const uint32_t termination = 4294966398 / 10;
 	const uint32_t remainder = 4294966398 % 10;
 	for (uint32_t i = 0; i < termination; i++) {
 		FL_NOP; FL_NOP; FL_NOP; FL_NOP; FL_NOP;
