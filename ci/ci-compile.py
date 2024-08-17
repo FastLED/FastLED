@@ -224,7 +224,9 @@ def run(boards: list[str], examples: list[str]) -> int:
                 return 1
             else:
                 locked_print(f"Finished initializing build_dir for board {board}")
-    locked_print("\nAll build directories initialized.")
+    init_end_time = time.time()
+    init_time = (init_end_time - start_time) / 60
+    locked_print(f"\nAll build directories initialized in {init_time:.2f} minutes.")
     errors: list[str] = []
     # Run the compilation process
     num_cpus = max(1, min(cpu_count(), len(boards)))
