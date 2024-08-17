@@ -4,10 +4,6 @@ on:
       branches:
         - master
 
-    pull_request:
-      branches:
-        - master
-
 
 name: digix
 jobs:
