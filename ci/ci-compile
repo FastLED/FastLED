@@ -3,4 +3,5 @@
 # cd to the directory of the script
 cd "$(dirname "$0")"
 
-python ci-compile.py
+# Pass all command-line arguments to ci-compile.py
+python ci-compile.py "$@"
