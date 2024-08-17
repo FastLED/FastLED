@@ -11,6 +11,7 @@ import concurrent.futures
 import time
 from pathlib import Path
 from threading import Lock
+import argparse
 
 
 IS_GITHUB = "GITHUB_ACTIONS" in os.environ
@@ -59,11 +60,11 @@ BOARDS = [
 ]
 
 CUSTOM_PROJECT_OPTIONS = {
-    "esp32dev": f"platform={ESP32_IDF_5_1}",
-    "esp01": f"platform={ESP32_IDF_5_1}",
-    "esp32-c3-devkitm-1": f"platform={ESP32_IDF_5_1}",
+    #"esp32dev": f"platform={ESP32_IDF_5_1}",
+    #"esp01": f"platform={ESP32_IDF_5_1}",
+    #"esp32-c3-devkitm-1": f"platform={ESP32_IDF_5_1}",
     #"esp32-c6-devkitc-1": f"platform={ESP32_IDF_5_1}",
-    "esp32-s3-devkitc-1": f"platform={ESP32_IDF_5_1}",
+    #"esp32-s3-devkitc-1": f"platform={ESP32_IDF_5_1}",
 }
 
 ERROR_HAPPENED = False
@@ -126,6 +127,7 @@ def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
 
 def create_build_dir(board: str) -> tuple[bool, str]:
     """Create the build directory for the given board."""
+    locked_print(f"*** Initializing environment for board {board} ***")
     builddir = Path(".build") / board
     builddir = builddir.absolute()
     builddir.mkdir(parents=True, exist_ok=True)
@@ -141,7 +143,7 @@ def create_build_dir(board: str) -> tuple[bool, str]:
     ]
     custom_project_options = CUSTOM_PROJECT_OPTIONS.get(board)
     if custom_project_options:
-        cmd_list.append(f'--project-option="{custom_project_options}"')
+        cmd_list.append(f'--project-option={custom_project_options}')
     result = subprocess.run(
         cmd_list,
         stdout=subprocess.PIPE,
@@ -160,7 +162,7 @@ def create_build_dir(board: str) -> tuple[bool, str]:
 
 
 # Function to process task queues for each board
-def process_queue(board: str, examples: list[str]) -> tuple[bool, str]:
+def compile_examples(board: str, examples: list[str]) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
     is_first = True
@@ -184,32 +186,33 @@ def process_queue(board: str, examples: list[str]) -> tuple[bool, str]:
     return True, ""
 
 
-def main() -> int:
-    """Main function."""
+def parse_args():
+    parser = argparse.ArgumentParser(description="Compile FastLED examples for various boards.")
+    parser.add_argument("--boards", type=str, help="Comma-separated list of boards to compile for")
+    parser.add_argument("--examples", type=str, help="Comma-separated list of examples to compile")
+    return parser.parse_args()
+
+
+def run(boards: list[str], examples: list[str]) -> int:
     start_time = time.time()
-
-    # Set the working directory to the script's parent directory.
-    script_dir = Path(__file__).parent.resolve()
-    locked_print(f"Changing working directory to {script_dir.parent}")
-    os.chdir(script_dir.parent)
-    os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = "pre:lib/ci/ci-flags.py"
-
-    task_queues = {board: EXAMPLES.copy() for board in BOARDS}
-    num_cpus = min(cpu_count(), len(BOARDS))
-
+    # Validate input
+    num_cpus = min(cpu_count(), len(boards))
     # Necessary to create the first project alone, so that the necessary root directories
     # are created and the subsequent projects can be created in parallel.
-    create_build_dir(BOARDS[0])
-
+    create_build_dir(boards[0])
     # This is not memory/cpu bound but is instead network bound so we can run one thread
     # per board to speed up the process.
+<<<<<<< HEAD
+    parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(boards)
+=======
     parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(BOARDS)
-
+>>>>>>> 15766e06 (adds c6 test)
     # Initialize the build directories for all boards
     with concurrent.futures.ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
         future_to_board = {
             executor.submit(create_build_dir, board): board
-            for board in BOARDS
+            for board in boards
+            for board in boards
         }
         for future in concurrent.futures.as_completed(future_to_board):
             board = future_to_board[future]
@@ -222,15 +225,17 @@ def main() -> int:
                 return 1
             else:
                 locked_print(f"Finished initializing build_dir for board {board}")
-
-
+    locked_print("\nAll build directories initialized.")
     errors: list[str] = []
-
     # Run the compilation process
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
-            executor.submit(process_queue, board, task_queues[board]): board
+            executor.submit(compile_examples, board, examples): board
+<<<<<<< HEAD
+            for board in boards
+=======
             for board in BOARDS
+>>>>>>> 15766e06 (adds c6 test)
         }
         for future in concurrent.futures.as_completed(future_to_board):
             board = future_to_board[future]
@@ -242,7 +247,6 @@ def main() -> int:
                 for f in future_to_board:
                     f.cancel()
                 break
-
     total_time = (time.time() - start_time) / 60
     if ERROR_HAPPENED:
         locked_print("\nDone. Errors happened during compilation.")
@@ -252,6 +256,32 @@ def main() -> int:
         f"\nDone. Built all projects for all boards in {total_time:.2f} minutes."
     )
     return 0
+
+
+def main() -> int:
+    """Main function."""
+    args = parse_args()
+    # Set the working directory to the script's parent directory.
+    script_dir = Path(__file__).parent.resolve()
+    locked_print(f"Changing working directory to {script_dir.parent}")
+    os.chdir(script_dir.parent)
+    os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = "pre:lib/ci/ci-flags.py"
+
+    boards = args.boards.split(',') if args.boards else BOARDS
+    examples = args.examples.split(',') if args.examples else EXAMPLES
+
+    invalid_boards = set(boards) - set(BOARDS)
+    invalid_examples = set(examples) - set(EXAMPLES)
+    
+    if invalid_boards:
+        locked_print(f"Error: Invalid boards specified: {', '.join(invalid_boards)}")
+        return 1
+    if invalid_examples:
+        locked_print(f"Error: Invalid examples specified: {', '.join(invalid_examples)}")
+        return 1
+
+    return run(boards, examples)
+
 
 
 if __name__ == "__main__":
