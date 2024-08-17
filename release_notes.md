@@ -1,3 +1,14 @@
+FastLED 3.7.3
+=============
+Adds Arduino IDE 2.3.1+ support in the idf-5.1 toolchain
+The following boards are now tested to compile and build
+  * esp32dev
+  * esp32c3
+  * esp32s3
+The following boards do not compile as of 8/17/2024:
+  * esp32c6
+
+
 FastLED 3.7.2
 =============
 This is a feature enhancement release
