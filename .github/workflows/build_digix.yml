@@ -1,4 +1,4 @@
-name: digix
+name: digix-SAM3X8E
 
 on:
   workflow_dispatch:

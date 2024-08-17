@@ -1,4 +1,4 @@
-name: yun
+name: yun-32u4
 
 on:
   workflow_dispatch:
