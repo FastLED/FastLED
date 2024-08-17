@@ -51,7 +51,7 @@ BOARDS = [
     "esp32dev",
     "esp01",  # ESP8266
     "esp32-c3-devkitm-1",
-    #"esp32-c6-devkitm-1",  # doesn't work yet.
+    #"esp32-c6-devkitc-1", # doesn't work yet.
     "esp32-s3-devkitc-1",
     "yun",
     "digix",
@@ -62,7 +62,7 @@ CUSTOM_PROJECT_OPTIONS = {
     "esp32dev": f"platform={ESP32_IDF_5_1}",
     "esp01": f"platform={ESP32_IDF_5_1}",
     "esp32-c3-devkitm-1": f"platform={ESP32_IDF_5_1}",
-    #"esp32-c6-devkitm-1": f"platform={ESP32_IDF_5_1}",
+    #"esp32-c6-devkitc-1": f"platform={ESP32_IDF_5_1}",
     "esp32-s3-devkitc-1": f"platform={ESP32_IDF_5_1}",
 }
 
@@ -83,7 +83,7 @@ def locked_print(*args, **kwargs):
         print(*args, **kwargs)
 
 
-def compile_for_board_and_example(board: str, example: str):
+def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     builddir = Path(".build") / board
     builddir = builddir.absolute()
@@ -120,9 +120,9 @@ def compile_for_board_and_example(board: str, example: str):
     locked_print(result.stdout)
     if result.returncode != 0:
         locked_print(f"*** Error compiling example {example} for board {board} ***")
-        return False
+        return False, result.stdout
     locked_print(f"*** Finished building example {example} for board {board} ***")
-    return True
+    return True, result.stdout
 
 def create_build_dir(board: str) -> tuple[bool, str]:
     """Create the build directory for the given board."""
@@ -174,13 +174,13 @@ def process_queue(board: str, examples: list[str]) -> tuple[bool, str]:
             with FIRST_BUILD_LOCK:
                 # Github runners are memory limited and the first job is the most
                 # memory intensive since all the artifacts are being generated in parallel.
-                success = compile_for_board_and_example(board=board, example=example)
+                success, message = compile_for_board_and_example(board=board, example=example)
         else:
-            success = compile_for_board_and_example(board=board, example=example)
+            success, message = compile_for_board_and_example(board=board, example=example)
         is_first = False
         if not success:
             ERROR_HAPPENED = True
-            return False, f"Error building {example} for board {board}"
+            return False, f"Error building {example} for board {board}. stdout:\n{message}"
     return True, ""
 
 
