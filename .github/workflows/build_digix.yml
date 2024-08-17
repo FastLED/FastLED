@@ -1,0 +1,26 @@
+on:
+    workflow_dispatch:
+    push:
+      branches:
+        - master
+
+name: digix
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: install python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install platformio build dependencies
+        run: |
+          pip install -r ci/requirements.txt
+
+      - name: Build FastLED examples
+        run: python ./ci/ci-compile.py --boards digix
