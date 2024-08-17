@@ -57,7 +57,7 @@ BOARDS = [
     "yun",
     "digix",
     "teensy30",
-    # "teensy41"
+    "teensy41"
 ]
 
 
