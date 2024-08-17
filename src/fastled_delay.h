@@ -2,6 +2,7 @@
 #define __INC_FL_DELAY_H
 
 #include "FastLED.h"
+#include "types.h"
 
 /// @file fastled_delay.h
 /// Utility functions and classes for managing delay cycles
@@ -76,11 +77,11 @@ public:
 /// Delay N clock cycles. 
 /// @tparam CYCLES the number of clock cycles to delay
 /// @note No delay is applied if CYCLES is less than or equal to zero.
-template<int CYCLES> inline void delaycycles();
+template<cycle_t CYCLES> inline void delaycycles();
 
 /// A variant of ::delaycycles that will always delay
 /// at least one cycle.
-template<int CYCLES> inline void delaycycles_min1() {
+template<cycle_t CYCLES> inline void delaycycles_min1() {
 	delaycycles<1>();
 	delaycycles<CYCLES-1>();
 }
@@ -91,7 +92,7 @@ template<int CYCLES> inline void delaycycles_min1() {
 // usable definition
 #if defined(FASTLED_AVR)
 // worker template - this will nop for LOOP * 3 + PAD cycles total
-template<int LOOP, int PAD> inline void _delaycycles_AVR() {
+template<int LOOP, cycle_t PAD> inline void _delaycycles_AVR() {
 	delaycycles<PAD>();
 	// the loop below is 3 cycles * LOOP.  the LDI is one cycle,
 	// the DEC is 1 cycle, the BRNE is 2 cycles if looping back and
@@ -106,11 +107,45 @@ template<int LOOP, int PAD> inline void _delaycycles_AVR() {
 		);
 }
 
-template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() {
+template<cycle_t CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 	_delaycycles_AVR<CYCLES / 3, CYCLES % 3>();
 }
+#elif defined(ESP32)
+
+// Prevent template overflow for large chips by using a 
+// New delaycycles implementation
+template<cycle_t CYCLES>
+__attribute__((always_inline)) inline void delaycycles();
+
+template<cycle_t CYCLES, bool isEven>
+struct DelayHelper {
+    static inline void delay();
+};
+
+template<cycle_t CYCLES>
+struct DelayHelper<CYCLES, true> {
+    static inline void delay() {
+        delaycycles<CYCLES/2>();
+        delaycycles<CYCLES/2>();
+    }
+};
+
+template<cycle_t CYCLES>
+struct DelayHelper<CYCLES, false> {
+    static inline void delay() {
+        delaycycles<CYCLES/2>();
+        delaycycles<CYCLES/2>();
+        FL_NOP;
+    }
+};
+
+template<cycle_t CYCLES>
+__attribute__((always_inline)) inline void delaycycles() {
+    DelayHelper<CYCLES, (CYCLES % 2 == 0)>::delay();
+}
+
 #else
-// template<int LOOP, int PAD> inline void _delaycycles_ARM() {
+// template<int LOOP, cycle_t PAD> inline void _delaycycles_ARM() {
 // 	delaycycles<PAD>();
 // 	// the loop below is 3 cycles * LOOP.  the LDI is one cycle,
 // 	// the DEC is 1 cycle, the BRNE is 2 cycles if looping back and
@@ -126,7 +161,7 @@ template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 // }
 
 
-template<int CYCLES> __attribute__((always_inline)) inline void delaycycles() {
+template<cycle_t CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 	// _delaycycles_ARM<CYCLES / 3, CYCLES % 3>();
 	FL_NOP; delaycycles<CYCLES-1>();
 }
@@ -156,6 +191,40 @@ template<> __attribute__((always_inline)) inline void delaycycles<5>() {FL_NOP2;
 /// @endcond
 
 /// @}
+
+
+
+// New delaycycles implementation
+template<cycle_t CYCLES>
+__attribute__((always_inline)) inline void delaycycles();
+
+template<cycle_t CYCLES, bool isEven>
+struct DelayHelper {
+    static inline void delay();
+};
+
+template<cycle_t CYCLES>
+struct DelayHelper<CYCLES, true> {
+    static inline void delay() {
+        delaycycles<CYCLES/2>();
+        delaycycles<CYCLES/2>();
+    }
+};
+
+template<cycle_t CYCLES>
+struct DelayHelper<CYCLES, false> {
+    static inline void delay() {
+        delaycycles<CYCLES/2>();
+        delaycycles<CYCLES/2>();
+        FL_NOP;
+    }
+};
+
+template<cycle_t CYCLES>
+__attribute__((always_inline)) inline void delaycycles() {
+    DelayHelper<CYCLES, (CYCLES % 2 == 0)>::delay();
+}
+
 
 
 /// @name Some timing related macros/definitions
