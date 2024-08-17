@@ -45,7 +45,7 @@ public:
 
     /// Hook called after a block of data is written to the output. 
     /// In this dummy version, no action is performed.
-    static __attribute__((always_inline)) inline void postBlock(int /* len */) { }
+    static __attribute__((always_inline)) inline void postBlock(int /* len */, void* context = NULL) { }
 };
 
 /// Flag for the start of an SPI transaction
