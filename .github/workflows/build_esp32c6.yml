@@ -4,7 +4,7 @@ on:
       branches:
         - master
 
-name: build esp32c6
+name: esp32c6
 jobs:
 
   build:

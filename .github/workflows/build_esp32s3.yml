@@ -4,7 +4,7 @@ on:
       branches:
         - master
 
-name: build esp32s3
+name: esp32s3
 jobs:
 
   build:
