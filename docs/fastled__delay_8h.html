@@ -34,7 +34,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.2</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.3</span>
    </div>
   </td>
  </tr>
@@ -108,6 +108,7 @@ $(document).ready(function(){initNavTree('fastled__delay_8h.html',''); initResiz
 
 <p class="definition">Definition in file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
+<code>#include &quot;types.h&quot;</code><br />
 </div>
 <p><a href="fastled__delay_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -140,11 +141,11 @@ Macros</h2></td></tr>
 <tr class="memitem:a25a701b693218049c1c74b422353f8d9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fastled__delay_8h.html#a25a701b693218049c1c74b422353f8d9">FL_NOP2</a>&#160;&#160;&#160;__asm__ __volatile__ (&quot;nop\n\t nop\n&quot;);</td></tr>
 <tr class="memdesc:a25a701b693218049c1c74b422353f8d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Double no operation ("no-op") instruction for delay.  <br /></td></tr>
 <tr class="separator:a25a701b693218049c1c74b422353f8d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acdd14fccd97b45d3d566c95bff28ed76"><td class="memTemplParams" colspan="2">template&lt;int CYCLES&gt; </td></tr>
+<tr class="memitem:acdd14fccd97b45d3d566c95bff28ed76"><td class="memTemplParams" colspan="2">template&lt;cycle_t CYCLES&gt; </td></tr>
 <tr class="memitem:acdd14fccd97b45d3d566c95bff28ed76"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fastled__delay_8h.html#acdd14fccd97b45d3d566c95bff28ed76">delaycycles</a> ()</td></tr>
 <tr class="memdesc:acdd14fccd97b45d3d566c95bff28ed76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Delay N clock cycles.  <br /></td></tr>
 <tr class="separator:acdd14fccd97b45d3d566c95bff28ed76"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76328edb9ea1a1f017567ff835247d2d"><td class="memTemplParams" colspan="2">template&lt;int CYCLES&gt; </td></tr>
+<tr class="memitem:a76328edb9ea1a1f017567ff835247d2d"><td class="memTemplParams" colspan="2">template&lt;cycle_t CYCLES&gt; </td></tr>
 <tr class="memitem:a76328edb9ea1a1f017567ff835247d2d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fastled__delay_8h.html#a76328edb9ea1a1f017567ff835247d2d">delaycycles_min1</a> ()</td></tr>
 <tr class="memdesc:a76328edb9ea1a1f017567ff835247d2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A variant of <a class="el" href="fastled__delay_8h.html#acdd14fccd97b45d3d566c95bff28ed76" title="Delay N clock cycles.">delaycycles</a> that will always delay at least one cycle.  <br /></td></tr>
 <tr class="separator:a76328edb9ea1a1f017567ff835247d2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,7 +169,7 @@ Macros</h2></td></tr>
 
 <p>Convert from number of clock cycles to microseconds. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00175">175</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00208">208</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 
 </div>
 </div>
@@ -186,7 +187,7 @@ Macros</h2></td></tr>
 
 <p>CPU speed, in megahertz (MHz) </p>
 
-<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00168">168</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00201">201</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 
 </div>
 </div>
@@ -204,7 +205,7 @@ Macros</h2></td></tr>
 
 <p>Single no operation ("no-op") instruction for delay. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00068">68</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00069">69</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 
 </div>
 </div>
@@ -222,7 +223,7 @@ Macros</h2></td></tr>
 
 <p>Double no operation ("no-op") instruction for delay. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00070">70</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00071">71</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 
 </div>
 </div>
@@ -260,7 +261,7 @@ Macros</h2></td></tr>
 
 <p>Macro for making sure there's enough time available. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00178">178</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00211">211</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 
 </div>
 </div>
@@ -282,7 +283,7 @@ Macros</h2></td></tr>
 
 <p>Convert from nanoseconds to number of clock cycles. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00173">173</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00206">206</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 
 </div>
 </div>
@@ -293,7 +294,7 @@ Macros</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int CYCLES&gt; </div>
+template&lt;cycle_t CYCLES&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -321,7 +322,7 @@ template&lt;int CYCLES&gt; </div>
 </dl>
 <dl class="section note"><dt>Note</dt><dd>No delay is applied if CYCLES is less than or equal to zero. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00129">129</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00133">133</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 
 </div>
 </div>
@@ -331,7 +332,7 @@ template&lt;int CYCLES&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;int CYCLES&gt; </div>
+template&lt;cycle_t CYCLES&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -352,7 +353,7 @@ template&lt;int CYCLES&gt; </div>
 
 <p>A variant of <a class="el" href="fastled__delay_8h.html#acdd14fccd97b45d3d566c95bff28ed76" title="Delay N clock cycles.">delaycycles</a> that will always delay at least one cycle. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00083">83</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastled__delay_8h_source.html#l00084">84</a> of file <a class="el" href="fastled__delay_8h_source.html">fastled_delay.h</a>.</p>
 
 </div>
 </div>
@@ -363,7 +364,7 @@ template&lt;int CYCLES&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="fastled__delay_8h.html">fastled_delay.h</a></li>
-    <li class="footer">Generated on Sat Aug 17 2024 07:22:18 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated on Sat Aug 17 2024 07:22:52 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 <!-- ... -->

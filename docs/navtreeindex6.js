@@ -87,6 +87,7 @@ var NAVTREEINDEX6 =
 "todo.html":[6],
 "trig8_8h.html":[10,0,1,0,3],
 "trig8_8h_source.html":[10,0,1,0,3],
+"types_8h_source.html":[10,0,1,39],
 "union_i_e_e_e754binary32__t.html":[8,3,6,0],
 "union_i_e_e_e754binary32__t.html#a2275cfe0cacae08983ad44cdf074a7a6":[8,3,6,0,8],
 "union_i_e_e_e754binary32__t.html#a37bee81c74782e027d67199f81074bd3":[8,3,6,0,11],
@@ -122,6 +123,6 @@ var NAVTREEINDEX6 =
 "unionjust8bits.html#acda11b6492d3f6f39ed252bfdbc5293f":[9,0,40,2],
 "unionjust8bits.html#ad67c956d73da25b76e389fa617306b04":[9,0,40,7],
 "unionjust8bits.html#ae4f5c1652bd536727fd481c140d7c3df":[9,0,40,1],
-"wiring_8cpp.html":[10,0,1,39],
-"wiring_8cpp_source.html":[10,0,1,39]
+"wiring_8cpp.html":[10,0,1,40],
+"wiring_8cpp_source.html":[10,0,1,40]
 };
