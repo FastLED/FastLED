@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 from threading import Lock
 import argparse
+import shutil
 
 
 IS_GITHUB = "GITHUB_ACTIONS" in os.environ
@@ -131,7 +132,11 @@ def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str
     builddir = Path(".build") / board
     builddir = builddir.absolute()
     builddir.mkdir(parents=True, exist_ok=True)
-
+    # if lib directory (where FastLED lives) exists, remove it. This is necessary to run on
+    # recycled build directories for fastled to update. This is a fast operation.
+    srcdir = builddir / "lib"
+    if srcdir.exists():
+        shutil.rmtree(srcdir)
     cmd_list = [
         "pio",
         "project",
