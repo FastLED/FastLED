@@ -26,4 +26,4 @@ jobs:
           pip install -r ci/requirements.txt
 
       - name: Build FastLED examples
-        run: python ./ci/ci-compile.py --board esp32-c6-devkitc-1
+        run: python ./ci/ci-compile.py --boards esp32-c6-devkitc-1
