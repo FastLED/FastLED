@@ -6,8 +6,8 @@
         }
     },
     "files.eol": "\n", // Unix
-    "editor.tabSize": 2,
-    "editor.insertSpaces": false,
-    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": true,
     "editor.formatOnSave": false
 }
