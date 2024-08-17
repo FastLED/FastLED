@@ -67,6 +67,7 @@ BOARDS = [
 CUSTOM_PROJECT_OPTIONS = {
     "esp32dev": f"platform={ESP32_IDF_5_1}",
     #"esp01": f"platform={ESP32_IDF_5_1}",
+    "esp32-c2-devkitm-1": f"platform={ESP32_IDF_5_1}",
     "esp32-c3-devkitm-1": f"platform={ESP32_IDF_5_1}",
     "esp32-c6-devkitc-1": f"platform={ESP32_IDF_5_1}",
     "esp32-s3-devkitc-1": f"platform={ESP32_IDF_5_1}",
