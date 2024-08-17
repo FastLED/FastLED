@@ -1,0 +1,7 @@
+# Add files or directories to ignore here
+
+run
+lint
+test
+install
+clean

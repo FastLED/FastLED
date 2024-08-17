@@ -1,0 +1,9 @@
+
+# 2024-08-16 19:50:21.990263
++/add ci\ci-compile
+
+# 2024-08-16 19:50:33.776625
++pass any command args to ci-compile.py
+
+# 2024-08-16 19:51:48.889298
++make it so that the input is a string of comman seperated values
