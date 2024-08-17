@@ -25,14 +25,17 @@
 var NAVTREE =
 [
   [ "FastLED", "index.html", [
-    [ "Getting Started", "index.html#autotoc_md0", null ],
-    [ "Help and Support", "index.html#autotoc_md1", null ],
-    [ "Supported LED Chipsets", "index.html#autotoc_md2", null ],
-    [ "Supported Platforms", "index.html#autotoc_md3", [
-      [ "Porting FastLED to a new platform", "index.html#autotoc_md4", null ]
+    [ "Getting Started", "index.html#autotoc_md0", [
+      [ "Arduino IDE / PlatformIO Dual Repo", "index.html#autotoc_md1", null ],
+      [ "ArduinoIDE", "index.html#autotoc_md2", null ]
     ] ],
-    [ "What about that name?", "index.html#autotoc_md5", null ],
-    [ "For more information", "index.html#autotoc_md6", null ],
+    [ "Help and Support", "index.html#autotoc_md3", null ],
+    [ "Supported LED Chipsets", "index.html#autotoc_md4", null ],
+    [ "Supported Platforms", "index.html#autotoc_md5", [
+      [ "Porting FastLED to a new platform", "index.html#autotoc_md6", null ]
+    ] ],
+    [ "What about that name?", "index.html#autotoc_md7", null ],
+    [ "For more information", "index.html#autotoc_md8", null ],
     [ "Todo List", "todo.html", null ],
     [ "Deprecated List", "deprecated.html", null ],
     [ "Modules", "modules.html", "modules" ],
@@ -72,8 +75,8 @@ var NAVTREEINDEX =
 "class_g_w6205__400.html",
 "fastspi__types_8h.html#a902b229144afd589cd405eb9d339aae3",
 "group___linear_interpolation.html#ga62ed4425400bc4140902347dc54ffb72",
-"modules.html",
-"struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99afcc79b4c1ead3f48f5ff558ea99cd249"
+"math8_8h.html",
+"struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99af7e5db27c43bbbcc12fecc4c5c266242"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

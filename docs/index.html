@@ -34,7 +34,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.1</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.2</span>
    </div>
   </td>
  </tr>
@@ -101,7 +101,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
   <div class="headertitle"><div class="title">FastLED </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_r_e_a_d_m_e"></a> <a href="https://www.ardu-badge.com/FastLED"><img src="https://www.ardu-badge.com/badge/FastLED.svg" alt="arduino-library-badge" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build.yml"><img src="https://github.com/FastLED/FastLED/workflows/build/badge.svg" alt="build status" style="pointer-events: none;" class="inline"/></a> <a href="http://fastled.io/docs"><img src="https://img.shields.io/badge/Docs-Doxygen-blue.svg" alt="Documentation" style="pointer-events: none;" class="inline"/></a> <a href="https://www.reddit.com/r/FastLED/"><img src="https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit" alt="Reddit" style="pointer-events: none;" class="inline"/></a></p>
+<div class="textblock"><p><a class="anchor" id="md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_r_e_a_d_m_e"></a> <a href="https://www.ardu-badge.com/FastLED"><img src="https://www.ardu-badge.com/badge/FastLED.svg" alt="arduino-library-badge" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build.yml"><img src="https://github.com/FastLED/FastLED/workflows/build/badge.svg" alt="build status" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml/badge.svg" alt="Arduino Library Lint" style="pointer-events: none;" class="inline"/></a> <a href="http://fastled.io/docs"><img src="https://img.shields.io/badge/Docs-Doxygen-blue.svg" alt="Documentation" style="pointer-events: none;" class="inline"/></a> <a href="https://www.reddit.com/r/FastLED/"><img src="https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit" alt="Reddit" style="pointer-events: none;" class="inline"/></a></p>
 <p>This is a library for easily &amp; efficiently controlling a wide variety of LED chipsets, like the ones sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress. In addition to writing to the LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while still keeping things as fast as possible.</p>
 <p>We have multiple goals with this library:</p>
 <ul>
@@ -111,6 +111,15 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 </ul>
 <h1><a class="anchor" id="autotoc_md0"></a>
 Getting Started</h1>
+<h2><a class="anchor" id="autotoc_md1"></a>
+Arduino IDE / PlatformIO Dual Repo</h2>
+<p>We've created a custom repo you can try to start your projects. This repo is designed to be used with VSCode + PlatformIO but is also <em>backwards compatible with the Arduino IDE</em>.</p>
+<p>PlatformIO is an extension to VSCode and is generally viewed as a much better experience than the Arduino IDE. You get auto completion tools like intellisense and CoPilot and the ability to install tools like crash decoding. Anything you can do in Arduino IDE you can do with PlatformIO.</p>
+<p>Get started here:</p>
+<p><a href="https://github.com/FastLED/PlatformIO-Starter">https://github.com/FastLED/PlatformIO-Starter</a></p>
+<h2><a class="anchor" id="autotoc_md2"></a>
+ArduinoIDE</h2>
+<p>When running the Arduino IDE you need to do the additional installation step of installing FastLED in the global Arduino IDE package manager.</p>
 <p>Install the library using either <a href="https://github.com/FastLED/FastLED/releases/latest/">the .zip file from the latest release</a> or by searching for "FastLED" in the libraries manager of the Arduino IDE. <a href="https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries">See the Arduino documentation on how to install libraries for more information.</a></p>
 <p>How quickly can you get up and running with the library? Here's a simple blink program:</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;<a class="code" href="_fast_l_e_d_8h.html">FastLED.h</a>&gt;</span></div>
@@ -129,12 +138,12 @@ Getting Started</h1>
 <div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00120">pixeltypes.h:120</a></div></div>
 <div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce">CRGB::White</a></div><div class="ttdeci">@ White</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00806">pixeltypes.h:806</a></div></div>
 <div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00670">pixeltypes.h:670</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md1"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md3"></a>
 Help and Support</h1>
 <p>If you need help with using the library, please consider visiting the Reddit community at <a href="https://reddit.com/r/FastLED">https://reddit.com/r/FastLED</a>. There are thousands of knowledgeable FastLED users in that group and a plethora of solutions in the post history.</p>
 <p>If you are looking for documentation on how something in the library works, please see the Doxygen documentation online at <a href="http://fastled.io/docs">http://fastled.io/docs</a>.</p>
 <p>If you run into bugs with the library, or if you'd like to request support for a particular platform or LED chipset, please submit an issue at <a href="http://fastled.io/issues">http://fastled.io/issues</a>.</p>
-<h1><a class="anchor" id="autotoc_md2"></a>
+<h1><a class="anchor" id="autotoc_md4"></a>
 Supported LED Chipsets</h1>
 <p>Here's a list of all the LED chipsets are supported. More details on the LED chipsets are included <a href="https://github.com/FastLED/FastLED/wiki/Chipset-reference">on our wiki page</a></p>
 <ul>
@@ -157,7 +166,7 @@ Supported LED Chipsets</h1>
 <li>LPD6803 - SPI based chpiset, chip CMODE pin must be set to 1 (inside oscillator mode)</li>
 </ul>
 <p>HL1606, and "595"-style shift registers are no longer supported by the library. The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.</p>
-<h1><a class="anchor" id="autotoc_md3"></a>
+<h1><a class="anchor" id="autotoc_md5"></a>
 Supported Platforms</h1>
 <p>Right now the library is supported on a variety of Arduino compatible platforms. If it's ARM or AVR and uses the Arduino software (or a modified version of it to build) then it is likely supported. Note that we have a long list of upcoming platforms to support, so if you don't see what you're looking for here, ask, it may be on the roadmap (or may already be supported). N.B. at the moment we are only supporting the stock compilers that ship with the Arduino software. Support for upgraded compilers, as well as using AVR Studio and skipping the Arduino entirely, should be coming in a near future release.</p>
 <ul>
@@ -174,13 +183,13 @@ Supported Platforms</h1>
 <li>ESP32 based boards</li>
 </ul>
 <p>What types of platforms are we thinking about supporting in the future? Here's a short list: ChipKit32, Maple, Beagleboard</p>
-<h2><a class="anchor" id="autotoc_md4"></a>
+<h2><a class="anchor" id="autotoc_md6"></a>
 Porting FastLED to a new platform</h2>
 <p>Information on porting FastLED can be found in the file PORTING.md.</p>
-<h1><a class="anchor" id="autotoc_md5"></a>
+<h1><a class="anchor" id="autotoc_md7"></a>
 What about that name?</h1>
 <p>Wait, what happened to FastSPI_LED and FastSPI_LED2? The library was initially named FastSPI_LED because it was focused on very fast and efficient SPI access. However, since then, the library has expanded to support a number of LED chipsets that don't use SPI, as well as a number of math and utility functions for LED processing across the board. We decided that the name FastLED more accurately represents the totality of what the library provides, everything fast, for LEDs.</p>
-<h1><a class="anchor" id="autotoc_md6"></a>
+<h1><a class="anchor" id="autotoc_md8"></a>
 For more information</h1>
 <p>Check out the official site <a href="http://fastled.io">http://fastled.io</a> for links to documentation, issues, and news</p>
 <p><em>TODO</em> - get candy </p>
@@ -191,7 +200,7 @@ For more information</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Aug 7 2024 18:14:30 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+    <li class="footer">Generated on Sat Aug 17 2024 07:22:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
   </ul>
 </div>
 <!-- ... -->
