@@ -59,6 +59,8 @@ BOARDS = [
     "teensy30"
 ]
 
+
+
 CUSTOM_PROJECT_OPTIONS = {
     "esp32dev": f"platform={ESP32_IDF_5_1}",
     #"esp01": f"platform={ESP32_IDF_5_1}",
@@ -261,10 +263,8 @@ def main() -> int:
     
     if invalid_boards:
         locked_print(f"Error: Invalid boards specified: {', '.join(invalid_boards)}")
-        return 1
     if invalid_examples:
         locked_print(f"Error: Invalid examples specified: {', '.join(invalid_examples)}")
-        return 1
 
     return run(boards, examples)
 

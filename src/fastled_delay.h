@@ -110,39 +110,8 @@ template<int LOOP, cycle_t PAD> inline void _delaycycles_AVR() {
 template<cycle_t CYCLES> __attribute__((always_inline)) inline void delaycycles() {
 	_delaycycles_AVR<CYCLES / 3, CYCLES % 3>();
 }
-#elif defined(ESP32)
 
-// Prevent template overflow for large chips by using a 
-// New delaycycles implementation
-template<cycle_t CYCLES>
-__attribute__((always_inline)) inline void delaycycles();
 
-template<cycle_t CYCLES, bool isEven>
-struct DelayHelper {
-    static inline void delay();
-};
-
-template<cycle_t CYCLES>
-struct DelayHelper<CYCLES, true> {
-    static inline void delay() {
-        delaycycles<CYCLES/2>();
-        delaycycles<CYCLES/2>();
-    }
-};
-
-template<cycle_t CYCLES>
-struct DelayHelper<CYCLES, false> {
-    static inline void delay() {
-        delaycycles<CYCLES/2>();
-        delaycycles<CYCLES/2>();
-        FL_NOP;
-    }
-};
-
-template<cycle_t CYCLES>
-__attribute__((always_inline)) inline void delaycycles() {
-    DelayHelper<CYCLES, (CYCLES % 2 == 0)>::delay();
-}
 
 #else
 // template<int LOOP, cycle_t PAD> inline void _delaycycles_ARM() {
@@ -165,6 +134,10 @@ template<cycle_t CYCLES> __attribute__((always_inline)) inline void delaycycles(
 	// _delaycycles_ARM<CYCLES / 3, CYCLES % 3>();
 	FL_NOP; delaycycles<CYCLES-1>();
 }
+
+
+
+ 
 #endif
 
 // pre-instantiations for values small enough to not need the loop, as well as sanity holders
@@ -188,6 +161,31 @@ template<> __attribute__((always_inline)) inline void delaycycles<2>() {FL_NOP2;
 template<> __attribute__((always_inline)) inline void delaycycles<3>() {FL_NOP;FL_NOP2;}
 template<> __attribute__((always_inline)) inline void delaycycles<4>() {FL_NOP2;FL_NOP2;}
 template<> __attribute__((always_inline)) inline void delaycycles<5>() {FL_NOP2;FL_NOP2;FL_NOP;}
+#if defined(ESP32)
+template<> __attribute__((always_inline)) inline void delaycycles<4294966398>() {
+	// specialization for a gigantic amount of cycles, apparently this is needed
+	// or esp32 will blow the stack with cycles = 4294966398.
+	const uint32_t termination = 4294966398 / 10
+	const unt32_t remainder = 4294966398 % 10;
+	for (uint32_t i = 0; i < termination; i++) {
+		FL_NOP; FL_NOP; FL_NOP; FL_NOP; FL_NOP;
+		FL_NOP; FL_NOP; FL_NOP; FL_NOP; FL_NOP;
+	}
+
+	// remainder
+	switch (remainder) {
+		case 9: FL_NOP;
+		case 8: FL_NOP;
+		case 7: FL_NOP;
+		case 6: FL_NOP;
+		case 5: FL_NOP;
+		case 4: FL_NOP;
+		case 3: FL_NOP;
+		case 2: FL_NOP;
+		case 1: FL_NOP;
+	}
+}
+#endif
 /// @endcond
 
 /// @}
