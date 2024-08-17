@@ -56,7 +56,8 @@ BOARDS = [
     "esp32-s3-devkitc-1",
     "yun",
     "digix",
-    "teensy30"
+    "teensy30",
+    # "teensy41"
 ]
 
 
