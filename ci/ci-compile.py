@@ -54,6 +54,7 @@ BOARDS = [
     "esp01",  # ESP8266
     "esp32-c3-devkitm-1",
     # "esp32-c6-devkitc-1", # doesn't work yet.
+    # "esp32-c2-devkitm-1", # doesn't work yet.
     "esp32-s3-devkitc-1",
     "yun",
     "digix",
