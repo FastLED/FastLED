@@ -3,5 +3,19 @@
 # cd to the directory of the script
 cd "$(dirname "$0")"
 
+# if mac, use python3
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    python=python3
+else
+    python=python
+fi
+
+# if linux use python3
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    python=python3
+else
+    python=python
+fi
+
 # Pass all command-line arguments to ci-compile.py
 python ci-compile.py "$@"
