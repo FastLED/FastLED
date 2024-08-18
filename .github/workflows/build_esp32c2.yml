@@ -1,4 +1,4 @@
-name: esp32c2
+name: ESP32-C2 Build
 
 on:
   workflow_dispatch:
@@ -8,41 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Verify ci/ci-compile exists
-        run: |
-          if [ ! -f "ci/ci-compile" ]; then
-            echo "Error: ci/ci-compile does not exist"
-            exit 1
-          fi
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Install PlatformIO build dependencies
-        run: |
-          pip install -r ci/requirements.txt
-
-
-      - name: Pre-build
-
-        run: python ./ci/ci-compile.py --boards uno
-
-
-      - name: Copy ci/boards/*.json to ~/.platformio/boards
-        run: |
-          mkdir -p ~/.platformio/boards
-          cp ci/boards/*.json ~/.platformio/boards
-
-      #- name: Build for ESP32-C2
-      #  uses: ./.github/workflows/build_template.yml
-       # with:
-       #   board: esp32-c2-devkitm-1
-      - name: Build for ESP32-C2
-        run: python ./ci/ci-compile.py --boards esp32-c2-devkitm-1
+    uses: ./.github/workflows/build_template_custom_board.yml
+    with:
+      board: esp32-c2-devkitm-1
 
