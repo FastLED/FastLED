@@ -7,21 +7,30 @@ on:
       - master
 
 jobs:
-
-  prebuild:
-    uses: ./.github/workflows/build_template.yml
-    with:
-      board: uno
-
-  copy_boards:
+  build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Verify ci/ci-compile exists
+        run: |
+          if [ ! -f "ci/ci-compile" ]; then
+            echo "Error: ci/ci-compile does not exist"
+            exit 1
+          fi
+      
+      - name: Pre-build
+        uses: ./.github/workflows/build_template.yml
+        with:
+          board: uno
+
       - name: Copy ci/boards/*.json to ~/.platformio/boards
         run: |
           mkdir -p ~/.platformio/boards
           cp ci/boards/*.json ~/.platformio/boards
 
-  build:
-    uses: ./.github/workflows/build_template.yml
-    with:
-      board: esp32-c2-devkitm-1
+      - name: Build for ESP32-C2
+        uses: ./.github/workflows/build_template.yml
+        with:
+          board: esp32-c2-devkitm-1
