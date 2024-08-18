@@ -32,5 +32,10 @@ jobs:
       #    restore-keys: |
       #      ${{ runner.os }}-build-
 
+      - name: Copy ci/boards/*.json to ~/.platformio/boards
+        run: |
+          mkdir -p ~/.platformio/boards
+          cp ci/boards/*.json ~/.platformio/boards
+
       - name: Build FastLED examples
         run: python ./ci/ci-compile.py --boards ${{ inputs.board }} --skip-init
