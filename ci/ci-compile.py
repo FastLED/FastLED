@@ -147,7 +147,7 @@ def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str
         str(builddir),
         "--board",
         board,
-        "--project-option=boards_dir=ci/boards",
+        "--project-option=boards_dir=../../ci/boards",
     ]
     if project_options:
         cmd_list.append(f'--project-option={project_options}')
