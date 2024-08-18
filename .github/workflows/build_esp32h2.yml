@@ -1,4 +1,4 @@
-name: esp32c2
+name: esp32h2
 
 on:
   workflow_dispatch:
