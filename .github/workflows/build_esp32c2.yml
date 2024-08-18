@@ -8,6 +8,6 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build_template.yml
+    uses: ./.github/workflows/build_template_skip_init.yml
     with:
       board: esp32-c2-devkitm-1
