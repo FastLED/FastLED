@@ -23,13 +23,14 @@ jobs:
         run: |
           pip install -r ci/requirements.txt
 
-      - name: Cache .build directory
-        uses: actions/cache@v3
-        with:
-          path: ./.build
-          key: ${{ runner.os }}-build-${{ hashFiles('./ci/**') }}
-          restore-keys: |
-            ${{ runner.os }}-build-
+      # disabled for now.
+      #- name: Cache .build directory
+      #  uses: actions/cache@v3
+      #  with:
+      #    path: ./.build
+      #    key: ${{ runner.os }}-build-${{ hashFiles('./ci/**') }}
+      #    restore-keys: |
+      #      ${{ runner.os }}-build-
 
       - name: Build FastLED examples
         run: python ./ci/ci-compile.py --boards ${{ inputs.board }}
