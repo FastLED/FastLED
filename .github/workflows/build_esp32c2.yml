@@ -19,18 +19,30 @@ jobs:
             echo "Error: ci/ci-compile does not exist"
             exit 1
           fi
-      
-      - name: Pre-build
-        uses: ./.github/workflows/build_template.yml
+      - name: Install Python
+        uses: actions/setup-python@v4
         with:
-          board: uno
+          python-version: '3.11'
+      
+      - name: Install PlatformIO build dependencies
+        run: |
+          pip install -r ci/requirements.txt
+
+
+      - name: Pre-build
+
+        run: python ./ci/ci-compile.py --boards uno
+
 
       - name: Copy ci/boards/*.json to ~/.platformio/boards
         run: |
           mkdir -p ~/.platformio/boards
           cp ci/boards/*.json ~/.platformio/boards
 
+      #- name: Build for ESP32-C2
+      #  uses: ./.github/workflows/build_template.yml
+       # with:
+       #   board: esp32-c2-devkitm-1
       - name: Build for ESP32-C2
-        uses: ./.github/workflows/build_template.yml
-        with:
-          board: esp32-c2-devkitm-1
+        run: python ./ci/ci-compile.py --boards esp32-c2-devkitm-1
+
