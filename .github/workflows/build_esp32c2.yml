@@ -15,11 +15,11 @@ jobs:
 
   copy_boards:
     runs-on: ubuntu-latest
-      steps:
-        - name: Copy ci/boards/*.json to ~/.platformio/boards
-          run: |
-            mkdir -p ~/.platformio/boards
-            cp ci/boards/*.json ~/.platformio/boards
+    steps:
+      - name: Copy ci/boards/*.json to ~/.platformio/boards
+        run: |
+          mkdir -p ~/.platformio/boards
+          cp ci/boards/*.json ~/.platformio/boards
 
   build:
     uses: ./.github/workflows/build_template.yml
