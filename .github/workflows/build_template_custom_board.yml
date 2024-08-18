@@ -1,0 +1,38 @@
+name: Template for Custom Board Build
+
+on:
+  workflow_call:
+    inputs:
+      board:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install PlatformIO build dependencies
+        run: |
+          pip install -r ci/requirements.txt
+
+      # Use the fastest build to instantiate the ~/.platformio/boards folder
+      - name: Pre-build
+        run: python ./ci/ci-compile.py --boards uno --examples Blink
+
+      # Copy the custom board JSON file to the PlatformIO boards folder
+      - name: Copy ci/boards/*.json to ~/.platformio/boards
+        run: |
+          mkdir -p ~/.platformio/boards
+          cp ci/boards/*.json ~/.platformio/boards
+
+      
+      - name: Build for Custom Board
+        run: python ./ci/ci-compile.py --boards ${{ inputs.board }}
