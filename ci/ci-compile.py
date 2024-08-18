@@ -139,6 +139,8 @@ def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str
     srcdir = builddir / "lib"
     if srcdir.exists():
         shutil.rmtree(srcdir)
+    boards_dir = (Path("ci") / "boards").absolute()
+    assert boards_dir.exists(), f"Boards directory {boards_dir} does not exist."
     cmd_list = [
         "pio",
         "project",
@@ -147,7 +149,7 @@ def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str
         str(builddir),
         "--board",
         board,
-        "--project-option=boards_dir=../../ci/boards",
+        f"--project-option=boards_dir={boards_dir}",
     ]
     if project_options:
         cmd_list.append(f'--project-option={project_options}')
