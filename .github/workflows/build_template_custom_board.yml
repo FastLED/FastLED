@@ -24,7 +24,7 @@ jobs:
           pip install -r ci/requirements.txt
 
       # Use the fastest build to instantiate the ~/.platformio/boards folder
-      - name: Pre-build
+      - name: Pre-build to ensure ~/.platformio/boards folder is created
         run: python ./ci/ci-compile.py --boards uno --examples Blink
 
       # Copy the custom board JSON file to the PlatformIO boards folder
@@ -33,6 +33,5 @@ jobs:
           mkdir -p ~/.platformio/boards
           cp ci/boards/*.json ~/.platformio/boards
 
-      
-      - name: Build for Custom Board
+      - name: Build
         run: python ./ci/ci-compile.py --boards ${{ inputs.board }}
