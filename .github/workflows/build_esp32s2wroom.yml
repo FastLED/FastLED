@@ -1,4 +1,4 @@
-name: esp32wroom
+name: esp32s2wroom
 
 on:
   workflow_dispatch:
