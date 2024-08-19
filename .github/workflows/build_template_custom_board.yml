@@ -6,6 +6,10 @@ on:
       board:
         required: true
         type: string
+      expected_to_fail:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -35,3 +39,7 @@ jobs:
 
       - name: Build
         run: python ./ci/ci-compile.py --boards ${{ inputs.board }}
+
+      - name: Set the build status to neutral
+        if: ${{ inputs.expected_to_fail }}
+        run: echo "conclusion=neutral" >> $GITHUB_OUTPUT
