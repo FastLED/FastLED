@@ -1,4 +1,4 @@
-name: teensy30
+name: teensyLC
 
 on:
   workflow_dispatch:
