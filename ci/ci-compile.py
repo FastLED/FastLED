@@ -274,16 +274,8 @@ def main() -> int:
 
     boards = args.boards.split(',') if args.boards else BOARDS
     examples = args.examples.split(',') if args.examples else EXAMPLES
-
-    invalid_boards = set(boards) - set(BOARDS)
-    invalid_examples = set(examples) - set(EXAMPLES)
-    
-    if invalid_boards:
-        locked_print(f"Error: Invalid boards specified: {', '.join(invalid_boards)}")
-    if invalid_examples:
-        locked_print(f"Error: Invalid examples specified: {', '.join(invalid_examples)}")
-
-    return run(boards=boards, examples=examples, skip_init=skip_init)
+    rtn = run(boards=boards, examples=examples, skip_init=skip_init)
+    return rtn
 
 
 
