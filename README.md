@@ -50,7 +50,7 @@ We have multiple goals with this library:
 [![esp32h2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml)
 
 
-## Extended Features
+## Platform Features
 
 #### Esp32
 
