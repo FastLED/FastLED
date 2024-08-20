@@ -10,3 +10,8 @@
     * Original repo is here: https://github.com/hpwit/I2SClockLessLedDriveresp32s3/blob/main/src/I2SClockLessLedDriveresp32s3.h
       * Our copy is here: https://github.com/FastLED/FastLED/blob/master/src/platforms/esp/32/clockless_i2s_esp32.h
     * Apparently, this driver allows MASSIVE parallelization for WS2812
+    * Timing guide for reducing RMT frequency https://github.com/Makuna/NeoPixelBus/pull/795
+    * ESp32 LED guide
+      * web: https://components.espressif.com/components/espressif/led_strip
+      * repo: https://github.com/espressif/idf-extra-components/tree/60c14263f3b69ac6e98ecae79beecbe5c18d5596/led_strip
+      * adafruit conversation on RMT progress: https://github.com/adafruit/Adafruit_NeoPixel/issues/375
