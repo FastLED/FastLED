@@ -33,6 +33,13 @@ FastLED
 ### Esp New
 [![esp32h2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml)
 
+
+## Extended Features
+
+### Esp32
+
+[![esp32_i2s_ws2812](https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml)
+
 ## About
 
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
