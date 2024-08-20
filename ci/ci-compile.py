@@ -48,13 +48,18 @@ EXAMPLES = [
     "XYMatrix",
 ]
 
+# Default boards to compile for. You can use boards not defined here but
+# if the board isn't part of the officially supported platformio boards then
+# you will need to add the board to the ~/.platformio/platforms directory.
+# prior to running this script. This happens automatically as of 2024-08-20
+# with the github workflow scripts.
 BOARDS = [
     "uno",  # Build is faster if this is first, because it's used for global init.
     "esp32dev",
     "esp01",  # ESP8266
     "esp32-c3-devkitm-1",
-    # "esp32-c6-devkitc-1", # doesn't work yet.
-    # "esp32-c2-devkitm-1", # doesn't work yet.
+    # "esp32-c6-devkitc-1",
+    # "esp32-c2-devkitm-1",
     "esp32-s3-devkitc-1",
     "yun",
     "digix",
@@ -100,7 +105,6 @@ def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
     # to speed up the next build.
     if srcdir.exists():
         subprocess.run(["rm", "-rf", str(srcdir)], check=True)
-    boards_dir = (Path("ci") / "boards").absolute()
     locked_print(f"*** Building example {example} for board {board} ***")
     cmd_list = [
         "pio",
@@ -111,7 +115,6 @@ def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
         "--lib=src",
         "--keep-build-dir",
         f"--build-dir={builddir}",
-        f"--project-option=boards_dir={boards_dir}",
         f"examples/{example}/*ino",
     ]
     result = subprocess.run(
@@ -140,8 +143,6 @@ def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str
     srcdir = builddir / "lib"
     if srcdir.exists():
         shutil.rmtree(srcdir)
-    boards_dir = (Path("ci") / "boards").absolute()
-    assert boards_dir.exists(), f"Boards directory {boards_dir} does not exist."
     cmd_list = [
         "pio",
         "project",
@@ -150,7 +151,6 @@ def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str
         str(builddir),
         "--board",
         board,
-        f"--project-option=boards_dir={boards_dir}",
     ]
     if project_options:
         cmd_list.append(f'--project-option={project_options}')
