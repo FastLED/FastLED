@@ -95,7 +95,7 @@ def locked_print(*args, **kwargs):
         print(*args, **kwargs)
 
 
-def compile_for_board_and_example(board: str, example: str, defines: list[str]) -> tuple[bool, str]:
+def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     builddir = Path(".build") / board
     builddir.mkdir(parents=True, exist_ok=True)
@@ -115,9 +115,6 @@ def compile_for_board_and_example(board: str, example: str, defines: list[str]) 
         "--keep-build-dir",
         f"--build-dir={builddir}",
     ]
-    if len(defines) > 0:
-        for define in defines:    
-            cmd_list.append(f"--project-option=build_flags=-D {define}")
     cmd_list.append(f"examples/{example}/*ino")
     cmd_str = subprocess.list2cmdline(cmd_list)
     locked_print(f"Running command: {cmd_str}")
@@ -136,17 +133,22 @@ def compile_for_board_and_example(board: str, example: str, defines: list[str]) 
     locked_print(f"*** Finished building example {example} for board {board} ***")
     return True, result.stdout
 
-def create_build_dir(board: str, project_options: str | None, defines: list[str]) -> tuple[bool, str]:
+def create_build_dir(board: str, project_options: str | None, defines: list[str], no_install_deps: bool, extra_packages: list[str]) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     locked_print(f"*** Initializing environment for board {board} ***")
     builddir = Path(".build") / board
-    builddir = builddir.absolute()
     builddir.mkdir(parents=True, exist_ok=True)
     # if lib directory (where FastLED lives) exists, remove it. This is necessary to run on
     # recycled build directories for fastled to update. This is a fast operation.
     srcdir = builddir / "lib"
     if srcdir.exists():
         shutil.rmtree(srcdir)
+    platformio_ini = builddir / "platformio.ini"
+    if platformio_ini.exists():
+        try:
+            platformio_ini.unlink()
+        except OSError as e:
+            locked_print(f"Error removing {platformio_ini}: {e}")
     cmd_list = [
         "pio",
         "project",
@@ -161,6 +163,10 @@ def create_build_dir(board: str, project_options: str | None, defines: list[str]
     if defines:
         build_flags = ' '.join(f'-D {define}' for define in defines)
         cmd_list.append(f'--project-option=build_flags={build_flags}')
+    if extra_packages:
+        cmd_list.append(f'--project-option=lib_deps={",".join(extra_packages)}')
+    if no_install_deps:
+        cmd_list.append("--no-install-dependencies")
     cmd_str = subprocess.list2cmdline(cmd_list)
     locked_print(f"Running command: {cmd_str}")
     result = subprocess.run(
@@ -181,7 +187,7 @@ def create_build_dir(board: str, project_options: str | None, defines: list[str]
 
 
 # Function to process task queues for each board
-def compile_examples(board: str, examples: list[str], defines: list[str]) -> tuple[bool, str]:
+def compile_examples(board: str, examples: list[str]) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
     is_first = True
@@ -195,9 +201,9 @@ def compile_examples(board: str, examples: list[str], defines: list[str]) -> tup
             with FIRST_BUILD_LOCK:
                 # Github runners are memory limited and the first job is the most
                 # memory intensive since all the artifacts are being generated in parallel.
-                success, message = compile_for_board_and_example(board=board, example=example, defines=defines)
+                success, message = compile_for_board_and_example(board=board, example=example)
         else:
-            success, message = compile_for_board_and_example(board=board, example=example, defines=defines)
+            success, message = compile_for_board_and_example(board=board, example=example)
         is_first = False
         if not success:
             ERROR_HAPPENED = True
@@ -211,44 +217,52 @@ def parse_args():
     parser.add_argument("--examples", type=str, help="Comma-separated list of examples to compile")
     parser.add_argument("--skip-init", action="store_true", help="Skip the initialization step")
     parser.add_argument("--defines", type=str, help="Comma-separated list of compiler definitions")
+    parser.add_argument("--extra-packages", type=str, help="Comma-separated list of extra packages to install")
     return parser.parse_args()
 
 
-def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[str]) -> int:
+def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[str], extra_packages: list[str]) -> int:
     start_time = time.time()
-    if not skip_init:
-        # Necessary to create the first project alone, so that the necessary root directories
-        # are created and the subsequent projects can be created in parallel.
-        create_build_dir(boards[0], CUSTOM_PROJECT_OPTIONS.get(boards[0]), defines)
-        # This is not memory/cpu bound but is instead network bound so we can run one thread
-        # per board to speed up the process.
-        parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(boards)
-        # Initialize the build directories for all boards
-        with concurrent.futures.ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
-            future_to_board = {
-                executor.submit(create_build_dir, board, CUSTOM_PROJECT_OPTIONS.get(board), defines): board
-                for board in boards
-            }
-            for future in concurrent.futures.as_completed(future_to_board):
-                board = future_to_board[future]
-                success, msg = future.result()
-                if not success:
-                    locked_print(f"Error initializing build_dir for board {board}:\n{msg}")
-                    # cancel all other tasks
-                    for f in future_to_board:
-                        f.cancel()
-                    return 1
-                else:
-                    locked_print(f"Finished initializing build_dir for board {board}")
-        init_end_time = time.time()
-        init_time = (init_end_time - start_time) / 60
-        locked_print(f"\nAll build directories initialized in {init_time:.2f} minutes.")
+    # Necessary to create the first project alone, so that the necessary root directories
+    # are created and the subsequent projects can be created in parallel.
+    first_board = boards[0]
+    first_board_options = CUSTOM_PROJECT_OPTIONS.get(first_board)
+    create_build_dir(
+        first_board,
+        project_options=first_board_options,
+        defines=defines,
+        no_install_deps=skip_init,
+        extra_packages=extra_packages)
+    # This is not memory/cpu bound but is instead network bound so we can run one thread
+    # per board to speed up the process.
+    parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(boards)
+    # Initialize the build directories for all boards
+    with concurrent.futures.ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
+
+        future_to_board: dict[concurrent.futures.Future, str] = {}
+        for board in boards:
+            future = executor.submit(create_build_dir, board, CUSTOM_PROJECT_OPTIONS.get(board), defines, skip_init, extra_packages)
+            future_to_board[future] = board
+        for future in concurrent.futures.as_completed(future_to_board):
+            board = future_to_board[future]
+            success, msg = future.result()
+            if not success:
+                locked_print(f"Error initializing build_dir for board {board}:\n{msg}")
+                # cancel all other tasks
+                for f in future_to_board:
+                    f.cancel()
+                return 1
+            else:
+                locked_print(f"Finished initializing build_dir for board {board}")
+    init_end_time = time.time()
+    init_time = (init_end_time - start_time) / 60
+    locked_print(f"\nAll build directories initialized in {init_time:.2f} minutes.")
     errors: list[str] = []
     # Run the compilation process
     num_cpus = max(1, min(cpu_count(), len(boards)))
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
-            executor.submit(compile_examples, board, examples, defines): board
+            executor.submit(compile_examples, board, examples): board
             for board in boards
         }
         for future in concurrent.futures.as_completed(future_to_board):
@@ -287,7 +301,10 @@ def main() -> int:
     defines: list[str] = []
     if args.defines:
         defines.extend(args.defines.split(','))
-    rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines)
+    extract_packages: list[str] = []
+    if args.extra_packages:
+        extract_packages.extend(args.extra_packages.split(','))
+    rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines, extra_packages=extract_packages)
     return rtn
 
 
