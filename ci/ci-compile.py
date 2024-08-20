@@ -277,7 +277,7 @@ def main() -> int:
 
     boards = args.boards.split(',') if args.boards else BOARDS
     examples = args.examples.split(',') if args.examples else EXAMPLES
-    defines = args.define if args.define else []
+    defines: list[str] = []
     if args.defines:
         defines.extend(args.defines.split(','))
     rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines)
