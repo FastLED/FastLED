@@ -1,4 +1,4 @@
-name: esp32c3_i2s_ws2812
+name: esp32_i2s_ws2812
 
 on:
   workflow_dispatch:
@@ -10,4 +10,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: --boards esp32-c3-devkitm-1 --defines FASTLED_ESP32_I2S
+      args: --boards esp32dev --defines FASTLED_ESP32_I2S
