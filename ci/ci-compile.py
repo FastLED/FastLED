@@ -203,7 +203,7 @@ def parse_args():
     parser.add_argument("--boards", type=str, help="Comma-separated list of boards to compile for")
     parser.add_argument("--examples", type=str, help="Comma-separated list of examples to compile")
     parser.add_argument("--skip-init", action="store_true", help="Skip the initialization step")
-    parser.add_argument("--define", action="append", help="Add a compiler definition (can be used multiple times)")
+    parser.add_argument("--defines", type=str, help="Comma-separated list of compiler definitions")
     return parser.parse_args()
 
 
@@ -278,6 +278,8 @@ def main() -> int:
     boards = args.boards.split(',') if args.boards else BOARDS
     examples = args.examples.split(',') if args.examples else EXAMPLES
     defines = args.define if args.define else []
+    if args.defines:
+        defines.extend(args.defines.split(','))
     rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines)
     return rtn
 
