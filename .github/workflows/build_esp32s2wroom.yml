@@ -13,4 +13,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      board: upesy_wroom
+      args: --boards upesy_wroom

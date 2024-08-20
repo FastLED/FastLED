@@ -3,9 +3,11 @@ name: Build Template
 on:
   workflow_call:
     inputs:
-      board:
-        required: true
+      args:
         type: string
+        required: false
+        default: ""
+
 
 jobs:
   build:
@@ -33,4 +35,5 @@ jobs:
       #      ${{ runner.os }}-build-
 
       - name: Build FastLED examples
-        run: python ./ci/ci-compile.py --boards ${{ inputs.board }}
+        run: python ./ci/ci-compile.py ${{ inputs.args }}
+

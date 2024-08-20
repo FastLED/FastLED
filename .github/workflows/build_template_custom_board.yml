@@ -3,7 +3,7 @@ name: Template for Custom Board Build
 on:
   workflow_call:
     inputs:
-      board:
+      args:
         required: true
         type: string
 
@@ -34,5 +34,5 @@ jobs:
           cp ci/boards/*.json ~/.platformio/boards
 
       - name: Build
-        run: python ./ci/ci-compile.py --boards ${{ inputs.board }}
+        run: python ./ci/ci-compile.py ${{ inputs.args }}
 
