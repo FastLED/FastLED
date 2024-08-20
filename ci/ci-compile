@@ -18,4 +18,4 @@ else
 fi
 
 # Pass all command-line arguments to ci-compile.py
-python ci-compile.py "$@"
+$python ci-compile.py "$@"
