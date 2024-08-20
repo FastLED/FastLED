@@ -1,4 +1,4 @@
-name: teensy41
+name: teensy_octoWS2811
 
 on:
   workflow_dispatch:
