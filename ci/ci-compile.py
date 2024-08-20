@@ -241,7 +241,7 @@ def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[s
     num_cpus = max(1, min(cpu_count(), len(boards)))
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
-            executor.submit(compile_examples, board, examples): board
+            executor.submit(compile_examples, board, examples, defines): board
             for board in boards
         }
         for future in concurrent.futures.as_completed(future_to_board):
