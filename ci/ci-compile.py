@@ -98,7 +98,6 @@ def locked_print(*args, **kwargs):
 def compile_for_board_and_example(board: str, example: str, defines: list[str]) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     builddir = Path(".build") / board
-    builddir = builddir.absolute()
     builddir.mkdir(parents=True, exist_ok=True)
     srcdir = builddir / "src"
     # Remove the previous *.ino file if it exists, everything else is recycled
@@ -116,9 +115,12 @@ def compile_for_board_and_example(board: str, example: str, defines: list[str]) 
         "--keep-build-dir",
         f"--build-dir={builddir}",
     ]
-    for define in defines:
-        cmd_list.extend(["-D", define])
+    if len(defines) > 0:
+        for define in defines:    
+            cmd_list.append(f"--project-option=build_flags=-D {define}")
     cmd_list.append(f"examples/{example}/*ino")
+    cmd_str = subprocess.list2cmdline(cmd_list)
+    locked_print(f"Running command: {cmd_str}")
     result = subprocess.run(
         cmd_list,
         stdout=subprocess.PIPE,
@@ -134,7 +136,7 @@ def compile_for_board_and_example(board: str, example: str, defines: list[str]) 
     locked_print(f"*** Finished building example {example} for board {board} ***")
     return True, result.stdout
 
-def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str]:
+def create_build_dir(board: str, project_options: str | None, defines: list[str]) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     locked_print(f"*** Initializing environment for board {board} ***")
     builddir = Path(".build") / board
@@ -156,6 +158,11 @@ def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str
     ]
     if project_options:
         cmd_list.append(f'--project-option={project_options}')
+    if defines:
+        build_flags = ' '.join(f'-D {define}' for define in defines)
+        cmd_list.append(f'--project-option=build_flags={build_flags}')
+    cmd_str = subprocess.list2cmdline(cmd_list)
+    locked_print(f"Running command: {cmd_str}")
     result = subprocess.run(
         cmd_list,
         stdout=subprocess.PIPE,
@@ -212,14 +219,14 @@ def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[s
     if not skip_init:
         # Necessary to create the first project alone, so that the necessary root directories
         # are created and the subsequent projects can be created in parallel.
-        create_build_dir(boards[0], CUSTOM_PROJECT_OPTIONS.get(boards[0]))
+        create_build_dir(boards[0], CUSTOM_PROJECT_OPTIONS.get(boards[0]), defines)
         # This is not memory/cpu bound but is instead network bound so we can run one thread
         # per board to speed up the process.
         parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(boards)
         # Initialize the build directories for all boards
         with concurrent.futures.ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
             future_to_board = {
-                executor.submit(create_build_dir, board, CUSTOM_PROJECT_OPTIONS.get(board)): board
+                executor.submit(create_build_dir, board, CUSTOM_PROJECT_OPTIONS.get(board), defines): board
                 for board in boards
             }
             for future in concurrent.futures.as_completed(future_to_board):
