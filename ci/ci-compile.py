@@ -95,7 +95,7 @@ def locked_print(*args, **kwargs):
         print(*args, **kwargs)
 
 
-def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
+def compile_for_board_and_example(board: str, example: str, defines: list[str]) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     builddir = Path(".build") / board
     builddir = builddir.absolute()
@@ -115,8 +115,10 @@ def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
         "--lib=src",
         "--keep-build-dir",
         f"--build-dir={builddir}",
-        f"examples/{example}/*ino",
     ]
+    for define in defines:
+        cmd_list.extend(["-D", define])
+    cmd_list.append(f"examples/{example}/*ino")
     result = subprocess.run(
         cmd_list,
         stdout=subprocess.PIPE,
@@ -172,7 +174,7 @@ def create_build_dir(board: str, project_options: str | None) -> tuple[bool, str
 
 
 # Function to process task queues for each board
-def compile_examples(board: str, examples: list[str]) -> tuple[bool, str]:
+def compile_examples(board: str, examples: list[str], defines: list[str]) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
     is_first = True
@@ -186,9 +188,9 @@ def compile_examples(board: str, examples: list[str]) -> tuple[bool, str]:
             with FIRST_BUILD_LOCK:
                 # Github runners are memory limited and the first job is the most
                 # memory intensive since all the artifacts are being generated in parallel.
-                success, message = compile_for_board_and_example(board=board, example=example)
+                success, message = compile_for_board_and_example(board=board, example=example, defines=defines)
         else:
-            success, message = compile_for_board_and_example(board=board, example=example)
+            success, message = compile_for_board_and_example(board=board, example=example, defines=defines)
         is_first = False
         if not success:
             ERROR_HAPPENED = True
@@ -201,10 +203,11 @@ def parse_args():
     parser.add_argument("--boards", type=str, help="Comma-separated list of boards to compile for")
     parser.add_argument("--examples", type=str, help="Comma-separated list of examples to compile")
     parser.add_argument("--skip-init", action="store_true", help="Skip the initialization step")
+    parser.add_argument("--define", action="append", help="Add a compiler definition (can be used multiple times)")
     return parser.parse_args()
 
 
-def run(boards: list[str], examples: list[str], skip_init: bool) -> int:
+def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[str]) -> int:
     start_time = time.time()
     if not skip_init:
         # Necessary to create the first project alone, so that the necessary root directories
@@ -274,7 +277,8 @@ def main() -> int:
 
     boards = args.boards.split(',') if args.boards else BOARDS
     examples = args.examples.split(',') if args.examples else EXAMPLES
-    rtn = run(boards=boards, examples=examples, skip_init=skip_init)
+    defines = args.define if args.define else []
+    rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines)
     return rtn
 
 
