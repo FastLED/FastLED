@@ -128,12 +128,17 @@ def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
         check=False,
     )
 
-    locked_print(result.stdout)
+
+    stdout = result.stdout
+    # replace all instances of "lib/src" => "src" so intellisense can find the files
+    # with one click.
+    stdout = stdout.replace("lib/src", "src")
+    locked_print(stdout)
     if result.returncode != 0:
         locked_print(f"*** Error compiling example {example} for board {board} ***")
-        return False, result.stdout
+        return False, stdout
     locked_print(f"*** Finished building example {example} for board {board} ***")
-    return True, result.stdout
+    return True, stdout
 
 def create_build_dir(board: str, project_options: str | None, defines: list[str], no_install_deps: bool, extra_packages: list[str]) -> tuple[bool, str]:
     """Create the build directory for the given board."""
