@@ -24,8 +24,15 @@ PARRALLEL_PROJECT_INITIALIZATION = os.environ.get("PARRALLEL_PROJECT_INITIALIZAT
 
 # An open source version of the esp-idf 5.1 platform for the ESP32 that
 # gives esp32 boards the same build environment as the Arduino 2.3.1+.
-ESP32_IDF_5_1 = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
-ESP32_IDF_5_1_ALT = "https://github.com/pioarduino/platform-espressif32"
+
+# Set to a specific release, we may want to update this in the future.
+ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
+# Top of trunk.
+#ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32"
+
+# Old fork that we were using
+# ESP32_IDF_5_1 = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
+
 
 EXAMPLES = [
     "Apa102HD",
