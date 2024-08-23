@@ -91,6 +91,12 @@ void loop() {
 }
 ```
 
+## Development
+
+Open up folder [dev](./dev) in PlatformIO. The FastLED src will be
+copied into dev/.pio/build folder automatically. Make sure to sync
+your fastled src directory between build and src before check in.
+
 ## Help and Support
 
 If you need help with using the library, please consider visiting the Reddit community at https://reddit.com/r/FastLED. There are thousands of knowledgeable FastLED users in that group and a plethora of solutions in the post history.
