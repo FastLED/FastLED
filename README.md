@@ -93,7 +93,7 @@ void loop() {
 
 ## Development
 
-If you want to make changes to the FastLED then please
+If you want to make changes to FastLED then please
 
   1. Fork FastLED into your repo and clone it locally.
   2. Open up the root folder of this repo with VSCode.
