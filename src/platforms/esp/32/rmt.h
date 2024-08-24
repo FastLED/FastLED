@@ -280,7 +280,7 @@ public:
 
     // -- Convert a byte into RMT pulses
     //    This function is only used when the built-in RMT driver is chosen
-    void convertByte(uint32_t byteval);
+    void ingest(uint32_t byteval);
 };
 
 
