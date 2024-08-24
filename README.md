@@ -93,9 +93,12 @@ void loop() {
 
 ## Development
 
-Open up folder [dev](./dev) in PlatformIO. The FastLED src will be
-copied into dev/.pio/build folder automatically. Make sure to sync
-your fastled src directory between build and src before check in.
+  1. Open up the root folder of this repo with VSCode.
+  2. Install PlatformIO extension.
+  3. Click the platformio compile / upload button at the bottom toolbar.
+
+To make changes just edit the dev/dev.ino file.
+
 
 ## Help and Support
 

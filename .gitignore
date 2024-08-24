@@ -19,3 +19,6 @@ Thumbs.db
 .pioenvs/
 .piolibdeps/
 .platformio/
+.vscode/extensions.json
+.vscode/launch.json
+.vscode/c_cpp_properties.json
