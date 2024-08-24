@@ -1,10 +1,111 @@
 
 #ifdef ESP32
 
+#include "led_sysdefs_esp32.h"
+
 #ifndef FASTLED_ESP32_I2S
+
+#ifndef FASTLED_RMT_SERIAL_DEBUG
+#define FASTLED_RMT_SERIAL_DEBUG 0
+#endif
+
+#if FASTLED_RMT_SERIAL_DEBUG == 1
+#define FASTLED_DEBUG(format, errcode, ...) if (errcode != ESP_OK) { Serial.printf(PSTR("FASTLED: " format "\n"), errcode, ##__VA_ARGS__); }
+#else
+#define FASTLED_DEBUG(format, errcode, ...) (void) errcode;
+#endif
+
+// 64 for ESP32, ESP32S2
+// 48 for ESP32S3, ESP32C3, ESP32H2
+#ifndef FASTLED_RMT_MEM_WORDS_PER_CHANNEL
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
+#define FASTLED_RMT_MEM_WORDS_PER_CHANNEL SOC_RMT_MEM_WORDS_PER_CHANNEL
+#else
+// ESP32 value (only chip variant supported on older IDF)
+#define FASTLED_RMT_MEM_WORDS_PER_CHANNEL 64 
+#endif 
+#endif
+
+// -- RMT memory configuration
+//    By default we use two memory blocks for each RMT channel instead of 1. The
+//    reason is that one memory block is only 64 bits, which causes the refill
+//    interrupt to fire too often. When combined with WiFi, this leads to conflicts
+//    between interrupts and weird flashy effects on the LEDs. Special thanks to
+//    Brian Bulkowski for finding this problem and developing a fix.
+#ifndef FASTLED_RMT_MEM_BLOCKS
+#define FASTLED_RMT_MEM_BLOCKS 2
+#endif
+
+
+#define MAX_PULSES (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS)
+#define PULSES_PER_FILL    (MAX_PULSES / 2)              /* Half of the channel buffer */
+
+// -- Configuration constants
+#define DIVIDER       2 /* 4, 8 still seem to work, but timings become marginal */
+
+
+// -- Max number of controllers we can support
+#ifndef FASTLED_RMT_MAX_CONTROLLERS
+#define FASTLED_RMT_MAX_CONTROLLERS 32
+#endif
+
+
+
+
+
+
+// @davidlmorris 2024-08-03
+// This is work-around for the issue of random fastLed freezes randomly sometimes minutes
+// but usually hours after the start, probably caused by interrupts 
+// being swallowed by the system so that the gTX_sem semaphore is never released
+// by the RMT interrupt handler causing FastLED.Show() never to return.
+
+// The default is never return (or max ticks aka portMAX_DELAY).  
+// To resolve this we need to set a maximum time to hold the semaphore.
+// For example: To wait a maximum of two seconds (enough time for the Esp32 to have sorted 
+// itself out and fast enough that it probably won't be greatly noticed by the audience)
+// use:
+// # define FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM (2000/portTICK_PERIOD_MS)
+// (Place this in your code directly before the first call to FastLED.h)
+#ifndef FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM  
+#define FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM (portMAX_DELAY)
+#endif
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern void spi_flash_op_lock(void);
+extern void spi_flash_op_unlock(void);
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #define FASTLED_INTERNAL
 #include "FastLED.h"
+
+__attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
+  uint32_t cyc;
+#ifdef FASTLED_XTENSA
+  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
+#else
+  cyc = cpu_hal_get_cycle_count();
+#endif
+  return cyc;
+}
+
+// -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
+// RMT Clock is typically APB CLK, which is 80MHz on most devices, but 40MHz on ESP32-H2
+#define F_CPU_RMT                   (  APB_CLK_FREQ )
+#define RMT_CYCLES_PER_SEC          (F_CPU_RMT/DIVIDER)
+#define RMT_CYCLES_PER_ESP_CYCLE    (F_CPU / RMT_CYCLES_PER_SEC)
+#define ESP_TO_RMT_CYCLES(n)        ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
+
 
 // -- Forward reference
 class ESP32RMTController;
@@ -67,7 +168,7 @@ void IRAM_ATTR GiveGTX_sem()
         }
 }
 
-ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, int memBlocks)
+ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver)
     : mPixelData(0), 
       mSize(0), 
       mCur(0),
@@ -75,11 +176,12 @@ ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int
       mWhichHalf(0),
       mBuffer(0),
       mBufferSize(0),
-      mCurPulse(0)
+      mCurPulse(0),
+      mBuiltInDriver(built_in_driver)
 {
     // -- Store the max channel and mem blocks parameters
     gMaxChannel = maxChannel;
-    gMemBlocks = memBlocks;
+    gMemBlocks = FASTLED_RMT_MEM_BLOCKS;
 
     // -- Precompute rmt items corresponding to a zero bit and a one bit
     //    according to the timing values given in the template instantiation
@@ -133,7 +235,7 @@ uint8_t * ESP32RMTController::getPixelBuffer(int size_in_bytes)
 
 // -- Initialize RMT subsystem
 //    This only needs to be done once
-void ESP32RMTController::init(gpio_num_t pin)
+void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 {
     if (gInitialized) return;
     esp_err_t espErr = ESP_OK;
@@ -159,7 +261,9 @@ void ESP32RMTController::init(gpio_num_t pin)
         espErr = rmt_config(&rmt_tx);
         FASTLED_DEBUG("rmt_config result: %d", espErr);
 
-        if (FASTLED_RMT_BUILTIN_DRIVER) {
+        // TODO: Move the value out of a define for this class and use
+        // the value from the define to pass into the RMT driver.
+        if (built_in_driver) {
             rmt_driver_install(rmt_channel_t(i), 0, 0);
         } else {
             // -- Set up the RMT to send 32 bits of the pulse buffer and then
@@ -176,13 +280,14 @@ void ESP32RMTController::init(gpio_num_t pin)
         xSemaphoreGive(gTX_sem);
     }
                 
-    if ( ! FASTLED_RMT_BUILTIN_DRIVER) {
+    if ( ! built_in_driver) {
         // -- Allocate the interrupt if we have not done so yet. This
         //    interrupt handler must work for all different kinds of
         //    strips, so it delegates to the refill function for each
         //    specific instantiation of ClocklessController.
-        if (gRMT_intr_handle == NULL)
+        if (gRMT_intr_handle == NULL) {
             esp_intr_alloc(ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3, interruptHandler, 0, &gRMT_intr_handle);
+        }
     }
 
     gInitialized = true;
@@ -195,7 +300,7 @@ void IRAM_ATTR ESP32RMTController::showPixels()
 {
     if (gNumStarted == 0) {
         // -- First controller: make sure everything is set up
-        ESP32RMTController::init(mPin);
+        ESP32RMTController::init(mPin, mBuiltInDriver);
 
 #if FASTLED_ESP32_FLASH_LOCK == 1
         // -- Make sure no flash operations happen right now
@@ -282,7 +387,7 @@ void IRAM_ATTR ESP32RMTController::startOnChannel(int channel)
     FASTLED_DEBUG("rrmt_set_pin result: %d", espErr);
 #endif
 
-    if (FASTLED_RMT_BUILTIN_DRIVER) {
+    if (mBuiltInDriver) {
         // -- Use the built-in RMT driver to send all the data in one shot
         rmt_register_tx_end_callback(doneOnChannel, 0);
         rmt_write_items(mRMT_channel, mBuffer, mBufferSize, false);
