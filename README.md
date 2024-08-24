@@ -95,10 +95,16 @@ void loop() {
 
 If you want to make changes to FastLED then please
 
-  1. Fork FastLED into your repo and clone it locally.
-  2. Open up the root folder of this repo with VSCode.
-  3. Install PlatformIO extension.
-  4. Click the platformio compile / upload button at the bottom toolbar.
+  * [Fork](https://github.com/FastLED/FastLED/fork) the https://github.com/FastLED/FastLED repo into your github account.
+  * Open up the folder with VSCode.
+  * If you don't have VSCode
+  	* Install PlatformIO extension if you don't have it already
+     		* and then exit your VSCode IDE.
+  * Once FastLED is loading with platform, give it some time to download the dependencies (esp32-s3 (default) has a 1+GB download!)
+  * Click the platformio compile
+    * Then upload to your device
+    
+<img width="1220" alt="image" src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b">
 
 To make changes just edit the [dev/dev.ino](dev/dev.ino) file.
 
