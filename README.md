@@ -102,6 +102,8 @@ If you want to make changes to the FastLED then please
 
 To make changes just edit the [dev/dev.ino](dev/dev.ino) file.
 
+When changes are made then push to your fork and issue a pull request.
+
 
 ## Help and Support
 
