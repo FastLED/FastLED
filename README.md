@@ -93,11 +93,14 @@ void loop() {
 
 ## Development
 
-  1. Open up the root folder of this repo with VSCode.
-  2. Install PlatformIO extension.
-  3. Click the platformio compile / upload button at the bottom toolbar.
+If you want to make changes to the FastLED then please
 
-To make changes just edit the dev/dev.ino file.
+  1. Fork FastLED into your repo and clone it locally.
+  2. Open up the root folder of this repo with VSCode.
+  3. Install PlatformIO extension.
+  4. Click the platformio compile / upload button at the bottom toolbar.
+
+To make changes just edit the [dev/dev.ino](dev/dev.ino) file.
 
 
 ## Help and Support
