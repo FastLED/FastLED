@@ -742,7 +742,7 @@ void ESP32RMTController::initPulseBuffer(int size_in_bytes)
 
 // -- Convert a byte into RMT pulses
 //    This function is only used when the built-in RMT driver is chosen
-void ESP32RMTController::convertByte(uint32_t byteval)
+void ESP32RMTController::ingest(uint32_t byteval)
 {
     // -- Write one byte's worth of RMT pulses to the big buffer
     byteval <<= 24;

@@ -186,6 +186,21 @@ public:
     /// @return the currently set dithering option (CLEDController::m_DitherMode)
     inline uint8_t getDither() { return m_DitherMode; }
 
+    virtual void* beginShowLeds() {
+        // By default, ingest an integer. If you override beginShowLeds() then
+        // you should also override endShowLeds() to match.
+        uintptr_t d = getDither();
+        void* out = reinterpret_cast<void*>(d);
+        return out;
+    }
+    virtual void endShowLeds(void* data) {
+        // data that was passed in is just an integer by default.
+        // If you override endShowLeds() then you should also override
+        // beginShowLeds() to match.
+        uintptr_t d = reinterpret_cast<uintptr_t>(data);
+        setDither(static_cast<uint8_t>(d));
+    }
+
     /// The color corrction to use for this controller, expressed as a CRGB object
     /// @param correction the color correction to set
     /// @returns a reference to the controller

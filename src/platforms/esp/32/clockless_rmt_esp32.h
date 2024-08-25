@@ -108,11 +108,11 @@ protected:
         uint32_t byteval;
         while (pixels.has(1)) {
             byteval = pixels.loadAndScale0();
-            mRMTController.convertByte(byteval);
+            mRMTController.ingest(byteval);
             byteval = pixels.loadAndScale1();
-            mRMTController.convertByte(byteval);
+            mRMTController.ingest(byteval);
             byteval = pixels.loadAndScale2();
-            mRMTController.convertByte(byteval);
+            mRMTController.ingest(byteval);
             pixels.advanceData();
             pixels.stepDithering();
         }
