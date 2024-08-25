@@ -97,20 +97,11 @@ If you want to make changes to FastLED then please
 
   * [Fork](https://github.com/FastLED/FastLED/fork) the https://github.com/FastLED/FastLED repo into your github account.
   * Open up the folder with VSCode.
-  * If you don't have VSCode
-  	* Install PlatformIO extension if you don't have it already
-     		* and then exit your VSCode IDE.
-  * Once FastLED is loading with platform, give it some time to download the dependencies (esp32-s3 (default) has a 1+GB download!)
+    * Make sure VSCode had the platformio extension.
+  * Once FastLED is loading with platformio, give it some time to download the dependencies (esp32-s3 (default) has a 1+GB download!)
   * Click the platformio compile
     * Then upload to your device
-
-The following picture show what the final state should look like when you are ready to work on a patch
-  * You are editing the `platformio.ini`
-    * We use esp32-s3 by default because it is dual-core, cheap and is a feature rich platform pushing LEDs to the limit.
-    * Be mindful of whether you are testing the esp-idf 4.x (Arduino IDE prior to ~July-2024) or the esp-idf 5.1 version.
-      * Both versions are available in the [platformio.ini](platformio.ini) file, see comments.
-    * You can also change the platform to something classic like `uno`, see examlpes on the internet.
-  * You have the [dev/dev.ino](dev/dev.ino) ready, where you are going to edit your changes.
+  * See [dev/dev.ino](dev/dev.ino).
 <img width="1220" alt="image" src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b">
 
 To make changes just edit the [dev/dev.ino](dev/dev.ino) file.
