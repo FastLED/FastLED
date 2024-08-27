@@ -85,6 +85,7 @@ CUSTOM_PROJECT_OPTIONS = {
     "esp32-c6-devkitc-1": f"platform={ESP32_IDF_5_1}",
     "esp32-s3-devkitc-1": f"platform={ESP32_IDF_5_1}",
     "esp32-h2-devkitm-1": f"platform={ESP32_IDF_5_1}",
+    "adafruit_feather_nrf52840_sense": "platform=nordicnrf52",
 }
 
 ERROR_HAPPENED = False
