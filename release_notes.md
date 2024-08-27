@@ -1,3 +1,16 @@
+FastLED 3.7.4
+=============
+Board support added
+  * https://github.com/FastLED/FastLED/pull/1681
+    * Partial support for adafruit nrf sense
+      * WS2812 compiles
+      * APA102 does not
+    * Hat tip to https://github.com/SamShort7 for the patch.
+  * https://github.com/FastLED/FastLED/pull/1630
+    * Adafruit Pixel Trinkey M0 support
+    * Hat tip: https://github.com/BlitzCityDIY
+
+
 FastLED 3.7.3
 =============
 Adds Arduino IDE 2.3.1+ support in the idf-5.1 toolchain
