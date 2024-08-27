@@ -1,7 +1,9 @@
 
 #ifdef ESP32
 
-#include "led_sysdefs_esp32.h"
+#include "FastLED.h"
+#include "idf4_rmt.h"
+
 
 #ifndef FASTLED_ESP32_I2S
 
@@ -85,9 +87,8 @@ extern void spi_flash_op_unlock(void);
 }
 #endif
 
-
 #define FASTLED_INTERNAL
-#include "FastLED.h"
+
 
 __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
   uint32_t cyc;
