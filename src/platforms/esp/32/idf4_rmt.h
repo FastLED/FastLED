@@ -114,6 +114,7 @@
 
 #pragma once
 
+#include "namespace.h"
 
 
 FASTLED_NAMESPACE_BEGIN

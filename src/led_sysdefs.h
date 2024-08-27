@@ -63,14 +63,7 @@
 #error "This platform isn't recognized by FastLED... yet.  See comments in FastLED/led_sysdefs.h for options."
 #endif
 
-#ifndef FASTLED_NAMESPACE_BEGIN
-/// Start of the FastLED namespace
-#define FASTLED_NAMESPACE_BEGIN
-/// End of the FastLED namespace
-#define FASTLED_NAMESPACE_END
-/// "Using" directive for the namespace
-#define FASTLED_USING_NAMESPACE
-#endif
+#include "namespace.h"
 
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #ifdef ARDUINO
