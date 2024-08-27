@@ -221,9 +221,6 @@ public:
     //    member variables.
     ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver);
 
-    // -- Get max cycles per fill
-    uint32_t IRAM_ATTR getMaxCyclesPerFill() const { return mMaxCyclesPerFill; }
-
     // -- Get or create the pixel data buffer
     uint8_t * getPixelBuffer(int size_in_bytes);
 
@@ -236,6 +233,18 @@ public:
     //    This is the main entry point for the pixel controller
     void IRAM_ATTR showPixels();
 
+
+    // -- Init pulse buffer
+    //    Set up the buffer that will hold all of the pulse items for this
+    //    controller. 
+    //    This function is only used when the built-in RMT driver is chosen
+    void initPulseBuffer(int size_in_bytes);
+
+    // -- Convert a byte into RMT pulses
+    //    This function is only used when the built-in RMT driver is chosen
+    void ingest(uint32_t byteval);
+
+ private:
     // -- Start up the next controller
     //    This method is static so that it can dispatch to the
     //    appropriate startOnChannel method of the given controller.
@@ -271,16 +280,6 @@ public:
     //    NOTE: Now the default is to use 128-bit buffers, so half a buffer is
     //          is 64 bits. See FASTLED_RMT_MEM_BLOCKS
     void IRAM_ATTR fillNext(bool check_time);
-
-    // -- Init pulse buffer
-    //    Set up the buffer that will hold all of the pulse items for this
-    //    controller. 
-    //    This function is only used when the built-in RMT driver is chosen
-    void initPulseBuffer(int size_in_bytes);
-
-    // -- Convert a byte into RMT pulses
-    //    This function is only used when the built-in RMT driver is chosen
-    void ingest(uint32_t byteval);
 };
 
 
