@@ -22,3 +22,6 @@ Thumbs.db
 .vscode/extensions.json
 .vscode/launch.json
 .vscode/c_cpp_properties.json
+.aider*
+!.aider.conf.yml
+!.aiderignore
