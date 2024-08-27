@@ -9,8 +9,8 @@ var indexSectionsWithContent =
   6: "cehlost",
   7: "abcdfghiklmnoprstuvwy",
   8: "_abcdfhlmnprsuv",
-  9: "bcdefghlnpstw",
-  10: "dft"
+  9: "abcdefghilmnoprstuw",
+  10: "dflt"
 };
 
 var indexSectionNames =

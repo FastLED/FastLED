@@ -22,61 +22,21 @@
 
  @licend  The above is the entire license notice for the JavaScript code in this file
  */
-var once=1;
-function initResizable()
-{
-  var cookie_namespace = 'doxygen';
-  var sidenav,navtree,content,header,barWidth=6,desktop_vp=768,titleHeight;
 
-  function readSetting(cookie)
-  {
-    if (window.chrome) {
-      var val = localStorage.getItem(cookie_namespace+'_width');
-      if (val) return val;
-    } else {
-      var myCookie = cookie_namespace+"_"+cookie+"=";
-      if (document.cookie) {
-        var index = document.cookie.indexOf(myCookie);
-        if (index != -1) {
-          var valStart = index + myCookie.length;
-          var valEnd = document.cookie.indexOf(";", valStart);
-          if (valEnd == -1) {
-            valEnd = document.cookie.length;
-          }
-          var val = document.cookie.substring(valStart, valEnd);
-          return val;
-        }
-      }
-    }
-    return 250;
-  }
+function initResizable(treeview) {
+  let sidenav,navtree,content,header,footer,barWidth=6;
+  const RESIZE_COOKIE_NAME = ''+'width';
 
-  function writeSetting(cookie, val)
-  {
-    if (window.chrome) {
-      localStorage.setItem(cookie_namespace+"_width",val);
-    } else {
-      var date = new Date();
-      date.setTime(date.getTime()+(10*365*24*60*60*1000)); // default expiration is one week
-      expiration = date.toGMTString();
-      document.cookie = cookie_namespace + "_" + cookie + "=" + val + "; SameSite=Lax; expires=" + expiration+"; path=/";
-    }
-  }
-
-  function resizeWidth()
-  {
-    var windowWidth = $(window).width() + "px";
-    var sidenavWidth = $(sidenav).outerWidth();
+  function resizeWidth() {
+    const sidenavWidth = $(sidenav).outerWidth();
     content.css({marginLeft:parseInt(sidenavWidth)+"px"});
     if (typeof page_layout!=='undefined' && page_layout==1) {
       footer.css({marginLeft:parseInt(sidenavWidth)+"px"});
     }
-    writeSetting('width',sidenavWidth-barWidth);
+    Cookie.writeSetting(RESIZE_COOKIE_NAME,sidenavWidth-barWidth);
   }
 
-  function restoreWidth(navWidth)
-  {
-    var windowWidth = $(window).width() + "px";
+  function restoreWidth(navWidth) {
     content.css({marginLeft:parseInt(navWidth)+barWidth+"px"});
     if (typeof page_layout!=='undefined' && page_layout==1) {
       footer.css({marginLeft:parseInt(navWidth)+barWidth+"px"});
@@ -84,71 +44,101 @@ function initResizable()
     sidenav.css({width:navWidth + "px"});
   }
 
-  function resizeHeight()
-  {
-    var headerHeight = header.outerHeight();
-    var footerHeight = footer.outerHeight();
-    var windowHeight = $(window).height();
-    var contentHeight,navtreeHeight,sideNavHeight;
-    if (typeof page_layout==='undefined' || page_layout==0) { /* DISABLE_INDEX=NO */
-      contentHeight = windowHeight - headerHeight - footerHeight;
-      navtreeHeight = contentHeight;
-      sideNavHeight = contentHeight;
-    } else if (page_layout==1) { /* DISABLE_INDEX=YES */
-      contentHeight = windowHeight - footerHeight;
-      navtreeHeight = windowHeight - headerHeight;
-      sideNavHeight = windowHeight;
+  function resizeHeight(treeview) {
+    const headerHeight = header.outerHeight();
+    const windowHeight = $(window).height();
+    let contentHeight;
+    if (treeview)
+    {
+      const footerHeight = footer.outerHeight();
+      let navtreeHeight,sideNavHeight;
+      if (typeof page_layout==='undefined' || page_layout==0) { /* DISABLE_INDEX=NO */
+        contentHeight = windowHeight - headerHeight - footerHeight;
+        navtreeHeight = contentHeight;
+        sideNavHeight = contentHeight;
+      } else if (page_layout==1) { /* DISABLE_INDEX=YES */
+        contentHeight = windowHeight - footerHeight;
+        navtreeHeight = windowHeight - headerHeight;
+        sideNavHeight = windowHeight;
+      }
+      navtree.css({height:navtreeHeight + "px"});
+      sidenav.css({height:sideNavHeight + "px"});
+    }
+    else
+    {
+      contentHeight = windowHeight - headerHeight;
     }
     content.css({height:contentHeight + "px"});
-    navtree.css({height:navtreeHeight + "px"});
-    sidenav.css({height:sideNavHeight + "px"});
     if (location.hash.slice(1)) {
       (document.getElementById(location.hash.slice(1))||document.body).scrollIntoView();
     }
   }
 
-  function collapseExpand()
-  {
-    var newWidth;
+  function collapseExpand() {
+    let newWidth;
     if (sidenav.width()>0) {
       newWidth=0;
-    }
-    else {
-      var width = readSetting('width');
+    } else {
+      const width = Cookie.readSetting(RESIZE_COOKIE_NAME,250);
       newWidth = (width>250 && width<$(window).width()) ? width : 250;
     }
     restoreWidth(newWidth);
-    var sidenavWidth = $(sidenav).outerWidth();
-    writeSetting('width',sidenavWidth-barWidth);
+    const sidenavWidth = $(sidenav).outerWidth();
+    Cookie.writeSetting(RESIZE_COOKIE_NAME,sidenavWidth-barWidth);
   }
 
   header  = $("#top");
-  sidenav = $("#side-nav");
   content = $("#doc-content");
-  navtree = $("#nav-tree");
   footer  = $("#nav-path");
-  $(".side-nav-resizable").resizable({resize: function(e, ui) { resizeWidth(); } });
-  $(sidenav).resizable({ minWidth: 0 });
-  $(window).resize(function() { resizeHeight(); });
-  var device = navigator.userAgent.toLowerCase();
-  var touch_device = device.match(/(iphone|ipod|ipad|android)/);
-  if (touch_device) { /* wider split bar for touch only devices */
-    $(sidenav).css({ paddingRight:'20px' });
-    $('.ui-resizable-e').css({ width:'20px' });
-    $('#nav-sync').css({ right:'34px' });
-    barWidth=20;
+  sidenav = $("#side-nav");
+  if (!treeview) {
+//    title   = $("#titlearea");
+//    titleH  = $(title).height();
+//    let animating = false;
+//    content.on("scroll", function() {
+//      slideOpts = { duration: 200,
+//                    step: function() {
+//                        contentHeight = $(window).height() - header.outerHeight();
+//                        content.css({ height : contentHeight + "px" });
+//                      },
+//                    done: function() { animating=false; }
+//                  };
+//      if (content.scrollTop()>titleH && title.css('display')!='none' && !animating) {
+//        title.slideUp(slideOpts);
+//        animating=true;
+//      } else if (content.scrollTop()<=titleH && title.css('display')=='none' && !animating) {
+//        title.slideDown(slideOpts);
+//        animating=true;
+//      }
+//    });
+  } else {
+    navtree = $("#nav-tree");
+    $(".side-nav-resizable").resizable({resize: function(e, ui) { resizeWidth(); } });
+    $(sidenav).resizable({ minWidth: 0 });
   }
-  var width = readSetting('width');
-  if (width) { restoreWidth(width); } else { resizeWidth(); }
-  resizeHeight();
-  var url = location.href;
-  var i=url.indexOf("#");
+  $(window).resize(function() { resizeHeight(treeview); });
+  if (treeview)
+  {
+    const device = navigator.userAgent.toLowerCase();
+    const touch_device = device.match(/(iphone|ipod|ipad|android)/);
+    if (touch_device) { /* wider split bar for touch only devices */
+      $(sidenav).css({ paddingRight:'20px' });
+      $('.ui-resizable-e').css({ width:'20px' });
+      $('#nav-sync').css({ right:'34px' });
+      barWidth=20;
+    }
+    const width = Cookie.readSetting(RESIZE_COOKIE_NAME,250);
+    if (width) { restoreWidth(width); } else { resizeWidth(); }
+  }
+  resizeHeight(treeview);
+  const url = location.href;
+  const i=url.indexOf("#");
   if (i>=0) window.location.hash=url.substr(i);
-  var _preventDefault = function(evt) { evt.preventDefault(); };
-  $("#splitbar").bind("dragstart", _preventDefault).bind("selectstart", _preventDefault);
-  if (once) {
+  const _preventDefault = function(evt) { evt.preventDefault(); };
+  if (treeview)
+  {
+    $("#splitbar").bind("dragstart", _preventDefault).bind("selectstart", _preventDefault);
     $(".ui-resizable-handle").dblclick(collapseExpand);
-    once=0
   }
   $(window).on('load',resizeHeight);
 }

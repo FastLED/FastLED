@@ -81,6 +81,7 @@ html {
     .ui-resizable-handle {
         cursor: default;
         width: 1px !important;
+        background: var(--separator-color);
         box-shadow: 0 calc(-2 * var(--top-height)) 0 0 var(--separator-color);
     }
 

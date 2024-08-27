@@ -10,6 +10,6 @@ var class_n_o_p_s_p_i_output =
     [ "writeByte", "class_n_o_p_s_p_i_output.html#af5485fc346e12c50480b969e5b242636", null ],
     [ "writeBytes", "class_n_o_p_s_p_i_output.html#a7b33548cfee1f5cda7a8a48fa45ee460", null ],
     [ "writeBytesValue", "class_n_o_p_s_p_i_output.html#a2f8e72323c827eb869b222b5a36ebbc1", null ],
-    [ "writePixels", "class_n_o_p_s_p_i_output.html#aa192a8b0f727e7c9fc399e94532e287f", null ],
+    [ "writePixels", "class_n_o_p_s_p_i_output.html#a36d9217652b6f56522482476e06fd51e", null ],
     [ "writeWord", "class_n_o_p_s_p_i_output.html#a31ccabe3e4987751ad67a5d06e502df2", null ]
 ];

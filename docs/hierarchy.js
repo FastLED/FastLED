@@ -19,30 +19,33 @@ var hierarchy =
     [ "CHSVPalette256", "class_c_h_s_v_palette256.html", null ],
     [ "CHSVPalette32", "class_c_h_s_v_palette32.html", null ],
     [ "CLEDController", "class_c_l_e_d_controller.html", [
-      [ "CPixelLEDController< RGB >", "class_c_pixel_l_e_d_controller.html", null ],
-      [ "CPixelLEDController< RGB_ORDER, LANES, MASK >", "class_c_pixel_l_e_d_controller.html", [
-        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_BitShift, uint32_t(0x00000000), uint32_t(0x00000000)>", "class_a_p_a102_controller.html", null ],
-        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_Null, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", null ],
-        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_BitShift, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", null ],
-        [ "DMXSerialController< RGB_ORDER >", "class_d_m_x_serial_controller.html", [
-          [ "DMXSERIAL< RGB_ORDER >", "class_d_m_x_s_e_r_i_a_l.html", null ]
-        ] ],
-        [ "DMXSimpleController< DATA_PIN, RGB_ORDER >", "class_d_m_x_simple_controller.html", [
-          [ "DMXSIMPLE< DATA_PIN, RGB_ORDER >", "class_d_m_x_s_i_m_p_l_e.html", null ]
-        ] ],
-        [ "WS2801Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(25) >", "class_w_s2801_controller.html", null ],
-        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED, GAMMA_CORRECTION_MODE, START_FRAME, END_FRAME >", "class_a_p_a102_controller.html", [
-          [ "APA102ControllerHD< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_a_p_a102_controller_h_d.html", null ],
-          [ "SK9822Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller.html", null ],
-          [ "SK9822ControllerHD< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller_h_d.html", null ]
-        ] ],
+      [ "CPixelLEDController< RGB >", "class_c_pixel_l_e_d_controller.html", [
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED, GAMMA_CORRECTION_MODE, START_FRAME, END_FRAME >", "class_a_p_a102_controller.html", null ],
         [ "DMXSerialController< RGB_ORDER >", "class_d_m_x_serial_controller.html", null ],
         [ "DMXSimpleController< DATA_PIN, RGB_ORDER >", "class_d_m_x_simple_controller.html", null ],
         [ "LPD6803Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_l_p_d6803_controller.html", null ],
         [ "LPD8806Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_l_p_d8806_controller.html", null ],
         [ "P9813Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_p9813_controller.html", null ],
         [ "SM16716Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_m16716_controller.html", null ],
-        [ "WS2801Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_w_s2801_controller.html", [
+        [ "WS2801Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_w_s2801_controller.html", null ]
+      ] ],
+      [ "CPixelLEDController< RGB_ORDER, LANES, MASK >", "class_c_pixel_l_e_d_controller.html", [
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_BitShift, uint32_t(0x00000000), uint32_t(0x00000000)>", "class_a_p_a102_controller.html", [
+          [ "APA102ControllerHD< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_a_p_a102_controller_h_d.html", null ]
+        ] ],
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_Null, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", [
+          [ "SK9822Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller.html", null ]
+        ] ],
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_BitShift, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", [
+          [ "SK9822ControllerHD< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller_h_d.html", null ]
+        ] ],
+        [ "DMXSerialController< RGB_ORDER >", "class_d_m_x_serial_controller.html", [
+          [ "DMXSERIAL< RGB_ORDER >", "class_d_m_x_s_e_r_i_a_l.html", null ]
+        ] ],
+        [ "DMXSimpleController< DATA_PIN, RGB_ORDER >", "class_d_m_x_simple_controller.html", [
+          [ "DMXSIMPLE< DATA_PIN, RGB_ORDER >", "class_d_m_x_s_i_m_p_l_e.html", null ]
+        ] ],
+        [ "WS2801Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(25) >", "class_w_s2801_controller.html", [
           [ "WS2803Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_w_s2803_controller.html", null ]
         ] ]
       ] ]

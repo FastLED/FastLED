@@ -1,4 +1,4 @@
-var modules =
+var topics =
 [
     [ "Color Correction/Temperature", "group___color_enums.html", "group___color_enums" ],
     [ "Color Palettes", "group___color_palettes.html", "group___color_palettes" ],

@@ -1,5 +1,6 @@
 var dir_d28a4824dc47e487b107a5db32ef43c4 =
 [
+    [ "_bugs", "dir_a28f5fea2b8786ae6755ff1fe11c7e25.html", "dir_a28f5fea2b8786ae6755ff1fe11c7e25" ],
     [ "AnalogOutput", "dir_8bb4b718726ef6bb146f349e752b8dbd.html", "dir_8bb4b718726ef6bb146f349e752b8dbd" ],
     [ "Apa102HD", "dir_444f6549ff4d6964f399c8619651b3db.html", "dir_444f6549ff4d6964f399c8619651b3db" ],
     [ "Blink", "dir_05dd8b05715c4ed4a1c3d13c1176049b.html", "dir_05dd8b05715c4ed4a1c3d13c1176049b" ],
@@ -14,6 +15,7 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "Noise", "dir_6ce71dca734103421d7f880fafdc58c0.html", "dir_6ce71dca734103421d7f880fafdc58c0" ],
     [ "NoisePlayground", "dir_8b10bafa6e455a6cfdd7da84bc339d80.html", "dir_8b10bafa6e455a6cfdd7da84bc339d80" ],
     [ "NoisePlusPalette", "dir_9855228c8cabbd40154e79ac1a40dc7f.html", "dir_9855228c8cabbd40154e79ac1a40dc7f" ],
+    [ "OctoWS2811", "dir_ace4e50fcc955ba7d1af81fff465c2e8.html", "dir_ace4e50fcc955ba7d1af81fff465c2e8" ],
     [ "Pacifica", "dir_6c462138272298d2e4097d58743c07ce.html", "dir_6c462138272298d2e4097d58743c07ce" ],
     [ "Pintest", "dir_26c6288c6e5cb98dccb832f1aa4eaa4f.html", "dir_26c6288c6e5cb98dccb832f1aa4eaa4f" ],
     [ "Ports", "dir_5be643861a9099dc7f4088bde5b50734.html", "dir_5be643861a9099dc7f4088bde5b50734" ],

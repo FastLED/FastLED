@@ -6,6 +6,6 @@ var searchData=
   ['port_3',['port',['../class_pin.html#aba2b626e233b5e2f498de7dbdd113684',1,'Pin::port()'],['../class_fast_pin.html#ab005abe848eadb60051daccb4eb7dbe8',1,'FastPin::port()']]],
   ['portaddr_4',['portAddr',['../struct_____f_l___p_o_r_t___i_n_f_o.html#a3bab01aa4faddd77dcd6a567bcf50043',1,'__FL_PORT_INFO']]],
   ['portname_5',['portName',['../struct_____f_l___p_o_r_t___i_n_f_o.html#ad7cedd4bff6b75c60ddf249dade8dd1c',1,'__FL_PORT_INFO']]],
-  ['postblock_6',['postBlock',['../class_d_a_t_a___n_o_p.html#a1273cd229c3b85e665a181e47b893844',1,'DATA_NOP']]],
+  ['postblock_6',['postBlock',['../class_d_a_t_a___n_o_p.html#a90b4d38f304b4958d9229b90e0e9aca7',1,'DATA_NOP']]],
   ['prestepfirstbytedithering_7',['preStepFirstByteDithering',['../struct_pixel_controller.html#a52b25ef22470e538b0a1a604ae9f95e5',1,'PixelController']]]
 ];

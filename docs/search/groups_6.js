@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['hsv_20to_20rgb_20conversion_20functions_0',['HSV to RGB Conversion Functions',['../group___h_s_v2_r_g_b.html',1,'']]]
+  ['gamma_20adjustment_20functions_0',['Gamma Adjustment Functions',['../group___gamma_funcs.html',1,'']]],
+  ['generation_20functions_1',['Noise Generation Functions',['../group___noise_generation.html',1,'']]],
+  ['generators_2',['Generators',['../group___random.html',1,'Fast Random Number Generators'],['../group___beat_generators.html',1,'Waveform Beat Generators'],['../group___waveform_generators.html',1,'Waveform Generators']]]
 ];

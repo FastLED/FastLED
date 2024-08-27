@@ -9,5 +9,5 @@ var class_a_v_r_software_s_p_i_output =
     [ "writeBytes", "class_a_v_r_software_s_p_i_output.html#af543930d08c9ce5c8229e45be97980e9", null ],
     [ "writeBytes", "class_a_v_r_software_s_p_i_output.html#a8e0f5d9fd6f2c1e1eab4436c1b5cb23a", null ],
     [ "writeBytesValue", "class_a_v_r_software_s_p_i_output.html#ac4ffa7160697ac63bbd7734b480308bc", null ],
-    [ "writePixels", "class_a_v_r_software_s_p_i_output.html#a122d1bec46768f7f73c2f169df267280", null ]
+    [ "writePixels", "class_a_v_r_software_s_p_i_output.html#a20772a8fdfa75015731375c36ccb3515", null ]
 ];
