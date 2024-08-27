@@ -1,0 +1,30 @@
+name: Build Template
+
+on:
+    workflow_dispatch:
+    push:
+      branches:
+        - master
+    pull_request:
+      branches:
+        - master
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO build dependencies
+        run: |
+          pip install -r ci/requirements.txt
+      - name: Build clone and compile example
+        run: pio ci src --project-conf platformio.ini --keep-build-dir --build-dir build
+
