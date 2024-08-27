@@ -111,9 +111,7 @@ If you want to make changes to FastLED then please
   * See [dev/dev.ino](dev/dev.ino).
 <img width="1220" alt="image" src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b">
 
-To make changes just edit the [dev/dev.ino](dev/dev.ino) file.
-
-When changes are made then push to your fork and issue a pull request.
+When changes are made then push to your fork to your repo and git will give you a url to trigger a pull request into the master repo.
 
 
 ## Help and Support
