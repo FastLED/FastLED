@@ -89,6 +89,7 @@ CUSTOM_PROJECT_OPTIONS = {
     "adafruit_feather_nrf52840_sense": ["platform=nordicnrf52"],
     "rpipicow": [
         "platform=https://github.com/earlephilhower/arduino-pico.git",
+        "board_build.core = earlephilhower",
         "board_build.filesystem_size=0.5m"
     ],
 }
