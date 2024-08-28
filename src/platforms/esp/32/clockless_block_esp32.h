@@ -8,7 +8,6 @@
 #include "eorder.h"
 #include "transpose8x1_noinline.h"
 
-#define FASTLED_HAS_CLOCKLESS 1
 #define FASTLED_HAS_BLOCKLESS 1
 
 #define PORT_MASK (((1<<LANES)-1) & 0x0000FFFFL)
