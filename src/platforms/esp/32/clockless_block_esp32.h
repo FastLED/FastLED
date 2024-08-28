@@ -17,6 +17,13 @@
 #define REAL_FIRST_PIN 12
 #define LAST_PIN (12 + USED_LANES - 1)
 
+// These are completely made up but allow the code to compile.
+// It looks like esp32 has a more flexible pin mapping than esp8266.
+// so these might actually work.
+#define PORTD_FIRST_PIN 12
+#define PORTA_FIRST_PIN 14
+#define PORTB_FIRST_PIN 16
+
 FASTLED_NAMESPACE_BEGIN
 
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
