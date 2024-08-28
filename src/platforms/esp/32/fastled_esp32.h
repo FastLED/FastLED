@@ -34,7 +34,6 @@
 #include "clockless_i2s_esp32.h"
 #elif FASTLED_ESP32_CLOCKLESS_BITBANG
 #include "clockless_block_esp32.h"
-#define ClocklessController InlineBlockClocklessController
 #else
 #include "clockless_rmt_esp32.h"
 #endif
