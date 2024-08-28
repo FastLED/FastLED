@@ -27,7 +27,7 @@ PARRALLEL_PROJECT_INITIALIZATION = os.environ.get("PARRALLEL_PROJECT_INITIALIZAT
 
 # Set to a specific release, we may want to update this in the future.
 ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
-ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32"
+ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32.git#develop"
 # Top of trunk.
 #ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32"
 
