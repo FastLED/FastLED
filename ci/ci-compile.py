@@ -79,15 +79,18 @@ BOARDS = [
 
 
 CUSTOM_PROJECT_OPTIONS = {
-    "esp32dev": f"platform={ESP32_IDF_5_1}",
+    "esp32dev": [f"platform={ESP32_IDF_5_1}"],
     #"esp01": f"platform={ESP32_IDF_5_1}",
-    "esp32-c2-devkitm-1": f"platform={ESP32_IDF_5_1_LATEST}",
-    "esp32-c3-devkitm-1": f"platform={ESP32_IDF_5_1}",
-    "esp32-c6-devkitc-1": f"platform={ESP32_IDF_5_1}",
-    "esp32-s3-devkitc-1": f"platform={ESP32_IDF_5_1}",
-    "esp32-h2-devkitm-1": f"platform={ESP32_IDF_5_1_LATEST}",
-    "adafruit_feather_nrf52840_sense": "platform=nordicnrf52",
-    "rpipicow": "platform=https://github.com/maxgerhardt/platform-raspberrypi.git",
+    "esp32-c2-devkitm-1": [f"platform={ESP32_IDF_5_1_LATEST}"],
+    "esp32-c3-devkitm-1": [f"platform={ESP32_IDF_5_1}"],
+    "esp32-c6-devkitc-1": [f"platform={ESP32_IDF_5_1}"],
+    "esp32-s3-devkitc-1": [f"platform={ESP32_IDF_5_1}"],
+    "esp32-h2-devkitm-1": [f"platform={ESP32_IDF_5_1_LATEST}"],
+    "adafruit_feather_nrf52840_sense": ["platform=nordicnrf52"],
+    "rpipicow": [
+        "platform=https://github.com/maxgerhardt/platform-raspberrypi.git",
+        "board_build.filesystem_size=0.5m"
+    ],
 }
 
 ERROR_HAPPENED = False
@@ -150,7 +153,7 @@ def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
     locked_print(f"*** Finished building example {example} for board {board} ***")
     return True, stdout
 
-def create_build_dir(board: str, project_options: str | None, defines: list[str], no_install_deps: bool, extra_packages: list[str]) -> tuple[bool, str]:
+def create_build_dir(board: str, project_options: list[str] | None, defines: list[str], no_install_deps: bool, extra_packages: list[str]) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     locked_print(f"*** Initializing environment for board {board} ***")
     builddir = Path(".build") / board
@@ -176,7 +179,8 @@ def create_build_dir(board: str, project_options: str | None, defines: list[str]
         board,
     ]
     if project_options:
-        cmd_list.append(f'--project-option={project_options}')
+        for project_option in project_options:
+            cmd_list.append(f'--project-option={project_option}')
     if defines:
         build_flags = ' '.join(f'-D {define}' for define in defines)
         cmd_list.append(f'--project-option=build_flags={build_flags}')
