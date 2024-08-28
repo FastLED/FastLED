@@ -3,6 +3,7 @@
 
 #include "FastLED.h"
 #include "idf4_rmt.h"
+#include "clock_cycles.h"
 
 
 #ifndef FASTLED_ESP32_I2S
@@ -90,15 +91,6 @@ extern void spi_flash_op_unlock(void);
 #define FASTLED_INTERNAL
 
 
-__attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
-  uint32_t cyc;
-#ifdef FASTLED_XTENSA
-  __asm__ __volatile__ ("rsr %0,ccount":"=a" (cyc));
-#else
-  cyc = cpu_hal_get_cycle_count();
-#endif
-  return cyc;
-}
 
 // -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
 // RMT Clock is typically APB CLK, which is 80MHz on most devices, but 40MHz on ESP32-H2
