@@ -56,7 +56,7 @@ We have multiple goals with this library:
 
 #### Esp Upcoming
 [![esp32h2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml)
-[![esp32c2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml)
+
 
 ## Platform Features
 
@@ -67,6 +67,17 @@ We have multiple goals with this library:
 #### Teensy
 
 [![teensy_octoWS2811](https://github.com/FastLED/FastLED/actions/workflows/build_teensy_octo.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_teensy_octo.yml)
+
+
+#### Not Supported (Yet)
+
+[![rp2035](https://github.com/FastLED/FastLED/actions/workflows/build_rp2035.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2035.yml)
+
+Raspberri Pi 2035 (Pico-2/W) has an issue with the wrong assembly being produced in both Arduino and Platform IO.
+
+[![esp32c2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml)
+
+Esp32 C2 variant does not have an RMT driver and we have no BitBang clockless driver for this variant. Also this is not officially supported by Arduino nor PlatformIO.
 
 ## Getting Started
 
