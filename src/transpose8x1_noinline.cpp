@@ -1,6 +1,4 @@
 
-#pragma once
-
 #include <stdint.h>
 
 void transpose8x1_noinline(unsigned char *A, unsigned char *B) {
