@@ -27,6 +27,7 @@ PARRALLEL_PROJECT_INITIALIZATION = os.environ.get("PARRALLEL_PROJECT_INITIALIZAT
 
 # Set to a specific release, we may want to update this in the future.
 ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
+ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32"
 # Top of trunk.
 #ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32"
 
@@ -80,7 +81,7 @@ BOARDS = [
 CUSTOM_PROJECT_OPTIONS = {
     "esp32dev": f"platform={ESP32_IDF_5_1}",
     #"esp01": f"platform={ESP32_IDF_5_1}",
-    "esp32-c2-devkitm-1": f"platform={ESP32_IDF_5_1}",
+    "esp32-c2-devkitm-1": f"platform={ESP32_IDF_5_1_LATEST}",
     "esp32-c3-devkitm-1": f"platform={ESP32_IDF_5_1}",
     "esp32-c6-devkitc-1": f"platform={ESP32_IDF_5_1}",
     "esp32-s3-devkitc-1": f"platform={ESP32_IDF_5_1}",
