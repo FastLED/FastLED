@@ -7,7 +7,7 @@
 # Feature Enhancements
 
   * I2S driver for ESP32 WS2812
-    * Original repo is here: https://github.com/hpwit/I2SClockLessLedDriveresp32s3/blob/main/src/I2SClockLessLedDriveresp32s3.h
+    * https://github.com/hpwit/I2SClocklessLedDriver
       * Our copy is here: https://github.com/FastLED/FastLED/blob/master/src/platforms/esp/32/clockless_i2s_esp32.h
     * Apparently, this driver allows MASSIVE parallelization for WS2812
     * Timing guide for reducing RMT frequency https://github.com/Makuna/NeoPixelBus/pull/795
