@@ -1,4 +1,4 @@
-name: rp2035
+name: rp2050
 
 on:
   workflow_dispatch:
