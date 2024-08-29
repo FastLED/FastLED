@@ -186,9 +186,9 @@ private:
     int            mBufSize;
 
     // -- RMT memory
-    volatile uint32_t * mRMT_mem_ptr;
-    volatile uint32_t * mRMT_mem_start;
-    int                 mWhichHalf;
+    volatile rmt_item32_t * mRMT_mem_ptr;
+    volatile rmt_item32_t * mRMT_mem_start;
+    int                     mWhichHalf;
 
     // -- Buffer to hold all of the pulses. For the version that uses
     //    the RMT driver built into the ESP core.
@@ -282,7 +282,7 @@ public:
 
     // -- Convert a byte into RMT pulses
     //    This function is only used when the built-in RMT driver is chosen
-    void ingest(uint32_t byteval);
+    void ingest(uint8_t byteval);
 
  private:
     // -- Start up the next controller

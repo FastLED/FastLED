@@ -152,6 +152,35 @@ typedef struct {
 extern rmt_block_mem_t RMTMEM;
 #endif
 
+// -- Write one byte's worth of RMT pulses to the big buffer
+//    out: A pointer into an array at least 8 units long (one unit for each bit).
+__attribute__((always_inline)) inline void IRAM_ATTR convert_byte_to_rmt(
+        FASTLED_REGISTER uint8_t byteval, 
+        FASTLED_REGISTER rmt_item32_t zero,
+        FASTLED_REGISTER rmt_item32_t one,
+        volatile rmt_item32_t* out) {
+    FASTLED_REGISTER uint32_t pixel_u32  = byteval;
+    pixel_u32 <<= 24;
+    uint32_t tmp[8];
+    for (FASTLED_REGISTER uint32_t j = 0; j < 8; j++) {
+        FASTLED_REGISTER uint32_t new_val = (pixel_u32 & 0x80000000L) ? one.val : zero.val;
+        pixel_u32 <<= 1;
+        // Write to a non volatile buffer to keep this fast and
+        // allow the compiler to optimize this loop.
+        tmp[j] = new_val;
+    }
+
+    // Now write out the values to the volatile buffer
+    out[0].val = tmp[0];
+    out[1].val = tmp[1];
+    out[2].val = tmp[2];
+    out[3].val = tmp[3];
+    out[4].val = tmp[4];
+    out[5].val = tmp[5];
+    out[6].val = tmp[6];
+    out[7].val = tmp[7];
+}
+
 
 void IRAM_ATTR GiveGTX_sem()
 {
@@ -389,7 +418,7 @@ void IRAM_ATTR ESP32RMTController::startOnChannel(int channel)
 
         // -- Initialize the counters that keep track of where we are in
         //    the pixel data and the RMT buffer
-        mRMT_mem_start = & (RMTMEM.chan[mRMT_channel].data32[0].val);
+        mRMT_mem_start = & (RMTMEM.chan[mRMT_channel].data32[0]);
         mRMT_mem_ptr = mRMT_mem_start;
         mCur = 0;
         mWhichHalf = 0;
@@ -707,31 +736,24 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
     mLastFill = now;
 
     // -- Get the zero and one values into local variables
-    FASTLED_REGISTER uint32_t one_val = mOne.val;
-    FASTLED_REGISTER uint32_t zero_val = mZero.val;
+    FASTLED_REGISTER rmt_item32_t one_val = mOne;
+    FASTLED_REGISTER rmt_item32_t zero_val = mZero;
 
     // -- Use locals for speed
-    volatile FASTLED_REGISTER uint32_t * pItem =  mRMT_mem_ptr;
+    volatile FASTLED_REGISTER rmt_item32_t* pItem = mRMT_mem_ptr;
 
     for (FASTLED_REGISTER int i = 0; i < PULSES_PER_FILL/8; i++) {
         if (mCur < mSize) {
 
             // -- Get the next four bytes of pixel data
-            FASTLED_REGISTER uint32_t pixeldata = mPixelData[mCur] << 24;
+            convert_byte_to_rmt(mPixelData[mCur], zero_val, one_val, pItem);
+            pItem += 8;
             mCur++;
-            
-            // Shift bits out, MSB first, setting RMTMEM.chan[n].data32[x] to the 
-            // rmt_item32_t value corresponding to the buffered bit value
-            for (FASTLED_REGISTER uint32_t j = 0; j < 8; j++) {
-                *pItem++ = (pixeldata & 0x80000000L) ? one_val : zero_val;
-                // Replaces: RMTMEM.chan[mRMT_channel].data32[mCurPulse].val = val;
-
-                pixeldata <<= 1;
-            }
         } else {
             // -- No more data; signal to the RMT we are done by filling the
             //    rest of the buffer with zeros
-            *pItem++ = 0;
+            pItem->val = 0;
+            pItem++;
         }
     }
 
@@ -762,15 +784,10 @@ void ESP32RMTController::initPulseBuffer(int size_in_bytes)
 
 // -- Convert a byte into RMT pulses
 //    This function is only used when the built-in RMT driver is chosen
-void ESP32RMTController::ingest(uint32_t byteval)
+void ESP32RMTController::ingest(uint8_t byteval)
 {
-    // -- Write one byte's worth of RMT pulses to the big buffer
-    byteval <<= 24;
-    for (FASTLED_REGISTER uint32_t j = 0; j < 8; j++) {
-        mBuffer[mCurPulse] = (byteval & 0x80000000L) ? mOne : mZero;
-        byteval <<= 1;
-        mCurPulse++;
-    }
+    convert_byte_to_rmt(byteval, mZero, mOne, mBuffer + mCurPulse);
+    mCurPulse += 8;
 }
 
 #endif // ! FASTLED_ESP32_I2S
