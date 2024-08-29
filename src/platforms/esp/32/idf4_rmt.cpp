@@ -90,11 +90,25 @@ extern void spi_flash_op_unlock(void);
 
 #define FASTLED_INTERNAL
 
+// On some platforms like c6 and h2, the RMT clock is 40MHz but
+// there seems to be an issue either with arduino or the ESP-IDF
+// that the APB_CLK_FREQ is not defined correctly. So we define
+// it here for the RMT. This can probably be taken out later and
+// was put in on 8/29/2024 by @zackees.
+#if defined(CONFIG_IDF_TARGET_ESP32C6) && CONFIG_IDF_TARGET_ESP32C6 == 1
+#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (40*1000000)
+#elif defined(CONFIG_IDF_TARGET_ESP32H2) && CONFIG_IDF_TARGET_ESP32H2 == 1
+#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (40*1000000)
+#endif
 
+#ifdef F_CPU_RMT_CLOCK_MANUALLY_DEFINED
+#define F_CPU_RMT                   (  F_CPU_RMT_CLOCK_MANUALLY_DEFINED )
+#else
+#define F_CPU_RMT                   (  APB_CLK_FREQ )
+#endif
 
 // -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
-// RMT Clock is typically APB CLK, which is 80MHz on most devices, but 40MHz on ESP32-H2
-#define F_CPU_RMT                   (  APB_CLK_FREQ )
+// RMT Clock is typically APB CLK, which is 80MHz on most devices, but 40MHz on ESP32-H2 and ESP32-C6
 #define RMT_CYCLES_PER_SEC          (F_CPU_RMT/DIVIDER)
 #define RMT_CYCLES_PER_ESP_CYCLE    (F_CPU / RMT_CYCLES_PER_SEC)
 #define ESP_TO_RMT_CYCLES(n)        ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
