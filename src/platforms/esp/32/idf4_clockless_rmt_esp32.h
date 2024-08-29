@@ -21,6 +21,15 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+*
+ * The default FastLED driver takes over control of the RMT interrupt
+ * handler, making it hard to use the RMT device for other
+ * (non-FastLED) purposes. You can change it's behavior to use the ESP
+ * core driver instead, allowing other RMT applications to
+ * co-exist. To switch to this mode, add the following directive
+ * before you include FastLED.h:
+ *
+ *      #define FASTLED_RMT_BUILTIN_DRIVER 1
  */
 
 #pragma once
@@ -29,6 +38,10 @@
 #include "idf4_rmt.h"
 #include "FastLED.h"
 
+// -- Core or custom driver
+#ifndef FASTLED_RMT_BUILTIN_DRIVER
+#define FASTLED_RMT_BUILTIN_DRIVER false
+#endif
 
 FASTLED_NAMESPACE_BEGIN
 

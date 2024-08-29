@@ -43,15 +43,6 @@
  *
  * OTHER RMT APPLICATIONS
  *
- * The default FastLED driver takes over control of the RMT interrupt
- * handler, making it hard to use the RMT device for other
- * (non-FastLED) purposes. You can change it's behavior to use the ESP
- * core driver instead, allowing other RMT applications to
- * co-exist. To switch to this mode, add the following directive
- * before you include FastLED.h:
- *
- *      #define FASTLED_RMT_BUILTIN_DRIVER 1
- *
  * There may be a performance penalty for using this mode. We need to
  * compute the RMT signal for the entire LED strip ahead of time,
  * rather than overlapping it with communication. We also need a large
@@ -157,10 +148,6 @@ extern "C" {
 #endif
 
 
-// -- Core or custom driver
-#ifndef FASTLED_RMT_BUILTIN_DRIVER
-#define FASTLED_RMT_BUILTIN_DRIVER false
-#endif
 
 
 // NOT CURRENTLY IMPLEMENTED:
