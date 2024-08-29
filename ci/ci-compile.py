@@ -91,7 +91,7 @@ CUSTOM_PROJECT_OPTIONS = {
         #"platform=https://github.com/earlephilhower/arduino-pico.git",
         "platform=https://github.com/maxgerhardt/platform-raspberrypi.git",
         "framework=framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
-        "board_build.core = earlephilhower",
+        "board_build.core=earlephilhower",
         "board_build.filesystem_size=0.5m"
     ],
 }
