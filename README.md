@@ -71,9 +71,9 @@ We have multiple goals with this library:
 
 #### Not Supported (Yet)
 
-[![rp2035](https://github.com/FastLED/FastLED/actions/workflows/build_rp2035.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2035.yml)
+[![rp2350](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml)
 
-Raspberri Pi 2035 (Pico-2/W) has an issue with the wrong assembly being produced in both Arduino and Platform IO.
+Raspberri Pi 2335 (Pico-2/W) super early board, not yet working on platformio in open source projects (8/28/2024).
 
 [![esp32c2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml)
 
