@@ -156,14 +156,14 @@ extern rmt_block_mem_t RMTMEM;
 //    out: A pointer into an array at least 8 units long (one unit for each bit).
 __attribute__((always_inline)) inline void IRAM_ATTR convert_byte_to_rmt(
         FASTLED_REGISTER uint8_t byteval, 
-        FASTLED_REGISTER rmt_item32_t zero,
-        FASTLED_REGISTER rmt_item32_t one,
+        FASTLED_REGISTER uint32_t zero,
+        FASTLED_REGISTER uint32_t one,
         volatile rmt_item32_t* out) {
     FASTLED_REGISTER uint32_t pixel_u32  = byteval;
     pixel_u32 <<= 24;
     uint32_t tmp[8];
     for (FASTLED_REGISTER uint32_t j = 0; j < 8; j++) {
-        FASTLED_REGISTER uint32_t new_val = (pixel_u32 & 0x80000000L) ? one.val : zero.val;
+        FASTLED_REGISTER uint32_t new_val = (pixel_u32 & 0x80000000L) ? one : zero;
         pixel_u32 <<= 1;
         // Write to a non volatile buffer to keep this fast and
         // allow the compiler to optimize this loop.
@@ -736,8 +736,8 @@ void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
     mLastFill = now;
 
     // -- Get the zero and one values into local variables
-    FASTLED_REGISTER rmt_item32_t one_val = mOne;
-    FASTLED_REGISTER rmt_item32_t zero_val = mZero;
+    FASTLED_REGISTER uint32_t one_val = mOne.val;
+    FASTLED_REGISTER uint32_t zero_val = mZero.val;
 
     // -- Use locals for speed
     volatile FASTLED_REGISTER rmt_item32_t* pItem = mRMT_mem_ptr;
@@ -786,7 +786,7 @@ void ESP32RMTController::initPulseBuffer(int size_in_bytes)
 //    This function is only used when the built-in RMT driver is chosen
 void ESP32RMTController::ingest(uint8_t byteval)
 {
-    convert_byte_to_rmt(byteval, mZero, mOne, mBuffer + mCurPulse);
+    convert_byte_to_rmt(byteval, mZero.val, mOne.val, mBuffer + mCurPulse);
     mCurPulse += 8;
 }
 
