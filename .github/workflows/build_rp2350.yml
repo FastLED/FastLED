@@ -1,11 +1,8 @@
-name: rp2050
+name: rp2350
 
 on:
   workflow_dispatch:
   push:
-    branches:
-      - master
-  pull_request:
     branches:
       - master
 
