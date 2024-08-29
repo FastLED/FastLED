@@ -15,8 +15,10 @@ set(FastLED_SRCS
   src/platforms.cpp
   src/power_mgt.cpp
   src/wiring.cpp
-  src/platforms/esp/32/idf4_rmt.cpp
   )
+
+file(GLOB ESP32_SRCS "src/platforms/esp/32/*.cpp")
+list(APPEND FastLED_SRCS ${ESP32_SRCS})
 
 idf_component_register(SRCS ${FastLED_SRCS}
                        INCLUDE_DIRS "src"
