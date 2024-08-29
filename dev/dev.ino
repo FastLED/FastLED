@@ -16,8 +16,10 @@
 // Define the array of leds
 CRGB leds[NUM_LEDS];
 
-void setup() { 
+void setup() {
+    Serial.begin(115200);
     FastLED.addLeds<WS2812, DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assume
+    delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
 
 void loop() { 
