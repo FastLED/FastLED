@@ -1937,6 +1937,17 @@ CRGB ColorFromPalette( const CRGBPalette16& pal,
                       uint8_t brightness=255,
                       TBlendType blendType=LINEARBLEND);
 
+/// @brief Same as ColorFromPalette, but higher precision. Will eventually
+///        become the default.
+/// @author https://github.com/sutaburosu
+/// @source https://github.com/FastLED/FastLED/pull/202#issuecomment-631333384
+/// @example https://wokwi.com/projects/285170662915441160
+CRGB ColorFromPaletteExtended(
+    const CRGBPalette32& pal,
+    uint16_t index,
+    uint8_t brightness,
+    TBlendType blendType);
+
 /// @copydoc ColorFromPalette(const CRGBPalette16&, uint8_t, uint8_t, TBlendType)
 CRGB ColorFromPalette( const TProgmemRGBPalette16& pal,
                        uint8_t index,
