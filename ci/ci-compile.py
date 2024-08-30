@@ -94,6 +94,10 @@ CUSTOM_PROJECT_OPTIONS = {
         "board_build.core=earlephilhower",
         "board_build.filesystem_size=0.5m"
     ],
+    "uno_r4_wifi": [
+        "platform=renesas-ra",
+        "board=uno_r4_wifi"
+    ]
 }
 
 ERROR_HAPPENED = False
