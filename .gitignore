@@ -25,3 +25,4 @@ Thumbs.db
 .aider*
 !.aider.conf.yml
 !.aiderignore
+ci/native/.vscode/
