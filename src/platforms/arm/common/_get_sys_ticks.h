@@ -1,5 +1,5 @@
 
-#ifdef __GET_SYS_TICKS_H__
+#ifndef __GET_SYS_TICKS_H__
 #define __GET_SYS_TICKS_H__
 // #include <core_cm0plus.h>  // This seems to be missing?
 
