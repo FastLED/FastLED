@@ -102,10 +102,11 @@ extern void spi_flash_op_unlock(void);
 // that the APB_CLK_FREQ is not defined correctly. So we define
 // it here for the RMT. This can probably be taken out later and
 // was put in on 8/29/2024 by @zackees.
+#ifndef F_CPU_RMT_CLOCK_MANUALLY_DEFINED  // if user has not defined it manually then...
 #if defined(CONFIG_IDF_TARGET_ESP32C6) && CONFIG_IDF_TARGET_ESP32C6 == 1
-#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (40*1000000)
+#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80*1000000)
 #elif defined(CONFIG_IDF_TARGET_ESP32H2) && CONFIG_IDF_TARGET_ESP32H2 == 1
-#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (40*1000000)
+#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80*1000000)
 #endif
 
 #ifdef F_CPU_RMT_CLOCK_MANUALLY_DEFINED
@@ -113,6 +114,7 @@ extern void spi_flash_op_unlock(void);
 #else
 #define F_CPU_RMT                   (  APB_CLK_FREQ )
 #endif
+#endif  //  F_CPU_RMT_CLOCK_MANUALLY_DEFINED
 
 // -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
 // RMT Clock is typically APB CLK, which is 80MHz on most devices, but 40MHz on ESP32-H2 and ESP32-C6
