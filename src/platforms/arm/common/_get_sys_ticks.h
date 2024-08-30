@@ -30,13 +30,14 @@ typedef struct {
 // Define the SysTick
 #define SysTick ((SysTick_Type *)SysTick_BASE)
 
-inline uint32_t _get_sys_ticks() {
-    return SysTick->VAL;
-}
 
 #ifdef __cplusplus
 }
 #endif
+
+inline uint32_t _get_sys_ticks() {
+    return SysTick->VAL;
+}
 
 #endif  // ___ARM_ARCH_6M__
 
