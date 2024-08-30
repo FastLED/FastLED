@@ -1,7 +1,9 @@
 #ifndef __INC_LED_SYSDEFS_STUB_H
 #define __INC_LED_SYSDEFS_STUB_H
 
+#ifndef FASTLED_STUB_IMPL
 #define FASTLED_STUB_IMPL
+#endif
 
 #include <stdint.h>
 

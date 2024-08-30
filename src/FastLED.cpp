@@ -269,10 +269,12 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
 	}
 }
 
+#ifndef FASTLED_STUB_IMPL
 /// Called at program exit when run in a desktop environment. 
 /// Extra C definition that some environments may need. 
 /// @returns 0 to indicate success
 extern "C" int atexit(void (* /*func*/ )()) { return 0; }
+#endif
 
 #ifdef FASTLED_NEEDS_YIELD
 extern "C" void yield(void) { }
