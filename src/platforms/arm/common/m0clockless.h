@@ -1,6 +1,8 @@
 #ifndef __INC_M0_CLOCKLESS_H
 #define __INC_M0_CLOCKLESS_H
 
+#include "hardware/structs/systick.h"
+
 struct M0ClocklessData {
   uint8_t d[3];
   uint8_t e[3];
