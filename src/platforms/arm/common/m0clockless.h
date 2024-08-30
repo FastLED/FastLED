@@ -2,6 +2,7 @@
 #define __INC_M0_CLOCKLESS_H
 
 #include <stdint.h>
+#include "_get_sys_ticks.h"
 
 uint32_t _get_sys_ticks();
 
