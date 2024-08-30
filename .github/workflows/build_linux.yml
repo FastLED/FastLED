@@ -1,0 +1,27 @@
+name: linux_native
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO build dependencies
+        run: |
+          pip install -r ci/requirements.txt
+
+      - name: Run Native Build
+        run: |
+          cd ci/native && pio run
