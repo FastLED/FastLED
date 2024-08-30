@@ -8,6 +8,10 @@ extern "C" {
 #endif
 
 
+// Some platforms have a missing definition for SysTick, in that
+// case fill that in now.
+// BEGIN SysTick DEFINITION
+#ifndef SysTick
 // Define the SysTick base address
 #define SCS_BASE            (0xE000E000UL)                            /*!< System Control Space Base Address */
 #define SysTick_BASE        (SCS_BASE +  0x0010UL)                    /*!< SysTick Base Address */
@@ -24,6 +28,8 @@ typedef struct {
 
 // Define the SysTick
 #define SysTick ((SysTick_Type *)SysTick_BASE)
+#endif
+// END SysTick DEFINITION
 
 
 #ifdef __cplusplus
