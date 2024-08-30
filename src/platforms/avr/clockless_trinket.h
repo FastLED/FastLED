@@ -24,6 +24,35 @@ FASTLED_NAMESPACE_BEGIN
 
 #define US_PER_TICK (64 / (F_CPU/1000000))
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// Due to the tight timing specifications of WS2811 and friends on AVR, interrupts are disabled by default to keep timings exact.
+// However, many WS2811 or WS2812 strips are surprisingly tolerant of jittery timings (such as those caused by interrupts), on the
+// condition that the shortest pulse in the specification (representing a 0 bit) is kept under a certain length. After exceeding
+// that length it would be interpreted as a 1, causing a glitch. 
+// 
+// If you set FASTLED_ALLOW_INTERRUPTS to 1, interrupts will only be disabled for a few cycles at a time, when necessary to keep
+// this signal pulse short.
+// 
+// Beware: even with FASTLED_ALLOW_INTERRUPTS enabled, you must ensure that your interrupt handlers are *very* fast. If they take
+// longer than 5µs, which is 80 clock cycles on a 16MHz AVR, the strip might latch partway through rendering, and you will see big
+// glitches.
+// 
+// Remember to account for the interrupt overhead when writing your ISR. This accounts for at least 10 cycles, often 20+.
+//
+// If you are using multiple timers with interrupts, you can set them out of phase so they only fire one at a time. 
+//
+// TODO: it would be possible to support longer interrupts providing that they only fire during the "on" pulse - holding the
+//       signal high indefinitely will never latch, although it would affect the framerate. Maybe the subject of a future PR…
+//
+// See https://wp.josh.com/2014/05/13/ws2812-neopixels-are-not-so-finicky-once-you-get-to-know-them/ for more information on the
+// tolerances.
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//#define FASTLED_ALLOW_INTERRUPTS 1
+
+
 // Variations on the functions in delay.h - w/a loop var passed in to preserve registers across calls by the optimizer/compiler
 template<int CYCLES> inline void _dc(FASTLED_REGISTER uint8_t & loopvar);
 
@@ -73,11 +102,20 @@ template<> __attribute__((always_inline)) inline void _dc<18>(FASTLED_REGISTER u
 template<> __attribute__((always_inline)) inline void _dc<19>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<9>(loopvar); }
 template<> __attribute__((always_inline)) inline void _dc<20>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<10>(loopvar); }
 
+#if (FASTLED_ALLOW_INTERRUPTS == 1)
+// If interrupts are enabled, HI1 actually takes 2 clocks due to cli().
+// To keep the timings exact, D3 (which precedes it) must be 1 clock less.
+// The same adjustment must be made for D2, due the corresponding sei().
+#define D_INT_ADJ 1
+#else
+#define D_INT_ADJ 0
+#endif
+
 #define DINTPIN(T,ADJ,PINADJ) (T-(PINADJ+ADJ)>0) ? _dc<T-(PINADJ+ADJ)>(loopvar) : _dc<0>(loopvar);
 #define DINT(T,ADJ) if(AVR_PIN_CYCLES(DATA_PIN)==1) { DINTPIN(T,ADJ,1) } else { DINTPIN(T,ADJ,2); }
 #define _D1(ADJ) DINT(T1,ADJ)
-#define _D2(ADJ) DINT(T2,ADJ)
-#define _D3(ADJ) DINT(T3,ADJ)
+#define _D2(ADJ) DINT(T2,ADJ+D_INT_ADJ)
+#define _D3(ADJ) DINT(T3,ADJ+D_INT_ADJ)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -120,7 +158,9 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 
 		mWait.wait();
+#if (!defined(FASTLED_ALLOW_INTERRUPTS) || FASTLED_ALLOW_INTERRUPTS == 0)
 		cli();
+#endif
 
 		if(pixels.mLen > 0) {
 			showRGBInternal(pixels);
@@ -175,7 +215,9 @@ protected:
 
 #endif
 
+#if (!defined(FASTLED_ALLOW_INTERRUPTS) || FASTLED_ALLOW_INTERRUPTS == 0)
 		sei();
+#endif
 		mWait.mark();
 	}
 #define USE_ASM_MACROS
@@ -192,7 +234,7 @@ protected:
 #define ASM_VARS : /* write variables */				\
 				[count] "+x" (count),					\
 				[data] "+z" (data),						\
-				[b1] "+d" (b1),							\
+				[b1] "+a" (b1),							\
 				[d0] "+r" (d0),							\
 				[d1] "+r" (d1),							\
 				[d2] "+r" (d2),							\
@@ -200,7 +242,7 @@ protected:
 				[scale_base] "+a" (scale_base)			\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
-				[b0] "d" (b0),							\
+				[b0] "a" (b0),							\
 				[hi] "r" (hi),							\
 				[lo] "r" (lo),							\
 				[s0] "r" (s0),					  		\
@@ -215,10 +257,17 @@ protected:
 				[O2] "M" (RGB_BYTE2(RGB_ORDER))		\
 				: "cc" /* clobber registers */
 
+#if (FASTLED_ALLOW_INTERRUPTS == 1)
+#define HI1CLI cli()
+#define QLO2SEI sei()
+#else
+#define HI1CLI
+#define QLO2SEI
+#endif
 #if defined(__AVR_ATmega4809__)
 
 // 1 cycle, write hi to the port
-#define HI1 do {*FastPin<DATA_PIN>::port()=hi;} while(0);
+#define HI1 HI1CLI; do {*FastPin<DATA_PIN>::port()=hi;} while(0);
 // 1 cycle, write lo to the port
 #define LO1 do {*FastPin<DATA_PIN>::port()=lo;} while(0);
 
@@ -226,14 +275,14 @@ protected:
 
 // Note: the code in the else in HI1/LO1 will be turned into an sts (2 cycle, 2 word)
 // 1 cycle, write hi to the port
-#define HI1 FASTLED_SLOW_CLOCK_ADJUST if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
+#define HI1 FASTLED_SLOW_CLOCK_ADJUST HI1CLI; if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[hi]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=hi; }
 // 1 cycle, write lo to the port
 #define LO1 if((int)(FastPin<DATA_PIN>::port())-0x20 < 64) { asm __volatile__("out %[PORT], %[lo]" ASM_VARS ); } else { *FastPin<DATA_PIN>::port()=lo; }
 
 #endif
 
 // 2 cycles, sbrs on flipping the line to lo if we're pushing out a 0
-#define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1;
+#define QLO2(B, N) asm __volatile__("sbrs %[" #B "], " #N ASM_VARS ); LO1; QLO2SEI;
 // load a byte from ram into the given var with the given offset
 #define LD2(B,O) asm __volatile__("ldd %[" #B "], Z + %[" #O "]\n\t" ASM_VARS );
 // 4 cycles - load a byte from ram into the scaling scratch space with the given offset, clear the target var, clear carry
