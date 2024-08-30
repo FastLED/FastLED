@@ -2,9 +2,27 @@
 #define __INC_M0_CLOCKLESS_H
 
 #include <stdint.h>
-#include "_get_sys_ticks.h"
 
-uint32_t _get_sys_ticks();
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Define the SysTick structure
+typedef struct {
+    volatile uint32_t CTRL;
+    volatile uint32_t LOAD;
+    volatile uint32_t VAL;
+    volatile const uint32_t CALIB;
+} SysTick_Type;
+
+// Define the SysTick
+#define SysTick ((SysTick_Type *)SysTick_BASE)
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 struct M0ClocklessData {
   uint8_t d[3];
@@ -318,7 +336,7 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       M0_ASM_ARGS
       );
 
-      uint32_t ticksBeforeInterrupts = _get_sys_ticks();
+      uint32_t ticksBeforeInterrupts = SysTick->VAL;
       sei();
       --counter;
       cli();
@@ -332,7 +350,7 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       const uint32_t kTicksPerUs = kTicksPerMs / 1000;
       const uint32_t kTicksIn45us = kTicksPerUs * 45;
 
-      const uint32_t currentTicks = _get_sys_ticks();
+      const uint32_t currentTicks = SysTick->VAL;
 
       if (ticksBeforeInterrupts < currentTicks) {
         // Timer started over
