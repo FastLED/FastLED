@@ -1,4 +1,3 @@
-#include "m0clockless.h"
 
 #ifdef ARDUINO
 #include <Arduino.h>  // this is where SysTick is defined
