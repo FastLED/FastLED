@@ -2,6 +2,9 @@
 #define __INC_M0_CLOCKLESS_H
 
 #include "hardware/structs/systick.h"
+#include "hardware/clocks.h"
+#include "hardware/sync.h"
+#include "hardware/gpio.h"
 
 struct M0ClocklessData {
   uint8_t d[3];
