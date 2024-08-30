@@ -7,6 +7,13 @@
 extern "C" {
 #endif
 
+
+// Define the SysTick base address
+#define SCS_BASE            (0xE000E000UL)                            /*!< System Control Space Base Address */
+#define SysTick_BASE        (SCS_BASE +  0x0010UL)                    /*!< SysTick Base Address */
+#define SysTick             ((SysTick_Type   *)     SysTick_BASE  )   /*!< SysTick configuration struct */
+
+
 // Define the SysTick structure
 typedef struct {
     volatile uint32_t CTRL;
