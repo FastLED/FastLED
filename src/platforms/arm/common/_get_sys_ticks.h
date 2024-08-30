@@ -2,6 +2,12 @@
 #ifndef __GET_SYS_TICKS_H__
 #define __GET_SYS_TICKS_H__
 
+#ifndef __FROM_SYS_TICKS_CPP__  // Calling from a CPP file for missing linkage.
+#define __FAST_LED_INLINE__ inline
+#else
+#define __FAST_LED_INLINE__
+#endif
+
 // only include this for the cortex m0 platform
 #ifdef ___ARM_ARCH_6M__
 
