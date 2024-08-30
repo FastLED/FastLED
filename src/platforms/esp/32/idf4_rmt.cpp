@@ -1,12 +1,18 @@
 
 #ifdef ESP32
+#ifndef FASTLED_ESP32_I2S
 
 #include "FastLED.h"
 #include "idf4_rmt.h"
 #include "clock_cycles.h"
 
 
-#ifndef FASTLED_ESP32_I2S
+#define _RMT_ASSERT(cond, MSG) do {       \
+    if (!(cond)) {                        \
+        std::cout << MSG << std::endl;    \
+        abort();                          \
+    }                                     \
+} while (0);
 
 #ifndef FASTLED_RMT_SERIAL_DEBUG
 #define FASTLED_RMT_SERIAL_DEBUG 0
