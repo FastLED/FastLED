@@ -5,6 +5,7 @@
 #include "FastLED.h"
 #include "idf4_rmt.h"
 #include "clock_cycles.h"
+#include <iostream>
 
 
 #define _RMT_ASSERT(cond, MSG) do {       \
@@ -530,7 +531,22 @@ void IRAM_ATTR ESP32RMTController::tx_start()
     // rmt_ll_tx_start(&RMT, mRMT_channel)
     RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
     RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
-#elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32
+#elif CONFIG_IDF_TARGET_ESP32S2
+    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    _RMT_ASSERT(false, "tx_start Not yet implemented for ESP32-S2 in idf 5.x");
+    #else
+    // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
+    RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
+    RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
+    // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
+    RMT.int_clr.val = (1 << (mRMT_channel * 3));
+    // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
+    RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
+    RMT.int_ena.val |= (1 << (mRMT_channel * 3));
+    // rmt_ll_tx_start(&RMT, mRMT_channel)
+    RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
+    #endif
+#elif CONFIG_IDF_TARGET_ESP32
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
     RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
     RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
@@ -635,6 +651,9 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
     RMT.chnconf0[channel].apb_mem_rst_chn = 1;
     RMT.chnconf0[channel].apb_mem_rst_chn = 0;
 #elif CONFIG_IDF_TARGET_ESP32S2
+    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    _RMT_ASSERT(false, "doneOnChannel not yet implemented for ESP32-S2 in idf 5.x");
+    #else
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
     RMT.int_ena.val &= ~(1 << (channel * 3));
     // rmt_ll_tx_stop(&RMT, channel)
@@ -642,6 +661,7 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
     // rmt_ll_tx_reset_pointer(&RMT, channel)
     RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
     RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
+    #endif
 #elif CONFIG_IDF_TARGET_ESP32
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
     RMT.int_ena.val &= ~(1 << (channel * 3));
