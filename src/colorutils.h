@@ -178,12 +178,9 @@ void fill_gradient( T* targetArray,
     huedelta823 *= 2;
     satdelta823 *= 2;
     valdelta823 *= 2;
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wshift-count-overflow"
-    uint32_t hue824 = startcolor.hue << 24;
-    uint32_t sat824 = startcolor.sat << 24;
-    uint32_t val824 = startcolor.val << 24;
-		#pragma GCC diagnostic pop
+    uint32_t hue824 = static_cast<uint32_t>(startcolor.hue) << 24;
+    uint32_t sat824 = static_cast<uint32_t>(startcolor.sat) << 24;
+    uint32_t val824 = static_cast<uint32_t>(startcolor.val) << 24;
     for( uint16_t i = startpos; i <= endpos; ++i) {
         targetArray[i] = CHSV( hue824 >> 24, sat824 >> 24, val824 >> 24);
         hue824 += huedelta823;
