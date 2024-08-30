@@ -1,7 +1,4 @@
-
-// #ifdef ARDUINO  // try to fix SysTick not defined
-#include <Arduino.h>  // this is where SysTick is defined
-// #endif
+#include <core_cm0plus.h>
 
 #include <stdint.h>
 
