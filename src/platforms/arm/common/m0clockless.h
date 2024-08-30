@@ -1,6 +1,8 @@
 #ifndef __INC_M0_CLOCKLESS_H
 #define __INC_M0_CLOCKLESS_H
 
+#include <stdint.h>
+
 uint32_t _get_sys_ticks();
 
 struct M0ClocklessData {

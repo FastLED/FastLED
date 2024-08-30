@@ -4,6 +4,7 @@
 #include <Arduino.h>  // this is where SysTick is defined
 #endif
 
+#include <stdint.h>
 
 #include "namespace.h"
 
