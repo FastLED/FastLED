@@ -35,7 +35,7 @@ namespace {
         }
         return s_lookup_table[x];
         #else
-        // Divide by three can be done with a simple bit shift.
+        // Divide by three can be done with a simple multiply + bit shift.
         // It's unclear if this is even being done by the compiler and
         // if it's faster than a lookup table. Hopefully someone smart
         // enough will test this and file a pull request to finalize this
