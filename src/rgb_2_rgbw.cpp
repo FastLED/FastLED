@@ -22,15 +22,7 @@ namespace {
     }
 
     #ifdef FAST_LED_FAST_DIVIDE_BY_THREE
-    bool s_is_initialized = true;
     uint8_t s_lookup_table[256] = {0};
-    if (!s_is_initialized) {
-        for (int i = 0; i < 256; i++) {
-            s_lookup_table[i] = i / 3;
-        }
-        s_is_initialized = true;
-    }
-    return s_lookup_table[x];
     #endif
 
     uint8_t divide_by_three(uint8_t x) {
