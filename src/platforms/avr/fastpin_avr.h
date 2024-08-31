@@ -233,7 +233,17 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 #endif
 
 #elif defined(ARDUINO_AVR_NANO_EVERY)
-#include "platforms/esp/32/led_sysdefs_esp32.h"
+
+#if !defined(#define ESP_IDF_VERSION_VAL)
+#define ESP_IDF_VERSION_VAL(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
+#endif
+
+// Handling for older versions of ESP32 Arduino core
+#if !defined(ESP_IDF_VERSION)
+// Define missing version macros.  Hard code older version 3.0 since actual version is unknown
+#define ESP_IDF_VERSION ESP_IDF_VERSION_VAL(3, 0, 0)
+#endif
+
 
 #define MAX_PIN 22
 _FL_DEFPIN(0, 5, C); _FL_DEFPIN(1, 4, C); _FL_DEFPIN(2, 0, A); _FL_DEFPIN(3, 5, F);
