@@ -98,6 +98,9 @@ CUSTOM_PROJECT_OPTIONS = {
     "uno_r4_wifi": [
         "platform=renesas-ra",
         "board=uno_r4_wifi"
+    ],
+    "nano_every": [
+        "platform=atmelmegaavr"
     ]
 }
 
