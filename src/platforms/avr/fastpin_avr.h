@@ -221,55 +221,16 @@ _FL_DEFPIN( 8, 0, B); _FL_DEFPIN( 9, 1, D); _FL_DEFPIN(10, 2, D); _FL_DEFPIN(11,
 _FL_DEFPIN(12, 4, D); _FL_DEFPIN(13, 5, D); _FL_DEFPIN(14, 0, C); _FL_DEFPIN(15, 1, C);
 _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19, 5, C);
 
-#define SPI_DATA 3
-#define SPI_CLOCK 5
-#define SPI_SELECT 2
-#define AVR_HARDWARE_SPI 1
-#define HAS_HARDWARE_PIN_SUPPORT 1
-
-#ifndef __AVR_ATmega8__
-#define SPI_UART0_DATA 9
-#define SPI_UART0_CLOCK 12
-#endif
-
-#elif defined(ARDUINO_AVR_NANO_EVERY)
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include "esp_system.h" // Load ESP_IDF_VERSION_MAJOR if exists
-// ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
-#ifdef __cplusplus
-}
-#endif
-
-#if !defined(#define ESP_IDF_VERSION_VAL)
-#define ESP_IDF_VERSION_VAL(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
-#endif
-
-// Handling for older versions of ESP32 Arduino core
-#if !defined(ESP_IDF_VERSION)
-// Define missing version macros.  Hard code older version 3.0 since actual version is unknown
-#define ESP_IDF_VERSION ESP_IDF_VERSION_VAL(3, 0, 0)
-#endif
-
 
 #define MAX_PIN 22
 _FL_DEFPIN(0, 5, C); _FL_DEFPIN(1, 4, C); _FL_DEFPIN(2, 0, A); _FL_DEFPIN(3, 5, F);
 _FL_DEFPIN(4, 6, C); _FL_DEFPIN(5, 2, B); _FL_DEFPIN(6, 4, F); _FL_DEFPIN(7, 1, A);
 _FL_DEFPIN(8, 3, E);
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-_FL_DEFPIN(9, 0, B);
-#else
+
 _FL_DEFPIN(9, 0, A); // Zach: Switch from B -> A to fix compiler error.
-#endif
 _FL_DEFPIN(10, 1, B); _FL_DEFPIN(11, 0, E);
 _FL_DEFPIN(12, 1, E); _FL_DEFPIN(13, 2, E);
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 _FL_DEFPIN(14, 3, A); // Zach: Switch from D -> A to fix compiler error.
-#else
-_FL_DEFPIN(14, 3, D);
-#endif
 _FL_DEFPIN(15, 2, D);
 _FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19, 3, A);
 _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D); _FL_DEFPIN(22, 2, A);
