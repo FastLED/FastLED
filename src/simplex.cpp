@@ -114,7 +114,7 @@ uint16_t snoise16(uint32_t x) {
 
     int32_t n = n0 + n1;   // .15
     n += 2503;             // .15: fix offset, adjust to +0.03
-    n = (n << 14) / 40225; // .15: fix scale to fit in [-1,1]
+    n = (n * 26694) >> 16; // .15: fix scale to fit in [-1,1]
     return uint16_t(n) + 0x8000;
 }
 
@@ -181,7 +181,7 @@ uint16_t snoise16(uint32_t x, uint32_t y) {
     // Add contributions from each corner to get the final noise value.
     // The result is scaled to return values in the interval [-1,1].
     int32_t n = n0 + n1 + n2;    // .30
-    n = (n << 6) / 46360; // fix scale to fit exactly in an int16_t
+    n = ((n >> 8) * 23163) >> 16; // fix scale to fit exactly in an int16
     return (uint16_t)n + 0x8000;
 }
 
@@ -313,7 +313,7 @@ uint16_t snoise16(uint32_t x, uint32_t y, uint32_t z) {
     // Add contributions from each corner to get the final noise value.
     // The result is scaled to stay just inside [-1,1]
     int32_t n = n0 + n1 + n2 + n3; // .30
-    n = (n << 6) / 64120;          // fix scale to fit exactly in an int16
+    n = ((n >> 8) * 16748) >> 16 ; // fix scale to fit exactly in an int16
     return (uint16_t)n + 0x8000;
 }
 
@@ -454,8 +454,9 @@ uint16_t snoise16(uint32_t x, uint32_t y, uint32_t z, uint32_t w) {
         n4 = t4 * grad(P((i+1+(uint32_t)(P((j+1+(uint32_t)(P((k+1+(uint32_t)(P((l+1)&0xff)))&0xff)))&0xff)))&0xff), x4, y4, z4, w4);
     }
 
-    int32_t n = n0 + n1 + n2 + n3 + n4; // .30
-    return (uint16_t)(n / 1213) + 0x8000;
+    int32_t n = n0 + n1 + n2 + n3 + n4;  // .30
+	n = ((n >> 8) * 13832) >> 16; // fix scale
+	return uint16_t(n) + 0x8000;
 }
 
 FASTLED_NAMESPACE_END
