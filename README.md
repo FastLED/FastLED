@@ -63,18 +63,13 @@ We have multiple goals with this library:
 *Specific features*
 [![esp32_i2s_ws2812](https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml)
 
-#### Host Platforms
 
-[![linux_native](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml)
-
-
-
-
-Raspberri Pi 2335 (Pico-2/W) super early board, not yet working on platformio in open source projects (8/28/2024).
-
+*Not Supported (Yet)*
 [![esp32c2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml)
 
-Esp32 C2 variant does not have an RMT driver and we have no BitBang clockless driver for this variant. Also this is not officially supported by Arduino nor PlatformIO.
+## x86
+
+[![linux_native](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml)
 
 ## Getting Started
 
