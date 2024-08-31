@@ -233,15 +233,24 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 #endif
 
 #elif defined(ARDUINO_AVR_NANO_EVERY)
+#include "platforms/esp/32/led_sysdefs_esp32.h"
 
 #define MAX_PIN 22
 _FL_DEFPIN(0, 5, C); _FL_DEFPIN(1, 4, C); _FL_DEFPIN(2, 0, A); _FL_DEFPIN(3, 5, F);
 _FL_DEFPIN(4, 6, C); _FL_DEFPIN(5, 2, B); _FL_DEFPIN(6, 4, F); _FL_DEFPIN(7, 1, A);
 _FL_DEFPIN(8, 3, E);
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+_FL_DEFPIN(9, 0, B);
+#else
 _FL_DEFPIN(9, 0, A); // Zach: Switch from B -> A to fix compiler error.
+#endif
 _FL_DEFPIN(10, 1, B); _FL_DEFPIN(11, 0, E);
 _FL_DEFPIN(12, 1, E); _FL_DEFPIN(13, 2, E);
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 _FL_DEFPIN(14, 3, A); // Zach: Switch from D -> A to fix compiler error.
+#else
+_FL_DEFPIN(14, 3, D);
+#endif
 _FL_DEFPIN(15, 2, D);
 _FL_DEFPIN(16, 1, D); _FL_DEFPIN(17, 0, D); _FL_DEFPIN(18, 2, A); _FL_DEFPIN(19, 3, A);
 _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D); _FL_DEFPIN(22, 2, A);
