@@ -234,6 +234,15 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 
 #elif defined(ARDUINO_AVR_NANO_EVERY)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include "esp_system.h" // Load ESP_IDF_VERSION_MAJOR if exists
+// ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
+#ifdef __cplusplus
+}
+#endif
+
 #if !defined(#define ESP_IDF_VERSION_VAL)
 #define ESP_IDF_VERSION_VAL(major, minor, patch) ((major << 16) | (minor << 8) | (patch))
 #endif
