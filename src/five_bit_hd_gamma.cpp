@@ -1,7 +1,12 @@
+
+
+#define FASTLED_INTERNAL 1
+
 #include "FastLED.h"
 #include "five_bit_hd_gamma.h"
 #include "fastled_progmem.h"
 #include "lib8tion/scale8.h"
+#include "namespace.h"
 
 // Author: Zach Vorhies
 

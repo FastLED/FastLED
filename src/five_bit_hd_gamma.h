@@ -1,7 +1,9 @@
 #ifndef _FIVE_BIT_HD_GAMMA_H_
 #define _FIVE_BIT_HD_GAMMA_H_
 
-#include "FastLED.h"
+#include <stdint.h>
+#include "namespace.h"
+
 
 FASTLED_NAMESPACE_BEGIN
 
