@@ -64,6 +64,13 @@ void rgb_2_rgbw(uint8_t r, uint8_t g, uint8_t b, uint16_t color_temperature,
         g_prime = g - min_component;
         b_prime = b - min_component;
     } else {
+        // Saturation stealing algorithm. Take from the rgb components
+        // and give to the white component. However, according to this:
+        // https://www.reddit.com/r/FastLED/comments/1f4a0za/comment/lks3l1o
+        // the W component is not actually 1/3rd the brightness, it's actually
+        // equal to the three components of the same value, as if they were summed
+        // together So consider this algorithm experimental until real world testing
+        // finalizes it.
         uint8_t w3 = divide_by_three(w);
         //assert(r >= w3);
         //assert(g >= w3);
