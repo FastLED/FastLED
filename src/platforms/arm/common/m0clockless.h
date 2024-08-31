@@ -26,8 +26,6 @@ typedef struct {
     volatile const uint32_t CALIB;
 } SysTick_Type;
 
-// Define the SysTick
-#define SysTick ((SysTick_Type *)SysTick_BASE)
 #endif
 // END SysTick DEFINITION
 
