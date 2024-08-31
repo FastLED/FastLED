@@ -74,7 +74,7 @@ void rgb_2_rgbw(uint8_t r, uint8_t g, uint8_t b, uint16_t color_temperature,
         // https://www.reddit.com/r/FastLED/comments/1f4a0za/comment/lks3l1o
         // the W component is not actually 1/3rd the brightness, it's actually
         // equal to the three components of the same value, as if they were summed
-        // together So consider this algorithm experimental until real world testing
+        // together. So consider this algorithm experimental until real world testing
         // finalizes it.
         uint8_t w3 = divide_by_three(w);
         //assert(r >= w3);
