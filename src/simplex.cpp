@@ -157,21 +157,21 @@ uint16_t snoise16(uint32_t x, uint32_t y) {
     int32_t n0 = 0, n1 = 0, n2 = 0; // Noise contributions from the three corners
 
     // Calculate the contribution from the three corners
-    int32_t t0 = ((1 << 27) - x0*x0 - y0*y0) >> 12; // .16
+    int32_t t0 = (((int32_t)1 << 27) - x0*x0 - y0*y0) >> 12; // .16
     if (t0 > 0) {
         t0 = (t0 * t0) >> 16;                                      // .16
         t0 = (t0 * t0) >> 16;                                      // .16
         n0 = t0 * grad(P((i+(uint32_t)(P(j&0xff)))&0xff), x0, y0); // .16 * .14 = .30
     }
 
-    int32_t t1 = ((1 << 27) - x1*x1 - y1*y1) >> 12; // .16
+    int32_t t1 = (((int32_t)1 << 27) - x1*x1 - y1*y1) >> 12; // .16
     if (t1 > 0) {
         t1 = (t1 * t1) >> 16;                                              // .16
         t1 = (t1 * t1) >> 16;                                              // .16
         n1 = t1 * grad(P((i+i1+(uint32_t)(P((j+j1)&0xff)))&0xff), x1, y1); // .16 * .14 = .30
     }
 
-    int32_t t2 = ((1 << 27) - x2*x2 - y2*y2) >> 12; // .16
+    int32_t t2 = (((int32_t)1 << 27) - x2*x2 - y2*y2) >> 12; // .16
     if (t2 > 0) {
         t2 = (t2 * t2) >> 16;                                            // .16
         t2 = (t2 * t2) >> 16;                                            // .16
