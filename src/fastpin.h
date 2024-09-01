@@ -8,6 +8,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#pragma GCC diagnostic ignored "-Wvolatile"
 
 /// @file fastpin.h
 /// Class base definitions for defining fast pin access
