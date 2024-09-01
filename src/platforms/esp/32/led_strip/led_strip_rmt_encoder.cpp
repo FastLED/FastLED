@@ -117,6 +117,9 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
 {
     esp_err_t ret = ESP_OK;
     rmt_led_strip_encoder_t *led_encoder = NULL;
+    rmt_bytes_encoder_config_t bytes_encoder_config = {};
+    rmt_copy_encoder_config_t copy_encoder_config = {};
+    uint32_t reset_ticks = config->resolution / RMT_FREQ * 280 / 2; // reset code duration defaults to 280us to accomodate WS2812B-V5
     ESP_GOTO_ON_FALSE(config && ret_encoder, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     ESP_GOTO_ON_FALSE(config->led_model < LED_MODEL_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led model");
     led_encoder = static_cast<rmt_led_strip_encoder_t*>(calloc(1, sizeof(rmt_led_strip_encoder_t)));
@@ -124,7 +127,7 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
     led_encoder->base.encode = rmt_encode_led_strip;
     led_encoder->base.del = rmt_del_led_strip_encoder;
     led_encoder->base.reset = rmt_led_strip_encoder_reset;
-    rmt_bytes_encoder_config_t bytes_encoder_config;
+
     if (config->led_model == LED_MODEL_SK6812) {
         rmt_symbol_word_t bit0 = make_symbol_word(
             1,
@@ -194,12 +197,11 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
         assert(false);
     }
     ESP_GOTO_ON_ERROR(rmt_new_bytes_encoder(&bytes_encoder_config, &led_encoder->bytes_encoder), err, TAG, "create bytes encoder failed");
-    rmt_copy_encoder_config_t copy_encoder_config = {};
     ESP_GOTO_ON_ERROR(rmt_new_copy_encoder(&copy_encoder_config, &led_encoder->copy_encoder), err, TAG, "create copy encoder failed");
 
 
 
-    uint32_t reset_ticks = config->resolution / RMT_FREQ * 280 / 2; // reset code duration defaults to 280us to accomodate WS2812B-V5
+
     led_encoder->reset_code = make_symbol_word(0, reset_ticks, 0, reset_ticks);
     // led_encoder->reset_code = (rmt_symbol_word_t) {
     //     .level0 = 0,
