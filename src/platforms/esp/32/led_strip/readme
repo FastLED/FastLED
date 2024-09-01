@@ -1,0 +1,19 @@
+This is a work in progress!
+
+```
+#include <FastLED.h>
+
+#include "platforms/esp/32/led_strip/led_strip.h"
+
+void setup() {}
+void loop() {}
+```
+
+
+
+Copied on Aug-31-2024 from
+https://github.com/espressif/idf-extra-components/tree/60c14263f3b69ac6e98ecae79beecbe5c18d5596/led_strip
+
+
+And then modified so that the library component has private symbols for FastLED
+(prevents linker errors if the user also includes led_strip)
