@@ -2,11 +2,19 @@
 #ifdef ESP32
 #ifndef FASTLED_ESP32_I2S
 
+#define FASTLED_INTERNAL
+
 #include "FastLED.h"
 #include "idf4_rmt.h"
 #include "clock_cycles.h"
 #include <iostream>
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wvolatile"
+
+// ignore warnings like: ignoring attribute 'section (".iram1.11")' because it conflicts with previous 'section (".iram1.2")' [-Wattributes]
+// #pragma GCC diagnostic ignored "-Wattributes"
 
 #define _RMT_ASSERT(cond, MSG) do {       \
     if (!(cond)) {                        \
@@ -341,7 +349,7 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 
 // -- Show this string of pixels
 //    This is the main entry point for the pixel controller
-void IRAM_ATTR ESP32RMTController::showPixels()
+void ESP32RMTController::showPixels()
 {
     if (gNumStarted == 0) {
         // -- First controller: make sure everything is set up
@@ -401,7 +409,7 @@ void IRAM_ATTR ESP32RMTController::showPixels()
 // -- Start up the next controller
 //    This method is static so that it can dispatch to the
 //    appropriate startOnChannel method of the given controller.
-void IRAM_ATTR ESP32RMTController::startNext(int channel)
+void ESP32RMTController::startNext(int channel)
 {
     if (gNext < gNumControllers) {
         ESP32RMTController * pController = gControllers[gNext];
@@ -413,7 +421,7 @@ void IRAM_ATTR ESP32RMTController::startNext(int channel)
 // -- Start this controller on the given channel
 //    This function just initiates the RMT write; it does not wait
 //    for it to finish.
-void IRAM_ATTR ESP32RMTController::startOnChannel(int channel)
+void ESP32RMTController::startOnChannel(int channel)
 {
     esp_err_t espErr = ESP_OK;
     // -- Assign this channel and configure the RMT
@@ -463,7 +471,7 @@ void IRAM_ATTR ESP32RMTController::startOnChannel(int channel)
 
 // -- Start RMT transmission
 //    Setting this RMT flag is what actually kicks off the peripheral
-void IRAM_ATTR ESP32RMTController::tx_start()
+void ESP32RMTController::tx_start()
 {
     // rmt_tx_start(mRMT_channel, true);
     // Inline the code for rmt_tx_start, so it can be placed in IRAM
@@ -751,7 +759,7 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 //    Puts 32 bits of pixel data into the next 32 slots in the RMT memory
 //    Each data bit is represented by a 32-bit RMT item that specifies how
 //    long to hold the signal high, followed by how long to hold it low.
-void IRAM_ATTR ESP32RMTController::fillNext(bool check_time)
+void ESP32RMTController::fillNext(bool check_time)
 {
     uint32_t now = __clock_cycles();
     if (check_time) {
@@ -831,6 +839,9 @@ void ESP32RMTController::ingest(uint8_t byteval)
     convert_byte_to_rmt(byteval, mZero.val, mOne.val, mBuffer + mCurPulse);
     mCurPulse += 8;
 }
+
+#pragma GCC diagnostic pop
+
 
 #endif // ! FASTLED_ESP32_I2S
 

@@ -105,6 +105,11 @@
 
 #pragma once
 
+#if defined(CONFIG_RMT_SUPPRESS_DEPRECATE_WARN)
+#undef CONFIG_RMT_SUPPRESS_DEPRECATE_WARN
+#endif
+#define CONFIG_RMT_SUPPRESS_DEPRECATE_WARN 1
+
 #include "namespace.h"
 
 
@@ -123,7 +128,11 @@ extern "C" {
 #endif
 #include "driver/gpio.h"
 #include "driver/rmt.h"
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
+#include "esp_private/periph_ctrl.h"
+#else
 #include "driver/periph_ctrl.h"
+#endif
 #include "freertos/semphr.h"
 #include "soc/rmt_struct.h"
 
