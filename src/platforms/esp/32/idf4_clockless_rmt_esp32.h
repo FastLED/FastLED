@@ -21,7 +21,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
-*
+ *
  * The default FastLED driver takes over control of the RMT interrupt
  * handler, making it hard to use the RMT device for other
  * (non-FastLED) purposes. You can change it's behavior to use the ESP
@@ -34,9 +34,9 @@
 
 #pragma once
 
-
 #include "idf4_rmt.h"
 #include "FastLED.h"
+#include "esp_idf_version.h"
 
 // -- Core or custom driver
 #ifndef FASTLED_RMT_BUILTIN_DRIVER
@@ -45,27 +45,38 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-
 #define FASTLED_HAS_CLOCKLESS 1
 #define NUM_COLOR_CHANNELS 3
 
+// -- Max RMT TX channel
+#ifndef FASTLED_RMT_MAX_CHANNELS
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
+// 8 for (ESP32)  4 for (ESP32S2, ESP32S3)  2 for (ESP32C3, ESP32H2)
+#define FASTLED_RMT_MAX_CHANNELS SOC_RMT_TX_CANDIDATES_PER_GROUP
+#else
+#ifdef CONFIG_IDF_TARGET_ESP32S2
+#define FASTLED_RMT_MAX_CHANNELS 4
+#else
+#define FASTLED_RMT_MAX_CHANNELS 8
+#endif
+#endif
+#endif
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
 private:
-
     // -- The actual controller object for ESP32
-    ESP32RMTController mRMTController;
+    RmtController mRMTController;
 
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
 
 public:
-
     ClocklessController()
         : mRMTController(DATA_PIN, T1, T2, T3, FASTLED_RMT_MAX_CHANNELS, FASTLED_RMT_BUILTIN_DRIVER)
-        {}
+    {
+    }
 
     void init()
     {
@@ -76,16 +87,10 @@ public:
 protected:
     // -- Show pixels
     //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER> & pixels)
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels)
     {
-        if (FASTLED_RMT_BUILTIN_DRIVER) {
-            mRMTController.loadAllPixelsToRmtSymbolData(pixels);
-        } else {
-            mRMTController.loadPixelDataForStreamEncoding(pixels);
-        }
-        mRMTController.showPixels();
+        mRMTController.showPixels(pixels);
     }
 };
-
 
 FASTLED_NAMESPACE_END
