@@ -9,6 +9,33 @@
 #include "clock_cycles.h"
 #include <iostream>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#include "esp32-hal.h"
+// ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
+#include "esp_intr_alloc.h"
+#else
+#include "esp_intr.h"
+#endif
+#include "driver/gpio.h"
+#include "driver/rmt.h"
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
+#include "esp_private/periph_ctrl.h"
+#else
+#include "driver/periph_ctrl.h"
+#endif
+#include "freertos/semphr.h"
+#include "soc/rmt_struct.h"
+
+#include "esp_log.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wvolatile"
@@ -16,21 +43,28 @@
 // ignore warnings like: ignoring attribute 'section (".iram1.11")' because it conflicts with previous 'section (".iram1.2")' [-Wattributes]
 // #pragma GCC diagnostic ignored "-Wattributes"
 
-#define _RMT_ASSERT(cond, MSG) do {       \
-    if (!(cond)) {                        \
-        std::cout << MSG << std::endl;    \
-        abort();                          \
-    }                                     \
-} while (0);
+#define _RMT_ASSERT(cond, MSG)             \
+    do                                     \
+    {                                      \
+        if (!(cond))                       \
+        {                                  \
+            std::cout << MSG << std::endl; \
+            abort();                       \
+        }                                  \
+    } while (0);
 
 #ifndef FASTLED_RMT_SERIAL_DEBUG
 #define FASTLED_RMT_SERIAL_DEBUG 0
 #endif
 
 #if FASTLED_RMT_SERIAL_DEBUG == 1
-#define FASTLED_DEBUG(format, errcode, ...) if (errcode != ESP_OK) { Serial.printf(PSTR("FASTLED: " format "\n"), errcode, ##__VA_ARGS__); }
+#define FASTLED_DEBUG(format, errcode, ...)                                   \
+    if (errcode != ESP_OK)                                                    \
+    {                                                                         \
+        Serial.printf(PSTR("FASTLED: " format "\n"), errcode, ##__VA_ARGS__); \
+    }
 #else
-#define FASTLED_DEBUG(format, errcode, ...) (void) errcode;
+#define FASTLED_DEBUG(format, errcode, ...) (void)errcode;
 #endif
 
 // 64 for ESP32, ESP32S2
@@ -40,8 +74,8 @@
 #define FASTLED_RMT_MEM_WORDS_PER_CHANNEL SOC_RMT_MEM_WORDS_PER_CHANNEL
 #else
 // ESP32 value (only chip variant supported on older IDF)
-#define FASTLED_RMT_MEM_WORDS_PER_CHANNEL 64 
-#endif 
+#define FASTLED_RMT_MEM_WORDS_PER_CHANNEL 64
+#endif
 #endif
 
 // -- RMT memory configuration
@@ -54,50 +88,55 @@
 #define FASTLED_RMT_MEM_BLOCKS 2
 #endif
 
-
 #define MAX_PULSES (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS)
-#define PULSES_PER_FILL    (MAX_PULSES / 2)              /* Half of the channel buffer */
+#define PULSES_PER_FILL (MAX_PULSES / 2) /* Half of the channel buffer */
 
 // -- Configuration constants
-#define DIVIDER       2 /* 4, 8 still seem to work, but timings become marginal */
-
+#define DIVIDER 2 /* 4, 8 still seem to work, but timings become marginal */
 
 // -- Max number of controllers we can support
 #ifndef FASTLED_RMT_MAX_CONTROLLERS
 #define FASTLED_RMT_MAX_CONTROLLERS 32
 #endif
 
-
-
-
-
+// -- Max RMT TX channel
+#ifndef FASTLED_RMT_MAX_CHANNELS
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
+// 8 for (ESP32)  4 for (ESP32S2, ESP32S3)  2 for (ESP32C3, ESP32H2)
+#define FASTLED_RMT_MAX_CHANNELS SOC_RMT_TX_CANDIDATES_PER_GROUP
+#else
+#ifdef CONFIG_IDF_TARGET_ESP32S2
+#define FASTLED_RMT_MAX_CHANNELS 4
+#else
+#define FASTLED_RMT_MAX_CHANNELS 8
+#endif
+#endif
+#endif
 
 // @davidlmorris 2024-08-03
 // This is work-around for the issue of random fastLed freezes randomly sometimes minutes
-// but usually hours after the start, probably caused by interrupts 
+// but usually hours after the start, probably caused by interrupts
 // being swallowed by the system so that the gTX_sem semaphore is never released
 // by the RMT interrupt handler causing FastLED.Show() never to return.
 
-// The default is never return (or max ticks aka portMAX_DELAY).  
+// The default is never return (or max ticks aka portMAX_DELAY).
 // To resolve this we need to set a maximum time to hold the semaphore.
-// For example: To wait a maximum of two seconds (enough time for the Esp32 to have sorted 
+// For example: To wait a maximum of two seconds (enough time for the Esp32 to have sorted
 // itself out and fast enough that it probably won't be greatly noticed by the audience)
 // use:
 // # define FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM (2000/portTICK_PERIOD_MS)
 // (Place this in your code directly before the first call to FastLED.h)
-#ifndef FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM  
+#ifndef FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM
 #define FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM (portMAX_DELAY)
 #endif
 
-
-
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-extern void spi_flash_op_lock(void);
-extern void spi_flash_op_unlock(void);
-
+    extern void spi_flash_op_lock(void);
+    extern void spi_flash_op_unlock(void);
 
 #ifdef __cplusplus
 }
@@ -110,38 +149,37 @@ extern void spi_flash_op_unlock(void);
 // that the APB_CLK_FREQ is not defined correctly. So we define
 // it here for the RMT. This can probably be taken out later and
 // was put in on 8/29/2024 by @zackees.
-#ifndef F_CPU_RMT_CLOCK_MANUALLY_DEFINED  // if user has not defined it manually then...
+#ifndef F_CPU_RMT_CLOCK_MANUALLY_DEFINED // if user has not defined it manually then...
 #if defined(CONFIG_IDF_TARGET_ESP32C6) && CONFIG_IDF_TARGET_ESP32C6 == 1
-#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80*1000000)
+#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80 * 1000000)
 #elif defined(CONFIG_IDF_TARGET_ESP32H2) && CONFIG_IDF_TARGET_ESP32H2 == 1
-#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80*1000000)
+#define F_CPU_RMT_CLOCK_MANUALLY_DEFINED (80 * 1000000)
 #endif
 
 #ifdef F_CPU_RMT_CLOCK_MANUALLY_DEFINED
-#define F_CPU_RMT                   (  F_CPU_RMT_CLOCK_MANUALLY_DEFINED )
+#define F_CPU_RMT (F_CPU_RMT_CLOCK_MANUALLY_DEFINED)
 #else
-#define F_CPU_RMT                   (  APB_CLK_FREQ )
+#define F_CPU_RMT (APB_CLK_FREQ)
 #endif
-#endif  //  F_CPU_RMT_CLOCK_MANUALLY_DEFINED
+#endif //  F_CPU_RMT_CLOCK_MANUALLY_DEFINED
 
 // -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
 // RMT Clock is typically APB CLK, which is 80MHz on most devices, but 40MHz on ESP32-H2 and ESP32-C6
-#define RMT_CYCLES_PER_SEC          (F_CPU_RMT/DIVIDER)
-#define RMT_CYCLES_PER_ESP_CYCLE    (F_CPU / RMT_CYCLES_PER_SEC)
-#define ESP_TO_RMT_CYCLES(n)        ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
-
+#define RMT_CYCLES_PER_SEC (F_CPU_RMT / DIVIDER)
+#define RMT_CYCLES_PER_ESP_CYCLE (F_CPU / RMT_CYCLES_PER_SEC)
+#define ESP_TO_RMT_CYCLES(n) ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
 
 // -- Forward reference
 class ESP32RMTController;
 
 // -- Array of all controllers
-//    This array is filled at the time controllers are registered 
+//    This array is filled at the time controllers are registered
 //    (Usually when the sketch calls addLeds)
-static ESP32RMTController * gControllers[FASTLED_RMT_MAX_CONTROLLERS];
+static ESP32RMTController *gControllers[FASTLED_RMT_MAX_CONTROLLERS];
 
 // -- Current set of active controllers, indexed by the RMT
 //    channel assigned to them.
-static ESP32RMTController * gOnChannel[FASTLED_RMT_MAX_CHANNELS];
+static ESP32RMTController *gOnChannel[FASTLED_RMT_MAX_CHANNELS];
 
 static int gNumControllers = 0;
 static int gNumStarted = 0;
@@ -154,14 +192,174 @@ static intr_handle_t gRMT_intr_handle = NULL;
 //    Semaphore is not given until all data has been sent
 #if tskKERNEL_VERSION_MAJOR >= 7
 static SemaphoreHandle_t gTX_sem = NULL;
-#else 
+#else
 static xSemaphoreHandle gTX_sem = NULL;
 #endif
 
 // -- Make sure we can't call show() too quickly
-CMinWait<50>   gWait;
+CMinWait<50> gWait;
 
 static bool gInitialized = false;
+
+class ESP32RMTController
+{
+private:
+    // friend function esp_rmt_init
+    friend void esp_rmt_init(gpio_num_t pin, bool built_in_driver);
+    friend class RmtController;
+
+    // -- RMT has 8 channels, numbered 0 to 7
+    rmt_channel_t mRMT_channel;
+
+    // -- Store the GPIO pin
+    gpio_num_t mPin;
+
+    // -- Timing values for zero and one bits, derived from T1, T2, and T3
+    rmt_item32_t mZero;
+    rmt_item32_t mOne;
+
+    // -- Total expected time to send 32 bits
+    //    Each strip should get an interrupt roughly at this interval
+    uint32_t mCyclesPerFill;
+    uint32_t mMaxCyclesPerFill;
+    uint32_t mLastFill;
+
+    // -- Pixel data
+    uint8_t *mPixelData;
+    int mSize;
+    int mCur;
+    int mBufSize;
+
+    // -- RMT memory
+    volatile rmt_item32_t *mRMT_mem_ptr;
+    volatile rmt_item32_t *mRMT_mem_start;
+    int mWhichHalf;
+
+    // -- Buffer to hold all of the pulses. For the version that uses
+    //    the RMT driver built into the ESP core.
+    rmt_item32_t *mBuffer;
+    uint16_t mBufferSize; // bytes
+    int mCurPulse;
+    bool mBuiltInDriver;
+
+    // -- These values need to be real variables, so we can access them
+    //    in the cpp file
+    static int gMaxChannel;
+    static int gMemBlocks;
+
+public:
+    // -- Constructor
+    //    Mainly just stores the template parameters from the LEDController as
+    //    member variables.
+    ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver);
+
+    // -- Show this string of pixels
+    //    This is the main entry point for the pixel controller
+    void IRAM_ATTR showPixels();
+
+    // -- Load pixel data
+    //    This method loads all of the pixel data into a separate buffer for use by
+    //    by the RMT driver. Copying does two important jobs: it fixes the color
+    //    order for the pixels, and it performs the scaling/adjusting ahead of time.
+    //    It also packs the bytes into 32 bit chunks with the right bit order.
+    template <EOrder RGB_ORDER>
+    void loadPixelDataForStreamEncoding(PixelController<RGB_ORDER> &pixels)
+    {
+        // -- Make sure the buffer is allocated
+        int size_in_bytes = pixels.size() * 3;
+        uint8_t *pData = getPixelBuffer(size_in_bytes);
+
+        // -- This might be faster
+        while (pixels.has(1))
+        {
+            *pData++ = pixels.loadAndScale0();
+            *pData++ = pixels.loadAndScale1();
+            *pData++ = pixels.loadAndScale2();
+            pixels.advanceData();
+            pixels.stepDithering();
+        }
+    }
+
+    // -- Convert all pixels to RMT pulses
+    //    This function is only used when the user chooses to use the
+    //    built-in RMT driver, which needs all of the RMT pulses
+    //    up-front. This is a LARGE buffer, about 24x larger than
+    //    the original pixel data. But the benefit is that no interrupt
+    //    is needed to convert during streaming so Wifi will not
+    //    interfere with the timing.
+    template <EOrder RGB_ORDER>
+    void loadAllPixelsToRmtSymbolData(PixelController<RGB_ORDER> &pixels)
+    {
+        // -- Make sure the data buffer is allocated
+        initPulseBuffer(pixels.size() * 3);
+
+        // -- Cycle through the R,G, and B values in the right order,
+        //    storing the pulses in the big buffer
+
+        uint32_t byteval;
+        while (pixels.has(1))
+        {
+            byteval = pixels.loadAndScale0();
+            ingest(byteval);
+            byteval = pixels.loadAndScale1();
+            ingest(byteval);
+            byteval = pixels.loadAndScale2();
+            ingest(byteval);
+            pixels.advanceData();
+            pixels.stepDithering();
+        }
+    }
+
+    // -- Init pulse buffer
+    //    Set up the buffer that will hold all of the pulse items for this
+    //    controller.
+    //    This function is only used when the built-in RMT driver is chosen
+    void initPulseBuffer(int size_in_bytes);
+
+    // -- Convert a byte into RMT pulses
+    //    This function is only used when the built-in RMT driver is chosen
+    void ingest(uint8_t byteval);
+
+private:
+    // -- Start up the next controller
+    //    This method is static so that it can dispatch to the
+    //    appropriate startOnChannel method of the given controller.
+    static void IRAM_ATTR startNext(int channel);
+
+    // -- Start this controller on the given channel
+    //    This function just initiates the RMT write; it does not wait
+    //    for it to finish.
+    void IRAM_ATTR startOnChannel(int channel);
+
+    // -- Start RMT transmission
+    //    Setting this RMT flag is what actually kicks off the peripheral
+    void IRAM_ATTR tx_start();
+
+    // -- A controller is done
+    //    This function is called when a controller finishes writing
+    //    its data. It is called either by the custom interrupt
+    //    handler (below), or as a callback from the built-in
+    //    interrupt handler. It is static because we don't know which
+    //    controller is done until we look it up.
+    static void IRAM_ATTR doneOnChannel(rmt_channel_t channel, void *arg);
+
+    // -- Custom interrupt handler
+    //    This interrupt handler handles two cases: a controller is
+    //    done writing its data, or a controller needs to fill the
+    //    next half of the RMT buffer with data.
+    static void IRAM_ATTR interruptHandler(void *arg);
+
+    // -- Fill RMT buffer
+    //    Puts 32 bits of pixel data into the next 32 slots in the RMT memory
+    //    Each data bit is represented by a 32-bit RMT item that specifies how
+    //    long to hold the signal high, followed by how long to hold it low.
+    //    NOTE: Now the default is to use 128-bit buffers, so half a buffer is
+    //          is 64 bits. See FASTLED_RMT_MEM_BLOCKS
+    void IRAM_ATTR fillNext(bool check_time);
+
+    // -- Get or create the pixel data buffer
+    uint8_t *getPixelBuffer(int size_in_bytes);
+};
 
 // -- Stored values for FASTLED_RMT_MAX_CHANNELS and FASTLED_RMT_MEM_BLOCKS
 int ESP32RMTController::gMaxChannel;
@@ -173,8 +371,10 @@ int ESP32RMTController::gMemBlocks;
 #include <rom/gpio.h>
 
 // copied from rmt_private.h with slight changes to match the idf 4.x syntax
-typedef struct {
-    struct {
+typedef struct
+{
+    struct
+    {
         rmt_item32_t data32[SOC_RMT_MEM_WORDS_PER_CHANNEL];
     } chan[SOC_RMT_CHANNELS_PER_GROUP];
 } rmt_block_mem_t;
@@ -186,14 +386,16 @@ extern rmt_block_mem_t RMTMEM;
 // -- Write one byte's worth of RMT pulses to the big buffer
 //    out: A pointer into an array at least 8 units long (one unit for each bit).
 __attribute__((always_inline)) inline void IRAM_ATTR convert_byte_to_rmt(
-        FASTLED_REGISTER uint8_t byteval, 
-        FASTLED_REGISTER uint32_t zero,
-        FASTLED_REGISTER uint32_t one,
-        volatile rmt_item32_t* out) {
-    FASTLED_REGISTER uint32_t pixel_u32  = byteval;
+    FASTLED_REGISTER uint8_t byteval,
+    FASTLED_REGISTER uint32_t zero,
+    FASTLED_REGISTER uint32_t one,
+    volatile rmt_item32_t *out)
+{
+    FASTLED_REGISTER uint32_t pixel_u32 = byteval;
     pixel_u32 <<= 24;
     uint32_t tmp[8];
-    for (FASTLED_REGISTER uint32_t j = 0; j < 8; j++) {
+    for (FASTLED_REGISTER uint32_t j = 0; j < 8; j++)
+    {
         FASTLED_REGISTER uint32_t new_val = (pixel_u32 & 0x80000000L) ? one : zero;
         pixel_u32 <<= 1;
         // Write to a non volatile buffer to keep this fast and
@@ -212,20 +414,19 @@ __attribute__((always_inline)) inline void IRAM_ATTR convert_byte_to_rmt(
     out[7].val = tmp[7];
 }
 
-
 void IRAM_ATTR GiveGTX_sem()
 {
     if (gTX_sem != NULL)
-        {
+    {
         xSemaphoreGive(gTX_sem);
-        }
+    }
 }
 
 ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver)
-    : mPixelData(0), 
-      mSize(0), 
+    : mPixelData(0),
+      mSize(0),
       mCur(0),
-      mBufSize(0), 
+      mBufSize(0),
       mWhichHalf(0),
       mBuffer(0),
       mBufferSize(0),
@@ -240,7 +441,7 @@ ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int
     //    according to the timing values given in the template instantiation
     // T1H
     mOne.level0 = 1;
-    mOne.duration0 = ESP_TO_RMT_CYCLES(T1+T2); // TO_RMT_CYCLES(T1+T2);
+    mOne.duration0 = ESP_TO_RMT_CYCLES(T1 + T2); // TO_RMT_CYCLES(T1+T2);
     // T1L
     mOne.level1 = 0;
     mOne.duration1 = ESP_TO_RMT_CYCLES(T3); // TO_RMT_CYCLES(T3);
@@ -250,7 +451,7 @@ ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int
     mZero.duration0 = ESP_TO_RMT_CYCLES(T1); // TO_RMT_CYCLES(T1);
     // T0L
     mZero.level1 = 0;
-    mZero.duration1 = ESP_TO_RMT_CYCLES(T2+T3); // TO_RMT_CYCLES(T2 + T3);
+    mZero.duration1 = ESP_TO_RMT_CYCLES(T2 + T3); // TO_RMT_CYCLES(T2 + T3);
 
     gControllers[gNumControllers] = this;
     gNumControllers++;
@@ -260,7 +461,7 @@ ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int
 
     // -- If there is ever an interval greater than 1.5 times
     //    the expected time, then bail out.
-    mMaxCyclesPerFill = mCyclesPerFill + mCyclesPerFill/2;
+    mMaxCyclesPerFill = mCyclesPerFill + mCyclesPerFill / 2;
 
     mPin = gpio_num_t(DATA_PIN);
 }
@@ -268,17 +469,19 @@ ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int
 // -- Get or create the buffer for the pixel data
 //    We can't allocate it ahead of time because we don't have
 //    the PixelController object until show is called.
-uint8_t * ESP32RMTController::getPixelBuffer(int size_in_bytes)
+uint8_t *ESP32RMTController::getPixelBuffer(int size_in_bytes)
 {
     // -- Free the old buffer if it will be too small
-    if (mPixelData != 0 and mBufSize < size_in_bytes) {
+    if (mPixelData != 0 and mBufSize < size_in_bytes)
+    {
         free(mPixelData);
         mPixelData = 0;
     }
 
-    if (mPixelData == 0) {
+    if (mPixelData == 0)
+    {
         mBufSize = size_in_bytes;
-        mPixelData = (uint8_t *) malloc(mBufSize);
+        mPixelData = (uint8_t *)malloc(mBufSize);
     }
 
     mSize = size_in_bytes;
@@ -288,12 +491,14 @@ uint8_t * ESP32RMTController::getPixelBuffer(int size_in_bytes)
 
 // -- Initialize RMT subsystem
 //    This only needs to be done once
-void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
+void esp_rmt_init(gpio_num_t pin, bool built_in_driver)
 {
-    if (gInitialized) return;
+    if (gInitialized)
+        return;
     esp_err_t espErr = ESP_OK;
 
-    for (int i = 0; i < gMaxChannel; i += gMemBlocks) {
+    for (int i = 0; i < ESP32RMTController::gMaxChannel; i += ESP32RMTController::gMemBlocks)
+    {
         gOnChannel[i] = NULL;
 
         // -- RMT configuration for transmission
@@ -302,7 +507,7 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
         rmt_tx.channel = rmt_channel_t(i);
         rmt_tx.rmt_mode = RMT_MODE_TX;
         rmt_tx.gpio_num = pin;
-        rmt_tx.mem_block_num = gMemBlocks;
+        rmt_tx.mem_block_num = ESP32RMTController::gMemBlocks;
         rmt_tx.clk_div = DIVIDER;
         rmt_tx.tx_config.loop_en = false;
         rmt_tx.tx_config.carrier_level = RMT_CARRIER_LEVEL_LOW;
@@ -316,9 +521,12 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 
         // TODO: Move the value out of a define for this class and use
         // the value from the define to pass into the RMT driver.
-        if (built_in_driver) {
+        if (built_in_driver)
+        {
             rmt_driver_install(rmt_channel_t(i), 0, 0);
-        } else {
+        }
+        else
+        {
             // -- Set up the RMT to send 32 bits of the pulse buffer and then
             //    generate an interrupt. When we get this interrupt we
             //    fill the other part in preparation (like double-buffering)
@@ -328,18 +536,21 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
     }
 
     // -- Create a semaphore to block execution until all the controllers are done
-    if (gTX_sem == NULL) {
+    if (gTX_sem == NULL)
+    {
         gTX_sem = xSemaphoreCreateBinary();
         xSemaphoreGive(gTX_sem);
     }
-                
-    if ( ! built_in_driver) {
+
+    if (!built_in_driver)
+    {
         // -- Allocate the interrupt if we have not done so yet. This
         //    interrupt handler must work for all different kinds of
         //    strips, so it delegates to the refill function for each
         //    specific instantiation of ClocklessController.
-        if (gRMT_intr_handle == NULL) {
-            esp_intr_alloc(ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3, interruptHandler, 0, &gRMT_intr_handle);
+        if (gRMT_intr_handle == NULL)
+        {
+            esp_intr_alloc(ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3, ESP32RMTController::interruptHandler, 0, &gRMT_intr_handle);
         }
     }
 
@@ -351,9 +562,10 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 //    This is the main entry point for the pixel controller
 void ESP32RMTController::showPixels()
 {
-    if (gNumStarted == 0) {
+    if (gNumStarted == 0)
+    {
         // -- First controller: make sure everything is set up
-        ESP32RMTController::init(mPin, mBuiltInDriver);
+        esp_rmt_init(mPin, mBuiltInDriver);
 
 #if FASTLED_ESP32_FLASH_LOCK == 1
         // -- Make sure no flash operations happen right now
@@ -366,7 +578,8 @@ void ESP32RMTController::showPixels()
 
     // -- The last call to showPixels is the one responsible for doing
     //    all of the actual work
-    if (gNumStarted == gNumControllers) {
+    if (gNumStarted == gNumControllers)
+    {
         gNext = 0;
 
         // -- This Take always succeeds immediately
@@ -377,7 +590,8 @@ void ESP32RMTController::showPixels()
 
         // -- First, fill all the available channels
         int channel = 0;
-        while (channel < gMaxChannel && gNext < gNumControllers) {
+        while (channel < gMaxChannel && gNext < gNumControllers)
+        {
             ESP32RMTController::startNext(channel);
             // -- Important: when we use more than one memory block, we need to
             //    skip the channels that would otherwise overlap in memory.
@@ -402,7 +616,6 @@ void ESP32RMTController::showPixels()
         // -- Release the lock on flash operations
         spi_flash_op_unlock();
 #endif
-
     }
 }
 
@@ -411,8 +624,9 @@ void ESP32RMTController::showPixels()
 //    appropriate startOnChannel method of the given controller.
 void ESP32RMTController::startNext(int channel)
 {
-    if (gNext < gNumControllers) {
-        ESP32RMTController * pController = gControllers[gNext];
+    if (gNext < gNumControllers)
+    {
+        ESP32RMTController *pController = gControllers[gNext];
         pController->startOnChannel(channel);
         gNext++;
     }
@@ -440,16 +654,19 @@ void ESP32RMTController::startOnChannel(int channel)
     FASTLED_DEBUG("rrmt_set_pin result: %d", espErr);
 #endif
 
-    if (mBuiltInDriver) {
+    if (mBuiltInDriver)
+    {
         // -- Use the built-in RMT driver to send all the data in one shot
         rmt_register_tx_end_callback(doneOnChannel, 0);
         rmt_write_items(mRMT_channel, mBuffer, mBufferSize, false);
-    } else {
+    }
+    else
+    {
         // -- Use our custom driver to send the data incrementally
 
         // -- Initialize the counters that keep track of where we are in
         //    the pixel data and the RMT buffer
-        mRMT_mem_start = & (RMTMEM.chan[mRMT_channel].data32[0]);
+        mRMT_mem_start = &(RMTMEM.chan[mRMT_channel].data32[0]);
         mRMT_mem_ptr = mRMT_mem_start;
         mCur = 0;
         mWhichHalf = 0;
@@ -502,8 +719,8 @@ void ESP32RMTController::tx_start()
     RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
     RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
 #elif CONFIG_IDF_TARGET_ESP32S3
-    // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
-    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+// rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
     RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
     RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 0;
     RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 1;
@@ -515,7 +732,7 @@ void ESP32RMTController::tx_start()
     // rmt_ll_tx_start(&RMT, mRMT_channel)
     RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
     RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
-    #else
+#else
     RMT.chnconf0[mRMT_channel].mem_rd_rst_n = 1;
     RMT.chnconf0[mRMT_channel].mem_rd_rst_n = 0;
     RMT.chnconf0[mRMT_channel].apb_mem_rst_n = 1;
@@ -527,7 +744,7 @@ void ESP32RMTController::tx_start()
     // rmt_ll_tx_start(&RMT, mRMT_channel)
     RMT.chnconf0[mRMT_channel].conf_update_n = 1;
     RMT.chnconf0[mRMT_channel].tx_start_n = 1;
-    #endif
+#endif
 #elif CONFIG_IDF_TARGET_ESP32C6
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
     RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
@@ -542,9 +759,9 @@ void ESP32RMTController::tx_start()
     RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
     RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
 #elif CONFIG_IDF_TARGET_ESP32S2
-    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
     _RMT_ASSERT(false, "tx_start Not yet implemented for ESP32-S2 in idf 5.x");
-    #else
+#else
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
     RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
     RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
@@ -555,7 +772,7 @@ void ESP32RMTController::tx_start()
     RMT.int_ena.val |= (1 << (mRMT_channel * 3));
     // rmt_ll_tx_start(&RMT, mRMT_channel)
     RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
-    #endif
+#endif
 #elif CONFIG_IDF_TARGET_ESP32
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
     RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
@@ -581,20 +798,20 @@ void ESP32RMTController::tx_start()
     RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
     RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
 #else
-    #error Not yet implemented for unknown ESP32 target
+#error Not yet implemented for unknown ESP32 target
 #endif
     mLastFill = __clock_cycles();
 }
 
-// -- A controller is done 
+// -- A controller is done
 //    This function is called when a controller finishes writing
 //    its data. It is called either by the custom interrupt
 //    handler (below), or as a callback from the built-in
 //    interrupt handler. It is static because we don't know which
 //    controller is done until we look it up.
-void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * arg)
+void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *arg)
 {
-    ESP32RMTController * pController = gOnChannel[channel];
+    ESP32RMTController *pController = gOnChannel[channel];
 
     // -- Turn off output on the pin
     //    Otherwise the pin will stay connected to the RMT controller,
@@ -631,8 +848,8 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
 #elif CONFIG_IDF_TARGET_ESP32S3
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
     RMT.int_ena.val &= ~(1 << channel);
-    // rmt_ll_tx_stop(&RMT, channel)
-    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+// rmt_ll_tx_stop(&RMT, channel)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
     RMT.chnconf0[channel].tx_stop_chn = 1;
     RMT.chnconf0[channel].conf_update_chn = 1;
     // rmt_ll_tx_reset_pointer(&RMT, channel)
@@ -640,7 +857,7 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
     RMT.chnconf0[channel].mem_rd_rst_chn = 0;
     RMT.chnconf0[channel].apb_mem_rst_chn = 1;
     RMT.chnconf0[channel].apb_mem_rst_chn = 0;
-    #else
+#else
     RMT.chnconf0[channel].tx_stop_n = 1;
     RMT.chnconf0[channel].conf_update_n = 1;
     // rmt_ll_tx_reset_pointer(&RMT, channel)
@@ -648,7 +865,7 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
     RMT.chnconf0[channel].mem_rd_rst_n = 0;
     RMT.chnconf0[channel].apb_mem_rst_n = 1;
     RMT.chnconf0[channel].apb_mem_rst_n = 0;
-    #endif
+#endif
 #elif CONFIG_IDF_TARGET_ESP32C6
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
     RMT.int_ena.val &= ~(1 << channel);
@@ -661,9 +878,9 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
     RMT.chnconf0[channel].apb_mem_rst_chn = 1;
     RMT.chnconf0[channel].apb_mem_rst_chn = 0;
 #elif CONFIG_IDF_TARGET_ESP32S2
-    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
     _RMT_ASSERT(false, "doneOnChannel not yet implemented for ESP32-S2 in idf 5.x");
-    #else
+#else
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
     RMT.int_ena.val &= ~(1 << (channel * 3));
     // rmt_ll_tx_stop(&RMT, channel)
@@ -671,7 +888,7 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
     // rmt_ll_tx_reset_pointer(&RMT, channel)
     RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
     RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
-    #endif
+#endif
 #elif CONFIG_IDF_TARGET_ESP32
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
     RMT.int_ena.val &= ~(1 << (channel * 3));
@@ -683,30 +900,38 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void * a
     // RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
     // RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
 #else
-    #error Not yet implemented for unknown ESP32 target
+#error Not yet implemented for unknown ESP32 target
 #endif
 
     gOnChannel[channel] = NULL;
     gNumDone++;
 
-    if (gNumDone == gNumControllers) {
+    if (gNumDone == gNumControllers)
+    {
         // -- If this is the last controller, signal that we are all done
-        if (FASTLED_RMT_BUILTIN_DRIVER) {
+        if (FASTLED_RMT_BUILTIN_DRIVER)
+        {
             xSemaphoreGive(gTX_sem);
-        } else {
+        }
+        else
+        {
             portBASE_TYPE HPTaskAwoken = 0;
             xSemaphoreGiveFromISR(gTX_sem, &HPTaskAwoken);
-            if (HPTaskAwoken == pdTRUE) portYIELD_FROM_ISR();
+            if (HPTaskAwoken == pdTRUE)
+                portYIELD_FROM_ISR();
         }
-    } else {
+    }
+    else
+    {
         // -- Otherwise, if there are still controllers waiting, then
         //    start the next one on this channel
-        if (gNext < gNumControllers) {
+        if (gNext < gNumControllers)
+        {
             startNext(channel);
         }
     }
 }
-    
+
 // -- Custom interrupt handler
 //    This interrupt handler handles two cases: a controller is
 //    done writing its data, or a controller needs to fill the
@@ -718,35 +943,41 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
     uint32_t intr_st = RMT.int_st.val;
     uint8_t channel;
 
-    for (channel = 0; channel < gMaxChannel; channel++) {
-        #if CONFIG_IDF_TARGET_ESP32S2
+    for (channel = 0; channel < gMaxChannel; channel++)
+    {
+#if CONFIG_IDF_TARGET_ESP32S2
         int tx_done_bit = channel * 3;
         int tx_next_bit = channel + 12;
-        #elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3
+#elif CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3
         int tx_done_bit = channel;
         int tx_next_bit = channel + 8;
-        #elif CONFIG_IDF_TARGET_ESP32H2
+#elif CONFIG_IDF_TARGET_ESP32H2
         int tx_done_bit = channel;
         int tx_next_bit = channel + 8;
-        #elif CONFIG_IDF_TARGET_ESP32C6
-        int tx_done_bit = channel; // TODO correct?
+#elif CONFIG_IDF_TARGET_ESP32C6
+        int tx_done_bit = channel;     // TODO correct?
         int tx_next_bit = channel + 8; // TODO correct?
-        #elif CONFIG_IDF_TARGET_ESP32
+#elif CONFIG_IDF_TARGET_ESP32
         int tx_done_bit = channel * 3;
         int tx_next_bit = channel + 24;
-        #else
-        #error Not yet implemented for unknown ESP32 target
-        #endif
+#else
+#error Not yet implemented for unknown ESP32 target
+#endif
 
-        ESP32RMTController * pController = gOnChannel[channel];
-        if (pController != NULL) {
-            if (intr_st & BIT(tx_next_bit)) {
+        ESP32RMTController *pController = gOnChannel[channel];
+        if (pController != NULL)
+        {
+            if (intr_st & BIT(tx_next_bit))
+            {
                 // -- More to send on this channel
                 pController->fillNext(true);
                 RMT.int_clr.val |= BIT(tx_next_bit);
-            } else {
+            }
+            else
+            {
                 // -- Transmission is complete on this channel
-                if (intr_st & BIT(tx_done_bit)) {
+                if (intr_st & BIT(tx_done_bit))
+                {
                     RMT.int_clr.val |= BIT(tx_done_bit);
                     doneOnChannel(rmt_channel_t(channel), 0);
                 }
@@ -762,10 +993,13 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 void ESP32RMTController::fillNext(bool check_time)
 {
     uint32_t now = __clock_cycles();
-    if (check_time) {
-        if (mLastFill != 0) {
+    if (check_time)
+    {
+        if (mLastFill != 0)
+        {
             int32_t delta = (now - mLastFill);
-            if (delta > (int32_t)mMaxCyclesPerFill) {
+            if (delta > (int32_t)mMaxCyclesPerFill)
+            {
                 // Serial.print(delta);
                 // Serial.print(" BAIL ");
                 // Serial.println(mCur);
@@ -790,16 +1024,20 @@ void ESP32RMTController::fillNext(bool check_time)
     FASTLED_REGISTER uint32_t zero_val = mZero.val;
 
     // -- Use locals for speed
-    volatile FASTLED_REGISTER rmt_item32_t* pItem = mRMT_mem_ptr;
+    volatile FASTLED_REGISTER rmt_item32_t *pItem = mRMT_mem_ptr;
 
-    for (FASTLED_REGISTER int i = 0; i < PULSES_PER_FILL/8; i++) {
-        if (mCur < mSize) {
+    for (FASTLED_REGISTER int i = 0; i < PULSES_PER_FILL / 8; i++)
+    {
+        if (mCur < mSize)
+        {
 
             // -- Get the next four bytes of pixel data
             convert_byte_to_rmt(mPixelData[mCur], zero_val, one_val, pItem);
             pItem += 8;
             mCur++;
-        } else {
+        }
+        else
+        {
             // -- No more data; signal to the RMT we are done by filling the
             //    rest of the buffer with zeros
             pItem->val = 0;
@@ -809,7 +1047,8 @@ void ESP32RMTController::fillNext(bool check_time)
 
     // -- Flip to the other half, resetting the pointer if necessary
     mWhichHalf++;
-    if (mWhichHalf == 2) {
+    if (mWhichHalf == 2)
+    {
         pItem = mRMT_mem_start;
         mWhichHalf = 0;
     }
@@ -820,14 +1059,15 @@ void ESP32RMTController::fillNext(bool check_time)
 
 // -- Init pulse buffer
 //    Set up the buffer that will hold all of the pulse items for this
-//    controller. 
+//    controller.
 //    This function is only used when the built-in RMT driver is chosen
 void ESP32RMTController::initPulseBuffer(int size_in_bytes)
 {
-    if (mBuffer == 0) {
+    if (mBuffer == 0)
+    {
         // -- Each byte has 8 bits, each bit needs a 32-bit RMT item
         mBufferSize = size_in_bytes * 8 * 4;
-        mBuffer = (rmt_item32_t *) calloc( mBufferSize, sizeof(rmt_item32_t));
+        mBuffer = (rmt_item32_t *)calloc(mBufferSize, sizeof(rmt_item32_t));
     }
     mCurPulse = 0;
 }
@@ -840,8 +1080,41 @@ void ESP32RMTController::ingest(uint8_t byteval)
     mCurPulse += 8;
 }
 
-#pragma GCC diagnostic pop
+RmtController::RmtController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver)
+{
+    pImpl = new ESP32RMTController(DATA_PIN, T1, T2, T3, maxChannel, built_in_driver);
+}
+RmtController::~RmtController()
+{
+    delete pImpl;
+}
 
+void RmtController::showPixels()
+{
+    pImpl->showPixels();
+}
+
+void RmtController::ingest(uint8_t val)
+{
+    pImpl->ingest(val);
+}
+
+uint8_t *RmtController::getPixelBuffer(int size_in_bytes)
+{
+    return pImpl->getPixelBuffer(size_in_bytes);
+}
+
+bool RmtController::built_in_driver()
+{
+    return pImpl->mBuiltInDriver;
+}
+
+void RmtController::initPulseBuffer(int size_in_bytes)
+{
+    pImpl->initPulseBuffer(size_in_bytes);
+}
+
+#pragma GCC diagnostic pop
 
 #endif // ! FASTLED_ESP32_I2S
 

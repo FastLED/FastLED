@@ -68,7 +68,7 @@
  *      processing is done up-front, in the templated class, so we
  *      can fill the RMT buffers more quickly.
  *
- *      IN THEORY, this design would also allow FastLED.show() to 
+ *      IN THEORY, this design would also allow FastLED.show() to
  *      send the data while the program continues to prepare the next
  *      frame of data.
  *
@@ -112,157 +112,55 @@
 
 #include "namespace.h"
 
-
 FASTLED_NAMESPACE_BEGIN
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "esp32-hal.h"
-// ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
-#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR > 3
-#include "esp_intr_alloc.h"
-#else
-#include "esp_intr.h"
-#endif
-#include "driver/gpio.h"
-#include "driver/rmt.h"
-#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
-#include "esp_private/periph_ctrl.h"
-#else
-#include "driver/periph_ctrl.h"
-#endif
-#include "freertos/semphr.h"
-#include "soc/rmt_struct.h"
-
-#include "esp_log.h"
-
-#ifdef __cplusplus
-}
-#endif
-
-// -- Max RMT TX channel
-#ifndef FASTLED_RMT_MAX_CHANNELS
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
-// 8 for (ESP32)  4 for (ESP32S2, ESP32S3)  2 for (ESP32C3, ESP32H2)
-#define FASTLED_RMT_MAX_CHANNELS SOC_RMT_TX_CANDIDATES_PER_GROUP
-#else
-#ifdef CONFIG_IDF_TARGET_ESP32S2
-#define FASTLED_RMT_MAX_CHANNELS 4
-#else
-#define FASTLED_RMT_MAX_CHANNELS 8
-#endif
-#endif
-#endif
-
-
-
+// -- Initialize RMT subsystem
+//    This only needs to be done once. The particular pin is not important,
+//    because we need to configure the RMT channels on the fly.
+static void esp_rmt_init(gpio_num_t pin, bool built_in_driver);
 
 // NOT CURRENTLY IMPLEMENTED:
 // -- Set to true to print debugging information about timing
 //    Useful for finding out if timing is being messed up by other things
 //    on the processor (WiFi, for example)
-//#ifndef FASTLED_RMT_SHOW_TIMER
-//#define FASTLED_RMT_SHOW_TIMER false
-//#endif
+// #ifndef FASTLED_RMT_SHOW_TIMER
+// #define FASTLED_RMT_SHOW_TIMER false
+// #endif
 
+class ESP32RMTController;
 
-class ESP32RMTController
+class RmtController
 {
-private:
-
-    // -- RMT has 8 channels, numbered 0 to 7
-    rmt_channel_t  mRMT_channel;
-
-    // -- Store the GPIO pin
-    gpio_num_t     mPin;
-
-    // -- Timing values for zero and one bits, derived from T1, T2, and T3
-    rmt_item32_t   mZero;
-    rmt_item32_t   mOne;
-
-    // -- Total expected time to send 32 bits
-    //    Each strip should get an interrupt roughly at this interval
-    uint32_t       mCyclesPerFill;
-    uint32_t       mMaxCyclesPerFill;
-    uint32_t       mLastFill;
-
-    // -- Pixel data
-    uint8_t *      mPixelData;
-    int            mSize;
-    int            mCur;
-    int            mBufSize;
-
-    // -- RMT memory
-    volatile rmt_item32_t * mRMT_mem_ptr;
-    volatile rmt_item32_t * mRMT_mem_start;
-    int                     mWhichHalf;
-
-    // -- Buffer to hold all of the pulses. For the version that uses
-    //    the RMT driver built into the ESP core.
-    rmt_item32_t * mBuffer;
-    uint16_t       mBufferSize; // bytes
-    int            mCurPulse;
-    bool           mBuiltInDriver;
-
-    // -- These values need to be real variables, so we can access them
-    //    in the cpp file
-    static int     gMaxChannel;
-    static int     gMemBlocks;
-
 public:
+    RmtController() = delete;
+    RmtController(const RmtController &) = delete;
+    RmtController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver);
+    ~RmtController();
 
-    // -- Constructor
-    //    Mainly just stores the template parameters from the LEDController as
-    //    member variables.
-    ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver);
-
-    // -- Get or create the pixel data buffer
-    uint8_t * getPixelBuffer(int size_in_bytes);
-
-    // -- Initialize RMT subsystem
-    //    This only needs to be done once. The particular pin is not important,
-    //    because we need to configure the RMT channels on the fly.
-    static void init(gpio_num_t pin, bool built_in_driver);
-
-    // -- Show this string of pixels
-    //    This is the main entry point for the pixel controller
-    void IRAM_ATTR showPixels();
-
-    // -- Load pixel data
-    //    This method loads all of the pixel data into a separate buffer for use by
-    //    by the RMT driver. Copying does two important jobs: it fixes the color
-    //    order for the pixels, and it performs the scaling/adjusting ahead of time.
-    //    It also packs the bytes into 32 bit chunks with the right bit order.
-    template<EOrder RGB_ORDER>
-    void loadPixelDataForStreamEncoding(PixelController<RGB_ORDER> & pixels)
+    template <EOrder RGB_ORDER>
+    void showPixels(PixelController<RGB_ORDER> &pixels)
     {
-        // -- Make sure the buffer is allocated
-        int size_in_bytes = pixels.size() * 3;
-        uint8_t * pData = getPixelBuffer(size_in_bytes);
-
-        // -- This might be faster
-        while (pixels.has(1)) {
-            *pData++ = pixels.loadAndScale0();
-            *pData++ = pixels.loadAndScale1();
-            *pData++ = pixels.loadAndScale2();
-            pixels.advanceData();
-            pixels.stepDithering();
+        if (built_in_driver())
+        {
+            loadAllPixelsToRmtSymbolData(pixels);
         }
+        else
+        {
+            loadPixelDataForStreamEncoding(pixels);
+        }
+        showPixels();
     }
 
-
-
-    // -- Convert all pixels to RMT pulses
-    //    This function is only used when the user chooses to use the
-    //    built-in RMT driver, which needs all of the RMT pulses
-    //    up-front. This is a LARGE buffer, about 24x larger than
-    //    the original pixel data. But the benefit is that no interrupt
-    //    is needed to convert during streaming so Wifi will not
-    //    interfere with the timing.
-    template<EOrder RGB_ORDER>
-    void loadAllPixelsToRmtSymbolData(PixelController<RGB_ORDER> & pixels)
+private:
+    static ESP32RMTController *new_rmt_controller(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver);
+    static void delete_rmt_controller(ESP32RMTController *controller);
+    void ingest(uint8_t val);
+    void showPixels();
+    bool built_in_driver();
+    uint8_t *getPixelBuffer(int size_in_bytes);
+    void initPulseBuffer(int size_in_bytes);
+    template <EOrder RGB_ORDER>
+    void loadAllPixelsToRmtSymbolData(PixelController<RGB_ORDER> &pixels)
     {
         // -- Make sure the data buffer is allocated
         initPulseBuffer(pixels.size() * 3);
@@ -271,7 +169,8 @@ public:
         //    storing the pulses in the big buffer
 
         uint32_t byteval;
-        while (pixels.has(1)) {
+        while (pixels.has(1))
+        {
             byteval = pixels.loadAndScale0();
             ingest(byteval);
             byteval = pixels.loadAndScale1();
@@ -283,54 +182,24 @@ public:
         }
     }
 
-    // -- Init pulse buffer
-    //    Set up the buffer that will hold all of the pulse items for this
-    //    controller. 
-    //    This function is only used when the built-in RMT driver is chosen
-    void initPulseBuffer(int size_in_bytes);
+    template <EOrder RGB_ORDER>
+    void loadPixelDataForStreamEncoding(PixelController<RGB_ORDER> &pixels)
+    {
+        // -- Make sure the buffer is allocated
+        int size_in_bytes = pixels.size() * 3;
+        uint8_t *pData = getPixelBuffer(size_in_bytes);
 
-    // -- Convert a byte into RMT pulses
-    //    This function is only used when the built-in RMT driver is chosen
-    void ingest(uint8_t byteval);
-
- private:
-    // -- Start up the next controller
-    //    This method is static so that it can dispatch to the
-    //    appropriate startOnChannel method of the given controller.
-    static void IRAM_ATTR startNext(int channel);
-
-    // -- Start this controller on the given channel
-    //    This function just initiates the RMT write; it does not wait
-    //    for it to finish.
-    void IRAM_ATTR startOnChannel(int channel);
-
-    // -- Start RMT transmission
-    //    Setting this RMT flag is what actually kicks off the peripheral
-    void IRAM_ATTR tx_start();
-
-    // -- A controller is done 
-    //    This function is called when a controller finishes writing
-    //    its data. It is called either by the custom interrupt
-    //    handler (below), or as a callback from the built-in
-    //    interrupt handler. It is static because we don't know which
-    //    controller is done until we look it up.
-    static void IRAM_ATTR doneOnChannel(rmt_channel_t channel, void * arg);
-    
-    // -- Custom interrupt handler
-    //    This interrupt handler handles two cases: a controller is
-    //    done writing its data, or a controller needs to fill the
-    //    next half of the RMT buffer with data.
-    static void IRAM_ATTR interruptHandler(void *arg);
-
-    // -- Fill RMT buffer
-    //    Puts 32 bits of pixel data into the next 32 slots in the RMT memory
-    //    Each data bit is represented by a 32-bit RMT item that specifies how
-    //    long to hold the signal high, followed by how long to hold it low.
-    //    NOTE: Now the default is to use 128-bit buffers, so half a buffer is
-    //          is 64 bits. See FASTLED_RMT_MEM_BLOCKS
-    void IRAM_ATTR fillNext(bool check_time);
+        // -- This might be faster
+        while (pixels.has(1))
+        {
+            *pData++ = pixels.loadAndScale0();
+            *pData++ = pixels.loadAndScale1();
+            *pData++ = pixels.loadAndScale2();
+            pixels.advanceData();
+            pixels.stepDithering();
+        }
+    }
+    ESP32RMTController *pImpl = nullptr;
 };
-
-
 
 FASTLED_NAMESPACE_END

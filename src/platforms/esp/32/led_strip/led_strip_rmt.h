@@ -4,15 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #pragma once
-
 #include "enabled.h"
-
 #if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <stdint.h>
 
@@ -24,6 +17,10 @@ extern "C" {
 #include "driver/rmt_types.h"
 #endif
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief LED Strip RMT specific configuration
