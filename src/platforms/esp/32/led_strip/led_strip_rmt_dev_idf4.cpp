@@ -149,7 +149,7 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     }
 
     // allocate memory for led_strip object
-    rmt_strip = calloc(1, sizeof(led_strip_rmt_obj) + led_config->max_leds * bytes_per_pixel);
+    rmt_strip = static_cast<led_strip_rmt_obj*>(calloc(1, sizeof(led_strip_rmt_obj) + led_config->max_leds * bytes_per_pixel));
     ESP_RETURN_ON_FALSE(rmt_strip, ESP_ERR_NO_MEM, TAG, "request memory for les_strip failed");
 
     // install RMT channel driver

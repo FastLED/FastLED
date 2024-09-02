@@ -110,10 +110,46 @@ static esp_err_t led_strip_rmt_del(led_strip_t *strip)
     return ESP_OK;
 }
 
+rmt_tx_channel_config_t make_tx_channel_config(
+    rmt_clock_source_t clock_src,
+    size_t mem_block_symbols,
+    uint32_t resolution_hz,
+    int strip_gpio_num,
+    size_t trans_queue_depth,
+    int intr_priority,
+    bool with_dma,
+    bool invert_out
+)
+{
+    rmt_tx_channel_config_t out = {};
+    memset(&out, 0, sizeof(rmt_tx_channel_config_t));
+
+    //     .clk_src = clock_src,
+    //     .gpio_num = strip_gpio_num,
+    //     .mem_block_symbols = mem_block_symbols,
+    //     .resolution_hz = resolution_hz
+    // };
+    out.gpio_num = static_cast<gpio_num_t>(strip_gpio_num);
+    out.clk_src = clock_src;
+    out.resolution_hz = resolution_hz;
+    out.mem_block_symbols = mem_block_symbols;
+    out.trans_queue_depth = trans_queue_depth;
+    out.intr_priority = intr_priority;
+    out.flags.with_dma = with_dma;
+    out.flags.invert_out = invert_out;
+    return out;
+}
+
 esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
 {
+    const int INTERRUPT_PRIORITY = 0;
+    size_t mem_block_symbols = LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS;
     led_strip_rmt_obj *rmt_strip = NULL;
     esp_err_t ret = ESP_OK;
+    led_strip_encoder_config_t strip_encoder_conf = {};
+    uint32_t resolution = 0;
+    // has to be declared before possible jump to error is needed
+    rmt_tx_channel_config_t rmt_chan_config = {};
     ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
     uint8_t bytes_per_pixel = 3;
@@ -126,30 +162,41 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     }
     rmt_strip = static_cast<led_strip_rmt_obj*>(calloc(1, sizeof(led_strip_rmt_obj) + led_config->max_leds * bytes_per_pixel));
     ESP_GOTO_ON_FALSE(rmt_strip, ESP_ERR_NO_MEM, err, TAG, "no mem for rmt strip");
-    uint32_t resolution = rmt_config->resolution_hz ? rmt_config->resolution_hz : LED_STRIP_RMT_DEFAULT_RESOLUTION;
+    resolution = rmt_config->resolution_hz ? rmt_config->resolution_hz : LED_STRIP_RMT_DEFAULT_RESOLUTION;
 
     // for backward compatibility, if the user does not set the clk_src, use the default value
     rmt_clock_source_t clk_src = RMT_CLK_SRC_DEFAULT;
     if (rmt_config->clk_src) {
         clk_src = rmt_config->clk_src;
     }
-    size_t mem_block_symbols = LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS;
+
     // override the default value if the user sets it
     if (rmt_config->mem_block_symbols) {
         mem_block_symbols = rmt_config->mem_block_symbols;
     }
-    rmt_tx_channel_config_t rmt_chan_config = {
-        .clk_src = clk_src,
-        .gpio_num = led_config->strip_gpio_num,
-        .mem_block_symbols = mem_block_symbols,
-        .resolution_hz = resolution,
-        .trans_queue_depth = LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,
-        .flags.with_dma = rmt_config->flags.with_dma,
-        .flags.invert_out = led_config->flags.invert_out,
-    };
+    // rmt_tx_channel_config_t rmt_chan_config = {
+    //     .clk_src = clk_src,
+    //     .gpio_num = led_config->strip_gpio_num,
+    //     .mem_block_symbols = mem_block_symbols,
+    //     .resolution_hz = resolution,
+    //     .trans_queue_depth = LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,
+    //     .flags.with_dma = rmt_config->flags.with_dma,
+    //     .flags.invert_out = led_config->flags.invert_out,
+    // };
+
+    rmt_chan_config = make_tx_channel_config(
+        clk_src,
+        mem_block_symbols,
+        resolution,
+        led_config->strip_gpio_num,
+        LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,
+        INTERRUPT_PRIORITY,
+        rmt_config->flags.with_dma,
+        led_config->flags.invert_out
+    );
     ESP_GOTO_ON_ERROR(rmt_new_tx_channel(&rmt_chan_config, &rmt_strip->rmt_chan), err, TAG, "create RMT TX channel failed");
 
-    led_strip_encoder_config_t strip_encoder_conf = {
+    strip_encoder_conf = {
         .resolution = resolution,
         .led_model = led_config->led_model
     };
