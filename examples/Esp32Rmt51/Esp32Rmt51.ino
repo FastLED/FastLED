@@ -110,7 +110,7 @@ void setup() {
 
 void loop() { 
   // Fill the LED array with red, then show
-  #if 1
+  #if 0
   fill_solid(leds, NUM_LEDS, CRGB::Red);
   FastLED.show();
   delay(500);
