@@ -8,6 +8,9 @@
 
 #if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
+#include "esp_idf_version.h"
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+
 #include <stdlib.h>
 #include <string.h>
 #include <sys/cdefs.h>
@@ -232,4 +235,5 @@ err:
 }
 #endif
 
+#endif // ESP_IDF_VERSION
 #endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
