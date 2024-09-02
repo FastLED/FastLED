@@ -55,7 +55,7 @@
             "+<*.c>",
             "+<*.cpp>",
             "+<*.h>",
-            "+<platforms/esp/32/*.cpp>"
+            "+<platforms/esp/32/**/*.cpp>"
         ],
         "libArchive": false
     }
