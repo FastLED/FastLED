@@ -143,6 +143,7 @@ rmt_tx_channel_config_t make_tx_channel_config(
 esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
 {
     const int INTERRUPT_PRIORITY = 0;
+    rmt_clock_source_t clk_src = RMT_CLK_SRC_DEFAULT;
     size_t mem_block_symbols = LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS;
     led_strip_rmt_obj *rmt_strip = NULL;
     esp_err_t ret = ESP_OK;
@@ -150,9 +151,9 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     uint32_t resolution = 0;
     // has to be declared before possible jump to error is needed
     rmt_tx_channel_config_t rmt_chan_config = {};
+    uint8_t bytes_per_pixel = 3;
     ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
-    uint8_t bytes_per_pixel = 3;
     if (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRBW) {
         bytes_per_pixel = 4;
     } else if (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRB) {
@@ -165,7 +166,6 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     resolution = rmt_config->resolution_hz ? rmt_config->resolution_hz : LED_STRIP_RMT_DEFAULT_RESOLUTION;
 
     // for backward compatibility, if the user does not set the clk_src, use the default value
-    rmt_clock_source_t clk_src = RMT_CLK_SRC_DEFAULT;
     if (rmt_config->clk_src) {
         clk_src = rmt_config->clk_src;
     }

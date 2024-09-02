@@ -164,13 +164,15 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     }
     config.mem_block_num = mem_block_num;
 
+    uint32_t counter_clk_hz = 0;
+    float ratio = 0.0f;
+
     ESP_GOTO_ON_ERROR(rmt_config(&config), err, TAG, "RMT config failed");
     ESP_GOTO_ON_ERROR(rmt_driver_install(config.channel, 0, 0), err, TAG, "RMT install failed");
 
-    uint32_t counter_clk_hz = 0;
     rmt_get_counter_clock((rmt_channel_t)dev_config->rmt_channel, &counter_clk_hz);
     // ns -> ticks
-    float ratio = (float)counter_clk_hz / 1e9;
+    ratio = (float)counter_clk_hz / 1e9;
     if (led_config->led_model == LED_MODEL_WS2812) {
         led_t0h_ticks = (uint32_t)(ratio * WS2812_T0H_NS);
         led_t0l_ticks = (uint32_t)(ratio * WS2812_T0L_NS);
