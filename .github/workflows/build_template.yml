@@ -37,3 +37,14 @@ jobs:
       - name: Build FastLED examples
         run: python ./ci/ci-compile.py ${{ inputs.args }}
 
+        
+      - name: Upload build artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          path: .build/
+
+      - name: Check build status
+        if: failure()
+        run: exit 1
