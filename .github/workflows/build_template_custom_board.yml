@@ -41,8 +41,9 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
+          name: build-artifacts-${{ inputs.args }}-${{ github.run_number }}-${{ github.run_attempt }}-${{ github.sha }}
           path: .build/
+          include-hidden-files: true
 
       - name: Check build status
         if: failure()
