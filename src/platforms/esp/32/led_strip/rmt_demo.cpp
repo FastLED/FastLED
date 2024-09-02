@@ -3,6 +3,9 @@
 /// @example Blink.ino
 
 #ifdef ESP32
+#include "enabled.h"
+
+#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
 #include "rmt_demo.h"
 #include <stdio.h>
@@ -120,4 +123,5 @@ void rmt_demo() {
     __demo();
 }
 
+#endif  // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 #endif  // ESP32
