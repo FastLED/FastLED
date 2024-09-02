@@ -146,7 +146,7 @@ rmt_tx_channel_config_t make_tx_channel_config(
 
 #if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE
 
-esp_err_t fastled_led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
+esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
 {
     const int INTERRUPT_PRIORITY = 0;
     rmt_clock_source_t clk_src = RMT_CLK_SRC_DEFAULT;
