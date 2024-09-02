@@ -27,7 +27,8 @@ extern "C" {
 #include "led_strip.h"
 #include "led_strip_interface.h"
 
-static const char *TAG = "led_strip_rmt";
+// static const char *TAG = "led_strip_rmt";
+#define TAG "led_strip_rmt"
 
 #define WS2812_T0H_NS   (300)
 #define WS2812_T0L_NS   (900)

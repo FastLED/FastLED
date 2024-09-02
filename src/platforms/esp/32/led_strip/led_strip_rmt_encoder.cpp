@@ -25,7 +25,8 @@ extern "C" {
 
 #include "led_strip_rmt_encoder.h"
 
-static const char *TAG = "led_rmt_encoder";
+//static const char *TAG = "led_rmt_encoder";
+#define TAG "led_rmt_encoder"
 
 typedef struct {
     rmt_encoder_t base;
