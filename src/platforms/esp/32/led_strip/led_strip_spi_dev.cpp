@@ -11,15 +11,14 @@
 #include <string.h>
 #include <sys/cdefs.h>
 
-
-
-
-
 #include "esp_log.h"
 #include "esp_check.h"
 #include "esp_rom_gpio.h"
 #include "soc/spi_periph.h"
-#include "hal/spi_hal.h"
+
+// IDF 5.1 - Must skip this include to get this spi device to
+// Compile.
+// #include "hal/spi_hal.h"
 
 
 #include "led_strip.h"
@@ -30,7 +29,7 @@
 extern "C" {
 #endif
 
-#define LED_STRIP_SPI_DEFAULT_RESOLUTION (2.5 * 1000 * 1000) // 2.5MHz resolution
+#define LED_STRIP_SPI_DEFAULT_RESOLUTION (static_cast<uint32_t>(2.5 * 1000 * 1000)) // 2.5MHz resolution
 #define LED_STRIP_SPI_DEFAULT_TRANS_QUEUE_SIZE 4
 
 #define SPI_BYTES_PER_COLOR_BYTE 3
@@ -139,9 +138,15 @@ esp_err_t led_strip_new_spi_device(const led_strip_config_t *led_config, const l
 {
     led_strip_spi_obj *spi_strip = NULL;
     esp_err_t ret = ESP_OK;
+    uint8_t bytes_per_pixel = 3;
+    uint32_t mem_caps = MALLOC_CAP_DEFAULT;
+    spi_clock_source_t clk_src = SPI_CLK_SRC_DEFAULT;
+    spi_bus_config_t spi_bus_cfg = {};
+    spi_device_interface_config_t spi_dev_cfg = {};
+    int clock_resolution_khz = 0;
     ESP_GOTO_ON_FALSE(led_config && spi_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
-    uint8_t bytes_per_pixel = 3;
+
     if (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRBW) {
         bytes_per_pixel = 4;
     } else if (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRB) {
@@ -149,53 +154,59 @@ esp_err_t led_strip_new_spi_device(const led_strip_config_t *led_config, const l
     } else {
         assert(false);
     }
-    uint32_t mem_caps = MALLOC_CAP_DEFAULT;
+
     if (spi_config->flags.with_dma) {
         // DMA buffer must be placed in internal SRAM
         mem_caps |= MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA;
     }
-    spi_strip = heap_caps_calloc(1, sizeof(led_strip_spi_obj) + led_config->max_leds * bytes_per_pixel * SPI_BYTES_PER_COLOR_BYTE, mem_caps);
+    spi_strip = static_cast<led_strip_spi_obj*>(
+        heap_caps_calloc(1, sizeof(led_strip_spi_obj) + led_config->max_leds * bytes_per_pixel * SPI_BYTES_PER_COLOR_BYTE, mem_caps)
+    );
+
 
     ESP_GOTO_ON_FALSE(spi_strip, ESP_ERR_NO_MEM, err, TAG, "no mem for spi strip");
 
     spi_strip->spi_host = spi_config->spi_bus;
     // for backward compatibility, if the user does not set the clk_src, use the default value
-    spi_clock_source_t clk_src = SPI_CLK_SRC_DEFAULT;
     if (spi_config->clk_src) {
         clk_src = spi_config->clk_src;
     }
 
-    spi_bus_config_t spi_bus_cfg = {
+    spi_bus_cfg = {
         .mosi_io_num = led_config->strip_gpio_num,
         //Only use MOSI to generate the signal, set -1 when other pins are not used.
         .miso_io_num = -1,
         .sclk_io_num = -1,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
-        .max_transfer_sz = led_config->max_leds * bytes_per_pixel * SPI_BYTES_PER_COLOR_BYTE,
+        .max_transfer_sz = static_cast<int>(led_config->max_leds * bytes_per_pixel * SPI_BYTES_PER_COLOR_BYTE),
     };
+
+    spi_dev_cfg = {
+        .command_bits = 0,
+        .address_bits = 0,
+        .dummy_bits = 0,
+        .mode = 0,
+        .clock_source = clk_src,
+        .clock_speed_hz = LED_STRIP_SPI_DEFAULT_RESOLUTION,
+        //set -1 when CS is not used
+        .spics_io_num = -1,
+        .queue_size = LED_STRIP_SPI_DEFAULT_TRANS_QUEUE_SIZE,
+    };
+
+
+
     ESP_GOTO_ON_ERROR(spi_bus_initialize(spi_strip->spi_host, &spi_bus_cfg, spi_config->flags.with_dma ? SPI_DMA_CH_AUTO : SPI_DMA_DISABLED), err, TAG, "create SPI bus failed");
 
     if (led_config->flags.invert_out == true) {
         esp_rom_gpio_connect_out_signal(led_config->strip_gpio_num, spi_periph_signal[spi_strip->spi_host].spid_out, true, false);
     }
 
-    spi_device_interface_config_t spi_dev_cfg = {
-        .clock_source = clk_src,
-        .command_bits = 0,
-        .address_bits = 0,
-        .dummy_bits = 0,
-        .clock_speed_hz = LED_STRIP_SPI_DEFAULT_RESOLUTION,
-        .mode = 0,
-        //set -1 when CS is not used
-        .spics_io_num = -1,
-        .queue_size = LED_STRIP_SPI_DEFAULT_TRANS_QUEUE_SIZE,
-    };
 
     ESP_GOTO_ON_ERROR(spi_bus_add_device(spi_strip->spi_host, &spi_dev_cfg, &spi_strip->spi_device), err, TAG, "Failed to add spi device");
     //ensure the reset time is enough
     esp_rom_delay_us(10);
-    int clock_resolution_khz = 0;
+
     spi_device_get_actual_freq(spi_strip->spi_device, &clock_resolution_khz);
     // TODO: ideally we should decide the SPI_BYTES_PER_COLOR_BYTE by the real clock resolution
     // But now, let's fixed the resolution, the downside is, we don't support a clock source whose frequency is not multiple of LED_STRIP_SPI_DEFAULT_RESOLUTION
