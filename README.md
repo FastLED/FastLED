@@ -140,7 +140,7 @@ void loop() {
 
 ## Development
 
-[![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
+[![clone and compile](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_default.yml)
 
 If you want to make changes to FastLED then please
 
