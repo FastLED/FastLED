@@ -5,12 +5,6 @@
  */
 #pragma once
 
-#include "enabled.h"
-
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
-
-
-
 
 #include <stdint.h>
 #include "esp_err.h"
@@ -56,5 +50,3 @@ esp_err_t led_strip_new_spi_device(const led_strip_config_t *led_config, const l
 #ifdef __cplusplus
 }
 #endif
-
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN

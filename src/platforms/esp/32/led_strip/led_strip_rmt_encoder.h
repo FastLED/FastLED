@@ -7,13 +7,6 @@
 
 #include "enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
-
-
-
-
-
-
 
 
 #ifdef __cplusplus
@@ -49,5 +42,3 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
 #ifdef __cplusplus
 }
 #endif
-
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN

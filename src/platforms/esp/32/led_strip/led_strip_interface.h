@@ -5,11 +5,6 @@
  */
 #pragma once
 
-#include "enabled.h"
-
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
-
-
 
 
 #include <stdint.h>
@@ -108,4 +103,3 @@ struct led_strip_t {
 }
 #endif
 
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
