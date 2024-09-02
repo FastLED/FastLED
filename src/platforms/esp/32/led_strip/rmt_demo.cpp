@@ -2,7 +2,7 @@
 /// @brief   Blink the first LED of an LED strip
 /// @example Blink.ino
 
-#ifndef ESP32
+#ifdef ESP32
 
 #include "rmt_demo.h"
 #include <stdio.h>

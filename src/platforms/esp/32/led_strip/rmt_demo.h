@@ -1,6 +1,6 @@
 
 #pragma once
 
-#ifndef ESP32
+#ifdef ESP32
 void rmt_demo();
 #endif
