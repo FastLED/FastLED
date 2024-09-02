@@ -251,6 +251,7 @@ def parse_args():
     parser.add_argument("--defines", type=str, help="Comma-separated list of compiler definitions")
     parser.add_argument("--extra-packages", type=str, help="Comma-separated list of extra packages to install")
     parser.add_argument("--build-dir", type=str, help="Override the default build directory")
+    parser.add_argument("--no-project-options", action="store_true", help="Don't use custom project options")
     return parser.parse_args()
 
 
@@ -329,6 +330,8 @@ def main() -> int:
     locked_print(f"Changing working directory to {script_dir.parent}")
     os.chdir(script_dir.parent)
     os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = "pre:lib/ci/ci-flags.py"
+    if args.no_project_options:
+        CUSTOM_PROJECT_OPTIONS.clear()
 
     boards = args.boards.split(',') if args.boards else BOARDS
     examples = args.examples.split(',') if args.examples else EXAMPLES
