@@ -144,7 +144,11 @@ rmt_tx_channel_config_t make_tx_channel_config(
     return out;
 }
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE
+#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE && !FASTLED_ESP32_COMPONENT_LED_STRIP_FORCE_IDF4
+
+// Note that the RMT driver does a runtime check to see if the RMT new driver has been linked in. It doesn't
+// matter if you install it or not, it will still crash on boot if it's linked in.
+// https://github.com/espressif/esp-idf/blob/e026fd1f81afc6d19561101b1c8fe0006932cff3/components/driver/deprecated/rmt_legacy.c#L1379
 
 esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
 {
@@ -200,13 +204,13 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
         rmt_config->flags.with_dma,
         led_config->flags.invert_out
     );
-    ESP_GOTO_ON_ERROR(rmt_new_tx_channel(&rmt_chan_config, &rmt_strip->rmt_chan), err, TAG, "create RMT TX channel failed");
+    //ESP_GOTO_ON_ERROR(rmt_new_tx_channel(&rmt_chan_config, &rmt_strip->rmt_chan), err, TAG, "create RMT TX channel failed");
 
     strip_encoder_conf = {
         .resolution = resolution,
         .led_model = led_config->led_model
     };
-    ESP_GOTO_ON_ERROR(rmt_new_led_strip_encoder(&strip_encoder_conf, &rmt_strip->strip_encoder), err, TAG, "create LED strip encoder failed");
+    //ESP_GOTO_ON_ERROR(rmt_new_led_strip_encoder(&strip_encoder_conf, &rmt_strip->strip_encoder), err, TAG, "create LED strip encoder failed");
 
 
     rmt_strip->bytes_per_pixel = bytes_per_pixel;
@@ -222,10 +226,10 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
 err:
     if (rmt_strip) {
         if (rmt_strip->rmt_chan) {
-            rmt_del_channel(rmt_strip->rmt_chan);
+            //rmt_del_channel(rmt_strip->rmt_chan);
         }
         if (rmt_strip->strip_encoder) {
-            rmt_del_encoder(rmt_strip->strip_encoder);
+            //rmt_del_encoder(rmt_strip->strip_encoder);
         }
         free(rmt_strip);
     }

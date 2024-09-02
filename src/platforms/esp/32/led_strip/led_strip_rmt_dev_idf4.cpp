@@ -137,7 +137,7 @@ static esp_err_t led_strip_rmt_del(led_strip_t *strip)
     return ESP_OK;
 }
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE
+#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE || FASTLED_ESP32_COMPONENT_LED_STRIP_FORCE_IDF4
 esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *dev_config, led_strip_handle_t *ret_strip)
 {
     led_strip_rmt_obj *rmt_strip = NULL;
