@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#if 0  // We don't care about the rmt driver for idf4, we are only pulling this in for idf5.
+
 #include "enabled.h"
 
 #if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
@@ -214,3 +216,5 @@ err:
 #endif
 
 #endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+
+#endif  // #if 0
