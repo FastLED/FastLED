@@ -164,7 +164,7 @@ def compile_for_board_and_example(board: str, example: str, build_dir: str | Non
     locked_print(f"*** Finished building example {example} for board {board} ***")
     return True, stdout
 
-def create_build_dir(board: str, project_options: list[str] | None, defines: list[str], no_install_deps: bool, extra_packages: list[str], build_dir: str | None) -> tuple[bool, str]:
+def create_build_dir(board: str, project_options: list[str] | None, defines: list[str], no_install_deps: bool, extra_packages: list[str], build_dir: str | None, build_flags: list[str]) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     locked_print(f"*** Initializing environment for board {board} ***")
     builddir = Path(build_dir) / board if build_dir else Path(".build") / board
@@ -192,9 +192,13 @@ def create_build_dir(board: str, project_options: list[str] | None, defines: lis
     if project_options:
         for project_option in project_options:
             cmd_list.append(f'--project-option={project_option}')
+    all_build_flags = []
     if defines:
-        build_flags = ' '.join(f'-D {define}' for define in defines)
-        cmd_list.append(f'--project-option=build_flags={build_flags}')
+        all_build_flags.extend(f'-D {define}' for define in defines)
+    if build_flags:
+        all_build_flags.extend(build_flags)
+    if all_build_flags:
+        cmd_list.append(f'--project-option=build_flags={" ".join(all_build_flags)}')
     if extra_packages:
         cmd_list.append(f'--project-option=lib_deps={",".join(extra_packages)}')
     if no_install_deps:
@@ -252,10 +256,11 @@ def parse_args():
     parser.add_argument("--extra-packages", type=str, help="Comma-separated list of extra packages to install")
     parser.add_argument("--build-dir", type=str, help="Override the default build directory")
     parser.add_argument("--no-project-options", action="store_true", help="Don't use custom project options")
+    parser.add_argument("--build-flags", type=str, help="Comma-separated list of build flags")
     return parser.parse_args()
 
 
-def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[str], extra_packages: list[str], build_dir: str | None) -> int:
+def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[str], extra_packages: list[str], build_dir: str | None, build_flags: list[str]) -> int:
     start_time = time.time()
     # Necessary to create the first project alone, so that the necessary root directories
     # are created and the subsequent projects can be created in parallel.
@@ -267,7 +272,8 @@ def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[s
         defines=defines,
         no_install_deps=skip_init,
         extra_packages=extra_packages,
-        build_dir=build_dir)
+        build_dir=build_dir,
+        build_flags=build_flags)
     # This is not memory/cpu bound but is instead network bound so we can run one thread
     # per board to speed up the process.
     parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(boards)
@@ -276,7 +282,7 @@ def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[s
 
         future_to_board: dict[concurrent.futures.Future, str] = {}
         for board in boards:
-            future = executor.submit(create_build_dir, board, CUSTOM_PROJECT_OPTIONS.get(board), defines, skip_init, extra_packages, build_dir)
+            future = executor.submit(create_build_dir, board, CUSTOM_PROJECT_OPTIONS.get(board), defines, skip_init, extra_packages, build_dir, build_flags)
             future_to_board[future] = board
         for future in concurrent.futures.as_completed(future_to_board):
             board = future_to_board[future]
@@ -338,11 +344,14 @@ def main() -> int:
     defines: list[str] = []
     if args.defines:
         defines.extend(args.defines.split(','))
-    extract_packages: list[str] = []
+    extra_packages: list[str] = []
     if args.extra_packages:
-        extract_packages.extend(args.extra_packages.split(','))
+        extra_packages.extend(args.extra_packages.split(','))
     build_dir = args.build_dir
-    rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines, extra_packages=extract_packages, build_dir=build_dir)
+    build_flags: list[str] = []
+    if args.build_flags:
+        build_flags.extend(args.build_flags.split(','))
+    rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines, extra_packages=extra_packages, build_dir=build_dir, build_flags=build_flags)
     return rtn
 
 
