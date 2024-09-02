@@ -20,7 +20,8 @@ extern "C" {
 #include "led_strip.h"
 #include "led_strip_interface.h"
 
-static const char *TAG = "led_strip";
+// static const char *TAG = "led_strip";
+#define TAG "led_strip"
 
 esp_err_t led_strip_set_pixel(led_strip_handle_t strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue)
 {

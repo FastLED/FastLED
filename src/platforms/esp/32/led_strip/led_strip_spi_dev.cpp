@@ -35,7 +35,8 @@ extern "C" {
 #define SPI_BYTES_PER_COLOR_BYTE 3
 #define SPI_BITS_PER_COLOR_BYTE (SPI_BYTES_PER_COLOR_BYTE * 8)
 
-static const char *TAG = "led_strip_spi";
+// static const char *TAG = "led_strip_spi";
+#define TAG "led_strip_spi"
 
 typedef struct {
     led_strip_t base;

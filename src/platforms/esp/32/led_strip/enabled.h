@@ -1,6 +1,16 @@
 
 #pragma once
 
-#ifndef FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#ifndef ESP32
+// No led strip component when not in ESP32 mode.
 #define FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN 0
-#endif
+#else
+#if !defined(FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN)
+#include "esp_idf_version.h"
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+#define FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN 1
+#else
+#define FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN 0
+#endif  // ESP_IDF_VERSION
+#endif  // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#endif  // ESP32

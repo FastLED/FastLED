@@ -38,7 +38,8 @@ extern "C" {
 #define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS 48
 #endif
 
-static const char *TAG = "led_strip_rmt";
+// static const char *TAG = "led_strip_rmt";
+#define TAG "led_strip_rmt"
 
 typedef struct {
     led_strip_t base;
