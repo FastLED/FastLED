@@ -1,0 +1,13 @@
+name: esp32rmt_51
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: --boards esp32-s3-devkitc-1 --examlpes Esp32Rmt51
