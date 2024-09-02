@@ -121,9 +121,9 @@ def locked_print(*args, **kwargs):
         print(*args, **kwargs)
 
 
-def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
+def compile_for_board_and_example(board: str, example: str, build_dir: str | None) -> tuple[bool, str]:
     """Compile the given example for the given board."""
-    builddir = Path(".build") / board
+    builddir = Path(build_dir) / board if build_dir else Path(".build") / board
     builddir.mkdir(parents=True, exist_ok=True)
     srcdir = builddir / "src"
     # Remove the previous *.ino file if it exists, everything else is recycled
@@ -164,10 +164,10 @@ def compile_for_board_and_example(board: str, example: str) -> tuple[bool, str]:
     locked_print(f"*** Finished building example {example} for board {board} ***")
     return True, stdout
 
-def create_build_dir(board: str, project_options: list[str] | None, defines: list[str], no_install_deps: bool, extra_packages: list[str]) -> tuple[bool, str]:
+def create_build_dir(board: str, project_options: list[str] | None, defines: list[str], no_install_deps: bool, extra_packages: list[str], build_dir: str | None) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     locked_print(f"*** Initializing environment for board {board} ***")
-    builddir = Path(".build") / board
+    builddir = Path(build_dir) / board if build_dir else Path(".build") / board
     builddir.mkdir(parents=True, exist_ok=True)
     # if lib directory (where FastLED lives) exists, remove it. This is necessary to run on
     # recycled build directories for fastled to update. This is a fast operation.
@@ -219,7 +219,7 @@ def create_build_dir(board: str, project_options: list[str] | None, defines: lis
 
 
 # Function to process task queues for each board
-def compile_examples(board: str, examples: list[str]) -> tuple[bool, str]:
+def compile_examples(board: str, examples: list[str], build_dir: str | None) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
     is_first = True
@@ -233,9 +233,9 @@ def compile_examples(board: str, examples: list[str]) -> tuple[bool, str]:
             with FIRST_BUILD_LOCK:
                 # Github runners are memory limited and the first job is the most
                 # memory intensive since all the artifacts are being generated in parallel.
-                success, message = compile_for_board_and_example(board=board, example=example)
+                success, message = compile_for_board_and_example(board=board, example=example, build_dir=build_dir)
         else:
-            success, message = compile_for_board_and_example(board=board, example=example)
+            success, message = compile_for_board_and_example(board=board, example=example, build_dir=build_dir)
         is_first = False
         if not success:
             ERROR_HAPPENED = True
@@ -250,10 +250,11 @@ def parse_args():
     parser.add_argument("--skip-init", action="store_true", help="Skip the initialization step")
     parser.add_argument("--defines", type=str, help="Comma-separated list of compiler definitions")
     parser.add_argument("--extra-packages", type=str, help="Comma-separated list of extra packages to install")
+    parser.add_argument("--build-dir", type=str, help="Override the default build directory")
     return parser.parse_args()
 
 
-def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[str], extra_packages: list[str]) -> int:
+def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[str], extra_packages: list[str], build_dir: str | None) -> int:
     start_time = time.time()
     # Necessary to create the first project alone, so that the necessary root directories
     # are created and the subsequent projects can be created in parallel.
@@ -264,7 +265,8 @@ def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[s
         project_options=first_board_options,
         defines=defines,
         no_install_deps=skip_init,
-        extra_packages=extra_packages)
+        extra_packages=extra_packages,
+        build_dir=build_dir)
     # This is not memory/cpu bound but is instead network bound so we can run one thread
     # per board to speed up the process.
     parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(boards)
@@ -273,7 +275,7 @@ def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[s
 
         future_to_board: dict[concurrent.futures.Future, str] = {}
         for board in boards:
-            future = executor.submit(create_build_dir, board, CUSTOM_PROJECT_OPTIONS.get(board), defines, skip_init, extra_packages)
+            future = executor.submit(create_build_dir, board, CUSTOM_PROJECT_OPTIONS.get(board), defines, skip_init, extra_packages, build_dir)
             future_to_board[future] = board
         for future in concurrent.futures.as_completed(future_to_board):
             board = future_to_board[future]
@@ -294,7 +296,7 @@ def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[s
     num_cpus = max(1, min(cpu_count(), len(boards)))
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
-            executor.submit(compile_examples, board, examples): board
+            executor.submit(compile_examples, board, examples, build_dir): board
             for board in boards
         }
         for future in concurrent.futures.as_completed(future_to_board):
@@ -336,7 +338,8 @@ def main() -> int:
     extract_packages: list[str] = []
     if args.extra_packages:
         extract_packages.extend(args.extra_packages.split(','))
-    rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines, extra_packages=extract_packages)
+    build_dir = args.build_dir
+    rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines, extra_packages=extract_packages, build_dir=build_dir)
     return rtn
 
 
