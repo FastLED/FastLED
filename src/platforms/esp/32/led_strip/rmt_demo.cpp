@@ -2,6 +2,8 @@
 /// @brief   Blink the first LED of an LED strip
 /// @example Blink.ino
 
+#ifndef ESP32
+
 #include "rmt_demo.h"
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
@@ -117,3 +119,5 @@ void __demo() {
 void rmt_demo() {
     __demo();
 }
+
+#endif  // ESP32
