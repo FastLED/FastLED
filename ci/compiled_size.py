@@ -20,7 +20,7 @@ def step_back_commits(steps):
     return True
 
 def check_firmware_size(board: str) -> int:
-    size_command = f"du -b .build/esp32dev/.pio/build/{board}/firmware.bin"
+    size_command = f"du -b .build/{board}/.pio/build/{board}/firmware.bin"
     output, error = run_command(size_command)
     if error:
         print(f"Error checking firmware size: {error}")
