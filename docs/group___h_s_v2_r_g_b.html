@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.4</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
    </div>
   </td>
  </tr>
@@ -458,7 +458,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Recover approximate HSV values from RGB. </p>
-<p>These values are <em>approximate</em>, not exact. Why is this "only" an approximation? Because not all RGB colors have HSV equivalents! For example, there is no HSV value that will ever convert to <a class="el" href="group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4a30447e9f6efa4afdd251f9afc1d5fb44" title="Red, Green, Blue (0012)">RGB(255,255,0)</a> using the code provided in this library. So if you try to convert <a class="el" href="group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4a30447e9f6efa4afdd251f9afc1d5fb44" title="Red, Green, Blue (0012)">RGB(255,255,0)</a> "back" to HSV, you'll necessarily get only an approximation. Emphasis has been placed on getting the "hue" as close as usefully possible, but even that's a bit of a challenge. The 8-bit HSV and 8-bit RGB color spaces are not a "bijection".</p>
+<p>These values are <em>approximate</em>, not exact. Why is this "only" an approximation? Because not all RGB colors have HSV equivalents! For example, there is no HSV value that will ever convert to RGB(255,255,0) using the code provided in this library. So if you try to convert RGB(255,255,0) "back" to HSV, you'll necessarily get only an approximation. Emphasis has been placed on getting the "hue" as close as usefully possible, but even that's a bit of a challenge. The 8-bit HSV and 8-bit RGB color spaces are not a "bijection".</p>
 <p>Nevertheless, this function does a pretty good job, particularly at recovering the 'hue' from fully saturated RGB colors that originally came from HSV rainbow colors. So if you start with <a class="el" href="struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV(hue_in,255,255)</a>, and convert that to RGB, and then convert it back to HSV using this function, the resulting output hue will either exactly the same, or very close (+/-1). The more desaturated the original RGB color is, the rougher the approximation, and the less accurate the results. </p><dl class="section note"><dt>Note</dt><dd>This function is a long-term work in progress; expect results to change slightly over time as this function is refined and improved. </dd></dl>
 <dl class="section user"><dt></dt><dd></dd></dl>
 <dl class="section note"><dt>Note</dt><dd>This function is most accurate when the input is an RGB color that came from a fully-saturated HSV color to start with. E.g. <a class="el" href="struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV( hue, 255, 255)</a> -&gt; <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> -&gt; <a class="el" href="struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV</a> will give best results. </dd></dl>
@@ -483,7 +483,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Aug 27 2024 18:13:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

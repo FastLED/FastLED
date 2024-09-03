@@ -27,19 +27,19 @@ var NAVTREE =
   [ "FastLED", "index.html", [
     [ "About", "index.html#autotoc_md0", null ],
     [ "Board Support", "index.html#autotoc_md1", null ],
-    [ "Platform Features", "index.html#autotoc_md8", null ],
-    [ "Getting Started", "index.html#autotoc_md11", [
-      [ "Arduino IDE / PlatformIO Dual Repo", "index.html#autotoc_md12", null ],
-      [ "ArduinoIDE", "index.html#autotoc_md13", null ]
+    [ "x86", "index.html#autotoc_md7", null ],
+    [ "Getting Started", "index.html#autotoc_md8", [
+      [ "Arduino IDE / PlatformIO Dual Repo", "index.html#autotoc_md9", null ],
+      [ "ArduinoIDE", "index.html#autotoc_md10", null ]
     ] ],
-    [ "Development", "index.html#autotoc_md14", null ],
-    [ "Help and Support", "index.html#autotoc_md15", null ],
-    [ "Supported LED Chipsets", "index.html#autotoc_md16", null ],
-    [ "Supported Platforms", "index.html#autotoc_md17", [
-      [ "Porting FastLED to a new platform", "index.html#autotoc_md18", null ]
+    [ "Development", "index.html#autotoc_md11", null ],
+    [ "Help and Support", "index.html#autotoc_md12", null ],
+    [ "Supported LED Chipsets", "index.html#autotoc_md13", null ],
+    [ "Supported Platforms", "index.html#autotoc_md14", [
+      [ "Porting FastLED to a new platform", "index.html#autotoc_md15", null ]
     ] ],
-    [ "What about that name?", "index.html#autotoc_md19", null ],
-    [ "For more information", "index.html#autotoc_md20", null ],
+    [ "What about that name?", "index.html#autotoc_md16", null ],
+    [ "For more information", "index.html#autotoc_md17", null ],
     [ "Todo List", "todo.html", null ],
     [ "Deprecated List", "deprecated.html", null ],
     [ "Topics", "topics.html", "topics" ],
@@ -77,10 +77,10 @@ var NAVTREEINDEX =
 "1653___s3___apa102___hardware___pins_8ino_source.html",
 "class_c_h_s_v_palette32.html#a7c50a7c321a9faad6335600e6bd82ca5",
 "class_g_s1903.html",
-"fastspi__ref_8h_source.html",
-"group___h_s_v2_r_g_b.html#ga5ca233d1f5f70b5efdabc405f9bcf8ec",
-"index.html#autotoc_md20",
-"struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ae59608233a1cc562ebafadb29fe4b622"
+"fastspi__nop_8h_source.html",
+"group___h_s_v2_r_g_b.html#ga25585eb2c24bd5f1b3b292dce24da048",
+"led__sysdefs_8h.html#ad469b729e752d3920e3cd5bfaf9febe9",
+"struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ae4ca615b1f19603975fb715108ecb20a"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

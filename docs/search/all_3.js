@@ -21,7 +21,7 @@ var searchData=
   ['cfastled_18',['CFastLED',['../class_c_fast_l_e_d.html',1,'']]],
   ['chartreuse_19',['Chartreuse',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ae78f4f54a27fa19c5414f59933c6b613',1,'CRGB']]],
   ['chipset_20controllers_20',['LED Chipset Controllers',['../group___chipsets.html',1,'']]],
-  ['chipsets_21',['Chipsets',['../group___clocked_chipsets.html',1,'Clocked Chipsets'],['../group___clockless_chipsets.html',1,'Clockless Chipsets'],['../index.html#autotoc_md16',1,'Supported LED Chipsets']]],
+  ['chipsets_21',['Chipsets',['../group___clocked_chipsets.html',1,'Clocked Chipsets'],['../group___clockless_chipsets.html',1,'Clockless Chipsets'],['../index.html#autotoc_md13',1,'Supported LED Chipsets']]],
   ['chipsets_2eh_22',['chipsets.h',['../chipsets_8h.html',1,'']]],
   ['chocolate_23',['Chocolate',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a93daf580c511f1159c43955b62205ef7',1,'CRGB']]],
   ['chsv_24',['CHSV',['../struct_c_h_s_v.html',1,'CHSV'],['../struct_c_h_s_v.html#a61fcf3457088c52be7f7d530783aedc6',1,'CHSV::CHSV()=default'],['../struct_c_h_s_v.html#a91a2604c8a6d9f5171736273c9f2b850',1,'CHSV::CHSV(uint8_t ih, uint8_t is, uint8_t iv)'],['../struct_c_h_s_v.html#aae9d5c9d7e6a7c442c324e1c555676b5',1,'CHSV::CHSV(const CHSV &amp;rhs)=default'],['../group___pixel_types.html',1,'Pixel Data Types (CRGB/CHSV)']]],

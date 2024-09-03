@@ -12,6 +12,7 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
     [ "controller.h", "controller_8h.html", "controller_8h" ],
     [ "cpp_compat.h", "cpp__compat_8h.html", "cpp__compat_8h" ],
     [ "dmx.h", "dmx_8h.html", "dmx_8h" ],
+    [ "eorder.h", "eorder_8h_source.html", null ],
     [ "FastLED.cpp", "_fast_l_e_d_8cpp.html", "_fast_l_e_d_8cpp" ],
     [ "FastLED.h", "_fast_l_e_d_8h.html", "_fast_l_e_d_8h" ],
     [ "fastled_config.h", "fastled__config_8h.html", "fastled__config_8h" ],
@@ -31,6 +32,7 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
     [ "led_sysdefs.h", "led__sysdefs_8h.html", "led__sysdefs_8h" ],
     [ "lib8tion.cpp", "lib8tion_8cpp.html", "lib8tion_8cpp" ],
     [ "lib8tion.h", "lib8tion_8h.html", "lib8tion_8h" ],
+    [ "namespace.h", "namespace_8h_source.html", null ],
     [ "noise.cpp", "noise_8cpp.html", "noise_8cpp" ],
     [ "noise.h", "noise_8h.html", "noise_8h" ],
     [ "pixelset.h", "pixelset_8h.html", "pixelset_8h" ],
@@ -39,6 +41,12 @@ var dir_68267d1309a1af8e8297ef4c3efbcdba =
     [ "platforms.h", "platforms_8h.html", null ],
     [ "power_mgt.cpp", "power__mgt_8cpp.html", "power__mgt_8cpp" ],
     [ "power_mgt.h", "power__mgt_8h.html", "power__mgt_8h" ],
+    [ "rgb_2_rgbw.cpp", "rgb__2__rgbw_8cpp_source.html", null ],
+    [ "rgb_2_rgbw.h", "rgb__2__rgbw_8h_source.html", null ],
+    [ "simplex.cpp", "simplex_8cpp_source.html", null ],
+    [ "stub_main.cpp", "stub__main_8cpp_source.html", null ],
+    [ "transpose8x1_noinline.cpp", "transpose8x1__noinline_8cpp_source.html", null ],
+    [ "transpose8x1_noinline.h", "transpose8x1__noinline_8h_source.html", null ],
     [ "types.h", "types_8h_source.html", null ],
     [ "wiring.cpp", "wiring_8cpp.html", null ]
 ];

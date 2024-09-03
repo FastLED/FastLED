@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.4</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
    </div>
   </td>
  </tr>
@@ -392,49 +392,51 @@ $(function(){initNavTree('_fast_l_e_d_8cpp_source.html',''); initResizable(true)
 <div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>}</div>
 </div>
 <div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span> </div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno"><a class="line" href="_fast_l_e_d_8cpp.html#a5a485781a43898e8594302dc3be9abbf">  275</a></span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">int</span> <a class="code hl_function" href="_fast_l_e_d_8cpp.html#a5a485781a43898e8594302dc3be9abbf">atexit</a>(<span class="keywordtype">void</span> (* <span class="comment">/*func*/</span> )()) { <span class="keywordflow">return</span> 0; }</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span><span class="preprocessor">#ifdef FASTLED_NEEDS_YIELD</span></div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> yield(<span class="keywordtype">void</span>) { }</div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span> </div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span><span class="preprocessor">#ifdef NEED_CXX_BITS</span></div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="keyword">namespace </span>__cxxabiv1</div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>{</div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span><span class="preprocessor">    #if !defined(ESP8266) &amp;&amp; !defined(ESP32)</span></div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_pure_virtual (<span class="keywordtype">void</span>) {}</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    <span class="comment">/* guard variables */</span></div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span><span class="preprocessor">#ifndef FASTLED_STUB_IMPL</span></div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno"><a class="line" href="_fast_l_e_d_8cpp.html#a5a485781a43898e8594302dc3be9abbf">  276</a></span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">int</span> <a class="code hl_function" href="_fast_l_e_d_8cpp.html#a5a485781a43898e8594302dc3be9abbf">atexit</a>(<span class="keywordtype">void</span> (* <span class="comment">/*func*/</span> )()) { <span class="keywordflow">return</span> 0; }</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="preprocessor">#ifdef FASTLED_NEEDS_YIELD</span></div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> yield(<span class="keywordtype">void</span>) { }</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span><span class="preprocessor">#ifdef NEED_CXX_BITS</span></div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span><span class="keyword">namespace </span>__cxxabiv1</div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>{</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span><span class="preprocessor">    #if !defined(ESP8266) &amp;&amp; !defined(ESP32)</span></div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_pure_virtual (<span class="keywordtype">void</span>) {}</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span><span class="preprocessor">    #endif</span></div>
 <div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>    <span class="comment">/* The ABI requires a 64-bit type.  */</span></div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    __extension__ <span class="keyword">typedef</span> <span class="keywordtype">int</span> __guard __attribute__((mode(__DI__)));</div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span> </div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">int</span> __cxa_guard_acquire (__guard *) __attribute__((weak));</div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_guard_release (__guard *) __attribute__((weak));</div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_guard_abort (__guard *) __attribute__((weak));</div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span> </div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">int</span> __cxa_guard_acquire (__guard *g)</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>    {</div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>        <span class="keywordflow">return</span> !*(<span class="keywordtype">char</span> *)(g);</div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    }</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_guard_release (__guard *g)</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    {</div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>        *(<span class="keywordtype">char</span> *)g = 1;</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    }</div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span> </div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_guard_abort (__guard *)</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>    {</div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span> </div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    }</div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>}</div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span> </div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>FASTLED_NAMESPACE_END</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>    <span class="comment">/* guard variables */</span></div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>    <span class="comment">/* The ABI requires a 64-bit type.  */</span></div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    __extension__ <span class="keyword">typedef</span> <span class="keywordtype">int</span> __guard __attribute__((mode(__DI__)));</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span> </div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">int</span> __cxa_guard_acquire (__guard *) __attribute__((weak));</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_guard_release (__guard *) __attribute__((weak));</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_guard_abort (__guard *) __attribute__((weak));</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">int</span> __cxa_guard_acquire (__guard *g)</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    {</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>        <span class="keywordflow">return</span> !*(<span class="keywordtype">char</span> *)(g);</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>    }</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span> </div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_guard_release (__guard *g)</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    {</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>        *(<span class="keywordtype">char</span> *)g = 1;</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    }</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span> </div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    <span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> <span class="keywordtype">void</span> __cxa_guard_abort (__guard *)</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    {</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>    }</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>}</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span> </div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>FASTLED_NAMESPACE_END</div>
 <div class="ttc" id="a_fast_l_e_d_8cpp_html_a0093621cbfc137ce372b755bc2dde85d"><div class="ttname"><a href="_fast_l_e_d_8cpp.html#a0093621cbfc137ce372b755bc2dde85d">_retry_cnt</a></div><div class="ttdeci">uint32_t _retry_cnt</div><div class="ttdoc">Global frame retry counter, used for debugging ESP implementations.</div><div class="ttdef"><b>Definition</b> <a href="#l00033">FastLED.cpp:33</a></div></div>
 <div class="ttc" id="a_fast_l_e_d_8cpp_html_a0d0cd1944c11e20c7382f56e673339c8"><div class="ttname"><a href="_fast_l_e_d_8cpp.html#a0d0cd1944c11e20c7382f56e673339c8">pSmartMatrix</a></div><div class="ttdeci">void * pSmartMatrix</div><div class="ttdoc">Pointer to the matrix object when using the Smart Matrix Library.</div><div class="ttdef"><b>Definition</b> <a href="#l00019">FastLED.cpp:19</a></div></div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_html_a5a485781a43898e8594302dc3be9abbf"><div class="ttname"><a href="_fast_l_e_d_8cpp.html#a5a485781a43898e8594302dc3be9abbf">atexit</a></div><div class="ttdeci">int atexit(void(*)())</div><div class="ttdoc">Called at program exit when run in a desktop environment.</div><div class="ttdef"><b>Definition</b> <a href="#l00275">FastLED.cpp:275</a></div></div>
+<div class="ttc" id="a_fast_l_e_d_8cpp_html_a5a485781a43898e8594302dc3be9abbf"><div class="ttname"><a href="_fast_l_e_d_8cpp.html#a5a485781a43898e8594302dc3be9abbf">atexit</a></div><div class="ttdeci">int atexit(void(*)())</div><div class="ttdoc">Called at program exit when run in a desktop environment.</div><div class="ttdef"><b>Definition</b> <a href="#l00276">FastLED.cpp:276</a></div></div>
 <div class="ttc" id="a_fast_l_e_d_8cpp_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="#l00021">FastLED.cpp:21</a></div></div>
 <div class="ttc" id="a_fast_l_e_d_8cpp_html_abaa6fdee895d1130d5d498bd37f7eab0"><div class="ttname"><a href="_fast_l_e_d_8cpp.html#abaa6fdee895d1130d5d498bd37f7eab0">noise_max</a></div><div class="ttdeci">int noise_max</div><div class="ttdoc">Unused value.</div></div>
 <div class="ttc" id="a_fast_l_e_d_8cpp_html_adbe81f5b70be627e9eaf78633b81e936"><div class="ttname"><a href="_fast_l_e_d_8cpp.html#adbe81f5b70be627e9eaf78633b81e936">_frame_cnt</a></div><div class="ttdeci">uint32_t _frame_cnt</div><div class="ttdoc">Global frame counter, used for debugging ESP implementations.</div><div class="ttdef"><b>Definition</b> <a href="#l00029">FastLED.cpp:29</a></div></div>
@@ -469,7 +471,7 @@ $(function(){initNavTree('_fast_l_e_d_8cpp_source.html',''); initResizable(true)
 <div class="ttc" id="aclass_c_l_e_d_controller_html_aba5aa24458cb37f0f5e6b18a74408a47"><div class="ttname"><a href="class_c_l_e_d_controller.html#aba5aa24458cb37f0f5e6b18a74408a47">CLEDController::m_pTail</a></div><div class="ttdeci">static CLEDController * m_pTail</div><div class="ttdoc">pointer to the last LED controller in the linked list</div><div class="ttdef"><b>Definition</b> <a href="controller_8h_source.html#l00071">controller.h:71</a></div></div>
 <div class="ttc" id="aclass_c_l_e_d_controller_html_af877a15a5ec452780fbd1d359b8a9913"><div class="ttname"><a href="class_c_l_e_d_controller.html#af877a15a5ec452780fbd1d359b8a9913">CLEDController::init</a></div><div class="ttdeci">virtual void init()=0</div><div class="ttdoc">Initialize the LED controller.</div></div>
 <div class="ttc" id="aclass_c_l_e_d_controller_html_afc138dfd8c32629cf4ecf0d430397e77"><div class="ttname"><a href="class_c_l_e_d_controller.html#afc138dfd8c32629cf4ecf0d430397e77">CLEDController::m_pHead</a></div><div class="ttdeci">static CLEDController * m_pHead</div><div class="ttdoc">pointer to the first LED controller in the linked list</div><div class="ttdef"><b>Definition</b> <a href="controller_8h_source.html#l00070">controller.h:70</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00120">pixeltypes.h:120</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00121">pixeltypes.h:121</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -477,7 +479,7 @@ $(function(){initNavTree('_fast_l_e_d_8cpp_source.html',''); initResizable(true)
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="_fast_l_e_d_8cpp.html">FastLED.cpp</a></li>
-    <li class="footer">Generated on Tue Aug 27 2024 18:13:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

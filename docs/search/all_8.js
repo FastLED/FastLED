@@ -9,7 +9,7 @@ var searchData=
   ['head_6',['head',['../class_c_l_e_d_controller.html#a8b412ff1fd4833d0db63a175d40a2ee0',1,'CLEDController']]],
   ['heatcolor_7',['HeatColor',['../group___color_fills.html#gac5c6b83ec07d310385a430f9f0336530',1,'HeatColor(uint8_t temperature):&#160;colorutils.cpp'],['../group___color_fills.html#gac5c6b83ec07d310385a430f9f0336530',1,'HeatColor(uint8_t temperature):&#160;colorutils.cpp']]],
   ['heatcolors_5fp_8',['HeatColors_p',['../group___predefined_palettes.html#ga8932790994cfe78cf535fce88502d649',1,'colorpalettes.cpp']]],
-  ['help_20and_20support_9',['Help and Support',['../index.html#autotoc_md15',1,'']]],
+  ['help_20and_20support_9',['Help and Support',['../index.html#autotoc_md12',1,'']]],
   ['hi_10',['hi',['../class_pin.html#a5a2884f01bb407fd628f57553eaaa9f4',1,'Pin::hi()'],['../class_pin.html#a60e2715b756d236bf8efdffae663b568',1,'Pin::hi(FASTLED_REGISTER port_ptr_t port)'],['../class_fast_pin.html#add52474362013eb37903fc832e2abdc2',1,'FastPin::hi()'],['../class_fast_pin.html#a4f20ac7720b2e6aa838f98ab8feaa6e9',1,'FastPin::hi(FASTLED_REGISTER port_ptr_t port)']]],
   ['highnoonsun_11',['HighNoonSun',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9ac9a2b02351fcc9ad08ef4e2748530e76',1,'color.h']]],
   ['highpressuresodium_12',['HighPressureSodium',['../group___color_enums.html#gga251e9e8dc2c7b981786b71706522b2a9a677f1d00c77b396f7a90e87166fc239a',1,'color.h']]],

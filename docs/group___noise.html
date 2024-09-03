@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.4</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
    </div>
   </td>
  </tr>
@@ -121,14 +121,129 @@ Topics</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___noise_generation.html">Noise Generation Functions</a></td></tr>
 <tr class="memdesc:group___noise_generation"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions to generate noise. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader">32 bit simplex noise functions</h2></td></tr>
+<tr class="memitem:ga48f4d856c46824dd30ffb245d131624e" id="r_ga48f4d856c46824dd30ffb245d131624e"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga48f4d856c46824dd30ffb245d131624e">snoise16</a> (uint32_t x)</td></tr>
+<tr class="separator:ga48f4d856c46824dd30ffb245d131624e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3217c7a96ad97882771b953a144db23e" id="r_ga3217c7a96ad97882771b953a144db23e"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3217c7a96ad97882771b953a144db23e">snoise16</a> (uint32_t x, uint32_t y)</td></tr>
+<tr class="separator:ga3217c7a96ad97882771b953a144db23e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga48fc9ad0a977771f165d6d90ed1fd42c" id="r_ga48fc9ad0a977771f165d6d90ed1fd42c"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga48fc9ad0a977771f165d6d90ed1fd42c">snoise16</a> (uint32_t x, uint32_t y, uint32_t z)</td></tr>
+<tr class="separator:ga48fc9ad0a977771f165d6d90ed1fd42c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8339e6f3f6831e2a6a33a77554b6600a" id="r_ga8339e6f3f6831e2a6a33a77554b6600a"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga8339e6f3f6831e2a6a33a77554b6600a">snoise16</a> (uint32_t x, uint32_t y, uint32_t z, uint32_t w)</td></tr>
+<tr class="separator:ga8339e6f3f6831e2a6a33a77554b6600a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="ga48f4d856c46824dd30ffb245d131624e" name="ga48f4d856c46824dd30ffb245d131624e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga48f4d856c46824dd30ffb245d131624e">&#9670;&#160;</a></span>snoise16() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t snoise16 </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>32 bit, fixed point implementation of simplex noise functions. The inputs are 20.12 fixed-point value. The result covers the full range of a uint16_t averaging around 32768. </p>
+
+<p class="definition">Definition at line <a class="el" href="simplex_8cpp_source.html#l00099">99</a> of file <a class="el" href="simplex_8cpp_source.html">simplex.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ga3217c7a96ad97882771b953a144db23e" name="ga3217c7a96ad97882771b953a144db23e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3217c7a96ad97882771b953a144db23e">&#9670;&#160;</a></span>snoise16() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t snoise16 </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simplex_8cpp_source.html#l00122">122</a> of file <a class="el" href="simplex_8cpp_source.html">simplex.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ga48fc9ad0a977771f165d6d90ed1fd42c" name="ga48fc9ad0a977771f165d6d90ed1fd42c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga48fc9ad0a977771f165d6d90ed1fd42c">&#9670;&#160;</a></span>snoise16() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t snoise16 </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>z</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simplex_8cpp_source.html#l00189">189</a> of file <a class="el" href="simplex_8cpp_source.html">simplex.cpp</a>.</p>
+
+</div>
+</div>
+<a id="ga8339e6f3f6831e2a6a33a77554b6600a" name="ga8339e6f3f6831e2a6a33a77554b6600a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8339e6f3f6831e2a6a33a77554b6600a">&#9670;&#160;</a></span>snoise16() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint16_t snoise16 </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>z</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>w</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="simplex_8cpp_source.html#l00321">321</a> of file <a class="el" href="simplex_8cpp_source.html">simplex.cpp</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Aug 27 2024 18:13:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

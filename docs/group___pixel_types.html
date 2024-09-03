@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.4</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
    </div>
   </td>
  </tr>
@@ -139,18 +139,6 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:ga6585ae9f9a54e6a1fcb7c5f985931fb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pre-defined hue values for <a class="el" href="struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV</a> objects.  <a href="#ga6585ae9f9a54e6a1fcb7c5f985931fb3">More...</a><br /></td></tr>
 <tr class="separator:ga6585ae9f9a54e6a1fcb7c5f985931fb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3c26d076773aa0f331d3066b46dbc6a4" id="r_ga3c26d076773aa0f331d3066b46dbc6a4"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga3c26d076773aa0f331d3066b46dbc6a4">EOrder</a> { <br />
-&#160;&#160;<a class="el" href="#gga3c26d076773aa0f331d3066b46dbc6a4a30447e9f6efa4afdd251f9afc1d5fb44">RGB</a> =0012
-, <a class="el" href="#gga3c26d076773aa0f331d3066b46dbc6a4ac6df59182dbf95476bd74527b6785a1d">RBG</a> =0021
-, <a class="el" href="#gga3c26d076773aa0f331d3066b46dbc6a4aa94cf1760393e10a753b8edba4ca1c98">GRB</a> =0102
-, <a class="el" href="#gga3c26d076773aa0f331d3066b46dbc6a4ad60fbd7d8962ed9fb329aa0c0a47edc9">GBR</a> =0120
-, <br />
-&#160;&#160;<a class="el" href="#gga3c26d076773aa0f331d3066b46dbc6a4aa23d02d9d56089f1419a6c2eee27d16f">BRG</a> =0201
-, <a class="el" href="#gga3c26d076773aa0f331d3066b46dbc6a4a4a19a93c929964c201e01c8352dc8b9c">BGR</a> =0210
-<br />
- }</td></tr>
-<tr class="memdesc:ga3c26d076773aa0f331d3066b46dbc6a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">RGB color channel orderings, used when instantiating controllers to determine what order the controller should send data out in.  <a href="#ga3c26d076773aa0f331d3066b46dbc6a4">More...</a><br /></td></tr>
-<tr class="separator:ga3c26d076773aa0f331d3066b46dbc6a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -204,39 +192,6 @@ Functions</h2></td></tr>
 <tr class="separator:ga73f8d4c919e86197a8a95336c0865944"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
-<a id="ga3c26d076773aa0f331d3066b46dbc6a4" name="ga3c26d076773aa0f331d3066b46dbc6a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga3c26d076773aa0f331d3066b46dbc6a4">&#9670;&#160;</a></span>EOrder</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="#ga3c26d076773aa0f331d3066b46dbc6a4">EOrder</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>RGB color channel orderings, used when instantiating controllers to determine what order the controller should send data out in. </p>
-<p>The default ordering is RGB. Within this enum, the red channel is 0, the green channel is 1, and the blue chanel is 2. </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga3c26d076773aa0f331d3066b46dbc6a4a30447e9f6efa4afdd251f9afc1d5fb44" name="gga3c26d076773aa0f331d3066b46dbc6a4a30447e9f6efa4afdd251f9afc1d5fb44"></a>RGB&#160;</td><td class="fielddoc"><p>Red, Green, Blue (0012) </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga3c26d076773aa0f331d3066b46dbc6a4ac6df59182dbf95476bd74527b6785a1d" name="gga3c26d076773aa0f331d3066b46dbc6a4ac6df59182dbf95476bd74527b6785a1d"></a>RBG&#160;</td><td class="fielddoc"><p>Red, Blue, Green (0021) </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga3c26d076773aa0f331d3066b46dbc6a4aa94cf1760393e10a753b8edba4ca1c98" name="gga3c26d076773aa0f331d3066b46dbc6a4aa94cf1760393e10a753b8edba4ca1c98"></a>GRB&#160;</td><td class="fielddoc"><p>Green, Red, Blue (0102) </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga3c26d076773aa0f331d3066b46dbc6a4ad60fbd7d8962ed9fb329aa0c0a47edc9" name="gga3c26d076773aa0f331d3066b46dbc6a4ad60fbd7d8962ed9fb329aa0c0a47edc9"></a>GBR&#160;</td><td class="fielddoc"><p>Green, Blue, Red (0120) </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga3c26d076773aa0f331d3066b46dbc6a4aa23d02d9d56089f1419a6c2eee27d16f" name="gga3c26d076773aa0f331d3066b46dbc6a4aa23d02d9d56089f1419a6c2eee27d16f"></a>BRG&#160;</td><td class="fielddoc"><p>Blue, Red, Green (0201) </p>
-</td></tr>
-<tr><td class="fieldname"><a id="gga3c26d076773aa0f331d3066b46dbc6a4a4a19a93c929964c201e01c8352dc8b9c" name="gga3c26d076773aa0f331d3066b46dbc6a4a4a19a93c929964c201e01c8352dc8b9c"></a>BGR&#160;</td><td class="fielddoc"><p>Blue, Green, Red (0210) </p>
-</td></tr>
-</table>
-
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00954">954</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
-
-</div>
-</div>
 <a id="ga6585ae9f9a54e6a1fcb7c5f985931fb3" name="ga6585ae9f9a54e6a1fcb7c5f985931fb3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga6585ae9f9a54e6a1fcb7c5f985931fb3">&#9670;&#160;</a></span>HSVHue</h2>
 
@@ -269,7 +224,7 @@ Functions</h2></td></tr>
 </td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00108">108</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00109">109</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -336,7 +291,7 @@ Functions</h2></td></tr>
 
 <p>Check if two <a class="el" href="struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV</a> objects do <em>not</em> have the same color data. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00843">843</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00844">844</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -369,7 +324,7 @@ Functions</h2></td></tr>
 
 <p>Check if two <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> objects do <em>not</em> have the same color data. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00831">831</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00832">832</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -402,7 +357,7 @@ Functions</h2></td></tr>
 
 <p>Scale using <a class="el" href="struct_c_r_g_b.html#a1525f95282d64a826802490d5baa48f3" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules.">CRGB::nscale8_video()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00940">940</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00941">941</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -435,7 +390,7 @@ Functions</h2></td></tr>
 
 <p>Combine two <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> objects, taking the smallest value of each channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00922">922</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00923">923</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -468,7 +423,7 @@ Functions</h2></td></tr>
 
 <p>Multiply each of the channels by a constant, saturating each channel at 0xFF.    </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00905">905</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00906">906</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -501,7 +456,7 @@ Functions</h2></td></tr>
 
 <p>Add one <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> to another, saturating at 0xFF for each channel.    </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00887">887</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00888">888</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -534,7 +489,7 @@ Functions</h2></td></tr>
 
 <p>Subtract one <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> from another, saturating at 0x00 for each channel.    </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00896">896</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00897">897</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -567,7 +522,7 @@ Functions</h2></td></tr>
 
 <p>Divide each of the channels by a constant.    </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00914">914</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00915">915</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -600,7 +555,7 @@ Functions</h2></td></tr>
 
 <p>Check if the sum of the color channels in one <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object is less than another. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00849">849</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00850">850</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -633,7 +588,7 @@ Functions</h2></td></tr>
 
 <p>Check if the sum of the color channels in one <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object is less than or equal to another. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00876">876</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00877">877</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -666,7 +621,7 @@ Functions</h2></td></tr>
 
 <p>Check if two <a class="el" href="struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV</a> objects have the same color data. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00837">837</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00838">838</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -699,7 +654,7 @@ Functions</h2></td></tr>
 
 <p>Check if two <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> objects have the same color data. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00825">825</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00826">826</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -732,7 +687,7 @@ Functions</h2></td></tr>
 
 <p>Check if the sum of the color channels in one <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object is greater than another. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00858">858</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00859">859</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -765,7 +720,7 @@ Functions</h2></td></tr>
 
 <p>Check if the sum of the color channels in one <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object is greater than or equal to another. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00867">867</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00868">868</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -798,7 +753,7 @@ Functions</h2></td></tr>
 
 <p>Combine two <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> objects, taking the largest value of each channel. </p>
 
-<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00931">931</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="pixeltypes_8h_source.html#l00932">932</a> of file <a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>.</p>
 
 </div>
 </div>
@@ -808,7 +763,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Aug 27 2024 18:13:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -1,5 +1,6 @@
 var NAVTREEINDEX6 =
 {
+"struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ae4ca615b1f19603975fb715108ecb20a":[12,9,1,0,35],
 "struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ae59608233a1cc562ebafadb29fe4b622":[12,9,1,0,68],
 "struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ae677e01529e938cbde08c4f97a6226bc":[12,9,1,0,47],
 "struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ae78f4f54a27fa19c5414f59933c6b613":[12,9,1,0,15],
@@ -96,11 +97,14 @@ var NAVTREEINDEX6 =
 "structsub4.html#af19bf78fa32695ff3266f7817144d534":[13,0,69,16],
 "structsub4.html#af59d256057cfb1c1f18ef34e602755c1":[13,0,69,28],
 "structsub4.html#af62353204ff783dca725ecb17e1be6ef":[13,0,69,18],
+"stub__main_8cpp_source.html":[14,0,1,44],
 "todo.html":[10],
 "topics.html":[12],
+"transpose8x1__noinline_8cpp_source.html":[14,0,1,45],
+"transpose8x1__noinline_8h_source.html":[14,0,1,46],
 "trig8_8h.html":[14,0,1,0,3],
 "trig8_8h_source.html":[14,0,1,0,3],
-"types_8h_source.html":[14,0,1,39],
+"types_8h_source.html":[14,0,1,47],
 "union_i_e_e_e754binary32__t.html":[12,3,6,0],
 "union_i_e_e_e754binary32__t.html#a2275cfe0cacae08983ad44cdf074a7a6":[12,3,6,0,8],
 "union_i_e_e_e754binary32__t.html#a37bee81c74782e027d67199f81074bd3":[12,3,6,0,11],
@@ -136,6 +140,6 @@ var NAVTREEINDEX6 =
 "unionjust8bits.html#acda11b6492d3f6f39ed252bfdbc5293f":[13,0,40,2],
 "unionjust8bits.html#ad67c956d73da25b76e389fa617306b04":[13,0,40,7],
 "unionjust8bits.html#ae4f5c1652bd536727fd481c140d7c3df":[13,0,40,1],
-"wiring_8cpp.html":[14,0,1,40],
-"wiring_8cpp_source.html":[14,0,1,40]
+"wiring_8cpp.html":[14,0,1,48],
+"wiring_8cpp_source.html":[14,0,1,48]
 };

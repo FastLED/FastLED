@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.4</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
    </div>
   </td>
  </tr>
@@ -108,7 +108,6 @@ $(function(){initNavTree('index.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="md__2home_2runner_2work_2_fast_l_e_d_2_fast_l_e_d_2_r_e_a_d_m_e"></a> <a href="https://www.ardu-badge.com/FastLED"><img src="https://www.ardu-badge.com/badge/FastLED.svg" alt="arduino-library-badge" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build.yml"><img src="https://github.com/FastLED/FastLED/workflows/build/badge.svg" alt="build status" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/arduino_library_lint.yml/badge.svg" alt="Arduino Library Lint" style="pointer-events: none;" class="inline"/></a> <a href="http://fastled.io/docs"><img src="https://img.shields.io/badge/Docs-Doxygen-blue.svg" alt="Documentation" style="pointer-events: none;" class="inline"/></a> <a href="https://www.reddit.com/r/FastLED/"><img src="https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit" alt="Reddit" style="pointer-events: none;" class="inline"/></a></p>
-<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_default.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg" alt="clone and compile" style="pointer-events: none;" class="inline"/></a></p>
 <h1><a class="anchor" id="autotoc_md0"></a>
 About</h1>
 <p>This is a library for easily &amp; efficiently controlling a wide variety of LED chipsets, like the ones sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress. In addition to writing to the LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while still keeping things as fast as possible.</p>
@@ -122,39 +121,53 @@ About</h1>
 Board Support</h1>
 <h3><a class="anchor" id="autotoc_md2"></a>
 Arduino</h3>
-<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml/badge.svg" alt="uno" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml/badge.svg" alt="yun" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_digix.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_digix.yml/badge.svg" alt="digix" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml/badge.svg" alt="uno" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_yun.yml/badge.svg" alt="yun" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_digix.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_digix.yml/badge.svg" alt="digix" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_uno_r4_wifif.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_uno_r4_wifif.yml/badge.svg" alt="uno_r4_wifi" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml/badge.svg" alt="nano_every" style="pointer-events: none;" class="inline"/></a></p>
 <h3><a class="anchor" id="autotoc_md3"></a>
 Teensy</h3>
-<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy30.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy30.yml/badge.svg" alt="teensy30" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy31.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy31.yml/badge.svg" alt="teensy31" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensyLC.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensyLC.yml/badge.svg" alt="teensyLC" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy40.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy40.yml/badge.svg" alt="teensy40" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy41.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy41.yml/badge.svg" alt="teensy41" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy30.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy30.yml/badge.svg" alt="teensy30" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy31.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy31.yml/badge.svg" alt="teensy31" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensyLC.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensyLC.yml/badge.svg" alt="teensyLC" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy40.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy40.yml/badge.svg" alt="teensy40" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy41.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy41.yml/badge.svg" alt="teensy41" style="pointer-events: none;" class="inline"/></a></p>
+<p><em>Specific Features</em></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy_octo.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy_octo.yml/badge.svg" alt="teensy_octoWS2811" style="pointer-events: none;" class="inline"/></a></p>
 <h3><a class="anchor" id="autotoc_md4"></a>
 NRF</h3>
-<p><a href="https://github.com/FastLED/FastLED/actions/workflows/buiild_adafruit_feather_nrf52840_sense.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/buiild_adafruit_feather_nrf52840_sense.yml/badge.svg" alt="nrf52840_sense" style="pointer-events: none;" class="inline"/></a> <em><a class="el" href="class_w_s2812.html" title="WS2812 controller class.">WS2812</a> compiles, APA102 does not</em></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/buiild_adafruit_feather_nrf52840_sense.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/buiild_adafruit_feather_nrf52840_sense.yml/badge.svg" alt="nrf52840_sense" style="pointer-events: none;" class="inline"/></a></p>
+<p><em><a class="el" href="class_w_s2812.html" title="WS2812 controller class.">WS2812</a> compiles, APA102 does not</em></p>
 <h3><a class="anchor" id="autotoc_md5"></a>
-Esp Legacy</h3>
-<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp8622.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp8622.yml/badge.svg" alt="esp32-8266" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2wroom.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2wroom.yml/badge.svg" alt="esp32s2wroom" style="pointer-events: none;" class="inline"/></a></p>
+Raspberry Pi</h3>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml/badge.svg" alt="rp2040" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml/badge.svg" alt="rp2350" style="pointer-events: none;" class="inline"/></a></p>
 <h3><a class="anchor" id="autotoc_md6"></a>
-Esp Mainstream</h3>
-<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml/badge.svg" alt="esp32dev" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c3.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c3.yml/badge.svg" alt="esp32c3" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32s3.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32s3.yml/badge.svg" alt="esp32s3" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c6.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c6.yml/badge.svg" alt="esp32c6" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml/badge.svg" alt="esp32c2" style="pointer-events: none;" class="inline"/></a></p>
-<h3><a class="anchor" id="autotoc_md7"></a>
-Esp New</h3>
+Esp</h3>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp8622.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp8622.yml/badge.svg" alt="esp32-8266" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml/badge.svg" alt="esp32dev" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2wroom.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2wroom.yml/badge.svg" alt="esp32s2wroom" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml/badge.svg" alt="esp32c2" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c3.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c3.yml/badge.svg" alt="esp32c3" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32s3.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32s3.yml/badge.svg" alt="esp32s3" style="pointer-events: none;" class="inline"/></a></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c6.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32c6.yml/badge.svg" alt="esp32c6" style="pointer-events: none;" class="inline"/></a></p>
 <p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32h2.yml/badge.svg" alt="esp32h2" style="pointer-events: none;" class="inline"/></a></p>
-<h1><a class="anchor" id="autotoc_md8"></a>
-Platform Features</h1>
-<h3><a class="anchor" id="autotoc_md9"></a>
-Esp32</h3>
+<p><em>Specific features</em></p>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32rmt.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32rmt.yml/badge.svg" alt="esp32rmt_51" style="pointer-events: none;" class="inline"/></a> (in progress)</p>
 <p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_esp32_i2s_ws2812.yml/badge.svg" alt="esp32_i2s_ws2812" style="pointer-events: none;" class="inline"/></a></p>
-<h3><a class="anchor" id="autotoc_md10"></a>
-Teensy</h3>
-<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_teensy_octo.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_teensy_octo.yml/badge.svg" alt="teensy_octoWS2811" style="pointer-events: none;" class="inline"/></a></p>
-<h1><a class="anchor" id="autotoc_md11"></a>
+<h1><a class="anchor" id="autotoc_md7"></a>
+x86</h1>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml/badge.svg" alt="linux_native" style="pointer-events: none;" class="inline"/></a></p>
+<h1><a class="anchor" id="autotoc_md8"></a>
 Getting Started</h1>
-<h2><a class="anchor" id="autotoc_md12"></a>
+<h2><a class="anchor" id="autotoc_md9"></a>
 Arduino IDE / PlatformIO Dual Repo</h2>
 <p>We've created a custom repo you can try to start your projects. This repo is designed to be used with VSCode + PlatformIO but is also <em>backwards compatible with the Arduino IDE</em>.</p>
 <p>PlatformIO is an extension to VSCode and is generally viewed as a much better experience than the Arduino IDE. You get auto completion tools like intellisense and CoPilot and the ability to install tools like crash decoding. Anything you can do in Arduino IDE you can do with PlatformIO.</p>
 <p>Get started here:</p>
 <p><a href="https://github.com/FastLED/PlatformIO-Starter">https://github.com/FastLED/PlatformIO-Starter</a></p>
-<h2><a class="anchor" id="autotoc_md13"></a>
+<h2><a class="anchor" id="autotoc_md10"></a>
 ArduinoIDE</h2>
 <p>When running the Arduino IDE you need to do the additional installation step of installing FastLED in the global Arduino IDE package manager.</p>
 <p>Install the library using either <a href="https://github.com/FastLED/FastLED/releases/latest/">the .zip file from the latest release</a> or by searching for "FastLED" in the libraries manager of the Arduino IDE. <a href="https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries">See the Arduino documentation on how to install libraries for more information.</a></p>
@@ -172,11 +185,12 @@ ArduinoIDE</h2>
 <div class="ttc" id="aclass_c_fast_l_e_d_html_a83afdd1e2a21f33ac4f8d2610d6e331b"><div class="ttname"><a href="class_c_fast_l_e_d.html#a83afdd1e2a21f33ac4f8d2610d6e331b">CFastLED::show</a></div><div class="ttdeci">void show(uint8_t scale)</div><div class="ttdoc">Update all our controllers with the current led colors, using the passed in brightness.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00058">FastLED.cpp:58</a></div></div>
 <div class="ttc" id="aclass_c_fast_l_e_d_html_afd7928d822589740af6e23b2d510cf3f"><div class="ttname"><a href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">CFastLED::addLeds</a></div><div class="ttdeci">static CLEDController &amp; addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset=0)</div><div class="ttdoc">Add a CLEDController instance to the world.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00046">FastLED.cpp:46</a></div></div>
 <div class="ttc" id="aclass_n_e_o_p_i_x_e_l_html"><div class="ttname"><a href="class_n_e_o_p_i_x_e_l.html">NEOPIXEL</a></div><div class="ttdoc">LED controller for WS2812 LEDs with GRB color order.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8h_source.html#l00126">FastLED.h:126</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00120">pixeltypes.h:120</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce">CRGB::White</a></div><div class="ttdeci">@ White</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00806">pixeltypes.h:806</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00670">pixeltypes.h:670</a></div></div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md14"></a>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00121">pixeltypes.h:121</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce">CRGB::White</a></div><div class="ttdeci">@ White</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00807">pixeltypes.h:807</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00671">pixeltypes.h:671</a></div></div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md11"></a>
 Development</h1>
+<p><a href="https://github.com/FastLED/FastLED/actions/workflows/build_default.yml"><img src="https://github.com/FastLED/FastLED/actions/workflows/build_default.yml/badge.svg" alt="clone and compile" style="pointer-events: none;" class="inline"/></a></p>
 <p>If you want to make changes to FastLED then please</p>
 <ul>
 <li><a href="https://github.com/FastLED/FastLED/fork">Fork</a> the <a href="https://github.com/FastLED/FastLED">https://github.com/FastLED/FastLED</a> repo into your github account.</li>
@@ -191,14 +205,13 @@ Development</h1>
 </li>
 <li>See <a href="dev/dev.ino">dev/dev.ino</a>. <img src="https://github.com/user-attachments/assets/66f1832d-3cfb-4633-8af8-e66148bcad1b" alt="image" width="1220" class="inline"/></li>
 </ul>
-<p>To make changes just edit the <a href="dev/dev.ino">dev/dev.ino</a> file.</p>
-<p>When changes are made then push to your fork and issue a pull request.</p>
-<h1><a class="anchor" id="autotoc_md15"></a>
+<p>When changes are made then push to your fork to your repo and git will give you a url to trigger a pull request into the master repo.</p>
+<h1><a class="anchor" id="autotoc_md12"></a>
 Help and Support</h1>
 <p>If you need help with using the library, please consider visiting the Reddit community at <a href="https://reddit.com/r/FastLED">https://reddit.com/r/FastLED</a>. There are thousands of knowledgeable FastLED users in that group and a plethora of solutions in the post history.</p>
 <p>If you are looking for documentation on how something in the library works, please see the Doxygen documentation online at <a href="http://fastled.io/docs">http://fastled.io/docs</a>.</p>
 <p>If you run into bugs with the library, or if you'd like to request support for a particular platform or LED chipset, please submit an issue at <a href="http://fastled.io/issues">http://fastled.io/issues</a>.</p>
-<h1><a class="anchor" id="autotoc_md16"></a>
+<h1><a class="anchor" id="autotoc_md13"></a>
 Supported LED Chipsets</h1>
 <p>Here's a list of all the LED chipsets are supported. More details on the LED chipsets are included <a href="https://github.com/FastLED/FastLED/wiki/Chipset-reference">on our wiki page</a></p>
 <ul>
@@ -221,7 +234,7 @@ Supported LED Chipsets</h1>
 <li>LPD6803 - SPI based chpiset, chip CMODE pin must be set to 1 (inside oscillator mode)</li>
 </ul>
 <p>HL1606, and "595"-style shift registers are no longer supported by the library. The older Version 1 of the library ("FastSPI_LED") has support for these, but is missing many of the advanced features of current versions and is no longer being maintained.</p>
-<h1><a class="anchor" id="autotoc_md17"></a>
+<h1><a class="anchor" id="autotoc_md14"></a>
 Supported Platforms</h1>
 <p>Right now the library is supported on a variety of Arduino compatible platforms. If it's ARM or AVR and uses the Arduino software (or a modified version of it to build) then it is likely supported. Note that we have a long list of upcoming platforms to support, so if you don't see what you're looking for here, ask, it may be on the roadmap (or may already be supported). N.B. at the moment we are only supporting the stock compilers that ship with the Arduino software. Support for upgraded compilers, as well as using AVR Studio and skipping the Arduino entirely, should be coming in a near future release.</p>
 <ul>
@@ -238,13 +251,13 @@ Supported Platforms</h1>
 <li>ESP32 based boards</li>
 </ul>
 <p>What types of platforms are we thinking about supporting in the future? Here's a short list: ChipKit32, Maple, Beagleboard</p>
-<h2><a class="anchor" id="autotoc_md18"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 Porting FastLED to a new platform</h2>
 <p>Information on porting FastLED can be found in the file PORTING.md.</p>
-<h1><a class="anchor" id="autotoc_md19"></a>
+<h1><a class="anchor" id="autotoc_md16"></a>
 What about that name?</h1>
 <p>Wait, what happened to FastSPI_LED and FastSPI_LED2? The library was initially named FastSPI_LED because it was focused on very fast and efficient SPI access. However, since then, the library has expanded to support a number of LED chipsets that don't use SPI, as well as a number of math and utility functions for LED processing across the board. We decided that the name FastLED more accurately represents the totality of what the library provides, everything fast, for LEDs.</p>
-<h1><a class="anchor" id="autotoc_md20"></a>
+<h1><a class="anchor" id="autotoc_md17"></a>
 For more information</h1>
 <p>Check out the official site <a href="http://fastled.io">http://fastled.io</a> for links to documentation, issues, and news</p>
 <p><em>TODO</em> - get candy </p>
@@ -256,7 +269,7 @@ For more information</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Aug 27 2024 18:13:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Tue Sep 3 2024 02:36:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

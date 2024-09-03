@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.4</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
    </div>
   </td>
  </tr>
@@ -123,7 +123,7 @@ $(function(){initNavTree('1653___s3___apa102___hardware___pins_8ino_source.html'
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keywordtype">void</span> setup()</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>{</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="comment">// Initialize the LED stripThe sketch is:</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <a class="code hl_variable" href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.<a class="code hl_function" href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">addLeds</a>&lt;<a class="code hl_enumvalue" href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a>, LED_DI, LED_CI, <a class="code hl_enumvalue" href="group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4a4a19a93c929964c201e01c8352dc8b9c">BGR</a>&gt;(leds, NUM_LEDS);</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    <a class="code hl_variable" href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.<a class="code hl_function" href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">addLeds</a>&lt;<a class="code hl_enumvalue" href="_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926ab58884059d69c6f6fdb432cc53b5db48">APA102</a>, LED_DI, LED_CI, BGR&gt;(leds, NUM_LEDS);</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="comment">// set master brightness control</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <a class="code hl_variable" href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.<a class="code hl_function" href="class_c_fast_l_e_d.html#a730ba7d967e882b4b893689cf333b2eb">setBrightness</a>(64);</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>}</div>
@@ -146,9 +146,8 @@ $(function(){initNavTree('1653___s3___apa102___hardware___pins_8ino_source.html'
 <div class="ttc" id="aclass_c_fast_l_e_d_html_a730ba7d967e882b4b893689cf333b2eb"><div class="ttname"><a href="class_c_fast_l_e_d.html#a730ba7d967e882b4b893689cf333b2eb">CFastLED::setBrightness</a></div><div class="ttdeci">void setBrightness(uint8_t scale)</div><div class="ttdoc">Set the global brightness scaling.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8h_source.html#l00678">FastLED.h:678</a></div></div>
 <div class="ttc" id="aclass_c_fast_l_e_d_html_a83afdd1e2a21f33ac4f8d2610d6e331b"><div class="ttname"><a href="class_c_fast_l_e_d.html#a83afdd1e2a21f33ac4f8d2610d6e331b">CFastLED::show</a></div><div class="ttdeci">void show(uint8_t scale)</div><div class="ttdoc">Update all our controllers with the current led colors, using the passed in brightness.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00058">FastLED.cpp:58</a></div></div>
 <div class="ttc" id="aclass_c_fast_l_e_d_html_afd7928d822589740af6e23b2d510cf3f"><div class="ttname"><a href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">CFastLED::addLeds</a></div><div class="ttdeci">static CLEDController &amp; addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset=0)</div><div class="ttdoc">Add a CLEDController instance to the world.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00046">FastLED.cpp:46</a></div></div>
-<div class="ttc" id="agroup___pixel_types_html_gga3c26d076773aa0f331d3066b46dbc6a4a4a19a93c929964c201e01c8352dc8b9c"><div class="ttname"><a href="group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4a4a19a93c929964c201e01c8352dc8b9c">BGR</a></div><div class="ttdeci">@ BGR</div><div class="ttdoc">Blue, Green, Red (0210)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00961">pixeltypes.h:960</a></div></div>
-<div class="ttc" id="astruct_c_h_s_v_html"><div class="ttname"><a href="struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)).</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00027">pixeltypes.h:27</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00120">pixeltypes.h:120</a></div></div>
+<div class="ttc" id="astruct_c_h_s_v_html"><div class="ttname"><a href="struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)).</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00028">pixeltypes.h:28</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00121">pixeltypes.h:121</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -156,7 +155,7 @@ $(function(){initNavTree('1653___s3___apa102___hardware___pins_8ino_source.html'
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_a28f5fea2b8786ae6755ff1fe11c7e25.html">_bugs</a></li><li class="navelem"><a class="el" href="dir_768277eb201c0a73aa0e3f1dc58af2ca.html">1653_S3_Apa102_Hardware_Pins</a></li><li class="navelem"><b>1653_S3_Apa102_Hardware_Pins.ino</b></li>
-    <li class="footer">Generated on Tue Aug 27 2024 18:13:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

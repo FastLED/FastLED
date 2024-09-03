@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.4</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
    </div>
   </td>
  </tr>
@@ -190,10 +190,10 @@ Typedefs</h2></td></tr>
 <div class="line">    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="struct_____f_l___p_o_r_t___i_n_f_o.html#ad7cedd4bff6b75c60ddf249dade8dd1c">portName</a>() { <span class="keywordflow">return</span> #L; } \</div>
 <div class="line">    <span class="keyword">typedef</span> BASE __t_baseType;  \</div>
 <div class="line">    <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">void</span> *<a class="code hl_function" href="struct_____f_l___p_o_r_t___i_n_f_o.html#a3bab01aa4faddd77dcd6a567bcf50043">portAddr</a>() { <span class="keywordflow">return</span> (<span class="keywordtype">void</span>*)&amp;__t_baseType::r(); } };</div>
-<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html"><div class="ttname"><a href="struct_____f_l___p_o_r_t___i_n_f_o.html">__FL_PORT_INFO</a></div><div class="ttdoc">Utility template for tracking down information about pins and ports.</div><div class="ttdef"><b>Definition</b> <a href="fastpin_8h_source.html#l00317">fastpin.h:317</a></div></div>
-<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html_a3bab01aa4faddd77dcd6a567bcf50043"><div class="ttname"><a href="struct_____f_l___p_o_r_t___i_n_f_o.html#a3bab01aa4faddd77dcd6a567bcf50043">__FL_PORT_INFO::portAddr</a></div><div class="ttdeci">static const void * portAddr()</div><div class="ttdoc">Gets the raw address of the port.</div><div class="ttdef"><b>Definition</b> <a href="fastpin_8h_source.html#l00323">fastpin.h:323</a></div></div>
-<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html_a407030c6570cb7463ac9a76355abae35"><div class="ttname"><a href="struct_____f_l___p_o_r_t___i_n_f_o.html#a407030c6570cb7463ac9a76355abae35">__FL_PORT_INFO::hasPort</a></div><div class="ttdeci">static bool hasPort()</div><div class="ttdoc">Checks whether a port exists.</div><div class="ttdef"><b>Definition</b> <a href="fastpin_8h_source.html#l00319">fastpin.h:319</a></div></div>
-<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html_ad7cedd4bff6b75c60ddf249dade8dd1c"><div class="ttname"><a href="struct_____f_l___p_o_r_t___i_n_f_o.html#ad7cedd4bff6b75c60ddf249dade8dd1c">__FL_PORT_INFO::portName</a></div><div class="ttdeci">static const char * portName()</div><div class="ttdoc">Gets the name of the port, as a C-string.</div><div class="ttdef"><b>Definition</b> <a href="fastpin_8h_source.html#l00321">fastpin.h:321</a></div></div>
+<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html"><div class="ttname"><a href="struct_____f_l___p_o_r_t___i_n_f_o.html">__FL_PORT_INFO</a></div><div class="ttdoc">Utility template for tracking down information about pins and ports.</div><div class="ttdef"><b>Definition</b> <a href="fastpin_8h_source.html#l00318">fastpin.h:318</a></div></div>
+<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html_a3bab01aa4faddd77dcd6a567bcf50043"><div class="ttname"><a href="struct_____f_l___p_o_r_t___i_n_f_o.html#a3bab01aa4faddd77dcd6a567bcf50043">__FL_PORT_INFO::portAddr</a></div><div class="ttdeci">static const void * portAddr()</div><div class="ttdoc">Gets the raw address of the port.</div><div class="ttdef"><b>Definition</b> <a href="fastpin_8h_source.html#l00324">fastpin.h:324</a></div></div>
+<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html_a407030c6570cb7463ac9a76355abae35"><div class="ttname"><a href="struct_____f_l___p_o_r_t___i_n_f_o.html#a407030c6570cb7463ac9a76355abae35">__FL_PORT_INFO::hasPort</a></div><div class="ttdeci">static bool hasPort()</div><div class="ttdoc">Checks whether a port exists.</div><div class="ttdef"><b>Definition</b> <a href="fastpin_8h_source.html#l00320">fastpin.h:320</a></div></div>
+<div class="ttc" id="astruct_____f_l___p_o_r_t___i_n_f_o_html_ad7cedd4bff6b75c60ddf249dade8dd1c"><div class="ttname"><a href="struct_____f_l___p_o_r_t___i_n_f_o.html#ad7cedd4bff6b75c60ddf249dade8dd1c">__FL_PORT_INFO::portName</a></div><div class="ttdeci">static const char * portName()</div><div class="ttdoc">Gets the name of the port, as a C-string.</div><div class="ttdef"><b>Definition</b> <a href="fastpin_8h_source.html#l00322">fastpin.h:322</a></div></div>
 </div><!-- fragment -->
 <p>Macro to create the instantiations for defined ports. </p>
 <p>We're going to abuse this later for auto discovery of pin/port mappings for new variants. <br  />
@@ -205,7 +205,7 @@ Typedefs</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00333">333</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00334">334</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
 
 </div>
 </div>
@@ -249,7 +249,7 @@ Typedefs</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00349">349</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00350">350</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
 
 </div>
 </div>
@@ -269,7 +269,7 @@ Typedefs</h2></td></tr>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo</a></b></dt><dd>Unused, remove? <br  />
  </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00019">19</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00020">20</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
 
 </div>
 </div>
@@ -288,7 +288,7 @@ Typedefs</h2></td></tr>
 
 <p>Pointer to a 32-bit register, volatile. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00313">313</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00314">314</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
 
 </div>
 </div>
@@ -306,7 +306,7 @@ Typedefs</h2></td></tr>
 
 <p>Reference to a 32-bit register, volatile. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00312">312</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastpin_8h_source.html#l00313">313</a> of file <a class="el" href="fastpin_8h_source.html">fastpin.h</a>.</p>
 
 </div>
 </div>
@@ -317,7 +317,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="fastpin_8h.html">fastpin.h</a></li>
-    <li class="footer">Generated on Tue Aug 27 2024 18:13:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

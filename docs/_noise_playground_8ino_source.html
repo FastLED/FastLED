@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.4</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
    </div>
   </td>
  </tr>
@@ -174,7 +174,7 @@ $(function(){initNavTree('_noise_playground_8ino_source.html',''); initResizable
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>  Serial.println(<span class="stringliteral">&quot;resetting!&quot;</span>);</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>  delay(3000);</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <a class="code hl_variable" href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.<a class="code hl_function" href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">addLeds</a>&lt;<a class="code hl_class" href="class_w_s2811.html">WS2811</a>,2,<a class="code hl_enumvalue" href="group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4aa94cf1760393e10a753b8edba4ca1c98">GRB</a>&gt;(leds,NUM_LEDS);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>  <a class="code hl_variable" href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.<a class="code hl_function" href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">addLeds</a>&lt;<a class="code hl_class" href="class_w_s2811.html">WS2811</a>,2,GRB&gt;(leds,NUM_LEDS);</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>  <a class="code hl_variable" href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.<a class="code hl_function" href="class_c_fast_l_e_d.html#a730ba7d967e882b4b893689cf333b2eb">setBrightness</a>(96);</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>  hxy = (uint32_t)((uint32_t)<a class="code hl_function" href="group___random.html#ga17034d936ef716efe820e11c1df043b0">random16</a>() &lt;&lt; 16) + (uint32_t)<a class="code hl_function" href="group___random.html#ga17034d936ef716efe820e11c1df043b0">random16</a>();</div>
@@ -191,11 +191,10 @@ $(function(){initNavTree('_noise_playground_8ino_source.html',''); initResizable
 <div class="ttc" id="aclass_c_fast_l_e_d_html_afd7928d822589740af6e23b2d510cf3f"><div class="ttname"><a href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">CFastLED::addLeds</a></div><div class="ttdeci">static CLEDController &amp; addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset=0)</div><div class="ttdoc">Add a CLEDController instance to the world.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00046">FastLED.cpp:46</a></div></div>
 <div class="ttc" id="aclass_w_s2811_html"><div class="ttname"><a href="class_w_s2811.html">WS2811</a></div><div class="ttdoc">WS2811 controller class.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8h_source.html#l00221">FastLED.h:221</a></div></div>
 <div class="ttc" id="agroup___noise_fill_html_ga714a0f305e385a60d81a40d1f98b53fc"><div class="ttname"><a href="group___noise_fill.html#ga714a0f305e385a60d81a40d1f98b53fc">fill_2dnoise16</a></div><div class="ttdeci">void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine, uint8_t octaves, uint32_t x, int xscale, uint32_t y, int yscale, uint32_t time, uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale, uint16_t hue_time, bool blend, uint16_t hue_shift)</div><div class="ttdoc">Fill an LED matrix with random colors, using 16-bit noise.</div><div class="ttdef"><b>Definition</b> <a href="noise_8cpp_source.html#l00824">noise.cpp:824</a></div></div>
-<div class="ttc" id="agroup___pixel_types_html_gga3c26d076773aa0f331d3066b46dbc6a4aa94cf1760393e10a753b8edba4ca1c98"><div class="ttname"><a href="group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4aa94cf1760393e10a753b8edba4ca1c98">GRB</a></div><div class="ttdeci">@ GRB</div><div class="ttdoc">Green, Red, Blue (0102)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00957">pixeltypes.h:957</a></div></div>
 <div class="ttc" id="agroup___random_html_ga1078b2029a50e86c93ccf4e3e1d85e7d"><div class="ttname"><a href="group___random.html#ga1078b2029a50e86c93ccf4e3e1d85e7d">random16_add_entropy</a></div><div class="ttdeci">LIB8STATIC void random16_add_entropy(uint16_t entropy)</div><div class="ttdoc">Add entropy into the random number generator.</div><div class="ttdef"><b>Definition</b> <a href="random8_8h_source.html#l00110">random8.h:110</a></div></div>
 <div class="ttc" id="agroup___random_html_ga17034d936ef716efe820e11c1df043b0"><div class="ttname"><a href="group___random.html#ga17034d936ef716efe820e11c1df043b0">random16</a></div><div class="ttdeci">LIB8STATIC uint16_t random16()</div><div class="ttdoc">Generate a 16-bit random number.</div><div class="ttdef"><b>Definition</b> <a href="random8_8h_source.html#l00052">random8.h:52</a></div></div>
 <div class="ttc" id="agroup___random_html_ga95e371c2438843e0ed1ed83412b28c99"><div class="ttname"><a href="group___random.html#ga95e371c2438843e0ed1ed83412b28c99">random16_set_seed</a></div><div class="ttdeci">LIB8STATIC void random16_set_seed(uint16_t seed)</div><div class="ttdoc">Set the 16-bit seed used for the random number generator.</div><div class="ttdef"><b>Definition</b> <a href="random8_8h_source.html#l00098">random8.h:98</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00120">pixeltypes.h:120</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00121">pixeltypes.h:121</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -203,7 +202,7 @@ $(function(){initNavTree('_noise_playground_8ino_source.html',''); initResizable
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_8b10bafa6e455a6cfdd7da84bc339d80.html">NoisePlayground</a></li><li class="navelem"><a class="el" href="_noise_playground_8ino.html">NoisePlayground.ino</a></li>
-    <li class="footer">Generated on Tue Aug 27 2024 18:13:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -43,7 +43,7 @@ var searchData=
   ['delaycycles_5fmin1_40',['delaycycles_min1',['../fastled__delay_8h.html#a76328edb9ea1a1f017567ff835247d2d',1,'fastled_delay.h']]],
   ['demoreel100_2eino_41',['DemoReel100.ino',['../_demo_reel100_8ino.html',1,'']]],
   ['deprecated_20list_42',['Deprecated List',['../deprecated.html',1,'']]],
-  ['development_43',['Development',['../index.html#autotoc_md14',1,'']]],
+  ['development_43',['Development',['../index.html#autotoc_md11',1,'']]],
   ['dim8_5flin_44',['dim8_lin',['../group___dimming.html#ga3f94d2455e0aa92133f77af8747b5914',1,'scale8.h']]],
   ['dim8_5fraw_45',['dim8_raw',['../group___dimming.html#gae51352a3522bb8eae5e17dbee97aa1aa',1,'scale8.h']]],
   ['dim8_5fvideo_46',['dim8_video',['../group___dimming.html#ga40a13446a2022dc489be8b2a8f2fa494',1,'scale8.h']]],
@@ -68,7 +68,7 @@ var searchData=
   ['dotstarhd_65',['DOTSTARHD',['../_fast_l_e_d_8h.html#ac06549dc4a351e2c8f1dda8ae81f7926ad74c74695186923a5bac9867ec57e281',1,'FastLED.h']]],
   ['dp1903controller400khz_66',['DP1903Controller400Khz',['../class_d_p1903_controller400_khz.html',1,'']]],
   ['dp1903controller800khz_67',['DP1903Controller800Khz',['../class_d_p1903_controller800_khz.html',1,'']]],
-  ['dual_20repo_68',['Arduino IDE / PlatformIO Dual Repo',['../index.html#autotoc_md12',1,'']]],
+  ['dual_20repo_68',['Arduino IDE / PlatformIO Dual Repo',['../index.html#autotoc_md9',1,'']]],
   ['dump_69',['dump',['../class_c_pixel_view.html#a7c48be778df95d36399eeaa4e9164cda',1,'CPixelView']]],
   ['dword_70',['dword',['../union_t_r_g_b_gradient_palette_entry_union.html#a2d804a8e4f58e9aa7d65f456f69d904b',1,'TRGBGradientPaletteEntryUnion']]]
 ];

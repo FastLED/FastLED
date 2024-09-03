@@ -1,13 +1,5 @@
 var pixeltypes_8h =
 [
-    [ "EOrder", "group___pixel_types.html#ga3c26d076773aa0f331d3066b46dbc6a4", [
-      [ "RGB", "group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4a30447e9f6efa4afdd251f9afc1d5fb44", null ],
-      [ "RBG", "group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4ac6df59182dbf95476bd74527b6785a1d", null ],
-      [ "GRB", "group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4aa94cf1760393e10a753b8edba4ca1c98", null ],
-      [ "GBR", "group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4ad60fbd7d8962ed9fb329aa0c0a47edc9", null ],
-      [ "BRG", "group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4aa23d02d9d56089f1419a6c2eee27d16f", null ],
-      [ "BGR", "group___pixel_types.html#gga3c26d076773aa0f331d3066b46dbc6a4a4a19a93c929964c201e01c8352dc8b9c", null ]
-    ] ],
     [ "HSVHue", "group___pixel_types.html#ga6585ae9f9a54e6a1fcb7c5f985931fb3", [
       [ "HUE_RED", "group___pixel_types.html#gga6585ae9f9a54e6a1fcb7c5f985931fb3af99ca29e78f56261625c2f83f8d9d641", null ],
       [ "HUE_ORANGE", "group___pixel_types.html#gga6585ae9f9a54e6a1fcb7c5f985931fb3a0908faa334c40567fac7aec352fb70f2", null ],
