@@ -2,9 +2,9 @@ import os
 import subprocess
 import argparse
 import csv
-from datetime import datetime
 import dateutil.parser
 import shutil
+from pathlib import Path
 
 def run_command(command):
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -68,13 +68,13 @@ def main(num_commits, skip_step, start_commit, end_commit):
     run_command("git checkout master")
 
     # If end_commit is specified, checkout that commit
-    if end_commit:
-        print(f"Checking out end commit: {end_commit}")
-        checkout_command = f"git checkout {end_commit}"
-        output, error = run_command(checkout_command)
-        #if error:
-        #    print(f"Error checking out end commit: {error}")
-        #    return
+    # if end_commit:
+    #     print(f"Checking out end commit: {end_commit}")
+    #     checkout_command = f"git checkout {end_commit}"
+    #     output, error = run_command(checkout_command)
+    #     #if error:
+    #     #    print(f"Error checking out end commit: {error}")
+    #     #    return
 
     # Prepare CSV file
     csv_filename = "../../firmware_sizes.csv"
@@ -83,22 +83,31 @@ def main(num_commits, skip_step, start_commit, end_commit):
         csvwriter.writerow(['datetime', 'commit_hash', 'binary_size'])
 
     commits_checked = 0
+    first_iteration = True
     while True:
         current_commit = get_commit_hash()
+
+        if first_iteration and start_commit:
+            first_iteration = False
+            while True:
+                if current_commit == start_commit:
+                    break
+                if not step_back_commits(1):
+                    break
+                current_commit = get_commit_hash()
         
-        # Stop if we've reached the start_commit or checked num_commits
-        if start_commit and current_commit == start_commit:
-            print(f"Reached start commit: {start_commit}")
-            break
         if num_commits and commits_checked >= num_commits:
             print(f"Checked {num_commits} commits")
+            break
+
+        if end_commit and current_commit == end_commit:
+            print(f"Checked until end commit: {end_commit}")
             break
 
         # 2. Run ci-compile.py for current commit
         print(f"\nChecking commit {commits_checked + 1}")
 
         # remove .build/esp32dev/pio/build/esp32dev/ directory
-        from pathlib import Path
         board_files = Path('.build') / "esp32dev" / ".pio" / "build" / "esp32dev"
 
         shutil.rmtree(str(board_files), ignore_errors=True)
@@ -106,7 +115,7 @@ def main(num_commits, skip_step, start_commit, end_commit):
         output, error = run_command(compile_command)
         if error:
             print(f"Error running ci-compile.py: {error}")
-            if not step_back_commits(1):
+            if not step_back_commits(skip_step):
                 break
             continue
 
