@@ -19,8 +19,8 @@ def step_back_commits(steps):
         return False
     return True
 
-def check_firmware_size():
-    size_command = "du -b .build/esp32dev/.pio/build/esp32dev/firmware.bin"
+def check_firmware_size(board) -> int:
+    size_command = f"du -b .build/esp32dev/.pio/build/{board}/firmware.bin"
     output, error = run_command(size_command)
     if error:
         print(f"Error checking firmware size: {error}")
@@ -44,7 +44,7 @@ def get_commit_date(commit_hash):
         return None
     return dateutil.parser.parse(output.strip()).isoformat()
 
-def main(num_commits, skip_step, start_commit, end_commit):
+def main(board: str, num_commits: int, skip_step: int, start_commit: str | None = None, end_commit: str | None = None):
     # Create tmp directory if it doesn't exist
     if not os.path.exists("tmp"):
         os.makedirs("tmp")
@@ -108,10 +108,10 @@ def main(num_commits, skip_step, start_commit, end_commit):
         print(f"\nChecking commit {commits_checked + 1}")
 
         # remove .build/esp32dev/pio/build/esp32dev/ directory
-        board_files = Path('.build') / "esp32dev" / ".pio" / "build" / "esp32dev"
+        board_files = Path('.build') / board / ".pio" / "build" / board
         if board_files.exists():
             shutil.rmtree(str(board_files), ignore_errors=True)
-        compile_command = "python3 ci/ci-compile.py --boards esp32dev --examples Blink"
+        compile_command = f"python3 ci/ci-compile.py --boards {board} --examples Blink"
         output, error = run_command(compile_command)
         if error:
             print(f"Error running ci-compile.py: {error}")
@@ -146,9 +146,25 @@ def main(num_commits, skip_step, start_commit, end_commit):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check FastLED firmware size for multiple commits.")
-    parser.add_argument("--num-commits", type=int, help="Number of commits to check")
+    parser.add_argument("--num-commits", type=int, default=1, help="Number of commits to check")
     parser.add_argument("--skip-step", type=int, default=1, help="Number of commits to skip between checks")
     parser.add_argument("--start-commit", type=str, help="Starting commit hash")
     parser.add_argument("--end-commit", type=str, help="Ending commit hash")
+    parser.add_argument("--board", type=str, default="esp32dev", help="Board to check firmware size for")
     args = parser.parse_args()
-    main(args.num_commits, args.skip_step, args.start_commit, args.end_commit)
+
+    if args.start_commit or args.end_commit:
+        if not (args.start_commit and not args.end_commit):
+            print("Both start commit and end commit must be specified.")
+            exit(1)
+        # if start_commit is specified, end_commit must be specified
+
+    num_commits = args.num_commits
+    if args.start_commit and args.end_commit:
+        if args.start_commit == args.end_commit:
+            print("Start commit and end commit are the same.")
+            exit(1)
+        num_commits = 999999
+    
+        
+    main(args.board, num_commits, args.skip_step, args.start_commit, args.end_commit)
