@@ -17,6 +17,9 @@
       * adafruit conversation on RMT progress: https://github.com/adafruit/Adafruit_NeoPixel/issues/375
 
 
+# ESP32 - IDF 5.1
+  * https://github.com/espressif/arduino-esp32/blob/gh-pages/LIBRARIES_TEST.md
+
 ## RMT driver for esp-idf 5.1
 
 Porting notes
