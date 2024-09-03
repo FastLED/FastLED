@@ -20,7 +20,14 @@ def step_back_commits(steps):
     return True
 
 def check_firmware_size(board: str) -> int:
-    size_command = f"du -b .build/{board}/.pio/build/{board}/firmware.bin"
+    base_path = Path(".build") / board / ".pio" / "build" / board
+    firmware = base_path / "firmware.bin"
+    if not firmware.exists():
+        firmware = base_path / "firmware.hex"
+    if not firmware.exists():
+        raise FileNotFoundError(f"firmware.bin or firmware.hex not found in {base_path}")
+    size_command = f"du -b {firmware}"
+
     output, error = run_command(size_command)
     if error:
         print(f"Error checking firmware size: {error}")
