@@ -27,3 +27,4 @@ Thumbs.db
 !.aiderignore
 ci/native/.vscode/
 tmp/
+firmware_sizes.csv
