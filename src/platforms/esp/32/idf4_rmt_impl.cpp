@@ -11,7 +11,6 @@
 #include "idf4_rmt.h"
 #include "idf4_rmt_impl.h"
 #include "clock_cycles.h"
-#include <iostream>
 
 #ifdef __cplusplus
 extern "C"
@@ -47,26 +46,20 @@ extern "C"
 // ignore warnings like: ignoring attribute 'section (".iram1.11")' because it conflicts with previous 'section (".iram1.2")' [-Wattributes]
 // #pragma GCC diagnostic ignored "-Wattributes"
 
-#define _RMT_ASSERT(cond, MSG)             \
-    do                                     \
-    {                                      \
-        if (!(cond))                       \
-        {                                  \
-            std::cout << MSG << std::endl; \
-            abort();                       \
-        }                                  \
-    } while (0);
 
 #ifndef FASTLED_RMT_SERIAL_DEBUG
 #define FASTLED_RMT_SERIAL_DEBUG 0
 #endif
 
-#if FASTLED_RMT_SERIAL_DEBUG == 1
-#define FASTLED_DEBUG(format, errcode, ...)                                   \
+#define FASTLED_ASSERT(format, errcode, ...)                                  \
     if (errcode != ESP_OK)                                                    \
     {                                                                         \
         Serial.printf(PSTR("FASTLED: " format "\n"), errcode, ##__VA_ARGS__); \
     }
+
+
+#if FASTLED_RMT_SERIAL_DEBUG == 1
+#define FASTLED_DEBUG(format, errcode, ...) FASTLED_ASSERT(format, errcode, ##__VA_ARGS__)
 #else
 #define FASTLED_DEBUG(format, errcode, ...) (void)errcode;
 #endif
@@ -603,7 +596,7 @@ void ESP32RMTController::tx_start()
     RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
 #elif CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-    _RMT_ASSERT(false, "tx_start Not yet implemented for ESP32-S2 in idf 5.x");
+    FASTLED_DEBUG(false, "tx_start Not yet implemented for ESP32-S2 in idf 5.x");
 #else
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
     RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
@@ -711,7 +704,7 @@ void IRAM_ATTR _rmt_set_tx_intr_disable(rmt_channel_t channel)
     RMT.chnconf0[channel].apb_mem_rst_chn = 0;
 #elif CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-    _RMT_ASSERT(false, "doneOnChannel not yet implemented for ESP32-S2 in idf 5.x");
+    FASTLED_ASSERT(false, "doneOnChannel not yet implemented for ESP32-S2 in idf 5.x");
 #else
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
     RMT.int_ena.val &= ~(1 << (channel * 3));
