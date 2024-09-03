@@ -19,7 +19,7 @@ def step_back_commits(steps):
         return False
     return True
 
-def check_firmware_size(board) -> int:
+def check_firmware_size(board: str) -> int:
     size_command = f"du -b .build/esp32dev/.pio/build/{board}/firmware.bin"
     output, error = run_command(size_command)
     if error:
@@ -121,7 +121,7 @@ def main(board: str, num_commits: int, skip_step: int, start_commit: str | None 
 
         # 3. Check firmware size and get commit hash
         print("Checking firmware size...")
-        size = check_firmware_size()
+        size = check_firmware_size(board)
         commit_hash = get_commit_hash()
         if size and commit_hash:
             commit_date = get_commit_date(commit_hash)
