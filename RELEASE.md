@@ -29,7 +29,9 @@ $ git push
 $ git push origin 3.2.10 
 ```
 
-Then use the GitHub UI to make a new “Release”
+Then use the GitHub UI to make a new “Release”:
+
+https://github.com/FastLED/FastLED/releases/new
 
 Announce new version on subreddit, highlighting major changes and thanking people for helping. 
 
