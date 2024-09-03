@@ -36,7 +36,7 @@ jobs:
 
       - name: Check Board Size
         run: |
-          python -c "
+          cd ci && python -c "
           import csv
           import sys
 
