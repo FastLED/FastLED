@@ -4,6 +4,9 @@
 
 #define FASTLED_INTERNAL
 
+// Inlines the rmt_set_tx_intr_en function to avoid the overhead of a function call
+#define INLINE_RMT_SET_TX_INTR_DISABLE 0
+
 #include "FastLED.h"
 #include "idf4_rmt.h"
 #include "idf4_rmt_impl.h"
@@ -643,24 +646,13 @@ void ESP32RMTController::tx_start()
     mLastFill = __clock_cycles();
 }
 
-// -- A controller is done
-//    This function is called when a controller finishes writing
-//    its data. It is called either by the custom interrupt
-//    handler (below), or as a callback from the built-in
-//    interrupt handler. It is static because we don't know which
-//    controller is done until we look it up.
-void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *arg)
+void IRAM_ATTR _rmt_set_tx_intr_disable(rmt_channel_t channel)
 {
-    ESP32RMTController *pController = gOnChannel[channel];
-
-    // -- Turn off output on the pin
-    //    Otherwise the pin will stay connected to the RMT controller,
-    //    and if the same RMT controller is used for another output
-    //    pin the RMT output will be routed to both pins.
-    gpio_matrix_out(pController->mPin, SIG_GPIO_OUT_IDX, 0, 0);
-
-    // -- Turn off the interrupts
-    // rmt_set_tx_intr_en(channel, false);
+    // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
+#if INLINE_RMT_SET_TX_INTR_DISABLE
+    rmt_set_tx_intr_en(channel, false);
+    return;
+#else
 
     // Inline the code for rmt_set_tx_intr_en(channel, false) and rmt_tx_stop, so it can be placed in IRAM
 #if CONFIG_IDF_TARGET_ESP32C3
@@ -742,6 +734,27 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *ar
 #else
 #error Not yet implemented for unknown ESP32 target
 #endif
+#endif
+}
+
+// -- A controller is done
+//    This function is called when a controller finishes writing
+//    its data. It is called either by the custom interrupt
+//    handler (below), or as a callback from the built-in
+//    interrupt handler. It is static because we don't know which
+//    controller is done until we look it up.
+void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *arg)
+{
+    ESP32RMTController *pController = gOnChannel[channel];
+
+    // -- Turn off output on the pin
+    //    Otherwise the pin will stay connected to the RMT controller,
+    //    and if the same RMT controller is used for another output
+    //    pin the RMT output will be routed to both pins.
+    gpio_matrix_out(pController->mPin, SIG_GPIO_OUT_IDX, 0, 0);
+
+    // -- Turn off the interrupts
+    _rmt_set_tx_intr_disable(channel);
 
     gOnChannel[channel] = NULL;
     gNumDone++;
@@ -919,8 +932,6 @@ void ESP32RMTController::ingest(uint8_t byteval)
     convert_byte_to_rmt(byteval, mZero.val, mOne.val, mBuffer + mCurPulse);
     mCurPulse += 8;
 }
-
-
 
 #pragma GCC diagnostic pop
 
