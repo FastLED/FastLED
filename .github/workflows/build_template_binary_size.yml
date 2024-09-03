@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ inputs.board }}-${{ github.run_number }}-${{ github.run_attempt }}-${{ github.sha }}
-          path: .build/
+          path: ./firmware_sizes.csv
           include-hidden-files: true
 
       - name: Check build status
