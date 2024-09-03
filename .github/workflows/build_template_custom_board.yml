@@ -6,6 +6,9 @@ on:
       args:
         required: true
         type: string
+      platform:
+        required: true
+        type: string
 
 jobs:
   build:
@@ -27,11 +30,8 @@ jobs:
       - name: Pre-build to ensure ~/.platformio/boards folder is created
         run: python ./ci/ci-compile.py --boards uno --examples Blink
 
-      # Copy the custom board JSON file to the PlatformIO boards folder
-      - name: Copy ci/boards/*.json to ~/.platformio/boards
-        run: |
-          mkdir -p ~/.platformio/boards
-          cp ci/boards/*.json ~/.platformio/boards
+      - name: Install Platform
+        run: pio pkg install -g -p ${{ inputs.platform }}
 
       - name: Build
         id: build

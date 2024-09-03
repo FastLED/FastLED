@@ -1,4 +1,4 @@
-name: esp32c6
+name: rp2040 earle
 
 on:
   workflow_dispatch:
@@ -13,4 +13,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: --boards esp32-c6-devkitc-1
+      args: --boards rpipico
