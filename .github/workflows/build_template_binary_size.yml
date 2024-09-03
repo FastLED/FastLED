@@ -32,7 +32,7 @@ jobs:
           pip install python-dateutil
 
       - name: Compile Board and Output Size
-        run: python compiled_size.py ${{ inputs.board }} --num-commits 1
+        run: python compiled_size.py --board ${{ inputs.board }} --num-commits 1
 
       - name: Check Board Size
         run: |
