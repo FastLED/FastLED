@@ -7,7 +7,6 @@
 #include "FastLED.h"
 #include "idf4_rmt.h"
 #include "idf4_rmt_impl.h"
-#include <iostream>
 
 
 void RmtController::init(gpio_num_t pin, bool built_in_driver)

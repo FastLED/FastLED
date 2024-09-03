@@ -15,6 +15,7 @@
         "compare": "cpp",
         "type_traits": "cpp",
         "cmath": "cpp",
-        "limits": "cpp"
+        "limits": "cpp",
+        "iostream": "cpp"
     }
 }
