@@ -109,8 +109,8 @@ def main(num_commits, skip_step, start_commit, end_commit):
 
         # remove .build/esp32dev/pio/build/esp32dev/ directory
         board_files = Path('.build') / "esp32dev" / ".pio" / "build" / "esp32dev"
-
-        shutil.rmtree(str(board_files), ignore_errors=True)
+        if board_files.exists():
+            shutil.rmtree(str(board_files), ignore_errors=True)
         compile_command = "python3 ci/ci-compile.py --boards esp32dev --examples Blink"
         output, error = run_command(compile_command)
         if error:
