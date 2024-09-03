@@ -37,10 +37,11 @@ jobs:
       - name: Check Board Size
         run: |
           IFS=, read -r _ _ size < <(tail -n 1 ./firmware_sizes.csv)
-          if [ $size -gt ${{ inputs.max_size }} ]; then
+          if (( $(echo "$size > ${{ inputs.max_size }}" | bc -l) )); then
             echo "Board size $size is greater than max size ${{ inputs.max_size }}"
             exit 1
           fi
+        shell: /bin/bash
 
       - name: Upload build artifacts on failure
         if: failure()
