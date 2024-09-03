@@ -36,12 +36,22 @@ jobs:
 
       - name: Check Board Size
         run: |
-          IFS=, read -r _ _ size < <(tail -n 1 ./firmware_sizes.csv)
-          if (( $(echo "$size > ${{ inputs.max_size }}" | bc -l) )); then
-            echo "Board size $size is greater than max size ${{ inputs.max_size }}"
-            exit 1
-          fi
-        shell: /bin/bash
+          python -c "
+          import csv
+          import sys
+          
+          with open('firmware_sizes.csv', 'r') as f:
+              reader = csv.reader(f)
+              next(reader)  # Skip the header row
+              first_data_row = next(reader)  # Get the first data row
+              size = int(first_data_row[2])
+          
+          if size > ${{ inputs.max_size }}:
+              print(f'Board size {size} is greater than max size ${{ inputs.max_size }}')
+              sys.exit(1)
+          else:
+              print(f'Board size {size} is within the limit of ${{ inputs.max_size }}')
+          "
 
       - name: Upload build artifacts on failure
         if: failure()
