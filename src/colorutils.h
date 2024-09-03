@@ -1939,7 +1939,7 @@ CRGB ColorFromPalette( const CRGBPalette16& pal,
 
 /// @brief Same as ColorFromPalette, but higher precision. Will eventually
 ///        become the default.
-/// @author https://github.com/sutaburosu
+/// @author https://github.com/generalelectrix
 /// @source https://github.com/FastLED/FastLED/pull/202#issuecomment-631333384
 /// @example https://wokwi.com/projects/285170662915441160
 CRGB ColorFromPaletteExtended(
@@ -1949,16 +1949,22 @@ CRGB ColorFromPaletteExtended(
     TBlendType blendType);
 
 /// @copydoc ColorFromPalette(const CRGBPalette16&, uint8_t, uint8_t, TBlendType)
-CRGB ColorFromPalette( const TProgmemRGBPalette16& pal,
-                       uint8_t index,
-                       uint8_t brightness=255,
-                       TBlendType blendType=LINEARBLEND);
+CRGB ColorFromPalette(const TProgmemRGBPalette16& pal,
+                      uint8_t index,
+                      uint8_t brightness=255,
+                      TBlendType blendType=LINEARBLEND);
 
 /// @copydoc ColorFromPalette(const CRGBPalette16&, uint8_t, uint8_t, TBlendType)
-CRGB ColorFromPalette( const CRGBPalette256& pal,
-                       uint8_t index,
-                       uint8_t brightness=255,
-                       TBlendType blendType=NOBLEND );
+CRGB ColorFromPalette(const CRGBPalette256& pal,
+                      uint8_t index,
+                      uint8_t brightness=255,
+                      TBlendType blendType=NOBLEND );
+
+// @author https://github.com/generalelectrix
+CRGB ColorFromPaletteExtended(const CRGBPalette256& pal,
+                              uint16_t index,
+                              uint8_t brightness,
+                              TBlendType blendType);
 
 /// @copydoc ColorFromPalette(const CRGBPalette16&, uint8_t, uint8_t, TBlendType)
 CHSV ColorFromPalette( const CHSVPalette16& pal,
