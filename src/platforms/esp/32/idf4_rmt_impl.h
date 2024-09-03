@@ -46,11 +46,19 @@ extern "C"
 #define FASTLED_INTERNAL
 
 
+
+
 // -- Forward reference
 class ESP32RMTController;
 
 class ESP32RMTController
 {
+public:
+    // -- Initialize RMT subsystem
+    //    This only needs to be done once. The particular pin is not important,
+    //    because we need to configure the RMT channels on the fly.
+    static void init(gpio_num_t pin, bool built_in_driver);
+
 private:
     // friend function esp_rmt_init
     friend void esp_rmt_init(gpio_num_t pin, bool built_in_driver);

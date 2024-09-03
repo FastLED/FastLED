@@ -114,10 +114,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-// -- Initialize RMT subsystem
-//    This only needs to be done once. The particular pin is not important,
-//    because we need to configure the RMT channels on the fly.
-static void esp_rmt_init(gpio_num_t pin, bool built_in_driver);
+
 
 // NOT CURRENTLY IMPLEMENTED:
 // -- Set to true to print debugging information about timing
@@ -132,6 +129,7 @@ class ESP32RMTController;
 class RmtController
 {
 public:
+    static void init(gpio_num_t pin, bool built_in_driver);
     RmtController() = delete;
     RmtController(const RmtController &) = delete;
     RmtController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver);

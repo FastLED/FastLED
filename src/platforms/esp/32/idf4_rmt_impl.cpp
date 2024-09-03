@@ -331,7 +331,7 @@ uint8_t *ESP32RMTController::getPixelBuffer(int size_in_bytes)
 
 // -- Initialize RMT subsystem
 //    This only needs to be done once
-void esp_rmt_init(gpio_num_t pin, bool built_in_driver)
+void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 {
     if (gInitialized)
         return;
@@ -405,7 +405,7 @@ void ESP32RMTController::showPixels()
     if (gNumStarted == 0)
     {
         // -- First controller: make sure everything is set up
-        esp_rmt_init(mPin, mBuiltInDriver);
+        init(mPin, mBuiltInDriver);
 
 #if FASTLED_ESP32_FLASH_LOCK == 1
         // -- Make sure no flash operations happen right now
