@@ -23,13 +23,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install PlatformIO build dependencies
+      - name: Install Tool Dependencies
         run: |
           pip install -r ci/requirements.txt
-
-      - name: Install Compile Board Size Dependencies
-        run: |
-          pip install python-dateutil
 
       - name: Compile Board and Output Size
         run: cd ci && python compiled_size.py --board ${{ inputs.board }} --num-commits 1
