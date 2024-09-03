@@ -119,6 +119,9 @@ We have multiple goals with this library:
 [![esp32dev_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_esp32_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_esp32_size.yml)
 
 
+[![teensy41_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml)
+
+
 ## Getting Started
 
 ### Arduino IDE / PlatformIO Dual Repo
