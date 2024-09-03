@@ -39,6 +39,8 @@ jobs:
           python -c "
           import csv
           import sys
+
+          board = '${{ inputs.board }}'
           
           with open('firmware_sizes.csv', 'r') as f:
               reader = csv.reader(f)
@@ -47,10 +49,10 @@ jobs:
               size = int(first_data_row[2])
           
           if size > ${{ inputs.max_size }}:
-              print(f'Board size {size} is greater than max size ${{ inputs.max_size }}')
+              print(f'{board} size {size} is greater than max size ${{ inputs.max_size }}')
               sys.exit(1)
           else:
-              print(f'Board size {size} is within the limit of ${{ inputs.max_size }}')
+              print(f'{board} size {size} is within the limit of ${{ inputs.max_size }}')
           "
 
       - name: Upload build artifacts on failure
