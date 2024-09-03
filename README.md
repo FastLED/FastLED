@@ -110,6 +110,11 @@ We have multiple goals with this library:
 
 [![linux_native](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml)
 
+
+## Compiled Library Size Check
+
+[![esp32dev_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_esp32_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_esp32_size.yml)
+
 ## Getting Started
 
 ### Arduino IDE / PlatformIO Dual Repo
