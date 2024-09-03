@@ -1,0 +1,55 @@
+name: Build Template
+
+on:
+  workflow_call:
+    inputs:
+      board:
+        type: string
+        required: true
+      max_size:
+        type: number
+        required: true
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO build dependencies
+        run: |
+          pip install -r ci/requirements.txt
+
+      - name: Install Compile Board Size Dependencies
+        run: |
+          pip install dateutil
+
+      - name: Compile Board and Output Size
+        run: python compiled_size.py ${{ inputs.board }} --num-commits 1
+
+      - name: Check Board Size
+        run: |
+          IFS=, read -r _ _ size < <(tail -n 1 ./firmware_sizes.csv)
+          if [ $size -gt ${{ inputs.max_size }} ]; then
+            echo "Board size $size is greater than max size ${{ inputs.max_size }}"
+            exit 1
+          fi
+
+      - name: Upload build artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ inputs.board }}-${{ github.run_number }}-${{ github.run_attempt }}-${{ github.sha }}
+          path: .build/
+          include-hidden-files: true
+
+      - name: Check build status
+        if: failure()
+        run: exit 1
