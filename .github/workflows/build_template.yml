@@ -35,9 +35,11 @@ jobs:
       #      ${{ runner.os }}-build-
 
       - name: Build FastLED examples
-        run: python ./ci/ci-compile.py ${{ inputs.args }} | tee build.log
+        run: |
+          set -o pipefail
+          python ./ci/ci-compile.py ${{ inputs.args }} | tee build.log
+        shell: bash
 
-        
       - name: Upload build artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
