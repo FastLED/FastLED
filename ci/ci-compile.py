@@ -76,6 +76,14 @@ BOARDS = [
     "teensy41"
 ]
 
+OTHER_BOARDS = [
+    "adafruit_feather_nrf52840_sense",
+    "rpipico",
+    "rpipico2",
+    "uno_r4_wifi",
+    "nano_every"
+]
+
 
 
 CUSTOM_PROJECT_OPTIONS = {
@@ -376,7 +384,7 @@ def main() -> int:
         CUSTOM_PROJECT_OPTIONS.clear()
 
     if args.interactive:
-        boards = choose_board_interactively(BOARDS)
+        boards = choose_board_interactively(BOARDS + OTHER_BOARDS)
     else:
         boards = args.boards.split(',') if args.boards else BOARDS
     examples = args.examples.split(',') if args.examples else EXAMPLES
