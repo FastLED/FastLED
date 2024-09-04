@@ -23,6 +23,9 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install UV
+        run: pip install uv
+
       - name: Install Continuous Integration Dependencies
         run: |
           pip install -r ci/requirements.txt
