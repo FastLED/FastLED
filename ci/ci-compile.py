@@ -13,7 +13,7 @@ import argparse
 import warnings
 
 from ci.locked_print import locked_print
-from ci.compile_for_board import compile_examples, ERROR_HAPPENED
+from ci.compile_for_board import compile_examples, errors_happened
 from ci.cpu_count import cpu_count
 from ci.create_build_dir import create_build_dir
 
@@ -232,7 +232,7 @@ def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[s
                     f.cancel()
                 break
     total_time = (time.time() - start_time) / 60
-    if ERROR_HAPPENED:
+    if errors_happened():
         locked_print("\nDone. Errors happened during compilation.")
         locked_print("\n".join(errors))
         return 1

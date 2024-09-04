@@ -1,1 +1,1 @@
-mypy .
+uv run mypy .

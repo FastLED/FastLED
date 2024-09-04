@@ -11,6 +11,10 @@ IS_GITHUB = "GITHUB_ACTIONS" in os.environ
 FIRST_BUILD_LOCK = Lock()
 USE_FIRST_BUILD_LOCK = IS_GITHUB
 
+def errors_happened() -> bool:
+    """Return whether any errors happened during the build."""
+    return ERROR_HAPPENED
+
 def compile_for_board_and_example(board: str, example: str, build_dir: str | None) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     builddir = Path(build_dir) / board if build_dir else Path(".build") / board
