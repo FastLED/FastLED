@@ -74,7 +74,7 @@ typedef volatile uint32_t RwReg;
 
 // Default to disabling M0 assembly clockless implementation
 #ifndef FASTLED_RP2040_CLOCKLESS_M0_FALLBACK
-#define FASTLED_RP2040_CLOCKLESS_M0_FALLBACK 1
+#define FASTLED_RP2040_CLOCKLESS_M0_FALLBACK 0
 #endif
 
 // SPI pin defs for old SDK ver
