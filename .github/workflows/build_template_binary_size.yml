@@ -28,7 +28,7 @@ jobs:
           pip install -r ci/requirements.txt
 
       - name: Compile Board and Output Size
-        run: cd ci && python compiled_size.py --board ${{ inputs.board }} --num-commits 1
+        run: cd ci && uv run compiled_size.py --board ${{ inputs.board }} --num-commits 1
 
       - name: Check Compiled Program Size for ${{ inputs.board }} is less than the limit of ${{ inputs.max_size }}
         run: |

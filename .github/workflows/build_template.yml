@@ -37,7 +37,7 @@ jobs:
       - name: Build FastLED examples
         run: |
           set -o pipefail
-          python ./ci/ci-compile.py ${{ inputs.args }} | tee build.log
+          ./compile ${{ inputs.args }} | tee build.log
         shell: bash
 
       - name: Upload build artifacts on failure
