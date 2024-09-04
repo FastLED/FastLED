@@ -8,7 +8,10 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#ifdef ESP32
+// Get rid of the endless volatile warnings in ESP32
 #pragma GCC diagnostic ignored "-Wvolatile"
+#endif
 
 /// @file fastpin.h
 /// Class base definitions for defining fast pin access
