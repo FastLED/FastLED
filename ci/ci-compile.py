@@ -290,11 +290,14 @@ def choose_board_interactively(boards: list[str]) -> list[str]:
     boards = sorted(boards)
     for i, board in enumerate(boards):
         print(f"[{i}]: {board}")
+    print("[all]: All boards")
     out: list[str] = []
     while True:
         try:
             #choice = int(input("Enter the number of the board(s) you want to compile to: "))
             input_str = input("Enter the number of the board(s) you want to compile to: ")
+            if input_str == "all":
+                return boards
             board_selections: list[int] = [int(x) for x in input_str.split(",")]
             #if 0 <= choice < len(boards):
             #    return boards[choice]
