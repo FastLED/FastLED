@@ -1,3 +1,3 @@
 Import("env")
 
-env.Append(CXXFLAGS=["-Wno-register", "-Wno-volatile"])
+env.Append(CXXFLAGS=["-Wno-register"])
