@@ -277,12 +277,12 @@ def parse_args():
     parser.add_argument("--interactive", action="store_true", help="Enable interactive mode to choose a board")
     # Passed by the github action to disable interactive mode.
     parser.add_argument("--no-interactive", action="store_true", help="Disable interactive mode")
-
     args = parser.parse_args()
     # if --interactive and --no-interative are both passed, --no-interactive takes precedence.
     if args.interactive and args.no_interactive:
         warnings.warn("Both --interactive and --no-interactive were passed, --no-interactive takes precedence.")
         args.interactive = False
+    return args
 
 
 def choose_board_interactively(boards: list[str]) -> list[str]:
