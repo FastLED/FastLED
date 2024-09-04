@@ -87,8 +87,14 @@ CUSTOM_PROJECT_OPTIONS = {
     "esp32-s3-devkitc-1": [f"platform={ESP32_IDF_5_1}"],
     "esp32-h2-devkitm-1": [f"platform={ESP32_IDF_5_1_LATEST}"],
     "adafruit_feather_nrf52840_sense": ["platform=nordicnrf52"],
+    "rpipico": [
+        "platform=https://github.com/maxgerhardt/platform-raspberrypi.git",
+        "platform_packages=framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
+        "framework=arduino",
+        "board_build.core=earlephilhower",
+        "board_build.filesystem_size=0.5m"
+    ],
     "rpipico2": [
-        #"platform=https://github.com/earlephilhower/arduino-pico.git",
         "platform=https://github.com/maxgerhardt/platform-raspberrypi.git",
         "platform_packages=framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
         "framework=arduino",
