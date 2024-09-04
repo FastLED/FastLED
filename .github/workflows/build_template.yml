@@ -48,9 +48,7 @@ jobs:
           path: .build/
           include-hidden-files: true
 
-      # if fail upload the build.log
-      - name: Upload build log on failure
-        if: failure()
+      - name: Upload build log
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ inputs.args }}-${{ github.run_number }}-${{ github.run_attempt }}-${{ github.sha }}
