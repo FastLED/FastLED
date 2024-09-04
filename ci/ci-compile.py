@@ -149,7 +149,12 @@ def compile_for_board_and_example(board: str, example: str, build_dir: str | Non
     ]
     cmd_list.append(f"examples/{example}/*ino")
     cmd_str = subprocess.list2cmdline(cmd_list)
-    locked_print(f"Running command: {cmd_str}")
+    msg = "\n\n******************************\n"
+    msg += f"* Running command:"
+    msg += f"*     {cmd_str}"
+    msg += "******************************\n"
+
+    locked_print(msg)
     result = subprocess.run(
         cmd_list,
         stdout=subprocess.PIPE,
