@@ -29,3 +29,4 @@ ci/native/.vscode/
 tmp/
 firmware_sizes.csv
 .aiderignore
+uv.lock
