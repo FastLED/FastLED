@@ -276,7 +276,7 @@ def parse_args():
     parser.add_argument("--no-project-options", action="store_true", help="Don't use custom project options")
     parser.add_argument("--interactive", action="store_true", help="Enable interactive mode to choose a board")
     # Passed by the github action to disable interactive mode.
-    parser.add_argument("--no-interactive", action="store_true", version="%(prog)s 1.0")
+    parser.add_argument("--no-interactive", action="store_true", help="Disable interactive mode")
 
     args = parser.parse_args()
     # if --interactive and --no-interative are both passed, --no-interactive takes precedence.
