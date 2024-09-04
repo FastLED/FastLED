@@ -13,6 +13,7 @@ from pathlib import Path
 from threading import Lock
 import argparse
 import shutil
+import warnings
 
 
 IS_GITHUB = "GITHUB_ACTIONS" in os.environ
@@ -274,7 +275,14 @@ def parse_args():
     parser.add_argument("--build-dir", type=str, help="Override the default build directory")
     parser.add_argument("--no-project-options", action="store_true", help="Don't use custom project options")
     parser.add_argument("--interactive", action="store_true", help="Enable interactive mode to choose a board")
-    return parser.parse_args()
+    # Passed by the github action to disable interactive mode.
+    parser.add_argument("--no-interactive", action="store_true", version="%(prog)s 1.0")
+
+    args = parser.parse_args()
+    # if --interactive and --no-interative are both passed, --no-interactive takes precedence.
+    if args.interactive and args.no_interactive:
+        warnings.warn("Both --interactive and --no-interactive were passed, --no-interactive takes precedence.")
+        args.interactive = False
 
 
 def choose_board_interactively(boards: list[str]) -> list[str]:

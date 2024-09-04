@@ -41,7 +41,7 @@ jobs:
       - name: Build FastLED examples
         run: |
           set -o pipefail
-          ./compile ${{ inputs.args }} | tee build.log
+          ./compile --no-interactive  ${{ inputs.args }} | tee build.log
         shell: bash
 
       - name: Upload build artifacts on failure
