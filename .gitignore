@@ -30,3 +30,4 @@ tmp/
 firmware_sizes.csv
 .aiderignore
 uv.lock
+.venv/
