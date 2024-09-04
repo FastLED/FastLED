@@ -31,7 +31,7 @@ def check_firmware_size(board: str) -> int:
     output, error = run_command(size_command)
     if error:
         print(f"Error checking firmware size: {error}")
-        return None
+        return -1
     size_in_bytes = output.strip().split()[0]
     return int(size_in_bytes)
 

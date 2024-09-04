@@ -6,19 +6,18 @@ files are built faster.
 
 import os
 import sys
-import subprocess
 import concurrent.futures
 import time
 from pathlib import Path
-from threading import Lock
 import argparse
-import shutil
 import warnings
 
+from ci.locked_print import locked_print
+from ci.compile_for_board import compile_examples, ERROR_HAPPENED
+from ci.cpu_count import cpu_count
+from ci.create_build_dir import create_build_dir
 
-IS_GITHUB = "GITHUB_ACTIONS" in os.environ
-FIRST_BUILD_LOCK = Lock()
-USE_FIRST_BUILD_LOCK = IS_GITHUB
+
 
 # Project initialization doesn't take a lot of memory or cpu so it's safe to run in parallel
 PARRALLEL_PROJECT_INITIALIZATION = os.environ.get("PARRALLEL_PROJECT_INITIALIZATION", "1") == "1"
@@ -119,150 +118,11 @@ CUSTOM_PROJECT_OPTIONS = {
     ]
 }
 
-ERROR_HAPPENED = False
-PRINT_LOCK = Lock()
-
-def cpu_count() -> int:
-    """Get the number of CPUs."""
-    if "GITHUB_ACTIONS" in os.environ:
-        return 4
-    return os.cpu_count()
-    
 
 
-def locked_print(*args, **kwargs):
-    """Print with a lock to prevent garbled output for multiple threads."""
-    with PRINT_LOCK:
-        print(*args, **kwargs)
 
 
-def compile_for_board_and_example(board: str, example: str, build_dir: str | None) -> tuple[bool, str]:
-    """Compile the given example for the given board."""
-    builddir = Path(build_dir) / board if build_dir else Path(".build") / board
-    builddir.mkdir(parents=True, exist_ok=True)
-    srcdir = builddir / "src"
-    # Remove the previous *.ino file if it exists, everything else is recycled
-    # to speed up the next build.
-    if srcdir.exists():
-        subprocess.run(["rm", "-rf", str(srcdir)], check=True)
-    locked_print(f"*** Building example {example} for board {board} ***")
-    cmd_list = [
-        "pio",
-        "ci",
-        "--board",
-        board,
-        "--lib=ci",
-        "--lib=src",
-        "--keep-build-dir",
-        f"--build-dir={builddir}",
-    ]
-    cmd_list.append(f"examples/{example}/*ino")
-    cmd_str = subprocess.list2cmdline(cmd_list)
-    msg_lsit = [
-        "\n\n******************************",
-        "* Running command:",
-        f"*     {cmd_str}",
-        "******************************\n",
-    ]
-    msg = "\n".join(msg_lsit)
-    locked_print(msg)
-    result = subprocess.run(
-        cmd_list,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        check=False,
-    )
 
-
-    stdout = result.stdout
-    # replace all instances of "lib/src" => "src" so intellisense can find the files
-    # with one click.
-    stdout = stdout.replace("lib/src", "src")
-    locked_print(stdout)
-    if result.returncode != 0:
-        locked_print(f"*** Error compiling example {example} for board {board} ***")
-        return False, stdout
-    locked_print(f"*** Finished building example {example} for board {board} ***")
-    return True, stdout
-
-def create_build_dir(board: str, project_options: list[str] | None, defines: list[str], no_install_deps: bool, extra_packages: list[str], build_dir: str | None) -> tuple[bool, str]:
-    """Create the build directory for the given board."""
-    locked_print(f"*** Initializing environment for board {board} ***")
-    builddir = Path(build_dir) / board if build_dir else Path(".build") / board
-    builddir.mkdir(parents=True, exist_ok=True)
-    # if lib directory (where FastLED lives) exists, remove it. This is necessary to run on
-    # recycled build directories for fastled to update. This is a fast operation.
-    srcdir = builddir / "lib"
-    if srcdir.exists():
-        shutil.rmtree(srcdir)
-    platformio_ini = builddir / "platformio.ini"
-    if platformio_ini.exists():
-        try:
-            platformio_ini.unlink()
-        except OSError as e:
-            locked_print(f"Error removing {platformio_ini}: {e}")
-    cmd_list = [
-        "pio",
-        "project",
-        "init",
-        "--project-dir",
-        str(builddir),
-        "--board",
-        board,
-    ]
-    if project_options:
-        for project_option in project_options:
-            cmd_list.append(f'--project-option={project_option}')
-    if defines:
-        build_flags = ' '.join(f'-D {define}' for define in defines)
-        cmd_list.append(f'--project-option=build_flags={build_flags}')
-    if extra_packages:
-        cmd_list.append(f'--project-option=lib_deps={",".join(extra_packages)}')
-    if no_install_deps:
-        cmd_list.append("--no-install-dependencies")
-    cmd_str = subprocess.list2cmdline(cmd_list)
-    locked_print(f"Running command: {cmd_str}")
-    result = subprocess.run(
-        cmd_list,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        check=False,
-    )
-    stdout = result.stdout
-
-    locked_print(result.stdout)
-    if result.returncode != 0:
-        locked_print(f"*** Error setting up project for board {board} ***")
-        return False, stdout
-    locked_print(f"*** Finished initializing environment for board {board} ***")
-    return True, stdout
-
-
-# Function to process task queues for each board
-def compile_examples(board: str, examples: list[str], build_dir: str | None) -> tuple[bool, str]:
-    """Process the task queue for the given board."""
-    global ERROR_HAPPENED  # pylint: disable=global-statement
-    is_first = True
-    for example in examples:
-        if ERROR_HAPPENED:
-            return True
-        locked_print(f"\n*** Building {example} for board {board} ***")
-        if is_first:
-            locked_print(f"*** Building for first example {example} board {board} ***")
-        if is_first and USE_FIRST_BUILD_LOCK:
-            with FIRST_BUILD_LOCK:
-                # Github runners are memory limited and the first job is the most
-                # memory intensive since all the artifacts are being generated in parallel.
-                success, message = compile_for_board_and_example(board=board, example=example, build_dir=build_dir)
-        else:
-            success, message = compile_for_board_and_example(board=board, example=example, build_dir=build_dir)
-        is_first = False
-        if not success:
-            ERROR_HAPPENED = True
-            return False, f"Error building {example} for board {board}. stdout:\n{message}"
-    return True, ""
 
 
 def parse_args():

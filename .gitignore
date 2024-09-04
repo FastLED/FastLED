@@ -31,3 +31,5 @@ firmware_sizes.csv
 .aiderignore
 uv.lock
 .venv/
+__pycache__
+*.pyc
