@@ -1,2 +1,3 @@
 platformio==6.1.15
 python-dateutil
+uv
