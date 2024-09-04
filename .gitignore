@@ -28,3 +28,4 @@ Thumbs.db
 ci/native/.vscode/
 tmp/
 firmware_sizes.csv
+.aiderignore
