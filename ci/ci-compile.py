@@ -265,10 +265,39 @@ def parse_args():
     parser.add_argument("--extra-packages", type=str, help="Comma-separated list of extra packages to install")
     parser.add_argument("--build-dir", type=str, help="Override the default build directory")
     parser.add_argument("--no-project-options", action="store_true", help="Don't use custom project options")
+    parser.add_argument("--interactive", action="store_true", help="Enable interactive mode to choose a board")
     return parser.parse_args()
 
 
-def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[str], extra_packages: list[str], build_dir: str | None) -> int:
+def choose_board_interactively(boards: list[str]) -> list[str]:
+    print("Available boards:")
+    boards = sorted(boards)
+    for i, board in enumerate(boards):
+        print(f"[{i}]: {board}")
+    out: list[str] = []
+    while True:
+        try:
+            #choice = int(input("Enter the number of the board(s) you want to compile to: "))
+            input_str = input("Enter the number of the board(s) you want to compile to: ")
+            board_selections: list[int] = [int(x) for x in input_str.split(",")]
+            #if 0 <= choice < len(boards):
+            #    return boards[choice]
+            for id in board_selections:
+                if 0 <= id < len(boards):
+                    # return boards
+                    board = boards[id]
+                    out.append(board)
+                else:
+                    print("invalid board id: ", id)
+            if not out:
+                print("No valid board ids entered. Please try again.")
+                continue
+            return out
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+
+def run(boards: list[str], examples: list[str], skip_init: bool, defines: list[str], extra_packages: list[str], build_dir: str | None, interactive: bool) -> int:
     start_time = time.time()
     # Necessary to create the first project alone, so that the necessary root directories
     # are created and the subsequent projects can be created in parallel.
@@ -346,7 +375,10 @@ def main() -> int:
     if args.no_project_options:
         CUSTOM_PROJECT_OPTIONS.clear()
 
-    boards = args.boards.split(',') if args.boards else BOARDS
+    if args.interactive:
+        boards = choose_board_interactively(BOARDS)
+    else:
+        boards = args.boards.split(',') if args.boards else BOARDS
     examples = args.examples.split(',') if args.examples else EXAMPLES
     defines: list[str] = []
     if args.defines:
@@ -355,7 +387,7 @@ def main() -> int:
     if args.extra_packages:
         extract_packages.extend(args.extra_packages.split(','))
     build_dir = args.build_dir
-    rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines, extra_packages=extract_packages, build_dir=build_dir)
+    rtn = run(boards=boards, examples=examples, skip_init=skip_init, defines=defines, extra_packages=extract_packages, build_dir=build_dir, interactive=args.interactive)
     return rtn
 
 

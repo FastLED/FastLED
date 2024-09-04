@@ -209,6 +209,23 @@ If you want to make changes to FastLED then please
 
 When changes are made then push to your fork to your repo and git will give you a url to trigger a pull request into the master repo.
 
+### Testing other devices
+
+  * run `compile` and then select your board
+
+```bash
+Available boards:
+[0]: uno
+[1]: esp32dev
+[2]: esp01
+[3]: esp32-c3-devkitm-1
+[4]: esp32-s3-devkitc-1
+[5]: yun
+[6]: digix
+[7]: teensy30
+[8]: teensy41
+Enter the number of the board you want to use: 0
+```
 
 ## Help and Support
 
