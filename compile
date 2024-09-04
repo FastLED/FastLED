@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+cd "$(dirname "$0")"
+# if .venv not found
+if [ ! -d .venv ]; then
+    # create virtual environment
+    ./install
+fi
+
+interactive_stmt=""
+# if no arguments
+if [ $# -eq 0 ]; then
+    # set interactive statement
+    interactive_stmt="--interactive"
+fi
+
+uv run ci/ci-compile.py $interactive_stmt "$@"
