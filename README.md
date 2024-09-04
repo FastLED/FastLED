@@ -7,6 +7,43 @@ FastLED
 [![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
 
+```C++
+/// Blink red then off.
+
+#include <FastLED.h>
+
+// How many leds in your strip?
+#define NUM_LEDS 100
+#define DATA_PIN 3
+
+
+// Define the array of leds
+CRGB leds[NUM_LEDS];
+
+void setup() { 
+    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is assumed
+}
+
+void fill(CRGB color)
+{
+    for(int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = color;
+    }
+}
+
+/// blink red and then off every half second.
+void loop() { 
+  // Turn the LED on, then pause
+  fill(CRGB::Red);
+  FastLED.show();
+  delay(500);
+  // Now turn the LED off, then pause
+  fill(CRGB::Black);
+  FastLED.show();
+  delay(500);
+}
+```
+
 
 ## About
 
@@ -21,6 +58,8 @@ We have multiple goals with this library:
 * Quick start for new developers - hook up your LEDs and go, no need to think about specifics of the LED chipsets being used
 * Zero pain switching LED chipsets - you get some new LEDs that the library supports, just change the definition of LEDs you're using, et. voila!  Your code is running with the new LEDs.
 * High performance - with features like zero cost global brightness scaling, high performance 8-bit math for RGB manipulation, and some of the fastest bit-bang'd SPI support around, FastLED wants to keep as many CPU cycles available for your LED patterns as possible
+
+## [Examples](examples)
 
 ## Board Support
 #### Arduino
@@ -109,6 +148,18 @@ We have multiple goals with this library:
 ## x86
 
 [![linux_native](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml)
+
+
+## Compiled Library Size Check
+
+[![uno_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_uno_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_uno_size.yml)
+
+
+[![esp32dev_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_esp32_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_esp32_size.yml)
+
+
+[![teensy41_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml)
+
 
 ## Getting Started
 

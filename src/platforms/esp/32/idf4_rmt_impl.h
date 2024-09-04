@@ -9,7 +9,6 @@
 #include "FastLED.h"
 #include "idf4_rmt.h"
 #include "clock_cycles.h"
-#include <iostream>
 
 #ifdef __cplusplus
 extern "C"
