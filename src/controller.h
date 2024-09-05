@@ -634,27 +634,57 @@ struct PixelController {
         __attribute__((always_inline)) inline uint8_t getScale1() { return getscale<1>(*this); }  ///< non-template alias of getscale<1>()
         __attribute__((always_inline)) inline uint8_t getScale2() { return getscale<2>(*this); }  ///< non-template alias of getscale<2>()
 
-
-        __attribute__((always_inline)) inline void loadAndScaleRGB(uint8_t* r, uint8_t* g, uint8_t* b) {
-            *r = loadAndScale0();
-            *g = loadAndScale1();
-            *b = loadAndScale2();
+        __attribute__((always_inline)) inline void loadAndScaleRGB(uint8_t* b0, uint8_t* b1, uint8_t* b2) {
+            *b0 = loadAndScale0();
+            *b1 = loadAndScale1();
+            *b2 = loadAndScale2();
         }
 
-        __attribute__((always_inline)) inline void loadAndScaleRGBW(RGBW_MODE rgbw_mode, uint16_t white_color_temp, uint8_t* r_out, uint8_t* g_out, uint8_t* b_out, uint8_t* w_out) {
-            uint8_t r = loadAndScale0();
-            uint8_t g = loadAndScale1();
-            uint8_t b = loadAndScale2();
+        template<RGBW_MODE MODE>
+        __attribute__((always_inline)) inline void loadAndScaleRGBW(uint16_t white_color_temp, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
+            CRGB rgb = CRGB(
+                scale8(mData[0], mScale.r),
+                scale8(mData[1], mScale.g),
+                scale8(mData[2], mScale.b)
+            );
+            uint8_t w = 0;
+            rgb_2_rgbw<MODE>(
+                white_color_temp,
+                rgb.r, rgb.b, rgb.g,
+                mScale.r, mScale.g, mScale.b,
+                &rgb.r, &rgb.g, &rgb.b, &w
+            );
+            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
+            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
+            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
+            *b0_out = rgb.raw[b0_index];
+            *b1_out = rgb.raw[b1_index];
+            *b2_out = rgb.raw[b2_index];
+            // Assume the w component is the last byte in the data stream
+            *w_out = w;
+        }
+
+        __attribute__((always_inline)) inline void loadAndScaleRGBW(RGBW_MODE rgbw_mode, uint16_t white_color_temp, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
+            CRGB rgb = CRGB(
+                scale8(mData[0], mScale.r),
+                scale8(mData[1], mScale.g),
+                scale8(mData[2], mScale.b)
+            );
             uint8_t w = 0;
             rgb_2_rgbw(
                 rgbw_mode,
                 white_color_temp,
-                r, g, b,
-                &r, &g, &b, &w
+                rgb.r, rgb.b, rgb.g,
+                mScale.r, mScale.g, mScale.b,
+                &rgb.r, &rgb.g, &rgb.b, &w
             );
-            *r_out = r;
-            *g_out = g;
-            *b_out = b;
+            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
+            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
+            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
+            *b0_out = rgb.raw[b0_index];
+            *b1_out = rgb.raw[b1_index];
+            *b2_out = rgb.raw[b2_index];
+            // Assume the w component is the last byte in the data stream
             *w_out = w;
         }
 

@@ -22,7 +22,7 @@ RmtController::RmtController(
 {
     mIsRgbw = is_rgbw;
     mRgbwMode = mode;
-    kColorTemp = white_color_temp;
+    mColorTemp = white_color_temp;
     pImpl = new ESP32RMTController(DATA_PIN, T1, T2, T3, maxChannel, built_in_driver);
 }
 RmtController::~RmtController()

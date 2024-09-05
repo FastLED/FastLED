@@ -170,30 +170,34 @@ private:
         const int size = pixels.size() * bytes_per_pixel;
         initPulseBuffer(size);
 
-        // -- Cycle through the R,G, and B values in the right order,
+        // -- Cycle through the R,G, B (and W) values in the right order,
         //    storing the pulses in the big buffer
-
-        while (pixels.has(1))
+        if (!mIsRgbw)
         {
-            uint8_t r,g,b;
-            if (!mIsRgbw)
+            while (pixels.has(1))
             {
+                uint8_t r, g, b;
                 pixels.loadAndScaleRGB(&r, &g, &b);
                 ingest(r);
                 ingest(g);
                 ingest(b);
+                pixels.advanceData();
+                pixels.stepDithering();
             }
-            else
+        }
+        else
+        {
+            while (pixels.has(1))
             {
-                uint8_t w;
-                pixels.loadAndScaleRGBW(mRgbwMode, mRgbwMode, &r, &g, &b, &w);
+                uint8_t r, g, b, w;
+                pixels.loadAndScaleRGBW(mRgbwMode, mColorTemp, &r, &g, &b, &w);
                 ingest(r);
                 ingest(g);
                 ingest(b);
-                ingest(w);  // Just set it to 0 for now
+                ingest(w);
+                pixels.advanceData();
+                pixels.stepDithering();
             }
-            pixels.advanceData();
-            pixels.stepDithering();
         }
     }
 
@@ -205,33 +209,28 @@ private:
         const int size_in_bytes = pixels.size() * size_per_pixel;
         uint8_t *pData = getPixelBuffer(size_in_bytes);
 
-        // -- This might be faster
-        while (pixels.has(1))
-        {
-            uint8_t r = pixels.loadAndScale0();
-            uint8_t g = pixels.loadAndScale1();
-            uint8_t b = pixels.loadAndScale2();
-            if (!mIsRgbw) {
-                *pData++ = r;
-                *pData++ = g;
-                *pData++ = b;
-            } else {
-                uint8_t w;
-                // *pData++ = 0;  // Just set it to 0 for now
-                rgb_2_rgbw(mRgbwMode, kColorTemp, r, g, b, &r, &g, &b, &w);
-                *pData++ = r;
-                *pData++ = g;
-                *pData++ = b;
-                *pData++ = w;
+        if (!mIsRgbw) {
+            while (pixels.has(1))
+            {
+                pixels.loadAndScaleRGB(pData, pData + 1, pData + 2);
+                pData += 3;
+                pixels.advanceData();
+                pixels.stepDithering();
             }
-            pixels.advanceData();
-            pixels.stepDithering();
+        } else {
+            while (pixels.has(1))
+            {
+                pixels.loadAndScaleRGBW(mRgbwMode, mColorTemp, pData, pData + 1, pData + 2, pData + 3);
+                pData += 4;
+                pixels.advanceData();
+                pixels.stepDithering();
+            }
         }
     }
     ESP32RMTController *pImpl = nullptr;
     bool mIsRgbw = false;
     RGBW_MODE mRgbwMode = kRGBWInvalid;
-    uint16_t kColorTemp = kRGBWDefaultColorTemp;
+    uint16_t mColorTemp = kRGBWDefaultColorTemp;
 };
 
 FASTLED_NAMESPACE_END
