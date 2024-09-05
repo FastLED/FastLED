@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 
 
 uv run clang-format -i src/lib8tion/*.h
-uv run clang-format -i src/stubs/*.h
-uv run clang-format -i src/stubs/*.cpp
-uv run clang-format -i src/platforms/arm/**/*.h
-uv run clang-format -i src/platforms/arm/**/*.cpp
+uv run clang-format -i src/platforms/stub/*.h
+uv run clang-format -i src/platforms/stub/*.cpp
+# uv run clang-format -i src/platforms/arm/**/*.h
+# uv run clang-format -i src/platforms/arm/**/*.cpp
