@@ -94,6 +94,13 @@ void hsv2rgb_rainbow( const struct CHSV* phsv, struct CRGB * prgb, int numLeds);
 /// @param rgb CRGB struct to store the result of the conversion (will be modified)
 void hsv2rgb_spectrum( const struct CHSV& hsv, struct CRGB& rgb);
 
+/// Inline version of hsv2rgb_spectrum which returns a CRGB object.
+inline CRGB hsv2rgb_spectrum( const struct CHSV& hsv) {
+    CRGB rgb;
+    hsv2rgb_spectrum(hsv, rgb);
+    return rgb;
+}
+
 /// @copybrief hsv2rgb_spectrum(const struct CHSV&, struct CRGB&)
 /// @see hsv2rgb_spectrum(const struct CHSV&, struct CRGB&)
 /// @param phsv CHSV array to convert to RGB. Max hue supported is HUE_MAX_SPECTRUM
