@@ -1,6 +1,7 @@
 #ifndef __INC_LED_SYSDEFS_ARM_D21_H
 #define __INC_LED_SYSDEFS_ARM_D21_H
 
+
 #define FASTLED_ARM
 #define FASTLED_ARM_M0_PLUS
 
@@ -18,7 +19,8 @@
 #endif
 
 // reusing/abusing cli/sei defs for due
-#define cli() __disable_irq();
+#define cli()  __disable_irq();
 #define sei() __enable_irq();
+
 
 #endif

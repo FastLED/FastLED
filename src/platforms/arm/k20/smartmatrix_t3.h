@@ -12,7 +12,7 @@ extern SmartMatrix *pSmartMatrix;
 class CSmartMatrixController : public CPixelLEDController<RGB_ORDER> {
     SmartMatrix matrix;
 
-  public:
+public:
     // initialize the LED controller
     virtual void init() {
         // Initialize 32x32 LED Matrix
@@ -26,13 +26,13 @@ class CSmartMatrixController : public CPixelLEDController<RGB_ORDER> {
         pSmartMatrix = &matrix;
     }
 
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) {
-        if (SMART_MATRIX_CAN_TRIPLE_BUFFER) {
+    virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+        if(SMART_MATRIX_CAN_TRIPLE_BUFFER) {
             rgb24 *md = matrix.getRealBackBuffer();
         } else {
             rgb24 *md = matrix.backBuffer();
         }
-        while (pixels.has(1)) {
+        while(pixels.has(1)) {
             md->red = pixels.loadAndScale0();
             md->green = pixels.loadAndScale1();
             md->blue = pixels.loadAndScale2();
@@ -41,7 +41,7 @@ class CSmartMatrixController : public CPixelLEDController<RGB_ORDER> {
             pixels.stepDithering();
         }
         matrix.swapBuffers();
-        if (SMART_MATRIX_CAN_TRIPLE_BUFFER && pixels.advanceBy() > 0) {
+        if(SMART_MATRIX_CAN_TRIPLE_BUFFER && pixels.advanceBy() > 0) {
             matrix.setBackBuffer(pixels.mData);
         }
     }

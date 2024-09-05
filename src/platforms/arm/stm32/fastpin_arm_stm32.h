@@ -10,22 +10,18 @@ FASTLED_NAMESPACE_BEGIN
 
 #else
 
-/// Template definition for STM32 style ARM pins, providing direct access to the
-/// various GPIO registers.  Note that this uses the full port GPIO registers.
-/// In theory, in some way, bit-band register access -should- be faster, however
-/// I have found that something about the way gcc does register allocation
-/// results in the bit-band code being slower.  It will need more fine tuning.
-/// The registers are data output, set output, clear output, toggle output,
-/// input, and direction
+/// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.  Note that this
+/// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
+/// that something about the way gcc does register allocation results in the bit-band code being slower.  It will need more fine tuning.
+/// The registers are data output, set output, clear output, toggle output, input, and direction
 
-template <uint8_t PIN, uint8_t _BIT, uint32_t _MASK, typename _GPIO>
-class _ARMPIN {
+template<uint8_t PIN, uint8_t _BIT, uint32_t _MASK, typename _GPIO> class _ARMPIN {
 
-  public:
-    typedef volatile uint32_t *port_ptr_t;
+public:
+    typedef volatile uint32_t * port_ptr_t;
     typedef uint32_t port_t;
 
-#if 0
+    #if 0
     inline static void setOutput() {
         if(_BIT<8) {
             _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4));
@@ -34,166 +30,90 @@ class _ARMPIN {
         }
     }
     inline static void setInput() { /* TODO */ } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
-#endif
+    #endif
 
-    inline static void setOutput() {
-        pinMode(PIN, OUTPUT);
-    } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
-    inline static void setInput() {
-        pinMode(PIN, INPUT);
-    } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
+    inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
+    inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
 #if defined(STM32F2XX)
-    inline static void hi() __attribute__((always_inline)) {
-        _GPIO::r()->BSRRL = _MASK;
-    }
-    inline static void lo() __attribute__((always_inline)) {
-        _GPIO::r()->BSRRH = _MASK;
-    }
+    inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRRL = _MASK; }
+    inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRRH = _MASK; }
 #else
-    inline static void hi() __attribute__((always_inline)) {
-        _GPIO::r()->BSRR = _MASK;
-    }
-    inline static void lo() __attribute__((always_inline)) {
-        _GPIO::r()->BRR = _MASK;
-    }
-    // inline static void lo() __attribute__ ((always_inline)) {
-    // _GPIO::r()->BSRR = (_MASK<<16); }
+    inline static void hi() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = _MASK; }
+    inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BRR = _MASK; }
+    // inline static void lo() __attribute__ ((always_inline)) { _GPIO::r()->BSRR = (_MASK<<16); }
 #endif
-    inline static void set(FASTLED_REGISTER port_t val)
-        __attribute__((always_inline)) {
-        _GPIO::r()->ODR = val;
-    }
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { _GPIO::r()->ODR = val; }
 
-    inline static void strobe() __attribute__((always_inline)) {
-        toggle();
-        toggle();
-    }
+    inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 
-    inline static void toggle() __attribute__((always_inline)) {
-        if (_GPIO::r()->ODR & _MASK) {
-            lo();
-        } else {
-            hi();
-        }
-    }
+    inline static void toggle() __attribute__ ((always_inline)) { if(_GPIO::r()->ODR & _MASK) { lo(); } else { hi(); } }
 
-    inline static void hi(FASTLED_REGISTER port_ptr_t port)
-        __attribute__((always_inline)) {
-        hi();
-    }
-    inline static void lo(FASTLED_REGISTER port_ptr_t port)
-        __attribute__((always_inline)) {
-        lo();
-    }
-    inline static void fastset(FASTLED_REGISTER port_ptr_t port,
-                               FASTLED_REGISTER port_t val)
-        __attribute__((always_inline)) {
-        *port = val;
-    }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port = val; }
 
-    inline static port_t hival() __attribute__((always_inline)) {
-        return _GPIO::r()->ODR | _MASK;
-    }
-    inline static port_t loval() __attribute__((always_inline)) {
-        return _GPIO::r()->ODR & ~_MASK;
-    }
-    inline static port_ptr_t port() __attribute__((always_inline)) {
-        return &_GPIO::r()->ODR;
-    }
+    inline static port_t hival() __attribute__ ((always_inline)) { return _GPIO::r()->ODR | _MASK; }
+    inline static port_t loval() __attribute__ ((always_inline)) { return _GPIO::r()->ODR & ~_MASK; }
+    inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_GPIO::r()->ODR; }
 
 #if defined(STM32F2XX)
-    inline static port_ptr_t sport() __attribute__((always_inline)) {
-        return &_GPIO::r()->BSRRL;
-    }
-    inline static port_ptr_t cport() __attribute__((always_inline)) {
-        return &_GPIO::r()->BSRRH;
-    }
+    inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRRL; }
+    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRRH; }
 #else
-    inline static port_ptr_t sport() __attribute__((always_inline)) {
-        return &_GPIO::r()->BSRR;
-    }
-    inline static port_ptr_t cport() __attribute__((always_inline)) {
-        return &_GPIO::r()->BRR;
-    }
+    inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRR; }
+    inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BRR; }
 #endif
 
-    inline static port_t mask() __attribute__((always_inline)) { return _MASK; }
+    inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-#define _R(T) struct __gen_struct_##T
-#define _FL_DEFPIN(PIN, BIT, L)                                                \
-    template <>                                                                \
-    class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO##L)> {};
+
+#define _R(T) struct __gen_struct_ ## T
+#define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
 
 #if defined(STM32F10X_MD)
-#define _RD32(T)                                                               \
-    struct __gen_struct_##T {                                                  \
-        static __attribute__((always_inline)) inline volatile GPIO_TypeDef *   \
-        r() {                                                                  \
-            return T;                                                          \
-        }                                                                      \
-    };
-#define _FL_IO(L, C)                                                           \
-    _RD32(GPIO##L);                                                            \
-    _FL_DEFINE_PORT3(L, C, _R(GPIO##L));
+#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
+#define _FL_IO(L,C) _RD32(GPIO ## L);  _FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
 
 #elif defined(__STM32F1__)
-#define _RD32(T)                                                               \
-    struct __gen_struct_##T {                                                  \
-        static __attribute__((always_inline)) inline gpio_reg_map *r() {       \
-            return T->regs;                                                    \
-        }                                                                      \
-    };
-#define _FL_IO(L, C)                                                           \
-    _RD32(GPIO##L);                                                            \
-    _FL_DEFINE_PORT3(L, C, _R(GPIO##L));
+#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline gpio_reg_map* r() { return T->regs; } };
+#define _FL_IO(L,C) _RD32(GPIO ## L);  _FL_DEFINE_PORT3(L, C, _R(GPIO ## L));
 
 #elif defined(STM32F2XX)
-#define _RD32(T)                                                               \
-    struct __gen_struct_##T {                                                  \
-        static __attribute__((always_inline)) inline volatile GPIO_TypeDef *   \
-        r() {                                                                  \
-            return T;                                                          \
-        }                                                                      \
-    };
-#define _FL_IO(L, C) _RD32(GPIO##L);
+#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
+#define _FL_IO(L,C) _RD32(GPIO ## L);
 
-#elif defined(STM32F1)
+#elif defined (STM32F1)
 // stm32duino
-#define _RD32(T)                                                               \
-    struct __gen_struct_##T {                                                  \
-        static __attribute__((always_inline)) inline volatile GPIO_TypeDef *   \
-        r() {                                                                  \
-            return T;                                                          \
-        }                                                                      \
-    };
-#define _FL_IO(L, C) _RD32(GPIO##L);
+#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile GPIO_TypeDef * r() { return T; } };
+#define _FL_IO(L,C) _RD32(GPIO ## L);
+
 
 #else
 #error "Platform not supported"
 #endif
 
 #ifdef GPIOA
-_FL_IO(A, 0);
+_FL_IO(A,0);
 #endif
 #ifdef GPIOB
-_FL_IO(B, 1);
+_FL_IO(B,1);
 #endif
 #ifdef GPIOC
-_FL_IO(C, 2);
+_FL_IO(C,2);
 #endif
 #ifdef GPIOD
-_FL_IO(D, 3);
+_FL_IO(D,3);
 #endif
 #ifdef GPIOE
-_FL_IO(E, 4);
+_FL_IO(E,4);
 #endif
 #ifdef GPIOF
-_FL_IO(F, 5);
+_FL_IO(F,5);
 #endif
 #ifdef GPIOG
-_FL_IO(G, 6);
+_FL_IO(G,6);
 #endif
 
 // Actual pin definitions
@@ -259,7 +179,7 @@ _FL_DEFPIN(19, 2, A);
 
 #define MAX_PIN 46
 
-_FL_DEFPIN(10, 0, A); // PA0 - PA7
+_FL_DEFPIN(10, 0, A);	// PA0 - PA7
 _FL_DEFPIN(11, 1, A);
 _FL_DEFPIN(12, 2, A);
 _FL_DEFPIN(13, 3, A);
@@ -267,7 +187,7 @@ _FL_DEFPIN(14, 4, A);
 _FL_DEFPIN(15, 5, A);
 _FL_DEFPIN(16, 6, A);
 _FL_DEFPIN(17, 7, A);
-_FL_DEFPIN(29, 8, A); // PA8 - PA15
+_FL_DEFPIN(29, 8, A);	// PA8 - PA15
 _FL_DEFPIN(30, 9, A);
 _FL_DEFPIN(31, 10, A);
 _FL_DEFPIN(32, 11, A);
@@ -276,7 +196,7 @@ _FL_DEFPIN(34, 13, A);
 _FL_DEFPIN(37, 14, A);
 _FL_DEFPIN(38, 15, A);
 
-_FL_DEFPIN(18, 0, B); // PB0 - PB11
+_FL_DEFPIN(18, 0, B);	// PB0 - PB11
 _FL_DEFPIN(19, 1, B);
 _FL_DEFPIN(20, 2, B);
 _FL_DEFPIN(39, 3, B);
@@ -289,7 +209,7 @@ _FL_DEFPIN(46, 9, B);
 _FL_DEFPIN(21, 10, B);
 _FL_DEFPIN(22, 11, B);
 
-_FL_DEFPIN(2, 13, C); // PC13 - PC15
+_FL_DEFPIN(2, 13, C);	// PC13 - PC15
 _FL_DEFPIN(3, 14, C);
 _FL_DEFPIN(4, 15, C);
 

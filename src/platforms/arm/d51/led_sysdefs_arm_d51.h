@@ -1,6 +1,7 @@
 #ifndef __INC_LED_SYSDEFS_ARM_D51_H
 #define __INC_LED_SYSDEFS_ARM_D51_H
 
+
 #define FASTLED_ARM
 
 #ifndef INTERRUPT_THRESHOLD
@@ -17,7 +18,8 @@
 #endif
 
 // reusing/abusing cli/sei defs for due
-#define cli() __disable_irq();
+#define cli()  __disable_irq();
 #define sei() __enable_irq();
+
 
 #endif

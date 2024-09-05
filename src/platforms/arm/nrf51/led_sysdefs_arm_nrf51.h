@@ -18,9 +18,9 @@
 #define F_CPU 16000000
 #endif
 
-#include <core_cm0.h>
-#include <nrf51.h>
 #include <stdint.h>
+#include <nrf51.h>
+#include <core_cm0.h>
 
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
@@ -40,7 +40,7 @@ typedef uint8_t boolean;
 #define FASTLED_ALLOW_INTERRUPTS 1
 #endif
 
-#define cli() __disable_irq();
+#define cli()  __disable_irq();
 #define sei() __enable_irq();
 
 #endif
