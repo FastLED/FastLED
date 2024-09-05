@@ -1,3 +1,10 @@
+FastLED 3.7.6
+=============
+* WS2812 RGBW Mode enabled on ESP32 via experimental `FASTLED_EXPERIMENTAL_ESP32_RGBW_ENABLED`
+* RPXXXX compiler fixes to solve asm segment overflow violation
+* ESP32 binary size blew up in 3.7.5, in 3.7.6 it's back to the same size as 3.7.4
+
+
 FastLED 3.7.5
 =============
 
