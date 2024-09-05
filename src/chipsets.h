@@ -734,7 +734,7 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class TM1809Controller800Khz : public ClocklessController<DATA_PIN, C_NS(350), C_NS(350), C_NS(450), RGB_ORDER> {};
 
 // WS2811 - 320ns, 320ns, 640ns
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, C_NS(320), C_NS(320), C_NS(640), RGB_ORDER> {};
 
 // WS2813 - 320ns, 320ns, 640ns
@@ -742,11 +742,11 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2813Controller : public ClocklessController<DATA_PIN, C_NS(320), C_NS(320), C_NS(640), RGB_ORDER> {};
 
 // WS2812 - 250ns, 625ns, 375ns
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz : public ClocklessController<DATA_PIN, C_NS(250), C_NS(625), C_NS(375), RGB_ORDER> {};
 
 // WS2811@400khz - 800ns, 800ns, 900ns
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2811Controller400Khz : public ClocklessController<DATA_PIN, C_NS(800), C_NS(800), C_NS(900), RGB_ORDER> {};
 
 // 750NS, 750NS, 750NS
