@@ -325,7 +325,10 @@ struct PixelController {
         /// @param dither dither setting for the LEDs
         /// @param advance whether the pointer (d) should advance per LED
         /// @param skip if the pointer is advancing, how many bytes to skip in addition to 3
-        PixelController(const uint8_t *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0) : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(
+                const uint8_t *d, int len, CRGB & s,
+                EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0)
+                    : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mData += skip;
             mAdvance = (advance) ? 3+skip : 0;
@@ -337,7 +340,10 @@ struct PixelController {
         /// @param len length of the LED data
         /// @param s LED scale values, as CRGB struct
         /// @param dither dither setting for the LEDs
-        PixelController(const CRGB *d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(
+                const CRGB *d, int len, CRGB & s,
+                EDitherMode dither = BINARY_DITHER)
+                    : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 3;
             initOffsets(len);
@@ -348,7 +354,9 @@ struct PixelController {
         /// @param len length of the LED data
         /// @param s LED scale values, as CRGB struct
         /// @param dither dither setting for the LEDs
-        PixelController(const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER) : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(
+                const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER)
+                    : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mAdvance = 0;
             initOffsets(len);
@@ -624,6 +632,8 @@ struct PixelController {
         __attribute__((always_inline)) inline uint8_t advanceAndLoadAndScale0(int lane) { return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc advanceAndLoadAndScale0(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t stepAdvanceAndLoadAndScale0(int lane) { stepDithering(); return advanceAndLoadAndScale<0>(*this, lane); }  ///< @copydoc stepAdvanceAndLoadAndScale0(int, uint8_t)
 
+        // LoadAndScale0 loads the pixel data in the order specified by RGB_ORDER and then scales it by the color correction values
+        // For example in color order GRB, loadAndScale0() will return the green channel scaled by the color correction value for green.
         __attribute__((always_inline)) inline uint8_t loadAndScale0() { return loadAndScale<0>(*this); }  ///< @copydoc loadAndScale0(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t loadAndScale1() { return loadAndScale<1>(*this); }  ///< @copydoc loadAndScale1(int, uint8_t)
         __attribute__((always_inline)) inline uint8_t loadAndScale2() { return loadAndScale<2>(*this); }  ///< @copydoc loadAndScale2(int, uint8_t)
@@ -640,36 +650,16 @@ struct PixelController {
             *b2 = loadAndScale2();
         }
 
-        template<RGBW_MODE MODE>
-        __attribute__((always_inline)) inline void loadAndScaleRGBW(uint16_t white_color_temp, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
-            CRGB rgb = CRGB(
-                scale8(mData[0], mScale.r),
-                scale8(mData[1], mScale.g),
-                scale8(mData[2], mScale.b)
-            );
-            uint8_t w = 0;
-            rgb_2_rgbw<MODE>(
-                white_color_temp,
-                rgb.r, rgb.b, rgb.g,
-                mScale.r, mScale.g, mScale.b,
-                &rgb.r, &rgb.g, &rgb.b, &w
-            );
-            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
-            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
-            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
-            *b0_out = rgb.raw[b0_index];
-            *b1_out = rgb.raw[b1_index];
-            *b2_out = rgb.raw[b2_index];
-            // Assume the w component is the last byte in the data stream
-            *w_out = w;
-        }
 
-        __attribute__((always_inline)) inline void loadAndScaleRGBW(RGBW_MODE rgbw_mode, uint16_t white_color_temp, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
-            CRGB rgb = CRGB(
-                scale8(mData[0], mScale.r),
-                scale8(mData[1], mScale.g),
-                scale8(mData[2], mScale.b)
-            );
+        // LoadAndScaleRGBW loads the pixel data in the order specified by RGB_ORDER
+        // and adjusts for the white component of the RGBW LED. The b0_out through b2_out
+        // are the RGB values re-ordered and scaled by the color correction values.
+        // The white component is always assumed to be in the last position and if it's
+        // not then it will have to be handled by the caller.
+        __attribute__((always_inline)) inline void loadAndScaleRGBW(
+                RGBW_MODE rgbw_mode, uint16_t white_color_temp,
+                uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
+            CRGB rgb = CRGB(mData[0], mData[1], mData[2]);  // Raw RGB values in native r,g,b ordering.
             uint8_t w = 0;
             rgb_2_rgbw(
                 rgbw_mode,
@@ -684,7 +674,31 @@ struct PixelController {
             *b0_out = rgb.raw[b0_index];
             *b1_out = rgb.raw[b1_index];
             *b2_out = rgb.raw[b2_index];
-            // Assume the w component is the last byte in the data stream
+            // Assume the w component is the last byte in the data stream and never reordered.
+            *w_out = w;
+        }
+
+
+        // Slightly faster in template mode when we know that the RGBW_MODE is constant.
+        template<RGBW_MODE MODE>
+        __attribute__((always_inline)) inline void loadAndScaleRGBW(
+                uint16_t white_color_temp,
+                uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
+            CRGB rgb = CRGB(mData[0], mData[1], mData[2]);  // Raw RGB values in native r,g,b ordering.
+            uint8_t w = 0;
+            rgb_2_rgbw<MODE>(
+                white_color_temp,
+                rgb.r, rgb.b, rgb.g,
+                mScale.r, mScale.g, mScale.b,
+                &rgb.r, &rgb.g, &rgb.b, &w
+            );
+            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
+            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
+            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
+            *b0_out = rgb.raw[b0_index];
+            *b1_out = rgb.raw[b1_index];
+            *b2_out = rgb.raw[b2_index];
+            // Assume the w component is the last byte in the data stream and never reordered.
             *w_out = w;
         }
 
@@ -703,18 +717,18 @@ protected:
     /// Set all the LEDs on the controller to a given color
     /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs to set to this color
-    /// @param scale the RGB scaling value for outputting color
-    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) {
-        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale, getDither());
+    /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
+    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale_pre_mixed) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale_pre_mixed, getDither());
         showPixels(pixels);
     }
 
     /// Write the passed in RGB data out to the LEDs managed by this controller
     /// @param data the RGB data to write out to the strip
     /// @param nLeds the number of LEDs being written out
-    /// @param scale the RGB scaling to apply to each LED before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) {
-        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds < 0 ? -nLeds : nLeds, scale, getDither());
+    /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
+    virtual void show(const struct CRGB *data, int nLeds, CRGB scale_pre_mixed) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds < 0 ? -nLeds : nLeds, scale_pre_mixed, getDither());
         if(nLeds < 0) {
             // nLeds < 0 implies that we want to show them in reverse
             pixels.mAdvance = -pixels.mAdvance;
