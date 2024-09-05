@@ -286,8 +286,8 @@ _FL_DEFPIN(17, 29, 0); // D17 / A3 is P0.29
 // Cannot determine which pin on PCA10056 would be intended solely from UNO R3
 // digital pin number
 //_FL_DEFPIN(18, 30, 0); // D18 could be one of two pins: A4 would be P0.30, SDA
-//would be P0.26 _FL_DEFPIN(19, 31, 0); // D19 could be one of two pins: A5
-//would be P0.31, SCL would be P0.27
+// would be P0.26 _FL_DEFPIN(19, 31, 0); // D19 could be one of two pins: A5
+// would be P0.31, SCL would be P0.27
 #elif defined(FASTLED_NRF52_USE_ARDUINO_MEGA_2560_REV3_HEADER_PIN_NUMBERING)
 /* The following allows defining and using the FastPin<> templates,
    using the Arduino UNO R3 connector pin definitions.
@@ -317,8 +317,8 @@ _FL_DEFPIN(19, 5, 0);  // D15 is P0.05
 // Cannot determine which pin on PCA10056 would be intended solely from UNO MEGA
 // 2560 digital pin number
 //_FL_DEFPIN(20,  1, 0); // D20 could be one of two pins: D20 on lower header
-//would be P0.01, SDA would be P0.26 _FL_DEFPIN(21,  0, 0); // D21 could be one
-//of two pins: D21 on lower header would be P0.00, SCL would be P0.27
+// would be P0.01, SDA would be P0.26 _FL_DEFPIN(21,  0, 0); // D21 could be one
+// of two pins: D21 on lower header would be P0.00, SCL would be P0.27
 
 // Arduino MEGA 2560 has D22-D53 exposed on perpendicular two-row header
 // PCA10056 has support for D22-D38 via a 2x19 header at that location (D39 is

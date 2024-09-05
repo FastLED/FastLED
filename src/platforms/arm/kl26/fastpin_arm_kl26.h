@@ -114,7 +114,7 @@ class _ARMPIN {
                          _R(GPIO##L##_PTOR), _R(FGPIO##L##_PDIR),              \
                          _R(FGPIO##L##_PDDR)> {};                              \
 /* template<> class FastPinBB<PIN> : public _ARMPIN_BITBAND<PIN, BIT, _R(GPIO  \
-## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), _R(GPIO ## L                                                                  \
+## L ## _PDOR), _R(GPIO ## L ## _PSOR), _R(GPIO ## L ## _PCOR), _R(GPIO ## L   \
 ## _PTOR), _R(GPIO ## L ## _PDIR), _R(GPIO ## L ## _PDDR)> {}; */
 
 _FL_IO(A, 0);
