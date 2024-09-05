@@ -10,6 +10,7 @@
 #include "color.h"
 #include <stddef.h>
 #include "rgb_2_rgbw.h"
+#include "five_bit_hd_gamma.h"
 #include "force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -326,10 +327,6 @@ struct PixelController {
         /// @param dither dither setting for the LEDs
         /// @param advance whether the pointer (d) should advance per LED
         /// @param skip if the pointer is advancing, how many bytes to skip in addition to 3
-        PixelController(
-                const uint8_t *d, int len, CRGB & s,
-                EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0)
-                    : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
         PixelController(
                 const uint8_t *d, int len, CRGB & s,
                 EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0)
@@ -655,13 +652,14 @@ struct PixelController {
             *b2 = loadAndScale2();
         }
 
-        template<RGBW_MODE MODE>
-        FASTLED_FORCE_INLINE void loadAndScaleRGBW(uint16_t white_color_temp, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
-            CRGB rgb = CRGB(
-                scale8(mData[0], mScale.r),
-                scale8(mData[1], mScale.g),
-                scale8(mData[2], mScale.b)
-            );
+        /// Generates RGBW pixel information. While the RGB data is loaded in the order specified by RGB_ORDER
+        /// the W data is assumed to be the last byte in the data stream. This is true for WS2812 but may need
+        /// to be changed in the future if the white component starts being reordered across chipsets.
+        FASTLED_FORCE_INLINE void loadAndScaleRGBW(
+                RGBW_MODE rgbw_mode, uint16_t white_color_temp,
+                uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
+            // Get the naive RGB data order in r,g,b.
+            CRGB rgb = CRGB(mData[0], mData[1], mData[2]);  // Raw RGB values in native r,g,b ordering.
             uint8_t w = 0;
             rgb_2_rgbw(
                 rgbw_mode,
@@ -704,7 +702,7 @@ struct PixelController {
             *w_out = w;
         }
 
-        __attribute__((always_inline)) inline void loadAndScale_APA102_HD(
+        FASTLED_FORCE_INLINE void loadAndScale_APA102_HD(
                 uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out,  // Output RGB values in order of RGB_ORDER
                 uint8_t* brightness_out) {
             CRGB rgb = CRGB(mData[0], mData[1], mData[2]);

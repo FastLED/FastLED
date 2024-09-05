@@ -8,6 +8,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+#pragma GCC push_options
+#pragma GCC optimize ("O3")
+
 namespace {
     inline uint8_t min3(uint8_t a, uint8_t b, uint8_t c) {
         if (a < b) {
@@ -122,5 +125,6 @@ void rgb_2_rgbw_user_function(uint16_t w_color_temperature,
     g_user_function(w_color_temperature, r, g, b, r_scale, g_scale, b_scale, out_r, out_g, out_b, out_w);
 }
 
+#pragma GCC pop_options
 
 FASTLED_NAMESPACE_END
