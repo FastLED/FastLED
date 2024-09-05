@@ -2,6 +2,8 @@
 /// @brief   Blink the first LED of an LED strip
 /// @example Blink.ino
 
+// #define FASTLED_RMT_BUILTIN_DRIVER 1
+
 #include <FastLED.h>
 
 // How many leds in your strip?
@@ -18,7 +20,7 @@ CRGB leds[NUM_LEDS];
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812, DATA_PIN>(leds, NUM_LEDS);  // GRB ordering is assume
+    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is assume
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
 
