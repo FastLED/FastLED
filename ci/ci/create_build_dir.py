@@ -4,8 +4,14 @@ import subprocess
 from ci.locked_print import locked_print
 
 
-
-def create_build_dir(board: str, project_options: list[str] | None, defines: list[str], no_install_deps: bool, extra_packages: list[str], build_dir: str | None) -> tuple[bool, str]:
+def create_build_dir(
+    board: str,
+    project_options: list[str] | None,
+    defines: list[str],
+    no_install_deps: bool,
+    extra_packages: list[str],
+    build_dir: str | None,
+) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     locked_print(f"*** Initializing environment for board {board} ***")
     builddir = Path(build_dir) / board if build_dir else Path(".build") / board
@@ -32,10 +38,10 @@ def create_build_dir(board: str, project_options: list[str] | None, defines: lis
     ]
     if project_options:
         for project_option in project_options:
-            cmd_list.append(f'--project-option={project_option}')
+            cmd_list.append(f"--project-option={project_option}")
     if defines:
-        build_flags = ' '.join(f'-D {define}' for define in defines)
-        cmd_list.append(f'--project-option=build_flags={build_flags}')
+        build_flags = " ".join(f"-D {define}" for define in defines)
+        cmd_list.append(f"--project-option=build_flags={build_flags}")
     if extra_packages:
         cmd_list.append(f'--project-option=lib_deps={",".join(extra_packages)}')
     if no_install_deps:

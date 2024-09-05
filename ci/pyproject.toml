@@ -6,7 +6,10 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "platformio==6.1.15",
-    "python-dateutil"
+    "python-dateutil",
+    "ruff",
+    "mypy",
+    "types-python-dateutil"
 ]
 
 [build-system]

@@ -6,10 +6,14 @@ import dateutil.parser
 import shutil
 from pathlib import Path
 
+
 def run_command(command):
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    process = subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
     output, error = process.communicate()
-    return output.decode('utf-8'), error.decode('utf-8')
+    return output.decode("utf-8"), error.decode("utf-8")
+
 
 def step_back_commits(steps):
     step_back_command = f"git reset --hard HEAD~{steps}"
@@ -19,13 +23,16 @@ def step_back_commits(steps):
         return False
     return True
 
+
 def check_firmware_size(board: str) -> int:
     base_path = Path(".build") / board / ".pio" / "build" / board
     firmware = base_path / "firmware.bin"
     if not firmware.exists():
         firmware = base_path / "firmware.hex"
     if not firmware.exists():
-        raise FileNotFoundError(f"firmware.bin or firmware.hex not found in {base_path}")
+        raise FileNotFoundError(
+            f"firmware.bin or firmware.hex not found in {base_path}"
+        )
     size_command = f"du -b {firmware}"
 
     output, error = run_command(size_command)
@@ -35,6 +42,7 @@ def check_firmware_size(board: str) -> int:
     size_in_bytes = output.strip().split()[0]
     return int(size_in_bytes)
 
+
 def get_commit_hash():
     hash_command = "git rev-parse HEAD"
     output, error = run_command(hash_command)
@@ -42,6 +50,7 @@ def get_commit_hash():
         print(f"Error getting commit hash: {error}")
         return None
     return output.strip()
+
 
 def get_commit_date(commit_hash):
     date_command = f"git show -s --format=%ci {commit_hash}"
@@ -51,7 +60,14 @@ def get_commit_date(commit_hash):
         return None
     return dateutil.parser.parse(output.strip()).isoformat()
 
-def main(board: str, num_commits: int, skip_step: int, start_commit: str | None = None, end_commit: str | None = None):
+
+def main(
+    board: str,
+    num_commits: int,
+    skip_step: int,
+    start_commit: str | None = None,
+    end_commit: str | None = None,
+):
     # Create tmp directory if it doesn't exist
     if not os.path.exists("tmp"):
         os.makedirs("tmp")
@@ -63,7 +79,7 @@ def main(board: str, num_commits: int, skip_step: int, start_commit: str | None 
     print("Cloning FastLED repository...")
     clone_command = "git clone https://github.com/FastLED/FastLED.git"
     output, error = run_command(clone_command)
-    #if error:
+    # if error:
     #    print(f"Error cloning repository: {error}")
     #    os.chdir("..")
     #    return
@@ -85,9 +101,9 @@ def main(board: str, num_commits: int, skip_step: int, start_commit: str | None 
 
     # Prepare CSV file
     csv_filename = "../../firmware_sizes.csv"
-    with open(csv_filename, 'w', newline='') as csvfile:
+    with open(csv_filename, "w", newline="") as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(['datetime', 'commit_hash', 'binary_size'])
+        csvwriter.writerow(["datetime", "commit_hash", "binary_size"])
 
     commits_checked = 0
     first_iteration = True
@@ -102,7 +118,7 @@ def main(board: str, num_commits: int, skip_step: int, start_commit: str | None 
                 if not step_back_commits(1):
                     break
                 current_commit = get_commit_hash()
-        
+
         if num_commits and commits_checked >= num_commits:
             print(f"Checked {num_commits} commits")
             break
@@ -115,7 +131,7 @@ def main(board: str, num_commits: int, skip_step: int, start_commit: str | None 
         print(f"\nChecking commit {commits_checked + 1}")
 
         # remove .build/esp32dev/pio/build/esp32dev/ directory
-        board_files = Path('.build') / board / ".pio" / "build" / board
+        board_files = Path(".build") / board / ".pio" / "build" / board
         if board_files.exists():
             shutil.rmtree(str(board_files), ignore_errors=True)
         compile_command = f"python3 ci/ci-compile.py --boards {board} --examples Blink"
@@ -133,12 +149,12 @@ def main(board: str, num_commits: int, skip_step: int, start_commit: str | None 
         if size and commit_hash:
             commit_date = get_commit_date(commit_hash)
             print(f"Firmware size: {size} bytes")
-            
+
             # Write to CSV incrementally
-            with open(csv_filename, 'a', newline='') as csvfile:
+            with open(csv_filename, "a", newline="") as csvfile:
                 csvwriter = csv.writer(csvfile)
                 csvwriter.writerow([commit_date, commit_hash, size])
-            
+
             print(f"Result appended to {csv_filename}")
 
         commits_checked += 1
@@ -151,13 +167,25 @@ def main(board: str, num_commits: int, skip_step: int, start_commit: str | None 
     # Don't remove the tmp directory
     print("\nTemporary directory 'tmp' has been left intact for inspection.")
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Check FastLED firmware size for multiple commits.")
-    parser.add_argument("--num-commits", type=int, default=1, help="Number of commits to check")
-    parser.add_argument("--skip-step", type=int, default=1, help="Number of commits to skip between checks")
+    parser = argparse.ArgumentParser(
+        description="Check FastLED firmware size for multiple commits."
+    )
+    parser.add_argument(
+        "--num-commits", type=int, default=1, help="Number of commits to check"
+    )
+    parser.add_argument(
+        "--skip-step",
+        type=int,
+        default=1,
+        help="Number of commits to skip between checks",
+    )
     parser.add_argument("--start-commit", type=str, help="Starting commit hash")
     parser.add_argument("--end-commit", type=str, help="Ending commit hash")
-    parser.add_argument("--board", type=str, default="esp32dev", help="Board to check firmware size for")
+    parser.add_argument(
+        "--board", type=str, default="esp32dev", help="Board to check firmware size for"
+    )
     args = parser.parse_args()
 
     if args.start_commit or args.end_commit:
@@ -172,6 +200,5 @@ if __name__ == "__main__":
             print("Start commit and end commit are the same.")
             exit(1)
         num_commits = 999999
-    
-        
+
     main(args.board, num_commits, args.skip_step, args.start_commit, args.end_commit)

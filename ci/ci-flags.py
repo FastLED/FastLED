@@ -1,4 +1,3 @@
-
 # mypy: ignore-errors
 # flake8: noqa
 # ruff: skip

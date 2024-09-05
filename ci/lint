@@ -1,1 +1,7 @@
+#!/bin/bash
+
+# cd to current directory
+cd "$(dirname "$0")"
 uv run mypy .
+uv run ruff check --fix .
+uv run ruff format .

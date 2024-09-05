@@ -11,11 +11,15 @@ IS_GITHUB = "GITHUB_ACTIONS" in os.environ
 FIRST_BUILD_LOCK = Lock()
 USE_FIRST_BUILD_LOCK = IS_GITHUB
 
+
 def errors_happened() -> bool:
     """Return whether any errors happened during the build."""
     return ERROR_HAPPENED
 
-def compile_for_board_and_example(board: str, example: str, build_dir: str | None) -> tuple[bool, str]:
+
+def compile_for_board_and_example(
+    board: str, example: str, build_dir: str | None
+) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     builddir = Path(build_dir) / board if build_dir else Path(".build") / board
     builddir.mkdir(parents=True, exist_ok=True)
@@ -53,7 +57,6 @@ def compile_for_board_and_example(board: str, example: str, build_dir: str | Non
         check=False,
     )
 
-
     stdout = result.stdout
     # replace all instances of "lib/src" => "src" so intellisense can find the files
     # with one click.
@@ -66,9 +69,10 @@ def compile_for_board_and_example(board: str, example: str, build_dir: str | Non
     return True, stdout
 
 
-
 # Function to process task queues for each board
-def compile_examples(board: str, examples: list[str], build_dir: str | None) -> tuple[bool, str]:
+def compile_examples(
+    board: str, examples: list[str], build_dir: str | None
+) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
     is_first = True
@@ -82,11 +86,18 @@ def compile_examples(board: str, examples: list[str], build_dir: str | None) -> 
             with FIRST_BUILD_LOCK:
                 # Github runners are memory limited and the first job is the most
                 # memory intensive since all the artifacts are being generated in parallel.
-                success, message = compile_for_board_and_example(board=board, example=example, build_dir=build_dir)
+                success, message = compile_for_board_and_example(
+                    board=board, example=example, build_dir=build_dir
+                )
         else:
-            success, message = compile_for_board_and_example(board=board, example=example, build_dir=build_dir)
+            success, message = compile_for_board_and_example(
+                board=board, example=example, build_dir=build_dir
+            )
         is_first = False
         if not success:
             ERROR_HAPPENED = True
-            return False, f"Error building {example} for board {board}. stdout:\n{message}"
+            return (
+                False,
+                f"Error building {example} for board {board}. stdout:\n{message}",
+            )
     return True, ""
