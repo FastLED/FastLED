@@ -9,6 +9,7 @@
 #include "pixeltypes.h"
 #include "color.h"
 #include <stddef.h>
+#include "rgb_2_rgbw.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -632,6 +633,31 @@ struct PixelController {
         __attribute__((always_inline)) inline uint8_t getScale0() { return getscale<0>(*this); }  ///< non-template alias of getscale<0>()
         __attribute__((always_inline)) inline uint8_t getScale1() { return getscale<1>(*this); }  ///< non-template alias of getscale<1>()
         __attribute__((always_inline)) inline uint8_t getScale2() { return getscale<2>(*this); }  ///< non-template alias of getscale<2>()
+
+
+        __attribute__((always_inline)) inline void loadAndScaleRGB(uint8_t* r, uint8_t* g, uint8_t* b) {
+            *r = loadAndScale0();
+            *g = loadAndScale1();
+            *b = loadAndScale2();
+        }
+
+        __attribute__((always_inline)) inline void loadAndScaleRGBW(RGBW_MODE rgbw_mode, uint16_t white_color_temp, uint8_t* r_out, uint8_t* g_out, uint8_t* b_out, uint8_t* w_out) {
+            uint8_t r = loadAndScale0();
+            uint8_t g = loadAndScale1();
+            uint8_t b = loadAndScale2();
+            uint8_t w = 0;
+            rgb_2_rgbw(
+                rgbw_mode,
+                white_color_temp,
+                r, g, b,
+                &r, &g, &b, &w
+            );
+            *r_out = r;
+            *g_out = g;
+            *b_out = b;
+            *w_out = w;
+        }
+
 };
 
 /// Template extension of the CLEDController class

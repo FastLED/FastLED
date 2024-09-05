@@ -46,7 +46,8 @@
 FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_HAS_CLOCKLESS 1
-#define NUM_COLOR_CHANNELS 3
+// Not used.
+//#define NUM_COLOR_CHANNELS 3
 
 // -- Max RMT TX channel
 #ifndef FASTLED_RMT_MAX_CHANNELS
@@ -62,6 +63,18 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 #endif
 
+#ifndef FASTLED_EXPERIMENTAL_ESP32_RGBW_ENABLED
+#define FASTLED_EXPERIMENTAL_ESP32_RGBW_ENABLED 0
+#endif
+
+#ifndef FASTLED_EXPERIMENTAL_ESP32_RGBW_MODE
+#define FASTLED_EXPERIMENTAL_ESP32_RGBW_MODE kExactColors
+#endif
+
+#ifndef FASTLED_EXPERIMENTAL_ESP32_RGBW_WHITE_TEMP
+#define FASTLED_EXPERIMENTAL_ESP32_RGBW_WHITE_TEMP 4000
+#endif
+
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
@@ -74,7 +87,14 @@ private:
 
 public:
     ClocklessController()
-        : mRMTController(DATA_PIN, T1, T2, T3, FASTLED_RMT_MAX_CHANNELS, FASTLED_RMT_BUILTIN_DRIVER)
+        : mRMTController(
+            DATA_PIN, T1, T2, T3,
+            FASTLED_RMT_MAX_CHANNELS,
+            FASTLED_RMT_BUILTIN_DRIVER,
+            FASTLED_EXPERIMENTAL_ESP32_RGBW_ENABLED,
+            FASTLED_EXPERIMENTAL_ESP32_RGBW_MODE,
+            FASTLED_EXPERIMENTAL_ESP32_RGBW_WHITE_TEMP
+        )
     {
     }
 

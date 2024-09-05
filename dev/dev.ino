@@ -2,7 +2,8 @@
 /// @brief   Blink the first LED of an LED strip
 /// @example Blink.ino
 
-// #define FASTLED_RMT_BUILTIN_DRIVER 1
+#define FASTLED_RMT_BUILTIN_DRIVER 0
+#define FASTLED_EXPERIMENTAL_ESP32_RGBW_ENABLED 0
 
 #include <FastLED.h>
 

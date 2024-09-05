@@ -132,7 +132,14 @@ public:
     static void init(gpio_num_t pin, bool built_in_driver);
     RmtController() = delete;
     RmtController(const RmtController &) = delete;
-    RmtController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver);
+    RmtController(
+        int DATA_PIN,
+        int T1, int T2, int T3,  // Bit timings.
+        int maxChannel,
+        bool built_in_driver,
+        bool is_rgbw,
+        RGBW_MODE,
+        uint16_t white_color_temp);
     ~RmtController();
 
     template <EOrder RGB_ORDER>
@@ -150,8 +157,6 @@ public:
     }
 
 private:
-    static ESP32RMTController *new_rmt_controller(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver);
-    static void delete_rmt_controller(ESP32RMTController *controller);
     void ingest(uint8_t val);
     void showPixels();
     bool built_in_driver();
@@ -161,20 +166,32 @@ private:
     void loadAllPixelsToRmtSymbolData(PixelController<RGB_ORDER> &pixels)
     {
         // -- Make sure the data buffer is allocated
-        initPulseBuffer(pixels.size() * 3);
+        const int bytes_per_pixel = mIsRgbw ? 4 : 3;
+        const int size = pixels.size() * bytes_per_pixel;
+        initPulseBuffer(size);
 
         // -- Cycle through the R,G, and B values in the right order,
         //    storing the pulses in the big buffer
 
-        uint32_t byteval;
         while (pixels.has(1))
         {
-            byteval = pixels.loadAndScale0();
-            ingest(byteval);
-            byteval = pixels.loadAndScale1();
-            ingest(byteval);
-            byteval = pixels.loadAndScale2();
-            ingest(byteval);
+            uint8_t r,g,b;
+            if (!mIsRgbw)
+            {
+                pixels.loadAndScaleRGB(&r, &g, &b);
+                ingest(r);
+                ingest(g);
+                ingest(b);
+            }
+            else
+            {
+                uint8_t w;
+                pixels.loadAndScaleRGBW(kExactColors, kColorTemp, &r, &g, &b, &w);
+                ingest(r);
+                ingest(g);
+                ingest(b);
+                ingest(w);  // Just set it to 0 for now
+            }
             pixels.advanceData();
             pixels.stepDithering();
         }
@@ -184,20 +201,37 @@ private:
     void loadPixelDataForStreamEncoding(PixelController<RGB_ORDER> &pixels)
     {
         // -- Make sure the buffer is allocated
-        int size_in_bytes = pixels.size() * 3;
+        const int size_per_pixel = mIsRgbw ? 4 : 3;
+        const int size_in_bytes = pixels.size() * size_per_pixel;
         uint8_t *pData = getPixelBuffer(size_in_bytes);
 
         // -- This might be faster
         while (pixels.has(1))
         {
-            *pData++ = pixels.loadAndScale0();
-            *pData++ = pixels.loadAndScale1();
-            *pData++ = pixels.loadAndScale2();
+            uint8_t r = pixels.loadAndScale0();
+            uint8_t g = pixels.loadAndScale1();
+            uint8_t b = pixels.loadAndScale2();
+            if (!mIsRgbw) {
+                *pData++ = r;
+                *pData++ = g;
+                *pData++ = b;
+            } else {
+                uint8_t w;
+                // *pData++ = 0;  // Just set it to 0 for now
+                rgb_2_rgbw(kExactColors, kColorTemp, r, g, b, &r, &g, &b, &w);
+                *pData++ = r;
+                *pData++ = g;
+                *pData++ = b;
+                *pData++ = w;
+            }
             pixels.advanceData();
             pixels.stepDithering();
         }
     }
     ESP32RMTController *pImpl = nullptr;
+    bool mIsRgbw = false;
+    RGBW_MODE kRgbwMode = kInvalid;
+    uint16_t kColorTemp = kRGBWDefaultColorTemp;
 };
 
 FASTLED_NAMESPACE_END
