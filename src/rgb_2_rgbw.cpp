@@ -51,17 +51,17 @@ void rgb_2_rgbw(
     uint8_t* out_r, uint8_t* out_g, uint8_t* out_b, uint8_t* out_w
 ) {
     switch (mode) {
-        case kInvalid:
-        case kNullWhitePixel:
+        case kRGBWInvalid:
+        case kRGBWNullWhitePixel:
             *out_r = r;
             *out_g = g;
             *out_b = b;
             *out_w = 0;
             return;
-        case kExactColors:
+        case kRGBWExactColors:
             rgb_2_rgbw_exact(r, g, b, white_color_temp, out_r, out_g, out_b, out_w);
             return;
-        case kMaxBrightness:
+        case kRGBWMaxBrightness:
             *out_r = r;
             *out_g = g;
             *out_b = b;

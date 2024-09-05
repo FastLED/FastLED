@@ -186,7 +186,7 @@ private:
             else
             {
                 uint8_t w;
-                pixels.loadAndScaleRGBW(kExactColors, kColorTemp, &r, &g, &b, &w);
+                pixels.loadAndScaleRGBW(mRgbwMode, mRgbwMode, &r, &g, &b, &w);
                 ingest(r);
                 ingest(g);
                 ingest(b);
@@ -218,7 +218,7 @@ private:
             } else {
                 uint8_t w;
                 // *pData++ = 0;  // Just set it to 0 for now
-                rgb_2_rgbw(kExactColors, kColorTemp, r, g, b, &r, &g, &b, &w);
+                rgb_2_rgbw(mRgbwMode, kColorTemp, r, g, b, &r, &g, &b, &w);
                 *pData++ = r;
                 *pData++ = g;
                 *pData++ = b;
@@ -230,7 +230,7 @@ private:
     }
     ESP32RMTController *pImpl = nullptr;
     bool mIsRgbw = false;
-    RGBW_MODE kRgbwMode = kInvalid;
+    RGBW_MODE mRgbwMode = kRGBWInvalid;
     uint16_t kColorTemp = kRGBWDefaultColorTemp;
 };
 

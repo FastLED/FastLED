@@ -7,10 +7,10 @@
 FASTLED_NAMESPACE_BEGIN
 
 enum RGBW_MODE {
-    kInvalid,
-    kNullWhitePixel,
-    kExactColors,
-    kMaxBrightness
+    kRGBWInvalid,
+    kRGBWNullWhitePixel,
+    kRGBWExactColors,
+    kRGBWMaxBrightness
 };
 
 enum {

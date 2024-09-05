@@ -1,11 +1,13 @@
-/// @file    Blink.ino
-/// @brief   Blink the first LED of an LED strip
-/// @example Blink.ino
+/// @file    HSVDemo.ino
+/// @brief   Cycle through hues on an LED strip using HSV color model
+/// @example HSVDemo.ino
 
 #define FASTLED_RMT_BUILTIN_DRIVER 0
 #define FASTLED_EXPERIMENTAL_ESP32_RGBW_ENABLED 0
+#define FASTLED_EXPERIMENTAL_ESP32_RGBW_MODE kRGBWExactColors
 
 #include <FastLED.h>
+#include "noise.h"
 
 // How many leds in your strip?
 #define NUM_LEDS 10
@@ -21,17 +23,19 @@ CRGB leds[NUM_LEDS];
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is assume
+    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is assumed
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
 
 void loop() { 
-  // Fill the LED array with red, then show
-  fill_solid(leds, NUM_LEDS, CRGB::Red);
+  uint16_t hue = inoise16(millis() * 80, 0, 0) >> 8;
+  uint16_t sat = inoise16(millis() * 40, 0, 0) >> 8;
+  uint16_t val = inoise16(millis() * 20, 0, 0) >> 8;
+
+  // Fill the LED array with the current hue
+  fill_solid(leds, NUM_LEDS, CHSV(hue, sat, val));
   FastLED.show();
-  delay(500);
-  // Fill the LED array with black (off), then show
-  fill_solid(leds, NUM_LEDS, CRGB::Black);
-  FastLED.show();
-  delay(500);
+
+  // Small delay to control the speed of the color change
+  delay(1);
 }
