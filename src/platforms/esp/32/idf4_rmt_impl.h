@@ -112,59 +112,6 @@ public:
     //    This is the main entry point for the pixel controller
     void IRAM_ATTR showPixels();
 
-    // -- Load pixel data
-    //    This method loads all of the pixel data into a separate buffer for use by
-    //    by the RMT driver. Copying does two important jobs: it fixes the color
-    //    order for the pixels, and it performs the scaling/adjusting ahead of time.
-    //    It also packs the bytes into 32 bit chunks with the right bit order.
-    template <EOrder RGB_ORDER>
-    void loadPixelDataForStreamEncoding(PixelController<RGB_ORDER> &pixels)
-    {
-        // -- Make sure the buffer is allocated
-        int size_in_bytes = pixels.size() * 3;
-        uint8_t *pData = getPixelBuffer(size_in_bytes);
-
-        // -- This might be faster
-        while (pixels.has(1))
-        {
-            *pData++ = pixels.loadAndScale0();
-            *pData++ = pixels.loadAndScale1();
-            *pData++ = pixels.loadAndScale2();
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
-    }
-
-    // -- Convert all pixels to RMT pulses
-    //    This function is only used when the user chooses to use the
-    //    built-in RMT driver, which needs all of the RMT pulses
-    //    up-front. This is a LARGE buffer, about 24x larger than
-    //    the original pixel data. But the benefit is that no interrupt
-    //    is needed to convert during streaming so Wifi will not
-    //    interfere with the timing.
-    template <EOrder RGB_ORDER>
-    void loadAllPixelsToRmtSymbolData(PixelController<RGB_ORDER> &pixels)
-    {
-        // -- Make sure the data buffer is allocated
-        initPulseBuffer(pixels.size() * 3);
-
-        // -- Cycle through the R,G, and B values in the right order,
-        //    storing the pulses in the big buffer
-
-        uint32_t byteval;
-        while (pixels.has(1))
-        {
-            byteval = pixels.loadAndScale0();
-            ingest(byteval);
-            byteval = pixels.loadAndScale1();
-            ingest(byteval);
-            byteval = pixels.loadAndScale2();
-            ingest(byteval);
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
-    }
-
     // -- Init pulse buffer
     //    Set up the buffer that will hold all of the pulse items for this
     //    controller.

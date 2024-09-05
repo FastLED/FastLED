@@ -14,8 +14,15 @@ void RmtController::init(gpio_num_t pin, bool built_in_driver)
     ESP32RMTController::init(pin, built_in_driver);
 }
 
-RmtController::RmtController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver)
+RmtController::RmtController(
+    int DATA_PIN,
+    int T1, int T2, int T3,
+    int maxChannel, bool built_in_driver,
+    bool is_rgbw, RGBW_MODE mode, uint16_t white_color_temp)
 {
+    mIsRgbw = is_rgbw;
+    kRgbwMode = mode;
+    kColorTemp = white_color_temp;
     pImpl = new ESP32RMTController(DATA_PIN, T1, T2, T3, maxChannel, built_in_driver);
 }
 RmtController::~RmtController()
