@@ -27,6 +27,7 @@ void rgb_2_rgbw_exact(
     uint8_t r_scale, uint8_t g_scale, uint8_t b_scale,
     uint8_t* out_r, uint8_t* out_g, uint8_t* out_b, uint8_t* out_w);
 
+// RGB(255, 255, 255) -> RGBW(255, 255, 255, 255)
 void rgb_2_rgbw_max_brightness(
     uint16_t w_color_temperature,
     uint8_t r, uint8_t g, uint8_t b,
