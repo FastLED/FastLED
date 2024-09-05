@@ -330,6 +330,10 @@ struct PixelController {
                 const uint8_t *d, int len, CRGB & s,
                 EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0)
                     : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
+        PixelController(
+                const uint8_t *d, int len, CRGB & s,
+                EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0)
+                    : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
             enable_dithering(dither);
             mData += skip;
             mAdvance = (advance) ? 3+skip : 0;
@@ -651,16 +655,13 @@ struct PixelController {
             *b2 = loadAndScale2();
         }
 
-
-        // LoadAndScaleRGBW loads the pixel data in the order specified by RGB_ORDER
-        // and adjusts for the white component of the RGBW LED. The b0_out through b2_out
-        // are the RGB values re-ordered and scaled by the color correction values.
-        // The white component is always assumed to be in the last position and if it's
-        // not then it will have to be handled by the caller.
-        FASTLED_FORCE_INLINE void loadAndScaleRGBW(
-                RGBW_MODE rgbw_mode, uint16_t white_color_temp,
-                uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
-            CRGB rgb = CRGB(mData[0], mData[1], mData[2]);  // Raw RGB values in native r,g,b ordering.
+        template<RGBW_MODE MODE>
+        FASTLED_FORCE_INLINE void loadAndScaleRGBW(uint16_t white_color_temp, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
+            CRGB rgb = CRGB(
+                scale8(mData[0], mScale.r),
+                scale8(mData[1], mScale.g),
+                scale8(mData[2], mScale.b)
+            );
             uint8_t w = 0;
             rgb_2_rgbw(
                 rgbw_mode,
@@ -701,6 +702,29 @@ struct PixelController {
             *b2_out = rgb.raw[b2_index];
             // Assume the w component is the last byte in the data stream and never reordered.
             *w_out = w;
+        }
+
+        __attribute__((always_inline)) inline void loadAndScale_APA102_HD(
+                uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out,  // Output RGB values in order of RGB_ORDER
+                uint8_t* brightness_out) {
+            CRGB rgb = CRGB(mData[0], mData[1], mData[2]);
+            uint8_t brightness = 0;
+            if (rgb) {
+                five_bit_hd_gamma_bitshift(
+                    rgb.r, rgb.g, rgb.b,
+                    // Note this mScale has the global brightness scale mixed in with the
+                    // color correction scale.
+                    mScale.r, mScale.g, mScale.b,
+                    &rgb.r, &rgb.g, &rgb.b, &brightness
+                );
+            }
+            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
+            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
+            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
+            *b0_out = rgb.raw[b0_index];
+            *b1_out = rgb.raw[b1_index];
+            *b2_out = rgb.raw[b2_index];
+            *brightness_out = brightness;
         }
 
 };
