@@ -9,10 +9,14 @@ dependencies = [
     "python-dateutil",
     "ruff",
     "mypy",
-    "types-python-dateutil"
+    "types-python-dateutil",
+    "clang-format"
 ]
 
 [build-system]
 requires = ["hatchling", "hatch-requirements-txt"]
 build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
+
+[tool.hatch.build]
+packages = ["ci"]
