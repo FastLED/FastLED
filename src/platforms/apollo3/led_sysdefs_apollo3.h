@@ -26,14 +26,16 @@
 #endif
 
 // data type defs
-typedef volatile uint8_t RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
-typedef volatile uint8_t RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
+typedef volatile uint8_t
+    RoReg; /**< Read only 8-bit register (volatile const unsigned int) */
+typedef volatile uint8_t
+    RwReg; /**< Read-Write 8-bit register (volatile unsigned int) */
 
 #define FASTLED_NO_PINMAP
 
 // reusing/abusing cli/sei defs for due
 // These should be fine for the Apollo3. It has its own defines in cmsis_gcc.h
-#define cli() __disable_irq();  //__disable_fault_irq();
+#define cli() __disable_irq(); //__disable_fault_irq();
 #define sei() __enable_irq();  //__enable_fault_irq();
 
 #endif
