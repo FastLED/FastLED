@@ -6,5 +6,5 @@
 #include "fastspi_esp8266.h"
 #endif
 
-#include "clockless_esp8266.h"
 #include "clockless_block_esp8266.h"
+#include "clockless_esp8266.h"

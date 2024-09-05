@@ -10,7 +10,7 @@ dependencies = [
     "ruff",
     "mypy",
     "types-python-dateutil",
-    "clang-format"
+    "clang-format",
 ]
 
 [build-system]

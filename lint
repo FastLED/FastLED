@@ -6,9 +6,14 @@ cd "$(dirname "$0")"
 
 ./ci/lint
 
+folders=(
+    "src/lib8tion"
+    "src/platforms/stub"
+    "src/platforms/apollo3"
+    "src/platforms/esp/8266"
+)
 
-uv run clang-format -i src/lib8tion/*.h
-uv run clang-format -i src/platforms/stub/*.h
-uv run clang-format -i src/platforms/stub/*.cpp
-# uv run clang-format -i src/platforms/arm/**/*.h
-# uv run clang-format -i src/platforms/arm/**/*.cpp
+for folder in "${folders[@]}"; do
+    echo "Running clang-format on $folder"
+    uv run ci/run-clang-format.py -i -r "$folder"
+done
