@@ -12,8 +12,8 @@ FASTLED_NAMESPACE_BEGIN
 #define FASTLED_ALL_PINS_HARDWARE_SPI
 
 class StubSPIOutput {
-  public:
-    StubSPIOutput() {}
+public:
+    StubSPIOutput() { }
 };
 
 #endif // defined(FASTLED_STUB_IMPL)

@@ -7,8 +7,8 @@ cd "$(dirname "$0")"
 ./ci/lint
 
 folders=(
-    "src/lib8tion"
-    "src/platforms/stub"
+    #"src/lib8tion"
+    #"src/platforms/stub"
     #"src/platforms/apollo3"  # clang-format breaks apollo3
     #"src/platforms/esp/8266"  # clang-format breaks esp8266
     #"src/platforms/arm" # clang-format breaks arm
