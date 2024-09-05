@@ -71,11 +71,6 @@ inline void rgb_2_rgbw(
                 out_r, out_g, out_b, out_w);
             return;
     }
-    static bool s_warned = false;
-    if (!s_warned) {
-        s_warned = true;
-        printf("rgb_2_rgbw: Invalid RGBW mode %d\n", MODE);
-    }
     rgb_2_rgbw_null_white_pixel(
         w_color_temperature,
         r, g, b,
@@ -112,11 +107,6 @@ inline void rgb_2_rgbw(
                 r_scale, g_scale, b_scale,
                 out_r, out_g, out_b, out_w);
             return;
-    }
-    static bool s_warned = false;
-    if (!s_warned) {
-        s_warned = true;
-        printf("rgb_2_rgbw: Invalid RGBW mode %d\n", mode);
     }
     rgb_2_rgbw_null_white_pixel(
         w_color_temperature,
