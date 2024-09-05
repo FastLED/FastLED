@@ -16,6 +16,8 @@
         "type_traits": "cpp",
         "cmath": "cpp",
         "limits": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "random": "cpp",
+        "functional": "cpp"
     }
 }
