@@ -11,6 +11,7 @@ folders=(
     "src/platforms/stub"
     "src/platforms/apollo3"
     "src/platforms/esp/8266"
+    "src/platforms/arm"
 )
 
 for folder in "${folders[@]}"; do

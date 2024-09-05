@@ -17,7 +17,7 @@
 #endif
 
 // reusing/abusing cli/sei defs for due
-#define cli()  __disable_irq();
+#define cli() __disable_irq();
 #define sei() __enable_irq();
 
 #define FASTLED_NO_PINMAP
