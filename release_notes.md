@@ -11,7 +11,8 @@ FastLED 3.7.6
   * SK9822 have downgraded their default clock from 24 mhz -> 12 mhz out of an abundance of caution.
     * I don't see an analysis of whether SK9822 has the same issue as the APA102 for the clock signal degredation.
     * However, 12 mhz is still blazingly fast (>10x) compared to WS2812. If you need faster, bump it up.
-
+* NRF52XXX platforms
+  * Selecting an invalid pin will not spew pages and pages of template errors. Now it's been deprecated to a runtime message and assert.
 
 FastLED 3.7.5
 =============
