@@ -148,6 +148,7 @@ class _INVALID_ARMPIN: public _ARMPIN<_MASK, _PORT, _PORT_NUMBER, _PIN_NUMBER> {
 public:
     _INVALID_ARMPIN() {
         Serial.println("For whatever reason, this pin has been marked as invalid and you should use a different pin.")
+        delay(1000);  // Give time for the message to be printed.
         assert(false);
     }
     
