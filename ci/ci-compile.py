@@ -138,7 +138,6 @@ def main() -> int:
         defines=defines,
         extra_packages=extract_packages,
         build_dir=build_dir,
-        interactive=args.interactive,
     )
     return rtn
 

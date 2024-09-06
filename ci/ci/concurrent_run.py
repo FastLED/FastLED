@@ -16,7 +16,6 @@ def run(
     defines: list[str],
     extra_packages: list[str],
     build_dir: str | None,
-    interactive: bool,
 ) -> int:
     start_time = time.time()
     # Necessary to create the first project alone, so that the necessary root directories
