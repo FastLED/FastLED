@@ -25,7 +25,7 @@ jobs:
       
       - name: Install PlatformIO build dependencies
         run: |
-          pip install -r ci/requirements.txt
+          pip install .
 
       # Use the fastest build to instantiate the ~/.platformio/boards folder
       - name: Pre-build to ensure ~/.platformio/boards folder is created
