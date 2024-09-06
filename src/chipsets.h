@@ -219,7 +219,12 @@ protected:
 template <
 	uint8_t DATA_PIN, uint8_t CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(12),
+	// APA102 has a bug where long strip can't handle full speed due to clock degredation.
+	// This only affects long strips, but then again if you have a short strip does 6 mhz actually slow
+	// you down?  Probably not. And you can always bump it up for speed. Therefore we are prioritizing
+	// "just works" over "fastest possible" here.
+	// https://www.pjrc.com/why-apa102-leds-have-trouble-at-24-mhz/
+	uint32_t SPI_SPEED = DATA_RATE_MHZ(6),
 	FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = kFiveBitGammaCorrectionMode_Null,
 	uint32_t START_FRAME = 0x00000000,
 	uint32_t END_FRAME = 0xFF000000
@@ -373,7 +378,12 @@ template <
 	uint8_t DATA_PIN,
 	uint8_t CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(24)
+	// APA102 has a bug where long strip can't handle full speed due to clock degredation.
+	// This only affects long strips, but then again if you have a short strip does 6 mhz actually slow
+	// you down?  Probably not. And you can always bump it up for speed. Therefore we are prioritizing
+	// "just works" over "fastest possible" here.
+	// https://www.pjrc.com/why-apa102-leds-have-trouble-at-24-mhz/
+	uint32_t SPI_SPEED = DATA_RATE_MHZ(6)
 >
 class APA102ControllerHD : public APA102Controller<
 	DATA_PIN,
@@ -397,7 +407,7 @@ template <
 	uint8_t DATA_PIN,
 	uint8_t CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(24)
+	uint32_t SPI_SPEED = DATA_RATE_MHZ(12)
 >
 class SK9822Controller : public APA102Controller<
 	DATA_PIN,
@@ -419,7 +429,7 @@ template <
 	uint8_t DATA_PIN,
 	uint8_t CLOCK_PIN,
 	EOrder RGB_ORDER = RGB,
-	uint32_t SPI_SPEED = DATA_RATE_MHZ(24)
+	uint32_t SPI_SPEED = DATA_RATE_MHZ(12)
 >
 class SK9822ControllerHD : public APA102Controller<
 	DATA_PIN,

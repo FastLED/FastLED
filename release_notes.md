@@ -3,6 +3,14 @@ FastLED 3.7.6
 * WS2812 RGBW Mode enabled on ESP32 via experimental `FASTLED_EXPERIMENTAL_ESP32_RGBW_ENABLED`
 * RPXXXX compiler fixes to solve asm segment overflow violation
 * ESP32 binary size blew up in 3.7.5, in 3.7.6 it's back to the same size as 3.7.4
+* APA102 & SK9822 have downgraded their default clock speed to improve "just works" experience
+  * APA102 chipsets have downgraded their default clock from 24 mhz to 6mhz to get around "long strip signal degredaton bug"
+    * https://www.pjrc.com/why-apa102-leds-have-trouble-at-24-mhz/
+    * We are prioritizing "just works by default" rather than "optimized by default but only for short strips".
+    * 6 Mhz is still blazingly fast compared to WS2812 and you can always bump it up to get more performance.
+  * SK9822 have downgraded their default clock from 24 mhz -> 12 mhz out of an abundance of caution.
+    * I don't see an analysis of whether SK9822 has the same issue as the APA102 for the clock signal degredation.
+    * However, 12 mhz is still blazingly fast (>10x) compared to WS2812. If you need faster, bump it up.
 
 
 FastLED 3.7.5
