@@ -13,6 +13,7 @@ FastLED 3.7.6
     * However, 12 mhz is still blazingly fast (>10x) compared to WS2812. If you need faster, bump it up.
 * NRF52XXX platforms
   * Selecting an invalid pin will not spew pages and pages of template errors. Now it's been deprecated to a runtime message and assert.
+* nrf52840 compile support now official.
 
 FastLED 3.7.5
 =============
