@@ -74,22 +74,23 @@ def choose_board_interactively(boards: list[str]) -> list[str]:
         try:
             # choice = int(input("Enter the number of the board(s) you want to compile to: "))
             input_str = input(
-                "Enter the number of the board(s) you want to compile to: "
+                "Enter the number of the board(s) you want to compile to, or it's name(s): "
             )
             if "all" in input_str:
                 return boards
-            board_selections: list[int] = [int(x) for x in input_str.split(",")]
-            # if 0 <= choice < len(boards):
-            #    return boards[choice]
-            for id in board_selections:
-                if 0 <= id < len(boards):
-                    # return boards
-                    board = boards[id]
-                    out.append(board)
+            for board in input_str.split(","):
+                if board == "":
+                    continue
+                if not board.isdigit():
+                    out.append(board)  # Assume it's a board name.
                 else:
-                    print("invalid board id: ", id)
+                    index = int(board)  # Find the board from the index.
+                    if 0 <= index < len(boards):
+                        out.append(boards[index])
+                    else:
+                        warnings.warn(f"invalid board index: {index}, skipping")
             if not out:
-                print("No valid board ids entered. Please try again.")
+                print("Please try again.")
                 continue
             return out
         except ValueError:
