@@ -260,7 +260,15 @@ template<uint8_t PIN> volatile RoReg *FastPin<PIN>::sInPort;
 #else
 
 template<uint8_t PIN> class FastPin {
+	// This is a default implementation. If you are hitting this then FastPin<> has
+	// not be defined for your platform. You need to define a FastPin<> specialization
+	// or change what get's included for your particular build target.
 	constexpr static bool validpin() { return false; }
+	constexpr static bool LowSpeedOnlyRecommended() {  // Some implementations assume this exists.
+        // Caller must always determine if high speed use if allowed on a given pin,
+        // because it depends on more than just the chip packaging ... it depends on entire board (and even system) design.
+        return false; // choosing default to be FALSE, to allow users to ATTEMPT to use high-speed on pins where support is not known
+    }
 
 	static_assert(validpin(), "Invalid pin specified");
 

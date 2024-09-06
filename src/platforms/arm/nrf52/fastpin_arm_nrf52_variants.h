@@ -149,7 +149,7 @@
 
     // Arduino pins 0..7
     _FL_DEFPIN( 0, 25, 0); // D0  is P0.25 -- UART TX
-    //_FL_DEFPIN( 1, 24, 0); // D1  is P0.24 -- UART RX
+    _FL_DEF_INVALID_PIN( 1, 24, 0); // D1  is P0.24 -- UART RX
     _FL_DEFPIN( 2, 10, 0); // D2  is P0.10 -- NFC2
     _FL_DEFPIN( 3, 43, 1); // D3  is P1.11 
     _FL_DEFPIN( 4, 42, 1); // D4  is P1.10 -- PIN_LED2 (blue)
@@ -172,8 +172,8 @@
     _FL_DEFPIN(17, 28, 0); // D17 is P0.28 -- A3
     _FL_DEFPIN(18,  2, 0); // D18 is P0.02 -- A4
     _FL_DEFPIN(19,  3, 0); // D19 is P0.03 -- A5
-    //_FL_DEFPIN(20, 29, 0); // D20 is P0.29 -- A6 -- Connected to battery!
-    //_FL_DEFPIN(21, 31, 0); // D21 is P0.31 -- A7 -- AREF
+    _FL_DEF_INVALID_PIN(20, 29, 0); // D20 is P0.29 -- A6 -- Connected to battery!
+    _FL_DEF_INVALID_PIN(21, 31, 0); // D21 is P0.31 -- A7 -- AREF
     _FL_DEFPIN(22, 12, 0); // D22 is P0.12 -- SDA
     _FL_DEFPIN(23, 11, 0); // D23 is P0.11 -- SCL
 
@@ -181,15 +181,15 @@
     _FL_DEFPIN(24, 15, 0); // D24 is P0.15 -- PIN_SPI_MISO
     _FL_DEFPIN(25, 13, 0); // D25 is P0.13 -- PIN_SPI_MOSI
     _FL_DEFPIN(26, 14, 0); // D26 is P0.14 -- PIN_SPI_SCK
-    //_FL_DEFPIN(27, 19, 0); // D27 is P0.19 -- PIN_QSPI_SCK
-    //_FL_DEFPIN(28, 20, 0); // D28 is P0.20 -- PIN_QSPI_CS
-    //_FL_DEFPIN(29, 17, 0); // D29 is P0.17 -- PIN_QSPI_DATA0
-    //_FL_DEFPIN(30, 22, 0); // D30 is P0.22 -- PIN_QSPI_DATA1
-    //_FL_DEFPIN(31, 23, 0); // D31 is P0.23 -- PIN_QSPI_DATA2
+    _FL_DEF_INVALID_PIN(27, 19, 0); // D27 is P0.19 -- PIN_QSPI_SCK
+    _FL_DEF_INVALID_PIN(28, 20, 0); // D28 is P0.20 -- PIN_QSPI_CS
+    _FL_DEF_INVALID_PIN(29, 17, 0); // D29 is P0.17 -- PIN_QSPI_DATA0
+    _FL_DEF_INVALID_PIN(30, 22, 0); // D30 is P0.22 -- PIN_QSPI_DATA1
+    _FL_DEF_INVALID_PIN(31, 23, 0); // D31 is P0.23 -- PIN_QSPI_DATA2
 
     // Arduino pins 32..34
-    //_FL_DEFPIN(32, 21, 0); // D32 is P0.21 -- PIN_QSPI_DATA3
-    //_FL_DEFPIN(33,  9, 0); // D33 is NFC1, only accessible via test point
+    //_FL_DEF_INVALID_PIN(32, 21, 0); // D32 is P0.21 -- PIN_QSPI_DATA3
+    //_FL_DEF_INVALID_PIN(33,  9, 0); // D33 is NFC1, only accessible via test point
 #endif // defined (ARDUINO_NRF52840_FEATHER_SENSE)
 
 // Adafruit Bluefruit nRF52840 Metro Express
