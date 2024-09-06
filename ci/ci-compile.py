@@ -63,14 +63,13 @@ def parse_args():
     return args
 
 
-def remove_duplicates(boards: list[str]) -> list[str]:
-    # in order to keep the order, we use a set to keep track of the boards we've seen
+def remove_duplicates(items: list[str]) -> list[str]:
     seen = set()
     out = []
-    for board in boards:
-        if board not in seen:
-            seen.add(board)
-            out.append(board)
+    for item in items:
+        if item not in seen:
+            seen.add(item)
+            out.append(item)
     return out
 
 
