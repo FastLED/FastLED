@@ -44,18 +44,24 @@ jobs:
           ./compile --no-interactive  ${{ inputs.args }} | tee build.log
         shell: bash
 
+      - name: Generate timestamp and random hex
+        id: generate_id
+        run: |
+          echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+          echo "random_hex=$(openssl rand -hex 3)" >> $GITHUB_OUTPUT
+
       - name: Upload build artifacts on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts-${{ inputs.args }}-${{ github.run_number }}-${{ github.run_attempt }}-${{ github.sha }}
+          name: build-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
           path: .build/
           include-hidden-files: true
 
       - name: Upload build log
         uses: actions/upload-artifact@v4
         with:
-          name: build-log-${{ inputs.args }}-${{ github.run_number }}-${{ github.run_attempt }}-${{ github.sha }}
+          name: build-log-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
           path: build.log
 
       - name: Check build status
