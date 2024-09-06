@@ -1,6 +1,8 @@
 #ifndef __FASTPIN_ARM_NRF52_H
 #define __FASTPIN_ARM_NRF52_H
 
+#include <assert.h>
+
 
 /*
 //
@@ -144,7 +146,11 @@ public:
 template <uint32_t _MASK, typename _PORT, uint8_t _PORT_NUMBER, uint8_t _PIN_NUMBER>
 class _INVALID_ARMPIN: public _ARMPIN<_MASK, _PORT, _PORT_NUMBER, _PIN_NUMBER> {
 public:
-    static_assert(false, "For whatever reason, this pin has been marked as invalid and you should use a different pin.");
+    _INVALID_ARMPIN() {
+        Serial.println("For whatever reason, this pin has been marked as invalid and you should use a different pin.")
+        assert(false);
+    }
+    
 };
 
 //
