@@ -1,6 +1,8 @@
 #ifndef __FASTPIN_ARM_KL26_H
 #define __FASTPIN_ARM_KL26_H
 
+#include "force_inline.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
@@ -48,8 +50,8 @@ public:
 #define GPIO_BITBAND_PTR(reg, bit) ((uint32_t *)GPIO_BITBAND_ADDR((reg), (bit)))
 
 #define _R(T) struct __gen_struct_ ## T
-#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; } \
-template<int BIT> static __attribute__((always_inline)) inline ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
+#define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE reg32_t r() { return T; } \
+template<int BIT> static FASTLED_FORCE_INLINE ptr_reg32_t rx() { return GPIO_BITBAND_PTR(T, BIT); } };
 #define _FL_IO(L,C) _RD32(FGPIO ## L ## _PDOR); _RD32(FGPIO ## L ## _PSOR); _RD32(FGPIO ## L ## _PCOR); _RD32(GPIO ## L ## _PTOR); _RD32(FGPIO ## L ## _PDIR); _RD32(FGPIO ## L ## _PDDR); _FL_DEFINE_PORT3(L,C,_R(FGPIO ## L ## _PDOR));
 
 #define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, 1 << BIT, _R(FGPIO ## L ## _PDOR), _R(FGPIO ## L ## _PSOR), _R(FGPIO ## L ## _PCOR), \

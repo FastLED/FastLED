@@ -7,6 +7,7 @@
 #include "FastLED.h"
 
 #include "fastled_delay.h"
+#include "force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -175,7 +176,7 @@ public:
 
 private:
 	/// Write the BIT'th bit out via SPI, setting the data pin then strobing the clock, using the passed in pin registers to accelerate access if needed
-	template <uint8_t BIT> __attribute__((always_inline)) inline static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin) {
+	template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin) {
 		if(b & (1 << BIT)) {
 			FastPin<DATA_PIN>::hi(datapin);
 			FastPin<CLOCK_PIN>::hi(clockpin); CLOCK_HI_DELAY;
@@ -190,7 +191,7 @@ private:
 
 	/// The version of writeBit() to use when clock and data are on separate pins with precomputed values for setting
 	/// the clock and data pins
-	template <uint8_t BIT> __attribute__((always_inline)) inline static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin,
+	template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin,
 													data_t hival, data_t loval, clock_t hiclock, clock_t loclock) {
 		// // only need to explicitly set clock hi if clock and data are on different ports
 		if(b & (1 << BIT)) {
@@ -207,7 +208,7 @@ private:
 
 	/// The version of writeBit() to use when clock and data are on the same port with precomputed values for the various
 	/// combinations
-	template <uint8_t BIT> __attribute__((always_inline)) inline static void writeBit(uint8_t b, data_ptr_t clockdatapin,
+	template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, data_ptr_t clockdatapin,
 													data_t datahiclockhi, data_t dataloclockhi,
 													data_t datahiclocklo, data_t dataloclocklo) {
 #if 0

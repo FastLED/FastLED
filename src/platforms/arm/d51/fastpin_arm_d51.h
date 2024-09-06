@@ -1,6 +1,8 @@
 #ifndef __INC_FASTPIN_ARM_D51_H
 #define __INC_FASTPIN_ARM_D51_H
 
+#include "force_inline.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
@@ -55,7 +57,7 @@ public:
 };
 
 #define _R(T) struct __gen_struct_ ## T
-#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline volatile PortGroup * r() { return T; } };
+#define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE volatile PortGroup * r() { return T; } };
 
 #define _FL_IO(L) _RD32(GPIO ## L)
 

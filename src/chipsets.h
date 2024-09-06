@@ -4,6 +4,7 @@
 #include "FastLED.h"
 #include "pixeltypes.h"
 #include "five_bit_hd_gamma.h"
+#include "force_inline.h"
 
 /// @file chipsets.h
 /// Contains the bulk of the definitions for the various LED chipsets supported.
@@ -91,8 +92,8 @@ class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
 	class LPD8806_ADJUST {
 	public:
 		// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
-		__attribute__((always_inline)) inline static uint8_t adjust(FASTLED_REGISTER uint8_t data) { return ((data>>1) | 0x80) + ((data && (data<254)) & 0x01); }
-		__attribute__((always_inline)) inline static void postBlock(int len, void* context = NULL) {
+		FASTLED_FORCE_INLINE static uint8_t adjust(FASTLED_REGISTER uint8_t data) { return ((data>>1) | 0x80) + ((data && (data<254)) & 0x01); }
+		FASTLED_FORCE_INLINE static void postBlock(int len, void* context = NULL) {
 			SPI* pSPI = static_cast<SPI*>(context);
 			pSPI->writeBytesValueRaw(0, ((len*3+63)>>6));
 		}

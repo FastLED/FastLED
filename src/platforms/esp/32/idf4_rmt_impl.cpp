@@ -8,6 +8,7 @@
 #define INLINE_RMT_SET_TX_INTR_DISABLE 0
 
 #include "FastLED.h"
+#include "force_inline.h"
 #include "idf4_rmt.h"
 #include "idf4_rmt_impl.h"
 #include "clock_cycles.h"
@@ -221,7 +222,7 @@ extern rmt_block_mem_t RMTMEM;
 
 // -- Write one byte's worth of RMT pulses to the big buffer
 //    out: A pointer into an array at least 8 units long (one unit for each bit).
-__attribute__((always_inline)) inline void IRAM_ATTR convert_byte_to_rmt(
+FASTLED_FORCE_INLINE void IRAM_ATTR convert_byte_to_rmt(
     FASTLED_REGISTER uint8_t byteval,
     FASTLED_REGISTER uint32_t zero,
     FASTLED_REGISTER uint32_t one,

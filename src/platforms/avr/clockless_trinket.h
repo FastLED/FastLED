@@ -4,6 +4,7 @@
 #include "../../controller.h"
 #include "../../lib8tion.h"
 #include <avr/interrupt.h> // for cli/se definitions
+#include "../../force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -56,7 +57,7 @@ FASTLED_NAMESPACE_BEGIN
 // Variations on the functions in delay.h - w/a loop var passed in to preserve registers across calls by the optimizer/compiler
 template<int CYCLES> inline void _dc(FASTLED_REGISTER uint8_t & loopvar);
 
-template<int _LOOP, int PAD> __attribute__((always_inline)) inline void _dc_AVR(FASTLED_REGISTER uint8_t & loopvar) {
+template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER uint8_t & loopvar) {
 	_dc<PAD>(loopvar);
 	// The convolution in here is to ensure that the state of the carry flag coming into the delay loop is preserved
 	asm __volatile__ (  "BRCS L_PC%=\n\t"
@@ -67,40 +68,40 @@ template<int _LOOP, int PAD> __attribute__((always_inline)) inline void _dc_AVR(
 							[loopvar] "+d" (loopvar) : [_LOOP] "M" (_LOOP) : );
 }
 
-template<int CYCLES> __attribute__((always_inline)) inline void _dc(FASTLED_REGISTER uint8_t & loopvar) {
+template<int CYCLES> FASTLED_FORCE_INLINE void _dc(FASTLED_REGISTER uint8_t & loopvar) {
 	_dc_AVR<CYCLES/6,CYCLES%6>(loopvar);
 }
-template<> __attribute__((always_inline)) inline void _dc<-6>(FASTLED_REGISTER uint8_t & ) {}
-template<> __attribute__((always_inline)) inline void _dc<-5>(FASTLED_REGISTER uint8_t & ) {}
-template<> __attribute__((always_inline)) inline void _dc<-4>(FASTLED_REGISTER uint8_t & ) {}
-template<> __attribute__((always_inline)) inline void _dc<-3>(FASTLED_REGISTER uint8_t & ) {}
-template<> __attribute__((always_inline)) inline void _dc<-2>(FASTLED_REGISTER uint8_t & ) {}
-template<> __attribute__((always_inline)) inline void _dc<-1>(FASTLED_REGISTER uint8_t & ) {}
-template<> __attribute__((always_inline)) inline void _dc< 0>(FASTLED_REGISTER uint8_t & ) {}
-template<> __attribute__((always_inline)) inline void _dc< 1>(FASTLED_REGISTER uint8_t & ) {asm __volatile__("mov r0,r0":::);}
+template<> FASTLED_FORCE_INLINE void _dc<-6>(FASTLED_REGISTER uint8_t & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-5>(FASTLED_REGISTER uint8_t & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-4>(FASTLED_REGISTER uint8_t & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-3>(FASTLED_REGISTER uint8_t & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-2>(FASTLED_REGISTER uint8_t & ) {}
+template<> FASTLED_FORCE_INLINE void _dc<-1>(FASTLED_REGISTER uint8_t & ) {}
+template<> FASTLED_FORCE_INLINE void _dc< 0>(FASTLED_REGISTER uint8_t & ) {}
+template<> FASTLED_FORCE_INLINE void _dc< 1>(FASTLED_REGISTER uint8_t & ) {asm __volatile__("mov r0,r0":::);}
 #if defined(__LGT8F__) 
-template<> __attribute__((always_inline)) inline void _dc< 2>(FASTLED_REGISTER uint8_t & loopvar) { _dc<1>(loopvar); _dc<1>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc< 2>(FASTLED_REGISTER uint8_t & loopvar) { _dc<1>(loopvar); _dc<1>(loopvar); }
 #else
-template<> __attribute__((always_inline)) inline void _dc< 2>(FASTLED_REGISTER uint8_t & ) {asm __volatile__("rjmp .+0":::);}
+template<> FASTLED_FORCE_INLINE void _dc< 2>(FASTLED_REGISTER uint8_t & ) {asm __volatile__("rjmp .+0":::);}
 #endif
-template<> __attribute__((always_inline)) inline void _dc< 3>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc< 4>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc< 5>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<3>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc< 6>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); _dc<2>(loopvar);}
-template<> __attribute__((always_inline)) inline void _dc< 7>(FASTLED_REGISTER uint8_t & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc< 8>(FASTLED_REGISTER uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc< 9>(FASTLED_REGISTER uint8_t & loopvar) { _dc<5>(loopvar); _dc<4>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<10>(FASTLED_REGISTER uint8_t & loopvar) { _dc<6>(loopvar); _dc<4>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<11>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<1>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<12>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<2>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<13>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<3>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<14>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<4>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<15>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<5>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<16>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<6>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<17>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<7>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<18>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<8>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<19>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<9>(loopvar); }
-template<> __attribute__((always_inline)) inline void _dc<20>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<10>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc< 3>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<1>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc< 4>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc< 5>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<3>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc< 6>(FASTLED_REGISTER uint8_t & loopvar) { _dc<2>(loopvar); _dc<2>(loopvar); _dc<2>(loopvar);}
+template<> FASTLED_FORCE_INLINE void _dc< 7>(FASTLED_REGISTER uint8_t & loopvar) { _dc<4>(loopvar); _dc<3>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc< 8>(FASTLED_REGISTER uint8_t & loopvar) { _dc<4>(loopvar); _dc<4>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc< 9>(FASTLED_REGISTER uint8_t & loopvar) { _dc<5>(loopvar); _dc<4>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<10>(FASTLED_REGISTER uint8_t & loopvar) { _dc<6>(loopvar); _dc<4>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<11>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<1>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<12>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<2>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<13>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<3>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<14>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<4>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<15>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<5>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<16>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<6>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<17>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<7>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<18>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<8>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<19>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<9>(loopvar); }
+template<> FASTLED_FORCE_INLINE void _dc<20>(FASTLED_REGISTER uint8_t & loopvar) { _dc<10>(loopvar); _dc<10>(loopvar); }
 
 #if (FASTLED_ALLOW_INTERRUPTS == 1)
 // If interrupts are enabled, HI1 actually takes 2 clocks due to cli().

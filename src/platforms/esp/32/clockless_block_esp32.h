@@ -7,6 +7,7 @@
 #include "esp_intr_alloc.h"
 #include "eorder.h"
 #include "transpose8x1_noinline.h"
+#include "force_inline.h"
 
 #define FASTLED_HAS_BLOCKLESS 1
 
@@ -30,14 +31,14 @@ extern uint32_t _frame_cnt;
 extern uint32_t _retry_cnt;
 #endif
 
-__attribute__((always_inline)) inline void interrupt_unlock() {
+FASTLED_FORCE_INLINE void interrupt_unlock() {
 	// ets_intr_unlock();
 	// TODO: imlement interrupt_unlock?
 	// These functions were mined out of the code below and
 	// made no-ops here. We probably want to implement them.
 }
 
-__attribute__((always_inline)) inline void interrupt_lock()  {
+FASTLED_FORCE_INLINE void interrupt_lock()  {
 	// ets_intr_lock();
 	// TODO: imlement interrupt_lock?
 }

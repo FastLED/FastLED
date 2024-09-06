@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "namespace.h"
+#include "force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -50,7 +51,7 @@ void rgb_2_rgbw_white_boosted(
     uint8_t* out_r, uint8_t* out_g, uint8_t* out_b, uint8_t* out_w);
 
 /// @brief Converts RGB to RGBW using one of the functions.
-__attribute__((always_inline)) inline void rgb_2_rgbw(
+FASTLED_FORCE_INLINE void rgb_2_rgbw(
     RGBW_MODE mode,
     uint16_t w_color_temperature,
     uint8_t r, uint8_t g, uint8_t b,
@@ -97,7 +98,7 @@ __attribute__((always_inline)) inline void rgb_2_rgbw(
 
 // @brief Converts RGB to RGBW using one of the functions.
 template <RGBW_MODE MODE>
-__attribute__((always_inline)) inline void rgb_2_rgbw(
+FASTLED_FORCE_INLINE void rgb_2_rgbw(
     uint16_t w_color_temperature,
     uint8_t r, uint8_t g, uint8_t b,
     uint8_t r_scale, uint8_t g_scale, uint8_t b_scale,
