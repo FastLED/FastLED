@@ -1,6 +1,8 @@
 #ifndef __FASTPIN_ARM_NRF51_H
 #define __FASTPIN_ARM_NRF51_H
 
+#include "force_inline.h"
+
 #if defined(NRF51)
 /// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
@@ -41,7 +43,7 @@ public:
 #define NR_OUTCLR ADDR(0x5000050CUL) // NR_GPIO_ADDR(NRF_GPIO_BASE, 0x50C)
 #define NR_OUT ADDR(0x50000504UL) // NR_GPIO_ADDR(NRF_GPIO_BASE, 0x504)
 
-#define _RD32_NRF(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline reg32_t r() { return T; }};
+#define _RD32_NRF(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE reg32_t r() { return T; }};
 
 _RD32_NRF(NR_DIRSET);
 _RD32_NRF(NR_DIRCLR);

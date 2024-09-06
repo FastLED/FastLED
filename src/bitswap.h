@@ -2,6 +2,7 @@
 #define __INC_BITSWAP_H
 
 #include "FastLED.h"
+#include "force_inline.h"
 
 /// @file bitswap.h
 /// Functions for doing a rotation of bits/bytes used by parallel output
@@ -108,7 +109,7 @@ typedef union {
 
 
 /// Do an 8-byte by 8-bit rotation
-__attribute__((always_inline)) inline void swapbits8(bitswap_type in, bitswap_type & out) {
+FASTLED_FORCE_INLINE void swapbits8(bitswap_type in, bitswap_type & out) {
 
   // SWAPS(a.a,7);
   // SWAPS(a.b,6);
@@ -156,7 +157,7 @@ __attribute__((always_inline)) inline void swapbits8(bitswap_type in, bitswap_ty
 }
 
 /// Slow version of the 8 byte by 8 bit rotation
-__attribute__((always_inline)) inline void slowswap(unsigned char *A, unsigned char *B) {
+FASTLED_FORCE_INLINE void slowswap(unsigned char *A, unsigned char *B) {
 
   for(int row = 0; row < 7; ++row) {
     uint8_t x = A[row];
@@ -187,7 +188,7 @@ __attribute__((always_inline)) inline void slowswap(unsigned char *A, unsigned c
 void transpose8x1_noinline(unsigned char *A, unsigned char *B);
 
 /// @copydoc transpose8x1_noinline()
-__attribute__((always_inline)) inline void transpose8x1(unsigned char *A, unsigned char *B) {
+FASTLED_FORCE_INLINE void transpose8x1(unsigned char *A, unsigned char *B) {
   uint32_t x, y, t;
 
   // Load the array and pack it into x and y.
@@ -213,7 +214,7 @@ __attribute__((always_inline)) inline void transpose8x1(unsigned char *A, unsign
 
 /// Simplified form of bits rotating function. 
 /// Based on code found here: https://web.archive.org/web/20190108225554/http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt
-__attribute__((always_inline)) inline void transpose8x1_MSB(unsigned char *A, unsigned char *B) {
+FASTLED_FORCE_INLINE void transpose8x1_MSB(unsigned char *A, unsigned char *B) {
   uint32_t x, y, t;
 
   // Load the array and pack it into x and y.
@@ -247,7 +248,7 @@ __attribute__((always_inline)) inline void transpose8x1_MSB(unsigned char *A, un
 /// Templated bit-rotating function. 
 /// Based on code found here: https://web.archive.org/web/20190108225554/http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt
 template<int m, int n>
-__attribute__((always_inline)) inline void transpose8(unsigned char *A, unsigned char *B) {
+FASTLED_FORCE_INLINE void transpose8(unsigned char *A, unsigned char *B) {
   uint32_t x, y, t;
 
   // Load the array and pack it into x and y.

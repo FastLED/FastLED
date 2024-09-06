@@ -2,6 +2,7 @@
 #define __INC_PIXELSET_H
 
 #include "FastLED.h"
+#include "force_inline.h"
 
 #ifndef abs
 #include <stdlib.h>
@@ -360,21 +361,21 @@ public:
 
     public:
         /// Copy constructor
-        __attribute__((always_inline)) inline pixelset_iterator_base(const pixelset_iterator_base & rhs) : leds(rhs.leds), dir(rhs.dir) {}
+        FASTLED_FORCE_INLINE pixelset_iterator_base(const pixelset_iterator_base & rhs) : leds(rhs.leds), dir(rhs.dir) {}
 
         /// Base constructor
         /// @tparam the type of the LED array data
         /// @param _leds pointer to LED array
         /// @param _dir direction of LED array
-        __attribute__((always_inline)) inline pixelset_iterator_base(T * _leds, const char _dir) : leds(_leds), dir(_dir) {}
+        FASTLED_FORCE_INLINE pixelset_iterator_base(T * _leds, const char _dir) : leds(_leds), dir(_dir) {}
 
-        __attribute__((always_inline)) inline pixelset_iterator_base& operator++() { leds += dir; return *this; }  ///< Increment LED pointer in data direction
-        __attribute__((always_inline)) inline pixelset_iterator_base operator++(int) { pixelset_iterator_base tmp(*this); leds += dir; return tmp; }  ///< @copydoc operator++()
+        FASTLED_FORCE_INLINE pixelset_iterator_base& operator++() { leds += dir; return *this; }  ///< Increment LED pointer in data direction
+        FASTLED_FORCE_INLINE pixelset_iterator_base operator++(int) { pixelset_iterator_base tmp(*this); leds += dir; return tmp; }  ///< @copydoc operator++()
 
-        __attribute__((always_inline)) inline bool operator==(pixelset_iterator_base & other) const { return leds == other.leds; /* && set==other.set; */ }    ///< Check if iterator is at the same position
-        __attribute__((always_inline)) inline bool operator!=(pixelset_iterator_base & other) const { return leds != other.leds; /* || set != other.set; */ }  ///< Check if iterator is not at the same position
+        FASTLED_FORCE_INLINE bool operator==(pixelset_iterator_base & other) const { return leds == other.leds; /* && set==other.set; */ }    ///< Check if iterator is at the same position
+        FASTLED_FORCE_INLINE bool operator!=(pixelset_iterator_base & other) const { return leds != other.leds; /* || set != other.set; */ }  ///< Check if iterator is not at the same position
 
-        __attribute__((always_inline)) inline PIXEL_TYPE& operator*() const { return *leds; }  ///< Dereference operator, to get underlying pointer to the LEDs
+        FASTLED_FORCE_INLINE PIXEL_TYPE& operator*() const { return *leds; }  ///< Dereference operator, to get underlying pointer to the LEDs
     };
 
     typedef pixelset_iterator_base<PIXEL_TYPE> iterator;              ///< Iterator helper type for this class

@@ -5,6 +5,7 @@
 #define __INC_FASTSPI_TYPES_H
 
 #include "FastLED.h"
+#include "force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -35,17 +36,17 @@ class DATA_NOP {
 public:
     /// Hook called to adjust a byte of data before writing it to the output. 
     /// In this dummy version, no adjustment is made.
-    static __attribute__((always_inline)) inline uint8_t adjust(FASTLED_REGISTER uint8_t data) { return data; }
+    static FASTLED_FORCE_INLINE uint8_t adjust(FASTLED_REGISTER uint8_t data) { return data; }
 
     /// @copybrief adjust(FASTLED_REGISTER uint8_t)
     /// @param data input byte
     /// @param scale scale value
     /// @returns input byte rescaled using ::scale8(uint8_t, uint8_t)
-    static __attribute__((always_inline)) inline uint8_t adjust(FASTLED_REGISTER uint8_t data, FASTLED_REGISTER uint8_t scale) { return scale8(data, scale); }
+    static FASTLED_FORCE_INLINE uint8_t adjust(FASTLED_REGISTER uint8_t data, FASTLED_REGISTER uint8_t scale) { return scale8(data, scale); }
 
     /// Hook called after a block of data is written to the output. 
     /// In this dummy version, no action is performed.
-    static __attribute__((always_inline)) inline void postBlock(int /* len */, void* context = NULL) { }
+    static FASTLED_FORCE_INLINE void postBlock(int /* len */, void* context = NULL) { }
 };
 
 /// Flag for the start of an SPI transaction

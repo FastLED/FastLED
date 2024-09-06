@@ -3,6 +3,7 @@
 
 #include "FastLED.h"
 #include "types.h"
+#include "force_inline.h"
 
 /// @file fastled_delay.h
 /// Utility functions and classes for managing delay cycles
@@ -107,7 +108,7 @@ template<int LOOP, cycle_t PAD> inline void _delaycycles_AVR() {
 		);
 }
 
-template<cycle_t CYCLES> __attribute__((always_inline)) inline void delaycycles() {
+template<cycle_t CYCLES> FASTLED_FORCE_INLINE void delaycycles() {
 	_delaycycles_AVR<CYCLES / 3, CYCLES % 3>();
 }
 
@@ -130,7 +131,7 @@ template<cycle_t CYCLES> __attribute__((always_inline)) inline void delaycycles(
 // }
 
 
-template<cycle_t CYCLES> __attribute__((always_inline)) inline void delaycycles() {
+template<cycle_t CYCLES> FASTLED_FORCE_INLINE void delaycycles() {
 	// _delaycycles_ARM<CYCLES / 3, CYCLES % 3>();
 	FL_NOP; delaycycles<CYCLES-1>();
 }
@@ -145,24 +146,24 @@ template<cycle_t CYCLES> __attribute__((always_inline)) inline void delaycycles(
 
 // These are hidden from Doxygen because they match the expected behavior of the class. 
 /// @cond
-template<> __attribute__((always_inline)) inline void delaycycles<-10>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<-9>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<-8>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<-7>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<-6>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<-5>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<-4>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<-3>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<-2>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<-1>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<0>() {}
-template<> __attribute__((always_inline)) inline void delaycycles<1>() {FL_NOP;}
-template<> __attribute__((always_inline)) inline void delaycycles<2>() {FL_NOP2;}
-template<> __attribute__((always_inline)) inline void delaycycles<3>() {FL_NOP;FL_NOP2;}
-template<> __attribute__((always_inline)) inline void delaycycles<4>() {FL_NOP2;FL_NOP2;}
-template<> __attribute__((always_inline)) inline void delaycycles<5>() {FL_NOP2;FL_NOP2;FL_NOP;}
+template<> FASTLED_FORCE_INLINE void delaycycles<-10>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-9>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-8>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-7>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-6>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-5>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-4>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-3>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-2>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-1>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<0>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<1>() {FL_NOP;}
+template<> FASTLED_FORCE_INLINE void delaycycles<2>() {FL_NOP2;}
+template<> FASTLED_FORCE_INLINE void delaycycles<3>() {FL_NOP;FL_NOP2;}
+template<> FASTLED_FORCE_INLINE void delaycycles<4>() {FL_NOP2;FL_NOP2;}
+template<> FASTLED_FORCE_INLINE void delaycycles<5>() {FL_NOP2;FL_NOP2;FL_NOP;}
 #if defined(ESP32)
-template<> __attribute__((always_inline)) inline void delaycycles<4294966398>() {
+template<> FASTLED_FORCE_INLINE void delaycycles<4294966398>() {
 	// specialization for a gigantic amount of cycles, apparently this is needed
 	// or esp32 will blow the stack with cycles = 4294966398.
 	const uint32_t termination = 4294966398 / 10;
