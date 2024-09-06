@@ -60,7 +60,7 @@ def compile_for_board_and_example(
     stdout = result.stdout
     # replace all instances of "lib/src" => "src" so intellisense can find the files
     # with one click.
-    stdout = stdout.replace("lib/src", "src")
+    stdout = stdout.replace("lib/src", "src").replace("lib\\src", "src")
     locked_print(stdout)
     if result.returncode != 0:
         locked_print(f"*** Error compiling example {example} for board {board} ***")
