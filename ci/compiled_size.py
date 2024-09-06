@@ -184,7 +184,7 @@ if __name__ == "__main__":
     parser.add_argument("--start-commit", type=str, help="Starting commit hash")
     parser.add_argument("--end-commit", type=str, help="Ending commit hash")
     parser.add_argument(
-        "--board", type=str, default="esp32dev", help="Board to check firmware size for"
+        "--board", type=str, required=True, help="Board to check firmware size for"
     )
     args = parser.parse_args()
 

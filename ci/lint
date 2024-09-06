@@ -1,7 +1,12 @@
 #!/bin/bash
 
+set -e
+
 # cd to current directory
 cd "$(dirname "$0")"
-uv run mypy .
-uv run ruff check --fix .
-uv run ruff format .
+echo "Running mypy"
+uv run mypy . --exclude tmp/
+echo "Running ruff check"
+uv run ruff check --fix . --exclude tmp/
+echo "Running ruff format"
+uv run ruff format . --exclude tmp/
