@@ -63,9 +63,20 @@ def parse_args():
     return args
 
 
+def remove_duplicates(boards: list[str]) -> list[str]:
+    # in order to keep the order, we use a set to keep track of the boards we've seen
+    seen = set()
+    out = []
+    for board in boards:
+        if board not in seen:
+            seen.add(board)
+            out.append(board)
+    return out
+
+
 def choose_board_interactively(boards: list[str]) -> list[str]:
     print("Available boards:")
-    boards = sorted(boards)
+    boards = remove_duplicates(sorted(boards))
     for i, board in enumerate(boards):
         print(f"[{i}]: {board}")
     print("[all]: All boards")
