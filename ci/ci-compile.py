@@ -78,8 +78,8 @@ def choose_board_interactively(boards: list[str]) -> list[str]:
     print("Available boards:")
     boards = remove_duplicates(sorted(boards))
     for i, board in enumerate(boards):
-        print(f"[{i}]: {board}")
-    print("[all]: All boards")
+        print(f"  [{i}]: {board}")
+    print("  [all]: All boards")
     out: list[str] = []
     while True:
         try:
