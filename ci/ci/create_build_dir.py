@@ -83,16 +83,16 @@ def create_build_dir(
         board_name,
     ]
     if board.platform:
-        cmd_list.append(f"--board-option=platform={board.platform}")
+        cmd_list.append(f"--project-option=platform={board.platform}")
     if board.platform_packages:
-        cmd_list.append(f"--board-option=platform_packages={board.platform_packages}")
+        cmd_list.append(f"--project-option=platform_packages={board.platform_packages}")
     if board.framework:
         cmd_list.append(f"--project-option=framework={board.framework}")
     if board.board_build_core:
-        cmd_list.append(f"--board-option=board_build.core={board.board_build_core}")
+        cmd_list.append(f"--project-option=board_build.core={board.board_build_core}")
     if board.board_build_filesystem_size:
         cmd_list.append(
-            f"--board-option=board_build.filesystem_size={board.board_build_filesystem_size}"
+            f"--project-option=board_build.filesystem_size={board.board_build_filesystem_size}"
         )
     if defines:
         build_flags = " ".join(f"-D {define}" for define in defines)
