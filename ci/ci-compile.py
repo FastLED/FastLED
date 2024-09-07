@@ -137,7 +137,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         extra_packages=extra_packages,
         build_dir=build_dir,
         extra_scripts=extra_scripts,
-        cwd=str(HERE),
+        cwd=str(HERE.parent),
     )
     return out
 
