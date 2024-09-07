@@ -135,7 +135,7 @@ def main(
         board_files = Path(".build") / board / ".pio" / "build" / board
         if board_files.exists():
             shutil.rmtree(str(board_files), ignore_errors=True)
-        compile_command = f"python3 ci/ci-compile.py --boards {board} --examples Blink"
+        compile_command = f"python3 ci/ci-compile.py {board} --examples Blink"
         output, error = run_command(compile_command)
         if error:
             print(f"Error running ci-compile.py: {error}")

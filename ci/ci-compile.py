@@ -23,8 +23,15 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description="Compile FastLED examples for various boards."
     )
+    # parser.add_argument(
+    #     "--boards", type=str, help="Comma-separated list of boards to compile for"
+    # )
+    # needs to be a positional argument instead
     parser.add_argument(
-        "--boards", type=str, help="Comma-separated list of boards to compile for"
+        "boards",
+        type=str,
+        help="Comma-separated list of boards to compile for",
+        nargs="?",
     )
     parser.add_argument(
         "--examples", type=str, help="Comma-separated list of examples to compile"

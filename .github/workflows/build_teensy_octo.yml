@@ -13,4 +13,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: --boards teensy41 --extra-packages OctoWS2811 --examples OctoWS2811
+      args: teensy41 --extra-packages OctoWS2811 --examples OctoWS2811

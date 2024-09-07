@@ -13,4 +13,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: --boards teensy31
+      args: teensy31

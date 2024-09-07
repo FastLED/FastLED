@@ -10,5 +10,5 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: --boards lolin_s2_mini
+      args: lolin_s2_mini
 

@@ -13,4 +13,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: --boards nanorp2040connect
+      args: nanorp2040connect
