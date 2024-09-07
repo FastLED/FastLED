@@ -9,11 +9,10 @@ import os
 import sys
 import time
 import warnings
-from dataclasses import dataclass
 from pathlib import Path
 
 from ci.boards import BOARDS, OTHER_BOARDS
-from ci.concurrent_run import concurrent_run
+from ci.concurrent_run import ConcurrentRunArgs, concurrent_run
 from ci.examples import EXAMPLES
 from ci.locked_print import locked_print
 from ci.project import Project, get_project
@@ -111,16 +110,6 @@ def choose_board_interactively(boards: list[str]) -> list[str]:
             print("Invalid input. Please enter a number.")
 
 
-@dataclass
-class ConcurrentRunArgs:
-    projects: list[Project]
-    examples: list[str]
-    skip_init: bool
-    defines: list[str]
-    extra_packages: list[str]
-    build_dir: str | None
-
-
 def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     skip_init = args.skip_init
     if args.interactive:
@@ -138,6 +127,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     if args.extra_packages:
         extra_packages.extend(args.extra_packages.split(","))
     build_dir = args.build_dir
+    extra_scripts = "pre:lib/ci/ci-flags.py"
     out: ConcurrentRunArgs = ConcurrentRunArgs(
         projects=projects,
         examples=examples,
@@ -145,6 +135,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         defines=defines,
         extra_packages=extra_packages,
         build_dir=build_dir,
+        extra_scripts=extra_scripts,
     )
     return out
 
@@ -156,17 +147,9 @@ def main() -> int:
     script_dir = Path(__file__).parent.resolve()
     locked_print(f"Changing working directory to {script_dir.parent}")
     os.chdir(script_dir.parent)
-    os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = "pre:lib/ci/ci-flags.py"
     run_args = create_concurrent_run_args(args)
     start_time = time.time()
-    rtn = concurrent_run(
-        projects=run_args.projects,
-        examples=run_args.examples,
-        skip_init=run_args.skip_init,
-        defines=run_args.defines,
-        extra_packages=run_args.extra_packages,
-        build_dir=run_args.build_dir,
-    )
+    rtn = concurrent_run(args=run_args)
     time_taken = time.strftime("%Mm:%Ss", time.gmtime(time.time() - start_time))
     locked_print(f"Compilation finished in {time_taken}.")
     return rtn

@@ -1,8 +1,7 @@
 import os
 import time
-from concurrent.futures import Future
-from concurrent.futures import ProcessPoolExecutor as Executor
-from concurrent.futures import as_completed
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 
 from ci.compile_for_board import compile_examples, errors_happened
 from ci.cpu_count import cpu_count
@@ -16,16 +15,31 @@ PARRALLEL_PROJECT_INITIALIZATION = (
 )
 
 
+@dataclass
+class ConcurrentRunArgs:
+    projects: list[Project]
+    examples: list[str]
+    skip_init: bool
+    defines: list[str]
+    extra_packages: list[str]
+    build_dir: str | None
+    extra_scripts: str | None
+
+
 def concurrent_run(
-    projects: list[Project],
-    examples: list[str],
-    skip_init: bool,
-    defines: list[str],
-    extra_packages: list[str],
-    build_dir: str | None,
+    args: ConcurrentRunArgs,
 ) -> int:
+    projects = args.projects
+    examples = args.examples
+    skip_init = args.skip_init
+    defines = args.defines
+    extra_packages = args.extra_packages
+    build_dir = args.build_dir
+    extra_scripts = args.extra_scripts
     start_time = time.time()
     first_project = projects[0]
+    if extra_scripts:
+        os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = extra_scripts
     create_build_dir(
         project=first_project,
         defines=defines,
@@ -37,7 +51,7 @@ def concurrent_run(
     # per board to speed up the process.
     parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(projects)
     # Initialize the build directories for all boards
-    with Executor(max_workers=parallel_init_workers) as executor:
+    with ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
         future_to_board: dict[Future, Project] = {}
         for project in projects:
             future = executor.submit(
@@ -70,7 +84,7 @@ def concurrent_run(
     errors: list[str] = []
     # Run the compilation process
     num_cpus = max(1, min(cpu_count(), len(projects)))
-    with Executor(max_workers=num_cpus) as executor:
+    with ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
             executor.submit(compile_examples, project, examples, build_dir): project
             for project in projects
