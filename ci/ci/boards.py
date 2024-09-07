@@ -62,6 +62,7 @@ ESP32DEV = Board(
 
 ESP32_C2_DEVKITM_1 = Board(
     board_name="esp32-c2-devkitm-1",
+    platform_needs_install=True,  # Install platform package to get the boards
     platform=ESP32_IDF_5_1_LATEST,
 )
 
@@ -82,6 +83,7 @@ ESP32_S3_DEVKITC_1 = Board(
 
 ESP32_H2_DEVKITM_1 = Board(
     board_name="esp32-h2-devkitm-1",
+    platform_needs_install=True,  # Install platform package to get the boards
     platform=ESP32_IDF_5_1_LATEST,
 )
 
@@ -102,8 +104,7 @@ RPI_PICO = Board(
 RPI_PICO2 = Board(
     board_name="rpipico2",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
-    # Work in progress
-    platform_needs_install=True,
+    platform_needs_install=True,  # Install platform package to get the boards
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
     framework="arduino",
     board_build_core="earlephilhower",
