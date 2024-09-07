@@ -20,7 +20,7 @@ def errors_happened() -> bool:
 
 
 def compile_for_board_and_example(
-    board: Board, example: str, build_dir: str | None
+    board: Board, example: Path, build_dir: str | None
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     board_name = board.board_name
@@ -44,7 +44,8 @@ def compile_for_board_and_example(
         "--keep-build-dir",
         f"--build-dir={builddir.as_posix()}",
     ]
-    cmd_list.append(f"examples/{example}/*ino")
+
+    cmd_list.append(f"{example.as_posix()}/*ino")
     cmd_str = subprocess.list2cmdline(cmd_list)
     msg_lsit = [
         "\n\n******************************",
@@ -78,13 +79,14 @@ def compile_for_board_and_example(
 
 # Function to process task queues for each board
 def compile_examples(
-    board: Board, examples: list[str], build_dir: str | None
+    board: Board, examples: list[Path], build_dir: str | None
 ) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
     board_name = board.board_name
     is_first = True
     for example in examples:
+        example = example.relative_to(Path(".").resolve())
         if ERROR_HAPPENED:
             return True, ""
         locked_print(f"\n*** Building {example} for board {board_name} ***")

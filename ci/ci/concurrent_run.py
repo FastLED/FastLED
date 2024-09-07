@@ -2,6 +2,7 @@ import os
 import time
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
+from pathlib import Path
 
 from ci.boards import Board
 from ci.compile_for_board import compile_examples, errors_happened
@@ -18,7 +19,7 @@ PARRALLEL_PROJECT_INITIALIZATION = (
 @dataclass
 class ConcurrentRunArgs:
     projects: list[Board]
-    examples: list[str]
+    examples: list[Path]
     skip_init: bool
     defines: list[str]
     extra_packages: list[str]

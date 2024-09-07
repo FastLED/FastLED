@@ -166,6 +166,13 @@ def choose_board_interactively(boards: list[str]) -> list[str]:
             print("Invalid input. Please enter a number.")
 
 
+def resolve_example_path(example: str) -> Path:
+    example_path = HERE.parent / "examples" / example
+    if not example_path.exists():
+        raise FileNotFoundError(f"Example '{example}' not found at '{example_path}'")
+    return example_path
+
+
 def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     skip_init = args.skip_init
     if args.interactive:
@@ -176,6 +183,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     for board in boards:
         projects.append(get_board(board, no_project_options=args.no_project_options))
     examples = args.examples.split(",") if args.examples else DEFAULT_EXAMPLES
+    examples_paths = [resolve_example_path(example) for example in examples]
     defines: list[str] = []
     if args.defines:
         defines.extend(args.defines.split(","))
@@ -186,7 +194,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     extra_scripts = "pre:lib/ci/ci-flags.py"
     out: ConcurrentRunArgs = ConcurrentRunArgs(
         projects=projects,
-        examples=examples,
+        examples=examples_paths,
         skip_init=skip_init,
         defines=defines,
         extra_packages=extra_packages,
