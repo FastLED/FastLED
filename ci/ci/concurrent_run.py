@@ -23,16 +23,11 @@ def concurrent_run(
     defines: list[str],
     extra_packages: list[str],
     build_dir: str | None,
-    # project_options: dict[str, Project],
 ) -> int:
     start_time = time.time()
-    # Necessary to create the first project alone, so that the necessary root directories
-    # are created and the subsequent projects can be created in parallel.
     first_project = projects[0]
-    # first_board_options = project_options.get(first_board)
     create_build_dir(
         project=first_project,
-        # project_options=first_board_options,
         defines=defines,
         no_install_deps=skip_init,
         extra_packages=extra_packages,
@@ -48,7 +43,6 @@ def concurrent_run(
             future = executor.submit(
                 create_build_dir,
                 project,
-                # project_options.get(board),
                 defines,
                 skip_init,
                 extra_packages,
@@ -91,12 +85,8 @@ def concurrent_run(
                 for f in future_to_board:
                     f.cancel()
                 break
-    total_time = (time.time() - start_time) / 60
     if errors_happened():
         locked_print("\nDone. Errors happened during compilation.")
         locked_print("\n".join(errors))
         return 1
-    locked_print(
-        f"\nDone. Built all projects for all boards in {total_time:.2f} minutes."
-    )
     return 0

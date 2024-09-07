@@ -7,7 +7,9 @@ files are built faster.
 import argparse
 import os
 import sys
+import time
 import warnings
+from dataclasses import dataclass
 from pathlib import Path
 
 from ci.boards import BOARDS, OTHER_BOARDS
@@ -109,15 +111,18 @@ def choose_board_interactively(boards: list[str]) -> list[str]:
             print("Invalid input. Please enter a number.")
 
 
-def main() -> int:
-    """Main function."""
-    args = parse_args()
+@dataclass
+class ConcurrentRunArgs:
+    projects: list[Project]
+    examples: list[str]
+    skip_init: bool
+    defines: list[str]
+    extra_packages: list[str]
+    build_dir: str | None
+
+
+def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     skip_init = args.skip_init
-    # Set the working directory to the script's parent directory.
-    script_dir = Path(__file__).parent.resolve()
-    locked_print(f"Changing working directory to {script_dir.parent}")
-    os.chdir(script_dir.parent)
-    os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = "pre:lib/ci/ci-flags.py"
     if args.interactive:
         boards = choose_board_interactively(BOARDS + OTHER_BOARDS)
     else:
@@ -129,18 +134,41 @@ def main() -> int:
     defines: list[str] = []
     if args.defines:
         defines.extend(args.defines.split(","))
-    extract_packages: list[str] = []
+    extra_packages: list[str] = []
     if args.extra_packages:
-        extract_packages.extend(args.extra_packages.split(","))
+        extra_packages.extend(args.extra_packages.split(","))
     build_dir = args.build_dir
-    rtn = concurrent_run(
+    out: ConcurrentRunArgs = ConcurrentRunArgs(
         projects=projects,
         examples=examples,
         skip_init=skip_init,
         defines=defines,
-        extra_packages=extract_packages,
+        extra_packages=extra_packages,
         build_dir=build_dir,
     )
+    return out
+
+
+def main() -> int:
+    """Main function."""
+    args = parse_args()
+    # Set the working directory to the script's parent directory.
+    script_dir = Path(__file__).parent.resolve()
+    locked_print(f"Changing working directory to {script_dir.parent}")
+    os.chdir(script_dir.parent)
+    os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = "pre:lib/ci/ci-flags.py"
+    run_args = create_concurrent_run_args(args)
+    start_time = time.time()
+    rtn = concurrent_run(
+        projects=run_args.projects,
+        examples=run_args.examples,
+        skip_init=run_args.skip_init,
+        defines=run_args.defines,
+        extra_packages=run_args.extra_packages,
+        build_dir=run_args.build_dir,
+    )
+    time_taken = time.strftime("%Mm:%Ss", time.gmtime(time.time() - start_time))
+    locked_print(f"Compilation finished in {time_taken}.")
     return rtn
 
 
