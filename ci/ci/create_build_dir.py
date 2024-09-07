@@ -4,7 +4,7 @@ import warnings
 from pathlib import Path
 
 from ci.locked_print import locked_print
-from ci.project import Project
+from ci.projects import Project
 
 
 def _install_global_package(package: str) -> None:

@@ -4,7 +4,7 @@ from pathlib import Path
 from threading import Lock
 
 from ci.locked_print import locked_print
-from ci.project import Project
+from ci.projects import Project
 
 ERROR_HAPPENED = False
 

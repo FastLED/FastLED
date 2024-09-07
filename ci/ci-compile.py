@@ -14,7 +14,7 @@ from ci.boards import BOARDS, OTHER_BOARDS
 from ci.concurrent_run import ConcurrentRunArgs, concurrent_run
 from ci.examples import EXAMPLES
 from ci.locked_print import locked_print
-from ci.project import Project, get_project
+from ci.projects import Project, get_project
 
 HERE = Path(__file__).parent.resolve()
 
