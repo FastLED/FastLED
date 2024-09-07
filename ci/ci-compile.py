@@ -10,13 +10,39 @@ import time
 import warnings
 from pathlib import Path
 
-from ci.boards import BOARDS, OTHER_BOARDS
 from ci.concurrent_run import ConcurrentRunArgs, concurrent_run
 from ci.examples import EXAMPLES
 from ci.locked_print import locked_print
 from ci.projects import Project, get_project
 
 HERE = Path(__file__).parent.resolve()
+
+# Default boards to compile for. You can use boards not defined here but
+# if the board isn't part of the officially supported platformio boards then
+# you will need to add the board to the ~/.platformio/platforms directory.
+# prior to running this script. This happens automatically as of 2024-08-20
+# with the github workflow scripts.
+DEFAULT_BOARDS_NAMES = [
+    "uno",  # Build is faster if this is first, because it's used for global init.
+    "esp32dev",
+    "esp01",  # ESP8266
+    "esp32-c3-devkitm-1",
+    # "esp32-c6-devkitc-1",
+    # "esp32-c2-devkitm-1",
+    "esp32-s3-devkitc-1",
+    "yun",
+    "digix",
+    "teensy30",
+    "teensy41",
+]
+
+OTHER_BOARDS_NAMES = [
+    "adafruit_feather_nrf52840_sense",
+    "rpipico",
+    "rpipico2",
+    "uno_r4_wifi",
+    "nano_every",
+]
 
 
 def parse_args():
@@ -121,9 +147,9 @@ def choose_board_interactively(boards: list[str]) -> list[str]:
 def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     skip_init = args.skip_init
     if args.interactive:
-        boards = choose_board_interactively(BOARDS + OTHER_BOARDS)
+        boards = choose_board_interactively(DEFAULT_BOARDS_NAMES + OTHER_BOARDS_NAMES)
     else:
-        boards = args.boards.split(",") if args.boards else BOARDS
+        boards = args.boards.split(",") if args.boards else DEFAULT_BOARDS_NAMES
     projects: list[Project] = []
     for board in boards:
         projects.append(get_project(board, no_project_options=args.no_project_options))
