@@ -12,7 +12,7 @@ from pathlib import Path
 
 from ci.concurrent_run import ConcurrentRunArgs, concurrent_run
 from ci.locked_print import locked_print
-from ci.projects import Project, get_project
+from ci.projects import Board, get_project
 
 HERE = Path(__file__).parent.resolve()
 
@@ -172,7 +172,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         boards = choose_board_interactively(DEFAULT_BOARDS_NAMES + OTHER_BOARDS_NAMES)
     else:
         boards = args.boards.split(",") if args.boards else DEFAULT_BOARDS_NAMES
-    projects: list[Project] = []
+    projects: list[Board] = []
     for board in boards:
         projects.append(get_project(board, no_project_options=args.no_project_options))
     examples = args.examples.split(",") if args.examples else DEFAULT_EXAMPLES

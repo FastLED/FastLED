@@ -4,7 +4,7 @@ from pathlib import Path
 from threading import Lock
 
 from ci.locked_print import locked_print
-from ci.projects import Project
+from ci.projects import Board
 
 ERROR_HAPPENED = False
 
@@ -20,7 +20,7 @@ def errors_happened() -> bool:
 
 
 def compile_for_board_and_example(
-    project: Project, example: str, build_dir: str | None
+    project: Board, example: str, build_dir: str | None
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     board = project.board_name
@@ -30,7 +30,7 @@ def compile_for_board_and_example(
     # Remove the previous *.ino file if it exists, everything else is recycled
     # to speed up the next build.
     if srcdir.exists():
-        subprocess.run(["rm", "-rf", str(srcdir)], check=True)
+        subprocess.run(["rm", "-rf", srcdir.as_posix()], check=True)
     locked_print(f"*** Building example {example} for board {board} ***")
     cmd_list = [
         "pio",
@@ -74,7 +74,7 @@ def compile_for_board_and_example(
 
 # Function to process task queues for each board
 def compile_examples(
-    project: Project, examples: list[str], build_dir: str | None
+    project: Board, examples: list[str], build_dir: str | None
 ) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement

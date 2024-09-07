@@ -4,7 +4,7 @@ import warnings
 from pathlib import Path
 
 from ci.locked_print import locked_print
-from ci.projects import Project
+from ci.projects import Board
 
 
 def _install_global_package(package: str) -> None:
@@ -33,7 +33,7 @@ def _install_global_package(package: str) -> None:
 
 
 def create_build_dir(
-    project: Project,
+    project: Board,
     defines: list[str],
     no_install_deps: bool,
     extra_packages: list[str],

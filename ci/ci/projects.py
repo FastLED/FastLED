@@ -17,7 +17,7 @@ ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32.git#d
 
 
 @dataclass
-class Project:
+class Board:
     board_name: str
     platform: str | None = None
     platform_needs_install: bool = False
@@ -50,47 +50,47 @@ class Project:
         return json_str
 
 
-ESP32DEV = Project(
+ESP32DEV = Board(
     board_name="esp32dev",
     platform=ESP32_IDF_5_1,
 )
 
-# ESP01 = Project(
+# ESP01 = Board(
 #     board_name="esp01",
 #     platform=ESP32_IDF_5_1,
 # )
 
-ESP32_C2_DEVKITM_1 = Project(
+ESP32_C2_DEVKITM_1 = Board(
     board_name="esp32-c2-devkitm-1",
     platform=ESP32_IDF_5_1_LATEST,
 )
 
-ESP32_C3_DEVKITM_1 = Project(
+ESP32_C3_DEVKITM_1 = Board(
     board_name="esp32-c3-devkitm-1",
     platform=ESP32_IDF_5_1,
 )
 
-ESP32_C6_DEVKITC_1 = Project(
+ESP32_C6_DEVKITC_1 = Board(
     board_name="esp32-c6-devkitc-1",
     platform=ESP32_IDF_5_1,
 )
 
-ESP32_S3_DEVKITC_1 = Project(
+ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_1,
 )
 
-ESP32_H2_DEVKITM_1 = Project(
+ESP32_H2_DEVKITM_1 = Board(
     board_name="esp32-h2-devkitm-1",
     platform=ESP32_IDF_5_1_LATEST,
 )
 
-ADA_FEATHER_NRF52840_SENSE = Project(
+ADA_FEATHER_NRF52840_SENSE = Board(
     board_name="adafruit_feather_nrf52840_sense",
     platform="nordicnrf52",
 )
 
-RPI_PICO = Project(
+RPI_PICO = Board(
     board_name="rpipico",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
@@ -99,7 +99,7 @@ RPI_PICO = Project(
     board_build_filesystem_size="0.5m",
 )
 
-RPI_PICO2 = Project(
+RPI_PICO2 = Board(
     board_name="rpipico2",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     # Work in progress
@@ -110,17 +110,17 @@ RPI_PICO2 = Project(
     board_build_filesystem_size="0.5m",
 )
 
-UNO_R4_WIFI = Project(
+UNO_R4_WIFI = Board(
     board_name="uno_r4_wifi",
     platform="renesas-ra",
 )
 
-NANO_EVERY = Project(
+NANO_EVERY = Board(
     board_name="nano_every",
     platform="atmelmegaavr",
 )
 
-ALL: list[Project] = [
+ALL: list[Board] = [
     ESP32DEV,
     # ESP01,
     ESP32_C2_DEVKITM_1,
@@ -135,14 +135,14 @@ ALL: list[Project] = [
     NANO_EVERY,
 ]
 
-_CUSTOM_PROJECT_OPTIONS: dict[str, Project] = {board.board_name: board for board in ALL}
+_CUSTOM_PROJECT_OPTIONS: dict[str, Board] = {board.board_name: board for board in ALL}
 
 
-def get_project(board_name: str, no_project_options: bool = False) -> Project:
+def get_project(board_name: str, no_project_options: bool = False) -> Board:
     if no_project_options:
-        return Project(board_name=board_name)
+        return Board(board_name=board_name)
     if board_name not in _CUSTOM_PROJECT_OPTIONS:
         # empty project without any special overrides, assume platformio will know what to do with it.
-        return Project(board_name=board_name)
+        return Board(board_name=board_name)
     else:
         return _CUSTOM_PROJECT_OPTIONS[board_name]

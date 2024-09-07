@@ -7,9 +7,9 @@ from ci.compile_for_board import compile_examples, errors_happened
 from ci.cpu_count import cpu_count
 from ci.create_build_dir import create_build_dir
 from ci.locked_print import locked_print
-from ci.projects import Project
+from ci.projects import Board
 
-# Project initialization doesn't take a lot of memory or cpu so it's safe to run in parallel
+# Board initialization doesn't take a lot of memory or cpu so it's safe to run in parallel
 PARRALLEL_PROJECT_INITIALIZATION = (
     os.environ.get("PARRALLEL_PROJECT_INITIALIZATION", "1") == "1"
 )
@@ -17,7 +17,7 @@ PARRALLEL_PROJECT_INITIALIZATION = (
 
 @dataclass
 class ConcurrentRunArgs:
-    projects: list[Project]
+    projects: list[Board]
     examples: list[str]
     skip_init: bool
     defines: list[str]
@@ -62,7 +62,7 @@ def concurrent_run(
     parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(projects)
     # Initialize the build directories for all boards
     with ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
-        future_to_board: dict[Future, Project] = {}
+        future_to_board: dict[Future, Board] = {}
         for project in projects:
             future = executor.submit(
                 create_build_dir,
