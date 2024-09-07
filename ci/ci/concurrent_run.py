@@ -6,7 +6,9 @@ from ci.compile_for_board import compile_examples, errors_happened
 from ci.cpu_count import cpu_count
 from ci.create_build_dir import create_build_dir
 from ci.locked_print import locked_print
-from ci.project_options import CUSTOM_PROJECT_OPTIONS
+from ci.project_options import (  # old style of board definitions, will be replaced.
+    CUSTOM_PROJECT_OPTIONS_DICT,
+)
 
 # Project initialization doesn't take a lot of memory or cpu so it's safe to run in parallel
 PARRALLEL_PROJECT_INITIALIZATION = (
@@ -26,7 +28,7 @@ def run(
     # Necessary to create the first project alone, so that the necessary root directories
     # are created and the subsequent projects can be created in parallel.
     first_board = boards[0]
-    first_board_options = CUSTOM_PROJECT_OPTIONS.get(first_board)
+    first_board_options = CUSTOM_PROJECT_OPTIONS_DICT.get(first_board)
     create_build_dir(
         first_board,
         project_options=first_board_options,
@@ -47,7 +49,7 @@ def run(
             future = executor.submit(
                 create_build_dir,
                 board,
-                CUSTOM_PROJECT_OPTIONS.get(board),
+                CUSTOM_PROJECT_OPTIONS_DICT.get(board),
                 defines,
                 skip_init,
                 extra_packages,

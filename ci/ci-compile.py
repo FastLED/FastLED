@@ -14,7 +14,7 @@ from ci.boards import BOARDS, OTHER_BOARDS
 from ci.concurrent_run import run
 from ci.examples import EXAMPLES
 from ci.locked_print import locked_print
-from ci.project_options import CUSTOM_PROJECT_OPTIONS
+from ci.project_options import CUSTOM_PROJECT_OPTIONS_DICT
 
 
 def parse_args():
@@ -119,7 +119,7 @@ def main() -> int:
     os.chdir(script_dir.parent)
     os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = "pre:lib/ci/ci-flags.py"
     if args.no_project_options:
-        CUSTOM_PROJECT_OPTIONS.clear()
+        CUSTOM_PROJECT_OPTIONS_DICT.clear()
 
     if args.interactive:
         boards = choose_board_interactively(BOARDS + OTHER_BOARDS)

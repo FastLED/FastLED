@@ -127,7 +127,9 @@ ALL: list[ProjectOptions] = [
 ]
 
 
-def build_custom_project_options(boards: list[ProjectOptions]) -> dict[str, list[str]]:
+def build_CUSTOM_PROJECT_OPTIONS_DICT(
+    boards: list[ProjectOptions],
+) -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
     for board in boards:
         out.update(board.to_dictionary())
@@ -136,4 +138,9 @@ def build_custom_project_options(boards: list[ProjectOptions]) -> dict[str, list
 
 # The build system still relies on dictionary representation
 # of the project options. But this will change.
-CUSTOM_PROJECT_OPTIONS = build_custom_project_options(ALL)
+CUSTOM_PROJECT_OPTIONS_DICT = build_CUSTOM_PROJECT_OPTIONS_DICT(ALL)
+
+# This is the new way to do it.
+CUSTOM_PROJECT_OPTIONS: dict[str, ProjectOptions] = {
+    board.board_name: board for board in ALL
+}
