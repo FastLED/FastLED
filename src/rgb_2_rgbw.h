@@ -17,7 +17,7 @@ enum RGBW_MODE {
 };
 
 enum {
-    kRGBWDefaultColorTemp = 6500,
+    kRGBWDefaultColorTemp = 6000,
 };
 
 
