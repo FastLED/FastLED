@@ -651,15 +651,13 @@ struct PixelController {
             *b2 = loadAndScale2();
         }
 
-
-        // LoadAndScaleRGBW loads the pixel data in the order specified by RGB_ORDER
-        // and adjusts for the white component of the RGBW LED. The b0_out through b2_out
-        // are the RGB values re-ordered and scaled by the color correction values.
-        // The white component is always assumed to be in the last position and if it's
-        // not then it will have to be handled by the caller.
+        /// Generates RGBW pixel information. While the RGB data is loaded in the order specified by RGB_ORDER
+        /// the W data is assumed to be the last byte in the data stream. This is true for WS2812 but may need
+        /// to be changed in the future if the white component starts being reordered across chipsets.
         FASTLED_FORCE_INLINE void loadAndScaleRGBW(
                 RGBW_MODE rgbw_mode, uint16_t white_color_temp,
                 uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
+            // Get the naive RGB data order in r,g,b.
             CRGB rgb = CRGB(mData[0], mData[1], mData[2]);  // Raw RGB values in native r,g,b ordering.
             uint8_t w = 0;
             rgb_2_rgbw(
