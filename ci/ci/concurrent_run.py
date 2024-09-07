@@ -14,7 +14,7 @@ PARRALLEL_PROJECT_INITIALIZATION = (
 )
 
 
-def run(
+def concurrent_run(
     projects: list[Project],
     examples: list[str],
     skip_init: bool,

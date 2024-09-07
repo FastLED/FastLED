@@ -11,7 +11,7 @@ import warnings
 from pathlib import Path
 
 from ci.boards import BOARDS, OTHER_BOARDS
-from ci.concurrent_run import run
+from ci.concurrent_run import concurrent_run
 from ci.examples import EXAMPLES
 from ci.locked_print import locked_print
 from ci.project import Project, get_project
@@ -118,9 +118,6 @@ def main() -> int:
     locked_print(f"Changing working directory to {script_dir.parent}")
     os.chdir(script_dir.parent)
     os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = "pre:lib/ci/ci-flags.py"
-    # if args.no_project_options:
-    #     CUSTOM_PROJECT_OPTIONS.clear()
-
     if args.interactive:
         boards = choose_board_interactively(BOARDS + OTHER_BOARDS)
     else:
@@ -136,7 +133,7 @@ def main() -> int:
     if args.extra_packages:
         extract_packages.extend(args.extra_packages.split(","))
     build_dir = args.build_dir
-    rtn = run(
+    rtn = concurrent_run(
         projects=projects,
         examples=examples,
         skip_init=skip_init,
