@@ -103,7 +103,7 @@ RPI_PICO2 = Board(
     board_name="rpipico2",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     # Work in progress
-    # platform_needs_install=True,
+    platform_needs_install=True,
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
     framework="arduino",
     board_build_core="earlephilhower",
