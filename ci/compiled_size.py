@@ -27,9 +27,11 @@ def step_back_commits(steps):
 
 def check_firmware_size(board: str) -> int:
     base_path = Path(".build") / board / ".pio" / "build" / board
-    firmware = base_path / "firmware.bin"
+    firmware = base_path / "firmware.bin"  # ESP32
     if not firmware.exists():
-        firmware = base_path / "firmware.hex"
+        firmware = base_path / "firmware.hex"  # AVR
+    if not firmware.exists():
+        firmware = base_path / "firmware.uf2"  # Raspberry pi
     if not firmware.exists():
         raise FileNotFoundError(
             f"firmware.bin or firmware.hex not found in {base_path}"
