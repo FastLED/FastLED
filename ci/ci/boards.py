@@ -95,6 +95,7 @@ ADA_FEATHER_NRF52840_SENSE = Board(
 RPI_PICO = Board(
     board_name="rpipico",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
+    platform_needs_install=True,  # Install platform package to get the boards
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
     framework="arduino",
     board_build_core="earlephilhower",
