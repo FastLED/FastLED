@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class ProjectOptions:
+class Project:
     board_name: str
     platform: str | None = None
     platform_packages: str | None = None
@@ -43,47 +43,47 @@ ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32.git#d
 # ESP32_IDF_5_1 = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
 
 
-ESP32DEV = ProjectOptions(
+ESP32DEV = Project(
     board_name="esp32dev",
     platform=ESP32_IDF_5_1,
 )
 
-# ESP01 = ProjectOptions(
+# ESP01 = Project(
 #     board_name="esp01",
 #     platform=ESP32_IDF_5_1,
 # )
 
-ESP32_C2_DEVKITM_1 = ProjectOptions(
+ESP32_C2_DEVKITM_1 = Project(
     board_name="esp32-c2-devkitm-1",
     platform=ESP32_IDF_5_1_LATEST,
 )
 
-ESP32_C3_DEVKITM_1 = ProjectOptions(
+ESP32_C3_DEVKITM_1 = Project(
     board_name="esp32-c3-devkitm-1",
     platform=ESP32_IDF_5_1,
 )
 
-ESP32_C6_DEVKITC_1 = ProjectOptions(
+ESP32_C6_DEVKITC_1 = Project(
     board_name="esp32-c6-devkitc-1",
     platform=ESP32_IDF_5_1,
 )
 
-ESP32_S3_DEVKITC_1 = ProjectOptions(
+ESP32_S3_DEVKITC_1 = Project(
     board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_1,
 )
 
-ESP32_H2_DEVKITM_1 = ProjectOptions(
+ESP32_H2_DEVKITM_1 = Project(
     board_name="esp32-h2-devkitm-1",
     platform=ESP32_IDF_5_1_LATEST,
 )
 
-ADA_FEATHER_NRF52840_SENSE = ProjectOptions(
+ADA_FEATHER_NRF52840_SENSE = Project(
     board_name="adafruit_feather_nrf52840_sense",
     platform="nordicnrf52",
 )
 
-RPI_PICO = ProjectOptions(
+RPI_PICO = Project(
     board_name="rpipico",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
@@ -92,7 +92,7 @@ RPI_PICO = ProjectOptions(
     board_build_filesystem_size="0.5m",
 )
 
-RPI_PICO2 = ProjectOptions(
+RPI_PICO2 = Project(
     board_name="rpipico2",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
@@ -101,17 +101,17 @@ RPI_PICO2 = ProjectOptions(
     board_build_filesystem_size="0.5m",
 )
 
-UNO_R4_WIFI = ProjectOptions(
+UNO_R4_WIFI = Project(
     board_name="uno_r4_wifi",
     platform="renesas-ra",
 )
 
-NANO_EVERY = ProjectOptions(
+NANO_EVERY = Project(
     board_name="nano_every",
     platform="atmelmegaavr",
 )
 
-ALL: list[ProjectOptions] = [
+ALL: list[Project] = [
     ESP32DEV,
     # ESP01,
     ESP32_C2_DEVKITM_1,
@@ -128,7 +128,7 @@ ALL: list[ProjectOptions] = [
 
 
 def build_CUSTOM_PROJECT_OPTIONS_DICT(
-    boards: list[ProjectOptions],
+    boards: list[Project],
 ) -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
     for board in boards:
@@ -141,6 +141,4 @@ def build_CUSTOM_PROJECT_OPTIONS_DICT(
 CUSTOM_PROJECT_OPTIONS_DICT = build_CUSTOM_PROJECT_OPTIONS_DICT(ALL)
 
 # This is the new way to do it.
-CUSTOM_PROJECT_OPTIONS: dict[str, ProjectOptions] = {
-    board.board_name: board for board in ALL
-}
+CUSTOM_PROJECT_OPTIONS: dict[str, Project] = {board.board_name: board for board in ALL}

@@ -6,7 +6,7 @@ from ci.compile_for_board import compile_examples, errors_happened
 from ci.cpu_count import cpu_count
 from ci.create_build_dir import create_build_dir
 from ci.locked_print import locked_print
-from ci.project_options import ProjectOptions
+from ci.project import Project
 
 # Project initialization doesn't take a lot of memory or cpu so it's safe to run in parallel
 PARRALLEL_PROJECT_INITIALIZATION = (
@@ -15,13 +15,13 @@ PARRALLEL_PROJECT_INITIALIZATION = (
 
 
 def run(
-    projects: list[ProjectOptions],
+    projects: list[Project],
     examples: list[str],
     skip_init: bool,
     defines: list[str],
     extra_packages: list[str],
     build_dir: str | None,
-    # project_options: dict[str, ProjectOptions],
+    # project_options: dict[str, Project],
 ) -> int:
     start_time = time.time()
     # Necessary to create the first project alone, so that the necessary root directories
@@ -43,7 +43,7 @@ def run(
     with concurrent.futures.ThreadPoolExecutor(
         max_workers=parallel_init_workers
     ) as executor:
-        future_to_board: dict[concurrent.futures.Future, ProjectOptions] = {}
+        future_to_board: dict[concurrent.futures.Future, Project] = {}
         for project in projects:
             future = executor.submit(
                 create_build_dir,

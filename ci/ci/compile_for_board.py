@@ -4,7 +4,7 @@ from pathlib import Path
 from threading import Lock
 
 from ci.locked_print import locked_print
-from ci.project_options import ProjectOptions
+from ci.project import Project
 
 ERROR_HAPPENED = False
 
@@ -20,7 +20,7 @@ def errors_happened() -> bool:
 
 
 def compile_for_board_and_example(
-    project: ProjectOptions, example: str, build_dir: str | None
+    project: Project, example: str, build_dir: str | None
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     board = project.board_name
@@ -74,7 +74,7 @@ def compile_for_board_and_example(
 
 # Function to process task queues for each board
 def compile_examples(
-    project: ProjectOptions, examples: list[str], build_dir: str | None
+    project: Project, examples: list[str], build_dir: str | None
 ) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement

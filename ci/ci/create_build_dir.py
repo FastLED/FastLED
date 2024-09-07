@@ -3,11 +3,11 @@ import subprocess
 from pathlib import Path
 
 from ci.locked_print import locked_print
-from ci.project_options import ProjectOptions
+from ci.project import Project
 
 
 def create_build_dir(
-    project: ProjectOptions,
+    project: Project,
     defines: list[str],
     no_install_deps: bool,
     extra_packages: list[str],
