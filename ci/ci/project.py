@@ -20,6 +20,7 @@ ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32.git#d
 class Project:
     board_name: str
     platform: str | None = None
+    platform_needs_install: bool = False
     platform_packages: str | None = None
     framework: str | None = None
     board_build_core: str | None = None
@@ -30,6 +31,8 @@ class Project:
         options = out.setdefault(self.board_name, [])
         if self.platform:
             options.append(f"platform={self.platform}")
+        if self.platform_needs_install:
+            options.append("platform_needs_install=true")
         if self.platform_packages:
             options.append(f"platform_packages={self.platform_packages}")
         if self.framework:
@@ -99,6 +102,8 @@ RPI_PICO = Project(
 RPI_PICO2 = Project(
     board_name="rpipico2",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
+    # Work in progress
+    # platform_needs_install=True,
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
     framework="arduino",
     board_build_core="earlephilhower",

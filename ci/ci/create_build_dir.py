@@ -1,9 +1,37 @@
 import shutil
 import subprocess
+import warnings
 from pathlib import Path
 
 from ci.locked_print import locked_print
 from ci.project import Project
+
+# pio pkg -g -p https://github.com/maxgerhardt/platform-raspberrypi.git
+
+
+def _install_package(package: str, build_dir: Path) -> None:
+    # example pio pkg -g -p "https://github.com/maxgerhardt/platform-raspberrypi.git".
+    locked_print(f"*** Installing {package} ***")
+    cmd_list = [
+        "pio",
+        "pkg",
+        "install",
+        "-p",
+        package,
+        "--project-dir",
+        build_dir.as_posix(),
+    ]
+    cmd_str = subprocess.list2cmdline(cmd_list)
+    locked_print(f"Running command: {cmd_str}")
+    result = subprocess.run(
+        cmd_list,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        check=True,
+    )
+    locked_print(result.stdout)
+    locked_print(f"*** Finished installing {package} ***")
 
 
 def create_build_dir(
@@ -29,6 +57,11 @@ def create_build_dir(
             platformio_ini.unlink()
         except OSError as e:
             locked_print(f"Error removing {platformio_ini}: {e}")
+    if project.platform_needs_install:
+        if project.platform:
+            _install_package(project.platform, builddir)
+        else:
+            warnings.warn("Platform install was specified but no platform was given.")
     cmd_list = [
         "pio",
         "project",
