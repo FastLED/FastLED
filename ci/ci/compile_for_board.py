@@ -4,6 +4,7 @@ from pathlib import Path
 from threading import Lock
 
 from ci.locked_print import locked_print
+from ci.project_options import ProjectOptions
 
 ERROR_HAPPENED = False
 
@@ -19,9 +20,10 @@ def errors_happened() -> bool:
 
 
 def compile_for_board_and_example(
-    board: str, example: str, build_dir: str | None
+    project: ProjectOptions, example: str, build_dir: str | None
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
+    board = project.board_name
     builddir = Path(build_dir) / board if build_dir else Path(".build") / board
     builddir.mkdir(parents=True, exist_ok=True)
     srcdir = builddir / "src"
@@ -72,10 +74,11 @@ def compile_for_board_and_example(
 
 # Function to process task queues for each board
 def compile_examples(
-    board: str, examples: list[str], build_dir: str | None
+    project: ProjectOptions, examples: list[str], build_dir: str | None
 ) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
+    board = project.board_name
     is_first = True
     for example in examples:
         if ERROR_HAPPENED:
@@ -88,11 +91,11 @@ def compile_examples(
                 # Github runners are memory limited and the first job is the most
                 # memory intensive since all the artifacts are being generated in parallel.
                 success, message = compile_for_board_and_example(
-                    board=board, example=example, build_dir=build_dir
+                    project=project, example=example, build_dir=build_dir
                 )
         else:
             success, message = compile_for_board_and_example(
-                board=board, example=example, build_dir=build_dir
+                project=project, example=example, build_dir=build_dir
             )
         is_first = False
         if not success:

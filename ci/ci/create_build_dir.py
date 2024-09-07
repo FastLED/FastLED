@@ -7,14 +7,14 @@ from ci.project_options import ProjectOptions
 
 
 def create_build_dir(
-    board: str,
-    project_options: ProjectOptions | None,
+    project: ProjectOptions,
     defines: list[str],
     no_install_deps: bool,
     extra_packages: list[str],
     build_dir: str | None,
 ) -> tuple[bool, str]:
     """Create the build directory for the given board."""
+    board = project.board_name
     locked_print(f"*** Initializing environment for board {board} ***")
     builddir = Path(build_dir) / board if build_dir else Path(".build") / board
     builddir.mkdir(parents=True, exist_ok=True)
@@ -38,23 +38,20 @@ def create_build_dir(
         "--board",
         board,
     ]
-    if project_options:
-        if project_options.platform:
-            cmd_list.append(f"--project-option=platform={project_options.platform}")
-        if project_options.platform_packages:
-            cmd_list.append(
-                f"--project-option=platform_packages={project_options.platform_packages}"
-            )
-        if project_options.framework:
-            cmd_list.append(f"--project-option=framework={project_options.framework}")
-        if project_options.board_build_core:
-            cmd_list.append(
-                f"--project-option=board_build.core={project_options.board_build_core}"
-            )
-        if project_options.board_build_filesystem_size:
-            cmd_list.append(
-                f"--project-option=board_build.filesystem_size={project_options.board_build_filesystem_size}"
-            )
+    if project.platform:
+        cmd_list.append(f"--project-option=platform={project.platform}")
+    if project.platform_packages:
+        cmd_list.append(
+            f"--project-option=platform_packages={project.platform_packages}"
+        )
+    if project.framework:
+        cmd_list.append(f"--project-option=framework={project.framework}")
+    if project.board_build_core:
+        cmd_list.append(f"--project-option=board_build.core={project.board_build_core}")
+    if project.board_build_filesystem_size:
+        cmd_list.append(
+            f"--project-option=board_build.filesystem_size={project.board_build_filesystem_size}"
+        )
     if defines:
         build_flags = " ".join(f"-D {define}" for define in defines)
         cmd_list.append(f"--project-option=build_flags={build_flags}")
