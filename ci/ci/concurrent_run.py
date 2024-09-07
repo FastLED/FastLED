@@ -24,6 +24,7 @@ class ConcurrentRunArgs:
     extra_packages: list[str]
     build_dir: str | None
     extra_scripts: str | None
+    cwd: str | None = None
 
 
 def concurrent_run(
@@ -36,8 +37,14 @@ def concurrent_run(
     extra_packages = args.extra_packages
     build_dir = args.build_dir
     extra_scripts = args.extra_scripts
+    cwd = args.cwd
     start_time = time.time()
     first_project = projects[0]
+    prev_cwd: str | None = None
+    if cwd:
+        prev_cwd = os.getcwd()
+        locked_print(f"Changing to directory {cwd}")
+        os.chdir(cwd)
     if extra_scripts:
         os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = extra_scripts
     create_build_dir(
@@ -99,6 +106,9 @@ def concurrent_run(
                 for f in future_to_board:
                     f.cancel()
                 break
+    if prev_cwd:
+        locked_print(f"Changing back to directory {prev_cwd}")
+        os.chdir(prev_cwd)
     if errors_happened():
         locked_print("\nDone. Errors happened during compilation.")
         locked_print("\n".join(errors))

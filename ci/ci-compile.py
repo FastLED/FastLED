@@ -5,7 +5,6 @@ files are built faster.
 """
 
 import argparse
-import os
 import sys
 import time
 import warnings
@@ -16,6 +15,8 @@ from ci.concurrent_run import ConcurrentRunArgs, concurrent_run
 from ci.examples import EXAMPLES
 from ci.locked_print import locked_print
 from ci.project import Project, get_project
+
+HERE = Path(__file__).parent.resolve()
 
 
 def parse_args():
@@ -136,6 +137,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         extra_packages=extra_packages,
         build_dir=build_dir,
         extra_scripts=extra_scripts,
+        cwd=str(HERE),
     )
     return out
 
@@ -144,9 +146,6 @@ def main() -> int:
     """Main function."""
     args = parse_args()
     # Set the working directory to the script's parent directory.
-    script_dir = Path(__file__).parent.resolve()
-    locked_print(f"Changing working directory to {script_dir.parent}")
-    os.chdir(script_dir.parent)
     run_args = create_concurrent_run_args(args)
     start_time = time.time()
     rtn = concurrent_run(args=run_args)
