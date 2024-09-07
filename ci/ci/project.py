@@ -1,6 +1,19 @@
 # dataclasses
 
+import json
 from dataclasses import dataclass
+
+# An open source version of the esp-idf 5.1 platform for the ESP32 that
+# gives esp32 boards the same build environment as the Arduino 2.3.1+.
+
+# Set to a specific release, we may want to update this in the future.
+ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
+ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32.git#develop"
+# Top of trunk.
+# ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32"
+
+# Old fork that we were using
+# ESP32_IDF_5_1 = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
 
 
 @dataclass
@@ -29,18 +42,9 @@ class Project:
             )
         return out
 
-
-# An open source version of the esp-idf 5.1 platform for the ESP32 that
-# gives esp32 boards the same build environment as the Arduino 2.3.1+.
-
-# Set to a specific release, we may want to update this in the future.
-ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
-ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32.git#develop"
-# Top of trunk.
-# ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32"
-
-# Old fork that we were using
-# ESP32_IDF_5_1 = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
+    def __repr__(self) -> str:
+        json_str = json.dumps(self.to_dictionary(), indent=4, sort_keys=True)
+        return json_str
 
 
 ESP32DEV = Project(
@@ -126,21 +130,6 @@ ALL: list[Project] = [
     NANO_EVERY,
 ]
 
-
-def build_CUSTOM_PROJECT_OPTIONS_DICT(
-    boards: list[Project],
-) -> dict[str, list[str]]:
-    out: dict[str, list[str]] = {}
-    for board in boards:
-        out.update(board.to_dictionary())
-    return out
-
-
-# The build system still relies on dictionary representation
-# of the project options. But this will change.
-# CUSTOM_PROJECT_OPTIONS_DICT = build_CUSTOM_PROJECT_OPTIONS_DICT(ALL)
-
-# This is the new way to do it.
 _CUSTOM_PROJECT_OPTIONS: dict[str, Project] = {board.board_name: board for board in ALL}
 
 
