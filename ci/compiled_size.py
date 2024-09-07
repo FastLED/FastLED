@@ -1,10 +1,11 @@
-import os
-import subprocess
 import argparse
 import csv
-import dateutil.parser
+import os
 import shutil
+import subprocess
 from pathlib import Path
+
+import dateutil.parser
 
 
 def run_command(command):

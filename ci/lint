@@ -4,9 +4,11 @@ set -e
 
 # cd to current directory
 cd "$(dirname "$0")"
-echo "Running mypy"
-uv run mypy . --exclude tmp/
 echo "Running ruff check"
 uv run ruff check --fix . --exclude tmp/
-echo "Running ruff format"
-uv run ruff format . --exclude tmp/
+echo Running black
+black . --exclude tmp/
+echo Running isort
+isort --profile black . --skip tmp/
+echo "Running mypy"
+uv run mypy . --exclude tmp/

@@ -2,6 +2,7 @@ import os
 import subprocess
 from pathlib import Path
 from threading import Lock
+
 from ci.locked_print import locked_print
 
 ERROR_HAPPENED = False

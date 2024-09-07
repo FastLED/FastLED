@@ -11,6 +11,8 @@ dependencies = [
     "mypy",
     "types-python-dateutil",
     "clang-format",
+    "isort",
+    "black",
 ]
 
 [build-system]

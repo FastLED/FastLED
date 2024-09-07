@@ -4,17 +4,17 @@ Build artifacts are recycled within a board group so that subsequent ino
 files are built faster.
 """
 
+import argparse
 import os
 import sys
-from pathlib import Path
-import argparse
 import warnings
+from pathlib import Path
 
-from ci.locked_print import locked_print
 from ci.boards import BOARDS, OTHER_BOARDS
-from ci.examples import EXAMPLES
-from ci.project_options import CUSTOM_PROJECT_OPTIONS
 from ci.concurrent_run import run
+from ci.examples import EXAMPLES
+from ci.locked_print import locked_print
+from ci.project_options import CUSTOM_PROJECT_OPTIONS
 
 
 def parse_args():
