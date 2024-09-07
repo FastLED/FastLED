@@ -14,7 +14,7 @@ from ci.boards import BOARDS, OTHER_BOARDS
 from ci.concurrent_run import run
 from ci.examples import EXAMPLES
 from ci.locked_print import locked_print
-from ci.project import CUSTOM_PROJECT_OPTIONS, Project
+from ci.project import Project, get_project
 
 
 def parse_args():
@@ -118,8 +118,8 @@ def main() -> int:
     locked_print(f"Changing working directory to {script_dir.parent}")
     os.chdir(script_dir.parent)
     os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = "pre:lib/ci/ci-flags.py"
-    if args.no_project_options:
-        CUSTOM_PROJECT_OPTIONS.clear()
+    # if args.no_project_options:
+    #     CUSTOM_PROJECT_OPTIONS.clear()
 
     if args.interactive:
         boards = choose_board_interactively(BOARDS + OTHER_BOARDS)
@@ -127,12 +127,7 @@ def main() -> int:
         boards = args.boards.split(",") if args.boards else BOARDS
     projects: list[Project] = []
     for board in boards:
-        if board not in CUSTOM_PROJECT_OPTIONS:
-            # empty project without any special overrides, assume platformio will know what to do with it.
-            new_project_options = Project(board_name=board)
-            projects.append(new_project_options)
-        else:
-            projects.append(CUSTOM_PROJECT_OPTIONS[board])
+        projects.append(get_project(board, no_project_options=args.no_project_options))
     examples = args.examples.split(",") if args.examples else EXAMPLES
     defines: list[str] = []
     if args.defines:

@@ -138,7 +138,17 @@ def build_CUSTOM_PROJECT_OPTIONS_DICT(
 
 # The build system still relies on dictionary representation
 # of the project options. But this will change.
-CUSTOM_PROJECT_OPTIONS_DICT = build_CUSTOM_PROJECT_OPTIONS_DICT(ALL)
+# CUSTOM_PROJECT_OPTIONS_DICT = build_CUSTOM_PROJECT_OPTIONS_DICT(ALL)
 
 # This is the new way to do it.
-CUSTOM_PROJECT_OPTIONS: dict[str, Project] = {board.board_name: board for board in ALL}
+_CUSTOM_PROJECT_OPTIONS: dict[str, Project] = {board.board_name: board for board in ALL}
+
+
+def get_project(board_name: str, no_project_options: bool = False) -> Project:
+    if no_project_options:
+        return Project(board_name=board_name)
+    if board_name not in _CUSTOM_PROJECT_OPTIONS:
+        # empty project without any special overrides, assume platformio will know what to do with it.
+        return Project(board_name=board_name)
+    else:
+        return _CUSTOM_PROJECT_OPTIONS[board_name]
