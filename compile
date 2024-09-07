@@ -1,5 +1,12 @@
 #!/bin/bash
 set -e
+
+# if uv command is not found then warn the user and exit
+if ! command -v uv &> /dev/null; then
+    echo "uv command not found. Please install it by running 'pip install uv'"
+    exit 1
+fi
+
 cd "$(dirname "$0")"
 # if .venv not found
 if [ ! -d .venv ]; then

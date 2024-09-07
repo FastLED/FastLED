@@ -1,6 +1,13 @@
 @echo off
 setlocal
 
+rem if uv command is not found (using the where command) then warn the user and exit
+where uv >nul 2>nul
+if %errorlevel% neq 0 (
+    echo "uv" command not found. Please install "uv" by running "pip install uv" and try again.
+    exit /b 1
+)
+
 rem Change to the directory of the batch file
 cd /d "%~dp0"
 
