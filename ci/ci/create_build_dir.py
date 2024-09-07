@@ -65,7 +65,11 @@ def create_build_dir(
         shutil.copytree(str(board_dir), str(builddir / "boards"))
     if project.platform_needs_install:
         if project.platform:
-            _install_global_package(project.platform)
+            try:
+                _install_global_package(project.platform)
+            except subprocess.CalledProcessError as e:
+                stdout = e.stdout
+                return False, stdout
         else:
             warnings.warn("Platform install was specified but no platform was given.")
 
@@ -107,10 +111,9 @@ def create_build_dir(
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        check=True,
+        check=False,
     )
     stdout = result.stdout
-
     locked_print(result.stdout)
     if result.returncode != 0:
         locked_print(f"*** Error setting up project for board {board} ***")
