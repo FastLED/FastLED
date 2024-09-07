@@ -3,8 +3,8 @@ import subprocess
 import warnings
 from pathlib import Path
 
+from ci.boards import Board
 from ci.locked_print import locked_print
-from ci.projects import Board
 
 
 def _install_global_package(package: str) -> None:

@@ -3,8 +3,8 @@ import subprocess
 from pathlib import Path
 from threading import Lock
 
+from ci.boards import Board
 from ci.locked_print import locked_print
-from ci.projects import Board
 
 ERROR_HAPPENED = False
 
