@@ -1,12 +1,17 @@
+import os
 import time
 import concurrent.futures
 from ci.locked_print import locked_print
 from ci.compile_for_board import compile_examples, errors_happened
 from ci.cpu_count import cpu_count
 from ci.create_build_dir import create_build_dir
+from ci.project_options import CUSTOM_PROJECT_OPTIONS
 
 
-from ci.constants import PARRALLEL_PROJECT_INITIALIZATION, CUSTOM_PROJECT_OPTIONS
+# Project initialization doesn't take a lot of memory or cpu so it's safe to run in parallel
+PARRALLEL_PROJECT_INITIALIZATION = (
+    os.environ.get("PARRALLEL_PROJECT_INITIALIZATION", "1") == "1"
+)
 
 
 def run(

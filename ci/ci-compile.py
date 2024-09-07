@@ -11,7 +11,9 @@ import argparse
 import warnings
 
 from ci.locked_print import locked_print
-from ci.constants import EXAMPLES, BOARDS, OTHER_BOARDS, CUSTOM_PROJECT_OPTIONS
+from ci.boards import BOARDS, OTHER_BOARDS
+from ci.examples import EXAMPLES
+from ci.project_options import CUSTOM_PROJECT_OPTIONS
 from ci.concurrent_run import run
 
 
