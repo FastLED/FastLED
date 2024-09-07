@@ -12,13 +12,20 @@ enum RGBW_MODE {
     kRGBWNullWhitePixel,
     kRGBWExactColors,
     kRGBWBoostedWhite,
-    kRGBWMaxBrightness
+    kRGBWMaxBrightness,
+    kRGBWUserFunction
 };
 
 enum {
     kRGBWDefaultColorTemp = 6500,
 };
 
+
+typedef void (*rgb_2_rgbw_function)(
+    uint16_t w_color_temperature,
+    uint8_t r, uint8_t g, uint8_t b,
+    uint8_t r_scale, uint8_t g_scale, uint8_t b_scale,
+    uint8_t* out_r, uint8_t* out_g, uint8_t* out_b, uint8_t* out_w);
 
 // @brief Converts RGB to RGBW using a color transfer method
 // from color channels to 3x white.
@@ -49,6 +56,15 @@ void rgb_2_rgbw_white_boosted(
     uint8_t r, uint8_t g, uint8_t b,
     uint8_t r_scale, uint8_t g_scale, uint8_t b_scale,
     uint8_t* out_r, uint8_t* out_g, uint8_t* out_b, uint8_t* out_w);
+
+void rgb_2_rgbw_user_function(
+    uint16_t w_color_temperature,
+    uint8_t r, uint8_t g, uint8_t b,
+    uint8_t r_scale, uint8_t g_scale, uint8_t b_scale,
+    uint8_t* out_r, uint8_t* out_g, uint8_t* out_b, uint8_t* out_w);
+
+
+void set_rgb_2_rgbw_function(rgb_2_rgbw_function func);
 
 /// @brief Converts RGB to RGBW using one of the functions.
 FASTLED_FORCE_INLINE void rgb_2_rgbw(
@@ -82,6 +98,13 @@ FASTLED_FORCE_INLINE void rgb_2_rgbw(
             return;
         case kRGBWMaxBrightness:
             rgb_2_rgbw_max_brightness(
+                w_color_temperature,
+                r, g, b,
+                r_scale, g_scale, b_scale,
+                out_r, out_g, out_b, out_w);
+            return;
+        case kRGBWUserFunction:
+            rgb_2_rgbw_user_function(
                 w_color_temperature,
                 r, g, b,
                 r_scale, g_scale, b_scale,
