@@ -40,7 +40,7 @@ def compile_for_board_and_example(
         "--lib=ci",
         "--lib=src",
         "--keep-build-dir",
-        f"--build-dir={builddir}",
+        f"--build-dir={builddir.as_posix()}",
     ]
     cmd_list.append(f"examples/{example}/*ino")
     cmd_str = subprocess.list2cmdline(cmd_list)
