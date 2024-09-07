@@ -138,6 +138,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         build_dir=build_dir,
         extra_scripts=extra_scripts,
         cwd=str(HERE.parent),
+        board_dir=(HERE / "boards").absolute().as_posix(),
     )
     return out
 

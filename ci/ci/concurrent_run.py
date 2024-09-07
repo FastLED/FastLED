@@ -24,7 +24,8 @@ class ConcurrentRunArgs:
     extra_packages: list[str]
     build_dir: str | None
     extra_scripts: str | None
-    cwd: str | None = None
+    cwd: str | None
+    board_dir: str | None
 
 
 def concurrent_run(
@@ -41,6 +42,7 @@ def concurrent_run(
     start_time = time.time()
     first_project = projects[0]
     prev_cwd: str | None = None
+    board_dir = args.board_dir
     if cwd:
         prev_cwd = os.getcwd()
         locked_print(f"Changing to directory {cwd}")
@@ -53,6 +55,7 @@ def concurrent_run(
         no_install_deps=skip_init,
         extra_packages=extra_packages,
         build_dir=build_dir,
+        board_dir=board_dir,
     )
     # This is not memory/cpu bound but is instead network bound so we can run one thread
     # per board to speed up the process.
@@ -68,6 +71,7 @@ def concurrent_run(
                 skip_init,
                 extra_packages,
                 build_dir,
+                board_dir,
             )
             future_to_board[future] = project
         for future in as_completed(future_to_board):
