@@ -144,7 +144,7 @@ def get_board(board_name: str, no_project_options: bool = False) -> Board:
     if no_project_options:
         return Board(board_name=board_name)
     if board_name not in _BOARD_MAP:
-        # empty project without any special overrides, assume platformio will know what to do with it.
+        # empty board without any special overrides, assume platformio will know what to do with it.
         return Board(board_name=board_name)
     else:
         return _BOARD_MAP[board_name]

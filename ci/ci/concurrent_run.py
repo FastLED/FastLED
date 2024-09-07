@@ -50,7 +50,7 @@ def concurrent_run(
     if extra_scripts:
         os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = extra_scripts
     create_build_dir(
-        project=first_project,
+        board=first_project,
         defines=defines,
         no_install_deps=skip_init,
         extra_packages=extra_packages,
@@ -63,23 +63,23 @@ def concurrent_run(
     # Initialize the build directories for all boards
     with ThreadPoolExecutor(max_workers=parallel_init_workers) as executor:
         future_to_board: dict[Future, Board] = {}
-        for project in projects:
+        for board in projects:
             future = executor.submit(
                 create_build_dir,
-                project,
+                board,
                 defines,
                 skip_init,
                 extra_packages,
                 build_dir,
                 board_dir,
             )
-            future_to_board[future] = project
+            future_to_board[future] = board
         for future in as_completed(future_to_board):
-            project = future_to_board[future]
+            board = future_to_board[future]
             success, msg = future.result()
             if not success:
                 locked_print(
-                    f"Error initializing build_dir for board {project.board_name}:\n{msg}"
+                    f"Error initializing build_dir for board {board.board_name}:\n{msg}"
                 )
                 # cancel all other tasks
                 for f in future_to_board:
@@ -87,7 +87,7 @@ def concurrent_run(
                 return 1
             else:
                 locked_print(
-                    f"Finished initializing build_dir for board {project.board_name}"
+                    f"Finished initializing build_dir for board {board.board_name}"
                 )
     init_end_time = time.time()
     init_time = (init_end_time - start_time) / 60
@@ -97,8 +97,8 @@ def concurrent_run(
     num_cpus = max(1, min(cpu_count(), len(projects)))
     with ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
-            executor.submit(compile_examples, project, examples, build_dir): project
-            for project in projects
+            executor.submit(compile_examples, board, examples, build_dir): board
+            for board in projects
         }
         for future in as_completed(future_to_board):
             board = future_to_board[future]

@@ -20,23 +20,25 @@ def errors_happened() -> bool:
 
 
 def compile_for_board_and_example(
-    project: Board, example: str, build_dir: str | None
+    board: Board, example: str, build_dir: str | None
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
-    board = project.board_name
-    builddir = Path(build_dir) / board if build_dir else Path(".build") / board
+    board_name = board.board_name
+    builddir = (
+        Path(build_dir) / board_name if build_dir else Path(".build") / board_name
+    )
     builddir.mkdir(parents=True, exist_ok=True)
     srcdir = builddir / "src"
     # Remove the previous *.ino file if it exists, everything else is recycled
     # to speed up the next build.
     if srcdir.exists():
         subprocess.run(["rm", "-rf", srcdir.as_posix()], check=True)
-    locked_print(f"*** Building example {example} for board {board} ***")
+    locked_print(f"*** Building example {example} for board {board_name} ***")
     cmd_list = [
         "pio",
         "ci",
         "--board",
-        board,
+        board_name,
         "--lib=ci",
         "--lib=src",
         "--keep-build-dir",
@@ -66,42 +68,46 @@ def compile_for_board_and_example(
     stdout = stdout.replace("lib/src", "src").replace("lib\\src", "src")
     locked_print(stdout)
     if result.returncode != 0:
-        locked_print(f"*** Error compiling example {example} for board {board} ***")
+        locked_print(
+            f"*** Error compiling example {example} for board {board_name} ***"
+        )
         return False, stdout
-    locked_print(f"*** Finished building example {example} for board {board} ***")
+    locked_print(f"*** Finished building example {example} for board {board_name} ***")
     return True, stdout
 
 
 # Function to process task queues for each board
 def compile_examples(
-    project: Board, examples: list[str], build_dir: str | None
+    board: Board, examples: list[str], build_dir: str | None
 ) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
-    board = project.board_name
+    board_name = board.board_name
     is_first = True
     for example in examples:
         if ERROR_HAPPENED:
             return True, ""
-        locked_print(f"\n*** Building {example} for board {board} ***")
+        locked_print(f"\n*** Building {example} for board {board_name} ***")
         if is_first:
-            locked_print(f"*** Building for first example {example} board {board} ***")
+            locked_print(
+                f"*** Building for first example {example} board {board_name} ***"
+            )
         if is_first and USE_FIRST_BUILD_LOCK:
             with FIRST_BUILD_LOCK:
                 # Github runners are memory limited and the first job is the most
                 # memory intensive since all the artifacts are being generated in parallel.
                 success, message = compile_for_board_and_example(
-                    project=project, example=example, build_dir=build_dir
+                    board=board, example=example, build_dir=build_dir
                 )
         else:
             success, message = compile_for_board_and_example(
-                project=project, example=example, build_dir=build_dir
+                board=board, example=example, build_dir=build_dir
             )
         is_first = False
         if not success:
             ERROR_HAPPENED = True
             return (
                 False,
-                f"Error building {example} for board {board}. stdout:\n{message}",
+                f"Error building {example} for board {board_name}. stdout:\n{message}",
             )
     return True, ""

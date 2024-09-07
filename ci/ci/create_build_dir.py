@@ -33,7 +33,7 @@ def _install_global_package(package: str) -> None:
 
 
 def create_build_dir(
-    project: Board,
+    board: Board,
     defines: list[str],
     no_install_deps: bool,
     extra_packages: list[str],
@@ -41,11 +41,11 @@ def create_build_dir(
     board_dir: str | None,
 ) -> tuple[bool, str]:
     """Create the build directory for the given board."""
-    board = project.board_name
-    locked_print(f"*** Initializing environment for board {board} ***")
+    board_name = board.board_name
+    locked_print(f"*** Initializing environment for {board_name} ***")
     # builddir = Path(build_dir) / board if build_dir else Path(".build") / board
     build_dir = build_dir or ".build"
-    builddir = Path(build_dir) / board
+    builddir = Path(build_dir) / board_name
     builddir.mkdir(parents=True, exist_ok=True)
     # if lib directory (where FastLED lives) exists, remove it. This is necessary to run on
     # recycled build directories for fastled to update. This is a fast operation.
@@ -63,10 +63,10 @@ def create_build_dir(
         if dst_dir.exists():
             shutil.rmtree(dst_dir)
         shutil.copytree(str(board_dir), str(builddir / "boards"))
-    if project.platform_needs_install:
-        if project.platform:
+    if board.platform_needs_install:
+        if board.platform:
             try:
-                _install_global_package(project.platform)
+                _install_global_package(board.platform)
             except subprocess.CalledProcessError as e:
                 stdout = e.stdout
                 return False, stdout
@@ -80,21 +80,19 @@ def create_build_dir(
         "--project-dir",
         builddir.as_posix(),
         "--board",
-        board,
+        board_name,
     ]
-    if project.platform:
-        cmd_list.append(f"--project-option=platform={project.platform}")
-    if project.platform_packages:
+    if board.platform:
+        cmd_list.append(f"--board-option=platform={board.platform}")
+    if board.platform_packages:
+        cmd_list.append(f"--board-option=platform_packages={board.platform_packages}")
+    if board.framework:
+        cmd_list.append(f"--project-option=framework={board.framework}")
+    if board.board_build_core:
+        cmd_list.append(f"--board-option=board_build.core={board.board_build_core}")
+    if board.board_build_filesystem_size:
         cmd_list.append(
-            f"--project-option=platform_packages={project.platform_packages}"
-        )
-    if project.framework:
-        cmd_list.append(f"--project-option=framework={project.framework}")
-    if project.board_build_core:
-        cmd_list.append(f"--project-option=board_build.core={project.board_build_core}")
-    if project.board_build_filesystem_size:
-        cmd_list.append(
-            f"--project-option=board_build.filesystem_size={project.board_build_filesystem_size}"
+            f"--board-option=board_build.filesystem_size={board.board_build_filesystem_size}"
         )
     if defines:
         build_flags = " ".join(f"-D {define}" for define in defines)
@@ -116,7 +114,7 @@ def create_build_dir(
     stdout = result.stdout
     locked_print(result.stdout)
     if result.returncode != 0:
-        locked_print(f"*** Error setting up project for board {board} ***")
+        locked_print(f"*** Error setting up board {board_name} ***")
         return False, stdout
-    locked_print(f"*** Finished initializing environment for board {board} ***")
+    locked_print(f"*** Finished initializing environment for board {board_name} ***")
     return True, stdout
