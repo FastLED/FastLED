@@ -11,7 +11,6 @@ import warnings
 from pathlib import Path
 
 from ci.concurrent_run import ConcurrentRunArgs, concurrent_run
-from ci.examples import EXAMPLES
 from ci.locked_print import locked_print
 from ci.projects import Project, get_project
 
@@ -42,6 +41,29 @@ OTHER_BOARDS_NAMES = [
     "rpipico2",
     "uno_r4_wifi",
     "nano_every",
+]
+
+# Examples to compile.
+DEFAULT_EXAMPLES = [
+    "Apa102HD",
+    "Blink",
+    "ColorPalette",
+    "ColorTemperature",
+    "Cylon",
+    "DemoReel100",
+    "Fire2012",
+    "FirstLight",
+    "Multiple/MultipleStripsInOneArray",
+    "Multiple/ArrayOfLedArrays",
+    "Noise",
+    "NoisePlayground",
+    "NoisePlusPalette",
+    "Pacifica",
+    "Pride2015",
+    "RGBCalibrate",
+    "RGBSetDemo",
+    "TwinkleFox",
+    "XYMatrix",
 ]
 
 
@@ -153,7 +175,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
     projects: list[Project] = []
     for board in boards:
         projects.append(get_project(board, no_project_options=args.no_project_options))
-    examples = args.examples.split(",") if args.examples else EXAMPLES
+    examples = args.examples.split(",") if args.examples else DEFAULT_EXAMPLES
     defines: list[str] = []
     if args.defines:
         defines.extend(args.defines.split(","))
