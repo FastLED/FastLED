@@ -10,6 +10,7 @@
 #include "color.h"
 #include <stddef.h>
 #include "rgb_2_rgbw.h"
+#include "five_bit_hd_gamma.h"
 #include "force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -699,6 +700,29 @@ struct PixelController {
             *b2_out = rgb.raw[b2_index];
             // Assume the w component is the last byte in the data stream and never reordered.
             *w_out = w;
+        }
+
+        FASTLED_FORCE_INLINE void loadAndScale_APA102_HD(
+                uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out,  // Output RGB values in order of RGB_ORDER
+                uint8_t* brightness_out) {
+            CRGB rgb = CRGB(mData[0], mData[1], mData[2]);
+            uint8_t brightness = 0;
+            if (rgb) {
+                five_bit_hd_gamma_bitshift(
+                    rgb.r, rgb.g, rgb.b,
+                    // Note this mScale has the global brightness scale mixed in with the
+                    // color correction scale.
+                    mScale.r, mScale.g, mScale.b,
+                    &rgb.r, &rgb.g, &rgb.b, &brightness
+                );
+            }
+            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
+            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
+            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
+            *b0_out = rgb.raw[b0_index];
+            *b1_out = rgb.raw[b1_index];
+            *b2_out = rgb.raw[b2_index];
+            *brightness_out = brightness;
         }
 
 };

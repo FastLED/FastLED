@@ -328,10 +328,10 @@ private:
 		getGlobalBrightnessAndScalingFactors(pixels, &s0, &s1, &s2, &global_brightness);
 		startBoundary();
 		while (pixels.has(1)) {
-			uint8_t r = pixels.loadAndScale0(0, s0);
-			uint8_t g = pixels.loadAndScale1(0, s1);
-			uint8_t b = pixels.loadAndScale2(0, s2);
-			writeLed(global_brightness, r, g, b);
+			uint8_t c0 = pixels.loadAndScale0(0, s0);
+			uint8_t c1 = pixels.loadAndScale1(0, s1);
+			uint8_t c2 = pixels.loadAndScale2(0, s2);
+			writeLed(global_brightness, c0, c1, c2);
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
@@ -343,24 +343,12 @@ private:
 
 	inline void showPixelsGammaBitShift(PixelController<RGB_ORDER> & pixels) {
 		mSPI.select();
-		uint8_t r_scale = pixels.getScale0();
-		uint8_t g_scale = pixels.getScale1();
-		uint8_t b_scale = pixels.getScale2();
 		startBoundary();
 		while (pixels.has(1)) {
 			// Load raw uncorrected r,g,b values.
-			uint8_t r = pixels.loadAndScale0(0, 0xFF);
-			uint8_t g = pixels.loadAndScale1(0, 0xFF);
-			uint8_t b = pixels.loadAndScale2(0, 0xFF);
-			uint8_t brightness = 0;
-			if ((r | g | b) != 0) {
-				// Compute the gamma correction for non black pixels.
-				five_bit_hd_gamma_bitshift(
-					r, g, b,
-					r_scale, g_scale, b_scale,  // Post-gamma scale.
-					&r, &g, &b, &brightness);
-			}
-			writeLed(brightness, r, g, b);
+			uint8_t brightness, c0, c1, c2;  // c0-c2 is the RGB data re-ordered for pixel
+			pixels.loadAndScale_APA102_HD(&c0, &c1, &c2, &brightness);
+			writeLed(brightness, c0, c1, c2);
 			pixels.stepDithering();
 			pixels.advanceData();
 		}
