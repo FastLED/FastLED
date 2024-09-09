@@ -7,6 +7,24 @@ FastLED
 [![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
 
+
+
+## About
+
+This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
+sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress.  In addition to writing to the
+LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating
+your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while
+still keeping things as fast as possible.
+
+We have multiple goals with this library:
+
+* Quick start for new developers - hook up your LEDs and go, no need to think about specifics of the LED chipsets being used
+* Zero pain switching LED chipsets - you get some new LEDs that the library supports, just change the definition of LEDs you're using, et. voila!  Your code is running with the new LEDs.
+* High performance - with features like zero cost global brightness scaling, high performance 8-bit math for RGB manipulation, and some of the fastest bit-bang'd SPI support around, FastLED wants to keep as many CPU cycles available for your LED patterns as possible
+
+## [Examples](examples)
+
 ```C++
 /// Blink red then off.
 
@@ -44,22 +62,6 @@ void loop() {
 }
 ```
 
-
-## About
-
-This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
-sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress.  In addition to writing to the
-LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating
-your RGB values, as well as low level classes for abstracting out access to pins and SPI hardware, while
-still keeping things as fast as possible.
-
-We have multiple goals with this library:
-
-* Quick start for new developers - hook up your LEDs and go, no need to think about specifics of the LED chipsets being used
-* Zero pain switching LED chipsets - you get some new LEDs that the library supports, just change the definition of LEDs you're using, et. voila!  Your code is running with the new LEDs.
-* High performance - with features like zero cost global brightness scaling, high performance 8-bit math for RGB manipulation, and some of the fastest bit-bang'd SPI support around, FastLED wants to keep as many CPU cycles available for your LED patterns as possible
-
-## [Examples](examples)
 
 ## Board Support
 #### Arduino
