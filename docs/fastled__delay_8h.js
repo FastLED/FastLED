@@ -8,5 +8,6 @@ var fastled__delay_8h =
     [ "NO_TIME", "fastled__delay_8h.html#acd145d740ef1b06533fce6d4659401a2", null ],
     [ "NS", "fastled__delay_8h.html#a3c2d7a356c40ef25cfcaaad8556a71c2", null ],
     [ "delaycycles", "fastled__delay_8h.html#acdd14fccd97b45d3d566c95bff28ed76", null ],
+    [ "delaycycles", "fastled__delay_8h.html#a09be4e640c4988800c829b08b66723e5", null ],
     [ "delaycycles_min1", "fastled__delay_8h.html#a76328edb9ea1a1f017567ff835247d2d", null ]
 ];

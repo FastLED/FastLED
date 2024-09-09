@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
    </div>
   </td>
  </tr>
@@ -123,7 +123,7 @@ struct PixelController&lt; RGB_ORDER, LANES, MASK &gt;</div><p>Pixel controller 
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00274">274</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00287">287</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="controller_8h_source.html">controller.h</a>&gt;</code></p>
 <table class="memberdecls">
@@ -135,168 +135,178 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a358944f031ee8b8536d2f48ca670de77" id="r_a358944f031ee8b8536d2f48ca670de77"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a358944f031ee8b8536d2f48ca670de77">initOffsets</a> (int len)</td></tr>
 <tr class="memdesc:a358944f031ee8b8536d2f48ca670de77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the <a class="el" href="#a5ea77404f9ea28134291af923a79c82f" title="the number of bytes to offset each lane from the starting pointer">PixelController::mOffsets</a> array based on the length of the strip.  <br /></td></tr>
 <tr class="separator:a358944f031ee8b8536d2f48ca670de77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85acf3ef47eaeaa6723b7cf5ea4f071d" id="r_a85acf3ef47eaeaa6723b7cf5ea4f071d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85acf3ef47eaeaa6723b7cf5ea4f071d">PixelController</a> (const uint8_t *<a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, <a class="el" href="controller_8h.html#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a> <a class="el" href="#a1d0e72424236664698ee67f705af9640">dither</a>=<a class="el" href="controller_8h.html#aa5f08faeb733faf0fab65127e79e6b44">BINARY_DITHER</a>, bool advance=true, uint8_t skip=0)</td></tr>
+<tr class="memitem:a85acf3ef47eaeaa6723b7cf5ea4f071d" id="r_a85acf3ef47eaeaa6723b7cf5ea4f071d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85acf3ef47eaeaa6723b7cf5ea4f071d">PixelController</a> (const uint8_t *<a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, <a class="el" href="controller_8h.html#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a> <a class="el" href="#aa2a1b38058a62a4337605425e482202f">dither</a>=<a class="el" href="controller_8h.html#aa5f08faeb733faf0fab65127e79e6b44">BINARY_DITHER</a>, bool advance=true, uint8_t skip=0)</td></tr>
 <tr class="memdesc:a85acf3ef47eaeaa6723b7cf5ea4f071d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
 <tr class="separator:a85acf3ef47eaeaa6723b7cf5ea4f071d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5631b8132087ca68008d85a891c82d2b" id="r_a5631b8132087ca68008d85a891c82d2b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5631b8132087ca68008d85a891c82d2b">PixelController</a> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> *<a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, <a class="el" href="controller_8h.html#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a> <a class="el" href="#a1d0e72424236664698ee67f705af9640">dither</a>=<a class="el" href="controller_8h.html#aa5f08faeb733faf0fab65127e79e6b44">BINARY_DITHER</a>)</td></tr>
+<tr class="memitem:a5631b8132087ca68008d85a891c82d2b" id="r_a5631b8132087ca68008d85a891c82d2b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5631b8132087ca68008d85a891c82d2b">PixelController</a> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> *<a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, <a class="el" href="controller_8h.html#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a> <a class="el" href="#aa2a1b38058a62a4337605425e482202f">dither</a>=<a class="el" href="controller_8h.html#aa5f08faeb733faf0fab65127e79e6b44">BINARY_DITHER</a>)</td></tr>
 <tr class="memdesc:a5631b8132087ca68008d85a891c82d2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
 <tr class="separator:a5631b8132087ca68008d85a891c82d2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a802a3dadccd652a9f1db490f7ba64655" id="r_a802a3dadccd652a9f1db490f7ba64655"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a802a3dadccd652a9f1db490f7ba64655">PixelController</a> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;<a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, <a class="el" href="controller_8h.html#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a> <a class="el" href="#a1d0e72424236664698ee67f705af9640">dither</a>=<a class="el" href="controller_8h.html#aa5f08faeb733faf0fab65127e79e6b44">BINARY_DITHER</a>)</td></tr>
+<tr class="memitem:a802a3dadccd652a9f1db490f7ba64655" id="r_a802a3dadccd652a9f1db490f7ba64655"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a802a3dadccd652a9f1db490f7ba64655">PixelController</a> (const <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;<a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>, int len, <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;s, <a class="el" href="controller_8h.html#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a> <a class="el" href="#aa2a1b38058a62a4337605425e482202f">dither</a>=<a class="el" href="controller_8h.html#aa5f08faeb733faf0fab65127e79e6b44">BINARY_DITHER</a>)</td></tr>
 <tr class="memdesc:a802a3dadccd652a9f1db490f7ba64655"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <br /></td></tr>
 <tr class="separator:a802a3dadccd652a9f1db490f7ba64655"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a8441da873d3a094c15c337b34d3e43" id="r_a2a8441da873d3a094c15c337b34d3e43"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2a8441da873d3a094c15c337b34d3e43">init_binary_dithering</a> ()</td></tr>
 <tr class="memdesc:a2a8441da873d3a094c15c337b34d3e43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set up the values for binary dithering.  <br /></td></tr>
 <tr class="separator:a2a8441da873d3a094c15c337b34d3e43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb6c796bf7def8f0e330f57776a2edd0" id="r_aeb6c796bf7def8f0e330f57776a2edd0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb6c796bf7def8f0e330f57776a2edd0">has</a> (int n)</td></tr>
-<tr class="memdesc:aeb6c796bf7def8f0e330f57776a2edd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do we have n pixels left to process?  <br /></td></tr>
-<tr class="separator:aeb6c796bf7def8f0e330f57776a2edd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa86847022436988b28343a76bab0db4c" id="r_aa86847022436988b28343a76bab0db4c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa86847022436988b28343a76bab0db4c">enable_dithering</a> (<a class="el" href="controller_8h.html#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a> <a class="el" href="#a1d0e72424236664698ee67f705af9640">dither</a>)</td></tr>
+<tr class="memitem:ac13f3e00855fcf6125ea27543c2fb48c" id="r_ac13f3e00855fcf6125ea27543c2fb48c"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac13f3e00855fcf6125ea27543c2fb48c">has</a> (int n)</td></tr>
+<tr class="memdesc:ac13f3e00855fcf6125ea27543c2fb48c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do we have n pixels left to process?  <br /></td></tr>
+<tr class="separator:ac13f3e00855fcf6125ea27543c2fb48c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa86847022436988b28343a76bab0db4c" id="r_aa86847022436988b28343a76bab0db4c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa86847022436988b28343a76bab0db4c">enable_dithering</a> (<a class="el" href="controller_8h.html#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a> <a class="el" href="#aa2a1b38058a62a4337605425e482202f">dither</a>)</td></tr>
 <tr class="memdesc:aa86847022436988b28343a76bab0db4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggle dithering enable If dithering is set to enabled, this will re-init the dithering values (<a class="el" href="#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">init_binary_dithering()</a>).  <br /></td></tr>
 <tr class="separator:aa86847022436988b28343a76bab0db4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a658ce6138a576739b5fef2dbd4f4d284" id="r_a658ce6138a576739b5fef2dbd4f4d284"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a658ce6138a576739b5fef2dbd4f4d284">size</a> ()</td></tr>
-<tr class="memdesc:a658ce6138a576739b5fef2dbd4f4d284"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the length of the LED strip.  <br /></td></tr>
-<tr class="separator:a658ce6138a576739b5fef2dbd4f4d284"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8f4596b8c7d6f5e2300fb7dbca458f2" id="r_ab8f4596b8c7d6f5e2300fb7dbca458f2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab8f4596b8c7d6f5e2300fb7dbca458f2">lanes</a> ()</td></tr>
-<tr class="memdesc:ab8f4596b8c7d6f5e2300fb7dbca458f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of lanes of the Controller.  <br /></td></tr>
-<tr class="separator:ab8f4596b8c7d6f5e2300fb7dbca458f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac3116551b7d69675bbd4aaaac57005f1" id="r_ac3116551b7d69675bbd4aaaac57005f1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac3116551b7d69675bbd4aaaac57005f1">advanceBy</a> ()</td></tr>
-<tr class="memdesc:ac3116551b7d69675bbd4aaaac57005f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the amount to advance the pointer by.  <br /></td></tr>
-<tr class="separator:ac3116551b7d69675bbd4aaaac57005f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a64e13d27e73a7a056a251e4b09295c44" id="r_a64e13d27e73a7a056a251e4b09295c44"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a64e13d27e73a7a056a251e4b09295c44">advanceData</a> ()</td></tr>
-<tr class="memdesc:a64e13d27e73a7a056a251e4b09295c44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance the data pointer forward, adjust position counter.  <br /></td></tr>
-<tr class="separator:a64e13d27e73a7a056a251e4b09295c44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3340b291d085d72b34687f89610bfa62" id="r_a3340b291d085d72b34687f89610bfa62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3340b291d085d72b34687f89610bfa62">stepDithering</a> ()</td></tr>
-<tr class="memdesc:a3340b291d085d72b34687f89610bfa62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step the dithering forward.  <br /></td></tr>
-<tr class="separator:a3340b291d085d72b34687f89610bfa62"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52b25ef22470e538b0a1a604ae9f95e5" id="r_a52b25ef22470e538b0a1a604ae9f95e5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a52b25ef22470e538b0a1a604ae9f95e5">preStepFirstByteDithering</a> ()</td></tr>
-<tr class="memdesc:a52b25ef22470e538b0a1a604ae9f95e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately.  <br /></td></tr>
-<tr class="separator:a52b25ef22470e538b0a1a604ae9f95e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33cf0d3a56273fb6bff13b62317926c4" id="r_a33cf0d3a56273fb6bff13b62317926c4"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33cf0d3a56273fb6bff13b62317926c4">loadAndScale0</a> (int lane, uint8_t <a class="el" href="#abc7c6fc40ee625cfb76187079aedd7c5">scale</a>)</td></tr>
-<tr class="memdesc:a33cf0d3a56273fb6bff13b62317926c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>  <br /></td></tr>
-<tr class="separator:a33cf0d3a56273fb6bff13b62317926c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6aa919a2ee2e56f4af03194dcfc5fa7d" id="r_a6aa919a2ee2e56f4af03194dcfc5fa7d"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6aa919a2ee2e56f4af03194dcfc5fa7d">loadAndScale1</a> (int lane, uint8_t <a class="el" href="#abc7c6fc40ee625cfb76187079aedd7c5">scale</a>)</td></tr>
-<tr class="memdesc:a6aa919a2ee2e56f4af03194dcfc5fa7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>  <br /></td></tr>
-<tr class="separator:a6aa919a2ee2e56f4af03194dcfc5fa7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf34e8849462ab58f7c62ed4ad3e7858" id="r_abf34e8849462ab58f7c62ed4ad3e7858"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abf34e8849462ab58f7c62ed4ad3e7858">loadAndScale2</a> (int lane, uint8_t <a class="el" href="#abc7c6fc40ee625cfb76187079aedd7c5">scale</a>)</td></tr>
-<tr class="memdesc:abf34e8849462ab58f7c62ed4ad3e7858"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>  <br /></td></tr>
-<tr class="separator:abf34e8849462ab58f7c62ed4ad3e7858"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aedb31ca042693e2c6959a2f1042c0e8a" id="r_aedb31ca042693e2c6959a2f1042c0e8a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aedb31ca042693e2c6959a2f1042c0e8a">advanceAndLoadAndScale0</a> (int lane, uint8_t <a class="el" href="#abc7c6fc40ee625cfb76187079aedd7c5">scale</a>)</td></tr>
-<tr class="memdesc:aedb31ca042693e2c6959a2f1042c0e8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a36c71bec08f0a73b06261f8bc887a54a" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>  <br /></td></tr>
-<tr class="separator:aedb31ca042693e2c6959a2f1042c0e8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a187119ed1bcf6af216009f1e5e343250" id="r_a187119ed1bcf6af216009f1e5e343250"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a187119ed1bcf6af216009f1e5e343250">stepAdvanceAndLoadAndScale0</a> (int lane, uint8_t <a class="el" href="#abc7c6fc40ee625cfb76187079aedd7c5">scale</a>)</td></tr>
-<tr class="memdesc:a187119ed1bcf6af216009f1e5e343250"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#a3340b291d085d72b34687f89610bfa62" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#ad97f1374042069db95526097244643b0" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>  <br /></td></tr>
-<tr class="separator:a187119ed1bcf6af216009f1e5e343250"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5fb7912ab0ea88a353f4779f755b1f0" id="r_ac5fb7912ab0ea88a353f4779f755b1f0"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac5fb7912ab0ea88a353f4779f755b1f0">loadAndScale0</a> (int lane)</td></tr>
-<tr class="memdesc:ac5fb7912ab0ea88a353f4779f755b1f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>     <br /></td></tr>
-<tr class="separator:ac5fb7912ab0ea88a353f4779f755b1f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac828611aeec61ece07dad8f11c9c37df" id="r_ac828611aeec61ece07dad8f11c9c37df"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac828611aeec61ece07dad8f11c9c37df">loadAndScale1</a> (int lane)</td></tr>
-<tr class="memdesc:ac828611aeec61ece07dad8f11c9c37df"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>     <br /></td></tr>
-<tr class="separator:ac828611aeec61ece07dad8f11c9c37df"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff0a1022e3eab3180a16b28ee9eb4cc8" id="r_aff0a1022e3eab3180a16b28ee9eb4cc8"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff0a1022e3eab3180a16b28ee9eb4cc8">loadAndScale2</a> (int lane)</td></tr>
-<tr class="memdesc:aff0a1022e3eab3180a16b28ee9eb4cc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>     <br /></td></tr>
-<tr class="separator:aff0a1022e3eab3180a16b28ee9eb4cc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad5a2b1d8b408ed18ef33f412968da3f" id="r_aad5a2b1d8b408ed18ef33f412968da3f"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aad5a2b1d8b408ed18ef33f412968da3f">advanceAndLoadAndScale0</a> (int lane)</td></tr>
-<tr class="memdesc:aad5a2b1d8b408ed18ef33f412968da3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a36c71bec08f0a73b06261f8bc887a54a" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>     <br /></td></tr>
-<tr class="separator:aad5a2b1d8b408ed18ef33f412968da3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a262a85c5d422cb7f2336a9a5c279ab62" id="r_a262a85c5d422cb7f2336a9a5c279ab62"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a262a85c5d422cb7f2336a9a5c279ab62">stepAdvanceAndLoadAndScale0</a> (int lane)</td></tr>
-<tr class="memdesc:a262a85c5d422cb7f2336a9a5c279ab62"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#a3340b291d085d72b34687f89610bfa62" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#ad97f1374042069db95526097244643b0" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>     <br /></td></tr>
-<tr class="separator:a262a85c5d422cb7f2336a9a5c279ab62"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c1d1693ec371ffa83a6a00f80151951" id="r_a1c1d1693ec371ffa83a6a00f80151951"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1c1d1693ec371ffa83a6a00f80151951">loadAndScale0</a> ()</td></tr>
-<tr class="memdesc:a1c1d1693ec371ffa83a6a00f80151951"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>     <br /></td></tr>
-<tr class="separator:a1c1d1693ec371ffa83a6a00f80151951"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abae41b8a9c2c8363f8e944a4b51e0891" id="r_abae41b8a9c2c8363f8e944a4b51e0891"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abae41b8a9c2c8363f8e944a4b51e0891">loadAndScale1</a> ()</td></tr>
-<tr class="memdesc:abae41b8a9c2c8363f8e944a4b51e0891"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>     <br /></td></tr>
-<tr class="separator:abae41b8a9c2c8363f8e944a4b51e0891"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad8a77947006d3304fc631dc5bb7e5374" id="r_ad8a77947006d3304fc631dc5bb7e5374"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad8a77947006d3304fc631dc5bb7e5374">loadAndScale2</a> ()</td></tr>
-<tr class="memdesc:ad8a77947006d3304fc631dc5bb7e5374"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>     <br /></td></tr>
-<tr class="separator:ad8a77947006d3304fc631dc5bb7e5374"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad97f1374042069db95526097244643b0" id="r_ad97f1374042069db95526097244643b0"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad97f1374042069db95526097244643b0">advanceAndLoadAndScale0</a> ()</td></tr>
-<tr class="memdesc:ad97f1374042069db95526097244643b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a36c71bec08f0a73b06261f8bc887a54a" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>     <br /></td></tr>
-<tr class="separator:ad97f1374042069db95526097244643b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a94083aa8becb9964497868366b29a3da" id="r_a94083aa8becb9964497868366b29a3da"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a94083aa8becb9964497868366b29a3da">stepAdvanceAndLoadAndScale0</a> ()</td></tr>
-<tr class="memdesc:a94083aa8becb9964497868366b29a3da"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#a3340b291d085d72b34687f89610bfa62" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#ad97f1374042069db95526097244643b0" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>     <br /></td></tr>
-<tr class="separator:a94083aa8becb9964497868366b29a3da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a70d40736e4fb2cb8f70d14a50f5eb339" id="r_a70d40736e4fb2cb8f70d14a50f5eb339"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a70d40736e4fb2cb8f70d14a50f5eb339">getScale0</a> ()</td></tr>
-<tr class="memdesc:a70d40736e4fb2cb8f70d14a50f5eb339"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a36ef0c42fb8109c8da9a1f37812e176e" title="Gets the scale data for the provided output slot.">getscale&lt;0&gt;()</a>  <br /></td></tr>
-<tr class="separator:a70d40736e4fb2cb8f70d14a50f5eb339"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1031647981c3e18d4b432204bdcd1de7" id="r_a1031647981c3e18d4b432204bdcd1de7"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1031647981c3e18d4b432204bdcd1de7">getScale1</a> ()</td></tr>
-<tr class="memdesc:a1031647981c3e18d4b432204bdcd1de7"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a36ef0c42fb8109c8da9a1f37812e176e" title="Gets the scale data for the provided output slot.">getscale&lt;1&gt;()</a>  <br /></td></tr>
-<tr class="separator:a1031647981c3e18d4b432204bdcd1de7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae09de2dd8c96888d5e3c53257ad5a003" id="r_ae09de2dd8c96888d5e3c53257ad5a003"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae09de2dd8c96888d5e3c53257ad5a003">getScale2</a> ()</td></tr>
-<tr class="memdesc:ae09de2dd8c96888d5e3c53257ad5a003"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a36ef0c42fb8109c8da9a1f37812e176e" title="Gets the scale data for the provided output slot.">getscale&lt;2&gt;()</a>  <br /></td></tr>
-<tr class="separator:ae09de2dd8c96888d5e3c53257ad5a003"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85305135ad8ad18edcd32dfc7431c660" id="r_a85305135ad8ad18edcd32dfc7431c660"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a85305135ad8ad18edcd32dfc7431c660">size</a> ()</td></tr>
+<tr class="memdesc:a85305135ad8ad18edcd32dfc7431c660"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the length of the LED strip.  <br /></td></tr>
+<tr class="separator:a85305135ad8ad18edcd32dfc7431c660"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5774d9ac88ededea49f5eec4b9772361" id="r_a5774d9ac88ededea49f5eec4b9772361"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5774d9ac88ededea49f5eec4b9772361">lanes</a> ()</td></tr>
+<tr class="memdesc:a5774d9ac88ededea49f5eec4b9772361"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of lanes of the Controller.  <br /></td></tr>
+<tr class="separator:a5774d9ac88ededea49f5eec4b9772361"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f02d52fbcd108b1b7e8110dac23c0b9" id="r_a4f02d52fbcd108b1b7e8110dac23c0b9"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4f02d52fbcd108b1b7e8110dac23c0b9">advanceBy</a> ()</td></tr>
+<tr class="memdesc:a4f02d52fbcd108b1b7e8110dac23c0b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the amount to advance the pointer by.  <br /></td></tr>
+<tr class="separator:a4f02d52fbcd108b1b7e8110dac23c0b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab44f62f166d162bd1e3b095b368feef2" id="r_ab44f62f166d162bd1e3b095b368feef2"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab44f62f166d162bd1e3b095b368feef2">advanceData</a> ()</td></tr>
+<tr class="memdesc:ab44f62f166d162bd1e3b095b368feef2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advance the data pointer forward, adjust position counter.  <br /></td></tr>
+<tr class="separator:ab44f62f166d162bd1e3b095b368feef2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7cb7840989882cce60218ac43dbe8ef" id="r_ac7cb7840989882cce60218ac43dbe8ef"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac7cb7840989882cce60218ac43dbe8ef">stepDithering</a> ()</td></tr>
+<tr class="memdesc:ac7cb7840989882cce60218ac43dbe8ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step the dithering forward.  <br /></td></tr>
+<tr class="separator:ac7cb7840989882cce60218ac43dbe8ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4339ebd06d211b9affb17343ae2eefe0" id="r_a4339ebd06d211b9affb17343ae2eefe0"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4339ebd06d211b9affb17343ae2eefe0">preStepFirstByteDithering</a> ()</td></tr>
+<tr class="memdesc:a4339ebd06d211b9affb17343ae2eefe0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately.  <br /></td></tr>
+<tr class="separator:a4339ebd06d211b9affb17343ae2eefe0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4984f158bbc3b6c79ca16dd847fe67e1" id="r_a4984f158bbc3b6c79ca16dd847fe67e1"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4984f158bbc3b6c79ca16dd847fe67e1">loadAndScale0</a> (int lane, uint8_t <a class="el" href="#a060678fc5a4cf518e155ed3a6145b8d4">scale</a>)</td></tr>
+<tr class="memdesc:a4984f158bbc3b6c79ca16dd847fe67e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>  <br /></td></tr>
+<tr class="separator:a4984f158bbc3b6c79ca16dd847fe67e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11f9b50f738c6d57d08d6776b3d8eb43" id="r_a11f9b50f738c6d57d08d6776b3d8eb43"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a11f9b50f738c6d57d08d6776b3d8eb43">loadAndScale1</a> (int lane, uint8_t <a class="el" href="#a060678fc5a4cf518e155ed3a6145b8d4">scale</a>)</td></tr>
+<tr class="memdesc:a11f9b50f738c6d57d08d6776b3d8eb43"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>  <br /></td></tr>
+<tr class="separator:a11f9b50f738c6d57d08d6776b3d8eb43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33c22b408cbc9eb8b9d98993fe985264" id="r_a33c22b408cbc9eb8b9d98993fe985264"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33c22b408cbc9eb8b9d98993fe985264">loadAndScale2</a> (int lane, uint8_t <a class="el" href="#a060678fc5a4cf518e155ed3a6145b8d4">scale</a>)</td></tr>
+<tr class="memdesc:a33c22b408cbc9eb8b9d98993fe985264"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>  <br /></td></tr>
+<tr class="separator:a33c22b408cbc9eb8b9d98993fe985264"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ed1cdb992788946f8aa585e014491fa" id="r_a5ed1cdb992788946f8aa585e014491fa"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ed1cdb992788946f8aa585e014491fa">advanceAndLoadAndScale0</a> (int lane, uint8_t <a class="el" href="#a060678fc5a4cf518e155ed3a6145b8d4">scale</a>)</td></tr>
+<tr class="memdesc:a5ed1cdb992788946f8aa585e014491fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a6c5dff0bd5be54ed5cdc8edb05d3ee2d" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>  <br /></td></tr>
+<tr class="separator:a5ed1cdb992788946f8aa585e014491fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb4a76e70b987649e50290f68648e9d6" id="r_acb4a76e70b987649e50290f68648e9d6"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb4a76e70b987649e50290f68648e9d6">stepAdvanceAndLoadAndScale0</a> (int lane, uint8_t <a class="el" href="#a060678fc5a4cf518e155ed3a6145b8d4">scale</a>)</td></tr>
+<tr class="memdesc:acb4a76e70b987649e50290f68648e9d6"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#aa6a77bc5cd442a95a4f36b3c39d09f6e" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>  <br /></td></tr>
+<tr class="separator:acb4a76e70b987649e50290f68648e9d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a007d808b1aa8a8ea456ace5b9a8d7d69" id="r_a007d808b1aa8a8ea456ace5b9a8d7d69"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a007d808b1aa8a8ea456ace5b9a8d7d69">loadAndScale0</a> (int lane)</td></tr>
+<tr class="memdesc:a007d808b1aa8a8ea456ace5b9a8d7d69"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>     <br /></td></tr>
+<tr class="separator:a007d808b1aa8a8ea456ace5b9a8d7d69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cd4db2b559aa2f61b61bccfbe8a978b" id="r_a2cd4db2b559aa2f61b61bccfbe8a978b"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2cd4db2b559aa2f61b61bccfbe8a978b">loadAndScale1</a> (int lane)</td></tr>
+<tr class="memdesc:a2cd4db2b559aa2f61b61bccfbe8a978b"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>     <br /></td></tr>
+<tr class="separator:a2cd4db2b559aa2f61b61bccfbe8a978b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4688b73eef22022b80df81e4f6c22b49" id="r_a4688b73eef22022b80df81e4f6c22b49"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4688b73eef22022b80df81e4f6c22b49">loadAndScale2</a> (int lane)</td></tr>
+<tr class="memdesc:a4688b73eef22022b80df81e4f6c22b49"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>     <br /></td></tr>
+<tr class="separator:a4688b73eef22022b80df81e4f6c22b49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b3aad7f0649ea0d87e2ac243a6ede89" id="r_a9b3aad7f0649ea0d87e2ac243a6ede89"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9b3aad7f0649ea0d87e2ac243a6ede89">advanceAndLoadAndScale0</a> (int lane)</td></tr>
+<tr class="memdesc:a9b3aad7f0649ea0d87e2ac243a6ede89"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a6c5dff0bd5be54ed5cdc8edb05d3ee2d" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>     <br /></td></tr>
+<tr class="separator:a9b3aad7f0649ea0d87e2ac243a6ede89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fd9d16856c759d9fe45025464eae1de" id="r_a1fd9d16856c759d9fe45025464eae1de"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1fd9d16856c759d9fe45025464eae1de">stepAdvanceAndLoadAndScale0</a> (int lane)</td></tr>
+<tr class="memdesc:a1fd9d16856c759d9fe45025464eae1de"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#aa6a77bc5cd442a95a4f36b3c39d09f6e" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>     <br /></td></tr>
+<tr class="separator:a1fd9d16856c759d9fe45025464eae1de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4afe8b8ec93c89308fe185b1eb164ff6" id="r_a4afe8b8ec93c89308fe185b1eb164ff6"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4afe8b8ec93c89308fe185b1eb164ff6">loadAndScale0</a> ()</td></tr>
+<tr class="memdesc:a4afe8b8ec93c89308fe185b1eb164ff6"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>     <br /></td></tr>
+<tr class="separator:a4afe8b8ec93c89308fe185b1eb164ff6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae570967d1b674970cf472feb379f248f" id="r_ae570967d1b674970cf472feb379f248f"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae570967d1b674970cf472feb379f248f">loadAndScale1</a> ()</td></tr>
+<tr class="memdesc:ae570967d1b674970cf472feb379f248f"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>     <br /></td></tr>
+<tr class="separator:ae570967d1b674970cf472feb379f248f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5a5f12205a4187aa4df499b8224ed35" id="r_af5a5f12205a4187aa4df499b8224ed35"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5a5f12205a4187aa4df499b8224ed35">loadAndScale2</a> ()</td></tr>
+<tr class="memdesc:af5a5f12205a4187aa4df499b8224ed35"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>     <br /></td></tr>
+<tr class="separator:af5a5f12205a4187aa4df499b8224ed35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6a77bc5cd442a95a4f36b3c39d09f6e" id="r_aa6a77bc5cd442a95a4f36b3c39d09f6e"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa6a77bc5cd442a95a4f36b3c39d09f6e">advanceAndLoadAndScale0</a> ()</td></tr>
+<tr class="memdesc:aa6a77bc5cd442a95a4f36b3c39d09f6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a6c5dff0bd5be54ed5cdc8edb05d3ee2d" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>     <br /></td></tr>
+<tr class="separator:aa6a77bc5cd442a95a4f36b3c39d09f6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b169100513e0e2fe996401a8f653688" id="r_a0b169100513e0e2fe996401a8f653688"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0b169100513e0e2fe996401a8f653688">stepAdvanceAndLoadAndScale0</a> ()</td></tr>
+<tr class="memdesc:a0b169100513e0e2fe996401a8f653688"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#aa6a77bc5cd442a95a4f36b3c39d09f6e" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>     <br /></td></tr>
+<tr class="separator:a0b169100513e0e2fe996401a8f653688"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a320fa30e08b30b14bf81dfde27c5b971" id="r_a320fa30e08b30b14bf81dfde27c5b971"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a320fa30e08b30b14bf81dfde27c5b971">getScale0</a> ()</td></tr>
+<tr class="memdesc:a320fa30e08b30b14bf81dfde27c5b971"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a9d1ddf7aa7b8e5a3896a898911f0a6cd" title="Gets the scale data for the provided output slot.">getscale&lt;0&gt;()</a>  <br /></td></tr>
+<tr class="separator:a320fa30e08b30b14bf81dfde27c5b971"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec2cbf1845d2343e2e7b840f36d0bbe7" id="r_aec2cbf1845d2343e2e7b840f36d0bbe7"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec2cbf1845d2343e2e7b840f36d0bbe7">getScale1</a> ()</td></tr>
+<tr class="memdesc:aec2cbf1845d2343e2e7b840f36d0bbe7"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a9d1ddf7aa7b8e5a3896a898911f0a6cd" title="Gets the scale data for the provided output slot.">getscale&lt;1&gt;()</a>  <br /></td></tr>
+<tr class="separator:aec2cbf1845d2343e2e7b840f36d0bbe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ac29f180ad5429301cb6e3ac3966616" id="r_a6ac29f180ad5429301cb6e3ac3966616"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6ac29f180ad5429301cb6e3ac3966616">getScale2</a> ()</td></tr>
+<tr class="memdesc:a6ac29f180ad5429301cb6e3ac3966616"><td class="mdescLeft">&#160;</td><td class="mdescRight">non-template alias of <a class="el" href="#a9d1ddf7aa7b8e5a3896a898911f0a6cd" title="Gets the scale data for the provided output slot.">getscale&lt;2&gt;()</a>  <br /></td></tr>
+<tr class="separator:a6ac29f180ad5429301cb6e3ac3966616"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac82ddeb3ea556e723776377c03e48a28" id="r_ac82ddeb3ea556e723776377c03e48a28"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac82ddeb3ea556e723776377c03e48a28">loadAndScaleRGB</a> (uint8_t *b0, uint8_t *b1, uint8_t *b2)</td></tr>
+<tr class="separator:ac82ddeb3ea556e723776377c03e48a28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c725f2e21a98b3ea700947e4dccbfc2" id="r_a4c725f2e21a98b3ea700947e4dccbfc2"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4c725f2e21a98b3ea700947e4dccbfc2">loadAndScaleRGBW</a> (RGBW_MODE rgbw_mode, uint16_t white_color_temp, uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *w_out)</td></tr>
+<tr class="memdesc:a4c725f2e21a98b3ea700947e4dccbfc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates RGBW pixel information.  <br /></td></tr>
+<tr class="separator:a4c725f2e21a98b3ea700947e4dccbfc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9c593c24a59398d7d825a0ac09221e7" id="r_aa9c593c24a59398d7d825a0ac09221e7"><td class="memTemplParams" colspan="2">template&lt;RGBW_MODE MODE&gt; </td></tr>
+<tr class="memitem:aa9c593c24a59398d7d825a0ac09221e7"><td class="memTemplItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#aa9c593c24a59398d7d825a0ac09221e7">loadAndScaleRGBW</a> (uint16_t white_color_temp, uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *w_out)</td></tr>
+<tr class="separator:aa9c593c24a59398d7d825a0ac09221e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07853a147d535144f71b3f2640f4b0d5" id="r_a07853a147d535144f71b3f2640f4b0d5"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a07853a147d535144f71b3f2640f4b0d5">loadAndScale_APA102_HD</a> (uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *brightness_out)</td></tr>
+<tr class="separator:a07853a147d535144f71b3f2640f4b0d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr><td colspan="2"><div class="groupHeader">Template'd static functions for output</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>These functions are used for retrieving LED data for the LED chipset output controllers. </p>
 </div></td></tr>
-<tr class="memitem:afad1c6a10f81bab5c48043fb2e423e00" id="r_afad1c6a10f81bab5c48043fb2e423e00"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:afad1c6a10f81bab5c48043fb2e423e00"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#afad1c6a10f81bab5c48043fb2e423e00">loadByte</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
-<tr class="memdesc:afad1c6a10f81bab5c48043fb2e423e00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a byte of LED data.  <br /></td></tr>
-<tr class="separator:afad1c6a10f81bab5c48043fb2e423e00"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac851ee73f439bcd54f1408c4c89ba376" id="r_ac851ee73f439bcd54f1408c4c89ba376"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:ac851ee73f439bcd54f1408c4c89ba376"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#ac851ee73f439bcd54f1408c4c89ba376">loadByte</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane)</td></tr>
-<tr class="memdesc:ac851ee73f439bcd54f1408c4c89ba376"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a byte of LED data for parallel output.  <br /></td></tr>
-<tr class="separator:ac851ee73f439bcd54f1408c4c89ba376"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d0e72424236664698ee67f705af9640" id="r_a1d0e72424236664698ee67f705af9640"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a1d0e72424236664698ee67f705af9640"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a1d0e72424236664698ee67f705af9640">dither</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, uint8_t b)</td></tr>
-<tr class="memdesc:a1d0e72424236664698ee67f705af9640"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate a dither value using the per-channel dither data.  <br /></td></tr>
-<tr class="separator:a1d0e72424236664698ee67f705af9640"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7291c2154b69b6a5f206ce147eeb3df4" id="r_a7291c2154b69b6a5f206ce147eeb3df4"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a7291c2154b69b6a5f206ce147eeb3df4"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a7291c2154b69b6a5f206ce147eeb3df4">dither</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;, uint8_t b, uint8_t <a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>)</td></tr>
-<tr class="memdesc:a7291c2154b69b6a5f206ce147eeb3df4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate a dither value.  <br /></td></tr>
-<tr class="separator:a7291c2154b69b6a5f206ce147eeb3df4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc7c6fc40ee625cfb76187079aedd7c5" id="r_abc7c6fc40ee625cfb76187079aedd7c5"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:abc7c6fc40ee625cfb76187079aedd7c5"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#abc7c6fc40ee625cfb76187079aedd7c5">scale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, uint8_t b)</td></tr>
-<tr class="memdesc:abc7c6fc40ee625cfb76187079aedd7c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale a value using the per-channel scale data.  <br /></td></tr>
-<tr class="separator:abc7c6fc40ee625cfb76187079aedd7c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a39c471ab18f0890564b513a0589b4f6b" id="r_a39c471ab18f0890564b513a0589b4f6b"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a39c471ab18f0890564b513a0589b4f6b"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a39c471ab18f0890564b513a0589b4f6b">scale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;, uint8_t b, uint8_t scale)</td></tr>
-<tr class="memdesc:a39c471ab18f0890564b513a0589b4f6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale a value.  <br /></td></tr>
-<tr class="separator:a39c471ab18f0890564b513a0589b4f6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75ef76fbecdc9b39b01eeab216845d9d" id="r_a75ef76fbecdc9b39b01eeab216845d9d"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a75ef76fbecdc9b39b01eeab216845d9d"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a75ef76fbecdc9b39b01eeab216845d9d">loadByte</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="memdesc:a75ef76fbecdc9b39b01eeab216845d9d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a byte of LED data.  <br /></td></tr>
+<tr class="separator:a75ef76fbecdc9b39b01eeab216845d9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af18d90ea43599f9135cea2b60ccc5065" id="r_af18d90ea43599f9135cea2b60ccc5065"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:af18d90ea43599f9135cea2b60ccc5065"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#af18d90ea43599f9135cea2b60ccc5065">loadByte</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane)</td></tr>
+<tr class="memdesc:af18d90ea43599f9135cea2b60ccc5065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read a byte of LED data for parallel output.  <br /></td></tr>
+<tr class="separator:af18d90ea43599f9135cea2b60ccc5065"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2a1b38058a62a4337605425e482202f" id="r_aa2a1b38058a62a4337605425e482202f"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:aa2a1b38058a62a4337605425e482202f"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#aa2a1b38058a62a4337605425e482202f">dither</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, uint8_t b)</td></tr>
+<tr class="memdesc:aa2a1b38058a62a4337605425e482202f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate a dither value using the per-channel dither data.  <br /></td></tr>
+<tr class="separator:aa2a1b38058a62a4337605425e482202f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f94a8f75b316b2a289283b3ee53ad5d" id="r_a9f94a8f75b316b2a289283b3ee53ad5d"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a9f94a8f75b316b2a289283b3ee53ad5d"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a9f94a8f75b316b2a289283b3ee53ad5d">dither</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;, uint8_t b, uint8_t <a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>)</td></tr>
+<tr class="memdesc:a9f94a8f75b316b2a289283b3ee53ad5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate a dither value.  <br /></td></tr>
+<tr class="separator:a9f94a8f75b316b2a289283b3ee53ad5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a060678fc5a4cf518e155ed3a6145b8d4" id="r_a060678fc5a4cf518e155ed3a6145b8d4"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a060678fc5a4cf518e155ed3a6145b8d4"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a060678fc5a4cf518e155ed3a6145b8d4">scale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, uint8_t b)</td></tr>
+<tr class="memdesc:a060678fc5a4cf518e155ed3a6145b8d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale a value using the per-channel scale data.  <br /></td></tr>
+<tr class="separator:a060678fc5a4cf518e155ed3a6145b8d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad6f8ce8a3aa9429025e67050e312929" id="r_aad6f8ce8a3aa9429025e67050e312929"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:aad6f8ce8a3aa9429025e67050e312929"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#aad6f8ce8a3aa9429025e67050e312929">scale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;, uint8_t b, uint8_t scale)</td></tr>
+<tr class="memdesc:aad6f8ce8a3aa9429025e67050e312929"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale a value.  <br /></td></tr>
+<tr class="separator:aad6f8ce8a3aa9429025e67050e312929"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Composite shortcut functions for loading, dithering, and scaling</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>These composite functions will load color data, dither it, and scale it all at once so that it's ready for the output controller to send to the LEDs. </p>
 </div></td></tr>
-<tr class="memitem:a8d1f19955187d5d98147f8a7153e3d79" id="r_a8d1f19955187d5d98147f8a7153e3d79"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a8d1f19955187d5d98147f8a7153e3d79"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79">loadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
-<tr class="memdesc:a8d1f19955187d5d98147f8a7153e3d79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values.  <br /></td></tr>
-<tr class="separator:a8d1f19955187d5d98147f8a7153e3d79"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc4d5acdb027930f3c0fce93262aef26" id="r_adc4d5acdb027930f3c0fce93262aef26"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:adc4d5acdb027930f3c0fce93262aef26"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#adc4d5acdb027930f3c0fce93262aef26">loadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane)</td></tr>
-<tr class="memdesc:adc4d5acdb027930f3c0fce93262aef26"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads, dithers, and scales a single byte for a given output slot and lane, using class dither and scale values.  <br /></td></tr>
-<tr class="separator:adc4d5acdb027930f3c0fce93262aef26"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a697676a264496d55739605bf079ef1b4" id="r_a697676a264496d55739605bf079ef1b4"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a697676a264496d55739605bf079ef1b4"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a697676a264496d55739605bf079ef1b4">loadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane, uint8_t <a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>, uint8_t <a class="el" href="#abc7c6fc40ee625cfb76187079aedd7c5">scale</a>)</td></tr>
-<tr class="memdesc:a697676a264496d55739605bf079ef1b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads, dithers, and scales a single byte for a given output slot and lane.  <br /></td></tr>
-<tr class="separator:a697676a264496d55739605bf079ef1b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f3ac392503acdad30e24c01696c53b8" id="r_a7f3ac392503acdad30e24c01696c53b8"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a7f3ac392503acdad30e24c01696c53b8"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a7f3ac392503acdad30e24c01696c53b8">loadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane, uint8_t <a class="el" href="#abc7c6fc40ee625cfb76187079aedd7c5">scale</a>)</td></tr>
-<tr class="memdesc:a7f3ac392503acdad30e24c01696c53b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads and scales a single byte for a given output slot and lane.  <br /></td></tr>
-<tr class="separator:a7f3ac392503acdad30e24c01696c53b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36c71bec08f0a73b06261f8bc887a54a" id="r_a36c71bec08f0a73b06261f8bc887a54a"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a36c71bec08f0a73b06261f8bc887a54a"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a36c71bec08f0a73b06261f8bc887a54a">advanceAndLoadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
-<tr class="memdesc:a36c71bec08f0a73b06261f8bc887a54a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A version of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer.  <br /></td></tr>
-<tr class="separator:a36c71bec08f0a73b06261f8bc887a54a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7e42d1ba943dd99923969c0f3698cf0a" id="r_a7e42d1ba943dd99923969c0f3698cf0a"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a7e42d1ba943dd99923969c0f3698cf0a"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a7e42d1ba943dd99923969c0f3698cf0a">advanceAndLoadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane)</td></tr>
-<tr class="memdesc:a7e42d1ba943dd99923969c0f3698cf0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A version of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer.  <br /></td></tr>
-<tr class="separator:a7e42d1ba943dd99923969c0f3698cf0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0b318a57978e8290fdb176fb5351b67" id="r_af0b318a57978e8290fdb176fb5351b67"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:af0b318a57978e8290fdb176fb5351b67"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#af0b318a57978e8290fdb176fb5351b67">advanceAndLoadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane, uint8_t <a class="el" href="#abc7c6fc40ee625cfb76187079aedd7c5">scale</a>)</td></tr>
-<tr class="memdesc:af0b318a57978e8290fdb176fb5351b67"><td class="mdescLeft">&#160;</td><td class="mdescRight">A version of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer without dithering.  <br /></td></tr>
-<tr class="separator:af0b318a57978e8290fdb176fb5351b67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56fc5e5bf305e1760198c0a69ac85ff9" id="r_a56fc5e5bf305e1760198c0a69ac85ff9"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a56fc5e5bf305e1760198c0a69ac85ff9"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9">loadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="memdesc:a56fc5e5bf305e1760198c0a69ac85ff9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values.  <br /></td></tr>
+<tr class="separator:a56fc5e5bf305e1760198c0a69ac85ff9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73553caa10abdb91e454a27456fc14e5" id="r_a73553caa10abdb91e454a27456fc14e5"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a73553caa10abdb91e454a27456fc14e5"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a73553caa10abdb91e454a27456fc14e5">loadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane)</td></tr>
+<tr class="memdesc:a73553caa10abdb91e454a27456fc14e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads, dithers, and scales a single byte for a given output slot and lane, using class dither and scale values.  <br /></td></tr>
+<tr class="separator:a73553caa10abdb91e454a27456fc14e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f2b0c051d473813018715f1621ea259" id="r_a7f2b0c051d473813018715f1621ea259"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a7f2b0c051d473813018715f1621ea259"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a7f2b0c051d473813018715f1621ea259">loadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane, uint8_t <a class="el" href="#a576c3a3eac363fb83e475e142bbe586d">d</a>, uint8_t <a class="el" href="#a060678fc5a4cf518e155ed3a6145b8d4">scale</a>)</td></tr>
+<tr class="memdesc:a7f2b0c051d473813018715f1621ea259"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads, dithers, and scales a single byte for a given output slot and lane.  <br /></td></tr>
+<tr class="separator:a7f2b0c051d473813018715f1621ea259"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2096cee6b377960ef21fbda622f08994" id="r_a2096cee6b377960ef21fbda622f08994"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a2096cee6b377960ef21fbda622f08994"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a2096cee6b377960ef21fbda622f08994">loadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane, uint8_t <a class="el" href="#a060678fc5a4cf518e155ed3a6145b8d4">scale</a>)</td></tr>
+<tr class="memdesc:a2096cee6b377960ef21fbda622f08994"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads and scales a single byte for a given output slot and lane.  <br /></td></tr>
+<tr class="separator:a2096cee6b377960ef21fbda622f08994"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c5dff0bd5be54ed5cdc8edb05d3ee2d" id="r_a6c5dff0bd5be54ed5cdc8edb05d3ee2d"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a6c5dff0bd5be54ed5cdc8edb05d3ee2d"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a6c5dff0bd5be54ed5cdc8edb05d3ee2d">advanceAndLoadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="memdesc:a6c5dff0bd5be54ed5cdc8edb05d3ee2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A version of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer.  <br /></td></tr>
+<tr class="separator:a6c5dff0bd5be54ed5cdc8edb05d3ee2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebc10b48403a00eb03bdb9e07e09f183" id="r_aebc10b48403a00eb03bdb9e07e09f183"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:aebc10b48403a00eb03bdb9e07e09f183"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#aebc10b48403a00eb03bdb9e07e09f183">advanceAndLoadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane)</td></tr>
+<tr class="memdesc:aebc10b48403a00eb03bdb9e07e09f183"><td class="mdescLeft">&#160;</td><td class="mdescRight">A version of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer.  <br /></td></tr>
+<tr class="separator:aebc10b48403a00eb03bdb9e07e09f183"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b2c3f0de852388e61d6b788d24f1ede" id="r_a7b2c3f0de852388e61d6b788d24f1ede"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a7b2c3f0de852388e61d6b788d24f1ede"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a7b2c3f0de852388e61d6b788d24f1ede">advanceAndLoadAndScale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc, int lane, uint8_t <a class="el" href="#a060678fc5a4cf518e155ed3a6145b8d4">scale</a>)</td></tr>
+<tr class="memdesc:a7b2c3f0de852388e61d6b788d24f1ede"><td class="mdescLeft">&#160;</td><td class="mdescRight">A version of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer without dithering.  <br /></td></tr>
+<tr class="separator:a7b2c3f0de852388e61d6b788d24f1ede"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Data retrieval functions</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>These functions retrieve channel-specific data from the class, arranged in output order. </p>
 </div></td></tr>
-<tr class="memitem:adb6b26bc719c49c49a3ae1fe6aa8d13c" id="r_adb6b26bc719c49c49a3ae1fe6aa8d13c"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:adb6b26bc719c49c49a3ae1fe6aa8d13c"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#adb6b26bc719c49c49a3ae1fe6aa8d13c">getd</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
-<tr class="memdesc:adb6b26bc719c49c49a3ae1fe6aa8d13c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the dithering data for the provided output slot.  <br /></td></tr>
-<tr class="separator:adb6b26bc719c49c49a3ae1fe6aa8d13c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36ef0c42fb8109c8da9a1f37812e176e" id="r_a36ef0c42fb8109c8da9a1f37812e176e"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
-<tr class="memitem:a36ef0c42fb8109c8da9a1f37812e176e"><td class="memTemplItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a36ef0c42fb8109c8da9a1f37812e176e">getscale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
-<tr class="memdesc:a36ef0c42fb8109c8da9a1f37812e176e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the scale data for the provided output slot.  <br /></td></tr>
-<tr class="separator:a36ef0c42fb8109c8da9a1f37812e176e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a894fa569a9ee8a3b58dd3cbf37ea727f" id="r_a894fa569a9ee8a3b58dd3cbf37ea727f"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a894fa569a9ee8a3b58dd3cbf37ea727f"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a894fa569a9ee8a3b58dd3cbf37ea727f">getd</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="memdesc:a894fa569a9ee8a3b58dd3cbf37ea727f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the dithering data for the provided output slot.  <br /></td></tr>
+<tr class="separator:a894fa569a9ee8a3b58dd3cbf37ea727f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d1ddf7aa7b8e5a3896a898911f0a6cd" id="r_a9d1ddf7aa7b8e5a3896a898911f0a6cd"><td class="memTemplParams" colspan="2">template&lt;int SLOT&gt; </td></tr>
+<tr class="memitem:a9d1ddf7aa7b8e5a3896a898911f0a6cd"><td class="memTemplItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a9d1ddf7aa7b8e5a3896a898911f0a6cd">getscale</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a> &amp;pc)</td></tr>
+<tr class="memdesc:a9d1ddf7aa7b8e5a3896a898911f0a6cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the scale data for the provided output slot.  <br /></td></tr>
+<tr class="separator:a9d1ddf7aa7b8e5a3896a898911f0a6cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -360,7 +370,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00286">286</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00299">299</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -426,7 +436,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00317">317</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00330">330</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -480,7 +490,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00329">329</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00345">345</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -534,13 +544,13 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00340">340</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00359">359</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a36c71bec08f0a73b06261f8bc887a54a" name="a36c71bec08f0a73b06261f8bc887a54a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36c71bec08f0a73b06261f8bc887a54a">&#9670;&#160;</a></span>advanceAndLoadAndScale() <span class="overload">[1/3]</span></h2>
+<a id="a6c5dff0bd5be54ed5cdc8edb05d3ee2d" name="a6c5dff0bd5be54ed5cdc8edb05d3ee2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c5dff0bd5be54ed5cdc8edb05d3ee2d">&#9670;&#160;</a></span>advanceAndLoadAndScale() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -553,7 +563,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span></td><td>)</td>
           <td></td>
@@ -566,7 +576,7 @@ template&lt;int SLOT&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>A version of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer. </p>
+<p>A version of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pc</td><td>reference to the pixel controller </td></tr>
@@ -574,12 +584,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00563">563</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00584">584</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a7e42d1ba943dd99923969c0f3698cf0a" name="a7e42d1ba943dd99923969c0f3698cf0a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7e42d1ba943dd99923969c0f3698cf0a">&#9670;&#160;</a></span>advanceAndLoadAndScale() <span class="overload">[2/3]</span></h2>
+<a id="aebc10b48403a00eb03bdb9e07e09f183" name="aebc10b48403a00eb03bdb9e07e09f183"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aebc10b48403a00eb03bdb9e07e09f183">&#9670;&#160;</a></span>advanceAndLoadAndScale() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -592,7 +602,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span>, </td>
         </tr>
@@ -609,7 +619,7 @@ template&lt;int SLOT&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>A version of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer. </p>
+<p>A version of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pc</td><td>reference to the pixel controller </td></tr>
@@ -618,12 +628,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00568">568</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00589">589</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="af0b318a57978e8290fdb176fb5351b67" name="af0b318a57978e8290fdb176fb5351b67"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af0b318a57978e8290fdb176fb5351b67">&#9670;&#160;</a></span>advanceAndLoadAndScale() <span class="overload">[3/3]</span></h2>
+<a id="a7b2c3f0de852388e61d6b788d24f1ede" name="a7b2c3f0de852388e61d6b788d24f1ede"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b2c3f0de852388e61d6b788d24f1ede">&#9670;&#160;</a></span>advanceAndLoadAndScale() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -636,7 +646,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span>, </td>
         </tr>
@@ -658,7 +668,7 @@ template&lt;int SLOT&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>A version of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer without dithering. </p>
+<p>A version of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale()</a> that advances the output data pointer without dithering. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pc</td><td>reference to the pixel controller </td></tr>
@@ -668,12 +678,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00574">574</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00595">595</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="ad97f1374042069db95526097244643b0" name="ad97f1374042069db95526097244643b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad97f1374042069db95526097244643b0">&#9670;&#160;</a></span>advanceAndLoadAndScale0() <span class="overload">[1/3]</span></h2>
+<a id="aa6a77bc5cd442a95a4f36b3c39d09f6e" name="aa6a77bc5cd442a95a4f36b3c39d09f6e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa6a77bc5cd442a95a4f36b3c39d09f6e">&#9670;&#160;</a></span>advanceAndLoadAndScale0() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -684,7 +694,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale0 </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -697,14 +707,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a36c71bec08f0a73b06261f8bc887a54a" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>    </p>
+<p>non-template alias of <a class="el" href="#a6c5dff0bd5be54ed5cdc8edb05d3ee2d" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00619">619</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00642">642</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="aad5a2b1d8b408ed18ef33f412968da3f" name="aad5a2b1d8b408ed18ef33f412968da3f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad5a2b1d8b408ed18ef33f412968da3f">&#9670;&#160;</a></span>advanceAndLoadAndScale0() <span class="overload">[2/3]</span></h2>
+<a id="a9b3aad7f0649ea0d87e2ac243a6ede89" name="a9b3aad7f0649ea0d87e2ac243a6ede89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b3aad7f0649ea0d87e2ac243a6ede89">&#9670;&#160;</a></span>advanceAndLoadAndScale0() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -715,7 +725,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale0 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span></td><td>)</td>
           <td></td>
@@ -728,14 +738,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a36c71bec08f0a73b06261f8bc887a54a" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>    </p>
+<p>non-template alias of <a class="el" href="#a6c5dff0bd5be54ed5cdc8edb05d3ee2d" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00613">613</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00634">634</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="aedb31ca042693e2c6959a2f1042c0e8a" name="aedb31ca042693e2c6959a2f1042c0e8a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aedb31ca042693e2c6959a2f1042c0e8a">&#9670;&#160;</a></span>advanceAndLoadAndScale0() <span class="overload">[3/3]</span></h2>
+<a id="a5ed1cdb992788946f8aa585e014491fa" name="a5ed1cdb992788946f8aa585e014491fa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5ed1cdb992788946f8aa585e014491fa">&#9670;&#160;</a></span>advanceAndLoadAndScale0() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -746,7 +756,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceAndLoadAndScale0 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span>, </td>
         </tr>
@@ -763,14 +773,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a36c71bec08f0a73b06261f8bc887a54a" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a> </p>
+<p>non-template alias of <a class="el" href="#a6c5dff0bd5be54ed5cdc8edb05d3ee2d" title="A version of loadAndScale() that advances the output data pointer.">advanceAndLoadAndScale&lt;0&gt;()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00607">607</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00628">628</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="ac3116551b7d69675bbd4aaaac57005f1" name="ac3116551b7d69675bbd4aaaac57005f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac3116551b7d69675bbd4aaaac57005f1">&#9670;&#160;</a></span>advanceBy()</h2>
+<a id="a4f02d52fbcd108b1b7e8110dac23c0b9" name="a4f02d52fbcd108b1b7e8110dac23c0b9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4f02d52fbcd108b1b7e8110dac23c0b9">&#9670;&#160;</a></span>advanceBy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -781,7 +791,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceBy </td>
+          <td class="memname">FASTLED_FORCE_INLINE int <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceBy </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -797,12 +807,12 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 <p>Get the amount to advance the pointer by. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="#a0f4eb594a337bc3a739e65b2a1e5c401" title="how many bytes to advance the pointer by each time. For CRGB this is 3.">PixelController::mAdvance</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00469">469</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00490">490</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a64e13d27e73a7a056a251e4b09295c44" name="a64e13d27e73a7a056a251e4b09295c44"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a64e13d27e73a7a056a251e4b09295c44">&#9670;&#160;</a></span>advanceData()</h2>
+<a id="ab44f62f166d162bd1e3b095b368feef2" name="ab44f62f166d162bd1e3b095b368feef2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab44f62f166d162bd1e3b095b368feef2">&#9670;&#160;</a></span>advanceData()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -813,7 +823,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceData </td>
+          <td class="memname">FASTLED_FORCE_INLINE void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::advanceData </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -828,12 +838,12 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 
 <p>Advance the data pointer forward, adjust position counter. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00472">472</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00493">493</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a7291c2154b69b6a5f206ce147eeb3df4" name="a7291c2154b69b6a5f206ce147eeb3df4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7291c2154b69b6a5f206ce147eeb3df4">&#9670;&#160;</a></span>dither() <span class="overload">[1/2]</span></h2>
+<a id="a9f94a8f75b316b2a289283b3ee53ad5d" name="a9f94a8f75b316b2a289283b3ee53ad5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9f94a8f75b316b2a289283b3ee53ad5d">&#9670;&#160;</a></span>dither() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -846,7 +856,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::dither </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::dither </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
         </tr>
@@ -883,12 +893,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00513">513</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00534">534</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a1d0e72424236664698ee67f705af9640" name="a1d0e72424236664698ee67f705af9640"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d0e72424236664698ee67f705af9640">&#9670;&#160;</a></span>dither() <span class="overload">[2/2]</span></h2>
+<a id="aa2a1b38058a62a4337605425e482202f" name="aa2a1b38058a62a4337605425e482202f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2a1b38058a62a4337605425e482202f">&#9670;&#160;</a></span>dither() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -901,7 +911,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::dither </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::dither </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span>, </td>
         </tr>
@@ -934,7 +944,7 @@ template&lt;int SLOT&gt; </div>
 </dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a576c3a3eac363fb83e475e142bbe586d" title="values for the scaled dither signal">PixelController::d</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00508">508</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00529">529</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -971,12 +981,12 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00452">452</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00473">473</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="adb6b26bc719c49c49a3ae1fe6aa8d13c" name="adb6b26bc719c49c49a3ae1fe6aa8d13c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adb6b26bc719c49c49a3ae1fe6aa8d13c">&#9670;&#160;</a></span>getd()</h2>
+<a id="a894fa569a9ee8a3b58dd3cbf37ea727f" name="a894fa569a9ee8a3b58dd3cbf37ea727f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a894fa569a9ee8a3b58dd3cbf37ea727f">&#9670;&#160;</a></span>getd()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -989,7 +999,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getd </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getd </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span></td><td>)</td>
           <td></td>
@@ -1018,12 +1028,12 @@ template&lt;int SLOT&gt; </div>
 <dl class="section return"><dt>Returns</dt><dd>dithering data for the given channel </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a576c3a3eac363fb83e475e142bbe586d" title="values for the scaled dither signal">PixelController::d</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00589">589</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00610">610</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a36ef0c42fb8109c8da9a1f37812e176e" name="a36ef0c42fb8109c8da9a1f37812e176e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36ef0c42fb8109c8da9a1f37812e176e">&#9670;&#160;</a></span>getscale()</h2>
+<a id="a9d1ddf7aa7b8e5a3896a898911f0a6cd" name="a9d1ddf7aa7b8e5a3896a898911f0a6cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d1ddf7aa7b8e5a3896a898911f0a6cd">&#9670;&#160;</a></span>getscale()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1036,7 +1046,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getscale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getscale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span></td><td>)</td>
           <td></td>
@@ -1065,12 +1075,12 @@ template&lt;int SLOT&gt; </div>
 <dl class="section return"><dt>Returns</dt><dd>scale data for the given channel </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a9c8fa28fd867a4048796b4f88146d332" title="the per-channel scale values, provided by a color correction function such as CLEDController::compute...">PixelController::mScale</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00596">596</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00617">617</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a70d40736e4fb2cb8f70d14a50f5eb339" name="a70d40736e4fb2cb8f70d14a50f5eb339"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a70d40736e4fb2cb8f70d14a50f5eb339">&#9670;&#160;</a></span>getScale0()</h2>
+<a id="a320fa30e08b30b14bf81dfde27c5b971" name="a320fa30e08b30b14bf81dfde27c5b971"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a320fa30e08b30b14bf81dfde27c5b971">&#9670;&#160;</a></span>getScale0()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1081,7 +1091,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getScale0 </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -1094,14 +1104,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a36ef0c42fb8109c8da9a1f37812e176e" title="Gets the scale data for the provided output slot.">getscale&lt;0&gt;()</a> </p>
+<p>non-template alias of <a class="el" href="#a9d1ddf7aa7b8e5a3896a898911f0a6cd" title="Gets the scale data for the provided output slot.">getscale&lt;0&gt;()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00622">622</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00645">645</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a1031647981c3e18d4b432204bdcd1de7" name="a1031647981c3e18d4b432204bdcd1de7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1031647981c3e18d4b432204bdcd1de7">&#9670;&#160;</a></span>getScale1()</h2>
+<a id="aec2cbf1845d2343e2e7b840f36d0bbe7" name="aec2cbf1845d2343e2e7b840f36d0bbe7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec2cbf1845d2343e2e7b840f36d0bbe7">&#9670;&#160;</a></span>getScale1()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1112,7 +1122,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getScale1 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getScale1 </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -1125,14 +1135,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a36ef0c42fb8109c8da9a1f37812e176e" title="Gets the scale data for the provided output slot.">getscale&lt;1&gt;()</a> </p>
+<p>non-template alias of <a class="el" href="#a9d1ddf7aa7b8e5a3896a898911f0a6cd" title="Gets the scale data for the provided output slot.">getscale&lt;1&gt;()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00623">623</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00646">646</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="ae09de2dd8c96888d5e3c53257ad5a003" name="ae09de2dd8c96888d5e3c53257ad5a003"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae09de2dd8c96888d5e3c53257ad5a003">&#9670;&#160;</a></span>getScale2()</h2>
+<a id="a6ac29f180ad5429301cb6e3ac3966616" name="a6ac29f180ad5429301cb6e3ac3966616"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6ac29f180ad5429301cb6e3ac3966616">&#9670;&#160;</a></span>getScale2()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1143,7 +1153,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getScale2 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::getScale2 </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -1156,14 +1166,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a36ef0c42fb8109c8da9a1f37812e176e" title="Gets the scale data for the provided output slot.">getscale&lt;2&gt;()</a> </p>
+<p>non-template alias of <a class="el" href="#a9d1ddf7aa7b8e5a3896a898911f0a6cd" title="Gets the scale data for the provided output slot.">getscale&lt;2&gt;()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00624">624</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00647">647</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="aeb6c796bf7def8f0e330f57776a2edd0" name="aeb6c796bf7def8f0e330f57776a2edd0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeb6c796bf7def8f0e330f57776a2edd0">&#9670;&#160;</a></span>has()</h2>
+<a id="ac13f3e00855fcf6125ea27543c2fb48c" name="ac13f3e00855fcf6125ea27543c2fb48c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac13f3e00855fcf6125ea27543c2fb48c">&#9670;&#160;</a></span>has()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1174,7 +1184,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::has </td>
+          <td class="memname">FASTLED_FORCE_INLINE bool <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::has </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
           <td></td>
@@ -1196,7 +1206,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>'true' if there are more than n pixels left to process </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00443">443</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00464">464</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -1227,7 +1237,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 
 <p>Set up the values for binary dithering. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00387">387</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00408">408</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -1264,12 +1274,12 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00302">302</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00315">315</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="ab8f4596b8c7d6f5e2300fb7dbca458f2" name="ab8f4596b8c7d6f5e2300fb7dbca458f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab8f4596b8c7d6f5e2300fb7dbca458f2">&#9670;&#160;</a></span>lanes()</h2>
+<a id="a5774d9ac88ededea49f5eec4b9772361" name="a5774d9ac88ededea49f5eec4b9772361"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5774d9ac88ededea49f5eec4b9772361">&#9670;&#160;</a></span>lanes()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1280,7 +1290,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::lanes </td>
+          <td class="memname">FASTLED_FORCE_INLINE int <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::lanes </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -1296,12 +1306,12 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 <p>Get the number of lanes of the Controller. </p>
 <dl class="section return"><dt>Returns</dt><dd>LANES from template </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00465">465</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00486">486</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a8d1f19955187d5d98147f8a7153e3d79" name="a8d1f19955187d5d98147f8a7153e3d79"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d1f19955187d5d98147f8a7153e3d79">&#9670;&#160;</a></span>loadAndScale() <span class="overload">[1/4]</span></h2>
+<a id="a56fc5e5bf305e1760198c0a69ac85ff9" name="a56fc5e5bf305e1760198c0a69ac85ff9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56fc5e5bf305e1760198c0a69ac85ff9">&#9670;&#160;</a></span>loadAndScale() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1314,7 +1324,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span></td><td>)</td>
           <td></td>
@@ -1341,12 +1351,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00537">537</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00558">558</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="adc4d5acdb027930f3c0fce93262aef26" name="adc4d5acdb027930f3c0fce93262aef26"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adc4d5acdb027930f3c0fce93262aef26">&#9670;&#160;</a></span>loadAndScale() <span class="overload">[2/4]</span></h2>
+<a id="a73553caa10abdb91e454a27456fc14e5" name="a73553caa10abdb91e454a27456fc14e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73553caa10abdb91e454a27456fc14e5">&#9670;&#160;</a></span>loadAndScale() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1359,7 +1369,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span>, </td>
         </tr>
@@ -1391,12 +1401,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00543">543</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00564">564</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a697676a264496d55739605bf079ef1b4" name="a697676a264496d55739605bf079ef1b4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a697676a264496d55739605bf079ef1b4">&#9670;&#160;</a></span>loadAndScale() <span class="overload">[3/4]</span></h2>
+<a id="a7f2b0c051d473813018715f1621ea259" name="a7f2b0c051d473813018715f1621ea259"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f2b0c051d473813018715f1621ea259">&#9670;&#160;</a></span>loadAndScale() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1409,7 +1419,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span>, </td>
         </tr>
@@ -1453,12 +1463,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00551">551</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00572">572</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a7f3ac392503acdad30e24c01696c53b8" name="a7f3ac392503acdad30e24c01696c53b8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7f3ac392503acdad30e24c01696c53b8">&#9670;&#160;</a></span>loadAndScale() <span class="overload">[4/4]</span></h2>
+<a id="a2096cee6b377960ef21fbda622f08994" name="a2096cee6b377960ef21fbda622f08994"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2096cee6b377960ef21fbda622f08994">&#9670;&#160;</a></span>loadAndScale() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1471,7 +1481,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span>, </td>
         </tr>
@@ -1509,12 +1519,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00558">558</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00579">579</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a1c1d1693ec371ffa83a6a00f80151951" name="a1c1d1693ec371ffa83a6a00f80151951"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c1d1693ec371ffa83a6a00f80151951">&#9670;&#160;</a></span>loadAndScale0() <span class="overload">[1/3]</span></h2>
+<a id="a4afe8b8ec93c89308fe185b1eb164ff6" name="a4afe8b8ec93c89308fe185b1eb164ff6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4afe8b8ec93c89308fe185b1eb164ff6">&#9670;&#160;</a></span>loadAndScale0() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1525,7 +1535,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale0 </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -1538,14 +1548,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>    </p>
+<p>non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00616">616</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00639">639</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="ac5fb7912ab0ea88a353f4779f755b1f0" name="ac5fb7912ab0ea88a353f4779f755b1f0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac5fb7912ab0ea88a353f4779f755b1f0">&#9670;&#160;</a></span>loadAndScale0() <span class="overload">[2/3]</span></h2>
+<a id="a007d808b1aa8a8ea456ace5b9a8d7d69" name="a007d808b1aa8a8ea456ace5b9a8d7d69"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a007d808b1aa8a8ea456ace5b9a8d7d69">&#9670;&#160;</a></span>loadAndScale0() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1556,7 +1566,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale0 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span></td><td>)</td>
           <td></td>
@@ -1569,14 +1579,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>    </p>
+<p>non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00610">610</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00631">631</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a33cf0d3a56273fb6bff13b62317926c4" name="a33cf0d3a56273fb6bff13b62317926c4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a33cf0d3a56273fb6bff13b62317926c4">&#9670;&#160;</a></span>loadAndScale0() <span class="overload">[3/3]</span></h2>
+<a id="a4984f158bbc3b6c79ca16dd847fe67e1" name="a4984f158bbc3b6c79ca16dd847fe67e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4984f158bbc3b6c79ca16dd847fe67e1">&#9670;&#160;</a></span>loadAndScale0() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1587,7 +1597,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale0 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span>, </td>
         </tr>
@@ -1604,14 +1614,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a> </p>
+<p>non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;0&gt;()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00604">604</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00625">625</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="abae41b8a9c2c8363f8e944a4b51e0891" name="abae41b8a9c2c8363f8e944a4b51e0891"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abae41b8a9c2c8363f8e944a4b51e0891">&#9670;&#160;</a></span>loadAndScale1() <span class="overload">[1/3]</span></h2>
+<a id="ae570967d1b674970cf472feb379f248f" name="ae570967d1b674970cf472feb379f248f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae570967d1b674970cf472feb379f248f">&#9670;&#160;</a></span>loadAndScale1() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1622,7 +1632,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale1 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale1 </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -1635,14 +1645,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>    </p>
+<p>non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00617">617</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00640">640</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="ac828611aeec61ece07dad8f11c9c37df" name="ac828611aeec61ece07dad8f11c9c37df"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac828611aeec61ece07dad8f11c9c37df">&#9670;&#160;</a></span>loadAndScale1() <span class="overload">[2/3]</span></h2>
+<a id="a2cd4db2b559aa2f61b61bccfbe8a978b" name="a2cd4db2b559aa2f61b61bccfbe8a978b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cd4db2b559aa2f61b61bccfbe8a978b">&#9670;&#160;</a></span>loadAndScale1() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1653,7 +1663,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale1 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale1 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span></td><td>)</td>
           <td></td>
@@ -1666,14 +1676,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>    </p>
+<p>non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00611">611</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00632">632</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a6aa919a2ee2e56f4af03194dcfc5fa7d" name="a6aa919a2ee2e56f4af03194dcfc5fa7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6aa919a2ee2e56f4af03194dcfc5fa7d">&#9670;&#160;</a></span>loadAndScale1() <span class="overload">[3/3]</span></h2>
+<a id="a11f9b50f738c6d57d08d6776b3d8eb43" name="a11f9b50f738c6d57d08d6776b3d8eb43"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11f9b50f738c6d57d08d6776b3d8eb43">&#9670;&#160;</a></span>loadAndScale1() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1684,7 +1694,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale1 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale1 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span>, </td>
         </tr>
@@ -1701,14 +1711,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a> </p>
+<p>non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;1&gt;()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00605">605</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00626">626</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="ad8a77947006d3304fc631dc5bb7e5374" name="ad8a77947006d3304fc631dc5bb7e5374"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad8a77947006d3304fc631dc5bb7e5374">&#9670;&#160;</a></span>loadAndScale2() <span class="overload">[1/3]</span></h2>
+<a id="af5a5f12205a4187aa4df499b8224ed35" name="af5a5f12205a4187aa4df499b8224ed35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5a5f12205a4187aa4df499b8224ed35">&#9670;&#160;</a></span>loadAndScale2() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1719,7 +1729,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale2 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale2 </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -1732,14 +1742,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>    </p>
+<p>non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00618">618</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00641">641</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="aff0a1022e3eab3180a16b28ee9eb4cc8" name="aff0a1022e3eab3180a16b28ee9eb4cc8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aff0a1022e3eab3180a16b28ee9eb4cc8">&#9670;&#160;</a></span>loadAndScale2() <span class="overload">[2/3]</span></h2>
+<a id="a4688b73eef22022b80df81e4f6c22b49" name="a4688b73eef22022b80df81e4f6c22b49"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4688b73eef22022b80df81e4f6c22b49">&#9670;&#160;</a></span>loadAndScale2() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1750,7 +1760,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale2 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale2 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span></td><td>)</td>
           <td></td>
@@ -1763,14 +1773,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>    </p>
+<p>non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00612">612</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00633">633</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="abf34e8849462ab58f7c62ed4ad3e7858" name="abf34e8849462ab58f7c62ed4ad3e7858"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abf34e8849462ab58f7c62ed4ad3e7858">&#9670;&#160;</a></span>loadAndScale2() <span class="overload">[3/3]</span></h2>
+<a id="a33c22b408cbc9eb8b9d98993fe985264" name="a33c22b408cbc9eb8b9d98993fe985264"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a33c22b408cbc9eb8b9d98993fe985264">&#9670;&#160;</a></span>loadAndScale2() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1781,7 +1791,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale2 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale2 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span>, </td>
         </tr>
@@ -1798,14 +1808,201 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p>non-template alias of <a class="el" href="#a8d1f19955187d5d98147f8a7153e3d79" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a> </p>
+<p>non-template alias of <a class="el" href="#a56fc5e5bf305e1760198c0a69ac85ff9" title="Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values...">loadAndScale&lt;2&gt;()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00606">606</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00627">627</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="afad1c6a10f81bab5c48043fb2e423e00" name="afad1c6a10f81bab5c48043fb2e423e00"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afad1c6a10f81bab5c48043fb2e423e00">&#9670;&#160;</a></span>loadByte() <span class="overload">[1/2]</span></h2>
+<a id="a07853a147d535144f71b3f2640f4b0d5" name="a07853a147d535144f71b3f2640f4b0d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07853a147d535144f71b3f2640f4b0d5">&#9670;&#160;</a></span>loadAndScale_APA102_HD()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">FASTLED_FORCE_INLINE void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScale_APA102_HD </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b0_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b1_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b2_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>brightness_out</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00705">705</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+
+</div>
+</div>
+<a id="ac82ddeb3ea556e723776377c03e48a28" name="ac82ddeb3ea556e723776377c03e48a28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac82ddeb3ea556e723776377c03e48a28">&#9670;&#160;</a></span>loadAndScaleRGB()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">FASTLED_FORCE_INLINE void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScaleRGB </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b0</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b2</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00649">649</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+
+</div>
+</div>
+<a id="a4c725f2e21a98b3ea700947e4dccbfc2" name="a4c725f2e21a98b3ea700947e4dccbfc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c725f2e21a98b3ea700947e4dccbfc2">&#9670;&#160;</a></span>loadAndScaleRGBW() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">FASTLED_FORCE_INLINE void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScaleRGBW </td>
+          <td>(</td>
+          <td class="paramtype">RGBW_MODE</td>          <td class="paramname"><span class="paramname"><em>rgbw_mode</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t</td>          <td class="paramname"><span class="paramname"><em>white_color_temp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b0_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b1_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b2_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>w_out</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Generates RGBW pixel information. </p>
+<p>While the RGB data is loaded in the order specified by RGB_ORDER the W data is assumed to be the last byte in the data stream. This is true for <a class="el" href="class_w_s2812.html" title="WS2812 controller class.">WS2812</a> but may need to be changed in the future if the white component starts being reordered across chipsets. </p>
+
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00658">658</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+
+</div>
+</div>
+<a id="aa9c593c24a59398d7d825a0ac09221e7" name="aa9c593c24a59398d7d825a0ac09221e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9c593c24a59398d7d825a0ac09221e7">&#9670;&#160;</a></span>loadAndScaleRGBW() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </div>
+<div class="memtemplate">
+template&lt;RGBW_MODE MODE&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">FASTLED_FORCE_INLINE void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadAndScaleRGBW </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t</td>          <td class="paramname"><span class="paramname"><em>white_color_temp</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b0_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b1_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>b2_out</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>w_out</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00684">684</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+
+</div>
+</div>
+<a id="a75ef76fbecdc9b39b01eeab216845d9d" name="a75ef76fbecdc9b39b01eeab216845d9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75ef76fbecdc9b39b01eeab216845d9d">&#9670;&#160;</a></span>loadByte() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1818,7 +2015,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadByte </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadByte </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span></td><td>)</td>
           <td></td>
@@ -1845,12 +2042,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00496">496</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00517">517</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="ac851ee73f439bcd54f1408c4c89ba376" name="ac851ee73f439bcd54f1408c4c89ba376"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac851ee73f439bcd54f1408c4c89ba376">&#9670;&#160;</a></span>loadByte() <span class="overload">[2/2]</span></h2>
+<a id="af18d90ea43599f9135cea2b60ccc5065" name="af18d90ea43599f9135cea2b60ccc5065"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af18d90ea43599f9135cea2b60ccc5065">&#9670;&#160;</a></span>loadByte() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1863,7 +2060,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadByte </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::loadByte </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span>, </td>
         </tr>
@@ -1895,12 +2092,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00501">501</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00522">522</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a52b25ef22470e538b0a1a604ae9f95e5" name="a52b25ef22470e538b0a1a604ae9f95e5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a52b25ef22470e538b0a1a604ae9f95e5">&#9670;&#160;</a></span>preStepFirstByteDithering()</h2>
+<a id="a4339ebd06d211b9affb17343ae2eefe0" name="a4339ebd06d211b9affb17343ae2eefe0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4339ebd06d211b9affb17343ae2eefe0">&#9670;&#160;</a></span>preStepFirstByteDithering()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1911,7 +2108,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::preStepFirstByteDithering </td>
+          <td class="memname">FASTLED_FORCE_INLINE void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::preStepFirstByteDithering </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -1926,12 +2123,12 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 
 <p>Some chipsets pre-cycle the first byte, which means we want to cycle byte 0's dithering separately. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00485">485</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00506">506</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a39c471ab18f0890564b513a0589b4f6b" name="a39c471ab18f0890564b513a0589b4f6b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a39c471ab18f0890564b513a0589b4f6b">&#9670;&#160;</a></span>scale() <span class="overload">[1/2]</span></h2>
+<a id="aad6f8ce8a3aa9429025e67050e312929" name="aad6f8ce8a3aa9429025e67050e312929"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad6f8ce8a3aa9429025e67050e312929">&#9670;&#160;</a></span>scale() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1944,7 +2141,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::scale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::scale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
         </tr>
@@ -1981,12 +2178,12 @@ template&lt;int SLOT&gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00525">525</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00546">546</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="abc7c6fc40ee625cfb76187079aedd7c5" name="abc7c6fc40ee625cfb76187079aedd7c5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abc7c6fc40ee625cfb76187079aedd7c5">&#9670;&#160;</a></span>scale() <span class="overload">[2/2]</span></h2>
+<a id="a060678fc5a4cf518e155ed3a6145b8d4" name="a060678fc5a4cf518e155ed3a6145b8d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a060678fc5a4cf518e155ed3a6145b8d4">&#9670;&#160;</a></span>scale() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1999,7 +2196,7 @@ template&lt;int SLOT&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::scale </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::scale </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>pc</em></span>, </td>
         </tr>
@@ -2032,12 +2229,12 @@ template&lt;int SLOT&gt; </div>
 </dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a9c8fa28fd867a4048796b4f88146d332" title="the per-channel scale values, provided by a color correction function such as CLEDController::compute...">PixelController::mScale</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00520">520</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00541">541</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a658ce6138a576739b5fef2dbd4f4d284" name="a658ce6138a576739b5fef2dbd4f4d284"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a658ce6138a576739b5fef2dbd4f4d284">&#9670;&#160;</a></span>size()</h2>
+<a id="a85305135ad8ad18edcd32dfc7431c660" name="a85305135ad8ad18edcd32dfc7431c660"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a85305135ad8ad18edcd32dfc7431c660">&#9670;&#160;</a></span>size()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2048,7 +2245,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::size </td>
+          <td class="memname">FASTLED_FORCE_INLINE int <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::size </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -2064,12 +2261,12 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 <p>Get the length of the LED strip. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="#a6e1491364f944af0eee408fc8dffef58" title="number of LEDs in the data for one lane">PixelController::mLen</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00461">461</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00482">482</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a94083aa8becb9964497868366b29a3da" name="a94083aa8becb9964497868366b29a3da"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a94083aa8becb9964497868366b29a3da">&#9670;&#160;</a></span>stepAdvanceAndLoadAndScale0() <span class="overload">[1/3]</span></h2>
+<a id="a0b169100513e0e2fe996401a8f653688" name="a0b169100513e0e2fe996401a8f653688"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b169100513e0e2fe996401a8f653688">&#9670;&#160;</a></span>stepAdvanceAndLoadAndScale0() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2080,7 +2277,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::stepAdvanceAndLoadAndScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::stepAdvanceAndLoadAndScale0 </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -2093,14 +2290,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="#a3340b291d085d72b34687f89610bfa62" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#ad97f1374042069db95526097244643b0" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>    </p>
+<p><a class="el" href="#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#aa6a77bc5cd442a95a4f36b3c39d09f6e" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00620">620</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00643">643</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a262a85c5d422cb7f2336a9a5c279ab62" name="a262a85c5d422cb7f2336a9a5c279ab62"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a262a85c5d422cb7f2336a9a5c279ab62">&#9670;&#160;</a></span>stepAdvanceAndLoadAndScale0() <span class="overload">[2/3]</span></h2>
+<a id="a1fd9d16856c759d9fe45025464eae1de" name="a1fd9d16856c759d9fe45025464eae1de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fd9d16856c759d9fe45025464eae1de">&#9670;&#160;</a></span>stepAdvanceAndLoadAndScale0() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2111,7 +2308,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::stepAdvanceAndLoadAndScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::stepAdvanceAndLoadAndScale0 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span></td><td>)</td>
           <td></td>
@@ -2124,14 +2321,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="#a3340b291d085d72b34687f89610bfa62" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#ad97f1374042069db95526097244643b0" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>    </p>
+<p><a class="el" href="#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#aa6a77bc5cd442a95a4f36b3c39d09f6e" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00614">614</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00635">635</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a187119ed1bcf6af216009f1e5e343250" name="a187119ed1bcf6af216009f1e5e343250"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a187119ed1bcf6af216009f1e5e343250">&#9670;&#160;</a></span>stepAdvanceAndLoadAndScale0() <span class="overload">[3/3]</span></h2>
+<a id="acb4a76e70b987649e50290f68648e9d6" name="acb4a76e70b987649e50290f68648e9d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb4a76e70b987649e50290f68648e9d6">&#9670;&#160;</a></span>stepAdvanceAndLoadAndScale0() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2142,7 +2339,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::stepAdvanceAndLoadAndScale0 </td>
+          <td class="memname">FASTLED_FORCE_INLINE uint8_t <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::stepAdvanceAndLoadAndScale0 </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lane</em></span>, </td>
         </tr>
@@ -2159,14 +2356,14 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="#a3340b291d085d72b34687f89610bfa62" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#ad97f1374042069db95526097244643b0" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a> </p>
+<p><a class="el" href="#ac7cb7840989882cce60218ac43dbe8ef" title="Step the dithering forward.">stepDithering()</a> and <a class="el" href="#aa6a77bc5cd442a95a4f36b3c39d09f6e" title="non-template alias of advanceAndLoadAndScale&lt;0&gt;()">advanceAndLoadAndScale0()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00608">608</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00629">629</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
-<a id="a3340b291d085d72b34687f89610bfa62" name="a3340b291d085d72b34687f89610bfa62"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3340b291d085d72b34687f89610bfa62">&#9670;&#160;</a></span>stepDithering()</h2>
+<a id="ac7cb7840989882cce60218ac43dbe8ef" name="ac7cb7840989882cce60218ac43dbe8ef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7cb7840989882cce60218ac43dbe8ef">&#9670;&#160;</a></span>stepDithering()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2177,7 +2374,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::stepDithering </td>
+          <td class="memname">FASTLED_FORCE_INLINE void <a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, LANES, MASK &gt;::stepDithering </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -2193,7 +2390,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 <p>Step the dithering forward. </p>
 <dl class="section note"><dt>Note</dt><dd>If updating here, be sure to update the asm version in clockless_trinket.h! </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00476">476</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00497">497</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -2215,7 +2412,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 <p>values for the scaled dither signal </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">init_binary_dithering()</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00278">278</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00291">291</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -2236,7 +2433,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 <p>values for the scaled dither signal </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">init_binary_dithering()</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00279">279</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00292">292</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -2256,7 +2453,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 
 <p>how many bytes to advance the pointer by each time. For <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> this is 3. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00281">281</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00294">294</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -2276,7 +2473,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 
 <p>pointer to the underlying LED data </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00275">275</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00288">288</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -2296,7 +2493,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 
 <p>number of LEDs in the data for one lane </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00276">276</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00289">289</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -2316,7 +2513,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 
 <p>counter for the number of LEDs left to process </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00277">277</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00290">290</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -2337,7 +2534,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 <p>the number of bytes to offset each lane from the starting pointer </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a358944f031ee8b8536d2f48ca670de77" title="Initialize the PixelController::mOffsets array based on the length of the strip.">initOffsets()</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00282">282</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00295">295</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -2357,7 +2554,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 
 <p>the per-channel scale values, provided by a color correction function such as <a class="el" href="class_c_l_e_d_controller.html#a3ad4ceb3bc9ae2efa11e50ffe4b140d4" title="Calculates the combined color adjustment to the LEDs at a given scale, color correction,...">CLEDController::computeAdjustment()</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00280">280</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00293">293</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -2371,7 +2568,7 @@ template&lt;EOrder RGB_ORDER, int LANES = 1, uint32_t MASK = 0xFFFFFFFF&gt; </di
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="struct_pixel_controller.html">PixelController</a></li>
-    <li class="footer">Generated on Tue Sep 3 2024 02:36:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

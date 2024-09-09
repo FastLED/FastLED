@@ -1,6 +1,8 @@
 var examples =
 [
     [ "https://wokwi.com/projects/285170662915441160", "https_1_2_2wokwi_8com_2projects_2285170662915441160-example.html", null ],
+    [ "https://wokwi.com/projects/407831886158110721", "https_1_2_2wokwi_8com_2projects_2407831886158110721-example.html", null ],
+    [ "RGB", "_r_g_b-example.html", null ],
     [ "AnalogOutput.ino", "_analog_output_8ino-example.html", null ],
     [ "Blink.ino", "_blink_8ino-example.html", null ],
     [ "ColorPalette.ino", "_color_palette_8ino-example.html", null ],

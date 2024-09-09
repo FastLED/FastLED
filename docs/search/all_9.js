@@ -1,12 +1,12 @@
 var searchData=
 [
   ['i_0',['i',['../union_i_e_e_e754binary32__t.html#aa999f6c1a14b333db5eff13abe4bdb50',1,'IEEE754binary32_t']]],
-  ['ide_20platformio_20dual_20repo_1',['Arduino IDE / PlatformIO Dual Repo',['../index.html#autotoc_md9',1,'']]],
+  ['ide_20platformio_20dual_20repo_1',['Arduino IDE / PlatformIO Dual Repo',['../index.html#autotoc_md11',1,'']]],
   ['ieee754binary32_5ft_2',['IEEE754binary32_t',['../union_i_e_e_e754binary32__t.html',1,'']]],
   ['index_3',['index',['../union_t_r_g_b_gradient_palette_entry_union.html#ac87a0e1364f18466bfddf9f7d74ab1e4',1,'TRGBGradientPaletteEntryUnion']]],
   ['indianred_4',['IndianRed',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ab63d06563b94a638a1666ce930453edb',1,'CRGB']]],
   ['indigo_5',['Indigo',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99aad3ce9eb9debe2f6e9284c54e06ed9c5',1,'CRGB']]],
-  ['information_6',['For more information',['../index.html#autotoc_md17',1,'']]],
+  ['information_6',['For more information',['../index.html#autotoc_md20',1,'']]],
   ['init_7',['init',['../class_l_p_d8806_controller.html#abe5be69b938d0709cfc77fcf57c75608',1,'LPD8806Controller::init()'],['../class_w_s2801_controller.html#ad6187b68bccb831cd5cab3cffbd6bdb4',1,'WS2801Controller::init()'],['../class_l_p_d6803_controller.html#a90d8b0c2141ed53c25a77dc912d785b8',1,'LPD6803Controller::init()'],['../class_a_p_a102_controller.html#af354f0751a07151be963a6bc8093f6ef',1,'APA102Controller::init()'],['../class_p9813_controller.html#ad6fcb36b9378df660721ae24ed857b8a',1,'P9813Controller::init()'],['../class_s_m16716_controller.html#a1ba5a4e3f00b2235f278b9fb9aeb1591',1,'SM16716Controller::init()'],['../class_c_l_e_d_controller.html#af877a15a5ec452780fbd1d359b8a9913',1,'CLEDController::init()'],['../class_d_m_x_simple_controller.html#a251c7d09383870337853c360996871c3',1,'DMXSimpleController::init()'],['../class_d_m_x_serial_controller.html#a0cd937424d4f6eedb90acec81ca1fa27',1,'DMXSerialController::init()'],['../class_a_v_r_software_s_p_i_output.html#ae321dbae3fceaa2d73a98f6aa08ea3c5',1,'AVRSoftwareSPIOutput::init()'],['../class_n_o_p_s_p_i_output.html#ad9ff9bf62427b69e3bb578699e0ce561',1,'NOPSPIOutput::init()'],['../class_r_e_f_hardware_s_p_i_output.html#aaf52398e54f9e5908f3956ce8ef923a5',1,'REFHardwareSPIOutput::init()']]],
   ['init_5fbinary_5fdithering_8',['init_binary_dithering',['../struct_pixel_controller.html#a2a8441da873d3a094c15c337b34d3e43',1,'PixelController']]],
   ['initoffsets_9',['initOffsets',['../struct_pixel_controller.html#a358944f031ee8b8536d2f48ca670de77',1,'PixelController']]],

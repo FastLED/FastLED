@@ -41,7 +41,7 @@ var searchData=
   ['blurcolumns_38',['blurColumns',['../group___color_blurs.html#gacb40363ff285a5d816a1cf3096e27c14',1,'blurColumns(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount):&#160;colorutils.cpp'],['../group___color_blurs.html#gacb40363ff285a5d816a1cf3096e27c14',1,'blurColumns(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount):&#160;colorutils.cpp']]],
   ['blurring_20functions_39',['Color Blurring Functions',['../group___color_blurs.html',1,'']]],
   ['blurrows_40',['blurRows',['../group___color_blurs.html#ga3dbf22d8f71f7a0b54bbfaaf1ef7b44b',1,'blurRows(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount):&#160;colorutils.cpp'],['../group___color_blurs.html#ga3dbf22d8f71f7a0b54bbfaaf1ef7b44b',1,'blurRows(CRGB *leds, uint8_t width, uint8_t height, fract8 blur_amount):&#160;colorutils.cpp']]],
-  ['board_20support_41',['Board Support',['../index.html#autotoc_md1',1,'']]],
+  ['board_20support_41',['Board Support',['../index.html#autotoc_md2',1,'']]],
   ['brighten8_5flin_42',['brighten8_lin',['../group___dimming.html#ga094bda002b416c66e57521fc93878830',1,'scale8.h']]],
   ['brighten8_5fraw_43',['brighten8_raw',['../group___dimming.html#gae8e36472a70f3016595048532d6c3a2d',1,'scale8.h']]],
   ['brighten8_5fvideo_44',['brighten8_video',['../group___dimming.html#gad21876a676bcf26c47f957faed23f9bb',1,'scale8.h']]],

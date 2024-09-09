@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
    </div>
   </td>
  </tr>
@@ -120,6 +120,9 @@ $(function(){initNavTree('controller_8h.html',''); initResizable(true); });
 <code>#include &quot;<a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="color_8h_source.html">color.h</a>&quot;</code><br />
 <code>#include &lt;stddef.h&gt;</code><br />
+<code>#include &quot;rgb_2_rgbw.h&quot;</code><br />
+<code>#include &quot;five_bit_hd_gamma.h&quot;</code><br />
+<code>#include &quot;force_inline.h&quot;</code><br />
 </div>
 <p><a href="controller_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -195,7 +198,7 @@ Typedefs</h2></td></tr>
 
 <p>Enable dithering using binary dithering (only option) </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00046">46</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00049">49</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -213,7 +216,7 @@ Typedefs</h2></td></tr>
 
 <p>Disable dithering. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00044">44</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00047">47</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -231,7 +234,7 @@ Typedefs</h2></td></tr>
 
 <p>Predicted max update rate, in Hertz. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00350">350</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00371">371</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -249,7 +252,7 @@ Typedefs</h2></td></tr>
 
 <p>Minimum acceptable dithering rate, in Hertz. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00353">353</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00374">374</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -272,12 +275,12 @@ Typedefs</h2></td></tr>
 <div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;32) + \</div>
 <div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;64) + \</div>
 <div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;128) )</div>
-<div class="ttc" id="acontroller_8h_html_aebfff45adc514fa6fee761623598df59"><div class="ttname"><a href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a></div><div class="ttdeci">#define UPDATES_PER_FULL_DITHER_CYCLE</div><div class="ttdoc">The number of updates in a single dither cycle.</div><div class="ttdef"><b>Definition</b> <a href="controller_8h_source.html#l00356">controller.h:356</a></div></div>
+<div class="ttc" id="acontroller_8h_html_aebfff45adc514fa6fee761623598df59"><div class="ttname"><a href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a></div><div class="ttdeci">#define UPDATES_PER_FULL_DITHER_CYCLE</div><div class="ttdoc">The number of updates in a single dither cycle.</div><div class="ttdef"><b>Definition</b> <a href="controller_8h_source.html#l00377">controller.h:377</a></div></div>
 </div><!-- fragment -->
 <p>Set "virtual bits" of dithering to the highest level that is not likely to cause excessive flickering at low brightness levels + low update rates. </p>
 <p>These pre-set values are a little ambitious, since a 400Hz update rate for WS2811-family LEDs is only possible with 85 pixels or fewer. Once we have a "number of milliseconds since last update" value available here, we can quickly calculate the correct number of "virtual bits" on the fly with a couple of "if" statements &ndash; no division required. At this point, the division is done at compile time, so there's no runtime cost, but the values are still hard-coded. </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo</a></b></dt><dd>Can these macros be replaced with constants scoped to <a class="el" href="struct_pixel_controller.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">PixelController::init_binary_dithering()</a>? </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00371">371</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00392">392</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -311,7 +314,7 @@ Typedefs</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>the color channel for that byte (0 = red, 1 = green, 2 = blue) </dd></dl>
 <dl class="section see"><dt>See also</dt><dd>EOrder </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00029">29</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00032">32</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -333,7 +336,7 @@ Typedefs</h2></td></tr>
 <p>Gets the color channel for byte 0. </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8" title="Gets the assigned color channel for a byte&#39;s position in the output, using a passed RGB color order.">RGB_BYTE(RO,X)</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00033">33</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00036">36</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -355,7 +358,7 @@ Typedefs</h2></td></tr>
 <p>Gets the color channel for byte 1. </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8" title="Gets the assigned color channel for a byte&#39;s position in the output, using a passed RGB color order.">RGB_BYTE(RO,X)</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00036">36</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00039">39</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -377,7 +380,7 @@ Typedefs</h2></td></tr>
 <p>Gets the color channel for byte 2. </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8" title="Gets the assigned color channel for a byte&#39;s position in the output, using a passed RGB color order.">RGB_BYTE(RO,X)</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00039">39</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00042">42</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -406,7 +409,7 @@ Typedefs</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>the color channel for that byte (0 = red, 1 = green, 2 = blue) </dd></dl>
 <dl class="section see"><dt>See also</dt><dd>EOrder </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00021">21</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00024">24</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -424,7 +427,7 @@ Typedefs</h2></td></tr>
 
 <p>The number of updates in a single dither cycle. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00356">356</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00377">377</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -442,7 +445,7 @@ Typedefs</h2></td></tr>
 
 <p>Alias for RECOMMENDED_VIRTUAL_BITS. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00381">381</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00402">402</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -461,7 +464,7 @@ Typedefs</h2></td></tr>
 
 <p>The dither setting, either DISABLE_DITHER or BINARY_DITHER. </p>
 
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00048">48</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00051">51</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 
 </div>
 </div>
@@ -472,7 +475,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="controller_8h.html">controller.h</a></li>
-    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

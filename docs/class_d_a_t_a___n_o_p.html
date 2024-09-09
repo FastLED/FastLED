@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
    </div>
   </td>
  </tr>
@@ -115,25 +115,25 @@ $(function(){initNavTree('class_d_a_t_a___n_o_p.html',''); initResizable(true); 
 <p>Some of the SPI controllers will need to perform a transform on each byte before doing anything with it. Creating a class of this form and passing it in as a template parameter to writeBytes()/writeBytes3() will ensure that the body of this method will get called on every byte worked on. </p><dl class="section note"><dt>Note</dt><dd>Recommendation: make the adjust method aggressively inlined. </dd></dl>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000017">Todo</a></b></dt><dd>Convinience macro for building these </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="fastspi__types_8h_source.html#l00034">34</a> of file <a class="el" href="fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastspi__types_8h_source.html#l00035">35</a> of file <a class="el" href="fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="fastspi__types_8h_source.html">fastspi_types.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a5106b471ccabd51bf509315cb5bea713" id="r_a5106b471ccabd51bf509315cb5bea713"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5106b471ccabd51bf509315cb5bea713">adjust</a> (<a class="el" href="cpp__compat_8h.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t data)</td></tr>
-<tr class="memdesc:a5106b471ccabd51bf509315cb5bea713"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called to adjust a byte of data before writing it to the output.  <br /></td></tr>
-<tr class="separator:a5106b471ccabd51bf509315cb5bea713"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f4a40772c4c29f77acac71774bb2280" id="r_a0f4a40772c4c29f77acac71774bb2280"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0f4a40772c4c29f77acac71774bb2280">adjust</a> (<a class="el" href="cpp__compat_8h.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t data, <a class="el" href="cpp__compat_8h.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t scale)</td></tr>
-<tr class="memdesc:a0f4a40772c4c29f77acac71774bb2280"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called to adjust a byte of data before writing it to the output.     <br /></td></tr>
-<tr class="separator:a0f4a40772c4c29f77acac71774bb2280"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90b4d38f304b4958d9229b90e0e9aca7" id="r_a90b4d38f304b4958d9229b90e0e9aca7"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a90b4d38f304b4958d9229b90e0e9aca7">postBlock</a> (int, void *context=NULL)</td></tr>
-<tr class="memdesc:a90b4d38f304b4958d9229b90e0e9aca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called after a block of data is written to the output.  <br /></td></tr>
-<tr class="separator:a90b4d38f304b4958d9229b90e0e9aca7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04e08608f39f20dad29685dbf85b7790" id="r_a04e08608f39f20dad29685dbf85b7790"><td class="memItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a04e08608f39f20dad29685dbf85b7790">adjust</a> (<a class="el" href="cpp__compat_8h.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t data)</td></tr>
+<tr class="memdesc:a04e08608f39f20dad29685dbf85b7790"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called to adjust a byte of data before writing it to the output.  <br /></td></tr>
+<tr class="separator:a04e08608f39f20dad29685dbf85b7790"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b1d7c26545a8da0cad78828709d96e3" id="r_a1b1d7c26545a8da0cad78828709d96e3"><td class="memItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1b1d7c26545a8da0cad78828709d96e3">adjust</a> (<a class="el" href="cpp__compat_8h.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t data, <a class="el" href="cpp__compat_8h.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t scale)</td></tr>
+<tr class="memdesc:a1b1d7c26545a8da0cad78828709d96e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called to adjust a byte of data before writing it to the output.     <br /></td></tr>
+<tr class="separator:a1b1d7c26545a8da0cad78828709d96e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a05965df99e92867f7fe7491bb934b6" id="r_a5a05965df99e92867f7fe7491bb934b6"><td class="memItemLeft" align="right" valign="top">static FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5a05965df99e92867f7fe7491bb934b6">postBlock</a> (int, void *context=NULL)</td></tr>
+<tr class="memdesc:a5a05965df99e92867f7fe7491bb934b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hook called after a block of data is written to the output.  <br /></td></tr>
+<tr class="separator:a5a05965df99e92867f7fe7491bb934b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a5106b471ccabd51bf509315cb5bea713" name="a5106b471ccabd51bf509315cb5bea713"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5106b471ccabd51bf509315cb5bea713">&#9670;&#160;</a></span>adjust() <span class="overload">[1/2]</span></h2>
+<a id="a04e08608f39f20dad29685dbf85b7790" name="a04e08608f39f20dad29685dbf85b7790"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04e08608f39f20dad29685dbf85b7790">&#9670;&#160;</a></span>adjust() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -142,7 +142,7 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t DATA_NOP::adjust </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t DATA_NOP::adjust </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="cpp__compat_8h.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t</td>          <td class="paramname"><span class="paramname"><em>data</em></span></td><td>)</td>
           <td></td>
@@ -158,12 +158,12 @@ Static Public Member Functions</h2></td></tr>
 <p>Hook called to adjust a byte of data before writing it to the output. </p>
 <p>In this dummy version, no adjustment is made. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastspi__types_8h_source.html#l00038">38</a> of file <a class="el" href="fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastspi__types_8h_source.html#l00039">39</a> of file <a class="el" href="fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
 
 </div>
 </div>
-<a id="a0f4a40772c4c29f77acac71774bb2280" name="a0f4a40772c4c29f77acac71774bb2280"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0f4a40772c4c29f77acac71774bb2280">&#9670;&#160;</a></span>adjust() <span class="overload">[2/2]</span></h2>
+<a id="a1b1d7c26545a8da0cad78828709d96e3" name="a1b1d7c26545a8da0cad78828709d96e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1b1d7c26545a8da0cad78828709d96e3">&#9670;&#160;</a></span>adjust() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -172,7 +172,7 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static uint8_t DATA_NOP::adjust </td>
+          <td class="memname">static FASTLED_FORCE_INLINE uint8_t DATA_NOP::adjust </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="cpp__compat_8h.html#a1daa598467bdfaa27c878f3782885c2e">FASTLED_REGISTER</a> uint8_t</td>          <td class="paramname"><span class="paramname"><em>data</em></span>, </td>
         </tr>
@@ -199,12 +199,12 @@ Static Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>input byte rescaled using <a class="el" href="group___scaling.html#gad7535ccda9c92470c4e6ee0265585555" title="Scale one byte by a second one, which is treated as the numerator of a fraction whose denominator is ...">scale8(uint8_t, uint8_t)</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="fastspi__types_8h_source.html#l00044">44</a> of file <a class="el" href="fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastspi__types_8h_source.html#l00045">45</a> of file <a class="el" href="fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
 
 </div>
 </div>
-<a id="a90b4d38f304b4958d9229b90e0e9aca7" name="a90b4d38f304b4958d9229b90e0e9aca7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a90b4d38f304b4958d9229b90e0e9aca7">&#9670;&#160;</a></span>postBlock()</h2>
+<a id="a5a05965df99e92867f7fe7491bb934b6" name="a5a05965df99e92867f7fe7491bb934b6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a05965df99e92867f7fe7491bb934b6">&#9670;&#160;</a></span>postBlock()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -213,7 +213,7 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void DATA_NOP::postBlock </td>
+          <td class="memname">static FASTLED_FORCE_INLINE void DATA_NOP::postBlock </td>
           <td>(</td>
           <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em></em></span>, </td>
         </tr>
@@ -233,7 +233,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Hook called after a block of data is written to the output. </p>
 <p>In this dummy version, no action is performed. </p>
 
-<p class="definition">Definition at line <a class="el" href="fastspi__types_8h_source.html#l00048">48</a> of file <a class="el" href="fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="fastspi__types_8h_source.html#l00049">49</a> of file <a class="el" href="fastspi__types_8h_source.html">fastspi_types.h</a>.</p>
 
 </div>
 </div>
@@ -247,7 +247,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_d_a_t_a___n_o_p.html">DATA_NOP</a></li>
-    <li class="footer">Generated on Tue Sep 3 2024 02:36:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

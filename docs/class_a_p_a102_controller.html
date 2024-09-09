@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(function(){initNavTree('class_a_p_a102_controller.html',''); initResizable(tru
 </div><!--header-->
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><div class="compoundTemplParams">template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(12), FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = kFiveBitGammaCorrectionMode_Null, uint32_t START_FRAME = 0x00000000, uint32_t END_FRAME = 0xFF000000&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(6), FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = kFiveBitGammaCorrectionMode_Null, uint32_t START_FRAME = 0x00000000, uint32_t END_FRAME = 0xFF000000&gt;<br />
 class APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED, GAMMA_CORRECTION_MODE, START_FRAME, END_FRAME &gt;</div><p>APA102 controller class. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
@@ -124,7 +124,7 @@ class APA102Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED, GAMMA_CORR
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00227">227</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00233">233</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="chipsets_8h_source.html">chipsets.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -230,12 +230,12 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a1ab7248c894ba95c3a71665f5bed2a17 inherit pro_methods_class_c_pixel_l_e_d_controller" id="r_a1ab7248c894ba95c3a71665f5bed2a17"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_l_e_d_controller.html#a1ab7248c894ba95c3a71665f5bed2a17">showPixels</a> (<a class="el" href="struct_pixel_controller.html">PixelController</a>&lt; RGB_ORDER, 1, 0xFFFFFFFF &gt; &amp;pixels)=0</td></tr>
 <tr class="memdesc:a1ab7248c894ba95c3a71665f5bed2a17 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Send the LED data to the strip.  <br /></td></tr>
 <tr class="separator:a1ab7248c894ba95c3a71665f5bed2a17 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af5569b9e92f75410e03c75bf5764e016 inherit pro_methods_class_c_pixel_l_e_d_controller" id="r_af5569b9e92f75410e03c75bf5764e016"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_l_e_d_controller.html#af5569b9e92f75410e03c75bf5764e016">showColor</a> (const struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;data, int nLeds, <a class="el" href="struct_c_r_g_b.html">CRGB</a> scale)</td></tr>
-<tr class="memdesc:af5569b9e92f75410e03c75bf5764e016 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set all the LEDs on the controller to a given color.  <br /></td></tr>
-<tr class="separator:af5569b9e92f75410e03c75bf5764e016 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a36cc2a15671bae0db53df1e26b4a813c inherit pro_methods_class_c_pixel_l_e_d_controller" id="r_a36cc2a15671bae0db53df1e26b4a813c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_l_e_d_controller.html#a36cc2a15671bae0db53df1e26b4a813c">show</a> (const struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> *data, int nLeds, <a class="el" href="struct_c_r_g_b.html">CRGB</a> scale)</td></tr>
-<tr class="memdesc:a36cc2a15671bae0db53df1e26b4a813c inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the passed in RGB data out to the LEDs managed by this controller.  <br /></td></tr>
-<tr class="separator:a36cc2a15671bae0db53df1e26b4a813c inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c8868bc240e4d48533b3746a2b32e94 inherit pro_methods_class_c_pixel_l_e_d_controller" id="r_a2c8868bc240e4d48533b3746a2b32e94"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_l_e_d_controller.html#a2c8868bc240e4d48533b3746a2b32e94">showColor</a> (const struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;data, int nLeds, <a class="el" href="struct_c_r_g_b.html">CRGB</a> scale_pre_mixed)</td></tr>
+<tr class="memdesc:a2c8868bc240e4d48533b3746a2b32e94 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set all the LEDs on the controller to a given color.  <br /></td></tr>
+<tr class="separator:a2c8868bc240e4d48533b3746a2b32e94 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e3edae00fb89f361a4af4caa39447e4 inherit pro_methods_class_c_pixel_l_e_d_controller" id="r_a8e3edae00fb89f361a4af4caa39447e4"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_l_e_d_controller.html#a8e3edae00fb89f361a4af4caa39447e4">show</a> (const struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> *data, int nLeds, <a class="el" href="struct_c_r_g_b.html">CRGB</a> scale_pre_mixed)</td></tr>
+<tr class="memdesc:a8e3edae00fb89f361a4af4caa39447e4 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write the passed in RGB data out to the LEDs managed by this controller.  <br /></td></tr>
+<tr class="separator:a8e3edae00fb89f361a4af4caa39447e4 inherit pro_methods_class_c_pixel_l_e_d_controller"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -280,7 +280,7 @@ Additional Inherited Members</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(12), FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = kFiveBitGammaCorrectionMode_Null, uint32_t START_FRAME = 0x00000000, uint32_t END_FRAME = 0xFF000000&gt; </div>
+template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(6), FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = kFiveBitGammaCorrectionMode_Null, uint32_t START_FRAME = 0x00000000, uint32_t END_FRAME = 0xFF000000&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -299,7 +299,7 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00274">274</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00280">280</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
 
 </div>
 </div>
@@ -310,7 +310,7 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(12), FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = kFiveBitGammaCorrectionMode_Null, uint32_t START_FRAME = 0x00000000, uint32_t END_FRAME = 0xFF000000&gt; </div>
+template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(6), FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = kFiveBitGammaCorrectionMode_Null, uint32_t START_FRAME = 0x00000000, uint32_t END_FRAME = 0xFF000000&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -333,7 +333,7 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_
 
 <p>Implements <a class="el" href="class_c_l_e_d_controller.html#af877a15a5ec452780fbd1d359b8a9913">CLEDController</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00276">276</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00282">282</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
 
 </div>
 </div>
@@ -343,7 +343,7 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(12), FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = kFiveBitGammaCorrectionMode_Null, uint32_t START_FRAME = 0x00000000, uint32_t END_FRAME = 0xFF000000&gt; </div>
+template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(6), FiveBitGammaCorrectionMode GAMMA_CORRECTION_MODE = kFiveBitGammaCorrectionMode_Null, uint32_t START_FRAME = 0x00000000, uint32_t END_FRAME = 0xFF000000&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -370,7 +370,7 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00282">282</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="chipsets_8h_source.html#l00288">288</a> of file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
 
 </div>
 </div>
@@ -384,7 +384,7 @@ template&lt;uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="class_a_p_a102_controller.html">APA102Controller</a></li>
-    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

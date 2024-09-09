@@ -19,6 +19,7 @@ var searchData=
   ['spioutput_3c_20data_5fpin_2c_20clock_5fpin_2c_20data_5frate_5fmhz_2810_29_20_3e_16',['SPIOutput&lt; DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(10) &gt;',['../class_s_p_i_output.html',1,'']]],
   ['spioutput_3c_20data_5fpin_2c_20clock_5fpin_2c_20data_5frate_5fmhz_2812_29_20_3e_17',['SPIOutput&lt; DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(12) &gt;',['../class_s_p_i_output.html',1,'']]],
   ['spioutput_3c_20data_5fpin_2c_20clock_5fpin_2c_20data_5frate_5fmhz_2816_29_20_3e_18',['SPIOutput&lt; DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(16) &gt;',['../class_s_p_i_output.html',1,'']]],
-  ['spioutput_3c_20data_5fpin_2c_20clock_5fpin_2c_20spi_5fspeed_20_3e_19',['SPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;',['../class_s_p_i_output.html',1,'']]],
-  ['sub4_20',['sub4',['../structsub4.html',1,'']]]
+  ['spioutput_3c_20data_5fpin_2c_20clock_5fpin_2c_20data_5frate_5fmhz_286_29_20_3e_19',['SPIOutput&lt; DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(6) &gt;',['../class_s_p_i_output.html',1,'']]],
+  ['spioutput_3c_20data_5fpin_2c_20clock_5fpin_2c_20spi_5fspeed_20_3e_20',['SPIOutput&lt; DATA_PIN, CLOCK_PIN, SPI_SPEED &gt;',['../class_s_p_i_output.html',1,'']]],
+  ['sub4_21',['sub4',['../structsub4.html',1,'']]]
 ];

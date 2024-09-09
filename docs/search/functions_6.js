@@ -4,7 +4,7 @@ var searchData=
   ['getaveragelight_1',['getAverageLight',['../struct_c_r_g_b.html#a9734c31e8251aa876072c1e1b5df5de4',1,'CRGB']]],
   ['getbrightness_2',['getBrightness',['../class_c_fast_l_e_d.html#ac2615781ec12e025fb17cc0e66281716',1,'CFastLED']]],
   ['getcorrection_3',['getCorrection',['../class_c_l_e_d_controller.html#a168c661bb9b4a5dfc797b69d3900b26c',1,'CLEDController']]],
-  ['getd_4',['getd',['../struct_pixel_controller.html#adb6b26bc719c49c49a3ae1fe6aa8d13c',1,'PixelController']]],
+  ['getd_4',['getd',['../struct_pixel_controller.html#a894fa569a9ee8a3b58dd3cbf37ea727f',1,'PixelController']]],
   ['getdither_5',['getDither',['../class_c_l_e_d_controller.html#a676f705adf93898739a405b85150a3e7',1,'CLEDController']]],
   ['getelapsed_6',['getElapsed',['../class_c_every_n_time.html#abf8af3755a0c9c8ac5d1f70eabef5c3b',1,'CEveryNTime']]],
   ['getfps_7',['getFPS',['../class_c_fast_l_e_d.html#aa8c3ae3381e524ce30b181ffa23b83cd',1,'CFastLED']]],
@@ -14,10 +14,10 @@ var searchData=
   ['getparity_11',['getParity',['../struct_c_r_g_b.html#af1469c62f5a3b4bdf755851606d8e71f',1,'CRGB']]],
   ['getperiod_12',['getPeriod',['../class_c_every_n_time.html#aecb3b6e391c4e84be022da4d54624371',1,'CEveryNTime']]],
   ['getremaining_13',['getRemaining',['../class_c_every_n_time.html#af9baddee5f65500d9b1488e4264c8ff1',1,'CEveryNTime']]],
-  ['getscale_14',['getscale',['../struct_pixel_controller.html#a36ef0c42fb8109c8da9a1f37812e176e',1,'PixelController']]],
-  ['getscale0_15',['getScale0',['../struct_pixel_controller.html#a70d40736e4fb2cb8f70d14a50f5eb339',1,'PixelController']]],
-  ['getscale1_16',['getScale1',['../struct_pixel_controller.html#a1031647981c3e18d4b432204bdcd1de7',1,'PixelController']]],
-  ['getscale2_17',['getScale2',['../struct_pixel_controller.html#ae09de2dd8c96888d5e3c53257ad5a003',1,'PixelController']]],
+  ['getscale_14',['getscale',['../struct_pixel_controller.html#a9d1ddf7aa7b8e5a3896a898911f0a6cd',1,'PixelController']]],
+  ['getscale0_15',['getScale0',['../struct_pixel_controller.html#a320fa30e08b30b14bf81dfde27c5b971',1,'PixelController']]],
+  ['getscale1_16',['getScale1',['../struct_pixel_controller.html#aec2cbf1845d2343e2e7b840f36d0bbe7',1,'PixelController']]],
+  ['getscale2_17',['getScale2',['../struct_pixel_controller.html#a6ac29f180ad5429301cb6e3ac3966616',1,'PixelController']]],
   ['gettemperature_18',['getTemperature',['../class_c_l_e_d_controller.html#afc94e9d029d7e59f56a4ab845f3de32d',1,'CLEDController']]],
   ['gettime_19',['getTime',['../class_c_every_n_time.html#a9e72ce7dcf1e5b321ec9fa61f6c4fbd5',1,'CEveryNTime']]]
 ];

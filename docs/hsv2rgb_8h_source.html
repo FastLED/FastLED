@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
    </div>
   </td>
  </tr>
@@ -129,26 +129,34 @@ $(function(){initNavTree('hsv2rgb_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="keywordtype">void</span> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#ga704160ddb9173c3420a3dbfb44674440">hsv2rgb_spectrum</a>( <span class="keyword">const</span> <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a>&amp; hsv, <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a>&amp; rgb);</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="keywordtype">void</span> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#ga704160ddb9173c3420a3dbfb44674440">hsv2rgb_spectrum</a>( <span class="keyword">const</span> <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a>* phsv, <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> * prgb, <span class="keywordtype">int</span> numLeds);</div>
+<div class="foldopen" id="foldopen00098" data-start="{" data-end="}">
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="group___h_s_v2_r_g_b.html#gaa9d490009cb1d6ea0491e60b724d360f">   98</a></span><span class="keyword">inline</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#ga704160ddb9173c3420a3dbfb44674440">hsv2rgb_spectrum</a>( <span class="keyword">const</span> <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a>&amp; hsv) {</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> rgb;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <a class="code hl_function" href="group___h_s_v2_r_g_b.html#ga704160ddb9173c3420a3dbfb44674440">hsv2rgb_spectrum</a>(hsv, rgb);</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <span class="keywordflow">return</span> rgb;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>}</div>
+</div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="group___h_s_v2_r_g_b.html#ga65cd3df592c1e5b9f2df4e364b9ae078">  105</a></span><span class="preprocessor">#define HUE_MAX_SPECTRUM 255</span></div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="keywordtype">void</span> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#ga66f61978949a6830b138d1bf08257019">hsv2rgb_raw</a>(<span class="keyword">const</span> <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a>&amp; hsv, <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> &amp; rgb);</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> </div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="keywordtype">void</span> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#ga66f61978949a6830b138d1bf08257019">hsv2rgb_raw</a>(<span class="keyword">const</span> <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a>* phsv, <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> * prgb, <span class="keywordtype">int</span> numLeds);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span><span class="keywordtype">void</span> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#ga704160ddb9173c3420a3dbfb44674440">hsv2rgb_spectrum</a>( <span class="keyword">const</span> <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a>* phsv, <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> * prgb, <span class="keywordtype">int</span> numLeds);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="group___h_s_v2_r_g_b.html#ga65cd3df592c1e5b9f2df4e364b9ae078">  112</a></span><span class="preprocessor">#define HUE_MAX_SPECTRUM 255</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="keywordtype">void</span> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#ga66f61978949a6830b138d1bf08257019">hsv2rgb_raw</a>(<span class="keyword">const</span> <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a>&amp; hsv, <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> &amp; rgb);</div>
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno"><a class="line" href="group___h_s_v2_r_g_b.html#ga25585eb2c24bd5f1b3b292dce24da048">  126</a></span><span class="preprocessor">#define HUE_MAX 191</span></div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#gab3d6aa6b1a86a5e9bb820c55c68fe4b9">rgb2hsv_approximate</a>( <span class="keyword">const</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a>&amp; rgb);</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> </div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>FASTLED_NAMESPACE_END</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="keywordtype">void</span> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#ga66f61978949a6830b138d1bf08257019">hsv2rgb_raw</a>(<span class="keyword">const</span> <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a>* phsv, <span class="keyword">struct</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> * prgb, <span class="keywordtype">int</span> numLeds);</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno"><a class="line" href="group___h_s_v2_r_g_b.html#ga25585eb2c24bd5f1b3b292dce24da048">  133</a></span><span class="preprocessor">#define HUE_MAX 191</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span> </div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><a class="code hl_struct" href="struct_c_h_s_v.html">CHSV</a> <a class="code hl_function" href="group___h_s_v2_r_g_b.html#gab3d6aa6b1a86a5e9bb820c55c68fe4b9">rgb2hsv_approximate</a>( <span class="keyword">const</span> <a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a>&amp; rgb);</div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> </div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>FASTLED_NAMESPACE_END</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_html_ga66f61978949a6830b138d1bf08257019"><div class="ttname"><a href="group___h_s_v2_r_g_b.html#ga66f61978949a6830b138d1bf08257019">hsv2rgb_raw</a></div><div class="ttdeci">void hsv2rgb_raw(const struct CHSV &amp;hsv, struct CRGB &amp;rgb)</div><div class="ttdoc">Convert an HSV value to RGB using a mathematically straight spectrum.</div><div class="ttdef"><b>Definition</b> <a href="hsv2rgb_8cpp_source.html#l00023">hsv2rgb.cpp:23</a></div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_html_ga704160ddb9173c3420a3dbfb44674440"><div class="ttname"><a href="group___h_s_v2_r_g_b.html#ga704160ddb9173c3420a3dbfb44674440">hsv2rgb_spectrum</a></div><div class="ttdeci">void hsv2rgb_spectrum(const struct CHSV &amp;hsv, struct CRGB &amp;rgb)</div><div class="ttdoc">Convert an HSV value to RGB using a mathematically straight spectrum.</div><div class="ttdef"><b>Definition</b> <a href="hsv2rgb_8cpp_source.html#l00226">hsv2rgb.cpp:226</a></div></div>
@@ -164,7 +172,7 @@ $(function(){initNavTree('hsv2rgb_8h_source.html',''); initResizable(true); });
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="hsv2rgb_8h.html">hsv2rgb.h</a></li>
-    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

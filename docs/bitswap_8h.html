@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
    </div>
   </td>
  </tr>
@@ -116,6 +116,7 @@ $(function(){initNavTree('bitswap_8h.html',''); initResizable(true); });
 
 <p class="definition">Definition in file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
+<code>#include &quot;force_inline.h&quot;</code><br />
 </div>
 <p><a href="bitswap_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -145,25 +146,25 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:abb49125d8b960e7c458d218f253ffbb7" id="r_abb49125d8b960e7c458d218f253ffbb7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abb49125d8b960e7c458d218f253ffbb7">swapbits8</a> (<a class="el" href="unionbitswap__type.html">bitswap_type</a> in, <a class="el" href="unionbitswap__type.html">bitswap_type</a> &amp;out)</td></tr>
-<tr class="memdesc:abb49125d8b960e7c458d218f253ffbb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an 8-byte by 8-bit rotation.  <br /></td></tr>
-<tr class="separator:abb49125d8b960e7c458d218f253ffbb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f8b24568aa5c3ea94c3c9f5833e5768" id="r_a0f8b24568aa5c3ea94c3c9f5833e5768"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0f8b24568aa5c3ea94c3c9f5833e5768">slowswap</a> (unsigned char *A, unsigned char *B)</td></tr>
-<tr class="memdesc:a0f8b24568aa5c3ea94c3c9f5833e5768"><td class="mdescLeft">&#160;</td><td class="mdescRight">Slow version of the 8 byte by 8 bit rotation.  <br /></td></tr>
-<tr class="separator:a0f8b24568aa5c3ea94c3c9f5833e5768"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f5a74d0ea3b3bfd42f0dd9c6d833873" id="r_a1f5a74d0ea3b3bfd42f0dd9c6d833873"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f5a74d0ea3b3bfd42f0dd9c6d833873">swapbits8</a> (<a class="el" href="unionbitswap__type.html">bitswap_type</a> in, <a class="el" href="unionbitswap__type.html">bitswap_type</a> &amp;out)</td></tr>
+<tr class="memdesc:a1f5a74d0ea3b3bfd42f0dd9c6d833873"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do an 8-byte by 8-bit rotation.  <br /></td></tr>
+<tr class="separator:a1f5a74d0ea3b3bfd42f0dd9c6d833873"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c0838cd90f3f7d303fbba2c771a2716" id="r_a7c0838cd90f3f7d303fbba2c771a2716"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7c0838cd90f3f7d303fbba2c771a2716">slowswap</a> (unsigned char *A, unsigned char *B)</td></tr>
+<tr class="memdesc:a7c0838cd90f3f7d303fbba2c771a2716"><td class="mdescLeft">&#160;</td><td class="mdescRight">Slow version of the 8 byte by 8 bit rotation.  <br /></td></tr>
+<tr class="separator:a7c0838cd90f3f7d303fbba2c771a2716"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a961f249fa1af0950840b9e2b9a1850e9" id="r_a961f249fa1af0950840b9e2b9a1850e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a961f249fa1af0950840b9e2b9a1850e9">transpose8x1_noinline</a> (unsigned char *A, unsigned char *B)</td></tr>
 <tr class="memdesc:a961f249fa1af0950840b9e2b9a1850e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simplified form of bits rotating function.  <br /></td></tr>
 <tr class="separator:a961f249fa1af0950840b9e2b9a1850e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5b194f928be832ed71d5f7b2039e40f" id="r_ac5b194f928be832ed71d5f7b2039e40f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac5b194f928be832ed71d5f7b2039e40f">transpose8x1</a> (unsigned char *A, unsigned char *B)</td></tr>
-<tr class="memdesc:ac5b194f928be832ed71d5f7b2039e40f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simplified form of bits rotating function.     <br /></td></tr>
-<tr class="separator:ac5b194f928be832ed71d5f7b2039e40f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d739d880e97c40765e4eb2c449120d7" id="r_a0d739d880e97c40765e4eb2c449120d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0d739d880e97c40765e4eb2c449120d7">transpose8x1_MSB</a> (unsigned char *A, unsigned char *B)</td></tr>
-<tr class="memdesc:a0d739d880e97c40765e4eb2c449120d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simplified form of bits rotating function.  <br /></td></tr>
-<tr class="separator:a0d739d880e97c40765e4eb2c449120d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15117b46590f77556edd32753cc5b871" id="r_a15117b46590f77556edd32753cc5b871"><td class="memTemplParams" colspan="2">template&lt;int m, int n&gt; </td></tr>
-<tr class="memitem:a15117b46590f77556edd32753cc5b871"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a15117b46590f77556edd32753cc5b871">transpose8</a> (unsigned char *A, unsigned char *B)</td></tr>
-<tr class="memdesc:a15117b46590f77556edd32753cc5b871"><td class="mdescLeft">&#160;</td><td class="mdescRight">Templated bit-rotating function.  <br /></td></tr>
-<tr class="separator:a15117b46590f77556edd32753cc5b871"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a621c13d8007fc1b36a62cf0c244cb643" id="r_a621c13d8007fc1b36a62cf0c244cb643"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a621c13d8007fc1b36a62cf0c244cb643">transpose8x1</a> (unsigned char *A, unsigned char *B)</td></tr>
+<tr class="memdesc:a621c13d8007fc1b36a62cf0c244cb643"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simplified form of bits rotating function.     <br /></td></tr>
+<tr class="separator:a621c13d8007fc1b36a62cf0c244cb643"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5798031ac62fda6b32523a468a1dbb74" id="r_a5798031ac62fda6b32523a468a1dbb74"><td class="memItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5798031ac62fda6b32523a468a1dbb74">transpose8x1_MSB</a> (unsigned char *A, unsigned char *B)</td></tr>
+<tr class="memdesc:a5798031ac62fda6b32523a468a1dbb74"><td class="mdescLeft">&#160;</td><td class="mdescRight">Simplified form of bits rotating function.  <br /></td></tr>
+<tr class="separator:a5798031ac62fda6b32523a468a1dbb74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8d834c97f99dae9d7136eca9d13caab" id="r_aa8d834c97f99dae9d7136eca9d13caab"><td class="memTemplParams" colspan="2">template&lt;int m, int n&gt; </td></tr>
+<tr class="memitem:aa8d834c97f99dae9d7136eca9d13caab"><td class="memTemplItemLeft" align="right" valign="top">FASTLED_FORCE_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#aa8d834c97f99dae9d7136eca9d13caab">transpose8</a> (unsigned char *A, unsigned char *B)</td></tr>
+<tr class="memdesc:aa8d834c97f99dae9d7136eca9d13caab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Templated bit-rotating function.  <br /></td></tr>
+<tr class="separator:aa8d834c97f99dae9d7136eca9d13caab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a289261c8a700608f3b0aa7a9b52dc90a" name="a289261c8a700608f3b0aa7a9b52dc90a"></a>
@@ -203,7 +204,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="unionbitswap__type.html" title="Union containing a full 8 bytes to swap the bit orientation on.">bitswap_type</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00100">100</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00101">101</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
 
 </div>
 </div>
@@ -240,7 +241,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="unionbitswap__type.html" title="Union containing a full 8 bytes to swap the bit orientation on.">bitswap_type</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00080">80</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00081">81</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
 
 </div>
 </div>
@@ -277,22 +278,19 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="unionbitswap__type.html" title="Union containing a full 8 bytes to swap the bit orientation on.">bitswap_type</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00090">90</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00091">91</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a0f8b24568aa5c3ea94c3c9f5833e5768" name="a0f8b24568aa5c3ea94c3c9f5833e5768"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0f8b24568aa5c3ea94c3c9f5833e5768">&#9670;&#160;</a></span>slowswap()</h2>
+<a id="a7c0838cd90f3f7d303fbba2c771a2716" name="a7c0838cd90f3f7d303fbba2c771a2716"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7c0838cd90f3f7d303fbba2c771a2716">&#9670;&#160;</a></span>slowswap()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void slowswap </td>
+          <td class="memname">FASTLED_FORCE_INLINE void slowswap </td>
           <td>(</td>
           <td class="paramtype">unsigned char *</td>          <td class="paramname"><span class="paramname"><em>A</em></span>, </td>
         </tr>
@@ -302,30 +300,22 @@ Functions</h2></td></tr>
           <td class="paramtype">unsigned char *</td>          <td class="paramname"><span class="paramname"><em>B</em></span>&#160;)</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Slow version of the 8 byte by 8 bit rotation. </p>
 
-<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00159">159</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00160">160</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
 
 </div>
 </div>
-<a id="abb49125d8b960e7c458d218f253ffbb7" name="abb49125d8b960e7c458d218f253ffbb7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abb49125d8b960e7c458d218f253ffbb7">&#9670;&#160;</a></span>swapbits8()</h2>
+<a id="a1f5a74d0ea3b3bfd42f0dd9c6d833873" name="a1f5a74d0ea3b3bfd42f0dd9c6d833873"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f5a74d0ea3b3bfd42f0dd9c6d833873">&#9670;&#160;</a></span>swapbits8()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void swapbits8 </td>
+          <td class="memname">FASTLED_FORCE_INLINE void swapbits8 </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="unionbitswap__type.html">bitswap_type</a></td>          <td class="paramname"><span class="paramname"><em>in</em></span>, </td>
         </tr>
@@ -335,32 +325,24 @@ Functions</h2></td></tr>
           <td class="paramtype"><a class="el" href="unionbitswap__type.html">bitswap_type</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Do an 8-byte by 8-bit rotation. </p>
 
-<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00111">111</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00112">112</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
 
 </div>
 </div>
-<a id="a15117b46590f77556edd32753cc5b871" name="a15117b46590f77556edd32753cc5b871"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15117b46590f77556edd32753cc5b871">&#9670;&#160;</a></span>transpose8()</h2>
+<a id="aa8d834c97f99dae9d7136eca9d13caab" name="aa8d834c97f99dae9d7136eca9d13caab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8d834c97f99dae9d7136eca9d13caab">&#9670;&#160;</a></span>transpose8()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;int m, int n&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void transpose8 </td>
+          <td class="memname">FASTLED_FORCE_INLINE void transpose8 </td>
           <td>(</td>
           <td class="paramtype">unsigned char *</td>          <td class="paramname"><span class="paramname"><em>A</em></span>, </td>
         </tr>
@@ -370,31 +352,23 @@ template&lt;int m, int n&gt; </div>
           <td class="paramtype">unsigned char *</td>          <td class="paramname"><span class="paramname"><em>B</em></span>&#160;)</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Templated bit-rotating function. </p>
 <p>Based on code found here: <a href="https://web.archive.org/web/20190108225554/http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt">https://web.archive.org/web/20190108225554/http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00250">250</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00251">251</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
 
 </div>
 </div>
-<a id="ac5b194f928be832ed71d5f7b2039e40f" name="ac5b194f928be832ed71d5f7b2039e40f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac5b194f928be832ed71d5f7b2039e40f">&#9670;&#160;</a></span>transpose8x1()</h2>
+<a id="a621c13d8007fc1b36a62cf0c244cb643" name="a621c13d8007fc1b36a62cf0c244cb643"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a621c13d8007fc1b36a62cf0c244cb643">&#9670;&#160;</a></span>transpose8x1()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void transpose8x1 </td>
+          <td class="memname">FASTLED_FORCE_INLINE void transpose8x1 </td>
           <td>(</td>
           <td class="paramtype">unsigned char *</td>          <td class="paramname"><span class="paramname"><em>A</em></span>, </td>
         </tr>
@@ -404,32 +378,24 @@ template&lt;int m, int n&gt; </div>
           <td class="paramtype">unsigned char *</td>          <td class="paramname"><span class="paramname"><em>B</em></span>&#160;)</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Simplified form of bits rotating function.    </p>
 <p>This rotates data into LSB for a faster write (the code using this data can happily walk the array backwards). <br  />
  Based on code found here: <a href="https://web.archive.org/web/20190108225554/http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt">https://web.archive.org/web/20190108225554/http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt</a>    </p>
 
-<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00190">190</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00191">191</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
 
 </div>
 </div>
-<a id="a0d739d880e97c40765e4eb2c449120d7" name="a0d739d880e97c40765e4eb2c449120d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d739d880e97c40765e4eb2c449120d7">&#9670;&#160;</a></span>transpose8x1_MSB()</h2>
+<a id="a5798031ac62fda6b32523a468a1dbb74" name="a5798031ac62fda6b32523a468a1dbb74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5798031ac62fda6b32523a468a1dbb74">&#9670;&#160;</a></span>transpose8x1_MSB()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void transpose8x1_MSB </td>
+          <td class="memname">FASTLED_FORCE_INLINE void transpose8x1_MSB </td>
           <td>(</td>
           <td class="paramtype">unsigned char *</td>          <td class="paramname"><span class="paramname"><em>A</em></span>, </td>
         </tr>
@@ -439,17 +405,12 @@ template&lt;int m, int n&gt; </div>
           <td class="paramtype">unsigned char *</td>          <td class="paramname"><span class="paramname"><em>B</em></span>&#160;)</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Simplified form of bits rotating function. </p>
 <p>Based on code found here: <a href="https://web.archive.org/web/20190108225554/http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt">https://web.archive.org/web/20190108225554/http://www.hackersdelight.org/hdcodetxt/transpose8.c.txt</a> </p>
 
-<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00216">216</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bitswap_8h_source.html#l00217">217</a> of file <a class="el" href="bitswap_8h_source.html">bitswap.h</a>.</p>
 
 </div>
 </div>
@@ -487,7 +448,7 @@ template&lt;int m, int n&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="bitswap_8h.html">bitswap.h</a></li>
-    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

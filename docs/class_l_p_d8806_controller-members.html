@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
    </div>
   </td>
  </tr>
@@ -142,9 +142,9 @@ $(function(){initNavTree('class_l_p_d8806_controller.html',''); initResizable(tr
   <tr class="odd"><td class="entry"><a class="el" href="class_c_l_e_d_controller.html#a6c8e2157d244ce8b1b878947ca7695d9">setLeds</a>(CRGB *data, int nLeds)</td><td class="entry"><a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_c_l_e_d_controller.html#aa400d68e05557c5e7d254b0d9080ab5f">setTemperature</a>(CRGB temperature)</td><td class="entry"><a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr class="odd"><td class="entry"><a class="el" href="class_c_l_e_d_controller.html#a0b9abe02a684f8d19e5d45f7cc37763a">setTemperature</a>(ColorTemperature temperature)</td><td class="entry"><a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_c_pixel_l_e_d_controller.html#a36cc2a15671bae0db53df1e26b4a813c">show</a>(const struct CRGB *data, int nLeds, CRGB scale)</td><td class="entry"><a class="el" href="class_c_pixel_l_e_d_controller.html">CPixelLEDController&lt; RGB &gt;</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_c_pixel_l_e_d_controller.html#a8e3edae00fb89f361a4af4caa39447e4">show</a>(const struct CRGB *data, int nLeds, CRGB scale_pre_mixed)</td><td class="entry"><a class="el" href="class_c_pixel_l_e_d_controller.html">CPixelLEDController&lt; RGB &gt;</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></td></tr>
   <tr class="odd"><td class="entry"><a class="el" href="class_c_l_e_d_controller.html#abe990b9a65f5bff1f391cc5c28752abb">CLEDController::show</a>(const struct CRGB *data, int nLeds, uint8_t brightness)</td><td class="entry"><a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
-  <tr class="even"><td class="entry"><a class="el" href="class_c_pixel_l_e_d_controller.html#af5569b9e92f75410e03c75bf5764e016">showColor</a>(const struct CRGB &amp;data, int nLeds, CRGB scale)</td><td class="entry"><a class="el" href="class_c_pixel_l_e_d_controller.html">CPixelLEDController&lt; RGB &gt;</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_c_pixel_l_e_d_controller.html#a2c8868bc240e4d48533b3746a2b32e94">showColor</a>(const struct CRGB &amp;data, int nLeds, CRGB scale_pre_mixed)</td><td class="entry"><a class="el" href="class_c_pixel_l_e_d_controller.html">CPixelLEDController&lt; RGB &gt;</a></td><td class="entry"><span class="mlabel">inline</span><span class="mlabel">protected</span><span class="mlabel">virtual</span></td></tr>
   <tr class="odd"><td class="entry"><a class="el" href="class_c_l_e_d_controller.html#a253069a734075b298da65d59d6efbb3b">CLEDController::showColor</a>(const struct CRGB &amp;data, int nLeds, uint8_t brightness)</td><td class="entry"><a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_c_l_e_d_controller.html#a4ccd149ab7282817041a1ae4e586a9d4">CLEDController::showColor</a>(const struct CRGB &amp;data, uint8_t brightness=255)</td><td class="entry"><a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr class="odd"><td class="entry"><a class="el" href="class_c_l_e_d_controller.html#aa4124b1cf5546ad028166e7884276076">showLeds</a>(uint8_t brightness=255)</td><td class="entry"><a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
@@ -157,7 +157,7 @@ $(function(){initNavTree('class_l_p_d8806_controller.html',''); initResizable(tr
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Sep 3 2024 02:36:12 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

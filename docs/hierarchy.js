@@ -4,6 +4,7 @@ var hierarchy =
     [ "AVRSoftwareSPIOutput< DATA_PIN, CLOCK_PIN, SPI_SPEED >", "class_a_v_r_software_s_p_i_output.html", null ],
     [ "AVRSoftwareSPIOutput< _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER >", "class_a_v_r_software_s_p_i_output.html", [
       [ "SPIOutput< DATA_PIN, CLOCK_PIN, SPI_SPEED >", "class_s_p_i_output.html", null ],
+      [ "SPIOutput< DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(6) >", "class_s_p_i_output.html", null ],
       [ "SPIOutput< DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(12) >", "class_s_p_i_output.html", null ],
       [ "SPIOutput< DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(10) >", "class_s_p_i_output.html", null ],
       [ "SPIOutput< DATA_PIN, CLOCK_PIN, DATA_RATE_MHZ(16) >", "class_s_p_i_output.html", null ],
@@ -30,13 +31,13 @@ var hierarchy =
         [ "WS2801Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_w_s2801_controller.html", null ]
       ] ],
       [ "CPixelLEDController< RGB_ORDER, LANES, MASK >", "class_c_pixel_l_e_d_controller.html", [
-        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_BitShift, uint32_t(0x00000000), uint32_t(0x00000000)>", "class_a_p_a102_controller.html", [
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(6), kFiveBitGammaCorrectionMode_BitShift, uint32_t(0x00000000), uint32_t(0x00000000)>", "class_a_p_a102_controller.html", [
           [ "APA102ControllerHD< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_a_p_a102_controller_h_d.html", null ]
         ] ],
-        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_Null, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", [
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(12), kFiveBitGammaCorrectionMode_Null, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", [
           [ "SK9822Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller.html", null ]
         ] ],
-        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(24), kFiveBitGammaCorrectionMode_BitShift, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", [
+        [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(12), kFiveBitGammaCorrectionMode_BitShift, 0x00000000, 0x00000000 >", "class_a_p_a102_controller.html", [
           [ "SK9822ControllerHD< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_k9822_controller_h_d.html", null ]
         ] ],
         [ "DMXSerialController< RGB_ORDER >", "class_d_m_x_serial_controller.html", [

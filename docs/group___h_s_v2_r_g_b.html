@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.5</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
    </div>
   </td>
  </tr>
@@ -155,6 +155,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga704160ddb9173c3420a3dbfb44674440" id="r_ga704160ddb9173c3420a3dbfb44674440"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ga704160ddb9173c3420a3dbfb44674440">hsv2rgb_spectrum</a> (const struct <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;hsv, struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> &amp;rgb)</td></tr>
 <tr class="memdesc:ga704160ddb9173c3420a3dbfb44674440"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert an HSV value to RGB using a mathematically straight spectrum.  <br /></td></tr>
 <tr class="separator:ga704160ddb9173c3420a3dbfb44674440"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa9d490009cb1d6ea0491e60b724d360f" id="r_gaa9d490009cb1d6ea0491e60b724d360f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_c_r_g_b.html">CRGB</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaa9d490009cb1d6ea0491e60b724d360f">hsv2rgb_spectrum</a> (const struct <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;hsv)</td></tr>
+<tr class="memdesc:gaa9d490009cb1d6ea0491e60b724d360f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inline version of hsv2rgb_spectrum which returns a <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object.  <br /></td></tr>
+<tr class="separator:gaa9d490009cb1d6ea0491e60b724d360f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaabe3b0d539d6e15bc4ba86e10ec98fcc" id="r_gaabe3b0d539d6e15bc4ba86e10ec98fcc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaabe3b0d539d6e15bc4ba86e10ec98fcc">hsv2rgb_spectrum</a> (const struct <a class="el" href="struct_c_h_s_v.html">CHSV</a> *phsv, struct <a class="el" href="struct_c_r_g_b.html">CRGB</a> *prgb, int numLeds)</td></tr>
 <tr class="memdesc:gaabe3b0d539d6e15bc4ba86e10ec98fcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert an HSV value to RGB using a mathematically straight spectrum.     <br /></td></tr>
 <tr class="separator:gaabe3b0d539d6e15bc4ba86e10ec98fcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -183,7 +186,7 @@ Functions</h2></td></tr>
 
 <p>Max hue accepted for the <a class="el" href="#ga66f61978949a6830b138d1bf08257019" title="Convert an HSV value to RGB using a mathematically straight spectrum.">hsv2rgb_raw()</a> function. </p>
 
-<p class="definition">Definition at line <a class="el" href="hsv2rgb_8h_source.html#l00126">126</a> of file <a class="el" href="hsv2rgb_8h_source.html">hsv2rgb.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hsv2rgb_8h_source.html#l00133">133</a> of file <a class="el" href="hsv2rgb_8h_source.html">hsv2rgb.h</a>.</p>
 
 </div>
 </div>
@@ -219,7 +222,7 @@ Functions</h2></td></tr>
 
 <p>Max hue accepted for the <a class="el" href="#ga704160ddb9173c3420a3dbfb44674440" title="Convert an HSV value to RGB using a mathematically straight spectrum.">hsv2rgb_spectrum()</a> function. </p>
 
-<p class="definition">Definition at line <a class="el" href="hsv2rgb_8h_source.html#l00105">105</a> of file <a class="el" href="hsv2rgb_8h_source.html">hsv2rgb.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="hsv2rgb_8h_source.html#l00112">112</a> of file <a class="el" href="hsv2rgb_8h_source.html">hsv2rgb.h</a>.</p>
 
 </div>
 </div>
@@ -368,8 +371,37 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="gaa9d490009cb1d6ea0491e60b724d360f" name="gaa9d490009cb1d6ea0491e60b724d360f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa9d490009cb1d6ea0491e60b724d360f">&#9670;&#160;</a></span>hsv2rgb_spectrum() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_c_r_g_b.html">CRGB</a> hsv2rgb_spectrum </td>
+          <td>(</td>
+          <td class="paramtype">const struct <a class="el" href="struct_c_h_s_v.html">CHSV</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>hsv</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Inline version of hsv2rgb_spectrum which returns a <a class="el" href="struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> object. </p>
+
+<p class="definition">Definition at line <a class="el" href="hsv2rgb_8h_source.html#l00098">98</a> of file <a class="el" href="hsv2rgb_8h_source.html">hsv2rgb.h</a>.</p>
+
+</div>
+</div>
 <a id="ga704160ddb9173c3420a3dbfb44674440" name="ga704160ddb9173c3420a3dbfb44674440"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga704160ddb9173c3420a3dbfb44674440">&#9670;&#160;</a></span>hsv2rgb_spectrum() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ga704160ddb9173c3420a3dbfb44674440">&#9670;&#160;</a></span>hsv2rgb_spectrum() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -404,7 +436,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="gaabe3b0d539d6e15bc4ba86e10ec98fcc" name="gaabe3b0d539d6e15bc4ba86e10ec98fcc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaabe3b0d539d6e15bc4ba86e10ec98fcc">&#9670;&#160;</a></span>hsv2rgb_spectrum() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#gaabe3b0d539d6e15bc4ba86e10ec98fcc">&#9670;&#160;</a></span>hsv2rgb_spectrum() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -483,7 +515,7 @@ Functions</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Tue Sep 3 2024 02:36:11 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

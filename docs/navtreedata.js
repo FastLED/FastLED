@@ -26,20 +26,24 @@ var NAVTREE =
 [
   [ "FastLED", "index.html", [
     [ "About", "index.html#autotoc_md0", null ],
-    [ "Board Support", "index.html#autotoc_md1", null ],
-    [ "x86", "index.html#autotoc_md7", null ],
-    [ "Getting Started", "index.html#autotoc_md8", [
-      [ "Arduino IDE / PlatformIO Dual Repo", "index.html#autotoc_md9", null ],
-      [ "ArduinoIDE", "index.html#autotoc_md10", null ]
+    [ "[Examples](examples)", "index.html#autotoc_md1", null ],
+    [ "Board Support", "index.html#autotoc_md2", null ],
+    [ "x86", "index.html#autotoc_md8", null ],
+    [ "Compiled Library Size Check", "index.html#autotoc_md9", null ],
+    [ "Getting Started", "index.html#autotoc_md10", [
+      [ "Arduino IDE / PlatformIO Dual Repo", "index.html#autotoc_md11", null ],
+      [ "ArduinoIDE", "index.html#autotoc_md12", null ]
     ] ],
-    [ "Development", "index.html#autotoc_md11", null ],
-    [ "Help and Support", "index.html#autotoc_md12", null ],
-    [ "Supported LED Chipsets", "index.html#autotoc_md13", null ],
-    [ "Supported Platforms", "index.html#autotoc_md14", [
-      [ "Porting FastLED to a new platform", "index.html#autotoc_md15", null ]
+    [ "Development", "index.html#autotoc_md13", [
+      [ "Testing other devices", "index.html#autotoc_md14", null ]
     ] ],
-    [ "What about that name?", "index.html#autotoc_md16", null ],
-    [ "For more information", "index.html#autotoc_md17", null ],
+    [ "Help and Support", "index.html#autotoc_md15", null ],
+    [ "Supported LED Chipsets", "index.html#autotoc_md16", null ],
+    [ "Supported Platforms", "index.html#autotoc_md17", [
+      [ "Porting FastLED to a new platform", "index.html#autotoc_md18", null ]
+    ] ],
+    [ "What about that name?", "index.html#autotoc_md19", null ],
+    [ "For more information", "index.html#autotoc_md20", null ],
     [ "Todo List", "todo.html", null ],
     [ "Deprecated List", "deprecated.html", null ],
     [ "Topics", "topics.html", "topics" ],
@@ -75,12 +79,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "1653___s3___apa102___hardware___pins_8ino_source.html",
-"class_c_h_s_v_palette32.html#a7c50a7c321a9faad6335600e6bd82ca5",
-"class_g_s1903.html",
-"fastspi__nop_8h_source.html",
-"group___h_s_v2_r_g_b.html#ga25585eb2c24bd5f1b3b292dce24da048",
-"led__sysdefs_8h.html#ad469b729e752d3920e3cd5bfaf9febe9",
-"struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ae4ca615b1f19603975fb715108ecb20a"
+"class_c_h_s_v_palette32.html#a7bc32b739dea0f7dfbbe7706c24e13e4",
+"class_g_e8822_controller800_khz.html",
+"fastspi__dma_8h_source.html",
+"group___gamma_funcs.html#gab78df04338197d73f7cc0e49eb28ead5",
+"index.html#autotoc_md17",
+"struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99acc56fb672d5ce34230c171fb1f61a432"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
