@@ -1,3 +1,4 @@
 #!/bin/bash
 
-cd ci/native && pio run
+set -e
+uv run ci/ci-compile-native.py
