@@ -38,22 +38,18 @@ void RmtController::initPulseBuffer(int size_in_bytes) {
     pImpl->initPulseBuffer(size_in_bytes);
 }
 
-    void RmtController::showPixels(PixelIterator &pixels)
-    {
-        if (mIsRgbw) {
-            pixels.set_rgbw({mColorTemp, mRgbwMode});
-        }
-        
-        if (built_in_driver())
-        {
-            loadAllPixelsToRmtSymbolData(pixels);
-        }
-        else
-        {
-            loadPixelDataForStreamEncoding(pixels);
-        }
-        showPixels();
+void RmtController::showPixels(PixelIterator &pixels) {
+    if (mIsRgbw) {
+        pixels.set_rgbw({mColorTemp, mRgbwMode});
     }
+
+    if (built_in_driver()) {
+        loadAllPixelsToRmtSymbolData(pixels);
+    } else {
+        loadPixelDataForStreamEncoding(pixels);
+    }
+    showPixels();
+}
 
 void RmtController::loadAllPixelsToRmtSymbolData(PixelIterator &pixels) {
     // -- Make sure the data buffer is allocated
@@ -102,8 +98,7 @@ void RmtController::loadPixelDataForStreamEncoding(PixelIterator &pixels) {
         }
     } else {
         while (pixels.has(1)) {
-            pixels.loadAndScaleRGBW(pData, pData + 1,
-                                    pData + 2, pData + 3);
+            pixels.loadAndScaleRGBW(pData, pData + 1, pData + 2, pData + 3);
             pData += 4;
             pixels.advanceData();
             pixels.stepDithering();
