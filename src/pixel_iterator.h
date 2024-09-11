@@ -10,6 +10,9 @@
 FASTLED_NAMESPACE_BEGIN
 
 struct RgbwArg {
+    explicit RgbwArg(uint16_t white_color_temp = kRGBWDefaultColorTemp,
+                      RGBW_MODE rgbw_mode = kRGBWExactColors)
+        : white_color_temp(white_color_temp), rgbw_mode(rgbw_mode) {}
     uint16_t white_color_temp = kRGBWDefaultColorTemp;
     RGBW_MODE rgbw_mode = kRGBWExactColors;
 };
