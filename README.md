@@ -81,7 +81,7 @@ void loop() {
 
 
 [![nano_every](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml)
-Actually works but one of the tests uses a pin that is invalid on this device.
+This used to work, but an atmel update broke the pins. See issue https://github.com/FastLED/FastLED/issues/716
 
 #### Teensy
 [![teensy30](https://github.com/FastLED/FastLED/actions/workflows/build_teensy30.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_teensy30.yml)
