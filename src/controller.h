@@ -54,11 +54,14 @@ protected:
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
 
 public:
+
+#ifndef __AVR__
     RgbwArg mRgbMode = RgbwArgInvalid::value();
     void setRgbwMode(RgbwArg arg = RgbwDefault::value()) {
         mRgbMode = arg;
     }
     RgbwArg getRgbwMode() const { return mRgbMode; }
+#endif
 
     /// Create an led controller object, add it to the chain of controllers
     CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
