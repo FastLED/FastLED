@@ -40,7 +40,8 @@ void RmtController::initPulseBuffer(int size_in_bytes) {
 
 void RmtController::showPixels(PixelIterator &pixels) {
     if (mIsRgbw) {
-        pixels.set_rgbw({mColorTemp, mRgbwMode});
+        RgbwArg rgbw_arg = {mColorTemp, mRgbwMode};
+        pixels.set_rgbw(rgbw_arg);
     }
 
     if (built_in_driver()) {
