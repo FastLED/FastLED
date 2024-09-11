@@ -11,6 +11,7 @@ struct RgbwArg {
 };
 
 struct RgbwArgInvalid {
+    static RgbwArg as_base_class() { return {kRGBWDefaultColorTemp, kRGBWInvalid}; }
     uint16_t white_color_temp = kRGBWDefaultColorTemp;
     RGBW_MODE rgbw_mode = kRGBWInvalid;
 };

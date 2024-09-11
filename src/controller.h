@@ -12,6 +12,7 @@
 #include "force_inline.h"
 #include "pixel_controller.h"
 #include "dither_mode.h"
+#include "pixel_iterator.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -38,6 +39,13 @@ protected:
     int m_nLeds;               ///< the number of LEDs in the LED data array
     static CLEDController *m_pHead;  ///< pointer to the first LED controller in the linked list
     static CLEDController *m_pTail;  ///< pointer to the last LED controller in the linked list
+
+    RgbwArg mRgbMode = RgbwArgInvalid::as_base_class();
+    void setRgbwMode(RGBW_MODE rgbw_mode, uint16_t white_color_temp) {
+        mRgbMode = {white_color_temp, rgbw_mode};
+    }
+    uint16_t getWhiteColorTemp() const { return mRgbMode.white_color_temp; }
+    RGBW_MODE getRgbwMode() const { return mRgbMode.rgbw_mode; }
 
     /// Set all the LEDs to a given color. 
     /// @param data the CRGB color to set the LEDs to
