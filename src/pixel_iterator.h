@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <string.h>
 
+FASTLED_NAMESPACE_BEGIN
+
 struct RgbwArg {
     uint16_t white_color_temp = kRGBWDefaultColorTemp;
     RGBW_MODE rgbw_mode = kRGBWExactColors;
@@ -67,3 +69,5 @@ class PixelIterator {
   protected:
     RgbwArg mRgbw;
 };
+
+FASTLED_NAMESPACE_END
