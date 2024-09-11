@@ -103,6 +103,10 @@
 #pragma message "NOTE: ESP32 support using I2S parallel driver. All strips must use the same chipset"
 #endif
 
+#include "namespace.h"
+#include "eorder.h"
+#include "i2s.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #ifdef __cplusplus
@@ -273,20 +277,7 @@ public:
     virtual uint16_t getMaxRefreshRate() const { return 400; }
     
 protected:
-   static int pgcd(int smallest,int precision,int a,int b,int c)
-    {
-        int pgc_=1;
-        for( int i=smallest;i>0;--i)
-        {
-            
-            if( a%i<=precision && b%i<=precision && c%i<=precision)
-            {
-                pgc_=i;
-                break;
-            }
-        }
-        return pgc_;
-    }
+
     
     /** Compute pules/bit patterns
      *
@@ -360,7 +351,7 @@ protected:
          
          */
         
-         CLOCK_DIVIDER_N=(int)((double)I2S_BASE_CLK/freq);
+        CLOCK_DIVIDER_N=(int)((double)I2S_BASE_CLK/freq);
         double v=I2S_BASE_CLK/freq-CLOCK_DIVIDER_N;
 
         double prec=(double)1/63;
