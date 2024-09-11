@@ -66,7 +66,7 @@ void loop() {
 ```
 
 
-## Board Support
+## Supported Platforms
 #### Arduino
 
 [![uno](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml)
