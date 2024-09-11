@@ -23,7 +23,6 @@ enum {
     kRGBWDefaultColorTemp = 6000,
 };
 
-
 typedef void (*rgb_2_rgbw_function)(
     uint16_t w_color_temperature,
     uint8_t r, uint8_t g, uint8_t b,
