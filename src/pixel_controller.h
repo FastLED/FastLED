@@ -481,7 +481,11 @@ struct PixelController: protected PixelIterator {  // to get PixelIterator use a
     FASTLED_FORCE_INLINE void loadAndScaleRGBW(
             uint16_t white_color_temp,
             uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
+        const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
+        const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
+        const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
         CRGB rgb = CRGB(mData[0], mData[1], mData[2]);  // Raw RGB values in native r,g,b ordering.
+        #ifndef __AVR__
         uint8_t w = 0;
         rgb_2_rgbw<MODE>(
             white_color_temp,
@@ -489,14 +493,19 @@ struct PixelController: protected PixelIterator {  // to get PixelIterator use a
             mScale.r, mScale.g, mScale.b,
             &rgb.r, &rgb.g, &rgb.b, &w
         );
-        const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
-        const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
-        const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
         *b0_out = rgb.raw[b0_index];
         *b1_out = rgb.raw[b1_index];
         *b2_out = rgb.raw[b2_index];
         // Assume the w component is the last byte in the data stream and never reordered.
         *w_out = w;
+        #else
+        *b0_out = rgb.raw[b0_index];
+        *b1_out = rgb.raw[b1_index];
+        *b2_out = rgb.raw[b2_index];
+        // Assume the w component is the last byte in the data stream and never reordered.
+        *w_out = 0;
+        #endif
+        
     }
 
     FASTLED_FORCE_INLINE void loadAndScale_APA102_HD(
