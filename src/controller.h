@@ -40,11 +40,6 @@ protected:
     static CLEDController *m_pHead;  ///< pointer to the first LED controller in the linked list
     static CLEDController *m_pTail;  ///< pointer to the last LED controller in the linked list
 
-    RgbwArg mRgbMode = RgbwArgInvalid::as_base_class();
-    void setRgbwMode(RgbwArg arg) {
-        mRgbMode = arg;
-    }
-    RgbwArg getRgbwMode() const { return mRgbMode; }
 
     /// Set all the LEDs to a given color. 
     /// @param data the CRGB color to set the LEDs to
@@ -59,6 +54,12 @@ protected:
     virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
 
 public:
+    RgbwArg mRgbMode = RgbwArgInvalid::value();
+    void setRgbwMode(RgbwArg arg = RgbwDefault::value()) {
+        mRgbMode = arg;
+    }
+    RgbwArg getRgbwMode() const { return mRgbMode; }
+
     /// Create an led controller object, add it to the chain of controllers
     CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
         m_pNext = NULL;

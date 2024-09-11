@@ -1,10 +1,10 @@
 
 #pragma once
 
+#include "namespace.h"
 #include "rgb_2_rgbw.h"
 #include <stddef.h>
 #include <stdint.h>
-#include "namespace.h"
 #include <string.h>
 
 struct RgbwArg {
@@ -12,17 +12,27 @@ struct RgbwArg {
     RGBW_MODE rgbw_mode = kRGBWExactColors;
 };
 
-struct RgbwArgInvalid: public RgbwArg {
+struct RgbwArgInvalid : public RgbwArg {
     RgbwArgInvalid() {
         white_color_temp = kRGBWDefaultColorTemp;
         rgbw_mode = kRGBWInvalid;
     }
-    static RgbwArg as_base_class() {
+    static RgbwArg value() {
         RgbwArgInvalid invalid;
         return invalid;
     }
 };
 
+struct RgbwDefault : public RgbwArg {
+    RgbwDefault() {
+        white_color_temp = kRGBWDefaultColorTemp;
+        rgbw_mode = kRGBWExactColors;
+    }
+    static RgbwArg value() {
+        RgbwDefault _default;
+        return _default;
+    }
+};
 
 // Abstract class
 class PixelIterator {
