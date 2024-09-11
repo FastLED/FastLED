@@ -40,7 +40,7 @@ struct RgbwDefault : public RgbwArg {
 class PixelIterator {
   public:
     virtual ~PixelIterator();
-    explicit PixelIterator(RgbwArg rgbw_arg = {}) : mRgbw(rgbw_arg) {}
+    explicit PixelIterator(RgbwArg rgbw_arg = RgbwArgInvalid::value()) : mRgbw(rgbw_arg) {}
     virtual bool has(int n) = 0;
     // loadAndScaleRGBW
     virtual void loadAndScaleRGBW(uint8_t *b0_out, uint8_t *b1_out,
