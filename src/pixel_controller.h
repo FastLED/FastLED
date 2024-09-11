@@ -85,8 +85,9 @@ struct PixelController: protected PixelIterator {  // to get PixelIterator use a
     //
     // Most of the complexity of PixelController is targeted at supporting the AVR chipsets
     // with tight timing requirements and has to remain here for legacy purposes.
-    PixelIterator& as_iterator() {
+    PixelIterator& as_iterator(RgbwArg rgbw) {
         PixelIterator& out = *this;
+        out.set_rgbw(rgbw);
         return *this;
     }
 

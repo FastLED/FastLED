@@ -41,11 +41,10 @@ protected:
     static CLEDController *m_pTail;  ///< pointer to the last LED controller in the linked list
 
     RgbwArg mRgbMode = RgbwArgInvalid::as_base_class();
-    void setRgbwMode(RGBW_MODE rgbw_mode, uint16_t white_color_temp) {
-        mRgbMode = {white_color_temp, rgbw_mode};
+    void setRgbwMode(RgbwArg arg) {
+        mRgbMode = arg;
     }
-    uint16_t getWhiteColorTemp() const { return mRgbMode.white_color_temp; }
-    RGBW_MODE getRgbwMode() const { return mRgbMode.rgbw_mode; }
+    RgbwArg getRgbwMode() const { return mRgbMode; }
 
     /// Set all the LEDs to a given color. 
     /// @param data the CRGB color to set the LEDs to

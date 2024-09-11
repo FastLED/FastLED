@@ -286,7 +286,8 @@ public:
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-		PixelIterator& pixel_iterator = pixels.getPixelIterator();
+		RgbwArg rgbw = this->getRgbwMode();
+		PixelIterator& pixel_iterator = pixels.as_iterator(rgbw);
 		switch (GAMMA_CORRECTION_MODE) {
 			case kFiveBitGammaCorrectionMode_Null: {
 				showPixelsDefault(pixel_iterator);

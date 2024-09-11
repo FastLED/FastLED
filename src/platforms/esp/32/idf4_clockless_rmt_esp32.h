@@ -109,7 +109,8 @@ protected:
     //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels)
     {
-        mRMTController.showPixels(pixels.as_iterator());
+        RgbwArg rgbw = this->getRgbwMode();
+        mRMTController.showPixels(pixels.as_iterator(rgbw));
     }
 };
 

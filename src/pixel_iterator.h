@@ -4,16 +4,23 @@
 #include "rgb_2_rgbw.h"
 #include <stddef.h>
 #include <stdint.h>
+#include "namespace.h"
+#include <string.h>
 
 struct RgbwArg {
     uint16_t white_color_temp = kRGBWDefaultColorTemp;
     RGBW_MODE rgbw_mode = kRGBWExactColors;
 };
 
-struct RgbwArgInvalid {
-    static RgbwArg as_base_class() { return {kRGBWDefaultColorTemp, kRGBWInvalid}; }
-    uint16_t white_color_temp = kRGBWDefaultColorTemp;
-    RGBW_MODE rgbw_mode = kRGBWInvalid;
+struct RgbwArgInvalid: public RgbwArg {
+    RgbwArgInvalid() {
+        white_color_temp = kRGBWDefaultColorTemp;
+        rgbw_mode = kRGBWInvalid;
+    }
+    static RgbwArg as_base_class() {
+        RgbwArgInvalid invalid;
+        return invalid;
+    }
 };
 
 
