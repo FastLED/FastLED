@@ -145,18 +145,7 @@ public:
         uint16_t white_color_temp);
     ~RmtController();
 
-    void showPixels(PixelIterator &pixels)
-    {
-        if (built_in_driver())
-        {
-            loadAllPixelsToRmtSymbolData(pixels);
-        }
-        else
-        {
-            loadPixelDataForStreamEncoding(pixels);
-        }
-        showPixels();
-    }
+    void showPixels(PixelIterator &pixels);
 
 private:
     void ingest(uint8_t val);
@@ -164,69 +153,9 @@ private:
     bool built_in_driver();
     uint8_t *getPixelBuffer(int size_in_bytes);
     void initPulseBuffer(int size_in_bytes);
-    void loadAllPixelsToRmtSymbolData(PixelIterator& pixels)
-    {
-        // -- Make sure the data buffer is allocated
-        const int bytes_per_pixel = mIsRgbw ? 4 : 3;
-        const int size = pixels.size() * bytes_per_pixel;
-        initPulseBuffer(size);
+    void loadAllPixelsToRmtSymbolData(PixelIterator& pixels);
 
-        // -- Cycle through the R,G, B (and W) values in the right order,
-        //    storing the pulses in the big buffer
-        if (!mIsRgbw)
-        {
-            while (pixels.has(1))
-            {
-                uint8_t r, g, b;
-                pixels.loadAndScaleRGB(&r, &g, &b);
-                ingest(r);
-                ingest(g);
-                ingest(b);
-                pixels.advanceData();
-                pixels.stepDithering();
-            }
-        }
-        else
-        {
-            while (pixels.has(1))
-            {
-                uint8_t r, g, b, w;
-                pixels.loadAndScaleRGBW(mRgbwMode, mColorTemp, &r, &g, &b, &w);
-                ingest(r);
-                ingest(g);
-                ingest(b);
-                ingest(w);
-                pixels.advanceData();
-                pixels.stepDithering();
-            }
-        }
-    }
-
-    void loadPixelDataForStreamEncoding(PixelIterator& pixels)
-    {
-        // -- Make sure the buffer is allocated
-        const int size_per_pixel = mIsRgbw ? 4 : 3;
-        const int size_in_bytes = pixels.size() * size_per_pixel;
-        uint8_t *pData = getPixelBuffer(size_in_bytes);
-
-        if (!mIsRgbw) {
-            while (pixels.has(1))
-            {
-                pixels.loadAndScaleRGB(pData, pData + 1, pData + 2);
-                pData += 3;
-                pixels.advanceData();
-                pixels.stepDithering();
-            }
-        } else {
-            while (pixels.has(1))
-            {
-                pixels.loadAndScaleRGBW(mRgbwMode, mColorTemp, pData, pData + 1, pData + 2, pData + 3);
-                pData += 4;
-                pixels.advanceData();
-                pixels.stepDithering();
-            }
-        }
-    }
+    void loadPixelDataForStreamEncoding(PixelIterator& pixels);
     ESP32RMTController *pImpl = nullptr;
     bool mIsRgbw = false;
     RGBW_MODE mRgbwMode = kRGBWInvalid;
