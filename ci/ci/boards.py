@@ -9,6 +9,7 @@ from dataclasses import dataclass
 # Set to a specific release, we may want to update this in the future.
 ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
 ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32.git#develop"
+ESP32_IDF_ARDUINO_LATEST = "platformio/espressif32"
 # Top of trunk.
 # ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32"
 
@@ -52,7 +53,7 @@ class Board:
 
 ESP32DEV = Board(
     board_name="esp32dev",
-    platform=ESP32_IDF_5_1,
+    platform=ESP32_IDF_ARDUINO_LATEST,
 )
 
 # ESP01 = Board(
