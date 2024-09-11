@@ -108,6 +108,8 @@ FASTLED_NAMESPACE_BEGIN
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "esp_idf_version.h"
     
 #include "esp_heap_caps.h"
 #include "soc/soc.h"
@@ -116,7 +118,13 @@ extern "C" {
 #include "soc/i2s_struct.h"
 #include "soc/io_mux_reg.h"
 #include "driver/gpio.h"
+
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
+#include "esp_private/periph_ctrl.h"
+#else
 #include "driver/periph_ctrl.h"
+#endif
+
 #include "rom/lldesc.h"
 #include "esp_system.h" // Load ESP_IDF_VERSION_MAJOR if exists
 // ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
