@@ -6,21 +6,15 @@
 #include <stdint.h>
 
 struct RgbwArg {
-    uint16_t white_color_temp;
-    RGBW_MODE rgbw_mode;
+    uint16_t white_color_temp = kRGBWDefaultColorTemp;
+    RGBW_MODE rgbw_mode = kRGBWExactColors;
 };
 
-struct RgbwDefault: public RgbwArg {
-    RgbwDefault() {
-        white_color_temp = kRGBWDefaultColorTemp;
-        rgbw_mode = kRGBWInvalid;
-    }
-};
 
 // Abstract class
 class PixelIterator {
   public:
-    explicit PixelIterator(RgbwArg rgbw_arg = RgbwDefault()) : mRgbw(rgbw_arg) {}
+    explicit PixelIterator(RgbwArg rgbw_arg = {}) : mRgbw(rgbw_arg) {}
     virtual bool has(int n) = 0;
     // loadAndScaleRGBW
     virtual void loadAndScaleRGBW(uint8_t *b0_out,
