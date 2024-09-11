@@ -26,7 +26,7 @@ We have multiple goals with this library:
 ## Example
 
 Examples [link](examples)
-
+*This is an Arduino Sketch that will run on Arduino Uno/Esp32/Raspberri Pi*
 ```C++
 /// Blink red then off.
 
