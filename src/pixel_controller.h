@@ -53,7 +53,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam LANES how many parallel lanes of output to write
 /// @tparam MASK bitmask for the output lanes
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF>
-struct PixelController: public PixelIterator {
+struct PixelController: protected PixelIterator {  // to get PixelIterator use as_iterator().
     const uint8_t *mData;    ///< pointer to the underlying LED data
     int mLen;                ///< number of LEDs in the data for one lane
     int mLenRemaining;       ///< counter for the number of LEDs left to process
@@ -79,12 +79,16 @@ struct PixelController: public PixelIterator {
         for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
     }
 
+
     // New chipsets/drivers should use as_iterator() to process led output.
     // Accessing PixelController directly from user code deprecated, and should be minimized.
     //
     // Most of the complexity of PixelController is targeted at supporting the AVR chipsets
     // with tight timing requirements and has to remain here for legacy purposes.
-    PixelIterator& as_iterator() { return *this; }
+    PixelIterator& as_iterator() {
+        PixelIterator& out = *this;
+        return *this;
+    }
 
     /// Initialize the PixelController::mOffsets array based on the length of the strip
     /// @param len the number of LEDs in one lane of the strip
