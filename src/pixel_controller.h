@@ -79,6 +79,13 @@ struct PixelController: public PixelIterator {
         for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
     }
 
+    // New chipsets/drivers should use as_iterator() to process led output.
+    // Accessing PixelController directly from user code deprecated, and should be minimized.
+    //
+    // Most of the complexity of PixelController is targeted at supporting the AVR chipsets
+    // with tight timing requirements and has to remain here for legacy purposes.
+    PixelIterator& as_iterator() { return *this; }
+
     /// Initialize the PixelController::mOffsets array based on the length of the strip
     /// @param len the number of LEDs in one lane of the strip
     void initOffsets(int len) {

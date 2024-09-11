@@ -286,13 +286,14 @@ public:
 protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+		PixelIterator& pixel_iterator = pixels.getPixelIterator();
 		switch (GAMMA_CORRECTION_MODE) {
 			case kFiveBitGammaCorrectionMode_Null: {
-				showPixelsDefault(pixels);
+				showPixelsDefault(pixel_iterator);
 				break;
 			}
 			case kFiveBitGammaCorrectionMode_BitShift: {
-				showPixelsGammaBitShift(pixels);
+				showPixelsGammaBitShift(pixel_iterator);
 				break;
 			}
 		}
@@ -301,12 +302,12 @@ protected:
 private:
 
 	static inline void getGlobalBrightnessAndScalingFactors(
-		    PixelController<RGB_ORDER>& pixels,
+		    PixelIterator& pixels,
 		    uint8_t* out_s0, uint8_t* out_s1, uint8_t* out_s2, uint8_t* out_brightness) {
-		uint8_t s0 = pixels.getScale0();
-		uint8_t s1 = pixels.getScale1();
-		uint8_t s2 = pixels.getScale2();
+		uint8_t s0, s1, s2;
+		pixels.loadAndScaleRGB(&s0, &s1, &s2);
 #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
+		// This function is pure magic.
 		const uint16_t maxBrightness = 0x1F;
 		uint16_t brightness = ((((uint16_t)max(max(s0, s1), s2) + 1) * maxBrightness - 1) >> 8) + 1;
 		s0 = (maxBrightness * s0 + (brightness >> 1)) / brightness;
@@ -322,15 +323,14 @@ private:
 	}
 
 	// Legacy showPixels implementation.
-	inline void showPixelsDefault(PixelController<RGB_ORDER> & pixels) {
+	inline void showPixelsDefault(PixelIterator& pixels) {
 		mSPI.select();
 		uint8_t s0, s1, s2, global_brightness;
 		getGlobalBrightnessAndScalingFactors(pixels, &s0, &s1, &s2, &global_brightness);
 		startBoundary();
 		while (pixels.has(1)) {
-			uint8_t c0 = pixels.loadAndScale0(0, s0);
-			uint8_t c1 = pixels.loadAndScale1(0, s1);
-			uint8_t c2 = pixels.loadAndScale2(0, s2);
+			uint8_t c0, c1, c2;
+			pixels.loadAndScaleRGB(&c0, &c1, &c2);
 			writeLed(global_brightness, c0, c1, c2);
 			pixels.stepDithering();
 			pixels.advanceData();
@@ -341,7 +341,7 @@ private:
 		mSPI.release();
 	}
 
-	inline void showPixelsGammaBitShift(PixelController<RGB_ORDER> & pixels) {
+	inline void showPixelsGammaBitShift(PixelIterator& pixels) {
 		mSPI.select();
 		startBoundary();
 		while (pixels.has(1)) {

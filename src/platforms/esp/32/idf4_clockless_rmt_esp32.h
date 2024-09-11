@@ -109,8 +109,7 @@ protected:
     //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels)
     {
-        PixelIterator& pixel_iterator = pixels;
-        mRMTController.showPixels(pixel_iterator);
+        mRMTController.showPixels(pixels.as_iterator());
     }
 };
 
