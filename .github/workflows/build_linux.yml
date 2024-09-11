@@ -21,10 +21,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install PlatformIO build dependencies
-        run: |
-          pip install .
+      - name: Install UV
+        run: pip install uv
 
       - name: Run Native Build
         run: |
-          cd ci/native && pio run
+          uv run ci/ci-compile-native.py
