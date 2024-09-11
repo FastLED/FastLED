@@ -124,7 +124,7 @@ This used to work, but an atmel update broke the pins. See issue https://github.
 [![esp32dev](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml)
 
 
-[![esp32s2wroom](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2wroom.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32s2wroom.yml)
+[![esp32wroom](https://github.com/FastLED/FastLED/actions/workflows/build_esp32wroom.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32wroom.yml)
 
 
 [![esp32c2](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32c2.yml)
