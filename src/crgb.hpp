@@ -6,11 +6,12 @@
 #include "crgb.h"
 #include "lib8tion.h"
 #include "namespace.h"
+#include "force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 /// Add one CRGB to another, saturating at 0xFF for each channel
-inline CRGB& CRGB::operator+= (const CRGB& rhs )
+FASTLED_FORCE_INLINE CRGB& CRGB::operator+= (const CRGB& rhs )
 {
     r = qadd8( r, rhs.r);
     g = qadd8( g, rhs.g);
@@ -18,7 +19,7 @@ inline CRGB& CRGB::operator+= (const CRGB& rhs )
     return *this;
 }
 
-inline CRGB& CRGB::addToRGB (uint8_t d )
+FASTLED_FORCE_INLINE CRGB& CRGB::addToRGB (uint8_t d )
 {
     r = qadd8( r, d);
     g = qadd8( g, d);
@@ -26,7 +27,7 @@ inline CRGB& CRGB::addToRGB (uint8_t d )
     return *this;
 }
 
-inline CRGB& CRGB::operator-= (const CRGB& rhs )
+FASTLED_FORCE_INLINE CRGB& CRGB::operator-= (const CRGB& rhs )
 {
     r = qsub8( r, rhs.r);
     g = qsub8( g, rhs.g);
@@ -34,7 +35,7 @@ inline CRGB& CRGB::operator-= (const CRGB& rhs )
     return *this;
 }
 
-inline CRGB& CRGB::subtractFromRGB(uint8_t d)
+FASTLED_FORCE_INLINE CRGB& CRGB::subtractFromRGB(uint8_t d)
 {
     r = qsub8( r, d);
     g = qsub8( g, d);
@@ -42,7 +43,7 @@ inline CRGB& CRGB::subtractFromRGB(uint8_t d)
     return *this;
 }
 
-inline CRGB& CRGB::operator*= (uint8_t d )
+FASTLED_FORCE_INLINE CRGB& CRGB::operator*= (uint8_t d )
 {
     r = qmul8( r, d);
     g = qmul8( g, d);
@@ -50,31 +51,31 @@ inline CRGB& CRGB::operator*= (uint8_t d )
     return *this;
 }
 
-inline CRGB& CRGB::nscale8_video(uint8_t scaledown )
+FASTLED_FORCE_INLINE CRGB& CRGB::nscale8_video(uint8_t scaledown )
 {
     nscale8x3_video( r, g, b, scaledown);
     return *this;
 }
 
-inline CRGB& CRGB::operator%= (uint8_t scaledown )
+FASTLED_FORCE_INLINE CRGB& CRGB::operator%= (uint8_t scaledown )
 {
     nscale8x3_video( r, g, b, scaledown);
     return *this;
 }
 
-inline CRGB& CRGB::fadeLightBy (uint8_t fadefactor )
+FASTLED_FORCE_INLINE CRGB& CRGB::fadeLightBy (uint8_t fadefactor )
 {
     nscale8x3_video( r, g, b, 255 - fadefactor);
     return *this;
 }
 
-inline CRGB& CRGB::nscale8 (uint8_t scaledown )
+FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (uint8_t scaledown )
 {
     nscale8x3( r, g, b, scaledown);
     return *this;
 }
 
-inline CRGB& CRGB::nscale8 (const CRGB & scaledown )
+FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (const CRGB & scaledown )
 {
     r = ::scale8(r, scaledown.r);
     g = ::scale8(g, scaledown.g);
@@ -82,14 +83,14 @@ inline CRGB& CRGB::nscale8 (const CRGB & scaledown )
     return *this;
 }
 
-inline CRGB CRGB::scale8 (uint8_t scaledown ) const
+FASTLED_FORCE_INLINE CRGB CRGB::scale8 (uint8_t scaledown ) const
 {
     CRGB out = *this;
     nscale8x3( out.r, out.g, out.b, scaledown);
     return out;
 }
 
-inline CRGB CRGB::scale8 (const CRGB & scaledown ) const
+FASTLED_FORCE_INLINE CRGB CRGB::scale8 (const CRGB & scaledown ) const
 {
     CRGB out;
     out.r = ::scale8(r, scaledown.r);
@@ -104,7 +105,7 @@ inline CRGB& CRGB::fadeToBlackBy (uint8_t fadefactor )
     return *this;
 }
 
-inline uint8_t CRGB::getLuma( )  const {
+FASTLED_FORCE_INLINE uint8_t CRGB::getLuma( )  const {
     //Y' = 0.2126 R' + 0.7152 G' + 0.0722 B'
     //     54            183       18 (!)
 
@@ -115,7 +116,7 @@ inline uint8_t CRGB::getLuma( )  const {
     return luma;
 }
 
-inline uint8_t CRGB::getAverageLight( )  const {
+FASTLED_FORCE_INLINE uint8_t CRGB::getAverageLight( )  const {
 #if FASTLED_SCALE8_FIXED == 1
     const uint8_t eightyfive = 85;
 #else
@@ -128,7 +129,7 @@ inline uint8_t CRGB::getAverageLight( )  const {
     return avg;
 }
 
-inline CRGB CRGB::lerp8( const CRGB& other, fract8 frac) const
+FASTLED_FORCE_INLINE CRGB CRGB::lerp8( const CRGB& other, fract8 frac) const
 {
     CRGB ret;
 
@@ -139,7 +140,7 @@ inline CRGB CRGB::lerp8( const CRGB& other, fract8 frac) const
     return ret;
 }
 
-inline CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const
+FASTLED_FORCE_INLINE CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const
 {
     CRGB ret;
 
@@ -152,8 +153,7 @@ inline CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const
 
 
 /// @copydoc CRGB::operator+=
-__attribute__((always_inline))
-inline CRGB operator+( const CRGB& p1, const CRGB& p2)
+__attribute__((always_inline)) inline CRGB operator+( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( qadd8( p1.r, p2.r),
                  qadd8( p1.g, p2.g),
@@ -161,8 +161,7 @@ inline CRGB operator+( const CRGB& p1, const CRGB& p2)
 }
 
 /// @copydoc CRGB::operator-=
-__attribute__((always_inline))
-inline CRGB operator-( const CRGB& p1, const CRGB& p2)
+__attribute__((always_inline)) inline CRGB operator-( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( qsub8( p1.r, p2.r),
                  qsub8( p1.g, p2.g),
@@ -170,8 +169,7 @@ inline CRGB operator-( const CRGB& p1, const CRGB& p2)
 }
 
 /// @copydoc CRGB::operator*=
-__attribute__((always_inline))
-inline CRGB operator*( const CRGB& p1, uint8_t d)
+__attribute__((always_inline)) inline CRGB operator*( const CRGB& p1, uint8_t d)
 {
     return CRGB( qmul8( p1.r, d),
                  qmul8( p1.g, d),
@@ -179,8 +177,7 @@ inline CRGB operator*( const CRGB& p1, uint8_t d)
 }
 
 /// Scale using CRGB::nscale8_video()
-__attribute__((always_inline))
-inline CRGB operator%( const CRGB& p1, uint8_t d)
+__attribute__((always_inline)) inline CRGB operator%( const CRGB& p1, uint8_t d)
 {
     CRGB retval( p1);
     retval.nscale8_video( d);

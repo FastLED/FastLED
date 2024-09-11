@@ -6,6 +6,7 @@
 #include "namespace.h"
 #include "color.h"
 #include "lib8tion/types.h"
+#include "force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -48,7 +49,7 @@ struct CRGB {
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
     /// @returns the CRGB::raw value for the given index
-    inline uint8_t& operator[] (uint8_t x) __attribute__((always_inline))
+    FASTLED_FORCE_INLINE uint8_t& operator[] (uint8_t x)
     {
         return raw[x];
     }
@@ -56,14 +57,14 @@ struct CRGB {
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
     /// @returns the CRGB::raw value for the given index
-    inline const uint8_t& operator[] (uint8_t x) const __attribute__((always_inline))
+    FASTLED_FORCE_INLINE const uint8_t& operator[] (uint8_t x) const
     {
         return raw[x];
     }
 
     /// Default constructor
     /// @warning Default values are UNITIALIZED!
-    inline CRGB() __attribute__((always_inline)) = default;
+    FASTLED_FORCE_INLINE CRGB() = default;
 
     /// Allow construction from red, green, and blue
     /// @param ir input red value
@@ -96,20 +97,20 @@ struct CRGB {
     }
 
     /// Allow copy construction
-    inline CRGB(const CRGB& rhs) __attribute__((always_inline)) = default;
+    FASTLED_FORCE_INLINE CRGB(const CRGB& rhs) = default;
 
     /// Allow construction from a CHSV color
-    inline CRGB(const CHSV& rhs) __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB(const CHSV& rhs)
     {
         hsv2rgb_rainbow( rhs, *this);
     }
 
     /// Allow assignment from one RGB struct to another
-    inline CRGB& operator= (const CRGB& rhs) __attribute__((always_inline)) = default;
+    FASTLED_FORCE_INLINE CRGB& operator= (const CRGB& rhs) = default;
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    inline CRGB& operator= (const uint32_t colorcode) __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB& operator= (const uint32_t colorcode)
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -121,7 +122,7 @@ struct CRGB {
     /// @param nr new red value
     /// @param ng new green value
     /// @param nb new blue value
-    inline CRGB& setRGB (uint8_t nr, uint8_t ng, uint8_t nb) __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB& setRGB (uint8_t nr, uint8_t ng, uint8_t nb)
     {
         r = nr;
         g = ng;
@@ -133,7 +134,7 @@ struct CRGB {
     /// @param hue color hue
     /// @param sat color saturation
     /// @param val color value (brightness)
-    inline CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val) __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB& setHSV (uint8_t hue, uint8_t sat, uint8_t val)
     {
         hsv2rgb_rainbow( CHSV(hue, sat, val), *this);
         return *this;
@@ -142,14 +143,14 @@ struct CRGB {
     /// Allow assignment from just a hue.
     /// Saturation and value (brightness) are set automatically to max.
     /// @param hue color hue
-    inline CRGB& setHue (uint8_t hue) __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB& setHue (uint8_t hue)
     {
         hsv2rgb_rainbow( CHSV(hue, 255, 255), *this);
         return *this;
     }
 
     /// Allow assignment from HSV color
-    inline CRGB& operator= (const CHSV& rhs) __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB& operator= (const CHSV& rhs)
     {
         hsv2rgb_rainbow( rhs, *this);
         return *this;
@@ -157,7 +158,7 @@ struct CRGB {
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    inline CRGB& setColorCode (uint32_t colorcode) __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB& setColorCode (uint32_t colorcode)
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -167,32 +168,32 @@ struct CRGB {
 
 
     /// Add one CRGB to another, saturating at 0xFF for each channel
-    inline CRGB& operator+= (const CRGB& rhs);
+    FASTLED_FORCE_INLINE CRGB& operator+= (const CRGB& rhs);
 
     /// Add a constant to each channel, saturating at 0xFF.
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
     /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
-    inline CRGB& addToRGB (uint8_t d);
+    FASTLED_FORCE_INLINE CRGB& addToRGB (uint8_t d);
 
     /// Subtract one CRGB from another, saturating at 0x00 for each channel
-    inline CRGB& operator-= (const CRGB& rhs);
+    FASTLED_FORCE_INLINE CRGB& operator-= (const CRGB& rhs);
 
     /// Subtract a constant from each channel, saturating at 0x00.
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
     /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
-    inline CRGB& subtractFromRGB(uint8_t d );
+    FASTLED_FORCE_INLINE CRGB& subtractFromRGB(uint8_t d );
 
     /// Subtract a constant of '1' from each channel, saturating at 0x00
-    inline CRGB& operator-- ()  __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB& operator-- ()
     {
         subtractFromRGB(1);
         return *this;
     }
 
     /// @copydoc operator--
-    inline CRGB operator-- (int )  __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB operator-- (int )
     {
         CRGB retval(*this);
         --(*this);
@@ -200,14 +201,14 @@ struct CRGB {
     }
 
     /// Add a constant of '1' from each channel, saturating at 0xFF
-    inline CRGB& operator++ ()  __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB& operator++ ()
     {
         addToRGB(1);
         return *this;
     }
 
     /// @copydoc operator++
-    inline CRGB operator++ (int )  __attribute__((always_inline))
+    FASTLED_FORCE_INLINE CRGB operator++ (int )
     {
         CRGB retval(*this);
         ++(*this);
@@ -215,7 +216,7 @@ struct CRGB {
     }
 
     /// Divide each of the channels by a constant
-    inline CRGB& operator/= (uint8_t d )
+    FASTLED_FORCE_INLINE CRGB& operator/= (uint8_t d )
     {
         r /= d;
         g /= d;
@@ -224,7 +225,7 @@ struct CRGB {
     }
 
     /// Right shift each of the channels by a constant
-    inline CRGB& operator>>= (uint8_t d)
+    FASTLED_FORCE_INLINE CRGB& operator>>= (uint8_t d)
     {
         r >>= d;
         g >>= d;
@@ -234,7 +235,7 @@ struct CRGB {
 
     /// Multiply each of the channels by a constant,
     /// saturating each channel at 0xFF.
-    inline CRGB& operator*= (uint8_t d);
+    FASTLED_FORCE_INLINE CRGB& operator*= (uint8_t d);
 
     /// Scale down a RGB to N/256ths of it's current brightness using
     /// "video" dimming rules. "Video" dimming rules means that unless the scale factor
@@ -242,40 +243,40 @@ struct CRGB {
     /// nonzero, it'll stay nonzero, even if that means the hue shifts a little
     /// at low brightness levels.
     /// @see nscale8x3_video
-    inline CRGB& nscale8_video (uint8_t scaledown);
+    FASTLED_FORCE_INLINE CRGB& nscale8_video (uint8_t scaledown);
 
     /// %= is a synonym for nscale8_video().  Think of it is scaling down
     /// by "a percentage"
-    inline CRGB& operator%= (uint8_t scaledown);
+    FASTLED_FORCE_INLINE CRGB& operator%= (uint8_t scaledown);
 
     /// fadeLightBy is a synonym for nscale8_video(), as a fade instead of a scale
     /// @param fadefactor the amount to fade, sent to nscale8_video() as (255 - fadefactor)
-    inline CRGB& fadeLightBy (uint8_t fadefactor );
+    FASTLED_FORCE_INLINE CRGB& fadeLightBy (uint8_t fadefactor );
 
     /// Scale down a RGB to N/256ths of its current brightness, using
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light
     /// levels may dim all the way to 100% black.
     /// @see nscale8x3
-    inline CRGB& nscale8 (uint8_t scaledown );
+    FASTLED_FORCE_INLINE CRGB& nscale8 (uint8_t scaledown );
 
     /// Scale down a RGB to N/256ths of its current brightness, using
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light
     /// levels may dim all the way to 100% black.
     /// @see ::scale8
-    inline CRGB& nscale8 (const CRGB & scaledown );
+    FASTLED_FORCE_INLINE CRGB& nscale8 (const CRGB & scaledown );
 
     /// Return a CRGB object that is a scaled down version of this object
-    inline CRGB scale8 (uint8_t scaledown ) const;
+    FASTLED_FORCE_INLINE CRGB scale8 (uint8_t scaledown ) const;
 
     /// Return a CRGB object that is a scaled down version of this object
-    inline CRGB scale8 (const CRGB & scaledown ) const;
+    FASTLED_FORCE_INLINE CRGB scale8 (const CRGB & scaledown ) const;
 
     /// fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale
     /// @param fadefactor the amount to fade, sent to nscale8() as (255 - fadefactor)
-    inline CRGB& fadeToBlackBy (uint8_t fadefactor );
+    FASTLED_FORCE_INLINE CRGB& fadeToBlackBy (uint8_t fadefactor );
 
     /// "or" operator brings each channel up to the higher of the two values
-    inline CRGB& operator|= (const CRGB& rhs )
+    FASTLED_FORCE_INLINE CRGB& operator|= (const CRGB& rhs )
     {
         if( rhs.r > r) r = rhs.r;
         if( rhs.g > g) g = rhs.g;
@@ -284,7 +285,7 @@ struct CRGB {
     }
 
     /// @copydoc operator|=
-    inline CRGB& operator|= (uint8_t d )
+    FASTLED_FORCE_INLINE CRGB& operator|= (uint8_t d )
     {
         if( d > r) r = d;
         if( d > g) g = d;
@@ -293,7 +294,7 @@ struct CRGB {
     }
 
     /// "and" operator brings each channel down to the lower of the two values
-    inline CRGB& operator&= (const CRGB& rhs )
+    FASTLED_FORCE_INLINE CRGB& operator&= (const CRGB& rhs )
     {
         if( rhs.r < r) r = rhs.r;
         if( rhs.g < g) g = rhs.g;
@@ -302,7 +303,7 @@ struct CRGB {
     }
 
     /// @copydoc operator&=
-    inline CRGB& operator&= (uint8_t d )
+    FASTLED_FORCE_INLINE CRGB& operator&= (uint8_t d )
     {
         if( d < r) r = d;
         if( d < g) g = d;
@@ -311,13 +312,13 @@ struct CRGB {
     }
 
     /// This allows testing a CRGB for zero-ness
-    inline explicit operator bool() const __attribute__((always_inline))
+    FASTLED_FORCE_INLINE explicit operator bool() const
     {
         return r || g || b;
     }
 
     /// Converts a CRGB to a 32-bit color having an alpha of 255.
-    inline explicit operator uint32_t() const
+    FASTLED_FORCE_INLINE explicit operator uint32_t() const
     {
         return uint32_t{0xff000000} |
                (uint32_t{r} << 16) |
@@ -326,7 +327,7 @@ struct CRGB {
     }
 
     /// Invert each channel
-    inline CRGB operator- () const
+    FASTLED_FORCE_INLINE CRGB operator- () const
     {
         CRGB retval;
         retval.r = 255 - r;
@@ -349,17 +350,17 @@ struct CRGB {
 
     /// Get the "luma" of a CRGB object. In other words, roughly how much
     /// light the CRGB pixel is putting out (from 0 to 255).
-    inline uint8_t getLuma() const;
+    FASTLED_FORCE_INLINE uint8_t getLuma() const;
 
     /// Get the average of the R, G, and B values
-    inline uint8_t getAverageLight() const;
+    FASTLED_FORCE_INLINE uint8_t getAverageLight() const;
 
     /// Maximize the brightness of this CRGB object.
     /// This makes the individual color channels as bright as possible
     /// while keeping the same value differences between channels.
     /// @note This does not keep the same ratios between channels,
     /// just the same difference in absolute values.
-    inline void maximizeBrightness( uint8_t limit = 255 )  {
+    FASTLED_FORCE_INLINE void maximizeBrightness( uint8_t limit = 255 )  {
         uint8_t max = red;
         if( green > max) max = green;
         if( blue > max) max = blue;
@@ -374,12 +375,12 @@ struct CRGB {
     }
 
     /// Return a new CRGB object after performing a linear interpolation between this object and the passed in object
-    inline CRGB lerp8( const CRGB& other, fract8 frac) const;
+    FASTLED_FORCE_INLINE CRGB lerp8( const CRGB& other, fract8 frac) const;
 
     /// @copydoc lerp8
-    inline CRGB lerp16( const CRGB& other, fract16 frac) const;
+    FASTLED_FORCE_INLINE CRGB lerp16( const CRGB& other, fract16 frac) const;
     /// Returns 0 or 1, depending on the lowest bit of the sum of the color components.
-    inline uint8_t getParity()
+    FASTLED_FORCE_INLINE uint8_t getParity()
     {
         uint8_t sum = r + g + b;
         return (sum & 0x01);
@@ -407,7 +408,7 @@ struct CRGB {
     /// the parity twice should generally result in the
     /// original color again.
     ///
-    inline void setParity( uint8_t parity)
+    FASTLED_FORCE_INLINE void setParity( uint8_t parity)
     {
         uint8_t curparity = getParity();
 
@@ -619,31 +620,31 @@ struct CRGB {
 
 
 /// Check if two CRGB objects have the same color data
-inline __attribute__((always_inline)) bool operator== (const CRGB& lhs, const CRGB& rhs)
+FASTLED_FORCE_INLINE bool operator== (const CRGB& lhs, const CRGB& rhs)
 {
     return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b);
 }
 
 /// Check if two CRGB objects do *not* have the same color data
-inline __attribute__((always_inline)) bool operator!= (const CRGB& lhs, const CRGB& rhs)
+FASTLED_FORCE_INLINE bool operator!= (const CRGB& lhs, const CRGB& rhs)
 {
     return !(lhs == rhs);
 }
 
 /// Check if two CHSV objects have the same color data
-inline __attribute__((always_inline)) bool operator== (const CHSV& lhs, const CHSV& rhs)
+FASTLED_FORCE_INLINE bool operator== (const CHSV& lhs, const CHSV& rhs)
 {
     return (lhs.h == rhs.h) && (lhs.s == rhs.s) && (lhs.v == rhs.v);
 }
 
 /// Check if two CHSV objects do *not* have the same color data
-inline __attribute__((always_inline)) bool operator!= (const CHSV& lhs, const CHSV& rhs)
+FASTLED_FORCE_INLINE bool operator!= (const CHSV& lhs, const CHSV& rhs)
 {
     return !(lhs == rhs);
 }
 
 /// Check if the sum of the color channels in one CRGB object is less than another
-inline __attribute__((always_inline)) bool operator< (const CRGB& lhs, const CRGB& rhs)
+FASTLED_FORCE_INLINE bool operator< (const CRGB& lhs, const CRGB& rhs)
 {
     uint16_t sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -652,7 +653,7 @@ inline __attribute__((always_inline)) bool operator< (const CRGB& lhs, const CRG
 }
 
 /// Check if the sum of the color channels in one CRGB object is greater than another
-inline __attribute__((always_inline)) bool operator> (const CRGB& lhs, const CRGB& rhs)
+FASTLED_FORCE_INLINE bool operator> (const CRGB& lhs, const CRGB& rhs)
 {
     uint16_t sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -661,7 +662,7 @@ inline __attribute__((always_inline)) bool operator> (const CRGB& lhs, const CRG
 }
 
 /// Check if the sum of the color channels in one CRGB object is greater than or equal to another
-inline __attribute__((always_inline)) bool operator>= (const CRGB& lhs, const CRGB& rhs)
+FASTLED_FORCE_INLINE bool operator>= (const CRGB& lhs, const CRGB& rhs)
 {
     uint16_t sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -670,7 +671,7 @@ inline __attribute__((always_inline)) bool operator>= (const CRGB& lhs, const CR
 }
 
 /// Check if the sum of the color channels in one CRGB object is less than or equal to another
-inline __attribute__((always_inline)) bool operator<= (const CRGB& lhs, const CRGB& rhs)
+FASTLED_FORCE_INLINE bool operator<= (const CRGB& lhs, const CRGB& rhs)
 {
     uint16_t sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -681,16 +682,14 @@ inline __attribute__((always_inline)) bool operator<= (const CRGB& lhs, const CR
 
 
 /// @copydoc CRGB::operator/=
-__attribute__((always_inline))
-inline CRGB operator/( const CRGB& p1, uint8_t d)
+FASTLED_FORCE_INLINE CRGB operator/( const CRGB& p1, uint8_t d)
 {
     return CRGB( p1.r/d, p1.g/d, p1.b/d);
 }
 
 
 /// Combine two CRGB objects, taking the smallest value of each channel
-__attribute__((always_inline))
-inline CRGB operator&( const CRGB& p1, const CRGB& p2)
+FASTLED_FORCE_INLINE CRGB operator&( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( p1.r < p2.r ? p1.r : p2.r,
                  p1.g < p2.g ? p1.g : p2.g,
@@ -698,8 +697,7 @@ inline CRGB operator&( const CRGB& p1, const CRGB& p2)
 }
 
 /// Combine two CRGB objects, taking the largest value of each channel
-__attribute__((always_inline))
-inline CRGB operator|( const CRGB& p1, const CRGB& p2)
+FASTLED_FORCE_INLINE CRGB operator|( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( p1.r > p2.r ? p1.r : p2.r,
                  p1.g > p2.g ? p1.g : p2.g,
@@ -707,19 +705,15 @@ inline CRGB operator|( const CRGB& p1, const CRGB& p2)
 }
 
 /// @copydoc CRGB::operator+=
-__attribute__((always_inline))
-inline CRGB operator+( const CRGB& p1, const CRGB& p2);
+FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2);
 
 /// @copydoc CRGB::operator-=
-__attribute__((always_inline))
-inline CRGB operator-( const CRGB& p1, const CRGB& p2);
+FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2);
 
 /// @copydoc CRGB::operator*=
-__attribute__((always_inline))
-inline CRGB operator*( const CRGB& p1, uint8_t d);
+FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, uint8_t d);
 
 /// Scale using CRGB::nscale8_video()
-__attribute__((always_inline))
-inline CRGB operator%( const CRGB& p1, uint8_t d);
+FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d);
 
 FASTLED_NAMESPACE_END
