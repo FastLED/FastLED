@@ -39,7 +39,7 @@ struct RgbwDefault : public RgbwArg {
 // Abstract class
 class PixelIterator {
   public:
-    virtual ~PixelIterator() {}
+    virtual ~PixelIterator();
     explicit PixelIterator(RgbwArg rgbw_arg = {}) : mRgbw(rgbw_arg) {}
     virtual bool has(int n) = 0;
     // loadAndScaleRGBW
