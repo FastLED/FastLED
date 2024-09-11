@@ -428,11 +428,14 @@ struct PixelController: public PixelIterator {
     /// the W data is assumed to be the last byte in the data stream. This is true for WS2812 but may need
     /// to be changed in the future if the white component starts being reordered across chipsets.
     FASTLED_FORCE_INLINE void loadAndScaleRGBW(
-            RGBW_MODE rgbw_mode, uint16_t white_color_temp,
             uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
         // Get the naive RGB data order in r,g,b.
         CRGB rgb = CRGB(mData[0], mData[1], mData[2]);  // Raw RGB values in native r,g,b ordering.
         uint8_t w = 0;
+        PixelIterator* self = this;
+        RgbwArg rgbw_arg = self->get_rgbw();
+        RGBW_MODE rgbw_mode = rgbw_arg.rgbw_mode;
+        uint16_t white_color_temp = rgbw_arg.white_color_temp;
         rgb_2_rgbw(
             rgbw_mode,
             white_color_temp,

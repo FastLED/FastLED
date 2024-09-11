@@ -40,6 +40,10 @@ void RmtController::initPulseBuffer(int size_in_bytes) {
 
     void RmtController::showPixels(PixelIterator &pixels)
     {
+        if (mIsRgbw) {
+            pixels.set_rgbw({mColorTemp, mRgbwMode});
+        }
+        
         if (built_in_driver())
         {
             loadAllPixelsToRmtSymbolData(pixels);
@@ -72,7 +76,7 @@ void RmtController::loadAllPixelsToRmtSymbolData(PixelIterator &pixels) {
     } else {
         while (pixels.has(1)) {
             uint8_t r, g, b, w;
-            pixels.loadAndScaleRGBW(mRgbwMode, mColorTemp, &r, &g, &b, &w);
+            pixels.loadAndScaleRGBW(&r, &g, &b, &w);
             ingest(r);
             ingest(g);
             ingest(b);
@@ -98,7 +102,7 @@ void RmtController::loadPixelDataForStreamEncoding(PixelIterator &pixels) {
         }
     } else {
         while (pixels.has(1)) {
-            pixels.loadAndScaleRGBW(mRgbwMode, mColorTemp, pData, pData + 1,
+            pixels.loadAndScaleRGBW(pData, pData + 1,
                                     pData + 2, pData + 3);
             pData += 4;
             pixels.advanceData();
