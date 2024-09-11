@@ -36,9 +36,10 @@
 // uint8_t DATA_PIN, uint8_t CLOCK_PIN,
 
 #define STRIP_0_DATA_PIN 1
-#define STRIP_0_CLOCK_PIN 2
+#define STRIP_0_CLOCK_PIN 12
 #define STRIP_1_DATA_PIN 3
 #define STRIP_1_CLOCK_PIN 4
+
 
 CRGB leds_hd[NUM_LEDS] = {0};  // HD mode implies gamma.
 CRGB leds[NUM_LEDS] = {0};     // Software gamma mode.
