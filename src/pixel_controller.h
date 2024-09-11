@@ -11,6 +11,7 @@
 #include "namespace.h"
 #include "eorder.h"
 #include "dither_mode.h"
+#include "pixel_iterator.h"
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -52,7 +53,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam LANES how many parallel lanes of output to write
 /// @tparam MASK bitmask for the output lanes
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF>
-struct PixelController {
+struct PixelController: public PixelIterator {
     const uint8_t *mData;    ///< pointer to the underlying LED data
     int mLen;                ///< number of LEDs in the data for one lane
     int mLenRemaining;       ///< counter for the number of LEDs left to process

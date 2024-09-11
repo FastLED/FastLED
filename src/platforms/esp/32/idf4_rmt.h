@@ -111,6 +111,9 @@
 #define CONFIG_RMT_SUPPRESS_DEPRECATE_WARN 1
 
 #include "namespace.h"
+#include "eorder.h"
+#include "rgb_2_rgbw.h"
+#include "pixel_iterator.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -129,7 +132,7 @@ class ESP32RMTController;
 class RmtController
 {
 public:
-    static void init(gpio_num_t pin, bool built_in_driver);
+    static void init(int pin, bool built_in_driver);
     RmtController() = delete;
     RmtController(const RmtController &) = delete;
     RmtController(
@@ -142,8 +145,7 @@ public:
         uint16_t white_color_temp);
     ~RmtController();
 
-    template <EOrder RGB_ORDER>
-    void showPixels(PixelController<RGB_ORDER> &pixels)
+    void showPixels(PixelIterator &pixels)
     {
         if (built_in_driver())
         {
@@ -162,8 +164,7 @@ private:
     bool built_in_driver();
     uint8_t *getPixelBuffer(int size_in_bytes);
     void initPulseBuffer(int size_in_bytes);
-    template <EOrder RGB_ORDER>
-    void loadAllPixelsToRmtSymbolData(PixelController<RGB_ORDER> &pixels)
+    void loadAllPixelsToRmtSymbolData(PixelIterator& pixels)
     {
         // -- Make sure the data buffer is allocated
         const int bytes_per_pixel = mIsRgbw ? 4 : 3;
@@ -201,8 +202,7 @@ private:
         }
     }
 
-    template <EOrder RGB_ORDER>
-    void loadPixelDataForStreamEncoding(PixelController<RGB_ORDER> &pixels)
+    void loadPixelDataForStreamEncoding(PixelIterator& pixels)
     {
         // -- Make sure the buffer is allocated
         const int size_per_pixel = mIsRgbw ? 4 : 3;

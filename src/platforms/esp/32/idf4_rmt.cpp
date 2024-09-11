@@ -9,9 +9,10 @@
 #include "idf4_rmt_impl.h"
 
 
-void RmtController::init(gpio_num_t pin, bool built_in_driver)
+void RmtController::init(int pin, bool built_in_driver)
 {
-    ESP32RMTController::init(pin, built_in_driver);
+    gpio_num_t _pin = static_cast<gpio_num_t>(pin);
+    ESP32RMTController::init(_pin, built_in_driver);
 }
 
 RmtController::RmtController(
