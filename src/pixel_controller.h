@@ -126,11 +126,30 @@ struct PixelController {  // to get PixelIterator use as_iterator().
             *w_out = 0;
             #endif
         }
-        virtual void loadAndScaleRGB(uint8_t *r_out, uint8_t *g_out, uint8_t *b_out) {
-            mPixelController.loadAndScaleRGB(r_out, g_out, b_out);
+        virtual void loadAndScaleRGB(uint8_t *b0, uint8_t *b1, uint8_t *b2) {
+            *b0 = mPixelController.loadAndScale0();
+            *b1 = mPixelController.loadAndScale1();
+            *b2 = mPixelController.loadAndScale2();
         }
         virtual void loadAndScale_APA102_HD(uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *brightness_out) {
-            mPixelController.loadAndScale_APA102_HD(b0_out, b1_out, b2_out, brightness_out);
+            CRGB rgb = CRGB(mPixelController.mData[0], mPixelController.mData[1], mPixelController.mData[2]);
+            uint8_t brightness = 0;
+            if (rgb) {
+                five_bit_hd_gamma_bitshift(
+                    rgb.r, rgb.g, rgb.b,
+                    // Note this mScale has the global brightness scale mixed in with the
+                    // color correction scale.
+                    mPixelController.mScale.r, mPixelController.mScale.g, mPixelController.mScale.b,
+                    &rgb.r, &rgb.g, &rgb.b, &brightness
+                );
+            }
+            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
+            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
+            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
+            *b0_out = rgb.raw[b0_index];
+            *b1_out = rgb.raw[b1_index];
+            *b2_out = rgb.raw[b2_index];
+            *brightness_out = brightness;
         }
         virtual void stepDithering() { mPixelController.stepDithering(); }
         virtual void advanceData() { mPixelController.advanceData(); }
@@ -491,34 +510,6 @@ struct PixelController {  // to get PixelIterator use as_iterator().
     FASTLED_FORCE_INLINE uint8_t getScale1() { return getscale<1>(*this); }  ///< non-template alias of getscale<1>()
     FASTLED_FORCE_INLINE uint8_t getScale2() { return getscale<2>(*this); }  ///< non-template alias of getscale<2>()
 
-    FASTLED_FORCE_INLINE void loadAndScaleRGB(uint8_t* b0, uint8_t* b1, uint8_t* b2) {
-        *b0 = loadAndScale0();
-        *b1 = loadAndScale1();
-        *b2 = loadAndScale2();
-    }
-
-    FASTLED_FORCE_INLINE void loadAndScale_APA102_HD(
-            uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out,  // Output RGB values in order of RGB_ORDER
-            uint8_t* brightness_out) {
-        CRGB rgb = CRGB(mData[0], mData[1], mData[2]);
-        uint8_t brightness = 0;
-        if (rgb) {
-            five_bit_hd_gamma_bitshift(
-                rgb.r, rgb.g, rgb.b,
-                // Note this mScale has the global brightness scale mixed in with the
-                // color correction scale.
-                mScale.r, mScale.g, mScale.b,
-                &rgb.r, &rgb.g, &rgb.b, &brightness
-            );
-        }
-        const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
-        const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
-        const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
-        *b0_out = rgb.raw[b0_index];
-        *b1_out = rgb.raw[b1_index];
-        *b2_out = rgb.raw[b2_index];
-        *brightness_out = brightness;
-    }
 
 };
 
