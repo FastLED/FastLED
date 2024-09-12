@@ -3,11 +3,11 @@
 /// @file controller.h
 /// base definitions used by led controllers for writing out led data
 
-// Note that new code should use the PixelIterator interface to write out led data.
+// Note that new code should use the PixelIterator concrete object to write out
+// led data.
 // Using this class deep in driver code is deprecated because it's templates will
-// infact everything it touches. Instead use PixelIterator to write out led data, which
-// has a non-template interface and can be used in a more flexible way.
-// see pixel_iterator_wrapper.h on how to convert a PixelController to a PixelIterator.
+// infact everything it touches. PixelIterator is concrete and doesn't have these
+// problems. See PixelController::as_iterator() for how to create a PixelIterator.
 
 #include "FastLED.h"
 #include <stddef.h>
@@ -59,7 +59,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam LANES how many parallel lanes of output to write
 /// @tparam MASK bitmask for the output lanes
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF>
-struct PixelController {  // to get PixelIterator use as_iterator().
+struct PixelController {
     const uint8_t *mData;    ///< pointer to the underlying LED data
     int mLen;                ///< number of LEDs in the data for one lane
     int mLenRemaining;       ///< counter for the number of LEDs left to process
@@ -460,7 +460,6 @@ struct PixelController {  // to get PixelIterator use as_iterator().
 
     FASTLED_FORCE_INLINE void loadAndScaleRGBW(Rgbw rgbw, uint8_t *b0_out, uint8_t *b1_out,
                                                uint8_t *b2_out, uint8_t *b3_out) {
-
 #ifdef __AVR__
         // Don't do RGBW conversion for AVR, just set the W pixel to black.
         uint8_t out[4] = {
@@ -472,9 +471,10 @@ struct PixelController {  // to get PixelIterator use as_iterator().
         };
         EOrderW w_placement = rgbw.w_placement;
         // Apply w-component insertion.
-        rgbw_partial_reorder(w_placement, out[0], out[1], out[2],
-                     0, // Pre-ordered RGB data with a 0 white component.
-                     b0_out, b1_out, b2_out, b3_out);
+        rgbw_partial_reorder(
+            w_placement, out[0], out[1], out[2],
+            0, // Pre-ordered RGB data with a 0 white component.
+            b0_out, b1_out, b2_out, b3_out);
 #else
         const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);  // Needed to re-order RGB back into led native order.
         const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
@@ -483,17 +483,18 @@ struct PixelController {  // to get PixelIterator use as_iterator().
         CRGB rgb(mData[0], mData[1], mData[2]);
         uint8_t w = 0;
         rgb_2_rgbw(rgbw.rgbw_mode,
-                  rgbw.white_color_temp,
-                  rgb.r, rgb.b, rgb.g,  // Input colors
-                  mScale.r, mScale.g, mScale.b,  // How these colors are scaled for color balance.
-                  &rgb.r, &rgb.g, &rgb.b, &w);
+                   rgbw.white_color_temp,
+                   rgb.r, rgb.b, rgb.g,  // Input colors
+                   mScale.r, mScale.g, mScale.b,  // How these colors are scaled for color balance.
+                   &rgb.r, &rgb.g, &rgb.b, &w);
         // Now finish the ordering so that the output is in the native led order for all of RGBW.
-        rgbw_partial_reorder(rgbw.w_placement,
-                    rgb.raw[b0_index],  // in-place re-ordering for the RGB data.
-                    rgb.raw[b1_index],
-                    rgb.raw[b2_index],
-                    w,  // The white component is not ordered in this call.
-                    b0_out, b1_out, b2_out, b3_out);  // RGBW data now in total native led order.
+        rgbw_partial_reorder(
+            rgbw.w_placement,
+            rgb.raw[b0_index],  // in-place re-ordering for the RGB data.
+            rgb.raw[b1_index],
+            rgb.raw[b2_index],
+            w,  // The white component is not ordered in this call.
+            b0_out, b1_out, b2_out, b3_out);  // RGBW data now in total native led order.
 #endif
     }
 };
