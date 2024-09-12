@@ -62,6 +62,7 @@ DEFAULT_EXAMPLES = [
     "Pride2015",
     "RGBCalibrate",
     "RGBSetDemo",
+    "RGBW",
     "TwinkleFox",
     "XYMatrix",
 ]
