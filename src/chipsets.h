@@ -99,13 +99,12 @@ class RGBWEmulatedController
     virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
-
         // This version sent down to the real controller.
-        PixelController<RGB, LANES, MASK> pixels_rgbw(pixels);
-        pixels_rgbw.mScale = CRGB(255, 255, 255); // No scaling because we do that.
-        pixels_rgbw.mData = reinterpret_cast<uint8_t *>(mRGBWPixels);
-        pixels_rgbw.mLen = mNumRGBWLeds;
-        pixels_rgbw.mLenRemaining = mNumRGBWLeds;
+        PixelController<RGB, LANES, MASK> pixels_device(pixels);
+        pixels_device.mScale = CRGB(255, 255, 255); // No scaling because we do that.
+        pixels_device.mData = reinterpret_cast<uint8_t *>(mRGBWPixels);
+        pixels_device.mLen = mNumRGBWLeds;
+        pixels_device.mLenRemaining = mNumRGBWLeds;
         uint8_t *data = reinterpret_cast<uint8_t *>(mRGBWPixels);
         PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         while (iterator.has(1)) {
@@ -116,13 +115,12 @@ class RGBWEmulatedController
         }
         // cast to base class to get around protected/private access issues
         CPixelLEDController<RGB, LANES, MASK> &base = mController;
-        base.showPixels(pixels_rgbw);
+        base.showPixels(pixels_device);
     }
 
   private:
-    void init() override {
-        // Initialization is now handled by ensureBuffer
-    }
+    // Needed by the interface.
+    void init() override {}
 
     void ensureBuffer(int32_t num_leds) {
         if (num_leds != mNumRGBLeds) {
