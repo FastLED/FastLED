@@ -80,10 +80,12 @@ struct PixelController {  // to get PixelIterator use as_iterator().
     }
 
     class PixelIteratorT: protected PixelIterator {
-        // Create an adapter class to allow PixelIterator to access protected members of PixelController.
-        // Note, that this adapter pattern to prevent code blowup, the other method that was tried
-        // was having PixelController inherit from PixelIterator, but that caused the AVR builds to
-        // blow up in size.
+        // Create an adapter class to allow PixelController to be used as a PixelIterator.
+        // Caller must save the fully templatized object to the stack, then call base() in
+        // order to get the non-templatized base class, which is then used to call the
+        // get the ordering of pixels.
+        // PixelIterator should be used for more powerful micro controllers which can easily
+        // handle the virtual function overhead.
         public:
         PixelIteratorT(PixelController & pc) : mPixelController(pc) {}
         virtual bool has(int n) { return mPixelController.has(n); }
@@ -101,7 +103,7 @@ struct PixelController {  // to get PixelIterator use as_iterator().
             #ifndef __AVR__
             CRGB scale = mPixelController.mScale;
             uint8_t w = 0;
-            PixelIterator* self = this;
+            PixelIterator* self = this;  // explicit base class is needed for templates.
             RgbwArg rgbw_arg = self->get_rgbw();
             RGBW_MODE rgbw_mode = rgbw_arg.rgbw_mode;
             uint16_t white_color_temp = rgbw_arg.white_color_temp;
