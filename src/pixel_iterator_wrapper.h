@@ -28,7 +28,7 @@ class PixelIteratorT : protected PixelIterator {
     virtual bool has(int n) { return mPixelController.has(n); }
     virtual void loadAndScaleRGBW(uint8_t *b0_out, uint8_t *b1_out,
                                   uint8_t *b2_out, uint8_t *b3_out) {
-        RGBW_MODE rgbw_mode = get_rgbw().rgbw_mode;
+
 #ifdef __AVR__
         // Don't do RGBW conversion for AVR, just set the W pixel to black.
         uint8_t out[4] = {
@@ -38,8 +38,9 @@ class PixelIteratorT : protected PixelIterator {
             mPixelController.loadAndScale2(),
             0,
         };
+        EOrderW w_placement = get_rgbw().w_placement;
         // Apply w-component insertion.
-        rgbw_reorder(rgbw_mode.w_placement, out[0], out[1], out[2],
+        rgbw_reorder(w_placement, out[0], out[1], out[2],
                      0, // Pre-ordered RGB data with a 0 white component.
                      b0_out, b1_out, b2_out, b3_out);
 #else
@@ -51,10 +52,9 @@ class PixelIteratorT : protected PixelIterator {
                  mPixelController.mData[2]);
         CRGB scale = mPixelController.mScale;
         uint8_t w = 0;
-        PixelIterator *self = this; // explicit base class is needed for templates.
-        RgbwArg rgbw_arg = self->get_rgbw();
+        RgbwArg rgbw_arg = get_rgbw();
         uint16_t white_color_temp = rgbw_arg.white_color_temp;
-        rgb_2_rgbw(rgbw_mode, white_color_temp, rgb.r, rgb.b, rgb.g, scale.r,
+        rgb_2_rgbw(rgbw_arg.rgbw_mode, white_color_temp, rgb.r, rgb.b, rgb.g, scale.r,
                    scale.g, scale.b, &rgb.r, &rgb.g, &rgb.b, &w);
         rgbw_reorder(rgbw_arg.w_placement, rgb.raw[b0_index], rgb.raw[b1_index],
                      rgb.raw[b2_index], w, b0_out, b1_out, b2_out, b3_out);
