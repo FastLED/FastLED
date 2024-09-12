@@ -44,7 +44,7 @@ class PixelIteratorT : protected PixelIterator {
                      0, // Pre-ordered RGB data with a 0 white component.
                      b0_out, b1_out, b2_out, b3_out);
 #else
-        const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
+        const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);  // Needed to re-order RGB back into led native order.
         const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
         const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
         // Get the naive RGB data order in r,g,b order.
@@ -53,11 +53,18 @@ class PixelIteratorT : protected PixelIterator {
         CRGB scale = mPixelController.mScale;
         uint8_t w = 0;
         RgbwArg rgbw_arg = get_rgbw();
-        uint16_t white_color_temp = rgbw_arg.white_color_temp;
-        rgb_2_rgbw(rgbw_arg.rgbw_mode, white_color_temp, rgb.r, rgb.b, rgb.g, scale.r,
-                   scale.g, scale.b, &rgb.r, &rgb.g, &rgb.b, &w);
-        rgbw_reorder(rgbw_arg.w_placement, rgb.raw[b0_index], rgb.raw[b1_index],
-                     rgb.raw[b2_index], w, b0_out, b1_out, b2_out, b3_out);
+        rgb_2_rgbw(rgbw_arg.rgbw_mode,
+                  rgbw_arg.white_color_temp,
+                  rgb.r, rgb.b, rgb.g,  // Input colors
+                  scale.r, scale.g, scale.b,  // How these colors are scaled for color balance.
+                  &rgb.r, &rgb.g, &rgb.b, &w);
+        // Now finish the ordering so that the output is in the native led order for all of RGBW.
+        rgbw_reorder(rgbw_arg.w_placement,
+                    rgb.raw[b0_index],  // in-place re-ordering for the RGB data.
+                    rgb.raw[b1_index],
+                    rgb.raw[b2_index],
+                    w,  // The white component is not ordered in this call.
+                    b0_out, b1_out, b2_out, b3_out);  // RGBW data now in total native led order.
 #endif
     }
     virtual void loadAndScaleRGB(uint8_t *b0, uint8_t *b1, uint8_t *b2) {
