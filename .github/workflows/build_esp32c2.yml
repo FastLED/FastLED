@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build_template.yml
+    uses: ./.github/workflows/build_custom_board_template.yml
     with:
       args: esp32-c2-devkitm-1
 
