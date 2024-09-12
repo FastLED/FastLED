@@ -28,7 +28,7 @@ static WS2812<DATA_PIN, GRB> gWs2812_Rgbw;
 void setup() {
     Serial.begin(115200);
     //FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is assumed
-    gWs2812_Rgbw.setRgbwMode(RgbwDefault::value());
+    gWs2812_Rgbw.setRgbw(RgbwDefault::value());
     FastLED.addLeds(&gWs2812_Rgbw, leds, NUM_LEDS);
     FastLED.setBrightness(128);  // Set global brightness to 50%
     delay(2000);  // If something ever goes wrong this delay will allow upload.
