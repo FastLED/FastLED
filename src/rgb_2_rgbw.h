@@ -32,6 +32,7 @@ struct Rgbw {
     uint16_t white_color_temp = kRGBWDefaultColorTemp;
     EOrderW w_placement = WDefault;
     RGBW_MODE rgbw_mode = kRGBWExactColors;
+    bool active() const { return rgbw_mode != kRGBWInvalid; }
 };
 
 struct RgbwInvalid : public Rgbw {

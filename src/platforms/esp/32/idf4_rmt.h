@@ -139,10 +139,7 @@ public:
         int DATA_PIN,
         int T1, int T2, int T3,  // Bit timings.
         int maxChannel,
-        bool built_in_driver,
-        bool is_rgbw,
-        RGBW_MODE,
-        uint16_t white_color_temp);
+        bool built_in_driver);
     ~RmtController();
 
     void showPixels(PixelIterator &pixels);
@@ -157,9 +154,6 @@ private:
 
     void loadPixelDataForStreamEncoding(PixelIterator& pixels);
     ESP32RMTController *pImpl = nullptr;
-    bool mIsRgbw = false;
-    RGBW_MODE mRgbwMode = kRGBWInvalid;
-    uint16_t mColorTemp = kRGBWDefaultColorTemp;
 };
 
 FASTLED_NAMESPACE_END
