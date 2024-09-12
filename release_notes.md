@@ -1,3 +1,13 @@
+FastLED 3.7.7
+=============
+* WS2812 RGBW mode is now part of the API.
+  * Api: `FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbw(RgbwDefault());`
+  * Only enabled on ESP32 boards, no op on other platforms, looking for help to implement on others.
+* [PixelIterator](src/pixel_iterator.h) has been introduced to reduce complexity of writing driver code
+  * This is how RGBW mode was implemented.
+  * This is a concrete class (no templates!)
+  * PixelController<> can convert to a PixelIterator, see `PixelController<>::as_iterator(...)`
+
 FastLED 3.7.6
 =============
 * WS2812 RGBW Mode enabled on ESP32 via experimental `FASTLED_EXPERIMENTAL_ESP32_RGBW_ENABLED`
