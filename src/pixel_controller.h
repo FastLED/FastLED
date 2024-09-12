@@ -463,7 +463,7 @@ struct PixelController {  // to get PixelIterator use as_iterator().
         };
         EOrderW w_placement = rgbw.w_placement;
         // Apply w-component insertion.
-        rgbw_reorder(w_placement, out[0], out[1], out[2],
+        rgbw_partial_reorder(w_placement, out[0], out[1], out[2],
                      0, // Pre-ordered RGB data with a 0 white component.
                      b0_out, b1_out, b2_out, b3_out);
 #else
@@ -479,7 +479,7 @@ struct PixelController {  // to get PixelIterator use as_iterator().
                   mScale.r, mScale.g, mScale.b,  // How these colors are scaled for color balance.
                   &rgb.r, &rgb.g, &rgb.b, &w);
         // Now finish the ordering so that the output is in the native led order for all of RGBW.
-        rgbw_reorder(rgbw.w_placement,
+        rgbw_partial_reorder(rgbw.w_placement,
                     rgb.raw[b0_index],  // in-place re-ordering for the RGB data.
                     rgb.raw[b1_index],
                     rgb.raw[b2_index],

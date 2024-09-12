@@ -32,7 +32,9 @@ struct Rgbw {
     uint16_t white_color_temp = kRGBWDefaultColorTemp;
     EOrderW w_placement = WDefault;
     RGBW_MODE rgbw_mode = kRGBWExactColors;
-    FASTLED_FORCE_INLINE bool active() const { return rgbw_mode != kRGBWInvalid; }
+    FASTLED_FORCE_INLINE bool active() const {
+        return rgbw_mode != kRGBWInvalid;
+    }
 };
 
 struct RgbwInvalid : public Rgbw {
@@ -158,9 +160,12 @@ rgb_2_rgbw(uint16_t w_color_temperature, uint8_t r, uint8_t g, uint8_t b,
 
 // Assuming all RGB pixels are already ordered, this function will reorder them
 // so that white is in the correct position, given by the w_placement enum.
-void rgbw_reorder(EOrderW w_placement, uint8_t b0, uint8_t b1, uint8_t b2,
-                  uint8_t w, uint8_t *out_b0, uint8_t *out_b1, uint8_t *out_b2,
-                  uint8_t *out_b3);
+// b0-b2 are actually rgb in that are already in native LED order.
+// w is the white component.
+// and out_b0-out_b3 are the output RGBW in native LED chipset order.
+void rgbw_partial_reorder(EOrderW w_placement, uint8_t b0, uint8_t b1,
+                          uint8_t b2, uint8_t w, uint8_t *out_b0,
+                          uint8_t *out_b1, uint8_t *out_b2, uint8_t *out_b3);
 
 #pragma GCC pop_options
 
