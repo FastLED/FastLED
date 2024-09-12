@@ -287,14 +287,15 @@ protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		RgbwArg rgbw = this->getRgbwMode();
-		PixelIterator& pixel_iterator = pixels.as_iterator(rgbw);
+		auto pixel_iterator = pixels.as_iterator(rgbw);
+		PixelIterator& iterator = pixel_iterator.base();
 		switch (GAMMA_CORRECTION_MODE) {
 			case kFiveBitGammaCorrectionMode_Null: {
-				showPixelsDefault(pixel_iterator);
+				showPixelsDefault(iterator);
 				break;
 			}
 			case kFiveBitGammaCorrectionMode_BitShift: {
-				showPixelsGammaBitShift(pixel_iterator);
+				showPixelsGammaBitShift(iterator);
 				break;
 			}
 		}

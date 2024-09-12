@@ -53,7 +53,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam LANES how many parallel lanes of output to write
 /// @tparam MASK bitmask for the output lanes
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF>
-struct PixelController: protected PixelIterator {  // to get PixelIterator use as_iterator().
+struct PixelController {  // to get PixelIterator use as_iterator().
     const uint8_t *mData;    ///< pointer to the underlying LED data
     int mLen;                ///< number of LEDs in the data for one lane
     int mLenRemaining;       ///< counter for the number of LEDs left to process
@@ -79,16 +79,77 @@ struct PixelController: protected PixelIterator {  // to get PixelIterator use a
         for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
     }
 
+    class PixelIteratorT: protected PixelIterator {
+        // Create an adapter class to allow PixelIterator to access protected members of PixelController.
+        // Note, that this adapter pattern to prevent code blowup, the other method that was tried
+        // was having PixelController inherit from PixelIterator, but that caused the AVR builds to
+        // blow up in size.
+        public:
+        PixelIteratorT(PixelController & pc) : mPixelController(pc) {}
+        virtual bool has(int n) { return mPixelController.has(n); }
+        virtual void loadAndScaleRGBW(uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *w_out) {
+            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
+            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
+            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
+
+            // Get the naive RGB data order in r,g,b.
+            CRGB rgb(
+                mPixelController.mData[0],
+                mPixelController.mData[1],
+                mPixelController.mData[2]
+            );
+            #ifndef __AVR__
+            CRGB scale = mPixelController.mScale;
+            uint8_t w = 0;
+            PixelIterator* self = this;
+            RgbwArg rgbw_arg = self->get_rgbw();
+            RGBW_MODE rgbw_mode = rgbw_arg.rgbw_mode;
+            uint16_t white_color_temp = rgbw_arg.white_color_temp;
+            rgb_2_rgbw(
+                rgbw_mode,
+                white_color_temp,
+                rgb.r, rgb.b, rgb.g,
+                scale.r, scale.g, scale.b,
+                &rgb.r, &rgb.g, &rgb.b, &w
+            );
+
+            *b0_out = rgb.raw[b0_index];
+            *b1_out = rgb.raw[b1_index];
+            *b2_out = rgb.raw[b2_index];
+            // Assume the w component is the last byte in the data stream and never reordered.
+            *w_out = w;
+            #else
+            *b0_out = rgb.raw[b0_index];
+            *b1_out = rgb.raw[b1_index];
+            *b2_out = rgb.raw[b2_index];
+            // Assume the w component is the last byte in the data stream and never reordered.
+            *w_out = 0;
+            #endif
+        }
+        virtual void loadAndScaleRGB(uint8_t *r_out, uint8_t *g_out, uint8_t *b_out) {
+            mPixelController.loadAndScaleRGB(r_out, g_out, b_out);
+        }
+        virtual void loadAndScale_APA102_HD(uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *brightness_out) {
+            mPixelController.loadAndScale_APA102_HD(b0_out, b1_out, b2_out, brightness_out);
+        }
+        virtual void stepDithering() { mPixelController.stepDithering(); }
+        virtual void advanceData() { mPixelController.advanceData(); }
+        virtual int size() { return mPixelController.size(); }
+        void set_rgbw(RgbwArg rgbw) { PixelIterator::set_rgbw(rgbw); }
+        PixelIterator& base() { return *this; }
+        PixelController & mPixelController;
+    };
+
 
     // New chipsets/drivers should use as_iterator() to process led output.
     // Accessing PixelController directly from user code deprecated, and should be minimized.
     //
     // Most of the complexity of PixelController is targeted at supporting the AVR chipsets
     // with tight timing requirements and has to remain here for legacy purposes.
-    PixelIterator& as_iterator(RgbwArg rgbw) {
-        PixelIterator& out = *this;
+    PixelIteratorT as_iterator(RgbwArg rgbw) {
+        PixelIteratorT out(*this);
         out.set_rgbw(rgbw);
-        return *this;
+        return out;
     }
 
     /// Initialize the PixelController::mOffsets array based on the length of the strip
@@ -434,78 +495,6 @@ struct PixelController: protected PixelIterator {  // to get PixelIterator use a
         *b0 = loadAndScale0();
         *b1 = loadAndScale1();
         *b2 = loadAndScale2();
-    }
-
-    /// Generates RGBW pixel information. While the RGB data is loaded in the order specified by RGB_ORDER
-    /// the W data is assumed to be the last byte in the data stream. This is true for WS2812 but may need
-    /// to be changed in the future if the white component starts being reordered across chipsets.
-    FASTLED_FORCE_INLINE void loadAndScaleRGBW(
-            uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
-        const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
-        const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
-        const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
-
-        // Get the naive RGB data order in r,g,b.
-        CRGB rgb = CRGB(mData[0], mData[1], mData[2]);  // Raw RGB values in native r,g,b ordering.
-        #ifndef __AVR__
-        uint8_t w = 0;
-        PixelIterator* self = this;
-        RgbwArg rgbw_arg = self->get_rgbw();
-        RGBW_MODE rgbw_mode = rgbw_arg.rgbw_mode;
-        uint16_t white_color_temp = rgbw_arg.white_color_temp;
-        rgb_2_rgbw(
-            rgbw_mode,
-            white_color_temp,
-            rgb.r, rgb.b, rgb.g,
-            mScale.r, mScale.g, mScale.b,
-            &rgb.r, &rgb.g, &rgb.b, &w
-        );
-
-        *b0_out = rgb.raw[b0_index];
-        *b1_out = rgb.raw[b1_index];
-        *b2_out = rgb.raw[b2_index];
-        // Assume the w component is the last byte in the data stream and never reordered.
-        *w_out = w;
-        #else
-        *b0_out = rgb.raw[b0_index];
-        *b1_out = rgb.raw[b1_index];
-        *b2_out = rgb.raw[b2_index];
-        // Assume the w component is the last byte in the data stream and never reordered.
-        *w_out = 0;
-        #endif
-    }
-
-
-    // Slightly faster in template mode when we know that the RGBW_MODE is constant.
-    template<RGBW_MODE MODE>
-    FASTLED_FORCE_INLINE void loadAndScaleRGBW(
-            uint16_t white_color_temp,
-            uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* w_out) {
-        const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
-        const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
-        const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
-        CRGB rgb = CRGB(mData[0], mData[1], mData[2]);  // Raw RGB values in native r,g,b ordering.
-        #ifndef __AVR__
-        uint8_t w = 0;
-        rgb_2_rgbw<MODE>(
-            white_color_temp,
-            rgb.r, rgb.b, rgb.g,
-            mScale.r, mScale.g, mScale.b,
-            &rgb.r, &rgb.g, &rgb.b, &w
-        );
-        *b0_out = rgb.raw[b0_index];
-        *b1_out = rgb.raw[b1_index];
-        *b2_out = rgb.raw[b2_index];
-        // Assume the w component is the last byte in the data stream and never reordered.
-        *w_out = w;
-        #else
-        *b0_out = rgb.raw[b0_index];
-        *b1_out = rgb.raw[b1_index];
-        *b2_out = rgb.raw[b2_index];
-        // Assume the w component is the last byte in the data stream and never reordered.
-        *w_out = 0;
-        #endif
-        
     }
 
     FASTLED_FORCE_INLINE void loadAndScale_APA102_HD(

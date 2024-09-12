@@ -110,7 +110,9 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels)
     {
         RgbwArg rgbw = this->getRgbwMode();
-        mRMTController.showPixels(pixels.as_iterator(rgbw));
+        auto iterator = pixels.as_iterator(rgbw);
+        PixelIterator& pixel_iterator = iterator.base();
+        mRMTController.showPixels(pixel_iterator);
     }
 };
 
