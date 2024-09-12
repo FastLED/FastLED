@@ -11,7 +11,7 @@
 
 #include "FastLED.h"
 #include <stddef.h>
-#include "rgb_2_rgbw.h"
+#include "rgbw.h"
 #include "five_bit_hd_gamma.h"
 #include "force_inline.h"
 #include "namespace.h"

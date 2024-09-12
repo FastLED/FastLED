@@ -112,7 +112,7 @@
 
 #include "namespace.h"
 #include "eorder.h"
-#include "rgb_2_rgbw.h"
+#include "rgbw.h"
 #include "pixel_iterator.h"
 
 FASTLED_NAMESPACE_BEGIN

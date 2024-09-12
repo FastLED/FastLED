@@ -2,7 +2,7 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
-#include "rgb_2_rgbw.h"
+#include "rgbw.h"
 #include <stdint.h>
 #include <stdio.h>
 

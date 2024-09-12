@@ -2,7 +2,7 @@
 #pragma once
 
 #include "namespace.h"
-#include "rgb_2_rgbw.h"
+#include "rgbw.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
