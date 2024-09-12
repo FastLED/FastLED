@@ -92,6 +92,8 @@ public:
     virtual void stepDithering() { mPixelController.stepDithering(); }
     virtual void advanceData() { mPixelController.advanceData(); }
     virtual int size() { return mPixelController.size(); }
+
+    // Get the base class reference for the PixelIterator, which is used by the driver system.
     PixelIterator& base() { return *this; }
 
     PixelControllerT& mPixelController;

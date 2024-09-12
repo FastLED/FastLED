@@ -112,8 +112,7 @@ protected:
     {
         RgbwArg rgbw = this->getRgbwMode();
         PixelIteratorT<PixelController<RGB_ORDER> > iterator(pixels, rgbw);
-        PixelIterator& pixel_iterator = iterator.base();
-        mRMTController.showPixels(pixel_iterator);
+        mRMTController.showPixels(iterator.base());
     }
 };
 
