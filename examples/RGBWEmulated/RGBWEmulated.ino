@@ -24,7 +24,7 @@ CRGB leds[NUM_LEDS];
 #define TIME_FACTOR_VAL 100
 
 typedef WS2812<DATA_PIN, RGB> ControllerT;  // RGB mode must be RGB, no re-ordering allowed.
-static RGBWEmulatedController<ControllerT, GRB> rgbwEmu(leds, NUM_LEDS);
+static RGBWEmulatedController<ControllerT> rgbwEmu(leds, NUM_LEDS);
 
 void setup() {
     Serial.begin(115200);
@@ -37,7 +37,8 @@ void setup() {
 void loop() {
     uint32_t ms = millis();
     static size_t frame_count = 0;
-    int frame_cycle = frame_count % 3;
+    int frame_cycle = frame_count % 4;
+    frame_count++;
 
     CRGB pixel;
     switch (frame_cycle) {
@@ -50,6 +51,9 @@ void loop() {
         case 2:
             pixel = CRGB::Blue;
             break;
+        case 3:
+            pixel = CRGB::White;
+            break;
     }
 
     for (int i = -1; i < frame_cycle; ++i) {
@@ -57,11 +61,12 @@ void loop() {
             leds[j] = pixel;
         }
         FastLED.show();
-        delay(500);
+        delay(200);
         for (int j = 0; j < NUM_LEDS; ++j) {
             leds[j] = CRGB::Black;
         }
         FastLED.show();
-        delay(500);
+        delay(200);
     }
+    delay(1000);
 }

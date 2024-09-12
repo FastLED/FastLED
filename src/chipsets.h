@@ -71,10 +71,15 @@ protected:
 #endif
 #endif
 
-// Emulation layer to support RGBW leds on RGB controllers. This works by creating
+// Emulution layer to support RGBW leds on RGB controllers. This works by creating
 // a side buffer dedicated for the RGBW data. The RGB data is then converted to RGBW
-// and sent to the delegate controller for rendering.
-template <typename CONTROLLER, EOrder RGB_ORDER>
+// and sent to the delegate controller for rendering as if it were RGB data.
+template <
+	typename CONTROLLER,
+	EOrder RGB_ORDER = GRB,  // Default on WS2812
+	EOrderW W3ORDER = W3,
+	RGBW_MODE W_MODE = kRGBWExactColors,
+	uint16_t W_COLOR_TEMP = kRGBWDefaultColorTemp>
 class RGBWEmulatedController
     : public CPixelLEDController<RGB_ORDER, CONTROLLER::LANES_VALUE,
                                  CONTROLLER::MASK_VALUE> {
@@ -130,7 +135,8 @@ class RGBWEmulatedController
         // padding because, for example, if we have one pixel then this will
         // translate into 4 bytes, but needs to be 6 bytes.
         mNumRGBWLeds = numLeds * 4 / 3;
-        this->setRgbw(RgbwDefault::value());  // By default, RGBW mode is enabled.
+		Rgbw rgbw(W_COLOR_TEMP, W_MODE, W3ORDER);
+        this->setRgbw(rgbw);  // By default, RGBW mode is enabled.
     }
     const CRGB *mRGBPixels = nullptr;
     CRGB *mRGBWPixels = nullptr;
