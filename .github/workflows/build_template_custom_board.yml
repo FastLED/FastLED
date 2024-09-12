@@ -29,7 +29,7 @@ jobs:
 
       # Use the fastest build to instantiate the ~/.platformio/boards folder
       - name: Pre-build to ensure ~/.platformio/boards folder is created
-        run: ./compile --boards uno --examples Blink
+        run: ./compile uno --examples Blink
         shell: bash
 
       # Copy the custom board JSON file to the PlatformIO boards folder
