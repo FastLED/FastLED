@@ -25,7 +25,7 @@ CRGB leds[NUM_LEDS];
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbwMode(RgbwDefault::value());
+    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbwMode(RgbwDefault());
     FastLED.setBrightness(128);  // Set global brightness to 50%
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }

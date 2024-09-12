@@ -56,7 +56,7 @@ protected:
 public:
 
     Rgbw mRgbMode = RgbwInvalid::value();
-    void setRgbwMode(Rgbw arg = RgbwDefault::value()) {
+    void setRgbwMode(const Rgbw& arg = RgbwDefault::value()) {
         mRgbMode = arg;
     }
     Rgbw getRgbwMode() const { return mRgbMode; }
