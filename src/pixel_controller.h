@@ -487,7 +487,6 @@ struct PixelController {  // to get PixelIterator use as_iterator().
                     b0_out, b1_out, b2_out, b3_out);  // RGBW data now in total native led order.
 #endif
     }
-
 };
 
 

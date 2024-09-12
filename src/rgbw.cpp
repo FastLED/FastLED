@@ -135,23 +135,27 @@ void rgbw_partial_reorder(EOrderW w_placement, uint8_t b0, uint8_t b1,
     // unrolled loop for speed.
     case W3:
         out[3] = w;
-        return;
+        break;
     case W2:
         out[3] = out[2];  // memmove and copy.
         out[2] = w;
-        return;
+        break;
     case W1:
         out[3] = out[2];
         out[2] = out[1];
         out[1] = w;
-        return;
+        break;
     case W0:
         out[3] = out[2];
         out[2] = out[1];
         out[1] = out[0];
         out[0] = w;
-        return;
+        break;
     }
+    *out_b0 = out[0];
+    *out_b1 = out[1];
+    *out_b2 = out[2];
+    *out_b3 = out[3];
 }
 
 #pragma GCC pop_options
