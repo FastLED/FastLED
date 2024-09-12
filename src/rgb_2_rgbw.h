@@ -151,6 +151,11 @@ FASTLED_FORCE_INLINE void rgb_2_rgbw(
         out_r, out_g, out_b, out_w);
 }
 
+// Assuming all RGB pixels are already ordered, this function will reorder them so that
+// white is in the correct position, given by the w_placement enum.
+void rgbw_reorder(
+    EOrderW w_placement, uint8_t b0, uint8_t b1, uint8_t b2, uint8_t w,
+    uint8_t* out_b0, uint8_t* out_b1, uint8_t* out_b2, uint8_t* out_b3);
 
 #pragma GCC pop_options
 

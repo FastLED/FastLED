@@ -125,6 +125,33 @@ void rgb_2_rgbw_user_function(uint16_t w_color_temperature,
     g_user_function(w_color_temperature, r, g, b, r_scale, g_scale, b_scale, out_r, out_g, out_b, out_w);
 }
 
+void rgbw_reorder(
+    EOrderW w_placement, uint8_t b0, uint8_t b1, uint8_t b2, uint8_t w,
+    uint8_t* out_b0, uint8_t* out_b1, uint8_t* out_b2, uint8_t* out_b3) {
+
+    uint8_t out[4] = {b0, b1, b2, 0};
+    switch (w_placement) {
+        case W3:
+            out[3] = out[2];
+            out[2] = out[1];
+            out[1] = out[0];
+            out[0] = w;
+            break;
+        case W2:
+            out[3] = out[2];
+            out[2] = out[1];
+            out[1] = w;
+            break;
+        case W1:
+            out[3] = out[2];
+            out[2] = w;
+            break;
+        case W0:
+            out[3] = w;
+            break;
+    }
+}
+
 #pragma GCC pop_options
 
 FASTLED_NAMESPACE_END

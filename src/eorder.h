@@ -17,5 +17,14 @@ enum EOrder {
 	BGR=0210   ///< Blue,  Green, Red   (0210)
 };
 
+// After EOrder is applied this is where W is inserted for RGBW.
+enum EOrderW {
+	W3 = 0x3,  ///< White is fourth
+	W2 = 0x2,  ///< White is third
+	W1 = 0x1,  ///< White is second
+	W0 = 0x0,   ///< White is first
+	WDefault = W3
+};
+
 FASTLED_NAMESPACE_END
 
