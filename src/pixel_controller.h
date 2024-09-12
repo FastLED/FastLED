@@ -3,6 +3,12 @@
 /// @file controller.h
 /// base definitions used by led controllers for writing out led data
 
+// Note that new code should use the PixelIterator interface to write out led data.
+// Using this class deep in driver code is deprecated because it's templates will
+// infact everything it touches. Instead use PixelIterator to write out led data, which
+// has a non-template interface and can be used in a more flexible way.
+// see pixel_iterator_wrapper.h on how to convert a PixelController to a PixelIterator.
+
 #include "FastLED.h"
 #include <stddef.h>
 #include "rgb_2_rgbw.h"
