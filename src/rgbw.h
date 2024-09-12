@@ -4,6 +4,7 @@
 
 #include "force_inline.h"
 #include "namespace.h"
+#include "eorder.h"
 
 FASTLED_NAMESPACE_BEGIN
 
