@@ -63,6 +63,7 @@ DEFAULT_EXAMPLES = [
     "RGBCalibrate",
     "RGBSetDemo",
     "RGBW",
+    "RGBWEmulated",
     "TwinkleFox",
     "XYMatrix",
 ]
