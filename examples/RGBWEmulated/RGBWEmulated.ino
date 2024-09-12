@@ -24,7 +24,7 @@ CRGB leds[NUM_LEDS];
 #define TIME_FACTOR_VAL 100
 
 typedef WS2812<DATA_PIN, RGB> ControllerT;  // RGB mode must be RGB, no re-ordering allowed.
-static RGBWEmulatedController<ControllerT> rgbwEmu(leds, NUM_LEDS);
+static RGBWEmulatedController<ControllerT> rgbwEmu;
 
 void setup() {
     Serial.begin(115200);
@@ -32,6 +32,13 @@ void setup() {
     FastLED.addLeds(&rgbwEmu, leds, NUM_LEDS);
     FastLED.setBrightness(128);  // Set global brightness to 50%
     delay(2000);  // If something ever goes wrong this delay will allow upload.
+}
+
+void fillAndShow(CRGB color) {
+    for (int i = 0; i < NUM_LEDS; ++i) {
+        leds[i] = color;
+    }
+    FastLED.show();
 }
 
 void loop() {
@@ -57,15 +64,10 @@ void loop() {
     }
 
     for (int i = -1; i < frame_cycle; ++i) {
-        for (int j = 0; j < NUM_LEDS; ++j) {
-            leds[j] = pixel;
-        }
-        FastLED.show();
+
+        fillAndShow(pixel);
         delay(200);
-        for (int j = 0; j < NUM_LEDS; ++j) {
-            leds[j] = CRGB::Black;
-        }
-        FastLED.show();
+        fillAndShow(CRGB::Black);
         delay(200);
     }
     delay(1000);

@@ -90,16 +90,19 @@ class RGBWEmulatedController
     // The delegated controller must do no reordering.
     static_assert(RGB == CONTROLLER::RGB_ORDER_VALUE);
 
-    RGBWEmulatedController(const CRGB *leds, int numLeds) {
-        construct(leds, numLeds);
-    }
+    RGBWEmulatedController() {
+        Rgbw rgbw(W_COLOR_TEMP, W_MODE, W3ORDER);
+        this->setRgbw(rgbw);  // By default, RGBW mode is enabled.
+    };
     ~RGBWEmulatedController() { delete[] mRGBWPixels; }
 
     virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
+        // Ensure buffer is large enough
+        ensureBuffer(pixels.size());
+
         // This version sent down to the real controller.
         PixelController<RGB, LANES, MASK> pixels_rgbw(pixels);
-        pixels_rgbw.mScale =
-            CRGB(255, 255, 255); // No scaling because we do that.
+        pixels_rgbw.mScale = CRGB(255, 255, 255); // No scaling because we do that.
         pixels_rgbw.mData = reinterpret_cast<uint8_t *>(mRGBWPixels);
         pixels_rgbw.mLen = mNumRGBWLeds;
         pixels_rgbw.mLenRemaining = mNumRGBWLeds;
@@ -118,30 +121,26 @@ class RGBWEmulatedController
 
   private:
     void init() override {
-        // The delegate controller expects the raw pixel byte data in multiples of 3.
-		// In the case of src data not a multiple of 3, then we need to
-		// add pad bytes so that the delegate controller doesn't walk off the end
-		// of the array and invoke a buffer overflow panic.
-        size_t extra = mNumRGBWLeds % 3 ? 1 : 0;
-		// Allocation of the RGBW buffer MUST be done at init time because otherwise the
-		// malloc wil fail on certain platforms when this controller type is statically
-		// allocated and global constructors are used.
-        mRGBWPixels = new CRGB[mNumRGBWLeds + extra];
+        // Initialization is now handled by ensureBuffer
     }
-    void construct(const CRGB *leds, int numLeds) {
-        mNumRGBLeds = numLeds;
-        mRGBPixels = leds;
-        // The delegate controller expects 3 bytes per pixel, so we have to add
-        // padding because, for example, if we have one pixel then this will
-        // translate into 4 bytes, but needs to be 6 bytes.
-        mNumRGBWLeds = numLeds * 4 / 3;
-		Rgbw rgbw(W_COLOR_TEMP, W_MODE, W3ORDER);
-        this->setRgbw(rgbw);  // By default, RGBW mode is enabled.
+
+    void ensureBuffer(int32_t num_leds) {
+        if (num_leds != mNumRGBLeds) {
+            mNumRGBLeds = num_leds;
+            // The delegate controller expects the raw pixel byte data in multiples of 3.
+            // In the case of src data not a multiple of 3, then we need to
+            // add pad bytes so that the delegate controller doesn't walk off the end
+            // of the array and invoke a buffer overflow panic.
+            mNumRGBWLeds = (num_leds * 4 + 2) / 3; // Round up to nearest multiple of 3
+            size_t extra = mNumRGBWLeds % 3 ? 1 : 0;
+            delete[] mRGBWPixels;
+            mRGBWPixels = new CRGB[mNumRGBWLeds + extra];
+        }
     }
-    const CRGB *mRGBPixels = nullptr;
+
     CRGB *mRGBWPixels = nullptr;
-    int mNumRGBLeds = 0;
-    int mNumRGBWLeds = 0;
+    int32_t mNumRGBLeds = 0;
+    int32_t mNumRGBWLeds = 0;
     CONTROLLER mController; // Real controller.
 };
 
