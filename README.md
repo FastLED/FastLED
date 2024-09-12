@@ -214,7 +214,7 @@ When changes are made then push to your fork to your repo and git will give you 
 
 ### Testing other devices
 
-  * run `compile` and then select your board
+  * run [compile](compile) and then select your board
 
 ```bash
 Available boards:
