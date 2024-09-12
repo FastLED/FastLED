@@ -37,6 +37,7 @@
 #include "idf4_rmt.h"
 #include "FastLED.h"
 #include "esp_idf_version.h"
+#include "pixel_iterator_wrapper.h"
 
 // -- Core or custom driver
 #ifndef FASTLED_RMT_BUILTIN_DRIVER
@@ -110,7 +111,7 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels)
     {
         RgbwArg rgbw = this->getRgbwMode();
-        auto iterator = pixels.as_iterator(rgbw);
+        PixelIteratorT<PixelController<RGB_ORDER> > iterator(pixels, rgbw);
         PixelIterator& pixel_iterator = iterator.base();
         mRMTController.showPixels(pixel_iterator);
     }

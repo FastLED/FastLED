@@ -5,6 +5,7 @@
 #include "pixeltypes.h"
 #include "five_bit_hd_gamma.h"
 #include "force_inline.h"
+#include "pixel_iterator_wrapper.h"
 
 /// @file chipsets.h
 /// Contains the bulk of the definitions for the various LED chipsets supported.
@@ -287,7 +288,7 @@ protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		RgbwArg rgbw = this->getRgbwMode();
-		auto pixel_iterator = pixels.as_iterator(rgbw);
+		PixelIteratorT<PixelController<RGB_ORDER> > pixel_iterator(pixels, rgbw);
 		PixelIterator& iterator = pixel_iterator.base();
 		switch (GAMMA_CORRECTION_MODE) {
 			case kFiveBitGammaCorrectionMode_Null: {

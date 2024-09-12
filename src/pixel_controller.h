@@ -63,6 +63,8 @@ struct PixelController {  // to get PixelIterator use as_iterator().
     int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
     int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
 
+    static const EOrder RGB_ORDER_VALUE = RGB_ORDER;
+
     /// Copy constructor
     /// @param other the object to copy 
     PixelController(const PixelController & other) {
@@ -77,103 +79,6 @@ struct PixelController {  // to get PixelIterator use as_iterator().
         mAdvance = other.mAdvance;
         mLenRemaining = mLen = other.mLen;
         for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
-    }
-
-    class PixelIteratorT: protected PixelIterator {
-        // Create an adapter class to allow PixelController to be used as a PixelIterator.
-        // Caller must save the fully templatized object to the stack, then call base() in
-        // order to get the non-templatized base class, which is then used to call the
-        // get the ordering of pixels.
-        // PixelIterator should be used for more powerful micro controllers which can easily
-        // handle the virtual function overhead.
-
-        protected:
-          PixelIteratorT(PixelController & pc) : mPixelController(pc) {}
-        public:
-
-        virtual bool has(int n) { return mPixelController.has(n); }
-        virtual void loadAndScaleRGBW(uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *w_out) {
-            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
-            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
-            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
-
-            // Get the naive RGB data order in r,g,b.
-            CRGB rgb(
-                mPixelController.mData[0],
-                mPixelController.mData[1],
-                mPixelController.mData[2]
-            );
-            #ifndef __AVR__
-            CRGB scale = mPixelController.mScale;
-            uint8_t w = 0;
-            PixelIterator* self = this;  // explicit base class is needed for templates.
-            RgbwArg rgbw_arg = self->get_rgbw();
-            RGBW_MODE rgbw_mode = rgbw_arg.rgbw_mode;
-            uint16_t white_color_temp = rgbw_arg.white_color_temp;
-            rgb_2_rgbw(
-                rgbw_mode,
-                white_color_temp,
-                rgb.r, rgb.b, rgb.g,
-                scale.r, scale.g, scale.b,
-                &rgb.r, &rgb.g, &rgb.b, &w
-            );
-
-            *b0_out = rgb.raw[b0_index];
-            *b1_out = rgb.raw[b1_index];
-            *b2_out = rgb.raw[b2_index];
-            // Assume the w component is the last byte in the data stream and never reordered.
-            *w_out = w;
-            #else
-            *b0_out = rgb.raw[b0_index];
-            *b1_out = rgb.raw[b1_index];
-            *b2_out = rgb.raw[b2_index];
-            // Assume the w component is the last byte in the data stream and never reordered.
-            *w_out = 0;
-            #endif
-        }
-        virtual void loadAndScaleRGB(uint8_t *b0, uint8_t *b1, uint8_t *b2) {
-            *b0 = mPixelController.loadAndScale0();
-            *b1 = mPixelController.loadAndScale1();
-            *b2 = mPixelController.loadAndScale2();
-        }
-        virtual void loadAndScale_APA102_HD(uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *brightness_out) {
-            CRGB rgb = CRGB(mPixelController.mData[0], mPixelController.mData[1], mPixelController.mData[2]);
-            uint8_t brightness = 0;
-            if (rgb) {
-                five_bit_hd_gamma_bitshift(
-                    rgb.r, rgb.g, rgb.b,
-                    // Note this mScale has the global brightness scale mixed in with the
-                    // color correction scale.
-                    mPixelController.mScale.r, mPixelController.mScale.g, mPixelController.mScale.b,
-                    &rgb.r, &rgb.g, &rgb.b, &brightness
-                );
-            }
-            const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
-            const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);
-            const uint8_t b2_index = RGB_BYTE2(RGB_ORDER);
-            *b0_out = rgb.raw[b0_index];
-            *b1_out = rgb.raw[b1_index];
-            *b2_out = rgb.raw[b2_index];
-            *brightness_out = brightness;
-        }
-        virtual void stepDithering() { mPixelController.stepDithering(); }
-        virtual void advanceData() { mPixelController.advanceData(); }
-        virtual int size() { return mPixelController.size(); }
-        void set_rgbw(RgbwArg rgbw) { PixelIterator::set_rgbw(rgbw); }
-        PixelIterator& base() { return *this; }
-        PixelController & mPixelController;
-    };
-
-
-    // New chipsets/drivers should use as_iterator() to process led output.
-    // Accessing PixelController directly from user code deprecated, and should be minimized.
-    //
-    // Most of the complexity of PixelController is targeted at supporting the AVR chipsets
-    // with tight timing requirements and has to remain here for legacy purposes.
-    PixelIteratorT as_iterator(RgbwArg rgbw) {
-        PixelIteratorT out(*this);
-        out.set_rgbw(rgbw);
-        return out;
     }
 
     /// Initialize the PixelController::mOffsets array based on the length of the strip
