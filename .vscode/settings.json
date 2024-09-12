@@ -36,6 +36,7 @@
         "system_error": "cpp",
         "tuple": "cpp",
         "initializer_list": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "new": "cpp"
     }
 }
