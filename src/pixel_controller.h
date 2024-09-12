@@ -86,8 +86,11 @@ struct PixelController {  // to get PixelIterator use as_iterator().
         // get the ordering of pixels.
         // PixelIterator should be used for more powerful micro controllers which can easily
         // handle the virtual function overhead.
+
+        protected:
+          PixelIteratorT(PixelController & pc) : mPixelController(pc) {}
         public:
-        PixelIteratorT(PixelController & pc) : mPixelController(pc) {}
+
         virtual bool has(int n) { return mPixelController.has(n); }
         virtual void loadAndScaleRGBW(uint8_t *b0_out, uint8_t *b1_out, uint8_t *b2_out, uint8_t *w_out) {
             const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
