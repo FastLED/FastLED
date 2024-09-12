@@ -110,7 +110,7 @@ protected:
     //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels)
     {
-        RgbwArg rgbw = this->getRgbwMode();
+        Rgbw rgbw = this->getRgbwMode();
         PixelIteratorT<PixelController<RGB_ORDER> > iterator(pixels, rgbw);
         mRMTController.showPixels(iterator.base());
     }

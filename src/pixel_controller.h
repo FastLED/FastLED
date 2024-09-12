@@ -449,7 +449,7 @@ struct PixelController {  // to get PixelIterator use as_iterator().
         *brightness_out = brightness;
     }
 
-    FASTLED_FORCE_INLINE void loadAndScaleRGBW(RgbwArg rgbw, uint8_t *b0_out, uint8_t *b1_out,
+    FASTLED_FORCE_INLINE void loadAndScaleRGBW(Rgbw rgbw, uint8_t *b0_out, uint8_t *b1_out,
                                                uint8_t *b2_out, uint8_t *b3_out) {
 
 #ifdef __AVR__

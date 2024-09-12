@@ -9,45 +9,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-struct RgbwArg {
-    explicit RgbwArg(uint16_t white_color_temp = kRGBWDefaultColorTemp,
-                    RGBW_MODE rgbw_mode = kRGBWExactColors,
-                    EOrderW _w_placement = WDefault)
-        : white_color_temp(white_color_temp),
-          w_placement(_w_placement),
-          rgbw_mode(rgbw_mode) {}
-    uint16_t white_color_temp = kRGBWDefaultColorTemp;
-    EOrderW w_placement = WDefault;
-    RGBW_MODE rgbw_mode = kRGBWExactColors;
-};
-
-struct RgbwArgInvalid : public RgbwArg {
-    RgbwArgInvalid() {
-        white_color_temp = kRGBWDefaultColorTemp;
-        rgbw_mode = kRGBWInvalid;
-    }
-    static RgbwArg value() {
-        RgbwArgInvalid invalid;
-        return invalid;
-    }
-};
-
-struct RgbwDefault : public RgbwArg {
-    RgbwDefault() {
-        white_color_temp = kRGBWDefaultColorTemp;
-        rgbw_mode = kRGBWExactColors;
-    }
-    static RgbwArg value() {
-        RgbwDefault _default;
-        return _default;
-    }
-};
-
 // Abstract class
 class PixelIterator {
   public:
     virtual ~PixelIterator() {}
-    explicit PixelIterator(RgbwArg rgbw_arg = RgbwArgInvalid::value()) : mRgbw(rgbw_arg) {}
+    explicit PixelIterator(Rgbw rgbw_arg = RgbwInvalid::value()) : mRgbw(rgbw_arg) {}
     virtual bool has(int n) = 0;
     // loadAndScaleRGBW
     virtual void loadAndScaleRGBW(uint8_t *b0_out, uint8_t *b1_out,
@@ -71,11 +37,11 @@ class PixelIterator {
     // size
     virtual int size() = 0;
 
-    void set_rgbw(RgbwArg rgbw) { mRgbw = rgbw; }
-    RgbwArg get_rgbw() const { return mRgbw; }
+    void set_rgbw(Rgbw rgbw) { mRgbw = rgbw; }
+    Rgbw get_rgbw() const { return mRgbw; }
 
   protected:
-    RgbwArg mRgbw;
+    Rgbw mRgbw;
 };
 
 FASTLED_NAMESPACE_END

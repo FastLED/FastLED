@@ -22,13 +22,13 @@ class PixelIteratorT : protected PixelIterator {
   public:
     static const EOrder RGB_ORDER = PixelControllerT::RGB_ORDER_VALUE;
 
-    PixelIteratorT(PixelControllerT &pc, RgbwArg rgbw) : mPixelController(pc) {
+    PixelIteratorT(PixelControllerT &pc, Rgbw rgbw) : mPixelController(pc) {
         set_rgbw(rgbw);
     }
     virtual bool has(int n) { return mPixelController.has(n); }
     virtual void loadAndScaleRGBW(uint8_t *b0_out, uint8_t *b1_out,
                                   uint8_t *b2_out, uint8_t *b3_out) {
-        RgbwArg rgbw = get_rgbw();
+        Rgbw rgbw = get_rgbw();
         mPixelController.loadAndScaleRGBW(rgbw, b0_out, b1_out, b2_out, b3_out);
     }
     virtual void loadAndScaleRGB(uint8_t *b0, uint8_t *b1, uint8_t *b2) {
