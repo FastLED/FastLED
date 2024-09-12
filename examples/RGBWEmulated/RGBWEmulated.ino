@@ -23,7 +23,7 @@ CRGB leds[NUM_LEDS];
 #define TIME_FACTOR_SAT 100
 #define TIME_FACTOR_VAL 100
 
-typedef WS2812<DATA_PIN, RGB> ControllerT;
+typedef WS2812<DATA_PIN, RGB> ControllerT;  // RGB mode must be RGB, no re-ordering allowed.
 static RGBWEmulatedController<ControllerT, GRB> rgbwEmu(leds, NUM_LEDS);
 
 void setup() {
@@ -36,26 +36,32 @@ void setup() {
 
 void loop() {
     uint32_t ms = millis();
-    
-    for(int i = 0; i < NUM_LEDS; i++) {
-        // Use different noise functions for each LED and each color component
-        uint8_t hue = inoise16(ms * TIME_FACTOR_HUE, i * 1000, 0) >> 8;
-        uint8_t sat = inoise16(ms * TIME_FACTOR_SAT, i * 2000, 1000) >> 8;
-        uint8_t val = inoise16(ms * TIME_FACTOR_VAL, i * 3000, 2000) >> 8;
-        
-        // Map the noise to full range for saturation and value
-        sat = map(sat, 0, 255, 30, 255);
-        val = map(val, 0, 255, 100, 255);
-        if (i % 2 == 0) {
-            // Even LEDs are black.
-            val = 0;
-        }
-        leds[i] = CHSV(hue, sat, val);
+    static size_t frame_count = 0;
+    int frame_cycle = frame_count % 3;
+
+    CRGB pixel;
+    switch (frame_cycle) {
+        case 0:
+            pixel = CRGB::Red;
+            break;
+        case 1:
+            pixel = CRGB::Green;
+            break;
+        case 2:
+            pixel = CRGB::Blue;
+            break;
     }
 
-    FastLED.show();
-    
-    // Small delay to control the overall speed of the animation
-    //FastLED.delay(1);
-
+    for (int i = -1; i < frame_cycle; ++i) {
+        for (int j = 0; j < NUM_LEDS; ++j) {
+            leds[j] = pixel;
+        }
+        FastLED.show();
+        delay(500);
+        for (int j = 0; j < NUM_LEDS; ++j) {
+            leds[j] = CRGB::Black;
+        }
+        FastLED.show();
+        delay(500);
+    }
 }
