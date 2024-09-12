@@ -9,7 +9,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 #pragma GCC push_options
-#pragma GCC optimize ("O3")
+#pragma GCC optimize ("Os")
 
 namespace {
     inline uint8_t min3(uint8_t a, uint8_t b, uint8_t c) {
