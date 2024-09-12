@@ -56,8 +56,9 @@ protected:
 public:
 
     Rgbw mRgbMode = RgbwInvalid::value();
-    void setRgbw(const Rgbw& arg = RgbwDefault::value()) {
+    CLEDController& setRgbw(const Rgbw& arg = RgbwDefault::value()) {
         mRgbMode = arg;
+        return *this;  // builder pattern.
     }
     Rgbw getRgbwMode() const { return mRgbMode; }
 
