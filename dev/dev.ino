@@ -7,7 +7,7 @@
 #include <FastLED.h>
 
 // How many leds in your strip?
-#define NUM_LEDS 12
+#define NUM_LEDS 10
 
 // For led chips like WS2812, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
@@ -23,13 +23,9 @@ CRGB leds[NUM_LEDS];
 #define TIME_FACTOR_SAT 100
 #define TIME_FACTOR_VAL 100
 
-typedef WS2812<DATA_PIN, RGB> ControllerT;
-static RGBWEmulatedController<ControllerT, GRB> rgbwEmu(leds, NUM_LEDS);
-
 void setup() {
     Serial.begin(115200);
-    //FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    FastLED.addLeds(&rgbwEmu, leds, NUM_LEDS);
+    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbw(RgbwDefault());
     FastLED.setBrightness(128);  // Set global brightness to 50%
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
@@ -46,10 +42,7 @@ void loop() {
         // Map the noise to full range for saturation and value
         sat = map(sat, 0, 255, 30, 255);
         val = map(val, 0, 255, 100, 255);
-        if (i % 2 == 0) {
-            // Even LEDs are black.
-            val = 0;
-        }
+        
         leds[i] = CHSV(hue, sat, val);
     }
 
