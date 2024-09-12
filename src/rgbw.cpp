@@ -132,24 +132,25 @@ void rgbw_partial_reorder(EOrderW w_placement, uint8_t b0, uint8_t b1,
 
     uint8_t out[4] = {b0, b1, b2, 0};
     switch (w_placement) {
+    // unrolled loop for speed.
     case W3:
+        out[3] = w;
+        return;
+    case W2:
+        out[3] = out[2];  // memmove and copy.
+        out[2] = w;
+        return;
+    case W1:
+        out[3] = out[2];
+        out[2] = out[1];
+        out[1] = w;
+        return;
+    case W0:
         out[3] = out[2];
         out[2] = out[1];
         out[1] = out[0];
         out[0] = w;
-        break;
-    case W2:
-        out[3] = out[2];
-        out[2] = out[1];
-        out[1] = w;
-        break;
-    case W1:
-        out[3] = out[2];
-        out[2] = w;
-        break;
-    case W0:
-        out[3] = w;
-        break;
+        return;
     }
 }
 
