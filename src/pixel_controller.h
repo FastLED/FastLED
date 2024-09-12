@@ -69,7 +69,9 @@ struct PixelController {  // to get PixelIterator use as_iterator().
     int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
     int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
 
-    static const EOrder RGB_ORDER_VALUE = RGB_ORDER;
+    PixelIterator as_iterator(const Rgbw& rgbw) {
+        return PixelIterator(this, rgbw);
+    }
 
     /// Copy constructor
     /// @param other the object to copy 
@@ -447,6 +449,13 @@ struct PixelController {  // to get PixelIterator use as_iterator().
         *b1_out = rgb.raw[b1_index];
         *b2_out = rgb.raw[b2_index];
         *brightness_out = brightness;
+    }
+
+    FASTLED_FORCE_INLINE void loadAndScaleRGB(uint8_t *b0_out, uint8_t *b1_out,
+                                              uint8_t *b2_out) {
+        *b0_out = loadAndScale0();
+        *b1_out = loadAndScale1();
+        *b2_out = loadAndScale2();
     }
 
     FASTLED_FORCE_INLINE void loadAndScaleRGBW(Rgbw rgbw, uint8_t *b0_out, uint8_t *b1_out,

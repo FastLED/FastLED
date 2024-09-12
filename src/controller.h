@@ -60,7 +60,7 @@ public:
         mRgbMode = arg;
         return *this;  // builder pattern.
     }
-    Rgbw getRgbwMode() const { return mRgbMode; }
+    Rgbw getRgbw() const { return mRgbMode; }
 
     /// Create an led controller object, add it to the chain of controllers
     CLEDController() : m_Data(NULL), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
