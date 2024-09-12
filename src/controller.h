@@ -260,9 +260,7 @@ public:
 /// @tparam MASK bitmask for the output lanes
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF> class CPixelLEDController : public CLEDController {
 protected:
-    /// Send the LED data to the strip
-    /// @param pixels the PixelController object for the LED data
-    virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
+
 
     /// Set all the LEDs on the controller to a given color
     /// @param data the CRGB color to set the LEDs to
@@ -287,7 +285,14 @@ protected:
     }
 
 public:
+    static const EOrder RGB_ORDER_VALUE = RGB_ORDER; ///< The RGB ordering for this controller
+    static const int LANES_VALUE = LANES;             ///< The number of lanes for this controller
+    static const uint32_t MASK_VALUE = MASK;         ///< The mask for the lanes for this controller
     CPixelLEDController() : CLEDController() {}
+
+    /// Send the LED data to the strip
+    /// @param pixels the PixelController object for the LED data
+    virtual void showPixels(PixelController<RGB_ORDER,LANES,MASK> & pixels) = 0;
 
     /// Get the number of lanes of the Controller
     /// @returns LANES from template

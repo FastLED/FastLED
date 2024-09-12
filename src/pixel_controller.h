@@ -76,6 +76,16 @@ struct PixelController {
     /// Copy constructor
     /// @param other the object to copy 
     PixelController(const PixelController & other) {
+        copy(other);
+    }
+
+    template<EOrder RGB_ORDER_OTHER>
+    PixelController(const PixelController<RGB_ORDER_OTHER, LANES, MASK> & other) {
+        copy(other);
+    }
+
+    template<typename PixelControllerT>
+    void copy(const PixelControllerT& other) {
         d[0] = other.d[0];
         d[1] = other.d[1];
         d[2] = other.d[2];
@@ -94,8 +104,8 @@ struct PixelController {
     void initOffsets(int len) {
         int nOffset = 0;
         for(int i = 0; i < LANES; ++i) {
-        mOffsets[i] = nOffset;
-        if((1<<i) & MASK) { nOffset += (len * mAdvance); }
+            mOffsets[i] = nOffset;
+            if((1<<i) & MASK) { nOffset += (len * mAdvance); }
         }
     }
 

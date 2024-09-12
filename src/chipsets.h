@@ -5,6 +5,7 @@
 #include "pixeltypes.h"
 #include "five_bit_hd_gamma.h"
 #include "force_inline.h"
+#include "pixel_iterator.h"
 
 /// @file chipsets.h
 /// Contains the bulk of the definitions for the various LED chipsets supported.
@@ -69,6 +70,74 @@ protected:
 // };
 #endif
 #endif
+
+// Emulation layer to support RGBW leds on RGB controllers. This works by creating
+// a side buffer dedicated for the RGBW data. The RGB data is then converted to RGBW
+// and sent to the delegate controller for rendering.
+template <typename CONTROLLER, EOrder RGB_ORDER>
+class RGBWEmulatedController
+    : public CPixelLEDController<RGB_ORDER, CONTROLLER::LANES_VALUE,
+                                 CONTROLLER::MASK_VALUE> {
+  public:
+    static const int LANES = CONTROLLER::LANES_VALUE;
+    static const uint32_t MASK = CONTROLLER::MASK_VALUE;
+
+    // The delegated controller must do no reordering.
+    static_assert(RGB == CONTROLLER::RGB_ORDER_VALUE);
+
+    RGBWEmulatedController(const CRGB *leds, int numLeds) {
+        construct(leds, numLeds);
+    }
+    ~RGBWEmulatedController() { delete[] mRGBWPixels; }
+
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
+        // This version sent down to the real controller.
+        PixelController<RGB, LANES, MASK> pixels_rgbw(pixels);
+        pixels_rgbw.mScale =
+            CRGB(255, 255, 255); // No scaling because we do that.
+        pixels_rgbw.mData = reinterpret_cast<uint8_t *>(mRGBWPixels);
+        pixels_rgbw.mLen = mNumRGBWLeds;
+        pixels_rgbw.mLenRemaining = mNumRGBWLeds;
+        uint8_t *data = reinterpret_cast<uint8_t *>(mRGBWPixels);
+        PixelIterator iterator = pixels.as_iterator(this->getRgbw());
+        while (iterator.has(1)) {
+            pixels.stepDithering();
+            iterator.loadAndScaleRGBW(data, data + 1, data + 2, data + 3);
+            data += 4;
+            iterator.advanceData();
+        }
+        // cast to base class to get around protected/private access issues
+        CPixelLEDController<RGB, LANES, MASK> &base = mController;
+        base.showPixels(pixels_rgbw);
+    }
+
+  private:
+    void init() override {
+        // The delegate controller expects the raw pixel byte data in multiples of 3.
+		// In the case of src data not a multiple of 3, then we need to
+		// add pad bytes so that the delegate controller doesn't walk off the end
+		// of the array and invoke a buffer overflow panic.
+        size_t extra = mNumRGBWLeds % 3 ? 1 : 0;
+		// Allocation of the RGBW buffer MUST be done at init time because otherwise the
+		// malloc wil fail on certain platforms when this controller type is statically
+		// allocated and global constructors are used.
+        mRGBWPixels = new CRGB[mNumRGBWLeds + extra];
+    }
+    void construct(const CRGB *leds, int numLeds) {
+        mNumRGBLeds = numLeds;
+        mRGBPixels = leds;
+        // The delegate controller expects 3 bytes per pixel, so we have to add
+        // padding because, for example, if we have one pixel then this will
+        // translate into 4 bytes, but needs to be 6 bytes.
+        mNumRGBWLeds = numLeds * 4 / 3;
+        this->setRgbw(RgbwDefault::value());  // By default, RGBW mode is enabled.
+    }
+    const CRGB *mRGBPixels = nullptr;
+    CRGB *mRGBWPixels = nullptr;
+    int mNumRGBLeds = 0;
+    int mNumRGBWLeds = 0;
+    CONTROLLER mController; // Real controller.
+};
 
 /// @defgroup ClockedChipsets Clocked Chipsets
 /// Nominally SPI based, these chipsets have a data and a clock line.
