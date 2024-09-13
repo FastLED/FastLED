@@ -94,7 +94,10 @@ def compile_for_board_and_example(
         # replace all instances of "lib/src" => "src" so intellisense can find the files
         # with one click.
         stdout = stdout.replace("lib/src", "src").replace("lib\\src", "src")
-        stdout = stdout + "\n\nThis is a second attempt, but with verbose output, look above for compiler errors.\n"
+        stdout = (
+            stdout
+            + "\n\nThis is a second attempt, but with verbose output, look above for compiler errors.\n"
+        )
         locked_print(stdout)
         return False, stdout
     locked_print(f"*** Finished building example {example} for board {board_name} ***")

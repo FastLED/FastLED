@@ -92,7 +92,8 @@ led_strip_handle_t configure_led(int pin)
 }
 
 void __demo() {
-    led_strip_handle_t led_strip = configure_led();
+    static const int LED_STRIP_BLINK_GPIO = 2;
+    led_strip_handle_t led_strip = configure_led(LED_STRIP_BLINK_GPIO);
     bool led_on_off = false;
 
     ESP_LOGI(TAG, "Start blinking LED strip");
