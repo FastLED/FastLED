@@ -63,9 +63,6 @@ void five_bit_hd_gamma_function(uint8_t r8, uint8_t g8,
   *b16 = _gamma_2_8[b8];
 }
 #endif  // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
-#endif  // FASTLED_FIVE_BIT_HD_GAMMA_BITSHIFT_FUNCTION_OVERRIDE
-
-#ifndef FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
 
 void five_bit_hd_gamma_bitshift(
     uint8_t r8, uint8_t g8, uint8_t b8,
