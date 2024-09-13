@@ -1,6 +1,8 @@
 /// @file    Apa102HD.ino
 /// @brief   Example showing how to use the APA102HD gamma correction with user override.
 
+#define FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
+
 #include <Arduino.h>
 #include <FastLED.h>
 #include <lib8tion.h>
