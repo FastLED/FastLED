@@ -76,10 +76,7 @@ protected:
 // and sent to the delegate controller for rendering as if it were RGB data.
 template <
 	typename CONTROLLER,
-	EOrder RGB_ORDER = GRB,  // Default on WS2812
-	EOrderW W3ORDER = W3,
-	RGBW_MODE W_MODE = kRGBWExactColors,
-	uint16_t W_COLOR_TEMP = kRGBWDefaultColorTemp>
+	EOrder RGB_ORDER = GRB>  // Default on WS2812>
 class RGBWEmulatedController
     : public CPixelLEDController<RGB_ORDER, CONTROLLER::LANES_VALUE,
                                  CONTROLLER::MASK_VALUE> {
@@ -90,9 +87,8 @@ class RGBWEmulatedController
     // The delegated controller must do no reordering.
     static_assert(RGB == CONTROLLER::RGB_ORDER_VALUE);
 
-    RGBWEmulatedController() {
-        Rgbw rgbw(W_COLOR_TEMP, W_MODE, W3ORDER);
-        this->setRgbw(rgbw);  // By default, RGBW mode is enabled.
+    RGBWEmulatedController(const Rgbw& rgbw = RgbwDefault()) {
+        this->setRgbw(rgbw);
     };
     ~RGBWEmulatedController() { delete[] mRGBWPixels; }
 
