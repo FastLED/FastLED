@@ -132,6 +132,11 @@ class ESP32RMTController;
 class RmtController
 {
 public:
+    // When built_in_driver is true then the entire RMT datablock is
+    // generated ahead of time. This eliminates the flicker at the
+    // cost of using WAY more memory (24x the size of the pixel data
+    // as opposed to 2x - the size of an additional pixel buffer for
+    // stream encoding).
     static void init(int pin, bool built_in_driver);
     RmtController() = delete;
     RmtController(const RmtController &) = delete;
