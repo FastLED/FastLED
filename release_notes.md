@@ -14,6 +14,7 @@ FastLED 3.7.7
   * This is how RGBW mode was implemented.
   * This is a concrete class (no templates!) so it's suitable for driver code in cpp files.
   * PixelController<> can convert to a PixelIterator, see `PixelController<>::as_iterator(...)`
+* UCS1912 LED chipset support added.
 
 FastLED 3.7.6
 =============
