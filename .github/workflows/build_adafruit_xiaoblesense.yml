@@ -1,4 +1,4 @@
-name: nrf52840_sense
+name: adafruit_xiaoblesense
 
 on:
   workflow_dispatch:
