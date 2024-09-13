@@ -2,13 +2,12 @@ FastLED 3.7.7
 =============
 * WS2812 RGBW mode is now part of the API.
   * Api: `FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbw(RgbwDefault());`
-  * Only enabled on ESP32 boards, no op on other platforms, looking for help to implement on others.
-  * This will only work for chipsets that directly support RGBW mode, which at this point is ESP32 only.
+  * Only enabled on ESP32 boards, no op on other platforms.
   * See [examples/RGBW/RGBW.ino](https://github.com/FastLED/FastLED/blob/master/examples/RGBW/RGBW.ino)
 * WS2812 Emulated RGBW Controller
   * Works on all platforms (theoretically)
   * Has an extra side buffer to convert RGB -> RGBW data.
-    * This data is sent as if it were RGB data.
+    * This data is sent to the real driver as if it were RGB data.
     * Some padding is added when source LED data is not a multiple of 3.
   * See [examples/RGBWEmulated/RGBWEmulated.ino](https://github.com/FastLED/FastLED/blob/master/examples/RGBW/RGBW.ino)
 * [PixelIterator](src/pixel_iterator.h) has been introduced to reduce complexity of writing driver code
