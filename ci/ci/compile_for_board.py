@@ -72,6 +72,29 @@ def compile_for_board_and_example(
         locked_print(
             f"*** Error compiling example {example} for board {board_name} ***"
         )
+        # re-running command with verbose output to see what the defines are.
+        cmd_list.append("-v")
+        cmd_str = subprocess.list2cmdline(cmd_list)
+        msg_lsit = [
+            "\n\n******************************",
+            "* Running command but with verbose output:",
+            f"*     {cmd_str}",
+            "******************************\n",
+        ]
+        msg = "\n".join(msg_lsit)
+        locked_print(msg)
+        result = subprocess.run(
+            cmd_list,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+        )
+        stdout = result.stdout
+        # replace all instances of "lib/src" => "src" so intellisense can find the files
+        # with one click.
+        stdout = stdout.replace("lib/src", "src").replace("lib\\src", "src")
+        locked_print(stdout)
         return False, stdout
     locked_print(f"*** Finished building example {example} for board {board_name} ***")
     return True, stdout
