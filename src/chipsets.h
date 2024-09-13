@@ -667,6 +667,11 @@ class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, 2 * F
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class WS2812Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
+/// WS2815 controller class @ 400 KHz.
+/// @copydetails WS2812Controller800Khz
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class WS2815Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 9 * FMUL, 4 * FMUL, RGB_ORDER> {};
+
 /// WS2811 controller class @ 800 KHz.
 /// @copydetails WS2812Controller800Khz
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
@@ -756,6 +761,11 @@ class GW6205Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 4 
 /// @copydetails WS2812Controller800Khz
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
+
+// UCS1912 - Note, never been tested, this is according to the datasheet
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1912Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMUL, 3 * FMUL, RGB_ORDER> {};
+
 
 #else
 
