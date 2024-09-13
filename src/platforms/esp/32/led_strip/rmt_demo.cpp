@@ -25,8 +25,6 @@
 
 #endif
 
-// GPIO assignment
-#define LED_STRIP_BLINK_GPIO  2
 // Numbers of the LED in the strip
 #define LED_STRIP_LED_NUMBERS 24
 // 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)
@@ -66,10 +64,10 @@ led_strip_rmt_config_t make_rmt_config(rmt_clock_source_t clk_src, uint32_t reso
     return config;
 }
 
-led_strip_handle_t configure_led(void)
+led_strip_handle_t configure_led(int pin)
 {
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0) || FASTLED_ESP32_COMPONENT_LED_STRIP_FORCE_IDF4
-    led_strip_config_t strip_config = make_config(LED_STRIP_BLINK_GPIO, LED_STRIP_LED_NUMBERS, LED_PIXEL_FORMAT_GRB, LED_MODEL_WS2812, 0);
+    led_strip_config_t strip_config = make_config(pin, LED_STRIP_LED_NUMBERS, LED_PIXEL_FORMAT_GRB, LED_MODEL_WS2812, 0);
     led_strip_rmt_config_t rmt_config = make_rmt_config(RMT_CLK_SRC_DEFAULT, LED_STRIP_RMT_RES_HZ, 0, false);
 
     // LED Strip object handle
@@ -80,7 +78,7 @@ led_strip_handle_t configure_led(void)
 #else
     // For older ESP-IDF versions, use the appropriate LED strip initialization
     led_strip_config_t strip_config = {
-        .strip_gpio_num = LED_STRIP_BLINK_GPIO,
+        .strip_gpio_num = pin,
         .max_leds = LED_STRIP_LED_NUMBERS,
     };
     led_strip_rmt_config_t rmt_config = {
