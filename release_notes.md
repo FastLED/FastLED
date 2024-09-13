@@ -10,11 +10,14 @@ FastLED 3.7.7
     * This data is sent to the real driver as if it were RGB data.
     * Some padding is added when source LED data is not a multiple of 3.
   * See [examples/RGBWEmulated/RGBWEmulated.ino](https://github.com/FastLED/FastLED/blob/master/examples/RGBW/RGBW.ino)
+* New supported chipsets
+  * UCS1912 (Clockless)
+  * WS2815 (Clockless)
 * [PixelIterator](src/pixel_iterator.h) has been introduced to reduce complexity of writing driver code
   * This is how RGBW mode was implemented.
   * This is a concrete class (no templates!) so it's suitable for driver code in cpp files.
   * PixelController<> can convert to a PixelIterator, see `PixelController<>::as_iterator(...)`
-* UCS1912 LED chipset support added.
+
 
 FastLED 3.7.6
 =============
