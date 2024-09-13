@@ -37,6 +37,7 @@ DEFAULT_BOARDS_NAMES = [
 
 OTHER_BOARDS_NAMES = [
     "adafruit_feather_nrf52840_sense",
+    "xiaoblesense_adafruit",
     "rpipico",
     "rpipico2",
     "uno_r4_wifi",

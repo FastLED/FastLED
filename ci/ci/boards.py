@@ -93,6 +93,12 @@ ADA_FEATHER_NRF52840_SENSE = Board(
     platform="nordicnrf52",
 )
 
+XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
+    board_name="xiaoblesense_adafruit",
+    platform="https://github.com/maxgerhardt/platform-nordicnrf52",
+    platform_needs_install=True,  # Install platform package to get the boards
+)
+
 RPI_PICO = Board(
     board_name="rpipico",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
@@ -136,6 +142,7 @@ ALL: list[Board] = [
     RPI_PICO2,
     UNO_R4_WIFI,
     NANO_EVERY,
+    XIAOBLESENSE_ADAFRUIT_NRF52,
 ]
 
 _BOARD_MAP: dict[str, Board] = {board.board_name: board for board in ALL}
