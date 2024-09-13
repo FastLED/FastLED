@@ -13,6 +13,9 @@ FastLED 3.7.7
 * New supported chipsets
   * UCS1912 (Clockless)
   * WS2815 (Clockless)
+* New supported boards
+  * xiaoblesense_adafruit
+    * Fixes https://github.com/FastLED/FastLED/issues/1445
 * [PixelIterator](src/pixel_iterator.h) has been introduced to reduce complexity of writing driver code
   * This is how RGBW mode was implemented.
   * This is a concrete class (no templates!) so it's suitable for driver code in cpp files.
