@@ -768,6 +768,11 @@ class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL
 #define C_NS(_NS) (((_NS * ((CLOCKLESS_FREQUENCY / 1000000L)) + 999)) / 1000)
 #endif
 
+// At T=0        : the line is raised hi to start a bit
+// At T=T1       : the line is dropped low to transmit a zero bit
+// At T=T1+T2    : the line is dropped low to transmit a one bit
+// At T=T1+T2+T3 : the cycle is concluded (next bit can be sent)
+
 // GE8822 - 350ns 660ns 350ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class GE8822Controller800Khz : public ClocklessController<DATA_PIN, C_NS(350), C_NS(660), C_NS(350), RGB_ORDER, 4> {};
@@ -844,6 +849,10 @@ class SM16703Controller : public ClocklessController<DATA_PIN, C_NS(300), C_NS(6
 
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
 class PL9823Controller : public ClocklessController<DATA_PIN, C_NS(350), C_NS(1010), C_NS(350), RGB_ORDER> {};
+
+// UCS1912 - Note, never been tested, this is according to the datasheet
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+class UCS1912Controller : public ClocklessController<DATA_PIN, C_NS(250), C_NS(1000), C_NS(350), RGB_ORDER> {};
 #endif
 /// @} ClocklessChipsets
 
