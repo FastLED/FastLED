@@ -20,6 +20,7 @@ FastLED 3.7.7
   * This is how RGBW mode was implemented.
   * This is a concrete class (no templates!) so it's suitable for driver code in cpp files.
   * PixelController<> can convert to a PixelIterator, see `PixelController<>::as_iterator(...)`
+* Fixed APA102HD mode for user supplied function via the linker. Added test so that it won't break.
 
 
 FastLED 3.7.6
