@@ -105,7 +105,7 @@ This used to work, but an atmel update broke the pins. See issue https://github.
 
 #### NRF
 
-[![nrf52840_sense](https://github.com/FastLED/FastLED/actions/workflows/buiild_adafruit_feather_nrf52840_sense.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/buiild_adafruit_feather_nrf52840_sense.yml)
+[![nrf52840_sense](https://github.com/FastLED/FastLED/actions/workflows/build_adafruit_feather_nrf52840_sense.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_adafruit_feather_nrf52840_sense.yml)
 
 [![adafruit_xiaoblesense](https://github.com/FastLED/FastLED/actions/workflows/build_adafruit_xiaoblesense.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_adafruit_xiaoblesense.yml)
 
