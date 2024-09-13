@@ -37,6 +37,7 @@
         "tuple": "cpp",
         "initializer_list": "cpp",
         "utility": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "numeric": "cpp"
     }
 }
