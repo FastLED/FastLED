@@ -47,6 +47,7 @@ OTHER_BOARDS_NAMES = [
 # Examples to compile.
 DEFAULT_EXAMPLES = [
     "Apa102HD",
+    "Apa102HDOverride",
     "Blink",
     "ColorPalette",
     "ColorTemperature",
