@@ -772,6 +772,27 @@ class PL9823Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 8 * FMUL
 // At T=T1       : the line is dropped low to transmit a zero bit
 // At T=T1+T2    : the line is dropped low to transmit a one bit
 // At T=T1+T2+T3 : the cycle is concluded (next bit can be sent)
+//
+// Python script to calculate the values for T1, T2, and T3 for FastLED:
+//
+//  print("Enter the values of T0H, T0L, T1H, T1L, in nanoseconds: ")
+//  T0H = int(input("  T0H: "))
+//  T0L = int(input("  T0L: "))
+//  T1H = int(input("  T1H: "))
+//  T1L = int(input("  T1L: "))
+//  
+//  duration = max(T0H + T0L, T1H + T1L)
+//  
+//  print("The max duration of the signal is: ", duration)
+//  
+//  T1 = T0H
+//  T2 = T1H
+//  T3 = duration - T0H - T0L
+//  
+//  print("T1: ", T1)
+//  print("T2: ", T2)
+//  print("T3: ", T3)
+
 
 // GE8822 - 350ns 660ns 350ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
