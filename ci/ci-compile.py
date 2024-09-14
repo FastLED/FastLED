@@ -117,7 +117,9 @@ def parse_args():
     parser.add_argument(
         "--no-interactive", action="store_true", help="Disable interactive mode"
     )
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose output"
+    )
     args = parser.parse_args()
     # if --interactive and --no-interative are both passed, --no-interactive takes precedence.
     if args.interactive and args.no_interactive:
