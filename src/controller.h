@@ -60,7 +60,7 @@ public:
     CLEDController& setRgbw(const Rgbw& arg = RgbwDefault::value()) {
 
         #if !defined(ESP32)
-        // Only ESP32 has native RGBW support
+        // Only ESP32 has native RGBW support at this time.
         assert(false);
         #endif
 
