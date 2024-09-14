@@ -63,7 +63,7 @@ class Board:
 
 ESP32DEV = Board(
     board_name="esp32dev",
-    platform=ESP32_IDF_ARDUINO_LATEST,
+    platform=ESP32_IDF_5_1_LATEST,
 )
 
 # ESP01 = Board(
