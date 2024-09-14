@@ -29,39 +29,13 @@ Examples [link](examples)
 
 *This is an Arduino Sketch that will run on Arduino Uno/Esp32/Raspberri Pi*
 ```C++
-/// Blink red then off.
-
 #include <FastLED.h>
-
-// How many leds in your strip?
-#define NUM_LEDS 100
-#define DATA_PIN 3
-
-
-// Define the array of leds
+#define NUM_LEDS 60
 CRGB leds[NUM_LEDS];
-
-void setup() { 
-    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is assumed
-}
-
-void fill(CRGB color)
-{
-    for(int i = 0; i < NUM_LEDS; i++) {
-        leds[i] = color;
-    }
-}
-
-/// blink red and then off every half second.
-void loop() { 
-  // Turn the LED on, then pause
-  fill(CRGB::Red);
-  FastLED.show();
-  delay(500);
-  // Now turn the LED off, then pause
-  fill(CRGB::Black);
-  FastLED.show();
-  delay(500);
+void setup() { FastLED.addLeds<NEOPIXEL, 6>(leds, NUM_LEDS); }
+void loop() {
+	leds[0] = CRGB::White; FastLED.show(); delay(30);
+	leds[0] = CRGB::Black; FastLED.show(); delay(30);
 }
 ```
 
@@ -183,19 +157,6 @@ https://github.com/FastLED/PlatformIO-Starter
 When running the Arduino IDE you need to do the additional installation step of installing FastLED in the global Arduino IDE package manager.
 
 Install the library using either [the .zip file from the latest release](https://github.com/FastLED/FastLED/releases/latest/) or by searching for "FastLED" in the libraries manager of the Arduino IDE. [See the Arduino documentation on how to install libraries for more information.](https://docs.arduino.cc/software/ide-v1/tutorials/installing-libraries)
-
-How quickly can you get up and running with the library?  Here's a simple blink program:
-
-```cpp
-#include <FastLED.h>
-#define NUM_LEDS 60
-CRGB leds[NUM_LEDS];
-void setup() { FastLED.addLeds<NEOPIXEL, 6>(leds, NUM_LEDS); }
-void loop() {
-	leds[0] = CRGB::White; FastLED.show(); delay(30);
-	leds[0] = CRGB::Black; FastLED.show(); delay(30);
-}
-```
 
 ## Development
 
