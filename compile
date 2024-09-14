@@ -1,10 +1,23 @@
 #!/bin/bash
 set -e
 
-# if uv command is not found then warn the user and exit
+# Function to find Python executable
+find_python() {
+    if command -v python3 &> /dev/null; then
+        echo "python3"
+    elif command -v python &> /dev/null; then
+        echo "python"
+    else
+        echo "Python not found. Please install Python 3."
+        exit 1
+    fi
+}
+
+# Check if uv is installed, if not, install it
 if ! command -v uv &> /dev/null; then
-    echo "uv command not found. Please install it by running 'pip install uv'"
-    exit 1
+    echo "uv command not found. Installing uv..."
+    PYTHON=$(find_python)
+    $PYTHON -m pip install uv
 fi
 
 cd "$(dirname "$0")"
