@@ -13,6 +13,7 @@
 #include "pixel_controller.h"
 #include "dither_mode.h"
 #include "pixel_iterator.h"
+#include "assert.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -57,6 +58,12 @@ public:
 
     Rgbw mRgbMode = RgbwInvalid::value();
     CLEDController& setRgbw(const Rgbw& arg = RgbwDefault::value()) {
+
+        #if !defined(ESP32)
+        // Only ESP32 has native RGBW support
+        assert(false);
+        #endif
+
         mRgbMode = arg;
         return *this;  // builder pattern.
     }
