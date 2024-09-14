@@ -42,6 +42,7 @@ def create_build_dir(
 ) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     board_name = board.board_name
+    real_board_name = board.get_real_board_name()
     locked_print(f"*** Initializing environment for {board_name} ***")
     # builddir = Path(build_dir) / board if build_dir else Path(".build") / board
     build_dir = build_dir or ".build"
@@ -80,7 +81,7 @@ def create_build_dir(
         "--project-dir",
         builddir.as_posix(),
         "--board",
-        board_name,
+        real_board_name,
     ]
     if board.platform:
         cmd_list.append(f"--project-option=platform={board.platform}")

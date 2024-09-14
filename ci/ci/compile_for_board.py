@@ -24,6 +24,7 @@ def compile_for_board_and_example(
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     board_name = board.board_name
+    real_board_name = board.get_real_board_name()
     builddir = (
         Path(build_dir) / board_name if build_dir else Path(".build") / board_name
     )
@@ -38,7 +39,7 @@ def compile_for_board_and_example(
         "pio",
         "ci",
         "--board",
-        board_name,
+        real_board_name,
         "--lib=ci",
         "--lib=src",
         "--keep-build-dir",

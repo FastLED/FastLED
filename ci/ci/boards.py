@@ -20,6 +20,7 @@ ESP32_IDF_ARDUINO_LATEST = "platformio/espressif32"
 @dataclass
 class Board:
     board_name: str
+    real_board_name: str | None = None
     platform: str | None = None
     platform_needs_install: bool = False
     platform_packages: str | None = None
@@ -27,8 +28,13 @@ class Board:
     board_build_core: str | None = None
     board_build_filesystem_size: str | None = None
 
+    def get_real_board_name(self) -> str:
+        return self.real_board_name if self.real_board_name else self.board_name
+
     def to_dictionary(self) -> dict[str, list[str]]:
         out: dict[str, list[str]] = {}
+        if self.real_board_name:
+            out[self.board_name] = [f"board={self.real_board_name}"]
         options = out.setdefault(self.board_name, [])
         if self.platform:
             options.append(f"platform={self.platform}")
@@ -129,8 +135,15 @@ NANO_EVERY = Board(
     platform="atmelmegaavr",
 )
 
+ESP_I2S = Board(
+    board_name="esp32dev_i2s",
+    real_board_name="esp32dev",
+    platform=ESP32_IDF_ARDUINO_LATEST,
+)
+
 ALL: list[Board] = [
     ESP32DEV,
+    ESP_I2S,
     # ESP01,
     ESP32_C2_DEVKITM_1,
     ESP32_C3_DEVKITM_1,

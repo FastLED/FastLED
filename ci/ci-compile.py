@@ -42,6 +42,7 @@ OTHER_BOARDS_NAMES = [
     "rpipico2",
     "uno_r4_wifi",
     "nano_every",
+    "esp32dev_i2s",
 ]
 
 # Examples to compile.
