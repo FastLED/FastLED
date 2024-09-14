@@ -1,4 +1,0 @@
-#!/bin/bash
-set -e
-uv venv
-uv pip install ci

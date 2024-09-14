@@ -7,6 +7,8 @@ from pathlib import Path
 
 import dateutil.parser
 
+HERE = Path(__file__).resolve().parent
+
 
 def run_command(command):
     process = subprocess.Popen(
@@ -74,6 +76,8 @@ def main(
     start_commit: str | None = None,
     end_commit: str | None = None,
 ):
+    # change to the script dir
+    os.chdir(str(HERE))
     # Create tmp directory if it doesn't exist
     if not os.path.exists("tmp"):
         os.makedirs("tmp")

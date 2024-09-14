@@ -26,12 +26,8 @@ jobs:
       - name: Install UV
         run: pip install uv
 
-      - name: Install Continuous Integration Dependencies
-        run: |
-          pip install .
-
       - name: Compile Board and Output Size
-        run: cd ci && uv run compiled_size.py --board ${{ inputs.board }} --num-commits 1
+        run: uv run ci/compiled_size.py --board ${{ inputs.board }} --num-commits 1
 
       - name: Check Compiled Program Size for ${{ inputs.board }} is less than the limit of ${{ inputs.max_size }}
         run: |
