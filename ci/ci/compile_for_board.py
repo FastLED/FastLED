@@ -23,6 +23,7 @@ def compile_for_board_and_example(
     board: Board, example: Path, build_dir: str | None
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
+    global ERROR_HAPPENED  # pylint: disable=global-statement
     board_name = board.board_name
     real_board_name = board.get_real_board_name()
     builddir = (
@@ -70,6 +71,9 @@ def compile_for_board_and_example(
     stdout = stdout.replace("lib/src", "src").replace("lib\\src", "src")
     locked_print(stdout)
     if result.returncode != 0:
+        if ERROR_HAPPENED:
+            return False, ""
+        ERROR_HAPPENED = True
         locked_print(
             f"*** Error compiling example {example} for board {board_name} ***"
         )
