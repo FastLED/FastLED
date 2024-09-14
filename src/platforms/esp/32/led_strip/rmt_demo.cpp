@@ -83,12 +83,16 @@ led_strip_handle_t configure_led(int pin, uint32_t led_numbers, uint32_t rmt_res
 #endif
 }
 
-void __demo() {
-    static const int led_strip_gpio = 2;
-    uint32_t led_numbers = 24;            // Replace with desired number of LEDs
-    uint32_t rmt_res_hz = (10 * 1000 * 1000); // 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)
+enum {
+    kDefaultRmtFreq = (10 * 1000 * 1000) // 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)
+};
 
-    led_strip_handle_t led_strip = configure_led(led_strip_gpio, led_numbers, rmt_res_hz);
+
+void rmt_demo() {
+    static const int led_strip_gpio = 2;
+    static const uint32_t led_numbers = 24;            // Replace with desired number of LEDs
+
+    led_strip_handle_t led_strip = configure_led(led_strip_gpio, led_numbers, kDefaultRmtFreq);
     bool led_on_off = false;
 
     ESP_LOGI(TAG, "Start blinking LED strip");
@@ -110,11 +114,6 @@ void __demo() {
         led_on_off = !led_on_off;
         vTaskDelay(pdMS_TO_TICKS(500));
     }
-}
-
-
-void rmt_demo() {
-    __demo();
 }
 
 #endif  // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
