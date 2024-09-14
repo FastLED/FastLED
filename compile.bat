@@ -1,11 +1,25 @@
 @echo off
 setlocal
 
-rem if uv command is not found (using the where command) then warn the user and exit
+rem Function to find Python executable
+where python >nul 2>nul
+if %errorlevel% equ 0 (
+    set "PYTHON=python"
+) else (
+    where python3 >nul 2>nul
+    if %errorlevel% equ 0 (
+        set "PYTHON=python3"
+    ) else (
+        echo Python not found. Please install Python 3.
+        exit /b 1
+    )
+)
+
+rem Check if uv is installed, if not, install it
 where uv >nul 2>nul
 if %errorlevel% neq 0 (
-    echo "uv" command not found. Please install "uv" by running "pip install uv" and try again.
-    exit /b 1
+    echo uv command not found. Installing uv...
+    %PYTHON% -m pip install uv
 )
 
 rem Change to the directory of the batch file
