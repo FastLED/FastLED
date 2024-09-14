@@ -20,7 +20,7 @@ def errors_happened() -> bool:
 
 
 def compile_for_board_and_example(
-    board: Board, example: Path, build_dir: str | None
+    board: Board, example: Path, build_dir: str | None, verbose_on_failure: bool
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
@@ -111,7 +111,7 @@ def compile_for_board_and_example(
 
 # Function to process task queues for each board
 def compile_examples(
-    board: Board, examples: list[Path], build_dir: str | None
+    board: Board, examples: list[Path], build_dir: str | None, verbose_on_failure: bool
 ) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
@@ -131,11 +131,17 @@ def compile_examples(
                 # Github runners are memory limited and the first job is the most
                 # memory intensive since all the artifacts are being generated in parallel.
                 success, message = compile_for_board_and_example(
-                    board=board, example=example, build_dir=build_dir
+                    board=board,
+                    example=example,
+                    build_dir=build_dir,
+                    verbose_on_failure=verbose_on_failure,
                 )
         else:
             success, message = compile_for_board_and_example(
-                board=board, example=example, build_dir=build_dir
+                board=board,
+                example=example,
+                build_dir=build_dir,
+                verbose_on_failure=verbose_on_failure,
             )
         is_first = False
         if not success:

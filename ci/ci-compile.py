@@ -117,6 +117,7 @@ def parse_args():
     parser.add_argument(
         "--no-interactive", action="store_true", help="Disable interactive mode"
     )
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     args = parser.parse_args()
     # if --interactive and --no-interative are both passed, --no-interactive takes precedence.
     if args.interactive and args.no_interactive:
@@ -197,6 +198,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         extra_packages.extend(args.extra_packages.split(","))
     build_dir = args.build_dir
     extra_scripts = "pre:lib/ci/ci-flags.py"
+    verbose = args.verbose
     out: ConcurrentRunArgs = ConcurrentRunArgs(
         projects=projects,
         examples=examples_paths,
@@ -207,6 +209,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         extra_scripts=extra_scripts,
         cwd=str(HERE.parent),
         board_dir=(HERE / "boards").absolute().as_posix(),
+        verbose=verbose,
     )
     return out
 

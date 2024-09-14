@@ -27,6 +27,7 @@ class ConcurrentRunArgs:
     extra_scripts: str | None
     cwd: str | None
     board_dir: str | None
+    verbose: bool = False
 
 
 def concurrent_run(
@@ -58,6 +59,7 @@ def concurrent_run(
         build_dir=build_dir,
         board_dir=board_dir,
     )
+    verbose = args.verbose
     # This is not memory/cpu bound but is instead network bound so we can run one thread
     # per board to speed up the process.
     parallel_init_workers = 1 if not PARRALLEL_PROJECT_INITIALIZATION else len(projects)
@@ -98,7 +100,9 @@ def concurrent_run(
     num_cpus = max(1, min(cpu_count(), len(projects)))
     with ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
-            executor.submit(compile_examples, board, examples, build_dir): board
+            executor.submit(
+                compile_examples, board, examples, build_dir, verbose
+            ): board
             for board in projects
         }
         for future in as_completed(future_to_board):
