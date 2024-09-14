@@ -58,12 +58,8 @@ public:
 
     Rgbw mRgbMode = RgbwInvalid::value();
     CLEDController& setRgbw(const Rgbw& arg = RgbwDefault::value()) {
-
-        #if !defined(ESP32)
-        // Only ESP32 has native RGBW support at this time.
-        assert(false);
-        #endif
-
+        // Note that at this time (Sept 13th, 2024) this is only implemented in the ESP32 driver
+        // directly. For an emulated version please see RGBWEmulatedController in chipsets.h
         mRgbMode = arg;
         return *this;  // builder pattern.
     }
