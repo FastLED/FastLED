@@ -71,6 +71,9 @@ def compile_for_board_and_example(
     stdout = stdout.replace("lib/src", "src").replace("lib\\src", "src")
     locked_print(stdout)
     if result.returncode != 0:
+        if not verbose_on_failure:
+            ERROR_HAPPENED = True
+            return False, stdout
         if ERROR_HAPPENED:
             return False, ""
         ERROR_HAPPENED = True
