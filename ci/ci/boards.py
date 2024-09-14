@@ -146,6 +146,17 @@ ESP32DEV_I2S = Board(
     defines=["FASTLED_ESP32_I2S"],
 )
 
+ESP32S3_RMT51 = Board(
+    board_name="esp32-s3-rmt51",
+    real_board_name="esp32-s3-devkitc-1",
+    platform_needs_install=True,
+    platform=ESP32_IDF_5_1,
+    defines=[
+        "FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN=1",
+        "FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE=1",
+    ],
+)
+
 ALL: list[Board] = [
     ESP32DEV,
     ESP32DEV_I2S,
@@ -161,6 +172,7 @@ ALL: list[Board] = [
     UNO_R4_WIFI,
     NANO_EVERY,
     XIAOBLESENSE_ADAFRUIT_NRF52,
+    ESP32S3_RMT51,
 ]
 
 

@@ -43,6 +43,7 @@ OTHER_BOARDS_NAMES = [
     "uno_r4_wifi",
     "nano_every",
     "esp32dev_i2s",
+    "esp32-s3-rmt51",
 ]
 
 # Examples to compile.
