@@ -41,6 +41,10 @@ def create_build_dir(
     board_dir: str | None,
 ) -> tuple[bool, str]:
     """Create the build directory for the given board."""
+    if board.defines:
+        defines.extend(board.defines)
+        # remove duplicates
+        defines = list(set(defines))
     board_name = board.board_name
     real_board_name = board.get_real_board_name()
     locked_print(f"*** Initializing environment for {board_name} ***")
@@ -96,7 +100,7 @@ def create_build_dir(
             f"--project-option=board_build.filesystem_size={board.board_build_filesystem_size}"
         )
     if defines:
-        build_flags = " ".join(f"-D {define}" for define in defines)
+        build_flags = " ".join(f"-D{define}" for define in defines)
         cmd_list.append(f"--project-option=build_flags={build_flags}")
     if extra_packages:
         cmd_list.append(f'--project-option=lib_deps={",".join(extra_packages)}')

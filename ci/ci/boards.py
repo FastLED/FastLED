@@ -27,6 +27,7 @@ class Board:
     framework: str | None = None
     board_build_core: str | None = None
     board_build_filesystem_size: str | None = None
+    defines: list[str] | None = None
 
     def get_real_board_name(self) -> str:
         return self.real_board_name if self.real_board_name else self.board_name
@@ -50,6 +51,9 @@ class Board:
             options.append(
                 f"board_build.filesystem_size={self.board_build_filesystem_size}"
             )
+        if self.defines:
+            for define in self.defines:
+                options.append(f"build_flags=-D{define}")
         return out
 
     def __repr__(self) -> str:
@@ -135,15 +139,16 @@ NANO_EVERY = Board(
     platform="atmelmegaavr",
 )
 
-ESP_I2S = Board(
+ESP32DEV_I2S = Board(
     board_name="esp32dev_i2s",
     real_board_name="esp32dev",
     platform=ESP32_IDF_ARDUINO_LATEST,
+    defines=["FASTLED_ESP32_I2S"],
 )
 
 ALL: list[Board] = [
     ESP32DEV,
-    ESP_I2S,
+    ESP32DEV_I2S,
     # ESP01,
     ESP32_C2_DEVKITM_1,
     ESP32_C3_DEVKITM_1,
@@ -158,7 +163,19 @@ ALL: list[Board] = [
     XIAOBLESENSE_ADAFRUIT_NRF52,
 ]
 
-_BOARD_MAP: dict[str, Board] = {board.board_name: board for board in ALL}
+
+def _make_board_map(boards: list[Board]) -> dict[str, Board]:
+    # make board map, but assert on duplicate board names
+    board_map: dict[str, Board] = {}
+    for board in boards:
+        assert (
+            board.board_name not in board_map
+        ), f"Duplicate board name: {board.board_name}"
+        board_map[board.board_name] = board
+    return board_map
+
+
+_BOARD_MAP: dict[str, Board] = _make_board_map(ALL)
 
 
 def get_board(board_name: str, no_project_options: bool = False) -> Board:
