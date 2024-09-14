@@ -16,6 +16,7 @@ extern "C" {
  * @brief LED strip pixel format
  */
 typedef enum {
+    // Note - Zach Vorhies - Only this enum means that there is no re-ordering of the colors.
     LED_PIXEL_FORMAT_GRB,    /*!< Pixel format: GRB */
     LED_PIXEL_FORMAT_GRBW,   /*!< Pixel format: GRBW */
     LED_PIXEL_FORMAT_INVALID /*!< Invalid pixel format */
