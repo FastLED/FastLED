@@ -85,18 +85,15 @@ led_strip_handle_t configure_led(int pin, uint32_t led_numbers, uint32_t rmt_res
 
 
 
-void rmt_demo(int led_strip_gpio, uint32_t led_numbers, uint32_t rmt_res_hz) {
-    //static const int led_strip_gpio = 2;
-    //static const uint32_t led_numbers = 24;            // Replace with desired number of LEDs
-
-    led_strip_handle_t led_strip = configure_led(led_strip_gpio, led_numbers, rmt_res_hz);
+void rmt_demo(int led_strip_gpio, uint32_t num_leds, uint32_t rmt_res_hz) {
+    led_strip_handle_t led_strip = configure_led(led_strip_gpio, num_leds, rmt_res_hz);
     bool led_on_off = false;
 
     ESP_LOGI(TAG, "Start blinking LED strip");
     while (1) {
         if (led_on_off) {
             /* Set the LED pixel using RGB from 0 (0%) to 255 (100%) for each color */
-            for (int i = 0; i < led_numbers; i++) {
+            for (int i = 0; i < num_leds; i++) {
                 ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, 5, 5, 5));
             }
             /* Refresh the strip to send data */
