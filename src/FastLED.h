@@ -394,59 +394,83 @@ public:
 	/// @returns a reference to the added controller
 	/// @{
 
+
+	// Base template: Causes a compile-time error if an unsupported CHIPSET is used
+	template<ESPIChipsets CHIPSET, uint8_t DATA_PIN, uint8_t CLOCK_PIN>
+	struct ClockedChipsetHelper {
+	    // Default implementation, will be specialized for supported chipsets
+		static const bool IS_VALID = false;
+	};
+
+	// Macro to define a mapping from the ESPIChipeset enum to the controller class
+	// in it's various template configurations.
+	#define _FL_MAP_CLOCKED_CHIPSET(CHIPSET_ENUM, CONTROLLER_CLASS)                              \
+		template<uint8_t DATA_PIN, uint8_t CLOCK_PIN>                                              \
+		struct ClockedChipsetHelper<CHIPSET_ENUM, DATA_PIN, CLOCK_PIN> {                           \
+		    static const bool IS_VALID = true;                                                     \
+			typedef CONTROLLER_CLASS<DATA_PIN, CLOCK_PIN> ControllerType;                          \
+			/* Controller type with RGB_ORDER specified */                                         \
+			template<EOrder RGB_ORDER>															   \
+			struct CONTROLLER_CLASS_WITH_ORDER {                                                   \
+				typedef CONTROLLER_CLASS<DATA_PIN, CLOCK_PIN, RGB_ORDER> ControllerType;           \
+			};                                                                                     \
+			/* Controller type with RGB_ORDER and spi frequency specified */                       \
+			template<EOrder RGB_ORDER, uint32_t FREQ>                                              \
+			struct CONTROLLER_CLASS_WITH_ORDER_AND_FREQ {                                          \
+				typedef CONTROLLER_CLASS<DATA_PIN, CLOCK_PIN, RGB_ORDER, FREQ> ControllerType;     \
+			};                                                                                     \
+		};
+
+	// Define specializations for each supported CHIPSET
+	_FL_MAP_CLOCKED_CHIPSET(LPD6803, LPD6803Controller)
+	_FL_MAP_CLOCKED_CHIPSET(LPD8806, LPD8806Controller)
+	_FL_MAP_CLOCKED_CHIPSET(WS2801, WS2801Controller)
+	_FL_MAP_CLOCKED_CHIPSET(WS2803, WS2803Controller)
+	_FL_MAP_CLOCKED_CHIPSET(SM16716, SM16716Controller)
+	_FL_MAP_CLOCKED_CHIPSET(P9813, P9813Controller)
+
+	// Both DOTSTAR and APA102 use the same controller class
+	_FL_MAP_CLOCKED_CHIPSET(DOTSTAR, APA102Controller)
+	_FL_MAP_CLOCKED_CHIPSET(APA102, APA102Controller)
+
+	// Both DOTSTARHD and APA102HD use the same controller class
+	_FL_MAP_CLOCKED_CHIPSET(DOTSTARHD, APA102ControllerHD)
+	_FL_MAP_CLOCKED_CHIPSET(APA102HD, APA102ControllerHD)
+
+	_FL_MAP_CLOCKED_CHIPSET(SK9822, SK9822Controller)
+	_FL_MAP_CLOCKED_CHIPSET(SK9822HD, SK9822ControllerHD)
+
+
 	/// Add an SPI based CLEDController instance to the world.
-	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint32_t SPI_DATA_RATE > CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		switch(CHIPSET) {
-			case LPD6803: { static LPD6803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case WS2803: { static WS2803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case DOTSTAR:
-			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case DOTSTARHD:
-			case APA102HD: { static APA102ControllerHD<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case SK9822: { static SK9822Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-		    case SK9822HD: { static SK9822ControllerHD<DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_DATA_RATE> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-		}
+	template<ESPIChipsets CHIPSET, uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER, uint32_t SPI_DATA_RATE > CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		// Instantiate the controller using ClockedChipsetHelper
+		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
+		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ<RGB_ORDER, SPI_DATA_RATE>::ControllerType ControllerTypeWithFreq;
+		static_assert(CHIP::IS_VALID, "Unsupported chipset");
+		static ControllerTypeWithFreq c;
+		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add an SPI based CLEDController instance to the world.
-	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN > static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		switch(CHIPSET) {
-			case LPD6803: { static LPD6803Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case WS2803: { static WS2803Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case DOTSTAR:
-			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case DOTSTARHD:
-			case APA102HD: { static APA102ControllerHD<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case SK9822: { static SK9822Controller<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case SK9822HD: { static SK9822ControllerHD<DATA_PIN, CLOCK_PIN> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-		}
+	template<ESPIChipsets CHIPSET, uint8_t DATA_PIN, uint8_t CLOCK_PIN > static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
+		typedef typename CHIP::ControllerType ControllerType;
+		static_assert(CHIP::IS_VALID, "Unsupported chipset");
+		static ControllerType c;
+		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	/// Add an SPI based CLEDController instance to the world.
-	template<ESPIChipsets CHIPSET,  uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER > static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
-		switch(CHIPSET) {
-			case LPD6803: { static LPD6803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case LPD8806: { static LPD8806Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case WS2801: { static WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case WS2803: { static WS2803Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case SM16716: { static SM16716Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case P9813: { static P9813Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case DOTSTAR:
-			case APA102: { static APA102Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case DOTSTARHD:
-			case APA102HD: { static APA102ControllerHD<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case SK9822: { static SK9822Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-			case SK9822HD: { static SK9822ControllerHD<DATA_PIN, CLOCK_PIN, RGB_ORDER> c; return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset); }
-		}
+
+	// The addLeds function using ChipsetHelper
+	template<ESPIChipsets CHIPSET, uint8_t DATA_PIN, uint8_t CLOCK_PIN, EOrder RGB_ORDER>
+	CLEDController& addLeds(struct CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
+		static_assert(CHIP::IS_VALID, "Unsupported chipset");
+		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER<RGB_ORDER>::ControllerType ControllerTypeWithOrder;
+		static ControllerTypeWithOrder c;
+		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
+
 
 #ifdef SPI_DATA
 	template<ESPIChipsets CHIPSET> static CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
