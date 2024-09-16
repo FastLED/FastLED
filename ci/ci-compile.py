@@ -44,6 +44,7 @@ OTHER_BOARDS_NAMES = [
     "nano_every",
     "esp32dev_i2s",
     "esp32-s3-rmt51",
+    "esp32dev_idf44",
 ]
 
 # Examples to compile.

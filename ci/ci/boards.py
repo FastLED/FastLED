@@ -9,7 +9,7 @@ from dataclasses import dataclass
 # Set to a specific release, we may want to update this in the future.
 ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
 ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32.git#develop"
-ESP32_IDF_ARDUINO_LATEST = "platformio/espressif32"
+ESP32_IDF_4_4_LATEST = "platformio/espressif32"
 # Top of trunk.
 # ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32"
 
@@ -64,6 +64,13 @@ class Board:
 ESP32DEV = Board(
     board_name="esp32dev",
     platform=ESP32_IDF_5_1_LATEST,
+)
+
+ESP32DEV_IDF4_4 = Board(
+    board_name="esp32dev_idf44",
+    real_board_name="esp32dev",
+    framework = "espidf",
+    platform=ESP32_IDF_4_4_LATEST,
 )
 
 # ESP01 = Board(
@@ -142,7 +149,7 @@ NANO_EVERY = Board(
 ESP32DEV_I2S = Board(
     board_name="esp32dev_i2s",
     real_board_name="esp32dev",
-    platform=ESP32_IDF_ARDUINO_LATEST,
+    platform=ESP32_IDF_4_4_LATEST,
     defines=["FASTLED_ESP32_I2S"],
 )
 
@@ -159,6 +166,7 @@ ESP32S3_RMT51 = Board(
 
 ALL: list[Board] = [
     ESP32DEV,
+    ESP32DEV_IDF4_4,
     ESP32DEV_I2S,
     # ESP01,
     ESP32_C2_DEVKITM_1,
