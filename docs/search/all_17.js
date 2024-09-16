@@ -6,9 +6,9 @@ var searchData=
   ['waveform_20beat_20generators_3',['Waveform Beat Generators',['../group___beat_generators.html',1,'']]],
   ['waveform_20generators_4',['Waveform Generators',['../group___waveform_generators.html',1,'']]],
   ['what_20about_20that_20name_5',['What about that name?',['../index.html#autotoc_md19',1,'']]],
-  ['wheat_6',['Wheat',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a22541bf68ff7246e103661cb614d1fa0',1,'CRGB']]],
-  ['white_7',['White',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce',1,'CRGB']]],
-  ['whitesmoke_8',['WhiteSmoke',['../struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99af7e5db27c43bbbcc12fecc4c5c266242',1,'CRGB']]],
+  ['wheat_6',['Wheat',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a22541bf68ff7246e103661cb614d1fa0',1,'CRGB']]],
+  ['white_7',['White',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a1c48628099183e2c82e11d5f2a3ce3ce',1,'CRGB']]],
+  ['whitesmoke_8',['WhiteSmoke',['../group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99af7e5db27c43bbbcc12fecc4c5c266242',1,'CRGB']]],
   ['wiring_2ecpp_9',['wiring.cpp',['../wiring_8cpp.html',1,'']]],
   ['word_10',['word',['../unionbitswap__type.html#a2d1f4e8932378c4519158248150d11b8',1,'bitswap_type']]],
   ['writebit_11',['writeBit',['../class_a_v_r_software_s_p_i_output.html#ad13d8cd559302413e8c885aab5ad7497',1,'AVRSoftwareSPIOutput::writeBit()'],['../class_n_o_p_s_p_i_output.html#a9b0cd7fa63b1cff86c61f796aa8a6637',1,'NOPSPIOutput::writeBit(uint8_t b)'],['../class_n_o_p_s_p_i_output.html#a9b0cd7fa63b1cff86c61f796aa8a6637',1,'NOPSPIOutput::writeBit(uint8_t b)'],['../class_r_e_f_hardware_s_p_i_output.html#a63c213c547fd413c258e9bfbf4c7b982',1,'REFHardwareSPIOutput::writeBit()']]],
@@ -39,5 +39,8 @@ var searchData=
   ['ws2813_36',['WS2813',['../class_w_s2813.html',1,'']]],
   ['ws2813controller_37',['WS2813Controller',['../class_w_s2813_controller.html',1,'']]],
   ['ws2813controller_3c_20data_5fpin_2c_20rgb_5forder_20_3e_38',['WS2813Controller&lt; DATA_PIN, RGB_ORDER &gt;',['../class_w_s2813_controller.html',1,'']]],
-  ['ws2852_39',['WS2852',['../class_w_s2852.html',1,'']]]
+  ['ws2815_39',['WS2815',['../class_w_s2815.html',1,'']]],
+  ['ws2815controller_40',['WS2815Controller',['../class_w_s2815_controller.html',1,'']]],
+  ['ws2815controller_3c_20data_5fpin_2c_20rgb_5forder_20_3e_41',['WS2815Controller&lt; DATA_PIN, RGB_ORDER &gt;',['../class_w_s2815_controller.html',1,'']]],
+  ['ws2852_42',['WS2852',['../class_w_s2852.html',1,'']]]
 ];

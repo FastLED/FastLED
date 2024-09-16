@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['edithermode_0',['EDitherMode',['../controller_8h.html#a685662f0b6e22bfab012e574168ba5c9',1,'controller.h']]]
+  ['fract16_0',['fract16',['../group___fractional_types.html#gaaf46b9f719ef3bdb574f8e967af6dbb5',1,'types.h']]],
+  ['fract8_1',['fract8',['../group___fractional_types.html#ga5d6d013429a5b8a09d564d6137217644',1,'types.h']]]
 ];

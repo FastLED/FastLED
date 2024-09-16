@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.7</span>
    </div>
   </td>
  </tr>
@@ -121,8 +121,17 @@ $(function(){initNavTree('eorder_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>    BGR=0210   </div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>};</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>FASTLED_NAMESPACE_END</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="comment">// After EOrder is applied this is where W is inserted for RGBW.</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">enum</span> EOrderW {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    W3 = 0x3,  </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    W2 = 0x2,  </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    W1 = 0x1,  </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    W0 = 0x0,   </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    WDefault = W3</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>};</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>FASTLED_NAMESPACE_END</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -130,7 +139,7 @@ $(function(){initNavTree('eorder_8h_source.html',''); initResizable(true); });
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>eorder.h</b></li>
-    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 16 2024 05:47:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

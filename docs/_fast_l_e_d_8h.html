@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.7</span>
    </div>
   </td>
  </tr>
@@ -133,7 +133,7 @@ $(function(){initNavTree('_fast_l_e_d_8h.html',''); initResizable(true); });
 <code>#include &quot;<a class="el" href="platforms_8h_source.html">platforms.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="fastled__progmem_8h_source.html">fastled_progmem.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>&quot;</code><br />
+<code>#include &quot;pixeltypes.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="hsv2rgb_8h_source.html">hsv2rgb.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="colorutils_8h_source.html">colorutils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="pixelset_8h_source.html">pixelset.h</a>&quot;</code><br />
@@ -183,6 +183,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_w_s2812.html">WS2812&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_w_s2812.html" title="WS2812 controller class.">WS2812</a> controller class.  <a href="class_w_s2812.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_w_s2815.html">WS2815&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_w_s2815.html" title="WS2815 controller class.">WS2815</a> controller class.  <a href="class_w_s2815.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_w_s2852.html">WS2852&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_w_s2852.html" title="WS2852 controller class.">WS2852</a> controller class.  <a href="class_w_s2852.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -231,6 +234,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_l_p_d1886__8_b_i_t.html">LPD1886_8BIT&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_l_p_d1886__8_b_i_t.html" title="LPD1886_8BIT controller class.">LPD1886_8BIT</a> controller class.  <a href="class_l_p_d1886__8_b_i_t.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_c_s1912.html">UCS1912&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_u_c_s1912.html" title="UCS1912 controller class.">UCS1912</a> controller class.  <a href="class_u_c_s1912.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_d_m_x_s_i_m_p_l_e.html">DMXSIMPLE&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">DMX512 based LED controller class, using the DmxSimple library.     <a href="class_d_m_x_s_i_m_p_l_e.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -243,7 +249,7 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:a2f9de4cfbd302323305a4ad0e99167f4" id="r_a2f9de4cfbd302323305a4ad0e99167f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f9de4cfbd302323305a4ad0e99167f4">FASTLED_VERSION</a>&#160;&#160;&#160;3007006</td></tr>
+<tr class="memitem:a2f9de4cfbd302323305a4ad0e99167f4" id="r_a2f9de4cfbd302323305a4ad0e99167f4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f9de4cfbd302323305a4ad0e99167f4">FASTLED_VERSION</a>&#160;&#160;&#160;3007007</td></tr>
 <tr class="memdesc:a2f9de4cfbd302323305a4ad0e99167f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current FastLED version number, as an integer.  <br /></td></tr>
 <tr class="separator:a2f9de4cfbd302323305a4ad0e99167f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00167d1f0bf80faa62c6d8952f540f82" id="r_a00167d1f0bf80faa62c6d8952f540f82"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a00167d1f0bf80faa62c6d8952f540f82">__PROG_TYPES_COMPAT__</a></td></tr>
@@ -341,7 +347,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define FASTLED_VERSION&#160;&#160;&#160;3007006</td>
+          <td class="memname">#define FASTLED_VERSION&#160;&#160;&#160;3007007</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -371,7 +377,7 @@ Variables</h2></td></tr>
 
 <p>Alias of the FastLED instance for legacy purposes. </p>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00776">776</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00784">784</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -389,7 +395,7 @@ Variables</h2></td></tr>
 
 <p>Alias of the FastLED instance for legacy purposes. </p>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00778">778</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00786">786</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -408,7 +414,7 @@ Variables</h2></td></tr>
 <p>If no pin/port mappings are found, sends a warning message to the user during compilation. </p>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="fastpin_8h.html" title="Class base definitions for defining fast pin access.">fastpin.h</a> </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00792">792</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00800">800</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -425,9 +431,9 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Unknown NUM_CONTROLLERS definition. </p>
-<p>Unused elsewhere in the library? </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo</a></b></dt><dd>Remove? </dd></dl>
+<p>Unused elsewhere in the library? </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo</a></b></dt><dd>Remove? </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00321">321</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00329">329</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -454,7 +460,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the brightness scale, limited to max power </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00330">330</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00338">338</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -473,7 +479,7 @@ Variables</h2></td></tr>
 
 <p>Blockless output port enum. </p>
 
-<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00278">278</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_fast_l_e_d_8h_source.html#l00286">286</a> of file <a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>.</p>
 
 </div>
 </div>
@@ -616,7 +622,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="_fast_l_e_d_8h.html">FastLED.h</a></li>
-    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 16 2024 05:47:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

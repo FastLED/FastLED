@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.7</span>
    </div>
   </td>
  </tr>
@@ -844,7 +844,7 @@ template&lt;typename PALETTE &gt; </div>
     <tr><td class="paramname">targetColorArray</td><td>the LED array to store the resulting colors into. Must be at least as long as <code>dataCount</code>. </td></tr>
     <tr><td class="paramname">pal</td><td>the color palette to pull colors from </td></tr>
     <tr><td class="paramname">brightness</td><td>optional brightness value used to scale the resulting color </td></tr>
-    <tr><td class="paramname">opacity</td><td>optional opacity value for the new color. If this is 255 (default), the new colors will be written to the array directly. Otherwise the existing LED data will be scaled down using <code><a class="el" href="struct_c_r_g_b.html#a1525f95282d64a826802490d5baa48f3" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules.">CRGB::nscale8_video()</a></code> and then new colors will be added on top. A higher value means that the new colors will be more visible. </td></tr>
+    <tr><td class="paramname">opacity</td><td>optional opacity value for the new color. If this is 255 (default), the new colors will be written to the array directly. Otherwise the existing LED data will be scaled down using <code><a class="el" href="group___pixel_types.html#ga0441d6094ab8f98d800ec789c36b4461" title="Scale down a RGB to N/256ths of it&#39;s current brightness using &quot;video&quot; dimming rules.">CRGB::nscale8_video()</a></code> and then new colors will be added on top. A higher value means that the new colors will be more visible. </td></tr>
     <tr><td class="paramname">blendType</td><td>whether to take the palette entries directly (NOBLEND) or blend linearly between palette entries (LINEARBLEND) </td></tr>
   </table>
   </dd>
@@ -881,10 +881,10 @@ template&lt;typename PALETTE &gt; </div>
 <p>Alter one palette by making it slightly more like a "target palette". </p>
 <p>Used for palette cross-fades.</p>
 <p>It does this by comparing each of the R, G, and B channels of each entry in the current palette to the corresponding entry in the target palette and making small adjustments:</p><ul>
-<li>If the <a class="el" href="struct_c_r_g_b.html#a89666a473d004d7b837d634686cdac94" title="Red channel value.">CRGB::red</a> channel is too low, it will be increased.</li>
-<li>If the <a class="el" href="struct_c_r_g_b.html#a89666a473d004d7b837d634686cdac94" title="Red channel value.">CRGB::red</a> channel is too high, it will be slightly reduced.</li>
+<li>If the <a class="el" href="group___pixel_types.html#ga89666a473d004d7b837d634686cdac94" title="Red channel value.">CRGB::red</a> channel is too low, it will be increased.</li>
+<li>If the <a class="el" href="group___pixel_types.html#ga89666a473d004d7b837d634686cdac94" title="Red channel value.">CRGB::red</a> channel is too high, it will be slightly reduced.</li>
 </ul>
-<p>...and so on and so forth for the <a class="el" href="struct_c_r_g_b.html#ab9843c579e6982fe49630531a0a0ab67" title="Green channel value.">CRGB::green</a> and <a class="el" href="struct_c_r_g_b.html#a90bc5170416c8e09fcd468675a319718" title="Blue channel value.">CRGB::blue</a> channels.</p>
+<p>...and so on and so forth for the <a class="el" href="group___pixel_types.html#gab9843c579e6982fe49630531a0a0ab67" title="Green channel value.">CRGB::green</a> and <a class="el" href="group___pixel_types.html#ga90bc5170416c8e09fcd468675a319718" title="Blue channel value.">CRGB::blue</a> channels.</p>
 <p>Additionally, there are two significant visual improvements to this algorithm implemented here. First is this:</p><ul>
 <li>When increasing a channel, it is stepped up by ONE.</li>
 <li>When decreasing a channel, it is stepped down by TWO.</li>
@@ -912,7 +912,7 @@ template&lt;typename PALETTE &gt; </div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 16 2024 05:47:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

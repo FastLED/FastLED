@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.7</span>
    </div>
   </td>
  </tr>
@@ -115,14 +115,17 @@ $(function(){initNavTree('chipsets_8h.html',''); initResizable(true); });
 
 <p class="definition">Definition in file <a class="el" href="chipsets_8h_source.html">chipsets.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>&quot;</code><br />
+<code>#include &quot;pixeltypes.h&quot;</code><br />
 <code>#include &quot;five_bit_hd_gamma.h&quot;</code><br />
 <code>#include &quot;force_inline.h&quot;</code><br />
+<code>#include &quot;pixel_iterator.h&quot;</code><br />
 </div>
 <p><a href="chipsets_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_r_g_b_w_emulated_controller.html">RGBWEmulatedController&lt; CONTROLLER, RGB_ORDER &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_l_p_d8806_controller.html">LPD8806Controller&lt; DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">LPD8806 controller class.  <a href="class_l_p_d8806_controller.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -164,6 +167,9 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_w_s2812_controller800_khz.html">WS2812Controller800Khz&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_w_s2812.html" title="WS2812 controller class.">WS2812</a> controller class @ 800 KHz.  <a href="class_w_s2812_controller800_khz.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_w_s2815_controller.html">WS2815Controller&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_w_s2815.html" title="WS2815 controller class.">WS2815</a> controller class @ 400 KHz.  <a href="class_w_s2815_controller.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_w_s2811_controller800_khz.html">WS2811Controller800Khz&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_w_s2811.html" title="WS2811 controller class.">WS2811</a> controller class @ 800 KHz.  <a href="class_w_s2811_controller800_khz.html#details">More...</a><br /></td></tr>
@@ -219,6 +225,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p_l9823_controller.html">PL9823Controller&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="class_p_l9823.html" title="PL9823 controller class.">PL9823</a> controller class.  <a href="class_p_l9823_controller.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_u_c_s1912_controller.html">UCS1912Controller&lt; DATA_PIN, RGB_ORDER &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
@@ -233,7 +241,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="chipsets_8h.html">chipsets.h</a></li>
-    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 16 2024 05:47:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

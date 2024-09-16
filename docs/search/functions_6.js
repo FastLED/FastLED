@@ -1,7 +1,7 @@
 var searchData=
 [
   ['getadjustment_0',['getAdjustment',['../class_c_l_e_d_controller.html#af6173cca91ee446766cc15102990d7bb',1,'CLEDController']]],
-  ['getaveragelight_1',['getAverageLight',['../struct_c_r_g_b.html#a9734c31e8251aa876072c1e1b5df5de4',1,'CRGB']]],
+  ['getaveragelight_1',['getAverageLight',['../group___pixel_types.html#ga940908cc69606bdabe3b2d32a9097356',1,'CRGB']]],
   ['getbrightness_2',['getBrightness',['../class_c_fast_l_e_d.html#ac2615781ec12e025fb17cc0e66281716',1,'CFastLED']]],
   ['getcorrection_3',['getCorrection',['../class_c_l_e_d_controller.html#a168c661bb9b4a5dfc797b69d3900b26c',1,'CLEDController']]],
   ['getd_4',['getd',['../struct_pixel_controller.html#a894fa569a9ee8a3b58dd3cbf37ea727f',1,'PixelController']]],
@@ -9,9 +9,9 @@ var searchData=
   ['getelapsed_6',['getElapsed',['../class_c_every_n_time.html#abf8af3755a0c9c8ac5d1f70eabef5c3b',1,'CEveryNTime']]],
   ['getfps_7',['getFPS',['../class_c_fast_l_e_d.html#aa8c3ae3381e524ce30b181ffa23b83cd',1,'CFastLED']]],
   ['getlasttriggertime_8',['getLastTriggerTime',['../class_c_every_n_time.html#a66a10ad1574d96a28e66df625c7df2f6',1,'CEveryNTime']]],
-  ['getluma_9',['getLuma',['../struct_c_r_g_b.html#aca4a5547633fc946a05825e7e5e47bab',1,'CRGB']]],
+  ['getluma_9',['getLuma',['../group___pixel_types.html#ga1646931c5c6fe7a68548474388a3e97c',1,'CRGB']]],
   ['getmaxrefreshrate_10',['getMaxRefreshRate',['../class_c_l_e_d_controller.html#a44d20f088426191c82919c9cdbc63a35',1,'CLEDController']]],
-  ['getparity_11',['getParity',['../struct_c_r_g_b.html#af1469c62f5a3b4bdf755851606d8e71f',1,'CRGB']]],
+  ['getparity_11',['getParity',['../group___pixel_types.html#ga385612de52ce7a479fea99a618a397fd',1,'CRGB']]],
   ['getperiod_12',['getPeriod',['../class_c_every_n_time.html#aecb3b6e391c4e84be022da4d54624371',1,'CEveryNTime']]],
   ['getremaining_13',['getRemaining',['../class_c_every_n_time.html#af9baddee5f65500d9b1488e4264c8ff1',1,'CEveryNTime']]],
   ['getscale_14',['getscale',['../struct_pixel_controller.html#a9d1ddf7aa7b8e5a3896a898911f0a6cd',1,'PixelController']]],

@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.7</span>
    </div>
   </td>
  </tr>
@@ -156,7 +156,7 @@ $(function(){initNavTree('_parallel_output_demo_8ino_source.html',''); initResiz
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>  <span class="comment">// Set the first n leds on each strip to show which strip it is</span></div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0; i &lt; NUM_STRIPS; i++) {</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> j = 0; j &lt;= i; j++) {</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>      leds[(i*NUM_LEDS_PER_STRIP) + j] = <a class="code hl_enumvalue" href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>      leds[(i*NUM_LEDS_PER_STRIP) + j] = <a class="code hl_enumvalue" href="group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a>;</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    }</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>  }</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
@@ -169,9 +169,9 @@ $(function(){initNavTree('_parallel_output_demo_8ino_source.html',''); initResiz
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
 <div class="ttc" id="aclass_c_fast_l_e_d_html_a83afdd1e2a21f33ac4f8d2610d6e331b"><div class="ttname"><a href="class_c_fast_l_e_d.html#a83afdd1e2a21f33ac4f8d2610d6e331b">CFastLED::show</a></div><div class="ttdeci">void show(uint8_t scale)</div><div class="ttdoc">Update all our controllers with the current led colors, using the passed in brightness.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00058">FastLED.cpp:58</a></div></div>
 <div class="ttc" id="aclass_c_fast_l_e_d_html_afd7928d822589740af6e23b2d510cf3f"><div class="ttname"><a href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">CFastLED::addLeds</a></div><div class="ttdeci">static CLEDController &amp; addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset=0)</div><div class="ttdoc">Add a CLEDController instance to the world.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00046">FastLED.cpp:46</a></div></div>
-<div class="ttc" id="astruct_c_h_s_v_html"><div class="ttname"><a href="struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)).</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00028">pixeltypes.h:28</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00121">pixeltypes.h:121</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a></div><div class="ttdeci">@ Red</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00783">pixeltypes.h:783</a></div></div>
+<div class="ttc" id="agroup___pixel_types_html_ggaeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a"><div class="ttname"><a href="group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a></div><div class="ttdeci">@ Red</div><div class="ttdef"><b>Definition</b> <a href="crgb_8h_source.html#l00580">crgb.h:580</a></div></div>
+<div class="ttc" id="astruct_c_h_s_v_html"><div class="ttname"><a href="struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)).</div><div class="ttdef"><b>Definition</b> <a href="chsv_8h_source.html#l00011">chsv.h:11</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="crgb_8h_source.html#l00025">crgb.h:25</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -179,7 +179,7 @@ $(function(){initNavTree('_parallel_output_demo_8ino_source.html',''); initResiz
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_b0ccd010afae1b6736eeed36b0121387.html">Multiple</a></li><li class="navelem"><a class="el" href="dir_e2bb19e0d903e444cf02a1eb11fa8f0b.html">ParallelOutputDemo</a></li><li class="navelem"><a class="el" href="_parallel_output_demo_8ino.html">ParallelOutputDemo.ino</a></li>
-    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 16 2024 05:47:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

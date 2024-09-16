@@ -17,5 +17,8 @@ var searchData=
   ['ws2813_14',['WS2813',['../class_w_s2813.html',1,'']]],
   ['ws2813controller_15',['WS2813Controller',['../class_w_s2813_controller.html',1,'']]],
   ['ws2813controller_3c_20data_5fpin_2c_20rgb_5forder_20_3e_16',['WS2813Controller&lt; DATA_PIN, RGB_ORDER &gt;',['../class_w_s2813_controller.html',1,'']]],
-  ['ws2852_17',['WS2852',['../class_w_s2852.html',1,'']]]
+  ['ws2815_17',['WS2815',['../class_w_s2815.html',1,'']]],
+  ['ws2815controller_18',['WS2815Controller',['../class_w_s2815_controller.html',1,'']]],
+  ['ws2815controller_3c_20data_5fpin_2c_20rgb_5forder_20_3e_19',['WS2815Controller&lt; DATA_PIN, RGB_ORDER &gt;',['../class_w_s2815_controller.html',1,'']]],
+  ['ws2852_20',['WS2852',['../class_w_s2852.html',1,'']]]
 ];

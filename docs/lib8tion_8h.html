@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.7</span>
    </div>
   </td>
  </tr>
@@ -119,6 +119,7 @@ $(function(){initNavTree('lib8tion_8h.html',''); initResizable(true); });
 
 <p class="definition">Definition in file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
+<code>#include &quot;lib8tion/types.h&quot;</code><br />
 <code>#include &lt;stdint.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="math8_8h_source.html">lib8tion/math8.h</a>&quot;</code><br />
@@ -130,9 +131,6 @@ $(function(){initNavTree('lib8tion_8h.html',''); initResizable(true); });
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="union_i_e_e_e754binary32__t.html">IEEE754binary32_t</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">typedef for IEEE754 "binary32" float type internals  <a href="union_i_e_e_e754binary32__t.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classqfx.html">qfx&lt; T, F, I &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template class for representing fractional ints.  <a href="classqfx.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -163,7 +161,7 @@ Macros</h2></td></tr>
 <div class="line"><a class="code hl_function" href="group___color_fills.html#ga0fef54ded2e4748869f1796603433b6b">fill_rainbow</a>(leds, NUM_LEDS, hue);</div>
 <div class="line"><a class="code hl_define" href="group___timekeeping.html#ga90e084b8253af257a0257a23aeef53e1">EVERY_N_MILLIS</a>(20) { hue++; }  <span class="comment">// advances hue every 20 milliseconds</span></div>
 <div class="ttc" id="agroup___color_fills_html_ga0fef54ded2e4748869f1796603433b6b"><div class="ttname"><a href="group___color_fills.html#ga0fef54ded2e4748869f1796603433b6b">fill_rainbow</a></div><div class="ttdeci">void fill_rainbow(struct CRGB *targetArray, int numToFill, uint8_t initialhue, uint8_t deltahue)</div><div class="ttdoc">Fill a range of LEDs with a rainbow of colors.</div><div class="ttdef"><b>Definition</b> <a href="colorutils_8cpp_source.html#l00039">colorutils.cpp:39</a></div></div>
-<div class="ttc" id="agroup___timekeeping_html_ga90e084b8253af257a0257a23aeef53e1"><div class="ttname"><a href="group___timekeeping.html#ga90e084b8253af257a0257a23aeef53e1">EVERY_N_MILLIS</a></div><div class="ttdeci">#define EVERY_N_MILLIS(N)</div><div class="ttdoc">Checks whether to execute a block of code every N milliseconds.</div><div class="ttdef"><b>Definition</b> <a href="lib8tion_8h_source.html#l01378">lib8tion.h:1378</a></div></div>
+<div class="ttc" id="agroup___timekeeping_html_ga90e084b8253af257a0257a23aeef53e1"><div class="ttname"><a href="group___timekeeping.html#ga90e084b8253af257a0257a23aeef53e1">EVERY_N_MILLIS</a></div><div class="ttdeci">#define EVERY_N_MILLIS(N)</div><div class="ttdoc">Checks whether to execute a block of code every N milliseconds.</div><div class="ttdef"><b>Definition</b> <a href="lib8tion_8h_source.html#l01307">lib8tion.h:1307</a></div></div>
 </div><!-- fragment --><p> Note that in order for these to be accurate, the EVERY_N block must be evaluated at a regular basis. <br  />
  </p>
 </div></td></tr>
@@ -206,36 +204,6 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ga5d6d013429a5b8a09d564d6137217644" id="r_ga5d6d013429a5b8a09d564d6137217644"><td class="memItemLeft" align="right" valign="top">typedef uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#ga5d6d013429a5b8a09d564d6137217644">fract8</a></td></tr>
-<tr class="memdesc:ga5d6d013429a5b8a09d564d6137217644"><td class="mdescLeft">&#160;</td><td class="mdescRight">ANSI: unsigned short _Fract.  <br /></td></tr>
-<tr class="separator:ga5d6d013429a5b8a09d564d6137217644"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7d6219a7247ab1923ed623e7ae0f34ae" id="r_ga7d6219a7247ab1923ed623e7ae0f34ae"><td class="memItemLeft" align="right" valign="top">typedef int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#ga7d6219a7247ab1923ed623e7ae0f34ae">sfract7</a></td></tr>
-<tr class="memdesc:ga7d6219a7247ab1923ed623e7ae0f34ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">ANSI: signed short _Fract.  <br /></td></tr>
-<tr class="separator:ga7d6219a7247ab1923ed623e7ae0f34ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaaf46b9f719ef3bdb574f8e967af6dbb5" id="r_gaaf46b9f719ef3bdb574f8e967af6dbb5"><td class="memItemLeft" align="right" valign="top">typedef uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#gaaf46b9f719ef3bdb574f8e967af6dbb5">fract16</a></td></tr>
-<tr class="memdesc:gaaf46b9f719ef3bdb574f8e967af6dbb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">ANSI: unsigned _Fract.  <br /></td></tr>
-<tr class="separator:gaaf46b9f719ef3bdb574f8e967af6dbb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga00cb5dc9e5b477a58669a3e40bc473c2" id="r_ga00cb5dc9e5b477a58669a3e40bc473c2"><td class="memItemLeft" align="right" valign="top">typedef int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#ga00cb5dc9e5b477a58669a3e40bc473c2">sfract15</a></td></tr>
-<tr class="memdesc:ga00cb5dc9e5b477a58669a3e40bc473c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">ANSI: signed _Fract.  <br /></td></tr>
-<tr class="separator:ga00cb5dc9e5b477a58669a3e40bc473c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga397f872082dbd788e04e8c6e443e563a" id="r_ga397f872082dbd788e04e8c6e443e563a"><td class="memItemLeft" align="right" valign="top">typedef uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#ga397f872082dbd788e04e8c6e443e563a">accum88</a></td></tr>
-<tr class="memdesc:ga397f872082dbd788e04e8c6e443e563a"><td class="mdescLeft">&#160;</td><td class="mdescRight">ANSI: unsigned short _Accum. 8 bits int, 8 bits fraction.  <br /></td></tr>
-<tr class="separator:ga397f872082dbd788e04e8c6e443e563a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9585be88f27cab4c367399d8e91c8467" id="r_ga9585be88f27cab4c367399d8e91c8467"><td class="memItemLeft" align="right" valign="top">typedef int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#ga9585be88f27cab4c367399d8e91c8467">saccum78</a></td></tr>
-<tr class="memdesc:ga9585be88f27cab4c367399d8e91c8467"><td class="mdescLeft">&#160;</td><td class="mdescRight">ANSI: signed short _Accum. 7 bits int, 8 bits fraction.  <br /></td></tr>
-<tr class="separator:ga9585be88f27cab4c367399d8e91c8467"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae3ac7def25ef5ddea2da1a3bc0c00f44" id="r_gae3ac7def25ef5ddea2da1a3bc0c00f44"><td class="memItemLeft" align="right" valign="top">typedef uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#gae3ac7def25ef5ddea2da1a3bc0c00f44">accum1616</a></td></tr>
-<tr class="memdesc:gae3ac7def25ef5ddea2da1a3bc0c00f44"><td class="mdescLeft">&#160;</td><td class="mdescRight">ANSI: signed _Accum. 16 bits int, 16 bits fraction.  <br /></td></tr>
-<tr class="separator:gae3ac7def25ef5ddea2da1a3bc0c00f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad2dad84f67c8a4cc6d4c92e2c7d3e89f" id="r_gad2dad84f67c8a4cc6d4c92e2c7d3e89f"><td class="memItemLeft" align="right" valign="top">typedef int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#gad2dad84f67c8a4cc6d4c92e2c7d3e89f">saccum1516</a></td></tr>
-<tr class="memdesc:gad2dad84f67c8a4cc6d4c92e2c7d3e89f"><td class="mdescLeft">&#160;</td><td class="mdescRight">ANSI: signed _Accum. 15 bits int, 16 bits fraction.  <br /></td></tr>
-<tr class="separator:gad2dad84f67c8a4cc6d4c92e2c7d3e89f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga7bcc9ebf20b0dd74d9999d5a630d443f" id="r_ga7bcc9ebf20b0dd74d9999d5a630d443f"><td class="memItemLeft" align="right" valign="top">typedef uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#ga7bcc9ebf20b0dd74d9999d5a630d443f">accum124</a></td></tr>
-<tr class="memdesc:ga7bcc9ebf20b0dd74d9999d5a630d443f"><td class="mdescLeft">&#160;</td><td class="mdescRight">no direct ANSI counterpart. 12 bits int, 4 bits fraction  <br /></td></tr>
-<tr class="separator:ga7bcc9ebf20b0dd74d9999d5a630d443f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga95e7a40d98aa0371e9adce9220d3a67c" id="r_ga95e7a40d98aa0371e9adce9220d3a67c"><td class="memItemLeft" align="right" valign="top">typedef int32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#ga95e7a40d98aa0371e9adce9220d3a67c">saccum114</a></td></tr>
-<tr class="memdesc:ga95e7a40d98aa0371e9adce9220d3a67c"><td class="mdescLeft">&#160;</td><td class="mdescRight">no direct ANSI counterpart. 1 bit int, 14 bits fraction  <br /></td></tr>
-<tr class="separator:ga95e7a40d98aa0371e9adce9220d3a67c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0633f7b895315d42362360319177fb52" id="r_ga0633f7b895315d42362360319177fb52"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classqfx.html">qfx</a>&lt; uint8_t, 4, 4 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___fractional_types.html#ga0633f7b895315d42362360319177fb52">q44</a></td></tr>
 <tr class="memdesc:ga0633f7b895315d42362360319177fb52"><td class="mdescLeft">&#160;</td><td class="mdescRight">A 4.4 integer (4 bits integer, 4 bits fraction)  <br /></td></tr>
 <tr class="separator:ga0633f7b895315d42362360319177fb52"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -387,7 +355,7 @@ void *&#160;</td><td class="memItemRight" valign="bottom"><b>memset8</b> (void *
 
 <p>Define a LIB8TION member function as static inline with an "unused" attribute. </p>
 
-<p class="definition">Definition at line <a class="el" href="lib8tion_8h_source.html#l00021">21</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="lib8tion_8h_source.html#l00022">22</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -405,7 +373,7 @@ void *&#160;</td><td class="memItemRight" valign="bottom"><b>memset8</b> (void *
 
 <p>Define a LIB8TION member function as always static inline. </p>
 
-<p class="definition">Definition at line <a class="el" href="lib8tion_8h_source.html#l00023">23</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="lib8tion_8h_source.html#l00024">24</a> of file <a class="el" href="lib8tion_8h_source.html">lib8tion.h</a>.</p>
 
 </div>
 </div>
@@ -416,7 +384,7 @@ void *&#160;</td><td class="memItemRight" valign="bottom"><b>memset8</b> (void *
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="lib8tion_8h.html">lib8tion.h</a></li>
-    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 16 2024 05:47:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

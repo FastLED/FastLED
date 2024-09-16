@@ -1,8 +1,13 @@
 var searchData=
 [
-  ['saccum114_0',['saccum114',['../group___fractional_types.html#ga95e7a40d98aa0371e9adce9220d3a67c',1,'lib8tion.h']]],
-  ['saccum1516_1',['saccum1516',['../group___fractional_types.html#gad2dad84f67c8a4cc6d4c92e2c7d3e89f',1,'lib8tion.h']]],
-  ['saccum78_2',['saccum78',['../group___fractional_types.html#ga9585be88f27cab4c367399d8e91c8467',1,'lib8tion.h']]],
-  ['sfract15_3',['sfract15',['../group___fractional_types.html#ga00cb5dc9e5b477a58669a3e40bc473c2',1,'lib8tion.h']]],
-  ['sfract7_4',['sfract7',['../group___fractional_types.html#ga7d6219a7247ab1923ed623e7ae0f34ae',1,'lib8tion.h']]]
+  ['tdynamicrgbgradientpalette_5fbyte_0',['TDynamicRGBGradientPalette_byte',['../group___palette_classes.html#ga9b4bbbaa572ed85baf5d098dc47a347b',1,'colorutils.h']]],
+  ['tdynamicrgbgradientpalette_5fbytes_1',['TDynamicRGBGradientPalette_bytes',['../group___palette_classes.html#gae1c82c19302557ba92e9ce0ec2c9ed5b',1,'colorutils.h']]],
+  ['tdynamicrgbgradientpaletteptr_2',['TDynamicRGBGradientPalettePtr',['../group___palette_classes.html#ga8ca55222f4aaa94bba41171554225f75',1,'colorutils.h']]],
+  ['tprogmemhsvpalette16_3',['TProgmemHSVPalette16',['../group___palette_classes.html#ga68d7c7a5522fb7aa113e50351bd620d4',1,'colorutils.h']]],
+  ['tprogmemhsvpalette32_4',['TProgmemHSVPalette32',['../group___palette_classes.html#ga4173693bfea9b72f0f73085e9a7318a8',1,'colorutils.h']]],
+  ['tprogmemrgbgradientpalette_5fbyte_5',['TProgmemRGBGradientPalette_byte',['../group___palette_classes.html#ga5c6ee5f16c2e9dcea972adc5b582218c',1,'colorutils.h']]],
+  ['tprogmemrgbgradientpalette_5fbytes_6',['TProgmemRGBGradientPalette_bytes',['../group___palette_classes.html#ga56cb3bce8ab7c903689192abedcc9699',1,'colorutils.h']]],
+  ['tprogmemrgbgradientpaletteptr_7',['TProgmemRGBGradientPalettePtr',['../group___palette_classes.html#gad07b6fd5973f3c9fc4a084b206aaeabd',1,'colorutils.h']]],
+  ['tprogmemrgbpalette16_8',['TProgmemRGBPalette16',['../group___palette_classes.html#ga3ce4f8424098c820a739f95cf86d7663',1,'colorutils.h']]],
+  ['tprogmemrgbpalette32_9',['TProgmemRGBPalette32',['../group___palette_classes.html#ga0402dc727d6a118cf426da017ff42152',1,'colorutils.h']]]
 ];

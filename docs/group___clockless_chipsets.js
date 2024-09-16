@@ -4,6 +4,7 @@ var group___clockless_chipsets =
     [ "LPD1886Controller1250Khz< DATA_PIN, RGB_ORDER >", "class_l_p_d1886_controller1250_khz.html", null ],
     [ "LPD1886Controller1250Khz_8bit< DATA_PIN, RGB_ORDER >", "class_l_p_d1886_controller1250_khz__8bit.html", null ],
     [ "WS2812Controller800Khz< DATA_PIN, RGB_ORDER >", "class_w_s2812_controller800_khz.html", null ],
+    [ "WS2815Controller< DATA_PIN, RGB_ORDER >", "class_w_s2815_controller.html", null ],
     [ "WS2811Controller800Khz< DATA_PIN, RGB_ORDER >", "class_w_s2811_controller800_khz.html", null ],
     [ "DP1903Controller800Khz< DATA_PIN, RGB_ORDER >", "class_d_p1903_controller800_khz.html", null ],
     [ "DP1903Controller400Khz< DATA_PIN, RGB_ORDER >", "class_d_p1903_controller400_khz.html", null ],
@@ -22,6 +23,7 @@ var group___clockless_chipsets =
     [ "GW6205Controller400Khz< DATA_PIN, RGB_ORDER >", "class_g_w6205_controller400_khz.html", null ],
     [ "GW6205Controller800Khz< DATA_PIN, RGB_ORDER >", "class_g_w6205_controller800_khz.html", null ],
     [ "PL9823Controller< DATA_PIN, RGB_ORDER >", "class_p_l9823_controller.html", null ],
+    [ "UCS1912Controller< DATA_PIN, RGB_ORDER >", "class_u_c_s1912_controller.html", null ],
     [ "DMXSimpleController< DATA_PIN, RGB_ORDER >", "class_d_m_x_simple_controller.html", [
       [ "init", "class_d_m_x_simple_controller.html#a251c7d09383870337853c360996871c3", null ],
       [ "showPixels", "class_d_m_x_simple_controller.html#a6744d598f10ba5d97a57df08c46bafab", null ]
@@ -42,6 +44,7 @@ var group___clockless_chipsets =
     [ "UCS1904< DATA_PIN, RGB_ORDER >", "class_u_c_s1904.html", null ],
     [ "UCS2903< DATA_PIN, RGB_ORDER >", "class_u_c_s2903.html", null ],
     [ "WS2812< DATA_PIN, RGB_ORDER >", "class_w_s2812.html", null ],
+    [ "WS2815< DATA_PIN, RGB_ORDER >", "class_w_s2815.html", null ],
     [ "WS2852< DATA_PIN, RGB_ORDER >", "class_w_s2852.html", null ],
     [ "WS2812B< DATA_PIN, RGB_ORDER >", "class_w_s2812_b.html", null ],
     [ "GS1903< DATA_PIN, RGB_ORDER >", "class_g_s1903.html", null ],
@@ -58,6 +61,7 @@ var group___clockless_chipsets =
     [ "GW6205_400< DATA_PIN, RGB_ORDER >", "class_g_w6205__400.html", null ],
     [ "LPD1886< DATA_PIN, RGB_ORDER >", "class_l_p_d1886.html", null ],
     [ "LPD1886_8BIT< DATA_PIN, RGB_ORDER >", "class_l_p_d1886__8_b_i_t.html", null ],
+    [ "UCS1912< DATA_PIN, RGB_ORDER >", "class_u_c_s1912.html", null ],
     [ "DMXSIMPLE< DATA_PIN, RGB_ORDER >", "class_d_m_x_s_i_m_p_l_e.html", null ],
     [ "DMXSERIAL< RGB_ORDER >", "class_d_m_x_s_e_r_i_a_l.html", null ],
     [ "FMUL", "group___clockless_chipsets.html#ga21e124974d43423655bca453500f8378", null ],

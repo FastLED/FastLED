@@ -26,8 +26,8 @@ var NAVTREE =
 [
   [ "FastLED", "index.html", [
     [ "About", "index.html#autotoc_md0", null ],
-    [ "[Examples](examples)", "index.html#autotoc_md1", null ],
-    [ "Board Support", "index.html#autotoc_md2", null ],
+    [ "Example", "index.html#autotoc_md1", null ],
+    [ "Supported Platforms", "index.html#autotoc_md2", null ],
     [ "x86", "index.html#autotoc_md8", null ],
     [ "Compiled Library Size Check", "index.html#autotoc_md9", null ],
     [ "Getting Started", "index.html#autotoc_md10", [
@@ -79,12 +79,13 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "1653___s3___apa102___hardware___pins_8ino_source.html",
-"class_c_h_s_v_palette32.html#a7bc32b739dea0f7dfbbe7706c24e13e4",
-"class_g_e8822_controller800_khz.html",
-"fastspi__dma_8h_source.html",
-"group___gamma_funcs.html#gab78df04338197d73f7cc0e49eb28ead5",
-"index.html#autotoc_md17",
-"struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99acc56fb672d5ce34230c171fb1f61a432"
+"class_c_h_s_v_palette32.html#a1214c57e9ae5ecc58d25897f4d435847",
+"class_fast_pin.html",
+"fastspi__bitbang_8h.html",
+"group___gamma_funcs.html#ga0af2b547872e9a707d5dfa016f30445a",
+"group___pixel_types.html#ggaeb40a08b7cb90c1e21bd408261558b99a21927430e53394c5261fa4b86da5833e",
+"group___power.html#ga8db01f418cbff03a8d51caa528e44e0d",
+"structsub4.html#a7ecbd68603a75da0bd98609c30c037cc"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -26,7 +26,6 @@ var struct_pixel_controller =
     [ "loadAndScale2", "struct_pixel_controller.html#af5a5f12205a4187aa4df499b8224ed35", null ],
     [ "loadAndScale2", "struct_pixel_controller.html#a4688b73eef22022b80df81e4f6c22b49", null ],
     [ "loadAndScale2", "struct_pixel_controller.html#a33c22b408cbc9eb8b9d98993fe985264", null ],
-    [ "loadAndScaleRGBW", "struct_pixel_controller.html#a4c725f2e21a98b3ea700947e4dccbfc2", null ],
     [ "preStepFirstByteDithering", "struct_pixel_controller.html#a4339ebd06d211b9affb17343ae2eefe0", null ],
     [ "size", "struct_pixel_controller.html#a85305135ad8ad18edcd32dfc7431c660", null ],
     [ "stepAdvanceAndLoadAndScale0", "struct_pixel_controller.html#a0b169100513e0e2fe996401a8f653688", null ],

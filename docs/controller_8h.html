@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.7</span>
    </div>
   </td>
  </tr>
@@ -105,9 +105,7 @@ $(function(){initNavTree('controller_8h.html',''); initResizable(true); });
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
-<a href="#define-members">Macros</a> &#124;
-<a href="#typedef-members">Typedefs</a>  </div>
+<a href="#nested-classes">Classes</a>  </div>
   <div class="headertitle"><div class="title">controller.h File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -117,12 +115,14 @@ $(function(){initNavTree('controller_8h.html',''); initResizable(true); });
 <p class="definition">Definition in file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
 </div><div class="textblock"><code>#include &quot;<a class="el" href="_fast_l_e_d_8h_source.html">FastLED.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="led__sysdefs_8h_source.html">led_sysdefs.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="pixeltypes_8h_source.html">pixeltypes.h</a>&quot;</code><br />
+<code>#include &quot;pixeltypes.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="color_8h_source.html">color.h</a>&quot;</code><br />
 <code>#include &lt;stddef.h&gt;</code><br />
-<code>#include &quot;rgb_2_rgbw.h&quot;</code><br />
-<code>#include &quot;five_bit_hd_gamma.h&quot;</code><br />
 <code>#include &quot;force_inline.h&quot;</code><br />
+<code>#include &quot;pixel_controller.h&quot;</code><br />
+<code>#include &quot;dither_mode.h&quot;</code><br />
+<code>#include &quot;pixel_iterator.h&quot;</code><br />
+<code>#include &quot;assert.h&quot;</code><br />
 </div>
 <p><a href="controller_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -131,343 +131,10 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_l_e_d_controller.html">CLEDController</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base definition for an LED controller.  <a href="class_c_l_e_d_controller.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_pixel_controller.html">PixelController&lt; RGB_ORDER, LANES, MASK &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pixel controller class.  <a href="struct_pixel_controller.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_c_pixel_l_e_d_controller.html">CPixelLEDController&lt; RGB_ORDER, LANES, MASK &gt;</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template extension of the <a class="el" href="class_c_l_e_d_controller.html" title="Base definition for an LED controller.">CLEDController</a> class.  <a href="class_c_pixel_l_e_d_controller.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
-Macros</h2></td></tr>
-<tr class="memitem:afef3a6dc05d96466ceb8bd8a89d7b6bd" id="r_afef3a6dc05d96466ceb8bd8a89d7b6bd"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>(X)&#160;&#160;&#160;<a class="el" href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8">RGB_BYTE</a>(RGB_ORDER, X)</td></tr>
-<tr class="memdesc:afef3a6dc05d96466ceb8bd8a89d7b6bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the assigned color channel for a byte's position in the output, using the color order (EOrder) template parameter from the LED controller.  <br /></td></tr>
-<tr class="separator:afef3a6dc05d96466ceb8bd8a89d7b6bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29cf1a59cdb0fc81a54ba6ae0c865bc8" id="r_a29cf1a59cdb0fc81a54ba6ae0c865bc8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8">RGB_BYTE</a>(<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>,  X)&#160;&#160;&#160;(((<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>)&gt;&gt;(3*(2-(X)))) &amp; 0x3)</td></tr>
-<tr class="memdesc:a29cf1a59cdb0fc81a54ba6ae0c865bc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the assigned color channel for a byte's position in the output, using a passed RGB color order.  <br /></td></tr>
-<tr class="separator:a29cf1a59cdb0fc81a54ba6ae0c865bc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a91cc38f145b4669c7285771d61babcc4" id="r_a91cc38f145b4669c7285771d61babcc4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a91cc38f145b4669c7285771d61babcc4">RGB_BYTE0</a>(<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>)&#160;&#160;&#160;((<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>&gt;&gt;6) &amp; 0x3)</td></tr>
-<tr class="memdesc:a91cc38f145b4669c7285771d61babcc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the color channel for byte 0.  <br /></td></tr>
-<tr class="separator:a91cc38f145b4669c7285771d61babcc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a755c0684c69efc85971a1b23b13f0c15" id="r_a755c0684c69efc85971a1b23b13f0c15"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a755c0684c69efc85971a1b23b13f0c15">RGB_BYTE1</a>(<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>)&#160;&#160;&#160;((<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>&gt;&gt;3) &amp; 0x3)</td></tr>
-<tr class="memdesc:a755c0684c69efc85971a1b23b13f0c15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the color channel for byte 1.  <br /></td></tr>
-<tr class="separator:a755c0684c69efc85971a1b23b13f0c15"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3a773b9f4d127513db107060da8481f8" id="r_a3a773b9f4d127513db107060da8481f8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3a773b9f4d127513db107060da8481f8">RGB_BYTE2</a>(<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>)&#160;&#160;&#160;((<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>) &amp; 0x3)</td></tr>
-<tr class="memdesc:a3a773b9f4d127513db107060da8481f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the color channel for byte 2.  <br /></td></tr>
-<tr class="separator:a3a773b9f4d127513db107060da8481f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac14609ddf64580c4fbbb5e12c4ee5324" id="r_ac14609ddf64580c4fbbb5e12c4ee5324"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac14609ddf64580c4fbbb5e12c4ee5324">DISABLE_DITHER</a>&#160;&#160;&#160;0x00</td></tr>
-<tr class="memdesc:ac14609ddf64580c4fbbb5e12c4ee5324"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disable dithering.  <br /></td></tr>
-<tr class="separator:ac14609ddf64580c4fbbb5e12c4ee5324"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5f08faeb733faf0fab65127e79e6b44" id="r_aa5f08faeb733faf0fab65127e79e6b44"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa5f08faeb733faf0fab65127e79e6b44">BINARY_DITHER</a>&#160;&#160;&#160;0x01</td></tr>
-<tr class="memdesc:aa5f08faeb733faf0fab65127e79e6b44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable dithering using binary dithering (only option)  <br /></td></tr>
-<tr class="separator:aa5f08faeb733faf0fab65127e79e6b44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b62d843cb5aa0c21dceafe56901fd17" id="r_a6b62d843cb5aa0c21dceafe56901fd17"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6b62d843cb5aa0c21dceafe56901fd17">MAX_LIKELY_UPDATE_RATE_HZ</a>&#160;&#160;&#160;400</td></tr>
-<tr class="memdesc:a6b62d843cb5aa0c21dceafe56901fd17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Predicted max update rate, in Hertz.  <br /></td></tr>
-<tr class="separator:a6b62d843cb5aa0c21dceafe56901fd17"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4e5988c0a9a14761da407256de025abf" id="r_a4e5988c0a9a14761da407256de025abf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4e5988c0a9a14761da407256de025abf">MIN_ACCEPTABLE_DITHER_RATE_HZ</a>&#160;&#160;&#160;50</td></tr>
-<tr class="memdesc:a4e5988c0a9a14761da407256de025abf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum acceptable dithering rate, in Hertz.  <br /></td></tr>
-<tr class="separator:a4e5988c0a9a14761da407256de025abf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aebfff45adc514fa6fee761623598df59" id="r_aebfff45adc514fa6fee761623598df59"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&#160;&#160;&#160;(<a class="el" href="#a6b62d843cb5aa0c21dceafe56901fd17">MAX_LIKELY_UPDATE_RATE_HZ</a> / <a class="el" href="#a4e5988c0a9a14761da407256de025abf">MIN_ACCEPTABLE_DITHER_RATE_HZ</a>)</td></tr>
-<tr class="memdesc:aebfff45adc514fa6fee761623598df59"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of updates in a single dither cycle.  <br /></td></tr>
-<tr class="separator:aebfff45adc514fa6fee761623598df59"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0d71bfb7ef663994e4121f7b42aa8183" id="r_a0d71bfb7ef663994e4121f7b42aa8183"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0d71bfb7ef663994e4121f7b42aa8183">RECOMMENDED_VIRTUAL_BITS</a></td></tr>
-<tr class="memdesc:a0d71bfb7ef663994e4121f7b42aa8183"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set "virtual bits" of dithering to the highest level that is not likely to cause excessive flickering at low brightness levels + low update rates.  <br /></td></tr>
-<tr class="separator:a0d71bfb7ef663994e4121f7b42aa8183"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25177681f9e6192fe226707691a24dcb" id="r_a25177681f9e6192fe226707691a24dcb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a25177681f9e6192fe226707691a24dcb">VIRTUAL_BITS</a>&#160;&#160;&#160;<a class="el" href="#a0d71bfb7ef663994e4121f7b42aa8183">RECOMMENDED_VIRTUAL_BITS</a></td></tr>
-<tr class="memdesc:a25177681f9e6192fe226707691a24dcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Alias for RECOMMENDED_VIRTUAL_BITS.  <br /></td></tr>
-<tr class="separator:a25177681f9e6192fe226707691a24dcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a685662f0b6e22bfab012e574168ba5c9" id="r_a685662f0b6e22bfab012e574168ba5c9"><td class="memItemLeft" align="right" valign="top">typedef uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a></td></tr>
-<tr class="memdesc:a685662f0b6e22bfab012e574168ba5c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">The dither setting, either DISABLE_DITHER or BINARY_DITHER.  <br /></td></tr>
-<tr class="separator:a685662f0b6e22bfab012e574168ba5c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Macro Definition Documentation</h2>
-<a id="aa5f08faeb733faf0fab65127e79e6b44" name="aa5f08faeb733faf0fab65127e79e6b44"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa5f08faeb733faf0fab65127e79e6b44">&#9670;&#160;</a></span>BINARY_DITHER</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define BINARY_DITHER&#160;&#160;&#160;0x01</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Enable dithering using binary dithering (only option) </p>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00049">49</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="ac14609ddf64580c4fbbb5e12c4ee5324" name="ac14609ddf64580c4fbbb5e12c4ee5324"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac14609ddf64580c4fbbb5e12c4ee5324">&#9670;&#160;</a></span>DISABLE_DITHER</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define DISABLE_DITHER&#160;&#160;&#160;0x00</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Disable dithering. </p>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00047">47</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="a6b62d843cb5aa0c21dceafe56901fd17" name="a6b62d843cb5aa0c21dceafe56901fd17"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b62d843cb5aa0c21dceafe56901fd17">&#9670;&#160;</a></span>MAX_LIKELY_UPDATE_RATE_HZ</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define MAX_LIKELY_UPDATE_RATE_HZ&#160;&#160;&#160;400</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Predicted max update rate, in Hertz. </p>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00371">371</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="a4e5988c0a9a14761da407256de025abf" name="a4e5988c0a9a14761da407256de025abf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4e5988c0a9a14761da407256de025abf">&#9670;&#160;</a></span>MIN_ACCEPTABLE_DITHER_RATE_HZ</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define MIN_ACCEPTABLE_DITHER_RATE_HZ&#160;&#160;&#160;50</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Minimum acceptable dithering rate, in Hertz. </p>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00374">374</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="a0d71bfb7ef663994e4121f7b42aa8183" name="a0d71bfb7ef663994e4121f7b42aa8183"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d71bfb7ef663994e4121f7b42aa8183">&#9670;&#160;</a></span>RECOMMENDED_VIRTUAL_BITS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define RECOMMENDED_VIRTUAL_BITS</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">                                  ((<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;1) + \</div>
-<div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;2) + \</div>
-<div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;4) + \</div>
-<div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;8) + \</div>
-<div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;16) + \</div>
-<div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;32) + \</div>
-<div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;64) + \</div>
-<div class="line">                                  (<a class="code hl_define" href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a>&gt;128) )</div>
-<div class="ttc" id="acontroller_8h_html_aebfff45adc514fa6fee761623598df59"><div class="ttname"><a href="#aebfff45adc514fa6fee761623598df59">UPDATES_PER_FULL_DITHER_CYCLE</a></div><div class="ttdeci">#define UPDATES_PER_FULL_DITHER_CYCLE</div><div class="ttdoc">The number of updates in a single dither cycle.</div><div class="ttdef"><b>Definition</b> <a href="controller_8h_source.html#l00377">controller.h:377</a></div></div>
-</div><!-- fragment -->
-<p>Set "virtual bits" of dithering to the highest level that is not likely to cause excessive flickering at low brightness levels + low update rates. </p>
-<p>These pre-set values are a little ambitious, since a 400Hz update rate for WS2811-family LEDs is only possible with 85 pixels or fewer. Once we have a "number of milliseconds since last update" value available here, we can quickly calculate the correct number of "virtual bits" on the fly with a couple of "if" statements &ndash; no division required. At this point, the division is done at compile time, so there's no runtime cost, but the values are still hard-coded. </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo</a></b></dt><dd>Can these macros be replaced with constants scoped to <a class="el" href="struct_pixel_controller.html#a2a8441da873d3a094c15c337b34d3e43" title="Set up the values for binary dithering.">PixelController::init_binary_dithering()</a>? </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00392">392</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="a29cf1a59cdb0fc81a54ba6ae0c865bc8" name="a29cf1a59cdb0fc81a54ba6ae0c865bc8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8">&#9670;&#160;</a></span>RGB_BYTE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define RGB_BYTE</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em><a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a></em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>X</em></span>&#160;)&#160;&#160;&#160;(((<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>)&gt;&gt;(3*(2-(X)))) &amp; 0x3)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Gets the assigned color channel for a byte's position in the output, using a passed RGB color order. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">RO</td><td>the RGB color order </td></tr>
-    <tr><td class="paramname">X</td><td>the byte's position in the output (0-2) </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the color channel for that byte (0 = red, 1 = green, 2 = blue) </dd></dl>
-<dl class="section see"><dt>See also</dt><dd>EOrder </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00032">32</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="a91cc38f145b4669c7285771d61babcc4" name="a91cc38f145b4669c7285771d61babcc4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a91cc38f145b4669c7285771d61babcc4">&#9670;&#160;</a></span>RGB_BYTE0</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define RGB_BYTE0</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em><a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a></em></span></td><td>)</td>
-          <td>&#160;&#160;&#160;((<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>&gt;&gt;6) &amp; 0x3)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Gets the color channel for byte 0. </p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8" title="Gets the assigned color channel for a byte&#39;s position in the output, using a passed RGB color order.">RGB_BYTE(RO,X)</a> </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00036">36</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="a755c0684c69efc85971a1b23b13f0c15" name="a755c0684c69efc85971a1b23b13f0c15"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a755c0684c69efc85971a1b23b13f0c15">&#9670;&#160;</a></span>RGB_BYTE1</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define RGB_BYTE1</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em><a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a></em></span></td><td>)</td>
-          <td>&#160;&#160;&#160;((<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>&gt;&gt;3) &amp; 0x3)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Gets the color channel for byte 1. </p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8" title="Gets the assigned color channel for a byte&#39;s position in the output, using a passed RGB color order.">RGB_BYTE(RO,X)</a> </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00039">39</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="a3a773b9f4d127513db107060da8481f8" name="a3a773b9f4d127513db107060da8481f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a773b9f4d127513db107060da8481f8">&#9670;&#160;</a></span>RGB_BYTE2</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define RGB_BYTE2</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em><a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a></em></span></td><td>)</td>
-          <td>&#160;&#160;&#160;((<a class="el" href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">RO</a>) &amp; 0x3)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Gets the color channel for byte 2. </p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8" title="Gets the assigned color channel for a byte&#39;s position in the output, using a passed RGB color order.">RGB_BYTE(RO,X)</a> </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00042">42</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="afef3a6dc05d96466ceb8bd8a89d7b6bd" name="afef3a6dc05d96466ceb8bd8a89d7b6bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afef3a6dc05d96466ceb8bd8a89d7b6bd">&#9670;&#160;</a></span>RO</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define RO</td>
-          <td>(</td>
-          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>X</em></span></td><td>)</td>
-          <td>&#160;&#160;&#160;<a class="el" href="#a29cf1a59cdb0fc81a54ba6ae0c865bc8">RGB_BYTE</a>(RGB_ORDER, X)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Gets the assigned color channel for a byte's position in the output, using the color order (EOrder) template parameter from the LED controller. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">X</td><td>the byte's position in the output (0-2) </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>the color channel for that byte (0 = red, 1 = green, 2 = blue) </dd></dl>
-<dl class="section see"><dt>See also</dt><dd>EOrder </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00024">24</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="aebfff45adc514fa6fee761623598df59" name="aebfff45adc514fa6fee761623598df59"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aebfff45adc514fa6fee761623598df59">&#9670;&#160;</a></span>UPDATES_PER_FULL_DITHER_CYCLE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define UPDATES_PER_FULL_DITHER_CYCLE&#160;&#160;&#160;(<a class="el" href="#a6b62d843cb5aa0c21dceafe56901fd17">MAX_LIKELY_UPDATE_RATE_HZ</a> / <a class="el" href="#a4e5988c0a9a14761da407256de025abf">MIN_ACCEPTABLE_DITHER_RATE_HZ</a>)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>The number of updates in a single dither cycle. </p>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00377">377</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<a id="a25177681f9e6192fe226707691a24dcb" name="a25177681f9e6192fe226707691a24dcb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a25177681f9e6192fe226707691a24dcb">&#9670;&#160;</a></span>VIRTUAL_BITS</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define VIRTUAL_BITS&#160;&#160;&#160;<a class="el" href="#a0d71bfb7ef663994e4121f7b42aa8183">RECOMMENDED_VIRTUAL_BITS</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Alias for RECOMMENDED_VIRTUAL_BITS. </p>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00402">402</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
-<h2 class="groupheader">Typedef Documentation</h2>
-<a id="a685662f0b6e22bfab012e574168ba5c9" name="a685662f0b6e22bfab012e574168ba5c9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a685662f0b6e22bfab012e574168ba5c9">&#9670;&#160;</a></span>EDitherMode</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef uint8_t <a class="el" href="#a685662f0b6e22bfab012e574168ba5c9">EDitherMode</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>The dither setting, either DISABLE_DITHER or BINARY_DITHER. </p>
-
-<p class="definition">Definition at line <a class="el" href="controller_8h_source.html#l00051">51</a> of file <a class="el" href="controller_8h_source.html">controller.h</a>.</p>
-
-</div>
-</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -475,7 +142,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="controller_8h.html">controller.h</a></li>
-    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 16 2024 05:47:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

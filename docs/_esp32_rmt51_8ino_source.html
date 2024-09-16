@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.7</span>
    </div>
   </td>
  </tr>
@@ -108,136 +108,38 @@ $(function(){initNavTree('_esp32_rmt51_8ino_source.html',''); initResizable(true
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;<a class="code" href="_fast_l_e_d_8h.html">FastLED.h</a>&gt;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;freertos/FreeRTOS.h&quot;</span></div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;freertos/task.h&quot;</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#include &quot;platforms/esp/32/led_strip/led_strip.h&quot;</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#include &quot;esp_log.h&quot;</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#include &quot;esp_err.h&quot;</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;<a class="code" href="_fast_l_e_d_8h.html">FastLED.h</a>&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;platforms/esp/32/led_strip/rmt_demo.h&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// How many leds in your strip?</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#define NUM_LEDS 10</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// For led chips like WS2812, which have a data line, ground, and power, you just</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// ground, and power), like the LPD8806 define both DATA_PIN and CLOCK_PIN</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// Clock pin only needed for SPI based chipsets when not using hardware SPI</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#define DATA_PIN 9</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// GPIO assignment</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define LED_STRIP_BLINK_GPIO  2</span></div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// Numbers of the LED in the strip</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define LED_STRIP_LED_NUMBERS 24</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="comment">// 10MHz resolution, 1 tick = 0.1us (led strip needs a high resolution)</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define LED_STRIP_RMT_RES_HZ  (10 * 1000 * 1000)</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *TAG = <span class="stringliteral">&quot;example&quot;</span>;</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// Define the array of leds</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> leds[NUM_LEDS];</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// Time scaling factors for each component</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#define TIME_FACTOR_HUE 60</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define TIME_FACTOR_SAT 100</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#define TIME_FACTOR_VAL 100</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>led_strip_config_t make_config(</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>      <span class="keywordtype">int</span> strip_gpio_num,</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>      uint32_t max_leds,</div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>      led_pixel_format_t led_pixel_format,</div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>      led_model_t led_model,</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>      uint32_t invert_out) {</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="comment">// Note this is the idf 5.1 code with the idf 4.4 code stripped out.</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    led_strip_config_t config = {};</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    config.strip_gpio_num = strip_gpio_num;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    config.max_leds = max_leds;</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    config.led_pixel_format = led_pixel_format;</div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    config.led_model = led_model;</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    config.flags.invert_out = invert_out;</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keywordflow">return</span> config;</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>}</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>led_strip_rmt_config_t make_rmt_config(rmt_clock_source_t clk_src, uint32_t resolution_hz, <span class="keywordtype">size_t</span> mem_block_symbols = 0, <span class="keywordtype">bool</span> with_dma = <span class="keyword">false</span>) {</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    <span class="comment">// assume #if ESP_IDF_VERSION &gt;= ESP_IDF_VERSION_VAL(5, 0, 0)</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    led_strip_rmt_config_t config = {};</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">    #if ESP_IDF_VERSION &lt; ESP_IDF_VERSION_VAL(5, 0, 0)</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    config.rmt_channel = rmt_channel;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">    #else</span></div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    config.clk_src = clk_src;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    config.resolution_hz = resolution_hz;</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">    #endif</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    config.mem_block_symbols = mem_block_symbols;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    config.flags.with_dma = with_dma;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <span class="keywordflow">return</span> config;</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>}</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>led_strip_handle_t configure_led(<span class="keywordtype">void</span>)</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>{</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    led_strip_config_t strip_config = make_config(LED_STRIP_BLINK_GPIO, LED_STRIP_LED_NUMBERS, LED_PIXEL_FORMAT_GRB, LED_MODEL_WS2812, 0);</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    led_strip_rmt_config_t rmt_config = make_rmt_config(RMT_CLK_SRC_DEFAULT, LED_STRIP_RMT_RES_HZ);</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">// LED Strip object handle</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    led_strip_handle_t led_strip;</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    ESP_ERROR_CHECK(led_strip_new_rmt_device(&amp;strip_config, &amp;rmt_config, &amp;led_strip));</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    ESP_LOGI(TAG, <span class="stringliteral">&quot;Created LED strip object with RMT backend&quot;</span>);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordflow">return</span> led_strip;</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>}</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="keywordtype">void</span> app_main(<span class="keywordtype">void</span>)</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>{</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    led_strip_handle_t led_strip = configure_led();</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordtype">bool</span> led_on_off = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    ESP_LOGI(TAG, <span class="stringliteral">&quot;Start blinking LED strip&quot;</span>);</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <span class="keywordflow">while</span> (1) {</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordflow">if</span> (led_on_off) {</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            <span class="comment">/* Set the LED pixel using RGB from 0 (0%) to 255 (100%) for each color */</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; LED_STRIP_LED_NUMBERS; i++) {</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>                ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, 5, 5, 5));</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>            }</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>            <span class="comment">/* Refresh the strip to send data */</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>            ESP_ERROR_CHECK(led_strip_refresh(led_strip));</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>            ESP_LOGI(TAG, <span class="stringliteral">&quot;LED ON!&quot;</span>);</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            <span class="comment">/* Set all LED off to clear all pixels */</span></div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            ESP_ERROR_CHECK(led_strip_clear(led_strip));</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>            ESP_LOGI(TAG, <span class="stringliteral">&quot;LED OFF!&quot;</span>);</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        }</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        led_on_off = !led_on_off;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        vTaskDelay(pdMS_TO_TICKS(500));</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    }</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>}</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span><span class="comment">// How many leds in your strip?</span></div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#define NUM_LEDS 10</span></div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="comment">// For led chips like WS2812, which have a data line, ground, and power, you just</span></div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="comment">// need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="comment">// ground, and power), like the LPD8806 define both DATA_PIN and CLOCK_PIN</span></div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="comment">// Clock pin only needed for SPI based chipsets when not using hardware SPI</span></div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="preprocessor">#define DATA_PIN 9</span></div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="comment">// Define the array of leds</span></div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><a class="code hl_struct" href="struct_c_r_g_b.html">CRGB</a> leds[NUM_LEDS];</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="keywordtype">void</span> setup() {</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    Serial.begin(115200);</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <a class="code hl_variable" href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.<a class="code hl_function" href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">addLeds</a>&lt;<a class="code hl_class" href="class_w_s2812.html">WS2812</a>, DATA_PIN&gt;(leds, NUM_LEDS);  <span class="comment">// GRB ordering is assume</span></div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    delay(2000);  <span class="comment">// If something ever goes wrong this delay will allow upload.</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="keywordtype">void</span> loop() { </div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>  <span class="comment">// Fill the LED array with red, then show</span></div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">  #if 0</span></div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>  <a class="code hl_function" href="group___color_fills.html#gac0bcd5712f9f57a186f2c5f96911af1d">fill_solid</a>(leds, NUM_LEDS, <a class="code hl_enumvalue" href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a>);</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>  <a class="code hl_variable" href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.<a class="code hl_function" href="class_c_fast_l_e_d.html#a83afdd1e2a21f33ac4f8d2610d6e331b">show</a>();</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>  delay(500);</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>  <span class="comment">// Fill the LED array with black (off), then show</span></div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>  <a class="code hl_function" href="group___color_fills.html#gac0bcd5712f9f57a186f2c5f96911af1d">fill_solid</a>(leds, NUM_LEDS, <a class="code hl_enumvalue" href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a>);</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>  <a class="code hl_variable" href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a>.<a class="code hl_function" href="class_c_fast_l_e_d.html#a83afdd1e2a21f33ac4f8d2610d6e331b">show</a>();</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>  delay(500);</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">  #else</span></div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>  app_main();</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="preprocessor">  #endif</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>}</div>
-<div class="ttc" id="a_fast_l_e_d_8cpp_html_a7077a6a69b1339a4c04f4bb9ecc0ad3f"><div class="ttname"><a href="_fast_l_e_d_8cpp.html#a7077a6a69b1339a4c04f4bb9ecc0ad3f">FastLED</a></div><div class="ttdeci">CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00021">FastLED.cpp:21</a></div></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keywordtype">void</span> setup() {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    Serial.begin(115200);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>}</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keywordtype">void</span> loop() {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    rmt_demo(DATA_PIN, NUM_LEDS);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    delay(1000);</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>}</div>
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
-<div class="ttc" id="aclass_c_fast_l_e_d_html_a83afdd1e2a21f33ac4f8d2610d6e331b"><div class="ttname"><a href="class_c_fast_l_e_d.html#a83afdd1e2a21f33ac4f8d2610d6e331b">CFastLED::show</a></div><div class="ttdeci">void show(uint8_t scale)</div><div class="ttdoc">Update all our controllers with the current led colors, using the passed in brightness.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00058">FastLED.cpp:58</a></div></div>
-<div class="ttc" id="aclass_c_fast_l_e_d_html_afd7928d822589740af6e23b2d510cf3f"><div class="ttname"><a href="class_c_fast_l_e_d.html#afd7928d822589740af6e23b2d510cf3f">CFastLED::addLeds</a></div><div class="ttdeci">static CLEDController &amp; addLeds(CLEDController *pLed, struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset=0)</div><div class="ttdoc">Add a CLEDController instance to the world.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8cpp_source.html#l00046">FastLED.cpp:46</a></div></div>
-<div class="ttc" id="aclass_w_s2812_html"><div class="ttname"><a href="class_w_s2812.html">WS2812</a></div><div class="ttdoc">WS2812 controller class.</div><div class="ttdef"><b>Definition</b> <a href="_fast_l_e_d_8h_source.html#l00182">FastLED.h:182</a></div></div>
-<div class="ttc" id="agroup___color_fills_html_gac0bcd5712f9f57a186f2c5f96911af1d"><div class="ttname"><a href="group___color_fills.html#gac0bcd5712f9f57a186f2c5f96911af1d">fill_solid</a></div><div class="ttdeci">void fill_solid(struct CRGB *targetArray, int numToFill, const struct CRGB &amp;color)</div><div class="ttdoc">Fill a range of LEDs with a solid color.</div><div class="ttdef"><b>Definition</b> <a href="colorutils_8cpp_source.html#l00016">colorutils.cpp:16</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00121">pixeltypes.h:121</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a></div><div class="ttdeci">@ Red</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00783">pixeltypes.h:783</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html_aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7"><div class="ttname"><a href="struct_c_r_g_b.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a></div><div class="ttdeci">@ Black</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00671">pixeltypes.h:671</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="crgb_8h_source.html#l00025">crgb.h:25</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -245,7 +147,7 @@ $(function(){initNavTree('_esp32_rmt51_8ino_source.html',''); initResizable(true
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="dir_f097c76a9b451cf438c58098675df98c.html">Esp32Rmt51</a></li><li class="navelem"><b>Esp32Rmt51.ino</b></li>
-    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 16 2024 05:47:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

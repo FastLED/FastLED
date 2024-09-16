@@ -14,11 +14,12 @@ var searchData=
   ['mant_5fhi16_5fexp_5flo1_11',['mant_hi16_exp_lo1',['../union_i_e_e_e754binary32__t.html#a9662a563b61afb6bdafb5f005c52b38b',1,'IEEE754binary32_t']]],
   ['mant_5flo8_12',['mant_lo8',['../union_i_e_e_e754binary32__t.html#a78f17dc24c6f6ae2e5720824493bf533',1,'IEEE754binary32_t']]],
   ['mantissa_13',['mantissa',['../union_i_e_e_e754binary32__t.html#a2275cfe0cacae08983ad44cdf074a7a6',1,'IEEE754binary32_t']]],
-  ['mdata_14',['mData',['../struct_pixel_controller.html#a54bedae9117a19b242b73682c5d1a182',1,'PixelController']]],
-  ['mlen_15',['mLen',['../struct_pixel_controller.html#a6e1491364f944af0eee408fc8dffef58',1,'PixelController']]],
-  ['mlenremaining_16',['mLenRemaining',['../struct_pixel_controller.html#a329cebe498f2d119cf10e0e6a7b5f7c5',1,'PixelController']]],
-  ['moffsets_17',['mOffsets',['../struct_pixel_controller.html#a5ea77404f9ea28134291af923a79c82f',1,'PixelController']]],
-  ['mperiod_18',['mPeriod',['../class_c_every_n_time.html#a27fdededaf37417018f079336feabbf7',1,'CEveryNTime']]],
-  ['mprevtrigger_19',['mPrevTrigger',['../class_c_every_n_time.html#af886ee09b27d68263dfa1e40d6137ce8',1,'CEveryNTime']]],
-  ['mscale_20',['mScale',['../struct_pixel_controller.html#a9c8fa28fd867a4048796b4f88146d332',1,'PixelController']]]
+  ['mask_5fvalue_14',['MASK_VALUE',['../class_c_pixel_l_e_d_controller.html#a32e69eb58eddbeca00179bb5559ec451',1,'CPixelLEDController']]],
+  ['mdata_15',['mData',['../struct_pixel_controller.html#a54bedae9117a19b242b73682c5d1a182',1,'PixelController']]],
+  ['mlen_16',['mLen',['../struct_pixel_controller.html#a6e1491364f944af0eee408fc8dffef58',1,'PixelController']]],
+  ['mlenremaining_17',['mLenRemaining',['../struct_pixel_controller.html#a329cebe498f2d119cf10e0e6a7b5f7c5',1,'PixelController']]],
+  ['moffsets_18',['mOffsets',['../struct_pixel_controller.html#a5ea77404f9ea28134291af923a79c82f',1,'PixelController']]],
+  ['mperiod_19',['mPeriod',['../class_c_every_n_time.html#a27fdededaf37417018f079336feabbf7',1,'CEveryNTime']]],
+  ['mprevtrigger_20',['mPrevTrigger',['../class_c_every_n_time.html#af886ee09b27d68263dfa1e40d6137ce8',1,'CEveryNTime']]],
+  ['mscale_21',['mScale',['../struct_pixel_controller.html#a9c8fa28fd867a4048796b4f88146d332',1,'PixelController']]]
 ];

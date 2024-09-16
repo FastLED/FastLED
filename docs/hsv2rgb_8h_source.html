@@ -35,7 +35,7 @@
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="fastled_logo.png"/></td>
   <td id="projectalign">
-   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.6</span>
+   <div id="projectname">FastLED<span id="projectnumber">&#160;3.7.7</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,7 @@ $(function(){initNavTree('hsv2rgb_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="_fast_l_e_d_8h.html">FastLED.h</a>&quot;</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;<a class="code" href="pixeltypes_8h.html">pixeltypes.h</a>&quot;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;pixeltypes.h&quot;</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
@@ -162,9 +162,8 @@ $(function(){initNavTree('hsv2rgb_8h_source.html',''); initResizable(true); });
 <div class="ttc" id="agroup___h_s_v2_r_g_b_html_ga704160ddb9173c3420a3dbfb44674440"><div class="ttname"><a href="group___h_s_v2_r_g_b.html#ga704160ddb9173c3420a3dbfb44674440">hsv2rgb_spectrum</a></div><div class="ttdeci">void hsv2rgb_spectrum(const struct CHSV &amp;hsv, struct CRGB &amp;rgb)</div><div class="ttdoc">Convert an HSV value to RGB using a mathematically straight spectrum.</div><div class="ttdef"><b>Definition</b> <a href="hsv2rgb_8cpp_source.html#l00226">hsv2rgb.cpp:226</a></div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_html_gab316cfeb8bd5f37d8faaf761ad3c834b"><div class="ttname"><a href="group___h_s_v2_r_g_b.html#gab316cfeb8bd5f37d8faaf761ad3c834b">hsv2rgb_rainbow</a></div><div class="ttdeci">void hsv2rgb_rainbow(const struct CHSV &amp;hsv, struct CRGB &amp;rgb)</div><div class="ttdoc">Convert an HSV value to RGB using a visually balanced rainbow.</div></div>
 <div class="ttc" id="agroup___h_s_v2_r_g_b_html_gab3d6aa6b1a86a5e9bb820c55c68fe4b9"><div class="ttname"><a href="group___h_s_v2_r_g_b.html#gab3d6aa6b1a86a5e9bb820c55c68fe4b9">rgb2hsv_approximate</a></div><div class="ttdeci">CHSV rgb2hsv_approximate(const CRGB &amp;rgb)</div><div class="ttdoc">Recover approximate HSV values from RGB.</div><div class="ttdef"><b>Definition</b> <a href="hsv2rgb_8cpp_source.html#l00498">hsv2rgb.cpp:498</a></div></div>
-<div class="ttc" id="apixeltypes_8h_html"><div class="ttname"><a href="pixeltypes_8h.html">pixeltypes.h</a></div><div class="ttdoc">Definitions for pixel color data structs.</div></div>
-<div class="ttc" id="astruct_c_h_s_v_html"><div class="ttname"><a href="struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)).</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00028">pixeltypes.h:28</a></div></div>
-<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="pixeltypes_8h_source.html#l00121">pixeltypes.h:121</a></div></div>
+<div class="ttc" id="astruct_c_h_s_v_html"><div class="ttname"><a href="struct_c_h_s_v.html">CHSV</a></div><div class="ttdoc">Representation of an HSV pixel (hue, saturation, value (aka brightness)).</div><div class="ttdef"><b>Definition</b> <a href="chsv_8h_source.html#l00011">chsv.h:11</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="crgb_8h_source.html#l00025">crgb.h:25</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -172,7 +171,7 @@ $(function(){initNavTree('hsv2rgb_8h_source.html',''); initResizable(true); });
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="hsv2rgb_8h.html">hsv2rgb.h</a></li>
-    <li class="footer">Generated on Mon Sep 9 2024 04:53:59 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
+    <li class="footer">Generated on Mon Sep 16 2024 05:47:25 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.11.0 </li>
   </ul>
 </div>
 <!-- ... -->

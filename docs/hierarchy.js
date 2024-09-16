@@ -30,6 +30,9 @@ var hierarchy =
         [ "SM16716Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_s_m16716_controller.html", null ],
         [ "WS2801Controller< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_w_s2801_controller.html", null ]
       ] ],
+      [ "CPixelLEDController< GRB, CONTROLLER::LANES_VALUE, CONTROLLER::MASK_VALUE >", "class_c_pixel_l_e_d_controller.html", [
+        [ "RGBWEmulatedController< CONTROLLER, RGB_ORDER >", "class_r_g_b_w_emulated_controller.html", null ]
+      ] ],
       [ "CPixelLEDController< RGB_ORDER, LANES, MASK >", "class_c_pixel_l_e_d_controller.html", [
         [ "APA102Controller< DATA_PIN, CLOCK_PIN, RGB, DATA_RATE_MHZ(6), kFiveBitGammaCorrectionMode_BitShift, uint32_t(0x00000000), uint32_t(0x00000000)>", "class_a_p_a102_controller.html", [
           [ "APA102ControllerHD< DATA_PIN, CLOCK_PIN, RGB_ORDER, SPI_SPEED >", "class_a_p_a102_controller_h_d.html", null ]
@@ -100,6 +103,9 @@ var hierarchy =
       [ "UCS1904Controller800Khz< DATA_PIN, RGB_ORDER >", "class_u_c_s1904_controller800_khz.html", [
         [ "UCS1904< DATA_PIN, RGB_ORDER >", "class_u_c_s1904.html", null ]
       ] ],
+      [ "UCS1912Controller< DATA_PIN, RGB_ORDER >", "class_u_c_s1912_controller.html", [
+        [ "UCS1912< DATA_PIN, RGB_ORDER >", "class_u_c_s1912.html", null ]
+      ] ],
       [ "UCS2903Controller< DATA_PIN, RGB_ORDER >", "class_u_c_s2903_controller.html", [
         [ "UCS2903< DATA_PIN, RGB_ORDER >", "class_u_c_s2903.html", null ]
       ] ],
@@ -122,6 +128,9 @@ var hierarchy =
       [ "WS2813Controller< DATA_PIN, RGB_ORDER >", "class_w_s2813_controller.html", [
         [ "WS2813< DATA_PIN, RGB_ORDER >", "class_w_s2813.html", null ]
       ] ],
+      [ "WS2815Controller< DATA_PIN, RGB_ORDER >", "class_w_s2815_controller.html", [
+        [ "WS2815< DATA_PIN, RGB_ORDER >", "class_w_s2815.html", null ]
+      ] ],
       [ "DP1903Controller400Khz< DATA_PIN, RGB_ORDER >", "class_d_p1903_controller400_khz.html", null ],
       [ "DP1903Controller800Khz< DATA_PIN, RGB_ORDER >", "class_d_p1903_controller800_khz.html", null ],
       [ "GE8822Controller800Khz< DATA_PIN, RGB_ORDER >", "class_g_e8822_controller800_khz.html", null ],
@@ -139,11 +148,13 @@ var hierarchy =
       [ "UCS1903BController800Khz< DATA_PIN, RGB_ORDER >", "class_u_c_s1903_b_controller800_khz.html", null ],
       [ "UCS1903Controller400Khz< DATA_PIN, RGB_ORDER >", "class_u_c_s1903_controller400_khz.html", null ],
       [ "UCS1904Controller800Khz< DATA_PIN, RGB_ORDER >", "class_u_c_s1904_controller800_khz.html", null ],
+      [ "UCS1912Controller< DATA_PIN, RGB_ORDER >", "class_u_c_s1912_controller.html", null ],
       [ "UCS2903Controller< DATA_PIN, RGB_ORDER >", "class_u_c_s2903_controller.html", null ],
       [ "WS2811Controller400Khz< DATA_PIN, RGB_ORDER >", "class_w_s2811_controller400_khz.html", null ],
       [ "WS2811Controller800Khz< DATA_PIN, RGB_ORDER >", "class_w_s2811_controller800_khz.html", null ],
       [ "WS2812Controller800Khz< DATA_PIN, RGB_ORDER >", "class_w_s2812_controller800_khz.html", null ],
-      [ "WS2813Controller< DATA_PIN, RGB_ORDER >", "class_w_s2813_controller.html", null ]
+      [ "WS2813Controller< DATA_PIN, RGB_ORDER >", "class_w_s2813_controller.html", null ],
+      [ "WS2815Controller< DATA_PIN, RGB_ORDER >", "class_w_s2815_controller.html", null ]
     ] ],
     [ "CMinWait< WAIT >", "class_c_min_wait.html", null ],
     [ "CMinWait< 1000 >", "class_c_min_wait.html", null ],
@@ -163,9 +174,15 @@ var hierarchy =
     [ "just8bits", "unionjust8bits.html", null ],
     [ "NOPSPIOutput< _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER >", "class_n_o_p_s_p_i_output.html", null ],
     [ "PixelController< RGB_ORDER, LANES, MASK >", "struct_pixel_controller.html", null ],
+    [ "PixelControllerVtable< PixelControllerT >", "struct_pixel_controller_vtable.html", null ],
+    [ "PixelIterator", "class_pixel_iterator.html", null ],
     [ "CPixelView< PIXEL_TYPE >::pixelset_iterator_base< T >", "class_c_pixel_view_1_1pixelset__iterator__base.html", null ],
     [ "qfx< T, F, I >", "classqfx.html", null ],
     [ "REFHardwareSPIOutput< _DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER >", "class_r_e_f_hardware_s_p_i_output.html", null ],
+    [ "Rgbw", "struct_rgbw.html", [
+      [ "RgbwDefault", "struct_rgbw_default.html", null ],
+      [ "RgbwInvalid", "struct_rgbw_invalid.html", null ]
+    ] ],
     [ "Selectable", "class_selectable.html", [
       [ "Pin", "class_pin.html", [
         [ "InputPin", "class_input_pin.html", null ],
