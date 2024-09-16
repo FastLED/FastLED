@@ -13,7 +13,7 @@ Edit these files to update the version number
   * library.properties 
   * FastLED.h 
   * README.md 
-  * Doxyfile
+  * docs/Doxyfile
 
 
 Edit this file with release notes and version number.
