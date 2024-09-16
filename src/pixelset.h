@@ -191,7 +191,7 @@ public:
     /// @param color the color to fill with
     inline CPixelView & fill_solid(const PIXEL_TYPE & color) { *this = color; return *this; }
     /// @copydoc CPixelView::fill_solid(const PIXEL_TYPE&)
-    inline CPixelView & fill_solid(const CHSV & color) { if(dir>0) { *this = color; return *this; } }
+    inline CPixelView & fill_solid(const CHSV & color) { *this = color; return *this; }
 
     /// Fill all of the LEDs with a rainbow of colors.
     /// @param initialhue the starting hue for the rainbow
