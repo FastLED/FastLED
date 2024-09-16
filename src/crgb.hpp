@@ -153,7 +153,7 @@ FASTLED_FORCE_INLINE CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const
 
 
 /// @copydoc CRGB::operator+=
-__attribute__((always_inline)) inline CRGB operator+( const CRGB& p1, const CRGB& p2)
+FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( qadd8( p1.r, p2.r),
                  qadd8( p1.g, p2.g),
@@ -161,7 +161,7 @@ __attribute__((always_inline)) inline CRGB operator+( const CRGB& p1, const CRGB
 }
 
 /// @copydoc CRGB::operator-=
-__attribute__((always_inline)) inline CRGB operator-( const CRGB& p1, const CRGB& p2)
+FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2)
 {
     return CRGB( qsub8( p1.r, p2.r),
                  qsub8( p1.g, p2.g),
@@ -169,7 +169,7 @@ __attribute__((always_inline)) inline CRGB operator-( const CRGB& p1, const CRGB
 }
 
 /// @copydoc CRGB::operator*=
-__attribute__((always_inline)) inline CRGB operator*( const CRGB& p1, uint8_t d)
+FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, uint8_t d)
 {
     return CRGB( qmul8( p1.r, d),
                  qmul8( p1.g, d),
@@ -177,7 +177,7 @@ __attribute__((always_inline)) inline CRGB operator*( const CRGB& p1, uint8_t d)
 }
 
 /// Scale using CRGB::nscale8_video()
-__attribute__((always_inline)) inline CRGB operator%( const CRGB& p1, uint8_t d)
+FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d)
 {
     CRGB retval( p1);
     retval.nscale8_video( d);
