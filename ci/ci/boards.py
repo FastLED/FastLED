@@ -69,7 +69,6 @@ ESP32DEV = Board(
 ESP32DEV_IDF4_4 = Board(
     board_name="esp32dev_idf44",
     real_board_name="esp32dev",
-    framework="espidf",
     platform=ESP32_IDF_4_4_LATEST,
 )
 
