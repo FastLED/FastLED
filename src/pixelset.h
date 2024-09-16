@@ -8,6 +8,17 @@
 #include <stdlib.h>
 #endif
 
+template<class PIXEL_TYPE>
+class CPixelView;
+
+/// CPixelView for CRGB arrays
+typedef CPixelView<CRGB> CRGBSet;
+
+/// Retrieve a pointer to a CRGB array, using a CRGBSet and an LED offset
+FASTLED_FORCE_INLINE
+CRGB *operator+(const CRGBSet & pixels, int offset);
+
+
 /// @file pixelset.h
 /// Declares classes for managing logical groups of LEDs
 
@@ -393,12 +404,10 @@ public:
     /// @} Iterator
 };
 
-/// CPixelView for CRGB arrays
-typedef CPixelView<CRGB> CRGBSet;
-
-/// Retrieve a pointer to a CRGB array, using a CRGBSet and an LED offset
-__attribute__((always_inline))
-inline CRGB *operator+(const CRGBSet & pixels, int offset) { return (CRGB*)pixels + offset; }
+FASTLED_FORCE_INLINE
+CRGB *operator+(const CRGBSet & pixels, int offset) {
+    return (CRGB*)pixels + offset;
+}
 
 
 /// A version of CPixelView<CRGB> with an included array of CRGB LEDs
