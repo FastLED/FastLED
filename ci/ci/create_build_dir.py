@@ -122,4 +122,28 @@ def create_build_dir(
         locked_print(f"*** Error setting up board {board_name} ***")
         return False, stdout
     locked_print(f"*** Finished initializing environment for board {board_name} ***")
+    # dumping enviorment variables to help debug.
+    # this is the command: pio run --target envdump
+    cwd = str(builddir.resolve())
+    cmd_list = [
+        "pio",
+        "run",
+        "--target",
+        "envdump",
+    ]
+    cmd_str = subprocess.list2cmdline(cmd_list)
+    stdout = subprocess.run(
+        cmd_list,
+        cwd=cwd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        check=False,
+    ).stdout
+    # now dump the values to the file at the root of the build directory.
+    env_file = builddir / "envdump.txt"
+    with open(env_file, "w") as f:
+        stdout = cwd + "\n" + stdout
+        f.write(stdout)
     return True, stdout
