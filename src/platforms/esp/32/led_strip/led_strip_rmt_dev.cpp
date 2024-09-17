@@ -149,7 +149,7 @@ rmt_tx_channel_config_t make_tx_channel_config(
 // Note that the RMT driver does a runtime check to see if the RMT new driver has been linked in. It doesn't
 // matter if you install it or not, it will still crash on boot if it's linked in.
 // https://github.com/espressif/esp-idf/blob/e026fd1f81afc6d19561101b1c8fe0006932cff3/components/driver/deprecated/rmt_legacy.c#L1379
-
+// It seems that the offending include is "driver/rmt.h", which should be purged everywhere.
 esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
 {
     const int INTERRUPT_PRIORITY = 0;
