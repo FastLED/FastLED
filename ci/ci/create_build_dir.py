@@ -57,6 +57,9 @@ def insert_tool_aliases(meta_json: dict[str, dict]) -> None:
                 "as",
                 "ranlib",
                 "strip",
+                "c++filt",
+                "readelf",
+                "addr2line",
             ]:
                 name = f"{prefix}{tool}" + suffix
                 tool_path = Path(str(parent / name))
