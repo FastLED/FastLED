@@ -49,8 +49,6 @@ def concurrent_run(
         prev_cwd = os.getcwd()
         locked_print(f"Changing to directory {cwd}")
         os.chdir(cwd)
-    if extra_scripts:
-        os.environ["PLATFORMIO_EXTRA_SCRIPTS"] = extra_scripts
     create_build_dir(
         board=first_project,
         defines=defines,
@@ -58,6 +56,7 @@ def concurrent_run(
         extra_packages=extra_packages,
         build_dir=build_dir,
         board_dir=board_dir,
+        extra_scripts=extra_scripts,
     )
     verbose = args.verbose
     # This is not memory/cpu bound but is instead network bound so we can run one thread
@@ -75,6 +74,7 @@ def concurrent_run(
                 extra_packages,
                 build_dir,
                 board_dir,
+                extra_scripts,
             )
             future_to_board[future] = board
         for future in as_completed(future_to_board):

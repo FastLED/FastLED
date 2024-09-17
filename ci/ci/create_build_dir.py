@@ -39,6 +39,7 @@ def create_build_dir(
     extra_packages: list[str],
     build_dir: str | None,
     board_dir: str | None,
+    extra_scripts: str | None,
 ) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     if board.defines:
@@ -106,6 +107,8 @@ def create_build_dir(
         cmd_list.append(f'--project-option=lib_deps={",".join(extra_packages)}')
     if no_install_deps:
         cmd_list.append("--no-install-dependencies")
+    if extra_scripts:
+        cmd_list.append(f"--project-option=extra_scripts={extra_scripts}")
     cmd_str = subprocess.list2cmdline(cmd_list)
     locked_print(f"\n\nRunning command:\n  {cmd_str}\n")
     result = subprocess.run(
