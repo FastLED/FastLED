@@ -50,7 +50,7 @@ def insert_tool_aliases(meta_json: dict[str, dict]) -> None:
                 tool_path = Path(str(parent / name))
                 if tool_path.exists():
                     aliases[tool] = str(tool_path)
-        meta_json[board]["tool_aliases"] = aliases
+        meta_json[board]["aliases"] = aliases
 
 
 def create_build_dir(
