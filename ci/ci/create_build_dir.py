@@ -33,6 +33,26 @@ def _install_global_package(package: str) -> None:
     locked_print(f"*** Finished installing {package} ***")
 
 
+def insert_tool_aliases(meta_json: dict[str, dict]) -> None:
+    for board in meta_json.keys():
+        aliases: dict[str, str] = {}
+        cc_path = meta_json[board].get("cc_path")
+        cc_path = Path(cc_path) if cc_path else None
+        if cc_path:
+            # get the prefix of the base name of the compiler.
+            cc_base = cc_path.name
+            parent = cc_path.parent
+            prefix = cc_base.split("gcc")[0]
+            suffix = cc_path.suffix
+            # create the aliases
+            for tool in ["gcc", "g++", "ar", "objcopy", "objdump", "size", "nm"]:
+                name = f"{prefix}{tool}" + suffix
+                tool_path = Path(str(parent / name))
+                if tool_path.exists():
+                    aliases[tool] = str(tool_path)
+        meta_json[board]["tool_aliases"] = aliases
+
+
 def create_build_dir(
     board: Board,
     defines: list[str],
@@ -145,10 +165,13 @@ def create_build_dir(
         text=True,
         check=False,
     ).stdout
+
+    data = json.loads(stdout)
     # now dump the values to the file at the root of the build directory.
     matadata_json = builddir / "meta.json"
     try:
-        formatted = json.dumps(json.loads(stdout), indent=4, sort_keys=True)
+        insert_tool_aliases(data)
+        formatted = json.dumps(data, indent=4, sort_keys=True)
         with open(matadata_json, "w") as f:
             f.write(formatted)
     except Exception:
