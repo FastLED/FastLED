@@ -146,7 +146,7 @@ def create_build_dir(
         check=False,
     ).stdout
     # now dump the values to the file at the root of the build directory.
-    matadata_json = builddir / "build.json"
+    matadata_json = builddir / "meta.json"
     try:
         formatted = json.dumps(json.loads(stdout), indent=4, sort_keys=True)
         with open(matadata_json, "w") as f:
