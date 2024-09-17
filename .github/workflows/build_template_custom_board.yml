@@ -36,6 +36,16 @@ jobs:
           ./compile --no-interactive ${{ inputs.args }}| tee build.log
         shell: bash
 
+      - name: Print out build_info.json
+        run: |
+          build_info=$(find . -name build_info.json)
+          if [ -f "$build_info" ]; then
+            cat $build_info
+          else
+            echo "build_info.json not found"
+          fi
+        if: always()
+
       - name: Generate timestamp and random hex
         id: generate_id
         run: |
