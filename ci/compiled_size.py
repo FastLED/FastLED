@@ -1,5 +1,6 @@
 import argparse
 import csv
+import json
 import os
 import shutil
 import subprocess
@@ -28,7 +29,11 @@ def step_back_commits(steps):
 
 
 def check_firmware_size(board: str) -> int:
-    base_path = Path(".build") / board / ".pio" / "build" / board
+    root_build_dir = Path(".build") / board
+    build_info_json = root_build_dir / "build_info.json"
+    build_info = json.loads(build_info_json.read_text())
+    prog_path = Path(build_info["prog_path"])
+    base_path = prog_path.parent
     suffixes = [".bin", ".hex", ".uf2"]
     firmware: Path
     for suffix in suffixes:
@@ -42,7 +47,6 @@ def check_firmware_size(board: str) -> int:
         )
         raise FileNotFoundError(msg)
     size_command = f"du -b {firmware}"
-
     output, error = run_command(size_command)
     if error:
         print(f"Error checking firmware size: {error}")
