@@ -168,7 +168,7 @@ def create_build_dir(
 
     data = json.loads(stdout)
     # now dump the values to the file at the root of the build directory.
-    matadata_json = builddir / "meta.json"
+    matadata_json = builddir / "build_info.json"
     try:
         insert_tool_aliases(data)
         formatted = json.dumps(data, indent=4, sort_keys=True)
