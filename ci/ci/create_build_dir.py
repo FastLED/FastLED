@@ -108,7 +108,8 @@ def create_build_dir(
     if no_install_deps:
         cmd_list.append("--no-install-dependencies")
     if extra_scripts:
-        cmd_list.append(f"--project-option=extra_scripts={extra_scripts}")
+        p = Path(extra_scripts)
+        cmd_list.append(f"--project-option=extra_scripts={p.resolve()}")
     cmd_str = subprocess.list2cmdline(cmd_list)
     locked_print(f"\n\nRunning command:\n  {cmd_str}\n")
     result = subprocess.run(
@@ -138,7 +139,6 @@ def create_build_dir(
     stdout = subprocess.run(
         cmd_list,
         cwd=cwd,
-        shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -147,6 +147,6 @@ def create_build_dir(
     # now dump the values to the file at the root of the build directory.
     env_file = builddir / "envdump.txt"
     with open(env_file, "w") as f:
-        stdout = cwd + "\n" + stdout
+        stdout = cwd + "\n" + cmd_str + "\n\n" + stdout + "\n"
         f.write(stdout)
     return True, stdout
