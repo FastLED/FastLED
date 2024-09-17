@@ -33,46 +33,6 @@ def _install_global_package(package: str) -> None:
     locked_print(f"*** Finished installing {package} ***")
 
 
-def _parse_json(stdout: str) -> dict:
-    lines: list[str] = stdout.split("\n")
-    out: dict[str, str | list[str]] = {}
-    # pop lines until PACKAGES: is found
-    while lines:
-        line = lines.pop(0)
-        if "PACKAGES:" in line:
-            break
-    # while " - " is found, parse the key value pairs."
-    packages: list[str] = []
-    while lines:
-        line = lines.pop(0)
-        if " - " in line:
-            _, value = line.split(" - ")
-            value = value.strip()
-            value = value.replace(r"\\\\", r"\\")
-            packages.append(value)
-        else:
-            break
-    out["PACKAGES"] = packages
-
-    def _parse_value(line: str, key: str) -> None:
-        nonlocal out
-        key_in_line = f"'{key}':"
-        if key_in_line in line:
-            _, value = line.split(":", maxsplit=1)
-            out[key] = value
-
-    for line in lines:
-        _parse_value(line, "AR")
-        _parse_value(line, "AS")
-        _parse_value(line, "CC")
-        _parse_value(line, "CXX")
-        _parse_value(line, "LD")
-        _parse_value(line, "OBJCOPY")
-        _parse_value(line, "toolpath")
-        _parse_value(line, "ENV")
-    return out
-
-
 def create_build_dir(
     board: Board,
     defines: list[str],
@@ -172,9 +132,9 @@ def create_build_dir(
     cwd = str(builddir.resolve())
     cmd_list = [
         "pio",
-        "run",
-        "--target",
-        "envdump",
+        "project",
+        "metadata",
+        "--json-output",
     ]
     cmd_str = subprocess.list2cmdline(cmd_list)
     stdout = subprocess.run(
@@ -186,17 +146,12 @@ def create_build_dir(
         check=False,
     ).stdout
     # now dump the values to the file at the root of the build directory.
-    env_file = builddir / "envdump.txt"
-    with open(env_file, "w") as f:
-        stdout = cwd + "\n" + cmd_str + "\n\n" + stdout + "\n"
-        f.write(stdout)
-    # now dump the json
+    matadata_json = builddir / "build.json"
     try:
-        env_json_file = builddir / "envdump.json"
-        env_dict = _parse_json(stdout)
-        with open(env_json_file, "w") as f:
-            json.dump(env_dict, f, indent=4)
-    except Exception as e:
-        locked_print(f"Error writing envdump.json: {e}")
-
+        formatted = json.dumps(json.loads(stdout), indent=4, sort_keys=True)
+        with open(matadata_json, "w") as f:
+            f.write(formatted)
+    except Exception:
+        with open(matadata_json, "w") as f:
+            f.write(stdout)
     return True, stdout
