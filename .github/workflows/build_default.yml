@@ -1,0 +1,27 @@
+name: clone and compile
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install PlatformIO build dependencies
+        run: |
+          pip install .
+
+      - name: Build Default Board
+        run: platformio run

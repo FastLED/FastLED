@@ -1,0 +1,16 @@
+name: esp32h2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32-h2-devkitm-1
+
+
+

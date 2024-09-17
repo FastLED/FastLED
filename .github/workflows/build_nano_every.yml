@@ -1,0 +1,13 @@
+name: nano_every
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: nano_every

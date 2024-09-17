@@ -1,0 +1,13 @@
+name: esp32_i2s_ws2812
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: esp32dev_i2s --defines FASTLED_ESP32_I2S --examples EspI2SDemo

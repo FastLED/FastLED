@@ -1,0 +1,17 @@
+name: nrf52840_sense
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: adafruit_feather_nrf52840_sense

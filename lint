@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+cd "$(dirname "$0")"
+
+# Linting the python code.
+echo "Running ruff check"
+uv run ruff check --fix ci --exclude ci/tmp/
+echo Running black
+black ci --exclude ci/tmp/
+echo Running isort
+isort --profile black ci --skip ci/tmp/
+echo "Running mypy"
+uv run mypy ci --exclude ci/tmp/
+
+
+# Linting the C++ code.
+folders=(
+    #"src/lib8tion"
+    #"src/platforms/stub"
+    #"src/platforms/apollo3"  # clang-format breaks apollo3
+    #"src/platforms/esp/8266"  # clang-format breaks esp8266
+    #"src/platforms/arm" # clang-format breaks arm
+)
+
+for folder in "${folders[@]}"; do
+    echo "Running clang-format on $folder"
+    uv run ci/run-clang-format.py -i -r "$folder"
+done

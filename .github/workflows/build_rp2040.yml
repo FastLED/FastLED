@@ -1,0 +1,16 @@
+name: rp2040
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: nanorp2040connect

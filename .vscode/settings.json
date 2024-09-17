@@ -1,0 +1,43 @@
+{
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.profiles.windows": {
+        "Git Bash": {
+            "path": "C:\\Program Files\\Git\\bin\\bash.exe"
+        }
+    },
+    "files.eol": "\n", // Unix
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": true,
+    "editor.formatOnSave": false,
+    "files.associations": {
+        "*.embeddedhtml": "html",
+        "compare": "cpp",
+        "type_traits": "cpp",
+        "cmath": "cpp",
+        "limits": "cpp",
+        "iostream": "cpp",
+        "random": "cpp",
+        "functional": "cpp",
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "optional": "cpp",
+        "iomanip": "cpp",
+        "ios": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp",
+        "streambuf": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp",
+        "new": "cpp",
+        "numeric": "cpp"
+    }
+}

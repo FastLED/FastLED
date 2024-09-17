@@ -1,0 +1,14 @@
+name: esp32s2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: lolin_s2_mini
+

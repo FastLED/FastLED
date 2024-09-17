@@ -42,9 +42,7 @@ protected:
       #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
       ++_retry_cnt;
       #endif
-      os_intr_unlock();
       delayMicroseconds(WAIT_TIME);
-      os_intr_lock();
     }
     mWait.mark();
   }
@@ -52,18 +50,24 @@ protected:
 #define _ESP_ADJ (0)
 #define _ESP_ADJ2 (0)
 
-	template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(register uint32_t & last_mark, register uint32_t b)  {
+	template<int BITS> __attribute__ ((always_inline)) inline static bool writeBits(FASTLED_REGISTER uint32_t & last_mark, FASTLED_REGISTER uint32_t b)  {
     b <<= 24; b = ~b;
-    for(register uint32_t i = BITS; i > 0; --i) {
-      while((__clock_cycles() - last_mark) < (T1+T2+T3));
-			last_mark = __clock_cycles();
+    for(FASTLED_REGISTER uint32_t i = BITS; i > 0; --i) {
+      while((__clock_cycles() - last_mark) < (T1+T2+T3)) {
+            ;
+      }
+      last_mark = __clock_cycles();
       FastPin<DATA_PIN>::hi();
 
-      while((__clock_cycles() - last_mark) < T1);
+      while((__clock_cycles() - last_mark) < T1) {
+            ;
+      }
       if(b & 0x80000000L) { FastPin<DATA_PIN>::lo(); }
       b <<= 1;
 
-      while((__clock_cycles() - last_mark) < (T1+T2));
+      while((__clock_cycles() - last_mark) < (T1+T2)) {
+            ;
+      }
       FastPin<DATA_PIN>::lo();
 
 			// even with interrupts disabled, the NMI interupt seems to cause
@@ -78,23 +82,35 @@ protected:
 		return false;
 	}
 
-	// This method is made static to force making register Y available to use for data on AVR - if the method is non-static, then
-	// gcc will use register Y for the this pointer.
-	static uint32_t ICACHE_RAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
+
+	static uint32_t IRAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
-		register uint32_t b = pixels.loadAndScale0();
-    pixels.preStepFirstByteDithering();
+		FASTLED_REGISTER uint32_t b = pixels.loadAndScale0();
+		pixels.preStepFirstByteDithering();
 		uint32_t start;
-		{
-			struct Lock {
-				Lock() {
-					os_intr_lock();
-				}
-				~Lock() {
-					os_intr_unlock();
-				}
-			};
+		
+		// This function has multiple exits, so we'll use an object
+		// with a destructor that releases the interrupt lock, regardless
+		// of how we exit the function.  It also has methods for manually
+		// unlocking and relocking interrupts temporarily.
+		struct InterruptLock {
+			InterruptLock() {
+				os_intr_lock();
+			}
+			~InterruptLock() {
+				os_intr_unlock();
+			}
+			void Unlock() {
+				os_intr_unlock();
+			}
+			void Lock() {
+				os_intr_lock();
+			}
+		};
+
+		{ // Start of interrupt-locked block
+			InterruptLock intlock;
 
 			start = __clock_cycles();
 			uint32_t last_mark = start;
@@ -117,14 +133,14 @@ protected:
 				}
 
 				#if (FASTLED_ALLOW_INTERRUPTS == 1)
-				os_intr_unlock();
+				intlock.Unlock();
 				#endif
 
 				b = pixels.advanceAndLoadAndScale0();
 				pixels.stepDithering();
 
 				#if (FASTLED_ALLOW_INTERRUPTS == 1)
-				os_intr_lock();
+				intlock.Lock();
 				// if interrupts took longer than 45µs, punt on the current frame
 				if((int32_t)(__clock_cycles()-last_mark) > 0) {
 					if((int32_t)(__clock_cycles()-last_mark) > (T1+T2+T3+((WAIT_TIME-INTERRUPT_THRESHOLD)*CLKS_PER_US))) {
@@ -133,7 +149,7 @@ protected:
 				}
 				#endif
 			};
-		}
+		}  // End of interrupt-locked block
 
     #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
     ++_frame_cnt;

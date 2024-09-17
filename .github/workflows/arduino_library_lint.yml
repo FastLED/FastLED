@@ -1,0 +1,15 @@
+# https://github.com/arduino/arduino-lint-action?tab=readme-ov-file
+
+on: [push, pull_request]
+name: Arduino Library Lint
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/arduino-lint-action@v1
+        with:
+          library-manager: update
+          compliance: strict
+          project-type: library
+          verbose: true

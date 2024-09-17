@@ -1,6 +1,9 @@
 #define FASTLED_INTERNAL
 #define __PROG_TYPES_COMPAT__
 
+/// @file colorutils.cpp
+/// Utility functions for color fill, palettes, blending, and more
+
 #include <stdint.h>
 #include <math.h>
 
@@ -10,19 +13,19 @@ FASTLED_NAMESPACE_BEGIN
 
 
 
-void fill_solid( struct CRGB * leds, int numToFill,
+void fill_solid( struct CRGB * targetArray, int numToFill,
                  const struct CRGB& color)
 {
     for( int i = 0; i < numToFill; ++i) {
-        leds[i] = color;
+        targetArray[i] = color;
     }
 }
 
 void fill_solid( struct CHSV * targetArray, int numToFill,
-                 const struct CHSV& hsvColor)
+                 const struct CHSV& color)
 {
     for( int i = 0; i < numToFill; ++i) {
-        targetArray[i] = hsvColor;
+        targetArray[i] = color;
     }
 }
 
@@ -33,7 +36,7 @@ void fill_solid( struct CHSV * targetArray, int numToFill,
 // 	fill_solid<CRGB>( targetArray, numToFill, (CRGB) hsvColor);
 // }
 
-void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
+void fill_rainbow( struct CRGB * targetArray, int numToFill,
                   uint8_t initialhue,
                   uint8_t deltahue )
 {
@@ -42,7 +45,7 @@ void fill_rainbow( struct CRGB * pFirstLED, int numToFill,
     hsv.val = 255;
     hsv.sat = 240;
     for( int i = 0; i < numToFill; ++i) {
-        pFirstLED[i] = hsv;
+        targetArray[i] = hsv;
         hsv.hue += deltahue;
     }
 }
@@ -58,6 +61,47 @@ void fill_rainbow( struct CHSV * targetArray, int numToFill,
     for( int i = 0; i < numToFill; ++i) {
         targetArray[i] = hsv;
         hsv.hue += deltahue;
+    }
+}
+
+
+void fill_rainbow_circular(struct CRGB* targetArray, int numToFill, uint8_t initialhue, bool reversed)
+{
+    if (numToFill == 0) return;  // avoiding div/0
+
+    CHSV hsv;
+    hsv.hue = initialhue;
+    hsv.val = 255;
+    hsv.sat = 240;
+
+    const uint16_t hueChange = 65535 / (uint16_t)numToFill;  // hue change for each LED, * 256 for precision (256 * 256 - 1)
+    uint16_t hueOffset = 0;  // offset for hue value, with precision (*256)
+
+    for (int i = 0; i < numToFill; ++i) {
+        targetArray[i] = hsv;
+        if (reversed) hueOffset -= hueChange;
+        else hueOffset += hueChange;
+        hsv.hue = initialhue + (uint8_t)(hueOffset >> 8);  // assign new hue with precise offset (as 8-bit)
+    }
+}
+
+void fill_rainbow_circular(struct CHSV* targetArray, int numToFill, uint8_t initialhue, bool reversed)
+{
+    if (numToFill == 0) return;  // avoiding div/0
+
+    CHSV hsv;
+    hsv.hue = initialhue;
+    hsv.val = 255;
+    hsv.sat = 240;
+
+    const uint16_t hueChange = 65535 / (uint16_t) numToFill;  // hue change for each LED, * 256 for precision (256 * 256 - 1)
+    uint16_t hueOffset = 0;  // offset for hue value, with precision (*256)
+
+    for (int i = 0; i < numToFill; ++i) {
+        targetArray[i] = hsv;
+        if (reversed) hueOffset -= hueChange;
+        else hueOffset += hueChange;
+        hsv.hue = initialhue + (uint8_t)(hueOffset >> 8);  // assign new hue with precise offset (as 8-bit)
     }
 }
 
@@ -197,6 +241,8 @@ void fade_raw( CRGB* leds, uint16_t num_leds, uint8_t fadeBy)
     nscale8( leds, num_leds, 255 - fadeBy);
 }
 
+/// Unused alias of nscale8(CRGB*, uint16_t, uint8_t)
+/// @todo Remove this or add a declaration? This is not listed in the colorutils.h header.
 void nscale8_raw( CRGB* leds, uint16_t num_leds, uint8_t scale)
 {
     nscale8( leds, num_leds, scale);
@@ -362,8 +408,8 @@ CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fra
 
 
 
-// Forward declaration of the function "XY" which must be provided by
-// the application for use in two-dimensional filter functions.
+/// Forward declaration of the function "XY" which must be provided by
+/// the application for use in two-dimensional filter functions.
 uint16_t XY( uint8_t, uint8_t);// __attribute__ ((weak));
 
 
@@ -500,10 +546,10 @@ CRGB HeatColor( uint8_t temperature)
 }
 
 
-// lsrX4: helper function to divide a number by 16, aka four LSR's.
-// On avr-gcc, "u8 >> 4" generates a loop, which is big, and slow.
-// merely forcing it to be four /=2's causes avr-gcc to emit
-// a SWAP instruction followed by an AND 0x0F, which is faster, and smaller.
+/// Helper function to divide a number by 16, aka four logical shift right (LSR)'s. 
+/// On avr-gcc, "u8 >> 4" generates a loop, which is big, and slow.
+/// merely forcing it to be four /=2's causes avr-gcc to emit
+/// a SWAP instruction followed by an AND 0x0F, which is faster, and smaller.
 inline uint8_t lsrX4( uint8_t dividend) __attribute__((always_inline));
 inline uint8_t lsrX4( uint8_t dividend)
 {
@@ -518,9 +564,57 @@ inline uint8_t lsrX4( uint8_t dividend)
     return dividend;
 }
 
+CRGB ColorFromPaletteExtended(const CRGBPalette32& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
+  // Extract the five most significant bits of the index as a palette index.
+  uint8_t index_5bit = (index >> 11);
+  // Calculate the 8-bit offset from the palette index.
+  uint8_t offset = (uint8_t)(index >> 3);
+  // Get the palette entry from the 5-bit index
+  const CRGB* entry = &(pal[0]) + index_5bit;
+  uint8_t red1   = entry->red;
+  uint8_t green1 = entry->green;
+  uint8_t blue1  = entry->blue;
+
+  uint8_t blend = offset && (blendType != NOBLEND);
+  if (blend) {
+    if (index_5bit == 31) {
+      entry = &(pal[0]);
+    } else {
+      entry++;
+    }
+
+    // Calculate the scaling factor and scaled values for the lower palette value.
+    uint8_t f1 = 255 - offset;
+    red1   = scale8_LEAVING_R1_DIRTY(red1,   f1);
+    green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
+    blue1  = scale8_LEAVING_R1_DIRTY(blue1,  f1);
+
+    // Calculate the scaled values for the neighbouring palette value.
+    uint8_t red2   = entry->red;
+    uint8_t green2 = entry->green;
+    uint8_t blue2  = entry->blue;
+    red2   = scale8_LEAVING_R1_DIRTY(red2,   offset);
+    green2 = scale8_LEAVING_R1_DIRTY(green2, offset);
+    blue2  = scale8_LEAVING_R1_DIRTY(blue2,  offset);
+    cleanup_R1();
+
+    // These sums can't overflow, so no qadd8 needed.
+    red1   += red2;
+    green1 += green2;
+    blue1  += blue2;
+  }
+  if (brightness != 255) {
+    nscale8x3_video(red1, green1, blue1, brightness);
+  }
+  return CRGB(red1, green1, blue1);
+}
 
 CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
+   if ( blendType == LINEARBLEND_NOWRAP) {
+     index = map8(index, 0, 239);  // Blend range is affected by lo4 blend of values, remap to avoid wrapping
+   }
+
     //      hi4 = index >> 4;
     uint8_t hi4 = lsrX4(index);
     uint8_t lo4 = index & 0x0F;
@@ -604,8 +698,58 @@ CRGB ColorFromPalette( const CRGBPalette16& pal, uint8_t index, uint8_t brightne
     return CRGB( red1, green1, blue1);
 }
 
+CRGB ColorFromPaletteExtended(const CRGBPalette16& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
+  // Extract the four most significant bits of the index as a palette index.
+  uint8_t index_4bit = index >> 12;
+  // Calculate the 8-bit offset from the palette index.
+  uint8_t offset = (uint8_t)(index >> 4);
+  // Get the palette entry from the 4-bit index
+  const CRGB* entry = &(pal[0]) + index_4bit;
+  uint8_t red1   = entry->red;
+  uint8_t green1 = entry->green;
+  uint8_t blue1  = entry->blue;
+
+  uint8_t blend = offset && (blendType != NOBLEND);
+  if (blend) {
+    if (index_4bit == 15) {
+      entry = &(pal[0]);
+    } else {
+      entry++;
+    }
+
+    // Calculate the scaling factor and scaled values for the lower palette value.
+    uint8_t f1 = 255 - offset;
+    red1   = scale8_LEAVING_R1_DIRTY(red1,   f1);
+    green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
+    blue1  = scale8_LEAVING_R1_DIRTY(blue1,  f1);
+
+    // Calculate the scaled values for the neighbouring palette value.
+    uint8_t red2   = entry->red;
+    uint8_t green2 = entry->green;
+    uint8_t blue2  = entry->blue;
+    red2   = scale8_LEAVING_R1_DIRTY(red2,   offset);
+    green2 = scale8_LEAVING_R1_DIRTY(green2, offset);
+    blue2  = scale8_LEAVING_R1_DIRTY(blue2,  offset);
+    cleanup_R1();
+
+    // These sums can't overflow, so no qadd8 needed.
+    red1   += red2;
+    green1 += green2;
+    blue1  += blue2;
+  }
+  if (brightness != 255) {
+    // nscale8x3_video(red1, green1, blue1, brightness);
+    nscale8x3(red1, green1, blue1, brightness);
+  }
+  return CRGB(red1, green1, blue1);
+}
+
 CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
+   if ( blendType == LINEARBLEND_NOWRAP) {
+     index = map8(index, 0, 239);  // Blend range is affected by lo4 blend of values, remap to avoid wrapping
+   }
+
     //      hi4 = index >> 4;
     uint8_t hi4 = lsrX4(index);
     uint8_t lo4 = index & 0x0F;
@@ -685,6 +829,10 @@ CRGB ColorFromPalette( const TProgmemRGBPalette16& pal, uint8_t index, uint8_t b
 
 CRGB ColorFromPalette( const CRGBPalette32& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
+   if ( blendType == LINEARBLEND_NOWRAP) {
+     index = map8(index, 0, 247);  // Blend range is affected by lo3 blend of values, remap to avoid wrapping
+   }
+
     uint8_t hi5 = index;
 #if defined(__AVR__)
     hi5 /= 2;
@@ -776,6 +924,10 @@ CRGB ColorFromPalette( const CRGBPalette32& pal, uint8_t index, uint8_t brightne
 
 CRGB ColorFromPalette( const TProgmemRGBPalette32& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
+   if ( blendType == LINEARBLEND_NOWRAP) {
+     index = map8(index, 0, 247);  // Blend range is affected by lo3 blend of values, remap to avoid wrapping
+   }
+
     uint8_t hi5 = index;
 #if defined(__AVR__)
     hi5 /= 2;
@@ -878,9 +1030,60 @@ CRGB ColorFromPalette( const CRGBPalette256& pal, uint8_t index, uint8_t brightn
     return CRGB( red, green, blue);
 }
 
+CRGB ColorFromPaletteExtended(const CRGBPalette256& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
+  // Extract the eight most significant bits of the index as a palette index.
+  uint8_t index_8bit = index >> 8;
+  // Calculate the 8-bit offset from the palette index.
+  uint8_t offset = index & 0xff;
+  // Get the palette entry from the 8-bit index
+  const CRGB* entry = &(pal[0]) + index_8bit;
+  uint8_t red1   = entry->red;
+  uint8_t green1 = entry->green;
+  uint8_t blue1  = entry->blue;
 
-CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
+  uint8_t blend = offset && (blendType != NOBLEND);
+  if (blend) {
+    if (index_8bit == 255) {
+      entry = &(pal[0]);
+    } else {
+      entry++;
+    }
+
+    // Calculate the scaling factor and scaled values for the lower palette value.
+    uint8_t f1 = 255 - offset;
+    red1   = scale8_LEAVING_R1_DIRTY(red1,   f1);
+    green1 = scale8_LEAVING_R1_DIRTY(green1, f1);
+    blue1  = scale8_LEAVING_R1_DIRTY(blue1,  f1);
+
+    // Calculate the scaled values for the neighbouring palette value.
+    uint8_t red2   = entry->red;
+    uint8_t green2 = entry->green;
+    uint8_t blue2  = entry->blue;
+    red2   = scale8_LEAVING_R1_DIRTY(red2,   offset);
+    green2 = scale8_LEAVING_R1_DIRTY(green2, offset);
+    blue2  = scale8_LEAVING_R1_DIRTY(blue2,  offset);
+    cleanup_R1();
+
+    // These sums can't overflow, so no qadd8 needed.
+    red1   += red2;
+    green1 += green2;
+    blue1  += blue2;
+  }
+  if (brightness != 255) {
+    // nscale8x3_video(red1, green1, blue1, brightness);
+    nscale8x3(red1, green1, blue1, brightness);
+  }
+  return CRGB(red1, green1, blue1);
+}
+
+
+
+CHSV ColorFromPalette( const CHSVPalette16& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
+   if ( blendType == LINEARBLEND_NOWRAP) {
+     index = map8(index, 0, 239);  // Blend range is affected by lo4 blend of values, remap to avoid wrapping
+   }
+
     //      hi4 = index >> 4;
     uint8_t hi4 = lsrX4(index);
     uint8_t lo4 = index & 0x0F;
@@ -963,8 +1166,12 @@ CHSV ColorFromPalette( const struct CHSVPalette16& pal, uint8_t index, uint8_t b
 }
 
 
-CHSV ColorFromPalette( const struct CHSVPalette32& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
+CHSV ColorFromPalette( const CHSVPalette32& pal, uint8_t index, uint8_t brightness, TBlendType blendType)
 {
+   if ( blendType == LINEARBLEND_NOWRAP) {
+     index = map8(index, 0, 247);  // Blend range is affected by lo3 blend of values, remap to avoid wrapping
+   }
+
     uint8_t hi5 = index;
 #if defined(__AVR__)
     hi5 /= 2;
@@ -1052,7 +1259,7 @@ CHSV ColorFromPalette( const struct CHSVPalette32& pal, uint8_t index, uint8_t b
     return CHSV( hue1, sat1, val1);
 }
 
-CHSV ColorFromPalette( const struct CHSVPalette256& pal, uint8_t index, uint8_t brightness, TBlendType)
+CHSV ColorFromPalette( const CHSVPalette256& pal, uint8_t index, uint8_t brightness, TBlendType)
 {
     CHSV hsv = *( &(pal[0]) + index );
 

@@ -1,3 +1,7 @@
+/// @file    RGBSetDemo.ino
+/// @brief   Demonstrates how to create an LED group with CRGBArray
+/// @example RGBSetDemo.ino
+
 #include <FastLED.h>
 #define NUM_LEDS 40
 

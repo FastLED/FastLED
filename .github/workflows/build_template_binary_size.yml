@@ -1,0 +1,76 @@
+name: Build Template
+
+on:
+  workflow_call:
+    inputs:
+      board:
+        type: string
+        required: true
+      max_size:
+        type: number
+        required: true
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install UV
+        run: pip install uv
+
+      - name: Compile Board and Output Size
+        run: uv run ci/compiled_size.py --board ${{ inputs.board }} --num-commits 1
+
+      - name: Check Compiled Program Size for ${{ inputs.board }} is less than the limit of ${{ inputs.max_size }}
+        run: |
+          cd ci && python -c "
+          import csv
+          import sys
+
+          board = '${{ inputs.board }}'
+          
+          with open('firmware_sizes.csv', 'r') as f:
+              reader = csv.reader(f)
+              next(reader)  # Skip the header row
+              first_data_row = next(reader)  # Get the first data row
+              size = int(first_data_row[2])
+          
+          if size > ${{ inputs.max_size }}:
+              print(f'{board} size {size} is greater than max size ${{ inputs.max_size }}')
+              sys.exit(1)
+          else:
+              print(f'{board} size {size} is within the limit of ${{ inputs.max_size }}')
+          "
+
+
+      - name: Generate timestamp and random hex
+        id: generate_id
+        run: |
+          echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+          echo "random_hex=$(openssl rand -hex 3)" >> $GITHUB_OUTPUT
+
+      - name: Upload build artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
+          path: ci/firmware_sizes.csv
+          include-hidden-files: true
+
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
+          path: build.log
+
+      - name: Check build status
+        if: failure()
+        run: exit 1

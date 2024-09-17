@@ -1,0 +1,4 @@
+#!/bin/bash
+
+set -e
+uv run ci/ci-compile-native.py

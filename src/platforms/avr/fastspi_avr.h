@@ -125,7 +125,7 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(register uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		//setSPIRate();
 		uint8_t *end = data + len;
 		select();
@@ -136,11 +136,11 @@ public:
 		release();
 	}
 
-	void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -271,7 +271,7 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(register uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		//setSPIRate();
 		uint8_t *end = data + len;
 		select();
@@ -282,11 +282,11 @@ public:
 		release();
 	}
 
-	void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -432,7 +432,7 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(register uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		//setSPIRate();
 		uint8_t *end = data + len;
 		select();
@@ -443,11 +443,11 @@ public:
 		release();
 	}
 
-	void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -612,7 +612,7 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(register uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		//setSPIRate();
 		uint8_t *end = data + len;
 		select();
@@ -623,11 +623,11 @@ public:
 		release();
 	}
 
-	void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -790,7 +790,7 @@ public:
 	}
 
 	// Write a block of n uint8_ts out
-	template <class D> void writeBytes(register uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		//setSPIRate();
 		uint8_t *end = data + len;
 		select();
@@ -801,11 +801,11 @@ public:
 		release();
 	}
 
-	void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
 		//setSPIRate();
 		int len = pixels.mLen;
 

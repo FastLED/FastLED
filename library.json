@@ -27,17 +27,23 @@
             "name": "Josh Huber",
             "url": "https://github.com/uberjay",
             "maintainer": true
+        },
+        {
+            "name": "Zach Vorhies",
+            "url": "https://github.com/zackees",
+            "maintainer": true
         }
     ],
     "repository": {
         "type": "git",
         "url": "https://github.com/FastLED/FastLED.git"
     },
-    "version": "3.4.0",
+    "version": "3.7.7",
     "license": "MIT",
     "homepage": "http://fastled.io",
     "frameworks": "arduino",
     "platforms": "atmelavr, atmelsam, freescalekinetis, nordicnrf51, nxplpc, ststm32, teensy, espressif8266, espressif32, nordicnrf52",
+    "headers": "FastLED.h",
     "export": {
         "exclude": [
             "docs",
@@ -49,7 +55,7 @@
             "+<*.c>",
             "+<*.cpp>",
             "+<*.h>",
-            "+<platforms/esp/32/*.cpp>"
+            "+<platforms/esp/32/**/*.cpp>"
         ],
         "libArchive": false
     }

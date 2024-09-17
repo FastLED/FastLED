@@ -3,6 +3,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+#include <SPI.h>
+
 /*
  * ESP32 Hardware SPI Driver
  *
@@ -45,37 +47,61 @@ FASTLED_NAMESPACE_BEGIN
  * THE SOFTWARE.
  */
 
-#ifndef FASTLED_ESP32_SPI_BUS
-    #define FASTLED_ESP32_SPI_BUS VSPI
+#include<SPI.h>
+
+// Conditional compilation for ESP32-S3 to utilize its flexible SPI capabilities
+#if CONFIG_IDF_TARGET_ESP32S3
+	#pragma message "Targeting ESP32S3, which has better SPI support. Configuring for flexible pin assignment."
+	#undef FASTLED_ESP32_SPI_BUS
+	// I *think* we have to "fake" being FSPI... there might be a better way to do this.
+	// whatever the case, this "tricks" the pin assignment defines below into using DATA_PIN & CLOCK_PIN
+	#define FASTLED_ESP32_SPI_BUS FSPI
+#else // Configuration for other ESP32 variants
+	#ifndef FASTLED_ESP32_SPI_BUS
+	#pragma message "Setting ESP32 SPI bus to VSPI by default"
+	#define FASTLED_ESP32_SPI_BUS VSPI
+	#endif
 #endif
 
-SPIClass ledSPI(FASTLED_ESP32_SPI_BUS);
-
 #if FASTLED_ESP32_SPI_BUS == VSPI
-    static uint8_t spiClk = 18;
-    static uint8_t spiMiso = 19;
-    static uint8_t spiMosi = 23;
-    static uint8_t spiCs = 5;
+    static int8_t spiClk = 18;
+    static int8_t spiMiso = 19;
+    static int8_t spiMosi = 23;
+    static int8_t spiCs = 5;
 #elif FASTLED_ESP32_SPI_BUS == HSPI
-    static uint8_t spiClk = 14;
-    static uint8_t spiMiso = 12;
-    static uint8_t spiMosi = 13;
-    static uint8_t spiCs = 15;
+    static int8_t spiClk = 14;
+    static int8_t spiMiso = 12;
+    static int8_t spiMosi = 13;
+    static int8_t spiCs = 15;
+#elif FASTLED_ESP32_SPI_BUS == FSPI  // ESP32S2 can re-route to arbitrary pins
+    #define spiMosi DATA_PIN
+    #define spiClk CLOCK_PIN
+    #define spiMiso -1
+    #define spiCs -1
 #endif
 
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class ESP32SPIOutput {
+    SPIClass m_ledSPI;
 	Selectable 	*m_pSelect;
 
 public:
-	ESP32SPIOutput() { m_pSelect = NULL; }
-	ESP32SPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
+	// Verify that the pins are valid
+	static_assert(FastPin<DATA_PIN>::validpin(), "Invalid data pin specified");
+	static_assert(FastPin<CLOCK_PIN>::validpin(), "Invalid clock pin specified");
+
+	ESP32SPIOutput() :
+	  m_ledSPI(FASTLED_ESP32_SPI_BUS),
+	  m_pSelect(nullptr) {}
+	ESP32SPIOutput(Selectable *pSelect) :
+	  m_ledSPI(FASTLED_ESP32_SPI_BUS),
+	  m_pSelect(pSelect) {}
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
 	void init() {
 		// set the pins to output and make sure the select is released (which apparently means hi?  This is a bit
 		// confusing to me)
-		ledSPI.begin(spiClk, spiMiso, spiMosi, spiCs);
+		m_ledSPI.begin(spiClk, spiMiso, spiMosi, spiCs);
 		release();
 	}
 
@@ -86,14 +112,17 @@ public:
 	static void wait() __attribute__((always_inline)) { }
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
-	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); }
-	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); wait(); }
+	void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); }
+	void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); wait(); }
 
-	static void writeWord(uint16_t w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	void writeWord(uint16_t w) __attribute__((always_inline)) {
+		writeByte(static_cast<uint8_t>(w>>8));
+		writeByte(static_cast<uint8_t>(w&0xFF));
+	}
 
 	// naive writeByte implelentation, simply calls writeBit on the 8 bits in the byte.
-	static void writeByte(uint8_t b) {
-		ledSPI.transfer(b);
+	void writeByte(uint8_t b) {
+		m_ledSPI.transfer(b);
 	}
 
 public:
@@ -101,53 +130,53 @@ public:
 	// select the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move select responsibility out of the SPI classes
 	// entirely, make it up to the caller to remember to lock/select the line?)
 	void select() { 
-		ledSPI.beginTransaction(SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0));
+		m_ledSPI.beginTransaction(SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0));
 		if(m_pSelect != NULL) { m_pSelect->select(); } 
 	} 
 
 	// release the SPI line
 	void release() { 
 		if(m_pSelect != NULL) { m_pSelect->release(); } 
-		ledSPI.endTransaction();
+		m_ledSPI.endTransaction();
 	}
 
-	// Write out len bytes of the given value out over ledSPI.  Useful for quickly flushing, say, a line of 0's down the line.
+	// Write out len bytes of the given value out over m_ledSPI.  Useful for quickly flushing, say, a line of 0's down the line.
 	void writeBytesValue(uint8_t value, int len) {
 		select();
 		writeBytesValueRaw(value, len);
 		release();
 	}
 
-	static void writeBytesValueRaw(uint8_t value, int len) {
+	void writeBytesValueRaw(uint8_t value, int len) {
 		while(len--) {
-			ledSPI.transfer(value); 
+			m_ledSPI.transfer(value); 
 		}
 	}
 
 	// write a block of len uint8_ts out.  Need to type this better so that explicit casts into the call aren't required.
 	// note that this template version takes a class parameter for a per-byte modifier to the data.
-	template <class D> void writeBytes(register uint8_t *data, int len) {
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
 		select();
 		uint8_t *end = data + len;
 		while(data != end) {
 			writeByte(D::adjust(*data++));
 		}
-		D::postBlock(len);
+		D::postBlock(len, &m_ledSPI);
 		release();
 	}
 
 	// default version of writing a block of data out to the SPI port, with no data modifications being made
-	void writeBytes(register uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline void writeBit(uint8_t b) {
-		ledSPI.transfer(b);
+		m_ledSPI.transfer(b);
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context) {
 		select();
 		int len = pixels.mLen;
 		while(pixels.has(1)) {
@@ -160,7 +189,7 @@ public:
 			pixels.advanceData();
 			pixels.stepDithering();
 		}
-		D::postBlock(len);
+		D::postBlock(len, context);
 		release();
 	}
 };
