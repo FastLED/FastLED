@@ -38,6 +38,7 @@ jobs:
         shell: bash
 
       - name: Print out build_info.json
+        if: always()
         run: |
           build_info=$(find . -name build_info.json)
           if [ -f "$build_info" ]; then
@@ -45,7 +46,10 @@ jobs:
           else
             echo "build_info.json not found"
           fi
-        if: always()
+
+      - name: CPP Check
+        run: |
+          pio check --skip-packages --src-filters="+<lib/src/>" --src-filters="-<lib/src/platforms/>" --severity=high --fail-on-defect=high
 
       - name: Generate timestamp and random hex
         id: generate_id
