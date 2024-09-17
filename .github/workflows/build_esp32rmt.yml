@@ -10,4 +10,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: esp32-s3-devkitc-1 --examples Esp32Rmt51 --defines "FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN=1,FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE=1"
+      args: esp32-s3-rmt51 --examples Esp32Rmt51
