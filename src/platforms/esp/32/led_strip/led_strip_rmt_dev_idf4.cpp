@@ -4,11 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
+#ifdef ESP32
 
 #include "enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN!=1
+#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
 #include "esp_idf_version.h"
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
@@ -225,3 +225,5 @@ err:
 #endif  // ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
 
 #endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+
+#endif  // ESP32
