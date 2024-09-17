@@ -35,7 +35,7 @@ def _install_global_package(package: str) -> None:
 
 def insert_tool_aliases(meta_json: dict[str, dict]) -> None:
     for board in meta_json.keys():
-        aliases: dict[str, str] = {}
+        aliases: dict[str, str | None] = {}
         cc_path = meta_json[board].get("cc_path")
         cc_path = Path(cc_path) if cc_path else None
         if cc_path:
@@ -45,11 +45,25 @@ def insert_tool_aliases(meta_json: dict[str, dict]) -> None:
             prefix = cc_base.split("gcc")[0]
             suffix = cc_path.suffix
             # create the aliases
-            for tool in ["gcc", "g++", "ar", "objcopy", "objdump", "size", "nm"]:
+            for tool in [
+                "gcc",
+                "g++",
+                "ar",
+                "objcopy",
+                "objdump",
+                "size",
+                "nm",
+                "ld",
+                "as",
+                "ranlib",
+                "strip",
+            ]:
                 name = f"{prefix}{tool}" + suffix
                 tool_path = Path(str(parent / name))
                 if tool_path.exists():
                     aliases[tool] = str(tool_path)
+                else:
+                    aliases[tool] = None
         meta_json[board]["aliases"] = aliases
 
 
