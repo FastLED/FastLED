@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
@@ -23,5 +26,5 @@ jobs:
         run: |
           pip install .
 
-      - name: Build Default Board
+      - name: Build Root projectio
         run: platformio run
