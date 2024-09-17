@@ -34,6 +34,12 @@
 
 #pragma once
 
+
+#include "led_strip/enabled.h"
+
+#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN!=1
+
+
 #include "idf4_rmt.h"
 #include "FastLED.h"
 #include "esp_idf_version.h"
@@ -102,3 +108,5 @@ protected:
 };
 
 FASTLED_NAMESPACE_END
+
+#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN

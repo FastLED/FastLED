@@ -8,7 +8,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN!=1
 
 #include "esp_idf_version.h"
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
