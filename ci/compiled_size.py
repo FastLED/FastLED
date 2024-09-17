@@ -32,7 +32,9 @@ def check_firmware_size(board: str) -> int:
     root_build_dir = Path(".build") / board
     build_info_json = root_build_dir / "build_info.json"
     build_info = json.loads(build_info_json.read_text())
-    prog_path = Path(build_info["prog_path"])
+    board_info = build_info.get(board)
+    assert board_info, f"Board {board} not found in {build_info_json}"
+    prog_path = Path(board_info["prog_path"])
     base_path = prog_path.parent
     suffixes = [".bin", ".hex", ".uf2"]
     firmware: Path
@@ -86,8 +88,7 @@ def main(
 
     if os.path.exists("tmp"):
         shutil.rmtree("tmp")
-
-    os.makedirs("tmp")
+    os.makedirs("tmp", exist_ok=True)
 
     # Change to the tmp directory
     os.chdir("tmp")
