@@ -2,3 +2,4 @@
 
 set -e
 uv run ci/ci-compile-native.py
+uv run pio check --skip-packages --src-filters="+<src/>"  --severity=medium --fail-on-defect=high --flags --inline-suppr

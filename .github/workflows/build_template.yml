@@ -52,7 +52,7 @@ jobs:
           pip install platformio
           cd .build
           cd $(ls)
-          pio check --skip-packages --src-filters="+<lib/src/>" --src-filters="-<lib/src/platforms/>" --severity=medium --fail-on-defect=high --flags --inline-suppr
+          pio check --skip-packages --src-filters="+<lib/src/>" --severity=medium --fail-on-defect=high --flags --inline-suppr
 
       - name: Generate timestamp and random hex
         id: generate_id

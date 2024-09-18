@@ -139,6 +139,8 @@ public:
     // stream encoding).
     static void init(int pin, bool built_in_driver);
     RmtController() = delete;
+    RmtController(RmtController &&) = delete;
+    RmtController &operator=(const RmtController &) = delete;
     RmtController(const RmtController &) = delete;
     RmtController(
         int DATA_PIN,

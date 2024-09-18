@@ -61,7 +61,8 @@ typedef bool (*hasFunction)(void* pixel_controller, int n);
 class PixelIterator {
   public:
     template<typename PixelControllerT>
-    PixelIterator(PixelControllerT* pc, Rgbw rgbw) : mPixelController(pc), mRgbw(rgbw) { // cppcheck-suppress uninitMemberVar
+    PixelIterator(PixelControllerT* pc, Rgbw rgbw)
+         : mPixelController(pc), mRgbw(rgbw) {
       // manually build up a vtable.
       typedef PixelControllerVtable<PixelControllerT> Vtable;
       mLoadAndScaleRGBW = &Vtable::loadAndScaleRGBW;
@@ -92,15 +93,15 @@ class PixelIterator {
 
   private:
     // vtable emulation
-    void* mPixelController;
+    void* mPixelController = nullptr;
     Rgbw mRgbw;
-    loadAndScaleRGBWFunction mLoadAndScaleRGBW;
-    loadAndScaleRGBFunction mLoadAndScaleRGB;
-    loadAndScale_APA102_HDFunction mLoadAndScale_APA102_HD;
-    stepDitheringFunction mStepDithering;
-    advanceDataFunction mAdvanceData;
-    sizeFunction mSize;
-    hasFunction mHas;
+    loadAndScaleRGBWFunction mLoadAndScaleRGBW = nullptr;
+    loadAndScaleRGBFunction mLoadAndScaleRGB = nullptr;
+    loadAndScale_APA102_HDFunction mLoadAndScale_APA102_HD = nullptr;
+    stepDitheringFunction mStepDithering = nullptr;
+    advanceDataFunction mAdvanceData = nullptr;
+    sizeFunction mSize = nullptr;
+    hasFunction mHas = nullptr;
 };
 
 
