@@ -186,7 +186,7 @@ ALL: list[Board] = [
     NANO_EVERY,
     XIAOBLESENSE_ADAFRUIT_NRF52,
     ESP32S3_RMT51,
-    BLUEPILL
+    BLUEPILL,
 ]
 
 
