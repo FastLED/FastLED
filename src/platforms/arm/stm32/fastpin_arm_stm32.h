@@ -2,7 +2,7 @@
 #define __FASTPIN_ARM_STM32_H
 
 #if defined(ARDUINO_BLUEPILL_F103C8)
-#include "fastpin_arm_stm32_bluepill.h"
+#include "fastpin_arm_stm_bluepill.h"
 #else
 // Everything else.
 #include "fastpin_arm_stm_generic.h"
