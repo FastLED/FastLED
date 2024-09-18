@@ -7,79 +7,47 @@ on:
       - master
 
 jobs:
-  get_supported_boards:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Get supported boards
-        run: |
-          echo "Supported boards:"
-          ./compile --supported-boards > supported_boards.txt
-        shell: bash
-      - name: Upload supported boards
-        uses: actions/upload-artifact@v3
-        with:
-          name: supported-boards
-          path: supported_boards.txt
+  build_uno:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "uno"
 
-  build:
-    runs-on: ubuntu-latest
-    needs: get_supported_boards
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      
-      - name: Download supported boards
-        uses: actions/download-artifact@v3
-        with:
-          name: supported-boards
+  build_esp32dev:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "esp32dev"
 
-      - name: Install GitHub CLI
-        run: |
-          type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && sudo apt update \
-          && sudo apt install gh -y
-        shell: bash
+  build_esp01:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "esp01"
 
-      - name: Check supported_boards.txt and trigger builds
-        run: |
-          import os
-          import time
-          import subprocess
+  build_esp32_c3_devkitm_1:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "esp32-c3-devkitm-1"
 
-          def run_command(command):
-              process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
-              output, error = process.communicate()
-              return process.returncode, output, error
+  build_esp32_s3_devkitc_1:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "esp32-s3-devkitc-1"
 
-          if not os.path.exists('supported_boards.txt'):
-              print("Error: supported_boards.txt file not found")
-              exit(1)
+  build_yun:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "yun"
 
-          if os.stat('supported_boards.txt').st_size == 0:
-              print("Error: supported_boards.txt is empty")
-              exit(1)
+  build_digix:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "digix"
 
-          with open('supported_boards.txt', 'r') as f:
-              boards = f.read().strip().split(',')
+  build_teensy30:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "teensy30"
 
-          for board in boards:
-              board = board.strip()
-              if board:
-                  print(f"Building for board: {board}")
-                  command = f"gh workflow run .github/workflows/build_template.yml --ref ${{ github.ref }} --field args=\"{board}\""
-                  returncode, output, error = run_command(command)
-                  if returncode != 0:
-                      print(f"Error triggering workflow for {board}: {error}")
-                      exit(1)
-                  print(output)
-                  time.sleep(5)  # Add a small delay to avoid rate limiting
-
-          print("All builds triggered successfully")
-        shell: python
+  build_teensy41:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "teensy41"
