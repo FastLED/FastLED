@@ -1,8 +1,8 @@
 FastLED 3.7.8
 =============
 * Attiny0/1 (commonly Attiny85) support added.
-  * https://github.com/FastLED/FastLED/pull/1292
-  * Special thanks to https://github.com/ngyl88 for the contribution.
+  * https://github.com/FastLED/FastLED/pull/1292 , https://github.com/FastLED/FastLED/pull/1183 , https://github.com/FastLED/FastLED/pull/1061
+  * Special thanks to [@freemovers](https://github.com/freemovers), [@jasoncoon](https://github.com/jasoncoon), [@ngyl88](https://github.com/ngyl88) for the contribution.
 
 
 FastLED 3.7.7
