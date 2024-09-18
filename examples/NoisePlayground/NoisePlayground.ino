@@ -1,8 +1,17 @@
+
+
+
 /// @file    NoisePlayground.ino
 /// @brief   Demonstrates how to use noise generation on a 2D LED matrix
 /// @example NoisePlayground.ino
 
 #include <FastLED.h>
+
+#if defined(__AVR_ATtiny85__)
+// too large for ATtiny85, so skip this.
+void setup() {};
+void loop() {};
+#else
 
 // Params for width and height
 const uint8_t kMatrixWidth = 16;
@@ -77,3 +86,5 @@ void setup() {
   hue_time = (uint32_t)((uint32_t)random16() << 16) + (uint32_t)random16();
 
 }
+
+#endif
