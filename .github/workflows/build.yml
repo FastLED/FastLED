@@ -17,6 +17,11 @@ jobs:
           echo "Supported boards:"
           ./compile --supported-boards > supported_boards.txt
         shell: bash
+      - name: Upload supported boards
+        uses: actions/upload-artifact@v3
+        with:
+          name: supported-boards
+          path: supported_boards.txt
 
   build:
     runs-on: ubuntu-latest
@@ -24,6 +29,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      
+      - name: Download supported boards
+        uses: actions/download-artifact@v3
+        with:
+          name: supported-boards
 
       - name: Read supported boards and trigger builds
         run: |
