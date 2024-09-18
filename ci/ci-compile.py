@@ -33,18 +33,18 @@ DEFAULT_BOARDS_NAMES = [
     "digix",
     "teensy30",
     "teensy41",
-]
-
-OTHER_BOARDS_NAMES = [
     "adafruit_feather_nrf52840_sense",
     "xiaoblesense_adafruit",
     "rpipico",
     "rpipico2",
     "uno_r4_wifi",
-    "nano_every",
     "esp32dev_i2s",
     "esp32-s3-rmt51",
     "esp32dev_idf44",
+]
+
+OTHER_BOARDS_NAMES = [
+    "nano_every",
 ]
 
 # Examples to compile.
