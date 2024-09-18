@@ -7,5 +7,29 @@ on:
       - master
 
 jobs:
+  get_supported_boards:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Get supported boards
+        run: |
+          echo "Supported boards:"
+          ./compile --supported-boards > supported_boards.txt
+        shell: bash
+
   build:
-    uses: ./.github/workflows/build_template.yml
+    runs-on: ubuntu-latest
+    needs: get_supported_boards
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read supported boards and trigger builds
+        run: |
+          while IFS= read -r board; do
+            echo "Building for board: $board"
+            # Call the build_template.yml with the current board as an argument.
+            gh workflow run ./.github/workflows/build_template.yml --field args="$board"
+          done < supported_boards.txt
+        shell: bash
