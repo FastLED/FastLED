@@ -1,8 +1,7 @@
 #ifndef __FASTPIN_ARM_STM32_H
 #define __FASTPIN_ARM_STM32_H
 
-#if defined(ARDUINO_BLUEPILL_F103C8) && 0
-// not implemented yet.
+#if defined(ARDUINO_BLUEPILL_F103C8)
 #include "fastpin_arm_stm32_bluepill.h"
 #else
 // Everything else.
