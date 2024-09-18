@@ -135,6 +135,12 @@ RPI_PICO2 = Board(
     board_build_filesystem_size="0.5m",
 )
 
+BLUEPILL = Board(
+    board_name="bluepill",
+    real_board_name="bluepill_f103c8",
+    platform="ststm32",
+)
+
 UNO_R4_WIFI = Board(
     board_name="uno_r4_wifi",
     platform="renesas-ra",
@@ -180,6 +186,7 @@ ALL: list[Board] = [
     NANO_EVERY,
     XIAOBLESENSE_ADAFRUIT_NRF52,
     ESP32S3_RMT51,
+    BLUEPILL
 ]
 
 
