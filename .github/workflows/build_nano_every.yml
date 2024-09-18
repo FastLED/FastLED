@@ -11,4 +11,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: nano_every --examples Blink
+      args: nano_every --examples Apa102HD
