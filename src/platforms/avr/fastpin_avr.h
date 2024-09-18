@@ -51,8 +51,9 @@ typedef volatile uint8_t & reg8_t;
 #define _R(T) struct __gen_struct_ ## T
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
 
+
 // Register name equivalent (using flat names)
-#if defined(AVR_ATtinyxy7) || defined(AVR_ATtinyxy6) || defined(AVR_ATtinyxy4) || defined(AVR_ATtinyxy2)
+#if defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__)
 
 // ATtiny series 0/1 and ATmega series 0
 #define _FL_IO(L,C) _RD8(PORT ## L ## _DIR); _RD8(PORT ## L ## _OUT); _RD8(PORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(PORT ## L ## _OUT));
@@ -60,16 +61,19 @@ typedef volatile uint8_t & reg8_t;
 
 #elif defined(__AVR_ATmega4809__)
 
-// Leverage VPORTs instead of PORTs for faster access
+// ATmega series 0
+// Optimize Nano Every: Leverage VPORTs instead of PORTs for faster access
 #define _FL_IO(L,C) _RD8(VPORT ## L ## _DIR); _RD8(VPORT ## L ## _OUT); _RD8(VPORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(VPORT ## L ## _OUT));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(VPORT ## L ## _OUT), _R(VPORT ## L ## _DIR), _R(VPORT ## L ## _IN)> {};
 
 #else
 
-// Others
+// Others AVR platforms
 #define _FL_IO(L,C) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L); _FL_DEFINE_PORT3(L, C, _R(PORT ## L));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
+
 #endif
+
 
 // Pre-do all the port definitions
 #ifdef PORTA
@@ -253,6 +257,40 @@ _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D); _FL_DEFPIN(22, 2, A);
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
+#elif defined(__AVR_ATtiny202__) || defined(__AVR_ATtiny204__) || defined(__AVR_ATtiny212__) || defined(__AVR_ATtiny214__)  || defined(__AVR_ATtiny402__) || defined(__AVR_ATtiny404__) || defined(__AVR_ATtiny406__) || defined(__AVR_ATtiny407__) || defined(__AVR_ATtiny412__) || defined(__AVR_ATtiny414__) || defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny417__)
+#pragma message "ATtiny2YZ or ATtiny4YZ have very limited storage. This library could use up to more than 100% of its flash size"
+
+#elif defined(__AVR_ATtinyxy4__)
+#define MAX_PIN 12
+_FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
+_FL_DEFPIN( 4, 3, B); _FL_DEFPIN( 5, 2, B); _FL_DEFPIN( 6, 1, B); _FL_DEFPIN( 7, 0, B); 
+_FL_DEFPIN( 8, 1, A); _FL_DEFPIN( 9, 2, A); _FL_DEFPIN(10, 3, A); _FL_DEFPIN(11, 0, A);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(__AVR_ATtinyxy6__)
+
+#define MAX_PIN 18
+_FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
+_FL_DEFPIN( 4, 5, B); _FL_DEFPIN( 5, 4, B); _FL_DEFPIN( 6, 3, B); _FL_DEFPIN( 7, 2, B);
+_FL_DEFPIN( 8, 1, B); _FL_DEFPIN( 9, 0, B); _FL_DEFPIN(10, 0, C); _FL_DEFPIN(11, 1, C);
+_FL_DEFPIN(12, 2, C); _FL_DEFPIN(13, 3, C); _FL_DEFPIN(14, 1, A); _FL_DEFPIN(15, 2, A);
+_FL_DEFPIN(16, 3, A); _FL_DEFPIN(17, 0, A);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
+#elif defined(__AVR_ATtinyxy7__)
+
+#define MAX_PIN 22
+_FL_DEFPIN( 0, 4, A); _FL_DEFPIN( 1, 5, A); _FL_DEFPIN( 2, 6, A); _FL_DEFPIN( 3, 7, A);
+_FL_DEFPIN( 4, 7, B); _FL_DEFPIN( 5, 6, B); _FL_DEFPIN( 6, 5, B); _FL_DEFPIN( 7, 4, B);
+_FL_DEFPIN( 8, 3, B); _FL_DEFPIN( 9, 2, B); _FL_DEFPIN(10, 1, B); _FL_DEFPIN(11, 0, B);
+_FL_DEFPIN(12, 0, C); _FL_DEFPIN(13, 1, C); _FL_DEFPIN(14, 2, C); _FL_DEFPIN(15, 3, C);
+_FL_DEFPIN(16, 4, C); _FL_DEFPIN(17, 5, C); _FL_DEFPIN(18, 1, A); _FL_DEFPIN(19, 2, A);
+_FL_DEFPIN(20, 3, A); _FL_DEFPIN(21, 0, A);
+
+#define HAS_HARDWARE_PIN_SUPPORT 1
+
 #elif defined(__AVR_ATmega4809__)
 
 #define MAX_PIN 21
@@ -271,6 +309,7 @@ _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D);
 
 //#define SPI_UART0_DATA 1
 //#define SPI_UART0_CLOCK 4
+
 
 #elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328PB__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega8__)
 
