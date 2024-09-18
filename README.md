@@ -60,7 +60,6 @@ void loop() {
 
 
 [![nano_every](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_nano_every.yml)
-This used to work, but a package update broke the pins. See issue https://github.com/FastLED/FastLED/issues/716
 
 
 #### Teensy
