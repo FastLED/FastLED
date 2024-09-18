@@ -52,7 +52,7 @@ jobs:
           while IFS= read -r board || [ -n "$board" ]; do
             if [ -n "$board" ]; then
               echo "Building for board: $board"
-              gh workflow run build_template.yml --ref ${{ github.ref }} --field args="$board"
+              gh workflow run .github/workflows/build_template.yml --ref ${{ github.ref }} --field args="$board"
               sleep 5  # Add a small delay to avoid rate limiting
             fi
           done < supported_boards.txt
