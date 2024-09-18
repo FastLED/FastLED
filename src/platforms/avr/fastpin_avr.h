@@ -53,22 +53,24 @@ typedef volatile uint8_t & reg8_t;
 
 
 // Register name equivalent (using flat names)
-#if defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__)
 
-// ATtiny series 0/1 and ATmega series 0
-#define _FL_IO(L,C) _RD8(PORT ## L ## _DIR); _RD8(PORT ## L ## _OUT); _RD8(PORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(PORT ## L ## _OUT));
-#define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L ## _OUT), _R(PORT ## L ## _DIR), _R(PORT ## L ## _IN)> {};
-
-#elif defined(__AVR_ATmega4809__)
-
-// ATmega series 0
+#if defined(ARDUINO_AVR_NANO_EVERY)
+// This block must be before the elif block of __AVR_ATmega4809__ , because Nano Every is also powered by ATmega4809
 // Optimize Nano Every: Leverage VPORTs instead of PORTs for faster access
+
 #define _FL_IO(L,C) _RD8(VPORT ## L ## _DIR); _RD8(VPORT ## L ## _OUT); _RD8(VPORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(VPORT ## L ## _OUT));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(VPORT ## L ## _OUT), _R(VPORT ## L ## _DIR), _R(VPORT ## L ## _IN)> {};
 
-#else
+#elif defined(__AVR_ATmega4809__) || defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__)
+// ATmega series 0 , excludes Arduino Nano Every which optimised with VPORTs, include boards eg. Arduino Uno Wifi Rev 2 or Rev 3
+// ATtiny series 0/1
 
+#define _FL_IO(L,C) _RD8(PORT ## L ## _DIR); _RD8(PORT ## L ## _OUT); _RD8(PORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(PORT ## L ## _OUT));
+#define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L ## _OUT), _R(PORT ## L ## _DIR), _R(PORT ## L ## _IN)> {};
+
+#else
 // Others AVR platforms
+
 #define _FL_IO(L,C) _RD8(DDR ## L); _RD8(PORT ## L); _RD8(PIN ## L); _FL_DEFINE_PORT3(L, C, _R(PORT ## L));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L), _R(DDR ## L), _R(PIN ## L)> {};
 
