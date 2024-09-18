@@ -51,3 +51,43 @@ jobs:
     uses: ./.github/workflows/build_template.yml
     with:
       args: "teensy41"
+
+  build_adafruit_feather_nrf52840_sense:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "adafruit_feather_nrf52840_sense"
+
+  build_xiaoblesense_adafruit:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "xiaoblesense_adafruit"
+
+  build_rpipico:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "rpipico"
+
+  build_rpipico2:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "rpipico2"
+
+  build_uno_r4_wifi:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "uno_r4_wifi"
+
+  build_esp32dev_i2s:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "esp32dev_i2s"
+
+  build_esp32_s3_rmt51:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "esp32-s3-rmt51"
+
+  build_esp32dev_idf44:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: "esp32dev_idf44"
