@@ -50,6 +50,8 @@ jobs:
       - name: CPP Check
         run: |
           pip install platformio
+          cd .build
+          cd $(ls)
           pio check --skip-packages --src-filters="+<lib/src/>" --src-filters="-<lib/src/platforms/>" --severity=high --fail-on-defect=high
 
       - name: Generate timestamp and random hex
