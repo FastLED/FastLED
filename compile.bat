@@ -18,8 +18,8 @@ if %errorlevel% equ 0 (
 rem Check if uv is installed, if not, install it
 where uv >nul 2>nul
 if %errorlevel% neq 0 (
-    echo uv command not found. Installing uv...
-    %PYTHON% -m pip install uv
+    echo "uv" command not found. Please install "uv" by running "pip install uv" and try again.
+    exit /b 1
 )
 
 rem Change to the directory of the batch file

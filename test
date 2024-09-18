@@ -1,5 +1,13 @@
 #!/bin/bash
 
 set -e
+
+cd "$(dirname "$0")"
+# if .venv not found
+if [ ! -d .venv ]; then
+    # create virtual environment
+    ./install
+fi
+
 uv run ci/ci-compile-native.py
 uv run pio check --skip-packages --src-filters="+<src/>"  --severity=medium --fail-on-defect=high --flags --inline-suppr

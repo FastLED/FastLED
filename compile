@@ -20,6 +20,13 @@ if ! command -v uv &> /dev/null; then
     $PYTHON -m pip install uv
 fi
 
+cd "$(dirname "$0")"
+# if .venv not found
+if [ ! -d .venv ]; then
+    # create virtual environment
+    ./install
+fi
+
 interactive_stmt=""
 # if no arguments
 if [ $# -eq 0 ]; then
