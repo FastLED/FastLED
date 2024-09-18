@@ -26,6 +26,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: get_supported_boards
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,11 +37,20 @@ jobs:
         with:
           name: supported-boards
 
+      - name: Install GitHub CLI
+        run: |
+          type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y
+        shell: bash
+
       - name: Read supported boards and trigger builds
         run: |
           while IFS= read -r board; do
             echo "Building for board: $board"
-            # Call the build_template.yml with the current board as an argument.
             gh workflow run ./.github/workflows/build_template.yml --field args="$board"
           done < supported_boards.txt
         shell: bash
