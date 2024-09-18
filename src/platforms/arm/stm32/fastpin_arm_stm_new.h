@@ -1,21 +1,14 @@
 #pragma once
 
+#include "namespace.h"
+
 // Grabbed from https://github.com/13rac1/FastLED-STM32/blob/stm32f103/platforms/arm/stm32/fastpin_arm_stm32.h
 // It looks like this might work for all STM32F1 boards and more.
-// However, there are lots of problems with the bluepill so we are using this as the first test case
-// to see if this works.
 
 #include "namespace.h"
 #include "force_inline.h"
 
 FASTLED_NAMESPACE_BEGIN
-
-#if defined(FASTLED_FORCE_SOFTWARE_PINS)
-#warning "Software pin support forced, pin access will be sloightly slower."
-#define NO_HARDWARE_PIN_SUPPORT
-#undef HAS_HARDWARE_PIN_SUPPORT
-
-#else
 
 #include "armpin.h"
 
@@ -56,9 +49,9 @@ _DEFPIN_ARM(19, 2, A);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
-#endif
+#elif defined(__STM32F1__)  // bluepill
 
-#if defined(__STM32F1__)  // bluepill
+
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline gpio_reg_map* r() { return T->regs; } };
 #define _IO32(L) _RD32(GPIO ## L)
 
@@ -106,9 +99,10 @@ _DEFPIN_ARM(PB1, 1, B);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
-#endif
+#else
+#error "Please define pin mappings for your board"
 
-#endif // FASTLED_FORCE_SOFTWARE_PINS
+#endif
 
 FASTLED_NAMESPACE_END
 

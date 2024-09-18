@@ -6,13 +6,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-#if defined(FASTLED_FORCE_SOFTWARE_PINS)
-#warning "Software pin support forced, pin access will be slightly slower."
-#define NO_HARDWARE_PIN_SUPPORT
-#undef HAS_HARDWARE_PIN_SUPPORT
-
-#else
-
 #include "armpin.h"
 
 #if defined(STM32F10X_MD)
@@ -217,8 +210,6 @@ _FL_DEFPIN(36, 1, D);
 #define HAS_HARDWARE_PIN_SUPPORT
 
 #endif // STM32F1
-
-#endif // FASTLED_FORCE_SOFTWARE_PINS
 
 FASTLED_NAMESPACE_END
 

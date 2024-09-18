@@ -1,5 +1,11 @@
-#ifndef __FASTPIN_ARM_STM32_H
-#define __FASTPIN_ARM_STM32_H
+#pragma once
+
+#if defined(FASTLED_FORCE_SOFTWARE_PINS)
+#warning "Software pin support forced, pin access will be sloightly slower."
+#define NO_HARDWARE_PIN_SUPPORT
+#undef HAS_HARDWARE_PIN_SUPPORT
+
+#else
 
 #if defined(ARDUINO_BLUEPILL_F103C8) && 0
 // from https://github.com/13rac1/FastLED-STM32
@@ -9,4 +15,5 @@
 #include "fastpin_arm_stm_legacy.h"
 #endif
 
-#endif // __INC_FASTPIN_ARM_STM32
+#endif  // FASTLED_FORCE_SOFTWARE_PINS
+
