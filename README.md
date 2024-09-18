@@ -232,8 +232,6 @@ HL1606, and "595"-style shift registers are no longer supported by the library. 
 
 ## Supported Platforms
 
-## Supported platforms
-
 Right now the library is supported on a variety of arduino compatible platforms.  If it's ARM or AVR and uses the arduino software (or a modified version of it to build) then it is likely supported.  Note that we have a long list of upcoming platforms to support, so if you don't see what you're looking for here, ask, it may be on the roadmap (or may already be supported).  N.B. at the moment we are only supporting the stock compilers that ship with the arduino software.  Support for upgraded compilers, as well as using AVR studio and skipping the arduino entirely, should be coming in a near future release.
 
 * Adafruit Trinket & Gemma - Trinket Pro may be supported, but haven't tested to confirm yet
