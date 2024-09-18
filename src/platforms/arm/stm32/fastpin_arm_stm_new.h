@@ -90,7 +90,7 @@ _DEFPIN_ARM(19, 2, A);
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
-#elif defined(__STM32F1__)
+#elif defined(__STM32F1__) || defined(STM32F1)
 #define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline gpio_reg_map* r() { return T->regs; } };
 #define _IO32(L) _RD32(GPIO ## L)
 
