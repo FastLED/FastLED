@@ -61,7 +61,7 @@ typedef bool (*hasFunction)(void* pixel_controller, int n);
 class PixelIterator {
   public:
     template<typename PixelControllerT>
-    PixelIterator(PixelControllerT* pc, Rgbw rgbw) : mPixelController(pc), mRgbw(rgbw) {
+    PixelIterator(PixelControllerT* pc, Rgbw rgbw) : mPixelController(pc), mRgbw(rgbw) { // cppcheck-suppress uninitMemberVar
       // manually build up a vtable.
       typedef PixelControllerVtable<PixelControllerT> Vtable;
       mLoadAndScaleRGBW = &Vtable::loadAndScaleRGBW;
