@@ -41,6 +41,7 @@ CFastLED::CFastLED() {
 	m_nFPS = 0;
 	m_pPowerFunc = NULL;
 	m_nPowerData = 0xFFFFFFFF;
+	m_nMinMicros = 0;
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
