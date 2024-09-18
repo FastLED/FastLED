@@ -49,7 +49,6 @@ void fillAndShow(CRGB color) {
 
 // Cycle r,g,b,w. Red will blink once, green twice, ... white 4 times.
 void loop() {
-    uint32_t ms = millis();
     static size_t frame_count = 0;
     int frame_cycle = frame_count % 4;
     frame_count++;
