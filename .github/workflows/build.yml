@@ -49,11 +49,13 @@ jobs:
 
       - name: Read supported boards and trigger builds
         run: |
-          while IFS= read -r board || [ -n "$board" ]; do
+          IFS=',' read -ra BOARDS <<< $(cat supported_boards.txt)
+          for board in "${BOARDS[@]}"; do
+            board=$(echo $board | xargs)  # Trim whitespace
             if [ -n "$board" ]; then
               echo "Building for board: $board"
               gh workflow run .github/workflows/build_template.yml --ref ${{ github.ref }} --field args="$board"
               sleep 5  # Add a small delay to avoid rate limiting
             fi
-          done < supported_boards.txt
+          done
         shell: bash
