@@ -1,3 +1,10 @@
+FastLED 3.7.8
+=============
+* Attiny0/1 (commonly Attiny85) support added.
+  * https://github.com/FastLED/FastLED/pull/1292
+  * Special thanks to https://github.com/ngyl88 for the contribution.
+
+
 FastLED 3.7.7
 =============
 * WS2812 RGBW mode is now part of the API.
