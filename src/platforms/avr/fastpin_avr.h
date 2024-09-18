@@ -1,6 +1,19 @@
 #ifndef __INC_FASTPIN_AVR_H
 #define __INC_FASTPIN_AVR_H
 
+// NOTE: If you work on a platform in this file then please split it into it's own file
+// like fastpin_avr_nano_every.h here. It turns out that AI is pretty good at finding
+// what the correct AVR pin settings but wants to have small files to work with.
+// This god-header is too big and AI will stumble trying to generate the correct
+// edits.
+
+#if defined(ARDUINO_AVR_NANO_EVERY)
+#include "fastpin_avr_nano_every.h"
+#else
+
+#include "namespace.h"
+#include "avr_pin.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
@@ -11,36 +24,6 @@ FASTLED_NAMESPACE_BEGIN
 #else
 
 #define AVR_PIN_CYCLES(_PIN) ((((int)FastPin<_PIN>::port())-0x20 < 64) ? 1 : 2)
-
-/// Class definition for a Pin where we know the port registers at compile time for said pin.  This allows us to make
-/// a lot of optimizations, as the inlined hi/lo methods will devolve to a single io register write/bitset.
-template<uint8_t PIN, uint8_t _MASK, typename _PORT, typename _DDR, typename _PIN> class _AVRPIN {
-public:
-	typedef volatile uint8_t * port_ptr_t;
-	typedef uint8_t port_t;
-
-	inline static void setOutput() { _DDR::r() |= _MASK; }
-	inline static void setInput() { _DDR::r() &= ~_MASK; }
-
-	inline static void hi() __attribute__ ((always_inline)) { _PORT::r() |= _MASK; }
-	inline static void lo() __attribute__ ((always_inline)) { _PORT::r() &= ~_MASK; }
-	inline static void set(FASTLED_REGISTER uint8_t val) __attribute__ ((always_inline)) { _PORT::r() = val; }
-
-	inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
-
-	inline static void toggle() __attribute__ ((always_inline)) { _PIN::r() = _MASK; }
-
-	inline static void hi(FASTLED_REGISTER port_ptr_t /*port*/) __attribute__ ((always_inline)) { hi(); }
-	inline static void lo(FASTLED_REGISTER port_ptr_t /*port*/) __attribute__ ((always_inline)) { lo(); }
-	inline static void fastset(FASTLED_REGISTER port_ptr_t /*port*/, FASTLED_REGISTER uint8_t val) __attribute__ ((always_inline)) { set(val); }
-
-	inline static port_t hival() __attribute__ ((always_inline)) { return _PORT::r() | _MASK; }
-	inline static port_t loval() __attribute__ ((always_inline)) { return _PORT::r() & ~_MASK; }
-	inline static port_ptr_t port() __attribute__ ((always_inline)) { return &_PORT::r(); }
-
-	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
-};
-
 
 
 /// AVR definitions for pins.  Getting around  the fact that I can't pass GPIO register addresses in as template arguments by instead creating
@@ -500,5 +483,8 @@ _FL_DEFPIN(52, 7, F);
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 
 FASTLED_NAMESPACE_END
+
+
+#endif  // __INC_FASTPIN_AVR_H
 
 #endif // __INC_FASTPIN_AVR_H
