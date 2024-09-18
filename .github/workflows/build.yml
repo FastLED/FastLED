@@ -47,31 +47,39 @@ jobs:
           && sudo apt install gh -y
         shell: bash
 
-      - name: Check supported_boards.txt
+      - name: Check supported_boards.txt and trigger builds
         run: |
-          if [ ! -f supported_boards.txt ]; then
-            echo "Error: supported_boards.txt file not found"
-            exit 1
-          fi
-          if [ ! -s supported_boards.txt ]; then
-            echo "Error: supported_boards.txt is empty"
-            exit 1
-          fi
-        shell: bash
+          import os
+          import time
+          import subprocess
 
-      - name: Read supported boards and trigger builds
-        run: |
-          if [ -f supported_boards.txt ] && [ -s supported_boards.txt ]; then
-            while IFS= read -r board || [[ -n "$board" ]]; do
-              board=$(echo "$board" | xargs)  # Trim whitespace
-              if [ -n "$board" ]; then
-                echo "Building for board: $board"
-                gh workflow run .github/workflows/build_template.yml --ref ${{ github.ref }} --field args="$board"
-                sleep 5  # Add a small delay to avoid rate limiting
-              fi
-            done < supported_boards.txt
-          else
-            echo "Error: supported_boards.txt is missing or empty"
-            exit 1
-          fi
-        shell: bash
+          def run_command(command):
+              process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, text=True)
+              output, error = process.communicate()
+              return process.returncode, output, error
+
+          if not os.path.exists('supported_boards.txt'):
+              print("Error: supported_boards.txt file not found")
+              exit(1)
+
+          if os.stat('supported_boards.txt').st_size == 0:
+              print("Error: supported_boards.txt is empty")
+              exit(1)
+
+          with open('supported_boards.txt', 'r') as f:
+              boards = f.read().strip().split(',')
+
+          for board in boards:
+              board = board.strip()
+              if board:
+                  print(f"Building for board: {board}")
+                  command = f"gh workflow run .github/workflows/build_template.yml --ref ${{ github.ref }} --field args=\"{board}\""
+                  returncode, output, error = run_command(command)
+                  if returncode != 0:
+                      print(f"Error triggering workflow for {board}: {error}")
+                      exit(1)
+                  print(output)
+                  time.sleep(5)  # Add a small delay to avoid rate limiting
+
+          print("All builds triggered successfully")
+        shell: python
