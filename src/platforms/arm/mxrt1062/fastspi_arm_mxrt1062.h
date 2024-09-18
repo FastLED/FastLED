@@ -8,9 +8,9 @@ FASTLED_NAMESPACE_BEGIN
 
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_RATE, SPIClass & _SPIObject, int _SPI_INDEX>
 class Teensy4HardwareSPIOutput {
-	Selectable *m_pSelect;
-	uint32_t  m_bitCount;
-	uint32_t m_bitData;
+	Selectable *m_pSelect = nullptr;
+	uint32_t  m_bitCount = 0;
+	uint32_t m_bitData = 0;
 	inline IMXRT_LPSPI_t & port() __attribute__((always_inline)) {
 		switch(_SPI_INDEX) {
 			case 0:
