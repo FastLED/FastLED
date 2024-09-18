@@ -5,10 +5,9 @@ on:
   push:
     branches:
       - master
-      - fix-nano-every-build
 
 jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: nano_every --examples Blink,RGBSetDemo
+      args: nano_every
