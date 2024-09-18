@@ -122,6 +122,11 @@ def parse_args():
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="Enable verbose output"
     )
+    parser.add_argument(
+        "--supported-boards",
+        action="store_true",
+        help="Print the list of supported boards and exit",
+    )
     args = parser.parse_args()
     # if --interactive and --no-interative are both passed, --no-interactive takes precedence.
     if args.interactive and args.no_interactive:
@@ -221,6 +226,9 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
 def main() -> int:
     """Main function."""
     args = parse_args()
+    if args.supported_boards:
+        print(",".join(DEFAULT_BOARDS_NAMES))
+        return 0
     # Set the working directory to the script's parent directory.
     run_args = create_concurrent_run_args(args)
     start_time = time.time()
