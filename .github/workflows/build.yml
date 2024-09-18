@@ -47,15 +47,31 @@ jobs:
           && sudo apt install gh -y
         shell: bash
 
+      - name: Check supported_boards.txt
+        run: |
+          if [ ! -f supported_boards.txt ]; then
+            echo "Error: supported_boards.txt file not found"
+            exit 1
+          fi
+          if [ ! -s supported_boards.txt ]; then
+            echo "Error: supported_boards.txt is empty"
+            exit 1
+          fi
+        shell: bash
+
       - name: Read supported boards and trigger builds
         run: |
-          IFS=',' read -ra BOARDS <<< $(cat supported_boards.txt)
-          for board in "${BOARDS[@]}"; do
-            board=$(echo $board | xargs)  # Trim whitespace
-            if [ -n "$board" ]; then
-              echo "Building for board: $board"
-              gh workflow run .github/workflows/build_template.yml --ref ${{ github.ref }} --field args="$board"
-              sleep 5  # Add a small delay to avoid rate limiting
-            fi
-          done
+          if [ -f supported_boards.txt ] && [ -s supported_boards.txt ]; then
+            while IFS= read -r board || [[ -n "$board" ]]; do
+              board=$(echo "$board" | xargs)  # Trim whitespace
+              if [ -n "$board" ]; then
+                echo "Building for board: $board"
+                gh workflow run .github/workflows/build_template.yml --ref ${{ github.ref }} --field args="$board"
+                sleep 5  # Add a small delay to avoid rate limiting
+              fi
+            done < supported_boards.txt
+          else
+            echo "Error: supported_boards.txt is missing or empty"
+            exit 1
+          fi
         shell: bash
