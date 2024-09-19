@@ -63,7 +63,30 @@ class PixelIterator {
     template<typename PixelControllerT>
     PixelIterator(PixelControllerT* pc, Rgbw rgbw)
          : mPixelController(pc), mRgbw(rgbw) {
-      // manually build up a vtable.
+      // Manually build up a vtable.
+      // Wait... what? Stupid nerds trying to show off how smart they are...
+      // Why not just use a virtual function?!
+      //
+      // Before you think this then you should know that the alternative straight
+      // forward way is to have a virtual interface class that PixelController inherits from.
+      // ...and that was already tried. And if you try to do this yourself
+      // this then let me tell you what is going to happen...
+      //
+      // EVERY SINGLE PLATFORM THAT HAS A COMPILED BINARY SIZE CHECK WILL IMMEDIATELY
+      // FAIL AS THE BINARY BLOWS UP BY 10-30%!!! It doesn't matter if only one PixelController
+      // with a vtable is used, gcc seems not to de-virtualize the calls. And we really care
+      // about binary size since FastLED needs to run on those tiny little microcontrollers like
+      // the Attiny85 (and family) which are in the sub $1 range used for commercial products.
+      //
+      // So to satisfy these tight memory requirements we make the dynamic dispatch used in PixelIterator
+      // an optional zero-cost abstraction which doesn't affect the binary size for platforms that
+      // don't use it. So that's why we are using this manual construction of the vtable that is built
+      // up using template magic. If your platform has lots of memory then you'll gladly trade
+      // a sliver of memory for the convenience of having a concrete implementation of
+      // PixelController that you can use without having to make all your driver code a template.
+      //
+      // Btw, this pattern in C++ is called the "type-erasure pattern". It allows non virtual
+      // polymorphism by leveraging the C++ template system to ensure type safety.
       typedef PixelControllerVtable<PixelControllerT> Vtable;
       mLoadAndScaleRGBW = &Vtable::loadAndScaleRGBW;
       mLoadAndScaleRGB = &Vtable::loadAndScaleRGB;
