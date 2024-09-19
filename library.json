@@ -47,7 +47,14 @@
     "export": {
         "exclude": [
             "docs",
-            "extras"
+            "extras",
+            "ci",
+            ".*",
+            "compile.bat",
+            "compile",
+            "lint",
+            "test",
+            "platformio.ini"
         ]
     },
     "build": {
