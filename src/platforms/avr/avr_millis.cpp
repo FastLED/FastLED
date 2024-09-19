@@ -1,19 +1,17 @@
 
-
 // Defines a timer_millis for led_sysdefs_avr.h
 
-#ifndef DEFINE_AVR_MILLIS
-#if defined(__AVR_ATtinyxy6__)
-#define DEFINE_AVR_MILLIS 1
+#ifdef DEFINE_AVR_MILLIS
+#warning "Untested code: using timer 0 for millis on ATtiny 0/1 series"
+#if defined(__AVR_ATtinyxy6__) || defined(ARDUINO_attinyxy6)
+
 #define DEFINE_AVR_MILLIS_USES_TIMER0
-#else
-#define DEFINE_AVR_MILLIS 0
-#endif
 #endif
 
-#if DEFINE_AVR_MILLIS
 
-#if DEFINE_AVR_MILLIS_USES_TIMER0
+
+
+#ifdef DEFINE_AVR_MILLIS_USES_TIMER0
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -21,14 +19,14 @@
 #define MICROSECONDS_PER_TIMER0_OVERFLOW (64 * 256)
 
 
-volatile unsigned long timer0_overflow_count = 0;
-extern volatile unsigned long timer_millis;
+volatile unsigned long timer_millis = 0;
 
 
 ISR(TCA0_OVF_vect)
 {
+    // ISR code
     timer_millis += MICROSECONDS_PER_TIMER0_OVERFLOW / 1000;
-    timer0_overflow_count++;
+    // Clear the interrupt flag
     TCA0.SINGLE.INTFLAGS = TCA_SINGLE_OVF_bm;
 }
 
@@ -47,9 +45,6 @@ static void avr_millis_init()
 }
 
 #else
-#error "Timer not defined for this AVR"
+#error "No timer defined for millis"
 #endif  // DEFINE_AVR_MILLIS_USES_TIMER0
-
-#endif  // DEFINE_AVR_MILLIS
-
-volatile unsigned long timer_millis = 0;
+#endif // DEFINE_AVR_MILLIS
