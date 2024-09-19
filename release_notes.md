@@ -3,10 +3,10 @@ FastLED 3.7.8
 * Attiny0/1 (commonly Attiny85) support added.
   * https://github.com/FastLED/FastLED/pull/1292 , https://github.com/FastLED/FastLED/pull/1183 , https://github.com/FastLED/FastLED/pull/1061
   * Special thanks to [@freemovers](https://github.com/freemovers), [@jasoncoon](https://github.com/jasoncoon), [@ngyl88](https://github.com/ngyl88) for the contribution.
-* Arduino nano every compile support
+* Arduino nano compiling
   *  https://github.com/FastLED/FastLED/pull/1719
   *  Thanks to https://github.com/ngyl88 for the contribution!
-* STM32F1 support
+* New STM32F1 compiling
   * bluepill
   * maple mini
 
