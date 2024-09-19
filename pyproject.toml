@@ -13,6 +13,7 @@ dependencies = [
     "clang-format",
     "isort",
     "black",
+    "pip"
 ]
 
 [build-system]

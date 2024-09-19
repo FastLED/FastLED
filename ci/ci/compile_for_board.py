@@ -2,6 +2,7 @@ import os
 import subprocess
 from pathlib import Path
 from threading import Lock
+import shutil
 
 from ci.boards import Board
 from ci.locked_print import locked_print
@@ -25,6 +26,7 @@ def compile_for_board_and_example(
     """Compile the given example for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
     board_name = board.board_name
+    just_use_pio_run = board.just_use_pio_run
     real_board_name = board.get_real_board_name()
     builddir = (
         Path(build_dir) / board_name if build_dir else Path(".build") / board_name
@@ -36,22 +38,50 @@ def compile_for_board_and_example(
     if srcdir.exists():
         subprocess.run(["rm", "-rf", srcdir.as_posix()], check=True)
     locked_print(f"*** Building example {example} for board {board_name} ***")
-    cmd_list = [
-        "pio",
-        "ci",
-        "--board",
-        real_board_name,
-        "--lib=ci",
-        "--lib=src",
-        "--keep-build-dir",
-        f"--build-dir={builddir.as_posix()}",
-    ]
-
-    cmd_list.append(f"{example.as_posix()}/*ino")
+    cwd: str | None = None
+    shell: bool = False
+    if just_use_pio_run:
+        # we have to copy a few folders of pio ci in order to get this to work.
+        project_srcdir = Path("src")
+        assert project_srcdir.exists()
+        build_src = builddir / "lib" / "src"
+        shutil.rmtree(build_src, ignore_errors=True)
+        shutil.copytree(project_srcdir, build_src)
+        # now do the same thing with ci
+        ci = Path("ci")
+        assert ci.exists()
+        shutil.rmtree(builddir / "lib " / "ci", ignore_errors=True)
+        shutil.copytree(ci, builddir / "lib" / "ci")
+        # now copy the example into the "src" directory
+        ino_file = example / f"{example.name}.ino"
+        locked_print(f"Copying {ino_file} to {srcdir / f'{example.name}.ino'}")
+        srcdir.mkdir(parents=True, exist_ok=True)
+        shutil.copy(ino_file, srcdir / f"{example.name}.ino")
+        cwd = str(builddir)
+        shell = True
+        cmd_list = [
+            "pio",
+            "run",
+        ]
+        # in this case we need to manually copy the example to the src directory
+        # because platformio doesn't support building a single file.
+        ino_file = example / f"{example.name}.ino"
+    else:
+        cmd_list = [
+            "pio",
+            "ci",
+            "--board",
+            real_board_name,
+            "--lib=ci",
+            "--lib=src",
+            "--keep-build-dir",
+            f"--build-dir={builddir.as_posix()}",
+        ]
+        cmd_list.append(f"{example.as_posix()}/*ino")
     cmd_str = subprocess.list2cmdline(cmd_list)
     msg_lsit = [
         "\n\n******************************",
-        "* Running command:",
+        f"* Running command in cwd: {cwd if cwd else os.getcwd()}",
         f"*     {cmd_str}",
         "******************************\n",
     ]
@@ -59,6 +89,8 @@ def compile_for_board_and_example(
     locked_print(msg)
     result = subprocess.run(
         cmd_list,
+        cwd=cwd,
+        shell=shell,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,

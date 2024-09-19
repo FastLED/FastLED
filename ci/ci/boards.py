@@ -23,6 +23,7 @@ class Board:
     real_board_name: str | None = None
     platform: str | None = None
     platform_needs_install: bool = False
+    just_use_pio_run: bool = False  # some platforms like esp32-c2-devkitm-1 will only work with pio run
     platform_packages: str | None = None
     framework: str | None = None
     board_build_core: str | None = None
@@ -80,6 +81,7 @@ ESP32DEV_IDF4_4 = Board(
 ESP32_C2_DEVKITM_1 = Board(
     board_name="esp32-c2-devkitm-1",
     # platform_needs_install=True,  # Install platform package to get the boards
+    just_use_pio_run=True,
     platform="https://github.com/Jason2866/platform-espressif32.git",  # No support from PIO so we use a fork.
 )
 
