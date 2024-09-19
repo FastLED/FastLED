@@ -19,10 +19,6 @@ FASTLED_NAMESPACE_BEGIN
 
 typedef volatile uint8_t& reg8_t;
 
-#define _R(T) struct __gen_struct_##T
-#define _RD8(T) struct __gen_struct_##T { static inline reg8_t& r() { return T; } };
-
-#define _CONCAT2(a, b) a##b
 #define _CONCAT3(a, b, c) a##b##c
 
 // Use VPORTx registers for direct port manipulation

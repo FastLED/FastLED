@@ -23,8 +23,11 @@ FASTLED_NAMESPACE_BEGIN
 
 typedef volatile uint8_t& reg8_t;
 
+//todo: replace with _CONCAT3 like avr_nano_every.h
+//but why VPORT##L.DIR not VPORT##L##DIR - is it due to _DIR ?
 #define _R(T) struct __gen_struct_##T
 #define _RD8(T) struct __gen_struct_##T { static inline reg8_t& r() { return T; } };
+//#define _CONCAT3(a, b, c) a##b##c
 
 #define _FL_IO(L,C)             \
     _RD8(PORT ## L ## _DIR);    \
