@@ -1,7 +1,8 @@
 #ifndef __INC_NOISE_H
 #define __INC_NOISE_H
 
-#include "FastLED.h"
+#include <stdint.h>
+#include "crgb.h"
 
 /// @file noise.h
 /// Functions to generate and fill arrays with noise.
