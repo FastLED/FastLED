@@ -16,6 +16,8 @@ from ci.locked_print import locked_print
 
 HERE = Path(__file__).parent.resolve()
 
+LIBS = ["src", "ci"]
+
 # Default boards to compile for. You can use boards not defined here but
 # if the board isn't part of the officially supported platformio boards then
 # you will need to add the board to the ~/.platformio/platforms directory.
@@ -216,6 +218,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         skip_init=skip_init,
         defines=defines,
         extra_packages=extra_packages,
+        libs=LIBS,
         build_dir=build_dir,
         extra_scripts=extra_scripts,
         cwd=str(HERE.parent),

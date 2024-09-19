@@ -23,6 +23,7 @@ class ConcurrentRunArgs:
     skip_init: bool
     defines: list[str]
     extra_packages: list[str]
+    libs: list[str] | None
     build_dir: str | None
     extra_scripts: str | None
     cwd: str | None
