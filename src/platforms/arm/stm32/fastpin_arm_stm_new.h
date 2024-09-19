@@ -99,10 +99,11 @@ _DEFPIN_ARM(19, 2, A);
 #define _RD32_GPIO_MAP(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) FASTLED_FORCE_INLINE volatile GPIO_TypeDef* r() { return T; } };
 
 #if defined(ARDUINO_MAPLE_MINI)
-#define _RD32(T) _RD32_REG_MAP(T)
+#define _RD32 _RD32_REG_MAP
 #else
-#define _RD32(T) _RD32_GPIO_MAP(T)
+#define _RD32 _RD32_GPIO_MAP
 #endif
+
 #define _IO32(L) _RD32(GPIO ## L)
 
 _IO32(A); _IO32(B); _IO32(C); _IO32(D);
