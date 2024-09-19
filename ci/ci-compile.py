@@ -28,8 +28,7 @@ DEFAULT_BOARDS_NAMES = [
     "esp32-c3-devkitm-1",
     "attiny85",
     "ATtiny1616",
-    # "esp32-c6-devkitc-1",
-    # "esp32-c2-devkitm-1",
+    "esp32-c6-devkitc-1",
     "esp32-s3-devkitc-1",
     "yun",
     "digix",
@@ -47,6 +46,8 @@ DEFAULT_BOARDS_NAMES = [
 
 OTHER_BOARDS_NAMES = [
     "nano_every",
+    "esp32-c2-devkitm-1",
+
 ]
 
 # Examples to compile.
