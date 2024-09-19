@@ -46,6 +46,9 @@ For more examples see this [link](examples).
 [![uno](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_uno.yml)
 
 
+[![attiny13](https://github.com/FastLED/FastLED/actions/workflows/build_attiny13.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_attiny13.yml)
+
+
 [![attiny85](https://github.com/FastLED/FastLED/actions/workflows/build_attiny85.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_attiny85.yml)
 
 
