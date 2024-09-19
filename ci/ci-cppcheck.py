@@ -6,7 +6,7 @@ from pathlib import Path
 
 def main() -> int:
     here = Path(__file__).parent
-    project_root = here.parent.parent
+    project_root = here.parent
     build = project_root / ".build"
     os.chdir(str(build))
 
