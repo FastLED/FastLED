@@ -26,6 +26,8 @@ DEFAULT_BOARDS_NAMES = [
     "esp32dev",
     "esp01",  # ESP8266
     "esp32-c3-devkitm-1",
+    "attiny85",
+    "ATtiny1616",
     # "esp32-c6-devkitc-1",
     # "esp32-c2-devkitm-1",
     "esp32-s3-devkitc-1",
