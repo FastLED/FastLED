@@ -6,7 +6,7 @@ FastLED 3.7.8
 * Arduino nano compiling
   *  https://github.com/FastLED/FastLED/pull/1719
   *  Thanks to https://github.com/ngyl88 for the contribution!
-* New STM32F1 compiling
+* New STM32F1 boards compiling
   * bluepill
   * maple mini
 
