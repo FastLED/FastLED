@@ -1,0 +1,14 @@
+name: attiny4313
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: attiny4313
