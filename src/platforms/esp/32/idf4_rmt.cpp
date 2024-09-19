@@ -37,11 +37,6 @@ void RmtController::initPulseBuffer(int size_in_bytes) {
 }
 
 void RmtController::showPixels(PixelIterator &pixels) {
-    Rgbw rgbw = pixels.get_rgbw();
-    if (rgbw.active()) {
-        pixels.set_rgbw(rgbw);
-    }
-
     if (built_in_driver()) {
         loadAllPixelsToRmtSymbolData(pixels);
     } else {
