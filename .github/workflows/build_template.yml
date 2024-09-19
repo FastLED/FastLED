@@ -37,7 +37,7 @@ jobs:
       #    restore-keys: |
       #      ${{ runner.os }}-build-
 
-      - name: Build FastLED examples
+      - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
         run: |
           set -o pipefail
           ./compile --no-interactive  ${{ inputs.args }} | tee build.log
