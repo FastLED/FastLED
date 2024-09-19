@@ -166,7 +166,7 @@ ESP32DEV_I2S = Board(
 )
 
 ESP32S3_RMT51 = Board(
-    board_name="esp32-s3-rmt51",
+    board_name="esp32rmt_51",
     real_board_name="esp32-s3-devkitc-1",
     platform_needs_install=True,
     platform=ESP32_IDF_5_1,

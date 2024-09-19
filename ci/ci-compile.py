@@ -39,7 +39,7 @@ DEFAULT_BOARDS_NAMES = [
     "rpipico2",
     "uno_r4_wifi",
     "esp32dev_i2s",
-    "esp32-s3-rmt51",
+    "esp32rmt_51",
     "esp32dev_idf44",
 ]
 
