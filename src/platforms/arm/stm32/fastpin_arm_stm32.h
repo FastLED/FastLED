@@ -7,7 +7,7 @@
 
 #else
 
-#if defined(ARDUINO_BLUEPILL_F103C8)
+#if defined(ARDUINO_BLUEPILL_F103C8) || defined(FORCE_NEW_STM32_PIN_DEFINITIONS)
 // from https://github.com/13rac1/FastLED-STM32
 #include "fastpin_arm_stm_new.h"
 #else
