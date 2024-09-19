@@ -195,7 +195,7 @@ def create_build_dir(
         except Exception:
             with open(matadata_json, "w") as f:
                 f.write(stdout)
-    except json.JSONDecodeError as e:
-        msg = f"build_info.json will not be generated because of error in decoding json from stdout: {stdout}\n\nError: {e}"
+    except json.JSONDecodeError:
+        msg = f"build_info.json will not be generated because of error because stdout does not look like a json file:\n#### STDOUT ####\n{stdout}\n#### END STDOUT ####\n"
         locked_print(msg)
     return True, stdout
