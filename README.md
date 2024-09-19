@@ -25,8 +25,6 @@ We have multiple goals with this library:
 
 ## Example
 
-Examples [link](examples)
-
 *This is an Arduino Sketch that will run on Arduino Uno/Esp32/Raspberri Pi*
 ```C++
 #include <FastLED.h>
@@ -40,6 +38,7 @@ void loop() {
 }
 ```
 
+For more examples see this [link](examples).
 
 ## Supported Platforms
 #### Arduino
