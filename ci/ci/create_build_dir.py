@@ -183,15 +183,19 @@ def create_build_dir(
         check=False,
     ).stdout
 
-    data = json.loads(stdout)
-    # now dump the values to the file at the root of the build directory.
-    matadata_json = builddir / "build_info.json"
     try:
-        insert_tool_aliases(data)
-        formatted = json.dumps(data, indent=4, sort_keys=True)
-        with open(matadata_json, "w") as f:
-            f.write(formatted)
-    except Exception:
-        with open(matadata_json, "w") as f:
-            f.write(stdout)
+        data = json.loads(stdout)
+        # now dump the values to the file at the root of the build directory.
+        matadata_json = builddir / "build_info.json"
+        try:
+            insert_tool_aliases(data)
+            formatted = json.dumps(data, indent=4, sort_keys=True)
+            with open(matadata_json, "w") as f:
+                f.write(formatted)
+        except Exception:
+            with open(matadata_json, "w") as f:
+                f.write(stdout)
+    except json.JSONDecodeError as e:
+        msg = f"build_info.json will not be generated because of error in decoding json from stdout: {stdout}\n\nError: {e}"
+        locked_print(msg)
     return True, stdout
