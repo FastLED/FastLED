@@ -18,7 +18,7 @@ public:
   #if 0
   inline static void setOutput() {
     if(_BIT<8) {
-      _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4));
+      _CRL::r() = (_CRL::r() & (0xF << (_BIT*4)) | (0x1 << (_BIT*4)));
     } else {
       _CRH::r() = (_CRH::r() & (0xF << ((_BIT-8)*4))) | (0x1 << ((_BIT-8)*4));
     }
@@ -91,7 +91,7 @@ _DEFPIN_ARM(19, 2, A);
 #define HAS_HARDWARE_PIN_SUPPORT
 
 #elif defined(__STM32F1__) || defined(STM32F1)
-#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) inline gpio_reg_map* r() { return T->regs; } };
+#define _RD32(T) struct __gen_struct_ ## T { static __attribute__((always_inline)) FASTLED_FORCE_INLINE volatile GPIO_TypeDef* r() { return T->regs; } };
 #define _IO32(L) _RD32(GPIO ## L)
 
 _IO32(A); _IO32(B); _IO32(C); _IO32(D);
