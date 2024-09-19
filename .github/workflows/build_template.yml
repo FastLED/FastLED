@@ -55,10 +55,7 @@ jobs:
 
       - name: CPP Check
         run: |
-          pip install platformio
-          cd .build
-          cd $(ls)
-          pio check --skip-packages --src-filters="+<lib/src/>" --severity=medium --fail-on-defect=high --flags --inline-suppr
+          uv run ci/ci-cppcheck.py
 
       - name: Generate timestamp and random hex
         id: generate_id
