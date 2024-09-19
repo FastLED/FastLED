@@ -30,7 +30,7 @@ def compile_for_board_and_example(
     """Compile the given example for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
     board_name = board.board_name
-    just_use_pio_run = board.just_use_pio_run
+    use_pio_run = board.use_pio_run
     real_board_name = board.get_real_board_name()
     libs = libs or []
     builddir = (
@@ -46,7 +46,7 @@ def compile_for_board_and_example(
     cwd: str | None = None
     shell: bool = False
     # libs = ["src", "ci"]
-    if just_use_pio_run:
+    if use_pio_run:
         # we have to copy a few folders of pio ci in order to get this to work.
         for lib in libs:
             project_libdir = Path(lib)
