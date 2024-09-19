@@ -3,6 +3,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+MINIMUM_REPORT_SEVERTIY = "medium"
+MINIMUM_FAIL_SEVERTIY = "high"
+
 
 def main() -> int:
     here = Path(__file__).parent
@@ -25,8 +28,8 @@ def main() -> int:
             "check",
             "--skip-packages",
             "--src-filters=+<lib/src/>",
-            "--severity=medium",
-            "--fail-on-defect=high",
+            f"--severity={MINIMUM_REPORT_SEVERTIY}",
+            f"--fail-on-defect={MINIMUM_FAIL_SEVERTIY}",
             "--flags",
             "--inline-suppr",
         ],
