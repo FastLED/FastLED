@@ -2,7 +2,12 @@
 // Defines a timer_millis for led_sysdefs_avr.h
 
 #ifdef DEFINE_AVR_MILLIS
-#warning "Untested code: using timer 0 for millis on ATtiny 0/1 series"
+#warning "Untested code: defining our own millis() timer, which is probably wrong."
+
+#if defined(CLOCK_SOURCE) && (CLOCK_SOURCE == 0)
+#warning "CLOCK_SOURCE=0 and may not work with timer 0"
+#endif
+
 #if defined(__AVR_ATtinyxy6__) || defined(ARDUINO_attinyxy6)
 
 #define DEFINE_AVR_MILLIS_USES_TIMER0
