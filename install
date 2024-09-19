@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
-uv venv
+uv venv --python 3.11
 uv pip install ci
