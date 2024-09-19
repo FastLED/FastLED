@@ -3,7 +3,8 @@ FastLED 3.7.8
 * Attiny0/1 (commonly Attiny85) support added.
   * https://github.com/FastLED/FastLED/pull/1292 , https://github.com/FastLED/FastLED/pull/1183 , https://github.com/FastLED/FastLED/pull/1061
   * Special thanks to [@freemovers](https://github.com/freemovers), [@jasoncoon](https://github.com/jasoncoon), [@ngyl88](https://github.com/ngyl88) for the contribution.
-* Arduino nano compiling
+  * Many common boards are now compiling in the Attiny family. See our repo for which ones are supported.
+* Arduino nano compiling with new pin definitions.
   *  https://github.com/FastLED/FastLED/pull/1719
   *  Thanks to https://github.com/ngyl88 for the contribution!
 * New STM32F1 boards compiling
