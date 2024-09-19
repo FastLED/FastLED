@@ -1,9 +1,10 @@
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 
-def main():
+def main() -> int:
     here = Path(__file__).parent
     project_root = here.parent.parent
     build = project_root / ".build"
@@ -18,7 +19,7 @@ def main():
         os.chdir(subdirs[0])
 
     # Run pio check command
-    subprocess.run(
+    cp = subprocess.run(
         [
             "pio",
             "check",
@@ -29,9 +30,9 @@ def main():
             "--flags",
             "--inline-suppr",
         ],
-        check=True,
     )
+    return cp.returncode
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
