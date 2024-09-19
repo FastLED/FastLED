@@ -80,7 +80,7 @@ ESP32DEV_IDF4_4 = Board(
 ESP32_C2_DEVKITM_1 = Board(
     board_name="esp32-c2-devkitm-1",
     platform_needs_install=True,  # Install platform package to get the boards
-    platform=ESP32_IDF_5_1_LATEST,
+    platform="https://github.com/Jason2866/platform-espressif32",  # No support from PIO, have to use a hacked version to get this to work
 )
 
 ESP32_C3_DEVKITM_1 = Board(
