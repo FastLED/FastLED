@@ -21,13 +21,18 @@ def errors_happened() -> bool:
 
 
 def compile_for_board_and_example(
-    board: Board, example: Path, build_dir: str | None, verbose_on_failure: bool
+    board: Board,
+    example: Path,
+    build_dir: str | None,
+    verbose_on_failure: bool,
+    libs: list[str] | None,
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
     board_name = board.board_name
     just_use_pio_run = board.just_use_pio_run
     real_board_name = board.get_real_board_name()
+    libs = libs or []
     builddir = (
         Path(build_dir) / board_name if build_dir else Path(".build") / board_name
     )
@@ -40,7 +45,7 @@ def compile_for_board_and_example(
     locked_print(f"*** Building example {example} for board {board_name} ***")
     cwd: str | None = None
     shell: bool = False
-    libs = ["src", "ci"]
+    # libs = ["src", "ci"]
     if just_use_pio_run:
         # we have to copy a few folders of pio ci in order to get this to work.
         for lib in libs:
@@ -142,7 +147,11 @@ def compile_for_board_and_example(
 
 # Function to process task queues for each board
 def compile_examples(
-    board: Board, examples: list[Path], build_dir: str | None, verbose_on_failure: bool
+    board: Board,
+    examples: list[Path],
+    build_dir: str | None,
+    verbose_on_failure: bool,
+    libs: list[str] | None,
 ) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
@@ -166,6 +175,7 @@ def compile_examples(
                     example=example,
                     build_dir=build_dir,
                     verbose_on_failure=verbose_on_failure,
+                    libs=libs,
                 )
         else:
             success, message = compile_for_board_and_example(
@@ -173,6 +183,7 @@ def compile_examples(
                 example=example,
                 build_dir=build_dir,
                 verbose_on_failure=verbose_on_failure,
+                libs=libs,
             )
         is_first = False
         if not success:

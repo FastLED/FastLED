@@ -45,6 +45,7 @@ def concurrent_run(
     first_project = projects[0]
     prev_cwd: str | None = None
     board_dir = args.board_dir
+    libs = ["src", "ci"]
     if cwd:
         prev_cwd = os.getcwd()
         locked_print(f"Changing to directory {cwd}")
@@ -101,7 +102,12 @@ def concurrent_run(
     with ThreadPoolExecutor(max_workers=num_cpus) as executor:
         future_to_board = {
             executor.submit(
-                compile_examples, board, examples, build_dir, verbose
+                compile_examples,
+                board,
+                examples,
+                build_dir,
+                verbose,
+                libs=libs,
             ): board
             for board in projects
         }
