@@ -3,10 +3,13 @@
 
 #include "force_inline.h"
 #include "namespace.h"
+#include "armpin.h"
+
+#include "fastpin_arm_stm32.h"
 
 FASTLED_NAMESPACE_BEGIN
 
-#include "armpin.h"
+
 
 #if defined(STM32F10X_MD)
 #define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE volatile GPIO_TypeDef * r() { return T; } };
