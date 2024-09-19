@@ -23,7 +23,9 @@ class Board:
     real_board_name: str | None = None
     platform: str | None = None
     platform_needs_install: bool = False
-    just_use_pio_run: bool = False  # some platforms like esp32-c2-devkitm-1 will only work with pio run
+    just_use_pio_run: bool = (
+        False  # some platforms like esp32-c2-devkitm-1 will only work with pio run
+    )
     platform_packages: str | None = None
     framework: str | None = None
     board_build_core: str | None = None

@@ -47,7 +47,6 @@ DEFAULT_BOARDS_NAMES = [
 OTHER_BOARDS_NAMES = [
     "nano_every",
     "esp32-c2-devkitm-1",
-
 ]
 
 # Examples to compile.

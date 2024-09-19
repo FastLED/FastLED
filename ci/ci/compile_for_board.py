@@ -1,8 +1,8 @@
 import os
+import shutil
 import subprocess
 from pathlib import Path
 from threading import Lock
-import shutil
 
 from ci.boards import Board
 from ci.locked_print import locked_print
@@ -40,18 +40,15 @@ def compile_for_board_and_example(
     locked_print(f"*** Building example {example} for board {board_name} ***")
     cwd: str | None = None
     shell: bool = False
+    libs = ["src", "ci"]
     if just_use_pio_run:
         # we have to copy a few folders of pio ci in order to get this to work.
-        project_srcdir = Path("src")
-        assert project_srcdir.exists()
-        build_src = builddir / "lib" / "src"
-        shutil.rmtree(build_src, ignore_errors=True)
-        shutil.copytree(project_srcdir, build_src)
-        # now do the same thing with ci
-        ci = Path("ci")
-        assert ci.exists()
-        shutil.rmtree(builddir / "lib " / "ci", ignore_errors=True)
-        shutil.copytree(ci, builddir / "lib" / "ci")
+        for lib in libs:
+            project_libdir = Path(lib)
+            assert project_libdir.exists()
+            build_lib = builddir / "lib" / lib
+            shutil.rmtree(build_lib, ignore_errors=True)
+            shutil.copytree(project_libdir, build_lib)
         # now copy the example into the "src" directory
         ino_file = example / f"{example.name}.ino"
         locked_print(f"Copying {ino_file} to {srcdir / f'{example.name}.ino'}")
@@ -72,8 +69,7 @@ def compile_for_board_and_example(
             "ci",
             "--board",
             real_board_name,
-            "--lib=ci",
-            "--lib=src",
+            *[f"--lib={lib}" for lib in libs],
             "--keep-build-dir",
             f"--build-dir={builddir.as_posix()}",
         ]
