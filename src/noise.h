@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "crgb.h"
+#include "namespace.h"
 
 /// @file noise.h
 /// Functions to generate and fill arrays with noise.
