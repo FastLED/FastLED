@@ -141,6 +141,13 @@ BLUEPILL = Board(
     platform="ststm32",
 )
 
+# maple_mini_b20
+MAPLE_MINI = Board(
+    board_name="maple_mini",
+    real_board_name="maple_mini_b20",
+    platform="ststm32",
+)
+
 UNO_R4_WIFI = Board(
     board_name="uno_r4_wifi",
     platform="renesas-ra",
@@ -187,6 +194,7 @@ ALL: list[Board] = [
     XIAOBLESENSE_ADAFRUIT_NRF52,
     ESP32S3_RMT51,
     BLUEPILL,
+    MAPLE_MINI,
 ]
 
 

@@ -1,0 +1,14 @@
+name: maple_mini
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: maple_mini
