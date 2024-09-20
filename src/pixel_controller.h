@@ -59,25 +59,32 @@ struct PixelControllerArgs {
     EDitherMode dither;
     bool advance;
     uint8_t skip;
+    //CRGB color_adjustment_scale;
+    //uint8_t global_brightness;
 
-    PixelControllerArgs(const uint8_t *data, int len, CRGB scale, EDitherMode dither, bool advance, uint8_t skip)
+    PixelControllerArgs(
+            const uint8_t *data,
+            int len,
+            CRGB scale,
+            EDitherMode dither,
+            bool advance, uint8_t skip)
         : data(data), len(len), scale(scale), dither(dither), advance(advance), skip(skip) {
     }
 
     PixelControllerArgs(
-            const uint8_t *d, int len, CRGB & s,
+            const uint8_t *d, int len, const CRGB & s,
             EDitherMode dither, bool advance, uint8_t skip)
                 : data(d), len(len), scale(s), dither(dither), advance(advance), skip(skip) {
     }
 
     PixelControllerArgs(
-            const CRGB *d, int len, CRGB & s,
+            const CRGB *d, int len, const CRGB & s,
             EDitherMode dither)
                 : data((const uint8_t*)d), len(len), scale(s), dither(dither), advance(true), skip(0) {
     }
 
     PixelControllerArgs(
-            const CRGB &d, int len, CRGB & s, EDitherMode dither)
+            const CRGB &d, int len, const CRGB & s, EDitherMode dither)
                 : data((const uint8_t*)&d), len(len), scale(s), dither(dither), advance(false), skip(0) {
     }
 };
