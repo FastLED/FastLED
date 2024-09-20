@@ -60,7 +60,6 @@ def compile_for_board_and_example(
         srcdir.mkdir(parents=True, exist_ok=True)
         shutil.copy(ino_file, srcdir / f"{example.name}.ino")
         cwd = str(builddir)
-        shell = True
         cmd_list = [
             "pio",
             "run",
