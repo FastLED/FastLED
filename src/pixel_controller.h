@@ -52,6 +52,37 @@ FASTLED_NAMESPACE_BEGIN
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
 
+struct PixelControllerArgs {
+    const uint8_t *data;
+    int len;
+    CRGB scale;
+    EDitherMode dither;
+    bool advance;
+    uint8_t skip;
+
+    PixelControllerArgs(const uint8_t *data, int len, CRGB scale, EDitherMode dither, bool advance, uint8_t skip)
+        : data(data), len(len), scale(scale), dither(dither), advance(advance), skip(skip) {
+    }
+
+    PixelControllerArgs(
+            const uint8_t *d, int len, CRGB & s,
+            EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0)
+                : data(d), len(len), scale(s), dither(dither), advance(advance), skip(skip) {
+    }
+
+    PixelControllerArgs(
+            const CRGB *d, int len, CRGB & s,
+            EDitherMode dither = BINARY_DITHER)
+                : data((const uint8_t*)d), len(len), scale(s), dither(dither), advance(true), skip(0) {
+    }
+
+    PixelControllerArgs(
+            const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER)
+                : data((const uint8_t*)&d), len(len), scale(s), dither(dither), advance(false), skip(0) {
+    }
+};
+
+
 /// Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
 /// support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will
 /// centralize 8/12/16 conversions here as well.
@@ -110,47 +141,13 @@ struct PixelController {
     }
 
     /// Constructor
-    /// @param d pointer to LED data
-    /// @param len length of the LED data
-    /// @param s LED scale values, as CRGB struct
-    /// @param dither dither setting for the LEDs
-    /// @param advance whether the pointer (d) should advance per LED
-    /// @param skip if the pointer is advancing, how many bytes to skip in addition to 3
-    PixelController(
-            const uint8_t *d, int len, CRGB & s,
-            EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0)
-                : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
-        enable_dithering(dither);
-        mData += skip;
-        mAdvance = (advance) ? 3+skip : 0;
-        initOffsets(len);
-    }
-
-    /// Constructor
-    /// @param d pointer to LED data
-    /// @param len length of the LED data
-    /// @param s LED scale values, as CRGB struct
-    /// @param dither dither setting for the LEDs
-    PixelController(
-            const CRGB *d, int len, CRGB & s,
-            EDitherMode dither = BINARY_DITHER)
-                : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
-        enable_dithering(dither);
-        mAdvance = 3;
-        initOffsets(len);
-    }
-
-    /// Constructor
-    /// @param d pointer to LED data
-    /// @param len length of the LED data
-    /// @param s LED scale values, as CRGB struct
-    /// @param dither dither setting for the LEDs
-    PixelController(
-            const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER)
-                : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
-        enable_dithering(dither);
-        mAdvance = 0;
-        initOffsets(len);
+    /// @param args PixelControllerArgs struct containing all necessary parameters
+    PixelController(const PixelControllerArgs& args)
+        : mData(args.data), mLen(args.len), mLenRemaining(args.len), mScale(args.scale) {
+        enable_dithering(args.dither);
+        mData += args.skip;
+        mAdvance = args.advance ? 3 + args.skip : 0;
+        initOffsets(args.len);
     }
 
 
