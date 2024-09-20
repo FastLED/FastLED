@@ -7,14 +7,16 @@ from dataclasses import dataclass
 # gives esp32 boards the same build environment as the Arduino 2.3.1+.
 
 # Set to a specific release, we may want to update this in the future.
-ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
-ESP32_IDF_5_1_LATEST = "https://github.com/pioarduino/platform-espressif32.git#develop"
+ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/51.03.04/platform-espressif32.zip"
+ESP32_IDF_5_1_PIOARDUINO_LATEST = (
+    "https://github.com/pioarduino/platform-espressif32.git#develop"
+)
 ESP32_IDF_4_4_LATEST = "platformio/espressif32"
 # Top of trunk.
-# ESP32_IDF_5_1 = "https://github.com/pioarduino/platform-espressif32"
+# ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32"
 
 # Old fork that we were using
-# ESP32_IDF_5_1 = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
+# ESP32_IDF_5_1_PIOARDUINO = "https://github.com/zackees/platform-espressif32#Arduino/IDF5"
 
 
 @dataclass
@@ -66,7 +68,7 @@ class Board:
 
 ESP32DEV = Board(
     board_name="esp32dev",
-    platform=ESP32_IDF_5_1_LATEST,
+    platform=ESP32_IDF_5_1_PIOARDUINO_LATEST,
 )
 
 ESP32DEV_IDF4_4 = Board(
@@ -77,7 +79,7 @@ ESP32DEV_IDF4_4 = Board(
 
 # ESP01 = Board(
 #     board_name="esp01",
-#     platform=ESP32_IDF_5_1,
+#     platform=ESP32_IDF_5_1_PIOARDUINO,
 # )
 
 ESP32_C2_DEVKITM_1 = Board(
@@ -89,23 +91,23 @@ ESP32_C2_DEVKITM_1 = Board(
 
 ESP32_C3_DEVKITM_1 = Board(
     board_name="esp32-c3-devkitm-1",
-    platform=ESP32_IDF_5_1,
+    platform=ESP32_IDF_5_1_PIOARDUINO,
 )
 
 ESP32_C6_DEVKITC_1 = Board(
     board_name="esp32-c6-devkitc-1",
-    platform=ESP32_IDF_5_1,
+    platform=ESP32_IDF_5_1_PIOARDUINO,
 )
 
 ESP32_S3_DEVKITC_1 = Board(
     board_name="esp32-s3-devkitc-1",
-    platform=ESP32_IDF_5_1,
+    platform=ESP32_IDF_5_1_PIOARDUINO,
 )
 
 ESP32_H2_DEVKITM_1 = Board(
     board_name="esp32-h2-devkitm-1",
     platform_needs_install=True,  # Install platform package to get the boards
-    platform=ESP32_IDF_5_1_LATEST,
+    platform=ESP32_IDF_5_1_PIOARDUINO_LATEST,
 )
 
 ADA_FEATHER_NRF52840_SENSE = Board(
@@ -173,7 +175,7 @@ ESP32S3_RMT51 = Board(
     board_name="esp32rmt_51",
     real_board_name="esp32-s3-devkitc-1",
     platform_needs_install=True,
-    platform=ESP32_IDF_5_1,
+    platform=ESP32_IDF_5_1_PIOARDUINO,
     defines=[
         "FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN=1",
         "FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE=1",
