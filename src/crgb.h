@@ -320,7 +320,7 @@ struct CRGB {
     /// Converts a CRGB to a 32-bit color having an alpha of 255.
     FASTLED_FORCE_INLINE explicit operator uint32_t() const
     {
-        return uint32_t{0xff000000} |
+        return uint32_t(0xff000000) |
                (uint32_t{r} << 16) |
                (uint32_t{g} << 8) |
                uint32_t{b};

@@ -1,6 +1,12 @@
 #ifndef __INC_CLOCKLESS_BLOCK_ESP8266_H
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
+#include <stdint.h>
+#include "namespace.h"
+#include "register.h"
+#include "eorder.h"
+#include "transpose8x1_noinline.h"
+
 #define FASTLED_HAS_BLOCKLESS 1
 
 #define FIX_BITS(bits) (((bits & 0x0fL) << 12) | (bits & 0x30))
