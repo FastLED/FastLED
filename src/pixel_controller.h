@@ -66,18 +66,18 @@ struct PixelControllerArgs {
 
     PixelControllerArgs(
             const uint8_t *d, int len, CRGB & s,
-            EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0)
+            EDitherMode dither, bool advance, uint8_t skip)
                 : data(d), len(len), scale(s), dither(dither), advance(advance), skip(skip) {
     }
 
     PixelControllerArgs(
             const CRGB *d, int len, CRGB & s,
-            EDitherMode dither = BINARY_DITHER)
+            EDitherMode dither)
                 : data((const uint8_t*)d), len(len), scale(s), dither(dither), advance(true), skip(0) {
     }
 
     PixelControllerArgs(
-            const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER)
+            const CRGB &d, int len, CRGB & s, EDitherMode dither)
                 : data((const uint8_t*)&d), len(len), scale(s), dither(dither), advance(false), skip(0) {
     }
 };
