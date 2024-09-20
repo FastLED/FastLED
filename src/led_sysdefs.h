@@ -48,7 +48,7 @@
 #include "platforms/apollo3/led_sysdefs_apollo3.h"
 #elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(ARDUINO_ARCH_RENESAS_PORTENTA)
 #include "platforms/arm/renesas/led_sysdef_arm_renesas.h"
-#elif defined(__x86_64__)
+#elif defined(__x86_64__) || defined(FASTLED_STUB_IMPL)
 // Not on a microcontroller
 //#    ifdef FASTLED_HAS_PRAGMA_MESSAGE
 //#      pragma message "Using stub, no data will be written to pins"
