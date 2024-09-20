@@ -142,7 +142,7 @@ struct PixelController {
 
     /// Constructor
     /// @param args PixelControllerArgs struct containing all necessary parameters
-    PixelController(const PixelControllerArgs& args)
+    PixelController(const PixelControllerArgs&& args)
         : mData(args.data), mLen(args.len), mLenRemaining(args.len), mScale(args.scale) {
         enable_dithering(args.dither);
         mData += args.skip;
