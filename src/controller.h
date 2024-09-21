@@ -271,6 +271,8 @@ protected:
     /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
     virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale_pre_mixed) {
         PixelController<RGB_ORDER, LANES, MASK> pixels(PixelControllerArgs(data, nLeds, scale_pre_mixed, getDither()));
+        PixelControllerArgs args(data, nLeds, scale_pre_mixed, getDither());
+        PixelController<RGB_ORDER, LANES, MASK> pixels(args);
         showPixels(pixels);
     }
 
