@@ -101,8 +101,7 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
     void showColor(const struct CRGB &data, int nLeds, uint8_t brightness) {
-        PixelControllerArgs args(data, nLeds, getAdjustment(brightness), BINARY_DITHER);
-        show(args);
+        show(PixelControllerArgs(data, nLeds, getAdjustment(brightness), BINARY_DITHER));
     }
 
     /// Write the data to the LEDs managed by this controller
@@ -110,12 +109,12 @@ public:
     /// @see show(const struct CRGB*, int, uint8_t)
     void showLeds(uint8_t brightness=255) {
         //show(m_Data, m_nLeds, getAdjustment(brightness));
-        PixelControllerArgs args(
+        // 
+        show(PixelControllerArgs(
             m_Data,
             brightness,
             getAdjustment(brightness),
-            BINARY_DITHER);
-        show(args);
+            BINARY_DITHER));
     }
 
     /// @copybrief showColor(const struct CRGB&, int, CRGB)
@@ -125,8 +124,8 @@ public:
     /// @see showColor(const struct CRGB&, int, CRGB)
     void showColor(const struct CRGB & data, uint8_t brightness=255) {
         // showColor(data, m_nLeds, getAdjustment(brightness));
-        PixelControllerArgs args(data, m_nLeds, getAdjustment(brightness), BINARY_DITHER);
-        show(args);
+        
+        show(PixelControllerArgs(data, m_nLeds, getAdjustment(brightness), BINARY_DITHER));
     }
 
     /// Get the first LED controller in the linked list of controllers
