@@ -74,8 +74,7 @@ public:
     /// @param nLeds the number of LEDs to clear
     virtual void clearLeds(int nLeds) {
         //showColor(CRGB::Black, nLeds, CRGB::Black);
-        PixelControllerArgs args(CRGB::Black, nLeds, CRGB::Black, BINARY_DITHER);
-        show(args);
+        show(PixelControllerArgs(CRGB::Black, nLeds, CRGB::Black, BINARY_DITHER));
     }
 
     /// @copybrief show(const struct CRGB*, int, CRGB)
