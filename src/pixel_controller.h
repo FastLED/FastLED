@@ -141,8 +141,8 @@ struct PixelController {
             EDitherMode dither,
             bool advance,
             uint8_t skip,
-            const CRGB& color_correction,
-            const CRGB& color_temperature,
+            CRGB color_correction,
+            CRGB color_temperature,
             uint8_t brightness)
                 : mData(d),
                   mLen(len),
@@ -176,8 +176,8 @@ struct PixelController {
             const CRGB *d,
             int len,
             EDitherMode dither,
-            const CRGB& color_correction,
-            const CRGB& color_temperature,
+            CRGB color_correction,
+            CRGB color_temperature,
             uint8_t brightness)
                 : mData((const uint8_t*)d),
                   mLen(len),
@@ -199,8 +199,8 @@ struct PixelController {
             const CRGB &d,
             int len,
             EDitherMode dither,
-            const CRGB& colorCorrection,
-            const CRGB& colorTemperature,
+            CRGB colorCorrection,
+            CRGB colorTemperature,
             uint8_t brightness)
                 : mData((const uint8_t*)&d),
                   mLen(len),
