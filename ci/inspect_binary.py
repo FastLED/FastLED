@@ -38,6 +38,20 @@ def dump_symbols(firmware_path: Path, objdump_path: Path) -> str:
     return result.stdout
 
 
+def dump_sections_size(firmware_path: Path, size_path: Path) -> str:
+    command = f"{size_path} {firmware_path}"
+    result = subprocess.run(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Error running command: {result.stderr}")
+    return result.stdout
+
+
 def main() -> int:
     root_build_dir = Path(".build")
 
@@ -64,15 +78,21 @@ def main() -> int:
     objdump_path = Path(board_info["aliases"]["objdump"])
     cpp_filt_path = Path(board_info["aliases"]["c++filt"])
 
-    print(f"Dumping symbols for {board} firmware: {firmware_path}")
+    print(f"Dumping sections size for {board} firmware: {firmware_path}")
+    try:
+        size_path = Path(board_info["aliases"]["size"])
+        sections_size = dump_sections_size(firmware_path, size_path)
+        print(sections_size)
+    except Exception as e:
+        print(f"Error while dumping sections size: {e}")
 
+    print(f"Dumping symbols for {board} firmware: {firmware_path}")
     try:
         symbols = dump_symbols(firmware_path, objdump_path)
         symbols = cpp_filt(cpp_filt_path, symbols)
         print(symbols)
     except Exception as e:
-        print(f"Error: {e}")
-        return 1
+        print(f"Error while dumping symbols: {e}")
 
     return 0
 
