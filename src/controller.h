@@ -115,7 +115,7 @@ public:
     /// @param data the CRGB color to set the LEDs to
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
-    void showColor(const struct CRGB & data, uint8_t brightness=255) {
+    void showColor(const struct CRGB & data, uint8_t brightness) {
         showColor(data, m_nLeds, getAdjustment(brightness));
     }
 
