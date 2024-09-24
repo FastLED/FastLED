@@ -1,6 +1,5 @@
 import argparse
 import json
-import os
 import subprocess
 from pathlib import Path
 
@@ -64,14 +63,16 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     if args.cwd:
-        os.chdir(args.cwd)
-    root_build_dir = Path(".build")
+        # os.chdir(args.cwd)
+        root_build_dir = Path(args.cwd) / ".build"
+    else:
+        root_build_dir = Path(".build")
 
     # Find the first board directory
     board_dirs = [d for d in root_build_dir.iterdir() if d.is_dir()]
     if not board_dirs:
         # print("No board directories found in .build")
-        print(f"No board directories found in {root_build_dir.resolve()}")
+        print(f"No board directories found in {root_build_dir.absolute()}")
         return 1
 
     # display all the boards to the user and ask them to select which one they want by number
