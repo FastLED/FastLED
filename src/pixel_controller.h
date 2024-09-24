@@ -118,7 +118,7 @@ struct PixelController {
     /// @param skip if the pointer is advancing, how many bytes to skip in addition to 3
     PixelController(
             const uint8_t *d, int len, CRGB & s,
-            EDitherMode dither = BINARY_DITHER, bool advance=true, uint8_t skip=0)
+            EDitherMode dither, bool advance, uint8_t skip)
                 : mData(d), mLen(len), mLenRemaining(len), mScale(s) {
         enable_dithering(dither);
         mData += skip;
@@ -133,7 +133,7 @@ struct PixelController {
     /// @param dither dither setting for the LEDs
     PixelController(
             const CRGB *d, int len, CRGB & s,
-            EDitherMode dither = BINARY_DITHER)
+            EDitherMode dither)
                 : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(s) {
         enable_dithering(dither);
         mAdvance = 3;
@@ -146,7 +146,7 @@ struct PixelController {
     /// @param s LED scale values, as CRGB struct
     /// @param dither dither setting for the LEDs
     PixelController(
-            const CRGB &d, int len, CRGB & s, EDitherMode dither = BINARY_DITHER)
+            const CRGB &d, int len, CRGB & s, EDitherMode dither)
                 : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(s) {
         enable_dithering(dither);
         mAdvance = 0;
