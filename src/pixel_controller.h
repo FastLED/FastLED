@@ -23,13 +23,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-#ifndef FASTLED_HD_COLOR_MIXING
-#ifdef __AVR__
-#define FASTLED_HD_COLOR_MIXING 1
-#else
-#define FASTLED_HD_COLOR_MIXING 1
-#endif  // __AVR__
-#endif  // FASTLED_HD_COLOR_MIXING
 
 /// Gets the assigned color channel for a byte's position in the output,
 /// using the color order (EOrder) template parameter from the
@@ -76,11 +69,8 @@ struct PixelController {
     CRGB mScale;             ///< the per-channel scale values, provided by a color correction function such as CLEDController::computeAdjustment()
     int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
     int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
-
-    #if FASTLED_HD_COLOR_MIXING
     CRGB mScaleNoBrightness;   ///< the color correction to apply to the strip
     uint8_t mBrightness = 255;     ///< the brightness to apply to the strip
-    #endif
 
     PixelIterator as_iterator(const Rgbw& rgbw) {
         return PixelIterator(this, rgbw);
@@ -109,10 +99,8 @@ struct PixelController {
         mScale = other.mScale;
         mAdvance = other.mAdvance;
         mLenRemaining = mLen = other.mLen;
-        #if FASTLED_HD_COLOR_MIXING
         mScaleNoBrightness = other.mScaleNoBrightness;
         mBrightness = other.mBrightness;
-        #endif
         for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
     }
 
@@ -159,10 +147,8 @@ struct PixelController {
             const CRGB& colorTemperature,
             uint8_t brightness) {
         mScale = CRGB::computeAdjustment(brightness, colorCorrection, colorTemperature);
-        #if FASTLED_HD_COLOR_MIXING
         mScaleNoBrightness = CRGB::computeAdjustment(255, colorCorrection, colorTemperature);
         mBrightness = brightness;
-        #endif
     }
 
     /// Constructor
