@@ -33,27 +33,37 @@ FASTLED_NAMESPACE_BEGIN
 class CLEDController {
 protected:
     friend class CFastLED;
-    CRGB *m_Data;              ///< pointer to the LED data used by this controller
-    CLEDController *m_pNext;   ///< pointer to the next LED controller in the linked list
-    CRGB m_ColorCorrection;    ///< CRGB object representing the color correction to apply to the strip on show()  @see setCorrection
-    CRGB m_ColorTemperature;   ///< CRGB object representing the color temperature to apply to the strip on show() @see setTemperature
-    EDitherMode m_DitherMode;  ///< the current dither mode of the controller
-    int m_nLeds;               ///< the number of LEDs in the LED data array
-    static CLEDController *m_pHead;  ///< pointer to the first LED controller in the linked list
-    static CLEDController *m_pTail;  ///< pointer to the last LED controller in the linked list
+    CRGB *m_Data;                          ///< pointer to the LED data used by this controller
+    CLEDController *m_pNext;               ///< pointer to the next LED controller in the linked list
+    CRGB m_ColorCorrection;                ///< CRGB object representing the color correction to apply to the strip on show()  @see setCorrection
+    CRGB m_ColorTemperature;               ///< CRGB object representing the color temperature to apply to the strip on show() @see setTemperature
+    EDitherMode m_DitherMode;              ///< the current dither mode of the controller
+    int m_nLeds;                           ///< the number of LEDs in the LED data array
+    static CLEDController *m_pHead;        ///< pointer to the first LED controller in the linked list
+    static CLEDController *m_pTail;        ///< pointer to the last LED controller in the linked list
 
 
     /// Set all the LEDs to a given color. 
     /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs to set to this color
     /// @param scale the rgb scaling value for outputting color
-    virtual void showColor(const struct CRGB & data, int nLeds, CRGB premixed, CRGB color_correction, uint8_t brightness) = 0;
+    virtual void showColor(
+        const CRGB& data,
+        int nLeds,
+        const CRGB& color_correction,
+        const CRGB& color_temperature,
+        uint8_t brightness) = 0;
 
     /// Write the passed in RGB data out to the LEDs managed by this controller. 
     /// @param data the rgb data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale the rgb scaling to apply to each led before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, CRGB premixed, CRGB color_correction, uint8_t brightness) = 0;
+    virtual void show(
+        const CRGB *data,
+        int nLeds,
+        const CRGB& color_correction,
+        const CRGB& color_temperature,
+        uint8_t brightness) = 0;
 
 public:
 
@@ -79,7 +89,9 @@ public:
 
     /// Clear out/zero out the given number of LEDs.
     /// @param nLeds the number of LEDs to clear
-    virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black, CRGB::Black, 0x0); }
+    virtual void clearLeds(int nLeds) {
+        showColor(CRGB::Black, nLeds, CRGB::Black, CRGB::Black, 0x0);
+    }
 
     /// @copybrief show(const struct CRGB*, int, CRGB)
     ///
@@ -89,7 +101,7 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, CRGB)
     void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
-        show(data, nLeds, getAdjustment(brightness), getAdjustment(255), brightness);
+        show(data, nLeds, m_ColorCorrection, m_ColorTemperature, brightness);
     }
 
     /// @copybrief showColor(const struct CRGB&, int, CRGB)
@@ -100,14 +112,14 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
     void showColor(const struct CRGB &data, int nLeds, uint8_t brightness) {
-        showColor(data, nLeds, getAdjustment(brightness), getAdjustment(255), brightness);
+        showColor(data, nLeds, m_ColorCorrection, m_ColorTemperature, brightness);
     }
 
     /// Write the data to the LEDs managed by this controller
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, uint8_t)
     void showLeds(uint8_t brightness) {
-        show(m_Data, m_nLeds, getAdjustment(brightness), getAdjustment(255), brightness);
+        show(m_Data, m_nLeds, m_ColorCorrection, m_ColorTemperature, brightness);
     }
 
     /// @copybrief showColor(const struct CRGB&, int, CRGB)
@@ -116,7 +128,7 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
     void showColor(const struct CRGB & data, uint8_t brightness) {
-        showColor(data, m_nLeds, getAdjustment(brightness), getAdjustment(255), brightness);
+        showColor(data, m_nLeds, m_ColorCorrection, m_ColorTemperature, brightness);
     }
 
     /// Get the first LED controller in the linked list of controllers
@@ -218,13 +230,6 @@ public:
     /// @returns the current color temperature (CLEDController::m_ColorTemperature)
     CRGB getTemperature() { return m_ColorTemperature; }
 
-    /// Get the combined brightness/color adjustment for this controller
-    /// @param scale the brightness scale to get the correction for
-    /// @returns a CRGB object representing the total adjustment, including color correction and color temperature
-    CRGB getAdjustment(uint8_t scale) {
-        return CRGB::computeAdjustment(scale, m_ColorCorrection, m_ColorTemperature);
-    }
-
     /// Gets the maximum possible refresh rate of the strip
     /// @returns the maximum refresh rate, in frames per second (FPS)
     virtual uint16_t getMaxRefreshRate() const { return 0; }
@@ -242,14 +247,15 @@ protected:
     /// Set all the LEDs on the controller to a given color
     /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs to set to this color
-    /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
-    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale_pre_mixed, CRGB color_correction, uint8_t brightness) {
+    /// @param color_correction the color correction to apply to the strip
+    /// @param color_temperature the color temperature to apply to the strip
+    virtual void showColor(const CRGB & data, int nLeds, const CRGB& color_correction, const CRGB& color_temperature, uint8_t brightness) {
         PixelController<RGB_ORDER, LANES, MASK> pixels(
             data,
             nLeds,
-            scale_pre_mixed,
             getDither(),
             color_correction,
+            color_temperature,
             brightness);
         showPixels(pixels);
     }
@@ -258,12 +264,12 @@ protected:
     /// @param data the RGB data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
-    virtual void show(const struct CRGB *data, int nLeds, CRGB scale_pre_mixed, CRGB color_correction, uint8_t brightness) {
+    virtual void show(const CRGB *data, int nLeds, const CRGB& color_correction, const CRGB& color_temperature, uint8_t brightness) {
         PixelController<RGB_ORDER, LANES, MASK> pixels(
             data, nLeds < 0 ? -nLeds : nLeds,
-            scale_pre_mixed,
             getDither(),
             color_correction,
+            color_temperature,
             brightness);
         if(nLeds < 0) {
             // nLeds < 0 implies that we want to show them in reverse
