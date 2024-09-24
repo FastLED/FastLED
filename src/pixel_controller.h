@@ -51,6 +51,17 @@ FASTLED_NAMESPACE_BEGIN
 
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
+struct PixelControllerBase {
+    const uint8_t *mData;    ///< pointer to the underlying LED data
+    int mLen;                ///< number of LEDs in the data for one lane
+    int mLenRemaining;       ///< counter for the number of LEDs left to process
+    uint8_t d[3];            ///< values for the scaled dither signal @see init_binary_dithering()
+    uint8_t e[3];            ///< values for the scaled dither signal @see init_binary_dithering()
+    CRGB mScale;             ///< the per-channel scale values, provided by a color correction function such as CLEDController::computeAdjustment()
+    int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
+    CRGB mColorCorrection;   ///< the color correction to apply to the strip
+    uint8_t mBrightness;     ///< the brightness to apply to the strip
+};
 
 /// Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
 /// support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will
@@ -59,17 +70,8 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam LANES how many parallel lanes of output to write
 /// @tparam MASK bitmask for the output lanes
 template<EOrder RGB_ORDER, int LANES=1, uint32_t MASK=0xFFFFFFFF>
-struct PixelController {
-    const uint8_t *mData;    ///< pointer to the underlying LED data
-    int mLen;                ///< number of LEDs in the data for one lane
-    int mLenRemaining;       ///< counter for the number of LEDs left to process
-    uint8_t d[3];            ///< values for the scaled dither signal @see init_binary_dithering()
-    uint8_t e[3];            ///< values for the scaled dither signal @see init_binary_dithering()
-    CRGB mScale;             ///< the per-channel scale values, provided by a color correction function such as CLEDController::computeAdjustment()
-    int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
+struct PixelController: public PixelControllerBase {
     int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
-    CRGB mColorCorrection;   ///< the color correction to apply to the strip
-    uint8_t mBrightness;     ///< the brightness to apply to the strip
 
     PixelIterator as_iterator(const Rgbw& rgbw) {
         return PixelIterator(this, rgbw);
