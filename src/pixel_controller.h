@@ -19,6 +19,15 @@
 #include "dither_mode.h"
 #include "pixel_iterator.h"
 
+#ifndef FASTLED_HD_COLOR_MIXING
+// no hd mixing for AVR
+#if defined(__AVR__)
+#define FASTLED_HD_COLOR_MIXING 0
+#else
+#define FASTLED_HD_COLOR_MIXING 1
+#endif
+#endif
+
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -68,8 +77,11 @@ struct PixelController {
     CRGB mScale;             ///< the per-channel scale values, provided by a color correction function such as CLEDController::computeAdjustment()
     int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
     int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
+
+    #if FASTLED_HD_COLOR_MIXING
     CRGB mColorCorrection;   ///< the color correction to apply to the strip
     uint8_t mBrightness;     ///< the brightness to apply to the strip
+    #endif
 
     PixelIterator as_iterator(const Rgbw& rgbw) {
         return PixelIterator(this, rgbw);
@@ -98,8 +110,10 @@ struct PixelController {
         mScale = other.mScale;
         mAdvance = other.mAdvance;
         mLenRemaining = mLen = other.mLen;
+        #if FASTLED_HD_COLOR_MIXING
         mColorCorrection = other.mColorCorrection;
         mBrightness = other.mBrightness;
+        #endif
         for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
     }
 
@@ -134,9 +148,12 @@ struct PixelController {
                 : mData(d),
                   mLen(len),
                   mLenRemaining(len),
-                  mScale(pre_mixed),
-                  mColorCorrection(color_correction),
-                  mBrightness(brightness) {
+                  mScale(pre_mixed)
+                  #if FASTLED_HD_COLOR_MIXING
+                  ,mColorCorrection(color_correction),
+                  mBrightness(brightness)
+                  #endif
+                  {
         enable_dithering(dither);
         mData += skip;
         mAdvance = (advance) ? 3+skip : 0;
@@ -160,9 +177,12 @@ struct PixelController {
                 : mData((const uint8_t*)d),
                   mLen(len),
                   mLenRemaining(len),
-                  mScale(pre_mixed),
-                  mColorCorrection(color_correction),
-                  mBrightness(brightness) {
+                  mScale(pre_mixed)
+                  #if FASTLED_HD_COLOR_MIXING
+                  ,mColorCorrection(color_correction),
+                  mBrightness(brightness)
+                  #endif
+                  {
         enable_dithering(dither);
         mAdvance = 3;
         initOffsets(len);
@@ -185,9 +205,12 @@ struct PixelController {
                 : mData((const uint8_t*)&d),
                   mLen(len),
                   mLenRemaining(len),
-                  mScale(pre_mixed),
-                  mColorCorrection(color_correction),
-                  mBrightness(brightness) {
+                  mScale(pre_mixed)
+                  #if FASTLED_HD_COLOR_MIXING
+                  ,mColorCorrection(color_correction),
+                  mBrightness(brightness)
+                  #endif
+                  {
         enable_dithering(dither);
         mAdvance = 0;
         initOffsets(len);
