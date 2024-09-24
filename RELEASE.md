@@ -12,7 +12,6 @@ Edit these files to update the version number
   * library.json 
   * library.properties 
   * FastLED.h 
-  * README.md 
   * docs/Doxyfile
 
 
