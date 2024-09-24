@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -56,11 +57,14 @@ def dump_sections_size(firmware_path: Path, size_path: Path) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Inspect a compiled binary")
     parser.add_argument("--first", action="store_true", help="Inspect the first board")
+    parser.add_argument("--cwd", type=str, help="Custom working directory")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    if args.cwd:
+        os.chdir(args.cwd)
     root_build_dir = Path(".build")
 
     # Find the first board directory

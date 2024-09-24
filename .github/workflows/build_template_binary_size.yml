@@ -53,7 +53,7 @@ jobs:
       - name: Inspect Binary
         continue-on-error: true
         run: |
-          uv run ci/inspect_binary.py --first
+          uv run ci/inspect_binary.py --first --cwd ci/tmp
 
       - name: Generate timestamp and random hex
         id: generate_id
