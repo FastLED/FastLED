@@ -11,7 +11,9 @@ CRGB CRGB::computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const 
                     uint8_t cc = colorCorrection.raw[i];
                     uint8_t ct = colorTemperature.raw[i];
                     if(cc > 0 && ct > 0) {
-                        uint32_t work = (((uint32_t)cc)+1) * (((uint32_t)ct)+1) * scale;
+                        uint32_t work = (((uint16_t)cc)+1);
+                        work *= (((uint16_t)ct)+1);
+                        work *= scale;
                         work /= 0x10000L;
                         adj.raw[i] = work & 0xFF;
                     }
