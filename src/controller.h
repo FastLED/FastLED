@@ -47,13 +47,13 @@ protected:
     /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs to set to this color
     /// @param scale the rgb scaling value for outputting color
-    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale) = 0;
+    virtual void showColor(const struct CRGB & data, int nLeds, CRGB premixed, CRGB color_correction, uint8_t brightness) = 0;
 
     /// Write the passed in RGB data out to the LEDs managed by this controller. 
     /// @param data the rgb data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale the rgb scaling to apply to each led before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, CRGB scale) = 0;
+    virtual void show(const struct CRGB *data, int nLeds, CRGB premixed, CRGB color_correction, uint8_t brightness) = 0;
 
 public:
 
@@ -79,7 +79,7 @@ public:
 
     /// Clear out/zero out the given number of LEDs.
     /// @param nLeds the number of LEDs to clear
-    virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black); }
+    virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black, CRGB::Black, 0x0); }
 
     /// @copybrief show(const struct CRGB*, int, CRGB)
     ///
@@ -89,7 +89,7 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, CRGB)
     void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
-        show(data, nLeds, getAdjustment(brightness));
+        show(data, nLeds, getAdjustment(brightness), getAdjustment(255), brightness);
     }
 
     /// @copybrief showColor(const struct CRGB&, int, CRGB)
@@ -100,14 +100,14 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
     void showColor(const struct CRGB &data, int nLeds, uint8_t brightness) {
-        showColor(data, nLeds, getAdjustment(brightness));
+        showColor(data, nLeds, getAdjustment(brightness), getAdjustment(255), brightness);
     }
 
     /// Write the data to the LEDs managed by this controller
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, uint8_t)
     void showLeds(uint8_t brightness) {
-        show(m_Data, m_nLeds, getAdjustment(brightness));
+        show(m_Data, m_nLeds, getAdjustment(brightness), getAdjustment(255), brightness);
     }
 
     /// @copybrief showColor(const struct CRGB&, int, CRGB)
@@ -116,7 +116,7 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
     void showColor(const struct CRGB & data, uint8_t brightness) {
-        showColor(data, m_nLeds, getAdjustment(brightness));
+        showColor(data, m_nLeds, getAdjustment(brightness), getAdjustment(255), brightness);
     }
 
     /// Get the first LED controller in the linked list of controllers
@@ -243,8 +243,14 @@ protected:
     /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs to set to this color
     /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
-    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale_pre_mixed) {
-        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds, scale_pre_mixed, getDither());
+    virtual void showColor(const struct CRGB & data, int nLeds, CRGB scale_pre_mixed, CRGB color_correction, uint8_t brightness) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(
+            data,
+            nLeds,
+            scale_pre_mixed,
+            getDither(),
+            color_correction,
+            brightness);
         showPixels(pixels);
     }
 
@@ -252,8 +258,13 @@ protected:
     /// @param data the RGB data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
-    virtual void show(const struct CRGB *data, int nLeds, CRGB scale_pre_mixed) {
-        PixelController<RGB_ORDER, LANES, MASK> pixels(data, nLeds < 0 ? -nLeds : nLeds, scale_pre_mixed, getDither());
+    virtual void show(const struct CRGB *data, int nLeds, CRGB scale_pre_mixed, CRGB color_correction, uint8_t brightness) {
+        PixelController<RGB_ORDER, LANES, MASK> pixels(
+            data, nLeds < 0 ? -nLeds : nLeds,
+            scale_pre_mixed,
+            getDither(),
+            color_correction,
+            brightness);
         if(nLeds < 0) {
             // nLeds < 0 implies that we want to show them in reverse
             pixels.mAdvance = -pixels.mAdvance;
