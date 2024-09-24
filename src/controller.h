@@ -221,34 +221,7 @@ public:
     /// @param scale the brightness scale to get the correction for
     /// @returns a CRGB object representing the total adjustment, including color correction and color temperature
     CRGB getAdjustment(uint8_t scale) {
-        return computeAdjustment(scale, m_ColorCorrection, m_ColorTemperature);
-    }
-
-    /// Calculates the combined color adjustment to the LEDs at a given scale, color correction, and color temperature
-    /// @param scale the scale value for the RGB data (i.e. brightness)
-    /// @param colorCorrection color correction to apply
-    /// @param colorTemperature color temperature to apply
-    /// @returns a CRGB object representing the adjustment, including color correction and color temperature
-    static CRGB computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const CRGB & colorTemperature) {
-      #if defined(NO_CORRECTION) && (NO_CORRECTION==1)
-              return CRGB(scale,scale,scale);
-      #else
-              CRGB adj(0,0,0);
-
-              if(scale > 0) {
-                  for(uint8_t i = 0; i < 3; ++i) {
-                      uint8_t cc = colorCorrection.raw[i];
-                      uint8_t ct = colorTemperature.raw[i];
-                      if(cc > 0 && ct > 0) {
-                          uint32_t work = (((uint32_t)cc)+1) * (((uint32_t)ct)+1) * scale;
-                          work /= 0x10000L;
-                          adj.raw[i] = work & 0xFF;
-                      }
-                  }
-              }
-
-              return adj;
-      #endif
+        return CRGB::computeAdjustment(scale, m_ColorCorrection, m_ColorTemperature);
     }
 
     /// Gets the maximum possible refresh rate of the strip

@@ -17,11 +17,8 @@ FASTLED_NAMESPACE_BEGIN
 
 
 #include <stdint.h>
+#include "lib8tion/lib8static.h"
 
-/// Define a LIB8TION member function as static inline with an "unused" attribute
-#define LIB8STATIC __attribute__ ((unused)) static inline
-/// Define a LIB8TION member function as always static inline
-#define LIB8STATIC_ALWAYS_INLINE __attribute__ ((always_inline)) static inline
 
 #if !defined(__AVR__)
 #include <string.h>
