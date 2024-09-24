@@ -50,8 +50,8 @@ protected:
     virtual void showColor(
         const CRGB& data,
         int nLeds,
-        const CRGB& color_correction,
-        const CRGB& color_temperature,
+        CRGB color_correction,
+        CRGB color_temperature,
         uint8_t brightness) = 0;
 
     /// Write the passed in RGB data out to the LEDs managed by this controller. 
@@ -61,8 +61,8 @@ protected:
     virtual void show(
         const CRGB *data,
         int nLeds,
-        const CRGB& color_correction,
-        const CRGB& color_temperature,
+        CRGB color_correction,
+        CRGB color_temperature,
         uint8_t brightness) = 0;
 
 public:
@@ -127,7 +127,7 @@ public:
     /// @param data the CRGB color to set the LEDs to
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
-    void showColor(const struct CRGB & data, uint8_t brightness) {
+    void showColor(const CRGB& data, uint8_t brightness) {
         showColor(data, m_nLeds, m_ColorCorrection, m_ColorTemperature, brightness);
     }
 
@@ -151,7 +151,7 @@ public:
     /// Zero out the LED data managed by this controller
     void clearLedData() {
         if(m_Data) {
-            memset8((void*)m_Data, 0, sizeof(struct CRGB) * m_nLeds);
+            memset8((void*)m_Data, 0, sizeof(CRGB)*m_nLeds);
         }
     }
 
@@ -170,12 +170,12 @@ public:
     /// Reference to the n'th LED managed by the controller
     /// @param x the LED number to retrieve
     /// @returns reference to CLEDController::m_Data[x]
-    CRGB &operator[](int x) { return m_Data[x]; }
+    CRGB& operator[](int x) { return m_Data[x]; }
 
     /// Set the dithering mode for this controller to use
     /// @param ditherMode the dithering mode to set
     /// @returns a reference to the controller
-    inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
+    inline CLEDController& setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
 
     /// Get the dithering option currently set for this controller
     /// @return the currently set dithering option (CLEDController::m_DitherMode)
