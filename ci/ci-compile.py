@@ -223,6 +223,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         extra_scripts=extra_scripts,
         cwd=str(HERE.parent),
         board_dir=(HERE / "boards").absolute().as_posix(),
+        build_flags=["-Wl,-Map,firmware.map"],
         verbose=verbose,
     )
     return out

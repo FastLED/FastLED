@@ -1,7 +1,7 @@
+import argparse
 import json
 import subprocess
 from pathlib import Path
-import argparse
 
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
@@ -52,6 +52,7 @@ def dump_sections_size(firmware_path: Path, size_path: Path) -> str:
         raise RuntimeError(f"Error running command: {result.stderr}")
     return result.stdout
 
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Inspect a compiled binary")
     parser.add_argument("--first", action="store_true", help="Inspect the first board")
@@ -72,7 +73,7 @@ def main() -> int:
     print("Available boards:")
     for i, board_dir in enumerate(board_dirs):
         print(f"[{i}]: {board_dir.name}")
-    
+
     if args.first:
         which = 0
     else:
@@ -104,6 +105,13 @@ def main() -> int:
         print(symbols)
     except Exception as e:
         print(f"Error while dumping symbols: {e}")
+
+    print(f"Dumping map file for {board} firmware: {firmware_path}")
+    map_path = board_dir / "firmware.map"
+    if map_path.exists():
+        print(map_path.read_text())
+    else:
+        print(f"Map file not found at {map_path}")
 
     return 0
 

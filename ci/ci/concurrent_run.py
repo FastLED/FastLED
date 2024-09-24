@@ -28,6 +28,7 @@ class ConcurrentRunArgs:
     extra_scripts: str | None
     cwd: str | None
     board_dir: str | None
+    build_flags: list[str] | None
     verbose: bool = False
 
 
@@ -46,7 +47,7 @@ def concurrent_run(
     first_project = projects[0]
     prev_cwd: str | None = None
     board_dir = args.board_dir
-    libs = ["src", "ci"]
+    libs = args.libs
     if cwd:
         prev_cwd = os.getcwd()
         locked_print(f"Changing to directory {cwd}")
@@ -58,6 +59,7 @@ def concurrent_run(
         extra_packages=extra_packages,
         build_dir=build_dir,
         board_dir=board_dir,
+        build_flags=args.build_flags,
         extra_scripts=extra_scripts,
     )
     verbose = args.verbose
@@ -76,6 +78,7 @@ def concurrent_run(
                 extra_packages,
                 build_dir,
                 board_dir,
+                args.build_flags,
                 extra_scripts,
             )
             future_to_board[future] = board
