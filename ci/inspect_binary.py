@@ -70,7 +70,8 @@ def main() -> int:
     # Find the first board directory
     board_dirs = [d for d in root_build_dir.iterdir() if d.is_dir()]
     if not board_dirs:
-        print("No board directories found in .build")
+        # print("No board directories found in .build")
+        print(f"No board directories found in {root_build_dir.resolve()}")
         return 1
 
     # display all the boards to the user and ask them to select which one they want by number
