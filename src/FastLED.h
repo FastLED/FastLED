@@ -1,8 +1,6 @@
 #ifndef __INC_FASTSPI_LED2_H
 #define __INC_FASTSPI_LED2_H
 
-#pragma GCC push_options
-#pragma GCC optimize("Os")
 
 /// @file FastLED.h
 /// central include file for FastLED, defines the CFastLED class/object
@@ -830,8 +828,6 @@ extern CFastLED FastLED;
 #define NO_HARDWARE_PIN_SUPPORT
 #endif
 
-
-#pragma GCC pop_options
 
 FASTLED_NAMESPACE_END
 
