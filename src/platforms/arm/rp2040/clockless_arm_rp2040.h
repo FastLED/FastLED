@@ -3,10 +3,6 @@
 
 #include "hardware/structs/sio.h"
 
-#pragma GCC push_options
-// Attempt to fix https://github.com/FastLED/FastLED/issues/1629
-#pragma GCC optimize ("Os")
-
 #if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK || !FASTLED_RP2040_CLOCKLESS_PIO
 #include "../common/m0clockless.h"
 #endif
@@ -335,6 +331,5 @@ public:
 
 FASTLED_NAMESPACE_END
 
-#pragma GCC pop_options
 
 #endif // __INC_CLOCKLESS_ARM_RP2040
