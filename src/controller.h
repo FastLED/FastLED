@@ -14,6 +14,7 @@
 #include "dither_mode.h"
 #include "pixel_iterator.h"
 #include "assert.h"
+#include "crgb.h"
 
 FASTLED_NAMESPACE_BEGIN
 
