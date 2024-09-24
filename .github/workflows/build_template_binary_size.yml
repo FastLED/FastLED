@@ -50,6 +50,10 @@ jobs:
               print(f'{board} size {size} is within the limit of ${{ inputs.max_size }}')
           "
 
+      - name: Inspect Binary
+        continue-on-error: true
+        run: |
+          uv run ci/inspect_binary.py --first
 
       - name: Generate timestamp and random hex
         id: generate_id

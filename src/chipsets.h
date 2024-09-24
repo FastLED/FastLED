@@ -320,7 +320,7 @@ class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 		} while(nDWords--);
 	}
 
-	inline void writeLed(uint8_t brightness, uint8_t b0, uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
+	FASTLED_FORCE_INLINE void writeLed(uint8_t brightness, uint8_t b0, uint8_t b1, uint8_t b2) {
 #ifdef FASTLED_SPI_BYTE_ONLY
 		mSPI.writeByte(0xE0 | brightness);
 		mSPI.writeByte(b0);
@@ -335,7 +335,7 @@ class APA102Controller : public CPixelLEDController<RGB_ORDER> {
 #endif
 	}
 
-	inline void write2Bytes(uint8_t b1, uint8_t b2) __attribute__((always_inline)) {
+	FASTLED_FORCE_INLINE void write2Bytes(uint8_t b1, uint8_t b2) {
 #ifdef FASTLED_SPI_BYTE_ONLY
 		mSPI.writeByte(b1);
 		mSPI.writeByte(b2);
@@ -519,7 +519,7 @@ class P9813Controller : public CPixelLEDController<RGB_ORDER> {
 
 	void writeBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
 
-	inline void writeLed(uint8_t r, uint8_t g, uint8_t b) __attribute__((always_inline)) {
+	FASTLED_FORCE_INLINE void writeLed(uint8_t r, uint8_t g, uint8_t b) {
 		FASTLED_REGISTER uint8_t top = 0xC0 | ((~b & 0xC0) >> 2) | ((~g & 0xC0) >> 4) | ((~r & 0xC0) >> 6);
 		mSPI.writeByte(top); mSPI.writeByte(b); mSPI.writeByte(g); mSPI.writeByte(r);
 	}
