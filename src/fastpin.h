@@ -10,6 +10,7 @@
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
 #ifdef ESP32
 // Get rid of the endless volatile warnings in ESP32
+#pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wvolatile"
 #endif
 
