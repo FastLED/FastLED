@@ -249,7 +249,7 @@ protected:
     /// @param nLeds the number of LEDs to set to this color
     /// @param color_correction the color correction to apply to the strip
     /// @param color_temperature the color temperature to apply to the strip
-    virtual void showColor(const CRGB & data, int nLeds, const CRGB& color_correction, const CRGB& color_temperature, uint8_t brightness) {
+    virtual void showColor(const CRGB & data, int nLeds, CRGB color_correction, CRGB color_temperature, uint8_t brightness) {
         PixelController<RGB_ORDER, LANES, MASK> pixels(
             data,
             nLeds,
@@ -264,7 +264,7 @@ protected:
     /// @param data the RGB data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale_pre_mixed the RGB scaling of color adjustment + global brightness to apply to each LED (in RGB8 mode).
-    virtual void show(const CRGB *data, int nLeds, const CRGB& color_correction, const CRGB& color_temperature, uint8_t brightness) {
+    virtual void show(const CRGB *data, int nLeds, CRGB color_correction, CRGB color_temperature, uint8_t brightness) {
         PixelController<RGB_ORDER, LANES, MASK> pixels(
             data, nLeds < 0 ? -nLeds : nLeds,
             getDither(),
