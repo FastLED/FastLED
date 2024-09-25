@@ -3,12 +3,19 @@ import json
 from pathlib import Path
 
 
+def _get_board_info(path: Path) -> dict:
+    build_info = json.loads(path.read_text())
+    assert build_info.keys(), f"No boards found in {build_info}"
+    assert (
+        len(build_info.keys()) == 1
+    ), f"Multiple boards found in {build_info}, so correct board should be specified"
+    return build_info[next(iter(build_info))]
+
+
 def check_firmware_size(board: str) -> int:
     root_build_dir = Path(".build") / board
     build_info_json = root_build_dir / "build_info.json"
-    build_info = json.loads(build_info_json.read_text())
-    assert build_info.keys(), f"No boards found in {root_build_dir}"
-    board_info = build_info.get(board) or build_info.keys()[0]
+    board_info = _get_board_info(build_info_json)
     assert board_info, f"Board {board} not found in {build_info_json}"
     prog_path = Path(board_info["prog_path"])
     base_path = prog_path.parent
