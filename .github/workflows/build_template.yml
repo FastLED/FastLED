@@ -50,6 +50,10 @@ jobs:
         run: |
           uv run ci/ci-cppcheck.py
 
+      - name: Check Compiled size
+        run: |
+          uv run ci/ci-check-compiled-size.py ${{ inputs.args }}
+
       - name: Inspect Binary
         continue-on-error: true
         run: |
