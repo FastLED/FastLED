@@ -125,6 +125,10 @@ def main() -> int:
 
     print(f"Dumping map file for {board} firmware: {firmware_path}")
     map_path = board_dir / "firmware.map"
+    if not map_path.exists():
+        # Some platforms like esp32 ignore the map path and instead just
+        # place it in the same directory as the firmware.
+        map_path = firmware_path.with_suffix(".map")
     if map_path.exists():
         print(map_path.read_text())
     else:
