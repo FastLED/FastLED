@@ -16,8 +16,7 @@ def run_command(cmd):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Check compiled program size for a board",
-        allow_unknown_args=True
+        description="Check compiled program size for a board"
     )
     parser.add_argument("board", help="Board name")
     parser.add_argument(
@@ -42,7 +41,7 @@ def main():
 
     if not size_match:
         print("Error: Unable to extract size from output")
-        print("::error::Failed to determine compiled size")
+        print(f"Output: {output}")
         sys.exit(1)
 
     size = int(size_match.group(1))
