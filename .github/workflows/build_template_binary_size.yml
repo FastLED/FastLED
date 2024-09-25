@@ -32,7 +32,7 @@ jobs:
       - name: Check Compiled Program Size for ${{ inputs.board }} is less than the limit of ${{ inputs.max_size }}
         run: |
           output=$(uv run ci/compiled_size.py --board ${{ inputs.board }})
-          size=$(echo "$output" | cut -d':' -f2 | tr -d ' ')
+          size=$(echo "$output" | sed -n 's/.*: *\([0-9]*\).*/\1/p')
           
           if [ $size -gt ${{ inputs.max_size }} ]; then
             echo "${{ inputs.board }} size $size is greater than max size ${{ inputs.max_size }}"
