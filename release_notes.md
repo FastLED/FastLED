@@ -10,6 +10,7 @@ FastLED 3.7.8
 * New STM32F1 boards compiling
   * bluepill
   * maple mini
+* CPPCheck now passing for HIGH and MEDIUM severity on all platforms.
 
 
 FastLED 3.7.7

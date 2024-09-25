@@ -46,6 +46,10 @@ jobs:
           fi
         if: always()
 
+      - name: CPP Check
+        run: |
+          uv run ci/ci-cppcheck.py
+
       - name: Generate timestamp and random hex
         id: generate_id
         run: |

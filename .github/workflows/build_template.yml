@@ -7,13 +7,6 @@ on:
         type: string
         required: false
         default: ""
-  workflow_dispatch:
-    inputs:
-      args:
-        description: 'Board to build'
-        required: true
-        type: string
-
 
 jobs:
   build:
@@ -56,6 +49,11 @@ jobs:
       - name: CPP Check
         run: |
           uv run ci/ci-cppcheck.py
+
+      - name: Inspect Binary
+        continue-on-error: true
+        run: |
+          uv run ci/inspect_binary.py --first
 
       - name: Generate timestamp and random hex
         id: generate_id

@@ -374,6 +374,13 @@ struct CRGB {
         }
     }
 
+    /// Calculates the combined color adjustment to the LEDs at a given scale, color correction, and color temperature
+    /// @param scale the scale value for the RGB data (i.e. brightness)
+    /// @param colorCorrection color correction to apply
+    /// @param colorTemperature color temperature to apply
+    /// @returns a CRGB object representing the adjustment, including color correction and color temperature
+    static CRGB computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const CRGB & colorTemperature);
+
     /// Return a new CRGB object after performing a linear interpolation between this object and the passed in object
     FASTLED_FORCE_INLINE CRGB lerp8( const CRGB& other, fract8 frac) const;
 

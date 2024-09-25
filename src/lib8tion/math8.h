@@ -2,6 +2,7 @@
 #define __INC_LIB8TION_MATH_H
 
 #include "scale8.h"
+#include "lib8tion/lib8static.h"
 
 /// @file math8.h
 /// Fast, efficient 8-bit math functions specifically

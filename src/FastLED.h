@@ -1,8 +1,6 @@
 #ifndef __INC_FASTSPI_LED2_H
 #define __INC_FASTSPI_LED2_H
 
-#pragma GCC push_options
-#pragma GCC optimize("Os")
 
 /// @file FastLED.h
 /// central include file for FastLED, defines the CFastLED class/object
@@ -16,11 +14,11 @@
 /// * 1 digit for the major version
 /// * 3 digits for the minor version
 /// * 3 digits for the patch version
-#define FASTLED_VERSION 3007007
+#define FASTLED_VERSION 3007008
 #ifndef FASTLED_INTERNAL
 #  ifdef  FASTLED_SHOW_VERSION
 #    ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#      pragma message "FastLED version 3.007.007"
+#      pragma message "FastLED version 3.007.008"
 #    else
 #      warning FastLED version 3.007.007  (Not really a warning, just telling you here.)
 #    endif
@@ -830,8 +828,6 @@ extern CFastLED FastLED;
 #define NO_HARDWARE_PIN_SUPPORT
 #endif
 
-
-#pragma GCC pop_options
 
 FASTLED_NAMESPACE_END
 

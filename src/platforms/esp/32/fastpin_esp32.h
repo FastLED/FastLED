@@ -4,6 +4,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wvolatile"
 
 template<uint8_t PIN, uint32_t MASK, bool VALIDPIN> class _ESPPIN {
