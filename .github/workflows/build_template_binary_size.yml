@@ -27,7 +27,7 @@ jobs:
         run: pip install uv
 
       - name: Compile Board
-        run: uv run ci/ci-compile.py --board ${{ inputs.board }} --examples Blink
+        run: uv run ci/ci-compile.py ${{ inputs.board }} --examples Blink
 
       - name: Check Compiled Program Size for ${{ inputs.board }} is less than the limit of ${{ inputs.max_size }}
         run: |
