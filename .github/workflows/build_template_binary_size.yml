@@ -26,7 +26,7 @@ jobs:
       - name: Install UV
         run: pip install uv
 
-      - name: Compile Board for $${{ inputs.board }} with example Blink
+      - name: Compile Board for ${{ inputs.board }} with example Blink
         run: uv run ci/ci-compile.py ${{ inputs.board }} --examples Blink
 
       - name: Check Compiled Program Size for ${{ inputs.board }}

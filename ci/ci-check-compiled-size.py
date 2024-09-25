@@ -22,6 +22,9 @@ def parse_args():
     parser.add_argument(
         "--max-size", type=int, required=False, help="Maximum allowed size"
     )
+    parser.add_argument(
+        "--defines", type=str, required=False, help="This is sent by the CI but are ignored"
+    )
     return parser.parse_args()
 
 
