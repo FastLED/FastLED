@@ -26,8 +26,8 @@ jobs:
       - name: Install UV
         run: pip install uv
 
-      - name: Compile Board and Output Size
-        run: uv run ci/compiled_size.py --board ${{ inputs.board }}
+      - name: Compile Board
+        run: uv run ci/compile.py --board ${{ inputs.board }} --examples Blink
 
       - name: Check Compiled Program Size for ${{ inputs.board }} is less than the limit of ${{ inputs.max_size }}
         run: |
