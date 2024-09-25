@@ -26,37 +26,11 @@ jobs:
       - name: Install UV
         run: pip install uv
 
-      - name: Compile Board
+      - name: Compile Board for $${{ inputs.board }} with example Blink
         run: uv run ci/ci-compile.py ${{ inputs.board }} --examples Blink
 
-      - name: Check Compiled Program Size for ${{ inputs.board }} is less than the limit of ${{ inputs.max_size }}
-        run: |
-          import subprocess
-          import re
-          import sys
-
-          def run_command(cmd):
-              result = subprocess.run(cmd, capture_output=True, text=True)
-              return result.stdout.strip()
-
-          output = run_command(['uv', 'run', 'ci/compiled_size.py', '--board', '${{ inputs.board }}'])
-          size_match = re.search(r': *(\d+)', output)
-
-          if not size_match:
-              print("Error: Unable to extract size from output")
-              print("::error::Failed to determine compiled size")
-              sys.exit(1)
-
-          size = int(size_match.group(1))
-          max_size = ${{ inputs.max_size }}
-
-          if size > max_size:
-              print(f"${{ inputs.board }} size {size} is greater than max size {max_size}")
-              print("::error::Compiled size exceeds maximum allowed size")
-              sys.exit(1)
-          else:
-              print(f"${{ inputs.board }} size {size} is within the limit of {max_size}")
-        shell: python
+      - name: Check Compiled Program Size for ${{ inputs.board }}
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }}
 
       - name: Inspect Binary
         continue-on-error: true
