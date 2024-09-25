@@ -23,12 +23,12 @@ def parse_args():
         "--max-size", type=int, required=False, help="Maximum allowed size"
     )
     args, unknown = parser.parse_known_args()
-    
+
     if unknown:
         print("Ignoring unknown arguments:")
         for arg in unknown:
             print(f"  {arg}")
-    
+
     return args
 
 
@@ -45,7 +45,7 @@ def main():
         sys.exit(1)
 
     size = int(size_match.group(1))
-    
+
     if args.max_size is not None:
         max_size = args.max_size
         if size > max_size:

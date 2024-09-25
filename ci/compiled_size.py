@@ -7,7 +7,8 @@ def check_firmware_size(board: str) -> int:
     root_build_dir = Path(".build") / board
     build_info_json = root_build_dir / "build_info.json"
     build_info = json.loads(build_info_json.read_text())
-    board_info = build_info.get(board)
+    assert build_info.keys(), f"No boards found in {root_build_dir}"
+    board_info = build_info.get(board) or build_info.keys()[0]
     assert board_info, f"Board {board} not found in {build_info_json}"
     prog_path = Path(board_info["prog_path"])
     base_path = prog_path.parent
