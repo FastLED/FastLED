@@ -102,7 +102,7 @@ def main() -> int:
 
     build_info_json = board_dir / "build_info.json"
     build_info = json.loads(build_info_json.read_text())
-    board_info = build_info[board]
+    board_info = build_info.get(board) or build_info[next(iter(build_info))]
 
     firmware_path = Path(board_info["prog_path"])
     objdump_path = Path(board_info["aliases"]["objdump"])

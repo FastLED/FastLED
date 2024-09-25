@@ -50,7 +50,7 @@ jobs:
         run: |
           uv run ci/ci-cppcheck.py
 
-      - name: Check Compiled size
+      - name: Check Compiled size of last compiled example
         run: |
           uv run ci/ci-check-compiled-size.py ${{ inputs.args }}
 
