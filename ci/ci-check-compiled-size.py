@@ -16,16 +16,21 @@ def run_command(cmd):
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Check compiled program size for a board"
+        description="Check compiled program size for a board",
+        allow_unknown_args=True
     )
     parser.add_argument("board", help="Board name")
     parser.add_argument(
         "--max-size", type=int, required=False, help="Maximum allowed size"
     )
-    parser.add_argument(
-        "--defines", type=str, required=False, help="This is sent by the CI but are ignored"
-    )
-    return parser.parse_args()
+    args, unknown = parser.parse_known_args()
+    
+    if unknown:
+        print("Ignoring unknown arguments:")
+        for arg in unknown:
+            print(f"  {arg}")
+    
+    return args
 
 
 def main():
