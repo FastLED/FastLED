@@ -25,18 +25,30 @@ def cpp_filt(cpp_filt_path: str | Path, stdout: str) -> str:
     return result.stdout
 
 
-def dump_symbols(firmware_path: Path, objdump_path: Path) -> str:
-    command = f"{objdump_path} -t {firmware_path}"
-    result = subprocess.run(
-        command,
+def dump_symbols(firmware_path: Path, objdump_path: Path, cpp_filt_path: Path) -> str:
+    objdump_command = f"{objdump_path} -t {firmware_path}"
+    objdump_result = subprocess.run(
+        objdump_command,
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
     )
-    if result.returncode != 0:
-        raise RuntimeError(f"Error running command: {result.stderr}")
-    return result.stdout
+    if objdump_result.returncode != 0:
+        raise RuntimeError(f"Error running objdump command: {objdump_result.stderr}")
+
+    cpp_filt_command = [str(cpp_filt_path), "--no-strip-underscore"]
+    cpp_filt_result = subprocess.run(
+        cpp_filt_command,
+        input=objdump_result.stdout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if cpp_filt_result.returncode != 0:
+        raise RuntimeError(f"Error running c++filt command: {cpp_filt_result.stderr}")
+
+    return cpp_filt_result.stdout
 
 
 def dump_sections_size(firmware_path: Path, size_path: Path) -> str:
@@ -106,8 +118,7 @@ def main() -> int:
 
     print(f"Dumping symbols for {board} firmware: {firmware_path}")
     try:
-        symbols = dump_symbols(firmware_path, objdump_path)
-        symbols = cpp_filt(cpp_filt_path, symbols)
+        symbols = dump_symbols(firmware_path, objdump_path, cpp_filt_path)
         print(symbols)
     except Exception as e:
         print(f"Error while dumping symbols: {e}")

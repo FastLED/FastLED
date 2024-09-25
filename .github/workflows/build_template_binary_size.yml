@@ -27,20 +27,36 @@ jobs:
         run: pip install uv
 
       - name: Compile Board
-        run: uv run ci/compile.py --board ${{ inputs.board }} --examples Blink
+        run: uv run ci/ci-compile.py --board ${{ inputs.board }} --examples Blink
 
       - name: Check Compiled Program Size for ${{ inputs.board }} is less than the limit of ${{ inputs.max_size }}
         run: |
-          output=$(uv run ci/compiled_size.py --board ${{ inputs.board }})
-          size=$(echo "$output" | sed -n 's/.*: *\([0-9]*\).*/\1/p')
-          
-          if [ $size -gt ${{ inputs.max_size }} ]; then
-            echo "${{ inputs.board }} size $size is greater than max size ${{ inputs.max_size }}"
-            echo "::error::Compiled size exceeds maximum allowed size"
-            exit 1
-          else
-            echo "${{ inputs.board }} size $size is within the limit of ${{ inputs.max_size }}"
-          fi
+          import subprocess
+          import re
+          import sys
+
+          def run_command(cmd):
+              result = subprocess.run(cmd, capture_output=True, text=True)
+              return result.stdout.strip()
+
+          output = run_command(['uv', 'run', 'ci/compiled_size.py', '--board', '${{ inputs.board }}'])
+          size_match = re.search(r': *(\d+)', output)
+
+          if not size_match:
+              print("Error: Unable to extract size from output")
+              print("::error::Failed to determine compiled size")
+              sys.exit(1)
+
+          size = int(size_match.group(1))
+          max_size = ${{ inputs.max_size }}
+
+          if size > max_size:
+              print(f"${{ inputs.board }} size {size} is greater than max size {max_size}")
+              print("::error::Compiled size exceeds maximum allowed size")
+              sys.exit(1)
+          else:
+              print(f"${{ inputs.board }} size {size} is within the limit of {max_size}")
+        shell: python
 
       - name: Inspect Binary
         continue-on-error: true
