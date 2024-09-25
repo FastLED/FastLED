@@ -7,7 +7,7 @@ HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 
 
-def cpp_filt(cpp_filt_path: str | Path, input_text: str) -> str:
+def cpp_filt(cpp_filt_path: str | Path, stdout: str) -> str:
     p = Path(cpp_filt_path)
     if not p.exists():
         raise FileNotFoundError(f"cppfilt not found at '{p}'")
@@ -15,7 +15,47 @@ def cpp_filt(cpp_filt_path: str | Path, input_text: str) -> str:
     print(f"Running command: {' '.join(command)}")
     result = subprocess.run(
         command,
-        input=input_text,
+        input=stdout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"Error running command: {result.stderr}")
+    return result.stdout
+
+
+def dump_symbols(firmware_path: Path, objdump_path: Path, cpp_filt_path: Path) -> str:
+    objdump_command = f"{objdump_path} -t {firmware_path}"
+    objdump_result = subprocess.run(
+        objdump_command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if objdump_result.returncode != 0:
+        raise RuntimeError(f"Error running objdump command: {objdump_result.stderr}")
+
+    cpp_filt_command = [str(cpp_filt_path), "--no-strip-underscore"]
+    cpp_filt_result = subprocess.run(
+        cpp_filt_command,
+        input=objdump_result.stdout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if cpp_filt_result.returncode != 0:
+        raise RuntimeError(f"Error running c++filt command: {cpp_filt_result.stderr}")
+
+    return cpp_filt_result.stdout
+
+
+def dump_sections_size(firmware_path: Path, size_path: Path) -> str:
+    command = f"{size_path} {firmware_path}"
+    result = subprocess.run(
+        command,
+        shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -63,20 +103,25 @@ def main() -> int:
     build_info_json = board_dir / "build_info.json"
     build_info = json.loads(build_info_json.read_text())
     board_info = build_info.get(board) or build_info[next(iter(build_info))]
+
     firmware_path = Path(board_info["prog_path"])
+    objdump_path = Path(board_info["aliases"]["objdump"])
     cpp_filt_path = Path(board_info["aliases"]["c++filt"])
-    map_path = board_dir / "firmware.map"
-    if not map_path.exists():
-        # Some platforms like esp32 ignore the map path and instead just
-        # place it in the same directory as the firmware.
-        map_path = firmware_path.with_suffix(".map")
-    if map_path.exists():
-        print(f"Dumping map file for {board} compiled firmware binary at {map_path}")
-        input_text = map_path.read_text()
-        demangled_text = cpp_filt(cpp_filt_path, input_text)
-        print(demangled_text)
-    else:
-        print(f"Map file not found at {map_path}")
+
+    print(f"Dumping sections size for {board} firmware: {firmware_path}")
+    try:
+        size_path = Path(board_info["aliases"]["size"])
+        sections_size = dump_sections_size(firmware_path, size_path)
+        print(sections_size)
+    except Exception as e:
+        print(f"Error while dumping sections size: {e}")
+
+    print(f"Dumping symbols for {board} firmware: {firmware_path}")
+    try:
+        symbols = dump_symbols(firmware_path, objdump_path, cpp_filt_path)
+        print(symbols)
+    except Exception as e:
+        print(f"Error while dumping symbols: {e}")
 
     return 0
 
