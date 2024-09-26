@@ -82,7 +82,9 @@ public:
 
     void inline getAdjustmentData(uint8_t brightness, CRGB* premixed, CRGB* color_correction) {
         *premixed = getAdjustment(brightness);
-        *color_correction = getAdjustment(255);
+        if (color_correction) {
+            *color_correction = getAdjustment(255);
+        }
     }
 
     /// @copybrief show(const struct CRGB*, int, CRGB)
