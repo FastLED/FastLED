@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 from ci.bin_2_elf import bin_to_elf
-from ci.elf import print_symbol_sizes
+from ci.elf import dump_symbol_sizes
 from ci.paths import PROJECT_ROOT
 from ci.tools import Tools, load_tools
 
@@ -32,7 +32,7 @@ class TestBinToElf(unittest.TestCase):
                 print(f"Error during compilation: {e}")
                 raise
 
-    def test_bin_to_elf_conversion(self):
+    def test_bin_to_elf_conversion(self) -> None:
         tools: Tools = load_tools(BUILD_INFO_PATH)
         bin_file = UNO / "firmware.hex"
         map_file = UNO / "firmware.map"
@@ -45,7 +45,8 @@ class TestBinToElf(unittest.TestCase):
             tools.objcopy_path,
             output_elf,
         )
-        print_symbol_sizes(tools.objdump_path, tools.cpp_filt_path, output_elf)
+        stdout = dump_symbol_sizes(tools.nm_path, tools.cpp_filt_path, output_elf)
+        print(stdout)
 
 
 if __name__ == "__main__":

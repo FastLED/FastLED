@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from ci.bin_2_elf import bin_to_elf
-from ci.elf import print_symbol_sizes
+from ci.elf import dump_symbol_sizes
 from ci.map_dump import map_dump
 
 
@@ -111,8 +111,9 @@ def main() -> int:
     cpp_filt_path = Path(board_info["aliases"]["c++filt"])
     ld_path = Path(board_info["aliases"]["ld"])
     as_path = Path(board_info["aliases"]["as"])
+    nm_path = Path(board_info["aliases"]["nm"])
     objcopy_path = Path(board_info["aliases"]["objcopy"])
-    objdump_path = Path(board_info["aliases"]["objdump"])
+    nm_path = Path(board_info["aliases"]["nm"])
     map_file = board_dir / "firmware.map"
     if not map_file.exists():
         map_file = bin_file.with_suffix(".map")
@@ -128,7 +129,8 @@ def main() -> int:
                 objcopy_path,
                 temp_dir_path / "output.elf",
             )
-            print_symbol_sizes(objdump_path, cpp_filt_path, output_elf)
+            out = dump_symbol_sizes(nm_path, cpp_filt_path, output_elf)
+            print(out)
     except Exception as e:
         print(
             f"Error while converting binary to ELF, binary analysis will not work on this build: {e}"

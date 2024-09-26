@@ -2,7 +2,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-from ci.elf import print_symbol_sizes
+from ci.elf import dump_symbol_sizes
 from ci.paths import PROJECT_ROOT
 from ci.tools import Tools, load_tools
 
@@ -16,7 +16,7 @@ BUILD_INFO_PATH = PROJECT_ROOT / ".build" / "uno" / "build_info.json"
 class TestBinToElf(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         uno_build = PROJECT_ROOT / ".build" / "uno"
         print(f"Checking for Uno build in: {uno_build}")
         if not uno_build.exists():
@@ -30,9 +30,10 @@ class TestBinToElf(unittest.TestCase):
                 print(f"Error during compilation: {e}")
                 raise
 
-    def test_bin_to_elf_conversion(self):
+    def test_bin_to_elf_conversion(self) -> None:
         tools: Tools = load_tools(BUILD_INFO_PATH)
-        print_symbol_sizes(tools.objdump_path, tools.cpp_filt_path, ELF_FILE)
+        msg = dump_symbol_sizes(tools.nm_path, tools.cpp_filt_path, ELF_FILE)
+        print(msg)
 
 
 if __name__ == "__main__":

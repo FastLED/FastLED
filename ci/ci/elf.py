@@ -1,4 +1,5 @@
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -69,24 +70,53 @@ def cpp_filt(cppfilt_path: Path, input_text: str) -> str:
     return stdout
 
 
-def print_symbol_sizes(objdump_path: Path, cppfilt_path: Path, elf_file: Path):
-    """
-    Print the sizes of all symbols in the ELF file using objdump.
-
-    Args:
-        objdump_path (Path): Path to the objdump executable.
-        elf_file (Path): Path to the ELF file.
-    """
-    command = [
-        str(objdump_path),
-        "-t",
+def dump_symbol_sizes(nm_path: Path, cpp_filt_path: Path, elf_file: Path) -> str:
+    nm_command = [
+        str(nm_path),
+        "-S",
+        "--size-sort",
         str(elf_file),
-    ]  # "-t" option lists symbols with sizes.
+    ]
     print(f"Listing symbols and sizes in ELF file: {elf_file}")
-    print("Running command: ", " ".join(command))
-    stdout = run_command(command, show_output=False)
-    stdout = cpp_filt(cppfilt_path, stdout)
-    print(stdout)
+    print("Running command: ", " ".join(nm_command))
+    nm_result = subprocess.run(
+        nm_command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if nm_result.returncode != 0:
+        raise RuntimeError(f"Error running nm command: {nm_result.stderr}")
+
+    cpp_filt_command = [str(cpp_filt_path), "--no-strip-underscore"]
+    print("Running c++filt command: ", " ".join(cpp_filt_command))
+    cpp_filt_result = subprocess.run(
+        cpp_filt_command,
+        input=nm_result.stdout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if cpp_filt_result.returncode != 0:
+        raise RuntimeError(f"Error running c++filt command: {cpp_filt_result.stderr}")
+
+    # now reverse sort the lines
+    lines = cpp_filt_result.stdout.splitlines()
+
+    @dataclass
+    class Entry:
+        address: str
+        size: int
+        everything_else: str
+
+    def parse_line(line: str) -> Entry:
+        address, size, *rest = line.split()
+        return Entry(address, int(size, 16), " ".join(rest))
+
+    data: list[Entry] = [parse_line(line) for line in lines]
+    data.sort(key=lambda x: x.size, reverse=True)
+    lines = [f"{d.size:6d} {d.everything_else}" for d in data]
+    return "\n".join(lines)
 
 
 def demangle_symbol(cppfilt_path: Path, symbol: str) -> str:
