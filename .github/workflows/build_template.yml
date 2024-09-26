@@ -36,6 +36,12 @@ jobs:
           ./compile --no-interactive  ${{ inputs.args }} | tee build.log
         shell: bash
 
+      - name: Build Blink.ino for library info
+        continue-on-error: true
+        run: |
+          uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
+        shell: bash
+
       - name: Print out build_info.json
         if: always()
         run: |
@@ -50,10 +56,19 @@ jobs:
         run: |
           uv run ci/ci-cppcheck.py
 
+      - name: Check Compiled size of last compiled example
+        run: |
+          uv run ci/ci-check-compiled-size.py ${{ inputs.args }}
+
       - name: Inspect Binary
         continue-on-error: true
         run: |
           uv run ci/inspect_binary.py --first
+
+      - name: Inspect Elf
+        continue-on-error: true
+        run: |
+          uv run ci/inspect_elf.py --first
 
       - name: Generate timestamp and random hex
         id: generate_id

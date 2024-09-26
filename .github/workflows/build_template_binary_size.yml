@@ -26,40 +26,27 @@ jobs:
       - name: Install UV
         run: pip install uv
 
-      - name: Compile Board and Output Size
-        run: uv run ci/compiled_size.py --board ${{ inputs.board }}
+      - name: Compile Board for ${{ inputs.board }} with example Blink
+        run: uv run ci/ci-compile.py ${{ inputs.board }} --examples Blink
 
-      - name: Check Compiled Program Size for ${{ inputs.board }} is less than the limit of ${{ inputs.max_size }}
-        run: |
-          output=$(uv run ci/compiled_size.py --board ${{ inputs.board }})
-          size=$(echo "$output" | cut -d':' -f2 | tr -d ' ')
-          
-          if [ $size -gt ${{ inputs.max_size }} ]; then
-            echo "${{ inputs.board }} size $size is greater than max size ${{ inputs.max_size }}"
-            echo "::error::Compiled size exceeds maximum allowed size"
-            exit 1
-          else
-            echo "${{ inputs.board }} size $size is within the limit of ${{ inputs.max_size }}"
-          fi
+      - name: Check Compiled Program Size for ${{ inputs.board }}
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }}
 
       - name: Inspect Binary
         continue-on-error: true
         run: |
-          uv run ci/inspect_binary.py --first --cwd ci/tmp/FastLED
+          uv run ci/inspect_binary.py --first
+
+      - name: Inspect Elf
+        continue-on-error: true
+        run: |
+          uv run ci/inspect_elf.py --first
 
       - name: Generate timestamp and random hex
         id: generate_id
         run: |
           echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
           echo "random_hex=$(openssl rand -hex 3)" >> $GITHUB_OUTPUT
-
-      - name: Upload build artifacts on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: ci/firmware_sizes.csv
-          include-hidden-files: true
 
       - name: Upload build log
         uses: actions/upload-artifact@v4

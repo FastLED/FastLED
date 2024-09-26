@@ -1,126 +1,153 @@
 import argparse
 import json
 import subprocess
+import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
-HERE = Path(__file__).resolve().parent
-PROJECT_ROOT = HERE.parent
+from ci.bin_2_elf import bin_to_elf
+from ci.elf import dump_symbol_sizes
+from ci.map_dump import map_dump
 
 
-def cpp_filt(cpp_filt_path: str | Path, stdout: str) -> str:
-    p = Path(cpp_filt_path)
-    if not p.exists():
-        raise FileNotFoundError(f"cppfilt not found at '{p}'")
-    command = [str(p), "-t"]
-    print(f"Running command: {' '.join(command)}")
-    result = subprocess.run(
+def cpp_filt(cpp_filt_path: Path, input_text: str) -> str:
+    """
+    Demangle C++ symbols using c++filt.
+
+    Args:
+        cpp_filt_path (Path): Path to c++filt executable.
+        input_text (str): Text to demangle.
+
+    Returns:
+        str: Demangled text.
+    """
+    if not cpp_filt_path.exists():
+        raise FileNotFoundError(f"cppfilt not found at '{cpp_filt_path}'")
+    command = [str(cpp_filt_path), "-t", "-n"]
+    print(f"Running c++filt on input text with {cpp_filt_path}")
+    process = subprocess.Popen(
         command,
-        input=stdout,
+        stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
     )
-    if result.returncode != 0:
-        raise RuntimeError(f"Error running command: {result.stderr}")
-    return result.stdout
-
-
-def dump_symbols(firmware_path: Path, objdump_path: Path) -> str:
-    command = f"{objdump_path} -t {firmware_path}"
-    result = subprocess.run(
-        command,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"Error running command: {result.stderr}")
-    return result.stdout
-
-
-def dump_sections_size(firmware_path: Path, size_path: Path) -> str:
-    command = f"{size_path} {firmware_path}"
-    result = subprocess.run(
-        command,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"Error running command: {result.stderr}")
-    return result.stdout
+    stdout, stderr = process.communicate(input=input_text)
+    if process.returncode != 0:
+        raise RuntimeError(f"Error running c++filt: {stderr}")
+    return stdout
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Inspect a compiled binary")
+    parser = argparse.ArgumentParser(
+        description="Convert a binary file to ELF using map file."
+    )
     parser.add_argument("--first", action="store_true", help="Inspect the first board")
-    parser.add_argument("--cwd", type=str, help="Custom working directory")
+    parser.add_argument("--cwd", type=Path, help="Custom working directory")
+
     return parser.parse_args()
+
+
+def load_build_info(build_info_path: Path) -> dict:
+    """
+    Load build information from a JSON file.
+
+    Args:
+        build_info_path (Path): Path to the build_info.json file.
+
+    Returns:
+        dict: Parsed JSON data.
+    """
+    if not build_info_path.exists():
+        raise FileNotFoundError(f"Build info JSON not found at '{build_info_path}'")
+    return json.loads(build_info_path.read_text())
 
 
 def main() -> int:
     args = parse_args()
     if args.cwd:
-        # os.chdir(args.cwd)
-        root_build_dir = Path(args.cwd) / ".build"
+        root_build_dir = args.cwd / ".build"
     else:
         root_build_dir = Path(".build")
 
-    # Find the first board directory
     board_dirs = [d for d in root_build_dir.iterdir() if d.is_dir()]
     if not board_dirs:
-        # print("No board directories found in .build")
         print(f"No board directories found in {root_build_dir.absolute()}")
         return 1
 
-    # display all the boards to the user and ask them to select which one they want by number
     print("Available boards:")
     for i, board_dir in enumerate(board_dirs):
         print(f"[{i}]: {board_dir.name}")
 
-    if args.first:
-        which = 0
-    else:
-        which = int(input("Enter the number of the board you want to inspect: "))
-
+    which = (
+        0
+        if args.first
+        else int(input("Enter the number of the board you want to inspect: "))
+    )
     board_dir = board_dirs[which]
-    board = board_dir.name
-
     build_info_json = board_dir / "build_info.json"
-    build_info = json.loads(build_info_json.read_text())
-    board_info = build_info[board]
 
-    firmware_path = Path(board_info["prog_path"])
-    objdump_path = Path(board_info["aliases"]["objdump"])
+    build_info = load_build_info(build_info_json)
+    board = board_dir.name
+    board_info = build_info.get(board) or build_info[next(iter(build_info))]
+
+    # Validate paths from build_info.json
+    elf_path = Path(board_info.get("prog_path", ""))
+    if not elf_path.exists():
+        print(
+            f"Error: ELF path '{elf_path}' does not exist. Check the 'prog_path' in build_info.json."
+        )
+        return 1
+
+    bin_file = elf_path.with_suffix(".bin")
+    if not bin_file.exists():
+        # use .hex or .uf2 if .bin doesn't exist
+        bin_file = elf_path.with_suffix(".hex")
+        if not bin_file.exists():
+            bin_file = elf_path.with_suffix(".uf2")
+            if not bin_file.exists():
+                print(f"Error: Binary file not found for '{elf_path}'")
+                return 1
     cpp_filt_path = Path(board_info["aliases"]["c++filt"])
+    ld_path = Path(board_info["aliases"]["ld"])
+    as_path = Path(board_info["aliases"]["as"])
+    nm_path = Path(board_info["aliases"]["nm"])
+    objcopy_path = Path(board_info["aliases"]["objcopy"])
+    nm_path = Path(board_info["aliases"]["nm"])
+    map_file = board_dir / "firmware.map"
+    if not map_file.exists():
+        map_file = bin_file.with_suffix(".map")
 
-    print(f"Dumping sections size for {board} firmware: {firmware_path}")
     try:
-        size_path = Path(board_info["aliases"]["size"])
-        sections_size = dump_sections_size(firmware_path, size_path)
-        print(sections_size)
+        with TemporaryDirectory() as temp_dir:
+            temp_dir_path = Path(temp_dir)
+            output_elf = bin_to_elf(
+                bin_file,
+                map_file,
+                as_path,
+                ld_path,
+                objcopy_path,
+                temp_dir_path / "output.elf",
+            )
+            out = dump_symbol_sizes(nm_path, cpp_filt_path, output_elf)
+            print(out)
     except Exception as e:
-        print(f"Error while dumping sections size: {e}")
+        print(
+            f"Error while converting binary to ELF, binary analysis will not work on this build: {e}"
+        )
 
-    print(f"Dumping symbols for {board} firmware: {firmware_path}")
-    try:
-        symbols = dump_symbols(firmware_path, objdump_path)
-        symbols = cpp_filt(cpp_filt_path, symbols)
-        print(symbols)
-    except Exception as e:
-        print(f"Error while dumping symbols: {e}")
+    map_dump(map_file)
 
-    print(f"Dumping map file for {board} firmware: {firmware_path}")
-    map_path = board_dir / "firmware.map"
-    if map_path.exists():
-        print(map_path.read_text())
-    else:
-        print(f"Map file not found at {map_path}")
+    # Demangle and print map file using c++filt
+    print("\n##################################################")
+    print("# Map file dump:")
+    print("##################################################\n")
+    map_text = map_file.read_text()
+    dmangled_text = cpp_filt(cpp_filt_path, map_text)
+    print(dmangled_text)
 
     return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
