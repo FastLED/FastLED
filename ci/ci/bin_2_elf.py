@@ -82,7 +82,9 @@ def _create_dummy_object_file(as_path: Path, dummy_obj_path: Path):
     asm_file.unlink()  # Clean up the temporary assembly file
 
 
-def _create_dummy_elf(ld_path: Path, linker_script: Path, dummy_obj: Path, output_elf: Path):
+def _create_dummy_elf(
+    ld_path: Path, linker_script: Path, dummy_obj: Path, output_elf: Path
+):
     """
     Create a dummy ELF file using the specified linker script and dummy object file.
 
@@ -92,12 +94,21 @@ def _create_dummy_elf(ld_path: Path, linker_script: Path, dummy_obj: Path, outpu
         dummy_obj (Path): Path to the dummy object file.
         output_elf (Path): Path to the output ELF file.
     """
-    command = [str(ld_path), str(dummy_obj), "-T", str(linker_script), "-o", str(output_elf)]
+    command = [
+        str(ld_path),
+        str(dummy_obj),
+        "-T",
+        str(linker_script),
+        "-o",
+        str(output_elf),
+    ]
     print(f"Creating dummy ELF file: {output_elf}")
     _run_command(command, show_output=True)
 
 
-def _update_elf_sections(objcopy_path: Path, bin_file: Path, elf_file: Path, section_name: str):
+def _update_elf_sections(
+    objcopy_path: Path, bin_file: Path, elf_file: Path, section_name: str
+):
     """
     Update the ELF file sections with binary data.
 
@@ -107,12 +118,26 @@ def _update_elf_sections(objcopy_path: Path, bin_file: Path, elf_file: Path, sec
         elf_file (Path): Path to the ELF file.
         section_name (str): Name of the section to update.
     """
-    command = [str(objcopy_path), "--update-section", f"{section_name}={bin_file}", str(elf_file)]
-    print(f"Updating ELF file '{elf_file}' section '{section_name}' with binary file '{bin_file}'")
+    command = [
+        str(objcopy_path),
+        "--update-section",
+        f"{section_name}={bin_file}",
+        str(elf_file),
+    ]
+    print(
+        f"Updating ELF file '{elf_file}' section '{section_name}' with binary file '{bin_file}'"
+    )
     _run_command(command, show_output=True)
 
 
-def bin_to_elf(bin_file: Path, map_file: Path, as_path: Path, ld_path: Path, objcopy_path: Path, output_elf: Path):
+def bin_to_elf(
+    bin_file: Path,
+    map_file: Path,
+    as_path: Path,
+    ld_path: Path,
+    objcopy_path: Path,
+    output_elf: Path,
+):
     """
     Convert a binary file to ELF format.
 
