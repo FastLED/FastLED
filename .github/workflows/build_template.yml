@@ -30,6 +30,9 @@ jobs:
       #    restore-keys: |
       #      ${{ runner.os }}-build-
 
+      - name: Install UV
+        run: pip install uv
+
       - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
         run: |
           set -o pipefail
