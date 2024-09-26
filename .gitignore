@@ -38,3 +38,4 @@ __pycache__
 **/.ruff_cache/
 dev/dev.ino.cpp
 ci/tmp/
+ci/tests/output
