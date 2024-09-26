@@ -70,6 +70,10 @@ jobs:
         run: |
           uv run ci/inspect_elf.py --first
 
+      - name: Optimization Report
+        run: |
+          uv run ci/optimization_report.py
+
       - name: Generate timestamp and random hex
         id: generate_id
         run: |
