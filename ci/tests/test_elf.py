@@ -1,9 +1,11 @@
+import subprocess
 import sys
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
 
 from ci.elf import print_symbol_sizes
+from ci.paths import PROJECT_ROOT
 
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
@@ -44,6 +46,22 @@ TOOLS = load_tools()
 
 
 class TestBinToElf(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        uno_build = PROJECT_ROOT / ".build" / "uno"
+        print(f"Checking for Uno build in: {uno_build}")
+        if not uno_build.exists():
+            print("Uno build not found. Running compilation...")
+            try:
+                subprocess.run(
+                    "uv run ci/compile.py uno --examples Blink", shell=True, check=True
+                )
+                print("Compilation completed successfully.")
+            except subprocess.CalledProcessError as e:
+                print(f"Error during compilation: {e}")
+                raise
+
     def test_bin_to_elf_conversion(self):
         print_symbol_sizes(TOOLS.objdump_path, TOOLS.cpp_filt_path, ELF_FILE)
 
