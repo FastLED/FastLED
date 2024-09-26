@@ -61,16 +61,20 @@ jobs:
           uv run ci/ci-check-compiled-size.py ${{ inputs.args }}
 
       - name: Inspect Binary
+        if: always()
         continue-on-error: true
         run: |
           uv run ci/inspect_binary.py --first
 
       - name: Inspect Elf
+        if: always()
         continue-on-error: true
         run: |
           uv run ci/inspect_elf.py --first
 
       - name: Optimization Report
+        if: always()
+        continue-on-error: true
         run: |
           uv run ci/optimization_report.py --first
 
