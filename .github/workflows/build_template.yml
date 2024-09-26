@@ -58,7 +58,7 @@ jobs:
 
       - name: Check Compiled size of last compiled example
         run: |
-          uv run ci/ci-check-compiled-size.py ${{ inputs.args }}
+          uv run ci/ci-check-compiled-size.py ${{ inputs.args }} --no-build
 
       - name: Inspect Binary
         if: always()
