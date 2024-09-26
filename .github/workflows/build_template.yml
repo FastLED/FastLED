@@ -36,6 +36,11 @@ jobs:
           ./compile --no-interactive  ${{ inputs.args }} | tee build.log
         shell: bash
 
+      - name: Build Blink.ino for library info
+        run: |
+          uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
+        shell: bash
+
       - name: Print out build_info.json
         if: always()
         run: |
