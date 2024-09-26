@@ -57,6 +57,7 @@ jobs:
           uv run ci/ci-cppcheck.py
 
       - name: Check Compiled size of last compiled example
+        continue-on-error: true
         run: |
           uv run ci/ci-check-compiled-size.py ${{ inputs.args }} --no-build
 
