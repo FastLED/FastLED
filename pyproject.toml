@@ -14,7 +14,8 @@ dependencies = [
     "isort",
     "black",
     "pip",
-    "pytest"
+    "pytest",
+    "fpvgcc"
 ]
 
 [build-system]
