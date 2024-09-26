@@ -3,6 +3,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from ci.bin_2_elf import bin_to_elf
 from ci.elf import analyze_elf_file
@@ -42,9 +43,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--first", action="store_true", help="Inspect the first board")
     parser.add_argument("--cwd", type=Path, help="Custom working directory")
-    parser.add_argument(
-        "--output-elf", type=Path, help="Output ELF file path.", default="output.elf"
-    )
+
     return parser.parse_args()
 
 
@@ -117,19 +116,22 @@ def main() -> int:
     if not map_file.exists():
         map_file = bin_file.with_suffix(".map")
 
-    # Convert binary to ELF
-    output_elf = bin_to_elf(
-        bin_file, map_file, as_path, ld_path, objcopy_path, args.output_elf
-    )
-
-    # Analyze the generated ELF file using objdump
-    analyze_elf_file(objdump_path, output_elf)
-
-    # Check ELF file format (to ensure it is being read correctly)
-    # check_elf_format(objdump_path, output_elf)
-
-    # Dump the contents of all sections in the ELF file
-    # check_section_contents(objdump_path, output_elf)
+    try:
+        with TemporaryDirectory() as temp_dir:
+            temp_dir_path = Path(temp_dir)
+            output_elf = bin_to_elf(
+                bin_file,
+                map_file,
+                as_path,
+                ld_path,
+                objcopy_path,
+                temp_dir_path / "output.elf",
+            )
+            analyze_elf_file(objdump_path, output_elf)
+    except Exception as e:
+        print(
+            f"Error while converting binary to ELF, binary analysis will not work on this build: {e}"
+        )
 
     # Demangle and print map file using c++filt
     print("\n##################################################")
