@@ -72,7 +72,7 @@ jobs:
 
       - name: Optimization Report
         run: |
-          uv run ci/optimization_report.py
+          uv run ci/optimization_report.py --first
 
       - name: Generate timestamp and random hex
         id: generate_id
