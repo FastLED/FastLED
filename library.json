@@ -54,7 +54,8 @@
             "compile",
             "lint",
             "test",
-            "platformio.ini"
+            "platformio.ini",
+            "**/*.exe"
         ]
     },
     "build": {
