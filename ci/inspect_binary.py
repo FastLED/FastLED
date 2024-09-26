@@ -216,7 +216,9 @@ def main() -> int:
     print("\n##################################################")
     print("# Map file dump:")
     print("##################################################\n")
-    print(map_path.read_text())
+    text = map_path.read_text()
+    dmangled_text = cpp_filt(cpp_filt_path, text)
+    print(dmangled_text)
 
     return 0 if not error_happened else 1
 
