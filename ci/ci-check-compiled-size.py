@@ -8,6 +8,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 
+IS_GITHUB = "GITHUB_ACTIONS" in os.environ
+
 
 def run_command(cmd, shell: bool = False, check=None, capture_output: bool = False):
     check = check if check is not None else check
@@ -47,7 +49,7 @@ def main():
 
     if not args.no_build:
         cmd_list = ["uv", "run", "ci/ci-compile.py", args.board, "--examples", "Blink"]
-        run_command(cmd_list, shell=True, capture_output=True)
+        run_command(cmd_list, shell=True, capture_output=IS_GITHUB, check=True)
 
     output = run_command(
         ["uv", "run", "ci/compiled_size.py", "--board", args.board],
