@@ -49,28 +49,30 @@ def cpp_filt(cpp_filt_path: str | Path, input_text: str) -> str:
     p = Path(cpp_filt_path)
     if not p.exists():
         raise FileNotFoundError(f"cppfilt not found at '{p}'")
-    command = [str(p), "-t"]
+    command = [str(p), "-t", "-n"]
     print(f"Running command: {' '.join(command)}")
-    result = subprocess.run(
+    process = subprocess.Popen(
         command,
-        input=input_text,
+        stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
     )
-    if result.returncode != 0:
-        raise RuntimeError(f"Error running command: {result.stderr}")
-    return result.stdout
+    stdout, stderr = process.communicate(input=input_text)
+    if process.returncode != 0:
+        raise RuntimeError(f"Error running command: {stderr}")
+    return stdout
 
 
 def run_objdump(cpp_filt_path: Path, objdump_path: Path, elf_path: Path) -> dict:
-    command = [str(objdump_path), "-t", str(elf_path)]
+    command = [str(objdump_path), "-t", "--demangle", str(elf_path)]
     print(f"Running command: {' '.join(command)}")
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"Error running objdump: {result.stderr}")
 
     stdout = result.stdout
+    # We'll still use cpp_filt as a fallback
     stdout = cpp_filt(cpp_filt_path, stdout)
 
     symbols = {}
@@ -78,7 +80,9 @@ def run_objdump(cpp_filt_path: Path, objdump_path: Path, elf_path: Path) -> dict
         parts = line.split()
         if len(parts) >= 6:
             size = int(parts[4], 16)
-            name = parts[5]
+            name = " ".join(
+                parts[5:]
+            )  # Join all parts after the 5th to capture full symbol names
             section = parts[3]
             if size > 0:
                 symbols[name] = {"size": size, "section": section}
