@@ -169,7 +169,8 @@ protected:
 
 		// Adjust the timer
 #if (!defined(NO_CLOCK_CORRECTION) || (NO_CLOCK_CORRECTION == 0)) && (FASTLED_ALLOW_INTERRUPTS == 0)
-        uint32_t microsTaken = (uint32_t)pixels.size() * (uint32_t)CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+		uint32_t microsTaken = pixels.size();
+		microsTaken *= CLKS_TO_MICROS(24 * (T1 + T2 + T3));
 
         // adust for approximate observed actal runtime (as of January 2015)
         // roughly 9.6 cycles per pixel, which is 0.6us/pixel at 16MHz
@@ -210,8 +211,10 @@ protected:
         // a 16-bit variable.  The difference between /1000 and /1024 only starts showing
         // up in the range of about 100 pixels, so many ATtiny projects won't even
         // see a clock difference due to the approximation there.
-		uint16_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS((24) * (T1 + T2 + T3));
-        MS_COUNTER += (microsTaken >> 10);
+		uint32_t microsTaken = nLeds;
+		microsTaken *= CLKS_TO_MICROS(24 * (T1 + T2 + T3));
+		//uint16_t microsTaken = (uint32_t)nLeds * (uint32_t)CLKS_TO_MICROS((24) * (T1 + T2 + T3));
+        MS_COUNTER += static_cast<uint16_t>(microsTaken >> 10);
 #endif
 
 #endif
