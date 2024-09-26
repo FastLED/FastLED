@@ -105,7 +105,7 @@ public:
     /// Write the data to the LEDs managed by this controller
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, uint8_t)
-    void showLedsInternal(uint8_t brightness=255) {
+    void showLedsInternal(uint8_t brightness) {
         show(m_Data, m_nLeds, getAdjustment(brightness));
     }
 
@@ -114,7 +114,7 @@ public:
     /// @param data the CRGB color to set the LEDs to
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
-    void showColorInternal(const struct CRGB & data, uint8_t brightness=255) {
+    void showColorInternal(const struct CRGB & data, uint8_t brightness) {
         showColor(data, m_nLeds, getAdjustment(brightness));
     }
 
