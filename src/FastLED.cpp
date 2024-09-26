@@ -71,8 +71,8 @@ void CFastLED::show(uint8_t scale) {
 		scale = (*m_pPowerFunc)(scale, m_nPowerData);
 	}
 
-	// void** controllersData = (void**)FASTLED_ALLOCA(MAX_CLED_CONTROLLERS * sizeof(void*));
-	void* controllersData[MAX_CLED_CONTROLLERS] = {0};
+	// static uninitialized controllersData produces the smallest binary on attiny85.
+	static void* controllersData[MAX_CLED_CONTROLLERS];
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
 
