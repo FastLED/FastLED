@@ -26,12 +26,13 @@ def run_command(command: list, show_output=False):
     return result.stdout
 
 
-def analyze_elf_file(objdump_path: Path, elf_file: Path):
+def analyze_elf_file(objdump_path: Path, cppfilt_path: Path, elf_file: Path):
     """
     Analyze the ELF file using objdump to display its contents.
 
     Args:
         objdump_path (Path): Path to the objdump executable.
+        cppfilt_path (Path): Path to the c++filt executable.
         elf_file (Path): Path to the ELF file.
     """
     command = [str(objdump_path), "-h", str(elf_file)]  # "-h" option shows headers.
@@ -39,10 +40,36 @@ def analyze_elf_file(objdump_path: Path, elf_file: Path):
     output = run_command(command, show_output=True)
     print("\nELF File Analysis:")
     print(output)
-    list_symbols_and_sizes(objdump_path, elf_file)
+    list_symbols_and_sizes(objdump_path, cppfilt_path, elf_file)
 
 
-def print_symbol_sizes(objdump_path: Path, elf_file: Path):
+def cpp_filt(cppfilt_path: Path, input_text: str) -> str:
+    """
+    Demangle C++ symbols using c++filt.
+
+    Args:
+        cppfilt_path (Path): Path to c++filt executable.
+        input_text (str): Text to demangle.
+
+    Returns:
+        str: Demangled text.
+    """
+    command = [str(cppfilt_path), "-t", "-n"]
+    print(f"Running c++filt on input text with {cppfilt_path}")
+    process = subprocess.Popen(
+        command,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    stdout, stderr = process.communicate(input=input_text)
+    if process.returncode != 0:
+        raise RuntimeError(f"Error running c++filt: {stderr}")
+    return stdout
+
+
+def print_symbol_sizes(objdump_path: Path, cppfilt_path: Path, elf_file: Path):
     """
     Print the sizes of all symbols in the ELF file using objdump.
 
@@ -57,15 +84,33 @@ def print_symbol_sizes(objdump_path: Path, elf_file: Path):
     ]  # "-t" option lists symbols with sizes.
     print(f"Listing symbols and sizes in ELF file: {elf_file}")
     print("Running command: ", " ".join(command))
-    run_command(command, show_output=True)
+    stdout = run_command(command, show_output=False)
+    stdout = cpp_filt(cppfilt_path, stdout)
+    print(stdout)
 
 
-def list_symbols_and_sizes(objdump_path: Path, elf_file: Path):
+def demangle_symbol(cppfilt_path: Path, symbol: str) -> str:
+    """
+    Demangle a C++ symbol using c++filt.
+
+    Args:
+        cppfilt_path (Path): Path to the c++filt executable.
+        symbol (str): The symbol to demangle.
+
+    Returns:
+        str: The demangled symbol.
+    """
+    command = [str(cppfilt_path), symbol]
+    return run_command(command, show_output=False).strip()
+
+
+def list_symbols_and_sizes(objdump_path: Path, cppfilt_path: Path, elf_file: Path):
     """
     List all symbols and their sizes from the ELF file using objdump.
 
     Args:
         objdump_path (Path): Path to the objdump executable.
+        cppfilt_path (Path): Path to the c++filt executable.
         elf_file (Path): Path to the ELF file.
     """
     command = [
@@ -92,8 +137,9 @@ def list_symbols_and_sizes(objdump_path: Path, elf_file: Path):
     if symbols:
         print("\nSymbols and Sizes in ELF File:")
         for symbol in symbols:
+            demangled_name = demangle_symbol(cppfilt_path, symbol["name"])
             print(
-                f"Symbol: {symbol['name']}, Size: {symbol['size']} bytes, Type: {symbol['type']}, Section: {symbol['section']}"
+                f"Symbol: {demangled_name}, Size: {symbol['size']} bytes, Type: {symbol['type']}, Section: {symbol['section']}"
             )
     else:
         print("No symbols found or unable to parse symbols correctly.")
