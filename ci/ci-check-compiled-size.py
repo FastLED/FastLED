@@ -9,9 +9,13 @@ HERE = Path(__file__).resolve().parent
 PROJECT_ROOT = HERE.parent
 
 
-def run_command(cmd):
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    return result.stdout.strip()
+def run_command(cmd, shell: bool = False, check=None, capture_output: bool = False):
+    check = check if check is not None else check
+
+    result = subprocess.run(
+        cmd, capture_output=capture_output, text=True, shell=shell, check=check
+    )
+    return result.stdout.strip() if capture_output else None
 
 
 def parse_args():
@@ -35,8 +39,12 @@ def parse_args():
 def main():
     os.chdir(str(PROJECT_ROOT))
     args = parse_args()
-
-    output = run_command(["uv", "run", "ci/compiled_size.py", "--board", args.board])
+    cmd_list = ["uv", "run", "ci/ci-compile.py", args.board, "--examples", "Blink"]
+    run_command(cmd_list, shell=True, capture_output=True)
+    output = run_command(
+        ["uv", "run", "ci/ci/compiled_size.py", "--board", args.board],
+        capture_output=True,
+    )
     size_match = re.search(r": *(\d+)", output)
 
     if not size_match:
