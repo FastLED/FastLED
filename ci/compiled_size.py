@@ -2,8 +2,6 @@ import argparse
 import json
 from pathlib import Path
 
-<<<<<<< HEAD
-=======
 
 def _get_board_info(path: Path) -> dict:
     build_info = json.loads(path.read_text())
@@ -13,7 +11,6 @@ def _get_board_info(path: Path) -> dict:
     ), f"Multiple boards found in {build_info}, so correct board should be specified"
     return build_info[next(iter(build_info))]
 
->>>>>>> master
 
 def check_firmware_size(board: str) -> int:
     root_build_dir = Path(".build") / board
