@@ -53,7 +53,7 @@ def main():
         cmd_list = ["uv", "run", "ci/ci-compile.py", args.board, "--examples", "Blink"]
         try:
             run_command(cmd_list, shell=True, capture_output=IS_GITHUB, check=True)
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             run_command(cmd_list, shell=True, capture_output=False, check=True)
 
     output = run_command(

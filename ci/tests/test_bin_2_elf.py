@@ -1,7 +1,7 @@
 import subprocess
 import unittest
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 from ci.bin_2_elf import bin_to_elf
 from ci.elf import dump_symbol_sizes
