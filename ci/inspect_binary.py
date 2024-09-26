@@ -148,55 +148,61 @@ def main() -> int:
     map_path = board_dir / "firmware.map"
     if not map_path.exists():
         map_path = elf_path.with_suffix(".map")
-
+    error_happened = False
     if map_path.exists() and elf_path.exists():
-        print(f"Analyzing map file and ELF for {board} compiled firmware binary")
-        # input_text = map_path.read_text()
-        # demangled_text = cpp_filt(cpp_filt_path, input_text)
-        # map_sections = parse_map_file(demangled_text)
+        try:
+            print(f"Analyzing map file and ELF for {board} compiled firmware binary")
+            # input_text = map_path.read_text()
+            # demangled_text = cpp_filt(cpp_filt_path, input_text)
+            # map_sections = parse_map_file(demangled_text)
 
-        objdump_symbols = run_objdump(cpp_filt_path, objdump_path, elf_path)
+            objdump_symbols = run_objdump(cpp_filt_path, objdump_path, elf_path)
 
-        print("\nMemory Usage Summary (from objdump):")
-        total_size = sum(symbol["size"] for symbol in objdump_symbols.values())
-        sections = {}
-        for symbol, data in objdump_symbols.items():
-            section = data["section"]
-            if section not in sections:
-                sections[section] = {"size": 0, "symbols": []}
-            sections[section]["size"] += data["size"]
-            sections[section]["symbols"].append((symbol, data["size"]))  # type: ignore
+            print("\nMemory Usage Summary (from objdump):")
+            total_size = sum(symbol["size"] for symbol in objdump_symbols.values())
+            sections = {}
+            for symbol, data in objdump_symbols.items():
+                section = data["section"]
+                if section not in sections:
+                    sections[section] = {"size": 0, "symbols": []}
+                sections[section]["size"] += data["size"]
+                sections[section]["symbols"].append((symbol, data["size"]))  # type: ignore
 
-        sorted_sections = sorted(
-            sections.items(),
-            key=lambda x: x[1]["size"] if isinstance(x[1]["size"], (int, float)) else 0,
-            reverse=True,
-        )
-        print(f"{'Section':<20} {'Size':<15} {'Percentage':<10}")
-        print("-" * 45)
-        for section, data in sorted_sections:
-            size = data["size"]
-            percentage = size / total_size * 100
-            print(f"{section:<20} {format_size(size):<15} {percentage:.2f}%")
-        print("-" * 45)
-        print(f"{'Total':<20} {format_size(total_size):<15} 100.00%")
+            sorted_sections = sorted(
+                sections.items(),
+                key=lambda x: (
+                    x[1]["size"] if isinstance(x[1]["size"], (int, float)) else 0
+                ),
+                reverse=True,
+            )
+            print(f"{'Section':<20} {'Size':<15} {'Percentage':<10}")
+            print("-" * 45)
+            for section, data in sorted_sections:
+                size = data["size"]
+                percentage = size / total_size * 100
+                print(f"{section:<20} {format_size(size):<15} {percentage:.2f}%")
+            print("-" * 45)
+            print(f"{'Total':<20} {format_size(total_size):<15} 100.00%")
 
-        print(f"\nTop {args.top} largest symbols per section (from objdump):")
-        for section, data in sorted_sections:
-            symbols = data.get("symbols", [])
-            if isinstance(symbols, list) and symbols:
-                print(f"\n{section}:")
-                sorted_symbols = sorted(symbols, key=lambda x: x[1], reverse=True)
-                for symbol, size in sorted_symbols[: args.top]:
-                    print(f"  {symbol:<60} {format_size(size):>10}")
-            else:
-                print(f"\n{section}: No symbols")
+            print(f"\nTop {args.top} largest symbols per section (from objdump):")
+            for section, data in sorted_sections:
+                symbols = data.get("symbols", [])
+                if isinstance(symbols, list) and symbols:
+                    print(f"\n{section}:")
+                    sorted_symbols = sorted(symbols, key=lambda x: x[1], reverse=True)
+                    for symbol, size in sorted_symbols[: args.top]:
+                        print(f"  {symbol:<60} {format_size(size):>10}")
+                else:
+                    print(f"\n{section}: No symbols")
 
-        print("\nDetailed symbol sizes (for easy diffing):")
-        for symbol, data in sorted(
-            objdump_symbols.items(), key=lambda x: x[1]["size"], reverse=True
-        ):
-            print(f"{data['size']},{data['section']},{symbol}")
+            print("\nDetailed symbol sizes (for easy diffing):")
+            for symbol, data in sorted(
+                objdump_symbols.items(), key=lambda x: x[1]["size"], reverse=True
+            ):
+                print(f"{data['size']},{data['section']},{symbol}")
+        except Exception as e:
+            print(f"Error while analyzing map file and ELF: {e}")
+            error_happened = True
     else:
         print(f"Map file not found at {map_path} or ELF file not found at {elf_path}")
         return 1
@@ -204,7 +210,7 @@ def main() -> int:
     print("Map file dump:")
     print(map_path.read_text())
 
-    return 0
+    return 0 if not error_happened else 1
 
 
 if __name__ == "__main__":
