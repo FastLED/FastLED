@@ -79,13 +79,18 @@ def run_objdump(cpp_filt_path: Path, objdump_path: Path, elf_path: Path) -> dict
     for line in stdout.splitlines():
         parts = line.split()
         if len(parts) >= 6:
-            size = int(parts[4], 16)
-            name = " ".join(
-                parts[5:]
-            )  # Join all parts after the 5th to capture full symbol names
-            section = parts[3]
-            if size > 0:
-                symbols[name] = {"size": size, "section": section}
+            try:
+                size = int(parts[4], 16)
+                name = " ".join(
+                    parts[5:]
+                )  # Join all parts after the 5th to capture full symbol names
+                section = parts[3]
+                if size > 0:
+                    symbols[name] = {"size": size, "section": section}
+            except Exception as e:
+                print(f"Error parsing line: {line}")
+                print(e)
+
     return symbols
 
 
