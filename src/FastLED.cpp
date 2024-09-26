@@ -122,7 +122,7 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 		scale = (*m_pPowerFunc)(scale, m_nPowerData);
 	}
 
-	void* controllersData[MAX_CLED_CONTROLLERS];
+	static void* controllersData[MAX_CLED_CONTROLLERS];
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
