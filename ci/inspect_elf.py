@@ -69,11 +69,18 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Inspect a compiled binary")
     parser.add_argument("--first", action="store_true", help="Inspect the first board")
     parser.add_argument("--cwd", type=str, help="Custom working directory")
+    parser.add_argument("--elf", type=str, help="Path to the ELF file to inspect")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    if args.elf:
+        firmware_path = Path(args.elf)
+        if not firmware_path.exists():
+            print(f"ELF file not found: {firmware_path}")
+            return 1
+
     if args.cwd:
         # os.chdir(args.cwd)
         root_build_dir = Path(args.cwd) / ".build"
