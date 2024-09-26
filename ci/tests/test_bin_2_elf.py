@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ci.bin_2_elf import bin_to_elf
-from ci.elf import analyze_elf_file
+from ci.elf import print_symbol_sizes
 
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
@@ -53,7 +53,7 @@ class TestBinToElf(unittest.TestCase):
             TOOLS.objcopy_path,
             output_elf,
         )
-        analyze_elf_file(TOOLS.objdump_path, output_elf)
+        print_symbol_sizes(TOOLS.objdump_path, output_elf)
 
 
 if __name__ == "__main__":

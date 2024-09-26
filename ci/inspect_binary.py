@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from ci.bin_2_elf import bin_to_elf
-from ci.elf import analyze_elf_file
+from ci.elf import print_symbol_sizes
 
 
 def cpp_filt(cpp_filt_path: Path, input_text: str) -> str:
@@ -127,7 +127,7 @@ def main() -> int:
                 objcopy_path,
                 temp_dir_path / "output.elf",
             )
-            analyze_elf_file(objdump_path, output_elf)
+            print_symbol_sizes(objdump_path, output_elf)
     except Exception as e:
         print(
             f"Error while converting binary to ELF, binary analysis will not work on this build: {e}"
