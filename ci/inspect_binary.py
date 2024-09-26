@@ -212,7 +212,10 @@ def main() -> int:
         print(f"Map file not found at {map_path} or ELF file not found at {elf_path}")
         return 1
 
-    print("Map file dump:")
+    # print("\n\nMap file dump:\n")
+    print("\n##################################################")
+    print("# Map file dump:")
+    print("##################################################\n")
     print(map_path.read_text())
 
     return 0 if not error_happened else 1
