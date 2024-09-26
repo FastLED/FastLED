@@ -61,6 +61,8 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
+static void* gControllersData[MAX_CLED_CONTROLLERS];
+
 void CFastLED::show(uint8_t scale) {
 	// guard against showing too rapidly
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
@@ -71,13 +73,12 @@ void CFastLED::show(uint8_t scale) {
 		scale = (*m_pPowerFunc)(scale, m_nPowerData);
 	}
 
-	// static uninitialized controllersData produces the smallest binary on attiny85.
-	static void* controllersData[MAX_CLED_CONTROLLERS];
+	// static uninitialized gControllersData produces the smallest binary on attiny85.
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
 
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		controllersData[length++] = pCur->beginShowLeds();
+		gControllersData[length++] = pCur->beginShowLeds();
 		if (m_nFPS < 100) { pCur->setDither(0); }
 		pCur->showLedsInternal(scale);
 		pCur = pCur->next();
@@ -85,7 +86,7 @@ void CFastLED::show(uint8_t scale) {
 	length = 0;  // Reset length to 0 and iterate again.
 	pCur = CLEDController::head();
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		pCur->endShowLeds(controllersData[length++]);
+		pCur->endShowLeds(gControllersData[length++]);
 		pCur = pCur->next();
 	}
 	countFPS();
@@ -122,11 +123,10 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 		scale = (*m_pPowerFunc)(scale, m_nPowerData);
 	}
 
-	static void* controllersData[MAX_CLED_CONTROLLERS];
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		controllersData[length++] = pCur->beginShowLeds();
+		gControllersData[length++] = pCur->beginShowLeds();
 		if(m_nFPS < 100) { pCur->setDither(0); }
 		pCur->showColorInternal(color, scale);
 		pCur = pCur->next();
@@ -135,7 +135,7 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 	pCur = CLEDController::head();
 	length = 0;  // Reset length to 0 and iterate again.
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
-		pCur->endShowLeds(controllersData[length++]);
+		pCur->endShowLeds(gControllersData[length++]);
 		pCur = pCur->next();
 	}
 	countFPS();
