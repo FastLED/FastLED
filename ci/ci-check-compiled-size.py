@@ -26,6 +26,11 @@ def parse_args():
     parser.add_argument(
         "--max-size", type=int, required=False, help="Maximum allowed size"
     )
+    parser.add_argument(
+        "--no-build",
+        action="store_true",
+        help="Skip compilation and check existing build",
+    )
     args, unknown = parser.parse_known_args()
 
     if unknown:
@@ -39,8 +44,11 @@ def parse_args():
 def main():
     os.chdir(str(PROJECT_ROOT))
     args = parse_args()
-    cmd_list = ["uv", "run", "ci/ci-compile.py", args.board, "--examples", "Blink"]
-    run_command(cmd_list, shell=True, capture_output=True)
+
+    if not args.no_build:
+        cmd_list = ["uv", "run", "ci/ci-compile.py", args.board, "--examples", "Blink"]
+        run_command(cmd_list, shell=True, capture_output=True)
+
     output = run_command(
         ["uv", "run", "ci/ci/compiled_size.py", "--board", args.board],
         capture_output=True,
