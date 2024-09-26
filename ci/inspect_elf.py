@@ -162,23 +162,7 @@ def main() -> int:
     board_info = build_info.get(board) or build_info[next(iter(build_info))]
 
     firmware_path = Path(board_info["prog_path"])
-    objdump_path = Path(board_info["aliases"]["objdump"])
     cpp_filt_path = Path(board_info["aliases"]["c++filt"])
-
-    print(f"Dumping sections size for {board} firmware: {firmware_path}")
-    try:
-        size_path = Path(board_info["aliases"]["size"])
-        sections_size = dump_sections_size(firmware_path, size_path)
-        print(sections_size)
-    except Exception as e:
-        print(f"Error while dumping sections size: {e}")
-
-    print(f"Dumping symbols for {board} firmware: {firmware_path}")
-    try:
-        symbols = dump_symbols(firmware_path, objdump_path, cpp_filt_path)
-        print(symbols)
-    except Exception as e:
-        print(f"Error while dumping symbols: {e}")
 
     print(f"Dumping symbol sizes for {board} firmware: {firmware_path}")
     try:
