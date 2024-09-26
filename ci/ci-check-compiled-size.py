@@ -50,7 +50,7 @@ def main():
         run_command(cmd_list, shell=True, capture_output=True)
 
     output = run_command(
-        ["uv", "run", "ci/ci/compiled_size.py", "--board", args.board],
+        ["uv", "run", "ci/compiled_size.py", "--board", args.board],
         capture_output=True,
     )
     size_match = re.search(r": *(\d+)", output)
