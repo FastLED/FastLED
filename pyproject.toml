@@ -13,7 +13,8 @@ dependencies = [
     "clang-format",
     "isort",
     "black",
-    "pip"
+    "pip",
+    "pytest"
 ]
 
 [build-system]
