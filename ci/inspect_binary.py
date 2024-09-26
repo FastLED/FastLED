@@ -1,6 +1,7 @@
 import argparse
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -62,15 +63,18 @@ def cpp_filt(cpp_filt_path: str | Path, input_text: str) -> str:
     return result.stdout
 
 
-def run_objdump(objdump_path: Path, elf_path: Path) -> dict:
+def run_objdump(cpp_filt_path: Path, objdump_path: Path, elf_path: Path) -> dict:
     command = [str(objdump_path), "-t", str(elf_path)]
     print(f"Running command: {' '.join(command)}")
     result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
         raise RuntimeError(f"Error running objdump: {result.stderr}")
 
+    stdout = result.stdout
+    stdout = cpp_filt(cpp_filt_path, stdout)
+
     symbols = {}
-    for line in result.stdout.splitlines():
+    for line in stdout.splitlines():
         parts = line.split()
         if len(parts) >= 6:
             size = int(parts[4], 16)
@@ -135,7 +139,7 @@ def main() -> int:
     board_info = build_info.get(board) or build_info[next(iter(build_info))]
     elf_path = Path(board_info["prog_path"])
     # binary_path = _find_binary_path(elf_path)
-    # cpp_filt_path = Path(board_info["aliases"]["c++filt"])
+    cpp_filt_path = Path(board_info["aliases"]["c++filt"])
     objdump_path = Path(board_info["aliases"]["objdump"])
     map_path = board_dir / "firmware.map"
     if not map_path.exists():
@@ -147,7 +151,7 @@ def main() -> int:
         # demangled_text = cpp_filt(cpp_filt_path, input_text)
         # map_sections = parse_map_file(demangled_text)
 
-        objdump_symbols = run_objdump(objdump_path, elf_path)
+        objdump_symbols = run_objdump(cpp_filt_path, objdump_path, elf_path)
 
         print("\nMemory Usage Summary (from objdump):")
         total_size = sum(symbol["size"] for symbol in objdump_symbols.values())
@@ -191,9 +195,13 @@ def main() -> int:
             print(f"{data['size']},{data['section']},{symbol}")
     else:
         print(f"Map file not found at {map_path} or ELF file not found at {elf_path}")
+        return 1
+
+    print("Map file dump:")
+    print(map_path.read_text())
 
     return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
