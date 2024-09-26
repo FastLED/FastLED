@@ -78,7 +78,9 @@ public:
 
     /// Clear out/zero out the given number of LEDs.
     /// @param nLeds the number of LEDs to clear
-    virtual void clearLeds(int nLeds) { showColor(CRGB::Black, nLeds, CRGB::Black); }
+    virtual void clearLeds(int nLeds = -1) {
+        clearLedDataInternal(nLeds);
+    }
 
     /// @copybrief show(const struct CRGB*, int, CRGB)
     ///
@@ -87,7 +89,7 @@ public:
     /// @param nLeds the number of LEDs in the data array
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, CRGB)
-    void show(const struct CRGB *data, int nLeds, uint8_t brightness) {
+    void showInternal(const struct CRGB *data, int nLeds, uint8_t brightness) {
         show(data, nLeds, getAdjustment(brightness));
     }
 
@@ -98,14 +100,14 @@ public:
     /// @param nLeds the number of LEDs in the data array
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
-    void showColor(const struct CRGB &data, int nLeds, uint8_t brightness) {
+    void showColorInternal(const struct CRGB &data, int nLeds, uint8_t brightness) {
         showColor(data, nLeds, getAdjustment(brightness));
     }
 
     /// Write the data to the LEDs managed by this controller
     /// @param brightness the brightness of the LEDs
     /// @see show(const struct CRGB*, int, uint8_t)
-    void showLeds(uint8_t brightness=255) {
+    void showLedsInternal(uint8_t brightness=255) {
         show(m_Data, m_nLeds, getAdjustment(brightness));
     }
 
@@ -114,7 +116,7 @@ public:
     /// @param data the CRGB color to set the LEDs to
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
-    void showColor(const struct CRGB & data, uint8_t brightness=255) {
+    void showColorInternal(const struct CRGB & data, uint8_t brightness=255) {
         showColor(data, m_nLeds, getAdjustment(brightness));
     }
 
@@ -136,9 +138,11 @@ public:
     }
 
     /// Zero out the LED data managed by this controller
-    void clearLedData() {
+    void clearLedDataInternal(int nLeds = -1) {
         if(m_Data) {
-            memset8((void*)m_Data, 0, sizeof(struct CRGB) * m_nLeds);
+            nLeds = (nLeds < 0) ? m_nLeds : nLeds;
+            nLeds = (nLeds > m_nLeds) ? m_nLeds : nLeds;
+            memset((void*)m_Data, 0, sizeof(struct CRGB) * nLeds);
         }
     }
 

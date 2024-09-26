@@ -1,12 +1,17 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
+
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
 
 #ifndef MAX_CLED_CONTROLLERS
+#ifdef __AVR__
+#define MAX_CLED_CONTROLLERS 8
+#else
 #define MAX_CLED_CONTROLLERS 64
-#endif
+#endif  // __AVR__
+#endif  // MAX_CLED_CONTROLLERS
 
 #if defined(__SAM3X8E__)
 volatile uint32_t fuckit;
@@ -66,7 +71,7 @@ void CFastLED::show(uint8_t scale) {
 		scale = (*m_pPowerFunc)(scale, m_nPowerData);
 	}
 
-	// CLEDController controllers[MAX_CLED_CONTROLLERS] = {0};
+	// void** controllersData = (void**)FASTLED_ALLOCA(MAX_CLED_CONTROLLERS * sizeof(void*));
 	void* controllersData[MAX_CLED_CONTROLLERS] = {0};
 	int length = 0;
 	CLEDController *pCur = CLEDController::head();
@@ -74,7 +79,7 @@ void CFastLED::show(uint8_t scale) {
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
 		controllersData[length++] = pCur->beginShowLeds();
 		if (m_nFPS < 100) { pCur->setDither(0); }
-		pCur->showLeds(scale);
+		pCur->showLedsInternal(scale);
 		pCur = pCur->next();
 	}
 	length = 0;  // Reset length to 0 and iterate again.
@@ -123,7 +128,7 @@ void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
 		controllersData[length++] = pCur->beginShowLeds();
 		if(m_nFPS < 100) { pCur->setDither(0); }
-		pCur->showColor(color, scale);
+		pCur->showColorInternal(color, scale);
 		pCur = pCur->next();
 	}
 
@@ -146,7 +151,7 @@ void CFastLED::clear(bool writeData) {
 void CFastLED::clearData() {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
-		pCur->clearLedData();
+		pCur->clearLedDataInternal();
 		pCur = pCur->next();
 	}
 }

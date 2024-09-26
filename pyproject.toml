@@ -15,7 +15,8 @@ dependencies = [
     "black",
     "pip",
     "pytest",
-    "fpvgcc"
+    "fpvgcc",
+    "uv"
 ]
 
 [build-system]

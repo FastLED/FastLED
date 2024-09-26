@@ -23,7 +23,9 @@ class TestBinToElf(unittest.TestCase):
             print("Uno build not found. Running compilation...")
             try:
                 subprocess.run(
-                    "uv run ci/compile.py uno --examples Blink", shell=True, check=True
+                    "uv run ci/ci-compile.py uno --examples Blink",
+                    shell=True,
+                    check=True,
                 )
                 print("Compilation completed successfully.")
             except subprocess.CalledProcessError as e:
