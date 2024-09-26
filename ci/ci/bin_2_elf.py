@@ -169,4 +169,7 @@ def bin_to_elf(
     if dummy_obj_path.exists():
         dummy_obj_path.unlink()
 
+    if linker_script.exists():
+        linker_script.unlink()
+
     return output_elf
