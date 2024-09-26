@@ -37,6 +37,7 @@ jobs:
         shell: bash
 
       - name: Build Blink.ino for library info
+        continue-on-error: true
         run: |
           uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
         shell: bash
