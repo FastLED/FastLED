@@ -1,6 +1,7 @@
 import argparse
 import json
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -49,6 +50,55 @@ def dump_symbols(firmware_path: Path, objdump_path: Path, cpp_filt_path: Path) -
         raise RuntimeError(f"Error running c++filt command: {cpp_filt_result.stderr}")
 
     return cpp_filt_result.stdout
+
+
+def dump_symbol_sizes(nm_path: Path, cpp_filt_path: Path, elf_file: Path) -> str:
+    nm_command = [
+        str(nm_path),
+        "-S",
+        "--size-sort",
+        str(elf_file),
+    ]
+    print(f"Listing symbols and sizes in ELF file: {elf_file}")
+    print("Running command: ", " ".join(nm_command))
+    nm_result = subprocess.run(
+        nm_command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if nm_result.returncode != 0:
+        raise RuntimeError(f"Error running nm command: {nm_result.stderr}")
+
+    cpp_filt_command = [str(cpp_filt_path), "--no-strip-underscore"]
+    print("Running c++filt command: ", " ".join(cpp_filt_command))
+    cpp_filt_result = subprocess.run(
+        cpp_filt_command,
+        input=nm_result.stdout,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if cpp_filt_result.returncode != 0:
+        raise RuntimeError(f"Error running c++filt command: {cpp_filt_result.stderr}")
+
+    # now reverse sort the lines
+    lines = cpp_filt_result.stdout.splitlines()
+
+    @dataclass
+    class Entry:
+        address: str
+        size: int
+        everything_else: str
+
+    def parse_line(line: str) -> Entry:
+        address, size, *rest = line.split()
+        return Entry(address, int(size, 16), " ".join(rest))
+
+    data: list[Entry] = [parse_line(line) for line in lines]
+    data.sort(key=lambda x: x.size, reverse=True)
+    lines = [f"{d.size:6d} {d.everything_else}" for d in data]
+    return "\n".join(lines)
 
 
 def dump_sections_size(firmware_path: Path, size_path: Path) -> str:
@@ -129,6 +179,14 @@ def main() -> int:
         print(symbols)
     except Exception as e:
         print(f"Error while dumping symbols: {e}")
+
+    print(f"Dumping symbol sizes for {board} firmware: {firmware_path}")
+    try:
+        nm_path = Path(board_info["aliases"]["nm"])
+        symbol_sizes = dump_symbol_sizes(nm_path, cpp_filt_path, firmware_path)
+        print(symbol_sizes)
+    except Exception as e:
+        print(f"Error while dumping symbol sizes: {e}")
 
     return 0
 
