@@ -3,7 +3,7 @@ import unittest
 from dataclasses import dataclass
 from pathlib import Path
 
-from ci.elf import analyze_elf_file
+from ci.elf import print_symbol_sizes
 
 HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
@@ -42,7 +42,7 @@ TOOLS = load_tools()
 
 class TestBinToElf(unittest.TestCase):
     def test_bin_to_elf_conversion(self):
-        analyze_elf_file(TOOLS.objdump_path, ELF_FILE)
+        print_symbol_sizes(TOOLS.objdump_path, ELF_FILE)
 
 
 if __name__ == "__main__":

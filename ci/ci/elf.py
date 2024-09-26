@@ -42,6 +42,24 @@ def analyze_elf_file(objdump_path: Path, elf_file: Path):
     list_symbols_and_sizes(objdump_path, elf_file)
 
 
+def print_symbol_sizes(objdump_path: Path, elf_file: Path):
+    """
+    Print the sizes of all symbols in the ELF file using objdump.
+
+    Args:
+        objdump_path (Path): Path to the objdump executable.
+        elf_file (Path): Path to the ELF file.
+    """
+    command = [
+        str(objdump_path),
+        "-t",
+        str(elf_file),
+    ]  # "-t" option lists symbols with sizes.
+    print(f"Listing symbols and sizes in ELF file: {elf_file}")
+    print("Running command: ", " ".join(command))
+    run_command(command, show_output=True)
+
+
 def list_symbols_and_sizes(objdump_path: Path, elf_file: Path):
     """
     List all symbols and their sizes from the ELF file using objdump.
