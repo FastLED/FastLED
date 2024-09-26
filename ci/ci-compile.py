@@ -17,6 +17,7 @@ from ci.locked_print import locked_print
 HERE = Path(__file__).parent.resolve()
 
 LIBS = ["src", "ci"]
+BUILD_FLAGS = ["-Wl,-Map,firmware.map", "-fopt-info-all=optimization_report.txt"]
 
 # Default boards to compile for. You can use boards not defined here but
 # if the board isn't part of the officially supported platformio boards then
@@ -224,7 +225,7 @@ def create_concurrent_run_args(args: argparse.Namespace) -> ConcurrentRunArgs:
         extra_scripts=extra_scripts,
         cwd=str(HERE.parent),
         board_dir=(HERE / "boards").absolute().as_posix(),
-        build_flags=["-Wl,-Map,firmware.map"],
+        build_flags=BUILD_FLAGS,
         verbose=verbose,
     )
     return out
