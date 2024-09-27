@@ -1,7 +1,8 @@
 FastLED 3.8.0
 =============
 * New APA102 global brightness algorithm
-* APA102HD?
+  * APA102
+  * APA102HD
 * 3.7.8: attiny85 size 9447 is within the limit of 9500
 * 3.8.0: attiny85 size 9296 is within the limit of 9500
 
