@@ -14,6 +14,7 @@ def compile_tests():
     return_code, stdout, stderr = run_command("uv run tests/compile.py")
     if return_code != 0:
         print("Compilation failed:")
+        print(stdout)
         print(stderr)
         sys.exit(1)
     print("Compilation successful.")
