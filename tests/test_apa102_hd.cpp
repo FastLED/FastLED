@@ -7,8 +7,6 @@
 #include "FastLED.h"
 #include "five_bit_hd_gamma.h"
 
-CRGB leds[1];
-
 TEST_CASE("sanity check") {
   CHECK(1 == 1);
 }
