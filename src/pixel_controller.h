@@ -490,7 +490,9 @@ struct PixelController {
                 rgb.r, rgb.g, rgb.b,
                 // Note this mScale has the global brightness scale mixed in
                 // with the color correction scale.
-                mColorAdjustment.color.r, mColorAdjustment.color.g, mColorAdjustment.color.b,
+                mColorAdjustment.color.r,
+                mColorAdjustment.color.g,
+                mColorAdjustment.color.b,
                 mColorAdjustment.brightness,
                 &rgb.r, &rgb.g, &rgb.b, &brightness);
             #else
