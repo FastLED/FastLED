@@ -22,13 +22,14 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-#ifndef HD_COLOR_MIXING
+// Whether to allow HD_COLOR_MIXING
+#ifndef FASTLED_HD_COLOR_MIXING
 #ifdef __AVR__
-#define HD_COLOR_MIXING 0
+#define FASTLED_HD_COLOR_MIXING 0
 #else
-#define HD_COLOR_MIXING 1
-#endif
-#endif
+#define FASTLED_HD_COLOR_MIXING 1
+#endif  // __AVR__
+#endif  // FASTLED_HD_COLOR_MIXING
 
 
 /// Gets the assigned color channel for a byte's position in the output,
@@ -61,7 +62,7 @@ FASTLED_NAMESPACE_BEGIN
 
 struct ColorAdjustment {
     CRGB premixed;       /// the per-channel scale values premixed with brightness.
-    #if HD_COLOR_MIXING
+    #if FASTLED_HD_COLOR_MIXING
     CRGB color;          /// the per-channel scale values NOT mixed with brightness.
     uint8_t brightness;  /// the global brightness value
     #endif
@@ -169,6 +170,12 @@ struct PixelController {
         mAdvance = 0;
         initOffsets(len);
     }
+
+    #if FASTLED_HD_COLOR_MIXING
+    uint8_t global_brightness() const {
+        return mColorAdjustment.brightness;
+    }
+    #endif
 
 
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
@@ -454,6 +461,16 @@ struct PixelController {
     FASTLED_FORCE_INLINE uint8_t getScale0() { return getscale<0>(*this); }  ///< non-template alias of getscale<0>()
     FASTLED_FORCE_INLINE uint8_t getScale1() { return getscale<1>(*this); }  ///< non-template alias of getscale<1>()
     FASTLED_FORCE_INLINE uint8_t getScale2() { return getscale<2>(*this); }  ///< non-template alias of getscale<2>()
+
+    #if FASTLED_HD_COLOR_MIXING
+    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t getscaleNoBrightness(PixelController & pc) { return pc.mColorAdjustment.color.raw[RO(SLOT)]; }
+    FASTLED_FORCE_INLINE void getHdScale(uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
+        *c0 = getscaleNoBrightness<0>(*this);
+        *c1 = getscaleNoBrightness<1>(*this);
+        *c2 = getscaleNoBrightness<2>(*this);
+        *brightness = mColorAdjustment.brightness;
+    }
+    #endif
 
 
     FASTLED_FORCE_INLINE void loadAndScale_APA102_HD(uint8_t *b0_out, uint8_t *b1_out,

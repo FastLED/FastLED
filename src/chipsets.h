@@ -7,6 +7,11 @@
 #include "force_inline.h"
 #include "pixel_iterator.h"
 
+// When true, applies APA102 HD GLOBAL BRIGHTNESS scaling to RGB data.
+#ifndef FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS
+#define FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS 0
+#endif  // FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS
+
 /// @file chipsets.h
 /// Contains the bulk of the definitions for the various LED chipsets supported.
 
@@ -98,7 +103,7 @@ class RGBWEmulatedController
         // This version sent down to the real controller.
         PixelController<RGB, LANES, MASK> pixels_device(pixels);
         pixels_device.mColorAdjustment.premixed = CRGB(255, 255, 255); // No scaling because we do that.
-		#if HD_COLOR_MIXING
+		#if FASTLED_HD_COLOR_MIXING
 		pixels_device.mColorAdjustment.color = CRGB(255, 255, 255);
 		pixels_device.mColorAdjustment.brightness = 255;
 		#endif
@@ -376,6 +381,12 @@ private:
 	static inline void getGlobalBrightnessAndScalingFactors(
 		    PixelIterator& pixels,
 		    uint8_t* out_s0, uint8_t* out_s1, uint8_t* out_s2, uint8_t* out_brightness) {
+#if FASTLED_HD_COLOR_MIXING && FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS
+		uint8_t brightness;
+		pixels.getHdScale(out_s0, out_s1, out_s2, &brightness);
+		*out_brightness = map8(brightness, 0, 31);
+		return;
+#else
 		uint8_t s0, s1, s2;
 		pixels.loadAndScaleRGB(&s0, &s1, &s2);
 #if FASTLED_USE_GLOBAL_BRIGHTNESS == 1
@@ -387,11 +398,12 @@ private:
 		s2 = (maxBrightness * s2 + (brightness >> 1)) / brightness;
 #else
 		const uint8_t brightness = 0x1F;
-#endif
+#endif  // FASTLED_USE_GLOBAL_BRIGHTNESS
 		*out_s0 = s0;
 		*out_s1 = s1;
 		*out_s2 = s2;
 		*out_brightness = static_cast<uint8_t>(brightness);
+#endif  // FASTLED_HD_COLOR_MIXING && FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS
 	}
 
 	// Legacy showPixels implementation.

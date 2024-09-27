@@ -85,7 +85,7 @@ public:
         // if (color_correction) {
         //     *color_correction = getAdjustment(255);
         // }
-        #if HD_COLOR_MIXING
+        #if FASTLED_HD_COLOR_MIXING
         ColorAdjustment out = {getAdjustment(brightness), getAdjustment(255), brightness};
         #else
         ColorAdjustment out = {getAdjustment(brightness)};
