@@ -55,5 +55,24 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
     CHECK_EQ(b8, 165);
     CHECK_EQ(power_5bit, 3);
   }
+
+  SUBCASE("Global brightness half") {
+    const uint8_t brightness = 128;
+    five_bit_hd_gamma_bitshift(65, 64, 64, 255, 255, 255, brightness, &r8, &g8, &b8, &power_5bit);
+    CHECK_EQ(r8, 85);
+    CHECK_EQ(g8, 83);
+    CHECK_EQ(b8, 83);
+    CHECK_EQ(power_5bit, 3);
+  }
+
+  SUBCASE("Global brightness low") {
+    const uint8_t brightness = 8;
+    five_bit_hd_gamma_bitshift(65, 64, 64, 255, 255, 255, brightness, &r8, &g8, &b8, &power_5bit);
+    CHECK_EQ(r8, 5);
+    CHECK_EQ(g8, 5);
+    CHECK_EQ(b8, 5);
+    CHECK_EQ(power_5bit, 3);
+  }
+
 }
 

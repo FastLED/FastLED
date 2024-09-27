@@ -170,6 +170,7 @@ void __builtin_five_bit_hd_gamma_bitshift(
       g16 = scale16by8(g16, global_brightness);
       b16 = scale16by8(b16, global_brightness);
       // TODO: Should we continue the bit shifting after global brightness is applied?
+      if (global_brightness >)
     }
 
     // Step 5: Conversion Back to 8-bit.
