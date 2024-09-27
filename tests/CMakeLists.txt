@@ -84,19 +84,35 @@ file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTA
 # Process source files
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
-        add_executable(${TEST_NAME} ${TEST_SOURCE})
-        target_link_libraries(${TEST_NAME} FastLED)
-        set_target_properties(${TEST_NAME} PROPERTIES
-            CXX_STANDARD 17
-            CXX_STANDARD_REQUIRED ON
-        )
+    add_executable(${TEST_NAME} ${TEST_SOURCE})
+    target_link_libraries(${TEST_NAME} FastLED)
+    set_target_properties(${TEST_NAME} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+    )
     # Add static linking flags and debug flags for test executables
-        target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
-        target_compile_options(${TEST_NAME} PRIVATE 
-            $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
-            $<$<CONFIG:Release>:-O3>
-        )
-        add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+    target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
+    target_compile_options(${TEST_NAME} PRIVATE 
+        $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
+        $<$<CONFIG:Release>:-O3>
+    )
+    
+    # Create a custom command to build the test only if source or FastLED library changes
+    add_custom_command(
+        OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_NAME}
+        COMMAND ${CMAKE_COMMAND} --build . --target ${TEST_NAME}
+        DEPENDS ${TEST_SOURCE} FastLED
+        COMMENT "Building ${TEST_NAME}"
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+    
+    # Create a custom target that depends on the custom command
+    add_custom_target(
+        ${TEST_NAME}_target ALL
+        DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_NAME}
+    )
+    
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endforeach()
 
 # Process remaining binaries (those without corresponding source files)
