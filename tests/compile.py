@@ -15,11 +15,7 @@ def run_command(command):
         exit(1)
     return stdout.decode()
 
-def main():
-    os.chdir(str(PROJECT_ROOT))
-
-    print(f"Current directory: {Path('.').absolute()}")
-
+def compile_fastled_library():
     gpp = "uv run python -m ziglang c++"
 
     # Create .build directory if it doesn't exist
@@ -50,6 +46,11 @@ def main():
         obj_file.unlink()
 
     print("Object files cleaned up.")
+
+def main():
+    os.chdir(str(PROJECT_ROOT))
+    print(f"Current directory: {Path('.').absolute()}")
+    compile_fastled_library()
 
 if __name__ == "__main__":
     main()
