@@ -16,7 +16,8 @@ dependencies = [
     "pip",
     "pytest",
     "fpvgcc",
-    "uv"
+    "uv",
+    "ziglang",
 ]
 
 [build-system]
