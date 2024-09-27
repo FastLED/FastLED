@@ -18,6 +18,7 @@ dependencies = [
     "fpvgcc",
     "uv",
     "ziglang",
+    "ninja",
 ]
 
 [build-system]

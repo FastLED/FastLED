@@ -16,12 +16,21 @@ def run_command(command):
     return stdout.decode()
 
 def compile_fastled_library():
-    makefile_path = HERE / "Makefile"
-    run_command(f"make -f {makefile_path}")
+    build_dir = HERE / "build"
+    build_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Configure CMake
+    cmake_configure_command = f'cmake -S {HERE} -B {build_dir} -G "Ninja"'
+    run_command(cmake_configure_command)
+    
+    # Build the project
+    cmake_build_command = f"cmake --build {build_dir}"
+    run_command(cmake_build_command)
+    
     print("FastLED library compiled successfully.")
 
 def main():
-    os.chdir(str(PROJECT_ROOT))
+    os.chdir(str(HERE))
     print(f"Current directory: {Path('.').absolute()}")
     compile_fastled_library()
 
