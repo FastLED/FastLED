@@ -14,7 +14,15 @@
 #define FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP 0
 #endif
 
+namespace {
+  template<typename T>
+  T mymax(T a, T b) {
+    return a > b ? a : b;
+  }
+}
+
 FASTLED_NAMESPACE_BEGIN
+
 
 #ifndef FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 // Fast a memory efficient gamma=2 function.
@@ -105,6 +113,7 @@ void __builtin_five_bit_hd_gamma_bitshift(
     const uint32_t r16_const = r16;
     const uint32_t g16_const = g16;
     const uint32_t b16_const = b16;
+    const uint32_t max16_const = mymax(mymax(r16_const, g16_const), b16_const);
 
     // Step 4: Bit Shifting Loop, can probably replaced with a
     // single pass bit-twiddling hack.
@@ -115,13 +124,7 @@ void __builtin_five_bit_hd_gamma_bitshift(
           break;
         }
         uint32_t max_value = 0xfffful * 15;
-        if (r16_const * 31 > max_value) {
-          break;
-        }
-        if (g16_const * 31 > max_value) {
-          break;
-        }
-        if (b16_const * 31 > max_value) {
+        if (max16_const * 31 > max_value) {
           break;
         }
         numerator = 31;
@@ -133,13 +136,7 @@ void __builtin_five_bit_hd_gamma_bitshift(
         }
 
         max_value = 0xfffful * 15 * 7;
-        if (r16_const * 31 * 15 > max_value) {
-          break;
-        }
-        if (g16_const * 31 * 15 > max_value) {
-          break;
-        }
-        if (b16_const * 31 * 15 > max_value) {
+        if (max16_const * 31 * 15 > max_value) {
           break;
         }
         numerator = 31 * 15;
@@ -151,13 +148,7 @@ void __builtin_five_bit_hd_gamma_bitshift(
         }
 
         max_value = 0xfffful * 15 * 7 * 3;
-        if (r16_const * 31 * 15 * 7 > max_value) {
-          break;
-        }
-        if (g16_const * 31 * 15 * 7 > max_value) {
-          break;
-        }
-        if (b16_const * 31 * 15 * 7 > max_value) {
+        if (max16_const * 31 * 15 * 7 > max_value) {
           break;
         }
         numerator = 31 * 15 * 7;
@@ -170,13 +161,7 @@ void __builtin_five_bit_hd_gamma_bitshift(
         }
 
         max_value = 0xfffful * 15 * 7 * 3;
-        if (r16_const * 31 * 15 * 7 * 3 > max_value) {
-          break;
-        }
-        if (g16_const * 31 * 15 * 7 * 3 > max_value) {
-          break;
-        }
-        if (b16_const * 31 * 15 * 7 * 3 > max_value) {
+        if (max16_const * 31 * 15 * 7 * 3 > max_value) {
           break;
         }
         numerator = 31 * 15 * 7 * 3;
