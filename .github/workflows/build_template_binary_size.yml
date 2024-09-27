@@ -33,7 +33,7 @@ jobs:
         run: uv run ci/ci-compile.py ${{ inputs.board }} --examples Blink
 
       - name: Check Compiled Program Size for ${{ inputs.board }}
-        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }}
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }} --no-build
 
       - name: Inspect Binary
         if: always()
@@ -51,7 +51,7 @@ jobs:
         run: uv run ci/ci-compile.py ${{ inputs.board }} --examples Apa102
 
       - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102)
-        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size_apa102 }}
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size_apa102 }} --no-build
 
       - name: Inspect Binary
         if: always()
