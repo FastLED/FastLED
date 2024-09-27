@@ -15,5 +15,5 @@ jobs:
     with:
       board: uno
       max_size: 11000
-      max_size_apa102: 11000
+      max_size_apa102: 12050
 

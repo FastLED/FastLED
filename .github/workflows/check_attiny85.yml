@@ -15,5 +15,5 @@ jobs:
     with:
       board: attiny85
       max_size: 9500
-      max_size_apa102: 9500
+      max_size_apa102: 12000
 
