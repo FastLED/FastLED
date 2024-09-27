@@ -18,12 +18,11 @@ FASTLED_NAMESPACE_BEGIN
 
 #ifndef FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 // Fast a memory efficient gamma=2 function.
-void five_bit_hd_gamma_function(
-  uint8_t r8, uint8_t g8, uint8_t b8,
-  uint16_t* r16, uint16_t* g16, uint16_t* b16) {
-    *r16 = uint16_t(r8) * r8;
-    *g16 = uint16_t(g8) * g8;
-    *b16 = uint16_t(b8) * b8;
+void five_bit_hd_gamma_function(CRGB color,
+                                uint16_t* r16, uint16_t* g16, uint16_t* b16) {
+    *r16 = uint16_t(color.r) * color.r;
+    *g16 = uint16_t(color.g) * color.g;
+    *b16 = uint16_t(color.b) * color.b;
 }
 #else
 // Using look up table for gamma16 correction at power of 2.8
@@ -53,41 +52,37 @@ static const uint16_t PROGMEM _gamma_2_8[256] = {
     57199, 57816, 58436, 59061, 59690, 60323, 60960, 61601, 62246, 62896, 63549,
     64207, 64869, 65535};
 
-void five_bit_hd_gamma_function(uint8_t r8, uint8_t g8,
-                                uint8_t b8, uint16_t *r16,
+void five_bit_hd_gamma_function(CRGB rgb,
+                                uint16_t *r16,
                                 uint16_t *g16,
                                 uint16_t *b16) {
-  *r16 = _gamma_2_8[r8];
-  *g16 = _gamma_2_8[g8];
-  *b16 = _gamma_2_8[b8];
+  *r16 = _gamma_2_8[rgb.r];
+  *g16 = _gamma_2_8[rgb.g];
+  *b16 = _gamma_2_8[rgb.b];
 }
 #endif  // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
 
 void __builtin_five_bit_hd_gamma_bitshift(
-    uint8_t r8, uint8_t g8, uint8_t b8,
-    uint8_t r8_scale,
-    uint8_t g8_scale,
-    uint8_t b8_scale,
+    CRGB colors,
+    CRGB colors_scale,
     uint8_t global_brightness,
-    uint8_t* out_r8,
-    uint8_t* out_g8,
-    uint8_t* out_b8,
+    CRGB* out_colors,
     uint8_t* out_power_5bit) {
 
     // Step 1: Gamma Correction
     uint16_t r16, g16, b16;
-    five_bit_hd_gamma_function(r8, g8, b8, &r16, &g16, &b16);
+    five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
 
     // Step 2: Post gamma correction scale.
-    if (r8_scale != 0xff) {
-      r16 = scale16by8(r16, r8_scale);
+    if (colors_scale.r != 0xff) {
+      r16 = scale16by8(r16, colors_scale.r);
     }
-    if (g8_scale != 0xff) {
-      g16 = scale16by8(g16, g8_scale);
+    if (colors_scale.g != 0xff) {
+      g16 = scale16by8(g16, colors_scale.g);
     }
-    if (b8_scale != 0xff) {
-      b16 = scale16by8(b16, b8_scale);
+    if (colors_scale.b != 0xff) {
+      b16 = scale16by8(b16, colors_scale.b);
     }
 
     // Step 3: Initialize 5-bit brightness.
@@ -200,30 +195,30 @@ void __builtin_five_bit_hd_gamma_bitshift(
     }
 
     // Step 5: Conversion Back to 8-bit.
-    uint8_t r8_final = (r8 == 255 && uint8_t(r16 >> 8) >= 254) ? 255 : uint8_t(r16 >> 8);
-    uint8_t g8_final = (g8 == 255 && uint8_t(g16 >> 8) >= 254) ? 255 : uint8_t(g16 >> 8);
-    uint8_t b8_final = (b8 == 255 && uint8_t(b16 >> 8) >= 254) ? 255 : uint8_t(b16 >> 8);
+    uint8_t r8_final = (colors.r == 255 && uint8_t(r16 >> 8) >= 254) ? 255 : uint8_t(r16 >> 8);
+    uint8_t g8_final = (colors.g == 255 && uint8_t(g16 >> 8) >= 254) ? 255 : uint8_t(g16 >> 8);
+    uint8_t b8_final = (colors.b == 255 && uint8_t(b16 >> 8) >= 254) ? 255 : uint8_t(b16 >> 8);
 
 #if FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP > 0
     if (v8 == 1) {
       // Linear tuning for the lowest possible brightness. x=y until
       // the intersection point at 9.
-      if (r8 < FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP && r16 > 0) {
-        r8_final = r8;
+      if (colors.r < FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP && r16 > 0) {
+        r8_final = colors.r;
       }
-      if (g8 < FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP && g16 > 0) {
-        g8_final = g8;
+      if (colors.g < FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP && g16 > 0) {
+        g8_final = colors.g;
       }
-      if (b8 < FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP && b16 > 0) {
-        b8_final = b8;
+      if (colors.b < FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP && b16 > 0) {
+        b8_final = colors.b;
       }
     }
 #endif
 
     // Step 6: Output
-    *out_r8 = r8_final;
-    *out_g8 = g8_final;
-    *out_b8 = b8_final;
+    out_colors->r = r8_final;
+    out_colors->g = g8_final;
+    out_colors->b = b8_final;
     *out_power_5bit = v8;
 }
 

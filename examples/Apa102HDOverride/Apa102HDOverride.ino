@@ -15,21 +15,13 @@
 #define STRIP_1_DATA_PIN 3
 #define STRIP_1_CLOCK_PIN 4
 
-void five_bit_hd_gamma_bitshift(uint8_t r8,
-                                uint8_t g8,
-                                uint8_t b8,
-                                uint8_t r8_scale,
-                                uint8_t g8_scale,
-                                uint8_t b8_scale,
+void five_bit_hd_gamma_bitshift(CRGB colors,
+                                CRGB scale,
                                 uint8_t global_brightness,
-                                uint8_t *out_r8,
-                                uint8_t *out_g8,
-                                uint8_t *out_b8,
+                                CRGB* out_colors,
                                 uint8_t *out_power_5bit) {
     // all 0 values for output
-    *out_r8 = 0;
-    *out_g8 = 0;
-    *out_b8 = 0;
+    *out_colors = CRGB(0, 0, 0);
     *out_power_5bit = 0;
     Serial.println("Override function called");
 }

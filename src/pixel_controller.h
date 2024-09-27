@@ -485,25 +485,19 @@ struct PixelController {
         CRGB rgb = CRGB(mData[0], mData[1], mData[2]);
         uint8_t brightness = 0;
         if (rgb) {
-            #if FASTLED_HD_COLOR_MIXING
-            five_bit_hd_gamma_bitshift(
-                rgb.r, rgb.g, rgb.b,
-                // Note this mScale has the global brightness scale mixed in
-                // with the color correction scale.
-                mColorAdjustment.color.r,
-                mColorAdjustment.color.g,
-                mColorAdjustment.color.b,
-                mColorAdjustment.brightness,
-                &rgb.r, &rgb.g, &rgb.b, &brightness);
+            #if FASTLED_HD_COLOR_MIXING == 1
+            uint8_t brightness = mColorAdjustment.brightness;
+            CRGB scale = mColorAdjustment.color;
             #else
-            five_bit_hd_gamma_bitshift(
-                rgb.r, rgb.g, rgb.b,
-                // Note this mScale has the global brightness scale mixed in
-                // with the color correction scale.
-                mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,
-                255,
-                &rgb.r, &rgb.g, &rgb.b, &brightness);
+            uint8_t brightness = 255;
+            CRGB scale = mColorAdjustment.premixed;
             #endif
+            five_bit_hd_gamma_bitshift(
+                rgb,
+                scale,
+                brightness,
+                &rgb,
+                &brightness);
         }
         const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
         const uint8_t b1_index = RGB_BYTE1(RGB_ORDER);

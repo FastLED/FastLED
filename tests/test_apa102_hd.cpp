@@ -19,58 +19,72 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
   uint8_t r8, g8, b8, power_5bit;
   
   SUBCASE("Full brightness, no scaling") {
-    five_bit_hd_gamma_bitshift(
-      255, 255, 255,  // rgb
-      255, 255, 255,  // scaling
-      kBrightness,    // brightness factor
-      &r8, &g8, &b8, &power_5bit);
-    CHECK_EQ(r8, 255);
-    CHECK_EQ(g8, 255);
-    CHECK_EQ(b8, 255);
+    CRGB colors(255, 255, 255);
+    CRGB colors_scale(255, 255, 255);
+    CRGB out_colors;
+    five_bit_hd_gamma_bitshift(colors, colors_scale, kBrightness, &out_colors, &power_5bit);
+    CHECK_EQ(out_colors.r, 255);
+    CHECK_EQ(out_colors.g, 255);
+    CHECK_EQ(out_colors.b, 255);
     CHECK_EQ(power_5bit, 31);
   }
 
   SUBCASE("Full brightness, half scaling") {
-    five_bit_hd_gamma_bitshift(255, 255, 255, 128, 128, 128, kBrightness, &r8, &g8, &b8, &power_5bit);
-    CHECK_LT(r8, 255);
-    CHECK_EQ(g8, r8);
-    CHECK_EQ(b8, r8);
+    CRGB colors(255, 255, 255);
+    CRGB colors_scale(128, 128, 128);
+    CRGB out_colors;
+    five_bit_hd_gamma_bitshift(colors, colors_scale, kBrightness, &out_colors, &power_5bit);
+    CHECK_LT(out_colors.r, 255);
+    CHECK_EQ(out_colors.g, out_colors.r);
+    CHECK_EQ(out_colors.b, out_colors.r);
     CHECK_EQ(power_5bit, 31);
   }
 
   SUBCASE("Different colors, no scaling") {
-    five_bit_hd_gamma_bitshift(255, 128, 64, 255, 255, 255, kBrightness, &r8, &g8, &b8, &power_5bit);
-    CHECK_EQ(r8, 255);
-    CHECK_GT(g8, 0);
-    CHECK_LT(g8, 255);
-    CHECK_GT(b8, 0);
-    CHECK_LT(b8, g8);
+    CRGB colors(255, 128, 64);
+    CRGB colors_scale(255, 255, 255);
+    CRGB out_colors;
+    five_bit_hd_gamma_bitshift(colors, colors_scale, kBrightness, &out_colors, &power_5bit);
+    CHECK_EQ(out_colors.r, 255);
+    CHECK_GT(out_colors.g, 0);
+    CHECK_LT(out_colors.g, 255);
+    CHECK_GT(out_colors.b, 0);
+    CHECK_LT(out_colors.b, out_colors.g);
     CHECK_EQ(power_5bit, 31);
   }
 
   SUBCASE("Some different values") {
-    five_bit_hd_gamma_bitshift(65, 64, 64, 255, 255, 255, kBrightness, &r8, &g8, &b8, &power_5bit);
-    CHECK_EQ(r8, 170);
-    CHECK_EQ(g8, 165);
-    CHECK_EQ(b8, 165);
+    CRGB colors(65, 64, 64);
+    CRGB colors_scale(255, 255, 255);
+    CRGB out_colors;
+    five_bit_hd_gamma_bitshift(colors, colors_scale, kBrightness, &out_colors, &power_5bit);
+    CHECK_EQ(out_colors.r, 170);
+    CHECK_EQ(out_colors.g, 165);
+    CHECK_EQ(out_colors.b, 165);
     CHECK_EQ(power_5bit, 3);
   }
 
   SUBCASE("Global brightness half") {
     const uint8_t brightness = 128;
-    five_bit_hd_gamma_bitshift(65, 64, 64, 255, 255, 255, brightness, &r8, &g8, &b8, &power_5bit);
-    CHECK_EQ(r8, 85);
-    CHECK_EQ(g8, 83);
-    CHECK_EQ(b8, 83);
+    CRGB colors(65, 64, 64);
+    CRGB colors_scale(255, 255, 255);
+    CRGB out_colors;
+    five_bit_hd_gamma_bitshift(colors, colors_scale, brightness, &out_colors, &power_5bit);
+    CHECK_EQ(out_colors.r, 85);
+    CHECK_EQ(out_colors.g, 83);
+    CHECK_EQ(out_colors.b, 83);
     CHECK_EQ(power_5bit, 3);
   }
 
   SUBCASE("Global brightness low end") {
     const uint8_t brightness = 8;
-    five_bit_hd_gamma_bitshift(65, 64, 64, 255, 255, 255, brightness, &r8, &g8, &b8, &power_5bit);
-    CHECK_EQ(r8, 9);
-    CHECK_EQ(g8, 9);
-    CHECK_EQ(b8, 9);
+    CRGB colors(65, 64, 64);
+    CRGB colors_scale(255, 255, 255);
+    CRGB out_colors;
+    five_bit_hd_gamma_bitshift(colors, colors_scale, brightness, &out_colors, &power_5bit);
+    CHECK_EQ(out_colors.r, 9);
+    CHECK_EQ(out_colors.g, 9);
+    CHECK_EQ(out_colors.b, 9);
     CHECK_EQ(power_5bit, 1);
   }
 
