@@ -129,7 +129,7 @@ struct PixelController {
     /// Constructor
     /// @param d pointer to LED data
     /// @param len length of the LED data
-    /// @param pre_mixed LED scale values premixed with global brightness, as CRGB struct
+    /// @param color_adjustment LED scale values
     /// @param dither dither setting for the LEDs
     /// @param advance whether the pointer (d) should advance per LED
     /// @param skip if the pointer is advancing, how many bytes to skip in addition to 3
@@ -146,7 +146,7 @@ struct PixelController {
     /// Constructor
     /// @param d pointer to LED data
     /// @param len length of the LED data
-    /// @param pre_mixed LED scale values premixed with global brightness, as CRGB struct
+    /// @param color_adjustment LED scale values
     /// @param dither dither setting for the LEDs
     PixelController(
             const CRGB *d, int len, ColorAdjustment color_adjustment,
@@ -160,7 +160,7 @@ struct PixelController {
     /// Constructor
     /// @param d pointer to LED data
     /// @param len length of the LED data
-    /// @param pre_mixed LED scale values premixed with global brightness, as CRGB struct
+    /// @param color_adjustment LED scale values
     /// @param dither dither setting for the LEDs
     PixelController(
             const CRGB &d, int len, ColorAdjustment color_adjustment, EDitherMode dither)
