@@ -94,6 +94,17 @@ void __builtin_five_bit_hd_gamma_bitshift(
     // Note: we only get 5 levels of brightness
     uint8_t v8 = 31;
 
+    // global brightness trades bits with 5 bit power brightness to improve
+    // final color resolution. The shifted global brightness is then applied
+    // at the end so it has better resolution and doesn't truncate bits.
+    if (global_brightness < 128) {
+      while (v8 > 1 && (global_brightness < 128)) {
+        global_brightness = (global_brightness << 1) | 0x1;  // global brightness shifts up
+        v8 >>= 1;                                            // driver bit brightness shifts down
+      }
+    }
+
+
     uint16_t numerator = 1;
     uint16_t denominator = 1;
     const uint32_t r16_const = r16;
@@ -105,6 +116,9 @@ void __builtin_five_bit_hd_gamma_bitshift(
     do {
         // Note that to avoid slow divisions, we multiply the max_value
         // by the denominator.
+        if (v8 < 2) {
+          break;
+        }
         uint32_t max_value = 0xfffful * 15;
         if (r16_const * 31 > max_value) {
           break;
@@ -117,7 +131,11 @@ void __builtin_five_bit_hd_gamma_bitshift(
         }
         numerator = 31;
         denominator = 15;
-        v8 = 15;
+        v8 >>= 1;
+
+        if (v8 < 2) {
+          break;
+        }
 
         max_value = 0xfffful * 15 * 7;
         if (r16_const * 31 * 15 > max_value) {
@@ -131,7 +149,11 @@ void __builtin_five_bit_hd_gamma_bitshift(
         }
         numerator = 31 * 15;
         denominator = 15 * 7;
-        v8 = 7;
+        v8 >>= 1;
+
+        if (v8 < 2) {
+          break;
+        }
 
         max_value = 0xfffful * 15 * 7 * 3;
         if (r16_const * 31 * 15 * 7 > max_value) {
@@ -145,7 +167,12 @@ void __builtin_five_bit_hd_gamma_bitshift(
         }
         numerator = 31 * 15 * 7;
         denominator = 15 * 7 * 3;
-        v8 = 3;
+        
+        v8 >>= 1;
+
+        if (v8 < 2) {
+          break;
+        }
 
         max_value = 0xfffful * 15 * 7 * 3;
         if (r16_const * 31 * 15 * 7 * 3 > max_value) {
@@ -158,19 +185,18 @@ void __builtin_five_bit_hd_gamma_bitshift(
           break;
         }
         numerator = 31 * 15 * 7 * 3;
-        v8 = 1;
+        v8 = 1;  // last possible iteration so set to 1
     } while(false);
 
     r16 = uint16_t(r16_const * numerator / denominator);
     g16 = uint16_t(g16_const * numerator / denominator);
     b16 = uint16_t(b16_const * numerator / denominator);
 
+    // now apply the rest of the global_brightness that has been bitshifted up.
     if (global_brightness != 0xff) {
       r16 = scale16by8(r16, global_brightness);
       g16 = scale16by8(g16, global_brightness);
       b16 = scale16by8(b16, global_brightness);
-      // TODO: Should we continue the bit shifting after global brightness is applied?
-      if (global_brightness >)
     }
 
     // Step 5: Conversion Back to 8-bit.

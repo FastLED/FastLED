@@ -7,10 +7,6 @@
 #include "FastLED.h"
 #include "five_bit_hd_gamma.h"
 
-TEST_CASE("sanity check") {
-  CHECK(1 == 1);
-}
-
 TEST_CASE("FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS is 1") {
   CHECK_EQ(FASTLED_HD_COLOR_MIXING, 1);
   CHECK_EQ(FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS, 1);
@@ -23,7 +19,11 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
   uint8_t r8, g8, b8, power_5bit;
   
   SUBCASE("Full brightness, no scaling") {
-    five_bit_hd_gamma_bitshift(255, 255, 255, 255, 255, 255, kBrightness, &r8, &g8, &b8, &power_5bit);
+    five_bit_hd_gamma_bitshift(
+      255, 255, 255,  // rgb
+      255, 255, 255,  // scaling
+      kBrightness,    // brightness factor
+      &r8, &g8, &b8, &power_5bit);
     CHECK_EQ(r8, 255);
     CHECK_EQ(g8, 255);
     CHECK_EQ(b8, 255);
@@ -65,13 +65,13 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
     CHECK_EQ(power_5bit, 3);
   }
 
-  SUBCASE("Global brightness low") {
+  SUBCASE("Global brightness low end") {
     const uint8_t brightness = 8;
     five_bit_hd_gamma_bitshift(65, 64, 64, 255, 255, 255, brightness, &r8, &g8, &b8, &power_5bit);
-    CHECK_EQ(r8, 5);
-    CHECK_EQ(g8, 5);
-    CHECK_EQ(b8, 5);
-    CHECK_EQ(power_5bit, 3);
+    CHECK_EQ(r8, 9);
+    CHECK_EQ(g8, 9);
+    CHECK_EQ(b8, 9);
+    CHECK_EQ(power_5bit, 1);
   }
 
 }
