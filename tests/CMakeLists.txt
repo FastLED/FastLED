@@ -23,7 +23,7 @@ add_library(FastLED STATIC ${FASTLED_SOURCES})
 
 # Set C++ standard
 set_target_properties(FastLED PROPERTIES
-    CXX_STANDARD 11
+    CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
 
@@ -33,4 +33,8 @@ enable_testing()
 # Add the test executable
 add_executable(test_apa102_hd ${CMAKE_CURRENT_SOURCE_DIR}/test_apa102_hd.cpp)
 target_link_libraries(test_apa102_hd FastLED)
+set_target_properties(test_apa102_hd PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+)
 add_test(NAME APA102HDTest COMMAND test_apa102_hd)
