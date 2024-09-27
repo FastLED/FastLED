@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
+# Set default build type to Debug
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+endif()
+
+# Output the current build type
+message(STATUS "Current build type: ${CMAKE_BUILD_TYPE}")
+
 # Function to wrap Zig command
 function(use_zig_as_cpp)
     find_program(UV_EXECUTABLE uv)
@@ -13,8 +21,11 @@ function(use_zig_as_cpp)
         message(FATAL_ERROR "Python not found. Please install Python.")
     endif()
 
-    set(CMAKE_CXX_COMPILER_LAUNCHER ${UV_EXECUTABLE} run ${PYTHON_EXECUTABLE} -m ziglang)
+    # uv run python -m ziglang c++
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${UV_EXECUTABLE} run ${PYTHON_EXECUTABLE} -m ziglang c++)
+    set(CMAKE_C_COMPILER_LAUNCHER ${UV_EXECUTABLE} run ${PYTHON_EXECUTABLE} -m ziglang cc)
     set(CMAKE_CXX_COMPILER c++)
+    set(CMAKE_C_COMPILER cc)
 endfunction()
 
 # Use Zig as the C++ compiler
@@ -47,10 +58,18 @@ list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
 # Create FastLED library
 add_library(FastLED STATIC ${FASTLED_SOURCES})
 
-# Set C++ standard
+# Set C++ standard and static linking for FastLED
 set_target_properties(FastLED PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
+    POSITION_INDEPENDENT_CODE ON
+)
+
+# Add static linking flags and debug flags for FastLED
+target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
+target_compile_options(FastLED PRIVATE 
+    $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
+    $<$<CONFIG:Release>:-O3>
 )
 
 # Enable testing
@@ -68,5 +87,14 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
     )
+    # Add static linking flags and debug flags for test executables
+    target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
+    target_compile_options(${TEST_NAME} PRIVATE 
+        $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
+        $<$<CONFIG:Release>:-O3>
+    )
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endforeach()
+
+# Add verbose output for tests
+set(CMAKE_CTEST_ARGUMENTS "--output-on-failure")
