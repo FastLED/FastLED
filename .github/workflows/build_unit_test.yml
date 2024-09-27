@@ -1,4 +1,4 @@
-name: clone and compile
+name: unit tests
 
 on:
   workflow_dispatch:
@@ -25,6 +25,7 @@ jobs:
       - name: Install
         run: |
           pip install uv
-
-      - name: Build Root projectio
-        run: uv run platformio run
+      
+      - name: Run Test
+        run: |
+          ./test

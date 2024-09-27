@@ -7,3 +7,4 @@ rm -rf .venv
 rm -rf .build
 rm -rf .pio
 rm -rf ci/tmp
+rm -rf
