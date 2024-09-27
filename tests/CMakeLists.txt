@@ -38,11 +38,17 @@ set_target_properties(FastLED PROPERTIES
 # Enable testing
 enable_testing()
 
-# Add the test executable
-add_executable(test_apa102_hd ${CMAKE_CURRENT_SOURCE_DIR}/test_apa102_hd.cpp)
-target_link_libraries(test_apa102_hd FastLED)
-set_target_properties(test_apa102_hd PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-)
-add_test(NAME APA102HDTest COMMAND test_apa102_hd)
+# Find all test files
+file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
+
+# Add each test file as an executable
+foreach(TEST_SOURCE ${TEST_SOURCES})
+    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+    add_executable(${TEST_NAME} ${TEST_SOURCE})
+    target_link_libraries(${TEST_NAME} FastLED)
+    set_target_properties(${TEST_NAME} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+    )
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+endforeach()
