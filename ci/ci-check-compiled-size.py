@@ -35,6 +35,11 @@ def parse_args():
         action="store_true",
         help="Skip compilation and check existing build",
     )
+    parser.add_argument(
+        "--example",
+        default="Blink",
+        help="Example to compile (default: Blink)",
+    )
     args, unknown = parser.parse_known_args()
 
     if unknown:
@@ -50,7 +55,14 @@ def main():
     args = parse_args()
 
     if not args.no_build:
-        cmd_list = ["uv", "run", "ci/ci-compile.py", args.board, "--examples", "Blink"]
+        cmd_list = [
+            "uv",
+            "run",
+            "ci/ci-compile.py",
+            args.board,
+            "--examples",
+            args.example,
+        ]
         try:
             run_command(cmd_list, shell=True, capture_output=IS_GITHUB, check=True)
         except subprocess.CalledProcessError:
