@@ -75,25 +75,35 @@ target_compile_options(FastLED PRIVATE
 # Enable testing
 enable_testing()
 
-# Find all test files
+# Find all test source files
 file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
 
-# Add each test file as an executable
+# Find all test binaries
+file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTABLE_SUFFIX}")
+
+# Process source files
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
-    add_executable(${TEST_NAME} ${TEST_SOURCE})
-    target_link_libraries(${TEST_NAME} FastLED)
-    set_target_properties(${TEST_NAME} PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON
-    )
+        add_executable(${TEST_NAME} ${TEST_SOURCE})
+        target_link_libraries(${TEST_NAME} FastLED)
+        set_target_properties(${TEST_NAME} PROPERTIES
+            CXX_STANDARD 17
+            CXX_STANDARD_REQUIRED ON
+        )
     # Add static linking flags and debug flags for test executables
-    target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
-    target_compile_options(${TEST_NAME} PRIVATE 
-        $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
-        $<$<CONFIG:Release>:-O3>
-    )
-    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+        target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
+        target_compile_options(${TEST_NAME} PRIVATE 
+            $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
+            $<$<CONFIG:Release>:-O3>
+        )
+        add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+endforeach()
+
+# Process remaining binaries (those without corresponding source files)
+foreach(ORPHANED_BINARY ${TEST_BINARIES})
+    message(STATUS "Found orphaned binary without source: ${ORPHANED_BINARY}")
+    file(REMOVE ${ORPHANED_BINARY})
+    message(STATUS "Deleted orphaned binary: ${ORPHANED_BINARY}")
 endforeach()
 
 # Add verbose output for tests
