@@ -97,7 +97,11 @@ class RGBWEmulatedController
         ensureBuffer(pixels.size());
         // This version sent down to the real controller.
         PixelController<RGB, LANES, MASK> pixels_device(pixels);
-        pixels_device.mScale = CRGB(255, 255, 255); // No scaling because we do that.
+        pixels_device.mColorAdjustment.premixed = CRGB(255, 255, 255); // No scaling because we do that.
+		#if HD_COLOR_MIXING
+		pixels_device.mColorAdjustment.color = CRGB(255, 255, 255);
+		pixels_device.mColorAdjustment.brightness = 255;
+		#endif
         pixels_device.mData = reinterpret_cast<uint8_t *>(mRGBWPixels);
         pixels_device.mLen = mNumRGBWLeds;
         pixels_device.mLenRemaining = mNumRGBWLeds;

@@ -102,7 +102,7 @@ struct PixelController {
 
     template<typename PixelControllerT>
     void copy(const PixelControllerT& other) {
-        static_assert(sizeof(this.mOffsets) == sizeof(other.mOffsets), "PixelController::mOffsets size mismatch");
+        static_assert(sizeof(mOffsets) == sizeof(other.mOffsets), "PixelController::mOffsets size mismatch");
         d[0] = other.d[0];
         d[1] = other.d[1];
         d[2] = other.d[2];
