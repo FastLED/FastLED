@@ -80,11 +80,17 @@ public:
         clearLedDataInternal(nLeds);
     }
 
-    void inline getAdjustmentData(uint8_t brightness, CRGB* premixed, CRGB* color_correction) {
-        *premixed = getAdjustment(brightness);
-        if (color_correction) {
-            *color_correction = getAdjustment(255);
-        }
+    inline ColorAdjustment getAdjustmentData(uint8_t brightness) {
+        // *premixed = getAdjustment(brightness);
+        // if (color_correction) {
+        //     *color_correction = getAdjustment(255);
+        // }
+        #if HD_COLOR_MIXING
+        ColorAdjustment out = {getAdjustment(brightness), getAdjustment(255), brightness};
+        #else
+        ColorAdjustment out = {getAdjustment(brightness)};
+        #endif
+        return out;
     }
 
     /// @copybrief show(const struct CRGB*, int, CRGB)
@@ -106,7 +112,6 @@ public:
     /// @param brightness the brightness of the LEDs
     /// @see showColor(const struct CRGB&, int, CRGB)
     void showColorInternal(const struct CRGB &data, int nLeds, uint8_t brightness) {
-
         showColor(data, nLeds, brightness);
     }
 

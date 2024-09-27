@@ -22,6 +22,14 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+#ifndef HD_COLOR_MIXING
+#ifdef __AVR__
+#define HD_COLOR_MIXING 0
+#else
+#define HD_COLOR_MIXING 1
+#endif
+#endif
+
 
 /// Gets the assigned color channel for a byte's position in the output,
 /// using the color order (EOrder) template parameter from the
@@ -51,6 +59,14 @@ FASTLED_NAMESPACE_BEGIN
 
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
+struct ColorAdjustment {
+    CRGB premixed;       /// the per-channel scale values premixed with brightness.
+    #if HD_COLOR_MIXING
+    CRGB color;          /// the per-channel scale values NOT mixed with brightness.
+    uint8_t brightness;  /// the global brightness value
+    #endif
+};
+
 
 /// Pixel controller class.  This is the class that we use to centralize pixel access in a block of data, including
 /// support for things like RGB reordering, scaling, dithering, skipping (for ARGB data), and eventually, we will
@@ -65,9 +81,9 @@ struct PixelController {
     int mLenRemaining;       ///< counter for the number of LEDs left to process
     uint8_t d[3];            ///< values for the scaled dither signal @see init_binary_dithering()
     uint8_t e[3];            ///< values for the scaled dither signal @see init_binary_dithering()
-    CRGB mScale;             ///< the per-channel scale values, provided by a color correction function such as CLEDController::computeAdjustment()
     int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
     int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
+    ColorAdjustment mColorAdjustment;
 
     PixelIterator as_iterator(const Rgbw& rgbw) {
         return PixelIterator(this, rgbw);
@@ -94,7 +110,7 @@ struct PixelController {
         e[1] = other.e[1];
         e[2] = other.e[2];
         mData = other.mData;
-        mScale = other.mScale;
+        mColorAdjustment = other.mColorAdjustment;
         mAdvance = other.mAdvance;
         mLenRemaining = mLen = other.mLen;
         for(int i = 0; i < LANES; ++i) { mOffsets[i] = other.mOffsets[i]; }
@@ -118,9 +134,9 @@ struct PixelController {
     /// @param advance whether the pointer (d) should advance per LED
     /// @param skip if the pointer is advancing, how many bytes to skip in addition to 3
     PixelController(
-            const uint8_t *d, int len, CRGB pre_mixed,
+            const uint8_t *d, int len, ColorAdjustment color_adjustment,
             EDitherMode dither, bool advance, uint8_t skip)
-                : mData(d), mLen(len), mLenRemaining(len), mScale(pre_mixed) {
+                : mData(d), mLen(len), mLenRemaining(len), mColorAdjustment(color_adjustment) {
         enable_dithering(dither);
         mData += skip;
         mAdvance = (advance) ? 3+skip : 0;
@@ -133,9 +149,9 @@ struct PixelController {
     /// @param pre_mixed LED scale values premixed with global brightness, as CRGB struct
     /// @param dither dither setting for the LEDs
     PixelController(
-            const CRGB *d, int len, CRGB pre_mixed,
+            const CRGB *d, int len, ColorAdjustment color_adjustment,
             EDitherMode dither)
-                : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mScale(pre_mixed) {
+                : mData((const uint8_t*)d), mLen(len), mLenRemaining(len), mColorAdjustment(color_adjustment) {
         enable_dithering(dither);
         mAdvance = 3;
         initOffsets(len);
@@ -147,8 +163,8 @@ struct PixelController {
     /// @param pre_mixed LED scale values premixed with global brightness, as CRGB struct
     /// @param dither dither setting for the LEDs
     PixelController(
-            const CRGB &d, int len, CRGB pre_mixed, EDitherMode dither)
-                : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mScale(pre_mixed) {
+            const CRGB &d, int len, ColorAdjustment color_adjustment, EDitherMode dither)
+                : mData((const uint8_t*)&d), mLen(len), mLenRemaining(len), mColorAdjustment(color_adjustment) {
         enable_dithering(dither);
         mAdvance = 0;
         initOffsets(len);
@@ -237,7 +253,7 @@ struct PixelController {
 
         // Setup the initial D and E values
         for(int i = 0; i < 3; ++i) {
-                uint8_t s = mScale.raw[i];
+                uint8_t s = mColorAdjustment.premixed.raw[i];
                 e[i] = s ? (256/s) + 1 : 0;
                 d[i] = scale8(Q, e[i]);
 #if (FASTLED_SCALE8_FIXED == 1)
@@ -330,7 +346,7 @@ struct PixelController {
     /// @param pc reference to the pixel controller
     /// @param b the color byte to scale
     /// @see PixelController::mScale
-    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mScale.raw[RO(SLOT)]); }
+    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t scale(PixelController & pc, uint8_t b) { return scale8(b, pc.mColorAdjustment.premixed.raw[RO(SLOT)]); }
     
     /// Scale a value
     /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
@@ -407,7 +423,7 @@ struct PixelController {
     /// @param pc reference to the pixel controller
     /// @returns scale data for the given channel
     /// @see PixelController::mScale
-    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t getscale(PixelController & pc) { return pc.mScale.raw[RO(SLOT)]; }
+    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t getscale(PixelController & pc) { return pc.mColorAdjustment.premixed.raw[RO(SLOT)]; }
 
     /// @} Data retrieval functions
 
@@ -450,7 +466,7 @@ struct PixelController {
                 rgb.r, rgb.g, rgb.b,
                 // Note this mScale has the global brightness scale mixed in
                 // with the color correction scale.
-                mScale.r, mScale.g, mScale.b,
+                mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,
                 &rgb.r, &rgb.g, &rgb.b, &brightness);
         }
         const uint8_t b0_index = RGB_BYTE0(RGB_ORDER);
@@ -496,7 +512,7 @@ struct PixelController {
         rgb_2_rgbw(rgbw.rgbw_mode,
                    rgbw.white_color_temp,
                    rgb.r, rgb.b, rgb.g,  // Input colors
-                   mScale.r, mScale.g, mScale.b,  // How these colors are scaled for color balance.
+                   mColorAdjustment.premixed.r, mColorAdjustment.premixed.g, mColorAdjustment.premixed.b,  // How these colors are scaled for color balance.
                    &rgb.r, &rgb.g, &rgb.b, &w);
         // Now finish the ordering so that the output is in the native led order for all of RGBW.
         rgbw_partial_reorder(
