@@ -41,14 +41,11 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
   }
 
   SUBCASE("Some different values") {
-    five_bit_hd_gamma_bitshift(255, 128, 64, 128, 64, 32, &r8, &g8, &b8, &power_5bit);
-    CHECK_GT(r8, 0);
-    CHECK_LT(r8, 255);
-    CHECK_GT(g8, 0);
-    CHECK_LT(g8, r8);
-    CHECK_GT(b8, 0);
-    CHECK_LT(b8, g8);
-    CHECK_EQ(power_5bit, 31);
+    five_bit_hd_gamma_bitshift(65, 64, 64, 255, 255, 255, &r8, &g8, &b8, &power_5bit);
+    CHECK_EQ(r8, 170);
+    CHECK_EQ(g8, 165);
+    CHECK_EQ(b8, 165);
+    CHECK_EQ(power_5bit, 3);
   }
 }
 
