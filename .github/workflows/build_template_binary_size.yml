@@ -11,7 +11,7 @@ on:
         required: true
       max_size_apa102:
         type: number
-        required: false
+        required: true
 
 
 jobs:
@@ -28,15 +28,6 @@ jobs:
 
       - name: Install UV
         run: pip install uv
-
-      - name: Calculate max_size_apa102
-        id: apa102_size
-        run: |
-          if [[ -z "${{ inputs.max_size_apa102 }}" ]]; then
-            echo "MAX_SIZE_APA102=$(printf "%.0f" $(echo "${{ inputs.max_size }} * 1.1" | bc))" >> $GITHUB_OUTPUT
-          else
-            echo "MAX_SIZE_APA102=$(printf "%.0f" ${{ inputs.max_size_apa102 }})" >> $GITHUB_OUTPUT
-          fi
 
       - name: Compile Board for ${{ inputs.board }} with example Blink
         run: uv run ci/ci-compile.py ${{ inputs.board }} --examples Blink
@@ -60,7 +51,7 @@ jobs:
         run: uv run ci/ci-compile.py ${{ inputs.board }} --examples Apa102
 
       - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102)
-        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ steps.apa102_size.outputs.MAX_SIZE_APA102 }}
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size_apa102 }}
 
       - name: Inspect Binary
         if: always()

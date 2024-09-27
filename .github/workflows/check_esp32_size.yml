@@ -15,4 +15,5 @@ jobs:
     with:
       board: esp32dev
       max_size: 300000
+      max_size_apa102: 300000
 
