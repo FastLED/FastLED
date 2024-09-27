@@ -31,7 +31,7 @@ set_target_properties(FastLED PROPERTIES
 enable_testing()
 
 # Add a simple test executable if the test file exists
-set(TEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/test_fastled.cpp)
+set(TEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/test_apa102_hd.cpp)
 if(EXISTS ${TEST_FILE})
     add_executable(fastled_test ${TEST_FILE})
     target_link_libraries(fastled_test FastLED)

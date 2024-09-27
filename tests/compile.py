@@ -16,7 +16,7 @@ def run_command(command):
     return stdout.decode()
 
 def compile_fastled_library():
-    build_dir = HERE / "build"
+    build_dir = HERE / ".build"
     build_dir.mkdir(parents=True, exist_ok=True)
     
     # Configure CMake
