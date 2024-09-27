@@ -1,6 +1,25 @@
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
+# Function to wrap Zig command
+function(use_zig_as_cpp)
+    find_program(UV_EXECUTABLE uv)
+    if(NOT UV_EXECUTABLE)
+        message(FATAL_ERROR "uv not found. Please install uv.")
+    endif()
+
+    find_program(PYTHON_EXECUTABLE python)
+    if(NOT PYTHON_EXECUTABLE)
+        message(FATAL_ERROR "Python not found. Please install Python.")
+    endif()
+
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${UV_EXECUTABLE} run ${PYTHON_EXECUTABLE} -m ziglang)
+    set(CMAKE_CXX_COMPILER c++)
+endfunction()
+
+# Use Zig as the C++ compiler
+use_zig_as_cpp()
+
 # Set the path to the FastLED source directory
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
@@ -18,7 +37,6 @@ include_directories(${FASTLED_SOURCE_DIR}/src)
 # Find all FastLED source files
 file(GLOB_RECURSE FASTLED_SOURCES 
     "${FASTLED_SOURCE_DIR}/src/*.cpp"
-    "${FASTLED_SOURCE_DIR}/src/*.c"
 )
 
 # Remove platform-specific files that might cause issues

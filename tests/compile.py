@@ -11,7 +11,11 @@ def run_command(command):
     stdout, stderr = process.communicate()
     if process.returncode != 0:
         print(f"Error executing command: {command}")
+        print("STDOUT:")
+        print(stdout.decode())
+        print("STDERR:")
         print(stderr.decode())
+        print(f"Return code: {process.returncode}")
         exit(1)
     return stdout.decode()
 
