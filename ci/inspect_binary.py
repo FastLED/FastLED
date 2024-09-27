@@ -116,7 +116,16 @@ def main() -> int:
     nm_path = Path(board_info["aliases"]["nm"])
     map_file = board_dir / "firmware.map"
     if not map_file.exists():
+        # Search for the map file
         map_file = bin_file.with_suffix(".map")
+        if not map_file.exists():
+            possible_map_files = list(board_dir.glob("**/*.map"))
+            if possible_map_files:
+                map_file = Path(possible_map_files[0]).absolute()
+                print(f"Error, firmware.map found instead at: {map_file}")
+            else:
+                print("Error: firmware.map file not found")
+            return 1
 
     try:
         with TemporaryDirectory() as temp_dir:
