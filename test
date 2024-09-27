@@ -12,4 +12,5 @@ fi
 # run uv unittests in ci/tests
 uv run pytest ci/tests
 uv run ci/ci-compile-native.py
+uv run tests/run.py
 uv run pio check --skip-packages --src-filters="+<src/>"  --severity=medium --fail-on-defect=high --flags --inline-suppr
