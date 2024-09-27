@@ -86,6 +86,10 @@ struct PixelController {
     int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
     ColorAdjustment mColorAdjustment;
 
+    enum {
+        kLanes = LANES,
+    };
+
     PixelIterator as_iterator(const Rgbw& rgbw) {
         return PixelIterator(this, rgbw);
     }
@@ -103,7 +107,7 @@ struct PixelController {
 
     template<typename PixelControllerT>
     void copy(const PixelControllerT& other) {
-        static_assert(sizeof(mOffsets) == sizeof(other.mOffsets), "PixelController::mOffsets size mismatch");
+        static_assert(kLanes == PixelControllerT::kLanes, "PixelController lanes must match or mOffsets will be wrong");
         d[0] = other.d[0];
         d[1] = other.d[1];
         d[2] = other.d[2];
