@@ -65,6 +65,12 @@ set_target_properties(FastLED PROPERTIES
     POSITION_INDEPENDENT_CODE ON
 )
 
+# Add specific defines to FastLED library
+target_compile_definitions(FastLED PRIVATE 
+    FASTLED_HD_COLOR_MIXING=1
+    FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS=1
+)
+
 # Add static linking flags and debug flags for FastLED
 target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
 target_compile_options(FastLED PRIVATE 
@@ -95,6 +101,11 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     target_compile_options(${TEST_NAME} PRIVATE 
         $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
         $<$<CONFIG:Release>:-O3>
+    )
+    # Add specific defines to test executables
+    target_compile_definitions(${TEST_NAME} PRIVATE 
+        FASTLED_HD_COLOR_MIXING=1
+        FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS=1
     )
     
     # Create a custom command to build the test only if source or FastLED library changes
