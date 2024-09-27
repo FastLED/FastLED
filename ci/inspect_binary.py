@@ -119,11 +119,9 @@ def main() -> int:
         # Search for the map file
         map_file = bin_file.with_suffix(".map")
         if not map_file.exists():
-            possible_map_files = list(board_dir.glob("**/*.map"))
+            possible_map_files = list(board_dir.glob("**/firmware.map"))
             if possible_map_files:
-                for file in possible_map_files:
-                    p = Path(file).absolute()
-                    print(f"Possible map file found at: {p}")
+                map_file = possible_map_files[0]
             else:
                 print("Error: firmware.map file not found")
             return 1
