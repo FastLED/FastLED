@@ -17,10 +17,13 @@ TEST_CASE("FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS is 1") {
 }
 
 TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
+  enum {
+    kBrightness = 255,
+  };
   uint8_t r8, g8, b8, power_5bit;
   
   SUBCASE("Full brightness, no scaling") {
-    five_bit_hd_gamma_bitshift(255, 255, 255, 255, 255, 255, &r8, &g8, &b8, &power_5bit);
+    five_bit_hd_gamma_bitshift(255, 255, 255, 255, 255, 255, kBrightness, &r8, &g8, &b8, &power_5bit);
     CHECK_EQ(r8, 255);
     CHECK_EQ(g8, 255);
     CHECK_EQ(b8, 255);
@@ -28,7 +31,7 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
   }
 
   SUBCASE("Full brightness, half scaling") {
-    five_bit_hd_gamma_bitshift(255, 255, 255, 128, 128, 128, &r8, &g8, &b8, &power_5bit);
+    five_bit_hd_gamma_bitshift(255, 255, 255, 128, 128, 128, kBrightness, &r8, &g8, &b8, &power_5bit);
     CHECK_LT(r8, 255);
     CHECK_EQ(g8, r8);
     CHECK_EQ(b8, r8);
@@ -36,7 +39,7 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
   }
 
   SUBCASE("Different colors, no scaling") {
-    five_bit_hd_gamma_bitshift(255, 128, 64, 255, 255, 255, &r8, &g8, &b8, &power_5bit);
+    five_bit_hd_gamma_bitshift(255, 128, 64, 255, 255, 255, kBrightness, &r8, &g8, &b8, &power_5bit);
     CHECK_EQ(r8, 255);
     CHECK_GT(g8, 0);
     CHECK_LT(g8, 255);
@@ -46,7 +49,7 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
   }
 
   SUBCASE("Some different values") {
-    five_bit_hd_gamma_bitshift(65, 64, 64, 255, 255, 255, &r8, &g8, &b8, &power_5bit);
+    five_bit_hd_gamma_bitshift(65, 64, 64, 255, 255, 255, kBrightness, &r8, &g8, &b8, &power_5bit);
     CHECK_EQ(r8, 170);
     CHECK_EQ(g8, 165);
     CHECK_EQ(b8, 165);

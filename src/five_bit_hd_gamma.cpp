@@ -66,7 +66,10 @@ void five_bit_hd_gamma_function(uint8_t r8, uint8_t g8,
 
 void __builtin_five_bit_hd_gamma_bitshift(
     uint8_t r8, uint8_t g8, uint8_t b8,
-    uint8_t r8_scale, uint8_t g8_scale, uint8_t b8_scale,
+    uint8_t r8_scale,
+    uint8_t g8_scale,
+    uint8_t b8_scale,
+    uint8_t global_brightness,
     uint8_t* out_r8,
     uint8_t* out_g8,
     uint8_t* out_b8,
@@ -77,9 +80,13 @@ void __builtin_five_bit_hd_gamma_bitshift(
     five_bit_hd_gamma_function(r8, g8, b8, &r16, &g16, &b16);
 
     // Step 2: Post gamma correction scale.
-    if (r8_scale != 0xff || g8_scale != 0xff || b8_scale != 0xff) {
+    if (r8_scale != 0xff) {
       r16 = scale16by8(r16, r8_scale);
+    }
+    if (g8_scale != 0xff) {
       g16 = scale16by8(g16, g8_scale);
+    }
+    if (b8_scale != 0xff) {
       b16 = scale16by8(b16, b8_scale);
     }
 
@@ -157,6 +164,13 @@ void __builtin_five_bit_hd_gamma_bitshift(
     r16 = uint16_t(r16_const * numerator / denominator);
     g16 = uint16_t(g16_const * numerator / denominator);
     b16 = uint16_t(b16_const * numerator / denominator);
+
+    if (global_brightness != 0xff) {
+      r16 = scale16by8(r16, global_brightness);
+      g16 = scale16by8(g16, global_brightness);
+      b16 = scale16by8(b16, global_brightness);
+      // TODO: Should we continue the bit shifting after global brightness is applied?
+    }
 
     // Step 5: Conversion Back to 8-bit.
     uint8_t r8_final = (r8 == 255 && uint8_t(r16 >> 8) >= 254) ? 255 : uint8_t(r16 >> 8);
