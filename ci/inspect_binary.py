@@ -124,7 +124,7 @@ def main() -> int:
                 map_file = possible_map_files[0]
             else:
                 print("Error: firmware.map file not found")
-            return 1
+                return 1
 
     try:
         with TemporaryDirectory() as temp_dir:
