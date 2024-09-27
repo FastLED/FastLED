@@ -1,3 +1,9 @@
+FastLED 3.8.0
+=============
+* New APA102 global brightness algorithm
+* APA102HD?
+
+
 FastLED 3.7.8
 =============
 * Attiny0/1 (commonly Attiny85) support added.
