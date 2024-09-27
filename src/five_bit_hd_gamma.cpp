@@ -216,9 +216,7 @@ void __builtin_five_bit_hd_gamma_bitshift(
 #endif
 
     // Step 6: Output
-    out_colors->r = r8_final;
-    out_colors->g = g8_final;
-    out_colors->b = b8_final;
+    *out_colors = CRGB(r8_final, g8_final, b8_final);
     *out_power_5bit = v8;
 }
 
