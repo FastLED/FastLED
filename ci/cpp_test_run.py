@@ -4,20 +4,26 @@ import sys
 
 from ci.paths import PROJECT_ROOT
 
+
 def run_command(command):
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    process = subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
     stdout, stderr = process.communicate()
     return process.returncode, stdout.decode(), stderr.decode()
 
+
 def compile_tests():
+    os.chdir(str(PROJECT_ROOT))
     print("Compiling tests...")
-    return_code, stdout, stderr = run_command("uv run tests/compile.py")
+    return_code, stdout, stderr = run_command("uv run ci/cpp_test_compile.py")
     if return_code != 0:
         print("Compilation failed:")
         print(stdout)
         print(stderr)
         sys.exit(1)
     print("Compilation successful.")
+
 
 def run_tests():
     test_dir = os.path.join("tests", ".build", "bin")
@@ -31,20 +37,23 @@ def run_tests():
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
             print(f"Running test: {test_file}")
             return_code, stdout, stderr = run_command(test_path)
-            print(f"Test output:")
+            print("Test output:")
             print(stdout)
             if stderr:
-                print(f"Test errors:")
+                print("Test errors:")
                 print(stderr)
-            print(f"Test {'passed' if return_code == 0 else 'failed'} with return code {return_code}")
+            print(
+                f"Test {'passed' if return_code == 0 else 'failed'} with return code {return_code}"
+            )
             print("-" * 40)
             if return_code != 0:
                 sys.exit(1)
 
+
 def main():
-    os.chdir(str(PROJECT_ROOT))
     compile_tests()
     run_tests()
+
 
 if __name__ == "__main__":
     main()
