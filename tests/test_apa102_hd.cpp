@@ -11,6 +11,10 @@ TEST_CASE("sanity check") {
   CHECK(1 == 1);
 }
 
+TEST_CASE("FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS is 1") {
+  CHECK_EQ(FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS, 1);
+}
+
 TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
   uint8_t r8, g8, b8, power_5bit;
   
