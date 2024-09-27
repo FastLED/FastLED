@@ -19,6 +19,7 @@ dependencies = [
     "uv",
     "ziglang",
     "ninja",
+    "cmake"
 ]
 
 [build-system]
