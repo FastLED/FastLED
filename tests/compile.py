@@ -1,5 +1,6 @@
 import os
 import subprocess
+import json
 from pathlib import Path
 
 from ci.paths import PROJECT_ROOT
@@ -15,6 +16,30 @@ def run_command(command):
         exit(1)
     return stdout.decode()
 
+def get_file_mtime(file_path):
+    return os.path.getmtime(file_path) if os.path.exists(file_path) else 0
+
+def load_build_cache(cache_file):
+    if os.path.exists(cache_file):
+        with open(cache_file, 'r') as f:
+            return json.load(f)
+    return {}
+
+def save_build_cache(cache_file, cache):
+    with open(cache_file, 'w') as f:
+        json.dump(cache, f)
+
+def needs_recompilation(src_dir, lib_file, cache_file):
+    src_files = list(Path(src_dir).rglob("*.cpp")) + list(Path(src_dir).rglob("*.h"))
+    lib_mtime = get_file_mtime(lib_file)
+    cache = load_build_cache(cache_file)
+
+    for src_file in src_files:
+        src_mtime = get_file_mtime(src_file)
+        if src_mtime > lib_mtime or str(src_file) not in cache or cache[str(src_file)] < src_mtime:
+            return True
+    return False
+
 def compile_fastled_library():
     gpp = "uv run python -m ziglang c++"
 
@@ -22,8 +47,17 @@ def compile_fastled_library():
     build_dir = Path(f"{HERE}") / ".build"
     build_dir.mkdir(parents=True, exist_ok=True)
 
-    # Compile C++ files into object files
+    # Set up paths
     src_dir = Path("src")
+    lib_name = build_dir / "libfastled.a"
+    cache_file = build_dir / "build_cache.json"
+
+    # Check if recompilation is needed
+    if not needs_recompilation(src_dir, lib_name, cache_file):
+        print("No changes detected. Skipping compilation.")
+        return
+
+    # Compile C++ files into object files
     cpp_files = list(src_dir.rglob("*.cpp"))
     obj_files = []
 
@@ -35,7 +69,6 @@ def compile_fastled_library():
         run_command(f"{gpp} -c -std=c++14 -g -fstack-protector-all -Wno-unknown-pragmas -Wno-unused-parameter -Wno-sign-compare -D_USE_MATH_DEFINES -I. -I./src {cpp_file} -o {obj_file}")
 
     # Create static library
-    lib_name = build_dir / "libfastled.a"
     obj_files_str = " ".join(str(f) for f in obj_files)
     run_command(f"ar rcs {lib_name} {obj_files_str}")
 
@@ -46,6 +79,11 @@ def compile_fastled_library():
         obj_file.unlink()
 
     print("Object files cleaned up.")
+
+    # Update build cache
+    all_files = cpp_files + list(src_dir.rglob("*.h"))
+    cache = {str(file): get_file_mtime(file) for file in all_files}
+    save_build_cache(cache_file, cache)
 
 def main():
     os.chdir(str(PROJECT_ROOT))

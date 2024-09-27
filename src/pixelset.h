@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #endif
 
+
 template<class PIXEL_TYPE>
 class CPixelView;
 
