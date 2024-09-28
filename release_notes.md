@@ -5,6 +5,7 @@ FastLED 3.8.0
   * APA102HD
 * 3.7.8: attiny85 size 9447 is within the limit of 9500
 * 3.8.0: attiny85 size 9296 is within the limit of 9500
+* Compile support for ATtiny1604
 
 
 FastLED 3.7.8
