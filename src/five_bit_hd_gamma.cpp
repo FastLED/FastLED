@@ -10,11 +10,21 @@
 
 // Author: Zach Vorhies
 
-#ifndef FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP
-#define FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP 0
-#endif
-
 FASTLED_NAMESPACE_BEGIN
+
+namespace
+{
+  template<typename T>
+  T mymax(T a, T b) {
+    return (a > b) ? a : b;
+  }
+
+  template<typename T>
+  T max3(T a, T b, T c) {
+    return mymax(mymax(a, b), c);
+  }
+  
+} // namespace
 
 #ifndef FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 // Fast a memory efficient gamma=2 function.
@@ -63,6 +73,52 @@ void five_bit_hd_gamma_function(CRGB rgb,
 #endif  // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
 
+void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16, uint8_t brightness, CRGB* out, uint8_t* out_power_5bit) {
+    // Step 3: Initialize 5-bit brightness.
+    // Note: we only get 5 levels of brightness
+    uint8_t v8 = 0b00011111;
+
+    // global brightness trades bits with 5 bit power brightness to improve
+    // final color resolution. The shifted global brightness is then applied
+    // at the end so it has better resolution and doesn't truncate bits.
+    if (brightness <= 85) {
+      while (v8 > 1 && (brightness <= 85)) {
+        // each bitshift down for v8 is a divide by 3, hence we multiply by 3 for the global brightness.
+        brightness = (brightness << 1) | 0x1;  // global brightness shifts up
+        v8 >>= 1;                                            // driver bit brightness shifts down
+      }
+    }
+    {
+      uint32_t overflow = max3(r16, g16, b16);
+      while (v8 > 1) {
+        overflow = (overflow << 1) | 1;
+        if (overflow > 0xffff) {
+          break;
+        }
+        v8 >>= 1;
+        r16 = (r16 << 1) | 1;
+        g16 = (g16 << 1) | 1;
+        b16 = (b16 << 1) | 1;
+      }
+    }
+
+    // now apply the rest of the global_brightness that has been bitshifted up.
+    if (brightness != 0xff) {
+      r16 = scale16by8(r16, brightness);
+      g16 = scale16by8(g16, brightness);
+      b16 = scale16by8(b16, brightness);
+    }
+
+    // Step 5: Conversion Back to 8-bit.
+    uint8_t r8_final = (uint8_t(r16 >> 8) >= 254) ? 255 : uint8_t(r16 >> 8);
+    uint8_t g8_final = (uint8_t(g16 >> 8) >= 254) ? 255 : uint8_t(g16 >> 8);
+    uint8_t b8_final = (uint8_t(b16 >> 8) >= 254) ? 255 : uint8_t(b16 >> 8);
+
+    // Step 6: Output
+    *out = CRGB(r8_final, g8_final, b8_final);
+    *out_power_5bit = v8;
+}
+
 void __builtin_five_bit_hd_gamma_bitshift(
     CRGB colors,
     CRGB colors_scale,
@@ -75,6 +131,8 @@ void __builtin_five_bit_hd_gamma_bitshift(
     five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
 
     // Step 2: Post gamma correction scale.
+    // Note that the colors_scale is expected to be the high range and should
+    // represent color correction.
     if (colors_scale.r != 0xff) {
       r16 = scale16by8(r16, colors_scale.r);
     }
@@ -85,139 +143,7 @@ void __builtin_five_bit_hd_gamma_bitshift(
       b16 = scale16by8(b16, colors_scale.b);
     }
 
-    // Step 3: Initialize 5-bit brightness.
-    // Note: we only get 5 levels of brightness
-    uint8_t v8 = 31;
-
-    // global brightness trades bits with 5 bit power brightness to improve
-    // final color resolution. The shifted global brightness is then applied
-    // at the end so it has better resolution and doesn't truncate bits.
-    if (global_brightness < 128) {
-      while (v8 > 1 && (global_brightness < 128)) {
-        global_brightness = (global_brightness << 1) | 0x1;  // global brightness shifts up
-        v8 >>= 1;                                            // driver bit brightness shifts down
-      }
-    }
-
-
-    uint16_t numerator = 1;
-    uint16_t denominator = 1;
-    const uint32_t r16_const = r16;
-    const uint32_t g16_const = g16;
-    const uint32_t b16_const = b16;
-
-    // Step 4: Bit Shifting Loop, can probably replaced with a
-    // single pass bit-twiddling hack.
-    do {
-        // Note that to avoid slow divisions, we multiply the max_value
-        // by the denominator.
-        if (v8 < 2) {
-          break;
-        }
-        uint32_t max_value = 0xfffful * 15;
-        if (r16_const * 31 > max_value) {
-          break;
-        }
-        if (g16_const * 31 > max_value) {
-          break;
-        }
-        if (b16_const * 31 > max_value) {
-          break;
-        }
-        numerator = 31;
-        denominator = 15;
-        v8 >>= 1;
-
-        if (v8 < 2) {
-          break;
-        }
-
-        max_value = 0xfffful * 15 * 7;
-        if (r16_const * 31 * 15 > max_value) {
-          break;
-        }
-        if (g16_const * 31 * 15 > max_value) {
-          break;
-        }
-        if (b16_const * 31 * 15 > max_value) {
-          break;
-        }
-        numerator = 31 * 15;
-        denominator = 15 * 7;
-        v8 >>= 1;
-
-        if (v8 < 2) {
-          break;
-        }
-
-        max_value = 0xfffful * 15 * 7 * 3;
-        if (r16_const * 31 * 15 * 7 > max_value) {
-          break;
-        }
-        if (g16_const * 31 * 15 * 7 > max_value) {
-          break;
-        }
-        if (b16_const * 31 * 15 * 7 > max_value) {
-          break;
-        }
-        numerator = 31 * 15 * 7;
-        denominator = 15 * 7 * 3;
-        
-        v8 >>= 1;
-
-        if (v8 < 2) {
-          break;
-        }
-
-        max_value = 0xfffful * 15 * 7 * 3;
-        if (r16_const * 31 * 15 * 7 * 3 > max_value) {
-          break;
-        }
-        if (g16_const * 31 * 15 * 7 * 3 > max_value) {
-          break;
-        }
-        if (b16_const * 31 * 15 * 7 * 3 > max_value) {
-          break;
-        }
-        numerator = 31 * 15 * 7 * 3;
-        v8 = 1;  // last possible iteration so set to 1
-    } while(false);
-
-    r16 = uint16_t(r16_const * numerator / denominator);
-    g16 = uint16_t(g16_const * numerator / denominator);
-    b16 = uint16_t(b16_const * numerator / denominator);
-
-    // now apply the rest of the global_brightness that has been bitshifted up.
-    if (global_brightness != 0xff) {
-      r16 = scale16by8(r16, global_brightness);
-      g16 = scale16by8(g16, global_brightness);
-      b16 = scale16by8(b16, global_brightness);
-    }
-
-    // Step 5: Conversion Back to 8-bit.
-    uint8_t r8_final = (colors.r == 255 && uint8_t(r16 >> 8) >= 254) ? 255 : uint8_t(r16 >> 8);
-    uint8_t g8_final = (colors.g == 255 && uint8_t(g16 >> 8) >= 254) ? 255 : uint8_t(g16 >> 8);
-    uint8_t b8_final = (colors.b == 255 && uint8_t(b16 >> 8) >= 254) ? 255 : uint8_t(b16 >> 8);
-
-#if FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP > 0
-    if (v8 == 1) {
-      // Linear tuning for the lowest possible brightness. x=y until
-      // the intersection point at 9.
-      if (colors.r < FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP && r16 > 0) {
-        r8_final = colors.r;
-      }
-      if (colors.g < FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP && g16 > 0) {
-        g8_final = colors.g;
-      }
-      if (colors.b < FASTLED_FIVE_BIT_HD_GAMMA_LOW_END_LINEAR_RAMP && b16 > 0) {
-        b8_final = colors.b;
-      }
-    }
-#endif
-
-    // Step 6: Output
-    *out_colors = CRGB(r8_final, g8_final, b8_final);
-    *out_power_5bit = v8;
+    five_bit_bitshift(r16, g16, b16, global_brightness, out_colors, out_power_5bit);
 }
 
 
