@@ -4,6 +4,13 @@
 
 #include <FastLED.h>
 
+
+#if defined(__AVR_ATtinyxy4__)
+// too large for ATtiny1604, so skip this.
+void setup() {};
+void loop() {};
+#else
+
 #define LED_PIN     3
 #define BRIGHTNESS  96
 #define LED_TYPE    WS2811
@@ -278,3 +285,4 @@ uint16_t XY( uint8_t x, uint8_t y)
   return i;
 }
 
+#endif // !defined(__AVR_ATtinyxy4__)
