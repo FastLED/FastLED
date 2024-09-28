@@ -15,13 +15,13 @@ LED_STRIP_NAMESPACE_BEGIN
 
 #define TAG "configure_led.cpp"
 
-led_strip_handle_t configure_led(int pin, uint32_t max_leds, led_model_t chipset, led_pixel_format_t rgbw) {
+led_strip_handle_t configure_led(config_led_t config) {
     // LED strip general initialization, according to your led board design
     led_strip_config_t strip_config = {};
-    strip_config.strip_gpio_num = pin;
-    strip_config.max_leds = max_leds;
-    strip_config.led_pixel_format = rgbw;
-    strip_config.led_model = chipset;
+    strip_config.strip_gpio_num = config.pin;
+    strip_config.max_leds = config.max_leds;
+    strip_config.led_pixel_format = config.rgbw;
+    strip_config.led_model = config.chipset;
     strip_config.flags.invert_out = 0;
 
     // print out the values of the configuration

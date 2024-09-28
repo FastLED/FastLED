@@ -134,7 +134,13 @@ void demo(int led_strip_gpio, uint32_t num_leds, LedStripMode mode) {
     led_model_t chipset = {};
     to_esp_modes(mode, &chipset, &rgbw_mode);
     const bool is_rgbw_active = is_rgbw_mode_active(rgbw_mode);
-    led_strip_handle_t led_strip = configure_led(led_strip_gpio, num_leds, chipset, rgbw_mode);
+    config_led_t config = {
+        .pin = led_strip_gpio,
+        .max_leds = num_leds,
+        .chipset = chipset,
+        .rgbw = rgbw_mode
+    };
+    led_strip_handle_t led_strip = configure_led(config);
     draw_loop(led_strip, num_leds, is_rgbw_active);
 }
 

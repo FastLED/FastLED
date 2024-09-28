@@ -58,7 +58,15 @@ void RmtController5::showPixels(PixelIterator &pixels) {
     led_model_t chipset;
     led_pixel_format_t rgbw_mode;
     to_esp_modes(mode, &chipset, &rgbw_mode);
-    led_strip_handle_t led_strip = configure_led(mPin, max_leds, chipset, rgbw_mode);
+
+    config_led_t config = {
+        .pin = mPin,
+        .max_leds = max_leds,
+        .chipset = chipset,
+        .rgbw = rgbw_mode
+    };
+    
+    led_strip_handle_t led_strip = configure_led(config);
     bool rgbw_active = rgbw.active();
 
     if (rgbw.active()) {
