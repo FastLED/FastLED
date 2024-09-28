@@ -39,6 +39,7 @@ void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_
 RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3) {
     // Stub implementation
     ESP_LOGI(TAG, "RmtController5 constructor called");
+    mPin = DATA_PIN;
 }
 
 RmtController5::~RmtController5() {
@@ -49,6 +50,14 @@ RmtController5::~RmtController5() {
 void RmtController5::showPixels(PixelIterator &pixels) {
     // Stub implementation
     ESP_LOGI(TAG, "showPixels called");
+    uint32_t max_leds = pixels.size();
+    Rgbw rgbw = pixels.get_rgbw();
+    LedStripMode mode = rgbw.active() ? WS2812_RGBW : WS2812;
+    led_model_t chipset;
+    led_pixel_format_t rgbw_mode;
+    to_esp_modes(mode, &chipset, &rgbw_mode);
+    led_strip_handle_t led_strip = configure_led(mPin, max_leds, chipset, rgbw_mode);
+    draw_loop(led_strip, max_leds, rgbw.active());
 }
 
 void RmtController5::ingest(uint8_t val) {

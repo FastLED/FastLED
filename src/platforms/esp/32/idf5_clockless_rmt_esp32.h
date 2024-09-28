@@ -30,8 +30,6 @@ public:
     }
 
     void init() override { }
-
-
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:

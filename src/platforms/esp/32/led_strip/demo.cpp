@@ -17,7 +17,7 @@ LED_STRIP_NAMESPACE_BEGIN
 
 #define TAG "rmt_demo.cpp"
 
-// #define DRAW_BLINK_DEMO
+#define DRAW_BLINK_DEMO
 
 void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_t* out_rgbw) {
     switch (mode) {

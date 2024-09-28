@@ -33,6 +33,8 @@ private:
     bool built_in_driver();
     uint8_t *getPixelBuffer(int size_in_bytes);
     void loadPixelDataForStreamEncoding(PixelIterator& pixels);
+
+    int mPin;
 };
 
 

@@ -15,5 +15,6 @@ enum LedStripMode {
 
 
 void demo(int led_strip_gpio, uint32_t num_leds, LedStripMode mode);
+void draw_loop(led_strip_handle_t led_strip, uint32_t num_leds, bool rgbw_active);
 
 LED_STRIP_NAMESPACE_END
