@@ -20,14 +20,17 @@ private:
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
 
+    // -- The actual controller object for ESP32
+    RmtController5 mRMTController;
+
 public:
     ClocklessController()
+        : mRMTController(DATA_PIN, T1, T2, T3)
     {
     }
 
-    void init()
-    {
-    }
+    void init() override { }
+
 
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 

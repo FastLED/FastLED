@@ -21,9 +21,8 @@ public:
     RmtController5(const RmtController5 &) = delete;
     RmtController5(
         int DATA_PIN,
-        int T1, int T2, int T3,  // Bit timings.
-        int maxChannel,
-        bool built_in_driver);
+        int T1, int T2, int T3);  // Bit timings.
+
     ~RmtController5();
 
     void showPixels(PixelIterator &pixels);
