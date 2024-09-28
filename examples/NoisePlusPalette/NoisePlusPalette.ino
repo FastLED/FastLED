@@ -2,14 +2,19 @@
 /// @brief   Demonstrates how to mix noise generation with color palettes on a 2D LED matrix
 /// @example NoisePlusPalette.ino
 
-#include <FastLED.h>
-
-
+#ifndef COMPILE_NOISEPLUSPALETTE
 #if defined(__AVR_ATtinyxy4__)
 // too large for ATtiny1604, so skip this.
-void setup() {};
-void loop() {};
+#define COMPILE_NOISEPLUSPALETTE 0
 #else
+#define COMPILE_NOISEPLUSPALETTE 1
+#endif
+#endif  // COMPILE_NOISEPLUSPALETTE
+
+
+#if COMPILE_NOISEPLUSPALETTE
+
+#include <FastLED.h>
 
 #define LED_PIN     3
 #define BRIGHTNESS  96
@@ -285,4 +290,8 @@ uint16_t XY( uint8_t x, uint8_t y)
   return i;
 }
 
-#endif // !defined(__AVR_ATtinyxy4__)
+#else
+void setup() {}
+void loop() {}
+#endif // COMPILE_NOISEPLUSPALETTE
+
