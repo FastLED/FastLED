@@ -76,7 +76,9 @@ target_compile_definitions(FastLED PRIVATE
 )
 
 # Add static linking flags and debug flags for FastLED
-target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
+if(NOT APPLE)
+    target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
+endif()
 target_compile_options(FastLED PRIVATE 
     $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
     $<$<CONFIG:Release>:-O3>
@@ -101,7 +103,9 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         CXX_STANDARD_REQUIRED ON
     )
     # Add static linking flags and debug flags for test executables
-    target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
+    if(NOT APPLE)
+        target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
+    endif()
     target_compile_options(${TEST_NAME} PRIVATE 
         $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
         $<$<CONFIG:Release>:-O3>
