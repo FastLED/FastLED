@@ -14,9 +14,8 @@
 
 #define CHECK_NEAR(a, b, c) CHECK_LT(abs(a - b), c)
 
-// Testing allows upto 4% error between power output of WS2812 and APA102 in HD mode.
-// This probably happens on the high end of the brightness scale.
-const static float TOLERANCE = 0.04;
+// Testing allows upto 2.2% error between power output of WS2812 and APA102 in HD mode.
+const static float TOLERANCE = 0.022;
 const static int NUM_TESTS = 1000000;
 const static size_t MAX_FAILURES = 30;
 struct Power {
@@ -79,7 +78,7 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
     CHECK_EQ(FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS, 1);
   }
 
-  SUBCASE("Randomized Test") {
+  SUBCASE("Randomized Power Matching Test for 5 bit power") {
     srand(0);  // Seed the random number generator so we get consitent results.
     bool fail = false;
     std::vector<Data> failures;
@@ -90,7 +89,6 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
       Power result = compute_power(brightness, color);
       float diff = abs(result.power - result.power_5bit);
       if (diff > TOLERANCE) {
-        std::cout << "diff=" << diff << " for brightness=" << (int)brightness << ", color=(" << (int)color.r << "," << (int)color.g << "," << (int)color.b << ")" << std::endl;
         failures.push_back({color, brightness});
         while (failures.size() > MAX_FAILURES) {
           failures.pop_back();
