@@ -28,12 +28,6 @@ public:
     void showPixels(PixelIterator &pixels);
 
 private:
-    void ingest(uint8_t val);
-    void showPixels();
-    bool built_in_driver();
-    uint8_t *getPixelBuffer(int size_in_bytes);
-    void loadPixelDataForStreamEncoding(PixelIterator& pixels);
-
     int mPin;
 };
 

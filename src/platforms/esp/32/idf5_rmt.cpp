@@ -2,6 +2,8 @@
 
 #if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
+#warning "Work in progress: ESP32 ClocklessController for IDF 5.1 - this is still a prototype"
+
 #include "idf5_rmt.h"
 #include "led_strip/led_strip.h"
 #include "esp_log.h"
@@ -48,7 +50,6 @@ RmtController5::~RmtController5() {
 }
 
 void RmtController5::showPixels(PixelIterator &pixels) {
-    // Stub implementation
     ESP_LOGI(TAG, "showPixels called");
     uint32_t max_leds = pixels.size();
     Rgbw rgbw = pixels.get_rgbw();
@@ -57,37 +58,16 @@ void RmtController5::showPixels(PixelIterator &pixels) {
     led_pixel_format_t rgbw_mode;
     to_esp_modes(mode, &chipset, &rgbw_mode);
     led_strip_handle_t led_strip = configure_led(mPin, max_leds, chipset, rgbw_mode);
-    draw_loop(led_strip, max_leds, rgbw.active());
+    bool rgbw_active = rgbw.active();
+    uint8_t c0,c1,c2;
+    for (uint16_t i = 0; i < max_leds; i++) {
+        pixels.loadAndScaleRGB(&c0, &c1, &c2);
+        set_pixel(led_strip, i, rgbw_active, c0, c1, c2);
+        ESP_ERROR_CHECK(led_strip_refresh(led_strip));
+    }
+    // tear down the led strip to allow it to be used elsewhere
+    led_strip_del(led_strip);
 }
-
-void RmtController5::ingest(uint8_t val) {
-    // Stub implementation
-    ESP_LOGI(TAG, "ingest called with value: %d", val);
-}
-
-void RmtController5::showPixels() {
-    // Stub implementation
-    ESP_LOGI(TAG, "showPixels called");
-}
-
-bool RmtController5::built_in_driver() {
-    // Stub implementation
-    ESP_LOGI(TAG, "built_in_driver called");
-    return true;
-}
-
-uint8_t* RmtController5::getPixelBuffer(int size_in_bytes) {
-    // Stub implementation
-    ESP_LOGI(TAG, "getPixelBuffer called with size: %d", size_in_bytes);
-    return nullptr;
-}
-
-void RmtController5::loadPixelDataForStreamEncoding(PixelIterator& pixels) {
-    // Stub implementation
-    ESP_LOGI(TAG, "loadPixelDataForStreamEncoding called");
-}
-
-
 
 #endif  // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 

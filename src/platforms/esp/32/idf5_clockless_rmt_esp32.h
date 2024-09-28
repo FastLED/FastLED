@@ -3,8 +3,6 @@
 // signal to the world that we have a ClocklessController to allow WS2812 and others.
 #define FASTLED_HAS_CLOCKLESS 1
 
-#warning "Work in progress: ESP32 ClocklessController for IDF 5.1, this is non functional right now"
-
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
