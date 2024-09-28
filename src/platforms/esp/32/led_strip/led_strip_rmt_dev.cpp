@@ -79,10 +79,18 @@ static esp_err_t led_strip_rmt_set_pixel_rgbw(led_strip_t *strip, uint32_t index
     ESP_RETURN_ON_FALSE(rmt_strip->bytes_per_pixel == 4, ESP_ERR_INVALID_ARG, TAG, "wrong LED pixel format, expected 4 bytes per pixel");
     uint8_t *buf_start = rmt_strip->pixel_buf + index * 4;
     // SK6812 component order is GRBW
+    #if 0
     *buf_start = green & 0xFF;
     *++buf_start = red & 0xFF;
     *++buf_start = blue & 0xFF;
     *++buf_start = white & 0xFF;
+    #else
+    // FastLED controls the order of the LEDs, so we need to set the colors in the order of RGBW
+    *buf_start = red & 0xFF;
+    *++buf_start = green & 0xFF;
+    *++buf_start = blue & 0xFF;
+    *++buf_start = white & 0xFF;
+    #endif
     return ESP_OK;
 }
 
