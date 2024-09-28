@@ -19,5 +19,5 @@ else
     uv run ci/cpp_test_run.py
     uv run ci/ci-compile-native.py
     uv run pytest ci/tests
-    uv run pio check --skip-packages --src-filters="+<src/>"  --severity=medium --fail-on-defect=high --flags --inline-suppr
+    uv run pio check --skip-packages --src-filters="+<src/>"  --severity=medium --fail-on-defect=high --flags "--inline-suppr --enable=all --std=c++17"
 fi
