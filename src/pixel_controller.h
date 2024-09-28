@@ -63,7 +63,7 @@ FASTLED_NAMESPACE_BEGIN
 struct ColorAdjustment {
     CRGB premixed;       /// the per-channel scale values premixed with brightness.
     #if FASTLED_HD_COLOR_MIXING
-    CRGB color;          /// the per-channel scale values NOT mixed with brightness.
+    CRGB color;          /// the per-channel scale values assuming full brightness.
     uint8_t brightness;  /// the global brightness value
     #endif
 };
