@@ -1,6 +1,6 @@
 #include "led_strip/enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#if FASTLED_RMT51
 
 #warning "Work in progress: ESP32 ClocklessController for IDF 5.1 - this is still a prototype"
 
@@ -83,5 +83,5 @@ void RmtController5::showPixels(PixelIterator &pixels) {
     led_strip_del(led_strip);
 }
 
-#endif  // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#endif  // FASTLED_RMT51
 

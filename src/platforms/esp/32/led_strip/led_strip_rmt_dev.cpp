@@ -8,7 +8,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#if FASTLED_RMT51
 
 #include <stdlib.h>
 #include <string.h>
@@ -221,6 +221,6 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
 
 LED_STRIP_NAMESPACE_END
 
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#endif // FASTLED_RMT51
 
 #endif // ESP32

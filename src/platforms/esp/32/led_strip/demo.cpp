@@ -3,7 +3,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#if FASTLED_RMT51
 
 #include <Arduino.h>
 
@@ -141,6 +141,6 @@ void demo(int led_strip_gpio, uint32_t num_leds, LedStripMode mode) {
 
 LED_STRIP_NAMESPACE_END
 
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#endif // FASTLED_RMT51
 
 #endif // ESP32

@@ -2,7 +2,7 @@
 #ifdef ESP32
 #ifndef FASTLED_ESP32_I2S
 
-#if !FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#if !FASTLED_RMT51
 
 #define FASTLED_INTERNAL
 
@@ -102,7 +102,7 @@ void RmtController::loadPixelDataForStreamEncoding(PixelIterator &pixels) {
     }
 }
 
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#endif // FASTLED_RMT51
 
 #endif // ! FASTLED_ESP32_I2S
 
