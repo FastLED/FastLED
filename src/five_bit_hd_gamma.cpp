@@ -122,32 +122,27 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
       // Loop while v5 is greater than 1
       while (v5 > 1) {
           uint8_t next_v5 = v5 >> 1;
-          numerator *= v5;
-          denominator *= next_v5;
-
+          uint32_t next_numerator = numerator * v5;
+          uint32_t next_denominator = denominator * next_v5;
           // Calculate potential new overflow
-          uint32_t next_overflow = (overflow * numerator) / denominator;
-
+          uint32_t next_overflow = (overflow * next_numerator);
           // Check if overflow exceeds the uint16_t limit
-          if (next_overflow > 0xFFFF) {
+          if (next_overflow > next_denominator * 0xffff) {
               break;
           }
-
+          numerator = next_numerator;
+          denominator = next_denominator;
           // Save valid color component values
-          saved_r16 = (r16 * numerator) / denominator;
-          saved_g16 = (g16 * numerator) / denominator;
-          saved_b16 = (b16 * numerator) / denominator;
           has_saved_values = true;
-
           // Update v5 for the next iteration
           v5 = next_v5;
       }
 
       // Use saved values if we found a valid configuration
       if (has_saved_values) {
-          r16 = saved_r16;
-          g16 = saved_g16;
-          b16 = saved_b16;
+          r16 = static_cast<uint16_t>((r16 * numerator) / denominator);
+          g16 = static_cast<uint16_t>((g16 * numerator) / denominator);
+          b16 = static_cast<uint16_t>((b16 * numerator) / denominator);
       }
   }
 

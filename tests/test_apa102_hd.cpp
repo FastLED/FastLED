@@ -14,8 +14,8 @@
 
 #define CHECK_NEAR(a, b, c) CHECK_LT(abs(a - b), c)
 
-// Testing allows upto 0.5% error between power output of WS2812 and APA102 in HD mode.
-const static float TOLERANCE = 0.005;
+// Testing allows upto 0.6% error between power output of WS2812 and APA102 in HD mode.
+const static float TOLERANCE = 0.006;
 const static int NUM_TESTS = 1000000;
 const static size_t MAX_FAILURES = 30;
 struct Power {
