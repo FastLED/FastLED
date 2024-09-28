@@ -74,49 +74,46 @@ void five_bit_hd_gamma_function(CRGB rgb,
 
 
 void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16, uint8_t brightness, CRGB* out, uint8_t* out_power_5bit) {
-    // Step 3: Initialize 5-bit brightness.
-    // Note: we only get 5 levels of brightness
-    uint8_t v8 = 0b00011111;
+    // Step 1: Initialize brightness
+    uint8_t v5 = 0b00011111;
 
-    // global brightness trades bits with 5 bit power brightness to improve
-    // final color resolution. The shifted global brightness is then applied
-    // at the end so it has better resolution and doesn't truncate bits.
+    // Step 2: Boost brightness by swapping with the driver brightness.
     if (brightness <= 85) {
-      while (v8 > 1 && (brightness <= 85)) {
-        // each bitshift down for v8 is a divide by 3, hence we multiply by 3 for the global brightness.
+      // When v5 shifts down, it is a division of three. The brightness will be multiplied by 3 to compensate.
+      while (v5 > 1 && (brightness <= 85)) {
         brightness = (brightness << 1) | 0x1;  // global brightness shifts up
-        v8 >>= 1;                                            // driver bit brightness shifts down
+        v5 >>= 1;                              // driver brightness shifts down
       }
     }
+
+    // Step 3: Boost brightness of the color channels by swapping with the driver brightness.
     {
       uint32_t overflow = max3(r16, g16, b16);
-      while (v8 > 1) {
+      while (v5 > 1) {
         overflow = (overflow << 1) | 1;
-        if (overflow > 0xffff) {
+        if (overflow > 0xffff) {  // The largest color component exceeded uint16_t width.
           break;
         }
-        v8 >>= 1;
+        // The next bit shift (divide by three) will succeed, so shift the brightness
+        // down and saturate shift the color channels up.
+        v5 >>= 1;
         r16 = (r16 << 1) | 1;
         g16 = (g16 << 1) | 1;
         b16 = (b16 << 1) | 1;
       }
     }
 
-    // now apply the rest of the global_brightness that has been bitshifted up.
+    // Step 4: The power saturated color channels are multiplied by the power saturated
+    // brightness.
     if (brightness != 0xff) {
       r16 = scale16by8(r16, brightness);
       g16 = scale16by8(g16, brightness);
       b16 = scale16by8(b16, brightness);
     }
 
-    // Step 5: Conversion Back to 8-bit.
-    uint8_t r8_final = (uint8_t(r16 >> 8) >= 254) ? 255 : uint8_t(r16 >> 8);
-    uint8_t g8_final = (uint8_t(g16 >> 8) >= 254) ? 255 : uint8_t(g16 >> 8);
-    uint8_t b8_final = (uint8_t(b16 >> 8) >= 254) ? 255 : uint8_t(b16 >> 8);
-
-    // Step 6: Output
-    *out = CRGB(r8_final, g8_final, b8_final);
-    *out_power_5bit = v8;
+    // Step 5: Output
+    *out = CRGB(uint8_t(r16 >> 8), uint8_t(g16 >> 8), uint8_t(b16 >> 8));
+    *out_power_5bit = v5;
 }
 
 void __builtin_five_bit_hd_gamma_bitshift(
