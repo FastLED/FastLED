@@ -8,7 +8,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#if FASTLED_RMT51
 
 #include <stdlib.h>
 #include <string.h>
@@ -55,10 +55,17 @@ static esp_err_t led_strip_rmt_set_pixel(led_strip_t *strip, uint32_t index, uin
     led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
     ESP_RETURN_ON_FALSE(index < rmt_strip->strip_len, ESP_ERR_INVALID_ARG, TAG, "index out of maximum number of LEDs");
     uint32_t start = index * rmt_strip->bytes_per_pixel;
+    #if 0
     // In thr order of GRB, as LED strip like WS2812 sends out pixels in this order
     rmt_strip->pixel_buf[start + 0] = green & 0xFF;
     rmt_strip->pixel_buf[start + 1] = red & 0xFF;
     rmt_strip->pixel_buf[start + 2] = blue & 0xFF;
+    #else
+    // FastLED controls the order of the LEDs, so we need to set the colors in the order of RGB
+    rmt_strip->pixel_buf[start + 0] = red & 0xFF;
+    rmt_strip->pixel_buf[start + 1] = green & 0xFF;
+    rmt_strip->pixel_buf[start + 2] = blue & 0xFF;
+    #endif
     if (rmt_strip->bytes_per_pixel > 3) {
         rmt_strip->pixel_buf[start + 3] = 0;
     }
@@ -214,6 +221,6 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
 
 LED_STRIP_NAMESPACE_END
 
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#endif // FASTLED_RMT51
 
 #endif // ESP32

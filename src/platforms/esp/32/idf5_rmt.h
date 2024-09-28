@@ -2,7 +2,7 @@
 
 #include "led_strip/enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#if FASTLED_RMT51
 
 #include "pixel_iterator.h"
 #include <stdint.h>
@@ -21,25 +21,17 @@ public:
     RmtController5(const RmtController5 &) = delete;
     RmtController5(
         int DATA_PIN,
-        int T1, int T2, int T3,  // Bit timings.
-        int maxChannel,
-        bool built_in_driver);
+        int T1, int T2, int T3);  // Bit timings.
+
     ~RmtController5();
 
     void showPixels(PixelIterator &pixels);
 
 private:
-    void ingest(uint8_t val);
-    void showPixels();
-    bool built_in_driver();
-    uint8_t *getPixelBuffer(int size_in_bytes);
-    void initPulseBuffer(int size_in_bytes);
-    void loadAllPixelsToRmtSymbolData(PixelIterator& pixels);
-
-    void loadPixelDataForStreamEncoding(PixelIterator& pixels);
+    int mPin;
 };
 
 
 
-#endif  // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#endif  // FASTLED_RMT51
 

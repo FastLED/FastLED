@@ -3,8 +3,6 @@
 // signal to the world that we have a ClocklessController to allow WS2812 and others.
 #define FASTLED_HAS_CLOCKLESS 1
 
-#warning "Work in progress: ESP32 ClocklessController for IDF 5.1, this is non functional right now"
-
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
@@ -20,15 +18,16 @@ private:
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin specified");
 
+    // -- The actual controller object for ESP32
+    RmtController5 mRMTController;
+
 public:
     ClocklessController()
+        : mRMTController(DATA_PIN, T1, T2, T3)
     {
     }
 
-    void init()
-    {
-    }
-
+    void init() override { }
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
@@ -37,6 +36,6 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels)
     {
         PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-        // mRMTController.showPixels(iterator);
+        mRMTController.showPixels(iterator);
     }
 };
