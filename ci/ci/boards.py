@@ -154,6 +154,12 @@ MAPLE_MINI = Board(
     platform="ststm32",
 )
 
+# ATtiny1604
+ATTINY1616 = Board(
+    board_name="ATtiny1616",
+    platform="atmelmegaavr",
+)
+
 UNO_R4_WIFI = Board(
     board_name="uno_r4_wifi",
     platform="renesas-ra",
