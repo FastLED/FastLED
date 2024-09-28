@@ -73,6 +73,7 @@ void five_bit_hd_gamma_function(CRGB rgb,
 #endif  // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
 
+
 void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16, uint8_t brightness, CRGB* out, uint8_t* out_power_5bit) {
     // Step 1: Initialize brightness
     uint8_t v5 = 0b00011111;
@@ -90,16 +91,19 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16, uint8_t brightn
     {
       uint32_t overflow = max3(r16, g16, b16);
       while (v5 > 1) {
-        overflow = (overflow << 1) | 1;
-        if (overflow > 0xffff) {  // The largest color component exceeded uint16_t width.
+        uint8_t next_v5 = v5 >> 1;
+        uint8_t numerator = v5 / next_v5;
+        uint32_t next_overflow = overflow * numerator;
+        if (next_overflow > 0xffff) {  // The largest color component exceeded uint16_t width.
           break;
         }
-        // The next bit shift (divide by three) will succeed, so shift the brightness
-        // down and saturate shift the color channels up.
-        v5 >>= 1;
-        r16 = (r16 << 1) | 1;
-        g16 = (g16 << 1) | 1;
-        b16 = (b16 << 1) | 1;
+        overflow = next_overflow;
+        // The next bit shift will succeed, so shift the brightness
+        // down and multiply the color channels up.
+        v5 = next_v5;
+        r16 *= numerator;
+        g16 *= numerator;
+        b16 *= numerator;
       }
     }
 
@@ -127,9 +131,8 @@ void __builtin_five_bit_hd_gamma_bitshift(
     uint16_t r16, g16, b16;
     five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
 
-    // Step 2: Post gamma correction scale.
-    // Note that the colors_scale is expected to be the high range and should
-    // represent color correction.
+    // Step 2: Color correction step comes after gamma correction. These values
+    // are assumed to be be relatively close to 255.
     if (colors_scale.r != 0xff) {
       r16 = scale16by8(r16, colors_scale.r);
     }
