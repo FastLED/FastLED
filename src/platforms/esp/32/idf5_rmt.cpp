@@ -4,6 +4,16 @@
 
 #include "idf5_rmt.h"
 
+
+#include "led_strip/led_strip.h"
+#include "esp_log.h"
+#include "led_strip/demo.h"
+#include "led_strip/configure_led.h"
+
+USING_NAMESPACE_LED_STRIP
+
+#define TAG "idf5_rmt.cpp"
+
 void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_t* out_rgbw) {
     switch (mode) {
         case WS2812:

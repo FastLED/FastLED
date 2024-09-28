@@ -4,6 +4,8 @@
 
 #if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
+#include "pixel_iterator.h"
+#include <stdint.h>
 
 class RmtController5
 {
@@ -14,9 +16,9 @@ public:
     // as opposed to 2x - the size of an additional pixel buffer for
     // stream encoding).
     RmtController5() = delete;
-    RmtController5(RmtController &&) = delete;
-    RmtController5 &operator=(const RmtController &) = delete;
-    RmtController5(const RmtController &) = delete;
+    RmtController5(RmtController5 &&) = delete;
+    RmtController5 &operator=(const RmtController5 &) = delete;
+    RmtController5(const RmtController5 &) = delete;
     RmtController5(
         int DATA_PIN,
         int T1, int T2, int T3,  // Bit timings.
