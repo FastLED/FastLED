@@ -7,7 +7,7 @@
 
 #include <Arduino.h>
 
-#include "led_strip/led_strip.h"
+#include "led_strip.h"
 #include "demo.h"
 #include "esp_log.h"
 #include "configure_led.h"
