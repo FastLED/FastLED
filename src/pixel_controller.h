@@ -108,8 +108,8 @@ struct PixelController {
 
     template<typename PixelControllerT>
     void copy(const PixelControllerT& other) {
-        static_assert(kLanes == PixelControllerT::kLanes, "PixelController lanes must match or mOffsets will be wrong");
-        static_assert(kMask == PixelControllerT::kMask, "PixelController mask must match or else one or the other controls different lanes");
+        static_assert(int(kLanes) == int(PixelControllerT::kLanes), "PixelController lanes must match or mOffsets will be wrong");
+        static_assert(int(kMask) == int(PixelControllerT::kMask), "PixelController mask must match or else one or the other controls different lanes");
         d[0] = other.d[0];
         d[1] = other.d[1];
         d[2] = other.d[2];
