@@ -73,40 +73,36 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     }
 
     // Step 1: Initialize brightness
-    uint8_t v5 = 0b00011111;
+    static const uint8_t kStartBrightness = 0b00011111;
+    uint8_t v5 = kStartBrightness;
 
     // Step 2: Boost brightness by swapping bits with the driver brightness.
     uint32_t numerator = 1;
     uint16_t denominator = 1;
-    uint8_t saved_brightness = 0;
-    bool has_saved_brightness = false;
-
-
     // Loop while there is room to adjust brightness
     while (v5 > 1) {
         // Calculate the next reduced value of v5
         uint8_t next_v5 = v5 >> 1;
         // Update the numerator and denominator to scale brightness
-        numerator *= v5;
-        denominator *= next_v5;
+        uint32_t next_numerator = numerator * v5;
+        uint32_t next_denominator = denominator * next_v5;
         // Calculate the next potential brightness value
-        uint32_t next_brightness = brightness;
-        next_brightness *= numerator;
-
+        uint32_t next_brightness_times_numerator = brightness;
+        next_brightness_times_numerator *= next_numerator;
         // Check for overflow
-        if (next_brightness > denominator * 0xff) {
+        if (next_brightness_times_numerator > denominator * 0xff) {
             break;
         }
-        uint16_t brightness16 = static_cast<uint16_t>(next_brightness / denominator);
-        // Save the valid brightness value and update v5
-        saved_brightness = static_cast<uint8_t>(brightness16);
+        numerator = next_numerator;
+        denominator = next_denominator;
         v5 = next_v5;
-        has_saved_brightness = true;
     }
-
-    // If a valid brightness was saved, use it
-    if (has_saved_brightness) {
-        brightness = saved_brightness;
+    // If brightness was adjusted, calculate the new brightness value
+    if (v5 != kStartBrightness) {
+        // brightness = saved_brightness;
+        uint32_t b32 = brightness;
+        b32 *= numerator;
+        brightness = static_cast<uint8_t>(b32 / denominator);
     }
 
     // Step 3: Boost brightness of the color channels by swapping with the
