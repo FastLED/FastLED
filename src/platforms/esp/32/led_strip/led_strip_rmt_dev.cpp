@@ -4,24 +4,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifdef ESP32
+
 #include "enabled.h"
 
 #if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
-#include "esp_idf_version.h"
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-
 #include <stdlib.h>
 #include <string.h>
 #include <sys/cdefs.h>
-
-
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <iostream>
 
 
 #include "esp_log.h"
@@ -40,6 +32,11 @@ extern "C" {
 #else
 #define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS 48
 #endif
+
+#include "cleanup.h"
+
+#include "namespace.h"
+LED_STRIP_NAMESPACE_BEGIN
 
 // static const char *TAG = "led_strip_rmt";
 #define TAG "led_strip_rmt"
@@ -114,56 +111,51 @@ static esp_err_t led_strip_rmt_del(led_strip_t *strip)
     return ESP_OK;
 }
 
-rmt_tx_channel_config_t make_tx_channel_config(
-    rmt_clock_source_t clock_src,
-    size_t mem_block_symbols,
-    uint32_t resolution_hz,
-    int strip_gpio_num,
-    size_t trans_queue_depth,
-    int intr_priority,
-    bool with_dma,
-    bool invert_out
-)
-{
-    rmt_tx_channel_config_t out = {};
-    memset(&out, 0, sizeof(rmt_tx_channel_config_t));
-
-    //     .clk_src = clock_src,
-    //     .gpio_num = strip_gpio_num,
-    //     .mem_block_symbols = mem_block_symbols,
-    //     .resolution_hz = resolution_hz
-    // };
-    out.gpio_num = static_cast<gpio_num_t>(strip_gpio_num);
-    out.clk_src = clock_src;
-    out.resolution_hz = resolution_hz;
-    out.mem_block_symbols = mem_block_symbols;
-    out.trans_queue_depth = trans_queue_depth;
-    out.intr_priority = intr_priority;
-    out.flags.with_dma = with_dma;
-    out.flags.invert_out = invert_out;
-    return out;
+void delete_strip(led_strip_rmt_obj *rmt_strip) {
+    if (rmt_strip) {
+        if (rmt_strip->rmt_chan) {
+            rmt_del_channel(rmt_strip->rmt_chan);
+        }
+        if (rmt_strip->strip_encoder) {
+            rmt_del_encoder(rmt_strip->strip_encoder);
+        }
+        free(rmt_strip);
+    }
 }
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE && !FASTLED_ESP32_COMPONENT_LED_STRIP_FORCE_IDF4
+// C++ doesn't like the goto statement, so we need to replace it with a macro to do an early return instead
+// This is a common pattern in the ESP-IDF codebase.
+#undef ESP_GOTO_ON_FALSE
+#undef ESP_GOTO_ON_ERROR
 
-// Note that the RMT driver does a runtime check to see if the RMT new driver has been linked in. It doesn't
-// matter if you install it or not, it will still crash on boot if it's linked in.
-// https://github.com/espressif/esp-idf/blob/e026fd1f81afc6d19561101b1c8fe0006932cff3/components/driver/deprecated/rmt_legacy.c#L1379
-// It seems that the offending include is "driver/rmt.h", which should be purged everywhere.
+#define ESP_GOTO_ON_FALSE(a, err_code, goto_tag, log_tag, format, ...) do {                                \
+        if (unlikely(!(a))) {                                                                              \
+            ESP_LOGE(log_tag, "%s(%d): " format, __FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__);        \
+            ret = err_code;                                                                                \
+            return ret;                                                                                    \
+        }                                                                                                  \
+    } while (0)
+
+#define ESP_GOTO_ON_ERROR(x, goto_tag, log_tag, format, ...) do {                                          \
+        esp_err_t err_rc_ = (x);                                                                           \
+        if (unlikely(err_rc_ != ESP_OK)) {                                                                 \
+            ESP_LOGE(log_tag, "%s(%d): " format, __FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__);        \
+            ret = err_rc_;                                                                                 \
+            return ret;                                                                                    \
+        }                                                                                                  \
+    } while(0)
+
+
+
+
 esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
 {
-    const int INTERRUPT_PRIORITY = 0;
-    rmt_clock_source_t clk_src = RMT_CLK_SRC_DEFAULT;
-    size_t mem_block_symbols = LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS;
     led_strip_rmt_obj *rmt_strip = NULL;
+    Cleanup cleanup_if_failure(delete_strip, rmt_strip);
     esp_err_t ret = ESP_OK;
-    led_strip_encoder_config_t strip_encoder_conf = {};
-    uint32_t resolution = 0;
-    // has to be declared before possible jump to error is needed
-    rmt_tx_channel_config_t rmt_chan_config = {};
-    uint8_t bytes_per_pixel = 3;
     ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
+    uint8_t bytes_per_pixel = 3;
     if (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRBW) {
         bytes_per_pixel = 4;
     } else if (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRB) {
@@ -173,40 +165,34 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     }
     rmt_strip = static_cast<led_strip_rmt_obj*>(calloc(1, sizeof(led_strip_rmt_obj) + led_config->max_leds * bytes_per_pixel));
     ESP_GOTO_ON_FALSE(rmt_strip, ESP_ERR_NO_MEM, err, TAG, "no mem for rmt strip");
-    resolution = rmt_config->resolution_hz ? rmt_config->resolution_hz : LED_STRIP_RMT_DEFAULT_RESOLUTION;
+    uint32_t resolution = rmt_config->resolution_hz ? rmt_config->resolution_hz : LED_STRIP_RMT_DEFAULT_RESOLUTION;
 
     // for backward compatibility, if the user does not set the clk_src, use the default value
+    rmt_clock_source_t clk_src = RMT_CLK_SRC_DEFAULT;
     if (rmt_config->clk_src) {
         clk_src = rmt_config->clk_src;
     }
-
+    size_t mem_block_symbols = LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS;
     // override the default value if the user sets it
     if (rmt_config->mem_block_symbols) {
         mem_block_symbols = rmt_config->mem_block_symbols;
     }
-    // rmt_tx_channel_config_t rmt_chan_config = {
-    //     .clk_src = clk_src,
-    //     .gpio_num = led_config->strip_gpio_num,
-    //     .mem_block_symbols = mem_block_symbols,
-    //     .resolution_hz = resolution,
-    //     .trans_queue_depth = LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,
-    //     .flags.with_dma = rmt_config->flags.with_dma,
-    //     .flags.invert_out = led_config->flags.invert_out,
-    // };
-
-    rmt_chan_config = make_tx_channel_config(
-        clk_src,
-        mem_block_symbols,
-        resolution,
-        led_config->strip_gpio_num,
-        LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,
-        INTERRUPT_PRIORITY,
-        rmt_config->flags.with_dma,
-        led_config->flags.invert_out
-    );
+    rmt_tx_channel_config_t rmt_chan_config = {
+        .gpio_num = gpio_num_t(led_config->strip_gpio_num),
+        .clk_src = clk_src,
+        .resolution_hz = resolution,
+        .mem_block_symbols = mem_block_symbols,
+        .trans_queue_depth = LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,
+        //.flags.with_dma = rmt_config->flags.with_dma,
+        //.flags.invert_out = led_config->flags.invert_out,
+        .flags = {
+            .invert_out = led_config->flags.invert_out,
+            .with_dma = rmt_config->flags.with_dma,
+        }
+    };
     ESP_GOTO_ON_ERROR(rmt_new_tx_channel(&rmt_chan_config, &rmt_strip->rmt_chan), err, TAG, "create RMT TX channel failed");
 
-    strip_encoder_conf = {
+    led_strip_encoder_config_t strip_encoder_conf = {
         .resolution = resolution,
         .led_model = led_config->led_model
     };
@@ -222,26 +208,12 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     rmt_strip->base.del = led_strip_rmt_del;
 
     *ret_strip = &rmt_strip->base;
+    cleanup_if_failure.release();
     return ESP_OK;
-err:
-    if (rmt_strip) {
-        if (rmt_strip->rmt_chan) {
-            rmt_del_channel(rmt_strip->rmt_chan);
-        }
-        if (rmt_strip->strip_encoder) {
-            rmt_del_encoder(rmt_strip->strip_encoder);
-        }
-        free(rmt_strip);
-    }
-    return ret;
 }
 
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN_COMPILE_PROBLEMATIC_CODE
+LED_STRIP_NAMESPACE_END
 
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // ESP_IDF_VERSION
 #endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+
+#endif // ESP32

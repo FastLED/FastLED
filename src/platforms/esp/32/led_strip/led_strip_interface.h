@@ -5,20 +5,11 @@
  */
 #pragma once
 
-
-
 #include <stdint.h>
-
-
-
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "esp_err.h"
+
+#include "namespace.h"
+LED_STRIP_NAMESPACE_BEGIN
 
 typedef struct led_strip_t led_strip_t; /*!< Type of LED strip */
 
@@ -98,8 +89,4 @@ struct led_strip_t {
     esp_err_t (*del)(led_strip_t *strip);
 };
 
-
-#ifdef __cplusplus
-}
-#endif
-
+LED_STRIP_NAMESPACE_END

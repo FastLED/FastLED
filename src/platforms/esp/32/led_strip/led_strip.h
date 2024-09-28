@@ -1,25 +1,23 @@
+#pragma once
+
 /*
  * SPDX-FileCopyrightText: 2022-2023 Espressif Systems (Shanghai) CO LTD
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#pragma once
+
+
+
+
+#ifdef ESP32
 
 #include <stdint.h>
 #include "esp_err.h"
 #include "led_strip_rmt.h"
 #include "esp_idf_version.h"
 
-
-
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 1, 0)
-#include "led_strip_spi.h"
-#endif
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "namespace.h"
+LED_STRIP_NAMESPACE_BEGIN
 
 /**
  * @brief Set RGB for a specific pixel
@@ -109,6 +107,6 @@ esp_err_t led_strip_clear(led_strip_handle_t strip);
  */
 esp_err_t led_strip_del(led_strip_handle_t strip);
 
-#ifdef __cplusplus
-}
+LED_STRIP_NAMESPACE_END
+
 #endif
