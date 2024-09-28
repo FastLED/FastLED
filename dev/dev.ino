@@ -19,14 +19,52 @@ CRGB leds[NUM_LEDS];
 #define TIME_FACTOR_SAT 100
 #define TIME_FACTOR_VAL 100
 
+#define DELAY 200
+#define BRIGHNESS 128
+
+// #define COLOR_ORDER_TEST
+
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    FastLED.setBrightness(128);  // Set global brightness to 50%
+    FastLED.addLeds<WS2812, DATA_PIN, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.setBrightness(BRIGHNESS);  // Set global brightness to 50%
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
 
-void loop() {
+void fill(CRGB color) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i] = color;
+    }
+}
+
+void Blink(CRGB color, int times) {
+    for (int i = 0; i < times; i++) {
+        fill(color);
+        FastLED.show();
+        delay(DELAY);
+        fill(CRGB::Black);
+        FastLED.show();
+        delay(DELAY);
+    }
+    delay(DELAY*2);
+}
+
+
+
+
+void blink_loop() {
+    uint32_t ms = millis();
+    Blink(CRGB::Red, 1);
+    Blink(CRGB::Green, 2);
+    Blink(CRGB::Blue, 3);
+    Blink(CRGB::White, 4);
+    delay(DELAY);
+
+    // long delay to make the cycle visible
+    delay(DELAY * 4);
+}
+
+void hue_loop() {
     uint32_t ms = millis();
     
     for(int i = 0; i < NUM_LEDS; i++) {
@@ -43,9 +81,12 @@ void loop() {
     }
 
     FastLED.show();
-    
-    // Small delay to control the overall speed of the animation
-    //FastLED.delay(1);
-    //delay(30);
+}
 
+void loop() {
+    #ifdef COLOR_ORDER_TEST
+    blink_loop();
+    #else
+    hue_loop();
+    #endif
 }
