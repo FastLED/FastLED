@@ -7,7 +7,7 @@
 
 #include <FastLED.h>
 
-#if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__)
+#if defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtinyxy4__)
 // too large for ATtiny85, so skip this.
 void setup() {};
 void loop() {};
