@@ -469,11 +469,13 @@ struct PixelController {
     FASTLED_FORCE_INLINE uint8_t getScale2() { return getscale<2>(*this); }  ///< non-template alias of getscale<2>()
 
     #if FASTLED_HD_COLOR_MIXING
-    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t getscaleNoBrightness(PixelController & pc) { return pc.mColorAdjustment.color.raw[RO(SLOT)]; }
+    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t getScaleFullBrightness(PixelController & pc) { return pc.mColorAdjustment.color.raw[RO(SLOT)]; }
+    // Gets the color corection and also the brightness as seperate values.
+    // This is needed for the higher precision chipsets like the APA102.
     FASTLED_FORCE_INLINE void getHdScale(uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
-        *c0 = getscaleNoBrightness<0>(*this);
-        *c1 = getscaleNoBrightness<1>(*this);
-        *c2 = getscaleNoBrightness<2>(*this);
+        *c0 = getScaleFullBrightness<0>(*this);
+        *c1 = getScaleFullBrightness<1>(*this);
+        *c2 = getScaleFullBrightness<2>(*this);
         *brightness = mColorAdjustment.brightness;
     }
     #endif
