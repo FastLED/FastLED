@@ -9,7 +9,8 @@
 #else
 
 #ifndef FASTLED_DEFINE_TIMER_WEAK_SYMBOL
-#if defined(__AVR_ATtinyxy6__) || defined(ARDUINO_attinyxy6) \
+#if !defined(MILLIS_USE_TIMERA0) \
+    || defined(__AVR_ATtinyxy6__) || defined(ARDUINO_attinyxy6) \
     || defined(__AVR_ATtinyxy7__) || defined(ARDUINO_attinyxy7) \
     || defined(__AVR_ATtinyxy8__) || defined(ARDUINO_attinyxy8) \
     || defined(__AVR_ATtinyxy4__) || defined(ARDUINO_attinyxy4) \
