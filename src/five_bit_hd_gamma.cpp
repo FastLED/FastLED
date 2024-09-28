@@ -65,12 +65,16 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 
 void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
                        uint8_t brightness, CRGB *out, uint8_t *out_power_5bit) {
-
     if (!(r16 | g16 | b16) || brightness == 0) {
         *out = CRGB(0, 0, 0);
         *out_power_5bit = 0;
         return;
     }
+
+    // Note: One day someone smarter than me will come along and invent a closed
+    // form solution for this. However, the numerical method works extremely
+    // well and has been optimized to avoid division performance penalties as
+    // much as possible.
 
     // Step 1: Initialize brightness
     static const uint8_t kStartBrightness = 0b00011111;
