@@ -10,13 +10,14 @@
 #include "led_strip/demo.h"
 #include "led_strip/configure_led.h"
 
+
 USING_NAMESPACE_LED_STRIP
 
 #define TAG "idf5_rmt.cpp"
 
 void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_t* out_rgbw) {
     switch (mode) {
-        case WS2812:
+        case kWS2812:
             *out_rgbw = LED_PIXEL_FORMAT_GRB;
             *out_chipset = LED_MODEL_WS2812;
             break;
@@ -24,7 +25,7 @@ void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_
             *out_rgbw = LED_PIXEL_FORMAT_GRB;
             *out_chipset = LED_MODEL_SK6812;
             break;
-        case WS2812_RGBW:
+        case kWS2812_RGBW:
             *out_rgbw = LED_PIXEL_FORMAT_GRBW;
             *out_chipset = LED_MODEL_WS2812;
             break;
@@ -53,18 +54,31 @@ void RmtController5::showPixels(PixelIterator &pixels) {
     ESP_LOGI(TAG, "showPixels called");
     uint32_t max_leds = pixels.size();
     Rgbw rgbw = pixels.get_rgbw();
-    LedStripMode mode = rgbw.active() ? WS2812_RGBW : WS2812;
+    LedStripMode mode = rgbw.active() ? kWS2812_RGBW : kWS2812;
     led_model_t chipset;
     led_pixel_format_t rgbw_mode;
     to_esp_modes(mode, &chipset, &rgbw_mode);
     led_strip_handle_t led_strip = configure_led(mPin, max_leds, chipset, rgbw_mode);
     bool rgbw_active = rgbw.active();
-    uint8_t c0,c1,c2;
-    for (uint16_t i = 0; i < max_leds; i++) {
-        pixels.loadAndScaleRGB(&c0, &c1, &c2);
-        set_pixel(led_strip, i, rgbw_active, c0, c1, c2);
-        ESP_ERROR_CHECK(led_strip_refresh(led_strip));
+
+    if (rgbw.active()) {
+        uint8_t r, g, b, w;
+        for (uint16_t i = 0; pixels.has(1); i++) {
+            pixels.loadAndScaleRGBW(&r, &g, &b, &w);
+            ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, g, r, b, w));
+            pixels.advanceData();
+            pixels.stepDithering();
+        }
+    } else {
+        uint8_t r, g, b;
+        for (uint16_t i = 0; pixels.has(1); i++) {
+            pixels.loadAndScaleRGB(&r, &g, &b);
+            ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, r, g, b));
+            pixels.advanceData();
+            pixels.stepDithering();
+        }
     }
+    ESP_ERROR_CHECK(led_strip_refresh(led_strip));
     // tear down the led strip to allow it to be used elsewhere
     led_strip_del(led_strip);
 }

@@ -46,5 +46,6 @@ void loop() {
     
     // Small delay to control the overall speed of the animation
     //FastLED.delay(1);
+    //delay(30);
 
 }
