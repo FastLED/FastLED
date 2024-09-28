@@ -65,6 +65,13 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 
 void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
                        uint8_t brightness, CRGB *out, uint8_t *out_power_5bit) {
+
+    if (!(r16 | g16 | b16) || brightness == 0) {
+        *out = CRGB(0, 0, 0);
+        *out_power_5bit = 0;
+        return;
+    }
+
     // Step 1: Initialize brightness
     uint8_t v5 = 0b00011111;
 
@@ -74,24 +81,23 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     uint8_t saved_brightness = 0;
     bool has_saved_brightness = false;
 
+
     // Loop while there is room to adjust brightness
     while (v5 > 1) {
         // Calculate the next reduced value of v5
         uint8_t next_v5 = v5 >> 1;
-
         // Update the numerator and denominator to scale brightness
         numerator *= v5;
         denominator *= next_v5;
-
         // Calculate the next potential brightness value
         uint32_t next_brightness = brightness;
         next_brightness *= numerator;
-        next_brightness /= denominator;
-        uint16_t brightness16 = static_cast<uint16_t>(next_brightness);
+
         // Check for overflow
-        if (brightness16 & 0xFF00) {
+        if (next_brightness > denominator * 0xff) {
             break;
         }
+        uint16_t brightness16 = static_cast<uint16_t>(next_brightness / denominator);
         // Save the valid brightness value and update v5
         saved_brightness = static_cast<uint8_t>(brightness16);
         v5 = next_v5;
