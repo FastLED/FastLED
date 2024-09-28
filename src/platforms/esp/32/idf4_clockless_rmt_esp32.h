@@ -37,7 +37,7 @@
 
 #include "led_strip/enabled.h"
 
-#if !FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+
 
 
 #include "idf4_rmt.h"
@@ -69,7 +69,6 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 #endif
 #endif
-
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
@@ -109,4 +108,3 @@ protected:
 
 FASTLED_NAMESPACE_END
 
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN

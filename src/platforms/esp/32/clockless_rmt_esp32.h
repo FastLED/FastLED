@@ -26,8 +26,9 @@
 #pragma once
 
 #include "esp_idf_version.h"
+#include "led_strip/enabled.h"
 
-#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
+#if !FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN || ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
 #include "idf4_clockless_rmt_esp32.h"
 #else
 #include "idf5_clockless_rmt_esp32.h"
