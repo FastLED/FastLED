@@ -32,9 +32,6 @@ private:
     void showPixels();
     bool built_in_driver();
     uint8_t *getPixelBuffer(int size_in_bytes);
-    void initPulseBuffer(int size_in_bytes);
-    void loadAllPixelsToRmtSymbolData(PixelIterator& pixels);
-
     void loadPixelDataForStreamEncoding(PixelIterator& pixels);
 };
 
