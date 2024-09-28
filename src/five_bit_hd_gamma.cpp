@@ -78,7 +78,7 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
 
     // Step 2: Boost brightness by swapping power with the driver brightness.
     uint32_t numerator = 1;
-    uint16_t denominator = 1;
+    uint16_t denominator = 1;  // can hold all possible denominators for v5.
     // Loop while there is room to adjust brightness
     while (v5 > 1) {
         // Calculate the next reduced value of v5
@@ -110,7 +110,7 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     {
         // Initialize numerator and denominator for scaling
         uint32_t numerator = 1;
-        uint32_t denominator = 1;
+        uint16_t denominator = 1;  // can hold all possible denomintors for v5.
         uint32_t overflow = max3(r16, g16, b16);
 
         // Loop while v5 is greater than 1
