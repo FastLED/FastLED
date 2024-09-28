@@ -5,7 +5,7 @@
 
 #include "led_strip/enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN!=1
+#if !FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
 
 // Inlines the rmt_set_tx_intr_en function to avoid the overhead of a function call

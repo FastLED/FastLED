@@ -37,7 +37,7 @@
 
 #include "led_strip/enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN!=1
+#if !FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
 
 #include "idf4_rmt.h"
