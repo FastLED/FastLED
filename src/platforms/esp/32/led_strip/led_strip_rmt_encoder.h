@@ -5,19 +5,12 @@
  */
 #pragma once
 
-#include "enabled.h"
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <stdint.h>
 #include "led_strip_types.h"
-
-
 #include "driver/rmt_encoder.h"
+
+#include "namespace.h"
+LED_STRIP_NAMESPACE_BEGIN
 
 /**
  * @brief Type of led strip encoder configuration
@@ -39,6 +32,4 @@ typedef struct {
  */
 esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder);
 
-#ifdef __cplusplus
-}
-#endif
+LED_STRIP_NAMESPACE_END

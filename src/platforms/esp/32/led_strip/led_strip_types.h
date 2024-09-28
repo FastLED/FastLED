@@ -7,10 +7,8 @@
 
 #include <stdint.h>
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "namespace.h"
+LED_STRIP_NAMESPACE_BEGIN
 
 /**
  * @brief LED strip pixel format
@@ -51,7 +49,4 @@ typedef struct {
     } flags;                    /*!< Extra driver flags */
 } led_strip_config_t;
 
-
-#ifdef __cplusplus
-}
-#endif
+LED_STRIP_NAMESPACE_END

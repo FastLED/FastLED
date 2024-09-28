@@ -3,25 +3,29 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include "enabled.h"
 
-#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#ifdef ESP32
 
+#include "esp_idf_version.h"
 
-#ifdef __cplusplus
-extern "C" {
+#if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
+#error "This library is only designed to run on ESP-IDF v5.0.0 and later"
 #endif
-
 
 #include "esp_log.h"
 #include "esp_check.h"
 
-
 #include "led_strip.h"
 #include "led_strip_interface.h"
 
+
+#include "namespace.h"
+LED_STRIP_NAMESPACE_BEGIN
+
+
 // static const char *TAG = "led_strip";
 #define TAG "led_strip"
+
 
 esp_err_t led_strip_set_pixel(led_strip_handle_t strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue)
 {
@@ -106,9 +110,6 @@ esp_err_t led_strip_del(led_strip_handle_t strip)
     return strip->del(strip);
 }
 
+LED_STRIP_NAMESPACE_END
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+#endif // ESP32
