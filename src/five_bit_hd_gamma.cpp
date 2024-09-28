@@ -76,7 +76,7 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     static const uint8_t kStartBrightness = 0b00011111;
     uint8_t v5 = kStartBrightness;
 
-    // Step 2: Boost brightness by swapping bits with the driver brightness.
+    // Step 2: Boost brightness by swapping power with the driver brightness.
     uint32_t numerator = 1;
     uint16_t denominator = 1;
     // Loop while there is room to adjust brightness
@@ -105,46 +105,38 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         brightness = static_cast<uint8_t>(b32 / denominator);
     }
 
-    // Step 3: Boost brightness of the color channels by swapping with the
+    // Step 3: Boost brightness of the color channels by swapping power with the
     // driver brightness.
-  {
-      // Initialize numerator and denominator for scaling
-      uint32_t numerator = 1;
-      uint32_t denominator = 1;
-      uint32_t overflow = max3(r16, g16, b16);
+    {
+        // Initialize numerator and denominator for scaling
+        uint32_t numerator = 1;
+        uint32_t denominator = 1;
+        uint32_t overflow = max3(r16, g16, b16);
 
-      // Saved values in case we need to revert to a safe state
-      uint32_t saved_r16 = r16;
-      uint32_t saved_g16 = g16;
-      uint32_t saved_b16 = b16;
-      bool has_saved_values = false;
+        // Loop while v5 is greater than 1
+        while (v5 > 1) {
+            uint8_t next_v5 = v5 >> 1;
+            uint32_t next_numerator = numerator * v5;
+            uint32_t next_denominator = denominator * next_v5;
+            // Calculate potential new overflow
+            uint32_t next_overflow = (overflow * next_numerator);
+            // Check if overflow exceeds the uint16_t limit
+            if (next_overflow > next_denominator * 0xffff) {
+                break;
+            }
+            numerator = next_numerator;
+            denominator = next_denominator;
+            // Update v5 for the next iteration
+            v5 = next_v5;
+        }
 
-      // Loop while v5 is greater than 1
-      while (v5 > 1) {
-          uint8_t next_v5 = v5 >> 1;
-          uint32_t next_numerator = numerator * v5;
-          uint32_t next_denominator = denominator * next_v5;
-          // Calculate potential new overflow
-          uint32_t next_overflow = (overflow * next_numerator);
-          // Check if overflow exceeds the uint16_t limit
-          if (next_overflow > next_denominator * 0xffff) {
-              break;
-          }
-          numerator = next_numerator;
-          denominator = next_denominator;
-          // Save valid color component values
-          has_saved_values = true;
-          // Update v5 for the next iteration
-          v5 = next_v5;
-      }
-
-      // Use saved values if we found a valid configuration
-      if (has_saved_values) {
-          r16 = static_cast<uint16_t>((r16 * numerator) / denominator);
-          g16 = static_cast<uint16_t>((g16 * numerator) / denominator);
-          b16 = static_cast<uint16_t>((b16 * numerator) / denominator);
-      }
-  }
+        // Use saved values if we found a valid configuration
+        if (numerator > 1) {
+            r16 = static_cast<uint16_t>((r16 * numerator) / denominator);
+            g16 = static_cast<uint16_t>((g16 * numerator) / denominator);
+            b16 = static_cast<uint16_t>((b16 * numerator) / denominator);
+        }
+    }
 
     // Step 4: The power saturated color channels are multiplied by the power
     // saturated brightness.
