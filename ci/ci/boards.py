@@ -123,7 +123,7 @@ XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
 
 RPI_PICO = Board(
     board_name="rpipico",
-    platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
+    platform="https://github.com/maxgerhardt/platform-raspberrypi.git#5e87ae34ca025274df25b3303e9e9cb6c120123c",
     platform_needs_install=True,  # Install platform package to get the boards
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
     framework="arduino",
