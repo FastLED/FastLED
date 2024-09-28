@@ -1,7 +1,10 @@
 
 
 #include <FastLED.h>
-#include "platforms/esp/32/led_strip/rmt_demo.h"
+
+#if !defined(FASTLED_RMT51) || !FASTLED_RMT51
+#error "This example requires the FASTLED_RMT51 option to be enabled in your FastLED platform configuration."
+#endif 
 
 // How many leds in your strip?
 #define NUM_LEDS 10
@@ -20,12 +23,28 @@ CRGB leds[NUM_LEDS];
 #define TIME_FACTOR_SAT 100
 #define TIME_FACTOR_VAL 100
 
-
 void setup() {
     Serial.begin(115200);
+    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.setBrightness(128);  // Set global brightness to 50%
+    delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
 
 void loop() {
-    rmt_demo(DATA_PIN, NUM_LEDS);
-    delay(1000);
+    uint32_t ms = millis();
+    
+    for(int i = 0; i < NUM_LEDS; i++) {
+        // Use different noise functions for each LED and each color component
+        uint8_t hue = inoise16(ms * TIME_FACTOR_HUE, i * 1000, 0) >> 8;
+        uint8_t sat = inoise16(ms * TIME_FACTOR_SAT, i * 2000, 1000) >> 8;
+        uint8_t val = inoise16(ms * TIME_FACTOR_VAL, i * 3000, 2000) >> 8;
+        
+        // Map the noise to full range for saturation and value
+        sat = map(sat, 0, 255, 30, 255);
+        val = map(val, 0, 255, 100, 255);
+        
+        leds[i] = CHSV(hue, sat, val);
+    }
+
+    FastLED.show();
 }
