@@ -99,7 +99,6 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     }
     // If brightness was adjusted, calculate the new brightness value
     if (v5 != kStartBrightness) {
-        // brightness = saved_brightness;
         uint32_t b32 = brightness;
         b32 *= numerator;
         brightness = static_cast<uint8_t>(b32 / denominator);
@@ -117,7 +116,7 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         while (v5 > 1) {
             uint8_t next_v5 = v5 >> 1;
             uint32_t next_numerator = numerator * v5;
-            uint32_t next_denominator = denominator * next_v5;
+            uint16_t next_denominator = denominator * next_v5;
             // Calculate potential new overflow
             uint32_t next_overflow = (overflow * next_numerator);
             // Check if overflow exceeds the uint16_t limit
@@ -130,23 +129,21 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
             v5 = next_v5;
         }
 
-        // Use saved values if we found a valid configuration
-        if (numerator > 1) {
+        if (numerator != 1) {  // Signal that a new value was computed.
             r16 = static_cast<uint16_t>((r16 * numerator) / denominator);
             g16 = static_cast<uint16_t>((g16 * numerator) / denominator);
             b16 = static_cast<uint16_t>((b16 * numerator) / denominator);
         }
     }
 
-    // Step 4: The power saturated color channels are multiplied by the power
-    // saturated brightness.
+    // Step 4: scale by final brightness factor.
     if (brightness != 0xff) {
         r16 = scale16by8(r16, brightness);
         g16 = scale16by8(g16, brightness);
         b16 = scale16by8(b16, brightness);
     }
 
-    // Step 5: Output
+    // Step 5: Convert back to 8-bit and output.
     *out = CRGB(uint8_t(r16 >> 8), uint8_t(g16 >> 8), uint8_t(b16 >> 8));
     *out_power_5bit = v5;
 }
