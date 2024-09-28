@@ -13,4 +13,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: ATtiny1616 --defines DEFINE_AVR_TIMER_SOURCE
+      args: ATtiny1616
