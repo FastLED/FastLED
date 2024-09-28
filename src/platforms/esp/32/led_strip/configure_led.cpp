@@ -1,6 +1,11 @@
 
 #ifdef ESP32
 
+#include "enabled.h"
+
+#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+
+
 
 #include "configure_led.h"
 #include "esp_log.h"
@@ -52,5 +57,7 @@ led_strip_handle_t configure_led(int pin, uint32_t max_leds, led_model_t chipset
 
 LED_STRIP_NAMESPACE_END
 
+
+#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
 #endif // ESP32

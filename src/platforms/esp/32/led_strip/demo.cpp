@@ -1,6 +1,10 @@
 
 #ifdef ESP32
 
+#include "enabled.h"
+
+#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+
 #include <Arduino.h>
 
 #include "led_strip/led_strip.h"
@@ -137,4 +141,6 @@ void demo(int led_strip_gpio, uint32_t num_leds, LedStripMode mode) {
 
 LED_STRIP_NAMESPACE_END
 
-#endif
+#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+
+#endif // ESP32

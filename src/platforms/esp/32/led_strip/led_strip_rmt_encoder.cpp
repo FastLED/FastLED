@@ -8,6 +8,10 @@
 
 #include "enabled.h"
 
+#if FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
+
+#include "enabled.h"
+
 
 // enable fprmissive
 #pragma GCC diagnostic push
@@ -210,5 +214,7 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
 
 
 LED_STRIP_NAMESPACE_END
+
+#endif // FASTLED_ESP32_COMPONENT_LED_STRIP_BUILT_IN
 
 #endif // ESP32
