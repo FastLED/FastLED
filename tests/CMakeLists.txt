@@ -1,3 +1,7 @@
+# Note that we are using the zig compiler as a drop in replacement for
+# gcc. This allows the unit tests to be compiled across different platforms
+# without having to worry about the underlying compiler.
+
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
