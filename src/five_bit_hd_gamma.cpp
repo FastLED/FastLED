@@ -1,9 +1,9 @@
 
 
 #define FASTLED_INTERNAL 1
-
 #include "FastLED.h"
 #include "five_bit_hd_gamma.h"
+
 #include "fastled_progmem.h"
 #include "lib8tion/scale8.h"
 #include "namespace.h"
@@ -12,24 +12,17 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-namespace
-{
-  template<typename T>
-  T mymax(T a, T b) {
-    return (a > b) ? a : b;
-  }
+namespace {
+template <typename T> T mymax(T a, T b) { return (a > b) ? a : b; }
 
-  template<typename T>
-  T max3(T a, T b, T c) {
-    return mymax(mymax(a, b), c);
-  }
-  
+template <typename T> T max3(T a, T b, T c) { return mymax(mymax(a, b), c); }
+
 } // namespace
 
 #ifndef FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 // Fast a memory efficient gamma=2 function.
-void five_bit_hd_gamma_function(CRGB color,
-                                uint16_t* r16, uint16_t* g16, uint16_t* b16) {
+void five_bit_hd_gamma_function(CRGB color, uint16_t *r16, uint16_t *g16,
+                                uint16_t *b16) {
     *r16 = uint16_t(color.r) * color.r;
     *g16 = uint16_t(color.g) * color.g;
     *b16 = uint16_t(color.b) * color.b;
@@ -62,57 +55,106 @@ static const uint16_t PROGMEM _gamma_2_8[256] = {
     57199, 57816, 58436, 59061, 59690, 60323, 60960, 61601, 62246, 62896, 63549,
     64207, 64869, 65535};
 
-void five_bit_hd_gamma_function(CRGB rgb,
-                                uint16_t *r16,
-                                uint16_t *g16,
+void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
                                 uint16_t *b16) {
-  *r16 = _gamma_2_8[rgb.r];
-  *g16 = _gamma_2_8[rgb.g];
-  *b16 = _gamma_2_8[rgb.b];
+    *r16 = _gamma_2_8[rgb.r];
+    *g16 = _gamma_2_8[rgb.g];
+    *b16 = _gamma_2_8[rgb.b];
 }
-#endif  // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
+#endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
-
-
-void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16, uint8_t brightness, CRGB* out, uint8_t* out_power_5bit) {
+void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
+                       uint8_t brightness, CRGB *out, uint8_t *out_power_5bit) {
     // Step 1: Initialize brightness
     uint8_t v5 = 0b00011111;
 
-    // Step 2: Boost brightness by swapping with the driver brightness.
-    if (brightness <= 85) {
-      // When v5 shifts down, it is a division of three. The brightness will be multiplied by 3 to compensate.
-      while (v5 > 1 && (brightness <= 85)) {
-        brightness = (brightness << 1) | 0x1;  // global brightness shifts up
-        v5 >>= 1;                              // driver brightness shifts down
-      }
-    }
+    // Step 2: Boost brightness by swapping bits with the driver brightness.
+    uint32_t numerator = 1;
+    uint16_t denominator = 1;
+    uint8_t saved_brightness = 0;
+    bool has_saved_brightness = false;
 
-    // Step 3: Boost brightness of the color channels by swapping with the driver brightness.
-    {
-      uint32_t overflow = max3(r16, g16, b16);
-      while (v5 > 1) {
+    // Loop while there is room to adjust brightness
+    while (v5 > 1) {
+        // Calculate the next reduced value of v5
         uint8_t next_v5 = v5 >> 1;
-        uint8_t numerator = v5 / next_v5;
-        uint32_t next_overflow = overflow * numerator;
-        if (next_overflow > 0xffff) {  // The largest color component exceeded uint16_t width.
-          break;
+
+        // Update the numerator and denominator to scale brightness
+        numerator *= v5;
+        denominator *= next_v5;
+
+        // Calculate the next potential brightness value
+        uint32_t next_brightness = brightness;
+        next_brightness *= numerator;
+        next_brightness /= denominator;
+        uint16_t brightness16 = static_cast<uint16_t>(next_brightness);
+        // Check for overflow
+        if (brightness16 & 0xFF00) {
+            break;
         }
-        overflow = next_overflow;
-        // The next bit shift will succeed, so shift the brightness
-        // down and multiply the color channels up.
+        // Save the valid brightness value and update v5
+        saved_brightness = static_cast<uint8_t>(brightness16);
         v5 = next_v5;
-        r16 *= numerator;
-        g16 *= numerator;
-        b16 *= numerator;
-      }
+        has_saved_brightness = true;
     }
 
-    // Step 4: The power saturated color channels are multiplied by the power saturated
-    // brightness.
+    // If a valid brightness was saved, use it
+    if (has_saved_brightness) {
+        brightness = saved_brightness;
+    }
+
+    // Step 3: Boost brightness of the color channels by swapping with the
+    // driver brightness.
+  {
+      // Initialize numerator and denominator for scaling
+      uint32_t numerator = 1;
+      uint32_t denominator = 1;
+      uint32_t overflow = max3(r16, g16, b16);
+
+      // Saved values in case we need to revert to a safe state
+      uint32_t saved_r16 = r16;
+      uint32_t saved_g16 = g16;
+      uint32_t saved_b16 = b16;
+      bool has_saved_values = false;
+
+      // Loop while v5 is greater than 1
+      while (v5 > 1) {
+          uint8_t next_v5 = v5 >> 1;
+          numerator *= v5;
+          denominator *= next_v5;
+
+          // Calculate potential new overflow
+          uint32_t next_overflow = (overflow * numerator) / denominator;
+
+          // Check if overflow exceeds the uint16_t limit
+          if (next_overflow > 0xFFFF) {
+              break;
+          }
+
+          // Save valid color component values
+          saved_r16 = (r16 * numerator) / denominator;
+          saved_g16 = (g16 * numerator) / denominator;
+          saved_b16 = (b16 * numerator) / denominator;
+          has_saved_values = true;
+
+          // Update v5 for the next iteration
+          v5 = next_v5;
+      }
+
+      // Use saved values if we found a valid configuration
+      if (has_saved_values) {
+          r16 = saved_r16;
+          g16 = saved_g16;
+          b16 = saved_b16;
+      }
+  }
+
+    // Step 4: The power saturated color channels are multiplied by the power
+    // saturated brightness.
     if (brightness != 0xff) {
-      r16 = scale16by8(r16, brightness);
-      g16 = scale16by8(g16, brightness);
-      b16 = scale16by8(b16, brightness);
+        r16 = scale16by8(r16, brightness);
+        g16 = scale16by8(g16, brightness);
+        b16 = scale16by8(b16, brightness);
     }
 
     // Step 5: Output
@@ -120,12 +162,10 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16, uint8_t brightn
     *out_power_5bit = v5;
 }
 
-void __builtin_five_bit_hd_gamma_bitshift(
-    CRGB colors,
-    CRGB colors_scale,
-    uint8_t global_brightness,
-    CRGB* out_colors,
-    uint8_t* out_power_5bit) {
+void __builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
+                                          uint8_t global_brightness,
+                                          CRGB *out_colors,
+                                          uint8_t *out_power_5bit) {
 
     // Step 1: Gamma Correction
     uint16_t r16, g16, b16;
@@ -134,17 +174,17 @@ void __builtin_five_bit_hd_gamma_bitshift(
     // Step 2: Color correction step comes after gamma correction. These values
     // are assumed to be be relatively close to 255.
     if (colors_scale.r != 0xff) {
-      r16 = scale16by8(r16, colors_scale.r);
+        r16 = scale16by8(r16, colors_scale.r);
     }
     if (colors_scale.g != 0xff) {
-      g16 = scale16by8(g16, colors_scale.g);
+        g16 = scale16by8(g16, colors_scale.g);
     }
     if (colors_scale.b != 0xff) {
-      b16 = scale16by8(b16, colors_scale.b);
+        b16 = scale16by8(b16, colors_scale.b);
     }
 
-    five_bit_bitshift(r16, g16, b16, global_brightness, out_colors, out_power_5bit);
+    five_bit_bitshift(r16, g16, b16, global_brightness, out_colors,
+                      out_power_5bit);
 }
-
 
 FASTLED_NAMESPACE_END

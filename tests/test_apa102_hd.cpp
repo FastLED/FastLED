@@ -14,8 +14,8 @@
 
 #define CHECK_NEAR(a, b, c) CHECK_LT(abs(a - b), c)
 
-// Testing allows upto 2.2% error between power output of WS2812 and APA102 in HD mode.
-const static float TOLERANCE = 0.022;
+// Testing allows upto 0.5% error between power output of WS2812 and APA102 in HD mode.
+const static float TOLERANCE = 0.005;
 const static int NUM_TESTS = 1000000;
 const static size_t MAX_FAILURES = 30;
 struct Power {
@@ -99,7 +99,8 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
       std::cout << "Failures:" << std::endl;
       for (auto& failure : failures) {
         Power p = compute_power(failure.brightness, failure.color);
-        std::cout << "  brightness=" << (int)failure.brightness << ", color=(" << (int)failure.color.r << "," << (int)failure.color.g << "," << (int)failure.color.b << "), power=" << p.power << ", power_5bit=" << p.power_5bit << std::endl;
+        std::string color_str = "R: " + std::to_string(failure.color.r) + " G: " + std::to_string(failure.color.g) + " B: " + std::to_string(failure.color.b);
+        std::cout << "Failure, diff is " << abs(p.power - p.power_5bit) << " brightness: " << int(failure.brightness) << " color: " << color_str << std::endl;
       }
     }
   }

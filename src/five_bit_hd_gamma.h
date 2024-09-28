@@ -4,6 +4,7 @@
 #include "namespace.h"
 #include <stdint.h>
 #include "force_inline.h"
+#include "crgb.h"
 
 FASTLED_NAMESPACE_BEGIN
 
