@@ -9,8 +9,14 @@
 //
 
 // Params for width and height
+#if defined(__AVR_ATtinyxy4__)
+// Tiny 4x4 matrix for this memory constrained device.
+const uint8_t kMatrixWidth = 8;
+const uint8_t kMatrixHeight = 8;
+#else
 const uint8_t kMatrixWidth = 16;
 const uint8_t kMatrixHeight = 16;
+#endif
 
 #define MAX_DIMENSION ((kMatrixWidth>kMatrixHeight) ? kMatrixWidth : kMatrixHeight)
 #define NUM_LEDS (kMatrixWidth * kMatrixHeight)
