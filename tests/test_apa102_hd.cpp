@@ -38,18 +38,6 @@ struct Power {
 };
 
 
-
-// float compute_power(uint8_t brightness8, CRGB color) {
-//     uint16_t r16 = mymap(color.r, 0, 255, 0, 0xffff);
-//     uint16_t g16 = mymap(color.g, 0, 255, 0, 0xffff);
-//     uint16_t b16 = mymap(color.b, 0, 255, 0, 0xffff);
-//     uint8_t power_5bit;
-//     CRGB out_colors;
-//     five_bit_bitshift(r16, g16, b16, brightness8, &out_colors, &power_5bit);
-//     float power = computer_power_5bit(out_colors, power_5bit);
-//     return power;
-// }
-
 Power compute_power(uint8_t brightness8, CRGB color) {
   uint16_t r16 = mymap(color.r, 0, 255, 0, 0xffff);
   uint16_t g16 = mymap(color.g, 0, 255, 0, 0xffff);
@@ -101,97 +89,6 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
   SUBCASE("Low Color and Brightness") {
     verify_power(8, CRGB(3, 3, 3), TOLERANCE);
   }
-
-  #if 0
-
-  SUBCASE("five_bit_bitshift") {
-    for (int i = 0; i < 256; i++) {
-      uint8_t brightness = i;
-      uint16_t r16 = 0xffff;
-      uint16_t g16 = 0xffff;
-      uint16_t b16 = 0xffff;
-      uint8_t power_5bit;
-      CRGB out_colors;
-      five_bit_bitshift(r16, g16, b16, brightness, &out_colors, &power_5bit);
-      float power = compute_power(out_colors, power_5bit);
-      CHECK_NEAR(i / 255.0f, power, 0.016f);
-    }
-
-    for (int i = 0; i < 256; i++) {
-      uint16_t component = mymap(i, 0, 255, 0, 0xffff);
-      uint8_t brightness = 255;
-      uint16_t r16 = component;
-      uint16_t g16 = component;
-      uint16_t b16 = component;
-      uint8_t power_5bit;
-      CRGB out_colors;
-      five_bit_bitshift(r16, g16, b16, brightness, &out_colors, &power_5bit);
-      float power = compute_power(out_colors, power_5bit);
-      CHECK_NEAR(i / 255.0f, power, 0.04f);
-    }
-
-
-    for (int i = 0; i < 256; i++) {
-      uint16_t component = mymap(i, 0, 255, 0, 0xffff);
-      uint8_t brightness = i;
-      uint16_t r16 = component;
-      uint16_t g16 = component;
-      uint16_t b16 = component;
-      uint8_t power_5bit;
-      CRGB out_colors;
-      five_bit_bitshift(r16, g16, b16, brightness, &out_colors, &power_5bit);
-      float power = compute_power(out_colors, power_5bit);
-      float p = i / 255.0f;
-      CHECK_NEAR(p, power, 0.04f);
-    }
-
-  }
-
-  #endif
-
-  #if 0
-
-
-  SUBCASE("Half Brightness") {
-    const uint8_t brightness = 127;
-    CRGB colors(255, 255, 255);
-    CRGB colors_scale(255, 255, 255);
-    CRGB out_colors;
-    uint8_t power_5bit;
-    five_bit_hd_gamma_bitshift(colors, colors_scale, brightness, &out_colors, &power_5bit);
-    CHECK_EQ(out_colors.r, 127);
-    CHECK_EQ(out_colors.g, 127);
-    CHECK_EQ(out_colors.b, 127);
-    CHECK_EQ(power_5bit, 31);
-
-    int out_rgbpow;
-    int out_rgbpow_bri;
-    power_test(out_colors, power_5bit, &out_rgbpow, &out_rgbpow_bri);
-    CHECK_EQ(out_rgbpow, 127);
-    CHECK_EQ(out_rgbpow_bri, 127);
-  }
-
-
-  SUBCASE("Half Brightness") {
-    const uint8_t brightness = 85;
-    CRGB colors(255, 255, 255);
-    CRGB colors_scale(255, 255, 255);
-    CRGB out_colors;
-    uint8_t power_5bit;
-    five_bit_hd_gamma_bitshift(colors, colors_scale, brightness, &out_colors, &power_5bit);
-    CHECK_EQ(out_colors.r, 170);
-    CHECK_EQ(out_colors.g, 170);
-    CHECK_EQ(out_colors.b, 170);
-    CHECK_EQ(power_5bit, 31 >> 1);
-
-    int out_rgbpow;
-    int out_rgbpow_bri;
-    power_test(out_colors, power_5bit, &out_rgbpow, &out_rgbpow_bri);
-    CHECK_EQ(out_rgbpow, 85);
-    CHECK_EQ(out_rgbpow_bri, 85);
-  }
-
-  #endif
 
 
 }
