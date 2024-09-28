@@ -55,17 +55,10 @@ static esp_err_t led_strip_rmt_set_pixel(led_strip_t *strip, uint32_t index, uin
     led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
     ESP_RETURN_ON_FALSE(index < rmt_strip->strip_len, ESP_ERR_INVALID_ARG, TAG, "index out of maximum number of LEDs");
     uint32_t start = index * rmt_strip->bytes_per_pixel;
-    #if 0
     // In thr order of GRB, as LED strip like WS2812 sends out pixels in this order
     rmt_strip->pixel_buf[start + 0] = green & 0xFF;
     rmt_strip->pixel_buf[start + 1] = red & 0xFF;
     rmt_strip->pixel_buf[start + 2] = blue & 0xFF;
-    #else
-    // FastLED controls the order of the LEDs, so we need to set the colors in the order of RGB
-    rmt_strip->pixel_buf[start + 0] = red & 0xFF;
-    rmt_strip->pixel_buf[start + 1] = green & 0xFF;
-    rmt_strip->pixel_buf[start + 2] = blue & 0xFF;
-    #endif
     if (rmt_strip->bytes_per_pixel > 3) {
         rmt_strip->pixel_buf[start + 3] = 0;
     }
@@ -79,18 +72,11 @@ static esp_err_t led_strip_rmt_set_pixel_rgbw(led_strip_t *strip, uint32_t index
     ESP_RETURN_ON_FALSE(rmt_strip->bytes_per_pixel == 4, ESP_ERR_INVALID_ARG, TAG, "wrong LED pixel format, expected 4 bytes per pixel");
     uint8_t *buf_start = rmt_strip->pixel_buf + index * 4;
     // SK6812 component order is GRBW
-    #if 0
+
     *buf_start = green & 0xFF;
     *++buf_start = red & 0xFF;
     *++buf_start = blue & 0xFF;
     *++buf_start = white & 0xFF;
-    #else
-    // FastLED controls the order of the LEDs, so we need to set the colors in the order of RGBW
-    *buf_start = red & 0xFF;
-    *++buf_start = green & 0xFF;
-    *++buf_start = blue & 0xFF;
-    *++buf_start = white & 0xFF;
-    #endif
     return ESP_OK;
 }
 
