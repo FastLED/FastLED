@@ -37,9 +37,9 @@ led_strip_handle_t configure_led(config_led_t config) {
     led_strip_rmt_config_t rmt_config = {};
     memset(&rmt_config, 0, sizeof(led_strip_rmt_config_t));
     rmt_config.clk_src = RMT_CLK_SRC_DEFAULT;
-    rmt_config.resolution_hz = 10000000;
-    rmt_config.mem_block_symbols = 64;
-    rmt_config.flags.with_dma = false;
+    rmt_config.resolution_hz = 10000000;  // This is hard coded in other places so leave it.
+    rmt_config.mem_block_symbols = config.mem_block_symbols;
+    rmt_config.flags.with_dma = config.with_dma;
 
     ESP_LOGI(TAG, "rmt_config.clk_src: %d", rmt_config.clk_src);
     ESP_LOGI(TAG, "rmt_config.resolution_hz: %d", rmt_config.resolution_hz);
