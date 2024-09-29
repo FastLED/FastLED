@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -24,7 +25,6 @@ def cpp_filt(cpp_filt_path: Path, input_text: str) -> str:
     if not cpp_filt_path.exists():
         raise FileNotFoundError(f"cppfilt not found at '{cpp_filt_path}'")
     command = [str(cpp_filt_path), "-t", "-n"]
-    print(f"Running c++filt on input text with {cpp_filt_path}")
     process = subprocess.Popen(
         command,
         stdin=subprocess.PIPE,
@@ -36,6 +36,42 @@ def cpp_filt(cpp_filt_path: Path, input_text: str) -> str:
     if process.returncode != 0:
         raise RuntimeError(f"Error running c++filt: {stderr}")
     return stdout
+
+
+def demangle_gnu_linkonce_symbols(cpp_filt_path: Path, map_text: str) -> str:
+    """
+    Demangle .gnu.linkonce.t symbols in the map file.
+
+    Args:
+        cpp_filt_path (Path): Path to c++filt executable.
+        map_text (str): Content of the map file.
+
+    Returns:
+        str: Map file content with demangled symbols.
+    """
+    # Extract all .gnu.linkonce.t symbols
+    pattern = r"\.gnu\.linkonce\.t\.(.+?)\s"
+    matches = re.findall(pattern, map_text)
+
+    if not matches:
+        return map_text
+
+    # Create a block of text with the extracted symbols
+    symbols_block = "\n".join(matches)
+
+    # Demangle the symbols
+    demangled_block = cpp_filt(cpp_filt_path, symbols_block)
+
+    # Create a dictionary of mangled to demangled symbols
+    demangled_dict = dict(zip(matches, demangled_block.strip().split("\n")))
+
+    # Replace the mangled symbols with demangled ones in the original text
+    for mangled, demangled in demangled_dict.items():
+        map_text = map_text.replace(
+            f".gnu.linkonce.t.{mangled}", f".gnu.linkonce.t.{demangled}"
+        )
+
+    return map_text
 
 
 def parse_args() -> argparse.Namespace:
@@ -146,13 +182,13 @@ def main() -> int:
 
     map_dump(map_file)
 
-    # Demangle and print map file using c++filt
+    # Demangle .gnu.linkonce.t symbols and print map file
     print("\n##################################################")
     print("# Map file dump:")
     print("##################################################\n")
     map_text = map_file.read_text()
-    dmangled_text = cpp_filt(cpp_filt_path, map_text)
-    print(dmangled_text)
+    demangled_map_text = demangle_gnu_linkonce_symbols(cpp_filt_path, map_text)
+    print(demangled_map_text)
 
     return 0
 
