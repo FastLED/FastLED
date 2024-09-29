@@ -65,9 +65,12 @@ rmt_bytes_encoder_config_t make_encoder(
     return out;
 }
 
-config_led_t make_led_config(int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf) {
+config_led_t make_led_config(
+        uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
+        int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf) {
     rmt_symbol_word_t reset;
-    rmt_bytes_encoder_config_t bytes_encoder_config = make_encoder(T0H, T0L, T1H, T1L, TRESET, &reset);
+    rmt_bytes_encoder_config_t bytes_encoder_config = make_encoder(
+        T0H, T0L, T1H, T1L, TRESET, &reset);
     config_led_t config = {
         .pin = pin,
         .max_leds = max_leds,
@@ -82,8 +85,11 @@ config_led_t make_led_config(int pin, uint32_t max_leds, bool is_rgbw, uint8_t* 
 } // namespace
 
 
-led_strip_handle_t construct_led_strip(int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf) {
-    config_led_t config = make_led_config(pin, max_leds, is_rgbw, pixel_buf);
+led_strip_handle_t construct_led_strip(
+        int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf) {
+    config_led_t config = make_led_config(
+        T0H, T0L, T1H, T1L, TRESET,
+        pin, max_leds, is_rgbw, pixel_buf);
     led_strip_handle_t out = construct_new_led_strip(config);
     return out;
 }
