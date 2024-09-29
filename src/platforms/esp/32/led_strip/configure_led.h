@@ -3,22 +3,9 @@
 #include <stdint.h>
 #include "led_strip.h"
 #include "namespace.h"
+#include "defs.h"
 
 LED_STRIP_NAMESPACE_BEGIN
-
-#ifndef FASTLED_RMT_WITH_DMA
-#define FASTLED_RMT_WITH_DMA 1
-#else
-#define FASTLED_RMT_WITH_DMA 0
-#endif
-
-#ifndef FASTLED_RMT_MEMBLOCK_SYMBOLS
-#if FASTLED_RMT_WITH_DMA
-#define FASTLED_RMT_MEMBLOCK_SYMBOLS 1024
-#else
-#define FASTLED_RMT_MEMBLOCK_SYMBOLS 0  // Let the library decide
-#endif  // FASTLED_RMT_WITH_DMA
-#endif  // FASTLED_RMT_MEMBLOCK_SYMBOLS
 
 struct config_led_t {
     int pin;

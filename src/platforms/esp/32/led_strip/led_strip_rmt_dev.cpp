@@ -23,17 +23,9 @@
 #include "led_strip.h"
 #include "led_strip_interface.h"
 #include "led_strip_rmt_encoder.h"
+#include "defs.h"
 
-#define INTERRUPT_PRIORITY 3  // maximum priority level for RMT interrupt
 
-#define LED_STRIP_RMT_DEFAULT_RESOLUTION 10000000 // 10MHz resolution
-#define LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE 4
-// the memory size of each RMT channel, in words (4 bytes)
-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
-#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS 64
-#else
-#define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS 48
-#endif
 
 #include "cleanup.h"
 
