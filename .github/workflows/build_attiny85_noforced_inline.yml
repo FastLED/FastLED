@@ -10,4 +10,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: attiny85 --defines FASTLED_NO_FORCE_INLINE
+      args: attiny85 --defines FASTLED_NO_FORCE_INLINE --examples Blink
