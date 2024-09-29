@@ -40,12 +40,13 @@ def parse_args():
         default="Blink",
         help="Example to compile (default: Blink)",
     )
-    parser.add_argument(
-        "extra_args",
-        nargs=argparse.REMAINDER,
-        help="Additional arguments to pass to the compilation command",
-    )
-    args = parser.parse_args()
+
+    # Parse known args first
+    args, unknown = parser.parse_known_args()
+
+    # Add remaining arguments as extra_args
+    args.extra_args = unknown
+
     return args
 
 
@@ -80,7 +81,7 @@ def main():
 
     size = int(size_match.group(1))
 
-    if args.max_size is not None:
+    if args.max_size is not None and args.max_size > 0:
         max_size = args.max_size
         if size > max_size:
             print(f"{args.board} size {size} is greater than max size {max_size}")
@@ -89,6 +90,10 @@ def main():
         else:
             print(f"{args.board} size {size} is within the limit of {max_size}")
     else:
+        if not args.max_size:
+            print("Warning: No max size specified")
+        elif args.max_size <= 0:
+            print("Warning: max size was <= 0 so no check was performed")
         print(f"{args.board} size: {size}")
 
 
