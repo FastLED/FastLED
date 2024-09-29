@@ -12,6 +12,10 @@ on:
       max_size_apa102:
         type: number
         required: true
+      extra_args:
+        type: string
+        required: false
+        default: ''
 
 
 jobs:
@@ -30,7 +34,7 @@ jobs:
         run: pip install uv
 
       - name: Check Compiled Program Size for ${{ inputs.board }}
-        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }} --example Blink
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size }} --example Blink ${{ inputs.extra_args }}
 
       - name: Inspect Binary
         if: always()
@@ -45,7 +49,7 @@ jobs:
           uv run ci/inspect_elf.py --first
 
       - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102)
-        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size_apa102 }} --example Apa102
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --max-size ${{ inputs.max_size_apa102 }} --example Apa102 ${{ inputs.extra_args }}
 
       - name: Inspect Binary
         if: always()
