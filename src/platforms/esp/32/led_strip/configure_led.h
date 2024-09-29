@@ -5,9 +5,9 @@
 
 LED_STRIP_NAMESPACE_BEGIN
 
-#ifndef FASTLED_RMT_MEMBLOCK_SYMBOLS
-#define FASTLED_RMT_MEMBLOCK_SYMBOLS 64
-#endif
+// #ifndef FASTLED_RMT_MEMBLOCK_SYMBOLS
+// #define FASTLED_RMT_MEMBLOCK_SYMBOLS 64
+// #endif
 
 #ifndef FASTLED_RMT_WITH_DMA
 #define FASTLED_RMT_WITH_DMA 0
@@ -19,7 +19,7 @@ struct config_led_t {
     uint32_t max_leds;
     led_model_t chipset;
     led_pixel_format_t rgbw;
-    size_t mem_block_symbols = FASTLED_RMT_MEMBLOCK_SYMBOLS;
+    size_t mem_block_symbols = 0;  // Let the library decide
     bool with_dma = FASTLED_RMT_WITH_DMA;
 };
 

@@ -48,4 +48,5 @@ typedef struct {
 esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip);
 
 
+
 LED_STRIP_NAMESPACE_END

@@ -15,9 +15,20 @@
 #include "esp_err.h"
 #include "led_strip_rmt.h"
 #include "esp_idf_version.h"
+#include "led_strip_interface.h"
 
 #include "namespace.h"
 LED_STRIP_NAMESPACE_BEGIN
+
+
+typedef struct {
+    led_strip_t base;
+    rmt_channel_handle_t rmt_chan;
+    rmt_encoder_handle_t strip_encoder;
+    uint32_t strip_len;
+    uint8_t bytes_per_pixel;
+    uint8_t* pixel_buf;
+} led_strip_rmt_obj;
 
 /**
  * @brief Set RGB for a specific pixel
