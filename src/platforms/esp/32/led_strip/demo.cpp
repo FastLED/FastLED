@@ -10,7 +10,7 @@
 #include "led_strip.h"
 #include "demo.h"
 #include "esp_log.h"
-#include "construct_new_led_strip.h"
+#include "configure_led.h"
 
 #include "namespace.h"
 LED_STRIP_NAMESPACE_BEGIN

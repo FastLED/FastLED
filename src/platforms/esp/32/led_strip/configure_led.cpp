@@ -5,9 +5,7 @@
 
 #if FASTLED_RMT51
 
-
-
-#include "construct_new_led_strip.h"
+#include "configure_led.h"
 #include "esp_log.h"
 #include <cstring>
 
