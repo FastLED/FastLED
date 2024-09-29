@@ -74,15 +74,22 @@ public:
 
     void acquire_rmt() {
         assert(!mLedStrip);
+        assert(!mAquired);
         config_led_t config = make_config();
         mLedStrip = construct_new_led_strip(config);
+        mAquired = true;
     }
 
     void release_rmt() {
+        if (!mAquired) {
+            return;
+        }
+        led_strip_wait_refresh_done(mLedStrip, -1);
         if (mLedStrip) {
             led_strip_del(mLedStrip, false);
             mLedStrip = nullptr;
         }
+        mAquired = false;
     }
 
     virtual ~RmtLedStrip() override {
@@ -107,10 +114,17 @@ public:
         ESP_ERROR_CHECK(led_strip_refresh(mLedStrip));
     }
 
+    void draw_async() {
+        ESP_ERROR_CHECK(led_strip_refresh_async(mLedStrip));
+    }
+
     virtual void draw() override {
-        acquire_rmt();
-        draw_and_wait_for_completion();
         release_rmt();
+        if (!mAquired) {
+            acquire_rmt();
+        }
+        draw_async();
+
     }
 
     virtual uint32_t num_pixels() const {
@@ -123,6 +137,7 @@ private:
     bool mIsRgbw = false;
     uint32_t mMaxLeds = 0;
     uint8_t* mBuffer = nullptr;
+    bool mAquired = false;
 };
 
 IRmtLedStrip* create_rmt_led_strip(int pin, uint32_t max_leds, bool is_rgbw) {

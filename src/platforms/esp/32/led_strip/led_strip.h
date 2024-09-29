@@ -127,7 +127,7 @@ esp_err_t led_strip_refresh_async(led_strip_handle_t strip);
  *      This function blocks until the asynchronous refresh operation completes or the timeout is reached.
  *      It should be called after led_strip_refresh_async to ensure the refresh process has finished.
  */
-esp_err_t led_strip_wait_refresh_done(led_strip_handle_t strip, uint32_t timeout_ms);
+esp_err_t led_strip_wait_refresh_done(led_strip_handle_t strip, int32_t timeout_ms);
 
 /**
  * @brief Clear LED strip (turn off all LEDs)
