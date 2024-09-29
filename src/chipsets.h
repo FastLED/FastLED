@@ -7,6 +7,24 @@
 #include "force_inline.h"
 #include "pixel_iterator.h"
 
+
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+ #if defined(FASTLED_TEENSY4)
+   #define FASTLED_CLOCKLESS_USES_NANOSECONDS 1
+ #elif defined(ESP32)
+   #include "esp_idf_version.h"
+   #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+   // RMT 5.1 driver converts from nanoseconds to RMT ticks.
+   #define FASTLED_CLOCKLESS_USES_NANOSECONDS 1
+   #else
+   #define FASTLED_CLOCKLESS_USES_NANOSECONDS 0
+   #endif
+ #else
+   #define FASTLED_CLOCKLESS_USES_NANOSECONDS 0
+ #endif  // FASTLED_TEENSY4
+#endif  // FASTLED_CLOCKLESS_USES_NANOSECONDS
+
+
 // When true, applies APA102 HD GLOBAL BRIGHTNESS scaling to RGB data.
 #ifndef FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS
 #define FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS 0
@@ -787,7 +805,7 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMU
 
 /// Calculates the number of cycles for the clockless chipset (which may differ from CPU cycles)
 /// @see ::NS()
-#ifdef FASTLED_TEENSY4
+#if FASTLED_CLOCKLESS_USES_NANOSECONDS
 // just use raw nanosecond values for the teensy4
 #define C_NS(_NS) _NS
 #else
