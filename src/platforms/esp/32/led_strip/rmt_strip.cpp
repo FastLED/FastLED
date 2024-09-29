@@ -29,7 +29,12 @@ LED_STRIP_NAMESPACE_BEGIN
         }                              \
     }
 
-
+// WS2812 timings.
+const uint16_t T0H = 300; // 0.3us
+const uint16_t T0L = 900; // 0.9us
+const uint16_t T1H = 600; // 0.6us
+const uint16_t T1L = 600; // 0.6us
+const uint32_t TRESET = 280000; // 280us (WS2812-V5)
 
 class RmtLedStrip : public IRmtLedStrip {
 public:
@@ -45,7 +50,9 @@ public:
     void acquire_rmt() {
         assert(!mLedStrip);
         assert(!mAquired);
-        mLedStrip = construct_led_strip(mPin, mMaxLeds, mIsRgbw, mBuffer);
+        mLedStrip = construct_led_strip(
+            T0H, T0L, T1H, T1L, TRESET,
+            mPin, mMaxLeds, mIsRgbw, mBuffer);
         mAquired = true;
     }
 

@@ -16,12 +16,6 @@ LED_STRIP_NAMESPACE_BEGIN
 
 namespace {
 
-const uint16_t T0H = 300; // 0.3us
-const uint16_t T0L = 900; // 0.9us
-const uint16_t T1H = 600; // 0.6us
-const uint16_t T1L = 600; // 0.6us
-const uint32_t TRESET = 280000; // 280us
-
 rmt_bytes_encoder_config_t make_encoder(
         uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
         rmt_symbol_word_t* reset) {
@@ -86,6 +80,7 @@ config_led_t make_led_config(
 
 
 led_strip_handle_t construct_led_strip(
+        uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
         int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf) {
     config_led_t config = make_led_config(
         T0H, T0L, T1H, T1L, TRESET,
