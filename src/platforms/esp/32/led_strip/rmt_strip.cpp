@@ -67,21 +67,29 @@ static rmt_bytes_encoder_config_t make_encoder(rmt_symbol_word_t* reset) {
     return out;
 }
 
+static config_led_t make_led_config(int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf) {
+    rmt_symbol_word_t reset;
+    rmt_bytes_encoder_config_t bytes_encoder_config = make_encoder(&reset);
+    config_led_t config = {
+        .pin = pin,
+        .max_leds = max_leds,
+        .rgbw = is_rgbw,
+        .rmt_bytes_encoder_config = make_encoder(&reset),
+        .reset_code = reset,
+        .pixel_buf = pixel_buf
+    };
+    return config;
+}
+
+
+static led_strip_handle_t construct_led_strip(int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf) {
+    config_led_t config = make_led_config(pin, max_leds, is_rgbw, pixel_buf);
+    led_strip_handle_t out = construct_new_led_strip(config);
+    return out;
+}
+
 class RmtLedStrip : public IRmtLedStrip {
 public:
-    config_led_t make_config() const {
-        rmt_symbol_word_t reset;
-        rmt_bytes_encoder_config_t bytes_encoder_config = make_encoder(&reset);
-        config_led_t config = {
-            .pin = mPin,
-            .max_leds = mMaxLeds,
-            .rgbw = mIsRgbw,
-            .rmt_bytes_encoder_config = make_encoder(&reset),
-            .reset_code = reset,
-            .pixel_buf = mBuffer
-        };
-        return config;
-    }
 
     RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw)
         : mIsRgbw(is_rgbw),
@@ -94,8 +102,7 @@ public:
     void acquire_rmt() {
         assert(!mLedStrip);
         assert(!mAquired);
-        config_led_t config = make_config();
-        mLedStrip = construct_new_led_strip(config);
+        mLedStrip = construct_led_strip(mPin, mMaxLeds, mIsRgbw, mBuffer);
         mAquired = true;
     }
 
