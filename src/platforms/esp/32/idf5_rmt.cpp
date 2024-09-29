@@ -8,7 +8,6 @@
 #include "idf5_rmt.h"
 #include "led_strip/led_strip.h"
 #include "esp_log.h"
-#include "led_strip/demo.h"
 #include "led_strip/configure_led.h"
 #include "led_strip/rmt_strip.h"
 

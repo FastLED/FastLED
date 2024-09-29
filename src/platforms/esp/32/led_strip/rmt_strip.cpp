@@ -5,10 +5,8 @@
 #if FASTLED_RMT51
 
 #include "rmt_strip.h"
-#include "demo.h"
 #include "led_strip.h"
 #include "esp_log.h"
-#include "demo.h"
 #include "configure_led.h"
 #include "led_strip_types.h"
 

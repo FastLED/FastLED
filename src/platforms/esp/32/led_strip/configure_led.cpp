@@ -15,12 +15,6 @@ LED_STRIP_NAMESPACE_BEGIN
 
 led_strip_handle_t construct_new_led_strip(config_led_t config) {
     // LED strip general initialization, according to your led board design
-    // led_strip_config_t strip_config = {};
-    // strip_config.strip_gpio_num = config.pin;
-    // strip_config.max_leds = config.max_leds;
-    // strip_config.led_pixel_format = config.rgbw;
-    // strip_config.led_model = config.chipset;
-    // strip_config.flags.invert_out = 0;
     led_strip_config_t strip_config = {
         .strip_gpio_num = config.pin,
         .max_leds = config.max_leds,
@@ -31,12 +25,6 @@ led_strip_handle_t construct_new_led_strip(config_led_t config) {
         },
     };
 
-    // led_strip_rmt_config_t rmt_config = {};
-    // memset(&rmt_config, 0, sizeof(led_strip_rmt_config_t));
-    // rmt_config.clk_src = RMT_CLK_SRC_DEFAULT;
-    // rmt_config.resolution_hz = 10000000;  // This is hard coded in other places so leave it.
-    // rmt_config.mem_block_symbols = config.mem_block_symbols;
-    // rmt_config.flags.with_dma = config.with_dma;
     led_strip_rmt_config_t rmt_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT,
         .resolution_hz = 10000000,
