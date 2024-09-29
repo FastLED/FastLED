@@ -8,9 +8,6 @@
 #include "pixel_iterator.h"
 #include "idf5_rmt.h"
 
-// #include "idf4_clockless_rmt_esp32.h"
-
-
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
@@ -32,20 +29,21 @@ public:
 
 protected:
 
+    // Wait until the last draw is complete, if necessary.
     virtual void* beginShowLeds() override {
         void* data = CPixelLEDController<RGB_ORDER>::beginShowLeds();
         mRMTController.waitForDrawComplete();
         return data;
     }
 
-    // -- Show pixels
-    //    This is the main entry point for the controller.
+    // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
         PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         mRMTController.loadPixelData(iterator);
     }
 
+    // Send the data to the strip
     virtual void endShowLeds(void* data) override {
         CPixelLEDController<RGB_ORDER>::endShowLeds(data);
         mRMTController.showPixels();
