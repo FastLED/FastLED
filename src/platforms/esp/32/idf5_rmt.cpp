@@ -43,7 +43,7 @@ void RmtController5::showPixels(PixelIterator &pixels) {
         uint8_t r, g, b, w;
         for (uint16_t i = 0; pixels.has(1); i++) {
             pixels.loadAndScaleRGBW(&r, &g, &b, &w);
-            mLedStrip->set_pixel_rgbw(i, r, g, b, w);
+            mLedStrip->set_pixel_rgbw(i, r, g, b, w); // Tested to be faster than memcpy of direct bytes.
             pixels.advanceData();
             pixels.stepDithering();
         }
@@ -51,7 +51,7 @@ void RmtController5::showPixels(PixelIterator &pixels) {
         uint8_t r, g, b;
         for (uint16_t i = 0; pixels.has(1); i++) {
             pixels.loadAndScaleRGB(&r, &g, &b);
-            mLedStrip->set_pixel(i, r, g, b);
+            mLedStrip->set_pixel(i, r, g, b); // Tested to be faster than memcpy of direct bytes.
             pixels.advanceData();
             pixels.stepDithering();
         }
