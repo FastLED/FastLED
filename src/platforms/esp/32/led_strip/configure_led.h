@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include "led_strip.h"
 #include "namespace.h"
 
@@ -21,6 +22,7 @@ struct config_led_t {
     led_pixel_format_t rgbw;
     size_t mem_block_symbols = 0;  // Let the library decide
     bool with_dma = FASTLED_RMT_WITH_DMA;
+    uint8_t* pixel_buf = nullptr;
 };
 
 

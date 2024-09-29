@@ -47,8 +47,13 @@ led_strip_handle_t construct_new_led_strip(config_led_t config) {
 
     // LED Strip object handle
     led_strip_handle_t led_strip;
-    ESP_ERROR_CHECK(
-        led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
+    if (config.pixel_buf) {
+        ESP_ERROR_CHECK(led_strip_new_rmt_device_with_buffer(
+            &strip_config, &rmt_config, config.pixel_buf, &led_strip));
+    } else {
+        ESP_ERROR_CHECK(
+            led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
+    }
     ESP_LOGI(TAG, "Created LED strip object with RMT backend");
     return led_strip;
 }

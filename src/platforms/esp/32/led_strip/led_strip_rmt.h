@@ -54,8 +54,8 @@ esp_err_t led_strip_new_rmt_device(
 esp_err_t led_strip_new_rmt_device_with_buffer(
         const led_strip_config_t *led_config,
         const led_strip_rmt_config_t *rmt_config,
-        led_strip_handle_t *ret_strip,
-        uint8_t *pixel_buf);
+        uint8_t *pixel_buf,
+        led_strip_handle_t *ret_strip);
 
 // release_pixel_buffer is true then the pixel buffer will also be freed.
 esp_err_t led_strip_release_rmt_device(led_strip_handle_t strip, bool release_pixel_buffer);
