@@ -1,3 +1,4 @@
+
 #include "led_strip/enabled.h"
 
 #if FASTLED_RMT51
@@ -15,18 +16,18 @@ USING_NAMESPACE_LED_STRIP
 
 #define TAG "idf5_rmt.cpp"
 
-// WS2812 timings.
-const uint16_t T0H = 300; // 0.3us
-const uint16_t T0L = 900; // 0.9us
-const uint16_t T1H = 600; // 0.6us
-const uint16_t T1L = 600; // 0.6us
-const uint32_t TRESET = 280000; // 280us (WS2812-V5)
+// TODO get rid of this
+static const uint32_t TRESET = 280000; // 280us (WS2812-V5)
 
+void convert(int T1, int T2, int T3, uint16_t* T0H, uint16_t* T0L, uint16_t* T1H, uint16_t* T1L) {
+    *T0H = T1;
+    *T0L = T2 + T3;
+    *T1H = T1 + T2;
+    *T1L = T3;
+}
 
-RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3) {
-    // Stub implementation
-    ESP_LOGI(TAG, "RmtController5 constructor called");
-    mPin = DATA_PIN;
+RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3)
+        : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3) {
 }
 
 RmtController5::~RmtController5() {
@@ -41,7 +42,9 @@ void RmtController5::showPixels(PixelIterator &pixels) {
     ESP_LOGI(TAG, "showPixels called");
     const bool is_rgbw = pixels.get_rgbw().active();
     if (!mLedStrip) {
-        mLedStrip = create_rmt_led_strip(T0H, T0L, T1H, T1L, TRESET, mPin, pixels.size(), is_rgbw);
+        uint16_t t0h, t0l, t1h, t1l;
+        convert(mT1, mT2, mT3, &t0h, &t0l, &t1h, &t1l);
+        mLedStrip = create_rmt_led_strip(t0h, t0l, t1h, t1l, TRESET, mPin, pixels.size(), is_rgbw);
     } else {
         assert(mLedStrip->num_pixels() == pixels.size());
     }

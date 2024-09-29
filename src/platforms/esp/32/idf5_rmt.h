@@ -31,6 +31,7 @@ public:
 
 private:
     int mPin;
+    int mT1, mT2, mT3;
     fastled_rmt51_strip::IRmtLedStrip *mLedStrip = nullptr;
 };
 
