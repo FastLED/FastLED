@@ -18,27 +18,27 @@ namespace {
 
 rmt_bytes_encoder_config_t make_encoder(rmt_symbol_word_t* reset) {
     static_assert(LED_STRIP_RMT_DEFAULT_RESOLUTION == 10000000, "Assumes 10MHz");
-    static const double ratio = 10.0f; // assumes 10mhz
+    static const double ratio = .01; // assumes 10mhz
     rmt_symbol_word_t bit0 = {
-        .duration0 = static_cast<uint16_t>(0.3 * ratio), // T0H=0.3us
+        .duration0 = static_cast<uint16_t>(300 * ratio), // T0H=0.3us
         .level0 = 1,
-        .duration1 = static_cast<uint16_t>(0.9 * ratio), // T0L=0.9us
+        .duration1 = static_cast<uint16_t>(900 * ratio), // T0L=0.9us
         .level1 = 0,
     };
 
     rmt_symbol_word_t bit1 = {
-        .duration0 = static_cast<uint16_t>(0.6 * ratio), // T1H=0.6us
+        .duration0 = static_cast<uint16_t>(600 * ratio), // T1H=0.6us
         .level0 = 1,
-        .duration1 = static_cast<uint16_t>(0.6 * ratio), // T1L=0.6us
+        .duration1 = static_cast<uint16_t>(600 * ratio), // T1L=0.6us
         .level1 = 0,
     };
 
     // reset code duration defaults to 280us to accomodate WS2812B-V5
-    uint16_t reset_ticks = static_cast<uint16_t>(ratio * 280 / 2);
+    uint16_t reset_ticks = static_cast<uint16_t>(.5 * ratio * 28000);
     *reset = {
-        .duration0 = reset_ticks, // TRES=50us
+        .duration0 = reset_ticks,
         .level0 = 0,
-        .duration1 = reset_ticks, // TRES=50us
+        .duration1 = reset_ticks,
         .level1 = 0,
     };
 
