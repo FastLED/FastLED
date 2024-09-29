@@ -4,6 +4,7 @@
 
 #warning "Work in progress: ESP32 ClocklessController for IDF 5.1 - this is still a prototype"
 
+#include <assert.h>
 #include "idf5_rmt.h"
 #include "led_strip/led_strip.h"
 #include "esp_log.h"
@@ -24,21 +25,24 @@ RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3) {
 RmtController5::~RmtController5() {
     // Stub implementation
     ESP_LOGI(TAG, "RmtController5 destructor called");
+    if (mLedStrip) {
+        delete mLedStrip;
+    }
 }
 
 void RmtController5::showPixels(PixelIterator &pixels) {
     ESP_LOGI(TAG, "showPixels called");
-    uint32_t max_leds = pixels.size();
-    Rgbw rgbw = pixels.get_rgbw();
-    const bool is_rgbw = rgbw.active();
-    LedStripMode mode = rgbw.active() ? kWS2812_RGBW : kWS2812;
-    // RmtLedStrip led_strip(mPin, max_leds, mode);
-    IRmtLedStrip* led_strip = create_rmt_led_strip(mPin, max_leds, is_rgbw);
+    const bool is_rgbw = pixels.get_rgbw().active();
+    if (!mLedStrip) {
+        mLedStrip = create_rmt_led_strip(mPin, pixels.size(), is_rgbw);
+    } else {
+        assert(mLedStrip->num_pixels() == pixels.size());
+    }
     if (is_rgbw) {
         uint8_t r, g, b, w;
         for (uint16_t i = 0; pixels.has(1); i++) {
             pixels.loadAndScaleRGBW(&r, &g, &b, &w);
-            led_strip->set_pixel_rgbw(i, r, g, b, w);
+            mLedStrip->set_pixel_rgbw(i, r, g, b, w);
             pixels.advanceData();
             pixels.stepDithering();
         }
@@ -46,13 +50,12 @@ void RmtController5::showPixels(PixelIterator &pixels) {
         uint8_t r, g, b;
         for (uint16_t i = 0; pixels.has(1); i++) {
             pixels.loadAndScaleRGB(&r, &g, &b);
-            led_strip->set_pixel(i, r, g, b);
+            mLedStrip->set_pixel(i, r, g, b);
             pixels.advanceData();
             pixels.stepDithering();
         }
     }
-    led_strip->draw();
-    delete led_strip;
+    mLedStrip->draw();
 }
 
 #endif  // FASTLED_RMT51

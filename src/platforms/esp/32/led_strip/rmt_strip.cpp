@@ -86,6 +86,10 @@ public:
         ESP_ERROR_CHECK(led_strip_refresh(mLedStrip));
     }
 
+    virtual uint32_t num_pixels() const {
+        return mMaxLeds;
+    }
+
 private:
     led_strip_handle_t mLedStrip;
     bool is_rgbw;
