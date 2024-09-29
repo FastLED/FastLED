@@ -16,4 +16,11 @@ jobs:
       board: uno
       max_size: 11000
       max_size_apa102: 12050
+  build_no_forced_inline:
+    uses: ./.github/workflows/build_template_binary_size.yml
+    with:
+      board: uno
+      max_size: 11000
+      max_size_apa102: 12050
+      extra_args: --defines FASTLED_NO_FORCE_INLINE
 
