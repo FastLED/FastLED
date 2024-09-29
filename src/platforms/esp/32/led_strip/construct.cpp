@@ -16,25 +16,31 @@ LED_STRIP_NAMESPACE_BEGIN
 
 namespace {
 
+const uint16_t T0H = 300; // 0.3us
+const uint16_t T0L = 900; // 0.9us
+const uint16_t T1H = 600; // 0.6us
+const uint16_t T1L = 600; // 0.6us
+const uint32_t TRESET = 28000; // 280us
+
 rmt_bytes_encoder_config_t make_encoder(rmt_symbol_word_t* reset) {
     static_assert(LED_STRIP_RMT_DEFAULT_RESOLUTION == 10000000, "Assumes 10MHz");
     static const double ratio = .01; // assumes 10mhz
     rmt_symbol_word_t bit0 = {
-        .duration0 = static_cast<uint16_t>(300 * ratio), // T0H=0.3us
+        .duration0 = static_cast<uint16_t>(T0H * ratio), // T0H=0.3us
         .level0 = 1,
-        .duration1 = static_cast<uint16_t>(900 * ratio), // T0L=0.9us
+        .duration1 = static_cast<uint16_t>(T0L * ratio), // T0L=0.9us
         .level1 = 0,
     };
 
     rmt_symbol_word_t bit1 = {
-        .duration0 = static_cast<uint16_t>(600 * ratio), // T1H=0.6us
+        .duration0 = static_cast<uint16_t>(T1H * ratio), // T1H=0.6us
         .level0 = 1,
-        .duration1 = static_cast<uint16_t>(600 * ratio), // T1L=0.6us
+        .duration1 = static_cast<uint16_t>(T1L * ratio), // T1L=0.6us
         .level1 = 0,
     };
 
     // reset code duration defaults to 280us to accomodate WS2812B-V5
-    uint16_t reset_ticks = static_cast<uint16_t>(.5 * ratio * 28000);
+    uint16_t reset_ticks = static_cast<uint16_t>(.5 * ratio * TRESET);
     *reset = {
         .duration0 = reset_ticks,
         .level0 = 0,
