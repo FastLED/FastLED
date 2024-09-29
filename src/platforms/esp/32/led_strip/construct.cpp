@@ -22,7 +22,9 @@ const uint16_t T1H = 600; // 0.6us
 const uint16_t T1L = 600; // 0.6us
 const uint32_t TRESET = 280000; // 280us
 
-rmt_bytes_encoder_config_t make_encoder(rmt_symbol_word_t* reset) {
+rmt_bytes_encoder_config_t make_encoder(
+        uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
+        rmt_symbol_word_t* reset) {
     static_assert(LED_STRIP_RMT_DEFAULT_RESOLUTION == 10000000, "Assumes 10MHz");
     static const double ratio = .01; // assumes 10mhz
     uint16_t t0h = static_cast<uint16_t>(T0H * ratio);
@@ -65,7 +67,7 @@ rmt_bytes_encoder_config_t make_encoder(rmt_symbol_word_t* reset) {
 
 config_led_t make_led_config(int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf) {
     rmt_symbol_word_t reset;
-    rmt_bytes_encoder_config_t bytes_encoder_config = make_encoder(&reset);
+    rmt_bytes_encoder_config_t bytes_encoder_config = make_encoder(T0H, T0L, T1H, T1L, TRESET, &reset);
     config_led_t config = {
         .pin = pin,
         .max_leds = max_leds,
