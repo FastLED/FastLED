@@ -1,9 +1,10 @@
 
 
 #include <FastLED.h>
+#include <iostream>
 
 // How many leds in your strip?
-#define NUM_LEDS 10
+#define NUM_LEDS 100
 
 // For led chips like WS2812, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
@@ -23,6 +24,7 @@ CRGB leds[NUM_LEDS];
 #define BRIGHNESS 128
 
 // #define COLOR_ORDER_TEST
+#define TIMING_TEST
 
 void setup() {
     Serial.begin(115200);
@@ -53,15 +55,24 @@ void Blink(CRGB color, int times) {
 
 
 void blink_loop() {
-    uint32_t ms = millis();
     Blink(CRGB::Red, 1);
     Blink(CRGB::Green, 2);
     Blink(CRGB::Blue, 3);
     Blink(CRGB::White, 4);
     delay(DELAY);
-
     // long delay to make the cycle visible
     delay(DELAY * 4);
+}
+
+void timing_loop() {
+    // Tests how long it takes to set all leds to a single color and draw them
+    FastLED.setBrightness(8);
+    fill(CRGB::White);
+    FastLED.show();
+    uint32_t us = micros();
+    // Serial.printf("Time to set all leds to white: %lu\n", millis() - ms);
+    std::cout << "Microseconds to set all leds to white: " << micros() - us << std::endl;
+    delay(250);  // now allow the leds to draw so that the time can be measured.
 }
 
 void hue_loop() {
@@ -86,6 +97,8 @@ void hue_loop() {
 void loop() {
     #ifdef COLOR_ORDER_TEST
     blink_loop();
+    #elif defined(TIMING_TEST)
+    timing_loop();
     #else
     hue_loop();
     #endif
