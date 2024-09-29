@@ -31,21 +31,25 @@ LED_STRIP_NAMESPACE_BEGIN
     }
 
 static rmt_bytes_encoder_config_t make_encoder() {
+    rmt_symbol_word_t bit0 = {
+        .duration0 = static_cast<uint16_t>(0.3 * 10000000 / 1000000), // T0H=0.3us
+        .level0 = 1,
+        .duration1 = static_cast<uint16_t>(0.9 * 10000000 / 1000000), // T0L=0.9us
+        .level1 = 0,
+    };
+
+    rmt_symbol_word_t bit1 = {
+        .duration0 = static_cast<uint16_t>(0.6 * 10000000 / 1000000), // T1H=0.6us
+        .level0 = 1,
+        .duration1 = static_cast<uint16_t>(0.6 * 10000000 / 1000000), // T1L=0.6us
+        .level1 = 0,
+    };
+
     rmt_bytes_encoder_config_t out = {
-        .bit0 = {
-            .duration0 = static_cast<uint16_t>(0.3 * 10000000 / 1000000), // T0H=0.3us
-            .level0 = 1,
-            .duration1 = static_cast<uint16_t>(0.9 * 10000000 / 1000000), // T0L=0.9us
-            .level1 = 0,
-        },
-        .bit1 = {
-            .duration0 = static_cast<uint16_t>(0.6 * 10000000 / 1000000), // T1H=0.6us
-            .level0 = 1,
-            .duration1 = static_cast<uint16_t>(0.6 * 10000000 / 1000000), // T1L=0.6us
-            .level1 = 0,
-        },
+        .bit0 = bit0,
+        .bit1 = bit1,
         .flags = {
-            .msb_first = 1 // SK6812 transfer bit order: G7...G0R7...R0B7...B0(W7...W0)
+            .msb_first = 1 // WS2812 transfer bit order: G7...G0R7...R0B7...B0(W7...W0)
         }
     };
     return out;
