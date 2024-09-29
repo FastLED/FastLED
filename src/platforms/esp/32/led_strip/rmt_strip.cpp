@@ -51,6 +51,7 @@ public:
     RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw) {
         LedStripMode mode = is_rgbw ? kWS2812_RGBW : kWS2812;
         mMaxLeds = max_leds;
+        mBuffer = static_cast<uint8_t*>(calloc(max_leds, is_rgbw ? 4 : 3));
         led_model_t chipset;
         led_pixel_format_t rgbw_mode;
         to_esp_modes(mode, &chipset, &rgbw_mode);
@@ -59,17 +60,15 @@ public:
             .pin = pin,
             .max_leds = max_leds,
             .chipset = chipset,
-            .rgbw = rgbw_mode
+            .rgbw = rgbw_mode,
+            .pixel_buf = mBuffer
         };
         mLedStrip = construct_new_led_strip(config);
         led_strip_rmt_obj *rmt_strip = __containerof(mLedStrip, led_strip_rmt_obj, base);
-        mBuffer = rmt_strip->pixel_buf;
-        is_rgbw = (mode == kWS2812_RGBW || mode == kSK6812_RGBW);
     }
 
     virtual ~RmtLedStrip() override {
-        bool release_pixel_buffer = false;
-        led_strip_del(mLedStrip, release_pixel_buffer);
+        led_strip_del(mLedStrip, false);
         free(mBuffer);
     }
 
