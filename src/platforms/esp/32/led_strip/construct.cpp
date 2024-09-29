@@ -70,7 +70,7 @@ config_led_t make_led_config(int pin, uint32_t max_leds, bool is_rgbw, uint8_t* 
         .pin = pin,
         .max_leds = max_leds,
         .rgbw = is_rgbw,
-        .rmt_bytes_encoder_config = make_encoder(&reset),
+        .rmt_bytes_encoder_config = bytes_encoder_config,
         .reset_code = reset,
         .pixel_buf = pixel_buf
     };
