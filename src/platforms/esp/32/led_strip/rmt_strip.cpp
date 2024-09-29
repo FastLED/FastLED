@@ -64,12 +64,12 @@ public:
         return config;
     }
 
-    RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw) {
-        mIsRgbw = is_rgbw;
-        mPin = pin;
-        mMaxLeds = max_leds;
-        mBuffer = static_cast<uint8_t*>(calloc(max_leds, is_rgbw ? 4 : 3));
-        allocate_rmt();
+    RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw)
+        : mIsRgbw(is_rgbw),
+          mPin(pin),
+          mMaxLeds(max_leds) {
+        const uint8_t bytes_per_pixel = is_rgbw ? 4 : 3;
+        mBuffer = static_cast<uint8_t*>(calloc(max_leds, bytes_per_pixel));
     }
 
     void allocate_rmt() {
@@ -91,16 +91,22 @@ public:
     }
 
     virtual void set_pixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b) override {
-        led_strip_handle_t led_strip = static_cast<led_strip_handle_t>(mLedStrip);
-        ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, g, r, b));
+        mBuffer[i * 3 + 0] = r;
+        mBuffer[i * 3 + 1] = g;
+        mBuffer[i * 3 + 2] = b;
     }
 
     virtual void set_pixel_rgbw(uint32_t i, uint8_t r, uint8_t g, uint8_t b, uint8_t w) override {
-        ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(mLedStrip, i, g, r, b, w));
+        mBuffer[i * 4 + 0] = r;
+        mBuffer[i * 4 + 1] = g;
+        mBuffer[i * 4 + 2] = b;
+        mBuffer[i * 4 + 3] = w;
     }
 
     virtual void draw() override {
+        allocate_rmt();
         ESP_ERROR_CHECK(led_strip_refresh(mLedStrip));
+        release_rmt();
     }
 
     virtual uint32_t num_pixels() const {
@@ -108,7 +114,7 @@ public:
     }
 
 private:
-    int mPin;
+    int mPin = -1;
     led_strip_handle_t mLedStrip = nullptr;
     bool mIsRgbw = false;
     uint32_t mMaxLeds = 0;
