@@ -38,6 +38,7 @@ void RmtController5::showPixels(PixelIterator &pixels) {
     } else {
         assert(mLedStrip->num_pixels() == pixels.size());
     }
+    mLedStrip->wait_for_draw_complete();
     if (is_rgbw) {
         uint8_t r, g, b, w;
         for (uint16_t i = 0; pixels.has(1); i++) {

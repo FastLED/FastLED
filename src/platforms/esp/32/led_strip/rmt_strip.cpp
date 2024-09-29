@@ -46,6 +46,20 @@ void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_
 }  // namespace
 
 
+#define RMT_ASSERT(x)                  \
+    {                                  \
+        if (!(x)) {                    \
+            ESP_ERROR_CHECK(ESP_FAIL); \
+        }                              \
+    }
+
+#define RMT_ASSERT_LT(x, y)            \
+    {                                  \
+        if (!((x) < (y))) {            \
+            ESP_ERROR_CHECK(ESP_FAIL); \
+        }                              \
+    }
+
 class RmtLedStrip : public IRmtLedStrip {
 public:
 
@@ -98,12 +112,18 @@ public:
     }
 
     virtual void set_pixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b) override {
+        RMT_ASSERT(!mAquired);
+        RMT_ASSERT_LT(i, mMaxLeds);
+        RMT_ASSERT(!mIsRgbw);
         mBuffer[i * 3 + 0] = r;
         mBuffer[i * 3 + 1] = g;
         mBuffer[i * 3 + 2] = b;
     }
 
     virtual void set_pixel_rgbw(uint32_t i, uint8_t r, uint8_t g, uint8_t b, uint8_t w) override {
+        RMT_ASSERT(!mAquired);
+        RMT_ASSERT_LT(i, mMaxLeds);
+        RMT_ASSERT(mIsRgbw);
         mBuffer[i * 4 + 0] = r;
         mBuffer[i * 4 + 1] = g;
         mBuffer[i * 4 + 2] = b;
