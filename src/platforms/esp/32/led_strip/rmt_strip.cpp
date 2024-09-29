@@ -18,34 +18,6 @@ LED_STRIP_NAMESPACE_BEGIN
 
 #define TAG "rtm_strip.cpp"
 
-namespace {
-void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_t* out_rgbw) {
-    switch (mode) {
-        case kWS2812:
-            *out_rgbw = LED_PIXEL_FORMAT_GRB;
-            *out_chipset = LED_MODEL_WS2812;
-            break;
-        case kSK6812:
-            *out_rgbw = LED_PIXEL_FORMAT_GRB;
-            *out_chipset = LED_MODEL_SK6812;
-            break;
-        case kWS2812_RGBW:
-            *out_rgbw = LED_PIXEL_FORMAT_GRBW;
-            *out_chipset = LED_MODEL_WS2812;
-            break;
-        case kSK6812_RGBW:
-            *out_rgbw = LED_PIXEL_FORMAT_GRBW;
-            *out_chipset = LED_MODEL_SK6812;
-            break;
-        default:
-            ESP_LOGE(TAG, "Invalid LedStripMode");
-            break;
-    }
-}
-
-}  // namespace
-
-
 #define RMT_ASSERT(x)                  \
     {                                  \
         if (!(x)) {                    \
@@ -60,19 +32,35 @@ void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_
         }                              \
     }
 
+static rmt_bytes_encoder_config_t make_encoder() {
+    rmt_bytes_encoder_config_t out = {
+        .bit0 = {
+            .duration0 = static_cast<uint16_t>(0.3 * 10000000 / 1000000), // T0H=0.3us
+            .level0 = 1,
+            .duration1 = static_cast<uint16_t>(0.9 * 10000000 / 1000000), // T0L=0.9us
+            .level1 = 0,
+        },
+        .bit1 = {
+            .duration0 = static_cast<uint16_t>(0.6 * 10000000 / 1000000), // T1H=0.6us
+            .level0 = 1,
+            .duration1 = static_cast<uint16_t>(0.6 * 10000000 / 1000000), // T1L=0.6us
+            .level1 = 0,
+        },
+        .flags = {
+            .msb_first = 1 // SK6812 transfer bit order: G7...G0R7...R0B7...B0(W7...W0)
+        }
+    };
+    return out;
+}
+
 class RmtLedStrip : public IRmtLedStrip {
 public:
-
     config_led_t make_config() const {
-        LedStripMode mode = mIsRgbw ? kWS2812_RGBW : kWS2812;
-        led_model_t chipset;
-        led_pixel_format_t rgbw_mode;
-        to_esp_modes(mode, &chipset, &rgbw_mode);
         config_led_t config = {
             .pin = mPin,
             .max_leds = mMaxLeds,
-            .chipset = chipset,
-            .rgbw = rgbw_mode,
+            .rgbw = mIsRgbw,
+            .rmt_bytes_encoder_config = make_encoder(),
             .pixel_buf = mBuffer
         };
         return config;

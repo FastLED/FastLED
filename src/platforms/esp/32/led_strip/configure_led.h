@@ -23,8 +23,10 @@ LED_STRIP_NAMESPACE_BEGIN
 struct config_led_t {
     int pin;
     uint32_t max_leds;
-    led_model_t chipset;
-    led_pixel_format_t rgbw;
+    // led_model_t chipset;
+    bool rgbw;
+    //led_pixel_format_t rgbw;
+    rmt_bytes_encoder_config_t rmt_bytes_encoder_config;
     size_t mem_block_symbols = FASTLED_RMT_MEMBLOCK_SYMBOLS;
     bool with_dma = FASTLED_RMT_WITH_DMA;
     uint8_t* pixel_buf = nullptr;

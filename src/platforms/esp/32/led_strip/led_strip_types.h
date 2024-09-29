@@ -6,8 +6,9 @@
 #pragma once
 
 #include <stdint.h>
-
+#include "driver/rmt_encoder.h"
 #include "namespace.h"
+
 LED_STRIP_NAMESPACE_BEGIN
 
 /**
@@ -41,12 +42,15 @@ typedef struct led_strip_t *led_strip_handle_t;
 typedef struct {
     int strip_gpio_num;      /*!< GPIO number that used by LED strip */
     uint32_t max_leds;       /*!< Maximum LEDs in a single strip */
-    led_pixel_format_t led_pixel_format; /*!< LED pixel format */
-    led_model_t led_model;   /*!< LED model */
-
+    //led_pixel_format_t led_pixel_format; /*!< LED pixel format */
+    // led_model_t led_model;   /*!< LED model */
+    rmt_bytes_encoder_config_t rmt_bytes_encoder_config; /*!< RMT bytes encoder configuration */
     struct {
         uint32_t invert_out: 1; /*!< Invert output signal */
+        uint32_t rgbw: 1;       /*!< RGBW mode */
     } flags;                    /*!< Extra driver flags */
+
+
 } led_strip_config_t;
 
 LED_STRIP_NAMESPACE_END

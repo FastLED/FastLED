@@ -12,12 +12,13 @@
 #include "namespace.h"
 LED_STRIP_NAMESPACE_BEGIN
 
+
 /**
  * @brief Type of led strip encoder configuration
  */
 typedef struct {
     uint32_t resolution;   /*!< Encoder resolution, in Hz */
-    led_model_t led_model; /*!< LED model */
+    rmt_bytes_encoder_config_t bytes_encoder_config; /*!< RMT bytes encoder configuration */
 } led_strip_encoder_config_t;
 
 /**

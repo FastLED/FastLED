@@ -230,16 +230,8 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
     Cleanup cleanup_if_failure(delete_strip_leave_buffer, rmt_strip);
     esp_err_t ret = ESP_OK;
     ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
-    ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
-    uint8_t bytes_per_pixel = 3;
-    if (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRBW) {
-        bytes_per_pixel = 4;
-    } else if (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRB) {
-        bytes_per_pixel = 3;
-    } else {
-        assert(false);
-    }
-
+    //ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
+    uint8_t bytes_per_pixel = led_config->flags.rgbw ? 4 : 3;
     uint32_t resolution = rmt_config->resolution_hz ? rmt_config->resolution_hz : LED_STRIP_RMT_DEFAULT_RESOLUTION;
 
     // for backward compatibility, if the user does not set the clk_src, use the default value
@@ -274,7 +266,7 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
 
     led_strip_encoder_config_t strip_encoder_conf = {
         .resolution = resolution,
-        .led_model = led_config->led_model
+        .bytes_encoder_config = led_config->rmt_bytes_encoder_config
     };
     ESP_GOTO_ON_ERROR(rmt_new_led_strip_encoder(&strip_encoder_conf, &rmt_strip->strip_encoder), err, TAG, "create LED strip encoder failed");
 
@@ -301,8 +293,9 @@ esp_err_t led_strip_new_rmt_device(
 {
     esp_err_t ret = ESP_OK;
     ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
-    ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
-    uint8_t bytes_per_pixel = (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRBW) ? 4 : 3;
+    // ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
+    //uint8_t bytes_per_pixel = (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRBW) ? 4 : 3;
+    uint8_t bytes_per_pixel = led_config->flags.rgbw ? 4 : 3;
     uint8_t* pixel_buf = static_cast<uint8_t*>(calloc(1, led_config->max_leds * bytes_per_pixel));
     ESP_GOTO_ON_FALSE(pixel_buf, ESP_ERR_NO_MEM, err, TAG, "no mem for pixel buffer");
     ret = led_strip_new_rmt_device_with_buffer(led_config, rmt_config, pixel_buf, ret_strip);
