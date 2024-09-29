@@ -1,9 +1,7 @@
 
-#include "Arduino.h"
 #include "led_strip/enabled.h"
 
 #if FASTLED_RMT51
-#include <iostream>
 
 #warning "Work in progress: ESP32 ClocklessController for IDF 5.1 - this is still a prototype"
 
@@ -18,33 +16,8 @@ USING_NAMESPACE_LED_STRIP
 
 #define TAG "idf5_rmt.cpp"
 
-const uint32_t TRESET = 280000; // 280us (WS2812-V5)
-
-#if 0
-// WS2812 timings.
-const uint16_t T0H = 300; // 0.3us
-const uint16_t T0L = 900; // 0.9us
-const uint16_t T1H = 600; // 0.6us
-const uint16_t T1L = 600; // 0.6us
-
-
-
-    // -- Precompute rmt items corresponding to a zero bit and a one bit
-    //    according to the timing values given in the template instantiation
-    // T1H
-    mOne.level0 = 1;
-    mOne.duration0 = ESP_TO_RMT_CYCLES(T1 + T2); // TO_RMT_CYCLES(T1+T2);
-    // T1L
-    mOne.level1 = 0;
-    mOne.duration1 = ESP_TO_RMT_CYCLES(T3); // TO_RMT_CYCLES(T3);
-
-    // T0H
-    mZero.level0 = 1;
-    mZero.duration0 = ESP_TO_RMT_CYCLES(T1); // TO_RMT_CYCLES(T1);
-    // T0L
-    mZero.level1 = 0;
-    mZero.duration1 = ESP_TO_RMT_CYCLES(T2 + T3); // TO_RMT_CYCLES(T2 + T3);
-#endif
+// TODO get rid of this
+static const uint32_t TRESET = 280000; // 280us (WS2812-V5)
 
 void convert(int T1, int T2, int T3, uint16_t* T0H, uint16_t* T0L, uint16_t* T1H, uint16_t* T1L) {
     *T0H = T1;
