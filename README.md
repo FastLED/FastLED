@@ -54,9 +54,6 @@ For more examples see this [link](examples).
 [![attiny85](https://github.com/FastLED/FastLED/actions/workflows/build_attiny85.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_attiny85.yml)
 
 
-[![attiny85_noforced_inline](https://github.com/FastLED/FastLED/actions/workflows/build_attiny85_noforced_inline.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_attiny85_noforced_inline.yml)
-
-
 [![attiny1604](https://github.com/FastLED/FastLED/actions/workflows/build_attiny1604.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_attiny1604.yml)
 
 
