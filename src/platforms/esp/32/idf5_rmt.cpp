@@ -15,6 +15,14 @@ USING_NAMESPACE_LED_STRIP
 
 #define TAG "idf5_rmt.cpp"
 
+// WS2812 timings.
+const uint16_t T0H = 300; // 0.3us
+const uint16_t T0L = 900; // 0.9us
+const uint16_t T1H = 600; // 0.6us
+const uint16_t T1L = 600; // 0.6us
+const uint32_t TRESET = 280000; // 280us (WS2812-V5)
+
+
 RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3) {
     // Stub implementation
     ESP_LOGI(TAG, "RmtController5 constructor called");
@@ -33,7 +41,7 @@ void RmtController5::showPixels(PixelIterator &pixels) {
     ESP_LOGI(TAG, "showPixels called");
     const bool is_rgbw = pixels.get_rgbw().active();
     if (!mLedStrip) {
-        mLedStrip = create_rmt_led_strip(mPin, pixels.size(), is_rgbw);
+        mLedStrip = create_rmt_led_strip(T0H, T0L, T1H, T1L, TRESET, mPin, pixels.size(), is_rgbw);
     } else {
         assert(mLedStrip->num_pixels() == pixels.size());
     }

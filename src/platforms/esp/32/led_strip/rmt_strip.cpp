@@ -29,18 +29,18 @@ LED_STRIP_NAMESPACE_BEGIN
         }                              \
     }
 
-// WS2812 timings.
-const uint16_t T0H = 300; // 0.3us
-const uint16_t T0L = 900; // 0.9us
-const uint16_t T1H = 600; // 0.6us
-const uint16_t T1L = 600; // 0.6us
-const uint32_t TRESET = 280000; // 280us (WS2812-V5)
+
 
 class RmtLedStrip : public IRmtLedStrip {
 public:
-
-    RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw)
-        : mIsRgbw(is_rgbw),
+    RmtLedStrip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
+                int pin, uint32_t max_leds, bool is_rgbw)
+        : mT0H(T0H),
+          mT0L(T0L),
+          mT1H(T1H),
+          mT1L(T1L),
+          mTRESET(TRESET),
+          mIsRgbw(is_rgbw),
           mPin(pin),
           mMaxLeds(max_leds) {
         const uint8_t bytes_per_pixel = is_rgbw ? 4 : 3;
@@ -51,7 +51,7 @@ public:
         assert(!mLedStrip);
         assert(!mAquired);
         mLedStrip = construct_led_strip(
-            T0H, T0L, T1H, T1L, TRESET,
+            mT0H, mT0L, mT1H, mT1L, mTRESET,
             mPin, mMaxLeds, mIsRgbw, mBuffer);
         mAquired = true;
     }
@@ -123,10 +123,15 @@ private:
     uint32_t mMaxLeds = 0;
     uint8_t* mBuffer = nullptr;
     bool mAquired = false;
+    uint16_t mT0H = 0;
+    uint16_t mT0L = 0;
+    uint16_t mT1H = 0;
+    uint16_t mT1L = 0;
+    uint32_t mTRESET = 0;
 };
 
-IRmtLedStrip* create_rmt_led_strip(int pin, uint32_t max_leds, bool is_rgbw) {
-    return new RmtLedStrip(pin, max_leds, is_rgbw);
+IRmtLedStrip* create_rmt_led_strip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET, int pin, uint32_t max_leds, bool is_rgbw) {
+    return new RmtLedStrip(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
 }
 
 LED_STRIP_NAMESPACE_END
