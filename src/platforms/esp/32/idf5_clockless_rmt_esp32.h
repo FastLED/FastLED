@@ -36,6 +36,7 @@ protected:
     virtual void showPixels(PixelController<RGB_ORDER> &pixels)
     {
         PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-        mRMTController.showPixels(iterator);
+        mRMTController.loadPixelData(iterator);
+        mRMTController.showPixels();
     }
 };

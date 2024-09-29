@@ -28,7 +28,7 @@ led_strip_handle_t construct_new_led_strip(config_led_t config) {
 
     led_strip_rmt_config_t rmt_config = {
         .clk_src = RMT_CLK_SRC_DEFAULT,
-        .resolution_hz = 10000000,
+        .resolution_hz = LED_STRIP_RMT_DEFAULT_RESOLUTION,
         .mem_block_symbols = config.mem_block_symbols,
         .flags = {
             .with_dma = config.with_dma,

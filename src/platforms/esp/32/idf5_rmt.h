@@ -27,7 +27,8 @@ public:
 
     ~RmtController5();
 
-    void showPixels(PixelIterator &pixels);
+    void loadPixelData(PixelIterator &pixels);
+    void showPixels();
 
 private:
     int mPin;

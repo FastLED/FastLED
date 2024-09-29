@@ -3,8 +3,6 @@
 
 #if FASTLED_RMT51
 
-#warning "Work in progress: ESP32 ClocklessController for IDF 5.1 - this is still a prototype"
-
 #include <assert.h>
 #include "idf5_rmt.h"
 #include "led_strip/led_strip.h"
@@ -38,7 +36,7 @@ RmtController5::~RmtController5() {
     }
 }
 
-void RmtController5::showPixels(PixelIterator &pixels) {
+void RmtController5::loadPixelData(PixelIterator &pixels) {
     ESP_LOGI(TAG, "showPixels called");
     const bool is_rgbw = pixels.get_rgbw().active();
     if (!mLedStrip) {
@@ -66,6 +64,10 @@ void RmtController5::showPixels(PixelIterator &pixels) {
             pixels.stepDithering();
         }
     }
+
+}
+
+void RmtController5::showPixels() {
     mLedStrip->draw();
 }
 
