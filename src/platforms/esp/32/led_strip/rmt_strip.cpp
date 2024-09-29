@@ -48,23 +48,29 @@ void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_
 
 class RmtLedStrip : public IRmtLedStrip {
 public:
-    RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw) {
-        LedStripMode mode = is_rgbw ? kWS2812_RGBW : kWS2812;
-        mMaxLeds = max_leds;
-        mBuffer = static_cast<uint8_t*>(calloc(max_leds, is_rgbw ? 4 : 3));
+
+    config_led_t make_config() const {
+        LedStripMode mode = mIsRgbw ? kWS2812_RGBW : kWS2812;
         led_model_t chipset;
         led_pixel_format_t rgbw_mode;
         to_esp_modes(mode, &chipset, &rgbw_mode);
-
         config_led_t config = {
-            .pin = pin,
-            .max_leds = max_leds,
+            .pin = mPin,
+            .max_leds = mMaxLeds,
             .chipset = chipset,
             .rgbw = rgbw_mode,
             .pixel_buf = mBuffer
         };
+        return config;
+    }
+
+    RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw) {
+        mIsRgbw = is_rgbw;
+        mPin = pin;
+        mMaxLeds = max_leds;
+        mBuffer = static_cast<uint8_t*>(calloc(max_leds, is_rgbw ? 4 : 3));
+        config_led_t config = make_config();
         mLedStrip = construct_new_led_strip(config);
-        led_strip_rmt_obj *rmt_strip = __containerof(mLedStrip, led_strip_rmt_obj, base);
     }
 
     virtual ~RmtLedStrip() override {
@@ -90,8 +96,9 @@ public:
     }
 
 private:
+    int mPin;
     led_strip_handle_t mLedStrip;
-    bool is_rgbw;
+    bool mIsRgbw;
     uint32_t mMaxLeds;
     uint8_t* mBuffer = nullptr;
 };
