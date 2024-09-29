@@ -51,10 +51,9 @@ struct led_strip_t {
     esp_err_t (*set_pixel_rgbw)(led_strip_t *strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue, uint32_t white);
 
     /**
-     * @brief Refresh memory colors to LEDs
+     * @brief Refresh memory colors to LEDs (blocking)
      *
      * @param strip: LED strip
-     * @param timeout_ms: timeout value for refreshing task
      *
      * @return
      *      - ESP_OK: Refresh successfully
@@ -62,11 +61,36 @@ struct led_strip_t {
      *
      * @note:
      *      After updating the LED colors in the memory, a following invocation of this API is needed to flush colors to strip.
+     *      This function blocks until the refresh is complete.
      */
     esp_err_t (*refresh)(led_strip_t *strip);
 
+    /**
+     * @brief Refresh memory colors to LEDs asynchronously
+     *
+     * @param strip: LED strip
+     *
+     * @return
+     *      - ESP_OK: Async refresh started successfully
+     *      - ESP_FAIL: Failed to start async refresh
+     *
+     * @note:
+     *      This function starts the refresh process and returns immediately.
+     *      Use wait_refresh_done to wait for the refresh to complete.
+     */
     esp_err_t (*refresh_async)(led_strip_t *strip);
 
+    /**
+     * @brief Wait for an asynchronous refresh operation to complete
+     *
+     * @param strip: LED strip
+     * @param timeout_ms: timeout value in milliseconds
+     *
+     * @return
+     *      - ESP_OK: Refresh completed successfully within the timeout
+     *      - ESP_ERR_TIMEOUT: Refresh did not complete within the specified timeout
+     *      - ESP_FAIL: Waiting for refresh failed due to other errors
+     */
     esp_err_t (*wait_refresh_done)(led_strip_t *strip, int32_t timeout_ms);
 
     /**
