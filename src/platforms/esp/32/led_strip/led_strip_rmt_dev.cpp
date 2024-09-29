@@ -103,11 +103,31 @@ static esp_err_t led_strip_rmt_clear(led_strip_t *strip)
     return led_strip_rmt_refresh(strip);
 }
 
-static esp_err_t led_strip_rmt_del(led_strip_t *strip)
+static esp_err_t led_strip_rmt_release_channel(led_strip_t *strip)
 {
     led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
-    ESP_RETURN_ON_ERROR(rmt_del_channel(rmt_strip->rmt_chan), TAG, "delete RMT channel failed");
-    ESP_RETURN_ON_ERROR(rmt_del_encoder(rmt_strip->strip_encoder), TAG, "delete strip encoder failed");
+    if (rmt_strip->rmt_chan) {
+        ESP_RETURN_ON_ERROR(rmt_del_channel(rmt_strip->rmt_chan), TAG, "delete RMT channel failed");
+        rmt_strip->rmt_chan = NULL;
+    }
+    return ESP_OK;
+}
+
+static esp_err_t led_strip_rmt_release_encoder(led_strip_t *strip)
+{
+    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
+    if (rmt_strip->strip_encoder) {
+        ESP_RETURN_ON_ERROR(rmt_del_encoder(rmt_strip->strip_encoder), TAG, "delete strip encoder failed");
+        rmt_strip->strip_encoder = NULL;
+    }
+    return ESP_OK;
+}
+
+static esp_err_t led_strip_rmt_del(led_strip_t *strip)
+{
+    ESP_RETURN_ON_ERROR(led_strip_rmt_release_channel(strip), TAG, "remove RMT channel failed");
+    ESP_RETURN_ON_ERROR(led_strip_rmt_release_encoder(strip), TAG, "remove RMT encoder failed");
+    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
     free(rmt_strip);
     return ESP_OK;
 }
