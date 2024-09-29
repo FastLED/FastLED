@@ -17,9 +17,7 @@
 #endif  // LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS
 
 #ifndef FASTLED_RMT_WITH_DMA
-#define FASTLED_RMT_WITH_DMA 1
-#else
-#define FASTLED_RMT_WITH_DMA 0
+#define FASTLED_RMT_WITH_DMA 1  // what platforms don't support DMA?
 #endif  // FASTLED_RMT_WITH_DMA
 
 #ifndef FASTLED_RMT_MEMBLOCK_SYMBOLS
