@@ -74,25 +74,15 @@ public:
         led_strip_del(led_strip, release_pixel_buffer);
     }
 
-    void show_pixels(PixelIterator &pixels) {
-        assert(pixels.size() <= mMaxLeds);
-        if (is_rgbw) {
-            uint8_t r, g, b, w;
-            for (uint16_t i = 0; pixels.has(1); i++) {
-                pixels.loadAndScaleRGBW(&r, &g, &b, &w);
-                ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, g, r, b, w));
-                pixels.advanceData();
-                pixels.stepDithering();
-            }
-        } else {
-            uint8_t r, g, b;
-            for (uint16_t i = 0; pixels.has(1); i++) {
-                pixels.loadAndScaleRGB(&r, &g, &b);
-                ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, g, r, b));
-                pixels.advanceData();
-                pixels.stepDithering();
-            }
-        }
+    void set_pixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b) {
+        ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, g, r, b));
+    }
+
+    void set_pixel_rgbw(uint32_t i, uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
+        ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, g, r, b, w));
+    }
+
+    void draw() {
         ESP_ERROR_CHECK(led_strip_refresh(led_strip));
     }
 
@@ -107,10 +97,27 @@ void RmtController5::showPixels(PixelIterator &pixels) {
     ESP_LOGI(TAG, "showPixels called");
     uint32_t max_leds = pixels.size();
     Rgbw rgbw = pixels.get_rgbw();
+    const bool is_rgbw = rgbw.active();
     LedStripMode mode = rgbw.active() ? kWS2812_RGBW : kWS2812;
-
     RmtLedStrip led_strip(mPin, max_leds, mode);
-    led_strip.show_pixels(pixels);
+    if (is_rgbw) {
+        uint8_t r, g, b, w;
+        for (uint16_t i = 0; pixels.has(1); i++) {
+            pixels.loadAndScaleRGBW(&r, &g, &b, &w);
+            led_strip.set_pixel_rgbw(i, r, g, b, w);
+            pixels.advanceData();
+            pixels.stepDithering();
+        }
+    } else {
+        uint8_t r, g, b;
+        for (uint16_t i = 0; pixels.has(1); i++) {
+            pixels.loadAndScaleRGB(&r, &g, &b);
+            led_strip.set_pixel(i, r, g, b);
+            pixels.advanceData();
+            pixels.stepDithering();
+        }
+    }
+    led_strip.draw();
 }
 
 #endif  // FASTLED_RMT51
