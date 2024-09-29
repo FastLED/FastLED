@@ -7,7 +7,7 @@ LED_STRIP_NAMESPACE_BEGIN
 
 class IRmtLedStrip {
 public:
-    virtual ~IRmtLedStrip() = 0;
+    virtual ~IRmtLedStrip() = default;
     virtual void set_pixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b) = 0;
     virtual void set_pixel_rgbw(uint32_t i, uint8_t r, uint8_t g, uint8_t b, uint8_t w) = 0;
     virtual void draw() = 0;
