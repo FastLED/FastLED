@@ -154,6 +154,18 @@ void delete_strip(led_strip_rmt_obj *rmt_strip) {
     }
 }
 
+void delete_strip_leave_buffer(led_strip_rmt_obj *rmt_strip) {
+    if (rmt_strip) {
+        if (rmt_strip->rmt_chan) {
+            rmt_del_channel(rmt_strip->rmt_chan);
+        }
+        if (rmt_strip->strip_encoder) {
+            rmt_del_encoder(rmt_strip->strip_encoder);
+        }
+        free(rmt_strip);
+    }
+}
+
 // C++ doesn't like the goto statement, so we need to replace it with a macro to do an early return instead
 // This is a common pattern in the ESP-IDF codebase.
 #undef ESP_GOTO_ON_FALSE
@@ -176,13 +188,13 @@ void delete_strip(led_strip_rmt_obj *rmt_strip) {
         }                                                                                                  \
     } while(0)
 
-
-
-
-esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
-{
+static esp_err_t led_strip_new_rmt_device_with_buffer(
+        const led_strip_config_t *led_config,
+        const led_strip_rmt_config_t *rmt_config,
+        led_strip_handle_t *ret_strip,
+        uint8_t *pixel_buf) {
     led_strip_rmt_obj *rmt_strip = NULL;
-    Cleanup cleanup_if_failure(delete_strip, rmt_strip);
+    Cleanup cleanup_if_failure(delete_strip_leave_buffer, rmt_strip);
     esp_err_t ret = ESP_OK;
     ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
     ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
@@ -194,10 +206,7 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     } else {
         assert(false);
     }
-    uint8_t* memory_buffer = static_cast<uint8_t*>(calloc(1, led_config->max_leds * bytes_per_pixel));
-    rmt_strip = static_cast<led_strip_rmt_obj*>(calloc(1, sizeof(led_strip_rmt_obj)));
-    rmt_strip->pixel_buf = memory_buffer;
-    ESP_GOTO_ON_FALSE(rmt_strip, ESP_ERR_NO_MEM, err, TAG, "no mem for rmt strip");
+
     uint32_t resolution = rmt_config->resolution_hz ? rmt_config->resolution_hz : LED_STRIP_RMT_DEFAULT_RESOLUTION;
 
     // for backward compatibility, if the user does not set the clk_src, use the default value
@@ -223,6 +232,10 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
             .with_dma = rmt_config->flags.with_dma,
         }
     };
+    rmt_strip = static_cast<led_strip_rmt_obj*>(calloc(1, sizeof(led_strip_rmt_obj)));
+    rmt_strip->pixel_buf = pixel_buf;
+    ESP_GOTO_ON_FALSE(rmt_strip, ESP_ERR_NO_MEM, err, TAG, "no mem for rmt strip");
+
     ESP_GOTO_ON_ERROR(rmt_new_tx_channel(&rmt_chan_config, &rmt_strip->rmt_chan), err, TAG, "create RMT TX channel failed");
 
     led_strip_encoder_config_t strip_encoder_conf = {
@@ -230,7 +243,6 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
         .led_model = led_config->led_model
     };
     ESP_GOTO_ON_ERROR(rmt_new_led_strip_encoder(&strip_encoder_conf, &rmt_strip->strip_encoder), err, TAG, "create LED strip encoder failed");
-
 
     rmt_strip->bytes_per_pixel = bytes_per_pixel;
     rmt_strip->strip_len = led_config->max_leds;
@@ -240,9 +252,27 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     rmt_strip->base.clear = led_strip_rmt_clear;
     rmt_strip->base.del = led_strip_rmt_del;
 
+
     *ret_strip = &rmt_strip->base;
     cleanup_if_failure.release();
     return ESP_OK;
+}
+
+
+esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
+{
+    esp_err_t ret = ESP_OK;
+    ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
+    ESP_GOTO_ON_FALSE(led_config->led_pixel_format < LED_PIXEL_FORMAT_INVALID, ESP_ERR_INVALID_ARG, err, TAG, "invalid led_pixel_format");
+    uint8_t bytes_per_pixel = (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRBW) ? 4 : 3;
+    uint8_t* pixel_buf = static_cast<uint8_t*>(calloc(1, led_config->max_leds * bytes_per_pixel));
+    ESP_GOTO_ON_FALSE(pixel_buf, ESP_ERR_NO_MEM, err, TAG, "no mem for pixel buffer");
+    ret = led_strip_new_rmt_device_with_buffer(led_config, rmt_config, ret_strip, pixel_buf);
+    if (ret != ESP_OK) {
+        free(pixel_buf);
+    }
+err:
+    return ret;
 }
 
 
