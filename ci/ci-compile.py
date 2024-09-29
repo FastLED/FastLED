@@ -135,7 +135,9 @@ def parse_args():
         action="store_true",
         help="Print the list of supported boards and exit",
     )
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
+    if unknown:
+        warnings.warn(f"Unknown arguments: {unknown}")
     # if --interactive and --no-interative are both passed, --no-interactive takes precedence.
     if args.interactive and args.no_interactive:
         warnings.warn(
