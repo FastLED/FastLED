@@ -66,12 +66,15 @@ public:
             .rgbw = rgbw_mode
         };
         led_strip = construct_new_led_strip(config);
+        led_strip_rmt_obj *rmt_strip = __containerof(led_strip, led_strip_rmt_obj, base);
+        mBuffer = rmt_strip->pixel_buf;
         is_rgbw = (mode == kWS2812_RGBW || mode == kSK6812_RGBW);
     }
 
     ~RmtLedStrip() {
-        bool release_pixel_buffer = true;
+        bool release_pixel_buffer = false;
         led_strip_del(led_strip, release_pixel_buffer);
+        free(mBuffer);
     }
 
     void set_pixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b) {
@@ -90,6 +93,7 @@ private:
     led_strip_handle_t led_strip;
     bool is_rgbw;
     uint32_t mMaxLeds;
+    uint8_t* mBuffer = nullptr;
 };
 
 
