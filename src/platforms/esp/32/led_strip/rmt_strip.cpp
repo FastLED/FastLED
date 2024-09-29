@@ -10,6 +10,7 @@
 #include "esp_log.h"
 #include "demo.h"
 #include "configure_led.h"
+#include "led_strip_types.h"
 
 #include "namespace.h"
 
@@ -45,6 +46,21 @@ void to_esp_modes(LedStripMode mode, led_model_t* out_chipset, led_pixel_format_
 }  // namespace
 
 
+class RmtLedStrip : public IRmtLedStrip {
+public:
+    RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw);
+    virtual ~RmtLedStrip() override;
+    virtual void set_pixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b) override;
+    virtual void set_pixel_rgbw(uint32_t i, uint8_t r, uint8_t g, uint8_t b, uint8_t w) override;
+    virtual void draw() override;
+
+private:
+    led_strip_handle_t mLedStrip;
+    bool is_rgbw;
+    uint32_t mMaxLeds;
+    uint8_t* mBuffer = nullptr;
+};
+
 RmtLedStrip::RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw) {
     LedStripMode mode = is_rgbw ? kWS2812_RGBW : kWS2812;
     mMaxLeds = max_leds;
@@ -58,34 +74,33 @@ RmtLedStrip::RmtLedStrip(int pin, uint32_t max_leds, bool is_rgbw) {
         .chipset = chipset,
         .rgbw = rgbw_mode
     };
-    led_strip_handle_t led_strip = construct_new_led_strip(config);
-    led_strip_rmt_obj *rmt_strip = __containerof(led_strip, led_strip_rmt_obj, base);
+    mLedStrip = construct_new_led_strip(config);
+    led_strip_rmt_obj *rmt_strip = __containerof(mLedStrip, led_strip_rmt_obj, base);
     mBuffer = rmt_strip->pixel_buf;
     is_rgbw = (mode == kWS2812_RGBW || mode == kSK6812_RGBW);
-    mLedStrip = led_strip;
 }
 
 RmtLedStrip::~RmtLedStrip() {
     bool release_pixel_buffer = false;
-    led_strip_handle_t led_strip = static_cast<led_strip_handle_t>(mLedStrip);
-    led_strip_del(led_strip, release_pixel_buffer);
+    led_strip_del(mLedStrip, release_pixel_buffer);
     free(mBuffer);
 }
 
 void RmtLedStrip::set_pixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b) {
-    // convert to
     led_strip_handle_t led_strip = static_cast<led_strip_handle_t>(mLedStrip);
     ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, g, r, b));
 }
 
 void RmtLedStrip::set_pixel_rgbw(uint32_t i, uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
-    led_strip_handle_t led_strip = static_cast<led_strip_handle_t>(mLedStrip);
-    ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, g, r, b, w));
+    ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(mLedStrip, i, g, r, b, w));
 }
 
 void RmtLedStrip::draw() {
-    led_strip_handle_t led_strip = static_cast<led_strip_handle_t>(mLedStrip);
-    ESP_ERROR_CHECK(led_strip_refresh(led_strip));
+    ESP_ERROR_CHECK(led_strip_refresh(mLedStrip));
+}
+
+IRmtLedStrip* create_rmt_led_strip(int pin, uint32_t max_leds, bool is_rgbw) {
+    return new RmtLedStrip(pin, max_leds, is_rgbw);
 }
 
 LED_STRIP_NAMESPACE_END
