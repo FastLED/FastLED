@@ -28,7 +28,7 @@
 #include "esp_idf_version.h"
 #include "led_strip/enabled.h"
 
-#if !FASTLED_RMT51 || ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
+#if !FASTLED_RMT51
 #include "idf4_clockless_rmt_esp32.h"
 #else
 #include "idf5_clockless_rmt_esp32.h"

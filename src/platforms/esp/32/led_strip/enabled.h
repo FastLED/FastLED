@@ -12,7 +12,7 @@
  #if !defined(FASTLED_RMT51)
   #include "esp_idf_version.h"
   #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-   #define FASTLED_RMT51 0
+   #define FASTLED_RMT51 1
   #else
    #define FASTLED_RMT51 0
   #endif  // ESP_IDF_VERSION

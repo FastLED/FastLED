@@ -2,6 +2,9 @@
 #ifdef ESP32
 #ifndef FASTLED_ESP32_I2S
 
+
+#include "led_strip/enabled.h"
+
 #if !FASTLED_RMT51
 
 #define FASTLED_INTERNAL
