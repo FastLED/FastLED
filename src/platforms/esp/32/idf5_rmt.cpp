@@ -8,7 +8,7 @@
 #include "led_strip/led_strip.h"
 #include "esp_log.h"
 #include "led_strip/demo.h"
-#include "led_strip/configure_led.h"
+#include "led_strip/construct_new_led_strip.h"
 
 
 USING_NAMESPACE_LED_STRIP
@@ -66,7 +66,7 @@ void RmtController5::showPixels(PixelIterator &pixels) {
         .rgbw = rgbw_mode
     };
     
-    led_strip_handle_t led_strip = configure_led(config);
+    led_strip_handle_t led_strip = construct_new_led_strip(config);
     bool rgbw_active = rgbw.active();
 
     if (rgbw.active()) {

@@ -24,6 +24,6 @@ struct config_led_t {
 };
 
 
-led_strip_handle_t configure_led(config_led_t config);
+led_strip_handle_t construct_new_led_strip(config_led_t config);
 
 LED_STRIP_NAMESPACE_END

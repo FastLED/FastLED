@@ -60,7 +60,7 @@ Good sources of info:
 
 static const char *TAG = "example";
 
-led_strip_handle_t configure_led(void)
+led_strip_handle_t construct_new_led_strip(void)
 {
     // LED strip general initialization, according to your led board design
     led_strip_config_t strip_config = {
@@ -91,7 +91,7 @@ led_strip_handle_t configure_led(void)
 
 void app_main(void)
 {
-    led_strip_handle_t led_strip = configure_led();
+    led_strip_handle_t led_strip = construct_new_led_strip();
     bool led_on_off = false;
 
     ESP_LOGI(TAG, "Start blinking LED strip");

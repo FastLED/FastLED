@@ -7,15 +7,15 @@
 
 
 
-#include "configure_led.h"
+#include "construct_new_led_strip.h"
 #include "esp_log.h"
 #include <cstring>
 
 LED_STRIP_NAMESPACE_BEGIN
 
-#define TAG "configure_led.cpp"
+#define TAG "construct_new_led_strip.cpp"
 
-led_strip_handle_t configure_led(config_led_t config) {
+led_strip_handle_t construct_new_led_strip(config_led_t config) {
     // LED strip general initialization, according to your led board design
     led_strip_config_t strip_config = {};
     strip_config.strip_gpio_num = config.pin;

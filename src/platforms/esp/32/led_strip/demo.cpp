@@ -10,7 +10,7 @@
 #include "led_strip.h"
 #include "demo.h"
 #include "esp_log.h"
-#include "configure_led.h"
+#include "construct_new_led_strip.h"
 
 #include "namespace.h"
 LED_STRIP_NAMESPACE_BEGIN
@@ -140,7 +140,7 @@ void demo(int led_strip_gpio, uint32_t num_leds, LedStripMode mode) {
         .chipset = chipset,
         .rgbw = rgbw_mode
     };
-    led_strip_handle_t led_strip = configure_led(config);
+    led_strip_handle_t led_strip = construct_new_led_strip(config);
     draw_loop(led_strip, num_leds, is_rgbw_active);
 }
 
