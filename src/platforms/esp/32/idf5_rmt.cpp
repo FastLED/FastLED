@@ -9,6 +9,7 @@
 #include "esp_log.h"
 #include "led_strip/demo.h"
 #include "led_strip/configure_led.h"
+#include "led_strip/rmt_strip.h"
 
 
 USING_NAMESPACE_LED_STRIP
@@ -50,51 +51,6 @@ RmtController5::~RmtController5() {
     ESP_LOGI(TAG, "RmtController5 destructor called");
 }
 
-
-class RmtLedStrip {
-public:
-    RmtLedStrip(int pin, uint32_t max_leds, LedStripMode mode) {
-        mMaxLeds = max_leds;
-        led_model_t chipset;
-        led_pixel_format_t rgbw_mode;
-        to_esp_modes(mode, &chipset, &rgbw_mode);
-
-        config_led_t config = {
-            .pin = pin,
-            .max_leds = max_leds,
-            .chipset = chipset,
-            .rgbw = rgbw_mode
-        };
-        led_strip = construct_new_led_strip(config);
-        led_strip_rmt_obj *rmt_strip = __containerof(led_strip, led_strip_rmt_obj, base);
-        mBuffer = rmt_strip->pixel_buf;
-        is_rgbw = (mode == kWS2812_RGBW || mode == kSK6812_RGBW);
-    }
-
-    ~RmtLedStrip() {
-        bool release_pixel_buffer = false;
-        led_strip_del(led_strip, release_pixel_buffer);
-        free(mBuffer);
-    }
-
-    void set_pixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b) {
-        ESP_ERROR_CHECK(led_strip_set_pixel(led_strip, i, g, r, b));
-    }
-
-    void set_pixel_rgbw(uint32_t i, uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
-        ESP_ERROR_CHECK(led_strip_set_pixel_rgbw(led_strip, i, g, r, b, w));
-    }
-
-    void draw() {
-        ESP_ERROR_CHECK(led_strip_refresh(led_strip));
-    }
-
-private:
-    led_strip_handle_t led_strip;
-    bool is_rgbw;
-    uint32_t mMaxLeds;
-    uint8_t* mBuffer = nullptr;
-};
 
 
 void RmtController5::showPixels(PixelIterator &pixels) {
