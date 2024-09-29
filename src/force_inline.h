@@ -1,7 +1,7 @@
 #pragma once
 
 
-#ifdef NO_FORCE_INLINE
+#ifdef FASTLED_NO_FORCE_INLINE
 #define FASTLED_FORCE_INLINE inline
 #else
 #define FASTLED_FORCE_INLINE __attribute__((always_inline)) inline
