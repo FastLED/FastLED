@@ -19,6 +19,7 @@ led_strip_handle_t construct_new_led_strip(config_led_t config) {
         .strip_gpio_num = config.pin,
         .max_leds = config.max_leds,
         .rmt_bytes_encoder_config = config.rmt_bytes_encoder_config,
+        .reset_code = config.reset_code,
         .flags = {
             .invert_out = 0,
             .rgbw = config.rgbw,

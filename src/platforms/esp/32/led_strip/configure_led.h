@@ -14,6 +14,7 @@ struct config_led_t {
     bool rgbw;
     //led_pixel_format_t rgbw;
     rmt_bytes_encoder_config_t rmt_bytes_encoder_config;
+    rmt_symbol_word_t reset_code;
     size_t mem_block_symbols = FASTLED_RMT_MEMBLOCK_SYMBOLS;
     bool with_dma = FASTLED_RMT_WITH_DMA;
     uint8_t* pixel_buf = nullptr;

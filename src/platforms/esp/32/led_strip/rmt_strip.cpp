@@ -31,7 +31,7 @@ LED_STRIP_NAMESPACE_BEGIN
         }                              \
     }
 
-static rmt_bytes_encoder_config_t make_encoder() {
+static rmt_bytes_encoder_config_t make_encoder(rmt_symbol_word_t* reset) {
     static_assert(LED_STRIP_RMT_DEFAULT_RESOLUTION == 10000000, "Assumes 10MHz");
     static const double ratio = 10.0f; // assumes 10mhz
     rmt_symbol_word_t bit0 = {
@@ -48,6 +48,15 @@ static rmt_bytes_encoder_config_t make_encoder() {
         .level1 = 0,
     };
 
+    // reset code duration defaults to 280us to accomodate WS2812B-V5
+    uint16_t reset_ticks = static_cast<uint16_t>(ratio * 280 / 2);
+    *reset = {
+        .duration0 = reset_ticks, // TRES=50us
+        .level0 = 0,
+        .duration1 = reset_ticks, // TRES=50us
+        .level1 = 0,
+    };
+
     rmt_bytes_encoder_config_t out = {
         .bit0 = bit0,
         .bit1 = bit1,
@@ -61,11 +70,14 @@ static rmt_bytes_encoder_config_t make_encoder() {
 class RmtLedStrip : public IRmtLedStrip {
 public:
     config_led_t make_config() const {
+        rmt_symbol_word_t reset;
+        rmt_bytes_encoder_config_t bytes_encoder_config = make_encoder(&reset);
         config_led_t config = {
             .pin = mPin,
             .max_leds = mMaxLeds,
             .rgbw = mIsRgbw,
-            .rmt_bytes_encoder_config = make_encoder(),
+            .rmt_bytes_encoder_config = make_encoder(&reset),
+            .reset_code = reset,
             .pixel_buf = mBuffer
         };
         return config;
