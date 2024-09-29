@@ -20,7 +20,7 @@ const uint16_t T0H = 300; // 0.3us
 const uint16_t T0L = 900; // 0.9us
 const uint16_t T1H = 600; // 0.6us
 const uint16_t T1L = 600; // 0.6us
-const uint32_t TRESET = 28000; // 280us
+const uint32_t TRESET = 280000; // 280us
 
 rmt_bytes_encoder_config_t make_encoder(rmt_symbol_word_t* reset) {
     static_assert(LED_STRIP_RMT_DEFAULT_RESOLUTION == 10000000, "Assumes 10MHz");
