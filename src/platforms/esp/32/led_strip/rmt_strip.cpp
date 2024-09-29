@@ -69,12 +69,24 @@ public:
         mPin = pin;
         mMaxLeds = max_leds;
         mBuffer = static_cast<uint8_t*>(calloc(max_leds, is_rgbw ? 4 : 3));
+        allocate_rmt();
+    }
+
+    void allocate_rmt() {
+        assert(!mLedStrip);
         config_led_t config = make_config();
         mLedStrip = construct_new_led_strip(config);
     }
 
+    void release_rmt() {
+        if (mLedStrip) {
+            led_strip_del(mLedStrip, false);
+            mLedStrip = nullptr;
+        }
+    }
+
     virtual ~RmtLedStrip() override {
-        led_strip_del(mLedStrip, false);
+        release_rmt();
         free(mBuffer);
     }
 
@@ -97,9 +109,9 @@ public:
 
 private:
     int mPin;
-    led_strip_handle_t mLedStrip;
-    bool mIsRgbw;
-    uint32_t mMaxLeds;
+    led_strip_handle_t mLedStrip = nullptr;
+    bool mIsRgbw = false;
+    uint32_t mMaxLeds = 0;
     uint8_t* mBuffer = nullptr;
 };
 
