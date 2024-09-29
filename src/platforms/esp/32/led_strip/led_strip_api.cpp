@@ -108,10 +108,10 @@ esp_err_t led_strip_clear(led_strip_handle_t strip)
     return strip->clear(strip);
 }
 
-esp_err_t led_strip_del(led_strip_handle_t strip)
+esp_err_t led_strip_del(led_strip_handle_t strip, bool release_pixel_buffer)
 {
     ESP_RETURN_ON_FALSE(strip, ESP_ERR_INVALID_ARG, TAG, "invalid argument");
-    return strip->del(strip);
+    return strip->del(strip, release_pixel_buffer);
 }
 
 LED_STRIP_NAMESPACE_END

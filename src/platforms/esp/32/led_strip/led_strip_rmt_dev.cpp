@@ -138,6 +138,23 @@ static esp_err_t led_strip_rmt_del(led_strip_t *strip)
     return ESP_OK;
 }
 
+
+static esp_err_t led_strip_rmt_del2(led_strip_t *strip, bool free_pixel_buf)
+{
+    WARN_ON_ERROR(led_strip_rmt_release_channel(strip), TAG, "remove RMT channel failed");
+    WARN_ON_ERROR(led_strip_rmt_release_encoder(strip), TAG, "remove RMT encoder failed");
+    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
+    if (free_pixel_buf) {
+        uint8_t *pixel_buf = rmt_strip->pixel_buf;
+        if (pixel_buf) {
+            free(pixel_buf);
+        }
+    }
+    free(rmt_strip);
+    return ESP_OK;
+}
+
+
 void delete_strip(led_strip_rmt_obj *rmt_strip) {
     if (rmt_strip) {
         if (rmt_strip->rmt_chan) {
@@ -188,11 +205,11 @@ void delete_strip_leave_buffer(led_strip_rmt_obj *rmt_strip) {
         }                                                                                                  \
     } while(0)
 
-static esp_err_t led_strip_new_rmt_device_with_buffer(
+esp_err_t led_strip_new_rmt_device_with_buffer(
         const led_strip_config_t *led_config,
         const led_strip_rmt_config_t *rmt_config,
-        led_strip_handle_t *ret_strip,
-        uint8_t *pixel_buf) {
+        uint8_t *pixel_buf,
+        led_strip_handle_t *ret_strip) {
     led_strip_rmt_obj *rmt_strip = NULL;
     Cleanup cleanup_if_failure(delete_strip_leave_buffer, rmt_strip);
     esp_err_t ret = ESP_OK;
@@ -250,8 +267,7 @@ static esp_err_t led_strip_new_rmt_device_with_buffer(
     rmt_strip->base.set_pixel_rgbw = led_strip_rmt_set_pixel_rgbw;
     rmt_strip->base.refresh = led_strip_rmt_refresh;
     rmt_strip->base.clear = led_strip_rmt_clear;
-    rmt_strip->base.del = led_strip_rmt_del;
-
+    rmt_strip->base.del = led_strip_rmt_del2;
 
     *ret_strip = &rmt_strip->base;
     cleanup_if_failure.release();
@@ -259,7 +275,10 @@ static esp_err_t led_strip_new_rmt_device_with_buffer(
 }
 
 
-esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip)
+esp_err_t led_strip_new_rmt_device(
+        const led_strip_config_t *led_config,
+        const led_strip_rmt_config_t *rmt_config,
+        led_strip_handle_t *ret_strip)
 {
     esp_err_t ret = ESP_OK;
     ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
@@ -267,7 +286,7 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     uint8_t bytes_per_pixel = (led_config->led_pixel_format == LED_PIXEL_FORMAT_GRBW) ? 4 : 3;
     uint8_t* pixel_buf = static_cast<uint8_t*>(calloc(1, led_config->max_leds * bytes_per_pixel));
     ESP_GOTO_ON_FALSE(pixel_buf, ESP_ERR_NO_MEM, err, TAG, "no mem for pixel buffer");
-    ret = led_strip_new_rmt_device_with_buffer(led_config, rmt_config, ret_strip, pixel_buf);
+    ret = led_strip_new_rmt_device_with_buffer(led_config, rmt_config, pixel_buf, ret_strip);
     if (ret != ESP_OK) {
         free(pixel_buf);
     }
@@ -275,7 +294,13 @@ err:
     return ret;
 }
 
-
+esp_err_t led_strip_release_rmt_device(led_strip_handle_t strip, bool release_pixel_buffer) {
+    led_strip_rmt_obj *rmt_strip = __containerof(strip, led_strip_rmt_obj, base);
+    if (!release_pixel_buffer) {
+        rmt_strip->pixel_buf = NULL;
+    }
+    return led_strip_rmt_del(strip);
+}
 
 LED_STRIP_NAMESPACE_END
 

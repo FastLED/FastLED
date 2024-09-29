@@ -88,7 +88,8 @@ void RmtController5::showPixels(PixelIterator &pixels) {
     }
     ESP_ERROR_CHECK(led_strip_refresh(led_strip));
     // tear down the led strip to allow it to be used elsewhere
-    led_strip_del(led_strip);
+    bool release_pixel_buffer = true;
+    led_strip_del(led_strip, release_pixel_buffer);
 }
 
 #endif  // FASTLED_RMT51

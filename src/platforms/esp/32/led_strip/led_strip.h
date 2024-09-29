@@ -116,7 +116,7 @@ esp_err_t led_strip_clear(led_strip_handle_t strip);
  *      - ESP_OK: Free resources successfully
  *      - ESP_FAIL: Free resources failed because error occurred
  */
-esp_err_t led_strip_del(led_strip_handle_t strip);
+esp_err_t led_strip_del(led_strip_handle_t strip, bool release_pixel_buffer);
 
 LED_STRIP_NAMESPACE_END
 

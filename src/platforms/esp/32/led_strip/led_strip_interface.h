@@ -86,7 +86,7 @@ struct led_strip_t {
      *      - ESP_OK: Free resources successfully
      *      - ESP_FAIL: Free resources failed because error occurred
      */
-    esp_err_t (*del)(led_strip_t *strip);
+    esp_err_t (*del)(led_strip_t *strip, bool release_pixel_buffer);
 };
 
 LED_STRIP_NAMESPACE_END

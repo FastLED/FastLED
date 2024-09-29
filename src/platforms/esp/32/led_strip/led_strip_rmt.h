@@ -45,8 +45,19 @@ typedef struct {
  *      - ESP_ERR_NO_MEM: create LED strip handle failed because of out of memory
  *      - ESP_FAIL: create LED strip handle failed because some other error
  */
-esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const led_strip_rmt_config_t *rmt_config, led_strip_handle_t *ret_strip);
+esp_err_t led_strip_new_rmt_device(
+        const led_strip_config_t *led_config,
+        const led_strip_rmt_config_t *rmt_config,
+        led_strip_handle_t *ret_strip);
 
+// Create a new led strip with a pre-allocated pixel buffer.
+esp_err_t led_strip_new_rmt_device_with_buffer(
+        const led_strip_config_t *led_config,
+        const led_strip_rmt_config_t *rmt_config,
+        led_strip_handle_t *ret_strip,
+        uint8_t *pixel_buf);
 
+// release_pixel_buffer is true then the pixel buffer will also be freed.
+esp_err_t led_strip_release_rmt_device(led_strip_handle_t strip, bool release_pixel_buffer);
 
 LED_STRIP_NAMESPACE_END
