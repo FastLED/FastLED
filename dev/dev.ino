@@ -4,13 +4,13 @@
 #include <iostream>
 
 // How many leds in your strip?
-#define NUM_LEDS 100
+#define NUM_LEDS 10
 
 // For led chips like WS2812, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
 // ground, and power), like the LPD8806 define both DATA_PIN and CLOCK_PIN
 // Clock pin only needed for SPI based chipsets when not using hardware SPI
-#define DATA_PIN 9
+#define DATA_PIN 2
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
@@ -21,7 +21,7 @@ CRGB leds[NUM_LEDS];
 #define TIME_FACTOR_VAL 100
 
 #define DELAY 200
-#define BRIGHNESS 128
+#define BRIGHNESS 8
 
 // #define COLOR_ORDER_TEST
 // #define TIMING_TEST

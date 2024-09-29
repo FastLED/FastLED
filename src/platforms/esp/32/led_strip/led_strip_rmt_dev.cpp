@@ -256,9 +256,19 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
 
     ESP_GOTO_ON_ERROR(rmt_new_tx_channel(&rmt_chan_config, &rmt_strip->rmt_chan), err, TAG, "create RMT TX channel failed");
 
+
+    uint32_t reset_ticks = resolution / 1000000 * 280 / 2; // reset code duration defaults to 280us to accomodate WS2812B-V5
+    rmt_symbol_word_t reset_code = {
+        .duration0 = reset_ticks,
+        .level0 = 0,
+        .duration1 = reset_ticks,
+        .level1 = 0,
+    };
+
     led_strip_encoder_config_t strip_encoder_conf = {
         .resolution = resolution,
-        .bytes_encoder_config = led_config->rmt_bytes_encoder_config
+        .bytes_encoder_config = led_config->rmt_bytes_encoder_config,
+        .reset_code = reset_code
     };
     ESP_GOTO_ON_ERROR(rmt_new_led_strip_encoder(&strip_encoder_conf, &rmt_strip->strip_encoder), err, TAG, "create LED strip encoder failed");
 
