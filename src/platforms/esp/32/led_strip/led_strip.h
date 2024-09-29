@@ -96,6 +96,39 @@ esp_err_t led_strip_set_pixel_hsv(led_strip_handle_t strip, uint32_t index, uint
  */
 esp_err_t led_strip_refresh(led_strip_handle_t strip);
 
+
+/**
+ * @brief Refresh memory colors to LEDs asynchronously
+ *
+ * @param strip: LED strip
+ *
+ * @return
+ *      - ESP_OK: Asynchronous refresh started successfully
+ *      - ESP_FAIL: Asynchronous refresh failed to start because some other error occurred
+ *
+ * @note:
+ *      This function starts the refresh process asynchronously. It returns immediately without waiting for the refresh to complete.
+ *      Use led_strip_wait_refresh_done to wait for the refresh to finish.
+ */
+esp_err_t led_strip_refresh_async(led_strip_handle_t strip);
+
+/**
+ * @brief Wait for an asynchronous refresh operation to complete
+ *
+ * @param strip: LED strip
+ * @param timeout_ms: Timeout in milliseconds to wait for the refresh to complete
+ *
+ * @return
+ *      - ESP_OK: Refresh completed successfully within the timeout period
+ *      - ESP_ERR_TIMEOUT: Refresh did not complete within the specified timeout
+ *      - ESP_FAIL: Waiting for refresh completion failed because some other error occurred
+ *
+ * @note:
+ *      This function blocks until the asynchronous refresh operation completes or the timeout is reached.
+ *      It should be called after led_strip_refresh_async to ensure the refresh process has finished.
+ */
+esp_err_t led_strip_wait_refresh_done(led_strip_handle_t strip, uint32_t timeout_ms);
+
 /**
  * @brief Clear LED strip (turn off all LEDs)
  *

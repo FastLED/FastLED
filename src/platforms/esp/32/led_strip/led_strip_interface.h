@@ -65,6 +65,10 @@ struct led_strip_t {
      */
     esp_err_t (*refresh)(led_strip_t *strip);
 
+    esp_err_t (*refresh_async)(led_strip_t *strip);
+
+    esp_err_t (*wait_refresh_done)(led_strip_t *strip, int32_t timeout_ms);
+
     /**
      * @brief Clear LED strip (turn off all LEDs)
      *
