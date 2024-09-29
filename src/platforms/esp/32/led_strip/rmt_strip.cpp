@@ -124,7 +124,10 @@ public:
             acquire_rmt();
         }
         draw_async();
+    }
 
+    virtual void wait_for_draw_complete() override {
+        release_rmt();
     }
 
     virtual uint32_t num_pixels() const {

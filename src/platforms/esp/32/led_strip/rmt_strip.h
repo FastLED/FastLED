@@ -10,7 +10,12 @@ public:
     virtual ~IRmtLedStrip() = default;
     virtual void set_pixel(uint32_t i, uint8_t r, uint8_t g, uint8_t b) = 0;
     virtual void set_pixel_rgbw(uint32_t i, uint8_t r, uint8_t g, uint8_t b, uint8_t w) = 0;
+    
+    // Non-blocking draw if and only if the number of strips is less than the number of channels.
     virtual void draw() = 0;
+
+    virtual void wait_for_draw_complete() = 0;
+
     virtual uint32_t num_pixels() const = 0;
 };
 
