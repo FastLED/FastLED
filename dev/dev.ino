@@ -24,7 +24,7 @@ CRGB leds[NUM_LEDS];
 #define BRIGHNESS 128
 
 // #define COLOR_ORDER_TEST
-#define TIMING_TEST
+// #define TIMING_TEST
 
 void setup() {
     Serial.begin(115200);

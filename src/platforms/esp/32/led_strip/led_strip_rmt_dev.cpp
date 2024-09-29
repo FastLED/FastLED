@@ -24,6 +24,8 @@
 #include "led_strip_interface.h"
 #include "led_strip_rmt_encoder.h"
 
+#define INTERRUPT_PRIORITY 3  // maximum priority level for RMT interrupt
+
 #define LED_STRIP_RMT_DEFAULT_RESOLUTION 10000000 // 10MHz resolution
 #define LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE 4
 // the memory size of each RMT channel, in words (4 bytes)
@@ -256,6 +258,7 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
         .resolution_hz = resolution,
         .mem_block_symbols = mem_block_symbols,
         .trans_queue_depth = LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,
+        .intr_priority = INTERRUPT_PRIORITY,
         //.flags.with_dma = rmt_config->flags.with_dma,
         //.flags.invert_out = led_config->flags.invert_out,
         .flags = {
