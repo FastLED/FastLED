@@ -31,12 +31,23 @@ public:
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
+
+    virtual void* beginShowLeds() override {
+        void* data = CPixelLEDController<RGB_ORDER>::beginShowLeds();
+        mRMTController.waitForDrawComplete();
+        return data;
+    }
+
     // -- Show pixels
     //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels)
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
         PixelIterator iterator = pixels.as_iterator(this->getRgbw());
         mRMTController.loadPixelData(iterator);
+    }
+
+    virtual void endShowLeds(void* data) override {
+        CPixelLEDController<RGB_ORDER>::endShowLeds(data);
         mRMTController.showPixels();
     }
 };

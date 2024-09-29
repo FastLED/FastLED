@@ -29,15 +29,18 @@ RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3)
 }
 
 RmtController5::~RmtController5() {
-    // Stub implementation
-    ESP_LOGI(TAG, "RmtController5 destructor called");
     if (mLedStrip) {
         delete mLedStrip;
     }
 }
 
+void RmtController5::waitForDrawComplete() {
+    if (mLedStrip) {
+        mLedStrip->wait_for_draw_complete();
+    }
+}
+
 void RmtController5::loadPixelData(PixelIterator &pixels) {
-    ESP_LOGI(TAG, "showPixels called");
     const bool is_rgbw = pixels.get_rgbw().active();
     if (!mLedStrip) {
         uint16_t t0h, t0l, t1h, t1l;

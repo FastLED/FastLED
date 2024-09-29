@@ -29,6 +29,7 @@ public:
 
     void loadPixelData(PixelIterator &pixels);
     void showPixels();
+    void waitForDrawComplete();
 
 private:
     int mPin;
