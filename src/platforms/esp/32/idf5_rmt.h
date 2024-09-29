@@ -2,7 +2,7 @@
 
 #include "led_strip/enabled.h"
 
-#if FASTLED_RMT51
+#if FASTLED_RMT5
 
 #include "pixel_iterator.h"
 #include <stdint.h>
@@ -39,5 +39,5 @@ private:
 
 
 
-#endif  // FASTLED_RMT51
+#endif  // FASTLED_RMT5
 

@@ -1,7 +1,7 @@
 
 #include "led_strip/enabled.h"
 
-#if FASTLED_RMT51
+#if FASTLED_RMT5
 
 #include <assert.h>
 #include "idf5_rmt.h"
@@ -74,5 +74,5 @@ void RmtController5::showPixels() {
     mLedStrip->draw();
 }
 
-#endif  // FASTLED_RMT51
+#endif  // FASTLED_RMT5
 

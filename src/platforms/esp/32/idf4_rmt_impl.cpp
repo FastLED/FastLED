@@ -5,7 +5,7 @@
 
 #include "led_strip/enabled.h"
 
-#if !FASTLED_RMT51
+#if !FASTLED_RMT5
 
 
 // Inlines the rmt_set_tx_intr_en function to avoid the overhead of a function call
@@ -934,7 +934,7 @@ void ESP32RMTController::ingest(uint8_t byteval)
 
 #pragma GCC diagnostic pop
 
-#endif // FASTLED_RMT51
+#endif // FASTLED_RMT5
 
 #endif // ! FASTLED_ESP32_I2S
 

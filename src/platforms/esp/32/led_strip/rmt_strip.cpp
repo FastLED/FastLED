@@ -2,7 +2,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_RMT51
+#if FASTLED_RMT5
 
 #include "rmt_strip.h"
 #include "esp_log.h"
@@ -136,6 +136,6 @@ IRmtLedStrip* create_rmt_led_strip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uin
 
 LED_STRIP_NAMESPACE_END
 
-#endif  // FASTLED_RMT51
+#endif  // FASTLED_RMT5
 
 #endif  // ESP32

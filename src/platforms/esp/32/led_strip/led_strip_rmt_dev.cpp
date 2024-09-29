@@ -8,7 +8,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_RMT51
+#if FASTLED_RMT5
 
 #include <stdlib.h>
 #include <string.h>
@@ -307,6 +307,6 @@ esp_err_t led_strip_release_rmt_device(led_strip_handle_t strip, bool release_pi
 
 LED_STRIP_NAMESPACE_END
 
-#endif // FASTLED_RMT51
+#endif // FASTLED_RMT5
 
 #endif // ESP32

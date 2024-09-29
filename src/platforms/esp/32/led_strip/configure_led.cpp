@@ -3,7 +3,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_RMT51
+#if FASTLED_RMT5
 
 #include "configure_led.h"
 #include "esp_log.h"
@@ -51,6 +51,6 @@ led_strip_handle_t construct_new_led_strip(config_led_t config) {
 LED_STRIP_NAMESPACE_END
 
 
-#endif // FASTLED_RMT51
+#endif // FASTLED_RMT5
 
 #endif // ESP32

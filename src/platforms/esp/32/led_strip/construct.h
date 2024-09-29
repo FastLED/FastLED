@@ -2,7 +2,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_RMT51
+#if FASTLED_RMT5
 
 #include <stdint.h>
 #include "namespace.h"
@@ -16,4 +16,4 @@ led_strip_handle_t construct_led_strip(
 
 LED_STRIP_NAMESPACE_END
 
-#endif // FASTLED_RMT51
+#endif // FASTLED_RMT5

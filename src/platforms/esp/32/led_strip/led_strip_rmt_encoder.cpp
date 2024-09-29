@@ -8,7 +8,7 @@
 
 #include "enabled.h"
 
-#if FASTLED_RMT51
+#if FASTLED_RMT5
 
 #include "enabled.h"
 
@@ -167,6 +167,6 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
 
 LED_STRIP_NAMESPACE_END
 
-#endif // FASTLED_RMT51
+#endif // FASTLED_RMT5
 
 #endif // ESP32
