@@ -40,13 +40,12 @@ def parse_args():
         default="Blink",
         help="Example to compile (default: Blink)",
     )
-    args, unknown = parser.parse_known_args()
-
-    if unknown:
-        print("Ignoring unknown arguments:")
-        for arg in unknown:
-            print(f"  {arg}")
-
+    parser.add_argument(
+        "extra_args",
+        nargs=argparse.REMAINDER,
+        help="Additional arguments to pass to the compilation command",
+    )
+    args = parser.parse_args()
     return args
 
 
@@ -62,7 +61,7 @@ def main():
             args.board,
             "--examples",
             args.example,
-        ]
+        ] + args.extra_args
         try:
             run_command(cmd_list, shell=True, capture_output=IS_GITHUB, check=True)
         except subprocess.CalledProcessError:
