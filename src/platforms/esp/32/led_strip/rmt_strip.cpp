@@ -72,7 +72,7 @@ public:
         mBuffer = static_cast<uint8_t*>(calloc(max_leds, bytes_per_pixel));
     }
 
-    void allocate_rmt() {
+    void acquire_rmt() {
         assert(!mLedStrip);
         config_led_t config = make_config();
         mLedStrip = construct_new_led_strip(config);
@@ -103,9 +103,13 @@ public:
         mBuffer[i * 4 + 3] = w;
     }
 
-    virtual void draw() override {
-        allocate_rmt();
+    void draw_and_wait_for_completion() {
         ESP_ERROR_CHECK(led_strip_refresh(mLedStrip));
+    }
+
+    virtual void draw() override {
+        acquire_rmt();
+        draw_and_wait_for_completion();
         release_rmt();
     }
 
