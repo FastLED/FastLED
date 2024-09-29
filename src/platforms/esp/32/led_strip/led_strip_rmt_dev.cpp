@@ -274,6 +274,9 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
     *ret_strip = &rmt_strip->base;
     cleanup_if_failure.release();
     return ESP_OK;
+
+err:
+    return ret;
 }
 
 
