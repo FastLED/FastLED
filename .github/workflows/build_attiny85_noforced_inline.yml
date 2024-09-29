@@ -1,4 +1,4 @@
-name: attiny85
+name: attiny85_noforced_inline
 
 on:
   workflow_dispatch:
