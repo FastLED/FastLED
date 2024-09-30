@@ -86,6 +86,13 @@ extern void five_bit_hd_gamma_function(CRGB color,
 void five_bit_hd_gamma_function(CRGB color,
                                 uint16_t *r16, uint16_t *g16, uint16_t *b16);
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_OVERRIDE
+
+
+// exposed for testing:
+void five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5);
+void five_bit_color_bitshift(uint16_t* _r16, uint16_t* _g16, uint16_t* _b16, uint8_t* _v5);
+
+
 FASTLED_NAMESPACE_END
 
 #endif // _FIVE_BIT_HD_GAMMA_H_
