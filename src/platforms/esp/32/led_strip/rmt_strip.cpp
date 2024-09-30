@@ -13,6 +13,8 @@
 
 LED_STRIP_NAMESPACE_BEGIN
 
+#define MAX_RMT_LED_STRIPS 24
+
 #define TAG "rtm_strip.cpp"
 
 #define RMT_ASSERT(x)                  \
@@ -29,10 +31,11 @@ LED_STRIP_NAMESPACE_BEGIN
         }                              \
     }
 
-
-#define MAX_RMT_LED_STRIPS 24
-
 class RmtLedStrip;
+
+
+
+static int gTotalActiveStripsAllowed = -1;  // start off as unknown.
 static RmtLedStrip* gAllRmtLedStrips[MAX_RMT_LED_STRIPS] = {};
 static void add_active_strip(RmtLedStrip* strip) {
     for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
@@ -66,6 +69,24 @@ static int count_active_strips() {
     return count;
 }
 
+static void wait_if_max_number_of_strips_active() {
+    if (gTotalActiveStripsAllowed == -1) {
+        // We don't know the limit yet.
+        return;
+    }
+    if (gTotalActiveStripsAllowed == 0) {
+        // in invalid number of active strips. In this case we just abort
+        // the program.
+        ESP_ERROR_CHECK(ESP_FAIL);
+    }
+    // We've hit the limit before and now the number of known max number
+    // active strips is known and that we are saturated. Therefore we block
+    // the main thread until a strip is available.
+    if (count_active_strips() >= gTotalActiveStripsAllowed) {
+        wait_for_any_strip_to_complete();
+    }
+}
+
 class RmtLedStrip : public IRmtLedStrip {
 public:
     RmtLedStrip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
@@ -86,6 +107,8 @@ public:
         assert(!mLedStrip);
         assert(!mAquired);
 
+        wait_if_max_number_of_strips_active();
+
         do {
             esp_err_t err = construct_led_strip(
                 mT0H, mT0L, mT1H, mT1L, mTRESET,
@@ -101,11 +124,20 @@ public:
             // break;
 
             if (err == ESP_ERR_NOT_FOUND) {  // No free RMT channels yet.
-                if (count_active_strips() == 0) {
+                int active_strips = count_active_strips();
+                if (active_strips == 0) {
                     // If there are no active strips and we don't have any resources then
-                    // this means RMT is not supported on this platform.
+                    // this means RMT is not supported on this platform so we just abort.
                     ESP_ERROR_CHECK(err);
                 }
+                // Update the total number of active strips allowed. Once this value has been
+                // set then it can only decrease. This can happen if the user makes a lot of
+                // rmt devices and then deletes them. We could periodically check the number
+                // and revalidate the gTotalActiveStripsAllowed value if this becomes a problem.
+                // The reason we aren't doing it now is that there is a momentary pause in the
+                // main thread when we hit the rmt channel limit and we don't want to introduce
+                // that delay until it becomes a problem.
+                gTotalActiveStripsAllowed = active_strips;
                 // wait for one of the strips to complete and then try again.
                 wait_for_any_strip_to_complete();
                 continue;
