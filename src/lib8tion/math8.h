@@ -3,6 +3,7 @@
 
 #include "scale8.h"
 #include "lib8tion/lib8static.h"
+#include "intmap.h"
 
 /// @file math8.h
 /// Fast, efficient 8-bit math functions specifically
@@ -545,6 +546,10 @@ LIB8STATIC uint8_t sqrt16(uint16_t x) {
     } while (hi >= low);
 
     return low - 1;
+}
+
+LIB8STATIC_ALWAYS_INLINE uint8_t sqrt8(uint8_t x) {
+    return sqrt16(map8_to_16(x));
 }
 
 /// Blend a variable proportion (0-255) of one byte to another.

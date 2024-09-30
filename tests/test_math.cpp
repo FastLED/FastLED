@@ -7,9 +7,7 @@
 #include "FastLED.h"
 #include "lib8tion/scale8.h"
 #include "lib8tion/intmap.h"
-
-
-
+#include <math.h>
 
 
 TEST_CASE("scale16") {
@@ -56,7 +54,6 @@ TEST_CASE("scale16by8") {
     }
 }
 
-
 TEST_CASE("bit equivalence") {
     // tests that 8bit and 16bit are equivalent
     uint8_t r = 0xff;
@@ -69,3 +66,9 @@ TEST_CASE("bit equivalence") {
     CHECK_EQ(r16 >> 8, r8);
 }
 
+TEST_CASE("sqrt16") {
+    float f = sqrt(.5) * 0xff;
+    uint8_t result = sqrt16(map8_to_16(0xff / 2));
+    CHECK_EQ(int(f), result);
+    CHECK_EQ(sqrt8(0xff / 2), result);
+}

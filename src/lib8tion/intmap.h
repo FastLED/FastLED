@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "namespace.h"
 #include "lib8static.h"
 #include <stdint.h>
