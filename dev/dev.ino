@@ -1,116 +1,84 @@
+/// @file    Apa102HD.ino
+/// @brief   Example showing how to use the APA102HD gamma correction.
+///
+///          In this example we compare two strips of LEDs.
+///          One strip is in HD mode, the other is in software gamma mode.
+///
+///          Each strip is a linear ramp of brightnesses, from 0 to 255.
+///          Showcasing all the different brightnesses.
+///
+///          Why do we love gamma correction? Gamma correction more closely
+///          matches how humans see light. Led values are measured in fractions
+///          of max power output (1/255, 2/255, etc.), while humans see light
+///          in a logarithmic way. Gamma correction converts to this eye friendly
+///          curve. Gamma correction wants a LED with a high bit depth. The APA102
+///          gives us the standard 3 components (red, green, blue) with 8 bits each, it
+///          *also* has a 5 bit brightness component. This gives us a total of 13 bits,
+///          which allows us to achieve a higher dynamic range. This means deeper fades.
+///
+///          Example:
+///            CRGB leds[NUM_LEDS] = {0};
+///            void setup() {
+///              FastLED.addLeds<
+///                APA102HD, // <--- This selects HD mode.
+///                STRIP_0_DATA_PIN,
+///                STRIP_0_CLOCK_PIN,
+///                RGB
+///              >(leds, NUM_LEDS);
+///            }
 
 
+#include <Arduino.h>
 #include <FastLED.h>
-#include <iostream>
+#include <lib8tion.h>
 
-// How many leds in your strip?
-#define NUM_LEDS 10
+#define NUM_LEDS  20
+// uint8_t DATA_PIN, uint8_t CLOCK_PIN,
 
-// For led chips like WS2812, which have a data line, ground, and power, you just
-// need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
-// ground, and power), like the LPD8806 define both DATA_PIN and CLOCK_PIN
-// Clock pin only needed for SPI based chipsets when not using hardware SPI
-#define DATA_PIN 2
+#define STRIP_0_DATA_PIN 9
+#define STRIP_0_CLOCK_PIN 44
+#define STRIP_1_DATA_PIN 1
+#define STRIP_1_CLOCK_PIN 2
 
-// Define the array of leds
-CRGB leds[NUM_LEDS];
 
-// Time scaling factors for each component
-#define TIME_FACTOR_HUE 60
-#define TIME_FACTOR_SAT 100
-#define TIME_FACTOR_VAL 100
+CRGB leds_hd[NUM_LEDS] = {0};  // HD mode implies gamma.
+CRGB leds[NUM_LEDS] = {0};     // Software gamma mode.
 
-#define DELAY 200
-#define BRIGHNESS 8
-
-// #define COLOR_ORDER_TEST
-// #define TIMING_TEST
-#define STRESS_TEST
+// This is the regular gamma correction function that we used to have
+// to do. It's used here to showcase the difference between APA102HD
+// mode which does the gamma correction for you.
+CRGB software_gamma(const CRGB& in) {
+    return in;
+}
 
 void setup() {
-    Serial.begin(115200);
-    FastLED.addLeds<WS2812, 2, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    #ifdef STRESS_TEST
-    FastLED.addLeds<WS2812, 1, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    FastLED.addLeds<WS2812, 3, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    FastLED.addLeds<WS2812, 4, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    FastLED.addLeds<WS2812, 5, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    FastLED.addLeds<WS2812, 6, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    FastLED.addLeds<WS2812, 7, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    FastLED.addLeds<WS2812, 8, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    FastLED.addLeds<WS2812, 9, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    #endif
-    FastLED.setBrightness(BRIGHNESS);  // Set global brightness to 50%
-    delay(2000);  // If something ever goes wrong this delay will allow upload.
+    delay(500); // power-up safety delay
+    // Two strips of LEDs, one in HD mode, one in software gamma mode.
+    FastLED.addLeds<APA102HD, STRIP_0_DATA_PIN, STRIP_0_CLOCK_PIN, RGB>(leds_hd, NUM_LEDS);
+    FastLED.addLeds<APA102,   STRIP_1_DATA_PIN, STRIP_1_CLOCK_PIN, RGB>(leds, NUM_LEDS);
 }
 
-void fill(CRGB color) {
-    for (int i = 0; i < NUM_LEDS; i++) {
-        leds[i] = color;
-    }
-}
-
-void Blink(CRGB color, int times) {
-    for (int i = 0; i < times; i++) {
-        fill(color);
-        FastLED.show();
-        delay(DELAY);
-        fill(CRGB::Black);
-        FastLED.show();
-        delay(DELAY);
-    }
-    delay(DELAY*2);
-}
-
-
-
-
-void blink_loop() {
-    Blink(CRGB::Red, 1);
-    Blink(CRGB::Green, 2);
-    Blink(CRGB::Blue, 3);
-    Blink(CRGB::White, 4);
-    delay(DELAY);
-    // long delay to make the cycle visible
-    delay(DELAY * 4);
-}
-
-void timing_loop() {
-    // Tests how long it takes to set all leds to a single color and draw them
-    FastLED.setBrightness(8);
-    fill(CRGB::White);
-    FastLED.show();
-    uint32_t us = micros();
-    // Serial.printf("Time to set all leds to white: %lu\n", millis() - ms);
-    std::cout << "Microseconds to set all leds to white: " << micros() - us << std::endl;
-    delay(250);  // now allow the leds to draw so that the time can be measured.
-}
-
-void hue_loop() {
-    uint32_t ms = millis();
-    
-    for(int i = 0; i < NUM_LEDS; i++) {
-        // Use different noise functions for each LED and each color component
-        uint8_t hue = inoise16(ms * TIME_FACTOR_HUE, i * 1000, 0) >> 8;
-        uint8_t sat = inoise16(ms * TIME_FACTOR_SAT, i * 2000, 1000) >> 8;
-        uint8_t val = inoise16(ms * TIME_FACTOR_VAL, i * 3000, 2000) >> 8;
-        
-        // Map the noise to full range for saturation and value
-        sat = map(sat, 0, 255, 30, 255);
-        val = map(val, 0, 255, 100, 255);
-        
-        leds[i] = CHSV(hue, sat, val);
-    }
-
-    FastLED.show();
+uint8_t wrap_8bit(int i) {
+    // Module % operator here wraps a large "i" so that it is
+    // always in [0, 255] range when returned. For example, if
+    // "i" is 256, then this will return 0. If "i" is 257
+    // then this will return 1. No matter how big the "i" is, the
+    // output range will always be [0, 255]
+    return i % 256;
 }
 
 void loop() {
-    #ifdef COLOR_ORDER_TEST
-    blink_loop();
-    #elif defined(TIMING_TEST)
-    timing_loop();
-    #else
-    hue_loop();
-    #endif
+    // Draw a a linear ramp of brightnesses to showcase the difference between
+    // the HD and non-HD mode.
+    for (int i = 0; i < 256; ++i) {
+        FastLED.setBrightness(i);
+        for (int i = 0; i < NUM_LEDS; i++) {
+            leds_hd[i] = CRGB(32,64,128);  // The APA102HD leds do their own gamma correction.
+            leds[i] = CRGB(32,64,128);  // Set the software gamma corrected
+                                        // values to the other strip.
+        }
+        FastLED.show();  // All leds are now written out.
+        delay(50);  // Wait 8 milliseconds until the next frame.
+    }
+
 }
