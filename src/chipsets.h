@@ -399,8 +399,11 @@ private:
 		uint8_t brightness;
 		pixels.getHdScale(out_s0, out_s1, out_s2, &brightness);
 		static const uint8_t kMaxValueThisCanBeAppliedTo = 124;
-
-		uint8_t max_component = max(max(*out_s0, *out_s1), *out_s2);
+		struct Math {
+			static uint8_t max(uint8_t a, uint8_t b) { return a > b? a : b; }
+			static uint8_t max3(uint8_t a, uint8_t b, uint8_t c) { return max(max(a, b), c); }
+		};
+		uint8_t max_component = Math::max3(*out_s0, *out_s1, *out_s2);
 		uint8_t five_bit_brightness = 31;
 		if (max_component != 0 && max_component < kMaxValueThisCanBeAppliedTo) {
 			// Brightness steal from 5bit and give it to color scale. This drastically
