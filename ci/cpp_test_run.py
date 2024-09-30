@@ -1,8 +1,17 @@
 import os
 import subprocess
 import sys
+from dataclasses import dataclass
 
 from ci.paths import PROJECT_ROOT
+
+
+@dataclass
+class FailedTest:
+    name: str
+    return_code: int
+    stdout: str
+    stderr: str
 
 
 def run_command(command):
@@ -32,7 +41,7 @@ def run_tests():
         sys.exit(1)
 
     print("Running tests...")
-    failed_tests: list[str] = []
+    failed_tests: list[FailedTest] = []
     for test_file in os.listdir(test_dir):
         test_path = os.path.join(test_dir, test_file)
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
@@ -48,10 +57,18 @@ def run_tests():
             )
             print("-" * 40)
             if return_code != 0:
-                failed_tests.append(test_file)
+                failed_tests.append(FailedTest(test_file, return_code, stdout, stderr))
     if failed_tests:
         for failed_test in failed_tests:
-            print(f"Failed test: {failed_test}")
+            print(
+                f"Test {failed_test.name} failed with return code {failed_test.return_code}\n{failed_test.stdout}"
+            )
+        tests_failed = len(failed_tests)
+        failed_test_names = [test.name for test in failed_tests]
+        # print(f"{tests_failed} test{'s' if tests_failed != 1 else ''} failed.")
+        print(
+            f"{tests_failed} test{'s' if tests_failed != 1 else ''} failed: {', '.join(failed_test_names)}"
+        )
         sys.exit(1)
     print("All tests passed.")
 
