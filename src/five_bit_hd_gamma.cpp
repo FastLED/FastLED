@@ -70,6 +70,11 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 
 bool five_bit_bitshift_brightness(uint8_t *_brightness, uint8_t *_v5) {
     const uint8_t brightness = *_brightness;
+    if (brightness > 123) {
+        // This function is a no-op if brightness is above max value that this
+        // function can handle.
+        return false;
+    }
     uint8_t v5 = *_v5;
     uint32_t numerator = 1;
     uint16_t denominator = 1; // can hold all possible denominators for v5.
@@ -84,7 +89,7 @@ bool five_bit_bitshift_brightness(uint8_t *_brightness, uint8_t *_v5) {
         uint32_t next_brightness_times_numerator = brightness;
         next_brightness_times_numerator *= next_numerator;
         // Check for overflow
-        if (next_brightness_times_numerator > denominator * 0xff) {
+        if (brightness * next_numerator > 0xff * next_denominator) {
             break;
         }
 
