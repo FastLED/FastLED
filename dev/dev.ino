@@ -29,9 +29,9 @@ CRGB leds[NUM_LEDS];
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812, 1, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
-    #ifdef STRESS_TEST
     FastLED.addLeds<WS2812, 2, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    #ifdef STRESS_TEST
+    FastLED.addLeds<WS2812, 1, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
     FastLED.addLeds<WS2812, 3, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
     FastLED.addLeds<WS2812, 4, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
     FastLED.addLeds<WS2812, 5, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
