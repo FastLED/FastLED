@@ -1,9 +1,9 @@
 #pragma once
 
 #include <stdint.h>
-#include "namespace.h"
 
-LED_STRIP_NAMESPACE_BEGIN
+
+namespace fastled_rmt51_strip {
 
 class IRmtLedStrip {
 public:
@@ -24,4 +24,4 @@ IRmtLedStrip* create_rmt_led_strip(
         uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET, // Timing is in nanoseconds
         int pin, uint32_t max_leds, bool is_rgbw);
 
-LED_STRIP_NAMESPACE_END
+}

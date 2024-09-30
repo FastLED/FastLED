@@ -9,8 +9,8 @@
 #include "led_strip_types.h"
 #include "driver/rmt_encoder.h"
 
-#include "namespace.h"
-LED_STRIP_NAMESPACE_BEGIN
+
+namespace fastled_rmt51_strip {
 
 
 /**
@@ -34,4 +34,4 @@ typedef struct {
  */
 esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder);
 
-LED_STRIP_NAMESPACE_END
+}

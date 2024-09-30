@@ -9,11 +9,12 @@
 #include "configure_led.h"
 #include "construct.h"
 #include "esp_check.h"
-#include "namespace.h"
 
-LED_STRIP_NAMESPACE_BEGIN
+#include "rmt_strip_group.h"
 
-#define MAX_RMT_LED_STRIPS 24
+namespace fastled_rmt51_strip {
+
+
 
 #define TAG "rtm_strip.cpp"
 
@@ -32,94 +33,7 @@ LED_STRIP_NAMESPACE_BEGIN
     }
 
 
-class RmtActiveStripGroup {
-public:
-    static RmtActiveStripGroup& instance() {
-        static RmtActiveStripGroup instance;
-        return instance;
-    }
 
-    void add(IRmtLedStrip* strip) {
-        for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
-            if (mAllRmtLedStrips[i] == nullptr) {
-                mAllRmtLedStrips[i] = strip;
-                return;
-            }
-        }
-        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
-    }
-
-    void remove(IRmtLedStrip* strip) {
-        int found_idx = -1;
-        for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
-            if (mAllRmtLedStrips[i] == strip) {
-                mAllRmtLedStrips[i] = nullptr;
-                found_idx = i;
-            }
-        }
-        if (found_idx == -1) {
-            ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
-        }
-        // We want no gaps in the array so that we can only wait on the oldest
-        // element, which will be towards the front. Newest elements will be
-        // towards the back.
-        for (int i = found_idx; i < MAX_RMT_LED_STRIPS - 1; i++) {
-            mAllRmtLedStrips[i] = mAllRmtLedStrips[i + 1];
-        }
-        mAllRmtLedStrips[MAX_RMT_LED_STRIPS - 1] = nullptr;
-    }
-
-    void wait_for_any_strip_to_release() {
-        for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
-            if (mAllRmtLedStrips[i]) {
-                mAllRmtLedStrips[i]->wait_for_draw_complete();
-            }
-        }
-    }
-
-    int count_active() {
-        int count = 0;
-        for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
-            if (mAllRmtLedStrips[i]) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    void wait_if_max_number_active() {
-        if (mTotalActiveStripsAllowed == -1) {
-            // We don't know the limit yet.
-            return;
-        }
-        if (mTotalActiveStripsAllowed == 0) {
-            // in invalid number of active strips. In this case we just abort
-            // the program.
-            ESP_ERROR_CHECK(ESP_FAIL);
-        }
-        // We've hit the limit before and now the number of known max number
-        // active strips is known and that we are saturated. Therefore we block
-        // the main thread until a strip is available.
-        if (count_active() >= mTotalActiveStripsAllowed) {
-            wait_for_any_strip_to_release();
-        }
-    }
-
-    void set_total_allowed(int value) {
-        mTotalActiveStripsAllowed = value;
-    }
-
-    int get_total_allowed() const {
-        return mTotalActiveStripsAllowed;
-    }
-
-private:
-    RmtActiveStripGroup() : mTotalActiveStripsAllowed(-1) {}
-    RmtActiveStripGroup(const RmtActiveStripGroup&) = delete;
-    RmtActiveStripGroup& operator=(const RmtActiveStripGroup&) = delete;
-    int mTotalActiveStripsAllowed;
-    IRmtLedStrip* mAllRmtLedStrips[MAX_RMT_LED_STRIPS] = {};
-};
 
 class RmtLedStrip : public IRmtLedStrip {
 public:
@@ -256,7 +170,7 @@ IRmtLedStrip* create_rmt_led_strip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uin
     return new RmtLedStrip(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
 }
 
-LED_STRIP_NAMESPACE_END
+}
 
 #endif  // FASTLED_RMT5
 

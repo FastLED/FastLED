@@ -18,8 +18,8 @@
 #error "This library is only designed to run on ESP-IDF v5.0.0 and later"
 #endif
 
-#include "namespace.h"
-LED_STRIP_NAMESPACE_BEGIN
+
+namespace fastled_rmt51_strip {
 
 /**
  * @brief LED Strip RMT specific configuration
@@ -60,4 +60,4 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
 // release_pixel_buffer is true then the pixel buffer will also be freed.
 esp_err_t led_strip_release_rmt_device(led_strip_handle_t strip, bool release_pixel_buffer);
 
-LED_STRIP_NAMESPACE_END
+}

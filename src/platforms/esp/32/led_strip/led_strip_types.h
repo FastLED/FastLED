@@ -7,9 +7,9 @@
 
 #include <stdint.h>
 #include "driver/rmt_encoder.h"
-#include "namespace.h"
 
-LED_STRIP_NAMESPACE_BEGIN
+
+namespace fastled_rmt51_strip {
 
 /**
  * @brief LED strip pixel format
@@ -54,4 +54,4 @@ typedef struct {
 
 } led_strip_config_t;
 
-LED_STRIP_NAMESPACE_END
+}

@@ -9,7 +9,7 @@
 #include "esp_log.h"
 #include <cstring>
 
-LED_STRIP_NAMESPACE_BEGIN
+namespace fastled_rmt51_strip {
 
 #define TAG "construct_new_led_strip.cpp"
 
@@ -46,7 +46,7 @@ esp_err_t construct_new_led_strip(config_led_t config, led_strip_handle_t* ret_s
     return err;
 }
 
-LED_STRIP_NAMESPACE_END
+}
 
 
 #endif // FASTLED_RMT5

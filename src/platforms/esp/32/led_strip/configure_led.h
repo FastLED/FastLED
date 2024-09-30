@@ -2,10 +2,10 @@
 
 #include <stdint.h>
 #include "led_strip.h"
-#include "namespace.h"
+
 #include "defs.h"
 
-LED_STRIP_NAMESPACE_BEGIN
+namespace fastled_rmt51_strip {
 
 struct config_led_t {
     int pin;
@@ -23,4 +23,4 @@ struct config_led_t {
 
 esp_err_t construct_new_led_strip(config_led_t config, led_strip_handle_t* ret_strip);
 
-LED_STRIP_NAMESPACE_END
+}

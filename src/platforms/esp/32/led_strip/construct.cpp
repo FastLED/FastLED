@@ -3,7 +3,7 @@
 
 #if FASTLED_RMT5
 
-#include "namespace.h"
+
 
 #include "rmt_strip.h"
 #include "led_strip.h"
@@ -12,7 +12,7 @@
 #include "led_strip_types.h"
 #include "defs.h"
 
-LED_STRIP_NAMESPACE_BEGIN
+namespace fastled_rmt51_strip {
 
 #define TAG "construct.cpp"
 
@@ -102,6 +102,6 @@ esp_err_t construct_led_strip(
     return err;
 }
 
-LED_STRIP_NAMESPACE_END
+}
 
 #endif // FASTLED_RMT5

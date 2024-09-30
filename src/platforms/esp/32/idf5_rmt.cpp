@@ -10,7 +10,7 @@
 #include "led_strip/configure_led.h"
 #include "led_strip/rmt_strip.h"
 
-USING_NAMESPACE_LED_STRIP
+using namespace fastled_rmt51_strip;
 
 #define TAG "idf5_rmt.cpp"
 

@@ -17,8 +17,8 @@
 #include "esp_idf_version.h"
 #include "led_strip_interface.h"
 
-#include "namespace.h"
-LED_STRIP_NAMESPACE_BEGIN
+
+namespace fastled_rmt51_strip {
 
 
 typedef struct {
@@ -151,6 +151,6 @@ esp_err_t led_strip_clear(led_strip_handle_t strip);
  */
 esp_err_t led_strip_del(led_strip_handle_t strip, bool release_pixel_buffer);
 
-LED_STRIP_NAMESPACE_END
+}
 
 #endif

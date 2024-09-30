@@ -23,8 +23,8 @@
 #include "led_strip_interface.h"
 
 
-#include "namespace.h"
-LED_STRIP_NAMESPACE_BEGIN
+
+namespace fastled_rmt51_strip {
 
 
 // static const char *TAG = "led_strip";
@@ -124,7 +124,7 @@ esp_err_t led_strip_del(led_strip_handle_t strip, bool release_pixel_buffer)
     return strip->del(strip, release_pixel_buffer);
 }
 
-LED_STRIP_NAMESPACE_END
+}
 
 #endif // FASTLED_RMT5
 

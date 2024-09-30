@@ -8,8 +8,8 @@
 #include <stdint.h>
 #include "esp_err.h"
 
-#include "namespace.h"
-LED_STRIP_NAMESPACE_BEGIN
+
+namespace fastled_rmt51_strip {
 
 typedef struct led_strip_t led_strip_t; /*!< Type of LED strip */
 
@@ -117,4 +117,4 @@ struct led_strip_t {
     esp_err_t (*del)(led_strip_t *strip, bool release_pixel_buffer);
 };
 
-LED_STRIP_NAMESPACE_END
+}

@@ -24,8 +24,8 @@
 #include "led_strip_rmt_encoder.h"
 #include "cleanup.h"
 
-#include "namespace.h"
-LED_STRIP_NAMESPACE_BEGIN
+
+namespace fastled_rmt51_strip {
 
 #define TAG "led_strip"
 
@@ -165,7 +165,7 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
 #pragma GCC diagnostic pop
 
 
-LED_STRIP_NAMESPACE_END
+}
 
 #endif // FASTLED_RMT5
 
