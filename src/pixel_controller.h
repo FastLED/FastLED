@@ -18,18 +18,9 @@
 #include "eorder.h"
 #include "dither_mode.h"
 #include "pixel_iterator.h"
-
+#include "crgb.h"
 
 FASTLED_NAMESPACE_BEGIN
-
-// Whether to allow HD_COLOR_MIXING
-#ifndef FASTLED_HD_COLOR_MIXING
-#ifdef __AVR__
-#define FASTLED_HD_COLOR_MIXING 0
-#else
-#define FASTLED_HD_COLOR_MIXING 1
-#endif  // __AVR__
-#endif  // FASTLED_HD_COLOR_MIXING
 
 
 /// Gets the assigned color channel for a byte's position in the output,

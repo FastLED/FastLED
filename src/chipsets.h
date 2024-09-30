@@ -6,6 +6,7 @@
 #include "five_bit_hd_gamma.h"
 #include "force_inline.h"
 #include "pixel_iterator.h"
+#include "crgb.h"
 
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
@@ -24,11 +25,6 @@
  #endif  // FASTLED_TEENSY4
 #endif  // FASTLED_CLOCKLESS_USES_NANOSECONDS
 
-
-// When true, applies APA102 HD GLOBAL BRIGHTNESS scaling to RGB data.
-#ifndef FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS
-#define FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS 0
-#endif  // FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS
 
 /// @file chipsets.h
 /// Contains the bulk of the definitions for the various LED chipsets supported.
@@ -399,7 +395,7 @@ private:
 	static inline void getGlobalBrightnessAndScalingFactors(
 		    PixelIterator& pixels,
 		    uint8_t* out_s0, uint8_t* out_s1, uint8_t* out_s2, uint8_t* out_brightness) {
-#if FASTLED_HD_COLOR_MIXING && FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS
+#if FASTLED_HD_COLOR_MIXING
 		uint8_t brightness;
 		pixels.getHdScale(out_s0, out_s1, out_s2, &brightness);
 		*out_brightness = map8(brightness, 0, 31);
@@ -421,7 +417,7 @@ private:
 		*out_s1 = s1;
 		*out_s2 = s2;
 		*out_brightness = static_cast<uint8_t>(brightness);
-#endif  // FASTLED_HD_COLOR_MIXING && FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS
+#endif  // FASTLED_HD_COLOR_MIXING
 	}
 
 	// Legacy showPixels implementation.

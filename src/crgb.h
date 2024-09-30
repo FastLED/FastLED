@@ -8,6 +8,16 @@
 #include "lib8tion/types.h"
 #include "force_inline.h"
 
+// Whether to allow HD_COLOR_MIXING
+#ifndef FASTLED_HD_COLOR_MIXING
+#ifdef __AVR__
+// Saves some memory on these constrained devices.
+#define FASTLED_HD_COLOR_MIXING 0
+#else
+#define FASTLED_HD_COLOR_MIXING 1
+#endif  // __AVR__
+#endif  // FASTLED_HD_COLOR_MIXING
+
 FASTLED_NAMESPACE_BEGIN
 
 struct CRGB;

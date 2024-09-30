@@ -75,7 +75,6 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
 
   SUBCASE("Sanity test for defines") {
     CHECK_EQ(FASTLED_HD_COLOR_MIXING, 1);
-    CHECK_EQ(FASTLED_APA102_USES_HD_GLOBAL_BRIGHTNESS, 1);
   }
 
   SUBCASE("Randomized Power Matching Test for 5 bit power") {
