@@ -1,13 +1,13 @@
 
 
 #define FASTLED_INTERNAL 1
-#include "FastLED.h"
 #include "five_bit_hd_gamma.h"
+#include "FastLED.h"
 
 #include "fastled_progmem.h"
-#include "lib8tion/scale8.h"
 #include "lib8tion/intmap.h"
 #include "lib8tion/math8.h"
+#include "lib8tion/scale8.h"
 #include "namespace.h"
 
 // Author: Zach Vorhies
@@ -68,11 +68,11 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 }
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
-bool five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5) {
+bool five_bit_bitshift_brightness(uint8_t *_brightness, uint8_t *_v5) {
     const uint8_t brightness = *_brightness;
     uint8_t v5 = *_v5;
     uint32_t numerator = 1;
-    uint16_t denominator = 1;  // can hold all possible denominators for v5.
+    uint16_t denominator = 1; // can hold all possible denominators for v5.
     // Loop while there is room to adjust brightness
     while (v5 > 1) {
         // Calculate the next reduced value of v5
@@ -102,7 +102,8 @@ bool five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5) {
     return false;
 }
 
-void five_bit_color_bitshift(uint16_t* _r16, uint16_t* _g16, uint16_t* _b16, uint8_t* _v5) {
+bool five_bit_color_bitshift(uint16_t *_r16, uint16_t *_g16, uint16_t *_b16,
+                             uint8_t *_v5) {
 
     // Initialize numerator and denominator for scaling
     uint16_t r16 = *_r16;
@@ -110,7 +111,7 @@ void five_bit_color_bitshift(uint16_t* _r16, uint16_t* _g16, uint16_t* _b16, uin
     uint16_t b16 = *_b16;
     uint8_t v5 = *_v5;
     uint32_t numerator = 1;
-    uint16_t denominator = 1;  // can hold all possible denomintors for v5.
+    uint16_t denominator = 1; // can hold all possible denomintors for v5.
     uint32_t overflow = max3(r16, g16, b16);
 
     // Loop while v5 is greater than 1
@@ -130,7 +131,7 @@ void five_bit_color_bitshift(uint16_t* _r16, uint16_t* _g16, uint16_t* _b16, uin
         v5 = next_v5;
     }
 
-    if (numerator != 1) {  // Signal that a new value was computed.
+    if (numerator != 1) { // Signal that a new value was computed.
         r16 = static_cast<uint16_t>((r16 * numerator) / denominator);
         g16 = static_cast<uint16_t>((g16 * numerator) / denominator);
         b16 = static_cast<uint16_t>((b16 * numerator) / denominator);
@@ -138,7 +139,9 @@ void five_bit_color_bitshift(uint16_t* _r16, uint16_t* _g16, uint16_t* _b16, uin
         *_g16 = g16;
         *_b16 = b16;
         *_v5 = v5;
+        return true;
     }
+    return false;
 }
 
 void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
@@ -181,35 +184,20 @@ void __builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
                                           CRGB *out_colors,
                                           uint8_t *out_power_5bit) {
 
-    // Step 0: Scale the color channels brightness trading between global_brightness
-    // and the color scale.
-    #if FASTLED_HD_COLOR_MIXING
-    if (global_brightness < 64) {
-        // Swap bytes, experimentally determined to help the color balance
-        // at low global brightness levels. Figure out why.
-        uint8_t numerator = max3(colors_scale.r, colors_scale.g, colors_scale.b);
-        uint16_t denominator = numerator >> 1;
-        colors_scale.r = static_cast<uint8_t>((colors_scale.r * denominator) / numerator);
-        colors_scale.g = static_cast<uint8_t>((colors_scale.g * denominator) / numerator);
-        colors_scale.b = static_cast<uint8_t>((colors_scale.b * denominator) / numerator);
-        global_brightness = static_cast<uint8_t>(uint16_t(global_brightness) * numerator / denominator);
-    }
-    #endif
-
     // Step 1: Gamma Correction
     uint16_t r16, g16, b16;
-        five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
+    five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
 
     // Step 2: Color correction step comes after gamma correction. These values
     // are assumed to be be relatively close to 255.
-        if (colors_scale.r != 0xff) {
-            r16 = scale16by8(r16, colors_scale.r);
-        }
-        if (colors_scale.g != 0xff) {
-            g16 = scale16by8(g16, colors_scale.g);
-        }
-        if (colors_scale.b != 0xff) {
-            b16 = scale16by8(b16, colors_scale.b);
+    if (colors_scale.r != 0xff) {
+        r16 = scale16by8(r16, colors_scale.r);
+    }
+    if (colors_scale.g != 0xff) {
+        g16 = scale16by8(g16, colors_scale.g);
+    }
+    if (colors_scale.b != 0xff) {
+        b16 = scale16by8(b16, colors_scale.b);
     }
 
     five_bit_bitshift(r16, g16, b16, global_brightness, out_colors,

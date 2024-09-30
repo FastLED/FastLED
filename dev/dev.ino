@@ -70,15 +70,16 @@ uint8_t wrap_8bit(int i) {
 void loop() {
     // Draw a a linear ramp of brightnesses to showcase the difference between
     // the HD and non-HD mode.
-    for (int i = 0; i < 256; ++i) {
+    for (int i = 0; i < 32; ++i) {
         FastLED.setBrightness(i);
+        static const int denom = 2;
         for (int i = 0; i < NUM_LEDS; i++) {
-            leds_hd[i] = CRGB(32,64,128);  // The APA102HD leds do their own gamma correction.
-            leds[i] = CRGB(32,64,128);  // Set the software gamma corrected
+            leds_hd[i] = CRGB(32/denom,64/denom,128/denom);  // The APA102HD leds do their own gamma correction.
+            leds[i] = CRGB(32/denom,64/denom,128/denom);  // Set the software gamma corrected
                                         // values to the other strip.
         }
         FastLED.show();  // All leds are now written out.
-        delay(50);  // Wait 8 milliseconds until the next frame.
+        delay(500);  // Wait 8 milliseconds until the next frame.
     }
 
 }
