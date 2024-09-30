@@ -25,10 +25,21 @@ CRGB leds[NUM_LEDS];
 
 // #define COLOR_ORDER_TEST
 // #define TIMING_TEST
+// #define STRESS_TEST
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812, DATA_PIN, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 1, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    #ifdef STRESS_TEST
+    FastLED.addLeds<WS2812, 2, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 3, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 4, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 5, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 6, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 7, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 8, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 9, BRG>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+    #endif
     FastLED.setBrightness(BRIGHNESS);  // Set global brightness to 50%
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
