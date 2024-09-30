@@ -39,6 +39,10 @@ typedef int8_t    sfract7;
 /// Should be interpreted as unsigned 65536ths.
 typedef uint16_t  fract16;
 
+typedef int32_t   sfract31; ///< ANSI: signed long _Fract. 31 bits int, 1 bit fraction
+
+typedef uint32_t  fract32;   ///< ANSI: unsigned long _Fract. 32 bits int, 32 bits fraction
+
 /// ANSI: signed _Fract.
 /// Range is -0.99996948242 to 0.99996948242 in steps of 0.00003051757.  
 /// Should be interpreted as signed 32768ths.
