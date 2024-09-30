@@ -1,0 +1,3 @@
+To run tests use
+
+`uv run ci/cpp_test_run.py`
