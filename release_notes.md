@@ -1,5 +1,19 @@
 FastLED 3.8.0
 =============
+* ESP32 RMT5 Driver Implemented.
+  * Driver crashes on boot should now be solved.
+  * Parallel AND async.
+    * Drive up to 8 channels in parralel (more, for future boards) with graceful failback
+      if you sketch allocates some of them.
+        * In the 3.7.X series the total number of RMT channels was limited to 4.
+    * async mode means FastLED.show() returns immediately if RMT channels are ready for new
+      data. This means you can compute the next frame while the current frame is being drawn.
+  * Flicker with WIFI *should* be solved. The new RMT 5.1 driver features
+    large DMA buffers and deep transaction queues to prevent underflow conditions.
+  * Memory efficient streaming encoding. As a result the "one shot" encoder no longer
+    exists for the RMT5 driver. But may be added back at a future date if people want it.
+  * If for some reason the RMT5 driver doesn't work for you then use the following define
+    * FASTLED_RMT5=0 to get back the old behavior.
 * New APA102 global brightness algorithm
   * APA102
   * APA102HD
