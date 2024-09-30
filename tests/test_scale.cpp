@@ -30,6 +30,27 @@ TEST_CASE("scale16") {
     }
 }
 
+TEST_CASE("scale32") {
+    CHECK_EQ(scale32(0, 0), 0);
+    CHECK_EQ(scale32(0, 1), 0);
+    CHECK_EQ(scale32(1, 0), 0);
+    CHECK_EQ(scale32(0xffffffff, 0xffffffff), 0xffffffff);
+    CHECK_EQ(scale32(0xffffffff, 0xffffffff >> 1), 0xffffffff >> 1);
+    CHECK_EQ(scale32(0xffffffff >> 1, 0xffffffff >> 1), 0xffffffff >> 2);
+
+    for (int i = 0; i < 32; ++i) {
+        for (int j = 0; j < 32; ++j) {
+            int total_bitshift = i + j;
+            if (total_bitshift > 31) {
+                break;
+            }
+            // print out info if this test fails to capture the i,j values that are failing
+            INFO("i: " << i << " j: " << j << " total_bitshift: " << total_bitshift);
+            CHECK_EQ(scale32(0xffffffff >> i, 0xffffffff >> j), 0xffffffff >> total_bitshift);
+        }
+    }
+}
+
 TEST_CASE("scale16by8") {
     CHECK_EQ(scale16by8(0, 0), 0);
     CHECK_EQ(scale16by8(0, 1), 0);

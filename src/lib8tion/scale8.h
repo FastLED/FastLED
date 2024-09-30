@@ -519,6 +519,15 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
 #endif
 }
 
+LIB8STATIC uint32_t scale32(uint32_t i, fract32 scale) {
+    uint32_t result;
+#if FASTLED_SCALE8_FIXED == 1
+    result = ((uint64_t)(i) * (1 + (uint64_t)(scale))) / (static_cast<uint64_t>(0xffffffff) + 1);
+#else
+    result = ((uint64_t)(i) * (uint64_t)(scale)) / (static_cast<uint64_t>(0xffffffff) + 1);
+#endif
+}
+
 /// Scale a 16-bit unsigned value by an 16-bit value, which is treated
 /// as the numerator of a fraction whose denominator is 65536.
 /// In other words, it computes i * (scale / 65536)
