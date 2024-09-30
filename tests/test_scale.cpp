@@ -82,6 +82,8 @@ TEST_CASE("scale32by8") {
     CHECK_EQ(scale32by8(0xffffffff, 0xff >> 1), 0xffffffff >> 1);
     CHECK_EQ(scale32by8(0xffffffff >> 1, 0xff >> 1), 0xffffffff >> 2);
 
+    CHECK_EQ(scale32by8(4227265, 8), 1);
+
     for (int i = 0; i < 32; ++i) {
         for (int j = 0; j < 8; ++j) {
             int total_bitshift = i + j;
@@ -93,4 +95,16 @@ TEST_CASE("scale32by8") {
             CHECK_EQ(scale32by8(0xffffffff >> i, 0xff >> j), 0xffffffff >> total_bitshift);
         }
     }
+}
+
+TEST_CASE("bit equivalence") {
+    // tests that 8bit and 16bit are equivalent
+    uint8_t r = 0xff;
+    uint8_t r_scale = 0xff / 2;
+    uint8_t brightness = 0xff / 2;
+    uint16_t r_scale16 = map8_to_16(r_scale);
+    uint16_t brightness16 = map8_to_16(brightness);
+    uint16_t r16 = scale16by8(scale16(r_scale16, brightness16), r);
+    uint8_t r8 = scale8(scale8(r_scale, brightness), r);
+    CHECK_EQ(r16, r8);
 }
