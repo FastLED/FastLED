@@ -6,6 +6,7 @@
 
 #include "fastled_progmem.h"
 #include "lib8tion/scale8.h"
+#include "lib8tion/intmap.h"
 #include "namespace.h"
 
 // Author: Zach Vorhies
@@ -23,9 +24,12 @@ template <typename T> T max3(T a, T b, T c) { return mymax(mymax(a, b), c); }
 // Fast a memory efficient gamma=2 function.
 void five_bit_hd_gamma_function(CRGB color, uint16_t *r16, uint16_t *g16,
                                 uint16_t *b16) {
-    *r16 = uint16_t(color.r) * color.r;
-    *g16 = uint16_t(color.g) * color.g;
-    *b16 = uint16_t(color.b) * color.b;
+    uint16_t _r16 = map8_to_16(color.r);
+    uint16_t _g16 = map8_to_16(color.g);
+    uint16_t _b16 = map8_to_16(color.b);
+    *r16 = scale16by8(_r16, color.r);
+    *g16 = scale16by8(_g16, color.g);
+    *b16 = scale16by8(_b16, color.b);
 }
 #else
 // Using look up table for gamma16 correction at power of 2.8
