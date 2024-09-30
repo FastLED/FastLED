@@ -17,17 +17,18 @@ FastLED 3.8.0
 * Improved color mixing algorithm, global brightness and color scaling are now seperate for non
   avr platforms. This only affects chipsets that have higher than RGB8 output, aka APA102 and clones
   right now.
-  * APA102 and APA102HD color mixing algorithms have been re-written to exploit this seperation and now feature drastically improved brightness scaling.
+  * APA102 and APA102HD color mixing algorithms have been re-written to exploit this seperation and now feature drastically improved color resolution across global brightness scales.
     * APA102-HD mode now has higher color resolution by using the color adjustment scale
     from the global brightness scale. These two are now mixed together during pixel generation
     instead of using the premixed color state. A new bit-stealing algorithm boosts the global brightness
-    factor by stealing bits from the 5-bit driver brightness.
+    factor by stealing bits from the 5-bit driver brightness and transfering it to the global brightness.
     * Non-Apa102-HD mode has drastically improved it's resolution with respect to global brightness.
     As a result, you no longer have to force it on as it's always on by default.
     The color correction scale now is expected to have high order bits and won't degenerate the colors while the global brightness scale is mapped from 8-bit to the 5-bit driver brightness, the way god intended it.
+    * If you don't like this behavior you can always go back by using setting `FASTLED_HD_COLOR_MIXING=0`.
 * Binary size
-  * You might expect that becaue of the color mixing feature that this would means less memory on AVR platforms. However through profile guided optimization this increase was offset for a total *decrease* of 200 bytes in comparison to 3.7.8:
-    * 3.7.8: attiny85 size was 9447 (limit is 9500)
+  * You might expect that becaue of the color mixing feature that this would mean less memory on AVR platforms. However through profile guided optimization this increase was offset for a total *decrease* of 200 bytes in comparison to 3.7.8:
+    * 3.7.8: attiny85 size was 9447 (limit is 9500 before the builder triggers a failure)
     * 3.8.0: attiny85 size is now 9296
     * This is only true for the WS2812 chipset. The APA102 chipset consumes significantly more memory.
 * Compile support for ATtiny1604 and other Attiny boards
