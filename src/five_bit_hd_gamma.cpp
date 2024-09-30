@@ -7,6 +7,7 @@
 #include "fastled_progmem.h"
 #include "lib8tion/scale8.h"
 #include "lib8tion/intmap.h"
+#include "lib8tion/math8.h"
 #include "namespace.h"
 
 // Author: Zach Vorhies
@@ -67,24 +68,9 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 }
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
-void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
-                       uint8_t brightness, CRGB *out, uint8_t *out_power_5bit) {
-    if (!(r16 | g16 | b16) || brightness == 0) {
-        *out = CRGB(0, 0, 0);
-        *out_power_5bit = 0;
-        return;
-    }
-
-    // Note: One day someone smarter than me will come along and invent a closed
-    // form solution for this. However, the numerical method works extremely
-    // well and has been optimized to avoid division performance penalties as
-    // much as possible.
-
-    // Step 1: Initialize brightness
-    static const uint8_t kStartBrightness = 0b00011111;
-    uint8_t v5 = kStartBrightness;
-
-    // Step 2: Boost brightness by swapping power with the driver brightness.
+bool five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5) {
+    const uint8_t brightness = *_brightness;
+    uint8_t v5 = *_v5;
     uint32_t numerator = 1;
     uint16_t denominator = 1;  // can hold all possible denominators for v5.
     // Loop while there is room to adjust brightness
@@ -101,48 +87,82 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         if (next_brightness_times_numerator > denominator * 0xff) {
             break;
         }
+
         numerator = next_numerator;
         denominator = next_denominator;
         v5 = next_v5;
     }
-    // If brightness was adjusted, calculate the new brightness value
-    if (v5 != kStartBrightness) {
+    if (denominator != 1) {
         uint32_t b32 = brightness;
         b32 *= numerator;
-        brightness = static_cast<uint8_t>(b32 / denominator);
+        *_brightness = static_cast<uint8_t>(b32 / denominator);
+        *_v5 = v5;
+        return true;
     }
+    return false;
+}
+
+void five_bit_color_bitshift(uint16_t* _r16, uint16_t* _g16, uint16_t* _b16, uint8_t* _v5) {
+
+    // Initialize numerator and denominator for scaling
+    uint16_t r16 = *_r16;
+    uint16_t g16 = *_g16;
+    uint16_t b16 = *_b16;
+    uint8_t v5 = *_v5;
+    uint32_t numerator = 1;
+    uint16_t denominator = 1;  // can hold all possible denomintors for v5.
+    uint32_t overflow = max3(r16, g16, b16);
+
+    // Loop while v5 is greater than 1
+    while (v5 > 1) {
+        uint8_t next_v5 = v5 >> 1;
+        uint32_t next_numerator = numerator * v5;
+        uint16_t next_denominator = denominator * next_v5;
+        // Calculate potential new overflow
+        uint32_t next_overflow = (overflow * next_numerator);
+        // Check if overflow exceeds the uint16_t limit
+        if (next_overflow > next_denominator * 0xffff) {
+            break;
+        }
+        numerator = next_numerator;
+        denominator = next_denominator;
+        // Update v5 for the next iteration
+        v5 = next_v5;
+    }
+
+    if (numerator != 1) {  // Signal that a new value was computed.
+        r16 = static_cast<uint16_t>((r16 * numerator) / denominator);
+        g16 = static_cast<uint16_t>((g16 * numerator) / denominator);
+        b16 = static_cast<uint16_t>((b16 * numerator) / denominator);
+        *_r16 = r16;
+        *_g16 = g16;
+        *_b16 = b16;
+        *_v5 = v5;
+    }
+}
+
+void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
+                       uint8_t brightness, CRGB *out, uint8_t *out_power_5bit) {
+    if (!(r16 | g16 | b16) || brightness == 0) {
+        *out = CRGB(0, 0, 0);
+        *out_power_5bit = 0;
+        return;
+    }
+
+    // Note: One day someone smarter than me will come along and invent a closed
+    // form solution for this. However, the numerical method works extremely
+    // well and has been optimized to avoid division performance penalties as
+    // much as possible.
+
+    // Step 1: Initialize brightness
+    static const uint8_t kStartBrightness = 0b00011111;
+    uint8_t v5 = kStartBrightness;
+    // Step 2: Boost brightness by swapping power with the driver brightness.
+    five_bit_bitshift_brightness(&brightness, &v5);
 
     // Step 3: Boost brightness of the color channels by swapping power with the
     // driver brightness.
-    {
-        // Initialize numerator and denominator for scaling
-        uint32_t numerator = 1;
-        uint16_t denominator = 1;  // can hold all possible denomintors for v5.
-        uint32_t overflow = max3(r16, g16, b16);
-
-        // Loop while v5 is greater than 1
-        while (v5 > 1) {
-            uint8_t next_v5 = v5 >> 1;
-            uint32_t next_numerator = numerator * v5;
-            uint16_t next_denominator = denominator * next_v5;
-            // Calculate potential new overflow
-            uint32_t next_overflow = (overflow * next_numerator);
-            // Check if overflow exceeds the uint16_t limit
-            if (next_overflow > next_denominator * 0xffff) {
-                break;
-            }
-            numerator = next_numerator;
-            denominator = next_denominator;
-            // Update v5 for the next iteration
-            v5 = next_v5;
-        }
-
-        if (numerator != 1) {  // Signal that a new value was computed.
-            r16 = static_cast<uint16_t>((r16 * numerator) / denominator);
-            g16 = static_cast<uint16_t>((g16 * numerator) / denominator);
-            b16 = static_cast<uint16_t>((b16 * numerator) / denominator);
-        }
-    }
+    five_bit_color_bitshift(&r16, &g16, &b16, &v5);
 
     // Step 4: scale by final brightness factor.
     if (brightness != 0xff) {
@@ -178,18 +198,18 @@ void __builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
 
     // Step 1: Gamma Correction
     uint16_t r16, g16, b16;
-    five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
+        five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
 
     // Step 2: Color correction step comes after gamma correction. These values
     // are assumed to be be relatively close to 255.
-    if (colors_scale.r != 0xff) {
-        r16 = scale16by8(r16, colors_scale.r);
-    }
-    if (colors_scale.g != 0xff) {
-        g16 = scale16by8(g16, colors_scale.g);
-    }
-    if (colors_scale.b != 0xff) {
-        b16 = scale16by8(b16, colors_scale.b);
+        if (colors_scale.r != 0xff) {
+            r16 = scale16by8(r16, colors_scale.r);
+        }
+        if (colors_scale.g != 0xff) {
+            g16 = scale16by8(g16, colors_scale.g);
+        }
+        if (colors_scale.b != 0xff) {
+            b16 = scale16by8(b16, colors_scale.b);
     }
 
     five_bit_bitshift(r16, g16, b16, global_brightness, out_colors,
