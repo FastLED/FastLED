@@ -7,6 +7,7 @@
 #include "force_inline.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
+#include <stdint.h>
 
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
