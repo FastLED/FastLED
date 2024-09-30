@@ -3,31 +3,29 @@ FastLED 3.8.0
 * ESP32 RMT5 Driver Implemented.
   * Driver crashes on boot should now be solved.
   * Parallel AND async.
-    * Drive up to 8 channels in parallel (more, for future boards) with graceful failback
-      if you sketch allocates some of them.
+    * Drive up to 8 channels in parallel (more, for future boards) with graceful fallback
+      if your sketch allocates some of them.
         * In the 3.7.X series the total number of RMT channels was limited to 4.
     * async mode means FastLED.show() returns immediately if RMT channels are ready for new
       data. This means you can compute the next frame while the current frame is being drawn.
   * Flicker with WIFI *should* be solved. The new RMT 5.1 driver features
     large DMA buffers and deep transaction queues to prevent underflow conditions.
   * Memory efficient streaming encoding. As a result the "one shot" encoder no longer
-    exists for the RMT5 driver. But may be added back at a future date if people want it.
-  * If for some reason the RMT5 driver doesn't work for you then use the following define
-    * FASTLED_RMT5=0 to get back the old behavior.
-* Improved color mixing algorithm, global brightness and color scaling are now seperate for non
-  avr platforms. This only affects chipsets that have higher than RGB8 output, aka APA102 and clones
+    exists for the RMT5 driver, but may be added back at a future date if people want it.
+  * If for some reason the RMT5 driver doesn't work for you then use the following define `FASTLED_RMT5=0` to get back the old behavior.
+* Improved color mixing algorithm, global brightness, and color scaling are now separate for non-AVR platforms. This only affects chipsets that have higher than RGB8 output, aka APA102, and clones
   right now.
-  * APA102 and APA102HD color mixing algorithms have been re-written to exploit this seperation and now feature drastically improved color resolution across global brightness scales.
-    * APA102-HD mode now has higher color resolution by using the color adjustment scale seperation
+  * APA102 and APA102HD color mixing algorithms have been rewritten to exploit this separation and now feature drastically improved color resolution across global brightness scales.
+    * APA102-HD mode now has higher color resolution by using the color adjustment scale separation
     from the global brightness scale. These two are now mixed together during pixel generation
     instead of using the premixed color state. A new bit-stealing algorithm boosts the global brightness
-    factor by stealing bits from the 5-bit driver brightness and transfering it to the global brightness.
-    * Non-Apa102-HD mode has drastically improved it's resolution integrity with respect to global brightness. In the 3.7.X series the led color would change drastically as the color values were denormalized by the bottom end of the global brightness scale. Now the colors are stable through out the global brightness value.
-    As a result, you no longer have to force global brightness on for the APA102 on as it's always on by default. The only downside is that the global brightness for the APA102 chipset is now 5 bit instead of
-    8-bit - there is room for splitting the brightness factor between the driver brightness and the color scale, but at this point it seems not that important.
+    factor by stealing bits from the 5-bit driver brightness and transferring it to the global brightness.
+    * Non-Apa102-HD mode has drastically improved its resolution integrity with respect to global brightness. In the 3.7.X series, the LED color would change drastically as the color values were denormalized by the bottom end of the global brightness scale. Now the colors are stable throughout the global brightness value.
+    As a result, you no longer have to force global brightness on for the APA102 as it's always on by default. The only downside is that the global brightness for the APA102 chipset is now 5-bit instead of
+    8-bit - there is room for splitting the brightness factor between the driver brightness and the color scale, but it seems not that important at this point.
     * If you don't like this behavior you can always go back by using setting `FASTLED_HD_COLOR_MIXING=0`.
 * Binary size
-  * You might expect that becaue of the color mixing feature that this would mean less memory on AVR platforms. However through profile guided optimization this increase was offset for a total *decrease* of 200 bytes in comparison to 3.7.8:
+  * You might expect that because of the color mixing feature, this would mean less memory on AVR platforms. However, through profile-guided optimization, this increase was offset for a total *decrease* of 200 bytes in comparison to 3.7.8:
     * 3.7.8: attiny85 size was 9447 (limit is 9500 before the builder triggers a failure)
     * 3.8.0: attiny85 size is now 9296
     * This is only true for the WS2812 chipset. The APA102 chipset consumes significantly more memory.
@@ -41,7 +39,7 @@ FastLED 3.8.0
 * Attiny0/1 (commonly Attiny85) support added.
   * https://github.com/FastLED/FastLED/pull/1292 , https://github.com/FastLED/FastLED/pull/1183 , https://github.com/FastLED/FastLED/pull/1061
   * Special thanks to [@freemovers](https://github.com/freemovers), [@jasoncoon](https://github.com/jasoncoon), [@ngyl88](https://github.com/ngyl88) for the contribution.
-  * Many common boards are now compiling in the Attiny family. See our repo for which ones are supported.
+  * Many common boards are now compiled in the Attiny family. See our repo for which ones are supported.
 * Arduino nano compiling with new pin definitions.
   *  https://github.com/FastLED/FastLED/pull/1719
   *  Thanks to https://github.com/ngyl88 for the contribution!
@@ -55,7 +53,7 @@ FastLED 3.7.7
 =============
 * WS2812 RGBW mode is now part of the API.
   * Api: `FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS).setRgbw(RgbwDefault());`
-  * Only enabled on ESP32 boards, no op on other platforms.
+  * Only enabled on ESP32 boards, no-op on other platforms.
   * See [examples/RGBW/RGBW.ino](https://github.com/FastLED/FastLED/blob/master/examples/RGBW/RGBW.ino)
 * WS2812 Emulated RGBW Controller
   * Works on all platforms (theoretically)
@@ -82,7 +80,7 @@ FastLED 3.7.6
 * RPXXXX compiler fixes to solve asm segment overflow violation
 * ESP32 binary size blew up in 3.7.5, in 3.7.6 it's back to the same size as 3.7.4
 * APA102 & SK9822 have downgraded their default clock speed to improve "just works" experience
-  * APA102 chipsets have downgraded their default clock from 24 mhz to 6mhz to get around "long strip signal degredaton bug"
+  * APA102 chipsets have downgraded their default clock from 24 mhz to 6mhz to get around the "long strip signal degradation bug"
     * https://www.pjrc.com/why-apa102-leds-have-trouble-at-24-mhz/
     * We are prioritizing "just works by default" rather than "optimized by default but only for short strips".
     * 6 Mhz is still blazingly fast compared to WS2812 and you can always bump it up to get more performance.
@@ -104,7 +102,7 @@ FastLED 3.7.5
 * correct RP2350 PIO count / fix double define SysTick by @FeuerSturm in https://github.com/FastLED/FastLED/pull/1689
 * improved simplex noise by @zackees in https://github.com/FastLED/FastLED/pull/1690
 * Fix shift count overflow on AVR in simplex snoise16 by @tttapa in https://github.com/FastLED/FastLED/pull/1692
-* adds extended color pallette for 256 by @zackees in https://github.com/FastLED/FastLED/pull/1697
+* adds extended color palette for 256 by @zackees in https://github.com/FastLED/FastLED/pull/1697
 * RP2350 board now compiles.
 
 
