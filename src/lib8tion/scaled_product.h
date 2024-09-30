@@ -2,13 +2,10 @@
 #include <stdint.h>
 #include "namespace.h"
 #include "lib8static.h"
+#include "intmap.h"
 
 FASTLED_NAMESPACE_BEGIN
 
-
-LIB8STATIC_ALWAYS_INLINE uint16_t map8_to_16(uint8_t x) {
-    return uint16_t(x) * 257;
-}
 
 // Has the property that quadradic_norm8(0xff, 0xff) == 0xffff
 LIB8STATIC_ALWAYS_INLINE uint16_t scaled_product8_8_16(uint8_t a, uint8_t b) {
