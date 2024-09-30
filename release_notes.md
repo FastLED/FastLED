@@ -36,7 +36,7 @@ FastLED 3.8.0
   * If you need a working timer value on AVR that increases via an ISR you can do so by defining `FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL=1`
 
 
-FastLED 3.7.8
+FastLED 3.8.0
 =============
 * Attiny0/1 (commonly Attiny85) support added.
   * https://github.com/FastLED/FastLED/pull/1292 , https://github.com/FastLED/FastLED/pull/1183 , https://github.com/FastLED/FastLED/pull/1061
