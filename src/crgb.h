@@ -733,4 +733,16 @@ FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, uint8_t d);
 /// Scale using CRGB::nscale8_video()
 FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d);
 
+/// Generic template for ostream operator to print CRGB objects. Usefull
+/// for the unit_tests.
+template<typename T>
+T& operator<<(T& os, const CRGB& rgb) {
+    os << "CRGB(" << static_cast<int>(rgb.r) << ", " 
+       << static_cast<int>(rgb.g) << ", " 
+       << static_cast<int>(rgb.b) << ")";
+    return os;
+}
+
 FASTLED_NAMESPACE_END
+
+
