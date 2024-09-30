@@ -13,7 +13,7 @@ LED_STRIP_NAMESPACE_BEGIN
 
 #define TAG "construct_new_led_strip.cpp"
 
-led_strip_handle_t construct_new_led_strip(config_led_t config) {
+esp_err_t construct_new_led_strip(config_led_t config, led_strip_handle_t* ret_strip) {
     // LED strip general initialization, according to your led board design
     led_strip_config_t strip_config = {
         .strip_gpio_num = config.pin,
@@ -36,16 +36,14 @@ led_strip_handle_t construct_new_led_strip(config_led_t config) {
     };
 
     // LED Strip object handle
-    led_strip_handle_t led_strip;
+    esp_err_t err = ESP_OK;
     if (config.pixel_buf) {
-        ESP_ERROR_CHECK(led_strip_new_rmt_device_with_buffer(
-            &strip_config, &rmt_config, config.pixel_buf, &led_strip));
+        err = led_strip_new_rmt_device_with_buffer(
+            &strip_config, &rmt_config, config.pixel_buf, ret_strip);
     } else {
-        ESP_ERROR_CHECK(
-            led_strip_new_rmt_device(&strip_config, &rmt_config, &led_strip));
+        err = led_strip_new_rmt_device(&strip_config, &rmt_config, ret_strip);
     }
-    ESP_LOGI(TAG, "Created LED strip object with RMT backend");
-    return led_strip;
+    return err;
 }
 
 LED_STRIP_NAMESPACE_END

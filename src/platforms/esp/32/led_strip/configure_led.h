@@ -21,6 +21,6 @@ struct config_led_t {
 };
 
 
-led_strip_handle_t construct_new_led_strip(config_led_t config);
+esp_err_t construct_new_led_strip(config_led_t config, led_strip_handle_t* ret_strip);
 
 LED_STRIP_NAMESPACE_END

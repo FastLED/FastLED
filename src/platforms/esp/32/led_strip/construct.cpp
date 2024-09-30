@@ -14,6 +14,8 @@
 
 LED_STRIP_NAMESPACE_BEGIN
 
+#define TAG "construct.cpp"
+
 namespace {
 
 rmt_bytes_encoder_config_t make_encoder(
@@ -78,6 +80,12 @@ config_led_t make_led_config(
 
 } // namespace
 
+#define WARN_ON_ERROR(x, tag, format, ...) do { \
+    esp_err_t err_rc_ = (x); \
+    if (unlikely(err_rc_ != ESP_OK)) { \
+        ESP_LOGW(tag, "%s(%d): " format, __FUNCTION__, __LINE__ __VA_OPT__(,) __VA_ARGS__); \
+    } \
+} while(0)
 
 led_strip_handle_t construct_led_strip(
         uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
@@ -85,7 +93,9 @@ led_strip_handle_t construct_led_strip(
     config_led_t config = make_led_config(
         T0H, T0L, T1H, T1L, TRESET,
         pin, max_leds, is_rgbw, pixel_buf);
-    led_strip_handle_t out = construct_new_led_strip(config);
+    led_strip_handle_t out = nullptr;
+    esp_err_t err = construct_new_led_strip(config, &out);
+    WARN_ON_ERROR(err, TAG, "construct_new_led_strip failed");
     return out;
 }
 
