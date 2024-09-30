@@ -32,6 +32,7 @@ def run_tests():
         sys.exit(1)
 
     print("Running tests...")
+    failed_tests: list[str] = []
     for test_file in os.listdir(test_dir):
         test_path = os.path.join(test_dir, test_file)
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
@@ -47,7 +48,12 @@ def run_tests():
             )
             print("-" * 40)
             if return_code != 0:
-                sys.exit(1)
+                failed_tests.append(test_file)
+    if failed_tests:
+        for failed_test in failed_tests:
+            print(f"Failed test: {failed_test}")
+        sys.exit(1)
+    print("All tests passed.")
 
 
 def main():
