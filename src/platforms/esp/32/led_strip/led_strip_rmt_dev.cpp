@@ -313,7 +313,7 @@ esp_err_t led_strip_release_rmt_device(led_strip_handle_t strip, bool release_pi
     return led_strip_rmt_del(strip);
 }
 
-}
+}  // namespace fastled_rmt51_strip
 
 #endif // FASTLED_RMT5
 

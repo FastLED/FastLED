@@ -165,7 +165,7 @@ esp_err_t rmt_new_led_strip_encoder(const led_strip_encoder_config_t *config, rm
 #pragma GCC diagnostic pop
 
 
-}
+}  // namespace fastled_rmt51_strip
 
 #endif // FASTLED_RMT5
 

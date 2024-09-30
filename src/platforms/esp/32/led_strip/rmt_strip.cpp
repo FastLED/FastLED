@@ -170,7 +170,7 @@ IRmtLedStrip* create_rmt_led_strip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uin
     return new RmtLedStrip(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
 }
 
-}
+}  // namespace fastled_rmt51_strip
 
 #endif  // FASTLED_RMT5
 

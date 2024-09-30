@@ -117,4 +117,4 @@ struct led_strip_t {
     esp_err_t (*del)(led_strip_t *strip, bool release_pixel_buffer);
 };
 
-}
+}  // namespace fastled_rmt51_strip

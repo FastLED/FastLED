@@ -1,10 +1,18 @@
+
+
+#include "enabled.h"
+
+#if FASTLED_RMT5
+
+
 #include "rmt_strip_group.h"
 
 #include "rmt_strip.h"
-#include "esp_log.h"
 #include "configure_led.h"
 #include "construct.h"
 #include "esp_check.h"
+
+
 
 
 namespace fastled_rmt51_strip {
@@ -94,4 +102,6 @@ RmtActiveStripGroup::RmtActiveStripGroup() {
     }
 }
 
-}
+}  // namespace fastled_rmt51_strip
+
+#endif // FASTLED_RMT5

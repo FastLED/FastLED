@@ -36,6 +36,6 @@ private:
     IRmtLedStrip* mAllRmtLedStrips[kMaxRmtLedStrips];
 };
 
-}
+}  // namespace fastled_rmt51_strip
 
 #endif // FASTLED_RMT5

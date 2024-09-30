@@ -102,6 +102,6 @@ esp_err_t construct_led_strip(
     return err;
 }
 
-}
+}  // namespace fastled_rmt51_strip
 
 #endif // FASTLED_RMT5

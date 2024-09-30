@@ -151,6 +151,6 @@ esp_err_t led_strip_clear(led_strip_handle_t strip);
  */
 esp_err_t led_strip_del(led_strip_handle_t strip, bool release_pixel_buffer);
 
-}
+}  // namespace fastled_rmt51_strip
 
 #endif

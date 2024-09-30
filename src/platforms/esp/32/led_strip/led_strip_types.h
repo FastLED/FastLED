@@ -54,4 +54,4 @@ typedef struct {
 
 } led_strip_config_t;
 
-}
+}  // namespace fastled_rmt51_strip

@@ -60,4 +60,4 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
 // release_pixel_buffer is true then the pixel buffer will also be freed.
 esp_err_t led_strip_release_rmt_device(led_strip_handle_t strip, bool release_pixel_buffer);
 
-}
+}  // namespace fastled_rmt51_strip
