@@ -8,7 +8,7 @@
 #include "esp_log.h"
 #include "configure_led.h"
 #include "construct.h"
-
+#include "esp_check.h"
 #include "namespace.h"
 
 LED_STRIP_NAMESPACE_BEGIN
@@ -30,6 +30,41 @@ LED_STRIP_NAMESPACE_BEGIN
     }
 
 
+#define MAX_RMT_LED_STRIPS 24
+
+class RmtLedStrip;
+static RmtLedStrip* gAllRmtLedStrips[MAX_RMT_LED_STRIPS] = {};
+static void add_active_strip(RmtLedStrip* strip) {
+    for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
+        if (gAllRmtLedStrips[i] == nullptr) {
+            gAllRmtLedStrips[i] = strip;
+            return;
+        }
+    }
+    ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+}
+
+static void remove_active_strip(RmtLedStrip* strip) {
+    for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
+        if (gAllRmtLedStrips[i] == strip) {
+            gAllRmtLedStrips[i] = nullptr;
+            return;
+        }
+    }
+    ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+}
+
+static void wait_for_any_strip_to_complete();
+
+static int count_active_strips() {
+    int count = 0;
+    for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
+        if (gAllRmtLedStrips[i]) {
+            count++;
+        }
+    }
+    return count;
+}
 
 class RmtLedStrip : public IRmtLedStrip {
 public:
@@ -50,11 +85,40 @@ public:
     void acquire_rmt() {
         assert(!mLedStrip);
         assert(!mAquired);
-        esp_err_t err = construct_led_strip(
-            mT0H, mT0L, mT1H, mT1L, mTRESET,
-            mPin, mMaxLeds, mIsRgbw, mBuffer,
-            &mLedStrip);
-        ESP_ERROR_CHECK(err);
+
+        do {
+            esp_err_t err = construct_led_strip(
+                mT0H, mT0L, mT1H, mT1L, mTRESET,
+                mPin, mMaxLeds, mIsRgbw, mBuffer,
+                &mLedStrip);
+
+            if (err == ESP_OK) {
+                // Success
+                add_active_strip(this);
+                break;
+            }
+            // ESP_ERROR_CHECK(err);
+            // break;
+
+            if (err == ESP_ERR_NOT_FOUND) {  // No free RMT channels yet.
+                if (count_active_strips() == 0) {
+                    // If there are no active strips and we don't have any resources then
+                    // this means RMT is not supported on this platform.
+                    ESP_ERROR_CHECK(err);
+                }
+                // wait for one of the strips to complete and then try again.
+                wait_for_any_strip_to_complete();
+                continue;
+            }
+            // Some other error that we can't handle.
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "construct_led_strip failed: %s", esp_err_to_name(err));
+                ESP_ERROR_CHECK(err);
+                continue;
+            }
+            break;
+        } while (true);
+
         mAquired = true;
     }
 
@@ -63,6 +127,7 @@ public:
             return;
         }
         led_strip_wait_refresh_done(mLedStrip, -1);
+        remove_active_strip(this);
         if (mLedStrip) {
             led_strip_del(mLedStrip, false);
             mLedStrip = nullptr;
@@ -131,6 +196,14 @@ private:
     uint16_t mT1L = 0;
     uint32_t mTRESET = 0;
 };
+
+static void wait_for_any_strip_to_complete() {
+    for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
+        if (gAllRmtLedStrips[i]) {
+            gAllRmtLedStrips[i]->wait_for_draw_complete();
+        }
+    }
+}
 
 IRmtLedStrip* create_rmt_led_strip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET, int pin, uint32_t max_leds, bool is_rgbw) {
     return new RmtLedStrip(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
