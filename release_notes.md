@@ -3,7 +3,7 @@ FastLED 3.8.0
 * ESP32 RMT5 Driver Implemented.
   * Driver crashes on boot should now be solved.
   * Parallel AND async.
-    * Drive up to 8 channels in parralel (more, for future boards) with graceful failback
+    * Drive up to 8 channels in parallel (more, for future boards) with graceful failback
       if you sketch allocates some of them.
         * In the 3.7.X series the total number of RMT channels was limited to 4.
     * async mode means FastLED.show() returns immediately if RMT channels are ready for new
@@ -14,12 +14,25 @@ FastLED 3.8.0
     exists for the RMT5 driver. But may be added back at a future date if people want it.
   * If for some reason the RMT5 driver doesn't work for you then use the following define
     * FASTLED_RMT5=0 to get back the old behavior.
-* New APA102 global brightness algorithm
-  * APA102
-  * APA102HD
-* 3.7.8: attiny85 size 9447 is within the limit of 9500
-* 3.8.0: attiny85 size 9296 is within the limit of 9500
-* Compile support for ATtiny1604
+* Improved color mixing algorithm, global brightness and color scaling are now seperate for non
+  avr platforms. This only affects chipsets that have higher than RGB8 output, aka APA102 and clones
+  right now.
+  * APA102 and APA102HD color mixing algorithms have been re-written to exploit this seperation and now feature drastically improved brightness scaling.
+    * APA102-HD mode now has higher color resolution by using the color adjustment scale
+    from the global brightness scale. These two are now mixed together during pixel generation
+    instead of using the premixed color state. A new bit-stealing algorithm boosts the global brightness
+    factor by stealing bits from the 5-bit driver brightness.
+    * Non-Apa102-HD mode has drastically improved it's resolution with respect to global brightness.
+    As a result, you no longer have to force it on as it's always on by default.
+    The color correction scale now is expected to have high order bits and won't degenerate the colors while the global brightness scale is mapped from 8-bit to the 5-bit driver brightness, the way god intended it.
+* Binary size
+  * You might expect that becaue of the color mixing feature that this would means less memory on AVR platforms. However through profile guided optimization this increase was offset for a total *decrease* of 200 bytes in comparison to 3.7.8:
+    * 3.7.8: attiny85 size was 9447 (limit is 9500)
+    * 3.8.0: attiny85 size is now 9296
+    * This is only true for the WS2812 chipset. The APA102 chipset consumes significantly more memory.
+* Compile support for ATtiny1604 and other Attiny boards
+  * Many of these boards were failing a linking step due to a missing timer_millis value. This is now injected in via weak symbol for these boards, meaning that you won't get a linker error if you include code (like wiring.cpp) that defines this.
+  * If you need a working timer value on AVR that increases via an ISR you can do so by defining `FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL=1`
 
 
 FastLED 3.7.8
