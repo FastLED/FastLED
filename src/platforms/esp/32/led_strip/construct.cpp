@@ -87,16 +87,19 @@ config_led_t make_led_config(
     } \
 } while(0)
 
-led_strip_handle_t construct_led_strip(
+esp_err_t construct_led_strip(
         uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,
-        int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf) {
+        int pin, uint32_t max_leds, bool is_rgbw, uint8_t* pixel_buf,
+        led_strip_handle_t* out) {
     config_led_t config = make_led_config(
         T0H, T0L, T1H, T1L, TRESET,
         pin, max_leds, is_rgbw, pixel_buf);
-    led_strip_handle_t out = nullptr;
-    esp_err_t err = construct_new_led_strip(config, &out);
+    esp_err_t err = construct_new_led_strip(config, out);
     WARN_ON_ERROR(err, TAG, "construct_new_led_strip failed");
-    return out;
+    if (err != ESP_OK) {
+        out = nullptr;
+    }
+    return err;
 }
 
 LED_STRIP_NAMESPACE_END

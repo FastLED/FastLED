@@ -50,9 +50,11 @@ public:
     void acquire_rmt() {
         assert(!mLedStrip);
         assert(!mAquired);
-        mLedStrip = construct_led_strip(
+        esp_err_t err = construct_led_strip(
             mT0H, mT0L, mT1H, mT1L, mTRESET,
-            mPin, mMaxLeds, mIsRgbw, mBuffer);
+            mPin, mMaxLeds, mIsRgbw, mBuffer,
+            &mLedStrip);
+        ESP_ERROR_CHECK(err);
         mAquired = true;
     }
 
