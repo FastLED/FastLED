@@ -8,6 +8,28 @@
 #include "lib8tion/scale8.h"
 #include "lib8tion/intmap.h"
 
+
+TEST_CASE("scale16") {
+    CHECK_EQ(scale16(0, 0), 0);
+    CHECK_EQ(scale16(0, 1), 0);
+    CHECK_EQ(scale16(1, 0), 0);
+    CHECK_EQ(scale16(0xffff, 0xffff), 0xffff);
+    CHECK_EQ(scale16(0xffff, 0xffff >> 1), 0xffff >> 1);
+    CHECK_EQ(scale16(0xffff >> 1, 0xffff >> 1), 0xffff >> 2);
+
+    for (int i = 0; i < 16; ++i) {
+        for (int j = 0; j < 16; ++j) {
+            int total_bitshift = i + j;
+            if (total_bitshift > 15) {
+                break;
+            }
+            // print out info if this test fails to capture the i,j values that are failing
+            INFO("i: " << i << " j: " << j << " total_bitshift: " << total_bitshift);
+            CHECK_EQ(scale16(0xffff >> i, 0xffff >> j), 0xffff >> total_bitshift);
+        }
+    }
+}
+
 TEST_CASE("scale16by8") {
     CHECK_EQ(scale16by8(0, 0), 0);
     CHECK_EQ(scale16by8(0, 1), 0);
