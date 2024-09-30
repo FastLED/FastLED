@@ -398,7 +398,27 @@ private:
 #if FASTLED_HD_COLOR_MIXING
 		uint8_t brightness;
 		pixels.getHdScale(out_s0, out_s1, out_s2, &brightness);
-		*out_brightness = map8(brightness, 0, 31);
+		static const uint8_t kMaxValueThisCanBeAppliedTo = 124;
+
+		uint8_t max_component = max(max(*out_s0, *out_s1), *out_s2);
+		uint8_t five_bit_brightness = 31;
+		if (max_component != 0 && max_component < kMaxValueThisCanBeAppliedTo) {
+			// Brightness steal from 5bit and give it to color scale. This drastically
+			// improves the color resolution at the low range when the color scale is
+			// applied which will denormalize the colors.
+			uint16_t numerator = 31;
+			five_bit_brightness = 15;
+			*out_s0 = static_cast<uint8_t>((*out_s0 * numerator) / 15);
+			*out_s1 = static_cast<uint8_t>((*out_s1 * numerator) / 15);
+			*out_s2 = static_cast<uint8_t>((*out_s2 * numerator) / 15);
+			
+		}
+		five_bit_brightness = brightness == 0? 0 : map8(brightness, 0, five_bit_brightness);
+		if (five_bit_brightness == 0 && brightness != 0) {
+			// boost low end of five bit brightness so we don't get stuck at 0.
+			five_bit_brightness = 1;
+		}
+		*out_brightness = five_bit_brightness;
 		return;
 #else
 		uint8_t s0, s1, s2;
