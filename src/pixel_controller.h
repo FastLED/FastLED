@@ -479,10 +479,10 @@ struct PixelController {
         uint8_t brightness = 0;
         if (rgb) {
             #if FASTLED_HD_COLOR_MIXING == 1
-            uint8_t brightness = mColorAdjustment.brightness;
+            brightness = mColorAdjustment.brightness;
             CRGB scale = mColorAdjustment.color;
             #else
-            uint8_t brightness = 255;
+            brightness = 255;
             CRGB scale = mColorAdjustment.premixed;
             #endif
             five_bit_hd_gamma_bitshift(
