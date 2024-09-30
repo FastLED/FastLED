@@ -45,6 +45,14 @@ struct PixelControllerVtable {
     PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
     return pc->has(n);
   }
+
+  // function for getHdScale
+  #if FASTLED_HD_COLOR_MIXING
+  static void getHdScale(void* pixel_controller, uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
+    PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
+    pc->getHdScale(c0, c1, c2, brightness);
+  }
+  #endif
 };
 
 typedef void (*loadAndScaleRGBWFunction)(void* pixel_controller, Rgbw rgbw, uint8_t* b0_out, uint8_t* b1_out, uint8_t* b2_out, uint8_t* b3_out);

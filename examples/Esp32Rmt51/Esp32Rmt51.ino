@@ -2,8 +2,8 @@
 
 #include <FastLED.h>
 
-#if !defined(FASTLED_RMT51) || !FASTLED_RMT51
-#error "This example requires the FASTLED_RMT51 option to be enabled in your FastLED platform configuration."
+#if !defined(FASTLED_RMT5) || !FASTLED_RMT5
+#error "This example requires the FASTLED_RMT5 option to be enabled in your FastLED platform configuration."
 #endif 
 
 // How many leds in your strip?

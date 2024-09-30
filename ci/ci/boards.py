@@ -183,7 +183,7 @@ ESP32S3_RMT51 = Board(
     platform_needs_install=True,
     platform=ESP32_IDF_5_1_PIOARDUINO,
     defines=[
-        "FASTLED_RMT51=1",
+        "FASTLED_RMT5=1",
     ],
 )
 
