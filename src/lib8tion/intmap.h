@@ -13,8 +13,4 @@ LIB8STATIC_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x) {
     return uint32_t(x) * 0x1010101;
 }
 
-LIB8STATIC_ALWAYS_INLINE uint16_t map16_to_32(uint16_t x) {
-    return uint32_t(x) * 0x10001;
-}
-
 FASTLED_NAMESPACE_END

@@ -446,20 +446,6 @@ LIB8STATIC void nscale8x2_video(uint8_t &i, uint8_t &j, fract8 scale) {
 #endif
 }
 
-LIB8STATIC_ALWAYS_INLINE uint32_t scale32by8(uint32_t i, fract8 scale) {
-    if (scale == 0) {
-        return 0; // Fixes non zero output when scale == 0 and
-                  // FASTLED_SCALE8_FIXED==1
-    }
-    uint32_t result;
-#if FASTLED_SCALE8_FIXED == 1
-    result = ((uint64_t)(i) * (1 + (uint64_t)(scale))) / (static_cast<uint64_t>(0xffffffff) + 1);
-#else
-    result = ((uint64_t)(i) * (uint64_t)(scale)) / (static_cast<uint64_t>(0xffffffff) + 1);
-#endif
-    return result;
-}
-
 /// Scale a 16-bit unsigned value by an 8-bit value, which is treated
 /// as the numerator of a fraction whose denominator is 256.
 ///
@@ -531,16 +517,6 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
 #else
 #error "No implementation for scale16by8 available."
 #endif
-}
-
-LIB8STATIC uint32_t scale32(uint32_t i, fract32 scale) {
-    uint32_t result;
-#if FASTLED_SCALE8_FIXED == 1
-    result = ((uint64_t)(i) * (1 + (uint64_t)(scale))) / (static_cast<uint64_t>(0xffffffff) + 1);
-#else
-    result = ((uint64_t)(i) * (uint64_t)(scale)) / (static_cast<uint64_t>(0xffffffff) + 1);
-#endif
-    return result;
 }
 
 /// Scale a 16-bit unsigned value by an 16-bit value, which is treated
