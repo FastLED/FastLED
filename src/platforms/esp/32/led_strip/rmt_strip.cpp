@@ -31,61 +31,85 @@ LED_STRIP_NAMESPACE_BEGIN
         }                              \
     }
 
-class RmtLedStrip;
 
+class RmtActiveStripGroup {
+public:
+    static RmtActiveStripGroup& instance() {
+        static RmtActiveStripGroup instance;
+        return instance;
+    }
 
+    void add(IRmtLedStrip* strip) {
+        for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
+            if (mAllRmtLedStrips[i] == nullptr) {
+                mAllRmtLedStrips[i] = strip;
+                return;
+            }
+        }
+        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+    }
 
-static int gTotalActiveStripsAllowed = -1;  // start off as unknown.
-static RmtLedStrip* gAllRmtLedStrips[MAX_RMT_LED_STRIPS] = {};
-static void add_active_strip(RmtLedStrip* strip) {
-    for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
-        if (gAllRmtLedStrips[i] == nullptr) {
-            gAllRmtLedStrips[i] = strip;
+    void remove(IRmtLedStrip* strip) {
+        for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
+            if (mAllRmtLedStrips[i] == strip) {
+                mAllRmtLedStrips[i] = nullptr;
+                return;
+            }
+        }
+        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+    }
+
+    void wait_for_any_strip_to_release() {
+        for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
+            if (mAllRmtLedStrips[i]) {
+                mAllRmtLedStrips[i]->wait_for_draw_complete();
+            }
+        }
+    }
+
+    int count_active() {
+        int count = 0;
+        for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
+            if (mAllRmtLedStrips[i]) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    void wait_if_max_number_active() {
+        if (mTotalActiveStripsAllowed == -1) {
+            // We don't know the limit yet.
             return;
         }
-    }
-    ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
-}
-
-static void remove_active_strip(RmtLedStrip* strip) {
-    for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
-        if (gAllRmtLedStrips[i] == strip) {
-            gAllRmtLedStrips[i] = nullptr;
-            return;
+        if (mTotalActiveStripsAllowed == 0) {
+            // in invalid number of active strips. In this case we just abort
+            // the program.
+            ESP_ERROR_CHECK(ESP_FAIL);
+        }
+        // We've hit the limit before and now the number of known max number
+        // active strips is known and that we are saturated. Therefore we block
+        // the main thread until a strip is available.
+        if (count_active() >= mTotalActiveStripsAllowed) {
+            wait_for_any_strip_to_release();
         }
     }
-    ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
-}
 
-static void wait_for_any_strip_to_complete();
+    void set_total_allowed(int value) {
+        mTotalActiveStripsAllowed = value;
+    }
 
-static int count_active_strips() {
-    int count = 0;
-    for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
-        if (gAllRmtLedStrips[i]) {
-            count++;
-        }
+    int get_total_allowed() const {
+        return mTotalActiveStripsAllowed;
     }
-    return count;
-}
 
-static void wait_if_max_number_of_strips_active() {
-    if (gTotalActiveStripsAllowed == -1) {
-        // We don't know the limit yet.
-        return;
-    }
-    if (gTotalActiveStripsAllowed == 0) {
-        // in invalid number of active strips. In this case we just abort
-        // the program.
-        ESP_ERROR_CHECK(ESP_FAIL);
-    }
-    // We've hit the limit before and now the number of known max number
-    // active strips is known and that we are saturated. Therefore we block
-    // the main thread until a strip is available.
-    if (count_active_strips() >= gTotalActiveStripsAllowed) {
-        wait_for_any_strip_to_complete();
-    }
-}
+private:
+    RmtActiveStripGroup() : mTotalActiveStripsAllowed(-1) {}
+    RmtActiveStripGroup(const RmtActiveStripGroup&) = delete;
+    RmtActiveStripGroup& operator=(const RmtActiveStripGroup&) = delete;
+    int mTotalActiveStripsAllowed;
+    IRmtLedStrip* mAllRmtLedStrips[MAX_RMT_LED_STRIPS] = {};
+};
 
 class RmtLedStrip : public IRmtLedStrip {
 public:
@@ -107,7 +131,7 @@ public:
         assert(!mLedStrip);
         assert(!mAquired);
 
-        wait_if_max_number_of_strips_active();
+        RmtActiveStripGroup::instance().wait_if_max_number_active();
 
         do {
             esp_err_t err = construct_led_strip(
@@ -117,29 +141,21 @@ public:
 
             if (err == ESP_OK) {
                 // Success
-                add_active_strip(this);
+                RmtActiveStripGroup::instance().add(this);
                 break;
             }
-            // ESP_ERROR_CHECK(err);
-            // break;
 
             if (err == ESP_ERR_NOT_FOUND) {  // No free RMT channels yet.
-                int active_strips = count_active_strips();
+                int active_strips = RmtActiveStripGroup::instance().count_active();
                 if (active_strips == 0) {
                     // If there are no active strips and we don't have any resources then
                     // this means RMT is not supported on this platform so we just abort.
                     ESP_ERROR_CHECK(err);
                 }
-                // Update the total number of active strips allowed. Once this value has been
-                // set then it can only decrease. This can happen if the user makes a lot of
-                // rmt devices and then deletes them. We could periodically check the number
-                // and revalidate the gTotalActiveStripsAllowed value if this becomes a problem.
-                // The reason we aren't doing it now is that there is a momentary pause in the
-                // main thread when we hit the rmt channel limit and we don't want to introduce
-                // that delay until it becomes a problem.
-                gTotalActiveStripsAllowed = active_strips;
+                // Update the total number of active strips allowed.
+                RmtActiveStripGroup::instance().set_total_allowed(active_strips);
                 // wait for one of the strips to complete and then try again.
-                wait_for_any_strip_to_complete();
+                RmtActiveStripGroup::instance().wait_for_any_strip_to_release();
                 continue;
             }
             // Some other error that we can't handle.
@@ -159,7 +175,7 @@ public:
             return;
         }
         led_strip_wait_refresh_done(mLedStrip, -1);
-        remove_active_strip(this);
+        RmtActiveStripGroup::instance().remove(this);
         if (mLedStrip) {
             led_strip_del(mLedStrip, false);
             mLedStrip = nullptr;
@@ -228,14 +244,6 @@ private:
     uint16_t mT1L = 0;
     uint32_t mTRESET = 0;
 };
-
-static void wait_for_any_strip_to_complete() {
-    for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
-        if (gAllRmtLedStrips[i]) {
-            gAllRmtLedStrips[i]->wait_for_draw_complete();
-        }
-    }
-}
 
 IRmtLedStrip* create_rmt_led_strip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET, int pin, uint32_t max_leds, bool is_rgbw) {
     return new RmtLedStrip(T0H, T0L, T1H, T1L, TRESET, pin, max_leds, is_rgbw);
