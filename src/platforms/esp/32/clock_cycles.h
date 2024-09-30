@@ -2,7 +2,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "esp_idf_version.h"
+#include "platforms/esp/esp_version.h"
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 #include "hal/cpu_hal.h"
 #define __cpu_hal_get_cycle_count esp_cpu_get_cycle_count

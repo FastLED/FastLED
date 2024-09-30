@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "esp_idf_version.h"
+#include "platforms/esp/esp_version.h"
 #include "led_strip/enabled.h"
 
 #if !FASTLED_RMT5

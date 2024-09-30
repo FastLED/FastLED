@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-#include "esp_idf_version.h"
+#include "platforms/esp/esp_version.h"
 
 #include "driver/gpio.h"
 #include "esp_heap_caps.h"

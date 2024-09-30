@@ -10,7 +10,7 @@
 
 #include "esp_err.h"
 #include "led_strip_types.h"
-#include "esp_idf_version.h"
+#include "platforms/esp/esp_version.h"
 
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 #include "driver/rmt_types.h"

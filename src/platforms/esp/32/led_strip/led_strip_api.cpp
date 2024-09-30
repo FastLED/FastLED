@@ -10,7 +10,7 @@
 
 #if FASTLED_RMT5
 
-#include "esp_idf_version.h"
+#include "platforms/esp/esp_version.h"
 
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
 #error "This library is only designed to run on ESP-IDF v5.0.0 and later"

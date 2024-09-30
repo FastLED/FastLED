@@ -42,7 +42,7 @@
 
 #include "idf4_rmt.h"
 #include "FastLED.h"
-#include "esp_idf_version.h"
+#include "platforms/esp/esp_version.h"
 #include "pixel_iterator.h"
 
 // -- Core or custom driver

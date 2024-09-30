@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include "esp_err.h"
 #include "led_strip_rmt.h"
-#include "esp_idf_version.h"
+#include "platforms/esp/esp_version.h"
 #include "led_strip_interface.h"
 
 
