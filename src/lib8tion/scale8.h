@@ -1,6 +1,8 @@
 #ifndef __INC_LIB8TION_SCALE_H
 #define __INC_LIB8TION_SCALE_H
 
+#include "lib8static.h"
+
 /// @file scale8.h
 /// Fast, efficient 8-bit scaling functions specifically
 /// designed for high-performance LED programming.
