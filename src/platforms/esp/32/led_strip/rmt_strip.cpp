@@ -50,13 +50,23 @@ public:
     }
 
     void remove(IRmtLedStrip* strip) {
+        int found_idx = -1;
         for (int i = 0; i < MAX_RMT_LED_STRIPS; i++) {
             if (mAllRmtLedStrips[i] == strip) {
                 mAllRmtLedStrips[i] = nullptr;
-                return;
+                found_idx = i;
             }
         }
-        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+        if (found_idx == -1) {
+            ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+        }
+        // We want no gaps in the array so that we can only wait on the oldest
+        // element, which will be towards the front. Newest elements will be
+        // towards the back.
+        for (int i = found_idx; i < MAX_RMT_LED_STRIPS - 1; i++) {
+            mAllRmtLedStrips[i] = mAllRmtLedStrips[i + 1];
+        }
+        mAllRmtLedStrips[MAX_RMT_LED_STRIPS - 1] = nullptr;
     }
 
     void wait_for_any_strip_to_release() {
@@ -159,12 +169,9 @@ public:
                 continue;
             }
             // Some other error that we can't handle.
-            if (err != ESP_OK) {
-                ESP_LOGE(TAG, "construct_led_strip failed: %s", esp_err_to_name(err));
-                ESP_ERROR_CHECK(err);
-                continue;
-            }
-            break;
+
+            ESP_LOGE(TAG, "construct_led_strip failed because of unexpected error, is DMA not supported on this device?: %s", esp_err_to_name(err));
+            ESP_ERROR_CHECK(err);
         } while (true);
 
         mAquired = true;
