@@ -68,7 +68,7 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 }
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
-void five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5) {
+bool five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5) {
     const uint8_t brightness = *_brightness;
     uint8_t v5 = *_v5;
     uint32_t numerator = 1;
@@ -87,6 +87,7 @@ void five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5) {
         if (next_brightness_times_numerator > denominator * 0xff) {
             break;
         }
+
         numerator = next_numerator;
         denominator = next_denominator;
         v5 = next_v5;
@@ -95,9 +96,10 @@ void five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5) {
         uint32_t b32 = brightness;
         b32 *= numerator;
         *_brightness = static_cast<uint8_t>(b32 / denominator);
-        *_brightness = brightness;
         *_v5 = v5;
+        return true;
     }
+    return false;
 }
 
 void five_bit_color_bitshift(uint16_t* _r16, uint16_t* _g16, uint16_t* _b16, uint8_t* _v5) {

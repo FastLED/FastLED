@@ -89,7 +89,7 @@ void five_bit_hd_gamma_function(CRGB color,
 
 
 // exposed for testing:
-void five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5);
+bool five_bit_bitshift_brightness(uint8_t* _brightness, uint8_t* _v5);
 void five_bit_color_bitshift(uint16_t* _r16, uint16_t* _g16, uint16_t* _b16, uint8_t* _v5);
 
 
