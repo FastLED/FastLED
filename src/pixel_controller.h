@@ -478,7 +478,7 @@ struct PixelController {
         CRGB rgb = CRGB(mData[0], mData[1], mData[2]);
         uint8_t brightness = 0;
         if (rgb) {
-            #if FASTLED_HD_COLOR_MIXING == 1
+            #if FASTLED_HD_COLOR_MIXING
             brightness = mColorAdjustment.brightness;
             CRGB scale = mColorAdjustment.color;
             #else

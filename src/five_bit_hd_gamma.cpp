@@ -157,6 +157,21 @@ void __builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
                                           CRGB *out_colors,
                                           uint8_t *out_power_5bit) {
 
+    // Step 0: Scale the color channels brightness trading between global_brightness
+    // and the color scale.
+    #if FASTLED_HD_COLOR_MIXING
+    if (global_brightness < 64) {
+        // Swap bytes, experimentally determined to help the color balance
+        // at low global brightness levels. Figure out why.
+        uint8_t numerator = max3(colors_scale.r, colors_scale.g, colors_scale.b);
+        uint16_t denominator = numerator >> 1;
+        colors_scale.r = static_cast<uint8_t>((colors_scale.r * denominator) / numerator);
+        colors_scale.g = static_cast<uint8_t>((colors_scale.g * denominator) / numerator);
+        colors_scale.b = static_cast<uint8_t>((colors_scale.b * denominator) / numerator);
+        global_brightness = static_cast<uint8_t>(uint16_t(global_brightness) * numerator / denominator);
+    }
+    #endif
+
     // Step 1: Gamma Correction
     uint16_t r16, g16, b16;
     five_bit_hd_gamma_function(colors, &r16, &g16, &b16);
