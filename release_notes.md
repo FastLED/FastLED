@@ -18,13 +18,13 @@ FastLED 3.8.0
   avr platforms. This only affects chipsets that have higher than RGB8 output, aka APA102 and clones
   right now.
   * APA102 and APA102HD color mixing algorithms have been re-written to exploit this seperation and now feature drastically improved color resolution across global brightness scales.
-    * APA102-HD mode now has higher color resolution by using the color adjustment scale
+    * APA102-HD mode now has higher color resolution by using the color adjustment scale seperation
     from the global brightness scale. These two are now mixed together during pixel generation
     instead of using the premixed color state. A new bit-stealing algorithm boosts the global brightness
     factor by stealing bits from the 5-bit driver brightness and transfering it to the global brightness.
-    * Non-Apa102-HD mode has drastically improved it's resolution with respect to global brightness.
-    As a result, you no longer have to force it on as it's always on by default.
-    The color correction scale now is expected to have high order bits and won't degenerate the colors while the global brightness scale is mapped from 8-bit to the 5-bit driver brightness, the way god intended it.
+    * Non-Apa102-HD mode has drastically improved it's resolution integrity with respect to global brightness. In the 3.7.X series the led color would change drastically as the color values were denormalized by the bottom end of the global brightness scale. Now the colors are stable through out the global brightness value.
+    As a result, you no longer have to force global brightness on for the APA102 on as it's always on by default. The only downside is that the global brightness for the APA102 chipset is now 5 bit instead of
+    8-bit - there is room for splitting the brightness factor between the driver brightness and the color scale, but at this point it seems not that important.
     * If you don't like this behavior you can always go back by using setting `FASTLED_HD_COLOR_MIXING=0`.
 * Binary size
   * You might expect that becaue of the color mixing feature that this would mean less memory on AVR platforms. However through profile guided optimization this increase was offset for a total *decrease* of 200 bytes in comparison to 3.7.8:
