@@ -2,8 +2,6 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include <iostream>
-#include <bitset>
 
 inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightness_dst, uint8_t max_shifts) {
     uint8_t src = *brightness_src;
@@ -11,7 +9,6 @@ inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightne
         return 0;
     }
     // assert that there is a leading bit and no other bits set.
-    std::cout << "src: " << std::bitset<8>(src) << std::endl;
     assert( !(src & (src - 1) ));
 
     // Steal brightness from brightness_src and give it to brightness_dst.
@@ -45,16 +42,14 @@ inline uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *bright
         overflow_mask >>= 1;
         overflow_mask |= 0b10000000;
     }
-
     const uint8_t underflow_mask = 0b11111111 << steps;
-    assert( !(src & (src - 1) ));
+    assert( !(src & (src - 1) ));  // Assert only a leading bit.
     // Steal brightness from brightness_src and give it to brightness_dst.
     // After this function concludes the multiplication of brightness_dst and brightness_src will remain
     // constant.
     uint8_t curr = *brightness_dst;
     uint8_t shifts = 0;
-    for (uint8_t i = 0; i < max_shifts && src & underflow_mask; i+=steps) {
-        uint8_t curr_bit = 0b10000000;
+    for (uint8_t i = 0; i < max_shifts && (src & underflow_mask); i+=steps) {
         if (curr & overflow_mask) {
             // next shift will overflow
             break;
@@ -62,7 +57,6 @@ inline uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *bright
         curr <<= steps;
         src >>= steps;
     }
-    
     // write out the output values.
     *brightness_dst = curr;
     *brightness_src = src;
