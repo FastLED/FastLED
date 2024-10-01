@@ -21,7 +21,7 @@
 
 #ifndef FASTLED_RMT_WITH_DMA
 #if defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_ESP32S2_DEV) || defined(ESP8266)
-// This can be a runtime parameter that adjust to the chip detection feature of esp-idf.
+// This can be a runtime parameter that adjusts to the chip detection feature of esp-idf.
  #define FASTLED_RMT_WITH_DMA 0
 #else
  #define FASTLED_RMT_WITH_DMA 1
@@ -30,7 +30,7 @@
 
 #ifndef FASTLED_RMT_MEMBLOCK_SYMBOLS
 #if FASTLED_RMT_WITH_DMA
-// This can be a runtime parameter that adjust to the chip detection feature of esp-idf.
+// This can be a runtime parameter that adjusts to the chip detection feature of esp-idf.
 #define FASTLED_RMT_MEMBLOCK_SYMBOLS 1024
 #else
 #define FASTLED_RMT_MEMBLOCK_SYMBOLS 0  // Let the library decide
