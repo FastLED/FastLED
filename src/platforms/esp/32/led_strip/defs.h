@@ -1,5 +1,6 @@
 #pragma once
 
+
 // Configuration settings for the led_strip.
 #define LED_STRIP_RMT_DEFAULT_RESOLUTION 10000000 // 10MHz resolution
 #define INTERRUPT_PRIORITY 3  // maximum priority level for RMT interrupt
@@ -18,7 +19,11 @@
 #endif  // LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS
 
 #ifndef FASTLED_RMT_WITH_DMA
-#define FASTLED_RMT_WITH_DMA 1  // what platforms don't support DMA?
+#if defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_ESP32S2_DEV) || defined(ESP8266)
+ #define FASTLED_RMT_WITH_DMA 0
+#else
+ #define FASTLED_RMT_WITH_DMA 1
+#endif
 #endif  // FASTLED_RMT_WITH_DMA
 
 #ifndef FASTLED_RMT_MEMBLOCK_SYMBOLS
