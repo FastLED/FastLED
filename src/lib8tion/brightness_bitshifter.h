@@ -25,6 +25,7 @@ inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightne
         }
         curr <<= 1;
         src >>= 1;
+        shifts++;
     }
     // write out the output values.
     *brightness_dst = curr;
@@ -56,6 +57,7 @@ inline uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *bright
         }
         curr <<= steps;
         src >>= steps;
+        shifts += steps;
     }
     // write out the output values.
     *brightness_dst = curr;
