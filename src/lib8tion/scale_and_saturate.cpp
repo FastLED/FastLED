@@ -1,4 +1,8 @@
 #include <stdint.h>
+#include "namespace.h"
+#include "scale_and_saturate.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 namespace {
 template <typename T> T min(const T &a, const T &b) { return (a < b) ? a : b; }
@@ -75,3 +79,31 @@ bool scale_and_saturate_with_5bit_b(uint16_t *a, uint8_t *b) {
     // Return true if a is fully saturated
     return (*a == 0xffff);
 }
+
+
+bool scale_and_saturate(uint16_t largest_component, uint8_t* b, CRGB* out) {
+    // Calculate the remaining space to maximum for the largest component
+    uint32_t distance_to_max = 0xffff - largest_component;
+
+    // Scale the increment based on the b scaling factor (8-bit precision)
+    uint32_t scaled_increment = (distance_to_max * (*b)) / 255;
+
+    // Update the largest component with the scaled increment, clamping to 0xffff if necessary
+    largest_component = static_cast<uint16_t>(min<uint32_t>(0xffffu, largest_component + scaled_increment));
+
+    // Scale the RGB components proportionally to how largest_component was scaled
+    float scale_factor = static_cast<float>(largest_component) / static_cast<float>(0xffff);
+
+    // Apply the scaling factor to the RGB components
+    out->r = static_cast<uint16_t>(min<uint32_t>(0xffffu, static_cast<uint32_t>(out->r * scale_factor)));
+    out->g = static_cast<uint16_t>(min<uint32_t>(0xffffu, static_cast<uint32_t>(out->g * scale_factor)));
+    out->b = static_cast<uint16_t>(min<uint32_t>(0xffffu, static_cast<uint32_t>(out->b * scale_factor)));
+
+    // Ensure b doesn't reach 0, stays at least 1
+    *b = max<uint8_t>(1, *b);
+
+    // Return true if largest_component is fully saturated
+    return (largest_component == 0xffff);
+}
+
+FASTLED_NAMESPACE_END

@@ -1,9 +1,15 @@
 #pragma once
 
+#include "crgb.h"
 #include <stdint.h>
 
+#include "namespace.h"
 
-// These are function designed to 
+FASTLED_NAMESPACE_BEGIN
+
+// These are function designed to saturate one value while stealing value from the other.
+// This is useful for brightness stealing where software brightness needs to be maximized
+// while hardware brightness can be minimized (because it's free).
 
 
 // Scale and saturate the 16-bit unsigned integer a using the scaling factor b 
@@ -59,3 +65,9 @@ bool scale_and_saturate_with_5bit_b(uint8_t *a, uint8_t *b);
 //     modifies both a and b in place, clamping b to the 5-bit range, and ensures 
 //     a does not exceed 0xFFFF.
 bool scale_and_saturate_with_5bit_b(uint16_t *a, uint8_t *b);
+
+
+bool scale_and_saturate(uint16_t largest_component, uint8_t* b, CRGB* out);
+
+
+FASTLED_NAMESPACE_END
