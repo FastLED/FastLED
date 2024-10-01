@@ -3,7 +3,10 @@
 
 // Configuration settings for the led_strip.
 #define LED_STRIP_RMT_DEFAULT_RESOLUTION 10000000 // 10MHz resolution
-#define INTERRUPT_PRIORITY 3  // maximum priority level for RMT interrupt
+
+#ifndef FASTLED_RMT_INTERRUPT_PRIORITY
+#define FASTLED_RMT_INTERRUPT_PRIORITY 3  // maximum priority level for RMT interrupt
+#endif
 
 #ifndef LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE
 #define LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE 4
