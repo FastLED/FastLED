@@ -6,12 +6,15 @@
 #include "doctest.h"
 #include "lib8tion/intmap.h"
 #include "lib8tion/brightness_bitshifter.h"
+#include <iostream>
+#include <bitset>
 
 TEST_CASE("brightness_bitshifter") {
     SUBCASE("random test to check that the product is the same") {
         for (int i = 0; i < 10000; ++i) {
-            uint8_t brightness_src = rand() % 256;
-            uint8_t brightness_dst = 0b10000000 >> rand() % 6;
+            uint8_t brightness_src = 0b10000000 >> rand() % 6;
+            uint8_t brightness_dst = rand() % 256;
+            std::cout << "brightness_src: " << std::bitset<8>(brightness_src) << std::endl;
             uint8_t src_saved = brightness_src;
             uint8_t dst_saved = brightness_dst;
             INFO("brightness_src: " << src_saved << ", brightness_dst: " << dst_saved);
