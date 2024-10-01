@@ -399,7 +399,15 @@ private:
 #if FASTLED_HD_COLOR_MIXING
 		uint8_t brightness;
 		pixels.getHdScale(out_s0, out_s1, out_s2, &brightness);
-		*out_brightness = map(brightness, 0, 255, 0, 31);
+		struct Math {
+			static uint16_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint16_t out_min, uint16_t out_max) {
+				const uint16_t run = in_max - in_min;
+				const uint16_t rise = out_max - out_min;
+				const uint16_t delta = x - in_min;
+				return (delta * rise) / run + out_min;
+			}
+		};
+		*out_brightness = Math::map(brightness, 0, 255, 0, 31);
 		return;
 #else
 		uint8_t s0, s1, s2;
