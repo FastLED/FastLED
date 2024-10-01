@@ -29,3 +29,23 @@ TEST_CASE("brightness_bitshifter") {
         CHECK_GT(count, 0);
     }
 }
+
+
+// tests:
+// uint8_t brightness_bitshifter16(
+//    uint8_t *brightness_src, uint16_t 
+//    *brightness_dst, uint8_t max_shifts, uint8_t steps=2);
+
+TEST_CASE("brightness_bitshifter16") {
+    SUBCASE("simple") {
+        uint8_t brightness_src = 0x1 << 1;
+        uint16_t brightness_dst = 0x1 << 2;
+        uint8_t max_shifts = 8;
+        
+        uint8_t shifts = brightness_bitshifter16(&brightness_src, &brightness_dst, max_shifts);
+        
+        CHECK_EQ(shifts, 1);
+        CHECK_EQ(brightness_src, 1);
+        CHECK_EQ(brightness_dst, 0x1 << 4);
+    }
+}

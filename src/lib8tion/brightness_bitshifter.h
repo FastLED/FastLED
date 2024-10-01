@@ -3,9 +3,10 @@
 #include <stdint.h>
 #include <assert.h>
 
+
 inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightness_dst, uint8_t max_shifts) {
     uint8_t src = *brightness_src;
-    if (brightness_src == 0 || brightness_src == 0) {
+    if (*brightness_dst == 0 || src == 0) {
         return 0;
     }
     // assert that there is a leading bit and no other bits set.
@@ -33,31 +34,37 @@ inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightne
     return shifts;
 }
 
+// Return value is the number of shifts on the src. Multiply this by the number of steps to get the
+// the number of shifts on the dst.
 inline uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *brightness_dst, uint8_t max_shifts, uint8_t steps=2) {
     uint8_t src = *brightness_src;
-    if (brightness_src == 0 || brightness_src == 0) {
+    if (*brightness_src == 0 || *brightness_src == 0) {
         return 0;
     }
-    uint8_t overflow_mask = 0b10000000;
+
+    uint16_t overflow_mask = 0b1000000000000000;
     for (uint8_t i = 1; i < steps; i++) {
         overflow_mask >>= 1;
-        overflow_mask |= 0b10000000;
+        overflow_mask |= 0b1000000000000000;
     }
-    const uint8_t underflow_mask = 0b11111111 << steps;
+    const uint8_t underflow_mask = 0x1;
     assert( !(src & (src - 1) ));  // Assert only a leading bit.
     // Steal brightness from brightness_src and give it to brightness_dst.
     // After this function concludes the multiplication of brightness_dst and brightness_src will remain
     // constant.
-    uint8_t curr = *brightness_dst;
+    uint16_t curr = *brightness_dst;
     uint8_t shifts = 0;
-    for (uint8_t i = 0; i < max_shifts && (src & underflow_mask); i+=steps) {
+    for (uint8_t i = 0; i < max_shifts; i++) {
+        if (src & underflow_mask) {
+            break;
+        }
         if (curr & overflow_mask) {
             // next shift will overflow
             break;
         }
         curr <<= steps;
-        src >>= steps;
-        shifts += steps;
+        src >>= 1;
+        shifts++;
     }
     // write out the output values.
     *brightness_dst = curr;
