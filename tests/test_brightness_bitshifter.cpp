@@ -17,7 +17,6 @@ TEST_CASE("brightness_bitshifter") {
             uint8_t brightness_dst = rand() % 256;
             uint8_t src_saved = brightness_src;
             uint8_t dst_saved = brightness_dst;
-            //INFO("brightness_src: " << src_saved << ", brightness_dst: " << dst_saved);
             uint16_t product = uint16_t(brightness_src) * brightness_dst;
             uint8_t shifts = brightness_bitshifter8(&brightness_src, &brightness_dst, 7);
             uint16_t new_product = uint16_t(brightness_src) * brightness_dst;  
@@ -29,12 +28,6 @@ TEST_CASE("brightness_bitshifter") {
         CHECK_GT(count, 0);
     }
 }
-
-
-// tests:
-// uint8_t brightness_bitshifter16(
-//    uint8_t *brightness_src, uint16_t 
-//    *brightness_dst, uint8_t max_shifts, uint8_t steps=2);
 
 TEST_CASE("brightness_bitshifter16") {
     SUBCASE("simple with steps=2") {
@@ -61,4 +54,25 @@ TEST_CASE("brightness_bitshifter16") {
         CHECK_EQ(brightness_dst, 0x1 << 2);
     }
 
+    SUBCASE("random test to check that the product is the same") {
+        int count = 0;
+        for (int i = 0; i < 10000; ++i) {
+            uint8_t brightness_src = 0b10000000 >> (rand() % 8);
+            uint16_t brightness_dst = rand() % uint32_t(65536);
+            uint8_t src_saved = brightness_src;
+            uint16_t dst_saved = brightness_dst;
+            uint32_t product = uint32_t(brightness_src >> 8) * brightness_dst;
+            uint8_t max_shifts = 8;
+            uint8_t steps = 2;
+            
+            uint8_t shifts = brightness_bitshifter16(&brightness_src, &brightness_dst, max_shifts, steps);
+            
+            uint32_t new_product = uint32_t(brightness_src >> 8) * brightness_dst;  
+            CHECK_EQ(product, new_product);
+            if (shifts) {
+                count++;
+            }
+        }
+        CHECK_GT(count, 0);
+    }
 }
