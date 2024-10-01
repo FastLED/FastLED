@@ -71,6 +71,12 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "complex": "cpp",
+        "condition_variable": "cpp",
+        "csignal": "cpp",
+        "list": "cpp",
+        "fstream": "cpp",
+        "mutex": "cpp"
     }
 }
