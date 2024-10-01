@@ -13,11 +13,6 @@ bool bitshift_brightness(uint8_t *brightness_src, uint8_t *brightness_dst) {
     static_assert(
         N_BITS <= 5,
         "Not tested on more than 5 bits, denomintor or numerator may overflow.");
-    if (brightness > 123 && N_BITS == 5) {  // Early exit only tested on 5 bits.
-        // This function is a no-op if brightness is above max value that this
-        // function can handle.
-        return false;
-    }
     uint8_t v5 = *brightness_src;
     uint32_t numerator = 1;
     uint16_t denominator = 1; // can hold all possible denominators for v5.

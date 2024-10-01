@@ -8,6 +8,7 @@
 #include "lib8tion/intmap.h"
 #include "lib8tion/math8.h"
 #include "lib8tion/scale8.h"
+#include "lib8tion/bitshift_brightness.h"
 #include "namespace.h"
 
 // Author: Zach Vorhies
@@ -68,44 +69,6 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 }
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
-bool five_bit_bitshift_brightness(uint8_t *_brightness, uint8_t *_v5) {
-    const uint8_t brightness = *_brightness;
-    if (brightness > 123) {
-        // This function is a no-op if brightness is above max value that this
-        // function can handle.
-        return false;
-    }
-    uint8_t v5 = *_v5;
-    uint32_t numerator = 1;
-    uint16_t denominator = 1; // can hold all possible denominators for v5.
-    // Loop while there is room to adjust brightness
-    while (v5 > 1) {
-        // Calculate the next reduced value of v5
-        uint8_t next_v5 = v5 >> 1;
-        // Update the numerator and denominator to scale brightness
-        uint32_t next_numerator = numerator * v5;
-        uint32_t next_denominator = denominator * next_v5;
-        // Calculate the next potential brightness value
-        uint32_t next_brightness_times_numerator = brightness;
-        next_brightness_times_numerator *= next_numerator;
-        // Check for overflow
-        if (brightness * next_numerator > 0xff * next_denominator) {
-            break;
-        }
-
-        numerator = next_numerator;
-        denominator = next_denominator;
-        v5 = next_v5;
-    }
-    if (denominator != 1) {
-        uint32_t b32 = brightness;
-        b32 *= numerator;
-        *_brightness = static_cast<uint8_t>(b32 / denominator);
-        *_v5 = v5;
-        return true;
-    }
-    return false;
-}
 
 bool five_bit_color_bitshift(uint16_t *_r16, uint16_t *_g16, uint16_t *_b16,
                              uint8_t *_v5) {
@@ -166,7 +129,9 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     static const uint8_t kStartBrightness = 0b00011111;
     uint8_t v5 = kStartBrightness;
     // Step 2: Boost brightness by swapping power with the driver brightness.
-    five_bit_bitshift_brightness(&brightness, &v5);
+    if (brightness < 124) {  // No-op below this.
+        bitshift_brightness<5>(&v5, &brightness);
+    }
 
     // Step 3: Boost brightness of the color channels by swapping power with the
     // driver brightness.
