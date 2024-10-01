@@ -26,6 +26,8 @@ inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightne
             // next shift will overflow
             break;
         }
+        curr <<= 1;
+        src >>= 1;
     }
     // write out the output values.
     *brightness_dst = curr;
@@ -38,24 +40,29 @@ inline uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *bright
     if (brightness_src == 0 || brightness_src == 0) {
         return 0;
     }
+    uint8_t overflow_mask = 0b10000000;
+    for (uint8_t i = 1; i < steps; i++) {
+        overflow_mask >>= 1;
+        overflow_mask |= 0b10000000;
+    }
+
+    const uint8_t underflow_mask = 0b11111111 << steps;
     assert( !(src & (src - 1) ));
     // Steal brightness from brightness_src and give it to brightness_dst.
     // After this function concludes the multiplication of brightness_dst and brightness_src will remain
     // constant.
-    // This algorithm is a little difficult to follow and I don't understand why it works that well,
-    // however I did work it out manually and has something to do with how numbers respond to bitshifts.
     uint8_t curr = *brightness_dst;
     uint8_t shifts = 0;
-    for (uint8_t i = 0; i < max_shifts && src > 1; i+=steps) {
+    for (uint8_t i = 0; i < max_shifts && src & underflow_mask; i+=steps) {
         uint8_t curr_bit = 0b10000000;
-        for (int i = 0; i < steps; ++i) {
-            if (curr & curr_bit) {
-                // next shift will overflow
-                break;
-            }
-            curr_bit >>= 1;
+        if (curr & overflow_mask) {
+            // next shift will overflow
+            break;
         }
+        curr <<= steps;
+        src >>= steps;
     }
+    
     // write out the output values.
     *brightness_dst = curr;
     *brightness_src = src;
