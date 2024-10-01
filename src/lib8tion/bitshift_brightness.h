@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <iostream>
 
 // Steals brightness from brightness_src and gives it to brightness_dst. After
 // this function concludes the multiplication of brightness_dst and brightness_src will remain
@@ -28,7 +29,6 @@ bool bitshift_brightness(uint8_t *brightness_src, uint8_t *brightness_dst) {
         if (brightness * next_numerator > 0xff * next_denominator) {
             break;
         }
-
         numerator = next_numerator;
         denominator = next_denominator;
         v5 = next_v5;
@@ -42,3 +42,4 @@ bool bitshift_brightness(uint8_t *brightness_src, uint8_t *brightness_dst) {
     }
     return false;
 }
+
