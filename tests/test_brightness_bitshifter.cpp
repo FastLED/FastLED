@@ -37,15 +37,28 @@ TEST_CASE("brightness_bitshifter") {
 //    *brightness_dst, uint8_t max_shifts, uint8_t steps=2);
 
 TEST_CASE("brightness_bitshifter16") {
-    SUBCASE("simple") {
+    SUBCASE("simple with steps=2") {
         uint8_t brightness_src = 0x1 << 1;
         uint16_t brightness_dst = 0x1 << 2;
         uint8_t max_shifts = 8;
         
-        uint8_t shifts = brightness_bitshifter16(&brightness_src, &brightness_dst, max_shifts);
+        uint8_t shifts = brightness_bitshifter16(&brightness_src, &brightness_dst, max_shifts, 2);
         
         CHECK_EQ(shifts, 1);
         CHECK_EQ(brightness_src, 1);
         CHECK_EQ(brightness_dst, 0x1 << 4);
     }
+
+    SUBCASE("simple with steps=1") {
+        uint8_t brightness_src = 0x1 << 1;
+        uint16_t brightness_dst = 0x1 << 1;
+        uint8_t max_shifts = 8;
+        
+        uint8_t shifts = brightness_bitshifter16(&brightness_src, &brightness_dst, max_shifts, 1);
+        
+        CHECK_EQ(shifts, 1);
+        CHECK_EQ(brightness_src, 1);
+        CHECK_EQ(brightness_dst, 0x1 << 2);
+    }
+
 }
