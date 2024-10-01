@@ -4,7 +4,7 @@
 
 #if FASTLED_RMT5
 
-
+#include "defs.h"
 #include "rmt_strip.h"
 
 namespace fastled_rmt51_strip {
