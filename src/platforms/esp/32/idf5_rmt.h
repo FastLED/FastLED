@@ -12,18 +12,14 @@
 class RmtController5
 {
 public:
-    // When built_in_driver is true then the entire RMT datablock is
-    // generated ahead of time. This eliminates the flicker at the
-    // cost of using WAY more memory (24x the size of the pixel data
-    // as opposed to 2x - the size of an additional pixel buffer for
-    // stream encoding).
+    // Bridge between FastLED and the ESP RMT5 driver.
     RmtController5() = delete;
     RmtController5(RmtController5 &&) = delete;
     RmtController5 &operator=(const RmtController5 &) = delete;
     RmtController5(const RmtController5 &) = delete;
     RmtController5(
         int DATA_PIN,
-        int T1, int T2, int T3);  // Bit timings.
+        int T1, int T2, int T3);  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these.
 
     ~RmtController5();
 

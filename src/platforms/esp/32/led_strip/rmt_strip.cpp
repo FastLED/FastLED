@@ -32,9 +32,6 @@ namespace fastled_rmt51_strip {
         }                              \
     }
 
-
-
-
 class RmtLedStrip : public IRmtLedStrip {
 public:
     RmtLedStrip(uint16_t T0H, uint16_t T0L, uint16_t T1H, uint16_t T1L, uint32_t TRESET,

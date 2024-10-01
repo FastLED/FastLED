@@ -1,5 +1,6 @@
 #pragma once
 
+// Configuration settings for the led_strip.
 #define LED_STRIP_RMT_DEFAULT_RESOLUTION 10000000 // 10MHz resolution
 #define INTERRUPT_PRIORITY 3  // maximum priority level for RMT interrupt
 
@@ -26,4 +27,10 @@
 #else
 #define FASTLED_RMT_MEMBLOCK_SYMBOLS 0  // Let the library decide
 #endif  // FASTLED_RMT_WITH_DMA
+
+
+#ifndef FASTLED_RMT_MAX_CHANNELS
+#define FASTLED_RMT_MAX_CHANNELS -1  // Allow runtime discovery
+#endif  // FASTLED_RMT_MAX_CHANNELS
+
 #endif  // FASTLED_RMT_MEMBLOCK_SYMBOLS

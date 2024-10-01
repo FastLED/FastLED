@@ -13,8 +13,6 @@
 #include "esp_check.h"
 
 
-
-
 namespace fastled_rmt51_strip {
 
 RmtActiveStripGroup& RmtActiveStripGroup::instance() {

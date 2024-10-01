@@ -67,22 +67,6 @@ esp_err_t led_strip_set_pixel(led_strip_handle_t strip, uint32_t index, uint32_t
 esp_err_t led_strip_set_pixel_rgbw(led_strip_handle_t strip, uint32_t index, uint32_t red, uint32_t green, uint32_t blue, uint32_t white);
 
 /**
- * @brief Set HSV for a specific pixel
- *
- * @param strip: LED strip
- * @param index: index of pixel to set
- * @param hue: hue part of color (0 - 360)
- * @param saturation: saturation part of color (0 - 255, rescaled from 0 - 1. e.g. saturation = 0.5, rescaled to 127)
- * @param value: value part of color (0 - 255, rescaled from 0 - 1. e.g. value = 0.5, rescaled to 127)
- *
- * @return
- *      - ESP_OK: Set HSV color for a specific pixel successfully
- *      - ESP_ERR_INVALID_ARG: Set HSV color for a specific pixel failed because of an invalid argument
- *      - ESP_FAIL: Set HSV color for a specific pixel failed because other error occurred
- */
-esp_err_t led_strip_set_pixel_hsv(led_strip_handle_t strip, uint32_t index, uint16_t hue, uint8_t saturation, uint8_t value);
-
-/**
  * @brief Refresh memory colors to LEDs
  *
  * @param strip: LED strip

@@ -14,6 +14,8 @@ using namespace fastled_rmt51_strip;
 
 #define TAG "idf5_rmt.cpp"
 
+namespace {  // anonymous namespace
+
 // TODO get rid of this
 static const uint32_t TRESET = 280000; // 280us (WS2812-V5)
 
@@ -23,6 +25,8 @@ void convert(int T1, int T2, int T3, uint16_t* T0H, uint16_t* T0L, uint16_t* T1H
     *T1H = T1 + T2;
     *T1L = T3;
 }
+
+}  // namespace
 
 RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3)
         : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3) {

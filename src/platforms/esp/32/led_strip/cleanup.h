@@ -1,5 +1,7 @@
 #pragma once
 
+// A structure that will execute a cleanup function on scope exit unless
+// release() is called.
 struct Cleanup {
     typedef void (*void_fn_t)(void*);
     template<typename CleanupFunction>

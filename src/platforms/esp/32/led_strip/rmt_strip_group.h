@@ -32,7 +32,7 @@ private:
     RmtActiveStripGroup();
     RmtActiveStripGroup(const RmtActiveStripGroup&) = delete;
     RmtActiveStripGroup& operator=(const RmtActiveStripGroup&) = delete;
-    int mTotalActiveStripsAllowed = -1;  // Starts off as unknown.
+    int mTotalActiveStripsAllowed = FASTLED_RMT_MAX_CHANNELS;  // Default -1 to allow runtime discovery.
     IRmtLedStrip* mAllRmtLedStrips[kMaxRmtLedStrips];
 };
 
