@@ -9,14 +9,29 @@
 using namespace std;
 
 void do_it(uint8_t a, uint8_t b) {
-    uint8_t bprime = scale_and_saturate_u8(a, b);
+    uint8_t bprime, aprime;
+    scale_and_saturate_u8(a, b, &aprime, &bprime);
 
+    /*
     cout << "#############################################" << endl;
     cout << "a: " << (int)a << " b: " << (int)b << " bprime: " << (int)bprime
          << endl;
     // now multiply by b
     cout << "a * b: " << (int)(a * b) << " bprime * a: " << (int)(bprime * 255)
          << endl;
+         */
+    
+    cout << "#############################################" << endl;
+    cout << "a: " << (int)a << " b: " << (int)b << " bprime: " << (int)bprime << " aprime: " << (int)aprime << endl;
+    cout << "a * b: " << (int)(a * b) << " bprime * a: " << (int)(bprime * 255) << endl;
+
+
+    // float version:
+
+    float bprime_f = scale_and_saturate_float(a, b);
+    cout << "float version: " << bprime_f << endl;
+    cout << "#############################################" << endl;
+    cout << "bprime float: " << bprime_f << endl;
 
 }
 
