@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <iostream>
 
 // Steals brightness from brightness_src and gives it to brightness_dst. After
 // this function concludes the multiplication of brightness_dst and brightness_src will remain
