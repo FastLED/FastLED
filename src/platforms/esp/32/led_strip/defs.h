@@ -11,6 +11,7 @@
 
 // the memory size of each RMT channel, in words (4 bytes)
 #ifndef LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS
+// TODO: This can be a runtime parameter that adjust to the number of strips.
 #if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S2
 #define LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS 64
 #else
@@ -20,6 +21,7 @@
 
 #ifndef FASTLED_RMT_WITH_DMA
 #if defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_ESP32S2_DEV) || defined(ESP8266)
+// This can be a runtime parameter that adjust to the chip detection feature of esp-idf.
  #define FASTLED_RMT_WITH_DMA 0
 #else
  #define FASTLED_RMT_WITH_DMA 1
@@ -28,6 +30,7 @@
 
 #ifndef FASTLED_RMT_MEMBLOCK_SYMBOLS
 #if FASTLED_RMT_WITH_DMA
+// This can be a runtime parameter that adjust to the chip detection feature of esp-idf.
 #define FASTLED_RMT_MEMBLOCK_SYMBOLS 1024
 #else
 #define FASTLED_RMT_MEMBLOCK_SYMBOLS 0  // Let the library decide
