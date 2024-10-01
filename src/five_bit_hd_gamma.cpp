@@ -8,7 +8,7 @@
 #include "lib8tion/intmap.h"
 #include "lib8tion/math8.h"
 #include "lib8tion/scale8.h"
-#include "lib8tion/bitshift_brightness.h"
+#include "lib8tion/brightness_bitshifter.h"
 #include "namespace.h"
 
 // Author: Zach Vorhies
@@ -69,49 +69,6 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 }
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
-
-bool five_bit_color_bitshift(uint16_t *_r16, uint16_t *_g16, uint16_t *_b16,
-                             uint8_t *_v5) {
-
-    // Initialize numerator and denominator for scaling
-    uint16_t r16 = *_r16;
-    uint16_t g16 = *_g16;
-    uint16_t b16 = *_b16;
-    uint8_t v5 = *_v5;
-    uint32_t numerator = 1;
-    uint16_t denominator = 1; // can hold all possible denomintors for v5.
-    uint32_t overflow = max3(r16, g16, b16);
-
-    // Loop while v5 is greater than 1
-    while (v5 > 1) {
-        uint8_t next_v5 = v5 >> 1;
-        uint32_t next_numerator = numerator * v5;
-        uint16_t next_denominator = denominator * next_v5;
-        // Calculate potential new overflow
-        uint32_t next_overflow = (overflow * next_numerator);
-        // Check if overflow exceeds the uint16_t limit
-        if (next_overflow > next_denominator * 0xffff) {
-            break;
-        }
-        numerator = next_numerator;
-        denominator = next_denominator;
-        // Update v5 for the next iteration
-        v5 = next_v5;
-    }
-
-    if (numerator != 1) { // Signal that a new value was computed.
-        r16 = static_cast<uint16_t>((r16 * numerator) / denominator);
-        g16 = static_cast<uint16_t>((g16 * numerator) / denominator);
-        b16 = static_cast<uint16_t>((b16 * numerator) / denominator);
-        *_r16 = r16;
-        *_g16 = g16;
-        *_b16 = b16;
-        *_v5 = v5;
-        return true;
-    }
-    return false;
-}
-
 void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
                        uint8_t brightness, CRGB *out, uint8_t *out_power_5bit) {
     if (!(r16 | g16 | b16) || brightness == 0) {
@@ -126,16 +83,21 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     // much as possible.
 
     // Step 1: Initialize brightness
-    static const uint8_t kStartBrightness = 0b00011111;
+    static const uint8_t kStartBrightness = 0b00010000;
     uint8_t v5 = kStartBrightness;
     // Step 2: Boost brightness by swapping power with the driver brightness.
-    if (brightness < 124) {  // No-op below this.
-        bitshift_brightness<5>(&v5, &brightness);
-    }
+    brightness_bitshifter8(&v5, &brightness, 4);
 
     // Step 3: Boost brightness of the color channels by swapping power with the
     // driver brightness.
-    five_bit_color_bitshift(&r16, &g16, &b16, &v5);
+    uint16_t max_component = max3(r16, g16, b16);
+    // five_bit_color_bitshift(&r16, &g16, &b16, &v5);
+    uint8_t shifts = brightness_bitshifter16(&v5, &max_component, 4, 2);
+    if (shifts) {
+        r16 <<= shifts * 2;
+        g16 <<= shifts * 2;
+        b16 <<= shifts * 2;
+    }
 
     // Step 4: scale by final brightness factor.
     if (brightness != 0xff) {
