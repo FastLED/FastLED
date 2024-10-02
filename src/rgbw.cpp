@@ -4,7 +4,6 @@
 
 #include "rgbw.h"
 #include <stdint.h>
-#include <stdio.h>
 
 FASTLED_NAMESPACE_BEGIN
 
