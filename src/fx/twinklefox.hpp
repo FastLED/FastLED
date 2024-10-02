@@ -26,6 +26,13 @@
 //  the exact same wave function over time.  In this particular case,
 //  I chose a sawtooth triangle wave (triwave8) rather than a sine wave,
 //  but the idea is the same: brightness = triwave8( time ).  
+//
+//  The triangle wave function is a piecewise linear function that looks like:
+//
+//     / \ 
+//    /     \ 
+//   /         \ 
+//  /             \ 
 //  
 //  Of course, if all the pixels used the exact same wave form, and 
 //  if they all used the exact same 'clock' for their 'time base', all
