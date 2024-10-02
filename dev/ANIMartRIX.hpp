@@ -26,8 +26,11 @@ License CC BY-NC 3.0
 */
 
 #warning "\
-ANIMartRIX: Creative Commons Attribution License CC BY-NC-SA 4.0, free for non-commercial use only. \
-For commercial use, please contact Stefan Petrick. Github: https://github.com/StefanPetrick/animartrix"
+ANIMartRIX: free for non-commercial use and licensed under the Creative Commons Attribution License CC BY-NC-SA 4.0, . \
+For commercial use, please contact Stefan Petrick. Github: https://github.com/StefanPetrick/animartrix". \
+Modified by github.com/netmindz for class portability. \
+Modified by Zach Vorhies for FastLED fx compatibility."
+
 
 #include <FastLED.h>
 #include "ANIMartRIX.h"
