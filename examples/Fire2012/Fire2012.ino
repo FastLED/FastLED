@@ -49,7 +49,7 @@
 #define REVERSE_DIRECTION false
 
 CRGB leds[NUM_LEDS];
-Fire2020Data state(
+Fire2012Data state(
   leds,           // leds - required
   NUM_LEDS,       // num_leds - required
   nullptr,        // heat - will be allocated if not provided,
@@ -68,7 +68,7 @@ void setup() {
 
 void loop()
 {
-  Fire2020Loop(state); // run simulation frame
+  Fire2012Loop(state); // run simulation frame
   
   FastLED.show(); // display this frame
   FastLED.delay(1000 / FRAMES_PER_SECOND);

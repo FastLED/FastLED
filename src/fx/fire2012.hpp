@@ -44,7 +44,7 @@
 #include "FastLED.h"
 
 
-struct Fire2020Data {
+struct Fire2012Data {
     CRGB* leds = nullptr;
     uint16_t num_leds = 0;
     uint8_t* heat = nullptr; // Will be allocated if not provided.
@@ -53,11 +53,11 @@ struct Fire2020Data {
     bool reverse_direction = false;
     CRGBPalette16 palette = HeatColors_p; // Default palette
     // constructor
-    Fire2020Data(CRGB* leds, uint16_t num_leds, uint8_t* heat, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false, const CRGBPalette16& palette = HeatColors_p)
+    Fire2012Data(CRGB* leds, uint16_t num_leds, uint8_t* heat, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false, const CRGBPalette16& palette = HeatColors_p)
         : leds(leds), num_leds(num_leds), heat(heat), cooling(cooling), sparking(sparking), reverse_direction(reverse_direction), palette(palette) {}
 };
 
-void Fire2020Loop(Fire2020Data& self)
+void Fire2012Loop(Fire2012Data& self)
 {
 
     if (self.leds == nullptr) {
