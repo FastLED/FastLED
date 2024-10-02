@@ -9,6 +9,7 @@
 #define MAX_MA       4000
 
 CRGBArray<NUM_LEDS> leds;
+TwinkleFoxData twinkleFoxData(leds, NUM_LEDS);
 
 void setup() {
   delay(3000); // safety startup delay
@@ -17,19 +18,19 @@ void setup() {
     .setCorrection(TypicalLEDStrip)
     .setRgbw();
 
-  chooseNextColorPalette(gTargetPalette);
+  chooseNextColorPalette(twinkleFoxData.targetPalette);
 }
 
 void loop() {
   EVERY_N_SECONDS(SECONDS_PER_PALETTE) { 
-    chooseNextColorPalette(gTargetPalette); 
+    chooseNextColorPalette(twinkleFoxData.targetPalette); 
   }
   
   EVERY_N_MILLISECONDS(10) {
-    nblendPaletteTowardPalette(gCurrentPalette, gTargetPalette, 12);
+    nblendPaletteTowardPalette(twinkleFoxData.currentPalette, twinkleFoxData.targetPalette, 12);
   }
 
-  drawTwinkles(leds);
+  TwinkleFoxLoop(twinkleFoxData);
   
   FastLED.show();
 }
