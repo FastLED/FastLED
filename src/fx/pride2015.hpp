@@ -1,7 +1,12 @@
 #pragma once
 
+/// @file    pride2015.hpp
 /// @brief   Animated, ever-changing rainbows (Pride2015 effect)
 /// @example Pride2015.ino
+
+// Pride2015
+// Animated, ever-changing rainbows.
+// by Mark Kriegsman
 
 #include "FastLED.h"
 
@@ -21,10 +26,14 @@ struct Pride2015Data {
         : leds(leds), num_leds(num_leds) {}
 };
 
+// This function draws rainbows with an ever-changing,
+// widely-varying set of parameters.
 void Pride2015Loop(Pride2015Data& self) {
     if (self.leds == nullptr || self.num_leds == 0) {
         return;
     }
+
+    // tell FastLED about the LED strip configuration
 
     uint8_t sat8 = beatsin88(87, 220, 250);
     uint8_t brightdepth = beatsin88(341, 96, 224);
@@ -41,6 +50,7 @@ void Pride2015Loop(Pride2015Data& self) {
     self.sHue16 += deltams * beatsin88(400, 5, 9);
     uint16_t brightnesstheta16 = self.sPseudotime;
   
+    // set master brightness control
     for (uint16_t i = 0; i < self.num_leds; i++) {
         hue16 += hueinc16;
         uint8_t hue8 = hue16 / 256;
