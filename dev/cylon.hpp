@@ -22,7 +22,7 @@ CylonData cylonData(leds, NUM_LEDS);
 void setup() { 
     Serial.begin(57600);
     Serial.println("resetting");
-    FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS).setRgbw();
+    FastLED.addLeds<WS2812,DATA_PIN,BRG>(leds,NUM_LEDS).setRgbw();
     FastLED.setBrightness(84);
 }
 

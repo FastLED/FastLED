@@ -6,7 +6,7 @@
 #define NUM_LEDS            60
 #define MAX_POWER_MILLIAMPS 500
 #define LED_TYPE            WS2812B
-#define COLOR_ORDER         GRB
+#define COLOR_ORDER         BRG
 
 CRGB leds[NUM_LEDS];
 PacificaData pacificaData(leds, NUM_LEDS);

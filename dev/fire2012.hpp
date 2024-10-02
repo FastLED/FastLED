@@ -4,7 +4,7 @@
 #include "fx/fire2020.hpp"
 
 #define LED_PIN     2
-#define COLOR_ORDER GRB
+#define COLOR_ORDER BRG
 #define CHIPSET     WS2811
 #define NUM_LEDS    30
 
