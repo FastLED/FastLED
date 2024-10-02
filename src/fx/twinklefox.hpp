@@ -4,6 +4,12 @@
 
 #include "FastLED.h"
 
+// Forward declarations
+void chooseNextColorPalette(CRGBPalette16& pal);
+void drawTwinkles(CRGBSet& L);
+CRGB computeOneTwinkle(uint32_t ms, uint8_t salt);
+uint8_t attackDecayWave8(uint8_t i);
+void coolLikeIncandescent(CRGB& c, uint8_t phase);
 
 #define NUM_LEDS      100
 #define LED_TYPE   WS2811
