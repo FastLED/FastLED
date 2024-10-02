@@ -7,52 +7,51 @@
 #include "FastLED.h"
 
 struct Fire2020Data {
-    CRGB* leds;
-    uint16_t num_leds;
-    uint8_t cooling;
-    uint8_t sparking;
-    bool reverse_direction;
+    CRGB* leds = nullptr;
+    uint16_t num_leds = 0;
+    uint8_t* heat = nullptr; // Will be allocated if not provided.
+    uint8_t cooling = 55;
+    uint8_t sparking = 120;
+    bool reverse_direction = false;
 };
 
-void Fire2020(Fire2020Data& config)
+void Fire2020Loop(Fire2020Data& self)
 {
-    // Array of temperature readings at each simulation cell
-    static uint8_t* heat = nullptr;
-    static uint16_t last_num_leds = 0;
 
-    // Reallocate heat array if number of LEDs has changed
-    if (config.num_leds != last_num_leds) {
-        delete[] heat;
-        heat = new uint8_t[config.num_leds];
-        last_num_leds = config.num_leds;
+    if (self.leds == nullptr) {
+        return;
+    }
+    // We allow head to be auto created.
+    if (self.heat == nullptr && self.num_leds > 0) {
+        self.heat = new uint8_t[self.num_leds]();  // Initialize to zero
     }
 
     // Step 1.  Cool down every cell a little
-    for (int i = 0; i < config.num_leds; i++) {
-        heat[i] = qsub8(heat[i], random8(0, ((config.cooling * 10) / config.num_leds) + 2));
+    for (int i = 0; i < self.num_leds; i++) {
+        self.heat[i] = qsub8(self.heat[i], random8(0, ((self.cooling * 10) / self.num_leds) + 2));
     }
   
     // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-    for (int k = config.num_leds - 1; k >= 2; k--) {
-        heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
+    for (int k = self.num_leds - 1; k >= 2; k--) {
+        self.heat[k] = (self.heat[k - 1] + self.heat[k - 2] + self.heat[k - 2]) / 3;
     }
     
     // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-    if (random8() < config.sparking) {
+    if (random8() < self.sparking) {
         int y = random8(7);
-        heat[y] = qadd8(heat[y], random8(160, 255));
+        self.heat[y] = qadd8(self.heat[y], random8(160, 255));
     }
 
     // Step 4.  Map from heat cells to LED colors
-    for (int j = 0; j < config.num_leds; j++) {
-        CRGB color = HeatColor(heat[j]);
+    for (int j = 0; j < self.num_leds; j++) {
+        CRGB color = HeatColor(self.heat[j]);
         int pixelnumber;
-        if (config.reverse_direction) {
-            pixelnumber = (config.num_leds - 1) - j;
+        if (self.reverse_direction) {
+            pixelnumber = (self.num_leds - 1) - j;
         } else {
             pixelnumber = j;
         }
-        config.leds[pixelnumber] = color;
+        self.leds[pixelnumber] = color;
     }
 }
 
