@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <assert.h>
+
 
 
 inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightness_dst, uint8_t max_shifts) {
@@ -10,7 +10,12 @@ inline uint8_t brightness_bitshifter8(uint8_t *brightness_src, uint8_t *brightne
         return 0;
     }
     // assert that there is a leading bit and no other bits set.
-    assert( !(src & (src - 1) ));
+    if (!(src & (src - 1) )) {
+        // Assert only a leading bit.
+        // Invalid, but we can't use assert so we just bail.
+        return 0;
+    }
+
 
     // Steal brightness from brightness_src and give it to brightness_dst.
     // After this function concludes the multiplication of brightness_dst and brightness_src will remain
@@ -42,13 +47,18 @@ inline uint8_t brightness_bitshifter16(uint8_t *brightness_src, uint16_t *bright
         return 0;
     }
 
+    if (!(src & (src - 1) )) {
+        // Assert only a leading bit.
+        // Invalid, but we can't use assert so we just bail.
+        return 0;
+    }
+
     uint16_t overflow_mask = 0b1000000000000000;
     for (uint8_t i = 1; i < steps; i++) {
         overflow_mask >>= 1;
         overflow_mask |= 0b1000000000000000;
     }
     const uint8_t underflow_mask = 0x1;
-    assert( !(src & (src - 1) ));  // Assert only a leading bit.
     // Steal brightness from brightness_src and give it to brightness_dst.
     // After this function concludes the multiplication of brightness_dst and brightness_src will remain
     // constant.
