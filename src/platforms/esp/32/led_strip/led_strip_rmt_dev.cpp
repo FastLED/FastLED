@@ -225,11 +225,12 @@ esp_err_t led_strip_new_rmt_device_with_buffer(
     if (rmt_config->clk_src) {
         clk_src = rmt_config->clk_src;
     }
-    size_t mem_block_symbols = LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS;
+    size_t mem_block_symbols = rmt_config->mem_block_symbols;
+    assert(mem_block_symbols > 0);
     // override the default value if the user sets it
-    if (rmt_config->mem_block_symbols) {
-        mem_block_symbols = rmt_config->mem_block_symbols;
-    }
+    //if (rmt_config->mem_block_symbols) {
+    //    mem_block_symbols = rmt_config->mem_block_symbols;
+    //}
     rmt_tx_channel_config_t rmt_chan_config = {
         .gpio_num = gpio_num_t(led_config->strip_gpio_num),
         .clk_src = clk_src,
