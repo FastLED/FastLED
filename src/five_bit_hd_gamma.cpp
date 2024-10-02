@@ -12,8 +12,6 @@
 #include "namespace.h"
 
 
-#include <assert.h>
-
 // Author: Zach Vorhies
 
 FASTLED_NAMESPACE_BEGIN
@@ -118,7 +116,6 @@ uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         // So 0b00010000 | 0b00001111 = 0b00011111
         v5 = v5 | (v5 - 1);
     }
-    assert(v5 >= 1);
     // Step 5: Convert back to 8-bit and output.
     *out = CRGB(map16_to_8(r16), map16_to_8(g16), map16_to_8(b16));
     *out_power_5bit = v5;
