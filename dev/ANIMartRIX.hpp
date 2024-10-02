@@ -79,36 +79,62 @@ void setup() {
 
 //*******************************************************************************************************************
 
+enum Animation {
+  RGB_BLOBS5,
+  RGB_BLOBS4,
+  RGB_BLOBS3,
+  RGB_BLOBS2,
+  RGB_BLOBS,
+  POLAR_WAVES,
+  SLOW_FADE,
+  ZOOM2,
+  ZOOM,
+  HOT_BLOB,
+  SPIRALUS2,
+  SPIRALUS,
+  YVES,
+  SCALEDEMO1,
+  LAVA1,
+  CALEIDO3,
+  CALEIDO2,
+  CALEIDO1,
+  DISTANCE_EXPERIMENT,
+  CENTER_FIELD,
+  WAVES,
+  CHASING_SPIRALS,
+  ROTATING_BLOB,
+  RINGS,
+  NUM_ANIMATIONS
+};
+
 void loop() {
-  static uint8_t currentAnimation = 0;
-  static const uint8_t numAnimations = 25;
+  static Animation currentAnimation = RGB_BLOBS5;
 
   switch (currentAnimation) {
-    case 0: animatrix.RGB_Blobs5(); break;
-    case 1: animatrix.RGB_Blobs4(); break;
-    case 2: animatrix.RGB_Blobs3(); break;
-    case 3: animatrix.RGB_Blobs2(); break;
-    case 4: animatrix.RGB_Blobs(); break;
-    case 5: animatrix.Polar_Waves(); break;
-    case 6: animatrix.Slow_Fade(); break;
-    case 7: animatrix.Zoom2(); break;
-    case 8: animatrix.Zoom(); break;
-    case 9: animatrix.Hot_Blob(); break;
-    case 10: animatrix.Spiralus2(); break;
-    case 11: animatrix.Spiralus(); break;
-    case 12: animatrix.Yves(); break;
-    case 13: animatrix.Scaledemo1(); break;
-    case 14: animatrix.Lava1(); break;
-    case 15: animatrix.Caleido3(); break;
-    case 16: animatrix.Caleido2(); break;
-    case 17: animatrix.Caleido1(); break;
-    case 18: animatrix.Distance_Experiment(); break;
-    case 19: animatrix.Center_Field(); break;
-    case 20: animatrix.Waves(); break;
-    case 21: animatrix.Chasing_Spirals(); break;
-    case 22: animatrix.Rotating_Blob(); break;
-    case 23: animatrix.Rings(); break;
-    default: animatrix.RGB_Blobs2(); break;
+    case RGB_BLOBS5: animatrix.RGB_Blobs5(); break;
+    case RGB_BLOBS4: animatrix.RGB_Blobs4(); break;
+    case RGB_BLOBS3: animatrix.RGB_Blobs3(); break;
+    case RGB_BLOBS2: animatrix.RGB_Blobs2(); break;
+    case RGB_BLOBS: animatrix.RGB_Blobs(); break;
+    case POLAR_WAVES: animatrix.Polar_Waves(); break;
+    case SLOW_FADE: animatrix.Slow_Fade(); break;
+    case ZOOM2: animatrix.Zoom2(); break;
+    case ZOOM: animatrix.Zoom(); break;
+    case HOT_BLOB: animatrix.Hot_Blob(); break;
+    case SPIRALUS2: animatrix.Spiralus2(); break;
+    case SPIRALUS: animatrix.Spiralus(); break;
+    case YVES: animatrix.Yves(); break;
+    case SCALEDEMO1: animatrix.Scaledemo1(); break;
+    case LAVA1: animatrix.Lava1(); break;
+    case CALEIDO3: animatrix.Caleido3(); break;
+    case CALEIDO2: animatrix.Caleido2(); break;
+    case CALEIDO1: animatrix.Caleido1(); break;
+    case DISTANCE_EXPERIMENT: animatrix.Distance_Experiment(); break;
+    case CENTER_FIELD: animatrix.Center_Field(); break;
+    case WAVES: animatrix.Waves(); break;
+    case CHASING_SPIRALS: animatrix.Chasing_Spirals(); break;
+    case ROTATING_BLOB: animatrix.Rotating_Blob(); break;
+    case RINGS: animatrix.Rings(); break;
   }
 
   animatrix.logOutput();
@@ -118,6 +144,6 @@ void loop() {
 
   // Change animation every 10 seconds
   EVERY_N_SECONDS(10) {
-    currentAnimation = (currentAnimation + 1) % numAnimations;
+    currentAnimation = static_cast<Animation>((static_cast<int>(currentAnimation) + 1) % NUM_ANIMATIONS);
   }
 }
