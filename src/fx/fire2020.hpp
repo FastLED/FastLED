@@ -1,3 +1,5 @@
+#pragma once
+
 /// @brief   Simple one-dimensional fire animation function
 // Fire2012 by Mark Kriegsman, July 2012
 // as part of "Five Elements" shown here: http://youtu.be/knWiGsmgycY
@@ -36,8 +38,7 @@
 // Default 120, suggested range 50-200.
 
 
-#ifndef FIRE2020_HPP
-#define FIRE2020_HPP
+
 
 #include "crgb.h"
 #include "FastLED.h"
@@ -94,6 +95,3 @@ void Fire2020Loop(Fire2020Data& self)
         self.leds[pixelnumber] = color;
     }
 }
-
-#endif // FIRE2020_HPP
-
