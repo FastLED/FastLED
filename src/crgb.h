@@ -92,7 +92,7 @@ struct CRGB {
     {
     }
 
-    inline uint32_t as_uint32_t() const {
+    constexpr uint32_t as_uint32_t() const {
         return uint32_t(0xff000000) |
                (uint32_t{r} << 16) |
                (uint32_t{g} << 8) |
@@ -281,6 +281,8 @@ struct CRGB {
     /// levels may dim all the way to 100% black.
     /// @see ::scale8
     FASTLED_FORCE_INLINE CRGB& nscale8 (const CRGB & scaledown );
+
+    constexpr CRGB nscale8_constexpr (const CRGB scaledown ) const;
 
 
     /// Return a CRGB object that is a scaled down version of this object

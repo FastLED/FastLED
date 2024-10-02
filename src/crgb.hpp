@@ -75,6 +75,16 @@ FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (uint8_t scaledown )
     return *this;
 }
 
+constexpr CRGB CRGB::nscale8_constexpr(const CRGB scaledown) const
+{
+    return CRGB(
+        scale8_constexpr(r, scaledown.r),
+        scale8_constexpr(g, scaledown.g),
+        scale8_constexpr(b, scaledown.b)
+    );
+}
+
+
 FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (const CRGB & scaledown )
 {
     r = ::scale8(r, scaledown.r);
