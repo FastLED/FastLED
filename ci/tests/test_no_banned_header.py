@@ -1,10 +1,13 @@
 import os
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 
 from ci.paths import PROJECT_ROOT
 
 SRC_ROOT = PROJECT_ROOT / "src"
 PLATFORMS_DIR = os.path.join(SRC_ROOT, "platforms")
+
+NUM_WORKERS = (os.cpu_count() or 1) * 4
 
 BANNED_HEADERS = [
     "assert.h",
@@ -51,6 +54,17 @@ EXCLUDED_FILES = [
 
 class TestBinToElf(unittest.TestCase):
 
+    def check_file(self, file_path):
+        failings = []
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line_number, line in enumerate(f, 1):
+                for header in BANNED_HEADERS:
+                    if f"#include <{header}>" in line or f'#include "{header}"' in line:
+                        failings.append(
+                            f"Found banned header '{header}' in {file_path}:{line_number}"
+                        )
+        return failings
+
     def test_no_banned_headers(self) -> None:
         """Searches through the program files to check for banned headers, excluding src/platforms."""
         files_to_check = []
@@ -67,23 +81,21 @@ class TestBinToElf(unittest.TestCase):
                     ):
                         files_to_check.append(file_path)
 
-        failings = []
-        for file_path in files_to_check:
-            with open(file_path, "r", encoding="utf-8") as f:
-                for line_number, line in enumerate(f, 1):
-                    for header in BANNED_HEADERS:
-                        if (
-                            f"#include <{header}>" in line
-                            or f'#include "{header}"' in line
-                        ):
-                            failings.append(
-                                f"Found banned header '{header}' in {file_path}:{line_number}"
-                            )
+        all_failings = []
+        with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+            futures = [
+                executor.submit(self.check_file, file_path)
+                for file_path in files_to_check
+            ]
+            for future in futures:
+                all_failings.extend(future.result())
 
-        if failings:
-            for failing in failings:
+        if all_failings:
+            for failing in all_failings:
                 print(failing)
-            self.fail(f"Found {len(failings)} banned header(s). See above for details.")
+            self.fail(
+                f"Found {len(all_failings)} banned header(s). See above for details."
+            )
         else:
             print("No banned headers found.")
 
