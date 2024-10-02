@@ -252,10 +252,10 @@ const TProgmemRGBPalette16 BlueWhite_p FL_PROGMEM = {
     CRGB::Blue, CRGB::Gray, CRGB::Gray, CRGB::Gray
 };
 
-const TProgmemRGBPalette16 FairyLight_p FL_PROGMEM = {
+const TProgmemRGBPalette16 FairyLight_p = {
     CRGB::FairyLight, CRGB::FairyLight, CRGB::FairyLight, CRGB::FairyLight, 
-    CRGB(CRGB::FairyLight).nscale8(uint8_t(128)).as_uint32_t(), CRGB(CRGB::FairyLight).nscale8(uint8_t(128)).as_uint32_t(), CRGB::FairyLight, CRGB::FairyLight, 
-    CRGB(CRGB::FairyLight).nscale8(64).as_uint32_t(), CRGB(CRGB::FairyLight).nscale8(64).as_uint32_t(), CRGB::FairyLight, CRGB::FairyLight, 
+    CRGB(CRGB::FairyLight).nscale8_constexpr(uint8_t(128)).as_uint32_t(), CRGB(CRGB::FairyLight).nscale8_constexpr(uint8_t(128)).as_uint32_t(), CRGB::FairyLight, CRGB::FairyLight, 
+    CRGB(CRGB::FairyLight).nscale8_constexpr(64).as_uint32_t(), CRGB(CRGB::FairyLight).nscale8_constexpr(64).as_uint32_t(), CRGB::FairyLight, CRGB::FairyLight, 
     CRGB::FairyLight, CRGB::FairyLight, CRGB::FairyLight, CRGB::FairyLight
 };
 
