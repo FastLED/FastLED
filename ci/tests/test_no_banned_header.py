@@ -53,7 +53,7 @@ class TestBinToElf(unittest.TestCase):
 
     def test_no_banned_headers(self) -> None:
         """Searches through the program files to check for banned headers, excluding src/platforms."""
-        failings = []
+        files_to_check = []
         for root, _, files in os.walk(SRC_ROOT):
             if root.startswith(PLATFORMS_DIR):
                 continue  # Skip the platforms directory
@@ -62,18 +62,23 @@ class TestBinToElf(unittest.TestCase):
                     (".cpp", ".h", ".hpp")
                 ):  # Add or remove file extensions as needed
                     file_path = os.path.join(root, file)
-                    if any(file_path.endswith(excluded) for excluded in EXCLUDED_FILES):
-                        continue  # Skip excluded files
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        for line_number, line in enumerate(f, 1):
-                            for header in BANNED_HEADERS:
-                                if (
-                                    f"#include <{header}>" in line
-                                    or f'#include "{header}"' in line
-                                ):
-                                    failings.append(
-                                        f"Found banned header '{header}' in {file_path}:{line_number}"
-                                    )
+                    if not any(
+                        file_path.endswith(excluded) for excluded in EXCLUDED_FILES
+                    ):
+                        files_to_check.append(file_path)
+
+        failings = []
+        for file_path in files_to_check:
+            with open(file_path, "r", encoding="utf-8") as f:
+                for line_number, line in enumerate(f, 1):
+                    for header in BANNED_HEADERS:
+                        if (
+                            f"#include <{header}>" in line
+                            or f'#include "{header}"' in line
+                        ):
+                            failings.append(
+                                f"Found banned header '{header}' in {file_path}:{line_number}"
+                            )
 
         if failings:
             for failing in failings:
