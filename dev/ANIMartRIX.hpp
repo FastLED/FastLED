@@ -77,33 +77,44 @@ void setup() {
 //*******************************************************************************************************************
 
 void loop() {
-  //FastLED.clear();
-  // art.RGB_Blobs5();
-  // art.RGB_Blobs4();
-  // art.RGB_Blobs3();
-  animatrix.RGB_Blobs2();
-  // animatrix.RGB_Blobs();
-  // art.Polar_Waves();
-  // art.Slow_Fade();
-  // art.Zoom2();
-  // art.Zoom();
-  // art.Hot_Blob();
-  // art.Spiralus2();
-  // art.Spiralus();
-  // art.Yves();
-  // art.Scaledemo1();
-  // art. art.Lava1();
-  // art.Caleido3();
-  // art.Caleido2();
-  // art.Caleido1();
-  // art.Distance_Experiment();
-  // art.Center_Field();
-  // art.Waves();
-  // art.Chasing_Spirals();
-  // art.Rotating_Blob();
-  // art.Rings();
+  static uint8_t currentAnimation = 0;
+  static const uint8_t numAnimations = 25;
+
+  switch (currentAnimation) {
+    case 0: animatrix.RGB_Blobs5(); break;
+    case 1: animatrix.RGB_Blobs4(); break;
+    case 2: animatrix.RGB_Blobs3(); break;
+    case 3: animatrix.RGB_Blobs2(); break;
+    case 4: animatrix.RGB_Blobs(); break;
+    case 5: animatrix.Polar_Waves(); break;
+    case 6: animatrix.Slow_Fade(); break;
+    case 7: animatrix.Zoom2(); break;
+    case 8: animatrix.Zoom(); break;
+    case 9: animatrix.Hot_Blob(); break;
+    case 10: animatrix.Spiralus2(); break;
+    case 11: animatrix.Spiralus(); break;
+    case 12: animatrix.Yves(); break;
+    case 13: animatrix.Scaledemo1(); break;
+    case 14: animatrix.Lava1(); break;
+    case 15: animatrix.Caleido3(); break;
+    case 16: animatrix.Caleido2(); break;
+    case 17: animatrix.Caleido1(); break;
+    case 18: animatrix.Distance_Experiment(); break;
+    case 19: animatrix.Center_Field(); break;
+    case 20: animatrix.Waves(); break;
+    case 21: animatrix.Chasing_Spirals(); break;
+    case 22: animatrix.Rotating_Blob(); break;
+    case 23: animatrix.Rings(); break;
+    default: animatrix.RGB_Blobs2(); break;
+  }
+
   animatrix.logOutput();
   FastLED.show();
   animatrix.logFrame();
-  EVERY_N_MILLIS(500) animatrix.report_performance();   // check serial monitor for report 
-} 
+  EVERY_N_MILLIS(500) animatrix.report_performance();   // check serial monitor for report
+
+  // Change animation every 10 seconds
+  EVERY_N_SECONDS(10) {
+    currentAnimation = (currentAnimation + 1) % numAnimations;
+  }
+}
