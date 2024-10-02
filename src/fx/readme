@@ -1,1 +1,7 @@
 use hpp file names to imply they are essentially a cpp in a header.
+
+# FX Structure
+
+Each effect shall have a Data struct and a loop function that will only take
+in the data struct. This Data struct shall be trivially constructable to
+allow the struct to be trivially initialized on program startup.
