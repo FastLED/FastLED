@@ -1,3 +1,5 @@
+#pragma once
+
 /*
   ___        _            ___  ______ _____    _
  / _ \      (_)          / _ \ | ___ \_   _|  (_)
@@ -23,6 +25,10 @@ This code is licenced under a Creative Commons Attribution
 License CC BY-NC 3.0
 
 */
+
+#ifndef ANIMARTRIX_INTERNAL
+#error "This file is not meant to be included directly. Include animartrix.hpp instead."
+#endif
 
 #include <FastLED.h>
 #include <vector>

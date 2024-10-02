@@ -25,18 +25,17 @@ License CC BY-NC 3.0
 
 */
 
+
 #warning "\
 ANIMartRIX: free for non-commercial use and licensed under the Creative Commons Attribution License CC BY-NC-SA 4.0, . \
 For commercial use, please contact Stefan Petrick. Github: https://github.com/StefanPetrick/animartrix". \
 Modified by github.com/netmindz for class portability. \
 Modified by Zach Vorhies for FastLED fx compatibility."
 
-#include "animartrix.h"
-#include <FastLED.h>
 
-#include <iostream>
+#include "crgb.h"
 
-enum Animation {
+enum AnimartrixVis {
     RGB_BLOBS5 = 0,
     RGB_BLOBS4,
     RGB_BLOBS3,
@@ -65,18 +64,30 @@ enum Animation {
 };
 
 
-class FastLEDANIMartRIX;
-class AnimatrixData {
+
+class AnimartrixData {
   public:
     int x = 0;
     int y = 0;
     bool serpentine = true;
-    FastLEDANIMartRIX* obj = nullptr;
+    void* obj = nullptr;
     bool destroy = false;
     CRGB *leds = nullptr;
-    Animation current_animation = RGB_BLOBS5;
+    AnimartrixVis current_animation = RGB_BLOBS5;
 
-    AnimatrixData(int x, int y, CRGB *leds, Animation first_animation, bool serpentine) {
+    void next() {
+        current_animation = static_cast<AnimartrixVis>((static_cast<int>(current_animation) + 1) % NUM_ANIMATIONS);
+    }
+
+    void prev() {
+        if (current_animation == 0) {
+            current_animation = static_cast<AnimartrixVis>(NUM_ANIMATIONS - 1);
+            return;
+        }
+        current_animation = static_cast<AnimartrixVis>((static_cast<int>(current_animation) - 1));
+    }
+
+    AnimartrixData(int x, int y, CRGB *leds, AnimartrixVis first_animation, bool serpentine) {
         this->x = x;
         this->y = y;
         this->leds = leds;
@@ -85,19 +96,21 @@ class AnimatrixData {
     }
 };
 
-void AnimatrixDataLoop(AnimatrixData &self);
+void AnimartrixDataLoop(AnimartrixData &self);
 
+/// ##################################################
+/// Details with the implementation of Animartrix
 
-
-
+#define ANIMARTRIX_INTERNAL
+#include "animartrix_detail.hpp"
 
 class FastLEDANIMartRIX : public ANIMartRIX {
-    AnimatrixData *data = nullptr;
+    AnimartrixData *data = nullptr;
 
   public:
-    FastLEDANIMartRIX(AnimatrixData *_data) {
+    FastLEDANIMartRIX(AnimartrixData *_data) {
         this->data = _data;
-        this->init(data->x, data->y, serpentine);
+        this->init(data->x, data->y, data->serpentine);
     }
     void setPixelColor(int x, int y, rgb pixel) {
         data->leds[xy(x, y)] = CRGB(pixel.red, pixel.green, pixel.blue);
@@ -185,17 +198,18 @@ class FastLEDANIMartRIX : public ANIMartRIX {
 };
 
 
-
-void AnimatrixDataLoop(AnimatrixData &self) {
+void AnimartrixDataLoop(AnimartrixData &self) {
     if (self.obj == nullptr) {
         self.obj = new FastLEDANIMartRIX(&self);
     }
+
+    FastLEDANIMartRIX *obj = static_cast<FastLEDANIMartRIX*>(self.obj);
+
     if (self.destroy) {
-        delete self.obj;
+        delete obj;
         self.obj = nullptr;
         self.destroy = false;
         return;
     }
-    std::cout << "looping" << std::endl;
-    self.obj->loop();
+    obj->loop();
 }

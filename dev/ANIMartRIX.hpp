@@ -4,16 +4,13 @@
 
 #include "fx/animartrix.hpp"
 
-#define num_x  22                       // how many LEDs are in one row?
-#define num_y  22                       // how many rows?
-#define NUM_LED (num_x * num_y)
+#define WIDTH  22                       // how many LEDs are in one row?
+#define HEIGHT  22                       // how many rows?
+#define NUM_LED (WIDTH * HEIGHT)
+#define SERPENTINE true
 CRGB leds[NUM_LED];               // framebuffer
-bool serpentine = true;
-// FastLEDANIMartRIX animatrix(num_x, num_y, leds, serpentine);
 
-AnimatrixData data(num_x, num_y, leds, RGB_BLOBS5, serpentine);
-
-
+AnimartrixData data(WIDTH, HEIGHT, leds, RGB_BLOBS5, SERPENTINE);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
@@ -25,19 +22,10 @@ void setup() {
 }
 
 void loop() {
-  static Animation currentAnimation = RGB_BLOBS5;
-
-  //animatrix.logOutput();
-
-  //animatrix.logFrame();
-  //EVERY_N_MILLIS(500) animatrix.report_performance();   // check serial monitor for report
-
   // Change animation every 10 seconds
   EVERY_N_SECONDS(10) {
-    currentAnimation = static_cast<Animation>((static_cast<int>(currentAnimation) + 1) % NUM_ANIMATIONS);
-    data.current_animation = currentAnimation;
+    data.next();
   }
-
-  AnimatrixDataLoop(data);
+  AnimartrixDataLoop(data);
   FastLED.show();
 }
