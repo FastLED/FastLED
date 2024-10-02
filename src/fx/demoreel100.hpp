@@ -17,13 +17,12 @@ struct DemoReel100Data {
     CRGB* leds = nullptr;
     uint16_t num_leds = 0;
     uint8_t brightness = 96;
-    uint16_t frames_per_second = 120;
     uint8_t current_pattern_number = 0;
     uint8_t hue = 0;
 
     // constructor
-    DemoReel100Data(CRGB* leds, uint16_t num_leds, uint8_t brightness = 96, uint16_t frames_per_second = 120)
-        : leds(leds), num_leds(num_leds), brightness(brightness), frames_per_second(frames_per_second) {}
+    DemoReel100Data(CRGB* leds, uint16_t num_leds, uint8_t brightness = 96)
+        : leds(leds), num_leds(num_leds), brightness(brightness) {}
 };
 
 // Function prototypes
@@ -52,10 +51,6 @@ void DemoReel100Loop(DemoReel100Data& self)
     // Call the current pattern function once, updating the 'leds' array
     gPatterns[self.current_pattern_number](self);
 
-    // send the 'leds' array out to the actual LED strip
-    FastLED.show();  
-    // insert a delay to keep the framerate modest
-    FastLED.delay(1000/self.frames_per_second); 
 
     // do some periodic updates
     EVERY_N_MILLISECONDS( 20 ) { self.hue++; } // slowly cycle the "base color" through the rainbow
