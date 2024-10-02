@@ -50,6 +50,9 @@ struct Fire2020Data {
     uint8_t cooling = 55;
     uint8_t sparking = 120;
     bool reverse_direction = false;
+    // constructor
+    Fire2020Data(CRGB* leds, uint16_t num_leds, uint8_t* heat, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false)
+        : leds(leds), num_leds(num_leds), heat(heat), cooling(cooling), sparking(sparking), reverse_direction(reverse_direction) {}
 };
 
 void Fire2020Loop(Fire2020Data& self)
