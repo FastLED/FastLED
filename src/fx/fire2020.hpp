@@ -51,9 +51,10 @@ struct Fire2020Data {
     uint8_t cooling = 55;
     uint8_t sparking = 120;
     bool reverse_direction = false;
+    CRGBPalette16 palette = HeatColors_p; // Default palette
     // constructor
-    Fire2020Data(CRGB* leds, uint16_t num_leds, uint8_t* heat, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false)
-        : leds(leds), num_leds(num_leds), heat(heat), cooling(cooling), sparking(sparking), reverse_direction(reverse_direction) {}
+    Fire2020Data(CRGB* leds, uint16_t num_leds, uint8_t* heat, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false, const CRGBPalette16& palette = HeatColors_p)
+        : leds(leds), num_leds(num_leds), heat(heat), cooling(cooling), sparking(sparking), reverse_direction(reverse_direction), palette(palette) {}
 };
 
 void Fire2020Loop(Fire2020Data& self)
@@ -85,7 +86,10 @@ void Fire2020Loop(Fire2020Data& self)
 
     // Step 4.  Map from heat cells to LED colors
     for (uint16_t j = 0; j < self.num_leds; j++) {
-        CRGB color = HeatColor(self.heat[j]);
+        // Scale the heat value from 0-255 down to 0-240
+        // for best results with color palettes.
+        uint8_t colorindex = scale8(self.heat[j], 240);
+        CRGB color = ColorFromPalette(self.palette, colorindex);
         int pixelnumber;
         if (self.reverse_direction) {
             pixelnumber = (self.num_leds - 1) - j;
