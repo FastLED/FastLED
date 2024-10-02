@@ -117,8 +117,7 @@ void setup() {
   delay( 3000 ); //safety startup delay
   FastLED.setMaxPowerInVoltsAndMilliamps( VOLTS, MAX_MA);
   FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
-    .setCorrection(TypicalLEDStrip)
-    .setRgbw();
+    .setCorrection(TypicalLEDStrip);
 
   chooseNextColorPalette(gTargetPalette);
 }
