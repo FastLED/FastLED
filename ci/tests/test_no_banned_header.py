@@ -67,7 +67,10 @@ class TestBinToElf(unittest.TestCase):
                     with open(file_path, "r", encoding="utf-8") as f:
                         for line_number, line in enumerate(f, 1):
                             for header in BANNED_HEADERS:
-                                if f"#include <{header}>" in line:
+                                if (
+                                    f"#include <{header}>" in line
+                                    or f'#include "{header}"' in line
+                                ):
                                     failings.append(
                                         f"Found banned header '{header}' in {file_path}:{line_number}"
                                     )
