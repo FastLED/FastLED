@@ -63,6 +63,22 @@ jobs:
         run: |
           uv run ci/inspect_elf.py --first
 
+      - name: Check Compiled Program Size for ${{ inputs.board }} (Apa102 with HD Color Mixing)
+        if: inputs.board == 'attiny85'
+        run: uv run ci/ci-check-compiled-size.py ${{ inputs.board }} --example Apa102 ${{ inputs.extra_args }} --defines FASTLED_HD_COLOR_MIXING=1
+
+      - name: Inspect Binary (HD Color Mixing)
+        if: inputs.board == 'attiny85'
+        continue-on-error: true
+        run: |
+          uv run ci/inspect_binary.py --first
+
+      - name: Inspect Elf (HD Color Mixing)
+        if: inputs.board == 'attiny85'
+        continue-on-error: true
+        run: |
+          uv run ci/inspect_elf.py --first
+
       - name: Generate timestamp and random hex
         id: generate_id
         run: |
