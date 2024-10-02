@@ -11,6 +11,10 @@
 #include "lib8tion/brightness_bitshifter.h"
 #include "namespace.h"
 
+
+#include <assert.h>
+#include <iostream>
+
 // Author: Zach Vorhies
 
 FASTLED_NAMESPACE_BEGIN
@@ -69,12 +73,12 @@ void five_bit_hd_gamma_function(CRGB rgb, uint16_t *r16, uint16_t *g16,
 }
 #endif // FASTLED_FIVE_BIT_HD_GAMMA_FUNCTION_2_8
 
-void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
-                       uint8_t brightness, CRGB *out, uint8_t *out_power_5bit) {
+uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
+                          uint8_t brightness, CRGB *out, uint8_t *out_power_5bit) {
     if (!(r16 | g16 | b16) || brightness == 0) {
-        *out = CRGB(0, 0, 0);
-        *out_power_5bit = 0;
-        return;
+        *out = CRGB(map16_to_8(r16), map16_to_8(g16), map16_to_8(b16));
+        *out_power_5bit = 31;
+        return brightness;
     }
 
     // Note: One day someone smarter than me will come along and invent a closed
@@ -94,9 +98,9 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
     // five_bit_color_bitshift(&r16, &g16, &b16, &v5);
     uint8_t shifts = brightness_bitshifter16(&v5, &max_component, 4, 2);
     if (shifts) {
-        r16 <<= shifts * 2;
-        g16 <<= shifts * 2;
-        b16 <<= shifts * 2;
+        r16 = r16 << shifts;
+        g16 = g16 << shifts;
+        b16 = b16 << shifts;
     }
 
     // Step 4: scale by final brightness factor.
@@ -106,6 +110,7 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         b16 = scale16by8(b16, brightness);
     }
 
+
     // brighten hardware brightness by turning on low order bits
     if (v5 > 1) {
         // since v5 is a power of two, subtracting one will invert the leading bit
@@ -114,16 +119,23 @@ void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         // So 0b00010000 | 0b00001111 = 0b00011111
         v5 = v5 | v5 - 1;
     }
-
+    assert(v5 >= 1);
     // Step 5: Convert back to 8-bit and output.
-    *out = CRGB(uint8_t(r16 >> 8), uint8_t(g16 >> 8), uint8_t(b16 >> 8));
+    *out = CRGB(map16_to_8(r16), map16_to_8(g16), map16_to_8(b16));
     *out_power_5bit = v5;
+    return brightness;
 }
 
 void __builtin_five_bit_hd_gamma_bitshift(CRGB colors, CRGB colors_scale,
                                           uint8_t global_brightness,
                                           CRGB *out_colors,
                                           uint8_t *out_power_5bit) {
+
+    if (global_brightness == 0) {
+        *out_colors = CRGB(0, 0, 0);
+        *out_power_5bit = 0;
+        return;
+    }
 
     // Step 1: Gamma Correction
     uint16_t r16, g16, b16;

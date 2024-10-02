@@ -39,7 +39,7 @@ void __builtin_five_bit_hd_gamma_bitshift(CRGB colors,
 
 
 // Exposed for testing.
-void five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16, uint8_t brightness, CRGB* out, uint8_t* out_power_5bit);
+uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16, uint8_t brightness, CRGB* out, uint8_t* out_power_5bit);
 
 #ifdef FASTLED_FIVE_BIT_HD_BITSHIFT_FUNCTION_OVERRIDE
 // This function is located somewhere else in your project, so it's declared
