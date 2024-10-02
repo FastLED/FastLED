@@ -27,8 +27,9 @@
 // and the rest are fairly large. One component will get rounded down to 0, while in
 // apa mode it will bitshift to relevance.
 const static float TOLERANCE = 0.21;
-const static int NUM_TESTS = 100;
+const static int NUM_TESTS = 10000;
 const static size_t MAX_FAILURES = 30;
+const static int CUTOFF = 11;  // WS2812 will give bad results when one of the components is less than 10.
 struct Power {
   float power;
   float power_5bit;
@@ -141,6 +142,11 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
       CRGB color;
       uint8_t brightness;
       make_random(&color, &brightness);
+      // if one ore more of the compoents is less than 10 then skip.
+      if (color.r < CUTOFF || color.g < CUTOFF || color.b < CUTOFF || brightness < CUTOFF) {
+        // WS2812 does badly at this.
+        continue;
+      }
       Power result = compute_power(brightness, color);
       float diff = power_diff(result);
       if (diff > TOLERANCE) {

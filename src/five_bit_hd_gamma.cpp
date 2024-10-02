@@ -13,7 +13,6 @@
 
 
 #include <assert.h>
-#include <iostream>
 
 // Author: Zach Vorhies
 
@@ -117,7 +116,7 @@ uint8_t five_bit_bitshift(uint16_t r16, uint16_t g16, uint16_t b16,
         // and invert all the bits below it.
         // Example: 0b00010000 -1 = 0b00001111
         // So 0b00010000 | 0b00001111 = 0b00011111
-        v5 = v5 | v5 - 1;
+        v5 = v5 | (v5 - 1);
     }
     assert(v5 >= 1);
     // Step 5: Convert back to 8-bit and output.
