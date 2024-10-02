@@ -17,10 +17,19 @@ void setup() {
     .setCorrection(TypicalLEDStrip)
     .setRgbw();
 
-  twinklefox_setup();
+  chooseNextColorPalette(gTargetPalette);
 }
 
 void loop() {
-  twinklefox_loop(leds);
+  EVERY_N_SECONDS(SECONDS_PER_PALETTE) { 
+    chooseNextColorPalette(gTargetPalette); 
+  }
+  
+  EVERY_N_MILLISECONDS(10) {
+    nblendPaletteTowardPalette(gCurrentPalette, gTargetPalette, 12);
+  }
+
+  drawTwinkles(leds);
+  
   FastLED.show();
 }

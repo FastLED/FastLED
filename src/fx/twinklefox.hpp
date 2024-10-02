@@ -79,8 +79,6 @@ void coolLikeIncandescent(CRGB& c, uint8_t phase);
 //
 //  -Mark Kriegsman, December 2015
 
-CRGBArray<NUM_LEDS> leds;
-
 // Overall twinkle speed.
 // 0 (VERY slow) to 8 (VERY fast).  
 // 4, 5, and 6 are recommended, default is 4.
@@ -119,31 +117,9 @@ CRGB gBackgroundColor = CRGB::Black;
 CRGBPalette16 gCurrentPalette;
 CRGBPalette16 gTargetPalette;
 
-void setup() {
-  delay( 3000 ); //safety startup delay
-  FastLED.setMaxPowerInVoltsAndMilliamps( VOLTS, MAX_MA);
-  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
-    .setCorrection(TypicalLEDStrip);
-
-  chooseNextColorPalette(gTargetPalette);
-}
-
-
-void loop()
-{
-  EVERY_N_SECONDS( SECONDS_PER_PALETTE ) { 
-    chooseNextColorPalette( gTargetPalette ); 
-  }
-  
-  EVERY_N_MILLISECONDS( 10 ) {
-    nblendPaletteTowardPalette( gCurrentPalette, gTargetPalette, 12);
-  }
-
-  drawTwinkles( leds);
-  
-  FastLED.show();
-}
-
+// Function declarations
+void chooseNextColorPalette(CRGBPalette16& pal);
+void drawTwinkles(CRGBSet& L);
 
 //  This function loops over each pixel, calculates the 
 //  adjusted 'clock' that this pixel should use, and calls 
