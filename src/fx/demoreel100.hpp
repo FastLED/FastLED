@@ -1,6 +1,4 @@
-/// @file    DemoReel100.ino
-/// @brief   FastLED "100 lines of code" demo reel, showing off some effects
-/// @example DemoReel100.ino
+#pragma once
 
 #include <FastLED.h>
 
@@ -15,113 +13,109 @@ FASTLED_USING_NAMESPACE
 //
 // -Mark Kriegsman, December 2014
 
+struct DemoReel100Data {
+    CRGB* leds = nullptr;
+    uint16_t num_leds = 0;
+    uint8_t brightness = 96;
+    uint16_t frames_per_second = 120;
+    uint8_t current_pattern_number = 0;
+    uint8_t hue = 0;
 
-#define DATA_PIN    2
-//#define CLK_PIN   4
-#define LED_TYPE    WS2811
-#define COLOR_ORDER GRB
-#define NUM_LEDS    64
-CRGB leds[NUM_LEDS];
+    // constructor
+    DemoReel100Data(CRGB* leds, uint16_t num_leds, uint8_t brightness = 96, uint16_t frames_per_second = 120)
+        : leds(leds), num_leds(num_leds), brightness(brightness), frames_per_second(frames_per_second) {}
+};
 
-#define BRIGHTNESS          96
-#define FRAMES_PER_SECOND  120
-
-void setup() {
-  delay(3000); // 3 second delay for recovery
-  
-  // tell FastLED about the LED strip configuration
-  FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip).setRgbw();
-  //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-
-  // set master brightness control
-  FastLED.setBrightness(BRIGHTNESS);
-}
-
+// Function prototypes
+void rainbow(DemoReel100Data& self);
+void rainbowWithGlitter(DemoReel100Data& self);
+void addGlitter(DemoReel100Data& self, fract8 chanceOfGlitter);
+void confetti(DemoReel100Data& self);
+void sinelon(DemoReel100Data& self);
+void bpm(DemoReel100Data& self);
+void juggle(DemoReel100Data& self);
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
-typedef void (*SimplePatternList[])();
+typedef void (*SimplePatternList[])(DemoReel100Data&);
 SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, juggle, bpm };
-
-uint8_t gCurrentPatternNumber = 0; // Index number of which pattern is current
-uint8_t gHue = 0; // rotating "base color" used by many of the patterns
-  
-void loop()
-{
-  // Call the current pattern function once, updating the 'leds' array
-  gPatterns[gCurrentPatternNumber]();
-
-  // send the 'leds' array out to the actual LED strip
-  FastLED.show();  
-  // insert a delay to keep the framerate modest
-  FastLED.delay(1000/FRAMES_PER_SECOND); 
-
-  // do some periodic updates
-  EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
-  EVERY_N_SECONDS( 10 ) { nextPattern(); } // change patterns periodically
-}
 
 #define ARRAY_SIZE(A) (sizeof(A) / sizeof((A)[0]))
 
-void nextPattern()
+void nextPattern(DemoReel100Data& self)
 {
-  // add one to the current pattern number, and wrap around at the end
-  gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE( gPatterns);
+    // add one to the current pattern number, and wrap around at the end
+    self.current_pattern_number = (self.current_pattern_number + 1) % ARRAY_SIZE(gPatterns);
 }
 
-void rainbow() 
+void DemoReel100Loop(DemoReel100Data& self)
 {
-  // FastLED's built-in rainbow generator
-  fill_rainbow( leds, NUM_LEDS, gHue, 7);
+    // Call the current pattern function once, updating the 'leds' array
+    gPatterns[self.current_pattern_number](self);
+
+    // send the 'leds' array out to the actual LED strip
+    FastLED.show();  
+    // insert a delay to keep the framerate modest
+    FastLED.delay(1000/self.frames_per_second); 
+
+    // do some periodic updates
+    EVERY_N_MILLISECONDS( 20 ) { self.hue++; } // slowly cycle the "base color" through the rainbow
+    EVERY_N_SECONDS( 10 ) { nextPattern(self); } // change patterns periodically
 }
 
-void rainbowWithGlitter() 
+void rainbow(DemoReel100Data& self) 
 {
-  // built-in FastLED rainbow, plus some random sparkly glitter
-  rainbow();
-  addGlitter(80);
+    // FastLED's built-in rainbow generator
+    fill_rainbow(self.leds, self.num_leds, self.hue, 7);
 }
 
-void addGlitter( fract8 chanceOfGlitter) 
+void rainbowWithGlitter(DemoReel100Data& self) 
 {
-  if( random8() < chanceOfGlitter) {
-    leds[ random16(NUM_LEDS) ] += CRGB::White;
-  }
+    // built-in FastLED rainbow, plus some random sparkly glitter
+    rainbow(self);
+    addGlitter(self, 80);
 }
 
-void confetti() 
+void addGlitter(DemoReel100Data& self, fract8 chanceOfGlitter) 
 {
-  // random colored speckles that blink in and fade smoothly
-  fadeToBlackBy( leds, NUM_LEDS, 10);
-  int pos = random16(NUM_LEDS);
-  leds[pos] += CHSV( gHue + random8(64), 200, 255);
+    if(random8() < chanceOfGlitter) {
+        self.leds[random16(self.num_leds)] += CRGB::White;
+    }
 }
 
-void sinelon()
+void confetti(DemoReel100Data& self) 
 {
-  // a colored dot sweeping back and forth, with fading trails
-  fadeToBlackBy( leds, NUM_LEDS, 20);
-  int pos = beatsin16( 13, 0, NUM_LEDS-1 );
-  leds[pos] += CHSV( gHue, 255, 192);
+    // random colored speckles that blink in and fade smoothly
+    fadeToBlackBy(self.leds, self.num_leds, 10);
+    int pos = random16(self.num_leds);
+    self.leds[pos] += CHSV(self.hue + random8(64), 200, 255);
 }
 
-void bpm()
+void sinelon(DemoReel100Data& self)
 {
-  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-  uint8_t BeatsPerMinute = 62;
-  CRGBPalette16 palette = PartyColors_p;
-  uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
-  for( int i = 0; i < NUM_LEDS; i++) { //9948
-    leds[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
-  }
+    // a colored dot sweeping back and forth, with fading trails
+    fadeToBlackBy(self.leds, self.num_leds, 20);
+    int pos = beatsin16(13, 0, self.num_leds-1);
+    self.leds[pos] += CHSV(self.hue, 255, 192);
 }
 
-void juggle() {
-  // eight colored dots, weaving in and out of sync with each other
-  fadeToBlackBy( leds, NUM_LEDS, 20);
-  uint8_t dothue = 0;
-  for( int i = 0; i < 8; i++) {
-    leds[beatsin16( i+7, 0, NUM_LEDS-1 )] |= CHSV(dothue, 200, 255);
-    dothue += 32;
-  }
+void bpm(DemoReel100Data& self)
+{
+    // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+    uint8_t BeatsPerMinute = 62;
+    CRGBPalette16 palette = PartyColors_p;
+    uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
+    for(int i = 0; i < self.num_leds; i++) {
+        self.leds[i] = ColorFromPalette(palette, self.hue+(i*2), beat-self.hue+(i*10));
+    }
+}
+
+void juggle(DemoReel100Data& self) {
+    // eight colored dots, weaving in and out of sync with each other
+    fadeToBlackBy(self.leds, self.num_leds, 20);
+    uint8_t dothue = 0;
+    for(int i = 0; i < 8; i++) {
+        self.leds[beatsin16(i+7, 0, self.num_leds-1)] |= CHSV(dothue, 200, 255);
+        dothue += 32;
+    }
 }
 
