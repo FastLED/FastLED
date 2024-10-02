@@ -80,7 +80,7 @@ void Fire2020Loop(Fire2020Data& self)
     }
 
     // Step 4.  Map from heat cells to LED colors
-    for (int j = 0; j < self.num_leds; j++) {
+    for (uint16_t j = 0; j < self.num_leds; j++) {
         CRGB color = HeatColor(self.heat[j]);
         int pixelnumber;
         if (self.reverse_direction) {
