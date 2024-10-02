@@ -1,11 +1,6 @@
 
 #pragma once
 
-// Used by the source code to control compilation.
-#ifndef FASTLED_ESP32_COMPONENT_LED_STRIP_FORCE_IDF4
-#define FASTLED_ESP32_COMPONENT_LED_STRIP_FORCE_IDF4 0
-#endif
-
 #ifndef ESP32
 // No led strip component when not in ESP32 mode.
  #define FASTLED_RMT5 0
