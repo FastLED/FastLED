@@ -1,6 +1,4 @@
-/// @file    Fire2012.ino
-/// @brief   Simple one-dimensional fire animation
-/// @example Fire2012.ino
+
 
 #include <FastLED.h>
 #include "fx/fire2020.hpp"
@@ -12,16 +10,17 @@
 
 #define BRIGHTNESS  128
 #define FRAMES_PER_SECOND 30
+#define REVERSE_DIRECTION false
 
 CRGB leds[NUM_LEDS];
-Fire2020Data state = {
+Fire2020Data state(
   leds,           // leds - required
   NUM_LEDS,       // num_leds - required
   nullptr,        // heat - will be allocated if not provided,
   55,             // cooling
   120,            // sparking
-  false,          // reverse_direction
-};
+  REVERSE_DIRECTION
+);
 
 void setup() {
   delay(3000); // sanity delay
