@@ -100,7 +100,7 @@ void bpm(DemoReel100Data& self)
     uint8_t BeatsPerMinute = 62;
     CRGBPalette16 palette = PartyColors_p;
     uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
-    for(int i = 0; i < self.num_leds; i++) {
+    for(uint16_t i = 0; i < self.num_leds; i++) {
         self.leds[i] = ColorFromPalette(palette, self.hue+(i*2), beat-self.hue+(i*10));
     }
 }
@@ -109,7 +109,7 @@ void juggle(DemoReel100Data& self) {
     // eight colored dots, weaving in and out of sync with each other
     fadeToBlackBy(self.leds, self.num_leds, 20);
     uint8_t dothue = 0;
-    for(int i = 0; i < 8; i++) {
+    for(uint16_t i = 0; i < 8; i++) {
         self.leds[beatsin16(i+7, 0, self.num_leds-1)] |= CHSV(dothue, 200, 255);
         dothue += 32;
     }

@@ -33,7 +33,7 @@ void CylonLoop(CylonData& self) {
 
 
     // Fade all LEDs
-    for(int i = 0; i < self.num_leds; i++) {
+    for(uint16_t i = 0; i < self.num_leds; i++) {
         self.leds[i].nscale8(self.fade_amount);
     }
 
@@ -46,7 +46,7 @@ void CylonLoop(CylonData& self) {
         }
     } else {
         self.position++;
-        if (self.position >= self.num_leds) {
+        if (self.position >= int16_t(self.num_leds)) {
             self.position = self.num_leds - 2;
             self.reverse = true;
         }
