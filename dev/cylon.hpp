@@ -19,12 +19,15 @@ CRGB leds[NUM_LEDS];
 // Create a CylonData instance
 CylonData cylonData(leds, NUM_LEDS);
 
-void setup() {
-    FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS).setRgbw();
+void setup() { 
+    Serial.begin(57600);
+    Serial.println("resetting");
+    FastLED.addLeds<WS2812,DATA_PIN,BRG>(leds,NUM_LEDS).setRgbw();
     FastLED.setBrightness(84);
 }
 
 void loop() { 
+    Serial.print("x");
     CylonLoop(cylonData);
     FastLED.show();
     delay(cylonData.delay_ms);

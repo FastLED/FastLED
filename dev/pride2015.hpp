@@ -1,8 +1,8 @@
 #include "fx/pride2015.hpp"
 
-#define DATA_PIN    3
+#define DATA_PIN    2
 #define LED_TYPE    WS2811
-#define COLOR_ORDER GRB
+#define COLOR_ORDER BRG
 #define NUM_LEDS    200
 #define BRIGHTNESS  255
 
@@ -15,7 +15,8 @@ void setup() {
   // tell FastLED about the LED strip configuration
   FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS)
     .setCorrection(TypicalLEDStrip)
-    .setDither(BRIGHTNESS < 255);
+    .setDither(BRIGHTNESS < 255)
+    .setRgbw();
 
   // set master brightness control
   FastLED.setBrightness(BRIGHTNESS);

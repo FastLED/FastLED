@@ -92,6 +92,13 @@ struct CRGB {
     {
     }
 
+    constexpr uint32_t as_uint32_t() const {
+        return uint32_t(0xff000000) |
+               (uint32_t{r} << 16) |
+               (uint32_t{g} << 8) |
+               uint32_t{b};
+    }
+
     /// Allow construction from a LEDColorCorrection enum
     /// @param colorcode an LEDColorCorrect enumeration value
     constexpr CRGB(LEDColorCorrection colorcode) __attribute__((always_inline))
@@ -275,6 +282,9 @@ struct CRGB {
     /// @see ::scale8
     FASTLED_FORCE_INLINE CRGB& nscale8 (const CRGB & scaledown );
 
+    constexpr CRGB nscale8_constexpr (const CRGB scaledown ) const;
+
+
     /// Return a CRGB object that is a scaled down version of this object
     FASTLED_FORCE_INLINE CRGB scale8 (uint8_t scaledown ) const;
 
@@ -329,6 +339,15 @@ struct CRGB {
 
     /// Converts a CRGB to a 32-bit color having an alpha of 255.
     FASTLED_FORCE_INLINE explicit operator uint32_t() const
+    {
+        return uint32_t(0xff000000) |
+               (uint32_t{r} << 16) |
+               (uint32_t{g} << 8) |
+               uint32_t{b};
+    }
+
+    /// Converts a CRGB to a 32-bit color having an alpha of 255.
+    FASTLED_FORCE_INLINE explicit operator const uint32_t() const
     {
         return uint32_t(0xff000000) |
                (uint32_t{r} << 16) |
