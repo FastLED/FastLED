@@ -1,5 +1,9 @@
 #pragma once
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 /// @brief   Simple one-dimensional fire animation function
 // Fire2012 by Mark Kriegsman, July 2012
 // as part of "Five Elements" shown here: http://youtu.be/knWiGsmgycY
@@ -99,3 +103,5 @@ void Fire2012Loop(Fire2012Data& self)
         self.leds[pixelnumber] = color;
     }
 }
+
+FASTLED_NAMESPACE_END

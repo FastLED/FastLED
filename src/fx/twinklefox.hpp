@@ -1,5 +1,9 @@
 #pragma once
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 /// @file    TwinkleFox.hpp
 /// @brief   Twinkling "holiday" lights that fade in and out.
 /// @example TwinkleFox.ino
@@ -297,3 +301,5 @@ void chooseNextColorPalette(CRGBPalette16& pal) {
     whichPalette = addmod8(whichPalette, 1, numberOfPalettes);
     pal = *(ActivePaletteList[whichPalette]);
 }
+
+FASTLED_NAMESPACE_END

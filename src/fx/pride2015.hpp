@@ -1,5 +1,9 @@
 #pragma once
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 /// @file    pride2015.hpp
 /// @brief   Animated, ever-changing rainbows (Pride2015 effect)
 /// @example Pride2015.ino
@@ -69,3 +73,5 @@ void Pride2015Loop(Pride2015Data& self) {
         nblend(self.leds[pixelnumber], newcolor, 64);
     }
 }
+
+FASTLED_NAMESPACE_END

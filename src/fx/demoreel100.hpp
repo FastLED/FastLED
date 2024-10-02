@@ -1,8 +1,9 @@
 #pragma once
 
 #include <FastLED.h>
+#include "namespace.h"
 
-FASTLED_USING_NAMESPACE
+FASTLED_NAMESPACE_BEGIN
 
 // FastLED "100-lines-of-code" demo reel, showing just a few 
 // of the kinds of animation patterns you can quickly and easily 
@@ -113,4 +114,6 @@ void juggle(DemoReel100Data& self) {
         dothue += 32;
     }
 }
+
+FASTLED_NAMESPACE_END
 

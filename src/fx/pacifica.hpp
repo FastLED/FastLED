@@ -1,5 +1,9 @@
 #pragma once
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 /// @brief   An animation that simulates gentle, blue-green ocean waves
 /// @example Pacifica.ino
 //////////////////////////////////////////////////////////////////////////
@@ -136,3 +140,5 @@ void pacifica_deepen_colors(PacificaData& self) {
         self.leds[i] |= CRGB(2, 5, 7);
     }
 }
+
+FASTLED_NAMESPACE_END

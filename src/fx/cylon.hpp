@@ -1,9 +1,11 @@
 #pragma once
 
-/// @brief   An animation that moves a single LED back and forth (Larson Scanner effect)
-
-
+#include "namespace.h"
 #include "FastLED.h"
+
+FASTLED_NAMESPACE_BEGIN
+
+/// @brief   An animation that moves a single LED back and forth (Larson Scanner effect)
 
 struct CylonData {
     CRGB* leds = nullptr;
@@ -50,3 +52,5 @@ void CylonLoop(CylonData& self) {
         }
     }
 }
+
+FASTLED_NAMESPACE_END
