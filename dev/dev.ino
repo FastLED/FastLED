@@ -4,7 +4,7 @@
 #define LED_PIN     2
 #define COLOR_ORDER BRG
 #define CHIPSET     WS2811
-#define NUM_LEDS    100
+#define NUM_LEDS    200
 
 CRGB leds[NUM_LEDS];
 NoiseWaveData noiseWaveData(leds, NUM_LEDS);
