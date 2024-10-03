@@ -74,8 +74,10 @@ set_target_properties(FastLED PROPERTIES
 if(NOT APPLE)
     target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
 endif()
+
+# Add custom build flags for FastLED
 target_compile_options(FastLED PRIVATE 
-    $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
+    $<$<CONFIG:Debug>:-g -O0 -DDEBUG -DFASTLED_STUB_IMPL>
     $<$<CONFIG:Release>:-O3>
 )
 
