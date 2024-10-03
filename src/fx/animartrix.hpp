@@ -31,9 +31,6 @@ For commercial use, please contact Stefan Petrick. Github: https://github.com/St
 Modified by github.com/netmindz for class portability. \
 Modified by Zach Vorhies for FastLED fx compatibility."
 
-
-#warning "Some of AnimARTrix's animations seem to not respect the serpentine layout, please help us fix this."
-
 #include "crgb.h"
 
 enum AnimartrixAnim {
@@ -198,8 +195,12 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
         this->data = _data;
         this->init(data->x, data->y, data->serpentine);
     }
-    void setPixelColor(int x, int y, animartrix::rgb pixel) {
-        data->leds[xy(x, y)] = CRGB(pixel.red, pixel.green, pixel.blue);
+
+    void setPixelColor(int x, int y, CRGB pixel) {
+        data->leds[xy(x, y)] = pixel;
+    }
+    void setPixelColorInternal(int x, int y, animartrix::rgb pixel) {
+        setPixelColor(x, y, CRGB(pixel.red, pixel.green, pixel.blue));
     }
 
     void loop() {

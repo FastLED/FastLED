@@ -137,7 +137,7 @@ class ANIMartRIX {
         timings = oscillators();
         move = modulators();
         pixel = rgb();
-        
+
         this->num_x = w;
         this->num_y = h;
         this->serpentine = serpentine;
@@ -425,9 +425,9 @@ class ANIMartRIX {
         logOutput();
     }
 
-    virtual void setPixelColor(int x, int y, rgb pixel) = 0;
+    virtual void setPixelColorInternal(int x, int y, rgb pixel) = 0;
 
-    // virtual void setPixelColor(int index, rgb pixel) = 0;
+    // virtual void setPixelColorInternal(int index, rgb pixel) = 0;
 
     void logOutput() { b = micros(); }
 
@@ -525,7 +525,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -584,7 +584,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -639,7 +639,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -686,7 +686,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -738,7 +738,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -792,7 +792,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -860,7 +860,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -928,7 +928,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -1006,7 +1006,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -1070,7 +1070,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -1127,7 +1127,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -1205,7 +1205,7 @@ class ANIMartRIX {
                 pixel.blue = 0;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -1273,7 +1273,7 @@ class ANIMartRIX {
                 pixel.blue = f * (show3 - show1);
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -1342,7 +1342,7 @@ class ANIMartRIX {
                 pixel.blue = f * (show3 - show1);
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -1394,7 +1394,7 @@ class ANIMartRIX {
                 pixel.blue = 0;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -1431,7 +1431,7 @@ class ANIMartRIX {
                 pixel.blue = 0;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -1482,7 +1482,7 @@ class ANIMartRIX {
                 pixel.blue = radial * (show1 - show3) / 5;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -1534,7 +1534,7 @@ class ANIMartRIX {
                 pixel.blue = radial * show3;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -1590,7 +1590,7 @@ class ANIMartRIX {
                 pixel.blue = radial * show3;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -1649,7 +1649,7 @@ class ANIMartRIX {
                 pixel.blue = radial * (show3 - show2);
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -1708,7 +1708,7 @@ class ANIMartRIX {
                 pixel.blue = radial * (show3 + show2) * 0.5 * x / 15;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -1766,7 +1766,7 @@ class ANIMartRIX {
                 pixel.blue = radial * (show3 + show2) * 0.5 * x / 15;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -1825,7 +1825,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -1906,7 +1906,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
         // show_frame();
@@ -1988,11 +1988,11 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
                 // leds[xy(x, y)] = CRGB(pixel.red, pixel.green, pixel.blue);
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
 
-                setPixelColor((num_x - 1) - x, y, pixel);
-                setPixelColor((num_x - 1) - x, (num_y - 1) - y, pixel);
-                setPixelColor(x, (num_y - 1) - y, pixel);
+                setPixelColorInternal((num_x - 1) - x, y, pixel);
+                setPixelColorInternal((num_x - 1) - x, (num_y - 1) - y, pixel);
+                setPixelColorInternal(x, (num_y - 1) - y, pixel);
             }
         }
         // show_frame();
@@ -2054,7 +2054,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
         // show_frame();
@@ -2148,7 +2148,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -2205,7 +2205,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -2300,7 +2300,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -2401,7 +2401,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -2477,7 +2477,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -2559,7 +2559,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -2643,7 +2643,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -2734,7 +2734,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -2825,7 +2825,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -2941,7 +2941,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3061,7 +3061,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3116,7 +3116,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3174,7 +3174,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3267,7 +3267,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3363,7 +3363,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3404,7 +3404,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3446,7 +3446,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3488,7 +3488,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3525,7 +3525,7 @@ class ANIMartRIX {
                 pixel.blue = 40 - show1;
 
                 pixel = rgb_sanity_check(pixel);
-                setPixelColor(y, x, pixel);
+                setPixelColorInternal(y, x, pixel);
             }
         }
     }
@@ -3600,7 +3600,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3644,7 +3644,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3708,7 +3708,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3774,7 +3774,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3872,7 +3872,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -3918,7 +3918,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
@@ -4020,7 +4020,7 @@ class ANIMartRIX {
                 pixel.red = p.red;
                 pixel.green = p.green;
                 pixel.blue = p.blue;
-                setPixelColor(x, y, pixel);
+                setPixelColorInternal(x, y, pixel);
             }
         }
     }
