@@ -29,6 +29,7 @@ License CC BY-NC 3.0
 */
 #include "crgb.h"
 #include "namespace.h"
+#include "fx/xy.h"
 
 #define ANIMARTRIX_INTERNAL
 #include "animartrix_detail.hpp"
@@ -41,6 +42,8 @@ class Fx2d {
     virtual void lazyInit() {}
     virtual void draw() = 0;
     virtual uint16_t xy(uint16_t x, uint16_t y) = 0;
+    virtual uint16_t width() const = 0;
+    virtual uint16_t height() const = 0;
 
     virtual const char* fxName() const = 0;  // Get the name of the current fx. This is the class name if there is only one.
 
@@ -113,16 +116,20 @@ class Animartrix : public Fx2d {
     }
     ~Animartrix();
     void lazyInit() override {}
+
+
+    uint16_t width() const override { return x; }
+    uint16_t height() const override { return y; }
+
     uint16_t xy(uint16_t x, uint16_t y) override {
         return xy_no_virtual(x, y);
     }
     uint16_t xy_no_virtual(uint16_t x, uint16_t y) {
-        if (serpentine && y & 1) // check last bit
-            return (y + 1) * this->x - 1 -
-                   x; // reverse every second line for a serpentine lled layout
-        else
-            return y * this->x +
-                   x; // use this equation only for a line by line layout
+        if (serpentine) {
+            return xy_serpentine(x, y, this->x, this->y);
+        } else {
+            return xy_line_by_line(x, y, this->x, this->y);
+        }
     }
     void draw() override;
     int fxNum() const override { return NUM_ANIMATIONS; }
