@@ -12,7 +12,7 @@
 
 #include "crgb.h"
 #include "namespace.h"
-#include "fx/xy.h"
+#include "fx/_xymap.h"
 #include "fx/_fx2d.h"
 
 #define ANIMARTRIX_INTERNAL
@@ -208,14 +208,14 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
     }
 
     void setPixelColor(int x, int y, CRGB pixel) {
-        data->leds[xy(x, y)] = pixel;
+        data->leds[xyMap(x, y)] = pixel;
     }
     void setPixelColorInternal(int x, int y, animartrix::rgb pixel) {
         setPixelColor(x, y, CRGB(pixel.red, pixel.green, pixel.blue));
     }
 
-    uint16_t xy(uint16_t x, uint16_t y) override {
-        return data->xy(x, y);
+    uint16_t xyMap(uint16_t x, uint16_t y) override {
+        return data->xyMap(x, y);
     }
 
     void loop() {

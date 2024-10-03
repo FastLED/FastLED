@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "xy.h"
+#include "_xymap.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -23,8 +23,8 @@ class FxGrid {
     virtual void fxNext(int fx = 1) {};  // Negative numbers are allowed. -1 means previous fx.
     virtual int fxGet() const { return 0; };  // Set the current fx number.
 
-    uint16_t xy(uint16_t x, uint16_t y) const {
-        return mXyMap.get(x, y);
+    uint16_t xyMap(uint16_t x, uint16_t y) const {
+        return mXyMap.mapToIndex(x, y);
     }
     uint16_t getHeight() const { return mXyMap.getHeight(); }
     uint16_t getWidth() const { return mXyMap.getWidth(); }

@@ -17,7 +17,7 @@ uint16_t xy_line_by_line(uint16_t x, uint16_t y, uint16_t width, uint16_t height
 }
 
 
-// typedef for xy function type
+// typedef for xyMap function type
 typedef uint16_t (*XYFunction)(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
 
 enum XyMapType {
@@ -73,20 +73,24 @@ public:
         uint16_t* data = lookUpTableOwned.get();
         for (uint16_t y = 0; y < height; y++) {
             for (uint16_t x = 0; x < width; x++) {
-                data[y * width + x] = get(x, y);
+                data[y * width + x] = mapToIndex(x, y);
             }
         }
         type = kLookUpTable;
         xyFunction = nullptr;
     }
 
-    uint16_t get(uint16_t x, uint16_t y) const {
+    uint16_t mapToIndex(uint16_t x, uint16_t y) const {
         switch (type) {
             case kSeperentine:
+                x = x % width;
+                y = y % height;
                 return xy_serpentine(x, y, width, height);
             case kLineByLine:
                 return xy_line_by_line(x, y, width, height);
             case kFunction:
+                x = x % width;
+                y = y % height;
                 return xyFunction(x, y, width, height);
             case kLookUpTable:
                 return lookUpTable[y * width + x];

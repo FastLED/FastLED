@@ -151,7 +151,7 @@ class ANIMartRIX {
 
     ANIMartRIX(int w, int h) { this->init(w, h); }
 
-    virtual uint16_t xy(uint16_t x, uint16_t y) = 0;
+    virtual uint16_t xyMap(uint16_t x, uint16_t y) = 0;
 
 
     void init(int w, int h) {
@@ -395,7 +395,7 @@ class ANIMartRIX {
           CRGB finalcolor = CRGB(pixel.red, pixel.green, pixel.blue);
 
           // write the rendered pixel into the framebutter
-          leds[xy(x, y)] = finalcolor;
+          leds[xyMap(x, y)] = finalcolor;
     }
     */
 
@@ -1999,7 +1999,7 @@ class ANIMartRIX {
                 pixel.blue = show5;
 
                 pixel = rgb_sanity_check(pixel);
-                // leds[xy(x, y)] = CRGB(pixel.red, pixel.green, pixel.blue);
+                // leds[xyMap(x, y)] = CRGB(pixel.red, pixel.green, pixel.blue);
                 setPixelColorInternal(x, y, pixel);
 
                 setPixelColorInternal((num_x - 1) - x, y, pixel);
