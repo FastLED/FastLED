@@ -26,7 +26,7 @@ void setup() {
 void loop() {
   uint32_t now = millis();
   // Change animation every 10 seconds
-  EVERY_N_SECONDS(10) {
+  EVERY_N_SECONDS(5) {
     data.next();
     std::cout << "New animation: " << data.getName() << std::endl;
   }
