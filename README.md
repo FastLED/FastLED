@@ -12,6 +12,11 @@ FastLED
 
 ## About
 
+The led driver for tiny computers the size of a quarter.
+
+esp32, teensy, arduino,
+raspberri pi, attiny family and more.
+
 This is a library for easily & efficiently controlling a wide variety of LED chipsets, like the ones
 sold by Adafruit (NeoPixel, DotStar, LPD8806), Sparkfun (WS2801), and AliExpress.  In addition to writing to the
 LEDs, this library also includes a number of functions for high-performing 8-bit math for manipulating
