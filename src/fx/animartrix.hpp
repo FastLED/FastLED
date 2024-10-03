@@ -38,20 +38,26 @@ FASTLED_NAMESPACE_BEGIN
 
 class Fx2d {
   public:
+
+    Fx2d(const XYMap& xyMap): mXyMap(xyMap) {}
     virtual ~Fx2d() {}
     virtual void lazyInit() {}
     virtual void draw() = 0;
-    virtual uint16_t xy(uint16_t x, uint16_t y) = 0;
-    virtual uint16_t width() const = 0;
-    virtual uint16_t height() const = 0;
 
     virtual const char* fxName() const = 0;  // Get the name of the current fx. This is the class name if there is only one.
-
     // Optionally implement these for multi fx classes.
     virtual int fxNum() const { return 1; };  // Return 1 if you only have one fx managed by this class.
     virtual void fxSet(int fx) {};  // Get the current fx number.
     virtual void fxNext(int fx = 1) {};  // Negative numbers are allowed. -1 means previous fx.
     virtual int fxGet() const { return 0; };  // Set the current fx number.
+
+    uint16_t xy(uint16_t x, uint16_t y) const {
+        return mXyMap.get(x, y);
+    }
+    uint16_t getHeight() const { return mXyMap.getHeight(); }
+    uint16_t getWidth() const { return mXyMap.getWidth(); }
+protected:
+    XYMap mXyMap;
 };
 
 
@@ -105,31 +111,15 @@ enum AnimartrixAnim {
 class FastLEDANIMartRIX;
 class Animartrix : public Fx2d {
   public:
-    Animartrix(int x, int y, CRGB *leds, AnimartrixAnim first_animation,
-                   bool serpentine) {
+    Animartrix(CRGB *leds, XYMap xyMap, AnimartrixAnim first_animation): Fx2d(xyMap) {
         // Note: Swapping out height and width.
-        this->x = y;
-        this->y = x;
         this->leds = leds;
-        this->serpentine = serpentine;
-        this->current_animation = first_animation;
+        this->current_animation = first_animation;        
     }
     ~Animartrix();
-    void lazyInit() override {}
-
-
-    uint16_t width() const override { return x; }
-    uint16_t height() const override { return y; }
-
-    uint16_t xy(uint16_t x, uint16_t y) override {
-        return xy_no_virtual(x, y);
-    }
-    uint16_t xy_no_virtual(uint16_t x, uint16_t y) {
-        if (serpentine) {
-            return xy_serpentine(x, y, this->x, this->y);
-        } else {
-            return xy_line_by_line(x, y, this->x, this->y);
-        }
+    Animartrix(const Animartrix&) = delete;
+    void lazyInit() override {
+        this->mXyMap.optimizeAsLookupTable();
     }
     void draw() override;
     int fxNum() const override { return NUM_ANIMATIONS; }
@@ -145,9 +135,6 @@ class Animartrix : public Fx2d {
     static const char *getAnimationName(AnimartrixAnim animation);
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
     FastLEDANIMartRIX *impl = nullptr;
-    int x = 0;
-    int y = 0;
-    bool serpentine = true;
     bool destroy = false;
     CRGB *leds = nullptr;
     AnimartrixAnim current_animation = RGB_BLOBS5;
@@ -220,7 +207,7 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
   public:
     FastLEDANIMartRIX(Animartrix *_data) {
         this->data = _data;
-        this->init(data->x, data->y, data->serpentine);
+        this->init(data->getWidth(), data->getWidth());
     }
 
     void setPixelColor(int x, int y, CRGB pixel) {
@@ -231,7 +218,7 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
     }
 
     uint16_t xy(uint16_t x, uint16_t y) override {
-        return data->xy_no_virtual(x, y);
+        return data->xy(x, y);
     }
 
     void loop() {
@@ -394,7 +381,7 @@ void AnimartrixLoop(Animartrix &self) {
     if (self.prev_animation != self.current_animation) {
         if (self.impl) {
             // Re-initialize object.
-            self.impl->init(self.x, self.y, self.serpentine);
+            self.impl->init(self.getWidth(), self.getHeight());
         }
         self.prev_animation = self.current_animation;
     }

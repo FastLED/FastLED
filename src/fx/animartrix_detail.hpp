@@ -147,12 +147,12 @@ class ANIMartRIX {
 
     ANIMartRIX() {}
 
-    ANIMartRIX(int w, int h, bool serpentine) { this->init(w, h, serpentine); }
+    ANIMartRIX(int w, int h) { this->init(w, h); }
 
     virtual uint16_t xy(uint16_t x, uint16_t y) = 0;
 
 
-    void init(int w, int h, bool serpentine) {
+    void init(int w, int h) {
         animation = render_parameters();
         timings = oscillators();
         move = modulators();
@@ -160,7 +160,6 @@ class ANIMartRIX {
 
         this->num_x = w;
         this->num_y = h;
-        this->serpentine = serpentine;
         if (w <= 16) {
             this->radial_filter_radius = 11;
         } else {
