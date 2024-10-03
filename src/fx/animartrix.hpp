@@ -1,32 +1,13 @@
 #pragma once
 
 
-/*
-  ___        _            ___  ______ _____    _
- / _ \      (_)          / _ \ | ___ \_   _|  (_)
-/ /_\ \_ __  _ _ __ ___ / /_\ \| |_/ / | |_ __ ___  __
-|  _  | '_ \| | '_ ` _ \|  _  ||    /  | | '__| \ \/ /
-| | | | | | | | | | | | | | | || |\ \  | | |  | |>  <
-\_| |_/_| |_|_|_| |_| |_\_| |_/\_| \_| \_/_|  |_/_/\_\
+// FastLED Adapter for the animartrix fx library.
+// Copyright Stefen Petrick 2023.
+// Adapted to C++ by Netmindz 2023.
+// Adapted to FastLED by Zach Vorhies 2024.
+// For details on the animartrix library and licensing information, see
+// fx/aninamtrix_detail.hpp
 
-by Stefan Petrick 2023.
-
-High quality LED animations for your next project.
-
-This is a Shader and 5D Coordinate Mapper made for realtime
-rendering of generative animations & artistic dynamic visuals.
-
-This is also a modular animation synthesizer with waveform
-generators, oscillators, filters, modulators, noise generators,
-compressors... and much more.
-
-VO.42 beta version
-
-This code is licenced under a Creative Commons Attribution
-License CC BY-NC 3.0
-
-
-*/
 #include "crgb.h"
 #include "namespace.h"
 #include "fx/xy.h"
