@@ -35,6 +35,8 @@ License CC BY-NC 3.0
 
 #define num_oscillators 10
 
+namespace animartrix {
+
 struct render_parameters {
 
     // TODO float center_x = (num_x / 2) - 0.5;   // center of the matrix
@@ -4013,3 +4015,5 @@ class ANIMartRIX {
         }
     }
 };
+
+}  // namespace animartrix

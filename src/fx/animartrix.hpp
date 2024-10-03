@@ -171,7 +171,7 @@ const char *AnimartrixData::getAnimationName(AnimartrixAnim animation) {
     }
 }
 
-class FastLEDANIMartRIX : public ANIMartRIX {
+class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
     AnimartrixData *data = nullptr;
 
   public:
