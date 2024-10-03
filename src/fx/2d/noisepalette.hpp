@@ -76,6 +76,7 @@ class NoisePalette : public FxGrid {
     }
 
     void ChangePaletteAndSettingsPeriodically();
+    void setPalette(int paletteIndex);
 
   private:
     CRGB *leds;
@@ -86,6 +87,7 @@ class NoisePalette : public FxGrid {
     scoped_ptr<uint8_t> noise;
     CRGBPalette16 currentPalette = PartyColors_p;
     uint8_t colorLoop = 1;
+    int currentPaletteIndex = 0;
 
     void fillnoise8() {
         // If we're running at a low "speed", some 8-bit artifacts become
@@ -156,86 +158,65 @@ class NoisePalette : public FxGrid {
     }
 };
 
+inline void NoisePalette::setPalette(int paletteIndex) {
+    currentPaletteIndex = paletteIndex % 12;  // Ensure the index wraps around
+    switch (currentPaletteIndex) {
+        case 0:
+            currentPalette = RainbowColors_p;
+            speed = 20; scale = 30; colorLoop = 1;
+            break;
+        case 1:
+            SetupPurpleAndGreenPalette();
+            speed = 10; scale = 50; colorLoop = 1;
+            break;
+        case 2:
+            SetupBlackAndWhiteStripedPalette();
+            speed = 20; scale = 30; colorLoop = 1;
+            break;
+        case 3:
+            currentPalette = ForestColors_p;
+            speed = 8; scale = 120; colorLoop = 0;
+            break;
+        case 4:
+            currentPalette = CloudColors_p;
+            speed = 4; scale = 30; colorLoop = 0;
+            break;
+        case 5:
+            currentPalette = LavaColors_p;
+            speed = 8; scale = 50; colorLoop = 0;
+            break;
+        case 6:
+            currentPalette = OceanColors_p;
+            speed = 20; scale = 90; colorLoop = 0;
+            break;
+        case 7:
+            currentPalette = PartyColors_p;
+            speed = 20; scale = 30; colorLoop = 1;
+            break;
+        case 8:
+        case 9:
+        case 10:
+            SetupRandomPalette();
+            speed = 20 + (currentPaletteIndex - 8) * 30;
+            scale = 20 + (currentPaletteIndex - 8) * 30;
+            colorLoop = 1;
+            break;
+        case 11:
+            currentPalette = RainbowStripeColors_p;
+            speed = 30; scale = 20; colorLoop = 1;
+            break;
+    }
+}
+
 inline void NoisePalette::ChangePaletteAndSettingsPeriodically() {
-    static const uint8_t HOLD_PALETTES_X_TIMES_AS_LONG =
-        5; // You can adjust this value as needed
-    uint8_t secondHand =
-        ((millis() / 1000) / HOLD_PALETTES_X_TIMES_AS_LONG) % 60;
+    static const uint8_t HOLD_PALETTES_X_TIMES_AS_LONG = 5;
+    uint8_t secondHand = ((millis() / 1000) / HOLD_PALETTES_X_TIMES_AS_LONG) % 60;
     static uint8_t lastSecond = 99;
 
     if (lastSecond != secondHand) {
         lastSecond = secondHand;
-        if (secondHand == 0) {
-            currentPalette = RainbowColors_p;
-            speed = 20;
-            scale = 30;
-            colorLoop = 1;
-        }
-        if (secondHand == 5) {
-            SetupPurpleAndGreenPalette();
-            speed = 10;
-            scale = 50;
-            colorLoop = 1;
-        }
-        if (secondHand == 10) {
-            SetupBlackAndWhiteStripedPalette();
-            speed = 20;
-            scale = 30;
-            colorLoop = 1;
-        }
-        if (secondHand == 15) {
-            currentPalette = ForestColors_p;
-            speed = 8;
-            scale = 120;
-            colorLoop = 0;
-        }
-        if (secondHand == 20) {
-            currentPalette = CloudColors_p;
-            speed = 4;
-            scale = 30;
-            colorLoop = 0;
-        }
-        if (secondHand == 25) {
-            currentPalette = LavaColors_p;
-            speed = 8;
-            scale = 50;
-            colorLoop = 0;
-        }
-        if (secondHand == 30) {
-            currentPalette = OceanColors_p;
-            speed = 20;
-            scale = 90;
-            colorLoop = 0;
-        }
-        if (secondHand == 35) {
-            currentPalette = PartyColors_p;
-            speed = 20;
-            scale = 30;
-            colorLoop = 1;
-        }
-        if (secondHand == 40) {
-            SetupRandomPalette();
-            speed = 20;
-            scale = 20;
-            colorLoop = 1;
-        }
-        if (secondHand == 45) {
-            SetupRandomPalette();
-            speed = 50;
-            scale = 50;
-            colorLoop = 1;
-        }
-        if (secondHand == 50) {
-            SetupRandomPalette();
-            speed = 90;
-            scale = 90;
-            colorLoop = 1;
-        }
-        if (secondHand == 55) {
-            currentPalette = RainbowStripeColors_p;
-            speed = 30;
-            scale = 20;
-            colorLoop = 1;
+        if (secondHand % 5 == 0) {
+            setPalette(secondHand / 5);
         }
     }
 }
