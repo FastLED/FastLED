@@ -1,6 +1,8 @@
 #pragma once
 
 #include "namespace.h"
+#include "FastLED.h"
+#include "fx/_fx1d.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -12,50 +14,45 @@ FASTLED_NAMESPACE_BEGIN
 // Animated, ever-changing rainbows.
 // by Mark Kriegsman
 
-#include "FastLED.h"
+class Pride2015 : public FxStrip {
+public:
+    Pride2015(CRGB* leds, uint16_t num_leds) : FxStrip(num_leds), leds(leds) {}
 
-#if FASTLED_VERSION < 3001000
-#error "Requires FastLED 3.1 or later; check github for latest code."
-#endif
+    void lazyInit() override {}
+    void draw() override;
+    const char* fxName() const override { return "Pride2015"; }
 
-struct Pride2015Data {
-    CRGB* leds = nullptr;
-    uint16_t num_leds = 0;
-    uint16_t sPseudotime = 0;
-    uint16_t sLastMillis = 0;
-    uint16_t sHue16 = 0;
-
-    // constructor
-    Pride2015Data(CRGB* leds, uint16_t num_leds)
-        : leds(leds), num_leds(num_leds) {}
+private:
+    CRGB* leds;
+    uint16_t mPseudotime = 0;
+    uint16_t mLastMillis = 0;
+    uint16_t mHue16 = 0;
 };
 
 // This function draws rainbows with an ever-changing,
 // widely-varying set of parameters.
-void Pride2015Loop(Pride2015Data& self) {
-    if (self.leds == nullptr || self.num_leds == 0) {
+void Pride2015::draw() {
+    if (leds == nullptr || mNumLeds == 0) {
         return;
     }
-
-    // tell FastLED about the LED strip configuration
 
     uint8_t sat8 = beatsin88(87, 220, 250);
     uint8_t brightdepth = beatsin88(341, 96, 224);
     uint16_t brightnessthetainc16 = beatsin88(203, (25 * 256), (40 * 256));
     uint8_t msmultiplier = beatsin88(147, 23, 60);
 
-    uint16_t hue16 = self.sHue16;
+    uint16_t hue16 = mHue16;
     uint16_t hueinc16 = beatsin88(113, 1, 3000);
   
     uint16_t ms = millis();
-    uint16_t deltams = ms - self.sLastMillis;
-    self.sLastMillis = ms;
-    self.sPseudotime += deltams * msmultiplier;
-    self.sHue16 += deltams * beatsin88(400, 5, 9);
-    uint16_t brightnesstheta16 = self.sPseudotime;
+    uint16_t deltams = ms - mLastMillis;
+    mLastMillis = ms;
+    mPseudotime += deltams * msmultiplier;
+    mHue16 += deltams * beatsin88(400, 5, 9);
+    uint16_t brightnesstheta16 = mPseudotime;
   
     // set master brightness control
-    for (uint16_t i = 0; i < self.num_leds; i++) {
+    for (uint16_t i = 0; i < mNumLeds; i++) {
         hue16 += hueinc16;
         uint8_t hue8 = hue16 / 256;
 
@@ -68,9 +65,9 @@ void Pride2015Loop(Pride2015Data& self) {
     
         CRGB newcolor = CHSV(hue8, sat8, bri8);
     
-        uint16_t pixelnumber = (self.num_leds - 1) - i;
+        uint16_t pixelnumber = (mNumLeds - 1) - i;
     
-        nblend(self.leds[pixelnumber], newcolor, 64);
+        nblend(leds[pixelnumber], newcolor, 64);
     }
 }
 

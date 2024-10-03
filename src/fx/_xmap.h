@@ -59,6 +59,22 @@ public:
         }
     }
 
+    // define the assignment operator
+    XMap& operator=(const XMap &other) {
+        if (this != &other) {
+            type = other.type;
+            width = other.width;
+            xFunction = other.xFunction;
+            lookUpTable = other.lookUpTable;
+            if (other.lookUpTableOwned.get()) {
+                lookUpTableOwned.reset(new uint16_t[width]);
+                memcpy(lookUpTableOwned.get(), lookUpTable, width * sizeof(uint16_t));
+                lookUpTable = lookUpTableOwned.get();
+            }
+        }
+        return *this;
+    }
+
     void optimizeAsLookupTable() {
         if (type == kLookUpTable) {
             return;
@@ -113,6 +129,7 @@ public:
         xFunction = nullptr;
         lookUpTable = newLookUpTable;
     }
+
 
 private:
     XMap(uint16_t width, Type type)

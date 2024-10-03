@@ -2,13 +2,14 @@
 
 #include <stdint.h>
 #include "namespace.h"
+#include "fx/_xmap.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 // Abstract base class for 1D effects that use a strip of LEDs.
 class FxStrip {
   public:
-    FxStrip(uint16_t numLeds): mNumLeds(numLeds) {}
+    FxStrip(uint16_t numLeds): mNumLeds(numLeds), mXMap(numLeds, false) {}
     virtual ~FxStrip() {}
     virtual void lazyInit() {}
     virtual void draw() = 0;
@@ -21,9 +22,11 @@ class FxStrip {
     virtual int fxGet() const { return 0; };  // Get the current fx number.
 
     uint16_t getNumLeds() const { return mNumLeds; }
+    void setXmap(const XMap& xMap) { mXMap = xMap; }
 
 protected:
     uint16_t mNumLeds;
+    XMap mXMap;
 };
 
 FASTLED_NAMESPACE_END
