@@ -14,8 +14,6 @@
 #include "lib8tion/random8.h"
 #include "noise.h"
 
-#define MAX_DIMENSION 22
-
 FASTLED_NAMESPACE_BEGIN
 
 class NoisePalette : public FxGrid {
@@ -31,7 +29,7 @@ class NoisePalette : public FxGrid {
         z = random16();
 
         // Allocate memory for the noise array
-        noise = new uint8_t[MAX_DIMENSION * MAX_DIMENSION];
+        noise = new uint8_t[width * height];
     }
 
     ~NoisePalette() {
@@ -60,8 +58,8 @@ class NoisePalette : public FxGrid {
                 // array for our brightness, and the flipped value from (j,i)
                 // for our pixel's index into the color palette.
 
-                uint8_t index = noise[i * MAX_DIMENSION + j];
-                uint8_t bri = noise[j * MAX_DIMENSION + i];
+                uint8_t index = noise[i * height + j];
+                uint8_t bri = noise[j * width + i];
 
                 // if this palette is a 'loop', add a slowly-changing base value
                 if (colorLoop) {
@@ -104,9 +102,9 @@ class NoisePalette : public FxGrid {
             dataSmoothing = 200 - (speed * 4);
         }
 
-        for (int i = 0; i < MAX_DIMENSION; i++) {
+        for (int i = 0; i < width; i++) {
             int ioffset = scale * i;
-            for (int j = 0; j < MAX_DIMENSION; j++) {
+            for (int j = 0; j < height; j++) {
                 int joffset = scale * j;
 
                 uint8_t data = inoise8(x + ioffset, y + joffset, z);
@@ -118,13 +116,13 @@ class NoisePalette : public FxGrid {
                 data = qadd8(data, scale8(data, 39));
 
                 if (dataSmoothing) {
-                    uint8_t olddata = noise[i * MAX_DIMENSION + j];
+                    uint8_t olddata = noise[i * height + j];
                     uint8_t newdata = scale8(olddata, dataSmoothing) +
                                       scale8(data, 256 - dataSmoothing);
                     data = newdata;
                 }
 
-                noise[i * MAX_DIMENSION + j] = data;
+                noise[i * height + j] = data;
             }
         }
 
