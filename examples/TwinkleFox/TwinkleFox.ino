@@ -1,5 +1,5 @@
 #include "FastLED.h"
-#include "fx/twinklefox.hpp"
+#include "fx/1d/twinklefox.hpp"
 
 #define NUM_LEDS      100
 #define LED_TYPE   WS2811
@@ -9,7 +9,7 @@
 #define MAX_MA       4000
 
 CRGBArray<NUM_LEDS> leds;
-TwinkleFoxData twinkleFoxData(leds, NUM_LEDS);
+TwinkleFox twinkleFox(leds, NUM_LEDS);
 
 void setup() {
   delay(3000); // safety startup delay
@@ -18,19 +18,17 @@ void setup() {
     .setCorrection(TypicalLEDStrip)
     .setRgbw();
 
-  chooseNextColorPalette(twinkleFoxData.targetPalette);
+  twinkleFox.lazyInit();
 }
 
 void loop() {
-  EVERY_N_SECONDS(SECONDS_PER_PALETTE) { 
-    chooseNextColorPalette(twinkleFoxData.targetPalette); 
-  }
-  
-  EVERY_N_MILLISECONDS(10) {
-    nblendPaletteTowardPalette(twinkleFoxData.currentPalette, twinkleFoxData.targetPalette, 12);
-  }
 
-  TwinkleFoxLoop(twinkleFoxData);
+  EVERY_N_SECONDS(SECONDS_PER_PALETTE) { 
+    twinkleFox.chooseNextColorPalette(twinkleFox.targetPalette); 
+  }
   
+
+
+  twinkleFox.draw();
   FastLED.show();
 }
