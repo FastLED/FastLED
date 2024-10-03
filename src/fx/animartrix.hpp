@@ -33,6 +33,25 @@ License CC BY-NC 3.0
 
 FASTLED_NAMESPACE_BEGIN
 
+
+
+class Fx2d {
+  public:
+    virtual ~Fx2d() {}
+    virtual void lazyInit() {}
+    virtual void draw() = 0;
+    virtual uint16_t xy(uint16_t x, uint16_t y) = 0;
+
+    virtual const char* fxName() const = 0;  // Get the name of the current fx. This is the class name if there is only one.
+
+    // Optionally implement these for multi fx classes.
+    virtual int fxNum() const { return 1; };  // Return 1 if you only have one fx managed by this class.
+    virtual void fxSet(int fx) {};  // Get the current fx number.
+    virtual void fxNext(int fx = 1) {};  // Negative numbers are allowed. -1 means previous fx.
+    virtual int fxGet() const { return 0; };  // Set the current fx number.
+};
+
+
 enum AnimartrixAnim {
     RGB_BLOBS5 = 0,
     RGB_BLOBS4,
@@ -77,21 +96,6 @@ enum AnimartrixAnim {
     MODULE_EXPERIMENT9,
     MODULE_EXPERIMENT10,
     NUM_ANIMATIONS
-};
-
-
-class Fx2d {
-  public:
-    virtual ~Fx2d() {}
-    virtual void lazyInit() {}
-    virtual void draw() = 0;
-    virtual uint16_t xy(uint16_t x, uint16_t y) = 0;
-
-    virtual int fxNum() const = 0;  // Return 1 if you only have one fx managed by this class.
-    virtual void fxSet(int fx) = 0;  // Get the current fx number.
-    virtual void fxNext(int fx = 1) = 0;  // Negative numbers are allowed. -1 means previous fx.
-    virtual int fxGet() const = 0;  // Set the current fx number.
-    virtual const char* fxName() const = 0;  // Get the name of the current fx.
 };
 
 
