@@ -302,7 +302,6 @@ esp_err_t led_strip_new_rmt_device(
     if (ret != ESP_OK) {
         free(pixel_buf);
     }
-err:
     return ret;
 }
 
