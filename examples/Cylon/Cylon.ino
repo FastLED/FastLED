@@ -3,7 +3,7 @@
 /// @example Cylon.ino
 
 #include <FastLED.h>
-#include "fx/cylon.hpp"
+#include "fx/1d/cylon.hpp"
 
 // How many leds in your strip?
 #define NUM_LEDS 64 
@@ -19,7 +19,7 @@ CRGB leds[NUM_LEDS];
 // Create a CylonData instance
 CylonData cylonData(leds, NUM_LEDS);
 
-void setup() {
+void setup() { 
     FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS).setRgbw();
     FastLED.setBrightness(84);
 }
