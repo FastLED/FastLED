@@ -33,8 +33,8 @@ void loop() {
   // Change animation every 10 seconds
   #if CYCLE_THROUGH_ANIMATIONS > 0
   EVERY_N_SECONDS(CYCLE_THROUGH_ANIMATIONS) {
-    data.nextAnimation();
-    std::cout << "New animation: " << data.getName() << std::endl;
+    data.fxNext();
+    std::cout << "New animation: " << data.fxName() << std::endl;
   }
   #endif
   AnimartrixLoop(data);

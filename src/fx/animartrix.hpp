@@ -79,8 +79,24 @@ enum AnimartrixAnim {
     NUM_ANIMATIONS
 };
 
+
+class Fx2d {
+  public:
+    virtual ~Fx2d() {}
+    virtual void lazyInit() {}
+    virtual void draw() = 0;
+    virtual uint16_t xy(uint16_t x, uint16_t y) = 0;
+
+    virtual int fxNum() const = 0;  // Return 1 if you only have one fx managed by this class.
+    virtual void fxSet(int fx) = 0;  // Get the current fx number.
+    virtual void fxNext(int fx = 1) = 0;  // Negative numbers are allowed. -1 means previous fx.
+    virtual int fxGet() const = 0;  // Set the current fx number.
+    virtual const char* fxName() const = 0;  // Get the name of the current fx.
+};
+
+
 class FastLEDANIMartRIX;
-class AnimartrixData {
+class AnimartrixData : public Fx2d {
   public:
     AnimartrixData(int x, int y, CRGB *leds, AnimartrixAnim first_animation,
                    bool serpentine) {
@@ -92,36 +108,44 @@ class AnimartrixData {
         this->current_animation = first_animation;
     }
 
-    
-    uint16_t xy(uint16_t x, uint16_t y) {
+    void lazyInit() override {}
+
+    uint16_t xy(uint16_t x, uint16_t y) override {
+        return xy_no_virtual(x, y);
+    }
+
+    uint16_t xy_no_virtual(uint16_t x, uint16_t y) {
         if (serpentine && y & 1) // check last bit
             return (y + 1) * this->x - 1 -
                    x; // reverse every second line for a serpentine lled layout
         else
             return y * this->x +
                    x; // use this equation only for a line by line layout
-    } // remove the previous 3 lines of code in this case
-
-    void setAnimation(AnimartrixAnim animation) { current_animation = animation; }
-    AnimartrixAnim getAnimation() { return current_animation; }
-    const char* getName() { return getAnimationName(current_animation); }
-    void nextAnimation() {
-        AnimartrixAnim next_animation = static_cast<AnimartrixAnim>(
-             (static_cast<int>(current_animation) + 1) % NUM_ANIMATIONS);
-        setAnimation(next_animation);
     }
 
-    void previousAnimation() {
-        if (current_animation == 0) {
-            setAnimation(static_cast<AnimartrixAnim>(NUM_ANIMATIONS - 1));
-            return;
+    void draw() override;
+
+    int fxNum() const override { return NUM_ANIMATIONS; }
+
+    void fxSet(int fx) override {
+        int curr = fxGet();
+        if (fx < 0) {
+            fx = curr + fx;
+            if (fx < 0) {
+                fx = NUM_ANIMATIONS - 1;
+            } else {
+                fx = fx % NUM_ANIMATIONS;
+            }
         }
-        setAnimation(
-          static_cast<AnimartrixAnim>((static_cast<int>(current_animation) - 1))
-        );
+        current_animation = static_cast<AnimartrixAnim>(fx);
+    }
+    int fxGet() const override { return static_cast<int>(current_animation); }
+    const char* fxName() const override { return getAnimationName(current_animation); }
+
+    void fxNext(int fx = 1) override {
+        fxSet(fxGet() + fx);
     }
 
-    void loop();
 
   private:
     friend void AnimartrixLoop(AnimartrixData &self);
@@ -216,8 +240,8 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
         setPixelColor(x, y, CRGB(pixel.red, pixel.green, pixel.blue));
     }
 
-    uint16_t xy(uint16_t x, uint16_t y) {
-        return data->xy(x, y);
+    uint16_t xy(uint16_t x, uint16_t y) override {
+        return data->xy_no_virtual(x, y);
     }
 
     void loop() {
@@ -377,7 +401,7 @@ void AnimartrixLoop(AnimartrixData &self) {
     self.impl->loop();
 }
 
-void AnimartrixData::loop() {
+void AnimartrixData::draw() {
     AnimartrixLoop(*this); 
 }
 
