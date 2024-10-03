@@ -12,7 +12,7 @@ FastLED
 
 ## About
 
-The led driver for tiny computers the size of a quarter.
+The led driver for tiny computers the size of a quarter, more or less.
 
 esp32, teensy, arduino,
 raspberri pi, attiny family and more.
