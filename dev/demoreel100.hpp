@@ -3,7 +3,7 @@
 /// @example DemoReel100.ino
 
 #include <FastLED.h>
-#include "fx/f1/demoreel100.hpp"
+#include "fx/1d/demoreel100.hpp"
 
 #define DATA_PIN    2
 //#define CLK_PIN   4
@@ -15,7 +15,7 @@ CRGB leds[NUM_LEDS];
 #define BRIGHTNESS          96
 #define FRAMES_PER_SECOND  120
 
-DemoReel100Data demoReelData(leds, NUM_LEDS, BRIGHTNESS);
+DemoReel100 demoReel(leds, NUM_LEDS);
 
 void setup() {
   delay(3000); // 3 second delay for recovery
@@ -25,18 +25,22 @@ void setup() {
   //FastLED.addLeds<LED_TYPE,DATA_PIN,CLK_PIN,COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
 
   // set master brightness control
-  FastLED.setBrightness(demoReelData.brightness);
+  FastLED.setBrightness(BRIGHTNESS);
+
+  // Initialize the DemoReel100 instance
+  demoReel.lazyInit();
 }
 
 
 void loop()
 {
-    DemoReel100Loop(demoReelData);
+    // Run the DemoReel100 draw function
+    demoReel.draw();
+
     // send the 'leds' array out to the actual LED strip
     FastLED.show();  
     // insert a delay to keep the framerate modest
     FastLED.delay(1000/FRAMES_PER_SECOND); 
-
 }
 
 
