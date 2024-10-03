@@ -75,13 +75,12 @@ struct modulators {
 
 
 struct rgb {
-
     float red, green, blue;
 };
 
 
 
-static const byte PROGMEM pNoise[] = {
+static const uint8_t PROGMEM pNoise[] = {
     151, 160, 137, 91,  90,  15,  131, 13,  201, 95,  96,  53,  194, 233, 7,
     225, 140, 36,  103, 30,  69,  142, 8,   99,  37,  240, 21,  10,  23,  190,
     6,   148, 247, 120, 234, 75,  0,   26,  197, 62,  94,  252, 219, 203, 117,
