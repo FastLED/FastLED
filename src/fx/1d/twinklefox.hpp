@@ -115,7 +115,9 @@ public:
     TwinkleFox(CRGB* leds, uint16_t num_leds) 
         : FxStrip(num_leds), leds(leds), backgroundColor(CRGB::Black),
           twinkleSpeed(TWINKLE_SPEED), twinkleDensity(TWINKLE_DENSITY),
-          coolLikeIncandescent(COOL_LIKE_INCANDESCENT), autoSelectBackgroundColor(AUTO_SELECT_BACKGROUND_COLOR) {}
+          coolLikeIncandescent(COOL_LIKE_INCANDESCENT), autoSelectBackgroundColor(AUTO_SELECT_BACKGROUND_COLOR) {
+        lazyInit(); 
+    }
 
     void lazyInit() override {
         chooseNextColorPalette(targetPalette);
