@@ -44,7 +44,6 @@ License CC BY-NC 3.0
 // If you are just making art, then by all means do what you want with this library and you can stop reading now.
 // If you are using this header for commercial purposes, then you need to contact Stefan Petrick for a commercial use license.
 
-#include "fastled_progmem.h"
 
 #include <vector>  // ok include
 #include <math.h>  // ok include
@@ -135,7 +134,7 @@ static const uint8_t PERLIN_NOISE[] = {
 FASTLED_FORCE_INLINE uint8_t P(uint8_t x) {
     const uint8_t idx = x & 255;
     const uint8_t* ptr = PERLIN_NOISE + idx;
-    return FL_PGM_READ_BYTE_NEAR(ptr);
+    return *ptr;
 }
 
 class ANIMartRIX {

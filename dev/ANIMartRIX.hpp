@@ -2,8 +2,11 @@
 /// @brief   FastLED "100 lines of code" demo reel, showing off some effects
 /// @example DemoReel100.ino
 
-#include "fx/animartrix.hpp"
 
+#include "fx/2d/animartrix.hpp"
+
+#include <Arduino.h>
+#include "FastLED.h"
 
 #include <iostream>
 
