@@ -46,17 +46,12 @@
 
 #define BRIGHTNESS  128
 #define FRAMES_PER_SECOND 30
+#define COOLING 55
+#define SPARKING 120
 #define REVERSE_DIRECTION false
 
 CRGB leds[NUM_LEDS];
-Fire2012Data state(
-  leds,           // leds - required
-  NUM_LEDS,       // num_leds - required
-  nullptr,        // heat - will be allocated if not provided,
-  55,             // cooling
-  120,            // sparking
-  REVERSE_DIRECTION
-);
+Fire2012 fire(leds, NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
 
 void setup() {
   delay(3000); // sanity delay
@@ -68,7 +63,7 @@ void setup() {
 
 void loop()
 {
-  Fire2012Loop(state); // run simulation frame
+  fire.draw(); // run simulation frame
   
   FastLED.show(); // display this frame
   FastLED.delay(1000 / FRAMES_PER_SECOND);

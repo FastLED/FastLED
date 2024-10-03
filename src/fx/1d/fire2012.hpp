@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FastLED.h"
+#include "fx/_fx1d.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -41,67 +43,63 @@ FASTLED_NAMESPACE_BEGIN
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
 
-
-
-
-#include "crgb.h"
-#include "FastLED.h"
-
-
-struct Fire2012Data {
-    CRGB* leds = nullptr;
-    uint16_t num_leds = 0;
-    uint8_t* heat = nullptr; // Will be allocated if not provided.
-    uint8_t cooling = 55;
-    uint8_t sparking = 120;
-    bool reverse_direction = false;
-    CRGBPalette16 palette = HeatColors_p; // Default palette
-    // constructor
-    Fire2012Data(CRGB* leds, uint16_t num_leds, uint8_t* heat, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false, const CRGBPalette16& palette = HeatColors_p)
-        : leds(leds), num_leds(num_leds), heat(heat), cooling(cooling), sparking(sparking), reverse_direction(reverse_direction), palette(palette) {}
-};
-
-void Fire2012Loop(Fire2012Data& self)
-{
-
-    if (self.leds == nullptr) {
-        return;
-    }
-    // We allow head to be auto created.
-    if (self.heat == nullptr && self.num_leds > 0) {
-        self.heat = new uint8_t[self.num_leds]();  // Initialize to zero
+class Fire2012 : public FxStrip {
+public:
+    Fire2012(CRGB* leds, uint16_t num_leds, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false, const CRGBPalette16& palette = HeatColors_p)
+        : FxStrip(num_leds), leds(leds), cooling(cooling), sparking(sparking), reverse_direction(reverse_direction), palette(palette) {
+        heat = new uint8_t[num_leds]();  // Initialize to zero
     }
 
-    // Step 1.  Cool down every cell a little
-    for (uint16_t i = 0; i < self.num_leds; i++) {
-        self.heat[i] = qsub8(self.heat[i], random8(0, ((self.cooling * 10) / self.num_leds) + 2));
-    }
-  
-    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-    for (uint16_t k = self.num_leds - 1; k >= 2; k--) {
-        self.heat[k] = (self.heat[k - 1] + self.heat[k - 2] + self.heat[k - 2]) / 3;
-    }
-    
-    // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-    if (random8() < self.sparking) {
-        int y = random8(7);
-        self.heat[y] = qadd8(self.heat[y], random8(160, 255));
+    ~Fire2012() {
+        delete[] heat;
     }
 
-    // Step 4.  Map from heat cells to LED colors
-    for (uint16_t j = 0; j < self.num_leds; j++) {
-        // Scale the heat value from 0-255 down to 0-240
-        // for best results with color palettes.
-        uint8_t colorindex = scale8(self.heat[j], 240);
-        CRGB color = ColorFromPalette(self.palette, colorindex);
-        int pixelnumber;
-        if (self.reverse_direction) {
-            pixelnumber = (self.num_leds - 1) - j;
-        } else {
-            pixelnumber = j;
+    void draw() override {
+        if (leds == nullptr) {
+            return;
         }
-        self.leds[pixelnumber] = color;
+
+        // Step 1.  Cool down every cell a little
+        for (uint16_t i = 0; i < mNumLeds; i++) {
+            heat[i] = qsub8(heat[i], random8(0, ((cooling * 10) / mNumLeds) + 2));
+        }
+      
+        // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+        for (uint16_t k = mNumLeds - 1; k >= 2; k--) {
+            heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
+        }
+        
+        // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
+        if (random8() < sparking) {
+            int y = random8(7);
+            heat[y] = qadd8(heat[y], random8(160, 255));
+        }
+
+        // Step 4.  Map from heat cells to LED colors
+        for (uint16_t j = 0; j < mNumLeds; j++) {
+            // Scale the heat value from 0-255 down to 0-240
+            // for best results with color palettes.
+            uint8_t colorindex = scale8(heat[j], 240);
+            CRGB color = ColorFromPalette(palette, colorindex);
+            int pixelnumber;
+            if (reverse_direction) {
+                pixelnumber = (mNumLeds - 1) - j;
+            } else {
+                pixelnumber = j;
+            }
+            leds[pixelnumber] = color;
+        }
     }
-}
+
+    const char* fxName() const override { return "Fire2012"; }
+
+private:
+    CRGB* leds;
+    uint8_t* heat;
+    uint8_t cooling;
+    uint8_t sparking;
+    bool reverse_direction;
+    CRGBPalette16 palette;
+};
 
 FASTLED_NAMESPACE_END
