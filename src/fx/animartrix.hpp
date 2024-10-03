@@ -8,6 +8,8 @@
 // For details on the animartrix library and licensing information, see
 // fx/aninamtrix_detail.hpp
 
+#include <iostream>  // ok include
+
 #include "crgb.h"
 #include "namespace.h"
 #include "fx/xy.h"
@@ -153,6 +155,44 @@ const char *Animartrix::getAnimationName(AnimartrixAnim animation) {
         return "ROTATING_BLOB";
     case RINGS:
         return "RINGS";
+    case COMPLEX_KALEIDO:
+        return "COMPLEX_KALEIDO";
+    case COMPLEX_KALEIDO_2:
+        return "COMPLEX_KALEIDO_2";
+    case COMPLEX_KALEIDO_3:
+        return "COMPLEX_KALEIDO_3";
+    case COMPLEX_KALEIDO_4:
+        return "COMPLEX_KALEIDO_4";
+    case COMPLEX_KALEIDO_5:
+        return "COMPLEX_KALEIDO_5";
+    case COMPLEX_KALEIDO_6:
+        return "COMPLEX_KALEIDO_6";
+    case WATER:
+        return "WATER";
+    case PARAMETRIC_WATER:
+        return "PARAMETRIC_WATER";
+    case MODULE_EXPERIMENT1:
+        return "MODULE_EXPERIMENT1";
+    case MODULE_EXPERIMENT2:
+        return "MODULE_EXPERIMENT2";
+    case MODULE_EXPERIMENT3:
+        return "MODULE_EXPERIMENT3";
+    case MODULE_EXPERIMENT4:
+        return "MODULE_EXPERIMENT4";
+    case MODULE_EXPERIMENT5:
+        return "MODULE_EXPERIMENT5";
+    case MODULE_EXPERIMENT6:
+        return "MODULE_EXPERIMENT6";
+    case MODULE_EXPERIMENT7:
+        return "MODULE_EXPERIMENT7";
+    case MODULE_EXPERIMENT8:
+        return "MODULE_EXPERIMENT8";
+    case MODULE_EXPERIMENT9:
+        return "MODULE_EXPERIMENT9";
+    case MODULE_EXPERIMENT10:
+        return "MODULE_EXPERIMENT10";
+    case NUM_ANIMATIONS:
+        return "NUM_ANIMATIONS";
     default:
         return "UNKNOWN";
     }
@@ -356,7 +396,9 @@ Animartrix::~Animartrix() {
 }
 
 void Animartrix::draw() {
+    std::cout << "Drawing: " << this->fxName() << std::endl;
     AnimartrixLoop(*this); 
+    std::cout << "Done drawing: " << this->fxName() << std::endl;
 }
 
 FASTLED_NAMESPACE_END
