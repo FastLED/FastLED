@@ -4,13 +4,15 @@
 
 #include "fx/animartrix.hpp"
 
+#include <iostream>
+
 #define WIDTH  22                       // how many LEDs are in one row?
 #define HEIGHT  22                       // how many rows?
 #define NUM_LED (WIDTH * HEIGHT)
 #define SERPENTINE true
 CRGB leds[NUM_LED];               // framebuffer
 
-AnimartrixData data(WIDTH, HEIGHT, leds, POLAR_WAVES, SERPENTINE);
+AnimartrixData data(WIDTH, HEIGHT, leds, WAVES, SERPENTINE);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
@@ -25,6 +27,7 @@ void loop() {
   // Change animation every 10 seconds
   EVERY_N_SECONDS(10) {
     data.next();
+    std::cout << "New animation: " << data.getName() << std::endl;
   }
   AnimartrixLoop(data);
   FastLED.show();
