@@ -28,14 +28,11 @@ class NoisePalette : public FxGrid {
         y = random16();
         z = random16();
 
-        // Allocate memory for the noise array
-        noise = new uint8_t[width * height];
+        // Allocate memory for the noise array using scoped_ptr
+        noise = scoped_ptr<uint8_t>(new uint8_t[width * height]);
     }
 
-    ~NoisePalette() {
-        // Free the allocated memory
-        delete[] noise;
-    }
+    // No need for a destructor, scoped_ptr will handle memory deallocation
 
     void lazyInit() override {}
 
@@ -58,8 +55,8 @@ class NoisePalette : public FxGrid {
                 // array for our brightness, and the flipped value from (j,i)
                 // for our pixel's index into the color palette.
 
-                uint8_t index = noise[i * height + j];
-                uint8_t bri = noise[j * width + i];
+                uint8_t index = noise.get()[i * height + j];
+                uint8_t bri = noise.get()[j * width + i];
 
                 // if this palette is a 'loop', add a slowly-changing base value
                 if (colorLoop) {
@@ -88,7 +85,7 @@ class NoisePalette : public FxGrid {
     uint16_t width, height;
     uint16_t speed = 20;
     uint16_t scale = 30;
-    uint8_t *noise;
+    scoped_ptr<uint8_t> noise;
     CRGBPalette16 currentPalette = PartyColors_p;
     uint8_t colorLoop = 1;
 
@@ -116,13 +113,13 @@ class NoisePalette : public FxGrid {
                 data = qadd8(data, scale8(data, 39));
 
                 if (dataSmoothing) {
-                    uint8_t olddata = noise[i * height + j];
+                    uint8_t olddata = noise.get()[i * height + j];
                     uint8_t newdata = scale8(olddata, dataSmoothing) +
                                       scale8(data, 256 - dataSmoothing);
                     data = newdata;
                 }
 
-                noise[i * height + j] = data;
+                noise.get()[i * height + j] = data;
             }
         }
 

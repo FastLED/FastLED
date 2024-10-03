@@ -20,9 +20,19 @@ public:
     scoped_ptr(const scoped_ptr&) = delete;
     scoped_ptr& operator=(const scoped_ptr&) = delete;
 
-    // Disable move semantics (no ownership transfer allowed)
-    scoped_ptr(scoped_ptr&&) = delete;
-    scoped_ptr& operator=(scoped_ptr&&) = delete;
+    // Move constructor
+    scoped_ptr(scoped_ptr&& other) noexcept : ptr_(other.ptr_) {
+        other.ptr_ = nullptr;
+    }
+
+    // Move assignment operator
+    scoped_ptr& operator=(scoped_ptr&& other) noexcept {
+        if (this != &other) {
+            reset(other.ptr_);
+            other.ptr_ = nullptr;
+        }
+        return *this;
+    }
 
     // Access the managed object
     T* operator->() const {
@@ -37,6 +47,16 @@ public:
     // Get the raw pointer
     T* get() const {
         return ptr_;
+    }
+
+    // Boolean conversion operator
+    explicit operator bool() const noexcept {
+        return ptr_ != nullptr;
+    }
+
+    // Logical NOT operator
+    bool operator!() const noexcept {
+        return ptr_ == nullptr;
     }
 
     // Release the managed object and reset the pointer
