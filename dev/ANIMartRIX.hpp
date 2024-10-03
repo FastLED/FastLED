@@ -4,14 +4,16 @@
 
 #include "fx/animartrix.hpp"
 
+
 #include <iostream>
 
-#define WIDTH  22                       // how many LEDs are in one row?
+#define WIDTH 22                      // how many columns?
 #define HEIGHT  22                       // how many rows?
+
 #define NUM_LED (WIDTH * HEIGHT)
 #define SERPENTINE true
 
-#define CYCLE_THROUGH_ANIMATIONS
+#define CYCLE_THROUGH_ANIMATIONS 10
 
 CRGB leds[NUM_LED];               // framebuffer
 
@@ -19,7 +21,7 @@ AnimartrixData data(WIDTH, HEIGHT, leds, POLAR_WAVES, SERPENTINE);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
-  FastLED.setMaxPowerInVoltsAndMilliamps( 5, 2000); // optional current limiting [5V, 2000mA] 
+  FastLED.setMaxPowerInVoltsAndMilliamps(5, 2000); // optional current limiting [5V, 2000mA] 
   Serial.begin(115200);                 // check serial monitor for current fps count
   // fill_rainbow(leds, NUM_LED, 0);
   fill_solid(leds, NUM_LED, CRGB::Black);
@@ -29,9 +31,9 @@ void setup() {
 void loop() {
   uint32_t now = millis();
   // Change animation every 10 seconds
-  #if defined(CYCLE_THROUGH_ANIMATIONS)
-  EVERY_N_SECONDS(1) {
-    data.next();
+  #if CYCLE_THROUGH_ANIMATIONS > 0
+  EVERY_N_SECONDS(CYCLE_THROUGH_ANIMATIONS) {
+    data.nextAnimation();
     std::cout << "New animation: " << data.getName() << std::endl;
   }
   #endif

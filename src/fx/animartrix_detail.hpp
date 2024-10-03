@@ -30,8 +30,23 @@ License CC BY-NC 3.0
 #error "This file is not meant to be included directly. Include animartrix.hpp instead."
 #endif
 
+// Copyright Stefen Petrick 2023.
+// Licensed under the Creative Commons Attribution License CC BY-NC 3.0
+// https://creativecommons.org/licenses/by-nc/3.0/
+// This header is distributed with FastLED but not part of the licensing.
+// This header is licensed seperately from the FastLED driver and not included by FastLED.
+//
+// Like the rest of FastLED, this header is free for non-commercial use and licensed under the Creative Commons Attribution License CC BY-NC 3.0.
+// If you are just making art, then by all means have at it, and you can stop reading now.
+// If you are using this header for commercial purposes, then you need to contact Stefan Petrick for a commercial use license.
+
 #include <FastLED.h>
 #include <vector>  // ok include
+
+// Setting this to 1 means you agree to the licensing terms of the ANIMartRIX library for non commercial use only.
+#if defined(FASTLED_ANIMARTRIX_LICENSING_AGREEMENT) || (FASTLED_ANIMARTRIX_LICENSING_AGREEMENT != 0)
+#warning "Warning: Non-standard license. This fx header is separate from the FastLED driver and carries different licensing terms. On the plus side, IT'S FUCKING AMAZING. ANIMartRIX: free for non-commercial use and licensed under the Creative Commons Attribution License CC BY-NC-SA 4.0. If you'd like to purchase a commercial use license please contact Stefan Petrick. Github: github.com/StefanPetrick/animartrix Reddit: reddit.com/user/StefanPetrick/ Modified by github.com/netmindz for class portability. Ported into FastLED by Zach Vorhies."
+#endif  // 
 
 #define num_oscillators 10
 
@@ -80,7 +95,7 @@ struct rgb {
 
 
 
-static const uint8_t PROGMEM pNoise[] = {
+static const uint8_t PROGMEM PERLIN_NOISE[] = {
     151, 160, 137, 91,  90,  15,  131, 13,  201, 95,  96,  53,  194, 233, 7,
     225, 140, 36,  103, 30,  69,  142, 8,   99,  37,  240, 21,  10,  23,  190,
     6,   148, 247, 120, 234, 75,  0,   26,  197, 62,  94,  252, 219, 203, 117,
@@ -100,7 +115,7 @@ static const uint8_t PROGMEM pNoise[] = {
     222, 114, 67,  29,  24,  72,  243, 141, 128, 195, 78,  66,  215, 61,  156,
     180};
 
-FASTLED_FORCE_INLINE uint8_t P(uint8_t x) { return pgm_read_byte(pNoise + (x & 255)); }
+FASTLED_FORCE_INLINE uint8_t P(uint8_t x) { return pgm_read_byte(PERLIN_NOISE + (x & 255)); }
 
 class ANIMartRIX {
 

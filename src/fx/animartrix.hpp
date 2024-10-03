@@ -1,3 +1,6 @@
+#pragma once
+
+
 /*
   ___        _            ___  ______ _____    _
  / _ \      (_)          / _ \ | ___ \_   _|  (_)
@@ -24,13 +27,6 @@ License CC BY-NC 3.0
 
 
 */
-
-#warning "\
-ANIMartRIX: free for non-commercial use and licensed under the Creative Commons Attribution License CC BY-NC-SA 4.0, . \
-For commercial use, please contact Stefan Petrick. Github: https://github.com/StefanPetrick/animartrix". \
-Modified by github.com/netmindz for class portability. \
-Modified by Zach Vorhies for FastLED fx compatibility."
-
 #include "crgb.h"
 
 #include "namespace.h"
@@ -88,28 +84,29 @@ class AnimartrixData {
   public:
     AnimartrixData(int x, int y, CRGB *leds, AnimartrixAnim first_animation,
                    bool serpentine) {
-        this->x = x;
-        this->y = y;
+        // Note: Swapping out height and width.
+        this->x = y;
+        this->y = x;
         this->leds = leds;
         this->serpentine = serpentine;
         this->current_animation = first_animation;
     }
 
-    void set(AnimartrixAnim animation) { current_animation = animation; }
-    AnimartrixAnim get() { return current_animation; }
+    void setAnimation(AnimartrixAnim animation) { current_animation = animation; }
+    AnimartrixAnim getAnimation() { return current_animation; }
     const char* getName() { return getAnimationName(current_animation); }
-    void next() {
+    void nextAnimation() {
         AnimartrixAnim next_animation = static_cast<AnimartrixAnim>(
              (static_cast<int>(current_animation) + 1) % NUM_ANIMATIONS);
-        set(next_animation);
+        setAnimation(next_animation);
     }
 
-    void prev() {
+    void previousAnimation() {
         if (current_animation == 0) {
-            set(static_cast<AnimartrixAnim>(NUM_ANIMATIONS - 1));
+            setAnimation(static_cast<AnimartrixAnim>(NUM_ANIMATIONS - 1));
             return;
         }
-        set(
+        setAnimation(
           static_cast<AnimartrixAnim>((static_cast<int>(current_animation) - 1))
         );
     }
