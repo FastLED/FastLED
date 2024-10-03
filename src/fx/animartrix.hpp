@@ -13,7 +13,7 @@
 #include "crgb.h"
 #include "namespace.h"
 #include "fx/xy.h"
-#include "fx/fx2d.h"
+#include "fx/_fx2d.h"
 
 #define ANIMARTRIX_INTERNAL
 #include "animartrix_detail.hpp"
@@ -68,9 +68,9 @@ enum AnimartrixAnim {
 
 
 class FastLEDANIMartRIX;
-class Animartrix : public Fx2d {
+class Animartrix : public FxGrid {
   public:
-    Animartrix(CRGB *leds, XYMap xyMap, AnimartrixAnim first_animation): Fx2d(xyMap) {
+    Animartrix(CRGB *leds, XYMap xyMap, AnimartrixAnim first_animation): FxGrid(xyMap) {
         // Note: Swapping out height and width.
         this->leds = leds;
         this->current_animation = first_animation;        
@@ -395,9 +395,7 @@ Animartrix::~Animartrix() {
 }
 
 void Animartrix::draw() {
-    std::cout << "Drawing: " << this->fxName() << "(" << this->fxGet() << ")" << std::endl;
-    AnimartrixLoop(*this); 
-    std::cout << "Done drawing: " << this->fxName()  << "(" << this->fxGet() << ")" << std::endl;
+    AnimartrixLoop(*this);
 }
 
 FASTLED_NAMESPACE_END

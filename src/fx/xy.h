@@ -27,7 +27,7 @@ enum XyMapType {
     kLookUpTable
 };
 
-
+// XYMap holds either a function or a look up table to map x, y coordinates to a 1D index.
 class  XYMap {
 public:
     static XYMap constructWithUserFunction(uint16_t width, uint16_t height, XYFunction xyFunction) {
@@ -42,7 +42,8 @@ public:
         return out;
     }
 
-    XYMap(uint16_t width, uint16_t height, bool is_serpentine) {
+    // is_superentine is true. You probably want this unless you are 
+    XYMap(uint16_t width, uint16_t height, bool is_serpentine = true) {
         type = is_serpentine ? kSeperentine : kLineByLine;
         this->width = width;
         this->height = height;
@@ -68,6 +69,7 @@ public:
         if (!lookUpTableOwned.get()) {
             lookUpTableOwned.reset(new uint16_t[width * height]);
         }
+        lookUpTable = lookUpTableOwned.get();
         uint16_t* data = lookUpTableOwned.get();
         for (uint16_t y = 0; y < height; y++) {
             for (uint16_t x = 0; x < width; x++) {
@@ -76,7 +78,6 @@ public:
         }
         type = kLookUpTable;
         xyFunction = nullptr;
-        lookUpTable = lookUpTableOwned.get();
     }
 
     uint16_t get(uint16_t x, uint16_t y) const {

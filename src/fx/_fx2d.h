@@ -8,10 +8,11 @@ FASTLED_NAMESPACE_BEGIN
 
 // Abstract base class for 2D effects that use a grid, which is defined
 // by an XYMap.
-class Fx2d {
+class FxGrid {
   public:
-    Fx2d(const XYMap& xyMap): mXyMap(xyMap) {}
-    virtual ~Fx2d() {}
+    // XYMap holds either a function or a look up table to map x, y coordinates to a 1D index.
+    FxGrid(const XYMap& xyMap): mXyMap(xyMap) {}
+    virtual ~FxGrid() {}
     virtual void lazyInit() {}
     virtual void draw() = 0;
 
