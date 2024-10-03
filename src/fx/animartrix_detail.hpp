@@ -1067,7 +1067,7 @@ class ANIMartRIX {
 
         get_ready();
 
-        timings.master_speed = 0.00003; // speed ratios for the oscillators
+        timings.master_speed = 0.000001; // speed ratios for the oscillators
         timings.ratio[0] = 4;           // higher values = faster transitions
         timings.ratio[1] = 3.2;
         timings.ratio[2] = 10;
