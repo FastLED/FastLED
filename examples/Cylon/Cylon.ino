@@ -27,5 +27,5 @@ void setup() {
 void loop() { 
     cylon.draw();
     FastLED.show();
-    delay(cylonData.delay_ms);
+    delay(cylon.delay_ms);
 }
