@@ -6,9 +6,9 @@
 #include <stdint.h>
 
 #include "doctest.h"
-#include "fx/cylon.hpp"
-#include "fx/pride2015.hpp"
-#include "fx/noisewave.hpp"
+#include "fx/1d/cylon.hpp"
+#include "fx/1d/pride2015.hpp"
+#include "fx/1d/noisewave.hpp"
 
 
 #include "fx/2d/animartrix.hpp"
