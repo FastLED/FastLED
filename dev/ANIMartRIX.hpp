@@ -24,6 +24,7 @@ void setup() {
 }
 
 void loop() {
+  uint32_t now = millis();
   // Change animation every 10 seconds
   EVERY_N_SECONDS(10) {
     data.next();
@@ -31,4 +32,9 @@ void loop() {
   }
   AnimartrixLoop(data);
   FastLED.show();
+  uint32_t elapsed = millis() - now;
+
+  EVERY_N_SECONDS(1) {
+    std::cout << "frame time: " << elapsed << "ms" << std::endl;
+  }
 }
