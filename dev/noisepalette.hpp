@@ -15,7 +15,7 @@ XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT);
 NoisePalette noisePalette(leds, xyMap);
 
 void setup() {
-    delay(3000); // sanity delay
+    delay(1000); // sanity delay
     FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip);
     FastLED.setBrightness(96);
@@ -23,9 +23,8 @@ void setup() {
 }
 
 void loop() {
-    EVERY_N_BSECONDS(5) { noisePalette.ChangePaletteAndSettingsPeriodically(); }
+    EVERY_N_MILLISECONDS(5000) { noisePalette.changeToRandomPalette(); }
 
     noisePalette.draw();
     FastLED.show();
-    // delay(10);
 }
