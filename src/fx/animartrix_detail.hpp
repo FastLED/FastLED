@@ -53,7 +53,7 @@ struct render_parameters {
     float high_limit = 1;
 };
 
-render_parameters animation; // all animation parameters in one place
+
 struct oscillators {
 
     float master_speed; // global transition speed
@@ -62,7 +62,6 @@ struct oscillators {
     float ratio[num_oscillators]; // speed ratios for the individual oscillators
 };
 
-oscillators timings; // all speed settings in one place
 
 struct modulators {
 
@@ -72,14 +71,15 @@ struct modulators {
     float noise_angle[num_oscillators]; // returns 0 to 2*PI
 };
 
-modulators move; // all oscillator based movers and shifters at one place
+
+
 
 struct rgb {
 
     float red, green, blue;
 };
 
-rgb pixel;
+
 
 static const byte pNoise[] = {
     151, 160, 137, 91,  90,  15,  131, 13,  201, 95,  96,  53,  194, 233, 7,
@@ -112,6 +112,11 @@ class ANIMartRIX {
     float radial_filter_radius = 23.0; // on 32x32, use 11 for 16x16
 
     bool serpentine;
+
+    render_parameters animation; // all animation parameters in one place
+    oscillators timings; // all speed settings in one place
+    modulators move; // all oscillator based movers and shifters at one place
+    rgb pixel;
 
     std::vector<std::vector<float>>
         polar_theta; // look-up table for polar angles

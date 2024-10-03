@@ -64,16 +64,9 @@ enum AnimartrixAnim {
     NUM_ANIMATIONS
 };
 
+class FastLEDANIMartRIX;
 class AnimartrixData {
   public:
-    int x = 0;
-    int y = 0;
-    bool serpentine = true;
-    void *obj = nullptr;
-    bool destroy = false;
-    CRGB *leds = nullptr;
-    AnimartrixAnim current_animation = RGB_BLOBS5;
-
     AnimartrixData(int x, int y, CRGB *leds, AnimartrixAnim first_animation,
                    bool serpentine) {
         this->x = x;
@@ -86,8 +79,6 @@ class AnimartrixData {
     void set(AnimartrixAnim animation) { current_animation = animation; }
     AnimartrixAnim get() { return current_animation; }
     const char* getName() { return getAnimationName(current_animation); }
-
-
     void next() {
         AnimartrixAnim next_animation = static_cast<AnimartrixAnim>(
              (static_cast<int>(current_animation) + 1) % NUM_ANIMATIONS);
@@ -105,7 +96,17 @@ class AnimartrixData {
     }
 
   private:
+    friend void AnimartrixLoop(AnimartrixData &self);
+    friend class FastLEDANIMartRIX;
     static const char *getAnimationName(AnimartrixAnim animation);
+    AnimartrixAnim prev_animation = NUM_ANIMATIONS;
+    FastLEDANIMartRIX *impl = nullptr;
+    int x = 0;
+    int y = 0;
+    bool serpentine = true;
+    bool destroy = false;
+    CRGB *leds = nullptr;
+    AnimartrixAnim current_animation = RGB_BLOBS5;
 };
 
 void AnimartrixLoop(AnimartrixData &self);
@@ -262,17 +263,24 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
 };
 
 void AnimartrixLoop(AnimartrixData &self) {
-    if (self.obj == nullptr) {
-        self.obj = new FastLEDANIMartRIX(&self);
-    }
-
-    FastLEDANIMartRIX *obj = static_cast<FastLEDANIMartRIX *>(self.obj);
-
     if (self.destroy) {
-        delete obj;
-        self.obj = nullptr;
+        if (self.impl) {
+            delete self.impl;
+            self.impl = nullptr;
+        }
         self.destroy = false;
         return;
     }
-    obj->loop();
+
+    if (self.prev_animation != self.current_animation) {
+        if (self.impl) {
+            delete self.impl;
+            self.impl = nullptr;
+        }
+        self.prev_animation = self.current_animation;
+    }
+    if (self.impl == nullptr) {
+        self.impl = new FastLEDANIMartRIX(&self);
+    }
+    self.impl->loop();
 }

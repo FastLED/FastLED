@@ -15,7 +15,7 @@
 
 CRGB leds[NUM_LED];               // framebuffer
 
-AnimartrixData data(WIDTH, HEIGHT, leds, SCALEDEMO1, SERPENTINE);
+AnimartrixData data(WIDTH, HEIGHT, leds, POLAR_WAVES, SERPENTINE);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
