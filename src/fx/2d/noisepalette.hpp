@@ -10,16 +10,15 @@
 #include "FastLED.h"
 #include "fx/_fx2d.h"
 #include "fx/_xymap.h"
-#include "ptr.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
+#include "ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 class NoisePalette : public FxGrid {
   public:
-    NoisePalette(CRGB *leds, XYMap xyMap)
-        : FxGrid(xyMap), leds(leds) {
+    NoisePalette(CRGB *leds, XYMap xyMap) : FxGrid(xyMap), leds(leds) {
         width = xyMap.getWidth();
         height = xyMap.getHeight();
 
@@ -39,12 +38,9 @@ class NoisePalette : public FxGrid {
     void draw() override {
         fillnoise8();
         mapNoiseToLEDsUsingPalette();
-        ChangePaletteAndSettingsPeriodically();
     }
 
-    const char* fxName() const override {
-        return "NoisePalette";
-    }
+    const char *fxName() const override { return "NoisePalette"; }
 
     void mapNoiseToLEDsUsingPalette() {
         static uint8_t ihue = 0;
@@ -79,6 +75,8 @@ class NoisePalette : public FxGrid {
         ihue += 1;
     }
 
+    void ChangePaletteAndSettingsPeriodically();
+
   private:
     CRGB *leds;
     uint16_t x, y, z;
@@ -90,10 +88,10 @@ class NoisePalette : public FxGrid {
     uint8_t colorLoop = 1;
 
     void fillnoise8() {
-        // If we're running at a low "speed", some 8-bit artifacts become visible
-        // from frame-to-frame.  In order to reduce this, we can do some fast
-        // data-smoothing. The amount of data smoothing we're doing depends on
-        // "speed".
+        // If we're running at a low "speed", some 8-bit artifacts become
+        // visible from frame-to-frame.  In order to reduce this, we can do some
+        // fast data-smoothing. The amount of data smoothing we're doing depends
+        // on "speed".
         uint8_t dataSmoothing = 0;
         if (speed < 50) {
             dataSmoothing = 200 - (speed * 4);
@@ -107,8 +105,9 @@ class NoisePalette : public FxGrid {
                 uint8_t data = inoise8(x + ioffset, y + joffset, z);
 
                 // The range of the inoise8 function is roughly 16-238.
-                // These two operations expand those values out to roughly 0..255
-                // You can comment them out if you want the raw noise data.
+                // These two operations expand those values out to roughly
+                // 0..255 You can comment them out if you want the raw noise
+                // data.
                 data = qsub8(data, 16);
                 data = qadd8(data, scale8(data, 39));
 
@@ -130,12 +129,36 @@ class NoisePalette : public FxGrid {
         y -= speed / 16;
     }
 
-    uint16_t XY(uint8_t x, uint8_t y) const {
-        return mXyMap.mapToIndex(x, y);
+    uint16_t XY(uint8_t x, uint8_t y) const { return mXyMap.mapToIndex(x, y); }
+
+    void SetupRandomPalette() {
+        currentPalette =
+            CRGBPalette16(CHSV(random8(), 255, 32), CHSV(random8(), 255, 255),
+                          CHSV(random8(), 128, 255), CHSV(random8(), 255, 255));
     }
 
-    void ChangePaletteAndSettingsPeriodically() {
-    static const uint8_t HOLD_PALETTES_X_TIMES_AS_LONG = 5; // You can adjust this value as needed
+    void SetupBlackAndWhiteStripedPalette() {
+        fill_solid(currentPalette, 16, CRGB::Black);
+        currentPalette[0] = CRGB::White;
+        currentPalette[4] = CRGB::White;
+        currentPalette[8] = CRGB::White;
+        currentPalette[12] = CRGB::White;
+    }
+
+    void SetupPurpleAndGreenPalette() {
+        CRGB purple = CHSV(HUE_PURPLE, 255, 255);
+        CRGB green = CHSV(HUE_GREEN, 255, 255);
+        CRGB black = CRGB::Black;
+
+        currentPalette = CRGBPalette16(
+            green, green, black, black, purple, purple, black, black, green,
+            green, black, black, purple, purple, black, black);
+    }
+};
+
+inline void NoisePalette::ChangePaletteAndSettingsPeriodically() {
+    static const uint8_t HOLD_PALETTES_X_TIMES_AS_LONG =
+        5; // You can adjust this value as needed
     uint8_t secondHand =
         ((millis() / 1000) / HOLD_PALETTES_X_TIMES_AS_LONG) % 60;
     static uint8_t lastSecond = 99;
@@ -216,30 +239,5 @@ class NoisePalette : public FxGrid {
         }
     }
 }
-
-    void SetupRandomPalette() {
-        currentPalette =
-            CRGBPalette16(CHSV(random8(), 255, 32), CHSV(random8(), 255, 255),
-                          CHSV(random8(), 128, 255), CHSV(random8(), 255, 255));
-    }
-
-    void SetupBlackAndWhiteStripedPalette() {
-        fill_solid(currentPalette, 16, CRGB::Black);
-        currentPalette[0] = CRGB::White;
-        currentPalette[4] = CRGB::White;
-        currentPalette[8] = CRGB::White;
-        currentPalette[12] = CRGB::White;
-    }
-
-    void SetupPurpleAndGreenPalette() {
-        CRGB purple = CHSV(HUE_PURPLE, 255, 255);
-        CRGB green = CHSV(HUE_GREEN, 255, 255);
-        CRGB black = CRGB::Black;
-
-        currentPalette =
-            CRGBPalette16(green, green, black, black, purple, purple, black, black,
-                          green, green, black, black, purple, purple, black, black);
-    }
-};
 
 FASTLED_NAMESPACE_END
