@@ -131,18 +131,7 @@ class AnimartrixData : public Fx2d {
 
     int fxNum() const override { return NUM_ANIMATIONS; }
 
-    void fxSet(int fx) override {
-        int curr = fxGet();
-        if (fx < 0) {
-            fx = curr + fx;
-            if (fx < 0) {
-                fx = NUM_ANIMATIONS - 1;
-            } else {
-                fx = fx % NUM_ANIMATIONS;
-            }
-        }
-        current_animation = static_cast<AnimartrixAnim>(fx);
-    }
+    void fxSet(int fx) override;
     int fxGet() const override { return static_cast<int>(current_animation); }
     const char* fxName() const override { return getAnimationName(current_animation); }
 
@@ -378,6 +367,19 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
     }
 };
 
+
+void AnimartrixData::fxSet(int fx) {
+    int curr = fxGet();
+    if (fx < 0) {
+        fx = curr + fx;
+        if (fx < 0) {
+            fx = NUM_ANIMATIONS - 1;
+        } else {
+            fx = fx % NUM_ANIMATIONS;
+        }
+    }
+    current_animation = static_cast<AnimartrixAnim>(fx);
+}
 
 
 void AnimartrixLoop(AnimartrixData &self) {
