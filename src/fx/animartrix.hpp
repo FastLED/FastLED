@@ -357,10 +357,9 @@ void Animartrix::fxSet(int fx) {
         fx = curr + fx;
         if (fx < 0) {
             fx = NUM_ANIMATIONS - 1;
-        } else {
-            fx = fx % NUM_ANIMATIONS;
         }
     }
+    fx = fx % NUM_ANIMATIONS;
     current_animation = static_cast<AnimartrixAnim>(fx);
 }
 
@@ -396,9 +395,9 @@ Animartrix::~Animartrix() {
 }
 
 void Animartrix::draw() {
-    std::cout << "Drawing: " << this->fxName() << std::endl;
+    std::cout << "Drawing: " << this->fxName() << "(" << this->fxGet() << ")" << std::endl;
     AnimartrixLoop(*this); 
-    std::cout << "Done drawing: " << this->fxName() << std::endl;
+    std::cout << "Done drawing: " << this->fxName()  << "(" << this->fxGet() << ")" << std::endl;
 }
 
 FASTLED_NAMESPACE_END
