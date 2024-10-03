@@ -12,7 +12,7 @@
 #define SERPENTINE true
 CRGB leds[NUM_LED];               // framebuffer
 
-AnimartrixData data(WIDTH, HEIGHT, leds, WAVES, SERPENTINE);
+AnimartrixData data(WIDTH, HEIGHT, leds, ZOOM2, SERPENTINE);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   

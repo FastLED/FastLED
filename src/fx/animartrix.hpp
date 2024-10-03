@@ -182,9 +182,6 @@ class FastLEDANIMartRIX : public ANIMartRIX {
     void setPixelColor(int x, int y, rgb pixel) {
         data->leds[xy(x, y)] = CRGB(pixel.red, pixel.green, pixel.blue);
     }
-    void setPixelColor(int index, rgb pixel) {
-        data->leds[index] = CRGB(pixel.red, pixel.green, pixel.blue);
-    }
 
     void loop() {
         switch (data->current_animation) {

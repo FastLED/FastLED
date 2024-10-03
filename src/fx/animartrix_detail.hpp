@@ -415,7 +415,7 @@ class ANIMartRIX {
 
     virtual void setPixelColor(int x, int y, rgb pixel) = 0;
 
-    virtual void setPixelColor(int index, rgb pixel) = 0;
+    // virtual void setPixelColor(int index, rgb pixel) = 0;
 
     void logOutput() { b = micros(); }
 
@@ -1978,9 +1978,9 @@ class ANIMartRIX {
                 // leds[xy(x, y)] = CRGB(pixel.red, pixel.green, pixel.blue);
                 setPixelColor(x, y, pixel);
 
-                setPixelColor(xy((num_x - 1) - x, y), pixel);
-                setPixelColor(xy((num_x - 1) - x, (num_y - 1) - y), pixel);
-                setPixelColor(xy(x, (num_y - 1) - y), pixel);
+                setPixelColor((num_x - 1) - x, y, pixel);
+                setPixelColor((num_x - 1) - x, (num_y - 1) - y, pixel);
+                setPixelColor(x, (num_y - 1) - y, pixel);
             }
         }
         // show_frame();
