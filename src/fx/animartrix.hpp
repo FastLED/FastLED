@@ -179,7 +179,7 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
         this->data = _data;
         this->init(data->x, data->y, data->serpentine);
     }
-    void setPixelColor(int x, int y, rgb pixel) {
+    void setPixelColor(int x, int y, animartrix::rgb pixel) {
         data->leds[xy(x, y)] = CRGB(pixel.red, pixel.green, pixel.blue);
     }
 

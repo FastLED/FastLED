@@ -11,7 +11,7 @@
 #define NUM_LED (WIDTH * HEIGHT)
 #define SERPENTINE true
 
-//#define CYCLE_THROUGH_ANIMATIONS
+#define CYCLE_THROUGH_ANIMATIONS
 
 CRGB leds[NUM_LED];               // framebuffer
 
