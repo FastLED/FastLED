@@ -10,9 +10,12 @@
 #define HEIGHT  22                       // how many rows?
 #define NUM_LED (WIDTH * HEIGHT)
 #define SERPENTINE true
+
+//#define CYCLE_THROUGH_ANIMATIONS
+
 CRGB leds[NUM_LED];               // framebuffer
 
-AnimartrixData data(WIDTH, HEIGHT, leds, ZOOM2, SERPENTINE);
+AnimartrixData data(WIDTH, HEIGHT, leds, SCALEDEMO1, SERPENTINE);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
@@ -26,10 +29,12 @@ void setup() {
 void loop() {
   uint32_t now = millis();
   // Change animation every 10 seconds
+  #if defined(CYCLE_THROUGH_ANIMATIONS)
   EVERY_N_SECONDS(5) {
     data.next();
     std::cout << "New animation: " << data.getName() << std::endl;
   }
+  #endif
   AnimartrixLoop(data);
   FastLED.show();
   uint32_t elapsed = millis() - now;
