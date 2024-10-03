@@ -133,6 +133,11 @@ class ANIMartRIX {
     ANIMartRIX(int w, int h, bool serpentine) { this->init(w, h, serpentine); }
 
     void init(int w, int h, bool serpentine) {
+        animation = render_parameters();
+        timings = oscillators();
+        move = modulators();
+        pixel = rgb();
+        
         this->num_x = w;
         this->num_y = h;
         this->serpentine = serpentine;

@@ -346,8 +346,8 @@ void AnimartrixLoop(AnimartrixData &self) {
 
     if (self.prev_animation != self.current_animation) {
         if (self.impl) {
-            delete self.impl;
-            self.impl = nullptr;
+            // Re-initialize object.
+            self.impl->init(self.x, self.y, self.serpentine);
         }
         self.prev_animation = self.current_animation;
     }
