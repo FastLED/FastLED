@@ -17,7 +17,7 @@
 
 CRGB leds[NUM_LED];               // framebuffer
 
-AnimartrixData data(WIDTH, HEIGHT, leds, POLAR_WAVES, SERPENTINE);
+Animartrix fxAnimator(WIDTH, HEIGHT, leds, POLAR_WAVES, SERPENTINE);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
@@ -33,11 +33,11 @@ void loop() {
   // Change animation every 10 seconds
   #if CYCLE_THROUGH_ANIMATIONS > 0
   EVERY_N_SECONDS(CYCLE_THROUGH_ANIMATIONS) {
-    data.fxNext();
-    std::cout << "New animation: " << data.fxName() << std::endl;
+    fxAnimator.fxNext();
+    std::cout << "New animation: " << fxAnimator.fxName() << std::endl;
   }
   #endif
-  AnimartrixLoop(data);
+  fxAnimator.draw();
   FastLED.show();
   uint32_t elapsed = millis() - now;
 

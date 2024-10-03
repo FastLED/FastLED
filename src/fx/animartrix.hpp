@@ -100,9 +100,9 @@ enum AnimartrixAnim {
 
 
 class FastLEDANIMartRIX;
-class AnimartrixData : public Fx2d {
+class Animartrix : public Fx2d {
   public:
-    AnimartrixData(int x, int y, CRGB *leds, AnimartrixAnim first_animation,
+    Animartrix(int x, int y, CRGB *leds, AnimartrixAnim first_animation,
                    bool serpentine) {
         // Note: Swapping out height and width.
         this->x = y;
@@ -111,13 +111,11 @@ class AnimartrixData : public Fx2d {
         this->serpentine = serpentine;
         this->current_animation = first_animation;
     }
-
+    ~Animartrix();
     void lazyInit() override {}
-
     uint16_t xy(uint16_t x, uint16_t y) override {
         return xy_no_virtual(x, y);
     }
-
     uint16_t xy_no_virtual(uint16_t x, uint16_t y) {
         if (serpentine && y & 1) // check last bit
             return (y + 1) * this->x - 1 -
@@ -126,22 +124,16 @@ class AnimartrixData : public Fx2d {
             return y * this->x +
                    x; // use this equation only for a line by line layout
     }
-
     void draw() override;
-
     int fxNum() const override { return NUM_ANIMATIONS; }
-
     void fxSet(int fx) override;
     int fxGet() const override { return static_cast<int>(current_animation); }
     const char* fxName() const override { return getAnimationName(current_animation); }
-
     void fxNext(int fx = 1) override {
         fxSet(fxGet() + fx);
     }
-
-
   private:
-    friend void AnimartrixLoop(AnimartrixData &self);
+    friend void AnimartrixLoop(Animartrix &self);
     friend class FastLEDANIMartRIX;
     static const char *getAnimationName(AnimartrixAnim animation);
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
@@ -154,13 +146,13 @@ class AnimartrixData : public Fx2d {
     AnimartrixAnim current_animation = RGB_BLOBS5;
 };
 
-void AnimartrixLoop(AnimartrixData &self);
+void AnimartrixLoop(Animartrix &self);
 
 /// ##################################################
 /// Details with the implementation of Animartrix
 
 
-const char *AnimartrixData::getAnimationName(AnimartrixAnim animation) {
+const char *Animartrix::getAnimationName(AnimartrixAnim animation) {
     switch (animation) {
     case RGB_BLOBS5:
         return "RGB_BLOBS5";
@@ -216,10 +208,10 @@ const char *AnimartrixData::getAnimationName(AnimartrixAnim animation) {
 }
 
 class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
-    AnimartrixData *data = nullptr;
+    Animartrix *data = nullptr;
 
   public:
-    FastLEDANIMartRIX(AnimartrixData *_data) {
+    FastLEDANIMartRIX(Animartrix *_data) {
         this->data = _data;
         this->init(data->x, data->y, data->serpentine);
     }
@@ -368,7 +360,7 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
 };
 
 
-void AnimartrixData::fxSet(int fx) {
+void Animartrix::fxSet(int fx) {
     int curr = fxGet();
     if (fx < 0) {
         fx = curr + fx;
@@ -382,7 +374,7 @@ void AnimartrixData::fxSet(int fx) {
 }
 
 
-void AnimartrixLoop(AnimartrixData &self) {
+void AnimartrixLoop(Animartrix &self) {
     if (self.destroy) {
         if (self.impl) {
             delete self.impl;
@@ -405,7 +397,14 @@ void AnimartrixLoop(AnimartrixData &self) {
     self.impl->loop();
 }
 
-void AnimartrixData::draw() {
+Animartrix::~Animartrix() {
+    if (impl) {
+        delete impl;
+        impl = nullptr;
+    }
+}
+
+void Animartrix::draw() {
     AnimartrixLoop(*this); 
 }
 
