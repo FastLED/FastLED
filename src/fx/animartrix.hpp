@@ -33,6 +33,10 @@ Modified by Zach Vorhies for FastLED fx compatibility."
 
 #include "crgb.h"
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 enum AnimartrixAnim {
     RGB_BLOBS5 = 0,
     RGB_BLOBS4,
@@ -357,3 +361,5 @@ void AnimartrixLoop(AnimartrixData &self) {
     }
     self.impl->loop();
 }
+
+FASTLED_NAMESPACE_END
