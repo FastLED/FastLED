@@ -3,25 +3,22 @@
 #include <stdint.h>
 #include <memory.h>
 #include "ptr.h"
+#include "force_inline.h"
 
-uint16_t x_serpentine(uint16_t x, uint16_t width) {
-    if (x & 1) // Even or odd position?
-        // reverse every second position for a serpentine layout
-        return width - 1 - x;
-    else
-        return x;
+FASTLED_FORCE_INLINE uint16_t x_linear(uint16_t x, uint16_t width) {
+    return x;
 }
 
-uint16_t x_linear(uint16_t x, uint16_t width) {
-    return x;
+FASTLED_FORCE_INLINE uint16_t x_reverse(uint16_t x, uint16_t width) {
+    return width - 1 - x;
 }
 
 // typedef for xMap function type
 typedef uint16_t (*XFunction)(uint16_t x, uint16_t width);
 
 enum XMapType {
-    kSerpentine = 0,
-    kLinear,
+    kLinear = 0,
+    kReverse,
     kFunction,
     kLookUpTable
 };
@@ -41,9 +38,9 @@ public:
         return out;
     }
 
-    // is_serpentine is true. You probably want this unless you are using a linear layout
-    XMap(uint16_t width, bool is_serpentine = true) {
-        type = is_serpentine ? kSerpentine : kLinear;
+    // is_reverse is false by default for linear layout
+    XMap(uint16_t width, bool is_reverse = false) {
+        type = is_reverse ? kReverse : kLinear;
         this->width = width;
     }
 
@@ -77,11 +74,10 @@ public:
 
     uint16_t mapToIndex(uint16_t x) const {
         switch (type) {
-            case kSerpentine:
-                x = x % width;
-                return x_serpentine(x, width);
             case kLinear:
                 return x_linear(x, width);
+            case kReverse:
+                return x_reverse(x, width);
             case kFunction:
                 x = x % width;
                 return xFunction(x, width);

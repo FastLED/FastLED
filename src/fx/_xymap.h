@@ -120,7 +120,7 @@ public:
         uint16_t *newLookUpTable = lookUpTableOwned.get();
         for (uint16_t y = 0; y < height; y++) {
             for (uint16_t x = 0; x < width; x++) {
-                newLookUpTable[y * width + x] = get(x, y);
+                newLookUpTable[y * width + x] = mapToIndex(x, y);
             }
         }
         type = kLookUpTable;
