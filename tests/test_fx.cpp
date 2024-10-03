@@ -11,7 +11,7 @@
 #include "fx/noisewave.hpp"
 
 
-#include "fx/animartrix.hpp"
+#include "fx/2d/animartrix.hpp"
 
 
 // To satisfy the linker, we must also define uint16_t XY( uint8_t, uint8_t);
