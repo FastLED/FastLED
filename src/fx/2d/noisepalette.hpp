@@ -31,21 +31,15 @@ class NoisePalette : public FxGrid {
         z = random16();
 
         // Allocate memory for the noise array
-        noise = new uint8_t *[MAX_DIMENSION];
-        for (int i = 0; i < MAX_DIMENSION; ++i) {
-            noise[i] = new uint8_t[MAX_DIMENSION];
-        }
+        noise = new uint8_t[MAX_DIMENSION * MAX_DIMENSION];
     }
 
     ~NoisePalette() {
         // Free the allocated memory
-        for (int i = 0; i < MAX_DIMENSION; ++i) {
-            delete[] noise[i];
-        }
         delete[] noise;
     }
 
-    void lazyInit() override { this->mXyMap.optimizeAsLookupTable(); }
+    void lazyInit() override {}
 
     void draw() override {
         fillnoise8();
@@ -66,8 +60,8 @@ class NoisePalette : public FxGrid {
                 // array for our brightness, and the flipped value from (j,i)
                 // for our pixel's index into the color palette.
 
-                uint8_t index = noise[i][j];
-                uint8_t bri = noise[j][i];
+                uint8_t index = noise[i * MAX_DIMENSION + j];
+                uint8_t bri = noise[j * MAX_DIMENSION + i];
 
                 // if this palette is a 'loop', add a slowly-changing base value
                 if (colorLoop) {
@@ -96,7 +90,7 @@ class NoisePalette : public FxGrid {
     uint16_t width, height;
     uint16_t speed = 20;
     uint16_t scale = 30;
-    uint8_t **noise;
+    uint8_t *noise;
     CRGBPalette16 currentPalette = PartyColors_p;
     uint8_t colorLoop = 1;
 
@@ -124,13 +118,13 @@ class NoisePalette : public FxGrid {
                 data = qadd8(data, scale8(data, 39));
 
                 if (dataSmoothing) {
-                    uint8_t olddata = noise[i][j];
+                    uint8_t olddata = noise[i * MAX_DIMENSION + j];
                     uint8_t newdata = scale8(olddata, dataSmoothing) +
                                       scale8(data, 256 - dataSmoothing);
                     data = newdata;
                 }
 
-                noise[i][j] = data;
+                noise[i * MAX_DIMENSION + j] = data;
             }
         }
 
