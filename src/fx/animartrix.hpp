@@ -28,12 +28,12 @@ License CC BY-NC 3.0
 
 */
 #include "crgb.h"
-
 #include "namespace.h"
 
+#define ANIMARTRIX_INTERNAL
+#include "animartrix_detail.hpp"
+
 FASTLED_NAMESPACE_BEGIN
-
-
 
 class Fx2d {
   public:
@@ -170,8 +170,6 @@ void AnimartrixLoop(AnimartrixData &self);
 /// ##################################################
 /// Details with the implementation of Animartrix
 
-#define ANIMARTRIX_INTERNAL
-#include "animartrix_detail.hpp"
 
 const char *AnimartrixData::getAnimationName(AnimartrixAnim animation) {
     switch (animation) {
