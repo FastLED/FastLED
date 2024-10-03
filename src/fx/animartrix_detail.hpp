@@ -33,11 +33,13 @@ License CC BY-NC 3.0
 // Copyright Stefen Petrick 2023.
 // Licensed under the Creative Commons Attribution License CC BY-NC 3.0
 // https://creativecommons.org/licenses/by-nc/3.0/
-// This header is distributed with FastLED but not part of the licensing.
-// This header is licensed seperately from the FastLED driver and not included by FastLED.
+// This header is distributed with FastLED but has a different license that limits commercial use.
+// If you include this high quality LED animation library in your project, you must agree to the licensing terms.
+// It is not included by FastLED by default, you must include it manually.
+// Setting FASTLED_ANIMARTRIX_LICENSING_AGREEMENT=1 will indicate that you agree to the licensing terms of the ANIMartRIX library for non commercial use only.
 //
 // Like the rest of FastLED, this header is free for non-commercial use and licensed under the Creative Commons Attribution License CC BY-NC 3.0.
-// If you are just making art, then by all means have at it, and you can stop reading now.
+// If you are just making art, then by all means do what you want with this library and you can stop reading now.
 // If you are using this header for commercial purposes, then you need to contact Stefan Petrick for a commercial use license.
 
 #include <FastLED.h>
@@ -146,6 +148,9 @@ class ANIMartRIX {
     ANIMartRIX() {}
 
     ANIMartRIX(int w, int h, bool serpentine) { this->init(w, h, serpentine); }
+
+    virtual uint16_t xy(uint16_t x, uint16_t y) = 0;
+
 
     void init(int w, int h, bool serpentine) {
         animation = render_parameters();
@@ -425,15 +430,6 @@ class ANIMartRIX {
     }
 
     // find the right led index according to you LED matrix wiring
-
-    uint16_t xy(uint8_t x, uint8_t y) {
-        if (serpentine && y & 1) // check last bit
-            return (y + 1) * num_x - 1 -
-                   x; // reverse every second line for a serpentine lled layout
-        else
-            return y * num_x +
-                   x; // use this equation only for a line by line layout
-    } // remove the previous 3 lines of code in this case
 
     void get_ready() { // wait until new buffer is ready, measure time
         a = micros();

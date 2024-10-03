@@ -92,6 +92,16 @@ class AnimartrixData {
         this->current_animation = first_animation;
     }
 
+    
+    uint16_t xy(uint16_t x, uint16_t y) {
+        if (serpentine && y & 1) // check last bit
+            return (y + 1) * this->x - 1 -
+                   x; // reverse every second line for a serpentine lled layout
+        else
+            return y * this->x +
+                   x; // use this equation only for a line by line layout
+    } // remove the previous 3 lines of code in this case
+
     void setAnimation(AnimartrixAnim animation) { current_animation = animation; }
     AnimartrixAnim getAnimation() { return current_animation; }
     const char* getName() { return getAnimationName(current_animation); }
@@ -110,6 +120,8 @@ class AnimartrixData {
           static_cast<AnimartrixAnim>((static_cast<int>(current_animation) - 1))
         );
     }
+
+    void loop();
 
   private:
     friend void AnimartrixLoop(AnimartrixData &self);
@@ -202,6 +214,10 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
     }
     void setPixelColorInternal(int x, int y, animartrix::rgb pixel) {
         setPixelColor(x, y, CRGB(pixel.red, pixel.green, pixel.blue));
+    }
+
+    uint16_t xy(uint16_t x, uint16_t y) {
+        return data->xy(x, y);
     }
 
     void loop() {
@@ -336,6 +352,8 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
     }
 };
 
+
+
 void AnimartrixLoop(AnimartrixData &self) {
     if (self.destroy) {
         if (self.impl) {
@@ -357,6 +375,10 @@ void AnimartrixLoop(AnimartrixData &self) {
         self.impl = new FastLEDANIMartRIX(&self);
     }
     self.impl->loop();
+}
+
+void AnimartrixData::loop() {
+    AnimartrixLoop(*this); 
 }
 
 FASTLED_NAMESPACE_END
