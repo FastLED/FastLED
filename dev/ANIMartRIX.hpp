@@ -30,7 +30,7 @@ void loop() {
   uint32_t now = millis();
   // Change animation every 10 seconds
   #if defined(CYCLE_THROUGH_ANIMATIONS)
-  EVERY_N_SECONDS(5) {
+  EVERY_N_SECONDS(1) {
     data.next();
     std::cout << "New animation: " << data.getName() << std::endl;
   }

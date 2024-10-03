@@ -61,6 +61,24 @@ enum AnimartrixAnim {
     CHASING_SPIRALS,
     ROTATING_BLOB,
     RINGS,
+    COMPLEX_KALEIDO,
+    COMPLEX_KALEIDO_2,
+    COMPLEX_KALEIDO_3,
+    COMPLEX_KALEIDO_4,
+    COMPLEX_KALEIDO_5,
+    COMPLEX_KALEIDO_6,
+    WATER,
+    PARAMETRIC_WATER,
+    MODULE_EXPERIMENT1,
+    MODULE_EXPERIMENT2,
+    MODULE_EXPERIMENT3,
+    MODULE_EXPERIMENT4,
+    MODULE_EXPERIMENT5,
+    MODULE_EXPERIMENT6,
+    MODULE_EXPERIMENT7,
+    MODULE_EXPERIMENT8,
+    MODULE_EXPERIMENT9,
+    MODULE_EXPERIMENT10,
     NUM_ANIMATIONS
 };
 
@@ -257,6 +275,60 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
             break;
         case RINGS:
             Rings();
+            break;
+        case COMPLEX_KALEIDO:
+            Complex_Kaleido();
+            break;
+        case COMPLEX_KALEIDO_2:
+            Complex_Kaleido_2();
+            break;
+        case COMPLEX_KALEIDO_3:
+            Complex_Kaleido_3();
+            break;
+        case COMPLEX_KALEIDO_4:
+            Complex_Kaleido_4();
+            break;
+        case COMPLEX_KALEIDO_5:
+            Complex_Kaleido_5();
+            break;
+        case COMPLEX_KALEIDO_6:
+            Complex_Kaleido_6();
+            break;
+        case WATER:
+            Water();
+            break;
+        case PARAMETRIC_WATER:
+            Parametric_Water();
+            break;
+        case MODULE_EXPERIMENT1:
+            Module_Experiment1();
+            break;
+        case MODULE_EXPERIMENT2:
+            Module_Experiment2();
+            break;
+        case MODULE_EXPERIMENT3:
+            Module_Experiment3();
+            break;
+        case MODULE_EXPERIMENT4:
+            Module_Experiment4();
+            break;
+        case MODULE_EXPERIMENT5:
+            Module_Experiment5();
+            break;
+        case MODULE_EXPERIMENT6:
+            Module_Experiment6();
+            break;
+        case MODULE_EXPERIMENT7:
+            Module_Experiment7();
+            break;
+        case MODULE_EXPERIMENT8:
+            Module_Experiment8();
+            break;
+        case MODULE_EXPERIMENT9:
+            Module_Experiment9();
+            break;
+        case MODULE_EXPERIMENT10:
+            Module_Experiment10();
             break;
         }
     }
