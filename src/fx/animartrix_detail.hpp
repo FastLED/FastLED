@@ -100,6 +100,8 @@ static const uint8_t PROGMEM pNoise[] = {
     222, 114, 67,  29,  24,  72,  243, 141, 128, 195, 78,  66,  215, 61,  156,
     180};
 
+FASTLED_FORCE_INLINE uint8_t P(uint8_t x) { return pgm_read_byte(pNoise + (x & 255)); }
+
 class ANIMartRIX {
 
   public:
@@ -196,7 +198,6 @@ class ANIMartRIX {
         return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
     }
 
-#define P(x) pNoise[(x) & 255]
 
     float pnoise(float x, float y, float z) {
 
