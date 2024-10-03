@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <memory.h>
+#include <string.h>
 #include "ptr.h"
 #include "force_inline.h"
 

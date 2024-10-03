@@ -37,7 +37,7 @@
 // Default 120, suggested range 50-200.
 
 #include <FastLED.h>
-#include "fx/fire2012.hpp"
+#include "fx/1d/fire2012.hpp"
 
 #define LED_PIN     5
 #define COLOR_ORDER GRB

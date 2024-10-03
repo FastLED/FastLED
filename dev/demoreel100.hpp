@@ -3,7 +3,7 @@
 /// @example DemoReel100.ino
 
 #include <FastLED.h>
-#include "fx/demoreel100.hpp"
+#include "fx/f1/demoreel100.hpp"
 
 #define DATA_PIN    2
 //#define CLK_PIN   4

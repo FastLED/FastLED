@@ -9,9 +9,10 @@
 //  For Dan.
 //
 
+
 #define FASTLED_ALLOW_INTERRUPTS 0
 #include <FastLED.h>
-#include "fx/pacifica.hpp"
+#include "fx/1d/pacifica.hpp"
 
 #define DATA_PIN            3
 #define NUM_LEDS            60
@@ -20,7 +21,7 @@
 #define COLOR_ORDER         GRB
 
 CRGB leds[NUM_LEDS];
-PacificaData pacificaData(leds, NUM_LEDS);
+Pacifica pacifica(leds, NUM_LEDS);
 
 void setup() {
   delay(3000); // 3 second delay for boot recovery, and a moment of silence
@@ -31,7 +32,7 @@ void setup() {
 
 void loop() {
   EVERY_N_MILLISECONDS(20) {
-    PacificaLoop(pacificaData);
+    pacifica.draw();
     FastLED.show();
   }
 }
