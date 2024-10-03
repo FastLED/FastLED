@@ -31,6 +31,9 @@ For commercial use, please contact Stefan Petrick. Github: https://github.com/St
 Modified by github.com/netmindz for class portability. \
 Modified by Zach Vorhies for FastLED fx compatibility."
 
+
+#warning "Some of AnimARTrix's animations seem to not respect the serpentine layout, please help us fix this."
+
 #include "crgb.h"
 
 enum AnimartrixAnim {

@@ -93,10 +93,13 @@ class TestBinToElf(unittest.TestCase):
                 all_failings.extend(future.result())
 
         if all_failings:
+            msg = f"Found {len(all_failings)} banned header(s): \n" + "\n".join(
+                all_failings
+            )
             for failing in all_failings:
                 print(failing)
             self.fail(
-                f"Found {len(all_failings)} banned header(s). See above for details.\n"
+                msg + "\n"
                 "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
             )
         else:
