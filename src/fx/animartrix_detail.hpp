@@ -44,13 +44,26 @@ License CC BY-NC 3.0
 // If you are just making art, then by all means do what you want with this library and you can stop reading now.
 // If you are using this header for commercial purposes, then you need to contact Stefan Petrick for a commercial use license.
 
-#include <FastLED.h>
+#include "fastled_progmem.h"
+
 #include <vector>  // ok include
+#include <math.h>  // ok include
 
 // Setting this to 1 means you agree to the licensing terms of the ANIMartRIX library for non commercial use only.
 #if defined(FASTLED_ANIMARTRIX_LICENSING_AGREEMENT) || (FASTLED_ANIMARTRIX_LICENSING_AGREEMENT != 0)
 #warning "Warning: Non-standard license. This fx header is separate from the FastLED driver and carries different licensing terms. On the plus side, IT'S FUCKING AMAZING. ANIMartRIX: free for non-commercial use and licensed under the Creative Commons Attribution License CC BY-NC-SA 4.0. If you'd like to purchase a commercial use license please contact Stefan Petrick. Github: github.com/StefanPetrick/animartrix Reddit: reddit.com/user/StefanPetrick/ Modified by github.com/netmindz for class portability. Ported into FastLED by Zach Vorhies."
 #endif  // 
+
+
+#ifndef PI
+#define PI         3.1415926535897932384626433832795
+#endif
+
+#ifdef ANIMARTRIX_PRINT_USES_SERIAL
+#define ANIMARTRIX_PRINT_USES_SERIAL(S) Serial.print(S)
+#else
+#define ANIMARTRIX_PRINT(S)
+#endif
 
 #define num_oscillators 10
 
@@ -99,7 +112,7 @@ struct rgb {
 
 
 
-static const uint8_t PROGMEM PERLIN_NOISE[] = {
+static const uint8_t PERLIN_NOISE[] = {
     151, 160, 137, 91,  90,  15,  131, 13,  201, 95,  96,  53,  194, 233, 7,
     225, 140, 36,  103, 30,  69,  142, 8,   99,  37,  240, 21,  10,  23,  190,
     6,   148, 247, 120, 234, 75,  0,   26,  197, 62,  94,  252, 219, 203, 117,
@@ -119,7 +132,11 @@ static const uint8_t PROGMEM PERLIN_NOISE[] = {
     222, 114, 67,  29,  24,  72,  243, 141, 128, 195, 78,  66,  215, 61,  156,
     180};
 
-FASTLED_FORCE_INLINE uint8_t P(uint8_t x) { return pgm_read_byte(PERLIN_NOISE + (x & 255)); }
+FASTLED_FORCE_INLINE uint8_t P(uint8_t x) {
+    const uint8_t idx = x & 255;
+    const uint8_t* ptr = PERLIN_NOISE + idx;
+    return FL_PGM_READ_BYTE_NEAR(ptr);
+}
 
 class ANIMartRIX {
 
@@ -457,24 +474,25 @@ class ANIMartRIX {
         int fps = 1000000 / total;               // frames per second
         int kpps = (fps * num_x * num_y) / 1000; // kilopixel per second
 
-        Serial.print(fps);
-        Serial.print(" fps  ");
-        Serial.print(kpps);
-        Serial.print(" kpps @");
-        Serial.print(num_x * num_y);
-        Serial.print(" LEDs  ");
-        Serial.print(round(total));
-        Serial.print(" µs per frame  waiting: ");
-        Serial.print(round((calc * 100) / total));
-        Serial.print("%  rendering: ");
-        Serial.print(round((push * 100) / total));
-        Serial.print("%  (");
-        Serial.print(round(calc));
-        Serial.print(" + ");
-        Serial.print(round(push));
-        Serial.print(" µs)  Core-temp: ");
-        // TODO Serial.print( tempmonGetTemp() );
-        Serial.println(" °C");
+        ANIMARTRIX_PRINT(fps);
+        ANIMARTRIX_PRINT(" fps  ");
+        ANIMARTRIX_PRINT(kpps);
+        ANIMARTRIX_PRINT(" kpps @");
+        ANIMARTRIX_PRINT(num_x * num_y);
+        ANIMARTRIX_PRINT(" LEDs  ");
+        ANIMARTRIX_PRINT(round(total));
+        ANIMARTRIX_PRINT(" µs per frame  waiting: ");
+        ANIMARTRIX_PRINT(round((calc * 100) / total));
+        ANIMARTRIX_PRINT("%  rendering: ");
+        ANIMARTRIX_PRINT(round((push * 100) / total));
+        ANIMARTRIX_PRINT("%  (");
+        ANIMARTRIX_PRINT(round(calc));
+        ANIMARTRIX_PRINT(" + ");
+        ANIMARTRIX_PRINT(round(push));
+        ANIMARTRIX_PRINT(" µs)  Core-temp: ");
+        // TODO ANIMARTRIX_PRINT( tempmonGetTemp() );
+        //Serial.println(" °C");
+        ANIMARTRIX_PRINT(" °C\n");
     }
 
     // Effects
@@ -4026,7 +4044,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                byte a = millis() / 100;
+                uint8_t a = millis() / 100;
                 CRGB p = CRGB(CHSV(((a + show1 + show2) + show3), 255, 255));
                 rgb pixel;
                 pixel.red = p.red;

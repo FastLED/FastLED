@@ -16,16 +16,19 @@ FASTLED_FORCE_INLINE uint16_t x_reverse(uint16_t x, uint16_t width) {
 // typedef for xMap function type
 typedef uint16_t (*XFunction)(uint16_t x, uint16_t width);
 
-enum XMapType {
-    kLinear = 0,
-    kReverse,
-    kFunction,
-    kLookUpTable
-};
+
 
 // XMap holds either a function or a look up table to map x coordinates to a 1D index.
 class XMap {
 public:
+
+    enum Type {
+        kLinear = 0,
+        kReverse,
+        kFunction,
+        kLookUpTable
+    };
+
     static XMap constructWithUserFunction(uint16_t width, XFunction xFunction) {
         XMap out = XMap(width, kFunction);
         out.xFunction = xFunction;
@@ -91,7 +94,7 @@ public:
         return width;
     }
 
-    XMapType getType() const {
+    Type getType() const {
         return type;
     }
 
@@ -112,11 +115,11 @@ public:
     }
 
 private:
-    XMap(uint16_t width, XMapType type)
+    XMap(uint16_t width, Type type)
         : width(width), type(type) {
     }
 
-    XMapType type = kSerpentine;
+    Type type = kLinear;
     uint16_t width = 0;
     XFunction xFunction = nullptr;
     const uint16_t *lookUpTable = nullptr;
