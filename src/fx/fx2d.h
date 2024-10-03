@@ -1,14 +1,15 @@
 #pragma once
 
-#include <stdint.h
+#include <stdint.h>
 #include "xy.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 
+// Abstract base class for 2D effects that use a grid, which is defined
+// by an XYMap.
 class Fx2d {
   public:
-
     Fx2d(const XYMap& xyMap): mXyMap(xyMap) {}
     virtual ~Fx2d() {}
     virtual void lazyInit() {}

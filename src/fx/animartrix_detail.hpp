@@ -31,6 +31,8 @@ License CC BY-NC 3.0
 #endif
 
 // Copyright Stefen Petrick 2023.
+// Adapted to C++ by Netmindz 2023.
+// Adapted to FastLED by Zach Vorhies 2024.
 // Licensed under the Creative Commons Attribution License CC BY-NC 3.0
 // https://creativecommons.org/licenses/by-nc/3.0/
 // This header is distributed with FastLED but has a different license that limits commercial use.

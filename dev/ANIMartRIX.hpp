@@ -10,6 +10,9 @@
 #define WIDTH 22                      // how many columns?
 #define HEIGHT  22                       // how many rows?
 
+
+#define DEBUG_PRINT 0
+
 #define NUM_LED (WIDTH * HEIGHT)
 #define SERPENTINE true
 
@@ -36,7 +39,9 @@ void loop() {
   #if CYCLE_THROUGH_ANIMATIONS > 0
   EVERY_N_SECONDS(CYCLE_THROUGH_ANIMATIONS) {
     fxAnimator.fxNext();
+    #if DEBUG_PRINT
     std::cout << "New animation: " << fxAnimator.fxName() << std::endl;
+    #endif
   }
   #endif
   fxAnimator.draw();
@@ -44,6 +49,8 @@ void loop() {
   uint32_t elapsed = millis() - now;
 
   EVERY_N_SECONDS(1) {
+    #if DEBUG_PRINT
     std::cout << "frame time: " << elapsed << "ms" << std::endl;
+    #endif
   }
 }
