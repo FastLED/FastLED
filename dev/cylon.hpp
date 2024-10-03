@@ -1,9 +1,8 @@
-/// @file    Cylon.ino
 /// @brief   An animation that moves a single LED back and forth (Larson Scanner effect) using the fx library cylon
 /// @example Cylon.ino
 
 #include <FastLED.h>
-#include "fx/cylon.hpp"
+#include "fx/1d/cylon.hpp"
 
 // How many leds in your strip?
 #define NUM_LEDS 64 
@@ -16,19 +15,20 @@
 // Define the array of leds
 CRGB leds[NUM_LEDS];
 
-// Create a CylonData instance
-CylonData cylonData(leds, NUM_LEDS);
+// Create a Cylon instance
+Cylon cylon(leds, NUM_LEDS);
 
 void setup() { 
     Serial.begin(57600);
     Serial.println("resetting");
     FastLED.addLeds<WS2812,DATA_PIN,BRG>(leds,NUM_LEDS).setRgbw();
     FastLED.setBrightness(84);
+    cylon.lazyInit();
 }
 
 void loop() { 
     Serial.print("x");
-    CylonLoop(cylonData);
+    cylon.draw();
     FastLED.show();
     delay(cylonData.delay_ms);
 }

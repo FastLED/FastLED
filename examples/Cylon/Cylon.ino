@@ -16,8 +16,8 @@
 // Define the array of leds
 CRGB leds[NUM_LEDS];
 
-// Create a CylonData instance
-CylonData cylonData(leds, NUM_LEDS);
+// Create a Cylon instance
+Cylon cylon(leds, NUM_LEDS);
 
 void setup() { 
     FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS).setRgbw();
@@ -25,7 +25,7 @@ void setup() {
 }
 
 void loop() { 
-    CylonLoop(cylonData);
+    cylon.draw();
     FastLED.show();
     delay(cylonData.delay_ms);
 }
