@@ -31,7 +31,7 @@ License CC BY-NC 3.0
 #endif
 
 #include <FastLED.h>
-#include <vector>
+#include <vector>  // ok include
 
 #define num_oscillators 10
 

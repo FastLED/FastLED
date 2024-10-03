@@ -25,17 +25,15 @@ License CC BY-NC 3.0
 
 */
 
-
 #warning "\
 ANIMartRIX: free for non-commercial use and licensed under the Creative Commons Attribution License CC BY-NC-SA 4.0, . \
 For commercial use, please contact Stefan Petrick. Github: https://github.com/StefanPetrick/animartrix". \
 Modified by github.com/netmindz for class portability. \
 Modified by Zach Vorhies for FastLED fx compatibility."
 
-
 #include "crgb.h"
 
-enum AnimartrixVis {
+enum AnimartrixAnim {
     RGB_BLOBS5 = 0,
     RGB_BLOBS4,
     RGB_BLOBS3,
@@ -63,46 +61,112 @@ enum AnimartrixVis {
     NUM_ANIMATIONS
 };
 
-
-
 class AnimartrixData {
   public:
     int x = 0;
     int y = 0;
     bool serpentine = true;
-    void* obj = nullptr;
+    void *obj = nullptr;
     bool destroy = false;
     CRGB *leds = nullptr;
-    AnimartrixVis current_animation = RGB_BLOBS5;
+    AnimartrixAnim current_animation = RGB_BLOBS5;
 
-    void next() {
-        current_animation = static_cast<AnimartrixVis>((static_cast<int>(current_animation) + 1) % NUM_ANIMATIONS);
-    }
-
-    void prev() {
-        if (current_animation == 0) {
-            current_animation = static_cast<AnimartrixVis>(NUM_ANIMATIONS - 1);
-            return;
-        }
-        current_animation = static_cast<AnimartrixVis>((static_cast<int>(current_animation) - 1));
-    }
-
-    AnimartrixData(int x, int y, CRGB *leds, AnimartrixVis first_animation, bool serpentine) {
+    AnimartrixData(int x, int y, CRGB *leds, AnimartrixAnim first_animation,
+                   bool serpentine) {
         this->x = x;
         this->y = y;
         this->leds = leds;
         this->serpentine = serpentine;
         this->current_animation = first_animation;
     }
+
+    void set(AnimartrixAnim animation) { current_animation = animation; }
+    AnimartrixAnim get() { return current_animation; }
+    const char* getName() { return getAnimationName(current_animation); }
+
+
+    void next() {
+        AnimartrixAnim next_animation = static_cast<AnimartrixAnim>(
+             (static_cast<int>(current_animation) + 1) % NUM_ANIMATIONS);
+        set(next_animation);
+    }
+
+    void prev() {
+        if (current_animation == 0) {
+            set(static_cast<AnimartrixAnim>(NUM_ANIMATIONS - 1));
+            return;
+        }
+        set(
+          static_cast<AnimartrixAnim>((static_cast<int>(current_animation) - 1))
+        );
+    }
+
+  private:
+    static const char *getAnimationName(AnimartrixAnim animation);
 };
 
-void AnimartrixDataLoop(AnimartrixData &self);
+void AnimartrixLoop(AnimartrixData &self);
 
 /// ##################################################
 /// Details with the implementation of Animartrix
 
 #define ANIMARTRIX_INTERNAL
 #include "animartrix_detail.hpp"
+
+const char *AnimartrixData::getAnimationName(AnimartrixAnim animation) {
+    switch (animation) {
+    case RGB_BLOBS5:
+        return "RGB_BLOBS5";
+    case RGB_BLOBS4:
+        return "RGB_BLOBS4";
+    case RGB_BLOBS3:
+        return "RGB_BLOBS3";
+    case RGB_BLOBS2:
+        return "RGB_BLOBS2";
+    case RGB_BLOBS:
+        return "RGB_BLOBS";
+    case POLAR_WAVES:
+        return "POLAR_WAVES";
+    case SLOW_FADE:
+        return "SLOW_FADE";
+    case ZOOM2:
+        return "ZOOM2";
+    case ZOOM:
+        return "ZOOM";
+    case HOT_BLOB:
+        return "HOT_BLOB";
+    case SPIRALUS2:
+        return "SPIRALUS2";
+    case SPIRALUS:
+        return "SPIRALUS";
+    case YVES:
+        return "YVES";
+    case SCALEDEMO1:
+        return "SCALEDEMO1";
+    case LAVA1:
+        return "LAVA1";
+    case CALEIDO3:
+        return "CALEIDO3";
+    case CALEIDO2:
+        return "CALEIDO2";
+    case CALEIDO1:
+        return "CALEIDO1";
+    case DISTANCE_EXPERIMENT:
+        return "DISTANCE_EXPERIMENT";
+    case CENTER_FIELD:
+        return "CENTER_FIELD";
+    case WAVES:
+        return "WAVES";
+    case CHASING_SPIRALS:
+        return "CHASING_SPIRALS";
+    case ROTATING_BLOB:
+        return "ROTATING_BLOB";
+    case RINGS:
+        return "RINGS";
+    default:
+        return "UNKNOWN";
+    }
+}
 
 class FastLEDANIMartRIX : public ANIMartRIX {
     AnimartrixData *data = nullptr;
@@ -197,13 +261,12 @@ class FastLEDANIMartRIX : public ANIMartRIX {
     }
 };
 
-
-void AnimartrixDataLoop(AnimartrixData &self) {
+void AnimartrixLoop(AnimartrixData &self) {
     if (self.obj == nullptr) {
         self.obj = new FastLEDANIMartRIX(&self);
     }
 
-    FastLEDANIMartRIX *obj = static_cast<FastLEDANIMartRIX*>(self.obj);
+    FastLEDANIMartRIX *obj = static_cast<FastLEDANIMartRIX *>(self.obj);
 
     if (self.destroy) {
         delete obj;
