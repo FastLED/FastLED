@@ -30,5 +30,5 @@ void loop() {
     Serial.print("x");
     cylon.draw(millis(), leds);
     FastLED.show();
-    delay(cylonData.delay_ms);
+    delay(cylon.delay_ms);
 }
