@@ -22,7 +22,7 @@ class SdCardSpi {
   public:
     SdCardSpi(int clock, int data) : mClockPin(clock), mDataPin(data) {}
     SdCardSpi() {}  // Use default pins for spi.
-    bool begin();
+    bool begin(int chipSelect);
     //  End use of card
     void end();
 
@@ -31,10 +31,12 @@ class SdCardSpi {
 
     FileHandle* open(const char *name, uint8_t oflag);
     void close(FileHandle *file);
+    bool isOpen() const { return mChipSelect >= 0; }
+
   private:
     int mClockPin = -1;
     int mDataPin = -1;
-    int mActive = false;
+    int mChipSelect = -1;
 };
 
 } // namespace storage
