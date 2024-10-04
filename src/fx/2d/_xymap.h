@@ -107,6 +107,10 @@ public:
         return height;
     }
 
+    uint16_t getTotal() const {
+        return width * height;
+    }
+
     XyMapType getType() const {
         return type;
     }

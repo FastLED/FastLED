@@ -1,78 +1,124 @@
-#include "fx/2d/noisepalette.hpp"
+/// @file    Noise.ino
+/// @brief   Demonstrates how to use noise generation on a 2D LED matrix
+/// @example Noise.ino
+
 #include <FastLED.h>
 
-#include <iostream>
-
-#define LED_PIN 2
-#define COLOR_ORDER GRB
-#define CHIPSET WS2811
-
-#define MATRIX_WIDTH 22
-#define MATRIX_HEIGHT 22
-#define GRID_SERPENTINE 1
-
-#define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
-
-// This example combines two features of FastLED to produce a remarkable range of
-// effects from a relatively small amount of code.  This example combines FastLED's 
-// color palette lookup functions with FastLED's Perlin noise generator, and
-// the combination is extremely powerful.
 //
-// You might want to look at the "ColorPalette" and "Noise" examples separately
-// if this example code seems daunting.
+// Mark's xy coordinate mapping code.  See the XYMatrix for more information on it.
 //
-// 
-// The basic setup here is that for each frame, we generate a new array of 
-// 'noise' data, and then map it onto the LED matrix through a color palette.
-//
-// Periodically, the color palette is changed, and new noise-generation parameters
-// are chosen at the same time.  In this example, specific noise-generation
-// values have been selected to match the given color palettes; some are faster, 
-// or slower, or larger, or smaller than others, but there's no reason these 
-// parameters can't be freely mixed-and-matched.
-//
-// In addition, this example includes some fast automatic 'data smoothing' at 
-// lower noise speeds to help produce smoother animations in those cases.
-//
-// The FastLED built-in color palettes (Forest, Clouds, Lava, Ocean, Party) are
-// used, as well as some 'hand-defined' ones, and some proceedurally generated
-// palettes.
 
-// Scale determines how far apart the pixels in our noise matrix are.  Try
-// changing these values around to see how it affects the motion of the display.  The
-// higher the value of scale, the more "zoomed out" the noise iwll be.  A value
-// of 1 will be so zoomed in, you'll mostly see solid colors.
-#define SCALE 20
+// Params for width and height
+#if defined(__AVR_ATtinyxy4__)
+// Tiny 4x4 matrix for this memory constrained device.
+const uint8_t kMatrixWidth = 8;
+const uint8_t kMatrixHeight = 8;
+#else
+const uint8_t kMatrixWidth = 22;
+const uint8_t kMatrixHeight = 22;
+#endif
+
+#define MAX_DIMENSION ((kMatrixWidth>kMatrixHeight) ? kMatrixWidth : kMatrixHeight)
+#define NUM_LEDS (kMatrixWidth * kMatrixHeight)
+
+// Param for different pixel layouts
+const bool    kMatrixSerpentineLayout = true;
+
+
+uint16_t XY( uint8_t x, uint8_t y)
+{
+  uint16_t i;
+
+  if( kMatrixSerpentineLayout == false) {
+    i = (y * kMatrixWidth) + x;
+  }
+
+  if( kMatrixSerpentineLayout == true) {
+    if( y & 0x01) {
+      // Odd rows run backwards
+      uint8_t reverseX = (kMatrixWidth - 1) - x;
+      i = (y * kMatrixWidth) + reverseX;
+    } else {
+      // Even rows run forwards
+      i = (y * kMatrixWidth) + x;
+    }
+  }
+
+  return i;
+}
+
+// The leds
+CRGB leds[kMatrixWidth * kMatrixHeight];
+
+// The 32bit version of our coordinates
+static uint16_t x;
+static uint16_t y;
+static uint16_t z;
 
 // We're using the x/y dimensions to map to the x/y pixels on the matrix.  We'll
 // use the z-axis for "time".  speed determines how fast time moves forward.  Try
 // 1 for a very slow moving effect, or 60 for something that ends up looking like
 // water.
-#define SPEED 30
+// uint16_t speed = 1; // almost looks like a painting, moves very slowly
+uint16_t speed = 20; // a nice starting speed, mixes well with a scale of 100
+// uint16_t speed = 33;
+// uint16_t speed = 100; // wicked fast!
 
-CRGB leds[NUM_LEDS];
-XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePalette noisePalette(leds, xyMap);
+// Scale determines how far apart the pixels in our noise matrix are.  Try
+// changing these values around to see how it affects the motion of the display.  The
+// higher the value of scale, the more "zoomed out" the noise iwll be.  A value
+// of 1 will be so zoomed in, you'll mostly see solid colors.
+
+// uint16_t scale = 1; // mostly just solid colors
+// uint16_t scale = 4011; // very zoomed out and shimmery
+uint16_t scale = 30;
+
+// This is the array that we keep our computed noise values in
+uint16_t noise[MAX_DIMENSION][MAX_DIMENSION];
 
 void setup() {
-    delay(1000); // sanity delay
-    FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
-        .setCorrection(TypicalLEDStrip);
-    FastLED.setBrightness(96);
-    noisePalette.lazyInit();
-    noisePalette.setSpeed(SPEED);
-    noisePalette.setScale(SCALE);
+  // uncomment the following lines if you want to see FPS count information
+  // Serial.begin(38400);
+  // Serial.println("resetting!");
+  delay(3000);
+  FastLED.addLeds<WS2811,2,RGB>(leds,NUM_LEDS);
+  FastLED.setBrightness(96);
+
+  // Initialize our coordinates to some random values
+  x = random16();
+  y = random16();
+  z = random16();
 }
 
-void loop() {
-    EVERY_N_MILLISECONDS(1000) {
-        uint8_t n = noisePalette.getPalettePresetCount();
-        int idx = noisePalette.getPalettePreset();
-        idx = (idx + 1) % n;
-        noisePalette.setPalettePreset(idx);
-        std::cout << "Changed to palette " << idx << std::endl;
+// Fill the x/y array of 8-bit noise values using the inoise8 function.
+void fillnoise8() {
+  for(int i = 0; i < MAX_DIMENSION; i++) {
+    int ioffset = scale * i;
+    for(int j = 0; j < MAX_DIMENSION; j++) {
+      int joffset = scale * j;
+      noise[i][j] = inoise8(x + ioffset,y + joffset,z);
     }
+  }
+  z += speed;
+}
 
-    noisePalette.draw();
-    FastLED.delay(1000 / 60);
+
+void loop() {
+  static uint8_t ihue=0;
+  fillnoise8();
+  for(int i = 0; i < kMatrixWidth; i++) {
+    for(int j = 0; j < kMatrixHeight; j++) {
+      // We use the value at the (i,j) coordinate in the noise
+      // array for our brightness, and the flipped value from (j,i)
+      // for our pixel's hue.
+      leds[XY(i,j)] = CHSV(noise[j][i],255,noise[i][j]);
+
+      // You can also explore other ways to constrain the hue used, like below
+      // leds[XY(i,j)] = CHSV(ihue + (noise[j][i]>>2),255,noise[i][j]);
+    }
+  }
+  ihue+=1;
+
+  FastLED.show();
+  // delay(10);
 }
