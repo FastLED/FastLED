@@ -53,8 +53,12 @@ class ScaleUp : public FxGrid {
         uint16_t in_w = mDelegate->getWidth();
         uint16_t in_h = mDelegate->getHeight();
         uint16_t out_w = getWidth();
-        uint16_t out_h = getHeight();
-        expand(mSurface.get(), context.leds, in_w, in_h, mXyMap);
+        uint16_t out_h = getHeight();;
+        if (in_w == out_w && in_h == out_h) {
+            noExpand(context.leds, mSurface.get(), in_w, in_h);
+        } else {
+            expand(mSurface.get(), context.leds, in_w, in_h, mXyMap);
+        }
     }
 
     void expand(const CRGB *input, CRGB *output, uint16_t width, uint16_t height, XYMap mXyMap) {
@@ -72,9 +76,9 @@ class ScaleUp : public FxGrid {
     const char *fxName() const override { return "GridDoubler"; }
 
   private:
-    // This is useful for debugging. It skips any expansion and just draws the input.
-    void debugJustDrawIt(CRGB *output, const CRGB *input, uint16_t width,
-                         uint16_t height) {
+    // No expansion needed. Also useful for debugging.
+    void noExpand(CRGB *output, const CRGB *input, uint16_t width,
+                  uint16_t height) {
         uint16_t n = mXyMap.getTotal();
         uint16_t total_in = width * height;
         for (uint16_t w = 0; w < width; w++) {
