@@ -12,6 +12,7 @@ class Fx {
     struct DrawContext {
         uint32_t now;
         CRGB* leds;
+        DrawContext(uint32_t now, CRGB* leds): now(now), leds(leds) {}
     };
     Fx(uint16_t numLeds): mNumLeds(numLeds) {}
 

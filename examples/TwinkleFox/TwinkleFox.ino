@@ -25,6 +25,6 @@ void loop() {
   EVERY_N_SECONDS(SECONDS_PER_PALETTE) { 
     twinkleFox.chooseNextColorPalette(twinkleFox.targetPalette); 
   }
-  twinkleFox.draw(Fx::DrawContext{millis(), leds});
+  twinkleFox.draw(Fx::DrawContext(millis(), leds));
   FastLED.show();
 }

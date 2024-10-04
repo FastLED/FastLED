@@ -25,7 +25,7 @@ void setup() {
 }
 
 void loop() { 
-    cylon.draw(Fx::DrawContext{millis(), leds});
+    cylon.draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
     delay(cylon.delay_ms);
 }
