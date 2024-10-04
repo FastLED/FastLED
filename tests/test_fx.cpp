@@ -9,8 +9,7 @@
 #include "fx/1d/cylon.hpp"
 #include "fx/1d/pride2015.hpp"
 #include "fx/1d/noisewave.hpp"
-
-
+#include "fx/2d/noisepalette.hpp"
 #include "fx/2d/animartrix.hpp"
 
 
