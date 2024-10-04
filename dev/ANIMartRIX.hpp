@@ -24,7 +24,7 @@
 CRGB leds[NUM_LED];               // framebuffer
 
 XYMap xyMap(WIDTH, HEIGHT, SERPENTINE);
-Animartrix fxAnimator(leds, xyMap, POLAR_WAVES);
+Animartrix fxAnimator(xyMap, POLAR_WAVES);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
@@ -47,7 +47,7 @@ void loop() {
     #endif
   }
   #endif
-  fxAnimator.draw();
+  fxAnimator.draw(millis(), leds);
   FastLED.show();
   uint32_t elapsed = millis() - now;
 

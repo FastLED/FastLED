@@ -16,7 +16,7 @@
 CRGB leds[NUM_LEDS];
 
 // Create a Cylon instance
-Cylon cylon(leds, NUM_LEDS);
+Cylon cylon(NUM_LEDS);
 
 void setup() { 
     Serial.begin(57600);
@@ -28,7 +28,7 @@ void setup() {
 
 void loop() { 
     Serial.print("x");
-    cylon.draw();
+    cylon.draw(millis(), leds);
     FastLED.show();
     delay(cylonData.delay_ms);
 }

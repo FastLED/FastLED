@@ -9,7 +9,6 @@
 #define DELAY 500
 
 CRGB leds[NUM_LEDS];
-Pride2015Data prideData(leds, NUM_LEDS);
 
 void fill(CRGB c) {
     for (int i = 0; i < NUM_LEDS; i++) {

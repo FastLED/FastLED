@@ -15,7 +15,7 @@ CRGB leds[NUM_LEDS];
 #define BRIGHTNESS          96
 #define FRAMES_PER_SECOND  120
 
-DemoReel100 demoReel(leds, NUM_LEDS);
+DemoReel100 demoReel(NUM_LEDS);
 
 void setup() {
   delay(3000); // 3 second delay for recovery
@@ -35,7 +35,7 @@ void setup() {
 void loop()
 {
     // Run the DemoReel100 draw function
-    demoReel.draw();
+    demoReel.draw(millis(), leds);
 
     // send the 'leds' array out to the actual LED strip
     FastLED.show();  

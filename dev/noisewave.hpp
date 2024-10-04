@@ -7,7 +7,7 @@
 #define NUM_LEDS    484
 
 CRGB leds[NUM_LEDS];
-NoiseWave noiseWave(leds, NUM_LEDS);
+NoiseWave noiseWave(NUM_LEDS);
 
 void setup() {
   delay(3000); // sanity delay
@@ -19,7 +19,7 @@ void setup() {
 
 void loop()
 {
-  noiseWave.draw();
+  noiseWave.draw(leds, NUM_LEDS);
   FastLED.show();
   FastLED.delay(1000 / 60);
 }
