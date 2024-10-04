@@ -4,8 +4,8 @@
 /// @example NoisePlusPalette.ino
 
 #ifndef COMPILE_NOISEPLUSPALETTE
-#if defined(__AVR_ATtinyxy4__)
-// too large for ATtiny1604, so skip this.
+#if defined(__AVR__)
+// This has grown too large for the AVR to handle.
 #define COMPILE_NOISEPLUSPALETTE 0
 #else
 #define COMPILE_NOISEPLUSPALETTE 1
