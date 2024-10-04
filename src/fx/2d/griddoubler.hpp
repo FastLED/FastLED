@@ -16,6 +16,8 @@
 #include "bilinear_expansion.h"
 // #include <iostream>
 
+#define FASTLED_GRID_EXPANDER_INPUT_IS_ALWAYS_POWER_OF_2 0
+
 FASTLED_NAMESPACE_BEGIN
 
 // Uses bilearn filtering to double the size of the grid.
@@ -44,9 +46,13 @@ class GridDoubler : public FxGrid {
         uint16_t out_w = getWidth();
         uint16_t out_h = getHeight();
 
-
-        bilinearExpand(context.leds, mSurface.get(), in_w, in_h, out_w, out_h, &mXyMap);
-        //bilinearExpandPowerOf2(context.leds, mSurface.get(), 16, 16, &mXyMap);
+        #if defined(FASTLED_GRID_EXPANDER_INPUT_IS_ALWAYS_POWER_OF_2) && FASTLED_GRID_EXPANDER_INPUT_IS_ALWAYS_POWER_OF_2
+        // Faster for avr since most of this is in uint8_t.
+        bilinearExpandPowerOf2(mSurface.get(), context.leds, in_w, in_h, mXyMap);
+        #else
+        bilinearExpand(mSurface.get(), context.leds, in_w, in_h, mXyMap);
+        #endif
+        //bilinearExpandPowerOf2(mSurface.get(), context.leds, mXyMap);
         // justDrawIt(context.leds, mSurface.get(), 16, 16);
         // std::cout << "dumping" << std::endl;
     }

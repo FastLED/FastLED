@@ -19,11 +19,11 @@ uint8_t bilinearInterpolatePowerOf2(uint8_t v00, uint8_t v10, uint8_t v01,
                                     uint8_t v11, uint8_t dx, uint8_t dy);
 
 
-void bilinearExpand(CRGB *output, const CRGB *input, uint16_t inputWidth,
-                    uint16_t inputHeight, uint16_t outputWidth,
-                    uint16_t outputHeight, const XYMap* xy) {
-    XYMap xyMap = xy ? *xy : XYMap::constructRectangularGrid(outputWidth, outputHeight);
+void bilinearExpandArbitrary(const CRGB *input, CRGB *output, uint16_t inputWidth,
+                             uint16_t inputHeight, XYMap xyMap) {
     uint16_t n = xyMap.getTotal();
+    uint16_t outputWidth = xyMap.getWidth();
+    uint16_t outputHeight = xyMap.getHeight();
     const uint16_t scale_factor = 256; // Using 8 bits for the fractional part
 
     for (uint16_t y = 0; y < outputHeight; y++) {
@@ -83,11 +83,13 @@ uint8_t bilinearInterpolate(uint8_t v00, uint8_t v10, uint8_t v01, uint8_t v11,
     return result;
 }
 
-void bilinearExpandPowerOf2(CRGB *output, const CRGB *input, uint8_t width,
-                            uint8_t height, const XYMap* xy) {
-    XYMap xyMap = xy ? *xy : XYMap::constructRectangularGrid(width, height);
-    uint8_t inputWidth = width / 2;
-    uint8_t inputHeight = height / 2;
+void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth, uint8_t inputHeight, XYMap xyMap) {
+    uint8_t width = xyMap.getWidth();
+    uint8_t height = xyMap.getHeight();
+    if (width != xyMap.getWidth() || height != xyMap.getHeight()) {
+        // xyMap has width and height that do not fit in an uint16_t.
+        return;
+    }
     uint16_t n = xyMap.getTotal();
 
     for (uint8_t y = 0; y < height; y++) {
@@ -117,9 +119,9 @@ void bilinearExpandPowerOf2(CRGB *output, const CRGB *input, uint8_t width,
             CRGB c11 = input[i11];
 
             CRGB result;
-            result.r = bilinearInterpolate(c00.r, c10.r, c01.r, c11.r, dx, dy);
-            result.g = bilinearInterpolate(c00.g, c10.g, c01.g, c11.g, dx, dy);
-            result.b = bilinearInterpolate(c00.b, c10.b, c01.b, c11.b, dx, dy);
+            result.r = bilinearInterpolatePowerOf2(c00.r, c10.r, c01.r, c11.r, dx, dy);
+            result.g = bilinearInterpolatePowerOf2(c00.g, c10.g, c01.g, c11.g, dx, dy);
+            result.b = bilinearInterpolatePowerOf2(c00.b, c10.b, c01.b, c11.b, dx, dy);
 
             uint16_t idx = xyMap.mapToIndex(x, y);
             if (idx < n) {
