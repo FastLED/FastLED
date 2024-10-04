@@ -44,7 +44,7 @@ void Pacifica::draw(uint32_t now, CRGB* leds) {
     }
 
     // Update the hue each time through the loop
-    uint32_t ms = millis();
+    uint32_t ms = now;
     uint32_t deltams = ms - sLastms;
     sLastms = ms;
     uint16_t speedfactor1 = beatsin16(3, 179, 269);

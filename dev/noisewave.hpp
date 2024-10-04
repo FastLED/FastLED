@@ -19,7 +19,7 @@ void setup() {
 
 void loop()
 {
-  noiseWave.draw(leds, NUM_LEDS);
+  noiseWave.draw(millis(), leds);
   FastLED.show();
   FastLED.delay(1000 / 60);
 }
