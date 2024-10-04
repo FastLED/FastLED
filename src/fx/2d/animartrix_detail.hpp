@@ -66,7 +66,7 @@ License CC BY-NC 3.0
 
 #define num_oscillators 10
 
-namespace animartrix {
+namespace animartrix_detail {
 
 struct render_parameters {
 
@@ -4055,4 +4055,4 @@ class ANIMartRIX {
     }
 };
 
-}  // namespace animartrix
+}  // namespace animartrix_detail

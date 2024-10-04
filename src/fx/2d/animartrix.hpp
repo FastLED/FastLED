@@ -70,9 +70,8 @@ enum AnimartrixAnim {
 class FastLEDANIMartRIX;
 class Animartrix : public FxGrid {
   public:
-    Animartrix(CRGB *leds, XYMap xyMap, AnimartrixAnim which_animation): FxGrid(xyMap) {
+    Animartrix(XYMap xyMap, AnimartrixAnim which_animation): FxGrid(xyMap) {
         // Note: Swapping out height and width.
-        this->leds = leds;
         this->current_animation = which_animation;        
     }
     ~Animartrix();
@@ -198,7 +197,7 @@ const char *Animartrix::getAnimationName(AnimartrixAnim animation) {
     }
 }
 
-class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
+class FastLEDANIMartRIX : public animartrix_detail::ANIMartRIX {
     Animartrix *data = nullptr;
 
   public:
@@ -210,7 +209,7 @@ class FastLEDANIMartRIX : public animartrix::ANIMartRIX {
     void setPixelColor(int x, int y, CRGB pixel) {
         data->leds[xyMap(x, y)] = pixel;
     }
-    void setPixelColorInternal(int x, int y, animartrix::rgb pixel) {
+    void setPixelColorInternal(int x, int y, animartrix_detail::rgb pixel) {
         setPixelColor(x, y, CRGB(pixel.red, pixel.green, pixel.blue));
     }
 
