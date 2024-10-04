@@ -63,7 +63,7 @@ void setup() {
 
 void loop()
 {
-  fire.draw(millis(), leds); // run simulation frame
+  fire.draw(Fx::DrawContext{millis(), leds}); // run simulation frame
   
   FastLED.show(millis()); // display this frame
   FastLED.delay(1000 / FRAMES_PER_SECOND);

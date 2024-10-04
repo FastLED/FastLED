@@ -79,7 +79,7 @@ class Animartrix : public FxGrid {
     void lazyInit() override {
         this->mXyMap.convertToLookUpTable();
     }
-    void draw(uint32_t now, CRGB* leds) override;
+    void draw(DrawContext context) override;
     int fxNum() const override { return NUM_ANIMATIONS; }
     void fxSet(int fx) override;
     int fxGet() const override { return static_cast<int>(current_animation); }
@@ -393,8 +393,8 @@ Animartrix::~Animartrix() {
     }
 }
 
-void Animartrix::draw(uint32_t now, CRGB* leds) {
-    this->leds = leds;
+void Animartrix::draw(DrawContext ctx) {
+    this->leds = ctx.leds;
     AnimartrixLoop(*this);
     this->leds = nullptr;
 }

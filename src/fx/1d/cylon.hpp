@@ -17,10 +17,12 @@ public:
         // No initialization needed for Cylon
     }
 
-    void draw(uint32_t now, CRGB* leds) override {
-        if (leds == nullptr || mNumLeds == 0) {
+    void draw(DrawContext context) override {
+        if (context.leds == nullptr || mNumLeds == 0) {
             return;
         }
+
+        CRGB* leds = context.leds;
 
         // Set the current LED to the current hue
         leds[position] = CHSV(hue++, 255, 255);

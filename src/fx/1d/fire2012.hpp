@@ -54,7 +54,8 @@ public:
         delete[] heat;
     }
 
-    void draw(uint32_t now, CRGB* leds) override {
+    void draw(DrawContext context) override {
+        CRGB* leds = context.leds;
         if (leds == nullptr) {
             return;
         }

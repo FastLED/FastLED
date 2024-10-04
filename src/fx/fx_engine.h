@@ -59,14 +59,26 @@ public:
     void addFx(Fx* effect);
     //void startTransition(uint32_t now, uint32_t duration);
     void draw(uint32_t now, CRGB* outputBuffer);
-    void nextFx(uint32_t now, uint32_t duration) {
+    bool nextFx(uint32_t now, uint32_t duration) {
+        uint16_t next_index = (mCurrentIndex + 1) % mEffects.size();
+        return setNextFx(next_index, now, duration);
+    }
+
+    bool setNextFx(uint16_t index, uint32_t now, uint32_t duration) {
+        if (index >= mEffects.size() && index != mCurrentIndex) {
+            return false;
+        }
         if (mIsTransitioning) {
-            
+            // If already transitioning, complete the current transition immediately
+            mEffects[mCurrentIndex]->pause();
             mCurrentIndex = mNextIndex;
             mIsTransitioning = false;
         }
-        mNextIndex = (mCurrentIndex + 1) % mEffects.size();
-        startTransition(now, duration);
+        mNextIndex = index;
+        mEffects[mNextIndex]->resume();
+        mIsTransitioning = true;
+        mTransition.start(now, duration);
+        return true;
     }
 
 private:
@@ -75,6 +87,7 @@ private:
     scoped_array<CRGB> mLayer1;
     scoped_array<CRGB> mLayer2;
     bool mIsTransitioning;
+    bool mWasTransitioning;
     uint16_t mCurrentIndex;
     uint16_t mNextIndex;
     Transition mTransition;
@@ -83,7 +96,7 @@ private:
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds) 
-    : mNumLeds(numLeds), mIsTransitioning(false), mCurrentIndex(0), mNextIndex(0) {
+    : mNumLeds(numLeds), mIsTransitioning(false), mWasTransitioning(false), mCurrentIndex(0), mNextIndex(0) {
     mLayer1.reset(new CRGB[numLeds]);
     mLayer2.reset(new CRGB[numLeds]);
 }
@@ -94,17 +107,14 @@ inline void FxEngine::addFx(Fx* effect) {
     mEffects.push_back(effect);
 }
 
-inline void FxEngine::startTransition(uint32_t now, uint32_t duration) {
-    mIsTransitioning = true;
-    mTransition.start(now, duration);
-}
-
 inline void FxEngine::draw(uint32_t now, CRGB* finalBuffer) {
     if (!mEffects.empty()) {
-        mEffects[mCurrentIndex]->draw(now, mLayer1.get());
+        Fx::DrawContext context = {now, mLayer1.get()};
+        mEffects[mCurrentIndex]->draw(context);
         
         if (mIsTransitioning && mEffects.size() > 1) {
-            mEffects[mNextIndex]->draw(now, mLayer2.get());
+            context = {now, mLayer2.get()};
+            mEffects[mNextIndex]->draw(context);
             
             uint8_t progress = mTransition.getProgress(now);
             uint8_t inverse_progress = 255 - progress;
@@ -115,6 +125,7 @@ inline void FxEngine::draw(uint32_t now, CRGB* finalBuffer) {
 
             if (progress == 255) {
                 // Transition complete, update current index
+                mEffects[mCurrentIndex]->pause();
                 mCurrentIndex = mNextIndex;
                 mIsTransitioning = false;
             }

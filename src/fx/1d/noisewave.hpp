@@ -17,7 +17,7 @@ public:
         start_time = millis();
     }
 
-    void draw(uint32_t now, CRGB* leds) override {
+    void draw(DrawContext context) override {
         if (leds == nullptr || mNumLeds == 0) {
             return;
         }

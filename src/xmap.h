@@ -112,8 +112,8 @@ private:
     XMap(uint16_t length, Type type)
         : length(length), type(type) {
     }
-    Type type = kLinear;
     uint16_t length = 0;
+    Type type = kLinear;
     XFunction xFunction = nullptr;
     const uint16_t *mData = nullptr;
     RefPtr<LUT16> mLookUpTable;

@@ -123,7 +123,7 @@ public:
         chooseNextColorPalette(targetPalette);
     }
 
-    void draw(uint32_t now, CRGB* leds) override {
+    void draw(DrawContext context) override {
         EVERY_N_MILLISECONDS(10) {
             nblendPaletteTowardPalette(currentPalette, targetPalette, 12);
         }

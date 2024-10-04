@@ -15,7 +15,7 @@ public:
     Pacifica(uint16_t num_leds) : FxStrip(num_leds), leds(leds) {}
 
     void lazyInit() override {}
-    void draw(uint32_t now, CRGB* leds) override;
+    void draw(DrawContext context) override;
     const char* fxName() const override { return "Pacifica"; }
 
 private:
@@ -38,7 +38,9 @@ private:
     void pacifica_deepen_colors(CRGB* leds);
 };
 
-void Pacifica::draw(uint32_t now, CRGB* leds) {
+void Pacifica::draw(DrawContext ctx) {
+    CRGB* leds = ctx.leds;
+    uint32_t now = ctx.now;
     if (leds == nullptr || mNumLeds == 0) {
         return;
     }

@@ -38,9 +38,9 @@ class NoisePalette : public FxGrid {
 
     void lazyInit() override {}
 
-    void draw(uint32_t now, CRGB* leds) override {
+    void draw(DrawContext context) override {
         fillnoise8();
-        mapNoiseToLEDsUsingPalette(leds);
+        mapNoiseToLEDsUsingPalette(context.leds);
     }
 
     const char *fxName() const override { return "NoisePalette"; }

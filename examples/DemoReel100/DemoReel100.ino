@@ -34,7 +34,7 @@ void setup() {
 void loop()
 {
     // Run the DemoReel100 draw function
-    demoReel.draw(millis(), leds);
+    demoReel.draw(Fx::DrawContext{millis(), leds});
 
     // send the 'leds' array out to the actual LED strip
     FastLED.show();  

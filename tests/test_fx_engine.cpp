@@ -5,6 +5,7 @@
 
 
 #include "doctest.h"
+#include "fx/fx.h"
 #include "fx/fx_engine.h"
 #include "FastLED.h"
 
@@ -12,10 +13,10 @@ class MockFx : public Fx {
 public:
     MockFx(uint16_t numLeds, CRGB color) : Fx(numLeds), mColor(color) {}
 
-    void draw(uint32_t now, CRGB* leds) override {
-        mLastDrawTime = now;
+    void draw(DrawContext ctx) override {
+        mLastDrawTime = ctx.now;
         for (uint16_t i = 0; i < mNumLeds; ++i) {
-            leds[i] = mColor;
+            ctx.leds[i] = mColor;
         }
     }
 
