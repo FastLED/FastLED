@@ -1,7 +1,22 @@
-use hpp file names to imply they are essentially a cpp in a header.
 
 # FX Structure
 
-Each effect shall have a Data struct and a loop function that will only take
-in the data struct. This Data struct shall be trivially constructable to
-allow the struct to be trivially initialized on program startup.
+The FX module is an optional component that is not compiled into the core driver by default. 
+
+You can include these modules to achieve advanced visual effects.
+
+While the core driver is optimized to be as lightweight as possible, the rules for the FX directory are more flexible. These effects (FX) are intended for use on more powerful hardware, unlike more constrained platforms such as the Arduino UNO.
+
+As a result, FX components can be "heavyweight," meaning they may include a larger portion of the standard library or even depend on libraries like `Arduino.h`, which the core driver prohibits.
+
+## Licensing
+
+Some FX components are public domain and can be freely used or copied in commercial applications without the need for a license or permission.
+
+However, not all FX components come with permissive licenses for commercial use. If you include an FX component with restrictions, you will see a compilation warning indicating its non-commercial license. It is your responsibility to contact the creator for proper licensing if used in commercial products.
+
+For non-commercial, artistic projects where no financial transactions are involved, you generally don't need to worry about these restrictions.
+
+Certain higher-end FX components, such as those related to "animatrix," may have more restrictive licensing, but they remain free for non-commercial use.
+
+Happy coding!
