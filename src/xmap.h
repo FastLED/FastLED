@@ -4,6 +4,7 @@
 #include <string.h>
 #include "ptr.h"
 #include "force_inline.h"
+#include "lut16.h"
 
 FASTLED_FORCE_INLINE uint16_t x_linear(uint16_t x, uint16_t length) {
     return x;
@@ -15,20 +16,6 @@ FASTLED_FORCE_INLINE uint16_t x_reverse(uint16_t x, uint16_t length) {
 
 // typedef for xMap function type
 typedef uint16_t (*XFunction)(uint16_t x, uint16_t length);
-
-class LUT16 : public Referent {
-public:
-    LUT16(uint16_t length) : length(length) {
-        data.reset(new uint16_t[length]);
-    }
-
-    uint16_t* getData() const {
-        return data.get();
-    }
-private:
-    scoped_ptr<uint16_t> data;
-    uint16_t length;
-};
 
 
 // XMap holds either a function or a look up table to map x coordinates to a 1D index.
