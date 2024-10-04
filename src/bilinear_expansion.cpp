@@ -133,23 +133,26 @@ void bilinearExpandPowerOf2(const CRGB *input, CRGB *output, uint8_t inputWidth,
 
 uint8_t bilinearInterpolatePowerOf2(uint8_t v00, uint8_t v10, uint8_t v01,
                                     uint8_t v11, uint8_t dx, uint8_t dy) {
-    uint16_t dx_inv = 256 - dx;
-    uint16_t dy_inv = 256 - dy;
+    uint16_t dx_inv = 256 - dx;  // 0 to 256
+    uint16_t dy_inv = 256 - dy;  // 0 to 256
 
-    // Weights are 16-bit to handle values up to 256 * 256 = 65536
-    uint32_t w00 = (uint32_t)dx_inv * dy_inv; // Max 65536
-    uint32_t w10 = (uint32_t)dx * dy_inv;
-    uint32_t w01 = (uint32_t)dx_inv * dy;
-    uint32_t w11 = (uint32_t)dx * dy;
+    // Scale down weights to fit into uint16_t
+    uint16_t w00 = (dx_inv * dy_inv) >> 8; // Max value 256
+    uint16_t w10 = (dx * dy_inv) >> 8;
+    uint16_t w01 = (dx_inv * dy) >> 8;
+    uint16_t w11 = (dx * dy) >> 8;
 
-    // Sum is 32-bit to prevent overflow when multiplying by pixel values
-    uint32_t sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;
+    // Sum of weights should be approximately 256
+    uint16_t weight_sum = w00 + w10 + w01 + w11;
 
-    // Normalize the result by dividing by 65536 (shift right by 16 bits),
-    // with rounding
-    uint8_t result = (uint8_t)((sum + 32768) >> 16);
+    // Compute the weighted sum of pixel values
+    uint16_t sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;
+
+    // Normalize the result
+    uint8_t result = (sum + (weight_sum >> 1)) / weight_sum;
 
     return result;
 }
+
 
 FASTLED_NAMESPACE_END
