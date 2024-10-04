@@ -12,7 +12,7 @@
 
 #include "crgb.h"
 #include "namespace.h"
-#include "fx/2d/_xymap.h"
+#include "xymap.h"
 #include "fx/2d/_fx2d.h"
 
 #define ANIMARTRIX_INTERNAL

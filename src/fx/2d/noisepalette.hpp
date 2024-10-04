@@ -9,7 +9,7 @@
 
 #include "FastLED.h"
 #include "fx/2d/_fx2d.h"
-#include "fx/2d/_xymap.h"
+#include "xymap.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
 #include "ptr.h"
