@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "xymap.h"
 #include "namespace.h"
-#include "fx/_fx.h"
+#include "fx/fx.h"
 
 FASTLED_NAMESPACE_BEGIN
 

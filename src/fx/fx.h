@@ -5,7 +5,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-// Abstract base class for 1D effects that use a strip of LEDs.
+// Abstract base class for effects on a strip/grid of LEDs.
 class Fx {
   public:
     Fx(uint16_t numLeds): mNumLeds(numLeds) {}
