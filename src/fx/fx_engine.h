@@ -61,6 +61,7 @@ public:
     void draw(uint32_t now, CRGB* outputBuffer);
     void nextFx(uint32_t now, uint32_t duration) {
         if (mIsTransitioning) {
+            
             mCurrentIndex = mNextIndex;
             mIsTransitioning = false;
         }

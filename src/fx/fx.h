@@ -22,6 +22,9 @@ class Fx {
     virtual void fxNext(int fx = 1) {};  // Negative numbers are allowed. -1 means previous fx.
     virtual int fxGet() const { return 0; };  // Get the current fx number.
 
+    virtual void pause() {}  // Called when the fx is paused, usually when a transition has finished.
+    virtual void resume() {}  // Called when the fx is resumed after a pause, usually when a transition has started.
+
     virtual ~Fx() {}
     virtual void lazyInit() {}
     uint16_t getNumLeds() const { return mNumLeds; }
