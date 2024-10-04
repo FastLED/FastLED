@@ -18,7 +18,8 @@ FASTLED_NAMESPACE_BEGIN
 
 class NoisePalette : public FxGrid {
   public:
-    NoisePalette(CRGB *leds, XYMap xyMap) : FxGrid(xyMap), leds(leds) {
+    NoisePalette(CRGB *leds, XYMap xyMap)
+        : FxGrid(xyMap), leds(leds), scale(scale), speed(speed), colorLoop(1) {
         width = xyMap.getWidth();
         height = xyMap.getHeight();
 
@@ -26,6 +27,8 @@ class NoisePalette : public FxGrid {
         x = random16();
         y = random16();
         z = random16();
+
+        setPalettePreset(0);
 
         // Allocate memory for the noise array using scoped_ptr
         noise = scoped_ptr<uint8_t>(new uint8_t[width * height]);
@@ -44,18 +47,32 @@ class NoisePalette : public FxGrid {
 
     void mapNoiseToLEDsUsingPalette();
 
-    void changeToRandomPalette();
-    void setPalette(int paletteIndex);
+    uint8_t changeToRandomPalette();
+
+    // There are 12 palette indexes but they don't have names. Use this to set
+    // which one you want.
+    uint8_t getPalettePresetCount() const { return 12; }
+    uint8_t getPalettePreset() const { return currentPaletteIndex; }
+    void setPalettePreset(int paletteIndex);
+    void setPalette(const CRGBPalette16 &palette, uint16_t speed,
+                    uint16_t scale, bool colorLoop) {
+        currentPalette = palette;
+        this->speed = speed;
+        this->scale = scale;
+        this->colorLoop = colorLoop;
+    }
+    void setSpeed(uint16_t speed) { this->speed = speed; }
+    void setScale(uint16_t scale) { this->scale = scale; }
 
   private:
     CRGB *leds;
     uint16_t x, y, z;
     uint16_t width, height;
-    uint16_t speed = 20;
-    uint16_t scale = 30;
+    uint16_t speed = 0;
+    uint16_t scale = 0;
     scoped_ptr<uint8_t> noise;
     CRGBPalette16 currentPalette = PartyColors_p;
-    uint8_t colorLoop = 1;
+    bool colorLoop = 0;
     int currentPaletteIndex = 0;
 
     void fillnoise8();
@@ -91,53 +108,71 @@ class NoisePalette : public FxGrid {
     }
 };
 
-inline void NoisePalette::setPalette(int paletteIndex) {
-    currentPaletteIndex = paletteIndex % 12;  // Ensure the index wraps around
+inline void NoisePalette::setPalettePreset(int paletteIndex) {
+    currentPaletteIndex = paletteIndex % 12; // Ensure the index wraps around
     switch (currentPaletteIndex) {
-        case 0:
-            currentPalette = RainbowColors_p;
-            speed = 20; scale = 30; colorLoop = 1;
-            break;
-        case 1:
-            SetupPurpleAndGreenPalette();
-            speed = 10; scale = 50; colorLoop = 1;
-            break;
-        case 2:
-            SetupBlackAndWhiteStripedPalette();
-            speed = 20; scale = 30; colorLoop = 1;
-            break;
-        case 3:
-            currentPalette = ForestColors_p;
-            speed = 8; scale = 120; colorLoop = 0;
-            break;
-        case 4:
-            currentPalette = CloudColors_p;
-            speed = 4; scale = 30; colorLoop = 0;
-            break;
-        case 5:
-            currentPalette = LavaColors_p;
-            speed = 8; scale = 50; colorLoop = 0;
-            break;
-        case 6:
-            currentPalette = OceanColors_p;
-            speed = 20; scale = 90; colorLoop = 0;
-            break;
-        case 7:
-            currentPalette = PartyColors_p;
-            speed = 20; scale = 30; colorLoop = 1;
-            break;
-        case 8:
-        case 9:
-        case 10:
-            SetupRandomPalette();
-            speed = 20 + (currentPaletteIndex - 8) * 30;
-            scale = 20 + (currentPaletteIndex - 8) * 30;
-            colorLoop = 1;
-            break;
-        case 11:
-            currentPalette = RainbowStripeColors_p;
-            speed = 30; scale = 20; colorLoop = 1;
-            break;
+    case 0:
+        currentPalette = RainbowColors_p;
+        speed = 20;
+        scale = 30;
+        colorLoop = 1;
+        break;
+    case 1:
+        SetupPurpleAndGreenPalette();
+        speed = 10;
+        scale = 50;
+        colorLoop = 1;
+        break;
+    case 2:
+        SetupBlackAndWhiteStripedPalette();
+        speed = 20;
+        scale = 30;
+        colorLoop = 1;
+        break;
+    case 3:
+        currentPalette = ForestColors_p;
+        speed = 8;
+        scale = 120;
+        colorLoop = 0;
+        break;
+    case 4:
+        currentPalette = CloudColors_p;
+        speed = 4;
+        scale = 30;
+        colorLoop = 0;
+        break;
+    case 5:
+        currentPalette = LavaColors_p;
+        speed = 8;
+        scale = 50;
+        colorLoop = 0;
+        break;
+    case 6:
+        currentPalette = OceanColors_p;
+        speed = 20;
+        scale = 90;
+        colorLoop = 0;
+        break;
+    case 7:
+        currentPalette = PartyColors_p;
+        speed = 20;
+        scale = 30;
+        colorLoop = 1;
+        break;
+    case 8:
+    case 9:
+    case 10:
+        SetupRandomPalette();
+        speed = 20 + (currentPaletteIndex - 8) * 5;
+        scale = 20 + (currentPaletteIndex - 8) * 5;
+        colorLoop = 1;
+        break;
+    case 11:
+        currentPalette = RainbowStripeColors_p;
+        speed = 2;
+        scale = 20;
+        colorLoop = 1;
+        break;
     }
 }
 
@@ -201,7 +236,7 @@ inline void NoisePalette::fillnoise8() {
             if (dataSmoothing) {
                 uint8_t olddata = noise.get()[i * height + j];
                 uint8_t newdata = scale8(olddata, dataSmoothing) +
-                                    scale8(data, 256 - dataSmoothing);
+                                  scale8(data, 256 - dataSmoothing);
                 data = newdata;
             }
 
@@ -214,17 +249,17 @@ inline void NoisePalette::fillnoise8() {
     // apply slow drift to X and Y, just for visual variation.
     x += speed / 8;
     y -= speed / 16;
-    }
+}
 
-inline void NoisePalette::changeToRandomPalette() {
-    while(true) {
+inline uint8_t NoisePalette::changeToRandomPalette() {
+    while (true) {
         uint8_t new_idx = random8() % 12;
         if (new_idx == currentPaletteIndex) {
             continue;
         }
         currentPaletteIndex = new_idx;
-        setPalette(currentPaletteIndex);
-        return;
+        setPalettePreset(currentPaletteIndex);
+        return currentPaletteIndex;
     }
 }
 
