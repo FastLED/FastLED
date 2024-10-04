@@ -9,7 +9,7 @@ FASTLED_NAMESPACE_BEGIN
 
 class NoiseWave : public FxStrip {
 public:
-    NoiseWave(CRGB* leds, uint16_t num_leds) 
+    NoiseWave(uint16_t num_leds) 
         : FxStrip(num_leds), leds(leds),
           noiseGeneratorRed(500, 14), noiseGeneratorBlue(500, 10) {}
 
@@ -17,7 +17,7 @@ public:
         start_time = millis();
     }
 
-    void draw(uint32_t now) override {
+    void draw(uint32_t now, CRGB* leds) override {
         if (leds == nullptr || mNumLeds == 0) {
             return;
         }

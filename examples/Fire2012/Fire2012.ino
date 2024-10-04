@@ -51,7 +51,7 @@
 #define REVERSE_DIRECTION false
 
 CRGB leds[NUM_LEDS];
-Fire2012 fire(leds, NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
+Fire2012 fire(NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
 
 void setup() {
   delay(3000); // sanity delay
@@ -63,7 +63,7 @@ void setup() {
 
 void loop()
 {
-  fire.draw(millis()); // run simulation frame
+  fire.draw(millis(), leds); // run simulation frame
   
   FastLED.show(millis()); // display this frame
   FastLED.delay(1000 / FRAMES_PER_SECOND);

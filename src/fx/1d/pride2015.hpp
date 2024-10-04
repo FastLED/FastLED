@@ -16,14 +16,13 @@ FASTLED_NAMESPACE_BEGIN
 
 class Pride2015 : public FxStrip {
 public:
-    Pride2015(CRGB* leds, uint16_t num_leds) : FxStrip(num_leds), leds(leds) {}
+    Pride2015(uint16_t num_leds) : FxStrip(num_leds) {}
 
     void lazyInit() override {}
-    void draw(uint32_t now) override;
+    void draw(uint32_t now, CRGB* leds) override;
     const char* fxName() const override { return "Pride2015"; }
 
 private:
-    CRGB* leds;
     uint16_t mPseudotime = 0;
     uint16_t mLastMillis = 0;
     uint16_t mHue16 = 0;
@@ -31,7 +30,7 @@ private:
 
 // This function draws rainbows with an ever-changing,
 // widely-varying set of parameters.
-void Pride2015::draw(uint32_t now) {
+void Pride2015::draw(uint32_t now, CRGB* leds) {
     if (leds == nullptr || mNumLeds == 0) {
         return;
     }

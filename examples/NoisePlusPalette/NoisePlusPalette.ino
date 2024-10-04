@@ -67,7 +67,7 @@
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePalette noisePalette(leds, xyMap);
+NoisePalette noisePalette(xyMap);
 
 void setup() {
     delay(1000); // sanity delay
@@ -82,7 +82,7 @@ void setup() {
 void loop() {
     EVERY_N_MILLISECONDS(5000) { noisePalette.changeToRandomPalette(); }
 
-    noisePalette.draw(millis());
+    noisePalette.draw(millis(), leds);
     FastLED.show();
 }
 

@@ -80,7 +80,7 @@ class Animartrix : public FxGrid {
     void lazyInit() override {
         this->mXyMap.convertToLookUpTable();
     }
-    void draw(uint32_t now) override;
+    void draw(uint32_t now, CRGB* leds) override;
     int fxNum() const override { return NUM_ANIMATIONS; }
     void fxSet(int fx) override;
     int fxGet() const override { return static_cast<int>(current_animation); }
@@ -95,7 +95,7 @@ class Animartrix : public FxGrid {
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
     FastLEDANIMartRIX *impl = nullptr;
     bool destroy = false;
-    CRGB *leds = nullptr;
+    CRGB *leds = nullptr;  // Only set during draw, then unset back to nullptr.
     AnimartrixAnim current_animation = RGB_BLOBS5;
 };
 
@@ -394,8 +394,10 @@ Animartrix::~Animartrix() {
     }
 }
 
-void Animartrix::draw(uint32_t now) {
+void Animartrix::draw(uint32_t now, CRGB* leds) {
+    this->leds = leds;
     AnimartrixLoop(*this);
+    this->leds = nullptr;
 }
 
 FASTLED_NAMESPACE_END

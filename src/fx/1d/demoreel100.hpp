@@ -17,20 +17,20 @@ FASTLED_NAMESPACE_BEGIN
 // -Mark Kriegsman, December 2014
 class DemoReel100 : public FxStrip {
 public:
-    DemoReel100(CRGB* leds, uint16_t num_leds) 
-        : FxStrip(num_leds), leds(leds) {}
+    DemoReel100(uint16_t num_leds) 
+        : FxStrip(num_leds){}
 
     void lazyInit() override {
         start_time = millis();
     }
 
-    void draw(uint32_t now) override {
+    void draw(uint32_t now, CRGB* leds) override {
         if (leds == nullptr || mNumLeds == 0) {
             return;
         }
 
         // Call the current pattern function once, updating the 'leds' array
-        runPattern();
+        runPattern(leds);
 
         // do some periodic updates
         EVERY_N_MILLISECONDS( 20 ) { hue++; } // slowly cycle the "base color" through the rainbow
@@ -40,7 +40,6 @@ public:
     const char* fxName() const override { return "DemoReel100"; }
 
 private:
-    CRGB* leds;
     uint8_t current_pattern_number = 0;
     uint8_t hue = 0;
     unsigned long start_time = 0;
@@ -50,49 +49,49 @@ private:
         current_pattern_number = (current_pattern_number + 1) % 6; // 6 is the number of patterns
     }
 
-    void runPattern() {
+    void runPattern(CRGB* leds) {
         switch (current_pattern_number) {
-            case 0: rainbow(); break;
-            case 1: rainbowWithGlitter(); break;
-            case 2: confetti(); break;
-            case 3: sinelon(); break;
-            case 4: juggle(); break;
-            case 5: bpm(); break;
+            case 0: rainbow(leds); break;
+            case 1: rainbowWithGlitter(leds); break;
+            case 2: confetti(leds); break;
+            case 3: sinelon(leds); break;
+            case 4: juggle(leds); break;
+            case 5: bpm(leds); break;
         }
     }
 
-    void rainbow() {
+    void rainbow(CRGB* leds) {
         // FastLED's built-in rainbow generator
         fill_rainbow(leds, mNumLeds, hue, 7);
     }
 
-    void rainbowWithGlitter() {
+    void rainbowWithGlitter(CRGB* leds) {
         // built-in FastLED rainbow, plus some random sparkly glitter
-        rainbow();
-        addGlitter(80);
+        rainbow(leds);
+        addGlitter(80, leds);
     }
 
-    void addGlitter(fract8 chanceOfGlitter) {
+    void addGlitter(fract8 chanceOfGlitter, CRGB* leds) {
         if(random8() < chanceOfGlitter) {
             leds[random16(mNumLeds)] += CRGB::White;
         }
     }
 
-    void confetti() {
+    void confetti(CRGB* leds) {
         // random colored speckles that blink in and fade smoothly
         fadeToBlackBy(leds, mNumLeds, 10);
         int pos = random16(mNumLeds);
         leds[pos] += CHSV(hue + random8(64), 200, 255);
     }
 
-    void sinelon() {
+    void sinelon(CRGB* leds) {
         // a colored dot sweeping back and forth, with fading trails
         fadeToBlackBy(leds, mNumLeds, 20);
         int pos = beatsin16(13, 0, mNumLeds-1);
         leds[pos] += CHSV(hue, 255, 192);
     }
 
-    void bpm() {
+    void bpm(CRGB* leds) {
         // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
         uint8_t BeatsPerMinute = 62;
         CRGBPalette16 palette = PartyColors_p;
@@ -102,7 +101,7 @@ private:
         }
     }
 
-    void juggle() {
+    void juggle(CRGB* leds) {
         // eight colored dots, weaving in and out of sync with each other
         fadeToBlackBy(leds, mNumLeds, 20);
         uint8_t dothue = 0;

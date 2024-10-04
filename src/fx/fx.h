@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "namespace.h"
+#include "crgb.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -12,7 +13,7 @@ class Fx {
 
     /// @param now The current time in milliseconds. Fx writers are encouraged to use this instead of millis() directly
     /// as this will more deterministic behavior.
-    virtual void draw(uint32_t now) = 0;
+    virtual void draw(uint32_t now, CRGB* leds) = 0;
 
     virtual const char* fxName() const = 0;  // Get the name of the current fx. This is the class name if there is only one.
     // Optionally implement these for multi fx classes.

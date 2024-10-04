@@ -112,7 +112,7 @@ public:
     CRGBPalette16 targetPalette;
     CRGBPalette16 currentPalette;
 
-    TwinkleFox(CRGB* leds, uint16_t num_leds) 
+    TwinkleFox(uint16_t num_leds) 
         : FxStrip(num_leds), leds(leds), backgroundColor(CRGB::Black),
           twinkleSpeed(TWINKLE_SPEED), twinkleDensity(TWINKLE_DENSITY),
           coolLikeIncandescent(COOL_LIKE_INCANDESCENT), autoSelectBackgroundColor(AUTO_SELECT_BACKGROUND_COLOR) {
@@ -123,11 +123,11 @@ public:
         chooseNextColorPalette(targetPalette);
     }
 
-    void draw(uint32_t now) override {
+    void draw(uint32_t now, CRGB* leds) override {
         EVERY_N_MILLISECONDS(10) {
             nblendPaletteTowardPalette(currentPalette, targetPalette, 12);
         }
-        drawTwinkleFox();
+        drawTwinkleFox(leds);
     }
 
     void chooseNextColorPalette(CRGBPalette16& pal);
@@ -141,7 +141,7 @@ private:
     bool coolLikeIncandescent;
     bool autoSelectBackgroundColor;
 
-    void drawTwinkleFox() {
+    void drawTwinkleFox(CRGB* leds) {
         // "PRNG16" is the pseudorandom number generator
         // It MUST be reset to the same starting value each time
         // this function is called, so that the sequence of 'random'

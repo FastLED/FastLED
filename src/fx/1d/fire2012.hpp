@@ -45,8 +45,8 @@ FASTLED_NAMESPACE_BEGIN
 
 class Fire2012 : public FxStrip {
 public:
-    Fire2012(CRGB* leds, uint16_t num_leds, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false, const CRGBPalette16& palette = HeatColors_p)
-        : FxStrip(num_leds), leds(leds), cooling(cooling), sparking(sparking), reverse_direction(reverse_direction), palette(palette) {
+    Fire2012(uint16_t num_leds, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false, const CRGBPalette16& palette = HeatColors_p)
+        : FxStrip(num_leds), cooling(cooling), sparking(sparking), reverse_direction(reverse_direction), palette(palette) {
         heat = new uint8_t[num_leds]();  // Initialize to zero
     }
 
@@ -54,7 +54,7 @@ public:
         delete[] heat;
     }
 
-    void draw(uint32_t now) override {
+    void draw(uint32_t now, CRGB* leds) override {
         if (leds == nullptr) {
             return;
         }
@@ -94,7 +94,6 @@ public:
     const char* fxName() const override { return "Fire2012"; }
 
 private:
-    CRGB* leds;
     uint8_t* heat;
     uint8_t cooling;
     uint8_t sparking;

@@ -21,7 +21,7 @@
 #define COLOR_ORDER         GRB
 
 CRGB leds[NUM_LEDS];
-Pacifica pacifica(leds, NUM_LEDS);
+Pacifica pacifica(NUM_LEDS);
 
 void setup() {
   delay(3000); // 3 second delay for boot recovery, and a moment of silence
@@ -32,7 +32,7 @@ void setup() {
 
 void loop() {
   EVERY_N_MILLISECONDS(20) {
-    pacifica.draw(millis());
+    pacifica.draw(millis(), leds);
     FastLED.show();
   }
 }

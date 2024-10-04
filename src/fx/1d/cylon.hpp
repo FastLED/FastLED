@@ -10,14 +10,14 @@ FASTLED_NAMESPACE_BEGIN
 class Cylon : public FxStrip {
 public:
     uint8_t delay_ms;
-    Cylon(CRGB* leds, uint16_t num_leds, uint8_t fade_amount = 250, uint8_t delay_ms = 10) 
-        : FxStrip(num_leds), leds(leds), fade_amount(fade_amount), delay_ms(delay_ms) {}
+    Cylon(uint16_t num_leds, uint8_t fade_amount = 250, uint8_t delay_ms = 10) 
+        : FxStrip(num_leds), fade_amount(fade_amount), delay_ms(delay_ms) {}
 
     void lazyInit() override {
         // No initialization needed for Cylon
     }
 
-    void draw(uint32_t now) override {
+    void draw(uint32_t now, CRGB* leds) override {
         if (leds == nullptr || mNumLeds == 0) {
             return;
         }
@@ -49,7 +49,6 @@ public:
     const char* fxName() const override { return "Cylon"; }
 
 private:
-    CRGB* leds;
     uint8_t hue = 0;
     uint8_t fade_amount;
 

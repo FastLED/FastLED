@@ -12,10 +12,10 @@ FASTLED_NAMESPACE_BEGIN
 
 class Pacifica : public FxStrip {
 public:
-    Pacifica(CRGB* leds, uint16_t num_leds) : FxStrip(num_leds), leds(leds) {}
+    Pacifica(uint16_t num_leds) : FxStrip(num_leds), leds(leds) {}
 
     void lazyInit() override {}
-    void draw(uint32_t now) override;
+    void draw(uint32_t now, CRGB* leds) override;
     const char* fxName() const override { return "Pacifica"; }
 
 private:
@@ -34,11 +34,11 @@ private:
           0x000E39, 0x001040, 0x001450, 0x001860, 0x001C70, 0x002080, 0x1040BF, 0x2060FF };
 
     void pacifica_one_layer(CRGBPalette16& p, uint16_t cistart, uint16_t wavescale, uint8_t bri, uint16_t ioff);
-    void pacifica_add_whitecaps();
-    void pacifica_deepen_colors();
+    void pacifica_add_whitecaps(CRGB* leds);
+    void pacifica_deepen_colors(CRGB* leds);
 };
 
-void Pacifica::draw(uint32_t now) {
+void Pacifica::draw(uint32_t now, CRGB* leds) {
     if (leds == nullptr || mNumLeds == 0) {
         return;
     }
@@ -67,10 +67,10 @@ void Pacifica::draw(uint32_t now) {
     pacifica_one_layer(pacifica_palette_3, sCIStart4, 5 * 256, beatsin8(8, 10,28), beat16(601));
 
     // Add brighter 'whitecaps' where the waves lines up more
-    pacifica_add_whitecaps();
+    pacifica_add_whitecaps(leds);
 
     // Deepen the blues and greens a bit
-    pacifica_deepen_colors();
+    pacifica_deepen_colors(leds);
 }
 
 // Add one layer of waves into the led array
@@ -91,7 +91,7 @@ void Pacifica::pacifica_one_layer(CRGBPalette16& p, uint16_t cistart, uint16_t w
 }
 
 // Add extra 'white' to areas where the four layers of light have lined up brightly
-void Pacifica::pacifica_add_whitecaps() {
+void Pacifica::pacifica_add_whitecaps(CRGB* leds) {
     uint8_t basethreshold = beatsin8(9, 55, 65);
     uint8_t wave = beat8(7);
     
@@ -108,7 +108,7 @@ void Pacifica::pacifica_add_whitecaps() {
 }
 
 // Deepen the blues and greens
-void Pacifica::pacifica_deepen_colors() {
+void Pacifica::pacifica_deepen_colors(CRGB* leds) {
     for (uint16_t i = 0; i < mNumLeds; i++) {
         leds[i].blue = scale8(leds[i].blue,  145); 
         leds[i].green = scale8(leds[i].green, 200); 

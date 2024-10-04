@@ -18,8 +18,8 @@ FASTLED_NAMESPACE_BEGIN
 
 class NoisePalette : public FxGrid {
   public:
-    NoisePalette(CRGB *leds, XYMap xyMap)
-        : FxGrid(xyMap), leds(leds), scale(scale), speed(speed), colorLoop(1) {
+    NoisePalette(XYMap xyMap)
+        : FxGrid(xyMap), scale(scale), speed(speed), colorLoop(1) {
         width = xyMap.getWidth();
         height = xyMap.getHeight();
 
@@ -38,14 +38,14 @@ class NoisePalette : public FxGrid {
 
     void lazyInit() override {}
 
-    void draw(uint32_t now) override {
+    void draw(uint32_t now, CRGB* leds) override {
         fillnoise8();
-        mapNoiseToLEDsUsingPalette();
+        mapNoiseToLEDsUsingPalette(leds);
     }
 
     const char *fxName() const override { return "NoisePalette"; }
 
-    void mapNoiseToLEDsUsingPalette();
+    void mapNoiseToLEDsUsingPalette(CRGB* leds);
 
     uint8_t changeToRandomPalette();
 
@@ -65,7 +65,6 @@ class NoisePalette : public FxGrid {
     void setScale(uint16_t scale) { this->scale = scale; }
 
   private:
-    CRGB *leds;
     uint16_t mX, mY, mZ;
     uint16_t width, height;
     uint16_t speed = 0;
@@ -176,7 +175,7 @@ inline void NoisePalette::setPalettePreset(int paletteIndex) {
     }
 }
 
-inline void NoisePalette::mapNoiseToLEDsUsingPalette() {
+inline void NoisePalette::mapNoiseToLEDsUsingPalette(CRGB* leds) {
     static uint8_t ihue = 0;
 
     for (uint16_t i = 0; i < width; i++) {
