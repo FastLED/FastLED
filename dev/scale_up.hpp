@@ -6,8 +6,9 @@
 #include <FastLED.h>
 
 #include "fx/2d/noisepalette.hpp"
+#include "fx/fx_engine.h"
 #include "fx/2d/animartrix.hpp"
-#include "fx/2d/griddoubler.hpp"
+#include "fx/2d/scale_up.hpp"
 #include "fx/fx_engine.h"
 
 #define LED_PIN 2
@@ -15,6 +16,8 @@
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 
+#define MATRIX_SMALL_WIDTH 16
+#define MATRIX_SMALL_HEIGHT 16
 #define MATRIX_WIDTH 22
 #define MATRIX_HEIGHT 22
 #define GRID_SERPENTINE 1
@@ -26,15 +29,10 @@
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-// NoisePalette noisePalette(xyMap);
-
-XYMap xyMapSmall = XYMap::constructRectangularGrid(16, 16);
+XYMap xyMapSmall = XYMap::constructRectangularGrid(MATRIX_SMALL_WIDTH, MATRIX_SMALL_HEIGHT);
 Animartrix animartrix(xyMapSmall, POLAR_WAVES);
-
-GridDoubler gridDoubler(xyMap, &animartrix);
-
+ScaleUp scaleUp(xyMap, &animartrix);
 FxEngine fxEngine(NUM_LEDS);
-
 
 
 void setup() {
@@ -42,22 +40,10 @@ void setup() {
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip);
     FastLED.setBrightness(96);
-    // noisePalette.lazyInit();
-    // noisePalette.setSpeed(SPEED);
-    //noisePalette.setScale(SCALE);
-    //fxEngine.addFx(&noisePalette);
-    fxEngine.addFx(&gridDoubler);
+    fxEngine.addFx(&scaleUp);
 }
 
 void loop() {
-    uint32_t now = millis();
-    EVERY_N_MILLISECONDS(5000) {
-        //noisePalette.changeToRandomPalette();
-    }
-
-    EVERY_N_SECONDS(1) {
-        //fxEngine.nextFx(now, 500);
-    }
     fxEngine.draw(millis(), leds);
     FastLED.show();
 }

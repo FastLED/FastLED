@@ -1,7 +1,8 @@
-/// @file    NoisePlusPalette.hpp
-/// @brief   Demonstrates how to mix noise generation with color palettes on a
-/// 2D LED matrix
-/// @example NoisePlusPalette.hpp
+/// @file    expander.hpp
+/// @brief   Expands a grid using bilinear interpolation and scaling up. This is useful for 
+///          under powered devices that can't handle the full resolution of the grid,
+///          or if you suddenly need to increase the size of the grid and don't want to re-create
+///          new assets at the new resolution.
 
 #pragma once
 
@@ -32,9 +33,9 @@
 FASTLED_NAMESPACE_BEGIN
 
 // Uses bilearn filtering to double the size of the grid.
-class GridDoubler : public FxGrid {
+class ScaleUp : public FxGrid {
   public:
-    GridDoubler(XYMap xymap, FxGrid *fx) : FxGrid(xymap), mDelegate(fx) {
+    ScaleUp(XYMap xymap, FxGrid *fx) : FxGrid(xymap), mDelegate(fx) {
         // Turn off re-mapping of the delegate's XYMap, since bilinearExpand needs to
         // work in screen coordinates. The final mapping will for this class will
         // still be performed.
@@ -71,8 +72,9 @@ class GridDoubler : public FxGrid {
     const char *fxName() const override { return "GridDoubler"; }
 
   private:
-    void justDrawIt(CRGB *output, const CRGB *input, uint16_t width,
-                    uint16_t height) {
+    // This is useful for debugging. It skips any expansion and just draws the input.
+    void debugJustDrawIt(CRGB *output, const CRGB *input, uint16_t width,
+                         uint16_t height) {
         uint16_t n = mXyMap.getTotal();
         uint16_t total_in = width * height;
         for (uint16_t w = 0; w < width; w++) {

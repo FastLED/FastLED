@@ -14,4 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "grid_doubler.hpp"
+#include "scale_up.hpp"
