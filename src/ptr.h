@@ -103,7 +103,7 @@ public:
     }
 
     // Array subscript operator
-    T& operator[](std::size_t i) const {
+    T& operator[](size_t i) const {
         return arr_[i];
     }
 

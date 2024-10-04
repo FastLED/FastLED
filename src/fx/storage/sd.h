@@ -29,7 +29,7 @@ class SdCardSpi {
     // Not implemented yet.
     // bool restart();
 
-    FileHandle* open(const char *name, uint8_t oflag);
+    FileHandlePtr open(const char *name, uint8_t oflag);
     void close(FileHandle *file);
     bool isOpen() const { return mChipSelect >= 0; }
 

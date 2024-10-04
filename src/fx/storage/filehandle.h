@@ -3,15 +3,19 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "namespace.h"
+#include "ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 namespace storage
 {
 
+class FileHandle;
+typedef RefPtr<FileHandle> FileHandlePtr;
+
 // An abstract class that represents a file handle.
 // Devices like the SD card will return one of these.
-class FileHandle {
+class FileHandle: public Referent {
   public:
     virtual ~FileHandle() {}
     virtual bool available() const = 0;

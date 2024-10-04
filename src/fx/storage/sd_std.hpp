@@ -1,6 +1,7 @@
 #pragma once
 
 #include "namespace.h"
+#include "ptr.h"
 
 #if !__has_include(<SdFat.h>)
 #error "SdFat.h is required for the SD card support"
@@ -78,8 +79,8 @@ void SdCardSpi::end() {
     sd.end();
 }
 
-FileHandle* SdCardSpi::open(const char *name, uint8_t oflag) {
-    return new SdFileHandle(name, oflag);
+FileHandlePtr SdCardSpi::open(const char *name, uint8_t oflag) {
+    return FileHandlePtr(new SdFileHandle(name, oflag));
 }
 
 void SdCardSpi::close(FileHandle *file) {
