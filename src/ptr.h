@@ -135,4 +135,124 @@ private:
     T* arr_; // Managed array pointer
 };
 
+
+class Referent {
+public:
+    Referent() = default;
+    virtual ~Referent() = default;
+    virtual void ref() {
+        mRefCount++;
+    }
+    virtual int ref_count() const {
+        return mRefCount;
+    }
+
+    virtual void unref() {
+        if (--mRefCount == 0) {
+            delete this;
+        }
+    }
+
+protected:
+    Referent(const Referent&) = default;
+    Referent& operator=(const Referent&) = default;
+    Referent(Referent&&) = default;
+    Referent& operator=(Referent&&) = default;
+    int mRefCount = 0;
+};
+
+
+template <typename T>
+class RefPtr {
+public:
+    RefPtr() : referent_(nullptr) {}
+    
+    RefPtr(T* referent) : referent_(referent) {
+        if (referent_) {
+            referent_->ref();
+        }
+    }
+    
+    RefPtr(const RefPtr& other) : referent_(other.referent_) {
+        if (referent_) {
+            referent_->ref();
+        }
+    }
+    
+    RefPtr(RefPtr&& other) noexcept : referent_(other.referent_) {
+        other.referent_ = nullptr;
+    }
+    
+    ~RefPtr() {
+        if (referent_) {
+            referent_->unref();
+        }
+    }
+
+    RefPtr& operator=(T* referent) {
+        if (referent != referent_) {
+            if (referent) {
+                referent->ref();
+            }
+            referent_ = referent;
+        }
+        return *this;
+    }
+
+    RefPtr& operator=(const RefPtr& other) {
+        if (this != &other) {
+            if (other.referent_) {
+                other.referent_->ref();
+            }
+            referent_ = other.referent_;
+        }
+        return *this;
+    }
+
+    RefPtr& operator=(RefPtr&& other) noexcept {
+        if (this != &other) {
+            referent_ = other.referent_;
+            other.referent_ = nullptr;
+        }
+        return *this;
+    }
+
+    T* get() const {
+        return referent_;
+    }
+
+    T* operator->() const {
+        return referent_;
+    }
+
+    T& operator*() const {
+        return *referent_;
+    }
+
+    explicit operator bool() const noexcept {
+        return referent_ != nullptr;
+    }
+
+    void reset(T* referent = nullptr) {
+        if (referent != referent_) {
+            if (referent) {
+                referent->ref();
+            }
+            if (referent_) {
+                referent_->unref();
+            }
+            referent_ = referent;
+        }
+    }
+
+    void swap(RefPtr& other) noexcept {
+        T* temp = referent_;
+        referent_ = other.referent_;
+        other.referent_ = temp;
+    }
+
+private:
+    T* referent_;
+};
+
 FASTLED_NAMESPACE_END
