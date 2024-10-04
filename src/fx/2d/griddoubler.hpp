@@ -59,23 +59,26 @@ class GridDoubler : public FxGrid {
             }
         }
     }
-
     void bilinearExpand(CRGB *output, const CRGB *input, uint16_t width,
                         uint16_t height) {
         uint16_t inputWidth = width / 2;
         uint16_t inputHeight = height / 2;
         uint16_t n = mXyMap.getTotal();
 
+        const uint16_t scale_factor = 256; // 8 bits for fractional part
+
         for (uint16_t y = 0; y < height; y++) {
             for (uint16_t x = 0; x < width; x++) {
-                float fx = (x * (inputWidth - 1.0f)) / (width - 1.0f);
-                float fy = (y * (inputHeight - 1.0f)) / (height - 1.0f);
-                uint16_t ix = static_cast<uint16_t>(fx);
-                uint16_t iy = static_cast<uint16_t>(fy);
-                float dx = fx - ix;
-                float dy = fy - iy;
+                uint32_t fx = ((uint32_t)x * (inputWidth - 1) * scale_factor) /
+                              (width - 1);
+                uint32_t fy = ((uint32_t)y * (inputHeight - 1) * scale_factor) /
+                              (height - 1);
 
-                // Corrected index calculations
+                uint16_t ix = fx / scale_factor;
+                uint16_t iy = fy / scale_factor;
+                uint16_t dx = fx % scale_factor;
+                uint16_t dy = fy % scale_factor;
+
                 uint16_t ix1 = (ix + 1 < inputWidth) ? ix + 1 : ix;
                 uint16_t iy1 = (iy + 1 < inputHeight) ? iy + 1 : iy;
 
@@ -106,13 +109,21 @@ class GridDoubler : public FxGrid {
     }
 
     uint8_t bilinearInterpolate(uint8_t v00, uint8_t v10, uint8_t v01,
-                                uint8_t v11, float dx, float dy) {
-        float a = v00 * (1 - dx) * (1 - dy);
-        float b = v10 * dx * (1 - dy);
-        float c = v01 * (1 - dx) * dy;
-        float d = v11 * dx * dy;
-        float result = a + b + c + d;
-        return static_cast<uint8_t>(std::min(std::max(result, 0.0f), 255.0f));
+                                uint8_t v11, uint16_t dx, uint16_t dy) {
+        uint16_t dx_inv = 255 - dx;
+        uint16_t dy_inv = 255 - dy;
+
+        uint32_t w00 = dx_inv * dy_inv;
+        uint32_t w10 = dx * dy_inv;
+        uint32_t w01 = dx_inv * dy;
+        uint32_t w11 = dx * dy;
+
+        uint32_t sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;
+
+        // Shift right by 16 bits with rounding
+        uint8_t result = (sum + 32768) >> 16;
+
+        return result;
     }
 
     FxGrid *mDelegate;
