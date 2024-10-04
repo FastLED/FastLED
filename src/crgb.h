@@ -21,6 +21,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 struct CRGB;
+struct CRGBA;
 
 /// @defgroup PixelTypes Pixel Data Types (CRGB/CHSV)
 /// @brief Structs that hold pixel color data
@@ -200,7 +201,7 @@ struct CRGB {
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
     /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
-    FASTLED_FORCE_INLINE CRGB& subtractFromRGB(uint8_t d );
+    FASTLED_FORCE_INLINE CRGB& subtractFromRGB(uint8_t d);
 
     /// Subtract a constant of '1' from each channel, saturating at 0x00
     FASTLED_FORCE_INLINE CRGB& operator-- ()
@@ -652,6 +653,26 @@ struct CRGB {
         FairyLightNCC=0xFF9D2A         ///< @htmlcolorblock{FFE42D}
 
     } HTMLColorCode;
+};
+
+
+/// A 4-component color represented as RGBA, where each channel is 8 bits
+/// and the alpha channel is the final byte in the struct. This is
+/// useful for compositing framebuffers together where you want to know
+/// the alpha value of the source pixel.
+struct CRGBA {
+    uint8_t r = 0;
+    uint8_t g = 0;
+    uint8_t b = 0;
+    uint8_t a = 0;
+
+    /// Default constructor
+    CRGBA() = default;
+    CRGBA(CRGB rgb, uint8_t alpha = 255) : r(rgb.r), g(rgb.g), b(rgb.b), a(alpha) {}
+    CRGBA(const CRGBA& other) = default;
+    CRGBA(CRGBA&& other) = default;
+    CRGBA& operator=(const CRGBA& other) = default;
+    CRGBA& operator=(CRGBA&& other) = default;
 };
 
 
