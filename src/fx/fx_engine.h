@@ -53,9 +53,13 @@ public:
     FxEngine(uint16_t numLeds);
     ~FxEngine();
 
-    void addEffect(Fx* effect);
-    void startTransition(uint32_t now, uint32_t duration);
+    void addFx(Fx* effect);
+    //void startTransition(uint32_t now, uint32_t duration);
     void draw(uint32_t now, CRGB* outputBuffer);
+    void nextFx(uint32_t now, uint32_t duration) {
+        mNextIndex = (mNextIndex + 1) % mEffects.size();
+        startTransition(now, duration);
+    }
 
 private:
     uint16_t mNumLeds;
@@ -66,6 +70,7 @@ private:
     uint16_t mCurrentIndex;
     uint16_t mNextIndex;
     Transition mTransition;
+    void startTransition(uint32_t now, uint32_t duration);
 
     void composeLayers(uint32_t now, CRGB* finalBuffer);
 };
@@ -78,7 +83,7 @@ inline FxEngine::FxEngine(uint16_t numLeds)
 
 inline FxEngine::~FxEngine() {}
 
-inline void FxEngine::addEffect(Fx* effect) {
+inline void FxEngine::addFx(Fx* effect) {
     mEffects.push_back(effect);
 }
 

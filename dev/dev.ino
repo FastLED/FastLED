@@ -14,4 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "noisepalette.hpp"
+#include "fx_engine.hpp"
