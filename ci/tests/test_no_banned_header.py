@@ -58,6 +58,8 @@ class TestBinToElf(unittest.TestCase):
         failings = []
         with open(file_path, "r", encoding="utf-8") as f:
             for line_number, line in enumerate(f, 1):
+                if line.startswith("//"):
+                    continue
                 for header in BANNED_HEADERS:
                     if (
                         f"#include <{header}>" in line or f'#include "{header}"' in line

@@ -38,6 +38,10 @@ class XYMap {
         return out;
     }
 
+    static XYMap constructRectangularGrid(uint16_t width, uint16_t height) {
+        return XYMap(width, height, kLineByLine);
+    }
+
     static XYMap constructWithLookUpTable(uint16_t width, uint16_t height,
                                           const uint16_t *lookUpTable) {
         XYMap out(width, height, kLookUpTable);
