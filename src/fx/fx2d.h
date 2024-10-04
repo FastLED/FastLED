@@ -19,6 +19,8 @@ class FxGrid : public Fx {
     uint16_t getHeight() const { return mXyMap.getHeight(); }
     uint16_t getWidth() const { return mXyMap.getWidth(); }
     void setXYMap(const XYMap& xyMap) { mXyMap = xyMap; }
+    XYMap& getXYMap() { return mXyMap; }
+    const XYMap& getXYMap() const { return mXyMap; }
 protected:
     XYMap mXyMap;
 };

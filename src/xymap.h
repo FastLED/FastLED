@@ -76,6 +76,12 @@ class XYMap {
         xyFunction = nullptr;
     }
 
+    void setRectangularGrid() {
+        type = kLineByLine;
+        xyFunction = nullptr;
+        mLookUpTable = nullptr;
+    }
+
     uint16_t mapToIndex(uint16_t x, uint16_t y) const {
         switch (type) {
         case kSeperentine:
