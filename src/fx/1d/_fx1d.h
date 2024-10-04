@@ -15,8 +15,11 @@ class FxStrip : public Fx {
       mXMap = xMap;
     }
 
+    uint16_t xyMap(uint16_t x) const {
+        return mXMap.mapToIndex(x);
+    }
+
 protected:
-    uint16_t mNumLeds;
     XMap mXMap;
 };
 
