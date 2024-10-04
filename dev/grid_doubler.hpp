@@ -28,7 +28,7 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
 // NoisePalette noisePalette(xyMap);
 
-XYMap xyMapSmall = XYMap::constructRectangularGrid(8, 8);
+XYMap xyMapSmall = XYMap::constructRectangularGrid(16, 16);
 Animartrix animartrix(xyMapSmall, POLAR_WAVES);
 
 GridDoubler gridDoubler(xyMap, &animartrix);

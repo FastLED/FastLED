@@ -39,8 +39,14 @@ class GridDoubler : public FxGrid {
         delegateContext.leds = mSurface.get();
         mDelegate->draw(delegateContext);
 
-        //bilinearExpand(context.leds, mSurface.get(), 16, 16, 22, 22);
-        bilinearExpandPowerOf2(context.leds, mSurface.get(), 16, 16, mXyMap);
+        uint16_t in_w = mDelegate->getWidth();
+        uint16_t in_h = mDelegate->getHeight();
+        uint16_t out_w = getWidth();
+        uint16_t out_h = getHeight();
+
+
+        bilinearExpand(context.leds, mSurface.get(), in_w, in_h, out_w, out_h, &mXyMap);
+        //bilinearExpandPowerOf2(context.leds, mSurface.get(), 16, 16, &mXyMap);
         // justDrawIt(context.leds, mSurface.get(), 16, 16);
         // std::cout << "dumping" << std::endl;
     }
