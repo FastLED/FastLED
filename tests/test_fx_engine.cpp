@@ -75,6 +75,22 @@ TEST_CASE("test_fx_engine") {
             CHECK(leds[i] == CRGB::Blue);
         }
     }
+
+    SUBCASE("Multiple transitions") {
+        // First transition: Red to Blue
+        engine.nextFx(0, 1000);
+        engine.draw(1000, leds);
+        for (uint16_t i = 0; i < NUM_LEDS; ++i) {
+            CHECK(leds[i] == CRGB::Blue);
+        }
+
+        // Second transition: Blue to Red
+        engine.nextFx(1000, 1000);
+        engine.draw(2000, leds);
+        for (uint16_t i = 0; i < NUM_LEDS; ++i) {
+            CHECK(leds[i] == CRGB::Red);
+        }
+    }
 }
 
 TEST_CASE("test_transition") {

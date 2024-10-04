@@ -60,7 +60,7 @@ public:
     //void startTransition(uint32_t now, uint32_t duration);
     void draw(uint32_t now, CRGB* outputBuffer);
     void nextFx(uint32_t now, uint32_t duration) {
-        mNextIndex = (mNextIndex + 1) % mEffects.size();
+        mNextIndex = (mCurrentIndex + 1) % mEffects.size();
         startTransition(now, duration);
     }
 
@@ -109,9 +109,8 @@ inline void FxEngine::draw(uint32_t now, CRGB* finalBuffer) {
             }
 
             if (progress == 255) {
-                // Transition complete, update current and next indices
+                // Transition complete, update current index
                 mCurrentIndex = mNextIndex;
-                mNextIndex = (mNextIndex + 1) % mEffects.size();
                 mIsTransitioning = false;
             }
         } else {
