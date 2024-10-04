@@ -82,7 +82,7 @@ void loop() {
     }
 
     EVERY_N_SECONDS(1) {
-        fxEngine.nextFx(now, 500);
+        fxEngine.nextFx(now, 0);
     }
     fxEngine.draw(millis(), leds);
     FastLED.show();

@@ -20,6 +20,9 @@ public:
     ~Transition() {}
 
     uint8_t getProgress(uint32_t now) {
+        if (mNotStarted) {
+            return 0;
+        }
         if (now < mStart) {
             return 0;
         } else if (now >= mStart + mDuration) {
@@ -72,7 +75,6 @@ private:
     Transition mTransition;
     void startTransition(uint32_t now, uint32_t duration);
 
-    void composeLayers(uint32_t now, CRGB* finalBuffer);
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds) 
@@ -98,26 +100,23 @@ inline void FxEngine::draw(uint32_t now, CRGB* finalBuffer) {
         
         if (mIsTransitioning && mEffects.size() > 1) {
             mEffects[mNextIndex]->draw(now, mLayer2.get());
-            composeLayers(now, finalBuffer);
+            
+            uint8_t progress = mTransition.getProgress(now);
+            uint8_t inverse_progress = 255 - progress;
+
+            for (uint16_t i = 0; i < mNumLeds; i++) {
+                finalBuffer[i] = mLayer1[i].nscale8(inverse_progress) + mLayer2[i].nscale8(progress);
+            }
+
+            if (progress == 255) {
+                // Transition complete, update current and next indices
+                mCurrentIndex = mNextIndex;
+                mNextIndex = (mNextIndex + 1) % mEffects.size();
+                mIsTransitioning = false;
+            }
         } else {
             memcpy(finalBuffer, mLayer1.get(), sizeof(CRGB) * mNumLeds);
         }
-    }
-}
-
-inline void FxEngine::composeLayers(uint32_t now, CRGB* finalBuffer) {
-    uint8_t progress = mTransition.getProgress(now);
-    uint8_t inverse_progress = 255 - progress;
-
-    for (uint16_t i = 0; i < mNumLeds; i++) {
-        finalBuffer[i] = mLayer1[i].nscale8(inverse_progress) + mLayer2[i].nscale8(progress);
-    }
-
-    if (progress == 255) {
-        // Transition complete, update current and next indices
-        mCurrentIndex = mNextIndex;
-        mNextIndex = (mNextIndex + 1) % mEffects.size();
-        mIsTransitioning = false;
     }
 }
 
