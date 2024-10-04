@@ -60,6 +60,10 @@ public:
     //void startTransition(uint32_t now, uint32_t duration);
     void draw(uint32_t now, CRGB* outputBuffer);
     void nextFx(uint32_t now, uint32_t duration) {
+        if (mIsTransitioning) {
+            mCurrentIndex = mNextIndex;
+            mIsTransitioning = false;
+        }
         mNextIndex = (mCurrentIndex + 1) % mEffects.size();
         startTransition(now, duration);
     }
