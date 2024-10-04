@@ -16,6 +16,19 @@ FASTLED_FORCE_INLINE uint16_t x_reverse(uint16_t x, uint16_t length) {
 // typedef for xMap function type
 typedef uint16_t (*XFunction)(uint16_t x, uint16_t length);
 
+class LUT16 : public Referent {
+public:
+    LUT16(uint16_t length) : length(length) {
+        data.reset(new uint16_t[length]);
+    }
+
+    uint16_t* getData() const {
+        return data.get();
+    }
+private:
+    scoped_ptr<uint16_t> data;
+    uint16_t length;
+};
 
 
 // XMap holds either a function or a look up table to map x coordinates to a 1D index.
@@ -35,9 +48,11 @@ public:
         return out;
     }
 
+    // When a pointer to a lookup table is passed in then we assume it's
+    // owned by someone else and will not be deleted.
     static XMap constructWithLookUpTable(uint16_t length, const uint16_t *lookUpTable) {
         XMap out = XMap(length, kLookUpTable);
-        out.lookUpTable = lookUpTable;
+        out.mData = lookUpTable;
         return out;
     }
 
@@ -51,12 +66,8 @@ public:
         type = other.type;
         length = other.length;
         xFunction = other.xFunction;
-        lookUpTable = other.lookUpTable;
-        if (other.lookUpTableOwned.get()) {
-            lookUpTableOwned.reset(new uint16_t[length]);
-            memcpy(lookUpTableOwned.get(), lookUpTable, length * sizeof(uint16_t));
-            lookUpTable = lookUpTableOwned.get();
-        }
+        mData = other.mData;
+        mLookUpTable = other.mLookUpTable;
     }
 
     // define the assignment operator
@@ -65,27 +76,22 @@ public:
             type = other.type;
             length = other.length;
             xFunction = other.xFunction;
-            lookUpTable = other.lookUpTable;
-            if (other.lookUpTableOwned.get()) {
-                lookUpTableOwned.reset(new uint16_t[length]);
-                memcpy(lookUpTableOwned.get(), lookUpTable, length * sizeof(uint16_t));
-                lookUpTable = lookUpTableOwned.get();
-            }
+            mData = other.mData;
+            mLookUpTable = other.mLookUpTable;
         }
         return *this;
     }
 
-    void optimizeAsLookupTable() {
+    void convertToLookUpTable() {
         if (type == kLookUpTable) {
             return;
         }
-        if (!lookUpTableOwned.get()) {
-            lookUpTableOwned.reset(new uint16_t[length]);
-        }
-        lookUpTable = lookUpTableOwned.get();
-        uint16_t* data = lookUpTableOwned.get();
+        mLookUpTable.reset();
+        mLookUpTable.reset(new LUT16(length));
+        uint16_t* dataMutable = mLookUpTable->getData();
+        mData = mLookUpTable->getData();
         for (uint16_t x = 0; x < length; x++) {
-            data[x] = mapToIndex(x);
+            dataMutable[x] = mapToIndex(x);
         }
         type = kLookUpTable;
         xFunction = nullptr;
@@ -101,7 +107,7 @@ public:
                 x = x % length;
                 return xFunction(x, length);
             case kLookUpTable:
-                return lookUpTable[x];
+                return mData[x];
         }
         return 0;
     }
@@ -114,31 +120,14 @@ public:
         return type;
     }
 
-    void convertToLookUpTable() {
-        if (type == kLookUpTable) {
-            return;
-        }
-        if (!lookUpTableOwned.get()) {
-            lookUpTableOwned.reset(new uint16_t[length]);
-        }
-        uint16_t *newLookUpTable = lookUpTableOwned.get();
-        for (uint16_t x = 0; x < length; x++) {
-            newLookUpTable[x] = mapToIndex(x);
-        }
-        type = kLookUpTable;
-        xFunction = nullptr;
-        lookUpTable = newLookUpTable;
-    }
-
 
 private:
     XMap(uint16_t length, Type type)
         : length(length), type(type) {
     }
-
     Type type = kLinear;
     uint16_t length = 0;
     XFunction xFunction = nullptr;
-    const uint16_t *lookUpTable = nullptr;
-    scoped_ptr<uint16_t> lookUpTableOwned;
+    const uint16_t *mData = nullptr;
+    RefPtr<LUT16> mLookUpTable;
 };

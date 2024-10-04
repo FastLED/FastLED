@@ -14,8 +14,8 @@
 
 #if COMPILE_NOISEPLUSPALETTE
 
-#include "fx/2d/noisepalette.hpp"
 #include <FastLED.h>
+#include "fx/2d/noisepalette.hpp"
 
 #define LED_PIN 3
 #define BRIGHTNESS 96

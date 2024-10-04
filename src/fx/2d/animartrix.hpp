@@ -70,15 +70,15 @@ enum AnimartrixAnim {
 class FastLEDANIMartRIX;
 class Animartrix : public FxGrid {
   public:
-    Animartrix(CRGB *leds, XYMap xyMap, AnimartrixAnim first_animation): FxGrid(xyMap) {
+    Animartrix(CRGB *leds, XYMap xyMap, AnimartrixAnim which_animation): FxGrid(xyMap) {
         // Note: Swapping out height and width.
         this->leds = leds;
-        this->current_animation = first_animation;        
+        this->current_animation = which_animation;        
     }
     ~Animartrix();
     Animartrix(const Animartrix&) = delete;
     void lazyInit() override {
-        this->mXyMap.optimizeAsLookupTable();
+        this->mXyMap.convertToLookUpTable();
     }
     void draw() override;
     int fxNum() const override { return NUM_ANIMATIONS; }
