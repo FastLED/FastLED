@@ -703,17 +703,17 @@ class LPD1886Controller1250Khz_8bit : public ClocklessController<DATA_PIN, 2 * F
 /// WS2812 controller class @ 800 KHz.
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz : public ClocklessController<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// WS2815 controller class @ 400 KHz.
 /// @copydetails WS2812Controller800Khz
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2815Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 9 * FMUL, 4 * FMUL, RGB_ORDER> {};
 
 /// WS2811 controller class @ 800 KHz.
 /// @copydetails WS2812Controller800Khz
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// DP1903 controller class @ 800 KHz.
@@ -728,12 +728,12 @@ class DP1903Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 16
 
 /// WS2813 controller class.
 /// @copydetails WS2812Controller800Khz
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>                                                             //not tested
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>                                                             //not tested
 class WS2813Controller : public ClocklessController<DATA_PIN, 3 * FMUL, 4 * FMUL, 3 * FMUL, RGB_ORDER> {};
 
 /// WS2811 controller class @ 400 KHz.
 /// @copydetails WS2812Controller800Khz
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2811Controller400Khz : public ClocklessController<DATA_PIN, 4 * FMUL, 10 * FMUL, 6 * FMUL, RGB_ORDER> {};
 
 /// SK6822 controller class.
@@ -880,7 +880,7 @@ template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2811Controller800Khz : public ClocklessController<DATA_PIN, C_NS(320), C_NS(320), C_NS(640), RGB_ORDER> {};
 
 // WS2813 - 320ns, 320ns, 640ns
-template <uint8_t DATA_PIN, EOrder RGB_ORDER = RGB>
+template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2813Controller : public ClocklessController<DATA_PIN, C_NS(320), C_NS(320), C_NS(640), RGB_ORDER> {};
 
 // WS2812 - 250ns, 625ns, 375ns
