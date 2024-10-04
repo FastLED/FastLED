@@ -24,9 +24,9 @@ class NoisePalette : public FxGrid {
         height = xyMap.getHeight();
 
         // Initialize our coordinates to some random values
-        x = random16();
-        y = random16();
-        z = random16();
+        mX = random16();
+        mY = random16();
+        mZ = random16();
 
         setPalettePreset(0);
 
@@ -66,7 +66,7 @@ class NoisePalette : public FxGrid {
 
   private:
     CRGB *leds;
-    uint16_t x, y, z;
+    uint16_t mX, mY, mZ;
     uint16_t width, height;
     uint16_t speed = 0;
     uint16_t scale = 0;
@@ -179,8 +179,8 @@ inline void NoisePalette::setPalettePreset(int paletteIndex) {
 inline void NoisePalette::mapNoiseToLEDsUsingPalette() {
     static uint8_t ihue = 0;
 
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
+    for (uint16_t i = 0; i < width; i++) {
+        for (uint16_t j = 0; j < height; j++) {
             // We use the value at the (i,j) coordinate in the noise
             // array for our brightness, and the flipped value from (j,i)
             // for our pixel's index into the color palette.
@@ -219,12 +219,12 @@ inline void NoisePalette::fillnoise8() {
         dataSmoothing = 200 - (speed * 4);
     }
 
-    for (int i = 0; i < width; i++) {
+    for (uint16_t i = 0; i < width; i++) {
         int ioffset = scale * i;
         for (int j = 0; j < height; j++) {
             int joffset = scale * j;
 
-            uint8_t data = inoise8(x + ioffset, y + joffset, z);
+            uint8_t data = inoise8(mX + ioffset, mY + joffset, mZ);
 
             // The range of the inoise8 function is roughly 16-238.
             // These two operations expand those values out to roughly
@@ -244,11 +244,11 @@ inline void NoisePalette::fillnoise8() {
         }
     }
 
-    z += speed;
+    mZ += speed;
 
     // apply slow drift to X and Y, just for visual variation.
-    x += speed / 8;
-    y -= speed / 16;
+    mX += speed / 8;
+    mY -= speed / 16;
 }
 
 inline uint8_t NoisePalette::changeToRandomPalette() {
