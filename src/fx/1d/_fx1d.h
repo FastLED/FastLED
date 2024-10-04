@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 #include "namespace.h"
-#include "fx/_xmap.h"
+#include "_xmap.h"
 
 FASTLED_NAMESPACE_BEGIN
 

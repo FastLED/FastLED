@@ -2,7 +2,7 @@
 
 #include "namespace.h"
 #include "FastLED.h"
-#include "fx/_fx1d.h"
+#include "fx/1d/_fx1d.h"
 
 FASTLED_NAMESPACE_BEGIN
 

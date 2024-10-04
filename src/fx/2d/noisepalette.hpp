@@ -8,8 +8,8 @@
 #include <stdint.h>
 
 #include "FastLED.h"
-#include "fx/_fx2d.h"
-#include "fx/_xymap.h"
+#include "fx/2d/_fx2d.h"
+#include "fx/2d/_xymap.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
 #include "ptr.h"
