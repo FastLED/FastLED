@@ -40,7 +40,7 @@ class GridDoubler : public FxGrid {
 
         bilinearExpand(context.leds, mSurface.get(), 16, 16);
         // justDrawIt(context.leds, mSurface.get(), 16, 16);
-        std::cout << "dumping" << std::endl;
+        // std::cout << "dumping" << std::endl;
     }
 
     const char *fxName() const override { return "GridDoubler"; }
