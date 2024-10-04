@@ -32,7 +32,7 @@ void setup() {
 
 void loop() {
   EVERY_N_MILLISECONDS(20) {
-    pacifica.draw();
+    pacifica.draw(millis());
     FastLED.show();
   }
 }

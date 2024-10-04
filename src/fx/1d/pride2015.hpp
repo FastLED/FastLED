@@ -19,7 +19,7 @@ public:
     Pride2015(CRGB* leds, uint16_t num_leds) : FxStrip(num_leds), leds(leds) {}
 
     void lazyInit() override {}
-    void draw() override;
+    void draw(uint32_t now) override;
     const char* fxName() const override { return "Pride2015"; }
 
 private:
@@ -31,7 +31,7 @@ private:
 
 // This function draws rainbows with an ever-changing,
 // widely-varying set of parameters.
-void Pride2015::draw() {
+void Pride2015::draw(uint32_t now) {
     if (leds == nullptr || mNumLeds == 0) {
         return;
     }

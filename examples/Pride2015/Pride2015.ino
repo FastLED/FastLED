@@ -23,6 +23,6 @@ void setup() {
 }
 
 void loop() {
-  pride.draw();
+  pride.draw(millis());
   FastLED.show();  
 }

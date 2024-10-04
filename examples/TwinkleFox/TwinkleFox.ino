@@ -22,13 +22,9 @@ void setup() {
 }
 
 void loop() {
-
   EVERY_N_SECONDS(SECONDS_PER_PALETTE) { 
     twinkleFox.chooseNextColorPalette(twinkleFox.targetPalette); 
   }
-  
-
-
-  twinkleFox.draw();
+  twinkleFox.draw(millis());
   FastLED.show();
 }

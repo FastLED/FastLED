@@ -82,7 +82,7 @@ void setup() {
 void loop() {
     EVERY_N_MILLISECONDS(5000) { noisePalette.changeToRandomPalette(); }
 
-    noisePalette.draw();
+    noisePalette.draw(millis());
     FastLED.show();
 }
 

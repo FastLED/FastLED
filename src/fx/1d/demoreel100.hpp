@@ -24,7 +24,7 @@ public:
         start_time = millis();
     }
 
-    void draw() override {
+    void draw(uint32_t now) override {
         if (leds == nullptr || mNumLeds == 0) {
             return;
         }

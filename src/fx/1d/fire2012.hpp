@@ -54,7 +54,7 @@ public:
         delete[] heat;
     }
 
-    void draw() override {
+    void draw(uint32_t now) override {
         if (leds == nullptr) {
             return;
         }

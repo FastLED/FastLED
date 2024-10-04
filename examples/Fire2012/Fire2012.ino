@@ -63,9 +63,9 @@ void setup() {
 
 void loop()
 {
-  fire.draw(); // run simulation frame
+  fire.draw(millis()); // run simulation frame
   
-  FastLED.show(); // display this frame
+  FastLED.show(millis()); // display this frame
   FastLED.delay(1000 / FRAMES_PER_SECOND);
 }
 

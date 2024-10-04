@@ -80,7 +80,7 @@ class Animartrix : public FxGrid {
     void lazyInit() override {
         this->mXyMap.convertToLookUpTable();
     }
-    void draw() override;
+    void draw(uint32_t now) override;
     int fxNum() const override { return NUM_ANIMATIONS; }
     void fxSet(int fx) override;
     int fxGet() const override { return static_cast<int>(current_animation); }
@@ -394,7 +394,7 @@ Animartrix::~Animartrix() {
     }
 }
 
-void Animartrix::draw() {
+void Animartrix::draw(uint32_t now) {
     AnimartrixLoop(*this);
 }
 
