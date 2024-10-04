@@ -21,7 +21,6 @@
 FASTLED_NAMESPACE_BEGIN
 
 struct CRGB;
-struct CRGBA;
 
 /// @defgroup PixelTypes Pixel Data Types (CRGB/CHSV)
 /// @brief Structs that hold pixel color data
@@ -653,26 +652,6 @@ struct CRGB {
         FairyLightNCC=0xFF9D2A         ///< @htmlcolorblock{FFE42D}
 
     } HTMLColorCode;
-};
-
-
-/// A 4-component color represented as RGBA, where each channel is 8 bits
-/// and the alpha channel is the final byte in the struct. This is
-/// useful for compositing framebuffers together where you want to know
-/// the alpha value of the source pixel.
-struct CRGBA {
-    uint8_t r = 0;
-    uint8_t g = 0;
-    uint8_t b = 0;
-    uint8_t a = 0;
-
-    /// Default constructor
-    CRGBA() = default;
-    CRGBA(CRGB rgb, uint8_t alpha = 255) : r(rgb.r), g(rgb.g), b(rgb.b), a(alpha) {}
-    CRGBA(const CRGBA& other) = default;
-    CRGBA(CRGBA&& other) = default;
-    CRGBA& operator=(const CRGBA& other) = default;
-    CRGBA& operator=(CRGBA&& other) = default;
 };
 
 
