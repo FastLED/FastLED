@@ -2,6 +2,7 @@
 #pragma once
 
 #include "namespace.h"
+#include <cstddef>
 
 FASTLED_NAMESPACE_BEGIN
 
