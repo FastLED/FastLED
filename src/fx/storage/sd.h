@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "filehandle.h"
+#include "namespace.h"
 
 
 #if __has_include(<SdFat.h>)
@@ -11,6 +12,8 @@
 #else
 #define FASTLED_HAS_SD 0
 #endif
+
+FASTLED_NAMESPACE_BEGIN
 
 namespace storage
 {
@@ -35,3 +38,5 @@ class SdCardSpi {
 };
 
 } // namespace storage
+
+FASTLED_NAMESPACE_END

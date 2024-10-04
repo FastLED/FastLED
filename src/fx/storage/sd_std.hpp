@@ -2,7 +2,13 @@
 
 #include "namespace.h"
 
+#if !__has_include(<SdFat.h>)
+#error "SdFat.h is required for the SD card support"
+#endif
+
 #include <SdFat.h>
+
+FASTLED_NAMESPACE_BEGIN
 
 namespace storage
 {
@@ -82,3 +88,5 @@ void SdCardSpi::close(FileHandle *file) {
 }
 
 } // namespace storage
+
+FASTLED_NAMESPACE_END

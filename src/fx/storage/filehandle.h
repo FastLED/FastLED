@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 namespace storage
 {
@@ -22,3 +25,5 @@ class FileHandle {
 };
 
 } // namespace storage
+
+FASTLED_NAMESPACE_END
