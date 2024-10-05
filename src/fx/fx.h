@@ -5,15 +5,29 @@
 #include "crgb.h"
 #include "util/transition.h"
 #include "util/draw_context.h"
-
+#include "ptr.h"
 FASTLED_NAMESPACE_BEGIN
 
 
 // Abstract base class for effects on a strip/grid of LEDs.
-class Fx {
+class Fx: public Referent {
   public:
     // Alias DrawContext for use within Fx
     using DrawContext = ::DrawContext;
+
+    template<typename T, typename... Args>
+    static RefPtr<T> make(Args... args) {
+        return RefPtr<T>::FromHeap(new T(args...));
+    }
+
+    // Specialization for RefPtr to unwrap it
+    template<typename T, typename... Args>
+    static RefPtr<T> make(RefPtr<T>, Args... args) {
+        return make<T>(args...);
+    }
+
+
+
     Fx(uint16_t numLeds): mNumLeds(numLeds) {}
 
     /// @param now The current time in milliseconds. Fx writers are encouraged to use this instead of millis() directly
@@ -37,11 +51,16 @@ class Fx {
     virtual void pause() {}  // Called when the fx is paused, usually when a transition has finished.
     virtual void resume() {}  // Called when the fx is resumed after a pause, usually when a transition has started.
 
-    virtual ~Fx() {}
+    virtual void destroy() { delete this; }  // Public virtual destructor function
     virtual void lazyInit() {}
     uint16_t getNumLeds() const { return mNumLeds; }
 
 protected:
+    // protect operator new so that it has to go through Fx
+    void* operator new(size_t size) { return ::operator new(size); }
+    // protect operator delete so that it has to go through Fx
+    void operator delete(void* ptr) { ::operator delete(ptr); }
+    virtual ~Fx() {}  // Protected destructor
     uint16_t mNumLeds;
 };
 

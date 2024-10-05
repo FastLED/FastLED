@@ -6,6 +6,23 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+
+template<typename T>
+class RefPtr;
+
+// Helper type to detect RefPtr
+template<typename T>
+struct is_refptr {
+    static const bool value = false;
+};
+
+template<typename T>
+struct is_refptr<RefPtr<T>> {
+    static const bool value = true;
+};
+
+
+
 template <typename T>
 class scoped_ptr {
 public:
@@ -140,7 +157,7 @@ private:
 class Referent {
 public:
     Referent() = default;
-    virtual ~Referent() = default;
+
     virtual void ref() {
         mRefCount++;
     }
@@ -150,11 +167,16 @@ public:
 
     virtual void unref() {
         if (--mRefCount == 0) {
-            delete this;
+            this->destroy();
         }
     }
 
+    virtual void destroy() {
+        delete this;
+    }
+
 protected:
+    virtual ~Referent() = default;
     Referent(const Referent&) = default;
     Referent& operator=(const Referent&) = default;
     Referent(Referent&&) = default;
@@ -169,6 +191,8 @@ protected:
 template <typename T>
 class RefPtr {
 public:
+    // element_type is the type of the managed object
+    using element_type = T;
     static RefPtr FromHeap(T* referent) {
         return RefPtr(referent, true);
     }

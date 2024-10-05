@@ -16,6 +16,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+class NoisePalette;
+typedef RefPtr<NoisePalette> NoisePalettePtr;
+
 class NoisePalette : public FxGrid {
   public:
     NoisePalette(XYMap xyMap)
@@ -63,6 +66,9 @@ class NoisePalette : public FxGrid {
     }
     void setSpeed(uint16_t speed) { this->speed = speed; }
     void setScale(uint16_t scale) { this->scale = scale; }
+
+  protected:
+    virtual ~NoisePalette() {}
 
   private:
     uint16_t mX, mY, mZ;

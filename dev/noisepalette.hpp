@@ -55,7 +55,7 @@
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePalette noisePalette(xyMap);
+NoisePalettePtr noisePalette = Fx::make<NoisePalettePtr>(xyMap);
 
 
 void setup() {
@@ -63,13 +63,13 @@ void setup() {
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip);
     FastLED.setBrightness(96);
-    noisePalette.lazyInit();
-    noisePalette.setSpeed(SPEED);
-    noisePalette.setScale(SCALE);
+    noisePalette->lazyInit();
+    noisePalette->setSpeed(SPEED);
+    noisePalette->setScale(SCALE);
 }
 
 void loop() {
-    EVERY_N_MILLISECONDS(5000) { noisePalette.changeToRandomPalette(); }
-    noisePalette.draw(millis(), leds);
+    EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
+    noisePalette->draw(DrawContext{millis(), leds});
     FastLED.show();
 }

@@ -13,6 +13,7 @@
 #include "crgb.h"
 #include "namespace.h"
 #include "xymap.h"
+#include "ptr.h"
 #include "fx/fx2d.h"
 
 #define ANIMARTRIX_INTERNAL
@@ -66,6 +67,8 @@ enum AnimartrixAnim {
     NUM_ANIMATIONS
 };
 
+class Animartrix;
+typedef RefPtr<Animartrix> AnimartrixPtr;
 
 class FastLEDANIMartRIX;
 class Animartrix : public FxGrid {
@@ -74,7 +77,7 @@ class Animartrix : public FxGrid {
         // Note: Swapping out height and width.
         this->current_animation = which_animation;        
     }
-    ~Animartrix();
+
     Animartrix(const Animartrix&) = delete;
     void lazyInit() override {
         this->mXyMap.convertToLookUpTable();
@@ -87,6 +90,8 @@ class Animartrix : public FxGrid {
     void fxNext(int fx = 1) override {
         fxSet(fxGet() + fx);
     }
+  protected:
+    ~Animartrix();
   private:
     friend void AnimartrixLoop(Animartrix &self);
     friend class FastLEDANIMartRIX;

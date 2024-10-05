@@ -14,4 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "scale_up.hpp"
+#include "noisepalette.hpp"
