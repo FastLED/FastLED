@@ -92,8 +92,7 @@ class Animartrix : public FxGrid {
     friend class FastLEDANIMartRIX;
     static const char *getAnimationName(AnimartrixAnim animation);
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
-    FastLEDANIMartRIX *impl = nullptr;
-    bool destroy = false;
+    scoped_ptr<FastLEDANIMartRIX> impl;
     CRGB *leds = nullptr; // Only set during draw, then unset back to nullptr.
     AnimartrixAnim current_animation = RGB_BLOBS5;
 
@@ -346,6 +345,8 @@ class FastLEDANIMartRIX : public animartrix_detail::ANIMartRIX {
         case MODULE_EXPERIMENT10:
             Module_Experiment10();
             break;
+        case NUM_ANIMATIONS:
+            break;
         }
     }
 };
@@ -363,15 +364,6 @@ void Animartrix::fxSet(int fx) {
 }
 
 void AnimartrixLoop(Animartrix &self) {
-    if (self.destroy) {
-        if (self.impl) {
-            delete self.impl;
-            self.impl = nullptr;
-        }
-        self.destroy = false;
-        return;
-    }
-
     if (self.prev_animation != self.current_animation) {
         if (self.impl) {
             // Re-initialize object.
@@ -379,17 +371,13 @@ void AnimartrixLoop(Animartrix &self) {
         }
         self.prev_animation = self.current_animation;
     }
-    if (self.impl == nullptr) {
-        self.impl = new FastLEDANIMartRIX(&self);
+    if (!self.impl) {
+        self.impl.reset(new FastLEDANIMartRIX(&self));
     }
     self.impl->loop();
 }
 
 Animartrix::~Animartrix() {
-    if (impl) {
-        delete impl;
-        impl = nullptr;
-    }
 }
 
 void Animartrix::draw(DrawContext ctx) {

@@ -61,7 +61,7 @@ License CC BY-NC 3.0
 #ifdef ANIMARTRIX_PRINT_USES_SERIAL
 #define ANIMARTRIX_PRINT_USES_SERIAL(S) Serial.print(S)
 #else
-#define ANIMARTRIX_PRINT(S)
+#define ANIMARTRIX_PRINT(S) (void)(S)
 #endif
 
 #define num_oscillators 10
@@ -166,6 +166,8 @@ class ANIMartRIX {
     ANIMartRIX() {}
 
     ANIMartRIX(int w, int h) { this->init(w, h); }
+
+    virtual ~ANIMartRIX() {}
 
     virtual uint16_t xyMap(uint16_t x, uint16_t y) = 0;
 

@@ -12,13 +12,13 @@ FX_PTR(NoiseWave);
 class NoiseWave : public FxStrip {
   public:
     NoiseWave(uint16_t num_leds)
-        : FxStrip(num_leds), leds(leds), noiseGeneratorRed(500, 14),
+        : FxStrip(num_leds), noiseGeneratorRed(500, 14),
           noiseGeneratorBlue(500, 10) {}
 
     void lazyInit() override { start_time = millis(); }
 
     void draw(DrawContext context) override {
-        if (leds == nullptr || mNumLeds == 0) {
+        if (context.leds == nullptr || mNumLeds == 0) {
             return;
         }
 
@@ -28,14 +28,13 @@ class NoiseWave : public FxStrip {
             int r = noiseGeneratorRed.LedValue(i, time_now);
             int b = noiseGeneratorBlue.LedValue(i, time_now + 100000) >> 1;
             int g = 0;
-            leds[i] = CRGB(r, g, b);
+            context.leds[i] = CRGB(r, g, b);
         }
     }
 
     const char *fxName() const override { return "NoiseWave"; }
 
   private:
-    CRGB *leds;
     NoiseGenerator noiseGeneratorRed;
     NoiseGenerator noiseGeneratorBlue;
     unsigned long start_time = 0;

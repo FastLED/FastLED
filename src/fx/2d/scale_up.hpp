@@ -90,7 +90,6 @@ class ScaleUp : public FxGrid {
     void noExpand(CRGB *output, const CRGB *input, uint16_t width,
                   uint16_t height) {
         uint16_t n = mXyMap.getTotal();
-        uint16_t total_in = width * height;
         for (uint16_t w = 0; w < width; w++) {
             for (uint16_t h = 0; h < height; h++) {
                 uint16_t idx = mXyMap.mapToIndex(w, h);
