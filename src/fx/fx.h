@@ -8,15 +8,28 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+
+union FxCapabilities {
+    struct {
+        uint32_t alphaChannel : 1;
+        uint32_t reserved : 31;  // Reserved for future use
+    };
+    uint32_t value = 0;  // Allow access to the entire 32-bit value
+
+    bool hasAlphaChannel() const { return alphaChannel; }
+};
+
 // Abstract base class for effects on a strip/grid of LEDs.
 class Fx {
   public:
     typedef DrawContext DrawContext;
+    typedef FxCapabilities Capabilities;
     Fx(uint16_t numLeds): mNumLeds(numLeds) {}
 
     /// @param now The current time in milliseconds. Fx writers are encouraged to use this instead of millis() directly
     /// as this will more deterministic behavior.
     virtual void draw(DrawContext context) = 0;
+    virtual Capabilities getCapabilities() const { return Capabilities(); }
 
     virtual const char* fxName() const = 0;  // Get the name of the current fx. This is the class name if there is only one.
     // Optionally implement these for multi fx classes.
