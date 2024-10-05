@@ -77,6 +77,7 @@ endif()
 
 # Add custom build flags for FastLED
 target_compile_options(FastLED PRIVATE 
+    -Wall
     $<$<CONFIG:Debug>:-g -O0 -DDEBUG -DFASTLED_STUB_IMPL>
     $<$<CONFIG:Release>:-O3>
 )
@@ -104,6 +105,7 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
     endif()
     target_compile_options(${TEST_NAME} PRIVATE 
+        -Wall
         $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
         $<$<CONFIG:Release>:-O3>
     )
