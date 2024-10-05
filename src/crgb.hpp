@@ -35,6 +35,21 @@ FASTLED_FORCE_INLINE CRGB& CRGB::operator-= (const CRGB& rhs )
     return *this;
 }
 
+/// Add a constant of '1' from each channel, saturating at 0xFF
+FASTLED_FORCE_INLINE CRGB& CRGB::operator++ ()
+{
+    addToRGB(1);
+    return *this;
+}
+
+/// @copydoc operator++
+FASTLED_FORCE_INLINE CRGB CRGB::operator++ (int )
+{
+    CRGB retval(*this);
+    ++(*this);
+    return retval;
+}
+
 FASTLED_FORCE_INLINE CRGB& CRGB::subtractFromRGB(uint8_t d)
 {
     r = qsub8( r, d);

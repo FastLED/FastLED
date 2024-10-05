@@ -209,19 +209,10 @@ struct CRGB {
     FASTLED_FORCE_INLINE CRGB operator-- (int );
 
     /// Add a constant of '1' from each channel, saturating at 0xFF
-    FASTLED_FORCE_INLINE CRGB& operator++ ()
-    {
-        addToRGB(1);
-        return *this;
-    }
+    FASTLED_FORCE_INLINE CRGB& operator++ ();
 
     /// @copydoc operator++
-    FASTLED_FORCE_INLINE CRGB operator++ (int )
-    {
-        CRGB retval(*this);
-        ++(*this);
-        return retval;
-    }
+    FASTLED_FORCE_INLINE CRGB operator++ (int );
 
     /// Divide each of the channels by a constant
     FASTLED_FORCE_INLINE CRGB& operator/= (uint8_t d )
