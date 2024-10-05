@@ -99,7 +99,7 @@ TEST_CASE("RefPtr reset functionality") {
 TEST_CASE("RefPtr from static memory") {
     MyClass staticObject;
     {
-        MyClassPtr ptr = MyClassPtr::FromNonHeap(&staticObject);
+        MyClassPtr ptr = MyClassPtr::FromStatic(staticObject);
     }
     CHECK_EQ(staticObject.ref_count(), 0);
     CHECK_NE(staticObject.destructor_signal, 0xdeadbeef);

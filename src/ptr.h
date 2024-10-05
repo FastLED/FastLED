@@ -174,8 +174,8 @@ public:
     }
 
     // This is a special constructor that is used to create a RefPtr from a raw pointer
-    static RefPtr FromNonHeap(T* referent) {
-        return RefPtr(referent, false);
+    static RefPtr FromStatic(T& referent) {
+        return RefPtr(&referent, false);
     }
 
     RefPtr() : referent_(nullptr) {}
