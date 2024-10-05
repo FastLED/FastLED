@@ -15,7 +15,7 @@ class MyClass : public Referent {
 };
 
 TEST_CASE("RefPtr basic functionality") {
-    RefPtr<MyClass> ptr = MyClassPtr::make(new MyClass());
+    RefPtr<MyClass> ptr = MyClassPtr::FromHeap(new MyClass());
 
     SUBCASE("RefPtr is not null after construction") {
         CHECK(ptr.get() != nullptr);
@@ -35,7 +35,7 @@ TEST_CASE("RefPtr basic functionality") {
 TEST_CASE("RefPtr move semantics") {
 
     SUBCASE("Move constructor works correctly") {
-        RefPtr<MyClass> ptr1 = MyClassPtr::make(new MyClass());
+        RefPtr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
         MyClass *rawPtr = ptr1.get();
         RefPtr<MyClass> ptr2(std::move(ptr1));
         CHECK(ptr2.get() == rawPtr);
@@ -44,7 +44,7 @@ TEST_CASE("RefPtr move semantics") {
     }
 
     SUBCASE("Move assignment works correctly") {
-        RefPtr<MyClass> ptr1 = MyClassPtr::make(new MyClass());
+        RefPtr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
         MyClass *rawPtr = ptr1.get();
         RefPtr<MyClass> ptr2;
         ptr2 = std::move(ptr1);
@@ -57,14 +57,14 @@ TEST_CASE("RefPtr move semantics") {
 TEST_CASE("RefPtr reference counting") {
 
     SUBCASE("Reference count increases when copied") {
-        RefPtr<MyClass> ptr1 = MyClassPtr::make(new MyClass());
+        RefPtr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
         RefPtr<MyClass> ptr2 = ptr1;
         CHECK(ptr1->ref_count() == 2);
         CHECK(ptr2->ref_count() == 2);
     }
 
     SUBCASE("Reference count decreases when RefPtr goes out of scope") {
-        RefPtr<MyClass> ptr1 = MyClassPtr::make(new MyClass());
+        RefPtr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
         {
             RefPtr<MyClass> ptr2 = ptr1;
             CHECK(ptr1->ref_count() == 2);
@@ -78,7 +78,7 @@ TEST_CASE("RefPtr reference counting") {
 TEST_CASE("RefPtr reset functionality") {
 
     SUBCASE("Reset to nullptr") {
-        RefPtr<MyClass> ptr = RefPtr<MyClass>::make(new MyClass());
+        RefPtr<MyClass> ptr = RefPtr<MyClass>::FromHeap(new MyClass());
         CHECK_EQ(1, ptr->ref_count());
         ptr->ref();
         CHECK_EQ(2, ptr->ref_count());

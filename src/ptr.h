@@ -169,7 +169,7 @@ protected:
 template <typename T>
 class RefPtr {
 public:
-    static RefPtr make(T* referent) {
+    static RefPtr FromHeap(T* referent) {
         return RefPtr(referent, true);
     }
 
@@ -181,7 +181,7 @@ public:
     RefPtr& operator=(T* referent) = delete;
     
     RefPtr(const RefPtr& other) : referent_(other.referent_) {
-        if (referent_) {
+        if (referent_ && isOwned()) {
             referent_->ref();
         }
     }
@@ -191,23 +191,29 @@ public:
     }
     
     ~RefPtr() {
-        if (referent_) {
+        if (referent_ && isOwned()) {
             referent_->unref();
         }
     }
 
     RefPtr& operator=(const RefPtr& other) {
         if (this != &other) {
-            if (other.referent_) {
-                other.referent_->ref();
+            if (referent_ && isOwned()) {
+                referent_->unref();
             }
             referent_ = other.referent_;
+            if (referent_ && isOwned()) {
+                referent_->ref();
+            }
         }
         return *this;
     }
 
     RefPtr& operator=(RefPtr&& other) noexcept {
         if (this != &other) {
+            if (referent_ && isOwned()) {
+                referent_->unref();
+            }
             referent_ = other.referent_;
             other.referent_ = nullptr;
         }
@@ -231,7 +237,7 @@ public:
     }
 
     void reset() {
-        if (referent_) {
+        if (referent_ && isOwned()) {
             referent_->unref();
         }
         referent_ = nullptr;
@@ -239,12 +245,10 @@ public:
 
     void reset(RefPtr<T>& refptr) {
         if (refptr.referent_ != referent_) {
-            // Ref the new referent first, otherwise some types of complex ownership
-            // graphs could cause the new referent to be deleted before we ref it.
-            if (refptr) {
-                refptr->ref();
+            if (refptr.referent_ && refptr.isOwned()) {
+                refptr.referent_->ref();
             }
-            if (referent_) {
+            if (referent_ && isOwned()) {
                 referent_->unref();
             }
             referent_ = refptr.referent_;
@@ -257,9 +261,13 @@ public:
         other.referent_ = temp;
     }
 
+    bool isOwned() const {
+        return referent_ && referent_->ref_count() > 0;
+    }
+
 private:
-    RefPtr<T>(T* referent, bool) : referent_(referent) { 
-        if (referent_) {
+    RefPtr(T* referent, bool from_heap) : referent_(referent) {
+        if (referent_ && from_heap) {
             referent_->ref();
         }
     }

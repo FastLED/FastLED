@@ -67,8 +67,8 @@ private:
 
 inline FxEngine::FxEngine(uint16_t numLeds) 
     : mNumLeds(numLeds), mIsTransitioning(false), mCurrentIndex(0), mNextIndex(0) {
-    mLayer1 = LayerPtr::make(new Layer());
-    mLayer2 = LayerPtr::make(new Layer());
+    mLayer1 = LayerPtr::FromHeap(new Layer());
+    mLayer2 = LayerPtr::FromHeap(new Layer());
     // TODO: When there is only Fx in the list then don't allocate memory for the second layer
     mLayer1->surface.reset(new CRGB[numLeds]);
     mLayer2->surface.reset(new CRGB[numLeds]);

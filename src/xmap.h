@@ -74,7 +74,7 @@ public:
             return;
         }
         mLookUpTable.reset();
-        mLookUpTable = LUT16Ptr::make(new LUT16(length));
+        mLookUpTable = LUT16Ptr::FromHeap(new LUT16(length));
         uint16_t* dataMutable = mLookUpTable->getData();
         mData = mLookUpTable->getData();
         for (uint16_t x = 0; x < length; x++) {
