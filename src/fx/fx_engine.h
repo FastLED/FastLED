@@ -14,6 +14,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+struct Layer;
+typedef RefPtr<Layer> LayerPtr;
 struct Layer: public Referent {
     scoped_array<CRGB> surface;
     scoped_array<uint8_t> surface_alpha;
@@ -52,8 +54,8 @@ public:
 private:
     uint16_t mNumLeds;
     FixedVector<Fx*, FASTLED_FX_ENGINE_MAX_FX> mEffects;
-    RefPtr<Layer> mLayer1;
-    RefPtr<Layer> mLayer2;
+    LayerPtr mLayer1;
+    LayerPtr mLayer2;
     bool mIsTransitioning;
     bool mWasTransitioning;
     uint16_t mCurrentIndex;
@@ -65,8 +67,8 @@ private:
 
 inline FxEngine::FxEngine(uint16_t numLeds) 
     : mNumLeds(numLeds), mIsTransitioning(false), mCurrentIndex(0), mNextIndex(0) {
-    mLayer1 = new Layer();
-    mLayer2 = new Layer();
+    mLayer1 = LayerPtr::make(new Layer());
+    mLayer2 = LayerPtr::make(new Layer());
     // TODO: When there is only Fx in the list then don't allocate memory for the second layer
     mLayer1->surface.reset(new CRGB[numLeds]);
     mLayer2->surface.reset(new CRGB[numLeds]);

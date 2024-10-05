@@ -7,6 +7,9 @@
 // LUT16 holds a look up table to map data from one
 // value to another. This can be quite big (1/3rd of the frame buffer)
 // so a Referent is used to allow memory sharing.
+
+class LUT16;
+typedef RefPtr<LUT16> LUT16Ptr;
 class LUT16 : public Referent {
 public:
     LUT16(uint16_t length) : length(length) {

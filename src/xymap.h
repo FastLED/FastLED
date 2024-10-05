@@ -45,7 +45,7 @@ class XYMap {
     static XYMap constructWithLookUpTable(uint16_t width, uint16_t height,
                                           const uint16_t *lookUpTable) {
         XYMap out(width, height, kLookUpTable);
-        out.mLookUpTable = RefPtr<LUT16>(new LUT16(width * height));
+        out.mLookUpTable = LUT16Ptr::make(new LUT16(width * height));
         memcpy(out.mLookUpTable->getData(), lookUpTable,
                width * height * sizeof(uint16_t));
         return out;
@@ -65,7 +65,7 @@ class XYMap {
         if (type == kLookUpTable) {
             return;
         }
-        mLookUpTable = RefPtr<LUT16>(new LUT16(width * height));
+        mLookUpTable = LUT16Ptr::make(new LUT16(width * height));
         uint16_t *data = mLookUpTable->getData();
         for (uint16_t y = 0; y < height; y++) {
             for (uint16_t x = 0; x < width; x++) {
@@ -79,7 +79,7 @@ class XYMap {
     void setRectangularGrid() {
         type = kLineByLine;
         xyFunction = nullptr;
-        mLookUpTable = nullptr;
+        mLookUpTable.reset();
     }
 
     uint16_t mapToIndex(uint16_t x, uint16_t y) const {
@@ -113,6 +113,6 @@ class XYMap {
     uint16_t width = 0;
     uint16_t height = 0;
     XYFunction xyFunction = nullptr;
-    RefPtr<LUT16> mLookUpTable; // optional refptr to look up table.
+    LUT16Ptr mLookUpTable; // optional refptr to look up table.
     uint16_t *mData = nullptr;  // direct pointer to look up table data.
 };

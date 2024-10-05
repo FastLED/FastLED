@@ -6,6 +6,8 @@
 #include "doctest.h"
 #include "ptr.h"
 
+class MyClass;
+typedef RefPtr<MyClass> MyClassPtr;
 class MyClass : public Referent {
   public:
     MyClass() {}
@@ -13,7 +15,7 @@ class MyClass : public Referent {
 };
 
 TEST_CASE("RefPtr basic functionality") {
-    RefPtr<MyClass> ptr(new MyClass());
+    RefPtr<MyClass> ptr = MyClassPtr::make(new MyClass());
 
     SUBCASE("RefPtr is not null after construction") {
         CHECK(ptr.get() != nullptr);
@@ -33,7 +35,7 @@ TEST_CASE("RefPtr basic functionality") {
 TEST_CASE("RefPtr move semantics") {
 
     SUBCASE("Move constructor works correctly") {
-        RefPtr<MyClass> ptr1(new MyClass());
+        RefPtr<MyClass> ptr1 = MyClassPtr::make(new MyClass());
         MyClass *rawPtr = ptr1.get();
         RefPtr<MyClass> ptr2(std::move(ptr1));
         CHECK(ptr2.get() == rawPtr);
@@ -42,7 +44,7 @@ TEST_CASE("RefPtr move semantics") {
     }
 
     SUBCASE("Move assignment works correctly") {
-        RefPtr<MyClass> ptr1(new MyClass());
+        RefPtr<MyClass> ptr1 = MyClassPtr::make(new MyClass());
         MyClass *rawPtr = ptr1.get();
         RefPtr<MyClass> ptr2;
         ptr2 = std::move(ptr1);
@@ -55,14 +57,14 @@ TEST_CASE("RefPtr move semantics") {
 TEST_CASE("RefPtr reference counting") {
 
     SUBCASE("Reference count increases when copied") {
-        RefPtr<MyClass> ptr1(new MyClass());
+        RefPtr<MyClass> ptr1 = MyClassPtr::make(new MyClass());
         RefPtr<MyClass> ptr2 = ptr1;
         CHECK(ptr1->ref_count() == 2);
         CHECK(ptr2->ref_count() == 2);
     }
 
     SUBCASE("Reference count decreases when RefPtr goes out of scope") {
-        RefPtr<MyClass> ptr1(new MyClass());
+        RefPtr<MyClass> ptr1 = MyClassPtr::make(new MyClass());
         {
             RefPtr<MyClass> ptr2 = ptr1;
             CHECK(ptr1->ref_count() == 2);
@@ -76,7 +78,7 @@ TEST_CASE("RefPtr reference counting") {
 TEST_CASE("RefPtr reset functionality") {
 
     SUBCASE("Reset to nullptr") {
-        RefPtr<MyClass> ptr(new MyClass());
+        RefPtr<MyClass> ptr = RefPtr<MyClass>::make(new MyClass());
         CHECK_EQ(1, ptr->ref_count());
         ptr->ref();
         CHECK_EQ(2, ptr->ref_count());
@@ -88,15 +90,4 @@ TEST_CASE("RefPtr reset functionality") {
         originalPtr->unref();
     }
 
-    SUBCASE("Reset to new object") {
-        RefPtr<MyClass> ptr(new MyClass());
-        MyClass *originalPtr = ptr.get();
-        originalPtr->ref();
-        MyClass *newObj = new MyClass();
-        ptr.reset(newObj);
-        CHECK(ptr.get() == newObj);
-        CHECK(ptr->ref_count() == 1);
-        CHECK(originalPtr->ref_count() == 1);
-        originalPtr->unref();
-    }
 }

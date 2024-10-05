@@ -162,17 +162,26 @@ protected:
     int mRefCount = 0;
 };
 
-
+// RefPtr is a reference-counted smart pointer that manages the lifetime of an object.
+// This RefPtr has to be used with classes that inherit from Referent.
+// There is an important feature for this RefPtr though, it is designed to bind to pointers
+// that *may* have been allocated on the stack or static memory.
 template <typename T>
 class RefPtr {
 public:
+    static RefPtr make(T* referent) {
+        RefPtr out;
+        referent->ref();
+        out.referent_ = referent;
+        return out;
+    }
+
     RefPtr() : referent_(nullptr) {}
     
-    RefPtr(T* referent) : referent_(referent) {
-        if (referent_) {
-            referent_->ref();
-        }
-    }
+    // Forbidden to convert a raw pointer to a Referent into a RefPtr, because
+    // it's possible that the raw pointer comes from the stack or static memory.
+    RefPtr(T* referent) = delete;
+    RefPtr& operator=(T* referent) = delete;
     
     RefPtr(const RefPtr& other) : referent_(other.referent_) {
         if (referent_) {
@@ -188,16 +197,6 @@ public:
         if (referent_) {
             referent_->unref();
         }
-    }
-
-    RefPtr& operator=(T* referent) {
-        if (referent != referent_) {
-            if (referent) {
-                referent->ref();
-            }
-            referent_ = referent;
-        }
-        return *this;
     }
 
     RefPtr& operator=(const RefPtr& other) {
@@ -234,15 +233,24 @@ public:
         return referent_ != nullptr;
     }
 
-    void reset(T* referent = nullptr) {
-        if (referent != referent_) {
-            if (referent) {
-                referent->ref();
+    void reset() {
+        if (referent_) {
+            referent_->unref();
+        }
+        referent_ = nullptr;
+    }
+
+    void reset(RefPtr<T>& refptr) {
+        if (refptr.referent_ != referent_) {
+            // Ref the new referent first, otherwise some types of complex ownership
+            // graphs could cause the new referent to be deleted before we ref it.
+            if (refptr) {
+                refptr->ref();
             }
             if (referent_) {
                 referent_->unref();
             }
-            referent_ = referent;
+            referent_ = refptr.referent_;
         }
     }
 
