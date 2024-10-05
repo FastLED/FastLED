@@ -14,12 +14,17 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+struct Layer: public Referent {
+    scoped_array<CRGB> surface;
+    scoped_array<uint8_t> surface_alpha;
+};
+
 class FxEngine {
 public:
     FxEngine(uint16_t numLeds);
     ~FxEngine();
 
-    void addFx(Fx* effect);
+    bool addFx(Fx* effect);
     //void startTransition(uint32_t now, uint32_t duration);
     void draw(uint32_t now, CRGB* outputBuffer);
     bool nextFx(uint32_t now, uint32_t duration) {
@@ -47,8 +52,8 @@ public:
 private:
     uint16_t mNumLeds;
     FixedVector<Fx*, FASTLED_FX_ENGINE_MAX_FX> mEffects;
-    scoped_array<CRGB> mLayer1;
-    scoped_array<CRGB> mLayer2;
+    RefPtr<Layer> mLayer1;
+    RefPtr<Layer> mLayer2;
     bool mIsTransitioning;
     bool mWasTransitioning;
     uint16_t mCurrentIndex;
@@ -59,31 +64,38 @@ private:
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds) 
-    : mNumLeds(numLeds), mIsTransitioning(false), mWasTransitioning(false), mCurrentIndex(0), mNextIndex(0) {
-    mLayer1.reset(new CRGB[numLeds]);
-    mLayer2.reset(new CRGB[numLeds]);
+    : mNumLeds(numLeds), mIsTransitioning(false), mCurrentIndex(0), mNextIndex(0) {
+    mLayer1 = new Layer();
+    mLayer2 = new Layer();
+    // TODO: When there is only Fx in the list then don't allocate memory for the second layer
+    mLayer1->surface.reset(new CRGB[numLeds]);
+    mLayer2->surface.reset(new CRGB[numLeds]);
 }
 
 inline FxEngine::~FxEngine() {}
 
-inline void FxEngine::addFx(Fx* effect) {
+inline bool FxEngine::addFx(Fx* effect) {
+    if (mEffects.size() >= FASTLED_FX_ENGINE_MAX_FX) {
+        return false;
+    }
     mEffects.push_back(effect);
+    return true;
 }
 
 inline void FxEngine::draw(uint32_t now, CRGB* finalBuffer) {
     if (!mEffects.empty()) {
-        Fx::DrawContext context = {now, mLayer1.get()};
+        Fx::DrawContext context = {now, mLayer1->surface.get()};
         mEffects[mCurrentIndex]->draw(context);
         
         if (mIsTransitioning && mEffects.size() > 1) {
-            context = {now, mLayer2.get()};
+            context = {now, mLayer2->surface.get()};
             mEffects[mNextIndex]->draw(context);
             
             uint8_t progress = mTransition.getProgress(now);
             uint8_t inverse_progress = 255 - progress;
 
             for (uint16_t i = 0; i < mNumLeds; i++) {
-                finalBuffer[i] = mLayer1[i].nscale8(inverse_progress) + mLayer2[i].nscale8(progress);
+                finalBuffer[i] = mLayer1->surface[i].nscale8(inverse_progress) + mLayer2->surface[i].nscale8(progress);
             }
 
             if (progress == 255) {
@@ -93,7 +105,7 @@ inline void FxEngine::draw(uint32_t now, CRGB* finalBuffer) {
                 mIsTransitioning = false;
             }
         } else {
-            memcpy(finalBuffer, mLayer1.get(), sizeof(CRGB) * mNumLeds);
+            memcpy(finalBuffer, mLayer1->surface.get(), sizeof(CRGB) * mNumLeds);
         }
     }
 }

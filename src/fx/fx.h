@@ -22,7 +22,8 @@ union FxCapabilities {
 // Abstract base class for effects on a strip/grid of LEDs.
 class Fx {
   public:
-    typedef DrawContext DrawContext;
+    // Alias DrawContext for use within Fx
+    using DrawContext = ::DrawContext;
     typedef FxCapabilities Capabilities;
     Fx(uint16_t numLeds): mNumLeds(numLeds) {}
 
