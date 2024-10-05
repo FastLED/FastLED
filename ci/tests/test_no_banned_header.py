@@ -46,6 +46,7 @@ BANNED_HEADERS = [
     "cuchar",
     "cstdint",
     "cstddef",  # this certainally fails
+    "type_traits",  # this certainally fails
 ]
 
 EXCLUDED_FILES = [
