@@ -17,17 +17,37 @@ FASTLED_NAMESPACE_BEGIN
   protected:                                                                   \
     virtual ~FxClassName()
 
+
+
+template<typename T>
+struct ref_unwrapper {
+    using type = T;
+    using ref_type = RefPtr<T>;
+};
+
+// specialization for RefPtr<RefPtr<T>>
+template<typename T>
+struct ref_unwrapper<RefPtr<T>> {
+    using type = T;
+    using ref_type = RefPtr<T>;
+};
+
 // Abstract base class for effects on a strip/grid of LEDs.
 class Fx : public Referent {
   public:
     // Alias DrawContext for use within Fx
     using DrawContext = ::DrawContext;
 
-    // Partial specialization for RefPtr<T> to unwrap it
+    // Works for the intended use case of:
+    //  RefPtr<Fx> fx = Fx::make<MyFx>(args...);
+    // And also for the common accidental case of:
+    //  RefPtr<Fx> fx = Fx::make<RefPtr<Fx>>();
     template <typename T, typename... Args>
-    static RefPtr<T> make(Args... args) {
-        return RefPtr<T>::FromHeap(new T(args...));
+    static typename ref_unwrapper<T>::ref_type make(Args... args) {
+        using U = typename ref_unwrapper<T>::type;
+        return RefPtr<U>::FromHeap(new U(args...));
     }
+
 
     Fx(uint16_t numLeds) : mNumLeds(numLeds) {}
 
