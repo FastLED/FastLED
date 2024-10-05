@@ -75,7 +75,7 @@
 
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
 #ifdef ARDUINO
-#include <Arduino.h>
+#include <Arduino.h>  // ok include
 #endif
 
 /// Clock cycles per microsecond. 

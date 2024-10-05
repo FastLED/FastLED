@@ -136,7 +136,7 @@ void * memmove8 ( void * dst, const void* src, uint16_t num )
 
 #if 0
 // TEST / VERIFICATION CODE ONLY BELOW THIS POINT
-#include <Arduino.h>
+#include <Arduino.h>  // ok include
 #include "lib8tion.h"
 
 void test1abs( int8_t i)

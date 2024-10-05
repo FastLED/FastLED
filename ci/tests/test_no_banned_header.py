@@ -47,6 +47,7 @@ BANNED_HEADERS = [
     "cstdint",
     "cstddef",  # this certainally fails
     "type_traits",  # this certainally fails
+    "Arduino.h",
 ]
 
 EXCLUDED_FILES = [
