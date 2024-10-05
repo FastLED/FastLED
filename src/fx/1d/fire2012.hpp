@@ -11,10 +11,10 @@ FX_PTR(Fire2012);
 /// @brief   Simple one-dimensional fire animation function
 // Fire2012 by Mark Kriegsman, July 2012
 // as part of "Five Elements" shown here: http://youtu.be/knWiGsmgycY
-//// 
+////
 // This basic one-dimensional 'fire' simulation works roughly as follows:
 // There's a underlying array of 'heat' cells, that model the temperature
-// at each point along the line.  Every cycle through the simulation, 
+// at each point along the line.  Every cycle through the simulation,
 // four steps are performed:
 //  1) All cells cool down a little bit, losing heat to the air
 //  2) The heat from each cell drifts 'up' and diffuses a little
@@ -25,7 +25,7 @@ FX_PTR(Fire2012);
 // Temperature is in arbitrary units from 0 (cold black) to 255 (white hot).
 //
 // This simulation scales it self a bit depending on NUM_LEDS; it should look
-// "OK" on anywhere from 20 to 100 LEDs without too much tweaking. 
+// "OK" on anywhere from 20 to 100 LEDs without too much tweaking.
 //
 // I recommend running this simulation at anywhere from 30-100 frames per second,
 // meaning an interframe delay of about 10-35 milliseconds.
@@ -39,39 +39,39 @@ FX_PTR(Fire2012);
 //
 // COOLING: How much does the air cool as it rises?
 // Less cooling = taller flames.  More cooling = shorter flames.
-// Default 50, suggested range 20-100 
+// Default 50, suggested range 20-100
 
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
 
 class Fire2012 : public FxStrip {
-public:
-    Fire2012(uint16_t num_leds, uint8_t cooling = 55, uint8_t sparking = 120, bool reverse_direction = false, const CRGBPalette16& palette = HeatColors_p)
-        : FxStrip(num_leds), cooling(cooling), sparking(sparking), reverse_direction(reverse_direction), palette(palette) {
-        heat = new uint8_t[num_leds]();  // Initialize to zero
-    }
-
-    ~Fire2012() {
-        delete[] heat;
+  public:
+    Fire2012(uint16_t num_leds, uint8_t cooling = 55, uint8_t sparking = 120,
+             bool reverse_direction = false,
+             const CRGBPalette16 &palette = HeatColors_p)
+        : FxStrip(num_leds), cooling(cooling), sparking(sparking),
+          reverse_direction(reverse_direction), palette(palette) {
+        heat.reset(new uint8_t[num_leds]()); // Initialize to zero
     }
 
     void draw(DrawContext context) override {
-        CRGB* leds = context.leds;
+        CRGB *leds = context.leds;
         if (leds == nullptr) {
             return;
         }
 
         // Step 1.  Cool down every cell a little
         for (uint16_t i = 0; i < mNumLeds; i++) {
-            heat[i] = qsub8(heat[i], random8(0, ((cooling * 10) / mNumLeds) + 2));
+            heat[i] =
+                qsub8(heat[i], random8(0, ((cooling * 10) / mNumLeds) + 2));
         }
-      
+
         // Step 2.  Heat from each cell drifts 'up' and diffuses a little
         for (uint16_t k = mNumLeds - 1; k >= 2; k--) {
             heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2]) / 3;
         }
-        
+
         // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
         if (random8() < sparking) {
             int y = random8(7);
@@ -94,14 +94,16 @@ public:
         }
     }
 
-    const char* fxName() const override { return "Fire2012"; }
+    const char *fxName() const override { return "Fire2012"; }
 
-private:
-    uint8_t* heat;
+  private:
+    scoped_array<uint8_t> heat;
     uint8_t cooling;
     uint8_t sparking;
     bool reverse_direction;
     CRGBPalette16 palette;
+
+    FX_PROTECTED_DESTRUCTOR(Fire2012) {}
 };
 
 FASTLED_NAMESPACE_END

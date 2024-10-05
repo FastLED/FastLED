@@ -9,10 +9,10 @@
 
 #include "FastLED.h"
 #include "fx/fx2d.h"
-#include "xymap.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
 #include "ptr.h"
+#include "xymap.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -47,7 +47,7 @@ class NoisePalette : public FxGrid {
 
     const char *fxName() const override { return "NoisePalette"; }
 
-    void mapNoiseToLEDsUsingPalette(CRGB* leds);
+    void mapNoiseToLEDsUsingPalette(CRGB *leds);
 
     uint8_t changeToRandomPalette();
 
@@ -66,9 +66,6 @@ class NoisePalette : public FxGrid {
     void setSpeed(uint16_t speed) { this->speed = speed; }
     void setScale(uint16_t scale) { this->scale = scale; }
 
-  protected:
-    virtual ~NoisePalette() {}
-
   private:
     uint16_t mX, mY, mZ;
     uint16_t width, height;
@@ -80,6 +77,8 @@ class NoisePalette : public FxGrid {
     int currentPaletteIndex = 0;
 
     void fillnoise8();
+
+
 
     uint16_t XY(uint8_t x, uint8_t y) const { return mXyMap.mapToIndex(x, y); }
 
@@ -110,6 +109,7 @@ class NoisePalette : public FxGrid {
             green, green, black, black, purple, purple, black, black, green,
             green, black, black, purple, purple, black, black);
     }
+    FX_PROTECTED_DESTRUCTOR(NoisePalette);
 };
 
 inline void NoisePalette::setPalettePreset(int paletteIndex) {
@@ -180,7 +180,7 @@ inline void NoisePalette::setPalettePreset(int paletteIndex) {
     }
 }
 
-inline void NoisePalette::mapNoiseToLEDsUsingPalette(CRGB* leds) {
+inline void NoisePalette::mapNoiseToLEDsUsingPalette(CRGB *leds) {
     static uint8_t ihue = 0;
 
     for (uint16_t i = 0; i < width; i++) {

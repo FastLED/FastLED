@@ -33,7 +33,7 @@ FX_PTR(TwinkleFox);
 //  So the way this implementation works is that every pixel follows
 //  the exact same wave function over time.  In this particular case,
 //  I chose a sawtooth triangle wave (triwave8) rather than a sine wave,
-//  but the idea is the same: brightness = triwave8( time ).  
+//  but the idea is the same: brightness = triwave8( time ).
 //
 //  The triangle wave function is a piecewise linear function that looks like:
 //
@@ -41,29 +41,29 @@ FX_PTR(TwinkleFox);
 //    /     \ 
 //   /         \ 
 //  /             \ 
-//  
-//  Of course, if all the pixels used the exact same wave form, and 
+//
+//  Of course, if all the pixels used the exact same wave form, and
 //  if they all used the exact same 'clock' for their 'time base', all
 //  the pixels would brighten and dim at once -- which does not look
 //  like twinkling at all.
 //
-//  So to achieve random-looking twinkling, each pixel is given a 
-//  slightly different 'clock' signal.  Some of the clocks run faster, 
+//  So to achieve random-looking twinkling, each pixel is given a
+//  slightly different 'clock' signal.  Some of the clocks run faster,
 //  some run slower, and each 'clock' also has a random offset from zero.
-//  The net result is that the 'clocks' for all the pixels are always out 
+//  The net result is that the 'clocks' for all the pixels are always out
 //  of sync from each other, producing a nice random distribution
 //  of twinkles.
 //
 //  The 'clock speed adjustment' and 'time offset' for each pixel
 //  are generated randomly.  One (normal) approach to implementing that
-//  would be to randomly generate the clock parameters for each pixel 
+//  would be to randomly generate the clock parameters for each pixel
 //  at startup, and store them in some arrays.  However, that consumes
 //  a great deal of precious RAM, and it turns out to be totally
 //  unnessary!  If the random number generate is 'seeded' with the
 //  same starting value every time, it will generate the same sequence
 //  of values every time.  So the clock adjustment parameters for each
-//  pixel are 'stored' in a pseudo-random number generator!  The PRNG 
-//  is reset, and then the first numbers out of it are the clock 
+//  pixel are 'stored' in a pseudo-random number generator!  The PRNG
+//  is reset, and then the first numbers out of it are the clock
 //  adjustment parameters for the first pixel, the second numbers out
 //  of it are the parameters for the second pixel, and so on.
 //  In this way, we can 'store' a stable sequence of thousands of
@@ -83,12 +83,12 @@ FX_PTR(TwinkleFox);
 
 // TwinkleFox effect parameters
 // Overall twinkle speed.
-// 0 (VERY slow) to 8 (VERY fast).  
+// 0 (VERY slow) to 8 (VERY fast).
 // 4, 5, and 6 are recommended, default is 4.
 #define TWINKLE_SPEED 4
 
 // Overall twinkle density.
-// 0 (NONE lit) to 8 (ALL lit at once).  
+// 0 (NONE lit) to 8 (ALL lit at once).
 // Default is 5.
 #define TWINKLE_DENSITY 5
 
@@ -96,34 +96,30 @@ FX_PTR(TwinkleFox);
 #define SECONDS_PER_PALETTE 30
 
 // If AUTO_SELECT_BACKGROUND_COLOR is set to 1,
-// then for any palette where the first two entries 
+// then for any palette where the first two entries
 // are the same, a dimmed version of that color will
 // automatically be used as the background color.
 #define AUTO_SELECT_BACKGROUND_COLOR 0
 
-// If COOL_LIKE_INCANDESCENT is set to 1, colors will 
+// If COOL_LIKE_INCANDESCENT is set to 1, colors will
 // fade out slighted 'reddened', similar to how
 // incandescent bulbs change color as they get dim down.
 #define COOL_LIKE_INCANDESCENT 1
 
-
-
-
 class TwinkleFox : public FxStrip {
-public:
+  public:
     CRGBPalette16 targetPalette;
     CRGBPalette16 currentPalette;
 
-    TwinkleFox(uint16_t num_leds) 
+    TwinkleFox(uint16_t num_leds)
         : FxStrip(num_leds), leds(leds), backgroundColor(CRGB::Black),
           twinkleSpeed(TWINKLE_SPEED), twinkleDensity(TWINKLE_DENSITY),
-          coolLikeIncandescent(COOL_LIKE_INCANDESCENT), autoSelectBackgroundColor(AUTO_SELECT_BACKGROUND_COLOR) {
-        lazyInit(); 
+          coolLikeIncandescent(COOL_LIKE_INCANDESCENT),
+          autoSelectBackgroundColor(AUTO_SELECT_BACKGROUND_COLOR) {
+        lazyInit();
     }
 
-    void lazyInit() override {
-        chooseNextColorPalette(targetPalette);
-    }
+    void lazyInit() override { chooseNextColorPalette(targetPalette); }
 
     void draw(DrawContext context) override {
         EVERY_N_MILLISECONDS(10) {
@@ -132,18 +128,18 @@ public:
         drawTwinkleFox(leds);
     }
 
-    void chooseNextColorPalette(CRGBPalette16& pal);
-    const char* fxName() const override { return "TwinkleFox"; }
+    void chooseNextColorPalette(CRGBPalette16 &pal);
+    const char *fxName() const override { return "TwinkleFox"; }
 
-private:
-    CRGB* leds;
+  private:
+    CRGB *leds;
     CRGB backgroundColor;
     uint8_t twinkleSpeed;
     uint8_t twinkleDensity;
     bool coolLikeIncandescent;
     bool autoSelectBackgroundColor;
 
-    void drawTwinkleFox(CRGB* leds) {
+    void drawTwinkleFox(CRGB *leds) {
         // "PRNG16" is the pseudorandom number generator
         // It MUST be reset to the same starting value each time
         // this function is called, so that the sequence of 'random'
@@ -152,7 +148,8 @@ private:
         uint32_t clock32 = millis();
 
         CRGB bg = backgroundColor;
-        if (autoSelectBackgroundColor && currentPalette[0] == currentPalette[1]) {
+        if (autoSelectBackgroundColor &&
+            currentPalette[0] == currentPalette[1]) {
             bg = currentPalette[0];
             uint8_t bglight = bg.getAverageLight();
             if (bglight > 64) {
@@ -170,8 +167,11 @@ private:
             PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384;
             uint16_t myclockoffset16 = PRNG16;
             PRNG16 = (uint16_t)(PRNG16 * 2053) + 1384;
-            uint8_t myspeedmultiplierQ5_3 = ((((PRNG16 & 0xFF) >> 4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
-            uint32_t myclock30 = (uint32_t)((clock32 * myspeedmultiplierQ5_3) >> 3) + myclockoffset16;
+            uint8_t myspeedmultiplierQ5_3 =
+                ((((PRNG16 & 0xFF) >> 4) + (PRNG16 & 0x0F)) & 0x0F) + 0x08;
+            uint32_t myclock30 =
+                (uint32_t)((clock32 * myspeedmultiplierQ5_3) >> 3) +
+                myclockoffset16;
             uint8_t myunique8 = PRNG16 >> 8;
 
             CRGB c = computeOneTwinkle(myclock30, myunique8);
@@ -195,7 +195,7 @@ private:
         slowcycle16 += sin8(slowcycle16);
         slowcycle16 = (slowcycle16 * 2053) + 1384;
         uint8_t slowcycle8 = (slowcycle16 & 0xFF) + (slowcycle16 >> 8);
-        
+
         uint8_t bright = 0;
         if (((slowcycle8 & 0x0E) / 2) < twinkleDensity) {
             bright = attackDecayWave8(fastcycle8);
@@ -223,13 +223,16 @@ private:
         }
     }
 
-    void coolLikeIncandescentFunction(CRGB& c, uint8_t phase) {
-        if (phase < 128) return;
+    void coolLikeIncandescentFunction(CRGB &c, uint8_t phase) {
+        if (phase < 128)
+            return;
 
         uint8_t cooling = (phase - 128) >> 4;
         c.g = qsub8(c.g, cooling);
         c.b = qsub8(c.b, cooling * 2);
     }
+
+    FX_PROTECTED_DESTRUCTOR(TwinkleFox) {}
 };
 
 // Color palettes
@@ -237,79 +240,69 @@ private:
 // A mostly red palette with green accents and white trim.
 // "CRGB::Gray" is used as white to keep the brightness more uniform.
 const TProgmemRGBPalette16 RedGreenWhite_p FL_PROGMEM = {
-    CRGB::Red, CRGB::Red, CRGB::Red, CRGB::Red, 
-    CRGB::Red, CRGB::Red, CRGB::Red, CRGB::Red, 
-    CRGB::Red, CRGB::Red, CRGB::Gray, CRGB::Gray, 
-    CRGB::Green, CRGB::Green, CRGB::Green, CRGB::Green
-};
+    CRGB::Red,   CRGB::Red,   CRGB::Red,   CRGB::Red,  CRGB::Red,  CRGB::Red,
+    CRGB::Red,   CRGB::Red,   CRGB::Red,   CRGB::Red,  CRGB::Gray, CRGB::Gray,
+    CRGB::Green, CRGB::Green, CRGB::Green, CRGB::Green};
 
 const TProgmemRGBPalette16 Holly_p FL_PROGMEM = {
-    0x00580c, 0x00580c, 0x00580c, 0x00580c, 
-    0x00580c, 0x00580c, 0x00580c, 0x00580c, 
-    0x00580c, 0x00580c, 0x00580c, 0x00580c, 
-    0x00580c, 0x00580c, 0x00580c, 0xB00402
-};
+    0x00580c, 0x00580c, 0x00580c, 0x00580c, 0x00580c, 0x00580c,
+    0x00580c, 0x00580c, 0x00580c, 0x00580c, 0x00580c, 0x00580c,
+    0x00580c, 0x00580c, 0x00580c, 0xB00402};
 
 const TProgmemRGBPalette16 RedWhite_p FL_PROGMEM = {
-    CRGB::Red, CRGB::Red, CRGB::Red, CRGB::Red, 
-    CRGB::Gray, CRGB::Gray, CRGB::Gray, CRGB::Gray,
-    CRGB::Red, CRGB::Red, CRGB::Red, CRGB::Red, 
-    CRGB::Gray, CRGB::Gray, CRGB::Gray, CRGB::Gray
-};
+    CRGB::Red,  CRGB::Red,  CRGB::Red,  CRGB::Red, CRGB::Gray, CRGB::Gray,
+    CRGB::Gray, CRGB::Gray, CRGB::Red,  CRGB::Red, CRGB::Red,  CRGB::Red,
+    CRGB::Gray, CRGB::Gray, CRGB::Gray, CRGB::Gray};
 
 const TProgmemRGBPalette16 BlueWhite_p FL_PROGMEM = {
-    CRGB::Blue, CRGB::Blue, CRGB::Blue, CRGB::Blue, 
-    CRGB::Blue, CRGB::Blue, CRGB::Blue, CRGB::Blue, 
-    CRGB::Blue, CRGB::Blue, CRGB::Blue, CRGB::Blue, 
-    CRGB::Blue, CRGB::Gray, CRGB::Gray, CRGB::Gray
-};
+    CRGB::Blue, CRGB::Blue, CRGB::Blue, CRGB::Blue, CRGB::Blue, CRGB::Blue,
+    CRGB::Blue, CRGB::Blue, CRGB::Blue, CRGB::Blue, CRGB::Blue, CRGB::Blue,
+    CRGB::Blue, CRGB::Gray, CRGB::Gray, CRGB::Gray};
 
 const TProgmemRGBPalette16 FairyLight_p = {
-    CRGB::FairyLight, CRGB::FairyLight, CRGB::FairyLight, CRGB::FairyLight, 
-    CRGB(CRGB::FairyLight).nscale8_constexpr(uint8_t(128)).as_uint32_t(), CRGB(CRGB::FairyLight).nscale8_constexpr(uint8_t(128)).as_uint32_t(), CRGB::FairyLight, CRGB::FairyLight, 
-    CRGB(CRGB::FairyLight).nscale8_constexpr(64).as_uint32_t(), CRGB(CRGB::FairyLight).nscale8_constexpr(64).as_uint32_t(), CRGB::FairyLight, CRGB::FairyLight, 
-    CRGB::FairyLight, CRGB::FairyLight, CRGB::FairyLight, CRGB::FairyLight
-};
+    CRGB::FairyLight,
+    CRGB::FairyLight,
+    CRGB::FairyLight,
+    CRGB::FairyLight,
+    CRGB(CRGB::FairyLight).nscale8_constexpr(uint8_t(128)).as_uint32_t(),
+    CRGB(CRGB::FairyLight).nscale8_constexpr(uint8_t(128)).as_uint32_t(),
+    CRGB::FairyLight,
+    CRGB::FairyLight,
+    CRGB(CRGB::FairyLight).nscale8_constexpr(64).as_uint32_t(),
+    CRGB(CRGB::FairyLight).nscale8_constexpr(64).as_uint32_t(),
+    CRGB::FairyLight,
+    CRGB::FairyLight,
+    CRGB::FairyLight,
+    CRGB::FairyLight,
+    CRGB::FairyLight,
+    CRGB::FairyLight};
 
 const TProgmemRGBPalette16 Snow_p FL_PROGMEM = {
-    0x304048, 0x304048, 0x304048, 0x304048,
-    0x304048, 0x304048, 0x304048, 0x304048,
-    0x304048, 0x304048, 0x304048, 0x304048,
-    0x304048, 0x304048, 0x304048, 0xE0F0FF
-};
+    0x304048, 0x304048, 0x304048, 0x304048, 0x304048, 0x304048,
+    0x304048, 0x304048, 0x304048, 0x304048, 0x304048, 0x304048,
+    0x304048, 0x304048, 0x304048, 0xE0F0FF};
 
 const TProgmemRGBPalette16 RetroC9_p FL_PROGMEM = {
-    0xB80400, 0x902C02, 0xB80400, 0x902C02,
-    0x902C02, 0xB80400, 0x902C02, 0xB80400,
-    0x046002, 0x046002, 0x046002, 0x046002,
-    0x070758, 0x070758, 0x070758, 0x606820
-};
+    0xB80400, 0x902C02, 0xB80400, 0x902C02, 0x902C02, 0xB80400,
+    0x902C02, 0xB80400, 0x046002, 0x046002, 0x046002, 0x046002,
+    0x070758, 0x070758, 0x070758, 0x606820};
 
 const TProgmemRGBPalette16 Ice_p FL_PROGMEM = {
-    0x0C1040, 0x0C1040, 0x0C1040, 0x0C1040,
-    0x0C1040, 0x0C1040, 0x0C1040, 0x0C1040,
-    0x0C1040, 0x0C1040, 0x0C1040, 0x0C1040,
-    0x182080, 0x182080, 0x182080, 0x5080C0
-};
+    0x0C1040, 0x0C1040, 0x0C1040, 0x0C1040, 0x0C1040, 0x0C1040,
+    0x0C1040, 0x0C1040, 0x0C1040, 0x0C1040, 0x0C1040, 0x0C1040,
+    0x182080, 0x182080, 0x182080, 0x5080C0};
 
 // Add or remove palette names from this list to control which color
 // palettes are used, and in what order.
-const TProgmemRGBPalette16* ActivePaletteList[] = {
-    &RetroC9_p,
-    &BlueWhite_p,
-    &RainbowColors_p,
-    &FairyLight_p,
-    &RedGreenWhite_p,
-    &PartyColors_p,
-    &RedWhite_p,
-    &Snow_p,
-    &Holly_p,
-    &Ice_p  
-};
+const TProgmemRGBPalette16 *ActivePaletteList[] = {
+    &RetroC9_p,       &BlueWhite_p,   &RainbowColors_p, &FairyLight_p,
+    &RedGreenWhite_p, &PartyColors_p, &RedWhite_p,      &Snow_p,
+    &Holly_p,         &Ice_p};
 
-void TwinkleFox::chooseNextColorPalette(CRGBPalette16& pal) {
-    const uint8_t numberOfPalettes = sizeof(ActivePaletteList) / sizeof(ActivePaletteList[0]);
-    static uint8_t whichPalette = -1; 
+void TwinkleFox::chooseNextColorPalette(CRGBPalette16 &pal) {
+    const uint8_t numberOfPalettes =
+        sizeof(ActivePaletteList) / sizeof(ActivePaletteList[0]);
+    static uint8_t whichPalette = -1;
     whichPalette = addmod8(whichPalette, 1, numberOfPalettes);
     pal = *(ActivePaletteList[whichPalette]);
 }

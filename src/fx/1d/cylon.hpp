@@ -6,14 +6,14 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-
 FX_PTR(Cylon);
 
-/// @brief   An animation that moves a single LED back and forth (Larson Scanner effect)
+/// @brief   An animation that moves a single LED back and forth (Larson Scanner
+/// effect)
 class Cylon : public FxStrip {
-public:
+  public:
     uint8_t delay_ms;
-    Cylon(uint16_t num_leds, uint8_t fade_amount = 250, uint8_t delay_ms = 10) 
+    Cylon(uint16_t num_leds, uint8_t fade_amount = 250, uint8_t delay_ms = 10)
         : FxStrip(num_leds), fade_amount(fade_amount), delay_ms(delay_ms) {}
 
     void lazyInit() override {
@@ -25,13 +25,13 @@ public:
             return;
         }
 
-        CRGB* leds = context.leds;
+        CRGB *leds = context.leds;
 
         // Set the current LED to the current hue
         leds[position] = CHSV(hue++, 255, 255);
 
         // Fade all LEDs
-        for(uint16_t i = 0; i < mNumLeds; i++) {
+        for (uint16_t i = 0; i < mNumLeds; i++) {
             leds[i].nscale8(fade_amount);
         }
 
@@ -51,14 +51,16 @@ public:
         }
     }
 
-    const char* fxName() const override { return "Cylon"; }
+    const char *fxName() const override { return "Cylon"; }
 
-private:
+  private:
     uint8_t hue = 0;
     uint8_t fade_amount;
 
     bool reverse = false;
     int16_t position = 0;
+
+    FX_PROTECTED_DESTRUCTOR(Cylon) {}
 };
 
 FASTLED_NAMESPACE_END

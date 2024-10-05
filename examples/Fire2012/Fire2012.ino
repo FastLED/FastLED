@@ -51,7 +51,7 @@
 #define REVERSE_DIRECTION false
 
 CRGB leds[NUM_LEDS];
-Fire2012 fire(NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
+Fire2012Ptr fire = Fx::make<Fire2012>(NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
 
 void setup() {
   delay(3000); // sanity delay
@@ -63,7 +63,7 @@ void setup() {
 
 void loop()
 {
-  fire.draw(Fx::DrawContext(millis(), leds)); // run simulation frame
+  fire->draw(Fx::DrawContext(millis(), leds)); // run simulation frame
   
   FastLED.show(millis()); // display this frame
   FastLED.delay(1000 / FRAMES_PER_SECOND);

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "namespace.h"
 #include "FastLED.h"
 #include "fx/fx1d.h"
+#include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -17,17 +17,19 @@ FX_PTR(Pride2015);
 // by Mark Kriegsman
 
 class Pride2015 : public FxStrip {
-public:
+  public:
     Pride2015(uint16_t num_leds) : FxStrip(num_leds) {}
 
     void lazyInit() override {}
     void draw(Fx::DrawContext context) override;
-    const char* fxName() const override { return "Pride2015"; }
+    const char *fxName() const override { return "Pride2015"; }
 
-private:
+  private:
     uint16_t mPseudotime = 0;
     uint16_t mLastMillis = 0;
     uint16_t mHue16 = 0;
+
+    FX_PROTECTED_DESTRUCTOR(Pride2015) {}
 };
 
 // This function draws rainbows with an ever-changing,
@@ -44,14 +46,14 @@ void Pride2015::draw(Fx::DrawContext ctx) {
 
     uint16_t hue16 = mHue16;
     uint16_t hueinc16 = beatsin88(113, 1, 3000);
-  
+
     uint16_t ms = millis();
     uint16_t deltams = ms - mLastMillis;
     mLastMillis = ms;
     mPseudotime += deltams * msmultiplier;
     mHue16 += deltams * beatsin88(400, 5, 9);
     uint16_t brightnesstheta16 = mPseudotime;
-  
+
     // set master brightness control
     for (uint16_t i = 0; i < mNumLeds; i++) {
         hue16 += hueinc16;
@@ -63,11 +65,11 @@ void Pride2015::draw(Fx::DrawContext ctx) {
         uint16_t bri16 = (uint32_t)((uint32_t)b16 * (uint32_t)b16) / 65536;
         uint8_t bri8 = (uint32_t)(((uint32_t)bri16) * brightdepth) / 65536;
         bri8 += (255 - brightdepth);
-    
+
         CRGB newcolor = CHSV(hue8, sat8, bri8);
-    
+
         uint16_t pixelnumber = (mNumLeds - 1) - i;
-    
+
         nblend(ctx.leds[pixelnumber], newcolor, 64);
     }
 }

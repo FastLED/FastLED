@@ -1,6 +1,5 @@
 #pragma once
 
-
 // FastLED Adapter for the animartrix fx library.
 // Copyright Stefen Petrick 2023.
 // Adapted to C++ by Netmindz 2023.
@@ -8,13 +7,13 @@
 // For details on the animartrix library and licensing information, see
 // fx/aninamtrix_detail.hpp
 
-#include <iostream>  // ok include
+#include <iostream> // ok include
 
 #include "crgb.h"
-#include "namespace.h"
-#include "xymap.h"
-#include "ptr.h"
 #include "fx/fx2d.h"
+#include "namespace.h"
+#include "ptr.h"
+#include "xymap.h"
 
 #define ANIMARTRIX_INTERNAL
 #include "animartrix_detail.hpp"
@@ -72,25 +71,22 @@ enum AnimartrixAnim {
 class FastLEDANIMartRIX;
 class Animartrix : public FxGrid {
   public:
-    Animartrix(XYMap xyMap, AnimartrixAnim which_animation): FxGrid(xyMap) {
+    Animartrix(XYMap xyMap, AnimartrixAnim which_animation) : FxGrid(xyMap) {
         // Note: Swapping out height and width.
-        this->current_animation = which_animation;        
+        this->current_animation = which_animation;
     }
 
-    Animartrix(const Animartrix&) = delete;
-    void lazyInit() override {
-        this->mXyMap.convertToLookUpTable();
-    }
+    Animartrix(const Animartrix &) = delete;
+    void lazyInit() override { this->mXyMap.convertToLookUpTable(); }
     void draw(DrawContext context) override;
     int fxNum() const override { return NUM_ANIMATIONS; }
     void fxSet(int fx) override;
     int fxGet() const override { return static_cast<int>(current_animation); }
-    const char* fxName() const override { return getAnimationName(current_animation); }
-    void fxNext(int fx = 1) override {
-        fxSet(fxGet() + fx);
+    const char *fxName() const override {
+        return getAnimationName(current_animation);
     }
-  protected:
-    ~Animartrix();
+    void fxNext(int fx = 1) override { fxSet(fxGet() + fx); }
+
   private:
     friend void AnimartrixLoop(Animartrix &self);
     friend class FastLEDANIMartRIX;
@@ -98,15 +94,16 @@ class Animartrix : public FxGrid {
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
     FastLEDANIMartRIX *impl = nullptr;
     bool destroy = false;
-    CRGB *leds = nullptr;  // Only set during draw, then unset back to nullptr.
+    CRGB *leds = nullptr; // Only set during draw, then unset back to nullptr.
     AnimartrixAnim current_animation = RGB_BLOBS5;
+
+    FX_PROTECTED_DESTRUCTOR(Animartrix);
 };
 
 void AnimartrixLoop(Animartrix &self);
 
 /// ##################################################
 /// Details with the implementation of Animartrix
-
 
 const char *Animartrix::getAnimationName(AnimartrixAnim animation) {
     switch (animation) {
@@ -353,7 +350,6 @@ class FastLEDANIMartRIX : public animartrix_detail::ANIMartRIX {
     }
 };
 
-
 void Animartrix::fxSet(int fx) {
     int curr = fxGet();
     if (fx < 0) {
@@ -365,7 +361,6 @@ void Animartrix::fxSet(int fx) {
     fx = fx % NUM_ANIMATIONS;
     current_animation = static_cast<AnimartrixAnim>(fx);
 }
-
 
 void AnimartrixLoop(Animartrix &self) {
     if (self.destroy) {

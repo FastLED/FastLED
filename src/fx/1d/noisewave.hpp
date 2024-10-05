@@ -1,23 +1,21 @@
 #pragma once
 
 #include "FastLED.h"
-#include "noisegen.h"
 #include "fx/fx1d.h"
 #include "namespace.h"
+#include "noisegen.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 FX_PTR(NoiseWave);
 
 class NoiseWave : public FxStrip {
-public:
-    NoiseWave(uint16_t num_leds) 
-        : FxStrip(num_leds), leds(leds),
-          noiseGeneratorRed(500, 14), noiseGeneratorBlue(500, 10) {}
+  public:
+    NoiseWave(uint16_t num_leds)
+        : FxStrip(num_leds), leds(leds), noiseGeneratorRed(500, 14),
+          noiseGeneratorBlue(500, 10) {}
 
-    void lazyInit() override {
-        start_time = millis();
-    }
+    void lazyInit() override { start_time = millis(); }
 
     void draw(DrawContext context) override {
         if (leds == nullptr || mNumLeds == 0) {
@@ -34,13 +32,15 @@ public:
         }
     }
 
-    const char* fxName() const override { return "NoiseWave"; }
+    const char *fxName() const override { return "NoiseWave"; }
 
-private:
-    CRGB* leds;
+  private:
+    CRGB *leds;
     NoiseGenerator noiseGeneratorRed;
     NoiseGenerator noiseGeneratorBlue;
     unsigned long start_time = 0;
+
+    FX_PROTECTED_DESTRUCTOR(NoiseWave) {}
 };
 
 FASTLED_NAMESPACE_END

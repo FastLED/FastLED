@@ -9,12 +9,12 @@
 #include <stdint.h>
 
 #include "FastLED.h"
+#include "bilinear_expansion.h"
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
 #include "ptr.h"
 #include "xymap.h"
-#include "bilinear_expansion.h"
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.
 // If you are somehow running this on AVR then you probably want this if
@@ -68,18 +68,19 @@ class ScaleUp : public FxGrid {
         }
     }
 
-    void expand(const CRGB *input, CRGB *output, uint16_t width, uint16_t height, XYMap mXyMap) {
-        #if FASTLED_SCALE_UP == FASTLED_SCALE_UP_ALWAYS_POWER_OF_2
+    void expand(const CRGB *input, CRGB *output, uint16_t width,
+                uint16_t height, XYMap mXyMap) {
+#if FASTLED_SCALE_UP == FASTLED_SCALE_UP_ALWAYS_POWER_OF_2
         bilinearExpandPowerOf2(input, output, width, height, mXyMap);
-        #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_HIGH_PRECISION
+#elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_HIGH_PRECISION
         bilinearExpandArbitrary(input, output, width, height, mXyMap);
-        #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_DECIDE_AT_RUNTIME
+#elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_DECIDE_AT_RUNTIME
         bilinearExpand(input, output, width, height, mXyMap);
-        #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_FORCE_FLOATING_POINT
+#elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_FORCE_FLOATING_POINT
         bilinearExpandPowerOf2Float(input, output, width, height, mXyMap);
-        #else
-        #error "Invalid FASTLED_SCALE_UP"
-        #endif
+#else
+#error "Invalid FASTLED_SCALE_UP"
+#endif
     }
 
     const char *fxName() const override { return "GridDoubler"; }
@@ -101,6 +102,8 @@ class ScaleUp : public FxGrid {
     }
     FxGrid *mDelegate;
     scoped_array<CRGB> mSurface;
+
+    FX_PROTECTED_DESTRUCTOR(ScaleUp);
 };
 
 FASTLED_NAMESPACE_END
