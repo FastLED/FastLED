@@ -19,6 +19,7 @@ typedef RefPtr<Layer> LayerPtr;
 struct Layer: public Referent {
     scoped_array<CRGB> surface;
     scoped_array<uint8_t> surface_alpha;
+    // RefPtr<Fx> fx;
 };
 
 class FxEngine {
@@ -54,8 +55,7 @@ public:
 private:
     uint16_t mNumLeds;
     FixedVector<Fx*, FASTLED_FX_ENGINE_MAX_FX> mEffects;
-    LayerPtr mLayer1;
-    LayerPtr mLayer2;
+    LayerPtr mLayers[2];
     bool mIsTransitioning;
     bool mWasTransitioning;
     uint16_t mCurrentIndex;
@@ -67,11 +67,11 @@ private:
 
 inline FxEngine::FxEngine(uint16_t numLeds) 
     : mNumLeds(numLeds), mIsTransitioning(false), mCurrentIndex(0), mNextIndex(0) {
-    mLayer1 = LayerPtr::FromHeap(new Layer());
-    mLayer2 = LayerPtr::FromHeap(new Layer());
+    mLayers[0] = LayerPtr::FromHeap(new Layer());
+    mLayers[1] = LayerPtr::FromHeap(new Layer());
     // TODO: When there is only Fx in the list then don't allocate memory for the second layer
-    mLayer1->surface.reset(new CRGB[numLeds]);
-    mLayer2->surface.reset(new CRGB[numLeds]);
+    mLayers[0]->surface.reset(new CRGB[numLeds]);
+    mLayers[1]->surface.reset(new CRGB[numLeds]);
 }
 
 inline FxEngine::~FxEngine() {}
@@ -86,18 +86,20 @@ inline bool FxEngine::addFx(Fx* effect) {
 
 inline void FxEngine::draw(uint32_t now, CRGB* finalBuffer) {
     if (!mEffects.empty()) {
-        Fx::DrawContext context = {now, mLayer1->surface.get()};
+        Fx::DrawContext context = {now, mLayers[0]->surface.get()};
         mEffects[mCurrentIndex]->draw(context);
         
         if (mIsTransitioning && mEffects.size() > 1) {
-            context = {now, mLayer2->surface.get()};
+            context = {now, mLayers[1]->surface.get()};
             mEffects[mNextIndex]->draw(context);
             
             uint8_t progress = mTransition.getProgress(now);
             uint8_t inverse_progress = 255 - progress;
 
             for (uint16_t i = 0; i < mNumLeds; i++) {
-                finalBuffer[i] = mLayer1->surface[i].nscale8(inverse_progress) + mLayer2->surface[i].nscale8(progress);
+                CRGB p0 = mLayers[0]->surface[i].nscale8(inverse_progress);
+                CRGB p1 = mLayers[1]->surface[i].nscale8(progress);
+                finalBuffer[i] = p0 + p1;
             }
 
             if (progress == 255) {
@@ -107,7 +109,7 @@ inline void FxEngine::draw(uint32_t now, CRGB* finalBuffer) {
                 mIsTransitioning = false;
             }
         } else {
-            memcpy(finalBuffer, mLayer1->surface.get(), sizeof(CRGB) * mNumLeds);
+            memcpy(finalBuffer, mLayers[0]->surface.get(), sizeof(CRGB) * mNumLeds);
         }
     }
 }
