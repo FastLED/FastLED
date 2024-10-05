@@ -107,7 +107,7 @@ class XYMap {
 
   private:
     XYMap(uint16_t width, uint16_t height, XyMapType type)
-        : width(width), height(height), type(type) {}
+        : type(type), width(width), height(height) {}
 
     XyMapType type = kSeperentine;
     uint16_t width = 0;
