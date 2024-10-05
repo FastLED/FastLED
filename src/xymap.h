@@ -54,8 +54,8 @@ class XYMap {
     // is_serpentine is true by default. You probably want this unless you are
     // using a different layout
     XYMap(uint16_t width, uint16_t height, bool is_serpentine = true)
-        : width(width), height(height),
-          type(is_serpentine ? kSeperentine : kLineByLine) {}
+        : type(is_serpentine ? kSeperentine : kLineByLine),
+          width(width), height(height) {}
 
     XYMap(const XYMap &other)
         : type(other.type), width(other.width), height(other.height),
@@ -109,9 +109,9 @@ class XYMap {
     XYMap(uint16_t width, uint16_t height, XyMapType type)
         : type(type), width(width), height(height) {}
 
-    XyMapType type = kSeperentine;
-    uint16_t width = 0;
-    uint16_t height = 0;
+    XyMapType type;
+    uint16_t width;
+    uint16_t height;
     XYFunction xyFunction = nullptr;
     LUT16Ptr mLookUpTable; // optional refptr to look up table.
     uint16_t *mData = nullptr;  // direct pointer to look up table data.
