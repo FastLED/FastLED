@@ -155,4 +155,135 @@ uint8_t bilinearInterpolatePowerOf2(uint8_t v00, uint8_t v10, uint8_t v01,
 }
 
 
+/// @file    NoisePlusPalette.hpp
+/// @brief   Demonstrates how to mix noise generation with color palettes on a
+/// 2D LED matrix
+/// @example NoisePlusPalette.hpp
+
+#include "bilinear_expansion.h"
+#include "crgb.h"
+#include "namespace.h"
+#include "xymap.h"
+#include <stdint.h>
+
+FASTLED_NAMESPACE_BEGIN
+
+// Floating-point version of bilinear interpolation
+uint8_t bilinearInterpolateFloat(uint8_t v00, uint8_t v10, uint8_t v01,
+                                 uint8_t v11, float dx, float dy) {
+    float dx_inv = 1.0f - dx;
+    float dy_inv = 1.0f - dy;
+
+    // Calculate the weights for each corner
+    float w00 = dx_inv * dy_inv;
+    float w10 = dx * dy_inv;
+    float w01 = dx_inv * dy;
+    float w11 = dx * dy;
+
+    // Compute the weighted sum
+    float sum = v00 * w00 + v10 * w10 + v01 * w01 + v11 * w11;
+
+    // Clamp the result to [0, 255] and round
+    uint8_t result = static_cast<uint8_t>(sum + 0.5f);
+
+    return result;
+}
+
+// Floating-point version for arbitrary grid sizes
+void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
+                                  uint16_t inputWidth, uint16_t inputHeight,
+                                  XYMap xyMap) {
+    uint16_t n = xyMap.getTotal();
+    uint16_t outputWidth = xyMap.getWidth();
+    uint16_t outputHeight = xyMap.getHeight();
+
+    for (uint16_t y = 0; y < outputHeight; y++) {
+        for (uint16_t x = 0; x < outputWidth; x++) {
+            // Map output pixel to input grid position
+            float fx = static_cast<float>(x) * (inputWidth - 1) / (outputWidth - 1);
+            float fy = static_cast<float>(y) * (inputHeight - 1) / (outputHeight - 1);
+
+            uint16_t ix = static_cast<uint16_t>(fx);
+            uint16_t iy = static_cast<uint16_t>(fy);
+            float dx = fx - ix;
+            float dy = fy - iy;
+
+            uint16_t ix1 = (ix + 1 < inputWidth) ? ix + 1 : ix;
+            uint16_t iy1 = (iy + 1 < inputHeight) ? iy + 1 : iy;
+
+            uint16_t i00 = iy * inputWidth + ix;
+            uint16_t i10 = iy * inputWidth + ix1;
+            uint16_t i01 = iy1 * inputWidth + ix;
+            uint16_t i11 = iy1 * inputWidth + ix1;
+
+            CRGB c00 = input[i00];
+            CRGB c10 = input[i10];
+            CRGB c01 = input[i01];
+            CRGB c11 = input[i11];
+
+            CRGB result;
+            result.r = bilinearInterpolateFloat(c00.r, c10.r, c01.r, c11.r, dx, dy);
+            result.g = bilinearInterpolateFloat(c00.g, c10.g, c01.g, c11.g, dx, dy);
+            result.b = bilinearInterpolateFloat(c00.b, c10.b, c01.b, c11.b, dx, dy);
+
+            uint16_t idx = xyMap.mapToIndex(x, y);
+            if (idx < n) {
+                output[idx] = result;
+            }
+        }
+    }
+}
+
+// Floating-point version for power-of-two grid sizes
+void bilinearExpandPowerOf2Float(const CRGB *input, CRGB *output,
+                                 uint8_t inputWidth, uint8_t inputHeight,
+                                 XYMap xyMap) {
+    uint8_t outputWidth = xyMap.getWidth();
+    uint8_t outputHeight = xyMap.getHeight();
+    if (outputWidth != xyMap.getWidth() || outputHeight != xyMap.getHeight()) {
+        // xyMap has width and height that do not fit in a uint8_t.
+        return;
+    }
+    uint16_t n = xyMap.getTotal();
+
+    for (uint8_t y = 0; y < outputHeight; y++) {
+        for (uint8_t x = 0; x < outputWidth; x++) {
+            // Map output pixel to input grid position
+            float fx = static_cast<float>(x) * (inputWidth - 1) / (outputWidth - 1);
+            float fy = static_cast<float>(y) * (inputHeight - 1) / (outputHeight - 1);
+
+            uint8_t ix = static_cast<uint8_t>(fx);
+            uint8_t iy = static_cast<uint8_t>(fy);
+            float dx = fx - ix;
+            float dy = fy - iy;
+
+            uint8_t ix1 = (ix + 1 < inputWidth) ? ix + 1 : ix;
+            uint8_t iy1 = (iy + 1 < inputHeight) ? iy + 1 : iy;
+
+            uint16_t i00 = iy * inputWidth + ix;
+            uint16_t i10 = iy * inputWidth + ix1;
+            uint16_t i01 = iy1 * inputWidth + ix;
+            uint16_t i11 = iy1 * inputWidth + ix1;
+
+            CRGB c00 = input[i00];
+            CRGB c10 = input[i10];
+            CRGB c01 = input[i01];
+            CRGB c11 = input[i11];
+
+            CRGB result;
+            result.r = bilinearInterpolateFloat(c00.r, c10.r, c01.r, c11.r, dx, dy);
+            result.g = bilinearInterpolateFloat(c00.g, c10.g, c01.g, c11.g, dx, dy);
+            result.b = bilinearInterpolateFloat(c00.b, c10.b, c01.b, c11.b, dx, dy);
+
+            uint16_t idx = xyMap.mapToIndex(x, y);
+            if (idx < n) {
+                output[idx] = result;
+            }
+        }
+    }
+}
+
+FASTLED_NAMESPACE_END
+
+
 FASTLED_NAMESPACE_END

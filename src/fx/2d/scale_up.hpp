@@ -19,15 +19,20 @@
 // Optimized for 2^n grid sizes in terms of both memory and performance.
 // If you are somehow running this on AVR then you probably want this if
 // you can make your grid size a power of 2.
-#define FASTLED_GRID_EXPANDER_STRATEGY_ALWAYS_POWER_OF_2 0 // 0 for always power of 2.
-// Uses more memory than FASTLED_GRID_EXPANDER_STRATEGY_ALWAYS_POWER_OF_2 but can handle
+#define FASTLED_SCALE_UP_ALWAYS_POWER_OF_2 0 // 0 for always power of 2.
+// Uses more memory than FASTLED_SCALE_UP_ALWAYS_POWER_OF_2 but can handle
 // arbitrary grid sizes.
-#define FASTLED_GRID_EXPANDER_STRATEGY_HIGH_PRECISION    1 // 1 for always choose high precision.
-// Uses the most memory but is faster for 2^n grid sizes which are common.
-#define FASTLED_GRID_EXPANDER_STRATEGY_DECIDE_AT_RUNTIME 2 // 2 for runtime decision.
+#define FASTLED_SCALE_UP_HIGH_PRECISION    1 // 1 for always choose high precision.
+// Uses the most executable memory because both low and high precision versions are compiled in.
+// If the grid size is a power of 2 then the faster version is used. Note that the floating point
+// version has to be directly specified because in testing it offered no benefits over the integer
+// versions.
+#define FASTLED_SCALE_UP_DECIDE_AT_RUNTIME 2 // 2 for runtime decision.
 
-#ifndef FASTLED_GRID_EXPANDER_STRATEGY
-#define FASTLED_GRID_EXPANDER_STRATEGY FASTLED_GRID_EXPANDER_STRATEGY_DECIDE_AT_RUNTIME
+#define FASTLED_SCALE_UP_FORCE_FLOATING_POINT 3 // Warning, this is slow.
+
+#ifndef FASTLED_SCALE_UP
+#define FASTLED_SCALE_UP FASTLED_SCALE_UP_DECIDE_AT_RUNTIME
 #endif
 
 FASTLED_NAMESPACE_BEGIN
@@ -62,14 +67,16 @@ class ScaleUp : public FxGrid {
     }
 
     void expand(const CRGB *input, CRGB *output, uint16_t width, uint16_t height, XYMap mXyMap) {
-        #if FASTLED_GRID_EXPANDER_STRATEGY == FASTLED_GRID_EXPANDER_STRATEGY_ALWAYS_POWER_OF_2
+        #if FASTLED_SCALE_UP == FASTLED_SCALE_UP_ALWAYS_POWER_OF_2
         bilinearExpandPowerOf2(input, output, width, height, mXyMap);
-        #elif FASTLED_GRID_EXPANDER_STRATEGY == FASTLED_GRID_EXPANDER_STRATEGY_HIGH_PRECISION
+        #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_HIGH_PRECISION
         bilinearExpandArbitrary(input, output, width, height, mXyMap);
-        #elif FASTLED_GRID_EXPANDER_STRATEGY == FASTLED_GRID_EXPANDER_STRATEGY_DECIDE_AT_RUNTIME
+        #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_DECIDE_AT_RUNTIME
         bilinearExpand(input, output, width, height, mXyMap);
+        #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_FORCE_FLOATING_POINT
+        bilinearExpandPowerOf2Float(input, output, width, height, mXyMap);
         #else
-        #error "Invalid FASTLED_GRID_EXPANDER_STRATEGY"
+        #error "Invalid FASTLED_SCALE_UP"
         #endif
     }
 

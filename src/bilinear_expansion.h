@@ -52,4 +52,8 @@ inline void bilinearExpand(const CRGB *input, CRGB *output, uint16_t inputWidth,
     }
 }
 
+void bilinearExpandPowerOf2Float(const CRGB *input, CRGB *output,
+                                 uint8_t inputWidth, uint8_t inputHeight,
+                                 XYMap xyMap);
+
 FASTLED_NAMESPACE_END
