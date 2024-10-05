@@ -21,6 +21,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+FX_PTR(Animartrix);
+
 enum AnimartrixAnim {
     RGB_BLOBS5 = 0,
     RGB_BLOBS4,
@@ -66,8 +68,6 @@ enum AnimartrixAnim {
     MODULE_EXPERIMENT10,
     NUM_ANIMATIONS
 };
-
-FX_PTR(Animartrix);
 
 class FastLEDANIMartRIX;
 class Animartrix : public FxGrid {

@@ -6,6 +6,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+FX_PTR(Pacifica);
+
 /// @file    pacifica.hpp
 /// @brief   An animation that simulates gentle, blue-green ocean waves
 /// @example Pacifica.ino

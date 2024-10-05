@@ -7,6 +7,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+FX_PTR(NoiseWave);
+
 class NoiseWave : public FxStrip {
 public:
     NoiseWave(uint16_t num_leds) 

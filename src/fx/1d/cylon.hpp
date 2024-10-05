@@ -6,6 +6,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+
+FX_PTR(Cylon);
+
 /// @brief   An animation that moves a single LED back and forth (Larson Scanner effect)
 class Cylon : public FxStrip {
 public:

@@ -6,6 +6,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+FX_PTR(TwinkleFox);
+
 /// @file    TwinkleFox.hpp
 /// @brief   Twinkling "holiday" lights that fade in and out.
 /// @example TwinkleFox.ino

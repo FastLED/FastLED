@@ -37,6 +37,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+FX_PTR(ScaleUp);
+
 // Uses bilearn filtering to double the size of the grid.
 class ScaleUp : public FxGrid {
   public:

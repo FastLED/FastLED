@@ -6,6 +6,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+FX_PTR(Pride2015);
+
 /// @file    pride2015.hpp
 /// @brief   Animated, ever-changing rainbows (Pride2015 effect)
 /// @example Pride2015.ino

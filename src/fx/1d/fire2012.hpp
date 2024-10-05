@@ -6,6 +6,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+FX_PTR(Fire2012);
+
 /// @brief   Simple one-dimensional fire animation function
 // Fire2012 by Mark Kriegsman, July 2012
 // as part of "Five Elements" shown here: http://youtu.be/knWiGsmgycY
