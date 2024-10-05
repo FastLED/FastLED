@@ -173,6 +173,11 @@ public:
         return RefPtr(referent, true);
     }
 
+    // This is a special constructor that is used to create a RefPtr from a raw pointer
+    static RefPtr FromNonHeap(T* referent) {
+        return RefPtr(referent, false);
+    }
+
     RefPtr() : referent_(nullptr) {}
     
     // Forbidden to convert a raw pointer to a Referent into a RefPtr, because

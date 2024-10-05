@@ -11,7 +11,10 @@ typedef RefPtr<MyClass> MyClassPtr;
 class MyClass : public Referent {
   public:
     MyClass() {}
-    ~MyClass() {}
+    ~MyClass() {
+        destructor_signal = 0xdeadbeef;
+    }
+    uint32_t destructor_signal = 0;
 };
 
 TEST_CASE("RefPtr basic functionality") {
@@ -89,5 +92,16 @@ TEST_CASE("RefPtr reset functionality") {
         CHECK(originalPtr->ref_count() == 1);
         originalPtr->unref();
     }
+
+}
+
+
+TEST_CASE("RefPtr from static memory") {
+    MyClass staticObject;
+    {
+        MyClassPtr ptr = MyClassPtr::FromNonHeap(&staticObject);
+    }
+    CHECK_EQ(staticObject.ref_count(), 0);
+    CHECK_NE(staticObject.destructor_signal, 0xdeadbeef);
 
 }
