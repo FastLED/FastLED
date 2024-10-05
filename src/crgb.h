@@ -203,19 +203,10 @@ struct CRGB {
     FASTLED_FORCE_INLINE CRGB& subtractFromRGB(uint8_t d);
 
     /// Subtract a constant of '1' from each channel, saturating at 0x00
-    FASTLED_FORCE_INLINE CRGB& operator-- ()
-    {
-        subtractFromRGB(1);
-        return *this;
-    }
+    FASTLED_FORCE_INLINE CRGB& operator-- ();
 
     /// @copydoc operator--
-    FASTLED_FORCE_INLINE CRGB operator-- (int )
-    {
-        CRGB retval(*this);
-        --(*this);
-        return retval;
-    }
+    FASTLED_FORCE_INLINE CRGB operator-- (int );
 
     /// Add a constant of '1' from each channel, saturating at 0xFF
     FASTLED_FORCE_INLINE CRGB& operator++ ()

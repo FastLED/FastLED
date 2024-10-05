@@ -69,6 +69,21 @@ FASTLED_FORCE_INLINE CRGB& CRGB::fadeLightBy (uint8_t fadefactor )
     return *this;
 }
 
+/// Subtract a constant of '1' from each channel, saturating at 0x00
+FASTLED_FORCE_INLINE CRGB& CRGB::operator-- ()
+{
+    subtractFromRGB(1);
+    return *this;
+}
+
+/// @copydoc operator--
+FASTLED_FORCE_INLINE CRGB CRGB::operator-- (int )
+{
+    CRGB retval(*this);
+    --(*this);
+    return retval;
+}
+
 FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (uint8_t scaledown )
 {
     nscale8x3( r, g, b, scaledown);
