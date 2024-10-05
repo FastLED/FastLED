@@ -55,7 +55,7 @@
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePalettePtr noisePalette = Fx::make<NoisePalettePtr>(xyMap);
+NoisePalettePtr noisePalette = Fx::make<NoisePalette>(xyMap);
 
 
 void setup() {

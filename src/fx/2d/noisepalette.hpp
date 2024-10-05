@@ -16,8 +16,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-class NoisePalette;
-typedef RefPtr<NoisePalette> NoisePalettePtr;
+FX_PTR(NoisePalette);
 
 class NoisePalette : public FxGrid {
   public:

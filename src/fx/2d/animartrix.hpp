@@ -67,8 +67,7 @@ enum AnimartrixAnim {
     NUM_ANIMATIONS
 };
 
-class Animartrix;
-typedef RefPtr<Animartrix> AnimartrixPtr;
+FX_PTR(Animartrix);
 
 class FastLEDANIMartRIX;
 class Animartrix : public FxGrid {

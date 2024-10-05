@@ -8,6 +8,10 @@
 #include "ptr.h"
 FASTLED_NAMESPACE_BEGIN
 
+#define FX_PTR(X) \
+    class X; \
+    typedef RefPtr<X> X ## Ptr;
+
 
 // Abstract base class for effects on a strip/grid of LEDs.
 class Fx: public Referent {
@@ -15,17 +19,11 @@ class Fx: public Referent {
     // Alias DrawContext for use within Fx
     using DrawContext = ::DrawContext;
 
+    // Partial specialization for RefPtr<T> to unwrap it
     template<typename T, typename... Args>
     static RefPtr<T> make(Args... args) {
         return RefPtr<T>::FromHeap(new T(args...));
     }
-
-    // Specialization for RefPtr to unwrap it
-    template<typename T, typename... Args>
-    static RefPtr<T> make(RefPtr<T>, Args... args) {
-        return make<T>(args...);
-    }
-
 
 
     Fx(uint16_t numLeds): mNumLeds(numLeds) {}
