@@ -170,10 +170,7 @@ template <typename T>
 class RefPtr {
 public:
     static RefPtr make(T* referent) {
-        RefPtr out;
-        referent->ref();
-        out.referent_ = referent;
-        return out;
+        return RefPtr(referent, true);
     }
 
     RefPtr() : referent_(nullptr) {}
@@ -261,6 +258,11 @@ public:
     }
 
 private:
+    RefPtr<T>(T* referent, bool) : referent_(referent) { 
+        if (referent_) {
+            referent_->ref();
+        }
+    }
     T* referent_;
 };
 
