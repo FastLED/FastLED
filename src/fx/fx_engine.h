@@ -109,7 +109,8 @@ inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
 
         if (progress == 255) {
             // Transition complete, update current index
-            mEffects[mCurrentIndex]->pause();
+            //mEffects[mCurrentIndex]->pause();
+            mCompositor.mLayers[0]->fx->pause();
             mCompositor.setLayerFx(mEffects[mNextIndex], RefPtr<Fx>());
             mCurrentIndex = mNextIndex;
             mIsTransitioning = false;
