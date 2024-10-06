@@ -62,7 +62,7 @@ class ScaleUp : public FxGrid {
         uint16_t out_w = getWidth();
         uint16_t out_h = getHeight();;
         if (in_w == out_w && in_h == out_h) {
-            noExpand(context.leds, mSurface.get(), in_w, in_h);
+            noExpand(mSurface.get(), context.leds, in_w, in_h);
         } else {
             expand(mSurface.get(), context.leds, in_w, in_h, mXyMap);
         }
@@ -83,11 +83,11 @@ class ScaleUp : public FxGrid {
 #endif
     }
 
-    const char *fxName() const override { return "GridDoubler"; }
+    const char *fxName() const override { return "scale_up"; }
 
   private:
     // No expansion needed. Also useful for debugging.
-    void noExpand(CRGB *output, const CRGB *input, uint16_t width,
+    void noExpand(const CRGB *input, CRGB *output, uint16_t width,
                   uint16_t height) {
         uint16_t n = mXyMap.getTotal();
         for (uint16_t w = 0; w < width; w++) {
