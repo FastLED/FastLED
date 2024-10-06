@@ -29,16 +29,12 @@ class FxEngine {
     uint16_t mNumLeds;
     FixedVector<RefPtr<Fx>, FASTLED_FX_ENGINE_MAX_FX> mEffects;
     FxCompositingEngine mCompositor;
-    bool mIsTransitioning;
-    // bool mWasTransitioning;
     uint16_t mCurrentIndex;
     uint16_t mNextIndex;
-    Transition mTransition;
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
-    : mNumLeds(numLeds), mCompositor(numLeds), mIsTransitioning(false), mCurrentIndex(0),
-      mNextIndex(0) {
+    : mNumLeds(numLeds), mCompositor(numLeds), mCurrentIndex(0), mNextIndex(0) {
 }
 
 inline FxEngine::~FxEngine() {}
@@ -63,62 +59,35 @@ inline bool FxEngine::setNextFx(uint16_t index, uint32_t now, uint32_t duration)
     if (index >= mEffects.size() && index != mCurrentIndex) {
         return false;
     }
-    if (mIsTransitioning) {
+    if (mCompositor.isTransitioning()) {
         // If already transitioning, complete the current transition
         // immediately
         mEffects[mCurrentIndex]->pause();
         mCompositor.setLayerFx(mEffects[mNextIndex], mEffects[index]);
         mCurrentIndex = mNextIndex;
-        mIsTransitioning = false;
+        mCompositor.completeTransition();
     } else {
         mCompositor.setLayerFx(mEffects[mCurrentIndex], mEffects[index]);
     }
     mNextIndex = index;
     mEffects[mNextIndex]->resume();
-    mIsTransitioning = true;
-    mTransition.start(now, duration);
+    mCompositor.startTransition(now, duration);
     return true;
 }
 
 inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
     if (!mEffects.empty()) {
-        //assert(mEffects[mCurrentIndex] == mCompositor.mLayers[0]->fx);
-        Fx::DrawContext context = {now, mCompositor.mLayers[0]->surface.get()};
-        mCompositor.mLayers[0]->fx->draw(context);
+        mCompositor.draw(now, finalBuffer);
 
-        if (!mIsTransitioning || mEffects.size() < 2) {
-            memcpy(finalBuffer, mCompositor.mLayers[0]->surface.get(),
-                   sizeof(CRGB) * mNumLeds);
-            return;
-        }
-
-        context = {now, mCompositor.mLayers[1]->surface.get()};
-        mCompositor.mLayers[1]->fx->draw(context);
-
-        uint8_t progress = mTransition.getProgress(now);
-        uint8_t inverse_progress = 255 - progress;
-
-        const CRGB* surface0 = mCompositor.mLayers[0]->surface.get();
-        const CRGB* surface1 = mCompositor.mLayers[1]->surface.get();
-
-        for (uint16_t i = 0; i < mNumLeds; i++) {
-            CRGB p0 = surface0[i];
-            CRGB p1 = surface1[i];
-            p0.nscale8(inverse_progress);
-            p1.nscale8(progress);
-            finalBuffer[i] = p0 + p1;
-        }
-
-        if (progress == 255) {
-            // Transition complete, update current index
-            //mEffects[mCurrentIndex]->pause();
-            mCompositor.mLayers[0]->fx->pause();
-            mCompositor.setLayerFx(mEffects[mNextIndex], RefPtr<Fx>());
-            mCurrentIndex = mNextIndex;
-            mIsTransitioning = false;
+        if (!mCompositor.isTransitioning()) {
+            if (mCurrentIndex != mNextIndex) {
+                // Transition complete, update current index
+                mCompositor.mLayers[0]->fx->pause();
+                mCompositor.setLayerFx(mEffects[mNextIndex], RefPtr<Fx>());
+                mCurrentIndex = mNextIndex;
+            }
         }
     }
 }
-
 
 FASTLED_NAMESPACE_END
