@@ -20,6 +20,8 @@ public:
     FxCompositingEngine(uint16_t numLeds) : mNumLeds(numLeds) {
         mLayers[0] = LayerPtr::FromHeap(new Layer());
         mLayers[1] = LayerPtr::FromHeap(new Layer());
+        // TODO: When there is only Fx in the list then don't allocate memory for
+        // the second layer
         mLayers[0]->surface.reset(new CRGB[numLeds]);
         mLayers[1]->surface.reset(new CRGB[numLeds]);
     }

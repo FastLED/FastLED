@@ -28,7 +28,7 @@ class FxEngine {
   private:
     uint16_t mNumLeds;
     FixedVector<RefPtr<Fx>, FASTLED_FX_ENGINE_MAX_FX> mEffects;
-    LayerPtr mLayers[2];
+    FxCompositingEngine mCompositor;
     bool mIsTransitioning;
     bool mWasTransitioning;
     uint16_t mCurrentIndex;
@@ -38,14 +38,8 @@ class FxEngine {
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
-    : mNumLeds(numLeds), mIsTransitioning(false), mCurrentIndex(0),
+    : mNumLeds(numLeds), mCompositor(numLeds), mIsTransitioning(false), mCurrentIndex(0),
       mNextIndex(0) {
-    mLayers[0] = LayerPtr::FromHeap(new Layer());
-    mLayers[1] = LayerPtr::FromHeap(new Layer());
-    // TODO: When there is only Fx in the list then don't allocate memory for
-    // the second layer
-    mLayers[0]->surface.reset(new CRGB[numLeds]);
-    mLayers[1]->surface.reset(new CRGB[numLeds]);
 }
 
 inline FxEngine::~FxEngine() {}
@@ -83,23 +77,23 @@ inline bool FxEngine::setNextFx(uint16_t index, uint32_t now, uint32_t duration)
 
 inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
     if (!mEffects.empty()) {
-        Fx::DrawContext context = {now, mLayers[0]->surface.get()};
+        Fx::DrawContext context = {now, mCompositor.mLayers[0]->surface.get()};
         mEffects[mCurrentIndex]->draw(context);
 
         if (!mIsTransitioning || mEffects.size() < 2) {
-            memcpy(finalBuffer, mLayers[0]->surface.get(),
+            memcpy(finalBuffer, mCompositor.mLayers[0]->surface.get(),
                    sizeof(CRGB) * mNumLeds);
             return;
         }
 
-        context = {now, mLayers[1]->surface.get()};
+        context = {now, mCompositor.mLayers[1]->surface.get()};
         mEffects[mNextIndex]->draw(context);
 
         uint8_t progress = mTransition.getProgress(now);
         uint8_t inverse_progress = 255 - progress;
 
-        const CRGB* surface0 = mLayers[0]->surface.get();
-        const CRGB* surface1 = mLayers[1]->surface.get();
+        const CRGB* surface0 = mCompositor.mLayers[0]->surface.get();
+        const CRGB* surface1 = mCompositor.mLayers[1]->surface.get();
 
         for (uint16_t i = 0; i < mNumLeds; i++) {
             CRGB p0 = surface0[i];
