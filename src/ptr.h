@@ -247,6 +247,13 @@ public:
         return *this;
     }
 
+    bool operator==(const RefPtr& other) const {
+        return referent_ == other.referent_;
+    }
+    bool operator!=(const RefPtr& other) const {
+        return referent_ != other.referent_;
+    }
+
     RefPtr& operator=(RefPtr&& other) noexcept {
         if (this != &other) {
             if (referent_ && isOwned()) {
