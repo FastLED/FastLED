@@ -39,7 +39,10 @@ public:
     void draw(uint32_t now, CRGB *finalBuffer);
 
     bool isTransitioning() const { return mIsTransitioning; }
-    void completeTransition() { mIsTransitioning = false; }
+    void completeTransition() {
+        mLayers[0]->fx->pause();
+        mIsTransitioning = false;
+    }
 
     LayerPtr mLayers[2];
     const uint16_t mNumLeds;
