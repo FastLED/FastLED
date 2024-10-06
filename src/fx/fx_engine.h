@@ -30,11 +30,10 @@ class FxEngine {
     FixedVector<RefPtr<Fx>, FASTLED_FX_ENGINE_MAX_FX> mEffects;
     FxCompositingEngine mCompositor;
     bool mIsTransitioning;
-    bool mWasTransitioning;
+    // bool mWasTransitioning;
     uint16_t mCurrentIndex;
     uint16_t mNextIndex;
     Transition mTransition;
-    void startTransition(uint32_t now, uint32_t duration);
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
