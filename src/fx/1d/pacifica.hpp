@@ -37,7 +37,7 @@ class Pacifica : public FxStrip {
                                         0x000E39, 0x001040, 0x001450, 0x001860,
                                         0x001C70, 0x002080, 0x1040BF, 0x2060FF};
 
-    void pacifica_one_layer(CRGBPalette16 &p, uint16_t cistart,
+    void pacifica_one_layer(CRGB* leds, CRGBPalette16 &p, uint16_t cistart,
                             uint16_t wavescale, uint8_t bri, uint16_t ioff);
     void pacifica_add_whitecaps(CRGB *leds);
     void pacifica_deepen_colors(CRGB *leds);
@@ -71,15 +71,15 @@ void Pacifica::draw(DrawContext ctx) {
 
     // Render each of four layers, with different scales and speeds, that vary
     // over time
-    pacifica_one_layer(pacifica_palette_1, sCIStart1,
+    pacifica_one_layer(leds, pacifica_palette_1, sCIStart1,
                        beatsin16(3, 11 * 256, 14 * 256), beatsin8(10, 70, 130),
                        0 - beat16(301));
-    pacifica_one_layer(pacifica_palette_2, sCIStart2,
+    pacifica_one_layer(leds, pacifica_palette_2, sCIStart2,
                        beatsin16(4, 6 * 256, 9 * 256), beatsin8(17, 40, 80),
                        beat16(401));
-    pacifica_one_layer(pacifica_palette_3, sCIStart3, 6 * 256,
+    pacifica_one_layer(leds, pacifica_palette_3, sCIStart3, 6 * 256,
                        beatsin8(9, 10, 38), 0 - beat16(503));
-    pacifica_one_layer(pacifica_palette_3, sCIStart4, 5 * 256,
+    pacifica_one_layer(leds, pacifica_palette_3, sCIStart4, 5 * 256,
                        beatsin8(8, 10, 28), beat16(601));
 
     // Add brighter 'whitecaps' where the waves lines up more
@@ -90,7 +90,7 @@ void Pacifica::draw(DrawContext ctx) {
 }
 
 // Add one layer of waves into the led array
-void Pacifica::pacifica_one_layer(CRGBPalette16 &p, uint16_t cistart,
+void Pacifica::pacifica_one_layer(CRGB* leds, CRGBPalette16 &p, uint16_t cistart,
                                   uint16_t wavescale, uint8_t bri,
                                   uint16_t ioff) {
     uint16_t ci = cistart;

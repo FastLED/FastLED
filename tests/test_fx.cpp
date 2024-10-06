@@ -12,6 +12,7 @@
 #include "fx/2d/noisepalette.hpp"
 #include "fx/2d/animartrix.hpp"
 #include "fx/2d/scale_up.hpp"
+#include "fx/1d/pacifica.hpp"
 
 
 // To satisfy the linker, we must also define uint16_t XY( uint8_t, uint8_t);
