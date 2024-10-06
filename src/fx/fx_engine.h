@@ -48,6 +48,9 @@ inline bool FxEngine::addFx(RefPtr<Fx> effect) {
         return false;
     }
     mEffects.push_back(effect);
+    if (mEffects.size() == 1) {
+        mCompositor.setLayerFx(mEffects[0], RefPtr<Fx>());
+    }
     return true;
 }
 
@@ -64,6 +67,7 @@ inline bool FxEngine::setNextFx(uint16_t index, uint32_t now, uint32_t duration)
         // If already transitioning, complete the current transition
         // immediately
         mEffects[mCurrentIndex]->pause();
+        mCompositor.setLayerFx(mEffects[mNextIndex], mEffects[index]);
         mCurrentIndex = mNextIndex;
         mIsTransitioning = false;
     }
@@ -76,6 +80,7 @@ inline bool FxEngine::setNextFx(uint16_t index, uint32_t now, uint32_t duration)
 
 inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
     if (!mEffects.empty()) {
+        //assert(mEffects[mCurrentIndex] == mCompositor.mLayers[0]->fx);
         Fx::DrawContext context = {now, mCompositor.mLayers[0]->surface.get()};
         mEffects[mCurrentIndex]->draw(context);
 
@@ -105,6 +110,7 @@ inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
         if (progress == 255) {
             // Transition complete, update current index
             mEffects[mCurrentIndex]->pause();
+            mCompositor.setLayerFx(mEffects[mNextIndex], RefPtr<Fx>());
             mCurrentIndex = mNextIndex;
             mIsTransitioning = false;
         }

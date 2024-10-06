@@ -26,6 +26,11 @@ public:
         mLayers[1]->surface.reset(new CRGB[numLeds]);
     }
 
+    void setLayerFx(RefPtr<Fx> fx0, RefPtr<Fx> fx1) {
+        mLayers[0]->fx = fx0;
+        mLayers[1]->fx = fx1;
+    }
+
     LayerPtr mLayers[2];
     const uint16_t mNumLeds;
 };
