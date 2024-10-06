@@ -25,8 +25,8 @@
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePalette noisePalette(xyMap);
-Animartrix animartrix(xyMap, POLAR_WAVES);
+NoisePalettePtr noisePalette = Fx::make<NoisePalette>(xyMap);
+AnimartrixPtr animartrix = Fx::make<Animartrix>(xyMap, POLAR_WAVES);
 
 FxEngine fxEngine(NUM_LEDS);
 
@@ -37,11 +37,11 @@ void setup() {
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip);
     FastLED.setBrightness(96);
-    noisePalette.lazyInit();
-    noisePalette.setSpeed(SPEED);
-    noisePalette.setScale(SCALE);
-    fxEngine.addFx(&noisePalette);
-    fxEngine.addFx(&animartrix);
+    noisePalette->lazyInit();
+    noisePalette->setSpeed(SPEED);
+    noisePalette->setScale(SCALE);
+    fxEngine.addFx(noisePalette);
+    fxEngine.addFx(animartrix);
 }
 
 void loop() {

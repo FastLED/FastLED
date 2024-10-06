@@ -27,7 +27,7 @@ class FxEngine {
     FxEngine(uint16_t numLeds);
     ~FxEngine();
 
-    bool addFx(Fx *effect);
+    bool addFx(RefPtr<Fx> effect);
     // void startTransition(uint32_t now, uint32_t duration);
     void draw(uint32_t now, CRGB *outputBuffer);
     bool nextFx(uint32_t now, uint32_t duration) {
@@ -55,7 +55,7 @@ class FxEngine {
 
   private:
     uint16_t mNumLeds;
-    FixedVector<Fx *, FASTLED_FX_ENGINE_MAX_FX> mEffects;
+    FixedVector<RefPtr<Fx>, FASTLED_FX_ENGINE_MAX_FX> mEffects;
     LayerPtr mLayers[2];
     bool mIsTransitioning;
     bool mWasTransitioning;
@@ -78,7 +78,7 @@ inline FxEngine::FxEngine(uint16_t numLeds)
 
 inline FxEngine::~FxEngine() {}
 
-inline bool FxEngine::addFx(Fx *effect) {
+inline bool FxEngine::addFx(RefPtr<Fx> effect) {
     if (mEffects.size() >= FASTLED_FX_ENGINE_MAX_FX) {
         return false;
     }

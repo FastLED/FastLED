@@ -203,6 +203,14 @@ public:
         return RefPtr(&referent, false);
     }
 
+    // create an upcasted RefPtr
+    template <typename U>
+    RefPtr(RefPtr<U>& refptr) : referent_(refptr.get()) {
+        if (referent_ && isOwned()) {
+            referent_->ref();
+        }
+    }
+
     RefPtr() : referent_(nullptr) {}
     
     // Forbidden to convert a raw pointer to a Referent into a RefPtr, because

@@ -12,6 +12,7 @@ FX_PTR(Cylon);
 /// effect)
 class Cylon : public FxStrip {
   public:
+    uint8_t delay_ms;
     Cylon(uint16_t num_leds, uint8_t fade_amount = 250, uint8_t delay_ms = 10)
         : FxStrip(num_leds), delay_ms(delay_ms), fade_amount(fade_amount) {}
 
@@ -56,7 +57,7 @@ class Cylon : public FxStrip {
 
   private:
     uint8_t hue = 0;
-    uint8_t delay_ms;
+
     uint8_t fade_amount;
 
     bool reverse = false;

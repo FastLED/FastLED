@@ -32,11 +32,11 @@ TEST_CASE("test_fx_engine") {
     FxEngine engine(NUM_LEDS);
     CRGB leds[NUM_LEDS];
 
-    MockFx redFx(NUM_LEDS, CRGB::Red);
-    MockFx blueFx(NUM_LEDS, CRGB::Blue);
+    RefPtr<MockFx> redFx = Fx::make<MockFx>(NUM_LEDS, CRGB::Red);
+    RefPtr<MockFx> blueFx = Fx::make<MockFx>(NUM_LEDS, CRGB::Blue);
 
-    engine.addFx(&redFx);
-    engine.addFx(&blueFx);
+    engine.addFx(redFx);
+    engine.addFx(blueFx);
 
     SUBCASE("Initial state") {
         engine.draw(0, leds);
