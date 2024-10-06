@@ -14,14 +14,13 @@ FX_PTR(Pacifica);
 
 class Pacifica : public FxStrip {
   public:
-    Pacifica(uint16_t num_leds) : FxStrip(num_leds), leds(leds) {}
+    Pacifica(uint16_t num_leds) : FxStrip(num_leds) {}
 
     void lazyInit() override {}
     void draw(DrawContext context) override;
     const char *fxName() const override { return "Pacifica"; }
 
   private:
-    CRGB *leds;
     uint16_t sCIStart1 = 0, sCIStart2 = 0, sCIStart3 = 0, sCIStart4 = 0;
     uint32_t sLastms = 0;
 
