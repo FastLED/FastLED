@@ -47,7 +47,7 @@ void setup() {
 void loop() {
     uint32_t now = millis();
     EVERY_N_MILLISECONDS(5000) {
-        noisePalette.changeToRandomPalette();
+        noisePalette->changeToRandomPalette();
     }
 
     EVERY_N_SECONDS(1) {
