@@ -70,6 +70,8 @@ inline bool FxEngine::setNextFx(uint16_t index, uint32_t now, uint32_t duration)
         mCompositor.setLayerFx(mEffects[mNextIndex], mEffects[index]);
         mCurrentIndex = mNextIndex;
         mIsTransitioning = false;
+    } else {
+        mCompositor.setLayerFx(mEffects[mCurrentIndex], mEffects[index]);
     }
     mNextIndex = index;
     mEffects[mNextIndex]->resume();
@@ -82,7 +84,7 @@ inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
     if (!mEffects.empty()) {
         //assert(mEffects[mCurrentIndex] == mCompositor.mLayers[0]->fx);
         Fx::DrawContext context = {now, mCompositor.mLayers[0]->surface.get()};
-        mEffects[mCurrentIndex]->draw(context);
+        mCompositor.mLayers[0]->fx->draw(context);
 
         if (!mIsTransitioning || mEffects.size() < 2) {
             memcpy(finalBuffer, mCompositor.mLayers[0]->surface.get(),
@@ -91,7 +93,7 @@ inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
         }
 
         context = {now, mCompositor.mLayers[1]->surface.get()};
-        mEffects[mNextIndex]->draw(context);
+        mCompositor.mLayers[1]->fx->draw(context);
 
         uint8_t progress = mTransition.getProgress(now);
         uint8_t inverse_progress = 255 - progress;
