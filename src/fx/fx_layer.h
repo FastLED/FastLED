@@ -18,6 +18,14 @@ struct Layer : public Referent {
     scoped_array<uint8_t> surface_alpha;
     RefPtr<Fx> fx;
     bool running = false;
+
+    void setFx(RefPtr<Fx> newFx) {
+        if (newFx && newFx != fx) {
+            pause();
+            fx = newFx;
+        }
+    }
+
     void draw(uint32_t now) {
         if (fx && !running) {
             fx->resume();

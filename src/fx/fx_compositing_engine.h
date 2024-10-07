@@ -23,8 +23,19 @@ public:
     }
 
     void setLayerFx(RefPtr<Fx> fx0, RefPtr<Fx> fx1) {
-        mLayers[0]->fx = fx0;
-        mLayers[1]->fx = fx1;
+        if (fx0 == mLayers[1]->fx) {
+            // Recycle the layer because the new fx needs
+            // to keep it's state.
+            LayerPtr tmp = mLayers[0];
+            mLayers[0] = mLayers[1];
+            mLayers[1] = tmp;
+            // Setting the fx will pause the layer and memclear the framebuffer.
+            mLayers[1]->setFx(fx1);
+        } else {
+            mLayers[0]->setFx(fx0);
+            mLayers[1]->setFx(fx1);
+        }
+        mIsTransitioning = false;
     }
 
     void startTransition(uint32_t now, uint32_t duration) {
@@ -32,14 +43,9 @@ public:
         mTransition.start(now, duration);
     }
 
+
     void draw(uint32_t now, CRGB *finalBuffer);
-
     bool isTransitioning() const { return mIsTransitioning; }
-    void completeTransition() {
-        mLayers[0]->pause();
-        mIsTransitioning = false;
-    }
-
     LayerPtr mLayers[2];
     const uint16_t mNumLeds;
 
@@ -51,7 +57,9 @@ private:
 inline void FxCompositingEngine::draw(uint32_t now, CRGB *finalBuffer) {
     mLayers[0]->draw(now);
     if (!mIsTransitioning) {
-        memcpy(finalBuffer, mLayers[0]->surface.get(), sizeof(CRGB) * mNumLeds);
+        if (mLayers[0]->surface) {
+            memcpy(finalBuffer, mLayers[0]->surface.get(), sizeof(CRGB) * mNumLeds);
+        }
         return;
     }
     mLayers[1]->draw(now);
