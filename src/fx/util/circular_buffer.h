@@ -10,7 +10,7 @@ FASTLED_NAMESPACE_BEGIN
 template <typename T>
 class CircularBuffer {
 public:
-    CircularBuffer(uint16_t capacity, T* buffer = nullptr) 
+    CircularBuffer(size_t capacity, T* buffer = nullptr) 
         : mCapacity(capacity), mSize(0), mHead(0), mTail(0) {
         if (buffer) {
             mBuffer.reset(buffer);
@@ -59,19 +59,19 @@ public:
         return mBuffer[(mHead - 1 + mCapacity) % mCapacity];
     }
 
-    T& operator[](uint16_t index) {
+    T& operator[](size_t index) {
         return mBuffer[(mTail + index) % mCapacity];
     }
 
-    const T& operator[](uint16_t index) const {
+    const T& operator[](size_t index) const {
         return mBuffer[(mTail + index) % mCapacity];
     }
 
-    uint16_t size() const {
+    size_t size() const {
         return mSize;
     }
 
-    uint16_t capacity() const {
+    size_t capacity() const {
         return mCapacity;
     }
 
@@ -89,10 +89,10 @@ public:
 
 private:
     scoped_array<T> mBuffer;
-    uint16_t mCapacity;
-    uint16_t mSize;
-    uint16_t mHead;
-    uint16_t mTail;
+    size_t mCapacity;
+    size_t mSize;
+    size_t mHead;
+    size_t mTail;
 };
 
 FASTLED_NAMESPACE_END

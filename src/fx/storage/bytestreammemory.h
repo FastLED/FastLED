@@ -5,10 +5,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "bytestream.h"
+#include "fx/util/circular_buffer.h"
 
 FASTLED_NAMESPACE_BEGIN
-
-class CRGB;
 
 DECLARE_SMART_PTR(ByteStreamMemory);
 
@@ -19,11 +18,10 @@ class ByteStreamMemory : public ByteStream {
     bool available() const override;
     size_t read(uint8_t *dst, size_t bytesToRead) override;
     const char *path() const override { return "ByteStreamMemory"; }
+    size_t write(const uint8_t* src, size_t n);
 
   private:
-    uint8_t* mBuffer;
-    uint32_t mSize;
-    uint32_t mPosition;
+    CircularBuffer<uint8_t> mBuffer;
 };
 
 FASTLED_NAMESPACE_END

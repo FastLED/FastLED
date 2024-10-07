@@ -1,18 +1,19 @@
 #include "bytestreammemory.h"
 #include <string.h>
-#include "crgb.h"
+#include "fl_math.h"
+
 
 FASTLED_NAMESPACE_BEGIN
 
-ByteStreamMemory::ByteStreamMemory(uint32_t size_buffer)
-    : mBuffer(new uint8_t[size_buffer]), mSize(size_buffer), mPosition(0) {}
+using fl_math::min;
 
-ByteStreamMemory::~ByteStreamMemory() {
-    delete[] mBuffer;
-}
+ByteStreamMemory::ByteStreamMemory(uint32_t size_buffer)
+    : mBuffer(size_buffer) {}
+
+ByteStreamMemory::~ByteStreamMemory() = default;
 
 bool ByteStreamMemory::available() const {
-    return mPosition < mSize;
+    return !mBuffer.full();
 }
 
 size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
@@ -20,14 +21,25 @@ size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
         return 0;
     }
 
-    size_t remainingBytes = mSize - mPosition;
-    size_t actualBytesToRead = (bytesToRead < remainingBytes) ? bytesToRead : remainingBytes;
+    size_t actualBytesToRead = min(bytesToRead, mBuffer.size());
+    size_t bytesRead = 0;
 
-    memcpy(dst, mBuffer + mPosition, actualBytesToRead);
-    mPosition += actualBytesToRead;
+    while (bytesRead < actualBytesToRead) {
+        dst[bytesRead] = mBuffer.pop_front();
+        bytesRead++;
+    }
 
-    return actualBytesToRead;
+    return bytesRead;
 }
 
+size_t ByteStreamMemory::write(const uint8_t* src, size_t n) {
+    for (uint16_t i = 0; i < n; ++i) {
+        if (mBuffer.full()) {
+            return i;
+        }
+        mBuffer.push_back(src[i]);
+    }
+    return n;
+}
 
 FASTLED_NAMESPACE_END
