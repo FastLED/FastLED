@@ -6,11 +6,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FX_PTR(Pacifica);
-
 /// @file    pacifica.hpp
 /// @brief   An animation that simulates gentle, blue-green ocean waves
 /// @example Pacifica.ino
+
+FX_PTR(Pacifica);
 
 class Pacifica : public FxStrip {
   public:
@@ -18,7 +18,7 @@ class Pacifica : public FxStrip {
 
     void lazyInit() override {}
     void draw(DrawContext context) override;
-    const char *fxName() const override { return "Pacifica"; }
+    const char *fxName(int) const override { return "Pacifica"; }
 
   private:
     uint16_t sCIStart1 = 0, sCIStart2 = 0, sCIStart3 = 0, sCIStart4 = 0;

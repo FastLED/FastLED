@@ -6,7 +6,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FX_PTR(Pride2015);
+
 
 /// @file    pride2015.hpp
 /// @brief   Animated, ever-changing rainbows (Pride2015 effect)
@@ -16,13 +16,15 @@ FX_PTR(Pride2015);
 // Animated, ever-changing rainbows.
 // by Mark Kriegsman
 
+FX_PTR(Pride2015);
+
 class Pride2015 : public FxStrip {
   public:
     Pride2015(uint16_t num_leds) : FxStrip(num_leds) {}
 
     void lazyInit() override {}
     void draw(Fx::DrawContext context) override;
-    const char *fxName() const override { return "Pride2015"; }
+    const char *fxName(int) const override { return "Pride2015"; }
 
   private:
     uint16_t mPseudotime = 0;

@@ -6,7 +6,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FX_PTR(DemoReel100);
+
 
 // FastLED "100-lines-of-code" demo reel, showing just a few
 // of the kinds of animation patterns you can quickly and easily
@@ -16,6 +16,9 @@ FX_PTR(DemoReel100);
 // animations patterns and have them automatically rotate.
 //
 // -Mark Kriegsman, December 2014
+
+FX_PTR(DemoReel100);
+
 class DemoReel100 : public FxStrip {
   public:
     DemoReel100(uint16_t num_leds) : FxStrip(num_leds) {}
@@ -38,7 +41,7 @@ class DemoReel100 : public FxStrip {
         EVERY_N_SECONDS(10) { nextPattern(); } // change patterns periodically
     }
 
-    const char *fxName() const override { return "DemoReel100"; }
+    const char *fxName(int) const override { return "DemoReel100"; }
 
   private:
     uint8_t current_pattern_number = 0;

@@ -20,7 +20,7 @@ public:
         }
     }
 
-    const char* fxName() const override { return "MockFx"; }
+    const char* fxName(int) const override { return "MockFx"; }
 
 private:
     CRGB mColor;

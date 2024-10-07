@@ -83,7 +83,7 @@ class ScaleUp : public FxGrid {
 #endif
     }
 
-    const char *fxName() const override { return "scale_up"; }
+    const char *fxName(int) const override { return "scale_up"; }
 
   private:
     // No expansion needed. Also useful for debugging.

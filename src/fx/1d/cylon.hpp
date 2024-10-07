@@ -53,7 +53,7 @@ class Cylon : public FxStrip {
         }
     }
 
-    const char *fxName() const override { return "Cylon"; }
+    const char *fxName(int) const override { return "Cylon"; }
 
   private:
     uint8_t hue = 0;

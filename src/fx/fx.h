@@ -64,7 +64,8 @@ class Fx : public Referent {
     virtual bool hasFixedFrameRate(uint8_t *fps) const { return false; }
 
     // Get the name of the current fx. This is the class name if there is only one.
-    virtual const char * fxName() const = 0;
+    // -1 means to get the current fx name if there are multiple fx.
+    virtual const char * fxName(int which = -1) const = 0;
     // Optionally implement these for multi fx classes.
     virtual int fxNum() const {
         return 1;

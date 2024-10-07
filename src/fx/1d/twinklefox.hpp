@@ -6,7 +6,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FX_PTR(TwinkleFox);
+
 
 /// @file    TwinkleFox.hpp
 /// @brief   Twinkling "holiday" lights that fade in and out.
@@ -106,13 +106,15 @@ FX_PTR(TwinkleFox);
 // incandescent bulbs change color as they get dim down.
 #define COOL_LIKE_INCANDESCENT 1
 
+FX_PTR(TwinkleFox);
+
 class TwinkleFox : public FxStrip {
   public:
     CRGBPalette16 targetPalette;
     CRGBPalette16 currentPalette;
 
     TwinkleFox(uint16_t num_leds)
-        : FxStrip(num_leds), leds(leds), backgroundColor(CRGB::Black),
+        : FxStrip(num_leds), backgroundColor(CRGB::Black),
           twinkleSpeed(TWINKLE_SPEED), twinkleDensity(TWINKLE_DENSITY),
           coolLikeIncandescent(COOL_LIKE_INCANDESCENT),
           autoSelectBackgroundColor(AUTO_SELECT_BACKGROUND_COLOR) {
@@ -125,14 +127,13 @@ class TwinkleFox : public FxStrip {
         EVERY_N_MILLISECONDS(10) {
             nblendPaletteTowardPalette(currentPalette, targetPalette, 12);
         }
-        drawTwinkleFox(leds);
+        drawTwinkleFox(context.leds);
     }
 
     void chooseNextColorPalette(CRGBPalette16 &pal);
-    const char *fxName() const override { return "TwinkleFox"; }
+    const char *fxName(int) const override { return "TwinkleFox"; }
 
   private:
-    CRGB *leds;
     CRGB backgroundColor;
     uint8_t twinkleSpeed;
     uint8_t twinkleDensity;

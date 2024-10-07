@@ -21,7 +21,7 @@ FX_PTR(NoisePalette);
 class NoisePalette : public FxGrid {
   public:
     NoisePalette(XYMap xyMap)
-        : FxGrid(xyMap), scale(scale), speed(speed), colorLoop(1) {
+        : FxGrid(xyMap), speed(0), scale(0), colorLoop(1) {
         width = xyMap.getWidth();
         height = xyMap.getHeight();
 
@@ -45,7 +45,7 @@ class NoisePalette : public FxGrid {
         mapNoiseToLEDsUsingPalette(context.leds);
     }
 
-    const char *fxName() const override { return "NoisePalette"; }
+    const char *fxName(int which) const override { return "NoisePalette"; }
 
     void mapNoiseToLEDsUsingPalette(CRGB *leds);
 

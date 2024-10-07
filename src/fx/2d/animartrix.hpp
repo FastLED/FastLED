@@ -82,8 +82,8 @@ class Animartrix : public FxGrid {
     int fxNum() const override { return NUM_ANIMATIONS; }
     void fxSet(int fx) override;
     int fxGet() const override { return static_cast<int>(current_animation); }
-    const char *fxName() const override {
-        return getAnimationName(current_animation);
+    const char *fxName(int which) const override {
+        return getAnimationName(which != -1 ? static_cast<AnimartrixAnim>(which) : current_animation);
     }
     void fxNext(int fx = 1) override { fxSet(fxGet() + fx); }
 

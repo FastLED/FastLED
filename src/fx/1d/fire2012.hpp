@@ -6,7 +6,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FX_PTR(Fire2012);
 
 /// @brief   Simple one-dimensional fire animation function
 // Fire2012 by Mark Kriegsman, July 2012
@@ -44,6 +43,8 @@ FX_PTR(Fire2012);
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
+
+FX_PTR(Fire2012);
 
 class Fire2012 : public FxStrip {
   public:
@@ -94,7 +95,7 @@ class Fire2012 : public FxStrip {
         }
     }
 
-    const char *fxName() const override { return "Fire2012"; }
+    const char *fxName(int) const override { return "Fire2012"; }
 
   private:
     scoped_array<uint8_t> heat;
