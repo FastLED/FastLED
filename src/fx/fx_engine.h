@@ -22,14 +22,16 @@ class FxEngine {
     ~FxEngine();
     bool addFx(RefPtr<Fx> effect);
     void draw(uint32_t now, CRGB *outputBuffer);
-    bool nextFx(uint32_t now, uint32_t duration);
-    bool setNextFx(uint16_t index, uint32_t now, uint32_t duration);
+    bool nextFx(uint16_t duration);
+    bool setNextFx(uint16_t index, uint16_t duration);
 
   private:
     uint16_t mNumLeds;
     FixedVector<RefPtr<Fx>, FASTLED_FX_ENGINE_MAX_FX> mEffects;
     FxCompositor mCompositor;
     uint16_t mCurrentIndex;
+    uint16_t mDuration = 0;
+    bool mDurationSet = false;
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
@@ -49,22 +51,26 @@ inline bool FxEngine::addFx(RefPtr<Fx> effect) {
     return true;
 }
 
-inline bool FxEngine::nextFx(uint32_t now, uint32_t duration) {
+inline bool FxEngine::nextFx(uint16_t duration) {
     uint16_t next_index = (mCurrentIndex + 1) % mEffects.size();
-    return setNextFx(next_index, now, duration);
+    return setNextFx(next_index, duration);
 }
 
-inline bool FxEngine::setNextFx(uint16_t index, uint32_t now, uint32_t duration) {
+inline bool FxEngine::setNextFx(uint16_t index, uint16_t duration) {
     if (index >= mEffects.size() || index == mCurrentIndex) {
         return false;
     }
-
     mCurrentIndex = index;
-    mCompositor.startTransition(now, duration, mEffects[mCurrentIndex]);
+    mDuration = duration;
+    mDurationSet = true;
     return true;
 }
 
 inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
+    if (mDurationSet) {
+        mCompositor.startTransition(now, mDuration, mEffects[mCurrentIndex]);
+        mDurationSet = false;
+    }
     if (!mEffects.empty()) {
         mCompositor.draw(now, finalBuffer);
     }

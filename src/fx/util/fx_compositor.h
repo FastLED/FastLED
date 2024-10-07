@@ -8,7 +8,6 @@
 #include "ptr.h"
 #include <stdint.h>
 #include <string.h>
-// #include <iostream>
 
 
 #ifndef FASTLED_FX_ENGINE_MAX_FX
@@ -64,22 +63,18 @@ inline void FxCompositor::draw(uint32_t now, CRGB *finalBuffer) {
     mLayers[0]->draw(now);
     uint8_t progress = mTransition.getProgress(now);
     if (!progress) {
-        //std::cout << "Not transitioning: " << mLayers[0]->getFx()->fxName(0) << std::endl;
         memcpy(finalBuffer, mLayers[0]->getSurface(), sizeof(CRGB) * mNumLeds);
         return;
     }
     mLayers[1]->draw(now);
-    //std::cout << "Progress: " << int(progress) << " on " << mLayers[0]->getFx()->fxName(0) << " and " << mLayers[1]->getFx()->fxName(0) << std::endl;
-    uint8_t inverse_progress = 255 - progress;
     const CRGB* surface0 = mLayers[0]->getSurface();
     const CRGB* surface1 = mLayers[1]->getSurface();
 
     for (uint16_t i = 0; i < mNumLeds; i++) {
-        CRGB p0 = surface0[i];
-        CRGB p1 = surface1[i];
-        p0.nscale8(inverse_progress);
-        p1.nscale8(progress);
-        finalBuffer[i] = p0 + p1;
+        const CRGB& p0 = surface0[i];
+        const CRGB& p1 = surface1[i];
+        CRGB out = CRGB::blend(p0, p1, progress);
+        finalBuffer[i] = out;
     }
     if (progress == 255) {
         completeTransition();

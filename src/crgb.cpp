@@ -1,5 +1,7 @@
-#include "crgb.h"
 
+#include "FastLED.h"
+#include "crgb.h"
+#include "lib8tion/math8.h"
 
 CRGB CRGB::computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const CRGB & colorTemperature) {
     #if defined(NO_CORRECTION) && (NO_CORRECTION==1)
@@ -23,4 +25,13 @@ CRGB CRGB::computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const 
             }
             return adj;
     #endif
+}
+
+
+CRGB CRGB::blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2) {
+    return CRGB(
+        blend8(p1.r, p2.r, amountOfP2),
+        blend8(p1.g, p2.g, amountOfP2),
+        blend8(p1.b, p2.b, amountOfP2)
+    );
 }

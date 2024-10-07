@@ -40,18 +40,14 @@ void setup() {
     noisePalette->lazyInit();
     noisePalette->setSpeed(SPEED);
     noisePalette->setScale(SCALE);
+    noisePalette->setPalettePreset(2);
     fxEngine.addFx(noisePalette);
     fxEngine.addFx(animartrix);
 }
 
 void loop() {
-    uint32_t now = millis();
-    EVERY_N_MILLISECONDS(5000) {
-        noisePalette->changeToRandomPalette();
-    }
-
-    EVERY_N_SECONDS(10) {
-        fxEngine.nextFx(now, 5000);
+    EVERY_N_SECONDS(1) {
+        fxEngine.nextFx(500);
     }
     fxEngine.draw(millis(), leds);
     FastLED.show();

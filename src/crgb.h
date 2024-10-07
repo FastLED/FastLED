@@ -56,6 +56,8 @@ struct CRGB {
         uint8_t raw[3];
     };
 
+    static CRGB blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2);
+
     /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
     /// @returns the CRGB::raw value for the given index
