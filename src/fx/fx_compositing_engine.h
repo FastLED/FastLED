@@ -38,11 +38,27 @@ public:
         mIsTransitioning = false;
     }
 
-    void startTransition(uint32_t now, uint32_t duration) {
+    void swapLayers() {
+        LayerPtr tmp = mLayers[0];
+        mLayers[0] = mLayers[1];
+        mLayers[1] = tmp;
+    }
+
+    void startTransition(uint32_t now, uint32_t duration, RefPtr<Fx> nextFx) {
+        completeTransition();
+        setLayerFx(mLayers[0]->fx, nextFx);
+        mLayers[1]->setFx(nextFx);
         mIsTransitioning = true;
         mTransition.start(now, duration);
     }
 
+    void completeTransition() {
+        mIsTransitioning = false;
+        if (mLayers[1]->fx) {
+            swapLayers();
+            mLayers[1]->release();
+        }
+    }
 
     void draw(uint32_t now, CRGB *finalBuffer);
     bool isTransitioning() const { return mIsTransitioning; }
@@ -66,7 +82,6 @@ inline void FxCompositingEngine::draw(uint32_t now, CRGB *finalBuffer) {
 
     uint8_t progress = mTransition.getProgress(now);
     uint8_t inverse_progress = 255 - progress;
-
     const CRGB* surface0 = mLayers[0]->surface.get();
     const CRGB* surface1 = mLayers[1]->surface.get();
 
@@ -77,9 +92,8 @@ inline void FxCompositingEngine::draw(uint32_t now, CRGB *finalBuffer) {
         p1.nscale8(progress);
         finalBuffer[i] = p0 + p1;
     }
-
     if (progress == 255) {
-        mIsTransitioning = false;
+        completeTransition();
     }
 }
 

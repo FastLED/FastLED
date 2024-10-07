@@ -30,11 +30,10 @@ class FxEngine {
     FixedVector<RefPtr<Fx>, FASTLED_FX_ENGINE_MAX_FX> mEffects;
     FxCompositingEngine mCompositor;
     uint16_t mCurrentIndex;
-    uint16_t mNextIndex;
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
-    : mNumLeds(numLeds), mCompositor(numLeds), mCurrentIndex(0), mNextIndex(0) {
+    : mNumLeds(numLeds), mCompositor(numLeds), mCurrentIndex(0) {
 }
 
 inline FxEngine::~FxEngine() {}
@@ -56,33 +55,18 @@ inline bool FxEngine::nextFx(uint32_t now, uint32_t duration) {
 }
 
 inline bool FxEngine::setNextFx(uint16_t index, uint32_t now, uint32_t duration) {
-    if (index >= mEffects.size() && index != mCurrentIndex) {
+    if (index >= mEffects.size() || index == mCurrentIndex) {
         return false;
     }
-    if (mCompositor.isTransitioning()) {
-        // If already transitioning, complete the current transition
-        // immediately
-        mCompositor.setLayerFx(mEffects[mNextIndex], mEffects[index]);
-        mCurrentIndex = mNextIndex;
 
-    } else {
-        mCompositor.setLayerFx(mEffects[mCurrentIndex], mEffects[index]);
-    }
-    mNextIndex = index;
-    mCompositor.startTransition(now, duration);
+    mCurrentIndex = index;
+    mCompositor.startTransition(now, duration, mEffects[mCurrentIndex]);
     return true;
 }
 
 inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
     if (!mEffects.empty()) {
         mCompositor.draw(now, finalBuffer);
-
-        if (!mCompositor.isTransitioning()) {
-            if (mCurrentIndex != mNextIndex) {
-                mCompositor.setLayerFx(mEffects[mNextIndex], RefPtr<Fx>());
-                mCurrentIndex = mNextIndex;
-            }
-        }
     }
 }
 

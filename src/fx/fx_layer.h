@@ -20,15 +20,14 @@ struct Layer : public Referent {
     bool running = false;
 
     void setFx(RefPtr<Fx> newFx) {
-        if (newFx && newFx != fx) {
-            pause();
+        if (newFx != fx) {
+            release();
             fx = newFx;
         }
     }
 
     void draw(uint32_t now) {
-        if (fx && !running) {
-            fx->resume();
+        if (fx) {
             if (!surface.get()) {
                 surface.reset(new CRGB[fx->getNumLeds()]);
             }
@@ -44,9 +43,6 @@ struct Layer : public Referent {
             if (surface_alpha_ptr) {
                 memset(surface_alpha_ptr, 0, sizeof(uint8_t) * fx->getNumLeds());
             }
-            running = true;
-        }
-        if (fx) {
             if (!running) {
                 fx->resume();
                 running = true;
@@ -64,6 +60,11 @@ struct Layer : public Referent {
             fx->pause();
             running = false;
         }
+    }
+
+    void release() {
+        pause();
+        fx.reset();
     }
 };
 
