@@ -18,6 +18,8 @@ TEST_CASE("bytestreammemory basic operations") {
         uint8_t readByte = 0;
         CHECK(stream.read(&readByte, 1) == 1);
         CHECK(readByte == testByte);
+        // next read will fail
+        CHECK(stream.read(&readByte, 1) == 0);
     }
 
     SUBCASE("Write and read multiple bytes") {
