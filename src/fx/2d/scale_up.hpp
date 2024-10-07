@@ -42,7 +42,7 @@ FX_PTR(ScaleUp);
 // Uses bilearn filtering to double the size of the grid.
 class ScaleUp : public FxGrid {
   public:
-    ScaleUp(XYMap xymap, FxGrid *fx) : FxGrid(xymap), mDelegate(fx) {
+    ScaleUp(XYMap xymap, FxGridPtr fx) : FxGrid(xymap), mDelegate(fx) {
         // Turn off re-mapping of the delegate's XYMap, since bilinearExpand needs to
         // work in screen coordinates. The final mapping will for this class will
         // still be performed.
@@ -99,7 +99,7 @@ class ScaleUp : public FxGrid {
             }
         }
     }
-    FxGrid *mDelegate;
+    FxGridPtr mDelegate;
     scoped_array<CRGB> mSurface;
 
     FX_PROTECTED_DESTRUCTOR(ScaleUp);

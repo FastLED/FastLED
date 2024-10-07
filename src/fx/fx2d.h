@@ -4,8 +4,11 @@
 #include "xymap.h"
 #include "namespace.h"
 #include "fx/fx.h"
+#include "ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
+
+FX_PTR(FxGrid);
 
 // Abstract base class for 2D effects that use a grid, which is defined
 // by an XYMap.
