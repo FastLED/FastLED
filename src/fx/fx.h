@@ -63,16 +63,16 @@ class Fx : public Referent {
     // set to the frame rate.
     virtual bool hasFixedFrameRate(uint8_t *fps) const { return false; }
 
-    virtual const char *
-    fxName() const = 0; // Get the name of the current fx. This is the class
-                        // name if there is only one.
+    // Get the name of the current fx. This is the class name if there is only one.
+    virtual const char * fxName() const = 0;
     // Optionally implement these for multi fx classes.
     virtual int fxNum() const {
         return 1;
     }; // Return 1 if you only have one fx managed by this class.
     virtual void fxSet(int fx) {}; // Set the current fx number.
-    virtual void fxNext(int fx = 1) {
-    }; // Negative numbers are allowed. -1 means previous fx.
+
+     // Negative numbers are allowed. -1 means previous fx.
+    virtual void fxNext(int fx = 1) {};
     virtual int fxGet() const { return 0; }; // Get the current fx number.
 
     virtual void pause() {
