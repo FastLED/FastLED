@@ -54,6 +54,18 @@ file(GLOB_RECURSE FASTLED_SOURCES
     "${FASTLED_SOURCE_DIR}/src/*.cpp"
 )
 
+# Try to find libunwind, but make it optional
+find_package(LibUnwind QUIET)
+
+# Define a variable to check if we should use libunwind
+set(USE_LIBUNWIND ${LibUnwind_FOUND})
+
+if(USE_LIBUNWIND)
+    message(STATUS "LibUnwind found. Using it for better stack traces.")
+else()
+    message(STATUS "LibUnwind not found. Falling back to basic stack traces.")
+endif()
+
 # Remove platform-specific files that might cause issues
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
@@ -78,9 +90,14 @@ endif()
 # Add custom build flags for FastLED
 target_compile_options(FastLED PRIVATE 
     -Wall
+    -funwind-tables
     $<$<CONFIG:Debug>:-g -O0 -DDEBUG -DFASTLED_STUB_IMPL>
     $<$<CONFIG:Release>:-O3>
 )
+
+if(USE_LIBUNWIND)
+    target_link_libraries(FastLED PRIVATE ${LIBUNWIND_LIBRARIES})
+endif()
 
 # Enable testing
 enable_testing()
@@ -96,6 +113,10 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
     target_link_libraries(${TEST_NAME} FastLED)
+    if(USE_LIBUNWIND)
+        target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
+    endif()
+    target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     set_target_properties(${TEST_NAME} PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
@@ -106,8 +127,13 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     endif()
     target_compile_options(${TEST_NAME} PRIVATE 
         -Wall
+        -funwind-tables
         $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
         $<$<CONFIG:Release>:-O3>
+    )
+    target_compile_definitions(${TEST_NAME} PRIVATE 
+        ENABLE_CRASH_HANDLER
+        $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
     )
     
     # Create a custom command to build the test only if source or FastLED library changes
