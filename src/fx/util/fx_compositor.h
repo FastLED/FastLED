@@ -26,10 +26,9 @@ public:
     void startTransition(uint32_t now, uint32_t duration, RefPtr<Fx> nextFx) {
         completeTransition();
         if (duration == 0) {
-            setLayerFx(nextFx, RefPtr<Fx>());
+            mLayers[0]->setFx(nextFx);
             return;
         }
-        setLayerFx(mLayers[0]->getFx(), nextFx);
         mLayers[1]->setFx(nextFx);
         mIsTransitioning = true;
         mTransition.start(now, duration);
@@ -51,21 +50,6 @@ private:
         FxLayerPtr tmp = mLayers[0];
         mLayers[0] = mLayers[1];
         mLayers[1] = tmp;
-    }
-    void setLayerFx(RefPtr<Fx> fx0, RefPtr<Fx> fx1) {
-        if (fx0 == mLayers[1]->getFx()) {
-            // Recycle the layer because the new fx needs
-            // to keep it's state.
-            FxLayerPtr tmp = mLayers[0];
-            mLayers[0] = mLayers[1];
-            mLayers[1] = tmp;
-            // Setting the fx will pause the layer and memclear the framebuffer.
-            mLayers[1]->setFx(fx1);
-        } else {
-            mLayers[0]->setFx(fx0);
-            mLayers[1]->setFx(fx1);
-        }
-        mIsTransitioning = false;
     }
 
     FxLayerPtr mLayers[2];
