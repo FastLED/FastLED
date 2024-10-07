@@ -8,6 +8,7 @@
 #include "fx/2d/noisepalette.hpp"
 #include "fx/2d/animartrix.hpp"
 #include "fx/fx_engine.h"
+#include "fx/storage/sd.h"
 
 #define LED_PIN 2
 #define BRIGHTNESS 96
