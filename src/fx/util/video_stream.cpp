@@ -2,7 +2,11 @@
 #include "video_stream.h"
 #include "namespace.h"
 #include "fx/storage/filebuffer.h"
-#include <limits>
+
+#ifndef INT32_MAX
+#define INT32_MAX 0x7fffffff
+#endif
+
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -76,7 +80,7 @@ int32_t VideoStream::FramesDisplayed() const {
 
 int32_t VideoStream::BytesRemaining() const {
     if (mUsingByteStream) {
-        return std::numeric_limits<int32_t>::max();
+        return INT32_MAX;
     } else {
         return mFileBuffer->BytesLeft();
     }
