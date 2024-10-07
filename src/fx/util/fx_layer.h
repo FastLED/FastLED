@@ -30,17 +30,18 @@ class FxLayer : public Referent {
         if (fx->hasAlphaChannel() && !surface_alpha.get()) {
             surface_alpha.reset(new uint8_t[fx->getNumLeds()]);
         }
-        // mem clear the surface
-        CRGB *surface_ptr = this->surface.get();
-        uint8_t *surface_alpha_ptr = this->surface_alpha.get();
-        if (surface_ptr) {
-            memset(surface_ptr, 0, sizeof(CRGB) * fx->getNumLeds());
-        }
-        if (surface_alpha_ptr) {
-            memset(surface_alpha_ptr, 0,
-                    sizeof(uint8_t) * fx->getNumLeds());
-        }
+
         if (!running) {
+            // mem clear the surface
+            CRGB *surface_ptr = this->surface.get();
+            uint8_t *surface_alpha_ptr = this->surface_alpha.get();
+            if (surface_ptr) {
+                memset(surface_ptr, 0, sizeof(CRGB) * fx->getNumLeds());
+            }
+            if (surface_alpha_ptr) {
+                memset(surface_alpha_ptr, 0,
+                        sizeof(uint8_t) * fx->getNumLeds());
+            }
             fx->resume();
             running = true;
         }

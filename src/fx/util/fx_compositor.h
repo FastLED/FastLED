@@ -8,6 +8,7 @@
 #include "ptr.h"
 #include <stdint.h>
 #include <string.h>
+// #include <iostream>
 
 
 #ifndef FASTLED_FX_ENGINE_MAX_FX
