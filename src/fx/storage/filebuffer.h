@@ -3,12 +3,15 @@
 
 #include <stdint.h>
 #include "sd.h"
+#include "ptr.h"
 
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 
-class FileBuffer {
+DECLARE_SMART_PTR(FileBuffer);
+
+class FileBuffer: public Referent {
  public:
   FileBuffer(FileHandlePtr file);
   virtual ~FileBuffer();
@@ -16,6 +19,10 @@ class FileBuffer {
   bool available() const;
   int32_t BytesLeft() const;
   int32_t FileSize() const;
+  void close() {
+    mFile->close();
+    mIsOpen = false;
+  }
 
   // Reads the next byte, else -1 is returned for end of buffer.
   int16_t read();

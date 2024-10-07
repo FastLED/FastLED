@@ -7,25 +7,13 @@
 #include "namespace.h"
 #include "ptr.h"
 #include "filehandle.h"
+#include "filereader.h"
 
 
 FASTLED_NAMESPACE_BEGIN
 
 
 DECLARE_SMART_PTR(SdCardSpi);
-
-class FileReader {
-  public:
-    struct Visitor {
-      virtual void accept(const char* path) = 0;
-    };
-  
-    virtual FileHandlePtr openRead(const char *path) = 0;
-    virtual void close(FileHandlePtr file) = 0;
-
-    // False signals to stop the file iteration.
-    virtual bool ls(Visitor &visitor) = 0;
-};
 
 class SdCardSpi : public Referent, public FileReader {
   public:
@@ -37,7 +25,7 @@ class SdCardSpi : public Referent, public FileReader {
     virtual void end() = 0;
     virtual void close(FileHandlePtr file) = 0;
 
-    virtual bool ls(Visitor &visitor) {
+    virtual bool ls(FileReader::Visitor &visitor) {
       // todo: implement.
       return false;
     }
