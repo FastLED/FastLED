@@ -26,7 +26,7 @@ class FileBuffer: public Referent {
 
   // Reads the next byte, else -1 is returned for end of buffer.
   int16_t read();
-  bool Read(uint8_t* dst);
+  size_t read(uint8_t* dst, size_t n);
 
  private:
   void ResetBuffer();

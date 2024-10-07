@@ -4,6 +4,7 @@
 #include "crgb.h"
 #include "fx/storage/filereader.h"
 #include "fx/storage/filebuffer.h"
+#include "fx/storage/bytestream.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -13,10 +14,11 @@ class VideoStream {
   explicit VideoStream(int bytes_per_frame);
   virtual ~VideoStream();
   bool begin(FileHandlePtr h);
+  bool begin(ByteStreamPtr s);
   void Close();
   int32_t BytesPerFrame();
   bool ReadPixel(CRGB* dst);
-  uint16_t ReadBytes(uint8_t* dst, uint16_t len);
+  size_t ReadBytes(uint8_t* dst, size_t len);
   int32_t FramesRemaining() const;
   int32_t FramesDisplayed() const;
 
@@ -29,6 +31,8 @@ class VideoStream {
   int32_t mBytesPerFrame;
   FileHandlePtr mFileHandle;
   FileBufferPtr mFileBuffer;
+  ByteStreamPtr mByteStream;
+  bool mUsingByteStream;
 };
 
 FASTLED_NAMESPACE_END

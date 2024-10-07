@@ -37,10 +37,10 @@ FASTLED_NAMESPACE_BEGIN
 //
 //  The triangle wave function is a piecewise linear function that looks like:
 //
-//     / \ 
-//    /     \ 
-//   /         \ 
-//  /             \ 
+//     / \\ 
+//    /     \\ 
+//   /         \\ 
+//  /             \\ 
 //
 //  Of course, if all the pixels used the exact same wave form, and
 //  if they all used the exact same 'clock' for their 'time base', all

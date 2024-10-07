@@ -54,14 +54,16 @@ int16_t FileBuffer::read() {
   return output;
 }
 
-bool FileBuffer::Read(uint8_t* dst) {
-  int16_t val = read();
-  if (val == -1) {
-    return false;
+size_t FileBuffer::read(uint8_t* dst, size_t n) {
+  size_t bytes_read = 0;
+  for (size_t i = 0; i < n; i++) {
+    int16_t next_byte = read();
+    if (next_byte == -1) {
+      break;
+    }
+    dst[bytes_read++] = static_cast<uint8_t>(next_byte);
   }
-
-  *dst = (uint8_t)(val & 0xff);
-  return true;
+  return bytes_read;
 }
 
 void FileBuffer::ResetBuffer() {

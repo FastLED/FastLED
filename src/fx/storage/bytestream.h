@@ -17,29 +17,10 @@ class ByteStream : public Referent {
     virtual ~ByteStream() {}
     virtual bool available() const = 0;
     virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
-    bool read(CRGB* dst);
     virtual const char *path() const = 0;
     virtual void close() {}  // default is do nothing on close.
 };
 
-
-inline bool ByteStream::read(CRGB* dst) {
-    if (!available()) {
-        return false;
-    }
-    CRGB out;
-    if (1 != read(&out.r, 1)) {
-        return false;
-    }
-    if (1 != read(&out.g, 1)) {
-        return false;
-    }
-    if (1 != read(&out.b, 1)) {
-        return false;
-    }
-    *dst = out;
-    return true;
-}
 
 
 FASTLED_NAMESPACE_END
