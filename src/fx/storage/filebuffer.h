@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include "sd.h"
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 class FileBuffer {
  public:
   FileBuffer(FileHandlePtr file);
@@ -31,3 +35,5 @@ class FileBuffer {
   FileHandlePtr mFile;
   bool mIsOpen;
 };
+
+FASTLED_NAMESPACE_END

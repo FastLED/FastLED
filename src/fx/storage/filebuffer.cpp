@@ -7,12 +7,12 @@ FileBuffer::FileBuffer(FileHandlePtr fh) {
   mFile = fh;
   ResetBuffer();
 }
+
 FileBuffer::~FileBuffer() {
   if (mIsOpen) {
     mFile->close();
   }
 }
-
 
 void FileBuffer::RewindToStart() {
   mFile->seek(0);
