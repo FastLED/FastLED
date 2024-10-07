@@ -10,7 +10,6 @@ VideoStream::VideoStream(int pixels_per_frame) : mPixelsPerFrame(pixels_per_fram
 }
 
 VideoStream::~VideoStream() {
-    Close();
 }
 
 bool VideoStream::begin(FileHandlePtr h) {
