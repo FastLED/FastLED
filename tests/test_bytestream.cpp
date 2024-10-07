@@ -126,13 +126,12 @@ TEST_CASE("ByteStreamMemory basic operations") {
         uint8_t readData[3] = {0};
         CHECK(stream.read(readData, 0) == 0);
     }
-#if 0
+
     SUBCASE("Write and read with null pointers") {
         ByteStreamMemory stream(10);
         CHECK(stream.write(nullptr, 5) == 0);
         CHECK(stream.read(nullptr, 5) == 0);
     }
-#endif
 
     SUBCASE("Boundary conditions") {
         ByteStreamMemory stream(10);
@@ -184,7 +183,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
         CHECK(stream.read(readData, 3) == 0);  // Should read nothing
     }
 
-    #if 0
+    #if 1
 
     SUBCASE("Write zero bytes when buffer is full") {
         ByteStreamMemory stream(0);  // Zero capacity

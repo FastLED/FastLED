@@ -14,7 +14,7 @@ bool ByteStreamMemory::available() const {
 }
 
 size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
-    if (!available()) {
+    if (!available() || dst == nullptr) {
         return 0;
     }
 
@@ -30,13 +30,19 @@ size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
 }
 
 size_t ByteStreamMemory::write(const uint8_t* src, size_t n) {
+    if (src == nullptr || mBuffer.capacity() == 0) {
+        return 0;
+    }
+
+    size_t written = 0;
     for (size_t i = 0; i < n; ++i) {
         if (mBuffer.full()) {
-            return i;
+            break;
         }
         mBuffer.push_back(src[i]);
+        ++written;
     }
-    return n;
+    return written;
 }
 
 FASTLED_NAMESPACE_END
