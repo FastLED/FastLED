@@ -45,7 +45,7 @@ private:
     const char* _path;
 
 public:
-    SDFileHandle(File file, const char* path) : _file(std::move(file)), _path(path) {}
+    SDFileHandle(File file, const char* path) : _file(file), _path(path) {}
     ~SDFileHandle() override { _file.close(); }
 
     bool available() const override {
