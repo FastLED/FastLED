@@ -24,7 +24,7 @@
 CRGB leds[NUM_LED];               // framebuffer
 
 XYMap xyMap(WIDTH, HEIGHT, SERPENTINE);
-Animartrix fxAnimator(xyMap, POLAR_WAVES);
+AnimartrixPtr fxAnimator = Fx::make<Animartrix>(xyMap, POLAR_WAVES);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   
@@ -33,7 +33,7 @@ void setup() {
   // fill_rainbow(leds, NUM_LED, 0);
   fill_solid(leds, NUM_LED, CRGB::Black);
   FastLED.show();
-  fxAnimator.lazyInit();  // test look up table construction.
+  fxAnimator->lazyInit();  // test look up table construction.
 }
 
 void loop() {
@@ -41,13 +41,13 @@ void loop() {
   // Change animation every 10 seconds
   #if CYCLE_THROUGH_ANIMATIONS > 0
   EVERY_N_SECONDS(CYCLE_THROUGH_ANIMATIONS) {
-    fxAnimator.fxNext();
+    fxAnimator->fxNext();
     #if DEBUG_PRINT
     std::cout << "New animation: " << fxAnimator.fxName() << std::endl;
     #endif
   }
   #endif
-  fxAnimator.draw(millis(), leds);
+  fxAnimator->draw(Fx::DrawContext{millis(), leds});
   FastLED.show();
   uint32_t elapsed = millis() - now;
 

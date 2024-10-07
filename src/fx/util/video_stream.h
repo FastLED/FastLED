@@ -16,6 +16,7 @@ class VideoStream {
   void Close();
   int32_t PixelsPerFrame();
   bool ReadPixel(CRGB* dst);
+  uint16_t ReadBytes(uint8_t* dst, uint16_t len);
   int32_t FramesRemaining() const;
   int32_t FramesDisplayed() const;
 

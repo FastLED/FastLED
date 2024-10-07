@@ -55,4 +55,16 @@ void VideoStream::Rewind() {
     mFileBuffer->RewindToStart();
 }
 
+uint16_t VideoStream::ReadBytes(uint8_t* dst, uint16_t len) {
+    uint16_t bytesRead = 0;
+    while (bytesRead < len && mFileBuffer->available()) {
+        if (mFileBuffer->Read(dst + bytesRead)) {
+            bytesRead++;
+        } else {
+            break;
+        }
+    }
+    return bytesRead;
+}
+
 FASTLED_NAMESPACE_END
