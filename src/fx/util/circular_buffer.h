@@ -4,6 +4,7 @@
 #include <stdint.h>   // For standard integer types
 #include "namespace.h"
 #include "ptr.h"      // Assuming this provides `scoped_array` or similar
+#include "fl_math.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -13,18 +14,11 @@ public:
     // Constructor
     CircularBuffer(size_t capacity, T* buffer = nullptr) 
         : mCapacity(capacity), mSize(0), mHead(0), mTail(0) {
-        // Ensure capacity is greater than zero
-        if (capacity == 0) {
-            // Handle zero capacity appropriately (e.g., set to 1 or return)
-            capacity = 1;
-            mCapacity = capacity;
-        }
-
         if (buffer) {
             // Assume ownership of the provided buffer
             mBuffer.reset(buffer);
         } else {
-            mBuffer.reset(new T[capacity]);
+            mBuffer.reset(new T[max<size_t>(1, mCapacity)]);
         }
     }
 
@@ -34,13 +28,16 @@ public:
 
     // Push value to the back of the buffer
     void push_back(const T& value) {
+        if (mCapacity == 0) {
+            return;
+        }
         mBuffer[mHead] = value;
-        mHead = increment(mHead);
         if (mSize < mCapacity) {
             ++mSize;
-        } else {
-            // Overwrite the oldest data
-            mTail = increment(mTail);
+        }
+        mHead = increment(mHead);
+        if (mSize == mCapacity) {
+            mTail = mHead;
         }
     }
 
@@ -53,6 +50,9 @@ public:
         T value = mBuffer[mTail];
         mTail = increment(mTail);
         --mSize;
+        if (empty()) {
+            mHead = mTail;
+        }
         return value;
     }
 

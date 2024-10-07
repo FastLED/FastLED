@@ -126,3 +126,72 @@ TEST_CASE("circular_buffer with custom type") {
     CHECK_EQ(buffer.pop_front().value, 3);
     CHECK_EQ(buffer.pop_front().value, 4);
 }
+
+TEST_CASE("circular_buffer writing to full buffer") {
+    CircularBuffer<int> buffer(3);
+
+    // Fill the buffer
+    buffer.push_back(1);
+    buffer.push_back(2);
+    buffer.push_back(3);
+    CHECK(buffer.full());
+
+    // Write to full buffer
+    buffer.push_back(4);
+    CHECK(buffer.full());
+    CHECK_EQ(buffer.size(), 3);
+
+    // Check that the oldest element was overwritten
+    CHECK_EQ(buffer[0], 2);
+    CHECK_EQ(buffer[1], 3);
+    CHECK_EQ(buffer[2], 4);
+
+    // Write multiple elements to full buffer
+    buffer.push_back(5);
+    buffer.push_back(6);
+    CHECK(buffer.full());
+    CHECK_EQ(buffer.size(), 3);
+
+    // Check that the buffer contains only the most recent elements
+    CHECK_EQ(buffer[0], 4);
+    CHECK_EQ(buffer[1], 5);
+    CHECK_EQ(buffer[2], 6);
+
+    // Verify front() and back()
+    CHECK_EQ(buffer.front(), 4);
+    CHECK_EQ(buffer.back(), 6);
+
+    // Pop all elements and verify
+    CHECK_EQ(buffer.pop_front(), 4);
+    CHECK_EQ(buffer.pop_front(), 5);
+    CHECK_EQ(buffer.pop_front(), 6);
+    CHECK(buffer.empty());
+}
+
+#if 1
+
+TEST_CASE("circular_buffer zero capacity") {
+    CircularBuffer<int> buffer(0);
+
+    CHECK(buffer.empty());
+    CHECK(buffer.full());
+    CHECK_EQ(buffer.size(), 0);
+
+    // Attempt to push an element
+    buffer.push_back(1);
+
+    // Buffer should now contain one element
+    CHECK(buffer.empty());
+    CHECK(buffer.full());
+    CHECK_EQ(buffer.size(), 0);
+
+    // Attempt to pop an element
+    CHECK_EQ(buffer.pop_front(), 0);
+
+    // Buffer should be empty again
+    CHECK(buffer.empty());
+    CHECK(buffer.full());
+    CHECK_EQ(buffer.size(), 0);
+}
+
+#endif  

@@ -183,7 +183,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
         CHECK(stream.read(readData, 3) == 0);  // Should read nothing
     }
 
-    #if 0
+    #if 1
 
     SUBCASE("Write zero bytes when buffer is full") {
         ByteStreamMemory stream(0);  // Zero capacity
