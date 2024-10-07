@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <string.h>
 
+
 #ifndef FASTLED_FX_ENGINE_MAX_FX
 #define FASTLED_FX_ENGINE_MAX_FX 64
 #endif
@@ -18,7 +19,7 @@ FASTLED_NAMESPACE_BEGIN
 // Takes two fx layers and composites them together to a final output buffer.
 class FxCompositor {
 public:
-    FxCompositor(uint16_t numLeds) : mNumLeds(numLeds), mIsTransitioning(false) {
+    FxCompositor(uint16_t numLeds) : mNumLeds(numLeds) {
         mLayers[0] = FxLayerPtr::FromHeap(new FxLayer());
         mLayers[1] = FxLayerPtr::FromHeap(new FxLayer());
     }
@@ -30,20 +31,18 @@ public:
             return;
         }
         mLayers[1]->setFx(nextFx);
-        mIsTransitioning = true;
         mTransition.start(now, duration);
     }
 
     void completeTransition() {
-        mIsTransitioning = false;
         if (mLayers[1]->getFx()) {
             swapLayers();
             mLayers[1]->release();
         }
+        mTransition.end();
     }
 
     void draw(uint32_t now, CRGB *finalBuffer);
-    bool isTransitioning() const { return mIsTransitioning; }
 
 private:
     void swapLayers() {
@@ -54,21 +53,22 @@ private:
 
     FxLayerPtr mLayers[2];
     const uint16_t mNumLeds;
-    bool mIsTransitioning;
     Transition mTransition;
 };
 
 inline void FxCompositor::draw(uint32_t now, CRGB *finalBuffer) {
+    if (!mLayers[0]->getFx()) {
+        return;
+    }
     mLayers[0]->draw(now);
-    if (!mIsTransitioning) {
-        if (mLayers[0]->getSurface()) {
-            memcpy(finalBuffer, mLayers[0]->getSurface(), sizeof(CRGB) * mNumLeds);
-        }
+    uint8_t progress = mTransition.getProgress(now);
+    if (!progress) {
+        //std::cout << "Not transitioning: " << mLayers[0]->getFx()->fxName(0) << std::endl;
+        memcpy(finalBuffer, mLayers[0]->getSurface(), sizeof(CRGB) * mNumLeds);
         return;
     }
     mLayers[1]->draw(now);
-
-    uint8_t progress = mTransition.getProgress(now);
+    //std::cout << "Progress: " << int(progress) << " on " << mLayers[0]->getFx()->fxName(0) << " and " << mLayers[1]->getFx()->fxName(0) << std::endl;
     uint8_t inverse_progress = 255 - progress;
     const CRGB* surface0 = mLayers[0]->getSurface();
     const CRGB* surface1 = mLayers[1]->getSurface();

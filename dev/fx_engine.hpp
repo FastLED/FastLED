@@ -50,8 +50,8 @@ void loop() {
         noisePalette->changeToRandomPalette();
     }
 
-    EVERY_N_SECONDS(1) {
-        fxEngine.nextFx(now, 500);
+    EVERY_N_SECONDS(10) {
+        fxEngine.nextFx(now, 5000);
     }
     fxEngine.draw(millis(), leds);
     FastLED.show();

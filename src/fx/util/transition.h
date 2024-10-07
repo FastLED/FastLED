@@ -30,6 +30,10 @@ public:
         mDuration = duration;
     }
 
+    void end() {
+        mNotStarted = true;
+    }
+
     bool isTransitioning(uint32_t now) {
         if (mNotStarted) {
             return false;
