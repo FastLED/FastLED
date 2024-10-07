@@ -19,7 +19,7 @@ class ISdCardSpi {
     //  End use of card
     virtual void end() = 0;
     virtual FileHandlePtr openRead(const char *name) = 0;
-    virtual void close(FileHandle *file) = 0;
+    virtual void close(FileHandlePtr file) = 0;
 };
 
 

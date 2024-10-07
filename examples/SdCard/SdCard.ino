@@ -1,26 +1,36 @@
 
 
+
+#ifdef __AVR__
+void setup() {
+  // put your setup code here, to run once:
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+}
+#else
+
 #include <FastLED.h>
 #include "Arduino.h"
-#include "fx/storage/sd.h"
-
-#define SPI_DATA 13
-#define SPI_CLOCK 14
+#include "fx/storage/sd.hpp"
 
 using namespace storage;
 
-SdCardSpi sd(SPI_CLOCK, SPI_DATA);
+ISdCardSpi* sd = createSdCardSpi(5);
 
 #define INVALID_FILENAME "fhjdiskljdskj.txt"
 
 void setup() {
     Serial.begin(115200);
-    sd.begin();
+    sd->begin(5);
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
 
 void loop() {
-    FileHandle *file = sd.open(INVALID_FILENAME, 0);
-    sd.close(file);
+    FileHandlePtr file = sd->openRead(INVALID_FILENAME);
+    sd->close(file);
     delay(1000);    
 }
+
+#endif

@@ -105,7 +105,7 @@ public:
 #endif
     }
 
-    void close(FileHandle *file) override {
+    void close(FileHandlePtr file) override {
         // The close operation is now handled in the FileHandle wrapper classes
         // This method is no longer necessary, but we keep it for compatibility
         if (file) {
