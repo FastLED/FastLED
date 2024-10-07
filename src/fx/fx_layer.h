@@ -8,17 +8,12 @@
 #include <stdint.h>
 #include <string.h>
 
-
 FASTLED_NAMESPACE_BEGIN
 
-struct Layer;
-typedef RefPtr<Layer> LayerPtr;
-struct Layer : public Referent {
-    scoped_array<CRGB> surface;
-    scoped_array<uint8_t> surface_alpha;
-    RefPtr<Fx> fx;
-    bool running = false;
-
+class FxLayer;
+typedef RefPtr<FxLayer> FxLayerPtr;
+class FxLayer : public Referent {
+  public:
     void setFx(RefPtr<Fx> newFx) {
         if (newFx != fx) {
             release();
@@ -35,13 +30,14 @@ struct Layer : public Referent {
                 surface_alpha.reset(new uint8_t[fx->getNumLeds()]);
             }
             // mem clear the surface
-            CRGB* surface_ptr = this->surface.get();
-            uint8_t* surface_alpha_ptr = this->surface_alpha.get();
+            CRGB *surface_ptr = this->surface.get();
+            uint8_t *surface_alpha_ptr = this->surface_alpha.get();
             if (surface_ptr) {
                 memset(surface_ptr, 0, sizeof(CRGB) * fx->getNumLeds());
             }
             if (surface_alpha_ptr) {
-                memset(surface_alpha_ptr, 0, sizeof(uint8_t) * fx->getNumLeds());
+                memset(surface_alpha_ptr, 0,
+                       sizeof(uint8_t) * fx->getNumLeds());
             }
             if (!running) {
                 fx->resume();
@@ -66,6 +62,17 @@ struct Layer : public Referent {
         pause();
         fx.reset();
     }
+
+    RefPtr<Fx> getFx() { return fx; }
+
+    CRGB *getSurface() { return surface.get(); }
+    uint8_t *getSurfaceAlpha() { return surface_alpha.get(); }
+
+  private:
+    scoped_array<CRGB> surface;
+    scoped_array<uint8_t> surface_alpha;
+    RefPtr<Fx> fx;
+    bool running = false;
 };
 
 FASTLED_NAMESPACE_END

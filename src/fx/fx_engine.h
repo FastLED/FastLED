@@ -3,7 +3,7 @@
 #include "crgb.h"
 #include "fixed_vector.h"
 #include "fx/fx.h"
-#include "fx/fx_compositing_engine.h"
+#include "fx/fx_compositor.h"
 #include "fx/fx_layer.h"
 #include "namespace.h"
 #include "ptr.h"
@@ -28,7 +28,7 @@ class FxEngine {
   private:
     uint16_t mNumLeds;
     FixedVector<RefPtr<Fx>, FASTLED_FX_ENGINE_MAX_FX> mEffects;
-    FxCompositingEngine mCompositor;
+    FxCompositor mCompositor;
     uint16_t mCurrentIndex;
 };
 
