@@ -22,7 +22,7 @@ class VideoStream {
 
   int32_t BytesRemaining() const;
   int32_t BytesRemainingInFrame() const;
-  void Rewind();
+  bool Rewind();  // Returns true on failure, which can happen for streaming mode.
   
  private:
   void init(int bytes_per_frame);

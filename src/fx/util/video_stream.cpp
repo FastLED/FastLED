@@ -50,8 +50,9 @@ int32_t VideoStream::BytesRemainingInFrame() const {
     return BytesRemaining() % mBytesPerFrame;
 }
 
-void VideoStream::Rewind() {
+bool VideoStream::Rewind() {
     mFileBuffer->RewindToStart();
+    return true;
 }
 
 uint16_t VideoStream::ReadBytes(uint8_t* dst, uint16_t len) {
