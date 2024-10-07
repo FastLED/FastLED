@@ -20,6 +20,7 @@ namespace storage
 
 class SdCardSpi {
   public:
+    static bool isCompiledIn();
     SdCardSpi(int clock, int data) : mClockPin(clock), mDataPin(data) {}
     SdCardSpi() {}  // Use default pins for spi.
     bool begin(int chipSelect);
