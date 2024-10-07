@@ -8,9 +8,6 @@
 #include "fx/storage/sd.hpp"
 #include <iostream>
 
-using namespace std;
-#define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
-
 #define SCALE 20
 #define SPEED 30
 
