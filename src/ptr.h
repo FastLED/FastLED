@@ -13,17 +13,28 @@ FASTLED_NAMESPACE_BEGIN
 template<typename T>
 class RefPtr;
 
-// Helper type to detect RefPtr
 template<typename T>
-struct is_refptr {
-    static const bool value = false;
+struct ref_unwrapper {
+    using type = T;
+    using ref_type = RefPtr<T>;
 };
 
+// specialization for RefPtr<RefPtr<T>>
 template<typename T>
-struct is_refptr<RefPtr<T>> {
-    static const bool value = true;
+struct ref_unwrapper<RefPtr<T>> {
+    using type = T;
+    using ref_type = RefPtr<T>;
 };
 
+
+
+struct Ptr {
+    template <typename T, typename... Args>
+    static typename ref_unwrapper<T>::ref_type New(Args... args) {
+        using U = typename ref_unwrapper<T>::type;
+        return RefPtr<U>::FromHeap(new U(args...));
+    }
+};
 
 
 template <typename T>

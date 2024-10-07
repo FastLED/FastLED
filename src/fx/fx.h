@@ -19,19 +19,6 @@ FASTLED_NAMESPACE_BEGIN
 
 
 
-template<typename T>
-struct ref_unwrapper {
-    using type = T;
-    using ref_type = RefPtr<T>;
-};
-
-// specialization for RefPtr<RefPtr<T>>
-template<typename T>
-struct ref_unwrapper<RefPtr<T>> {
-    using type = T;
-    using ref_type = RefPtr<T>;
-};
-
 // Abstract base class for effects on a strip/grid of LEDs.
 class Fx : public Referent {
   public:
@@ -45,7 +32,7 @@ class Fx : public Referent {
     template <typename T, typename... Args>
     static typename ref_unwrapper<T>::ref_type make(Args... args) {
         using U = typename ref_unwrapper<T>::type;
-        return RefPtr<U>::FromHeap(new U(args...));
+        return Ptr::New<U>(args...);
     }
 
 
@@ -88,6 +75,7 @@ class Fx : public Referent {
     uint16_t getNumLeds() const { return mNumLeds; }
 
   protected:
+    friend class Ptr;
     // protect operator new so that it has to go through Fx
     void *operator new(size_t size) { return ::operator new(size); }
     // protect operator delete so that it has to go through Fx
