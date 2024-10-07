@@ -53,6 +53,13 @@ public:
         return mVideoStream->begin(fileHandle);
     }
 
+    bool beginStream(ByteStreamPtr byteStream) {
+        const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
+        mVideoStream = RefPtr<VideoStream>::FromHeap(
+            new VideoStream(bytes_per_frame));
+        return mVideoStream->beginStream(byteStream);
+    }
+
     void close() {
         mVideoStream->Close();
     }
@@ -63,7 +70,7 @@ private:
     VideoStreamPtr mVideoStream;
     bool mInitialized = false;
 
-    FX_PROTECTED_DESTRUCTOR(Video);
+    FX_PROTECTED_DESTRUCTOR(Video) = default;
 };
 
 FASTLED_NAMESPACE_END

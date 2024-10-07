@@ -41,7 +41,7 @@ struct Ptr {
         return RefPtr<U>::FromHeap(new U(args...));
     }
 
-    template <typename T, typename... Args>
+    template <typename T>
     static typename ref_unwrapper<T>::ref_type New() {
         using U = typename ref_unwrapper<T>::type;
         return RefPtr<U>::FromHeap(new U());

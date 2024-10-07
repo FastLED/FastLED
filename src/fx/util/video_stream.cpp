@@ -50,6 +50,14 @@ bool VideoStream::ReadPixel(CRGB* dst) {
     }
 }
 
+bool VideoStream::available() const {
+    if (mUsingByteStream) {
+        return mByteStream->available();
+    } else {
+        return mFileBuffer->available();
+    }
+}
+
 int32_t VideoStream::FramesRemaining() const {
     if (mBytesPerFrame == 0) return 0;
     int32_t bytes_left = BytesRemaining();

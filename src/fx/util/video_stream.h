@@ -30,6 +30,7 @@ class VideoStream: public Referent {
   size_t ReadBytes(uint8_t* dst, size_t len);
   int32_t FramesRemaining() const;
   int32_t FramesDisplayed() const;
+  bool available() const;
 
 
   int32_t BytesRemaining() const;
