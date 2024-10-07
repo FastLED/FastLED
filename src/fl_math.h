@@ -21,4 +21,9 @@ namespace fl_math {
     }
 }
 
+using fl_math::min;
+using fl_math::max;
+using fl_math::abs;
+
+
 FASTLED_NAMESPACE_END

@@ -2,10 +2,7 @@
 #include <string.h>
 #include "fl_math.h"
 
-
 FASTLED_NAMESPACE_BEGIN
-
-using fl_math::min;
 
 ByteStreamMemory::ByteStreamMemory(uint32_t size_buffer)
     : mBuffer(size_buffer) {}
