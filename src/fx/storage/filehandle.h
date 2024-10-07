@@ -7,9 +7,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-namespace storage
-{
-
 class FileHandle;
 typedef RefPtr<FileHandle> FileHandlePtr;
 
@@ -28,6 +25,5 @@ class FileHandle: public Referent {
     virtual void close() = 0;
 };
 
-} // namespace storage
 
 FASTLED_NAMESPACE_END

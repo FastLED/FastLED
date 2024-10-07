@@ -9,12 +9,12 @@
 #include <iostream>
 
 using namespace std;
-using namespace storage;
 
 #define SCALE 20
 #define SPEED 30
+#define CS_PIN 5
 
-ISdCardSpi* SD_CARD_READER = createSdCardSpi(5);
+SdCardSpiPtr SD_CARD_READER = SdCardSpi::make(CS_PIN);
 
 
 void runSdCardTest() {

@@ -1,8 +1,6 @@
 #pragma once
 
 #include "sd.h"
-#include "namespace.h"
-
 
 
 #if __has_include(<SD.h>)

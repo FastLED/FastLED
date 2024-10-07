@@ -14,8 +14,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-namespace storage {
-
 #ifdef USE_SDFAT
 class SdFatFileHandle : public FileHandle {
 private:
@@ -62,7 +60,7 @@ public:
 };
 #endif
 
-class SdCardSpiArduino : public ISdCardSpi {
+class SdCardSpiArduino : public SdCardSpi {
 private:
     int _cs_pin;
 #ifdef USE_SDFAT
@@ -114,10 +112,10 @@ public:
     }
 };
 
-ISdCardSpi *createSdCardSpi(int cs_pin) {
-    return new SdCardSpiArduino(cs_pin);
+inline SdCardSpiPtr SdCardSpi::make(int cs_pin) {
+    return SdCardSpiPtr::FromHeap(new SdCardSpiArduino(cs_pin));
 }
 
-} // namespace storage
+
 
 FASTLED_NAMESPACE_END

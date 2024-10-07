@@ -6,6 +6,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+#define DECLARE_SMART_PTR(type) \
+    class type; \
+    using type##Ptr = RefPtr<type>;
 
 template<typename T>
 class RefPtr;
@@ -195,6 +198,11 @@ public:
     // element_type is the type of the managed object
     using element_type = T;
     static RefPtr FromHeap(T* referent) {
+        return RefPtr(referent, true);
+    }
+
+    template<typename U>
+    static RefPtr FromHeap(U* referent) {
         return RefPtr(referent, true);
     }
 
