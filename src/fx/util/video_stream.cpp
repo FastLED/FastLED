@@ -26,7 +26,7 @@ bool VideoStream::beginStream(ByteStreamPtr s) {
     Close();
     mByteStream = s;
     mUsingByteStream = true;
-    return mByteStream->available();
+    return mByteStream->available(mBytesPerFrame);
 }
 
 void VideoStream::Close() {
@@ -52,7 +52,7 @@ bool VideoStream::ReadPixel(CRGB* dst) {
 
 bool VideoStream::available() const {
     if (mUsingByteStream) {
-        return mByteStream->available();
+        return mByteStream->available(mBytesPerFrame);
     } else {
         return mFileBuffer->available();
     }
@@ -103,7 +103,7 @@ VideoStream::Type VideoStream::getType() const {
 size_t VideoStream::ReadBytes(uint8_t* dst, size_t len) {
     uint16_t bytesRead = 0;
     if (mUsingByteStream) {
-        while (bytesRead < len && mByteStream->available()) {
+        while (bytesRead < len && mByteStream->available(len)) {
             // use pop_front()
             if (mByteStream->read(dst + bytesRead, 1)) {
                 bytesRead++;

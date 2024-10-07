@@ -15,7 +15,7 @@ class ByteStreamMemory : public ByteStream {
   public:
     ByteStreamMemory(uint32_t size_buffer);
     ~ByteStreamMemory() override;
-    bool available() const override;
+    bool available(size_t n) const override;
     size_t read(uint8_t *dst, size_t bytesToRead) override;
     void clear() {
         mBuffer.clear();
