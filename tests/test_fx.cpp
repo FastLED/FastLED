@@ -16,6 +16,7 @@
 #include "fx/2d/noisepalette.hpp"
 #include "fx/2d/scale_up.hpp"
 #include "fx/2d/redsquare.hpp"
+#include "fx/2d/video.hpp"
 
 // To satisfy the linker, we must also define uint16_t XY( uint8_t, uint8_t);
 // This should go away someday and only use functions supplied by the user.
