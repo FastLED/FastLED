@@ -5,6 +5,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// Logic to control the progression of a transition over time.
 class Transition {
 public:
     Transition() : mStart(0), mDuration(0), mNotStarted(true) {}

@@ -15,6 +15,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// Takes two fx layers and composites them together to a final output buffer.
 class FxCompositor {
 public:
     FxCompositor(uint16_t numLeds) : mNumLeds(numLeds), mIsTransitioning(false) {
