@@ -23,7 +23,7 @@ class VideoStream: public Referent {
   explicit VideoStream(int bytes_per_frame);
 
   bool begin(FileHandlePtr h);
-  bool begin(ByteStreamPtr s);
+  bool beginStream(ByteStreamPtr s);
   void Close();
   int32_t BytesPerFrame();
   bool ReadPixel(CRGB* dst);

@@ -22,7 +22,7 @@ bool VideoStream::begin(FileHandlePtr h) {
     return mFileBuffer->available();
 }
 
-bool VideoStream::begin(ByteStreamPtr s) {
+bool VideoStream::beginStream(ByteStreamPtr s) {
     Close();
     mByteStream = s;
     mUsingByteStream = true;

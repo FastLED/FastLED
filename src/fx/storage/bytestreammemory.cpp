@@ -10,7 +10,7 @@ ByteStreamMemory::ByteStreamMemory(uint32_t size_buffer)
 ByteStreamMemory::~ByteStreamMemory() = default;
 
 bool ByteStreamMemory::available() const {
-    return !mBuffer.full();
+    return !mBuffer.empty();
 }
 
 size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {

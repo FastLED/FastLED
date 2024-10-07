@@ -40,6 +40,12 @@ struct Ptr {
         using U = typename ref_unwrapper<T>::type;
         return RefPtr<U>::FromHeap(new U(args...));
     }
+
+    template <typename T, typename... Args>
+    static typename ref_unwrapper<T>::ref_type New() {
+        using U = typename ref_unwrapper<T>::type;
+        return RefPtr<U>::FromHeap(new U());
+    }
 };
 
 
@@ -231,6 +237,13 @@ public:
     // create an upcasted RefPtr
     template <typename U>
     RefPtr(RefPtr<U>& refptr) : referent_(refptr.get()) {
+        if (referent_ && isOwned()) {
+            referent_->ref();
+        }
+    }
+
+    template <typename U>
+    RefPtr(const RefPtr<U>& refptr) : referent_(refptr.get()) {
         if (referent_ && isOwned()) {
             referent_->ref();
         }
