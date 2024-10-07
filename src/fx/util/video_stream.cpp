@@ -88,6 +88,10 @@ bool VideoStream::Rewind() {
     }
 }
 
+VideoStream::Type VideoStream::getType() const {
+    return mUsingByteStream ? Type::kStreaming : Type::kFile;
+}
+
 size_t VideoStream::ReadBytes(uint8_t* dst, size_t len) {
     uint16_t bytesRead = 0;
     if (mUsingByteStream) {

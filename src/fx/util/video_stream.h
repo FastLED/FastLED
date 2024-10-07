@@ -11,6 +11,12 @@ FASTLED_NAMESPACE_BEGIN
 // Warning, do NOT intialize VideoStream during static construction time!!
 class VideoStream {
  public:
+
+  enum Type {
+    kStreaming,
+    kFile,
+  };
+
   explicit VideoStream(int bytes_per_frame);
   virtual ~VideoStream();
   bool begin(FileHandlePtr h);
@@ -22,9 +28,11 @@ class VideoStream {
   int32_t FramesRemaining() const;
   int32_t FramesDisplayed() const;
 
+
   int32_t BytesRemaining() const;
   int32_t BytesRemainingInFrame() const;
-  bool Rewind();  // Returns true on failure, which can happen for streaming mode.
+  bool Rewind();  // Returns false on failure, which can happen for streaming mode.
+  Type getType() const;  // Returns the type of the video stream (kStreaming or kFile)
   
  private:
   void init(int bytes_per_frame);
