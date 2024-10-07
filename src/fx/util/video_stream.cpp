@@ -6,7 +6,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-VideoStream::VideoStream(int pixels_per_frame) : mPixelsPerFrame(pixels_per_frame) {
+VideoStream::VideoStream(int bytes_per_frame) : mBytesPerFrame(bytes_per_frame) {
 }
 
 VideoStream::~VideoStream() {
@@ -23,8 +23,8 @@ void VideoStream::Close() {
     mFileBuffer.reset();
 }
 
-int32_t VideoStream::PixelsPerFrame() {
-    return mPixelsPerFrame;
+int32_t VideoStream::BytesPerFrame() {
+    return mBytesPerFrame;
 }
 
 bool VideoStream::ReadPixel(CRGB* dst) {
@@ -32,23 +32,22 @@ bool VideoStream::ReadPixel(CRGB* dst) {
 }
 
 int32_t VideoStream::FramesRemaining() const {
-    if (mPixelsPerFrame == 0) return 0;
-    int32_t pixels_left = mFileBuffer->BytesLeft() / 3;
-    return (pixels_left > 0) ? (pixels_left / mPixelsPerFrame) : 0;
+    if (mBytesPerFrame == 0) return 0;
+    int32_t bytes_left = mFileBuffer->BytesLeft();
+    return (bytes_left > 0) ? (bytes_left / mBytesPerFrame) : 0;
 }
 
 int32_t VideoStream::FramesDisplayed() const {
     int32_t bytes_played = mFileBuffer->FileSize() - mFileBuffer->BytesLeft();
-    int32_t pixels_played = bytes_played / 3;
-    return pixels_played / mPixelsPerFrame;
+    return bytes_played / mBytesPerFrame;
 }
 
 int32_t VideoStream::BytesRemaining() const {
     return mFileBuffer->BytesLeft();
 }
 
-int32_t VideoStream::PixelsRemainingInFrame() const {
-    return (BytesRemaining() / 3) % mPixelsPerFrame;
+int32_t VideoStream::BytesRemainingInFrame() const {
+    return BytesRemaining() % mBytesPerFrame;
 }
 
 void VideoStream::Rewind() {
