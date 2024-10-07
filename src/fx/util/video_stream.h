@@ -2,14 +2,17 @@
 
 #include "namespace.h"
 #include "crgb.h"
+#include "ptr.h"
 #include "fx/storage/filereader.h"
 #include "fx/storage/filebuffer.h"
 #include "fx/storage/bytestream.h"
 
 FASTLED_NAMESPACE_BEGIN
 
+DECLARE_SMART_PTR(VideoStream);
+
 // Warning, do NOT intialize VideoStream during static construction time!!
-class VideoStream {
+class VideoStream: public Referent {
  public:
 
   enum Type {
@@ -18,7 +21,7 @@ class VideoStream {
   };
 
   explicit VideoStream(int bytes_per_frame);
-  virtual ~VideoStream();
+
   bool begin(FileHandlePtr h);
   bool begin(ByteStreamPtr s);
   void Close();
@@ -41,6 +44,9 @@ class VideoStream {
   FileBufferPtr mFileBuffer;
   ByteStreamPtr mByteStream;
   bool mUsingByteStream;
+
+protected:
+  virtual ~VideoStream();
 };
 
 FASTLED_NAMESPACE_END

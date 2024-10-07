@@ -13,7 +13,7 @@ FX_PTR(Video);
 
 class Video : public FxGrid {
 public:
-    Video(XYMap xymap) : FxGrid(xymap), mVideoStream(xymap.getTotal()) {}
+    Video(XYMap xymap) : FxGrid(xymap) {}
 
     void lazyInit() override {
         if (!mInitialized) {
@@ -23,13 +23,22 @@ public:
     }
 
     void draw(DrawContext context) override {
-        if (!mVideoStream.FramesRemaining()) {
-            mVideoStream.Rewind();
+        if (!mVideoStream) {
+            return;
+        }
+        VideoStream::Type type = mVideoStream->getType();
+        if (type == VideoStream::kStreaming) {
+            if (!mVideoStream->FramesRemaining()) {
+                return;  // can't rewind streaming video
+            }
+        }
+        if (!mVideoStream->FramesRemaining()) {
+            mVideoStream->Rewind();
         }
 
         for (uint16_t i = 0; i < mXyMap.getTotal(); ++i) {
             CRGB pixel;
-            if (mVideoStream.ReadPixel(&pixel)) {
+            if (mVideoStream->ReadPixel(&pixel)) {
                 context.leds[i] = pixel;
             } else {
                 context.leds[i] = CRGB::Black;
@@ -38,17 +47,20 @@ public:
     }
 
     bool begin(FileHandlePtr fileHandle) {
-        return mVideoStream.begin(fileHandle);
+        const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
+        mVideoStream = RefPtr<VideoStream>::FromHeap(
+            new VideoStream(bytes_per_frame));
+        return mVideoStream->begin(fileHandle);
     }
 
     void close() {
-        mVideoStream.Close();
+        mVideoStream->Close();
     }
 
     const char* fxName(int) const override { return "video"; }
 
 private:
-    VideoStream mVideoStream;
+    VideoStreamPtr mVideoStream;
     bool mInitialized = false;
 
     FX_PROTECTED_DESTRUCTOR(Video);
