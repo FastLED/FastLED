@@ -7,8 +7,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-class FileHandle;
-typedef RefPtr<FileHandle> FileHandlePtr;
+DECLARE_SMART_PTR(FileHandle);
 
 // An abstract class that represents a file handle.
 // Devices like the SD card will return one of these.

@@ -12,8 +12,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-/// @brief Performs bilinear interpolation mapping from a 2D grid to another 2D
-/// grid.
+/// @brief Performs bilinear interpolation for upscaling an image.
 /// @param output The output grid to write into the interpolated values.
 /// @param input The input grid to read from.
 /// @param inputWidth The width of the input grid.
@@ -26,9 +25,7 @@ void bilinearExpandArbitrary(const CRGB *input, CRGB *output,
                              uint16_t inputWidth, uint16_t inputHeight,
                              XYMap xyMap);
 
-/// @brief Performs bilinear interpolation mapping from a 2D grid to another 2D
-/// grid. This version is optimized for when the input dimensions are a power of
-/// 2 - which allows uint8_t interpolation.
+/// @brief Performs bilinear interpolation for upscaling an image.
 /// @param output The output grid to write into the interpolated values.
 /// @param input The input grid to read from.
 /// @param outputWidth The width of the output grid.
@@ -52,7 +49,7 @@ inline void bilinearExpand(const CRGB *input, CRGB *output, uint16_t inputWidth,
     }
 }
 
-void bilinearExpandPowerOf2Float(const CRGB *input, CRGB *output,
+void bilinearExpandFloat(const CRGB *input, CRGB *output,
                                  uint8_t inputWidth, uint8_t inputHeight,
                                  XYMap xyMap);
 

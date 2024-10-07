@@ -235,7 +235,7 @@ void bilinearExpandArbitraryFloat(const CRGB *input, CRGB *output,
 }
 
 // Floating-point version for power-of-two grid sizes
-void bilinearExpandPowerOf2Float(const CRGB *input, CRGB *output,
+void bilinearExpandFloat(const CRGB *input, CRGB *output,
                                  uint8_t inputWidth, uint8_t inputHeight,
                                  XYMap xyMap) {
     uint8_t outputWidth = xyMap.getWidth();

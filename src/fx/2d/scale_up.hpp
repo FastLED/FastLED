@@ -77,7 +77,7 @@ class ScaleUp : public FxGrid {
 #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_DECIDE_AT_RUNTIME
         bilinearExpand(input, output, width, height, mXyMap);
 #elif FASTLED_SCALE_UP == FASTLED_SCALE_UP_FORCE_FLOATING_POINT
-        bilinearExpandPowerOf2Float(input, output, width, height, mXyMap);
+        bilinearExpandFloat(input, output, width, height, mXyMap);
 #else
 #error "Invalid FASTLED_SCALE_UP"
 #endif
