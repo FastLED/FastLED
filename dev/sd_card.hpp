@@ -8,32 +8,42 @@
 #include "fx/storage/sd.hpp"
 #include <iostream>
 
+using namespace std;
+using namespace storage;
+
 #define SCALE 20
 #define SPEED 30
 
+ISdCardSpi* SD_CARD_READER = createSdCardSpi(5);
+
 
 void runSdCardTest() {
-    #if 0
-    SdCardSpi sdCard;
-    if (sdCard.isCompiledIn()) {
-        // Serial.println("SD card support compiled in");
-        cout << "SD card support compiled in" << endl;
-    } else {
-        // Serial.println("No SD card support compiled in");
-        cout << "No SD card support compiled in" << endl;
+    cout << "Running SD card test" << endl;
+    SD_CARD_READER->begin(5);
+    FileHandlePtr file = SD_CARD_READER->openRead("/test.txt");
+    if (!file) {
+        cout << "Failed to open file" << endl;
+        return;
     }
-    #endif
+    cout << "File opened" << endl;
+    char buffer[256];
+    size_t bytesRead = file->read((uint8_t*)buffer, sizeof(buffer));
+    cout << "Read " << bytesRead << " bytes" << endl;
+    cout << "File contents: " << buffer << endl;
+    file->close();
+    cout << "File closed" << endl;
+    SD_CARD_READER->end();
+    cout << "SD card test complete" << endl;
 }
 
 
 void setup() {
     delay(1000); // sanity delay
-    runSdCardTest();
-
 }
 
 
 
 void loop() {
-    
+    runSdCardTest();
+    delay(1000);
 }

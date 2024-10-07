@@ -18,7 +18,7 @@ class ISdCardSpi {
     virtual bool begin(int chipSelect) = 0;
     //  End use of card
     virtual void end() = 0;
-    virtual FileHandlePtr open(const char *name, uint8_t oflag) = 0;
+    virtual FileHandlePtr openRead(const char *name) = 0;
     virtual void close(FileHandle *file) = 0;
 };
 
