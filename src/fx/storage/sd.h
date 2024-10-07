@@ -21,6 +21,7 @@ class FileReader {
     };
   
     virtual FileHandlePtr openRead(const char *path) = 0;
+    virtual void close(FileHandlePtr file) = 0;
 
     // False signals to stop the file iteration.
     virtual bool ls(Visitor &visitor) = 0;
