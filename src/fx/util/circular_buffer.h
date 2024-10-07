@@ -18,7 +18,8 @@ public:
             // Assume ownership of the provided buffer
             mBuffer.reset(buffer);
         } else {
-            mBuffer.reset(new T[max<size_t>(1, mCapacity)]);
+            size_t n = fl_math::max<size_t>(1, mCapacity);
+            mBuffer.reset(new T[n]);
         }
     }
 

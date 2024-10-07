@@ -183,15 +183,11 @@ TEST_CASE("ByteStreamMemory basic operations") {
         CHECK(stream.read(readData, 3) == 0);  // Should read nothing
     }
 
-    #if 1
-
     SUBCASE("Write zero bytes when buffer is full") {
         ByteStreamMemory stream(0);  // Zero capacity
         uint8_t testByte = 42;
         CHECK(stream.write(&testByte, 1) == 0);  // Cannot write to zero-capacity buffer
     }
-
-    #endif
 
     SUBCASE("Sequential writes and reads") {
         ByteStreamMemory stream(10);

@@ -32,8 +32,9 @@ FxEngine fxEngine(NUM_LEDS);
 void write_one_frame(ByteStreamMemoryPtr memoryStream) {
     //memoryStream->seek(0);  // Reset to the beginning of the stream
     uint32_t total_bytes_written = 0;
+    int toggle = (millis() / 500) % 2;
     for (uint32_t i = 0; i < NUM_LEDS; ++i) {
-        CRGB color = (i % 2 == 0) ? CRGB::Black : CRGB::Red;
+        CRGB color = (i % 2 == toggle) ? CRGB::Black : CRGB::Red;
         size_t bytes_written = memoryStream->write(color.raw, 3);
         if (bytes_written != 3) {
             std::cout << "Error writing to memory stream at LED " << i << std::endl;
@@ -67,9 +68,7 @@ void setup() {
 void loop() {
     // Reset the memory stream position before reading
     //memoryStream->seek(0);
-
-    // Clear the LEDs
-    FastLED.clear();
+    write_one_frame(memoryStream);  // Write next frame data
 
     // Draw the frame
     fxEngine.draw(millis(), leds);
