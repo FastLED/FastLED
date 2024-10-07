@@ -10,6 +10,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 FX_PTR(Video);
+FX_PTR(VideoFx);
 
 class Video : public FxGrid {
 public:
@@ -71,6 +72,46 @@ private:
     bool mInitialized = false;
 
     FX_PROTECTED_DESTRUCTOR(Video) = default;
+};
+
+
+
+class VideoFx : public FxGrid {
+public:
+    VideoFx(XYMap xymap, RefPtr<FxGrid> fx) : FxGrid(xymap), mDelegate(fx) {
+        // Turn off re-mapping of the delegate's XYMap, similar to ScaleUp
+        mDelegate->getXYMap().setRectangularGrid();
+    }
+
+    void lazyInit() override {
+        if (!mInitialized) {
+            mInitialized = true;
+            mDelegate->lazyInit();
+        }
+    }
+
+    void draw(DrawContext context) override {
+        if (!mSurface) {
+            mSurface.reset(new CRGB[mDelegate->getNumLeds()]);
+        }
+        DrawContext delegateContext = context;
+        delegateContext.leds = mSurface.get();
+        mDelegate->draw(delegateContext);
+
+        // Copy the delegate's output to the final output
+        for (uint16_t i = 0; i < mXyMap.getTotal(); ++i) {
+            context.leds[i] = mSurface[i];
+        }
+    }
+
+    const char* fxName(int) const override { return "video_fx"; }
+
+private:
+    RefPtr<FxGrid> mDelegate;
+    scoped_array<CRGB> mSurface;
+    bool mInitialized = false;
+
+    FX_PROTECTED_DESTRUCTOR(VideoFx) = default;
 };
 
 FASTLED_NAMESPACE_END
