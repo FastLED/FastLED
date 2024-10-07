@@ -21,7 +21,7 @@
 CRGB leds[NUM_LEDS];
 
 const int BYTES_PER_FRAME = 3 * MATRIX_WIDTH * MATRIX_HEIGHT;
-const int NUM_FRAMES = 1;
+const int NUM_FRAMES = 2;
 const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * NUM_FRAMES;
 
 ByteStreamMemoryPtr memoryStream;
@@ -30,14 +30,17 @@ FxEngine fxEngine(NUM_LEDS);
 
 
 void write_one_frame(ByteStreamMemoryPtr memoryStream) {
-    for (uint32_t i = 0; i < BUFFER_SIZE / 3; ++i) {
-        CRGB color = (i % 6 < 3) ? CRGB::Black : CRGB::Red;
+    //memoryStream->seek(0);  // Reset to the beginning of the stream
+    uint32_t total_bytes_written = 0;
+    for (uint32_t i = 0; i < NUM_LEDS; ++i) {
+        CRGB color = (i % 2 == 0) ? CRGB::Black : CRGB::Red;
         size_t bytes_written = memoryStream->write(color.raw, 3);
         if (bytes_written != 3) {
-            // Serial.println("Error writing to memory stream");
-            std::cout << "Error writing to memory stream" << std::endl;
+            std::cout << "Error writing to memory stream at LED " << i << std::endl;
         }
+        total_bytes_written += bytes_written;
     }
+    std::cout << "Total bytes written: " << total_bytes_written << " / " << BUFFER_SIZE << std::endl;
 }
 
 void setup() {
@@ -48,19 +51,35 @@ void setup() {
 
     // Create and fill the ByteStreamMemory with test data
     memoryStream = Ptr::New<ByteStreamMemory>(BUFFER_SIZE);
+    write_one_frame(memoryStream);  // Write initial frame data
+
     // Create and initialize Video fx object
     XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
     videoFx = Fx::make<VideoPtr>(xymap);
-    //videoFx = RefPtr<Video>::FromHeap(new Video(xymap));
     videoFx->beginStream(memoryStream);
 
     // Add the video effect to the FxEngine
     fxEngine.addFx(videoFx);
+
+    std::cout << "Setup complete. Starting main loop." << std::endl;
 }
 
 void loop() {
-    write_one_frame(memoryStream);
+    // Reset the memory stream position before reading
+    //memoryStream->seek(0);
+
+    // Clear the LEDs
+    FastLED.clear();
+
+    // Draw the frame
     fxEngine.draw(millis(), leds);
+
+    // Debug output
+    //std::cout << "First LED: R=" << (int)leds[0].r << " G=" << (int)leds[0].g << " B=" << (int)leds[0].b << std::endl;
+    //std::cout << "Last LED: R=" << (int)leds[NUM_LEDS-1].r << " G=" << (int)leds[NUM_LEDS-1].g << " B=" << (int)leds[NUM_LEDS-1].b << std::endl;
+
+    // Show the LEDs
     FastLED.show();
+
     delay(100); // Adjust this delay to control frame rate
 }

@@ -30,7 +30,7 @@ size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
 }
 
 size_t ByteStreamMemory::write(const uint8_t* src, size_t n) {
-    for (uint16_t i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         if (mBuffer.full()) {
             return i;
         }
