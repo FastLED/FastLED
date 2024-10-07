@@ -20,10 +20,6 @@ public:
     FxCompositingEngine(uint16_t numLeds) : mNumLeds(numLeds), mIsTransitioning(false) {
         mLayers[0] = LayerPtr::FromHeap(new Layer());
         mLayers[1] = LayerPtr::FromHeap(new Layer());
-        // TODO: When there is only Fx in the list then don't allocate memory for
-        // the second layer
-        mLayers[0]->surface.reset(new CRGB[numLeds]);
-        mLayers[1]->surface.reset(new CRGB[numLeds]);
     }
 
     void setLayerFx(RefPtr<Fx> fx0, RefPtr<Fx> fx1) {
@@ -40,7 +36,7 @@ public:
 
     bool isTransitioning() const { return mIsTransitioning; }
     void completeTransition() {
-        mLayers[0]->fx->pause();
+        mLayers[0]->pause();
         mIsTransitioning = false;
     }
 
@@ -53,16 +49,12 @@ private:
 };
 
 inline void FxCompositingEngine::draw(uint32_t now, CRGB *finalBuffer) {
-    Fx::DrawContext context = {now, mLayers[0]->surface.get()};
-    mLayers[0]->fx->draw(context);
-
+    mLayers[0]->draw(now);
     if (!mIsTransitioning) {
         memcpy(finalBuffer, mLayers[0]->surface.get(), sizeof(CRGB) * mNumLeds);
         return;
     }
-
-    context = {now, mLayers[1]->surface.get()};
-    mLayers[1]->fx->draw(context);
+    mLayers[1]->draw(now);
 
     uint8_t progress = mTransition.getProgress(now);
     uint8_t inverse_progress = 255 - progress;

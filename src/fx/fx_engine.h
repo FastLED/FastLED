@@ -62,7 +62,6 @@ inline bool FxEngine::setNextFx(uint16_t index, uint32_t now, uint32_t duration)
     if (mCompositor.isTransitioning()) {
         // If already transitioning, complete the current transition
         // immediately
-        // mEffects[mCurrentIndex]->pause();
         mCompositor.completeTransition();
         mCompositor.setLayerFx(mEffects[mNextIndex], mEffects[index]);
         mCurrentIndex = mNextIndex;
