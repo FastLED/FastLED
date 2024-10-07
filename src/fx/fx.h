@@ -9,14 +9,8 @@
 FASTLED_NAMESPACE_BEGIN
 
 // FT_PTR(MyFx) will produce MyFxPtr type.
-#define FX_PTR(FxClassName)                                                    \
-    class FxClassName;                                                         \
-    typedef RefPtr<FxClassName> FxClassName##Ptr;
-
-#define FX_PROTECTED_DESTRUCTOR(FxClassName)                                           \
-  protected:                                                                   \
-    virtual ~FxClassName()
-
+#define FX_PTR REF_PTR
+#define FX_PROTECTED_DESTRUCTOR PROTECTED_DESTRUCTOR
 
 
 // Abstract base class for effects on a strip/grid of LEDs.

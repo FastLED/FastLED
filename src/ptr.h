@@ -26,7 +26,13 @@ struct ref_unwrapper<RefPtr<T>> {
     using ref_type = RefPtr<T>;
 };
 
+#define REF_PTR(T) \
+    class T; \
+    using T##Ptr = RefPtr<T>;
 
+#define PROTECTED_DESTRUCTOR(T) \
+protected: \
+    virtual ~T()
 
 struct Ptr {
     template <typename T, typename... Args>
