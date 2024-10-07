@@ -44,7 +44,7 @@ inline bool FxEngine::addFx(RefPtr<Fx> effect) {
     }
     mEffects.push_back(effect);
     if (mEffects.size() == 1) {
-        mCompositor.setLayerFx(mEffects[0], RefPtr<Fx>());
+        mCompositor.startTransition(0, 0, mEffects[0]);
     }
     return true;
 }

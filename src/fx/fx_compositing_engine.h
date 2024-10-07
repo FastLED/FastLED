@@ -22,30 +22,12 @@ public:
         mLayers[1] = LayerPtr::FromHeap(new Layer());
     }
 
-    void setLayerFx(RefPtr<Fx> fx0, RefPtr<Fx> fx1) {
-        if (fx0 == mLayers[1]->fx) {
-            // Recycle the layer because the new fx needs
-            // to keep it's state.
-            LayerPtr tmp = mLayers[0];
-            mLayers[0] = mLayers[1];
-            mLayers[1] = tmp;
-            // Setting the fx will pause the layer and memclear the framebuffer.
-            mLayers[1]->setFx(fx1);
-        } else {
-            mLayers[0]->setFx(fx0);
-            mLayers[1]->setFx(fx1);
-        }
-        mIsTransitioning = false;
-    }
-
-    void swapLayers() {
-        LayerPtr tmp = mLayers[0];
-        mLayers[0] = mLayers[1];
-        mLayers[1] = tmp;
-    }
-
     void startTransition(uint32_t now, uint32_t duration, RefPtr<Fx> nextFx) {
         completeTransition();
+        if (duration == 0) {
+            setLayerFx(nextFx, RefPtr<Fx>());
+            return;
+        }
         setLayerFx(mLayers[0]->fx, nextFx);
         mLayers[1]->setFx(nextFx);
         mIsTransitioning = true;
@@ -62,10 +44,31 @@ public:
 
     void draw(uint32_t now, CRGB *finalBuffer);
     bool isTransitioning() const { return mIsTransitioning; }
-    LayerPtr mLayers[2];
-    const uint16_t mNumLeds;
 
 private:
+    void swapLayers() {
+        LayerPtr tmp = mLayers[0];
+        mLayers[0] = mLayers[1];
+        mLayers[1] = tmp;
+    }
+    void setLayerFx(RefPtr<Fx> fx0, RefPtr<Fx> fx1) {
+        if (fx0 == mLayers[1]->fx) {
+            // Recycle the layer because the new fx needs
+            // to keep it's state.
+            LayerPtr tmp = mLayers[0];
+            mLayers[0] = mLayers[1];
+            mLayers[1] = tmp;
+            // Setting the fx will pause the layer and memclear the framebuffer.
+            mLayers[1]->setFx(fx1);
+        } else {
+            mLayers[0]->setFx(fx0);
+            mLayers[1]->setFx(fx1);
+        }
+        mIsTransitioning = false;
+    }
+
+    LayerPtr mLayers[2];
+    const uint16_t mNumLeds;
     bool mIsTransitioning;
     Transition mTransition;
 };
