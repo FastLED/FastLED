@@ -93,11 +93,7 @@ bool FrameInterpolator::selectFrames(uint32_t now, const Frame **frameMin,
             return true;
         }
     }
-
-    // If we didn't find a bracket, use the last two frames
-    *frameMin = mFrames[mFrames.size() - 2].get();
-    *frameMax = mFrames[mFrames.size() - 1].get();
-    return true;
+    return false;
 }
 
 FASTLED_NAMESPACE_END
