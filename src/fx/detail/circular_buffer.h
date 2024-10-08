@@ -12,15 +12,10 @@ template <typename T>
 class CircularBuffer {
 public:
     // Constructor
-    CircularBuffer(size_t capacity, T* buffer = nullptr) 
+    CircularBuffer(size_t capacity) 
         : mCapacity(capacity), mSize(0), mHead(0), mTail(0) {
-        if (buffer) {
-            // Assume ownership of the provided buffer
-            mBuffer.reset(buffer);
-        } else {
-            size_t n = MAX(1, mCapacity);
-            mBuffer.reset(new T[n]);
-        }
+        size_t n = MAX(1, mCapacity);
+        mBuffer.reset(new T[n]);
     }
 
     // Deleted copy constructor and assignment operator to prevent copying
@@ -143,7 +138,12 @@ public:
 
     // Clear the buffer
     void clear() {
-        mHead = mTail = mSize = 0;
+        mBuffer.reset();
+        size_t n = MAX(1, mCapacity);
+        mBuffer.reset(new T[n]);
+        mSize = 0;
+        mHead = 0;
+        mTail = 0;
     }
 
 private:

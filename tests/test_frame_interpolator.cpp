@@ -56,7 +56,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         // Add frames with timestamps
         CHECK(interpolator.addWithTimestamp(frame1, 0));
         CHECK(interpolator.addWithTimestamp(frame2, 1000));
-        
+
         const Frame *selected1;
         const Frame *selected2;
 
@@ -99,5 +99,27 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         // timestamp of the second frame
         CHECK(selected1->getTimestamp() == 1000);
         CHECK(selected2->getTimestamp() == 1000);
+    }
+}
+
+TEST_CASE("FrameInterpolator::addWithTimestamp") {
+    SUBCASE("add first frame") {
+        FrameInterpolator interpolator(5);
+        Frame frame(10, false);
+        CHECK(interpolator.addWithTimestamp(frame, 1000));
+        FrameInterpolator::FrameBuffer &frames = interpolator.getFrames();
+        CHECK_EQ(frames.size(), 1);
+        CHECK_EQ(frames.front()->getTimestamp(), 1000);
+    }
+
+    SUBCASE("add second frame which is before first frame and should be rejected") {
+        FrameInterpolator interpolator(5);
+        Frame frame1(10, false);
+        Frame frame2(10, false);
+        CHECK(interpolator.addWithTimestamp(frame1, 1000));
+        CHECK_FALSE(interpolator.addWithTimestamp(frame2, 500));
+        FrameInterpolator::FrameBuffer &frames = interpolator.getFrames();
+        CHECK_EQ(frames.size(), 1);
+        CHECK_EQ(frames.front()->getTimestamp(), 1000);
     }
 }

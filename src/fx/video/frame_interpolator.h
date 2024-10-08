@@ -11,7 +11,7 @@ DECLARE_SMART_PTR(FrameInterpolator);
 
 class FrameInterpolator : public Referent {
 public:
-
+    typedef CircularBuffer<FramePtr> FrameBuffer;
     FrameInterpolator(size_t nframes);
 
     // Will search through the array, select the two frames that are closest to the current time
@@ -23,12 +23,17 @@ public:
 
     bool addWithTimestamp(const Frame& frame, uint32_t timestamp);
 
+    // Clear all frames
+    void clear() { mFrames.clear(); }
+
     // Selects the two frames that are closest to the current time. Returns false on failure.
     // frameMin will be before or equal to the current time, frameMax will be after.
     bool selectFrames(uint32_t now, const Frame** frameMin, const Frame** frameMax) const;
 
+    FrameBuffer& getFrames() { return mFrames; }
+
 private:
-    CircularBuffer<FramePtr> mFrames;
+    FrameBuffer mFrames;
 };
 
 FASTLED_NAMESPACE_END
