@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "noise.h"
 
-#include "fl_math.h"
+#include "math_macros.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN

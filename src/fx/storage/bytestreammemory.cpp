@@ -1,6 +1,6 @@
 #include "bytestreammemory.h"
 #include <string.h>
-#include "fl_math.h"
+#include "math_macros.h"
 
 FASTLED_NAMESPACE_BEGIN
 
