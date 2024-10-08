@@ -10,13 +10,20 @@ DECLARE_SMART_PTR(Frame);
 
 class Frame : public Referent {
 public:
-    explicit Frame(int bytes_per_frame);
-    uint8_t* data() { return mSurface.get(); }
-    const uint8_t* data() const { return mSurface.get(); }
+    explicit Frame(int pixels_per_frame);
+    CRGB* rgb() { return mRgb.get(); }
+    const CRGB* rgb() const { return mRgb.get(); }
+
+    size_t size() const { return mPixelsCount; }
+
+    
+    uint8_t* alpha() { return mAlpha.get(); }
+    const uint8_t* alpha() const { return mAlpha.get(); }
+
     void copy(const Frame& other);
 private:
-    size_t mBytesPerFrame;
-    scoped_array<uint8_t> mSurface;
+    const size_t mPixelsCount;
+    scoped_array<CRGB> mRgb;
     scoped_array<uint8_t> mAlpha;  // Optional alpha channel.
 
 };

@@ -25,18 +25,21 @@ class FxLayer : public Referent {
     void draw(uint32_t now) {
         //assert(fx);
         if (!frame) {
-            frame = FramePtr::New(fx->getNumLeds() * (fx->hasAlphaChannel() ? 4 : 3));
+            frame = FramePtr::New(fx->getNumLeds());
         }
 
         if (!running) {
             // Clear the frame
-            memset(frame->data(), 0, fx->getNumLeds() * (fx->hasAlphaChannel() ? 4 : 3));
+            memset(frame->rgb(), 0, frame->size() * sizeof(CRGB));
+            if (fx->hasAlphaChannel()) {
+                memset(frame->alpha(), 0, frame->size());
+            }
             fx->resume();
             running = true;
         }
-        Fx::DrawContext context = {now, reinterpret_cast<CRGB*>(frame->data())};
+        Fx::DrawContext context = {now, frame->rgb()};
         if (fx->hasAlphaChannel()) {
-            context.alpha_channel = frame->data() + fx->getNumLeds() * 3;
+            context.alpha_channel = frame->alpha();
         }
         fx->draw(context);
     }
@@ -55,8 +58,10 @@ class FxLayer : public Referent {
 
     Ptr<Fx> getFx() { return fx; }
 
-    CRGB *getSurface() { return reinterpret_cast<CRGB*>(frame->data()); }
-    uint8_t *getSurfaceAlpha() { return fx->hasAlphaChannel() ? frame->data() + fx->getNumLeds() * 3 : nullptr; }
+    CRGB *getSurface() { return frame->rgb(); }
+    uint8_t *getSurfaceAlpha() {
+        return fx->hasAlphaChannel() ? frame->alpha() : nullptr;
+    }
 
   private:
     Ptr<Frame> frame;

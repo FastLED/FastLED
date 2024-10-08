@@ -67,11 +67,8 @@ bool VideoStream::readFrame(Frame* frame) {
     if (!FramesRemaining() || !frame) {
         return false;
     }
-    uint8_t* data = frame->data();
-    for (int i = 0; i < mBytesPerFrame; i++) {
-        if (!ReadBytes(data + i, 1)) {
-            return false;
-        }
+    if (!readFrame(frame)) {
+        return false;
     }
     return true;
 }
