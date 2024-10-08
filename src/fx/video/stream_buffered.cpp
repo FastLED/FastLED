@@ -6,29 +6,29 @@ VideoStreamBuffered::VideoStreamBuffered(VideoStreamPtr stream, size_t nframes)
     : mStream(stream), mNFrames(nframes), mFrames(nframes) {
 }
 
-bool VideoStreamBuffered::draw(Frame* frame) {
+bool VideoStreamBuffered::draw(uint32_t now, Frame* frame) {
     if (!frame) {
         return false;
     }
     if (mFrames.empty()) {
         return false;
     }
-    FramePtr f;
+    TimestampedFrame tf;
     bool needs_recycle = false;
     if (mFrames.full()) {
         needs_recycle = true;
-        if (!mFrames.pop_front(&f)) {
+        if (!mFrames.pop_front(&tf)) {
             return false;
         }
     } else {
-        f = mFrames.front();
-        if (!f) {
+        tf = mFrames.front();
+        if (!tf.frame) {
             return false;
         }
     }
-    frame->copy(*f);
+    frame->copy(*tf.frame);
     if (needs_recycle) {
-        mFrames.push_back(f);
+        mFrames.push_back(tf);
     }
     return true;
 }
