@@ -122,4 +122,29 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
         CHECK_EQ(frames.size(), 1);
         CHECK_EQ(frames.front()->getTimestamp(), 1000);
     }
+
+    
+    SUBCASE("add second frame which has the same timestamp as first frame and should be rejected") {
+        FrameInterpolator interpolator(5);
+        Frame frame1(10, false);
+        Frame frame2(10, false);
+        CHECK(interpolator.addWithTimestamp(frame1, 1000));
+        CHECK_FALSE(interpolator.addWithTimestamp(frame2, 1000));
+        FrameInterpolator::FrameBuffer &frames = interpolator.getFrames();
+        CHECK_EQ(frames.size(), 1);
+        CHECK_EQ(frames.front()->getTimestamp(), 1000);
+    }
+
+    SUBCASE("add second frame which is after first frame and should be accepted") {
+        FrameInterpolator interpolator(5);
+        Frame frame1(10, false);
+        Frame frame2(10, false);
+        CHECK(interpolator.addWithTimestamp(frame1, 1000));
+        CHECK(interpolator.addWithTimestamp(frame2, 1500));
+        FrameInterpolator::FrameBuffer &frames = interpolator.getFrames();
+        CHECK_EQ(frames.size(), 2);
+        CHECK_EQ(frames.front()->getTimestamp(), 1500);
+        CHECK_EQ(frames.back()->getTimestamp(), 1000);
+    }
+
 }
