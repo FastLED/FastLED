@@ -24,10 +24,13 @@ public:
     size_t size() const { return mPixelsCount; }
     uint8_t* alpha() { return mAlpha.get(); }
     const uint8_t* alpha() const { return mAlpha.get(); }
+    void setTimestamp(uint32_t now) { mTimeStamp = now; }
+    uint32_t getTimestamp() const { return mTimeStamp; }
 
     void copy(const Frame& other);
 private:
     const size_t mPixelsCount;
+    uint32_t mTimeStamp = 0;
     scoped_array<CRGB> mRgb;
     scoped_array<uint8_t> mAlpha;  // Optional alpha channel.
 };
