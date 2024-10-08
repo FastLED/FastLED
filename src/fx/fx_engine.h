@@ -3,8 +3,8 @@
 #include "crgb.h"
 #include "fixed_vector.h"
 #include "fx/fx.h"
-#include "fx/util/fx_compositor.h"
-#include "fx/util/fx_layer.h"
+#include "fx/detail/fx_compositor.h"
+#include "fx/detail/fx_layer.h"
 #include "namespace.h"
 #include "ptr.h"
 #include <stdint.h>

@@ -4,7 +4,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "doctest.h"
-#include "fx/util/circular_buffer.h"
+#include "fx/detail/circular_buffer.h"
 
 TEST_CASE("circular_buffer basic operations") {
     CircularBuffer<int> buffer(5);

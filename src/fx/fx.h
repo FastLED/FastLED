@@ -3,8 +3,8 @@
 #include "crgb.h"
 #include "namespace.h"
 #include "ptr.h"
-#include "util/draw_context.h"
-#include "util/transition.h"
+#include "detail/draw_context.h"
+#include "detail/transition.h"
 #include <stdint.h>
 FASTLED_NAMESPACE_BEGIN
 

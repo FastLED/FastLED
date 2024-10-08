@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "bytestream.h"
-#include "fx/util/circular_buffer.h"
+#include "fx/detail/circular_buffer.h"
 
 FASTLED_NAMESPACE_BEGIN
 
