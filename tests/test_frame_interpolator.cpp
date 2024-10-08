@@ -37,8 +37,8 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         CHECK(selected);
         CHECK(selected1);
         CHECK(selected2);
-        // CHECK(selected1 == &frame1);
-        // CHECK(selected2 == &frame2);
+        // now check that the frames are different
+        CHECK(selected1 != selected2);
     }
 
 

@@ -73,13 +73,15 @@ bool FrameInterpolator::selectFrames(uint32_t now, const Frame **frame1,
 
     // Handle case before the first frame
     if (now <= mFrames.front()->getTimestamp()) {
-        *frame1 = *frame2 = mFrames.front().get();
+        *frame1 = mFrames.front().get();
+        *frame2 = mFrames[1].get();
         return true;
     }
 
     // Handle case after the last frame
     if (now >= mFrames.back()->getTimestamp()) {
-        *frame1 = *frame2 = mFrames.back().get();
+        *frame1 = mFrames[mFrames.size() - 2].get();
+        *frame2 = mFrames.back().get();
         return true;
     }
 
@@ -92,8 +94,10 @@ bool FrameInterpolator::selectFrames(uint32_t now, const Frame **frame1,
         }
     }
 
-    // This should never happen if all previous conditions are correct
-    return false;
+    // If we didn't find a bracket, use the last two frames
+    *frame1 = mFrames[mFrames.size() - 2].get();
+    *frame2 = mFrames[mFrames.size() - 1].get();
+    return true;
 }
 
 FASTLED_NAMESPACE_END
