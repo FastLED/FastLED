@@ -17,7 +17,35 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         CHECK_FALSE(interpolator.selectFrames(0, &selected1, &selected2));
     }
 
-    SUBCASE("2 frame interpolator") {
+    SUBCASE("2 frame interpolator before") {
+        // Create an interpolator with capacity for 2 frames
+        FrameInterpolator interpolator(2); 
+
+        // Create some test frames with different timestamps
+        Frame frame1(10, false); // 10 pixels, no alpha
+        Frame frame2(10, false);
+
+        // Add frames with timestamps
+        CHECK(interpolator.addWithTimestamp(frame1, 1000));
+        CHECK(interpolator.addWithTimestamp(frame2, 2000));
+
+        const Frame *selected1;
+        const Frame *selected2;
+
+        // Falls between two frames.
+        bool selected = interpolator.selectFrames(0, &selected1, &selected2);
+        CHECK(selected);
+        CHECK(selected1);
+        CHECK(selected2);
+        // Now check that it's the same frame.
+        CHECK(selected1 == selected2);
+        // now check that the timestamp of the first frame is less than the timestamp of the second frame
+        CHECK(selected1->getTimestamp() == 1000);
+        CHECK(selected2->getTimestamp() == 1000);
+    }
+
+
+    SUBCASE("2 frame interpolator between") {
         // Create an interpolator with capacity for 2 frames
         FrameInterpolator interpolator(2); 
 
@@ -54,7 +82,6 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         CHECK(selected1->getTimestamp() == 1000);
         CHECK(selected2->getTimestamp() == 1000);
     }
-
 
 
 }

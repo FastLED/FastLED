@@ -85,6 +85,15 @@ bool FrameInterpolator::selectFrames(uint32_t now, const Frame **frameMin,
         return true;
     }
 
+    // handle case before first timestamp
+    if (now <= mFrames.back()->getTimestamp())
+    {
+        *frameMin = mFrames.back().get();
+        *frameMax = mFrames.back().get();
+        return true;
+    }
+    
+
     // Handle case after the last frame
     if (now >= mFrames.front()->getTimestamp()) {
         Frame* cur = mFrames.front().get();
