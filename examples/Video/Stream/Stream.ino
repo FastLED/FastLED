@@ -2,6 +2,19 @@
 /// @brief   Demonstrates a simple video test using alternating black/red pixels
 /// @example VideoTest.ino
 
+
+#ifndef COMPILE_VIDEO_STREAM
+#if defined(__AVR__)
+// This has grown too large for the AVR to handle.
+#define COMPILE_VIDEO_STREAM 0
+#else
+#define COMPILE_VIDEO_STREAM 1
+#endif
+#endif // COMPILE_VIDEO_STREAM
+
+#if COMPILE_VIDEO_STREAM
+
+
 #include <FastLED.h>
 #include "fx/storage/bytestreammemory.h"
 #include "fx/2d/video.hpp"
@@ -77,3 +90,7 @@ void loop() {
 
     delay(100); // Adjust this delay to control frame rate
 }
+#else
+void setup() {}
+void loop() {}
+#endif // COMPILE_VIDEO_STREAM
