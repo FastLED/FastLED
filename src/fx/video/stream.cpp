@@ -21,7 +21,7 @@ VideoStream::~VideoStream() {
 bool VideoStream::begin(FileHandlePtr h) {
     Close();
     mFileHandle = h;
-    mFileBuffer = RefPtr<FileBuffer>::FromHeap(new FileBuffer(h));
+    mFileBuffer = Ptr<FileBuffer>::FromHeap(new FileBuffer(h));
     mUsingByteStream = false;
     return mFileBuffer->available();
 }

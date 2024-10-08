@@ -14,7 +14,7 @@ TEST_CASE("video stream simple test") {
     
     // Create a ByteStreamMemory
     const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * 10; // Enough for 10 frames
-    ByteStreamMemoryPtr memoryStream = Ptr::New<ByteStreamMemory>(BUFFER_SIZE);
+    ByteStreamMemoryPtr memoryStream = ByteStreamMemoryPtr::New<ByteStreamMemory>(BUFFER_SIZE);
 
     // Fill the ByteStreamMemory with test data
     uint8_t testData[BUFFER_SIZE];
@@ -24,7 +24,7 @@ TEST_CASE("video stream simple test") {
     memoryStream->write(testData, BUFFER_SIZE);
 
     // Create and initialize VideoStream
-    VideoStreamPtr videoStream = Ptr::New<VideoStream>(BYTES_PER_FRAME);
+    VideoStreamPtr videoStream = VideoStreamPtr::New<VideoStream>(BYTES_PER_FRAME);
     bool initSuccess = videoStream->beginStream(memoryStream);
     REQUIRE(initSuccess);
 

@@ -59,14 +59,14 @@ public:
 
     bool begin(FileHandlePtr fileHandle) {
         const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mVideoStream = RefPtr<VideoStream>::FromHeap(
+        mVideoStream = Ptr<VideoStream>::FromHeap(
             new VideoStream(bytes_per_frame));
         return mVideoStream->begin(fileHandle);
     }
 
     bool beginStream(ByteStreamPtr byteStream) {
         const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mVideoStream = RefPtr<VideoStream>::FromHeap(
+        mVideoStream = Ptr<VideoStream>::FromHeap(
             new VideoStream(bytes_per_frame));
         return mVideoStream->beginStream(byteStream);
     }
@@ -88,7 +88,7 @@ private:
 
 class VideoFx : public FxGrid {
 public:
-    VideoFx(XYMap xymap, RefPtr<FxGrid> fx) : FxGrid(xymap), mDelegate(fx) {
+    VideoFx(XYMap xymap, Ptr<FxGrid> fx) : FxGrid(xymap), mDelegate(fx) {
         // Turn off re-mapping of the delegate's XYMap, similar to ScaleUp
         mDelegate->getXYMap().setRectangularGrid();
     }
@@ -113,7 +113,7 @@ public:
     const char* fxName(int) const override { return "video_fx"; }
 
 private:
-    RefPtr<FxGrid> mDelegate;
+    Ptr<FxGrid> mDelegate;
     scoped_array<CRGB> mSurface;
     bool mInitialized = false;
 

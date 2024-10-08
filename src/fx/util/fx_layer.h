@@ -12,10 +12,10 @@
 FASTLED_NAMESPACE_BEGIN
 
 class FxLayer;
-typedef RefPtr<FxLayer> FxLayerPtr;
+typedef Ptr<FxLayer> FxLayerPtr;
 class FxLayer : public Referent {
   public:
-    void setFx(RefPtr<Fx> newFx) {
+    void setFx(Ptr<Fx> newFx) {
         if (newFx != fx) {
             release();
             fx = newFx;
@@ -65,7 +65,7 @@ class FxLayer : public Referent {
         fx.reset();
     }
 
-    RefPtr<Fx> getFx() { return fx; }
+    Ptr<Fx> getFx() { return fx; }
 
     CRGB *getSurface() { return surface.get(); }
     uint8_t *getSurfaceAlpha() { return surface_alpha.get(); }
@@ -73,7 +73,7 @@ class FxLayer : public Referent {
   private:
     scoped_array<CRGB> surface;
     scoped_array<uint8_t> surface_alpha;
-    RefPtr<Fx> fx;
+    Ptr<Fx> fx;
     bool running = false;
 };
 

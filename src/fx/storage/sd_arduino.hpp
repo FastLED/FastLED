@@ -86,9 +86,9 @@ public:
 #ifdef USE_SDFAT
         SdFile file;
         if (!file.open(name, oflag)) {
-            return RefPtr<FileHandle>::FromHeap(nullptr);
+            return Ptr<FileHandle>::FromHeap(nullptr);
         }
-        return RefPtr<FileHandle>::FromHeap(new SdFatFileHandle(std::move(file), name));
+        return Ptr<FileHandle>::FromHeap(new SdFatFileHandle(std::move(file), name));
 #else
 
         #ifdef ESP32
@@ -97,9 +97,9 @@ public:
         File file = SD.open(name);
         #endif
         if (!file) {
-            return RefPtr<FileHandle>::FromHeap(nullptr);
+            return Ptr<FileHandle>::FromHeap(nullptr);
         }
-        return RefPtr<FileHandle>::FromHeap(new SDFileHandle(std::move(file), name));
+        return Ptr<FileHandle>::FromHeap(new SDFileHandle(std::move(file), name));
 #endif
     }
 

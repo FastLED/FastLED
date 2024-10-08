@@ -7,7 +7,7 @@
 #include "ptr.h"
 
 class MyClass;
-typedef RefPtr<MyClass> MyClassPtr;
+typedef Ptr<MyClass> MyClassPtr;
 class MyClass : public Referent {
   public:
     MyClass() {}
@@ -17,39 +17,39 @@ class MyClass : public Referent {
     uint32_t destructor_signal = 0;
 };
 
-TEST_CASE("RefPtr basic functionality") {
-    RefPtr<MyClass> ptr = MyClassPtr::FromHeap(new MyClass());
+TEST_CASE("Ptr basic functionality") {
+    Ptr<MyClass> ptr = MyClassPtr::FromHeap(new MyClass());
 
-    SUBCASE("RefPtr is not null after construction") {
+    SUBCASE("Ptr is not null after construction") {
         CHECK(ptr.get() != nullptr);
     }
 
-    SUBCASE("RefPtr increments reference count") {
+    SUBCASE("Ptr increments reference count") {
         CHECK(ptr->ref_count() == 1);
     }
 
-    SUBCASE("RefPtr can be reassigned") {
-        RefPtr<MyClass> ptr2 = ptr;
+    SUBCASE("Ptr can be reassigned") {
+        Ptr<MyClass> ptr2 = ptr;
         CHECK(ptr2.get() == ptr.get());
         CHECK(ptr->ref_count() == 2);
     }
 }
 
-TEST_CASE("RefPtr move semantics") {
+TEST_CASE("Ptr move semantics") {
 
     SUBCASE("Move constructor works correctly") {
-        RefPtr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
+        Ptr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
         MyClass *rawPtr = ptr1.get();
-        RefPtr<MyClass> ptr2(std::move(ptr1));
+        Ptr<MyClass> ptr2(std::move(ptr1));
         CHECK(ptr2.get() == rawPtr);
         CHECK(ptr1.get() == nullptr);
         CHECK(ptr2->ref_count() == 1);
     }
 
     SUBCASE("Move assignment works correctly") {
-        RefPtr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
+        Ptr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
         MyClass *rawPtr = ptr1.get();
-        RefPtr<MyClass> ptr2;
+        Ptr<MyClass> ptr2;
         ptr2 = std::move(ptr1);
         CHECK(ptr2.get() == rawPtr);
         CHECK(ptr1.get() == nullptr);
@@ -57,19 +57,19 @@ TEST_CASE("RefPtr move semantics") {
     }
 }
 
-TEST_CASE("RefPtr reference counting") {
+TEST_CASE("Ptr reference counting") {
 
     SUBCASE("Reference count increases when copied") {
-        RefPtr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
-        RefPtr<MyClass> ptr2 = ptr1;
+        Ptr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
+        Ptr<MyClass> ptr2 = ptr1;
         CHECK(ptr1->ref_count() == 2);
         CHECK(ptr2->ref_count() == 2);
     }
 
-    SUBCASE("Reference count decreases when RefPtr goes out of scope") {
-        RefPtr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
+    SUBCASE("Reference count decreases when Ptr goes out of scope") {
+        Ptr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
         {
-            RefPtr<MyClass> ptr2 = ptr1;
+            Ptr<MyClass> ptr2 = ptr1;
             CHECK(ptr1->ref_count() == 2);
         }
         CHECK(ptr1->ref_count() == 1);
@@ -78,10 +78,10 @@ TEST_CASE("RefPtr reference counting") {
 
 
 
-TEST_CASE("RefPtr reset functionality") {
+TEST_CASE("Ptr reset functionality") {
 
     SUBCASE("Reset to nullptr") {
-        RefPtr<MyClass> ptr = RefPtr<MyClass>::FromHeap(new MyClass());
+        Ptr<MyClass> ptr = Ptr<MyClass>::FromHeap(new MyClass());
         CHECK_EQ(1, ptr->ref_count());
         ptr->ref();
         CHECK_EQ(2, ptr->ref_count());
@@ -96,7 +96,7 @@ TEST_CASE("RefPtr reset functionality") {
 }
 
 
-TEST_CASE("RefPtr from static memory") {
+TEST_CASE("Ptr from static memory") {
     MyClass staticObject;
     {
         MyClassPtr ptr = MyClassPtr::FromStatic(staticObject);

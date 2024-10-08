@@ -9,7 +9,7 @@
 // so a Referent is used to allow memory sharing.
 
 class LUT16;
-typedef RefPtr<LUT16> LUT16Ptr;
+typedef Ptr<LUT16> LUT16Ptr;
 class LUT16 : public Referent {
 public:
     LUT16(uint16_t length) : length(length) {

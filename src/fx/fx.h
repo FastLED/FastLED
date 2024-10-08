@@ -20,13 +20,13 @@ class Fx : public Referent {
     using DrawContext = ::DrawContext;
 
     // Works for the intended use case of:
-    //  RefPtr<Fx> fx = Fx::make<MyFx>(args...);
+    //  Ptr<Fx> fx = Fx::make<MyFx>(args...);
     // And also for the common accidental case of:
-    //  RefPtr<Fx> fx = Fx::make<RefPtr<Fx>>();
+    //  Ptr<Fx> fx = Fx::make<Ptr<Fx>>();
     template <typename T, typename... Args>
     static typename ref_unwrapper<T>::ref_type make(Args... args) {
         using U = typename ref_unwrapper<T>::type;
-        return Ptr::New<U>(args...);
+        return Ptr<Fx>::New<U>(args...);
     }
 
 
@@ -69,11 +69,6 @@ class Fx : public Referent {
     uint16_t getNumLeds() const { return mNumLeds; }
 
   protected:
-    friend class Ptr;
-    // protect operator new so that it has to go through Fx
-    void *operator new(size_t size) { return ::operator new(size); }
-    // protect operator delete so that it has to go through Fx
-    void operator delete(void *ptr) { ::operator delete(ptr); }
     virtual ~Fx() {} // Protected destructor
     uint16_t mNumLeds;
 };
