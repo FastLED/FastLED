@@ -4,8 +4,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-using fl_math::Min;
-
 ByteStreamMemory::ByteStreamMemory(uint32_t size_buffer)
     : mBuffer(size_buffer) {}
 
@@ -20,7 +18,7 @@ size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
         return 0;
     }
 
-    size_t actualBytesToRead = fl_math::Min(bytesToRead, mBuffer.size());
+    size_t actualBytesToRead = MIN(bytesToRead, mBuffer.size());
     size_t bytesRead = 0;
 
     while (bytesRead < actualBytesToRead) {

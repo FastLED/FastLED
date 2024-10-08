@@ -2,25 +2,18 @@
 
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+#ifndef MAX
+#define MAX(a,b) ((a)>(b)?(a):(b))
+#endif
 
-namespace fl_math {
-    
-    template <typename T>
-    T Min(T a, T b) {
-        return a < b ? a : b;
-    }
-    
-    template <typename T>
-    T Max(T a, T b) {
-        return a > b ? a : b;
-    }
+#ifndef MIN
+#define MIN(a,b) ((a)<(b)?(a):(b))
+#endif
 
-    template <typename T>
-    T Abs(T a) {
-        return a < 0 ? -a : a;
-    }
-}
+#ifndef ABS
+#define ABS(x) ((x)>0?(x):-(x))
+#endif
 
-
-FASTLED_NAMESPACE_END
+#ifndef PI
+#define PI 3.1415926535897932384626433832795
+#endif
