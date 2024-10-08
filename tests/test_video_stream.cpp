@@ -5,7 +5,7 @@
 
 #include "doctest.h"
 #include "lib8tion/intmap.h"
-#include "fx/util/video_stream.h"
+#include "fx/video/stream.h"
 #include "fx/storage/bytestreammemory.h"
 #include "ptr.h"
 

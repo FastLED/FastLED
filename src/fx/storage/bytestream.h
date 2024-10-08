@@ -15,7 +15,7 @@ DECLARE_SMART_PTR(ByteStream);
 class ByteStream : public Referent {
   public:
     virtual ~ByteStream() {}
-    virtual bool available(size_t n) const = 0;
+    virtual bool available(size_t) const = 0;
     virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
     virtual const char *path() const = 0;
     virtual void close() {}  // default is do nothing on close.
