@@ -18,7 +18,7 @@ class MyClass : public Referent {
 };
 
 TEST_CASE("Ptr basic functionality") {
-    Ptr<MyClass> ptr = MyClassPtr::FromHeap(new MyClass());
+    Ptr<MyClass> ptr = MyClassPtr::New();
 
     SUBCASE("Ptr is not null after construction") {
         CHECK(ptr.get() != nullptr);
@@ -38,7 +38,7 @@ TEST_CASE("Ptr basic functionality") {
 TEST_CASE("Ptr move semantics") {
 
     SUBCASE("Move constructor works correctly") {
-        Ptr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
+        Ptr<MyClass> ptr1 = MyClassPtr::New();
         MyClass *rawPtr = ptr1.get();
         Ptr<MyClass> ptr2(std::move(ptr1));
         CHECK(ptr2.get() == rawPtr);
@@ -47,7 +47,7 @@ TEST_CASE("Ptr move semantics") {
     }
 
     SUBCASE("Move assignment works correctly") {
-        Ptr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
+        Ptr<MyClass> ptr1 = MyClassPtr::New();
         MyClass *rawPtr = ptr1.get();
         Ptr<MyClass> ptr2;
         ptr2 = std::move(ptr1);
@@ -60,14 +60,14 @@ TEST_CASE("Ptr move semantics") {
 TEST_CASE("Ptr reference counting") {
 
     SUBCASE("Reference count increases when copied") {
-        Ptr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
+        Ptr<MyClass> ptr1 = MyClassPtr::New();
         Ptr<MyClass> ptr2 = ptr1;
         CHECK(ptr1->ref_count() == 2);
         CHECK(ptr2->ref_count() == 2);
     }
 
     SUBCASE("Reference count decreases when Ptr goes out of scope") {
-        Ptr<MyClass> ptr1 = MyClassPtr::FromHeap(new MyClass());
+        Ptr<MyClass> ptr1 = MyClassPtr::New();
         {
             Ptr<MyClass> ptr2 = ptr1;
             CHECK(ptr1->ref_count() == 2);
@@ -81,7 +81,7 @@ TEST_CASE("Ptr reference counting") {
 TEST_CASE("Ptr reset functionality") {
 
     SUBCASE("Reset to nullptr") {
-        Ptr<MyClass> ptr = Ptr<MyClass>::FromHeap(new MyClass());
+        Ptr<MyClass> ptr = Ptr<MyClass>::New();
         CHECK_EQ(1, ptr->ref_count());
         ptr->ref();
         CHECK_EQ(2, ptr->ref_count());

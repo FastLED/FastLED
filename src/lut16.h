@@ -12,6 +12,7 @@ class LUT16;
 typedef Ptr<LUT16> LUT16Ptr;
 class LUT16 : public Referent {
 public:
+    friend class PtrTraits<LUT16>;
     LUT16(uint16_t length) : length(length) {
         data.reset(new uint16_t[length]);
     }

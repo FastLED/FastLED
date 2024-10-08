@@ -20,8 +20,8 @@ FASTLED_NAMESPACE_BEGIN
 class FxCompositor {
 public:
     FxCompositor(uint16_t numLeds) : mNumLeds(numLeds) {
-        mLayers[0] = FxLayerPtr::FromHeap(new FxLayer());
-        mLayers[1] = FxLayerPtr::FromHeap(new FxLayer());
+        mLayers[0] = FxLayerPtr::New();
+        mLayers[1] = FxLayerPtr::New();
     }
 
     void startTransition(uint32_t now, uint32_t duration, Ptr<Fx> nextFx) {

@@ -46,7 +46,7 @@ class XYMap {
     static XYMap constructWithLookUpTable(uint16_t width, uint16_t height,
                                           const uint16_t *lookUpTable) {
         XYMap out(width, height, kLookUpTable);
-        out.mLookUpTable = LUT16Ptr::FromHeap(new LUT16(width * height));
+        out.mLookUpTable = LUT16Ptr::New(width * height);
         memcpy(out.mLookUpTable->getData(), lookUpTable,
                width * height * sizeof(uint16_t));
         return out;
@@ -76,7 +76,7 @@ class XYMap {
         if (type == kLookUpTable) {
             return;
         }
-        mLookUpTable = LUT16Ptr::FromHeap(new LUT16(width * height));
+        mLookUpTable = LUT16Ptr::New(width * height);
         uint16_t *data = mLookUpTable->getData();
         for (uint16_t y = 0; y < height; y++) {
             for (uint16_t x = 0; x < width; x++) {

@@ -48,12 +48,12 @@ class PtrTraits {
     template <typename... Args>
     static Ptr<T> New(Args... args) {
         T* ptr = new T(args...);
-        return Ptr<T>::FromHeap(ptr);
+        return Ptr<T>(ptr, true);
     }
 
     static Ptr<T> New() {
         T* ptr = new T();
-        return Ptr<T>::FromHeap(ptr);
+        return Ptr<T>(ptr, true);
     }
 };
 
@@ -64,14 +64,9 @@ class PtrTraits {
 template <typename T>
 class Ptr: public PtrTraits<T> {
   public:
+    friend class PtrTraits<T>;
     // element_type is the type of the managed object
     using element_type = T;
-    static Ptr FromHeap(T *referent) { return Ptr(referent, true); }
-
-    template <typename U> static Ptr FromHeap(U *referent) {
-        return Ptr(referent, true);
-    }
-
     template <typename... Args>
     static Ptr<T> New(Args... args) {
         return PtrTraits<T>::New(args...);
