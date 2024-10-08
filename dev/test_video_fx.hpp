@@ -1,13 +1,12 @@
 /// @file    VideoTest.ino
-/// @brief   Demonstrates a simple video test using alternating black/red pixels
+/// @brief   Demonstrates a video test using NoisePalette to generate content
 /// @example VideoTest.ino
 
 #include <FastLED.h>
-#include "fx/storage/bytestreammemory.h"
 #include "fx/2d/video.hpp"
+#include "fx/2d/noisepalette.hpp"
 #include "fx/fx_engine.h"
 #include "ptr.h"
-#include <iostream>
 
 #define LED_PIN 2
 #define BRIGHTNESS 96
@@ -18,31 +17,14 @@
 #define MATRIX_HEIGHT 22
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 
+#define SCALE 20
+#define SPEED 30
+
 CRGB leds[NUM_LEDS];
 
-const int BYTES_PER_FRAME = 3 * MATRIX_WIDTH * MATRIX_HEIGHT;
-const int NUM_FRAMES = 2;
-const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * NUM_FRAMES;
-
-ByteStreamMemoryPtr memoryStream;
-VideoPtr videoFx;
+VideoFxPtr videoFx;
+NoisePalettePtr noisePalette;
 FxEngine fxEngine(NUM_LEDS);
-
-
-void write_one_frame(ByteStreamMemoryPtr memoryStream) {
-    //memoryStream->seek(0);  // Reset to the beginning of the stream
-    uint32_t total_bytes_written = 0;
-    int toggle = (millis() / 500) % 2;
-    for (uint32_t i = 0; i < NUM_LEDS; ++i) {
-        CRGB color = (i % 2 == toggle) ? CRGB::Black : CRGB::Red;
-        size_t bytes_written = memoryStream->write(color.raw, 3);
-        if (bytes_written != 3) {
-            std::cout << "Error writing to memory stream at LED " << i << std::endl;
-        }
-        total_bytes_written += bytes_written;
-    }
-    std::cout << "Total bytes written: " << total_bytes_written << " / " << BUFFER_SIZE << std::endl;
-}
 
 void setup() {
     delay(1000); // sanity delay
@@ -50,25 +32,24 @@ void setup() {
         .setCorrection(TypicalLEDStrip);
     FastLED.setBrightness(BRIGHTNESS);
 
-    // Create and fill the ByteStreamMemory with test data
-    memoryStream = Ptr::New<ByteStreamMemory>(BUFFER_SIZE);
-    write_one_frame(memoryStream);  // Write initial frame data
-
-    // Create and initialize Video fx object
+    // Create and initialize XYMap
     XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
-    videoFx = Fx::make<VideoPtr>(xymap);
-    videoFx->beginStream(memoryStream);
 
+    // Create and initialize NoisePalette object
+    noisePalette = Fx::make<NoisePalette>(xymap);
+    noisePalette->lazyInit();
+    noisePalette->setSpeed(SPEED);
+    noisePalette->setScale(SCALE);
+
+    // Create and initialize VideoFx object
+    videoFx = Fx::make<VideoFx>(xymap, noisePalette);
+    
     // Add the video effect to the FxEngine
     fxEngine.addFx(videoFx);
-
-    std::cout << "Setup complete. Starting main loop." << std::endl;
 }
 
 void loop() {
-    // Reset the memory stream position before reading
-    //memoryStream->seek(0);
-    write_one_frame(memoryStream);  // Write next frame data
+    EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
 
     // Draw the frame
     fxEngine.draw(millis(), leds);
@@ -80,5 +61,5 @@ void loop() {
     // Show the LEDs
     FastLED.show();
 
-    delay(100); // Adjust this delay to control frame rate
+    FastLED.delay(1000 / 60); // 60 fps
 }
