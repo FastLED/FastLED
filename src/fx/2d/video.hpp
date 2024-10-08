@@ -107,22 +107,7 @@ public:
         DrawContext delegateContext = context;
         delegateContext.leds = mSurface.get();
         mDelegate->draw(delegateContext);
-
-        // Copy the delegate's output to the final output
-        
-        // map index and copy through xyMap
-        for (uint16_t w = 0; w < mDelegate->getWidth(); w++) {
-            for (uint16_t h = 0; h < mDelegate->getHeight(); h++) {
-                uint16_t idx = mXyMap.mapToIndex(w, h);
-                if (idx < mXyMap.getTotal()) {
-                    context.leds[idx] = mSurface[mDelegate->xyMap(w, h)];
-                }
-            }
-        }
-
-        //for (uint16_t i = 0; i < mXyMap.getTotal(); ++i) {
-        //    context.leds[i] = mSurface[i];
-        //}
+        getXYMap().mapPixels(mSurface.get(), context.leds);
     }
 
     const char* fxName(int) const override { return "video_fx"; }

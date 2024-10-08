@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "lut16.h"
+#include "crgb.h"
 
 FASTLED_FORCE_INLINE uint16_t xy_serpentine(uint16_t x, uint16_t y,
                                             uint16_t width, uint16_t height) {
@@ -60,6 +61,16 @@ class XYMap {
     XYMap(const XYMap &other)
         : type(other.type), width(other.width), height(other.height),
           xyFunction(other.xyFunction), mLookUpTable(other.mLookUpTable) {}
+
+    void mapPixels(const CRGB* input, CRGB* output) const {
+        uint16_t pos = 0;
+        for (uint16_t y = 0; y < height; y++) {
+            for (uint16_t x = 0; x < width; x++) {
+                uint16_t i = pos++;
+                output[i] = input[mapToIndex(x, y)];
+            }
+        }
+    }
 
     void convertToLookUpTable() {
         if (type == kLookUpTable) {
