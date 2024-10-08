@@ -23,7 +23,9 @@ TEST_CASE("circular_buffer basic operations") {
     CHECK_EQ(buffer.front(), 1);
     CHECK_EQ(buffer.back(), 3);
 
-    CHECK_EQ(buffer.pop_front(), 1);
+    int value;
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value, 1);
     CHECK_EQ(buffer.size(), 2);
     CHECK_EQ(buffer.front(), 2);
 }
@@ -40,12 +42,17 @@ TEST_CASE("circular_buffer overflow behavior") {
     CHECK(buffer.full());
     CHECK_EQ(buffer.size(), 3);
 
-    CHECK_EQ(buffer.pop_front(), 2);
-    CHECK_EQ(buffer.pop_front(), 3);
-    CHECK_EQ(buffer.pop_front(), 4);
+    int value;
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value, 2);
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value, 3);
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value, 4);
     CHECK(buffer.empty());
 
-    CHECK_EQ(buffer.pop_front(), 0);  // Returns default-constructed int (0) when empty
+    // CHECK_EQ(buffer.pop_front(), 0);  // Returns default-constructed int (0) when empty
+    CHECK_EQ(buffer.pop_front(&value), false);
 }
 
 TEST_CASE("circular_buffer edge cases") {
@@ -62,7 +69,10 @@ TEST_CASE("circular_buffer edge cases") {
     CHECK_EQ(buffer.front(), 43);
     CHECK_EQ(buffer.back(), 43);
 
-    CHECK_EQ(buffer.pop_front(), 43);
+    int value;
+    bool ok = buffer.pop_front(&value);
+    CHECK(ok);
+    CHECK_EQ(value, 43);
     CHECK(buffer.empty());
 }
 
@@ -96,7 +106,7 @@ TEST_CASE("circular_buffer indexing") {
     CHECK_EQ(buffer[1], 20);
     CHECK_EQ(buffer[2], 30);
 
-    buffer.pop_front();
+    buffer.pop_front(nullptr);
     buffer.push_back(40);
 
     CHECK_EQ(buffer[0], 20);
@@ -122,9 +132,13 @@ TEST_CASE("circular_buffer with custom type") {
 
     buffer.push_back(CustomType(4));
 
-    CHECK_EQ(buffer.pop_front().value, 2);
-    CHECK_EQ(buffer.pop_front().value, 3);
-    CHECK_EQ(buffer.pop_front().value, 4);
+    CustomType value;
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value.value, 2);
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value.value, 3);
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value.value, 4);
 }
 
 TEST_CASE("circular_buffer writing to full buffer") {
@@ -162,9 +176,16 @@ TEST_CASE("circular_buffer writing to full buffer") {
     CHECK_EQ(buffer.back(), 6);
 
     // Pop all elements and verify
-    CHECK_EQ(buffer.pop_front(), 4);
-    CHECK_EQ(buffer.pop_front(), 5);
-    CHECK_EQ(buffer.pop_front(), 6);
+    //CHECK_EQ(buffer.pop_front(), 4);
+    //CHECK_EQ(buffer.pop_front(), 5);
+    //CHECK_EQ(buffer.pop_front(), 6);
+    int value;
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value, 4);
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value, 5);
+    CHECK_EQ(buffer.pop_front(&value), true);
+    CHECK_EQ(value, 6);
     CHECK(buffer.empty());
 }
 
@@ -186,8 +207,10 @@ TEST_CASE("circular_buffer zero capacity") {
     CHECK_EQ(buffer.size(), 0);
 
     // Attempt to pop an element
-    CHECK_EQ(buffer.pop_front(), 0);
-
+    // CHECK_EQ(buffer.pop_front(), 0);
+    int value;
+    CHECK_EQ(buffer.pop_front(&value), false);
+    
     // Buffer should be empty again
     CHECK(buffer.empty());
     CHECK(buffer.full());

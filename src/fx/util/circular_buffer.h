@@ -28,9 +28,9 @@ public:
     CircularBuffer& operator=(const CircularBuffer&) = delete;
 
     // Push value to the back of the buffer
-    void push_back(const T& value) {
+    bool push_back(const T& value) {
         if (mCapacity == 0) {
-            return;
+            return false;
         }
         mBuffer[mHead] = value;
         if (mSize < mCapacity) {
@@ -40,13 +40,14 @@ public:
         if (mSize == mCapacity) {
             mTail = mHead;
         }
+        return true;
     }
 
     // Pop value from the front of the buffer
-    T pop_front() {
+    bool pop_front(T* dst) {
         if (empty()) {
             // Handle underflow appropriately (e.g., return default value)
-            return T();
+            return false;
         }
         T value = mBuffer[mTail];
         mTail = increment(mTail);
@@ -54,7 +55,10 @@ public:
         if (empty()) {
             mHead = mTail;
         }
-        return value;
+        if (dst) {
+            *dst = value;
+        }
+        return true;
     }
 
     // Access the front element

@@ -24,7 +24,7 @@ size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
     size_t bytesRead = 0;
 
     while (bytesRead < actualBytesToRead) {
-        dst[bytesRead] = mBuffer.pop_front();
+        mBuffer.pop_front(&dst[bytesRead]);
         bytesRead++;
     }
 
