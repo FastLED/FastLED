@@ -16,7 +16,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FX_PTR(NoisePalette);
+DECLARE_SMART_PTR(NoisePalette);
 
 class NoisePalette : public FxGrid {
   public:

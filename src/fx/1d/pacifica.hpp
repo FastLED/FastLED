@@ -10,7 +10,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @brief   An animation that simulates gentle, blue-green ocean waves
 /// @example Pacifica.ino
 
-FX_PTR(Pacifica);
+DECLARE_SMART_PTR(Pacifica);
 
 class Pacifica : public FxStrip {
   public:

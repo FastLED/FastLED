@@ -44,7 +44,7 @@ FASTLED_NAMESPACE_BEGIN
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
 
-FX_PTR(Fire2012);
+DECLARE_SMART_PTR(Fire2012);
 
 class Fire2012 : public FxStrip {
   public:

@@ -8,9 +8,6 @@
 #include <stdint.h>
 FASTLED_NAMESPACE_BEGIN
 
-// FT_PTR(MyFx) will produce MyFxPtr type.
-#define FX_PTR REF_PTR
-
 // Abstract base class for effects on a strip/grid of LEDs.
 class Fx : public Referent {
   public:

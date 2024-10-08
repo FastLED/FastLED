@@ -17,7 +17,7 @@ FASTLED_NAMESPACE_BEGIN
 //
 // -Mark Kriegsman, December 2014
 
-FX_PTR(DemoReel100);
+DECLARE_SMART_PTR(DemoReel100);
 
 class DemoReel100 : public FxStrip {
   public:

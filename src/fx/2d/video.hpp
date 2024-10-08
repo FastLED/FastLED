@@ -9,8 +9,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FX_PTR(Video);
-FX_PTR(VideoFx);
+DECLARE_SMART_PTR(Video);
+DECLARE_SMART_PTR(VideoFx);
 
 class Video : public FxGrid {
 public:
