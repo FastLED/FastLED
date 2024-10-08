@@ -44,7 +44,7 @@ public:
     }
 
     // Pop value from the front of the buffer
-    bool pop_front(T* dst) {
+    bool pop_front(T* dst = nullptr) {
         if (empty()) {
             // Handle underflow appropriately (e.g., return default value)
             return false;
@@ -57,6 +57,38 @@ public:
         }
         if (dst) {
             *dst = value;
+        }
+        return true;
+    }
+
+    // Pop value from the back of the buffer
+    bool pop_back(T* dst = nullptr) {
+        if (empty()) {
+            return false;
+        }
+        mHead = decrement(mHead);
+        T value = mBuffer[mHead];
+        --mSize;
+        if (empty()) {
+            mTail = mHead;
+        }
+        if (dst) {
+            *dst = value;
+        }
+        return true;
+    }
+
+    // Push value to the front of the buffer
+    bool push_front(const T& value) {
+        if (mCapacity == 0) {
+            return false;
+        }
+        mTail = decrement(mTail);
+        mBuffer[mTail] = value;
+        if (mSize < mCapacity) {
+            ++mSize;
+        } else {
+            mHead = mTail;
         }
         return true;
     }
@@ -118,6 +150,11 @@ private:
     // Helper function to increment an index with wrap-around
     size_t increment(size_t index) const {
         return (index + 1) % mCapacity;
+    }
+
+    // Helper function to decrement an index with wrap-around
+    size_t decrement(size_t index) const {
+        return (index + mCapacity - 1) % mCapacity;
     }
 
     scoped_array<T> mBuffer;  // Assuming `scoped_array` is defined in "ptr.h"

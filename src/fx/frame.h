@@ -4,6 +4,7 @@
 #include "crgb.h"
 #include "ptr.h"
 #include <string.h>
+#include "allocator.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -28,6 +29,7 @@ public:
     uint32_t getTimestamp() const { return mTimeStamp; }
 
     void copy(const Frame& other);
+    void interpolate(const Frame& frame1, const Frame& frame2, float t);
 private:
     const size_t mPixelsCount;
     uint32_t mTimeStamp = 0;
@@ -38,6 +40,11 @@ private:
 
 inline void Frame::copy(const Frame& other) {
     memcpy(mRgb.get(), other.mRgb.get(), other.mPixelsCount * sizeof(CRGB));
+    if (other.mAlpha) {
+        // mAlpha.reset(new uint8_t[mPixelsCount]);
+        mAlpha.reset(LargeBlockAllocator<uint8_t>::Alloc(mPixelsCount));
+        memcpy(mAlpha.get(), other.mAlpha.get(), mPixelsCount);
+    }
 }
 
 FASTLED_NAMESPACE_END

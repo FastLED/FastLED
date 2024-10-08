@@ -28,4 +28,25 @@ Frame::~Frame() {
     }
 }
 
+void Frame::interpolate(const Frame& frame1, const Frame& frame2, float t) {
+    if (frame1.size() != frame2.size() || frame1.size() != mPixelsCount) {
+        return;  // Frames must have the same size
+    }
+
+    uint8_t progress = static_cast<uint8_t>(t * 255);
+
+    for (size_t i = 0; i < mPixelsCount; ++i) {
+        mRgb[i] = CRGB::blend(frame1.rgb()[i], frame2.rgb()[i], progress);
+    }
+
+    if (mAlpha && frame1.alpha() && frame2.alpha()) {
+        /*
+        TODO: Handle alpha
+        for (size_t i = 0; i < mPixelsCount; ++i) {
+            mAlpha[i] = blend8(frame1.alpha()[i], frame2.alpha()[i], progress);
+        }
+        */
+    }
+}
+
 FASTLED_NAMESPACE_END
