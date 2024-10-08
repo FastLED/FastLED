@@ -56,6 +56,12 @@ template <typename T> class scoped_ptr {
         ptr_ = ptr;
     }
 
+    T* release() {
+        T* tmp = ptr_;
+        ptr_ = nullptr;
+        return tmp;
+    }
+
   private:
     T *ptr_; // Managed pointer
 };
@@ -105,6 +111,12 @@ template <typename T> class scoped_array {
         }
         delete[] arr_;
         arr_ = arr;
+    }
+
+    T* release() {
+        T* tmp = arr_;
+        arr_ = nullptr;
+        return tmp;
     }
 
   private:

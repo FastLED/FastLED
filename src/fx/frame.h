@@ -9,13 +9,17 @@ FASTLED_NAMESPACE_BEGIN
 
 DECLARE_SMART_PTR(Frame);
 
+// Frames are used to hold led data. This includes an optional alpha channel. This object
+// is used by the fx and video engines. Most of the memory used for Fx and Video will be located
+// in instances of this class. See Frame::SetAllocator() for custom memory allocation.
 class Frame : public Referent {
 public:
     // Frames take up a lot of memory. On some devices like ESP32 there is
     // PSRAM available. This function allows you to set a custom allocator for these
-    // memory blocks. This will be used by the fx and video engines.
+    // memory blocks.
     static void SetAllocator(void* (*alloc)(size_t), void (*free)(void*));
     explicit Frame(int pixels_per_frame, bool has_alpha = false);
+    ~Frame() override;
     CRGB* rgb() { return mRgb.get(); }
     const CRGB* rgb() const { return mRgb.get(); }
     size_t size() const { return mPixelsCount; }
