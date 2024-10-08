@@ -218,3 +218,55 @@ TEST_CASE("circular_buffer zero capacity") {
 }
 
 #endif  
+
+TEST_CASE("circular_buffer pop_back operation") {
+    CircularBuffer<int> buffer(5);
+
+    buffer.push_back(1);
+    buffer.push_back(2);
+    buffer.push_back(3);
+
+    int value;
+    CHECK_EQ(buffer.pop_back(&value), true);
+    CHECK_EQ(value, 3);
+    CHECK_EQ(buffer.size(), 2);
+    CHECK_EQ(buffer.back(), 2);
+
+    CHECK_EQ(buffer.pop_back(&value), true);
+    CHECK_EQ(value, 2);
+    CHECK_EQ(buffer.size(), 1);
+    CHECK_EQ(buffer.front(), 1);
+    CHECK_EQ(buffer.back(), 1);
+
+    CHECK_EQ(buffer.pop_back(&value), true);
+    CHECK_EQ(value, 1);
+    CHECK(buffer.empty());
+
+    CHECK_EQ(buffer.pop_back(&value), false);
+}
+
+TEST_CASE("circular_buffer push_front operation") {
+    CircularBuffer<int> buffer(3);
+
+    buffer.push_front(1);
+    buffer.push_front(2);
+    buffer.push_front(3);
+
+    CHECK_EQ(buffer.size(), 3);
+    CHECK_EQ(buffer.front(), 3);
+    CHECK_EQ(buffer.back(), 1);
+
+    buffer.push_front(4);
+    CHECK_EQ(buffer.size(), 3);
+    CHECK_EQ(buffer.front(), 4);
+    CHECK_EQ(buffer.back(), 2);
+
+    int value;
+    CHECK_EQ(buffer.pop_back(&value), true);
+    CHECK_EQ(value, 2);
+    CHECK_EQ(buffer.pop_back(&value), true);
+    CHECK_EQ(value, 3);
+    CHECK_EQ(buffer.pop_back(&value), true);
+    CHECK_EQ(value, 4);
+    CHECK(buffer.empty());
+}
