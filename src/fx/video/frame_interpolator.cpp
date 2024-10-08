@@ -42,11 +42,7 @@ bool FrameInterpolator::draw(uint32_t now, Frame* dst) {
     return true;
 }
 
-bool FrameInterpolator::add(const Frame& frame, uint32_t timestamp) {
-    if (timestamp == 0) {
-        timestamp = frame.getTimestamp();
-    }
-
+bool FrameInterpolator::addWithTimestamp(const Frame& frame, uint32_t timestamp) {
     // Check if the new frame's timestamp is newer than all existing frames
     if (!mFrames.empty() && timestamp <= mFrames.back()->getTimestamp()) {
         return false;  // Reject the frame if it's not newer than the newest frame
@@ -68,6 +64,10 @@ bool FrameInterpolator::add(const Frame& frame, uint32_t timestamp) {
     mFrames.push_front(newFrame);
 
     return true;
+}
+
+bool FrameInterpolator::add(const Frame& frame) {
+    return addWithTimestamp(frame, frame.getTimestamp());
 }
 
 FASTLED_NAMESPACE_END

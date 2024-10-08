@@ -18,9 +18,10 @@ public:
     // and then interpolate between them, storing the results in the provided frame.
     bool draw(uint32_t now, Frame* dst);
 
-    // Frame's resources are copied into the internal data structures. If timestamp
-    // is zero then the current time from the Frame will be used.
-    bool add(const Frame& frame, uint32_t timestamp);
+    // Frame's resources are copied into the internal data structures.
+    bool add(const Frame& frame);
+
+    bool addWithTimestamp(const Frame& frame, uint32_t timestamp);
 
 private:
     CircularBuffer<FramePtr> mFrames;
