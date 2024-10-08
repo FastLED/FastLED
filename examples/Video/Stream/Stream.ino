@@ -7,7 +7,6 @@
 #include "fx/2d/video.hpp"
 #include "fx/fx_engine.h"
 #include "ptr.h"
-#include <iostream>
 
 #define LED_PIN 2
 #define BRIGHTNESS 96
@@ -37,11 +36,9 @@ void write_one_frame(ByteStreamMemoryPtr memoryStream) {
         CRGB color = (i % 2 == toggle) ? CRGB::Black : CRGB::Red;
         size_t bytes_written = memoryStream->write(color.raw, 3);
         if (bytes_written != 3) {
-            std::cout << "Error writing to memory stream at LED " << i << std::endl;
         }
         total_bytes_written += bytes_written;
     }
-    std::cout << "Total bytes written: " << total_bytes_written << " / " << BUFFER_SIZE << std::endl;
 }
 
 void setup() {
@@ -61,8 +58,6 @@ void setup() {
 
     // Add the video effect to the FxEngine
     fxEngine.addFx(videoFx);
-
-    std::cout << "Setup complete. Starting main loop." << std::endl;
 }
 
 void loop() {

@@ -15,7 +15,7 @@ private:
 
 public:
     // Constructor
-    constexpr FixedVector() noexcept = default;
+    constexpr FixedVector() = default;
 
     // Array subscript operator
     T& operator[](size_t index) {
@@ -28,16 +28,16 @@ public:
     }
 
     // Get the current size of the vector
-    constexpr size_t size() const noexcept {
+    constexpr size_t size() const {
         return current_size;
     }
 
-    constexpr bool empty() const noexcept {
+    constexpr bool empty() const {
         return current_size == 0;
     }
 
     // Get the capacity of the vector
-    constexpr size_t capacity() const noexcept {
+    constexpr size_t capacity() const {
         return N;
     }
 
@@ -56,7 +56,7 @@ public:
     }
 
     // Clear the vector
-    void clear() noexcept {
+    void clear() {
         for (size_t i = 0; i < current_size; ++i) {
             data[i].~T();
             data[i] = T();
@@ -69,7 +69,11 @@ public:
         if (it >= begin() && it < end()) {
             size_t index = it - begin();
             // TODO: Is std::move safe here?
-            std::move(it + 1, end(), const_cast<T*>(it));
+            // std::move(it + 1, end(), const_cast<T*>(it));
+            // no move
+            for (size_t i = index + 1; i < current_size; ++i) {
+                data[i - 1] = data[i];
+            }
             --current_size;
             return const_cast<T*>(it);
         }
@@ -77,10 +81,10 @@ public:
     }
 
     // Iterator support
-    constexpr T* begin() noexcept { return data; }
-    constexpr const T* begin() const noexcept { return data; }
-    constexpr T* end() noexcept { return data + current_size; }
-    constexpr const T* end() const noexcept { return data + current_size; }
+    T* begin() { return data; }
+    const T* begin() const { return data; }
+    T* end() { return data + current_size; }
+    const T* end() const { return data + current_size; }
 };
 
 FASTLED_NAMESPACE_END
