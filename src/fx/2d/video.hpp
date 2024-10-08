@@ -45,12 +45,14 @@ public:
             return;
         }
 
-        for (uint16_t i = 0; i < mXyMap.getTotal(); ++i) {
-            CRGB pixel;
-            if (mVideoStream->ReadPixel(&pixel)) {
-                context.leds[i] = pixel;
-            } else {
-                context.leds[i] = CRGB::Black;
+        for (uint16_t w = 0; w < mXyMap.getWidth(); w++) {
+            for (uint16_t h = 0; h < mXyMap.getHeight(); h++) {
+                CRGB pixel;
+                if (mVideoStream->ReadPixel(&pixel)) {
+                    context.leds[mXyMap.mapToIndex(w, h)] = pixel;
+                } else {
+                    context.leds[mXyMap.mapToIndex(w, h)] = CRGB::Black;
+                }
             }
         }
     }
