@@ -30,6 +30,21 @@ TEST_CASE("circular_buffer basic operations") {
     CHECK_EQ(buffer.front(), 2);
 }
 
+TEST_CASE("circular_buffer operator[]") {
+    CircularBuffer<int> buffer(5);
+
+    CHECK(buffer.empty());
+    CHECK_EQ(buffer.size(), 0);
+
+    buffer.push_back(1);
+    buffer.push_back(2);
+    CHECK_EQ(buffer.size(), 2);
+    CHECK_EQ(buffer[0], 1);
+    CHECK_EQ(buffer[1], 2);
+    buffer.pop_front(nullptr);
+    CHECK_EQ(2, buffer[0]);
+}
+
 TEST_CASE("circular_buffer overflow behavior") {
     CircularBuffer<int> buffer(3);
 
