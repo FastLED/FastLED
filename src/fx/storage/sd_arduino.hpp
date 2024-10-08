@@ -112,7 +112,7 @@ public:
     }
 };
 
-inline SdCardSpiPtr SdCardSpi::make(int cs_pin) {
+inline SdCardSpiPtr SdCardSpi::New(int cs_pin) {
     return SdCardSpiPtr::FromHeap(new SdCardSpiArduino(cs_pin));
 }
 
