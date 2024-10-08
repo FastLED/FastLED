@@ -6,7 +6,7 @@
 #include "fx/storage/filereader.h"
 #include "fx/storage/filebuffer.h"
 #include "fx/storage/bytestream.h"
-#include "fx/video/frame.h"
+#include "fx/frame.h"
 
 FASTLED_NAMESPACE_BEGIN
 

@@ -17,6 +17,7 @@ public:
 private:
     size_t mBytesPerFrame;
     scoped_array<uint8_t> mSurface;
+    scoped_array<uint8_t> mAlpha;  // Optional alpha channel.
 
 };
 

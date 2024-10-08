@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fx/video/stream.h"
-#include "fx/video/frame.h"
+#include "fx/frame.h"
 #include "namespace.h"
 #include "fx/detail/circular_buffer.h"
 

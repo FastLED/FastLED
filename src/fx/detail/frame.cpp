@@ -1,7 +1,7 @@
 #include "namespace.h"
 #include "crgb.h"
 #include "ptr.h"
-#include "frame.h"
+#include "fx/frame.h"
 #include <string.h>
 
 FASTLED_NAMESPACE_BEGIN
