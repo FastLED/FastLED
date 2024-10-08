@@ -7,4 +7,5 @@
 #define FASTLED_NAMESPACE_END
 /// "Using" directive for the namespace
 #define FASTLED_USING_NAMESPACE
+#define FASTLED_NAMESPACE_USE
 #endif
