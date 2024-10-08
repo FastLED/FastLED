@@ -9,6 +9,8 @@
 FASTLED_NAMESPACE_BEGIN
 
 
+// Simple noise generator for 1-d waves. Default values will give good results
+// for most cases.
 struct NoiseGenerator {
     int32_t iteration_scale;
     unsigned long time_multiplier;
