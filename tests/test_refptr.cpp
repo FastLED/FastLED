@@ -99,7 +99,7 @@ TEST_CASE("Ptr reset functionality") {
 TEST_CASE("Ptr from static memory") {
     MyClass staticObject;
     {
-        MyClassPtr ptr = MyClassPtr::FromStatic(staticObject);
+        MyClassPtr ptr = MyClassPtr::NoTracking(staticObject);
     }
     CHECK_EQ(staticObject.ref_count(), 0);
     CHECK_NE(staticObject.destructor_signal, 0xdeadbeef);

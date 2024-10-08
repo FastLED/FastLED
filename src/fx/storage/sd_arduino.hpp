@@ -86,9 +86,9 @@ public:
 #ifdef USE_SDFAT
         SdFile file;
         if (!file.open(name, oflag)) {
-            return Ptr<FileHandle>::FromHeap(nullptr);
+            return Ptr<FileHandle>::TakeOwnership(nullptr);
         }
-        return Ptr<FileHandle>::FromHeap(new SdFatFileHandle(std::move(file), name));
+        return Ptr<FileHandle>::TakeOwnership(new SdFatFileHandle(std::move(file), name));
 #else
 
         #ifdef ESP32
@@ -97,9 +97,9 @@ public:
         File file = SD.open(name);
         #endif
         if (!file) {
-            return Ptr<FileHandle>::FromHeap(nullptr);
+            return Ptr<FileHandle>::TakeOwnership(nullptr);
         }
-        return Ptr<FileHandle>::FromHeap(new SDFileHandle(std::move(file), name));
+        return Ptr<FileHandle>::TakeOwnership(new SDFileHandle(std::move(file), name));
 #endif
     }
 
@@ -114,7 +114,7 @@ public:
 
 inline SdCardSpiPtr SdCardSpi::New(int cs_pin) {
     SdCardSpi* ptr = new SdCardSpiArduino(cs_pin);
-    return Ptr<SdCardSpi>::FromHeap(ptr);
+    return Ptr<SdCardSpi>::TakeOwnership(ptr);
 }
 
 

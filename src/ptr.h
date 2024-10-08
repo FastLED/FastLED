@@ -1,6 +1,8 @@
 
 #pragma once
 
+// FastLED smart pointer. Used mainly by the fx components.
+
 #include "namespace.h"
 #include "scoped_ptr.h"
 #include <stddef.h>
@@ -79,14 +81,15 @@ template <typename T> class Ptr : public PtrTraits<T> {
         return PtrTraits<T>::New(args...);
     }
 
+
     // Used for low level allocations, typically for pointer to an implementation
     // where it needs to convert to a Ptr of a base class.
-    static Ptr FromHeap(T *ptr) { return Ptr(ptr, true); }
+    static Ptr TakeOwnership(T *ptr) { return Ptr(ptr, true); }
 
     // Used for low level allocations, typically to handle memory that is
     // statically allocated where the destructor should not be called when
     // the refcount reaches 0.
-    static Ptr FromStatic(T &referent) { return Ptr(&referent, false); }
+    static Ptr NoTracking(T &referent) { return Ptr(&referent, false); }
 
     // create an upcasted Ptr
     template <typename U> Ptr(Ptr<U> &refptr) : referent_(refptr.get()) {
