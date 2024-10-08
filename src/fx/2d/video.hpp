@@ -57,15 +57,13 @@ public:
 
     bool begin(FileHandlePtr fileHandle) {
         const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mVideoStream = Ptr<VideoStream>::FromHeap(
-            new VideoStream(bytes_per_frame));
+        mVideoStream = VideoStreamPtr::New(bytes_per_frame);
         return mVideoStream->begin(fileHandle);
     }
 
     bool beginStream(ByteStreamPtr byteStream) {
         const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mVideoStream = Ptr<VideoStream>::FromHeap(
-            new VideoStream(bytes_per_frame));
+        mVideoStream = VideoStreamPtr::New(bytes_per_frame);
         return mVideoStream->beginStream(byteStream);
     }
 
