@@ -148,3 +148,12 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
     }
 
 }
+
+TEST_CASE("FrameInterpolator::draw") {
+    SUBCASE("Empty interpolator") {
+        FrameInterpolator interpolator(5);
+        Frame frame(10, false);
+        Frame dst(10, false);
+        CHECK_FALSE(interpolator.draw(0, &dst));
+    }
+}
