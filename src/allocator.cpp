@@ -37,8 +37,12 @@ void SetLargeBlockAllocator(void *(*alloc)(size_t), void (*free)(void *)) {
     Free = free;
 }
 
-void* LargeBlockAllocate(size_t size) {
-    return Alloc(size);
+void* LargeBlockAllocate(size_t size, bool zero) {
+    void* ptr = Alloc(size);
+    if (zero) {
+        memset(ptr, 0, size);
+    }
+    return ptr;
 }
 
 void LargeBlockDeallocate(void* ptr) {
