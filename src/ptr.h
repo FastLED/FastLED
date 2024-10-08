@@ -2,16 +2,28 @@
 #pragma once
 
 #include "namespace.h"
-#include <stddef.h>
 #include "scoped_ptr.h"
+#include <stddef.h>
 
 FASTLED_NAMESPACE_BEGIN
 
+// Declares a smart pointer. DECLARE_SMART_PTR(Foo) will declare a class FooPtr
+// which will be a typedef of Ptr<Foo>. After this FooPtr::New(...args) can be
+// used to create a new instance of Ptr<Foo>.
 #define DECLARE_SMART_PTR(type)                                                \
     class type;                                                                \
     using type##Ptr = Ptr<type>;
 
-
+// If you have an interface class that you want to create a smart pointer for,
+// then you need to use this to bind it to a constructor.
+#define DECLARE_SMART_PTR_CONSTRUCTOR(type, constructor)                       \
+    template <> class PtrTraits<type> {                                        \
+      public:                                                                  \
+        template <typename... Args> static Ptr<type> New(Args... args) {       \
+            Ptr<type> ptr = constructor(args...);                              \
+            return ptr;                                                        \
+        }                                                                      \
+    };
 
 // Objects that inherit this class can be reference counted and put into
 // a Ptr object.
@@ -41,18 +53,15 @@ class Referent {
 
 template <typename T> class Ptr;
 
-
-template<typename T>
-class PtrTraits {
+template <typename T> class PtrTraits {
   public:
-    template <typename... Args>
-    static Ptr<T> New(Args... args) {
-        T* ptr = new T(args...);
+    template <typename... Args> static Ptr<T> New(Args... args) {
+        T *ptr = new T(args...);
         return Ptr<T>(ptr, true);
     }
 
     static Ptr<T> New() {
-        T* ptr = new T();
+        T *ptr = new T();
         return Ptr<T>(ptr, true);
     }
 };
@@ -61,19 +70,22 @@ class PtrTraits {
 // object. This Ptr has to be used with classes that inherit from Referent.
 // There is an important feature for this Ptr though, it is designed to bind
 // to pointers that *may* have been allocated on the stack or static memory.
-template <typename T>
-class Ptr: public PtrTraits<T> {
+template <typename T> class Ptr : public PtrTraits<T> {
   public:
     friend class PtrTraits<T>;
     // element_type is the type of the managed object
     using element_type = T;
-    template <typename... Args>
-    static Ptr<T> New(Args... args) {
+    template <typename... Args> static Ptr<T> New(Args... args) {
         return PtrTraits<T>::New(args...);
     }
 
-    // This is a special constructor that is used to create a Ptr from a raw
-    // pointer
+    // Used for low level allocations, typically for pointer to an implementation
+    // where it needs to convert to a Ptr of a base class.
+    static Ptr FromHeap(T *ptr) { return Ptr(ptr, true); }
+
+    // Used for low level allocations, typically to handle memory that is
+    // statically allocated where the destructor should not be called when
+    // the refcount reaches 0.
     static Ptr FromStatic(T &referent) { return Ptr(&referent, false); }
 
     // create an upcasted Ptr
@@ -83,8 +95,7 @@ class Ptr: public PtrTraits<T> {
         }
     }
 
-    template <typename U>
-    Ptr(const Ptr<U> &refptr) : referent_(refptr.get()) {
+    template <typename U> Ptr(const Ptr<U> &refptr) : referent_(refptr.get()) {
         if (referent_ && isOwned()) {
             referent_->ref();
         }

@@ -15,7 +15,7 @@ void loop() {
 #include "Arduino.h"
 #include "fx/storage/sd.hpp"
 
-SdCardSpiPtr sd = SdCardSpi::New(5);
+SdCardSpiPtr sd = SdCardSpiPtr::New(5);
 
 #define INVALID_FILENAME "fhjdiskljdskj.txt"
 

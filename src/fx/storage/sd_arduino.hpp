@@ -113,7 +113,8 @@ public:
 };
 
 inline SdCardSpiPtr SdCardSpi::New(int cs_pin) {
-    return SdCardSpiPtr::FromHeap(new SdCardSpiArduino(cs_pin));
+    SdCardSpi* ptr = new SdCardSpiArduino(cs_pin);
+    return Ptr<SdCardSpi>::FromHeap(ptr);
 }
 
 

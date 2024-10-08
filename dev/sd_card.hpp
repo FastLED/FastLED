@@ -14,12 +14,12 @@ using namespace std;
 #define SPEED 30
 #define CS_PIN 5
 
-SdCardSpiPtr SD_CARD_READER = SdCardSpi::New(CS_PIN);
+SdCardSpiPtr SD_CARD_READER = SdCardSpiPtr::New(CS_PIN);
 
 
 void runSdCardTest() {
     cout << "Running SD card test" << endl;
-    SD_CARD_READER->begin(5);
+    SD_CARD_READER->begin(CS_PIN);
     FileHandlePtr file = SD_CARD_READER->openRead("/test.txt");
     if (!file) {
         cout << "Failed to open file" << endl;

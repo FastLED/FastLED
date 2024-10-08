@@ -12,7 +12,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-
 DECLARE_SMART_PTR(SdCardSpi);
 
 class SdCardSpi : public Referent, public FileReader {
@@ -30,7 +29,8 @@ class SdCardSpi : public Referent, public FileReader {
       // todo: implement.
       return false;
     }
-
 };
+
+DECLARE_SMART_PTR_CONSTRUCTOR(SdCardSpi, SdCardSpi::New);
 
 FASTLED_NAMESPACE_END
