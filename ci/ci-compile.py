@@ -79,6 +79,7 @@ DEFAULT_EXAMPLES = [
     "RGBWEmulated",
     "TwinkleFox",
     "XYMatrix",
+    "Video/Stream",
 ]
 
 
