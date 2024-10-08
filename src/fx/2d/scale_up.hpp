@@ -101,8 +101,6 @@ class ScaleUp : public FxGrid {
     }
     FxGridPtr mDelegate;
     scoped_array<CRGB> mSurface;
-
-    FX_PROTECTED_DESTRUCTOR(ScaleUp);
 };
 
 FASTLED_NAMESPACE_END

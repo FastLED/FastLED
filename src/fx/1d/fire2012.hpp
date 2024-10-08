@@ -56,6 +56,8 @@ class Fire2012 : public FxStrip {
         heat.reset(new uint8_t[num_leds]()); // Initialize to zero
     }
 
+    ~Fire2012() {}
+
     void draw(DrawContext context) override {
         CRGB *leds = context.leds;
         if (leds == nullptr) {
@@ -103,8 +105,6 @@ class Fire2012 : public FxStrip {
     uint8_t sparking;
     bool reverse_direction;
     CRGBPalette16 palette;
-
-    FX_PROTECTED_DESTRUCTOR(Fire2012) {}
 };
 
 FASTLED_NAMESPACE_END

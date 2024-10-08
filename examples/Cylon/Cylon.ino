@@ -17,7 +17,7 @@
 CRGB leds[NUM_LEDS];
 
 // Create a Cylon instance
-CylonPtr cylon = Fx::make<Cylon>(NUM_LEDS);
+CylonPtr cylon = CylonPtr::New(NUM_LEDS);
 
 void setup() { 
     FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS).setRgbw();

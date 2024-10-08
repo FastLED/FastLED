@@ -80,8 +80,6 @@ public:
 private:
     VideoStreamPtr mVideoStream;
     bool mInitialized = false;
-
-    FX_PROTECTED_DESTRUCTOR(Video) = default;
 };
 
 
@@ -116,8 +114,6 @@ private:
     Ptr<FxGrid> mDelegate;
     scoped_array<CRGB> mSurface;
     bool mInitialized = false;
-
-    FX_PROTECTED_DESTRUCTOR(VideoFx) = default;
 };
 
 FASTLED_NAMESPACE_END

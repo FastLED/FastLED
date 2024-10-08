@@ -43,9 +43,6 @@ class RedSquare : public FxGrid {
     }
 
     const char *fxName(int) const override { return "red_square"; }
-
-  private:
-    FX_PROTECTED_DESTRUCTOR(RedSquare);
 };
 
 FASTLED_NAMESPACE_END

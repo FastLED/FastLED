@@ -95,8 +95,6 @@ class Animartrix : public FxGrid {
     scoped_ptr<FastLEDANIMartRIX> impl;
     CRGB *leds = nullptr; // Only set during draw, then unset back to nullptr.
     AnimartrixAnim current_animation = RGB_BLOBS5;
-
-    FX_PROTECTED_DESTRUCTOR(Animartrix);
 };
 
 void AnimartrixLoop(Animartrix &self);
@@ -375,9 +373,6 @@ void AnimartrixLoop(Animartrix &self) {
         self.impl.reset(new FastLEDANIMartRIX(&self));
     }
     self.impl->loop();
-}
-
-Animartrix::~Animartrix() {
 }
 
 void Animartrix::draw(DrawContext ctx) {

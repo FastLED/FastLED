@@ -38,8 +38,6 @@ class NoiseWave : public FxStrip {
     NoiseGenerator noiseGeneratorRed;
     NoiseGenerator noiseGeneratorBlue;
     unsigned long start_time = 0;
-
-    FX_PROTECTED_DESTRUCTOR(NoiseWave) {}
 };
 
 FASTLED_NAMESPACE_END

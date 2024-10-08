@@ -9,6 +9,8 @@
 #include "fx/fx_engine.h"
 #include "FastLED.h"
 
+DECLARE_SMART_PTR(MockFx);
+
 class MockFx : public Fx {
 public:
     MockFx(uint16_t numLeds, CRGB color) : Fx(numLeds), mColor(color) {}
@@ -32,8 +34,8 @@ TEST_CASE("test_fx_engine") {
     FxEngine engine(NUM_LEDS);
     CRGB leds[NUM_LEDS];
 
-    Ptr<MockFx> redFx = Fx::make<MockFx>(NUM_LEDS, CRGB::Red);
-    Ptr<MockFx> blueFx = Fx::make<MockFx>(NUM_LEDS, CRGB::Blue);
+    Ptr<MockFx> redFx = MockFxPtr::New(NUM_LEDS, CRGB::Red);
+    Ptr<MockFx> blueFx = MockFxPtr::New(NUM_LEDS, CRGB::Blue);
 
     engine.addFx(redFx);
     engine.addFx(blueFx);

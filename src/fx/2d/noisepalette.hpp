@@ -109,7 +109,6 @@ class NoisePalette : public FxGrid {
             green, green, black, black, purple, purple, black, black, green,
             green, black, black, purple, purple, black, black);
     }
-    FX_PROTECTED_DESTRUCTOR(NoisePalette) {};
 };
 
 inline void NoisePalette::setPalettePreset(int paletteIndex) {

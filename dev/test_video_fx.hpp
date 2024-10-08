@@ -36,13 +36,13 @@ void setup() {
     XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
 
     // Create and initialize NoisePalette object
-    noisePalette = Fx::make<NoisePalette>(xymap);
+    noisePalette = NoisePalettePtr::New(xymap);
     noisePalette->lazyInit();
     noisePalette->setSpeed(SPEED);
     noisePalette->setScale(SCALE);
 
     // Create and initialize VideoFx object
-    videoFx = Fx::make<VideoFx>(xymap, noisePalette);
+    videoFx = VideoFxPtr::New(xymap, noisePalette);
     
     // Add the video effect to the FxEngine
     fxEngine.addFx(videoFx);

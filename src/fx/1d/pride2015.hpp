@@ -30,8 +30,6 @@ class Pride2015 : public FxStrip {
     uint16_t mPseudotime = 0;
     uint16_t mLastMillis = 0;
     uint16_t mHue16 = 0;
-
-    FX_PROTECTED_DESTRUCTOR(Pride2015) {}
 };
 
 // This function draws rainbows with an ever-changing,

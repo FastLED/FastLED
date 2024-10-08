@@ -41,8 +41,6 @@ class Pacifica : public FxStrip {
                             uint16_t wavescale, uint8_t bri, uint16_t ioff);
     void pacifica_add_whitecaps(CRGB *leds);
     void pacifica_deepen_colors(CRGB *leds);
-
-    FX_PROTECTED_DESTRUCTOR(Pacifica) {}
 };
 
 void Pacifica::draw(DrawContext ctx) {

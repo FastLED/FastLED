@@ -62,8 +62,6 @@ class Cylon : public FxStrip {
 
     bool reverse = false;
     int16_t position = 0;
-
-    FX_PROTECTED_DESTRUCTOR(Cylon) {}
 };
 
 FASTLED_NAMESPACE_END

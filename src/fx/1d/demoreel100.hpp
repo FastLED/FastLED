@@ -128,8 +128,6 @@ class DemoReel100 : public FxStrip {
             dothue += 32;
         }
     }
-
-    FX_PROTECTED_DESTRUCTOR(DemoReel100) {}
 };
 
 FASTLED_NAMESPACE_END

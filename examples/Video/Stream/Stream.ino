@@ -61,12 +61,12 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
 
     // Create and fill the ByteStreamMemory with test data
-    memoryStream = Ptr::New<ByteStreamMemory>(BUFFER_SIZE);
+    memoryStream = ByteStreamMemoryPtr::New(BUFFER_SIZE);
     write_one_frame(memoryStream);  // Write initial frame data
 
     // Create and initialize Video fx object
     XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
-    videoFx = Fx::make<VideoPtr>(xymap);
+    videoFx = VideoPtr::New(xymap);
     videoFx->beginStream(memoryStream);
 
     // Add the video effect to the FxEngine

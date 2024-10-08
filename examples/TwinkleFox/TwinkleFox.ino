@@ -9,7 +9,7 @@
 #define MAX_MA       4000
 
 CRGBArray<NUM_LEDS> leds;
-TwinkleFoxPtr twinkleFox = Fx::make<TwinkleFox>(NUM_LEDS);
+TwinkleFoxPtr twinkleFox = TwinkleFoxPtr::New(NUM_LEDS);
 
 void setup() {
   delay(3000); // safety startup delay

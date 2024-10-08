@@ -232,8 +232,6 @@ class TwinkleFox : public FxStrip {
         c.g = qsub8(c.g, cooling);
         c.b = qsub8(c.b, cooling * 2);
     }
-
-    FX_PROTECTED_DESTRUCTOR(TwinkleFox) {}
 };
 
 // Color palettes

@@ -190,6 +190,11 @@ class Ptr: public PtrBase {
         return Ptr(referent, true);
     }
 
+    template <typename... Args>
+    static Ptr<T> New(Args... args) {
+        return PtrBase::New<T>(args...);
+    }
+
     // This is a special constructor that is used to create a Ptr from a raw
     // pointer
     static Ptr FromStatic(T &referent) { return Ptr(&referent, false); }
