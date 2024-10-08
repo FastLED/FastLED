@@ -5,14 +5,14 @@
 #include "fx/fx.h"
 #include "namespace.h"
 #include "ptr.h"
+#include "fx/frame.h"
 #include <stdint.h>
 #include <string.h>
 //#include <assert.h>
 
 FASTLED_NAMESPACE_BEGIN
 
-class FxLayer;
-typedef Ptr<FxLayer> FxLayerPtr;
+DECLARE_SMART_PTR(FxLayer);
 class FxLayer : public Referent {
   public:
     void setFx(Ptr<Fx> newFx) {
@@ -24,33 +24,21 @@ class FxLayer : public Referent {
 
     void draw(uint32_t now) {
         //assert(fx);
-        if (!surface.get()) {
-            surface.reset(new CRGB[fx->getNumLeds()]);
-        }
-        if (fx->hasAlphaChannel() && !surface_alpha.get()) {
-            surface_alpha.reset(new uint8_t[fx->getNumLeds()]);
+        if (!frame) {
+            frame = FramePtr::New(fx->getNumLeds() * (fx->hasAlphaChannel() ? 4 : 3));
         }
 
         if (!running) {
-            // mem clear the surface
-            CRGB *surface_ptr = this->surface.get();
-            uint8_t *surface_alpha_ptr = this->surface_alpha.get();
-            if (surface_ptr) {
-                memset(surface_ptr, 0, sizeof(CRGB) * fx->getNumLeds());
-            }
-            if (surface_alpha_ptr) {
-                memset(surface_alpha_ptr, 0,
-                        sizeof(uint8_t) * fx->getNumLeds());
-            }
+            // Clear the frame
+            memset(frame->data(), 0, fx->getNumLeds() * (fx->hasAlphaChannel() ? 4 : 3));
             fx->resume();
             running = true;
         }
-        Fx::DrawContext context = {now, surface.get()};
+        Fx::DrawContext context = {now, reinterpret_cast<CRGB*>(frame->data())};
         if (fx->hasAlphaChannel()) {
-            context.alpha_channel = surface_alpha.get();
+            context.alpha_channel = frame->data() + fx->getNumLeds() * 3;
         }
         fx->draw(context);
-
     }
 
     void pause() {
@@ -67,12 +55,11 @@ class FxLayer : public Referent {
 
     Ptr<Fx> getFx() { return fx; }
 
-    CRGB *getSurface() { return surface.get(); }
-    uint8_t *getSurfaceAlpha() { return surface_alpha.get(); }
+    CRGB *getSurface() { return reinterpret_cast<CRGB*>(frame->data()); }
+    uint8_t *getSurfaceAlpha() { return fx->hasAlphaChannel() ? frame->data() + fx->getNumLeds() * 3 : nullptr; }
 
   private:
-    scoped_array<CRGB> surface;
-    scoped_array<uint8_t> surface_alpha;
+    Ptr<Frame> frame;
     Ptr<Fx> fx;
     bool running = false;
 };
