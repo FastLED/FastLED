@@ -59,12 +59,12 @@ template <typename T> class PtrTraits {
   public:
     template <typename... Args> static Ptr<T> New(Args... args) {
         T *ptr = new T(args...);
-        return Ptr<T>(ptr, true);
+        return Ptr<T>::TakeOwnership(ptr);
     }
 
     static Ptr<T> New() {
         T *ptr = new T();
-        return Ptr<T>(ptr, true);
+        return Ptr<T>::TakeOwnership(ptr);
     }
 };
 
