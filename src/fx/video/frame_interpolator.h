@@ -23,6 +23,8 @@ public:
 
     bool addWithTimestamp(const Frame& frame, uint32_t timestamp);
 
+    bool selectFrames(uint32_t now, const Frame** frame1, const Frame** frame2) const;
+
 private:
     CircularBuffer<FramePtr> mFrames;
 };

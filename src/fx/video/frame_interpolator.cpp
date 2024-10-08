@@ -9,25 +9,10 @@ FrameInterpolator::FrameInterpolator(size_t nframes)
     : mFrames(nframes) {}
 
 bool FrameInterpolator::draw(uint32_t now, Frame* dst) {
-    if (mFrames.size() < 2) {
-        return false;
-    }
-
     const Frame* frame1 = nullptr;
     const Frame* frame2 = nullptr;
 
-    // Find the two frames closest to the current time
-    for (size_t i = 0; i < mFrames.size(); ++i) {
-        const FramePtr& frame = mFrames[i];
-        if (frame->getTimestamp() <= now) {
-            frame1 = frame.get();
-        } else {
-            frame2 = frame.get();
-            break;
-        }
-    }
-
-    if (!frame1 || !frame2) {
+    if (!selectFrames(now, &frame1, &frame2)) {
         return false;
     }
 
@@ -71,6 +56,22 @@ bool FrameInterpolator::addWithTimestamp(const Frame& frame, uint32_t timestamp)
 
 bool FrameInterpolator::add(const Frame& frame) {
     return addWithTimestamp(frame, frame.getTimestamp());
+}
+
+bool FrameInterpolator::selectFrames(uint32_t now, const Frame** frame1, const Frame** frame2) const {
+    if (mFrames.size() < 2) {
+        return false;
+    }
+
+    for (size_t i = 0; i < mFrames.size() - 1; ++i) {
+        if (mFrames[i]->getTimestamp() <= now && mFrames[i + 1]->getTimestamp() > now) {
+            *frame1 = mFrames[i].get();
+            *frame2 = mFrames[i + 1].get();
+            return true;
+        }
+    }
+
+    return false;
 }
 
 FASTLED_NAMESPACE_END
