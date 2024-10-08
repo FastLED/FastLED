@@ -19,7 +19,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
 
     SUBCASE("2 frame interpolator before") {
         // Create an interpolator with capacity for 2 frames
-        FrameInterpolator interpolator(2); 
+        FrameInterpolator interpolator(2);
 
         // Create some test frames with different timestamps
         Frame frame1(10, false); // 10 pixels, no alpha
@@ -39,15 +39,15 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         CHECK(selected2);
         // Now check that it's the same frame.
         CHECK(selected1 == selected2);
-        // now check that the timestamp of the first frame is less than the timestamp of the second frame
+        // now check that the timestamp of the first frame is less than the
+        // timestamp of the second frame
         CHECK(selected1->getTimestamp() == 1000);
         CHECK(selected2->getTimestamp() == 1000);
     }
 
-
     SUBCASE("2 frame interpolator between") {
         // Create an interpolator with capacity for 2 frames
-        FrameInterpolator interpolator(2); 
+        FrameInterpolator interpolator(2);
 
         // Create some test frames with different timestamps
         Frame frame1(10, false); // 10 pixels, no alpha
@@ -56,9 +56,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         // Add frames with timestamps
         CHECK(interpolator.addWithTimestamp(frame1, 0));
         CHECK(interpolator.addWithTimestamp(frame2, 1000));
-
-
-
+        
         const Frame *selected1;
         const Frame *selected2;
 
@@ -69,19 +67,37 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         CHECK(selected2);
         // now check that the frames are different
         CHECK(selected1 != selected2);
-        // now check that the timestamp of the first frame is less than the timestamp of the second frame
+        // now check that the timestamp of the first frame is less than the
+        // timestamp of the second frame
         CHECK(selected1->getTimestamp() == 0);
-        CHECK(selected2->getTimestamp() == 1000);
-
-        // now select the frame after the max timestamp
-        selected = interpolator.selectFrames(2000, &selected1, &selected2);
-        // check that the selection was true and that the two frames are the same pointer.
-        CHECK(selected);
-        CHECK(selected1 == selected2);
-        // now check that the timestamp of the first frame is less than the timestamp of the second frame
-        CHECK(selected1->getTimestamp() == 1000);
         CHECK(selected2->getTimestamp() == 1000);
     }
 
+    SUBCASE("2 frame interpolator after") {
+        // Create an interpolator with capacity for 2 frames
+        FrameInterpolator interpolator(2);
 
+        // Create some test frames with different timestamps
+        Frame frame1(10, false); // 10 pixels, no alpha
+        Frame frame2(10, false);
+
+        // Add frames with timestamps
+        CHECK(interpolator.addWithTimestamp(frame1, 0));
+        CHECK(interpolator.addWithTimestamp(frame2, 1000));
+
+        const Frame *selected1;
+        const Frame *selected2;
+
+        // Falls between two frames.
+        bool selected = interpolator.selectFrames(1500, &selected1, &selected2);
+        CHECK(selected);
+        CHECK(selected1);
+        CHECK(selected2);
+        // now check that the frames are different
+        CHECK(selected1 == selected2);
+        // now check that the timestamp of the first frame is less than the
+        // timestamp of the second frame
+        CHECK(selected1->getTimestamp() == 1000);
+        CHECK(selected2->getTimestamp() == 1000);
+    }
 }
