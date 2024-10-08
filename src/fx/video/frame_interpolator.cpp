@@ -34,11 +34,25 @@ bool FrameInterpolator::addWithTimestamp(const Frame &frame,
                       // frame
     }
 
+    if (mFrames.empty()) {
+        // Insert the first frame
+        FramePtr newFrame = FramePtr::New(frame.size(), !!frame.alpha());
+        newFrame->copy(frame);
+        newFrame->setTimestamp(timestamp);
+        mFrames.push_back(newFrame);
+        return true;
+    }
+
+    if (timestamp <= mFrames.front()->getTimestamp()) {
+        // Reject the frame as it's older than newest frame.
+        return false;
+    }
+
     FramePtr newFrame;
     if (mFrames.full()) {
         // Reuse the oldest frame
         bool ok = mFrames.pop_back(&newFrame);
-        if (!ok) {
+        if (!ok || !newFrame) {
             // Something unexpected happened. This should never occur.
             return false;
         }
@@ -72,17 +86,18 @@ bool FrameInterpolator::selectFrames(uint32_t now, const Frame **frameMin,
     }
 
     // Handle case after the last frame
-    if (now >= mFrames.back()->getTimestamp()) {
-        *frameMin = mFrames[mFrames.size() - 2].get();
-        *frameMax = mFrames.back().get();
+    if (now >= mFrames.front()->getTimestamp()) {
+        Frame* cur = mFrames.front().get();
+        *frameMin = cur;
+        *frameMax = cur;
         return true;
     }
 
     // Find the two frames that bracket the given timestamp
     for (size_t i = 0; i < mFrames.size() - 1; ++i) {
-        if (mFrames[i]->getTimestamp() <= now && mFrames[i + 1]->getTimestamp() > now) {
-            *frameMin = mFrames[i].get();
-            *frameMax = mFrames[i + 1].get();
+        if (now <= mFrames[i]->getTimestamp() && mFrames[i + 1]->getTimestamp() <= now) {
+            *frameMax = mFrames[i].get();
+            *frameMin = mFrames[i + 1].get();
             return true;
         }
     }

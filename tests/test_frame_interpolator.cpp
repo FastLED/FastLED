@@ -35,15 +35,15 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         const Frame *selected2;
 
         // Falls between two frames.
-        bool selected = interpolator.selectFrames(1500, &selected1, &selected2);
+        bool selected = interpolator.selectFrames(500, &selected1, &selected2);
         CHECK(selected);
         CHECK(selected1);
         CHECK(selected2);
         // now check that the frames are different
         CHECK(selected1 != selected2);
         // now check that the timestamp of the first frame is less than the timestamp of the second frame
-        //CHECK(selected1->getTimestamp() == 0);
-        //CHECK(selected2->getTimestamp() == 1000);
+        CHECK(selected1->getTimestamp() == 0);
+        CHECK(selected2->getTimestamp() == 1000);
     }
 
 
