@@ -34,8 +34,6 @@ public:
             }
         }
 
-
-
         if (!mVideoStream->FramesRemaining()) {
             mVideoStream->Rewind();
         }
