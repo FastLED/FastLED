@@ -33,8 +33,16 @@ public:
                 return;  // can't rewind streaming video
             }
         }
+
+
+
         if (!mVideoStream->FramesRemaining()) {
             mVideoStream->Rewind();
+        }
+
+        if (!mVideoStream->available() && mVideoStream->getType() == VideoStream::kStreaming) {
+            // If we're streaming and we're out of data then bail.
+            return;
         }
 
         for (uint16_t i = 0; i < mXyMap.getTotal(); ++i) {
@@ -99,9 +107,20 @@ public:
         mDelegate->draw(delegateContext);
 
         // Copy the delegate's output to the final output
-        for (uint16_t i = 0; i < mXyMap.getTotal(); ++i) {
-            context.leds[i] = mSurface[i];
+        
+        // map index and copy through xyMap
+        for (uint16_t w = 0; w < mDelegate->getWidth(); w++) {
+            for (uint16_t h = 0; h < mDelegate->getHeight(); h++) {
+                uint16_t idx = mXyMap.mapToIndex(w, h);
+                if (idx < mXyMap.getTotal()) {
+                    context.leds[idx] = mSurface[mDelegate->xyMap(w, h)];
+                }
+            }
         }
+
+        //for (uint16_t i = 0; i < mXyMap.getTotal(); ++i) {
+        //    context.leds[i] = mSurface[i];
+        //}
     }
 
     const char* fxName(int) const override { return "video_fx"; }
