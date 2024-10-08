@@ -62,6 +62,20 @@ bool VideoStream::available() const {
     }
 }
 
+bool VideoStream::readFrame(Frame* frame) {
+    // returns true if a frame was read.
+    if (!FramesRemaining() || !frame) {
+        return false;
+    }
+    uint8_t* data = frame->data();
+    for (int i = 0; i < mBytesPerFrame; i++) {
+        if (!ReadBytes(data + i, 1)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 int32_t VideoStream::FramesRemaining() const {
     if (mBytesPerFrame == 0) return 0;
     int32_t bytes_left = BytesRemaining();

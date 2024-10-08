@@ -6,6 +6,7 @@
 #include "fx/storage/filereader.h"
 #include "fx/storage/filebuffer.h"
 #include "fx/storage/bytestream.h"
+#include "fx/video/frame.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -28,6 +29,8 @@ class VideoStream: public Referent {
   int32_t BytesPerFrame();
   bool ReadPixel(CRGB* dst);
   size_t ReadBytes(uint8_t* dst, size_t len);
+
+  bool readFrame(Frame* frame);
   int32_t FramesRemaining() const;
   int32_t FramesDisplayed() const;
   bool available() const;
