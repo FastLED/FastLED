@@ -51,16 +51,19 @@ bool FrameInterpolator::addWithTimestamp(const Frame& frame, uint32_t timestamp)
     FramePtr newFrame;
     if (mFrames.full()) {
         // Reuse the oldest frame
-        newFrame = mFrames.back();
-        mFrames.pop_back();
-        newFrame->copy(frame);
+        bool ok = mFrames.pop_back(&newFrame);
+        if (!ok) {
+            // Something unexpected happened. This should never occur.
+            return false;
+        }
     } else {
         // Allocate a new frame
         newFrame = FramePtr::New(frame.size(), !!frame.alpha());
     }
+    newFrame->copy(frame);
     newFrame->setTimestamp(timestamp);
 
-    // Insert the new frame at the front (it's guaranteed to be the newest)
+    // Insert the new frame at the front
     mFrames.push_front(newFrame);
 
     return true;
