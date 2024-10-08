@@ -11,21 +11,10 @@ FASTLED_NAMESPACE_BEGIN
     class type;                                                                \
     using type##Ptr = Ptr<type>;
 
-template <typename T> class Ptr;
-
-template <typename T> struct ref_unwrapper {
-    using type = T;
-    using ref_type = Ptr<T>;
-};
-
-// specialization for Ptr<Ptr<T>>
-template <typename T> struct ref_unwrapper<Ptr<T>> {
-    using type = T;
-    using ref_type = Ptr<T>;
-};
 
 
-
+// Objects that inherit this class can be reference counted and put into
+// a Ptr object.
 class Referent {
   public:
     Referent() = default;
@@ -50,17 +39,21 @@ class Referent {
     int mRefCount = 0;
 };
 
-class PtrBase {
+template <typename T> class Ptr;
+
+
+template<typename T>
+class PtrTraits {
   public:
-    template <typename T, typename... Args>
-    static typename ref_unwrapper<T>::ref_type New(Args... args) {
-        using U = typename ref_unwrapper<T>::type;
-        return Ptr<U>::FromHeap(new U(args...));
+    template <typename... Args>
+    static Ptr<T> New(Args... args) {
+        T* ptr = new T(args...);
+        return Ptr<T>::FromHeap(ptr);
     }
 
-    template <typename T> static typename ref_unwrapper<T>::ref_type New() {
-        using U = typename ref_unwrapper<T>::type;
-        return Ptr<U>::FromHeap(new U());
+    static Ptr<T> New() {
+        T* ptr = new T();
+        return Ptr<T>::FromHeap(ptr);
     }
 };
 
@@ -69,7 +62,7 @@ class PtrBase {
 // There is an important feature for this Ptr though, it is designed to bind
 // to pointers that *may* have been allocated on the stack or static memory.
 template <typename T>
-class Ptr: public PtrBase {
+class Ptr: public PtrTraits<T> {
   public:
     // element_type is the type of the managed object
     using element_type = T;
@@ -81,7 +74,7 @@ class Ptr: public PtrBase {
 
     template <typename... Args>
     static Ptr<T> New(Args... args) {
-        return PtrBase::New<T>(args...);
+        return PtrTraits<T>::New(args...);
     }
 
     // This is a special constructor that is used to create a Ptr from a raw
