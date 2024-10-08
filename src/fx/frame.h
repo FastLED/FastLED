@@ -15,9 +15,8 @@ DECLARE_SMART_PTR(Frame);
 class Frame : public Referent {
 public:
     // Frames take up a lot of memory. On some devices like ESP32 there is
-    // PSRAM available. This function allows you to set a custom allocator for these
-    // memory blocks.
-    static void SetAllocator(void* (*alloc)(size_t), void (*free)(void*));
+    // PSRAM available. You should see allocator.h -> SetLargeBlockAllocator(...)
+    // on setting a custom allocator for these large blocks.
     explicit Frame(int pixels_per_frame, bool has_alpha = false);
     ~Frame() override;
     CRGB* rgb() { return mRgb.get(); }
