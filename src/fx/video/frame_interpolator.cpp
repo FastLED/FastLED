@@ -71,13 +71,6 @@ bool FrameInterpolator::selectFrames(uint32_t now, const Frame **frameMin,
         return true;
     }
 
-    // Handle case before the first frame
-    if (now <= mFrames.front()->getTimestamp()) {
-        *frameMin = mFrames.front().get();
-        *frameMax = mFrames[1].get();
-        return true;
-    }
-
     // Handle case after the last frame
     if (now >= mFrames.back()->getTimestamp()) {
         *frameMin = mFrames[mFrames.size() - 2].get();
