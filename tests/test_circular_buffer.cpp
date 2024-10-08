@@ -43,6 +43,11 @@ TEST_CASE("circular_buffer operator[]") {
     CHECK_EQ(buffer[1], 2);
     buffer.pop_front(nullptr);
     CHECK_EQ(2, buffer[0]);
+    buffer.push_back(3);
+    CHECK_EQ(2, buffer[0]);
+    CHECK_EQ(3, buffer[1]);
+    buffer.pop_back(nullptr);
+    CHECK_EQ(2, buffer[0]);
 }
 
 TEST_CASE("circular_buffer overflow behavior") {
