@@ -6,7 +6,7 @@ VideoStreamBuffered::VideoStreamBuffered(VideoStreamPtr stream, size_t nframes)
     : mStream(stream), mNFrames(nframes), mFrames(nframes) {
 }
 
-bool VideoStreamBuffered::readFrame(Frame* frame) {
+bool VideoStreamBuffered::draw(Frame* frame) {
     if (!frame) {
         return false;
     }

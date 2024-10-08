@@ -3,6 +3,7 @@
 #include "namespace.h"
 #include "crgb.h"
 #include "ptr.h"
+#include <string.h>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -27,5 +28,14 @@ private:
     scoped_array<uint8_t> mAlpha;  // Optional alpha channel.
 
 };
+
+inline Frame::Frame(int pixels_count)
+    : mPixelsCount(pixels_count), mRgb(new CRGB[pixels_count]) {
+
+}
+
+inline void Frame::copy(const Frame& other) {
+    memcpy(mRgb.get(), other.mRgb.get(), other.mPixelsCount * sizeof(CRGB));
+}
 
 FASTLED_NAMESPACE_END

@@ -12,7 +12,7 @@ DECLARE_SMART_PTR(VideoStreamBuffered);
 class VideoStreamBuffered : public Referent {
 public:
     VideoStreamBuffered(VideoStreamPtr stream, size_t nframes);
-    bool readFrame(Frame* frame);
+    bool draw(Frame* frame);
     int32_t FramesRemaining() const;
     bool Rewind();
 
