@@ -57,6 +57,10 @@ template <typename T> class Ptr;
 
 template <typename T> class PtrTraits {
   public:
+
+    using element_type = T;
+    using ptr_type = Ptr<T>;
+
     template <typename... Args> static Ptr<T> New(Args... args) {
         T *ptr = new T(args...);
         return Ptr<T>::TakeOwnership(ptr);
@@ -69,19 +73,46 @@ template <typename T> class PtrTraits {
 };
 
 // Ptr is a reference-counted smart pointer that manages the lifetime of an
-// object. This Ptr has to be used with classes that inherit from Referent.
-// There is an important feature for this Ptr though, it is designed to bind
-// to pointers that *may* have been allocated on the stack or static memory.
+// object.
+//
+// It will work with any class implementing ref(), unref() and destroy().
+//
+// Please note that this Ptr class is "sticky" to it's referent, that is, no
+// automatic conversion from raw pointers to Ptr or vice versa is allowed and must
+// be done explicitly, see the Ptr::TakeOwnership() and Ptr::NoTracking() methods.
+//
+// To create a Ptr to a concrete object, it's best to use DECLARE_SMART_PTR(Foo) and then
+// use FooPtr::New(...) to create a new instance of Ptr<Foo>.
+//
+// To create a Ptr of an interface bound to a subclass (common for driver code or when hiding
+// implementation) use the Ptr<InterfaceClass>::TakeOwnership(new Subclass()) method.
+//
+// For objects created statically, use Ptr<Referent>::NoTracking(referent) to create a Ptr, as this
+// will disable reference tracking but still allow it to be used as a Ptr.
+//
+// Example:
+//   DECLARE_SMART_PTR(Foo);
+//   class Foo: public Referent {};
+//   FooPtr foo = FooPtr::New();
+//
+// Example 2: (Manual binding to constructor)
+//   class FooSubclass: public Foo {};
+//   Ptr<Foo> bar = Ptr<FooSubclass>::TakeOwnership(new FooSubclass());
+//
+// Example 3: (Provide your own constructor so that FooPtr::New() works to create a FooSubclass)
+//   class FooSubclass: public Foo {  // Foo is an interface, FooSubclass is an implementation.
+//     public:
+//       static FooPtr New(int a, int b);
+//   };  
+//   DECLARE_SMART_PTR_CONSTRUCTOR(Foo, FooSubclass::New);
+//   FooPtr foo = FooPtr::New(1, 2);  // this will now work.
 template <typename T> class Ptr : public PtrTraits<T> {
   public:
     friend class PtrTraits<T>;
-    // element_type is the type of the managed object
-    using element_type = T;
+    
     template <typename... Args> static Ptr<T> New(Args... args) {
         return PtrTraits<T>::New(args...);
     }
-
-
     // Used for low level allocations, typically for pointer to an implementation
     // where it needs to convert to a Ptr of a base class.
     static Ptr TakeOwnership(T *ptr) { return Ptr(ptr, true); }
@@ -183,6 +214,13 @@ template <typename T> class Ptr : public PtrTraits<T> {
             }
             referent_ = refptr.referent_;
         }
+    }
+
+    // Releases the pointer from reference counting from this Ptr.
+    T* release() {
+        T *temp = referent_;
+        referent_ = nullptr;
+        return temp;
     }
 
     void swap(Ptr &other) noexcept {
