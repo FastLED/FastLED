@@ -44,6 +44,15 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         // now check that the timestamp of the first frame is less than the timestamp of the second frame
         CHECK(selected1->getTimestamp() == 0);
         CHECK(selected2->getTimestamp() == 1000);
+
+        // now select the frame after the max timestamp
+        selected = interpolator.selectFrames(2000, &selected1, &selected2);
+        // check that the selection was true and that the two frames are the same pointer.
+        CHECK(selected);
+        CHECK(selected1 == selected2);
+        // now check that the timestamp of the first frame is less than the timestamp of the second frame
+        CHECK(selected1->getTimestamp() == 1000);
+        CHECK(selected2->getTimestamp() == 1000);
     }
 
 
