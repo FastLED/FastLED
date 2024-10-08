@@ -50,7 +50,9 @@ class Referent {
     Referent &operator=(const Referent &) = default;
     Referent(Referent &&) = default;
     Referent &operator=(Referent &&) = default;
-    int mRefCount = 0;
+    // In order for a Referent to be passed around as const, the refcount must be
+    // mutable.
+    mutable int mRefCount = 0;
 };
 
 template <typename T> class Ptr;
