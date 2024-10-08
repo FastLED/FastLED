@@ -11,13 +11,14 @@ DECLARE_SMART_PTR(Frame);
 
 class Frame : public Referent {
 public:
-    explicit Frame(int pixels_per_frame);
+    // Frames take up a lot of memory. On some devices like ESP32 there is
+    // PSRAM available. This function allows you to set a custom allocator for these
+    // memory blocks. This will be used by the fx and video engines.
+    static void SetAllocator(void* (*alloc)(size_t), void (*free)(void*));
+    explicit Frame(int pixels_per_frame, bool has_alpha = false);
     CRGB* rgb() { return mRgb.get(); }
     const CRGB* rgb() const { return mRgb.get(); }
-
     size_t size() const { return mPixelsCount; }
-
-    
     uint8_t* alpha() { return mAlpha.get(); }
     const uint8_t* alpha() const { return mAlpha.get(); }
 
@@ -26,13 +27,8 @@ private:
     const size_t mPixelsCount;
     scoped_array<CRGB> mRgb;
     scoped_array<uint8_t> mAlpha;  // Optional alpha channel.
-
 };
 
-inline Frame::Frame(int pixels_count)
-    : mPixelsCount(pixels_count), mRgb(new CRGB[pixels_count]) {
-
-}
 
 inline void Frame::copy(const Frame& other) {
     memcpy(mRgb.get(), other.mRgb.get(), other.mPixelsCount * sizeof(CRGB));
