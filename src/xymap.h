@@ -33,34 +33,39 @@ class XYMap {
     enum XyMapType { kSeperentine = 0, kLineByLine, kFunction, kLookUpTable };
 
     static XYMap constructWithUserFunction(uint16_t width, uint16_t height,
-                                           XYFunction xyFunction) {
+                                           XYFunction xyFunction, uint16_t offset = 0) {
         XYMap out(width, height, kFunction);
         out.xyFunction = xyFunction;
+        out.mOffset = offset;
         return out;
     }
 
-    static XYMap constructRectangularGrid(uint16_t width, uint16_t height) {
-        return XYMap(width, height, kLineByLine);
+    static XYMap constructRectangularGrid(uint16_t width, uint16_t height, uint16_t offset = 0) {
+        XYMap out(width, height, kLineByLine);
+        out.mOffset = offset;
+        return out;
     }
 
     static XYMap constructWithLookUpTable(uint16_t width, uint16_t height,
-                                          const uint16_t *lookUpTable) {
+                                          const uint16_t *lookUpTable, uint16_t offset = 0) {
         XYMap out(width, height, kLookUpTable);
         out.mLookUpTable = LUT16Ptr::New(width * height);
         memcpy(out.mLookUpTable->getData(), lookUpTable,
                width * height * sizeof(uint16_t));
+        out.mOffset = offset;
         return out;
     }
 
     // is_serpentine is true by default. You probably want this unless you are
     // using a different layout
-    XYMap(uint16_t width, uint16_t height, bool is_serpentine = true)
+    XYMap(uint16_t width, uint16_t height, bool is_serpentine = true, uint16_t offset = 0)
         : type(is_serpentine ? kSeperentine : kLineByLine),
-          width(width), height(height) {}
+          width(width), height(height), mOffset(offset) {}
 
     XYMap(const XYMap &other)
         : type(other.type), width(other.width), height(other.height),
-          xyFunction(other.xyFunction), mLookUpTable(other.mLookUpTable) {}
+          xyFunction(other.xyFunction), mLookUpTable(other.mLookUpTable),
+          mOffset(other.mOffset) {}
 
     void mapPixels(const CRGB* input, CRGB* output) const {
         uint16_t pos = 0;
@@ -94,21 +99,28 @@ class XYMap {
     }
 
     uint16_t mapToIndex(uint16_t x, uint16_t y) const {
+        uint16_t index;
         switch (type) {
         case kSeperentine:
             x = x % width;
             y = y % height;
-            return xy_serpentine(x, y, width, height);
+            index = xy_serpentine(x, y, width, height);
+            break;
         case kLineByLine:
-            return xy_line_by_line(x, y, width, height);
+            index = xy_line_by_line(x, y, width, height);
+            break;
         case kFunction:
             x = x % width;
             y = y % height;
-            return xyFunction(x, y, width, height);
+            index = xyFunction(x, y, width, height);
+            break;
         case kLookUpTable:
-            return mLookUpTable->getData()[y * width + x];
+            index = mLookUpTable->getData()[y * width + x];
+            break;
+        default:
+            return 0;
         }
-        return 0;
+        return index + mOffset;
     }
 
     uint16_t getWidth() const { return width; }
@@ -118,7 +130,7 @@ class XYMap {
 
   private:
     XYMap(uint16_t width, uint16_t height, XyMapType type)
-        : type(type), width(width), height(height) {}
+        : type(type), width(width), height(height), mOffset(0) {}
 
     XyMapType type;
     uint16_t width;
@@ -126,4 +138,5 @@ class XYMap {
     XYFunction xyFunction = nullptr;
     LUT16Ptr mLookUpTable; // optional refptr to look up table.
     uint16_t *mData = nullptr;  // direct pointer to look up table data.
+    uint16_t mOffset = 0;  // offset to be added to the output
 };

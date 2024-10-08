@@ -29,24 +29,27 @@ public:
         kLookUpTable
     };
 
-    static XMap constructWithUserFunction(uint16_t length, XFunction xFunction) {
+    static XMap constructWithUserFunction(uint16_t length, XFunction xFunction, uint16_t offset = 0) {
         XMap out = XMap(length, kFunction);
         out.xFunction = xFunction;
+        out.mOffset = offset;
         return out;
     }
 
     // When a pointer to a lookup table is passed in then we assume it's
     // owned by someone else and will not be deleted.
-    static XMap constructWithLookUpTable(uint16_t length, const uint16_t *lookUpTable) {
+    static XMap constructWithLookUpTable(uint16_t length, const uint16_t *lookUpTable, uint16_t offset = 0) {
         XMap out = XMap(length, kLookUpTable);
         out.mData = lookUpTable;
+        out.mOffset = offset;
         return out;
     }
 
     // is_reverse is false by default for linear layout
-    XMap(uint16_t length, bool is_reverse = false) {
+    XMap(uint16_t length, bool is_reverse = false, uint16_t offset = 0) {
         type = is_reverse ? kReverse : kLinear;
         this->length = length;
+        this->mOffset = offset;
     }
 
     XMap(const XMap &other) {
@@ -55,6 +58,7 @@ public:
         xFunction = other.xFunction;
         mData = other.mData;
         mLookUpTable = other.mLookUpTable;
+        mOffset = other.mOffset;
     }
 
     // define the assignment operator
@@ -85,18 +89,25 @@ public:
     }
 
     uint16_t mapToIndex(uint16_t x) const {
+        uint16_t index;
         switch (type) {
             case kLinear:
-                return x_linear(x, length);
+                index = x_linear(x, length);
+                break;
             case kReverse:
-                return x_reverse(x, length);
+                index = x_reverse(x, length);
+                break;
             case kFunction:
                 x = x % length;
-                return xFunction(x, length);
+                index = xFunction(x, length);
+                break;
             case kLookUpTable:
-                return mData[x];
+                index = mData[x];
+                break;
+            default:
+                return 0;
         }
-        return 0;
+        return index + mOffset;
     }
 
     uint16_t getLength() const {
@@ -110,11 +121,12 @@ public:
 
 private:
     XMap(uint16_t length, Type type)
-        : length(length), type(type) {
+        : length(length), type(type), mOffset(0) {
     }
     uint16_t length = 0;
     Type type = kLinear;
     XFunction xFunction = nullptr;
     const uint16_t *mData = nullptr;
     LUT16Ptr mLookUpTable;
+    uint16_t mOffset = 0;  // offset to be added to the output
 };
