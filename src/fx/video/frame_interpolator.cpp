@@ -8,20 +8,20 @@ FASTLED_NAMESPACE_BEGIN
 FrameInterpolator::FrameInterpolator(size_t nframes) : mFrames(nframes) {}
 
 bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
-    const Frame *frame1 = nullptr;
-    const Frame *frame2 = nullptr;
+    const Frame *frameMin = nullptr;
+    const Frame *frameMax = nullptr;
 
-    if (!selectFrames(now, &frame1, &frame2)) {
+    if (!selectFrames(now, &frameMin, &frameMax)) {
         return false;
     }
 
     // Calculate interpolation factor
-    uint32_t total_duration = frame2->getTimestamp() - frame1->getTimestamp();
-    uint32_t elapsed = now - frame1->getTimestamp();
+    uint32_t total_duration = frameMax->getTimestamp() - frameMin->getTimestamp();
+    uint32_t elapsed = now - frameMin->getTimestamp();
     uint8_t progress = (elapsed * 255) / total_duration;
 
     // Interpolate between the two frames
-    dst->interpolate(*frame1, *frame2, progress);
+    dst->interpolate(*frameMin, *frameMax, progress);
 
     return true;
 }
@@ -59,44 +59,44 @@ bool FrameInterpolator::add(const Frame &frame) {
     return addWithTimestamp(frame, frame.getTimestamp());
 }
 
-bool FrameInterpolator::selectFrames(uint32_t now, const Frame **frame1,
-                                     const Frame **frame2) const {
+bool FrameInterpolator::selectFrames(uint32_t now, const Frame **frameMin,
+                                     const Frame **frameMax) const {
     if (mFrames.empty()) {
-        *frame1 = *frame2 = nullptr;
+        *frameMin = *frameMax = nullptr;
         return false;
     }
 
     if (mFrames.size() == 1) {
-        *frame1 = *frame2 = mFrames.front().get();
+        *frameMin = *frameMax = mFrames.front().get();
         return true;
     }
 
     // Handle case before the first frame
     if (now <= mFrames.front()->getTimestamp()) {
-        *frame1 = mFrames.front().get();
-        *frame2 = mFrames[1].get();
+        *frameMin = mFrames.front().get();
+        *frameMax = mFrames[1].get();
         return true;
     }
 
     // Handle case after the last frame
     if (now >= mFrames.back()->getTimestamp()) {
-        *frame1 = mFrames[mFrames.size() - 2].get();
-        *frame2 = mFrames.back().get();
+        *frameMin = mFrames[mFrames.size() - 2].get();
+        *frameMax = mFrames.back().get();
         return true;
     }
 
     // Find the two frames that bracket the given timestamp
     for (size_t i = 0; i < mFrames.size() - 1; ++i) {
         if (mFrames[i]->getTimestamp() <= now && mFrames[i + 1]->getTimestamp() > now) {
-            *frame1 = mFrames[i].get();
-            *frame2 = mFrames[i + 1].get();
+            *frameMin = mFrames[i].get();
+            *frameMax = mFrames[i + 1].get();
             return true;
         }
     }
 
     // If we didn't find a bracket, use the last two frames
-    *frame1 = mFrames[mFrames.size() - 2].get();
-    *frame2 = mFrames[mFrames.size() - 1].get();
+    *frameMin = mFrames[mFrames.size() - 2].get();
+    *frameMax = mFrames[mFrames.size() - 1].get();
     return true;
 }
 

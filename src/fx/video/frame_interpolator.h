@@ -23,7 +23,9 @@ public:
 
     bool addWithTimestamp(const Frame& frame, uint32_t timestamp);
 
-    bool selectFrames(uint32_t now, const Frame** frame1, const Frame** frame2) const;
+    // Selects the two frames that are closest to the current time. Returns false on failure.
+    // frameMin will be before or equal to the current time, frameMax will be after.
+    bool selectFrames(uint32_t now, const Frame** frameMin, const Frame** frameMax) const;
 
 private:
     CircularBuffer<FramePtr> mFrames;

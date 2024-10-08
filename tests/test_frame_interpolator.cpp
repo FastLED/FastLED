@@ -39,6 +39,9 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         CHECK(selected2);
         // now check that the frames are different
         CHECK(selected1 != selected2);
+        // now check that the timestamp of the first frame is less than the timestamp of the second frame
+        CHECK(selected1->getTimestamp() == 2000);
+        CHECK(selected2->getTimestamp() == 1000);
     }
 
 
