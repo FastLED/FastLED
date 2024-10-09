@@ -207,4 +207,27 @@ TEST_CASE("FrameInterpolator::draw") {
         CHECK(interpolator.draw(3500, &dst));
         CHECK_EQ(dst.getTimestamp(), 3000);
     }
+
+    SUBCASE("Check that the draw command interpolates between two added frames when queried from the middle") {
+        FrameInterpolator interpolator(5);
+        Frame frame1(10, false);
+        Frame frame2(10, false);
+        // frame 1 is all red
+        for (int i = 0; i < 10; i++) {
+            frame1.rgb()[i] = CRGB::Red;
+        }
+        // frame 2 is all blue
+        for (int i = 0; i < 10; i++) {
+            frame2.rgb()[i] = CRGB::Blue;
+        }
+        CHECK(interpolator.addWithTimestamp(frame1, 1000));
+        CHECK(interpolator.addWithTimestamp(frame2, 2000));
+        Frame dst(10, false);
+        CHECK(interpolator.draw(1500, &dst));
+        CHECK_EQ(dst.getTimestamp(), 1500);
+        // now check that the frame is interpolated between red and blue
+        for (int i = 0; i < 10; i++) {
+            CHECK(dst.rgb()[i] == CRGB(128, 0, 127));
+        }
+    }
 }
