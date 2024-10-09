@@ -26,4 +26,8 @@ void delay(int ms) {
     std::this_thread::sleep_for (std::chrono::milliseconds(ms));
 }
 
+void yield() {
+    std::this_thread::yield();
+}
+
 #endif  // FASTLED_STUB_IMPL

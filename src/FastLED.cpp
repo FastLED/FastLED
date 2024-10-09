@@ -279,10 +279,7 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
 /// Extra C definition that some environments may need. 
 /// @returns 0 to indicate success
 extern "C" __attribute__((weak)) int atexit(void (* /*func*/ )()) { return 0; }
-
-#ifdef FASTLED_NEEDS_YIELD
-extern "C" void yield(void) { }
-#endif
+extern "C"  __attribute__((weak)) void yield(void) { }
 
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1
