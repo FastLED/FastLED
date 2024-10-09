@@ -1,17 +1,17 @@
 #pragma once
 
-#include "fx/video/stream.h"
+#include "fx/video/data_stream.h"
 #include "fx/frame.h"
 #include "namespace.h"
 #include "fx/video/frame_interpolator.h"
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(VideoStreamBuffered);
+DECLARE_SMART_PTR(VideoStream);
 
-class VideoStreamBuffered : public Referent {
+class VideoStream : public Referent {
 public:
-    VideoStreamBuffered(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo);
+    VideoStream(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo);
     void begin(uint32_t now, FileHandlePtr h);
     void beginStream(uint32_t now, ByteStreamPtr s);
     void end();
@@ -24,7 +24,7 @@ private:
     uint32_t mFrameCounter = 0;
     uint32_t mStartTime = 0;
     uint64_t mMicrosSecondsPerFrame;
-    VideoStreamPtr mStream;
+    DataStreamPtr mStream;
     FrameInterpolatorPtr mInterpolator;
 };
 

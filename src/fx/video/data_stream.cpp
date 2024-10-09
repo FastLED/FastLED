@@ -1,5 +1,5 @@
 
-#include "fx/video/stream.h"
+#include "fx/video/data_stream.h"
 #include "namespace.h"
 #include "fx/storage/filebuffer.h"
 
@@ -11,14 +11,14 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-VideoStream::VideoStream(int bytes_per_frame) : mBytesPerFrame(bytes_per_frame), mUsingByteStream(false) {
+DataStream::DataStream(int bytes_per_frame) : mBytesPerFrame(bytes_per_frame), mUsingByteStream(false) {
 }
 
-VideoStream::~VideoStream() {
+DataStream::~DataStream() {
     Close();
 }
 
-bool VideoStream::begin(FileHandlePtr h) {
+bool DataStream::begin(FileHandlePtr h) {
     Close();
     mFileHandle = h;
     mFileBuffer = FileBufferPtr::New(h);
@@ -26,14 +26,14 @@ bool VideoStream::begin(FileHandlePtr h) {
     return mFileBuffer->available();
 }
 
-bool VideoStream::beginStream(ByteStreamPtr s) {
+bool DataStream::beginStream(ByteStreamPtr s) {
     Close();
     mByteStream = s;
     mUsingByteStream = true;
     return mByteStream->available(mBytesPerFrame);
 }
 
-void VideoStream::Close() {
+void DataStream::Close() {
     if (!mUsingByteStream && mFileBuffer) {
         mFileBuffer->close();
         mFileBuffer.reset();
@@ -42,11 +42,11 @@ void VideoStream::Close() {
     mFileHandle.reset();
 }
 
-int32_t VideoStream::BytesPerFrame() {
+int32_t DataStream::BytesPerFrame() {
     return mBytesPerFrame;
 }
 
-bool VideoStream::ReadPixel(CRGB* dst) {
+bool DataStream::ReadPixel(CRGB* dst) {
     if (mUsingByteStream) {
         return mByteStream->read(&dst->r, 1) && mByteStream->read(&dst->g, 1) && mByteStream->read(&dst->b, 1);
     } else {
@@ -54,7 +54,7 @@ bool VideoStream::ReadPixel(CRGB* dst) {
     }
 }
 
-bool VideoStream::available() const {
+bool DataStream::available() const {
     if (mUsingByteStream) {
         return mByteStream->available(mBytesPerFrame);
     } else {
@@ -62,7 +62,7 @@ bool VideoStream::available() const {
     }
 }
 
-bool VideoStream::readFrame(Frame* frame) {
+bool DataStream::readFrame(Frame* frame) {
     // returns true if a frame was read.
     if (!FramesRemaining() || !frame) {
         return false;
@@ -73,13 +73,13 @@ bool VideoStream::readFrame(Frame* frame) {
     return true;
 }
 
-int32_t VideoStream::FramesRemaining() const {
+int32_t DataStream::FramesRemaining() const {
     if (mBytesPerFrame == 0) return 0;
     int32_t bytes_left = BytesRemaining();
     return (bytes_left > 0) ? (bytes_left / mBytesPerFrame) : 0;
 }
 
-int32_t VideoStream::FramesDisplayed() const {
+int32_t DataStream::FramesDisplayed() const {
     if (mUsingByteStream) {
         // ByteStream doesn't have a concept of total size, so we can't calculate this
         return -1;
@@ -89,7 +89,7 @@ int32_t VideoStream::FramesDisplayed() const {
     }
 }
 
-int32_t VideoStream::BytesRemaining() const {
+int32_t DataStream::BytesRemaining() const {
     if (mUsingByteStream) {
         return INT32_MAX;
     } else {
@@ -97,11 +97,11 @@ int32_t VideoStream::BytesRemaining() const {
     }
 }
 
-int32_t VideoStream::BytesRemainingInFrame() const {
+int32_t DataStream::BytesRemainingInFrame() const {
     return BytesRemaining() % mBytesPerFrame;
 }
 
-bool VideoStream::Rewind() {
+bool DataStream::Rewind() {
     if (mUsingByteStream) {
         // ByteStream doesn't support rewinding
         return false;
@@ -111,11 +111,11 @@ bool VideoStream::Rewind() {
     }
 }
 
-VideoStream::Type VideoStream::getType() const {
+DataStream::Type DataStream::getType() const {
     return mUsingByteStream ? Type::kStreaming : Type::kFile;
 }
 
-size_t VideoStream::ReadBytes(uint8_t* dst, size_t len) {
+size_t DataStream::ReadBytes(uint8_t* dst, size_t len) {
     uint16_t bytesRead = 0;
     if (mUsingByteStream) {
         while (bytesRead < len && mByteStream->available(len)) {

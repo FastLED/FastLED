@@ -4,7 +4,7 @@
 
 #include "FastLED.h"
 #include "fx/fx2d.h"
-#include "fx/video/stream.h"
+#include "fx/video/data_stream.h"
 #include "ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -24,21 +24,21 @@ public:
     }
 
     void draw(DrawContext context) override {
-        if (!mVideoStream) {
+        if (!mDataStream) {
             return;
         }
-        VideoStream::Type type = mVideoStream->getType();
-        if (type == VideoStream::kStreaming) {
-            if (!mVideoStream->FramesRemaining()) {
+        DataStream::Type type = mDataStream->getType();
+        if (type == DataStream::kStreaming) {
+            if (!mDataStream->FramesRemaining()) {
                 return;  // can't rewind streaming video
             }
         }
 
-        if (!mVideoStream->FramesRemaining()) {
-            mVideoStream->Rewind();
+        if (!mDataStream->FramesRemaining()) {
+            mDataStream->Rewind();
         }
 
-        if (!mVideoStream->available() && mVideoStream->getType() == VideoStream::kStreaming) {
+        if (!mDataStream->available() && mDataStream->getType() == DataStream::kStreaming) {
             // If we're streaming and we're out of data then bail.
             return;
         }
@@ -46,7 +46,7 @@ public:
         for (uint16_t w = 0; w < mXyMap.getWidth(); w++) {
             for (uint16_t h = 0; h < mXyMap.getHeight(); h++) {
                 CRGB pixel;
-                if (mVideoStream->ReadPixel(&pixel)) {
+                if (mDataStream->ReadPixel(&pixel)) {
                     context.leds[mXyMap.mapToIndex(w, h)] = pixel;
                 } else {
                     context.leds[mXyMap.mapToIndex(w, h)] = CRGB::Black;
@@ -57,24 +57,24 @@ public:
 
     bool begin(FileHandlePtr fileHandle) {
         const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mVideoStream = VideoStreamPtr::New(bytes_per_frame);
-        return mVideoStream->begin(fileHandle);
+        mDataStream = DataStreamPtr::New(bytes_per_frame);
+        return mDataStream->begin(fileHandle);
     }
 
     bool beginStream(ByteStreamPtr byteStream) {
         const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mVideoStream = VideoStreamPtr::New(bytes_per_frame);
-        return mVideoStream->beginStream(byteStream);
+        mDataStream = DataStreamPtr::New(bytes_per_frame);
+        return mDataStream->beginStream(byteStream);
     }
 
     void close() {
-        mVideoStream->Close();
+        mDataStream->Close();
     }
 
     const char* fxName(int) const override { return "video"; }
 
 private:
-    VideoStreamPtr mVideoStream;
+    DataStreamPtr mDataStream;
     bool mInitialized = false;
 };
 

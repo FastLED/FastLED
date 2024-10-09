@@ -5,7 +5,7 @@
 
 #include "doctest.h"
 #include "lib8tion/intmap.h"
-#include "fx/video/stream.h"
+#include "fx/video/data_stream.h"
 #include "fx/storage/bytestreammemory.h"
 #include "ptr.h"
 
@@ -23,18 +23,18 @@ TEST_CASE("video stream simple test") {
     }
     memoryStream->write(testData, BUFFER_SIZE);
 
-    // Create and initialize VideoStream
-    VideoStreamPtr videoStream = VideoStreamPtr::New(BYTES_PER_FRAME);
-    bool initSuccess = videoStream->beginStream(memoryStream);
+    // Create and initialize DataStream
+    DataStreamPtr DataStream = DataStreamPtr::New(BYTES_PER_FRAME);
+    bool initSuccess = DataStream->beginStream(memoryStream);
     REQUIRE(initSuccess);
 
     // Test basic properties
-    CHECK(videoStream->getType() == VideoStream::kStreaming);
-    CHECK(videoStream->BytesPerFrame() == BYTES_PER_FRAME);
+    CHECK(DataStream->getType() == DataStream::kStreaming);
+    CHECK(DataStream->BytesPerFrame() == BYTES_PER_FRAME);
 
     // Read a pixel
     CRGB pixel;
-    bool readSuccess = videoStream->ReadPixel(&pixel);
+    bool readSuccess = DataStream->ReadPixel(&pixel);
     REQUIRE(readSuccess);
     CHECK(pixel.r == 0);
     CHECK(pixel.g == 1);
@@ -42,18 +42,18 @@ TEST_CASE("video stream simple test") {
 
     // Read some bytes
     uint8_t buffer[10];
-    size_t bytesRead = videoStream->ReadBytes(buffer, 10);
+    size_t bytesRead = DataStream->ReadBytes(buffer, 10);
     CHECK(bytesRead == 10);
     for (int i = 0; i < 10; ++i) {
         CHECK(buffer[i] == static_cast<uint8_t>((i + 3) % 256));
     }
 
     // Check frame counting - streaming mode doesn't support this.
-    //CHECK(videoStream->FramesDisplayed() == 0);
-    //CHECK(videoStream->FramesRemaining() == 10); // We have 10 frames of data
+    //CHECK(DataStream->FramesDisplayed() == 0);
+    //CHECK(DataStream->FramesRemaining() == 10); // We have 10 frames of data
 
     // Close the stream
-    videoStream->Close();
+    DataStream->Close();
 }
 
 

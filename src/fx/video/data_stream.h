@@ -10,10 +10,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(VideoStream);
+DECLARE_SMART_PTR(DataStream);
 
-// Warning, do NOT intialize VideoStream during static construction time!!
-class VideoStream: public Referent {
+// DataStream is a class that reads data from a file or a stream.
+// It's sort of a merging point for the two types of data sources.
+class DataStream: public Referent {
  public:
 
   enum Type {
@@ -21,7 +22,7 @@ class VideoStream: public Referent {
     kFile,
   };
 
-  explicit VideoStream(int bytes_per_frame);
+  explicit DataStream(int bytes_per_frame);
 
   bool begin(FileHandlePtr h);
   bool beginStream(ByteStreamPtr s);
@@ -34,7 +35,6 @@ class VideoStream: public Referent {
   int32_t FramesRemaining() const;
   int32_t FramesDisplayed() const;
   bool available() const;
-
 
   int32_t BytesRemaining() const;
   int32_t BytesRemainingInFrame() const;
@@ -50,7 +50,7 @@ class VideoStream: public Referent {
   bool mUsingByteStream;
 
 protected:
-  virtual ~VideoStream();
+  virtual ~DataStream();
 };
 
 FASTLED_NAMESPACE_END

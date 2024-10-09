@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/video/stream.h"
+#include "fx/video/data_stream.h"
 #include "fx/frame.h"
 #include "namespace.h"
 #include "fx/detail/circular_buffer.h"
@@ -9,6 +9,9 @@ FASTLED_NAMESPACE_BEGIN
 
 DECLARE_SMART_PTR(FrameInterpolator);
 
+// Holds onto frames and allow interpolation. This allows
+// effects to have high effective frame rate and also
+// respond to things like sound which can modify the timing.
 class FrameInterpolator : public Referent {
 public:
     typedef CircularBuffer<FramePtr> FrameBuffer;
@@ -21,7 +24,8 @@ public:
     // frame that was selected.
     // Returns true if the interpolation was successful, false otherwise. If false then
     // the destination frame will not be modified.
-    bool draw(uint32_t now, Frame* dst);
+    // Note that this adjustable_time is allowed to go pause or go backward in time. 
+    bool draw(uint32_t adjustable_time, Frame* dst);
 
     // Frame's resources are copied into the internal data structures.
     bool add(const Frame& frame);
