@@ -1,3 +1,4 @@
+import argparse
 import os
 import subprocess
 import sys
@@ -22,10 +23,14 @@ def run_command(command) -> tuple[int, str, str]:
     return process.returncode, stdout.decode(), stderr.decode()
 
 
-def compile_tests() -> None:
+def compile_tests(clean: bool = False, unknown_args: list[str] = []) -> None:
     os.chdir(str(PROJECT_ROOT))
     print("Compiling tests...")
-    return_code, stdout, stderr = run_command("uv run ci/cpp_test_compile.py")
+    command = ["uv", "run", "ci/cpp_test_compile.py"]
+    if clean:
+        command.append("--clean")
+    command.extend(unknown_args)
+    return_code, stdout, stderr = run_command(" ".join(command))
     if return_code != 0:
         print("Compilation failed:")
         print(stdout)
@@ -78,9 +83,34 @@ def run_tests() -> None:
     print("All tests passed.")
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Compile and run C++ tests")
+    parser.add_argument(
+        "--compile-only",
+        action="store_true",
+        help="Only compile the tests without running them",
+    )
+    parser.add_argument(
+        "--run-only",
+        action="store_true",
+        help="Only run the tests without compiling them",
+    )
+    parser.add_argument(
+        "--clean", action="store_true", help="Clean build before compiling"
+    )
+    args, unknown = parser.parse_known_args()
+    args.unknown = unknown
+    return args
+
+
 def main() -> None:
-    compile_tests()
-    run_tests()
+    args = parse_args()
+
+    if not args.run_only:
+        compile_tests(clean=args.clean, unknown_args=args.unknown)
+
+    if not args.compile_only:
+        run_tests()
 
 
 if __name__ == "__main__":

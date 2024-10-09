@@ -1,21 +1,53 @@
+import argparse
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Tuple
 
 from ci.paths import PROJECT_ROOT
 
 BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
+
+
+def clean_build_directory():
+    print("Cleaning build directory...")
+    shutil.rmtree(BUILD_DIR, ignore_errors=True)
+    BUILD_DIR.mkdir(parents=True, exist_ok=True)
+    print("Build directory cleaned.")
+
+
 HERE = Path(__file__).resolve().parent
 
 WASM_BUILD = False
 USE_ZIG = False
+USE_CLANG = False
 
 
-def use_zig_compiler() -> tuple[Path, Path, Path]:
+def use_clang_compiler() -> Tuple[Path, Path, Path]:
+    CLANG = shutil.which("clang")
+    CLANGPP = shutil.which("clang++")
+    LLVM_AR = shutil.which("llvm-ar")
+    assert CLANG is not None, "Clang compiler not found in PATH."
+    assert CLANGPP is not None, "Clang++ compiler not found in PATH."
+    assert LLVM_AR is not None, "llvm-ar not found in PATH."
+
+    # Set environment variables for C and C++ compilers
+    os.environ["CC"] = CLANG
+    os.environ["CXX"] = CLANGPP
+    os.environ["AR"] = LLVM_AR
+
+    print(f"CC: {CLANG}")
+    print(f"CXX: {CLANGPP}")
+    print(f"AR: {LLVM_AR}")
+
+    return Path(CLANG), Path(CLANGPP), Path(LLVM_AR)
+
+
+def use_zig_compiler() -> Tuple[Path, Path, Path]:
     ZIG = shutil.which("zig")
     assert ZIG is not None, "Zig compiler not found in PATH."
     CC_PATH = BUILD_DIR / "cc"
@@ -78,11 +110,12 @@ def run_command(command: str, cwd=None) -> tuple[str, str]:
 
 
 def compile_fastled_library() -> None:
-    zig_prog = shutil.which("zig")
-    assert zig_prog is not None, "Zig compiler not found in PATH."
-
     if USE_ZIG:
+        zig_prog = shutil.which("zig")
+        assert zig_prog is not None, "Zig compiler not found in PATH."
         use_zig_compiler()
+    elif USE_CLANG:
+        use_clang_compiler()
 
     cmake_configure_command_list: list[str] = [
         "cmake",
@@ -118,9 +151,35 @@ def compile_fastled_library() -> None:
     print("FastLED library compiled successfully.")
 
 
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Compile FastLED library with different compiler options."
+    )
+    parser.add_argument("--use-zig", action="store_true", help="Use Zig compiler")
+    parser.add_argument("--use-clang", action="store_true", help="Use Clang compiler")
+    parser.add_argument("--wasm", action="store_true", help="Build for WebAssembly")
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Clean the build directory before compiling",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
+    global USE_ZIG, USE_CLANG, WASM_BUILD
+
+    args = parse_arguments()
+    USE_ZIG = args.use_zig
+    USE_CLANG = args.use_clang
+    WASM_BUILD = args.wasm
+
     os.chdir(str(HERE))
     print(f"Current directory: {Path('.').absolute()}")
+
+    if args.clean:
+        clean_build_directory()
+
     compile_fastled_library()
 
 
