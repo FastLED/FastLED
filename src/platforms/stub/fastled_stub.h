@@ -11,6 +11,8 @@
  * #undef HAS_HARDWARE_PIN_SUPPORT
  * But then compiling throws pragma message about "Forcing software SPI"
  */
+#ifndef HAS_HARDWARE_PIN_SUPPORT
 #define HAS_HARDWARE_PIN_SUPPORT
+#endif
 
 #endif // __INC_FASTLED_STUB_H

@@ -137,6 +137,5 @@ class XYMap {
     uint16_t height;
     XYFunction xyFunction = nullptr;
     LUT16Ptr mLookUpTable; // optional refptr to look up table.
-    uint16_t *mData = nullptr;  // direct pointer to look up table data.
     uint16_t mOffset = 0;  // offset to be added to the output
 };

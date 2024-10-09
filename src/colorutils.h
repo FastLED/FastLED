@@ -628,23 +628,23 @@ typedef TDynamicRGBGradientPalette_bytes TDynamicRGBGradientPalettePtr;  ///< Al
 /// Convert a 16-entry palette to a 256-entry palette
 /// @param srcpal16 the source palette to upscale
 /// @param destpal256 the destination palette for the upscaled data
-void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette256& destpal256);
+void UpscalePalette(const class CRGBPalette16& srcpal16, class CRGBPalette256& destpal256);
 /// @copydoc UpscalePalette(const struct CRGBPalette16&, struct CRGBPalette256&)
-void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette256& destpal256);
+void UpscalePalette(const class CHSVPalette16& srcpal16, class CHSVPalette256& destpal256);
 
 /// Convert a 16-entry palette to a 32-entry palette
 /// @param srcpal16 the source palette to upscale
 /// @param destpal32 the destination palette for the upscaled data
-void UpscalePalette(const struct CRGBPalette16& srcpal16, struct CRGBPalette32& destpal32);
+void UpscalePalette(const class CRGBPalette16& srcpal16, class CRGBPalette32& destpal32);
 /// @copydoc UpscalePalette(const struct CRGBPalette16&, struct CRGBPalette32&)
-void UpscalePalette(const struct CHSVPalette16& srcpal16, struct CHSVPalette32& destpal32);
+void UpscalePalette(const class CHSVPalette16& srcpal16, class CHSVPalette32& destpal32);
 
 /// Convert a 32-entry palette to a 256-entry palette
 /// @param srcpal32 the source palette to upscale
 /// @param destpal256 the destination palette for the upscaled data
-void UpscalePalette(const struct CRGBPalette32& srcpal32, struct CRGBPalette256& destpal256);
-/// @copydoc UpscalePalette(const struct CRGBPalette32&, struct CRGBPalette256&)
-void UpscalePalette(const struct CHSVPalette32& srcpal32, struct CHSVPalette256& destpal256);
+void UpscalePalette(const class CRGBPalette32& srcpal32, class CRGBPalette256& destpal256);
+/// @copydoc UpscalePalette(const struct CRGBPalette32&, class CRGBPalette256&)
+void UpscalePalette(const class CHSVPalette32& srcpal32, class CHSVPalette256& destpal256);
 
 /// @} PaletteUpscale
 
