@@ -12,7 +12,7 @@ BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
 HERE = Path(__file__).resolve().parent
 
-WEIRD_FILE = HERE / "-"
+WEIRD_FILE = HERE / "-"  # Sometimes appears on windows.
 
 
 def delete_weird_file():
