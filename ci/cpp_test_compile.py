@@ -3,12 +3,16 @@ import os
 import shutil
 import subprocess
 import sys
+import json
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Dict
 
 from ci.paths import PROJECT_ROOT
 
-BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
+HERE = Path(__file__).resolve().parent
+
+# BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
+BUILD_DIR = Path(".build")
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
 """
@@ -81,9 +85,9 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
     CXX_PATH = BUILD_DIR / "c++"
     AR_PATH = BUILD_DIR / "ar"
     if sys.platform == "win32":
-        CC_PATH = CC_PATH.with_suffix(".bat")
-        CXX_PATH = CXX_PATH.with_suffix(".bat")
-        AR_PATH = AR_PATH.with_suffix(".bat")
+        CC_PATH = CC_PATH.with_suffix(".cmd")
+        CXX_PATH = CXX_PATH.with_suffix(".cmd")
+        AR_PATH = AR_PATH.with_suffix(".cmd")
         CC_PATH.write_text(f'@echo off\n"{ZIG}" cc %*\n')
         CXX_PATH.write_text(f'@echo off\n"{ZIG}" c++ %*\n')
         AR_PATH.write_text(f'@echo off\n"{ZIG}" ar %*\n')
@@ -115,25 +119,21 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
     return CC_PATH, CXX_PATH, AR_PATH
 
 
-def run_command(command: str, cwd=None) -> tuple[str, str]:
+def run_command(command: str, cwd=None) -> None:
+    if cwd:
+        cwd = Path(cwd).resolve()
+    print("executing command:", command, "in", cwd)
     process = subprocess.Popen(
         command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        shell=True,
-        text=True,
-        cwd=cwd,
+        #shell=True,
+        cwd=str(cwd) if cwd else None,
+        #universal_newlines=True
     )
-    stdout, stderr = process.communicate()
+    process.wait()
     if process.returncode != 0:
         print(f"Error executing command: {command}")
-        print("STDOUT:")
-        print(stdout)
-        print("STDERR:")
-        print(stderr)
         print(f"Return code: {process.returncode}")
-        exit(1)
-    return stdout, stderr
+        sys.exit(1)
 
 
 def compile_fastled_library() -> None:
@@ -149,9 +149,9 @@ def compile_fastled_library() -> None:
     cmake_configure_command_list: list[str] = [
         "cmake",
         "-S",
-        str(PROJECT_ROOT / "tests"),
+        str("."),
         "-B",
-        str(BUILD_DIR),
+        str(".build"),
         "-G",
         "Ninja",
         "-DCMAKE_VERBOSE_MAKEFILE=ON",
@@ -160,8 +160,8 @@ def compile_fastled_library() -> None:
     if WASM_BUILD:
         cmake_configure_command_list.extend(
             [
-                "-DCMAKE_C_COMPILER_TARGET=wasm32-freestanding",
-                "-DCMAKE_CXX_COMPILER_TARGET=wasm32-freestanding",
+                "-DCMAKE_C_COMPILER_TARGET=wasm32-wasi",
+                "-DCMAKE_CXX_COMPILER_TARGET=wasm32-wasi",
                 "-DCMAKE_C_COMPILER_WORKS=TRUE",
                 "-DCMAKE_CXX_COMPILER_WORKS=TRUE",
                 "-DCMAKE_SYSTEM_NAME=Generic",
@@ -170,15 +170,12 @@ def compile_fastled_library() -> None:
             ]
         )
     cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
-    stdout, stderr = run_command(cmake_configure_command, cwd=BUILD_DIR)
-    print(stdout)
-    print(stderr)
+    run_command(cmake_configure_command, cwd=(PROJECT_ROOT / "tests").resolve())
 
     # Build the project
-    cmake_build_command = f"cmake --build {BUILD_DIR}"
-    stdout, stderr = run_command(cmake_build_command)
-    print(stdout)
-    print(stderr)
+    cwd = (PROJECT_ROOT / "tests").resolve()
+    cmake_build_command = f"cmake --build .build"
+    run_command(cmake_build_command, cwd=cwd)
 
     print("FastLED library compiled successfully.")
 
@@ -197,6 +194,38 @@ def parse_arguments():
     )
     return parser.parse_args()
 
+def get_build_info(args: argparse.Namespace) -> Dict[str, str]:
+    return {
+        "USE_ZIG": str(USE_ZIG),
+        "USE_CLANG": str(USE_CLANG),
+        "WASM_BUILD": str(WASM_BUILD),
+        "CC": os.environ.get("CC", ""),
+        "CXX": os.environ.get("CXX", ""),
+        "AR": os.environ.get("AR", ""),
+        "CFLAGS": os.environ.get("CFLAGS", ""),
+        "CXXFLAGS": os.environ.get("CXXFLAGS", ""),
+        "ARGS": {
+            "use_zig": str(args.use_zig),
+            "use_clang": str(args.use_clang),
+            "wasm": str(args.wasm),
+        },
+    }
+
+def should_clean_build(build_info: Dict[str, str]) -> bool:
+    build_info_file = BUILD_DIR / "build_info.json"
+    if not build_info_file.exists():
+        return True
+
+    with open(build_info_file, "r") as f:
+        old_build_info = json.load(f)
+
+    return old_build_info != build_info
+
+def update_build_info(build_info: Dict[str, str]):
+    build_info_file = BUILD_DIR / "build_info.json"
+    with open(build_info_file, "w") as f:
+        json.dump(build_info, f, indent=2)
+
 
 def main() -> None:
     global USE_ZIG, USE_CLANG, WASM_BUILD
@@ -209,10 +238,13 @@ def main() -> None:
     os.chdir(str(HERE))
     print(f"Current directory: {Path('.').absolute()}")
 
-    if args.clean:
+    build_info = get_build_info(args)
+    if args.clean or should_clean_build(build_info):
         clean_build_directory()
 
     compile_fastled_library()
+    update_build_info(build_info)
+    print("FastLED library compiled successfully.")
 
 
 if __name__ == "__main__":
