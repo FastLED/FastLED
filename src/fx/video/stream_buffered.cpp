@@ -10,36 +10,39 @@ VideoStreamBuffered::VideoStreamBuffered(size_t pixelsPerFrame, size_t nFramesIn
 }
 
 void VideoStreamBuffered::begin(uint32_t now, FileHandlePtr h) {
-    mInterpolator->clear();
-    mFrameCounter = 0;
+    end();
     mStartTime = now;
-    mStream.reset();
     mStream = VideoStreamPtr::New(mPixelsPerFrame);
+    mStartTime = now;
     mStream->begin(h);
 }
 
 void VideoStreamBuffered::beginStream(uint32_t now, ByteStreamPtr bs) {
-    mInterpolator->clear();
-    mFrameCounter = 0;
-    mStartTime = now;
-    mStream.reset();
+    end();
     mStream = VideoStreamPtr::New(mPixelsPerFrame);
+    mStartTime = now;
     mStream->beginStream(bs);
 }
 
+void VideoStreamBuffered::end() {
+    mInterpolator->clear();
+    mFrameCounter = 0;
+    mStartTime = 0;
+    mStream.reset();
+}
 
 bool VideoStreamBuffered::draw(uint32_t now, Frame* frame) {
     if (!mStream) {
         return false;
     }
-    fillBufferIfNecessary(now);
+    updateBufferIfNecessary(now);
     if (!frame) {
         return false;
     }
     return mInterpolator->draw(now, frame);
 }
 
-void VideoStreamBuffered::fillBufferIfNecessary(uint32_t now) {
+void VideoStreamBuffered::updateBufferIfNecessary(uint32_t now) {
     // get the number of frames according to the time elapsed
     uint32_t elapsed = now - mStartTime;
     uint32_t elapsedMicros = elapsed * 1000;
