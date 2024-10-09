@@ -13,8 +13,6 @@ if(DEFINED ENV{USE_WASM})
     set(USE_WASM $ENV{USE_WASM})
 endif()
 
-
-
 # Set build type to Debug
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 
@@ -40,36 +38,19 @@ set(COMMON_COMPILE_DEFINITIONS
     HAS_HARDWARE_PIN_SUPPORT
 )
 
-# Function to wrap Zig command
-function(use_zig_as_cpp)
-    find_program(UV_EXECUTABLE uv)
-    if(NOT UV_EXECUTABLE)
-        message(FATAL_ERROR "uv not found. Please install uv.")
+# Function to set Zig as the compiler directly
+function(add_wasm_flags_if_necessary)
+    # If building for WASM, add specific flags for WebAssembly
+    if(USE_WASM)
+        # debug force error
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -target wasm32-freestanding")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -target wasm32-freestanding")
+        set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
     endif()
-
-    find_program(PYTHON_EXECUTABLE python)
-    if(NOT PYTHON_EXECUTABLE)
-        message(FATAL_ERROR "Python not found. Please install Python.")
-    endif()
-
-    # uv run python -m ziglang c++
-    set(CMAKE_CXX_COMPILER_LAUNCHER ${UV_EXECUTABLE} run ${PYTHON_EXECUTABLE} -m ziglang c++)
-    set(CMAKE_C_COMPILER_LAUNCHER ${UV_EXECUTABLE} run ${PYTHON_EXECUTABLE} -m ziglang cc)
-    set(CMAKE_CXX_COMPILER c++)
-    set(CMAKE_C_COMPILER cc)
 endfunction()
 
-# Use Zig as the C++ compiler
-use_zig_as_cpp()
-
-if(USE_WASM)
-    # Set WASM-specific compiler flags
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -target wasm32-freestanding")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -target wasm32-freestanding")
-    
-    # Set the output file extension for WASM
-    set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
-endif()
+# Use Zig as the C and C++ compiler
+add_wasm_flags_if_necessary()
 
 # Set the path to the FastLED source directory
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)

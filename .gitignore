@@ -39,3 +39,6 @@ __pycache__
 dev/dev.ino.cpp
 ci/tmp/
 ci/tests/output
+
+# sometimes appears on windows during test compilation
+ci/-

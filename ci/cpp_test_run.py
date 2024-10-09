@@ -44,7 +44,10 @@ def run_tests():
 
     print("Running tests...")
     failed_tests: list[FailedTest] = []
-    for test_file in os.listdir(test_dir):
+    files = os.listdir(test_dir)
+    # filter out all pdb files (windows)
+    files = [f for f in files if not f.endswith(".pdb")]
+    for test_file in files:
         test_path = os.path.join(test_dir, test_file)
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
             print(f"Running test: {test_file}")
