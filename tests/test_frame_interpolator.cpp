@@ -163,7 +163,6 @@ TEST_CASE("FrameInterpolator::addWithTimestamp and overflow") {
     }
 
     SUBCASE("add two frames and check that Frame object was recycled") {
-        #if 0
         FrameInterpolator interpolator(2);
         FrameInterpolator::FrameBuffer* frames = interpolator.getFrames();
         CHECK_EQ(2, frames->capacity());
@@ -178,13 +177,12 @@ TEST_CASE("FrameInterpolator::addWithTimestamp and overflow") {
         CHECK_EQ(2, frames->size());
         CHECK(frames->full());
 
-        Frame* frameThatShouldBeRecycled = frames->front().get();
+        Frame* frameThatShouldBeRecycled = frames->back().get();
         CHECK(interpolator.addWithTimestamp(frame, 3000));
         CHECK_EQ(frames->size(), 2);
         CHECK_EQ(frames->front()->getTimestamp(), 3000);
         // check pointers are equal
         CHECK(frames->front().get() == frameThatShouldBeRecycled);
-        #endif
     }
 }
 
