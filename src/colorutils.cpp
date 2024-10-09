@@ -6,8 +6,8 @@
 
 #include <stdint.h>
 #include <math.h>
-
 #include "FastLED.h"
+#include "XYMap.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -408,11 +408,6 @@ CHSV* blend( const CHSV* src1, const CHSV* src2, CHSV* dest, uint16_t count, fra
 
 
 
-/// Forward declaration of the function "XY" which must be provided by
-/// the application for use in two-dimensional filter functions.
-uint16_t XY( uint8_t, uint8_t);// __attribute__ ((weak));
-
-
 // blur1d: one-dimensional blur filter. Spreads light to 2 line neighbors.
 // blur2d: two-dimensional blur filter. Spreads light to 8 XY neighbors.
 //
@@ -443,14 +438,15 @@ void blur1d( CRGB* leds, uint16_t numLeds, fract8 blur_amount)
     }
 }
 
-void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
+void blur2d( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount, const XYMap& xymap)
 {
-    blurRows(leds, width, height, blur_amount);
-    blurColumns(leds, width, height, blur_amount);
+    blurRows(leds, width, height, blur_amount, xymap);
+    blurColumns(leds, width, height, blur_amount, xymap);
 }
 
-void blurRows( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
+void blurRows( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount, const XYMap& xyMap)
 {
+
 /*    for( uint8_t row = 0; row < height; row++) {
         CRGB* rowbase = leds + (row * width);
         blur1d( rowbase, width, blur_amount);
@@ -462,20 +458,20 @@ void blurRows( CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
     for( uint8_t row = 0; row < height; row++) {
         CRGB carryover = CRGB::Black;
         for( uint8_t i = 0; i < width; i++) {
-            CRGB cur = leds[XY(i,row)];
+            CRGB cur = leds[xyMap.mapToIndex(i,row)];
             CRGB part = cur;
             part.nscale8( seep);
             cur.nscale8( keep);
             cur += carryover;
-            if( i) leds[XY(i-1,row)] += part;
-            leds[XY(i,row)] = cur;
+            if( i) leds[xyMap.mapToIndex(i-1,row)] += part;
+            leds[xyMap.mapToIndex(i,row)] = cur;
             carryover = part;
         }
     }
 }
 
 // blurColumns: perform a blur1d on each column of a rectangular matrix
-void blurColumns(CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
+void blurColumns(CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount, const XYMap& xyMap)
 {
     // blur columns
     uint8_t keep = 255 - blur_amount;
@@ -483,13 +479,13 @@ void blurColumns(CRGB* leds, uint8_t width, uint8_t height, fract8 blur_amount)
     for( uint8_t col = 0; col < width; ++col) {
         CRGB carryover = CRGB::Black;
         for( uint8_t i = 0; i < height; ++i) {
-            CRGB cur = leds[XY(col,i)];
+            CRGB cur = leds[xyMap.mapToIndex(col,i)];
             CRGB part = cur;
             part.nscale8( seep);
             cur.nscale8( keep);
             cur += carryover;
-            if( i) leds[XY(col,i-1)] += part;
-            leds[XY(col,i)] = cur;
+            if( i) leds[xyMap.mapToIndex(col,i-1)] += part;
+            leds[xyMap.mapToIndex(col,i)] = cur;
             carryover = part;
         }
     }
