@@ -26,6 +26,19 @@ public:
     // Frame's resources are copied into the internal data structures.
     bool add(const Frame& frame);
 
+    // Used for recycling externally.
+    bool pop_back(FramePtr* dst) { return mFrames.pop_back(dst); }
+    bool push_front(FramePtr frame, uint32_t timestamp) {
+        if (mFrames.full()) {
+            return false;
+        }
+        if (!mFrames.empty() && timestamp <= mFrames.front()->getTimestamp()) {
+            return false;
+        }
+        frame->setTimestamp(timestamp);
+        return mFrames.push_front(frame);
+    }
+
     bool addWithTimestamp(const Frame& frame, uint32_t timestamp);
 
     // Clear all frames
