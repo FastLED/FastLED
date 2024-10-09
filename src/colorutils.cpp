@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <math.h>
 #include "FastLED.h"
-#include "XYMap.h"
+#include "xymap.h"
 
 FASTLED_NAMESPACE_BEGIN
 
