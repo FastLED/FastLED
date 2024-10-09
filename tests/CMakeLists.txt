@@ -5,13 +5,25 @@
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
-# Set default build type to Debug
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
-endif()
+# Set build type to Debug
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 
 # Output the current build type
-message(STATUS "Current build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+# Define common compiler flags and definitions
+set(COMMON_COMPILE_FLAGS
+    -Wall
+    -funwind-tables
+    -g
+    -O0
+)
+
+set(COMMON_COMPILE_DEFINITIONS
+    ENABLE_CRASH_HANDLER
+    DEBUG
+    FASTLED_STUB_IMPL
+)
 
 # Function to wrap Zig command
 function(use_zig_as_cpp)
@@ -88,12 +100,8 @@ if(NOT APPLE)
 endif()
 
 # Add custom build flags for FastLED
-target_compile_options(FastLED PRIVATE 
-    -Wall
-    -funwind-tables
-    $<$<CONFIG:Debug>:-g -O0 -DDEBUG -DFASTLED_STUB_IMPL>
-    $<$<CONFIG:Release>:-O3>
-)
+target_compile_options(FastLED PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(FastLED PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
 if(USE_LIBUNWIND)
     target_link_libraries(FastLED PRIVATE ${LIBUNWIND_LIBRARIES})
@@ -125,14 +133,9 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     if(NOT APPLE)
         target_link_options(${TEST_NAME} PRIVATE -static-libgcc -static-libstdc++)
     endif()
-    target_compile_options(${TEST_NAME} PRIVATE 
-        -Wall
-        -funwind-tables
-        $<$<CONFIG:Debug>:-g -O0 -DDEBUG>
-        $<$<CONFIG:Release>:-O3>
-    )
+    target_compile_options(${TEST_NAME} PRIVATE ${COMMON_COMPILE_FLAGS})
     target_compile_definitions(${TEST_NAME} PRIVATE 
-        ENABLE_CRASH_HANDLER
+        ${COMMON_COMPILE_DEFINITIONS}
         $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
     )
     
