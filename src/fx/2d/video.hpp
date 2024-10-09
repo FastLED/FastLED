@@ -6,7 +6,6 @@
 #include "fx/detail/data_stream.h"
 #include "fx/fx2d.h"
 #include "fx/video/frame_interpolator.h"
-#include "fx/video/stream_buffered.h"
 #include "ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -40,24 +39,16 @@ class Video : public FxGrid {
     void close() { mDataStream->Close(); }
 
     void draw(DrawContext context) override {
-        if (!mDataStream) {
-            return;
-        }
-        DataStream::Type type = mDataStream->getType();
-        if (type == DataStream::kStreaming) {
-            if (!mDataStream->FramesRemaining()) {
-                return; // can't rewind streaming video
+        if (!mDataStream || !mDataStream->FramesRemaining()) {
+            if (mDataStream && mDataStream->getType() != DataStream::kStreaming) {
+                mDataStream->Rewind();
+            } else {
+                return; // Can't draw or rewind
             }
         }
 
-        if (!mDataStream->FramesRemaining()) {
-            mDataStream->Rewind();
-        }
-
-        if (!mDataStream->available() &&
-            mDataStream->getType() == DataStream::kStreaming) {
-            // If we're streaming and we're out of data then bail.
-            return;
+        if (!mDataStream->available()) {
+            return; // No data available
         }
 
         for (uint16_t w = 0; w < mXyMap.getWidth(); w++) {
@@ -81,17 +72,22 @@ class Video : public FxGrid {
     bool mInitialized = false;
 };
 
+// Converts a FxGrid to a video effect. This primarily allows for
+// fixed frame rates and frame interpolation.
 class VideoFx : public FxGrid {
   public:
-    VideoFx(XYMap xymap): FxGrid(xymap) {}
+    VideoFx(XYMap xymap) : FxGrid(xymap) {}
 
     void begin(FxGridPtr fx, uint16_t nFrameHistory, float fps = -1) {
         mDelegate = fx;
+        if (!mDelegate) {
+            return; // Early return if delegate is null
+        }
         mDelegate->getXYMap().setRectangularGrid();
-        float _fps = fps < 0 ? 30 : fps;
-        mDelegate->hasFixedFrameRate(&_fps);
-        mVideoStream =
-            VideoStreamPtr::New(mDelegate->getNumLeds(), nFrameHistory, _fps);
+        mFps = fps < 0 ? 30 : fps;
+        mDelegate->hasFixedFrameRate(&mFps);
+        mFrameInterpolator = FrameInterpolatorPtr::New(nFrameHistory, mFps);
+        mFrameInterpolator->setStartTime(millis());
     }
 
     void lazyInit() override {
@@ -105,16 +101,22 @@ class VideoFx : public FxGrid {
         if (!mDelegate) {
             return;
         }
-        #if 0
-        if (mVideoStream->needsRefresh(context.now)) {
-            FramePtr frame;
 
-            if (mVideoStream->full()) {
-                frame = mVideoStream->popOldest();
+        uint32_t precise_timestamp;
+        if (mFrameInterpolator->needsRefresh(context.now, &precise_timestamp)) {
+            FramePtr frame;
+            bool wasFullBeforePop = mFrameInterpolator->full();
+            if (wasFullBeforePop) {
+                if (!mFrameInterpolator->popOldest(&frame)) {
+                    return; // Failed to pop, something went wrong
+                }
+                if (mFrameInterpolator->full()) {
+                    return; // Still full after popping, something went wrong
+                }
             } else {
-                frame = FramePtr::New(mDelegate->getNumLeds(),
-                                      mDelegate->hasAlphaChannel());
+                frame = FramePtr::New(mDelegate->getNumLeds(), mDelegate->hasAlphaChannel());
             }
+
             if (!frame) {
                 return; // Something went wrong.
             }
@@ -122,15 +124,14 @@ class VideoFx : public FxGrid {
             DrawContext delegateContext = context;
             delegateContext.leds = frame->rgb();
             delegateContext.alpha_channel = frame->alpha();
+            delegateContext.now = precise_timestamp;
             mDelegate->draw(delegateContext);
-            frame->setTimestamp(context.now);
-            mVideoStream->pushNewest(frame);
+
+            mFrameInterpolator->pushNewest(frame, precise_timestamp);
+            mFrameInterpolator->incrementFrameCounter();
         }
-        #endif
 
-
-
-        //mVideoStream->draw(
+        mFrameInterpolator->draw(context.now, context.leds, context.alpha_channel);
     }
 
     const char *fxName(int) const override { return "video_fx"; }
@@ -138,7 +139,8 @@ class VideoFx : public FxGrid {
   private:
     Ptr<FxGrid> mDelegate;
     bool mInitialized = false;
-    VideoStreamPtr mVideoStream;
+    FrameInterpolatorPtr mFrameInterpolator;
+    float mFps;
 };
 
 FASTLED_NAMESPACE_END
