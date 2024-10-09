@@ -1,0 +1,33 @@
+{
+  "build": {
+    "core": "silabs",
+    "f_cpu": "39000000L",
+    "mcu": "cortex-m33",
+    "variant": "thingplusmatter"
+  },
+  "connectivity": [
+    "bluetooth",
+    "thread",
+    "wifi",
+    "zigbee"
+  ],
+  "debug": {
+    "jlink_device": "EFR32MG24B020F1536IM40",
+    "onboard_tools": [
+      "jlink"
+    ],
+    "svd_path": "EFR32MG24B020F1536IM40.svd"
+  },
+  "frameworks": [
+    "arduino"
+  ],
+  "name": "Sparkfun Thing Plus Matter",
+  "upload": {
+    "flash_size": "1536kB",
+    "maximum_ram_size": 262144,
+    "maximum_size": 1572864,
+    "protocol": "jlink"
+  },
+  "url": "https://www.sparkfun.com/products/20270",
+  "vendor": "Sparkfun"
+}
