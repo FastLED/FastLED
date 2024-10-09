@@ -1,9 +1,9 @@
 import argparse
+import json
 import os
 import shutil
 import subprocess
 import sys
-import json
 from pathlib import Path
 from typing import Tuple
 
@@ -59,11 +59,11 @@ def use_clang_compiler() -> Tuple[Path, Path, Path]:
             "--target=wasm32",
             "-O3",
             "-flto",
-            "-nostdlib",
-            "-Wl,--no-entry",
-            "-Wl,--export-all",
-            "-Wl,--lto-O3",
-            "-Wl,-z,stack-size=8388608",  # 8 * 1024 * 1024 (8MiB)
+            # "-nostdlib",
+            # "-Wl,--no-entry",
+            # "-Wl,--export-all",
+            # "-Wl,--lto-O3",
+            # "-Wl,-z,stack-size=8388608",  # 8 * 1024 * 1024 (8MiB)
         ]
         os.environ["CFLAGS"] = " ".join(wasm_flags)
         os.environ["CXXFLAGS"] = " ".join(wasm_flags)
@@ -85,15 +85,29 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
         CC_PATH = CC_PATH.with_suffix(".cmd")
         CXX_PATH = CXX_PATH.with_suffix(".cmd")
         AR_PATH = AR_PATH.with_suffix(".cmd")
-        CC_PATH.write_text(f'@echo off\n"{ZIG}" cc %*\n')
-        CXX_PATH.write_text(f'@echo off\n"{ZIG}" c++ %*\n')
-        AR_PATH.write_text(f'@echo off\n"{ZIG}" ar %*\n')
+        CC_PATH.write_text(f'@echo off\n"{ZIG}" cc %* 2>&1\n')
+        CXX_PATH.write_text(f'@echo off\n"{ZIG}" c++ %* 2>&1\n')
+        AR_PATH.write_text(f'@echo off\n"{ZIG}" ar %* 2>&1\n')
     else:
         CC_PATH.write_text(f'#!/bin/bash\n"{ZIG}" cc "$@"\n')
         CXX_PATH.write_text(f'#!/bin/bash\n"{ZIG}" c++ "$@"\n')
         AR_PATH.write_text(f'#!/bin/bash\n"{ZIG}" ar "$@"\n')
         CC_PATH.chmod(0o755)
         CXX_PATH.chmod(0o755)
+
+    if WASM_BUILD:
+        wasm_flags = [
+            # "--target=wasm32",
+            # "-O3",
+            # "-flto",
+            # "-nostdlib",
+            "-Wl,--no-entry",
+            # "-Wl,--export-all",
+            # "-Wl,--lto-O3",
+            "-Wl,-z,stack-size=8388608",  # 8 * 1024 * 1024 (8MiB)
+        ]
+    os.environ["CFLAGS"] = " ".join(wasm_flags)
+    os.environ["CXXFLAGS"] = " ".join(wasm_flags)
 
     cc, cxx = CC_PATH, CXX_PATH
     # use the system path, so on windows this looks like "C:\Program Files\Zig\zig.exe"
@@ -117,15 +131,25 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
 
 
 def run_command(command: str, cwd=None) -> tuple[str, str]:
-    process = subprocess.Popen(
+    # process = subprocess.Popen(
+    #    command,
+    #    stdout=subprocess.PIPE,
+    #    stderr=subprocess.PIPE,
+    #    shell=True,
+    #    text=True,
+    #    cwd=cwd,
+    # )
+    # stdout, stderr = process.communicate()
+    # use subprocess.run
+    process = subprocess.run(
         command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
         shell=True,
         text=True,
         cwd=cwd,
+        capture_output=True,
     )
-    stdout, stderr = process.communicate()
+    stdout = process.stdout
+    stderr = process.stderr
     if process.returncode != 0:
         print(f"Error executing command: {command}")
         print("STDOUT:")
@@ -198,7 +222,8 @@ def parse_arguments():
     )
     return parser.parse_args()
 
-def get_build_info(args: argparse.Namespace) -> dict[str, str]:
+
+def get_build_info(args: argparse.Namespace) -> dict[str, str | dict[str, str]]:
     return {
         "USE_ZIG": str(USE_ZIG),
         "USE_CLANG": str(USE_CLANG),
@@ -215,7 +240,8 @@ def get_build_info(args: argparse.Namespace) -> dict[str, str]:
         },
     }
 
-def should_clean_build(build_info: dict[str, str]) -> bool:
+
+def should_clean_build(build_info: dict[str, str | dict[str, str]]) -> bool:
     build_info_file = BUILD_DIR / "build_info.json"
     if not build_info_file.exists():
         return True
@@ -225,7 +251,8 @@ def should_clean_build(build_info: dict[str, str]) -> bool:
 
     return old_build_info != build_info
 
-def update_build_info(build_info: dict[str, str]):
+
+def update_build_info(build_info: dict[str, str | dict[str, str]]):
     build_info_file = BUILD_DIR / "build_info.json"
     with open(build_info_file, "w") as f:
         json.dump(build_info, f, indent=2)
