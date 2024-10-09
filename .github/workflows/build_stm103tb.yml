@@ -1,0 +1,14 @@
+name: stm103tb
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+
+jobs:
+  build:
+    uses: ./.github/workflows/build_template.yml
+    with:
+      args: hy_tinystm103tb
