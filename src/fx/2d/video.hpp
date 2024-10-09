@@ -25,6 +25,20 @@ class Video : public FxGrid {
         }
     }
 
+    bool begin(FileHandlePtr fileHandle) {
+        const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
+        mDataStream = DataStreamPtr::New(bytes_per_frame);
+        return mDataStream->begin(fileHandle);
+    }
+
+    bool beginStream(ByteStreamPtr byteStream) {
+        const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
+        mDataStream = DataStreamPtr::New(bytes_per_frame);
+        return mDataStream->beginStream(byteStream);
+    }
+
+    void close() { mDataStream->Close(); }
+
     void draw(DrawContext context) override {
         if (!mDataStream) {
             return;
@@ -58,19 +72,7 @@ class Video : public FxGrid {
         }
     }
 
-    bool begin(FileHandlePtr fileHandle) {
-        const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mDataStream = DataStreamPtr::New(bytes_per_frame);
-        return mDataStream->begin(fileHandle);
-    }
 
-    bool beginStream(ByteStreamPtr byteStream) {
-        const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mDataStream = DataStreamPtr::New(bytes_per_frame);
-        return mDataStream->beginStream(byteStream);
-    }
-
-    void close() { mDataStream->Close(); }
 
     const char *fxName(int) const override { return "video"; }
 
