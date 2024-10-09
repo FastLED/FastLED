@@ -7,9 +7,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-#pragma GCC push_options
-#pragma GCC optimize("Os")
-
 namespace {
 inline uint8_t min3(uint8_t a, uint8_t b, uint8_t c) {
     if (a < b) {
@@ -156,7 +153,5 @@ void rgbw_partial_reorder(EOrderW w_placement, uint8_t b0, uint8_t b1,
     *out_b2 = out[2];
     *out_b3 = out[3];
 }
-
-#pragma GCC pop_options
 
 FASTLED_NAMESPACE_END
