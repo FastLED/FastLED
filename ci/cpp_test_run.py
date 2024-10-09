@@ -14,7 +14,7 @@ class FailedTest:
     stderr: str
 
 
-def run_command(command):
+def run_command(command) -> tuple[int, str, str]:
     process = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     )
@@ -22,7 +22,7 @@ def run_command(command):
     return process.returncode, stdout.decode(), stderr.decode()
 
 
-def compile_tests():
+def compile_tests() -> None:
     os.chdir(str(PROJECT_ROOT))
     print("Compiling tests...")
     return_code, stdout, stderr = run_command("uv run ci/cpp_test_compile.py")
@@ -36,7 +36,7 @@ def compile_tests():
     print("Compilation successful.")
 
 
-def run_tests():
+def run_tests() -> None:
     test_dir = os.path.join("tests", ".build", "bin")
     if not os.path.exists(test_dir):
         print(f"Test directory not found: {test_dir}")
@@ -78,7 +78,7 @@ def run_tests():
     print("All tests passed.")
 
 
-def main():
+def main() -> None:
     compile_tests()
     run_tests()
 

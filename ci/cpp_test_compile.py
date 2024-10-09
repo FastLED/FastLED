@@ -15,19 +15,23 @@ WASM_BUILD = False
 USE_ZIG = False
 
 
-def use_zig_compiler() -> tuple[Path, Path]:
+def use_zig_compiler() -> tuple[Path, Path, Path]:
     ZIG = shutil.which("zig")
     assert ZIG is not None, "Zig compiler not found in PATH."
     CC_PATH = BUILD_DIR / "cc"
     CXX_PATH = BUILD_DIR / "c++"
+    AR_PATH = BUILD_DIR / "ar"
     if sys.platform == "win32":
         CC_PATH = CC_PATH.with_suffix(".bat")
         CXX_PATH = CXX_PATH.with_suffix(".bat")
+        AR_PATH = AR_PATH.with_suffix(".bat")
         CC_PATH.write_text(f'@echo off\n"{ZIG}" cc %*\n')
         CXX_PATH.write_text(f'@echo off\n"{ZIG}" c++ %*\n')
+        AR_PATH.write_text(f'@echo off\n"{ZIG}" ar %*\n')
     else:
         CC_PATH.write_text(f'#!/bin/bash\n"{ZIG}" cc "$@"\n')
         CXX_PATH.write_text(f'#!/bin/bash\n"{ZIG}" c++ "$@"\n')
+        AR_PATH.write_text(f'#!/bin/bash\n"{ZIG}" ar "$@"\n')
         CC_PATH.chmod(0o755)
         CXX_PATH.chmod(0o755)
 
@@ -42,12 +46,14 @@ def use_zig_compiler() -> tuple[Path, Path]:
     # print out the paths
     print(f"CC: {cc_path}")
     print(f"CXX: {cxx_path}")
+    print(f"AR: {AR_PATH}")
     # sys.exit(1)
 
     # Set environment variables for C and C++ compilers
     os.environ["CC"] = str(cc_path)
     os.environ["CXX"] = str(cxx_path)
-    return CC_PATH, CXX_PATH
+    os.environ["AR"] = str(AR_PATH)
+    return CC_PATH, CXX_PATH, AR_PATH
 
 
 def run_command(command: str, cwd=None) -> tuple[str, str]:
