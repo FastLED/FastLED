@@ -14,6 +14,12 @@ FASTLED_NAMESPACE_BEGIN
 class StubSPIOutput {
 public:
     StubSPIOutput() { }
+    void select() { }
+    void init() {}
+    void waitFully() {}
+    void release() {}
+    void writeByte(uint8_t byte) {}
+    void writeWord(uint16_t word) {}
 };
 
 #endif // defined(FASTLED_STUB_IMPL)

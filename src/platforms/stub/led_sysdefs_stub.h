@@ -12,6 +12,9 @@
 #endif // F_CPU
 
 #define FASTLED_HAS_MILLIS
+#define FASTLED_USE_PROGMEM 0
+#define FASTLED_ALLOW_INTERRUPTS 1
+#define INTERRUPT_THRESHOLD 0
 
 #define digitalPinToBitMask(P) ( 0 )
 #define digitalPinToPort(P) ( 0 )
@@ -23,8 +26,6 @@
 
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
-
-#define FASTLED_NEEDS_YIELD
 
 extern "C" {
     void pinMode(uint8_t pin, uint8_t mode);
