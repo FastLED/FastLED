@@ -4,7 +4,7 @@
 
 #include "FastLED.h"
 #include "fx/fx2d.h"
-#include "fx/video/data_stream.h"
+#include "fx/detail/data_stream.h"
 #include "ptr.h"
 
 FASTLED_NAMESPACE_BEGIN

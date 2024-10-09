@@ -1,6 +1,6 @@
 #include "fx/video/frame_interpolator.h"
 #include "fx/detail/circular_buffer.h"
-#include "fx/video/data_stream.h"
+#include "fx/detail/data_stream.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN

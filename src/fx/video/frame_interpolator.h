@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/video/data_stream.h"
+#include "fx/detail/data_stream.h"
 #include "fx/frame.h"
 #include "namespace.h"
 #include "fx/detail/circular_buffer.h"
