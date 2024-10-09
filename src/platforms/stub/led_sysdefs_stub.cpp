@@ -6,16 +6,20 @@
 #include <chrono>
 #include <thread>
 
+static const auto start_time = std::chrono::system_clock::now();
+
 void pinMode(uint8_t pin, uint8_t mode) {
     // Empty stub as we don't actually ever write anything
 }
 
 uint32_t millis() {
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto current_time = std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
 }
 
 uint32_t micros() {
-    return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    auto current_time = std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time).count();
 }
 
 void delay(int ms) {
