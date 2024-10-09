@@ -25,7 +25,6 @@ private:
     uint32_t mStartTime = 0;
     uint64_t mMicrosSecondsPerFrame;
     VideoStreamPtr mStream;
-    size_t mNFrames;
     FrameInterpolatorPtr mInterpolator;
 };
 

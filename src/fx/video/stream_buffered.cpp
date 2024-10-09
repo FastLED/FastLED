@@ -4,7 +4,6 @@ FASTLED_NAMESPACE_BEGIN
 
 VideoStreamBuffered::VideoStreamBuffered(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo)
     : mPixelsPerFrame(pixelsPerFrame),
-      mNFrames(nFramesInBuffer),
       mInterpolator(FrameInterpolatorPtr::New(nFramesInBuffer)) {
     mMicrosSecondsPerFrame = static_cast<uint64_t>(1000000.0f / fpsVideo);
 }
