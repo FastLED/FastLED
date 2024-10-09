@@ -8,3 +8,6 @@ rm -rf .build
 rm -rf .pio
 rm -rf ci/tmp
 rm -rf tests/.build
+
+# remove any CMakeCache.txt files
+find . -name "CMakeCache.txt" -type f -delete
