@@ -16,7 +16,9 @@ public:
 
     // Will search through the array, select the two frames that are closest to the current time
     // and then interpolate between them, storing the results in the provided frame.
-    // The destination frame will have "now" as the current timestamp.
+    // The destination frame will have "now" as the current timestamp if and only if
+    // there are two frames that can be interpolated. Else it's set to the timestamp of the
+    // frame that was selected.
     // Returns true if the interpolation was successful, false otherwise. If false then
     // the destination frame will not be modified.
     bool draw(uint32_t now, Frame* dst);

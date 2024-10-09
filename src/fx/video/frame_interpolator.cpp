@@ -22,7 +22,7 @@ bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
     if (frameMin == frameMax || total_duration == 0) {
         // There is only one frame, so just copy it
         dst->copy(*frameMax);
-        dst->setTimestamp(now);
+        dst->setTimestamp(frameMax->getTimestamp());
         return true;
     }
     uint32_t elapsed = now - frameMin->getTimestamp();

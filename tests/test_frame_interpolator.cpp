@@ -163,6 +163,8 @@ TEST_CASE("FrameInterpolator::draw") {
         CHECK(interpolator.addWithTimestamp(frame, 1000));
         Frame dst(10, false);
         CHECK(interpolator.draw(0, &dst));
-        CHECK_EQ(dst.getTimestamp(), 0);
+        CHECK_EQ(dst.getTimestamp(), 1000);
+        CHECK(interpolator.draw(2000, &dst));
+        CHECK_EQ(dst.getTimestamp(), 1000);
     }
 }
