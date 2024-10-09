@@ -11,13 +11,13 @@ fi
 
 # Linting the python code.
 echo "Running ruff check"
-uv run ruff check --fix ci --exclude ci/tmp/
+uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
 echo Running black
-black ci --exclude ci/tmp/
+black ci --exclude ci/tmp/ --exclude ci/wasm/
 echo Running isort
-isort --profile black ci --skip ci/tmp/
+isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
 echo "Running mypy"
-uv run mypy ci --exclude ci/tmp/
+uv run mypy ci --exclude ci/tmp/ --exclude ci/wasm/
 
 
 # Linting the C++ code.
