@@ -16,7 +16,7 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
 #define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
 #define DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
-#elif defined(FASTLED_TEENSY4) || (defined(ESP32) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)) || (defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI))
+#elif defined(FASTLED_TEENSY4) || (defined(ESP32) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)) || (defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI) || defined(FASTLED_STUB_IMPL))
 // just use clocks
 #define DATA_RATE_MHZ(X) (1000000 * (X))
 #define DATA_RATE_KHZ(X) (1000 * (X))
