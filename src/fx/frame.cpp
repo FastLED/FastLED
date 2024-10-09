@@ -60,8 +60,6 @@ void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t progre
     if (frame1.size() != frame2.size() || frame1.size() != mPixelsCount) {
         return;  // Frames must have the same size
     }
-    const CRGB* rgbFirst = frame1.rgb();
-    const CRGB* rgbSecond = frame2.rgb();
     interpolate(frame1, frame2, progress, mRgb.get(), mAlpha.get());
 }
 
