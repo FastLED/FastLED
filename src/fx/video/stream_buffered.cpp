@@ -2,20 +2,36 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-VideoStreamBuffered::VideoStreamBuffered(VideoStreamPtr stream, size_t nFramesInBuffer, float fpsVideo)
-    : mStream(stream),
+VideoStreamBuffered::VideoStreamBuffered(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo)
+    : mPixelsPerFrame(pixelsPerFrame),
       mNFrames(nFramesInBuffer),
       mInterpolator(FrameInterpolatorPtr::New(nFramesInBuffer)) {
     mMicrosSecondsPerFrame = static_cast<uint64_t>(1000000.0f / fpsVideo);
 }
 
-void VideoStreamBuffered::begin(uint32_t now) {
+void VideoStreamBuffered::begin(uint32_t now, FileHandlePtr h) {
     mInterpolator->clear();
     mFrameCounter = 0;
     mStartTime = now;
+    mStream.reset();
+    mStream = VideoStreamPtr::New(mPixelsPerFrame);
+    mStream->begin(h);
 }
 
+void VideoStreamBuffered::beginStream(uint32_t now, ByteStreamPtr bs) {
+    mInterpolator->clear();
+    mFrameCounter = 0;
+    mStartTime = now;
+    mStream.reset();
+    mStream = VideoStreamPtr::New(mPixelsPerFrame);
+    mStream->beginStream(bs);
+}
+
+
 bool VideoStreamBuffered::draw(uint32_t now, Frame* frame) {
+    if (!mStream) {
+        return false;
+    }
     fillBufferIfNecessary(now);
     if (!frame) {
         return false;
