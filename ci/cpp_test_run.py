@@ -31,6 +31,8 @@ def compile_tests():
         print(stdout)
         print(stderr)
         sys.exit(1)
+    print(stdout)
+    print(stderr)
     print("Compilation successful.")
 
 
