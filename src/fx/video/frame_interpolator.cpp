@@ -10,19 +10,26 @@ FrameInterpolator::FrameInterpolator(size_t nframes) : mFrames(nframes) {}
 bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
     const Frame *frameMin = nullptr;
     const Frame *frameMax = nullptr;
-
     if (!selectFrames(now, &frameMin, &frameMax)) {
         return false;
     }
-
+    if (!frameMin || !frameMax) {
+        // we should not be here
+        return false;
+    }
     // Calculate interpolation factor
     uint32_t total_duration = frameMax->getTimestamp() - frameMin->getTimestamp();
+    if (frameMin == frameMax || total_duration == 0) {
+        // There is only one frame, so just copy it
+        dst->copy(*frameMax);
+        dst->setTimestamp(now);
+        return true;
+    }
     uint32_t elapsed = now - frameMin->getTimestamp();
     uint8_t progress = (elapsed * 255) / total_duration;
-
     // Interpolate between the two frames
     dst->interpolate(*frameMin, *frameMax, progress);
-
+    dst->setTimestamp(now);
     return true;
 }
 

@@ -29,7 +29,7 @@ public:
     uint32_t getTimestamp() const { return mTimeStamp; }
 
     void copy(const Frame& other);
-    void interpolate(const Frame& frame1, const Frame& frame2, float t);
+    void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2);
 private:
     const size_t mPixelsCount;
     uint32_t mTimeStamp = 0;

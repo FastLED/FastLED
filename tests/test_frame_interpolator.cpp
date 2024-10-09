@@ -156,4 +156,13 @@ TEST_CASE("FrameInterpolator::draw") {
         Frame dst(10, false);
         CHECK_FALSE(interpolator.draw(0, &dst));
     }
+
+    SUBCASE("Add one frame and check that we will draw with that") {
+        FrameInterpolator interpolator(5);
+        Frame frame(10, false);
+        CHECK(interpolator.addWithTimestamp(frame, 1000));
+        Frame dst(10, false);
+        CHECK(interpolator.draw(0, &dst));
+        CHECK_EQ(dst.getTimestamp(), 0);
+    }
 }
