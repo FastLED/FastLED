@@ -27,8 +27,8 @@ void loop() {}
 // XY does mapping to a 1D array. Make it weak so that
 // the user can override it if they have supplied an example
 // in their sketch.
-#pragma weak XY
-uint16_t XY(uint8_t x, uint8_t y) {
+
+__attribute__((weak)) uint16_t XY(uint8_t x, uint8_t y) {
     std::cout << "Warning: XY function not defined. Using stub implementation." << std::endl;
     return 0;
 }

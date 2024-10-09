@@ -8,6 +8,8 @@
 #include <stdint.h>
 FASTLED_NAMESPACE_BEGIN
 
+DECLARE_SMART_PTR(Fx);
+
 // Abstract base class for effects on a strip/grid of LEDs.
 class Fx : public Referent {
   public:

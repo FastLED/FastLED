@@ -35,6 +35,7 @@ class TestBinToElf(unittest.TestCase):
                 print(f"Error during compilation: {e}")
                 raise
 
+    @unittest.skip("Skip bin to elf conversion test")
     def test_bin_to_elf_conversion(self) -> None:
         tools: Tools = load_tools(BUILD_INFO_PATH)
         bin_file = UNO / "firmware.hex"

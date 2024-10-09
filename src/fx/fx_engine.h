@@ -20,14 +20,14 @@ class FxEngine {
   public:
     FxEngine(uint16_t numLeds);
     ~FxEngine();
-    bool addFx(Ptr<Fx> effect);
+    bool addFx(FxPtr effect);
     void draw(uint32_t now, CRGB *outputBuffer);
     bool nextFx(uint16_t duration);
     bool setNextFx(uint16_t index, uint16_t duration);
 
   private:
     uint16_t mNumLeds;
-    FixedVector<Ptr<Fx>, FASTLED_FX_ENGINE_MAX_FX> mEffects;
+    FixedVector<FxPtr, FASTLED_FX_ENGINE_MAX_FX> mEffects;
     FxCompositor mCompositor;
     uint16_t mCurrentIndex;
     uint16_t mDuration = 0;
