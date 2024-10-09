@@ -2,7 +2,6 @@ import os
 import shutil
 import subprocess
 import sys
-from atexit import register
 from pathlib import Path
 
 from ci.paths import PROJECT_ROOT
@@ -11,16 +10,6 @@ BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
 HERE = Path(__file__).resolve().parent
-
-WEIRD_FILE = HERE / "-"  # Sometimes appears on windows.
-
-
-def delete_weird_file():
-    if WEIRD_FILE.exists():
-        WEIRD_FILE.unlink()
-
-
-register(delete_weird_file)
 
 
 def write_compiler_stubs():
@@ -89,7 +78,7 @@ def compile_fastled_library():
         f'cmake -S {PROJECT_ROOT / "tests"} -B {BUILD_DIR} -G "Ninja" '
         f"-DCMAKE_VERBOSE_MAKEFILE=ON"
     )
-    stdout, stderr = run_command(cmake_configure_command)
+    stdout, stderr = run_command(cmake_configure_command, cwd=BUILD_DIR)
     print(stdout)
     print(stderr)
 
