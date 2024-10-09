@@ -32,7 +32,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         const Frame *selected1;
         const Frame *selected2;
 
-        // Falls between two frames.
+        // Falls between two frames->
         bool selected = interpolator.selectFrames(0, &selected1, &selected2);
         CHECK(selected);
         CHECK(selected1);
@@ -60,7 +60,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         const Frame *selected1;
         const Frame *selected2;
 
-        // Falls between two frames.
+        // Falls between two frames->
         bool selected = interpolator.selectFrames(500, &selected1, &selected2);
         CHECK(selected);
         CHECK(selected1);
@@ -88,7 +88,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
         const Frame *selected1;
         const Frame *selected2;
 
-        // Falls between two frames.
+        // Falls between two frames->
         bool selected = interpolator.selectFrames(1500, &selected1, &selected2);
         CHECK(selected);
         CHECK(selected1);
@@ -107,9 +107,9 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
         FrameInterpolator interpolator(5);
         Frame frame(10, false);
         CHECK(interpolator.addWithTimestamp(frame, 1000));
-        FrameInterpolator::FrameBuffer &frames = interpolator.getFrames();
-        CHECK_EQ(frames.size(), 1);
-        CHECK_EQ(frames.front()->getTimestamp(), 1000);
+        FrameInterpolator::FrameBuffer* frames = interpolator.getFrames();
+        CHECK_EQ(frames->size(), 1);
+        CHECK_EQ(frames->front()->getTimestamp(), 1000);
     }
 
     SUBCASE("add second frame which is before first frame and should be rejected") {
@@ -118,9 +118,9 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
         Frame frame2(10, false);
         CHECK(interpolator.addWithTimestamp(frame1, 1000));
         CHECK_FALSE(interpolator.addWithTimestamp(frame2, 500));
-        FrameInterpolator::FrameBuffer &frames = interpolator.getFrames();
-        CHECK_EQ(frames.size(), 1);
-        CHECK_EQ(frames.front()->getTimestamp(), 1000);
+        FrameInterpolator::FrameBuffer* frames = interpolator.getFrames();
+        CHECK_EQ(frames->size(), 1);
+        CHECK_EQ(frames->front()->getTimestamp(), 1000);
     }
 
     
@@ -130,9 +130,9 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
         Frame frame2(10, false);
         CHECK(interpolator.addWithTimestamp(frame1, 1000));
         CHECK_FALSE(interpolator.addWithTimestamp(frame2, 1000));
-        FrameInterpolator::FrameBuffer &frames = interpolator.getFrames();
-        CHECK_EQ(frames.size(), 1);
-        CHECK_EQ(frames.front()->getTimestamp(), 1000);
+        FrameInterpolator::FrameBuffer* frames = interpolator.getFrames();
+        CHECK_EQ(frames->size(), 1);
+        CHECK_EQ(frames->front()->getTimestamp(), 1000);
     }
 
     SUBCASE("add second frame which is after first frame and should be accepted") {
@@ -141,13 +141,53 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
         Frame frame2(10, false);
         CHECK(interpolator.addWithTimestamp(frame1, 1000));
         CHECK(interpolator.addWithTimestamp(frame2, 1500));
-        FrameInterpolator::FrameBuffer &frames = interpolator.getFrames();
-        CHECK_EQ(frames.size(), 2);
-        CHECK_EQ(frames.front()->getTimestamp(), 1500);
-        CHECK_EQ(frames.back()->getTimestamp(), 1000);
+        FrameInterpolator::FrameBuffer* frames = interpolator.getFrames();
+        CHECK_EQ(frames->size(), 2);
+        CHECK_EQ(frames->front()->getTimestamp(), 1500);
+        CHECK_EQ(frames->back()->getTimestamp(), 1000);
     }
 
 }
+
+TEST_CASE("FrameInterpolator::addWithTimestamp and overflow") {
+    SUBCASE("add two frames and check time") {
+        FrameInterpolator interpolator(2);
+        Frame frame(10, false);
+        CHECK(interpolator.addWithTimestamp(frame, 1000));
+        CHECK(interpolator.addWithTimestamp(frame, 2000));
+        CHECK(interpolator.addWithTimestamp(frame, 3000));
+        FrameInterpolator::FrameBuffer* frames = interpolator.getFrames();
+        CHECK_EQ(frames->size(), 2);
+        CHECK_EQ(frames->front()->getTimestamp(), 3000);
+        CHECK_EQ(frames->back()->getTimestamp(), 2000);
+    }
+
+    SUBCASE("add two frames and check that Frame object was recycled") {
+        #if 0
+        FrameInterpolator interpolator(2);
+        FrameInterpolator::FrameBuffer* frames = interpolator.getFrames();
+        CHECK_EQ(2, frames->capacity());
+        CHECK_EQ(0, frames->size());
+        Frame frame(2, false);
+        CHECK(interpolator.addWithTimestamp(frame, 1000));
+        CHECK_EQ(2, frames->capacity());
+        CHECK_EQ(1, frames->size());
+
+        CHECK(interpolator.addWithTimestamp(frame, 2000));
+        CHECK_EQ(2, frames->capacity());
+        CHECK_EQ(2, frames->size());
+        CHECK(frames->full());
+
+        Frame* frameThatShouldBeRecycled = frames->front().get();
+        CHECK(interpolator.addWithTimestamp(frame, 3000));
+        CHECK_EQ(frames->size(), 2);
+        CHECK_EQ(frames->front()->getTimestamp(), 3000);
+        // check pointers are equal
+        CHECK(frames->front().get() == frameThatShouldBeRecycled);
+        #endif
+    }
+}
+
 
 TEST_CASE("FrameInterpolator::draw") {
     SUBCASE("Empty interpolator") {

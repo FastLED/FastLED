@@ -35,7 +35,7 @@ public:
     // frameMin will be before or equal to the current time, frameMax will be after.
     bool selectFrames(uint32_t now, const Frame** frameMin, const Frame** frameMax) const;
 
-    FrameBuffer& getFrames() { return mFrames; }
+    FrameBuffer* getFrames() { return &mFrames; }
 
 private:
     FrameBuffer mFrames;
