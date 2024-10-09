@@ -15,7 +15,7 @@ WASM_BUILD = False
 USE_ZIG = False
 
 
-def write_compiler_stubs() -> tuple[Path, Path]:
+def use_zig_compiler() -> tuple[Path, Path]:
     ZIG = shutil.which("zig")
     assert ZIG is not None, "Zig compiler not found in PATH."
     CC_PATH = BUILD_DIR / "cc"
@@ -30,6 +30,23 @@ def write_compiler_stubs() -> tuple[Path, Path]:
         CXX_PATH.write_text(f'#!/bin/bash\n"{ZIG}" c++ "$@"\n')
         CC_PATH.chmod(0o755)
         CXX_PATH.chmod(0o755)
+
+    cc, cxx = CC_PATH, CXX_PATH
+    # use the system path, so on windows this looks like "C:\Program Files\Zig\zig.exe"
+    cc_path: Path | str = cc.resolve()
+    cxx_path: Path | str = cxx.resolve()
+    if sys.platform == "win32":
+        cc_path = str(cc_path).replace("/", "\\")
+        cxx_path = str(cxx_path).replace("/", "\\")
+
+    # print out the paths
+    print(f"CC: {cc_path}")
+    print(f"CXX: {cxx_path}")
+    # sys.exit(1)
+
+    # Set environment variables for C and C++ compilers
+    os.environ["CC"] = str(cc_path)
+    os.environ["CXX"] = str(cxx_path)
     return CC_PATH, CXX_PATH
 
 
@@ -59,34 +76,8 @@ def compile_fastled_library() -> None:
     assert zig_prog is not None, "Zig compiler not found in PATH."
 
     if USE_ZIG:
-        cc, cxx = write_compiler_stubs()
-        # use the system path, so on windows this looks like "C:\Program Files\Zig\zig.exe"
-        cc_path: Path | str = cc.resolve()
-        cxx_path: Path | str = cxx.resolve()
-        if sys.platform == "win32":
-            cc_path = str(cc_path).replace("/", "\\")
-            cxx_path = str(cxx_path).replace("/", "\\")
+        use_zig_compiler()
 
-        # print out the paths
-        print(f"CC: {cc_path}")
-        print(f"CXX: {cxx_path}")
-        # sys.exit(1)
-
-        # Set environment variables for C and C++ compilers
-        os.environ["CC"] = str(cc_path)
-        os.environ["CXX"] = str(cxx_path)
-
-    # Configure CMake
-    # cmake_configure_command = (
-    #     f'cmake -S {PROJECT_ROOT / "tests"} -B {BUILD_DIR} -G "Ninja" '
-    #     f'-DCMAKE_C_COMPILER_TARGET=wasm32-freestanding '
-    #     f'-DCMAKE_CXX_COMPILER_TARGET=wasm32-freestanding '
-    #     f'-DCMAKE_C_COMPILER_WORKS=TRUE '
-    #     f'-DCMAKE_SYSTEM_NAME=Wasm '
-    #     # add define FASTLED_STUB_MAIN to avoid linking errors
-    #     f'-DFASTLED_STUB_MAIN=ON '
-    #     f"-DCMAKE_VERBOSE_MAKEFILE=ON"
-    # )
     cmake_configure_command_list: list[str] = [
         "cmake",
         "-S",
