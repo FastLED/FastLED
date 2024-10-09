@@ -5,11 +5,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FrameInterpolator::FrameInterpolator(size_t nframes, float fps) : mFrames(nframes) {
-    mFrameCounter = 0;
-    mStartTime = 0;
-    // set the microseconds per frame.
-    mMicrosSecondsPerFrame = 1000000 / fps;
+FrameInterpolator::FrameInterpolator(size_t nframes, float fps)
+    : mFrames(nframes), mInterval(fps) {
 }
 
 bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
@@ -21,10 +18,6 @@ bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
 }
 
 bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha, uint32_t* precise_timestamp) {
-
-   if (mStartTime == 0) {
-        mStartTime = now;
-    }
     const Frame *frameMin = nullptr;
     const Frame *frameMax = nullptr;
     if (!selectFrames(now, &frameMin, &frameMax)) {

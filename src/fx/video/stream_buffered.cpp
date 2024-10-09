@@ -9,7 +9,7 @@ VideoStream::VideoStream(size_t pixelsPerFrame, size_t nFramesInBuffer, float fp
 
 void VideoStream::begin(uint32_t now, FileHandlePtr h) {
     end();
-    mInterpolator->setStartTime(now);
+    // Removed setStartTime call
     mStream = DataStreamPtr::New(mPixelsPerFrame);
     mStream->begin(h);
 }
@@ -17,14 +17,13 @@ void VideoStream::begin(uint32_t now, FileHandlePtr h) {
 void VideoStream::beginStream(uint32_t now, ByteStreamPtr bs) {
     end();
     mStream = DataStreamPtr::New(mPixelsPerFrame);
-    mInterpolator->setStartTime(now);
+    // Removed setStartTime call
     mStream->beginStream(bs);
 }
 
 void VideoStream::end() {
     mInterpolator->clear();
-    mInterpolator->resetFrameCounter();
-    mInterpolator->setStartTime(0);
+    // Removed resetFrameCounter and setStartTime calls
     mStream.reset();
 }
 

@@ -78,7 +78,7 @@ class VideoFx : public FxGrid {
   public:
     VideoFx(XYMap xymap) : FxGrid(xymap) {}
 
-    void begin(FxGridPtr fx, uint16_t nFrameHistory, float fps = -1) {
+    void begin(uint32_t now, FxGridPtr fx,uint16_t nFrameHistory, float fps = -1) {
         mDelegate = fx;
         if (!mDelegate) {
             return; // Early return if delegate is null
@@ -87,7 +87,7 @@ class VideoFx : public FxGrid {
         mFps = fps < 0 ? 30 : fps;
         mDelegate->hasFixedFrameRate(&mFps);
         mFrameInterpolator = FrameInterpolatorPtr::New(nFrameHistory, mFps);
-        mFrameInterpolator->setStartTime(millis());
+        mFrameInterpolator->reset(now);
     }
 
     void lazyInit() override {

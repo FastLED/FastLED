@@ -4,6 +4,7 @@
 #include "fx/frame.h"
 #include "namespace.h"
 #include "fx/detail/circular_buffer.h"
+#include "fx/video/high_precision_interval.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -16,6 +17,9 @@ class FrameInterpolator : public Referent {
 public:
     typedef CircularBuffer<FramePtr> FrameBuffer;
     FrameInterpolator(size_t nframes, float fpsVideo);
+
+    HighPrecisionInterval& getInterval() { return mInterval; }
+    const HighPrecisionInterval& getInterval() const { return mInterval; }
 
     // Will search through the array, select the two frames that are closest to the current time
     // and then interpolate between them, storing the results in the provided frame.
@@ -55,8 +59,7 @@ public:
     // Clear all frames
     void clear() {
         mFrames.clear();
-        mFrameCounter = 0;
-        mStartTime = 0;
+        mInterval.reset(0);
     }
 
     // Selects the two frames that are closest to the current time. Returns false on failure.
@@ -68,26 +71,19 @@ public:
     FrameBuffer* getFrames() { return &mFrames; }
 
     bool needsRefresh(uint32_t now, uint32_t* precise_timestamp) const {
-        uint32_t elapsed = now - mStartTime;
-        uint32_t elapsedMicros = elapsed * 1000;
-        uint32_t frameNumber = elapsedMicros / mMicrosSecondsPerFrame;
-        // return frameNumber > mFrameCounter;
-        bool needs_update = frameNumber > mFrameCounter;
-        if (needs_update) {
-            *precise_timestamp = mStartTime + ((mFrameCounter+1) * mMicrosSecondsPerFrame) / 1000;
-        }
-        return needs_update;
+        return mInterval.needsRefresh(now, precise_timestamp);
     }
 
-    void setStartTime(uint32_t startTime) { mStartTime = startTime; }
-    void resetFrameCounter() { mFrameCounter = 0; }
-    void incrementFrameCounter() { mFrameCounter++; }
+    void reset(uint32_t startTime) { mInterval.reset(startTime); }
+    void incrementFrameCounter() { mInterval.incrementIntervalCounter(); }
+
+    void pause(uint32_t now) { mInterval.pause(now); }
+    void resume(uint32_t now) { mInterval.resume(now); }
+    bool isPaused() const { return mInterval.isPaused(); }
 
 private:
     FrameBuffer mFrames;
-    uint32_t mFrameCounter = 0;
-    uint32_t mStartTime = 0;
-    uint64_t mMicrosSecondsPerFrame;
+    HighPrecisionInterval mInterval;
 };
 
 FASTLED_NAMESPACE_END
