@@ -5,14 +5,11 @@ import subprocess
 import sys
 import json
 from pathlib import Path
-from typing import Tuple, Dict
+from typing import Tuple
 
 from ci.paths import PROJECT_ROOT
 
-HERE = Path(__file__).resolve().parent
-
-# BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
-BUILD_DIR = Path(".build")
+BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
 """
@@ -119,21 +116,25 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
     return CC_PATH, CXX_PATH, AR_PATH
 
 
-def run_command(command: str, cwd=None) -> None:
-    if cwd:
-        cwd = Path(cwd).resolve()
-    print("executing command:", command, "in", cwd)
+def run_command(command: str, cwd=None) -> tuple[str, str]:
     process = subprocess.Popen(
         command,
-        #shell=True,
-        cwd=str(cwd) if cwd else None,
-        #universal_newlines=True
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True,
+        text=True,
+        cwd=cwd,
     )
-    process.wait()
+    stdout, stderr = process.communicate()
     if process.returncode != 0:
         print(f"Error executing command: {command}")
+        print("STDOUT:")
+        print(stdout)
+        print("STDERR:")
+        print(stderr)
         print(f"Return code: {process.returncode}")
-        sys.exit(1)
+        exit(1)
+    return stdout, stderr
 
 
 def compile_fastled_library() -> None:
@@ -149,9 +150,9 @@ def compile_fastled_library() -> None:
     cmake_configure_command_list: list[str] = [
         "cmake",
         "-S",
-        str("."),
+        str(PROJECT_ROOT / "tests"),
         "-B",
-        str(".build"),
+        str(BUILD_DIR),
         "-G",
         "Ninja",
         "-DCMAKE_VERBOSE_MAKEFILE=ON",
@@ -170,12 +171,15 @@ def compile_fastled_library() -> None:
             ]
         )
     cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
-    run_command(cmake_configure_command, cwd=(PROJECT_ROOT / "tests").resolve())
+    stdout, stderr = run_command(cmake_configure_command, cwd=BUILD_DIR)
+    print(stdout)
+    print(stderr)
 
     # Build the project
-    cwd = (PROJECT_ROOT / "tests").resolve()
-    cmake_build_command = f"cmake --build .build"
-    run_command(cmake_build_command, cwd=cwd)
+    cmake_build_command = f"cmake --build {BUILD_DIR}"
+    stdout, stderr = run_command(cmake_build_command)
+    print(stdout)
+    print(stderr)
 
     print("FastLED library compiled successfully.")
 
@@ -194,7 +198,7 @@ def parse_arguments():
     )
     return parser.parse_args()
 
-def get_build_info(args: argparse.Namespace) -> Dict[str, str]:
+def get_build_info(args: argparse.Namespace) -> dict[str, str]:
     return {
         "USE_ZIG": str(USE_ZIG),
         "USE_CLANG": str(USE_CLANG),
@@ -211,7 +215,7 @@ def get_build_info(args: argparse.Namespace) -> Dict[str, str]:
         },
     }
 
-def should_clean_build(build_info: Dict[str, str]) -> bool:
+def should_clean_build(build_info: dict[str, str]) -> bool:
     build_info_file = BUILD_DIR / "build_info.json"
     if not build_info_file.exists():
         return True
@@ -221,7 +225,7 @@ def should_clean_build(build_info: Dict[str, str]) -> bool:
 
     return old_build_info != build_info
 
-def update_build_info(build_info: Dict[str, str]):
+def update_build_info(build_info: dict[str, str]):
     build_info_file = BUILD_DIR / "build_info.json"
     with open(build_info_file, "w") as f:
         json.dump(build_info, f, indent=2)
