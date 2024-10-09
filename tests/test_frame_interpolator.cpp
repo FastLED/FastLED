@@ -182,4 +182,23 @@ TEST_CASE("FrameInterpolator::draw") {
         CHECK(interpolator.draw(2500, &dst));
         CHECK_EQ(dst.getTimestamp(), 2000);
     }
+
+    SUBCASE("Add three frames and check behavior for drawing before, between 0&1, between 1&2 and after") {
+        FrameInterpolator interpolator(5);
+        Frame frame1(10, false);
+        Frame frame2(10, false);
+        Frame frame3(10, false);
+        CHECK(interpolator.addWithTimestamp(frame1, 1000));
+        CHECK(interpolator.addWithTimestamp(frame2, 2000));
+        CHECK(interpolator.addWithTimestamp(frame3, 3000));
+        Frame dst(10, false);
+        CHECK(interpolator.draw(0, &dst));
+        CHECK_EQ(dst.getTimestamp(), 1000);
+        CHECK(interpolator.draw(1500, &dst));
+        CHECK_EQ(dst.getTimestamp(), 1500);
+        CHECK(interpolator.draw(2500, &dst));
+        CHECK_EQ(dst.getTimestamp(), 2500);
+        CHECK(interpolator.draw(3500, &dst));
+        CHECK_EQ(dst.getTimestamp(), 3000);
+    }
 }
