@@ -26,7 +26,6 @@ class FxEngine {
     bool setNextFx(uint16_t index, uint16_t duration);
 
   private:
-    uint16_t mNumLeds;
     FixedVector<FxPtr, FASTLED_FX_ENGINE_MAX_FX> mEffects;
     FxCompositor mCompositor;
     uint16_t mCurrentIndex;
@@ -35,7 +34,7 @@ class FxEngine {
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
-    : mNumLeds(numLeds), mCompositor(numLeds), mCurrentIndex(0) {
+    : mCompositor(numLeds), mCurrentIndex(0) {
 }
 
 inline FxEngine::~FxEngine() {}

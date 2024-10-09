@@ -28,8 +28,17 @@ Frame::~Frame() {
     }
 }
 
-void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t progress) {
-    if (frame1.size() != frame2.size() || frame1.size() != mPixelsCount) {
+void Frame::draw(CRGB* leds, uint8_t* alpha) const {
+    if (mRgb) {
+        memcpy(leds, mRgb.get(), mPixelsCount * sizeof(CRGB));
+    }
+    if (alpha && mAlpha) {
+        memcpy(alpha, mAlpha.get(), mPixelsCount);
+    }
+}
+
+void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2, CRGB* pixels, uint8_t* alpha) {
+    if (frame1.size() != frame2.size()) {
         return;  // Frames must have the same size
     }
 
@@ -41,18 +50,19 @@ void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t progre
         return;
     }
 
-    for (size_t i = 0; i < mPixelsCount; ++i) {
-        mRgb[i] = CRGB::blend(rgbFirst[i], rgbSecond[i], progress);
+    for (size_t i = 0; i < frame2.size(); ++i) {
+        pixels[i] = CRGB::blend(rgbFirst[i], rgbSecond[i], amountofFrame2);
     }
+    // We will eventually do something with alpha.
+}
 
-    if (mAlpha && frame1.alpha() && frame2.alpha()) {
-        /*
-        TODO: Handle alpha
-        for (size_t i = 0; i < mPixelsCount; ++i) {
-            mAlpha[i] = blend8(frame1.alpha()[i], frame2.alpha()[i], progress);
-        }
-        */
+void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t progress) {
+    if (frame1.size() != frame2.size() || frame1.size() != mPixelsCount) {
+        return;  // Frames must have the same size
     }
+    const CRGB* rgbFirst = frame1.rgb();
+    const CRGB* rgbSecond = frame2.rgb();
+    interpolate(frame1, frame2, progress, mRgb.get(), mAlpha.get());
 }
 
 FASTLED_NAMESPACE_END

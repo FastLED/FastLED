@@ -15,7 +15,7 @@ DECLARE_SMART_PTR(FrameInterpolator);
 class FrameInterpolator : public Referent {
 public:
     typedef CircularBuffer<FramePtr> FrameBuffer;
-    FrameInterpolator(size_t nframes);
+    FrameInterpolator(size_t nframes, float fpsVideo);
 
     // Will search through the array, select the two frames that are closest to the current time
     // and then interpolate between them, storing the results in the provided frame.
@@ -26,6 +26,7 @@ public:
     // the destination frame will not be modified.
     // Note that this adjustable_time is allowed to go pause or go backward in time. 
     bool draw(uint32_t adjustable_time, Frame* dst);
+    bool draw(uint32_t adjustable_time, CRGB* leds, uint8_t* alpha, uint32_t* precise_timestamp = nullptr);
 
     // Frame's resources are copied into the internal data structures.
     bool add(const Frame& frame);
@@ -43,19 +44,50 @@ public:
         return mFrames.push_front(frame);
     }
 
+    bool pushNewest(FramePtr frame, uint32_t timestamp) {
+        frame->setTimestamp(timestamp);
+        return push_front(frame, timestamp);
+    }
+    bool popOldest(FramePtr* dst) { return mFrames.pop_back(dst); }
+
     bool addWithTimestamp(const Frame& frame, uint32_t timestamp);
 
     // Clear all frames
-    void clear() { mFrames.clear(); }
+    void clear() {
+        mFrames.clear();
+        mFrameCounter = 0;
+        mStartTime = 0;
+    }
 
     // Selects the two frames that are closest to the current time. Returns false on failure.
     // frameMin will be before or equal to the current time, frameMax will be after.
     bool selectFrames(uint32_t now, const Frame** frameMin, const Frame** frameMax) const;
+    bool full() const { return mFrames.full(); }
+
 
     FrameBuffer* getFrames() { return &mFrames; }
 
+    bool needsRefresh(uint32_t now, uint32_t* precise_timestamp) const {
+        uint32_t elapsed = now - mStartTime;
+        uint32_t elapsedMicros = elapsed * 1000;
+        uint32_t frameNumber = elapsedMicros / mMicrosSecondsPerFrame;
+        // return frameNumber > mFrameCounter;
+        bool needs_update = frameNumber > mFrameCounter;
+        if (needs_update) {
+            *precise_timestamp = mStartTime + ((mFrameCounter+1) * mMicrosSecondsPerFrame) / 1000;
+        }
+        return needs_update;
+    }
+
+    void setStartTime(uint32_t startTime) { mStartTime = startTime; }
+    void resetFrameCounter() { mFrameCounter = 0; }
+    void incrementFrameCounter() { mFrameCounter++; }
+
 private:
     FrameBuffer mFrames;
+    uint32_t mFrameCounter = 0;
+    uint32_t mStartTime = 0;
+    uint64_t mMicrosSecondsPerFrame;
 };
 
 FASTLED_NAMESPACE_END

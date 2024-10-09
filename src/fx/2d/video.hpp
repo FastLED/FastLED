@@ -3,8 +3,10 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fx/fx2d.h"
 #include "fx/detail/data_stream.h"
+#include "fx/fx2d.h"
+#include "fx/video/frame_interpolator.h"
+#include "fx/video/stream_buffered.h"
 #include "ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -13,7 +15,7 @@ DECLARE_SMART_PTR(Video);
 DECLARE_SMART_PTR(VideoFx);
 
 class Video : public FxGrid {
-public:
+  public:
     Video(XYMap xymap) : FxGrid(xymap) {}
 
     void lazyInit() override {
@@ -30,7 +32,7 @@ public:
         DataStream::Type type = mDataStream->getType();
         if (type == DataStream::kStreaming) {
             if (!mDataStream->FramesRemaining()) {
-                return;  // can't rewind streaming video
+                return; // can't rewind streaming video
             }
         }
 
@@ -38,7 +40,8 @@ public:
             mDataStream->Rewind();
         }
 
-        if (!mDataStream->available() && mDataStream->getType() == DataStream::kStreaming) {
+        if (!mDataStream->available() &&
+            mDataStream->getType() == DataStream::kStreaming) {
             // If we're streaming and we're out of data then bail.
             return;
         }
@@ -67,24 +70,26 @@ public:
         return mDataStream->beginStream(byteStream);
     }
 
-    void close() {
-        mDataStream->Close();
-    }
+    void close() { mDataStream->Close(); }
 
-    const char* fxName(int) const override { return "video"; }
+    const char *fxName(int) const override { return "video"; }
 
-private:
+  private:
     DataStreamPtr mDataStream;
     bool mInitialized = false;
 };
 
-
-
 class VideoFx : public FxGrid {
-public:
-    VideoFx(XYMap xymap, Ptr<FxGrid> fx) : FxGrid(xymap), mDelegate(fx) {
-        // Turn off re-mapping of the delegate's XYMap, similar to ScaleUp
+  public:
+    VideoFx(XYMap xymap): FxGrid(xymap) {}
+
+    void begin(FxGridPtr fx, uint16_t nFrameHistory, float fps = -1) {
+        mDelegate = fx;
         mDelegate->getXYMap().setRectangularGrid();
+        float _fps = fps < 0 ? 30 : fps;
+        mDelegate->hasFixedFrameRate(&_fps);
+        mVideoStream =
+            VideoStreamPtr::New(mDelegate->getNumLeds(), nFrameHistory, _fps);
     }
 
     void lazyInit() override {
@@ -95,21 +100,43 @@ public:
     }
 
     void draw(DrawContext context) override {
-        if (!mSurface) {
-            mSurface.reset(new CRGB[mDelegate->getNumLeds()]);
+        if (!mDelegate) {
+            return;
         }
-        DrawContext delegateContext = context;
-        delegateContext.leds = mSurface.get();
-        mDelegate->draw(delegateContext);
-        getXYMap().mapPixels(mSurface.get(), context.leds);
+        #if 0
+        if (mVideoStream->needsRefresh(context.now)) {
+            FramePtr frame;
+
+            if (mVideoStream->full()) {
+                frame = mVideoStream->popOldest();
+            } else {
+                frame = FramePtr::New(mDelegate->getNumLeds(),
+                                      mDelegate->hasAlphaChannel());
+            }
+            if (!frame) {
+                return; // Something went wrong.
+            }
+
+            DrawContext delegateContext = context;
+            delegateContext.leds = frame->rgb();
+            delegateContext.alpha_channel = frame->alpha();
+            mDelegate->draw(delegateContext);
+            frame->setTimestamp(context.now);
+            mVideoStream->pushNewest(frame);
+        }
+        #endif
+
+
+
+        //mVideoStream->draw(
     }
 
-    const char* fxName(int) const override { return "video_fx"; }
+    const char *fxName(int) const override { return "video_fx"; }
 
-private:
+  private:
     Ptr<FxGrid> mDelegate;
-    scoped_array<CRGB> mSurface;
     bool mInitialized = false;
+    VideoStreamPtr mVideoStream;
 };
 
 FASTLED_NAMESPACE_END

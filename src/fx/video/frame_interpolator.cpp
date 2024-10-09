@@ -5,9 +5,26 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FrameInterpolator::FrameInterpolator(size_t nframes) : mFrames(nframes) {}
+FrameInterpolator::FrameInterpolator(size_t nframes, float fps) : mFrames(nframes) {
+    mFrameCounter = 0;
+    mStartTime = 0;
+    // set the microseconds per frame.
+    mMicrosSecondsPerFrame = 1000000 / fps;
+}
 
 bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
+    bool ok = draw(now, dst->rgb(), dst->alpha(), &now);
+    if (ok) {
+        dst->setTimestamp(now);
+    }
+    return ok;
+}
+
+bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha, uint32_t* precise_timestamp) {
+
+   if (mStartTime == 0) {
+        mStartTime = now;
+    }
     const Frame *frameMin = nullptr;
     const Frame *frameMax = nullptr;
     if (!selectFrames(now, &frameMin, &frameMax)) {
@@ -21,15 +38,19 @@ bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
     uint32_t total_duration = frameMax->getTimestamp() - frameMin->getTimestamp();
     if (frameMin == frameMax || total_duration == 0) {
         // There is only one frame, so just copy it
-        dst->copy(*frameMax);
-        dst->setTimestamp(frameMax->getTimestamp());
+        frameMax->draw(leds, alpha);
+        if (precise_timestamp) {
+            *precise_timestamp = frameMax->getTimestamp();
+        }
         return true;
     }
     uint32_t elapsed = now - frameMin->getTimestamp();
     uint8_t progress = (elapsed * 255) / total_duration;
     // Interpolate between the two frames
-    dst->interpolate(*frameMin, *frameMax, progress);
-    dst->setTimestamp(now);
+    Frame::interpolate(*frameMin, *frameMax, progress, leds, alpha);
+    if (precise_timestamp) {
+        *precise_timestamp = frameMin->getTimestamp() + elapsed;
+    }
     return true;
 }
 

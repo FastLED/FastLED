@@ -11,7 +11,7 @@
 
 TEST_CASE("FrameInterpolator::selectFrames") {
     SUBCASE("Empty interpolator") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         const Frame *selected1;
         const Frame *selected2;
         CHECK_FALSE(interpolator.selectFrames(0, &selected1, &selected2));
@@ -19,7 +19,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
 
     SUBCASE("2 frame interpolator before") {
         // Create an interpolator with capacity for 2 frames
-        FrameInterpolator interpolator(2);
+        FrameInterpolator interpolator(2, -1);
 
         // Create some test frames with different timestamps
         Frame frame1(10, false); // 10 pixels, no alpha
@@ -47,7 +47,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
 
     SUBCASE("2 frame interpolator between") {
         // Create an interpolator with capacity for 2 frames
-        FrameInterpolator interpolator(2);
+        FrameInterpolator interpolator(2, -1);
 
         // Create some test frames with different timestamps
         Frame frame1(10, false); // 10 pixels, no alpha
@@ -75,7 +75,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
 
     SUBCASE("2 frame interpolator after") {
         // Create an interpolator with capacity for 2 frames
-        FrameInterpolator interpolator(2);
+        FrameInterpolator interpolator(2, -1);
 
         // Create some test frames with different timestamps
         Frame frame1(10, false); // 10 pixels, no alpha
@@ -104,7 +104,7 @@ TEST_CASE("FrameInterpolator::selectFrames") {
 
 TEST_CASE("FrameInterpolator::addWithTimestamp") {
     SUBCASE("add first frame") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         Frame frame(10, false);
         CHECK(interpolator.addWithTimestamp(frame, 1000));
         FrameInterpolator::FrameBuffer* frames = interpolator.getFrames();
@@ -113,7 +113,7 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
     }
 
     SUBCASE("add second frame which is before first frame and should be rejected") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         Frame frame1(10, false);
         Frame frame2(10, false);
         CHECK(interpolator.addWithTimestamp(frame1, 1000));
@@ -125,7 +125,7 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
 
     
     SUBCASE("add second frame which has the same timestamp as first frame and should be rejected") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         Frame frame1(10, false);
         Frame frame2(10, false);
         CHECK(interpolator.addWithTimestamp(frame1, 1000));
@@ -136,7 +136,7 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
     }
 
     SUBCASE("add second frame which is after first frame and should be accepted") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         Frame frame1(10, false);
         Frame frame2(10, false);
         CHECK(interpolator.addWithTimestamp(frame1, 1000));
@@ -151,7 +151,7 @@ TEST_CASE("FrameInterpolator::addWithTimestamp") {
 
 TEST_CASE("FrameInterpolator::addWithTimestamp and overflow") {
     SUBCASE("add two frames and check time") {
-        FrameInterpolator interpolator(2);
+        FrameInterpolator interpolator(2, -1);
         Frame frame(10, false);
         CHECK(interpolator.addWithTimestamp(frame, 1000));
         CHECK(interpolator.addWithTimestamp(frame, 2000));
@@ -163,7 +163,7 @@ TEST_CASE("FrameInterpolator::addWithTimestamp and overflow") {
     }
 
     SUBCASE("add two frames and check that Frame object was recycled") {
-        FrameInterpolator interpolator(2);
+        FrameInterpolator interpolator(2, -1);
         FrameInterpolator::FrameBuffer* frames = interpolator.getFrames();
         CHECK_EQ(2, frames->capacity());
         CHECK_EQ(0, frames->size());
@@ -189,14 +189,14 @@ TEST_CASE("FrameInterpolator::addWithTimestamp and overflow") {
 
 TEST_CASE("FrameInterpolator::draw") {
     SUBCASE("Empty interpolator") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         Frame frame(10, false);
         Frame dst(10, false);
         CHECK_FALSE(interpolator.draw(0, &dst));
     }
 
     SUBCASE("Add one frame and check that we will draw with that") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         Frame frame(10, false);
         CHECK(interpolator.addWithTimestamp(frame, 1000));
         Frame dst(10, false);
@@ -207,7 +207,7 @@ TEST_CASE("FrameInterpolator::draw") {
     }
 
     SUBCASE("Add two frames and check behavior for drawing before, between and after") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         Frame frame1(10, false);
         Frame frame2(10, false);
         CHECK(interpolator.addWithTimestamp(frame1, 1000));
@@ -222,7 +222,7 @@ TEST_CASE("FrameInterpolator::draw") {
     }
 
     SUBCASE("Add three frames and check behavior for drawing before, between 0&1, between 1&2 and after") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         Frame frame1(10, false);
         Frame frame2(10, false);
         Frame frame3(10, false);
@@ -247,7 +247,7 @@ TEST_CASE("FrameInterpolator::draw") {
     }
 
     SUBCASE("Check that the draw command interpolates between two added frames when queried from the middle") {
-        FrameInterpolator interpolator(5);
+        FrameInterpolator interpolator(5, -1);
         Frame frame1(10, false);
         Frame frame2(10, false);
         // frame 1 is all red

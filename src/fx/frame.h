@@ -30,6 +30,8 @@ public:
 
     void copy(const Frame& other);
     void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2);
+    static void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2, CRGB* pixels, uint8_t* alpha);
+    void draw(CRGB* leds, uint8_t* alpha) const;
 private:
     const size_t mPixelsCount;
     uint32_t mTimeStamp = 0;

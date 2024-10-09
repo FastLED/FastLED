@@ -28,7 +28,7 @@ class Fx : public Referent {
 
     // If true then this fx has a fixed frame rate and the fps parameter will be
     // set to the frame rate.
-    virtual bool hasFixedFrameRate(uint8_t *fps) const { return false; }
+    virtual bool hasFixedFrameRate(float *fps) const { return false; }
 
     // Get the name of the current fx. This is the class name if there is only one.
     // -1 means to get the current fx name if there are multiple fx.
