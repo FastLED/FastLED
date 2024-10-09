@@ -5,22 +5,11 @@
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
-# Option to use WASM (default is OFF)
-option(USE_WASM "Build for WebAssembly" OFF)
-
-# Check if the USE_WASM environment variable is set
-if(DEFINED ENV{USE_WASM})
-    set(USE_WASM $ENV{USE_WASM})
-endif()
-
 # Set build type to Debug
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 
 # Output the current build type
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-
-# Output the USE_WASM option
-message(STATUS "USE_WASM: ${USE_WASM}")
 
 # Define common compiler flags and definitions
 set(COMMON_COMPILE_FLAGS
@@ -37,20 +26,6 @@ set(COMMON_COMPILE_DEFINITIONS
     FASTLED_NO_PINMAP
     HAS_HARDWARE_PIN_SUPPORT
 )
-
-# Function to set Zig as the compiler directly
-function(add_wasm_flags_if_necessary)
-    # If building for WASM, add specific flags for WebAssembly
-    if(USE_WASM)
-        # debug force error
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -target wasm32-freestanding")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -target wasm32-freestanding")
-        set(CMAKE_EXECUTABLE_SUFFIX ".wasm")
-    endif()
-endfunction()
-
-# Use Zig as the C and C++ compiler
-add_wasm_flags_if_necessary()
 
 # Set the path to the FastLED source directory
 set(FASTLED_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)

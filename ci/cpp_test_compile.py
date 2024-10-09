@@ -11,8 +11,11 @@ BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
 HERE = Path(__file__).resolve().parent
 
+WASM_BUILD = False
+USE_ZIG = False
 
-def write_compiler_stubs():
+
+def write_compiler_stubs() -> tuple[Path, Path]:
     ZIG = shutil.which("zig")
     assert ZIG is not None, "Zig compiler not found in PATH."
     CC_PATH = BUILD_DIR / "cc"
@@ -30,7 +33,7 @@ def write_compiler_stubs():
     return CC_PATH, CXX_PATH
 
 
-def run_command(command: str, cwd=None):
+def run_command(command: str, cwd=None) -> tuple[str, str]:
     process = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
@@ -51,33 +54,60 @@ def run_command(command: str, cwd=None):
     return stdout, stderr
 
 
-def compile_fastled_library():
+def compile_fastled_library() -> None:
     zig_prog = shutil.which("zig")
     assert zig_prog is not None, "Zig compiler not found in PATH."
 
-    cc, cxx = write_compiler_stubs()
+    if USE_ZIG:
+        cc, cxx = write_compiler_stubs()
+        # use the system path, so on windows this looks like "C:\Program Files\Zig\zig.exe"
+        cc_path: Path | str = cc.resolve()
+        cxx_path: Path | str = cxx.resolve()
+        if sys.platform == "win32":
+            cc_path = str(cc_path).replace("/", "\\")
+            cxx_path = str(cxx_path).replace("/", "\\")
 
-    # use the system path, so on windows this looks like "C:\Program Files\Zig\zig.exe"
-    cc_path = cc.resolve()
-    cxx_path = cxx.resolve()
-    if sys.platform == "win32":
-        cc_path = str(cc_path).replace("/", "\\")
-        cxx_path = str(cxx_path).replace("/", "\\")
+        # print out the paths
+        print(f"CC: {cc_path}")
+        print(f"CXX: {cxx_path}")
+        # sys.exit(1)
 
-    # print out the paths
-    print(f"CC: {cc_path}")
-    print(f"CXX: {cxx_path}")
-    # sys.exit(1)
-
-    # Set environment variables for C and C++ compilers
-    os.environ["CC"] = str(cc_path)
-    os.environ["CXX"] = str(cxx_path)
+        # Set environment variables for C and C++ compilers
+        os.environ["CC"] = str(cc_path)
+        os.environ["CXX"] = str(cxx_path)
 
     # Configure CMake
-    cmake_configure_command = (
-        f'cmake -S {PROJECT_ROOT / "tests"} -B {BUILD_DIR} -G "Ninja" '
-        f"-DCMAKE_VERBOSE_MAKEFILE=ON"
-    )
+    # cmake_configure_command = (
+    #     f'cmake -S {PROJECT_ROOT / "tests"} -B {BUILD_DIR} -G "Ninja" '
+    #     f'-DCMAKE_C_COMPILER_TARGET=wasm32-freestanding '
+    #     f'-DCMAKE_CXX_COMPILER_TARGET=wasm32-freestanding '
+    #     f'-DCMAKE_C_COMPILER_WORKS=TRUE '
+    #     f'-DCMAKE_SYSTEM_NAME=Wasm '
+    #     # add define FASTLED_STUB_MAIN to avoid linking errors
+    #     f'-DFASTLED_STUB_MAIN=ON '
+    #     f"-DCMAKE_VERBOSE_MAKEFILE=ON"
+    # )
+    cmake_configure_command_list: list[str] = [
+        "cmake",
+        "-S",
+        str(PROJECT_ROOT / "tests"),
+        "-B",
+        str(BUILD_DIR),
+        "-G",
+        "Ninja",
+        "-DCMAKE_VERBOSE_MAKEFILE=ON",
+    ]
+
+    if WASM_BUILD:
+        cmake_configure_command_list.extend(
+            [
+                "-DCMAKE_C_COMPILER_TARGET=wasm32-freestanding",
+                "-DCMAKE_CXX_COMPILER_TARGET=wasm32-freestanding",
+                "-DCMAKE_C_COMPILER_WORKS=TRUE",
+                "-DCMAKE_SYSTEM_NAME=Wasm",
+            ]
+        )
+    cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
     stdout, stderr = run_command(cmake_configure_command, cwd=BUILD_DIR)
     print(stdout)
     print(stderr)
@@ -91,7 +121,7 @@ def compile_fastled_library():
     print("FastLED library compiled successfully.")
 
 
-def main():
+def main() -> None:
     os.chdir(str(HERE))
     print(f"Current directory: {Path('.').absolute()}")
     compile_fastled_library()

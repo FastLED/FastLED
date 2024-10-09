@@ -7,15 +7,20 @@
 */
 
 
-#ifdef FASTLED_STUB_MAIN_INCLUDE_INO
+#if defined(FASTLED_STUB_MAIN) || defined(FASTLED_STUB_MAIN_INCLUDE_INO)
 
 #ifndef _FASTLED_STRINGIFY
 #define _FASTLED_STRINGIFY_HELPER(x) #x
 #define _FASTLED_STRINGIFY(x) _FASTLED_STRINGIFY_HELPER(x)
 #endif
 
+#ifdef FASTLED_STUB_MAIN_INCLUDE_INO
 // Correctly include the file by expanding and stringifying the macro value
 #include _FASTLED_STRINGIFY(FASTLED_STUB_MAIN_INCLUDE_INO)
+#else
+void setup() {}
+void loop() {}
+#endif  // FASTLED_STUB_MAIN_INCLUDE_INO
 
 #include <iostream>
 
