@@ -194,8 +194,14 @@ TEST_CASE("FrameInterpolator::draw") {
         Frame dst(10, false);
         CHECK(interpolator.draw(0, &dst));
         CHECK_EQ(dst.getTimestamp(), 1000);
+        // now check what happens when we draw exactly at 1000
+        CHECK(interpolator.draw(1000, &dst));
+        CHECK_EQ(dst.getTimestamp(), 1000);
         CHECK(interpolator.draw(1500, &dst));
         CHECK_EQ(dst.getTimestamp(), 1500);
+        // now check what happens when we draw exactly at 2000
+        CHECK(interpolator.draw(2000, &dst));
+        CHECK_EQ(dst.getTimestamp(), 2000);
         CHECK(interpolator.draw(2500, &dst));
         CHECK_EQ(dst.getTimestamp(), 2500);
         CHECK(interpolator.draw(3500, &dst));
