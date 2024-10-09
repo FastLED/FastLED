@@ -11,6 +11,19 @@ from ci.paths import PROJECT_ROOT
 BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
+"""
+ clang \
+   --target=wasm32 \
+   -O3 \
+   -flto \
+   -nostdlib \
+   -Wl,--no-entry \
+   -Wl,--export-all \
+   -Wl,--lto-O3 \
++  -Wl,-z,stack-size=$[8 * 1024 * 1024] \ # Set maximum stack size to 8MiB
+   -o add.wasm \
+   add.c
+"""
 
 
 def clean_build_directory():
@@ -39,6 +52,20 @@ def use_clang_compiler() -> Tuple[Path, Path, Path]:
     os.environ["CC"] = CLANG
     os.environ["CXX"] = CLANGPP
     os.environ["AR"] = LLVM_AR
+
+    if WASM_BUILD:
+        wasm_flags = [
+            "--target=wasm32",
+            "-O3",
+            "-flto",
+            "-nostdlib",
+            "-Wl,--no-entry",
+            "-Wl,--export-all",
+            "-Wl,--lto-O3",
+            "-Wl,-z,stack-size=8388608",  # 8 * 1024 * 1024 (8MiB)
+        ]
+        os.environ["CFLAGS"] = " ".join(wasm_flags)
+        os.environ["CXXFLAGS"] = " ".join(wasm_flags)
 
     print(f"CC: {CLANG}")
     print(f"CXX: {CLANGPP}")
@@ -111,10 +138,12 @@ def run_command(command: str, cwd=None) -> tuple[str, str]:
 
 def compile_fastled_library() -> None:
     if USE_ZIG:
+        print("USING ZIG COMPILER")
         zig_prog = shutil.which("zig")
         assert zig_prog is not None, "Zig compiler not found in PATH."
         use_zig_compiler()
     elif USE_CLANG:
+        print("USING CLANG COMPILER")
         use_clang_compiler()
 
     cmake_configure_command_list: list[str] = [
@@ -134,7 +163,10 @@ def compile_fastled_library() -> None:
                 "-DCMAKE_C_COMPILER_TARGET=wasm32-freestanding",
                 "-DCMAKE_CXX_COMPILER_TARGET=wasm32-freestanding",
                 "-DCMAKE_C_COMPILER_WORKS=TRUE",
-                "-DCMAKE_SYSTEM_NAME=Wasm",
+                "-DCMAKE_CXX_COMPILER_WORKS=TRUE",
+                "-DCMAKE_SYSTEM_NAME=Generic",
+                "-DCMAKE_CROSSCOMPILING=TRUE",
+                "-DCMAKE_EXE_LINKER_FLAGS=-Wl,--no-entry -Wl,--export-all -Wl,--lto-O3 -Wl,-z,stack-size=8388608",
             ]
         )
     cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
@@ -171,7 +203,7 @@ def main() -> None:
 
     args = parse_arguments()
     USE_ZIG = args.use_zig
-    USE_CLANG = args.use_clang
+    USE_CLANG = args.use_clang or args.wasm  # Use Clang for WASM builds
     WASM_BUILD = args.wasm
 
     os.chdir(str(HERE))
