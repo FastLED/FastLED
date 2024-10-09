@@ -1,0 +1,29 @@
+name: wasm
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 'latest'
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Verify Emscripten
+        run: emcc -v
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Build with Emscripten
+        run: |
+          cd ci/wasm && pio run
