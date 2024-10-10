@@ -36,19 +36,17 @@
   
         }
 
-        // Function to call the setup and loop functions
-        function __runFastLED(moduleInstance, frame_rate) {
-            const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
-            if (!exports_exist) {
-                console.error("FastLED setup or loop functions are not available.");
-                return;
-            }
-            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frame_rate);
-  
-        }
-
         // Ensure we wait for the module to load
-        window.onload = async () => {
+        const onModuleLoaded = async () => {
+            // Unpack the module functions and send them to the runFastLED function
+            function __runFastLED(moduleInstance, frame_rate) {
+                const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
+                if (!exports_exist) {
+                    console.error("FastLED setup or loop functions are not available.");
+                    return;
+                }
+                return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frame_rate);
+            }
             try {
                 if (typeof fastled === 'function') {
                     // Load the module
@@ -65,6 +63,9 @@
                 console.error("Failed to load FastLED:", error);
             }
         };
+
+        // Bind the windows.onload event to the onModuleLoaded function.
+        window.onload = onModuleLoaded;
     </script>
 </head>
 
