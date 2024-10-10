@@ -8,11 +8,6 @@
 /// @file platforms.h
 /// Determines which platforms headers to include
 
-// just a test
-// define for wasm
-#ifdef __EMSCRIPTEN__
-#error
-#endif
 
 #if defined(NRF51)
 #include "platforms/arm/nrf51/fastled_arm_nrf51.h"
@@ -51,6 +46,14 @@
 #elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(ARDUINO_ARCH_RENESAS_PORTENTA)
 #include "platforms/arm/renesas/fastled_arm_renesas.h"
 #elif defined(__x86_64__) || defined(FASTLED_STUB_IMPL)
+
+
+// just a test
+// define for wasm
+#ifdef __EMSCRIPTEN__
+#error
+#endif
+
 // stub platform for testing (on cpu)
 #include "platforms/stub/fastled_stub.h"
 #else
