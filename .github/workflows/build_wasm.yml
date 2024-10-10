@@ -28,6 +28,13 @@ jobs:
         run: |
           cd ci/wasm && pio run
 
-      - name: Find wasm artifacts artifacts
+      - name: Find wasm artifacts
         run: |
-          cd ci/wasm && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
+          cd ci && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
+
+      - name: Upload wasm artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: wasm-artifacts
+          path: ci/wasm/.pio/build/wasm/*
+          if-no-files-found: error
