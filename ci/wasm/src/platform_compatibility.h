@@ -56,6 +56,6 @@ extern "C" {
 
     // Function to check if animation is running
     bool is_animation_running() {
-        return g_animation_running.load();
+        return g_animation_running;
     }
 }
