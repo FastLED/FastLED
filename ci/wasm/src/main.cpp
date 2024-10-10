@@ -2,6 +2,7 @@
 #include <emscripten/emscripten.h> // Include Emscripten headers
 
 #include "FastLED.h"
+#include "platforms/stub/led_sysdefs_stub.h"
 
 void setup() {
    printf("FastLED setup ran.\r\n");
