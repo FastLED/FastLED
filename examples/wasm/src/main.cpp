@@ -12,5 +12,5 @@
 // start on it.
 
 
-#include "noise_palette.ino"
+#include "Example/Example.ino"
 #include "wasm_exports.hpp"
