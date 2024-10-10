@@ -24,7 +24,7 @@ extern "C" {
     }
 
     // Replacement for 'delay' in WebAssembly context
-    void delay(uint32_t ms) {
+    void delay(int ms) {
         emscripten_sleep(ms);  // Non-blocking sleep for the specified time in milliseconds
     }
 }
