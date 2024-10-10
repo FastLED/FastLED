@@ -11,12 +11,6 @@ FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_ALL_PINS_HARDWARE_SPI
 
-// just a test
-// define for wasm
-#ifdef __EMSCRIPTEN__
-#error
-#endif
-
 class StubSPIOutput {
 public:
     StubSPIOutput() { }

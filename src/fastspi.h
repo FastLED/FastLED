@@ -72,6 +72,15 @@ class SPIOutput : public ESP8266SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVI
 #endif
 
 #if defined(FASTLED_STUB_IMPL)
+
+
+// just a test
+// define for wasm
+#ifdef __EMSCRIPTEN__
+#error
+#endif
+
+
 template<uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SPIOutput : public StubSPIOutput {};
 #endif
