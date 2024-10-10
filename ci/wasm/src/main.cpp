@@ -12,6 +12,22 @@
 // BEGIN COMPATIBILITY PREABMLE
 
 
+extern "C" {
+    // Replacement for 'micros' in WebAssembly context
+    uint32_t micros() {
+        return emscripten_get_now() * 1000;  // Emscripten provides milliseconds, multiply to get microseconds
+    }
+
+    // Replacement for 'millis' in WebAssembly context
+    uint32_t millis() {
+        return emscripten_get_now();  // Emscripten returns time in milliseconds
+    }
+
+    // Replacement for 'delay' in WebAssembly context
+    void delay(uint32_t ms) {
+        emscripten_sleep(ms);  // Non-blocking sleep for the specified time in milliseconds
+    }
+}
 
 
 // END COMPATIBILITY PREABMLE
@@ -53,6 +69,8 @@ void setup_once() {
 }
 
 
+
+//////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
 
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
