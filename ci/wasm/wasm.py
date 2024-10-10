@@ -1,5 +1,10 @@
 import os
 
+# Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
+# It seems easier to load the program as a pure JS file, so we will use asm.js
+# right now as a test.
+USE_WASM = 0
+
 Import("env", "projenv")
 
 # projenv is used for compiling individual files, env for linking
@@ -25,7 +30,8 @@ wasmflags = [
     "-s",
     "INITIAL_MEMORY=1073741824",
     "-s",
-    "STACK_SIZE=536870912"
+    "STACK_SIZE=536870912",
+    f"-sWASM={USE_WASM}"
 ]
 
 export_name = env.GetProjectOption("custom_wasm_export_name", "")

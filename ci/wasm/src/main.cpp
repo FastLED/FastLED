@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 
+#include "FastLED.h"
+
 // This is a very early preview of a the wasm build of FastLED.
 // Right now this demo only works in node.js, but the goal is to make it work in the browser, too.
 // 

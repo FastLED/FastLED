@@ -32,7 +32,15 @@ jobs:
         run: |
           cd ci/wasm && pio run
 
-      - name: Find wasm artifacts
+      - name: Scane for wasm/js/html artifacts
+        run: |
+          cd ci && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
+
+      - name: Copy wasm/index.html to wasm/.pio/build/wasm/ to prepare for artifact upload
+        run: |
+          cp ci/wasm/index.html ci/wasm/.pio/build/wasm/index.html
+
+      - name: Scane for wasm/js/html artifacts
         run: |
           cd ci && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
 
@@ -46,5 +54,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: ci/wasm/.pio/build/wasm/fastled.*
+          path: ci/wasm/.pio/build/wasm/*.*
           if-no-files-found: error

@@ -1,0 +1,55 @@
+<!-- this index.html is a minmal stub to show that the wasm build works.
+     It will be packaged up with the js payload. Simply run it in the brower.
+     If you are using this locally then you can do this easily by using `python -m http.server`
+     or better yet, use npm's live-server and start live coding. -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastLED Main Function</title>
+    <script>
+        // Function to call the _main function
+        function callMainFunction(moduleInstance) {
+            if (moduleInstance._main) {
+                console.log("Calling _main function...");
+                // Call the _main function
+                moduleInstance._main();
+            } else {
+                console.log("_main function is not available.");
+            }
+        }
+
+        // Ensure we wait for the module to load
+        window.onload = async () => {
+            try {
+                if (typeof fastled === 'function') {
+                    // Load the module
+                    fastled().then(instance => {
+                        console.log("Module loaded, calling _main...");
+                        callMainFunction(instance);  // Call the _main function
+                    }).catch(err => {
+                        console.error("Error loading fastled as a module:", err);
+                    });
+                } else {
+                    console.log("Could not detect a valid module loading for FastLED.");
+                }
+            } catch (error) {
+                console.error("Failed to load FastLED:", error);
+            }
+        };
+    </script>
+</head>
+
+<body>
+    <h1>Call _main in FastLED</h1>
+    <pre id="output"></pre>
+
+    <!-- Include the FastLED script -->
+    <script src="fastled.js"></script>
+</body>
+
+</html>
