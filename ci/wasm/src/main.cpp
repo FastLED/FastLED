@@ -17,8 +17,8 @@
 
 #include "FastLED.h"
 
-// This is the equivalent of an ino file.
-#include "noise_palette.hpp"
+
+#include "noise_palette.ino"
 
 
 /// Begin compatibility layer for FastLED platform. WebAssembly edition.
