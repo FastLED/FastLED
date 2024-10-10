@@ -1,6 +1,9 @@
 {
-    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "terminal.integrated.profiles.windows": {
+        "Command Prompt": {
+            "path": "C:\\Windows\\System32\\cmd.exe"
+        },
         "Git Bash": {
             "path": "C:\\Program Files\\Git\\bin\\bash.exe"
         }
