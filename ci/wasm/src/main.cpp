@@ -29,12 +29,6 @@ void loop() {
 //  > let fastled = require('./fastled');
 //  > fastled();
 
-extern "C" void loop_request_animation_frame();
-
-EMSCRIPTEN_KEEPALIVE extern "C" void loop_request_animation_frame() {
-    loop();
-    emscripten_request_animation_frame(loop_request_animation_frame);
-}
 
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
     setup();
