@@ -32,7 +32,7 @@ jobs:
         run: |
           cd ci/wasm && pio run
 
-      - name: Scane for wasm/js/html artifacts
+      - name: Scan for wasm/js/html artifacts
         run: |
           cd ci && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
 
@@ -40,7 +40,7 @@ jobs:
         run: |
           cp ci/wasm/index.html ci/wasm/.pio/build/wasm/index.html
 
-      - name: Scane for wasm/js/html artifacts
+      - name: Scan for wasm/js/html artifacts
         run: |
           cd ci && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
 
