@@ -40,6 +40,10 @@ jobs:
         run: |
           cp ci/wasm/index.html ci/wasm/.pio/build/wasm/index.html
 
+      - name: Scane for wasm/js/html artifacts
+        run: |
+          cd ci && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
+
       - name: Generate timestamp and random hex
         id: generate_id
         run: |
