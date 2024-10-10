@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
+#include <emscripten/html5.h>
+
+
 
 #include "FastLED.h"
 
@@ -26,6 +29,8 @@ void delay(int ms) {
 void yield() {
     std::this_thread::yield();
 }
+
+bool g_setup_called = false;
 }  // namespace hack
 
 
@@ -35,6 +40,9 @@ void yield() {
 
 void setup() {
    printf("FastLED setup ran.\r\n");
+   if (hack::g_setup_called) {
+       return;
+   }
 }
 
 void loop() {
@@ -61,23 +69,41 @@ void loop() {
 //  > fastled();
 
 
-EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
+void setup_once() {
+    if (hack::g_setup_called) {
+        return;
+    }
+    hack::g_setup_called = true;
     setup();
     return 0;
 }
 
+EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
+    setup_once();
+    return 0;
+}
+
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
+    setup_once();
     loop();
     return 0;
 }
 
+
+EMSCRIPTEN_KEEPALIVE extern "C" void start_loop() {
+  // Receives a function to call and some user data to provide it.
+  emscripten_request_animation_frame_loop(extern_loop, 0);
+}
+
+
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
-    printf("Hello from FastLED - use extern_setup and extern_loop\r\n");
+    printf("Hello from FastLED\r\n");
     /*
     setup();
     while(true) {
         loop();
     }
     */
+    start_loop();
     return 0;
 }
