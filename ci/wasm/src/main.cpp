@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
+#include <emscripten/html5.h> // Include for emscripten_request_animation_frame
 
 #include "FastLED.h"
 
@@ -28,12 +29,12 @@ void loop() {
 //  Or alternatively, you can run this:
 //  > let fastled = require('./fastled');
 //  > fastled();
-void emscripten_loop() {
+void emscripten_loop(double time) {
     loop();
     emscripten_request_animation_frame(emscripten_loop);
 }
 
-EMSCRIPTEN_KEEPALIVE extern "C" int main() {
+EMSCRIPTEN_KEEPALIVE int main() {
     printf("Hello from FastLED\r\n");
     setup();
     emscripten_request_animation_frame(emscripten_loop);
