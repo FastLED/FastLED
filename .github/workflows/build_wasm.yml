@@ -28,6 +28,6 @@ jobs:
         run: |
           cd ci/wasm && pio run
 
-      - name: Find html artifacts
+      - name: Find wasm artifacts artifacts
         run: |
-          find . -name "*.html" -print
+          cd ci/wasm && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
