@@ -9,10 +9,11 @@ on:
     branches:
       - master
 
-
 jobs:
-  build:
+  build-js-only:
     runs-on: ubuntu-latest
+    env:
+      WASM: 0
     steps:
       - uses: actions/checkout@v2
       
@@ -28,9 +29,49 @@ jobs:
       - name: Install PlatformIO
         run: pip install platformio
 
-      - name: Build with Emscripten
+      - name: Build without WASM
         run: |
-          cd ci/wasm && pio run
+          cd ci/wasm && pio run -e native
+
+      - name: Find non-wasm artifacts
+        run: |
+          cd ci && find . -name "*.o" -o -name "*.a" -o -name "*.exe"
+
+      - name: Generate timestamp and random hex
+        id: generate_id
+        run: |
+          echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+          echo "random_hex=$(openssl rand -hex 3)" >> $GITHUB_OUTPUT
+
+      - name: Upload non-wasm artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: non-wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
+          path: ci/wasm/.pio/build/native/*
+          if-no-files-found: error
+
+  build-wasm:
+    runs-on: ubuntu-latest
+    env:
+      WASM: 1
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 'latest'
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Verify Emscripten
+        run: emcc -v
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Build with WASM
+        run: |
+          cd ci/wasm && pio run -e wasm
 
       - name: Find wasm artifacts
         run: |

@@ -26,8 +26,11 @@ wasmflags = [
     "INITIAL_MEMORY=1073741824",
     "-s",
     "STACK_SIZE=536870912",
-    "-sWASM=0"
 ]
+
+# If FASTLED_PURE_JS_BINARY is set, use it to determine whether to use WASM or not
+wasm_binary = os.environ.get('WASM', '0')
+wasmflags.append(f"-sWASM={wasm_binary}")
 
 export_name = env.GetProjectOption("custom_wasm_export_name", "")
 if export_name:
