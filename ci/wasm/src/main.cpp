@@ -11,6 +11,8 @@
 
 // BEGIN COMPATIBILITY PREABMLE
 
+#include <thread>
+
 
 extern "C" {
     // Replacement for 'micros' in WebAssembly context
@@ -25,7 +27,7 @@ extern "C" {
 
     // Replacement for 'delay' in WebAssembly context
     void delay(int ms) {
-        emscripten_sleep(ms);  // Non-blocking sleep for the specified time in milliseconds
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
     }
 }
 
