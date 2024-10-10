@@ -75,7 +75,6 @@ void setup_once() {
     }
     hack::g_setup_called = true;
     setup();
-    return 0;
 }
 
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
