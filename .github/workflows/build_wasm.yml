@@ -30,15 +30,15 @@ jobs:
 
       - name: Build with Emscripten
         run: |
-          cd ci/wasm && pio run
+          cd examples/wasm && pio run
 
       - name: Scan for wasm/js/html artifacts
         run: |
-          cd ci && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
+          cd examples && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
 
       - name: Copy wasm/index.html to wasm/.pio/build/wasm/ to prepare for artifact upload
         run: |
-          cp ci/wasm/index.html ci/wasm/.pio/build/wasm/index.html
+          cp examples/wasm/index.html examples/wasm/.pio/build/wasm/index.html
 
       - name: Scan for wasm/js/html artifacts
         run: |
@@ -54,5 +54,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: ci/wasm/.pio/build/wasm/*.*
+          path: examples/wasm/.pio/build/wasm/*.*
           if-no-files-found: error
