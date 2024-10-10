@@ -36,7 +36,7 @@ uint32_t micros() {
 #include "FastLED.h"
 #include "noise_palette.hpp"
 
-bool g_setup_called = false;
+
 
 
 
