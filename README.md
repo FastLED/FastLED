@@ -158,11 +158,11 @@ For more examples see this [link](examples).
 Espressif's current evaluation of FastLED's compatibility with their product sheet can be found [here](https://github.com/espressif/arduino-esp32/blob/gh-pages/LIBRARIES_TEST.md)
 
 
-## x86
+### x86
 
 [![linux_native](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_linux.yml)
 
-# Wasm
+### Wasm
 
 [![wasm](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_wasm.yml)
 
