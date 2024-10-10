@@ -101,11 +101,15 @@ EMSCRIPTEN_KEEPALIVE extern "C" EM_BOOL on_request_animation_frame_loop(double t
     return true;
 }
 
+void interval_loop(void* userData) {
+    extern_loop();
+}
+
 
 EMSCRIPTEN_KEEPALIVE extern "C" void start_loop() {
   // Receives a function to call and some user data to provide it.
   //emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
-  emscripten_set_interval(extern_loop, 1000, 0);
+  emscripten_set_interval(interval_loop, 1000, nullptr);
 }
 
 
