@@ -101,7 +101,7 @@ EMSCRIPTEN_KEEPALIVE extern "C" EM_BOOL on_request_animation_frame_loop(double t
 
 EMSCRIPTEN_KEEPALIVE extern "C" void start_loop() {
   // Receives a function to call and some user data to provide it.
-  on_request_animation_frame_loop();
+  emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
 }
 
 
