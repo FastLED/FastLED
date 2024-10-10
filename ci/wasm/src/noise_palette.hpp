@@ -71,6 +71,9 @@ void setup() {
 
 void loop() {
     EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
+    EVERY_N_MILLISECONDS(1000) {
+        printf("fastled running\r\n");
+    }
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
