@@ -28,13 +28,7 @@ uint32_t micros() {
     return std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time).count();
 }
 
-void delay(int ms) {
-    std::this_thread::sleep_for (std::chrono::milliseconds(ms));
-}
 
-void yield() {
-    std::this_thread::yield();
-}
 
 
 // END COMPATIBILITY PREABMLE
