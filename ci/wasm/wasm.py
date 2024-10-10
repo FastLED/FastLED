@@ -35,7 +35,7 @@ if export_name:
         "-s",
         f"EXPORT_NAME='{export_name}'",
         "-o",
-        f"{env.subst('$BUILD_DIR')}/{export_name}.js",
+        f"{env.subst('$BUILD_DIR')}/{export_name}.html",
     ]
 
 env.Append(LINKFLAGS=wasmflags)
