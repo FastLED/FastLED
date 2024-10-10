@@ -12,23 +12,6 @@
 // BEGIN COMPATIBILITY PREABMLE
 
 
-#include <chrono>
-#include <thread>
-
-static const auto start_time = std::chrono::system_clock::now();
-
-// TODO: investigate why these time functions are not working
-uint32_t millis() {
-    auto current_time = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
-}
-
-uint32_t micros() {
-    auto current_time = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time).count();
-}
-
-
 
 
 // END COMPATIBILITY PREABMLE
