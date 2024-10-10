@@ -1,3 +1,9 @@
+// This code will generate a js file that can be run with the index.html file
+// provided in the repo. The index.html file will load the js file an invoke
+// start on it.
+
+
+
 #include <stdio.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
@@ -40,19 +46,6 @@ bool g_setup_called = false;
 
 
 
-
-void setup() {
-   printf("FastLED setup ran.\r\n");
-   if (hack::g_setup_called) {
-       return;
-   }
-}
-
-void loop() {
-   printf("FastLED loop ran.\r\n");
-   hack::delay(1000);
-}
-
 // This is a very early preview of a the wasm build of FastLED.
 // Right now this demo only works in node.js, but the goal is to make it work in the browser, too.
 // 
@@ -72,13 +65,18 @@ void loop() {
 //  > fastled();
 
 
+static bool g_setup_called = false;
+
 void setup_once() {
-    if (hack::g_setup_called) {
+    if (g_setup_called) {
         return;
     }
-    hack::g_setup_called = true;
+    g_setup_called = true;
     setup();
 }
+
+
+// BEGIN EMSCRIPTEN EXPORTS
 
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
     setup_once();
