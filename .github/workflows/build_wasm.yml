@@ -38,7 +38,7 @@ jobs:
 
       - name: Copy wasm/index.html to wasm/.pio/build/wasm/ to prepare for artifact upload
         run: |
-          cp ci/wasm/index.html ci/wasm/.pio/build/wasm/
+          cp ci/wasm/index.html ci/wasm/.pio/build/wasm/index.html
 
       - name: Generate timestamp and random hex
         id: generate_id
