@@ -5,6 +5,8 @@
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 
+#include "wasm_compatibility.hpp"
+
 extern void setup();
 extern void loop();
 

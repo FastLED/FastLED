@@ -8,6 +8,8 @@
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 
+
+
 // Global variables
 bool g_animation_running = true;
 uint32_t g_time_offset = 0;

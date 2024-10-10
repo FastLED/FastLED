@@ -16,26 +16,35 @@
 
         
         // Function to call the setup and loop functions
-        function runFastLED(moduleInstance, frame_rate) {
-            if (moduleInstance._extern_setup && moduleInstance._extern_loop) {
-                console.log("Calling setup function...");
-                moduleInstance._extern_setup();
-                
-                console.log("Starting loop...");
-                const frameInterval = 1000 / frame_rate; // 60 FPS
-                let lastFrameTime = 0;
-                
-                function runLoop(currentTime) {
-                    if (currentTime - lastFrameTime >= frameInterval) {
-                        moduleInstance._extern_loop();
-                        lastFrameTime = currentTime;
-                    }
-                    setTimeout(() => requestAnimationFrame(runLoop), 0);
+        function runFastLED(extern_setup, extern_loop, frame_rate) {
+            console.log("Calling setup function...");
+            extern_setup();
+            
+            console.log("Starting loop...");
+            const frameInterval = 1000 / frame_rate; // 60 FPS
+            let lastFrameTime = 0;
+            
+            // Executes every frame but only runs the loop function at the specified frame rate
+            function runLoop(currentTime) {
+                if (currentTime - lastFrameTime >= frameInterval) {
+                    extern_loop();
+                    lastFrameTime = currentTime;
                 }
-                requestAnimationFrame(runLoop);
-            } else {
-                console.log("setup or loop functions are not available.");
+                setTimeout(() => requestAnimationFrame(runLoop), 0);
             }
+            requestAnimationFrame(runLoop);
+  
+        }
+
+        // Function to call the setup and loop functions
+        function __runFastLED(moduleInstance, frame_rate) {
+            const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
+            if (!exports_exist) {
+                console.error("FastLED setup or loop functions are not available.");
+                return;
+            }
+            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frame_rate);
+  
         }
 
         // Ensure we wait for the module to load
@@ -45,7 +54,7 @@
                     // Load the module
                     fastled().then(instance => {
                         console.log("Module loaded, running FastLED...");
-                        runFastLED(instance, FRAME_RATE);
+                        __runFastLED(instance, FRAME_RATE);
                     }).catch(err => {
                         console.error("Error loading fastled as a module:", err);
                     });
