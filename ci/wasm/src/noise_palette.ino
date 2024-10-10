@@ -3,9 +3,12 @@
 /// 2D LED matrix
 /// @example NoisePlusPalette.ino
 
+// printf
+#include <stdio.h>
 
 #include <FastLED.h>
 #include "fx/2d/noisepalette.hpp"
+
 
 #define LED_PIN 3
 #define BRIGHTNESS 96
