@@ -5,7 +5,7 @@
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 
-#include "wasm_compatibility.hpp"
+#include "platforms/wasm/timer.hpp"
 
 extern void setup();
 extern void loop();
