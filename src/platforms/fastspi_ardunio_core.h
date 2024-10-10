@@ -1,6 +1,8 @@
 #ifndef __INC_FASTSPI_ARDUNIO_CORE_H
 #define __INC_FASTSPI_ARDUNIO_CORE_H
 
+#include "namespace.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(ARDUNIO_CORE_SPI)
