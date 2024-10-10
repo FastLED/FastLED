@@ -72,7 +72,7 @@ void interval_loop(void* userData) {
 
 
 
-EMSCRIPTEN_KEEPALIVE extern "C" void start_loop() {
+EMSCRIPTEN_KEEPALIVE extern "C" void async_start_loop() {
   // Receives a function to call and some user data to provide it.
   //emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
   emscripten_set_interval(interval_loop, SIXTY_FPS, nullptr);
@@ -81,6 +81,6 @@ EMSCRIPTEN_KEEPALIVE extern "C" void start_loop() {
 
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
     printf("Hello from FastLED\r\n");
-    start_loop();
+    async_start_loop();
     return 0;
 }

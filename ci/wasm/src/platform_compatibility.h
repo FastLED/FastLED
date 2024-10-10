@@ -48,7 +48,7 @@ extern "C" {
     void fastled_resume_timer() {
         if (!g_animation_running) {
             uint32_t current_time = real_millis();
-            uint32_t elapsed_pause_time = current_time - g_pause_time.load();
+            uint32_t elapsed_pause_time = current_time - g_pause_time;
             g_time_offset += elapsed_pause_time;
             g_animation_running = true;
         }
