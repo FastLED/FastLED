@@ -83,10 +83,13 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
 }
 
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
+    printf("FastLED extern_loop.\r\n");
     setup_once();
     loop();
     return 0;
 }
+
+// emscripten_set_interval(void (*cb)(void *userData), double intervalMsecs, void *userData)
 
 // define request animation frame
 
@@ -101,7 +104,8 @@ EMSCRIPTEN_KEEPALIVE extern "C" EM_BOOL on_request_animation_frame_loop(double t
 
 EMSCRIPTEN_KEEPALIVE extern "C" void start_loop() {
   // Receives a function to call and some user data to provide it.
-  emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
+  //emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
+  emscripten_set_interval(extern_loop, 1000, 0);
 }
 
 
