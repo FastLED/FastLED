@@ -25,7 +25,8 @@ wasmflags = [
     "-s",
     "INITIAL_MEMORY=1073741824",
     "-s",
-    "STACK_SIZE=536870912"
+    "STACK_SIZE=536870912",
+    "-sWASM=0"
 ]
 
 export_name = env.GetProjectOption("custom_wasm_export_name", "")
