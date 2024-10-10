@@ -3,7 +3,7 @@
 #include <emscripten/html5.h>
 
 
-#include "FastLED.h"
+#include "noise_palette.hpp"
 
 
 namespace {
@@ -14,17 +14,6 @@ int g_frame_time = 1000 / 60;
 }  // namespace hack
 
 
-
-void setup() {
-   printf("FastLED setup ran.\r\n");
-   if (g_setup_called) {
-       return;
-   }
-}
-
-void loop() {
-   printf("FastLED loop ran.\r\n");
-}
 
 // This is a very early preview of a the wasm build of FastLED.
 // Right now this demo only works in node.js, but the goal is to make it work in the browser, too.
