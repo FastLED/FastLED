@@ -3,17 +3,55 @@
 #include <emscripten/html5.h>
 
 
+// BEGIN COMPATIBILITY PREABMLE
+
+
+#include <chrono>
+#include <thread>
+
+static const auto start_time = std::chrono::system_clock::now();
+
+// TODO: investigate why these time functions are not working
+uint32_t millis() {
+    auto current_time = std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
+}
+
+uint32_t micros() {
+    auto current_time = std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time).count();
+}
+
+void delay(int ms) {
+    std::this_thread::sleep_for (std::chrono::milliseconds(ms));
+}
+
+void yield() {
+    std::this_thread::yield();
+}
+
+
+// END COMPATIBILITY PREABMLE
+
+#include "FastLED.h"
 #include "noise_palette.hpp"
 
-
-namespace {
-
 bool g_setup_called = false;
-int g_loop_job_id = -1;
-int g_frame_time = 1000 / 60;
-}  // namespace hack
 
 
+
+
+void setup() {
+   printf("FastLED setup ran.\r\n");
+   if (hack::g_setup_called) {
+       return;
+   }
+}
+
+void loop() {
+   printf("FastLED loop ran.\r\n");
+   hack::delay(1000);
+}
 
 // This is a very early preview of a the wasm build of FastLED.
 // Right now this demo only works in node.js, but the goal is to make it work in the browser, too.
@@ -35,10 +73,10 @@ int g_frame_time = 1000 / 60;
 
 
 void setup_once() {
-    if (g_setup_called) {
+    if (hack::g_setup_called) {
         return;
     }
-    g_setup_called = true;
+    hack::g_setup_called = true;
     setup();
 }
 
@@ -70,37 +108,22 @@ void interval_loop(void* userData) {
     extern_loop();
 }
 
-EMSCRIPTEN_KEEPALIVE extern "C" void change_frame_rate(float fps) {
-    g_frame_time = 1000 / fps;
-    if (g_loop_job_id == -1) {
-        // If the loop is not running, do nothing.
-        return;
-    }
-    // stop the loop and start it again with the new frame rate.
-    emscripten_clear_interval(g_loop_job_id);
-    g_loop_job_id = emscripten_set_interval(interval_loop, g_frame_time, nullptr);
-}
 
 EMSCRIPTEN_KEEPALIVE extern "C" void start_loop() {
-    // Receives a function to call and some user data to provide it.
-    //emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
-    if (g_loop_job_id != -1) {
-    printf("ignoring call to start_loop, since it was already called.\r\n");
-    }
-    g_loop_job_id = emscripten_set_interval(interval_loop, g_frame_time, nullptr);
-}
-
-EMSCRIPTEN_KEEPALIVE extern "C" void cancel_loop() {
-    if (g_loop_job_id == -1) {
-        printf("ignoring call to cancel_loop, since it was never called.\r\n");
-    }
-    emscripten_clear_interval(g_loop_job_id);
-    g_loop_job_id = -1;
+  // Receives a function to call and some user data to provide it.
+  //emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
+  emscripten_set_interval(interval_loop, 1000, nullptr);
 }
 
 
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
-    printf("Hello from FastLED - start_loop called\r\n");
+    printf("Hello from FastLED\r\n");
+    /*
+    setup();
+    while(true) {
+        loop();
+    }
+    */
     start_loop();
     return 0;
 }
