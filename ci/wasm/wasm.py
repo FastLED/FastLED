@@ -14,7 +14,6 @@ projenv.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib"
 env.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib")
 
 wasmflags = [
-    "--oformat=js",
     "-s",
     "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']",
     "-s",
@@ -24,7 +23,11 @@ wasmflags = [
     "-s",
     "INITIAL_MEMORY=1073741824",
     "-s",
-    "STACK_SIZE=536870912"
+    "STACK_SIZE=536870912",
+    "-s",
+    "ENVIRONMENT=web",
+    "--shell-file",
+    "shell.html"
 ]
 
 export_name = env.GetProjectOption("custom_wasm_export_name", "")
@@ -35,7 +38,7 @@ if export_name:
         "-s",
         f"EXPORT_NAME='{export_name}'",
         "-o",
-        f"{env.subst('$BUILD_DIR')}/{export_name}.js",
+        f"{env.subst('$BUILD_DIR')}/{export_name}.html",
     ]
 
 env.Append(LINKFLAGS=wasmflags)
