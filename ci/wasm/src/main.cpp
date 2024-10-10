@@ -41,10 +41,12 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
 }
 
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
-    printf("Hello from FastLED\r\n");
+    printf("Hello from FastLED - use extern_setup and extern_loop\r\n");
+    /*
     setup();
     while(true) {
         loop();
     }
+    */
     return 0;
 }
