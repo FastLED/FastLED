@@ -7,7 +7,7 @@
 #define EXTERN
 #endif
 
-EMSCRIPTEN_KEEPALIVE EXTERN "C" int main() {
+EMSCRIPTEN_KEEPALIVE EXTERN int main() {
    printf("Hello from FastLED\r\n");
    return 0;
 }
