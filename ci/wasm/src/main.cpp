@@ -3,6 +3,14 @@
 
 #include "FastLED.h"
 
+void setup() {
+   printf("FastLED setup ran.\r\n");
+}
+
+void loop() {
+   printf("FastLED loop ran.\r\n");
+}
+
 // This is a very early preview of a the wasm build of FastLED.
 // Right now this demo only works in node.js, but the goal is to make it work in the browser, too.
 // 
@@ -20,7 +28,14 @@
 //  Or alternatively, you can run this:
 //  > let fastled = require('./fastled');
 //  > fastled();
+void emscripten_loop() {
+    loop();
+    emscripten_request_animation_frame(emscripten_loop);
+}
+
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
-   printf("Hello from FastLED\r\n");
-   return 0;
+    printf("Hello from FastLED\r\n");
+    setup();
+    emscripten_request_animation_frame(emscripten_loop);
+    return 0;
 }
