@@ -1,0 +1,20 @@
+FROM trzeci/emscripten:1.39.17-upstream AS emscripten_base
+# A good practice is to don't use `latest` - even if some effort is made to make sure that `latest` version is stable
+
+# Target base image
+FROM fedora
+
+# Copy pre-compiled content of Emscripten SDK to target image
+COPY --from=emscripten_base /emsdk_portable /emsdk_portable
+
+# Install required tools to run Emscripten SDK
+RUN dnf install -y python python-pip ca-certificates
+
+# Set up the entrypoint script
+RUN echo '#!/bin/bash\n\
+source /emsdk_portable/emsdk_env.sh\n\
+exec "$@"' > /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/bin/bash"]
