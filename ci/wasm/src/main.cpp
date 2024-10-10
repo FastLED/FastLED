@@ -47,9 +47,11 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
 }
 
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
-    printf("FastLED extern_loop.\r\n");
+
     setup_once();
+    fastled_resume_timer();
     loop();
+    fastled_pause_timer();
     return 0;
 }
 
