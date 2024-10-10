@@ -42,5 +42,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: ci/wasm/.pio/build/wasm/*
+          path: ci/wasm/.pio/build/wasm/fastled.*
           if-no-files-found: error
