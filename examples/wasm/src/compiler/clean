@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# cleans the docker container
+
+# Stop and remove all containers
+docker stop $(docker ps -aq)
+docker rm $(docker ps -aq)
+
+# Remove all unused images
+docker image prune -af
+
+# Remove all unused volumes
+docker volume prune -f
+
+# Remove all unused networks
+docker network prune -f
+
+# Remove build cache
+docker builder prune -af
+
+echo "Docker cleanup completed."
+
