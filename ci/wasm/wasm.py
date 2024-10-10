@@ -26,8 +26,6 @@ wasmflags = [
     "STACK_SIZE=536870912",
     "-s",
     "ENVIRONMENT=web",
-    "--shell-file",
-    "shell.html"
 ]
 
 export_name = env.GetProjectOption("custom_wasm_export_name", "")
