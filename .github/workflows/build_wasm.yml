@@ -27,3 +27,7 @@ jobs:
       - name: Build with Emscripten
         run: |
           cd ci/wasm && pio run
+
+      - name: Find html artifacts
+        run: |
+          find . -name "*.html" -print
