@@ -9,6 +9,7 @@ void setup() {
 
 void loop() {
    printf("FastLED loop ran.\r\n");
+   delay(1000);
 }
 
 // This is a very early preview of a the wasm build of FastLED.
