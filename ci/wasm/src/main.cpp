@@ -89,10 +89,20 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
     return 0;
 }
 
+// define request animation frame
+
+EMSCRIPTEN_KEEPALIVE extern "C" EM_BOOL on_request_animation_frame_loop(double time, void *userData);
+
+EMSCRIPTEN_KEEPALIVE extern "C" EM_BOOL on_request_animation_frame_loop(double time, void *userData) {
+    extern_loop();
+    emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
+    return true;
+}
+
 
 EMSCRIPTEN_KEEPALIVE extern "C" void start_loop() {
   // Receives a function to call and some user data to provide it.
-  emscripten_request_animation_frame_loop(extern_loop, 0);
+  on_request_animation_frame_loop();
 }
 
 
