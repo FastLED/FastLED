@@ -12,14 +12,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FastLED Main Function</title>
     <script>
-        // Function to call the _main function
-        function callMainFunction(moduleInstance) {
-            if (moduleInstance._main) {
-                console.log("Calling _main function...");
-                // Call the _main function
-                moduleInstance._main();
+        // Function to call the setup and loop functions
+        function runFastLED(moduleInstance) {
+            if (moduleInstance._extern_setup && moduleInstance._extern_loop) {
+                console.log("Calling setup function...");
+                moduleInstance._extern_setup();
+                
+                console.log("Starting loop...");
+                function runLoop() {
+                    moduleInstance._extern_loop();
+                    requestAnimationFrame(runLoop);
+                }
+                requestAnimationFrame(runLoop);
             } else {
-                console.log("_main function is not available.");
+                console.log("setup or loop functions are not available.");
             }
         }
 
@@ -29,8 +35,8 @@
                 if (typeof fastled === 'function') {
                     // Load the module
                     fastled().then(instance => {
-                        console.log("Module loaded, calling _main...");
-                        callMainFunction(instance);  // Call the _main function
+                        console.log("Module loaded, running FastLED...");
+                        runFastLED(instance);
                     }).catch(err => {
                         console.error("Error loading fastled as a module:", err);
                     });
@@ -45,7 +51,7 @@
 </head>
 
 <body>
-    <h1>Call _main in FastLED</h1>
+    <h1>Run FastLED Setup and Loop</h1>
     <pre id="output"></pre>
 
     <!-- Include the FastLED script -->
