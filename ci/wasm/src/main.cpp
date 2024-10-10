@@ -2,7 +2,36 @@
 #include <emscripten/emscripten.h> // Include Emscripten headers
 
 #include "FastLED.h"
-#include "platforms/stub/led_sysdefs_stub.h"
+
+#include <chrono>
+#include <thread>
+
+static const auto start_time = std::chrono::system_clock::now();
+
+namespace hack {
+uint32_t millis() {
+    auto current_time = std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count();
+}
+
+uint32_t micros() {
+    auto current_time = std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::microseconds>(current_time - start_time).count();
+}
+
+void delay(int ms) {
+    std::this_thread::sleep_for (std::chrono::milliseconds(ms));
+}
+
+void yield() {
+    std::this_thread::yield();
+}
+}  // namespace hack
+
+
+
+
+
 
 void setup() {
    printf("FastLED setup ran.\r\n");
@@ -10,7 +39,7 @@ void setup() {
 
 void loop() {
    printf("FastLED loop ran.\r\n");
-   delay(1000);
+   hack::delay(1000);
 }
 
 // This is a very early preview of a the wasm build of FastLED.
