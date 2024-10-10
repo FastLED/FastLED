@@ -14,7 +14,7 @@ projenv.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib"
 env.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib")
 
 wasmflags = [
-    "--oformat=js",
+    "--oformat=html",
     "-s",
     "EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']",
     "-s",
