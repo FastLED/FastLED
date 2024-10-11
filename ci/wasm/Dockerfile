@@ -8,19 +8,32 @@ FROM fedora
 COPY --from=emscripten_base /emsdk_portable /emsdk_portable
 
 # Install required tools to run Emscripten SDK
-RUN dnf install -y python python-pip ca-certificates nano git
+
+RUN dnf install -y git
+RUN dnf install -y nano which
+RUN dnf install -y ca-certificates
+RUN dnf install -y python3 python3-pip
+
+# Create symlinks for python and pip
+#RUN ln -s /usr/bin/python3 /usr/bin/python && \
+#    ln -s /usr/bin/pip3 /usr/bin/pip
 
 # Install PlatformIO
-RUN pip install platformio==6.1.16
+RUN pip3 install platformio==6.1.16
+
+# Add Python and Emscripten to PATH
+ENV PATH="/usr/local/bin:/usr/bin:/emsdk_portable:/emsdk_portable/upstream/emscripten:${PATH}"
 
 # Create a custom print script
 RUN echo '#!/bin/sh' > /usr/bin/print && \
     echo 'echo "$@"' >> /usr/bin/print && \
     chmod +x /usr/bin/print
 
-# Add print function to /etc/profile to make it available in all shells
+# Add print function and PATH modifications to /etc/profile
 RUN echo 'print() { echo "$@"; }' >> /etc/profile && \
-    echo 'export -f print' >> /etc/profile
+    echo 'export -f print' >> /etc/profile && \
+    echo 'export PATH="/usr/bin:/emsdk_portable:/emsdk_portable/upstream/emscripten:$PATH"' >> /etc/profile && \
+    echo 'source /emsdk_portable/emsdk_env.sh' >> /etc/profile
 
 # THIS IS A WORK IN PROGRESS!!!!
 COPY platformio.ini /platformio.ini
