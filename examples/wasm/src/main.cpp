@@ -12,4 +12,3 @@
 // start on it.
 
 #include "Example/Example.ino.hpp"
-#include "platforms/stub/wasm/led_sysdefs_wasm.hpp"
