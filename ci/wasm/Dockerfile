@@ -52,6 +52,12 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
 COPY platformio.ini /wasm/platformio.ini
 COPY wasm.py /wasm/wasm.py
 
+
+# There is some download that needs to happen on the first compile.
+# so we will prewarm the cache by building a dummy project.
+RUN cp -r /wasm /wasm-prewarm && cd /wasm-prewarm && pio run && cd .. && rm -rf /wasm-prewarm
+
+
 WORKDIR /js
 
 # Create compile.sh in /js directory

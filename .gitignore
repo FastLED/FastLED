@@ -42,3 +42,5 @@ ci/tests/output
 
 # sometimes appears on windows during test compilation
 ci/-
+
+examples/wasm/fastled_js
