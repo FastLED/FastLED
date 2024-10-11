@@ -3,10 +3,11 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+from typing import List
 
-HERE = Path(__file__).parent
-WASM_DIR = HERE / "wasm"
-DOCKER_FILE = WASM_DIR / "Dockerfile"
+HERE: Path = Path(__file__).parent
+WASM_DIR: Path = HERE / "wasm"
+DOCKER_FILE: Path = WASM_DIR / "Dockerfile"
 
 
 class WASMCompileError(Exception):
@@ -15,14 +16,14 @@ class WASMCompileError(Exception):
     pass
 
 
-def check_prerequisites():
+def check_prerequisites() -> None:
     if not WASM_DIR.exists():
         raise WASMCompileError(f"ERROR: WASM directory not found at {WASM_DIR}")
     if not DOCKER_FILE.exists():
         raise WASMCompileError(f"ERROR: Dockerfile not found at {DOCKER_FILE}")
 
 
-def filter_containers():
+def filter_containers() -> str:
     return subprocess.run(
         ["docker", "ps", "-a", "-q", "--filter", "ancestor=fastled-wasm-compiler"],
         capture_output=True,
@@ -30,11 +31,11 @@ def filter_containers():
     ).stdout.strip()
 
 
-def container_exists():
+def container_exists() -> bool:
     return bool(filter_containers())
 
 
-def image_exists():
+def image_exists() -> bool:
     return (
         subprocess.run(
             ["docker", "image", "inspect", "fastled-wasm-compiler"],
@@ -44,7 +45,7 @@ def image_exists():
     )
 
 
-def clean():
+def clean() -> None:
     if container_exists():
         print("Stopping and removing containers...")
         container_ids = filter_containers()
@@ -63,10 +64,10 @@ def clean():
         print("No image found for fastled-wasm-compiler.")
 
 
-def build_image():
+def build_image() -> None:
     print("Building Docker image...")
     try:
-        cmd_list = [
+        cmd_list: List[str] = [
             "docker",
             "build",
             "--platform",
@@ -77,7 +78,7 @@ def build_image():
             str(DOCKER_FILE),
             str(WASM_DIR),
         ]
-        cmd_str = subprocess.list2cmdline(cmd_list)
+        cmd_str: str = subprocess.list2cmdline(cmd_list)
         print(f"Running command: {cmd_str}")
         subprocess.run(
             cmd_list,
@@ -92,15 +93,15 @@ def is_tty() -> bool:
     return sys.stdout.isatty()
 
 
-def run_container(directory, interactive):
-    absolute_directory = os.path.abspath(directory)
+def run_container(directory: str, interactive: bool) -> None:
+    absolute_directory: str = os.path.abspath(directory)
     if not os.path.isdir(absolute_directory):
         raise WASMCompileError(
             f"ERROR: Directory '{absolute_directory}' does not exist."
         )
 
     try:
-        docker_command = [
+        docker_command: List[str] = [
             "docker",
             "run",
             "--platform",
@@ -114,15 +115,17 @@ def run_container(directory, interactive):
             docker_command.insert(4, "-it")
         if interactive:
             docker_command.append("/bin/bash")
-        cmd_str = subprocess.list2cmdline(docker_command)
+        cmd_str: str = subprocess.list2cmdline(docker_command)
         print(f"Running command: {cmd_str}")
         subprocess.run(docker_command, check=True)
     except subprocess.CalledProcessError as e:
         raise WASMCompileError(f"ERROR: Failed to run Docker container.\n{e}")
 
 
-def main():
-    parser = argparse.ArgumentParser(description="WASM Compiler for FastLED")
+def main() -> None:
+    parser: argparse.ArgumentParser = argparse.ArgumentParser(
+        description="WASM Compiler for FastLED"
+    )
     parser.add_argument(
         "directory", nargs="?", help="The directory to mount as a volume"
     )
@@ -144,7 +147,7 @@ def main():
         action="store_true",
         help="Run the container in interactive mode with /bin/bash",
     )
-    args = parser.parse_args()
+    args: argparse.Namespace = parser.parse_args()
 
     try:
         check_prerequisites()
