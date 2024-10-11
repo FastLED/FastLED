@@ -1,9 +1,21 @@
 #!/bin/bash
 
+# Ensure script is run from the project root
+if [ ! -d "examples/wasm/compiler" ]; then
+    echo "Error: This script must be run from the root of the FastLED project."
+    echo "Please change to the project root directory and try again."
+    exit 1
+fi
+
 # Function to build the Docker image
 build_image() {
+    if [ ! -f "examples/wasm/compiler/Dockerfile" ]; then
+        echo "Error: Dockerfile not found in examples/wasm/compiler/"
+        echo "Please make sure you are running this script from the root of the FastLED project."
+        exit 1
+    fi
     echo "Building Docker image..."
-    docker build -t fastled-wasm-compiler .
+    docker build -t fastled-wasm-compiler -f examples/wasm/compiler/Dockerfile examples/wasm/compiler
 }
 
 # Function to display usage
@@ -50,4 +62,5 @@ if $build_flag || ! docker image inspect fastled-wasm-compiler >/dev/null 2>&1; 
 fi
 
 # Run the container with the specified volume
+# The local directory is mounted to /workspace inside the container
 docker run --rm -it -v "$absolute_directory:/workspace" fastled-wasm-compiler
