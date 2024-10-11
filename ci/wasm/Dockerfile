@@ -58,6 +58,7 @@ RUN echo '#!/bin/bash' > /js/compile.sh && \
     echo 'rm -rf /js/.pio' >> /js/compile.sh && \
     echo 'cd /js' >> /js/compile.sh && \
     echo 'pio run' >> /js/compile.sh && \
+    echo 'cp ./.pio/build/*/fastled.js /mapped/' >> /js/compile.sh && \
     chmod +x /js/compile.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
