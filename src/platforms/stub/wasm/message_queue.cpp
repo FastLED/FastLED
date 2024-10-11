@@ -22,12 +22,12 @@ bool js_message_pop_front(std::string* message) {
     return true;
 }
 
-extern "C" bool js_message_push_back(const char* msg) {
+extern "C" __attribute__((used)) bool js_message_push_back(const char* msg) {
     if (message_queue.size() >= MAX_QUEUE_SIZE) {
         message_queue.pop_front();
         missed_messages_count++;
     }
-    message_queue.push_back(message);
+    message_queue.push_back(msg);
     return true;
 }
 
