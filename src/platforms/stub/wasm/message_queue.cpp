@@ -3,6 +3,8 @@
 #include <deque>  // ok include
 #include "message_queue.h"
 
+#include <emscripten/emscripten.h> // Include Emscripten headers
+
 FASTLED_NAMESPACE_BEGIN
 
 static std::deque<std::string> message_queue;
@@ -22,7 +24,7 @@ bool js_message_pop_front(std::string* message) {
     return true;
 }
 
-extern "C" __attribute__((used)) bool js_message_push_back(const char* msg) {
+EMSCRIPTEN_KEEPALIVE extern "C" bool js_message_push_back(const char* msg) {
     if (message_queue.size() >= MAX_QUEUE_SIZE) {
         message_queue.pop_front();
         missed_messages_count++;
