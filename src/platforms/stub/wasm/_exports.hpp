@@ -106,7 +106,7 @@ void jsOnFrame(const char* message) {
     }, message);
 }
 
-MessageQueue js_message_queue;
+MessageQueue js_message_queue;  // hack - this needs to not be inlined into the hpp file!
 
 EMSCRIPTEN_KEEPALIVE extern "C" bool postMessage(const char* jstStr) {
     // post message to the message queue.
