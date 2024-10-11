@@ -83,6 +83,10 @@ def build_image():
         raise WASMCompileError(f"ERROR: Failed to build Docker image.\nError: {e}")
 
 
+def is_tty() -> bool:
+    return sys.stdout.isatty()
+
+
 def run_container(directory):
     absolute_directory = os.path.abspath(directory)
     if not os.path.isdir(absolute_directory):
@@ -91,18 +95,18 @@ def run_container(directory):
         )
 
     try:
-        subprocess.run(
-            [
-                "docker",
-                "run",
-                "--rm",
-                "-it",
-                "-v",
-                f"{absolute_directory}:/mapped",
-                "fastled-wasm-compiler",
-            ],
-            check=True,
-        )
+        docker_command = [
+            "docker",
+            "run",
+            "--rm",
+            "-v",
+            f"{absolute_directory}:/mapped",
+            "fastled-wasm-compiler",
+        ]
+        if is_tty():
+            docker_command.insert(3, "-it")
+
+        subprocess.run(docker_command, check=True)
     except subprocess.CalledProcessError as e:
         raise WASMCompileError(f"ERROR: Failed to run Docker container.\n{e}")
 
