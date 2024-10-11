@@ -10,6 +10,12 @@ COPY --from=emscripten_base /emsdk_portable /emsdk_portable
 # Install required tools to run Emscripten SDK
 RUN dnf install -y python python-pip ca-certificates
 
+# Install PlatformIO
+RUN pip install platformio==6.1.16
+
+# THIS IS A WORK IN PROGRESS!!!!
+COPY platformio.ini /platformio.ini
+
 # Set up the entrypoint script
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'source /emsdk_portable/emsdk_env.sh' >> /entrypoint.sh && \
