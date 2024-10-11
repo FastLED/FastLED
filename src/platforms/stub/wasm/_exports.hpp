@@ -65,8 +65,21 @@ EMSCRIPTEN_KEEPALIVE extern "C" void async_start_loop() {
   emscripten_set_interval(interval_loop, SIXTY_FPS, nullptr);
 }
 
+#include <emscripten.h>
+#include <iostream>
+
+// Function to invoke the JavaScript function to run a script
+void invokeScriptFromJS(const char* scriptPath) {
+    // Use EM_ASM to call JavaScript directly
+    EM_ASM({
+        var script = UTF8ToString($0);  // Convert C string to JavaScript string
+        runScript(script);              // Call the JS function to run the script
+    }, scriptPath);
+}
 
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
+    const char* scriptPath = "/path/to/your/script.sh"; // Change to your script path
+    invokeScriptFromJS(scriptPath);
     printf("Hello from FastLED\r\n");
     async_start_loop();
     return 0;
