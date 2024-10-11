@@ -8,7 +8,7 @@ FROM fedora
 COPY --from=emscripten_base /emsdk_portable /emsdk_portable
 
 # Install required tools to run Emscripten SDK
-RUN dnf install -y python python-pip ca-certificates
+RUN dnf install -y python python-pip ca-certificates nano
 
 # Install PlatformIO
 RUN pip install platformio==6.1.16
