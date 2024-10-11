@@ -49,7 +49,16 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
+WORKDIR /js
 
+# Create compile.sh in /js directory
+RUN echo '#!/bin/bash' > /js/compile.sh && \
+    echo 'set -e' >> /js/compile.sh && \
+    echo 'cp -r /mapped/* /js/' >> /js/compile.sh && \
+    echo 'rm -rf /js/.pio' >> /js/compile.sh && \
+    echo 'cd /js' >> /js/compile.sh && \
+    echo 'pio run' >> /js/compile.sh && \
+    chmod +x /js/compile.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]

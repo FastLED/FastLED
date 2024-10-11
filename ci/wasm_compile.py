@@ -98,7 +98,7 @@ def run_container(directory):
                 "--rm",
                 "-it",
                 "-v",
-                f"{absolute_directory}:/workspace",
+                f"{absolute_directory}:/mapped",
                 "fastled-wasm-compiler",
             ],
             check=True,
