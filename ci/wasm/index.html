@@ -57,7 +57,7 @@
     <script>
         const FRAME_RATE = 60; // 60 FPS
 
-        window.onFastLedFrame = function (jsStr) {
+        globalThis.onFastLedFrame = function (jsStr) {
             const output = document.getElementById('output');
             output.textContent = jsStr;
         };
