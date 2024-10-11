@@ -31,7 +31,7 @@ jobs:
 
       - name: Check for required artifacts
         run: |
-          cd examples/fastled_js
+          cd examples/wasm/fastled_js
           if [ ! -f fastled.js ] || [ ! -f fastled.wasm ] || [ ! -f index.html ]; then
             echo "Error: One or more required files (fastled.js, fastled.wasm, index.html) are missing."
             exit 1
@@ -48,5 +48,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
-          path: examples/fastled_js/*.*
+          path: examples/wasm/fastled_js/*.*
           if-no-files-found: error
