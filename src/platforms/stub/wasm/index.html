@@ -65,14 +65,13 @@
         function updateCanvas(data) {
             const canvas = document.getElementById('myCanvas');
             const ctx = canvas.getContext('2d');
-            const imageData = ctx.createImageData(CANVAS_SIZE, CANVAS_SIZE);
+            const imageData = ctx.createImageData(canvas.width, canvas.height);
 
-            for (let i = 0; i < data.length; i += 3) {
-                const pixelIndex = (i / 3) * 4;
-                imageData.data[pixelIndex] = data[i];       // Red
-                imageData.data[pixelIndex + 1] = data[i + 1]; // Green
-                imageData.data[pixelIndex + 2] = data[i + 2]; // Blue
-                imageData.data[pixelIndex + 3] = 255;         // Alpha (fully opaque)
+            for (let i = 0, j = 0; i < data.length; i += 3, j += 4) {
+                imageData.data[j] = data[i];       // Red
+                imageData.data[j + 1] = data[i + 1]; // Green
+                imageData.data[j + 2] = data[i + 2]; // Blue
+                imageData.data[j + 3] = 255;         // Alpha (fully opaque)
             }
 
             ctx.putImageData(imageData, 0, 0);
@@ -81,17 +80,25 @@
         globalThis.onFastLedSetCanvasSize = function (jsonStr) {
             const jsonData = JSON.parse(jsonStr);
             const canvas = document.getElementById('myCanvas');
+
             const first = jsonData[0];  // one canvas information per controller, just assume one for now.
             canvas.width = first.width;
             canvas.height = first.height;
-            console.log(`Canvas size set to ${first.width}x${first.height}`);
-            alert(`Canvas size set to ${first.width}x${first.height}`);
+
+            canvas.width = width;
+            canvas.height = height;
+            
+            const maxDisplaySize = 640; // Maximum display size in pixels
+            const scaleFactor = Math.min(maxDisplaySize / width, maxDisplaySize / height, 20);
+            
+            canvas.style.width = Math.round(width * scaleFactor) + 'px';
+            canvas.style.height = Math.round(height * scaleFactor) + 'px';
+            console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
         };
 
-        globalThis.onFastLedFrame = function (jsStr) {
-            const frameData = JSON.parse(jsStr);
-            const { frame_number, data } = frameData;
-            const msg = `Frame: ${frame_number}\nData: ${data.length / 3} pixels\n`;
+        globalThis.onFastLedFrame = function (frame_number, data_ptr, data_length) {
+            const data = new Uint8Array(Module.HEAPU8.buffer, data_ptr, data_length);
+            const msg = `Frame: ${frame_number}\nData: ${data_length / 3} pixels\n`;
             const output = document.getElementById('output');
             output.textContent = msg;
 
