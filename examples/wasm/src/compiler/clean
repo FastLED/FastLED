@@ -1,22 +1,41 @@
 #!/bin/bash
 
-# cleans the docker container
+# Cleans the fastled-wasm-compiler Docker image and related resources
 
-# Stop and remove all containers
-docker stop $(docker ps -aq)
-docker rm $(docker ps -aq)
+# Function to filter and return Docker container IDs
+filter_containers() {
+    docker ps -a -q --filter ancestor=fastled-wasm-compiler 2>/dev/null || true
+}
 
-# Remove all unused images
-docker image prune -af
+# Function to check if a container exists
+container_exists() {
+    [ -n "$(filter_containers)" ]
+}
 
-# Remove all unused volumes
-docker volume prune -f
+# Function to check if an image exists
+image_exists() {
+    docker image inspect fastled-wasm-compiler >/dev/null 2>&1
+}
 
-# Remove all unused networks
-docker network prune -f
+# Stop and remove containers related to fastled-wasm-compiler
+if container_exists; then
+    echo "Stopping and removing containers..."
+    container_ids=$(filter_containers)
+    
+    if [ -n "$container_ids" ]; then
+        docker stop $container_ids
+        docker rm $container_ids
+    else
+        echo "No containers found for fastled-wasm-compiler."
+    fi
+else
+    echo "No containers found for fastled-wasm-compiler."
+fi
 
-# Remove build cache
-docker builder prune -af
-
-echo "Docker cleanup completed."
-
+# Remove the fastled-wasm-compiler image
+if image_exists; then
+    echo "Removing fastled-wasm-compiler image..."
+    docker rmi fastled-wasm-compiler
+else
+    echo "No image found for fastled-wasm-compiler."
+fi
