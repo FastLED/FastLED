@@ -6,7 +6,7 @@ cp -r /wasm/* /js/
 cd /js
 for ino_file in *.ino; do
     if [ -f "$ino_file" ]; then
-        sed -i "1i#include \"platforms/stub/wasm/led_sysdefs_wasm.hpp\"" "$ino_file"
+        echo -e "\n#include \"platforms/stub/wasm/led_sysdefs_wasm.hpp\"" >> "$ino_file"
     fi
 done
 pio run
