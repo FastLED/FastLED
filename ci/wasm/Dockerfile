@@ -49,5 +49,7 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
+
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash"]

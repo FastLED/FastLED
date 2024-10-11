@@ -29,8 +29,8 @@ wasmflags = [
     "EXPORTED_FUNCTIONS=['_malloc', '_free', '_main']",
     "-s",
     "INITIAL_MEMORY=1073741824",
-    "-s",
-    "STACK_SIZE=536870912",
+    #"-s",
+    #"STACK_SIZE=5368709",
     f"-sWASM={USE_WASM}"
 ]
 
