@@ -22,9 +22,12 @@ jobs:
         run: pip install uv
 
       - name: Compile fastled.js, fastled.wasm, and index.html
-        run: uv run ci/wasm_compile.py examples/wasm -b
+        run: uv run ci/wasm_compile.py -b examples/wasm
         shell: bash
 
+      - name: Scan for wasm/js/html artifacts
+        run: |
+          find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
 
       - name: Check for required artifacts
         run: |
