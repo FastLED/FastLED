@@ -111,9 +111,7 @@ void jsSetCanvasSize(int width, int height) {
         globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(jsonData) {
             console.log("Missing globalThis.onFastLedSetCanvasSize(jsonData) function");
         };
-        // globalThis.onFastLedSetCanvasSize($0, $1);
-        var jsonData = []
-        jsonData.add({ width: $0, height: $1 });
+        var jsonData = [{ width: $0, height: $1 }];
         globalThis.onFastLedSetCanvasSize(jsonData);
     }, width, height);
 }
