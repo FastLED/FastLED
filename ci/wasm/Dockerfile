@@ -13,6 +13,15 @@ RUN dnf install -y python python-pip ca-certificates nano
 # Install PlatformIO
 RUN pip install platformio==6.1.16
 
+# Add alias for `print` command
+RUN echo "alias print='echo'" >> /etc/bashrc
+RUN echo "alias print='echo'" >> /etc/profile
+
+# Optionally, create a print command in case a non-interactive shell is used
+RUN echo '#!/bin/sh' > /usr/local/bin/print && \
+    echo 'echo "$@"' >> /usr/local/bin/print && \
+    chmod +x /usr/local/bin/print
+
 # THIS IS A WORK IN PROGRESS!!!!
 COPY platformio.ini /platformio.ini
 
