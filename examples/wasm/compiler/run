@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Function to build the Docker image
+build_image() {
+    echo "Building Docker image..."
+    docker build -t fastled-wasm-compiler .
+}
+
+# Function to display usage
+usage() {
+    echo "Usage: $0 [-b] <directory>"
+    echo "  -b: Build the Docker image before running"
+    echo "  <directory>: The directory to mount as a volume"
+    exit 1
+}
+
+# Parse arguments
+build_flag=false
+while getopts ":b" opt; do
+    case ${opt} in
+        b )
+            build_flag=true
+            ;;
+        \? )
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND -1))
+
+# Check if directory argument is provided
+if [ $# -eq 0 ]; then
+    usage
+fi
+
+directory=$1
+
+# Get absolute path of the directory
+absolute_directory=$(realpath "$directory")
+
+# Check if directory exists
+if [ ! -d "$absolute_directory" ]; then
+    echo "Error: Directory '$absolute_directory' does not exist."
+    exit 1
+fi
+
+# Build image if -b flag is provided or if the image doesn't exist
+if $build_flag || ! docker image inspect fastled-wasm-compiler >/dev/null 2>&1; then
+    build_image
+fi
+
+# Run the container with the specified volume
+docker run --rm -it -v "$absolute_directory:/workspace" fastled-wasm-compiler
