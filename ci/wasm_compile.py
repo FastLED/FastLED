@@ -66,16 +66,21 @@ def clean():
 def build_image():
     print("Building Docker image...")
     try:
+        cmd_list = [
+            "docker",
+            "build",
+            "--platform",
+            "linux/amd64",
+            "-t",
+            "fastled-wasm-compiler",
+            "-f",
+            str(DOCKER_FILE),
+            str(WASM_DIR),
+        ]
+        cmd_str = subprocess.list2cmdline(cmd_list)
+        print(f"Running command: {cmd_str}")
         subprocess.run(
-            [
-                "docker",
-                "build",
-                "-t",
-                "fastled-wasm-compiler",
-                "-f",
-                str(DOCKER_FILE),
-                str(WASM_DIR),
-            ],
+            cmd_list,
             check=True,
             text=True,
         )
@@ -98,14 +103,17 @@ def run_container(directory):
         docker_command = [
             "docker",
             "run",
+            "--platform",
+            "linux/amd64",
             "--rm",
             "-v",
             f"{absolute_directory}:/mapped",
             "fastled-wasm-compiler",
         ]
         if is_tty():
-            docker_command.insert(3, "-it")
-
+            docker_command.insert(4, "-it")
+        cmd_str = subprocess.list2cmdline(docker_command)
+        print(f"Running command: {cmd_str}")
         subprocess.run(docker_command, check=True)
     except subprocess.CalledProcessError as e:
         raise WASMCompileError(f"ERROR: Failed to run Docker container.\n{e}")

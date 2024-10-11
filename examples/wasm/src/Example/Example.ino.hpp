@@ -78,9 +78,9 @@ void loop() {
         printf("fastled running\r\n");
     }
 
-    EVERY_N_BSECONDS(4) {
-        invokeScriptFromJS('console.log("hello world");')
-    }
+    //EVERY_N_BSECONDS(4) {
+    //    invokeScriptFromJS('console.log("hello world");')
+    //}
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
