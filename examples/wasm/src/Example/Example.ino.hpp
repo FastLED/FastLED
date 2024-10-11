@@ -80,7 +80,9 @@ void loop() {
     }
 
     EVERY_N_BSECONDS(4) {
-        invokeScriptFromJS("console.log(\"hello world\");");
+        //invokeScriptFromJS("console.log(\"hello world\");");
+        //jsAlert();
+        jsOutput("hello world");
     }
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));

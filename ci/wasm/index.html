@@ -57,6 +57,11 @@
     <script>
         const FRAME_RATE = 60; // 60 FPS
 
+        window.fastledOnFrame = function (jsStr) {
+            const output = document.getElementById('output');
+            output.textContent = frame;
+        };
+
         // Function to call the setup and loop functions
         function runFastLED(extern_setup, extern_loop, frame_rate) {
             console.log("Calling setup function...");
