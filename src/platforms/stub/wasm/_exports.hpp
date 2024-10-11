@@ -95,7 +95,7 @@ void jsOutput(const char* message) {
         var message = UTF8ToString($0);  // Convert C string to JavaScript string
         //console.log(message);            // Log the message to the console
         //globalThis.postMessage({ type: 'message', message: message }); // Send the message to the main thread
-        window.fastledOnFrame(message);
+        window.onFastLedFrame(message);
 
     }, message);
 }
