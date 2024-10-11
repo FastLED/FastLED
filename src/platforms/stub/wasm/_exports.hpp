@@ -86,7 +86,7 @@ void jsAlert() {
     EM_ASM(alert('hai'));
 }
 
-void jsOutput(const char* message) {
+void jsOnFrame(const char* message) {
     // Use EM_ASM to call JavaScript directly
     EM_ASM_({
         window.onFastLedFrame = window.onFastLedFrame || function(jsonStr) {
