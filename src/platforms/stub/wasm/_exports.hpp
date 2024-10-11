@@ -1,3 +1,4 @@
+#pragma once
 
 /// Begin compatibility layer for FastLED platform. WebAssembly edition.
 
