@@ -64,15 +64,15 @@ jobs:
               const browser = await chromium.launch();
               const page = await browser.newPage();
               await page.goto("http://localhost:8000");
-              let frameCallCount = 0;
               await page.evaluate(() => {
+                window.frameCallCount = 0;
                 globalThis.onFastLedFrame = (jsonStr) => {
                   console.log("onFastLedFrame called with:", jsonStr);
-                  frameCallCount++;
+                  window.frameCallCount++;
                 };
               });
               await page.waitForTimeout(3000);
-              const callCount = await page.evaluate(() => frameCallCount);
+              const callCount = await page.evaluate(() => window.frameCallCount);
               if (callCount > 0) {
                 console.log("Success: onFastLedFrame was called", callCount, "times");
               } else {
