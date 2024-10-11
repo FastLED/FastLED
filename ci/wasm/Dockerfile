@@ -51,6 +51,7 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
 
 COPY platformio.ini /wasm/platformio.ini
 COPY wasm.py /wasm/wasm.py
+COPY index.html /wasm/index.html
 
 
 # There is some download that needs to happen on the first compile.
