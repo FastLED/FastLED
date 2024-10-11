@@ -68,13 +68,17 @@ EMSCRIPTEN_KEEPALIVE extern "C" void async_start_loop() {
 #include <emscripten.h>
 #include <iostream>
 
+
+
+
 // Function to invoke the JavaScript function to run a script
-void invokeScriptFromJS(const char* scriptPath) {
+void invokeScriptFromJS(const char* script) {
     // Use EM_ASM to call JavaScript directly
-    EM_ASM({
-        var script = UTF8ToString($0);  // Convert C string to JavaScript string
-        runScript(script);              // Call the JS function to run the script
-    }, scriptPath);
+    //EM_ASM({
+    //    var script = UTF8ToString($0);  // Convert C string to JavaScript string
+    //    emscripten_run_script(script);              // Call the JS function to run the script
+    //}, scriptPath);
+    emscripten_run_script(script);
 }
 
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {

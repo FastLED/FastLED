@@ -8,6 +8,7 @@
 
 #include <FastLED.h>
 #include "fx/2d/noisepalette.hpp"
+#include "platforms/stub/wasm/_exports.hpp"
 
 
 #define LED_PIN 3
@@ -78,9 +79,9 @@ void loop() {
         printf("fastled running\r\n");
     }
 
-    //EVERY_N_BSECONDS(4) {
-    //    invokeScriptFromJS('console.log("hello world");')
-    //}
+    EVERY_N_BSECONDS(4) {
+        invokeScriptFromJS("console.log(\"hello world\");");
+    }
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
