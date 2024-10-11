@@ -84,9 +84,6 @@
             const first = jsonData[0];  // one canvas information per controller, just assume one for now.
             canvas.width = first.width;
             canvas.height = first.height;
-
-            canvas.width = width;
-            canvas.height = height;
             
             const maxDisplaySize = 640; // Maximum display size in pixels
             const scaleFactor = Math.min(maxDisplaySize / width, maxDisplaySize / height, 20);
