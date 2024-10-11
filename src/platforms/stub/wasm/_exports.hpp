@@ -106,6 +106,10 @@ void jsOnFrame(const char* message) {
     }, message);
 }
 
+extern "C" void _js_message_push_back(const char* message) {
+    js_message_push_back(message);
+}
+
 EMSCRIPTEN_KEEPALIVE extern "C" bool postMessage(const char* jstStr) {
     // post message to the message queue.
     return js_message_push_back(jstStr);
