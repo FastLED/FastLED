@@ -9,6 +9,7 @@
 #include <FastLED.h>
 #include "fx/2d/noisepalette.hpp"
 #include "platforms/stub/wasm/_exports.hpp"
+#include "platforms/stub/wasm/json.h"
 
 
 #define LED_PIN 3
