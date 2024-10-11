@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from typing import List
 
+from ci.paths import PROJECT_ROOT
+
 HERE: Path = Path(__file__).parent
 WASM_DIR: Path = HERE / "wasm"
 DOCKER_FILE: Path = WASM_DIR / "Dockerfile"
@@ -122,6 +124,19 @@ def run_container(directory: str, interactive: bool) -> None:
         raise WASMCompileError(f"ERROR: Failed to run Docker container.\n{e}")
 
 
+def _copy_index_html_if_necessary() -> None:
+    src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "index.html"
+    dest_file = WASM_DIR / "index.html"
+    if not dest_file.exists():
+        print(f"Copying {src_file} to {dest_file}")
+        dest_file.write_text(src_file.read_text())
+        return
+    # check if the contents are the same
+    if src_file.read_text() != dest_file.read_text():
+        print(f"Copying {src_file} to {dest_file}")
+        dest_file.write_text(src_file.read_text())
+
+
 def main() -> None:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="WASM Compiler for FastLED"
@@ -158,6 +173,8 @@ def main() -> None:
 
         if args.directory is None:
             parser.error("ERROR: directory is required unless --clean is specified")
+
+        _copy_index_html_if_necessary()
 
         if args.build or not image_exists():
             build_image()
