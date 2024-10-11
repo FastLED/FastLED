@@ -11,9 +11,9 @@ COPY --from=emscripten_base /emsdk_portable /emsdk_portable
 RUN dnf install -y python python-pip ca-certificates
 
 # Set up the entrypoint script
-RUN echo '#!/bin/bash\n\
-source /emsdk_portable/emsdk_env.sh\n\
-exec "$@"' > /entrypoint.sh && \
+RUN echo '#!/bin/bash' > /entrypoint.sh && \
+    echo 'source /emsdk_portable/emsdk_env.sh' >> /entrypoint.sh && \
+    echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
