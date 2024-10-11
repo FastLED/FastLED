@@ -30,7 +30,7 @@ extern "C" {
             return g_pause_time;
         }
         #else
-        real_millis();
+        return real_millis();
         #endif
     }
 
