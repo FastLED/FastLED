@@ -75,17 +75,28 @@ void setup() {
 }
 
 void loop() {
+    static int frame = 0;
     EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
     EVERY_N_MILLISECONDS(1000) {
         printf("fastled running\r\n");
     }
 
-    EVERY_N_BSECONDS(4) {
+    if(true) {
         //invokeScriptFromJS("console.log(\"hello world\");");
         //jsAlert();
-        jsOnFrame("hello world");
+        //jsOnFrame("hello world");
+        // use arduino json to construct a simple json string.
+        JsonDocument doc;
+        doc["frame_number"] = frame;
+        JsonArray data = doc["data"].to<JsonArray>();
+        data.add(1);
+        data.add(2);
+        char output[256];
+        serializeJson(doc, output);
+        jsOnFrame(output);
     }
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
+    frame++;
 }
