@@ -57,28 +57,53 @@ jobs:
           npm install playwright
           npm install http-server
           npx playwright install chromium
-          npx http-server examples/wasm/fastled_js -p 8123 &
-          node -e '
-            const { chromium } = require("playwright");
+          
+          # Find an available port
+          PORT=$(node -e "
+            const net = require('net');
+            const server = net.createServer();
+            server.listen(0, () => {
+              console.log(server.address().port);
+              server.close();
+            });
+          ")
+          echo "Using port: $PORT"
+          
+          # Start http-server with the dynamic port
+          npx http-server examples/wasm/fastled_js -p $PORT &
+          SERVER_PID=$!
+          
+          # Wait for the server to start
+          sleep 5
+          
+          node -e "
+            const { chromium } = require('playwright');
             (async () => {
               const browser = await chromium.launch();
               const page = await browser.newPage();
-              await page.goto("http://localhost:8123");
-              await page.evaluate(() => {
-                window.frameCallCount = 0;
-                globalThis.onFastLedFrame = (jsonStr) => {
-                  console.log("onFastLedFrame called with:", jsonStr);
-                  window.frameCallCount++;
-                };
-              });
-              await page.waitForTimeout(3000);
-              const callCount = await page.evaluate(() => window.frameCallCount);
-              if (callCount > 0) {
-                console.log("Success: FastLED.js was initialized and called onFastLedFrame was called", callCount, "times");
-              } else {
-                console.error("Error: FastLED.js had something go wrong and onFastLedFrame was not called within 3 seconds");
+              try {
+                await page.goto('http://localhost:${PORT}', { timeout: 30000 });
+                await page.evaluate(() => {
+                  window.frameCallCount = 0;
+                  globalThis.onFastLedFrame = (jsonStr) => {
+                    console.log('onFastLedFrame called with:', jsonStr);
+                    window.frameCallCount++;
+                  };
+                });
+                await page.waitForTimeout(5000);
+                const callCount = await page.evaluate(() => window.frameCallCount);
+                if (callCount > 0) {
+                  console.log('Success: FastLED.js was initialized and onFastLedFrame was called', callCount, 'times');
+                } else {
+                  console.error('Error: FastLED.js had something go wrong and onFastLedFrame was not called within 5 seconds');
+                  process.exit(1);
+                }
+              } catch (error) {
+                console.error('An error occurred:', error);
                 process.exit(1);
+              } finally {
+                await browser.close();
+                process.kill(${SERVER_PID});
               }
-              await browser.close();
             })();
-          '
+          "
