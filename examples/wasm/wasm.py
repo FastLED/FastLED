@@ -30,7 +30,7 @@ wasmflags = [
     "-s",
     "INITIAL_MEMORY=1073741824",
     "-s",
-    #"STACK_SIZE=536870912",
+    #"STACK_SIZE=536870912",  <---- incompatible with emscripten:1.39.17-upstream
     f"-sWASM={USE_WASM}"
 ]
 

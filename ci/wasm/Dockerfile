@@ -49,6 +49,9 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
+COPY platformio.ini /wasm/platformio.ini
+COPY wasm.py /wasm/wasm.py
+
 WORKDIR /js
 
 # Create compile.sh in /js directory
@@ -56,9 +59,14 @@ RUN echo '#!/bin/bash' > /js/compile.sh && \
     echo 'set -e' >> /js/compile.sh && \
     echo 'cp -r /mapped/* /js/' >> /js/compile.sh && \
     echo 'rm -rf /js/.pio' >> /js/compile.sh && \
+    echo 'cp -r /wasm/* /js/' >> /js/compile.sh && \
     echo 'cd /js' >> /js/compile.sh && \
     echo 'pio run' >> /js/compile.sh && \
-    echo 'cp ./.pio/build/*/fastled.js /mapped/' >> /js/compile.sh && \
+    echo 'rm -rf /mapped/fastled_js/*' >> /js/compile.sh && \
+    echo 'mkdir -p /mapped/fastled_js' >> /js/compile.sh && \
+    echo 'cp ./.pio/build/*/fastled.js /mapped/fastled_js/fastled.js' >> /js/compile.sh && \
+    echo 'cp ./.pio/build/*/fastled.wasm /mapped/fastled_js/fastled.wasm' >> /js/compile.sh && \
+    echo 'cp ./index.html /mapped/fastled_js/index.html' >> /js/compile.sh && \
     chmod +x /js/compile.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
