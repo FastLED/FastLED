@@ -89,7 +89,7 @@ void jsAlert() {
 void jsOutput(const char* message) {
     // Use EM_ASM to call JavaScript directly
     EM_ASM_({
-        window.fastledOnFrame = window.onFastLedFrame || function(jsonStr) {
+        window.onFastLedFrame = window.onFastLedFrame || function(jsonStr) {
             console.log("Missing window.onFastLedFrame(jsonStr) function");
         };
         var message = UTF8ToString($0);  // Convert C string to JavaScript string
