@@ -8,19 +8,19 @@ FROM fedora
 COPY --from=emscripten_base /emsdk_portable /emsdk_portable
 
 # Install required tools to run Emscripten SDK
-RUN dnf install -y python python-pip ca-certificates nano
+RUN dnf install -y python python-pip ca-certificates nano git
 
 # Install PlatformIO
 RUN pip install platformio==6.1.16
 
-# Add alias for `print` command
-RUN echo "alias print='echo'" >> /etc/bashrc
-RUN echo "alias print='echo'" >> /etc/profile
+# Create a custom print script
+RUN echo '#!/bin/sh' > /usr/bin/print && \
+    echo 'echo "$@"' >> /usr/bin/print && \
+    chmod +x /usr/bin/print
 
-# Optionally, create a print command in case a non-interactive shell is used
-RUN echo '#!/bin/sh' > /usr/local/bin/print && \
-    echo 'echo "$@"' >> /usr/local/bin/print && \
-    chmod +x /usr/local/bin/print
+# Add print function to /etc/profile to make it available in all shells
+RUN echo 'print() { echo "$@"; }' >> /etc/profile && \
+    echo 'export -f print' >> /etc/profile
 
 # THIS IS A WORK IN PROGRESS!!!!
 COPY platformio.ini /platformio.ini
