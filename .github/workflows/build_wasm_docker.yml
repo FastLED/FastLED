@@ -1,4 +1,4 @@
-name: wasm
+name: wasm_docker
 
 on:
   workflow_dispatch:
@@ -12,9 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Verify Emscripten
-        run: emcc -v
-
       - name: Install UV for python
         run: pip install uv
 
