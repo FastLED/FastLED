@@ -74,9 +74,9 @@ jobs:
               await page.waitForTimeout(3000);
               const callCount = await page.evaluate(() => window.frameCallCount);
               if (callCount > 0) {
-                console.log("Success: onFastLedFrame was called", callCount, "times");
+                console.log("Success: FastLED.js was initialized and called onFastLedFrame was called", callCount, "times");
               } else {
-                console.error("Error: onFastLedFrame was not called within 3 seconds");
+                console.error("Error: FastLED.js had something go wrong and onFastLedFrame was not called within 3 seconds");
                 process.exit(1);
               }
               await browser.close();
