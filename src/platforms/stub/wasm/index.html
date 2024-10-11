@@ -46,8 +46,9 @@
 
         #myCanvas {
             background-color: #1E1E1E; /* Slightly lighter gray for contrast */
-            width: 400px;
-            height: 400px;
+            width: 320px;
+            height: 320px;
+            image-rendering: pixelated;
         }
 
         #output {
@@ -59,6 +60,23 @@
 
     <script>
         const FRAME_RATE = 60; // 60 FPS
+        const CANVAS_SIZE = 16; // 16x16 canvas
+
+        function updateCanvas(data) {
+            const canvas = document.getElementById('myCanvas');
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.createImageData(CANVAS_SIZE, CANVAS_SIZE);
+
+            for (let i = 0; i < data.length; i += 3) {
+                const pixelIndex = (i / 3) * 4;
+                imageData.data[pixelIndex] = data[i];       // Red
+                imageData.data[pixelIndex + 1] = data[i + 1]; // Green
+                imageData.data[pixelIndex + 2] = data[i + 2]; // Blue
+                imageData.data[pixelIndex + 3] = 255;         // Alpha (fully opaque)
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+        }
 
         globalThis.onFastLedFrame = function (jsStr) {
             const frameData = JSON.parse(jsStr);
@@ -66,6 +84,8 @@
             const msg = `Frame: ${frame_number}\nData: ${data.length / 3} pixels\n`;
             const output = document.getElementById('output');
             output.textContent = msg;
+
+            updateCanvas(data);
         };
 
         // Function to call the setup and loop functions
@@ -136,7 +156,7 @@
 <body>
     <h1>FastLED Wasm Demo</h1>
     <div id="canvas-container">
-        <canvas id="myCanvas" width="400" height="400"></canvas>
+        <canvas id="myCanvas" width="16" height="16"></canvas>
     </div>
     <pre id="output"></pre>
 
