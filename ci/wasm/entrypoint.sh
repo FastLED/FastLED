@@ -15,10 +15,26 @@ insert_header() {
 mkdir -p /js/src
 cp -r /mapped/* /js/src
 
-# if there is an ino file in the src directory, then rename it to main.cpp
+
+
+# If there is an ino file in the src directory, then rename it to main.cpp. Add
+# a special case if there already is a main.cpp file, in this case we will
+# rename it to main2.hpp, then generate the main.cpp file and then include the main2.hpp
+# file in the main.cpp file.
 if [ -f /js/src/*.ino ]; then
+    # Check if main.cpp already exists
+    if [ -f /js/src/main.cpp ]; then
+        # special case, main.cpp exists, so we want to rename it to main2.hpp
+        mv /js/src/main.cpp /js/src/main2.hpp
+    fi
     mv /js/src/*.ino /js/src/main.cpp
+    # If main2.hpp exists (because it was renamed, then append it to main.cpp)
+    if [ -f /js/src/main2.hpp ]; then
+        # the main2.hpp file was created, so include it.
+        echo '#include "main2.hpp"' >> /js/src/main.cpp
+    fi
 fi
+
 
 # Remove the .pio directory copy, if it exists because this could contain build
 # artifacts from a previous build
