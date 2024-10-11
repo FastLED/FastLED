@@ -86,6 +86,16 @@ void jsAlert() {
     EM_ASM(alert('hai'));
 }
 
+void jsOutput(const char* message) {
+    // Use EM_ASM to call JavaScript directly
+    EM_ASM_({
+        var message = UTF8ToString($0);  // Convert C string to JavaScript string
+        console.log(message);            // Log the message to the console
+        globalThis.postMessage({ type: 'message', message: message }); // Send the message to the main thread
+
+    }, message);
+}
+
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
     const char* scriptPath = "/path/to/your/script.sh"; // Change to your script path
     invokeScriptFromJS(scriptPath);
