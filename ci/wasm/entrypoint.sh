@@ -15,6 +15,11 @@ insert_header() {
 mkdir -p /js/src
 cp -r /mapped/* /js/src
 
+# if there is an ino file in the src directory, then rename it to main.cpp
+if [ -f /js/src/*.ino ]; then
+    mv /js/src/*.ino /js/src/main.cpp
+fi
+
 # Remove the .pio directory copy, if it exists because this could contain build
 # artifacts from a previous build
 rm -rf /js/.pio
