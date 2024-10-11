@@ -81,9 +81,12 @@ void invokeScriptFromJS(const char* script) {
     emscripten_run_script(script);
 }
 
-void jsAlert() {
-    // Use EM_ASM to call JavaScript directly
-    EM_ASM(alert('hai'));
+void jsAlert(const char* msg) {
+    EM_ASM_({
+        // Use EM_ASM to call JavaScript directly    EM_ASM({
+        var message = UTF8ToString($0);  // Convert C string to JavaScript string
+        alert(message);                 // Call the JS function to show an alert
+    });
 }
 
 void jsOnFrame(const char* message) {
