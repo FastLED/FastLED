@@ -1,0 +1,41 @@
+name: wasm
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Verify Emscripten
+        run: emcc -v
+
+      - name: Install UV for python
+        run: pip install uv
+
+      - name: Compile fastled.js, fastled.wasm, and index.html
+        run: uv run ci/wasm_compile.py examples\wasm -b
+
+
+      - name: Scan for wasm/js/html artifacts
+        run: |
+          cd examples && find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
+
+
+      - name: Generate timestamp and random hex
+        id: generate_id
+        run: |
+          echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+          echo "random_hex=$(openssl rand -hex 3)" >> $GITHUB_OUTPUT
+
+      - name: Upload wasm artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
+          path: examples/fastled_js/*.*
+          if-no-files-found: error
