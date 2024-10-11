@@ -5,8 +5,11 @@
 // emscripten headers
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
+#include <deque>  // ok include
+#include <string> // ok include
 
 #include "_timer.hpp"
+#include "message_queue.h"
 
 extern void setup();
 extern void loop();
@@ -101,6 +104,11 @@ void jsOnFrame(const char* message) {
         globalThis.onFastLedFrame(message);
 
     }, message);
+}
+
+EMSCRIPTEN_KEEPALIVE extern "C" bool postMessage(const char* jstStr) {
+    // post message to the message queue.
+    return js_message_push_back(jstStr);
 }
 
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
