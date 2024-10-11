@@ -10,6 +10,7 @@
 
 #include "_timer.hpp"
 #include "message_queue.h"
+#include "json.h"
 
 extern void setup();
 extern void loop();
