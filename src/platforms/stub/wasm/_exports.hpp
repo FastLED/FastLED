@@ -113,7 +113,7 @@ void jsSetCanvasSize(int width, int height) {
     JsonObject obj = array.createNestedObject();
     obj["width"] = width;
     obj["height"] = height;
-    char output[1024];
+    char jsonStr[1024];
     serializeJson(doc, jsonStr);
     EM_ASM_({
         globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(jsonStr) {
