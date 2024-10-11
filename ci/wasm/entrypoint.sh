@@ -12,7 +12,8 @@ insert_header() {
 }
 
 # Copy the contents of the hosts mapped directory to the container
-cp -r /mapped/* /js/
+mkdir -p /js/src
+cp -r /mapped/* /js/src
 
 # Remove the .pio directory copy, if it exists because this could contain build
 # artifacts from a previous build
