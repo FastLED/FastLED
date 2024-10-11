@@ -11,5 +11,5 @@
 // provided in the repo. The index.html file will load the js file an invoke
 // start on it.
 
-#include "Example/Example.ino"
-#include "platforms/wasm/led_sysdefs_wasm.hpp"
+#include "Example/Example.ino.hpp"
+#include "platforms/stub/wasm/led_sysdefs_wasm.hpp"
