@@ -81,6 +81,11 @@ void invokeScriptFromJS(const char* script) {
     emscripten_run_script(script);
 }
 
+void jsAlert() {
+    // Use EM_ASM to call JavaScript directly
+    EM_ASM(alert('hai'));
+}
+
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
     const char* scriptPath = "/path/to/your/script.sh"; // Change to your script path
     invokeScriptFromJS(scriptPath);
