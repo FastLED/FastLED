@@ -181,7 +181,7 @@ def main() -> None:
         if args.directory is None:
             parser.error("ERROR: directory is required unless --clean is specified")
 
-        # _copy_index_html_if_necessary()
+        _copy_index_html_if_necessary()
 
         if args.build or not image_exists():
             build_image()
