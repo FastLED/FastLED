@@ -57,13 +57,13 @@ jobs:
           npm install playwright
           npm install http-server
           npx playwright install chromium
-          npx http-server examples/wasm/fastled_js -p 8000 &
+          npx http-server examples/wasm/fastled_js -p 8123 &
           node -e '
             const { chromium } = require("playwright");
             (async () => {
               const browser = await chromium.launch();
               const page = await browser.newPage();
-              await page.goto("http://localhost:8000");
+              await page.goto("http://localhost:8123");
               await page.evaluate(() => {
                 window.frameCallCount = 0;
                 globalThis.onFastLedFrame = (jsonStr) => {
