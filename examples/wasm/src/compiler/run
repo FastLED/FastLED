@@ -3,13 +3,13 @@
 # Function to build the Docker image
 build_image() {
     echo "Building Docker image..."
-    docker build -t fasted-wasm-compiler .
+    docker build -t fastled-wasm-compiler .
 }
 
 # Check if -b flag is provided or if the image doesn't exist
-if [[ "$1" == "-b" ]] || ! docker image inspect fasted-wasm-compiler >/dev/null 2>&1; then
+if [[ "$1" == "-b" ]] || ! docker image inspect fastled-wasm-compiler >/dev/null 2>&1; then
     build_image
 fi
 
 # Run the container
-docker run --rm -it fasted-wasm-compiler
+docker run --rm -it fastled-wasm-compiler
