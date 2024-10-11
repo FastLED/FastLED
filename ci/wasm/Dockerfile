@@ -76,4 +76,4 @@ RUN echo '#!/bin/bash' > /js/compile.sh && \
     chmod +x /js/compile.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/bin/bash"]
+CMD ["/bin/bash", "/js/compile.sh"]
