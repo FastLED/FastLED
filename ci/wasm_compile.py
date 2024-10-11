@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 import sys
+import webbrowser
 from pathlib import Path
 from typing import List
 
@@ -162,6 +163,12 @@ def main() -> None:
         action="store_true",
         help="Run the container in interactive mode with /bin/bash",
     )
+    parser.add_argument(
+        "-o",
+        "--open",
+        action="store_true",
+        help="Launch a web server and open a browser after compilation",
+    )
     args: argparse.Namespace = parser.parse_args()
 
     try:
@@ -174,19 +181,42 @@ def main() -> None:
         if args.directory is None:
             parser.error("ERROR: directory is required unless --clean is specified")
 
-        _copy_index_html_if_necessary()
+        # _copy_index_html_if_necessary()
 
         if args.build or not image_exists():
             build_image()
 
         run_container(args.directory, args.interactive)
 
+        output_dir = str(Path(args.directory) / "fastled_js")
+
+        if args.open:
+            print(f"Launching web server from {output_dir}")
+            run_web_server(output_dir)
+
     except WASMCompileError as e:
         print(f"\033[91m{str(e)}\033[0m")  # Print error in red
         sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user.")
+        sys.exit(0)
     except Exception as e:
         print(f"\033[91mUnexpected error: {str(e)}\033[0m")  # Print error in red
         sys.exit(1)
+
+
+def run_web_server(directory: str, port: int = 8000) -> None:
+    os.chdir(directory)
+    print(f"Launching web server at http://localhost:{port}")
+    proc = subprocess.Popen(["python", "-m", "http.server", str(port)])
+    import time
+
+    time.sleep(3)
+    webbrowser.open(f"http://localhost:{port}")
+    try:
+        proc.wait()
+    except KeyboardInterrupt:
+        proc.terminate()
 
 
 if __name__ == "__main__":
