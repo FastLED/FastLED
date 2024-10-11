@@ -81,6 +81,7 @@
         "list": "cpp",
         "fstream": "cpp",
         "mutex": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "regex": "cpp"
     }
 }

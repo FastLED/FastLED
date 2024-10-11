@@ -10,7 +10,7 @@
 
 #include "_timer.hpp"
 #include "message_queue.h"
-#include "json.h"
+
 
 extern void setup();
 extern void loop();
@@ -108,14 +108,8 @@ void jsOnFrame(const char* message) {
 }
 
 void jsSetCanvasSize(int width, int height) {
-    JsonDocument doc;
-    JsonArray array = doc.to<JsonArray>();
-    // create a dictionary object
-    JsonObject obj = array.createNestedObject();
-    obj["width"] = width;
-    obj["height"] = height;
     char jsonStr[1024];
-    serializeJson(doc, jsonStr);
+    snprintf(jsonStr, sizeof(jsonStr), "[{\"width\":%d,\"height\":%d}]", width, height);
     EM_ASM_({
         globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(jsonStr) {
             console.log("Missing globalThis.onFastLedSetCanvasSize(jsonStr) function");
