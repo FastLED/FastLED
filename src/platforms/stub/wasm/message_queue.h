@@ -3,6 +3,8 @@
 #include <string>  // ok include
 #include "namespace.h"
 
+#include <emscripten/emscripten.h> // Include Emscripten headers
+
 FASTLED_NAMESPACE_BEGIN
 
 /**
@@ -23,7 +25,7 @@ bool js_message_pop_front(std::string* message);
  * @param message The message to be added.
  * @return true if the message was successfully added, false otherwise.
  */
-extern "C" bool js_message_push_back(const char* msg);
+EMSCRIPTEN_KEEPALIVE bool js_message_push_back(const char* msg);
 
 /**
  * @brief Get the count of messages that were missed due to queue overflow.

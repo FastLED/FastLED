@@ -24,7 +24,7 @@ bool js_message_pop_front(std::string* message) {
     return true;
 }
 
-EMSCRIPTEN_KEEPALIVE extern "C" bool js_message_push_back(const char* msg) {
+EMSCRIPTEN_KEEPALIVE bool js_message_push_back(const char* msg) {
     if (message_queue.size() >= MAX_QUEUE_SIZE) {
         message_queue.pop_front();
         missed_messages_count++;
