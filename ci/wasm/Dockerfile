@@ -21,8 +21,13 @@ RUN dnf install -y python3 python3-pip
 # Install PlatformIO
 RUN pip3 install platformio==6.1.16
 
+# Create /container/bin directory and add symbolic links
+RUN mkdir -p /container/bin && \
+    ln -s /usr/bin/python3 /container/bin/python && \
+    ln -s /usr/bin/pip3 /container/bin/pip
+
 # Add Python and Emscripten to PATH
-ENV PATH="/usr/local/bin:/usr/bin:/emsdk_portable:/emsdk_portable/upstream/emscripten:${PATH}"
+ENV PATH="/container/bin:/usr/local/bin:/usr/bin:/emsdk_portable:/emsdk_portable/upstream/emscripten:${PATH}"
 
 # Create a custom print script
 RUN echo '#!/bin/sh' > /usr/bin/print && \
@@ -32,7 +37,7 @@ RUN echo '#!/bin/sh' > /usr/bin/print && \
 # Add print function and PATH modifications to /etc/profile
 RUN echo 'print() { echo "$@"; }' >> /etc/profile && \
     echo 'export -f print' >> /etc/profile && \
-    echo 'export PATH="/usr/bin:/emsdk_portable:/emsdk_portable/upstream/emscripten:$PATH"' >> /etc/profile && \
+    echo 'export PATH="/container/bin:/usr/bin:/emsdk_portable:/emsdk_portable/upstream/emscripten:$PATH"' >> /etc/profile && \
     echo 'source /emsdk_portable/emsdk_env.sh' >> /etc/profile
 
 # THIS IS A WORK IN PROGRESS!!!!
