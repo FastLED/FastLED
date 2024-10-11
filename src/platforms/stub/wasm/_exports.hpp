@@ -89,13 +89,13 @@ void jsAlert() {
 void jsOnFrame(const char* message) {
     // Use EM_ASM to call JavaScript directly
     EM_ASM_({
-        window.onFastLedFrame = window.onFastLedFrame || function(jsonStr) {
-            console.log("Missing window.onFastLedFrame(jsonStr) function");
+        globalThis.onFastLedFrame = globalThis.onFastLedFrame || function(jsonStr) {
+            console.log("Missing globalThis.onFastLedFrame(jsonStr) function");
         };
         var message = UTF8ToString($0);  // Convert C string to JavaScript string
         //console.log(message);            // Log the message to the console
         //globalThis.postMessage({ type: 'message', message: message }); // Send the message to the main thread
-        window.onFastLedFrame(message);
+        globalThis.onFastLedFrame(message);
 
     }, message);
 }
