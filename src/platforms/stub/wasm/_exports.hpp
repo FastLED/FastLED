@@ -106,6 +106,15 @@ void jsOnFrame(const char* message) {
     }, message);
 }
 
+void jsSetCanvasSize(int width, int height) {
+    EM_ASM_({
+        globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(width, height) {
+            console.log("Missing globalThis.onFastLedSetCanvasSize(width, height) function");
+        };
+        globalThis.onFastLedSetCanvasSize(width, height);
+    }, width, height);
+}
+
 MessageQueue js_message_queue;  // hack - this needs to not be inlined into the hpp file!
 
 EMSCRIPTEN_KEEPALIVE extern "C" bool postMessage(const char* jstStr) {

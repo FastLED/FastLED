@@ -78,6 +78,12 @@
             ctx.putImageData(imageData, 0, 0);
         }
 
+        globalThis.onFastLedSetCanvasSize = function (width, height) {
+            const canvas = document.getElementById('myCanvas');
+            canvas.width = width;
+            canvas.height = height;
+        };
+
         globalThis.onFastLedFrame = function (jsStr) {
             const frameData = JSON.parse(jsStr);
             const { frame_number, data } = frameData;
