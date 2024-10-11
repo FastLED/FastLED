@@ -56,6 +56,7 @@ jobs:
           npm init -y
           npm install playwright
           npm install http-server
+          npx playwright install chromium
           npx http-server examples/wasm/fastled_js -p 8000 &
           node -e '
             const { chromium } = require("playwright");
