@@ -5,6 +5,7 @@
 
 // printf
 #include <stdio.h>
+#include <string>
 
 #include <FastLED.h>
 #include "fx/2d/noisepalette.hpp"
@@ -17,8 +18,8 @@
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 
-#define MATRIX_WIDTH 16
-#define MATRIX_HEIGHT 16
+#define MATRIX_WIDTH 256
+#define MATRIX_HEIGHT 256
 #define GRID_SERPENTINE false
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
@@ -97,9 +98,9 @@ void loop() {
             data.add(led.g);
             data.add(led.b);
         }
-        char output[0xffff];
+        std::string output;
         serializeJson(doc, output);
-        jsOnFrame(output);
+        jsOnFrame(output.c_str());
     }
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));

@@ -84,6 +84,8 @@
             const first = jsonData[0];  // one canvas information per controller, just assume one for now.
             canvas.width = first.width;
             canvas.height = first.height;
+            console.log(`Canvas size set to ${first.width}x${first.height}`);
+            alert(`Canvas size set to ${first.width}x${first.height}`);
         };
 
         globalThis.onFastLedFrame = function (jsStr) {
