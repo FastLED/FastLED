@@ -50,3 +50,34 @@ jobs:
           name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
           path: examples/wasm/fastled_js/*.*
           if-no-files-found: error
+
+      - name: Install Playwright and verify onFastLedFrame
+        run: |
+          npm init -y
+          npm install playwright
+          npm install http-server
+          npx http-server examples/wasm/fastled_js -p 8000 &
+          node -e '
+            const { chromium } = require("playwright");
+            (async () => {
+              const browser = await chromium.launch();
+              const page = await browser.newPage();
+              await page.goto("http://localhost:8000");
+              let frameCallCount = 0;
+              await page.evaluate(() => {
+                globalThis.onFastLedFrame = (jsonStr) => {
+                  console.log("onFastLedFrame called with:", jsonStr);
+                  frameCallCount++;
+                };
+              });
+              await page.waitForTimeout(3000);
+              const callCount = await page.evaluate(() => frameCallCount);
+              if (callCount > 0) {
+                console.log("Success: onFastLedFrame was called", callCount, "times");
+              } else {
+                console.error("Error: onFastLedFrame was not called within 3 seconds");
+                process.exit(1);
+              }
+              await browser.close();
+            })();
+          '
