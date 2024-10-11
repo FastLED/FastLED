@@ -58,8 +58,11 @@
         const FRAME_RATE = 60; // 60 FPS
 
         globalThis.onFastLedFrame = function (jsStr) {
+            const frameData = JSON.parse(jsStr);
+            const { frame_number, data } = frameData;
+            const msg = `Frame: ${frame_number}\nData: ${data.length / 3} pixels\n`;
             const output = document.getElementById('output');
-            output.textContent = jsStr;
+            output.textContent = msg;
         };
 
         // Function to call the setup and loop functions

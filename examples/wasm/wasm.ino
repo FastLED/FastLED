@@ -89,9 +89,13 @@ void loop() {
         JsonDocument doc;
         doc["frame_number"] = frame;
         JsonArray data = doc["data"].to<JsonArray>();
-        data.add(1);
-        data.add(2);
-        char output[256];
+        for (size_t i = 0; i < NUM_LEDS; ++i) {
+            const CRGB &led = leds[i];
+            data.add(led.r);
+            data.add(led.g);
+            data.add(led.b);
+        }
+        char output[0xffff];
         serializeJson(doc, output);
         jsOnFrame(output);
     }
