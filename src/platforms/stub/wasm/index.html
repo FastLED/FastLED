@@ -78,10 +78,11 @@
             ctx.putImageData(imageData, 0, 0);
         }
 
-        globalThis.onFastLedSetCanvasSize = function (width, height) {
+        globalThis.onFastLedSetCanvasSize = function (jsonData) {
             const canvas = document.getElementById('myCanvas');
-            canvas.width = width;
-            canvas.height = height;
+            const first = jsonData[0];  // one canvas information per controller, just assume one for now.
+            canvas.width = first.width;
+            canvas.height = first.height;
         };
 
         globalThis.onFastLedFrame = function (jsStr) {

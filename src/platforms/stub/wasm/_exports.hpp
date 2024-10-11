@@ -108,10 +108,13 @@ void jsOnFrame(const char* message) {
 
 void jsSetCanvasSize(int width, int height) {
     EM_ASM_({
-        globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(width, height) {
-            console.log("Missing globalThis.onFastLedSetCanvasSize(width, height) function");
+        globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(jsonData) {
+            console.log("Missing globalThis.onFastLedSetCanvasSize(jsonData) function");
         };
-        globalThis.onFastLedSetCanvasSize(width, height);
+        // globalThis.onFastLedSetCanvasSize($0, $1);
+        var jsonData = []
+        jsonData.add({ width: $0, height: $1 });
+        globalThis.onFastLedSetCanvasSize(jsonData);
     }, width, height);
 }
 
