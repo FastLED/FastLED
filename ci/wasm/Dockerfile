@@ -61,20 +61,10 @@ RUN cp -r /wasm /wasm-prewarm && cd /wasm-prewarm && pio run && cd .. && rm -rf 
 
 WORKDIR /js
 
+COPY entrypoint.sh /js/compile.sh
+
 # Create compile.sh in /js directory
-RUN echo '#!/bin/bash' > /js/compile.sh && \
-    echo 'set -e' >> /js/compile.sh && \
-    echo 'cp -r /mapped/* /js/' >> /js/compile.sh && \
-    echo 'rm -rf /js/.pio' >> /js/compile.sh && \
-    echo 'cp -r /wasm/* /js/' >> /js/compile.sh && \
-    echo 'cd /js' >> /js/compile.sh && \
-    echo 'pio run' >> /js/compile.sh && \
-    echo 'rm -rf /mapped/fastled_js/*' >> /js/compile.sh && \
-    echo 'mkdir -p /mapped/fastled_js' >> /js/compile.sh && \
-    echo 'cp ./.pio/build/*/fastled.js /mapped/fastled_js/fastled.js' >> /js/compile.sh && \
-    echo 'cp ./.pio/build/*/fastled.wasm /mapped/fastled_js/fastled.wasm' >> /js/compile.sh && \
-    echo 'cp ./index.html /mapped/fastled_js/index.html' >> /js/compile.sh && \
-    chmod +x /js/compile.sh
+RUN chmod +x /js/compile.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash", "/js/compile.sh"]
