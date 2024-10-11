@@ -23,6 +23,7 @@ jobs:
 
       - name: Compile fastled.js, fastled.wasm, and index.html
         run: uv run ci/wasm_compile.py examples/wasm -b
+        shell: bash
 
 
       - name: Check for required artifacts
