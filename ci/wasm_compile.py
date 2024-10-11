@@ -92,7 +92,7 @@ def is_tty() -> bool:
     return sys.stdout.isatty()
 
 
-def run_container(directory):
+def run_container(directory, interactive):
     absolute_directory = os.path.abspath(directory)
     if not os.path.isdir(absolute_directory):
         raise WASMCompileError(
@@ -112,6 +112,8 @@ def run_container(directory):
         ]
         if is_tty():
             docker_command.insert(4, "-it")
+        if interactive:
+            docker_command.append("/bin/bash")
         cmd_str = subprocess.list2cmdline(docker_command)
         print(f"Running command: {cmd_str}")
         subprocess.run(docker_command, check=True)
@@ -136,6 +138,12 @@ def main():
         action="store_true",
         help="Clean up Docker containers and images",
     )
+    parser.add_argument(
+        "-i",
+        "--interactive",
+        action="store_true",
+        help="Run the container in interactive mode with /bin/bash",
+    )
     args = parser.parse_args()
 
     try:
@@ -151,7 +159,7 @@ def main():
         if args.build or not image_exists():
             build_image()
 
-        run_container(args.directory)
+        run_container(args.directory, args.interactive)
 
     except WASMCompileError as e:
         print(f"\033[91m{str(e)}\033[0m")  # Print error in red
