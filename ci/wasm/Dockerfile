@@ -13,6 +13,7 @@ RUN dnf install -y git
 RUN dnf install -y nano which
 RUN dnf install -y ca-certificates
 RUN dnf install -y python3 python3-pip
+RUN dnf install -y dos2unix
 
 # Create symlinks for python and pip
 #RUN ln -s /usr/bin/python3 /usr/bin/python && \
@@ -62,6 +63,8 @@ RUN cp -r /wasm /wasm-prewarm && cd /wasm-prewarm && pio run && cd .. && rm -rf 
 WORKDIR /js
 
 COPY entrypoint.sh /js/compile.sh
+
+RUN dos2unix /js/compile.sh
 
 # Create compile.sh in /js directory
 RUN chmod +x /js/compile.sh
