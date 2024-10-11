@@ -107,13 +107,21 @@ void jsOnFrame(const char* message) {
 }
 
 void jsSetCanvasSize(int width, int height) {
+    JsonDocument doc;
+    JsonArray array = doc.to<JsonArray>();
+    // create a dictionary object
+    JsonObject obj = array.createNestedObject();
+    obj["width"] = width;
+    obj["height"] = height;
+    char output[1024];
+    serializeJson(doc, jsonStr);
     EM_ASM_({
-        globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(jsonData) {
-            console.log("Missing globalThis.onFastLedSetCanvasSize(jsonData) function");
+        globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(jsonStr) {
+            console.log("Missing globalThis.onFastLedSetCanvasSize(jsonStr) function");
         };
-        var jsonData = [{ width: $0, height: $1 }];
-        globalThis.onFastLedSetCanvasSize(jsonData);
-    }, width, height);
+        var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
+        globalThis.onFastLedSetCanvasSize(jsonStr);
+    }, jsonStr);
 }
 
 MessageQueue js_message_queue;  // hack - this needs to not be inlined into the hpp file!

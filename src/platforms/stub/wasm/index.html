@@ -78,7 +78,8 @@
             ctx.putImageData(imageData, 0, 0);
         }
 
-        globalThis.onFastLedSetCanvasSize = function (jsonData) {
+        globalThis.onFastLedSetCanvasSize = function (jsonStr) {
+            const jsonData = JSON.parse(jsonStr);
             const canvas = document.getElementById('myCanvas');
             const first = jsonData[0];  // one canvas information per controller, just assume one for now.
             canvas.width = first.width;
