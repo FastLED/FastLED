@@ -57,6 +57,6 @@ public:
     }
 
 private:
-    T* mData = default;
-    size_t mSize = default;
+    T* mData = nullptr;
+    size_t mSize = 0;
 };
