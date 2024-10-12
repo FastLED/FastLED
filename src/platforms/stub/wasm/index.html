@@ -109,12 +109,7 @@
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
     };
     globalThis.onFastLedFrame = function (frameData) {
-        const data = new Uint8Array(frameData.getPixelData_Uint8(0));
-        updateCanvas(data);
-    };
-
-    globalThis.onFastLedDemo = function (data) {
-        //console.log("Demo data received:", data.getPixelData_Uint8(0));
+        updateCanvas(frameData.getPixelData_Uint8(0));
     };
 
     // Function to call the setup and loop functions
