@@ -119,13 +119,9 @@
 
         console.log("Starting loop...");
         const frameInterval = 1000 / frame_rate;
-        let lastFrameTime = 0;
 
         // Executes every frame but only runs the loop function at the specified frame rate
         function runLoop(currentTime) {
-            val = moduleInstance.getInt8Array();
-            // console.log("val array: ", val);
-
             if (currentTime - lastFrameTime >= frameInterval) {
                 extern_loop();
                 lastFrameTime = currentTime;
