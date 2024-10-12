@@ -48,8 +48,16 @@ find . -type f \( -name "*.ino" -o -name "*.h" -o -name "*.hpp" -o -name "*.cpp"
 done
 
 pio run
-rm -rf /mapped/fastled_js/*
+# Ensure the directory exists
 mkdir -p /mapped/fastled_js
-cp ./.pio/build/*/fastled.js /mapped/fastled_js/fastled.js
-cp ./.pio/build/*/fastled.wasm /mapped/fastled_js/fastled.wasm
-cp ./index.html /mapped/fastled_js/index.html
+
+# Copy (overwrite if exists) the files
+cp -f ./.pio/build/*/fastled.js /mapped/fastled_js/fastled.js
+cp -f ./.pio/build/*/fastled.wasm /mapped/fastled_js/fastled.wasm
+cp -f ./index.html /mapped/fastled_js/index.html
+
+# now open the files and write them a second time just to be safe
+cat ./.pio/build/*/fastled.js > /mapped/fastled_js/fastled.js
+cat ./.pio/build/*/fastled.wasm > /mapped/fastled_js/fastled.wasm
+cat ./index.html > /mapped/fastled_js/index.html
+
