@@ -50,7 +50,8 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
-
+# In order to speed up the build, copy files that are not likely
+# to be changed first.
 COPY ./*.* /js/fastled/
 COPY ./src/*.* /js/fastled/src/
 COPY ./src/fx/ /js/fastled/src/fx/
@@ -71,7 +72,6 @@ COPY src/platforms/stub/wasm/message_queue.h /wasm/message_queue.h
 # There is some download that needs to happen on the first compile.
 # so we will prewarm the cache by building a dummy project.
 RUN cp -r /wasm /wasm-prewarm && cp -r /js/fastled /wasm-prewarm/fastled && cd /wasm-prewarm && pio run && cd .. && rm -rf /wasm-prewarm
-
 
 WORKDIR /js
 
