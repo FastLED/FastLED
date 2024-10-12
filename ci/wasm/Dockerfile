@@ -72,8 +72,7 @@ COPY src/platforms/stub/wasm/index.html /js/index.html
 # && rm -rf /wasm-prewarm
 
 WORKDIR /js
-
-RUN pio run && rm -rf /js/src
+ RUN pio run -t fastled
 
 
 COPY ci/wasm/entrypoint.sh /js/compile.sh
