@@ -135,6 +135,7 @@ def _copy_if_necessary(src_file: Path, dest_file: Path) -> None:
         print(f"Copying {src_file} to {dest_file}")
         dest_file.write_text(src_file.read_text())
 
+
 def _copy_index_html_if_necessary() -> None:
     src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "index.html"
     dest_file = WASM_DIR / "index.html"
@@ -147,14 +148,10 @@ def _copy_index_html_if_necessary() -> None:
         print(f"Copying {src_file} to {dest_file}")
         dest_file.write_text(src_file.read_text())
 
+
 def _copy_files_if_necessary() -> None:
     # _copy_index_html_if_necessary()
-    files = [
-        "index.html",
-        "_exports.hpp",
-        "_timer.hpp",
-        "message_queue.h"
-    ]
+    files = ["index.html", "_exports.hpp", "_timer.hpp", "message_queue.h"]
     # src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "index.html"
     # dest_file = WASM_DIR / "index.html"
     # _copy_if_necessary(src_file, dest_file)
@@ -166,7 +163,6 @@ def _copy_files_if_necessary() -> None:
         src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / file
         dest_file = WASM_DIR / file
         _copy_if_necessary(src_file, dest_file)
-
 
 
 def main() -> None:
