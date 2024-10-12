@@ -17,22 +17,22 @@ void setup() {
 }
 
 uint8_t wrap_8bit(int i) {
-    // Module % operator here wraps a large "i" so that it is
+    // Modulo % operator here wraps a large "i" so that it is
     // always in [0, 255] range when returned. For example, if
-    // "i" is 256, then this will return 0. If "i" is 257
+    // "i" is 256, then this will return 0. If "i" is 257,
     // then this will return 1. No matter how big the "i" is, the
     // output range will always be [0, 255]
     return i % 256;
 }
 
 void loop() {
-    // Draw a a linear ramp of brightnesses to showcase the difference between
+    // Draw a linear ramp of brightnesses to showcase the difference between
     // the HD and non-HD mode.
     for (int i = 0; i < NUM_LEDS; i++) {
         uint8_t brightness = map(i, 0, NUM_LEDS - 1, 0, 255);
         CRGB c(brightness, brightness, brightness);  // Just make a shade of white.
         leds[i] = c;
     }
-    FastLED.show();  // All leds are now written out.
+    FastLED.show();  // All LEDs are now displayed.
     delay(8);  // Wait 8 milliseconds until the next frame.
 }
