@@ -28,13 +28,23 @@
         }
 
         h1 {
-            font-size: 4em;
-            margin-top: 15vh;
+            font-size: 6em;
+            margin-top: 10vh;
             margin-bottom: 40px;
             text-align: center;
-            font-weight: 300; /* Light */
+            font-weight: 300;
             letter-spacing: 1px;
             line-height: 1.2;
+            position: relative;
+            animation: continuousGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes continuousGlow {
+            0% { text-shadow: 0 0 5px rgba(224, 224, 224, 0.1); }
+            25% { text-shadow: 0 0 20px rgba(224, 224, 224, 0.3); }
+            50% { text-shadow: 0 0 30px rgba(224, 224, 224, 0.5); }
+            75% { text-shadow: 0 0 20px rgba(224, 224, 224, 0.3); }
+            100% { text-shadow: 0 0 5px rgba(224, 224, 224, 0.1); }
         }
 
         #canvas-container {
@@ -49,6 +59,7 @@
             width: 320px;
             height: 320px;
             image-rendering: pixelated;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); /* Outer shadow */
         }
 
         #output {
