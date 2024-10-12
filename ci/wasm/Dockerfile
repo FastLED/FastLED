@@ -58,10 +58,13 @@ COPY src/platforms/stub/wasm/_timer.hpp /wasm/_timer.hpp
 COPY src/platforms/stub/wasm/message_queue.h /wasm/message_queue.h
 
 
+COPY . /js/fastled/
+
+
 
 # There is some download that needs to happen on the first compile.
 # so we will prewarm the cache by building a dummy project.
-RUN cp -r /wasm /wasm-prewarm && cd /wasm-prewarm && pio run && cd .. && rm -rf /wasm-prewarm
+RUN cp -r /wasm /wasm-prewarm && cp -r /js/fastled /wasm-prewarm/fastled && cd /wasm-prewarm && pio run && cd .. && rm -rf /wasm-prewarm
 
 
 WORKDIR /js
