@@ -50,12 +50,12 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
-COPY ci/wasm/platformio.ini /wasm/platformio.ini
-COPY ci/wasm/wasm.py /wasm/wasm.py
-COPY ci/wasm/index.html /wasm/index.html
-COPY ci/wasm/_exports.hpp /wasm/_exports.hpp
-COPY ci/wasm/_timer.hpp /wasm/_timer.hpp
-COPY ci/wasm/message_queue.h /wasm/message_queue.h
+COPY src/platforms/stub/wasm/platformio.ini /wasm/platformio.ini
+COPY src/platforms/stub/wasm/wasm.py /wasm/wasm.py
+COPY src/platforms/stub/wasm/index.html /wasm/index.html
+COPY src/platforms/stub/wasm/_exports.hpp /wasm/_exports.hpp
+COPY src/platforms/stub/wasm/_timer.hpp /wasm/_timer.hpp
+COPY src/platforms/stub/wasm/message_queue.h /wasm/message_queue.h
 
 
 
