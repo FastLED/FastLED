@@ -28,6 +28,7 @@ wasmflags = [
     "-Os",
     # "-s",
     #"EXPORTED_FUNCTIONS=['_malloc', '_free', '_main']",
+    "--bind",
     "-s",
     "INITIAL_MEMORY=1073741824",
     "--no-entry",

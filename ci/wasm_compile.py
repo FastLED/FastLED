@@ -125,6 +125,16 @@ def run_container(directory: str, interactive: bool) -> None:
         raise WASMCompileError(f"ERROR: Failed to run Docker container.\n{e}")
 
 
+def _copy_if_necessary(src_file: Path, dest_file: Path) -> None:
+    if not dest_file.exists():
+        print(f"Copying {src_file} to {dest_file}")
+        dest_file.write_text(src_file.read_text())
+        return
+    # check if the contents are the same
+    if src_file.read_text() != dest_file.read_text():
+        print(f"Copying {src_file} to {dest_file}")
+        dest_file.write_text(src_file.read_text())
+
 def _copy_index_html_if_necessary() -> None:
     src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "index.html"
     dest_file = WASM_DIR / "index.html"
@@ -136,6 +146,27 @@ def _copy_index_html_if_necessary() -> None:
     if src_file.read_text() != dest_file.read_text():
         print(f"Copying {src_file} to {dest_file}")
         dest_file.write_text(src_file.read_text())
+
+def _copy_files_if_necessary() -> None:
+    # _copy_index_html_if_necessary()
+    files = [
+        "index.html",
+        "_exports.hpp",
+        "_timer.hpp",
+        "message_queue.h"
+    ]
+    # src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "index.html"
+    # dest_file = WASM_DIR / "index.html"
+    # _copy_if_necessary(src_file, dest_file)
+    # src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "_exports.hpp"
+    # dest_file = WASM_DIR / "_exports.hpp"
+    # _copy_if_necessary(src_file, dest_file)
+
+    for file in files:
+        src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / file
+        dest_file = WASM_DIR / file
+        _copy_if_necessary(src_file, dest_file)
+
 
 
 def main() -> None:
@@ -181,7 +212,7 @@ def main() -> None:
         if args.directory is None:
             parser.error("ERROR: directory is required unless --clean is specified")
 
-        _copy_index_html_if_necessary()
+        _copy_files_if_necessary()
 
         if args.build or not image_exists():
             build_image()

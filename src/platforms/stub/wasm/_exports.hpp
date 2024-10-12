@@ -3,8 +3,13 @@
 /// Begin compatibility layer for FastLED platform. WebAssembly edition.
 
 // emscripten headers
+#include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
+
+#include <iostream> // ok include
 #include <deque>  // ok include
 #include <string> // ok include
 
@@ -69,9 +74,6 @@ EMSCRIPTEN_KEEPALIVE extern "C" void async_start_loop() {
   emscripten_set_interval(interval_loop, SIXTY_FPS, nullptr);
 }
 
-#include <emscripten.h>
-#include <iostream>
-
 
 
 
@@ -92,6 +94,61 @@ void jsAlert(const char* msg) {
         alert(message);                 // Call the JS function to show an alert
     });
 }
+
+
+class FastLED_ChannelData {
+public:
+    static FastLED_ChannelData* passThrough(FastLED_ChannelData* ptr) { return ptr; }
+    static FastLED_ChannelData* createC() { return new FastLED_ChannelData(); }
+
+    FastLED_ChannelData() {}
+    emscripten::val getPixelData_Uint8(int stripIndex) {
+        const VectorUint8* stripData = getStripData(stripIndex);
+        if (!stripData) {
+            return emscripten::val::null();
+        }
+        return emscripten::val(emscripten::typed_memory_view(stripData->size(), stripData->data()));
+    }
+    
+private:
+    typedef std::vector<uint8_t> VectorUint8;
+    typedef std::pair<int, VectorUint8> StripData;  // strip index -> data
+    typedef std::unique_ptr<StripData> StripDataPtr;
+    std::vector<StripDataPtr> mStripData;
+
+    const VectorUint8* getStripData(int stripIndex) const {
+        // search through the vector for the strip index
+        for (const auto& stripDataPtr : mStripData) {
+            if (stripDataPtr->first == stripIndex) {
+                return &stripDataPtr->second;
+            }
+        }
+        return nullptr;
+    }
+};
+
+EMSCRIPTEN_BINDINGS(better_smart_pointers) {
+    emscripten::class_<FastLED_ChannelData>("FastLED_ChannelData")
+        .smart_ptr_constructor("FastLED_ChannelData", &std::make_shared<FastLED_ChannelData>);
+}
+
+#if 0
+void jsOnFrame(const char* message /*ignored for now*/) {
+    // Use EM_ASM to call JavaScript directly
+    auto ptr = std::make_shared<FastLED_ChannelData>();
+    EM_ASM_({
+        globalThis.onFastLedFrame = globalThis.onFastLedFrame || function(jsonStr) {
+            console.log("Missing globalThis.onFastLedFrame(jsonStr) function");
+        };
+
+        emscripten::var message = ptr;  // Convert C string to JavaScript string
+        //console.log(message);            // Log the message to the console
+        //globalThis.postMessage({ type: 'message', message: message }); // Send the message to the main thread
+        globalThis.onFastLedFrame(message);
+
+    }, ptr.get());
+}
+#endif
 
 void jsOnFrame(const char* message) {
     // Use EM_ASM to call JavaScript directly

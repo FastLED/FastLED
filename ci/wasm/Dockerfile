@@ -53,6 +53,10 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
 COPY platformio.ini /wasm/platformio.ini
 COPY wasm.py /wasm/wasm.py
 COPY index.html /wasm/index.html
+COPY _exports.hpp /wasm/_exports.hpp
+COPY _timer.hpp /wasm/_timer.hpp
+COPY message_queue.h /wasm/message_queue.h
+
 
 
 # There is some download that needs to happen on the first compile.
