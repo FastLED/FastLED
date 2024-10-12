@@ -104,6 +104,48 @@
     const FRAME_RATE = 60; // 60 FPS
     const CANVAS_SIZE = 16; // 16x16 initial canvas size
 
+    globalThis.onFastLedSetCanvasSize = function (jsonStr) {
+        const jsonData = JSON.parse(jsonStr);
+        const canvas = document.getElementById('myCanvas');
+
+        const first = jsonData[0];  // one canvas information per controller, just assume one for now.
+        const width = first.width;
+        const height = first.height;
+        canvas.width = width;
+        canvas.height = height;
+        
+        const maxDisplaySize = 640; // Maximum display size in pixels
+        const scaleFactor = Math.min(maxDisplaySize / width, maxDisplaySize / height, 20);
+        
+        canvas.style.width = Math.round(width * scaleFactor) + 'px';
+        canvas.style.height = Math.round(height * scaleFactor) + 'px';
+        console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
+    };
+    globalThis.onFastLedFrame = function (frameData) {
+        updateCanvas(frameData.getPixelData_Uint8(0));
+    };
+
+    // Function to call the setup and loop functions
+    function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance) {
+        console.log("Calling setup function...");
+        extern_setup();
+
+        console.log("Starting loop...");
+        const frameInterval = 1000 / frame_rate;
+        let lastFrameTime = 0;
+
+        // Executes every frame but only runs the loop function at the specified frame rate
+        function runLoop(currentTime) {
+            if (currentTime - lastFrameTime >= frameInterval) {
+                extern_loop();
+                lastFrameTime = currentTime;
+            }
+            requestAnimationFrame(runLoop);
+        }
+        requestAnimationFrame(runLoop);
+    }
+
+
     let gl, program, positionBuffer, texCoordBuffer, texture;
 
     function initWebGL() {
@@ -196,47 +238,6 @@
         gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
-
-    globalThis.onFastLedSetCanvasSize = function (jsonStr) {
-        const jsonData = JSON.parse(jsonStr);
-        const canvas = document.getElementById('myCanvas');
-
-        const first = jsonData[0];  // one canvas information per controller, just assume one for now.
-        const width = first.width;
-        const height = first.height;
-        canvas.width = width;
-        canvas.height = height;
-        
-        const maxDisplaySize = 640; // Maximum display size in pixels
-        const scaleFactor = Math.min(maxDisplaySize / width, maxDisplaySize / height, 20);
-        
-        canvas.style.width = Math.round(width * scaleFactor) + 'px';
-        canvas.style.height = Math.round(height * scaleFactor) + 'px';
-        console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
-    };
-    globalThis.onFastLedFrame = function (frameData) {
-        updateCanvas(frameData.getPixelData_Uint8(0));
-    };
-
-    // Function to call the setup and loop functions
-    function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance) {
-        console.log("Calling setup function...");
-        extern_setup();
-
-        console.log("Starting loop...");
-        const frameInterval = 1000 / frame_rate;
-        let lastFrameTime = 0;
-
-        // Executes every frame but only runs the loop function at the specified frame rate
-        function runLoop(currentTime) {
-            if (currentTime - lastFrameTime >= frameInterval) {
-                extern_loop();
-                lastFrameTime = currentTime;
-            }
-            requestAnimationFrame(runLoop);
-        }
-        requestAnimationFrame(runLoop);
     }
 
     // Ensure we wait for the module to load
