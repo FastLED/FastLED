@@ -150,17 +150,12 @@ def _copy_index_html_if_necessary() -> None:
 
 
 def _copy_files_if_necessary() -> None:
-    # _copy_index_html_if_necessary()
+    # kind of a hack to get _exports, _timer, and message_queue.h to be copied
+    # will be removed later.
     files = ["index.html", "_exports.hpp", "_timer.hpp", "message_queue.h"]
-    # src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "index.html"
-    # dest_file = WASM_DIR / "index.html"
-    # _copy_if_necessary(src_file, dest_file)
-    # src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "_exports.hpp"
-    # dest_file = WASM_DIR / "_exports.hpp"
-    # _copy_if_necessary(src_file, dest_file)
-
+    stub_src_dir = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm"
     for file in files:
-        src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / file
+        src_file = stub_src_dir / file
         dest_file = WASM_DIR / file
         _copy_if_necessary(src_file, dest_file)
 
