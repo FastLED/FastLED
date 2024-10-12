@@ -44,8 +44,6 @@ fi
 
 # Remove the .pio directory copy, if it exists because this could contain build
 # artifacts from a previous build
-rm -rf /js/.pio
-cp -r /wasm/* /js/
 cd /js
 
 

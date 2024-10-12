@@ -109,7 +109,7 @@ def run_container(directory: str, interactive: bool) -> None:
             "run",
             "--platform",
             "linux/amd64",
-            "--rm",
+            #"--rm",
             "-v",
             f"{absolute_directory}:/mapped",
             "fastled-wasm-compiler",
