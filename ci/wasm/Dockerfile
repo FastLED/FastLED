@@ -50,12 +50,12 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
-COPY platformio.ini /wasm/platformio.ini
-COPY wasm.py /wasm/wasm.py
-COPY index.html /wasm/index.html
-COPY _exports.hpp /wasm/_exports.hpp
-COPY _timer.hpp /wasm/_timer.hpp
-COPY message_queue.h /wasm/message_queue.h
+COPY ci/wasm/platformio.ini /wasm/platformio.ini
+COPY ci/wasm/wasm.py /wasm/wasm.py
+COPY ci/wasm/index.html /wasm/index.html
+COPY ci/wasm/_exports.hpp /wasm/_exports.hpp
+COPY ci/wasm/_timer.hpp /wasm/_timer.hpp
+COPY ci/wasm/message_queue.h /wasm/message_queue.h
 
 
 
@@ -66,7 +66,7 @@ RUN cp -r /wasm /wasm-prewarm && cd /wasm-prewarm && pio run && cd .. && rm -rf 
 
 WORKDIR /js
 
-COPY entrypoint.sh /js/compile.sh
+COPY ci/wasm/entrypoint.sh /js/compile.sh
 
 RUN dos2unix /js/compile.sh
 

@@ -79,7 +79,7 @@ def build_image() -> None:
             "fastled-wasm-compiler",
             "-f",
             str(DOCKER_FILE),
-            str(WASM_DIR),
+            str(PROJECT_ROOT),
         ]
         cmd_str: str = subprocess.list2cmdline(cmd_list)
         print(f"Running command: {cmd_str}")
