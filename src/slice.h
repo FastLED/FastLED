@@ -5,8 +5,10 @@
 template<typename T>
 class Slice {
 public:
+
+    Slice() = default;
     Slice(T* data, size_t size) : mData(data), mSize(size) {}
-    Slice() : mData(nullptr), mSize(0) {}
+
     Slice(const Slice& other) = default;
     Slice& operator=(const Slice& other) = default;
 
@@ -55,6 +57,6 @@ public:
     }
 
 private:
-    T* mData;
-    size_t mSize;
+    T* mData = default;
+    size_t mSize = default;
 };
