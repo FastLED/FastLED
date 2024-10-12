@@ -11,7 +11,7 @@ insert_header() {
     # Remove any existing include of _exports.hpp
     sed -i '/#include "platforms\/stub\/wasm\/_exports.hpp"/d' "$file"
     # Add the include at the beginning of the file
-    sed -i '1i#include "_exports.hpp"' "$file"
+    sed -i '1i#include "platforms/stub/wasm/_exports.hpp"' "$file"
     echo "Processed: $file"
 }
 
@@ -53,14 +53,6 @@ cd /js
 find src -type f \( -name "*.ino" -o -name "*.h" -o -name "*.hpp" -o -name "*.cpp" \) | while read -r file; do
     insert_header "$file"
 done
-
-
-
-
-# copy _header.hpp to the src directory
-cp /js/_exports.hpp /js/src/_exports.hpp
-cp /js/message_queue.h /js/src/message_queue.h
-cp /js/_timer.hpp /js/src/_timer.hpp
 
 
 #############################################

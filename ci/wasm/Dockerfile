@@ -65,9 +65,6 @@ COPY ./src/platforms/ /js/fastled/src/platforms/
 COPY src/platforms/stub/wasm/platformio.ini /wasm/platformio.ini
 COPY src/platforms/stub/wasm/wasm.py /wasm/wasm.py
 COPY src/platforms/stub/wasm/index.html /wasm/index.html
-COPY src/platforms/stub/wasm/_exports.hpp /wasm/_exports.hpp
-COPY src/platforms/stub/wasm/_timer.hpp /wasm/_timer.hpp
-COPY src/platforms/stub/wasm/message_queue.h /wasm/message_queue.h
 
 # There is some download that needs to happen on the first compile.
 # so we will prewarm the cache by building a dummy project.
