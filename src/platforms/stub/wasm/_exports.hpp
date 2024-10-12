@@ -101,7 +101,11 @@ public:
     static FastLED_ChannelData* passThrough(FastLED_ChannelData* ptr) { return ptr; }
     static FastLED_ChannelData* createC() { return new FastLED_ChannelData(); }
 
-    FastLED_ChannelData() {}
+    FastLED_ChannelData() {
+        // Initialize the strip data
+        mStripData[0] = {0, 0, 0, 255, 255, 255, 0, 0, 0};
+        mStripData[1] = {255, 255, 255, 0, 0, 0, 255, 255, 255};
+    }
     emscripten::val getPixelData_Uint8(int stripIndex) {
         const VectorUint8* stripData = getStripData(stripIndex);
         if (!stripData) {
@@ -112,24 +116,38 @@ public:
     
 private:
     typedef std::vector<uint8_t> VectorUint8;
-    typedef std::pair<int, VectorUint8> StripData;  // strip index -> data
-    typedef std::unique_ptr<StripData> StripDataPtr;
-    std::vector<StripDataPtr> mStripData;
+    typedef std::map<int, VectorUint8> StripDataMap;
+    StripDataMap mStripData;
 
     const VectorUint8* getStripData(int stripIndex) const {
         // search through the vector for the strip index
-        for (const auto& stripDataPtr : mStripData) {
-            if (stripDataPtr->first == stripIndex) {
-                return &stripDataPtr->second;
-            }
+        auto it = mStripData.find(stripIndex);
+        if (it == mStripData.end()) {
+            return nullptr;
         }
-        return nullptr;
+        return &it->second;
     }
 };
 
+static std::shared_ptr<FastLED_ChannelData> g_channel_data = std::make_shared<FastLED_ChannelData>();
+static std::shared_ptr<FastLED_ChannelData> getChannelData() {
+    return g_channel_data;
+}
+
 EMSCRIPTEN_BINDINGS(better_smart_pointers) {
     emscripten::class_<FastLED_ChannelData>("FastLED_ChannelData")
-        .smart_ptr_constructor("FastLED_ChannelData", &std::make_shared<FastLED_ChannelData>);
+        .smart_ptr_constructor("FastLED_ChannelData", &getChannelData)
+        .function("getPixelData_Uint8", &FastLED_ChannelData::getPixelData_Uint8);
+}
+
+void jsOnDemo() {
+    EM_ASM({
+        globalThis.onFastLedDemo = globalThis.onFastLedDemo || function() {
+            console.log("Missing globalThis.onFastLedDemo() function");
+        };
+        globalThis.onFastLedDemoData = globalThis.onFastLedDemoData || new Module.FastLED_ChannelData();
+        globalThis.onFastLedDemo(globalThis.onFastLedDemoData);
+    });
 }
 
 #if 0
@@ -162,6 +180,18 @@ void jsOnFrame(const char* message) {
         globalThis.onFastLedFrame(message);
 
     }, message);
+}
+
+uint8_t buffer[1024] = {0};
+
+emscripten::val getInt8Array() {
+    return emscripten::val(
+       emscripten::typed_memory_view(1024, buffer)
+    );
+}
+
+EMSCRIPTEN_BINDINGS() {
+    function("getInt8Array", &getInt8Array);
 }
 
 void jsSetCanvasSize(int width, int height) {

@@ -101,6 +101,7 @@ void loop() {
         std::string output;
         serializeJson(doc, output);
         jsOnFrame(output.c_str());
+        jsOnDemo();
     }
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));

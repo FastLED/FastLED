@@ -118,8 +118,12 @@
         updateCanvas(data);
     };
 
+    globalThis.onFastLedDemo = function (data) {
+        //console.log("Demo data received:", data.getPixelData_Uint8(0));
+    };
+
     // Function to call the setup and loop functions
-    function runFastLED(extern_setup, extern_loop, frame_rate) {
+    function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance) {
         console.log("Calling setup function...");
         extern_setup();
 
@@ -129,6 +133,9 @@
 
         // Executes every frame but only runs the loop function at the specified frame rate
         function runLoop(currentTime) {
+            val = moduleInstance.getInt8Array();
+            // console.log("val array: ", val);
+
             if (currentTime - lastFrameTime >= frameInterval) {
                 extern_loop();
                 lastFrameTime = currentTime;
@@ -147,7 +154,7 @@
                 console.error("FastLED setup or loop functions are not available.");
                 return;
             }
-            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frame_rate);
+            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frame_rate, moduleInstance);
         }
         try {
             if (typeof fastled === 'function') {
