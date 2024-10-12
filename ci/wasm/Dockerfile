@@ -50,6 +50,22 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
+
+COPY . /js/fastled/
+
+COPY ./src/platforms/ /js/fastled/src/platforms/
+
+    
+# Copy root-level files
+#COPY ./*.* /js/fastled/*.*
+
+# Copy FastLED source files
+#COPY ./src/*.* /js/fastled/src/*.*
+
+# Copy platforms directory separately, since it changes a lot during development
+#COPY ./src/platforms/ /js/fastled/src/platforms/
+
+# Hack for now to get the wasm platform to compile
 COPY src/platforms/stub/wasm/platformio.ini /wasm/platformio.ini
 COPY src/platforms/stub/wasm/wasm.py /wasm/wasm.py
 COPY src/platforms/stub/wasm/index.html /wasm/index.html
@@ -57,14 +73,9 @@ COPY src/platforms/stub/wasm/_exports.hpp /wasm/_exports.hpp
 COPY src/platforms/stub/wasm/_timer.hpp /wasm/_timer.hpp
 COPY src/platforms/stub/wasm/message_queue.h /wasm/message_queue.h
 
-
-COPY . /js/fastled/
-
-
-
 # There is some download that needs to happen on the first compile.
 # so we will prewarm the cache by building a dummy project.
-RUN cp -r /wasm /wasm-prewarm && cp -r /js/fastled /wasm-prewarm/fastled && cd /wasm-prewarm && pio run && cd .. && rm -rf /wasm-prewarm
+# RUN cp -r /wasm /wasm-prewarm && cp -r /js/fastled /wasm-prewarm/fastled && cd /wasm-prewarm && pio run && cd .. && rm -rf /wasm-prewarm
 
 
 WORKDIR /js
