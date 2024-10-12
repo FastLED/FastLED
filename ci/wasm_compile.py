@@ -125,41 +125,6 @@ def run_container(directory: str, interactive: bool) -> None:
         raise WASMCompileError(f"ERROR: Failed to run Docker container.\n{e}")
 
 
-def _copy_if_necessary(src_file: Path, dest_file: Path) -> None:
-    if not dest_file.exists():
-        print(f"Copying {src_file} to {dest_file}")
-        dest_file.write_text(src_file.read_text())
-        return
-    # check if the contents are the same
-    if src_file.read_text() != dest_file.read_text():
-        print(f"Copying {src_file} to {dest_file}")
-        dest_file.write_text(src_file.read_text())
-
-
-def _copy_index_html_if_necessary() -> None:
-    src_file = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "index.html"
-    dest_file = WASM_DIR / "index.html"
-    if not dest_file.exists():
-        print(f"Copying {src_file} to {dest_file}")
-        dest_file.write_text(src_file.read_text())
-        return
-    # check if the contents are the same
-    if src_file.read_text() != dest_file.read_text():
-        print(f"Copying {src_file} to {dest_file}")
-        dest_file.write_text(src_file.read_text())
-
-
-def _copy_files_if_necessary() -> None:
-    # kind of a hack to get _exports, _timer, and message_queue.h to be copied
-    # will be removed later.
-    files = ["index.html", "_exports.hpp", "_timer.hpp", "message_queue.h"]
-    stub_src_dir = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm"
-    for file in files:
-        src_file = stub_src_dir / file
-        dest_file = WASM_DIR / file
-        _copy_if_necessary(src_file, dest_file)
-
-
 def main() -> None:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="WASM Compiler for FastLED"
@@ -202,8 +167,6 @@ def main() -> None:
 
         if args.directory is None:
             parser.error("ERROR: directory is required unless --clean is specified")
-
-        _copy_files_if_necessary()
 
         if args.build or not image_exists():
             build_image()
