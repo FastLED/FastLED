@@ -210,8 +210,6 @@ EMSCRIPTEN_KEEPALIVE extern "C" bool postMessage(const char* jstStr) {
 }
 
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
-    const char* scriptPath = "/path/to/your/script.sh"; // Change to your script path
-    invokeScriptFromJS(scriptPath);
     printf("Hello from FastLED\r\n");
     async_start_loop();
     return 0;
