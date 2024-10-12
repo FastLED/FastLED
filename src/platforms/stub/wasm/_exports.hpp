@@ -16,6 +16,8 @@
 #include "_timer.hpp"
 #include "message_queue.h"
 
+#include "slice.h"
+
 
 extern void setup();
 extern void loop();
@@ -77,16 +79,6 @@ EMSCRIPTEN_KEEPALIVE extern "C" void async_start_loop() {
 
 
 
-// Function to invoke the JavaScript function to run a script
-void invokeScriptFromJS(const char* script) {
-    // Use EM_ASM to call JavaScript directly
-    //EM_ASM({
-    //    var script = UTF8ToString($0);  // Convert C string to JavaScript string
-    //    emscripten_run_script(script);              // Call the JS function to run the script
-    //}, scriptPath);
-    emscripten_run_script(script);
-}
-
 void jsAlert(const char* msg) {
     EM_ASM_({
         // Use EM_ASM to call JavaScript directly    EM_ASM({
@@ -95,37 +87,44 @@ void jsAlert(const char* msg) {
     });
 }
 
+typedef Slice<uint8_t> SliceUint8;
+
+struct StripData {
+    int index = 0;
+    SliceUint8 slice;
+};
 
 class FastLED_ChannelData {
 public:
-    static FastLED_ChannelData* passThrough(FastLED_ChannelData* ptr) { return ptr; }
-    static FastLED_ChannelData* createC() { return new FastLED_ChannelData(); }
-
     FastLED_ChannelData() {
-        // Initialize the strip data
-        mStripData[0] = {0, 0, 0, 255, 255, 255, 0, 0, 0};
-        mStripData[1] = {255, 255, 255, 0, 0, 0, 255, 255, 255};
     }
-    emscripten::val getPixelData_Uint8(int stripIndex) {
-        const VectorUint8* stripData = getStripData(stripIndex);
-        if (!stripData) {
-            return emscripten::val::null();
+
+    void update(Slice<StripData> data) {
+        mStripMap.clear();
+        for (const StripData& stripData : data) {
+            mStripMap[stripData.index] = stripData.slice;
         }
-        return emscripten::val(emscripten::typed_memory_view(stripData->size(), stripData->data()));
+    }
+
+    emscripten::val getPixelData_Uint8(int stripIndex) {
+        SliceUint8 stripData = getStripData(stripIndex);
+        uint8_t* data = stripData.data();
+        size_t size = stripData.size();
+        return emscripten::val(emscripten::typed_memory_view(size, data));
     }
     
 private:
-    typedef std::vector<uint8_t> VectorUint8;
-    typedef std::map<int, VectorUint8> StripDataMap;
-    StripDataMap mStripData;
-
-    const VectorUint8* getStripData(int stripIndex) const {
-        // search through the vector for the strip index
-        auto it = mStripData.find(stripIndex);
-        if (it == mStripData.end()) {
-            return nullptr;
+    typedef std::map<int, SliceUint8> StripDataMap;
+    StripDataMap mStripMap;
+    SliceUint8 getStripData(int stripIndex) {
+        // search through the vector and look for the first element matching the stripIndex
+        // strip map
+        StripDataMap::const_iterator it = mStripMap.find(stripIndex);
+        if (it != mStripMap.end()) {
+            SliceUint8 slice = it->second;
+            return slice;
         }
-        return &it->second;
+        return SliceUint8();
     }
 };
 
@@ -150,23 +149,19 @@ void jsOnDemo() {
     });
 }
 
-#if 0
-void jsOnFrame(const char* message /*ignored for now*/) {
-    // Use EM_ASM to call JavaScript directly
-    auto ptr = std::make_shared<FastLED_ChannelData>();
+#if 1
+void jsOnFrame(Slice<StripData> data) {
+    // Populate the data in C++
+    g_channel_data->update(data);
     EM_ASM_({
-        globalThis.onFastLedFrame = globalThis.onFastLedFrame || function(jsonStr) {
-            console.log("Missing globalThis.onFastLedFrame(jsonStr) function");
+        globalThis.onFastLedFrame = globalThis.onFastLedFrame || function() {
+            console.log("Missing globalThis.onFastLedDemo() function");
         };
-
-        emscripten::var message = ptr;  // Convert C string to JavaScript string
-        //console.log(message);            // Log the message to the console
-        //globalThis.postMessage({ type: 'message', message: message }); // Send the message to the main thread
-        globalThis.onFastLedFrame(message);
-
-    }, ptr.get());
+        globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.FastLED_ChannelData();
+        globalThis.onFastLedFrame(globalThis.onFastLedFrameData);
+    });
 }
-#endif
+#else
 
 void jsOnFrame(const char* message) {
     // Use EM_ASM to call JavaScript directly
@@ -181,6 +176,7 @@ void jsOnFrame(const char* message) {
 
     }, message);
 }
+#endif
 
 uint8_t buffer[1024] = {0};
 

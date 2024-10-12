@@ -11,6 +11,7 @@
 #include "fx/2d/noisepalette.hpp"
 //#include "platforms/stub/wasm/_exports.hpp"
 #include "platforms/stub/wasm/json.h"
+#include "slice.h"
 
 
 #define LED_PIN 3
@@ -84,25 +85,15 @@ void loop() {
         printf("fastled running\r\n");
     }
 
-    if(true) {
-        //invokeScriptFromJS("console.log(\"hello world\");");
-        //jsAlert();
-        //jsOnFrame("hello world");
-        // use arduino json to construct a simple json string.
-        JsonDocument doc;
-        doc["frame_number"] = frame;
-        JsonArray data = doc["data"].to<JsonArray>();
-        for (size_t i = 0; i < NUM_LEDS; ++i) {
-            const CRGB &led = leds[i];
-            data.add(led.r);
-            data.add(led.g);
-            data.add(led.b);
-        }
-        std::string output;
-        serializeJson(doc, output);
-        jsOnFrame(output.c_str());
-        jsOnDemo();
-    }
+
+
+    StripData stripData[] = {
+        {0, SliceUint8((uint8_t *)leds, NUM_LEDS * 3)},
+    };
+    Slice<StripData> allData = Slice<StripData>(stripData, 1);
+    //printf("Calling jsOnFrame\r\n");
+    jsOnFrame(allData);
+
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));
     FastLED.show();

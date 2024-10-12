@@ -108,13 +108,8 @@
         canvas.style.height = Math.round(height * scaleFactor) + 'px';
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
     };
-    globalThis.onFastLedFrame = function (jsStr) {
-        const frameData = JSON.parse(jsStr);
-        const { frame_number, data } = frameData;
-        const msg = `Frame: ${frame_number}\nData: ${data.length / 3} pixels\n`;
-        const output = document.getElementById('output');
-        output.textContent = msg;
-
+    globalThis.onFastLedFrame = function (frameData) {
+        const data = new Uint8Array(frameData.getPixelData_Uint8(0));
         updateCanvas(data);
     };
 
