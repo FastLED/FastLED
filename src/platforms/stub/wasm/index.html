@@ -58,119 +58,11 @@
         }
     </style>
 
-    <script>
-        const FRAME_RATE = 60; // 60 FPS
-        const CANVAS_SIZE = 16; // 16x16 canvas
 
-        function updateCanvas(data) {
-            const canvas = document.getElementById('myCanvas');
-            const ctx = canvas.getContext('2d');
-            const imageData = ctx.createImageData(canvas.width, canvas.height);
-
-            for (let i = 0, j = 0; i < data.length; i += 3, j += 4) {
-                imageData.data[j] = data[i];       // Red
-                imageData.data[j + 1] = data[i + 1]; // Green
-                imageData.data[j + 2] = data[i + 2]; // Blue
-                imageData.data[j + 3] = 255;         // Alpha (fully opaque)
-            }
-
-            ctx.putImageData(imageData, 0, 0);
-        }
-
-        globalThis.onFastLedSetCanvasSize = function (jsonStr) {
-            const jsonData = JSON.parse(jsonStr);
-            const canvas = document.getElementById('myCanvas');
-
-            const first = jsonData[0];  // one canvas information per controller, just assume one for now.
-            const width = first.width;
-            const height = first.height;
-            canvas.width = width;
-            canvas.height = height;
-            
-            const maxDisplaySize = 640; // Maximum display size in pixels
-            const scaleFactor = Math.min(maxDisplaySize / width, maxDisplaySize / height, 20);
-            
-            canvas.style.width = Math.round(width * scaleFactor) + 'px';
-            canvas.style.height = Math.round(height * scaleFactor) + 'px';
-            console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
-        };
-        globalThis.onFastLedFrame = function (jsStr) {
-            const frameData = JSON.parse(jsStr);
-            const { frame_number, data } = frameData;
-            const msg = `Frame: ${frame_number}\nData: ${data.length / 3} pixels\n`;
-            const output = document.getElementById('output');
-            output.textContent = msg;
-
-            updateCanvas(data);
-        };
-
-        // Function to call the setup and loop functions
-        function runFastLED(extern_setup, extern_loop, frame_rate) {
-            console.log("Calling setup function...");
-            extern_setup();
-
-            console.log("Starting loop...");
-            const frameInterval = 1000 / frame_rate;
-            let lastFrameTime = 0;
-
-            // Executes every frame but only runs the loop function at the specified frame rate
-            function runLoop(currentTime) {
-                if (currentTime - lastFrameTime >= frameInterval) {
-                    extern_loop();
-                    lastFrameTime = currentTime;
-                }
-                requestAnimationFrame(runLoop);
-            }
-            requestAnimationFrame(runLoop);
-        }
-
-        // Ensure we wait for the module to load
-        const onModuleLoaded = async () => {
-            // Unpack the module functions and send them to the runFastLED function
-            function __runFastLED(moduleInstance, frame_rate) {
-                const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
-                if (!exports_exist) {
-                    console.error("FastLED setup or loop functions are not available.");
-                    return;
-                }
-                return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frame_rate);
-            }
-            try {
-                if (typeof fastled === 'function') {
-                    // Load the module
-                    fastled().then(instance => {
-                        console.log("Module loaded, running FastLED...");
-                        __runFastLED(instance, FRAME_RATE);
-                    }).catch(err => {
-                        console.error("Error loading fastled as a module:", err);
-                    });
-                } else {
-                    console.log("Could not detect a valid module loading for FastLED.");
-                }
-            } catch (error) {
-                console.error("Failed to load FastLED:", error);
-            }
-        };
-
-        // Wait for fonts to load before showing content
-        if (document.fonts && document.fonts.ready) {
-            document.fonts.ready.then(function () {
-                document.body.style.opacity = 1;
-            });
-        } else {
-            // Fallback for browsers that do not support document.fonts
-            window.onload = function () {
-                document.body.style.opacity = 1;
-            };
-        }
-
-        // Bind the window.onload event to the onModuleLoaded function.
-        window.addEventListener('load', onModuleLoaded);
-    </script>
 </head>
 
 <body>
-    <h1>FastLED Wasm Demo</h1>
+    <h1>FastLED.js</h1>
     <div id="canvas-container">
         <canvas id="myCanvas" width="16" height="16"></canvas>
     </div>
@@ -179,5 +71,115 @@
     <!-- Include the FastLED script -->
     <script src="fastled.js"></script>
 </body>
+
+<script>
+    const FRAME_RATE = 60; // 60 FPS
+    const CANVAS_SIZE = 16; // 16x16 canvas
+
+    function updateCanvas(data) {
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        const imageData = ctx.createImageData(canvas.width, canvas.height);
+
+        for (let i = 0, j = 0; i < data.length; i += 3, j += 4) {
+            imageData.data[j] = data[i];       // Red
+            imageData.data[j + 1] = data[i + 1]; // Green
+            imageData.data[j + 2] = data[i + 2]; // Blue
+            imageData.data[j + 3] = 255;         // Alpha (fully opaque)
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+    }
+
+    globalThis.onFastLedSetCanvasSize = function (jsonStr) {
+        const jsonData = JSON.parse(jsonStr);
+        const canvas = document.getElementById('myCanvas');
+
+        const first = jsonData[0];  // one canvas information per controller, just assume one for now.
+        const width = first.width;
+        const height = first.height;
+        canvas.width = width;
+        canvas.height = height;
+        
+        const maxDisplaySize = 640; // Maximum display size in pixels
+        const scaleFactor = Math.min(maxDisplaySize / width, maxDisplaySize / height, 20);
+        
+        canvas.style.width = Math.round(width * scaleFactor) + 'px';
+        canvas.style.height = Math.round(height * scaleFactor) + 'px';
+        console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
+    };
+    globalThis.onFastLedFrame = function (jsStr) {
+        const frameData = JSON.parse(jsStr);
+        const { frame_number, data } = frameData;
+        const msg = `Frame: ${frame_number}\nData: ${data.length / 3} pixels\n`;
+        const output = document.getElementById('output');
+        output.textContent = msg;
+
+        updateCanvas(data);
+    };
+
+    // Function to call the setup and loop functions
+    function runFastLED(extern_setup, extern_loop, frame_rate) {
+        console.log("Calling setup function...");
+        extern_setup();
+
+        console.log("Starting loop...");
+        const frameInterval = 1000 / frame_rate;
+        let lastFrameTime = 0;
+
+        // Executes every frame but only runs the loop function at the specified frame rate
+        function runLoop(currentTime) {
+            if (currentTime - lastFrameTime >= frameInterval) {
+                extern_loop();
+                lastFrameTime = currentTime;
+            }
+            requestAnimationFrame(runLoop);
+        }
+        requestAnimationFrame(runLoop);
+    }
+
+    // Ensure we wait for the module to load
+    const onModuleLoaded = async () => {
+        // Unpack the module functions and send them to the runFastLED function
+        function __runFastLED(moduleInstance, frame_rate) {
+            const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
+            if (!exports_exist) {
+                console.error("FastLED setup or loop functions are not available.");
+                return;
+            }
+            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frame_rate);
+        }
+        try {
+            if (typeof fastled === 'function') {
+                // Load the module
+                fastled().then(instance => {
+                    console.log("Module loaded, running FastLED...");
+                    __runFastLED(instance, FRAME_RATE);
+                }).catch(err => {
+                    console.error("Error loading fastled as a module:", err);
+                });
+            } else {
+                console.log("Could not detect a valid module loading for FastLED.");
+            }
+        } catch (error) {
+            console.error("Failed to load FastLED:", error);
+        }
+    };
+
+    // Wait for fonts to load before showing content
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () {
+            document.body.style.opacity = 1;
+        });
+    } else {
+        // Fallback for browsers that do not support document.fonts
+        window.onload = function () {
+            document.body.style.opacity = 1;
+        };
+    }
+
+    // Bind the window.onload event to the onModuleLoaded function.
+    window.addEventListener('load', onModuleLoaded);
+</script>
 
 </html>
