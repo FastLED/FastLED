@@ -6,6 +6,9 @@ template<typename T>
 class Slice {
 public:
     Slice(T* data, size_t size) : mData(data), mSize(size) {}
+    Slice() : mData(nullptr), mSize(0) {}
+    Slice(const Slice& other) = default;
+    Slice& operator=(const Slice& other) = default;
 
     T& operator[](size_t index) {
         // No bounds checking in embedded environment
@@ -35,6 +38,10 @@ public:
 
     T* data() {
         return mData;
+    }
+
+    size_t size() const {
+        return mSize;
     }
 
     Slice<T> slice(size_t start, size_t end) const {
