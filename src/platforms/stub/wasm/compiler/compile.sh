@@ -22,7 +22,15 @@ compile() {
     done
 }
 
-
+# Function to insert the header
+insert_header() {
+    local file="$1"
+    # Remove any existing include of _exports.hpp
+    sed -i '/#include "platforms\/stub\/wasm\/exports.hpp"/d' "$file"
+    # Add the include at the beginning of the file
+    sed -i '1i#include "platforms/stub/wasm/exports.hpp"' "$file"
+    echo "Processed: $file"
+}
 
 # Copy the contents of the hosts mapped directory to the container
 mkdir -p /js/src
@@ -44,9 +52,14 @@ include_deps() {
         # If main2.hpp exists (because it was renamed, then append it to main.cpp)
         if [ -f /js/src/main2.hpp ]; then
             # the main2.hpp file was created, so include it.
-            echo '#include "main2.hpp"' >> /js/src/generated_main.cpp
+            echo '#include "main2.hpp"' >> /js/src/main.cpp
         fi
     fi
+
+    # Find all .ino, .h, .hpp, and .cpp files recursively and process them
+    find src -type f \( -name "*.ino" -o -name "*.h" -o -name "*.hpp" -o -name "*.cpp" \) | while read -r file; do
+        insert_header "$file"
+    done
 }
 
 # Remove the .pio directory copy, if it exists because this could contain build

@@ -12,8 +12,6 @@
 #include "third_party/arduinojson/json.h"
 #include "slice.h"
 
-#include "platforms/stub/wasm/exports.h"
-
 
 #define LED_PIN 3
 #define BRIGHTNESS 96

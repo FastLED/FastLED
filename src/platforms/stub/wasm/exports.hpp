@@ -1,4 +1,8 @@
-#ifdef __EMSCRIPTEN__
+#pragma once
+
+#ifndef __EMSCRIPTEN__
+#error "This file should only be included in an Emscripten build"
+#endif
 
 /// Begin compatibility layer for FastLED platform. WebAssembly edition.
 
@@ -14,11 +18,10 @@
 #include <string> // ok include
 
 #include "exports.h"
-
-#include "_timer.hpp"
 #include "message_queue.h"
 
 #include "slice.h"
+#include "timer.hpp"
 
 
 extern void setup();
@@ -41,6 +44,12 @@ void setup_once() {
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
 
+
+
+
+
+
+
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
     setup_once();
     return 0;
@@ -54,6 +63,8 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
     //fastled_pause_timer();
     return 0;
 }
+
+
 
 #if 0
 
@@ -199,4 +210,3 @@ EMSCRIPTEN_KEEPALIVE extern "C" int main() {
     return 0;
 }
 
-#endif // __EMSCRIPTEN__
