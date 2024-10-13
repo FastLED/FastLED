@@ -2,7 +2,24 @@
 set -e
 
 compile() {
-    pio run
+    # sometimes the compilation fails, attempt to compile multiple times
+    local max_attempts=10
+    local attempt=1
+    
+    while [ $attempt -le $max_attempts ]; do
+        if pio run; then
+            echo "Compilation successful on attempt $attempt"
+            return 0
+        else
+            echo "Compilation failed on attempt $attempt"
+            if [ $attempt -eq $max_attempts ]; then
+                echo "Max attempts reached. Compilation failed."
+                return 1
+            fi
+            echo "Retrying..."
+            ((attempt++))
+        fi
+    done
 }
 
 # Function to insert the header
