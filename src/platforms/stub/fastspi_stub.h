@@ -1,29 +1,10 @@
-#ifndef __INC_FASTSPI_STUB_H
-#define __INC_FASTSPI_STUB_H
+#pragma once
 
-#include "namespace.h"
 
-// This is a stub implementation of fastspi.
-
-FASTLED_NAMESPACE_BEGIN
-
-#if defined(FASTLED_STUB_IMPL)
-
-#define FASTLED_ALL_PINS_HARDWARE_SPI
-
-class StubSPIOutput {
-public:
-    StubSPIOutput() { }
-    void select() { }
-    void init() {}
-    void waitFully() {}
-    void release() {}
-    void writeByte(uint8_t byte) {}
-    void writeWord(uint16_t word) {}
-};
-
-#endif // defined(FASTLED_STUB_IMPL)
-
-FASTLED_NAMESPACE_END
-
-#endif // __INC_FASTSPI_STUB_H
+#ifdef __EMSCRIPTEN__
+#include "platforms/stub/wasm/fastspi_wasm.h"
+#elif defined(FASTLED_STUB_IMPL)
+#include "platforms/stub/fastspi_stub_generic.h"
+#else
+#error "This file should only be included for stub or emscripten builds"
+#endif
