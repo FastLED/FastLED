@@ -64,9 +64,9 @@ COPY ./src/platforms/ /js/fastled/src/platforms/
 
 
 # Hack for now to get the wasm platform to compile
-COPY src/platforms/stub/wasm/platformio.ini /js/platformio.ini
-COPY src/platforms/stub/wasm/wasm.py /js/wasm.py
-COPY src/platforms/stub/wasm/index.html /js/index.html
+COPY src/platforms/stub/wasm/compiler/platformio.ini /js/platformio.ini
+COPY src/platforms/stub/wasm/compiler/wasm.py /js/wasm.py
+COPY src/platforms/stub/wasm/compiler/index.html /js/index.html
 
 WORKDIR /js
 
@@ -75,7 +75,7 @@ RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/exports.h\" #inc
 RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
 
 # Copy the compile script
-COPY src/platforms/stub/wasm/compile.sh /js/compile.sh
+COPY src/platforms/stub/wasm/compiler/compile.sh /js/compile.sh
 RUN dos2unix /js/compile.sh
 # Create compile.sh in /js directory
 RUN chmod +x /js/compile.sh
