@@ -5,7 +5,7 @@
 #include "platforms/stub/led_sysdefs_stub.h"
 
 #if defined(__EMSCRIPTEN__)
-#include "platforms/stub/wasm/led_sysdefs_wasm.hpp"
+#include "platforms/stub/wasm/led_sysdefs_wasm.h"
 #else
 #include "platforms/stub/generic/led_sysdefs_generic.hpp"
 #endif
