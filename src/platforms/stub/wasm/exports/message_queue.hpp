@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <mutex>
+#include <utility>  // for std::move
 
 #include "namespace.h"
 #include "message_queue.h"
@@ -46,7 +47,7 @@ bool MessageQueueImpl::popFront(std::string* message) {
     if (queue.empty()) {
         return false;
     }
-    *message = queue.front();
+    *message = std::move(queue.front());
     queue.pop_front();
     return true;
 }
