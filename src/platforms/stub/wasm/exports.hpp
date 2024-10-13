@@ -13,15 +13,18 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
+
 #include <iostream> // ok include
 #include <deque>  // ok include
 #include <string> // ok include
+#include <stdio.h>
+#include <thread>
+
 
 #include "exports.h"
 #include "message_queue.h"
 
 #include "slice.h"
-#include "timer.hpp"
 
 
 extern void setup();
@@ -39,6 +42,26 @@ void setup_once() {
     setup();
 }
 
+
+// Needed or the wasm compiler will strip them out.
+// Provide missing functions for WebAssembly build.
+extern "C" {
+
+    // Replacement for 'millis' in WebAssembly context
+    uint32_t millis() {
+        return emscripten_get_now();
+    }
+
+    // Replacement for 'micros' in WebAssembly context
+    uint32_t micros() {
+        return millis() * 1000;
+    }
+
+    // Replacement for 'delay' in WebAssembly context
+    void delay(int ms) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+    }
+}
 
 
 //////////////////////////////////////////////////////////////////////////
