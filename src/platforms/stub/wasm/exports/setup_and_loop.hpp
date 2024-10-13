@@ -7,6 +7,8 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
+#include "endframe.hpp"
+
 
 extern void setup();
 extern void loop();
@@ -14,15 +16,12 @@ extern void loop();
 // Frame time for 60 fps.
 #define SIXTY_FPS 16
 
-
-void exports_init();
-
 inline void setup_once() {
     static bool g_setup_called = false;
     if (g_setup_called) {
         return;
     }
-    exports_init();
+    OnEndFrameListener::Init();
     g_setup_called = true;
     setup();
 }

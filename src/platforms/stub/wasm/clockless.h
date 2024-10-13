@@ -14,9 +14,9 @@ FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-class InstanceCounter {
+class ClocklessInstanceCounter {
 public:
-	static InstanceCounter& getInstance();
+	static ClocklessInstanceCounter& getInstance();
 
 	uint32_t increment() {
 		return mCount++;
@@ -25,8 +25,8 @@ public:
 		uint32_t mCount = 0;
 };
 
-inline InstanceCounter& InstanceCounter::getInstance() {
-	InstanceCounter& out = Singleton<InstanceCounter>::instance();
+inline ClocklessInstanceCounter& ClocklessInstanceCounter::getInstance() {
+	ClocklessInstanceCounter& out = Singleton<ClocklessInstanceCounter>::instance();
 	return out;
 }
 
@@ -35,7 +35,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 public:
 	virtual void init() { }
 	ClocklessController() {
-		mId = InstanceCounter::getInstance().increment();
+		mId = ClocklessInstanceCounter::getInstance().increment();
 	}
 
 protected:
@@ -43,7 +43,6 @@ protected:
 		ChannelData& ch_data = Singleton<ChannelData>::instance();
 		const uint8_t* rgb = pixels.mData;
 		int nLeds = pixels.mLen;
-		//ch_data.update(mId, millis(), SliceUint8(rgb, nLeds * 3));
 		ch_data.update(mId, millis(), rgb, nLeds * 3);
 	}
 	private:

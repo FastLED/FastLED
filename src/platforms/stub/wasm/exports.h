@@ -19,8 +19,6 @@
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup();
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
 EMSCRIPTEN_KEEPALIVE extern "C" void async_start_loop();
-EMSCRIPTEN_KEEPALIVE extern "C" int main();
-
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.
@@ -35,9 +33,6 @@ extern "C" {
     // Replacement for 'delay' in WebAssembly context
     EMSCRIPTEN_KEEPALIVE void delay(int ms);
 }
-
-
-
 
 // Send frame data to the JavaScript side.
 void jsOnFrame();
