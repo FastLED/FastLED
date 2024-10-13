@@ -121,16 +121,16 @@ void jsAlert(const char* msg) {
 
 
 
-static ChannelData* getChannelDataPtr() {
-    ChannelData* channelData = &Singleton<ChannelData>::instance();
+static FastLED_ChannelData* getChannelDataPtr() {
+    FastLED_ChannelData* channelData = &Singleton<FastLED_ChannelData>::instance();
     return channelData;
 }
 
 
 EMSCRIPTEN_BINDINGS(external_constructors) {
-    emscripten::class_<ChannelData>("ChannelData")
+    emscripten::class_<FastLED_ChannelData>("FastLED_ChannelData")
         .constructor(&getChannelDataPtr, emscripten::allow_raw_pointers())
-        .function("getPixelData_Uint8", &ChannelData::getPixelData_Uint8);
+        .function("getPixelData_Uint8", &FastLED_ChannelData::getPixelData_Uint8);
 }
 
 void jsOnDemo() {
@@ -138,7 +138,7 @@ void jsOnDemo() {
         globalThis.onFastLedDemo = globalThis.onFastLedDemo || function() {
             console.log("Missing globalThis.onFastLedDemo() function");
         };
-        globalThis.onFastLedDemoData = globalThis.onFastLedDemoData || new Module.ChannelData();
+        globalThis.onFastLedDemoData = globalThis.onFastLedDemoData || new Module.FastLED_ChannelData();
         globalThis.onFastLedDemo(globalThis.onFastLedDemoData);
     });
 }
@@ -150,7 +150,7 @@ void jsOnFrame() {
         globalThis.onFastLedFrame = globalThis.onFastLedFrame || function() {
             console.log("Missing globalThis.onFastLedDemo() function");
         };
-        globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ChannelData();
+        globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.FastLED_ChannelData();
         globalThis.onFastLedFrame(globalThis.onFastLedFrameData);
     });
 }
