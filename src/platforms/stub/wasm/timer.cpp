@@ -1,4 +1,4 @@
-#pragma once
+#ifdef __EMSCRIPTEN__
 
 // clib headers
 #include <stdio.h>
@@ -66,3 +66,5 @@ extern "C" {
         return g_animation_running;
     }
 }
+
+#endif
