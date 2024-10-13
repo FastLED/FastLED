@@ -122,7 +122,7 @@
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
     };
     globalThis.onFastLedFrame = function (frameData) {
-        updateCanvas(frameData.getPixelData_Uint8(0));
+        updateCanvas(frameData.getFirstPixelData_Uint8());
     };
 
     // Function to call the setup and loop functions

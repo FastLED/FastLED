@@ -134,10 +134,13 @@ static ChannelData* getChannelDataPtr() {
 }
 
 
+
 EMSCRIPTEN_BINDINGS(external_constructors) {
     emscripten::class_<ChannelData>("ChannelData")
         .constructor(&getChannelDataPtr, emscripten::allow_raw_pointers())
-        .function("getPixelData_Uint8", &ChannelData::getPixelData_Uint8);
+        .function("getPixelData_Uint8", &ChannelData::getPixelData_Uint8)
+        .function("getFirstPixelData_Uint8", &ChannelData::getFirstPixelData_Uint8)
+        .function("getNthPixelStripData_Uint8", &ChannelData::getNthPixelStripData_Uint8);
 }
 
 void jsOnDemo() {
