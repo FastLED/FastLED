@@ -41,6 +41,7 @@ void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
     EM_ASM_({
         globalThis.onFastLedStripAdded = globalThis.onFastLedStripAdded || function() {
             console.log("Missing globalThis.onFastLedStripAdded(id, length) function");
+            console.log("Added strip id: " + arguments[0] + " with length: " + arguments[1]);
         };
         globalThis.onFastLedStripAdded($0, $1);
     }, strip, num_leds);
