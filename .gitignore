@@ -44,6 +44,4 @@ ci/tests/output
 ci/-
 ci/wasm/index.html
 **/fastled_js
-ci/wasm/_exports.hpp
-ci/wasm/_timer.hpp
-ci/wasm/message_queue.h
+

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef __EMSCRIPTEN__
+
 /// Begin compatibility layer for FastLED platform. WebAssembly edition.
 
 // emscripten headers
@@ -198,3 +200,5 @@ EMSCRIPTEN_KEEPALIVE extern "C" int main() {
     async_start_loop();
     return 0;
 }
+
+#endif // __EMSCRIPTEN__
