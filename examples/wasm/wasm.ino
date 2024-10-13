@@ -9,7 +9,6 @@
 
 #include <FastLED.h>
 #include "fx/2d/noisepalette.hpp"
-//#include "platforms/stub/wasm/_exports.hpp"
 #include "third_party/arduinojson/json.h"
 #include "slice.h"
 
