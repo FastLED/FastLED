@@ -26,6 +26,7 @@
 #include "message_queue.h"
 #include "channel_data.h"
 #include "singleton.h"
+#include "endframe.h"
 
 
 extern void setup();
@@ -35,10 +36,14 @@ extern void loop();
 #define SIXTY_FPS 16
 static bool g_setup_called = false;
 
+void exports_init();
+
+
 void setup_once() {
     if (g_setup_called) {
         return;
     }
+    exports_init();
     g_setup_called = true;
     setup();
 }
@@ -63,6 +68,8 @@ extern "C" {
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
     }
 }
+
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -121,16 +128,16 @@ void jsAlert(const char* msg) {
 
 
 
-static FastLED_ChannelData* getChannelDataPtr() {
-    FastLED_ChannelData* channelData = &Singleton<FastLED_ChannelData>::instance();
+static ChannelData* getChannelDataPtr() {
+    ChannelData* channelData = &Singleton<ChannelData>::instance();
     return channelData;
 }
 
 
 EMSCRIPTEN_BINDINGS(external_constructors) {
-    emscripten::class_<FastLED_ChannelData>("FastLED_ChannelData")
+    emscripten::class_<ChannelData>("ChannelData")
         .constructor(&getChannelDataPtr, emscripten::allow_raw_pointers())
-        .function("getPixelData_Uint8", &FastLED_ChannelData::getPixelData_Uint8);
+        .function("getPixelData_Uint8", &ChannelData::getPixelData_Uint8);
 }
 
 void jsOnDemo() {
@@ -138,7 +145,7 @@ void jsOnDemo() {
         globalThis.onFastLedDemo = globalThis.onFastLedDemo || function() {
             console.log("Missing globalThis.onFastLedDemo() function");
         };
-        globalThis.onFastLedDemoData = globalThis.onFastLedDemoData || new Module.FastLED_ChannelData();
+        globalThis.onFastLedDemoData = globalThis.onFastLedDemoData || new Module.ChannelData();
         globalThis.onFastLedDemo(globalThis.onFastLedDemoData);
     });
 }
@@ -150,7 +157,7 @@ void jsOnFrame() {
         globalThis.onFastLedFrame = globalThis.onFastLedFrame || function() {
             console.log("Missing globalThis.onFastLedDemo() function");
         };
-        globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.FastLED_ChannelData();
+        globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ChannelData();
         globalThis.onFastLedFrame(globalThis.onFastLedFrameData);
     });
 }
@@ -180,3 +187,31 @@ EMSCRIPTEN_KEEPALIVE extern "C" int main() {
     return 0;
 }
 
+class OnEndFrameListener: public EndFrameListener {
+public:
+    friend class Singleton<OnEndFrameListener>;
+    static void Init();
+
+    void onEndFrame() override {
+        jsOnFrame();
+    }
+private:
+    OnEndFrameListener() {
+        EndFrame* ptr = EndFrame::getInstance();
+        if (!ptr) {
+            // not available to this system
+        } else {
+            ptr->addListener(this);
+        }
+    }
+};
+
+void OnEndFrameListener::Init() {
+    Singleton<OnEndFrameListener>::instance();
+}
+
+
+
+void exports_init() {
+    OnEndFrameListener::Init();
+}

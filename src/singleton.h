@@ -5,8 +5,8 @@ template<typename T, int N = 0>
 class Singleton {
 public:
     static T& instance() {
-        static Singleton instance;
-        return instance.mInstance;
+        static T instance;
+        return instance;
     }
     Singleton(const Singleton&) = delete;
     Singleton& operator=(const Singleton&) = delete;

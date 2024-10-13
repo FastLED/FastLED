@@ -8,15 +8,9 @@ public:
     virtual void onEndFrame() = 0;
 };
 
-class EndFrame : public Singleton<EndFrame> {
+class EndFrame {
 public:
-    static EndFrame* getInstance() {
-        #ifdef __AVR__
-        return nullptr;  // strip out for avr.
-        #else
-        return &instance();
-        #endif
-    }
+    static EndFrame* getInstance();
 
     void addListener(EndFrameListener* listener) {
         #ifdef __AVR__
@@ -46,3 +40,11 @@ private:
     EndFrame() = default;
     friend class Singleton<EndFrame>;
 };
+
+EndFrame* EndFrame::getInstance() {
+    #ifdef __AVR__
+    return nullptr;  // strip out for avr.
+    #else
+    return &Singleton<EndFrame>::instance();
+    #endif
+}
