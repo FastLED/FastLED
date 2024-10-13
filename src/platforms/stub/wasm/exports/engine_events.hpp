@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
@@ -9,6 +10,8 @@
 
 #include "platforms/stub/wasm/active_strip_data.h"
 #include "engine_events.h"
+#include "platforms/stub/wasm/strip_id_map.h"
+
 
 #include "namespace.h"
 
@@ -55,7 +58,8 @@ public:
         jsOnFrame();
     }
     void onStripAdded(uintptr_t strip, uint32_t num_leds) override {
-        jsOnStripAdded(strip, num_leds);
+        int id = StripIdMap::add(strip);
+        jsOnStripAdded(id, num_leds);
     }
 private:
     EngineListener() {}
