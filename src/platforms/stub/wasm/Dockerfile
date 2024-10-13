@@ -75,7 +75,7 @@ RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/exports.h\" #inc
 RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
 
 # Copy the compile script
-COPY ci/wasm/compile.sh /js/compile.sh
+COPY src/platforms/stub/wasm/compile.sh /js/compile.sh
 RUN dos2unix /js/compile.sh
 # Create compile.sh in /js directory
 RUN chmod +x /js/compile.sh

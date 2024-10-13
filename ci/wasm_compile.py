@@ -9,21 +9,15 @@ from typing import List
 from ci.paths import PROJECT_ROOT
 
 HERE: Path = Path(__file__).parent
-WASM_DIR: Path = HERE / "wasm"
-DOCKER_FILE: Path = WASM_DIR / "Dockerfile"
+DOCKER_FILE: Path = PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "Dockerfile"
+
+assert DOCKER_FILE.exists(), f"ERROR: Dockerfile not found at {DOCKER_FILE}"
 
 
 class WASMCompileError(Exception):
     """Custom exception for WASM compilation errors."""
 
     pass
-
-
-def check_prerequisites() -> None:
-    if not WASM_DIR.exists():
-        raise WASMCompileError(f"ERROR: WASM directory not found at {WASM_DIR}")
-    if not DOCKER_FILE.exists():
-        raise WASMCompileError(f"ERROR: Dockerfile not found at {DOCKER_FILE}")
 
 
 def filter_containers() -> str:
@@ -159,8 +153,6 @@ def main() -> None:
     args: argparse.Namespace = parser.parse_args()
 
     try:
-        check_prerequisites()
-
         if args.clean:
             clean()
             return
