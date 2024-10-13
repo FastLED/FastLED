@@ -80,6 +80,7 @@
 
 #include "fastspi.h"
 #include "chipsets.h"
+#include "engine_events.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -357,6 +358,11 @@ class CFastLED {
 
 public:
 	CFastLED();
+
+	// Useful when you want to know when an event like onFrameBegin or onFrameEnd is happening.
+	// This is disabled on AVR to save space.
+	void addListener(EngineEvents::Listener *listener);
+	void removeListener(EngineEvents::Listener *listener);
 
 
 	/// Add a CLEDController instance to the world.  Exposed to the public to allow people to implement their own

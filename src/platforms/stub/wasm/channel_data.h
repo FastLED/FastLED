@@ -14,7 +14,7 @@
 #include "singleton.h"
 
 #include "namespace.h"
-#include "endframe.h"
+#include "engine_events.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -24,7 +24,7 @@ struct StripData {
     SliceUint8 slice;
 };
 
-class ChannelData: public EndFrame::Listener {
+class ChannelData: public EngineEvents::Listener {
 public:
 
 

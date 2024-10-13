@@ -8,6 +8,7 @@
 #include <emscripten/val.h>
 
 #include "platforms/stub/wasm/channel_data.h"
+#include "engine_events.h"
 
 static ChannelData* getChannelDataPtr() {
     ChannelData* channelData = &Singleton<ChannelData>::instance();
@@ -33,7 +34,7 @@ void jsOnFrame() {
 }
 
 
-class OnEndFrameListener: public EndFrame::Listener {
+class OnEndFrameListener: public EngineEvents::Listener {
 public:
     friend class Singleton<OnEndFrameListener>;
     static void Init();

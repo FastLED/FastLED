@@ -9,7 +9,7 @@
 #include "namespace.h"
 #include "channel_data.h"
 #include "singleton.h"
-#include "endframe.h"
+#include "engine_events.h"
 #include <vector>
 
 FASTLED_NAMESPACE_BEGIN
@@ -32,7 +32,7 @@ inline WasmSpiInstanceCounter& WasmSpiInstanceCounter::getInstance() {
     return out;
 }
 
-class WasmSpiOutput: public EndFrame::Listener {
+class WasmSpiOutput: public EngineEvents::Listener {
 public:
     WasmSpiOutput() {
         mId = WasmSpiInstanceCounter::getInstance().increment();

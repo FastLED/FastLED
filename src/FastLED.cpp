@@ -1,7 +1,7 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 #include "singleton.h"
-#include "endframe.h"
+#include "engine_events.h"
 
 #ifdef __EMSCRIPTEN__
 // Due to emscripten toolchain, the exports must live in an object
@@ -69,14 +69,17 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
+void CFastLED::addListener(EngineEvents::Listener *listener) {
+	EngineEvents::addListener(listener);
+}
+void CFastLED::removeListener(EngineEvents::Listener *listener) {
+	EngineEvents::removeListener(listener);
+}
+
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 void CFastLED::show(uint8_t scale) {
-	// guard against showing too rapidly
-	EndFrame* instance = EndFrame::getInstance();
-	if (instance) {
-		instance->onBeginFrame();
-	}
+	EngineEvents::onBeginFrame();
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
@@ -102,11 +105,7 @@ void CFastLED::show(uint8_t scale) {
 		pCur = pCur->next();
 	}
 	countFPS();
-
-	if (instance) {
-		instance->onEndFrame();
-	}
-
+	EngineEvents::onEndFrame();
 }
 
 int CFastLED::count() {

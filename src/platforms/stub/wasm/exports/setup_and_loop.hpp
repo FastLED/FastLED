@@ -7,8 +7,6 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
-#include "endframe.hpp"
-
 
 extern void setup();
 extern void loop();
