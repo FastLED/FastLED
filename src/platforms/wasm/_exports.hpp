@@ -1,11 +1,5 @@
 #pragma once
 
-
-
-#ifndef __EMSCRIPTEN__
-#error "This file should only be included in an Emscripten build"
-#endif
-
 /// Begin compatibility layer for FastLED platform. WebAssembly edition.
 
 // emscripten headers
@@ -15,17 +9,14 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
-
 #include <iostream> // ok include
 #include <deque>  // ok include
 #include <string> // ok include
-#include <stdio.h>
-#include <thread>
 
-#include "exports.h"
+#include "_timer.hpp"
 #include "message_queue.h"
-#include "channel_data.h"
-#include "singleton.h"
+
+#include "slice.h"
 
 
 extern void setup();
@@ -44,29 +35,10 @@ void setup_once() {
 }
 
 
-// Needed or the wasm compiler will strip them out.
-// Provide missing functions for WebAssembly build.
-extern "C" {
-
-    // Replacement for 'millis' in WebAssembly context
-    EMSCRIPTEN_KEEPALIVE uint32_t millis() {
-        return emscripten_get_now();
-    }
-
-    // Replacement for 'micros' in WebAssembly context
-    EMSCRIPTEN_KEEPALIVE uint32_t micros() {
-        return millis() * 1000;
-    }
-
-    // Replacement for 'delay' in WebAssembly context
-    EMSCRIPTEN_KEEPALIVE void delay(int ms) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-    }
-}
-
 
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
+
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
     setup_once();
     return 0;
@@ -80,8 +52,6 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
     //fastled_pause_timer();
     return 0;
 }
-
-
 
 #if 0
 
@@ -117,19 +87,55 @@ void jsAlert(const char* msg) {
     });
 }
 
+typedef Slice<uint8_t> SliceUint8;
 
+struct StripData {
+    int index = 0;
+    SliceUint8 slice;
+};
 
+class ChannelData {
+public:
+    ChannelData() {
+    }
 
+    void update(Slice<StripData> data) {
+        mStripMap.clear();
+        for (const StripData& stripData : data) {
+            mStripMap[stripData.index] = stripData.slice;
+        }
+    }
 
-static ChannelData* getChannelDataPtr() {
-    ChannelData* channelData = &Singleton<ChannelData>::instance();
-    return channelData;
+    emscripten::val getPixelData_Uint8(int stripIndex) {
+        SliceUint8 stripData = getStripData(stripIndex);
+        uint8_t* data = stripData.data();
+        size_t size = stripData.size();
+        return emscripten::val(emscripten::typed_memory_view(size, data));
+    }
+    
+private:
+    typedef std::map<int, SliceUint8> StripDataMap;
+    StripDataMap mStripMap;
+    SliceUint8 getStripData(int stripIndex) {
+        // search through the vector and look for the first element matching the stripIndex
+        // strip map
+        StripDataMap::const_iterator it = mStripMap.find(stripIndex);
+        if (it != mStripMap.end()) {
+            SliceUint8 slice = it->second;
+            return slice;
+        }
+        return SliceUint8();
+    }
+};
+
+static std::shared_ptr<ChannelData> g_channel_data = std::make_shared<ChannelData>();
+static std::shared_ptr<ChannelData> getChannelData() {
+    return g_channel_data;
 }
 
-
-EMSCRIPTEN_BINDINGS(external_constructors) {
+EMSCRIPTEN_BINDINGS(better_smart_pointers) {
     emscripten::class_<ChannelData>("ChannelData")
-        .constructor(&getChannelDataPtr, emscripten::allow_raw_pointers())
+        .smart_ptr_constructor("ChannelData", &getChannelData)
         .function("getPixelData_Uint8", &ChannelData::getPixelData_Uint8);
 }
 
@@ -143,9 +149,10 @@ void jsOnDemo() {
     });
 }
 
-void jsOnFrame() {
+#if 1
+void jsOnFrame(Slice<StripData> data) {
     // Populate the data in C++
-    //getChannelDataPtr()->update(data);
+    g_channel_data->update(data);
     EM_ASM_({
         globalThis.onFastLedFrame = globalThis.onFastLedFrame || function() {
             console.log("Missing globalThis.onFastLedDemo() function");
@@ -153,6 +160,34 @@ void jsOnFrame() {
         globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ChannelData();
         globalThis.onFastLedFrame(globalThis.onFastLedFrameData);
     });
+}
+#else
+
+void jsOnFrame(const char* message) {
+    // Use EM_ASM to call JavaScript directly
+    EM_ASM_({
+        globalThis.onFastLedFrame = globalThis.onFastLedFrame || function(jsonStr) {
+            console.log("Missing globalThis.onFastLedFrame(jsonStr) function");
+        };
+        var message = UTF8ToString($0);  // Convert C string to JavaScript string
+        //console.log(message);            // Log the message to the console
+        //globalThis.postMessage({ type: 'message', message: message }); // Send the message to the main thread
+        globalThis.onFastLedFrame(message);
+
+    }, message);
+}
+#endif
+
+uint8_t buffer[1024] = {0};
+
+emscripten::val getInt8Array() {
+    return emscripten::val(
+       emscripten::typed_memory_view(1024, buffer)
+    );
+}
+
+EMSCRIPTEN_BINDINGS() {
+    function("getInt8Array", &getInt8Array);
 }
 
 void jsSetCanvasSize(int width, int height) {
@@ -179,4 +214,3 @@ EMSCRIPTEN_KEEPALIVE extern "C" int main() {
     async_start_loop();
     return 0;
 }
-

@@ -20,7 +20,7 @@ public:
 
 protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-		FastLED_ChannelData& ch_data = Singleton<FastLED_ChannelData>::instance();
+		ChannelData& ch_data = Singleton<ChannelData>::instance();
 		const uint8_t* rgb = pixels.mData;
 		int nLeds = pixels.mLen;
 		StripData stripData = {0, SliceUint8(rgb, nLeds * 3)};

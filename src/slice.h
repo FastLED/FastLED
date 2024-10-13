@@ -6,12 +6,33 @@
 template<typename T>
 class Slice {
 public:
-
-    Slice() = default;
+    Slice() : mData(nullptr), mSize(0) {}
     Slice(T* data, size_t size) : mData(data), mSize(size) {}
 
-    Slice(const Slice& other) = default;
-    Slice& operator=(const Slice& other) = default;
+    Slice(const Slice& other) : mData(other.mData), mSize(other.mSize) {}
+
+    // Conversion constructor for compatible types
+    template<typename U>
+    Slice(const Slice<U>& other) : mData(reinterpret_cast<T*>(other.data())), mSize(other.size()) {}
+
+    Slice& operator=(const Slice& other) {
+        mData = other.mData;
+        mSize = other.mSize;
+        return *this;
+    }
+
+    // Assignment operator for compatible types
+    template<typename U>
+    Slice& operator=(const Slice<U>& other) {
+        mData = reinterpret_cast<T*>(other.data());
+        mSize = other.size();
+        return *this;
+    }
+
+    // Automatic promotion to const Slice<const T>
+    operator Slice<const T>() const {
+        return *this;
+    }
 
     T& operator[](size_t index) {
         // No bounds checking in embedded environment
@@ -57,7 +78,18 @@ public:
         return Slice<T>(mData + start, mSize - start);
     }
 
+    // Find the first occurrence of a value in the slice
+    // Returns the index of the first occurrence if found, or size_t(-1) if not found
+    size_t find(const T& value) const {
+        for (size_t i = 0; i < mSize; ++i) {
+            if (mData[i] == value) {
+                return i;
+            }
+        }
+        return size_t(-1);
+    }
+
 private:
-    T* mData = nullptr;
-    size_t mSize = 0;
+    T* mData;
+    size_t mSize;
 };
