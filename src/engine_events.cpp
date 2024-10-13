@@ -51,6 +51,12 @@ void EngineEvents::onEndFrame() {
     }
 }
 
+void EngineEvents::onStripAdded(uintptr_t strip, uint32_t num_leds) {
+    if (auto ptr = EngineEvents::getInstance()) {
+        ptr->_onStripAdded(strip, num_leds);
+    }
+}
+
 void EngineEvents::_addListener(Listener* listener) {
     #ifdef __AVR__
     (void)listener;
@@ -90,6 +96,18 @@ void EngineEvents::_onEndFrame() {
     ListenerList copy = mListeners;
     for (auto listener : copy) {
         listener->onEndFrame();
+    }
+    #endif
+}
+
+void EngineEvents::_onStripAdded(uintptr_t strip, uint32_t num_leds) {
+    #ifdef __AVR__
+    return;
+    #else
+    // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
+    ListenerList copy = mListeners;
+    for (auto listener : copy) {
+        listener->onStripAdded(strip, num_leds);
     }
     #endif
 }

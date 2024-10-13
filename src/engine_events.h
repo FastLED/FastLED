@@ -7,6 +7,10 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+#ifndef FASTLED_ENGINE_EVENTS_MAX_LISTENERS
+#define FASTLED_ENGINE_EVENTS_MAX_LISTENERS 8
+#endif
+
 class EngineEvents {
 public:
     class Listener {
@@ -15,12 +19,14 @@ public:
         virtual ~Listener();
         virtual void onBeginFrame() {}
         virtual void onEndFrame() {}
+        virtual void onStripAdded(uintptr_t strip, uint32_t num_leds) {}
     };
 
     static void addListener(Listener* listener);
     static void removeListener(Listener* listener);
     static void onBeginFrame();
     static void onEndFrame();
+    static void onStripAdded(uintptr_t strip, uint32_t num_leds);
 private:
     // Safe to add a listeners during a callback.
     void _addListener(Listener* listener);
@@ -28,8 +34,9 @@ private:
     void _removeListener(Listener* listener);
     void _onBeginFrame();
     void _onEndFrame();
+    void _onStripAdded(uintptr_t strip, uint32_t num_leds);
     #ifndef __AVR__
-    typedef FixedVector<Listener*, 8> ListenerList;
+    typedef FixedVector<Listener*, FASTLED_ENGINE_EVENTS_MAX_LISTENERS> ListenerList;
     ListenerList mListeners;
     #endif
 

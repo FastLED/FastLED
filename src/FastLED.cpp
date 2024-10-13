@@ -66,6 +66,7 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	pLed->init();
 	pLed->setLeds(data + nOffset, nLeds);
 	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
+	EngineEvents::onStripAdded(reinterpret_cast<uintptr_t>(pLed), nLedsOrOffset - nOffset);
 	return *pLed;
 }
 
