@@ -8,6 +8,9 @@ public:
         static T instance;
         return instance;
     }
+    static T* instancePtr() {
+        return &instance();
+    }
     Singleton(const Singleton&) = delete;
     Singleton& operator=(const Singleton&) = delete;
 private:
