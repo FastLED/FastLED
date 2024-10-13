@@ -2,6 +2,7 @@
 #pragma once
 
 #include <deque>
+#include <mutex>
 
 #include "namespace.h"
 #include "message_queue.h"
@@ -29,16 +30,19 @@ public:
 private:
     std::deque<std::string> queue;
     size_t missed_count;
+    mutable std::mutex mutex;
 };
 
 MessageQueueImpl::MessageQueueImpl()
     : missed_count(0) {}
 
 bool MessageQueueImpl::available() const {
+    std::lock_guard<std::mutex> lock(mutex);
     return !queue.empty();
 }
 
 bool MessageQueueImpl::popFront(std::string* message) {
+    std::lock_guard<std::mutex> lock(mutex);
     if (queue.empty()) {
         return false;
     }
@@ -48,6 +52,7 @@ bool MessageQueueImpl::popFront(std::string* message) {
 }
 
 bool MessageQueueImpl::pushBack(const char* msg) {
+    std::lock_guard<std::mutex> lock(mutex);
     if (queue.size() >= FASTLED_WASM_MAX_MESSAGE_QUEUE_SIZE) {
         queue.pop_front();
         missed_count++;
@@ -57,10 +62,12 @@ bool MessageQueueImpl::pushBack(const char* msg) {
 }
 
 size_t MessageQueueImpl::getMissedCount() const {
+    std::lock_guard<std::mutex> lock(mutex);
     return missed_count;
 }
 
 size_t MessageQueueImpl::getCount() const {
+    std::lock_guard<std::mutex> lock(mutex);
     return queue.size();
 }
 
