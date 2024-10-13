@@ -17,6 +17,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+class CLEDController;
+
 static ActiveStripData* getActiveStripDataPtr() {
     ActiveStripData* instance = &Singleton<ActiveStripData>::instance();
     return instance;
@@ -57,7 +59,7 @@ public:
     void onEndFrame() override {
         jsOnFrame();
     }
-    void onStripAdded(uintptr_t strip, uint32_t num_leds) override {
+    void onStripAdded(CLEDController* strip, uint32_t num_leds) override {
         int id = StripIdMap::add(strip);
         jsOnStripAdded(id, num_leds);
     }

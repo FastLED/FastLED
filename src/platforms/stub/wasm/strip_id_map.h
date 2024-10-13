@@ -9,10 +9,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+class CLEDController;
 
 class StripIdMap {
 public:
-    static int add(uintptr_t owner) {
+    static int add(CLEDController* owner) {
         StripIdMap& instance = Instance();
         auto find = instance.mStripMap.find(owner);
         if (find != instance.mStripMap.end()) {
@@ -25,7 +26,7 @@ public:
     }
 
     // 0 if not found
-    static uintptr_t getOwner(int id) {
+    static CLEDController* getOwner(int id) {
         StripIdMap& instance = Instance();
         auto find = instance.mOwnerMap.find(id);
         if (find != instance.mOwnerMap.end()) {
@@ -35,7 +36,7 @@ public:
     }
 
     /// -1 if not found
-    static int getId(uintptr_t owner) {
+    static int getId(CLEDController* owner) {
         StripIdMap& instance = Instance();
         auto find = instance.mStripMap.find(owner);
         if (find != instance.mStripMap.end()) {
@@ -48,8 +49,8 @@ private:
     static StripIdMap& Instance() {
         return Singleton<StripIdMap>::instance();
     }
-    std::map<uintptr_t, int> mStripMap;
-    std::map<int, uintptr_t> mOwnerMap;
+    std::map<CLEDController*, int> mStripMap;
+    std::map<int, CLEDController*> mOwnerMap;
     int mCounter = 0;
 };
 

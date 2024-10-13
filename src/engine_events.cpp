@@ -3,6 +3,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+
+
 EngineEvents::Listener::Listener(bool auto_attach) {
     if (auto_attach) {
         EngineEvents* ptr = EngineEvents::getInstance();
@@ -51,7 +53,7 @@ void EngineEvents::onEndFrame() {
     }
 }
 
-void EngineEvents::onStripAdded(uintptr_t strip, uint32_t num_leds) {
+void EngineEvents::onStripAdded(CLEDController* strip, uint32_t num_leds) {
     if (auto ptr = EngineEvents::getInstance()) {
         ptr->_onStripAdded(strip, num_leds);
     }
@@ -100,7 +102,7 @@ void EngineEvents::_onEndFrame() {
     #endif
 }
 
-void EngineEvents::_onStripAdded(uintptr_t strip, uint32_t num_leds) {
+void EngineEvents::_onStripAdded(CLEDController* strip, uint32_t num_leds) {
     #ifdef __AVR__
     return;
     #else
