@@ -52,7 +52,8 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
 
 # In order to speed up the build, copy files that are not likely
 # to be changed first.
-COPY ./*.* /js/fastled/
+COPY ./*.json /js/fastled/
+COPY ./*.properties /js/fastled/
 COPY ./src/*.* /js/fastled/src/
 COPY ./src/fx/ /js/fastled/src/fx/
 COPY ./src/lib8tion/ /js/fastled/src/lib8tion
