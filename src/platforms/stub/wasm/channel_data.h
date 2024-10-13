@@ -24,13 +24,12 @@ struct StripData {
     SliceUint8 slice;
 };
 
+// Zero copy data transfer of strip information from C++ to JavaScript.
 class ChannelData: public EngineEvents::Listener {
 public:
-
-
-    void onEndFrame() override {
-        // Clear the data
-        mClearOnNextCall = true;
+    void onBeginFrame() override {
+        mStripMap.clear();
+        mUpdateMap.clear();
     }
 
     static ChannelData& Instance() {
@@ -38,11 +37,6 @@ public:
     }
 
     void update(int id, uint32_t now, const uint8_t* data, size_t size) {
-        if (mClearOnNextCall) {
-            mStripMap.clear();
-            mUpdateMap.clear();
-            mClearOnNextCall = false;
-        };
         mStripMap[id] = SliceUint8(data, size);
         mUpdateMap[id] = now;
     }
@@ -104,15 +98,10 @@ public:
 
     
 private:
-
     friend class Singleton<ChannelData>;
-    ChannelData() {
-    }
-
+    ChannelData() {}
     typedef std::map<int, SliceUint8> StripDataMap;
     typedef std::map<int, uint32_t> UpdateMap;
     StripDataMap mStripMap;
     UpdateMap mUpdateMap;
-    bool mClearOnNextCall = false;
-
 };
