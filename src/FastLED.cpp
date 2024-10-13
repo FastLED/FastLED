@@ -1,6 +1,12 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
+#ifdef __EMSCRIPTEN__
+// Due to emscripten toolchain, the exports must live in an object
+// that that is guaranteed to be linked in. This is a great place for it.
+#include "platforms/stub/wasm/exports.hpp"
+#endif
+
 
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
