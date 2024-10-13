@@ -8,14 +8,9 @@
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
+#include "channel_data.h"
 
-#include "slice.h"
 
-typedef Slice<uint8_t> SliceUint8;
-struct StripData {
-    int index = 0;
-    SliceUint8 slice;
-};
 
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS

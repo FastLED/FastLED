@@ -1,5 +1,12 @@
 #pragma once
 
+#ifdef FASTLED_INTERNAL
+// Note - having extreme trouble trying to figure out how not to make emscripten
+// not strip out these symbols. It also slows down the build process as compiling
+// client code forces a FastLED rebuild.
+#error "At this time, this file MUST be included by client code, NOT FastLED internals"alignas
+#endif
+
 #ifndef __EMSCRIPTEN__
 #error "This file should only be included in an Emscripten build"
 #endif
@@ -23,8 +30,7 @@
 
 #include "exports.h"
 #include "message_queue.h"
-
-#include "slice.h"
+#include "channel_data.h"
 
 
 extern void setup();
@@ -66,13 +72,6 @@ extern "C" {
 
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
-
-
-
-
-
-
-
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
     setup_once();
     return 0;
@@ -124,39 +123,7 @@ void jsAlert(const char* msg) {
 }
 
 
-class FastLED_ChannelData {
-public:
-    FastLED_ChannelData() {
-    }
 
-    void update(Slice<StripData> data) {
-        mStripMap.clear();
-        for (const StripData& stripData : data) {
-            mStripMap[stripData.index] = stripData.slice;
-        }
-    }
-
-    emscripten::val getPixelData_Uint8(int stripIndex) {
-        SliceUint8 stripData = getStripData(stripIndex);
-        uint8_t* data = stripData.data();
-        size_t size = stripData.size();
-        return emscripten::val(emscripten::typed_memory_view(size, data));
-    }
-    
-private:
-    typedef std::map<int, SliceUint8> StripDataMap;
-    StripDataMap mStripMap;
-    SliceUint8 getStripData(int stripIndex) {
-        // search through the vector and look for the first element matching the stripIndex
-        // strip map
-        StripDataMap::const_iterator it = mStripMap.find(stripIndex);
-        if (it != mStripMap.end()) {
-            SliceUint8 slice = it->second;
-            return slice;
-        }
-        return SliceUint8();
-    }
-};
 
 static std::shared_ptr<FastLED_ChannelData> g_channel_data = std::make_shared<FastLED_ChannelData>();
 static std::shared_ptr<FastLED_ChannelData> getChannelData() {
