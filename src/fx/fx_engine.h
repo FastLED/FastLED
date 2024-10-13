@@ -1,7 +1,7 @@
 #pragma once
 
 #include "crgb.h"
-#include "fixed_vector.h"
+#include "fixed_map.h"
 #include "fx/fx.h"
 #include "fx/detail/fx_compositor.h"
 #include "fx/detail/fx_layer.h"
@@ -59,12 +59,14 @@ class FxEngine {
      */
     FxPtr getFx(int index);
 
+    int getCurrentFxId() const { return mCurrId; }
+
     /**
      * @brief Renders the current effect or transition to the output buffer.
      * @param now The current time in milliseconds.
      * @param outputBuffer The buffer to render the effect into.
      */
-    void draw(uint32_t now, CRGB *outputBuffer);
+    bool draw(uint32_t now, CRGB *outputBuffer);
 
     /**
      * @brief Transitions to the next effect in the sequence.
@@ -79,85 +81,102 @@ class FxEngine {
      * @param duration The duration of the transition in milliseconds.
      * @return True if the transition was set, false if the index was invalid.
      */
-    bool setNextFx(uint16_t index, uint16_t duration);
+    bool setNextFx(int index, uint16_t duration);
 
   private:
-    FixedVector<FxPtr, FASTLED_FX_ENGINE_MAX_FX> mEffects; ///< Collection of effects
+    int mCounter = 0;
+    FixedMap<int, FxPtr, FASTLED_FX_ENGINE_MAX_FX> mEffects; ///< Collection of effects
     FxCompositor mCompositor; ///< Handles effect transitions and rendering
-    uint16_t mCurrentIndex; ///< Index of the current effect
+    int mCurrId; ///< Id of the current effect
     uint16_t mDuration = 0; ///< Duration of the current transition
     bool mDurationSet = false; ///< Flag indicating if a new transition has been set
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
-    : mCompositor(numLeds), mCurrentIndex(0) {
+    : mCompositor(numLeds), mCurrId(0) {
 }
 
 inline FxEngine::~FxEngine() {}
 
 inline int FxEngine::addFx(FxPtr effect) {
-    if (mEffects.size() >= FASTLED_FX_ENGINE_MAX_FX) {
+    bool auto_set = mEffects.empty();
+    bool ok = mEffects.insert(mCounter, effect);
+    if (!ok) {
         return -1;
     }
-    int index = mEffects.size();
-    mEffects.push_back(effect);
-    if (mEffects.size() == 1) {
-        mCompositor.startTransition(0, 0, mEffects[0]);
+    if (auto_set) {
+        mCurrId = mCounter;
+        mCompositor.startTransition(0, 0, effect);
     }
-    return index;
+    return mCounter++;
 }
 
 inline bool FxEngine::nextFx(uint16_t duration) {
-    uint16_t next_index = (mCurrentIndex + 1) % mEffects.size();
-    return setNextFx(next_index, duration);
-}
-
-inline bool FxEngine::setNextFx(uint16_t index, uint16_t duration) {
-    if (index >= mEffects.size() || index == mCurrentIndex) {
+    bool ok = mEffects.next(mCurrId, &mCurrId, true);
+    if (!ok) {
         return false;
     }
-    mCurrentIndex = index;
+    setNextFx(mCurrId, duration);
+}
+
+inline bool FxEngine::setNextFx(int index, uint16_t duration) {
+    if (!mEffects.has(index)) {
+        return false;
+    }
+    mCurrId = index;
     mDuration = duration;
     mDurationSet = true;
     return true;
 }
 
 inline FxPtr FxEngine::removeFx(int index) {
-    if (index < 0 || index >= static_cast<int>(mEffects.size())) {
+    if (!mEffects.has(index)) {
         return FxPtr();
     }
     
-    FxPtr removedFx = mEffects[index];
-    mEffects.erase(mEffects.begin() + index);
+    FxPtr removedFx;
+    bool ok = mEffects.get(index, &removedFx);
+    if (!ok) {
+        return FxPtr();
+    }
     
-    if (mCurrentIndex == index) {
+    if (mCurrId == index) {
         // If we're removing the current effect, switch to the next one
-        mCurrentIndex = mCurrentIndex % mEffects.size();
+        mEffects.next(mCurrId, &mCurrId, true);
         mDurationSet = true;
         mDuration = 0; // Instant transition
-    } else if (mCurrentIndex > index) {
-        // Adjust the current index if we removed an effect before it
-        mCurrentIndex--;
     }
     
     return removedFx;
 }
 
-inline FxPtr FxEngine::getFx(int index) {
-    if (index < 0 || index >= static_cast<int>(mEffects.size())) {
-        return FxPtr();  // null.
+inline FxPtr FxEngine::getFx(int id) {
+    if (mEffects.has(id)) {
+        FxPtr fx;
+        mEffects.get(id, &fx);
+        return fx;
     }
-    return mEffects[index];
+    return FxPtr();
 }
 
-inline void FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
+inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
+    if (mEffects.empty()) {
+        return false;
+    }
     if (mDurationSet) {
-        mCompositor.startTransition(now, mDuration, mEffects[mCurrentIndex]);
+        FxPtr fx;
+        bool ok = mEffects.get(mCurrId, &fx);
+        if (!ok) {
+            // something went wrong.
+            return false;
+        }
+        mCompositor.startTransition(now, mDuration, fx);
         mDurationSet = false;
     }
     if (!mEffects.empty()) {
         mCompositor.draw(now, finalBuffer);
     }
+    return true;
 }
 
 FASTLED_NAMESPACE_END

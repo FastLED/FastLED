@@ -73,6 +73,10 @@ static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 void CFastLED::show(uint8_t scale) {
 	// guard against showing too rapidly
+	EndFrame* instance = EndFrame::getInstance();
+	if (instance) {
+		instance->onBeginFrame();
+	}
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
@@ -98,9 +102,9 @@ void CFastLED::show(uint8_t scale) {
 		pCur = pCur->next();
 	}
 	countFPS();
-	EndFrame* instance = EndFrame::getInstance();
+
 	if (instance) {
-		instance->endFrame();
+		instance->onEndFrame();
 	}
 
 }

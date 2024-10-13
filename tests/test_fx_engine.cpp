@@ -37,15 +37,19 @@ TEST_CASE("test_fx_engine") {
     Ptr<MockFx> redFx = MockFxPtr::New(NUM_LEDS, CRGB::Red);
     Ptr<MockFx> blueFx = MockFxPtr::New(NUM_LEDS, CRGB::Blue);
 
-    engine.addFx(redFx);
-    engine.addFx(blueFx);
+    int id0 = engine.addFx(redFx);
+    int id1 = engine.addFx(blueFx);
 
     SUBCASE("Initial state") {
-        engine.draw(0, leds);
+        int currId = engine.getCurrentFxId();
+        CHECK(currId == id0);
+        const bool ok = engine.draw(0, leds);
+        CHECK(ok);
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
             CHECK(leds[i] == CRGB::Red);
         }
     }
+
 
     SUBCASE("Transition") {
         engine.nextFx(1000);
@@ -80,6 +84,8 @@ TEST_CASE("test_fx_engine") {
     }
 
 }
+
+
 
 TEST_CASE("test_transition") {
 
@@ -137,4 +143,3 @@ TEST_CASE("test_transition") {
         CHECK(transition.getProgress(101) == 255);
     }
 }
-

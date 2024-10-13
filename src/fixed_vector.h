@@ -14,6 +14,8 @@ private:
     size_t current_size = 0;
 
 public:
+    typedef T* iterator;
+    typedef const T* const_iterator;
     // Constructor
     constexpr FixedVector() = default;
 
@@ -65,26 +67,46 @@ public:
     }
 
     // Erase the element at the given iterator position
-    T* erase(const T* it) {
-        if (it >= begin() && it < end()) {
-            size_t index = it - begin();
-            // TODO: Is std::move safe here?
-            // std::move(it + 1, end(), const_cast<T*>(it));
-            // no move
-            for (size_t i = index + 1; i < current_size; ++i) {
-                data[i - 1] = data[i];
+    iterator erase(const T& it) {
+        T* ptr = find(it);
+        if (ptr != end()) {
+            // shift all elements to the left
+            for (T* p = ptr; p != end() - 1; ++p) {
+                *p = *(p + 1);
             }
             --current_size;
-            return const_cast<T*>(it);
         }
-        return nullptr;
+        return ptr;
     }
 
+    iterator find(const T& it) {
+        for (size_t i = 0; i < current_size; ++i) {
+            if (data[i] == it) {
+                return data + i;
+            }
+        }
+        return end();
+    }
+
+    const_iterator find(const T& it) const {
+        for (size_t i = 0; i < current_size; ++i) {
+            if (data[i] == it) {
+                return data + i;
+            }
+        }
+        return end();
+    }
+
+    bool has(const T& it) const {
+        return find(it) != end();
+    }
+
+
     // Iterator support
-    T* begin() { return data; }
-    const T* begin() const { return data; }
-    T* end() { return data + current_size; }
-    const T* end() const { return data + current_size; }
+    iterator begin() { return data; }
+    const_iterator begin() const { return data; }
+    iterator end() { return data + current_size; }
+    const_iterator end() const { return data + current_size; }
 };
 
 FASTLED_NAMESPACE_END

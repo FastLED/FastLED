@@ -10,19 +10,17 @@ FASTLED_NAMESPACE_BEGIN
 
 template<typename Key, typename Value, size_t N>
 class FixedMap {
-private:
+public:
     struct Pair {
         Key key;
         Value value;
     };
 
     typedef FixedVector<Pair, N> VectorType;
-    VectorType data;
-
     typedef typename VectorType::iterator iterator;
-    typedef const typename VectorType::iterator const_iterator;
+    typedef typename VectorType::const_iterator const_iterator;
 
-public:
+
     // Constructor
     constexpr FixedMap() = default;
 
@@ -140,16 +138,11 @@ public:
         data.clear();
     }
 
-    bool has(const T& it) const {
+    bool has(const Key& it) const {
         return find(it) != end();
     }
-
-
-    // Iterator support
-    iterator begin() { return data.begin(); }
-    const_iterator begin() const { return data.begin(); }
-    iterator end() { return data.end(); }
-    const_iterator end() const { return data.end(); }
+private:
+    VectorType data;
 };
 
 FASTLED_NAMESPACE_END

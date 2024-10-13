@@ -22,7 +22,3 @@ EMSCRIPTEN_KEEPALIVE extern "C" bool postMessage(const char* jstStr) {
     MessageQueue& js_message_queue = MessageQueue::Instance();
     return js_message_queue.pushBack(jstStr);
 }
-
-void exports_init() {
-    OnEndFrameListener::Init();
-}
