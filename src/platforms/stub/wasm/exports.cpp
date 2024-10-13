@@ -1,5 +1,3 @@
-#pragma once
-
 #ifdef __EMSCRIPTEN__
 
 /// Begin compatibility layer for FastLED platform. WebAssembly edition.
@@ -15,7 +13,7 @@
 #include <deque>  // ok include
 #include <string> // ok include
 
-#include "_exports.h"
+#include "exports.h"
 
 #include "_timer.hpp"
 #include "message_queue.h"
