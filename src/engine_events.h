@@ -21,15 +21,13 @@ public:
     static void removeListener(Listener* listener);
     static void onBeginFrame();
     static void onEndFrame();
-
+private:
     // Safe to add a listeners during a callback.
     void _addListener(Listener* listener);
     // Safe to remove self during a callback.
     void _removeListener(Listener* listener);
     void _onBeginFrame();
     void _onEndFrame();
-
-private:
     #ifndef __AVR__
     typedef FixedVector<Listener*, 8> ListenerList;
     ListenerList mListeners;
