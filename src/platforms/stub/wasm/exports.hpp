@@ -28,19 +28,8 @@
 #include "exports/endframe.hpp"
 #include "exports/setup_and_loop.hpp"
 #include "exports/message_queue.hpp"
+#include "exports/canvas_size.hpp"
 
-
-void jsSetCanvasSize(int width, int height) {
-    char jsonStr[1024];
-    snprintf(jsonStr, sizeof(jsonStr), "[{\"width\":%d,\"height\":%d}]", width, height);
-    EM_ASM_({
-        globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(jsonStr) {
-            console.log("Missing globalThis.onFastLedSetCanvasSize(jsonStr) function");
-        };
-        var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
-        globalThis.onFastLedSetCanvasSize(jsonStr);
-    }, jsonStr);
-}
 
 EMSCRIPTEN_KEEPALIVE extern "C" bool postMessage(const char* jstStr) {
     // post message to the message queue.
