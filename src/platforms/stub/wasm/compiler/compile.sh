@@ -3,7 +3,7 @@ set -e
 
 compile() {
     # sometimes the compilation fails, attempt to compile multiple times
-    local max_attempts=10
+    local max_attempts=2
     local attempt=1
     
     while [ $attempt -le $max_attempts ]; do
