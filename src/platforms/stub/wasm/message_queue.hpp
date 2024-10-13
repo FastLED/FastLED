@@ -19,52 +19,52 @@ class MessageQueueImpl : public MessageQueue {
 public:
     MessageQueueImpl();
 
-    bool messages_available() const;
-    bool message_pop_front(std::string* message);
-    bool message_push_back(const char* msg);
-    size_t get_missed_messages_count() const;
-    size_t get_message_count() const;
-    size_t get_max_message_count() const;
+    bool available() const;
+    bool popFront(std::string* message);
+    bool pushBack(const char* msg);
+    size_t getMissedCount() const;
+    size_t getCount() const;
+    size_t getMaxCount() const;
 
 private:
-    std::deque<std::string> message_queue;
-    size_t missed_messages_count;
+    std::deque<std::string> queue;
+    size_t missed_count;
 };
 
 MessageQueueImpl::MessageQueueImpl()
-    : missed_messages_count(0) {}
+    : missed_count(0) {}
 
-bool MessageQueueImpl::messages_available() const {
-    return !message_queue.empty();
+bool MessageQueueImpl::available() const {
+    return !queue.empty();
 }
 
-bool MessageQueueImpl::message_pop_front(std::string* message) {
-    if (message_queue.empty()) {
+bool MessageQueueImpl::popFront(std::string* message) {
+    if (queue.empty()) {
         return false;
     }
-    *message = message_queue.front();
-    message_queue.pop_front();
+    *message = queue.front();
+    queue.pop_front();
     return true;
 }
 
-bool MessageQueueImpl::message_push_back(const char* msg) {
-    if (message_queue.size() >= FASTLED_WASM_MAX_MESSAGE_QUEUE_SIZE) {
-        message_queue.pop_front();
-        missed_messages_count++;
+bool MessageQueueImpl::pushBack(const char* msg) {
+    if (queue.size() >= FASTLED_WASM_MAX_MESSAGE_QUEUE_SIZE) {
+        queue.pop_front();
+        missed_count++;
     }
-    message_queue.push_back(msg);
+    queue.push_back(msg);
     return true;
 }
 
-size_t MessageQueueImpl::get_missed_messages_count() const {
-    return missed_messages_count;
+size_t MessageQueueImpl::getMissedCount() const {
+    return missed_count;
 }
 
-size_t MessageQueueImpl::get_message_count() const {
-    return message_queue.size();
+size_t MessageQueueImpl::getCount() const {
+    return queue.size();
 }
 
-size_t MessageQueueImpl::get_max_message_count() const {
+size_t MessageQueueImpl::getMaxCount() const {
     return FASTLED_WASM_MAX_MESSAGE_QUEUE_SIZE;
 }
 

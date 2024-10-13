@@ -10,18 +10,19 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// Messages from Js to C++. You must pull the messages from the queue. 
 class MessageQueue {
     public:
         static MessageQueue& Instance();
         MessageQueue(const MessageQueue&) = delete;
         MessageQueue& operator=(const MessageQueue&) = delete;
         virtual ~MessageQueue() {}
-        virtual bool messages_available() const = 0;
-        virtual bool message_pop_front(std::string* message) = 0;
-        virtual bool message_push_back(const char* msg) = 0;
-        virtual size_t get_missed_messages_count() const = 0;
-        virtual size_t get_message_count() const = 0;
-        virtual size_t get_max_message_count() const = 0;
+        virtual bool available() const = 0;
+        virtual bool popFront(std::string* message) = 0;
+        virtual bool pushBack(const char* msg) = 0;
+        virtual size_t getMissedCount() const = 0;
+        virtual size_t getCount() const = 0;
+        virtual size_t getMaxCount() const = 0;
     protected:
         MessageQueue() {}
 };

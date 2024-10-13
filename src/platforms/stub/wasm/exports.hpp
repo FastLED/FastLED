@@ -181,7 +181,7 @@ void jsSetCanvasSize(int width, int height) {
 EMSCRIPTEN_KEEPALIVE extern "C" bool postMessage(const char* jstStr) {
     // post message to the message queue.
     MessageQueue& js_message_queue = MessageQueue::Instance();
-    return js_message_queue.message_push_back(jstStr);
+    return js_message_queue.pushBack(jstStr);
 }
 
 EMSCRIPTEN_KEEPALIVE extern "C" int main() {
