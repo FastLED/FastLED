@@ -24,18 +24,13 @@ struct StripData {
     SliceUint8 slice;
 };
 
-class ChannelData: public EndFrameListener {
+class ChannelData: public EndFrame::Listener {
 public:
-    ChannelData() {
-        if (EndFrame* ef = EndFrame::getInstance()) {
-            ef->addListener(this);
-        }
-    }
+
 
     void onEndFrame() override {
         // Clear the data
         mClearOnNextCall = true;
-
     }
 
     static ChannelData& Instance() {
@@ -109,6 +104,10 @@ public:
 
     
 private:
+
+    friend class Singleton<ChannelData>;
+    ChannelData() {
+    }
 
     typedef std::map<int, SliceUint8> StripDataMap;
     typedef std::map<int, uint32_t> UpdateMap;

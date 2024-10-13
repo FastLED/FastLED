@@ -9,6 +9,7 @@
 #include "namespace.h"
 #include "channel_data.h"
 #include "singleton.h"
+#include "endframe.h"
 #include <vector>
 
 FASTLED_NAMESPACE_BEGIN
@@ -31,19 +32,13 @@ inline WasmSpiInstanceCounter& WasmSpiInstanceCounter::getInstance() {
     return out;
 }
 
-class WasmSpiOutput: public EndFrameListener {
+class WasmSpiOutput: public EndFrame::Listener {
 public:
     WasmSpiOutput() {
         mId = WasmSpiInstanceCounter::getInstance().increment();
-        if (EndFrame* ef = EndFrame::getInstance()) {
-            ef->addListener(this);
-        }
     }
 
     ~WasmSpiOutput() {
-        if (EndFrame* ef = EndFrame::getInstance()) {
-            ef->removeListener(this);
-        }
     }
 
     void onBeginFrame () override {

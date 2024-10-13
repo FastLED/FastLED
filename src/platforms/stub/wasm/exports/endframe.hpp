@@ -33,23 +33,15 @@ void jsOnFrame() {
 }
 
 
-class OnEndFrameListener: public EndFrameListener {
+class OnEndFrameListener: public EndFrame::Listener {
 public:
     friend class Singleton<OnEndFrameListener>;
     static void Init();
-
     void onEndFrame() override {
         jsOnFrame();
     }
 private:
-    OnEndFrameListener() {
-        EndFrame* ptr = EndFrame::getInstance();
-        if (!ptr) {
-            // not available to this system
-        } else {
-            ptr->addListener(this);
-        }
-    }
+    OnEndFrameListener() {}
 };
 
 void OnEndFrameListener::Init() {
