@@ -1,6 +1,7 @@
 #pragma once
 
 #include "namespace.h"
+#include "eorder.h"
 
 FASTLED_NAMESPACE_BEGIN
 
