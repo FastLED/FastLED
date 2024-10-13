@@ -27,6 +27,7 @@
 #include "channel_data.h"
 #include "singleton.h"
 #include "endframe.h"
+#include "message_queue.hpp"
 
 
 extern void setup();
@@ -177,10 +178,9 @@ void jsSetCanvasSize(int width, int height) {
     }, jsonStr);
 }
 
-MessageQueue js_message_queue;  // hack - this needs to not be inlined into the hpp file!
-
 EMSCRIPTEN_KEEPALIVE extern "C" bool postMessage(const char* jstStr) {
     // post message to the message queue.
+    MessageQueue& js_message_queue = MessageQueue::Instance();
     return js_message_queue.message_push_back(jstStr);
 }
 
