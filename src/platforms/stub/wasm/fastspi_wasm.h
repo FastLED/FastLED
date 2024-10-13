@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #include "namespace.h"
-#include "channel_data.h"
+#include "active_strip_data.h"
 #include "singleton.h"
 #include "engine_events.h"
 #include <vector>

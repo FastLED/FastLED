@@ -4,7 +4,7 @@
 #include "eorder.h"
 #include <stdint.h>
 
-#include "channel_data.h"
+#include "active_strip_data.h"
 #include "crgb.h"
 #include "exports.h"
 
@@ -40,7 +40,7 @@ public:
 
 protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-		ChannelData& ch_data = Singleton<ChannelData>::instance();
+		ActiveStripData& ch_data = Singleton<ActiveStripData>::instance();
 		const uint8_t* rgb = pixels.mData;
 		int nLeds = pixels.mLen;
 		ch_data.update(mId, millis(), rgb, nLeds * 3);

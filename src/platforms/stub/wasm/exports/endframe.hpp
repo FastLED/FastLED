@@ -7,20 +7,24 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
-#include "platforms/stub/wasm/channel_data.h"
+#include "platforms/stub/wasm/active_strip_data.h"
 #include "engine_events.h"
 
-static ChannelData* getChannelDataPtr() {
-    ChannelData* channelData = &Singleton<ChannelData>::instance();
-    return channelData;
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
+static ActiveStripData* getActiveStripDataPtr() {
+    ActiveStripData* instance = &Singleton<ActiveStripData>::instance();
+    return instance;
 }
 
 EMSCRIPTEN_BINDINGS(external_constructors) {
-    emscripten::class_<ChannelData>("ChannelData")
-        .constructor(&getChannelDataPtr, emscripten::allow_raw_pointers())
-        .function("getPixelData_Uint8", &ChannelData::getPixelData_Uint8)
-        .function("getFirstPixelData_Uint8", &ChannelData::getFirstPixelData_Uint8)
-        .function("getNthPixelStripData_Uint8", &ChannelData::getNthPixelStripData_Uint8);
+    emscripten::class_<ActiveStripData>("ActiveStripData")
+        .constructor(&getActiveStripDataPtr, emscripten::allow_raw_pointers())
+        .function("getPixelData_Uint8", &ActiveStripData::getPixelData_Uint8)
+        .function("getFirstPixelData_Uint8", &ActiveStripData::getFirstPixelData_Uint8)
+        .function("getNthPixelStripData_Uint8", &ActiveStripData::getNthPixelStripData_Uint8);
 }
 
 void jsOnFrame() {
@@ -28,7 +32,7 @@ void jsOnFrame() {
         globalThis.onFastLedFrame = globalThis.onFastLedFrame || function() {
             console.log("Missing globalThis.onFastLedDemo() function");
         };
-        globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ChannelData();
+        globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ActiveStripData();
         globalThis.onFastLedFrame(globalThis.onFastLedFrameData);
     });
 }
@@ -48,3 +52,5 @@ private:
 void OnEndFrameListener::Init() {
     Singleton<OnEndFrameListener>::instance();
 }
+
+FASTLED_NAMESPACE_END
