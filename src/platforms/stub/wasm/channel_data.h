@@ -9,7 +9,7 @@
 #include <emscripten/val.h>
 
 
-typedef Slice<uint8_t> SliceUint8;
+typedef Slice<const uint8_t> SliceUint8;
 struct StripData {
     int index = 0;
     SliceUint8 slice;
@@ -29,9 +29,10 @@ public:
 
     emscripten::val getPixelData_Uint8(int stripIndex) {
         SliceUint8 stripData = getStripData(stripIndex);
-        uint8_t* data = stripData.data();
+        const uint8_t* data = stripData.data();
+        uint8_t* data_mutable = const_cast<uint8_t*>(data);
         size_t size = stripData.size();
-        return emscripten::val(emscripten::typed_memory_view(size, data));
+        return emscripten::val(emscripten::typed_memory_view(size, data_mutable));
     }
     
 private:

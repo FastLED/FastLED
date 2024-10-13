@@ -1,14 +1,15 @@
 #pragma once
 
-#ifndef __EMSCRIPTEN__
-#error "This file should only be included in an Emscripten build"
-#endif
-
 #include "namespace.h"
 #include "eorder.h"
 
-FASTLED_NAMESPACE_BEGIN
+#include "channel_data.h"
+#include "crgb.h"
+#include "exports.h"
 
+#include "singleton.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_HAS_CLOCKLESS 1
 
@@ -18,7 +19,16 @@ public:
 	virtual void init() { }
 
 protected:
-	virtual void showPixels(PixelController<RGB_ORDER> & pixels) { }
+	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+		FastLED_ChannelData& ch_data = Singleton<FastLED_ChannelData>::instance();
+		const uint8_t* rgb = pixels.mData;
+		int nLeds = pixels.mLen;
+		StripData stripData = {0, SliceUint8(rgb, nLeds * 3)};
+		Slice<StripData> dataSlice(&stripData, 1);
+		ch_data.update(dataSlice);
+		jsOnFrame();
+	}
 };
 
 FASTLED_NAMESPACE_END
+

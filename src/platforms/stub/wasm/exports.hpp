@@ -1,11 +1,6 @@
 #pragma once
 
-#ifdef FASTLED_INTERNAL
-// Note - having extreme trouble trying to figure out how not to make emscripten
-// not strip out these symbols. It also slows down the build process as compiling
-// client code forces a FastLED rebuild.
-#error "At this time, this file MUST be included by client code, NOT FastLED internals"alignas
-#endif
+
 
 #ifndef __EMSCRIPTEN__
 #error "This file should only be included in an Emscripten build"
@@ -27,10 +22,10 @@
 #include <stdio.h>
 #include <thread>
 
-
 #include "exports.h"
 #include "message_queue.h"
 #include "channel_data.h"
+#include "singleton.h"
 
 
 extern void setup();
@@ -54,17 +49,17 @@ void setup_once() {
 extern "C" {
 
     // Replacement for 'millis' in WebAssembly context
-    uint32_t millis() {
+    EMSCRIPTEN_KEEPALIVE uint32_t millis() {
         return emscripten_get_now();
     }
 
     // Replacement for 'micros' in WebAssembly context
-    uint32_t micros() {
+    EMSCRIPTEN_KEEPALIVE uint32_t micros() {
         return millis() * 1000;
     }
 
     // Replacement for 'delay' in WebAssembly context
-    void delay(int ms) {
+    EMSCRIPTEN_KEEPALIVE void delay(int ms) {
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
     }
 }
@@ -125,14 +120,16 @@ void jsAlert(const char* msg) {
 
 
 
-static std::shared_ptr<FastLED_ChannelData> g_channel_data = std::make_shared<FastLED_ChannelData>();
-static std::shared_ptr<FastLED_ChannelData> getChannelData() {
-    return g_channel_data;
+
+static FastLED_ChannelData* getChannelDataPtr() {
+    FastLED_ChannelData* channelData = &Singleton<FastLED_ChannelData>::instance();
+    return channelData;
 }
 
-EMSCRIPTEN_BINDINGS(better_smart_pointers) {
+
+EMSCRIPTEN_BINDINGS(external_constructors) {
     emscripten::class_<FastLED_ChannelData>("FastLED_ChannelData")
-        .smart_ptr_constructor("FastLED_ChannelData", &getChannelData)
+        .constructor(&getChannelDataPtr, emscripten::allow_raw_pointers())
         .function("getPixelData_Uint8", &FastLED_ChannelData::getPixelData_Uint8);
 }
 
@@ -147,9 +144,9 @@ void jsOnDemo() {
 }
 
 #if 1
-void jsOnFrame(Slice<StripData> data) {
+void jsOnFrame() {
     // Populate the data in C++
-    g_channel_data->update(data);
+    //getChannelDataPtr()->update(data);
     EM_ASM_({
         globalThis.onFastLedFrame = globalThis.onFastLedFrame || function() {
             console.log("Missing globalThis.onFastLedDemo() function");

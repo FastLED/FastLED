@@ -73,7 +73,6 @@ void setup() {
     noisePalette->lazyInit();
     noisePalette->setSpeed(SPEED);
     noisePalette->setScale(SCALE);
-
     jsSetCanvasSize(MATRIX_WIDTH, MATRIX_HEIGHT);
 }
 
@@ -83,16 +82,6 @@ void loop() {
     EVERY_N_MILLISECONDS(1000) {
         printf("fastled running\r\n");
     }
-
-
-
-    StripData stripData[] = {
-        {0, SliceUint8((uint8_t *)leds, NUM_LEDS * 3)},
-    };
-    Slice<StripData> allData = Slice<StripData>(stripData, 1);
-    //printf("Calling jsOnFrame\r\n");
-    jsOnFrame(allData);
-
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
