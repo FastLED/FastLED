@@ -72,7 +72,10 @@ COPY src/platforms/stub/wasm/index.html /js/index.html
 # && rm -rf /wasm-prewarm
 
 WORKDIR /js
- RUN pio run -t fastled
+# Create a simple project to compile. This will cache all of the object files
+# so that when the container runs it will be instant.
+RUN mkdir -p /js/src && echo -e "#include \"FastLED.h\"\nvoid loop(){}\nvoid setup(){}\n" > /js/src/main.cpp
+RUN pio run && rm -rf /js/src/main.cpp
 
 
 COPY ci/wasm/entrypoint.sh /js/compile.sh
