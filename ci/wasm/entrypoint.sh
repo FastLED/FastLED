@@ -52,10 +52,8 @@ cd /js
 
 # We only want to run this compile pre-step once. Leave a breadcrumb to indicate
 # that we have already done this.
-if [ ! -f /js/fixed ]; then
-    include_deps
-    touch /js/fixed
-fi
+
+include_deps
 
 #############################################
 compile
@@ -75,4 +73,7 @@ cp -f ./index.html /mapped/fastled_js/index.html
 cat ./.pio/build/*/fastled.js > /mapped/fastled_js/fastled.js
 cat ./.pio/build/*/fastled.wasm > /mapped/fastled_js/fastled.wasm
 cat ./index.html > /mapped/fastled_js/index.html
+
+# now clean up the files
+rm -rf /js/src/*
 
