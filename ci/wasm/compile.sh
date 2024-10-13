@@ -48,11 +48,11 @@ include_deps() {
             # special case, main.cpp exists, so we want to rename it to main2.hpp
             mv /js/src/main.cpp /js/src/main2.hpp
         fi
-        mv /js/src/*.ino /js/src/main.cpp
+        mv /js/src/*.ino /js/src/generated_main.cpp
         # If main2.hpp exists (because it was renamed, then append it to main.cpp)
         if [ -f /js/src/main2.hpp ]; then
             # the main2.hpp file was created, so include it.
-            echo '#include "main2.hpp"' >> /js/src/main.cpp
+            echo '#include "main2.hpp"' >> /js/src/generated_main.cpp
         fi
     fi
 

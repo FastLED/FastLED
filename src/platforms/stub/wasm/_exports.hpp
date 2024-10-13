@@ -13,6 +13,8 @@
 #include <deque>  // ok include
 #include <string> // ok include
 
+#include "_exports.h"
+
 #include "_timer.hpp"
 #include "message_queue.h"
 
@@ -87,12 +89,6 @@ void jsAlert(const char* msg) {
     });
 }
 
-typedef Slice<uint8_t> SliceUint8;
-
-struct StripData {
-    int index = 0;
-    SliceUint8 slice;
-};
 
 class FastLED_ChannelData {
 public:
@@ -177,18 +173,6 @@ void jsOnFrame(const char* message) {
     }, message);
 }
 #endif
-
-uint8_t buffer[1024] = {0};
-
-emscripten::val getInt8Array() {
-    return emscripten::val(
-       emscripten::typed_memory_view(1024, buffer)
-    );
-}
-
-EMSCRIPTEN_BINDINGS() {
-    function("getInt8Array", &getInt8Array);
-}
 
 void jsSetCanvasSize(int width, int height) {
     char jsonStr[1024];
