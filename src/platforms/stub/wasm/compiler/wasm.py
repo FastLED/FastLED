@@ -27,7 +27,7 @@ wasmflags = [
     "ALLOW_MEMORY_GROWTH=1",
     "-Os",
     "-s",
-    "EXPORTED_FUNCTIONS=['_malloc','_free']",
+    "EXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop']",
     "--bind",
     "-s",
     "INITIAL_MEMORY=1073741824",
