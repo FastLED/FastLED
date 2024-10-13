@@ -72,9 +72,9 @@ COPY src/platforms/stub/wasm/index.html /js/index.html
 # && rm -rf /wasm-prewarm
 
 WORKDIR /js
-# Create a simple project to compile. This will cache all of the object files
-# so that when the container runs it will be instant.
-RUN mkdir -p /js/src && echo -e "#include \"FastLED.h\"\nvoid loop(){}\nvoid setup(){}\n" > /js/src/main.cpp
+# Create a simple project to compile. Include the symbols file to make sure the compile is successful
+# and is loaded into the cache.
+RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/_exports.hpp\"#include \"FastLed.h\"\nvoid setup() {} void loop(){}\n" > /js/src/main.cpp
 RUN pio run && rm -rf /js/src/main.cpp
 
 
