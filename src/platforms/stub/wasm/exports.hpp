@@ -29,6 +29,7 @@
 #include "endframe.h"
 #include "message_queue.hpp"
 #include "exports/timer.hpp"
+#include "exports/endframe.hpp"
 
 
 extern void setup();
@@ -39,7 +40,6 @@ extern void loop();
 static bool g_setup_called = false;
 
 void exports_init();
-
 
 void setup_once() {
     if (g_setup_called) {
@@ -79,41 +79,6 @@ EMSCRIPTEN_KEEPALIVE extern "C" void async_start_loop() {
   emscripten_set_interval(interval_loop, SIXTY_FPS, nullptr);
 }
 
-
-void jsAlert(const char* msg) {
-    EM_ASM_({
-        // Use EM_ASM to call JavaScript directly    EM_ASM({
-        var message = UTF8ToString($0);  // Convert C string to JavaScript string
-        alert(message);                 // Call the JS function to show an alert
-    });
-}
-
-static ChannelData* getChannelDataPtr() {
-    ChannelData* channelData = &Singleton<ChannelData>::instance();
-    return channelData;
-}
-
-EMSCRIPTEN_BINDINGS(external_constructors) {
-    emscripten::class_<ChannelData>("ChannelData")
-        .constructor(&getChannelDataPtr, emscripten::allow_raw_pointers())
-        .function("getPixelData_Uint8", &ChannelData::getPixelData_Uint8)
-        .function("getFirstPixelData_Uint8", &ChannelData::getFirstPixelData_Uint8)
-        .function("getNthPixelStripData_Uint8", &ChannelData::getNthPixelStripData_Uint8);
-}
-
-
-void jsOnFrame() {
-    // Populate the data in C++
-    //getChannelDataPtr()->update(data);
-    EM_ASM_({
-        globalThis.onFastLedFrame = globalThis.onFastLedFrame || function() {
-            console.log("Missing globalThis.onFastLedDemo() function");
-        };
-        globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ChannelData();
-        globalThis.onFastLedFrame(globalThis.onFastLedFrameData);
-    });
-}
-
 void jsSetCanvasSize(int width, int height) {
     char jsonStr[1024];
     snprintf(jsonStr, sizeof(jsonStr), "[{\"width\":%d,\"height\":%d}]", width, height);
@@ -136,29 +101,6 @@ EMSCRIPTEN_KEEPALIVE extern "C" int main() {
     printf("Hello from FastLED\r\n");
     async_start_loop();
     return 0;
-}
-
-class OnEndFrameListener: public EndFrameListener {
-public:
-    friend class Singleton<OnEndFrameListener>;
-    static void Init();
-
-    void onEndFrame() override {
-        jsOnFrame();
-    }
-private:
-    OnEndFrameListener() {
-        EndFrame* ptr = EndFrame::getInstance();
-        if (!ptr) {
-            // not available to this system
-        } else {
-            ptr->addListener(this);
-        }
-    }
-};
-
-void OnEndFrameListener::Init() {
-    Singleton<OnEndFrameListener>::instance();
 }
 
 
