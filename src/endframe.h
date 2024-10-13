@@ -20,7 +20,7 @@ public:
         #endif
     }
 
-    void callListeners() {
+    void endFrame() {
         #ifdef __AVR__
         return;
         #else

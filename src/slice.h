@@ -11,21 +11,10 @@ public:
 
     Slice(const Slice& other) : mData(other.mData), mSize(other.mSize) {}
 
-    // Conversion constructor for compatible types
-    template<typename U>
-    Slice(const Slice<U>& other) : mData(reinterpret_cast<T*>(other.data())), mSize(other.size()) {}
 
     Slice& operator=(const Slice& other) {
         mData = other.mData;
         mSize = other.mSize;
-        return *this;
-    }
-
-    // Assignment operator for compatible types
-    template<typename U>
-    Slice& operator=(const Slice<U>& other) {
-        mData = reinterpret_cast<T*>(other.data());
-        mSize = other.size();
         return *this;
     }
 

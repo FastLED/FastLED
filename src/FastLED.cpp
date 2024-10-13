@@ -1,5 +1,7 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
+#include "singleton.h"
+#include "endframe.h"
 
 #ifdef __EMSCRIPTEN__
 // Due to emscripten toolchain, the exports must live in an object
@@ -96,6 +98,11 @@ void CFastLED::show(uint8_t scale) {
 		pCur = pCur->next();
 	}
 	countFPS();
+	EndFrame* instance = EndFrame::getInstance();
+	if (instance) {
+		instance->endFrame();
+	}
+
 }
 
 int CFastLED::count() {

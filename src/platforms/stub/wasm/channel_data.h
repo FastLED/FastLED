@@ -31,15 +31,8 @@ public:
         return Singleton<ChannelData>::instance();
     }
 
-    void update(Slice<StripData> data) {
-        mStripMap.clear();
-        for (const StripData& stripData : data) {
-            mStripMap[stripData.index] = stripData.slice;
-        }
-    }
-
-    void update(int id, uint32_t now, Slice<SliceUint8> data) {
-        mStripMap[id] = data;
+    void update(int id, uint32_t now, const uint8_t* data, size_t size) {
+        mStripMap[id] = SliceUint8(data, size);
         mUpdateMap[id] = now;
     }
 
