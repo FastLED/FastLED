@@ -70,7 +70,7 @@ COPY src/platforms/stub/wasm/index.html /js/index.html
 WORKDIR /js
 
 # Prewarm the cache with a first compile.
-RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/_exports.hpp\"#include \"FastLed.h\"\nvoid setup() {} void loop(){}\n" > /js/src/main.cpp
+RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/_exports.hpp\" #include \"FastLed.h\"\nvoid setup() {}\nvoid loop(){}\n" > /js/src/main.cpp
 RUN source /entrypoint.sh && pio run && rm -rf /js/src/main.cpp
 
 # Copy the compile script
