@@ -37,20 +37,31 @@ void jsOnFrame() {
     });
 }
 
+void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
+    EM_ASM_({
+        globalThis.onFastLedStripAdded = globalThis.onFastLedStripAdded || function() {
+            console.log("Missing globalThis.onFastLedStripAdded(id, length) function");
+        };
+        globalThis.onFastLedStripAdded($0, $1);
+    }, strip, num_leds);
+}
 
-class OnEndFrameListener: public EngineEvents::Listener {
+class EngineListener: public EngineEvents::Listener {
 public:
-    friend class Singleton<OnEndFrameListener>;
+    friend class Singleton<EngineListener>;
     static void Init();
     void onEndFrame() override {
         jsOnFrame();
     }
+    void onStripAdded(uintptr_t strip, uint32_t num_leds) override {
+        jsOnStripAdded(strip, num_leds);
+    }
 private:
-    OnEndFrameListener() {}
+    EngineListener() {}
 };
 
-void OnEndFrameListener::Init() {
-    Singleton<OnEndFrameListener>::instance();
+void EngineListener::Init() {
+    Singleton<EngineListener>::instance();
 }
 
 FASTLED_NAMESPACE_END

@@ -19,7 +19,7 @@ inline void setup_once() {
     if (g_setup_called) {
         return;
     }
-    OnEndFrameListener::Init();
+    EngineListener::Init();
     g_setup_called = true;
     setup();
 }
