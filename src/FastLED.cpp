@@ -5,8 +5,8 @@
 
 #ifdef __EMSCRIPTEN__
 // Due to emscripten toolchain, the exports must live in an object
-// that that is guaranteed to be linked in. This is a great place for it.
-#include "platforms/stub/wasm/exports.hpp"
+// that that is guaranteed to be linked in. So we do it here.
+#include "platforms/stub/wasm/link.hpp"
 #endif
 
 
