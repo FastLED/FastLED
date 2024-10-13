@@ -22,6 +22,13 @@ compile() {
     done
 }
 
+# Function to insert the header
+insert_header() {
+    local file="$1"
+    sed -i '/#include "platforms\/stub\/wasm\/js.h"/d' "$file"
+    sed -i '1i#include "platforms/stub/wasm/js.h"' "$file"
+    echo "Processed: $file"
+}
 
 # Copy the contents of the hosts mapped directory to the container
 mkdir -p /js/src
@@ -46,6 +53,11 @@ include_deps() {
             echo '#include "main2.hpp"' >> /js/src/main.cpp
         fi
     fi
+
+    # Find all .ino, .h, .hpp, and .cpp files recursively and process them
+    find src -type f \( -name "*.ino" -o -name "*.h" -o -name "*.hpp" -o -name "*.cpp" \) | while read -r file; do
+        insert_header "$file"
+    done
 }
 
 # Remove the .pio directory copy, if it exists because this could contain build

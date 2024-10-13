@@ -12,7 +12,6 @@
 
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup();
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
+// Posts a message from JavaScript to C++.
+EMSCRIPTEN_KEEPALIVE extern "C" bool extern_post_message(const char* jstStr);
 
-// Send frame data to the JavaScript side.
-void jsOnFrame();
-void jsSetCanvasSize(int width, int height);
