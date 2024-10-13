@@ -14,6 +14,7 @@
 #include "singleton.h"
 
 #include "namespace.h"
+#include "endframe.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -23,15 +24,30 @@ struct StripData {
     SliceUint8 slice;
 };
 
-class ChannelData {
+class ChannelData: public EndFrameListener {
 public:
-    ChannelData() {}
+    ChannelData() {
+        if (EndFrame* ef = EndFrame::getInstance()) {
+            ef->addListener(this);
+        }
+    }
+
+    void onEndFrame() override {
+        // Clear the data
+        mClearOnNextCall = true;
+
+    }
 
     static ChannelData& Instance() {
         return Singleton<ChannelData>::instance();
     }
 
     void update(int id, uint32_t now, const uint8_t* data, size_t size) {
+        if (mClearOnNextCall) {
+            mStripMap.clear();
+            mUpdateMap.clear();
+            mClearOnNextCall = false;
+        };
         mStripMap[id] = SliceUint8(data, size);
         mUpdateMap[id] = now;
     }
@@ -71,5 +87,6 @@ private:
     typedef std::map<int, uint32_t> UpdateMap;
     StripDataMap mStripMap;
     UpdateMap mUpdateMap;
+    bool mClearOnNextCall = false;
 
 };

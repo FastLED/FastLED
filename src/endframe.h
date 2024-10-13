@@ -41,7 +41,7 @@ private:
     friend class Singleton<EndFrame>;
 };
 
-EndFrame* EndFrame::getInstance() {
+inline EndFrame* EndFrame::getInstance() {
     #ifdef __AVR__
     return nullptr;  // strip out for avr.
     #else
