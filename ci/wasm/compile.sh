@@ -57,9 +57,9 @@ include_deps() {
     fi
 
     # Find all .ino, .h, .hpp, and .cpp files recursively and process them
-    find src -type f \( -name "*.ino" -o -name "*.h" -o -name "*.hpp" -o -name "*.cpp" \) | while read -r file; do
-        insert_header "$file"
-    done
+    #find src -type f \( -name "*.ino" -o -name "*.h" -o -name "*.hpp" -o -name "*.cpp" \) | while read -r file; do
+    #    insert_header "$file"
+    #done
 }
 
 # Remove the .pio directory copy, if it exists because this could contain build
