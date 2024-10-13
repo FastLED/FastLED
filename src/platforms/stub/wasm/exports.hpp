@@ -28,6 +28,7 @@
 #include "singleton.h"
 #include "endframe.h"
 #include "message_queue.hpp"
+#include "exports/timer.hpp"
 
 
 extern void setup();
@@ -50,28 +51,6 @@ void setup_once() {
 }
 
 
-// Needed or the wasm compiler will strip them out.
-// Provide missing functions for WebAssembly build.
-extern "C" {
-
-    // Replacement for 'millis' in WebAssembly context
-    EMSCRIPTEN_KEEPALIVE uint32_t millis() {
-        return emscripten_get_now();
-    }
-
-    // Replacement for 'micros' in WebAssembly context
-    EMSCRIPTEN_KEEPALIVE uint32_t micros() {
-        return millis() * 1000;
-    }
-
-    // Replacement for 'delay' in WebAssembly context
-    EMSCRIPTEN_KEEPALIVE void delay(int ms) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-    }
-}
-
-
-
 
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
@@ -90,31 +69,15 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
 }
 
 
-
-#if 0
-
-EMSCRIPTEN_KEEPALIVE extern "C" EM_BOOL on_request_animation_frame_loop(double time, void *userData);
-
-EMSCRIPTEN_KEEPALIVE extern "C" EM_BOOL on_request_animation_frame_loop(double time, void *userData) {
-    extern_loop();
-    emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
-    return true;
-}
-#endif
-
 void interval_loop(void* userData) {
     extern_loop();
 }
-
-
 
 EMSCRIPTEN_KEEPALIVE extern "C" void async_start_loop() {
   // Receives a function to call and some user data to provide it.
   //emscripten_request_animation_frame_loop(on_request_animation_frame_loop, 0);
   emscripten_set_interval(interval_loop, SIXTY_FPS, nullptr);
 }
-
-
 
 
 void jsAlert(const char* msg) {
@@ -125,16 +88,10 @@ void jsAlert(const char* msg) {
     });
 }
 
-
-
-
-
 static ChannelData* getChannelDataPtr() {
     ChannelData* channelData = &Singleton<ChannelData>::instance();
     return channelData;
 }
-
-
 
 EMSCRIPTEN_BINDINGS(external_constructors) {
     emscripten::class_<ChannelData>("ChannelData")
@@ -144,15 +101,6 @@ EMSCRIPTEN_BINDINGS(external_constructors) {
         .function("getNthPixelStripData_Uint8", &ChannelData::getNthPixelStripData_Uint8);
 }
 
-void jsOnDemo() {
-    EM_ASM({
-        globalThis.onFastLedDemo = globalThis.onFastLedDemo || function() {
-            console.log("Missing globalThis.onFastLedDemo() function");
-        };
-        globalThis.onFastLedDemoData = globalThis.onFastLedDemoData || new Module.ChannelData();
-        globalThis.onFastLedDemo(globalThis.onFastLedDemoData);
-    });
-}
 
 void jsOnFrame() {
     // Populate the data in C++
