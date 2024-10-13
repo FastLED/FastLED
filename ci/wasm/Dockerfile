@@ -66,22 +66,15 @@ COPY src/platforms/stub/wasm/platformio.ini /js/platformio.ini
 COPY src/platforms/stub/wasm/wasm.py /js/wasm.py
 COPY src/platforms/stub/wasm/index.html /js/index.html
 
-# There is some download that needs to happen on the first compile.
-# so we will prewarm the cache by building a dummy project.
-#RUN cp -r /wasm /wasm-prewarm && cp -r /js/fastled /wasm-prewarm/fastled && cd /wasm-prewarm && pio run && cd ..
-# && rm -rf /wasm-prewarm
-
 WORKDIR /js
-# Create a simple project to compile. Include the symbols file to make sure the compile is successful
-# and is loaded into the cache.
+
+# Prewarm the cache with a first compile.
 RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/_exports.hpp\"#include \"FastLed.h\"\nvoid setup() {} void loop(){}\n" > /js/src/main.cpp
 RUN pio run && rm -rf /js/src/main.cpp
 
-
-COPY ci/wasm/entrypoint.sh /js/compile.sh
-
+# Copy the compile script
+COPY ci/wasm/compile.sh /js/compile.sh
 RUN dos2unix /js/compile.sh
-
 # Create compile.sh in /js directory
 RUN chmod +x /js/compile.sh
 
