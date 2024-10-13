@@ -204,7 +204,7 @@
 #if ARDUINOJSON_ENABLE_ARDUINO_STRING || ARDUINOJSON_ENABLE_ARDUINO_STREAM || \
     ARDUINOJSON_ENABLE_ARDUINO_PRINT ||                                       \
     (ARDUINOJSON_ENABLE_PROGMEM && defined(ARDUINO))
-#include <Arduino.h>
+#include <Arduino.h>  // ok include
 #endif
 #if !ARDUINOJSON_DEBUG
 #  ifdef __clang__
@@ -313,7 +313,7 @@ class DefaultAllocator : public Allocator {
 }  // namespace detail
 ARDUINOJSON_END_PUBLIC_NAMESPACE
 #if ARDUINOJSON_DEBUG
-#include <assert.h>
+#include <assert.h>  // ok include
 #  define ARDUINOJSON_ASSERT(X) assert(X)
 #else
 #  define ARDUINOJSON_ASSERT(X) ((void)0)

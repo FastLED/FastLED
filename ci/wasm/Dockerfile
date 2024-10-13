@@ -57,6 +57,7 @@ COPY ./*.properties /js/fastled/
 COPY ./src/*.* /js/fastled/src/
 COPY ./src/fx/ /js/fastled/src/fx/
 COPY ./src/lib8tion/ /js/fastled/src/lib8tion
+COPY ./src/third_party/ /js/fastled/src/third_party
 
 # Copy platforms directory separately, since it changes a lot during development
 COPY ./src/platforms/ /js/fastled/src/platforms/
