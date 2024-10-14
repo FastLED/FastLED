@@ -67,40 +67,63 @@ public:
     }
 
     // Erase the element at the given iterator position
-    iterator erase(const T& it) {
-        T* ptr = find(it);
-        if (ptr != end()) {
+    iterator erase(iterator pos) {
+        if (pos != end()) {
             // shift all elements to the left
-            for (T* p = ptr; p != end() - 1; ++p) {
+            for (iterator p = pos; p != end() - 1; ++p) {
                 *p = *(p + 1);
             }
             --current_size;
         }
-        return ptr;
+        return pos;
     }
 
-    iterator find(const T& it) {
-        for (size_t i = 0; i < current_size; ++i) {
-            if (data[i] == it) {
-                return data + i;
+    iterator erase(const T& value) {
+        iterator it = find(value);
+        if (it != end()) {
+            erase(it);
+        }
+        return it;
+    }
+
+    iterator find(const T& value) {
+        for (iterator it = begin(); it != end(); ++it) {
+            if (*it == value) {
+                return it;
             }
         }
         return end();
     }
 
-    const_iterator find(const T& it) const {
-        for (size_t i = 0; i < current_size; ++i) {
-            if (data[i] == it) {
-                return data + i;
+    const_iterator find(const T& value) const {
+        for (const_iterator it = begin(); it != end(); ++it) {
+            if (*it == value) {
+                return it;
             }
         }
         return end();
     }
 
-    bool has(const T& it) const {
-        return find(it) != end();
+    bool has(const T& value) const {
+        return find(value) != end();
     }
 
+    // Access to first and last elements
+    T& front() {
+        return data[0];
+    }
+
+    const T& front() const {
+        return data[0];
+    }
+
+    T& back() {
+        return data[current_size - 1];
+    }
+
+    const T& back() const {
+        return data[current_size - 1];
+    }
 
     // Iterator support
     iterator begin() { return data; }
