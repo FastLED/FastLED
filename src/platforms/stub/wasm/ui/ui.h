@@ -84,26 +84,18 @@ inline void jsUiManager::updateAll() {
     }
 }
 
-void jsUiManager::updateJs() {
-    std::string jsonStr = "[";
-    bool first = true;
-    for (const auto& component : mComponents) {
-        if (!first) {
-            jsonStr += ",";
-        }
-        jsonStr += "{\"type\":\"" + component->type() + "\"}";
-        first = false;
-    }
-    jsonStr += "]";
-
+inline void jsUiManager::updateJs() {
     EM_ASM_({
-        globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(uiList) {
+        globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(ui) {
             console.log("Missing globalThis.onFastLedUiElementsAdded(uiList) function");
-            console.log(uiList);
+            console.log("Added ui elements: " + ui);
+            console.log(ui);
+            debugger;
+            
         };
-        var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
-        globalThis.onFastLedUiElementsAdded(JSON.parse(jsonStr));
-    }, jsonStr.c_str());
+        globalThis.onFastLedSlider = globalThis.onFastLedSlider  || new Module.jsSlider("demo name", 0, 255, 0, 1);
+        globalThis.onFastLedUiElementsAdded(globalThis.onFastLedSlider);
+    });
 }
 
 FASTLED_NAMESPACE_END
