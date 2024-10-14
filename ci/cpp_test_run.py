@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass
 
 from ci.paths import PROJECT_ROOT
@@ -15,12 +16,34 @@ class FailedTest:
     stderr: str
 
 
-def run_command(command) -> tuple[int, str, str]:
-    process = subprocess.Popen(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-    )
-    stdout, stderr = process.communicate()
-    return process.returncode, stdout.decode(), stderr.decode()
+def run_command(command, use_gdb=False) -> tuple[int, str, str]:
+    if use_gdb:
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as gdb_script:
+            gdb_script.write("run\n")
+            gdb_script.write("bt full\n")
+            gdb_script.write("quit\n")
+
+        gdb_command = f"gdb -batch -x {gdb_script.name} --args {command}"
+        process = subprocess.Popen(
+            gdb_command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+            text=True,
+        )
+        stdout, stderr = process.communicate()
+        os.unlink(gdb_script.name)
+        return process.returncode, stdout, stderr
+    else:
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+            text=True,
+        )
+        stdout, stderr = process.communicate()
+        return process.returncode, stdout, stderr
 
 
 def compile_tests(clean: bool = False, unknown_args: list[str] = []) -> None:
@@ -57,6 +80,13 @@ def run_tests() -> None:
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
             print(f"Running test: {test_file}")
             return_code, stdout, stderr = run_command(test_path)
+
+            if return_code != 0:
+                print("Test failed. Re-running with GDB to get stack trace...")
+                _, gdb_stdout, gdb_stderr = run_command(test_path, use_gdb=True)
+                stdout += "\n--- GDB Output ---\n" + gdb_stdout
+                stderr += "\n--- GDB Errors ---\n" + gdb_stderr
+
             print("Test output:")
             print(stdout)
             if stderr:
