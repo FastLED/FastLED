@@ -3,17 +3,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "inplacenew.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
-
-#if __has_include(<new>)
-#include <new>
-#else
-inline void* operator new(size_t, void* ptr) noexcept {
-    return ptr;
-}
-#endif
 
 
 template<typename T, size_t N>
