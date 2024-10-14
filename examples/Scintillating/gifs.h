@@ -1,4 +1,4 @@
-const struct HSpr_35disk {
+FL_PROGMEM const struct HSpr_35disk {
   uint16_t datasize = 148;
   uint16_t frames = 1;
   uint16_t duration = 0;

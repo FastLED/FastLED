@@ -1,4 +1,8 @@
-Work in progress.
+Work in progress. Good test case for compatibility compiling a complicated arduino uno project.
+
+I've added:
+  * Arduino.h
+  * avr/pgmspace.h
 
 This is a port of:
 

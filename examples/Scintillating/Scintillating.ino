@@ -1,36 +1,14 @@
 // originally from:
 // https://github.com/sutaburosu/scintillating_heatshrink/
 
+#include <Arduino.h>
 #include <FastLED.h>
 #include <stdint.h>
+#include <avr/pgmspace.h>
 #include "heatshrink_config.h"
 #include "heatshrink_decoder.h"
 
 enum XY_matrix_config { SERPENTINE = 1, ROWMAJOR = 2, FLIPMAJOR = 4, FLIPMINOR = 8 };
-void inc_palette(uint8_t n);
-void inc_rs_preset(uint8_t n);
-void rainbow_smoothie();
-void nblendU8TowardU8(uint8_t& cur, const uint8_t target, uint8_t amount);
-void nblendU8TowardU8_video(uint8_t& cur, const uint8_t target, uint8_t amount);
-void scintillating_heatshrink();
-
-
-#define FL_PGM_READ_PTR_NEAR(x) (x)
-#define F(x) x
-
-struct SerialEmulation {
-    void print(const char *s) { printf("%s", s); }
-    void println(const char *s) { printf("%s\n", s); }
-    void print(uint8_t n) { printf("%d", n); }
-    void println(uint8_t n) { printf("%d\n", n); }
-    void print(int n) { printf("%d", n); }
-    void println(int n) { printf("%d\n", n); }
-    void print(uint16_t n) { printf("%d", n); }
-    void println(uint16_t n) { printf("%d\n", n); }
-};
-
-SerialEmulation Serial;
-
 
 // MAX_MILLIWATTS can only be changed at compile-time. Use 0 to disable limit.
 // Brightness can be changed at runtime via serial with 'b' and 'B'
@@ -129,7 +107,6 @@ void nblendU8TowardU8_video(uint8_t& cur, const uint8_t target, uint8_t amount) 
   }
 }
 
-#if 0
 // FastLED uses 4-bit interpolation.  8-bit looks far less janky.
 // https://github.com/FastLED/FastLED/pull/202
 CRGB ColorFromPaletteExtended(const CRGBPalette16& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
@@ -222,7 +199,6 @@ CRGB ColorFromPaletteExtended(const CRGBPalette32& pal, uint16_t index, uint8_t 
   }
   return CRGB(red1, green1, blue1);
 }
-#endif
 
 typedef struct HSprite {
   uint16_t datasize;
@@ -230,7 +206,7 @@ typedef struct HSprite {
   uint16_t duration;
   uint8_t flags;
   uint8_t palette_entries;
-  CRGB* palette;
+  CRGB palette[];
   uint8_t hs_data[];
 } HSprite;
 
@@ -282,11 +258,11 @@ FL_PROGMEM extern const HSprite *const hsprite_list[] = {
 #define HSPRITES_N (sizeof(hsprite_list) / sizeof(hsprite_list[0]))
 
 
-struct RainbowSmoothiePreset {
+typedef struct {
   uint8_t xw, yw, xd, yd;
   int16_t xdd, ydd, bcd;
-};
-struct Config {
+} RainbowSmoothiePreset;
+typedef struct {
   uint32_t frame = 0;
   uint32_t millis = 0;
   uint8_t effect = 2;
@@ -297,7 +273,7 @@ struct Config {
   TBlendType currentBlending = LINEARBLEND;
   uint8_t extendedmixing = 1;
   RainbowSmoothiePreset rs;
-} ;
+} Config;
 Config cfg;
 
 // /*__attribute__ ((section(".noinit")))*/ uint8_t * nv_preset;
@@ -306,10 +282,6 @@ void setup() {
   FastLED.setCorrection(UncorrectedColor);
   FastLED.setTemperature(UncorrectedTemperature);
   FastLED.setDither(DISABLE_DITHER);
-  // jsSetCanvasSize(MATRIX_WIDTH, MATRIX_HEIGHT);
-  jsSetCanvasSize(kMatrixWidth, kMatrixHeight);
-
-  #if 0
   // FastLED.setMaxRefreshRate(400);
   if (MAX_MILLIWATTS > 0) FastLED.setMaxPowerInMilliWatts(MAX_MILLIWATTS);
 
@@ -317,9 +289,8 @@ void setup() {
     Serial.begin(250000);
     halp();
   }
-  #endif
 
-  //pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
   inc_palette(0);
   inc_rs_preset(0);
 }
@@ -329,21 +300,18 @@ void loop() {
   uint8_t effect = cfg.effect + 1;
   if (effect & 1) rainbow_smoothie();
   if (effect & 2) scintillating_heatshrink();
-  #if 0
   if (SERIAL_UI == 1) poll_serial();
   if (cfg.frame <= FADEIN_FRAMES)
     FastLED.setBrightness(scale8(cfg.brightness, (cfg.frame * 255) / FADEIN_FRAMES));
-  #endif
+
   // cap the frame rate and indicate idle time via the built-in LED
   cfg.frame++;
   uint32_t frame_time = millis() - cfg.millis;  // wraparound safe
   int32_t pause = MS_GOAL - frame_time;
-  #if 0
   // if (pause < 0 && SERIAL_UI == 1) { Serial.print(-pause); Serial.println("ms late"); }
   digitalWrite(LED_BUILTIN, HIGH);
   if (pause > 0) delay(pause);
   digitalWrite(LED_BUILTIN, LOW);
-  #endif
   cfg.millis = millis();
   FastLED.show();
 }
@@ -352,7 +320,6 @@ void loop() {
 ///////////////////////////////////////////////////////////////////////
 
 void poll_serial() {
-    #if 0
   if (Serial.available() <= 0)
     return;
   int input = Serial.read();
@@ -421,10 +388,8 @@ void poll_serial() {
     default:
       Serial.println(F("?"));
   }
-  #endif
 }
 void halp() {
-    #if 0
   Serial.println(F(" #\trandomise rainbow smoothie\r\n"
                    " ~\tchoose next preset for rainbow smoothie\r\n"
                    " <enter>\tprint parameters\r\n"
@@ -436,7 +401,6 @@ void halp() {
                    " bB\tbrightness down/up\r\n"
                    " dD\tbinary dither off/on\r\n"
                    " fF\tdecrease/increase fade out rate\r\n"));
-                   #endif
 }
 void print_params() {
   Serial.println(F("bright\tfade\txw\tyw\txd\tyd\txdd\tydd\tbcd\tFPS"));
@@ -553,12 +517,12 @@ void rainbow_smoothie() {
   uint32_t lineStartHue = startHue - (kMatrixHeight / 2) * yHueDelta;
   uint32_t yd2 = cfg.rs.ydd * 2048;
   uint32_t xd2 = cfg.rs.xdd * 2048;
-  for (int y = 0; y < kMatrixHeight; y++) {
+  for (byte y = 0; y < kMatrixHeight; y++) {
     lineStartHue += yHueDelta;
     yHueDelta += yd2;
     uint32_t pixelHue = lineStartHue - (kMatrixWidth / 2) * xHueDelta;
     uint32_t xhd = xHueDelta;
-    for (int x = 0; x < kMatrixWidth; x++) {
+    for (byte x = 0; x < kMatrixWidth; x++) {
       pixelHue += xhd;
       xhd += xd2;
       if (cfg.extendedmixing == 1) {
