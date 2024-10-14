@@ -111,7 +111,7 @@ public:
                 *prev_key = it->key;
                 return true;
             } else if (allow_rollover && !empty()) {
-                *prev_key = (--end())->key;
+                *prev_key = data[data.size() - 1].key;
                 return true;
             }
         }
