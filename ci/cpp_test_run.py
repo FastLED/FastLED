@@ -95,14 +95,9 @@ def run_tests() -> None:
 
                 # Extract crash information
                 crash_info = extract_crash_info(gdb_stdout)
-                if crash_info:
-                    print(
-                        f"Crash occurred at: {crash_info.get('file', 'Unknown')}:{crash_info.get('line', 'Unknown')}"
-                    )
-                    if "cause" in crash_info:
-                        print(f"Cause: {crash_info['cause']}")
-                    if "stack" in crash_info:
-                        print(f"Stack: {crash_info['stack']}")
+                print(f"Crash occurred at: {crash_info.file}:{crash_info.line}")
+                print(f"Cause: {crash_info.cause}")
+                print(f"Stack: {crash_info.stack}")
 
             print("Test output:")
             print(stdout)
@@ -129,24 +124,45 @@ def run_tests() -> None:
     print("All tests passed.")
 
 
-def extract_crash_info(gdb_output: str) -> dict:
+@dataclass
+class CrashInfo:
+    cause: str = "Unknown"
+    stack: str = "Unknown"
+    file: str = "Unknown"
+    line: str = "Unknown"
+
+
+def extract_crash_info(gdb_output: str) -> CrashInfo:
     lines = gdb_output.split("\n")
-    crash_info = {}
-    for i, line in enumerate(lines):
-        if line.startswith("Program received signal"):
-            crash_info["cause"] = line.split(":", 1)[1].strip()
-        elif line.startswith("#0"):
-            # Found the crash point
-            crash_info["stack"] = line
-            for j in range(i, len(lines)):
-                if "at" in lines[j]:
-                    parts = lines[j].split("at")
-                    if len(parts) == 2:
-                        file_line = parts[1].strip()
-                        file, line = file_line.rsplit(":", 1)
-                        crash_info["file"] = file.strip()
-                        crash_info["line"] = line.strip()
-                        return crash_info
+    crash_info = CrashInfo()
+
+    try:
+        for i, line in enumerate(lines):
+            if line.startswith("Program received signal"):
+                try:
+                    crash_info.cause = line.split(":", 1)[1].strip()
+                except IndexError:
+                    crash_info.cause = line.strip()
+            elif line.startswith("#0"):
+                crash_info.stack = line
+                for j in range(i, len(lines)):
+                    if "at" in lines[j]:
+                        try:
+                            _, location = lines[j].split("at", 1)
+                            location = location.strip()
+                            if ":" in location:
+                                crash_info.file, crash_info.line = location.rsplit(
+                                    ":", 1
+                                )
+                            else:
+                                crash_info.file = location
+                        except ValueError:
+                            pass  # If split fails, we keep the default values
+                        break
+                break
+    except Exception as e:
+        print(f"Error parsing GDB output: {e}")
+
     return crash_info
 
 

@@ -52,24 +52,26 @@ TEST_CASE("test_fx_engine") {
 
 
     SUBCASE("Transition") {
-        engine.nextFx(1000);
+        bool ok = engine.nextFx(1000);
+        REQUIRE(ok);
         
         // Start of transition
-        engine.draw(0, leds);
+        ok = engine.draw(0, leds);
+        REQUIRE(ok);
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
-            CHECK(leds[i] == CRGB::Red);
+            REQUIRE(leds[i] == CRGB::Red);
         }
 
         // Middle of transition
-        engine.draw(500, leds);
+        REQUIRE(engine.draw(500, leds));
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
-            CHECK(leds[i].r == 128);
-            CHECK(leds[i].g == 0);
-            CHECK(leds[i].b == 127);
+            REQUIRE(leds[i].r == 128);
+            REQUIRE(leds[i].g == 0);
+            REQUIRE(leds[i].b == 127);
         }
 
         // End of transition
-        engine.draw(1000, leds);
+        REQUIRE(engine.draw(1000, leds));
         for (uint16_t i = 0; i < NUM_LEDS; ++i) {
             CHECK(leds[i] == CRGB::Blue);
         }
