@@ -69,10 +69,10 @@ struct CHSV {
     }
 
     /// Allow copy construction
-    constexpr inline CHSV(const CHSV& rhs) __attribute__((always_inline)) = default;
+    constexpr inline CHSV(const CHSV& rhs) noexcept : h(rhs.h), s(rhs.s), v(rhs.v) { }
 
     /// Allow copy construction
-    constexpr inline CHSV& operator= (const CHSV& rhs) __attribute__((always_inline)) = default;
+    inline CHSV& operator= (const CHSV& rhs) __attribute__((always_inline)) = default;
 
     /// Assign new HSV values
     /// @param ih input hue

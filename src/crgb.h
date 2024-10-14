@@ -129,7 +129,7 @@ struct CRGB {
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    constexpr CRGB& operator= (const uint32_t colorcode) noexcept
+    FASTLED_FORCE_INLINE CRGB& operator= (const uint32_t colorcode)
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -141,7 +141,7 @@ struct CRGB {
     /// @param nr new red value
     /// @param ng new green value
     /// @param nb new blue value
-    constexpr CRGB& setRGB (uint8_t nr, uint8_t ng, uint8_t nb) noexcept
+    FASTLED_FORCE_INLINE CRGB& setRGB (uint8_t nr, uint8_t ng, uint8_t nb)
     {
         r = nr;
         g = ng;
@@ -177,7 +177,7 @@ struct CRGB {
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    constexpr CRGB& setColorCode (uint32_t colorcode) noexcept
+    FASTLED_FORCE_INLINE CRGB& setColorCode (uint32_t colorcode)
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -340,9 +340,13 @@ struct CRGB {
     }
 
     /// Invert each channel
-    constexpr CRGB operator- () const noexcept
+    FASTLED_FORCE_INLINE CRGB operator- () const
     {
-        return CRGB(255 - r, 255 - g, 255 - b);
+        CRGB retval;
+        retval.r = 255 - r;
+        retval.g = 255 - g;
+        retval.b = 255 - b;
+        return retval;
     }
 
 #if (defined SmartMatrix_h || defined SmartMatrix3_h)
