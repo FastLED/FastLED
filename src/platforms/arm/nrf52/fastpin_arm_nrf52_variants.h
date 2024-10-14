@@ -784,6 +784,87 @@
     //_FL_DEF_INVALID_PIN(33,  9, 0); // D33 is NFC1, only accessible via test point
 #endif // defined(ARDUINO_STCT_NRF52_minidev)
 
+#if defined(ARDUINO_Seeed_XIAO_nRF52840)
+    #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
+        #error "Cannot define more than one board at a time"
+    #else
+        #define __FASTPIN_ARM_NRF52_VARIANT_FOUND
+    #endif
+
+    #if !defined(FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING)
+        #warning "ARDUINO_Seeed_XIAO_nRF52840 board is an untested board -- test and let use know your results via https://github.com/FastLED/FastLED/issues"
+    #endif
+
+    // Arduino pins 0..7
+    _FL_DEFPIN( 0, 2, 0); // D0  is P0.02
+    _FL_DEFPIN( 1, 3, 0); // D1  is P0.03
+    _FL_DEFPIN( 2, 28, 0); // D2  is P0.28
+    _FL_DEFPIN( 3, 29, 0); // D3  is P0.29 
+    _FL_DEFPIN( 4, 4, 0); // D4  is P0.4
+    _FL_DEFPIN( 5, 5, 0); // D5  is P0.5
+    _FL_DEFPIN( 6, 11, 1); // D6  is P1.11
+    _FL_DEFPIN( 7, 12, 1); // D7  is P1.12
+    
+    // Arduino pins 8..15
+    _FL_DEFPIN( 8, 13, 1); // D8  is P1.13
+    _FL_DEFPIN( 9, 14, 1); // D9  is P1.14
+    _FL_DEFPIN(10, 15, 1); // D10 is P1.15
+
+    _FL_DEF_INVALID_PIN(11, 26, 0); // D11 is P0.26 (LED RED)
+    _FL_DEF_INVALID_PIN(12, 6, 0); // D12 is P0.06 (LED BLUE)
+    _FL_DEF_INVALID_PIN(13, 30, 0); // D13 is P0.30 (LED GREEN)
+    _FL_DEF_INVALID_PIN(14, 14, 0); // D14 is P0.14 (READ_BAT)
+
+    _FL_DEF_INVALID_PIN(22, 13, 0); // D22 is P0.13 (HICHG)
+    _FL_DEF_INVALID_PIN(23, 17, 0); // D23 is P0.17 (~CHG)
+
+        
+    _FL_DEF_INVALID_PIN(24, 21, 0);  // D24 is P0.21 (QSPI_SCK)
+    _FL_DEF_INVALID_PIN(25, 25, 0);  // D25 is P0.25 (QSPI_CSN)
+    _FL_DEF_INVALID_PIN(26, 20, 0);  // D26 is P0.20 (QSPI_SIO_0 DI)
+    _FL_DEF_INVALID_PIN(27, 24, 0);  // D27 is P0.24 (QSPI_SIO_1 DO)
+    _FL_DEF_INVALID_PIN(28, 22, 0);  // D28 is P0.22 (QSPI_SIO_2 WP)
+    _FL_DEF_INVALID_PIN(29, 23, 0);  // D29 is P0.23 (QSPI_SIO_3 HOLD)
+
+    // NFC
+    _FL_DEF_INVALID_PIN(30, 9, 0);  // D30 is P0.09 (NFC1)
+    _FL_DEF_INVALID_PIN(31, 10, 0);  // D31 is P0.10 (NFC2)
+
+    // VBAT
+    _FL_DEF_INVALID_PIN(32, 31, 0);  // D32 is P0.31 (VBAT)
+
+
+    // _FL_DEFPIN(11,  6, 0); // D11 is P0.06
+    // _FL_DEFPIN(12,  8, 0); // D12 is P0.08
+    // _FL_DEFPIN(13, 41, 1); // D13 is P1.09 -- PIN_LED1 (red)
+    // _FL_DEFPIN(14,  4, 0); // D14 is P0.04 -- A0
+    // _FL_DEFPIN(15,  5, 0); // D15 is P0.05 -- A1
+
+    // // Arduino pins 16..23
+    // _FL_DEFPIN(16, 30, 0); // D16 is P0.30 -- A2
+    // _FL_DEFPIN(17, 28, 0); // D17 is P0.28 -- A3
+    // _FL_DEFPIN(18,  2, 0); // D18 is P0.02 -- A4
+    // _FL_DEFPIN(19,  3, 0); // D19 is P0.03 -- A5
+    // _FL_DEF_INVALID_PIN(20, 29, 0); // D20 is P0.29 -- A6 -- Connected to battery!
+    // _FL_DEF_INVALID_PIN(21, 31, 0); // D21 is P0.31 -- A7 -- AREF
+    // _FL_DEFPIN(22, 12, 0); // D22 is P0.12 -- SDA
+    // _FL_DEFPIN(23, 11, 0); // D23 is P0.11 -- SCL
+
+    // // Arduino pins 24..31
+    // _FL_DEFPIN(24, 15, 0); // D24 is P0.15 -- PIN_SPI_MISO
+    // _FL_DEFPIN(25, 13, 0); // D25 is P0.13 -- PIN_SPI_MOSI
+    // _FL_DEFPIN(26, 14, 0); // D26 is P0.14 -- PIN_SPI_SCK
+    // _FL_DEF_INVALID_PIN(27, 19, 0); // D27 is P0.19 -- PIN_QSPI_SCK
+    // _FL_DEF_INVALID_PIN(28, 20, 0); // D28 is P0.20 -- PIN_QSPI_CS
+    // _FL_DEF_INVALID_PIN(29, 17, 0); // D29 is P0.17 -- PIN_QSPI_DATA0
+    // _FL_DEF_INVALID_PIN(30, 22, 0); // D30 is P0.22 -- PIN_QSPI_DATA1
+    // _FL_DEF_INVALID_PIN(31, 23, 0); // D31 is P0.23 -- PIN_QSPI_DATA2
+
+    // Arduino pins 32..34
+    //_FL_DEF_INVALID_PIN(32, 21, 0); // D32 is P0.21 -- PIN_QSPI_DATA3
+    //_FL_DEF_INVALID_PIN(33,  9, 0); // D33 is NFC1, only accessible via test point
+#endif // defined(ARDUINO_STCT_NRF52_minidev)
+
 // Generic nRF52832
 // See https://github.com/sandeepmistry/arduino-nRF5/blob/master/boards.txt
 #if defined(ARDUINO_GENERIC) && (  defined(NRF52832_XXAA) || defined(NRF52832_XXAB)  )
