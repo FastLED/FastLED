@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include <utility>
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -11,7 +10,10 @@ FASTLED_NAMESPACE_BEGIN
 template<typename T, size_t N>
 class FixedVector {
 private:
-    alignas(T) char data[N * sizeof(T)];
+    union {
+        char raw[N * sizeof(T)];
+        T data[N];
+    };
     size_t current_size = 0;
 
 public:
@@ -27,12 +29,12 @@ public:
 
     // Array subscript operator
     T& operator[](size_t index) {
-        return *reinterpret_cast<T*>(&data[index * sizeof(T)]);
+        return data[index];
     }
 
     // Const array subscript operator
     const T& operator[](size_t index) const {
-        return *reinterpret_cast<const T*>(&data[index * sizeof(T)]);
+        return data[index];
     }
 
     // Get the current size of the vector
@@ -52,7 +54,7 @@ public:
     // Add an element to the end of the vector
     void push_back(const T& value) {
         if (current_size < N) {
-            new (&data[current_size * sizeof(T)]) T(value);
+            new (&data[current_size]) T(value);
             ++current_size;
         }
     }
@@ -60,33 +62,28 @@ public:
     // Remove the last element from the vector
     void pop_back() {
         if (current_size > 0) {
-            // destroy object
-            reinterpret_cast<T*>(&data[(current_size - 1) * sizeof(T)])->~T();
             --current_size;
+            data[current_size].~T();
         }
     }
 
     // Clear the vector
     void clear() {
-        for (size_t i = 0; i < current_size; ++i) {
-            reinterpret_cast<T*>(&data[i * sizeof(T)])->~T();
+        while (current_size > 0) {
+            pop_back();
         }
-        current_size = 0;
     }
 
     // Erase the element at the given iterator position
     iterator erase(iterator pos) {
         if (pos != end()) {
-            // Destroy the element at the position
             pos->~T();
             // shift all elements to the left
             for (iterator p = pos; p != end() - 1; ++p) {
-                *p = *(p + 1);
+                new (p) T(*(p + 1)); // Use copy constructor instead of std::move
+                (p + 1)->~T();
             }
             --current_size;
-            // Ensure the last element is properly destructed and default-constructed
-            (end())->~T();
-            new (end()) T();
         }
         return pos;
     }
@@ -123,26 +120,26 @@ public:
 
     // Access to first and last elements
     T& front() {
-        return *reinterpret_cast<T*>(&data[0]);
+        return data[0];
     }
 
     const T& front() const {
-        return *reinterpret_cast<const T*>(&data[0]);
+        return data[0];
     }
 
     T& back() {
-        return *reinterpret_cast<T*>(&data[(current_size - 1) * sizeof(T)]);
+        return data[current_size - 1];
     }
 
     const T& back() const {
-        return *reinterpret_cast<const T*>(&data[(current_size - 1) * sizeof(T)]);
+        return data[current_size - 1];
     }
 
     // Iterator support
-    iterator begin() { return reinterpret_cast<T*>(&data[0]); }
-    const_iterator begin() const { return reinterpret_cast<const T*>(&data[0]); }
-    iterator end() { return reinterpret_cast<T*>(&data[current_size * sizeof(T)]); }
-    const_iterator end() const { return reinterpret_cast<const T*>(&data[current_size * sizeof(T)]); }
+    iterator begin() { return &data[0]; }
+    const_iterator begin() const { return &data[0]; }
+    iterator end() { return &data[current_size]; }
+    const_iterator end() const { return &data[current_size]; }
 };
 
 FASTLED_NAMESPACE_END
