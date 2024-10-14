@@ -26,14 +26,14 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
+        run: pip install uv
+      
+      - name: Install GDB (Linux only)
+        if: runner.os == 'Linux'
         run: |
-          pip install uv
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            sudo apt-get update
-            sudo apt-get install -y gdb
-          fi
+          sudo apt-get update
+          sudo apt-get install -y gdb
       
       - name: Run Test
-        run: |
-            ./test
+        run: ./test
         shell: bash
