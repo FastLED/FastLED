@@ -5,14 +5,8 @@ template<typename T, int N = 0>
 class Singleton {
 public:
     static T& instance() {
-        static char storage[sizeof(T)];
-        static bool initialized = false;
-        if (!initialized) {
-            // Construct the object in-place using placement new
-            new (storage) T();
-            initialized = true;
-        }
-        return *reinterpret_cast<T*>(storage);
+        static T* instance = new T();
+        return *instance;
     }
     static T* instancePtr() {
         return &instance();

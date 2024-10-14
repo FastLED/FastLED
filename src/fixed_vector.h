@@ -7,6 +7,15 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+#if __has_include(<new>)
+#include <new>
+#else
+inline void* operator new(size_t, void* ptr) noexcept {
+    return ptr;
+}
+#endif
+
+
 template<typename T, size_t N>
 class FixedVector {
 private:
@@ -54,7 +63,8 @@ public:
     // Add an element to the end of the vector
     void push_back(const T& value) {
         if (current_size < N) {
-            new (&data[current_size]) T(value);
+            void* mem = &data[current_size];
+            new (mem) T(value);
             ++current_size;
         }
     }
