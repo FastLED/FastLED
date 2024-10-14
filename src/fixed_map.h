@@ -58,18 +58,18 @@ public:
     // We differ from the std standard here so that we don't allow
     // dereferencing the end iterator.
     bool get(const Key& key, Value* value) const {
-        const Pair* pair = find(key);
-        if (pair != end()) {
-            *value = pair->value;
+        const_iterator it = find(key);
+        if (it != end()) {
+            *value = it->value;
             return true;
         }
         return false;
     }
 
     bool insert(const Key& key, const Value& value) {
-        if (data.size() < N) {
-            Pair* pair = find(key);
-            if (pair == end()) {
+        iterator it = find(key);
+        if (it == end()) {
+            if (data.size() < N) {
                 data.push_back({key, value});
                 return true;
             }
