@@ -7,35 +7,20 @@
 #include "active_strip_data.h"
 #include "crgb.h"
 #include "exports.h"
-
+#include "strip_id_map.h"
 #include "singleton.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-class ClocklessInstanceCounter {
-public:
-	static ClocklessInstanceCounter& getInstance();
-
-	uint32_t increment() {
-		return mCount++;
-	}
-	private:
-		uint32_t mCount = 0;
-};
-
-inline ClocklessInstanceCounter& ClocklessInstanceCounter::getInstance() {
-	ClocklessInstanceCounter& out = Singleton<ClocklessInstanceCounter>::instance();
-	return out;
-}
 
 template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 public:
 	virtual void init() { }
 	ClocklessController() {
-		mId = ClocklessInstanceCounter::getInstance().increment();
+		mId = StripIdMap::getId(this);
 	}
 
 protected:

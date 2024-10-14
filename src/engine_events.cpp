@@ -47,6 +47,12 @@ void EngineEvents::onBeginFrame() {
     }
 }
 
+void EngineEvents::onEndShowLeds() {
+    if (auto ptr = EngineEvents::getInstance()) {
+        ptr->_onEndShowLeds();
+    }
+}
+
 void EngineEvents::onEndFrame() {
     if (auto ptr = EngineEvents::getInstance()) {
         ptr->_onEndFrame();
@@ -86,6 +92,18 @@ void EngineEvents::_onBeginFrame() {
     ListenerList copy = mListeners;
     for (auto listener : copy) {
         listener->onBeginFrame();
+    }
+    #endif
+}
+
+void EngineEvents::_onEndShowLeds() {
+    #ifdef __AVR__
+    return;
+    #else
+    // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
+    ListenerList copy = mListeners;
+    for (auto listener : copy) {
+        listener->onEndShowLeds();
     }
     #endif
 }

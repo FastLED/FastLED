@@ -20,6 +20,7 @@ public:
         Listener(bool auto_attach = true);
         virtual ~Listener();
         virtual void onBeginFrame() {}
+        virtual void onEndShowLeds() {}
         virtual void onEndFrame() {}
         virtual void onStripAdded(CLEDController* strip, uint32_t num_leds) {}
     };
@@ -27,6 +28,7 @@ public:
     static void addListener(Listener* listener);
     static void removeListener(Listener* listener);
     static void onBeginFrame();
+    static void onEndShowLeds();
     static void onEndFrame();
     static void onStripAdded(CLEDController* strip, uint32_t num_leds);
 private:
@@ -35,6 +37,7 @@ private:
     // Safe to remove self during a callback.
     void _removeListener(Listener* listener);
     void _onBeginFrame();
+    void _onEndShowLeds();
     void _onEndFrame();
     void _onStripAdded(CLEDController* strip, uint32_t num_leds);
     #ifndef __AVR__

@@ -10,32 +10,17 @@
 #include "active_strip_data.h"
 #include "singleton.h"
 #include "engine_events.h"
+#include "strip_id_map.h"
 #include <vector>
 
 FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_ALL_PINS_HARDWARE_SPI
 
-class WasmSpiInstanceCounter {
-public:
-    static WasmSpiInstanceCounter& getInstance();
-
-    uint32_t increment() {
-        return mCount++;
-    }
-private:
-    uint32_t mCount = 0;
-};
-
-inline WasmSpiInstanceCounter& WasmSpiInstanceCounter::getInstance() {
-    WasmSpiInstanceCounter& out = Singleton<WasmSpiInstanceCounter>::instance();
-    return out;
-}
 
 class WasmSpiOutput: public EngineEvents::Listener {
 public:
     WasmSpiOutput() {
-        mId = WasmSpiInstanceCounter::getInstance().increment();
     }
 
     ~WasmSpiOutput() {
@@ -43,6 +28,14 @@ public:
 
     void onBeginFrame () override {
         mBuffer.clear();
+    }
+
+    void onEndShowLeds() override {
+        if (mId == -1) {
+            mId = StripIdMap::getOrFindByAddress(reinterpret_cast<uint32_t>(this));
+        }
+		ActiveStripData& ch_data = Singleton<ActiveStripData>::instance();
+		ch_data.update(mId, millis(), mBuffer.data(), mBuffer.size());
     }
 
     void select() {}
@@ -60,7 +53,7 @@ public:
     }
 
 private:
-    int mId = 0;
+    int mId = -1;  // Deferred initialization
     std::vector<uint8_t> mBuffer;
 };
 

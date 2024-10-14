@@ -10,6 +10,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 class CLEDController;
+extern uint16_t cled_contoller_size();
 
 class StripIdMap {
 public:
@@ -41,6 +42,46 @@ public:
         auto find = instance.mStripMap.find(owner);
         if (find != instance.mStripMap.end()) {
             return find->second;
+        }
+        return -1;
+    }
+
+    static int getOrFindByAddress(uint32_t address) {
+        if (address == 0) {
+            return -1;
+        }
+        int id = getId(reinterpret_cast<CLEDController*>(address));
+        if (id >= 0) {
+            return id;
+        }
+        return spiFindId(address);
+    }
+
+    static int spiFindId(uint32_t spi_address) {
+        // spiDevice is going to be a member of the subclass of CLEDController. So
+        // to find the device we need to iterate over the map and compare the spiDevice pointer
+        // to the pointer address of all the CLedController objects.
+        // Note that the device should already have been added by the time this function is called.
+        StripIdMap& instance = Instance();
+        uint16_t controller_size = cled_contoller_size();
+        uint16_t smallest_diff = 0xFFFF;
+        CLEDController* closest_controller = nullptr;
+        
+        for (auto it = instance.mStripMap.begin(); it != instance.mStripMap.end(); ++it) {
+            CLEDController* controller = it->first;
+            uint32_t address_subclass = reinterpret_cast<uint32_t>(controller) + controller_size;
+            // if below, then the spiDevice is NOT a member of the subclass of CLEDController
+            if (spi_address < address_subclass) {
+                continue;
+            }
+            uint32_t diff = spi_address - address_subclass;
+            if (diff < smallest_diff) {
+                smallest_diff = diff;
+                closest_controller = controller;
+            }
+        }
+        if (closest_controller && smallest_diff < controller_size) {
+            return instance.mStripMap[closest_controller];
         }
         return -1;
     }

@@ -27,6 +27,10 @@ volatile uint32_t fuckit;
 
 FASTLED_NAMESPACE_BEGIN
 
+uint16_t cled_contoller_size() {
+	return sizeof(CLEDController);
+}
+
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
 void *pSmartMatrix = NULL;
@@ -99,6 +103,7 @@ void CFastLED::show(uint8_t scale) {
 		pCur->showLedsInternal(scale);
 		pCur = pCur->next();
 	}
+
 	length = 0;  // Reset length to 0 and iterate again.
 	pCur = CLEDController::head();
 	while(pCur && length < MAX_CLED_CONTROLLERS) {
@@ -106,6 +111,7 @@ void CFastLED::show(uint8_t scale) {
 		pCur = pCur->next();
 	}
 	countFPS();
+	EngineEvents::onEndShowLeds();
 	EngineEvents::onEndFrame();
 }
 
