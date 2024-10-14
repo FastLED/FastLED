@@ -15,8 +15,11 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 set(COMMON_COMPILE_FLAGS
     -Wall
     -funwind-tables
-    -g
+    -g3
+    -ggdb
+    -fno-omit-frame-pointer
     -O0
+    -fno-inline
 )
 
 set(COMMON_COMPILE_DEFINITIONS
@@ -25,6 +28,8 @@ set(COMMON_COMPILE_DEFINITIONS
     FASTLED_STUB_IMPL
     FASTLED_NO_PINMAP
     HAS_HARDWARE_PIN_SUPPORT
+    _GLIBCXX_DEBUG
+    _GLIBCXX_DEBUG_PEDANTIC
 )
 
 # Set the path to the FastLED source directory
@@ -116,6 +121,9 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     target_compile_definitions(${TEST_NAME} PRIVATE 
         ${COMMON_COMPILE_DEFINITIONS}
         $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
+    )
+    set_target_properties(${TEST_NAME} PROPERTIES 
+        LINK_FLAGS "-Wl,--export-dynamic"
     )
     
     # Create a custom command to build the test only if source or FastLED library changes
