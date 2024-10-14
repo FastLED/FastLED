@@ -19,11 +19,15 @@ class FailedTest:
 def run_command(command, use_gdb=False) -> tuple[int, str, str]:
     if use_gdb:
         with tempfile.NamedTemporaryFile(mode="w+", delete=False) as gdb_script:
+            gdb_script.write("set pagination off\n")
             gdb_script.write("run\n")
             gdb_script.write("bt full\n")
+            gdb_script.write("info registers\n")
+            gdb_script.write("x/16i $pc\n")
+            gdb_script.write("thread apply all bt full\n")
             gdb_script.write("quit\n")
 
-        gdb_command = f"gdb -batch -x {gdb_script.name} --args {command}"
+        gdb_command = f"gdb -return-child-result -batch -x {gdb_script.name} --args {command}"
         process = subprocess.Popen(
             gdb_command,
             stdout=subprocess.PIPE,
@@ -90,8 +94,11 @@ def run_tests() -> None:
                 # Extract crash information
                 crash_info = extract_crash_info(gdb_stdout)
                 if crash_info:
-                    print(f"Crash occurred at: {crash_info['file']}:{crash_info['line']}")
-                    print(f"Cause: {crash_info['cause']}")
+                    print(f"Crash occurred at: {crash_info.get('file', 'Unknown')}:{crash_info.get('line', 'Unknown')}")
+                    if 'cause' in crash_info:
+                        print(f"Cause: {crash_info['cause']}")
+                    if 'stack' in crash_info:
+                        print(f"Stack: {crash_info['stack']}")
 
             print("Test output:")
             print(stdout)
@@ -119,21 +126,23 @@ def run_tests() -> None:
 
 def extract_crash_info(gdb_output: str) -> dict:
     lines = gdb_output.split('\n')
+    crash_info = {}
     for i, line in enumerate(lines):
-        if line.startswith('#0'):
+        if line.startswith('Program received signal'):
+            crash_info['cause'] = line.split(':', 1)[1].strip()
+        elif line.startswith('#0'):
             # Found the crash point
+            crash_info['stack'] = line
             for j in range(i, len(lines)):
                 if 'at' in lines[j]:
                     parts = lines[j].split('at')
                     if len(parts) == 2:
                         file_line = parts[1].strip()
                         file, line = file_line.rsplit(':', 1)
-                        return {
-                            'file': file.strip(),
-                            'line': line.strip(),
-                            'cause': lines[i].split(':')[-1].strip() if ':' in lines[i] else 'Unknown'
-                        }
-    return {}
+                        crash_info['file'] = file.strip()
+                        crash_info['line'] = line.strip()
+                        return crash_info
+    return crash_info
 
 
 def parse_args() -> argparse.Namespace:
