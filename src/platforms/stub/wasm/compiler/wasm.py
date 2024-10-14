@@ -37,6 +37,7 @@ wasmflags = [
     "-std=gnu++17",
     "-fpermissive",
     "-Wno-constant-logical-operand",
+    "-Wnon-c-typedef-for-linkage",
     #"-s",
     #"STACK_SIZE=5368709",
     f"-sWASM={USE_WASM}",
