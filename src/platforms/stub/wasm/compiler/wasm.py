@@ -36,6 +36,7 @@ wasmflags = [
     # Enable C++17 with GNU extensions.
     "-std=gnu++17",
     "-fpermissive",
+    "-Wno-constant-logical-operand",
     #"-s",
     #"STACK_SIZE=5368709",
     f"-sWASM={USE_WASM}",
