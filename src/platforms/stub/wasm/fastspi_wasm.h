@@ -62,7 +62,6 @@ public:
     void release() {}
 
     void writeByte(uint8_t byte) {
-        mBuffer.push_back(byte);
     }
 
     void writeWord(uint16_t word) {
