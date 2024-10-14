@@ -16,6 +16,9 @@ FASTLED_NAMESPACE_BEGIN
     class type;                                                                \
     using type##Ptr = Ptr<type>;
 
+#define DECLARE_SMART_PTR_NO_FWD(type) \
+    using type##Ptr = Ptr<type>;
+
 // If you have an interface class that you want to create a smart pointer for,
 // then you need to use this to bind it to a constructor.
 #define DECLARE_SMART_PTR_CONSTRUCTOR(type, constructor)                       \

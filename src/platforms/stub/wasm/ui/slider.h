@@ -35,20 +35,15 @@ class jsSlider : public jsUI {
         jsUiManager::addComponent(jsUIPtr::TakeOwnership(this));
     }
 
+    std::string name() const { return mName; }
     std::string type() const override { return TypeName<T>::get(); }
-
     T value() const { return mValue; }
-
-    virtual void update() {}
-
+    virtual void update() override {}
     // Operator for implicit conversion to T
     operator T() const { return mValue; }
-
     // Getter for the unique identifier
     uint32_t getId() const { return mId; }
 
-    // Getter for the name
-    const std::string& getName() const { return mName; }
 
   private:
     T mMin;
@@ -74,3 +69,11 @@ std::atomic<uint32_t> jsSlider<T>::sNextId(0);
 typedef jsSlider<int> IntSlider;
 typedef jsSlider<float> FloatSlider;
 typedef jsSlider<uint8_t> Uint8Slider;
+
+//typedef Ptr<jsSlider<int>> IntSliderPtr;
+//typedef Ptr<jsSlider<float>> FloatSliderPtr;
+//typedef Ptr<jsSlider<uint8_t>> Uint8SliderPtr;
+
+DECLARE_SMART_PTR_NO_FWD(IntSlider);
+DECLARE_SMART_PTR_NO_FWD(FloatSlider);
+DECLARE_SMART_PTR_NO_FWD(Uint8Slider);

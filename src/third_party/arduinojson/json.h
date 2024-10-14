@@ -8202,7 +8202,7 @@ inline JsonObject JsonArray::createNestedObject() const {
 }
 ARDUINOJSON_END_PUBLIC_NAMESPACE
 
-using namespace ArduinoJson;
+// using namespace ArduinoJson;
 
 #else
 
