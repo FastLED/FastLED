@@ -122,9 +122,6 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
         ${COMMON_COMPILE_DEFINITIONS}
         $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
     )
-    set_target_properties(${TEST_NAME} PROPERTIES 
-        LINK_FLAGS "-Wl,--export-dynamic"
-    )
     
     # Create a custom command to build the test only if source or FastLED library changes
     add_custom_command(
