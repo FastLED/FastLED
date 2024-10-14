@@ -38,18 +38,20 @@ public:
     }
 
     iterator find(const Key& key) {
-        for (size_t i = 0; i < data.size(); ++i) {
-            if (data[i].key == key) {
-                return data.begin() + i;
+        iterator it = begin();
+        for (; it != end(); ++it) {
+            if (it->key == key) {
+                return it;
             }
         }
         return end();
     }
 
     const_iterator find(const Key& key) const {
-        for (size_t i = 0; i < data.size(); ++i) {
-            if (data[i].key == key) {
-                return data.begin() + i;
+        const_iterator it = begin();
+        for (; it != end(); ++it) {
+            if (it->key == key) {
+                return it;
             }
         }
         return end();
