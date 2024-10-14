@@ -14,6 +14,7 @@ public:
     struct Pair {
         Key first = Key();
         Value second = Value();
+        Pair(const Key& k, const Value& v) : first(k), second(v) {}
     };
 
     typedef FixedVector<Pair, N> VectorType;
@@ -70,7 +71,7 @@ public:
         iterator it = find(key);
         if (it == end()) {
             if (data.size() < N) {
-                data.push_back({key, value});
+                data.push_back(Pair(key, value));
                 return true;
             }
         }
