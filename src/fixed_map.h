@@ -12,8 +12,8 @@ template<typename Key, typename Value, size_t N>
 class FixedMap {
 public:
     struct Pair {
-        Key key;
-        Value value;
+        Key first = Key();
+        Value second = Value();
     };
 
     typedef FixedVector<Pair, N> VectorType;
@@ -39,7 +39,7 @@ public:
 
     iterator find(const Key& key) {
         for (auto it = begin(); it != end(); ++it) {
-            if (it->key == key) {
+            if (it->first == key) {
                 return it;
             }
         }
@@ -48,7 +48,7 @@ public:
 
     const_iterator find(const Key& key) const {
         for (auto it = begin(); it != end(); ++it) {
-            if (it->key == key) {
+            if (it->first == key) {
                 return it;
             }
         }
@@ -60,7 +60,7 @@ public:
     bool get(const Key& key, Value* value) const {
         const_iterator it = find(key);
         if (it != end()) {
-            *value = it->value;
+            *value = it->second;
             return true;
         }
         return false;
@@ -80,7 +80,7 @@ public:
     bool update(const Key& key, const Value& value, bool insert_if_missing = true) {
         iterator it = find(key);
         if (it != end()) {
-            it->value = value;
+            it->second = value;
             return true;
         } else if (insert_if_missing) {
             return insert(key, value);
@@ -93,10 +93,10 @@ public:
         if (it != end()) {
             ++it;
             if (it != end()) {
-                *next_key = it->key;
+                *next_key = it->first;
                 return true;
             } else if (allow_rollover && !empty()) {
-                *next_key = begin()->key;
+                *next_key = begin()->first;
                 return true;
             }
         }
@@ -108,10 +108,10 @@ public:
         if (it != end()) {
             if (it != begin()) {
                 --it;
-                *prev_key = it->key;
+                *prev_key = it->first;
                 return true;
             } else if (allow_rollover && !empty()) {
-                *prev_key = data[data.size() - 1].key;
+                *prev_key = data[data.size() - 1].first;
                 return true;
             }
         }

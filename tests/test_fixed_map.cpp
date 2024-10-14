@@ -88,7 +88,7 @@ TEST_CASE("FixedMap operations") {
 
         int sum = 0;
         for (const auto& pair : map) {
-            sum += pair.value;
+            sum += pair.second;
         }
         CHECK(sum == 60);
     }

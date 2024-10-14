@@ -27,6 +27,7 @@ FASTLED_NAMESPACE_BEGIN
  */
 class FxEngine {
   public:
+    typedef FixedMap<int, FxPtr, FASTLED_FX_ENGINE_MAX_FX> IntFxMap;
     /**
      * @brief Constructs an FxEngine with the specified number of LEDs.
      * @param numLeds The number of LEDs in the strip.
@@ -83,9 +84,12 @@ class FxEngine {
      */
     bool setNextFx(int index, uint16_t duration);
 
+    
+    IntFxMap& _getEffects() { return mEffects; }
+
   private:
     int mCounter = 0;
-    FixedMap<int, FxPtr, FASTLED_FX_ENGINE_MAX_FX> mEffects; ///< Collection of effects
+    IntFxMap mEffects; ///< Collection of effects
     FxCompositor mCompositor; ///< Handles effect transitions and rendering
     int mCurrId; ///< Id of the current effect
     uint16_t mDuration = 0; ///< Duration of the current transition
@@ -117,6 +121,7 @@ inline bool FxEngine::nextFx(uint16_t duration) {
         return false;
     }
     setNextFx(mCurrId, duration);
+    return true;
 }
 
 inline bool FxEngine::setNextFx(int index, uint16_t duration) {

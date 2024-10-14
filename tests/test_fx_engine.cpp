@@ -40,6 +40,9 @@ TEST_CASE("test_fx_engine") {
     int id0 = engine.addFx(redFx);
     int id1 = engine.addFx(blueFx);
 
+    REQUIRE_EQ(0, id0);
+    REQUIRE_EQ(1, id1);
+
     SUBCASE("Initial state") {
         int currId = engine.getCurrentFxId();
         CHECK(currId == id0);
@@ -53,6 +56,14 @@ TEST_CASE("test_fx_engine") {
 
     SUBCASE("Transition") {
         bool ok = engine.nextFx(1000);
+        if (!ok) {
+            auto& effects = engine._getEffects();
+            for (auto it = effects.begin(); it != effects.end(); ++it) {
+                auto& fx = it->second;
+                printf("fx: %s\n", fx->fxName(0));
+            }
+            FAIL("Failed to transition to next effect");
+        }
         REQUIRE(ok);
         
         // Start of transition
