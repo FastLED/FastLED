@@ -62,10 +62,7 @@ class XYMap {
         : type(is_serpentine ? kSeperentine : kLineByLine),
           width(width), height(height), mOffset(offset) {}
 
-    XYMap(const XYMap &other)
-        : type(other.type), width(other.width), height(other.height),
-          xyFunction(other.xyFunction), mLookUpTable(other.mLookUpTable),
-          mOffset(other.mOffset) {}
+    XYMap(const XYMap &other) = default;
 
     void mapPixels(const CRGB* input, CRGB* output) const {
         uint16_t pos = 0;

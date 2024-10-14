@@ -69,6 +69,7 @@ public:
             xFunction = other.xFunction;
             mData = other.mData;
             mLookUpTable = other.mLookUpTable;
+            mOffset = other.mOffset;
         }
         return *this;
     }
