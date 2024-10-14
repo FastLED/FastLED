@@ -38,8 +38,7 @@ public:
     }
 
     iterator find(const Key& key) {
-        iterator it = begin();
-        for (; it != end(); ++it) {
+        for (auto it = begin(); it != end(); ++it) {
             if (it->key == key) {
                 return it;
             }
@@ -48,8 +47,7 @@ public:
     }
 
     const_iterator find(const Key& key) const {
-        const_iterator it = begin();
-        for (; it != end(); ++it) {
+        for (auto it = begin(); it != end(); ++it) {
             if (it->key == key) {
                 return it;
             }
@@ -80,9 +78,9 @@ public:
     }
 
     bool update(const Key& key, const Value& value, bool insert_if_missing = true) {
-        Pair* pair = find(key);
-        if (pair != end()) {
-            pair->value = value;
+        iterator it = find(key);
+        if (it != end()) {
+            it->value = value;
             return true;
         } else if (insert_if_missing) {
             return insert(key, value);
