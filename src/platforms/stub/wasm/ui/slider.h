@@ -6,6 +6,8 @@
 
 #include "ui.h"
 
+#include <emscripten/bind.h>
+
 class jsSlider : public jsUI {
   public:
     jsSlider(const std::string& name, float min = 0.0f, float max = 255.0f, float value = 128.0f, float step = 1.0f, float* valuePtr = nullptr)
@@ -44,3 +46,14 @@ class jsSlider : public jsUI {
 std::atomic<uint32_t> jsSlider::sNextId(0);
 
 DECLARE_SMART_PTR_NO_FWD(jsSlider);
+
+
+
+EMSCRIPTEN_BINDINGS(jsSlider) {
+    emscripten::class_<jsSlider>("jsSlider")
+        .constructor<const std::string&, float, float, float, float, float*>()
+        .function("name", &jsSlider::name)
+        .function("value", &jsSlider::value)
+        .function("update", &jsSlider::update)
+        .function("getId", &jsSlider::getId);
+}

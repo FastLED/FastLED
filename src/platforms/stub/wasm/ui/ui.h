@@ -9,22 +9,45 @@
 #include <mutex>
 #include <string>
 #include "ptr.h"
+#include "engine_events.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 DECLARE_SMART_PTR(jsUI)
 
-class jsUiManager {
+class jsUiManager: EngineEvents::Listener {
   public:
     typedef std::set<jsUIPtr> jsUIPtrSet;
     static void addComponent(jsUIPtr component) {
         std::lock_guard<std::mutex> lock(instance().mMutex);
         instance().mComponents.insert(component);
+        instance().mItemsAdded = true;
+
     }
 
     static void removeComponent(jsUIPtr component) {
         std::lock_guard<std::mutex> lock(instance().mMutex);
         instance().mComponents.erase(component);
+    }
+
+    void onEndFrame() override {
+        if (mItemsAdded) {
+            updateJs();
+            mItemsAdded = false;
+        }
+
+    }
+
+    void updateJs() {
+        #if 0
+        EM_ASM_({
+            globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(uiList) {
+                console.log("Missing globalThis.onFastLedUiElementsAdded(uiList) function");
+            };
+            var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
+            globalThis.onFastLedSetCanvasSize(jsonStr);
+        }, jsonStr);
+        #endif
     }
 
     static void updateAll();
@@ -40,6 +63,7 @@ class jsUiManager {
     static jsUiManager &instance() {
         return Singleton<jsUiManager>::instance();
     }
+    bool mItemsAdded = false;
 };
 
 class jsUI : public Referent {
