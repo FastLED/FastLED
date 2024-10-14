@@ -2,6 +2,7 @@
 set -e
 
 compile() {
+    cp Arduino.h src/Arduino.h
     # sometimes the compilation fails, attempt to compile multiple times
     local max_attempts=2
     local attempt=1

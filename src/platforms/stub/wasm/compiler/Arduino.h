@@ -31,6 +31,20 @@ struct SerialEmulation {
 void digitalWrite(int, int) {}
 int digitalRead(int) { return LOW; }
 
+// avr flash memory macro is disabled.
+#ifdef F
+#undef F
+#endif
+
+#define F(x) x
+
+// Found in the wild for scintillating example
+#ifdef FL_PGM_READ_PTR_NEAR
+#undef FL_PGM_READ_PTR_NEAR
+#endif
+
+#define FL_PGM_READ_PTR_NEAR(addr) (*(addr))
+typedef uint8_t byte;
 
 
 SerialEmulation Serial;

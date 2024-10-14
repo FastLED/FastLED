@@ -67,6 +67,7 @@ COPY ./src/platforms/ /js/fastled/src/platforms/
 COPY src/platforms/stub/wasm/compiler/platformio.ini /js/platformio.ini
 COPY src/platforms/stub/wasm/compiler/wasm.py /js/wasm.py
 COPY src/platforms/stub/wasm/compiler/index.html /js/index.html
+COPY src/platforms/stub/wasm/compiler/Arduino.h /js/Arduino.h
 
 WORKDIR /js
 
