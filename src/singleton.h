@@ -5,8 +5,8 @@ template<typename T, int N = 0>
 class Singleton {
 public:
     static T& instance() {
-        static T* instance = new T();
-        return *instance;
+        static T instance;
+        return instance;
     }
     static T* instancePtr() {
         return &instance();
