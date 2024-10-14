@@ -87,6 +87,12 @@ def run_tests() -> None:
                 stdout += "\n--- GDB Output ---\n" + gdb_stdout
                 stderr += "\n--- GDB Errors ---\n" + gdb_stderr
 
+                # Extract crash information
+                crash_info = extract_crash_info(gdb_stdout)
+                if crash_info:
+                    print(f"Crash occurred at: {crash_info['file']}:{crash_info['line']}")
+                    print(f"Cause: {crash_info['cause']}")
+
             print("Test output:")
             print(stdout)
             if stderr:
@@ -105,12 +111,29 @@ def run_tests() -> None:
             )
         tests_failed = len(failed_tests)
         failed_test_names = [test.name for test in failed_tests]
-        # print(f"{tests_failed} test{'s' if tests_failed != 1 else ''} failed.")
         print(
             f"{tests_failed} test{'s' if tests_failed != 1 else ''} failed: {', '.join(failed_test_names)}"
         )
         sys.exit(1)
     print("All tests passed.")
+
+def extract_crash_info(gdb_output: str) -> dict:
+    lines = gdb_output.split('\n')
+    for i, line in enumerate(lines):
+        if line.startswith('#0'):
+            # Found the crash point
+            for j in range(i, len(lines)):
+                if 'at' in lines[j]:
+                    parts = lines[j].split('at')
+                    if len(parts) == 2:
+                        file_line = parts[1].strip()
+                        file, line = file_line.rsplit(':', 1)
+                        return {
+                            'file': file.strip(),
+                            'line': line.strip(),
+                            'cause': lines[i].split(':')[-1].strip() if ':' in lines[i] else 'Unknown'
+                        }
+    return {}
 
 
 def parse_args() -> argparse.Namespace:
