@@ -48,6 +48,59 @@ TEST_CASE("Fixed vector simple") {
     }
 }
 
+TEST_CASE("FixedVector construction and destruction") {
+    FASTLED_NAMESPACE_USE;
+    
+    static int live_object_count = 0;
+
+    struct TestObject {
+        int value;
+        TestObject(int v = 0) : value(v) { ++live_object_count; }
+        ~TestObject() { --live_object_count; }
+        TestObject(const TestObject& other) : value(other.value) { ++live_object_count; }
+        TestObject& operator=(const TestObject& other) {
+            value = other.value;
+            return *this;
+        }
+    };
+
+    SUBCASE("Construction and destruction") {
+        REQUIRE_EQ(0, live_object_count);
+        live_object_count = 0;
+        {
+            FixedVector<TestObject, 3> vec;
+            CHECK(live_object_count == 0);
+
+            vec.push_back(TestObject(1));
+            vec.push_back(TestObject(2));
+            vec.push_back(TestObject(3));
+
+            CHECK(live_object_count == 3);  // 3 objects in the vector
+
+            vec.pop_back();
+            CHECK(live_object_count == 2);  // 2 objects left in the vector
+        }
+        // vec goes out of scope here
+        REQUIRE_EQ(live_object_count, 0);
+    }
+
+    SUBCASE("Clear") {
+        live_object_count = 0;
+        {
+            FixedVector<TestObject, 3> vec;
+            vec.push_back(TestObject(1));
+            vec.push_back(TestObject(2));
+
+            CHECK(live_object_count == 2);
+
+            vec.clear();
+
+            CHECK(live_object_count == 0);  // All objects should be destroyed after clear
+        }
+        CHECK(live_object_count == 0);
+    }
+}
+
 TEST_CASE("Fixed vector advanced") {
     FASTLED_NAMESPACE_USE;
     FixedVector<int, 5> vec;

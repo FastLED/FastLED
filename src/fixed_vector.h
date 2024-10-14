@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include <utility>
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -10,23 +11,28 @@ FASTLED_NAMESPACE_BEGIN
 template<typename T, size_t N>
 class FixedVector {
 private:
-    T data[N] = {};
+    alignas(T) char data[N * sizeof(T)];
     size_t current_size = 0;
 
 public:
     typedef T* iterator;
     typedef const T* const_iterator;
     // Constructor
-    constexpr FixedVector() = default;
+    constexpr FixedVector() : current_size(0) {}
+
+    // Destructor
+    ~FixedVector() {
+        clear();
+    }
 
     // Array subscript operator
     T& operator[](size_t index) {
-        return data[index];
+        return *reinterpret_cast<T*>(&data[index * sizeof(T)]);
     }
 
     // Const array subscript operator
     const T& operator[](size_t index) const {
-        return data[index];
+        return *reinterpret_cast<const T*>(&data[index * sizeof(T)]);
     }
 
     // Get the current size of the vector
@@ -46,13 +52,16 @@ public:
     // Add an element to the end of the vector
     void push_back(const T& value) {
         if (current_size < N) {
-            data[current_size++] = value;
+            new (&data[current_size * sizeof(T)]) T(value);
+            ++current_size;
         }
     }
 
     // Remove the last element from the vector
     void pop_back() {
         if (current_size > 0) {
+            // destroy object
+            reinterpret_cast<T*>(&data[(current_size - 1) * sizeof(T)])->~T();
             --current_size;
         }
     }
@@ -60,8 +69,7 @@ public:
     // Clear the vector
     void clear() {
         for (size_t i = 0; i < current_size; ++i) {
-            data[i].~T();
-            new (&data[i]) T();
+            reinterpret_cast<T*>(&data[i * sizeof(T)])->~T();
         }
         current_size = 0;
     }
@@ -115,26 +123,26 @@ public:
 
     // Access to first and last elements
     T& front() {
-        return data[0];
+        return *reinterpret_cast<T*>(&data[0]);
     }
 
     const T& front() const {
-        return data[0];
+        return *reinterpret_cast<const T*>(&data[0]);
     }
 
     T& back() {
-        return data[current_size - 1];
+        return *reinterpret_cast<T*>(&data[(current_size - 1) * sizeof(T)]);
     }
 
     const T& back() const {
-        return data[current_size - 1];
+        return *reinterpret_cast<const T*>(&data[(current_size - 1) * sizeof(T)]);
     }
 
     // Iterator support
-    iterator begin() { return data; }
-    const_iterator begin() const { return data; }
-    iterator end() { return data + current_size; }
-    const_iterator end() const { return data + current_size; }
+    iterator begin() { return reinterpret_cast<T*>(&data[0]); }
+    const_iterator begin() const { return reinterpret_cast<const T*>(&data[0]); }
+    iterator end() { return reinterpret_cast<T*>(&data[current_size * sizeof(T)]); }
+    const_iterator end() const { return reinterpret_cast<const T*>(&data[current_size * sizeof(T)]); }
 };
 
 FASTLED_NAMESPACE_END
