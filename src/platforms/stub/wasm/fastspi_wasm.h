@@ -28,9 +28,6 @@ public:
     ~WasmSpiOutput() {
     }
 
-    void onBeginFrame () override {
-        mBuffer.clear();
-    }
 
     CLEDController* tryFindOwner() {
         if (mId == -1) {
@@ -75,7 +72,6 @@ public:
 
 private:
     int mId = -1;  // Deferred initialization
-    std::vector<uint8_t> mBuffer;
 };
 
 // Compatibility alias
