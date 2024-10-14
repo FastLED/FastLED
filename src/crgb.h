@@ -82,19 +82,19 @@ struct CRGB {
     /// @param ir input red value
     /// @param ig input green value
     /// @param ib input blue value
-    constexpr CRGB(uint8_t ir, uint8_t ig, uint8_t ib)  __attribute__((always_inline))
+    constexpr CRGB(uint8_t ir, uint8_t ig, uint8_t ib) noexcept
         : r(ir), g(ig), b(ib)
     {
     }
 
     /// Allow construction from 32-bit (really 24-bit) bit 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    constexpr CRGB(uint32_t colorcode)  __attribute__((always_inline))
+    constexpr CRGB(uint32_t colorcode) noexcept
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
 
-    constexpr uint32_t as_uint32_t() const {
+    constexpr uint32_t as_uint32_t() const noexcept {
         return uint32_t(0xff000000) |
                (uint32_t{r} << 16) |
                (uint32_t{g} << 8) |
@@ -103,14 +103,14 @@ struct CRGB {
 
     /// Allow construction from a LEDColorCorrection enum
     /// @param colorcode an LEDColorCorrect enumeration value
-    constexpr CRGB(LEDColorCorrection colorcode) __attribute__((always_inline))
+    constexpr CRGB(LEDColorCorrection colorcode) noexcept
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
 
     /// Allow construction from a ColorTemperature enum
     /// @param colorcode an ColorTemperature enumeration value
-    constexpr CRGB(ColorTemperature colorcode) __attribute__((always_inline))
+    constexpr CRGB(ColorTemperature colorcode) noexcept
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
@@ -129,7 +129,7 @@ struct CRGB {
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    FASTLED_FORCE_INLINE CRGB& operator= (const uint32_t colorcode)
+    constexpr CRGB& operator= (const uint32_t colorcode) noexcept
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -141,7 +141,7 @@ struct CRGB {
     /// @param nr new red value
     /// @param ng new green value
     /// @param nb new blue value
-    FASTLED_FORCE_INLINE CRGB& setRGB (uint8_t nr, uint8_t ng, uint8_t nb)
+    constexpr CRGB& setRGB (uint8_t nr, uint8_t ng, uint8_t nb) noexcept
     {
         r = nr;
         g = ng;
@@ -177,7 +177,7 @@ struct CRGB {
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    FASTLED_FORCE_INLINE CRGB& setColorCode (uint32_t colorcode)
+    constexpr CRGB& setColorCode (uint32_t colorcode) noexcept
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -316,13 +316,13 @@ struct CRGB {
     }
 
     /// This allows testing a CRGB for zero-ness
-    FASTLED_FORCE_INLINE explicit operator bool() const
+    constexpr explicit operator bool() const noexcept
     {
         return r || g || b;
     }
 
     /// Converts a CRGB to a 32-bit color having an alpha of 255.
-    FASTLED_FORCE_INLINE explicit operator uint32_t() const
+    constexpr explicit operator uint32_t() const noexcept
     {
         return uint32_t(0xff000000) |
                (uint32_t{r} << 16) |
@@ -331,7 +331,7 @@ struct CRGB {
     }
 
     /// Converts a CRGB to a 32-bit color having an alpha of 255.
-    FASTLED_FORCE_INLINE explicit operator const uint32_t() const
+    constexpr explicit operator const uint32_t() const noexcept
     {
         return uint32_t(0xff000000) |
                (uint32_t{r} << 16) |
@@ -340,13 +340,9 @@ struct CRGB {
     }
 
     /// Invert each channel
-    FASTLED_FORCE_INLINE CRGB operator- () const
+    constexpr CRGB operator- () const noexcept
     {
-        CRGB retval;
-        retval.r = 255 - r;
-        retval.g = 255 - g;
-        retval.b = 255 - b;
-        return retval;
+        return CRGB(255 - r, 255 - g, 255 - b);
     }
 
 #if (defined SmartMatrix_h || defined SmartMatrix3_h)

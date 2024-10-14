@@ -1,7 +1,7 @@
 #ifndef __INC_COLOR_H
 #define __INC_COLOR_H
 
-
+#include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 
