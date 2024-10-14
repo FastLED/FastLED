@@ -180,6 +180,10 @@ template <typename T> class Ptr : public PtrTraits<T> {
         return referent_ != other.referent_;
     }
 
+    bool operator<(const Ptr &other) const {
+        return referent_ < other.referent_;
+    }
+
     Ptr &operator=(Ptr &&other) noexcept {
         if (this != &other) {
             if (referent_ && isOwned()) {
