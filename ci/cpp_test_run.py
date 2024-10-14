@@ -27,7 +27,9 @@ def run_command(command, use_gdb=False) -> tuple[int, str, str]:
             gdb_script.write("thread apply all bt full\n")
             gdb_script.write("quit\n")
 
-        gdb_command = f"gdb -return-child-result -batch -x {gdb_script.name} --args {command}"
+        gdb_command = (
+            f"gdb -return-child-result -batch -x {gdb_script.name} --args {command}"
+        )
         process = subprocess.Popen(
             gdb_command,
             stdout=subprocess.PIPE,
@@ -94,10 +96,12 @@ def run_tests() -> None:
                 # Extract crash information
                 crash_info = extract_crash_info(gdb_stdout)
                 if crash_info:
-                    print(f"Crash occurred at: {crash_info.get('file', 'Unknown')}:{crash_info.get('line', 'Unknown')}")
-                    if 'cause' in crash_info:
+                    print(
+                        f"Crash occurred at: {crash_info.get('file', 'Unknown')}:{crash_info.get('line', 'Unknown')}"
+                    )
+                    if "cause" in crash_info:
                         print(f"Cause: {crash_info['cause']}")
-                    if 'stack' in crash_info:
+                    if "stack" in crash_info:
                         print(f"Stack: {crash_info['stack']}")
 
             print("Test output:")
@@ -124,23 +128,24 @@ def run_tests() -> None:
         sys.exit(1)
     print("All tests passed.")
 
+
 def extract_crash_info(gdb_output: str) -> dict:
-    lines = gdb_output.split('\n')
+    lines = gdb_output.split("\n")
     crash_info = {}
     for i, line in enumerate(lines):
-        if line.startswith('Program received signal'):
-            crash_info['cause'] = line.split(':', 1)[1].strip()
-        elif line.startswith('#0'):
+        if line.startswith("Program received signal"):
+            crash_info["cause"] = line.split(":", 1)[1].strip()
+        elif line.startswith("#0"):
             # Found the crash point
-            crash_info['stack'] = line
+            crash_info["stack"] = line
             for j in range(i, len(lines)):
-                if 'at' in lines[j]:
-                    parts = lines[j].split('at')
+                if "at" in lines[j]:
+                    parts = lines[j].split("at")
                     if len(parts) == 2:
                         file_line = parts[1].strip()
-                        file, line = file_line.rsplit(':', 1)
-                        crash_info['file'] = file.strip()
-                        crash_info['line'] = line.strip()
+                        file, line = file_line.rsplit(":", 1)
+                        crash_info["file"] = file.strip()
+                        crash_info["line"] = line.strip()
                         return crash_info
     return crash_info
 
