@@ -11,7 +11,9 @@
 #include "singleton.h"
 #include "engine_events.h"
 #include "strip_id_map.h"
+#include "crgb.h"
 #include <vector>
+#include <stdio.h>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -30,12 +32,31 @@ public:
         mBuffer.clear();
     }
 
-    void onEndShowLeds() override {
+    CLEDController* tryFindOwner() {
         if (mId == -1) {
             mId = StripIdMap::getOrFindByAddress(reinterpret_cast<uint32_t>(this));
         }
-		ActiveStripData& ch_data = Singleton<ActiveStripData>::instance();
-		ch_data.update(mId, millis(), mBuffer.data(), mBuffer.size());
+        if (mId == -1) {
+            return nullptr;
+        }
+        return StripIdMap::getOwner(mId);
+    }
+
+    void onEndShowLeds() override {
+        // Get the led data and send it to the JavaScript side. This is tricky because we
+        // have to find the owner of this pointer, which will be inlined in a CLEDController
+        // subclass. Therefore we are going to do address lookup to get the CLEDController
+        // for all CLEDController instances that exist and select the one in which this SpiOutput
+        // class would be inlined into.
+        CLEDController* owner = tryFindOwner();
+        if (owner == nullptr) {
+            return;
+        }
+        // Okay we got the owner, now we can get the data and send it to the JavaScript side.
+        const uint8_t *data = reinterpret_cast<const uint8_t*>(owner->leds());
+        const size_t data_size = owner->size() * 3;
+		ActiveStripData& active_strips = Singleton<ActiveStripData>::instance();
+		active_strips.update(mId, millis(), data, data_size);
     }
 
     void select() {}
