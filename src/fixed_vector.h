@@ -10,7 +10,7 @@ FASTLED_NAMESPACE_BEGIN
 template<typename T, size_t N>
 class FixedVector {
 private:
-    T data[N];
+    T data[N] = {};
     size_t current_size = 0;
 
 public:
@@ -61,7 +61,7 @@ public:
     void clear() {
         for (size_t i = 0; i < current_size; ++i) {
             data[i].~T();
-            data[i] = T();
+            new (&data[i]) T();
         }
         current_size = 0;
     }
@@ -69,11 +69,16 @@ public:
     // Erase the element at the given iterator position
     iterator erase(iterator pos) {
         if (pos != end()) {
+            // Destroy the element at the position
+            pos->~T();
             // shift all elements to the left
             for (iterator p = pos; p != end() - 1; ++p) {
                 *p = *(p + 1);
             }
             --current_size;
+            // Ensure the last element is properly destructed and default-constructed
+            (end())->~T();
+            new (end()) T();
         }
         return pos;
     }
