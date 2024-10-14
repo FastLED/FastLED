@@ -26,7 +26,7 @@ wasmflags = [
     "EXPORTED_RUNTIME_METHODS=['ccall','cwrap']",
     "-s",
     "ALLOW_MEMORY_GROWTH=1",
-    "-Os",
+    "-Oz",
     "-s",
     "EXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop']",
     "--bind",
