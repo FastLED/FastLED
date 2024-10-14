@@ -25,11 +25,15 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install
+      - name: Install dependencies
         run: |
           pip install uv
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get update
+            sudo apt-get install -y gdb
+          fi
       
       - name: Run Test
         run: |
-          ./test
+            ./test
         shell: bash
