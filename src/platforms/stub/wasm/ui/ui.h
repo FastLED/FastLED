@@ -10,6 +10,7 @@
 #include <string>
 #include "ptr.h"
 #include "engine_events.h"
+#include <emscripten.h>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -38,17 +39,7 @@ class jsUiManager: EngineEvents::Listener {
 
     }
 
-    void updateJs() {
-        #if 0
-        EM_ASM_({
-            globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(uiList) {
-                console.log("Missing globalThis.onFastLedUiElementsAdded(uiList) function");
-            };
-            var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
-            globalThis.onFastLedSetCanvasSize(jsonStr);
-        }, jsonStr);
-        #endif
-    }
+    void updateJs();
 
     static void updateAll();
 
@@ -91,6 +82,28 @@ inline void jsUiManager::updateAll() {
     for (const auto& component : copy) {
         component->update();
     }
+}
+
+void jsUiManager::updateJs() {
+    std::string jsonStr = "[";
+    bool first = true;
+    for (const auto& component : mComponents) {
+        if (!first) {
+            jsonStr += ",";
+        }
+        jsonStr += "{\"type\":\"" + component->type() + "\"}";
+        first = false;
+    }
+    jsonStr += "]";
+
+    EM_ASM_({
+        globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(uiList) {
+            console.log("Missing globalThis.onFastLedUiElementsAdded(uiList) function");
+            console.log(uiList);
+        };
+        var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
+        globalThis.onFastLedUiElementsAdded(JSON.parse(jsonStr));
+    }, jsonStr.c_str());
 }
 
 FASTLED_NAMESPACE_END
