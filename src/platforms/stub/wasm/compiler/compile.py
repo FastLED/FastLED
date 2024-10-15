@@ -87,15 +87,6 @@ def find_project_dir(mapped_dir: Path) -> Path:
     src_dir: Path = mapped_dirs[0]
     return src_dir
 
-def copy_arduino_h(js_dir: Path, js_src: Path) -> None:
-    print("Copying Arduino.h to src/Arduino.h")
-    shutil.copy(js_dir / 'Arduino.h', js_src / 'Arduino.h')
-
-def process_copy(src_dir: Path, js_dir: Path) -> None:
-    js_src = js_dir / 'src'
-    copy_files(src_dir, js_src)
-    copy_arduino_h(js_dir, js_src)
-    print("Copy operation completed.")
 
 def process_ino_files(src_dir: Path) -> None:
     transform_to_cpp(src_dir)
@@ -148,7 +139,9 @@ def main() -> int:
         do_compile = not any_only_flags or args.only_compile
 
         if do_copy:
-            process_copy(src_dir, js_dir)
+            copy_files(src_dir, js_dir / 'src')
+            print("Copying Arduino.h to src/Arduino.h")
+            shutil.copy(js_dir / 'Arduino.h', js_src / 'Arduino.h')
             if args.only_copy:
                 return 0
 
@@ -159,7 +152,6 @@ def main() -> int:
                 return 0
 
         if do_compile:
-            copy_arduino_h(js_dir, js_dir / 'src')
             process_compile(js_dir, src_dir)
 
         cleanup(args, js_src)
