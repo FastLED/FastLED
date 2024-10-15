@@ -5,6 +5,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <stdio.h>
 
 #include "namespace.h"
 
@@ -12,27 +13,33 @@ FASTLED_NAMESPACE_BEGIN
 
 class jsUiInternal : public std::enable_shared_from_this<jsUiInternal> {
 public:
-    using UpdateFunction = std::function<void(const char*)>;
+    using UpdateFunction = std::function<void(const char*)>; // jsonStr
+    using ToJsonStrFunction = std::function<std::string()>;  // returns jsonStr of element
 
-    jsUiInternal(const std::string& name, const std::string& type, UpdateFunction updateFunc);
-    ~jsUiInternal() { clearUpdateFunction(); }
+    jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonStrFunction toJsonStrFunc);
+    ~jsUiInternal() {
+        const bool functions_exist = mUpdateFunc || mToJsonStrFunc;
+        if (functions_exist) {
+            clearFunctions();
+            printf("Warning: %s: The owner of the jsUiInternal should clear the functions, not this destructor.\n", mName.c_str());
+        }
+    }
 
-    std::string type() const;
     std::string name() const;
     void update(const char* jsonStr);
     std::string toJsonStr() const;
     int id() const;
 
-    void clearUpdateFunction();
+    bool clearFunctions();
 
 private:
     static int nextId();
     static std::atomic<uint32_t> sNextId;
     int mId;
     std::string mName;
-    std::string mType;
     UpdateFunction mUpdateFunc;
-    std::mutex mMutex;
+    ToJsonStrFunction mToJsonStrFunc;
+    mutable std::mutex mMutex;
 };
 
 FASTLED_NAMESPACE_END

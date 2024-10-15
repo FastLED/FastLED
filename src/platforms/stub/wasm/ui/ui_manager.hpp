@@ -2,6 +2,7 @@
 
 #include "ui_manager.h"
 #include <emscripten.h>
+#include <sstream>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -63,21 +64,24 @@ inline void jsUiManager::updateJs() {
 }
 
 inline std::string jsUiManager::toJsonStr() {
-    std::string str = "[";
+    std::ostringstream oss;
+    oss << "[";
     std::lock_guard<std::mutex> lock(instance().mMutex);
+    bool first = true;
     for (auto it = mComponents.begin(); it != mComponents.end(); ) {
         if (auto component = it->lock()) {
-            str += component->toJsonStr() + ",";
+            if (!first) {
+                oss << ",";
+            }
+            oss << component->toJsonStr();
+            first = false;
             ++it;
         } else {
             it = mComponents.erase(it);
         }
     }
-    if (!mComponents.empty()) {
-        str.pop_back();
-    }
-    str += "]";
-    return str;
+    oss << "]";
+    return oss.str();
 }
 
 FASTLED_NAMESPACE_END

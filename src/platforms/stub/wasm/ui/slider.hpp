@@ -5,18 +5,15 @@
 FASTLED_NAMESPACE_BEGIN
 
 jsSlider::jsSlider(const std::string& name, float min, float max, float value, float step)
-    : mInternal(std::make_shared<jsUiInternal>(name, "slider", 
-           [this](const char* jsonStr) { this->updateInternal(jsonStr); })),
-      mMin(min), mMax(max), mValue(value), mStep(step) {
+    : mMin(min), mMax(max), mValue(value), mStep(step) {
+    auto updateFunc = [this](const char* jsonStr) { this->updateInternal(jsonStr); };
+    auto toJsonStrFunc = [this]() { return this->toJsonStr(); };
+    mInternal = std::make_shared<jsUiInternal>(name.c_str(), std::move(updateFunc), std::move(toJsonStrFunc));
     jsUiManager::addComponent(mInternal);
 }
 
 jsSlider::~jsSlider() {
     jsUiManager::removeComponent(mInternal);
-}
-
-std::string jsSlider::type() const { 
-    return "slider"; 
 }
 
 std::string jsSlider::name() const {
@@ -25,8 +22,8 @@ std::string jsSlider::name() const {
 
 std::string jsSlider::toJsonStr() const {
     std::ostringstream oss;
-    oss << "{\"type\":\"" << type() << "\""
-        << ",\"name\":\"" << name() << "\""
+    oss << "{"
+        << "\"name\":\"Slider: " << name() << "\""
         << ",\"id\":" << mInternal->id()
         << ",\"min\":" << mMin
         << ",\"max\":" << mMax

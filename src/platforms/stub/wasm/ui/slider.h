@@ -12,7 +12,6 @@ public:
     jsSlider(const std::string& name, float min = 0.0f, float max = 255.0f, float value = 128.0f, float step = 1.0f);
     ~jsSlider();
 
-    std::string type() const;
     std::string name() const;
     std::string toJsonStr() const;
     float value() const;
@@ -31,6 +30,5 @@ private:
 
 FASTLED_NAMESPACE_END
 
-DECLARE_SMART_PTR(jsSlider);
 
 

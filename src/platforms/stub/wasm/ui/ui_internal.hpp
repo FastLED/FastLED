@@ -4,10 +4,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-inline jsUiInternal::jsUiInternal(const std::string& name, const std::string& type, UpdateFunction updateFunc)
-    : mName(name), mType(type), mUpdateFunc(std::move(updateFunc)), mId(nextId()) {}
+inline jsUiInternal::jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonStrFunction toJsonStrFunc)
+    : mName(name), mUpdateFunc(std::move(updateFunc)), mToJsonStrFunc(std::move(toJsonStrFunc)), mId(nextId()), mMutex() {}
 
-inline std::string jsUiInternal::type() const { return mType; }
 inline std::string jsUiInternal::name() const { return mName; }
 inline void jsUiInternal::update(const char* jsonStr) { 
     std::lock_guard<std::mutex> lock(mMutex);
@@ -15,16 +14,22 @@ inline void jsUiInternal::update(const char* jsonStr) {
         mUpdateFunc(jsonStr);
     }
 }
-inline std::string jsUiInternal::toJsonStr() const { return "{}"; } // Default implementation
+inline std::string jsUiInternal::toJsonStr() const {
+    std::lock_guard<std::mutex> lock(mMutex);
+    return mToJsonStrFunc();
+}
 inline int jsUiInternal::id() const { return mId; }
 
-inline void jsUiInternal::clearUpdateFunction() {
+inline bool jsUiInternal::clearFunctions() {
     std::lock_guard<std::mutex> lock(mMutex);
+    bool wasCleared = (mUpdateFunc != nullptr) || (mToJsonStrFunc != nullptr);
     mUpdateFunc = nullptr;
+    mToJsonStrFunc = nullptr;
+    return wasCleared;
 }
 
 inline int jsUiInternal::nextId() {
-    return sNextId.fetch_add(1, std::memory_order_relaxed);
+    return sNextId.fetch_add(1, std::memory_order_seq_cst);
 }
 
 std::atomic<uint32_t> jsUiInternal::sNextId(0);
