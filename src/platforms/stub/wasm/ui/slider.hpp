@@ -24,6 +24,7 @@ std::string jsSlider::toJsonStr() const {
     std::ostringstream oss;
     oss << "{"
         << "\"name\":\"Slider: " << name() << "\""
+        << "\"type\":\"slider\""
         << ",\"id\":" << mInternal->id()
         << ",\"min\":" << mMin
         << ",\"max\":" << mMax
