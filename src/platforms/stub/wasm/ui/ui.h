@@ -8,6 +8,7 @@
 #include <set>
 #include <mutex>
 #include <string>
+#include <atomic>
 #include "ptr.h"
 #include "engine_events.h"
 #include <emscripten.h>
@@ -71,6 +72,12 @@ class jsUI : public Referent {
     virtual std::string name() const = 0;
     virtual void update() = 0;
     virtual std::string toJsonStr() const = 0;
+    virtual int id() const = 0;
+
+    static int nextId() {
+        static std::atomic<uint32_t> sNextId = 0;
+        return sNextId++;
+    }
 };
 
 
