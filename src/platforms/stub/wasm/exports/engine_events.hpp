@@ -54,9 +54,14 @@ private:
                     callback();
                 }
             };
+            let once = false;
             globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ActiveStripData();
-            globalThis.onFastLedFrame(globalThis.onFastLedFrameData, function() {
-                console.log("Missing globalThis.onFastLedFrame() callback function");
+            globalThis.onFastLedFrame(globalThis.onFastLedFrameData, function(data) {
+                if (!once) {
+                    console.log("Debug: recived frame data");
+                    console.log(data);
+                    once = true;
+                }
             });
         });
     }

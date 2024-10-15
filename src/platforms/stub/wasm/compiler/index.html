@@ -130,8 +130,10 @@
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
     
-    globalThis.onFastLedFrame = function (frameData) {
+    globalThis.onFastLedFrame = function (frameData, uiUpdateCallback) {
         updateCanvas(frameData.getFirstPixelData_Uint8());
+        const data = JSON.stringify({"message": "hi"});
+        uiUpdateCallback(data);
     };
 
     globalThis.onFastLedUiElementsAdded = function(jsonData) {
