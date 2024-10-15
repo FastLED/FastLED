@@ -1,14 +1,13 @@
 // Author: sutaburosu
 
 // based on https://web.archive.org/web/20160418004149/http://freespace.virgin.net/hugo.elias/graphics/x_water.htm
-// https://wokwi.com/projects/351880975091761743
 
 #include <FastLED.h>
 #include "Arduino.h"
 #include "xymap.h"
 
-#define WIDTH 16
-#define HEIGHT 16
+#define WIDTH 32
+#define HEIGHT 32
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 CRGB leds[NUM_LEDS];
 
@@ -18,7 +17,7 @@ CRGB leds[NUM_LEDS];
 uint8_t water[2][WATERWIDTH * WATERHEIGHT];
 
 void wu_water(uint8_t * const buf, uint16_t x, uint16_t y, uint8_t bright);
-void process_water(uint8_t * src, uint8_t * dst);
+void process_water(uint8_t * src, uint8_t * dst) ;
 
 void setup() {
   Serial.begin(115200);
@@ -95,45 +94,7 @@ void loop() {
   uint8_t * const bufB = &water[buffer][0];
 
   // add a moving stimulus
-  // wu_water(bufA, beatsin16(13, 256, HEIGHT * 256), beatsin16(7, 256, WIDTH * 256), beatsin8(160, 64, 255));
-
-
-  static uint16_t startHue = 0;
-  static uint16_t xPhase = 0;
-  static int16_t xPhaseMul = 2 * 256;
-  static int16_t yPhaseMul = 256;
-  static int8_t yPhaseMulStep = 3;
-  static int8_t xPhaseMulStep = 2;
-
-  startHue += 512;
-  xPhase += 512;
-
-  yPhaseMul += yPhaseMulStep;
-  if (yPhaseMul <= 96)
-    yPhaseMulStep = random8(4) + 1;
-  if (yPhaseMul >= 8 * 128)
-    yPhaseMulStep = -random8(4) - 1;
-
-  xPhaseMul += xPhaseMulStep;
-  if (xPhaseMul <= 96)
-    xPhaseMulStep = random8(4) + 1;
-  if (xPhaseMul >= 8 * 128)
-    xPhaseMulStep = -random8(4) - 1;
-
-  uint16_t pixelHue = startHue;
-  for (uint16_t i = 0; i < 64; i++) {
-    uint16_t x = 32767 + cos16(xPhase + i * xPhaseMul);
-    uint16_t y = 32767 + sin16(i * yPhaseMul);
-    x /= 256 / (WIDTH - 1);
-    y /= 256 / (HEIGHT - 1);
-    // CRGB col = ColorFromPalette(RainbowStripeColors_p, pixelHue >> 8, 255, LINEARBLEND);
-    // uint8_t bright = sin8(pixelHue >> 8);
-    // wu_pixel(x, y, col);
-    wu_water(bufA, x + 256, y + 256, 8);
-    pixelHue += 128;
-  }
-
-
+  wu_water(bufA, beatsin16(13, 256, HEIGHT * 256), beatsin16(7, 256, WIDTH * 256), beatsin8(160, 64, 255));
 
   // animate the water
   process_water(bufA, bufB);
@@ -146,7 +107,7 @@ void loop() {
   for (uint8_t y = 0; y < HEIGHT; y++) {
     input += 2;
     for (uint8_t x = 0; x < WIDTH; x++) {
-      leds[XY(x, y)] = MyColorFromPaletteExtended(RainbowStripeColors_p, pal_offset + (*input++ << 8), 255, LINEARBLEND);
+      leds[XY(x, y)] = MyColorFromPaletteExtended(RainbowColors_p, pal_offset + (*input++ << 8), 255, LINEARBLEND);
     }
   }
   FastLED.show();
