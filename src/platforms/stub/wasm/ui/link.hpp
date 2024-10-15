@@ -2,7 +2,6 @@
 
 #ifdef __EMSCRIPTEN__
 #include "slider.hpp"
-#include "ui.hpp"
 #include "ui_manager.hpp"
 #include "ui_internal.hpp"
 #endif

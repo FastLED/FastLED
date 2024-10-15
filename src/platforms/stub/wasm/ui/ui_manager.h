@@ -10,7 +10,6 @@
 FASTLED_NAMESPACE_BEGIN
 
 class jsUiInternal;
-class jsUI;
 
 class jsUiManager : EngineEvents::Listener {
   public:

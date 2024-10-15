@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ui_manager.h"
-#include "ui.h"
 #include <emscripten.h>
 
 FASTLED_NAMESPACE_BEGIN
