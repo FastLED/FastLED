@@ -3,6 +3,7 @@
 set -e
 set -x
 
+python compile.py --only-copy
+cp src/wasm.ino src/wasm.ino.cpp
 python process-ino.py src/wasm.ino.cpp
-rm -rf src/wasm.ino
 python compile.py --only-compile

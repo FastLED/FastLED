@@ -8,7 +8,7 @@ import re
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Process INO file and dump AST.")
-    parser.add_argument("input_file", help="Input source file (.cpp)", nargs='?', default="src/wasm.ino.cpp")
+    parser.add_argument("input_file", help="Input source file (.cpp)")
     return parser.parse_args()
 
 def run_command(command):
@@ -24,17 +24,6 @@ def main() -> None:
     # Parse command-line arguments
     args = parse_arguments()
 
-    # Run compile.py --only-copy
-    stdout, stderr, returncode = run_command(["python", "compile.py", "--only-copy"])
-    if returncode != 0:
-        print(f"Error running compile.py: {stderr}", file=sys.stderr)
-        sys.exit(returncode)
-
-    # Copy src/wasm.ino to src/wasm.ino.cpp
-    stdout, stderr, returncode = run_command(["cp", "src/wasm.ino", "src/wasm.ino.cpp"])
-    if returncode != 0:
-        print(f"Error copying file: {stderr}", file=sys.stderr)
-        sys.exit(returncode)
 
     # Ensure the file exists
     if not os.path.isfile(args.input_file):
