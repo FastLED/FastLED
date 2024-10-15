@@ -22,6 +22,7 @@ env.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib")
 wasmflags = [
     "--oformat=js",
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
+    "-DFASTLED_USE_PROGMEM=0",
     "-s",
     "EXPORTED_RUNTIME_METHODS=['ccall','cwrap']",
     "-s",
