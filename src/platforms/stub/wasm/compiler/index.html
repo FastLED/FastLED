@@ -26,6 +26,21 @@
             opacity: 0; /* Initially hide the content */
             transition: opacity 0.5s ease-in; /* Fade-in effect */
         }
+        #ui-controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .ui-control {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .ui-control input[type="range"] {
+            width: 200px;
+        }
 
         h1 {
             font-size: 6em;
@@ -145,7 +160,54 @@
         output.textContent += `UI elements added: ${jsonStr}\n`;
         console.log("UI elements added:");
         console.log(jsonData);
+
+        const uiControlsContainer = document.getElementById('ui-controls') || createUiControlsContainer();
+
+        jsonData.forEach(element => {
+            if (element.type === 'slider') {
+                const slider = createSlider(element);
+                uiControlsContainer.appendChild(slider);
+            }
+            // Add more element types here as needed
+        });
     };
+
+    function createUiControlsContainer() {
+        const container = document.createElement('div');
+        container.id = 'ui-controls';
+        document.body.insertBefore(container, document.getElementById('output'));
+        return container;
+    }
+
+    function createSlider(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const label = document.createElement('label');
+        label.textContent = element.name;
+        label.htmlFor = `slider-${element.id}`;
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.id = `slider-${element.id}`;
+        slider.min = element.min;
+        slider.max = element.max;
+        slider.value = element.value;
+        slider.step = element.step;
+
+        slider.addEventListener('input', function() {
+            // Call the C++ function to update the animation speed
+            Module._jsUiManager_updateUiComponents(JSON.stringify({
+                id: element.id,
+                value: parseFloat(this.value)
+            }));
+        });
+
+        controlDiv.appendChild(label);
+        controlDiv.appendChild(slider);
+
+        return controlDiv;
+    }
 
     // Function to call the setup and loop functions
     function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance) {
