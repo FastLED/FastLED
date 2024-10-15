@@ -15,6 +15,7 @@ OUTPUT_FILES = ["fastled.js", "fastled.wasm"]
 HEADER_TO_INSERT = '#include "platforms/stub/wasm/js.h"\n'
 FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 2
+FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
@@ -173,10 +174,15 @@ def main() -> int:
 
         if do_compile:
             process_compile(JS_DIR)
-            build_dir: Path = next(PIO_BUILD_DIR.iterdir())
+            build_dirs = [d for d in PIO_BUILD_DIR.iterdir() if d.is_dir()]
+            if len(build_dirs) != 1:
+                raise RuntimeError(
+                    f"Expected exactly one build directory in {PIO_BUILD_DIR}, found {len(build_dirs)}: {build_dirs}"
+                )
+            build_dir: Path = build_dirs[0]
 
             print("Copying output files...")
-            fastled_js_dir: Path = src_dir / "fastled_js"
+            fastled_js_dir: Path = src_dir / FASTLED_OUTPUT_DIR_NAME
             fastled_js_dir.mkdir(parents=True, exist_ok=True)
 
             for file in ["fastled.js", "fastled.wasm"]:
