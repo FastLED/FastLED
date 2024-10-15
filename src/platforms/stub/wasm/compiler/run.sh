@@ -21,4 +21,7 @@ ino_name="${ino_filename%.*}"
 cp "$ino_file" "src/${ino_name}.ino.cpp"
 python process-ino.py "src/${ino_name}.ino.cpp"
 
+# Remove the original .ino file
+rm "$ino_file"
+
 python compile.py --only-compile

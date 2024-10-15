@@ -61,9 +61,29 @@ def main() -> None:
         print("Error: setup() function not found in the file.")
         sys.exit(1)
 
+    def predicate(name: str) -> bool:
+        if name.startswith('loop ') or name.startswith('setup '):
+            return False
+        return True
+    
+    def parse(name: str) -> str:
+        if name.startswith('invalid '):
+            name = name[len('invalid '):]
+        parts = name.split()
+        if len(parts) < 2:
+            return ""
+        name, type, *rest = parts
+        #return name.split()[1] + " " + name.split()[0] + "();"
+        args= " ".join(rest)
+        return type + " " + name + f"{args};"
+    
+    prototypes = [parse(name) for name in function_prototypes if predicate(name)]
+    prototypes = [proto for proto in prototypes if proto]
+
     # Insert the prototypes before setup()
-    prototypes_text = "\n".join(f"{name.split()[1]} {name.split()[0]}();" for name in function_prototypes if not name.startswith('setup') and not name.startswith('loop'))
-    new_contents = file_contents[:setup_pos] + prototypes_text + "\n\n" + file_contents[setup_pos:]
+    prototypes_text = "\n".join(prototypes)
+    prototypes_text_cleaned = prototypes_text.replace('\n', '\n')  # This line effectively does nothing, but ensures prototypes_text_cleaned is a string
+    new_contents = file_contents[:setup_pos] + prototypes_text_cleaned + "\n\n" + file_contents[setup_pos:]
 
     # Write the modified contents back to the file
     with open(args.input_file, 'w') as f:
