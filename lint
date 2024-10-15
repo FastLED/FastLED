@@ -12,12 +12,16 @@ fi
 # Linting the python code.
 echo "Running ruff check"
 uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
+uv run ruff check --fix src/platforms/stub/wasm/compiler/compile.py
 echo Running black
 black ci --exclude ci/tmp/ --exclude ci/wasm/
+black src/platforms/stub/wasm/compiler/compile.py
 echo Running isort
 isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
+isort --profile black src/platforms/stub/wasm/compiler/compile.py
 echo "Running mypy"
 uv run mypy ci --exclude ci/tmp/ --exclude ci/wasm/
+uv run mypy src/platforms/stub/wasm/compiler/compile.py
 
 
 # Linting the C++ code.
