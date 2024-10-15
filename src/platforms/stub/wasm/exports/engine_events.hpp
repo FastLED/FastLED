@@ -49,14 +49,14 @@ private:
     void jsOnFrame() {
         EM_ASM_({
             globalThis.onFastLedFrame = globalThis.onFastLedFrame || function(frameData, callback) {
-                console.log("Missing globalThis.onFastLedDemo() function");
+                console.log("Missing globalThis.onFastLedFrame() function");
                 if (typeof callback === 'function') {
                     callback();
                 }
             };
             globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ActiveStripData();
             globalThis.onFastLedFrame(globalThis.onFastLedFrameData, function() {
-                console.log("Debug: JS engine called the callback function");
+                console.log("Missing globalThis.onFastLedFrame() callback function");
             });
         });
     }
