@@ -5,6 +5,10 @@ import sys
 from pathlib import Path
 from typing import List
 
+JS_DIR = Path("/js")
+MAPPED_DIR = Path("/mapped")
+JS_SRC = JS_DIR / "src"
+
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
     print("Copying files from mapped directory to container...")
@@ -139,11 +143,8 @@ def main() -> int:
     print(f"Keep files flag: {args.keep_files}")
 
     try:
-        js_dir = Path("/js")
-        js_src = js_dir / "src"
-        js_src.mkdir(parents=True, exist_ok=True)
-        mapped_dir = Path("/mapped")
-        src_dir = find_project_dir(mapped_dir)
+        JS_SRC.mkdir(parents=True, exist_ok=True)
+        src_dir = find_project_dir(MAPPED_DIR)
 
         any_only_flags = args.only_copy or args.only_insert_header or args.only_compile
 
@@ -152,21 +153,21 @@ def main() -> int:
         do_compile = not any_only_flags or args.only_compile
 
         if do_copy:
-            copy_files(src_dir, js_dir / "src")
+            copy_files(src_dir, JS_SRC)
             print("Copying Arduino.h to src/Arduino.h")
-            shutil.copy(js_dir / "Arduino.h", js_src / "Arduino.h")
+            shutil.copy(JS_DIR / "Arduino.h", JS_SRC / "Arduino.h")
             if args.only_copy:
                 return 0
 
         if do_insert_header:
-            process_ino_files(js_src)
+            process_ino_files(JS_SRC)
             if args.only_insert_header:
                 print("Transform to cpp and insert header operations completed.")
                 return 0
 
         if do_compile:
-            process_compile(js_dir)
-            build_dir: Path = next((js_dir / ".pio/build").iterdir())
+            process_compile(JS_DIR)
+            build_dir: Path = next((JS_DIR / ".pio/build").iterdir())
 
             print("Copying output files...")
             fastled_js_dir: Path = src_dir / "fastled_js"
@@ -177,9 +178,9 @@ def main() -> int:
                 shutil.copy2(build_dir / file, fastled_js_dir / file)
 
             print("Copying index.html to output directory")
-            shutil.copy2(js_dir / "index.html", fastled_js_dir / "index.html")
+            shutil.copy2(JS_DIR / "index.html", fastled_js_dir / "index.html")
 
-        cleanup(args, js_src)
+        cleanup(args, JS_SRC)
 
         print("Compilation process completed successfully")
         return 0
