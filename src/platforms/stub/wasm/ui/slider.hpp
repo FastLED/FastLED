@@ -1,64 +1,11 @@
 #include "slider.h"
 #include "ui_manager.h"
 #include <sstream>
+#include "json.h"
 
 FASTLED_NAMESPACE_BEGIN
 
-class JsonDictEncoder {
-private:
-    std::ostringstream oss;
-    bool first = true;
-    bool begun = false;
-    bool ended = false;
 
-    template<typename T>
-    void appendJsonField(const char* name, const T& value) {
-        oss << "\"" << name << "\":" << value;
-    }
-
-    void appendJsonField(const char* name, const std::string& value) {
-        oss << "\"" << name << "\":\"" << value << "\"";
-    }
-
-    void appendJsonField(const char* name, const char* value) {
-        oss << "\"" << name << "\":\"" << value << "\"";
-    }
-
-public:
-    JsonDictEncoder() = default;
-
-    void begin() {
-        if (!begun) {
-            oss << "{";
-            begun = true;
-        }
-    }
-
-    void end() {
-        if (begun && !ended) {
-            oss << "}";
-            begun = false;
-            ended = true;
-        }
-    }
-
-    template<typename T>
-    void addField(const char* name, const T& value) {
-        if (!begun) {
-            begin();
-        }
-        if (!first) {
-            oss << ",";
-        }
-        appendJsonField(name, value);
-        first = false;
-    }
-
-    const char* str() {
-        end();
-        return oss.str().c_str();
-    }
-};
 
 jsSlider::jsSlider(const std::string& name, float min, float max, float value, float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
