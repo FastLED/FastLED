@@ -6,16 +6,16 @@ import sys
 from pathlib import Path
 from typing import List
 
-def compile() -> int:
+def compile(js_dir: Path) -> int:
     print("Starting compilation process...")
-    shutil.copy('Arduino.h', 'src/Arduino.h')
+    shutil.copy(js_dir / 'Arduino.h', js_dir / 'src/Arduino.h')
     print("Copied Arduino.h to src/Arduino.h")
     max_attempts = 2
     
     for attempt in range(1, max_attempts + 1):
         try:
             print(f"Attempting compilation (attempt {attempt}/{max_attempts})...")
-            subprocess.run(['pio', 'run'], check=True)
+            subprocess.run(['pio', 'run'], cwd=js_dir, check=True)
             print(f"Compilation successful on attempt {attempt}")
             return 0
         except subprocess.CalledProcessError:
@@ -38,9 +38,9 @@ def insert_header(file: Path) -> None:
         f.write(content)
     print(f"Processed: {file}")
 
-def include_deps() -> None:
+def include_deps(js_dir: Path) -> None:
     print("Including dependencies...")
-    src_dir = Path('/js/src')
+    src_dir = js_dir / 'src'
     ino_files = list(src_dir.glob('*.ino'))
     
     if ino_files:
@@ -76,16 +76,18 @@ def main() -> int:
     args = parse_args()
     print(f"Keep files flag: {args.keep_files}")
 
+    js_dir = Path('/js')
+    js_src = js_dir / 'src'
+    js_src.mkdir(parents=True, exist_ok=True)
+    mapped_dirs: List[Path] = list(Path('/mapped').iterdir())
+    if len(mapped_dirs) > 1:
+        print("Error: More than one directory found in /mapped")
+        return 1
+    
+    src_dir: Path = mapped_dirs[0]
+
     if args.only_copy or not (args.only_insert_header or args.only_compile):
         print("Copying files from mapped directory to container...")
-        js_src = Path('/js/src')
-        js_src.mkdir(parents=True, exist_ok=True)
-        mapped_dirs: List[Path] = list(Path('/mapped').iterdir())
-        if len(mapped_dirs) > 1:
-            print("Error: More than one directory found in /mapped")
-            return 1
-        
-        src_dir: Path = mapped_dirs[0]
         for item in src_dir.iterdir():
             if item.is_dir():
                 print(f"Copying directory: {item}")
@@ -98,11 +100,8 @@ def main() -> int:
         print("Only copy operation completed.")
         return 0
 
-    print("Changing working directory to /js")
-    os.chdir('/js')
-
     if args.only_insert_header or not (args.only_copy or args.only_compile):
-        include_deps()
+        include_deps(js_dir)
 
     if args.only_insert_header:
         print("Only insert header operation completed.")
@@ -110,7 +109,7 @@ def main() -> int:
     
     if args.only_compile or not (args.only_copy or args.only_insert_header):
         print("Starting compilation...")
-        if compile() != 0:
+        if compile(js_dir) != 0:
             print("Compilation failed. Exiting.")
             return 1
 
@@ -118,14 +117,14 @@ def main() -> int:
         fastled_js_dir: Path = src_dir / 'fastled_js'
         fastled_js_dir.mkdir(parents=True, exist_ok=True)
 
-        build_dir: Path = next(Path('.pio/build').iterdir())
+        build_dir: Path = next((js_dir / '.pio/build').iterdir())
         
         for file in ['fastled.js', 'fastled.wasm']:
             print(f"Copying {file} to output directory")
             shutil.copy2(build_dir / file, fastled_js_dir / file)
         
         print("Copying index.html to output directory")
-        shutil.copy2('index.html', fastled_js_dir / 'index.html')
+        shutil.copy2(js_dir / 'index.html', fastled_js_dir / 'index.html')
 
     if not args.keep_files and not (args.only_copy or args.only_insert_header):
         print("Removing temporary source files")
