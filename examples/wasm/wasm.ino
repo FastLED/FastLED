@@ -72,6 +72,7 @@ jsSliderPtr slider = jsSliderPtr::New("Speed", 1, 100, SPEED);
 
 void setup() {
     delay(1000); // sanity delay
+    DoSomething();
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip);
     FastLED.setBrightness(96);
@@ -91,4 +92,9 @@ void loop() {
     noisePalette->draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
     frame++;
+}
+
+
+void DoSomething() {
+    printf("DoSomething\r\n");
 }
