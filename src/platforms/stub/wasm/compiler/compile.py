@@ -6,9 +6,8 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
-def copy_files(src_dir: Path, js_dir: Path) -> None:
+def copy_files(src_dir: Path, js_src: Path) -> None:
     print("Copying files from mapped directory to container...")
-    js_src = js_dir / 'src'
     for item in src_dir.iterdir():
         if item.is_dir():
             print(f"Copying directory: {item}")
@@ -16,9 +15,6 @@ def copy_files(src_dir: Path, js_dir: Path) -> None:
         else:
             print(f"Copying file: {item}")
             shutil.copy2(item, js_src / item.name)
-    
-    print("Copying Arduino.h to src/Arduino.h")
-    shutil.copy(js_dir / 'Arduino.h', js_src / 'Arduino.h')
 
 def compile(js_dir: Path) -> int:
     print("Starting compilation process...")
@@ -92,8 +88,14 @@ def find_project_dir(mapped_dir: Path) -> Path:
     src_dir: Path = mapped_dirs[0]
     return src_dir
 
+def copy_arduino_h(js_dir: Path, js_src: Path) -> None:
+    print("Copying Arduino.h to src/Arduino.h")
+    shutil.copy(js_dir / 'Arduino.h', js_src / 'Arduino.h')
+
 def process_copy(src_dir: Path, js_dir: Path) -> None:
-    copy_files(src_dir, js_dir)
+    js_src = js_dir / 'src'
+    copy_files(src_dir, js_src)
+    copy_arduino_h(js_dir, js_src)
     print("Copy operation completed.")
 
 def process_ino_files(js_dir: Path) -> None:
@@ -158,6 +160,7 @@ def main() -> int:
                 return 0
 
         if do_compile:
+            copy_arduino_h(js_dir, js_dir / 'src')
             process_compile(js_dir, src_dir)
 
         cleanup(args, js_src)
