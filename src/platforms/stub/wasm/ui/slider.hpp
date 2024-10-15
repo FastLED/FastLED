@@ -24,7 +24,7 @@ std::string jsSlider::toJsonStr() const {
     std::ostringstream oss;
     oss << "{"
         << "\"name\":\"Slider: " << name() << "\""
-        << "\"type\":\"slider\""
+        << ",\"type\":\"slider\""
         << ",\"id\":" << mInternal->id()
         << ",\"min\":" << mMin
         << ",\"max\":" << mMax
@@ -39,13 +39,7 @@ float jsSlider::value() const {
 }
 
 void jsSlider::updateInternal(const char* jsonStr) {
-    // TODO: Implement JSON parsing to update slider values
-    // For example:
-    // rapidjson::Document d;
-    // d.Parse(jsonStr);
-    // if (d.HasMember("value") && d["value"].IsNumber()) {
-    //     mValue = d["value"].GetFloat();
-    // }
+    // TODO: Implement the update logic here
 }
 
 void jsSlider::setValue(float value) {
