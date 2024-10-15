@@ -95,16 +95,16 @@ def process_ino_files(src_dir: Path) -> None:
     insert_headers(src_dir, exclusion_folders, file_extensions)
     print("Transform to cpp and insert header operations completed.")
 
-def process_compile(js_dir: Path, src_dir: Path) -> None:
+def process_compile(js_dir: Path) -> None:
     print("Starting compilation...")
     if compile(js_dir) != 0:
         raise RuntimeError("Compilation failed.")
+    print("Compilation successful.")
 
-    print("Compilation successful. Copying output files...")
+def copy_output_files(js_dir: Path, src_dir: Path, build_dir: Path) -> None:
+    print("Copying output files...")
     fastled_js_dir: Path = src_dir / 'fastled_js'
     fastled_js_dir.mkdir(parents=True, exist_ok=True)
-
-    build_dir: Path = next((js_dir / '.pio/build').iterdir())
     
     for file in ['fastled.js', 'fastled.wasm']:
         print(f"Copying {file} to output directory")
@@ -152,7 +152,9 @@ def main() -> int:
                 return 0
 
         if do_compile:
-            process_compile(js_dir, src_dir)
+            process_compile(js_dir)
+            build_dir: Path = next((js_dir / '.pio/build').iterdir())
+            copy_output_files(js_dir, src_dir, build_dir)
 
         cleanup(args, js_src)
 
