@@ -2,5 +2,5 @@
 
 #ifdef __EMSCRIPTEN__
 #include "slider.hpp"
-#include "ui.h"
+#include "ui.hpp"
 #endif
