@@ -9,15 +9,12 @@ COPY --from=emscripten_base /emsdk_portable /emsdk_portable
 
 # Install required tools to run Emscripten SDK
 
-RUN dnf install -y git
-RUN dnf install -y nano which
-RUN dnf install -y ca-certificates
-RUN dnf install -y python3 python3-pip
-RUN dnf install -y dos2unix
+RUN echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
 
-# Create symlinks for python and pip
-#RUN ln -s /usr/bin/python3 /usr/bin/python && \
-#    ln -s /usr/bin/pip3 /usr/bin/pip
+RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build && \
+    dnf clean all
+
+
 
 # Install PlatformIO
 RUN pip3 install platformio==6.1.16
@@ -40,6 +37,9 @@ RUN echo 'print() { echo "$@"; }' >> /etc/profile && \
     echo 'export -f print' >> /etc/profile && \
     echo 'export PATH="/container/bin:/usr/bin:/emsdk_portable:/emsdk_portable/upstream/emscripten:$PATH"' >> /etc/profile && \
     echo 'source /emsdk_portable/emsdk_env.sh' >> /etc/profile
+
+# wormhole-tx allows to send/recieve files to the host machine. The command `tx` becomes available.
+RUN pip3 install wormhole-tx || true
 
 # THIS IS A WORK IN PROGRESS!!!!
 COPY platformio.ini /platformio.ini
