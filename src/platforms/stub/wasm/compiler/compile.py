@@ -46,9 +46,8 @@ def insert_header(file: Path) -> None:
         f.write(content)
     print(f"Processed: {file}")
 
-def transform_to_cpp(js_dir: Path) -> None:
+def transform_to_cpp(src_dir: Path) -> None:
     print("Transforming files to cpp...")
-    src_dir = js_dir / 'src'
     ino_files = list(src_dir.glob('*.ino'))
     
     if ino_files:
@@ -98,11 +97,11 @@ def process_copy(src_dir: Path, js_dir: Path) -> None:
     copy_arduino_h(js_dir, js_src)
     print("Copy operation completed.")
 
-def process_ino_files(js_dir: Path) -> None:
-    transform_to_cpp(js_dir)
+def process_ino_files(src_dir: Path) -> None:
+    transform_to_cpp(src_dir)
     exclusion_folders = []
     file_extensions = ['.ino', '.h', '.hpp', '.cpp']
-    insert_headers(js_dir / 'src', exclusion_folders, file_extensions)
+    insert_headers(src_dir, exclusion_folders, file_extensions)
     print("Transform to cpp and insert header operations completed.")
 
 def process_compile(js_dir: Path, src_dir: Path) -> None:
@@ -154,7 +153,7 @@ def main() -> int:
                 return 0
 
         if do_insert_header:
-            process_ino_files(js_dir)
+            process_ino_files(js_src)
             if args.only_insert_header:
                 print("Transform to cpp and insert header operations completed.")
                 return 0
