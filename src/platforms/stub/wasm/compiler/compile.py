@@ -8,6 +8,9 @@ from typing import List
 JS_DIR = Path("/js")
 MAPPED_DIR = Path("/mapped")
 JS_SRC = JS_DIR / "src"
+PIO_BUILD_DIR = JS_DIR / ".pio/build"
+ARDUINO_H_SRC = JS_DIR / "Arduino.h"
+INDEX_HTML_SRC = JS_DIR / "index.html"
 
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
@@ -155,7 +158,7 @@ def main() -> int:
         if do_copy:
             copy_files(src_dir, JS_SRC)
             print("Copying Arduino.h to src/Arduino.h")
-            shutil.copy(JS_DIR / "Arduino.h", JS_SRC / "Arduino.h")
+            shutil.copy(ARDUINO_H_SRC, JS_SRC / "Arduino.h")
             if args.only_copy:
                 return 0
 
@@ -167,7 +170,7 @@ def main() -> int:
 
         if do_compile:
             process_compile(JS_DIR)
-            build_dir: Path = next((JS_DIR / ".pio/build").iterdir())
+            build_dir: Path = next(PIO_BUILD_DIR.iterdir())
 
             print("Copying output files...")
             fastled_js_dir: Path = src_dir / "fastled_js"
@@ -178,7 +181,7 @@ def main() -> int:
                 shutil.copy2(build_dir / file, fastled_js_dir / file)
 
             print("Copying index.html to output directory")
-            shutil.copy2(JS_DIR / "index.html", fastled_js_dir / "index.html")
+            shutil.copy2(INDEX_HTML_SRC, fastled_js_dir / "index.html")
 
         cleanup(args, JS_SRC)
 
