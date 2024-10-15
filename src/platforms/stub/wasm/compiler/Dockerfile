@@ -14,6 +14,9 @@ RUN echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
 RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build && \
     dnf clean all
 
+#RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build clang lld && \
+#    dnf clean all
+
 
 
 # Install PlatformIO
@@ -68,6 +71,9 @@ COPY src/platforms/stub/wasm/compiler/platformio.ini /js/platformio.ini
 COPY src/platforms/stub/wasm/compiler/wasm.py /js/wasm.py
 COPY src/platforms/stub/wasm/compiler/index.html /js/index.html
 COPY src/platforms/stub/wasm/compiler/Arduino.h /js/Arduino.h
+COPY src/platforms/stub/wasm/compiler/process-ino.sh /js/process-ino.sh
+COPY examples/Blink/Blink.ino /js/test/Blink.ino.cpp
+COPY examples/Scintillating/Scintillating.ino /js/test/Scintillating.ino.cpp
 
 WORKDIR /js
 
