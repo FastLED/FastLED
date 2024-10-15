@@ -75,7 +75,7 @@ COPY src/platforms/stub/wasm/compiler/wasm.py /js/wasm.py
 COPY src/platforms/stub/wasm/compiler/index.html /js/index.html
 COPY src/platforms/stub/wasm/compiler/Arduino.h /js/Arduino.h
 COPY src/platforms/stub/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh
-COPY src/platforms/stub/wasm/compiler/process-ino.sh /js/process-ino.sh
+COPY src/platforms/stub/wasm/compiler/*.sh /js/
 
 # COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
 #COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
@@ -92,6 +92,8 @@ RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
 COPY src/platforms/stub/wasm/compiler/compile.py /js/
 COPY src/platforms/stub/wasm/compiler/process-ino.py /js/
 RUN dos2unix /js/compile.py /js/process-ino.py
+RUN dos2unix /js/*.sh
+RUN chmod +x /js/*.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "/js/compile.py"]
