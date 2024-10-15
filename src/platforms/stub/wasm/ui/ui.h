@@ -70,6 +70,7 @@ class jsUI : public Referent {
     virtual std::string type() const = 0;
     virtual std::string name() const = 0;
     virtual void update() = 0;
+    virtual std::string toJsonStr() const = 0;
 };
 
 
@@ -107,7 +108,7 @@ inline void jsUiManager::updateJs() {
 inline std::string jsUiManager::toJsonStr() {
     std::string str = "[";
     for (const auto& component : mComponents) {
-        str += "{\"type\":\"" + component->type() + "\",\"name\":\"" + component->name() + "\"},";
+        str += component->toJsonStr() + ",";
     }
     str.pop_back();
     str += "]";

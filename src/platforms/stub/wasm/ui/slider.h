@@ -15,6 +15,12 @@ class jsSlider : public jsUI {
 
     std::string name() const override { return mName; }
     std::string type() const override { return "slider"; }
+
+    std::string toJsonStr() const override {
+      std::string str = "{\"type\":\"" + type() + "\",\"name\":\"" + name() + "\"}";
+      return str;
+    }
+
     float value() const { return mValue; }
     virtual void update() override {}
 
