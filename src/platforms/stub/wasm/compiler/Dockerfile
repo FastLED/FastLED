@@ -74,14 +74,11 @@ COPY src/platforms/stub/wasm/compiler/platformio.ini /js/platformio.ini
 COPY src/platforms/stub/wasm/compiler/wasm.py /js/wasm.py
 COPY src/platforms/stub/wasm/compiler/index.html /js/index.html
 COPY src/platforms/stub/wasm/compiler/Arduino.h /js/Arduino.h
-COPY src/platforms/stub/wasm/compiler/process-ino.sh /js/process-ino.sh
 COPY src/platforms/stub/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh
 
 # COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
 #COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
 #COPY examples/Scintillating/Scintillating.ino /js/Scintillating/Scintillating.ino
-
-
 
 
 WORKDIR /js
@@ -91,10 +88,9 @@ RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/exports.h\" #inc
 RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
 
 # Copy the compile script
-COPY src/platforms/stub/wasm/compiler/compile.sh /js/compile.sh
-RUN dos2unix /js/compile.sh
-# Create compile.sh in /js directory
-RUN chmod +x /js/compile.sh
+COPY src/platforms/stub/wasm/compiler/*.sh /js/
+RUN dos2unix /js/*.sh
+RUN chmod +x /js/*.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/bin/bash", "/js/compile.sh"]
