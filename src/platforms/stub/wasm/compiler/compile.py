@@ -11,6 +11,10 @@ JS_SRC = JS_DIR / "src"
 PIO_BUILD_DIR = JS_DIR / ".pio/build"
 ARDUINO_H_SRC = JS_DIR / "Arduino.h"
 INDEX_HTML_SRC = JS_DIR / "index.html"
+OUTPUT_FILES = ["fastled.js", "fastled.wasm"]
+HEADER_TO_INSERT = '#include "platforms/stub/wasm/js.h"\n'
+FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
+MAX_COMPILE_ATTEMPTS = 2
 
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
@@ -90,8 +94,7 @@ def insert_headers(
 def process_ino_files(src_dir: Path) -> None:
     transform_to_cpp(src_dir)
     exclusion_folders: List[Path] = []
-    file_extensions = [".ino", ".h", ".hpp", ".cpp"]
-    insert_headers(src_dir, exclusion_folders, file_extensions)
+    insert_headers(src_dir, exclusion_folders, FILE_EXTENSIONS)
     print("Transform to cpp and insert header operations completed.")
 
 
