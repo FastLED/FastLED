@@ -62,11 +62,16 @@ class jsUiManager: EngineEvents::Listener {
 
 class jsUI : public Referent {
   public:
-    virtual ~jsUI() {
+    virtual ~jsUI(): mId(nextId()) {
         // Note, because this is smart pointer, the destructor will not be called
         // ever.
         jsUiManager::removeComponent(jsUIPtr::TakeOwnership(this));
     }
+
+    int id() const { return mId; }
+
+
+    static std::atomic<uint32_t> sNextId;
     
     virtual std::string type() const = 0;
     virtual std::string name() const = 0;
@@ -78,8 +83,11 @@ class jsUI : public Referent {
         static std::atomic<uint32_t> sNextId = 0;
         return sNextId++;
     }
+    int mId;
 };
 
+
+inline std::atomic<uint32_t> jsSlider::sNextId(0);
 
 
 inline void jsUiManager::updateAll() {

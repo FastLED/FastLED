@@ -16,7 +16,6 @@ class jsSlider : public jsUI {
 
     std::string name() const override { return mName; }
     std::string type() const override { return "slider"; }
-    int id() const override { return mId; }
 
     std::string toJsonStr() const override {
       std::string str = "{\"type\":\"" + type() + 
@@ -39,7 +38,6 @@ class jsSlider : public jsUI {
     // Operator for implicit conversion to float
     operator float() const { return mValue; }
     // Getter for the unique identifier
-    uint32_t getId() const { return mId; }
 
   private:
     float mMin;
@@ -47,12 +45,9 @@ class jsSlider : public jsUI {
     float mValue;
     float mStep;
     std::string mName;
-    uint32_t mId;
+    
 
-    static std::atomic<uint32_t> sNextId;
 };
-
-inline std::atomic<uint32_t> jsSlider::sNextId(0);
 
 DECLARE_SMART_PTR_NO_FWD(jsSlider);
 
