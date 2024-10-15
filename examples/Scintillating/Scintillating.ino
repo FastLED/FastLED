@@ -59,6 +59,8 @@ uint16_t XY(uint8_t x, uint8_t y) {
 #endif
 #endif
 
+void nblendU8TowardU8(uint8_t& cur, const uint8_t target, uint8_t amount) ;
+void nblendU8TowardU8_video(uint8_t& cur, const uint8_t target, uint8_t amount);
 
 // Stuff from FastLED pull requests and gists that will hopefully be merged one day
 
@@ -109,7 +111,7 @@ void nblendU8TowardU8_video(uint8_t& cur, const uint8_t target, uint8_t amount) 
 
 // FastLED uses 4-bit interpolation.  8-bit looks far less janky.
 // https://github.com/FastLED/FastLED/pull/202
-CRGB ColorFromPaletteExtended(const CRGBPalette16& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
+CRGB ColorFromPaletteExtended2(const CRGBPalette16& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
   // Extract the four most significant bits of the index as a palette index.
   uint8_t index_4bit = (index >> 12);
   // Calculate the 8-bit offset from the palette index.
@@ -154,7 +156,7 @@ CRGB ColorFromPaletteExtended(const CRGBPalette16& pal, uint16_t index, uint8_t 
   }
   return CRGB(red1, green1, blue1);
 }
-CRGB ColorFromPaletteExtended(const CRGBPalette32& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
+CRGB ColorFromPaletteExtended2(const CRGBPalette32& pal, uint16_t index, uint8_t brightness, TBlendType blendType) {
   // Extract the five most significant bits of the index as a palette index.
   uint8_t index_5bit = (index >> 11);
   // Calculate the 8-bit offset from the palette index.
@@ -206,7 +208,11 @@ typedef struct HSprite {
   uint16_t duration;
   uint8_t flags;
   uint8_t palette_entries;
+  #ifdef __EMSCRIPTEN__
+  CRGB* palette;
+  #else
   CRGB palette[];
+  #endif
   uint8_t hs_data[];
 } HSprite;
 
@@ -276,6 +282,16 @@ typedef struct {
 } Config;
 Config cfg;
 
+void inc_palette(uint8_t n);
+void inc_rs_preset(uint8_t n);
+void print_params();
+void randomise_rainbowsmoothie();
+void poll_serial();
+void scintillating_heatshrink();
+void halp();
+void rainbow_smoothie();
+void nblendU8TowardU8_video(uint8_t& cur, const uint8_t target, uint8_t amount);
+
 // /*__attribute__ ((section(".noinit")))*/ uint8_t * nv_preset;
 void setup() {
   FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
@@ -293,10 +309,14 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   inc_palette(0);
   inc_rs_preset(0);
+  jsSetCanvasSize(kMatrixWidth, kMatrixHeight);
 }
 
 #define MAX_EFFECTS 3
 void loop() {
+  if (sizeof(uint8_t) > 1) {
+    Serial.println(F("This code is not designed for 16-bit platforms"));
+  }
   uint8_t effect = cfg.effect + 1;
   if (effect & 1) rainbow_smoothie();
   if (effect & 2) scintillating_heatshrink();
@@ -526,7 +546,7 @@ void rainbow_smoothie() {
       pixelHue += xhd;
       xhd += xd2;
       if (cfg.extendedmixing == 1) {
-        leds[XY(x, y)] = ColorFromPaletteExtended(currentPalette, pixelHue >> 7, 255, cfg.currentBlending);
+        leds[XY(x, y)] = ColorFromPaletteExtended2(currentPalette, pixelHue >> 7, 255, cfg.currentBlending);
       } else {
         leds[XY(x, y)] = ColorFromPalette(currentPalette, pixelHue >> 15, 255, cfg.currentBlending);
       }

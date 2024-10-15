@@ -29,7 +29,10 @@ struct SerialEmulation {
 #define HIGH 1
 #define LOW 0
 void digitalWrite(int, int) {}
+void analogWrite(int, int) {}
 int digitalRead(int) { return LOW; }
+
+void pinMode(int, int) {}
 
 // avr flash memory macro is disabled.
 #ifdef F
@@ -44,7 +47,7 @@ int digitalRead(int) { return LOW; }
 #endif
 
 #define FL_PGM_READ_PTR_NEAR(addr) (*(addr))
-typedef uint8_t byte;
+typedef unsigned char byte;
 
 
 SerialEmulation Serial;
