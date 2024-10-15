@@ -66,6 +66,9 @@ def include_deps() -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Compile FastLED for WASM")
     parser.add_argument('--keep-files', action='store_true', help="Keep source files after compilation")
+    parser.add_argument('--only-copy', action='store_true', help="Only copy files from mapped directory to container")
+    parser.add_argument('--only-insert-header', action='store_true', help="Only insert headers in source files")
+    parser.add_argument('--only-compile', action='store_true', help="Only compile the project")
     return parser.parse_args()
 
 def main() -> int:
@@ -73,46 +76,58 @@ def main() -> int:
     args = parse_args()
     print(f"Keep files flag: {args.keep_files}")
 
-    print("Copying files from mapped directory to container...")
-    js_src = Path('/js/src')
-    js_src.mkdir(parents=True, exist_ok=True)
-    mapped_dirs: List[Path] = list(Path('/mapped').iterdir())
-    if len(mapped_dirs) > 1:
-        print("Error: More than one directory found in /mapped")
-        return 1
-    
-    src_dir: Path = mapped_dirs[0]
-    for item in src_dir.iterdir():
-        if item.is_dir():
-            print(f"Copying directory: {item}")
-            shutil.copytree(item, js_src / item.name, dirs_exist_ok=True)
-        else:
-            print(f"Copying file: {item}")
-            shutil.copy2(item, js_src / item.name)
+    if args.only_copy or not (args.only_insert_header or args.only_compile):
+        print("Copying files from mapped directory to container...")
+        js_src = Path('/js/src')
+        js_src.mkdir(parents=True, exist_ok=True)
+        mapped_dirs: List[Path] = list(Path('/mapped').iterdir())
+        if len(mapped_dirs) > 1:
+            print("Error: More than one directory found in /mapped")
+            return 1
+        
+        src_dir: Path = mapped_dirs[0]
+        for item in src_dir.iterdir():
+            if item.is_dir():
+                print(f"Copying directory: {item}")
+                shutil.copytree(item, js_src / item.name, dirs_exist_ok=True)
+            else:
+                print(f"Copying file: {item}")
+                shutil.copy2(item, js_src / item.name)
+
+    if args.only_copy:
+        print("Only copy operation completed.")
+        return 0
 
     print("Changing working directory to /js")
     os.chdir('/js')
-    include_deps()
-    
-    print("Starting compilation...")
-    if compile() != 0:
-        print("Compilation failed. Exiting.")
-        return 1
 
-    print("Compilation successful. Copying output files...")
-    fastled_js_dir: Path = src_dir / 'fastled_js'
-    fastled_js_dir.mkdir(parents=True, exist_ok=True)
+    if args.only_insert_header or not (args.only_copy or args.only_compile):
+        include_deps()
 
-    build_dir: Path = next(Path('.pio/build').iterdir())
+    if args.only_insert_header:
+        print("Only insert header operation completed.")
+        return 0
     
-    for file in ['fastled.js', 'fastled.wasm']:
-        print(f"Copying {file} to output directory")
-        shutil.copy2(build_dir / file, fastled_js_dir / file)
-    
-    print("Copying index.html to output directory")
-    shutil.copy2('index.html', fastled_js_dir / 'index.html')
+    if args.only_compile or not (args.only_copy or args.only_insert_header):
+        print("Starting compilation...")
+        if compile() != 0:
+            print("Compilation failed. Exiting.")
+            return 1
 
-    if not args.keep_files:
+        print("Compilation successful. Copying output files...")
+        fastled_js_dir: Path = src_dir / 'fastled_js'
+        fastled_js_dir.mkdir(parents=True, exist_ok=True)
+
+        build_dir: Path = next(Path('.pio/build').iterdir())
+        
+        for file in ['fastled.js', 'fastled.wasm']:
+            print(f"Copying {file} to output directory")
+            shutil.copy2(build_dir / file, fastled_js_dir / file)
+        
+        print("Copying index.html to output directory")
+        shutil.copy2('index.html', fastled_js_dir / 'index.html')
+
+    if not args.keep_files and not (args.only_copy or args.only_insert_header):
         print("Removing temporary source files")
         shutil.rmtree(js_src)
     else:
