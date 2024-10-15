@@ -43,6 +43,8 @@ class jsUiManager: EngineEvents::Listener {
 
     static void updateAll();
 
+    std::string toJsonStr();
+
   private:
     friend class Singleton<jsUiManager>;
     jsUiManager() {}
@@ -66,6 +68,7 @@ class jsUI : public Referent {
     }
     
     virtual std::string type() const = 0;
+    virtual std::string name() const = 0;
     virtual void update() = 0;
 };
 
@@ -85,17 +88,30 @@ inline void jsUiManager::updateAll() {
 }
 
 inline void jsUiManager::updateJs() {
+    std::string s = jsUiManager::instance().toJsonStr();
     EM_ASM_({
-        globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(ui) {
+        globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(jsonData) {
             console.log("Missing globalThis.onFastLedUiElementsAdded(uiList) function");
-            console.log("Added ui elements: " + ui);
-            console.log(ui);
-            debugger;
-            
+            console.log("Added ui elements: " + jsonData);
+            console.log(jsonData);
         };
-        globalThis.onFastLedSlider = globalThis.onFastLedSlider  || new Module.jsSlider("demo name", 0, 255, 0, 1);
-        globalThis.onFastLedUiElementsAdded(globalThis.onFastLedSlider);
-    });
+        var jsonStr = UTF8ToString($0);
+        var data = JSON.parse(jsonStr);
+        //globalThis.onFastLedSlider = globalThis.onFastLedSlider  || new Module.jsSlider("demo name", 0, 255, 0, 1);
+        globalThis.onFastLedUiElementsAdded(data);
+    }, s.c_str());
+
+}
+
+
+inline std::string jsUiManager::toJsonStr() {
+    std::string str = "[";
+    for (const auto& component : mComponents) {
+        str += "{\"type\":\"" + component->type() + "\",\"name\":\"" + component->name() + "\"},";
+    }
+    str.pop_back();
+    str += "]";
+    return str;
 }
 
 FASTLED_NAMESPACE_END

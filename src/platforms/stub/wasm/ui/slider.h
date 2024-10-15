@@ -13,8 +13,8 @@ class jsSlider : public jsUI {
         jsUiManager::addComponent(jsUIPtr::TakeOwnership(this));
     }
 
-    std::string name() const { return mName; }
-    std::string type() const override { return "float"; }
+    std::string name() const override { return mName; }
+    std::string type() const override { return "slider"; }
     float value() const { return mValue; }
     virtual void update() override {}
 
