@@ -83,17 +83,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--only-compile', action='store_true', help="Only compile the project")
     return parser.parse_args()
 
-def setup_directories() -> Tuple[Path, Path, Path]:
-    js_dir = Path('/js')
-    js_src = js_dir / 'src'
-    js_src.mkdir(parents=True, exist_ok=True)
-    
-    mapped_dirs: List[Path] = list(Path('/mapped').iterdir())
+def find_project_dir(mapped_dir: Path) -> Path:
+    mapped_dirs: List[Path] = list(mapped_dir.iterdir())
     if len(mapped_dirs) > 1:
-        raise ValueError("Error: More than one directory found in /mapped")
+        raise ValueError(f"Error: More than one directory found in {mapped_dir}")
     
     src_dir: Path = mapped_dirs[0]
-    return js_dir, js_src, src_dir
+    return src_dir
 
 def process_copy(src_dir: Path, js_src: Path, js_dir: Path) -> None:
     copy_files(src_dir, js_src, js_dir)
@@ -137,7 +133,11 @@ def main() -> int:
     print(f"Keep files flag: {args.keep_files}")
 
     try:
-        js_dir, js_src, src_dir = setup_directories()
+        js_dir = Path('/js')
+        js_src = js_dir / 'src'
+        js_src.mkdir(parents=True, exist_ok=True)
+        mapped_dir = Path('/mapped')
+        src_dir = find_project_dir(mapped_dir)
 
         any_only_flags = args.only_copy or args.only_insert_header or args.only_compile
 
