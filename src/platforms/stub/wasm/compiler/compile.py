@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
-def copy_files(src_dir: Path, js_src: Path) -> None:
+def copy_files(src_dir: Path, js_src: Path, js_dir: Path) -> None:
     print("Copying files from mapped directory to container...")
     for item in src_dir.iterdir():
         if item.is_dir():
@@ -15,8 +15,7 @@ def copy_files(src_dir: Path, js_src: Path) -> None:
         else:
             print(f"Copying file: {item}")
             shutil.copy2(item, js_src / item.name)
-
-def copy_arduino_header(js_dir: Path) -> None:
+    
     print("Copying Arduino.h to src/Arduino.h")
     shutil.copy(js_dir / 'Arduino.h', js_dir / 'src/Arduino.h')
 
@@ -96,24 +95,19 @@ def setup_directories() -> Tuple[Path, Path, Path]:
     src_dir: Path = mapped_dirs[0]
     return js_dir, js_src, src_dir
 
-def process_copy(src_dir: Path, js_src: Path) -> None:
-    copy_files(src_dir, js_src)
+def process_copy(src_dir: Path, js_src: Path, js_dir: Path) -> None:
+    copy_files(src_dir, js_src, js_dir)
     print("Copy operation completed.")
 
 def process_ino_files(js_dir: Path) -> None:
     transform_to_cpp(js_dir)
-    exclusion_folders = [
-        js_dir / 'src' / 'excluded',
-        js_dir / 'src' / 'third_party',
-        js_dir / 'src' / 'generated'
-    ]
+    exclusion_folders = []
     file_extensions = ['.ino', '.h', '.hpp', '.cpp']
     insert_headers(js_dir / 'src', exclusion_folders, file_extensions)
     print("Transform to cpp and insert header operations completed.")
 
 def process_compile(js_dir: Path, src_dir: Path) -> None:
     print("Starting compilation...")
-    copy_arduino_header(js_dir)
     if compile(js_dir) != 0:
         raise RuntimeError("Compilation failed.")
 
@@ -152,7 +146,7 @@ def main() -> int:
         do_compile = not any_only_flags or args.only_compile
 
         if do_copy:
-            process_copy(src_dir, js_src)
+            process_copy(src_dir, js_src, js_dir)
             if args.only_copy:
                 return 0
 
