@@ -5,6 +5,16 @@ import sys
 import subprocess
 import argparse
 import re
+from dataclasses import dataclass
+
+@dataclass
+class FunctionPrototype:
+    return_type: str
+    name: str
+    args: list[str]
+
+    def __repr__(self) -> str:
+        return f"{self.return_type} {self.name}({', '.join(self.args)})"
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Process INO file and dump AST.")
@@ -77,8 +87,19 @@ def main() -> None:
         args= " ".join(rest)
         return type + " " + name + f"{args};"
     
-    prototypes = [parse(name) for name in function_prototypes if predicate(name)]
-    prototypes = [proto for proto in prototypes if proto]
+    def parse2(name: str) -> FunctionPrototype | None:
+        if name.startswith('invalid '):
+            name = name[len('invalid '):]
+        parts = name.split()
+        if len(parts) < 2:
+            return None
+        name, type, *rest = parts
+        args = " ".join(rest)
+        return FunctionPrototype(type, name, args.split(','))
+
+    
+    prototypes = [parse2(name) for name in function_prototypes if predicate(name)]
+    prototypes = [str(proto) for proto in prototypes if proto]
 
     # Insert the prototypes before setup()
     prototypes_text = "\n".join(prototypes)
