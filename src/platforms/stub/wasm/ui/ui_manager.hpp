@@ -67,7 +67,6 @@ inline void jsUiManager::updateJs() {
             console.log("Added ui elements:", jsonData);
         };
         var jsonStr = UTF8ToString($0);
-        console.log("Debug: Received JSON string:", jsonStr);
         // try {
         //     var data = JSON.parse(jsonStr);
         //     globalThis.onFastLedUiElementsAdded(data, function(updateData) {
@@ -79,15 +78,20 @@ inline void jsUiManager::updateJs() {
         //     console.error("Problematic JSON string:", jsonStr);
         // }
         // improve this by seperating out the update function from the parsing of the JSON
+        var data = null;
         try {
-            var data = JSON.parse(jsonStr);
+            data = JSON.parse(jsonStr);
         } catch (error) {
             console.error("Error parsing JSON:", error);
             console.error("Problematic JSON string:", jsonStr);
             return;
         }
+        if (data) {
+            globalThis.onFastLedUiElementsAdded(data);
+        } else {
+            console.error("Internal error, data is null");
+        }
 
-        globalThis.onFastLedUiElementsAdded(data);
     }, s.c_str());
 }
 
