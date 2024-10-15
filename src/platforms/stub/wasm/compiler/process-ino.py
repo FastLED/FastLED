@@ -76,18 +76,9 @@ def main() -> None:
             return False
         return True
     
-    def parse(name: str) -> str:
-        if name.startswith('invalid '):
-            name = name[len('invalid '):]
-        parts = name.split()
-        if len(parts) < 2:
-            return ""
-        name, type, *rest = parts
-        #return name.split()[1] + " " + name.split()[0] + "();"
-        args= " ".join(rest)
-        return type + " " + name + f"{args};"
+
     
-    def parse2(name: str) -> FunctionPrototype | None:
+    def parse(name: str) -> FunctionPrototype | None:
         if name.startswith('invalid '):
             name = name[len('invalid '):]
         parts = name.split()
@@ -98,7 +89,7 @@ def main() -> None:
         return FunctionPrototype(type, name, args.split(','))
 
     
-    prototypes = [parse2(name) for name in function_prototypes if predicate(name)]
+    prototypes = [parse(name) for name in function_prototypes if predicate(name)]
     prototypes = [str(proto) for proto in prototypes if proto]
 
     # Insert the prototypes before setup()
