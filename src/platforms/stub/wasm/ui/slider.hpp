@@ -1,4 +1,5 @@
 #include "slider.h"
+#include "ui_manager.h"
 #include <sstream>
 
 jsSlider::jsSlider(const std::string& name, float min, float max, float value, float step)
