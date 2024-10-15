@@ -117,9 +117,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# If KEEP_FILES is false, remove the .pio directory
+# If KEEP_FILES is false, remove the src files directory so that this can run again.
 if [ "$KEEP_FILES" = false ]; then
-    rm -rf ./.pio
+    # now clean up the files
+    rm -rf /js/src/*
 fi
 
 
