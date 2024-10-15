@@ -1,4 +1,5 @@
 import argparse
+import re
 import shutil
 import subprocess
 import sys
@@ -12,7 +13,7 @@ PIO_BUILD_DIR = JS_DIR / ".pio/build"
 ARDUINO_H_SRC = JS_DIR / "Arduino.h"
 INDEX_HTML_SRC = JS_DIR / "index.html"
 OUTPUT_FILES = ["fastled.js", "fastled.wasm"]
-HEADER_TO_INSERT = '#include "platforms/stub/wasm/js.h"\n'
+HEADER_TO_INSERT = ['#include "Arduino.h"', '#include "platforms/stub/wasm/js.h"']
 FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 2
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
@@ -58,8 +59,18 @@ def insert_header(file: Path) -> None:
     with open(file, "r") as f:
         content = f.read()
 
-    content = content.replace('#include "platforms/stub/wasm/js.h"\n', "")
-    content = '#include "platforms/stub/wasm/js.h"\n' + content
+    # Remove existing includes
+    for header in HEADER_TO_INSERT:
+        content = re.sub(
+            rf"^.*{re.escape(header)}.*\n", "", content, flags=re.MULTILINE
+        )
+
+    # Remove both versions of Arduino.h include
+    arduino_pattern = r'^\s*#\s*include\s*[<"]Arduino\.h[>"]\s*.*\n'
+    content = re.sub(arduino_pattern, "", content, flags=re.MULTILINE)
+
+    # Add new headers at the beginning
+    content = "\n".join(HEADER_TO_INSERT) + "\n" + content
 
     with open(file, "w") as f:
         f.write(content)
