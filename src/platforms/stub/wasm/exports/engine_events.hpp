@@ -54,15 +54,12 @@ private:
                     callback();
                 }
             };
-            let once = false;
+            globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || function(jsonData) {
+                console.log("Debug: recived frame data");
+                console.log(jsonData);
+            };
             globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ActiveStripData();
-            globalThis.onFastLedFrame(globalThis.onFastLedFrameData, function(data) {
-                if (!once) {
-                    console.log("Debug: recived frame data");
-                    console.log(data);
-                    once = true;
-                }
-            });
+            globalThis.onFastLedFrame(globalThis.onFastLedFrameData, globalThis.onFastLedUiUpdateFunction);
         });
     }
 

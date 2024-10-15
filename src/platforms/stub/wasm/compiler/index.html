@@ -129,11 +129,14 @@
         const output = document.getElementById('output');
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
-    
+    let once = false;
     globalThis.onFastLedFrame = function (frameData, uiUpdateCallback) {
         updateCanvas(frameData.getFirstPixelData_Uint8());
-        const data = JSON.stringify({"message": "hi"});
-        uiUpdateCallback(data);
+        if (!once) {
+            once = true;
+            const data = JSON.stringify({"message": "hi"});
+            uiUpdateCallback(data);
+        }
     };
 
     globalThis.onFastLedUiElementsAdded = function(jsonData) {
