@@ -6,8 +6,9 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
-def copy_files(src_dir: Path, js_src: Path, js_dir: Path) -> None:
+def copy_files(src_dir: Path, js_dir: Path) -> None:
     print("Copying files from mapped directory to container...")
+    js_src = js_dir / 'src'
     for item in src_dir.iterdir():
         if item.is_dir():
             print(f"Copying directory: {item}")
@@ -17,7 +18,7 @@ def copy_files(src_dir: Path, js_src: Path, js_dir: Path) -> None:
             shutil.copy2(item, js_src / item.name)
     
     print("Copying Arduino.h to src/Arduino.h")
-    shutil.copy(js_dir / 'Arduino.h', js_dir / 'src/Arduino.h')
+    shutil.copy(js_dir / 'Arduino.h', js_src / 'Arduino.h')
 
 def compile(js_dir: Path) -> int:
     print("Starting compilation process...")
@@ -91,8 +92,8 @@ def find_project_dir(mapped_dir: Path) -> Path:
     src_dir: Path = mapped_dirs[0]
     return src_dir
 
-def process_copy(src_dir: Path, js_src: Path, js_dir: Path) -> None:
-    copy_files(src_dir, js_src, js_dir)
+def process_copy(src_dir: Path, js_dir: Path) -> None:
+    copy_files(src_dir, js_dir)
     print("Copy operation completed.")
 
 def process_ino_files(js_dir: Path) -> None:
@@ -146,7 +147,7 @@ def main() -> int:
         do_compile = not any_only_flags or args.only_compile
 
         if do_copy:
-            process_copy(src_dir, js_src, js_dir)
+            process_copy(src_dir, js_dir)
             if args.only_copy:
                 return 0
 
