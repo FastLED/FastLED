@@ -73,7 +73,7 @@ def main() -> None:
         sys.exit(1)
 
     # Insert the prototypes before setup()
-    prototypes_text = "\n".join(f"{name.split()[1]} {name.split()[0]} ()" for name in function_prototypes if not name.startswith('setup') and not name.startswith('loop'))
+    prototypes_text = "\n".join(f"{name.split()[1]} {name.split()[0]}();" for name in function_prototypes if not name.startswith('setup') and not name.startswith('loop'))
     new_contents = file_contents[:setup_pos] + prototypes_text + "\n\n" + file_contents[setup_pos:]
 
     # Write the modified contents back to the file
