@@ -44,8 +44,11 @@ RUN echo 'print() { echo "$@"; }' >> /etc/profile && \
 # wormhole-tx allows to send/recieve files to the host machine. The command `tx` becomes available.
 RUN pip3 install wormhole-tx || true
 
-# THIS IS A WORK IN PROGRESS!!!!
-COPY platformio.ini /platformio.ini
+# src\platforms\stub\wasm\compiler\install-arduino-cli.sh
+
+COPY src/platforms/stub/wasm/compiler/install-arduino-cli.sh /install-arduino-cli.sh
+RUN chmod +x /install-arduino-cli.sh && /install-arduino-cli.sh || echo "Failed to install Arduino CLI"
+
 
 # Set up the entrypoint script
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
@@ -72,8 +75,14 @@ COPY src/platforms/stub/wasm/compiler/wasm.py /js/wasm.py
 COPY src/platforms/stub/wasm/compiler/index.html /js/index.html
 COPY src/platforms/stub/wasm/compiler/Arduino.h /js/Arduino.h
 COPY src/platforms/stub/wasm/compiler/process-ino.sh /js/process-ino.sh
-COPY examples/Blink/Blink.ino /js/test/Blink.ino.cpp
-COPY examples/Scintillating/Scintillating.ino /js/test/Scintillating.ino.cpp
+COPY src/platforms/stub/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh
+
+# COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
+#COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
+#COPY examples/Scintillating/Scintillating.ino /js/Scintillating/Scintillating.ino
+
+
+
 
 WORKDIR /js
 
