@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-#set -x
+set -x
 
 <<<<<<< HEAD
 
@@ -33,7 +33,7 @@ _compile() {
 compile() {
     local prev_dir=$(pwd)
     echo "current directory: $(pwd)"
-    local PROJECT_DIR_NAME="src/$1"
+    local PROJECT_DIR_NAME="src"
     #cp Arduino.h "src/$PROJECT_DIR_NAME/Arduino.h"
     # handle this in a separate process so that we don't change the current directory
     # _compile "$PROJECT_DIR_NAME"
@@ -62,11 +62,11 @@ fi
 
 # get the directory in mapped/
 PROJECT_DIR_NAME=$(ls /mapped)
-PROJECT_DIR="/js/src/$PROJECT_DIR_NAME"
+PROJECT_DIR="/js/src/"
 mkdir -p $PROJECT_DIR/src
 
 # copy files
-cp -r /mapped/$PROJECT_DIR_NAME $PROJECT_DIR
+cp -r /mapped/$PROJECT_DIR_NAME/* $PROJECT_DIR
 cp ./platformio.ini $PROJECT_DIR
 cp ./Arduino.h $PROJECT_DIR/src/Arduino.h
 cp -r ./fastled  $PROJECT_DIR/fastled
@@ -81,7 +81,7 @@ include_deps() {
         if [ -f "$PROJECT_DIR/main.cpp" ]; then
             mv "$PROJECT_DIR/main.cpp" "$PROJECT_DIR/main2.hpp"
         fi
-        mv "$PROJECT_DIR"/*.ino "$PROJECT_DIR/generated_main.cpp"
+        mv "$PROJECT_DIR"/*.ino "$PROJECT_DIR/src/generated_main.cpp"
         
         # If main2.hpp exists, append it to main.cpp
         if [ -f "$PROJECT_DIR/main2.hpp" ]; then
