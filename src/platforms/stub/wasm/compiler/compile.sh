@@ -35,7 +35,14 @@ insert_header() {
 
 # Copy the contents of the hosts mapped directory to the container
 mkdir -p /js/src
-cp -r /mapped/* /js/src
+childdir=$(ls /mapped)
+#if more than one then error
+if [ $(echo "$childdir" | wc -l) -gt 1 ]; then
+    echo "Error: More than one directory found in /mapped"
+    exit 1
+fi
+src_dir="/mapped/$childdir"
+cp -r $src_dir/* /js/src
 
 
 include_deps() {

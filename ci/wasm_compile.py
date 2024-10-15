@@ -94,6 +94,7 @@ def is_tty() -> bool:
 
 def run_container(directory: str, interactive: bool) -> None:
     absolute_directory: str = os.path.abspath(directory)
+    base_name = os.path.basename(absolute_directory)
     if not os.path.isdir(absolute_directory):
         raise WASMCompileError(
             f"ERROR: Directory '{absolute_directory}' does not exist."
@@ -107,7 +108,7 @@ def run_container(directory: str, interactive: bool) -> None:
             "linux/amd64",
             # "--rm",
             "-v",
-            f"{absolute_directory}:/mapped",
+            f"{absolute_directory}:/mapped/{base_name}",
             "fastled-wasm-compiler",
         ]
         if is_tty():
