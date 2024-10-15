@@ -4,12 +4,24 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
+
+def copy_files(src_dir: Path, js_src: Path) -> None:
+    print("Copying files from mapped directory to container...")
+    for item in src_dir.iterdir():
+        if item.is_dir():
+            print(f"Copying directory: {item}")
+            shutil.copytree(item, js_src / item.name, dirs_exist_ok=True)
+        else:
+            print(f"Copying file: {item}")
+            shutil.copy2(item, js_src / item.name)
+
+def copy_arduino_header(js_dir: Path) -> None:
+    print("Copying Arduino.h to src/Arduino.h")
+    shutil.copy(js_dir / 'Arduino.h', js_dir / 'src/Arduino.h')
 
 def compile(js_dir: Path) -> int:
     print("Starting compilation process...")
-    shutil.copy(js_dir / 'Arduino.h', js_dir / 'src/Arduino.h')
-    print("Copied Arduino.h to src/Arduino.h")
     max_attempts = 2
     
     for attempt in range(1, max_attempts + 1):
@@ -87,14 +99,7 @@ def main() -> int:
     src_dir: Path = mapped_dirs[0]
 
     if args.only_copy or not (args.only_insert_header or args.only_compile):
-        print("Copying files from mapped directory to container...")
-        for item in src_dir.iterdir():
-            if item.is_dir():
-                print(f"Copying directory: {item}")
-                shutil.copytree(item, js_src / item.name, dirs_exist_ok=True)
-            else:
-                print(f"Copying file: {item}")
-                shutil.copy2(item, js_src / item.name)
+        copy_files(src_dir, js_src)
 
     if args.only_copy:
         print("Only copy operation completed.")
@@ -109,6 +114,7 @@ def main() -> int:
     
     if args.only_compile or not (args.only_copy or args.only_insert_header):
         print("Starting compilation...")
+        copy_arduino_header(js_dir)
         if compile(js_dir) != 0:
             print("Compilation failed. Exiting.")
             return 1
