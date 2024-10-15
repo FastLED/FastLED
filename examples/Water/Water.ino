@@ -72,17 +72,11 @@ CRGB MyColorFromPaletteExtended(const CRGBPalette16& pal, uint16_t index, uint8_
   return CRGB(red1, green1, blue1);
 }
 
-
+// Rectangular grid
 XYMap xyMap(WIDTH, HEIGHT, false);
 
 // map X & Y coordinates onto a horizontal serpentine matrix layout
-uint8_t XY(uint8_t x, uint8_t y) {
-#if 0
-  if (y & 1)
-    return (y + 1) * WIDTH - x - 1;
-  return y * WIDTH + x;
-  #endif
-
+uint16_t XY(uint8_t x, uint8_t y) {
   return xyMap.mapToIndex(x, y);
 }
 
