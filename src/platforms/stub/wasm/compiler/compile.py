@@ -101,18 +101,6 @@ def process_compile(js_dir: Path) -> None:
         raise RuntimeError("Compilation failed.")
     print("Compilation successful.")
 
-def copy_output_files(js_dir: Path, src_dir: Path, build_dir: Path) -> None:
-    print("Copying output files...")
-    fastled_js_dir: Path = src_dir / 'fastled_js'
-    fastled_js_dir.mkdir(parents=True, exist_ok=True)
-    
-    for file in ['fastled.js', 'fastled.wasm']:
-        print(f"Copying {file} to output directory")
-        shutil.copy2(build_dir / file, fastled_js_dir / file)
-    
-    print("Copying index.html to output directory")
-    shutil.copy2(js_dir / 'index.html', fastled_js_dir / 'index.html')
-
 def cleanup(args: argparse.Namespace, js_src: Path) -> None:
     if not args.keep_files and not (args.only_copy or args.only_insert_header):
         print("Removing temporary source files")
@@ -154,7 +142,17 @@ def main() -> int:
         if do_compile:
             process_compile(js_dir)
             build_dir: Path = next((js_dir / '.pio/build').iterdir())
-            copy_output_files(js_dir, src_dir, build_dir)
+            
+            print("Copying output files...")
+            fastled_js_dir: Path = src_dir / 'fastled_js'
+            fastled_js_dir.mkdir(parents=True, exist_ok=True)
+            
+            for file in ['fastled.js', 'fastled.wasm']:
+                print(f"Copying {file} to output directory")
+                shutil.copy2(build_dir / file, fastled_js_dir / file)
+            
+            print("Copying index.html to output directory")
+            shutil.copy2(js_dir / 'index.html', fastled_js_dir / 'index.html')
 
         cleanup(args, js_src)
 
