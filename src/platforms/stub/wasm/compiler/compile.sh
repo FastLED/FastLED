@@ -2,14 +2,7 @@
 set -e
 set -x
 
-<<<<<<< HEAD
-
-
-compile() {
-    cp Arduino.h src/Arduino.h
-=======
 _compile() {
->>>>>>> 87bb1c69 (commit)
     # sometimes the compilation fails, attempt to compile multiple times
     local max_attempts=2
     local attempt=1
@@ -109,20 +102,20 @@ include_deps
 compile "$PROJECT_DIR_NAME"
 #############################################
 
+DST_DIR="/mapped/$PROJECT_DIR_NAME/fastled_js"
 
 # Ensure the directory exists
-mkdir -p /mapped/fastled_js
-
+mkdir -p $DST_DIR
 
 # Copy (overwrite if exists) the files
-cp -f ./.pio/build/*/fastled.js /mapped/fastled_js/fastled.js
-cp -f ./.pio/build/*/fastled.wasm /mapped/fastled_js/fastled.wasm
-cp -f ./index.html /mapped/fastled_js/index.html
+cp -f ./.pio/build/*/fastled.js $DST_DIR/fastled.js
+cp -f ./.pio/build/*/fastled.wasm $DST_DIR/fastled.wasm
+cp -f ./index.html $DST_DIR/index.html
 
 # now open the files and write them a second time just to be safe
-cat ./.pio/build/*/fastled.js > /mapped/fastled_js/fastled.js
-cat ./.pio/build/*/fastled.wasm > /mapped/fastled_js/fastled.wasm
-cat ./index.html > /mapped/fastled_js/index.html
+cat ./.pio/build/*/fastled.js > $DST_DIR/fastled.js
+cat ./.pio/build/*/fastled.wasm > $DST_DIR/fastled.wasm
+cat ./index.html > $DST_DIR/index.html
 
 
 # Initialize KEEP_FILES to false
