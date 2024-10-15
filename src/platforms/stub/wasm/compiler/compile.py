@@ -50,8 +50,8 @@ def insert_header(file: Path) -> None:
         f.write(content)
     print(f"Processed: {file}")
 
-def include_deps(js_dir: Path) -> None:
-    print("Including dependencies...")
+def transform_to_cpp(js_dir: Path) -> None:
+    print("Transforming files to cpp...")
     src_dir = js_dir / 'src'
     ino_files = list(src_dir.glob('*.ino'))
     
@@ -69,10 +69,11 @@ def include_deps(js_dir: Path) -> None:
             print("Including main2.hpp in main.cpp")
             with open(src_dir / 'main.cpp', 'a') as f:
                 f.write('#include "main2.hpp"\n')
-    
-    print("Processing all source files...")
+
+def insert_headers(src_dir: Path, exclusion_folders: List[Path], file_extensions: List[str]) -> None:
+    print("Inserting headers in source files...")
     for file in src_dir.rglob('*'):
-        if file.suffix in ('.ino', '.h', '.hpp', '.cpp'):
+        if file.suffix in file_extensions and not any(folder in file.parents for folder in exclusion_folders):
             insert_header(file)
 
 def parse_args() -> argparse.Namespace:
@@ -99,9 +100,16 @@ def process_copy(src_dir: Path, js_src: Path) -> None:
     copy_files(src_dir, js_src)
     print("Copy operation completed.")
 
-def process_insert_header(js_dir: Path) -> None:
-    include_deps(js_dir)
-    print("Insert header operation completed.")
+def process_ino_files(js_dir: Path) -> None:
+    transform_to_cpp(js_dir)
+    exclusion_folders = [
+        js_dir / 'src' / 'excluded',
+        js_dir / 'src' / 'third_party',
+        js_dir / 'src' / 'generated'
+    ]
+    file_extensions = ['.ino', '.h', '.hpp', '.cpp']
+    insert_headers(js_dir / 'src', exclusion_folders, file_extensions)
+    print("Transform to cpp and insert header operations completed.")
 
 def process_compile(js_dir: Path, src_dir: Path) -> None:
     print("Starting compilation...")
@@ -149,8 +157,9 @@ def main() -> int:
                 return 0
 
         if do_insert_header:
-            process_insert_header(js_dir)
+            process_ino_files(js_dir)
             if args.only_insert_header:
+                print("Transform to cpp and insert header operations completed.")
                 return 0
 
         if do_compile:
