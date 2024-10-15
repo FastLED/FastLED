@@ -99,23 +99,16 @@ inline void jsUiManager::updateAll() {
 
 inline void jsUiManager::updateJs() {
     std::string s = jsUiManager::instance().toJsonStr();
-    EM_ASM_(
-        {
-            globalThis.onFastLedUiElementsAdded =
-                globalThis.onFastLedUiElementsAdded || function(jsonData) {
-                console.log(
-                    "Missing globalThis.onFastLedUiElementsAdded(uiList) "
-                    "function");
-                console.log("Added ui elements: " + jsonData);
-                console.log(jsonData);
-            };
-            var jsonStr = UTF8ToString($0);
-            var data = JSON.parse(jsonStr);
-            // globalThis.onFastLedSlider = globalThis.onFastLedSlider  || new
-            // Module.jsSlider("demo name", 0, 255, 0, 1);
-            globalThis.onFastLedUiElementsAdded(data);
-        },
-        s.c_str());
+    EM_ASM_({
+        globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(jsonData) {
+            console.log("Missing globalThis.onFastLedUiElementsAdded(uiList) function");
+            console.log("Added ui elements: " + jsonData);
+            console.log(jsonData);
+        };
+        var jsonStr = UTF8ToString($0);
+        var data = JSON.parse(jsonStr);
+        globalThis.onFastLedUiElementsAdded(data);
+    }, s.c_str());
 }
 
 inline std::string jsUiManager::toJsonStr() {

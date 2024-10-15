@@ -102,8 +102,10 @@ def insert_headers(
 ) -> None:
     print("Inserting headers in source files...")
     for file in src_dir.rglob("*"):
-        if file.suffix in file_extensions and not any(
-            folder in file.parents for folder in exclusion_folders
+        if (
+            file.suffix in file_extensions
+            and not any(folder in file.parents for folder in exclusion_folders)
+            and file.name != "Arduino.h"
         ):
             insert_header(file)
 
