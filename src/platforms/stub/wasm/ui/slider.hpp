@@ -4,6 +4,62 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+class JsonDictEncoder {
+private:
+    std::ostringstream oss;
+    bool first = true;
+    bool begun = false;
+    bool ended = false;
+
+    template<typename T>
+    void appendJsonField(const char* name, const T& value) {
+        oss << "\"" << name << "\":" << value;
+    }
+
+    void appendJsonField(const char* name, const std::string& value) {
+        oss << "\"" << name << "\":\"" << value << "\"";
+    }
+
+    void appendJsonField(const char* name, const char* value) {
+        oss << "\"" << name << "\":\"" << value << "\"";
+    }
+
+public:
+    JsonDictEncoder() = default;
+
+    void begin() {
+        if (!begun) {
+            oss << "{";
+            begun = true;
+        }
+    }
+
+    void end() {
+        if (begun && !ended) {
+            oss << "}";
+            begun = false;
+            ended = true;
+        }
+    }
+
+    template<typename T>
+    void addField(const char* name, const T& value) {
+        if (!begun) {
+            begin();
+        }
+        if (!first) {
+            oss << ",";
+        }
+        appendJsonField(name, value);
+        first = false;
+    }
+
+    const char* str() {
+        end();
+        return oss.str().c_str();
+    }
+};
+
 jsSlider::jsSlider(const std::string& name, float min, float max, float value, float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
     auto updateFunc = [this](const char* jsonStr) { this->updateInternal(jsonStr); };
@@ -21,17 +77,15 @@ std::string jsSlider::name() const {
 }
 
 std::string jsSlider::toJsonStr() const {
-    std::ostringstream oss;
-    oss << "{"
-        << "\"name\":\"Slider: " << name() << "\""
-        << ",\"type\":\"slider\""
-        << ",\"id\":" << mInternal->id()
-        << ",\"min\":" << mMin
-        << ",\"max\":" << mMax
-        << ",\"value\":" << mValue
-        << ",\"step\":" << mStep
-        << "}";
-    return oss.str();
+    JsonDictEncoder encoder;
+    encoder.addField("name", "Slider: " + name());
+    encoder.addField("type", "slider");
+    encoder.addField("id", mInternal->id());
+    encoder.addField("min", mMin);
+    encoder.addField("max", mMax);
+    encoder.addField("value", mValue);
+    encoder.addField("step", mStep);
+    return encoder.str();
 }
 
 float jsSlider::value() const { 
