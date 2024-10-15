@@ -68,7 +68,7 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
 NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
-jsSliderPtr slider = jsSliderPtr::New("Speed", 1, 100, SPEED);
+jsSlider slider = jsSlider("Speed", 1, 100, SPEED);
 
 void setup() {
     delay(1000); // sanity delay

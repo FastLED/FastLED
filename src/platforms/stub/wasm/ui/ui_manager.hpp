@@ -6,13 +6,22 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-inline void jsUiManager::addComponent(jsUIPtr component) {
+inline bool jsUiManager::WeakPtrCompare::operator()(const std::weak_ptr<jsUiInternal>& lhs, const std::weak_ptr<jsUiInternal>& rhs) const {
+    auto l = lhs.lock();
+    auto r = rhs.lock();
+    if (!l && !r) return false;
+    if (!l) return true;
+    if (!r) return false;
+    return l->id() < r->id();
+}
+
+inline void jsUiManager::addComponent(std::weak_ptr<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.insert(component);
     instance().mItemsAdded = true;
 }
 
-inline void jsUiManager::removeComponent(jsUIPtr component) {
+inline void jsUiManager::removeComponent(std::weak_ptr<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.erase(component);
 }
@@ -29,13 +38,14 @@ inline jsUiManager& jsUiManager::instance() {
 }
 
 inline void jsUiManager::updateAll() {
-    auto copy = jsUiManager::instance().mComponents;
-    {
-        std::lock_guard<std::mutex> lock(instance().mMutex);
-        copy = instance().mComponents;
-    }
-    for (const auto &component : copy) {
-        component->update("{}");  // Todo - replace this with actual json string data.
+    std::lock_guard<std::mutex> lock(instance().mMutex);
+    for (auto it = instance().mComponents.begin(); it != instance().mComponents.end(); ) {
+        if (auto component = it->lock()) {
+            component->update("{}");  // Todo - replace this with actual json string data.
+            ++it;
+        } else {
+            it = instance().mComponents.erase(it);
+        }
     }
 }
 
@@ -55,8 +65,14 @@ inline void jsUiManager::updateJs() {
 
 inline std::string jsUiManager::toJsonStr() {
     std::string str = "[";
-    for (const auto &component : mComponents) {
-        str += component->toJsonStr() + ",";
+    std::lock_guard<std::mutex> lock(instance().mMutex);
+    for (auto it = mComponents.begin(); it != mComponents.end(); ) {
+        if (auto component = it->lock()) {
+            str += component->toJsonStr() + ",";
+            ++it;
+        } else {
+            it = mComponents.erase(it);
+        }
     }
     if (!mComponents.empty()) {
         str.pop_back();

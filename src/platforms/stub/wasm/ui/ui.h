@@ -1,31 +1,29 @@
 #pragma once
 
-// base class for all ui components
-
 #include "ptr.h"
-#include <atomic>
-#include <string>
+#include "ui_internal.h"
+#include <memory>
+#include <mutex>
 
 FASTLED_NAMESPACE_BEGIN
 
-class jsUI;
-DECLARE_SMART_PTR(jsUI)
-
-class jsUI : public Referent {
-  public:
-    jsUI();
+class jsUI {
+public:
+    jsUI(std::weak_ptr<jsUiInternal> internal);
     virtual ~jsUI();
 
-    virtual std::string type() const = 0;
-    virtual std::string name() const = 0;
-    virtual void update(const char* jsonStr) = 0;
-    virtual std::string toJsonStr() const = 0;
+    std::string type() const;
+    std::string name() const;
+    void update(const char* jsonStr);
+    std::string toJsonStr() const;
     int id() const;
+    void releaseInternal();
+    std::shared_ptr<jsUiInternal> getInternal();
 
-  private:
-    static int nextId();
-    static std::atomic<uint32_t> sNextId;
-    int mId;
+protected:
+    virtual void updateInternal(const char* jsonStr) = 0;
+    std::weak_ptr<jsUiInternal> mInternal;
+    mutable std::mutex mMutex;
 };
 
 FASTLED_NAMESPACE_END
