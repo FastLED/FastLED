@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <atomic>
 #include <string>
+#include <sstream>
 
 #include "ui.h"
 
@@ -17,7 +18,13 @@ class jsSlider : public jsUI {
     std::string type() const override { return "slider"; }
 
     std::string toJsonStr() const override {
-      std::string str = "{\"type\":\"" + type() + "\",\"name\":\"" + name() + "\"}";
+      std::string str = "{\"type\":\"" + type() + 
+                        "\",\"name\":\"" + name() + 
+                        "\",\"min\":" + std::to_string(mMin) + 
+                        ",\"max\":" + std::to_string(mMax) + 
+                        ",\"value\":" + std::to_string(mValue) + 
+                        ",\"step\":" + std::to_string(mStep) + 
+                        "}";
       return str;
     }
 
