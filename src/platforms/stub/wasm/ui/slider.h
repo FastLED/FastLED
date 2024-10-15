@@ -30,7 +30,7 @@ class jsSlider : public jsUI {
     }
 
     float value() const { return mValue; }
-    virtual void update() override {}
+    virtual void update(const char* jsonStr) override {}
 
     void setValue(float value) {
         mValue = value;
