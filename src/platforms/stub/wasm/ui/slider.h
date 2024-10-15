@@ -10,7 +10,7 @@
 class jsSlider : public jsUI {
   public:
     jsSlider(const std::string& name, float min = 0.0f, float max = 255.0f, float value = 128.0f, float step = 1.0f)
-        : mName(name), mMin(min), mMax(max), mValue(value), mStep(step), mId(nextId()) {
+        : mName(name), mMin(min), mMax(max), mValue(value), mStep(step) {
         jsUiManager::addComponent(jsUIPtr::TakeOwnership(this));
     }
 
@@ -20,7 +20,7 @@ class jsSlider : public jsUI {
     std::string toJsonStr() const override {
       std::string str = "{\"type\":\"" + type() + 
                         "\",\"name\":\"" + name() + 
-                        "\",\"id\":" + std::to_string(mId) + 
+                        "\",\"id\":" + std::to_string(id()) + 
                         ",\"min\":" + std::to_string(mMin) + 
                         ",\"max\":" + std::to_string(mMax) + 
                         ",\"value\":" + std::to_string(mValue) + 
