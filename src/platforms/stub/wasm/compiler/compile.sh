@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 
 
@@ -86,18 +87,18 @@ compile
 
 
 # Ensure the directory exists
-mkdir -p /mapped/fastled_js
+mkdir -p $src_dir/fastled_js
 
 
 # Copy (overwrite if exists) the files
-cp -f ./.pio/build/*/fastled.js /mapped/fastled_js/fastled.js
-cp -f ./.pio/build/*/fastled.wasm /mapped/fastled_js/fastled.wasm
-cp -f ./index.html /mapped/fastled_js/index.html
+cp -f ./.pio/build/*/fastled.js $src_dir/fastled_js/fastled.js
+cp -f ./.pio/build/*/fastled.wasm $src_dir/fastled_js/fastled.wasm
+cp -f ./index.html $src_dir/fastled_js/index.html
 
 # now open the files and write them a second time just to be safe
-cat ./.pio/build/*/fastled.js > /mapped/fastled_js/fastled.js
-cat ./.pio/build/*/fastled.wasm > /mapped/fastled_js/fastled.wasm
-cat ./index.html > /mapped/fastled_js/index.html
+cat ./.pio/build/*/fastled.js > $src_dir/fastled_js/fastled.js
+cat ./.pio/build/*/fastled.wasm > $src_dir/fastled_js/fastled.wasm
+cat ./index.html > $src_dir/fastled_js/index.html
 
 
 # Initialize KEEP_FILES to false
