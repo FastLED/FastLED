@@ -52,11 +52,18 @@ private:
                 console.log("Missing globalThis.onFastLedFrame() function");
                 if (typeof callback === 'function') {
                     callback();
+                } else {
+                    console.error("Callback function is not a function but is of type " + typeof callback);
                 }
             };
-            globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || function(jsonData) {
-                console.log("Debug: recived frame data");
-                console.log(jsonData);
+            globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || function(jsonString) {
+                console.log("Debug: received frame data");
+                console.log(jsonString);
+                if (typeof jsonString === 'string' && jsonString !== null) {
+                    Module._jsUiManager_updateUiComponents(jsonString);
+                } else {
+                    console.error("Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
+                }
             };
             globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ActiveStripData();
             globalThis.onFastLedFrame(globalThis.onFastLedFrameData, globalThis.onFastLedUiUpdateFunction);
