@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+
+
 compile() {
     cp Arduino.h src/Arduino.h
     # sometimes the compilation fails, attempt to compile multiple times
@@ -90,6 +92,26 @@ cat ./.pio/build/*/fastled.js > /mapped/fastled_js/fastled.js
 cat ./.pio/build/*/fastled.wasm > /mapped/fastled_js/fastled.wasm
 cat ./index.html > /mapped/fastled_js/index.html
 
-# now clean up the files
-rm -rf /js/src/*
+
+# Initialize KEEP_FILES to false
+KEEP_FILES=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --keep-files)
+            KEEP_FILES=true
+            shift
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+# If KEEP_FILES is false, remove the .pio directory
+if [ "$KEEP_FILES" = false ]; then
+    rm -rf ./.pio
+fi
+
 
