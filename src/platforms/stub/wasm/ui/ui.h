@@ -93,7 +93,7 @@ inline void jsUiManager::updateAll() {
         copy = instance().mComponents;
     }
     for (const auto &component : copy) {
-        component->update();
+        component->update("{}");  // Todo - replace this with actual json string data.
     }
 }
 
