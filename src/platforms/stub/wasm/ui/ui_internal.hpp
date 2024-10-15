@@ -7,7 +7,7 @@ FASTLED_NAMESPACE_BEGIN
 inline jsUiInternal::jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonStrFunction toJsonStrFunc)
     : mName(name), mUpdateFunc(std::move(updateFunc)), mToJsonStrFunc(std::move(toJsonStrFunc)), mId(nextId()), mMutex() {}
 
-inline std::string jsUiInternal::name() const { return mName; }
+inline const char* jsUiInternal::name() const { return mName; }
 inline void jsUiInternal::update(const char* jsonStr) { 
     std::lock_guard<std::mutex> lock(mMutex);
     if (mUpdateFunc) {

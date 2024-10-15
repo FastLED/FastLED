@@ -21,11 +21,11 @@ public:
         const bool functions_exist = mUpdateFunc || mToJsonStrFunc;
         if (functions_exist) {
             clearFunctions();
-            printf("Warning: %s: The owner of the jsUiInternal should clear the functions, not this destructor.\n", mName.c_str());
+            printf("Warning: %s: The owner of the jsUiInternal should clear the functions, not this destructor.\n", mName);
         }
     }
 
-    std::string name() const;
+    const char* name() const;
     void update(const char* jsonStr);
     std::string toJsonStr() const;
     int id() const;
@@ -36,7 +36,7 @@ private:
     static int nextId();
     static std::atomic<uint32_t> sNextId;
     int mId;
-    std::string mName;
+    const char* mName;
     UpdateFunction mUpdateFunc;
     ToJsonStrFunction mToJsonStrFunc;
     mutable std::mutex mMutex;

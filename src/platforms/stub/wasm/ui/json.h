@@ -6,6 +6,7 @@
 class JsonDictEncoder {
 private:
     std::ostringstream oss;
+    std::string finalStr;
     bool first = true;
     bool begun = false;
     bool ended = false;
@@ -38,6 +39,8 @@ public:
             oss << "}";
             begun = false;
             ended = true;
+            finalStr = oss.str();
+            oss.clear();
         }
     }
 
@@ -55,6 +58,6 @@ public:
 
     const char* str() {
         end();
-        return oss.str().c_str();
+        return finalStr.c_str();
     }
 };
