@@ -88,9 +88,8 @@ RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/exports.h\" #inc
 RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
 
 # Copy the compile script
-COPY src/platforms/stub/wasm/compiler/*.sh /js/
-RUN dos2unix /js/*.sh
-RUN chmod +x /js/*.sh
+COPY src/platforms/stub/wasm/compiler/compile.py /js/
+RUN dos2unix /js/compile.py
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/bin/bash", "/js/compile.sh"]
+CMD ["python", "/js/compile.py"]
