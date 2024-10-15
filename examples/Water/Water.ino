@@ -7,8 +7,8 @@
 #include "Arduino.h"
 #include "xymap.h"
 
-#define WIDTH 32
-#define HEIGHT 32
+#define WIDTH 16
+#define HEIGHT 16
 #define NUM_LEDS ((WIDTH) * (HEIGHT))
 CRGB leds[NUM_LEDS];
 
@@ -77,7 +77,7 @@ CRGB MyColorFromPaletteExtended(const CRGBPalette16& pal, uint16_t index, uint8_
 XYMap xyMap(WIDTH, HEIGHT, false);
 
 // map X & Y coordinates onto a horizontal serpentine matrix layout
-uint16_t XY(uint8_t x, uint8_t y) {
+uint8_t XY(uint8_t x, uint8_t y) {
 #if 0
   if (y & 1)
     return (y + 1) * WIDTH - x - 1;
