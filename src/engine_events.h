@@ -17,7 +17,9 @@ class EngineEvents {
 public:
     class Listener {
     public:
-        Listener(bool auto_attach = true);
+        // Note that the subclass must call EngineEvents::addListener(this) to start listening.
+        // In the subclass destructor, the subclass should call EngineEvents::removeListener(this).
+        Listener();
         virtual ~Listener();
         virtual void onBeginFrame() {}
         virtual void onEndShowLeds() {}
@@ -27,6 +29,7 @@ public:
 
     static void addListener(Listener* listener);
     static void removeListener(Listener* listener);
+    static bool hasListener(Listener* listener);
     static void onBeginFrame();
     static void onEndShowLeds();
     static void onEndFrame();

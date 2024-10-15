@@ -5,19 +5,17 @@ FASTLED_NAMESPACE_BEGIN
 
 
 
-EngineEvents::Listener::Listener(bool auto_attach) {
-    if (auto_attach) {
-        EngineEvents* ptr = EngineEvents::getInstance();
-        if (ptr) {
-            ptr->addListener(this);
-        }
-    }
+EngineEvents::Listener::Listener() {
 }
 
 EngineEvents::Listener::~Listener() {
     EngineEvents* ptr = EngineEvents::getInstance();
-    if (ptr) {
-        ptr->removeListener(this);
+    const bool has_listener = ptr && ptr->mListeners.has(this);
+    if (has_listener) {
+        // Warning, the listener should be removed by the subclass. If we are here
+        // then the subclass did not remove the listener and we are now in a partial
+        // state of destruction and the results may be undefined.
+        ptr->_removeListener(this);
     }
 }
 
@@ -39,6 +37,20 @@ void EngineEvents::removeListener(Listener* listener) {
     if (auto ptr = EngineEvents::getInstance()) {
         ptr->_removeListener(listener);
     }
+}
+
+bool EngineEvents::hasListener(Listener* listener) {
+    #ifdef __AVR__
+    (void)listener;
+    return false;
+    #else
+    if (auto ptr = EngineEvents::getInstance()) {
+        if (ptr->mListeners.has(listener)) {
+            return true;
+        }
+    }
+    return false;
+    #endif
 }
 
 void EngineEvents::onBeginFrame() {

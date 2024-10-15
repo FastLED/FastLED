@@ -23,9 +23,11 @@ FASTLED_NAMESPACE_BEGIN
 class WasmSpiOutput: public EngineEvents::Listener {
 public:
     WasmSpiOutput() {
+        EngineEvents::addListener(this);
     }
 
     ~WasmSpiOutput() {
+        EngineEvents::removeListener(this);
     }
 
 

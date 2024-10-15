@@ -66,7 +66,12 @@ private:
         }, strip, num_leds);
     }
 
-    EngineListener() {}
+    EngineListener() {
+        EngineEvents::addListener(this);
+    }
+    ~EngineListener() {
+        EngineEvents::removeListener(this);
+    }
 };
 
 void EngineListener::Init() {

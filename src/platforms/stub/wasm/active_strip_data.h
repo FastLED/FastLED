@@ -95,11 +95,16 @@ public:
         }
         return emscripten::val(indices);
     }
-
+    ~ActiveStripData() {
+        EngineEvents::removeListener(this);
+    }
     
 private:
     friend class Singleton<ActiveStripData>;
-    ActiveStripData() {}
+    ActiveStripData() {
+        EngineEvents::addListener(this);
+    }
+
     typedef std::map<int, SliceUint8> StripDataMap;
     typedef std::map<int, uint32_t> UpdateMap;
     StripDataMap mStripMap;
