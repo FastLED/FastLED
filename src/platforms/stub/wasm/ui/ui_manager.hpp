@@ -62,6 +62,7 @@ inline void jsUiManager::updateJs() {
     std::string s = jsUiManager::instance().toJsonStr();
     EM_ASM_({
         globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(jsonData, updateFunc) {
+            console.log(new Date().toLocaleTimeString());
             console.log("Missing globalThis.onFastLedUiElementsAdded(jsonData, updateFunc) function");
             console.log("Added ui elements:", jsonData);
         };
@@ -86,17 +87,7 @@ inline void jsUiManager::updateJs() {
             return;
         }
 
-        globalThis.onFastLedUiElementsAdded(data, function(updateData) {
-            try {
-                var updateJsonStr = JSON.stringify(updateData);
-                _jsUiManager_updateUiComponents(updateJsonStr);
-            } catch(err) {
-                console.error("Error updating UI components:", err);
-                console.error("Problematic JSON string:", updateData);
-                err.printStackTrace();
-            }
-
-        });
+        globalThis.onFastLedUiElementsAdded(data);
     }, s.c_str());
 }
 
