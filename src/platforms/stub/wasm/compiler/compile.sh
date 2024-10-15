@@ -1,10 +1,15 @@
 #!/bin/bash
 set -e
+#set -x
 
+<<<<<<< HEAD
 
 
 compile() {
     cp Arduino.h src/Arduino.h
+=======
+_compile() {
+>>>>>>> 87bb1c69 (commit)
     # sometimes the compilation fails, attempt to compile multiple times
     local max_attempts=2
     local attempt=1
@@ -25,6 +30,18 @@ compile() {
     done
 }
 
+compile() {
+    local prev_dir=$(pwd)
+    echo "current directory: $(pwd)"
+    local PROJECT_DIR_NAME="src/$1"
+    #cp Arduino.h "src/$PROJECT_DIR_NAME/Arduino.h"
+    # handle this in a separate process so that we don't change the current directory
+    # _compile "$PROJECT_DIR_NAME"
+    cd $PROJECT_DIR_NAME
+    _compile
+    cd $prev_dir
+}
+
 # Function to insert the header
 insert_header() {
     local file="$1"
@@ -35,30 +52,45 @@ insert_header() {
 
 # Copy the contents of the hosts mapped directory to the container
 mkdir -p /js/src
-cp -r /mapped/* /js/src
 
+
+# error if there is more than one file/dir in mapped
+if [ $(ls /mapped | wc -l) -gt 1 ]; then
+    echo "Error: More than one file or directory in /mapped"
+    exit 1
+fi
+
+# get the directory in mapped/
+PROJECT_DIR_NAME=$(ls /mapped)
+PROJECT_DIR="/js/src/$PROJECT_DIR_NAME"
+mkdir -p $PROJECT_DIR/src
+
+# copy files
+cp -r /mapped/$PROJECT_DIR_NAME $PROJECT_DIR
+cp ./platformio.ini $PROJECT_DIR
+cp ./Arduino.h $PROJECT_DIR/src/Arduino.h
+cp -r ./fastled  $PROJECT_DIR/fastled
+cp wasm.py $PROJECT_DIR/wasm.py
 
 include_deps() {
-    # If there is an ino file in the src directory, then rename it to main.cpp. Add
-    # a special case if there already is a main.cpp file, in this case we will
-    # rename it to main2.hpp, then generate the main.cpp file and then include the main2.hpp
-    # file in the main.cpp file.
-    if [ -f /js/src/*.ino ]; then
+
+    
+    # If there is an .ino file, rename it and handle main.cpp/main2.hpp logic
+    if [ -f "$PROJECT_DIR"/*.ino ]; then
         # Check if main.cpp already exists
-        if [ -f /js/src/main.cpp ]; then
-            # special case, main.cpp exists, so we want to rename it to main2.hpp
-            mv /js/src/main.cpp /js/src/main2.hpp
+        if [ -f "$PROJECT_DIR/main.cpp" ]; then
+            mv "$PROJECT_DIR/main.cpp" "$PROJECT_DIR/main2.hpp"
         fi
-        mv /js/src/*.ino /js/src/generated_main.cpp
-        # If main2.hpp exists (because it was renamed, then append it to main.cpp)
-        if [ -f /js/src/main2.hpp ]; then
-            # the main2.hpp file was created, so include it.
-            echo '#include "main2.hpp"' >> /js/src/main.cpp
+        mv "$PROJECT_DIR"/*.ino "$PROJECT_DIR/generated_main.cpp"
+        
+        # If main2.hpp exists, append it to main.cpp
+        if [ -f "$PROJECT_DIR/main2.hpp" ]; then
+            echo '#include "main2.hpp"' >> "$PROJECT_DIR/main.cpp"
         fi
     fi
-
-    # Find all .ino, .h, .hpp, and .cpp files recursively and process them
-    find src -type f \( -name "*.ino" -o -name "*.h" -o -name "*.hpp" -o -name "*.cpp" \) | while read -r file; do
+    
+    # Find all .ino, .h, .hpp, and .cpp files and process them
+    find "$PROJECT_DIR" -type f \( -name "*.ino" -o -name "*.h" -o -name "*.hpp" -o -name "*.cpp" \) ! -path "*fastled*" | while read -r file; do
         insert_header "$file"
     done
 }
@@ -74,7 +106,7 @@ cd /js
 include_deps
 
 #############################################
-compile
+compile "$PROJECT_DIR_NAME"
 #############################################
 
 
@@ -111,7 +143,7 @@ done
 
 # If KEEP_FILES is false, remove the .pio directory
 if [ "$KEEP_FILES" = false ]; then
-    rm -rf ./.pio
+   rm -rf /js/src/*
 fi
 
 
