@@ -17,6 +17,11 @@ FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 2
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
+assert JS_DIR.exists()
+assert MAPPED_DIR.exists()
+assert ARDUINO_H_SRC.exists()
+assert INDEX_HTML_SRC.exists()
+
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
     print("Copying files from mapped directory to container...")
