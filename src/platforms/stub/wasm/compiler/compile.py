@@ -83,63 +83,87 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--only-compile', action='store_true', help="Only compile the project")
     return parser.parse_args()
 
-def main() -> int:
-    print("Starting FastLED WASM compilation script...")
-    args = parse_args()
-    print(f"Keep files flag: {args.keep_files}")
-
+def setup_directories() -> Tuple[Path, Path, Path]:
     js_dir = Path('/js')
     js_src = js_dir / 'src'
     js_src.mkdir(parents=True, exist_ok=True)
+    
     mapped_dirs: List[Path] = list(Path('/mapped').iterdir())
     if len(mapped_dirs) > 1:
-        print("Error: More than one directory found in /mapped")
-        return 1
+        raise ValueError("Error: More than one directory found in /mapped")
     
     src_dir: Path = mapped_dirs[0]
+    return js_dir, js_src, src_dir
 
-    if args.only_copy or not (args.only_insert_header or args.only_compile):
-        copy_files(src_dir, js_src)
+def process_copy(src_dir: Path, js_src: Path) -> None:
+    copy_files(src_dir, js_src)
+    print("Copy operation completed.")
 
-    if args.only_copy:
-        print("Only copy operation completed.")
-        return 0
+def process_insert_header(js_dir: Path) -> None:
+    include_deps(js_dir)
+    print("Insert header operation completed.")
 
-    if args.only_insert_header or not (args.only_copy or args.only_compile):
-        include_deps(js_dir)
+def process_compile(js_dir: Path, src_dir: Path) -> None:
+    print("Starting compilation...")
+    copy_arduino_header(js_dir)
+    if compile(js_dir) != 0:
+        raise RuntimeError("Compilation failed.")
 
-    if args.only_insert_header:
-        print("Only insert header operation completed.")
-        return 0
+    print("Compilation successful. Copying output files...")
+    fastled_js_dir: Path = src_dir / 'fastled_js'
+    fastled_js_dir.mkdir(parents=True, exist_ok=True)
+
+    build_dir: Path = next((js_dir / '.pio/build').iterdir())
     
-    if args.only_compile or not (args.only_copy or args.only_insert_header):
-        print("Starting compilation...")
-        copy_arduino_header(js_dir)
-        if compile(js_dir) != 0:
-            print("Compilation failed. Exiting.")
-            return 1
+    for file in ['fastled.js', 'fastled.wasm']:
+        print(f"Copying {file} to output directory")
+        shutil.copy2(build_dir / file, fastled_js_dir / file)
+    
+    print("Copying index.html to output directory")
+    shutil.copy2(js_dir / 'index.html', fastled_js_dir / 'index.html')
 
-        print("Compilation successful. Copying output files...")
-        fastled_js_dir: Path = src_dir / 'fastled_js'
-        fastled_js_dir.mkdir(parents=True, exist_ok=True)
-
-        build_dir: Path = next((js_dir / '.pio/build').iterdir())
-        
-        for file in ['fastled.js', 'fastled.wasm']:
-            print(f"Copying {file} to output directory")
-            shutil.copy2(build_dir / file, fastled_js_dir / file)
-        
-        print("Copying index.html to output directory")
-        shutil.copy2(js_dir / 'index.html', fastled_js_dir / 'index.html')
-
+def cleanup(args: argparse.Namespace, js_src: Path) -> None:
     if not args.keep_files and not (args.only_copy or args.only_insert_header):
         print("Removing temporary source files")
         shutil.rmtree(js_src)
     else:
         print("Keeping temporary source files")
 
-    print("Compilation process completed successfully")
-    return 0
+def main() -> int:
+    print("Starting FastLED WASM compilation script...")
+    args = parse_args()
+    print(f"Keep files flag: {args.keep_files}")
+
+    try:
+        js_dir, js_src, src_dir = setup_directories()
+
+        any_only_flags = args.only_copy or args.only_insert_header or args.only_compile
+
+        do_copy = not any_only_flags or args.only_copy
+        do_insert_header = not any_only_flags or args.only_insert_header
+        do_compile = not any_only_flags or args.only_compile
+
+        if do_copy:
+            process_copy(src_dir, js_src)
+            if args.only_copy:
+                return 0
+
+        if do_insert_header:
+            process_insert_header(js_dir)
+            if args.only_insert_header:
+                return 0
+
+        if do_compile:
+            process_compile(js_dir, src_dir)
+
+        cleanup(args, js_src)
+
+        print("Compilation process completed successfully")
+        return 0
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return 1
 
 if __name__ == "__main__":
     sys.exit(main())
