@@ -144,12 +144,26 @@
         const output = document.getElementById('output');
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
-    let once = false;
+    let uiElements = [];
+    let previousUiState = {};
+
     globalThis.onFastLedFrame = function (frameData, uiUpdateCallback) {
         updateCanvas(frameData.getFirstPixelData_Uint8());
-        if (!once) {
-            once = true;
-            const data = JSON.stringify({"message": "hi"});
+        
+        const changes = {};
+        let hasChanges = false;
+
+        uiElements.forEach(element => {
+            const currentValue = document.getElementById(`slider-${element.id}`).value;
+            if (previousUiState[element.id] !== currentValue) {
+                changes[element.id] = parseFloat(currentValue);
+                hasChanges = true;
+                previousUiState[element.id] = currentValue;
+            }
+        });
+
+        if (hasChanges) {
+            const data = JSON.stringify(changes);
             uiUpdateCallback(data);
         }
     };
@@ -167,6 +181,8 @@
             if (element.type === 'slider') {
                 const slider = createSlider(element);
                 uiControlsContainer.appendChild(slider);
+                uiElements.push(element);
+                previousUiState[element.id] = element.value;
             }
             // Add more element types here as needed
         });
@@ -194,14 +210,6 @@
         slider.max = element.max;
         slider.value = element.value;
         slider.step = element.step;
-
-        slider.addEventListener('input', function() {
-            // Call the C++ function to update the animation speed
-            Module._jsUiManager_updateUiComponents(JSON.stringify({
-                id: element.id,
-                value: parseFloat(this.value)
-            }));
-        });
 
         controlDiv.appendChild(label);
         controlDiv.appendChild(slider);
