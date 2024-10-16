@@ -41,6 +41,7 @@ void jsButton::setPressed(bool pressed) {
 
 void jsButton::updateInternal(const char* jsonStr) {
     mPressed = (strcmp(jsonStr, "true") == 0);
+    printf("Button %s pressed: %d\n", name(), mPressed);
 }
 
 jsButton::operator bool() const {
