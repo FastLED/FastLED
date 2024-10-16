@@ -7,6 +7,7 @@
 #include <emscripten/html5.h>
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
+#include "platforms/wasm/js.h"
 
 #include "platforms/wasm/active_strip_data.h"
 #include "engine_events.h"
@@ -43,8 +44,13 @@ private:
         jsOnFrame();
     }
     void onStripAdded(CLEDController* strip, uint32_t num_leds) override {
-        int id = StripIdMap::add(strip);
+        int id = StripIdMap::addOrGetId(strip);
         jsOnStripAdded(id, num_leds);
+    }
+
+    void onCanvasUiSet(CLEDController* strip, const XYMap& xymap) override {
+        int controller_id = StripIdMap::addOrGetId(strip);
+        jsSetCanvasSize(controller_id, xymap);
     }
     void jsOnFrame() {
         EM_ASM_({

@@ -2,6 +2,7 @@
 
 #include "fixed_vector.h"
 #include "singleton.h"
+#include "xymap.h"
 
 #include "namespace.h"
 
@@ -34,6 +35,8 @@ class EngineEvents {
         virtual void onEndShowLeds() {}
         virtual void onEndFrame() {}
         virtual void onStripAdded(CLEDController *strip, uint32_t num_leds) {}
+        // Called to set the canvas for UI elements for a particular strip.
+        virtual void onCanvasUiSet(CLEDController *strip, const XYMap& xymap) {}
         virtual void onPlatformPreLoop() {}  
         virtual void onPlatformPreLoop2() {}
     };
@@ -83,6 +86,12 @@ class EngineEvents {
         #endif
     }
 
+    static void onCanvasUiSet(CLEDController *strip, const XYMap& xymap) {
+        #if FASTLED_HAS_ENGINE_EVENTS
+        EngineEvents::getInstance()->_onCanvasUiSet(strip, xymap);
+        #endif
+    }
+
     static void onPlatformPreLoop() {
         #if FASTLED_HAS_ENGINE_EVENTS
         EngineEvents::getInstance()->_onPlatformPreLoop();
@@ -98,6 +107,7 @@ class EngineEvents {
     void _onEndShowLeds();
     void _onEndFrame();
     void _onStripAdded(CLEDController *strip, uint32_t num_leds);
+    void _onCanvasUiSet(CLEDController *strip, const XYMap& xymap);
     void _onPlatformPreLoop();
 #if FASTLED_HAS_ENGINE_EVENTS
     typedef FixedVector<Listener *, FASTLED_ENGINE_EVENTS_MAX_LISTENERS>

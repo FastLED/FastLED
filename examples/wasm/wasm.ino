@@ -66,7 +66,7 @@
 #define SPEED 30
 
 CRGB leds[NUM_LEDS];
-XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
+XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
 NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
 Slider brightness = Slider("Brightness",255, 0, 255);
@@ -79,12 +79,12 @@ Button buttonChangePalette = Button("Next Palette");
 void setup() {
     delay(1000); // sanity delay
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
-        .setCorrection(TypicalLEDStrip);
+        .setCorrection(TypicalLEDStrip)
+        .setCanvasUi(xyMap);
     FastLED.setBrightness(96);
     noisePalette->lazyInit();
     noisePalette->setSpeed(SPEED);
     noisePalette->setScale(SCALE);
-    jsSetCanvasSize(MATRIX_WIDTH, MATRIX_HEIGHT);
 }
 
 void loop() {

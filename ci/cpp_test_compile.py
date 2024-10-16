@@ -138,7 +138,7 @@ def run_command(command: str, cwd=None, capture: bool = False) -> tuple[str, str
         cwd=cwd,
         capture_output=capture,
     )
-    
+
     if capture:
         stdout = process.stdout
         stderr = process.stderr
@@ -154,7 +154,7 @@ def run_command(command: str, cwd=None, capture: bool = False) -> tuple[str, str
             print(stderr)
         print(f"Return code: {process.returncode}")
         exit(1)
-    
+
     return stdout, stderr
 
 

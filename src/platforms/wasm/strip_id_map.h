@@ -14,7 +14,7 @@ extern uint16_t cled_contoller_size();
 
 class StripIdMap {
 public:
-    static int add(CLEDController* owner) {
+    static int addOrGetId(CLEDController* owner) {
         StripIdMap& instance = Instance();
         auto find = instance.mStripMap.find(owner);
         if (find != instance.mStripMap.end()) {

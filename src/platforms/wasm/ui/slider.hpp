@@ -33,7 +33,7 @@ std::string jsSlider::toJsonStr() const {
     encoder.addField("max", mMax);
     encoder.addField("value", mValue);
     encoder.addField("step", mStep);
-    return encoder.str();
+    return encoder.c_str();
 }
 
 float jsSlider::value() const { 

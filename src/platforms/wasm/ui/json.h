@@ -8,6 +8,7 @@
 class JsonDictEncoder {
 private:
     std::ostringstream oss;
+    std::ostringstream* external = nullptr;
     std::string finalStr;
     bool first = true;
     bool begun = false;
@@ -15,30 +16,37 @@ private:
 
     template<typename T>
     void appendJsonField(const char* name, const T& value) {
-        oss << "\"" << name << "\":" << value;
+        out() << "\"" << name << "\":" << value;
     }
 
     void appendJsonField(const char* name, const std::string& value) {
-        oss << "\"" << name << "\":\"" << value << "\"";
+        out() << "\"" << name << "\":\"" << value << "\"";
     }
 
     void appendJsonField(const char* name, const char* value) {
-        oss << "\"" << name << "\":\"" << value << "\"";
+        out() << "\"" << name << "\":\"" << value << "\"";
+    }
+
+    std::ostringstream& out() {
+        return external ? *external : oss;
     }
 
 public:
     JsonDictEncoder() = default;
 
-    void begin() {
+    void begin(std::ostringstream* externalStream = nullptr) {
+        if (externalStream) {
+            external = externalStream;
+        }
         if (!begun) {
-            oss << "{";
+            out() << "{";
             begun = true;
         }
     }
 
     void end() {
         if (begun && !ended) {
-            oss << "}";
+            out() << "}";
             begun = false;
             ended = true;
             finalStr = oss.str();
@@ -52,15 +60,22 @@ public:
             begin();
         }
         if (!first) {
-            oss << ",";
+            out() << ",";
         }
         appendJsonField(name, value);
         first = false;
     }
 
-    const char* str() {
+    // if using an external string this will be empty.
+    const char* c_str() {
         end();
         return finalStr.c_str();
+    }
+
+    // if using an external string this will be empty.
+    std::string str() {
+        end();
+        return finalStr;
     }
 };
 

@@ -12,6 +12,7 @@
 #include "pixel_controller.h"
 #include "dither_mode.h"
 #include "pixel_iterator.h"
+#include "engine_events.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -178,6 +179,16 @@ public:
     /// @param ditherMode the dithering mode to set
     /// @returns a reference to the controller
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
+
+    CLEDController& setCanvasUi(const XYMap& map) {
+        // This is a placeholder for the UI canvas. It is not implemented in the base class.
+        EngineEvents::onCanvasUiSet(this, map);
+        return *this;
+    }
+
+    CLEDController& setCanvasUi(uint16_t width, uint16_t height) {
+        return setCanvasUi(XYMap::constructRectangularGrid(width, height));
+    }
 
     /// Get the dithering option currently set for this controller
     /// @return the currently set dithering option (CLEDController::m_DitherMode)
