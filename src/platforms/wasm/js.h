@@ -51,6 +51,9 @@ class jsSlider {
 
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
+    jsSlider& operator=(float value) { setValue(value); return *this; }
+    jsSlider& operator=(int value) { setValue(static_cast<float>(value)); return *this; }
+
   private:
     void updateInternal(const char *jsonStr);
 
@@ -72,6 +75,9 @@ class jsCheckbox {
     void setValue(bool value);
     operator bool() const;
     operator int() const;
+
+    jsCheckbox& operator=(bool value) { setValue(value); return *this; }
+    jsCheckbox& operator=(int value) { setValue(value != 0); return *this; }
 
   private:
     void updateInternal(const char *jsonStr);
