@@ -43,6 +43,7 @@ float jsSlider::value() const {
 
 void jsSlider::updateInternal(const char* jsonStr) {
     // TODO: Implement the update logic here
+    printf("jsSlider::updateInternal: %s\n", jsonStr);
 }
 
 void jsSlider::setValue(float value) {

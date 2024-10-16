@@ -34,8 +34,8 @@ class jsUiManager : EngineEvents::Listener {
 
     void onEndFrame() override;
     void updateJs();
-    static void updateAll(const std::string& jsonStr);
-    static void receiveJsUpdate(const char* jsonStr);
+    static void updateAll(const std::map<int, std::string>& id_val_map);
+    static void receiveJsUpdate(const std::map<int, std::string>& id_val_map);
 
     std::string toJsonStr();
 

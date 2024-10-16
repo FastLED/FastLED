@@ -38,20 +38,39 @@ inline jsUiManager& jsUiManager::instance() {
     return Singleton<jsUiManager>::instance();
 }
 
-inline void jsUiManager::updateAll(const std::string& jsonStr) {
-    std::lock_guard<std::mutex> lock(instance().mMutex);
-    for (auto it = instance().mComponents.begin(); it != instance().mComponents.end(); ) {
-        if (auto component = it->lock()) {
-            component->update(jsonStr.c_str());
-            ++it;
+inline void jsUiManager::updateAll(const std::map<int, std::string>& id_val_map) {
+    jsUiManager& self = instance();
+
+    std::vector<std::shared_ptr<jsUiInternal>> components;
+    // Copy js ui components into a vector of shared_ptrs. This will lock it's lifetime
+    // for the duration of the call.
+    {
+        std::lock_guard<std::mutex> lock(self.mMutex);
+
+        components.reserve(self.mComponents.size());
+        for (auto it = self.mComponents.begin(); it != self.mComponents.end(); ) {
+            if (auto component = it->lock()) {
+                components.push_back(component);
+                ++it;
+            } else {
+                it = self.mComponents.erase(it);
+            }
+        }
+    }
+    
+    // Update components with matching ids
+    for (const auto& component : components) {
+        auto it = id_val_map.find(component->id());
+        if (it != id_val_map.end()) {
+            component->update(it->second.c_str());
         } else {
-            it = instance().mComponents.erase(it);
+            printf("Warning: UI id %d could not be found.\n", component->id());
         }
     }
 }
 
-inline void jsUiManager::receiveJsUpdate(const char* jsonStr) {
-    updateAll(jsonStr);
+inline void jsUiManager::receiveJsUpdate(const std::map<int, std::string>& id_val_map) {
+    updateAll(id_val_map);
 }
 
 inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
@@ -63,12 +82,11 @@ inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
         printf("Error: Invalid JSON string received: %s\n", jsonStr.c_str());
         return;
     }
-    /*
-    for (const auto& partial : decoder.getPartials()) {
-        // updateAll(partial);
-    }
-    */
-   printf("Parse ok - implement what happens next\n");
+    
+    // Call updateAll with the parsed id_val_map
+    updateAll(id_val_map);
+    
+    printf("Parse ok - updateAll called with parsed map\n");
 }
 
 inline void jsUiManager::updateJs() {
