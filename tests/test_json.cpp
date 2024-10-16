@@ -30,4 +30,21 @@ TEST_CASE("Test JsonIdValueDecoder") {
         CHECK_EQ(it->first, 0);
         CHECK_EQ(it->second, "value");
     }
+
+    SUBCASE("Multiple values") {
+        const char* json_str = R"({
+            "0": "value",
+            "1": "value1"
+        })";
+        std::map<int, std::string> result;
+        bool success = JsonIdValueDecoder::parseJson(json_str, &result);
+        CHECK(success);
+        REQUIRE(result.size() == 2);
+        std::map<int, std::string>::iterator it = result.begin();
+        CHECK_EQ(it->first, 0);
+        CHECK_EQ(it->second, "value");
+        it++;
+        CHECK_EQ(it->first, 1);
+        CHECK_EQ(it->second, "value1");
+    }
 }
