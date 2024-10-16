@@ -69,4 +69,8 @@ jsSlider::operator uint8_t() const {
     return static_cast<uint8_t>(mValue);
 }
 
+jsSlider::operator int() const {
+    return static_cast<uint8_t>(mValue);
+}
+
 FASTLED_NAMESPACE_END

@@ -23,6 +23,7 @@ public:
     void setValue(float value);
     operator float() const;
     operator uint8_t() const;
+    operator int() const;
 
 private:
     void updateInternal(const char* jsonStr);
