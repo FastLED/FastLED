@@ -1,4 +1,4 @@
-#include "slider.h"
+#include "platforms/stub/wasm/js.h"
 #include "ui_manager.h"
 #include <sstream>
 #include "json.h"

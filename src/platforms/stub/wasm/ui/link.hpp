@@ -5,4 +5,6 @@
 #include "ui_manager.hpp"
 #include "ui_internal.hpp"
 #include "ui_canvas_size.hpp"
+#include "engine_events.hpp"
+#include "setup_and_loop.hpp"
 #endif

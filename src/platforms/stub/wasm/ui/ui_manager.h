@@ -6,6 +6,7 @@
 #include <set>
 #include <string>
 #include <memory>
+#include <map>
 
 FASTLED_NAMESPACE_BEGIN
 

@@ -13,7 +13,6 @@
 #include "slice.h"
 
 #include "platforms/stub/wasm/js.h"
-#include "platforms/stub/wasm/ui/slider.h"
 
 
 #define LED_PIN 3
