@@ -60,4 +60,22 @@ private:
     bool mValue;
 };
 
+class jsButton {
+public:
+    jsButton(const char* name);
+    ~jsButton();
+
+    const char* name() const;
+    std::string toJsonStr() const;
+    bool isPressed() const;
+    void setPressed(bool pressed);
+    operator bool() const;
+
+private:
+    void updateInternal(const char* jsonStr);
+
+    std::shared_ptr<jsUiInternal> mInternal;
+    bool mPressed;
+};
+
 FASTLED_NAMESPACE_END
