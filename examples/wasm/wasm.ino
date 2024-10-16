@@ -69,6 +69,7 @@ NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
 jsSlider slider = jsSlider("Brightness", 0, 255, 255);
 jsSlider speedSlider = jsSlider("Speed", 1, 255, 30);
+jsCheckbox checkbox = jsCheckbox("Checkbox", false);
 
 void setup() {
     delay(1000); // sanity delay

@@ -36,4 +36,22 @@ private:
     float mStep;
 };
 
+class jsCheckbox {
+public:
+    jsCheckbox(const char* name, bool value);
+    ~jsCheckbox();
+
+    const char* name() const;
+    std::string toJsonStr() const;
+    bool value() const;
+    void setValue(bool value);
+    operator bool() const;
+
+private:
+    void updateInternal(const char* jsonStr);
+
+    std::shared_ptr<jsUiInternal> mInternal;
+    bool mValue;
+};
+
 FASTLED_NAMESPACE_END
