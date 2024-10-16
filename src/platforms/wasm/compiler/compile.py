@@ -1,3 +1,15 @@
+# A compilation script specific to fastled's docker compiler.
+# This script will pull the users code from a mapped directory,
+# then do some processing to convert the *.ino files to *.cpp and
+# insert certain headers like "Arduino.h" (pointing to a fake implementation).
+# After this, the code is compiled, and the output files are copied back
+# to the users mapped directory in the fastled_js folder.
+# There are a few assumptions for this script:
+# 1. The mapped directory will contain only one directory with the users code, this is
+#    enforced by the script that sets up the docker container.
+# 2. The docker container has installed compiler dependencies in the /js directory.
+
+
 import argparse
 import re
 import shutil
@@ -13,7 +25,7 @@ PIO_BUILD_DIR = JS_DIR / ".pio/build"
 ARDUINO_H_SRC = JS_DIR / "Arduino.h"
 INDEX_HTML_SRC = JS_DIR / "index.html"
 OUTPUT_FILES = ["fastled.js", "fastled.wasm"]
-HEADER_TO_INSERT = ['#include "Arduino.h"', '#include "platforms/wasm/js.h"']
+HEADERS_TO_INSERT = ['#include "Arduino.h"', '#include "platforms/wasm/js.h"']
 FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 2
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
@@ -60,7 +72,7 @@ def insert_header(file: Path) -> None:
         content = f.read()
 
     # Remove existing includes
-    for header in HEADER_TO_INSERT:
+    for header in HEADERS_TO_INSERT:
         content = re.sub(
             rf"^.*{re.escape(header)}.*\n", "", content, flags=re.MULTILINE
         )
@@ -70,7 +82,7 @@ def insert_header(file: Path) -> None:
     content = re.sub(arduino_pattern, "", content, flags=re.MULTILINE)
 
     # Add new headers at the beginning
-    content = "\n".join(HEADER_TO_INSERT) + "\n" + content
+    content = "\n".join(HEADERS_TO_INSERT) + "\n" + content
 
     with open(file, "w") as f:
         f.write(content)

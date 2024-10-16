@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# this is a work in progress for install the arduino-cli tool so that
+# ino sketches can be converted into cpp code in preparation for the
+# wasm compilation.
+
 wget https://github.com/arduino/arduino-cli/releases/download/v1.0.4/arduino-cli_1.0.4_Linux_64bit.tar.gz && \
     tar -xvf arduino-cli_1.0.4_Linux_64bit.tar.gz && \
     mv arduino-cli /usr/bin/arduino-cli && \

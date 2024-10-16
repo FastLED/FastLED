@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+# This is experimental code to process an INO file and output
+# a C++ version like the arduino IDE does, where all the declarations
+# of function prototypes are at the top of the file.
+# However, clang ast dump will not correctly identify the integer types
+# of the arguments. For examples, uint8_t was being identified as "int".
+# This could be because we are using clang 11 from emscripten and this
+# might have been fixed in a newer version version of clang. However,
+# the amount of work to get this to work is massive so I'm stopping here.
+
 import os
 import sys
 import subprocess
