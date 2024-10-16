@@ -69,7 +69,7 @@ NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
 jsSlider brightness = jsSlider("Brightness", 0, 255, 255);
 jsSlider speedSlider = jsSlider("Speed", 1, 50, 30);
-jsCheckbox checkbox = jsCheckbox("Set Black", true);
+jsCheckbox isOff = jsCheckbox("Set Black", false);
 jsCheckbox changePallete = jsCheckbox("Auto Next", true);
 jsSlider changePalletTime = jsSlider("Change Palette Time", 1, 100, 5);
 jsButton buttonChangePalette = jsButton("Next Palette");
@@ -86,7 +86,7 @@ void setup() {
 }
 
 void loop() {
-    FastLED.setBrightness(checkbox ? brightness.as<uint8_t>() : 0);
+    FastLED.setBrightness(!isOff ? brightness.as<uint8_t>() : 0);
     noisePalette->setSpeed(speedSlider);
     static int frame = 0;
     EVERY_N_MILLISECONDS(changePalletTime.as<int>() * 1000) {
@@ -99,7 +99,7 @@ void loop() {
         noisePalette->changeToRandomPalette();
 
     }
-    
+
     EVERY_N_MILLISECONDS(1000) {
         printf("fastled running\r\n");
     }
