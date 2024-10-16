@@ -76,13 +76,6 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	return *pLed;
 }
 
-void CFastLED::addListener(EngineEvents::Listener *listener) {
-	EngineEvents::addListener(listener);
-}
-void CFastLED::removeListener(EngineEvents::Listener *listener) {
-	EngineEvents::removeListener(listener);
-}
-
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
 void CFastLED::show(uint8_t scale) {
