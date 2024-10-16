@@ -42,13 +42,23 @@ float jsSlider::value() const {
 }
 
 void jsSlider::updateInternal(const char* jsonStr) {
-    // TODO: Implement the update logic here
-    printf("jsSlider::updateInternal: %s\n", jsonStr);
+    // We expect jsonStr to actually be a value string, so simply parse it.
+    float value = std::stof(jsonStr);
+    setValue(value);
 }
 
 void jsSlider::setValue(float value) {
     mValue = std::max(mMin, std::min(mMax, value));
-    // TODO: Notify UI of value change
+    if (mValue != value) {
+        // The value was outside the range so print out a warning that we
+        // clamped.
+        const char* name = mInternal->name();
+        int id = mInternal->id();
+        printf(
+            "Warning: Slider %s with id %d value %f was clamped to range [%f, %f] -> %f\n",
+            name, id,
+            value, mMin, mMax, mValue);
+    }
 }
 
 jsSlider::operator float() const { 

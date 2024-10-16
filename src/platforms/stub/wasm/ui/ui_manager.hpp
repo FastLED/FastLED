@@ -60,7 +60,7 @@ inline void jsUiManager::updateAll(const std::map<int, std::string>& id_val_map)
     
     // Update components with matching ids
     for (const auto& component : components) {
-        auto it = id_val_map.find(component->id());
+        const auto& it = id_val_map.find(component->id());
         if (it != id_val_map.end()) {
             component->update(it->second.c_str());
         } else {
