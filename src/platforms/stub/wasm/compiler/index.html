@@ -130,7 +130,8 @@
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #1E90FF; /* Dodger Blue */
+            background-color: #1E90FF;
+            /* Dodger Blue */
             color: white;
             border: none;
             border-radius: 5px;
@@ -138,11 +139,13 @@
         }
 
         .ui-control button:hover {
-            background-color: #187BE5; /* Slightly darker blue */
+            background-color: #187BE5;
+            /* Slightly darker blue */
         }
 
         .ui-control button:active {
-            background-color: #1670CC; /* Even darker blue for active state */
+            background-color: #1670CC;
+            /* Even darker blue for active state */
         }
     </style>
 
@@ -206,6 +209,7 @@
     let uiElements = {};
     let previousUiState = {};
 
+
     globalThis.onFastLedFrame = function (frameData, uiUpdateCallback) {
         updateCanvas(frameData.getFirstPixelData_Uint8());
 
@@ -218,15 +222,9 @@
 
             if (element.type === 'checkbox') {
                 currentValue = element.checked;
-            } else if (element.type === 'button') {
-                currentValue = previousUiState[id];
-                if (currentValue) {
-                    // Reset button state after one frame
-                    previousUiState[id] = false;
-                    changes[id] = false;
-                    hasChanges = true;
-                }
-                continue; // Skip the rest of the loop for buttons
+            } else if (element.type === 'submit') {
+                let attr = element.getAttribute('data-pressed');
+                currentValue = attr === 'true';
             } else {
                 currentValue = parseFloat(element.value);
             }
@@ -353,15 +351,25 @@
         const button = document.createElement('button');
         button.textContent = element.name;
         button.id = `button-${element.id}`;
+        button.setAttribute('data-pressed', 'false'); // Initialize data-pressed as false
 
-        button.addEventListener('click', function() {
-            // Update the button state
+        button.addEventListener('mousedown', function() {
+            // Set data-pressed to true when the button is clicked
+            this.setAttribute('data-pressed', 'true');
+
+            // Update the button's UI state (active visual feedback)
             this.classList.add('active');
-            setTimeout(() => this.classList.remove('active'), 200);
-
-            // Update the UI state
-            previousUiState[element.id] = true;
         });
+
+        button.addEventListener('mouseup', function() {
+            // Set data-pressed to false when the button is released
+            this.setAttribute('data-pressed', 'false');
+
+            // Update the button's UI state (remove active visual feedback)
+            this.classList.remove('active');
+        });
+
+
 
         controlDiv.appendChild(button);
 
