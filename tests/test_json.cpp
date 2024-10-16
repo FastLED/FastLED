@@ -7,6 +7,15 @@
 #include "platforms/stub/wasm/ui/json.h"
 
 TEST_CASE("Test JsonIdValueDecoder") {
+
+    SUBCASE("Empty string") {
+        const char* json_str = "";
+        std::map<int, std::string> result;
+        bool success = JsonIdValueDecoder::parseJson(json_str, &result);
+        CHECK(success);
+        CHECK(result.empty());
+    }
+
     SUBCASE("Test simple JSON parsing") {
         // R"(...)" is a raw string literal in C++, allowing us to write JSON strings without escaping quotes
         const char* json_str = R"({"0": "value"})";
@@ -110,7 +119,7 @@ TEST_CASE("Test JsonStringValueDecoder") {
         CHECK(result.empty());
     }
 
-    SUBCASE("Invalid JSON") {
+    SUBCASE("Trailing comma") {
         const char* json_str = R"({"key": "value",})";
         std::map<std::string, std::string> result;
         bool success = JsonStringValueDecoder::parseJson(json_str, &result);
