@@ -245,9 +245,7 @@
     };
 
     globalThis.onFastLedUiElementsAdded = function (jsonData) {
-        const output = document.getElementById('output');
         const jsonStr = JSON.stringify(jsonData);
-        output.textContent += `UI elements added: ${jsonStr}\n`;
         console.log("UI elements added:");
         console.log(jsonData);
 
