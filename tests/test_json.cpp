@@ -110,10 +110,10 @@ TEST_CASE("Test JsonStringValueDecoder") {
         CHECK(result.empty());
     }
 
-    //SUBCASE("Invalid JSON") {
-    //    const char* json_str = R"({"key": "value",})";
-    //    std::map<std::string, std::string> result;
-    //    bool success = JsonStringValueDecoder::parseJson(json_str, &result);
-    //    CHECK_FALSE(success);
-    //}
+    SUBCASE("Invalid JSON") {
+        const char* json_str = R"({"key": "value",})";
+        std::map<std::string, std::string> result;
+        bool success = JsonStringValueDecoder::parseJson(json_str, &result);
+        CHECK(success);
+    }
 }
