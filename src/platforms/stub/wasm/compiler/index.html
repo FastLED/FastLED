@@ -197,9 +197,20 @@
         const controlDiv = document.createElement('div');
         controlDiv.className = 'ui-control';
 
+        const labelValueContainer = document.createElement('div');
+        labelValueContainer.style.display = 'flex';
+        labelValueContainer.style.justifyContent = 'space-between';
+        labelValueContainer.style.width = '100%';
+
         const label = document.createElement('label');
         label.textContent = element.name;
         label.htmlFor = `slider-${element.id}`;
+
+        const valueDisplay = document.createElement('span');
+        valueDisplay.textContent = element.value;
+
+        labelValueContainer.appendChild(label);
+        labelValueContainer.appendChild(valueDisplay);
 
         const slider = document.createElement('input');
         slider.type = 'range';
@@ -209,7 +220,11 @@
         slider.value = element.value;
         slider.step = element.step;
 
-        controlDiv.appendChild(label);
+        slider.addEventListener('input', function() {
+            valueDisplay.textContent = this.value;
+        });
+
+        controlDiv.appendChild(labelValueContainer);
         controlDiv.appendChild(slider);
 
         return controlDiv;
