@@ -67,7 +67,7 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
 NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
-jsSlider slider = jsSlider("Speed", 1, 100, SPEED);
+jsSlider slider = jsSlider("Brightness", 1, 100, SPEED);
 
 void setup() {
     delay(1000); // sanity delay
@@ -81,6 +81,7 @@ void setup() {
 }
 
 void loop() {
+    FastLED.setBrightness(slider);
     static int frame = 0;
     EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
     EVERY_N_MILLISECONDS(1000) {
