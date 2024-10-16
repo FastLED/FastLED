@@ -69,7 +69,7 @@ NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
 jsSlider slider = jsSlider("Brightness", 0, 255, 255);
 jsSlider speedSlider = jsSlider("Speed", 1, 255, 30);
-jsCheckbox checkbox = jsCheckbox("Checkbox", false);
+jsCheckbox checkbox = jsCheckbox("Brightness", true);
 
 void setup() {
     delay(1000); // sanity delay
@@ -83,7 +83,7 @@ void setup() {
 }
 
 void loop() {
-    FastLED.setBrightness(slider);
+    FastLED.setBrightness(checkbox ? slider.as<uint8_t>() : 0);
     noisePalette->setSpeed(speedSlider);
     static int frame = 0;
     EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }

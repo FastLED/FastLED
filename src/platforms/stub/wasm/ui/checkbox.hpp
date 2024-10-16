@@ -49,4 +49,8 @@ jsCheckbox::operator bool() const {
     return mValue;
 }
 
+jsCheckbox::operator int() const {
+    return mValue;
+}
+
 FASTLED_NAMESPACE_END

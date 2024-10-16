@@ -61,6 +61,7 @@ void jsSlider::setValue(float value) {
     }
 }
 
+
 jsSlider::operator float() const { 
     return mValue; 
 }
@@ -74,7 +75,7 @@ jsSlider::operator uint16_t() const {
 }
 
 jsSlider::operator int() const {
-    return static_cast<uint8_t>(mValue);
+    return static_cast<int>(mValue);
 }
 
 FASTLED_NAMESPACE_END

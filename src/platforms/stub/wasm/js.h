@@ -26,6 +26,11 @@ public:
     operator uint16_t() const;
     operator int() const;
 
+    template<typename T>
+    T as() const {
+        return static_cast<T>(mValue);
+    }
+
 private:
     void updateInternal(const char* jsonStr);
 
@@ -46,6 +51,7 @@ public:
     bool value() const;
     void setValue(bool value);
     operator bool() const;
+    operator int() const;
 
 private:
     void updateInternal(const char* jsonStr);
