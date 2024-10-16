@@ -8,9 +8,9 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
-#include "platforms/stub/wasm/active_strip_data.h"
+#include "platforms/wasm/active_strip_data.h"
 #include "engine_events.h"
-#include "platforms/stub/wasm/strip_id_map.h"
+#include "platforms/wasm/strip_id_map.h"
 
 
 #include "namespace.h"

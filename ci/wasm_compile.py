@@ -10,7 +10,7 @@ from ci.paths import PROJECT_ROOT
 
 HERE: Path = Path(__file__).parent
 DOCKER_FILE: Path = (
-    PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "compiler" / "Dockerfile"
+    PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "Dockerfile"
 )
 
 assert DOCKER_FILE.exists(), f"ERROR: Dockerfile not found at {DOCKER_FILE}"

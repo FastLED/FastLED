@@ -1,4 +1,4 @@
-#include "platforms/stub/wasm/js.h"
+#include "platforms/wasm/js.h"
 #include "ui_manager.h"
 #include <sstream>
 #include <string.h>

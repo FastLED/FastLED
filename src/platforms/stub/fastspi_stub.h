@@ -2,7 +2,7 @@
 
 
 #ifdef __EMSCRIPTEN__
-#include "platforms/stub/wasm/fastspi_wasm.h"
+#include "platforms/wasm/fastspi_wasm.h"
 #elif defined(FASTLED_STUB_IMPL)
 #include "platforms/stub/fastspi_stub_generic.h"
 #else

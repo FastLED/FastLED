@@ -12,7 +12,7 @@
 #include "third_party/arduinojson/json.h"
 #include "slice.h"
 
-#include "platforms/stub/wasm/js.h"
+#include "platforms/wasm/js.h"
 
 
 #define LED_PIN 3

@@ -4,7 +4,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "doctest.h"
-#include "platforms/stub/wasm/ui/json.h"
+#include "platforms/wasm/ui/json.h"
 
 TEST_CASE("Test JsonIdValueDecoder") {
 

@@ -46,7 +46,7 @@ RUN pip3 install wormhole-tx || true
 
 # src\platforms\stub\wasm\compiler\install-arduino-cli.sh
 
-COPY src/platforms/stub/wasm/compiler/install-arduino-cli.sh /install-arduino-cli.sh
+COPY src/platforms/wasm/compiler/install-arduino-cli.sh /install-arduino-cli.sh
 RUN chmod +x /install-arduino-cli.sh && /install-arduino-cli.sh || echo "Failed to install Arduino CLI"
 
 
@@ -70,12 +70,12 @@ COPY ./src/platforms/ /js/fastled/src/platforms/
 
 
 # Hack for now to get the wasm platform to compile
-COPY src/platforms/stub/wasm/compiler/platformio.ini /js/platformio.ini
-COPY src/platforms/stub/wasm/compiler/wasm.py /js/wasm.py
-COPY src/platforms/stub/wasm/compiler/index.html /js/index.html
-COPY src/platforms/stub/wasm/compiler/Arduino.h /js/Arduino.h
-COPY src/platforms/stub/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh
-COPY src/platforms/stub/wasm/compiler/*.sh /js/
+COPY src/platforms/wasm/compiler/platformio.ini /js/platformio.ini
+COPY src/platforms/wasm/compiler/wasm.py /js/wasm.py
+COPY src/platforms/wasm/compiler/index.html /js/index.html
+COPY src/platforms/wasm/compiler/Arduino.h /js/Arduino.h
+COPY src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh
+COPY src/platforms/wasm/compiler/*.sh /js/
 
 # COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
 #COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
@@ -85,12 +85,12 @@ COPY src/platforms/stub/wasm/compiler/*.sh /js/
 WORKDIR /js
 
 # Prewarm the cache with a first compile.
-RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/exports.h\" #include \"FastLed.h\"\nvoid setup() {}\nvoid loop(){}\n" > /js/src/prewarm_main.cpp
+RUN mkdir -p /js/src && echo -e "#include \"platforms/wasm/exports.h\" #include \"FastLed.h\"\nvoid setup() {}\nvoid loop(){}\n" > /js/src/prewarm_main.cpp
 RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
 
 # Copy the compile script
-COPY src/platforms/stub/wasm/compiler/compile.py /js/
-COPY src/platforms/stub/wasm/compiler/process-ino.py /js/
+COPY src/platforms/wasm/compiler/compile.py /js/
+COPY src/platforms/wasm/compiler/process-ino.py /js/
 RUN dos2unix /js/compile.py /js/process-ino.py
 RUN dos2unix /js/*.sh
 RUN chmod +x /js/*.sh
