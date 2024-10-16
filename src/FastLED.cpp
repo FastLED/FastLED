@@ -31,6 +31,8 @@ uint16_t cled_contoller_size() {
 	return sizeof(CLEDController);
 }
 
+uint8_t get_brightness();
+
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
 void *pSmartMatrix = NULL;
@@ -296,6 +298,11 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
 	} else {
 		m_nMinMicros = 0;
 	}
+}
+
+
+uint8_t get_brightness() {
+	return FastLED.getBrightness();
 }
 
 /// Called at program exit when run in a desktop environment. 
