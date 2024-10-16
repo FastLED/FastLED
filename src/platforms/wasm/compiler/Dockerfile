@@ -71,7 +71,7 @@ COPY ./src/platforms/ /js/fastled/src/platforms/
 
 # Hack for now to get the wasm platform to compile
 COPY src/platforms/wasm/compiler/platformio.ini /js/platformio.ini
-COPY src/platforms/wasm/compiler/wasm.py /js/wasm.py
+COPY src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py
 COPY src/platforms/wasm/compiler/index.html /js/index.html
 COPY src/platforms/wasm/compiler/Arduino.h /js/Arduino.h
 COPY src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh
