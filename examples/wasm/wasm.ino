@@ -68,9 +68,11 @@ XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
 NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
 jsSlider brightness = jsSlider("Brightness", 0, 255, 255);
-jsSlider speedSlider = jsSlider("Speed", 1, 255, 30);
-jsCheckbox checkbox = jsCheckbox("Brightness", true);
-jsButton button = jsButton("Click me");
+jsSlider speedSlider = jsSlider("Speed", 1, 50, 30);
+jsCheckbox checkbox = jsCheckbox("Set Black", true);
+jsCheckbox changePallete = jsCheckbox("Auto Next", true);
+jsSlider changePalletTime = jsSlider("Change Palette Time", 1, 100, 5);
+jsButton buttonChangePalette = jsButton("Next Palette");
 
 void setup() {
     delay(1000); // sanity delay
@@ -87,7 +89,17 @@ void loop() {
     FastLED.setBrightness(checkbox ? brightness.as<uint8_t>() : 0);
     noisePalette->setSpeed(speedSlider);
     static int frame = 0;
-    EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
+    EVERY_N_MILLISECONDS(changePalletTime.as<int>() * 1000) {
+        if (changePallete) {
+            noisePalette->changeToRandomPalette();
+        }
+    }
+
+    if (buttonChangePalette) {
+        noisePalette->changeToRandomPalette();
+
+    }
+    
     EVERY_N_MILLISECONDS(1000) {
         printf("fastled running\r\n");
     }

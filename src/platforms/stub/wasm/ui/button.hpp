@@ -22,9 +22,7 @@ const char* jsButton::name() const {
 
 std::string jsButton::toJsonStr() const {
     JsonDictEncoder encoder;
-    char nameBuf[256];
-    snprintf(nameBuf, sizeof(nameBuf), "Button: %s", name());
-    encoder.addField("name", nameBuf);
+    encoder.addField("name", name());
     encoder.addField("type", "button");
     encoder.addField("id", mInternal->id());
     encoder.addField("pressed", mPressed);

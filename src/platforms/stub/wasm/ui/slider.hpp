@@ -25,9 +25,7 @@ const char* jsSlider::name() const {
 
 std::string jsSlider::toJsonStr() const {
     JsonDictEncoder encoder;
-    char nameBuf[256];
-    snprintf(nameBuf, sizeof(nameBuf), "Slider: %s", name());
-    encoder.addField("name", nameBuf);
+    encoder.addField("name", name());
     encoder.addField("type", "slider");
     encoder.addField("id", mInternal->id());
     encoder.addField("min", mMin);

@@ -23,9 +23,7 @@ const char* jsCheckbox::name() const {
 
 std::string jsCheckbox::toJsonStr() const {
     JsonDictEncoder encoder;
-    char nameBuf[256];
-    snprintf(nameBuf, sizeof(nameBuf), "Checkbox: %s", name());
-    encoder.addField("name", nameBuf);
+    encoder.addField("name", name());
     encoder.addField("type", "checkbox");
     encoder.addField("id", mInternal->id());
     encoder.addField("value", mValue);
