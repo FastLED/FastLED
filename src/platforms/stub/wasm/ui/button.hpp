@@ -10,6 +10,7 @@ jsButton::jsButton(const char* name)
     auto toJsonStrFunc = [this]() { return this->toJsonStr(); };
     mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonStrFunc));
     jsUiManager::addComponent(mInternal);
+    mUpdater.init(this);
 }
 
 jsButton::~jsButton() {
@@ -30,20 +31,15 @@ std::string jsButton::toJsonStr() const {
 }
 
 bool jsButton::isPressed() const {
-    return mPressed;
+    // Due to ordering of operations, mPressedLast is always equal to
+    // mPressed. So we kind of fudge a little on the isPressed() event
+    // here;
+    return mPressed || mClickedHappened;
 }
 
-void jsButton::setPressed(bool pressed) {
-    mPressed = pressed;
-}
 
 void jsButton::updateInternal(const char* jsonStr) {
     mPressed = (strcmp(jsonStr, "true") == 0);
-    printf("Button %s pressed: %d\n", name(), mPressed);
-}
-
-jsButton::operator bool() const {
-    return mPressed;
 }
 
 FASTLED_NAMESPACE_END

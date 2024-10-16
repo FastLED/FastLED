@@ -4,6 +4,7 @@
 #include <emscripten.h>
 #include "json.h"
 #include <sstream>
+#include <vector>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -27,18 +28,11 @@ inline void jsUiManager::removeComponent(std::weak_ptr<jsUiInternal> component) 
     instance().mComponents.erase(component);
 }
 
-inline void jsUiManager::onEndFrame() {
-    if (mItemsAdded) {
-        updateJs();
-        mItemsAdded = false;
-    }
-}
-
 inline jsUiManager& jsUiManager::instance() {
     return Singleton<jsUiManager>::instance();
 }
 
-inline void jsUiManager::updateAll(const std::map<int, std::string>& id_val_map) {
+inline void jsUiManager::updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map) {
     jsUiManager& self = instance();
 
     std::vector<std::shared_ptr<jsUiInternal>> components;
@@ -67,22 +61,23 @@ inline void jsUiManager::updateAll(const std::map<int, std::string>& id_val_map)
     }
 }
 
-inline void jsUiManager::receiveJsUpdate(const std::map<int, std::string>& id_val_map) {
-    updateAll(id_val_map);
+inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
+    instance().pendingJsonUpdate = jsonStr;
 }
 
-inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
-    // Check if the input is a valid JSON object or array
+inline void jsUiManager::executeUiUpdates(const std::string& jsonStr) {
     std::map<int, std::string> id_val_map;
     bool ok = JsonIdValueDecoder::parseJson(jsonStr.c_str(), &id_val_map);
     if (!ok) {
         printf("Error: Invalid JSON string received: %s\n", jsonStr.c_str());
         return;
     }
-    updateAll(id_val_map);
+    updateAllFastLedUiComponents(id_val_map);
+
 }
 
 inline void jsUiManager::updateJs() {
+    printf("updateJs: %d\n", millis());
     std::string s = jsUiManager::instance().toJsonStr();
     EM_ASM_({
         globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(jsonData, updateFunc) {

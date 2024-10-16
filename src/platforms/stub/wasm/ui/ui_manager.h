@@ -21,6 +21,7 @@ class jsUiManager : EngineEvents::Listener {
     static void updateUiComponents(const std::string& jsonStr);
 
   private:
+  static void executeUiUpdates(const std::string& jsonStr);
     struct WeakPtrCompare {
         bool operator()(const std::weak_ptr<jsUiInternal>& lhs, const std::weak_ptr<jsUiInternal>& rhs) const;
     };
@@ -33,10 +34,23 @@ class jsUiManager : EngineEvents::Listener {
         EngineEvents::removeListener(this);
     }
 
-    void onEndFrame() override;
+    void onPlatformPreLoop() override {
+        if (pendingJsonUpdate.empty()) {
+            return;
+        }
+        jsUiManager::executeUiUpdates(pendingJsonUpdate);
+        pendingJsonUpdate.clear();
+    }
+
+    void onEndShowLeds() override {
+        if (mItemsAdded) {
+            updateJs();
+            mItemsAdded = false;
+        }
+    }
     void updateJs();
-    static void updateAll(const std::map<int, std::string>& id_val_map);
-    static void receiveJsUpdate(const std::map<int, std::string>& id_val_map);
+    static void updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map);
+
 
     std::string toJsonStr();
 
@@ -45,6 +59,7 @@ class jsUiManager : EngineEvents::Listener {
 
     static jsUiManager &instance();
     bool mItemsAdded = false;
+    std::string pendingJsonUpdate;
 };
 
 FASTLED_NAMESPACE_END
