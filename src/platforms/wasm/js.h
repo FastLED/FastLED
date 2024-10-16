@@ -12,6 +12,8 @@
 #include "engine_events.h"
 #include "namespace.h"
 
+
+
 FASTLED_NAMESPACE_BEGIN
 
 // Needed or the wasm compiler will strip them out.
@@ -34,8 +36,8 @@ void jsSetCanvasSize(int width, int height);
 
 class jsSlider {
   public:
-    jsSlider(const char *name, float min = 0.0f, float max = 255.0f,
-             float value = 128.0f, float step = 1.0f);
+    jsSlider(const char *name, float value = 128.0f, float min = 0.0f, float max = 255.0f,
+             float step = 1.0f);
     ~jsSlider();
 
     const char *name() const;
@@ -115,5 +117,15 @@ class jsButton {
     bool mPressedLast = false;
     bool mClickedHappened = false;
 };
+
+
+#define FASTLED_HAS_UI_BUTTON 1
+#define FASTLED_HAS_UI_SLIDER 1
+#define FASTLED_HAS_UI_CHECKBOX 1
+
+typedef jsSlider Slider;
+typedef jsCheckbox Checkbox;
+typedef jsButton Button;
+
 
 FASTLED_NAMESPACE_END

@@ -8,7 +8,7 @@ FASTLED_NAMESPACE_BEGIN
 
 
 
-jsSlider::jsSlider(const char* name, float min, float max, float value, float step)
+jsSlider::jsSlider(const char* name, float value, float min, float max, float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
     auto updateFunc = [this](const char* jsonStr) { this->updateInternal(jsonStr); };
     auto toJsonStrFunc = [this]() { return this->toJsonStr(); };

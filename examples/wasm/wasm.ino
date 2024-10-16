@@ -14,6 +14,8 @@
 
 #include "platforms/wasm/js.h"
 
+#include "ui.h"
+
 
 #define LED_PIN 3
 #define BRIGHTNESS 96
@@ -67,12 +69,12 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
 NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
-jsSlider brightness = jsSlider("Brightness", 0, 255, 255);
-jsSlider speedSlider = jsSlider("Speed", 1, 50, 30);
-jsCheckbox isOff = jsCheckbox("Set Black", false);
-jsCheckbox changePallete = jsCheckbox("Auto Next", true);
-jsSlider changePalletTime = jsSlider("Change Palette Time", 1, 100, 5);
-jsButton buttonChangePalette = jsButton("Next Palette");
+Slider brightness = Slider("Brightness",255, 0, 255);
+Slider speedSlider = Slider("Speed", 30, 1, 50);
+Checkbox isOff = Checkbox("Set Black", false);
+Checkbox changePallete = Checkbox("Auto Next", true);
+Slider changePalletTime = Slider("Change Palette Time", 5, 1, 100);
+Button buttonChangePalette = Button("Next Palette");
 
 void setup() {
     delay(1000); // sanity delay
