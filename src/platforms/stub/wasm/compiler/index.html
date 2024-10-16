@@ -125,6 +125,25 @@
             transform: scale(1.5);
             /* Optionally, scale the checkbox for better visibility */
         }
+
+        .ui-control button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .ui-control button:hover {
+            background-color: #45a049;
+        }
+
+        .ui-control button:active {
+            background-color: #3e8e41;
+        }
     </style>
 
 
@@ -195,9 +214,25 @@
 
         for (const id in uiElements) {
             const element = uiElements[id];
-            const currentValue = element.type === 'checkbox' ? element.checked : element.value;
+            let currentValue;
+
+            if (element.type === 'checkbox') {
+                currentValue = element.checked;
+            } else if (element.type === 'button') {
+                currentValue = previousUiState[id];
+                if (currentValue) {
+                    // Reset button state after one frame
+                    previousUiState[id] = false;
+                    changes[id] = false;
+                    hasChanges = true;
+                }
+                continue; // Skip the rest of the loop for buttons
+            } else {
+                currentValue = parseFloat(element.value);
+            }
+
             if (previousUiState[id] !== currentValue) {
-                changes[id] = element.type === 'checkbox' ? currentValue : parseFloat(currentValue);
+                changes[id] = currentValue;
                 hasChanges = true;
                 previousUiState[id] = currentValue;
             }
@@ -224,11 +259,17 @@
                 control = createSlider(element);
             } else if (element.type === 'checkbox') {
                 control = createCheckbox(element);
+            } else if (element.type === 'button') {
+                control = createButton(element);
             }
 
             if (control) {
                 uiControlsContainer.appendChild(control);
-                uiElements[element.id] = control.querySelector('input');
+                if (element.type === 'button') {
+                    uiElements[element.id] = control.querySelector('button');
+                } else {
+                    uiElements[element.id] = control.querySelector('input');
+                }
                 previousUiState[element.id] = element.value;
             }
         });
@@ -303,6 +344,28 @@
         flexContainer.appendChild(checkbox);
 
         controlDiv.appendChild(flexContainer);
+
+        return controlDiv;
+    }
+
+    function createButton(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const button = document.createElement('button');
+        button.textContent = element.name;
+        button.id = `button-${element.id}`;
+
+        button.addEventListener('click', function() {
+            // Update the button state
+            this.classList.add('active');
+            setTimeout(() => this.classList.remove('active'), 200);
+
+            // Update the UI state
+            previousUiState[element.id] = true;
+        });
+
+        controlDiv.appendChild(button);
 
         return controlDiv;
     }
