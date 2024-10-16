@@ -30,6 +30,7 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mRgb.clear();
 		ActiveStripData& ch_data = Singleton<ActiveStripData>::instance();
+		pixels.disableColorAdjustment();
 		PixelController<RGB> pixels_rgb = pixels;  // Converts to RGB pixels
 		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
 		while (iterator.has(1)) {

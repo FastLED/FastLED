@@ -86,6 +86,13 @@ struct PixelController {
         return PixelIterator(this, rgbw);
     }
 
+    void disableColorAdjustment() {
+        #if FASTLED_HD_COLOR_MIXING
+        mColorAdjustment.premixed = CRGB(mColorAdjustment.brightness, mColorAdjustment.brightness, mColorAdjustment.brightness);
+        mColorAdjustment.color = CRGB(0xff, 0xff, 0xff);
+        #endif
+    }
+
     /// Copy constructor
     /// @param other the object to copy 
     PixelController(const PixelController & other) {

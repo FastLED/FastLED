@@ -68,6 +68,7 @@ XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
 NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
 jsSlider slider = jsSlider("Brightness", 0, 255, 255);
+jsSlider speedSlider = jsSlider("Speed", 1, 255, 30);
 
 void setup() {
     delay(1000); // sanity delay
@@ -82,6 +83,7 @@ void setup() {
 
 void loop() {
     FastLED.setBrightness(slider);
+    noisePalette->setSpeed(speedSlider);
     static int frame = 0;
     EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
     EVERY_N_MILLISECONDS(1000) {
