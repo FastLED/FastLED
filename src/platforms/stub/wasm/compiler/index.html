@@ -152,9 +152,9 @@
 
         for (const id in uiElements) {
             const element = uiElements[id];
-            const currentValue = element.value;
+            const currentValue = element.type === 'checkbox' ? element.checked : element.value;
             if (previousUiState[id] !== currentValue) {
-                changes[id] = parseFloat(currentValue);
+                changes[id] = element.type === 'checkbox' ? currentValue : parseFloat(currentValue);
                 hasChanges = true;
                 previousUiState[id] = currentValue;
             }
@@ -176,13 +176,18 @@
         const uiControlsContainer = document.getElementById('ui-controls') || createUiControlsContainer();
 
         jsonData.forEach(element => {
+            let control;
             if (element.type === 'slider') {
-                const slider = createSlider(element);
-                uiControlsContainer.appendChild(slider);
-                uiElements[element.id] = slider.querySelector('input');
+                control = createSlider(element);
+            } else if (element.type === 'checkbox') {
+                control = createCheckbox(element);
+            }
+
+            if (control) {
+                uiControlsContainer.appendChild(control);
+                uiElements[element.id] = control.querySelector('input');
                 previousUiState[element.id] = element.value;
             }
-            // Add more element types here as needed
         });
     };
 
@@ -226,6 +231,25 @@
 
         controlDiv.appendChild(labelValueContainer);
         controlDiv.appendChild(slider);
+
+        return controlDiv;
+    }
+
+    function createCheckbox(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const label = document.createElement('label');
+        label.textContent = element.name;
+        label.htmlFor = `checkbox-${element.id}`;
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `checkbox-${element.id}`;
+        checkbox.checked = element.value;
+
+        controlDiv.appendChild(checkbox);
+        controlDiv.appendChild(label);
 
         return controlDiv;
     }

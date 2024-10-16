@@ -63,8 +63,6 @@ inline void jsUiManager::updateAll(const std::map<int, std::string>& id_val_map)
         const auto& it = id_val_map.find(component->id());
         if (it != id_val_map.end()) {
             component->update(it->second.c_str());
-        } else {
-            printf("Warning: UI id %d could not be found.\n", component->id());
         }
     }
 }
