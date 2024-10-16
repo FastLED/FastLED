@@ -94,18 +94,20 @@ def transform_to_cpp(src_dir: Path) -> None:
     ino_files = list(src_dir.glob("*.ino"))
 
     if ino_files:
-        print(f"Found .ino file: {ino_files[0]}")
+        ino_file = ino_files[0]
+        print(f"Found .ino file: {ino_file}")
         main_cpp = src_dir / "main.cpp"
         if main_cpp.exists():
             print("main.cpp already exists, renaming to main2.hpp")
             main_cpp.rename(src_dir / "main2.hpp")
 
-        print(f"Renaming {ino_files[0]} to generated_main.cpp")
-        ino_files[0].rename(src_dir / "generated_main.cpp")
+        new_cpp_file = ino_file.with_suffix(".ino.cpp")
+        print(f"Renaming {ino_file} to {new_cpp_file.name}")
+        ino_file.rename(new_cpp_file)
 
         if (src_dir / "main2.hpp").exists():
-            print("Including main2.hpp in main.cpp")
-            with open(src_dir / "main.cpp", "a") as f:
+            print(f"Including main2.hpp in {new_cpp_file.name}")
+            with open(new_cpp_file, "a") as f:
                 f.write('#include "main2.hpp"\n')
 
 
