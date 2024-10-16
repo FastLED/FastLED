@@ -69,7 +69,7 @@ public:
         }
         const uint8_t* data = mRgb.data();
 		ActiveStripData& active_strips = Singleton<ActiveStripData>::instance();
-		active_strips.update(mId, millis(), mRgb.data(), data.size());
+		active_strips.update(mId, millis(), mRgb.data(), mRgb.size());
     }
 
     void select() {}
