@@ -11,7 +11,6 @@
 #include "exports/engine_events.hpp"
 #include "exports/setup_and_loop.hpp"
 #include "exports/message_queue.hpp"
-#include "exports/canvas_size.hpp"
 #include "exports/post_message.hpp"
 
 #include "ui/link.hpp"

@@ -4,4 +4,5 @@
 #include "slider.hpp"
 #include "ui_manager.hpp"
 #include "ui_internal.hpp"
+#include "ui_canvas_size.hpp"
 #endif
