@@ -65,9 +65,8 @@ public:
             mRgb.push_back(r);
             mRgb.push_back(g);
             mRgb.push_back(b);
-            pixels.advanceBy(1);
+            pixels.advanceBy();
         }
-        const uint8_t* data = mRgb.data();
 		ActiveStripData& active_strips = Singleton<ActiveStripData>::instance();
 		active_strips.update(mId, millis(), mRgb.data(), mRgb.size());
     }
@@ -87,7 +86,7 @@ public:
 
 private:
     int mId = -1;  // Deferred initialization
-    std::vector<CRGB> mRgb;
+    std::vector<uint8_t> mRgb;
 };
 
 // Compatibility alias
