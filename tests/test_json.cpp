@@ -9,6 +9,7 @@
 
 TEST_CASE("Test JsonIdValueDecoder") {
     SUBCASE("Test simple JSON parsing") {
+        // R"(...)" is a raw string literal in C++, allowing us to write JSON strings without escaping quotes
         const char* json_str = R"({"0": "value"})";
         std::map<int, std::string> result;
         bool success = JsonIdValueDecoder::parseJson(json_str, &result);
@@ -35,6 +36,23 @@ TEST_CASE("Test JsonIdValueDecoder") {
         const char* json_str = R"({
             "0": "value",
             "1": "value1"
+        })";
+        std::map<int, std::string> result;
+        bool success = JsonIdValueDecoder::parseJson(json_str, &result);
+        CHECK(success);
+        REQUIRE(result.size() == 2);
+        std::map<int, std::string>::iterator it = result.begin();
+        CHECK_EQ(it->first, 0);
+        CHECK_EQ(it->second, "value");
+        it++;
+        CHECK_EQ(it->first, 1);
+        CHECK_EQ(it->second, "value1");
+    }
+
+    SUBCASE("Trailing comma") {
+        const char* json_str = R"({
+            "0": "value",
+            "1": "value1",
         })";
         std::map<int, std::string> result;
         bool success = JsonIdValueDecoder::parseJson(json_str, &result);

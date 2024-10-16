@@ -106,6 +106,8 @@ public:
             (*destination)[key] = value;
 
             pos = valueEnd + 1;
+            // Skip any trailing commas and whitespace
+            while (pos < end && (jsonStr[pos] == ',' || jsonStr[pos] == ' ' || jsonStr[pos] == '\n' || jsonStr[pos] == '\r')) ++pos;
         }
 
         return true;
