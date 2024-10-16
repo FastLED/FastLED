@@ -2,6 +2,7 @@
 
 #include "ui_manager.h"
 #include <emscripten.h>
+#include "json.h"
 #include <sstream>
 
 FASTLED_NAMESPACE_BEGIN
@@ -56,6 +57,18 @@ inline void jsUiManager::receiveJsUpdate(const char* jsonStr) {
 inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
     // Check if the input is a valid JSON object or array
     printf("Debug: Received JSON string: %s\n", jsonStr.c_str());
+    std::map<int, std::string> id_val_map;
+    bool ok = JsonIdValueDecoder::parseJson(jsonStr.c_str(), &id_val_map);
+    if (!ok) {
+        printf("Error: Invalid JSON string received: %s\n", jsonStr.c_str());
+        return;
+    }
+    /*
+    for (const auto& partial : decoder.getPartials()) {
+        // updateAll(partial);
+    }
+    */
+   printf("Parse ok - implement what happens next\n");
 }
 
 inline void jsUiManager::updateJs() {
