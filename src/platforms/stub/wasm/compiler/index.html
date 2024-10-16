@@ -119,9 +119,6 @@
     const FRAME_RATE = 60; // 60 FPS
     const CANVAS_SIZE = 16; // 16x16 initial canvas size
 
-    // print time 
-    console.log(new Date().toLocaleTimeString());
-
     globalThis.onFastLedSetCanvasSize = function (jsonStr) {
         const jsonData = JSON.parse(jsonStr);
         const canvas = document.getElementById('myCanvas');

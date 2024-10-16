@@ -57,8 +57,6 @@ private:
                 }
             };
             globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || function(jsonString) {
-                console.log("Debug: received frame data");
-                console.log(jsonString);
                 if (typeof jsonString === 'string' && jsonString !== null) {
                     Module._jsUiManager_updateUiComponents(jsonString);
                 } else {

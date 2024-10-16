@@ -75,18 +75,13 @@ inline void jsUiManager::receiveJsUpdate(const std::map<int, std::string>& id_va
 
 inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
     // Check if the input is a valid JSON object or array
-    printf("Debug: Received JSON string: %s\n", jsonStr.c_str());
     std::map<int, std::string> id_val_map;
     bool ok = JsonIdValueDecoder::parseJson(jsonStr.c_str(), &id_val_map);
     if (!ok) {
         printf("Error: Invalid JSON string received: %s\n", jsonStr.c_str());
         return;
     }
-    
-    // Call updateAll with the parsed id_val_map
     updateAll(id_val_map);
-    
-    printf("Parse ok - updateAll called with parsed map\n");
 }
 
 inline void jsUiManager::updateJs() {
@@ -150,7 +145,6 @@ inline std::string jsUiManager::toJsonStr() {
     }
     oss << "]";
     std::string result = oss.str();
-    printf("Debug: Generated JSON: %s\n", result.c_str());
     return result;
 }
 
