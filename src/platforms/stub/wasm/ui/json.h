@@ -64,6 +64,86 @@ public:
     }
 };
 
+class JsonStringValueDecoder {
+public:
+    static bool parseJson(const char* input, std::map<std::string, std::string>* destination) {
+        if (!input || !destination) return false;
+
+        destination->clear();
+        std::string jsonStr(input);
+        size_t pos = 0;
+        size_t end = jsonStr.length();
+
+        // Skip leading whitespace
+        pos = jsonStr.find_first_not_of(" \t\n\r", pos);
+        if (pos == std::string::npos || jsonStr[pos] != '{') return false;
+
+        ++pos; // Skip opening brace
+        
+        // Handle empty object
+        pos = jsonStr.find_first_not_of(" \t\n\r", pos);
+        if (pos == std::string::npos) return false;
+        if (jsonStr[pos] == '}') return true;
+
+        while (pos < end) {
+            // Find key
+            pos = jsonStr.find('"', pos);
+            if (pos == std::string::npos) return false;
+            size_t keyEnd = jsonStr.find('"', pos + 1);
+            if (keyEnd == std::string::npos) return false;
+
+            // Parse key
+            std::string key = jsonStr.substr(pos + 1, keyEnd - pos - 1);
+
+            // Find colon
+            pos = jsonStr.find(':', keyEnd + 1);
+            if (pos == std::string::npos) return false;
+
+            // Find value
+            pos = jsonStr.find_first_not_of(" \t\n\r", pos + 1);
+            if (pos == std::string::npos) return false;
+
+            std::string value;
+            if (jsonStr[pos] == '"') {
+                size_t valueEnd = jsonStr.find('"', pos + 1);
+                if (valueEnd == std::string::npos) return false;
+                value = jsonStr.substr(pos + 1, valueEnd - pos - 1);
+                pos = valueEnd + 1;
+            } else {
+                size_t valueEnd = jsonStr.find_first_of(",}", pos);
+                if (valueEnd == std::string::npos) return false;
+                value = jsonStr.substr(pos, valueEnd - pos);
+                // Trim trailing whitespace from value
+                value.erase(value.find_last_not_of(" \t\n\r") + 1);
+                pos = valueEnd;
+            }
+
+            (*destination)[key] = value;
+
+            // Check for comma or end of object
+            pos = jsonStr.find_first_not_of(" \t\n\r", pos);
+            if (pos == std::string::npos) return false;
+            
+            if (jsonStr[pos] == '}') {
+                // Check if this is the last character (ignoring whitespace)
+                return jsonStr.find_first_not_of(" \t\n\r", pos + 1) == std::string::npos;
+            } else if (jsonStr[pos] == ',') {
+                ++pos; // Skip comma
+                // Allow trailing comma
+                pos = jsonStr.find_first_not_of(" \t\n\r", pos);
+                if (pos == std::string::npos) return false;
+                if (jsonStr[pos] == '}') {
+                    return jsonStr.find_first_not_of(" \t\n\r", pos + 1) == std::string::npos;
+                }
+            } else {
+                return false;
+            }
+        }
+
+        return false; // We should never reach here if the JSON is valid
+    }
+};
+
 class JsonIdValueDecoder {
 public:
     static bool parseJson(const char* input, std::map<int, std::string>* destination) {

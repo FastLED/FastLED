@@ -4,7 +4,6 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "doctest.h"
-#include "lib8tion/intmap.h"
 #include "platforms/stub/wasm/ui/json.h"
 
 TEST_CASE("Test JsonIdValueDecoder") {
@@ -65,4 +64,56 @@ TEST_CASE("Test JsonIdValueDecoder") {
         CHECK_EQ(it->first, 1);
         CHECK_EQ(it->second, "value1");
     }
+}
+
+TEST_CASE("Test JsonStringValueDecoder") {
+    SUBCASE("Test simple JSON parsing") {
+        const char* json_str = R"({"key": "value"})";
+        std::map<std::string, std::string> result;
+        bool success = JsonStringValueDecoder::parseJson(json_str, &result);
+        CHECK(success);
+        REQUIRE(result.size() == 1);
+        CHECK(result["key"] == "value");
+    }
+
+    SUBCASE("More complex JSON parsing") {
+        const char* json_str = R"({
+            "key1": "value1",
+            "key2": "value2"
+        })";
+        std::map<std::string, std::string> result;
+        bool success = JsonStringValueDecoder::parseJson(json_str, &result);
+        CHECK(success);
+        REQUIRE(result.size() == 2);
+        CHECK(result["key1"] == "value1");
+        CHECK(result["key2"] == "value2");
+    }
+
+    SUBCASE("Trailing comma") {
+        const char* json_str = R"({
+            "key1": "value1",
+            "key2": "value2",
+        })";
+        std::map<std::string, std::string> result;
+        bool success = JsonStringValueDecoder::parseJson(json_str, &result);
+        CHECK(success);
+        REQUIRE(result.size() == 2);
+        CHECK(result["key1"] == "value1");
+        CHECK(result["key2"] == "value2");
+    }
+
+    SUBCASE("Empty JSON") {
+        const char* json_str = "{}";
+        std::map<std::string, std::string> result;
+        bool success = JsonStringValueDecoder::parseJson(json_str, &result);
+        CHECK(success);
+        CHECK(result.empty());
+    }
+
+    //SUBCASE("Invalid JSON") {
+    //    const char* json_str = R"({"key": "value",})";
+    //    std::map<std::string, std::string> result;
+    //    bool success = JsonStringValueDecoder::parseJson(json_str, &result);
+    //    CHECK_FALSE(success);
+    //}
 }
