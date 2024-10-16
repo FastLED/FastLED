@@ -2,6 +2,8 @@
 #include "json.h"
 #include "platforms/stub/wasm/js.h"
 #include "ui_manager.h"
+#include <string.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 
