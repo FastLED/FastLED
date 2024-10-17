@@ -1,9 +1,14 @@
 import os
 
+DEBUG_SYMBOS = 0
+
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
 # It seems easier to load the program as a pure JS file, so we will use asm.js
 # right now as a test.
 USE_WASM = 1
+
+if DEBUG_SYMBOS:
+    USE_WASM=2
 
 Import("env", "projenv")
 
@@ -39,12 +44,14 @@ wasmflags = [
     "-fpermissive",
     "-Wno-constant-logical-operand",
     "-Wnon-c-typedef-for-linkage",
-    #"-s",
-    #"STACK_SIZE=5368709",
     f"-sWASM={USE_WASM}",
     "-s", f"WASM={USE_WASM}",
-    #"-s", "LEGACY_VM_SUPPORT=1"
-]
+
+
+if DEBUG_SYMBOS:
+    wasmflags += ['-g', '-gsource-map', '--emit-symbol-map']
+    
+
 
 export_name = env.GetProjectOption("custom_wasm_export_name", "")
 if export_name:
