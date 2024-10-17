@@ -29,7 +29,6 @@ class ActiveStripData: public EngineEvents::Listener {
 public:
     void onBeginFrame() override {
         mStripMap.clear();
-        mUpdateMap.clear();
     }
 
     static ActiveStripData& Instance() {
@@ -38,7 +37,6 @@ public:
 
     void update(int id, uint32_t now, const uint8_t* data, size_t size) {
         mStripMap[id] = SliceUint8(data, size);
-        mUpdateMap[id] = now;
     }
 
     emscripten::val getPixelData_Uint8(int stripIndex) {
@@ -80,14 +78,6 @@ public:
         return emscripten::val::undefined();
     }
 
-    emscripten::val GetPixelDataTimeStamp(int stripIndex) {
-        auto find = mUpdateMap.find(stripIndex);
-        if (find != mUpdateMap.end()) {
-            return emscripten::val(find->second);
-        }
-        return emscripten::val::undefined();
-    }
-
     emscripten::val GetActiveIndices() {
         std::vector<int> indices;
         for (auto& pair : mStripMap) {
@@ -104,9 +94,6 @@ private:
     ActiveStripData() {
         EngineEvents::addListener(this);
     }
-
     typedef std::map<int, SliceUint8> StripDataMap;
-    typedef std::map<int, uint32_t> UpdateMap;
     StripDataMap mStripMap;
-    UpdateMap mUpdateMap;
 };
