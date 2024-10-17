@@ -11,6 +11,7 @@
 
 #include "engine_events.h"
 #include "namespace.h"
+#include "ui/json.h"
 
 
 
@@ -124,6 +125,58 @@ class jsButton {
     bool mClickedHappened = false;
 };
 
+
+inline void jsSetCanvasSize(int cledcontoller_id, const XYMap& xymap) {
+    int width = xymap.getWidth();
+    int height = xymap.getHeight();
+    JsonDictEncoder encoder;
+    encoder.begin();
+    encoder.addField("strip_id", cledcontoller_id);
+    encoder.addField("event", "set_canvas_size");
+    encoder.addField("width", width);
+    encoder.addField("height", height);
+    encoder.end();
+    EM_ASM_({
+        globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || function(jsonStr) {
+            console.log("Missing globalThis.FastLED_onStripUpdate(jsonStr) function");
+        };
+        var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
+        var jsonData = JSON.parse(jsonStr);
+        globalThis.FastLED_onStripUpdate(jsonData);
+    }, encoder.c_str());
+}
+
+inline void jsOnFrame() {
+    EM_ASM_({
+        globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || function(frameData, callback) {
+            console.log("Missing globalThis.FastLED_onFrame() function");
+            if (typeof callback === 'function') {
+                callback();
+            } else {
+                console.error("Callback function is not a function but is of type " + typeof callback);
+            }
+        };
+        globalThis.onFastLedUiUpdateFunction = globalThis.onFastLedUiUpdateFunction || function(jsonString) {
+            if (typeof jsonString === 'string' && jsonString !== null) {
+                Module._jsUiManager_updateUiComponents(jsonString);
+            } else {
+                console.error("Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
+            }
+        };
+        globalThis.FastLED_onFrameData = globalThis.FastLED_onFrameData || new Module.ActiveStripData();
+        globalThis.FastLED_onFrame(globalThis.FastLED_onFrameData, globalThis.onFastLedUiUpdateFunction);
+    });
+}
+
+inline void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
+    EM_ASM_({
+        globalThis.FastLED_onStripAdded = globalThis.FastLED_onStripAdded || function() {
+            console.log("Missing globalThis.FastLED_onStripAdded(id, length) function");
+            console.log("Added strip id: " + arguments[0] + " with length: " + arguments[1]);
+        };
+        globalThis.FastLED_onStripAdded($0, $1);
+    }, strip, num_leds);
+}
 
 #define FASTLED_HAS_UI_BUTTON 1
 #define FASTLED_HAS_UI_SLIDER 1
