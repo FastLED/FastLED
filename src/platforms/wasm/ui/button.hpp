@@ -35,9 +35,12 @@ bool jsButton::isPressed() const {
     return mPressed || mClickedHappened;
 }
 
-
 void jsButton::updateInternal(const char* jsonStr) {
-    mPressed = (strcmp(jsonStr, "true") == 0);
+    ArduinoJson::JsonDocument doc;
+    ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, jsonStr);
+    if (!error) {
+        mPressed = doc["pressed"].as<bool>();
+    }
 }
 
 FASTLED_NAMESPACE_END

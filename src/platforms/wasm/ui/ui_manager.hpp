@@ -67,7 +67,7 @@ inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
 
 inline void jsUiManager::executeUiUpdates(const std::string& jsonStr) {
     std::map<int, std::string> id_val_map;
-    ArduinoJson::DynamicJsonDocument doc(1024); // Adjust size as needed
+    ArduinoJson::JsonDocument doc; // Use JsonDocument instead of DynamicJsonDocument
     ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, jsonStr);
 
     if (error) {
@@ -84,7 +84,7 @@ inline void jsUiManager::executeUiUpdates(const std::string& jsonStr) {
 }
 
 inline std::string jsUiManager::toJsonStr() {
-    ArduinoJson::DynamicJsonDocument doc(4096);
+    ArduinoJson::JsonDocument doc; // Use JsonDocument instead of DynamicJsonDocument
     ArduinoJson::JsonArray json = doc.to<ArduinoJson::JsonArray>();
     toJson(json);
     std::string result;
