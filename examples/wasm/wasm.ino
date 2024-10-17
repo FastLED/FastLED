@@ -69,8 +69,8 @@ CRGB leds[NUM_LEDS];
 XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
 NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
-Slider brightness = Slider("Brightness",255, 0, 255);
-Slider speedSlider = Slider("Speed", 30, 1, 50);
+Slider brightness = Slider("Brightness", 255, 0, 255);
+Slider speedSlider = Slider("Speed", 15, 1, 50);
 Checkbox isOff = Checkbox("Set Black", false);
 Checkbox changePallete = Checkbox("Auto Next", true);
 Slider changePalletTime = Slider("Change Palette Time", 5, 1, 100);
