@@ -131,16 +131,18 @@ inline void jsSetCanvasSize(int cledcontoller_id, const XYMap& xymap) {
     doc["event"] = "set_canvas_size";
     doc["width"] = width;
     doc["height"] = height;
-    std::string jsonStr;
-    serializeJson(doc, jsonStr);
+    
+    char jsonBuffer[512];
+    size_t jsonSize = serializeJson(doc, jsonBuffer, sizeof(jsonBuffer));
+    
     EM_ASM_({
         globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || function(jsonStr) {
             console.log("Missing globalThis.FastLED_onStripUpdate(jsonStr) function");
         };
-        var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
+        var jsonStr = UTF8ToString($0, $1);  // Convert C string to JavaScript string with length
         var jsonData = JSON.parse(jsonStr);
         globalThis.FastLED_onStripUpdate(jsonData);
-    }, jsonStr.c_str());
+    }, jsonBuffer, jsonSize);
 }
 
 inline void jsOnFrame() {
