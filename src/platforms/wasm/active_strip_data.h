@@ -79,13 +79,7 @@ public:
         return emscripten::val::undefined();
     }
 
-    emscripten::val GetActiveIndices() {
-        std::vector<int> indices;
-        for (const auto& pair : mStripMap) {
-            indices.push_back(pair.first);
-        }
-        return emscripten::val(indices);
-    }
+
     ~ActiveStripData() {
         EngineEvents::removeListener(this);
     }
