@@ -186,8 +186,12 @@
 
     let receivedCanvas = false;
 
-    globalThis.onFastLedSetCanvasSize = function (jsonData) {
+    globalThis.onFastLed_StripUpdate = function (jsonData) {
         console.log("Received canvas size data:", jsonData);
+        if (jsonData.event !== 'set_canvas_size') {
+            console.warn("We do not support any event other than \"set_canvas_size\" yet");
+            return;
+        }
         if (receivedCanvas) {
             console.warn("Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.");
         }

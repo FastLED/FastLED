@@ -26,15 +26,16 @@ void jsSetCanvasSize(int cledcontoller_id, const XYMap& xymap) {
     JsonDictEncoder encoder;
     encoder.begin();
     encoder.addField("strip_id", cledcontoller_id);
+    encoder.addField("event", "set_canvas_size");
     encoder.addField("width", width);
     encoder.addField("height", height);
     encoder.end();
     EM_ASM_({
-        globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(jsonStr) {
-            console.log("Missing globalThis.onFastLedSetCanvasSize(jsonStr) function");
+        globalThis.onFastLed_StripUpdate = globalThis.onFastLed_StripUpdate || function(jsonStr) {
+            console.log("Missing globalThis.onFastLed_StripUpdate(jsonStr) function");
         };
         var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
         var jsonData = JSON.parse(jsonStr);
-        globalThis.onFastLedSetCanvasSize(jsonData);
+        globalThis.onFastLed_StripUpdate(jsonData);
     }, encoder.c_str());
 }

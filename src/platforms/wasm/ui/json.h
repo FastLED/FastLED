@@ -19,6 +19,10 @@ private:
         out() << "\"" << name << "\":" << value;
     }
 
+    void appendJsonField(const char* name, bool value) {
+        out() << "\"" << name << "\":" << (value ? "true" : "false");
+    }
+
     void appendJsonField(const char* name, const std::string& value) {
         out() << "\"" << name << "\":\"" << value << "\"";
     }
