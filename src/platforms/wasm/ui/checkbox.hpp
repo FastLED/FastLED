@@ -29,7 +29,7 @@ std::string jsCheckbox::toJsonStr() const {
     encoder.addField("type", "checkbox");
     encoder.addField("id", mInternal->id());
     encoder.addField("value", mValue);
-    return encoder.str();
+    return encoder.c_str();
 }
 
 bool jsCheckbox::value() const {

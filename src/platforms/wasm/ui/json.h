@@ -5,81 +5,44 @@
 #include <string>
 
 
+#include "third_party/arduinojson/json.h"
+
 class JsonDictEncoder {
 private:
-    std::ostringstream oss;
-    std::ostringstream* external = nullptr;
-    std::string finalStr;
-    bool first = true;
-    bool begun = false;
-    bool ended = false;
-
-    template<typename T>
-    void appendJsonField(const char* name, const T& value) {
-        out() << "\"" << name << "\":" << value;
-    }
-
-    void appendJsonField(const char* name, bool value) {
-        out() << "\"" << name << "\":" << (value ? "true" : "false");
-    }
-
-    void appendJsonField(const char* name, const std::string& value) {
-        out() << "\"" << name << "\":\"" << value << "\"";
-    }
-
-    void appendJsonField(const char* name, const char* value) {
-        out() << "\"" << name << "\":\"" << value << "\"";
-    }
-
-    std::ostringstream& out() {
-        return external ? *external : oss;
-    }
+    ArduinoJson::DynamicJsonDocument doc;
+    char* buffer;
+    size_t bufferSize;
 
 public:
-    JsonDictEncoder() = default;
+    JsonDictEncoder(size_t capacity = 1024) : doc(capacity), buffer(nullptr), bufferSize(0) {}
 
-    void begin(std::ostringstream* externalStream = nullptr) {
-        if (externalStream) {
-            external = externalStream;
+    ~JsonDictEncoder() {
+        if (buffer) {
+            free(buffer);
         }
-        if (!begun) {
-            out() << "{";
-            begun = true;
-        }
+    }
+
+    void begin() {
+        doc.clear();
     }
 
     void end() {
-        if (begun && !ended) {
-            out() << "}";
-            begun = false;
-            ended = true;
-            finalStr = oss.str();
-            oss.clear();
+        size_t requiredSize = measureJson(doc) + 1;
+        if (requiredSize > bufferSize) {
+            buffer = (char*)realloc(buffer, requiredSize);
+            bufferSize = requiredSize;
         }
+        serializeJson(doc, buffer, bufferSize);
     }
 
     template<typename T>
     void addField(const char* name, const T& value) {
-        if (!begun) {
-            begin();
-        }
-        if (!first) {
-            out() << ",";
-        }
-        appendJsonField(name, value);
-        first = false;
+        doc[name] = value;
     }
 
-    // if using an external string this will be empty.
     const char* c_str() {
         end();
-        return finalStr.c_str();
-    }
-
-    // if using an external string this will be empty.
-    std::string str() {
-        end();
-        return finalStr;
+        return buffer;
     }
 };
 

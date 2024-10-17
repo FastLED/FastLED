@@ -27,7 +27,7 @@ std::string jsButton::toJsonStr() const {
     encoder.addField("type", "button");
     encoder.addField("id", mInternal->id());
     encoder.addField("pressed", mPressed);
-    return encoder.str();
+    return encoder.c_str();
 }
 
 bool jsButton::isPressed() const {

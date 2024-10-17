@@ -104,18 +104,17 @@ inline void jsUiManager::updateJs() {
 }
 
 inline std::string jsUiManager::toJsonStr() {
-    std::ostringstream oss;
-    oss << "[";
+    std::string result = "[";
     std::lock_guard<std::mutex> lock(instance().mMutex);
     bool first = true;
     for (auto it = mComponents.begin(); it != mComponents.end(); ) {
         if (auto component = it->lock()) {
             if (!first) {
-                oss << ",";
+                result += ",";
             }
             std::string componentJson = component->toJsonStr();
             if (!componentJson.empty()) {
-                oss << componentJson;
+                result += componentJson;
                 first = false;
             } else {
                 printf("Warning: Empty JSON from component\n");
@@ -125,8 +124,7 @@ inline std::string jsUiManager::toJsonStr() {
             it = mComponents.erase(it);
         }
     }
-    oss << "]";
-    std::string result = oss.str();
+    result += "]";
     return result;
 }
 
