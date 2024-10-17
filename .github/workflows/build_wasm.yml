@@ -61,7 +61,7 @@ jobs:
           path: examples/wasm/fastled_js/*.*
           if-no-files-found: error
 
-      - name: Install Playwright and verify onFastLedFrame
+      - name: Install Playwright and verify FastLED_onFrame
         run: |
           npm init -y
           npm install playwright
@@ -95,17 +95,17 @@ jobs:
                 await page.goto('http://localhost:${PORT}', { timeout: 30000 });
                 await page.evaluate(() => {
                   window.frameCallCount = 0;
-                  globalThis.onFastLedFrame = (jsonStr) => {
-                    console.log('onFastLedFrame called with:', jsonStr);
+                  globalThis.FastLED_onFrame = (jsonStr) => {
+                    console.log('FastLED_onFrame called with:', jsonStr);
                     window.frameCallCount++;
                   };
                 });
                 await page.waitForTimeout(5000);
                 const callCount = await page.evaluate(() => window.frameCallCount);
                 if (callCount > 0) {
-                  console.log('Success: FastLED.js was initialized and onFastLedFrame was called', callCount, 'times');
+                  console.log('Success: FastLED.js was initialized and FastLED_onFrame was called', callCount, 'times');
                 } else {
-                  console.error('Error: FastLED.js had something go wrong and onFastLedFrame was not called within 5 seconds');
+                  console.error('Error: FastLED.js had something go wrong and FastLED_onFrame was not called within 5 seconds');
                   process.exit(1);
                 }
               } catch (error) {

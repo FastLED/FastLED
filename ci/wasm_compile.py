@@ -10,7 +10,7 @@ from ci.paths import PROJECT_ROOT
 
 HERE: Path = Path(__file__).parent
 DOCKER_FILE: Path = (
-    PROJECT_ROOT / "src" / "platforms" / "stub" / "wasm" / "compiler" / "Dockerfile"
+    PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "Dockerfile"
 )
 
 assert DOCKER_FILE.exists(), f"ERROR: Dockerfile not found at {DOCKER_FILE}"
@@ -22,45 +22,106 @@ class WASMCompileError(Exception):
     pass
 
 
-def filter_containers() -> str:
-    return subprocess.run(
-        ["docker", "ps", "-a", "-q", "--filter", "ancestor=fastled-wasm-compiler"],
+def get_image_versions() -> List[str]:
+    result = subprocess.run(
+        [
+            "docker",
+            "images",
+            "--format",
+            "{{.Repository}}:{{.Tag}}",
+            "--filter",
+            "reference=fastled-wasm-compiler*",
+        ],
         capture_output=True,
         text=True,
-    ).stdout.strip()
+        check=True,
+    )
+    return sorted([img for img in result.stdout.split("\n") if img], reverse=True)
+
+
+def rename_images() -> None:
+    versions = get_image_versions()
+    for i, version in enumerate(versions[1:], start=1):  # Skip the first (latest) image
+        new_name = f"fastled-wasm-compiler-{i}"
+        if version != new_name:
+            subprocess.run(["docker", "tag", version, new_name], check=True)
+            subprocess.run(["docker", "rmi", version], check=True)
+
+
+def remove_oldest_image() -> None:
+    versions = get_image_versions()
+    if len(versions) > 5:
+        oldest = versions[-1]
+        print(f"Removing oldest image: {oldest}")
+        subprocess.run(["docker", "rmi", oldest], check=True)
 
 
 def container_exists() -> bool:
-    return bool(filter_containers())
+    result = subprocess.run(
+        [
+            "docker",
+            "ps",
+            "-a",
+            "--format",
+            "{{.Names}}",
+            "--filter",
+            "name=fastled-wasm-compiler",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    return "fastled-wasm-compiler" in result.stdout
 
 
 def image_exists() -> bool:
-    return (
-        subprocess.run(
-            ["docker", "image", "inspect", "fastled-wasm-compiler"],
+    versions = get_image_versions()
+    return len(versions) > 0
+
+
+def remove_existing_container(container_name: str) -> None:
+    try:
+        result = subprocess.run(
+            [
+                "docker",
+                "ps",
+                "-a",
+                "--filter",
+                f"name={container_name}",
+                "--format",
+                "{{.Names}}",
+            ],
             capture_output=True,
-        ).returncode
-        == 0
-    )
+            text=True,
+            check=True,
+        )
+        if result.stdout.strip():
+            print(f"Removing existing container: {container_name}")
+            subprocess.run(["docker", "rm", "-f", container_name], check=True)
+        else:
+            print(f"No existing container found with name: {container_name}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error checking/removing container: {e}")
+
+
+def remove_dangling_images() -> None:
+    print("Removing dangling images...")
+    subprocess.run(["docker", "image", "prune", "-f"], check=True)
 
 
 def clean() -> None:
     if container_exists():
-        print("Stopping and removing containers...")
-        container_ids = filter_containers()
-        if container_ids:
-            subprocess.run(["docker", "stop"] + container_ids.split(), check=True)
-            subprocess.run(["docker", "rm"] + container_ids.split(), check=True)
-        else:
-            print("No containers found for fastled-wasm-compiler.")
+        print("Stopping and removing fastled-wasm-compiler container...")
+        subprocess.run(["docker", "stop", "fastled-wasm-compiler"], check=True)
+        subprocess.run(["docker", "rm", "fastled-wasm-compiler"], check=True)
     else:
-        print("No containers found for fastled-wasm-compiler.")
+        print("No container found for fastled-wasm-compiler.")
 
-    if image_exists():
-        print("Removing fastled-wasm-compiler image...")
-        subprocess.run(["docker", "rmi", "fastled-wasm-compiler"], check=True)
-    else:
-        print("No image found for fastled-wasm-compiler.")
+    print("Removing all fastled-wasm-compiler related images...")
+    versions = get_image_versions()
+    for version in versions:
+        subprocess.run(["docker", "rmi", "-f", version], check=True)
+
+    remove_dangling_images()
 
 
 def build_image() -> None:
@@ -84,6 +145,8 @@ def build_image() -> None:
             check=True,
             text=True,
         )
+        rename_images()
+        remove_oldest_image()
     except subprocess.CalledProcessError as e:
         raise WASMCompileError(f"ERROR: Failed to build Docker image.\nError: {e}")
 
@@ -94,21 +157,24 @@ def is_tty() -> bool:
 
 def run_container(directory: str, interactive: bool) -> None:
     absolute_directory: str = os.path.abspath(directory)
+    base_name = os.path.basename(absolute_directory)
     if not os.path.isdir(absolute_directory):
         raise WASMCompileError(
             f"ERROR: Directory '{absolute_directory}' does not exist."
         )
 
     try:
+        latest_image = "fastled-wasm-compiler"
         docker_command: List[str] = [
             "docker",
             "run",
+            "--name",
+            "fastled-wasm-compiler",
             "--platform",
             "linux/amd64",
-            # "--rm",
             "-v",
-            f"{absolute_directory}:/mapped",
-            "fastled-wasm-compiler",
+            f"{absolute_directory}:/mapped/{base_name}",
+            latest_image,
         ]
         if is_tty():
             docker_command.insert(4, "-it")
@@ -163,7 +229,10 @@ def main() -> None:
             parser.error("ERROR: directory is required unless --clean is specified")
 
         if args.build or not image_exists():
+            # Check for and remove existing container before building
+            remove_existing_container("fastled-wasm-compiler")
             build_image()
+            remove_dangling_images()
 
         run_container(args.directory, args.interactive)
 

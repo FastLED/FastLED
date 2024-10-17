@@ -12,10 +12,14 @@
 #include "engine_events.h"
 #include "strip_id_map.h"
 #include "crgb.h"
+#include "pixel_controller.h"
+#include "dither_mode.h"
 #include <vector>
 #include <stdio.h>
 
 FASTLED_NAMESPACE_BEGIN
+
+extern uint8_t get_brightness();
 
 #define FASTLED_ALL_PINS_HARDWARE_SPI
 
@@ -23,9 +27,11 @@ FASTLED_NAMESPACE_BEGIN
 class WasmSpiOutput: public EngineEvents::Listener {
 public:
     WasmSpiOutput() {
+        EngineEvents::addListener(this);
     }
 
     ~WasmSpiOutput() {
+        EngineEvents::removeListener(this);
     }
 
 
@@ -49,11 +55,20 @@ public:
         if (owner == nullptr) {
             return;
         }
-        // Okay we got the owner, now we can get the data and send it to the JavaScript side.
-        const uint8_t *data = reinterpret_cast<const uint8_t*>(owner->leds());
-        const size_t data_size = owner->size() * 3;
+        ColorAdjustment color_adjustment = owner->getAdjustmentData(get_brightness());
+        PixelController<RGB> pixels(owner->leds(), owner->size(), color_adjustment, DISABLE_DITHER);
+        pixels.disableColorAdjustment();
+        mRgb.clear();
+        while (pixels.has(1)) {
+            uint8_t r, g, b;
+            pixels.loadAndScaleRGB(&r, &g, &b);
+            mRgb.push_back(r);
+            mRgb.push_back(g);
+            mRgb.push_back(b);
+            pixels.advanceBy();
+        }
 		ActiveStripData& active_strips = Singleton<ActiveStripData>::instance();
-		active_strips.update(mId, millis(), data, data_size);
+		active_strips.update(mId, millis(), mRgb.data(), mRgb.size());
     }
 
     void select() {}
@@ -71,6 +86,7 @@ public:
 
 private:
     int mId = -1;  // Deferred initialization
+    std::vector<uint8_t> mRgb;
 };
 
 // Compatibility alias

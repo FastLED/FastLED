@@ -14,8 +14,10 @@
 
     <style>
         body {
-            background-color: #121212; /* Dark gray background */
-            color: #E0E0E0; /* Light gray text */
+            background-color: #121212;
+            /* Dark gray background */
+            color: #E0E0E0;
+            /* Light gray text */
             margin: 0;
             padding: 0;
             font-family: 'Roboto Condensed', sans-serif;
@@ -23,8 +25,28 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            opacity: 0; /* Initially hide the content */
-            transition: opacity 0.5s ease-in; /* Fade-in effect */
+            opacity: 0;
+            /* Initially hide the content */
+            transition: opacity 0.5s ease-in;
+            /* Fade-in effect */
+        }
+
+        #ui-controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ui-control {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .ui-control input[type="range"] {
+            width: 200px;
         }
 
         h1 {
@@ -40,11 +62,25 @@
         }
 
         @keyframes continuousGlow {
-            0% { text-shadow: 0 0 5px rgba(224, 224, 224, 0.1); }
-            25% { text-shadow: 0 0 20px rgba(224, 224, 224, 0.3); }
-            50% { text-shadow: 0 0 30px rgba(224, 224, 224, 0.5); }
-            75% { text-shadow: 0 0 20px rgba(224, 224, 224, 0.3); }
-            100% { text-shadow: 0 0 5px rgba(224, 224, 224, 0.1); }
+            0% {
+                text-shadow: 0 0 5px rgba(224, 224, 224, 0.1);
+            }
+
+            25% {
+                text-shadow: 0 0 20px rgba(224, 224, 224, 0.3);
+            }
+
+            50% {
+                text-shadow: 0 0 30px rgba(224, 224, 224, 0.5);
+            }
+
+            75% {
+                text-shadow: 0 0 20px rgba(224, 224, 224, 0.3);
+            }
+
+            100% {
+                text-shadow: 0 0 5px rgba(224, 224, 224, 0.1);
+            }
         }
 
         #canvas-container {
@@ -55,17 +91,61 @@
         }
 
         #myCanvas {
-            background-color: #1E1E1E; /* Slightly lighter gray for contrast */
+            background-color: #1E1E1E;
+            /* Slightly lighter gray for contrast */
             width: 320px;
             height: 320px;
             image-rendering: pixelated;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); /* Outer shadow */
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            /* Outer shadow */
         }
 
         #output {
             font-size: 1em;
             padding: 20px;
             white-space: pre-wrap;
+        }
+
+        .ui-control {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            /* Make sure the control takes up the available space */
+        }
+
+        .ui-control label {
+            margin-right: 10px;
+            /* Adjust space between label and checkbox */
+        }
+
+        .ui-control input[type="checkbox"] {
+            cursor: pointer;
+            transform: scale(1.5);
+            /* Optionally, scale the checkbox for better visibility */
+        }
+
+        .ui-control button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #1E90FF;
+            /* Dodger Blue */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .ui-control button:hover {
+            background-color: #187BE5;
+            /* Slightly darker blue */
+        }
+
+        .ui-control button:active {
+            background-color: #1670CC;
+            /* Even darker blue for active state */
         }
     </style>
 
@@ -104,32 +184,202 @@
     const FRAME_RATE = 60; // 60 FPS
     const CANVAS_SIZE = 16; // 16x16 initial canvas size
 
-    globalThis.onFastLedSetCanvasSize = function (jsonStr) {
-        const jsonData = JSON.parse(jsonStr);
-        const canvas = document.getElementById('myCanvas');
+    let receivedCanvas = false;
 
-        const first = jsonData[0];  // one canvas information per controller, just assume one for now.
-        const width = first.width;
-        const height = first.height;
+    globalThis.FastLED_onStripUpdate = function (jsonData) {
+        console.log("Received strip update:", jsonData);
+        if (jsonData.event !== 'set_canvas_size') {
+            console.warn("We do not support any event other than \"set_canvas_size\" yet");
+            return;
+        }
+        if (receivedCanvas) {
+            console.warn("Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.");
+        }
+        const canvas = document.getElementById('myCanvas');
+        const width = jsonData.width;
+        const height = jsonData.height;
         canvas.width = width;
         canvas.height = height;
-        
+
         const maxDisplaySize = 640; // Maximum display size in pixels
         const scaleFactor = Math.min(maxDisplaySize / width, maxDisplaySize / height, 20);
-        
+
         canvas.style.width = Math.round(width * scaleFactor) + 'px';
         canvas.style.height = Math.round(height * scaleFactor) + 'px';
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
     };
 
-    globalThis.onFastLedStripAdded = function (stripId, stripLength) {
+    globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
         const output = document.getElementById('output');
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
-    
-    globalThis.onFastLedFrame = function (frameData) {
+    let uiElements = {};
+    let previousUiState = {};
+
+
+    globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
         updateCanvas(frameData.getFirstPixelData_Uint8());
+
+        const changes = {};
+        let hasChanges = false;
+
+        for (const id in uiElements) {
+            const element = uiElements[id];
+            let currentValue;
+
+            if (element.type === 'checkbox') {
+                currentValue = element.checked;
+            } else if (element.type === 'submit') {
+                let attr = element.getAttribute('data-pressed');
+                currentValue = attr === 'true';
+            } else {
+                currentValue = parseFloat(element.value);
+            }
+
+            if (previousUiState[id] !== currentValue) {
+                changes[id] = currentValue;
+                hasChanges = true;
+                previousUiState[id] = currentValue;
+            }
+        }
+
+        if (hasChanges) {
+            const data = JSON.stringify(changes);
+            uiUpdateCallback(data);
+        }
     };
+
+    globalThis.FastLED_onUiElementsAdded = function (jsonData) {
+        console.log("UI elements added:", jsonData);
+
+        const uiControlsContainer = document.getElementById('ui-controls') || createUiControlsContainer();
+
+        jsonData.forEach(element => {
+            let control;
+            if (element.type === 'slider') {
+                control = createSlider(element);
+            } else if (element.type === 'checkbox') {
+                control = createCheckbox(element);
+            } else if (element.type === 'button') {
+                control = createButton(element);
+            }
+
+            if (control) {
+                uiControlsContainer.appendChild(control);
+                if (element.type === 'button') {
+                    uiElements[element.id] = control.querySelector('button');
+                } else {
+                    uiElements[element.id] = control.querySelector('input');
+                }
+                previousUiState[element.id] = element.value;
+            }
+        });
+    };
+
+    function createUiControlsContainer() {
+        const container = document.createElement('div');
+        container.id = 'ui-controls';
+        document.body.insertBefore(container, document.getElementById('output'));
+        return container;
+    }
+
+    function createSlider(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const labelValueContainer = document.createElement('div');
+        labelValueContainer.style.display = 'flex';
+        labelValueContainer.style.justifyContent = 'space-between';
+        labelValueContainer.style.width = '100%';
+
+        const label = document.createElement('label');
+        label.textContent = element.name;
+        label.htmlFor = `slider-${element.id}`;
+
+        const valueDisplay = document.createElement('span');
+        valueDisplay.textContent = element.value;
+
+        labelValueContainer.appendChild(label);
+        labelValueContainer.appendChild(valueDisplay);
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.id = `slider-${element.id}`;
+        slider.min = element.min;
+        slider.max = element.max;
+        slider.value = element.value;
+        slider.step = element.step;
+
+        slider.addEventListener('input', function () {
+            valueDisplay.textContent = this.value;
+        });
+
+        controlDiv.appendChild(labelValueContainer);
+        controlDiv.appendChild(slider);
+
+        return controlDiv;
+    }
+
+    function createCheckbox(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        // Create the label
+        const label = document.createElement('label');
+        label.textContent = element.name;
+        label.htmlFor = `checkbox-${element.id}`;
+
+        // Create the checkbox input
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `checkbox-${element.id}`;
+        checkbox.checked = element.value;
+
+        // Add both label and checkbox to a flex container to align properly
+        const flexContainer = document.createElement('div');
+        flexContainer.style.display = 'flex';
+        flexContainer.style.alignItems = 'center';
+        flexContainer.style.justifyContent = 'space-between'; // Ensure checkbox is right-aligned
+
+        flexContainer.appendChild(label);
+        flexContainer.appendChild(checkbox);
+
+        controlDiv.appendChild(flexContainer);
+
+        return controlDiv;
+    }
+
+    function createButton(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const button = document.createElement('button');
+        button.textContent = element.name;
+        button.id = `button-${element.id}`;
+        button.setAttribute('data-pressed', 'false'); // Initialize data-pressed as false
+
+        button.addEventListener('mousedown', function() {
+            // Set data-pressed to true when the button is clicked
+            this.setAttribute('data-pressed', 'true');
+
+            // Update the button's UI state (active visual feedback)
+            this.classList.add('active');
+        });
+
+        button.addEventListener('mouseup', function() {
+            // Set data-pressed to false when the button is released
+            this.setAttribute('data-pressed', 'false');
+
+            // Update the button's UI state (remove active visual feedback)
+            this.classList.remove('active');
+        });
+
+
+
+        controlDiv.appendChild(button);
+
+        return controlDiv;
+    }
 
     // Function to call the setup and loop functions
     function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance) {

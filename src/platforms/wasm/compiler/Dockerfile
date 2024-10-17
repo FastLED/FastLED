@@ -9,15 +9,15 @@ COPY --from=emscripten_base /emsdk_portable /emsdk_portable
 
 # Install required tools to run Emscripten SDK
 
-RUN dnf install -y git
-RUN dnf install -y nano which
-RUN dnf install -y ca-certificates
-RUN dnf install -y python3 python3-pip
-RUN dnf install -y dos2unix
+RUN echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
 
-# Create symlinks for python and pip
-#RUN ln -s /usr/bin/python3 /usr/bin/python && \
-#    ln -s /usr/bin/pip3 /usr/bin/pip
+RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build && \
+    dnf clean all
+
+#RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build clang lld && \
+#    dnf clean all
+
+
 
 # Install PlatformIO
 RUN pip3 install platformio==6.1.16
@@ -41,8 +41,14 @@ RUN echo 'print() { echo "$@"; }' >> /etc/profile && \
     echo 'export PATH="/container/bin:/usr/bin:/emsdk_portable:/emsdk_portable/upstream/emscripten:$PATH"' >> /etc/profile && \
     echo 'source /emsdk_portable/emsdk_env.sh' >> /etc/profile
 
-# THIS IS A WORK IN PROGRESS!!!!
-COPY platformio.ini /platformio.ini
+# wormhole-tx allows to send/recieve files to the host machine. The command `tx` becomes available.
+RUN pip3 install wormhole-tx || true
+
+# src\platforms\stub\wasm\compiler\install-arduino-cli.sh
+
+COPY src/platforms/wasm/compiler/install-arduino-cli.sh /install-arduino-cli.sh
+RUN chmod +x /install-arduino-cli.sh && /install-arduino-cli.sh || echo "Failed to install Arduino CLI"
+
 
 # Set up the entrypoint script
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
@@ -64,21 +70,26 @@ COPY ./src/platforms/ /js/fastled/src/platforms/
 
 
 # Hack for now to get the wasm platform to compile
-COPY src/platforms/stub/wasm/compiler/platformio.ini /js/platformio.ini
-COPY src/platforms/stub/wasm/compiler/wasm.py /js/wasm.py
-COPY src/platforms/stub/wasm/compiler/index.html /js/index.html
+RUN cp /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini && \
+    cp /js/fastled/src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py && \
+    cp /js/fastled/src/platforms/wasm/compiler/index.html /js/index.html && \
+    cp /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
+    cp /js/fastled/src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh && \
+    cp /js/fastled/src/platforms/wasm/compiler/*.sh /js/
 
 WORKDIR /js
 
+# This is too slow for lots of testing, disabled for now
 # Prewarm the cache with a first compile.
-RUN mkdir -p /js/src && echo -e "#include \"platforms/stub/wasm/exports.h\" #include \"FastLed.h\"\nvoid setup() {}\nvoid loop(){}\n" > /js/src/prewarm_main.cpp
-RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
+#RUN mkdir -p /js/src && echo -e "#include \"platforms/wasm/exports.h\" #include \"FastLed.h\"\nvoid setup() {}\nvoid loop(){}\n" > /js/src/prewarm_main.cpp
+#RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
 
 # Copy the compile script
-COPY src/platforms/stub/wasm/compiler/compile.sh /js/compile.sh
-RUN dos2unix /js/compile.sh
-# Create compile.sh in /js directory
-RUN chmod +x /js/compile.sh
+COPY src/platforms/wasm/compiler/compile.py /js/
+COPY src/platforms/wasm/compiler/process-ino.py /js/
+RUN dos2unix /js/compile.py /js/process-ino.py
+RUN dos2unix /js/*.sh
+RUN chmod +x /js/*.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/bin/bash", "/js/compile.sh"]
+CMD ["python", "/js/compile.py"]

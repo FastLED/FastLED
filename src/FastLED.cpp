@@ -6,7 +6,7 @@
 #ifdef __EMSCRIPTEN__
 // Due to emscripten toolchain, the exports must live in an object
 // that that is guaranteed to be linked in. So we do it here.
-#include "platforms/stub/wasm/link.hpp"
+#include "platforms/wasm/link.hpp"
 #endif
 
 
@@ -30,6 +30,8 @@ FASTLED_NAMESPACE_BEGIN
 uint16_t cled_contoller_size() {
 	return sizeof(CLEDController);
 }
+
+uint8_t get_brightness();
 
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
@@ -72,13 +74,6 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 	FastLED.setMaxRefreshRate(pLed->getMaxRefreshRate(),true);
 	EngineEvents::onStripAdded(pLed, nLedsOrOffset - nOffset);
 	return *pLed;
-}
-
-void CFastLED::addListener(EngineEvents::Listener *listener) {
-	EngineEvents::addListener(listener);
-}
-void CFastLED::removeListener(EngineEvents::Listener *listener) {
-	EngineEvents::removeListener(listener);
 }
 
 static void* gControllersData[MAX_CLED_CONTROLLERS];
@@ -296,6 +291,11 @@ void CFastLED::setMaxRefreshRate(uint16_t refresh, bool constrain) {
 	} else {
 		m_nMinMicros = 0;
 	}
+}
+
+
+uint8_t get_brightness() {
+	return FastLED.getBrightness();
 }
 
 /// Called at program exit when run in a desktop environment. 

@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -87,8 +88,13 @@ def run_tests() -> None:
             print(f"Running test: {test_file}")
             return_code, stdout, stderr = run_command(test_path)
 
-            if return_code != 0:
-                print("Test failed. Re-running with GDB to get stack trace...")
+            output = stdout + stderr
+            failure_pattern = re.compile(r"Test .+ failed with return code (\d+)")
+            failure_match = failure_pattern.search(output)
+            is_crash = failure_match is not None
+
+            if is_crash:
+                print("Test crashed. Re-running with GDB to get stack trace...")
                 _, gdb_stdout, gdb_stderr = run_command(test_path, use_gdb=True)
                 stdout += "\n--- GDB Output ---\n" + gdb_stdout
                 stderr += "\n--- GDB Errors ---\n" + gdb_stderr
@@ -104,9 +110,17 @@ def run_tests() -> None:
             if stderr:
                 print("Test errors:")
                 print(stderr)
-            print(
-                f"Test {'passed' if return_code == 0 else 'failed'} with return code {return_code}"
-            )
+
+            if return_code == 0:
+                print("Test passed")
+            elif is_crash:
+                if failure_match:
+                    print(f"Test crashed with return code {failure_match.group(1)}")
+                else:
+                    print(f"Test crashed with return code {return_code}")
+            else:
+                print(f"Test failed with return code {return_code}")
+
             print("-" * 40)
             if return_code != 0:
                 failed_tests.append(FailedTest(test_file, return_code, stdout, stderr))

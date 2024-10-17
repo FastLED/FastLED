@@ -1,0 +1,2 @@
+#!/bin/bash
+uv run ci/wasm_compile.py -b examples/wasm --open "$@"

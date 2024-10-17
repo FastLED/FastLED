@@ -1,7 +1,7 @@
 #pragma once
 
 #if defined(__EMSCRIPTEN__)
-#include "platforms/stub/wasm/clockless.h"
+#include "platforms/wasm/clockless.h"
 #elif defined(FASTLED_STUB_IMPL)
 #include "platforms/stub/clockless_stub_generic.h"
 #else

@@ -7,10 +7,12 @@
 #include <emscripten/html5.h>
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
+#include "platforms/wasm/js.h"
 
-#include "platforms/stub/wasm/active_strip_data.h"
+#include "platforms/wasm/active_strip_data.h"
 #include "engine_events.h"
-#include "platforms/stub/wasm/strip_id_map.h"
+#include "platforms/wasm/strip_id_map.h"
+#include "platforms/wasm/js.h"
 
 
 #include "namespace.h"
@@ -43,30 +45,22 @@ private:
         jsOnFrame();
     }
     void onStripAdded(CLEDController* strip, uint32_t num_leds) override {
-        int id = StripIdMap::add(strip);
+        int id = StripIdMap::addOrGetId(strip);
         jsOnStripAdded(id, num_leds);
     }
-    void jsOnFrame() {
-        EM_ASM_({
-            globalThis.onFastLedFrame = globalThis.onFastLedFrame || function() {
-                console.log("Missing globalThis.onFastLedDemo() function");
-            };
-            globalThis.onFastLedFrameData = globalThis.onFastLedFrameData || new Module.ActiveStripData();
-            globalThis.onFastLedFrame(globalThis.onFastLedFrameData);
-        });
+
+    void onCanvasUiSet(CLEDController* strip, const XYMap& xymap) override {
+        int controller_id = StripIdMap::addOrGetId(strip);
+        jsSetCanvasSize(controller_id, xymap);
     }
 
-    void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
-        EM_ASM_({
-            globalThis.onFastLedStripAdded = globalThis.onFastLedStripAdded || function() {
-                console.log("Missing globalThis.onFastLedStripAdded(id, length) function");
-                console.log("Added strip id: " + arguments[0] + " with length: " + arguments[1]);
-            };
-            globalThis.onFastLedStripAdded($0, $1);
-        }, strip, num_leds);
-    }
 
-    EngineListener() {}
+    EngineListener() {
+        EngineEvents::addListener(this);
+    }
+    ~EngineListener() {
+        EngineEvents::removeListener(this);
+    }
 };
 
 void EngineListener::Init() {

@@ -12,8 +12,9 @@
 #include "third_party/arduinojson/json.h"
 #include "slice.h"
 
-#include "platforms/stub/wasm/js.h"
-#include "platforms/stub/wasm/ui/slider.h"
+#include "platforms/wasm/js.h"
+
+#include "ui.h"
 
 
 #define LED_PIN 3
@@ -65,25 +66,42 @@
 #define SPEED 30
 
 CRGB leds[NUM_LEDS];
-XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
+XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
 NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
 
-jsSliderPtr slider = jsSliderPtr::New("Speed", 1, 100, SPEED);
+Slider brightness = Slider("Brightness",255, 0, 255);
+Slider speedSlider = Slider("Speed", 30, 1, 50);
+Checkbox isOff = Checkbox("Set Black", false);
+Checkbox changePallete = Checkbox("Auto Next", true);
+Slider changePalletTime = Slider("Change Palette Time", 5, 1, 100);
+Button buttonChangePalette = Button("Next Palette");
 
 void setup() {
     delay(1000); // sanity delay
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
-        .setCorrection(TypicalLEDStrip);
+        .setCorrection(TypicalLEDStrip)
+        .setCanvasUi(xyMap);
     FastLED.setBrightness(96);
     noisePalette->lazyInit();
     noisePalette->setSpeed(SPEED);
     noisePalette->setScale(SCALE);
-    jsSetCanvasSize(MATRIX_WIDTH, MATRIX_HEIGHT);
 }
 
 void loop() {
+    FastLED.setBrightness(!isOff ? brightness.as<uint8_t>() : 0);
+    noisePalette->setSpeed(speedSlider);
     static int frame = 0;
-    EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
+    EVERY_N_MILLISECONDS(changePalletTime.as<int>() * 1000) {
+        if (changePallete) {
+            noisePalette->changeToRandomPalette();
+        }
+    }
+
+    if (buttonChangePalette) {
+        noisePalette->changeToRandomPalette();
+
+    }
+
     EVERY_N_MILLISECONDS(1000) {
         printf("fastled running\r\n");
     }
@@ -92,3 +110,5 @@ void loop() {
     FastLED.show();
     frame++;
 }
+
+

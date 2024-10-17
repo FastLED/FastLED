@@ -130,34 +130,31 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
     return CC_PATH, CXX_PATH, AR_PATH
 
 
-def run_command(command: str, cwd=None) -> tuple[str, str]:
-    # process = subprocess.Popen(
-    #    command,
-    #    stdout=subprocess.PIPE,
-    #    stderr=subprocess.PIPE,
-    #    shell=True,
-    #    text=True,
-    #    cwd=cwd,
-    # )
-    # stdout, stderr = process.communicate()
-    # use subprocess.run
+def run_command(command: str, cwd=None, capture: bool = False) -> tuple[str, str]:
     process = subprocess.run(
         command,
         shell=True,
         text=True,
         cwd=cwd,
-        capture_output=True,
+        capture_output=capture,
     )
-    stdout = process.stdout
-    stderr = process.stderr
+
+    if capture:
+        stdout = process.stdout
+        stderr = process.stderr
+    else:
+        stdout = stderr = ""
+
     if process.returncode != 0:
         print(f"Error executing command: {command}")
-        print("STDOUT:")
-        print(stdout)
-        print("STDERR:")
-        print(stderr)
+        if capture:
+            print("STDOUT:")
+            print(stdout)
+            print("STDERR:")
+            print(stderr)
         print(f"Return code: {process.returncode}")
         exit(1)
+
     return stdout, stderr
 
 
@@ -195,15 +192,11 @@ def compile_fastled_library() -> None:
             ]
         )
     cmake_configure_command = subprocess.list2cmdline(cmake_configure_command_list)
-    stdout, stderr = run_command(cmake_configure_command, cwd=BUILD_DIR)
-    print(stdout)
-    print(stderr)
+    run_command(cmake_configure_command, cwd=BUILD_DIR)
 
     # Build the project
     cmake_build_command = f"cmake --build {BUILD_DIR}"
-    stdout, stderr = run_command(cmake_build_command)
-    print(stdout)
-    print(stderr)
+    run_command(cmake_build_command)
 
     print("FastLED library compiled successfully.")
 

@@ -9,6 +9,9 @@
 #include "exports.h"
 #include "strip_id_map.h"
 #include "singleton.h"
+#include "pixel_controller.h"
+#include "pixel_iterator.h"
+#include <vector>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -25,13 +28,25 @@ public:
 
 protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
+		mRgb.clear();
 		ActiveStripData& ch_data = Singleton<ActiveStripData>::instance();
-		const uint8_t* rgb = pixels.mData;
-		int nLeds = pixels.mLen;
-		ch_data.update(mId, millis(), rgb, nLeds * 3);
+		pixels.disableColorAdjustment();
+		PixelController<RGB> pixels_rgb = pixels;  // Converts to RGB pixels
+		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
+		while (iterator.has(1)) {
+			uint8_t r, g, b;
+			iterator.loadAndScaleRGB(&r, &g, &b);
+			mRgb.push_back(r);
+			mRgb.push_back(g);
+			mRgb.push_back(b);
+			iterator.advanceData();
+		}
+		const uint8_t* rgb = mRgb.data();
+		ch_data.update(mId, millis(), rgb, mRgb.size());
 	}
 	private:
 	  int mId = 0;
+	  std::vector<uint8_t> mRgb;
 };
 
 FASTLED_NAMESPACE_END
