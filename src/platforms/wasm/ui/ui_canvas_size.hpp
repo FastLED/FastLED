@@ -23,21 +23,18 @@
 void jsSetCanvasSize(int cledcontoller_id, const XYMap& xymap) {
     int width = xymap.getWidth();
     int height = xymap.getHeight();
-    std::ostringstream oss;
     JsonDictEncoder encoder;
-    oss << "[";
-    encoder.begin(&oss);
-    encoder.addField("id", cledcontoller_id);
+    encoder.begin();
+    encoder.addField("strip_id", cledcontoller_id);
     encoder.addField("width", width);
     encoder.addField("height", height);
     encoder.end();
-    oss << "]";
-    std::string jsonStr = oss.str();
     EM_ASM_({
         globalThis.onFastLedSetCanvasSize = globalThis.onFastLedSetCanvasSize || function(jsonStr) {
             console.log("Missing globalThis.onFastLedSetCanvasSize(jsonStr) function");
         };
         var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
-        globalThis.onFastLedSetCanvasSize(jsonStr);
-    }, jsonStr.c_str());
+        var jsonData = JSON.parse(jsonStr);
+        globalThis.onFastLedSetCanvasSize(jsonData);
+    }, encoder.c_str());
 }

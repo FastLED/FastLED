@@ -184,13 +184,16 @@
     const FRAME_RATE = 60; // 60 FPS
     const CANVAS_SIZE = 16; // 16x16 initial canvas size
 
-    globalThis.onFastLedSetCanvasSize = function (jsonStr) {
-        const jsonData = JSON.parse(jsonStr);
-        const canvas = document.getElementById('myCanvas');
+    let receivedCanvas = false;
 
-        const first = jsonData[0];  // one canvas information per controller, just assume one for now.
-        const width = first.width;
-        const height = first.height;
+    globalThis.onFastLedSetCanvasSize = function (jsonData) {
+        console.log("Received canvas size data:", jsonData);
+        if (receivedCanvas) {
+            console.warn("Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.");
+        }
+        const canvas = document.getElementById('myCanvas');
+        const width = jsonData.width;
+        const height = jsonData.height;
         canvas.width = width;
         canvas.height = height;
 
