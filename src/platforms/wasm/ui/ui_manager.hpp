@@ -77,23 +77,22 @@ inline void jsUiManager::executeUiUpdates(const std::string& jsonStr) {
 
 inline std::string jsUiManager::toJsonStr() {
     ArduinoJson::DynamicJsonDocument doc(4096); // Adjust size as needed
-    ArduinoJson::JsonObject json = doc.to<ArduinoJson::JsonObject>();
+    ArduinoJson::JsonArray json = doc.to<ArduinoJson::JsonArray>();
     toJson(json);
     std::string result;
     ArduinoJson::serializeJson(doc, result);
     return result;
 }
 
-inline void jsUiManager::toJson(ArduinoJson::JsonObject& json) {
-    ArduinoJson::JsonArray componentsArray = json.createNestedArray("components");
+inline void jsUiManager::toJson(ArduinoJson::JsonArray& json) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     for (auto it = mComponents.begin(); it != mComponents.end(); ) {
         if (auto component = it->lock()) {
-            ArduinoJson::JsonObject componentJson = componentsArray.createNestedObject();
+            ArduinoJson::JsonObject componentJson = json.createNestedObject();
             component->toJson(componentJson);
             if (componentJson.size() == 0) {
                 printf("Warning: Empty JSON from component\n");
-                componentsArray.remove(componentsArray.size() - 1);
+                json.remove(json.size() - 1);
             }
             ++it;
         } else {

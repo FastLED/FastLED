@@ -194,8 +194,6 @@ inline void updateJs(const char* jsonStr) {
             console.error("Problematic JSON string:", jsonStr);
             return;
         }
-        // Hack that we'll remove later.
-        data = data["components"];
         if (data) {
             globalThis.FastLED_onUiElementsAdded(data);
         } else {

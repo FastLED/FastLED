@@ -55,7 +55,7 @@ class jsUiManager : EngineEvents::Listener {
 
 
     std::string toJsonStr();
-    void toJson(ArduinoJson::JsonObject& json);
+    void toJson(ArduinoJson::JsonArray& json);
 
     jsUIPtrSet mComponents;
     std::mutex mMutex;
