@@ -1235,6 +1235,30 @@ INSTANTIATE_EVERY_N_TIME_PERIODS(CEveryNHours,uint8_t,hours8);
 
 /// Alias for CEveryNMillis
 #define CEveryNMilliseconds CEveryNMillis
+
+/// Create the CEveryNMillisDynamic class for dynamic millisecond intervals
+class CEveryNMillisDynamic {
+public:
+    uint32_t mPrevTrigger;
+    uint32_t mPeriod;
+
+    CEveryNMillisDynamic(uint32_t period) : mPeriod(period) { reset(); };
+    uint32_t getTime() { return GET_MILLIS(); };
+    uint32_t getPeriod() const { return mPeriod; };
+    uint32_t getElapsed() { return getTime() - mPrevTrigger; }
+    uint32_t getRemaining() { return getPeriod() - getElapsed(); }
+    uint32_t getLastTriggerTime() { return mPrevTrigger; }
+    bool ready() {
+        bool isReady = (getElapsed() >= getPeriod());
+        if( isReady ) { reset(); }
+        return isReady;
+    }
+    void reset() { mPrevTrigger = getTime(); };
+    void trigger() { mPrevTrigger = getTime() - getPeriod(); };
+    void setPeriod(uint32_t period) { mPeriod = period; }
+
+    operator bool() { return ready(); }
+};
 /// @} CEveryNTime Base Classes
 
 #else
@@ -1348,6 +1372,15 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 #define EVERY_N_MILLISECONDS(N) EVERY_N_MILLIS(N)
 /// Alias for ::EVERY_N_MILLIS_I
 #define EVERY_N_MILLISECONDS_I(NAME,N) EVERY_N_MILLIS_I(NAME,N)
+
+/// Checks whether to execute a block of code every N milliseconds, where N is determined dynamically
+#define EVERY_N_MILLISECONDS_DYNAMIC(PERIOD_FUNC) EVERY_N_MILLISECONDS_DYNAMIC_I(CONCAT_MACRO(__dynamic_millis_timer, __COUNTER__ ), (PERIOD_FUNC))
+
+/// Checks whether to execute a block of code every N milliseconds, where N is determined dynamically, using a custom instance name
+#define EVERY_N_MILLISECONDS_DYNAMIC_I(NAME, PERIOD_FUNC) \
+    static CEveryNMillisDynamic NAME(1); \
+    NAME.setPeriod(PERIOD_FUNC); \
+    if( NAME )
 
 /// @} Every_N
 /// @} Timekeeping

@@ -91,7 +91,7 @@ void loop() {
     FastLED.setBrightness(!isOff ? brightness.as<uint8_t>() : 0);
     noisePalette->setSpeed(speedSlider);
     static int frame = 0;
-    EVERY_N_MILLISECONDS(changePalletTime.as<int>() * 1000) {
+    EVERY_N_MILLISECONDS_DYNAMIC(changePalletTime.as<int>() * 1000) {
         if (changePallete) {
             noisePalette->changeToRandomPalette();
         }
