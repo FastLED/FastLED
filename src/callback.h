@@ -21,6 +21,13 @@ public:
     operator bool() const { return callback != nullptr; }
     void operator()(Args... args) const { if (callback) callback(self, args...); }
     void clear() { callback = nullptr; self = nullptr; }
+    bool operator==(const Callback& other) const { return self == other.self && callback == other.callback; }
+    bool operator!=(const Callback& other) const { return !(*this == other); }
+    Callback& operator=(const Callback& other) { self = other.self; callback = other.callback; return *this; }
+    Callback& operator=(void* (*other)(Args... args)) { self = nullptr; callback = (void (*)(void*, Args...))other; return *this; }
+    Callback& operator=(void (*other)(void* self, Args... args)) { self = nullptr; callback = other; return *this; }
+    // operator < for set/map
+    bool operator<(const Callback& other) const { return self < other.self || (self == other.self && callback < other.callback); }
 private:
     void* self = nullptr;
     void (*callback)(void* self, Args... args) = nullptr;
