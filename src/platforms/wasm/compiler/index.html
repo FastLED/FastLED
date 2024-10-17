@@ -131,21 +131,14 @@
             font-size: 16px;
             cursor: pointer;
             background-color: #1E90FF;
-            /* Dodger Blue */
             color: white;
             border: none;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s ease-in-out;
         }
 
-        .ui-control button:hover {
-            background-color: #187BE5;
-            /* Slightly darker blue */
-        }
-
-        .ui-control button:active {
-            background-color: #1670CC;
-            /* Even darker blue for active state */
+        .ui-control button:active, .ui-control button.active {
+            background-color: #0066CC;
         }
     </style>
 
@@ -359,18 +352,17 @@
         button.setAttribute('data-pressed', 'false'); // Initialize data-pressed as false
 
         button.addEventListener('mousedown', function() {
-            // Set data-pressed to true when the button is clicked
             this.setAttribute('data-pressed', 'true');
-
-            // Update the button's UI state (active visual feedback)
             this.classList.add('active');
         });
 
         button.addEventListener('mouseup', function() {
-            // Set data-pressed to false when the button is released
             this.setAttribute('data-pressed', 'false');
+            this.classList.remove('active');
+        });
 
-            // Update the button's UI state (remove active visual feedback)
+        button.addEventListener('mouseleave', function() {
+            this.setAttribute('data-pressed', 'false');
             this.classList.remove('active');
         });
 
