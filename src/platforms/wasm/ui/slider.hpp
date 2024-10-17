@@ -10,8 +10,12 @@ FASTLED_NAMESPACE_BEGIN
 
 jsSlider::jsSlider(const char* name, float value, float min, float max, float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
-    auto updateFunc = [this](const char* jsonStr) { this->updateInternal(jsonStr); };
-    auto toJsonFunc = [this](ArduinoJson::JsonObject& json) { this->toJson(json); };
+    auto updateFunc = jsUiInternal::UpdateFunction{this, [](void* self, const char* jsonStr) {
+        static_cast<jsSlider*>(self)->updateInternal(jsonStr);
+    }};
+    auto toJsonFunc = jsUiInternal::ToJsonFunction{this, [](void* self, ArduinoJson::JsonObject& json) {
+        static_cast<jsSlider*>(self)->toJson(json);
+    }};
     mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }

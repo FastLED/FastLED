@@ -6,8 +6,13 @@ FASTLED_NAMESPACE_BEGIN
 
 jsButton::jsButton(const char* name)
     : mPressed(false) {
-    auto updateFunc = [this](const char* jsonStr) { this->updateInternal(jsonStr); };
-    auto toJsonFunc = [this](ArduinoJson::JsonObject& json) { this->toJson(json); };
+    auto updateFunc = jsUiInternal::UpdateFunction{this, [](void* self, const char* jsonStr) {
+        static_cast<jsButton*>(self)->updateInternal(jsonStr);
+    }};
+
+    auto toJsonFunc = jsUiInternal::ToJsonFunction{this, [](void* self, ArduinoJson::JsonObject& json) {
+        static_cast<jsButton*>(self)->toJson(json);
+    }};
     mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
     mUpdater.init(this);

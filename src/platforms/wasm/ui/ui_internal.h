@@ -12,12 +12,21 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+template<typename T, typename ...Args>
+struct Callback {
+    void* self = nullptr;
+    void (*callback)(void* self, T arg, Args... args) = nullptr;
+    operator bool() const { return callback != nullptr; }
+    void operator()(T arg, Args... args) const { if (callback) callback(self, arg, args...); }
+};
+
 class jsUiInternal : public std::enable_shared_from_this<jsUiInternal> {
 public:
-    using UpdateFunction = std::function<void(const char*)>; // jsonStr
-    using toJsonFunction = std::function<void(ArduinoJson::JsonObject& json)>;  // returns jsonStr of element
 
-    jsUiInternal(const char* name, UpdateFunction updateFunc, toJsonFunction toJsonFunc);
+    using UpdateFunction = Callback<const char*>;
+    using ToJsonFunction = Callback<ArduinoJson::JsonObject&>;
+
+    jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc);
     ~jsUiInternal() {
         const bool functions_exist = mUpdateFunc || mtoJsonFunc;
         if (functions_exist) {
@@ -39,7 +48,7 @@ private:
     int mId;
     const char* mName;
     UpdateFunction mUpdateFunc;
-    toJsonFunction mtoJsonFunc;
+    ToJsonFunction mtoJsonFunc;
     mutable std::mutex mMutex;
 };
 
