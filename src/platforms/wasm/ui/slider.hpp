@@ -26,6 +26,7 @@ const char* jsSlider::name() const {
 
 std::string jsSlider::toJsonStr() const {
     JsonDictEncoder encoder;
+    encoder.begin();
     encoder.addField("name", name());
     encoder.addField("type", "slider");
     encoder.addField("id", mInternal->id());

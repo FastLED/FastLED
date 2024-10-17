@@ -1,38 +1,18 @@
 #pragma once
 
-#include <sstream>
 #include <map>
 #include <string>
-
-
 #include "third_party/arduinojson/json.h"
 
 class JsonDictEncoder {
 private:
     ArduinoJson::DynamicJsonDocument doc;
-    char* buffer;
-    size_t bufferSize;
 
 public:
-    JsonDictEncoder(size_t capacity = 1024) : doc(capacity), buffer(nullptr), bufferSize(0) {}
-
-    ~JsonDictEncoder() {
-        if (buffer) {
-            free(buffer);
-        }
-    }
+    JsonDictEncoder(size_t capacity = 1024) : doc(capacity) {}
 
     void begin() {
         doc.clear();
-    }
-
-    void end() {
-        size_t requiredSize = measureJson(doc) + 1;
-        if (requiredSize > bufferSize) {
-            buffer = (char*)realloc(buffer, requiredSize);
-            bufferSize = requiredSize;
-        }
-        serializeJson(doc, buffer, bufferSize);
     }
 
     template<typename T>
@@ -40,9 +20,10 @@ public:
         doc[name] = value;
     }
 
-    const char* c_str() {
-        end();
-        return buffer;
+    std::string c_str() {
+        std::string output;
+        serializeJson(doc, output);
+        return output;
     }
 };
 
@@ -51,78 +32,17 @@ public:
     static bool parseJson(const char* input, std::map<std::string, std::string>* destination) {
         if (!input || !destination) return false;
 
+        ArduinoJson::DynamicJsonDocument doc(1024);
+        ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, input);
+
+        if (error) return false;
+
         destination->clear();
-        std::string jsonStr(input);
-        size_t pos = 0;
-        size_t end = jsonStr.length();
-
-        // Skip leading whitespace
-        pos = jsonStr.find_first_not_of(" \t\n\r", pos);
-        if (pos == std::string::npos || jsonStr[pos] != '{') return false;
-
-        ++pos; // Skip opening brace
-        
-        // Handle empty object
-        pos = jsonStr.find_first_not_of(" \t\n\r", pos);
-        if (pos == std::string::npos) return false;
-        if (jsonStr[pos] == '}') return true;
-
-        while (pos < end) {
-            // Find key
-            pos = jsonStr.find('"', pos);
-            if (pos == std::string::npos) return false;
-            size_t keyEnd = jsonStr.find('"', pos + 1);
-            if (keyEnd == std::string::npos) return false;
-
-            // Parse key
-            std::string key = jsonStr.substr(pos + 1, keyEnd - pos - 1);
-
-            // Find colon
-            pos = jsonStr.find(':', keyEnd + 1);
-            if (pos == std::string::npos) return false;
-
-            // Find value
-            pos = jsonStr.find_first_not_of(" \t\n\r", pos + 1);
-            if (pos == std::string::npos) return false;
-
-            std::string value;
-            if (jsonStr[pos] == '"') {
-                size_t valueEnd = jsonStr.find('"', pos + 1);
-                if (valueEnd == std::string::npos) return false;
-                value = jsonStr.substr(pos + 1, valueEnd - pos - 1);
-                pos = valueEnd + 1;
-            } else {
-                size_t valueEnd = jsonStr.find_first_of(",}", pos);
-                if (valueEnd == std::string::npos) return false;
-                value = jsonStr.substr(pos, valueEnd - pos);
-                // Trim trailing whitespace from value
-                value.erase(value.find_last_not_of(" \t\n\r") + 1);
-                pos = valueEnd;
-            }
-
-            (*destination)[key] = value;
-
-            // Check for comma or end of object
-            pos = jsonStr.find_first_not_of(" \t\n\r", pos);
-            if (pos == std::string::npos) return false;
-            
-            if (jsonStr[pos] == '}') {
-                // Check if this is the last character (ignoring whitespace)
-                return jsonStr.find_first_not_of(" \t\n\r", pos + 1) == std::string::npos;
-            } else if (jsonStr[pos] == ',') {
-                ++pos; // Skip comma
-                // Allow trailing comma
-                pos = jsonStr.find_first_not_of(" \t\n\r", pos);
-                if (pos == std::string::npos) return false;
-                if (jsonStr[pos] == '}') {
-                    return jsonStr.find_first_not_of(" \t\n\r", pos + 1) == std::string::npos;
-                }
-            } else {
-                return false;
-            }
+        for (ArduinoJson::JsonPair kv : doc.as<ArduinoJson::JsonObject>()) {
+            (*destination)[kv.key().c_str()] = kv.value().as<std::string>();
         }
 
-        return false; // We should never reach here if the JSON is valid
+        return true;
     }
 };
 
@@ -131,45 +51,15 @@ public:
     static bool parseJson(const char* input, std::map<int, std::string>* destination) {
         if (!input || !destination) return false;
 
+        ArduinoJson::DynamicJsonDocument doc(1024);
+        ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, input);
+
+        if (error) return false;
+
         destination->clear();
-        std::string jsonStr(input);
-        size_t pos = 0;
-        size_t end = jsonStr.length();
-
-        // Remove leading and trailing whitespace and braces
-        while (pos < end && (jsonStr[pos] == ' ' || jsonStr[pos] == '{')) ++pos;
-        while (end > pos && (jsonStr[end-1] == ' ' || jsonStr[end-1] == '}')) --end;
-
-        while (pos < end) {
-            // Find key
-            size_t keyStart = jsonStr.find('"', pos);
-            size_t keyEnd = jsonStr.find('"', keyStart + 1);
-            if (keyStart == std::string::npos || keyEnd == std::string::npos) return false;
-
-            // Parse key
-            int key;
-            try {
-                key = std::stoi(jsonStr.substr(keyStart + 1, keyEnd - keyStart - 1));
-            } catch (const std::exception&) {
-                return false;
-            }
-
-            // Find value
-            size_t valueStart = jsonStr.find(':', keyEnd) + 1;
-            size_t valueEnd = jsonStr.find(',', valueStart);
-            if (valueEnd == std::string::npos) valueEnd = end;
-
-            // Parse value
-            std::string value = jsonStr.substr(valueStart, valueEnd - valueStart);
-            // Trim whitespace and quotes from value
-            value.erase(0, value.find_first_not_of(" \t\n\r\""));
-            value.erase(value.find_last_not_of(" \t\n\r\"") + 1);
-
-            (*destination)[key] = value;
-
-            pos = valueEnd + 1;
-            // Skip any trailing commas and whitespace
-            while (pos < end && (jsonStr[pos] == ',' || jsonStr[pos] == ' ' || jsonStr[pos] == '\n' || jsonStr[pos] == '\r')) ++pos;
+        for (ArduinoJson::JsonPair kv : doc.as<ArduinoJson::JsonObject>()) {
+            int key = atoi(kv.key().c_str());
+            (*destination)[key] = kv.value().as<std::string>();
         }
 
         return true;
