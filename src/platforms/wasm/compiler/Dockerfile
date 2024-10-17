@@ -79,9 +79,10 @@ RUN cp /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini
 
 WORKDIR /js
 
+# This is too slow for lots of testing, disabled for now
 # Prewarm the cache with a first compile.
-RUN mkdir -p /js/src && echo -e "#include \"platforms/wasm/exports.h\" #include \"FastLed.h\"\nvoid setup() {}\nvoid loop(){}\n" > /js/src/prewarm_main.cpp
-RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
+#RUN mkdir -p /js/src && echo -e "#include \"platforms/wasm/exports.h\" #include \"FastLed.h\"\nvoid setup() {}\nvoid loop(){}\n" > /js/src/prewarm_main.cpp
+#RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
 
 # Copy the compile script
 COPY src/platforms/wasm/compiler/compile.py /js/

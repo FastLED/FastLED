@@ -62,7 +62,7 @@ inline void jsUiManager::updateAllFastLedUiComponents(const std::map<int, std::s
 }
 
 inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
-    instance().pendingJsonUpdate = jsonStr;
+    instance().pendingJsonUpdate = jsonStr.c_str();
 }
 
 inline void jsUiManager::executeUiUpdates(const std::string& jsonStr) {
