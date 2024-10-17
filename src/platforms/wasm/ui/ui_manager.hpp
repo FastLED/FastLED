@@ -77,14 +77,14 @@ jsUiManager::executeUiUpdates(const ArduinoJson::JsonDocument &doc) {
     for (ArduinoJson::JsonPairConst kv :
          doc.as<ArduinoJson::JsonObjectConst>()) {
         int id = atoi(kv.key().c_str());
-        std::string value = kv.value().as<std::string>();
+        const char* value = kv.value().as<const char*>();
 
         // double loop to avoid copying the string
         for (auto it = self.mComponents.begin(); it != self.mComponents.end();) {
             if (auto component = it->lock()) {
                 ++it;
                 if (component->id() == id) {
-                    component->update(value.c_str());
+                    component->update(value);
                 }
             } else {
                 it = self.mComponents.erase(it);
