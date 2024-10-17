@@ -80,23 +80,12 @@ inline void jsUiManager::updateJs() {
     printf("updateJs: %d\n", millis());
     std::string s = jsUiManager::instance().toJsonStr();
     EM_ASM_({
-        globalThis.onFastLedUiElementsAdded = globalThis.onFastLedUiElementsAdded || function(jsonData, updateFunc) {
+        globalThis.FastLED_onUiElementsAdded = globalThis.FastLED_onUiElementsAdded || function(jsonData, updateFunc) {
             console.log(new Date().toLocaleTimeString());
-            console.log("Missing globalThis.onFastLedUiElementsAdded(jsonData, updateFunc) function");
+            console.log("Missing globalThis.FastLED_onUiElementsAdded(jsonData, updateFunc) function");
             console.log("Added ui elements:", jsonData);
         };
         var jsonStr = UTF8ToString($0);
-        // try {
-        //     var data = JSON.parse(jsonStr);
-        //     globalThis.onFastLedUiElementsAdded(data, function(updateData) {
-        //         var updateJsonStr = JSON.stringify(updateData);
-        //         _jsUiManager_updateUiComponents(updateJsonStr);
-        //     });
-        // } catch (error) {
-        //     console.error("Error parsing JSON:", error);
-        //     console.error("Problematic JSON string:", jsonStr);
-        // }
-        // improve this by seperating out the update function from the parsing of the JSON
         var data = null;
         try {
             data = JSON.parse(jsonStr);
@@ -106,7 +95,7 @@ inline void jsUiManager::updateJs() {
             return;
         }
         if (data) {
-            globalThis.onFastLedUiElementsAdded(data);
+            globalThis.FastLED_onUiElementsAdded(data);
         } else {
             console.error("Internal error, data is null");
         }

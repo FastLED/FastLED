@@ -186,7 +186,7 @@
 
     let receivedCanvas = false;
 
-    globalThis.onFastLed_StripUpdate = function (jsonData) {
+    globalThis.FastLED_onStripUpdate = function (jsonData) {
         console.log("Received strip update:", jsonData);
         if (jsonData.event !== 'set_canvas_size') {
             console.warn("We do not support any event other than \"set_canvas_size\" yet");
@@ -209,7 +209,7 @@
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
     };
 
-    globalThis.onFastLedStripAdded = function (stripId, stripLength) {
+    globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
         const output = document.getElementById('output');
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
@@ -217,7 +217,7 @@
     let previousUiState = {};
 
 
-    globalThis.onFastLedFrame = function (frameData, uiUpdateCallback) {
+    globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
         updateCanvas(frameData.getFirstPixelData_Uint8());
 
         const changes = {};
@@ -249,7 +249,7 @@
         }
     };
 
-    globalThis.onFastLedUiElementsAdded = function (jsonData) {
+    globalThis.FastLED_onUiElementsAdded = function (jsonData) {
         const jsonStr = JSON.stringify(jsonData);
         console.log("UI elements added:");
         console.log(jsonData);
