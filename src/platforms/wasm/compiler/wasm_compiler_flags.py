@@ -37,7 +37,7 @@ wasmflags = [
     "EXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop']",
     "--bind",
     "-s",
-    "INITIAL_MEMORY=1073741824",
+    "INITIAL_MEMORY=268435456",
     "--no-entry",
     # Enable C++17 with GNU extensions.
     "-std=gnu++17",
