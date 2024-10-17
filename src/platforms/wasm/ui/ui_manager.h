@@ -48,17 +48,20 @@ class jsUiManager : EngineEvents::Listener {
 
     void onEndShowLeds() override {
         if (mItemsAdded) {
-            std::string jsonStr = toJsonStr();
-            updateJs(jsonStr.c_str());
+            // std::string jsonStr = toJsonStr();
+            ArduinoJson::JsonDocument doc;
+            ArduinoJson::JsonArray jarray = doc.to<ArduinoJson::JsonArray>();
+            toJson(jarray);
+            // conver to c_str()
+            char buff[1024*16] = {0};
+            ArduinoJson::serializeJson(doc, buff, sizeof(buff));
+            updateJs(buff);
             mItemsAdded = false;
         }
     }
     static void updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map);
 
     std::vector<std::shared_ptr<jsUiInternal>> getComponents();
-
-
-    std::string toJsonStr();
     void toJson(ArduinoJson::JsonArray& json);
 
     jsUIPtrSet mComponents;

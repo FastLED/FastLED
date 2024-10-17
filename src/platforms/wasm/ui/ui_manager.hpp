@@ -84,15 +84,6 @@ inline void jsUiManager::executeUiUpdates(const ArduinoJson::JsonDocument& doc) 
     updateAllFastLedUiComponents(id_val_map);
 }
 
-inline std::string jsUiManager::toJsonStr() {
-    ArduinoJson::JsonDocument doc; // Use JsonDocument instead of DynamicJsonDocument
-    ArduinoJson::JsonArray json = doc.to<ArduinoJson::JsonArray>();
-    toJson(json);
-    std::string result;
-    ArduinoJson::serializeJson(doc, result);
-    return result;
-}
-
 inline void jsUiManager::toJson(ArduinoJson::JsonArray& json) {
     std::vector<std::shared_ptr<jsUiInternal>> components = instance().getComponents();
     for (const auto& component : components) {
