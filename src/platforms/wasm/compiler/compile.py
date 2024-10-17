@@ -54,9 +54,23 @@ def compile(js_dir: Path) -> int:
     for attempt in range(1, max_attempts + 1):
         try:
             print(f"Attempting compilation (attempt {attempt}/{max_attempts})...")
-            subprocess.run(["pio", "run"], cwd=js_dir, check=True)
-            print(f"Compilation successful on attempt {attempt}")
-            return 0
+            process = subprocess.Popen(
+                ["pio", "run"],
+                cwd=js_dir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+            )
+            assert process.stdout is not None
+            for line in process.stdout:
+                processed_line = line.replace(".pio/libdeps/wasm/FastLED/", "")
+                print(processed_line, end="")
+            process.wait()
+            if process.returncode == 0:
+                print(f"Compilation successful on attempt {attempt}")
+                return 0
+            else:
+                raise subprocess.CalledProcessError(process.returncode, ["pio", "run"])
         except subprocess.CalledProcessError:
             print(f"Compilation failed on attempt {attempt}")
             if attempt == max_attempts:
