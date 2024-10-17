@@ -32,7 +32,7 @@ inline jsUiManager& jsUiManager::instance() {
     return Singleton<jsUiManager>::instance();
 }
 
-inline std::vector<std::shared_ptr<jsUiInternal>> getComponents() {
+inline std::vector<std::shared_ptr<jsUiInternal>> jsUiManager::getComponents() {
     std::vector<std::shared_ptr<jsUiInternal>> components;
     {
         std::lock_guard<std::mutex> lock(mMutex);
@@ -51,8 +51,7 @@ inline std::vector<std::shared_ptr<jsUiInternal>> getComponents() {
 }
 
 inline void jsUiManager::updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map) {
-    jsUiManager& self = instance();
-    std::vector<std::shared_ptr<jsUiInternal>> components = getComponents();
+    std::vector<std::shared_ptr<jsUiInternal>> components = instance().getComponents();
     // Update components with matching ids
     for (const auto& component : components) {
         const auto& it = id_val_map.find(component->id());

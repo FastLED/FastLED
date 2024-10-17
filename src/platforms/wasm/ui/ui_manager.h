@@ -8,6 +8,7 @@
 #include <memory>
 #include <map>
 
+#include "platforms/wasm/js.h"
 #include "json.h"
 
 FASTLED_NAMESPACE_BEGIN
