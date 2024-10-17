@@ -2,23 +2,15 @@
 
 #include <atomic>
 #include <string>
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <stdio.h>
 
 #include "namespace.h"
+#include "callback.h"
 #include "third_party/arduinojson/json.h"
 
 FASTLED_NAMESPACE_BEGIN
-
-template<typename T, typename ...Args>
-struct Callback {
-    void* self = nullptr;
-    void (*callback)(void* self, T arg, Args... args) = nullptr;
-    operator bool() const { return callback != nullptr; }
-    void operator()(T arg, Args... args) const { if (callback) callback(self, arg, args...); }
-};
 
 class jsUiInternal : public std::enable_shared_from_this<jsUiInternal> {
 public:

@@ -24,9 +24,9 @@ inline int jsUiInternal::id() const { return mId; }
 
 inline bool jsUiInternal::clearFunctions() {
     std::lock_guard<std::mutex> lock(mMutex);
-    bool wasCleared = (mUpdateFunc.callback != nullptr) || (mtoJsonFunc.callback != nullptr);
-    mUpdateFunc = UpdateFunction{nullptr, nullptr};
-    mtoJsonFunc = ToJsonFunction{nullptr, nullptr};
+    bool wasCleared = !mUpdateFunc || !mtoJsonFunc;
+    mUpdateFunc.clear();
+    mtoJsonFunc.clear();
     return wasCleared;
 }
 
