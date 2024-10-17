@@ -62,20 +62,21 @@ inline void jsUiManager::updateAllFastLedUiComponents(const std::map<int, std::s
 }
 
 inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
-    instance().pendingJsonUpdate = jsonStr.c_str();
-}
-
-inline void jsUiManager::executeUiUpdates(const std::string& jsonStr) {
-    std::map<int, std::string> id_val_map;
-    ArduinoJson::JsonDocument doc; // Use JsonDocument instead of DynamicJsonDocument
-    ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, jsonStr);
-
+    const char* cstr = jsonStr.c_str();
+    ArduinoJson::JsonDocument doc;
+    ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, cstr);
     if (error) {
-        printf("Error: Invalid JSON string received: %s\n", error.c_str());
+        printf("Error: Failed to parse JSON string: %s\n", error.c_str());
         return;
     }
+    auto& self = instance();
+    self.mPendingJsonUpdate = doc;
+    self.mHasPendingUpdate = true;
+}
 
-    for (ArduinoJson::JsonPair kv : doc.as<ArduinoJson::JsonObject>()) {
+inline void jsUiManager::executeUiUpdates(const ArduinoJson::JsonDocument& doc) {
+    std::map<int, std::string> id_val_map;
+    for (ArduinoJson::JsonPairConst kv : doc.as<ArduinoJson::JsonObjectConst>()) {
         int id = atoi(kv.key().c_str());
         id_val_map[id] = kv.value().as<std::string>();
     }
@@ -94,20 +95,6 @@ inline std::string jsUiManager::toJsonStr() {
 
 inline void jsUiManager::toJson(ArduinoJson::JsonArray& json) {
     std::vector<std::shared_ptr<jsUiInternal>> components = instance().getComponents();
-    // std::lock_guard<std::mutex> lock(instance().mMutex);
-    // for (auto it = mComponents.begin(); it != mComponents.end(); ) {
-    //     if (auto component = it->lock()) {
-    //         ArduinoJson::JsonObject componentJson = json.createNestedObject();
-    //         component->toJson(componentJson);
-    //         if (componentJson.size() == 0) {
-    //             printf("Warning: Empty JSON from component\n");
-    //             json.remove(json.size() - 1);
-    //         }
-    //         ++it;
-    //     } else {
-    //         it = mComponents.erase(it);
-    //     }
-    // }
     for (const auto& component : components) {
         ArduinoJson::JsonObject componentJson = json.add<ArduinoJson::JsonObject>();
         component->toJson(componentJson);

@@ -24,7 +24,7 @@ class jsUiManager : EngineEvents::Listener {
     static void updateUiComponents(const std::string& jsonStr);
 
   private:
-  static void executeUiUpdates(const std::string& jsonStr);
+   static void executeUiUpdates(const ArduinoJson::JsonDocument& doc);
     struct WeakPtrCompare {
         bool operator()(const std::weak_ptr<jsUiInternal>& lhs, const std::weak_ptr<jsUiInternal>& rhs) const;
     };
@@ -38,11 +38,12 @@ class jsUiManager : EngineEvents::Listener {
     }
 
     void onPlatformPreLoop() override {
-        if (pendingJsonUpdate.empty()) {
+        if (!mHasPendingUpdate) {
             return;
         }
-        jsUiManager::executeUiUpdates(pendingJsonUpdate);
-        pendingJsonUpdate.clear();
+        jsUiManager::executeUiUpdates(mPendingJsonUpdate);
+        mPendingJsonUpdate.clear();
+        mHasPendingUpdate = false;
     }
 
     void onEndShowLeds() override {
@@ -65,7 +66,8 @@ class jsUiManager : EngineEvents::Listener {
 
     static jsUiManager &instance();
     bool mItemsAdded = false;
-    std::string pendingJsonUpdate;
+    ArduinoJson::JsonDocument mPendingJsonUpdate;
+    bool mHasPendingUpdate = false;
 };
 
 FASTLED_NAMESPACE_END
