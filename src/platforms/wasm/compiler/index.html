@@ -251,9 +251,6 @@
 
     globalThis.FastLED_onUiElementsAdded = function (jsonData) {
         console.log("UI elements added:", jsonData);
-        const jsonStr = JSON.stringify(jsonData);
-        console.log("UI elements added:");
-        console.log(jsonData);
 
         const uiControlsContainer = document.getElementById('ui-controls') || createUiControlsContainer();
 
