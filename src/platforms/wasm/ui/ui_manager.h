@@ -8,6 +8,8 @@
 #include <memory>
 #include <map>
 
+#include "json.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 class jsUiInternal;
@@ -53,6 +55,7 @@ class jsUiManager : EngineEvents::Listener {
 
 
     std::string toJsonStr();
+    void toJson(ArduinoJson::JsonObject& json);
 
     jsUIPtrSet mComponents;
     std::mutex mMutex;

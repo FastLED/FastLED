@@ -94,6 +94,8 @@ inline void jsUiManager::updateJs() {
             console.error("Problematic JSON string:", jsonStr);
             return;
         }
+        // Hack that we'll remove later.
+        data = data["components"];
         if (data) {
             globalThis.FastLED_onUiElementsAdded(data);
         } else {
@@ -104,28 +106,30 @@ inline void jsUiManager::updateJs() {
 }
 
 inline std::string jsUiManager::toJsonStr() {
-    std::string result = "[";
+    ArduinoJson::DynamicJsonDocument doc(4096); // Adjust size as needed
+    ArduinoJson::JsonObject json = doc.to<ArduinoJson::JsonObject>();
+    toJson(json);
+    std::string result;
+    ArduinoJson::serializeJson(doc, result);
+    return result;
+}
+
+inline void jsUiManager::toJson(ArduinoJson::JsonObject& json) {
+    ArduinoJson::JsonArray componentsArray = json.createNestedArray("components");
     std::lock_guard<std::mutex> lock(instance().mMutex);
-    bool first = true;
     for (auto it = mComponents.begin(); it != mComponents.end(); ) {
         if (auto component = it->lock()) {
-            if (!first) {
-                result += ",";
-            }
-            std::string componentJson = component->toJsonStr();
-            if (!componentJson.empty()) {
-                result += componentJson;
-                first = false;
-            } else {
+            ArduinoJson::JsonObject componentJson = componentsArray.createNestedObject();
+            component->toJson(componentJson);
+            if (componentJson.size() == 0) {
                 printf("Warning: Empty JSON from component\n");
+                componentsArray.remove(componentsArray.size() - 1);
             }
             ++it;
         } else {
             it = mComponents.erase(it);
         }
     }
-    result += "]";
-    return result;
 }
 
 EMSCRIPTEN_BINDINGS(js_interface) {

@@ -4,8 +4,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-inline jsUiInternal::jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonStrFunction toJsonStrFunc)
-    : mName(name), mUpdateFunc(std::move(updateFunc)), mToJsonStrFunc(std::move(toJsonStrFunc)), mId(nextId()), mMutex() {}
+inline jsUiInternal::jsUiInternal(const char* name, UpdateFunction updateFunc, toJsonFunction toJsonFunc)
+    : mName(name), mUpdateFunc(std::move(updateFunc)), mtoJsonFunc(std::move(toJsonFunc)), mId(nextId()), mMutex() {}
 
 inline const char* jsUiInternal::name() const { return mName; }
 inline void jsUiInternal::update(const char* jsonStr) { 
@@ -14,17 +14,17 @@ inline void jsUiInternal::update(const char* jsonStr) {
         mUpdateFunc(jsonStr);
     }
 }
-inline std::string jsUiInternal::toJsonStr() const {
+inline void jsUiInternal::toJson(ArduinoJson::JsonObject& json) const {
     std::lock_guard<std::mutex> lock(mMutex);
-    return mToJsonStrFunc();
+    return mtoJsonFunc(json);
 }
 inline int jsUiInternal::id() const { return mId; }
 
 inline bool jsUiInternal::clearFunctions() {
     std::lock_guard<std::mutex> lock(mMutex);
-    bool wasCleared = (mUpdateFunc != nullptr) || (mToJsonStrFunc != nullptr);
+    bool wasCleared = (mUpdateFunc != nullptr) || (mtoJsonFunc != nullptr);
     mUpdateFunc = nullptr;
-    mToJsonStrFunc = nullptr;
+    mtoJsonFunc = nullptr;
     return wasCleared;
 }
 

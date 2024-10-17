@@ -12,8 +12,8 @@ FASTLED_NAMESPACE_BEGIN
 jsCheckbox::jsCheckbox(const char* name, bool value)
     : mValue(value) {
     auto updateFunc = [this](const char* jsonStr) { this->updateInternal(jsonStr); };
-    auto toJsonStrFunc = [this]() { return this->toJsonStr(); };
-    mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonStrFunc));
+    auto toJsonFunc = [this](ArduinoJson::JsonObject& json) { this->toJson(json); };
+    mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 
@@ -25,16 +25,11 @@ const char* jsCheckbox::name() const {
     return mInternal->name();
 }
 
-std::string jsCheckbox::toJsonStr() const {
-    ArduinoJson::DynamicJsonDocument doc(256);
-    ArduinoJson::JsonObject json = doc.to<ArduinoJson::JsonObject>();
+void jsCheckbox::toJson(ArduinoJson::JsonObject& json) const {
     json["name"] = name();
     json["type"] = "checkbox";
     json["id"] = mInternal->id();
     json["value"] = mValue;
-    std::string output;
-    serializeJson(doc, output);
-    return output;
 }
 
 bool jsCheckbox::value() const {

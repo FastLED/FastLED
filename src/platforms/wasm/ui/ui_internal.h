@@ -8,17 +8,18 @@
 #include <stdio.h>
 
 #include "namespace.h"
+#include "json.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 class jsUiInternal : public std::enable_shared_from_this<jsUiInternal> {
 public:
     using UpdateFunction = std::function<void(const char*)>; // jsonStr
-    using ToJsonStrFunction = std::function<std::string()>;  // returns jsonStr of element
+    using toJsonFunction = std::function<void(ArduinoJson::JsonObject& json)>;  // returns jsonStr of element
 
-    jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonStrFunction toJsonStrFunc);
+    jsUiInternal(const char* name, UpdateFunction updateFunc, toJsonFunction toJsonFunc);
     ~jsUiInternal() {
-        const bool functions_exist = mUpdateFunc || mToJsonStrFunc;
+        const bool functions_exist = mUpdateFunc || mtoJsonFunc;
         if (functions_exist) {
             clearFunctions();
             printf("Warning: %s: The owner of the jsUiInternal should clear the functions, not this destructor.\n", mName);
@@ -27,7 +28,7 @@ public:
 
     const char* name() const;
     void update(const char* jsonStr);
-    std::string toJsonStr() const;
+    void toJson(ArduinoJson::JsonObject& json) const;
     int id() const;
 
     bool clearFunctions();
@@ -38,7 +39,7 @@ private:
     int mId;
     const char* mName;
     UpdateFunction mUpdateFunc;
-    ToJsonStrFunction mToJsonStrFunc;
+    toJsonFunction mtoJsonFunc;
     mutable std::mutex mMutex;
 };
 

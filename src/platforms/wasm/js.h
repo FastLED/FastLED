@@ -42,7 +42,7 @@ class jsSlider {
     ~jsSlider();
 
     const char *name() const;
-    std::string toJsonStr() const;
+    void toJson(ArduinoJson::JsonObject& json) const;
     float value() const;
     void setValue(float value);
     operator float() const;
@@ -71,7 +71,7 @@ class jsCheckbox {
     ~jsCheckbox();
 
     const char *name() const;
-    std::string toJsonStr() const;
+    void toJson(ArduinoJson::JsonObject& json) const;
     bool value() const;
     void setValue(bool value);
     operator bool() const;
@@ -93,7 +93,7 @@ class jsButton {
     ~jsButton();
 
     const char *name() const;
-    std::string toJsonStr() const;
+    void toJson(ArduinoJson::JsonObject& json) const;
     bool isPressed() const;
     bool clicked() const {
         bool clickedHappened = mPressed && (mPressed != mPressedLast);

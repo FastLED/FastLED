@@ -11,8 +11,8 @@ FASTLED_NAMESPACE_BEGIN
 jsSlider::jsSlider(const char* name, float value, float min, float max, float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
     auto updateFunc = [this](const char* jsonStr) { this->updateInternal(jsonStr); };
-    auto toJsonStrFunc = [this]() { return this->toJsonStr(); };
-    mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonStrFunc));
+    auto toJsonFunc = [this](ArduinoJson::JsonObject& json) { this->toJson(json); };
+    mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 
@@ -24,9 +24,7 @@ const char* jsSlider::name() const {
     return mInternal->name();
 }
 
-std::string jsSlider::toJsonStr() const {
-    ArduinoJson::DynamicJsonDocument doc(256);
-    ArduinoJson::JsonObject json = doc.to<ArduinoJson::JsonObject>();
+void jsSlider::toJson(ArduinoJson::JsonObject& json) const {
     json["name"] = name();
     json["type"] = "slider";
     json["id"] = mInternal->id();
@@ -34,9 +32,6 @@ std::string jsSlider::toJsonStr() const {
     json["max"] = mMax;
     json["value"] = mValue;
     json["step"] = mStep;
-    std::string output;
-    serializeJson(doc, output);
-    return output;
 }
 
 float jsSlider::value() const { 
