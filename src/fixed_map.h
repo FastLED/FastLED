@@ -89,6 +89,24 @@ public:
         return false;
     }
 
+    Value& operator[](const Key& key) {
+        iterator it = find(key);
+        if (it != end()) {
+            return it->second;
+        }
+        data.push_back(Pair(key, Value()));
+        return data.back().second;
+    }
+
+    const Value& operator[](const Key& key) const {
+        const_iterator it = find(key);
+        if (it != end()) {
+            return it->second;
+        }
+        static Value default_value;
+        return default_value;
+    }
+
     bool next(const Key& key, Key* next_key, bool allow_rollover = false) const {
         const_iterator it = find(key);
         if (it != end()) {

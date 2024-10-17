@@ -8,6 +8,9 @@
 #include <memory>
 #include <map>
 
+
+#include "fixed_map.h"
+
 #include "platforms/wasm/js.h"
 #include "third_party/arduinojson/json.h"
 
@@ -59,7 +62,10 @@ class jsUiManager : EngineEvents::Listener {
             mItemsAdded = false;
         }
     }
-    static void updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map);
+
+
+    // static void updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map);
+    static void updateAllFastLedUiComponents(const FixedMap<int, std::string, 128>& id_val_map);
 
     std::vector<std::shared_ptr<jsUiInternal>> getComponents();
     void toJson(ArduinoJson::JsonArray& json);
