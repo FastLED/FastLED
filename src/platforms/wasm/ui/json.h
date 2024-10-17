@@ -4,28 +4,6 @@
 #include <string>
 #include "third_party/arduinojson/json.h"
 
-class JsonDictEncoder {
-private:
-    ArduinoJson::DynamicJsonDocument doc;
-
-public:
-    JsonDictEncoder(size_t capacity = 1024) : doc(capacity) {}
-
-    void begin() {
-        doc.clear();
-    }
-
-    template<typename T>
-    void addField(const char* name, const T& value) {
-        doc[name] = value;
-    }
-
-    std::string c_str() {
-        std::string output;
-        serializeJson(doc, output);
-        return output;
-    }
-};
 
 class JsonStringValueDecoder {
 public:

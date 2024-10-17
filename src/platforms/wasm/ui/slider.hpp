@@ -25,16 +25,18 @@ const char* jsSlider::name() const {
 }
 
 std::string jsSlider::toJsonStr() const {
-    JsonDictEncoder encoder;
-    encoder.begin();
-    encoder.addField("name", name());
-    encoder.addField("type", "slider");
-    encoder.addField("id", mInternal->id());
-    encoder.addField("min", mMin);
-    encoder.addField("max", mMax);
-    encoder.addField("value", mValue);
-    encoder.addField("step", mStep);
-    return encoder.c_str();
+    ArduinoJson::DynamicJsonDocument doc(256);
+    ArduinoJson::JsonObject json = doc.to<ArduinoJson::JsonObject>();
+    json["name"] = name();
+    json["type"] = "slider";
+    json["id"] = mInternal->id();
+    json["min"] = mMin;
+    json["max"] = mMax;
+    json["value"] = mValue;
+    json["step"] = mStep;
+    std::string output;
+    serializeJson(doc, output);
+    return output;
 }
 
 float jsSlider::value() const { 

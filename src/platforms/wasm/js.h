@@ -129,12 +129,13 @@ class jsButton {
 inline void jsSetCanvasSize(int cledcontoller_id, const XYMap& xymap) {
     int width = xymap.getWidth();
     int height = xymap.getHeight();
-    JsonDictEncoder encoder;
-    encoder.begin();
-    encoder.addField("strip_id", cledcontoller_id);
-    encoder.addField("event", "set_canvas_size");
-    encoder.addField("width", width);
-    encoder.addField("height", height);
+    ArduinoJson::DynamicJsonDocument doc(256);
+    doc["strip_id"] = cledcontoller_id;
+    doc["event"] = "set_canvas_size";
+    doc["width"] = width;
+    doc["height"] = height;
+    std::string jsonStr;
+    serializeJson(doc, jsonStr);
     EM_ASM_({
         globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || function(jsonStr) {
             console.log("Missing globalThis.FastLED_onStripUpdate(jsonStr) function");
@@ -142,7 +143,7 @@ inline void jsSetCanvasSize(int cledcontoller_id, const XYMap& xymap) {
         var jsonStr = UTF8ToString($0);  // Convert C string to JavaScript string
         var jsonData = JSON.parse(jsonStr);
         globalThis.FastLED_onStripUpdate(jsonData);
-    }, encoder.c_str().c_str());
+    }, jsonStr.c_str());
 }
 
 inline void jsOnFrame() {

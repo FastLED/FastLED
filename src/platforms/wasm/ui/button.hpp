@@ -22,13 +22,15 @@ const char* jsButton::name() const {
 }
 
 std::string jsButton::toJsonStr() const {
-    JsonDictEncoder encoder;
-    encoder.begin();
-    encoder.addField("name", name());
-    encoder.addField("type", "button");
-    encoder.addField("id", mInternal->id());
-    encoder.addField("pressed", mPressed);
-    return encoder.c_str();
+    ArduinoJson::DynamicJsonDocument doc(256);
+    ArduinoJson::JsonObject json = doc.to<ArduinoJson::JsonObject>();
+    json["name"] = name();
+    json["type"] = "button";
+    json["id"] = mInternal->id();
+    json["pressed"] = mPressed;
+    std::string output;
+    serializeJson(doc, output);
+    return output;
 }
 
 bool jsButton::isPressed() const {

@@ -4,6 +4,8 @@
 #include "ui_manager.h"
 #include <string.h>
 
+#include "json.h"
+
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -24,12 +26,15 @@ const char* jsCheckbox::name() const {
 }
 
 std::string jsCheckbox::toJsonStr() const {
-    JsonDictEncoder encoder;
-    encoder.addField("name", name());
-    encoder.addField("type", "checkbox");
-    encoder.addField("id", mInternal->id());
-    encoder.addField("value", mValue);
-    return encoder.c_str();
+    ArduinoJson::DynamicJsonDocument doc(256);
+    ArduinoJson::JsonObject json = doc.to<ArduinoJson::JsonObject>();
+    json["name"] = name();
+    json["type"] = "checkbox";
+    json["id"] = mInternal->id();
+    json["value"] = mValue;
+    std::string output;
+    serializeJson(doc, output);
+    return output;
 }
 
 bool jsCheckbox::value() const {
