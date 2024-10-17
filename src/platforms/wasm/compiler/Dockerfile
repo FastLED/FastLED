@@ -70,17 +70,12 @@ COPY ./src/platforms/ /js/fastled/src/platforms/
 
 
 # Hack for now to get the wasm platform to compile
-COPY src/platforms/wasm/compiler/platformio.ini /js/platformio.ini
-COPY src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py
-COPY src/platforms/wasm/compiler/index.html /js/index.html
-COPY src/platforms/wasm/compiler/Arduino.h /js/Arduino.h
-COPY src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh
-COPY src/platforms/wasm/compiler/*.sh /js/
-
-# COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
-#COPY examples/Blink/Blink.ino /js/Blink/Blink.ino
-#COPY examples/Scintillating/Scintillating.ino /js/Scintillating/Scintillating.ino
-
+RUN cp /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini && \
+    cp /js/fastled/src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py && \
+    cp /js/fastled/src/platforms/wasm/compiler/index.html /js/index.html && \
+    cp /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
+    cp /js/fastled/src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh && \
+    cp /js/fastled/src/platforms/wasm/compiler/*.sh /js/
 
 WORKDIR /js
 
