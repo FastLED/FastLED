@@ -9,7 +9,7 @@
 #include <map>
 
 #include "platforms/wasm/js.h"
-#include "json.h"
+#include "third_party/arduinojson/json.h"
 
 FASTLED_NAMESPACE_BEGIN
 

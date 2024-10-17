@@ -2,7 +2,7 @@
 #include "ui_manager.h"
 #include <sstream>
 #include <string.h>
-#include "json.h"
+#include "third_party/arduinojson/json.h"
 
 FASTLED_NAMESPACE_BEGIN
 

@@ -2,7 +2,7 @@
 
 #include "ui_manager.h"
 #include <emscripten.h>
-#include "json.h"
+#include "third_party/arduinojson/json.h"
 #include <sstream>
 #include <vector>
 
@@ -67,11 +67,19 @@ inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
 
 inline void jsUiManager::executeUiUpdates(const std::string& jsonStr) {
     std::map<int, std::string> id_val_map;
-    bool ok = JsonIdValueDecoder::parseJson(jsonStr.c_str(), &id_val_map);
-    if (!ok) {
-        printf("Error: Invalid JSON string received: %s\n", jsonStr.c_str());
+    ArduinoJson::DynamicJsonDocument doc(1024); // Adjust size as needed
+    ArduinoJson::DeserializationError error = ArduinoJson::deserializeJson(doc, jsonStr);
+
+    if (error) {
+        printf("Error: Invalid JSON string received: %s\n", error.c_str());
         return;
     }
+
+    for (ArduinoJson::JsonPair kv : doc.as<ArduinoJson::JsonObject>()) {
+        int id = atoi(kv.key().c_str());
+        id_val_map[id] = kv.value().as<std::string>();
+    }
+
     updateAllFastLedUiComponents(id_val_map);
 }
 

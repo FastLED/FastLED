@@ -18,6 +18,6 @@
 
 
 #include "xymap.h"
-#include "json.h"
+#include "third_party/arduinojson/json.h"
 
 

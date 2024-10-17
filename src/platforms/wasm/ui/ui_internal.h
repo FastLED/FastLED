@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 #include "namespace.h"
-#include "json.h"
+#include "third_party/arduinojson/json.h"
 
 FASTLED_NAMESPACE_BEGIN
 

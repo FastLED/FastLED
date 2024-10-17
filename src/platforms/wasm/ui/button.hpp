@@ -1,4 +1,4 @@
-#include "json.h"
+#include "third_party/arduinojson/json.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
 
