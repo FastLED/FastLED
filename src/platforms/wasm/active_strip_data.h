@@ -8,13 +8,13 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
-#include <map>
-
 #include "slice.h"
 #include "singleton.h"
+#include "fixed_map.h"
 
 #include "namespace.h"
 #include "engine_events.h"
+#include "fixed_map.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -36,14 +36,13 @@ public:
     }
 
     void update(int id, uint32_t now, const uint8_t* data, size_t size) {
-        mStripMap[id] = SliceUint8(data, size);
+        mStripMap.update(id, SliceUint8(data, size));
     }
 
     emscripten::val getPixelData_Uint8(int stripIndex) {
         // Efficient, zero copy conversion from internal data to JavaScript.
-        auto find = mStripMap.find(stripIndex);
-        if (find != mStripMap.end()) {
-            SliceUint8 stripData = find->second;
+        SliceUint8 stripData;
+        if (mStripMap.get(stripIndex, &stripData)) {
             const uint8_t* data = stripData.data();
             uint8_t* data_mutable = const_cast<uint8_t*>(data);
             size_t size = stripData.size();
@@ -54,7 +53,7 @@ public:
 
     emscripten::val getFirstPixelData_Uint8() {
         // Efficient, zero copy conversion from internal data to JavaScript.
-        if (mStripMap.size() > 0) {
+        if (!mStripMap.empty()) {
             SliceUint8 stripData = mStripMap.begin()->second;
             const uint8_t* data = stripData.data();
             uint8_t* data_mutable = const_cast<uint8_t*>(data);
@@ -68,19 +67,21 @@ public:
         // Efficient, zero copy conversion from internal data to JavaScript.
         if (mStripMap.size() > n) {
             auto it = mStripMap.begin();
-            std::advance(it, n);
-            SliceUint8 stripData = it->second;
-            const uint8_t* data = stripData.data();
-            uint8_t* data_mutable = const_cast<uint8_t*>(data);
-            size_t size = stripData.size();
-            return emscripten::val(emscripten::typed_memory_view(size, data_mutable));
+            for (int i = 0; i < n && it != mStripMap.end(); ++i, ++it) {}
+            if (it != mStripMap.end()) {
+                SliceUint8 stripData = it->second;
+                const uint8_t* data = stripData.data();
+                uint8_t* data_mutable = const_cast<uint8_t*>(data);
+                size_t size = stripData.size();
+                return emscripten::val(emscripten::typed_memory_view(size, data_mutable));
+            }
         }
         return emscripten::val::undefined();
     }
 
     emscripten::val GetActiveIndices() {
         std::vector<int> indices;
-        for (auto& pair : mStripMap) {
+        for (const auto& pair : mStripMap) {
             indices.push_back(pair.first);
         }
         return emscripten::val(indices);
@@ -94,6 +95,7 @@ private:
     ActiveStripData() {
         EngineEvents::addListener(this);
     }
-    typedef std::map<int, SliceUint8> StripDataMap;
+    static constexpr size_t MAX_STRIPS = 16; // Adjust this value based on your needs
+    typedef FixedMap<int, SliceUint8, MAX_STRIPS> StripDataMap;
     StripDataMap mStripMap;
 };
