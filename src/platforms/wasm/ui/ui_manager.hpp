@@ -51,16 +51,6 @@ inline std::vector<std::shared_ptr<jsUiInternal>> jsUiManager::getComponents() {
     return components;
 }
 
-// inline void jsUiManager::updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map) {
-//     std::vector<std::shared_ptr<jsUiInternal>> components = instance().getComponents();
-//     // Update components with matching ids
-//     for (const auto& component : components) {
-//         const auto& it = id_val_map.find(component->id());
-//         if (it != id_val_map.end()) {
-//             component->update(it->second.c_str());
-//         }
-//     }
-// }
 
 void jsUiManager::updateAllFastLedUiComponents(const FixedMap<int, std::string, 128>& id_val_map) {
     std::vector<std::shared_ptr<jsUiInternal>> components = jsUiManager::instance().getComponents();
@@ -89,7 +79,6 @@ inline void jsUiManager::updateUiComponents(const std::string& jsonStr) {
 inline void jsUiManager::executeUiUpdates(const ArduinoJson::JsonDocument& doc) {
 
     FixedMap<int, std::string, 128> id_val_map;
-    // std::map<int, std::string> id_val_map;
     for (ArduinoJson::JsonPairConst kv : doc.as<ArduinoJson::JsonObjectConst>()) {
         int id = atoi(kv.key().c_str());
         id_val_map[id] = kv.value().as<std::string>();

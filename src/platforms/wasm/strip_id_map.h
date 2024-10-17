@@ -1,11 +1,14 @@
 #pragma once
 
-#include <map>
 #include <stdint.h>
 #include <stddef.h>
 
 #include "singleton.h"
 #include "namespace.h"
+#include "fixed_map.h"
+
+// Define a reasonable maximum number of strips
+#define MAX_STRIPS 64
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -16,22 +19,22 @@ class StripIdMap {
 public:
     static int addOrGetId(CLEDController* owner) {
         StripIdMap& instance = Instance();
-        auto find = instance.mStripMap.find(owner);
-        if (find != instance.mStripMap.end()) {
-            return find->second;
+        int id;
+        if (instance.mStripMap.get(owner, &id)) {
+            return id;
         }
-        int id = instance.mCounter++;
-        instance.mStripMap[owner] = id;
-        instance.mOwnerMap[id] = owner;
+        id = instance.mCounter++;
+        instance.mStripMap.insert(owner, id);
+        instance.mOwnerMap.insert(id, owner);
         return id;
     }
 
     // 0 if not found
     static CLEDController* getOwner(int id) {
         StripIdMap& instance = Instance();
-        auto find = instance.mOwnerMap.find(id);
-        if (find != instance.mOwnerMap.end()) {
-            return find->second;
+        CLEDController* owner;
+        if (instance.mOwnerMap.get(id, &owner)) {
+            return owner;
         }
         return 0;
     }
@@ -39,9 +42,9 @@ public:
     /// -1 if not found
     static int getId(CLEDController* owner) {
         StripIdMap& instance = Instance();
-        auto find = instance.mStripMap.find(owner);
-        if (find != instance.mStripMap.end()) {
-            return find->second;
+        int id;
+        if (instance.mStripMap.get(owner, &id)) {
+            return id;
         }
         return -1;
     }
@@ -81,7 +84,10 @@ public:
             }
         }
         if (closest_controller && smallest_diff < controller_size) {
-            return instance.mStripMap[closest_controller];
+            int id;
+            if (instance.mStripMap.get(closest_controller, &id)) {
+                return id;
+            }
         }
         return -1;
     }
@@ -90,8 +96,8 @@ private:
     static StripIdMap& Instance() {
         return Singleton<StripIdMap>::instance();
     }
-    std::map<CLEDController*, int> mStripMap;
-    std::map<int, CLEDController*> mOwnerMap;
+    FixedMap<CLEDController*, int, MAX_STRIPS> mStripMap;
+    FixedMap<int, CLEDController*, MAX_STRIPS> mOwnerMap;
     int mCounter = 0;
 };
 
