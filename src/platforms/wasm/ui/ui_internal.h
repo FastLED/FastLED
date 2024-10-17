@@ -15,7 +15,7 @@ FASTLED_NAMESPACE_BEGIN
 class jsUiInternal : public std::enable_shared_from_this<jsUiInternal> {
 public:
 
-    using UpdateFunction = Callback<const char*>;
+    using UpdateFunction = Callback<const ArduinoJson::JsonVariantConst&>;
     using ToJsonFunction = Callback<ArduinoJson::JsonObject&>;
 
     jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc);
@@ -28,7 +28,7 @@ public:
     }
 
     const char* name() const;
-    void update(const char* jsonStr);
+    void update(const ArduinoJson::JsonVariantConst& json);
     void toJson(ArduinoJson::JsonObject& json) const;
     int id() const;
 

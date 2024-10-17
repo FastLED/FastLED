@@ -8,10 +8,10 @@ inline jsUiInternal::jsUiInternal(const char* name, UpdateFunction updateFunc, T
     : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc), mId(nextId()), mMutex() {}
 
 inline const char* jsUiInternal::name() const { return mName; }
-inline void jsUiInternal::update(const char* jsonStr) { 
+inline void jsUiInternal::update(const ArduinoJson::JsonVariantConst& json) { 
     std::lock_guard<std::mutex> lock(mMutex);
     if (mUpdateFunc) {
-        mUpdateFunc(jsonStr);
+        mUpdateFunc(json);
     }
 }
 inline void jsUiInternal::toJson(ArduinoJson::JsonObject& json) const {

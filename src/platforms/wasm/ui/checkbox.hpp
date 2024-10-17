@@ -8,8 +8,8 @@ FASTLED_NAMESPACE_BEGIN
 
 jsCheckbox::jsCheckbox(const char* name, bool value)
     : mValue(value) {
-    auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const char* jsonStr) {
-        static_cast<jsCheckbox*>(self)->updateInternal(jsonStr);
+    auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const ArduinoJson::JsonVariantConst& json) {
+        static_cast<jsCheckbox*>(self)->updateInternal(json);
     });
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, ArduinoJson::JsonObject& json) {
         static_cast<jsCheckbox*>(self)->toJson(json);
@@ -41,9 +41,9 @@ void jsCheckbox::setValue(bool value) {
     mValue = value;
 }
 
-void jsCheckbox::updateInternal(const char* jsonStr) {
+void jsCheckbox::updateInternal(const ArduinoJson::JsonVariantConst& value) {
     // We expect jsonStr to be a boolean value string, so parse it accordingly
-    mValue = (strcmp(jsonStr, "true") == 0);
+    mValue = value.as<bool>();
 }
 
 jsCheckbox::operator bool() const {
