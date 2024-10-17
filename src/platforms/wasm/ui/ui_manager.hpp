@@ -76,7 +76,7 @@ inline void jsUiManager::executeUiUpdates(const std::string& jsonStr) {
 }
 
 inline std::string jsUiManager::toJsonStr() {
-    ArduinoJson::DynamicJsonDocument doc(4096); // Adjust size as needed
+    ArduinoJson::DynamicJsonDocument doc(4096);
     ArduinoJson::JsonArray json = doc.to<ArduinoJson::JsonArray>();
     toJson(json);
     std::string result;
@@ -101,7 +101,7 @@ inline void jsUiManager::toJson(ArduinoJson::JsonArray& json) {
     //     }
     // }
     for (const auto& component : components) {
-        ArduinoJson::JsonObject componentJson = json.createNestedObject();
+        ArduinoJson::JsonObject componentJson = json.add<ArduinoJson::JsonObject>();
         component->toJson(componentJson);
         if (componentJson.size() == 0) {
             printf("Warning: Empty JSON from component\n");

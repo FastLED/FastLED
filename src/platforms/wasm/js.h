@@ -129,7 +129,7 @@ class jsButton {
 inline void jsSetCanvasSize(int cledcontoller_id, const XYMap& xymap) {
     int width = xymap.getWidth();
     int height = xymap.getHeight();
-    ArduinoJson::DynamicJsonDocument doc(256);
+    ArduinoJson::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
     doc["event"] = "set_canvas_size";
     doc["width"] = width;
