@@ -46,11 +46,11 @@ class jsUiManager : EngineEvents::Listener {
 
     void onEndShowLeds() override {
         if (mItemsAdded) {
-            updateJs();
+            std::string jsonStr = toJsonStr();
+            updateJs(jsonStr.c_str());
             mItemsAdded = false;
         }
     }
-    void updateJs();
     static void updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map);
 
 

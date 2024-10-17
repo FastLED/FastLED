@@ -73,36 +73,6 @@ inline void jsUiManager::executeUiUpdates(const std::string& jsonStr) {
         return;
     }
     updateAllFastLedUiComponents(id_val_map);
-
-}
-
-inline void jsUiManager::updateJs() {
-    printf("updateJs: %d\n", millis());
-    std::string s = jsUiManager::instance().toJsonStr();
-    EM_ASM_({
-        globalThis.FastLED_onUiElementsAdded = globalThis.FastLED_onUiElementsAdded || function(jsonData, updateFunc) {
-            console.log(new Date().toLocaleTimeString());
-            console.log("Missing globalThis.FastLED_onUiElementsAdded(jsonData, updateFunc) function");
-            console.log("Added ui elements:", jsonData);
-        };
-        var jsonStr = UTF8ToString($0);
-        var data = null;
-        try {
-            data = JSON.parse(jsonStr);
-        } catch (error) {
-            console.error("Error parsing JSON:", error);
-            console.error("Problematic JSON string:", jsonStr);
-            return;
-        }
-        // Hack that we'll remove later.
-        data = data["components"];
-        if (data) {
-            globalThis.FastLED_onUiElementsAdded(data);
-        } else {
-            console.error("Internal error, data is null");
-        }
-
-    }, s.c_str());
 }
 
 inline std::string jsUiManager::toJsonStr() {
