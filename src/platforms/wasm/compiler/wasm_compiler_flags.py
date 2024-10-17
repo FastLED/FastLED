@@ -46,7 +46,7 @@ wasmflags = [
     "-Wnon-c-typedef-for-linkage",
     f"-sWASM={USE_WASM}",
     "-s", f"WASM={USE_WASM}",
-
+]
 
 if DEBUG_SYMBOS:
     wasmflags += ['-g', '-gsource-map', '--emit-symbol-map']
