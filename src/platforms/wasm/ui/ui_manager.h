@@ -53,6 +53,8 @@ class jsUiManager : EngineEvents::Listener {
     }
     static void updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map);
 
+    std::vector<std::shared_ptr<jsUiInternal>> getComponents();
+
 
     std::string toJsonStr();
     void toJson(ArduinoJson::JsonArray& json);

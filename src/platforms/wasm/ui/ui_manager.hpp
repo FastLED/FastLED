@@ -32,26 +32,27 @@ inline jsUiManager& jsUiManager::instance() {
     return Singleton<jsUiManager>::instance();
 }
 
-inline void jsUiManager::updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map) {
-    jsUiManager& self = instance();
-
+inline std::vector<std::shared_ptr<jsUiInternal>> getComponents() {
     std::vector<std::shared_ptr<jsUiInternal>> components;
-    // Copy js ui components into a vector of shared_ptrs. This will lock it's lifetime
-    // for the duration of the call.
     {
-        std::lock_guard<std::mutex> lock(self.mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
 
-        components.reserve(self.mComponents.size());
-        for (auto it = self.mComponents.begin(); it != self.mComponents.end(); ) {
+        components.reserve(mComponents.size());
+        for (auto it = mComponents.begin(); it != mComponents.end(); ) {
             if (auto component = it->lock()) {
                 components.push_back(component);
                 ++it;
             } else {
-                it = self.mComponents.erase(it);
+                it = mComponents.erase(it);
             }
         }
     }
-    
+    return components;
+}
+
+inline void jsUiManager::updateAllFastLedUiComponents(const std::map<int, std::string>& id_val_map) {
+    jsUiManager& self = instance();
+    std::vector<std::shared_ptr<jsUiInternal>> components = getComponents();
     // Update components with matching ids
     for (const auto& component : components) {
         const auto& it = id_val_map.find(component->id());
@@ -85,18 +86,27 @@ inline std::string jsUiManager::toJsonStr() {
 }
 
 inline void jsUiManager::toJson(ArduinoJson::JsonArray& json) {
-    std::lock_guard<std::mutex> lock(instance().mMutex);
-    for (auto it = mComponents.begin(); it != mComponents.end(); ) {
-        if (auto component = it->lock()) {
-            ArduinoJson::JsonObject componentJson = json.createNestedObject();
-            component->toJson(componentJson);
-            if (componentJson.size() == 0) {
-                printf("Warning: Empty JSON from component\n");
-                json.remove(json.size() - 1);
-            }
-            ++it;
-        } else {
-            it = mComponents.erase(it);
+    std::vector<std::shared_ptr<jsUiInternal>> components = instance().getComponents();
+    // std::lock_guard<std::mutex> lock(instance().mMutex);
+    // for (auto it = mComponents.begin(); it != mComponents.end(); ) {
+    //     if (auto component = it->lock()) {
+    //         ArduinoJson::JsonObject componentJson = json.createNestedObject();
+    //         component->toJson(componentJson);
+    //         if (componentJson.size() == 0) {
+    //             printf("Warning: Empty JSON from component\n");
+    //             json.remove(json.size() - 1);
+    //         }
+    //         ++it;
+    //     } else {
+    //         it = mComponents.erase(it);
+    //     }
+    // }
+    for (const auto& component : components) {
+        ArduinoJson::JsonObject componentJson = json.createNestedObject();
+        component->toJson(componentJson);
+        if (componentJson.size() == 0) {
+            printf("Warning: Empty JSON from component\n");
+            json.remove(json.size() - 1);
         }
     }
 }
