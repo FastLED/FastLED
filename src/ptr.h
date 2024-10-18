@@ -159,7 +159,6 @@ template <typename T> class Ptr : public PtrTraits<T> {
 
     // Either returns the weakptr if it exists, or an empty weakptr.
     WeakPtr<T> weakPtrNoCreate() const;
-
     WeakPtr<T> weakPtr() const { return WeakPtr<T>(*this); }
 
     bool operator==(const T *other) const { return referent_ == other; }
@@ -351,7 +350,13 @@ template <typename T> class WeakPtr {
         if (!mWeakPtr) {
             return Ptr<T>();
         }
-        return Ptr<T>::TakeOwnership(static_cast<T *>(mWeakPtr->getReferent()));
+        T* out = static_cast<T*>(mWeakPtr->getReferent());
+        if (out->ref_count() == 0) {
+            // This is a static object, so the refcount is 0.
+            return Ptr<T>::NoTracking(*out);
+        }
+        // This is a heap object, so we need to ref it.
+        return Ptr<T>::TakeOwnership(static_cast<T *>(out));
     }
 
     bool expired() const {
