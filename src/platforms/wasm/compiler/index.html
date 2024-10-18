@@ -394,10 +394,8 @@
         requestAnimationFrame(runLoop);
     }
 
-    let gl, program, positionBuffer, texCoordBuffer;
-    let textures = [];  // Double-buffered textures
-    let currentBuffer = 0;  // 0 or 1 indicating the active buffer
-    let bufferLocks = [false, false];  // Locks for double buffering
+
+    let gl, program, positionBuffer, texCoordBuffer, texture;
 
     function initWebGL() {
         const canvas = document.getElementById('myCanvas');
@@ -423,18 +421,15 @@
         gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STREAM_DRAW);
 
-        // Create double-buffered textures
-        for (let i = 0; i < 2; i++) {
-            const texture = gl.createTexture();
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            textures.push(texture);
-        }
+        // Create texture
+        texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     }
-    
+
     function createShader(gl, type, source) {
         const shader = gl.createShader(type);
         gl.shaderSource(shader, source);
@@ -458,9 +453,6 @@
         }
         return program;
     }
-    let texturesInitialized = false;
-    let texWidth, texHeight;
-
     function updateCanvas(data) {
         if (data.length === 0) {
             console.warn("Received empty data, skipping update");
@@ -468,52 +460,42 @@
         }
         if (!gl) initWebGL();
 
-        // Check if both buffers are locked, skip frame if true
-        if (bufferLocks[0] && bufferLocks[1]) {
-            console.warn("Both buffers locked, skipping frame");
-            return;
-        }
-
         const canvasWidth = gl.canvas.width;
         const canvasHeight = gl.canvas.height;
 
-        // Initialize textures if not done yet
-        if (!texturesInitialized) {
-            texWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
-            texHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
+        // Ensure the texture dimensions are powers of two
+        const texWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
+        const texHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
 
-            for (let i = 0; i < 2; i++) {
-                gl.bindTexture(gl.TEXTURE_2D, textures[i]);
-                gl.texImage2D(
-                    gl.TEXTURE_2D,
-                    0,
-                    gl.RGB,
-                    texWidth,
-                    texHeight,
-                    0,
-                    gl.RGB,
-                    gl.UNSIGNED_BYTE,
-                    null
+        let texData;
+
+        if (canvasWidth === texWidth && canvasHeight === texHeight) {
+            // Directly use the original data if it matches power-of-two dimensions
+            texData = data;
+        } else {
+            // Create a new buffer if padding is required for power-of-two dimensions
+            texData = new Uint8Array(texWidth * texHeight * 3);
+            let rowSize = canvasWidth * 3;
+
+            for (let y = 0; y < canvasHeight; y++) {
+                texData.set(
+                    data.subarray(y * rowSize, (y + 1) * rowSize),
+                    y * texWidth * 3
                 );
             }
-            texturesInitialized = true;
         }
 
-        // Use the current buffer and mark it as locked
-        const texture = textures[currentBuffer];
-        bufferLocks[currentBuffer] = true;
-
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texSubImage2D(
+        gl.texImage2D(
             gl.TEXTURE_2D,
             0,
+            gl.RGB,
+            texWidth,
+            texHeight,
             0,
-            0,
-            canvasWidth,
-            canvasHeight,
             gl.RGB,
             gl.UNSIGNED_BYTE,
-            data
+            texData
         );
 
         // Set the viewport to the original canvas size
@@ -544,13 +526,7 @@
         gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STREAM_DRAW);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-        // Unlock the current buffer and switch to the other buffer
-        bufferLocks[currentBuffer] = false;
-        currentBuffer = (currentBuffer + 1) % 2;
     }
-
-
 
 
     // Ensure we wait for the module to load
