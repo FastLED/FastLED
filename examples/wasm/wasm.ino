@@ -67,14 +67,15 @@
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
-NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
+NoisePalette noisePalette = NoisePalette(xyMap);
 
-Slider brightness = Slider("Brightness",255, 0, 255);
-Slider speedSlider = Slider("Speed", 30, 1, 50);
-Checkbox isOff = Checkbox("Set Black", false);
-Checkbox changePallete = Checkbox("Auto Next", true);
-Slider changePalletTime = Slider("Change Palette Time", 5, 1, 100);
-Button buttonChangePalette = Button("Next Palette");
+Slider brightness("Brightness", 255, 0, 255);
+Slider speed("Speed", 15, 1, 50);
+Checkbox isOff("Set Black", false);
+Checkbox changePallete("Auto Next", true);
+Slider changePalletTime("Change Palette Time", 5, 1, 100);
+Slider scale( "Scale", 20, 1, 100);
+Button changePalette("Next Palette");
 
 void setup() {
     delay(1000); // sanity delay
@@ -82,23 +83,23 @@ void setup() {
         .setCorrection(TypicalLEDStrip)
         .setCanvasUi(xyMap);
     FastLED.setBrightness(96);
-    noisePalette->lazyInit();
-    noisePalette->setSpeed(SPEED);
-    noisePalette->setScale(SCALE);
+    noisePalette.setSpeed(speed);
+    noisePalette.setScale(scale);
 }
 
 void loop() {
     FastLED.setBrightness(!isOff ? brightness.as<uint8_t>() : 0);
-    noisePalette->setSpeed(speedSlider);
+    noisePalette.setSpeed(speed);
+    noisePalette.setScale(scale);
     static int frame = 0;
-    EVERY_N_MILLISECONDS(changePalletTime.as<int>() * 1000) {
+    EVERY_N_MILLISECONDS_DYNAMIC(changePalletTime.as<int>() * 1000) {
         if (changePallete) {
-            noisePalette->changeToRandomPalette();
+            noisePalette.changeToRandomPalette();
         }
     }
 
-    if (buttonChangePalette) {
-        noisePalette->changeToRandomPalette();
+    if (changePalette) {
+        noisePalette.changeToRandomPalette();
 
     }
 
@@ -106,7 +107,7 @@ void loop() {
         printf("fastled running\r\n");
     }
 
-    noisePalette->draw(Fx::DrawContext(millis(), leds));
+    noisePalette.draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
     frame++;
 }

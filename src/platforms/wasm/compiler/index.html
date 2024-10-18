@@ -131,21 +131,15 @@
             font-size: 16px;
             cursor: pointer;
             background-color: #1E90FF;
-            /* Dodger Blue */
             color: white;
             border: none;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s ease-in-out;
         }
 
-        .ui-control button:hover {
-            background-color: #187BE5;
-            /* Slightly darker blue */
-        }
-
-        .ui-control button:active {
-            background-color: #1670CC;
-            /* Even darker blue for active state */
+        .ui-control button:active,
+        .ui-control button.active {
+            background-color: #0066CC;
         }
     </style>
 
@@ -358,19 +352,18 @@
         button.id = `button-${element.id}`;
         button.setAttribute('data-pressed', 'false'); // Initialize data-pressed as false
 
-        button.addEventListener('mousedown', function() {
-            // Set data-pressed to true when the button is clicked
+        button.addEventListener('mousedown', function () {
             this.setAttribute('data-pressed', 'true');
-
-            // Update the button's UI state (active visual feedback)
             this.classList.add('active');
         });
 
-        button.addEventListener('mouseup', function() {
-            // Set data-pressed to false when the button is released
+        button.addEventListener('mouseup', function () {
             this.setAttribute('data-pressed', 'false');
+            this.classList.remove('active');
+        });
 
-            // Update the button's UI state (remove active visual feedback)
+        button.addEventListener('mouseleave', function () {
+            this.setAttribute('data-pressed', 'false');
             this.classList.remove('active');
         });
 
@@ -401,8 +394,10 @@
         requestAnimationFrame(runLoop);
     }
 
-
-    let gl, program, positionBuffer, texCoordBuffer, texture;
+    let gl, program, positionBuffer, texCoordBuffer;
+    let textures = [];  // Double-buffered textures
+    let currentBuffer = 0;  // 0 or 1 indicating the active buffer
+    let bufferLocks = [false, false];  // Locks for double buffering
 
     function initWebGL() {
         const canvas = document.getElementById('myCanvas');
@@ -422,21 +417,24 @@
         // Create buffers
         positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STREAM_DRAW);
 
         texCoordBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STREAM_DRAW);
 
-        // Create texture
-        texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        // Create double-buffered textures
+        for (let i = 0; i < 2; i++) {
+            const texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            textures.push(texture);
+        }
     }
-
+    
     function createShader(gl, type, source) {
         const shader = gl.createShader(type);
         gl.shaderSource(shader, source);
@@ -460,24 +458,66 @@
         }
         return program;
     }
+    let texturesInitialized = false;
+    let texWidth, texHeight;
 
     function updateCanvas(data) {
+        if (data.length === 0) {
+            console.warn("Received empty data, skipping update");
+            return;
+        }
         if (!gl) initWebGL();
 
+        // Check if both buffers are locked, skip frame if true
+        if (bufferLocks[0] && bufferLocks[1]) {
+            console.warn("Both buffers locked, skipping frame");
+            return;
+        }
+
+        const canvasWidth = gl.canvas.width;
+        const canvasHeight = gl.canvas.height;
+
+        // Initialize textures if not done yet
+        if (!texturesInitialized) {
+            texWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
+            texHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
+
+            for (let i = 0; i < 2; i++) {
+                gl.bindTexture(gl.TEXTURE_2D, textures[i]);
+                gl.texImage2D(
+                    gl.TEXTURE_2D,
+                    0,
+                    gl.RGB,
+                    texWidth,
+                    texHeight,
+                    0,
+                    gl.RGB,
+                    gl.UNSIGNED_BYTE,
+                    null
+                );
+            }
+            texturesInitialized = true;
+        }
+
+        // Use the current buffer and mark it as locked
+        const texture = textures[currentBuffer];
+        bufferLocks[currentBuffer] = true;
+
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(
+        gl.texSubImage2D(
             gl.TEXTURE_2D,
             0,
-            gl.RGB,
-            gl.canvas.width,
-            gl.canvas.height,
             0,
+            0,
+            canvasWidth,
+            canvasHeight,
             gl.RGB,
             gl.UNSIGNED_BYTE,
             data
         );
 
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        // Set the viewport to the original canvas size
+        gl.viewport(0, 0, canvasWidth, canvasHeight);
         gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -493,8 +533,25 @@
         gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
         gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
+        // Update texture coordinates based on actual canvas size
+        const texCoords = new Float32Array([
+            0, 0,
+            canvasWidth / texWidth, 0,
+            0, canvasHeight / texHeight,
+            canvasWidth / texWidth, canvasHeight / texHeight,
+        ]);
+        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STREAM_DRAW);
+
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        // Unlock the current buffer and switch to the other buffer
+        bufferLocks[currentBuffer] = false;
+        currentBuffer = (currentBuffer + 1) % 2;
     }
+
+
+
 
     // Ensure we wait for the module to load
     const onModuleLoaded = async () => {

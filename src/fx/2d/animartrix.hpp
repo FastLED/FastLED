@@ -207,7 +207,7 @@ class FastLEDANIMartRIX : public animartrix_detail::ANIMartRIX {
     void setPixelColor(int x, int y, CRGB pixel) {
         data->leds[xyMap(x, y)] = pixel;
     }
-    void setPixelColorInternal(int x, int y, animartrix_detail::rgb pixel) {
+    void setPixelColorInternal(int x, int y, animartrix_detail::rgb pixel) override {
         setPixelColor(x, y, CRGB(pixel.red, pixel.green, pixel.blue));
     }
 

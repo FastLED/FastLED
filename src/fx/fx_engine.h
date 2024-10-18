@@ -7,6 +7,7 @@
 #include "fx/detail/fx_layer.h"
 #include "namespace.h"
 #include "ptr.h"
+#include "ui.h"
 #include <stdint.h>
 #include <string.h>
 
@@ -47,7 +48,18 @@ class FxEngine {
     int addFx(FxPtr effect);
 
     /**
-     * @brief Removes an effect from the engine.
+     * @brief Adds a new effect to the engine. Allocate from static memory.
+     *        This is not reference tracked and an object passed in must never be
+     *        deleted, as the engine will use a non tracking Ptr which may outlive
+     *        a call to removeFx() and the engine will thefore not know that an
+     *        object has been deleted. But if it's a static object that's
+     *        then the object probably wasn't going to be deleted anyway.
+     */
+    int addFx(Fx& effect) { return addFx(Ptr<Fx>::NoTracking(effect)); }
+
+    /**
+     * @brief Requests removal of an effect from the engine, which might not happen
+     *        immediately (for example the Fx needs to finish a transition).
      * @param index The index of the effect to remove.
      * @return A pointer to the removed effect, or nullptr if the index was invalid.
      */
@@ -55,7 +67,7 @@ class FxEngine {
 
     /**
      * @brief Retrieves an effect from the engine without removing it.
-     * @param index The index of the effect to retrieve.
+     * @param index The id of the effect to retrieve.
      * @return A pointer to the effect, or nullptr if the index was invalid.
      */
     FxPtr getFx(int index);
@@ -88,7 +100,9 @@ class FxEngine {
     IntFxMap& _getEffects() { return mEffects; }
 
   private:
+    Slider mTimeBender;
     int mCounter = 0;
+    uint32_t mCurrentTime = 0;  // FxEngine controls the clock, to allow "time-bending" effects.
     IntFxMap mEffects; ///< Collection of effects
     FxCompositor mCompositor; ///< Handles effect transitions and rendering
     int mCurrId; ///< Id of the current effect
@@ -97,7 +111,7 @@ class FxEngine {
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
-    : mCompositor(numLeds), mCurrId(0) {
+    : mTimeBender("FxEngineSpeed", 1.0f, 0.0f, 2.0f, 0.01f), mCompositor(numLeds), mCurrId(0) {
 }
 
 inline FxEngine::~FxEngine() {}
@@ -165,6 +179,8 @@ inline FxPtr FxEngine::getFx(int id) {
 }
 
 inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
+    mCurrentTime = now;  // for now, we'll just set the time to the current time.
+                         // Later, this will be time controlled by the engine.
     if (mEffects.empty()) {
         return false;
     }
@@ -179,7 +195,7 @@ inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
         mDurationSet = false;
     }
     if (!mEffects.empty()) {
-        mCompositor.draw(now, finalBuffer);
+        mCompositor.draw(mCurrentTime, finalBuffer);
     }
     return true;
 }

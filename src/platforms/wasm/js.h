@@ -53,7 +53,7 @@ class jsSlider {
     jsSlider& operator=(int value) { setValue(static_cast<float>(value)); return *this; }
 
   private:
-    void updateInternal(const char *jsonStr);
+    void updateInternal(const ArduinoJson::JsonVariantConst& value);
 
     std::shared_ptr<jsUiInternal> mInternal;
     float mMin;
@@ -78,7 +78,7 @@ class jsCheckbox {
     jsCheckbox& operator=(int value) { setValue(value != 0); return *this; }
 
   private:
-    void updateInternal(const char *jsonStr);
+    void updateInternal(const ArduinoJson::JsonVariantConst& value);
 
     std::shared_ptr<jsUiInternal> mInternal;
     bool mValue;
@@ -114,7 +114,7 @@ class jsButton {
 
     Updater mUpdater;
 
-    void updateInternal(const char *jsonStr);
+    void updateInternal(const ArduinoJson::JsonVariantConst& value);
 
     std::shared_ptr<jsUiInternal> mInternal;
     bool mPressed = false;

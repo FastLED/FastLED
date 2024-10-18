@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Tuple
 
@@ -153,6 +154,7 @@ def run_command(command: str, cwd=None, capture: bool = False) -> tuple[str, str
             print("STDERR:")
             print(stderr)
         print(f"Return code: {process.returncode}")
+        time.sleep(1)
         exit(1)
 
     return stdout, stderr
