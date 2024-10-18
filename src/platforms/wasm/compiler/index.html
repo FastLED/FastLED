@@ -458,6 +458,9 @@
         }
         return program;
     }
+    let texturesInitialized = false;
+    let texWidth, texHeight;
+
     function updateCanvas(data) {
         if (data.length === 0) {
             console.warn("Received empty data, skipping update");
@@ -474,26 +477,26 @@
         const canvasWidth = gl.canvas.width;
         const canvasHeight = gl.canvas.height;
 
-        // Ensure the texture dimensions are powers of two
-        const texWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
-        const texHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
+        // Initialize textures if not done yet
+        if (!texturesInitialized) {
+            texWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
+            texHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
 
-        let texData;
-
-        if (canvasWidth === texWidth && canvasHeight === texHeight) {
-            // Directly use the original data if it matches power-of-two dimensions
-            texData = data;
-        } else {
-            // Create a new buffer if padding is required for power-of-two dimensions
-            texData = new Uint8Array(texWidth * texHeight * 3);
-            let rowSize = canvasWidth * 3;
-
-            for (let y = 0; y < canvasHeight; y++) {
-                texData.set(
-                    data.subarray(y * rowSize, (y + 1) * rowSize),
-                    y * texWidth * 3
+            for (let i = 0; i < 2; i++) {
+                gl.bindTexture(gl.TEXTURE_2D, textures[i]);
+                gl.texImage2D(
+                    gl.TEXTURE_2D,
+                    0,
+                    gl.RGB,
+                    texWidth,
+                    texHeight,
+                    0,
+                    gl.RGB,
+                    gl.UNSIGNED_BYTE,
+                    null
                 );
             }
+            texturesInitialized = true;
         }
 
         // Use the current buffer and mark it as locked
@@ -501,16 +504,16 @@
         bufferLocks[currentBuffer] = true;
 
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(
+        gl.texSubImage2D(
             gl.TEXTURE_2D,
             0,
-            gl.RGB,
-            texWidth,
-            texHeight,
             0,
+            0,
+            canvasWidth,
+            canvasHeight,
             gl.RGB,
             gl.UNSIGNED_BYTE,
-            texData
+            data
         );
 
         // Set the viewport to the original canvas size
