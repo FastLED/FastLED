@@ -152,7 +152,20 @@ template <typename T> class Ptr : public PtrTraits<T> {
         return *this;
     }
 
-    WeakPtr<T> weakPtr() const;
+    // Either returns the weakptr if it exists, or an empty weakptr.
+    WeakPtr<T> weakPtrNoCreate() const;
+
+    WeakPtr<T> weakPtr() const {
+        return WeakPtr<T>(*this);
+    }
+
+    bool operator==(const T *other) const {
+        return referent_ == other;
+    }
+
+    bool operator!=(const T *other) const {
+        return referent_ != other;
+    }
 
     bool operator==(const Ptr &other) const {
         return referent_ == other.referent_;
@@ -263,12 +276,12 @@ public:
 
     WeakPtr(const Ptr<T>& ptr) {
         if (ptr) {
-            WeakPtr weakPtr = ptr.weakPtr();
-            bool expired = weakPtr.expired();
+            WeakPtr weakPtrNoCreate = ptr.weakPtrNoCreate();
+            bool expired = weakPtrNoCreate.expired();
             if (expired) {
-                Ptr<WeakReferent> weakPtr = Ptr<WeakReferent>::New();
-                ptr->setWeakPtr(weakPtr);
-                weakPtr->setReferent(ptr.get());
+                Ptr<WeakReferent> weakPtrNoCreate = Ptr<WeakReferent>::New();
+                ptr->setWeakPtr(weakPtrNoCreate);
+                weakPtrNoCreate->setReferent(ptr.get());
             }
             mWeakPtr = ptr->mWeakPtr;
         }
@@ -277,12 +290,12 @@ public:
     template <typename U>
     WeakPtr(const Ptr<U>& ptr) : mWeakPtr(ptr->mWeakPtr) {
         if (ptr) {
-            WeakPtr weakPtr = ptr.weakPtr();
-            bool expired = weakPtr.expired();
+            WeakPtr weakPtrNoCreate = ptr.weakPtrNoCreate();
+            bool expired = weakPtrNoCreate.expired();
             if (expired) {
-                Ptr<WeakReferent> weakPtr = Ptr<WeakReferent>::New();
-                ptr->setWeakPtr(weakPtr);
-                weakPtr->setReferent(ptr.get());
+                Ptr<WeakReferent> weakPtrNoCreate = Ptr<WeakReferent>::New();
+                ptr->setWeakPtr(weakPtrNoCreate);
+                weakPtrNoCreate->setReferent(ptr.get());
             }
             mWeakPtr = ptr->mWeakPtr;
         }
@@ -384,7 +397,7 @@ class Referent {
     virtual int ref_count() const;
     virtual void unref();
     virtual void destroy();
-    void setWeakPtr(Ptr<WeakReferent> weakPtr) { mWeakPtr = weakPtr; }
+    void setWeakPtr(Ptr<WeakReferent> weakPtrNoCreate) { mWeakPtr = weakPtrNoCreate; }
 
     Ptr<WeakReferent> mWeakPtr;
 
@@ -406,7 +419,7 @@ class Referent {
 };
 
 template<typename T>
-inline WeakPtr<T> Ptr<T>::weakPtr() const {
+inline WeakPtr<T> Ptr<T>::weakPtrNoCreate() const {
     if (!referent_) {
         return WeakPtr<T>();
     }
@@ -419,10 +432,8 @@ inline WeakPtr<T> Ptr<T>::weakPtr() const {
     if (!referent) {
         return WeakPtr<T>();
     }
-    //tmp = referent->mWeakPtr.get();
-    // prepare output
     WeakPtr<T> out;
-    out.mWeakPtr->setReferent(referent);
+    out.mWeakPtr = get()->mWeakPtr;
     return out;
 }
 

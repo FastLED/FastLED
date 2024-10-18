@@ -145,5 +145,75 @@ TEST_CASE("WeakPtr functionality early expiration") {
     CHECK(expired);
 }
 
+TEST_CASE("WeakPtr additional functionality") {
+    SUBCASE("WeakPtr default constructor") {
+        WeakPtr<MyClass> weakPtr;
+        CHECK(weakPtr.expired());
+        CHECK(weakPtr.lock() == nullptr);
+    }
+
+    SUBCASE("WeakPtr assignment and reset") {
+        MyClassPtr strongPtr1 = MyClassPtr::New();
+        MyClassPtr strongPtr2 = MyClassPtr::New();
+        WeakPtr<MyClass> weakPtr = strongPtr1;
+
+        CHECK_FALSE(weakPtr.expired());
+        CHECK(weakPtr.lock().get() == strongPtr1.get());
+
+        weakPtr = strongPtr2;
+        CHECK_FALSE(weakPtr.expired());
+        CHECK(weakPtr.lock().get() == strongPtr2.get());
+
+        weakPtr.reset();
+        CHECK(weakPtr.expired());
+        CHECK(weakPtr.lock() == nullptr);
+    }
+
+    SUBCASE("WeakPtr multiple instances") {
+        MyClassPtr strongPtr = MyClassPtr::New();
+        WeakPtr<MyClass> weakPtr1 = strongPtr;
+        WeakPtr<MyClass> weakPtr2 = strongPtr;
+
+        CHECK_FALSE(weakPtr1.expired());
+        CHECK_FALSE(weakPtr2.expired());
+        CHECK(weakPtr1.lock().get() == weakPtr2.lock().get());
+
+        strongPtr.reset();
+        CHECK(weakPtr1.expired());
+        CHECK(weakPtr2.expired());
+    }
+
+    SUBCASE("WeakPtr with temporary strong pointer") {
+        WeakPtr<MyClass> weakPtr;
+        {
+            MyClassPtr tempStrongPtr = MyClassPtr::New();
+            weakPtr = tempStrongPtr;
+            CHECK_FALSE(weakPtr.expired());
+        }
+        CHECK(weakPtr.expired());
+    }
+
+    SUBCASE("WeakPtr lock performance") {
+        MyClassPtr strongPtr = MyClassPtr::New();
+        WeakPtr<MyClass> weakPtr = strongPtr;
+
+        for (int i = 0; i < 1000; ++i) {
+            MyClassPtr lockedPtr = weakPtr.lock();
+            CHECK(lockedPtr.get() == strongPtr.get());
+        }
+        CHECK_EQ(strongPtr->ref_count(), 1);
+    }
+
+    SUBCASE("WeakPtr with inheritance") {
+        class DerivedClass : public MyClass {};
+        Ptr<DerivedClass> derivedPtr = Ptr<DerivedClass>::New();
+        WeakPtr<MyClass> weakBasePtr = derivedPtr;
+        WeakPtr<DerivedClass> weakDerivedPtr = derivedPtr;
+
+        CHECK_FALSE(weakBasePtr.expired());
+        CHECK_FALSE(weakDerivedPtr.expired());
+        CHECK(weakBasePtr.lock().get() == weakDerivedPtr.lock().get());
+    }
+}
 
 
