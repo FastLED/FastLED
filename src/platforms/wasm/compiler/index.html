@@ -453,6 +453,9 @@
         }
         return program;
     }
+    let texWidth = 0, texHeight = 0;
+    let texData;
+
     function updateCanvas(data) {
         if (data.length === 0) {
             console.warn("Received empty data, skipping update");
@@ -463,36 +466,57 @@
         const canvasWidth = gl.canvas.width;
         const canvasHeight = gl.canvas.height;
 
-        // Ensure the texture dimensions are powers of two
-        const texWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
-        const texHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
+        // Check if we need to reallocate the texture
+        const newTexWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
+        const newTexHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
 
-        let texData;
+        if (texWidth !== newTexWidth || texHeight !== newTexHeight) {
+            console.log("Reallocating texture");
+            texWidth = newTexWidth;
+            texHeight = newTexHeight;
+            console.log(`Texture size: ${texWidth}x${texHeight}`);
+            console.log(`Canvas size: ${canvasWidth}x${canvasHeight}`);
 
-        if (canvasWidth === texWidth && canvasHeight === texHeight) {
-            // Directly use the original data if it matches power-of-two dimensions
-            texData = data;
-        } else {
-            // Create a new buffer if padding is required for power-of-two dimensions
+            // Reallocate texture
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            gl.texImage2D(
+                gl.TEXTURE_2D,
+                0,
+                gl.RGB,
+                texWidth,
+                texHeight,
+                0,
+                gl.RGB,
+                gl.UNSIGNED_BYTE,
+                null
+            );
+
+            // Reallocate texData buffer
             texData = new Uint8Array(texWidth * texHeight * 3);
-            let rowSize = canvasWidth * 3;
+        }
 
-            for (let y = 0; y < canvasHeight; y++) {
-                texData.set(
-                    data.subarray(y * rowSize, (y + 1) * rowSize),
-                    y * texWidth * 3
-                );
+        // Update texData with new frame data
+        const srcRowSize = canvasWidth * 3;
+        const destRowSize = texWidth * 3;
+        for (let y = 0; y < canvasHeight; y++) {
+            for (let x = 0; x < canvasWidth; x++) {
+                const srcIndex = (y * srcRowSize) + (x * 3);
+                const destIndex = (y * destRowSize) + (x * 3);
+                texData[destIndex] = data[srcIndex];
+                texData[destIndex + 1] = data[srcIndex + 1];
+                texData[destIndex + 2] = data[srcIndex + 2];
             }
         }
 
+        // Update texture with new data
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(
+        gl.texSubImage2D(
             gl.TEXTURE_2D,
             0,
-            gl.RGB,
+            0,
+            0,
             texWidth,
             texHeight,
-            0,
             gl.RGB,
             gl.UNSIGNED_BYTE,
             texData
