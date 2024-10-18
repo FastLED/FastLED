@@ -410,7 +410,6 @@ template <typename T> inline WeakPtr<T> Ptr<T>::weakPtrNoCreate() const {
     if (!referent_) {
         return WeakPtr<T>();
     }
-    // we have to downcast the weak referent to a T ptr.
     WeakReferent *tmp = get()->mWeakPtr.get();
     if (!tmp) {
         return WeakPtr<T>();
@@ -419,6 +418,9 @@ template <typename T> inline WeakPtr<T> Ptr<T>::weakPtrNoCreate() const {
     if (!referent) {
         return WeakPtr<T>();
     }
+    // At this point, we know that our weak referent is valid.
+    // However, the template parameter ensures that either we have
+    // an exact type, or are at least down-castable of it.
     WeakPtr<T> out;
     out.mWeakPtr = get()->mWeakPtr;
     return out;
