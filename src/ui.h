@@ -55,7 +55,7 @@ class Button {
     Button(const char *name) {}
     ~Button() {}
     bool isPressed() const { return false; }
-    bool clicked() const { false; }
+    bool clicked() const { return false; }
     operator bool() const { return false; }
 };
 
