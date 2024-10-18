@@ -194,8 +194,10 @@ def main() -> None:
         description="WASM Compiler for FastLED"
     )
     parser.add_argument(
-        "directory", nargs="?", help="The directory to mount as a volume",
-        default=DEFAULT_WASM_PRJECT_DIR
+        "directory",
+        nargs="?",
+        help="The directory to mount as a volume",
+        default=DEFAULT_WASM_PRJECT_DIR,
     )
     parser.add_argument(
         "-b",

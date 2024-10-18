@@ -28,8 +28,8 @@
 #endif
 
 
-Slider SCALE("SCALE", 20, 100, 20);
-Slider SPEED("SPEED", 30, 100, 30);
+Slider SCALE("SCALE", 20, 20, 100);
+Slider SPEED("SPEED", 30, 20, 100);
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine

@@ -454,21 +454,44 @@
     }
 
     function updateCanvas(data) {
+        if (data.length === 0) {
+            console.warn("Received empty data, skipping update");
+            return;
+        }
         if (!gl) initWebGL();
+
+        // Calculate the nearest power of two dimensions
+        const texWidth = Math.pow(2, Math.ceil(Math.log2(gl.canvas.width)));
+        const texHeight = Math.pow(2, Math.ceil(Math.log2(gl.canvas.height)));
+
+        // Create a new array with the power-of-two size
+        const texData = new Uint8Array(texWidth * texHeight * 3);
+
+        // Copy the original data into the new array
+        for (let y = 0; y < gl.canvas.height; y++) {
+            for (let x = 0; x < gl.canvas.width; x++) {
+                const srcIndex = (y * gl.canvas.width + x) * 3;
+                const dstIndex = (y * texWidth + x) * 3;
+                texData[dstIndex] = data[srcIndex];
+                texData[dstIndex + 1] = data[srcIndex + 1];
+                texData[dstIndex + 2] = data[srcIndex + 2];
+            }
+        }
 
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(
             gl.TEXTURE_2D,
             0,
             gl.RGB,
-            gl.canvas.width,
-            gl.canvas.height,
+            texWidth,
+            texHeight,
             0,
             gl.RGB,
             gl.UNSIGNED_BYTE,
-            data
+            texData
         );
 
+        // Set the viewport to the original canvas size
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
         gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
@@ -484,6 +507,16 @@
         gl.enableVertexAttribArray(texCoordLocation);
         gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
         gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
+
+        // Update texture coordinates to use only the portion of the texture that contains the actual data
+        const texCoords = new Float32Array([
+            0, 0,
+            gl.canvas.width / texWidth, 0,
+            0, gl.canvas.height / texHeight,
+            gl.canvas.width / texWidth, gl.canvas.height / texHeight
+        ]);
+        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
