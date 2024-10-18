@@ -137,7 +137,8 @@
             transition: background-color 0.2s ease-in-out;
         }
 
-        .ui-control button:active, .ui-control button.active {
+        .ui-control button:active,
+        .ui-control button.active {
             background-color: #0066CC;
         }
     </style>
@@ -351,17 +352,17 @@
         button.id = `button-${element.id}`;
         button.setAttribute('data-pressed', 'false'); // Initialize data-pressed as false
 
-        button.addEventListener('mousedown', function() {
+        button.addEventListener('mousedown', function () {
             this.setAttribute('data-pressed', 'true');
             this.classList.add('active');
         });
 
-        button.addEventListener('mouseup', function() {
+        button.addEventListener('mouseup', function () {
             this.setAttribute('data-pressed', 'false');
             this.classList.remove('active');
         });
 
-        button.addEventListener('mouseleave', function() {
+        button.addEventListener('mouseleave', function () {
             this.setAttribute('data-pressed', 'false');
             this.classList.remove('active');
         });
@@ -452,7 +453,6 @@
         }
         return program;
     }
-
     function updateCanvas(data) {
         if (data.length === 0) {
             console.warn("Received empty data, skipping update");
@@ -460,21 +460,28 @@
         }
         if (!gl) initWebGL();
 
-        // Calculate the nearest power of two dimensions
-        const texWidth = Math.pow(2, Math.ceil(Math.log2(gl.canvas.width)));
-        const texHeight = Math.pow(2, Math.ceil(Math.log2(gl.canvas.height)));
+        const canvasWidth = gl.canvas.width;
+        const canvasHeight = gl.canvas.height;
 
-        // Create a new array with the power-of-two size
-        const texData = new Uint8Array(texWidth * texHeight * 3);
+        // Ensure the texture dimensions are powers of two
+        const texWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
+        const texHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
 
-        // Copy the original data into the new array
-        for (let y = 0; y < gl.canvas.height; y++) {
-            for (let x = 0; x < gl.canvas.width; x++) {
-                const srcIndex = (y * gl.canvas.width + x) * 3;
-                const dstIndex = (y * texWidth + x) * 3;
-                texData[dstIndex] = data[srcIndex];
-                texData[dstIndex + 1] = data[srcIndex + 1];
-                texData[dstIndex + 2] = data[srcIndex + 2];
+        let texData;
+
+        if (canvasWidth === texWidth && canvasHeight === texHeight) {
+            // Directly use the original data if it matches power-of-two dimensions
+            texData = data;
+        } else {
+            // Create a new buffer if padding is required for power-of-two dimensions
+            texData = new Uint8Array(texWidth * texHeight * 3);
+            let rowSize = canvasWidth * 3;
+
+            for (let y = 0; y < canvasHeight; y++) {
+                texData.set(
+                    data.subarray(y * rowSize, (y + 1) * rowSize),
+                    y * texWidth * 3
+                );
             }
         }
 
@@ -492,7 +499,7 @@
         );
 
         // Set the viewport to the original canvas size
-        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        gl.viewport(0, 0, canvasWidth, canvasHeight);
         gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
@@ -508,18 +515,19 @@
         gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
         gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
 
-        // Update texture coordinates to use only the portion of the texture that contains the actual data
+        // Update texture coordinates based on actual canvas size
         const texCoords = new Float32Array([
             0, 0,
-            gl.canvas.width / texWidth, 0,
-            0, gl.canvas.height / texHeight,
-            gl.canvas.width / texWidth, gl.canvas.height / texHeight
+            canvasWidth / texWidth, 0,
+            0, canvasHeight / texHeight,
+            canvasWidth / texWidth, canvasHeight / texHeight,
         ]);
         gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STREAM_DRAW);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
+
 
     // Ensure we wait for the module to load
     const onModuleLoaded = async () => {
