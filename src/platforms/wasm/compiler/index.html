@@ -414,11 +414,11 @@
         // Create buffers
         positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STREAM_DRAW);
 
         texCoordBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STREAM_DRAW);
 
         // Create texture
         texture = gl.createTexture();
@@ -516,7 +516,7 @@
             gl.canvas.width / texWidth, gl.canvas.height / texHeight
         ]);
         gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STREAM_DRAW);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
