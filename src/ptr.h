@@ -232,17 +232,16 @@ class Referent;
 class WeakReferent {
   public:
     WeakReferent() : mRefCount(0), mReferent(nullptr) {}
-    virtual ~WeakReferent() {}
+    ~WeakReferent() {}
 
-    virtual void ref() { mRefCount++; }
-    virtual int ref_count() const { return mRefCount; }
-    virtual void unref() {
+    void ref() { mRefCount++; }
+    int ref_count() const { return mRefCount; }
+    void unref() {
         if (--mRefCount == 0) {
             destroy();
         }
     }
-    virtual void destroy() { delete this; }
-
+    void destroy() { delete this; }
     void setReferent(Referent* referent) { mReferent = referent; }
     Referent* getReferent() const { return mReferent; }
 
@@ -275,7 +274,25 @@ public:
         }
     }
 
+    template <typename U>
+    WeakPtr(const Ptr<U>& ptr) : mWeakPtr(ptr->mWeakPtr) {
+        if (ptr) {
+            WeakPtr weakPtr = ptr.weakPtr();
+            bool expired = weakPtr.expired();
+            if (expired) {
+                Ptr<WeakReferent> weakPtr = Ptr<WeakReferent>::New();
+                ptr->setWeakPtr(weakPtr);
+                weakPtr->setReferent(ptr.get());
+            }
+            mWeakPtr = ptr->mWeakPtr;
+        }
+    }
+
     WeakPtr(const WeakPtr& other) : mWeakPtr(other.mWeakPtr) {
+    }
+
+    template <typename U>
+    WeakPtr(const WeakPtr<U>& other) : mWeakPtr(other.mWeakPtr) {
     }
 
     WeakPtr(WeakPtr&& other) noexcept : mWeakPtr(other.mWeakPtr) {
@@ -314,11 +331,15 @@ public:
     }
 
     bool operator==(const Ptr<T>& other) const {
-        return lock() == other;
+        if (!mWeakPtr) {
+            return !other;
+        }
+        return mWeakPtr->getReferent() == other.get();
     }
 
     bool operator!=(const T* other) const {
-        return lock().get() != other;
+        bool equal = *this == other;
+        return !equal;
     }
 
     WeakPtr& operator=(const WeakPtr& other) {
@@ -328,10 +349,10 @@ public:
 
 
     Ptr<T> lock() const {
-        if (mWeakPtr && mWeakPtr->getReferent()) {
-            return Ptr<T>::TakeOwnership(static_cast<T*>(mWeakPtr->getReferent()));
+        if (!mWeakPtr) {
+            return Ptr<T>();
         }
-        return Ptr<T>();
+        return Ptr<T>::TakeOwnership(static_cast<T*>(mWeakPtr->getReferent()));
     }
 
     bool expired() const {
