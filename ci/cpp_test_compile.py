@@ -4,9 +4,9 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Tuple
-import time
 
 from ci.paths import PROJECT_ROOT
 

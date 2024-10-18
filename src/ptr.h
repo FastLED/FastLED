@@ -286,11 +286,12 @@ public:
     }
 
     operator bool() const {
-        return this->lock() != nullptr;
+        return mWeakPtr && mWeakPtr->getReferent();
     }
 
     bool operator!() const {
-        return this->lock() == nullptr;
+        bool ok = *this;
+        return !ok;
     }
 
     bool operator==(const WeakPtr& other) const {
@@ -298,7 +299,7 @@ public:
     }
 
     bool operator!=(const WeakPtr& other) const {
-        return mWeakPtr != other.mWeakPtr;
+        return !(mWeakPtr != other.mWeakPtr);
     }
 
     bool operator==(const T* other) const {
@@ -306,7 +307,10 @@ public:
     }
 
     bool operator==(T* other) const {
-        return lock().get() == other;
+        if (!mWeakPtr) {
+            return other == nullptr;
+        }
+        return mWeakPtr->getReferent() == other;
     }
 
     bool operator==(const Ptr<T>& other) const {
