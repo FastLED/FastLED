@@ -9,6 +9,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+class Referent; // Inherit this if you want your object to be able to go into a
+                // Ptr, or WeakPtr.
+template <typename T> class Ptr; // Reference counted smart pointer base class.
+template <typename T> class WeakPtr; // Weak reference smart pointer base class.
+
 // Declares a smart pointer. DECLARE_SMART_PTR(Foo) will declare a class FooPtr
 // which will be a typedef of Ptr<Foo>. After this FooPtr::New(...args) can be
 // used to create a new instance of Ptr<Foo>.
@@ -155,17 +160,11 @@ template <typename T> class Ptr : public PtrTraits<T> {
     // Either returns the weakptr if it exists, or an empty weakptr.
     WeakPtr<T> weakPtrNoCreate() const;
 
-    WeakPtr<T> weakPtr() const {
-        return WeakPtr<T>(*this);
-    }
+    WeakPtr<T> weakPtr() const { return WeakPtr<T>(*this); }
 
-    bool operator==(const T *other) const {
-        return referent_ == other;
-    }
+    bool operator==(const T *other) const { return referent_ == other; }
 
-    bool operator!=(const T *other) const {
-        return referent_ != other;
-    }
+    bool operator!=(const T *other) const { return referent_ != other; }
 
     bool operator==(const Ptr &other) const {
         return referent_ == other.referent_;
@@ -240,8 +239,7 @@ template <typename T> class Ptr : public PtrTraits<T> {
     T *referent_;
 };
 
-class Referent;
-
+// Don't inherit from this, this is an internal object.
 class WeakReferent {
   public:
     WeakReferent() : mRefCount(0), mReferent(nullptr) {}
@@ -255,8 +253,8 @@ class WeakReferent {
         }
     }
     void destroy() { delete this; }
-    void setReferent(Referent* referent) { mReferent = referent; }
-    Referent* getReferent() const { return mReferent; }
+    void setReferent(Referent *referent) { mReferent = referent; }
+    Referent *getReferent() const { return mReferent; }
 
   protected:
     WeakReferent(const WeakReferent &) = default;
@@ -266,15 +264,14 @@ class WeakReferent {
 
   private:
     mutable int mRefCount;
-    Referent* mReferent;
+    Referent *mReferent;
 };
 
-template <typename T>
-class WeakPtr {
-public:
+template <typename T> class WeakPtr {
+  public:
     WeakPtr() : mWeakPtr() {}
 
-    WeakPtr(const Ptr<T>& ptr) {
+    WeakPtr(const Ptr<T> &ptr) {
         if (ptr) {
             WeakPtr weakPtrNoCreate = ptr.weakPtrNoCreate();
             bool expired = weakPtrNoCreate.expired();
@@ -287,8 +284,7 @@ public:
         }
     }
 
-    template <typename U>
-    WeakPtr(const Ptr<U>& ptr) : mWeakPtr(ptr->mWeakPtr) {
+    template <typename U> WeakPtr(const Ptr<U> &ptr) : mWeakPtr(ptr->mWeakPtr) {
         if (ptr) {
             WeakPtr weakPtrNoCreate = ptr.weakPtrNoCreate();
             bool expired = weakPtrNoCreate.expired();
@@ -301,71 +297,61 @@ public:
         }
     }
 
-    WeakPtr(const WeakPtr& other) : mWeakPtr(other.mWeakPtr) {
-    }
+    WeakPtr(const WeakPtr &other) : mWeakPtr(other.mWeakPtr) {}
 
     template <typename U>
-    WeakPtr(const WeakPtr<U>& other) : mWeakPtr(other.mWeakPtr) {
-    }
+    WeakPtr(const WeakPtr<U> &other) : mWeakPtr(other.mWeakPtr) {}
 
-    WeakPtr(WeakPtr&& other) noexcept : mWeakPtr(other.mWeakPtr) {
-    }
+    WeakPtr(WeakPtr &&other) noexcept : mWeakPtr(other.mWeakPtr) {}
 
-    ~WeakPtr() {
-        reset();
-    }
+    ~WeakPtr() { reset(); }
 
-    operator bool() const {
-        return mWeakPtr && mWeakPtr->getReferent();
-    }
+    operator bool() const { return mWeakPtr && mWeakPtr->getReferent(); }
 
     bool operator!() const {
         bool ok = *this;
         return !ok;
     }
 
-    bool operator==(const WeakPtr& other) const {
+    bool operator==(const WeakPtr &other) const {
         return mWeakPtr == other.mWeakPtr;
     }
 
-    bool operator!=(const WeakPtr& other) const {
+    bool operator!=(const WeakPtr &other) const {
         return !(mWeakPtr != other.mWeakPtr);
     }
 
-    bool operator==(const T* other) const {
-        return lock().get() == other;
-    }
+    bool operator==(const T *other) const { return lock().get() == other; }
 
-    bool operator==(T* other) const {
+    bool operator==(T *other) const {
         if (!mWeakPtr) {
             return other == nullptr;
         }
         return mWeakPtr->getReferent() == other;
     }
 
-    bool operator==(const Ptr<T>& other) const {
+    bool operator==(const Ptr<T> &other) const {
         if (!mWeakPtr) {
             return !other;
         }
         return mWeakPtr->getReferent() == other.get();
     }
 
-    bool operator!=(const T* other) const {
+    bool operator!=(const T *other) const {
         bool equal = *this == other;
         return !equal;
     }
 
-    WeakPtr& operator=(const WeakPtr& other) {
+    WeakPtr &operator=(const WeakPtr &other) {
         this->mWeakPtr = other.mWeakPtr;
         return *this;
     }
-
 
     Ptr<T> lock() const {
         if (!mWeakPtr) {
             return Ptr<T>();
         }
-        return Ptr<T>::TakeOwnership(static_cast<T*>(mWeakPtr->getReferent()));
+        return Ptr<T>::TakeOwnership(static_cast<T *>(mWeakPtr->getReferent()));
     }
 
     bool expired() const {
@@ -387,48 +373,44 @@ public:
 };
 
 // Objects that inherit this class can be reference counted and put into
-// a Ptr object.
+// a Ptr object. They can also be put into a WeakPtr object.
 class Referent {
   public:
-    Referent();
-    virtual ~Referent();
-
-    virtual void ref();
     virtual int ref_count() const;
-    virtual void unref();
-    virtual void destroy();
-    void setWeakPtr(Ptr<WeakReferent> weakPtrNoCreate) { mWeakPtr = weakPtrNoCreate; }
-
-    Ptr<WeakReferent> mWeakPtr;
 
   protected:
+    Referent();
+    virtual ~Referent();
     Referent(const Referent &);
     Referent &operator=(const Referent &);
     Referent(Referent &&);
     Referent &operator=(Referent &&);
 
+    virtual void ref();
+    virtual void unref();
+    virtual void destroy();
+
   private:
     friend class WeakReferent;
-    // In order for a Referent to be passed around as const, the refcount must
-    // be mutable.
+    template <typename T> friend class Ptr;
+    template <typename T> friend class WeakPtr;
+    void setWeakPtr(Ptr<WeakReferent> weakPtrNoCreate) {
+        mWeakPtr = weakPtrNoCreate;
+    }
     mutable int mRefCount;
-
-
-    template <typename T>
-    friend class WeakPtr;
+    Ptr<WeakReferent> mWeakPtr; // Optional weak reference to this object.
 };
 
-template<typename T>
-inline WeakPtr<T> Ptr<T>::weakPtrNoCreate() const {
+template <typename T> inline WeakPtr<T> Ptr<T>::weakPtrNoCreate() const {
     if (!referent_) {
         return WeakPtr<T>();
     }
     // we have to downcast the weak referent to a T ptr.
-    WeakReferent* tmp = get()->mWeakPtr.get();
+    WeakReferent *tmp = get()->mWeakPtr.get();
     if (!tmp) {
         return WeakPtr<T>();
     }
-    T* referent = static_cast<T*>(tmp->getReferent());
+    T *referent = static_cast<T *>(tmp->getReferent());
     if (!referent) {
         return WeakPtr<T>();
     }
@@ -436,6 +418,5 @@ inline WeakPtr<T> Ptr<T>::weakPtrNoCreate() const {
     out.mWeakPtr = get()->mWeakPtr;
     return out;
 }
-
 
 FASTLED_NAMESPACE_END

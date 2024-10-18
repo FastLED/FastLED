@@ -14,6 +14,9 @@ class MyClass : public Referent {
     ~MyClass() {
         destructor_signal = 0xdeadbeef;
     }
+    virtual void ref() { Referent::ref(); }
+    virtual void unref() { Referent::unref(); }
+    virtual void destroy() { Referent::destroy(); }
     uint32_t destructor_signal = 0;
 };
 
