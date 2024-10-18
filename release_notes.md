@@ -1,4 +1,6 @@
-FastLED 3.8.0
+
+
+FastLED 4.0.0
 =============
 * ESP32 RMT5 Driver Implemented.
   * Driver crashes on boot should now be solved.
@@ -32,6 +34,8 @@ FastLED 3.8.0
 * Compile support for ATtiny1604 and other Attiny boards
   * Many of these boards were failing a linking step due to a missing timer_millis value. This is now injected in via weak symbol for these boards, meaning that you won't get a linker error if you include code (like wiring.cpp) that defines this.
   * If you need a working timer value on AVR that increases via an ISR you can do so by defining `FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL=1`
+* Board support
+  * nordicnrf52_dk now supported and tested (thanks https://github.com/paulhayes!)
 
 
 FastLED 3.8.0

@@ -131,6 +131,11 @@ RPI_PICO = Board(
     board_build_filesystem_size="0.5m",
 )
 
+NORDIC_NRF52 = Board(
+    board_name="nordicnrf52_dk",
+    platform="nordicnrf52",
+)
+
 RPI_PICO2 = Board(
     board_name="rpipico2",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
@@ -206,6 +211,7 @@ ALL: list[Board] = [
     ESP32S3_RMT51,
     BLUEPILL,
     MAPLE_MINI,
+    NORDIC_NRF52,
 ]
 
 
