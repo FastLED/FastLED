@@ -13,6 +13,8 @@ DOCKER_FILE: Path = (
     PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "Dockerfile"
 )
 
+DEFAULT_WASM_PRJECT_DIR: str = str(PROJECT_ROOT / "examples" / "wasm")
+
 assert DOCKER_FILE.exists(), f"ERROR: Dockerfile not found at {DOCKER_FILE}"
 
 
@@ -192,7 +194,8 @@ def main() -> None:
         description="WASM Compiler for FastLED"
     )
     parser.add_argument(
-        "directory", nargs="?", help="The directory to mount as a volume"
+        "directory", nargs="?", help="The directory to mount as a volume",
+        default=DEFAULT_WASM_PRJECT_DIR
     )
     parser.add_argument(
         "-b",
