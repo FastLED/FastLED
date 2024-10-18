@@ -48,13 +48,14 @@ class FxEngine {
 
     /**
      * @brief Adds a new effect to the engine. This is not reference tracked and
-     *        must never be deleted, as the engine will use a non tracking Ptr which
-     *        may outlive a call to removeFx().
+     *        objedt passed in must never be deleted, as the engine will use a non
+     *        tracking Ptr which may outlive a call to removeFx().
      */
     int addFx(Fx& effect) { return addFx(Ptr<Fx>::NoTracking(effect)); }
 
     /**
-     * @brief Removes an effect from the engine.
+     * @brief Requests removal of an effect from the engine, which might not happen
+     *        immediately (for example the Fx needs to finish a transition).
      * @param index The index of the effect to remove.
      * @return A pointer to the removed effect, or nullptr if the index was invalid.
      */
