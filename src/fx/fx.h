@@ -21,7 +21,8 @@ class Fx : public Referent {
     /// @param now The current time in milliseconds. Fx writers are encouraged
     /// to use this instead of millis() directly as this will more deterministic
     /// behavior.
-    virtual void draw(DrawContext context) = 0;
+    virtual void draw(DrawContext context) = 0;  // This is the only function that needs to be implemented
+                                                 // everything else is optional.
 
     // capabilities
     virtual bool hasAlphaChannel() const { return false; }

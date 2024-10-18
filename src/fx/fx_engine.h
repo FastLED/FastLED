@@ -47,9 +47,12 @@ class FxEngine {
     int addFx(FxPtr effect);
 
     /**
-     * @brief Adds a new effect to the engine. This is not reference tracked and
-     *        objedt passed in must never be deleted, as the engine will use a non
-     *        tracking Ptr which may outlive a call to removeFx().
+     * @brief Adds a new effect to the engine. Allocate from static memory.
+     *        This is not reference tracked and an object passed in must never be
+     *        deleted, as the engine will use a non tracking Ptr which may outlive
+     *        a call to removeFx() and the engine will thefore not know that an
+     *        object has been deleted. But if it's a static object that's
+     *        then the object probably wasn't going to be deleted anyway.
      */
     int addFx(Fx& effect) { return addFx(Ptr<Fx>::NoTracking(effect)); }
 
@@ -63,7 +66,7 @@ class FxEngine {
 
     /**
      * @brief Retrieves an effect from the engine without removing it.
-     * @param index The index of the effect to retrieve.
+     * @param index The id of the effect to retrieve.
      * @return A pointer to the effect, or nullptr if the index was invalid.
      */
     FxPtr getFx(int index);
