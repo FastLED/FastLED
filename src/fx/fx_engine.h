@@ -7,6 +7,7 @@
 #include "fx/detail/fx_layer.h"
 #include "namespace.h"
 #include "ptr.h"
+#include "ui.h"
 #include <stdint.h>
 #include <string.h>
 
@@ -99,6 +100,7 @@ class FxEngine {
     IntFxMap& _getEffects() { return mEffects; }
 
   private:
+    Slider mTimeBender;
     int mCounter = 0;
     uint32_t mCurrentTime = 0;  // FxEngine controls the clock, to allow "time-bending" effects.
     IntFxMap mEffects; ///< Collection of effects
@@ -109,7 +111,7 @@ class FxEngine {
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
-    : mCompositor(numLeds), mCurrId(0) {
+    : mTimeBender("FxEngineSpeed", 1.0f, 0.0f, 2.0f, 0.01f), mCompositor(numLeds), mCurrId(0) {
 }
 
 inline FxEngine::~FxEngine() {}
