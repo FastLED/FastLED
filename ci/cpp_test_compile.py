@@ -6,6 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Tuple
+import time
 
 from ci.paths import PROJECT_ROOT
 
@@ -153,6 +154,7 @@ def run_command(command: str, cwd=None, capture: bool = False) -> tuple[str, str
             print("STDERR:")
             print(stderr)
         print(f"Return code: {process.returncode}")
+        time.sleep(1)
         exit(1)
 
     return stdout, stderr

@@ -103,5 +103,47 @@ TEST_CASE("Ptr from static memory") {
     }
     CHECK_EQ(staticObject.ref_count(), 0);
     CHECK_NE(staticObject.destructor_signal, 0xdeadbeef);
-
 }
+
+TEST_CASE("WeakPtr functionality") {
+    WeakPtr<MyClass> weakPtr;
+    MyClassPtr strongPtr = MyClassPtr::New();
+    weakPtr = strongPtr;
+
+    REQUIRE_EQ(strongPtr->ref_count(), 1);
+    bool expired = weakPtr.expired();
+    REQUIRE_FALSE(expired);
+    REQUIRE(weakPtr != nullptr);
+    
+    SUBCASE("WeakPtr can be locked to get a strong reference") {
+        MyClassPtr lockedPtr = weakPtr.lock();
+        CHECK(lockedPtr.get() == strongPtr.get());
+        CHECK_EQ(strongPtr->ref_count(), 2);
+    }
+    weakPtr.reset();
+    expired = weakPtr.expired();
+    CHECK(expired);
+}
+
+TEST_CASE("WeakPtr functionality early expiration") {
+    WeakPtr<MyClass> weakPtr;
+    MyClassPtr strongPtr = MyClassPtr::New();
+    weakPtr = strongPtr;
+
+    REQUIRE_EQ(strongPtr->ref_count(), 1);
+    bool expired = weakPtr.expired();
+    REQUIRE_FALSE(expired);
+    REQUIRE(weakPtr != nullptr);
+    
+    SUBCASE("WeakPtr can be locked to get a strong reference") {
+        MyClassPtr lockedPtr = weakPtr.lock();
+        CHECK(lockedPtr.get() == strongPtr.get());
+        CHECK_EQ(strongPtr->ref_count(), 2);
+    }
+    strongPtr.reset();
+    expired = weakPtr.expired();
+    CHECK(expired);
+}
+
+
+
