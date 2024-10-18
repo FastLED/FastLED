@@ -100,6 +100,7 @@ class FxEngine {
 
   private:
     int mCounter = 0;
+    uint32_t mCurrentTime = 0;  // FxEngine controls the clock, to allow "time-bending" effects.
     IntFxMap mEffects; ///< Collection of effects
     FxCompositor mCompositor; ///< Handles effect transitions and rendering
     int mCurrId; ///< Id of the current effect
@@ -176,6 +177,8 @@ inline FxPtr FxEngine::getFx(int id) {
 }
 
 inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
+    mCurrentTime = now;  // for now, we'll just set the time to the current time.
+                         // Later, this will be time controlled by the engine.
     if (mEffects.empty()) {
         return false;
     }
@@ -190,7 +193,7 @@ inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
         mDurationSet = false;
     }
     if (!mEffects.empty()) {
-        mCompositor.draw(now, finalBuffer);
+        mCompositor.draw(mCurrentTime, finalBuffer);
     }
     return true;
 }
