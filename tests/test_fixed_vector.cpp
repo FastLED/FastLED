@@ -7,7 +7,7 @@
 #include "fixed_vector.h"
 
 TEST_CASE("Fixed vector simple") {
-    FASTLED_NAMESPACE_USE;
+    FASTLED_USING_NAMESPACE;
     FixedVector<int, 5> vec;
 
     SUBCASE("Initial state") {
@@ -49,7 +49,7 @@ TEST_CASE("Fixed vector simple") {
 }
 
 TEST_CASE("FixedVector construction and destruction") {
-    FASTLED_NAMESPACE_USE;
+    FASTLED_USING_NAMESPACE;
     
     static int live_object_count = 0;
 
@@ -102,7 +102,7 @@ TEST_CASE("FixedVector construction and destruction") {
 }
 
 TEST_CASE("Fixed vector advanced") {
-    FASTLED_NAMESPACE_USE;
+    FASTLED_USING_NAMESPACE;
     FixedVector<int, 5> vec;
 
     SUBCASE("Pop back") {
@@ -166,7 +166,7 @@ TEST_CASE("Fixed vector advanced") {
 }
 
 TEST_CASE("Fixed vector with custom type") {
-    FASTLED_NAMESPACE_USE;
+    FASTLED_USING_NAMESPACE;
     struct Point {
         int x, y;
         Point(int x = 0, int y = 0) : x(x), y(y) {}

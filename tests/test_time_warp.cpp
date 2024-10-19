@@ -7,7 +7,7 @@
 #include "fx/detail/time_warp.h"
 
 TEST_CASE("TimeWarp basic functionality") {
-    FASTLED_NAMESPACE_USE;
+    FASTLED_USING_NAMESPACE;
 
     SUBCASE("Initialization and normal time progression") {
         TimeWarp tw(1000, 1.0f);
