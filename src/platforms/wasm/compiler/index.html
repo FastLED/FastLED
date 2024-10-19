@@ -83,11 +83,17 @@
             }
         }
 
-        #canvas-container {
+        #main-container {
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             width: 100%;
+            margin-top: 20px;
+        }
+
+        #canvas-container {
+            flex: 0 0 auto;
+            margin-right: 20px;
         }
 
         #myCanvas {
@@ -100,10 +106,18 @@
             /* Outer shadow */
         }
 
+        #ui-controls {
+            flex: 0 0 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
         #output {
             font-size: 1em;
             padding: 20px;
             white-space: pre-wrap;
+            width: 100%;
         }
 
         .ui-control {
@@ -112,7 +126,6 @@
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            /* Make sure the control takes up the available space */
         }
 
         .ui-control label {
@@ -146,6 +159,10 @@
             width: 100px;
             padding: 5px;
             font-size: 16px;
+            background-color: #2E2E2E;
+            color: #E0E0E0;
+            border: 1px solid #444;
+            border-radius: 4px;
         }
     </style>
 
@@ -154,25 +171,28 @@
 
 <body>
     <h1>FastLED.js</h1>
-    <div id="canvas-container">
-        <canvas id="myCanvas" width="16" height="16"></canvas>
-        <script id="vertexShader" type="x-shader/x-vertex">
-            attribute vec2 a_position;
-            attribute vec2 a_texCoord;
-            varying vec2 v_texCoord;
-            void main() {
-                gl_Position = vec4(a_position, 0, 1);
-                v_texCoord = a_texCoord;
-            }
-        </script>
-        <script id="fragmentShader" type="x-shader/x-fragment">
-            precision mediump float;
-            uniform sampler2D u_image;
-            varying vec2 v_texCoord;
-            void main() {
-                gl_FragColor = texture2D(u_image, v_texCoord);
-            }
-        </script>
+    <div id="main-container">
+        <div id="canvas-container">
+            <canvas id="myCanvas" width="16" height="16"></canvas>
+            <script id="vertexShader" type="x-shader/x-vertex">
+                attribute vec2 a_position;
+                attribute vec2 a_texCoord;
+                varying vec2 v_texCoord;
+                void main() {
+                    gl_Position = vec4(a_position, 0, 1);
+                    v_texCoord = a_texCoord;
+                }
+            </script>
+            <script id="fragmentShader" type="x-shader/x-fragment">
+                precision mediump float;
+                uniform sampler2D u_image;
+                varying vec2 v_texCoord;
+                void main() {
+                    gl_FragColor = texture2D(u_image, v_texCoord);
+                }
+            </script>
+        </div>
+        <div id="ui-controls"></div>
     </div>
     <pre id="output"></pre>
 
@@ -294,7 +314,7 @@
         numberInput.value = element.value;
         numberInput.min = element.min;
         numberInput.max = element.max;
-        numberInput.step = 'any'; // Allows for decimal values
+        numberInput.step = (element.step !== undefined) ? element.step : 'any'; // Use provided step or allow any decimal
 
         controlDiv.appendChild(label);
         controlDiv.appendChild(numberInput);
@@ -303,9 +323,10 @@
     }
 
     function createUiControlsContainer() {
-        const container = document.createElement('div');
-        container.id = 'ui-controls';
-        document.body.insertBefore(container, document.getElementById('output'));
+        const container = document.getElementById('ui-controls');
+        if (!container) {
+            console.error('UI controls container not found in the HTML');
+        }
         return container;
     }
 

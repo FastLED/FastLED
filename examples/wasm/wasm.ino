@@ -78,7 +78,7 @@ Checkbox changePallete("Auto Next", true);
 Slider changePalletTime("Change Palette Time", 5, 1, 100);
 Slider scale( "Scale", 20, 1, 100);
 Button changePalette("Next Palette");
-NumberField fxIndex("Fx index", 0, 0, 8);
+NumberField fxIndex("Fx index", 0, 0, NUM_ANIMATIONS);
 
 Animartrix animartrix(xyMap, POLAR_WAVES);
 FxEngine fxEngine(NUM_LEDS);
