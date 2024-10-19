@@ -17,6 +17,10 @@
 #define FASTLED_HAS_UI_CHECKBOX 0
 #endif
 
+#ifndef FASTLED_HAS_UI_NUMBER_FIELD
+#define FASTLED_HAS_UI_NUMBER_FIELD 0
+#endif
+
 FASTLED_NAMESPACE_BEGIN
 
 
@@ -74,6 +78,28 @@ class Checkbox {
   private:
     void setValue(bool value) { mValue = value; }
     bool mValue;
+};
+
+#endif
+
+#if !FASTLED_HAS_UI_NUMBER_FIELD
+
+class NumberField {
+  public:
+    NumberField(const char *name, double value, double min = 0, double max = 100, double step = 1)
+      : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)), mStep(step) {}
+    ~NumberField() {}
+    double value() const { return mValue; }
+    void setValue(double value) { mValue = MAX(mMin, MIN(mMax, value)); }
+    operator double() const { return mValue; }
+    operator int() const { return static_cast<int>(mValue); }
+    NumberField& operator=(double value) { setValue(value); return *this; }
+    NumberField& operator=(int value) { setValue(static_cast<double>(value)); return *this; }
+  private:
+    double mValue;
+    double mMin;
+    double mMax;
+    double mStep;
 };
 
 #endif
