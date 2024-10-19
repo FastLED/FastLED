@@ -1,4 +1,4 @@
-name: nordicnrf52_dk
+name: nrf52840_dk
 
 on:
   workflow_dispatch:
@@ -14,4 +14,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: nordicnrf52_dk
+      args: nrf52840_dk
