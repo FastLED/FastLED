@@ -11,12 +11,18 @@
 #include "ripple.h"
 #include <FastLED.h>
 
-
+// Strips are different lengths because I am a dumb
+constexpr int lengths[] = {
+  154,
+  168,
+  84,
+  154
+};
 
 
 #if defined(USING_DOTSTAR)
-int lengths[] = {154, 168, 84,
-                 154}; // Strips are different lengths because I am a dumb
+#define COLOR_ORDER BGR
+
 
 Adafruit_DotStar strip0(lengths[0], 15, 2, DOTSTAR_BRG);
 Adafruit_DotStar strip1(lengths[1], 0, 4, DOTSTAR_BRG);
@@ -27,9 +33,7 @@ Adafruit_DotStar strips[4] = {strip0, strip1, strip2, strip3};
 
 #else
 #define NUM_STRIPS 4
-#define COLOR_ORDER BGR
-const int lengths[] = {154, 168, 84,
-                       154}; // Strips are different lengths because I am a dumb
+
 CRGB leds0[lengths[0]] = {};
 CRGB leds1[lengths[1]] = {};
 CRGB leds2[lengths[2]] = {};
