@@ -44,4 +44,14 @@ TEST_CASE("TimeWarp basic functionality") {
         tw.update(4000);
         CHECK(tw.getTime() == 4000);
     }
+
+    SUBCASE("Wrap-around protection - prevent from going below start time") {
+        TimeWarp tw(1000, 1.0f);
+        tw.update(1001);
+        CHECK(tw.getTime() == 1001);
+        tw.setTimeScale(-1.0f);
+        tw.update(2000);
+        CHECK_EQ(tw.getTime(), 1000);
+    }
+
 }
