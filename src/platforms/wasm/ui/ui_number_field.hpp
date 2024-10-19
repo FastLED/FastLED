@@ -1,22 +1,21 @@
 
 
-#pragma once
+#ifndef UI_NUMBER_FIELD_HPP
+#define UI_NUMBER_FIELD_HPP
 
 #include "namespace.h"
 #include "third_party/arduinojson/json.h"
 #include "ui_internal.h"
 #include "platforms/wasm/js.h"
+#include "ui_manager.h"
 
 #include <memory>
-#include <algorithm>
-
 
 FASTLED_NAMESPACE_BEGIN
 
 
-
-inline jsNumberField::jsNumberField(const char* name, double value, double min, double max, double step)
-    : mValue(std::clamp(value, min, max)), mMin(min), mMax(max), mStep(step) {
+jsNumberField::jsNumberField(const char* name, double value, double min, double max, double step)
+    : mValue(value), mMin(min), mMax(max), mStep(step) {
     auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const ArduinoJson::JsonVariantConst& json) {
         static_cast<jsNumberField*>(self)->updateInternal(json);
     });
@@ -27,15 +26,15 @@ inline jsNumberField::jsNumberField(const char* name, double value, double min, 
     jsUiManager::addComponent(mInternal);
 }
 
-inline jsNumberField::~jsNumberField() {
+jsNumberField::~jsNumberField() {
     jsUiManager::removeComponent(mInternal);
 }
 
-inline const char* jsNumberField::name() const {
+const char* jsNumberField::name() const {
     return mInternal->name();
 }
 
-inline void jsNumberField::toJson(ArduinoJson::JsonObject& json) const {
+void jsNumberField::toJson(ArduinoJson::JsonObject& json) const {
     json["name"] = name();
     json["type"] = "number";
     json["id"] = mInternal->id();
@@ -45,24 +44,26 @@ inline void jsNumberField::toJson(ArduinoJson::JsonObject& json) const {
     json["step"] = mStep;
 }
 
-inline double jsNumberField::value() const {
+double jsNumberField::value() const {
     return mValue;
 }
 
-inline void jsNumberField::setValue(double value) {
-    mValue = std::clamp(value, mMin, mMax);
+void jsNumberField::setValue(double value) {
+    mValue = std::max(mMin, std::min(mMax, value));
 }
 
-inline void jsNumberField::updateInternal(const ArduinoJson::JsonVariantConst& value) {
-    mValue = std::clamp(value.as<double>(), mMin, mMax);
+void jsNumberField::updateInternal(const ArduinoJson::JsonVariantConst& value) {
+    mValue = std::max(mMin, std::min(mMax, value.as<double>()));
 }
 
-inline jsNumberField::operator double() const {
-    return mValue;
+jsNumberField::operator double() const {
+    return value();
 }
 
-inline jsNumberField::operator int() const {
-    return static_cast<int>(mValue);
+jsNumberField::operator int() const {
+    return static_cast<int>(value());
 }
 
 FASTLED_NAMESPACE_END
+
+#endif // UI_NUMBER_FIELD_HPP

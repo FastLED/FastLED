@@ -76,6 +76,7 @@ Checkbox changePallete("Auto Next", true);
 Slider changePalletTime("Change Palette Time", 5, 1, 100);
 Slider scale( "Scale", 20, 1, 100);
 Button changePalette("Next Palette");
+NumberField paletteIndex("Palette Index", 0, 0, 255, 1);
 
 void setup() {
     delay(1000); // sanity delay
@@ -105,7 +106,9 @@ void loop() {
 
     EVERY_N_MILLISECONDS(1000) {
         printf("fastled running\r\n");
+        printf("Numberfield: %f\r\n", paletteIndex.value());
     }
+
 
     noisePalette.draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
