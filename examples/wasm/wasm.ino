@@ -11,7 +11,9 @@
 #include "fx/2d/noisepalette.hpp"
 #include "third_party/arduinojson/json.h"
 #include "slice.h"
+#include "fx/fx_engine.h"
 
+#include "fx/2d/animartrix.hpp"
 #include "platforms/wasm/js.h"
 
 #include "ui.h"
@@ -76,16 +78,20 @@ Checkbox changePallete("Auto Next", true);
 Slider changePalletTime("Change Palette Time", 5, 1, 100);
 Slider scale( "Scale", 20, 1, 100);
 Button changePalette("Next Palette");
-NumberField paletteIndex("Palette Index", 0, 0, 255);
+NumberField fxIndex("Fx index", 0, 0, 8);
+
+Animartrix animartrix(xyMap, POLAR_WAVES);
+FxEngine fxEngine(NUM_LEDS);
 
 void setup() {
-    delay(1000); // sanity delay
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setCanvasUi(xyMap);
-    FastLED.setBrightness(96);
-    noisePalette.setSpeed(speed);
+    FastLED.setBrightness(brightness);
+    //noisePalette.setSpeed(speed);
     noisePalette.setScale(scale);
+    fxEngine.addFx(animartrix);
+    fxEngine.addFx(noisePalette);
 }
 
 void loop() {
@@ -103,14 +109,19 @@ void loop() {
         noisePalette.changeToRandomPalette();
 
     }
+    static int lastFxIndex = -1;
+    if (fxIndex.value() != lastFxIndex) {
+        lastFxIndex = fxIndex;
+        animartrix.fxSet(fxIndex);
+    }
 
     EVERY_N_MILLISECONDS(1000) {
         printf("fastled running\r\n");
-        printf("Numberfield: %f\r\n", paletteIndex.value());
+        printf("Numberfield: %f\r\n", fxIndex.value());
     }
 
 
-    noisePalette.draw(Fx::DrawContext(millis(), leds));
+    fxEngine.draw(millis(), leds);
     FastLED.show();
     frame++;
 }

@@ -77,6 +77,10 @@ class jsNumberField {
 
     jsNumberField& operator=(double value) { setValue(value); return *this; }
     jsNumberField& operator=(int value) { setValue(static_cast<double>(value)); return *this; }
+    bool operator==(double v) const { return value() == v; }
+    bool operator==(int v) const { return value() == v; }
+    bool operator!=(double v) const { return value() != v; }
+    bool operator!=(int v) const { return value() != v; }
 
   private:
     void updateInternal(const ArduinoJson::JsonVariantConst& value);
