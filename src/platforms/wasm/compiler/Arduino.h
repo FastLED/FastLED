@@ -4,6 +4,22 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <random>
+#include <algorithm>
+
+using std::min;
+using std::max;
+
+inline long random(long min, long max) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(min, max);
+    return dis(gen);
+}
+
+inline long random(long max) {
+    return random(0, max);
+}
 
 struct SerialEmulation {
     void print(const char *s) { printf("%s", s); }

@@ -13,6 +13,7 @@
 
 
 
+
 #if defined(USING_DOTSTAR)
 int lengths[] = {154, 168, 84,
                  154}; // Strips are different lengths because I am a dumb
@@ -29,10 +30,10 @@ Adafruit_DotStar strips[4] = {strip0, strip1, strip2, strip3};
 #define COLOR_ORDER BGR
 const int lengths[] = {154, 168, 84,
                        154}; // Strips are different lengths because I am a dumb
-CRGB leds0[lengths[0]];
-CRGB leds1[lengths[1]];
-CRGB leds2[lengths[2]];
-CRGB leds3[lengths[3]];
+CRGB leds0[lengths[0]] = {};
+CRGB leds1[lengths[1]] = {};
+CRGB leds2[lengths[2]] = {};
+CRGB leds3[lengths[3]] = {};
 CRGB *leds[] = {leds0, leds1, leds2, leds3};
 #endif
 
