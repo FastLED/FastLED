@@ -8,8 +8,13 @@
 #include "namespace.h"
 #include "ptr.h"
 #include "ui.h"
+#include "fx/detail/time_warp.h"
 #include <stdint.h>
 #include <string.h>
+
+
+// Forward declaration
+class TimeWarp;
 
 #ifndef FASTLED_FX_ENGINE_MAX_FX
 #define FASTLED_FX_ENGINE_MAX_FX 64
@@ -99,10 +104,16 @@ class FxEngine {
     
     IntFxMap& _getEffects() { return mEffects; }
 
+    /**
+     * @brief Sets the time scale for the TimeWarp object.
+     * @param timeScale The new time scale value.
+     */
+    void setTimeScale(float timeScale) { mTimeWarp.setTimeScale(timeScale); }
+
   private:
     Slider mTimeBender;
     int mCounter = 0;
-    uint32_t mCurrentTime = 0;  // FxEngine controls the clock, to allow "time-bending" effects.
+    TimeWarp mTimeWarp;  // FxEngine controls the clock, to allow "time-bending" effects.
     IntFxMap mEffects; ///< Collection of effects
     FxCompositor mCompositor; ///< Handles effect transitions and rendering
     int mCurrId; ///< Id of the current effect
@@ -111,7 +122,10 @@ class FxEngine {
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
-    : mTimeBender("FxEngineSpeed", 1.0f, 0.0f, 2.0f, 0.01f), mCompositor(numLeds), mCurrId(0) {
+    : mTimeBender("FxEngineSpeed", 1.0f, 0.0f, 2.0f, 0.01f), 
+      mTimeWarp(0), 
+      mCompositor(numLeds), 
+      mCurrId(0) {
 }
 
 inline FxEngine::~FxEngine() {}
@@ -179,8 +193,10 @@ inline FxPtr FxEngine::getFx(int id) {
 }
 
 inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
-    mCurrentTime = now;  // for now, we'll just set the time to the current time.
-                         // Later, this will be time controlled by the engine.
+    mTimeWarp.setTimeScale(mTimeBender);
+    mTimeWarp.update(now);
+    uint32_t warpedTime = mTimeWarp.getTime();
+
     if (mEffects.empty()) {
         return false;
     }
@@ -195,7 +211,7 @@ inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
         mDurationSet = false;
     }
     if (!mEffects.empty()) {
-        mCompositor.draw(mCurrentTime, finalBuffer);
+        mCompositor.draw(now, warpedTime, finalBuffer);
     }
     return true;
 }

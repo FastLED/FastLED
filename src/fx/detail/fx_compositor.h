@@ -42,7 +42,7 @@ public:
         mTransition.end();
     }
 
-    void draw(uint32_t now, CRGB *finalBuffer);
+    void draw(uint32_t now, uint32_t warpedTime, CRGB *finalBuffer);
 
 private:
     void swapLayers() {
@@ -56,17 +56,17 @@ private:
     Transition mTransition;
 };
 
-inline void FxCompositor::draw(uint32_t now, CRGB *finalBuffer) {
+inline void FxCompositor::draw(uint32_t now, uint32_t warpedTime, CRGB *finalBuffer) {
     if (!mLayers[0]->getFx()) {
         return;
     }
-    mLayers[0]->draw(now);
+    mLayers[0]->draw(warpedTime);
     uint8_t progress = mTransition.getProgress(now);
     if (!progress) {
         memcpy(finalBuffer, mLayers[0]->getSurface(), sizeof(CRGB) * mNumLeds);
         return;
     }
-    mLayers[1]->draw(now);
+    mLayers[1]->draw(warpedTime);
     const CRGB* surface0 = mLayers[0]->getSurface();
     const CRGB* surface1 = mLayers[1]->getSurface();
 
