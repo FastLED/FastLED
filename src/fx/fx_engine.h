@@ -122,7 +122,7 @@ class FxEngine {
 };
 
 inline FxEngine::FxEngine(uint16_t numLeds)
-    : mTimeBender("FxEngineSpeed", 1.0f, 0.0f, 5.0f, 0.01f), 
+    : mTimeBender("FxEngineSpeed", 1.0f, -5.0f, 5.0f, 0.01f), 
       mTimeWarp(0), 
       mCompositor(numLeds), 
       mCurrId(0) {

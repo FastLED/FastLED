@@ -36,6 +36,7 @@ XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
 NoisePalette noisePalette(xyMap);
 Animartrix animartrix(xyMap, POLAR_WAVES);
 FxEngine fxEngine(NUM_LEDS);
+Checkbox switchFx("Switch Fx", true);
 
 void setup() {
     delay(1000); // sanity delay
@@ -53,7 +54,9 @@ void loop() {
     noisePalette.setSpeed(SPEED);
     noisePalette.setScale(SCALE);
     EVERY_N_SECONDS(1) {
-        fxEngine.nextFx(500);
+        if (switchFx) {
+            fxEngine.nextFx(500);
+        }
     }
     fxEngine.draw(millis(), leds);
     FastLED.show();
