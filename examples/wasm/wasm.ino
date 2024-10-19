@@ -76,7 +76,7 @@ Checkbox changePallete("Auto Next", true);
 Slider changePalletTime("Change Palette Time", 5, 1, 100);
 Slider scale( "Scale", 20, 1, 100);
 Button changePalette("Next Palette");
-NumberField paletteIndex("Palette Index", 0, 0, 255, 1);
+NumberField paletteIndex("Palette Index", 0, 0, 255);
 
 void setup() {
     delay(1000); // sanity delay

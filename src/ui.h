@@ -86,8 +86,8 @@ class Checkbox {
 
 class NumberField {
   public:
-    NumberField(const char *name, double value, double min = 0, double max = 100, double step = 1)
-      : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)), mStep(step) {}
+    NumberField(const char *name, double value, double min = 0, double max = 100)
+      : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {}
     ~NumberField() {}
     double value() const { return mValue; }
     void setValue(double value) { mValue = MAX(mMin, MIN(mMax, value)); }
@@ -99,7 +99,6 @@ class NumberField {
     double mValue;
     double mMin;
     double mMax;
-    double mStep;
 };
 
 #endif

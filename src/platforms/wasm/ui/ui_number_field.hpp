@@ -14,8 +14,8 @@
 FASTLED_NAMESPACE_BEGIN
 
 
-jsNumberField::jsNumberField(const char* name, double value, double min, double max, double step)
-    : mValue(value), mMin(min), mMax(max), mStep(step) {
+jsNumberField::jsNumberField(const char* name, double value, double min, double max)
+    : mValue(value), mMin(min), mMax(max) {
     auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const ArduinoJson::JsonVariantConst& json) {
         static_cast<jsNumberField*>(self)->updateInternal(json);
     });
@@ -41,7 +41,6 @@ void jsNumberField::toJson(ArduinoJson::JsonObject& json) const {
     json["value"] = mValue;
     json["min"] = mMin;
     json["max"] = mMax;
-    json["step"] = mStep;
 }
 
 double jsNumberField::value() const {

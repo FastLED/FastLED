@@ -65,7 +65,7 @@ class jsSlider {
 
 class jsNumberField {
   public:
-    jsNumberField(const char *name, double value, double min = 0, double max = 100, double step = 1);
+    jsNumberField(const char *name, double value, double min = 0, double max = 100);
     ~jsNumberField();
 
     const char *name() const;
@@ -85,7 +85,6 @@ class jsNumberField {
     double mValue;
     double mMin;
     double mMax;
-    double mStep;
 };
 
 
