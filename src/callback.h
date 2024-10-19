@@ -4,7 +4,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-/// @brief A callback that can be used to call a function with a variable number of arguments. If this binds
+/// @brief A void returning callback that can be used to call a function with a variable number of arguments. If this binds
 ///        to a non-static member function then self must be none null. If it's a free function then set self to
 ///        nullptr.
 /// @tparam ...Args The types of the arguments to the function.

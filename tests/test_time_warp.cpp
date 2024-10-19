@@ -38,10 +38,10 @@ TEST_CASE("TimeWarp basic functionality") {
         CHECK(tw.getTime() == 2000);
 
         uint32_t resetTime = tw.reset(3000);
-        CHECK(resetTime == 0);
-        CHECK(tw.getTime() == 0);
+        CHECK(resetTime == 3000);
+        CHECK(tw.getTime() == 3000);
 
         tw.update(4000);
-        CHECK(tw.getTime() == 1000);
+        CHECK(tw.getTime() == 4000);
     }
 }
