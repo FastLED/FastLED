@@ -1,4 +1,5 @@
-
+// Arduino.h emulation for the WebAssembly platform.
+// This allows us to compile sketches as is for the WebAssembly platform.
 
 #pragma once
 
@@ -67,3 +68,6 @@ typedef unsigned char byte;
 
 
 SerialEmulation Serial;
+SerialEmulation Serial1;
+SerialEmulation Serial2;
+SerialEmulation Serial3;
