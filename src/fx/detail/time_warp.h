@@ -19,7 +19,6 @@ class TimeWarp {
     void setTimeScale(float timeScale) { mTimeScale = timeScale; }
     float getTimeScale() const { return mTimeScale; }
     void update(uint32_t timeNow) {
-
         switch (mMode) {
         case EXACT:
             applyExact(timeNow);
@@ -40,22 +39,24 @@ class TimeWarp {
 
   private:
     void applyExact(uint32_t timeNow) {
-
         uint32_t elapsedRealTime = timeNow - mLastRealTime;
         int32_t diff = static_cast<int32_t>(elapsedRealTime * mTimeScale);
         if (diff < 0) {
-            if (mRealTime + diff > mStartTime) {
-                // okay, we didn't go below the start time.
-                mRealTime += diff;
-                mLastRealTime = timeNow;
-            } else {
+            if (mRealTime + diff < mStartTime) {
                 mRealTime = mStartTime;
                 mLastRealTime = mStartTime;
+                return;
             }
-        } else {
-            mRealTime += diff;
-            mLastRealTime = timeNow;
+            uint32_t newRealTime = mRealTime + diff;
+            if (newRealTime > mRealTime) {
+                // rolled over to positive territory.
+                mRealTime = mStartTime;
+                mLastRealTime = mStartTime;
+                return;
+            }
         }
+        mRealTime += diff;
+        mLastRealTime = timeNow;
     }
 
     uint32_t mRealTime = 0;
