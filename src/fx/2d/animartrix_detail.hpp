@@ -171,6 +171,10 @@ class ANIMartRIX {
 
     virtual uint16_t xyMap(uint16_t x, uint16_t y) = 0;
 
+    uint32_t currentTime = 0;
+    void setTime(uint32_t t) { currentTime = t; }
+    uint32_t getTime() { return currentTime ? currentTime : millis(); }
+
 
     void init(int w, int h) {
         animation = render_parameters();
@@ -274,7 +278,7 @@ class ANIMartRIX {
 
     void calculate_oscillators(oscillators &timings) {
 
-        double runtime = millis() * timings.master_speed *
+        double runtime = getTime() * timings.master_speed *
                          speed_factor; // global anaimation speed
 
         for (int i = 0; i < num_oscillators; i++) {
@@ -4045,7 +4049,7 @@ class ANIMartRIX {
 
                 pixel = rgb_sanity_check(pixel);
 
-                uint8_t a = millis() / 100;
+                uint8_t a = getTime() / 100;
                 CRGB p = CRGB(CHSV(((a + show1 + show2) + show3), 255, 255));
                 rgb pixel;
                 pixel.red = p.red;

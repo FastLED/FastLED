@@ -88,7 +88,7 @@ class Animartrix : public FxGrid {
     void fxNext(int fx = 1) override { fxSet(fxGet() + fx); }
 
   private:
-    friend void AnimartrixLoop(Animartrix &self);
+    friend void AnimartrixLoop(Animartrix &self, uint32_t now);
     friend class FastLEDANIMartRIX;
     static const char *getAnimationName(AnimartrixAnim animation);
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
@@ -97,7 +97,7 @@ class Animartrix : public FxGrid {
     AnimartrixAnim current_animation = RGB_BLOBS5;
 };
 
-void AnimartrixLoop(Animartrix &self);
+void AnimartrixLoop(Animartrix &self, uint32_t now);
 
 /// ##################################################
 /// Details with the implementation of Animartrix
@@ -361,7 +361,7 @@ void Animartrix::fxSet(int fx) {
     current_animation = static_cast<AnimartrixAnim>(fx);
 }
 
-void AnimartrixLoop(Animartrix &self) {
+void AnimartrixLoop(Animartrix &self, uint32_t now) {
     if (self.prev_animation != self.current_animation) {
         if (self.impl) {
             // Re-initialize object.
@@ -372,12 +372,13 @@ void AnimartrixLoop(Animartrix &self) {
     if (!self.impl) {
         self.impl.reset(new FastLEDANIMartRIX(&self));
     }
+    self.impl->setTime(now);
     self.impl->loop();
 }
 
 void Animartrix::draw(DrawContext ctx) {
     this->leds = ctx.leds;
-    AnimartrixLoop(*this);
+    AnimartrixLoop(*this, ctx.now);
     this->leds = nullptr;
 }
 
