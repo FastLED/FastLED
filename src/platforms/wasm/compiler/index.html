@@ -141,6 +141,12 @@
         .ui-control button.active {
             background-color: #0066CC;
         }
+
+        .ui-control input[type="number"] {
+            width: 100px;
+            padding: 5px;
+            font-size: 16px;
+        }
     </style>
 
 
@@ -226,6 +232,8 @@
             } else if (element.type === 'submit') {
                 let attr = element.getAttribute('data-pressed');
                 currentValue = attr === 'true';
+            } else if (element.type === 'number') {
+                currentValue = parseFloat(element.value);
             } else {
                 currentValue = parseFloat(element.value);
             }
@@ -256,6 +264,8 @@
                 control = createCheckbox(element);
             } else if (element.type === 'button') {
                 control = createButton(element);
+            } else if (element.type === 'number') {
+                control = createNumberField(element);
             }
 
             if (control) {
@@ -269,6 +279,28 @@
             }
         });
     };
+
+    function createNumberField(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const label = document.createElement('label');
+        label.textContent = element.name;
+        label.htmlFor = `number-${element.id}`;
+
+        const numberInput = document.createElement('input');
+        numberInput.type = 'number';
+        numberInput.id = `number-${element.id}`;
+        numberInput.value = element.value;
+        numberInput.min = element.min;
+        numberInput.max = element.max;
+        numberInput.step = 'any'; // Allows for decimal values
+
+        controlDiv.appendChild(label);
+        controlDiv.appendChild(numberInput);
+
+        return controlDiv;
+    }
 
     function createUiControlsContainer() {
         const container = document.createElement('div');
