@@ -187,6 +187,12 @@ ESP32S3_RMT51 = Board(
     ],
 )
 
+NRF52840 = Board(
+    board_name="nrf52840_dk",
+    platform="nordicnrf52",
+    platform_needs_install=True,
+)
+
 ALL: list[Board] = [
     ESP32DEV,
     ESP32DEV_IDF4_4,
@@ -206,6 +212,7 @@ ALL: list[Board] = [
     ESP32S3_RMT51,
     BLUEPILL,
     MAPLE_MINI,
+    NRF52840,
 ]
 
 
