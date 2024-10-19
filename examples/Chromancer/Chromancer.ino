@@ -10,6 +10,7 @@
 #include "net.h"
 #include "ripple.h"
 #include <FastLED.h>
+#include "data.h"
 
 // Strips are different lengths because I am a dumb
 constexpr int lengths[] = {
@@ -18,6 +19,7 @@ constexpr int lengths[] = {
   84,
   154
 };
+
 
 
 #if defined(USING_DOTSTAR)
@@ -34,11 +36,42 @@ Adafruit_DotStar strips[4] = {strip0, strip1, strip2, strip3};
 #else
 #define NUM_STRIPS 4
 
+/*
+GPIO: 16 - Start: 0 - Length: 84
+GPIO: 15 - Start: 84 - Length: 154
+GPIO: 0 - Start: 238 - Length: 168
+GPIO: 5 - Start: 406 - Length: 154
+*/
+
+//const int TOTAL_LEDS = lengths[0] + lengths[1] + lengths[2] + lengths[3];
+//CRGB led_all
+
+
+#ifdef __EMSCRIPTEN__
+
+// leds must all be all be one block (for now).
+const int TOTAL_LEDS = lengths[0] + lengths[1] + lengths[2] + lengths[3];
+CRGB leds_all[TOTAL_LEDS] = {};
+// now store the pointers in an array, because the algorihtm wants it.
+CRGB *leds[] = {
+  leds_all,
+  leds_all + lengths[0],
+  leds_all + lengths[0] + lengths[1],
+  leds_all + lengths[0] + lengths[1] + lengths[2]
+};
+
+
+#else
+
+// non emscripten uses separate arrays for each strip. Eventually emscripten
+// should support this as well but right now we don't
 CRGB leds0[lengths[0]] = {};
 CRGB leds1[lengths[1]] = {};
 CRGB leds2[lengths[2]] = {};
 CRGB leds3[lengths[3]] = {};
 CRGB *leds[] = {leds0, leds1, leds2, leds3};
+
+#endif
 #endif
 
 byte ledColors[40][14][3]; // LED buffer - each ripple writes to this, then we
@@ -112,7 +145,7 @@ unsigned long lastAutoPulseChange;
 unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
-CLEDController *controllers[4] = {};
+// CLEDController *controllers[4] = {};
 
 void setup() {
     Serial.begin(115200);
@@ -120,10 +153,12 @@ void setup() {
     Serial.println("*** LET'S GOOOOO ***");
 
     // Initialize FastLED strips
-    controllers[0] = &FastLED.addLeds<WS2812, 1>(leds[0], lengths[0]);
-    controllers[1] = &FastLED.addLeds<WS2812, 2>(leds[1], lengths[1]);
-    controllers[2] = &FastLED.addLeds<WS2812, 3>(leds[2], lengths[2]);
-    controllers[3] = &FastLED.addLeds<WS2812, 4>(leds[3], lengths[3]);
+    // controllers[0] = &FastLED.addLeds<WS2812, 1>(leds[0], lengths[0]);
+    // controllers[1] = &FastLED.addLeds<WS2812, 2>(leds[1], lengths[1]);
+    // controllers[2] = &FastLED.addLeds<WS2812, 3>(leds[2], lengths[2]);
+    // controllers[3] = &FastLED.addLeds<WS2812, 4>(leds[3], lengths[3]);
+
+    FastLED.addLeds<WS2812, 16>(leds_all, TOTAL_LEDS);  // .setCanvasUi(xyMap);
 
     // If your PSU sucks, use this to limit the current
     //  FastLED.setBrightness(125);
