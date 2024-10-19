@@ -62,6 +62,33 @@ class jsSlider {
     float mStep;
 };
 
+
+class jsNumberField {
+  public:
+    jsNumberField(const char *name, double value, double min = 0, double max = 100, double step = 1);
+    ~jsNumberField();
+
+    const char *name() const;
+    void toJson(ArduinoJson::JsonObject& json) const;
+    double value() const;
+    void setValue(double value);
+    operator double() const;
+    operator int() const;
+
+    jsNumberField& operator=(double value) { setValue(value); return *this; }
+    jsNumberField& operator=(int value) { setValue(static_cast<double>(value)); return *this; }
+
+  private:
+    void updateInternal(const ArduinoJson::JsonVariantConst& value);
+
+    std::shared_ptr<jsUiInternal> mInternal;
+    double mValue;
+    double mMin;
+    double mMax;
+    double mStep;
+};
+
+
 class jsCheckbox {
   public:
     jsCheckbox(const char *name, bool value);
@@ -206,7 +233,9 @@ inline void updateJs(const char* jsonStr) {
 #define FASTLED_HAS_UI_BUTTON 1
 #define FASTLED_HAS_UI_SLIDER 1
 #define FASTLED_HAS_UI_CHECKBOX 1
+#define FASTLED_HAS_UI_NUMBER_FIELD 1
 
+typedef jsNumberField NumberField;
 typedef jsSlider Slider;
 typedef jsCheckbox Checkbox;
 typedef jsButton Button;

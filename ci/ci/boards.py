@@ -121,6 +121,12 @@ XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
     platform_needs_install=True,  # Install platform package to get the boards
 )
 
+NRF52840 = Board(
+    board_name="nrf52840_dk",
+    platform="platformio/nordicnrf52",
+    platform_needs_install=True,
+)
+
 RPI_PICO = Board(
     board_name="rpipico",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
@@ -187,11 +193,6 @@ ESP32S3_RMT51 = Board(
     ],
 )
 
-NRF52840 = Board(
-    board_name="nrf52840_dk",
-    platform="nordicnrf52",
-    platform_needs_install=True,
-)
 
 ALL: list[Board] = [
     ESP32DEV,
