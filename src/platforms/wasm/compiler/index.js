@@ -3,8 +3,34 @@ const CANVAS_SIZE = 16; // 16x16 initial canvas size
 
 let receivedCanvas = false;
 
+
+function minMax(array_xy) {
+    // array_xy is a an array of an array of x and y values
+    // returns the lower left and upper right
+    let min_x = array_xy[0][0];
+    let min_y = array_xy[0][1];
+    let max_x = array_xy[0][0];
+    let max_y = array_xy[0][1];
+    for (let i = 1; i < array_xy.length; i++) {
+        min_x = Math.min(min_x, array_xy[i][0]);
+        min_y = Math.min(min_y, array_xy[i][1]);
+        max_x = Math.max(max_x, array_xy[i][0]);
+        max_y = Math.max(max_y, array_xy[i][1]);
+    }
+    return [[min_x, min_y], [max_x, max_y]];
+}
+
 globalThis.FastLED_onStripUpdate = function (jsonData) {
     console.log("Received strip update:", jsonData);
+
+    const event = jsonData.event;
+    if (event === "set_canvas_map") {
+        // Work in progress.
+        const map = jsonData.map;
+        const [min, max] = minMax(map);
+        console.log("min", min, "max", max);
+    }
+
     if (jsonData.event !== 'set_canvas_size') {
         console.warn("We do not support any event other than \"set_canvas_size\" yet, got event:", jsonData.event);
         return;
