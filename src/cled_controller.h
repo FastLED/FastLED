@@ -13,6 +13,7 @@
 #include "dither_mode.h"
 #include "pixel_iterator.h"
 #include "engine_events.h"
+#include "screenmap.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -184,6 +185,10 @@ public:
         // This is a placeholder for the UI canvas. It is not implemented in the base class.
         EngineEvents::onCanvasUiSet(this, map);
         return *this;
+    }
+
+    CLEDController& setCanvasUi(const ScreenMap& map) {
+        EngineEvents::onCanvasUiSet(this, map);
     }
 
     CLEDController& setCanvasUi(uint16_t width, uint16_t height) {

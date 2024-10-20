@@ -92,6 +92,17 @@ void EngineEvents::_onCanvasUiSet(CLEDController* strip, const XYMap& map) {
         listener->onCanvasUiSet(strip, map);
     }
 }
+
+
+void EngineEvents::_onCanvasUiSet(CLEDController *strip, const ScreenMap& screenmap) {
+    // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
+    ListenerList copy = mListeners;
+    for (auto listener : copy) {
+        listener->onCanvasUiSet(strip, screenmap);
+    }
+}
+
+
 #endif // FASTLED_HAS_ENGINE_EVENTS
 
 FASTLED_NAMESPACE_END

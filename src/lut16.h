@@ -5,34 +5,60 @@
 #include "force_inline.h"
 #include "allocator.h"
 
-// LUT16 holds a look up table to map data from one
+template<typename T>
+struct pair_xy {
+    T x = 0;
+    T y = 0;
+};
+
+using pair_xy_u16 = pair_xy<uint16_t>;
+
+// LUT holds a look up table to map data from one
 // value to another. This can be quite big (1/3rd of the frame buffer)
 // so a Referent is used to allow memory sharing.
 
-class LUT16;
-typedef Ptr<LUT16> LUT16Ptr;
-class LUT16 : public Referent {
+template<typename T>
+class LUT;
+
+typedef LUT<uint16_t> LUT16;
+typedef LUT<pair_xy_u16> LUTXY_u16;
+
+DECLARE_SMART_PTR_NO_FWD(LUT16);
+DECLARE_SMART_PTR_NO_FWD(LUTXY_u16);
+
+// Templated lookup table.
+template<typename T>
+class LUT : public Referent {
 public:
-    friend class PtrTraits<LUT16>;
-    LUT16(uint16_t length) : length(length) {
-        uint16_t* ptr = LargeBlockAllocator<uint16_t>::Alloc(length);
+    friend class PtrTraits<LUT<T>>;
+    LUT(uint32_t length) : length(length) {
+        T* ptr = LargeBlockAllocator<T>::Alloc(length);
         mDataHandle.reset(ptr);
         data = ptr;
     }
     // In this version the data is passed in but not managed by this object.
-    LUT16(uint16_t length, uint16_t* data) : length(length) {
+    LUT(uint32_t length, T* data) : length(length) {
         this->data = data;
     }
-    ~LUT16() {
-        LargeBlockAllocator<uint16_t>::Free(mDataHandle.release(), length);
+    ~LUT() {
+        LargeBlockAllocator<T>::Free(mDataHandle.release(), length);
         data = mDataHandle.get();
     }
 
-    FASTLED_FORCE_INLINE uint16_t* getData() const {
+    T operator[](uint32_t index) const {
+        return data[index];
+    }
+
+    T operator[](uint16_t index) const {
+        return data[index];
+    }
+
+    T* getData() const {
         return data;
     }
 private:
-    scoped_ptr<uint16_t> mDataHandle;
-    uint16_t* data = nullptr;
-    uint16_t length;
+    scoped_ptr<T> mDataHandle;
+    T* data = nullptr;
+    uint32_t length;
 };
+

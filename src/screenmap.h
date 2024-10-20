@@ -1,0 +1,67 @@
+#pragma once
+
+/* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED.js
+ * to map the 1D strip to a 2D grid. Note that the strip can have arbitrary size.
+ * this was first motivated during the (attempted? Oct. 19th 2024) port of the
+ * Chromancer project to FastLED.js.
+*/
+
+#include <stdint.h>
+#include <string.h>
+#include "ptr.h"
+#include "force_inline.h"
+#include "lut16.h"
+
+
+// ScreenMap holds either a function or a look up table to map x coordinates to a 1D index.
+class ScreenMap {
+public:
+    // is_reverse is false by default for linear layout
+    ScreenMap(uint32_t length): length(length) {
+        mLookUpTable = LUTXY_u16Ptr::New(length);
+        LUTXY_u16& lut = *mLookUpTable.get();
+        for (uint32_t x = 0; x < length; x++) {
+            lut[x] = {0, 0};
+        }
+    }
+
+    template<uint32_t N>
+    ScreenMap(uint32_t length, const pair_xy_u16 (&lut)[N]): length(length) {
+        mLookUpTable = LUTXY_u16Ptr::New(length);
+        LUTXY_u16& lut16xy = *mLookUpTable.get();
+        for (uint32_t x = 0; x < length; x++) {
+            lut16xy[x] = lut[x];
+        }
+    }
+
+    ScreenMap(const ScreenMap &other) {
+        length = other.length;
+        mLookUpTable = other.mLookUpTable;
+    }
+
+    // define the assignment operator
+    ScreenMap& operator=(const ScreenMap &other) {
+        if (this != &other) {
+            length = other.length;
+            mLookUpTable = other.mLookUpTable;
+        }
+        return *this;
+    }
+
+    pair_xy_u16 mapToIndex(uint32_t x) const {
+        if (x >= length || !mLookUpTable) {
+            return {0, 0};
+        }
+        LUTXY_u16& lut = *mLookUpTable.get();
+        pair_xy_u16 screen_coords = lut[x];
+        return screen_coords;
+    }
+
+    uint32_t getLength() const {
+        return length;
+    }
+
+private:
+    uint32_t length = 0;
+    LUTXY_u16Ptr mLookUpTable;
+};
