@@ -26,6 +26,15 @@ public:
         }
     }
 
+    ScreenMap(const pair_xy_u16* lut, uint32_t length): length(length) {
+        mLookUpTable = LUTXY_u16Ptr::New(length);
+        LUTXY_u16& lut16xy = *mLookUpTable.get();
+        pair_xy_u16* data = lut16xy.getData();
+        for (uint32_t x = 0; x < length; x++) {
+            data[x] = lut[x];
+        }
+    }
+
     template<uint32_t N>
     ScreenMap(const pair_xy_u16 (&lut)[N]): length(N) {
         mLookUpTable = LUTXY_u16Ptr::New(length);

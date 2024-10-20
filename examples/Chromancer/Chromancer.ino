@@ -154,20 +154,43 @@ pair_xy_u16 COORDS[] = {
     pair_xy_u16{0, 2},
 };
 
+void make_map(float angle, float step, int num, std::vector<pair_xy_u16>* _map) {
+    std::vector<pair_xy_u16>& map = *_map;
+    for (int i = 0; i < num; i++) {
+        float radius = i * step;
+        uint16_t x = static_cast<uint16_t>(radius * cos(angle) + 0.5f);
+        uint16_t y = static_cast<uint16_t>(radius * sin(angle) + 0.5f);
+        map.push_back(pair_xy_u16{x, y});
+    }
+}
+
+
 void setup() {
     Serial.begin(115200);
 
     Serial.println("*** LET'S GOOOOO ***");
+
+    
+    // std::vector<pair_xy_u16> map0 = make_map(0, 1, lengths[0]);
+    // std::vector<pair_xy_u16> map1 = make_map(90, 1, lengths[1]);
+    // std::vector<pair_xy_u16> map2 = make_map(180, 1, lengths[2]);
+    // std::vector<pair_xy_u16> map3 = make_map(270, 1, lengths[3]);
+
+    std::vector<pair_xy_u16> map;
+    make_map(0, 1, lengths[0], &map);
+    make_map(90, 1, lengths[1], &map);
+    make_map(180, 1, lengths[2], &map);
+    make_map(270, 1, lengths[3], &map);
 
     // Initialize FastLED strips
     // controllers[0] = &FastLED.addLeds<WS2812, 1>(leds[0], lengths[0]);
     // controllers[1] = &FastLED.addLeds<WS2812, 2>(leds[1], lengths[1]);
     // controllers[2] = &FastLED.addLeds<WS2812, 3>(leds[2], lengths[2]);
     // controllers[3] = &FastLED.addLeds<WS2812, 4>(leds[3], lengths[3]);
-    ScreenMap map(COORDS);
+    ScreenMap screenmap = ScreenMap(map.data(), map.size());
 
     FastLED.addLeds<WS2812, 16>(leds_all, TOTAL_LEDS)
-        .setCanvasUi(map);  // .setCanvasUi(xyMap);
+        .setCanvasUi(screenmap);  // .setCanvasUi(xyMap);
 
     // If your PSU sucks, use this to limit the current
     //  FastLED.setBrightness(125);
