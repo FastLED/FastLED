@@ -13,6 +13,7 @@
 #include "data.h"
 #include "detail.h"
 #include "screenmap.h"
+#include "math_macros.h"
 
 // Strips are different lengths because I am a dumb
 constexpr int lengths[] = {
@@ -147,23 +148,18 @@ unsigned long lastAutoPulseChange;
 unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
-// CLEDController *controllers[4] = {};
-pair_xy_u16 COORDS[] = {
-    pair_xy_u16{0, 0},
-    pair_xy_u16{0, 1},
-    pair_xy_u16{0, 2},
-};
 
-void make_map(float angle, float step, int num, std::vector<pair_xy_u16>* _map) {
-    std::vector<pair_xy_u16>& map = *_map;
+void make_map(float angle, float step, int num, std::vector<pair_xy16>* _map) {
+    std::vector<pair_xy16>& map = *_map;
     for (int i = 0; i < num; i++) {
         float radius = i * step;
-        uint16_t x = static_cast<uint16_t>(radius * cos(angle) + 0.5f);
-        uint16_t y = static_cast<uint16_t>(radius * sin(angle) + 0.5f);
-        map.push_back(pair_xy_u16{x, y});
+        int16_t x = static_cast<int16_t>(radius * cos(angle));
+        int16_t y = static_cast<int16_t>(radius * sin(angle));
+        map.push_back(pair_xy16{x, y});
     }
 }
 
+float to_rads(float degs) { return degs * PI / 180.0; }
 
 void setup() {
     Serial.begin(115200);
@@ -171,16 +167,17 @@ void setup() {
     Serial.println("*** LET'S GOOOOO ***");
 
     
-    // std::vector<pair_xy_u16> map0 = make_map(0, 1, lengths[0]);
-    // std::vector<pair_xy_u16> map1 = make_map(90, 1, lengths[1]);
-    // std::vector<pair_xy_u16> map2 = make_map(180, 1, lengths[2]);
-    // std::vector<pair_xy_u16> map3 = make_map(270, 1, lengths[3]);
+    // std::vector<pair_xy16> map0 = make_map(0, 1, lengths[0]);
+    // std::vector<pair_xy16> map1 = make_map(90, 1, lengths[1]);
+    // std::vector<pair_xy16> map2 = make_map(180, 1, lengths[2]);
+    // std::vector<pair_xy16> map3 = make_map(270, 1, lengths[3]);
 
-    std::vector<pair_xy_u16> map;
-    make_map(0, 1, lengths[0], &map);
-    make_map(90, 1, lengths[1], &map);
-    make_map(180, 1, lengths[2], &map);
-    make_map(270, 1, lengths[3], &map);
+
+    std::vector<pair_xy16> map;
+    make_map(to_rads(0), 1, lengths[0], &map);
+    make_map(to_rads(90), 1, lengths[1], &map);
+    make_map(to_rads(180), 1, lengths[2], &map);
+    make_map(to_rads(270), 1, lengths[3], &map);
 
     // Initialize FastLED strips
     // controllers[0] = &FastLED.addLeds<WS2812, 1>(leds[0], lengths[0]);
