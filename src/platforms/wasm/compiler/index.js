@@ -20,6 +20,8 @@ function minMax(array_xy) {
     return [[min_x, min_y], [max_x, max_y]];
 }
 
+let screenMap = {};
+
 globalThis.FastLED_onStripUpdate = function (jsonData) {
     console.log("Received strip update:", jsonData);
 
@@ -33,6 +35,12 @@ globalThis.FastLED_onStripUpdate = function (jsonData) {
         console.log("min", min, "max", max);
         width = max[0] - min[0];
         height = max[1] - min[1];
+        screenMap[jsonData.stripId] = {
+            map: map,
+            min: min,
+            max: max,
+        };
+
     } else {
         width = jsonData.width;
         height = jsonData.height;
@@ -344,6 +352,7 @@ let texWidth = 0, texHeight = 0;
 let texData;
 
 function updateCanvas(data) {
+    // TODO: map coordinates using the screenMap
     if (data.length === 0) {
         console.warn("Received empty data, skipping update");
         return;
@@ -385,6 +394,8 @@ function updateCanvas(data) {
     // Update texData with new frame data
     const srcRowSize = canvasWidth * 3;
     const destRowSize = texWidth * 3;
+
+    
     for (let y = 0; y < canvasHeight; y++) {
         for (let x = 0; x < canvasWidth; x++) {
             const srcIndex = (y * srcRowSize) + (x * 3);
