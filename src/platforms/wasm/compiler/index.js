@@ -24,11 +24,18 @@ globalThis.FastLED_onStripUpdate = function (jsonData) {
     console.log("Received strip update:", jsonData);
 
     const event = jsonData.event;
+    let width = 0;
+    let height = 0;
     if (event === "set_canvas_map") {
         // Work in progress.
         const map = jsonData.map;
         const [min, max] = minMax(map);
         console.log("min", min, "max", max);
+        width = max[0] - min[0];
+        height = max[1] - min[1];
+    } else {
+        width = jsonData.width;
+        height = jsonData.height;
     }
 
     if (jsonData.event !== 'set_canvas_size') {
@@ -39,8 +46,6 @@ globalThis.FastLED_onStripUpdate = function (jsonData) {
         console.warn("Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.");
     }
     const canvas = document.getElementById('myCanvas');
-    const width = jsonData.width;
-    const height = jsonData.height;
     canvas.width = width;
     canvas.height = height;
 
