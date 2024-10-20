@@ -25,6 +25,7 @@ PIO_BUILD_DIR = JS_DIR / ".pio/build"
 ARDUINO_H_SRC = JS_DIR / "Arduino.h"
 INDEX_HTML_SRC = JS_DIR / "index.html"
 INDEX_CSS_SRC = JS_DIR / "index.css"
+INDEX_JS_SRC = JS_DIR / "index.js"
 OUTPUT_FILES = ["fastled.js", "fastled.wasm"]
 HEADERS_TO_INSERT = ['#include "Arduino.h"', '#include "platforms/wasm/js.h"']
 FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
@@ -36,6 +37,7 @@ assert MAPPED_DIR.exists()
 assert ARDUINO_H_SRC.exists()
 assert INDEX_HTML_SRC.exists()
 assert INDEX_CSS_SRC.exists()
+assert INDEX_JS_SRC.exists()
 
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
@@ -241,6 +243,8 @@ def main() -> int:
             shutil.copy2(INDEX_HTML_SRC, fastled_js_dir / "index.html")
             print("Copying index.css to output directory")
             shutil.copy2(INDEX_CSS_SRC, fastled_js_dir / "index.css")
+            print("Copying index.js to output directory")
+            shutil.copy2(INDEX_JS_SRC, fastled_js_dir / "index.js")
 
         cleanup(args, JS_SRC)
 
