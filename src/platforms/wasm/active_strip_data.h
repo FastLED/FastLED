@@ -83,13 +83,20 @@ public:
     ~ActiveStripData() {
         EngineEvents::removeListener(this);
     }
+
+
+    static constexpr size_t MAX_STRIPS = 16; // Adjust this value based on your needs
+    typedef FixedMap<int, SliceUint8, MAX_STRIPS> StripDataMap;
+    const StripDataMap& getData() const  {
+        return mStripMap;
+    }
     
 private:
     friend class Singleton<ActiveStripData>;
     ActiveStripData() {
         EngineEvents::addListener(this);
     }
-    static constexpr size_t MAX_STRIPS = 16; // Adjust this value based on your needs
-    typedef FixedMap<int, SliceUint8, MAX_STRIPS> StripDataMap;
+
+
     StripDataMap mStripMap;
 };

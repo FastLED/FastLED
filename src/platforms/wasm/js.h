@@ -12,6 +12,7 @@
 #include "engine_events.h"
 #include "namespace.h"
 #include "screenmap.h"
+#include "active_strip_data.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -193,6 +194,20 @@ inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap& screenmap) {
 }
 
 inline void jsOnFrame() {
+
+    ActiveStripData& active_strips = Singleton<ActiveStripData>::instance();
+    const auto& info = active_strips.getData();
+
+    ArduinoJson::JsonDocument doc;
+    for (auto it = info.begin(); it != info.end(); ++it) {
+        int stripIndex = it->first;
+        auto stripData = it->second;
+        doc[stripIndex] = 1;
+    }
+
+    char jsonBuffer[512];
+    size_t jsonSize = serializeJson(doc, jsonBuffer, sizeof(jsonBuffer));
+
     EM_ASM_({
         globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || function(frameData, callback) {
             console.log("Missing globalThis.FastLED_onFrame() function");
@@ -209,9 +224,11 @@ inline void jsOnFrame() {
                 console.error("Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
             }
         };
+        var jsonStr = UTF8ToString($0, $1);
+        var jsonData = JSON.parse(jsonStr);
         globalThis.FastLED_onFrameData = globalThis.FastLED_onFrameData || new Module.ActiveStripData();
-        globalThis.FastLED_onFrame(globalThis.FastLED_onFrameData, globalThis.onFastLedUiUpdateFunction);
-    });
+        globalThis.FastLED_onFrame(jsonData, globalThis.FastLED_onFrameData, globalThis.onFastLedUiUpdateFunction);
+    }, jsonBuffer, jsonSize);
 }
 
 inline void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
