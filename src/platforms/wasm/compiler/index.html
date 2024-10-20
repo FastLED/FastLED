@@ -32,10 +32,14 @@
         }
 
         #ui-controls {
-            margin-top: 20px;
-            display: flex;
+            flex: 0 0 300px;
+            display: none;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
+        }
+
+        #ui-controls.active {
+            display: flex;
         }
 
         .ui-control {
@@ -106,12 +110,7 @@
             /* Outer shadow */
         }
 
-        #ui-controls {
-            flex: 0 0 300px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
+
 
         #output {
             font-size: 1em;
@@ -276,6 +275,7 @@
 
         const uiControlsContainer = document.getElementById('ui-controls') || createUiControlsContainer();
 
+        let foundUi = false;
         jsonData.forEach(element => {
             let control;
             if (element.type === 'slider') {
@@ -289,6 +289,7 @@
             }
 
             if (control) {
+                foundUi = true;
                 uiControlsContainer.appendChild(control);
                 if (element.type === 'button') {
                     uiElements[element.id] = control.querySelector('button');
@@ -298,6 +299,10 @@
                 previousUiState[element.id] = element.value;
             }
         });
+        if (foundUi) {
+            console.log("UI elements added, showing UI controls container");
+            uiControlsContainer.classList.add('active');
+        }
     };
 
     function createNumberField(element) {
