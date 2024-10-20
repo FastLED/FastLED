@@ -1,0 +1,150 @@
+body {
+    background-color: #121212;
+    /* Dark gray background */
+    color: #E0E0E0;
+    /* Light gray text */
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto Condensed', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    opacity: 0;
+    /* Initially hide the content */
+    transition: opacity 0.5s ease-in;
+    /* Fade-in effect */
+}
+
+#ui-controls {
+    flex: 0 0 300px;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#ui-controls.active {
+    display: flex;
+}
+
+.ui-control {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ui-control input[type="range"] {
+    width: 200px;
+}
+
+h1 {
+    font-size: 6em;
+    margin-top: 10vh;
+    margin-bottom: 40px;
+    text-align: center;
+    font-weight: 300;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    position: relative;
+    animation: continuousGlow 4s ease-in-out infinite;
+}
+
+@keyframes continuousGlow {
+    0% {
+        text-shadow: 0 0 5px rgba(224, 224, 224, 0.1);
+    }
+
+    25% {
+        text-shadow: 0 0 20px rgba(224, 224, 224, 0.3);
+    }
+
+    50% {
+        text-shadow: 0 0 30px rgba(224, 224, 224, 0.5);
+    }
+
+    75% {
+        text-shadow: 0 0 20px rgba(224, 224, 224, 0.3);
+    }
+
+    100% {
+        text-shadow: 0 0 5px rgba(224, 224, 224, 0.1);
+    }
+}
+
+#main-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    margin-top: 20px;
+}
+
+#canvas-container {
+    flex: 0 0 auto;
+    margin-right: 20px;
+}
+
+#myCanvas {
+    background-color: #1E1E1E;
+    /* Slightly lighter gray for contrast */
+    width: 320px;
+    height: 320px;
+    image-rendering: pixelated;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    /* Outer shadow */
+}
+
+
+
+#output {
+    font-size: 1em;
+    padding: 20px;
+    white-space: pre-wrap;
+    width: 100%;
+}
+
+.ui-control {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.ui-control label {
+    margin-right: 10px;
+    /* Adjust space between label and checkbox */
+}
+
+.ui-control input[type="checkbox"] {
+    cursor: pointer;
+    transform: scale(1.5);
+    /* Optionally, scale the checkbox for better visibility */
+}
+
+.ui-control button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #1E90FF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.ui-control button:active,
+.ui-control button.active {
+    background-color: #0066CC;
+}
+
+.ui-control input[type="number"] {
+    width: 100px;
+    padding: 5px;
+    font-size: 16px;
+    background-color: #2E2E2E;
+    color: #E0E0E0;
+    border: 1px solid #444;
+    border-radius: 4px;
+}

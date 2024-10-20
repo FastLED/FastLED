@@ -73,6 +73,7 @@ COPY ./src/platforms/ /js/fastled/src/platforms/
 RUN cp /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini && \
     cp /js/fastled/src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py && \
     cp /js/fastled/src/platforms/wasm/compiler/index.html /js/index.html && \
+    cp /js/fastled/src/platforms/wasm/compiler/index.css /js/index.css && \
     cp /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
     cp /js/fastled/src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh && \
     cp /js/fastled/src/platforms/wasm/compiler/*.sh /js/
