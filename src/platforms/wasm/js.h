@@ -11,6 +11,7 @@
 
 #include "engine_events.h"
 #include "namespace.h"
+#include "screenmap.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -152,19 +153,7 @@ class jsButton {
     bool mClickedHappened = false;
 };
 
-
-inline void jsSetCanvasSize(int cledcontoller_id, const XYMap& xymap) {
-    int width = xymap.getWidth();
-    int height = xymap.getHeight();
-    ArduinoJson::JsonDocument doc;
-    doc["strip_id"] = cledcontoller_id;
-    doc["event"] = "set_canvas_size";
-    doc["width"] = width;
-    doc["height"] = height;
-    
-    char jsonBuffer[512];
-    size_t jsonSize = serializeJson(doc, jsonBuffer, sizeof(jsonBuffer));
-    
+inline void jsSetCanvasSize(const char* jsonString, size_t jsonSize) {
     EM_ASM_({
         globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || function(jsonStr) {
             console.log("Missing globalThis.FastLED_onStripUpdate(jsonStr) function");
@@ -172,7 +161,35 @@ inline void jsSetCanvasSize(int cledcontoller_id, const XYMap& xymap) {
         var jsonStr = UTF8ToString($0, $1);  // Convert C string to JavaScript string with length
         var jsonData = JSON.parse(jsonStr);
         globalThis.FastLED_onStripUpdate(jsonData);
-    }, jsonBuffer, jsonSize);
+    }, jsonString, jsonSize);
+}
+
+
+inline void jsSetCanvasSize(int cledcontoller_id, uint16_t width, uint16_t height) {
+    ArduinoJson::JsonDocument doc;
+    doc["strip_id"] = cledcontoller_id;
+    doc["event"] = "set_canvas_size";
+    doc["width"] = width;
+    doc["height"] = height;
+    char jsonBuffer[512];
+    size_t jsonSize = serializeJson(doc, jsonBuffer, sizeof(jsonBuffer));
+    jsSetCanvasSize(jsonBuffer, jsonSize);
+}
+
+inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap& screenmap) {
+    ArduinoJson::JsonDocument doc;
+    doc["strip_id"] = cledcontoller_id;
+    doc["event"] = "set_canvas_map";
+    // auto& array = doc.createNestedArray("map");
+    auto array = doc["map"].to<ArduinoJson::JsonArray>();
+    for (uint32_t i = 0; i < screenmap.getLength(); i++) {
+        auto entry = array[i].to<ArduinoJson::JsonArray>();
+        entry.add(screenmap[i].x);
+        entry.add(screenmap[i].y);
+    }
+    std::string jsonBuffer;
+    serializeJson(doc, jsonBuffer);
+    jsSetCanvasSize(jsonBuffer.c_str(), jsonBuffer.size());
 }
 
 inline void jsOnFrame() {

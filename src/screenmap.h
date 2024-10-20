@@ -20,23 +20,33 @@ public:
     ScreenMap(uint32_t length): length(length) {
         mLookUpTable = LUTXY_u16Ptr::New(length);
         LUTXY_u16& lut = *mLookUpTable.get();
+        pair_xy_u16* data = lut.getData();
         for (uint32_t x = 0; x < length; x++) {
-            lut[x] = {0, 0};
+            data[x] = {0, 0};
         }
     }
 
     template<uint32_t N>
-    ScreenMap(uint32_t length, const pair_xy_u16 (&lut)[N]): length(length) {
+    ScreenMap(const pair_xy_u16 (&lut)[N]): length(N) {
         mLookUpTable = LUTXY_u16Ptr::New(length);
         LUTXY_u16& lut16xy = *mLookUpTable.get();
+        pair_xy_u16* data = lut16xy.getData();
         for (uint32_t x = 0; x < length; x++) {
-            lut16xy[x] = lut[x];
+            data[x] = lut[x];
         }
     }
 
     ScreenMap(const ScreenMap &other) {
         length = other.length;
         mLookUpTable = other.mLookUpTable;
+    }
+
+    const pair_xy_u16& operator[](uint32_t x) const {
+        if (x >= length || !mLookUpTable) {
+            return empty();  // better than crashing.
+        }
+        LUTXY_u16& lut = *mLookUpTable.get();
+        return lut[x];
     }
 
     // define the assignment operator
@@ -62,6 +72,10 @@ public:
     }
 
 private:
+    static const pair_xy_u16& empty() {
+        static const pair_xy_u16 s_empty = {0, 0};
+        return s_empty;
+    }
     uint32_t length = 0;
     LUTXY_u16Ptr mLookUpTable;
 };

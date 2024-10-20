@@ -9,6 +9,8 @@ template<typename T>
 struct pair_xy {
     T x = 0;
     T y = 0;
+    pair_xy() = default;
+    pair_xy(T x, T y) : x(x), y(y) {}
 };
 
 using pair_xy_u16 = pair_xy<uint16_t>;
@@ -45,11 +47,11 @@ public:
         data = mDataHandle.get();
     }
 
-    T operator[](uint32_t index) const {
+    const T& operator[](uint32_t index) const {
         return data[index];
     }
 
-    T operator[](uint16_t index) const {
+    const T& operator[](uint16_t index) const {
         return data[index];
     }
 

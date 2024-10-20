@@ -12,6 +12,7 @@
 #include <FastLED.h>
 #include "data.h"
 #include "detail.h"
+#include "screenmap.h"
 
 // Strips are different lengths because I am a dumb
 constexpr int lengths[] = {
@@ -147,6 +148,11 @@ unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
 // CLEDController *controllers[4] = {};
+pair_xy_u16 COORDS[] = {
+    pair_xy_u16{0, 0},
+    pair_xy_u16{0, 1},
+    pair_xy_u16{0, 2},
+};
 
 void setup() {
     Serial.begin(115200);
@@ -158,8 +164,10 @@ void setup() {
     // controllers[1] = &FastLED.addLeds<WS2812, 2>(leds[1], lengths[1]);
     // controllers[2] = &FastLED.addLeds<WS2812, 3>(leds[2], lengths[2]);
     // controllers[3] = &FastLED.addLeds<WS2812, 4>(leds[3], lengths[3]);
+    ScreenMap map(COORDS);
 
-    FastLED.addLeds<WS2812, 16>(leds_all, TOTAL_LEDS);  // .setCanvasUi(xyMap);
+    FastLED.addLeds<WS2812, 16>(leds_all, TOTAL_LEDS)
+        .setCanvasUi(map);  // .setCanvasUi(xyMap);
 
     // If your PSU sucks, use this to limit the current
     //  FastLED.setBrightness(125);

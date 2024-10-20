@@ -209,7 +209,7 @@
     globalThis.FastLED_onStripUpdate = function (jsonData) {
         console.log("Received strip update:", jsonData);
         if (jsonData.event !== 'set_canvas_size') {
-            console.warn("We do not support any event other than \"set_canvas_size\" yet");
+            console.warn("We do not support any event other than \"set_canvas_size\" yet, got event:", jsonData.event);
             return;
         }
         if (receivedCanvas) {
