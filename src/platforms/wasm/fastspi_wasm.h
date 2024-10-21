@@ -28,6 +28,10 @@ class WasmSpiOutput: public EngineEvents::Listener {
 public:
     WasmSpiOutput() {
         EngineEvents::addListener(this);
+        CLEDController* owner = tryFindOwner();
+        if (owner) {
+            mId = StripIdMap::addOrGetId(owner);
+        }
     }
 
     ~WasmSpiOutput() {

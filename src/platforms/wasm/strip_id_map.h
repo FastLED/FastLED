@@ -60,7 +60,7 @@ public:
         return spiFindId(address);
     }
 
-    static int spiFindId(uint32_t spi_address) {
+    static CLEDController* getOwnerByAddress(uint32_t spi_address) {
         // spiDevice is going to be a member of the subclass of CLEDController. So
         // to find the device we need to iterate over the map and compare the spiDevice pointer
         // to the pointer address of all the CLedController objects.
@@ -84,6 +84,15 @@ public:
             }
         }
         if (closest_controller && smallest_diff < controller_size) {
+            return closest_controller;
+        }
+        return nullptr;
+    }
+
+    static int spiFindId(uint32_t spi_address) {
+        StripIdMap& instance = Instance();
+        CLEDController* closest_controller = getOwnerByAddress(spi_address);
+        if (closest_controller) {
             int id;
             if (instance.mStripMap.get(closest_controller, &id)) {
                 return id;
