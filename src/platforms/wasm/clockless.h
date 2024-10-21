@@ -23,7 +23,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 public:
 	virtual void init() { }
 	ClocklessController() {
-		mId = StripIdMap::getId(this);
+		mId = StripIdMap::addOrGetId(this);
 	}
 
 protected:

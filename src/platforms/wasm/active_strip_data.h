@@ -15,6 +15,7 @@
 #include "namespace.h"
 #include "engine_events.h"
 #include "fixed_map.h"
+#include "active_strip_data.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -39,17 +40,7 @@ public:
         mStripMap.update(id, SliceUint8(data, size));
     }
 
-    emscripten::val getPixelData_Uint8(int stripIndex) {
-        // Efficient, zero copy conversion from internal data to JavaScript.
-        SliceUint8 stripData;
-        if (mStripMap.get(stripIndex, &stripData)) {
-            const uint8_t* data = stripData.data();
-            uint8_t* data_mutable = const_cast<uint8_t*>(data);
-            size_t size = stripData.size();
-            return emscripten::val(emscripten::typed_memory_view(size, data_mutable));
-        }
-        return emscripten::val::undefined();
-    }
+    emscripten::val getPixelData_Uint8(int stripIndex);
 
     emscripten::val getFirstPixelData_Uint8() {
         // Efficient, zero copy conversion from internal data to JavaScript.
@@ -78,6 +69,9 @@ public:
         }
         return emscripten::val::undefined();
     }
+
+    std::string infoJson();
+
 
 
     ~ActiveStripData() {

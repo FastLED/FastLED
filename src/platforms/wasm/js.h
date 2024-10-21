@@ -194,6 +194,7 @@ inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap& screenmap) {
 }
 
 inline void jsOnFrame() {
+    
     ActiveStripData& active_strips = Singleton<ActiveStripData>::instance();
     const auto& info = active_strips.getData();
 
@@ -201,12 +202,16 @@ inline void jsOnFrame() {
     auto array = doc.to<ArduinoJson::JsonArray>();
 
     for (const auto& [stripIndex, stripData] : info) {
-        auto nestedObject = array.createNestedObject();
+        //xuto nestedObject = array.createNestedObject();
+        auto nestedObject = array.add<ArduinoJson::JsonObject>();
         nestedObject["strip_id"] = stripIndex;
     }
 
     std::string jsonBuffer;
     serializeJson(doc, jsonBuffer);
+
+
+    std::string json_str = active_strips.infoJson();
 
     EM_ASM_({
         globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || function(frameData, callback) {

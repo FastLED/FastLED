@@ -7,4 +7,5 @@
 #endif
 
 #include "timer.hpp"
+#include "active_strip_data.hpp"
 #include "ui/link.hpp"
