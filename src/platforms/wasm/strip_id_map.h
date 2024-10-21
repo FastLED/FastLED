@@ -57,7 +57,7 @@ public:
         if (id >= 0) {
             return id;
         }
-        return spiFindId(address);
+        return spiFindIdOrMakeIt(address);
     }
 
     static CLEDController* getOwnerByAddress(uint32_t spi_address) {
@@ -89,7 +89,7 @@ public:
         return nullptr;
     }
 
-    static int spiFindId(uint32_t spi_address) {
+    static int spiFindIdOrMakeIt(uint32_t spi_address) {
         StripIdMap& instance = Instance();
         CLEDController* closest_controller = getOwnerByAddress(spi_address);
         if (closest_controller) {
