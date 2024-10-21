@@ -93,7 +93,7 @@ public:
         StripIdMap& instance = Instance();
         CLEDController* closest_controller = getOwnerByAddress(spi_address);
         if (closest_controller) {
-            int id;
+            int id = addOrGetId(closest_controller);
             if (instance.mStripMap.get(closest_controller, &id)) {
                 return id;
             }
