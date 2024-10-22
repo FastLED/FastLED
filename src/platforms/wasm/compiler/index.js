@@ -145,19 +145,39 @@ class GraphicsManager {
             // Reallocate texData buffer
             this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
         }
+        if (false) {
+            for (const stripId in frameData.screenMap) {
+                const stripData = frameData.screenMap[stripId];
+                const map = stripData.map;
 
-        // Update texData with new frame data
-        const srcRowSize = canvasWidth * 3;
-        const destRowSize = this.texWidth * 3;
-
-        for (let y = 0; y < canvasHeight; y++) {
-            for (let x = 0; x < canvasWidth; x++) {
-                const srcIndex = (y * srcRowSize) + (x * 3);
-                const destIndex = (y * destRowSize) + (x * 3);
-                this.texData[destIndex] = data[srcIndex];
-                this.texData[destIndex + 1] = data[srcIndex + 1];
-                this.texData[destIndex + 2] = data[srcIndex + 2];
+                for (let i = 0; i < map.length; i++) {
+                    const [x, y] = map[i];
+                    const srcIndex = i * 3;
+                    const destIndex = (y * this.texWidth + x) * 3;
+                    const r = data[srcIndex];
+                    const g = data[srcIndex + 1];
+                    const b = data[srcIndex + 2];
+                    this.texData[destIndex] = r;
+                    this.texData[destIndex + 1] = g;
+                    this.texData[destIndex + 2] = b;
+                    console.log(`Drawing pixel at (${x}, ${y}): R=${r}, G=${g}, B=${b}`);
+                }
             }
+        } else {
+            // Update texData with new frame data
+            const srcRowSize = canvasWidth * 3;
+            const destRowSize = this.texWidth * 3;
+
+            for (let y = 0; y < canvasHeight; y++) {
+                for (let x = 0; x < canvasWidth; x++) {
+                    const srcIndex = (y * srcRowSize) + (x * 3);
+                    const destIndex = (y * destRowSize) + (x * 3);
+                    this.texData[destIndex] = data[srcIndex];
+                    this.texData[destIndex + 1] = data[srcIndex + 1];
+                    this.texData[destIndex + 2] = data[srcIndex + 2];
+                }
+            }
+            console.log(`texWidth: ${this.texWidth}, texHeight: ${this.texHeight}, canvasWidth: ${canvasWidth}, canvasHeight: ${canvasHeight} `);
         }
 
         // Update texture with new data
@@ -442,13 +462,23 @@ class UiManager {
             const map = jsonData.map;
             const [min, max] = minMax(map);
             console.log("min", min, "max", max);
-            width = max[0] - min[0];
-            height = max[1] - min[1];
+
             const stripId = jsonData.strip_id;
             const isUndefined = (value) => typeof value === 'undefined';
             if (isUndefined(stripId)) {
                 throw new Error("strip_id is required for set_canvas_map event");
             }
+            // now shift all points down by the min[0] and min[1] so that the min is 0,0
+            for (let i = 0; i < map.length; i++) {
+                map[i][0] -= min[0];
+                map[i][1] -= min[1];
+            }
+            max[0] = max[0] - min[0];
+            max[1] = max[1] - min[1];
+            min[0] = 0;
+            min[1] = 0;
+            width = max[0];
+            height = max[1];
             screenMap[stripId] = {
                 map: map,
                 min: min,
@@ -477,7 +507,7 @@ class UiManager {
 
         canvas.style.width = Math.round(width * scaleFactor) + 'px';
         canvas.style.height = Math.round(height * scaleFactor) + 'px';
-        console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height}`);
+        console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
     };
 
     globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
@@ -529,6 +559,8 @@ class UiManager {
         if (!graphicsManager) {
             graphicsManager = new GraphicsManager(canvasId);
         }
+        // we are going to add the screenMap to the graphicsManager
+        frameData.screenMap = screenMap;
         graphicsManager.updateCanvas(frameData);
     }
 
