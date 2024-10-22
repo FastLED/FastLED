@@ -206,6 +206,198 @@ class GraphicsManager {
 }
 
 
+class UiManager {
+    constructor(uiControlsId) {
+        this.uiElements = {};
+        this.previousUiState = {};
+        this.uiControlsId = uiControlsId;
+    }
+
+    processUiChanges(uiUpdateCallback) {
+        const changes = {};
+        let hasChanges = false;
+        for (const id in this.uiElements) {
+            const element = this.uiElements[id];
+            let currentValue;
+            if (element.type === 'checkbox') {
+                currentValue = element.checked;
+            } else if (element.type === 'submit') {
+                let attr = element.getAttribute('data-pressed');
+                currentValue = attr === 'true';
+            } else if (element.type === 'number') {
+                currentValue = parseFloat(element.value);
+            } else {
+                currentValue = parseFloat(element.value);
+            }
+            if (this.previousUiState[id] !== currentValue) {
+                changes[id] = currentValue;
+                hasChanges = true;
+                this.previousUiState[id] = currentValue;
+            }
+        }
+        if (hasChanges) {
+            const data = JSON.stringify(changes);
+            uiUpdateCallback(data);
+        }
+    }
+
+    addUiElements(jsonData) {
+        console.log("UI elements added:", jsonData);
+
+        const uiControlsContainer = document.getElementById(this.uiControlsId) || this.createUiControlsContainer();
+
+        let foundUi = false;
+        jsonData.forEach(element => {
+            let control;
+            if (element.type === 'slider') {
+                control = this.createSlider(element);
+            } else if (element.type === 'checkbox') {
+                control = this.createCheckbox(element);
+            } else if (element.type === 'button') {
+                control = this.createButton(element);
+            } else if (element.type === 'number') {
+                control = this.createNumberField(element);
+            }
+
+            if (control) {
+                foundUi = true;
+                uiControlsContainer.appendChild(control);
+                if (element.type === 'button') {
+                    this.uiElements[element.id] = control.querySelector('button');
+                } else {
+                    this.uiElements[element.id] = control.querySelector('input');
+                }
+                this.previousUiState[element.id] = element.value;
+            }
+        });
+        if (foundUi) {
+            console.log("UI elements added, showing UI controls container");
+            uiControlsContainer.classList.add('active');
+        }
+    }
+
+    createUiControlsContainer() {
+        const container = document.getElementById(this.uiControlsId);
+        if (!container) {
+            console.error('UI controls container not found in the HTML');
+        }
+        return container;
+    }
+
+    createNumberField(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const label = document.createElement('label');
+        label.textContent = element.name;
+        label.htmlFor = `number-${element.id}`;
+
+        const numberInput = document.createElement('input');
+        numberInput.type = 'number';
+        numberInput.id = `number-${element.id}`;
+        numberInput.value = element.value;
+        numberInput.min = element.min;
+        numberInput.max = element.max;
+        numberInput.step = (element.step !== undefined) ? element.step : 'any';
+
+        controlDiv.appendChild(label);
+        controlDiv.appendChild(numberInput);
+
+        return controlDiv;
+    }
+
+    createSlider(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const labelValueContainer = document.createElement('div');
+        labelValueContainer.style.display = 'flex';
+        labelValueContainer.style.justifyContent = 'space-between';
+        labelValueContainer.style.width = '100%';
+
+        const label = document.createElement('label');
+        label.textContent = element.name;
+        label.htmlFor = `slider-${element.id}`;
+
+        const valueDisplay = document.createElement('span');
+        valueDisplay.textContent = element.value;
+
+        labelValueContainer.appendChild(label);
+        labelValueContainer.appendChild(valueDisplay);
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.id = `slider-${element.id}`;
+        slider.min = element.min;
+        slider.max = element.max;
+        slider.value = element.value;
+        slider.step = element.step;
+
+        slider.addEventListener('input', function () {
+            valueDisplay.textContent = this.value;
+        });
+
+        controlDiv.appendChild(labelValueContainer);
+        controlDiv.appendChild(slider);
+
+        return controlDiv;
+    }
+
+    createCheckbox(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const label = document.createElement('label');
+        label.textContent = element.name;
+        label.htmlFor = `checkbox-${element.id}`;
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `checkbox-${element.id}`;
+        checkbox.checked = element.value;
+
+        const flexContainer = document.createElement('div');
+        flexContainer.style.display = 'flex';
+        flexContainer.style.alignItems = 'center';
+        flexContainer.style.justifyContent = 'space-between';
+
+        flexContainer.appendChild(label);
+        flexContainer.appendChild(checkbox);
+
+        controlDiv.appendChild(flexContainer);
+
+        return controlDiv;
+    }
+
+    createButton(element) {
+        const controlDiv = document.createElement('div');
+        controlDiv.className = 'ui-control';
+
+        const button = document.createElement('button');
+        button.textContent = element.name;
+        button.id = `button-${element.id}`;
+        button.setAttribute('data-pressed', 'false');
+
+        button.addEventListener('mousedown', function () {
+            this.setAttribute('data-pressed', 'true');
+            this.classList.add('active');
+        });
+
+        button.addEventListener('mouseup', function () {
+            this.setAttribute('data-pressed', 'false');
+            this.classList.remove('active');
+        });
+
+        button.addEventListener('mouseleave', function () {
+            this.setAttribute('data-pressed', 'false');
+            this.classList.remove('active');
+        });
+        controlDiv.appendChild(button);
+        return controlDiv;
+    }
+}
+
+
 (function () {
     const FRAME_RATE = 60; // 60 FPS
     let receivedCanvas = false;
@@ -213,13 +405,11 @@ class GraphicsManager {
     // transforming led strip data pixel with an index
     // to a screen pixel with xy.
     let screenMap = {};
-    let uiElements = {};
-    let previousUiState = {};
     let canvasId;
     let uiControlsId;
     let outputId;
 
-
+    let uiManager;
 
     function minMax(array_xy) {
         // array_xy is a an array of an array of x and y values
@@ -296,38 +486,8 @@ class GraphicsManager {
     };
 
 
-    function processUiChanges(uiUpdateCallback) {
-        // Process UI changes.
-        const changes = {};
-        let hasChanges = false;
-        for (const id in uiElements) {
-            const element = uiElements[id];
-            let currentValue;
-            if (element.type === 'checkbox') {
-                currentValue = element.checked;
-            } else if (element.type === 'submit') {
-                let attr = element.getAttribute('data-pressed');
-                currentValue = attr === 'true';
-            } else if (element.type === 'number') {
-                currentValue = parseFloat(element.value);
-            } else {
-                currentValue = parseFloat(element.value);
-            }
-            if (previousUiState[id] !== currentValue) {
-                changes[id] = currentValue;
-                hasChanges = true;
-                previousUiState[id] = currentValue;
-            }
-        }
-        if (hasChanges) {
-            const data = JSON.stringify(changes);
-            uiUpdateCallback(data);
-        }
-    }
-
-
     globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
-        processUiChanges(uiUpdateCallback);
+        uiManager.processUiChanges(uiUpdateCallback);
         if (frameData.length === 0) {
             console.warn("Received empty frame data, skipping update");
             return;
@@ -336,162 +496,8 @@ class GraphicsManager {
     };
 
     globalThis.FastLED_onUiElementsAdded = function (jsonData) {
-        console.log("UI elements added:", jsonData);
-
-        const uiControlsContainer = document.getElementById(uiControlsId) || createUiControlsContainer();
-
-        let foundUi = false;
-        jsonData.forEach(element => {
-            let control;
-            if (element.type === 'slider') {
-                control = createSlider(element);
-            } else if (element.type === 'checkbox') {
-                control = createCheckbox(element);
-            } else if (element.type === 'button') {
-                control = createButton(element);
-            } else if (element.type === 'number') {
-                control = createNumberField(element);
-            }
-
-            if (control) {
-                foundUi = true;
-                uiControlsContainer.appendChild(control);
-                if (element.type === 'button') {
-                    uiElements[element.id] = control.querySelector('button');
-                } else {
-                    uiElements[element.id] = control.querySelector('input');
-                }
-                previousUiState[element.id] = element.value;
-            }
-        });
-        if (foundUi) {
-            console.log("UI elements added, showing UI controls container");
-            uiControlsContainer.classList.add('active');
-        }
+        uiManager.addUiElements(jsonData);
     };
-
-    function createNumberField(element) {
-        const controlDiv = document.createElement('div');
-        controlDiv.className = 'ui-control';
-
-        const label = document.createElement('label');
-        label.textContent = element.name;
-        label.htmlFor = `number-${element.id}`;
-
-        const numberInput = document.createElement('input');
-        numberInput.type = 'number';
-        numberInput.id = `number-${element.id}`;
-        numberInput.value = element.value;
-        numberInput.min = element.min;
-        numberInput.max = element.max;
-        numberInput.step = (element.step !== undefined) ? element.step : 'any'; // Use provided step or allow any decimal
-
-        controlDiv.appendChild(label);
-        controlDiv.appendChild(numberInput);
-
-        return controlDiv;
-    }
-
-    function createUiControlsContainer() {
-        const container = document.getElementById(uiControlsId);
-        if (!container) {
-            console.error('UI controls container not found in the HTML');
-        }
-        return container;
-    }
-
-    function createSlider(element) {
-        const controlDiv = document.createElement('div');
-        controlDiv.className = 'ui-control';
-
-        const labelValueContainer = document.createElement('div');
-        labelValueContainer.style.display = 'flex';
-        labelValueContainer.style.justifyContent = 'space-between';
-        labelValueContainer.style.width = '100%';
-
-        const label = document.createElement('label');
-        label.textContent = element.name;
-        label.htmlFor = `slider-${element.id}`;
-
-        const valueDisplay = document.createElement('span');
-        valueDisplay.textContent = element.value;
-
-        labelValueContainer.appendChild(label);
-        labelValueContainer.appendChild(valueDisplay);
-
-        const slider = document.createElement('input');
-        slider.type = 'range';
-        slider.id = `slider-${element.id}`;
-        slider.min = element.min;
-        slider.max = element.max;
-        slider.value = element.value;
-        slider.step = element.step;
-
-        slider.addEventListener('input', function () {
-            valueDisplay.textContent = this.value;
-        });
-
-        controlDiv.appendChild(labelValueContainer);
-        controlDiv.appendChild(slider);
-
-        return controlDiv;
-    }
-
-    function createCheckbox(element) {
-        const controlDiv = document.createElement('div');
-        controlDiv.className = 'ui-control';
-
-        // Create the label
-        const label = document.createElement('label');
-        label.textContent = element.name;
-        label.htmlFor = `checkbox-${element.id}`;
-
-        // Create the checkbox input
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = `checkbox-${element.id}`;
-        checkbox.checked = element.value;
-
-        // Add both label and checkbox to a flex container to align properly
-        const flexContainer = document.createElement('div');
-        flexContainer.style.display = 'flex';
-        flexContainer.style.alignItems = 'center';
-        flexContainer.style.justifyContent = 'space-between'; // Ensure checkbox is right-aligned
-
-        flexContainer.appendChild(label);
-        flexContainer.appendChild(checkbox);
-
-        controlDiv.appendChild(flexContainer);
-
-        return controlDiv;
-    }
-
-    function createButton(element) {
-        const controlDiv = document.createElement('div');
-        controlDiv.className = 'ui-control';
-
-        const button = document.createElement('button');
-        button.textContent = element.name;
-        button.id = `button-${element.id}`;
-        button.setAttribute('data-pressed', 'false'); // Initialize data-pressed as false
-
-        button.addEventListener('mousedown', function () {
-            this.setAttribute('data-pressed', 'true');
-            this.classList.add('active');
-        });
-
-        button.addEventListener('mouseup', function () {
-            this.setAttribute('data-pressed', 'false');
-            this.classList.remove('active');
-        });
-
-        button.addEventListener('mouseleave', function () {
-            this.setAttribute('data-pressed', 'false');
-            this.classList.remove('active');
-        });
-        controlDiv.appendChild(button);
-        return controlDiv;
-    }
 
     // Function to call the setup and loop functions
     function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance) {
@@ -558,6 +564,7 @@ class GraphicsManager {
         canvasId = options.canvasId;
         uiControlsId = options.uiControlsId;
         outputId = options.printId;
+        uiManager = new UiManager(uiControlsId);
         await onModuleLoaded();
     }
     globalThis.loadFastLED = loadFastLed;
