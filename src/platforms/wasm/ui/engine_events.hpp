@@ -42,7 +42,8 @@ public:
 
 private:
     void onEndFrame() override {
-        jsOnFrame();
+        ActiveStripData& active_strips = ActiveStripData::Instance();
+        jsOnFrame(active_strips);
     }
     void onStripAdded(CLEDController* strip, uint32_t num_leds) override {
         int id = StripIdMap::addOrGetId(strip);

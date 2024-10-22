@@ -13,6 +13,7 @@
 #include "namespace.h"
 #include "screenmap.h"
 #include "active_strip_data.h"
+#include "js.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -56,9 +57,7 @@ inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap& screenmap) {
     jsSetCanvasSize(jsonBuffer.c_str(), jsonBuffer.size());
 }
 
-inline void jsOnFrame() {
-    
-    ActiveStripData& active_strips = Singleton<ActiveStripData>::instance();
+inline void jsOnFrame(ActiveStripData& active_strips) {
     const auto& info = active_strips.getData();
 
     ArduinoJson::JsonDocument doc;
