@@ -1,3 +1,9 @@
+
+globalThis.loadFastLED = async function () {
+    console.log("FastLED loader function was not set.");
+    return null;
+};
+
 (function () {
     const FRAME_RATE = 60; // 60 FPS
     let receivedCanvas = false;
@@ -509,6 +515,7 @@
         };
     }
 
-    // Bind the window.onload event to the onModuleLoaded function.
-    window.addEventListener('load', onModuleLoaded);
+    globalThis.loadFastLED = onModuleLoaded;
+
+
 })();
