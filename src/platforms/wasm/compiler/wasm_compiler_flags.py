@@ -39,6 +39,8 @@ wasmflags = [
     "-s",
     "INITIAL_MEMORY=268435456",
     "--no-entry",
+    "-s",
+    "ASSERTIONS=1",
     # Enable C++17 with GNU extensions.
     "-std=gnu++17",
     "-fpermissive",

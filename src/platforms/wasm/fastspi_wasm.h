@@ -47,6 +47,7 @@ public:
             return nullptr;
         }
         return StripIdMap::getOwner(mId);
+
     }
 
     void onEndShowLeds() override {
