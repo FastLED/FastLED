@@ -24,15 +24,14 @@
 CRGB leds[NUM_LEDS];
 float to_rads(float degs) { return degs * PI / 180.0; }
 
-void make_map(float angle, float step, int num, std::vector<pair_xy16>* _map) {
-    float cos_angle = cos(angle);
-    float sin_angle = sin(angle);
+void make_map(int stepx, int stepy, int num, std::vector<pair_xy16>* _map) {
+    int16_t x = 0;
+    int16_t y = 0;
     std::vector<pair_xy16>& map = *_map;
-    for (int i = 0; i < num; i++) {
-        float radius = i * step;
-        int16_t x = static_cast<int16_t>(radius * cos_angle);
-        int16_t y = static_cast<int16_t>(radius * sin_angle);
+    for (int16_t i = 0; i < num; i++) {
         map.push_back(pair_xy16{x, y});
+        x += stepx;
+        y += stepy;
     }
 }
 
@@ -42,7 +41,7 @@ void setup() {
     }
     FastLED.setBrightness(255);
     std::vector<pair_xy16> map;
-    make_map(to_rads(225), 100, NUM_LEDS, &map);
+    make_map(1, 1, NUM_LEDS, &map);
     ScreenMap screenmap = ScreenMap(map.data(), map.size());
 
     // print out screen map
