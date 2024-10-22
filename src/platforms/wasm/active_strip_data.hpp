@@ -23,8 +23,8 @@ ActiveStripData& ActiveStripData::Instance() {
     return Singleton<ActiveStripData>::instance();
 }
 
-void ActiveStripData::update(int id, uint32_t now, const uint8_t* data, size_t size) {
-    mStripMap.update(id, SliceUint8(data, size));
+void ActiveStripData::update(int id, uint32_t now, const uint8_t* pixel_data, size_t size) {
+    mStripMap.update(id, SliceUint8(pixel_data, size));
 }
 
 emscripten::val ActiveStripData::getPixelData_Uint8(int stripIndex) {
@@ -47,6 +47,7 @@ std::string ActiveStripData::infoJsonString() {
     for (const auto &[stripIndex, stripData] : mStripMap) {
         auto obj = array.add<ArduinoJson::JsonObject>();
         obj["strip_id"] = stripIndex;
+        obj["type"] = "r8g8b8";
     }
 
     std::string jsonBuffer;

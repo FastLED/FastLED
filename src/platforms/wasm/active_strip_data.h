@@ -32,7 +32,7 @@ public:
         mStripMap.clear();
     }
     static ActiveStripData& Instance();
-    void update(int id, uint32_t now, const uint8_t* data, size_t size);
+    void update(int id, uint32_t now, const uint8_t* pixel_data, size_t size);
     emscripten::val getPixelData_Uint8(int stripIndex);
     std::string infoJsonString();
 
