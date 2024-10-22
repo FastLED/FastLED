@@ -74,10 +74,19 @@ h1 {
 
 #main-container {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px; /* Adjust this value as needed */
+    margin: 20px auto;
+}
+
+#top-row {
+    display: flex;
     justify-content: center;
     align-items: flex-start;
     width: 100%;
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 #canvas-container {
@@ -87,21 +96,20 @@ h1 {
 
 #myCanvas {
     background-color: #1E1E1E;
-    /* Slightly lighter gray for contrast */
     width: 320px;
     height: 320px;
     image-rendering: pixelated;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-    /* Outer shadow */
 }
-
-
 
 #output {
     font-size: 1em;
     padding: 20px;
     white-space: pre-wrap;
     width: 100%;
+    background-color: #1E1E1E;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 .ui-control {
