@@ -7,6 +7,9 @@ globalThis.loadFastLED = async function () {
 (function () {
     const FRAME_RATE = 60; // 60 FPS
     let receivedCanvas = false;
+    // screenMap contains data mapping a strip id to a screen map,
+    // transforming led strip data pixel with an index
+    // to a screen pixel with xy.
     let screenMap = {};
     let uiElements = {};
     let previousUiState = {};
@@ -74,26 +77,34 @@ globalThis.loadFastLED = async function () {
         const event = jsonData.event;
         let width = 0;
         let height = 0;
+        let eventHandled = false;
         if (event === "set_canvas_map") {
+            eventHandled = true;
             // Work in progress.
             const map = jsonData.map;
             const [min, max] = minMax(map);
             console.log("min", min, "max", max);
             width = max[0] - min[0];
             height = max[1] - min[1];
-            screenMap[jsonData.stripId] = {
+            const stripId = jsonData.strip_id;
+            const isUndefined = (value) => typeof value === 'undefined';
+            if (isUndefined(stripId)) {
+                throw new Error("strip_id is required for set_canvas_map event");
+            }
+            screenMap[stripId] = {
                 map: map,
                 min: min,
                 max: max,
             };
 
-        } else {
+        } else if (event === "set_canvas_size") {
+            eventHandled = true;
             width = jsonData.width;
             height = jsonData.height;
         }
 
-        if (jsonData.event !== 'set_canvas_size') {
-            console.warn("We do not support any event other than \"set_canvas_size\" yet, got event:", jsonData.event);
+        if (!eventHandled) {
+            console.warn(`We do not support event ${event} yet.`);
             return;
         }
         if (receivedCanvas) {
@@ -409,6 +420,10 @@ globalThis.loadFastLED = async function () {
         }
 
         const data = firstFrame.pixel_data;
+        // console.log("screenMap", screenMap);
+        if (Object.keys(screenMap).length >0) {
+            console.log("screenMap", screenMap);
+        }
 
         // TODO: map coordinates using the screenMap
         if (data.length === 0) {
