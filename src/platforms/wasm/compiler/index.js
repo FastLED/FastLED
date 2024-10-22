@@ -14,6 +14,9 @@ globalThis.loadFastLED = async function () {
     let gl, program, positionBuffer, texCoordBuffer, texture;
     let texWidth = 0, texHeight = 0;
     let texData;
+    let canvasId;
+    let uiControlsId;
+    let outputId;
 
 
     function createShaders() {
@@ -96,7 +99,7 @@ globalThis.loadFastLED = async function () {
         if (receivedCanvas) {
             console.warn("Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.");
         }
-        const canvas = document.getElementById('myCanvas');
+        const canvas = document.getElementById(canvasId);
         canvas.width = width;
         canvas.height = height;
 
@@ -109,7 +112,7 @@ globalThis.loadFastLED = async function () {
     };
 
     globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
-        const output = document.getElementById('output');
+        const output = document.getElementById(outputId);
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
 
@@ -156,7 +159,7 @@ globalThis.loadFastLED = async function () {
     globalThis.FastLED_onUiElementsAdded = function (jsonData) {
         console.log("UI elements added:", jsonData);
 
-        const uiControlsContainer = document.getElementById('ui-controls') || createUiControlsContainer();
+        const uiControlsContainer = document.getElementById(uiControlsId) || createUiControlsContainer();
 
         let foundUi = false;
         jsonData.forEach(element => {
@@ -211,7 +214,7 @@ globalThis.loadFastLED = async function () {
     }
 
     function createUiControlsContainer() {
-        const container = document.getElementById('ui-controls');
+        const container = document.getElementById(uiControlsId);
         if (!container) {
             console.error('UI controls container not found in the HTML');
         }
@@ -332,7 +335,7 @@ globalThis.loadFastLED = async function () {
     }
 
     function initWebGL() {
-        const canvas = document.getElementById('myCanvas');
+        const canvas = document.getElementById(canvasId);
         gl = canvas.getContext('webgl');
         if (!gl) {
             console.error('WebGL not supported');
@@ -546,6 +549,13 @@ globalThis.loadFastLED = async function () {
             document.body.style.opacity = 1;
         };
     }
-    createShaders();
-    globalThis.loadFastLED = onModuleLoaded;
+
+    async function loadFastLed(options) {
+        canvasId =  options.canvasId;
+        uiControlsId = options.uiControlsId;
+        outputId = options.printId;
+        createShaders();
+        await onModuleLoaded();
+    }
+    globalThis.loadFastLED = loadFastLed;
 })();

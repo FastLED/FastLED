@@ -34,8 +34,13 @@
 <script>
     // load fastled when the window is loaded.
     async function loadFastLed() {
-        // Load the FastLED script
-        await globalThis.loadFastLED();
+        // Load the FastLED module.
+        const options = {
+            canvasId: "myCanvas",
+            uiControlsId: "ui-controls",
+            printId: "output"
+        }
+        await globalThis.loadFastLED(options);
     }
     window.addEventListener('load', loadFastLed);
 </script>
