@@ -370,7 +370,14 @@ function updateCanvas(frameData) {
         console.warn("Received multiple strip data, only the first one will be displayed");
     }
 
-    const data = frameData[0].pixel_data;
+    const firstFrame = frameData[0];
+    const type = firstFrame.type;
+    if (type !== 'r8g8b8') {
+        console.warn("Unsupported pixel data type:", type);
+        return;
+    }
+
+    const data = firstFrame.pixel_data;
 
     // TODO: map coordinates using the screenMap
     if (data.length === 0) {

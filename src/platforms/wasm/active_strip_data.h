@@ -34,8 +34,6 @@ public:
     static ActiveStripData& Instance();
     void update(int id, uint32_t now, const uint8_t* data, size_t size);
     emscripten::val getPixelData_Uint8(int stripIndex);
-    emscripten::val getFirstPixelData_Uint8();
-    emscripten::val getNthPixelStripData_Uint8(int n);
     std::string infoJsonString();
 
 
