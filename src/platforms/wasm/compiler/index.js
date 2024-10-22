@@ -104,16 +104,10 @@ function processUiChanges(uiUpdateCallback) {
 
 globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
     processUiChanges(uiUpdateCallback);
-    //console.log(frameInfo);
-    //console.log(frameData);
     if (frameData.length === 0) {
         console.warn("Received empty frame data, skipping update");
         return;
     }
-    // frameData.forEach(data => {
-    //     const pixel_data = data.pixel_data;
-    //     updateCanvas(pixel_data);
-    // });
     updateCanvas(frameData);
 };
 
@@ -271,11 +265,7 @@ function createButton(element) {
         this.setAttribute('data-pressed', 'false');
         this.classList.remove('active');
     });
-
-
-
     controlDiv.appendChild(button);
-
     return controlDiv;
 }
 
