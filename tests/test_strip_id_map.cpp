@@ -25,6 +25,7 @@ class FakeCLedController : public CLEDController {
 };
 
 TEST_CASE("StripIdMap Simple Test") {
+    StripIdMap::test_clear();
     FakeCLedController fake_controller;
     int id = StripIdMap::addOrGetId(&fake_controller);
     CHECK(id == 0);
@@ -32,12 +33,10 @@ TEST_CASE("StripIdMap Simple Test") {
     CLEDController *match = &fake_controller;
     printf("Owner: %p, Match: %p\n", owner, match);
     CHECK_EQ(owner, match);
-
-#if 0
     CHECK(StripIdMap::getId(&fake_controller) == 0);
-    CHECK(StripIdMap::getOrFindByAddress(
-              reinterpret_cast<uintptr_t>(&fake_controller)) == 0);
-    CHECK(StripIdMap::getOwnerByAddress(reinterpret_cast<uintptr_t>(
-              &fake_controller)) == &fake_controller);
-#endif
+    id = StripIdMap::getOrFindByAddress(reinterpret_cast<uintptr_t>(&fake_controller));
+    CHECK(id == 0);
+    id = StripIdMap::getOrFindByAddress(reinterpret_cast<uintptr_t>(&fake_controller.fake_spi));
+    CHECK(id == 0);
+
 }

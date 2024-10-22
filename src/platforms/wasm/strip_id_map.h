@@ -103,6 +103,14 @@ public:
         return -1;
     }
 
+    #ifdef FASTLED_TESTING
+    static void test_clear() {
+        Instance().mStripMap.clear();
+        Instance().mOwnerMap.clear();
+        Instance().mCounter = 0;
+    }
+    #endif
+
 private:
     static StripIdMap& Instance() {
         return Singleton<StripIdMap>::instance();
