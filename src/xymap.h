@@ -7,6 +7,7 @@
 #include <string.h>
 #include "lut16.h"
 #include "crgb.h"
+#include "screenmap.h"
 
 FASTLED_FORCE_INLINE uint16_t xy_serpentine(uint16_t x, uint16_t y,
                                             uint16_t width, uint16_t height) {
@@ -63,6 +64,22 @@ class XYMap {
           width(width), height(height), mOffset(offset) {}
 
     XYMap(const XYMap &other) = default;
+
+    ScreenMap toScreenMap() const {
+        const uint16_t length = width * height;
+        ScreenMap out(length);
+        for (uint16_t w = 0; w < width; w++) {
+            for (uint16_t h = 0; h < height; h++) {
+                uint16_t index = mapToIndex(w, h);
+                pair_xy16 p = {
+                    static_cast<int16_t>(w),
+                    static_cast<int16_t>(h)
+                };
+                out.set(index, p);
+            }
+        }
+        return out;
+    }
 
     void mapPixels(const CRGB* input, CRGB* output) const {
         uint16_t pos = 0;

@@ -58,6 +58,14 @@ public:
         return lut[x];
     }
 
+    void set(uint16_t index, const pair_xy16& p) {
+        if (mLookUpTable) {
+            LUTXY16& lut = *mLookUpTable.get();
+            auto* data = lut.getData();
+            data[index] = p;
+        }
+    }
+
     // define the assignment operator
     ScreenMap& operator=(const ScreenMap &other) {
         if (this != &other) {
