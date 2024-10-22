@@ -72,19 +72,13 @@ globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
 let uiElements = {};
 let previousUiState = {};
 
-
-globalThis.FastLED_onFrame = function (frameInfo, frameData, uiUpdateCallback) {
-    //console.log(frameInfo);
-    //console.log(frameData);
-    updateCanvas(frameData.getFirstPixelData_Uint8());
-
+function processUiChanges(uiUpdateCallback) {
+    // Process UI changes.
     const changes = {};
     let hasChanges = false;
-
     for (const id in uiElements) {
         const element = uiElements[id];
         let currentValue;
-
         if (element.type === 'checkbox') {
             currentValue = element.checked;
         } else if (element.type === 'submit') {
@@ -95,18 +89,31 @@ globalThis.FastLED_onFrame = function (frameInfo, frameData, uiUpdateCallback) {
         } else {
             currentValue = parseFloat(element.value);
         }
-
         if (previousUiState[id] !== currentValue) {
             changes[id] = currentValue;
             hasChanges = true;
             previousUiState[id] = currentValue;
         }
     }
-
     if (hasChanges) {
         const data = JSON.stringify(changes);
         uiUpdateCallback(data);
     }
+}
+
+
+globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
+    processUiChanges(uiUpdateCallback);
+    //console.log(frameInfo);
+    //console.log(frameData);
+    if (frameData.length === 0) {
+        console.warn("Received empty frame data, skipping update");
+        return;
+    }
+    frameData.forEach(data => {
+        const pixel_data = data.pixel_data;
+        updateCanvas(pixel_data);
+    });
 };
 
 globalThis.FastLED_onUiElementsAdded = function (jsonData) {

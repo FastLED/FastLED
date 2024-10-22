@@ -31,52 +31,12 @@ public:
     void onBeginFrame() override {
         mStripMap.clear();
     }
-
-    static ActiveStripData& Instance() {
-        return Singleton<ActiveStripData>::instance();
-    }
-
-    void update(int id, uint32_t now, const uint8_t* data, size_t size) {
-        mStripMap.update(id, SliceUint8(data, size));
-    }
-
+    static ActiveStripData& Instance();
+    void update(int id, uint32_t now, const uint8_t* data, size_t size);
     emscripten::val getPixelData_Uint8(int stripIndex);
-
-    emscripten::val getFirstPixelData_Uint8() {
-        // Efficient, zero copy conversion from internal data to JavaScript.
-        if (!mStripMap.empty()) {
-            SliceUint8 stripData = mStripMap.begin()->second;
-            const uint8_t* data = stripData.data();
-            uint8_t* data_mutable = const_cast<uint8_t*>(data);
-            size_t size = stripData.size();
-            return emscripten::val(emscripten::typed_memory_view(size, data_mutable));
-        }
-        return emscripten::val::undefined();
-    }
-
-    emscripten::val getNthPixelStripData_Uint8(int n) {
-        // Efficient, zero copy conversion from internal data to JavaScript.
-        if (mStripMap.size() > n) {
-            auto it = mStripMap.begin();
-            for (int i = 0; i < n && it != mStripMap.end(); ++i, ++it) {}
-            if (it != mStripMap.end()) {
-                SliceUint8 stripData = it->second;
-                const uint8_t* data = stripData.data();
-                uint8_t* data_mutable = const_cast<uint8_t*>(data);
-                size_t size = stripData.size();
-                return emscripten::val(emscripten::typed_memory_view(size, data_mutable));
-            }
-        }
-        return emscripten::val::undefined();
-    }
-
-    std::string infoJson();
-
-
-
-    ~ActiveStripData() {
-        EngineEvents::removeListener(this);
-    }
+    emscripten::val getFirstPixelData_Uint8();
+    emscripten::val getNthPixelStripData_Uint8(int n);
+    std::string infoJsonString();
 
 
     static constexpr size_t MAX_STRIPS = 16; // Adjust this value based on your needs
@@ -85,6 +45,10 @@ public:
         return mStripMap;
     }
     
+    ~ActiveStripData() {
+        EngineEvents::removeListener(this);
+    }
+
 private:
     friend class Singleton<ActiveStripData>;
     ActiveStripData() {

@@ -73,10 +73,10 @@ inline void jsOnFrame(ActiveStripData& active_strips) {
     serializeJson(doc, jsonBuffer);
 
 
-    std::string json_str = active_strips.infoJson();
+    std::string json_str = active_strips.infoJsonString();
 
     EM_ASM_({
-        globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || function(frameData, callback) {
+        globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || function(frameInfo, callback) {
             console.log("Missing globalThis.FastLED_onFrame() function");
             //console.log("Received frame data:", frameData);
             if (typeof callback === 'function') {
@@ -92,10 +92,20 @@ inline void jsOnFrame(ActiveStripData& active_strips) {
                 console.error("Invalid jsonData received:", jsonString, "expected string but instead got:", typeof jsonString);
             }
         };
+
+       globalThis.FastLED_onFrameData = globalThis.FastLED_onFrameData || new Module.ActiveStripData();
+       var activeStrips = globalThis.FastLED_onFrameData;
+
         var jsonStr = UTF8ToString($0);
         var jsonData = JSON.parse(jsonStr);
-        globalThis.FastLED_onFrameData = globalThis.FastLED_onFrameData || new Module.ActiveStripData();
-        globalThis.FastLED_onFrame(jsonData, globalThis.FastLED_onFrameData, globalThis.onFastLedUiUpdateFunction);
+        for (var i = 0; i < jsonData.length; i++) {
+            var stripData = jsonData[i];
+            //console.log("Strip id:", stripData.strip_id);
+            var pixelData = activeStrips.getPixelData_Uint8(stripData.strip_id);
+            jsonData[i].pixel_data = pixelData;
+        }
+ 
+        globalThis.FastLED_onFrame(jsonData, globalThis.onFastLedUiUpdateFunction);
     }, jsonBuffer.c_str());
 }
 

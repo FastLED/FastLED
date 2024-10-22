@@ -21,19 +21,6 @@ FASTLED_NAMESPACE_BEGIN
 
 class CLEDController;
 
-static ActiveStripData* getActiveStripDataPtr() {
-    ActiveStripData* instance = &Singleton<ActiveStripData>::instance();
-    return instance;
-}
-
-EMSCRIPTEN_BINDINGS(engine_events_constructors) {
-    emscripten::class_<ActiveStripData>("ActiveStripData")
-        .constructor(&getActiveStripDataPtr, emscripten::allow_raw_pointers())
-        .function("getPixelData_Uint8", &ActiveStripData::getPixelData_Uint8)
-        .function("getFirstPixelData_Uint8", &ActiveStripData::getFirstPixelData_Uint8)
-        .function("getNthPixelStripData_Uint8", &ActiveStripData::getNthPixelStripData_Uint8);
-}
-
 
 class EngineListener: public EngineEvents::Listener {
 public:
