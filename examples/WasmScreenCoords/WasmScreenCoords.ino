@@ -19,7 +19,7 @@
 #define LED_PIN 3
 #define BRIGHTNESS 96
 #define COLOR_ORDER GRB
-#define NUM_LEDS 2
+#define NUM_LEDS 3
 
 CRGB leds[NUM_LEDS];
 float to_rads(float degs) { return degs * PI / 180.0; }

@@ -477,8 +477,8 @@ class UiManager {
             max[1] = max[1] - min[1];
             min[0] = 0;
             min[1] = 0;
-            width = max[0];
-            height = max[1];
+            width = max[0]+1;
+            height = max[1]+1;
             screenMap[stripId] = {
                 map: map,
                 min: min,
