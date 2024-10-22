@@ -26,8 +26,8 @@ public:
         }
         id = instance.mCounter++;
         printf("Adding strip id: %d\n", id);
-        //instance.mStripMap.update(owner, id);
-        //instance.mOwnerMap.update(id, owner);
+        instance.mStripMap.update(owner, id);
+        instance.mOwnerMap.update(id, owner);
         return id;
     }
 
@@ -38,7 +38,7 @@ public:
         if (instance.mOwnerMap.get(id, &owner)) {
             return owner;
         }
-        return 0;
+        return nullptr;
     }
 
     /// -1 if not found
