@@ -74,7 +74,7 @@ let previousUiState = {};
 
 
 globalThis.FastLED_onFrame = function (frameInfo, frameData, uiUpdateCallback) {
-    console.log(frameInfo);
+    //console.log(frameInfo);
     //console.log(frameData);
     updateCanvas(frameData.getFirstPixelData_Uint8());
 
