@@ -110,10 +110,11 @@ globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
         console.warn("Received empty frame data, skipping update");
         return;
     }
-    frameData.forEach(data => {
-        const pixel_data = data.pixel_data;
-        updateCanvas(pixel_data);
-    });
+    // frameData.forEach(data => {
+    //     const pixel_data = data.pixel_data;
+    //     updateCanvas(pixel_data);
+    // });
+    updateCanvas(frameData);
 };
 
 globalThis.FastLED_onUiElementsAdded = function (jsonData) {
@@ -360,7 +361,17 @@ function createProgram(gl, vertexShader, fragmentShader) {
 let texWidth = 0, texHeight = 0;
 let texData;
 
-function updateCanvas(data) {
+function updateCanvas(frameData) {
+    if (frameData.length === 0) {
+        console.warn("Received empty strip data, skipping update");
+        return;
+    }
+    if (frameData.length > 1) {
+        console.warn("Received multiple strip data, only the first one will be displayed");
+    }
+
+    const data = frameData[0].pixel_data;
+
     // TODO: map coordinates using the screenMap
     if (data.length === 0) {
         console.warn("Received empty data, skipping update");

@@ -100,9 +100,9 @@ inline void jsOnFrame(ActiveStripData& active_strips) {
         var jsonData = JSON.parse(jsonStr);
         for (var i = 0; i < jsonData.length; i++) {
             var stripData = jsonData[i];
-            //console.log("Strip id:", stripData.strip_id);
             var pixelData = activeStrips.getPixelData_Uint8(stripData.strip_id);
             jsonData[i].pixel_data = pixelData;
+            jsonData[i].type = "r8g8b8";
         }
  
         globalThis.FastLED_onFrame(jsonData, globalThis.onFastLedUiUpdateFunction);
