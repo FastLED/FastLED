@@ -114,6 +114,7 @@ class GraphicsManager {
 
         const firstFrame = frameData[0];
         const data = firstFrame.pixel_data;
+        const strip_id = firstFrame.strip_id;
 
         if (!this.gl) this.initWebGL();
 
@@ -146,21 +147,24 @@ class GraphicsManager {
             this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
         }
 
-        for (const stripId in frameData.screenMap) {
-            const stripData = frameData.screenMap[stripId];
-            const map = stripData.map;
+        if (!strip_id in frameData.screenMap) {
+            console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
+            return;
+        }
 
-            for (let i = 0; i < map.length; i++) {
-                const [x, y] = map[i];
-                const srcIndex = i * 3;
-                const destIndex = (y * this.texWidth + x) * 3;
-                const r = data[srcIndex];
-                const g = data[srcIndex + 1];
-                const b = data[srcIndex + 2];
-                this.texData[destIndex] = r;
-                this.texData[destIndex + 1] = g;
-                this.texData[destIndex + 2] = b;
-            }
+        const stripData = frameData.screenMap[strip_id];
+        const map = stripData.map;
+
+        for (let i = 0; i < map.length; i++) {
+            const [x, y] = map[i];
+            const srcIndex = i * 3;
+            const destIndex = (y * this.texWidth + x) * 3;
+            const r = data[srcIndex];
+            const g = data[srcIndex + 1];
+            const b = data[srcIndex + 2];
+            this.texData[destIndex] = r;
+            this.texData[destIndex + 1] = g;
+            this.texData[destIndex + 2] = b;
         }
         
 
