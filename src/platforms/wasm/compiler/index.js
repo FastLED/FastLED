@@ -4,6 +4,176 @@ globalThis.loadFastLED = async function () {
     return null;
 };
 
+class GraphicsManager {
+    constructor(canvasId) {
+        this.canvasId = canvasId;
+        this.gl = null;
+        this.program = null;
+        this.positionBuffer = null;
+        this.texCoordBuffer = null;
+        this.texture = null;
+        this.texWidth = 0;
+        this.texHeight = 0;
+        this.texData = null;
+    }
+
+    initWebGL() {
+        const canvas = document.getElementById(this.canvasId);
+        this.gl = canvas.getContext('webgl');
+        if (!this.gl) {
+            console.error('WebGL not supported');
+            return;
+        }
+
+        // Create shaders
+        const vertexShader = this.createShader(this.gl.VERTEX_SHADER, document.getElementById('fastled_vertexShader').text);
+        const fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, document.getElementById('fastled_FragmentShader').text);
+
+        // Create program
+        this.program = this.createProgram(vertexShader, fragmentShader);
+
+        // Create buffers
+        this.positionBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), this.gl.STREAM_DRAW);
+
+        this.texCoordBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), this.gl.STREAM_DRAW);
+
+        // Create texture
+        this.texture = this.gl.createTexture();
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+    }
+
+    createShader(type, source) {
+        const shader = this.gl.createShader(type);
+        this.gl.shaderSource(shader, source);
+        this.gl.compileShader(shader);
+        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+            console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
+            this.gl.deleteShader(shader);
+            return null;
+        }
+        return shader;
+    }
+
+    createProgram(vertexShader, fragmentShader) {
+        const program = this.gl.createProgram();
+        this.gl.attachShader(program, vertexShader);
+        this.gl.attachShader(program, fragmentShader);
+        this.gl.linkProgram(program);
+        if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+            console.error('Program link error:', this.gl.getProgramInfoLog(program));
+            return null;
+        }
+        return program;
+    }
+
+    updateCanvas(frameData) {
+        if (frameData.length === 0) {
+            console.warn("Received empty frame data, skipping update");
+            return;
+        }
+
+        const firstFrame = frameData[0];
+        const data = firstFrame.pixel_data;
+
+        if (!this.gl) this.initWebGL();
+
+        const canvasWidth = this.gl.canvas.width;
+        const canvasHeight = this.gl.canvas.height;
+
+        // Check if we need to reallocate the texture
+        const newTexWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
+        const newTexHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
+
+        if (this.texWidth !== newTexWidth || this.texHeight !== newTexHeight) {
+            this.texWidth = newTexWidth;
+            this.texHeight = newTexHeight;
+
+            // Reallocate texture
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+            this.gl.texImage2D(
+                this.gl.TEXTURE_2D,
+                0,
+                this.gl.RGB,
+                this.texWidth,
+                this.texHeight,
+                0,
+                this.gl.RGB,
+                this.gl.UNSIGNED_BYTE,
+                null
+            );
+
+            // Reallocate texData buffer
+            this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
+        }
+
+        // Update texData with new frame data
+        const srcRowSize = canvasWidth * 3;
+        const destRowSize = this.texWidth * 3;
+
+        for (let y = 0; y < canvasHeight; y++) {
+            for (let x = 0; x < canvasWidth; x++) {
+                const srcIndex = (y * srcRowSize) + (x * 3);
+                const destIndex = (y * destRowSize) + (x * 3);
+                this.texData[destIndex] = data[srcIndex];
+                this.texData[destIndex + 1] = data[srcIndex + 1];
+                this.texData[destIndex + 2] = data[srcIndex + 2];
+            }
+        }
+
+        // Update texture with new data
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        this.gl.texSubImage2D(
+            this.gl.TEXTURE_2D,
+            0,
+            0,
+            0,
+            this.texWidth,
+            this.texHeight,
+            this.gl.RGB,
+            this.gl.UNSIGNED_BYTE,
+            this.texData
+        );
+
+        // Set the viewport to the original canvas size
+        this.gl.viewport(0, 0, canvasWidth, canvasHeight);
+        this.gl.clearColor(0, 0, 0, 1);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+
+        this.gl.useProgram(this.program);
+
+        const positionLocation = this.gl.getAttribLocation(this.program, 'a_position');
+        this.gl.enableVertexAttribArray(positionLocation);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+        this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
+
+        const texCoordLocation = this.gl.getAttribLocation(this.program, 'a_texCoord');
+        this.gl.enableVertexAttribArray(texCoordLocation);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+        this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
+
+        // Update texture coordinates based on actual canvas size
+        const texCoords = new Float32Array([
+            0, 0,
+            canvasWidth / this.texWidth, 0,
+            0, canvasHeight / this.texHeight,
+            canvasWidth / this.texWidth, canvasHeight / this.texHeight,
+        ]);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STREAM_DRAW);
+
+        this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+}
+
+
 (function () {
     const FRAME_RATE = 60; // 60 FPS
     let receivedCanvas = false;
@@ -13,45 +183,11 @@ globalThis.loadFastLED = async function () {
     let screenMap = {};
     let uiElements = {};
     let previousUiState = {};
-    // gfx
-    let gl, program, positionBuffer, texCoordBuffer, texture;
-    let texWidth = 0, texHeight = 0;
-    let texData;
     let canvasId;
     let uiControlsId;
     let outputId;
 
 
-    function createShaders() {
-        const vertexShaderStr = `
-        attribute vec2 a_position;
-        attribute vec2 a_texCoord;
-        varying vec2 v_texCoord;
-        void main() {
-            gl_Position = vec4(a_position, 0, 1);
-            v_texCoord = a_texCoord;
-        }
-        `;
-
-        const fragmentShaderStr = `
-        precision mediump float;
-        uniform sampler2D u_image;
-        varying vec2 v_texCoord;
-        void main() {
-            gl_FragColor = texture2D(u_image, v_texCoord);
-        }
-        `;
-        const fragmentShader = document.createElement('script');
-        const vertexShader = document.createElement('script');
-        fragmentShader.id = 'fastled_FragmentShader';
-        vertexShader.id = 'fastled_vertexShader';
-        fragmentShader.type = 'x-shader/x-fragment';
-        vertexShader.type = 'x-shader/x-vertex';
-        fragmentShader.text = fragmentShaderStr;
-        vertexShader.text = vertexShaderStr;
-        document.head.appendChild(fragmentShader);
-        document.head.appendChild(vertexShader);
-    }
 
     function minMax(array_xy) {
         // array_xy is a an array of an array of x and y values
@@ -345,184 +481,47 @@ globalThis.loadFastLED = async function () {
         requestAnimationFrame(runLoop);
     }
 
-    function initWebGL() {
-        const canvas = document.getElementById(canvasId);
-        gl = canvas.getContext('webgl');
-        if (!gl) {
-            console.error('WebGL not supported');
-            return;
+
+    // BEGIN WebGL code
+    let graphicsManager;
+
+    function createShaders() {
+        const vertexShaderStr = `
+        attribute vec2 a_position;
+        attribute vec2 a_texCoord;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_Position = vec4(a_position, 0, 1);
+            v_texCoord = a_texCoord;
         }
+        `;
 
-        // Create shaders
-        const vertexShader = createShader(gl, gl.VERTEX_SHADER, document.getElementById('fastled_vertexShader').text);
-        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, document.getElementById('fastled_FragmentShader').text);
-
-        // Create program
-        program = createProgram(gl, vertexShader, fragmentShader);
-
-        // Create buffers
-        positionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STREAM_DRAW);
-
-        texCoordBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STREAM_DRAW);
-
-        // Create texture
-        texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    }
-
-    function createShader(gl, type, source) {
-        const shader = gl.createShader(type);
-        gl.shaderSource(shader, source);
-        gl.compileShader(shader);
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            console.error('Shader compile error:', gl.getShaderInfoLog(shader));
-            gl.deleteShader(shader);
-            return null;
+        const fragmentShaderStr = `
+        precision mediump float;
+        uniform sampler2D u_image;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_FragColor = texture2D(u_image, v_texCoord);
         }
-        return shader;
+        `;
+        const fragmentShader = document.createElement('script');
+        const vertexShader = document.createElement('script');
+        fragmentShader.id = 'fastled_FragmentShader';
+        vertexShader.id = 'fastled_vertexShader';
+        fragmentShader.type = 'x-shader/x-fragment';
+        vertexShader.type = 'x-shader/x-vertex';
+        fragmentShader.text = fragmentShaderStr;
+        vertexShader.text = vertexShaderStr;
+        document.head.appendChild(fragmentShader);
+        document.head.appendChild(vertexShader);
     }
-
-    function createProgram(gl, vertexShader, fragmentShader) {
-        const program = gl.createProgram();
-        gl.attachShader(program, vertexShader);
-        gl.attachShader(program, fragmentShader);
-        gl.linkProgram(program);
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-            console.error('Program link error:', gl.getProgramInfoLog(program));
-            return null;
-        }
-        return program;
-    }
-
 
     function updateCanvas(frameData) {
-        if (frameData.length === 0) {
-            console.warn("Received empty strip data, skipping update");
-            return;
+        if (!graphicsManager) {
+            graphicsManager = new GraphicsManager(canvasId);
         }
-        if (frameData.length > 1) {
-            console.warn("Received multiple strip data, only the first one will be displayed");
-        }
-
-        const firstFrame = frameData[0];
-        const type = firstFrame.type;
-        if (type !== 'r8g8b8') {
-            console.warn("Unsupported pixel data type:", type);
-            return;
-        }
-
-        const data = firstFrame.pixel_data;
-        // console.log("screenMap", screenMap);
-        if (Object.keys(screenMap).length >0) {
-            console.log("screenMap", screenMap);
-        }
-
-        // TODO: map coordinates using the screenMap
-        if (data.length === 0) {
-            console.warn("Received empty data, skipping update");
-            return;
-        }
-        if (!gl) initWebGL();
-
-        const canvasWidth = gl.canvas.width;
-        const canvasHeight = gl.canvas.height;
-
-        // Check if we need to reallocate the texture
-        const newTexWidth = Math.pow(2, Math.ceil(Math.log2(canvasWidth)));
-        const newTexHeight = Math.pow(2, Math.ceil(Math.log2(canvasHeight)));
-
-        if (texWidth !== newTexWidth || texHeight !== newTexHeight) {
-            console.log("Reallocating texture");
-            texWidth = newTexWidth;
-            texHeight = newTexHeight;
-            console.log(`Texture size: ${texWidth}x${texHeight}`);
-            console.log(`Canvas size: ${canvasWidth}x${canvasHeight}`);
-
-            // Reallocate texture
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(
-                gl.TEXTURE_2D,
-                0,
-                gl.RGB,
-                texWidth,
-                texHeight,
-                0,
-                gl.RGB,
-                gl.UNSIGNED_BYTE,
-                null
-            );
-
-            // Reallocate texData buffer
-            texData = new Uint8Array(texWidth * texHeight * 3);
-        }
-
-        // Update texData with new frame data
-        const srcRowSize = canvasWidth * 3;
-        const destRowSize = texWidth * 3;
-
-
-        for (let y = 0; y < canvasHeight; y++) {
-            for (let x = 0; x < canvasWidth; x++) {
-                const srcIndex = (y * srcRowSize) + (x * 3);
-                const destIndex = (y * destRowSize) + (x * 3);
-                texData[destIndex] = data[srcIndex];
-                texData[destIndex + 1] = data[srcIndex + 1];
-                texData[destIndex + 2] = data[srcIndex + 2];
-            }
-        }
-
-        // Update texture with new data
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texSubImage2D(
-            gl.TEXTURE_2D,
-            0,
-            0,
-            0,
-            texWidth,
-            texHeight,
-            gl.RGB,
-            gl.UNSIGNED_BYTE,
-            texData
-        );
-
-        // Set the viewport to the original canvas size
-        gl.viewport(0, 0, canvasWidth, canvasHeight);
-        gl.clearColor(0, 0, 0, 1);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-
-        gl.useProgram(program);
-
-        const positionLocation = gl.getAttribLocation(program, 'a_position');
-        gl.enableVertexAttribArray(positionLocation);
-        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-        const texCoordLocation = gl.getAttribLocation(program, 'a_texCoord');
-        gl.enableVertexAttribArray(texCoordLocation);
-        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-        gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
-
-        // Update texture coordinates based on actual canvas size
-        const texCoords = new Float32Array([
-            0, 0,
-            canvasWidth / texWidth, 0,
-            0, canvasHeight / texHeight,
-            canvasWidth / texWidth, canvasHeight / texHeight,
-        ]);
-        gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STREAM_DRAW);
-
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        graphicsManager.updateCanvas(frameData);
     }
-
 
     // Ensure we wait for the module to load
     const onModuleLoaded = async () => {
@@ -553,7 +552,7 @@ globalThis.loadFastLED = async function () {
         }
     };
     async function loadFastLed(options) {
-        canvasId =  options.canvasId;
+        canvasId = options.canvasId;
         uiControlsId = options.uiControlsId;
         outputId = options.printId;
         createShaders();
