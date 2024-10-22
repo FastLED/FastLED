@@ -42,6 +42,19 @@
         }
         await globalThis.loadFastLED(options);
     }
+
+    // Wait for fonts to load before showing content
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () {
+            document.body.style.opacity = 1;
+        });
+    } else {
+        // Fallback for browsers that do not support document.fonts
+        window.onload = function () {
+            document.body.style.opacity = 1;
+        };
+    }
+
     window.addEventListener('load', loadFastLed);
 </script>
 

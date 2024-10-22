@@ -537,19 +537,6 @@ globalThis.loadFastLED = async function () {
             console.error("Failed to load FastLED:", error);
         }
     };
-
-    // Wait for fonts to load before showing content
-    if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(function () {
-            document.body.style.opacity = 1;
-        });
-    } else {
-        // Fallback for browsers that do not support document.fonts
-        window.onload = function () {
-            document.body.style.opacity = 1;
-        };
-    }
-
     async function loadFastLed(options) {
         canvasId =  options.canvasId;
         uiControlsId = options.uiControlsId;
