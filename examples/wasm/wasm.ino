@@ -84,7 +84,7 @@ Animartrix animartrix(xyMap, POLAR_WAVES);
 FxEngine fxEngine(NUM_LEDS);
 
 void setup() {
-    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
+    FastLED.addLeds<APA102, LED_PIN, 2, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setCanvasUi(xyMap);
     FastLED.setBrightness(brightness);

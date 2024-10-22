@@ -28,10 +28,11 @@ class WasmSpiOutput: public EngineEvents::Listener {
 public:
     WasmSpiOutput() {
         EngineEvents::addListener(this);
-        CLEDController* owner = tryFindOwner();
-        if (owner) {
-            mId = StripIdMap::addOrGetId(owner);
-        }
+        //CLEDController* owner = tryFindOwner();
+        //printf("Owner: %p\n", owner);
+        //if (owner) {
+            //mId = StripIdMap::addOrGetId(owner);
+        //}
     }
 
     ~WasmSpiOutput() {
@@ -47,6 +48,7 @@ public:
             return nullptr;
         }
         return StripIdMap::getOwner(mId);
+
     }
 
     void onEndShowLeds() override {
@@ -59,6 +61,12 @@ public:
         if (owner == nullptr) {
             return;
         }
+        if (mId == -1) {
+            int new_id = StripIdMap::getId(owner);
+            if (new_id != -1) {
+                mId = new_id;
+            }
+        }
         ColorAdjustment color_adjustment = owner->getAdjustmentData(get_brightness());
         PixelController<RGB> pixels(owner->leds(), owner->size(), color_adjustment, DISABLE_DITHER);
         pixels.disableColorAdjustment();
@@ -69,7 +77,7 @@ public:
             mRgb.push_back(r);
             mRgb.push_back(g);
             mRgb.push_back(b);
-            pixels.advanceBy();
+            pixels.advanceData();
         }
 		ActiveStripData& active_strips = Singleton<ActiveStripData>::instance();
 		active_strips.update(mId, millis(), mRgb.data(), mRgb.size());

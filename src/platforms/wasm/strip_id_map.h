@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #include "singleton.h"
 #include "namespace.h"
@@ -24,8 +25,9 @@ public:
             return id;
         }
         id = instance.mCounter++;
-        instance.mStripMap.insert(owner, id);
-        instance.mOwnerMap.insert(id, owner);
+        printf("Adding strip id: %d\n", id);
+        instance.mStripMap.update(owner, id);
+        instance.mOwnerMap.update(id, owner);
         return id;
     }
 
@@ -36,7 +38,7 @@ public:
         if (instance.mOwnerMap.get(id, &owner)) {
             return owner;
         }
-        return 0;
+        return nullptr;
     }
 
     /// -1 if not found
@@ -49,7 +51,7 @@ public:
         return -1;
     }
 
-    static int getOrFindByAddress(uint32_t address) {
+    static int getOrFindByAddress(uintptr_t address) {
         if (address == 0) {
             return -1;
         }
@@ -60,7 +62,7 @@ public:
         return spiFindIdOrMakeIt(address);
     }
 
-    static CLEDController* getOwnerByAddress(uint32_t spi_address) {
+    static CLEDController* getOwnerByAddress(uintptr_t spi_address) {
         // spiDevice is going to be a member of the subclass of CLEDController. So
         // to find the device we need to iterate over the map and compare the spiDevice pointer
         // to the pointer address of all the CLedController objects.
@@ -72,12 +74,12 @@ public:
         
         for (auto it = instance.mStripMap.begin(); it != instance.mStripMap.end(); ++it) {
             CLEDController* controller = it->first;
-            uint32_t address_subclass = reinterpret_cast<uint32_t>(controller) + controller_size;
+            uintptr_t address_subclass = reinterpret_cast<uintptr_t>(controller) + controller_size;
             // if below, then the spiDevice is NOT a member of the subclass of CLEDController
             if (spi_address < address_subclass) {
                 continue;
             }
-            uint32_t diff = spi_address - address_subclass;
+            uintptr_t diff = spi_address - address_subclass;
             if (diff < smallest_diff) {
                 smallest_diff = diff;
                 closest_controller = controller;
@@ -89,17 +91,25 @@ public:
         return nullptr;
     }
 
-    static int spiFindIdOrMakeIt(uint32_t spi_address) {
-        StripIdMap& instance = Instance();
+    static int spiFindIdOrMakeIt(uintptr_t spi_address) {
         CLEDController* closest_controller = getOwnerByAddress(spi_address);
         if (closest_controller) {
             int id = addOrGetId(closest_controller);
-            if (instance.mStripMap.get(closest_controller, &id)) {
-                return id;
-            }
+            //if (instance.mStripMap.get(closest_controller, &id)) {
+            //    return id;
+            //}
+            return id;
         }
         return -1;
     }
+
+    #ifdef FASTLED_TESTING
+    static void test_clear() {
+        Instance().mStripMap.clear();
+        Instance().mOwnerMap.clear();
+        Instance().mCounter = 0;
+    }
+    #endif
 
 private:
     static StripIdMap& Instance() {
