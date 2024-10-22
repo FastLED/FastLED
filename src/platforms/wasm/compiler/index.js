@@ -15,6 +15,38 @@ globalThis.loadFastLED = async function () {
     let texWidth = 0, texHeight = 0;
     let texData;
 
+
+    function createShaders() {
+        const vertexShaderStr = `
+        attribute vec2 a_position;
+        attribute vec2 a_texCoord;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_Position = vec4(a_position, 0, 1);
+            v_texCoord = a_texCoord;
+        }
+        `;
+
+        const fragmentShaderStr = `
+        precision mediump float;
+        uniform sampler2D u_image;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_FragColor = texture2D(u_image, v_texCoord);
+        }
+        `;
+        const fragmentShader = document.createElement('script');
+        const vertexShader = document.createElement('script');
+        fragmentShader.id = 'fastled_FragmentShader';
+        vertexShader.id = 'fastled_vertexShader';
+        fragmentShader.type = 'x-shader/x-fragment';
+        vertexShader.type = 'x-shader/x-vertex';
+        fragmentShader.text = fragmentShaderStr;
+        vertexShader.text = vertexShaderStr;
+        document.head.appendChild(fragmentShader);
+        document.head.appendChild(vertexShader);
+    }
+
     function minMax(array_xy) {
         // array_xy is a an array of an array of x and y values
         // returns the lower left and upper right
@@ -308,8 +340,8 @@ globalThis.loadFastLED = async function () {
         }
 
         // Create shaders
-        const vertexShader = createShader(gl, gl.VERTEX_SHADER, document.getElementById('vertexShader').text);
-        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, document.getElementById('fragmentShader').text);
+        const vertexShader = createShader(gl, gl.VERTEX_SHADER, document.getElementById('fastled_vertexShader').text);
+        const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, document.getElementById('fastled_FragmentShader').text);
 
         // Create program
         program = createProgram(gl, vertexShader, fragmentShader);
@@ -514,8 +546,6 @@ globalThis.loadFastLED = async function () {
             document.body.style.opacity = 1;
         };
     }
-
+    createShaders();
     globalThis.loadFastLED = onModuleLoaded;
-
-
 })();

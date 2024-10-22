@@ -20,23 +20,6 @@
     <div id="main-container">
         <div id="canvas-container">
             <canvas id="myCanvas" width="16" height="16"></canvas>
-            <script id="vertexShader" type="x-shader/x-vertex">
-                attribute vec2 a_position;
-                attribute vec2 a_texCoord;
-                varying vec2 v_texCoord;
-                void main() {
-                    gl_Position = vec4(a_position, 0, 1);
-                    v_texCoord = a_texCoord;
-                }
-            </script>
-            <script id="fragmentShader" type="x-shader/x-fragment">
-                precision mediump float;
-                uniform sampler2D u_image;
-                varying vec2 v_texCoord;
-                void main() {
-                    gl_FragColor = texture2D(u_image, v_texCoord);
-                }
-            </script>
         </div>
         <div id="ui-controls"></div>
     </div>
@@ -50,7 +33,11 @@
 <script src="index.js"></script>
 <script>
     // load fastled when the window is loaded.
-    window.addEventListener('load', globalThis.loadFastLED);
+    async function loadFastLed() {
+        // Load the FastLED script
+        await globalThis.loadFastLED();
+    }
+    window.addEventListener('load', loadFastLed);
 </script>
 
 
