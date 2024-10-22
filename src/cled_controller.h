@@ -182,8 +182,9 @@ public:
     inline CLEDController & setDither(uint8_t ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
 
     CLEDController& setCanvasUi(const XYMap& map) {
-        // This is a placeholder for the UI canvas. It is not implemented in the base class.
-        EngineEvents::onCanvasUiSet(this, map);
+        // EngineEvents::onCanvasUiSet(this, map);
+        ScreenMap screenmap = map.toScreenMap();
+        EngineEvents::onCanvasUiSet(this, screenmap);
         return *this;
     }
 

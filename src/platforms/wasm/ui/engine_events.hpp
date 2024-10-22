@@ -37,11 +37,6 @@ private:
         jsOnStripAdded(id, num_leds);
     }
 
-    void onCanvasUiSet(CLEDController* strip, const XYMap& xymap) override {
-        int controller_id = StripIdMap::addOrGetId(strip);
-        jsSetCanvasSize(controller_id, xymap.getWidth(), xymap.getHeight());
-    }
-
     void onCanvasUiSet(CLEDController* strip, const ScreenMap& screenmap) override {
         int controller_id = StripIdMap::addOrGetId(strip);
         jsSetCanvasSize(controller_id, screenmap);

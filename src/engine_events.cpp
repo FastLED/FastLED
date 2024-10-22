@@ -85,14 +85,6 @@ void EngineEvents::_onStripAdded(CLEDController* strip, uint32_t num_leds) {
     }
 }
 
-void EngineEvents::_onCanvasUiSet(CLEDController* strip, const XYMap& map) {
-    // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
-    ListenerList copy = mListeners;
-    for (auto listener : copy) {
-        listener->onCanvasUiSet(strip, map);
-    }
-}
-
 
 void EngineEvents::_onCanvasUiSet(CLEDController *strip, const ScreenMap& screenmap) {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.

@@ -30,16 +30,7 @@ inline void jsSetCanvasSize(const char* jsonString, size_t jsonSize) {
 }
 
 
-inline void jsSetCanvasSize(int cledcontoller_id, uint16_t width, uint16_t height) {
-    ArduinoJson::JsonDocument doc;
-    doc["strip_id"] = cledcontoller_id;
-    doc["event"] = "set_canvas_size";
-    doc["width"] = width;
-    doc["height"] = height;
-    char jsonBuffer[512];
-    size_t jsonSize = serializeJson(doc, jsonBuffer, sizeof(jsonBuffer));
-    jsSetCanvasSize(jsonBuffer, jsonSize);
-}
+
 
 inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap& screenmap) {
     ArduinoJson::JsonDocument doc;

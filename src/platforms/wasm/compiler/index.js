@@ -145,40 +145,24 @@ class GraphicsManager {
             // Reallocate texData buffer
             this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
         }
-        if (false) {
-            for (const stripId in frameData.screenMap) {
-                const stripData = frameData.screenMap[stripId];
-                const map = stripData.map;
 
-                for (let i = 0; i < map.length; i++) {
-                    const [x, y] = map[i];
-                    const srcIndex = i * 3;
-                    const destIndex = (y * this.texWidth + x) * 3;
-                    const r = data[srcIndex];
-                    const g = data[srcIndex + 1];
-                    const b = data[srcIndex + 2];
-                    this.texData[destIndex] = r;
-                    this.texData[destIndex + 1] = g;
-                    this.texData[destIndex + 2] = b;
-                    console.log(`Drawing pixel at (${x}, ${y}): R=${r}, G=${g}, B=${b}`);
-                }
-            }
-        } else {
-            // Update texData with new frame data
-            const srcRowSize = canvasWidth * 3;
-            const destRowSize = this.texWidth * 3;
+        for (const stripId in frameData.screenMap) {
+            const stripData = frameData.screenMap[stripId];
+            const map = stripData.map;
 
-            for (let y = 0; y < canvasHeight; y++) {
-                for (let x = 0; x < canvasWidth; x++) {
-                    const srcIndex = (y * srcRowSize) + (x * 3);
-                    const destIndex = (y * destRowSize) + (x * 3);
-                    this.texData[destIndex] = data[srcIndex];
-                    this.texData[destIndex + 1] = data[srcIndex + 1];
-                    this.texData[destIndex + 2] = data[srcIndex + 2];
-                }
+            for (let i = 0; i < map.length; i++) {
+                const [x, y] = map[i];
+                const srcIndex = i * 3;
+                const destIndex = (y * this.texWidth + x) * 3;
+                const r = data[srcIndex];
+                const g = data[srcIndex + 1];
+                const b = data[srcIndex + 2];
+                this.texData[destIndex] = r;
+                this.texData[destIndex + 1] = g;
+                this.texData[destIndex + 2] = b;
             }
-            console.log(`texWidth: ${this.texWidth}, texHeight: ${this.texHeight}, canvasWidth: ${canvasWidth}, canvasHeight: ${canvasHeight} `);
         }
+        
 
         // Update texture with new data
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
@@ -485,10 +469,6 @@ class UiManager {
                 max: max,
             };
 
-        } else if (event === "set_canvas_size") {
-            eventHandled = true;
-            width = jsonData.width;
-            height = jsonData.height;
         }
 
         if (!eventHandled) {
