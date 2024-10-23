@@ -5,7 +5,7 @@ from enum import Enum
 from math import pi, cos, sin
 
 LED_PER_STRIP = 14
-SPACE_PER_LED = 0.5
+SPACE_PER_LED = 1.0  # Increased for better visibility
 
 SMALLEST_ANGLE = 360 / 6
 
@@ -34,7 +34,7 @@ def next_point(pos: Point, angle: HexagonAngle, space: float) -> Point:
     angle_rad = toRads(degrees)
     x = pos.x + space * cos(angle_rad)
     y = pos.y + space * sin(angle_rad)
-    return Point(round(x), round(y))
+    return Point(x, y)
 
 
 def gen_points(
@@ -42,20 +42,37 @@ def gen_points(
 ) -> list[Point]:
     points: list[Point] = []
     curr_point: Point = Point(startPos.x, startPos.y)
-    points.append(Point(startPos.x, startPos.y))
-    for i, angle in enumerate(input):
-        for j in range(leds_per_strip - 1):
-            if j == leds_per_strip:
-                break
+    points.append(curr_point)
+    for angle in input:
+        for _ in range(leds_per_strip - 1):
             curr_point = next_point(curr_point, angle, SPACE_PER_LED)
             points.append(curr_point)
     return points
 
+def remove_duplicates(points: list[Point]) -> list[Point]:
+    unique_points = []
+    seen = set()
+    for point in points:
+        rounded_point = (round(point.x, 2), round(point.y, 2))
+        if rounded_point not in seen:
+            seen.add(rounded_point)
+            unique_points.append(Point(round(point.x, 2), round(point.y, 2)))
+    return unique_points
+
 
 def main() -> None:
     startPos = Point(0, 0)
-    points = gen_points([HexagonAngle.UP], LED_PER_STRIP, startPos)
-    print(points)
+    hexagon_angles = [
+        HexagonAngle.UP,
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.RIGHT_DOWN,
+        HexagonAngle.DOWN,
+        HexagonAngle.LEFT_DOWN,
+        HexagonAngle.LEFT_UP,
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, startPos)
+    unique_points = remove_duplicates(points)
+    print(unique_points)
 
 
 if __name__ == "__main__":
