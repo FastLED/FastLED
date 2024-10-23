@@ -496,17 +496,22 @@ class UiManager {
 
             console.log("Screen map updated:", screenMap);
             // iterate through all the screenMaps and get the absolute min and max
-            let absMin = [Number.MAX_VALUE, Number.MAX_VALUE];
-            let absMax = [Number.MIN_VALUE, Number.MIN_VALUE];
+            let absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+            let absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
+            let setAtLeastOnce = false;
             for (const stripId in screenMap.strips) {
                 console.log("Processing strip ID", stripId);
                 const id = Number.parseInt(stripId, 10);
-
                 const stripData = screenMap.strips[id];
                 absMin[0] = Math.min(absMin[0], stripData.min[0]);
                 absMin[1] = Math.min(absMin[1], stripData.min[1]);
                 absMax[0] = Math.max(absMax[0], stripData.max[0]);
                 absMax[1] = Math.max(absMax[1], stripData.max[1]);
+                setAtLeastOnce = true;
+            }
+            if (!setAtLeastOnce) {
+                console.error("No screen map data found, skipping canvas size update");
+                return;
             }
             screenMap.absMin = absMin;
             screenMap.absMax = absMax;
