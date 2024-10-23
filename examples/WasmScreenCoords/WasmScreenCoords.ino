@@ -22,7 +22,8 @@
 #define NUM_LEDS 256
 
 CRGB leds[NUM_LEDS];
-float to_rads(float degs) { return degs * PI / 180.0; }
+CRGB leds2[NUM_LEDS];
+
 
 void make_map(int stepx, int stepy, int num, std::vector<pair_xy16>* _map) {
     int16_t x = 0;
@@ -39,21 +40,23 @@ void setup() {
     for (CRGB& c : leds) {
         c = CRGB::Blue;
     }
+    for (CRGB& c : leds2) {
+        c = CRGB::Red;
+    }
     FastLED.setBrightness(255);
     std::vector<pair_xy16> map;
     make_map(1, 1, NUM_LEDS, &map);
     ScreenMap screenmap = ScreenMap(map.data(), map.size());
 
-    // print out screen map
-    for (int i = 0; i < map.size(); i++) {
-        const pair_xy16& p = screenmap[i];
-        //printf("x: %d, y: %d\n", p.x, p.y);
-    }
-
-    // print out 
+    std::vector<pair_xy16> map2;
+    make_map(-1, -1, NUM_LEDS, &map2);
+    ScreenMap screenmap2 = ScreenMap(map2.data(), map2.size());
 
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCanvasUi(screenmap);
+
+    FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds2, NUM_LEDS)
+        .setCanvasUi(screenmap2);
 }
 
 void loop() {
