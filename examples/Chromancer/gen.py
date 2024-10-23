@@ -31,13 +31,13 @@ class Point:
 
     @staticmethod
     def toJson(points: list["Point"]) -> list[dict]:
-        def _toJson(p: "Point") -> dict:
-            # return {"x": p.x, "y": p.y}
-            # format at 4 decimal places
-            x_rounded = round(p.x, 4)
-            y_rounded = round(p.y, 4)
-            return [ x_rounded, y_rounded]
-        return [_toJson(p) for p in points]
+        x_values = [p.x for p in points]
+        y_values = [p.y for p in points]
+        # round 
+        x_values = [round(x, 4) for x in x_values]
+        y_values = [round(y, 4) for y in y_values]
+
+        return {"x": x_values, "y": y_values}
 
     def copy(self) -> "Point":
         return Point(self.x, self.y)
@@ -162,14 +162,14 @@ def find_blue_anchor_point() -> list[Point]:
     points = gen_points(hexagon_angles, LED_PER_STRIP, Point(0, 0))
     return points
 
-FIRST_ANCHOR_POINT = find_red_anchor_point()[-1]
-SECOND_ANCHOR_POINT = Point(0,0)  # Black
-THIRD_ANCHOR_POINT = find_green_anchore_point()[-1]
+RED_ANCHOR_POINT = find_red_anchor_point()[-1]
+BLACK_ANCHOR_POINT = Point(0,0)  # Black
+GREEN_ANCHOR_POINT = find_green_anchore_point()[-1]
 BLUE_ANCHOR_POINT = Point(0, 0)
 
 
 def generate_red_points() -> list[Point]:
-    starting_point = FIRST_ANCHOR_POINT.copy()
+    starting_point = RED_ANCHOR_POINT.copy()
     hexagon_angles = [
         HexagonAngle.UP,
         HexagonAngle.LEFT_UP,
@@ -182,18 +182,78 @@ def generate_red_points() -> list[Point]:
     return points
 
 
+def generate_black_points() -> list[Point]:
+    starting_point = BLACK_ANCHOR_POINT.copy()
+    hexagon_angles = [
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.UP,
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.RIGHT_DOWN,
+        HexagonAngle.DOWN,
+        HexagonAngle.LEFT_DOWN,
+        HexagonAngle.UP,
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.UP,
+        HexagonAngle.RIGHT_UP,
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point)
+    return points
 
+
+def generate_green_points() -> list[Point]:
+    starting_point = GREEN_ANCHOR_POINT.copy()
+    hexagon_angles = [
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.UP,
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.LEFT_DOWN,
+        HexagonAngle.DOWN,
+        HexagonAngle.DOWN,
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.UP,
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.LEFT_DOWN,
+        HexagonAngle.RIGHT_DOWN
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point, exclude=[4])
+    return points
+
+def generate_blue_points() -> list[Point]:
+    starting_point = BLUE_ANCHOR_POINT.copy()
+    hexagon_angles = [
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.UP,
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.LEFT_DOWN,
+        HexagonAngle.LEFT_DOWN,
+        HexagonAngle.RIGHT_DOWN,
+        HexagonAngle.RIGHT_DOWN,
+        HexagonAngle.UP,
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.UP,
+        HexagonAngle.RIGHT_UP,
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point)
+    return points
 
 def unit_test() -> None:
     #simple_test()
     #two_angle_test()
     out = {}
     map = out.setdefault("map", {})
-    data = map.setdefault("data", {})
-    data.update({
-        "red_segment": Point.toJson(generate_red_points())
+    map.update({
+        "red_segment": Point.toJson(generate_red_points()),
+        "back_segment": Point.toJson(generate_black_points()),
+        "green_segment": Point.toJson(generate_green_points()),
+        "blue_segment": Point.toJson(generate_blue_points()),
     })
-    print(json.dumps(out, indent=2))
+    print(json.dumps(out))
+    # write it out to a file
+    with open("output.json", "w") as f:
+        f.write(json.dumps(out))
 
 
 if __name__ == "__main__":

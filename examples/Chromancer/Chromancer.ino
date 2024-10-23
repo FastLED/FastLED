@@ -16,6 +16,8 @@
 #include "screenmap.h"
 #include "math_macros.h"
 
+#include "screenmap.json.h"
+
 // Strips are different lengths because I am a dumb
 constexpr int lengths[] = {
   154,
