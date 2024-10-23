@@ -22,16 +22,34 @@ inline long random(long max) {
     return random(0, max);
 }
 
+template<typename T>
+struct PrintHelper {};
+
+#define DEFINE_PRINT_HELPER(type, format) \
+    template<> \
+    struct PrintHelper<type> { \
+        static void print(type val) { printf(format, val); } \
+        static void println(type val) { printf(format, val); printf("\n"); } \
+    }
+
+DEFINE_PRINT_HELPER(long, "%ld");
+DEFINE_PRINT_HELPER(unsigned long, "%lu");
+DEFINE_PRINT_HELPER(unsigned int, "%u");
+DEFINE_PRINT_HELPER(double, "%f");
+DEFINE_PRINT_HELPER(float, "%f");
+DEFINE_PRINT_HELPER(const char *, "%s");
+DEFINE_PRINT_HELPER(char, "%c");
+DEFINE_PRINT_HELPER(int, "%d");
+DEFINE_PRINT_HELPER(unsigned char, "%u");
+
+
+
 struct SerialEmulation {
-    void print(const char *s) { printf("%s", s); }
-    void println(const char *s) { printf("%s\n", s); }
-    void print(uint8_t n) { printf("%d", n); }
-    void println(uint8_t n) { printf("%d\n", n); }
-    void print(int n) { printf("%d", n); }
-    void println(int n) { printf("%d\n", n); }
-    void print(uint16_t n) { printf("%d", n); }
-    void println(uint16_t n) { printf("%d\n", n); }
-    void begin(int32_t) {}
+    void begin(int) {}
+    template<typename T>
+    void print(T val) { PrintHelper<T>::print(val); }
+    template<typename T>
+    void println(T val) { PrintHelper<T>::println(val); }
     int available() { return 0; }
     int read() { return 0; }
     void write(uint8_t) {}
