@@ -4,7 +4,7 @@ from enum import Enum
 
 from math import pi, cos, sin
 
-LED_PER_STRIP = 2
+LED_PER_STRIP = 14
 SPACE_PER_LED = 1.0  # Increased for better visibility
 
 SMALLEST_ANGLE = 360 / 6
@@ -46,18 +46,23 @@ def gen_points(
     input: list[HexagonAngle], leds_per_strip: int, startPos: Point
 ) -> list[Point]:
     points: list[Point] = []
-
+    if (not input) or (not leds_per_strip):
+        return points
+    # Start FSM. Start pointer get's put into the accumulator.
     curr_point: Point = Point(startPos.x, startPos.y)
-    last_angle = None
-    for angle in input:
-        points.append(curr_point)
-        for _ in range(leds_per_strip - 1):
+    points.append(curr_point)
+    last_angle = input[0]
+    for i,angle in enumerate(input):
+        values = list(range(leds_per_strip - 1))
+        last_angle = angle
+        for v in values:
             last_angle = angle
             curr_point = next_point(curr_point, angle, SPACE_PER_LED)
             points.append(curr_point)
-    # for the last point, add the last angle
-    curr_point = next_point(curr_point, last_angle, SPACE_PER_LED)
-    points.append(curr_point)
+        if i == len(input) - 1:
+            break
+        curr_point = next_point(curr_point, last_angle, SPACE_PER_LED)
+        points.append(curr_point)
     return points
 
 
@@ -110,13 +115,60 @@ def two_angle_test2() -> None:
     print(points)
     # assert len(points) == LED_PER_STRIP * 2, f"Expected {LED_PER_STRIP * 2} points, got {len(points)} points"
 
+# Red is defined by this instruction tutorial: https://voidstar.dozuki.com/Guide/Chromance+Assembly+Instructions/6
+def find_red_anchor_point() -> list[Point]:
+    hexagon_angles = [
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.UP,
+        HexagonAngle.RIGHT_UP,
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, Point(0, 0))
+    return points
+
+def find_green_anchore_point() -> list[Point]:
+    hexagon_angles = [
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.UP,
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, Point(0, 0))
+    return points
+
+def find_blue_anchor_point() -> list[Point]:
+    hexagon_angles = [
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.UP,
+        HexagonAngle.LEFT_UP,
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, Point(0, 0))
+    return points
+
+FIRST_ANCHOR_POINT = find_red_anchor_point()[-1]
+SECOND_ANCHOR_POINT = Point(0,0)  # Black
+THIRD_ANCHOR_POINT = find_green_anchore_point()[-1]
+BLUE_ANCHOR_POINT = Point(0, 0)
+
+
+def generate_red_points() -> list[Point]:
+    starting_point = FIRST_ANCHOR_POINT.copy()
+    hexagon_angles = [
+        HexagonAngle.UP,
+        HexagonAngle.LEFT_UP,
+        HexagonAngle.LEFT_DOWN,
+        HexagonAngle.DOWN,
+        HexagonAngle.UP,
+        HexagonAngle.LEFT_UP
+    ]
+
 
 
 
 def unit_test() -> None:
     #simple_test()
     #two_angle_test()
-    two_angle_test2()
+    find_red_anchor_point()
 
 if __name__ == "__main__":
     unit_test()
