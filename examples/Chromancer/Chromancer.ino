@@ -149,48 +149,41 @@ unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
 
-void make_map(float angle, float step, int num, std::vector<pair_xy16>* _map) {
+void make_map(int xstep, int ystep, int num, std::vector<pair_xy16>* _map) {
+    int16_t x = 0;
+    int16_t y = 0;
     std::vector<pair_xy16>& map = *_map;
-    for (int i = 0; i < num; i++) {
-        float radius = i * step;
-        int16_t x = static_cast<int16_t>(radius * cos(angle));
-        int16_t y = static_cast<int16_t>(radius * sin(angle));
+    for (int16_t i = 0; i < num; i++) {
         map.push_back(pair_xy16{x, y});
+        x += xstep;
+        y += ystep;
     }
 }
 
-float to_rads(float degs) { return degs * PI / 180.0; }
+
+
+ScreenMap make_screen_map(int xstep, int ystep, int num) {
+    std::vector<pair_xy16> map;
+    make_map(xstep, ystep, num, &map);
+    return ScreenMap(map.data(), map.size());
+}
 
 void setup() {
     Serial.begin(115200);
 
     Serial.println("*** LET'S GOOOOO ***");
 
-    
-    // std::vector<pair_xy16> map0 = make_map(0, 1, lengths[0]);
-    // std::vector<pair_xy16> map1 = make_map(90, 1, lengths[1]);
-    // std::vector<pair_xy16> map2 = make_map(180, 1, lengths[2]);
-    // std::vector<pair_xy16> map3 = make_map(270, 1, lengths[3]);
-
-
-    std::vector<pair_xy16> map;
-    make_map(to_rads(0), 1, lengths[0], &map);
-    make_map(to_rads(90), 1, lengths[1], &map);
-    make_map(to_rads(180), 1, lengths[2], &map);
-    make_map(to_rads(270), 1, lengths[3], &map);
-
+    CLEDController* controllers[4];
     // Initialize FastLED strips
-    // controllers[0] = &FastLED.addLeds<WS2812, 1>(leds[0], lengths[0]);
-    // controllers[1] = &FastLED.addLeds<WS2812, 2>(leds[1], lengths[1]);
-    // controllers[2] = &FastLED.addLeds<WS2812, 3>(leds[2], lengths[2]);
-    // controllers[3] = &FastLED.addLeds<WS2812, 4>(leds[3], lengths[3]);
-    ScreenMap screenmap = ScreenMap(map.data(), map.size());
-
-    FastLED.addLeds<WS2812, 16>(leds_all, TOTAL_LEDS)
-        .setCanvasUi(screenmap);  // .setCanvasUi(xyMap);
-
-    // If your PSU sucks, use this to limit the current
-    //  FastLED.setBrightness(125);
+    controllers[0] = &FastLED.addLeds<WS2812, 1>(leds[0], lengths[0]);
+    controllers[1] = &FastLED.addLeds<WS2812, 2>(leds[1], lengths[1]);
+    controllers[2] = &FastLED.addLeds<WS2812, 3>(leds[2], lengths[2]);
+    controllers[3] = &FastLED.addLeds<WS2812, 4>(leds[3], lengths[3]);
+    
+    controllers[0]->setCanvasUi(make_screen_map(1, 0, lengths[0]));
+    controllers[1]->setCanvasUi(make_screen_map(0, 1, lengths[1]));
+    controllers[2]->setCanvasUi(make_screen_map(-1, 0, lengths[2]));
+    controllers[3]->setCanvasUi(make_screen_map(0, -1, lengths[3]));
 
     FastLED.show();
     net_init();
