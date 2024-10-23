@@ -31,7 +31,6 @@ public:
     static constexpr size_t MAX_STRIPS = 16; // Adjust this value based on your needs
     typedef FixedMap<int, SliceUint8, MAX_STRIPS> StripDataMap;
     typedef FixedMap<int, ScreenMap, MAX_STRIPS> ScreenMapMap;
-    typedef FixedMap<int, int, MAX_STRIPS> ScreenMapChanged;
 
     static ActiveStripData& Instance();
     void update(int id, uint32_t now, const uint8_t* pixel_data, size_t size);
@@ -61,9 +60,6 @@ public:
         return mScreenMap.has(id);
     }
 
-    const bool getScreenMapCounter(int id, int* counter) const {
-        return mScreenMapChanged.get(id, counter);
-    }
 
 private:
     friend class Singleton<ActiveStripData>;
@@ -75,5 +71,4 @@ private:
 
     StripDataMap mStripMap;
     ScreenMapMap mScreenMap;
-    ScreenMapChanged mScreenMapChanged;
 };

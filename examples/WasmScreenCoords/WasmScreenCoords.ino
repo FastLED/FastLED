@@ -47,7 +47,7 @@ void setup() {
     // print out screen map
     for (int i = 0; i < map.size(); i++) {
         const pair_xy16& p = screenmap[i];
-        printf("x: %d, y: %d\n", p.x, p.y);
+        //printf("x: %d, y: %d\n", p.x, p.y);
     }
 
     // print out 
