@@ -16,6 +16,7 @@
 #include "screenmap.h"
 #include "math_macros.h"
 #include "third_party/arduinojson/json.h"
+#include "ui.h"
 
 #include "screenmap.json.h"
 
@@ -28,27 +29,25 @@ constexpr int lengths[] = {
 };
 
 enum {
-    RedStrip = 2,
+    BlackStrip = 0,
     GreenStrip = 1,
+    RedStrip = 2,
     BlueStrip = 3,
-    BlackStrip = 0
 };
 
 
 
-#if defined(USING_DOTSTAR)
-#define COLOR_ORDER BGR
-
-
+/*
 Adafruit_DotStar strip0(lengths[0], 15, 2, DOTSTAR_BRG);
 Adafruit_DotStar strip1(lengths[1], 0, 4, DOTSTAR_BRG);
 Adafruit_DotStar strip2(lengths[2], 16, 17, DOTSTAR_BRG);
 Adafruit_DotStar strip3(lengths[3], 5, 18, DOTSTAR_BRG);
 
-Adafruit_DotStar strips[4] = {strip0, strip1, strip2, strip3};
 
-#else
-#define NUM_STRIPS 4
+Adafruit_DotStar strips[4] = {strip0, strip1, strip2, strip3};
+*/
+
+// #define NUM_STRIPS 4
 
 /*
 GPIO: 16 - Start: 0 - Length: 84
@@ -68,12 +67,13 @@ CRGB leds2[lengths[2]] = {}; // Red
 CRGB leds3[lengths[3]] = {};
 CRGB *leds[] = {leds0, leds1, leds2, leds3};
 
-#endif
 
 byte ledColors[40][14][3]; // LED buffer - each ripple writes to this, then we
                            // write this to the strips
-float decay = 0.97; // Multiply all LED's by this amount each tick to create
+//float decay = 0.97; // Multiply all LED's by this amount each tick to create
                     // fancy fading tails
+
+Slider decay("decay", .97f, .8, 1.0, .01);
 
 // These ripples are endlessly reused so we don't need to do any memory
 // management
@@ -169,29 +169,10 @@ void setup() {
     Serial.println("JSON SCREENMAP");
     Serial.println(JSON_SCREEN_MAP);
 
-    /*
-            if (mItemsAdded) {
-            // std::string jsonStr = toJsonStr();
-            ArduinoJson::JsonDocument doc;
-            ArduinoJson::JsonArray jarray = doc.to<ArduinoJson::JsonArray>();
-            toJson(jarray);
-            // conver to c_str()
-            char buff[1024*16] = {0};
-            ArduinoJson::serializeJson(doc, buff, sizeof(buff));
-            updateJs(buff);
-            mItemsAdded = false;
-        }
-        */
-
     ArduinoJson::JsonDocument doc;
     // ingest the JSON_SCREEN_MAP
     ArduinoJson::deserializeJson(doc, JSON_SCREEN_MAP);
 
-   /* "red_segment": Point.toJson(generate_red_points()),
-        "back_segment": Point.toJson(generate_black_points()),
-        "green_segment": Point.toJson(generate_green_points()),
-        "blue_segment": Point.toJson(generate_blue_points()),
-        */
     
     auto map = doc["map"];
     const char* segments[] = {"red_segment", "back_segment", "green_segment", "blue_segment"};
@@ -230,21 +211,12 @@ void setup() {
     CRGB* green_leds = leds[GreenStrip];
     CRGB* blue_leds = leds[BlueStrip];
 
-
     CLEDController* controllers[4];
     // Initialize FastLED strips
     controllers[RedStrip] = &FastLED.addLeds<WS2812, 1>(red_leds, lengths[RedStrip]);
     controllers[BlackStrip] = &FastLED.addLeds<WS2812, 2>(black_leds, lengths[BlackStrip]);
     controllers[GreenStrip] = &FastLED.addLeds<WS2812, 3>(green_leds, lengths[GreenStrip]);
     controllers[BlueStrip] = &FastLED.addLeds<WS2812, 4>(blue_leds, lengths[BlueStrip]);
-    
-    #if 0
-    controllers[0]->setCanvasUi(make_screen_map(1, 0, lengths[0]));
-    controllers[1]->setCanvasUi(make_screen_map(0, 1, lengths[1]));
-    controllers[2]->setCanvasUi(make_screen_map(-1, 0, lengths[2]));
-    controllers[3]->setCanvasUi(make_screen_map(0, -1, lengths[3]));
-    #endif
-
     controllers[RedStrip]->setCanvasUi(red_screenmap);
     controllers[BlackStrip]->setCanvasUi(black_screenmap);
     controllers[GreenStrip]->setCanvasUi(green_screenmap);
@@ -264,7 +236,7 @@ void loop() {
     for (int strip = 0; strip < 40; strip++) {
         for (int led = 0; led < 14; led++) {
             for (int i = 0; i < 3; i++) {
-                ledColors[strip][led][i] *= decay;
+                ledColors[strip][led][i] *= decay.value();
             }
         }
     }
@@ -273,21 +245,6 @@ void loop() {
         ripples[i].advance(ledColors);
     }
 
-#if defined(USING_DOTSTAR)
-    for (int segment = 0; segment < 40; segment++) {
-        for (int fromBottom = 0; fromBottom < 14; fromBottom++) {
-            int strip = ledAssignments[segment][0];
-            int led = round(fmap(fromBottom, 0, 13, ledAssignments[segment][2],
-                                 ledAssignments[segment][1]));
-            strips[strip].setPixelColor(led, ledColors[segment][fromBottom][0],
-                                        ledColors[segment][fromBottom][1],
-                                        ledColors[segment][fromBottom][2]);
-        }
-    }
-
-    for (int i = 0; i < 4; i++)
-        strips[i].show();
-#else
     for (int segment = 0; segment < 40; segment++) {
         for (int fromBottom = 0; fromBottom < 14; fromBottom++) {
             int strip = ledAssignments[segment][0];
@@ -300,7 +257,7 @@ void loop() {
     }
 
     FastLED.show();
-#endif
+
 
     if (millis() - lastHeartbeat >= autoPulseTimeout) {
         // When biometric data is unavailable, visualize at random
