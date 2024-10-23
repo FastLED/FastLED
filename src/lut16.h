@@ -9,8 +9,8 @@ template<typename T>
 struct pair_xy {
     T x = 0;
     T y = 0;
-    pair_xy() = default;
-    pair_xy(T x, T y) : x(x), y(y) {}
+    constexpr pair_xy() = default;
+    constexpr pair_xy(T x, T y) : x(x), y(y) {}
 };
 
 using pair_xy_float = pair_xy<float>;  // It's just easier if we allow negative values.

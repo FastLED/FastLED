@@ -96,7 +96,7 @@ class ScreenMap {
 
   private:
     static const pair_xy_float &empty() {
-        static const pair_xy_float s_empty = {0, 0};
+        static const pair_xy_float s_empty = pair_xy_float(0, 0);
         return s_empty;
     }
     uint32_t length = 0;

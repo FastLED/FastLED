@@ -25,7 +25,7 @@ void ScreenMap::ParseJson(const char *jsonStrOfMapFile,
         auto y = segment["y"];
         auto n = x.size();
         ScreenMap segment_map(n);
-        for (int j = 0; j < n; j++) {
+        for (uint16_t j = 0; j < n; j++) {
             segment_map.set(j, pair_xy_float{x[j], y[j]});
         }
         segmentMaps->insert(kv.key().c_str(), segment_map);
