@@ -164,37 +164,37 @@ class GraphicsManager {
         }
 
         const screenMap = frameData.screenMap;
-        const firstFrame = frameData[0];
-        const data = firstFrame.pixel_data;
-        const strip_id = firstFrame.strip_id;
 
-        if (!strip_id in screenMap.strips) {
-            console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
-            return;
+
+        for (let i = 0; i < frameData.length; i++) {
+            const strip = frameData[i];
+            const data = strip.pixel_data;
+            const strip_id = strip.strip_id;
+            if (!strip_id in screenMap.strips) {
+                console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
+                return;
+            }
+            const stripData = screenMap.strips[strip_id];
+            const pixelCount = data.length / 3;
+            const map = stripData.map;
+            const min_x = screenMap.absMin[0];
+            const min_y = screenMap.absMin[1];
+            //console.log("Writing data to canvas");
+            for (let i = 0; i < pixelCount; i++) {
+                let [x, y] = map[i];
+                x -= min_x;
+                y -= min_y;
+                //console.log(x, y);
+                const srcIndex = i * 3;
+                const destIndex = (y * this.texWidth + x) * 3;
+                const r = data[srcIndex];
+                const g = data[srcIndex + 1];
+                const b = data[srcIndex + 2];
+                this.texData[destIndex] = r;
+                this.texData[destIndex + 1] = g;
+                this.texData[destIndex + 2] = b;
+            }
         }
-
-        const stripData = screenMap.strips[strip_id];
-        const pixelCount = data.length / 3;
-        const map = stripData.map;
-        const min_x = screenMap.absMin[0];
-        const min_y = screenMap.absMin[1];
-
-        //console.log("Writing data to canvas");
-        for (let i = 0; i < pixelCount; i++) {
-            let [x, y] = map[i];
-            x -= min_x;
-            y -= min_y;
-            //console.log(x, y);
-            const srcIndex = i * 3;
-            const destIndex = (y * this.texWidth + x) * 3;
-            const r = data[srcIndex];
-            const g = data[srcIndex + 1];
-            const b = data[srcIndex + 2];
-            this.texData[destIndex] = r;
-            this.texData[destIndex + 1] = g;
-            this.texData[destIndex + 2] = b;
-        }
-        
 
         // Update texture with new data
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
