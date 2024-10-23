@@ -1,4 +1,5 @@
-#pragma once
+
+#ifdef __EMSCRIPTEN__
 
 #include <memory>
 
@@ -78,3 +79,5 @@ __attribute__((constructor))
 void __init_ActiveStripData() {
     ActiveStripData::Instance();
 }
+
+#endif
