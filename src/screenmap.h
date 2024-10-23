@@ -13,9 +13,14 @@
 #include "lut16.h"
 
 
-// ScreenMap holds either a function or a look up table to map x coordinates to a 1D index.
+// ScreenMap screen map maps strip indexes to x,y coordinates for a ui
+// canvas in float format.
+// This class is cheap to copy as it uses smart pointers for shared data.
 class ScreenMap {
 public:
+
+    ScreenMap() = default;
+
     // is_reverse is false by default for linear layout
     ScreenMap(uint32_t length): length(length) {
         mLookUpTable = LUTXYFLOATPtr::New(length);

@@ -194,55 +194,35 @@ void setup() {
         */
     
     auto map = doc["map"];
-    auto red_segment = map["red_segment"];
-    auto back_segment = map["back_segment"];
-    auto green_segment = map["green_segment"];
-    auto blue_segment = map["blue_segment"];
+    const char* segments[] = {"red_segment", "back_segment", "green_segment", "blue_segment"};
+    ScreenMap screenmaps[4];
 
-    std::vector<pair_xy_float> red_map;
-    std::vector<pair_xy_float> black_map;
-    std::vector<pair_xy_float> green_map;
-    std::vector<pair_xy_float> blue_map;
-
-    auto red_x = red_segment["x"];
-    auto red_y = red_segment["y"];
-
-    for (int i = 0; i < red_x.size(); i++) {
-        red_map.push_back(pair_xy_float{red_x[i], red_y[i]});
-    }
-    auto black_x = back_segment["x"];
-    auto black_y = back_segment["y"];
-    for (int i = 0; i < black_x.size(); i++) {
-        black_map.push_back(pair_xy_float{black_x[i], black_y[i]});
-    }
-    auto green_x = green_segment["x"];
-    auto green_y = green_segment["y"];
-    for (int i = 0; i < green_x.size(); i++) {
-        green_map.push_back(pair_xy_float{green_x[i], green_y[i]});
-    }
-    auto blue_x = blue_segment["x"];
-    auto blue_y = blue_segment["y"];
-    for (int i = 0; i < blue_x.size(); i++) {
-        blue_map.push_back(pair_xy_float{blue_x[i], blue_y[i]});
+    for (int i = 0; i < 4; i++) {
+        auto segment = map[segments[i]];
+        auto x = segment["x"];
+        auto y = segment["y"];
+        
+        std::vector<pair_xy_float> segment_map;
+        for (int j = 0; j < x.size(); j++) {
+            segment_map.push_back(pair_xy_float{x[j], y[j]});
+        }
+        
+        screenmaps[i] = ScreenMap(segment_map.data(), segment_map.size());
     }
 
-    ScreenMap red_screenmap = ScreenMap(red_map.data(), red_map.size());
-    ScreenMap black_screenmap = ScreenMap(black_map.data(), black_map.size());
-    ScreenMap green_screenmap = ScreenMap(green_map.data(), green_map.size());
-    ScreenMap blue_screenmap = ScreenMap(blue_map.data(), blue_map.size());
+    ScreenMap& red_screenmap = screenmaps[0];
+    ScreenMap& black_screenmap = screenmaps[1];
+    ScreenMap& green_screenmap = screenmaps[2];
+    ScreenMap& blue_screenmap = screenmaps[3];
 
 
-    Serial.println("\nRED SCREENMAP");
-    Serial.println(red_screenmap.getLength());
-
-    Serial.println("\nBLACK SCREENMAP");
-    Serial.println(black_screenmap.getLength());
-
-    Serial.println("\nGREEN SCREENMAP");
-    Serial.println(green_screenmap.getLength());
-
-    Serial.println("\nBLUE SCREENMAP");
-    Serial.println(blue_screenmap.getLength());
+    const char* colors[] = {"RED", "BLACK", "GREEN", "BLUE"};
+    for (int i = 0; i < 4; i++) {
+        Serial.print("\n");
+        Serial.print(colors[i]);
+        Serial.println(" SCREENMAP");
+        Serial.println(screenmaps[i].getLength());
+    }
     Serial.println("");
 
     CRGB* red_leds = leds[RedStrip];
