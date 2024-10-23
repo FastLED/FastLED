@@ -4,6 +4,15 @@
 
 #pragma once
 
+// constrict the ArduinoJson library to only the features we need. Otherwise
+// we get compiler errors on the avr platforms and others.
+#define ARDUINOJSON_ENABLE_STD_STREAM 0
+#define ARDUINOJSON_ENABLE_STRING_VIEW 0
+#define ARDUINOJSON_ENABLE_STD_STRING 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
+
 #ifdef __cplusplus
 
 #if __cplusplus < 201103L && (!defined(_MSC_VER) || _MSC_VER < 1910)
