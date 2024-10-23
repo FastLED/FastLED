@@ -28,6 +28,11 @@ class Point:
     x: float
     y: float
 
+    def __repr__(self) -> str:
+        x_rounded = round(self.x, 2)
+        y_rounded = round(self.y, 2)
+        return f"({x_rounded}, {y_rounded})"
+
 
 def next_point(pos: Point, angle: HexagonAngle, space: float) -> Point:
     degrees = angle.value
@@ -41,23 +46,15 @@ def gen_points(
     input: list[HexagonAngle], leds_per_strip: int, startPos: Point
 ) -> list[Point]:
     points: list[Point] = []
-    curr_point: Point = Point(startPos.x, startPos.y)
+
     points.append(curr_point)
     for angle in input:
+        curr_point: Point = Point(startPos.x, startPos.y)
         for _ in range(leds_per_strip - 1):
             curr_point = next_point(curr_point, angle, SPACE_PER_LED)
             points.append(curr_point)
     return points
 
-def remove_duplicates(points: list[Point]) -> list[Point]:
-    unique_points = []
-    seen = set()
-    for point in points:
-        rounded_point = (round(point.x, 2), round(point.y, 2))
-        if rounded_point not in seen:
-            seen.add(rounded_point)
-            unique_points.append(Point(round(point.x, 2), round(point.y, 2)))
-    return unique_points
 
 
 def main() -> None:
@@ -71,9 +68,35 @@ def main() -> None:
         HexagonAngle.LEFT_UP,
     ]
     points = gen_points(hexagon_angles, LED_PER_STRIP, startPos)
-    unique_points = remove_duplicates(points)
-    print(unique_points)
 
+    print(points)
+
+
+
+def simple_test() -> None:
+    startPos = Point(0, 0)
+    hexagon_angles = [
+        HexagonAngle.UP,
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, startPos)
+    print(points)
+    assert len(points) == LED_PER_STRIP
+
+def two_angle_test() -> None:
+    startPos = Point(0, 0)
+    hexagon_angles = [
+        HexagonAngle.UP,
+        HexagonAngle.RIGHT_UP,
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, startPos)
+    print(points)
+    assert len(points) == LED_PER_STRIP * 2, f"Expected {LED_PER_STRIP * 2} points, got {len(points)} points"
+
+
+
+def unit_test() -> None:
+    simple_test()
+    two_angle_test()
 
 if __name__ == "__main__":
-    main()
+    unit_test()
