@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+import json
 
 
 from math import pi, cos, sin
@@ -28,6 +29,19 @@ class Point:
     x: float
     y: float
 
+    @staticmethod
+    def toJson(points: list["Point"]) -> list[dict]:
+        def _toJson(p: "Point") -> dict:
+            # return {"x": p.x, "y": p.y}
+            # format at 4 decimal places
+            x_rounded = round(p.x, 4)
+            y_rounded = round(p.y, 4)
+            return [ x_rounded, y_rounded]
+        return [_toJson(p) for p in points]
+
+    def copy(self) -> "Point":
+        return Point(self.x, self.y)
+
     def __repr__(self) -> str:
         x_rounded = round(self.x, 2)
         y_rounded = round(self.y, 2)
@@ -43,11 +57,13 @@ def next_point(pos: Point, angle: HexagonAngle, space: float) -> Point:
 
 
 def gen_points(
-    input: list[HexagonAngle], leds_per_strip: int, startPos: Point
+    input: list[HexagonAngle], leds_per_strip: int, startPos: Point,
+    exclude: list[int] | None = None
 ) -> list[Point]:
     points: list[Point] = []
     if (not input) or (not leds_per_strip):
         return points
+    exclude = exclude or []
     # Start FSM. Start pointer get's put into the accumulator.
     curr_point: Point = Point(startPos.x, startPos.y)
     points.append(curr_point)
@@ -57,7 +73,8 @@ def gen_points(
         last_angle = angle
         for v in values:
             last_angle = angle
-            curr_point = next_point(curr_point, angle, SPACE_PER_LED)
+            if i not in exclude:
+                curr_point = next_point(curr_point, angle, SPACE_PER_LED)
             points.append(curr_point)
         if i == len(input) - 1:
             break
@@ -161,6 +178,8 @@ def generate_red_points() -> list[Point]:
         HexagonAngle.UP,
         HexagonAngle.LEFT_UP
     ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point, exclude=[4])
+    return points
 
 
 
@@ -168,7 +187,14 @@ def generate_red_points() -> list[Point]:
 def unit_test() -> None:
     #simple_test()
     #two_angle_test()
-    find_red_anchor_point()
+    out = {}
+    map = out.setdefault("map", {})
+    data = map.setdefault("data", {})
+    data.update({
+        "red_segment": Point.toJson(generate_red_points())
+    })
+    print(json.dumps(out, indent=2))
+
 
 if __name__ == "__main__":
     unit_test()
