@@ -440,7 +440,9 @@ class UiManager {
     // screenMap contains data mapping a strip id to a screen map,
     // transforming led strip data pixel with an index
     // to a screen pixel with xy.
-    let screenMap = {};
+    let screenMap = {
+        strips: {},
+    };
     let canvasId;
     let uiControlsId;
     let outputId;
@@ -483,10 +485,6 @@ class UiManager {
                 throw new Error("strip_id is required for set_canvas_map event");
             }
 
-            if (isUndefined(screenMap.strips)) {
-                screenMap.strips = {};
-            }
-
             screenMap.strips[stripId] = {
                 map: map,
                 min: min,
@@ -517,6 +515,7 @@ class UiManager {
             screenMap.absMax = absMax;
             width = absMax[0] - absMin[0] + 1;
             height = absMax[1] - absMin[1] + 1;
+            console.log("canvas updated with witdt and height", width, height);
             // now update the canvas size.
             const canvas = document.getElementById(canvasId);
             canvas.width = width;
