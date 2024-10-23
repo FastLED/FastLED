@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <random>
 #include <algorithm>
+#include <string>
 
 using std::min;
 using std::max;
@@ -32,17 +33,32 @@ struct PrintHelper {};
         static void println(type val) { printf(format, val); printf("\n"); } \
     }
 
-DEFINE_PRINT_HELPER(long, "%ld");
-DEFINE_PRINT_HELPER(unsigned long, "%lu");
-DEFINE_PRINT_HELPER(unsigned int, "%u");
+#define DEFINE_PRINT_HELPER_EXT(type, format, val_opp) \
+    template<> \
+    struct PrintHelper<type> { \
+        static void print(type val) { printf(format, val_opp); } \
+        static void println(type val) { printf(format, val_opp); printf("\n"); } \
+    }
+
+// gcc push options
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+
 DEFINE_PRINT_HELPER(double, "%f");
 DEFINE_PRINT_HELPER(float, "%f");
 DEFINE_PRINT_HELPER(const char *, "%s");
-DEFINE_PRINT_HELPER(char, "%c");
-DEFINE_PRINT_HELPER(int, "%d");
-DEFINE_PRINT_HELPER(unsigned char, "%u");
+DEFINE_PRINT_HELPER(uint64_t, "%lu");
+DEFINE_PRINT_HELPER(uint32_t, "%u");
+DEFINE_PRINT_HELPER(uint16_t, "%u");
+DEFINE_PRINT_HELPER(uint8_t, "%u");
+DEFINE_PRINT_HELPER(int64_t, "%ld");
+DEFINE_PRINT_HELPER(int32_t, "%d");
+DEFINE_PRINT_HELPER(int16_t, "%d");
+DEFINE_PRINT_HELPER(int8_t, "%d");
+DEFINE_PRINT_HELPER_EXT(std::string, "%s", val.c_str());
 
-
+// gcc pop options
+#pragma GCC diagnostic pop
 
 struct SerialEmulation {
     void begin(int) {}

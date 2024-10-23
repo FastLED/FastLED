@@ -67,6 +67,20 @@ public:
         return false;
     }
 
+    Value get(const Key& key, bool* has=nullptr) const {
+        const_iterator it = find(key);
+        if (it != end()) {
+            if (has) {
+                *has = true;
+            }
+            return it->second;
+        }
+        if (has) {
+            *has = false;
+        }
+        return Value();
+    }
+
     bool insert(const Key& key, const Value& value) {
         iterator it = find(key);
         if (it == end()) {

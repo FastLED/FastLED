@@ -17,6 +17,7 @@
 #include "math_macros.h"
 #include "third_party/arduinojson/json.h"
 #include "ui.h"
+#include "fixed_map.h"
 
 #include "screenmap.json.h"
 
@@ -161,6 +162,23 @@ ScreenMap make_screen_map(int xstep, int ystep, int num) {
     return ScreenMap(map.data(), map.size());
 }
 
+
+void jsonParseSegmentMaps(const char* jsonStrOfMapFile, FixedMap<std::string, ScreenMap, 16>* segmentMaps) {
+    ArduinoJson::JsonDocument doc;
+    ArduinoJson::deserializeJson(doc, jsonStrOfMapFile);
+    auto map = doc["map"];
+    for (auto kv : map.as<ArduinoJson::JsonObject>()) {
+        auto segment = kv.value();
+        auto x = segment["x"];
+        auto y = segment["y"];
+        std::vector<pair_xy_float> segment_map;
+        for (int j = 0; j < x.size(); j++) {
+            segment_map.push_back(pair_xy_float{x[j], y[j]});
+        }
+        segmentMaps->insert(kv.key().c_str(), ScreenMap(segment_map.data(), segment_map.size()));
+    }
+}
+
 void setup() {
     Serial.begin(115200);
 
@@ -169,42 +187,31 @@ void setup() {
     Serial.println("JSON SCREENMAP");
     Serial.println(JSON_SCREEN_MAP);
 
-    ArduinoJson::JsonDocument doc;
-    // ingest the JSON_SCREEN_MAP
-    ArduinoJson::deserializeJson(doc, JSON_SCREEN_MAP);
+    FixedMap<std::string, ScreenMap, 16> segmentMaps;
+    jsonParseSegmentMaps(JSON_SCREEN_MAP, &segmentMaps);
 
-    
-    auto map = doc["map"];
-    const char* segments[] = {"red_segment", "back_segment", "green_segment", "blue_segment"};
-    ScreenMap screenmaps[4];
+    printf("Parsed %d segment maps\n", int(segmentMaps.size()));
+    for (auto kv : segmentMaps) {
+        Serial.print(kv.first);
+        Serial.print(" ");
+        Serial.println(kv.second.getLength());
+    } 
 
-    for (int i = 0; i < 4; i++) {
-        auto segment = map[segments[i]];
-        auto x = segment["x"];
-        auto y = segment["y"];
-        
-        std::vector<pair_xy_float> segment_map;
-        for (int j = 0; j < x.size(); j++) {
-            segment_map.push_back(pair_xy_float{x[j], y[j]});
-        }
-        
-        screenmaps[i] = ScreenMap(segment_map.data(), segment_map.size());
+
+    // ScreenMap screenmaps[4];
+    ScreenMap red, black, green, blue;
+    bool ok = true;
+    ok = segmentMaps.get("red_segment", &red) && ok;
+    ok = segmentMaps.get("back_segment", &black) && ok;
+    ok = segmentMaps.get("green_segment", &green) && ok;
+    ok = segmentMaps.get("blue_segment", &blue) && ok;
+    if (!ok) {
+        Serial.println("Failed to get all segment maps");
+        return;
     }
 
-    ScreenMap& red_screenmap = screenmaps[0];
-    ScreenMap& black_screenmap = screenmaps[1];
-    ScreenMap& green_screenmap = screenmaps[2];
-    ScreenMap& blue_screenmap = screenmaps[3];
 
 
-    const char* colors[] = {"RED", "BLACK", "GREEN", "BLUE"};
-    for (int i = 0; i < 4; i++) {
-        Serial.print("\n");
-        Serial.print(colors[i]);
-        Serial.println(" SCREENMAP");
-        Serial.println(screenmaps[i].getLength());
-    }
-    Serial.println("");
 
     CRGB* red_leds = leds[RedStrip];
     CRGB* black_leds = leds[BlackStrip];
@@ -217,10 +224,10 @@ void setup() {
     controllers[BlackStrip] = &FastLED.addLeds<WS2812, 2>(black_leds, lengths[BlackStrip]);
     controllers[GreenStrip] = &FastLED.addLeds<WS2812, 3>(green_leds, lengths[GreenStrip]);
     controllers[BlueStrip] = &FastLED.addLeds<WS2812, 4>(blue_leds, lengths[BlueStrip]);
-    controllers[RedStrip]->setCanvasUi(red_screenmap);
-    controllers[BlackStrip]->setCanvasUi(black_screenmap);
-    controllers[GreenStrip]->setCanvasUi(green_screenmap);
-    controllers[BlueStrip]->setCanvasUi(blue_screenmap);
+    controllers[RedStrip]->setCanvasUi(red);
+    controllers[BlackStrip]->setCanvasUi(black);
+    controllers[GreenStrip]->setCanvasUi(green);
+    controllers[BlueStrip]->setCanvasUi(blue);
 
 
     FastLED.show();
