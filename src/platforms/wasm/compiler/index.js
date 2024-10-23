@@ -445,7 +445,8 @@ class UiManager {
 
 
 (function () {
-    const FRAME_RATE = 60; // 60 FPS
+    const DEFAULT_FRAME_RATE_60FPS = 60; // 60 FPS
+    let frameRate = DEFAULT_FRAME_RATE_60FPS;
     let receivedCanvas = false;
     // screenMap contains data mapping a strip id to a screen map,
     // transforming led strip data pixel with an index
@@ -583,12 +584,12 @@ class UiManager {
     };
 
     // Function to call the setup and loop functions
-    function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance) {
+    function runFastLED(extern_setup, extern_loop, DEFAULT_FRAME_RATE_60FPS, moduleInstance) {
         console.log("Calling setup function...");
         extern_setup();
 
         console.log("Starting loop...");
-        const frameInterval = 1000 / frame_rate;
+        const frameInterval = 1000 / DEFAULT_FRAME_RATE_60FPS;
         let lastFrameTime = 0;
 
         // Executes every frame but only runs the loop function at the specified frame rate
@@ -618,16 +619,17 @@ class UiManager {
         graphicsManager.updateCanvas(frameData);
     }
 
+
     // Ensure we wait for the module to load
     const onModuleLoaded = async () => {
         // Unpack the module functions and send them to the runFastLED function
-        function __runFastLED(moduleInstance, frame_rate) {
+        function __runFastLED(moduleInstance, DEFAULT_FRAME_RATE_60FPS) {
             const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
             if (!exports_exist) {
                 console.error("FastLED setup or loop functions are not available.");
                 return;
             }
-            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frame_rate, moduleInstance);
+            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, DEFAULT_FRAME_RATE_60FPS, moduleInstance);
         }
         var fastledLoader = globalThis.fastled;
         try {
@@ -635,7 +637,7 @@ class UiManager {
                 // Load the module
                 fastledLoader().then(instance => {
                     console.log("Module loaded, running FastLED...");
-                    __runFastLED(instance, FRAME_RATE);
+                    __runFastLED(instance, DEFAULT_FRAME_RATE_60FPS);
                 }).catch(err => {
                     console.error("Error loading fastled as a module:", err);
                 });
@@ -650,6 +652,7 @@ class UiManager {
         canvasId = options.canvasId;
         uiControlsId = options.uiControlsId;
         outputId = options.printId;
+        frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
         uiManager = new UiManager(uiControlsId);
         await onModuleLoaded();
     }
