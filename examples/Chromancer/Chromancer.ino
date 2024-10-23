@@ -21,7 +21,7 @@
 #include "fixed_map.h"
 
 #include "screenmap.json.h"
-#include "wstring.h"
+#include "str.h"
 
 // Strips are different lengths because I am a dumb
 constexpr int lengths[] = {
@@ -165,21 +165,6 @@ ScreenMap make_screen_map(int xstep, int ystep, int num) {
 }
 
 
-void jsonParseSegmentMaps(const char* jsonStrOfMapFile, FixedMap<std::string, ScreenMap, 16>* segmentMaps) {
-    ArduinoJson::JsonDocument doc;
-    ArduinoJson::deserializeJson(doc, jsonStrOfMapFile);
-    auto map = doc["map"];
-    for (auto kv : map.as<ArduinoJson::JsonObject>()) {
-        auto segment = kv.value();
-        auto x = segment["x"];
-        auto y = segment["y"];
-        std::vector<pair_xy_float> segment_map;
-        for (int j = 0; j < x.size(); j++) {
-            segment_map.push_back(pair_xy_float{x[j], y[j]});
-        }
-        segmentMaps->insert(kv.key().c_str(), ScreenMap(segment_map.data(), segment_map.size()));
-    }
-}
 
 void setup() {
     Serial.begin(115200);
@@ -189,8 +174,8 @@ void setup() {
     Serial.println("JSON SCREENMAP");
     Serial.println(JSON_SCREEN_MAP);
 
-    FixedMap<std::string, ScreenMap, 16> segmentMaps;
-    jsonParseSegmentMaps(JSON_SCREEN_MAP, &segmentMaps);
+    FixedMap<String, ScreenMap, 16> segmentMaps;
+    ScreenMap::ParseJson(JSON_SCREEN_MAP, &segmentMaps);
 
     printf("Parsed %d segment maps\n", int(segmentMaps.size()));
     for (auto kv : segmentMaps) {

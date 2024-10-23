@@ -58,7 +58,7 @@
 #define strcasecmp_P strcasecmp
 #endif
 
-#endif
+#endif  // !defined(__AVR__) && !defined(TEENSYDUINO)
 
 #ifdef TEENSYDUINO
 #define NEEDS_CLIB_STR 1
@@ -92,6 +92,11 @@ inline char* ltoa(long value, char* result, int base) {
 	sprintf(result, "%ld", value);
 	return result;
 }
+
+inline char* itoa(int value, char* result, int base) {
+	sprintf(result, "%d", value);
+	return result;
+}
 #endif
 
 // END COMPATIBILITY SHIM
@@ -100,19 +105,8 @@ inline char* ltoa(long value, char* result, int base) {
 /*  Constructors                             */
 /*********************************************/
 
-String::String(const char *cstr)
-{
-	init();
-	if (cstr) copy(cstr, strlen(cstr));
-}
 
-String::String(const String &value)
-{
-	init();
-	*this = value;
-}
-
-String::String(const __FlashStringHelper *pstr)
+inline String::String(const __FlashStringHelper *pstr)
 {
 	init();
 	*this = pstr;

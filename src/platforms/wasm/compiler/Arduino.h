@@ -8,6 +8,7 @@
 #include <random>
 #include <algorithm>
 #include <string>
+#include "third_party/wstring/wstring.h"
 
 using std::min;
 using std::max;
@@ -56,6 +57,7 @@ DEFINE_PRINT_HELPER(int32_t, "%d");
 DEFINE_PRINT_HELPER(int16_t, "%d");
 DEFINE_PRINT_HELPER(int8_t, "%d");
 DEFINE_PRINT_HELPER_EXT(std::string, "%s", val.c_str());
+DEFINE_PRINT_HELPER_EXT(String, "%s", val.c_str());
 
 // gcc pop options
 #pragma GCC diagnostic pop

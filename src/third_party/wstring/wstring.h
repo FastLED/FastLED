@@ -25,6 +25,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <ctype.h>
 
 // if gcc has
@@ -40,7 +41,9 @@
 //     -std=c++0x
 
 class __FlashStringHelper;
+#ifndef F
 #define F(string_literal) (reinterpret_cast<const __FlashStringHelper *>(PSTR(string_literal)))
+#endif
 
 // An inherited class for holding the result of a concatenation.  These
 // result objects are assumed to be writable by subsequent concatenations.
@@ -61,8 +64,16 @@ public:
 	// if the initial value is null or invalid, or if memory allocation
 	// fails, the string will be marked as invalid (i.e. "if (s)" will
 	// be false).
-	String(const char *cstr = "");
-	String(const String &str);
+	String() { init(); }
+	String(const char *cstr) {
+		init();
+		if (cstr) copy(cstr, strlen(cstr));
+	}
+	String(const String &value)	{
+		init();
+		*this = value;
+	}
+
 	String(const __FlashStringHelper *str);
        #if __cplusplus >= 201103L || defined(__GXX_EXPERIMENTAL_CXX0X__)
 	String(String &&rval);
