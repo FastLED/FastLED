@@ -179,14 +179,14 @@ class GraphicsManager {
         const stripData = screenMap[strip_id];
         const pixelCount = data.length / 3;
         const map = stripData.map;
-
-        //console.log(stripData);
-        //console.log(map);
-        //console.log(stripData);
+        const min_x = stripData.min[0];
+        const min_y = stripData.min[1];
 
         //console.log("Writing data to canvas");
         for (let i = 0; i < pixelCount; i++) {
-            const [x, y] = map[i];
+            let [x, y] = map[i];
+            x -= min_x;
+            y -= min_y;
             //console.log(x, y);
             const srcIndex = i * 3;
             const destIndex = (y * this.texWidth + x) * 3;
@@ -485,17 +485,8 @@ class UiManager {
             if (isUndefined(stripId)) {
                 throw new Error("strip_id is required for set_canvas_map event");
             }
-            // now shift all points down by the min[0] and min[1] so that the min is 0,0
-            for (let i = 0; i < map.length; i++) {
-                map[i][0] -= min[0];
-                map[i][1] -= min[1];
-            }
-            max[0] = max[0] - min[0];
-            max[1] = max[1] - min[1];
-            min[0] = 0;
-            min[1] = 0;
-            width = max[0]+1;
-            height = max[1]+1;
+            width = (max[0] - min[0])+1;
+            height = (max[1] - min[1])+1;
             screenMap[stripId] = {
                 map: map,
                 min: min,
@@ -568,11 +559,6 @@ class UiManager {
         }
         requestAnimationFrame(runLoop);
     }
-
-
-
-
-
 
     function updateCanvas(frameData) {
         if (!graphicsManager) {
