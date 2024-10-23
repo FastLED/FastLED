@@ -177,24 +177,15 @@ void setup() {
     }
 
 
-
-
     CRGB* red_leds = leds[RedStrip];
     CRGB* black_leds = leds[BlackStrip];
     CRGB* green_leds = leds[GreenStrip];
     CRGB* blue_leds = leds[BlueStrip];
 
-    CLEDController* controllers[4];
-    // Initialize FastLED strips
-    controllers[RedStrip] = &FastLED.addLeds<WS2812, 1>(red_leds, lengths[RedStrip]);
-    controllers[BlackStrip] = &FastLED.addLeds<WS2812, 2>(black_leds, lengths[BlackStrip]);
-    controllers[GreenStrip] = &FastLED.addLeds<WS2812, 3>(green_leds, lengths[GreenStrip]);
-    controllers[BlueStrip] = &FastLED.addLeds<WS2812, 4>(blue_leds, lengths[BlueStrip]);
-    controllers[RedStrip]->setCanvasUi(red);
-    controllers[BlackStrip]->setCanvasUi(black);
-    controllers[GreenStrip]->setCanvasUi(green);
-    controllers[BlueStrip]->setCanvasUi(blue);
-
+    FastLED.addLeds<WS2812, 1>(red_leds, lengths[RedStrip]).setCanvasUi(red);
+    FastLED.addLeds<WS2812, 2>(black_leds, lengths[BlackStrip]).setCanvasUi(black);
+    FastLED.addLeds<WS2812, 3>(green_leds, lengths[GreenStrip]).setCanvasUi(green);
+    FastLED.addLeds<WS2812, 4>(blue_leds, lengths[BlueStrip]).setCanvasUi(blue);
 
     FastLED.show();
     net_init();
