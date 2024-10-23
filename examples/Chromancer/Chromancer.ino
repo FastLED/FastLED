@@ -1,5 +1,6 @@
 /*
    Original Source: https://github.com/ZackFreedman/Chromance
+   GaryWoo's Video: https://www.youtube.com/watch?v=-nSCtxa2Kp0
    Chromance wall hexagon source (emotion controlled w/ EmotiBit)
    Partially cribbed from the DotStar example
    I smooshed in the ESP32 BasicOTA sketch, too
@@ -20,6 +21,7 @@
 #include "fixed_map.h"
 
 #include "screenmap.json.h"
+#include "wstring.h"
 
 // Strips are different lengths because I am a dumb
 constexpr int lengths[] = {

@@ -23,8 +23,8 @@
 #include <string.h>  // ok include
 #include <stdio.h>  // ok include
 
-
-#ifndef __AVR__
+// BEGIN COMPATIBILITY SHIM
+#if  !defined(__AVR__) && !defined(TEENSYDUINO)
 #define PROGMEM
 #define PGM_P const char *
 #define PSTR(s) (s)
@@ -37,13 +37,39 @@
 #define pgm_read_word(addr) (*(const unsigned short *)(addr))
 #define pgm_read_dword(addr) (*(const unsigned long *)(addr))
 #define pgm_read_float(addr) (*(const float *)(addr))
+
+#ifndef memcpy_P
 #define memcpy_P memcpy
+#endif
+
+#ifndef memccpy_P
 #define memccpy_P memccpy
+#endif
+
+#ifndef memmem_P
 #define memcmp_P memcmp
+#endif
+
+#ifndef memmem_P
 #define memmem_P memmem
+#endif
+
+#ifndef strcasecmp_P
 #define strcasecmp_P strcasecmp
+#endif
+
+#endif
+
+#ifdef TEENSYDUINO
+#define NEEDS_CLIB_STR 1
+#elif defined(__AVR__)
+#define NEEDS_CLIB_STR 0
+#else
+#define NEEDS_CLIB_STR 1
+#endif
 
 
+#if NEEDS_CLIB_STR
 // Custom implementations for missing functions
 inline char* utoa(unsigned value, char* result, int base) {
 	sprintf(result, "%u", value);
@@ -62,7 +88,13 @@ inline char* dtostrf(double value, signed char width, unsigned char prec, char* 
     return result;
 }
 
+inline char* ltoa(long value, char* result, int base) {
+	sprintf(result, "%ld", value);
+	return result;
+}
 #endif
+
+// END COMPATIBILITY SHIM
 
 /*********************************************/
 /*  Constructors                             */
