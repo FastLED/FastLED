@@ -6,7 +6,8 @@ import json
 from math import pi, cos, sin
 
 LED_PER_STRIP = 14
-SPACE_PER_LED = 1.0  # Increased for better visibility
+SPACE_PER_LED = 2.0  # Increased for better visibility
+MIRROR_X = True  # Diagramed from the reverse side. Reverse the x-axis
 
 SMALLEST_ANGLE = 360 / 6
 
@@ -36,6 +37,8 @@ class Point:
         # round 
         x_values = [round(x, 4) for x in x_values]
         y_values = [round(y, 4) for y in y_values]
+        if MIRROR_X:
+            x_values = [-x for x in x_values]
 
         return {"x": x_values, "y": y_values}
 
