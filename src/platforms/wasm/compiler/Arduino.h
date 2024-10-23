@@ -8,7 +8,7 @@
 #include <random>
 #include <algorithm>
 #include <string>
-#include "third_party/wstring/wstring.h"
+#include "str.h"
 
 using std::min;
 using std::max;
