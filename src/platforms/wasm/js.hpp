@@ -168,14 +168,6 @@ inline void updateJs(const char* jsonStr) {
     }, jsonStr);
 }
 
-#define FASTLED_HAS_UI_BUTTON 1
-#define FASTLED_HAS_UI_SLIDER 1
-#define FASTLED_HAS_UI_CHECKBOX 1
-#define FASTLED_HAS_UI_NUMBER_FIELD 1
 
-typedef jsNumberField NumberField;
-typedef jsSlider Slider;
-typedef jsCheckbox Checkbox;
-typedef jsButton Button;
 
 FASTLED_NAMESPACE_END
