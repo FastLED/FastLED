@@ -37,7 +37,7 @@ class EngineEvents {
         virtual void onEndFrame() {}
         virtual void onStripAdded(CLEDController *strip, uint32_t num_leds) {}
         // Called to set the canvas for UI elements for a particular strip.
-        virtual void onCanvasUiSet(CLEDController *strip, const ScreenMap& xymap) {}
+        virtual void onCanvasUiSet(CLEDController *strip, const ScreenMap& screenmap) {}
         virtual void onPlatformPreLoop() {}  
         virtual void onPlatformPreLoop2() {}
     };

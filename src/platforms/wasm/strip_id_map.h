@@ -9,7 +9,6 @@
 #include "fixed_map.h"
 
 // Define a reasonable maximum number of strips
-#define MAX_STRIPS 64
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -18,6 +17,7 @@ extern uint16_t cled_contoller_size();
 
 class StripIdMap {
 public:
+    static const int MAX_STRIPS = 64;
     static int addOrGetId(CLEDController* owner) {
         StripIdMap& instance = Instance();
         int id;

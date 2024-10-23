@@ -48,10 +48,31 @@ inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap& screenmap) {
     jsSetCanvasSize(jsonBuffer.c_str(), jsonBuffer.size());
 }
 
-inline void jsOnFrame(ActiveStripData& active_strips) {
+inline void jsFillInMissingScreenMaps(ActiveStripData& active_strips) {
     const auto& info = active_strips.getData();
-    std::string json_str = active_strips.infoJsonString();
+    // check to see if we have any missing screenmaps.
+    for (const auto& [stripIndex, stripData] : info) {
+        const bool has_screen_map = active_strips.hasScreenMap(stripIndex);
+        if (!has_screen_map) {
+            printf("Missing screenmap for strip %d, assuming linear array.\n", stripIndex);
+            // okay now generate a screenmap for this strip, let's assume
+            // a linear strip with only one row.
+            const int pixel_count = stripData.size() / 3;
+            ScreenMap screenmap(pixel_count);
+            for (uint32_t i = 0; i < pixel_count; i++) {
+                screenmap.set(i, {static_cast<int16_t>(i), 0});
+            }
+            active_strips.updateScreenMap(stripIndex, screenmap);
+            // Fire off the event to the JavaScript side that we now have
+            // a screenmap for this strip.
+            jsSetCanvasSize(stripIndex, screenmap);
+        }
+    }
+}
 
+inline void jsOnFrame(ActiveStripData& active_strips) {
+    jsFillInMissingScreenMaps(active_strips);
+    std::string json_str = active_strips.infoJsonString();
     EM_ASM_({
         globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || function(frameInfo, callback) {
             console.log("Missing globalThis.FastLED_onFrame() function");

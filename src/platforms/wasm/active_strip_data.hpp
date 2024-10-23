@@ -27,6 +27,10 @@ void ActiveStripData::update(int id, uint32_t now, const uint8_t* pixel_data, si
     mStripMap.update(id, SliceUint8(pixel_data, size));
 }
 
+void ActiveStripData::updateScreenMap(int id, const ScreenMap& screenmap) {
+    mScreenMap.update(id, screenmap);
+}
+
 emscripten::val ActiveStripData::getPixelData_Uint8(int stripIndex) {
     // Efficient, zero copy conversion from internal data to JavaScript.
     SliceUint8 stripData;
