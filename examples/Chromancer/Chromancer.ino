@@ -1,4 +1,5 @@
 /*
+   Original Source: https://github.com/ZackFreedman/Chromance
    Chromance wall hexagon source (emotion controlled w/ EmotiBit)
    Partially cribbed from the DotStar example
    I smooshed in the ESP32 BasicOTA sketch, too
@@ -49,23 +50,6 @@ GPIO: 5 - Start: 406 - Length: 154
 //const int TOTAL_LEDS = lengths[0] + lengths[1] + lengths[2] + lengths[3];
 //CRGB led_all
 
-
-#ifdef __EMSCRIPTEN__
-
-// leds must all be all be one block (for now).
-const int TOTAL_LEDS = lengths[0] + lengths[1] + lengths[2] + lengths[3];
-CRGB leds_all[TOTAL_LEDS] = {};
-// now store the pointers in an array, because the algorihtm wants it.
-CRGB *leds[] = {
-  leds_all,
-  leds_all + lengths[0],
-  leds_all + lengths[0] + lengths[1],
-  leds_all + lengths[0] + lengths[1] + lengths[2]
-};
-
-
-#else
-
 // non emscripten uses separate arrays for each strip. Eventually emscripten
 // should support this as well but right now we don't
 CRGB leds0[lengths[0]] = {};
@@ -74,7 +58,6 @@ CRGB leds2[lengths[2]] = {};
 CRGB leds3[lengths[3]] = {};
 CRGB *leds[] = {leds0, leds1, leds2, leds3};
 
-#endif
 #endif
 
 byte ledColors[40][14][3]; // LED buffer - each ripple writes to this, then we
