@@ -179,8 +179,8 @@ class GraphicsManager {
         const stripData = screenMap[strip_id];
         const pixelCount = data.length / 3;
         const map = stripData.map;
-        const min_x = stripData.min[0];
-        const min_y = stripData.min[1];
+        const min_x = screenMap.absMin[0];
+        const min_y = screenMap.absMin[1];
 
         //console.log("Writing data to canvas");
         for (let i = 0; i < pixelCount; i++) {
@@ -485,13 +485,27 @@ class UiManager {
             if (isUndefined(stripId)) {
                 throw new Error("strip_id is required for set_canvas_map event");
             }
-            width = (max[0] - min[0])+1;
-            height = (max[1] - min[1])+1;
+
             screenMap[stripId] = {
                 map: map,
                 min: min,
                 max: max,
             };
+
+            // iterate through all the screenMaps and get the absolute min and max
+            let absMin = [Number.MAX_VALUE, Number.MAX_VALUE];
+            let absMax = [Number.MIN_VALUE, Number.MIN_VALUE];
+            for (const stripId in screenMap) {
+                const stripData = screenMap[stripId];
+                absMin[0] = Math.min(absMin[0], stripData.min[0]);
+                absMin[1] = Math.min(absMin[1], stripData.min[1]);
+                absMax[0] = Math.max(absMax[0], stripData.max[0]);
+                absMax[1] = Math.max(absMax[1], stripData.max[1]);
+            }
+            screenMap.absMin = absMin;
+            screenMap.absMax = absMax;
+            width = absMax[0] - absMin[0] + 1;
+            height = absMax[1] - absMin[1] + 1;
             // now update the canvas size.
             const canvas = document.getElementById(canvasId);
             canvas.width = width;
