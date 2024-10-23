@@ -56,11 +56,13 @@ void EngineEvents::_addListener(Listener* listener, int priority) {
     for (auto it = mListeners.begin(); it != mListeners.end(); ++it) {
         if (it->priority < priority) {
             // this is now the highest priority in this spot.
-            mListeners.insert(it, {listener, priority});
+            EngineEvents::Pair pair = EngineEvents::Pair(listener, priority);
+            mListeners.insert(it, pair);
             return;
         }
     }
-    mListeners.push_back({listener, priority});
+    EngineEvents::Pair pair = EngineEvents::Pair(listener, priority);
+    mListeners.push_back(pair);
 }
 
 void EngineEvents::_removeListener(Listener* listener) {
