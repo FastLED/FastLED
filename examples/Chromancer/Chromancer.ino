@@ -21,10 +21,17 @@
 
 // Strips are different lengths because I am a dumb
 constexpr int lengths[] = {
-  154,
-  168,
-  84,
-  154
+  154, // Black strip?
+  168, // Green strip?
+  84,  // Red strip
+  154  // Blue strip?
+};
+
+enum {
+    RedStrip = 2,
+    GreenStrip = 1,
+    BlueStrip = 3,
+    BlackStrip = 0
 };
 
 
@@ -57,7 +64,7 @@ GPIO: 5 - Start: 406 - Length: 154
 // should support this as well but right now we don't
 CRGB leds0[lengths[0]] = {};
 CRGB leds1[lengths[1]] = {};
-CRGB leds2[lengths[2]] = {};
+CRGB leds2[lengths[2]] = {}; // Red 
 CRGB leds3[lengths[3]] = {};
 CRGB *leds[] = {leds0, leds1, leds2, leds3};
 
@@ -238,19 +245,31 @@ void setup() {
     Serial.println(blue_screenmap.getLength());
     Serial.println("");
 
+    CRGB* red_leds = leds[RedStrip];
+    CRGB* black_leds = leds[BlackStrip];
+    CRGB* green_leds = leds[GreenStrip];
+    CRGB* blue_leds = leds[BlueStrip];
 
 
     CLEDController* controllers[4];
     // Initialize FastLED strips
-    controllers[0] = &FastLED.addLeds<WS2812, 1>(leds[0], lengths[0]);
-    controllers[1] = &FastLED.addLeds<WS2812, 2>(leds[1], lengths[1]);
-    controllers[2] = &FastLED.addLeds<WS2812, 3>(leds[2], lengths[2]);
-    controllers[3] = &FastLED.addLeds<WS2812, 4>(leds[3], lengths[3]);
+    controllers[RedStrip] = &FastLED.addLeds<WS2812, 1>(red_leds, lengths[RedStrip]);
+    controllers[BlackStrip] = &FastLED.addLeds<WS2812, 2>(black_leds, lengths[BlackStrip]);
+    controllers[GreenStrip] = &FastLED.addLeds<WS2812, 3>(green_leds, lengths[GreenStrip]);
+    controllers[BlueStrip] = &FastLED.addLeds<WS2812, 4>(blue_leds, lengths[BlueStrip]);
     
+    #if 0
     controllers[0]->setCanvasUi(make_screen_map(1, 0, lengths[0]));
     controllers[1]->setCanvasUi(make_screen_map(0, 1, lengths[1]));
     controllers[2]->setCanvasUi(make_screen_map(-1, 0, lengths[2]));
     controllers[3]->setCanvasUi(make_screen_map(0, -1, lengths[3]));
+    #endif
+
+    controllers[RedStrip]->setCanvasUi(red_screenmap);
+    controllers[BlackStrip]->setCanvasUi(black_screenmap);
+    controllers[GreenStrip]->setCanvasUi(green_screenmap);
+    controllers[BlueStrip]->setCanvasUi(blue_screenmap);
+
 
     FastLED.show();
     net_init();
