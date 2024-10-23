@@ -15,6 +15,7 @@
 #include "detail.h"
 #include "screenmap.h"
 #include "math_macros.h"
+#include "third_party/arduinojson/json.h"
 
 #include "screenmap.json.h"
 
@@ -157,6 +158,87 @@ void setup() {
     Serial.begin(115200);
 
     Serial.println("*** LET'S GOOOOO ***");
+
+    Serial.println("JSON SCREENMAP");
+    Serial.println(JSON_SCREEN_MAP);
+
+    /*
+            if (mItemsAdded) {
+            // std::string jsonStr = toJsonStr();
+            ArduinoJson::JsonDocument doc;
+            ArduinoJson::JsonArray jarray = doc.to<ArduinoJson::JsonArray>();
+            toJson(jarray);
+            // conver to c_str()
+            char buff[1024*16] = {0};
+            ArduinoJson::serializeJson(doc, buff, sizeof(buff));
+            updateJs(buff);
+            mItemsAdded = false;
+        }
+        */
+
+    ArduinoJson::JsonDocument doc;
+    // ingest the JSON_SCREEN_MAP
+    ArduinoJson::deserializeJson(doc, JSON_SCREEN_MAP);
+
+   /* "red_segment": Point.toJson(generate_red_points()),
+        "back_segment": Point.toJson(generate_black_points()),
+        "green_segment": Point.toJson(generate_green_points()),
+        "blue_segment": Point.toJson(generate_blue_points()),
+        */
+    
+    auto map = doc["map"];
+    auto red_segment = map["red_segment"];
+    auto back_segment = map["back_segment"];
+    auto green_segment = map["green_segment"];
+    auto blue_segment = map["blue_segment"];
+
+    std::vector<pair_xy16> red_map;
+    std::vector<pair_xy16> black_map;
+    std::vector<pair_xy16> green_map;
+    std::vector<pair_xy16> blue_map;
+
+    auto red_x = red_segment["x"];
+    auto red_y = red_segment["y"];
+
+    for (int i = 0; i < red_x.size(); i++) {
+        red_map.push_back(pair_xy16{red_x[i], red_y[i]});
+    }
+    auto black_x = back_segment["x"];
+    auto black_y = back_segment["y"];
+    for (int i = 0; i < black_x.size(); i++) {
+        black_map.push_back(pair_xy16{black_x[i], black_y[i]});
+    }
+    auto green_x = green_segment["x"];
+    auto green_y = green_segment["y"];
+    for (int i = 0; i < green_x.size(); i++) {
+        green_map.push_back(pair_xy16{green_x[i], green_y[i]});
+    }
+    auto blue_x = blue_segment["x"];
+    auto blue_y = blue_segment["y"];
+    for (int i = 0; i < blue_x.size(); i++) {
+        blue_map.push_back(pair_xy16{blue_x[i], blue_y[i]});
+    }
+
+    ScreenMap red_screenmap = ScreenMap(red_map.data(), red_map.size());
+    ScreenMap black_screenmap = ScreenMap(black_map.data(), black_map.size());
+    ScreenMap green_screenmap = ScreenMap(green_map.data(), green_map.size());
+    ScreenMap blue_screenmap = ScreenMap(blue_map.data(), blue_map.size());
+
+
+    Serial.println("\nRED SCREENMAP");
+    Serial.println(red_screenmap.getLength());
+
+    Serial.println("\nBLACK SCREENMAP");
+    Serial.println(black_screenmap.getLength());
+
+    Serial.println("\nGREEN SCREENMAP");
+    Serial.println(green_screenmap.getLength());
+
+    Serial.println("\nBLUE SCREENMAP");
+    Serial.println(blue_screenmap.getLength());
+    Serial.println("");
+
+
 
     CLEDController* controllers[4];
     // Initialize FastLED strips
