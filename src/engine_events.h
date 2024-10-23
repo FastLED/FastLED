@@ -43,9 +43,9 @@ class EngineEvents {
     };
     
 
-    static void addListener(Listener *listener) {
+    static void addListener(Listener *listener, int priority = 0) {
         #if FASTLED_HAS_ENGINE_EVENTS
-        EngineEvents::getInstance()->_addListener(listener);
+        EngineEvents::getInstance()->_addListener(listener, priority);
         #endif
     }
     
@@ -102,7 +102,7 @@ class EngineEvents {
 
   private:
     // Safe to add a listeners during a callback.
-    void _addListener(Listener *listener);
+    void _addListener(Listener *listener, int priority);
     // Safe to remove self during a callback.
     void _removeListener(Listener *listener);
     void _onBeginFrame();

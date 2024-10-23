@@ -42,7 +42,7 @@ void EngineEvents::_onPlatformPreLoop() {
     }
 }
 
-void EngineEvents::_addListener(Listener* listener) {
+void EngineEvents::_addListener(Listener* listener, int priority) {
     if (mListeners.has(listener)) {
         return;
     }

@@ -19,7 +19,7 @@
 #define LED_PIN 3
 #define BRIGHTNESS 96
 #define COLOR_ORDER GRB
-#define NUM_LEDS 3
+#define NUM_LEDS 256
 
 CRGB leds[NUM_LEDS];
 float to_rads(float degs) { return degs * PI / 180.0; }
@@ -37,7 +37,7 @@ void make_map(int stepx, int stepy, int num, std::vector<pair_xy16>* _map) {
 
 void setup() {
     for (CRGB& c : leds) {
-        c = CRGB::White;
+        c = CRGB::Blue;
     }
     FastLED.setBrightness(255);
     std::vector<pair_xy16> map;
@@ -52,7 +52,8 @@ void setup() {
 
     // print out 
 
-    FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
+        .setCanvasUi(screenmap);
 }
 
 void loop() {

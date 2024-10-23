@@ -60,6 +60,10 @@ public:
         return mScreenMap.has(id);
     }
 
+    const bool getScreenMapCounter(int id, int* counter) const {
+        return mScreenMapChanged.get(id, counter);
+    }
+
 private:
     friend class Singleton<ActiveStripData>;
     ActiveStripData() {
@@ -69,4 +73,5 @@ private:
 
     StripDataMap mStripMap;
     ScreenMapMap mScreenMap;
+    ScreenMapChanged mScreenMapChanged;
 };

@@ -16,6 +16,7 @@
 #include "fixed_map.h"
 #include "js.h"
 #include "namespace.h"
+#include <stdio.h>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -29,6 +30,15 @@ void ActiveStripData::update(int id, uint32_t now, const uint8_t* pixel_data, si
 
 void ActiveStripData::updateScreenMap(int id, const ScreenMap& screenmap) {
     mScreenMap.update(id, screenmap);
+    int counter = 0;
+    bool ok = mScreenMapChanged.get(id, &counter);
+    if (!ok) {
+        printf("Failed to get screen map changed counter for strip %d\n", id);
+        return;
+    }
+    counter++;
+    mScreenMapChanged.update(id, counter);
+    printf("Updated screen map for strip %d\n", id);
 }
 
 emscripten::val ActiveStripData::getPixelData_Uint8(int stripIndex) {
@@ -45,6 +55,7 @@ emscripten::val ActiveStripData::getPixelData_Uint8(int stripIndex) {
 }
 
 std::string ActiveStripData::infoJsonString() {
+    auto& instance = Singleton<ActiveStripData>::instance();
     ArduinoJson::JsonDocument doc;
     auto array = doc.to<ArduinoJson::JsonArray>();
 
@@ -52,6 +63,9 @@ std::string ActiveStripData::infoJsonString() {
         auto obj = array.add<ArduinoJson::JsonObject>();
         obj["strip_id"] = stripIndex;
         obj["type"] = "r8g8b8";
+        int counter = -1;
+        instance.getScreenMapCounter(stripIndex, &counter);
+        obj["map_changed_counter"] = counter;
     }
 
     std::string jsonBuffer;
