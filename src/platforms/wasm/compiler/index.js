@@ -18,6 +18,11 @@ class GraphicsManager {
     }
 
     createShaders() {
+        const fragmentShaderId = 'fastled_FragmentShader';
+        const vertexShaderId = 'fastled_vertexShader';
+        if (document.getElementById(fragmentShaderId) && document.getElementById(vertexShaderId)) {
+            return;
+        }
         const vertexShaderStr = `
         attribute vec2 a_position;
         attribute vec2 a_texCoord;
@@ -38,8 +43,8 @@ class GraphicsManager {
         `;
         const fragmentShader = document.createElement('script');
         const vertexShader = document.createElement('script');
-        fragmentShader.id = 'fastled_FragmentShader';
-        vertexShader.id = 'fastled_vertexShader';
+        fragmentShader.id = fragmentShaderId;
+        vertexShader.id = vertexShaderId;
         fragmentShader.type = 'x-shader/x-fragment';
         vertexShader.type = 'x-shader/x-vertex';
         fragmentShader.text = fragmentShaderStr;
@@ -47,6 +52,17 @@ class GraphicsManager {
         document.head.appendChild(fragmentShader);
         document.head.appendChild(vertexShader);
     }
+
+    reset() {
+        if (this.gl) {
+            this.gl.deleteBuffer(this.positionBuffer);
+            this.gl.deleteBuffer(this.texCoordBuffer);
+            this.gl.deleteTexture(this.texture);
+            this.gl.deleteProgram(this.program);
+        }
+        this.gl = null;
+    }
+
 
     initWebGL() {
         this.createShaders();
@@ -111,12 +127,20 @@ class GraphicsManager {
             console.warn("Received empty frame data, skipping update");
             return;
         }
+        const screenMap = frameData.screenMap;
 
         const firstFrame = frameData[0];
         const data = firstFrame.pixel_data;
         const strip_id = firstFrame.strip_id;
 
         if (!this.gl) this.initWebGL();
+
+        // console.log(screenMap);
+
+        if (!strip_id in screenMap) {
+            console.error(`No screen map found for strip ID ${strip_id}`);
+            return;
+        }
 
         const canvasWidth = this.gl.canvas.width;
         const canvasHeight = this.gl.canvas.height;
@@ -147,16 +171,23 @@ class GraphicsManager {
             this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
         }
 
-        if (!strip_id in frameData.screenMap) {
+        if (!strip_id in screenMap) {
             console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
             return;
         }
 
-        const stripData = frameData.screenMap[strip_id];
+        const stripData = screenMap[strip_id];
+        const pixelCount = data.length / 3;
         const map = stripData.map;
 
-        for (let i = 0; i < map.length; i++) {
+        //console.log(stripData);
+        //console.log(map);
+        //console.log(stripData);
+
+        //console.log("Writing data to canvas");
+        for (let i = 0; i < pixelCount; i++) {
             const [x, y] = map[i];
+            //console.log(x, y);
             const srcIndex = i * 3;
             const destIndex = (y * this.texWidth + x) * 3;
             const r = data[srcIndex];
@@ -418,6 +449,7 @@ class UiManager {
     let outputId;
 
     let uiManager;
+    let uiCanvasChanged = false;
 
     function minMax(array_xy) {
         // array_xy is a an array of an array of x and y values
@@ -435,11 +467,8 @@ class UiManager {
         return [[min_x, min_y], [max_x, max_y]];
     }
 
-
-
     globalThis.FastLED_onStripUpdate = function (jsonData) {
         console.log("Received strip update:", jsonData);
-
         const event = jsonData.event;
         let width = 0;
         let height = 0;
@@ -472,7 +501,12 @@ class UiManager {
                 min: min,
                 max: max,
             };
-
+            // now update the canvas size.
+            const canvas = document.getElementById(canvasId);
+            canvas.width = width;
+            canvas.height = height;
+            uiCanvasChanged = true;
+            console.log("Screen map updated:", screenMap);
         }
 
         if (!eventHandled) {
@@ -499,6 +533,7 @@ class UiManager {
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
 
+    let graphicsManager;
 
     globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
         uiManager.processUiChanges(uiUpdateCallback);
@@ -506,6 +541,7 @@ class UiManager {
             console.warn("Received empty frame data, skipping update");
             return;
         }
+ 
         updateCanvas(frameData);
     };
 
@@ -534,15 +570,21 @@ class UiManager {
     }
 
 
-    // BEGIN WebGL code
-    let graphicsManager;
+
 
 
 
     function updateCanvas(frameData) {
         if (!graphicsManager) {
             graphicsManager = new GraphicsManager(canvasId);
+            uiCanvasChanged = false;
         }
+
+        if (uiCanvasChanged) {
+            uiCanvasChanged = false;
+            graphicsManager.reset();
+        }
+
         // we are going to add the screenMap to the graphicsManager
         frameData.screenMap = screenMap;
         graphicsManager.updateCanvas(frameData);
