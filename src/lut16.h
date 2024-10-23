@@ -13,7 +13,7 @@ struct pair_xy {
     pair_xy(T x, T y) : x(x), y(y) {}
 };
 
-using pair_xy16 = pair_xy<int16_t>;  // It's just easier if we allow negative values.
+using pair_xy_float = pair_xy<float>;  // It's just easier if we allow negative values.
 
 // LUT holds a look up table to map data from one
 // value to another. This can be quite big (1/3rd of the frame buffer)
@@ -23,10 +23,10 @@ template<typename T>
 class LUT;
 
 typedef LUT<uint16_t> LUT16;
-typedef LUT<pair_xy16> LUTXY16;
+typedef LUT<pair_xy_float> LUTXYFLOAT;
 
 DECLARE_SMART_PTR_NO_FWD(LUT16);
-DECLARE_SMART_PTR_NO_FWD(LUTXY16);
+DECLARE_SMART_PTR_NO_FWD(LUTXYFLOAT);
 
 // Templated lookup table.
 template<typename T>

@@ -142,12 +142,12 @@ unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
 
-void make_map(int xstep, int ystep, int num, std::vector<pair_xy16>* _map) {
-    int16_t x = 0;
-    int16_t y = 0;
-    std::vector<pair_xy16>& map = *_map;
+void make_map(int xstep, int ystep, int num, std::vector<pair_xy_float>* _map) {
+    float x = 0;
+    float y = 0;
+    std::vector<pair_xy_float>& map = *_map;
     for (int16_t i = 0; i < num; i++) {
-        map.push_back(pair_xy16{x, y});
+        map.push_back(pair_xy_float{x, y});
         x += xstep;
         y += ystep;
     }
@@ -156,7 +156,7 @@ void make_map(int xstep, int ystep, int num, std::vector<pair_xy16>* _map) {
 
 
 ScreenMap make_screen_map(int xstep, int ystep, int num) {
-    std::vector<pair_xy16> map;
+    std::vector<pair_xy_float> map;
     make_map(xstep, ystep, num, &map);
     return ScreenMap(map.data(), map.size());
 }
@@ -199,31 +199,31 @@ void setup() {
     auto green_segment = map["green_segment"];
     auto blue_segment = map["blue_segment"];
 
-    std::vector<pair_xy16> red_map;
-    std::vector<pair_xy16> black_map;
-    std::vector<pair_xy16> green_map;
-    std::vector<pair_xy16> blue_map;
+    std::vector<pair_xy_float> red_map;
+    std::vector<pair_xy_float> black_map;
+    std::vector<pair_xy_float> green_map;
+    std::vector<pair_xy_float> blue_map;
 
     auto red_x = red_segment["x"];
     auto red_y = red_segment["y"];
 
     for (int i = 0; i < red_x.size(); i++) {
-        red_map.push_back(pair_xy16{red_x[i], red_y[i]});
+        red_map.push_back(pair_xy_float{red_x[i], red_y[i]});
     }
     auto black_x = back_segment["x"];
     auto black_y = back_segment["y"];
     for (int i = 0; i < black_x.size(); i++) {
-        black_map.push_back(pair_xy16{black_x[i], black_y[i]});
+        black_map.push_back(pair_xy_float{black_x[i], black_y[i]});
     }
     auto green_x = green_segment["x"];
     auto green_y = green_segment["y"];
     for (int i = 0; i < green_x.size(); i++) {
-        green_map.push_back(pair_xy16{green_x[i], green_y[i]});
+        green_map.push_back(pair_xy_float{green_x[i], green_y[i]});
     }
     auto blue_x = blue_segment["x"];
     auto blue_y = blue_segment["y"];
     for (int i = 0; i < blue_x.size(); i++) {
-        blue_map.push_back(pair_xy16{blue_x[i], blue_y[i]});
+        blue_map.push_back(pair_xy_float{blue_x[i], blue_y[i]});
     }
 
     ScreenMap red_screenmap = ScreenMap(red_map.data(), red_map.size());

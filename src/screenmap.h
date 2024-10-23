@@ -18,28 +18,28 @@ class ScreenMap {
 public:
     // is_reverse is false by default for linear layout
     ScreenMap(uint32_t length): length(length) {
-        mLookUpTable = LUTXY16Ptr::New(length);
-        LUTXY16& lut = *mLookUpTable.get();
-        pair_xy16* data = lut.getData();
+        mLookUpTable = LUTXYFLOATPtr::New(length);
+        LUTXYFLOAT& lut = *mLookUpTable.get();
+        pair_xy_float* data = lut.getData();
         for (uint32_t x = 0; x < length; x++) {
             data[x] = {0, 0};
         }
     }
 
-    ScreenMap(const pair_xy16* lut, uint32_t length): length(length) {
-        mLookUpTable = LUTXY16Ptr::New(length);
-        LUTXY16& lut16xy = *mLookUpTable.get();
-        pair_xy16* data = lut16xy.getData();
+    ScreenMap(const pair_xy_float* lut, uint32_t length): length(length) {
+        mLookUpTable = LUTXYFLOATPtr::New(length);
+        LUTXYFLOAT& lut16xy = *mLookUpTable.get();
+        pair_xy_float* data = lut16xy.getData();
         for (uint32_t x = 0; x < length; x++) {
             data[x] = lut[x];
         }
     }
 
     template<uint32_t N>
-    ScreenMap(const pair_xy16 (&lut)[N]): length(N) {
-        mLookUpTable = LUTXY16Ptr::New(length);
-        LUTXY16& lut16xy = *mLookUpTable.get();
-        pair_xy16* data = lut16xy.getData();
+    ScreenMap(const pair_xy_float (&lut)[N]): length(N) {
+        mLookUpTable = LUTXYFLOATPtr::New(length);
+        LUTXYFLOAT& lut16xy = *mLookUpTable.get();
+        pair_xy_float* data = lut16xy.getData();
         for (uint32_t x = 0; x < length; x++) {
             data[x] = lut[x];
         }
@@ -50,17 +50,17 @@ public:
         mLookUpTable = other.mLookUpTable;
     }
 
-    const pair_xy16& operator[](uint32_t x) const {
+    const pair_xy_float& operator[](uint32_t x) const {
         if (x >= length || !mLookUpTable) {
             return empty();  // better than crashing.
         }
-        LUTXY16& lut = *mLookUpTable.get();
+        LUTXYFLOAT& lut = *mLookUpTable.get();
         return lut[x];
     }
 
-    void set(uint16_t index, const pair_xy16& p) {
+    void set(uint16_t index, const pair_xy_float& p) {
         if (mLookUpTable) {
-            LUTXY16& lut = *mLookUpTable.get();
+            LUTXYFLOAT& lut = *mLookUpTable.get();
             auto* data = lut.getData();
             data[index] = p;
         }
@@ -75,12 +75,12 @@ public:
         return *this;
     }
 
-    pair_xy16 mapToIndex(uint32_t x) const {
+    pair_xy_float mapToIndex(uint32_t x) const {
         if (x >= length || !mLookUpTable) {
             return {0, 0};
         }
-        LUTXY16& lut = *mLookUpTable.get();
-        pair_xy16 screen_coords = lut[x];
+        LUTXYFLOAT& lut = *mLookUpTable.get();
+        pair_xy_float screen_coords = lut[x];
         return screen_coords;
     }
 
@@ -89,10 +89,10 @@ public:
     }
 
 private:
-    static const pair_xy16& empty() {
-        static const pair_xy16 s_empty = {0, 0};
+    static const pair_xy_float& empty() {
+        static const pair_xy_float s_empty = {0, 0};
         return s_empty;
     }
     uint32_t length = 0;
-    LUTXY16Ptr mLookUpTable;
+    LUTXYFLOATPtr mLookUpTable;
 };

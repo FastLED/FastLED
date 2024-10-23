@@ -70,9 +70,9 @@ inline void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {
                 for (uint16_t i = 0; i < side; i++) {
                     for (uint16_t j = 0; j < side; j++) {
                         uint16_t index = i * side + j;
-                        pair_xy16 p = {
-                            static_cast<int16_t>(i),
-                            static_cast<int16_t>(j)
+                        pair_xy_float p = {
+                            static_cast<float>(i),
+                            static_cast<float>(j)
                         };
                         screenmap.set(index, p);
                     }
@@ -85,7 +85,7 @@ inline void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {
                 printf("Creating linear screenmap for %d\n", pixel_count);
                 ScreenMap screenmap(pixel_count);
                 for (uint32_t i = 0; i < pixel_count; i++) {
-                    screenmap.set(i, {static_cast<int16_t>(i), 0});
+                    screenmap.set(i, {static_cast<float>(i), 0});
                 }
                 active_strips.updateScreenMap(stripIndex, screenmap);
                 // Fire off the event to the JavaScript side that we now have

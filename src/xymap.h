@@ -71,9 +71,9 @@ class XYMap {
         for (uint16_t w = 0; w < width; w++) {
             for (uint16_t h = 0; h < height; h++) {
                 uint16_t index = mapToIndex(w, h);
-                pair_xy16 p = {
-                    static_cast<int16_t>(w),
-                    static_cast<int16_t>(h)
+                pair_xy_float p = {
+                    static_cast<float>(w),
+                    static_cast<float>(h)
                 };
                 out.set(index, p);
             }

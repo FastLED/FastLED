@@ -486,6 +486,14 @@ class UiManager {
             eventHandled = true;
             // Work in progress.
             const map = jsonData.map;
+
+            // convert to integers - this is a temporary fix until we can
+            // figure out why float isn't working with the engine.
+            for (let i = 0; i < map.length; i++) {
+                map[i][0] = Number.parseInt(map[i][0], 10);
+                map[i][1] = Number.parseInt(map[i][1], 10);
+            }
+
             const [min, max] = minMax(map);
             console.log("min", min, "max", max);
 
@@ -523,8 +531,8 @@ class UiManager {
             }
             screenMap.absMin = absMin;
             screenMap.absMax = absMax;
-            width = absMax[0] - absMin[0] + 1;
-            height = absMax[1] - absMin[1] + 1;
+            width = Number.parseInt(absMax[0] - absMin[0], 10) + 1;
+            height = Number.parseInt(absMax[1] - absMin[1], 10) + 1;
             console.log("canvas updated with witdt and height", width, height);
             // now update the canvas size.
             const canvas = document.getElementById(canvasId);
