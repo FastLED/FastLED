@@ -19,6 +19,14 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+
+#include "str.h"
+
+// On some platforms wstring is present, so we don't want to double define
+// it.
+#if !FASTLED_HAS_NATIVE_WSTRING
+
+
 #include "third_party/wstring/wstring.h"
 #include <string.h>  // ok include
 #include <stdio.h>  // ok include
@@ -816,3 +824,5 @@ double String::toDouble(void) const
 	if (buffer) return atof(buffer);
 	return 0;
 }
+
+#endif  // FASTLED_HAS_NATIVE_WSTRING
