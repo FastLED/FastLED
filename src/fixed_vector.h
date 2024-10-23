@@ -108,6 +108,30 @@ public:
         return end();
     }
 
+    template<typename Predicate>
+    iterator find_if(Predicate pred) {
+        for (iterator it = begin(); it != end(); ++it) {
+            if (pred(*it)) {
+                return it;
+            }
+        }
+        return end();
+    }
+
+    bool insert(iterator pos, const T& value) {
+        if (current_size < N) {
+            // shift all elements to the right
+            for (iterator p = end(); p != pos; --p) {
+                new (p) T(*(p - 1)); // Use copy constructor instead of std::move
+                (p - 1)->~T();
+            }
+            new (pos) T(value);
+            ++current_size;
+            return true;
+        }
+        return false;
+    }
+
     const_iterator find(const T& value) const {
         for (const_iterator it = begin(); it != end(); ++it) {
             if (*it == value) {

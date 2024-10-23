@@ -48,6 +48,107 @@ TEST_CASE("Fixed vector simple") {
     }
 }
 
+TEST_CASE("Fixed vector insert") {
+    FASTLED_USING_NAMESPACE;
+    FixedVector<int, 5> vec;
+
+    SUBCASE("Insert at beginning") {
+        vec.push_back(20);
+        vec.push_back(30);
+        bool inserted = vec.insert(vec.begin(), 10);
+
+        CHECK(inserted);
+        CHECK(vec.size() == 3);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+    }
+
+    SUBCASE("Insert in middle") {
+        vec.push_back(10);
+        vec.push_back(30);
+        bool inserted = vec.insert(vec.begin() + 1, 20);
+
+        CHECK(inserted);
+        CHECK(vec.size() == 3);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+    }
+
+    SUBCASE("Insert at end") {
+        vec.push_back(10);
+        vec.push_back(20);
+        bool inserted = vec.insert(vec.end(), 30);
+
+        CHECK(inserted);
+        CHECK(vec.size() == 3);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+    }
+
+    SUBCASE("Insert when full") {
+        vec.push_back(10);
+        vec.push_back(20);
+        vec.push_back(30);
+        vec.push_back(40);
+        vec.push_back(50);
+        bool inserted = vec.insert(vec.begin() + 2, 25);
+
+        CHECK_FALSE(inserted);
+        CHECK(vec.size() == 5);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+        CHECK(vec[3] == 40);
+        CHECK(vec[4] == 50);
+    }
+}
+
+TEST_CASE("Fixed vector find_if with predicate") {
+    FASTLED_USING_NAMESPACE;
+    FixedVector<int, 5> vec;
+
+    SUBCASE("Find even number") {
+        vec.push_back(1);
+        vec.push_back(2);
+        vec.push_back(3);
+        vec.push_back(4);
+        vec.push_back(5);
+
+        auto it = vec.find_if([](int n) { return n % 2 == 0; });
+        CHECK(it != vec.end());
+        CHECK(*it == 2);
+    }
+
+    SUBCASE("Find number greater than 3") {
+        vec.push_back(1);
+        vec.push_back(2);
+        vec.push_back(3);
+        vec.push_back(4);
+        vec.push_back(5);
+
+        auto it = vec.find_if([](int n) { return n > 3; });
+        CHECK(it != vec.end());
+        CHECK(*it == 4);
+    }
+
+    SUBCASE("Find non-existent condition") {
+        vec.push_back(1);
+        vec.push_back(3);
+        vec.push_back(5);
+
+        auto it = vec.find_if([](int n) { return n % 2 == 0; });
+        CHECK(it == vec.end());
+    }
+
+    SUBCASE("Find in empty vector") {
+        auto it = vec.find_if([](int n) { return true; });
+        CHECK(it == vec.end());
+    }
+}
+
 TEST_CASE("FixedVector construction and destruction") {
     FASTLED_USING_NAMESPACE;
     
