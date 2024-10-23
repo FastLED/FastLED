@@ -5580,7 +5580,10 @@ class StringBuilderPrint : public Print {
   StringBuilder copier_;
 };
 }  // namespace detail
-inline void convertToJson(const ::Printable& src, JsonVariant dst) {
+
+// Modified to work when printable.h isn't present. -- Zach Vorhies.
+template<typename Printable>
+inline void convertToJson(const Printable& src, JsonVariant dst) {
   auto resources = detail::VariantAttorney::getResourceManager(dst);
   auto data = detail::VariantAttorney::getData(dst);
   if (!resources || !data)
@@ -5592,6 +5595,7 @@ inline void convertToJson(const ::Printable& src, JsonVariant dst) {
     return;
   data->setOwnedString(print.save());
 }
+
 #endif
 #if ARDUINOJSON_ENABLE_ARDUINO_STRING
 inline void convertFromJson(JsonVariantConst src, ::String& dst) {
