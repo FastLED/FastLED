@@ -60,6 +60,8 @@ class GraphicsManager {
             this.gl.deleteTexture(this.texture);
             this.gl.deleteProgram(this.program);
         }
+        this.texWidth = 0;
+        this.texHeight = 0;
         this.gl = null;
     }
 
@@ -127,20 +129,10 @@ class GraphicsManager {
             console.warn("Received empty frame data, skipping update");
             return;
         }
-        const screenMap = frameData.screenMap;
 
-        const firstFrame = frameData[0];
-        const data = firstFrame.pixel_data;
-        const strip_id = firstFrame.strip_id;
 
         if (!this.gl) this.initWebGL();
 
-        // console.log(screenMap);
-
-        if (!strip_id in screenMap) {
-            console.error(`No screen map found for strip ID ${strip_id}`);
-            return;
-        }
 
         const canvasWidth = this.gl.canvas.width;
         const canvasHeight = this.gl.canvas.height;
@@ -171,6 +163,11 @@ class GraphicsManager {
             this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
         }
 
+        const screenMap = frameData.screenMap;
+        const firstFrame = frameData[0];
+        const data = firstFrame.pixel_data;
+        const strip_id = firstFrame.strip_id;
+        
         if (!strip_id in screenMap) {
             console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
             return;
