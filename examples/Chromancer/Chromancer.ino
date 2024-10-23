@@ -145,27 +145,6 @@ unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
 
-void make_map(int xstep, int ystep, int num, std::vector<pair_xy_float>* _map) {
-    float x = 0;
-    float y = 0;
-    std::vector<pair_xy_float>& map = *_map;
-    for (int16_t i = 0; i < num; i++) {
-        map.push_back(pair_xy_float{x, y});
-        x += xstep;
-        y += ystep;
-    }
-}
-
-
-
-ScreenMap make_screen_map(int xstep, int ystep, int num) {
-    std::vector<pair_xy_float> map;
-    make_map(xstep, ystep, num, &map);
-    return ScreenMap(map.data(), map.size());
-}
-
-
-
 void setup() {
     Serial.begin(115200);
 
