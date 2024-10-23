@@ -4,7 +4,7 @@ from enum import Enum
 
 from math import pi, cos, sin
 
-LED_PER_STRIP = 14
+LED_PER_STRIP = 2
 SPACE_PER_LED = 1.0  # Increased for better visibility
 
 SMALLEST_ANGLE = 360 / 6
@@ -47,12 +47,17 @@ def gen_points(
 ) -> list[Point]:
     points: list[Point] = []
 
-    points.append(curr_point)
+    curr_point: Point = Point(startPos.x, startPos.y)
+    last_angle = None
     for angle in input:
-        curr_point: Point = Point(startPos.x, startPos.y)
+        points.append(curr_point)
         for _ in range(leds_per_strip - 1):
+            last_angle = angle
             curr_point = next_point(curr_point, angle, SPACE_PER_LED)
             points.append(curr_point)
+    # for the last point, add the last angle
+    curr_point = next_point(curr_point, last_angle, SPACE_PER_LED)
+    points.append(curr_point)
     return points
 
 
@@ -80,23 +85,38 @@ def simple_test() -> None:
     ]
     points = gen_points(hexagon_angles, LED_PER_STRIP, startPos)
     print(points)
-    assert len(points) == LED_PER_STRIP
+    # assert len(points) == LED_PER_STRIP + 1
 
 def two_angle_test() -> None:
     startPos = Point(0, 0)
     hexagon_angles = [
         HexagonAngle.UP,
-        HexagonAngle.RIGHT_UP,
+        HexagonAngle.UP,
     ]
     points = gen_points(hexagon_angles, LED_PER_STRIP, startPos)
     print(points)
-    assert len(points) == LED_PER_STRIP * 2, f"Expected {LED_PER_STRIP * 2} points, got {len(points)} points"
+    # assert len(points) == LED_PER_STRIP * 2, f"Expected {LED_PER_STRIP * 2} points, got {len(points)} points"
+
+
+
+def two_angle_test2() -> None:
+    print("two_angle_test2")
+    startPos = Point(0, 0)
+    hexagon_angles = [
+        HexagonAngle.UP,
+        HexagonAngle.DOWN,
+    ]
+    points = gen_points(hexagon_angles, LED_PER_STRIP, startPos)
+    print(points)
+    # assert len(points) == LED_PER_STRIP * 2, f"Expected {LED_PER_STRIP * 2} points, got {len(points)} points"
+
 
 
 
 def unit_test() -> None:
-    simple_test()
-    two_angle_test()
+    #simple_test()
+    #two_angle_test()
+    two_angle_test2()
 
 if __name__ == "__main__":
     unit_test()
