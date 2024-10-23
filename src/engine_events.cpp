@@ -11,7 +11,7 @@ EngineEvents::Listener::Listener() {
 EngineEvents::Listener::~Listener() {
     #if FASTLED_HAS_ENGINE_EVENTS
     EngineEvents* ptr = EngineEvents::getInstance();
-    const bool has_listener = ptr && ptr->mListeners.has(this);
+    const bool has_listener = ptr && ptr->_hasListener(this);
     if (has_listener) {
         // Warning, the listener should be removed by the subclass. If we are here
         // then the subclass did not remove the listener and we are now in a partial
@@ -34,29 +34,49 @@ EngineEvents* EngineEvents::getInstance() {
 
 #if FASTLED_HAS_ENGINE_EVENTS
 void EngineEvents::_onPlatformPreLoop() {
-    for (auto listener : mListeners) {
+    for (auto [listener, _] : mListeners) {
         listener->onPlatformPreLoop();
     }
-    for (auto listener : mListeners) {
+    for (auto [listener, _] : mListeners) {
         listener->onPlatformPreLoop2();
     }
 }
 
+bool EngineEvents::_hasListener(Listener* listener) {
+    auto predicate = [listener](const Pair& pair) {
+        return pair.listener == listener;
+    };
+    return mListeners.find_if(predicate) != mListeners.end();
+}
+
 void EngineEvents::_addListener(Listener* listener, int priority) {
-    if (mListeners.has(listener)) {
+    if (_hasListener(listener)) {
         return;
     }
-    mListeners.push_back(listener);
+    for (auto it = mListeners.begin(); it != mListeners.end(); ++it) {
+        if (it->priority < priority) {
+            // this is now the highest priority in this spot.
+            mListeners.insert(it, {listener, priority});
+            return;
+        }
+    }
+    mListeners.push_back({listener, priority});
 }
 
 void EngineEvents::_removeListener(Listener* listener) {
-    mListeners.erase(listener);
+    auto predicate = [listener](const Pair& pair) {
+        return pair.listener == listener;
+    };
+    auto it = mListeners.find_if(predicate);
+    if (it != mListeners.end()) {
+        mListeners.erase(it);
+    }
 }
 
 void EngineEvents::_onBeginFrame() {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto listener : copy) {
+    for (auto [listener, _] : copy) {
         listener->onBeginFrame();
     }
 }
@@ -64,7 +84,7 @@ void EngineEvents::_onBeginFrame() {
 void EngineEvents::_onEndShowLeds() {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto listener : copy) {
+    for (auto [listener, _] : copy) {
         listener->onEndShowLeds();
     }
 }
@@ -72,7 +92,7 @@ void EngineEvents::_onEndShowLeds() {
 void EngineEvents::_onEndFrame() {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto listener : copy) {
+    for (auto [listener, _] : copy) {
         listener->onEndFrame();
     }
 }
@@ -80,7 +100,7 @@ void EngineEvents::_onEndFrame() {
 void EngineEvents::_onStripAdded(CLEDController* strip, uint32_t num_leds) {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto listener : copy) {
+    for (auto [listener, _] : copy) {
         listener->onStripAdded(strip, num_leds);
     }
 }
@@ -89,7 +109,7 @@ void EngineEvents::_onStripAdded(CLEDController* strip, uint32_t num_leds) {
 void EngineEvents::_onCanvasUiSet(CLEDController *strip, const ScreenMap& screenmap) {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto listener : copy) {
+    for (auto [listener, _] : copy) {
         listener->onCanvasUiSet(strip, screenmap);
     }
 }

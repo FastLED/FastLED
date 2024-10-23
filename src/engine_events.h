@@ -57,7 +57,7 @@ class EngineEvents {
     
     static bool hasListener(Listener *listener) {
         #if FASTLED_HAS_ENGINE_EVENTS
-        return EngineEvents::getInstance()->mListeners.has(listener);
+        return EngineEvents::getInstance()->_hasListener(listener);
         #else
         return false;
         #endif
@@ -111,8 +111,13 @@ class EngineEvents {
     void _onStripAdded(CLEDController *strip, uint32_t num_leds);
     void _onCanvasUiSet(CLEDController *strip, const ScreenMap& xymap);
     void _onPlatformPreLoop();
+    bool _hasListener(Listener *listener);
 #if FASTLED_HAS_ENGINE_EVENTS
-    typedef FixedVector<Listener *, FASTLED_ENGINE_EVENTS_MAX_LISTENERS>
+    struct Pair {
+        Listener *listener = nullptr;
+        int priority = 0;
+    };
+    typedef FixedVector<Pair, FASTLED_ENGINE_EVENTS_MAX_LISTENERS>
         ListenerList;
     ListenerList mListeners;
 #endif

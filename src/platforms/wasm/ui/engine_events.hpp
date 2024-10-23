@@ -42,7 +42,6 @@ private:
         jsSetCanvasSize(controller_id, screenmap);
     }
 
-
     EngineListener() {
         EngineEvents::addListener(this);
     }

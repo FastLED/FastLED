@@ -84,3 +84,10 @@ EMSCRIPTEN_BINDINGS(engine_events_constructors) {
         .function("getPixelData_Uint8", &ActiveStripData::getPixelData_Uint8);
 }
 
+
+// gcc constructor to get the 
+// ActiveStripData instance created.
+__attribute__((constructor))
+void __init_ActiveStripData() {
+    ActiveStripData::Instance();
+}
