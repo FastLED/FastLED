@@ -293,27 +293,27 @@ class UiManager {
         const uiControlsContainer = document.getElementById(this.uiControlsId) || this.createUiControlsContainer();
 
         let foundUi = false;
-        jsonData.forEach(element => {
+        jsonData.forEach(data => {
             let control;
-            if (element.type === 'slider') {
-                control = this.createSlider(element);
-            } else if (element.type === 'checkbox') {
-                control = this.createCheckbox(element);
-            } else if (element.type === 'button') {
-                control = this.createButton(element);
-            } else if (element.type === 'number') {
-                control = this.createNumberField(element);
+            if (data.type === 'slider') {
+                control = this.createSlider(data);
+            } else if (data.type === 'checkbox') {
+                control = this.createCheckbox(data);
+            } else if (data.type === 'button') {
+                control = this.createButton(data);
+            } else if (data.type === 'number') {
+                control = this.createNumberField(data);
             }
 
             if (control) {
                 foundUi = true;
                 uiControlsContainer.appendChild(control);
-                if (element.type === 'button') {
-                    this.uiElements[element.id] = control.querySelector('button');
+                if (data.type === 'button') {
+                    this.uiElements[data.id] = control.querySelector('button');
                 } else {
-                    this.uiElements[element.id] = control.querySelector('input');
+                    this.uiElements[data.id] = control.querySelector('input');
                 }
-                this.previousUiState[element.id] = element.value;
+                this.previousUiState[data.id] = data.value;
             }
         });
         if (foundUi) {
@@ -374,10 +374,18 @@ class UiManager {
         const slider = document.createElement('input');
         slider.type = 'range';
         slider.id = `slider-${element.id}`;
-        slider.min = element.min;
-        slider.max = element.max;
-        slider.value = element.value;
-        slider.step = element.step;
+        slider.min = Number.parseFloat(element.min);
+        slider.max = Number.parseFloat(element.max);
+        slider.value = Number.parseFloat(element.value);
+        slider.step = Number.parseFloat(element.step);
+
+        console.log("slider min: ", slider.min, "max: ", slider.max, "value: ", slider.value, "step: ", slider.step);
+        /// slider.value = element.value;
+        setTimeout(() => {
+            slider.value = Number.parseFloat(element.value);
+            valueDisplay.textContent = slider.value;
+        },0);
+
 
         slider.addEventListener('input', function () {
             valueDisplay.textContent = this.value;
@@ -584,12 +592,12 @@ class UiManager {
     };
 
     // Function to call the setup and loop functions
-    function runFastLED(extern_setup, extern_loop, DEFAULT_FRAME_RATE_60FPS, moduleInstance) {
+    function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance) {
         console.log("Calling setup function...");
         extern_setup();
 
         console.log("Starting loop...");
-        const frameInterval = 1000 / DEFAULT_FRAME_RATE_60FPS;
+        const frameInterval = 1000 / frame_rate;
         let lastFrameTime = 0;
 
         // Executes every frame but only runs the loop function at the specified frame rate
@@ -623,13 +631,13 @@ class UiManager {
     // Ensure we wait for the module to load
     const onModuleLoaded = async () => {
         // Unpack the module functions and send them to the runFastLED function
-        function __runFastLED(moduleInstance, DEFAULT_FRAME_RATE_60FPS) {
+        function __runFastLED(moduleInstance, frameRate) {
             const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
             if (!exports_exist) {
                 console.error("FastLED setup or loop functions are not available.");
                 return;
             }
-            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, DEFAULT_FRAME_RATE_60FPS, moduleInstance);
+            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance);
         }
         var fastledLoader = globalThis.fastled;
         try {
@@ -637,7 +645,7 @@ class UiManager {
                 // Load the module
                 fastledLoader().then(instance => {
                     console.log("Module loaded, running FastLED...");
-                    __runFastLED(instance, DEFAULT_FRAME_RATE_60FPS);
+                    __runFastLED(instance, frameRate);
                 }).catch(err => {
                     console.error("Error loading fastled as a module:", err);
                 });
