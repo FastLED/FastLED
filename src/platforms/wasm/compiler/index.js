@@ -181,9 +181,19 @@ class GraphicsManager {
             const min_y = screenMap.absMin[1];
             //console.log("Writing data to canvas");
             for (let i = 0; i < pixelCount; i++) {
+                if (i >= map.length) {
+                    console.warn(`Pixel ${i} is outside the screen map, skipping update`);
+                    continue;
+                }
                 let [x, y] = map[i];
                 x -= min_x;
                 y -= min_y;
+
+                // check to make sure that the pixel is within the canvas
+                if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
+                    console.warn(`Pixel ${i} is outside the canvas, skipping update`);
+                    continue;
+                }
                 //console.log(x, y);
                 const srcIndex = i * 3;
                 const destIndex = (y * this.texWidth + x) * 3;
