@@ -61,7 +61,7 @@
 
     const ENABLED = window.location.search.includes('threejs');
 
-    async function initThreeJS() {
+    async function initThreeJS(threeJsModules) {
 
         let camera, stats;
         let composer, renderer, mixer, clock;
@@ -173,7 +173,8 @@
         console.log('Loaded all ThreeJS modules:', { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass });
 
         threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
-        initThreeJS();
+        console.log("1: threeJsModules", threeJsModules);
+        initThreeJS(threeJsModules);
     }
 
 
