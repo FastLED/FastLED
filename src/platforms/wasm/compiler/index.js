@@ -404,6 +404,7 @@ class GraphicsManagerThreeJS {
     }
 
     reset() {
+        console.log("Resetting GraphicsManagerThreeJS");
         if (this.scene) {
             if (this.points) {
                 this.scene.remove(this.points);
@@ -416,6 +417,8 @@ class GraphicsManagerThreeJS {
                 this.renderer.dispose();
                 this.renderer = null;
             }
+            this.scene.dispose();
+            this.scene = null;
         }
         this.pointsGeometry = null;
         this.pointsMaterial = null;
@@ -452,6 +455,10 @@ class GraphicsManagerThreeJS {
 
     updateGeometry(totalPoints) {
         const { THREE } = this.threeJsModules;
+
+        if (!this.scene) {
+            this.initThreeJS();
+        }
         
         if (!this.pointsGeometry || totalPoints > this.maxPoints) {
             // Create new geometry with buffer attributes
