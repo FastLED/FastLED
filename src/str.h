@@ -14,7 +14,16 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 
 // A copy on write string class. Fast to copy from another
-// Str object as read only pointers are shared.
+// Str object as read only pointers are shared. If the size
+// of the string is below FASTLED_STR_INLINED_SIZE then the
+// the entire string fits in the object and no heap allocation occurs.
+// When the string is large enough it will overflow into heap
+// allocated memory. Copy on write means that if the Str has
+// a heap buffer that is shared with another Str object, then
+// a copy is made and then modified in place.
+// If write() or append() is called then the internal data structure
+// will grow to accomodate the new data with extra space for future,
+// like a vector.
 class Str;
 
 ///////////////////////////////////////////////////////
