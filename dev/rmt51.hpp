@@ -75,16 +75,6 @@ void blink_loop() {
     delay(DELAY * 4);
 }
 
-void timing_loop() {
-    // Tests how long it takes to set all leds to a single color and draw them
-    FastLED.setBrightness(8);
-    fill(CRGB::White);
-    FastLED.show();
-    uint32_t us = micros();
-    // Serial.printf("Time to set all leds to white: %lu\n", millis() - ms);
-    std::cout << "Microseconds to set all leds to white: " << micros() - us << std::endl;
-    delay(250);  // now allow the leds to draw so that the time can be measured.
-}
 
 void hue_loop() {
     uint32_t ms = millis();

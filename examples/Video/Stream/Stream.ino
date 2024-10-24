@@ -81,10 +81,6 @@ void loop() {
     // Draw the frame
     fxEngine.draw(millis(), leds);
 
-    // Debug output
-    //std::cout << "First LED: R=" << (int)leds[0].r << " G=" << (int)leds[0].g << " B=" << (int)leds[0].b << std::endl;
-    //std::cout << "Last LED: R=" << (int)leds[NUM_LEDS-1].r << " G=" << (int)leds[NUM_LEDS-1].g << " B=" << (int)leds[NUM_LEDS-1].b << std::endl;
-
     // Show the LEDs
     FastLED.show();
 
