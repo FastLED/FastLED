@@ -556,7 +556,7 @@ class UiManager {
             screenMap.absMax = absMax;
             width = Number.parseInt(absMax[0] - absMin[0], 10) + 1;
             height = Number.parseInt(absMax[1] - absMin[1], 10) + 1;
-            log("canvas updated with witdt and height", width, height);
+            log("canvas updated with width and height", width, height);
             // now update the canvas size.
             const canvas = document.getElementById(canvasId);
             canvas.width = width;

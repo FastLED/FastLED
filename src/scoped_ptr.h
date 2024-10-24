@@ -6,6 +6,15 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+
+template<typename T>
+struct ArrayDeleter {
+    void operator()(T* ptr) {
+        delete[] ptr;
+    }
+};
+
+
 template <typename T> class scoped_ptr {
   public:
     // Constructor
@@ -66,13 +75,14 @@ template <typename T> class scoped_ptr {
     T *ptr_; // Managed pointer
 };
 
-template <typename T> class scoped_array {
+template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
   public:
     // Constructor
     explicit scoped_array(T *arr = nullptr) : arr_(arr) {}
+    scoped_array(T *arr, Deleter deleter) : arr_(arr), deleter_(deleter) {}
 
     // Destructor
-    ~scoped_array() { delete[] arr_; }
+    ~scoped_array() { deleter_(arr_); }
 
     // Disable copy semantics (no copying allowed)
     scoped_array(const scoped_array &) = delete;
@@ -121,6 +131,7 @@ template <typename T> class scoped_array {
 
   private:
     T *arr_; // Managed array pointer
+    Deleter deleter_ = {};
 };
 
 
