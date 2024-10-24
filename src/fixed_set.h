@@ -8,6 +8,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// A simple unordered set implementation with a fixed size.
+// The user is responsible for making sure that the inserts
+// do not exceed the capacity of the set, otherwise they will
+// fail. Because of this limitation, this set is not a drop in
+// replacement for std::set.
 template<typename Key, size_t N>
 class FixedSet {
 public:
@@ -64,6 +69,14 @@ public:
         auto it = find(key);
         if (it != end()) {
             data.erase(it);
+            return true;
+        }
+        return false;
+    }
+
+    bool erase(iterator pos) {
+        if (pos != end()) {
+            data.erase(pos);
             return true;
         }
         return false;

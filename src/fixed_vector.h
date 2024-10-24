@@ -9,6 +9,10 @@
 FASTLED_NAMESPACE_BEGIN
 
 
+// A fixed sized vector. The user is responsible for making sure that the
+// inserts do not exceed the capacity of the vector, otherwise they will fail.
+// Because of this limitation, this vector is not a drop in replacement for
+// std::vector.
 template<typename T, size_t N>
 class FixedVector {
 private:

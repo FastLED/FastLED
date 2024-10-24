@@ -8,6 +8,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// A simple unordered map implementation with a fixed size.
+// The user is responsible for making sure that the inserts
+// do not exceed the capacity of the set, otherwise they will
+// fail. Because of this limitation, this set is not a drop in
+// replacement for std::map.
 template<typename Key, typename Value, size_t N>
 class FixedMap {
 public:

@@ -8,7 +8,7 @@
 #include <memory>
 #include <map>
 
-
+#include "fixed_set.h"
 #include "fixed_map.h"
 #include "ptr.h"
 
@@ -25,14 +25,13 @@ class jsUiManager : EngineEvents::Listener {
     static void removeComponent(WeakPtr<jsUiInternal> component);
 
     // Called from the JS engine.
-    static void updateUiComponents(const std::string& jsonStr);
+    static void jsUpdateUiComponents(const std::string& jsonStr) { updateUiComponents(jsonStr.c_str()); }
+    // Internal representation.
+    static void updateUiComponents(const char* jsonStr) ;
 
   private:
-   static void executeUiUpdates(const ArduinoJson::JsonDocument& doc);
-    struct WeakPtrCompare {
-        bool operator()(const WeakPtr<jsUiInternal>& lhs, const WeakPtr<jsUiInternal>& rhs) const;
-    };
-    typedef std::set<WeakPtr<jsUiInternal>, WeakPtrCompare> jsUIPtrSet;
+    static void executeUiUpdates(const ArduinoJson::JsonDocument& doc);
+    typedef FixedSet<WeakPtr<jsUiInternal>, 64> jsUIPtrSet;
     friend class Singleton<jsUiManager>;
     jsUiManager() {
         EngineEvents::addListener(this);
@@ -56,10 +55,9 @@ class jsUiManager : EngineEvents::Listener {
             ArduinoJson::JsonDocument doc;
             ArduinoJson::JsonArray jarray = doc.to<ArduinoJson::JsonArray>();
             toJson(jarray);
-            // conver to c_str()
-            char buff[1024*16] = {0};
-            ArduinoJson::serializeJson(doc, buff, sizeof(buff));
-            updateJs(buff);
+            Str buff;
+            ArduinoJson::serializeJson(doc, buff);
+            updateJs(buff.c_str());
             mItemsAdded = false;
         }
     }

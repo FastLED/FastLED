@@ -9,19 +9,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-inline bool jsUiManager::WeakPtrCompare::operator()(
-    const WeakPtr<jsUiInternal> &lhs,
-    const WeakPtr<jsUiInternal> &rhs) const {
-    auto l = lhs.lock();
-    auto r = rhs.lock();
-    if (!l && !r)
-        return false;
-    if (!l)
-        return true;
-    if (!r)
-        return false;
-    return l->id() < r->id();
-}
 
 inline void jsUiManager::addComponent(WeakPtr<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
@@ -50,18 +37,17 @@ inline std::vector<jsUiInternalPtr> jsUiManager::getComponents() {
                 components.push_back(component);
                 ++it;
             } else {
-                it = mComponents.erase(it);
+                mComponents.erase(it);
             }
         }
     }
     return components;
 }
 
-inline void jsUiManager::updateUiComponents(const std::string &jsonStr) {
-    const char *cstr = jsonStr.c_str();
+inline void jsUiManager::updateUiComponents(const char* jsonStr) {
     ArduinoJson::JsonDocument doc;
     ArduinoJson::DeserializationError error =
-        ArduinoJson::deserializeJson(doc, cstr);
+        ArduinoJson::deserializeJson(doc, jsonStr);
     if (error) {
         printf("Error: Failed to parse JSON string: %s\n", error.c_str());
         return;
@@ -85,7 +71,7 @@ jsUiManager::executeUiUpdates(const ArduinoJson::JsonDocument &doc) {
                     component->update(kv.value());
                 }
             } else {
-                it = self.mComponents.erase(it);
+                self.mComponents.erase(it);
             }
         }
     }
@@ -107,7 +93,7 @@ inline void jsUiManager::toJson(ArduinoJson::JsonArray &json) {
 
 EMSCRIPTEN_BINDINGS(js_interface) {
     emscripten::function("_jsUiManager_updateUiComponents",
-                         &jsUiManager::updateUiComponents);
+                         &jsUiManager::jsUpdateUiComponents);
 }
 
 FASTLED_NAMESPACE_END
