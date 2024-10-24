@@ -48,7 +48,6 @@
 <script src="fastled.js"></script>
 <script src="index.js"></script>
 <script type="module">
-    globalThis.ThreeJS = null;
     function initThreeJsStyle() {
         const styleSheet = "https://threejs.org/files/main.css";
         const style = document.createElement('link');
@@ -57,7 +56,6 @@
         document.head.appendChild(style);
     }
 
-    let threeJsModules = {}
 
     const ENABLED = window.location.search.includes('threejs');
 
@@ -153,11 +151,9 @@
         initThreeScene();
     }
 
-    if (ENABLED) {
-        initThreeJsStyle();
 
+    async function loadThreeJs() {
         // Dynamically import all required modules
-
         const THREE = await import('three');
         const { default: Stats } = await import('three/addons/libs/stats.module.js');
         const { GUI } = await import('three/addons/libs/lil-gui.module.min.js');
@@ -167,24 +163,19 @@
         const { RenderPass } = await import('three/addons/postprocessing/RenderPass.js');
         const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
         const { OutputPass } = await import('three/addons/postprocessing/OutputPass.js');
-
-
-        globalThis.ThreeJS = THREE;
-        console.log('Loaded all ThreeJS modules:', { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass });
-
-        threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
-        console.log("1: threeJsModules", threeJsModules);
+        const threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
+        return threeJsModules;
     }
-
 
     // load fastled when the window is loaded.
     async function loadFastLed() {
         // Load the FastLED module.
-
-        if (threeJsModules) {
+        let threeJsModules = {};
+        if (ENABLED) {
+            threeJsModules = await loadThreeJs();
             initThreeJS(threeJsModules);
+            console.log('Loaded all ThreeJS modules:', threeJsModules);
         }
-
         const options = {
             canvasId: "myCanvas",
             uiControlsId: "ui-controls",
@@ -210,7 +201,6 @@
     let loaded = false;
     let loadFastLedOnce = () => {
         if (loaded) return;
-
         loadFastLed();
         loaded = true;
     }
