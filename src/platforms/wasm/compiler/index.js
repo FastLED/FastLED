@@ -144,7 +144,6 @@ class GraphicsManager {
         this.texWidth = 0;
         this.texHeight = 0;
         this.texData = null;
-        this.threeJsModules = threeJsModules;
     }
 
     createShaders() {
@@ -382,6 +381,173 @@ class GraphicsManager {
         this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STREAM_DRAW);
 
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+}
+
+
+class GraphicsManagerThreeJS {
+    constructor(canvasId, threeJsModules) {
+        console.log("Creating GraphicsManagerThreeJS");
+        // args
+        console.log(canvasId, threeJsModules);
+        this.canvasId = canvasId;
+        this.threeJsModules = threeJsModules;
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.pointsGeometry = null;
+        this.pointsMaterial = null;
+        this.points = null;
+        this.positions = null;
+        this.colors = null;
+        this.maxPoints = 0;
+    }
+
+    reset() {
+        if (this.scene) {
+            if (this.points) {
+                this.scene.remove(this.points);
+                this.points.geometry.dispose();
+                this.points.material.dispose();
+            }
+            this.scene = null;
+            this.camera = null;
+            if (this.renderer) {
+                this.renderer.dispose();
+                this.renderer = null;
+            }
+        }
+        this.pointsGeometry = null;
+        this.pointsMaterial = null;
+        this.points = null;
+        this.positions = null;
+        this.colors = null;
+        this.maxPoints = 0;
+    }
+
+    initThreeJS() {
+        console.log(this.threeJsModules);
+        const { THREE } = this.threeJsModules;
+        
+        // Create scene
+        this.scene = new THREE.Scene();
+        
+        // Create camera
+        const canvas = document.getElementById(this.canvasId);
+        const aspect = canvas.width / canvas.height;
+        this.camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+        this.camera.position.z = 5;
+        
+        // Create renderer
+        this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        this.renderer.setSize(canvas.width, canvas.height);
+        
+        // Create points material
+        this.pointsMaterial = new THREE.PointsMaterial({
+            size: 0.1,
+            vertexColors: true,
+            sizeAttenuation: true
+        });
+    }
+
+    updateGeometry(totalPoints) {
+        const { THREE } = this.threeJsModules;
+        
+        if (!this.pointsGeometry || totalPoints > this.maxPoints) {
+            // Create new geometry with buffer attributes
+            this.maxPoints = totalPoints;
+            this.pointsGeometry = new THREE.BufferGeometry();
+            this.positions = new Float32Array(totalPoints * 3);
+            this.colors = new Float32Array(totalPoints * 3);
+            
+            this.pointsGeometry.setAttribute('position', 
+                new THREE.BufferAttribute(this.positions, 3));
+            this.pointsGeometry.setAttribute('color',
+                new THREE.BufferAttribute(this.colors, 3));
+                
+            if (this.points) {
+                this.scene.remove(this.points);
+            }
+            this.points = new THREE.Points(this.pointsGeometry, this.pointsMaterial);
+            this.scene.add(this.points);
+        }
+    }
+
+    updateCanvas(frameData) {
+        if (frameData.length === 0) {
+            console.warn("Received empty frame data, skipping update");
+            return;
+        }
+
+        if (!this.scene) {
+            this.initThreeJS();
+        }
+
+        const screenMap = frameData.screenMap;
+        let totalPoints = 0;
+
+        // Count total points needed
+        for (let i = 0; i < frameData.length; i++) {
+            const strip = frameData[i];
+            const strip_id = strip.strip_id;
+            if (strip_id in screenMap.strips) {
+                totalPoints += strip.pixel_data.length / 3;
+            }
+        }
+
+        this.updateGeometry(totalPoints);
+
+        let pointIndex = 0;
+        const min_x = screenMap.absMin[0];
+        const min_y = screenMap.absMin[1];
+        const canvas = document.getElementById(this.canvasId);
+        const scaleX = 10 / canvas.width;  // Scale to reasonable Three.js world coordinates
+        const scaleY = 10 / canvas.height;
+
+        // Update positions and colors
+        for (let i = 0; i < frameData.length; i++) {
+            const strip = frameData[i];
+            const data = strip.pixel_data;
+            const strip_id = strip.strip_id;
+            
+            if (!(strip_id in screenMap.strips)) {
+                continue;
+            }
+            
+            const stripData = screenMap.strips[strip_id];
+            const map = stripData.map;
+            const pixelCount = data.length / 3;
+
+            for (let j = 0; j < pixelCount; j++) {
+                if (j >= map.length) continue;
+
+                let [x, y] = map[j];
+                x = (x - min_x) * scaleX - 5;  // Center in scene
+                y = (y - min_y) * scaleY - 5;
+
+                const srcIndex = j * 3;
+                const destIndex = pointIndex * 3;
+
+                // Update position
+                this.positions[destIndex] = x;
+                this.positions[destIndex + 1] = y;
+                this.positions[destIndex + 2] = 0;
+
+                // Update color
+                this.colors[destIndex] = data[srcIndex] / 255;
+                this.colors[destIndex + 1] = data[srcIndex + 1] / 255;
+                this.colors[destIndex + 2] = data[srcIndex + 2] / 255;
+
+                pointIndex++;
+            }
+        }
+
+        // Mark attributes as needing update
+        this.pointsGeometry.attributes.position.needsUpdate = true;
+        this.pointsGeometry.attributes.color.needsUpdate = true;
+
+        // Render the scene
+        this.renderer.render(this.scene, this.camera);
     }
 }
 
@@ -762,6 +928,7 @@ class UiManager {
 
     function updateCanvas(frameData) {
         if (!graphicsManager) {
+            //graphicsManager = new GraphicsManagerThreeJS(canvasId, threeJsModules);
             graphicsManager = new GraphicsManager(canvasId, threeJsModules);
             uiCanvasChanged = false;
         }
@@ -818,13 +985,15 @@ class UiManager {
         console.log("ThreeJS:", threeJs);
         const fastLedLoader = options.fastled;
         await onModuleLoaded(fastLedLoader);
-        const threeJsModules = threeJs.modules;
+        threeJsModules = threeJs.modules;
         const containerId = threeJs.containerId;
         console.log("ThreeJS modules:", threeJsModules);
         console.log("Container ID:", containerId);
 
         if (threeJsModules) {
-            await initThreeJS(threeJsModules, containerId);
+            // await initThreeJS(threeJsModules, containerId);
+            graphicsManager = new GraphicsManagerThreeJS(canvasId, threeJsModules);
+
         }
     }
     globalThis.loadFastLED = loadFastLed;
