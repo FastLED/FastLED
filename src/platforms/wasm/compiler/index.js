@@ -182,7 +182,7 @@ class GraphicsManager {
             //console.log("Writing data to canvas");
             for (let i = 0; i < pixelCount; i++) {
                 if (i >= map.length) {
-                    console.warn(`Pixel ${i} is outside the screen map, skipping update`);
+                    console.warn(`Strip ${strip_id}: Pixel ${i} is outside the screen map, skipping update`);
                     continue;
                 }
                 let [x, y] = map[i];
@@ -191,7 +191,7 @@ class GraphicsManager {
 
                 // check to make sure that the pixel is within the canvas
                 if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
-                    console.warn(`Pixel ${i} is outside the canvas, skipping update`);
+                    console.warn(`Strip ${strip_id}: Pixel ${i} is outside the canvas, skipping update`);
                     continue;
                 }
                 //console.log(x, y);
