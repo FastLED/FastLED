@@ -567,6 +567,28 @@ class UiManager {
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
     };
 
+    function print(text) {
+        const output = document.getElementById(outputId);
+        output.textContent += text + '\n';
+        // split into lines, and if there are more than 100 lines, remove one.
+        const lines = output.textContent.split('\n');
+        while (lines.length > 100) {
+            lines.shift();
+            output.textContent = lines.join('\n');
+        }
+    }
+
+    const prevConsoleLog = console.log;
+
+    function doublePrint(text) {
+        prevConsoleLog(text);
+        print(text);
+    }
+
+    if (document.getElementById(outputId)) {
+        console.log = doublePrint;
+    }
+
     globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
         const output = document.getElementById(outputId);
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;

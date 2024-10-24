@@ -109,8 +109,8 @@ class NumberField {
 #endif
 
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS) \
-template <typename T> bool operator>= (T v, const UI_CLASS& ui) { return ui >= v; } \ 
-template <typename T> bool operator<= (T v, const UI_CLASS& ui) { return ui <= v; } \ 
+template <typename T> bool operator>= (T v, const UI_CLASS& ui) { return ui >= v; } \
+template <typename T> bool operator<= (T v, const UI_CLASS& ui) { return ui <= v; } \
 template <typename T> bool operator> (T v, const UI_CLASS& ui) { return ui > v; } \
 template <typename T> bool operator< (T v, const UI_CLASS& ui) { return ui < v; } \
 template <typename T> bool operator== (T v, const UI_CLASS& ui) { return ui == v; } \
