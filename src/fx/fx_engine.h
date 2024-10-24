@@ -91,7 +91,7 @@ class FxEngine {
      * @param duration The duration of the transition in milliseconds.
      * @return True if the transition was initiated, false otherwise.
      */
-    bool nextFx(uint16_t duration);
+    bool nextFx(uint16_t transition_ms = 500);
 
     /**
      * @brief Sets the next effect to transition to.

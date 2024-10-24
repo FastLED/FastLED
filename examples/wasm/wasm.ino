@@ -77,6 +77,7 @@ Checkbox changePallete("Auto Next", true);
 Slider changePalletTime("Change Palette Time", 5, 1, 100);
 Slider scale( "Scale", 20, 1, 100);
 Button changePalette("Next Palette");
+Button changeFx("Next Fx");
 NumberField fxIndex("Fx index", 0, 0, NUM_ANIMATIONS);
 
 Animartrix animartrix(xyMap, POLAR_WAVES);
@@ -97,6 +98,10 @@ void loop() {
     FastLED.setBrightness(!isOff ? brightness.as<uint8_t>() : 0);
     noisePalette.setSpeed(speed);
     noisePalette.setScale(scale);
+
+    if (changeFx) {
+        fxEngine.nextFx();
+    }
     static int frame = 0;
     EVERY_N_MILLISECONDS_DYNAMIC(changePalletTime.as<int>() * 1000) {
         if (changePallete) {
