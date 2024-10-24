@@ -38,116 +38,7 @@
     </script>
 
     <script type="module">
-        function initThreeJsStylesAndImportMap() {
-            const styleSheet = "https://threejs.org/files/main.css";
-            const style = document.createElement('link');
-            style.rel = 'stylesheet';
-            // niow insert into head
-            document.head.appendChild(style);
-        }
 
-        const ENABLED = window.location.search.includes('threejs');
-        if (ENABLED) {
-            initThreeJsStylesAndImportMap();
-
-            // Dynamically import all required modules
-            const THREE = await import('three');
-            const { default: Stats } = await import('three/addons/libs/stats.module.js');
-            const { GUI } = await import('three/addons/libs/lil-gui.module.min.js');
-            const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
-            const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
-            const { EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js');
-            const { RenderPass } = await import('three/addons/postprocessing/RenderPass.js');
-            const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
-            const { OutputPass } = await import('three/addons/postprocessing/OutputPass.js');
-
-            let camera, stats;
-            let composer, renderer, mixer, clock;
-
-            const params = {
-                threshold: 0,
-                strength: 1,
-                radius: 0,
-                exposure: 1
-            };
-
-            async function initThreeScene() {
-                const container = document.getElementById('container');
-                clock = new THREE.Clock();
-                const scene = new THREE.Scene();
-
-                camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 100);
-                camera.position.set(-5, 2.5, -3.5);
-                scene.add(camera);
-
-                scene.add(new THREE.AmbientLight(0xcccccc));
-
-                const pointLight = new THREE.PointLight(0xffffff, 100);
-                camera.add(pointLight);
-
-                const loader = new GLTFLoader();
-                const gltf = await loader.loadAsync('https://threejs.org/examples/models/gltf/PrimaryIonDrive.glb');
-
-                const model = gltf.scene;
-                scene.add(model);
-
-                mixer = new THREE.AnimationMixer(model);
-                const clip = gltf.animations[0];
-                mixer.clipAction(clip.optimize()).play();
-
-                renderer = new THREE.WebGLRenderer({ antialias: true });
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setAnimationLoop(animate);
-                renderer.toneMapping = THREE.ReinhardToneMapping;
-                container.appendChild(renderer.domElement);
-
-                const renderScene = new RenderPass(scene, camera);
-                const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-                bloomPass.threshold = params.threshold;
-                bloomPass.strength = params.strength;
-                bloomPass.radius = params.radius;
-
-                const outputPass = new OutputPass();
-
-                composer = new EffectComposer(renderer);
-                composer.addPass(renderScene);
-                composer.addPass(bloomPass);
-                composer.addPass(outputPass);
-
-                stats = new Stats();
-                container.appendChild(stats.dom);
-
-                const controls = new OrbitControls(camera, renderer.domElement);
-                controls.maxPolarAngle = Math.PI * 0.5;
-                controls.minDistance = 3;
-                controls.maxDistance = 8;
-
-                window.addEventListener('resize', onWindowResize);
-            }
-
-            function onWindowResize() {
-                const width = window.innerWidth;
-                const height = window.innerHeight;
-
-                camera.aspect = width / height;
-                camera.updateProjectionMatrix();
-
-                renderer.setSize(width, height);
-                composer.setSize(width, height);
-            }
-
-            function animate() {
-                const delta = clock.getDelta();
-                mixer.update(delta);
-                stats.update();
-                composer.render();
-            }
-
-            // Initialize Three.js scene when window loads
-            // window.addEventListener('load', initThreeScene);
-            initThreeScene();
-        }
     </script>
 
 </body>
@@ -157,6 +48,123 @@
 <script src="fastled.js"></script>
 <script src="index.js"></script>
 <script type="module">
+    globalThis.ThreeJS = null;
+    function initThreeJsStylesAndImportMap() {
+        const styleSheet = "https://threejs.org/files/main.css";
+        const style = document.createElement('link');
+        style.rel = 'stylesheet';
+        // niow insert into head
+        document.head.appendChild(style);
+    }
+
+    const ENABLED = window.location.search.includes('threejs');
+    if (ENABLED) {
+        initThreeJsStylesAndImportMap();
+
+        // Dynamically import all required modules
+
+        const THREE = await import('three');
+        const { default: Stats } = await import('three/addons/libs/stats.module.js');
+        const { GUI } = await import('three/addons/libs/lil-gui.module.min.js');
+        const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+        const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+        const { EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js');
+        const { RenderPass } = await import('three/addons/postprocessing/RenderPass.js');
+        const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
+        const { OutputPass } = await import('three/addons/postprocessing/OutputPass.js');
+
+
+        globalThis.ThreeJS = THREE;
+        console.log('Loaded all ThreeJS modules:', { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass });
+
+        let camera, stats;
+        let composer, renderer, mixer, clock;
+
+        const params = {
+            threshold: 0,
+            strength: 1,
+            radius: 0,
+            exposure: 1
+        };
+
+        async function initThreeScene() {
+            const container = document.getElementById('container');
+            clock = new THREE.Clock();
+            const scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 100);
+            camera.position.set(-5, 2.5, -3.5);
+            scene.add(camera);
+
+            scene.add(new THREE.AmbientLight(0xcccccc));
+
+            const pointLight = new THREE.PointLight(0xffffff, 100);
+            camera.add(pointLight);
+
+            const loader = new GLTFLoader();
+            const gltf = await loader.loadAsync('https://threejs.org/examples/models/gltf/PrimaryIonDrive.glb');
+
+            const model = gltf.scene;
+            scene.add(model);
+
+            mixer = new THREE.AnimationMixer(model);
+            const clip = gltf.animations[0];
+            mixer.clipAction(clip.optimize()).play();
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setAnimationLoop(animate);
+            renderer.toneMapping = THREE.ReinhardToneMapping;
+            container.appendChild(renderer.domElement);
+
+            const renderScene = new RenderPass(scene, camera);
+            const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+            bloomPass.threshold = params.threshold;
+            bloomPass.strength = params.strength;
+            bloomPass.radius = params.radius;
+
+            const outputPass = new OutputPass();
+
+            composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
+            composer.addPass(outputPass);
+
+            stats = new Stats();
+            container.appendChild(stats.dom);
+
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.maxPolarAngle = Math.PI * 0.5;
+            controls.minDistance = 3;
+            controls.maxDistance = 8;
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height);
+            composer.setSize(width, height);
+        }
+
+        function animate() {
+            const delta = clock.getDelta();
+            mixer.update(delta);
+            stats.update();
+            composer.render();
+        }
+
+        // Initialize Three.js scene when window loads
+        // window.addEventListener('load', initThreeScene);
+        initThreeScene();
+    }
+
     // load fastled when the window is loaded.
     async function loadFastLed() {
         // Load the FastLED module.
@@ -165,6 +173,7 @@
             uiControlsId: "ui-controls",
             printId: "output",
             frameRate: 60,
+            threeJS: globalThis.ThreeJS,
         }
         await globalThis.loadFastLED(options);
     }
@@ -181,7 +190,15 @@
         };
     }
 
-    window.addEventListener('load', loadFastLed);
+    let loaded = false;
+    let loadFastLedOnce = () => {
+        if (loaded) return;
+        loadFastLed();
+        loaded = true;
+    }
+
+    window.addEventListener('load', loadFastLedOnce);
+    setTimeout(loadFastLedOnce, 100);
 </script>
 
 

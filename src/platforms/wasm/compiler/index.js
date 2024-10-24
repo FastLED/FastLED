@@ -500,6 +500,24 @@ class UiManager {
     let uiManager;
     let uiCanvasChanged = false;
 
+    print = function (...args) {
+        // take the args and stringify them, then add them to the output element
+        let cleanedArgs = args.map(arg => {
+            if (typeof arg === 'object') {
+                return JSON.stringify(arg).slice(0, 100);
+            }
+            return arg;
+        });
+        const allText = output.textContent + [...cleanedArgs].join(' ') + '\n';
+        // split into lines, and if there are more than 100 lines, remove one.
+        const lines = allText.split('\n');
+        while (lines.length > 100) {
+            lines.shift();
+        }
+        const output = document.getElementById(outputId);
+        output.textContent = lines.join('\n');
+    }
+
 
     function minMax(array_xy) {
         // array_xy is a an array of an array of x and y values
@@ -596,23 +614,7 @@ class UiManager {
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
     };
 
-    print = function (...args) {
-        // take the args and stringify them, then add them to the output element
-        let cleanedArgs = args.map(arg => {
-            if (typeof arg === 'object') {
-                return JSON.stringify(arg).slice(0, 100);
-            }
-            return arg;
-        });
-        const allText = output.textContent + [...cleanedArgs].join(' ') + '\n';
-        // split into lines, and if there are more than 100 lines, remove one.
-        const lines = allText.split('\n');
-        while (lines.length > 100) {
-            lines.shift();
-        }
-        const output = document.getElementById(outputId);
-        output.textContent = lines.join('\n');
-    }
+
 
     globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
         const output = document.getElementById(outputId);
