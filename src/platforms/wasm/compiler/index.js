@@ -597,13 +597,20 @@ class UiManager {
     };
 
     print = function (...args) {
-        const output = document.getElementById(outputId);
-        const allText = output.textContent + [...args].join(' ') + '\n';
+        // take the args and stringify them, then add them to the output element
+        let cleanedArgs = args.map(arg => {
+            if (typeof arg === 'object') {
+                return JSON.stringify(arg).slice(0, 100);
+            }
+            return arg;
+        });
+        const allText = output.textContent + [...cleanedArgs].join(' ') + '\n';
         // split into lines, and if there are more than 100 lines, remove one.
         const lines = allText.split('\n');
         while (lines.length > 100) {
             lines.shift();
         }
+        const output = document.getElementById(outputId);
         output.textContent = lines.join('\n');
     }
 
@@ -699,6 +706,8 @@ class UiManager {
         outputId = options.printId;
         frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
         uiManager = new UiManager(uiControlsId);
+        let threeJS = options.threeJS;
+        console.log("ThreeJS:", threeJS);
         await onModuleLoaded();
     }
     globalThis.loadFastLED = loadFastLed;
