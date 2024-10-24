@@ -586,18 +586,14 @@ class UiManager {
 
     print = function (...args) {
         const output = document.getElementById(outputId);
-        const allText = [...args].join(' ');
-        output.textContent += allText + '\n';
+        const allText = output.textContent + [...args].join(' ') + '\n';
         // split into lines, and if there are more than 100 lines, remove one.
-        const lines = output.textContent.split('\n');
+        const lines = allText.split('\n');
         while (lines.length > 100) {
             lines.shift();
         }
         output.textContent = lines.join('\n');
     }
-
-
-
 
     globalThis.FastLED_onStripAdded = function (stripId, stripLength) {
         const output = document.getElementById(outputId);
