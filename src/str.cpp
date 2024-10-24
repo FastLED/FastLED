@@ -12,8 +12,19 @@ StringHolder::StringHolder(const char *str) {
         memcpy(mData, str, mLength + 1);
     } else {
         mLength = 0;
-        // Handle allocation failure if necessary
     }
+    mCapacity = mLength;
+}
+
+StringHolder::StringHolder(size_t length) {
+    mData = (char *)malloc(length + 1);
+    if (mData) {
+        mLength = length;
+        mData[mLength] = '\0';
+    } else {
+        mLength = 0;
+    }
+    mCapacity = mLength;
 }
 
 StringHolder::~StringHolder() {
@@ -22,14 +33,16 @@ StringHolder::~StringHolder() {
 
 
 void StringHolder::grow(size_t newLength) {
-    if (newLength <= mLength) {
+    if (newLength <= mCapacity) {
         // New length must be greater than current length
+        mLength = newLength;
         return;
     }
     char* newData = (char*)realloc(mData, newLength + 1);
     if (newData) {
         mData = newData;
         mLength = newLength;
+        mCapacity = newLength;
         mData[mLength] = '\0'; // Ensure null-termination
     } else {
         // handle re-allocation failure.
@@ -39,6 +52,9 @@ void StringHolder::grow(size_t newLength) {
             free(mData);
             mData = newData;
             mLength = newLength;
+            mCapacity = mLength;
+        } else {
+            // memory failure.
         }
     }
 }

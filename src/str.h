@@ -24,16 +24,19 @@ DECLARE_SMART_PTR(StringHolder);
 class StringHolder : public Referent {
   public:
     StringHolder(const char *str);
+    StringHolder(size_t length);
     ~StringHolder();
     bool isShared() const { return ref_count() > 1; }
     void grow(size_t newLength);
     const char *data() const { return mData; }
     char *data() { return mData; }
     size_t length() const { return mLength; }
+    size_t capacity() const { return mCapacity; }
 
   private:
-    char *mData;
-    size_t mLength;
+    char *mData = nullptr;
+    size_t mLength = 0;
+    size_t mCapacity = 0;
 };
 
 template <size_t SIZE = 64> class StrN {
@@ -50,13 +53,13 @@ template <size_t SIZE = 64> class StrN {
 
     StrN(const char *str) {
         size_t len = strlen(str);
+        mLength = len;
         if (len + 1 <= SIZE) {
             memcpy(mInlineData, str, len + 1);
             mHeapData.reset();
         } else {
             mHeapData = StringHolderPtr::New(str);
         }
-        mLength = len;
     }
 
     StrN(const StrN &other) { copy(other); }
@@ -115,12 +118,16 @@ template <size_t SIZE = 64> class StrN {
         return mHeapData ? mHeapData->data() : mInlineData;
     }
 
+    char *c_str_mutable() {
+        return mHeapData ? mHeapData->data() : mInlineData;
+    }
+
     char &operator[](size_t index) {
         if (index >= mLength) {
             static char dummy = '\0';
             return dummy;
         }
-        return c_str()[index];
+        return c_str_mutable()[index];
     }
 
     const char &operator[](size_t index) const {

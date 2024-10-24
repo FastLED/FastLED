@@ -57,7 +57,8 @@ DEFINE_PRINT_HELPER(int32_t, "%d");
 DEFINE_PRINT_HELPER(int16_t, "%d");
 DEFINE_PRINT_HELPER(int8_t, "%d");
 DEFINE_PRINT_HELPER_EXT(std::string, "%s", val.c_str());
-DEFINE_PRINT_HELPER_EXT(String, "%s", val.c_str());
+// DEFINE_PRINT_HELPER_EXT(String, "%s", val.c_str());
+
 
 // gcc pop options
 #pragma GCC diagnostic pop
