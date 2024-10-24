@@ -6,8 +6,8 @@ import json
 from math import pi, cos, sin
 
 LED_PER_STRIP = 14
-SPACE_PER_LED = 2.0  # Increased for better visibility
-MIRROR_X = True  # Diagramed from the reverse side. Reverse the x-axis
+SPACE_PER_LED = 3.0  # Increased for better visibility
+MIRROR_X = False  # Diagramed from the reverse side. Reverse the x-axis
 
 SMALLEST_ANGLE = 360 / 6
 
@@ -76,9 +76,9 @@ def gen_points(
         last_angle = angle
         for v in values:
             last_angle = angle
+            curr_point = next_point(curr_point, angle, SPACE_PER_LED)
             if i not in exclude:
-                curr_point = next_point(curr_point, angle, SPACE_PER_LED)
-            points.append(curr_point)
+                points.append(curr_point)
         if i == len(input) - 1:
             break
         curr_point = next_point(curr_point, last_angle, SPACE_PER_LED)
@@ -178,10 +178,11 @@ def generate_red_points() -> list[Point]:
         HexagonAngle.LEFT_UP,
         HexagonAngle.LEFT_DOWN,
         HexagonAngle.DOWN,
+        HexagonAngle.RIGHT_DOWN,
         HexagonAngle.UP,
         HexagonAngle.LEFT_UP
     ]
-    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point, exclude=[4])
+    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point, exclude=[5])
     return points
 
 
