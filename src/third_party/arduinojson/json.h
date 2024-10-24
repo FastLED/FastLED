@@ -14,7 +14,11 @@
 #undef ARDUINO
 #endif
 
+#define FASTLED_JSON_GUARD
+
 #include "json.hpp"
+
+#undef FASTLED_JSON_GUARD
 
 #if defined(__RESTORE_ARDUINO)
 #define ARDUINO __RESTORE_ARDUINO

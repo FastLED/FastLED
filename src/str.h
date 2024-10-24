@@ -105,9 +105,9 @@ template <size_t SIZE = 64> class StrN {
         }
     }
 
-    StrN &operator=(const StrN &other) { copy(other); }
+    StrN &operator=(const StrN &other) { copy(other); return *this; }
 
-    template <size_t M> StrN &operator=(const StrN<M> &other) { copy(other); }
+    template <size_t M> StrN &operator=(const StrN<M> &other) { copy(other); return *this; }
 
     // Destructor
     ~StrN() {}

@@ -5,6 +5,10 @@
 #pragma once
 
 
+#ifndef FASTLED_JSON_GUARD
+#error "You must include third_party/arduinojson/json.h instead of json.hpp"
+#endif
+
     
 
 #ifdef __cplusplus
