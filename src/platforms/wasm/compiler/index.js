@@ -40,7 +40,8 @@ async function initThreeJS(threeJsModules, containerId) {
         const styleSheet = "https://threejs.org/files/main.css";
         const style = document.createElement('link');
         style.rel = 'stylesheet';
-        // niow insert into head
+        style.type = 'text/css';
+        style.href = styleSheet;
         document.head.appendChild(style);
     }
 
