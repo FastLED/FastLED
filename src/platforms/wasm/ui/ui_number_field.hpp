@@ -36,6 +36,7 @@ const char* jsNumberField::name() const {
 
 void jsNumberField::toJson(ArduinoJson::JsonObject& json) const {
     json["name"] = name();
+    json["group"] = mGroup.c_str();
     json["type"] = "number";
     json["id"] = mInternal->id();
     json["value"] = mValue;

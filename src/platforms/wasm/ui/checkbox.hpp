@@ -28,6 +28,7 @@ const char* jsCheckbox::name() const {
 
 void jsCheckbox::toJson(ArduinoJson::JsonObject& json) const {
     json["name"] = name();
+    json["group"] = mGroup.c_str();
     json["type"] = "checkbox";
     json["id"] = mInternal->id();
     json["value"] = mValue;

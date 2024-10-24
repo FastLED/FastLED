@@ -31,6 +31,7 @@ const char* jsSlider::name() const {
 void jsSlider::toJson(ArduinoJson::JsonObject& json) const {
     json["name"] = name();
     json["type"] = "slider";
+    json["group"] = mGroup.c_str();
     json["id"] = mInternal->id();
     json["min"] = mMin;
     json["max"] = mMax;

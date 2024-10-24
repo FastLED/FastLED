@@ -28,6 +28,7 @@ const char* jsButton::name() const {
 
 void jsButton::toJson(ArduinoJson::JsonObject& json) const {
     json["name"] = name();
+    json["group"] = mGroup.c_str();
     json["type"] = "button";
     json["id"] = mInternal->id();
     json["pressed"] = mPressed;

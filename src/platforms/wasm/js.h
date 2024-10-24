@@ -39,6 +39,7 @@ class jsSlider {
     jsSlider(const char *name, float value = 128.0f, float min = 0.0f, float max = 255.0f,
              float step = 1.0f);
     ~jsSlider();
+    jsSlider& Group(const char* name) { mGroup = name; return *this; }
 
     const char *name() const;
     void toJson(ArduinoJson::JsonObject& json) const;
@@ -49,6 +50,7 @@ class jsSlider {
     operator uint16_t() const;
     operator uint32_t() const { return static_cast<uint32_t>(mValue); }
     operator int() const;
+    const Str& groupName() const { return mGroup; }
 
     template <typename T> bool operator>= (T v) const { return mValue >= static_cast<float>(v); }
     template <typename T> bool operator<= (T v) const { return mValue <= static_cast<float>(v); }
@@ -68,6 +70,7 @@ class jsSlider {
     float mMax;
     float mValue;
     float mStep;
+    Str mGroup;
 };
 
 
@@ -75,6 +78,7 @@ class jsNumberField {
   public:
     jsNumberField(const char *name, double value, double min = 0, double max = 100);
     ~jsNumberField();
+    jsNumberField& Group(const char* name) { mGroup = name; return *this; }
 
     const char *name() const;
     void toJson(ArduinoJson::JsonObject& json) const;
@@ -82,6 +86,7 @@ class jsNumberField {
     void setValue(double value);
     operator double() const;
     operator int() const;
+    const Str& groupName() const { return mGroup; }
 
     jsNumberField& operator=(double value) { setValue(value); return *this; }
     jsNumberField& operator=(int value) { setValue(static_cast<double>(value)); return *this; }
@@ -97,6 +102,7 @@ class jsNumberField {
     double mValue;
     double mMin;
     double mMax;
+    Str mGroup;
 };
 
 
@@ -104,6 +110,7 @@ class jsCheckbox {
   public:
     jsCheckbox(const char *name, bool value);
     ~jsCheckbox();
+    jsCheckbox& Group(const char* name) { mGroup = name; return *this; };
 
     const char *name() const;
     void toJson(ArduinoJson::JsonObject& json) const;
@@ -111,6 +118,7 @@ class jsCheckbox {
     void setValue(bool value);
     operator bool() const;
     operator int() const;
+    const Str& groupName() const { return mGroup; }
 
     jsCheckbox& operator=(bool value) { setValue(value); return *this; }
     jsCheckbox& operator=(int value) { setValue(value != 0); return *this; }
@@ -120,12 +128,14 @@ class jsCheckbox {
 
     std::shared_ptr<jsUiInternal> mInternal;
     bool mValue;
+    Str mGroup;
 };
 
 class jsButton {
   public:
     jsButton(const char *name);
     ~jsButton();
+    jsButton& Group(const char* name) { mGroup = name; return *this; }
 
     const char *name() const;
     void toJson(ArduinoJson::JsonObject& json) const;
@@ -135,6 +145,7 @@ class jsButton {
         return mClickedHappened;
     }
     operator bool() const { return clicked(); }
+    const Str& groupName() const { return mGroup; }
 
   private:
     struct Updater : EngineEvents::Listener {
@@ -158,6 +169,7 @@ class jsButton {
     bool mPressed = false;
     bool mPressedLast = false;
     bool mClickedHappened = false;
+    Str mGroup;
 };
 
 
