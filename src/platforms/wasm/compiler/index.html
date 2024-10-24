@@ -174,13 +174,17 @@
 
         threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
         console.log("1: threeJsModules", threeJsModules);
-        initThreeJS(threeJsModules);
     }
 
 
     // load fastled when the window is loaded.
     async function loadFastLed() {
         // Load the FastLED module.
+
+        if (threeJsModules) {
+            initThreeJS(threeJsModules);
+        }
+
         const options = {
             canvasId: "myCanvas",
             uiControlsId: "ui-controls",
@@ -206,6 +210,7 @@
     let loaded = false;
     let loadFastLedOnce = () => {
         if (loaded) return;
+
         loadFastLed();
         loaded = true;
     }
