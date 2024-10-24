@@ -22,6 +22,8 @@ function warn(args) {
 }
 
 function error(args) {
+    const stackTrace = new Error().stack;
+    args = args + '\n' + stackTrace;
     _prev_error(args);
     try { print(args); } catch (e) { }
 }
