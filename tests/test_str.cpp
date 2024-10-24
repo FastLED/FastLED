@@ -81,3 +81,35 @@ TEST_CASE("Str with long strings") {
     s2.append(" with some additional text");
     CHECK(strcmp(s.c_str(), long_string) == 0);  // Original string should remain unchanged
 }
+
+TEST_CASE("Str overflowing inline data") {
+    SUBCASE("Construction with long string") {
+        std::string long_string(FASTLED_STR_INLINED_SIZE + 10, 'a');  // Create a string longer than the inline buffer
+        Str s(long_string.c_str());
+        CHECK(s.size() == long_string.length());
+        CHECK(strcmp(s.c_str(), long_string.c_str()) == 0);
+    }
+
+    SUBCASE("Appending to overflow") {
+        Str s("Short string");
+        std::string append_string(FASTLED_STR_INLINED_SIZE, 'b');  // String to append that will cause overflow
+        s.append(append_string.c_str());
+        CHECK(s.size() == strlen("Short string") + append_string.length());
+        CHECK(s[0] == 'S');
+        CHECK(s[s.size() - 1] == 'b');
+    }
+
+    SUBCASE("Copy on write with long string") {
+        std::string long_string(FASTLED_STR_INLINED_SIZE + 20, 'c');
+        Str s1(long_string.c_str());
+        Str s2 = s1;
+        CHECK(s1.size() == s2.size());
+        CHECK(strcmp(s1.c_str(), s2.c_str()) == 0);
+
+        s2.append("extra");
+        CHECK(s1.size() == long_string.length());
+        CHECK(s2.size() == long_string.length() + 5);
+        CHECK(strcmp(s1.c_str(), long_string.c_str()) == 0);
+        CHECK(s2[s2.size() - 1] == 'a');
+    }
+}
