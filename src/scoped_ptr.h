@@ -14,29 +14,41 @@ struct ArrayDeleter {
     }
 };
 
+template<typename T>
+struct PointerDeleter {
+    void operator()(T* ptr) {
+        delete ptr;
+    }
+};
 
-template <typename T> class scoped_ptr {
+template <typename T, typename Deleter = PointerDeleter<T>>
+class scoped_ptr {
   public:
     // Constructor
-    explicit scoped_ptr(T *ptr = nullptr) : ptr_(ptr) {}
+    explicit scoped_ptr(T *ptr = nullptr, Deleter deleter = Deleter())
+        : ptr_(ptr), deleter_(deleter) {}
 
     // Destructor
-    ~scoped_ptr() { delete ptr_; }
+    ~scoped_ptr() { deleter_(ptr_); }
 
     // Disable copy semantics (no copying allowed)
     scoped_ptr(const scoped_ptr &) = delete;
     scoped_ptr &operator=(const scoped_ptr &) = delete;
 
     // Move constructor
-    scoped_ptr(scoped_ptr &&other) noexcept : ptr_(other.ptr_) {
+    scoped_ptr(scoped_ptr &&other) noexcept
+        : ptr_(other.ptr_), deleter_(other.deleter_) {
         other.ptr_ = nullptr;
+        other.deleter_ = {};
     }
 
     // Move assignment operator
     scoped_ptr &operator=(scoped_ptr &&other) noexcept {
         if (this != &other) {
             reset(other.ptr_);
+            deleter_ = other.deleter_;
             other.ptr_ = nullptr;
+            other.deleter_ = {};
         }
         return *this;
     }
@@ -58,11 +70,10 @@ template <typename T> class scoped_ptr {
 
     // Release the managed object and reset the pointer
     void reset(T *ptr = nullptr) {
-        if (ptr_ == ptr) {
-            return;
+        if (ptr_ != ptr) {
+            deleter_(ptr_);
+            ptr_ = ptr;
         }
-        delete ptr_;
-        ptr_ = ptr;
     }
 
     T* release() {
@@ -73,6 +84,7 @@ template <typename T> class scoped_ptr {
 
   private:
     T *ptr_; // Managed pointer
+    Deleter deleter_; // Custom deleter
 };
 
 template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
@@ -89,8 +101,9 @@ template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
     scoped_array &operator=(const scoped_array &) = delete;
 
     // Move constructor
-    scoped_array(scoped_array &&other) noexcept : arr_(other.arr_) {
+    scoped_array(scoped_array &&other) noexcept : arr_(other.arr_), deleter_(other.deleter_) {
         other.arr_ = nullptr;
+        other.deleter_ = {};
     }
 
     // Move assignment operator
@@ -119,7 +132,7 @@ template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
         if (arr_ == arr) {
             return;
         }
-        delete[] arr_;
+        deleter_(arr_);
         arr_ = arr;
     }
 
