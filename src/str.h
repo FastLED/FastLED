@@ -89,7 +89,8 @@ template <size_t SIZE = 64> class StrN {
         mLength = len;
     }
 
-    void copy(const char *str) {  // cppcheck-suppress operatorEqVarError
+    // cppcheck-suppress-begin [operatorEqVarError]
+    void copy(const char *str) {
         size_t len = strlen(str);
         mLength = len;
         if (len + 1 <= SIZE) {
@@ -106,6 +107,7 @@ template <size_t SIZE = 64> class StrN {
             mHeapData = StringHolderPtr::New(str);
         }
     }
+    // cppcheck-suppress-end
 
     size_t write(const uint8_t* data, size_t n) {
         const char* str = reinterpret_cast<const char*>(data);

@@ -196,6 +196,11 @@ void loop() {
     unsigned long benchmark = millis();
     net_loop();
 
+    // write red unconditionally into the red strip
+    for (int i = 0; i < lengths[RedStrip]; i++) {
+        leds[RedStrip][i] = CRGB(255, 0, 0);
+    }
+
     // Fade all dots to create trails
     for (int strip = 0; strip < 40; strip++) {
         for (int led = 0; led < 14; led++) {
