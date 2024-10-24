@@ -51,8 +51,10 @@ template <size_t SIZE = 64> class StrN {
     // Constructors
     StrN() = default;
 
-    template <size_t M> StrN(const StrN<M> &other) { copy(other); }
 
+
+    // cppcheck-suppress-begin [operatorEqVarError]
+    template <size_t M> StrN(const StrN<M> &other) { copy(other); }
     StrN(const char *str) {
         size_t len = strlen(str);
         mLength = len;
@@ -63,8 +65,28 @@ template <size_t SIZE = 64> class StrN {
             mHeapData = StringHolderPtr::New(str);
         }
     }
-
     StrN(const StrN &other) { copy(other); }
+    void copy(const char *str) {
+        size_t len = strlen(str);
+        mLength = len;
+        if (len + 1 <= SIZE) {
+            memcpy(mInlineData, str, len + 1);
+            mHeapData.reset();
+        } else {
+            if (mHeapData && !mHeapData->isShared()) {
+                // We are the sole owners of this data so we can modify it
+                mHeapData->grow(len);
+                memcpy(mHeapData->data(), str, len + 1);
+                return;
+            }
+            mHeapData.reset();
+            mHeapData = StringHolderPtr::New(str);
+        }
+    }
+    StrN &operator=(const StrN &other) { copy(other); return *this; }
+    template <size_t M> StrN &operator=(const StrN<M> &other) { copy(other); return *this; }
+    // cppcheck-suppress-end
+
 
     bool operator==(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) == 0;
@@ -88,26 +110,6 @@ template <size_t SIZE = 64> class StrN {
         }
         mLength = len;
     }
-
-    // cppcheck-suppress-begin [operatorEqVarError]
-    void copy(const char *str) {
-        size_t len = strlen(str);
-        mLength = len;
-        if (len + 1 <= SIZE) {
-            memcpy(mInlineData, str, len + 1);
-            mHeapData.reset();
-        } else {
-            if (mHeapData && !mHeapData->isShared()) {
-                // We are the sole owners of this data so we can modify it
-                mHeapData->grow(len);
-                memcpy(mHeapData->data(), str, len + 1);
-                return;
-            }
-            mHeapData.reset();
-            mHeapData = StringHolderPtr::New(str);
-        }
-    }
-    // cppcheck-suppress-end
 
     size_t write(const uint8_t* data, size_t n) {
         const char* str = reinterpret_cast<const char*>(data);
@@ -153,9 +155,6 @@ template <size_t SIZE = 64> class StrN {
         return write(str, 1);
     }
 
-    StrN &operator=(const StrN &other) { copy(other); return *this; }
-
-    template <size_t M> StrN &operator=(const StrN<M> &other) { copy(other); return *this; }
 
     // Destructor
     ~StrN() {}
