@@ -1,7 +1,8 @@
 /*
    Original Source: https://github.com/ZackFreedman/Chromance
    GaryWoo's Video: https://www.youtube.com/watch?v=-nSCtxa2Kp0
-   GaryWoo's presets: https://gist.github.com/Garywoo/b6cd1ea90cb5e17cc60b01ae68a2b770
+   GaryWoo's LedMap: https://gist.github.com/Garywoo/b6cd1ea90cb5e17cc60b01ae68a2b770
+   GaryWoo's presets: https://gist.github.com/Garywoo/82fa67c6e1f9529dc16a01dd97d05d58
    Chromance wall hexagon source (emotion controlled w/ EmotiBit)
    Partially cribbed from the DotStar example
    I smooshed in the ESP32 BasicOTA sketch, too
