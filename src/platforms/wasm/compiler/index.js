@@ -33,7 +33,7 @@ console.warn = warn;
 console.error = error;
 
 class GraphicsManager {
-    constructor(canvasId) {
+    constructor(canvasId, threeJsModules) {
         this.canvasId = canvasId;
         this.gl = null;
         this.program = null;
@@ -43,6 +43,7 @@ class GraphicsManager {
         this.texWidth = 0;
         this.texHeight = 0;
         this.texData = null;
+        this.threeJsModules = threeJsModules;
     }
 
     createShaders() {
@@ -499,6 +500,7 @@ class UiManager {
 
     let uiManager;
     let uiCanvasChanged = false;
+    let threeJsModules = {};  // For graphics.
 
     print = function (...args) {
         // take the args and stringify them, then add them to the output element
@@ -659,7 +661,7 @@ class UiManager {
 
     function updateCanvas(frameData) {
         if (!graphicsManager) {
-            graphicsManager = new GraphicsManager(canvasId);
+            graphicsManager = new GraphicsManager(canvasId, threeJsModules);
             uiCanvasChanged = false;
         }
 
@@ -702,13 +704,15 @@ class UiManager {
             console.error("Failed to load FastLED:", error);
         }
     };
+
+
     async function loadFastLed(options) {
         canvasId = options.canvasId;
         uiControlsId = options.uiControlsId;
         outputId = options.printId;
         frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
         uiManager = new UiManager(uiControlsId);
-        let threeJsModules = options.threeJsModules;
+        threeJsModules = options.threeJsModules;
         console.log("ThreeJS:", threeJsModules);
         await onModuleLoaded();
     }
