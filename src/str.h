@@ -186,30 +186,7 @@ template <size_t SIZE = 64> class StrN {
 
     // Append method
     void append(const char *str) {
-        size_t len = strlen(str);
-        size_t newLen = mLength + len;
-        if (newLen + 1 <= SIZE) {
-            memcpy(mInlineData + mLength, str, len + 1);
-            mLength = newLen;
-            return;
-        }
-        if (mHeapData) {
-            if (!mHeapData->isShared()) {
-                mHeapData->grow(newLen);
-                memcpy(mHeapData->data() + mLength, str, len + 1);
-                mLength = newLen;
-                return;
-            }
-        }
-        mHeapData.reset();
-        StringHolderPtr newData = StringHolderPtr::New(mLength + len);
-        if (newData) {
-            memcpy(newData->data(), c_str(), mLength);
-            memcpy(newData->data() + mLength, str, len + 1);
-            mHeapData = newData;
-            mLength = newLen;
-        }
-        mHeapData = newData;
+        write(str, strlen(str));
     }
 
   private:
