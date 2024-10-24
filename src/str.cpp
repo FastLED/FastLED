@@ -1,5 +1,5 @@
 #include "str.h"
-#include "malloc.h"
+#include <stdlib.h>
 
 
 StringHolder::StringHolder(const char *str) {
