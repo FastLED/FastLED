@@ -3,6 +3,22 @@
 #include "ptr.h"
 #include "string.h"
 
+
+#ifndef FASTLED_STR_INLINED_SIZE
+#define FASTLED_STR_INLINED_SIZE 64
+#endif
+
+template<size_t SIZE> class StrN;
+
+// A copy on write string class. Copy operations are
+// fast unless the string overflows the inlined buffer.
+// Whenever possible the heap memory will be shared.
+typedef StrN<FASTLED_STR_INLINED_SIZE> Str;
+
+
+///////////////////////////////////////////////////////
+// Implementation details.
+
 DECLARE_SMART_PTR(StringHolder);
 
 class StringHolder : public Referent {
@@ -20,7 +36,7 @@ class StringHolder : public Referent {
     size_t mLength;
 };
 
-template <size_t SIZE = 64> class StrT {
+template <size_t SIZE = 64> class StrN {
   private:
     size_t mLength = 0;
 
@@ -29,11 +45,11 @@ template <size_t SIZE = 64> class StrT {
 
   public:
     // Constructors
-    StrT() { mInlineData[0] = '\0'; }
+    StrN() { mInlineData[0] = '\0'; }
 
-    template <size_t M> StrT(const StrT<M> &other) { copy(other); }
+    template <size_t M> StrN(const StrN<M> &other) { copy(other); }
 
-    StrT(const char *str) {
+    StrN(const char *str) {
         size_t len = strlen(str);
         if (len + 1 <= SIZE) {
             memcpy(mInlineData, str, len + 1);
@@ -44,17 +60,17 @@ template <size_t SIZE = 64> class StrT {
         mLength = len;
     }
 
-    StrT(const StrT &other) { copy(other); }
+    StrN(const StrN &other) { copy(other); }
 
-    bool operator==(const StrT &other) const {
+    bool operator==(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) == 0;
     }
 
-    bool operator!=(const StrT &other) const {
+    bool operator!=(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) != 0;
     }
 
-    template <size_t M> void copy(const StrT<M> &other) {
+    template <size_t M> void copy(const StrN<M> &other) {
         size_t len = other.size();
         if (len + 1 <= SIZE) {
             memcpy(mInlineData, other.c_str(), len + 1);
@@ -87,12 +103,12 @@ template <size_t SIZE = 64> class StrT {
         }
     }
 
-    StrT &operator=(const StrT &other) { copy(other); }
+    StrN &operator=(const StrN &other) { copy(other); }
 
-    template <size_t M> StrT &operator=(const StrT<M> &other) { copy(other); }
+    template <size_t M> StrN &operator=(const StrN<M> &other) { copy(other); }
 
     // Destructor
-    ~StrT() {}
+    ~StrN() {}
 
     // Accessors
     size_t size() const { return mLength; }
@@ -149,4 +165,4 @@ template <size_t SIZE = 64> class StrT {
 };
 
 
-typedef StrT<64> Str;
+
