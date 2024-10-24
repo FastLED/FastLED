@@ -189,6 +189,10 @@ class GraphicsManager {
                 x -= min_x;
                 y -= min_y;
 
+                // Can't access the texture with floating point.
+                x = Number.parseInt(x, 10);
+                y = Number.parseInt(y, 10);
+
                 // check to make sure that the pixel is within the canvas
                 if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
                     console.warn(`Strip ${strip_id}: Pixel ${i} is outside the canvas at ${x}, ${y}, skipping update`);
@@ -495,12 +499,6 @@ class UiManager {
             // Work in progress.
             const map = jsonData.map;
 
-            // convert to integers - this is a temporary fix until we can
-            // figure out why float isn't working with the engine.
-            for (let i = 0; i < map.length; i++) {
-                map[i][0] = Number.parseInt(map[i][0], 10);
-                map[i][1] = Number.parseInt(map[i][1], 10);
-            }
 
             const [min, max] = minMax(map);
             console.log("min", min, "max", max);
