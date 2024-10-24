@@ -8,7 +8,7 @@
 #include "ui_internal.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
-
+#include "math_macros.h"
 #include <memory>
 
 FASTLED_NAMESPACE_BEGIN
@@ -49,11 +49,11 @@ double jsNumberField::value() const {
 }
 
 void jsNumberField::setValue(double value) {
-    mValue = std::max(mMin, std::min(mMax, value));
+    mValue = MAX(mMin, MIN(mMax, value));
 }
 
 void jsNumberField::updateInternal(const ArduinoJson::JsonVariantConst& value) {
-    mValue = std::max(mMin, std::min(mMax, value.as<double>()));
+    mValue = MAX(mMin, MIN(mMax, value.as<double>()));
 }
 
 jsNumberField::operator double() const {
