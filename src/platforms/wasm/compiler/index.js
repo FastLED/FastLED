@@ -778,7 +778,7 @@ class UiManager {
 
 
     // Ensure we wait for the module to load
-    const onModuleLoaded = async () => {
+    const onModuleLoaded = async (fastLedLoader) => {
         // Unpack the module functions and send them to the runFastLED function
         function __runFastLED(moduleInstance, frameRate) {
             const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
@@ -788,18 +788,18 @@ class UiManager {
             }
             return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance);
         }
-        var fastledLoader = globalThis.fastled;
+        
         try {
-            if (typeof fastledLoader === 'function') {
+            if (typeof fastLedLoader === 'function') {
                 // Load the module
-                fastledLoader().then(instance => {
+                fastLedLoader().then(instance => {
                     console.log("Module loaded, running FastLED...");
                     __runFastLED(instance, frameRate);
                 }).catch(err => {
                     console.error("Error loading fastled as a module:", err);
                 });
             } else {
-                console.log("Could not detect a valid module loading for FastLED.");
+                console.log("Could not detect a valid module loading for FastLED, expected function but got", typeof fastledLoader);
             }
         } catch (error) {
             console.error("Failed to load FastLED:", error);
@@ -808,6 +808,7 @@ class UiManager {
 
 
     async function loadFastLed(options) {
+        console.log("Loading FastLED with options:", options);
         canvasId = options.canvasId;
         uiControlsId = options.uiControlsId;
         outputId = options.printId;
@@ -815,11 +816,13 @@ class UiManager {
         uiManager = new UiManager(uiControlsId);
         threeJs = options.threeJs;
         console.log("ThreeJS:", threeJs);
-        await onModuleLoaded();
+        const fastLedLoader = options.fastled;
+        await onModuleLoaded(fastLedLoader);
         const threeJsModules = threeJs.modules;
         const containerId = threeJs.containerId;
         console.log("ThreeJS modules:", threeJsModules);
         console.log("Container ID:", containerId);
+
         if (threeJsModules) {
             await initThreeJS(threeJsModules, containerId);
         }
