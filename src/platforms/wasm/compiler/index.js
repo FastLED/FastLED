@@ -130,9 +130,7 @@ class GraphicsManager {
             return;
         }
 
-
         if (!this.gl) this.initWebGL();
-
 
         const canvasWidth = this.gl.canvas.width;
         const canvasHeight = this.gl.canvas.height;
@@ -165,14 +163,16 @@ class GraphicsManager {
 
         const screenMap = frameData.screenMap;
 
+        // Clear the texture data
+        this.texData.fill(0);
 
         for (let i = 0; i < frameData.length; i++) {
             const strip = frameData[i];
             const data = strip.pixel_data;
             const strip_id = strip.strip_id;
-            if (!strip_id in screenMap.strips) {
+            if (!(strip_id in screenMap.strips)) {
                 console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
-                return;
+                continue;
             }
             const stripData = screenMap.strips[strip_id];
             const pixelCount = data.length / 3;
@@ -378,10 +378,9 @@ class UiManager {
         slider.max = Number.parseFloat(element.max);
         slider.value = Number.parseFloat(element.value);
         slider.step = Number.parseFloat(element.step);
-
-        console.log("slider min: ", slider.min, "max: ", slider.max, "value: ", slider.value, "step: ", slider.step);
-        /// slider.value = element.value;
         setTimeout(() => {
+            // Sets the slider value, for some reason we have to do it
+            // next frame.
             slider.value = Number.parseFloat(element.value);
             valueDisplay.textContent = slider.value;
         },0);
