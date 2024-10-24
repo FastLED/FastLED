@@ -49,7 +49,7 @@
 <script src="index.js"></script>
 <script type="module">
     globalThis.ThreeJS = null;
-    function initThreeJsStylesAndImportMap() {
+    function initThreeJsStyle() {
         const styleSheet = "https://threejs.org/files/main.css";
         const style = document.createElement('link');
         style.rel = 'stylesheet';
@@ -154,7 +154,7 @@
     }
 
     if (ENABLED) {
-        initThreeJsStylesAndImportMap();
+        initThreeJsStyle();
 
         // Dynamically import all required modules
 
