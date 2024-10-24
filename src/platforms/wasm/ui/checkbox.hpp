@@ -14,7 +14,8 @@ jsCheckbox::jsCheckbox(const char* name, bool value)
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, ArduinoJson::JsonObject& json) {
         static_cast<jsCheckbox*>(self)->toJson(json);
     });
-    mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonFunc));
+    //mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 

@@ -10,8 +10,8 @@
 FASTLED_NAMESPACE_BEGIN
 
 inline bool jsUiManager::WeakPtrCompare::operator()(
-    const std::weak_ptr<jsUiInternal> &lhs,
-    const std::weak_ptr<jsUiInternal> &rhs) const {
+    const WeakPtr<jsUiInternal> &lhs,
+    const WeakPtr<jsUiInternal> &rhs) const {
     auto l = lhs.lock();
     auto r = rhs.lock();
     if (!l && !r)
@@ -23,14 +23,14 @@ inline bool jsUiManager::WeakPtrCompare::operator()(
     return l->id() < r->id();
 }
 
-inline void jsUiManager::addComponent(std::weak_ptr<jsUiInternal> component) {
+inline void jsUiManager::addComponent(WeakPtr<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.insert(component);
     instance().mItemsAdded = true;
 }
 
 inline void
-jsUiManager::removeComponent(std::weak_ptr<jsUiInternal> component) {
+jsUiManager::removeComponent(WeakPtr<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.erase(component);
 }
@@ -39,8 +39,8 @@ inline jsUiManager &jsUiManager::instance() {
     return Singleton<jsUiManager>::instance();
 }
 
-inline std::vector<std::shared_ptr<jsUiInternal>> jsUiManager::getComponents() {
-    std::vector<std::shared_ptr<jsUiInternal>> components;
+inline std::vector<jsUiInternalPtr> jsUiManager::getComponents() {
+    std::vector<jsUiInternalPtr> components;
     {
         std::lock_guard<std::mutex> lock(mMutex);
 
@@ -92,7 +92,7 @@ jsUiManager::executeUiUpdates(const ArduinoJson::JsonDocument &doc) {
 }
 
 inline void jsUiManager::toJson(ArduinoJson::JsonArray &json) {
-    std::vector<std::shared_ptr<jsUiInternal>> components =
+    std::vector<jsUiInternalPtr> components =
         instance().getComponents();
     for (const auto &component : components) {
         ArduinoJson::JsonObject componentJson =

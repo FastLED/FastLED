@@ -16,7 +16,7 @@ jsSlider::jsSlider(const char* name, float value, float min, float max, float st
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, ArduinoJson::JsonObject& json) {
         static_cast<jsSlider*>(self)->toJson(json);
     });
-    mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 

@@ -9,10 +9,13 @@
 #include "namespace.h"
 #include "callback.h"
 #include "third_party/arduinojson/json.h"
+#include "ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
 
-class jsUiInternal : public std::enable_shared_from_this<jsUiInternal> {
+DECLARE_SMART_PTR(jsUiInternal);
+
+class jsUiInternal : public Referent {
 public:
 
     using UpdateFunction = Callback<const ArduinoJson::JsonVariantConst&>;

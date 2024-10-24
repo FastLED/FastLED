@@ -22,7 +22,7 @@ jsNumberField::jsNumberField(const char* name, double value, double min, double 
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, ArduinoJson::JsonObject& json) {
         static_cast<jsNumberField*>(self)->toJson(json);
     });
-    mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 

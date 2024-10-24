@@ -13,7 +13,7 @@ jsButton::jsButton(const char* name)
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, ArduinoJson::JsonObject& json) {
         static_cast<jsButton*>(self)->toJson(json);
     });
-    mInternal = std::make_shared<jsUiInternal>(name, std::move(updateFunc), std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
     mUpdater.init(this);
 }

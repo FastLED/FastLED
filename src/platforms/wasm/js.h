@@ -12,6 +12,7 @@
 #include "engine_events.h"
 #include "namespace.h"
 #include "screenmap.h"
+#include "ptr.h"
 #include "active_strip_data.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -65,7 +66,7 @@ class jsSlider {
   private:
     void updateInternal(const ArduinoJson::JsonVariantConst& value);
 
-    std::shared_ptr<jsUiInternal> mInternal;
+    jsUiInternalPtr mInternal;
     float mMin;
     float mMax;
     float mValue;
@@ -98,7 +99,7 @@ class jsNumberField {
   private:
     void updateInternal(const ArduinoJson::JsonVariantConst& value);
 
-    std::shared_ptr<jsUiInternal> mInternal;
+    jsUiInternalPtr mInternal;
     double mValue;
     double mMin;
     double mMax;
@@ -126,7 +127,7 @@ class jsCheckbox {
   private:
     void updateInternal(const ArduinoJson::JsonVariantConst& value);
 
-    std::shared_ptr<jsUiInternal> mInternal;
+    jsUiInternalPtr mInternal;
     bool mValue;
     Str mGroup;
 };
@@ -165,7 +166,7 @@ class jsButton {
 
     void updateInternal(const ArduinoJson::JsonVariantConst& value);
 
-    std::shared_ptr<jsUiInternal> mInternal;
+    jsUiInternalPtr mInternal;
     bool mPressed = false;
     bool mPressedLast = false;
     bool mClickedHappened = false;
