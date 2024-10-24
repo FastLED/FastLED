@@ -6,18 +6,18 @@ globalThis.loadFastLED = async function () {
 
 var print = null;
 
-function log(text) {
-    console.log(text);
-    try { print(text); } catch (e) { }
+function log(...args) {
+    console.log(args);
+    try { print(args); } catch (e) { }
 }
-function warn(text) {
-    console.warn(text);
-    try { print(text); } catch (e) { }
+function warn(args) {
+    console.warn(args);
+    try { print(args); } catch (e) { }
 }
 
-function error(text) {
-    console.error(text);
-    try { print(text); } catch (e) { }
+function error(args) {
+    console.error(args);
+    try { print(args); } catch (e) { }
 }
 
 class GraphicsManager {
@@ -592,8 +592,8 @@ class UiManager {
         const lines = output.textContent.split('\n');
         while (lines.length > 100) {
             lines.shift();
-            output.textContent = lines.join('\n');
         }
+        output.textContent = lines.join('\n');
     }
 
 
