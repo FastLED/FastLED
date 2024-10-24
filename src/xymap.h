@@ -5,7 +5,7 @@
 #include "xmap.h" // Include xmap.h for LUT16
 #include <stdint.h>
 #include <string.h>
-#include "lut16.h"
+#include "lut.h"
 #include "crgb.h"
 #include "screenmap.h"
 

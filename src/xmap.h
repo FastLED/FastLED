@@ -4,7 +4,7 @@
 #include <string.h>
 #include "ptr.h"
 #include "force_inline.h"
-#include "lut16.h"
+#include "lut.h"
 
 FASTLED_FORCE_INLINE uint16_t x_linear(uint16_t x, uint16_t length) {
     return x;

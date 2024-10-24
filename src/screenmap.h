@@ -7,7 +7,7 @@
  */
 
 #include "force_inline.h"
-#include "lut16.h"
+#include "lut.h"
 #include "ptr.h"
 #include <stdint.h>
 #include "str.h"

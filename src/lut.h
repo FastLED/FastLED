@@ -1,5 +1,9 @@
 #pragma once
 
+/*
+LUT - Look up table implementation for various types.
+*/
+
 #include <stdint.h>
 #include "ptr.h"
 #include "force_inline.h"
