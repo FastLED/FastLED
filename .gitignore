@@ -44,3 +44,4 @@ ci/-
 **/fastled_js
 
 ignore/
+.env
