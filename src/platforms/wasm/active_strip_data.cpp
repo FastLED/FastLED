@@ -13,9 +13,11 @@
 #include "singleton.h"
 #include "slice.h"
 
+#include "active_strip_data.h"
 #include "engine_events.h"
 #include "fixed_map.h"
 #include "js.h"
+#include "str.h"
 #include "namespace.h"
 #include <stdio.h>
 
@@ -46,7 +48,7 @@ emscripten::val ActiveStripData::getPixelData_Uint8(int stripIndex) {
     return emscripten::val::undefined();
 }
 
-std::string ActiveStripData::infoJsonString() {
+Str ActiveStripData::infoJsonString() {
     ArduinoJson::JsonDocument doc;
     auto array = doc.to<ArduinoJson::JsonArray>();
 
@@ -56,7 +58,7 @@ std::string ActiveStripData::infoJsonString() {
         obj["type"] = "r8g8b8";
     }
 
-    std::string jsonBuffer;
+    Str jsonBuffer;
     serializeJson(doc, jsonBuffer);
     return jsonBuffer;
 }

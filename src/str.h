@@ -2,6 +2,7 @@
 
 #include "ptr.h"
 #include "string.h"
+#include <stdint.h>
 
 #include "namespace.h"
 
@@ -28,6 +29,7 @@ class StringHolder : public Referent {
     ~StringHolder();
     bool isShared() const { return ref_count() > 1; }
     void grow(size_t newLength);
+    bool hasCapacity(size_t newLength) const { return newLength <= mCapacity; }
     const char *data() const { return mData; }
     char *data() { return mData; }
     size_t length() const { return mLength; }
@@ -96,13 +98,57 @@ template <size_t SIZE = 64> class StrN {
         } else {
             if (mHeapData && !mHeapData->isShared()) {
                 // We are the sole owners of this data so we can modify it
-                mHeapData->grow(len);
+                mHeapData->grow(len * 3 / 2);  // Grow by 50%
                 memcpy(mHeapData->data(), str, len + 1);
                 return;
             }
             mHeapData.reset();
             mHeapData = StringHolderPtr::New(str);
         }
+    }
+
+    size_t write(const uint8_t* data, size_t n) {
+        const char* str = reinterpret_cast<const char*>(data);
+        return write(str, n);
+    }
+
+    size_t write(const char *str, size_t n) {
+        size_t newLen = mLength + n;
+        if (newLen + 1 <= SIZE) {
+            memcpy(mInlineData + mLength, str, n);
+            mLength = newLen;
+            mInlineData[mLength] = '\0';
+            return mLength;
+        }
+        if (mHeapData && !mHeapData->isShared()) {
+            if (!mHeapData->hasCapacity(newLen)) {
+                mHeapData->grow(newLen * 3 / 2);  // Grow by 50%
+            }
+            memcpy(mHeapData->data() + mLength, str, n);
+            mLength = newLen;
+            mHeapData->data()[mLength] = '\0';
+            return mLength;
+        }
+        mHeapData.reset();
+        StringHolderPtr newData = StringHolderPtr::New(newLen);
+        if (newData) {
+            memcpy(newData->data(), c_str(), mLength);
+            memcpy(newData->data() + mLength, str, n);
+            newData->data()[newLen] = '\0';
+            mHeapData = newData;
+            mLength = newLen;
+        }
+        mHeapData = newData;
+        return mLength;
+    }
+
+    size_t write(char c) {
+        return write(&c, 1);
+    }
+
+    size_t write(uint8_t c) {
+        const char* str = reinterpret_cast<const char*>(&c);
+        return write(str, 1);
     }
 
     StrN &operator=(const StrN &other) { copy(other); return *this; }

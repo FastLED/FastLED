@@ -36,7 +36,7 @@ public:
     void update(int id, uint32_t now, const uint8_t* pixel_data, size_t size);
     void updateScreenMap(int id, const ScreenMap& screenmap);
     emscripten::val getPixelData_Uint8(int stripIndex);
-    std::string infoJsonString();
+    Str infoJsonString();
 
 
     const StripDataMap& getData() const  {

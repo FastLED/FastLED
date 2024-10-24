@@ -153,7 +153,7 @@ void setup() {
     Serial.println("JSON SCREENMAP");
     Serial.println(JSON_SCREEN_MAP);
 
-    FixedMap<String, ScreenMap, 16> segmentMaps;
+    FixedMap<Str, ScreenMap, 16> segmentMaps;
     ScreenMap::ParseJson(JSON_SCREEN_MAP, &segmentMaps);
 
     printf("Parsed %d segment maps\n", int(segmentMaps.size()));

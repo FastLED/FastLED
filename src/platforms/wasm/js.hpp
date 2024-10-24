@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
+#include "str.h"
 
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
@@ -12,6 +13,7 @@
 #include "active_strip_data.h"
 #include "engine_events.h"
 #include "js.h"
+#include "str.h"
 #include "namespace.h"
 #include "screenmap.h"
 
@@ -40,7 +42,7 @@ inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap &screenmap) {
         entry.add(screenmap[i].x);
         entry.add(screenmap[i].y);
     }
-    std::string jsonBuffer;
+    Str jsonBuffer;
     serializeJson(doc, jsonBuffer);
     jsSetCanvasSize(jsonBuffer.c_str(), jsonBuffer.size());
 }
@@ -98,7 +100,7 @@ inline void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {
 
 inline void jsOnFrame(ActiveStripData& active_strips) {
     jsFillInMissingScreenMaps(active_strips);
-    std::string json_str = active_strips.infoJsonString();
+    Str json_str = active_strips.infoJsonString();
     EM_ASM_({
         globalThis.FastLED_onFrame = globalThis.FastLED_onFrame || function(frameInfo, callback) {
                 console.log("Missing globalThis.FastLED_onFrame() function");
