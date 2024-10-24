@@ -6,16 +6,17 @@
 
 #include "screenmap.h"
 
+#include "str.h"
 #include "fixed_map.h"
 #include "third_party/arduinojson/json.h"
 #include "namespace.h"
-#include "str.h"
+
 #include "fixed_vector.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 void ScreenMap::ParseJson(const char *jsonStrOfMapFile,
-                          FixedMap<String, ScreenMap, 16> *segmentMaps) {
+                          FixedMap<Str<64>, ScreenMap, 16> *segmentMaps) {
     ArduinoJson::JsonDocument doc;
     ArduinoJson::deserializeJson(doc, jsonStrOfMapFile);
     auto map = doc["map"];

@@ -10,7 +10,7 @@
 #include "lut16.h"
 #include "ptr.h"
 #include <stdint.h>
-#include <string.h>
+#include "str.h"
 #include "fixed_map.h"
 
 class String;
@@ -92,7 +92,7 @@ class ScreenMap {
     uint32_t getLength() const { return length; }
 
     static void ParseJson(const char *jsonStrOfMapFile,
-                          FixedMap<String, ScreenMap, 16> *segmentMaps);
+                          FixedMap<Str<64>, ScreenMap, 16> *segmentMaps);
 
   private:
     static const pair_xy_float &empty() {
