@@ -20,7 +20,7 @@ class StringHolder : public Referent {
     size_t mLength;
 };
 
-template <size_t SIZE = 64> class Str {
+template <size_t SIZE = 64> class StrT {
   private:
     size_t mLength = 0;
 
@@ -29,11 +29,11 @@ template <size_t SIZE = 64> class Str {
 
   public:
     // Constructors
-    Str() { mInlineData[0] = '\0'; }
+    StrT() { mInlineData[0] = '\0'; }
 
-    template <size_t M> Str(const Str<M> &other) { copy(other); }
+    template <size_t M> StrT(const StrT<M> &other) { copy(other); }
 
-    Str(const char *str) {
+    StrT(const char *str) {
         size_t len = strlen(str);
         if (len + 1 <= SIZE) {
             memcpy(mInlineData, str, len + 1);
@@ -44,17 +44,17 @@ template <size_t SIZE = 64> class Str {
         mLength = len;
     }
 
-    Str(const Str &other) { copy(other); }
+    StrT(const StrT &other) { copy(other); }
 
-    bool operator==(const Str &other) const {
+    bool operator==(const StrT &other) const {
         return strcmp(c_str(), other.c_str()) == 0;
     }
 
-    bool operator!=(const Str &other) const {
+    bool operator!=(const StrT &other) const {
         return strcmp(c_str(), other.c_str()) != 0;
     }
 
-    template <size_t M> void copy(const Str<M> &other) {
+    template <size_t M> void copy(const StrT<M> &other) {
         size_t len = other.size();
         if (len + 1 <= SIZE) {
             memcpy(mInlineData, other.c_str(), len + 1);
@@ -87,12 +87,12 @@ template <size_t SIZE = 64> class Str {
         }
     }
 
-    Str &operator=(const Str &other) { copy(other); }
+    StrT &operator=(const StrT &other) { copy(other); }
 
-    template <size_t M> Str &operator=(const Str<M> &other) { copy(other); }
+    template <size_t M> StrT &operator=(const StrT<M> &other) { copy(other); }
 
     // Destructor
-    ~Str() {}
+    ~StrT() {}
 
     // Accessors
     size_t size() const { return mLength; }
@@ -148,3 +148,5 @@ template <size_t SIZE = 64> class Str {
     StringHolderPtr mData;
 };
 
+
+typedef StrT<64> Str;

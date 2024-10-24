@@ -8,6 +8,6 @@
 #include "fixed_vector.h"
 
 TEST_CASE("str") {
-    FixedVector<Str<64>, 10> vec;
-    vec.push_back(Str<64>("hello"));
+    FixedVector<Str, 10> vec;
+    vec.push_back(Str("hello"));
 }

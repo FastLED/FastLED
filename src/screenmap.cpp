@@ -16,7 +16,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 void ScreenMap::ParseJson(const char *jsonStrOfMapFile,
-                          FixedMap<Str<64>, ScreenMap, 16> *segmentMaps) {
+                          FixedMap<Str, ScreenMap, 16> *segmentMaps) {
     ArduinoJson::JsonDocument doc;
     ArduinoJson::deserializeJson(doc, jsonStrOfMapFile);
     auto map = doc["map"];

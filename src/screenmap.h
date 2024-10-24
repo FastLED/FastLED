@@ -92,7 +92,7 @@ class ScreenMap {
     uint32_t getLength() const { return length; }
 
     static void ParseJson(const char *jsonStrOfMapFile,
-                          FixedMap<Str<64>, ScreenMap, 16> *segmentMaps);
+                          FixedMap<Str, ScreenMap, 16> *segmentMaps);
 
   private:
     static const pair_xy_float &empty() {
