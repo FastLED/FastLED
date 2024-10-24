@@ -3,6 +3,10 @@
 #include "ptr.h"
 #include "string.h"
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
@@ -35,13 +39,12 @@ class StringHolder : public Referent {
 template <size_t SIZE = 64> class StrN {
   private:
     size_t mLength = 0;
-
-    char mInlineData[SIZE];
+    char mInlineData[SIZE] = {0};
     StringHolderPtr mHeapData;
 
   public:
     // Constructors
-    StrN() { mInlineData[0] = '\0'; }
+    StrN() = default;
 
     template <size_t M> StrN(const StrN<M> &other) { copy(other); }
 
@@ -170,3 +173,5 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     template <size_t M> Str(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     Str &operator=(const Str &other) { copy(other); return *this; }
 };
+
+FASTLED_NAMESPACE_END

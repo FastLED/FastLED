@@ -1,5 +1,8 @@
 #include "str.h"
 #include <stdlib.h>
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 
 StringHolder::StringHolder(const char *str) {
@@ -40,4 +43,4 @@ void StringHolder::grow(size_t newLength) {
     }
 }
 
-
+FASTLED_NAMESPACE_END
