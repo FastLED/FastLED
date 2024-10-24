@@ -33,12 +33,15 @@ protected:
 		pixels.disableColorAdjustment();
 		PixelController<RGB> pixels_rgb = pixels;  // Converts to RGB pixels
 		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
+		mRgb.resize(iterator.size() * 3);
+		auto out_iterator = mRgb.data();
 		while (iterator.has(1)) {
 			uint8_t r, g, b;
 			iterator.loadAndScaleRGB(&r, &g, &b);
-			mRgb.push_back(r);
-			mRgb.push_back(g);
-			mRgb.push_back(b);
+			out_iterator[0] = r;
+			out_iterator[1] = g;
+			out_iterator[2] = b;
+			out_iterator += 3;
 			iterator.advanceData();
 		}
 		const uint8_t* rgb = mRgb.data();
