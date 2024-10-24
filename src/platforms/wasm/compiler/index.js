@@ -13,15 +13,15 @@ const _prev_warn = console.warn;
 const _prev_error = console.error;
 
 function log(...args) {
-    _prev_log(args);
-    try { print(args); } catch (e) { }
+    _prev_log(...args);
+    try { print(...args); } catch (e) { }
 }
-function warn(args) {
-    _prev_warn(args);
-    try { print(args); } catch (e) { }
+function warn(...args) {
+    _prev_warn(...args);
+    try { print(...args); } catch (e) { }
 }
 
-function error(args) {
+function error(...args) {
     const stackTrace = new Error().stack;
     args = args + '\n' + stackTrace;
     _prev_error(args);
