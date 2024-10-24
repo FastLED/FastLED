@@ -219,9 +219,11 @@ def generate_green_points() -> list[Point]:
         HexagonAngle.RIGHT_UP,
         HexagonAngle.LEFT_UP,
         HexagonAngle.LEFT_DOWN,
-        HexagonAngle.RIGHT_DOWN
+        HexagonAngle.RIGHT_DOWN,
+        HexagonAngle.RIGHT_UP,
+        HexagonAngle.RIGHT_DOWN,
     ]
-    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point, exclude=[4])
+    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point, exclude=[12])
     return points
 
 def generate_blue_points() -> list[Point]:
