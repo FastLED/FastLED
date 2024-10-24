@@ -89,7 +89,7 @@ template <size_t SIZE = 64> class StrN {
         mLength = len;
     }
 
-    void copy(const char *str) {
+    void copy(const char *str) {  // cppcheck-suppress operatorEqVarError
         size_t len = strlen(str);
         mLength = len;
         if (len + 1 <= SIZE) {
@@ -98,7 +98,7 @@ template <size_t SIZE = 64> class StrN {
         } else {
             if (mHeapData && !mHeapData->isShared()) {
                 // We are the sole owners of this data so we can modify it
-                mHeapData->grow(len * 3 / 2);  // Grow by 50%
+                mHeapData->grow(len);
                 memcpy(mHeapData->data(), str, len + 1);
                 return;
             }
