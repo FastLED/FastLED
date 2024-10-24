@@ -1,3 +1,8 @@
+"""
+Generates the hexegon using math.
+"""
+
+
 from dataclasses import dataclass
 from enum import Enum
 import json
