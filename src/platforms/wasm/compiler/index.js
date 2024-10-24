@@ -32,6 +32,106 @@ console.log = log;
 console.warn = warn;
 console.error = error;
 
+
+
+async function initThreeJS(threeJsModules) {
+
+    function initThreeJsStyle() {
+        const styleSheet = "https://threejs.org/files/main.css";
+        const style = document.createElement('link');
+        style.rel = 'stylesheet';
+        // niow insert into head
+        document.head.appendChild(style);
+    }
+
+    let camera, stats;
+    let composer, renderer, mixer, clock;
+
+    const params = {
+        threshold: 0,
+        strength: 1,
+        radius: 0,
+        exposure: 1
+    };
+
+    async function initThreeScene() {
+        console.log("threeJsModules", threeJsModules);
+        const { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass } = threeJsModules;
+        const container = document.getElementById('container');
+        clock = new THREE.Clock();
+        const scene = new THREE.Scene();
+
+        camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 100);
+        camera.position.set(-5, 2.5, -3.5);
+        scene.add(camera);
+
+        scene.add(new THREE.AmbientLight(0xcccccc));
+
+        const pointLight = new THREE.PointLight(0xffffff, 100);
+        camera.add(pointLight);
+
+        const loader = new GLTFLoader();
+        const gltf = await loader.loadAsync('https://threejs.org/examples/models/gltf/PrimaryIonDrive.glb');
+
+        const model = gltf.scene;
+        scene.add(model);
+
+        mixer = new THREE.AnimationMixer(model);
+        const clip = gltf.animations[0];
+        mixer.clipAction(clip.optimize()).play();
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setAnimationLoop(animate);
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        container.appendChild(renderer.domElement);
+
+        const renderScene = new RenderPass(scene, camera);
+        const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = params.threshold;
+        bloomPass.strength = params.strength;
+        bloomPass.radius = params.radius;
+
+        const outputPass = new OutputPass();
+
+        composer = new EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+        composer.addPass(outputPass);
+
+        stats = new Stats();
+        container.appendChild(stats.dom);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.maxPolarAngle = Math.PI * 0.5;
+        controls.minDistance = 3;
+        controls.maxDistance = 8;
+
+        window.addEventListener('resize', onWindowResize);
+    }
+
+    function onWindowResize() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+
+        renderer.setSize(width, height);
+        composer.setSize(width, height);
+    }
+
+    function animate() {
+        const delta = clock.getDelta();
+        mixer.update(delta);
+        stats.update();
+        composer.render();
+    }
+    initThreeJsStyle();
+    await initThreeScene();
+}
+
 class GraphicsManager {
     constructor(canvasId, threeJsModules) {
         this.canvasId = canvasId;
@@ -715,6 +815,9 @@ class UiManager {
         threeJsModules = options.threeJsModules;
         console.log("ThreeJS:", threeJsModules);
         await onModuleLoaded();
+        if (threeJsModules) {
+            await initThreeJS(threeJsModules);
+        }
     }
     globalThis.loadFastLED = loadFastLed;
 })();
