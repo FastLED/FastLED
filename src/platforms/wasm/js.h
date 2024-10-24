@@ -47,7 +47,13 @@ class jsSlider {
     operator float() const;
     operator uint8_t() const;
     operator uint16_t() const;
+    operator uint32_t() const { return static_cast<uint32_t>(mValue); }
     operator int() const;
+
+    template <typename T> bool operator>= (T v) const { return mValue >= static_cast<float>(v); }
+    template <typename T> bool operator<= (T v) const { return mValue <= static_cast<float>(v); }
+    template <typename T> bool operator> (T v) const { return mValue > static_cast<float>(v); }
+    template <typename T> bool operator< (T v) const { return mValue < static_cast<float>(v); }
 
     template <typename T> T as() const { return static_cast<T>(mValue); }
 
@@ -153,6 +159,7 @@ class jsButton {
     bool mPressedLast = false;
     bool mClickedHappened = false;
 };
+
 
 void jsSetCanvasSize(const char* jsonString, size_t jsonSize);
 void jsSetCanvasSize(int cledcontoller_id, uint16_t width, uint16_t height);

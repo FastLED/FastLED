@@ -50,6 +50,11 @@ class Slider {
     float mStep;
 };
 
+
+// template operator for >= against a jsSlider
+
+
+
 #endif
 
 #if !FASTLED_HAS_UI_BUTTON
@@ -102,5 +107,24 @@ class NumberField {
 };
 
 #endif
+
+#define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS) \
+template <typename T> bool operator>= (T v, const UI_CLASS& ui) { return ui >= v; } \ 
+template <typename T> bool operator<= (T v, const UI_CLASS& ui) { return ui <= v; } \ 
+template <typename T> bool operator> (T v, const UI_CLASS& ui) { return ui > v; } \
+template <typename T> bool operator< (T v, const UI_CLASS& ui) { return ui < v; } \
+template <typename T> bool operator== (T v, const UI_CLASS& ui) { return ui == v; } \
+template <typename T> bool operator!= (T v, const UI_CLASS& ui) { return ui != v; } \
+template <typename T> bool operator>=(const UI_CLASS& ui, T v) { return ui >= v; }  \
+template <typename T> bool operator<=(const UI_CLASS& ui, T v) { return ui <= v; } \
+template <typename T> bool operator>(const UI_CLASS& ui, T v) { return ui > v; } \
+template <typename T> bool operator<(const UI_CLASS& ui, T v) { return ui < v; } \
+template <typename T> bool operator==(const UI_CLASS& ui, T v) { return ui == v; } \
+template <typename T> bool operator!=(const UI_CLASS& ui, T v) { return ui != v; }
+
+FASTLED_UI_DEFINE_OPERATORS(Slider);
+FASTLED_UI_DEFINE_OPERATORS(NumberField);
+FASTLED_UI_DEFINE_OPERATORS(Checkbox);
+FASTLED_UI_DEFINE_OPERATORS(Button);
 
 FASTLED_NAMESPACE_END
