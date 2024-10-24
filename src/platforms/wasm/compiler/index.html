@@ -52,7 +52,7 @@
 
 
     const ENABLED = window.location.search.includes('threejs');
-    async function loadThreeJs() {
+    async function loadThreeJsModules() {
         // Dynamically import all required modules
         const THREE = await import('three');
         const { default: Stats } = await import('three/addons/libs/stats.module.js');
@@ -67,20 +67,26 @@
         return threeJsModules;
     }
 
+    async function loadThreeJs() {
+        if (!ENABLED) return {};
+        const threeJsModules = await loadThreeJsModules();
+        console.log('Loaded all ThreeJS modules:', threeJsModules);
+        return {
+            containerId: "container",
+            modules: threeJsModules,
+        };
+    }
+
     // load fastled when the window is loaded.
     async function loadFastLed() {
         // Load the FastLED module.
-        let threeJsModules = {};
-        if (ENABLED) {
-            threeJsModules = await loadThreeJs();
-            console.log('Loaded all ThreeJS modules:', threeJsModules);
-        }
+        const threeJs = await loadThreeJs();
         const options = {
             canvasId: "myCanvas",
             uiControlsId: "ui-controls",
             printId: "output",
             frameRate: 60,
-            threeJsModules: threeJsModules,
+            threeJs: threeJs,
         }
         await globalThis.loadFastLED(options);
     }

@@ -34,7 +34,7 @@ console.error = error;
 
 
 
-async function initThreeJS(threeJsModules) {
+async function initThreeJS(threeJsModules, containerId) {
 
     function initThreeJsStyle() {
         const styleSheet = "https://threejs.org/files/main.css";
@@ -57,7 +57,7 @@ async function initThreeJS(threeJsModules) {
     async function initThreeScene() {
         console.log("threeJsModules", threeJsModules);
         const { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass } = threeJsModules;
-        const container = document.getElementById('container');
+        const container = document.getElementById(containerId);
         clock = new THREE.Clock();
         const scene = new THREE.Scene();
 
@@ -812,11 +812,15 @@ class UiManager {
         outputId = options.printId;
         frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
         uiManager = new UiManager(uiControlsId);
-        threeJsModules = options.threeJsModules;
-        console.log("ThreeJS:", threeJsModules);
+        threeJs = options.threeJs;
+        console.log("ThreeJS:", threeJs);
         await onModuleLoaded();
+        const threeJsModules = threeJs.modules;
+        const containerId = threeJs.containerId;
+        console.log("ThreeJS modules:", threeJsModules);
+        console.log("Container ID:", containerId);
         if (threeJsModules) {
-            await initThreeJS(threeJsModules);
+            await initThreeJS(threeJsModules, containerId);
         }
     }
     globalThis.loadFastLED = loadFastLed;
