@@ -23,14 +23,6 @@
 #include "screenmap.json.h"
 #include "str.h"
 
-// Strips are different lengths because I am a dumb
-constexpr int lengths[] = {
-  154, // Black strip?
-  168, // Green strip?
-  84,  // Red strip
-  154  // Blue strip?
-};
-
 enum {
     BlackStrip = 0,
     GreenStrip = 1,
@@ -39,35 +31,27 @@ enum {
 };
 
 
+// Strips are different lengths because I am a dumb
 
-/*
-Adafruit_DotStar strip0(lengths[0], 15, 2, DOTSTAR_BRG);
-Adafruit_DotStar strip1(lengths[1], 0, 4, DOTSTAR_BRG);
-Adafruit_DotStar strip2(lengths[2], 16, 17, DOTSTAR_BRG);
-Adafruit_DotStar strip3(lengths[3], 5, 18, DOTSTAR_BRG);
+constexpr int lengths[] = {
+  154, // Black strip
+  168, // Green strip
+  84,  // Red strip
+  154  // Blue strip
+};
 
 
-Adafruit_DotStar strips[4] = {strip0, strip1, strip2, strip3};
-*/
 
-// #define NUM_STRIPS 4
 
-/*
-GPIO: 16 - Start: 0 - Length: 84
-GPIO: 15 - Start: 84 - Length: 154
-GPIO: 0 - Start: 238 - Length: 168
-GPIO: 5 - Start: 406 - Length: 154
-*/
 
-//const int TOTAL_LEDS = lengths[0] + lengths[1] + lengths[2] + lengths[3];
-//CRGB led_all
+
 
 // non emscripten uses separate arrays for each strip. Eventually emscripten
 // should support this as well but right now we don't
-CRGB leds0[lengths[0]] = {};
-CRGB leds1[lengths[1]] = {};
-CRGB leds2[lengths[2]] = {}; // Red 
-CRGB leds3[lengths[3]] = {};
+CRGB leds0[lengths[BlackStrip]] = {};
+CRGB leds1[lengths[GreenStrip]] = {};
+CRGB leds2[lengths[RedStrip]] = {}; // Red 
+CRGB leds3[lengths[BlueStrip]] = {};
 CRGB *leds[] = {leds0, leds1, leds2, leds3};
 
 
@@ -220,23 +204,6 @@ void loop() {
                                     ledColors[segment][fromBottom][1],
                                     ledColors[segment][fromBottom][2]);
         }
-    }
-
-    // write red unconditionally into the red strip
-    for (int i = 0; i < lengths[RedStrip]; i++) {
-        leds[RedStrip][i] = CRGB(255, 0, 0);
-    }
-
-    for (int i = 0; i < lengths[BlackStrip]; i++) {
-        leds[BlackStrip][i] = CRGB::White;
-    }
-
-    for (int i = 0; i < lengths[GreenStrip]; i++) {
-        leds[GreenStrip][i] = CRGB(0, 255, 0);
-    }
-
-    for (int i = 0; i < lengths[BlueStrip]; i++) {
-        leds[BlueStrip][i] = CRGB(0, 0, 255);
     }
 
     FastLED.show();

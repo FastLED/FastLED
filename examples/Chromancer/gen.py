@@ -7,7 +7,7 @@ from math import pi, cos, sin
 
 LED_PER_STRIP = 14
 SPACE_PER_LED = 3.0  # Increased for better visibility
-MIRROR_X = False  # Diagramed from the reverse side. Reverse the x-axis
+MIRROR_X = True  # Diagramed from the reverse side. Reverse the x-axis
 
 SMALLEST_ANGLE = 360 / 6
 
@@ -61,7 +61,8 @@ def next_point(pos: Point, angle: HexagonAngle, space: float) -> Point:
 
 def gen_points(
     input: list[HexagonAngle], leds_per_strip: int, startPos: Point,
-    exclude: list[int] | None = None
+    exclude: list[int] | None = None,
+    add_last: bool = False
 ) -> list[Point]:
     points: list[Point] = []
     if (not input) or (not leds_per_strip):
@@ -69,19 +70,24 @@ def gen_points(
     exclude = exclude or []
     # Start FSM. Start pointer get's put into the accumulator.
     curr_point: Point = Point(startPos.x, startPos.y)
-    points.append(curr_point)
+    # points.append(curr_point)
     last_angle = input[0]
     for i,angle in enumerate(input):
-        values = list(range(leds_per_strip - 1))
+        excluded = i in exclude
+        values = list(range(leds_per_strip))
         last_angle = angle
         for v in values:
             last_angle = angle
             curr_point = next_point(curr_point, angle, SPACE_PER_LED)
-            if i not in exclude:
+            if not excluded:
                 points.append(curr_point)
-        if i == len(input) - 1:
-            break
+        #if i == len(input) - 1:
+        #    break
+        # Next starting point
         curr_point = next_point(curr_point, last_angle, SPACE_PER_LED)
+        #if not excluded:
+        #    points.append(curr_point)
+    if add_last:
         points.append(curr_point)
     return points
 
@@ -143,7 +149,7 @@ def find_red_anchor_point() -> list[Point]:
         HexagonAngle.UP,
         HexagonAngle.RIGHT_UP,
     ]
-    points = gen_points(hexagon_angles, LED_PER_STRIP, Point(0, 0))
+    points = gen_points(hexagon_angles, LED_PER_STRIP, Point(0, 0), add_last=True)
     return points
 
 def find_green_anchore_point() -> list[Point]:
@@ -152,18 +158,9 @@ def find_green_anchore_point() -> list[Point]:
         HexagonAngle.RIGHT_UP,
         HexagonAngle.UP,
     ]
-    points = gen_points(hexagon_angles, LED_PER_STRIP, Point(0, 0))
+    points = gen_points(hexagon_angles, LED_PER_STRIP, Point(0, 0), add_last=True)
     return points
 
-def find_blue_anchor_point() -> list[Point]:
-    hexagon_angles = [
-        HexagonAngle.RIGHT_UP,
-        HexagonAngle.RIGHT_UP,
-        HexagonAngle.UP,
-        HexagonAngle.LEFT_UP,
-    ]
-    points = gen_points(hexagon_angles, LED_PER_STRIP, Point(0, 0))
-    return points
 
 RED_ANCHOR_POINT = find_red_anchor_point()[-1]
 BLACK_ANCHOR_POINT = Point(0,0)  # Black
@@ -213,17 +210,18 @@ def generate_green_points() -> list[Point]:
         HexagonAngle.LEFT_UP,
         HexagonAngle.LEFT_DOWN,
         HexagonAngle.DOWN,
-        HexagonAngle.DOWN,
+        HexagonAngle.RIGHT_DOWN, # skip
+        HexagonAngle.LEFT_DOWN,  # skip
         HexagonAngle.LEFT_UP,
         HexagonAngle.UP,
         HexagonAngle.RIGHT_UP,
         HexagonAngle.LEFT_UP,
         HexagonAngle.LEFT_DOWN,
         HexagonAngle.RIGHT_DOWN,
-        HexagonAngle.RIGHT_UP,
+        HexagonAngle.RIGHT_UP,   # skip
         HexagonAngle.RIGHT_DOWN,
     ]
-    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point, exclude=[12])
+    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point, exclude=[5,6,13])
     return points
 
 def generate_blue_points() -> list[Point]:
@@ -235,14 +233,14 @@ def generate_blue_points() -> list[Point]:
         HexagonAngle.LEFT_UP,
         HexagonAngle.LEFT_DOWN,
         HexagonAngle.LEFT_DOWN,
-        HexagonAngle.RIGHT_DOWN,
+        HexagonAngle.RIGHT_DOWN, # skip
         HexagonAngle.RIGHT_DOWN,
         HexagonAngle.UP,
         HexagonAngle.RIGHT_UP,
         HexagonAngle.UP,
         HexagonAngle.RIGHT_UP,
     ]
-    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point)
+    points = gen_points(hexagon_angles, LED_PER_STRIP, starting_point, exclude=[6])
     return points
 
 def unit_test() -> None:
