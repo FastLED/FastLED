@@ -57,25 +57,11 @@
         document.head.appendChild(style);
     }
 
+    let threeJsModules = {}
+
     const ENABLED = window.location.search.includes('threejs');
-    if (ENABLED) {
-        initThreeJsStylesAndImportMap();
 
-        // Dynamically import all required modules
-
-        const THREE = await import('three');
-        const { default: Stats } = await import('three/addons/libs/stats.module.js');
-        const { GUI } = await import('three/addons/libs/lil-gui.module.min.js');
-        const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
-        const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
-        const { EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js');
-        const { RenderPass } = await import('three/addons/postprocessing/RenderPass.js');
-        const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
-        const { OutputPass } = await import('three/addons/postprocessing/OutputPass.js');
-
-
-        globalThis.ThreeJS = THREE;
-        console.log('Loaded all ThreeJS modules:', { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass });
+    async function initThreeJS() {
 
         let camera, stats;
         let composer, renderer, mixer, clock;
@@ -88,6 +74,8 @@
         };
 
         async function initThreeScene() {
+            console.log("threeJsModules", threeJsModules);
+            const { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass } = threeJsModules;
             const container = document.getElementById('container');
             clock = new THREE.Clock();
             const scene = new THREE.Scene();
@@ -165,6 +153,30 @@
         initThreeScene();
     }
 
+    if (ENABLED) {
+        initThreeJsStylesAndImportMap();
+
+        // Dynamically import all required modules
+
+        const THREE = await import('three');
+        const { default: Stats } = await import('three/addons/libs/stats.module.js');
+        const { GUI } = await import('three/addons/libs/lil-gui.module.min.js');
+        const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
+        const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+        const { EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js');
+        const { RenderPass } = await import('three/addons/postprocessing/RenderPass.js');
+        const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
+        const { OutputPass } = await import('three/addons/postprocessing/OutputPass.js');
+
+
+        globalThis.ThreeJS = THREE;
+        console.log('Loaded all ThreeJS modules:', { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass });
+
+        threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
+        initThreeJS();
+    }
+
+
     // load fastled when the window is loaded.
     async function loadFastLed() {
         // Load the FastLED module.
@@ -173,7 +185,7 @@
             uiControlsId: "ui-controls",
             printId: "output",
             frameRate: 60,
-            threeJS: globalThis.ThreeJS,
+            threeJsModules: threeJsModules,
         }
         await globalThis.loadFastLED(options);
     }

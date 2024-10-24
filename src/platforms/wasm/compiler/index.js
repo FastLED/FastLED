@@ -708,8 +708,8 @@ class UiManager {
         outputId = options.printId;
         frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
         uiManager = new UiManager(uiControlsId);
-        let threeJS = options.threeJS;
-        console.log("ThreeJS:", threeJS);
+        let threeJsModules = options.threeJsModules;
+        console.log("ThreeJS:", threeJsModules);
         await onModuleLoaded();
     }
     globalThis.loadFastLED = loadFastLed;
