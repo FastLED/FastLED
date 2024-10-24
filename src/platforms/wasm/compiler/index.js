@@ -4,21 +4,31 @@ globalThis.loadFastLED = async function () {
     return null;
 };
 
-var print = null;
+// Will be overridden during initialization.
+var print = function () { };
+
+// Override console.log, console.warn, console.error to print to the output element
+const _prev_log = console.log;
+const _prev_warn = console.warn;
+const _prev_error = console.error;
 
 function log(...args) {
-    console.log(args);
+    _prev_log(args);
     try { print(args); } catch (e) { }
 }
 function warn(args) {
-    console.warn(args);
+    _prev_warn(args);
     try { print(args); } catch (e) { }
 }
 
 function error(args) {
-    console.error(args);
+    _prev_error(args);
     try { print(args); } catch (e) { }
 }
+
+console.log = log;
+console.warn = warn;
+console.error = error;
 
 class GraphicsManager {
     constructor(canvasId) {
@@ -142,7 +152,7 @@ class GraphicsManager {
 
     updateCanvas(frameData) {
         if (frameData.length === 0) {
-            warn("Received empty frame data, skipping update");
+            console.warn("Received empty frame data, skipping update");
             return;
         }
 
@@ -187,7 +197,7 @@ class GraphicsManager {
             const data = strip.pixel_data;
             const strip_id = strip.strip_id;
             if (!(strip_id in screenMap.strips)) {
-                warn(`No screen map found for strip ID ${strip_id}, skipping update`);
+                console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
                 continue;
             }
             const stripData = screenMap.strips[strip_id];
@@ -198,7 +208,7 @@ class GraphicsManager {
             //log("Writing data to canvas");
             for (let i = 0; i < pixelCount; i++) {
                 if (i >= map.length) {
-                    warn(`Strip ${strip_id}: Pixel ${i} is outside the screen map ${map.length}, skipping update`);
+                    console.warn(`Strip ${strip_id}: Pixel ${i} is outside the screen map ${map.length}, skipping update`);
                     continue;
                 }
                 let [x, y] = map[i];
@@ -211,7 +221,7 @@ class GraphicsManager {
 
                 // check to make sure that the pixel is within the canvas
                 if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
-                    warn(`Strip ${strip_id}: Pixel ${i} is outside the canvas at ${x}, ${y}, skipping update`);
+                    console.warn(`Strip ${strip_id}: Pixel ${i} is outside the canvas at ${x}, ${y}, skipping update`);
                     continue;
                 }
                 //log(x, y);
@@ -308,7 +318,7 @@ class UiManager {
     }
 
     addUiElements(jsonData) {
-        log("UI elements added:", jsonData);
+        console.log("UI elements added:", jsonData);
 
         const uiControlsContainer = document.getElementById(this.uiControlsId) || this.createUiControlsContainer();
 
@@ -337,7 +347,7 @@ class UiManager {
             }
         });
         if (foundUi) {
-            log("UI elements added, showing UI controls container");
+            console.log("UI elements added, showing UI controls container");
             uiControlsContainer.classList.add('active');
         }
     }
@@ -506,7 +516,7 @@ class UiManager {
     }
 
     globalThis.FastLED_onStripUpdate = function (jsonData) {
-        log("Received strip update:", jsonData);
+        console.log("Received strip update:", jsonData);
         const event = jsonData.event;
         let width = 0;
         let height = 0;
@@ -518,7 +528,7 @@ class UiManager {
 
 
             const [min, max] = minMax(map);
-            log("min", min, "max", max);
+            console.log("min", min, "max", max);
 
             const stripId = jsonData.strip_id;
             const isUndefined = (value) => typeof value === 'undefined';
@@ -533,13 +543,13 @@ class UiManager {
             };
 
 
-            log("Screen map updated:", screenMap);
+            console.log("Screen map updated:", screenMap);
             // iterate through all the screenMaps and get the absolute min and max
             let absMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
             let absMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
             let setAtLeastOnce = false;
             for (const stripId in screenMap.strips) {
-                log("Processing strip ID", stripId);
+                console.log("Processing strip ID", stripId);
                 const id = Number.parseInt(stripId, 10);
                 const stripData = screenMap.strips[id];
                 absMin[0] = Math.min(absMin[0], stripData.min[0]);
@@ -556,21 +566,21 @@ class UiManager {
             screenMap.absMax = absMax;
             width = Number.parseInt(absMax[0] - absMin[0], 10) + 1;
             height = Number.parseInt(absMax[1] - absMin[1], 10) + 1;
-            log("canvas updated with width and height", width, height);
+            console.log("canvas updated with width and height", width, height);
             // now update the canvas size.
             const canvas = document.getElementById(canvasId);
             canvas.width = width;
             canvas.height = height;
             uiCanvasChanged = true;
-            log("Screen map updated:", screenMap);
+            console.log("Screen map updated:", screenMap);
         }
 
         if (!eventHandled) {
-            warn(`We do not support event ${event} yet.`);
+            console.warn(`We do not support event ${event} yet.`);
             return;
         }
         if (receivedCanvas) {
-            warn("Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.");
+            console.warn("Canvas size has already been set, setting multiple canvas sizes is not supported yet and the previous one will be overwritten.");
         }
         const canvas = document.getElementById(canvasId);
         canvas.width = width;
@@ -581,7 +591,7 @@ class UiManager {
 
         canvas.style.width = Math.round(width * scaleFactor) + 'px';
         canvas.style.height = Math.round(height * scaleFactor) + 'px';
-        log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
+        console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
     };
 
     print = function (...args) {
@@ -605,7 +615,7 @@ class UiManager {
     globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
         uiManager.processUiChanges(uiUpdateCallback);
         if (frameData.length === 0) {
-            warn("Received empty frame data, skipping update");
+            console.warn("Received empty frame data, skipping update");
             return;
         }
  
@@ -659,7 +669,7 @@ class UiManager {
         function __runFastLED(moduleInstance, frameRate) {
             const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
             if (!exports_exist) {
-                error("FastLED setup or loop functions are not available.");
+                console.error("FastLED setup or loop functions are not available.");
                 return;
             }
             return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance);
@@ -669,16 +679,16 @@ class UiManager {
             if (typeof fastledLoader === 'function') {
                 // Load the module
                 fastledLoader().then(instance => {
-                    log("Module loaded, running FastLED...");
+                    console.log("Module loaded, running FastLED...");
                     __runFastLED(instance, frameRate);
                 }).catch(err => {
-                    error("Error loading fastled as a module:", err);
+                    console.error("Error loading fastled as a module:", err);
                 });
             } else {
-                log("Could not detect a valid module loading for FastLED.");
+                console.log("Could not detect a valid module loading for FastLED.");
             }
         } catch (error) {
-            error("Failed to load FastLED:", error);
+            console.error("Failed to load FastLED:", error);
         }
     };
     async function loadFastLed(options) {
