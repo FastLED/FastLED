@@ -13,7 +13,7 @@
 #include "str.h"
 #include "fixed_map.h"
 
-class String;
+class Str;
 
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui
 // canvas in float format.

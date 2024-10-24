@@ -8,13 +8,9 @@
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
-template<size_t SIZE> class StrN;
-
-// A copy on write string class. Copy operations are
-// fast unless the string overflows the inlined buffer.
-// Whenever possible the heap memory will be shared.
-typedef StrN<FASTLED_STR_INLINED_SIZE> Str;
-
+// A copy on write string class. Fast to copy from another
+// Str object as read only pointers are shared.
+class Str;
 
 ///////////////////////////////////////////////////////
 // Implementation details.
@@ -166,3 +162,11 @@ template <size_t SIZE = 64> class StrN {
 
 
 
+class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
+  public:
+    Str() : StrN<FASTLED_STR_INLINED_SIZE>() {}
+    Str(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}
+    Str(const Str &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
+    template <size_t M> Str(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
+    Str &operator=(const Str &other) { copy(other); return *this; }
+};
