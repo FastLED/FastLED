@@ -26,6 +26,7 @@ ARDUINO_H_SRC = JS_DIR / "Arduino.h"
 INDEX_HTML_SRC = JS_DIR / "index.html"
 INDEX_CSS_SRC = JS_DIR / "index.css"
 INDEX_JS_SRC = JS_DIR / "index.js"
+WASM_COMPILER_SETTTINGS = JS_DIR / "wasm_compiler_flags.py"
 OUTPUT_FILES = ["fastled.js", "fastled.wasm"]
 HEADERS_TO_INSERT = ['#include "Arduino.h"', '#include "platforms/wasm/js.h"']
 FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
@@ -38,6 +39,7 @@ assert ARDUINO_H_SRC.exists()
 assert INDEX_HTML_SRC.exists()
 assert INDEX_CSS_SRC.exists()
 assert INDEX_JS_SRC.exists()
+assert WASM_COMPILER_SETTTINGS.exists()
 
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
@@ -167,6 +169,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--only-compile", action="store_true", help="Only compile the project"
     )
+    parser.add_argument(
+        "--debug", action="store_true", help="Enable debug and symbols"
+    )
     return parser.parse_args()
 
 
@@ -208,6 +213,7 @@ def main() -> int:
         do_copy = not any_only_flags or args.only_copy
         do_insert_header = not any_only_flags or args.only_insert_header
         do_compile = not any_only_flags or args.only_compile
+        debug = args.debug
 
         if do_copy:
             copy_files(src_dir, JS_SRC)
@@ -221,6 +227,15 @@ def main() -> int:
             if args.only_insert_header:
                 print("Transform to cpp and insert header operations completed.")
                 return 0
+            
+        with open(WASM_COMPILER_SETTTINGS, "r") as f:
+            content = f.read()
+        if debug:
+            content = re.sub(r"DEBUG = 0", "DEBUG = 1", content)
+        else:
+            content = re.sub(r"DEBUG = 1", "DEBUG = 0", content)
+        with open(WASM_COMPILER_SETTTINGS, "w") as f:
+            f.write(content)
 
         if do_compile:
             process_compile(JS_DIR)

@@ -1,13 +1,13 @@
 import os
 
-DEBUG_SYMBOLS = 0
+DEBUG = 0
 
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
 # It seems easier to load the program as a pure JS file, so we will use asm.js
 # right now as a test.
 USE_WASM = 1
 
-if DEBUG_SYMBOLS:
+if DEBUG:
     USE_WASM=2
 
 Import("env", "projenv")
@@ -50,7 +50,7 @@ wasmflags = [
     "-s", f"WASM={USE_WASM}",
 ]
 
-if DEBUG_SYMBOLS:
+if DEBUG:
     wasmflags += ['-g', '-gsource-map', '--emit-symbol-map', '-s', 'STACK_OVERFLOW_CHECK=2', '-s', 'SAFE_HEAP=1', '-s', 'SAFE_HEAP_LOG=1', '-s', 'ASSERTIONS=1']
     
 
