@@ -55,6 +55,14 @@ def start_docker():
         print(f"Error starting Docker: {str(e)}")
     return False
 
+def remove_existing_container(container_name):
+    try:
+        subprocess.run(["docker", "rm", "-f", container_name], check=True, capture_output=True)
+        print(f"Removed existing container: {container_name}")
+    except subprocess.CalledProcessError:
+        # If the container doesn't exist, it's not an error
+        pass
+
 def main():
     if not is_docker_running():
         if start_docker():
@@ -72,11 +80,21 @@ def main():
         print(f"ERROR: Directory '{absolute_directory}' does not exist.")
         sys.exit(1)
 
+    # Remove existing container if it exists
+    remove_existing_container("fastled-wasm-compiler")
+
     # Launch the Docker container if Docker is running
     try:
         docker_command = [
             "docker",
             "run",
+            "--rm",  # Automatically remove the container when it exits
+        ]
+        
+        if sys.stdout.isatty():
+            docker_command.append("-it")
+        
+        docker_command.extend([
             "--name",
             "fastled-wasm-compiler",
             "--platform",
@@ -84,10 +102,7 @@ def main():
             "-v",
             f"{absolute_directory}:/mapped/{base_name}",
             "fastled-wasm-compiler:latest",
-        ]
-        
-        if sys.stdout.isatty():
-            docker_command.insert(4, "-it")
+        ])
 
         print(f"Running command: {' '.join(docker_command)}")
         process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
