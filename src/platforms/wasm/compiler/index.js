@@ -330,9 +330,10 @@ class GraphicsManager {
                 //log(x, y);
                 const srcIndex = i * 3;
                 const destIndex = (y * this.texWidth + x) * 3;
-                const r = data[srcIndex];
-                const g = data[srcIndex + 1];
-                const b = data[srcIndex + 2];
+                // Pixel data is already in 0-255 range, use directly
+                const r = data[srcIndex] & 0xFF;
+                const g = data[srcIndex + 1] & 0xFF;
+                const b = data[srcIndex + 2] & 0xFF;
                 this.texData[destIndex] = r;
                 this.texData[destIndex + 1] = g;
                 this.texData[destIndex + 2] = b;
@@ -516,7 +517,11 @@ class GraphicsManagerThreeJS {
         this.leds.forEach(led => {
             led.material.color.multiplyScalar(FADE_PER_FRAME);
             if (Math.random() < 0.01) {
-                led.material.color.setRGB(Math.random(), Math.random(), Math.random());
+                // Generate random RGB values between 0-255 and normalize for Three.js
+                const r = Math.floor(Math.random() * 256) / 255;
+                const g = Math.floor(Math.random() * 256) / 255;
+                const b = Math.floor(Math.random() * 256) / 255;
+                led.material.color.setRGB(r, g, b);
             }
         });
 
