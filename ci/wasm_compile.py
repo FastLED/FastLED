@@ -126,8 +126,12 @@ def clean() -> None:
     remove_dangling_images()
 
 
-def build_image(debug: bool = False) -> None:
-    print("Building Docker image...")
+def build_image(debug: bool = True) -> None:
+    print()
+    print("#######################################")
+    print("# Building Docker image...")
+    print("#######################################")
+    print()
     try:
         cmd_list: List[str] = [
             "docker",
@@ -164,6 +168,7 @@ def is_tty() -> bool:
 
 
 def run_container(directory: str, interactive: bool, debug: bool = False) -> None:
+
     absolute_directory: str = os.path.abspath(directory)
     base_name = os.path.basename(absolute_directory)
     if not os.path.isdir(absolute_directory):
@@ -191,6 +196,13 @@ def run_container(directory: str, interactive: bool, debug: bool = False) -> Non
         if interactive:
             docker_command.append("/bin/bash")
         cmd_str: str = subprocess.list2cmdline(docker_command)
+
+        print()
+        print("#######################################")
+        print(f"# Running Docker container with:")
+        print(f"#   {cmd_str}")
+        print("#######################################\n")
+
         print(f"Running command: {cmd_str}")
         subprocess.run(docker_command, check=True)
     except subprocess.CalledProcessError as e:
@@ -232,10 +244,9 @@ def main() -> None:
         help="Launch a web server and open a browser after compilation",
     )
     parser.add_argument(
-        "-d",
-        "--debug",
+        "--optimize",
         action="store_true",
-        help="Enable debug mode during compilation",
+        help="Turns off debug flags and enables optimization, results in much smaller binary.",
     )
     args: argparse.Namespace = parser.parse_args()
 
@@ -243,17 +254,16 @@ def main() -> None:
         if args.clean:
             clean()
             return
-
         if args.directory is None:
             parser.error("ERROR: directory is required unless --clean is specified")
-
+        debug_mode = not args.optimize
         if args.build or not image_exists():
             # Check for and remove existing container before building
             remove_existing_container("fastled-wasm-compiler")
-            build_image(args.debug)
+            build_image(debug_mode)
             remove_dangling_images()
 
-        run_container(args.directory, args.interactive, args.debug)
+        run_container(args.directory, args.interactive, debug_mode)
 
         output_dir = str(Path(args.directory) / "fastled_js")
 
