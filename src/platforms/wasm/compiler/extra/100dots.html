@@ -17,6 +17,115 @@
     </style>
 </head>
 
+
+<script>
+
+
+    class LedGrid {
+        constructor(width, height, options) {
+            this.SEGMENTS = 16;
+            this.LED_SCALE = 1.0;
+            this.leds = [];
+            this.modules = options.modules
+            this.resize(width, height);
+        }
+
+        resize(width, height) {
+            this.SCREEN_WIDTH = width;
+            this.SCREEN_HEIGHT = height;
+            this.reset();
+            this.initScene();
+            this.createGrid();
+        }
+
+        reset() {
+            // Clean up existing objects
+            if (this.leds) {
+                this.leds.forEach(led => {
+                    led.geometry.dispose();
+                    led.material.dispose();
+                    this.scene?.remove(led);
+                });
+            }
+            this.leds = [];
+
+            if (this.renderer) {
+                this.renderer.dispose();
+                this.renderer.domElement.remove();
+            }
+
+            if (this.composer) {
+                this.composer.dispose();
+            }
+        }
+
+        initScene() {
+            const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.modules;
+            this.scene = new THREE.Scene();
+            this.camera = new THREE.OrthographicCamera(
+                -this.SCREEN_WIDTH / 2, this.SCREEN_WIDTH / 2,
+                this.SCREEN_HEIGHT / 2, -this.SCREEN_HEIGHT / 2,
+                1, 1000
+            );
+            this.camera.position.z = 500;
+
+            this.renderer = new THREE.WebGLRenderer({ antialias: true });
+            this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+            document.body.appendChild(this.renderer.domElement);
+
+            const renderScene = new RenderPass(this.scene, this.camera);
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(this.SCREEN_WIDTH, this.SCREEN_HEIGHT),
+                16.0,
+                1.0,
+                0.0
+            );
+
+            this.composer = new EffectComposer(this.renderer);
+            this.composer.addPass(renderScene);
+            this.composer.addPass(bloomPass);
+        }
+
+        createGrid() {
+            const { THREE } = this.modules;
+            const NUM_LEDS = 5000; // Number of LEDs to create
+            const containerWidth = this.SCREEN_WIDTH;
+            const containerHeight = this.SCREEN_HEIGHT;
+
+            // Calculate dot size based on screen area and LED count
+            const screenArea = containerWidth * containerHeight;
+            const dotSize = Math.sqrt(screenArea / (NUM_LEDS * Math.PI)) * 0.4;
+
+            for (let i = 0; i < NUM_LEDS; i++) {
+                const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
+                const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const led = new THREE.Mesh(geometry, material);
+
+                // Random position within container bounds
+                led.position.set(
+                    (Math.random() - 0.5) * containerWidth,
+                    (Math.random() - 0.5) * containerHeight,
+                    0
+                );
+
+                this.scene.add(led);
+                this.leds.push(led);
+            }
+        }
+
+        animationLoop() {
+            this.leds.forEach(led => {
+                led.material.color.multiplyScalar(0.85);
+                if (Math.random() < 0.01) {
+                    led.material.color.setRGB(Math.random(), Math.random(), Math.random());
+                }
+            });
+
+            this.composer.render();
+        }
+    };
+</script>
+
 <body>
     <script type="importmap">
     {
@@ -25,6 +134,8 @@
             "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
         }
     }
+
+
 </script>
     <script type="module">
         import * as THREE from 'three';
@@ -32,114 +143,15 @@
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-        
-        class LedGrid {
-            constructor(width, height) {
-                this.SEGMENTS = 16;
-                this.LED_SCALE = 1.0;
-                this.leds = [];
-                this.resize(width, height);
-            }
+        const modules = { THREE, EffectComposer, RenderPass, UnrealBloomPass };
 
-            resize(width, height) {
-                this.SCREEN_WIDTH = width;
-                this.SCREEN_HEIGHT = height;
-                this.reset();
-                this.initScene();
-                this.createGrid();
-            }
-
-            reset() {
-                // Clean up existing objects
-                if (this.leds) {
-                    this.leds.forEach(led => {
-                        led.geometry.dispose();
-                        led.material.dispose();
-                        this.scene?.remove(led);
-                    });
-                }
-                this.leds = [];
-
-                if (this.renderer) {
-                    this.renderer.dispose();
-                    this.renderer.domElement.remove();
-                }
-                
-                if (this.composer) {
-                    this.composer.dispose();
-                }
-            }
-
-            initScene() {
-                this.scene = new THREE.Scene();
-                this.camera = new THREE.OrthographicCamera(
-                    -this.SCREEN_WIDTH/2, this.SCREEN_WIDTH/2, 
-                    this.SCREEN_HEIGHT/2, -this.SCREEN_HEIGHT/2, 
-                    1, 1000
-                );
-                this.camera.position.z = 500;
-
-                this.renderer = new THREE.WebGLRenderer({ antialias: true });
-                this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
-                document.body.appendChild(this.renderer.domElement);
-
-                const renderScene = new RenderPass(this.scene, this.camera);
-                const bloomPass = new UnrealBloomPass(
-                    new THREE.Vector2(this.SCREEN_WIDTH, this.SCREEN_HEIGHT),
-                    16.0,
-                    1.0,
-                    0.0
-                );
-
-                this.composer = new EffectComposer(this.renderer);
-                this.composer.addPass(renderScene);
-                this.composer.addPass(bloomPass);
-            }
-
-            createGrid() {
-                const NUM_LEDS = 5000; // Number of LEDs to create
-                const containerWidth = this.SCREEN_WIDTH;
-                const containerHeight = this.SCREEN_HEIGHT;
-                
-                // Calculate dot size based on screen area and LED count
-                const screenArea = containerWidth * containerHeight;
-                const dotSize = Math.sqrt(screenArea / (NUM_LEDS * Math.PI)) * 0.4;
-
-                for (let i = 0; i < NUM_LEDS; i++) {
-                    const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
-                    const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                    const led = new THREE.Mesh(geometry, material);
-                    
-                    // Random position within container bounds
-                    led.position.set(
-                        (Math.random() - 0.5) * containerWidth,
-                        (Math.random() - 0.5) * containerHeight,
-                        0
-                    );
-                    
-                    this.scene.add(led);
-                    this.leds.push(led);
-                }
-            }
-
-            animationLoop() {
-                this.leds.forEach(led => {
-                    led.material.color.multiplyScalar(0.85);
-                    if (Math.random() < 0.01) {
-                        led.material.color.setRGB(Math.random(), Math.random(), Math.random());
-                    }
-                });
-
-                this.composer.render();
-            }
-        }
 
         // Constants for screen dimensions
         let SCREEN_WIDTH = 800;
         let SCREEN_HEIGHT = SCREEN_WIDTH / 2;
 
-        const ledGrid = new LedGrid(SCREEN_WIDTH, SCREEN_HEIGHT);
-        
+        const ledGrid = new LedGrid(SCREEN_WIDTH, SCREEN_HEIGHT, { modules });
+
         // Animation loop handled outside the class
         function animate() {
             requestAnimationFrame(animate);
@@ -149,7 +161,7 @@
 
         // Periodically reset with new dimensions
         setInterval(() => {
-            const new_width =  Math.random() * 720;
+            const new_width = Math.random() * 720;
             const new_height = Math.random() * 1280;
             console.log('Resizing to', new_width);
             ledGrid.resize(new_width, new_height);
