@@ -24,7 +24,7 @@
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
     // Set up the scene, camera, and renderer
     const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera( -50, 50, 50, -50, 1, 1000 );
+    const camera = new THREE.OrthographicCamera( -50, 100, 50, -100, 1, 1000 );
     camera.position.z = 500;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -46,15 +46,35 @@
 
     // Create the LED grid
     var leds = [];
-    var gridSize = 10; // 10x10 grid
-    var spacing = 100 / (gridSize - 1); // Calculate spacing between LEDs
+    var gridSizeX = 100; // width
+    var gridSizeY = 200; // height
+    
+    // Calculate the aspect ratio to maintain circular dots
+    const containerWidth = 640;
+    const containerHeight = 640*2;
+    const aspectRatio = containerWidth / containerHeight;
+    
+    // Calculate spacing to fit the grid while maintaining proportions
+    var spacingX = containerWidth / gridSizeX;
+    var spacingY = containerHeight / gridSizeY;
+    
+    // Use the smaller spacing to ensure circles stay circular
+    const dotSize = Math.min(spacingX, spacingY) * 0.4;
+    
+    // Calculate offsets to center the grid
+    const offsetX = -containerWidth / 2 + spacingX / 2;
+    const offsetY = -containerHeight / 2 + spacingY / 2;
 
-    for (var x = 0; x < gridSize; x++) {
-        for (var y = 0; y < gridSize; y++) {
-            var geometry = new THREE.CircleGeometry(2, 16);
+    for (var x = 0; x < gridSizeX; x++) {
+        for (var y = 0; y < gridSizeY; y++) {
+            var geometry = new THREE.CircleGeometry(dotSize, 16);
             var material = new THREE.MeshBasicMaterial({ color: 0x000000 });
             var led = new THREE.Mesh(geometry, material);
-            led.position.set(-50 + x * spacing, -50 + y * spacing, 0);
+            led.position.set(
+                offsetX + x * spacingX,
+                offsetY + y * spacingY,
+                0
+            );
             scene.add(led);
             leds.push(led);
         }
