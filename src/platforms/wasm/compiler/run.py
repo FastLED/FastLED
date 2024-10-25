@@ -4,11 +4,18 @@ Uses the latest wasm compiler image to compile the FastLED sketch.
 Probably an unfortunate name.
 """
 
-
 import docker
 import subprocess
 import time
 import sys
+import os
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[4]
+DEFAULT_WASM_PROJECT_DIR = PROJECT_ROOT / "examples" / "wasm"
+# Relative to the current driectory
+DEFAULT_WASM_PROJECT_DIR = DEFAULT_WASM_PROJECT_DIR.relative_to(Path.cwd())
+DEFAULT_WASM_PROJECT_DIR = str(DEFAULT_WASM_PROJECT_DIR)
 
 def is_docker_running():
     """Check if Docker is running by pinging the Docker daemon."""
@@ -56,16 +63,32 @@ def main():
             print("Docker could not be started. Exiting.")
             sys.exit(1)
 
+    # Get the directory to mount
+    directory = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_WASM_PROJECT_DIR
+    absolute_directory = os.path.abspath(directory)
+    base_name = os.path.basename(absolute_directory)
+
+    if not os.path.isdir(absolute_directory):
+        print(f"ERROR: Directory '{absolute_directory}' does not exist.")
+        sys.exit(1)
+
     # Launch the Docker container if Docker is running
     try:
         client = docker.from_env()
         container = client.containers.run(
-            "niteris/fastled:latest",
+            "fastled-wasm-compiler:latest",
             detach=True,
-            name="fastled_instance",
-            ports={'80/tcp': 8080}
+            name="fastled_wasm_compiler",
+            platform="linux/amd64",
+            volumes={absolute_directory: {'bind': f'/mapped/{base_name}', 'mode': 'rw'}},
+            command="/bin/bash"  # Run in interactive mode
         )
         print(f"Container {container.name} started with ID {container.id}")
+        print(f"Mounted directory: {absolute_directory}")
+        
+        # Attach to the container to see the output
+        for line in container.logs(stream=True):
+            print(line.strip().decode('utf-8'))
     except docker.errors.DockerException as e:
         print(f"Failed to launch the container: {str(e)}")
 
