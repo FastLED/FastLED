@@ -51,7 +51,9 @@ wasmflags = [
 ]
 
 if DEBUG:
-    wasmflags += ['-g', '-gsource-map', '--emit-symbol-map', '-s', 'STACK_OVERFLOW_CHECK=2', '-s', 'SAFE_HEAP=1', '-s', 'SAFE_HEAP_LOG=1', '-s', 'ASSERTIONS=1']
+    wasmflags += ['-g3', '-gsource-map', '--emit-symbol-map', '-s', 'STACK_OVERFLOW_CHECK=2', '-s', 'SAFE_HEAP=1', '-s', 'SAFE_HEAP_LOG=1', '-s', 'ASSERTIONS=1']
+    # Remove -Oz flag
+    wasmflags.remove("-Oz")
     
 
 

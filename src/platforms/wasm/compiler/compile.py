@@ -261,9 +261,13 @@ def main() -> int:
             print("Copying index.js to output directory")
             shutil.copy2(INDEX_JS_SRC, fastled_js_dir / "index.js")
             fastled_js_mem = build_dir / "fastled.js.mem"
+            fastled_js_symbols = build_dir / "fastled.js.symbols"
             if fastled_js_mem.exists():
                 print(f"Copying {fastled_js_mem.name} to output directory")
                 shutil.copy2(fastled_js_mem, fastled_js_dir / fastled_js_mem.name)
+            if fastled_js_symbols.exists():
+                print(f"Copying {fastled_js_symbols.name} to output directory")
+                shutil.copy2(fastled_js_symbols, fastled_js_dir / fastled_js_symbols.name)
 
         cleanup(args, JS_SRC)
 
