@@ -429,8 +429,27 @@ class GraphicsManagerThreeJS {
     initThreeJS() {
         const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
-        this.SCREEN_WIDTH = canvas.width;
-        this.SCREEN_HEIGHT = canvas.height;
+        
+        // Set display size to 640px max while maintaining aspect ratio
+        const maxDisplaySize = 640;
+        let displayWidth, displayHeight;
+        
+        if (canvas.width > canvas.height) {
+            displayWidth = maxDisplaySize;
+            displayHeight = Math.round((canvas.height / canvas.width) * maxDisplaySize);
+        } else {
+            displayHeight = maxDisplaySize;
+            displayWidth = Math.round((canvas.width / canvas.height) * maxDisplaySize);
+        }
+
+        canvas.style.width = displayWidth + 'px';
+        canvas.style.height = displayHeight + 'px';
+
+        this.SCREEN_WIDTH = window.innerWidth;
+        this.SCREEN_HEIGHT = window.innerHeight;
+        
+        canvas.width = this.SCREEN_WIDTH;
+        canvas.height = this.SCREEN_HEIGHT;
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.OrthographicCamera(
@@ -465,8 +484,8 @@ class GraphicsManagerThreeJS {
     createGrid() {
         const { THREE } = this.threeJsModules;
         const NUM_LEDS = 5000; // Number of LEDs to create
-        const containerWidth = this.SCREEN_WIDTH;
-        const containerHeight = this.SCREEN_HEIGHT;
+        const containerWidth = window.innerWidth;
+        const containerHeight = window.innerHeight;
 
         // Calculate dot size based on screen area and LED count
         const screenArea = containerWidth * containerHeight;
@@ -835,18 +854,19 @@ class UiManager {
         canvas.width = width;
         canvas.height = height;
 
-        // Set display size to 640px max while maintaining aspect ratio
-        const maxDisplaySize = 640;
+        // Set display size (CSS pixels) with minimum width of 640px
         let displayWidth, displayHeight;
+        const minWidth = 640;
         
         if (width > height) {
-            displayWidth = maxDisplaySize;
-            displayHeight = Math.round((height / width) * maxDisplaySize);
+            displayWidth = Math.max(minWidth, width);
+            displayHeight = Math.round((height / width) * displayWidth);
         } else {
-            displayHeight = maxDisplaySize;
-            displayWidth = Math.round((width / height) * maxDisplaySize);
+            displayHeight = Math.round((height / width) * minWidth);
+            displayWidth = minWidth;
         }
 
+        // Set CSS display size while maintaining aspect ratio
         canvas.style.width = displayWidth + 'px';
         canvas.style.height = displayHeight + 'px';
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
