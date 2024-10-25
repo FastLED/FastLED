@@ -97,37 +97,28 @@
             }
 
             createGrid() {
-                const MAX_TOTAL_LEDS = 500; // Maximum number of LEDs
-                const aspectRatio = 760 / 1280.;
-                
-                // Calculate grid dimensions to stay under maximum LED count
-                const gridSizeX = Math.round(Math.sqrt(MAX_TOTAL_LEDS * aspectRatio));
-                const gridSizeY = Math.round(Math.sqrt(MAX_TOTAL_LEDS / aspectRatio));
-                
+                const NUM_LEDS = 5000; // Number of LEDs to create
                 const containerWidth = this.SCREEN_WIDTH;
                 const containerHeight = this.SCREEN_HEIGHT;
                 
-                const spacingX = containerWidth / gridSizeX;
-                const spacingY = containerHeight / gridSizeY;
-                
-                const dotSize = Math.min(spacingX, spacingY) * 0.4;
-                
-                const offsetX = -containerWidth / 2 + spacingX / 2;
-                const offsetY = -containerHeight / 2 + spacingY / 2;
+                // Calculate dot size based on screen area and LED count
+                const screenArea = containerWidth * containerHeight;
+                const dotSize = Math.sqrt(screenArea / (NUM_LEDS * Math.PI)) * 0.4;
 
-                for (let x = 0; x < gridSizeX; x++) {
-                    for (let y = 0; y < gridSizeY; y++) {
-                        const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
-                        const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                        const led = new THREE.Mesh(geometry, material);
-                        led.position.set(
-                            offsetX + x * spacingX,
-                            offsetY + y * spacingY,
-                            0
-                        );
-                        this.scene.add(led);
-                        this.leds.push(led);
-                    }
+                for (let i = 0; i < NUM_LEDS; i++) {
+                    const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
+                    const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                    const led = new THREE.Mesh(geometry, material);
+                    
+                    // Random position within container bounds
+                    led.position.set(
+                        (Math.random() - 0.5) * containerWidth,
+                        (Math.random() - 0.5) * containerHeight,
+                        0
+                    );
+                    
+                    this.scene.add(led);
+                    this.leds.push(led);
                 }
             }
 
@@ -158,8 +149,8 @@
 
         // Periodically reset with new dimensions
         setInterval(() => {
-            const new_width =  Math.random() * 1280;
-            const new_height = Math.random() * 720;
+            const new_width =  Math.random() * 720;
+            const new_height = Math.random() * 1280;
             console.log('Resizing to', new_width);
             ledGrid.resize(new_width, new_height);
         }, 2000); // Reset every 5 seconds
