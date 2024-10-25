@@ -510,12 +510,12 @@ class GraphicsManagerThreeJS {
         // Calculate dot size based on LED density
         const width = screenMap.absMax[0] - screenMap.absMin[0];
         const height = screenMap.absMax[1] - screenMap.absMin[1];
-        const screenArea = width * height;
+        //const screenArea = width * height;
         // Use point diameter from screen map if available, otherwise calculate default
-        const defaultDotSize = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
+        //const defaultDotSize = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
         const stripDotSizes = Object.values(screenMap.strips).map(strip => strip.pointDiameter || 1.0);
-        const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
-        const dotSize = defaultDotSize * avgPointDiameter;
+        //const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
+        //const dotSize = defaultDotSize * avgPointDiameter;
 
         // Create LEDs at mapped positions
         let ledIndex = 0;
@@ -525,7 +525,7 @@ class GraphicsManagerThreeJS {
                 const stripData = screenMap.strips[stripId];
                 const stripDiameter = stripData.diameter || 1.0;
                 stripData.map.forEach(pos => {
-                    const geometry = new THREE.CircleGeometry(dotSize * stripDiameter * this.LED_SCALE, this.SEGMENTS);
+                    const geometry = new THREE.CircleGeometry(stripDiameter * this.LED_SCALE, this.SEGMENTS);
                     const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
                     const led = new THREE.Mesh(geometry, material);
 
