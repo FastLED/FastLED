@@ -2,6 +2,9 @@ import os
 
 DEBUG = 0
 
+if "DEBUG" in os.environ:
+    DEBUG = 1
+
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
 # It seems easier to load the program as a pure JS file, so we will use asm.js
 # right now as a test.
@@ -31,7 +34,7 @@ wasmflags = [
     "-s",
     "EXPORTED_RUNTIME_METHODS=['ccall','cwrap']",
     "-s",
-    "ALLOW_MEMORY_GROWTH=1",
+    "ALLOW_MEMORY_GROWTH=0",
     "-Oz",
     "-s",
     "EXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop']",
@@ -40,7 +43,6 @@ wasmflags = [
     "INITIAL_MEMORY=134217728",
     "--no-entry",
     "-s",
-    "ASSERTIONS=1",
     # Enable C++17 with GNU extensions.
     "-std=gnu++17",
     "-fpermissive",

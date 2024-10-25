@@ -126,7 +126,7 @@ def clean() -> None:
     remove_dangling_images()
 
 
-def build_image() -> None:
+def build_image(debug: bool = False) -> None:
     print("Building Docker image...")
     try:
         cmd_list: List[str] = [
@@ -136,10 +136,14 @@ def build_image() -> None:
             "linux/amd64",
             "-t",
             "fastled-wasm-compiler",
+        ]
+        if debug:
+            cmd_list.extend(["--build-arg", "DEBUG=1"])
+        cmd_list.extend([
             "-f",
             str(DOCKER_FILE),
             str(PROJECT_ROOT),
-        ]
+        ])
         cmd_str: str = subprocess.list2cmdline(cmd_list)
         print(f"Running command: {cmd_str}")
         subprocess.run(
@@ -244,7 +248,7 @@ def main() -> None:
         if args.build or not image_exists():
             # Check for and remove existing container before building
             remove_existing_container("fastled-wasm-compiler")
-            build_image()
+            build_image(args.debug)
             remove_dangling_images()
 
         run_container(args.directory, args.interactive, args.debug)

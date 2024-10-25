@@ -79,6 +79,18 @@ RUN cp /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini
     cp /js/fastled/src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh && \
     cp /js/fastled/src/platforms/wasm/compiler/*.sh /js/
 
+# Build with --build-arg DEBUG=1 to enable debug mode
+ARG DEBUG=0
+ENV DEBUG=${DEBUG}
+# now set it in /etc/profile, if it exists
+RUN if \
+    [ -f /etc/profile ] && \
+    [ "${DEBUG}" = "1" ]; then \
+    echo 'export DEBUG=1' >> /etc/profile; \
+    echo 'echo "Debug mode enabled"' >> /etc/profile; \
+    fi
+
+
 WORKDIR /js
 
 # This is too slow for lots of testing, disabled for now
