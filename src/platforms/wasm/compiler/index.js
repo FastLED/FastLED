@@ -432,8 +432,9 @@ class GraphicsManagerThreeJS {
         console.log(this.threeJsModules);
         const { THREE } = this.threeJsModules;
         
-        // Create scene
+        // Create scene with black background
         this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0x000000);
         
         // Create camera
         const canvas = document.getElementById(this.canvasId);
@@ -441,8 +442,13 @@ class GraphicsManagerThreeJS {
         this.camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
         this.camera.position.z = 5;
         
-        // Create renderer
-        this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        // Create renderer with proper transparency
+        this.renderer = new THREE.WebGLRenderer({ 
+            canvas, 
+            antialias: true,
+            alpha: false
+        });
+        this.renderer.setClearColor(0x000000, 1);
         
         // Set renderer size to match canvas dimensions
         this.renderer.setSize(canvas.width, canvas.height, false); // false = don't update style
@@ -462,11 +468,14 @@ class GraphicsManagerThreeJS {
         canvas.style.width = displayWidth + 'px';
         canvas.style.height = displayHeight + 'px';
         
-        // Create points material
+        // Create points material with proper blending
         this.pointsMaterial = new THREE.PointsMaterial({
             size: 0.1,
             vertexColors: true,
-            sizeAttenuation: true
+            sizeAttenuation: true,
+            transparent: false,
+            opacity: 1.0,
+            blending: THREE.NormalBlending
         });
     }
 
@@ -506,6 +515,9 @@ class GraphicsManagerThreeJS {
         if (!this.scene) {
             this.initThreeJS();
         }
+
+        // clear and set to black
+        this.renderer.clear();
 
         const screenMap = frameData.screenMap;
         let totalPoints = 0;
