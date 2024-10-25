@@ -553,7 +553,6 @@ class GraphicsManagerThreeJS {
             console.warn("Received empty frame data, skipping update");
             return;
         }
-        console.log("begin draw");
         const totalPixels = frameData.reduce((acc, strip) => acc + strip.pixel_data.length / 3, 0);
 
         // Initialize scene if it doesn't exist or if LED count changed
@@ -642,7 +641,6 @@ class GraphicsManagerThreeJS {
         }
 
         this.composer.render();
-        console.log("End Draw");
     }
 }
 
