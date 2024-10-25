@@ -518,18 +518,27 @@ class GraphicsManagerThreeJS {
         const dotSize = defaultDotSize * avgPointDiameter;
 
         // Create LEDs at mapped positions
-        ledPositions.forEach(pos => {
-            const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
-            const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            const led = new THREE.Mesh(geometry, material);
+        let ledIndex = 0;
+        frameData.forEach(strip => {
+            const stripId = strip.strip_id;
+            if (stripId in screenMap.strips) {
+                const stripData = screenMap.strips[stripId];
+                const stripDiameter = stripData.diameter || 1.0;
+                stripData.map.forEach(pos => {
+                    const geometry = new THREE.CircleGeometry(dotSize * stripDiameter * this.LED_SCALE, this.SEGMENTS);
+                    const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                    const led = new THREE.Mesh(geometry, material);
 
-            // Position LED according to map, normalized to screen coordinates
-            const x = ((pos[0] - screenMap.absMin[0]) / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
-            const y = -((pos[1] - screenMap.absMin[1]) / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
-            led.position.set(x, y, 500);
+                    // Position LED according to map, normalized to screen coordinates
+                    const x = ((pos[0] - screenMap.absMin[0]) / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
+                    const y = -((pos[1] - screenMap.absMin[1]) / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
+                    led.position.set(x, y, 500);
 
-            this.scene.add(led);
-            this.leds.push(led);
+                    this.scene.add(led);
+                    this.leds.push(led);
+                    ledIndex++;
+                });
+            }
         });
     }
 
