@@ -9,7 +9,7 @@
             margin: 0;
         }
 
-        canvas {
+        #ledCanvas {
             display: block;
             margin: 0 auto;
             background-color: black;
@@ -49,13 +49,20 @@
             }
             this.leds = [];
 
-            if (this.renderer) {
-                this.renderer.dispose();
-                this.renderer.domElement.remove();
-            }
-
             if (this.composer) {
                 this.composer.dispose();
+            }
+
+            // Clear the scene
+            if (this.scene) {
+                while(this.scene.children.length > 0) { 
+                    this.scene.remove(this.scene.children[0]); 
+                }
+            }
+
+            // Don't remove the renderer or canvas
+            if (this.renderer) {
+                this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
             }
         }
 
@@ -69,9 +76,14 @@
             );
             this.camera.position.z = 500;
 
-            this.renderer = new THREE.WebGLRenderer({ antialias: true });
+            const canvas = document.getElementById('ledCanvas');
+            canvas.width = this.SCREEN_WIDTH;
+            canvas.height = this.SCREEN_HEIGHT;
+            this.renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                antialias: true 
+            });
             this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
-            document.body.appendChild(this.renderer.domElement);
 
             const renderScene = new RenderPass(this.scene, this.camera);
             const bloomPass = new UnrealBloomPass(
@@ -127,6 +139,7 @@
 </script>
 
 <body>
+    <canvas id="ledCanvas"></canvas>
     <script type="importmap">
     {
         "imports": {
