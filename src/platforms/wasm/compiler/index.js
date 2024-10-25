@@ -510,12 +510,12 @@ class GraphicsManagerThreeJS {
         // Calculate dot size based on LED density
         const width = screenMap.absMax[0] - screenMap.absMin[0];
         const height = screenMap.absMax[1] - screenMap.absMin[1];
-        //const screenArea = width * height;
+        const screenArea = width * height;
         // Use point diameter from screen map if available, otherwise calculate default
-        //const defaultDotSize = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
+        const defaultDotSizeScale = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
         const stripDotSizes = Object.values(screenMap.strips).map(strip => strip.pointDiameter || 1.0);
-        //const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
-        //const dotSize = defaultDotSize * avgPointDiameter;
+        const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
+        const defaultDotSize = defaultDotSizeScale * avgPointDiameter;
 
         // Create LEDs at mapped positions
         let ledIndex = 0;
@@ -523,7 +523,12 @@ class GraphicsManagerThreeJS {
             const stripId = strip.strip_id;
             if (stripId in screenMap.strips) {
                 const stripData = screenMap.strips[stripId];
-                const stripDiameter = stripData.diameter || 1.0;
+                let stripDiameter = null;
+                if (stripData.diameter) {
+                    stripDiameter = stripData.diameter * 2;
+                } else {
+                    stripDiameter = defaultDotSize;
+                }
                 stripData.map.forEach(pos => {
                     const geometry = new THREE.CircleGeometry(stripDiameter * this.LED_SCALE, this.SEGMENTS);
                     const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
@@ -543,11 +548,12 @@ class GraphicsManagerThreeJS {
     }
 
     updateCanvas(frameData) {
+
         if (frameData.length === 0) {
             console.warn("Received empty frame data, skipping update");
             return;
         }
-
+        console.log("begin draw");
         const totalPixels = frameData.reduce((acc, strip) => acc + strip.pixel_data.length / 3, 0);
 
         // Initialize scene if it doesn't exist or if LED count changed
@@ -636,6 +642,7 @@ class GraphicsManagerThreeJS {
         }
 
         this.composer.render();
+        console.log("End Draw");
     }
 }
 

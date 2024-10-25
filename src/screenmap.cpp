@@ -26,9 +26,12 @@ void ScreenMap::ParseJson(const char *jsonStrOfMapFile,
         auto x = segment["x"];
         auto y = segment["y"];
         auto obj = segment["diameter"];
-        float diameter = 1.0f;
+        float diameter = -1.0f;
         if (obj.is<float>()) {
-            diameter = obj.as<float>();
+            float d = obj.as<float>();
+            if (d > 0.0f) {
+                diameter = d;
+            }
         }
         auto n = x.size();
         ScreenMap segment_map(n, diameter);
@@ -51,7 +54,10 @@ void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16>& segmentMaps, ArduinoJ
             x_array.add(xy.x);
             y_array.add(xy.y);
         }
-        segment["diameter"] = kv.second.getDiameter();
+        float diameter = kv.second.getDiameter();
+        if (diameter > 0.0f) {
+            segment["diameter"] = diameter;
+        }
     }
 }
 

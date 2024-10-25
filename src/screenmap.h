@@ -24,7 +24,7 @@ class ScreenMap {
     ScreenMap() = default;
 
     // is_reverse is false by default for linear layout
-    ScreenMap(uint32_t length, float mDiameter = 1.0f) : length(length), mDiameter(mDiameter) {
+    ScreenMap(uint32_t length, float mDiameter = -1.0f) : length(length), mDiameter(mDiameter) {
         mLookUpTable = LUTXYFLOATPtr::New(length);
         LUTXYFLOAT &lut = *mLookUpTable.get();
         pair_xy_float *data = lut.getData();
@@ -33,7 +33,7 @@ class ScreenMap {
         }
     }
 
-    ScreenMap(const pair_xy_float *lut, uint32_t length, float diameter = 1.0) : length(length), mDiameter(diameter) {
+    ScreenMap(const pair_xy_float *lut, uint32_t length, float diameter = -1.0) : length(length), mDiameter(diameter) {
         mLookUpTable = LUTXYFLOATPtr::New(length);
         LUTXYFLOAT &lut16xy = *mLookUpTable.get();
         pair_xy_float *data = lut16xy.getData();
@@ -42,7 +42,7 @@ class ScreenMap {
         }
     }
 
-    template <uint32_t N> ScreenMap(const pair_xy_float (&lut)[N], float diameter = 1.0) : length(N), mDiameter(diameter) {
+    template <uint32_t N> ScreenMap(const pair_xy_float (&lut)[N], float diameter = -1.0) : length(N), mDiameter(diameter) {
         mLookUpTable = LUTXYFLOATPtr::New(length);
         LUTXYFLOAT &lut16xy = *mLookUpTable.get();
         pair_xy_float *data = lut16xy.getData();
@@ -110,6 +110,6 @@ class ScreenMap {
         return s_empty;
     }
     uint32_t length = 0;
-    float mDiameter = 1.0f;
+    float mDiameter = -1.0f;  // Only serialized if it's not > 0.0f.
     LUTXYFLOATPtr mLookUpTable;
 };

@@ -47,7 +47,10 @@ inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap &screenmap) {
         entry.add(screenmap[i].y);
     }
     // add diameter.
-    doc["diameter"] = screenmap.getDiameter();
+    float diameter = screenmap.getDiameter();
+    if (diameter > 0.0f) {
+        doc["diameter"] = diameter;
+    }
     Str jsonBuffer;
     serializeJson(doc, jsonBuffer);
     jsSetCanvasSize(jsonBuffer.c_str(), jsonBuffer.size());
