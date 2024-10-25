@@ -37,11 +37,25 @@
         }
     </script>
 
-    <script type="module">
 
-    </script>
 
 </body>
+
+<script type="module">
+    import * as THREE from 'three';
+
+    import Stats from 'three/addons/libs/stats.module.js';
+    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+    window.threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
+</script>
 
 
 <!-- Include the FastLED script -->
@@ -51,29 +65,14 @@
 
 
 
-    const ENABLED = window.location.search.includes('threejs');
-    async function loadThreeJsModules() {
-        // Dynamically import all required modules
-        const THREE = await import('three');
-        const { default: Stats } = await import('three/addons/libs/stats.module.js');
-        const { GUI } = await import('three/addons/libs/lil-gui.module.min.js');
-        const { OrbitControls } = await import('three/addons/controls/OrbitControls.js');
-        const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
-        const { EffectComposer } = await import('three/addons/postprocessing/EffectComposer.js');
-        const { RenderPass } = await import('three/addons/postprocessing/RenderPass.js');
-        const { UnrealBloomPass } = await import('three/addons/postprocessing/UnrealBloomPass.js');
-        const { OutputPass } = await import('three/addons/postprocessing/OutputPass.js');
-        const threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass };
-        return threeJsModules;
-    }
+    const ENABLED = window.location.search.includes('3js');
 
     async function loadThreeJs() {
         if (!ENABLED) return {};
-        const threeJsModules = await loadThreeJsModules();
-        console.log('Loaded all ThreeJS modules:', threeJsModules);
+        console.log('Using ThreeJS modules:', window.threeJsModules);
         return {
             containerId: "container",
-            modules: threeJsModules,
+            modules: window.threeJsModules,
         };
     }
 
