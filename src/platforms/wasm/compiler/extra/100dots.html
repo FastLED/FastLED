@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>LED Grid Demo</title>
     <style>
-        body { margin: 0; }
-        canvas { display: block; margin: 0 auto; background-color: black; }
+        body {
+            margin: 0;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: black;
+        }
     </style>
 </head>
+
 <body>
-<script type="importmap">
+    <script type="importmap">
     {
         "imports": {
             "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js",
@@ -17,93 +26,98 @@
         }
     }
 </script>
-<script type="module">
-    import * as THREE from 'three';
-    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-    // Constants for screen dimensions
-    const SCREEN_WIDTH = 640;
-    const SCREEN_HEIGHT = SCREEN_WIDTH * 2;
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        function load() {
+            // Constants for screen dimensions
+            const SCREEN_WIDTH = 640;
+            const SCREEN_HEIGHT = SCREEN_WIDTH * 2;
 
-    // Set up the scene, camera, and renderer
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera( -50, 100, 100, -200, 1, 1000 );
-    camera.position.z = 500;
+            // Set up the scene, camera, and renderer
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-50, 100, 100, -200, 1, 1000);
+            camera.position.z = 500;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-    document.body.appendChild(renderer.domElement);
-    
-    // Setup post-processing
-    const renderScene = new RenderPass(scene, camera);
-    const bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(SCREEN_WIDTH, SCREEN_HEIGHT),
-        16.0,    // bloom strength - increased from 1.5
-        1.0,    // radius - increased from 0.4
-        0.0     // threshold - lowered from 0.85 to make more elements bloom
-    );
-    
-    const composer = new EffectComposer(renderer);
-    composer.addPass(renderScene);
-    composer.addPass(bloomPass);
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+            document.body.appendChild(renderer.domElement);
 
-    // Create the LED grid
-    const SEGMENTS = 16;
-    const LED_SCALE = 1.0;
-    var leds = [];
-    var gridSizeX = 100; // width
-    var gridSizeY = gridSizeX * (SCREEN_HEIGHT / SCREEN_WIDTH); // height proportional to screen aspect ratio
-    
-    // Calculate the aspect ratio to maintain circular dots
-    const containerWidth = SCREEN_WIDTH;
-    const containerHeight = SCREEN_HEIGHT;
-    const aspectRatio = containerWidth / containerHeight;
-    
-    // Calculate spacing to fit the grid while maintaining proportions
-    var spacingX = containerWidth / gridSizeX;
-    var spacingY = containerHeight / gridSizeY;
-    
-    // Use the smaller spacing to ensure circles stay circular
-    const dotSize = Math.min(spacingX, spacingY) * 0.4;
-    
-    // Calculate offsets to center the grid
-    const offsetX = -containerWidth / 2 + spacingX / 2;
-    const offsetY = -containerHeight / 2 + spacingY / 2;
-
-    for (var x = 0; x < gridSizeX; x++) {
-        for (var y = 0; y < gridSizeY; y++) {
-            var geometry = new THREE.CircleGeometry(dotSize*LED_SCALE, SEGMENTS);
-            var material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            var led = new THREE.Mesh(geometry, material);
-            led.position.set(
-                offsetX + x * spacingX,
-                offsetY + y * spacingY,
-                0
+            // Setup post-processing
+            const renderScene = new RenderPass(scene, camera);
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(SCREEN_WIDTH, SCREEN_HEIGHT),
+                16.0,    // bloom strength - increased from 1.5
+                1.0,    // radius - increased from 0.4
+                0.0     // threshold - lowered from 0.85 to make more elements bloom
             );
-            scene.add(led);
-            leds.push(led);
-        }
-    }
 
-    // Animation loop
-    function animate() {
-        requestAnimationFrame(animate);
+            const composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
 
-        leds.forEach(function(led) {
-            // Fade the LED color by 85%
-            led.material.color.multiplyScalar(0.85);
+            // Create the LED grid
+            const SEGMENTS = 16;
+            const LED_SCALE = 1.0;
+            var leds = [];
+            var gridSizeX = 100; // width
+            var gridSizeY = gridSizeX * (SCREEN_HEIGHT / SCREEN_WIDTH); // height proportional to screen aspect ratio
 
-            // 1% chance to light up the LED with a random color
-            if (Math.random() < 0.01) {
-                led.material.color.setRGB(Math.random(), Math.random(), Math.random());
+            // Calculate the aspect ratio to maintain circular dots
+            const containerWidth = SCREEN_WIDTH;
+            const containerHeight = SCREEN_HEIGHT;
+            const aspectRatio = containerWidth / containerHeight;
+
+            // Calculate spacing to fit the grid while maintaining proportions
+            var spacingX = containerWidth / gridSizeX;
+            var spacingY = containerHeight / gridSizeY;
+
+            // Use the smaller spacing to ensure circles stay circular
+            const dotSize = Math.min(spacingX, spacingY) * 0.4;
+
+            // Calculate offsets to center the grid
+            const offsetX = -containerWidth / 2 + spacingX / 2;
+            const offsetY = -containerHeight / 2 + spacingY / 2;
+
+            for (var x = 0; x < gridSizeX; x++) {
+                for (var y = 0; y < gridSizeY; y++) {
+                    var geometry = new THREE.CircleGeometry(dotSize * LED_SCALE, SEGMENTS);
+                    var material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                    var led = new THREE.Mesh(geometry, material);
+                    led.position.set(
+                        offsetX + x * spacingX,
+                        offsetY + y * spacingY,
+                        0
+                    );
+                    scene.add(led);
+                    leds.push(led);
+                }
             }
-        });
 
-        composer.render();
-    }
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
 
-    animate();
-</script>
+                leds.forEach(function (led) {
+                    // Fade the LED color by 85%
+                    led.material.color.multiplyScalar(0.85);
+
+                    // 1% chance to light up the LED with a random color
+                    if (Math.random() < 0.01) {
+                        led.material.color.setRGB(Math.random(), Math.random(), Math.random());
+                    }
+                });
+
+                composer.render();
+            }
+
+            animate();
+        }
+
+        load();
+    </script>
 </body>
+
 </html>
