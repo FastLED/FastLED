@@ -16,7 +16,9 @@ using std::max;
 inline long random(long min, long max) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(min, max);
+    // Arduino random is exclusive of the max value, but std::uniform_int_distribution is inclusive.
+    // So we subtract 1 from the max value.
+    std::uniform_int_distribution<> dis(min, max-1);
     return dis(gen);
 }
 
