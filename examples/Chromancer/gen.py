@@ -11,7 +11,8 @@ import json
 from math import pi, cos, sin
 
 LED_PER_STRIP = 14
-SPACE_PER_LED = 3.0  # Increased for better visibility
+SPACE_PER_LED = 10.0  # Increased for better visibility
+LED_DIAMETER = SPACE_PER_LED / 2
 MIRROR_X = True  # Diagramed from the reverse side. Reverse the x-axis
 
 SMALLEST_ANGLE = 360 / 6
@@ -45,7 +46,7 @@ class Point:
         if MIRROR_X:
             x_values = [-x for x in x_values]
 
-        return {"x": x_values, "y": y_values}
+        return {"x": x_values, "y": y_values, "diameter": LED_DIAMETER}
 
     def copy(self) -> "Point":
         return Point(self.x, self.y)
