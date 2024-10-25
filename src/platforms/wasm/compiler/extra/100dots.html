@@ -36,7 +36,7 @@
         function load(SCREEN_WIDTH, SCREEN_HEIGHT) {
             // Set up the scene, camera, and renderer
             const scene = new THREE.Scene();
-            const camera = new THREE.OrthographicCamera(-50, 100, 100, -200, 1, 1000);
+            const camera = new THREE.OrthographicCamera(-SCREEN_WIDTH/2, SCREEN_WIDTH/2, SCREEN_HEIGHT/2, -SCREEN_HEIGHT/2, 1, 1000);
             camera.position.z = 500;
 
             const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -114,8 +114,8 @@
             animate();
         }
         // Constants for screen dimensions
-        const SCREEN_WIDTH = 640;
-        const SCREEN_HEIGHT = SCREEN_WIDTH * 2;
+        const SCREEN_WIDTH = 800;
+        const SCREEN_HEIGHT = SCREEN_WIDTH / 2;
 
         load(SCREEN_WIDTH, SCREEN_HEIGHT);
     </script>
