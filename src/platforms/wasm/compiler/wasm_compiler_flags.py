@@ -37,7 +37,7 @@ wasmflags = [
     "EXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop']",
     "--bind",
     "-s",
-    "INITIAL_MEMORY=268435456",
+    "INITIAL_MEMORY=134217728",
     "--no-entry",
     "-s",
     "ASSERTIONS=1",
@@ -51,7 +51,7 @@ wasmflags = [
 ]
 
 if DEBUG_SYMBOLS:
-    wasmflags += ['-g', '-gsource-map', '--emit-symbol-map']
+    wasmflags += ['-g', '-gsource-map', '--emit-symbol-map', '-s', 'STACK_OVERFLOW_CHECK=2', '-s', 'SAFE_HEAP=1', '-s', 'SAFE_HEAP_LOG=1', '-s', 'ASSERTIONS=1']
     
 
 
