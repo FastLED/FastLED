@@ -427,7 +427,7 @@ class GraphicsManagerThreeJS {
         }
     }
 
-    initThreeJS() {
+    initThreeJS(totalPixels) {
         const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
         
@@ -473,20 +473,20 @@ class GraphicsManagerThreeJS {
         this.composer.addPass(bloomPass);
 
         // Create LED grid
-        this.createGrid();
+        this.createGrid(totalPixels);
     }
 
-    createGrid() {
+    createGrid(num_leds) {
         const { THREE } = this.threeJsModules;
-        const NUM_LEDS = 5000; // Number of LEDs to create
+
         const containerWidth = window.innerWidth;
         const containerHeight = window.innerHeight;
 
         // Calculate dot size based on screen area and LED count
         const screenArea = containerWidth * containerHeight;
-        const dotSize = Math.sqrt(screenArea / (NUM_LEDS * Math.PI)) * 0.4;
+        const dotSize = Math.sqrt(screenArea / (num_leds * Math.PI)) * 0.4;
 
-        for (let i = 0; i < NUM_LEDS; i++) {
+        for (let i = 0; i < num_leds; i++) {
             const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
             const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
             const led = new THREE.Mesh(geometry, material);
@@ -509,21 +509,67 @@ class GraphicsManagerThreeJS {
             return;
         }
 
+        const totalPixels = frameData.reduce((acc, strip) => acc + strip.pixel_data.length, 0);
+
         if (!this.scene) {
-            this.initThreeJS();
+            this.initThreeJS(totalPixels);
         }
 
-        const FADE_PER_FRAME = 0.85;
+        const screenMap = frameData.screenMap;
+        
+        // Clear all LEDs
         this.leds.forEach(led => {
-            led.material.color.multiplyScalar(FADE_PER_FRAME);
-            if (Math.random() < 0.01) {
-                // Generate random RGB values between 0-255 and normalize for Three.js
-                const r = Math.floor(Math.random() * 256) / 255;
-                const g = Math.floor(Math.random() * 256) / 255;
-                const b = Math.floor(Math.random() * 256) / 255;
-                led.material.color.setRGB(r, g, b);
-            }
+            led.material.color.setRGB(0, 0, 0);
         });
+
+        // Update LEDs based on frame data
+        for (let i = 0; i < frameData.length; i++) {
+            const strip = frameData[i];
+            const data = strip.pixel_data;
+            const strip_id = strip.strip_id;
+            
+            if (!(strip_id in screenMap.strips)) {
+                console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
+                continue;
+            }
+            
+            const stripData = screenMap.strips[strip_id];
+            const map = stripData.map;
+            const min_x = screenMap.absMin[0];
+            const min_y = screenMap.absMin[1];
+            const pixelCount = data.length / 3;
+
+            for (let j = 0; j < pixelCount; j++) {
+                if (j >= map.length) {
+                    console.warn(`Strip ${strip_id}: Pixel ${j} is outside the screen map ${map.length}, skipping update`);
+                    continue;
+                }
+
+                let [x, y] = map[j];
+                //console.log(`LED ${j} original coords: (${x}, ${y})`);
+                x -= min_x;
+                y -= min_y;
+                //console.log(`LED ${j} after min adjustment: (${x}, ${y})`);
+
+                // Convert to normalized coordinates (-1 to 1)
+                const normalizedX = (x / this.SCREEN_WIDTH) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
+                const normalizedY = -(y / this.SCREEN_HEIGHT) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
+                //console.log(`LED ${j} normalized coords: (${normalizedX}, ${normalizedY})`);
+
+                // Find the LED at this position
+                const led = this.leds[j];
+                if (led) {
+                    led.position.set(normalizedX, normalizedY, 0);
+                    
+                    // Update LED color
+                    const srcIndex = j * 3;
+                    const r = (data[srcIndex] & 0xFF) / 255;
+                    const g = (data[srcIndex + 1] & 0xFF) / 255;
+                    const b = (data[srcIndex + 2] & 0xFF) / 255;
+                    led.material.color.setRGB(r, g, b);
+                }
+            }
+        }
 
         this.composer.render();
     }
