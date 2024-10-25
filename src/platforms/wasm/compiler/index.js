@@ -428,6 +428,7 @@ class GraphicsManagerThreeJS {
     }
 
     initThreeJS(totalPixels) {
+        const BLOOM_STRENGTH = 2.0;
         const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
         
@@ -463,9 +464,9 @@ class GraphicsManagerThreeJS {
         const renderScene = new RenderPass(this.scene, this.camera);
         const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(this.SCREEN_WIDTH, this.SCREEN_HEIGHT),
-            16.0,
-            1.0,
-            0.0
+            BLOOM_STRENGTH,
+            1.0,  // radius
+            0.0  // threshold
         );
 
         this.composer = new EffectComposer(this.renderer);
@@ -522,6 +523,8 @@ class GraphicsManagerThreeJS {
             led.material.color.setRGB(0, 0, 0);
         });
 
+        const pixelMap = {};
+
         // Update LEDs based on frame data
         for (let i = 0; i < frameData.length; i++) {
             const strip = frameData[i];
@@ -537,7 +540,15 @@ class GraphicsManagerThreeJS {
             const map = stripData.map;
             const min_x = screenMap.absMin[0];
             const min_y = screenMap.absMin[1];
+            const width = screenMap.absMax[0] - min_x;
+            const height = screenMap.absMax[1] - min_y;
             const pixelCount = data.length / 3;
+
+
+            pixelMap[strip_id] = [];
+            const curr_strip_pixels = pixelMap[strip_id];
+            console.log(`Processing strip ${strip_id} with ${pixelCount} pixels`);
+
 
             for (let j = 0; j < pixelCount; j++) {
                 if (j >= map.length) {
@@ -550,10 +561,13 @@ class GraphicsManagerThreeJS {
                 x -= min_x;
                 y -= min_y;
                 //console.log(`LED ${j} after min adjustment: (${x}, ${y})`);
+                // curr_strip_pixels.push([x,y]);
+                // add it to the array of pixels for this strip
+                curr_strip_pixels.push(x);
 
                 // Convert to normalized coordinates (-1 to 1)
-                const normalizedX = (x / this.SCREEN_WIDTH) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
-                const normalizedY = -(y / this.SCREEN_HEIGHT) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
+                const normalizedX = (x / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
+                const normalizedY = -(y / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
                 //console.log(`LED ${j} normalized coords: (${normalizedX}, ${normalizedY})`);
 
                 // Find the LED at this position
@@ -570,6 +584,8 @@ class GraphicsManagerThreeJS {
                 }
             }
         }
+
+        // console.log("LED data:", pixelMap);
 
         this.composer.render();
     }
