@@ -8,9 +8,8 @@
 
 #include "str.h"
 #include "fixed_map.h"
-#include "third_party/arduinojson/json.h"
+#include "json.h"
 #include "namespace.h"
-
 #include "fixed_vector.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -40,8 +39,8 @@ void ScreenMap::ParseJson(const char *jsonStrOfMapFile,
     }
 }
 
-void ScreenMap::toJsonStr(const FixedMap<Str, ScreenMap, 16>& segmentMaps, Str* jsonBuffer) {
-    ArduinoJson::JsonDocument doc;
+void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16>& segmentMaps, ArduinoJson::JsonDocument* _doc) {
+    auto& doc = *_doc;
     auto map = doc["map"].to<ArduinoJson::JsonObject>();
     for (auto kv : segmentMaps) {
         auto segment = map[kv.first].to<ArduinoJson::JsonObject>();
@@ -54,6 +53,11 @@ void ScreenMap::toJsonStr(const FixedMap<Str, ScreenMap, 16>& segmentMaps, Str* 
         }
         segment["diameter"] = kv.second.getDiameter();
     }
+}
+
+void ScreenMap::toJsonStr(const FixedMap<Str, ScreenMap, 16>& segmentMaps, Str* jsonBuffer) {
+    ArduinoJson::JsonDocument doc;
+    toJson(segmentMaps, &doc);
     ArduinoJson::serializeJson(doc, *jsonBuffer);
 }
 

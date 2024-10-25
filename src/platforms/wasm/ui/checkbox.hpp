@@ -1,5 +1,5 @@
 
-#include "third_party/arduinojson/json.h"
+#include "json.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
 #include <string.h>

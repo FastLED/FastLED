@@ -9,7 +9,7 @@
 #include <vector>
 
 #include <FastLED.h>
-#include "third_party/arduinojson/json.h"
+#include "json.h"
 #include "slice.h"
 #include "screenmap.h"
 #include "math_macros.h"

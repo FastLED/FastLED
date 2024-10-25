@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fixed_map.h"
-#include "third_party/arduinojson/json.h"
+#include "json.h"
 #include "ui_manager.h"
 #include <emscripten.h>
 #include <sstream>

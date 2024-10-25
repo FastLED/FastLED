@@ -13,7 +13,7 @@
 #include "ptr.h"
 
 #include "platforms/wasm/js.h"
-#include "third_party/arduinojson/json.h"
+#include "json.h"
 
 FASTLED_NAMESPACE_BEGIN
 

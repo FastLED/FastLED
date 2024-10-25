@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include "str.h"
 #include "fixed_map.h"
+#include "json.h"
 
 class Str;
 
@@ -100,7 +101,8 @@ class ScreenMap {
     static void ParseJson(const char *jsonStrOfMapFile,
                           FixedMap<Str, ScreenMap, 16> *segmentMaps);
 
-    static void toJsonStr(const FixedMap<Str, ScreenMap, 16>&, Str* jsonBuffer);  
+    static void toJsonStr(const FixedMap<Str, ScreenMap, 16>&, Str* jsonBuffer);
+    static void toJson(const FixedMap<Str, ScreenMap, 16>&, ArduinoJson::JsonDocument* doc);
 
   private:
     static const pair_xy_float &empty() {

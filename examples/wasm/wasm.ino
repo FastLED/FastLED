@@ -9,7 +9,7 @@
 
 #include <FastLED.h>
 #include "fx/2d/noisepalette.hpp"
-#include "third_party/arduinojson/json.h"
+#include "json.h"
 #include "slice.h"
 #include "fx/fx_engine.h"
 

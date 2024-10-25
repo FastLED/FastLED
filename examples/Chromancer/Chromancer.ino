@@ -17,7 +17,7 @@
 #include "detail.h"
 #include "screenmap.h"
 #include "math_macros.h"
-#include "third_party/arduinojson/json.h"
+#include "json.h"
 #include "ui.h"
 #include "fixed_map.h"
 

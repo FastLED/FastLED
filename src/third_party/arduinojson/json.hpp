@@ -6,7 +6,7 @@
 
 
 #ifndef FASTLED_JSON_GUARD
-#error "You must include third_party/arduinojson/json.h instead of json.hpp"
+#error "You must include json.h instead of json.hpp"
 #endif
 
     

@@ -4,7 +4,7 @@
 #define UI_NUMBER_FIELD_HPP
 
 #include "namespace.h"
-#include "third_party/arduinojson/json.h"
+#include "json.h"
 #include "ui_internal.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
