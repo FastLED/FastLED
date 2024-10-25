@@ -665,10 +665,18 @@ class UiManager {
     addUiElements(jsonData) {
         console.log("UI elements added:", jsonData);
 
+
         const uiControlsContainer = document.getElementById(this.uiControlsId) || this.createUiControlsContainer();
 
         let foundUi = false;
         jsonData.forEach(data => {
+            console.log("data:", data);
+            const group = data.group;
+            const hasGroup = group !== "" && group !== undefined;
+            if (hasGroup) {
+                console.log(`Group ${group} found, for item ${data.name}`);
+            }
+    
             let control;
             if (data.type === 'slider') {
                 control = this.createSlider(data);
@@ -889,6 +897,7 @@ class UiManager {
             eventHandled = true;
             // Work in progress.
             const map = jsonData.map;
+
 
 
             const [min, max] = minMax(map);
