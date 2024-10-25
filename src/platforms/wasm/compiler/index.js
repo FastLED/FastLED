@@ -397,6 +397,7 @@ class GraphicsManagerThreeJS {
         this.camera = null;
         this.renderer = null;
         this.composer = null;
+        this.previousTotalLeds = 0;
     }
 
     reset() {
@@ -427,8 +428,8 @@ class GraphicsManagerThreeJS {
         }
     }
 
-    initThreeJS(totalPixels) {
-        const BLOOM_STRENGTH = 2.0;
+    initThreeJS(frameData) {
+        const BLOOM_STRENGTH = 16.0;
         const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
         
@@ -474,20 +475,35 @@ class GraphicsManagerThreeJS {
         this.composer.addPass(bloomPass);
 
         // Create LED grid
-        this.createGrid(totalPixels);
+        this.createGrid(frameData);
     }
 
-    createGrid(num_leds) {
+    createGrid(frameData) {
         const { THREE } = this.threeJsModules;
+
+        // Calculate total number of LEDs across all strips
+        let totalLeds = 0;
+        frameData.forEach(strip => {
+            totalLeds += strip.pixel_data.length / 3; // Each pixel has RGB (3 values)
+        });
 
         const containerWidth = window.innerWidth;
         const containerHeight = window.innerHeight;
 
         // Calculate dot size based on screen area and LED count
         const screenArea = containerWidth * containerHeight;
-        const dotSize = Math.sqrt(screenArea / (num_leds * Math.PI)) * 0.4;
+        const dotSize = Math.sqrt(screenArea / (totalLeds * Math.PI)) * 0.4;
 
-        for (let i = 0; i < num_leds; i++) {
+        // Clear existing LEDs
+        this.leds.forEach(led => {
+            led.geometry.dispose();
+            led.material.dispose();
+            this.scene?.remove(led);
+        });
+        this.leds = [];
+
+        // Create exactly the right number of LEDs
+        for (let i = 0; i < totalLeds; i++) {
             const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
             const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
             const led = new THREE.Mesh(geometry, material);
@@ -510,10 +526,15 @@ class GraphicsManagerThreeJS {
             return;
         }
 
-        const totalPixels = frameData.reduce((acc, strip) => acc + strip.pixel_data.length, 0);
+        const totalPixels = frameData.reduce((acc, strip) => acc + strip.pixel_data.length / 3, 0);
 
-        if (!this.scene) {
-            this.initThreeJS(totalPixels);
+        // Initialize scene if it doesn't exist or if LED count changed
+        if (!this.scene || totalPixels !== this.previousTotalLeds) {
+            if (this.scene) {
+                this.reset(); // Clear existing scene if LED count changed
+            }
+            this.initThreeJS(frameData);
+            this.previousTotalLeds = totalPixels;
         }
 
         const screenMap = frameData.screenMap;
