@@ -102,8 +102,6 @@ class ScreenMap {
 
     static void toJsonStr(const FixedMap<Str, ScreenMap, 16>&, Str* jsonBuffer);  
 
-    static void toJsonStr(const ScreenMap &screenmap, Str* jsonBuffer);
-
   private:
     static const pair_xy_float &empty() {
         static const pair_xy_float s_empty = pair_xy_float(0, 0);
