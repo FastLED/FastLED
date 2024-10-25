@@ -20,6 +20,7 @@
 
 <script>
 
+    const FADE_PER_FRAME = 0.85;  // This should be 0 in production as led's are instant.
 
     class LedGrid {
         constructor(width, height, options) {
@@ -127,7 +128,7 @@
 
         animationLoop() {
             this.leds.forEach(led => {
-                led.material.color.multiplyScalar(0.85);
+                led.material.color.multiplyScalar(FADE_PER_FRAME);
                 if (Math.random() < 0.01) {
                     led.material.color.setRGB(Math.random(), Math.random(), Math.random());
                 }
