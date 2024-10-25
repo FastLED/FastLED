@@ -40,6 +40,23 @@ void ScreenMap::ParseJson(const char *jsonStrOfMapFile,
     }
 }
 
+void ScreenMap::toJsonStr(const FixedMap<Str, ScreenMap, 16>& segmentMaps, Str* jsonBuffer) {
+    ArduinoJson::JsonDocument doc;
+    auto map = doc["map"].to<ArduinoJson::JsonObject>();
+    for (auto kv : segmentMaps) {
+        auto segment = map[kv.first].to<ArduinoJson::JsonObject>();
+        auto x_array = segment["x"].to<ArduinoJson::JsonArray>();
+        auto y_array = segment["y"].to<ArduinoJson::JsonArray>();
+        for (uint16_t i = 0; i < kv.second.getLength(); i++) {
+            const pair_xy_float& xy = kv.second[i];
+            x_array.add(xy.x);
+            y_array.add(xy.y);
+        }
+        segment["diameter"] = kv.second.getDiameter();
+    }
+    ArduinoJson::serializeJson(doc, *jsonBuffer);
+}
+
 void ScreenMap::toJsonStr(const ScreenMap &screenmap, Str* jsonBuffer) {
     ArduinoJson::JsonDocument doc;
     auto map = doc["map"].to<ArduinoJson::JsonObject>();

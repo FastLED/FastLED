@@ -100,6 +100,8 @@ class ScreenMap {
     static void ParseJson(const char *jsonStrOfMapFile,
                           FixedMap<Str, ScreenMap, 16> *segmentMaps);
 
+    static void toJsonStr(const FixedMap<Str, ScreenMap, 16>&, Str* jsonBuffer);  
+
     static void toJsonStr(const ScreenMap &screenmap, Str* jsonBuffer);
 
   private:

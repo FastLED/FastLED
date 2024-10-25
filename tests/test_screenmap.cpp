@@ -75,6 +75,52 @@ TEST_CASE("ScreenMap JSON parsing") {
     CHECK(strip2[1].y == 45.0f);
 }
 
+TEST_CASE("ScreenMap multiple strips JSON serialization") {
+    // Create a map with multiple strips
+    FixedMap<Str, ScreenMap, 16> originalMaps;
+    
+    // First strip
+    ScreenMap strip1(2, 2.0f);
+    strip1.set(0, {1.0f, 2.0f});
+    strip1.set(1, {3.0f, 4.0f});
+    originalMaps.insert("strip1", strip1);
+    
+    // Second strip
+    ScreenMap strip2(3, 1.5f);
+    strip2.set(0, {10.0f, 20.0f});
+    strip2.set(1, {30.0f, 40.0f});
+    strip2.set(2, {50.0f, 60.0f});
+    originalMaps.insert("strip2", strip2);
+
+    // Serialize to JSON string
+    Str jsonStr;
+    ScreenMap::toJsonStr(originalMaps, &jsonStr);
+
+    // Deserialize back to a new map
+    FixedMap<Str, ScreenMap, 16> deserializedMaps;
+    ScreenMap::ParseJson(jsonStr.c_str(), &deserializedMaps);
+
+    // Verify first strip
+    ScreenMap& deserializedStrip1 = deserializedMaps["strip1"];
+    CHECK(deserializedStrip1.getLength() == 2);
+    CHECK(deserializedStrip1.getDiameter() == 2.0f);
+    CHECK(deserializedStrip1[0].x == 1.0f);
+    CHECK(deserializedStrip1[0].y == 2.0f);
+    CHECK(deserializedStrip1[1].x == 3.0f);
+    CHECK(deserializedStrip1[1].y == 4.0f);
+
+    // Verify second strip
+    ScreenMap& deserializedStrip2 = deserializedMaps["strip2"];
+    CHECK(deserializedStrip2.getLength() == 3);
+    CHECK(deserializedStrip2.getDiameter() == 1.5f);
+    CHECK(deserializedStrip2[0].x == 10.0f);
+    CHECK(deserializedStrip2[0].y == 20.0f);
+    CHECK(deserializedStrip2[1].x == 30.0f);
+    CHECK(deserializedStrip2[1].y == 40.0f);
+    CHECK(deserializedStrip2[2].x == 50.0f);
+    CHECK(deserializedStrip2[2].y == 60.0f);
+}
+
 TEST_CASE("ScreenMap JSON serialization round-trip") {
     // Create original map
     ScreenMap original(3, 2.5f);
