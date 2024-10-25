@@ -391,7 +391,7 @@ class GraphicsManagerThreeJS {
         this.canvasId = canvasId;
         this.threeJsModules = threeJsModules;
         this.SEGMENTS = 16;
-        this.LED_SCALE = 1.0;
+        this.LED_SCALE = .25;
         this.leds = [];
         this.scene = null;
         this.camera = null;
@@ -509,11 +509,16 @@ class GraphicsManagerThreeJS {
             const led = new THREE.Mesh(geometry, material);
 
             // Random position within container bounds
+            /*
             led.position.set(
                 (Math.random() - 0.5) * containerWidth,
                 (Math.random() - 0.5) * containerHeight,
                 0
             );
+            */
+
+            // set all offscreen
+            led.position.set(-1000, -1000, 0);
 
             this.scene.add(led);
             this.leds.push(led);
