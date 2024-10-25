@@ -99,7 +99,7 @@
             this.composer.addPass(bloomPass);
         }
 
-        createGrid() {
+        createGrid(_dotSize = undefined) {
             const { THREE } = this.modules;
             const NUM_LEDS = 5000; // Number of LEDs to create
             const containerWidth = this.SCREEN_WIDTH;
@@ -107,7 +107,7 @@
 
             // Calculate dot size based on screen area and LED count
             const screenArea = containerWidth * containerHeight;
-            const dotSize = Math.sqrt(screenArea / (NUM_LEDS * Math.PI)) * 0.4;
+            const dotSize = _dotSize ? _dotSize : Math.sqrt(screenArea / (NUM_LEDS * Math.PI)) * 0.4;
 
             for (let i = 0; i < NUM_LEDS; i++) {
                 const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
