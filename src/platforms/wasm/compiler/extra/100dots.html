@@ -97,8 +97,12 @@
             }
 
             createGrid() {
-                const gridSizeX = 100;
-                const gridSizeY = gridSizeX * (this.SCREEN_HEIGHT / this.SCREEN_WIDTH);
+                const MAX_TOTAL_LEDS = 500; // Maximum number of LEDs
+                const aspectRatio = 760 / 1280.;
+                
+                // Calculate grid dimensions to stay under maximum LED count
+                const gridSizeX = Math.round(Math.sqrt(MAX_TOTAL_LEDS * aspectRatio));
+                const gridSizeY = Math.round(Math.sqrt(MAX_TOTAL_LEDS / aspectRatio));
                 
                 const containerWidth = this.SCREEN_WIDTH;
                 const containerHeight = this.SCREEN_HEIGHT;
