@@ -443,7 +443,24 @@ class GraphicsManagerThreeJS {
         
         // Create renderer
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-        this.renderer.setSize(canvas.width, canvas.height);
+        
+        // Set renderer size to match canvas dimensions
+        this.renderer.setSize(canvas.width, canvas.height, false); // false = don't update style
+        
+        // Set display size (css pixels)
+        const maxDisplaySize = 640;
+        let displayWidth, displayHeight;
+        
+        if (canvas.width > canvas.height) {
+            displayWidth = maxDisplaySize;
+            displayHeight = Math.round((canvas.height / canvas.width) * maxDisplaySize);
+        } else {
+            displayHeight = maxDisplaySize;
+            displayWidth = Math.round((canvas.width / canvas.height) * maxDisplaySize);
+        }
+
+        canvas.style.width = displayWidth + 'px';
+        canvas.style.height = displayHeight + 'px';
         
         // Create points material
         this.pointsMaterial = new THREE.PointsMaterial({
@@ -882,11 +899,20 @@ class UiManager {
         canvas.width = width;
         canvas.height = height;
 
-        const maxDisplaySize = 640; // Maximum display size in pixels
-        const scaleFactor = Math.min(maxDisplaySize / width, maxDisplaySize / height, 20);
+        // Set display size to 640px max while maintaining aspect ratio
+        const maxDisplaySize = 640;
+        let displayWidth, displayHeight;
+        
+        if (width > height) {
+            displayWidth = maxDisplaySize;
+            displayHeight = Math.round((height / width) * maxDisplaySize);
+        } else {
+            displayHeight = maxDisplaySize;
+            displayWidth = Math.round((width / height) * maxDisplaySize);
+        }
 
-        canvas.style.width = Math.round(width * scaleFactor) + 'px';
-        canvas.style.height = Math.round(height * scaleFactor) + 'px';
+        canvas.style.width = displayWidth + 'px';
+        canvas.style.height = displayHeight + 'px';
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
     };
 
