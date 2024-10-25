@@ -139,11 +139,13 @@ def build_image(debug: bool = False) -> None:
         ]
         if debug:
             cmd_list.extend(["--build-arg", "DEBUG=1"])
-        cmd_list.extend([
-            "-f",
-            str(DOCKER_FILE),
-            str(PROJECT_ROOT),
-        ])
+        cmd_list.extend(
+            [
+                "-f",
+                str(DOCKER_FILE),
+                str(PROJECT_ROOT),
+            ]
+        )
         cmd_str: str = subprocess.list2cmdline(cmd_list)
         print(f"Running command: {cmd_str}")
         subprocess.run(

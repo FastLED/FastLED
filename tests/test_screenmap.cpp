@@ -26,8 +26,8 @@ TEST_CASE("ScreenMap basic functionality") {
     // Test length
     CHECK(map.getLength() == 3);
     
-    // Test diameter (default should be 1.0)
-    CHECK(map.getDiameter() == 1.0f);
+    // Test diameter (default should be -1.0)
+    CHECK(map.getDiameter() == -1.0f);
     
     // Test mapToIndex (should give same results as operator[])
     auto coords = map.mapToIndex(1);

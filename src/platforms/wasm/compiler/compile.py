@@ -11,6 +11,7 @@
 
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -169,9 +170,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--only-compile", action="store_true", help="Only compile the project"
     )
-    parser.add_argument(
-        "--debug", action="store_true", help="Enable debug and symbols"
-    )
+    parser.add_argument("--debug", action="store_true", help="Enable debug and symbols")
+    debug_from_env = bool(int(os.getenv("DEBUG", 0)))
+    if debug_from_env:
+        parser.set_defaults(debug=True)
     return parser.parse_args()
 
 
@@ -227,7 +229,7 @@ def main() -> int:
             if args.only_insert_header:
                 print("Transform to cpp and insert header operations completed.")
                 return 0
-            
+
         with open(WASM_COMPILER_SETTTINGS, "r") as f:
             content = f.read()
         if debug:
@@ -267,7 +269,9 @@ def main() -> int:
                 shutil.copy2(fastled_js_mem, fastled_js_dir / fastled_js_mem.name)
             if fastled_js_symbols.exists():
                 print(f"Copying {fastled_js_symbols.name} to output directory")
-                shutil.copy2(fastled_js_symbols, fastled_js_dir / fastled_js_symbols.name)
+                shutil.copy2(
+                    fastled_js_symbols, fastled_js_dir / fastled_js_symbols.name
+                )
 
         cleanup(args, JS_SRC)
 
