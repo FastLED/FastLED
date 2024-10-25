@@ -35,7 +35,7 @@
     const renderScene = new RenderPass(scene, camera);
     const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(640, 640),
-        32.0,    // bloom strength - increased from 1.5
+        16.0,    // bloom strength - increased from 1.5
         1.0,    // radius - increased from 0.4
         0.0     // threshold - lowered from 0.85 to make more elements bloom
     );
