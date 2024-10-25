@@ -13,6 +13,8 @@ FASTLED_NAMESPACE_BEGIN
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
+template <size_t N> class StrN;
+
 // A copy on write string class. Fast to copy from another
 // Str object as read only pointers are shared. If the size
 // of the string is below FASTLED_STR_INLINED_SIZE then the
@@ -30,6 +32,11 @@ class Str;
 // Implementation details.
 
 DECLARE_SMART_PTR(StringHolder);
+
+class StringFormatter {
+    public:
+    static void append(int val, StrN<64>* dst);
+};
 
 class StringHolder : public Referent {
   public:
@@ -118,6 +125,12 @@ template <size_t SIZE = 64> class StrN {
             }
         }
         mLength = len;
+    }
+
+    size_t write(int n) {
+        StrN<64> dst;
+        StringFormatter::append(n, &dst);  // Inlined size should suffice
+        return write(dst.c_str(), dst.size());
     }
 
     size_t write(const uint8_t* data, size_t n) {

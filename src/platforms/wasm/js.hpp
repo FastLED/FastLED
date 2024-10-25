@@ -16,6 +16,7 @@
 #include "str.h"
 #include "namespace.h"
 #include "screenmap.h"
+#include "fixed_map.h"
 
 FASTLED_NAMESPACE_BEGIN
 

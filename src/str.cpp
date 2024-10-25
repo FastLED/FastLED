@@ -4,6 +4,12 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+void StringFormatter::append(int val, StrN<64>* dst) {
+    char buf[12];
+    itoa(val, buf, 10);
+    dst->append(buf);
+}
+
 
 StringHolder::StringHolder(const char *str) {
     mLength = strlen(str);
