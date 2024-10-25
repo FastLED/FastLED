@@ -31,11 +31,9 @@
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-        function load() {
-            // Constants for screen dimensions
-            const SCREEN_WIDTH = 640;
-            const SCREEN_HEIGHT = SCREEN_WIDTH * 2;
 
+        
+        function load(SCREEN_WIDTH, SCREEN_HEIGHT) {
             // Set up the scene, camera, and renderer
             const scene = new THREE.Scene();
             const camera = new THREE.OrthographicCamera(-50, 100, 100, -200, 1, 1000);
@@ -115,8 +113,11 @@
 
             animate();
         }
+        // Constants for screen dimensions
+        const SCREEN_WIDTH = 640;
+        const SCREEN_HEIGHT = SCREEN_WIDTH * 2;
 
-        load();
+        load(SCREEN_WIDTH, SCREEN_HEIGHT);
     </script>
 </body>
 
