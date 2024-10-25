@@ -24,17 +24,17 @@
     import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
     // Set up the scene, camera, and renderer
     const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera( -50, 100, 50, -100, 1, 1000 );
+    const camera = new THREE.OrthographicCamera( -50, 100, 100, -200, 1, 1000 );
     camera.position.z = 500;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(640, 640);
+    renderer.setSize(640, 1280);
     document.body.appendChild(renderer.domElement);
     
     // Setup post-processing
     const renderScene = new RenderPass(scene, camera);
     const bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(640, 640),
+        new THREE.Vector2(640, 1280),
         16.0,    // bloom strength - increased from 1.5
         1.0,    // radius - increased from 0.4
         0.0     // threshold - lowered from 0.85 to make more elements bloom
