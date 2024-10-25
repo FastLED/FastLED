@@ -43,7 +43,7 @@
                 
                 this.initScene();
                 this.createGrid();
-                this.animate();
+
             }
 
             initScene() {
@@ -121,8 +121,9 @@
         const SCREEN_WIDTH = 800;
         const SCREEN_HEIGHT = SCREEN_WIDTH / 2;
 
-        // Create instance
-        new LedGrid(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        const ledGrid = new LedGrid(SCREEN_WIDTH, SCREEN_HEIGHT);
+        ledGrid.animate();
     </script>
 </body>
 
