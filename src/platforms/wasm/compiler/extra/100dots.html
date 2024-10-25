@@ -103,9 +103,7 @@
                 }
             }
 
-            animate() {
-                requestAnimationFrame(() => this.animate());
-
+            animationLoop() {
                 this.leds.forEach(led => {
                     led.material.color.multiplyScalar(0.85);
                     if (Math.random() < 0.01) {
@@ -121,9 +119,14 @@
         const SCREEN_WIDTH = 800;
         const SCREEN_HEIGHT = SCREEN_WIDTH / 2;
 
-
         const ledGrid = new LedGrid(SCREEN_WIDTH, SCREEN_HEIGHT);
-        ledGrid.animate();
+        
+        // Animation loop handled outside the class
+        function animate() {
+            requestAnimationFrame(animate);
+            ledGrid.animationLoop();
+        }
+        animate();
     </script>
 </body>
 
