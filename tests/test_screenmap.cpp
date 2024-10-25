@@ -75,3 +75,31 @@ TEST_CASE("ScreenMap JSON parsing") {
     CHECK(strip2[1].y == 45.0f);
 }
 
+TEST_CASE("ScreenMap JSON serialization round-trip") {
+    // Create original map
+    ScreenMap original(3, 2.5f);
+    original.set(0, {1.0f, 2.0f});
+    original.set(1, {3.0f, 4.0f});
+    original.set(2, {5.0f, 6.0f});
+
+    // Serialize to JSON string
+    Str jsonStr;
+    ScreenMap::toJsonStr(original, &jsonStr);
+
+    // Deserialize back to a new map
+    FixedMap<Str, ScreenMap, 16> segmentMaps;
+    ScreenMap::ParseJson(jsonStr.c_str(), &segmentMaps);
+
+    // Get the deserialized map (we know it uses "strip1" as the key)
+    ScreenMap& deserialized = segmentMaps["strip1"];
+
+    // Verify all properties match
+    CHECK(deserialized.getLength() == original.getLength());
+    CHECK(deserialized.getDiameter() == original.getDiameter());
+    
+    for (uint16_t i = 0; i < original.getLength(); i++) {
+        CHECK(deserialized[i].x == original[i].x);
+        CHECK(deserialized[i].y == original[i].y);
+    }
+}
+

@@ -15,6 +15,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+
+
 void ScreenMap::ParseJson(const char *jsonStrOfMapFile,
                           FixedMap<Str, ScreenMap, 16> *segmentMaps) {
     ArduinoJson::JsonDocument doc;
@@ -37,5 +39,27 @@ void ScreenMap::ParseJson(const char *jsonStrOfMapFile,
         segmentMaps->insert(kv.key().c_str(), segment_map);
     }
 }
+
+void ScreenMap::toJsonStr(const ScreenMap &screenmap, Str* jsonBuffer) {
+    ArduinoJson::JsonDocument doc;
+    auto map = doc["map"].to<ArduinoJson::JsonObject>();
+    auto strip = map["strip1"].to<ArduinoJson::JsonObject>();  // Using single strip for now
+    
+    auto x_array = strip["x"].to<ArduinoJson::JsonArray>();
+    auto y_array = strip["y"].to<ArduinoJson::JsonArray>();
+    
+    // Add all x,y coordinates
+    for (uint16_t i = 0; i < screenmap.getLength(); i++) {
+        const pair_xy_float& xy = screenmap[i];
+        x_array.add(xy.x);
+        y_array.add(xy.y);
+    }
+    
+    // Add diameter
+    strip["diameter"] = screenmap.getDiameter();
+    
+    ArduinoJson::serializeJson(doc, *jsonBuffer);
+}
+
 
 FASTLED_NAMESPACE_END
