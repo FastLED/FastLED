@@ -23,7 +23,7 @@ class ScreenMap {
     ScreenMap() = default;
 
     // is_reverse is false by default for linear layout
-    ScreenMap(uint32_t length) : length(length) {
+    ScreenMap(uint32_t length, float mDiameter = 1.0f) : length(length), mDiameter(mDiameter) {
         mLookUpTable = LUTXYFLOATPtr::New(length);
         LUTXYFLOAT &lut = *mLookUpTable.get();
         pair_xy_float *data = lut.getData();
@@ -32,7 +32,7 @@ class ScreenMap {
         }
     }
 
-    ScreenMap(const pair_xy_float *lut, uint32_t length) : length(length) {
+    ScreenMap(const pair_xy_float *lut, uint32_t length, float diameter = 1.0) : length(length), mDiameter(diameter) {
         mLookUpTable = LUTXYFLOATPtr::New(length);
         LUTXYFLOAT &lut16xy = *mLookUpTable.get();
         pair_xy_float *data = lut16xy.getData();
@@ -41,7 +41,7 @@ class ScreenMap {
         }
     }
 
-    template <uint32_t N> ScreenMap(const pair_xy_float (&lut)[N]) : length(N) {
+    template <uint32_t N> ScreenMap(const pair_xy_float (&lut)[N], float diameter = 1.0) : length(N), mDiameter(diameter) {
         mLookUpTable = LUTXYFLOATPtr::New(length);
         LUTXYFLOAT &lut16xy = *mLookUpTable.get();
         pair_xy_float *data = lut16xy.getData();
@@ -51,6 +51,7 @@ class ScreenMap {
     }
 
     ScreenMap(const ScreenMap &other) {
+        mDiameter = other.mDiameter;
         length = other.length;
         mLookUpTable = other.mLookUpTable;
     }
@@ -71,9 +72,12 @@ class ScreenMap {
         }
     }
 
+    void setDiameter(float diameter) { mDiameter = diameter; }
+
     // define the assignment operator
     ScreenMap &operator=(const ScreenMap &other) {
         if (this != &other) {
+            mDiameter = other.mDiameter;
             length = other.length;
             mLookUpTable = other.mLookUpTable;
         }
@@ -90,6 +94,8 @@ class ScreenMap {
     }
 
     uint32_t getLength() const { return length; }
+    // The diameter each point represents.
+    float getDiameter() const { return mDiameter; }
 
     static void ParseJson(const char *jsonStrOfMapFile,
                           FixedMap<Str, ScreenMap, 16> *segmentMaps);
@@ -100,5 +106,6 @@ class ScreenMap {
         return s_empty;
     }
     uint32_t length = 0;
+    float mDiameter = 1.0f;
     LUTXYFLOATPtr mLookUpTable;
 };

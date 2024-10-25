@@ -24,8 +24,13 @@ void ScreenMap::ParseJson(const char *jsonStrOfMapFile,
         auto segment = kv.value();
         auto x = segment["x"];
         auto y = segment["y"];
+        auto obj = segment["diameter"];
+        float diameter = 1.0f;
+        if (obj.is<float>()) {
+            diameter = obj.as<float>();
+        }
         auto n = x.size();
-        ScreenMap segment_map(n);
+        ScreenMap segment_map(n, diameter);
         for (uint16_t j = 0; j < n; j++) {
             segment_map.set(j, pair_xy_float{x[j], y[j]});
         }

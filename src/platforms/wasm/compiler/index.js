@@ -511,7 +511,11 @@ class GraphicsManagerThreeJS {
         const width = screenMap.absMax[0] - screenMap.absMin[0];
         const height = screenMap.absMax[1] - screenMap.absMin[1];
         const screenArea = width * height;
-        const dotSize = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
+        // Use point diameter from screen map if available, otherwise calculate default
+        const defaultDotSize = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
+        const stripDotSizes = Object.values(screenMap.strips).map(strip => strip.pointDiameter || 1.0);
+        const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
+        const dotSize = defaultDotSize * avgPointDiameter;
 
         // Create LEDs at mapped positions
         ledPositions.forEach(pos => {
@@ -899,6 +903,8 @@ class UiManager {
             // Work in progress.
             const map = jsonData.map;
 
+            console.log("Received map:", jsonData);
+
 
 
             const [min, max] = minMax(map);
@@ -914,6 +920,7 @@ class UiManager {
                 map: map,
                 min: min,
                 max: max,
+                diameter: jsonData.diameter || 1.0
             };
 
 
