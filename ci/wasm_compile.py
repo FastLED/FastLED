@@ -157,7 +157,7 @@ def is_tty() -> bool:
     return sys.stdout.isatty()
 
 
-def run_container(directory: str, interactive: bool) -> None:
+def run_container(directory: str, interactive: bool, debug: bool = False) -> None:
     absolute_directory: str = os.path.abspath(directory)
     base_name = os.path.basename(absolute_directory)
     if not os.path.isdir(absolute_directory):
@@ -176,8 +176,10 @@ def run_container(directory: str, interactive: bool) -> None:
             "linux/amd64",
             "-v",
             f"{absolute_directory}:/mapped/{base_name}",
-            latest_image,
         ]
+        docker_command.append(latest_image)
+        if debug and not interactive:
+            docker_command.extend(["python", "/js/compile.py", "--debug"])
         if is_tty():
             docker_command.insert(4, "-it")
         if interactive:
@@ -223,6 +225,12 @@ def main() -> None:
         action="store_true",
         help="Launch a web server and open a browser after compilation",
     )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Enable debug mode during compilation",
+    )
     args: argparse.Namespace = parser.parse_args()
 
     try:
@@ -239,7 +247,7 @@ def main() -> None:
             build_image()
             remove_dangling_images()
 
-        run_container(args.directory, args.interactive)
+        run_container(args.directory, args.interactive, args.debug)
 
         output_dir = str(Path(args.directory) / "fastled_js")
 
