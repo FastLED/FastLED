@@ -430,26 +430,20 @@ class GraphicsManagerThreeJS {
         const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
         
-        // Set display size to 640px max while maintaining aspect ratio
-        const maxDisplaySize = 640;
-        let displayWidth, displayHeight;
-        
-        if (canvas.width > canvas.height) {
-            displayWidth = maxDisplaySize;
-            displayHeight = Math.round((canvas.height / canvas.width) * maxDisplaySize);
-        } else {
-            displayHeight = maxDisplaySize;
-            displayWidth = Math.round((canvas.width / canvas.height) * maxDisplaySize);
-        }
+        // Always set width to 640px and scale height proportionally
+        const targetWidth = 640;
+        const aspectRatio = canvas.height / canvas.width;
+        const targetHeight = Math.round(targetWidth * aspectRatio);
 
-        canvas.style.width = displayWidth + 'px';
-        canvas.style.height = displayHeight + 'px';
-
-        this.SCREEN_WIDTH = window.innerWidth;
-        this.SCREEN_HEIGHT = window.innerHeight;
+        // Set the rendering resolution
+        this.SCREEN_WIDTH = targetWidth;
+        this.SCREEN_HEIGHT = targetHeight;
         
-        canvas.width = this.SCREEN_WIDTH;
-        canvas.height = this.SCREEN_HEIGHT;
+        // Set both the canvas size and display size
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        canvas.style.width = targetWidth + 'px';
+        canvas.style.height = targetHeight + 'px';
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.OrthographicCamera(
@@ -854,17 +848,9 @@ class UiManager {
         canvas.width = width;
         canvas.height = height;
 
-        // Set display size (CSS pixels) with minimum width of 640px
-        let displayWidth, displayHeight;
-        const minWidth = 640;
-        
-        if (width > height) {
-            displayWidth = Math.max(minWidth, width);
-            displayHeight = Math.round((height / width) * displayWidth);
-        } else {
-            displayHeight = Math.round((height / width) * minWidth);
-            displayWidth = minWidth;
-        }
+        // Set display size (CSS pixels) to 640px width while maintaining aspect ratio
+        const displayWidth = 640;
+        const displayHeight = Math.round((height / width) * displayWidth);
 
         // Set CSS display size while maintaining aspect ratio
         canvas.style.width = displayWidth + 'px';
