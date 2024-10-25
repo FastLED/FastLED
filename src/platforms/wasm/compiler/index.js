@@ -470,7 +470,7 @@ class GraphicsManagerThreeJS {
         
         // Create points material with proper blending
         this.pointsMaterial = new THREE.PointsMaterial({
-            size: 0.1,
+            size: 1.0,
             vertexColors: true,
             sizeAttenuation: true,
             transparent: false,
