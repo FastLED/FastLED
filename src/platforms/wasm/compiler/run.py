@@ -74,23 +74,37 @@ def main():
 
     # Launch the Docker container if Docker is running
     try:
-        client = docker.from_env()
-        container = client.containers.run(
+        docker_command = [
+            "docker",
+            "run",
+            "--name",
+            "fastled-wasm-compiler",
+            "--platform",
+            "linux/amd64",
+            "-v",
+            f"{absolute_directory}:/mapped/{base_name}",
             "fastled-wasm-compiler:latest",
-            detach=True,
-            name="fastled_wasm_compiler",
-            platform="linux/amd64",
-            volumes={absolute_directory: {'bind': f'/mapped/{base_name}', 'mode': 'rw'}},
-            command="/bin/bash"  # Run in interactive mode
-        )
-        print(f"Container {container.name} started with ID {container.id}")
-        print(f"Mounted directory: {absolute_directory}")
+        ]
         
-        # Attach to the container to see the output
-        for line in container.logs(stream=True):
-            print(line.strip().decode('utf-8'))
-    except docker.errors.DockerException as e:
-        print(f"Failed to launch the container: {str(e)}")
+        if sys.stdout.isatty():
+            docker_command.insert(4, "-it")
+
+        print(f"Running command: {' '.join(docker_command)}")
+        process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+        # Stream the output
+        for line in process.stdout:
+            print(line, end='')
+
+        # Wait for the process to complete
+        process.wait()
+
+        print("\nContainer execution completed.")
+
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to run Docker container: {e}")
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user.")
 
 if __name__ == "__main__":
     main()
