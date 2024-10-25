@@ -53,9 +53,23 @@ wasmflags = [
 ]
 
 if DEBUG:
-    wasmflags += ['-g3', '-gsource-map', '--emit-symbol-map', '-s', 'STACK_OVERFLOW_CHECK=2', '-s', 'SAFE_HEAP=1', '-s', 'SAFE_HEAP_LOG=1', '-s', 'ASSERTIONS=1']
+    wasmflags += [
+        '-g3',
+        '-gsource-map',
+        '--emit-symbol-map',
+        #'-sSTACK_OVERFLOW_CHECK=2',
+        #'-sSAFE_HEAP=1',
+        #'-sSAFE_HEAP_LOG=1',
+        '-ASSERTIONS=1',
+        # sanitize address
+        '-fsanitize=address',
+        '-fsanitize=undefined',
+    ]
     # Remove -Oz flag
-    wasmflags.remove("-Oz")
+    opt_flags = ["-Oz", "-Os", "-O1", "-O2", "-O3"]
+    for opt in opt_flags:
+        if opt in wasmflags:
+            wasmflags.remove(opt)
     
 
 
