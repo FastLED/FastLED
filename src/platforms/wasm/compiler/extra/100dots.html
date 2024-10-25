@@ -49,9 +49,11 @@
     composer.addPass(bloomPass);
 
     // Create the LED grid
+    const SEGMENTS = 16;
+    const LED_SCALE = 1.0;
     var leds = [];
     var gridSizeX = 100; // width
-    var gridSizeY = 200; // height
+    var gridSizeY = gridSizeX * (SCREEN_HEIGHT / SCREEN_WIDTH); // height proportional to screen aspect ratio
     
     // Calculate the aspect ratio to maintain circular dots
     const containerWidth = SCREEN_WIDTH;
@@ -71,7 +73,7 @@
 
     for (var x = 0; x < gridSizeX; x++) {
         for (var y = 0; y < gridSizeY; y++) {
-            var geometry = new THREE.CircleGeometry(dotSize, 16);
+            var geometry = new THREE.CircleGeometry(dotSize*LED_SCALE, SEGMENTS);
             var material = new THREE.MeshBasicMaterial({ color: 0x000000 });
             var led = new THREE.Mesh(geometry, material);
             led.position.set(
