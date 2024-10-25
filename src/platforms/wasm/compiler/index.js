@@ -387,122 +387,105 @@ class GraphicsManager {
 
 class GraphicsManagerThreeJS {
     constructor(canvasId, threeJsModules) {
-        console.log("Creating GraphicsManagerThreeJS");
-        // args
-        console.log(canvasId, threeJsModules);
         this.canvasId = canvasId;
         this.threeJsModules = threeJsModules;
+        this.SEGMENTS = 16;
+        this.LED_SCALE = 1.0;
+        this.leds = [];
         this.scene = null;
         this.camera = null;
         this.renderer = null;
-        this.pointsGeometry = null;
-        this.pointsMaterial = null;
-        this.points = null;
-        this.positions = null;
-        this.colors = null;
-        this.maxPoints = 0;
+        this.composer = null;
     }
 
     reset() {
-        console.log("Resetting GraphicsManagerThreeJS");
-        if (this.scene) {
-            if (this.points) {
-                this.scene.remove(this.points);
-                this.points.geometry.dispose();
-                this.points.material.dispose();
-            }
-            this.scene = null;
-            this.camera = null;
-            if (this.renderer) {
-                this.renderer.dispose();
-                this.renderer = null;
-            }
-            this.scene.dispose();
-            this.scene = null;
+        // Clean up existing objects
+        if (this.leds) {
+            this.leds.forEach(led => {
+                led.geometry.dispose();
+                led.material.dispose();
+                this.scene?.remove(led);
+            });
         }
-        this.pointsGeometry = null;
-        this.pointsMaterial = null;
-        this.points = null;
-        this.positions = null;
-        this.colors = null;
-        this.maxPoints = 0;
+        this.leds = [];
+
+        if (this.composer) {
+            this.composer.dispose();
+        }
+
+        // Clear the scene
+        if (this.scene) {
+            while(this.scene.children.length > 0) { 
+                this.scene.remove(this.scene.children[0]); 
+            }
+        }
+
+        // Don't remove the renderer or canvas
+        if (this.renderer) {
+            this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+        }
     }
 
     initThreeJS() {
-        console.log(this.threeJsModules);
-        const { THREE } = this.threeJsModules;
-        
-        // Create scene with black background
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x000000);
-        
-        // Create camera
+        const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
-        const aspect = canvas.width / canvas.height;
-        this.camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
-        this.camera.position.z = 5;
-        
-        // Create renderer with proper transparency
-        this.renderer = new THREE.WebGLRenderer({ 
-            canvas, 
-            antialias: true,
-            alpha: false
-        });
-        this.renderer.setClearColor(0x000000, 1);
-        
-        // Set renderer size to match canvas dimensions
-        this.renderer.setSize(canvas.width, canvas.height, false); // false = don't update style
-        
-        // Set display size (css pixels)
-        const maxDisplaySize = 640;
-        let displayWidth, displayHeight;
-        
-        if (canvas.width > canvas.height) {
-            displayWidth = maxDisplaySize;
-            displayHeight = Math.round((canvas.height / canvas.width) * maxDisplaySize);
-        } else {
-            displayHeight = maxDisplaySize;
-            displayWidth = Math.round((canvas.width / canvas.height) * maxDisplaySize);
-        }
+        this.SCREEN_WIDTH = canvas.width;
+        this.SCREEN_HEIGHT = canvas.height;
 
-        canvas.style.width = displayWidth + 'px';
-        canvas.style.height = displayHeight + 'px';
-        
-        // Create points material with proper blending
-        this.pointsMaterial = new THREE.PointsMaterial({
-            size: 1.0,
-            vertexColors: true,
-            sizeAttenuation: true,
-            transparent: false,
-            opacity: 1.0,
-            blending: THREE.NormalBlending
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.OrthographicCamera(
+            -this.SCREEN_WIDTH / 2, this.SCREEN_WIDTH / 2,
+            this.SCREEN_HEIGHT / 2, -this.SCREEN_HEIGHT / 2,
+            1, 1000
+        );
+        this.camera.position.z = 500;
+
+        this.renderer = new THREE.WebGLRenderer({ 
+            canvas: canvas,
+            antialias: true 
         });
+        this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+
+        const renderScene = new RenderPass(this.scene, this.camera);
+        const bloomPass = new UnrealBloomPass(
+            new THREE.Vector2(this.SCREEN_WIDTH, this.SCREEN_HEIGHT),
+            16.0,
+            1.0,
+            0.0
+        );
+
+        this.composer = new EffectComposer(this.renderer);
+        this.composer.addPass(renderScene);
+        this.composer.addPass(bloomPass);
+
+        // Create LED grid
+        this.createGrid();
     }
 
-    updateGeometry(totalPoints) {
+    createGrid() {
         const { THREE } = this.threeJsModules;
+        const NUM_LEDS = 5000; // Number of LEDs to create
+        const containerWidth = this.SCREEN_WIDTH;
+        const containerHeight = this.SCREEN_HEIGHT;
 
-        if (!this.scene) {
-            this.initThreeJS();
-        }
-        
-        if (!this.pointsGeometry || totalPoints > this.maxPoints) {
-            // Create new geometry with buffer attributes
-            this.maxPoints = totalPoints;
-            this.pointsGeometry = new THREE.BufferGeometry();
-            this.positions = new Float32Array(totalPoints * 3);
-            this.colors = new Float32Array(totalPoints * 3);
-            
-            this.pointsGeometry.setAttribute('position', 
-                new THREE.BufferAttribute(this.positions, 3));
-            this.pointsGeometry.setAttribute('color',
-                new THREE.BufferAttribute(this.colors, 3));
-                
-            if (this.points) {
-                this.scene.remove(this.points);
-            }
-            this.points = new THREE.Points(this.pointsGeometry, this.pointsMaterial);
-            this.scene.add(this.points);
+        // Calculate dot size based on screen area and LED count
+        const screenArea = containerWidth * containerHeight;
+        const dotSize = Math.sqrt(screenArea / (NUM_LEDS * Math.PI)) * 0.4;
+
+        for (let i = 0; i < NUM_LEDS; i++) {
+            const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
+            const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const led = new THREE.Mesh(geometry, material);
+
+            // Random position within container bounds
+            led.position.set(
+                (Math.random() - 0.5) * containerWidth,
+                (Math.random() - 0.5) * containerHeight,
+                0
+            );
+
+            this.scene.add(led);
+            this.leds.push(led);
         }
     }
 
@@ -516,74 +499,15 @@ class GraphicsManagerThreeJS {
             this.initThreeJS();
         }
 
-        // clear and set to black
-        this.renderer.clear();
-
-        const screenMap = frameData.screenMap;
-        let totalPoints = 0;
-
-        // Count total points needed
-        for (let i = 0; i < frameData.length; i++) {
-            const strip = frameData[i];
-            const strip_id = strip.strip_id;
-            if (strip_id in screenMap.strips) {
-                totalPoints += strip.pixel_data.length / 3;
+        const FADE_PER_FRAME = 0.85;
+        this.leds.forEach(led => {
+            led.material.color.multiplyScalar(FADE_PER_FRAME);
+            if (Math.random() < 0.01) {
+                led.material.color.setRGB(Math.random(), Math.random(), Math.random());
             }
-        }
+        });
 
-        this.updateGeometry(totalPoints);
-
-        let pointIndex = 0;
-        const min_x = screenMap.absMin[0];
-        const min_y = screenMap.absMin[1];
-        const canvas = document.getElementById(this.canvasId);
-        const scaleX = 10 / canvas.width;  // Scale to reasonable Three.js world coordinates
-        const scaleY = 10 / canvas.height;
-
-        // Update positions and colors
-        for (let i = 0; i < frameData.length; i++) {
-            const strip = frameData[i];
-            const data = strip.pixel_data;
-            const strip_id = strip.strip_id;
-            
-            if (!(strip_id in screenMap.strips)) {
-                continue;
-            }
-            
-            const stripData = screenMap.strips[strip_id];
-            const map = stripData.map;
-            const pixelCount = data.length / 3;
-
-            for (let j = 0; j < pixelCount; j++) {
-                if (j >= map.length) continue;
-
-                let [x, y] = map[j];
-                x = (x - min_x) * scaleX - 5;  // Center in scene
-                y = (y - min_y) * scaleY - 5;
-
-                const srcIndex = j * 3;
-                const destIndex = pointIndex * 3;
-
-                // Update position
-                this.positions[destIndex] = x;
-                this.positions[destIndex + 1] = y;
-                this.positions[destIndex + 2] = 0;
-
-                // Update color
-                this.colors[destIndex] = data[srcIndex] / 255;
-                this.colors[destIndex + 1] = data[srcIndex + 1] / 255;
-                this.colors[destIndex + 2] = data[srcIndex + 2] / 255;
-
-                pointIndex++;
-            }
-        }
-
-        // Mark attributes as needing update
-        this.pointsGeometry.attributes.position.needsUpdate = true;
-        this.pointsGeometry.attributes.color.needsUpdate = true;
-
-        // Render the scene
-        this.renderer.render(this.scene, this.camera);
+        this.composer.render();
     }
 }
 
