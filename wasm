@@ -1,2 +1,3 @@
 #!/bin/bash
+echo "Compiles sketch for wasm"
 uv run ci/wasm_compile.py -b --open "$@"
