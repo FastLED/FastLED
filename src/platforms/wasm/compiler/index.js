@@ -1,4 +1,8 @@
 
+// Selective bloom demo:
+// https://discourse.threejs.org/t/totentanz-selective-bloom/8329
+
+
 globalThis.loadFastLED = async function () {
     log("FastLED loader function was not set.");
     return null;
@@ -391,13 +395,14 @@ class GraphicsManagerThreeJS {
         this.canvasId = canvasId;
         this.threeJsModules = threeJsModules;
         this.SEGMENTS = 16;
-        this.LED_SCALE = .25;
+        this.LED_SCALE = 1.0;
         this.leds = [];
         this.scene = null;
         this.camera = null;
         this.renderer = null;
         this.composer = null;
         this.previousTotalLeds = 0;
+        this.BLOOM_STRENGTH = 8.0;
     }
 
     reset() {
@@ -429,7 +434,7 @@ class GraphicsManagerThreeJS {
     }
 
     initThreeJS(frameData) {
-        const BLOOM_STRENGTH = 16.0;
+
         const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
         
@@ -465,7 +470,7 @@ class GraphicsManagerThreeJS {
         const renderScene = new RenderPass(this.scene, this.camera);
         const bloomPass = new UnrealBloomPass(
             new THREE.Vector2(this.SCREEN_WIDTH, this.SCREEN_HEIGHT),
-            BLOOM_STRENGTH,
+            this.BLOOM_STRENGTH,
             1.0,  // radius
             0.0  // threshold
         );
@@ -480,19 +485,7 @@ class GraphicsManagerThreeJS {
 
     createGrid(frameData) {
         const { THREE } = this.threeJsModules;
-
-        // Calculate total number of LEDs across all strips
-        let totalLeds = 0;
-        frameData.forEach(strip => {
-            totalLeds += strip.pixel_data.length / 3; // Each pixel has RGB (3 values)
-        });
-
-        const containerWidth = window.innerWidth;
-        const containerHeight = window.innerHeight;
-
-        // Calculate dot size based on screen area and LED count
-        const screenArea = containerWidth * containerHeight;
-        const dotSize = Math.sqrt(screenArea / (totalLeds * Math.PI)) * 0.4;
+        const screenMap = frameData.screenMap;
 
         // Clear existing LEDs
         this.leds.forEach(led => {
@@ -502,27 +495,38 @@ class GraphicsManagerThreeJS {
         });
         this.leds = [];
 
-        // Create exactly the right number of LEDs
-        for (let i = 0; i < totalLeds; i++) {
+        // Calculate total number of LEDs and their positions
+        let ledPositions = [];
+        frameData.forEach(strip => {
+            const stripId = strip.strip_id;
+            if (stripId in screenMap.strips) {
+                const stripMap = screenMap.strips[stripId];
+                stripMap.map.forEach(pos => {
+                    ledPositions.push(pos);
+                });
+            }
+        });
+
+        // Calculate dot size based on LED density
+        const width = screenMap.absMax[0] - screenMap.absMin[0];
+        const height = screenMap.absMax[1] - screenMap.absMin[1];
+        const screenArea = width * height;
+        const dotSize = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
+
+        // Create LEDs at mapped positions
+        ledPositions.forEach(pos => {
             const geometry = new THREE.CircleGeometry(dotSize * this.LED_SCALE, this.SEGMENTS);
             const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
             const led = new THREE.Mesh(geometry, material);
 
-            // Random position within container bounds
-            /*
-            led.position.set(
-                (Math.random() - 0.5) * containerWidth,
-                (Math.random() - 0.5) * containerHeight,
-                0
-            );
-            */
-
-            // set all offscreen
-            led.position.set(-1000, -1000, 0);
+            // Position LED according to map, normalized to screen coordinates
+            const x = ((pos[0] - screenMap.absMin[0]) / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
+            const y = -((pos[1] - screenMap.absMin[1]) / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
+            led.position.set(x, y, 500);
 
             this.scene.add(led);
             this.leds.push(led);
-        }
+        });
     }
 
     updateCanvas(frameData) {
@@ -544,37 +548,21 @@ class GraphicsManagerThreeJS {
 
         const screenMap = frameData.screenMap;
         
-        // Clear all LEDs
-        this.leds.forEach(led => {
-            led.material.color.setRGB(0, 0, 0);
-        });
+        // Create a map to store LED data by position
+        const positionMap = new Map();
 
-        const pixelMap = {};
-
-        // Update LEDs based on frame data
-        for (let i = 0; i < frameData.length; i++) {
-            const strip = frameData[i];
-            const data = strip.pixel_data;
+        // First pass: collect all LED data and positions
+        frameData.forEach(strip => {
             const strip_id = strip.strip_id;
-            
             if (!(strip_id in screenMap.strips)) {
                 console.warn(`No screen map found for strip ID ${strip_id}, skipping update`);
-                continue;
+                return;
             }
-            
+
             const stripData = screenMap.strips[strip_id];
             const map = stripData.map;
-            const min_x = screenMap.absMin[0];
-            const min_y = screenMap.absMin[1];
-            const width = screenMap.absMax[0] - min_x;
-            const height = screenMap.absMax[1] - min_y;
+            const data = strip.pixel_data;
             const pixelCount = data.length / 3;
-
-
-            pixelMap[strip_id] = [];
-            const curr_strip_pixels = pixelMap[strip_id];
-            console.log(`Processing strip ${strip_id} with ${pixelCount} pixels`);
-
 
             for (let j = 0; j < pixelCount; j++) {
                 if (j >= map.length) {
@@ -582,36 +570,57 @@ class GraphicsManagerThreeJS {
                     continue;
                 }
 
-                let [x, y] = map[j];
-                //console.log(`LED ${j} original coords: (${x}, ${y})`);
-                x -= min_x;
-                y -= min_y;
-                //console.log(`LED ${j} after min adjustment: (${x}, ${y})`);
-                // curr_strip_pixels.push([x,y]);
-                // add it to the array of pixels for this strip
-                curr_strip_pixels.push(x);
+                const [x, y] = map[j];
+                const posKey = `${x},${y}`;
+                const srcIndex = j * 3;
+                const r = (data[srcIndex] & 0xFF) / 255;
+                const g = (data[srcIndex + 1] & 0xFF) / 255;
+                const b = (data[srcIndex + 2] & 0xFF) / 255;
+                const brightness = (r + g + b) / 3;
 
-                // Convert to normalized coordinates (-1 to 1)
-                const normalizedX = (x / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
-                const normalizedY = -(y / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
-                //console.log(`LED ${j} normalized coords: (${normalizedX}, ${normalizedY})`);
-
-                // Find the LED at this position
-                const led = this.leds[j];
-                if (led) {
-                    led.position.set(normalizedX, normalizedY, 0);
-                    
-                    // Update LED color
-                    const srcIndex = j * 3;
-                    const r = (data[srcIndex] & 0xFF) / 255;
-                    const g = (data[srcIndex + 1] & 0xFF) / 255;
-                    const b = (data[srcIndex + 2] & 0xFF) / 255;
-                    led.material.color.setRGB(r, g, b);
+                // Only update if this LED is brighter than any existing LED at this position
+                if (!positionMap.has(posKey) || positionMap.get(posKey).brightness < brightness) {
+                    positionMap.set(posKey, {
+                        x: x,
+                        y: y,
+                        r: r,
+                        g: g,
+                        b: b,
+                        brightness: brightness
+                    });
                 }
             }
+        });
+
+        // Calculate normalized coordinates
+        const min_x = screenMap.absMin[0];
+        const min_y = screenMap.absMin[1];
+        const width = screenMap.absMax[0] - min_x;
+        const height = screenMap.absMax[1] - min_y;
+
+        // Second pass: update LED positions and colors
+        let ledIndex = 0;
+        for (const [_, ledData] of positionMap) {
+            if (ledIndex >= this.leds.length) break;
+
+            const led = this.leds[ledIndex];
+            const x = ledData.x - min_x;
+            const y = ledData.y - min_y;
+
+            // Convert to normalized coordinates
+            const normalizedX = (x / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
+            const normalizedY = -(y / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
+
+            led.position.set(normalizedX, normalizedY, 0);
+            led.material.color.setRGB(ledData.r, ledData.g, ledData.b);
+            ledIndex++;
         }
 
-        // console.log("LED data:", pixelMap);
+        // Clear any remaining LEDs
+        for (let i = ledIndex; i < this.leds.length; i++) {
+            this.leds[i].material.color.setRGB(0, 0, 0);
+            this.leds[i].position.set(-1000, -1000, 0); // Move offscreen
+        }
 
         this.composer.render();
     }
