@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>LED Grid Demo</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; margin: 0 auto; background-color: black; }
+    </style>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
+<script>
+    // Set up the scene, camera, and renderer
+    var scene = new THREE.Scene();
+    var camera = new THREE.OrthographicCamera( -50, 50, 50, -50, 1, 1000 );
+    camera.position.z = 500;
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(128, 128);
+    document.body.appendChild(renderer.domElement);
+
+    // Create the LED grid
+    var leds = [];
+    var gridSize = 10; // 10x10 grid
+    var spacing = 100 / (gridSize - 1); // Calculate spacing between LEDs
+
+    for (var x = 0; x < gridSize; x++) {
+        for (var y = 0; y < gridSize; y++) {
+            var geometry = new THREE.CircleGeometry(2, 16);
+            var material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            var led = new THREE.Mesh(geometry, material);
+            led.position.set(-50 + x * spacing, -50 + y * spacing, 0);
+            scene.add(led);
+            leds.push(led);
+        }
+    }
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+
+        leds.forEach(function(led) {
+            // Fade the LED color by 85%
+            led.material.color.multiplyScalar(0.85);
+
+            // 1% chance to light up the LED with a random color
+            if (Math.random() < 0.01) {
+                led.material.color.setRGB(Math.random(), Math.random(), Math.random());
+            }
+        });
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
+</script>
+</body>
+</html>
