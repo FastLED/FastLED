@@ -747,7 +747,7 @@ class GraphicsManagerThreeJS {
 
             // Convert to normalized coordinates
             const normalizedX = (x / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH / 2;
-            const normalizedY = -(y / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT / 2;
+            const normalizedY = (y / height) * this.SCREEN_HEIGHT - this.SCREEN_HEIGHT / 2;
 
             led.position.set(normalizedX, normalizedY, 0);
             led.material.color.setRGB(ledData.r, ledData.g, ledData.b);
