@@ -12,7 +12,7 @@ from math import pi, cos, sin
 
 LED_PER_STRIP = 14
 SPACE_PER_LED = 30.0  # Increased for better visibility
-LED_DIAMETER = SPACE_PER_LED / 3
+LED_DIAMETER = SPACE_PER_LED / 4
 MIRROR_X = True  # Diagramed from the reverse side. Reverse the x-axis
 
 SMALLEST_ANGLE = 360 / 6

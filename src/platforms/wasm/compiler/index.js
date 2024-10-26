@@ -1245,13 +1245,6 @@ class UiManager {
             canvasId: canvasId,
             threeJsModules: threeJsModules
         }
-        /*
-        if (threeJsModules) {
-            // await initThreeJS(threeJsModules, containerId);
-            graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
-
-        }
-            */
         await onModuleLoaded(fastLedLoader);
     }
     globalThis.loadFastLED = loadFastLed;
