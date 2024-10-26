@@ -143,10 +143,12 @@ Button simulatedHeartbeat("Simulated Heartbeat");
 Button triggerStarburst("Trigger Starburst"); 
 Button triggerRainbowCube("Rainbow Cube");
 Button triggerBorderWave("Border Wave");
+Button triggerSpiral("Spiral Wave");
 bool wasHeartbeatClicked = false;
 bool wasStarburstClicked = false;
 bool wasRainbowCubeClicked = false;
 bool wasBorderWaveClicked = false;
+bool wasSpiralClicked = false;
 
 void setup() {
     Serial.begin(115200);
@@ -233,7 +235,33 @@ void loop() {
     wasStarburstClicked = bool(triggerStarburst);
     wasRainbowCubeClicked = bool(triggerRainbowCube);
     wasBorderWaveClicked = bool(triggerBorderWave);
+    wasSpiralClicked = bool(triggerSpiral);
     
+    if (wasSpiralClicked) {
+        // Trigger spiral wave effect from center
+        unsigned int baseColor = random(0xFFFF);
+        byte centerNode = 15; // Center node
+        
+        // Create 6 ripples in a spiral pattern
+        for (int i = 0; i < 6; i++) {
+            if (nodeConnections[centerNode][i] >= 0) {
+                for (int j = 0; j < numberOfRipples; j++) {
+                    if (ripples[j].state == dead) {
+                        ripples[j].start(
+                            centerNode, i,
+                            Adafruit_DotStar_ColorHSV(
+                                baseColor + (0xFFFF / 6) * i, 255, 255),
+                            0.3 + (i * 0.1), // Varying speeds creates spiral effect
+                            2000,
+                            i % 2 ? alwaysTurnsLeft : alwaysTurnsRight); // Alternating turn directions
+                        break;
+                    }
+                }
+            }
+        }
+        lastHeartbeat = millis();
+    }
+
     if (wasBorderWaveClicked) {
         // Trigger immediate border wave effect
         unsigned int baseColor = random(0xFFFF);
