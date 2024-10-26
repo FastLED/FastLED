@@ -515,9 +515,11 @@ class GraphicsManagerThreeJS {
         const screenArea = width * height;
         // Use point diameter from screen map if available, otherwise calculate default
         const defaultDotSizeScale = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
-        const stripDotSizes = Object.values(screenMap.strips).map(strip => strip.pointDiameter);
+        const stripDotSizes = Object.values(screenMap.strips).map(strip => strip.diameter);
         const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
         const defaultDotSize = defaultDotSizeScale * avgPointDiameter;
+
+        const normalizedScale = this.SCREEN_WIDTH / width;
 
         // Create LEDs at mapped positions
         let ledIndex = 0;
@@ -527,7 +529,7 @@ class GraphicsManagerThreeJS {
                 const stripData = screenMap.strips[stripId];
                 let stripDiameter = null;
                 if (stripData.diameter) {
-                    stripDiameter = stripData.diameter * 2;
+                    stripDiameter = stripData.diameter * normalizedScale;
                 } else {
                     stripDiameter = defaultDotSize;
                 }
