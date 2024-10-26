@@ -60,7 +60,7 @@ COPY ./src/lib8tion/ /js/fastled/src/lib8tion
 COPY ./src/third_party/ /js/fastled/src/third_party
 
 RUN mkdir -p /examples
-COPY ./examples/wasm /examples/
+COPY ./examples/Wasm /examples/
 
 # Copy platforms directory separately, since it changes a lot during development
 COPY ./src/platforms/ /js/fastled/src/platforms/
@@ -93,7 +93,7 @@ WORKDIR /js
 # This is too slow for lots of testing, disabled for now
 # Prewarm the cache with a first compile.
 RUN mkdir -p /js/src
-COPY /examples/wasm /mapped/wasm
+COPY examples/Wasm /mapped/Wasm
 #RUN mkdir -p /js/src && echo -e "void setup() {}\nvoid loop(){}\n" > /js/src/prewarm_main.cpp
 # RUN source /entrypoint.sh && pio run
 
