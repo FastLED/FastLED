@@ -8,8 +8,9 @@ globalThis.loadFastLED = async function () {
     return null;
 };
 
-const FORCE_FAST_RENDERER = false;
-const FORCE_THREEJS_RENDERER = false;
+const urlParams = new URLSearchParams(window.location.search);
+const FORCE_FAST_RENDERER = urlParams.get('gfx') === '0';
+const FORCE_THREEJS_RENDERER = urlParams.get('gfx') === '1';
 
 // Will be overridden during initialization.
 var print = function () { };
