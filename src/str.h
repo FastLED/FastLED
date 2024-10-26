@@ -8,7 +8,6 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
@@ -34,8 +33,8 @@ class Str;
 DECLARE_SMART_PTR(StringHolder);
 
 class StringFormatter {
-    public:
-    static void append(int val, StrN<64>* dst);
+  public:
+    static void append(int val, StrN<64> *dst);
 };
 
 class StringHolder : public Referent {
@@ -67,8 +66,6 @@ template <size_t SIZE = 64> class StrN {
     // Constructors
     StrN() = default;
 
-
-
     // cppcheck-suppress-begin [operatorEqVarError]
     template <size_t M> StrN(const StrN<M> &other) { copy(other); }
     StrN(const char *str) {
@@ -99,10 +96,15 @@ template <size_t SIZE = 64> class StrN {
             mHeapData = StringHolderPtr::New(str);
         }
     }
-    StrN &operator=(const StrN &other) { copy(other); return *this; }
-    template <size_t M> StrN &operator=(const StrN<M> &other) { copy(other); return *this; }
+    StrN &operator=(const StrN &other) {
+        copy(other);
+        return *this;
+    }
+    template <size_t M> StrN &operator=(const StrN<M> &other) {
+        copy(other);
+        return *this;
+    }
     // cppcheck-suppress-end
-
 
     bool operator==(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) == 0;
@@ -129,12 +131,12 @@ template <size_t SIZE = 64> class StrN {
 
     size_t write(int n) {
         StrN<64> dst;
-        StringFormatter::append(n, &dst);  // Inlined size should suffice
+        StringFormatter::append(n, &dst); // Inlined size should suffice
         return write(dst.c_str(), dst.size());
     }
 
-    size_t write(const uint8_t* data, size_t n) {
-        const char* str = reinterpret_cast<const char*>(data);
+    size_t write(const uint8_t *data, size_t n) {
+        const char *str = reinterpret_cast<const char *>(data);
         return write(str, n);
     }
 
@@ -148,7 +150,7 @@ template <size_t SIZE = 64> class StrN {
         }
         if (mHeapData && !mHeapData->isShared()) {
             if (!mHeapData->hasCapacity(newLen)) {
-                mHeapData->grow(newLen * 3 / 2);  // Grow by 50%
+                mHeapData->grow(newLen * 3 / 2); // Grow by 50%
             }
             memcpy(mHeapData->data() + mLength, str, n);
             mLength = newLen;
@@ -168,15 +170,12 @@ template <size_t SIZE = 64> class StrN {
         return mLength;
     }
 
-    size_t write(char c) {
-        return write(&c, 1);
-    }
+    size_t write(char c) { return write(&c, 1); }
 
     size_t write(uint8_t c) {
-        const char* str = reinterpret_cast<const char*>(&c);
+        const char *str = reinterpret_cast<const char *>(&c);
         return write(str, 1);
     }
-
 
     // Destructor
     ~StrN() {}
@@ -208,23 +207,23 @@ template <size_t SIZE = 64> class StrN {
     }
 
     // Append method
-    void append(const char *str) {
-        write(str, strlen(str));
-    }
+    void append(const char *str) { write(str, strlen(str)); }
 
   private:
     StringHolderPtr mData;
 };
-
-
 
 class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
   public:
     Str() : StrN<FASTLED_STR_INLINED_SIZE>() {}
     Str(const char *str) : StrN<FASTLED_STR_INLINED_SIZE>(str) {}
     Str(const Str &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
-    template <size_t M> Str(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
-    Str &operator=(const Str &other) { copy(other); return *this; }
+    template <size_t M>
+    Str(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
+    Str &operator=(const Str &other) {
+        copy(other);
+        return *this;
+    }
 };
 
 FASTLED_NAMESPACE_END
