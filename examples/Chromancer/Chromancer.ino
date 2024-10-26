@@ -130,7 +130,9 @@ unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
 Button simulatedHeartbeat("Simulated Heartbeat");
+Button triggerStarburst("Trigger Starburst");
 bool wasHeartbeatClicked = false;
+bool wasStarburstClicked = false;
 
 void setup() {
     Serial.begin(115200);
@@ -212,8 +214,29 @@ void loop() {
     FastLED.show();
 
 
-    // Check if heartbeat button was clicked
+    // Check if buttons were clicked
     wasHeartbeatClicked = bool(simulatedHeartbeat);
+    wasStarburstClicked = bool(triggerStarburst);
+    
+    if (wasStarburstClicked) {
+        // Trigger immediate starburst effect
+        unsigned int baseColor = random(0xFFFF);
+        byte behavior = random(2) ? alwaysTurnsLeft : alwaysTurnsRight;
+        
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < numberOfRipples; j++) {
+                if (ripples[j].state == dead) {
+                    ripples[j].start(
+                        starburstNode, i,
+                        Adafruit_DotStar_ColorHSV(
+                            baseColor + (0xFFFF / 6) * i, 255, 255),
+                        .65, 1500, behavior);
+                    break;
+                }
+            }
+        }
+        lastHeartbeat = millis();
+    }
     
     if (wasHeartbeatClicked) {
         // Trigger immediate heartbeat effect
