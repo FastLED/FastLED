@@ -84,13 +84,17 @@ def ensure_image_exists():
         print(f"Failed to ensure image exists: {e}")
         return False
 
-def remove_existing_container(container_name):
+def container_exists(container_name):
+    """Check if a container with the given name exists."""
     try:
-        subprocess.run(["docker", "rm", "-f", container_name], check=True, capture_output=True)
-        print(f"Removed existing container: {container_name}")
+        result = subprocess.run(
+            ["docker", "container", "inspect", container_name],
+            capture_output=True,
+            check=False
+        )
+        return result.returncode == 0
     except subprocess.CalledProcessError:
-        # If the container doesn't exist, it's not an error
-        pass
+        return False
 
 def main():
     if not is_docker_running():
@@ -109,34 +113,46 @@ def main():
         print(f"ERROR: Directory '{absolute_directory}' does not exist.")
         sys.exit(1)
 
-    # Remove existing container if it exists
-    remove_existing_container("fastled-wasm-compiler")
+    container_name = "fastled-wasm-compiler"
 
     # Ensure the image exists (pull if needed)
     if not ensure_image_exists():
         print("Failed to ensure Docker image exists. Exiting.")
         sys.exit(1)
 
-    # Launch the Docker container if Docker is running
+    # Check if container exists
+    container_exists_flag = container_exists(container_name)
+
+    # Launch or start the Docker container if Docker is running
     try:
-        docker_command = [
-            "docker",
-            "run",
-            "--rm",  # Automatically remove the container when it exits
-        ]
+        if container_exists_flag:
+            # Start existing container
+            docker_command = [
+                "docker",
+                "start",
+                "-a",  # Attach to container's output
+                container_name
+            ]
+        else:
+            # Create new container
+            docker_command = [
+                "docker",
+                "run",
+            ]
         
-        if sys.stdout.isatty():
-            docker_command.append("-it")
-        
-        docker_command.extend([
-            "--name",
-            "fastled-wasm-compiler",
-            "--platform",
-            "linux/amd64",
-            "-v",
-            f"{absolute_directory}:/mapped/{base_name}",
-            "fastled-wasm-compiler:latest",
-        ])
+        if not container_exists_flag:
+            # Only add these flags for 'docker run'
+            if sys.stdout.isatty():
+                docker_command.append("-it")
+            docker_command.extend([
+                "--name",
+                container_name,
+                "--platform",
+                "linux/amd64",
+                "-v",
+                f"{absolute_directory}:/mapped/{base_name}",
+                "fastled-wasm-compiler:latest"
+            ])
 
         print(f"Running command: {' '.join(docker_command)}")
         process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
