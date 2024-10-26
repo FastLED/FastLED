@@ -37,6 +37,41 @@ console.warn = warn;
 console.error = error;
 
 
+function isDenseGrid(frameData) {
+    const screenMap = frameData.screenMap;
+    
+    // Check if all pixel densities are undefined
+    let allPixelDensitiesUndefined = true;
+    for (const stripId in screenMap.strips) {
+        const strip = screenMap.strips[stripId];
+        allPixelDensitiesUndefined = allPixelDensitiesUndefined && (strip.diameter === undefined);
+        if (!allPixelDensitiesUndefined) {
+            break;
+        }
+    }
+
+    if (!allPixelDensitiesUndefined) {
+        return false;
+    }
+
+    // Calculate total pixels and screen area
+    let totalPixels = 0;
+    for (const strip of frameData) {
+        if (strip.strip_id in screenMap.strips) {
+            const stripMap = screenMap.strips[strip.strip_id];
+            totalPixels += stripMap.map.length;
+        }
+    }
+
+    const width = screenMap.absMax[0] - screenMap.absMin[0];
+    const height = screenMap.absMax[1] - screenMap.absMin[1];
+    const screenArea = width * height;
+    const pixelDensity = totalPixels / screenArea;
+
+    // Return true if density is close to 1 (indicating a grid)
+    return pixelDensity > 0.9 && pixelDensity < 1.1;
+}
+
 
 async function initThreeJS(threeJsModules, containerId) {
 
@@ -556,40 +591,14 @@ class GraphicsManagerThreeJS {
                 });
             }
         });
-
-        let allPixelDensitiesUndefined = true;
-        // screenMap.forEach(density => allPixelDensitiesUndefined = allPixelDensitiesUndefined || (density === undefined));
-        // screenMap.strips.forEach(strip => allPixelDensitiesUndefined = allPixelDensitiesUndefined || (strip.diameter === undefined));
-        for (const stripId in screenMap.strips) {
-            const strip = screenMap.strips[stripId];
-            allPixelDensitiesUndefined = allPixelDensitiesUndefined && (strip.diameter === undefined);
-            if (allPixelDensitiesUndefined) {
-                break;
-            }
-        }
-
-        // Calculate dot size based on LED density
         const width = screenMap.absMax[0] - screenMap.absMin[0];
         const height = screenMap.absMax[1] - screenMap.absMin[1];
-
         const { calcXPosition, calcYPosition } = this.makePositionCalculators(frameData);
-
-
+        const isDenseScreenMap = isDenseGrid(frameData);
         let pixelDensityDefault = undefined;
-        let isDenseScreenMap = false;
-        if (allPixelDensitiesUndefined) {
-            // Okay no pixel density was set, so we will look at the data and see if the pixel density is close to 1.
-            // If it is then someone is sending us a grid or a strip.
-            const totalPixels = ledPositions.length;
-            const width = screenMap.absMax[0] - screenMap.absMin[0];
-            const height = screenMap.absMax[1] - screenMap.absMin[1];
-            const screenArea = width * height;
-            const pixelDensity = totalPixels / screenArea;
-            if (pixelDensity > 0.9 && pixelDensity < 1.1) {
-                console.log("Pixel density is close to 1, assuming grid or strip");
-                pixelDensityDefault = Math.abs(calcXPosition(0) - calcXPosition(1));
-                isDenseScreenMap = true;
-            }
+        if (isDenseScreenMap) {
+            console.log("Pixel density is close to 1, assuming grid or strip");
+            pixelDensityDefault = Math.abs(calcXPosition(0) - calcXPosition(1));
         }
 
         const screenArea = width * height;
