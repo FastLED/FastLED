@@ -2,14 +2,27 @@
 Uses the latest wasm compiler image to compile the FastLED sketch.
 
 Probably an unfortunate name.
-"""
 
-import docker
+Push instructions:
+  1. docker login
+  2. (build the image, use the wasm_compiler in ci/)
+    a. This will create an image tagged by fastled-wasm-compiler
+  3. docker tag fastled-wasm-compiler:latest niteris/fastled-wasm:latest
+  4. docker push niteris/fastled-wasm:latest
+"""
+import sys
 import subprocess
 import time
-import sys
+
 import os
 from pathlib import Path
+
+try:
+    import docker
+except ImportError:
+    print("Please install the 'docker' package by running 'pip install docker'.")
+    sys.exit(1)
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[4]
 DEFAULT_WASM_PROJECT_DIR = PROJECT_ROOT / "examples" / "wasm"
