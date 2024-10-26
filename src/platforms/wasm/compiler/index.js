@@ -335,32 +335,30 @@ class GraphicsManager {
                 //log(x, y);
                 const diameter = stripData.diameter || 1.0;
                 const radius = Math.floor(diameter / 2);
-                
-                // Draw a filled circle for each LED
+
+                // Draw a filled square for each LED
                 for (let dy = -radius; dy <= radius; dy++) {
                     for (let dx = -radius; dx <= radius; dx++) {
-                        // Check if point is within circle
-                        if (dx*dx + dy*dy <= radius*radius) {
-                            const px = x + dx;
-                            const py = y + dy;
-                            
-                            // Check bounds
-                            if (px >= 0 && px < canvasWidth && py >= 0 && py < canvasHeight) {
-                                const srcIndex = i * 3;
-                                const destIndex = (py * this.texWidth + px) * 3;
-                                // Pixel data is already in 0-255 range, use directly
-                                const r = data[srcIndex] & 0xFF;
-                                const g = data[srcIndex + 1] & 0xFF;
-                                const b = data[srcIndex + 2] & 0xFF;
-                                this.texData[destIndex] = r;
-                                this.texData[destIndex + 1] = g;
-                                this.texData[destIndex + 2] = b;
-                            }
+                        const px = x + dx;
+                        const py = y + dy;
+
+                        // Check bounds
+                        if (px >= 0 && px < canvasWidth && py >= 0 && py < canvasHeight) {
+                            const srcIndex = i * 3;
+                            const destIndex = (py * this.texWidth + px) * 3;
+                            // Pixel data is already in 0-255 range, use directly
+                            const r = data[srcIndex] & 0xFF;
+                            const g = data[srcIndex + 1] & 0xFF;
+                            const b = data[srcIndex + 2] & 0xFF;
+                            this.texData[destIndex] = r;
+                            this.texData[destIndex + 1] = g;
+                            this.texData[destIndex + 2] = b;
                         }
                     }
                 }
             }
         }
+
 
         // Update texture with new data
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
@@ -441,8 +439,8 @@ class GraphicsManagerThreeJS {
 
         // Clear the scene
         if (this.scene) {
-            while(this.scene.children.length > 0) { 
-                this.scene.remove(this.scene.children[0]); 
+            while (this.scene.children.length > 0) {
+                this.scene.remove(this.scene.children[0]);
             }
         }
 
@@ -456,7 +454,7 @@ class GraphicsManagerThreeJS {
 
         const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
-        
+
         // Always set width to 640px and scale height proportionally
         const targetWidth = 640;
         const aspectRatio = canvas.height / canvas.width;
@@ -465,7 +463,7 @@ class GraphicsManagerThreeJS {
         // Set the rendering resolution (2x the display size)
         this.SCREEN_WIDTH = targetWidth * 2;
         this.SCREEN_HEIGHT = targetHeight * 2;
-        
+
         // Set internal canvas size to 2x for higher resolution
         canvas.width = targetWidth * 2;
         canvas.height = targetHeight * 2;
@@ -483,9 +481,9 @@ class GraphicsManagerThreeJS {
         );
         this.camera.position.z = 500;
 
-        this.renderer = new THREE.WebGLRenderer({ 
+        this.renderer = new THREE.WebGLRenderer({
             canvas: canvas,
-            antialias: true 
+            antialias: true
         });
         this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
 
@@ -559,8 +557,8 @@ class GraphicsManagerThreeJS {
                     const led = new THREE.Mesh(geometry, material);
 
                     // Position LED according to map, normalized to screen coordinates
-                    const x = ((pos[0] - screenMap.absMin[0]) / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
-                    const y = -((pos[1] - screenMap.absMin[1]) / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
+                    const x = ((pos[0] - screenMap.absMin[0]) / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH / 2;
+                    const y = -((pos[1] - screenMap.absMin[1]) / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT / 2;
                     led.position.set(x, y, 500);
 
                     this.scene.add(led);
@@ -589,7 +587,7 @@ class GraphicsManagerThreeJS {
         }
 
         const screenMap = frameData.screenMap;
-        
+
         // Create a map to store LED data by position
         const positionMap = new Map();
 
@@ -650,8 +648,8 @@ class GraphicsManagerThreeJS {
             const y = ledData.y - min_y;
 
             // Convert to normalized coordinates
-            const normalizedX = (x / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH/2;
-            const normalizedY = -(y / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT/2;
+            const normalizedX = (x / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH / 2;
+            const normalizedY = -(y / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT / 2;
 
             led.position.set(normalizedX, normalizedY, 0);
             led.material.color.setRGB(ledData.r, ledData.g, ledData.b);
@@ -719,7 +717,7 @@ class UiManager {
             if (hasGroup) {
                 console.log(`Group ${group} found, for item ${data.name}`);
             }
-    
+
             let control;
             if (data.type === 'slider') {
                 control = this.createSlider(data);
@@ -809,7 +807,7 @@ class UiManager {
             // next frame.
             slider.value = Number.parseFloat(element.value);
             valueDisplay.textContent = slider.value;
-        },0);
+        }, 0);
 
 
         slider.addEventListener('input', function () {
@@ -1033,7 +1031,7 @@ class UiManager {
             console.warn("Received empty frame data, skipping update");
             return;
         }
- 
+
         updateCanvas(frameData);
     };
 
@@ -1061,7 +1059,7 @@ class UiManager {
         requestAnimationFrame(runLoop);
     }
 
-    
+
 
 
     function updateCanvas(frameData) {
@@ -1093,7 +1091,7 @@ class UiManager {
             }
             return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance);
         }
-        
+
         try {
             if (typeof fastLedLoader === 'function') {
                 // Load the module
@@ -1136,7 +1134,7 @@ class UiManager {
 
         if (threeJsModules) {
             // await initThreeJS(threeJsModules, containerId);
- 
+
             graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
 
         }
