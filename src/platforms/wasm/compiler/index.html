@@ -63,12 +63,7 @@
 <script src="index.js"></script>
 <script type="module">
 
-
-
-    const ENABLED = window.location.search.includes('3js');
-
     async function loadThreeJs() {
-        if (!ENABLED) return {};
         console.log('Using ThreeJS modules:', window.threeJsModules);
         return {
             containerId: "container",

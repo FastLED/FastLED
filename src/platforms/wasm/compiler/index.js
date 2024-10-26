@@ -11,27 +11,36 @@ globalThis.loadFastLED = async function () {
 // Will be overridden during initialization.
 var print = function () { };
 
+const prev_console = console;
+
 // Override console.log, console.warn, console.error to print to the output element
-const _prev_log = console.log;
-const _prev_warn = console.warn;
-const _prev_error = console.error;
+const _prev_log = prev_console.log;
+const _prev_warn = prev_console.warn;
+const _prev_error = prev_console.error;
 
 function log(...args) {
     _prev_log(...args);
-    try { print(...args); } catch (e) { }
+    try { print(...args); } catch (e) {
+        __prev_log("Error in log", e);
+    }
 }
 function warn(...args) {
     _prev_warn(...args);
-    try { print(...args); } catch (e) { }
+    try { print(...args); } catch (e) {
+        __prev_warn("Error in warn", e);
+    }
 }
 
 function error(...args) {
     const stackTrace = new Error().stack;
     args = args + '\n' + stackTrace;
     _prev_error(args);
-    try { print(args); } catch (e) { }
+    try { print(args); } catch (e) {
+        _prev_error("Error in error", e);
+    }
 }
 
+console = {};
 console.log = log;
 console.warn = warn;
 console.error = error;
@@ -63,8 +72,8 @@ function isDenseGrid(frameData) {
         }
     }
 
-    const width = screenMap.absMax[0] - screenMap.absMin[0];
-    const height = screenMap.absMax[1] - screenMap.absMin[1];
+    const width = 1 + (screenMap.absMax[0] - screenMap.absMin[0]);
+    const height = 1 + (screenMap.absMax[1] - screenMap.absMin[1]);
     const screenArea = width * height;
     const pixelDensity = totalPixels / screenArea;
 
@@ -981,21 +990,28 @@ class UiManager {
     let containerId;  // for ThreeJS
     let graphicsArgs = {};
 
-    print = function (...args) {
+    function customPrintFunction(...args) {
+        if (containerId === undefined) {
+            return;  // Not ready yet.
+        }
         // take the args and stringify them, then add them to the output element
         let cleanedArgs = args.map(arg => {
             if (typeof arg === 'object') {
-                return JSON.stringify(arg).slice(0, 100);
+                try {
+                    return JSON.stringify(arg).slice(0, 100);
+                } catch (e) {
+                    return "" + arg;
+                }
             }
             return arg;
         });
+        const output = document.getElementById(outputId);
         const allText = output.textContent + [...cleanedArgs].join(' ') + '\n';
         // split into lines, and if there are more than 100 lines, remove one.
         const lines = allText.split('\n');
         while (lines.length > 100) {
             lines.shift();
         }
-        const output = document.getElementById(outputId);
         output.textContent = lines.join('\n');
     }
 
@@ -1018,6 +1034,7 @@ class UiManager {
 
     globalThis.FastLED_onStripUpdate = function (jsonData) {
         console.log("Received strip update:", jsonData);
+
         const event = jsonData.event;
         let width = 0;
         let height = 0;
@@ -1099,6 +1116,11 @@ class UiManager {
         canvas.style.width = displayWidth + 'px';
         canvas.style.height = displayHeight + 'px';
         console.log(`Canvas size set to ${width}x${height}, displayed at ${canvas.style.width}x${canvas.style.height} `);
+        // unconditionally delete the graphicsManager
+        if (graphicsManager) {
+            graphicsManager.reset();
+            graphicsManager = null;
+        }
     };
 
 
@@ -1148,9 +1170,18 @@ class UiManager {
 
 
     function updateCanvas(frameData) {
+       // we are going to add the screenMap to the graphicsManager
+       frameData.screenMap = screenMap;
         if (!graphicsManager) {
+            const isDenseMap = isDenseGrid(frameData);
             //graphicsManager = new GraphicsManagerThreeJS(canvasId, threeJsModules);
-            graphicsManager = new GraphicsManager(graphicsArgs);
+            if (isDenseMap) {
+                console.log("Creating Fast GraphicsManager with canvas ID", canvasId);
+                graphicsManager = new GraphicsManager(graphicsArgs);
+            } else {
+                console.log("Creating Beautiful GraphicsManager with canvas ID", canvasId);
+                graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
+            }
             uiCanvasChanged = false;
         }
 
@@ -1159,8 +1190,7 @@ class UiManager {
             graphicsManager.reset();
         }
 
-        // we are going to add the screenMap to the graphicsManager
-        frameData.screenMap = screenMap;
+ 
         graphicsManager.updateCanvas(frameData);
     }
 
@@ -1197,32 +1227,32 @@ class UiManager {
 
 
     async function loadFastLed(options) {
-        console.log("Loading FastLED with options:", options);
         canvasId = options.canvasId;
         uiControlsId = options.uiControlsId;
         outputId = options.printId;
+        print = customPrintFunction;
+        console.log("Loading FastLED with options:", options);
         frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
         uiManager = new UiManager(uiControlsId);
         threeJs = options.threeJs;
         console.log("ThreeJS:", threeJs);
         const fastLedLoader = options.fastled;
-        await onModuleLoaded(fastLedLoader);
         threeJsModules = threeJs.modules;
         containerId = threeJs.containerId;
         console.log("ThreeJS modules:", threeJsModules);
         console.log("Container ID:", containerId);
-
         graphicsArgs = {
             canvasId: canvasId,
             threeJsModules: threeJsModules
         }
-
+        /*
         if (threeJsModules) {
             // await initThreeJS(threeJsModules, containerId);
-
             graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
 
         }
+            */
+        await onModuleLoaded(fastLedLoader);
     }
     globalThis.loadFastLED = loadFastLed;
 })();
