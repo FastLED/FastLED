@@ -5,7 +5,7 @@ Probably an unfortunate name.
 
 Push instructions:
   1. docker login
-  2. (build the image, use the wasm_compiler in ci/)
+  2. ./wasm (builds the image and then runs a container)
     a. This will create an image tagged by fastled-wasm-compiler
   3. docker tag fastled-wasm-compiler:latest niteris/fastled-wasm:latest
   4. docker push niteris/fastled-wasm:latest
