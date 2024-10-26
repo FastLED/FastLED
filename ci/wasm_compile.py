@@ -230,6 +230,11 @@ def main() -> None:
         help="Build the Docker image before running",
     )
     parser.add_argument(
+        "--no-build",
+        action="store_true",
+        help="Skip building the Docker image, overrides --build",
+    )
+    parser.add_argument(
         "-c",
         "--clean",
         action="store_true",
@@ -253,6 +258,8 @@ def main() -> None:
         help="Enables debug flags and disables optimization. Results in larger binary with debug info.",
     )
     args: argparse.Namespace = parser.parse_args()
+    if args.no_build:
+        args.build = False
 
     try:
         if args.clean:
