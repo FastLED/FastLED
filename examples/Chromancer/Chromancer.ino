@@ -129,12 +129,24 @@ unsigned long lastAutoPulseChange;
 unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
+// Helper function to check if a node is on the border
+bool isNodeOnBorder(byte node) {
+    for (int i = 0; i < numberOfBorderNodes; i++) {
+        if (node == borderNodes[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
 Button simulatedHeartbeat("Simulated Heartbeat");
 Button triggerStarburst("Trigger Starburst"); 
 Button triggerRainbowCube("Rainbow Cube");
+Button triggerBorderWave("Border Wave");
 bool wasHeartbeatClicked = false;
 bool wasStarburstClicked = false;
 bool wasRainbowCubeClicked = false;
+bool wasBorderWaveClicked = false;
 
 void setup() {
     Serial.begin(115200);
@@ -220,7 +232,37 @@ void loop() {
     wasHeartbeatClicked = bool(simulatedHeartbeat);
     wasStarburstClicked = bool(triggerStarburst);
     wasRainbowCubeClicked = bool(triggerRainbowCube);
+    wasBorderWaveClicked = bool(triggerBorderWave);
     
+    if (wasBorderWaveClicked) {
+        // Trigger immediate border wave effect
+        unsigned int baseColor = random(0xFFFF);
+        
+        // Start ripples from each border node in sequence
+        for (int i = 0; i < numberOfBorderNodes; i++) {
+            byte node = borderNodes[i];
+            // Find an inward direction
+            for (int dir = 0; dir < 6; dir++) {
+                if (nodeConnections[node][dir] >= 0 && 
+                    !isNodeOnBorder(nodeConnections[node][dir])) {
+                    for (int j = 0; j < numberOfRipples; j++) {
+                        if (ripples[j].state == dead) {
+                            ripples[j].start(
+                                node, dir,
+                                Adafruit_DotStar_ColorHSV(
+                                    baseColor + (0xFFFF / numberOfBorderNodes) * i, 
+                                    255, 255),
+                                .4, 2000, 0);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        lastHeartbeat = millis();
+    }
+
     if (wasRainbowCubeClicked) {
         // Trigger immediate rainbow cube effect
         int node = cubeNodes[random(numberOfCubeNodes)];
