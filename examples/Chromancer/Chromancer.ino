@@ -129,6 +129,8 @@ unsigned long lastAutoPulseChange;
 unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
+Button simulatedHeartbeat("Simulated Heartbeat");
+bool wasHeartbeatClicked = false;
 
 void setup() {
     Serial.begin(115200);
@@ -209,6 +211,23 @@ void loop() {
 
     FastLED.show();
 
+
+    // Check if heartbeat button was clicked
+    wasHeartbeatClicked = bool(simulatedHeartbeat);
+    
+    if (wasHeartbeatClicked) {
+        // Trigger immediate heartbeat effect
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < numberOfRipples; j++) {
+                if (ripples[j].state == dead) {
+                    ripples[j].start(15, i, 0xEE1111,
+                                   float(random(100)) / 100.0 * .1 + .4, 1000, 0);
+                    break;
+                }
+            }
+        }
+        lastHeartbeat = millis();
+    }
 
     if (millis() - lastHeartbeat >= autoPulseTimeout) {
         // When biometric data is unavailable, visualize at random
