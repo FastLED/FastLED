@@ -130,9 +130,11 @@ unsigned long nextSimulatedHeartbeat;
 unsigned long nextSimulatedEda;
 
 Button simulatedHeartbeat("Simulated Heartbeat");
-Button triggerStarburst("Trigger Starburst");
+Button triggerStarburst("Trigger Starburst"); 
+Button triggerRainbowCube("Rainbow Cube");
 bool wasHeartbeatClicked = false;
 bool wasStarburstClicked = false;
+bool wasRainbowCubeClicked = false;
 
 void setup() {
     Serial.begin(115200);
@@ -217,7 +219,31 @@ void loop() {
     // Check if buttons were clicked
     wasHeartbeatClicked = bool(simulatedHeartbeat);
     wasStarburstClicked = bool(triggerStarburst);
+    wasRainbowCubeClicked = bool(triggerRainbowCube);
     
+    if (wasRainbowCubeClicked) {
+        // Trigger immediate rainbow cube effect
+        int node = cubeNodes[random(numberOfCubeNodes)];
+        unsigned int baseColor = random(0xFFFF);
+        byte behavior = random(2) ? alwaysTurnsLeft : alwaysTurnsRight;
+
+        for (int i = 0; i < 6; i++) {
+            if (nodeConnections[node][i] >= 0) {
+                for (int j = 0; j < numberOfRipples; j++) {
+                    if (ripples[j].state == dead) {
+                        ripples[j].start(
+                            node, i,
+                            Adafruit_DotStar_ColorHSV(
+                                baseColor + (0xFFFF / 6) * i, 255, 255),
+                            .5, 2000, behavior);
+                        break;
+                    }
+                }
+            }
+        }
+        lastHeartbeat = millis();
+    }
+
     if (wasStarburstClicked) {
         // Trigger immediate starburst effect
         unsigned int baseColor = random(0xFFFF);
