@@ -2,7 +2,7 @@ import argparse
 import os
 import subprocess
 import sys
-import webbrowser
+import time
 from pathlib import Path
 from typing import List
 
@@ -199,7 +199,7 @@ def run_container(directory: str, interactive: bool, debug: bool = False) -> Non
 
         print()
         print("#######################################")
-        print(f"# Running Docker container with:")
+        print("# Running Docker container with:")
         print(f"#   {cmd_str}")
         print("#######################################\n")
 
@@ -282,18 +282,38 @@ def main() -> None:
         sys.exit(1)
 
 
-def run_web_server(directory: str, port: int = 8000) -> None:
-    os.chdir(directory)
-    print(f"Launching web server at http://localhost:{port}")
-    proc = subprocess.Popen(["python", "-m", "http.server", str(port)])
-    import time
+def run_web_server(directory: str) -> None:
+    print("Launching web server at", directory)
+    print("Launching live-server at http://localhost")
 
-    time.sleep(3)
-    webbrowser.open(f"http://localhost:{port}")
+    # Check if live-server is installed
     try:
-        proc.wait()
-    except KeyboardInterrupt:
-        proc.terminate()
+        print("running live-server --version")
+        subprocess.run(
+            "live-server --version", capture_output=True, shell=True, check=True
+        )
+    except subprocess.CalledProcessError:
+        print("live-server not found. Please install it with:")
+        print("npm install -g live-server")
+        return
+
+    # Create a detached command window running live-server
+    cmd_list = ["live-server"]
+    cmd_str = subprocess.list2cmdline(cmd_list)
+    print(f"Running command: {cmd_str} at {directory}")
+    subprocess.Popen(
+        cmd_str,
+        shell=True,
+        cwd=directory,
+        # creationflags=CREATE_NEW_CONSOLE | DETACHED_PROCESS
+    )
+
+    # import time
+    # time.sleep(3)  # Give the server time to start
+    # webbrowser.open(f"http://localhost:{port}")
+    while True:
+
+        time.sleep(1)
 
 
 if __name__ == "__main__":
