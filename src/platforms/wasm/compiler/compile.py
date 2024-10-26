@@ -180,7 +180,9 @@ def parse_args() -> argparse.Namespace:
 def find_project_dir(mapped_dir: Path) -> Path:
     mapped_dirs: List[Path] = list(mapped_dir.iterdir())
     if len(mapped_dirs) > 1:
-        raise ValueError(f"Error: More than one directory found in {mapped_dir}")
+        raise ValueError(
+            f"Error: More than one directory found in {mapped_dir}, which are {mapped_dirs}"
+        )
 
     src_dir: Path = mapped_dirs[0]
     return src_dir

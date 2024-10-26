@@ -59,6 +59,9 @@ COPY ./src/fx/ /js/fastled/src/fx/
 COPY ./src/lib8tion/ /js/fastled/src/lib8tion
 COPY ./src/third_party/ /js/fastled/src/third_party
 
+RUN mkdir -p /examples
+COPY ./examples/wasm /examples/
+
 # Copy platforms directory separately, since it changes a lot during development
 COPY ./src/platforms/ /js/fastled/src/platforms/
 
@@ -89,8 +92,10 @@ WORKDIR /js
 
 # This is too slow for lots of testing, disabled for now
 # Prewarm the cache with a first compile.
+RUN mkdir -p /js/src
+COPY /examples/wasm /mapped/wasm
 #RUN mkdir -p /js/src && echo -e "void setup() {}\nvoid loop(){}\n" > /js/src/prewarm_main.cpp
-#RUN source /entrypoint.sh && pio run && rm -rf /js/src/prewarm_main.cpp
+# RUN source /entrypoint.sh && pio run
 
 # Copy the compile script
 COPY src/platforms/wasm/compiler/compile.py /js/
@@ -98,6 +103,11 @@ COPY src/platforms/wasm/compiler/process-ino.py /js/
 RUN dos2unix /js/compile.py /js/process-ino.py
 RUN dos2unix /js/*.sh
 RUN chmod +x /js/*.sh
+
+RUN python /js/compile.py
+
+#Clean up before the volume get's mapped in.
+RUN rm -rf /mapped
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "/js/compile.py"]
