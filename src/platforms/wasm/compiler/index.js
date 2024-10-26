@@ -513,7 +513,7 @@ class GraphicsManagerThreeJS {
         const screenArea = width * height;
         // Use point diameter from screen map if available, otherwise calculate default
         const defaultDotSizeScale = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
-        const stripDotSizes = Object.values(screenMap.strips).map(strip => strip.pointDiameter || 1.0);
+        const stripDotSizes = Object.values(screenMap.strips).map(strip => strip.pointDiameter);
         const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
         const defaultDotSize = defaultDotSizeScale * avgPointDiameter;
 
@@ -870,6 +870,7 @@ class UiManager {
     let uiManager;
     let uiCanvasChanged = false;
     let threeJsModules = {};  // For graphics.
+    let graphicsManager;
 
     print = function (...args) {
         // take the args and stringify them, then add them to the output element
@@ -998,7 +999,7 @@ class UiManager {
         output.textContent += `Strip added: ID ${stripId}, length ${stripLength}\n`;
     };
 
-    let graphicsManager;
+
 
     globalThis.FastLED_onFrame = function (frameData, uiUpdateCallback) {
         uiManager.processUiChanges(uiUpdateCallback);
