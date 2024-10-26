@@ -445,15 +445,18 @@ class GraphicsManagerThreeJS {
         const aspectRatio = canvas.height / canvas.width;
         const targetHeight = Math.round(targetWidth * aspectRatio);
 
-        // Set the rendering resolution
-        this.SCREEN_WIDTH = targetWidth;
-        this.SCREEN_HEIGHT = targetHeight;
+        // Set the rendering resolution (2x the display size)
+        this.SCREEN_WIDTH = targetWidth * 2;
+        this.SCREEN_HEIGHT = targetHeight * 2;
         
-        // Set both the canvas size and display size
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
+        // Set internal canvas size to 2x for higher resolution
+        canvas.width = targetWidth * 2;
+        canvas.height = targetHeight * 2;
+        // But keep display size the same
         canvas.style.width = targetWidth + 'px';
         canvas.style.height = targetHeight + 'px';
+        canvas.style.maxWidth = targetWidth + 'px';
+        canvas.style.maxHeight = targetHeight + 'px';
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.OrthographicCamera(
