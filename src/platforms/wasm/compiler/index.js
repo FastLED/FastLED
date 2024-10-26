@@ -333,15 +333,32 @@ class GraphicsManager {
                     continue;
                 }
                 //log(x, y);
-                const srcIndex = i * 3;
-                const destIndex = (y * this.texWidth + x) * 3;
-                // Pixel data is already in 0-255 range, use directly
-                const r = data[srcIndex] & 0xFF;
-                const g = data[srcIndex + 1] & 0xFF;
-                const b = data[srcIndex + 2] & 0xFF;
-                this.texData[destIndex] = r;
-                this.texData[destIndex + 1] = g;
-                this.texData[destIndex + 2] = b;
+                const diameter = stripData.diameter || 1.0;
+                const radius = Math.floor(diameter / 2);
+                
+                // Draw a filled circle for each LED
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        // Check if point is within circle
+                        if (dx*dx + dy*dy <= radius*radius) {
+                            const px = x + dx;
+                            const py = y + dy;
+                            
+                            // Check bounds
+                            if (px >= 0 && px < canvasWidth && py >= 0 && py < canvasHeight) {
+                                const srcIndex = i * 3;
+                                const destIndex = (py * this.texWidth + px) * 3;
+                                // Pixel data is already in 0-255 range, use directly
+                                const r = data[srcIndex] & 0xFF;
+                                const g = data[srcIndex + 1] & 0xFF;
+                                const b = data[srcIndex + 2] & 0xFF;
+                                this.texData[destIndex] = r;
+                                this.texData[destIndex + 1] = g;
+                                this.texData[destIndex + 2] = b;
+                            }
+                        }
+                    }
+                }
             }
         }
 
