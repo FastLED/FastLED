@@ -1,3 +1,4 @@
+#ifdef __EMSCRIPTEN__
 
 #include "ui/ui_internal.h"
 #include <memory>
@@ -186,3 +187,5 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
 
 
 FASTLED_NAMESPACE_END
+
+#endif  // __EMSCRIPTEN__

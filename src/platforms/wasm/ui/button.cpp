@@ -1,3 +1,6 @@
+
+#ifdef __EMSCRIPTEN__
+
 #include "json.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
@@ -46,3 +49,5 @@ void jsButton::updateInternal(const ArduinoJson::JsonVariantConst& value) {
 }
 
 FASTLED_NAMESPACE_END
+
+#endif  // __EMSCRIPTEN__
