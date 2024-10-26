@@ -419,7 +419,8 @@ class GraphicsManagerThreeJS {
         this.renderer = null;
         this.composer = null;
         this.previousTotalLeds = 0;
-        this.BLOOM_STRENGTH = 8.0;
+        this.bloom_stength = 1;
+        this.bloom_radius = 16;
     }
 
     reset() {
@@ -448,6 +449,25 @@ class GraphicsManagerThreeJS {
         if (this.renderer) {
             this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
         }
+    }
+
+    makePositionCalculators(frameData) {
+        // Calculate dot size based on LED density
+        const screenMap = frameData.screenMap;
+        const width = screenMap.absMax[0] - screenMap.absMin[0];
+        const height = screenMap.absMax[1] - screenMap.absMin[1];
+
+        const __screenWidth = this.SCREEN_WIDTH;
+        const __screenHeight = this.SCREEN_HEIGHT;
+
+        function calcXPosition(x) {
+            return (x - screenMap.absMin[0]) / width * __screenWidth - __screenWidth / 2;
+        }
+
+        function calcYPosition(y) {
+            return -((y - screenMap.absMin[1]) / height * __screenHeight - __screenHeight / 2);
+        }
+        return { calcXPosition, calcYPosition };
     }
 
     initThreeJS(frameData) {
@@ -488,19 +508,29 @@ class GraphicsManagerThreeJS {
         this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
 
         const renderScene = new RenderPass(this.scene, this.camera);
-        const bloomPass = new UnrealBloomPass(
-            new THREE.Vector2(this.SCREEN_WIDTH, this.SCREEN_HEIGHT),
-            this.BLOOM_STRENGTH,
-            1.0,  // radius
-            0.0  // threshold
-        );
-
         this.composer = new EffectComposer(this.renderer);
         this.composer.addPass(renderScene);
-        this.composer.addPass(bloomPass);
 
-        // Create LED grid
-        this.createGrid(frameData);
+        // Create LED grid.
+        const { isDenseScreenMap } = this.createGrid(frameData);
+
+        if (!isDenseScreenMap) {
+            this.bloom_stength = 16;
+            this.bloom_radius = 1;
+        } else {
+            this.bloom_stength = 0;
+            this.bloom_radius = 0;
+        }
+
+        if (this.bloom_stength > 0 || this.bloom_radius > 0) {
+            const bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(this.SCREEN_WIDTH, this.SCREEN_HEIGHT),
+                this.bloom_stength,
+                this.bloom_radius,  // radius
+                0.0  // threshold
+            );
+            this.composer.addPass(bloomPass);
+        }
     }
 
     createGrid(frameData) {
@@ -538,6 +568,13 @@ class GraphicsManagerThreeJS {
             }
         }
 
+        // Calculate dot size based on LED density
+        const width = screenMap.absMax[0] - screenMap.absMin[0];
+        const height = screenMap.absMax[1] - screenMap.absMin[1];
+
+        const { calcXPosition, calcYPosition } = this.makePositionCalculators(frameData);
+
+
         let pixelDensityDefault = undefined;
         let isDenseScreenMap = false;
         if (allPixelDensitiesUndefined) {
@@ -550,14 +587,11 @@ class GraphicsManagerThreeJS {
             const pixelDensity = totalPixels / screenArea;
             if (pixelDensity > 0.9 && pixelDensity < 1.1) {
                 console.log("Pixel density is close to 1, assuming grid or strip");
-                pixelDensityDefault = 1;
+                pixelDensityDefault = Math.abs(calcXPosition(0) - calcXPosition(1));
                 isDenseScreenMap = true;
             }
         }
 
-        // Calculate dot size based on LED density
-        const width = screenMap.absMax[0] - screenMap.absMin[0];
-        const height = screenMap.absMax[1] - screenMap.absMin[1];
         const screenArea = width * height;
         // Use point diameter from screen map if available, otherwise calculate default
         const defaultDotSizeScale = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
@@ -570,6 +604,7 @@ class GraphicsManagerThreeJS {
         }
 
         const normalizedScale = this.SCREEN_WIDTH / width;
+
 
         // Create LEDs at mapped positions
         let ledIndex = 0;
@@ -597,8 +632,8 @@ class GraphicsManagerThreeJS {
                     const led = new THREE.Mesh(geometry, material);
 
                     // Position LED according to map, normalized to screen coordinates
-                    const x = ((pos[0] - screenMap.absMin[0]) / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH / 2;
-                    const y = -((pos[1] - screenMap.absMin[1]) / height) * this.SCREEN_HEIGHT + this.SCREEN_HEIGHT / 2;
+                    const x = calcXPosition(pos[0]);
+                    const y = calcYPosition(pos[1]);
                     led.position.set(x, y, 500);
 
                     this.scene.add(led);
@@ -607,6 +642,7 @@ class GraphicsManagerThreeJS {
                 });
             }
         });
+        return {isDenseScreenMap}
     }
 
     updateCanvas(frameData) {
