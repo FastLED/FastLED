@@ -138,7 +138,8 @@ async function initThreeJS(threeJsModules, containerId) {
 }
 
 class GraphicsManager {
-    constructor(canvasId, threeJsModules) {
+    constructor(graphicsArgs) {
+        const { canvasId } = graphicsArgs;
         this.canvasId = canvasId;
         this.gl = null;
         this.program = null;
@@ -391,7 +392,8 @@ class GraphicsManager {
 
 
 class GraphicsManagerThreeJS {
-    constructor(canvasId, threeJsModules) {
+    constructor(graphicsArgs) {
+        const { canvasId, threeJsModules } = graphicsArgs;
         this.canvasId = canvasId;
         this.threeJsModules = threeJsModules;
         this.SEGMENTS = 16;
@@ -871,6 +873,8 @@ class UiManager {
     let uiCanvasChanged = false;
     let threeJsModules = {};  // For graphics.
     let graphicsManager;
+    let containerId;  // for ThreeJS
+    let graphicsArgs = {};
 
     print = function (...args) {
         // take the args and stringify them, then add them to the output element
@@ -1035,10 +1039,13 @@ class UiManager {
         requestAnimationFrame(runLoop);
     }
 
+    
+
+
     function updateCanvas(frameData) {
         if (!graphicsManager) {
             //graphicsManager = new GraphicsManagerThreeJS(canvasId, threeJsModules);
-            graphicsManager = new GraphicsManager(canvasId, threeJsModules);
+            graphicsManager = new GraphicsManager(graphicsArgs);
             uiCanvasChanged = false;
         }
 
@@ -1083,6 +1090,7 @@ class UiManager {
     };
 
 
+
     async function loadFastLed(options) {
         console.log("Loading FastLED with options:", options);
         canvasId = options.canvasId;
@@ -1095,13 +1103,19 @@ class UiManager {
         const fastLedLoader = options.fastled;
         await onModuleLoaded(fastLedLoader);
         threeJsModules = threeJs.modules;
-        const containerId = threeJs.containerId;
+        containerId = threeJs.containerId;
         console.log("ThreeJS modules:", threeJsModules);
         console.log("Container ID:", containerId);
 
+        graphicsArgs = {
+            canvasId: canvasId,
+            threeJsModules: threeJsModules
+        }
+
         if (threeJsModules) {
             // await initThreeJS(threeJsModules, containerId);
-            graphicsManager = new GraphicsManagerThreeJS(canvasId, threeJsModules);
+ 
+            graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
 
         }
     }
