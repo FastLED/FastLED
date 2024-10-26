@@ -68,6 +68,22 @@ def start_docker():
         print(f"Error starting Docker: {str(e)}")
     return False
 
+def ensure_image_exists():
+    """Check if local image exists, pull from remote if not."""
+    try:
+        # Check if local image exists
+        result = subprocess.run(["docker", "image", "inspect", "fastled-wasm-compiler:latest"], 
+                              capture_output=True, check=False)
+        if result.returncode != 0:
+            print("Local image not found. Pulling from niteris/fastled-wasm...")
+            subprocess.run(["docker", "pull", "niteris/fastled-wasm:latest"], check=True)
+            subprocess.run(["docker", "tag", "niteris/fastled-wasm:latest", "fastled-wasm-compiler:latest"], check=True)
+            print("Successfully pulled and tagged remote image.")
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to ensure image exists: {e}")
+        return False
+
 def remove_existing_container(container_name):
     try:
         subprocess.run(["docker", "rm", "-f", container_name], check=True, capture_output=True)
@@ -95,6 +111,11 @@ def main():
 
     # Remove existing container if it exists
     remove_existing_container("fastled-wasm-compiler")
+
+    # Ensure the image exists (pull if needed)
+    if not ensure_image_exists():
+        print("Failed to ensure Docker image exists. Exiting.")
+        sys.exit(1)
 
     # Launch the Docker container if Docker is running
     try:
