@@ -13,7 +13,7 @@ Push instructions:
 import sys
 import subprocess
 import time
-
+import webbrowser
 import os
 from pathlib import Path
 
@@ -165,6 +165,19 @@ def main():
         process.wait()
 
         print("\nContainer execution completed.")
+        
+        # Start HTTP server in the fastled_js directory
+        output_dir = os.path.join(absolute_directory, "fastled_js")
+        if os.path.exists(output_dir):
+            print(f"\nStarting HTTP server in {output_dir}")
+            os.chdir(output_dir)
+            
+            # Start Python's built-in HTTP server
+            print("\nStarting HTTP server...")
+            webbrowser.open('http://localhost:8000')
+            os.system("python -m http.server")
+        else:
+            print(f"\nOutput directory {output_dir} not found")
 
     except subprocess.CalledProcessError as e:
         print(f"Failed to run Docker container: {e}")
