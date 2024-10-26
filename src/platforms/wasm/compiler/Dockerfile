@@ -59,12 +59,13 @@ COPY ./src/fx/ /js/fastled/src/fx/
 COPY ./src/lib8tion/ /js/fastled/src/lib8tion
 COPY ./src/third_party/ /js/fastled/src/third_party
 
-RUN mkdir -p /examples
-COPY ./examples/Wasm /examples/
+COPY examples /examples
+
+# Create required directories
+RUN mkdir -p /mapped /examples/wasm
 
 # Copy platforms directory separately, since it changes a lot during development
 COPY ./src/platforms/ /js/fastled/src/platforms/
-
 
 # Hack for now to get the wasm platform to compile
 RUN cp /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini && \
@@ -92,9 +93,9 @@ WORKDIR /js
 
 # This is too slow for lots of testing, disabled for now
 # Prewarm the cache with a first compile.
-RUN mkdir -p /js/src
-COPY examples/Wasm /mapped/Wasm
-#RUN mkdir -p /js/src && echo -e "void setup() {}\nvoid loop(){}\n" > /js/src/prewarm_main.cpp
+#RUN mkdir -p /js/src && mkdir -p /mapped
+# COPY /examples/Wasm /mapped/
+RUN cp -r /examples/wasm /mapped/ || mkdir -p /mapped/wasm
 # RUN source /entrypoint.sh && pio run
 
 # Copy the compile script
