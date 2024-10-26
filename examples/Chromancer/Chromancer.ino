@@ -139,6 +139,8 @@ bool isNodeOnBorder(byte node) {
     return false;
 }
 
+Checkbox allWhite("All White", false);
+
 Button simulatedHeartbeat("Simulated Heartbeat");
 Button triggerStarburst("Trigger Starburst"); 
 Button triggerRainbowCube("Rainbow Cube");
@@ -224,6 +226,15 @@ void loop() {
             leds[strip][led] = CRGB(ledColors[segment][fromBottom][0],
                                     ledColors[segment][fromBottom][1],
                                     ledColors[segment][fromBottom][2]);
+        }
+    }
+
+    if (allWhite) {
+        // for all strips
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < lengths[i]; j++) {
+                leds[i][j] = CRGB::White;
+            }
         }
     }
 

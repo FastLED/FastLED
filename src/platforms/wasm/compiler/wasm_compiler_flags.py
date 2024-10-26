@@ -38,6 +38,7 @@ wasmflags = [
     "-s",
     "EXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop']",
     "--bind",
+    "-DUSE_OFFSET_CONVERTER=0",
     "-s",
     "INITIAL_MEMORY=134217728",
     "--no-entry",
