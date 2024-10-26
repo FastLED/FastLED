@@ -527,6 +527,32 @@ class GraphicsManagerThreeJS {
             }
         });
 
+        let allPixelDensitiesUndefined = true;
+        // screenMap.forEach(density => allPixelDensitiesUndefined = allPixelDensitiesUndefined || (density === undefined));
+        // screenMap.strips.forEach(strip => allPixelDensitiesUndefined = allPixelDensitiesUndefined || (strip.diameter === undefined));
+        for (const stripId in screenMap.strips) {
+            const strip = screenMap.strips[stripId];
+            allPixelDensitiesUndefined = allPixelDensitiesUndefined && (strip.diameter === undefined);
+            if (allPixelDensitiesUndefined) {
+                break;
+            }
+        }
+
+        let pixelDensityDefault = undefined;
+        if (allPixelDensitiesUndefined) {
+            // Okay no pixel density was set, so we will look at the data and see if the pixel density is close to 1.
+            // If it is then someone is sending us a grid or a strip.
+            const totalPixels = ledPositions.length;
+            const width = screenMap.absMax[0] - screenMap.absMin[0];
+            const height = screenMap.absMax[1] - screenMap.absMin[1];
+            const screenArea = width * height;
+            const pixelDensity = totalPixels / screenArea;
+            if (pixelDensity > 0.9 && pixelDensity < 1.1) {
+                console.log("Pixel density is close to 1, assuming grid or strip");
+                pixelDensityDefault = 1;
+            }
+        }
+
         // Calculate dot size based on LED density
         const width = screenMap.absMax[0] - screenMap.absMin[0];
         const height = screenMap.absMax[1] - screenMap.absMin[1];
@@ -535,7 +561,11 @@ class GraphicsManagerThreeJS {
         const defaultDotSizeScale = Math.max(4, Math.sqrt(screenArea / (ledPositions.length * Math.PI)) * 0.4);
         const stripDotSizes = Object.values(screenMap.strips).map(strip => strip.diameter);
         const avgPointDiameter = stripDotSizes.reduce((a, b) => a + b, 0) / stripDotSizes.length;
-        const defaultDotSize = defaultDotSizeScale * avgPointDiameter;
+        let defaultDotSize = defaultDotSizeScale * avgPointDiameter;
+        if (pixelDensityDefault) {
+            // Override default dot size if pixel density is close to 1 for this dense strip.
+            defaultDotSize = pixelDensityDefault;
+        }
 
         const normalizedScale = this.SCREEN_WIDTH / width;
 
@@ -959,7 +989,7 @@ class UiManager {
                 map: map,
                 min: min,
                 max: max,
-                diameter: jsonData.diameter || 1.0
+                diameter: jsonData.diameter
             };
 
 
