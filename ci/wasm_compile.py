@@ -244,9 +244,9 @@ def main() -> None:
         help="Launch a web server and open a browser after compilation",
     )
     parser.add_argument(
-        "--optimize",
+        "--debug",
         action="store_true",
-        help="Turns off debug flags and enables optimization, results in much smaller binary.",
+        help="Enables debug flags and disables optimization. Results in larger binary with debug info.",
     )
     args: argparse.Namespace = parser.parse_args()
 
@@ -256,7 +256,7 @@ def main() -> None:
             return
         if args.directory is None:
             parser.error("ERROR: directory is required unless --clean is specified")
-        debug_mode = not args.optimize
+        debug_mode = args.debug
         if args.build or not image_exists():
             # Check for and remove existing container before building
             remove_existing_container("fastled-wasm-compiler")
