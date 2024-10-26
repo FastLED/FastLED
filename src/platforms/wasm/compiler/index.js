@@ -539,6 +539,7 @@ class GraphicsManagerThreeJS {
         }
 
         let pixelDensityDefault = undefined;
+        let isDenseScreenMap = false;
         if (allPixelDensitiesUndefined) {
             // Okay no pixel density was set, so we will look at the data and see if the pixel density is close to 1.
             // If it is then someone is sending us a grid or a strip.
@@ -550,6 +551,7 @@ class GraphicsManagerThreeJS {
             if (pixelDensity > 0.9 && pixelDensity < 1.1) {
                 console.log("Pixel density is close to 1, assuming grid or strip");
                 pixelDensityDefault = 1;
+                isDenseScreenMap = true;
             }
         }
 
@@ -582,7 +584,15 @@ class GraphicsManagerThreeJS {
                     stripDiameter = defaultDotSize;
                 }
                 stripData.map.forEach(pos => {
-                    const geometry = new THREE.CircleGeometry(stripDiameter * this.LED_SCALE, this.SEGMENTS);
+                    let geometry;
+                    if (isDenseScreenMap) {
+                        const width = stripDiameter * this.LED_SCALE;
+                        const height = stripDiameter * this.LED_SCALE;
+                        geometry = new THREE.PlaneGeometry(width, height);
+                    } else {
+                        geometry = new THREE.CircleGeometry(stripDiameter * this.LED_SCALE, this.SEGMENTS);
+
+                    }
                     const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
                     const led = new THREE.Mesh(geometry, material);
 
