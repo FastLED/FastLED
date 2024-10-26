@@ -8,6 +8,9 @@ globalThis.loadFastLED = async function () {
     return null;
 };
 
+const FORCE_FAST_RENDERER = false;
+const FORCE_THREEJS_RENDERER = false;
+
 // Will be overridden during initialization.
 var print = function () { };
 
@@ -1174,8 +1177,13 @@ class UiManager {
        frameData.screenMap = screenMap;
         if (!graphicsManager) {
             const isDenseMap = isDenseGrid(frameData);
-            //graphicsManager = new GraphicsManagerThreeJS(canvasId, threeJsModules);
-            if (isDenseMap) {
+            if (FORCE_THREEJS_RENDERER) {
+                console.log("Creating Beautiful GraphicsManager with canvas ID (forced)", canvasId);
+                graphicsManager = new GraphicsManagerThreeJS(graphicsArgs);
+            } else if (FORCE_FAST_RENDERER) {
+                console.log("Creating Fast GraphicsManager with canvas ID (forced)", canvasId);
+                graphicsManager = new GraphicsManager(graphicsArgs);
+            } else if (isDenseMap) {
                 console.log("Creating Fast GraphicsManager with canvas ID", canvasId);
                 graphicsManager = new GraphicsManager(graphicsArgs);
             } else {
