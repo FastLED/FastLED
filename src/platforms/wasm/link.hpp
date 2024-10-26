@@ -7,5 +7,3 @@
 #endif
 
 #include "timer.hpp"
-#include "ui/link.hpp"
-#include "js.hpp"

@@ -97,6 +97,7 @@ RUN python /js/compile.py || echo "####### ERROR FAILED to run pre warm compiler
 
 #Clean up before the volume get's mapped in.
 RUN rm -rf /mapped
+RUN rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "/js/compile.py"]

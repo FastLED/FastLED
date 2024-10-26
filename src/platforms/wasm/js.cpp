@@ -1,4 +1,3 @@
-#pragma once
 
 #include "ui/ui_internal.h"
 #include <memory>
@@ -18,10 +17,15 @@
 #include "screenmap.h"
 #include "fixed_map.h"
 
+#include <emscripten.h>
+#include <emscripten/emscripten.h> // Include Emscripten headers
+#include <emscripten/html5.h>
+
+
 FASTLED_NAMESPACE_BEGIN
 
 
-inline void jsSetCanvasSize(const char* jsonString, size_t jsonSize) {
+EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(const char* jsonString, size_t jsonSize) {
     EM_ASM_({
         globalThis.FastLED_onStripUpdate = globalThis.FastLED_onStripUpdate || function(jsonStr) {
             console.log("Missing globalThis.FastLED_onStripUpdate(jsonStr) function");
@@ -32,7 +36,7 @@ inline void jsSetCanvasSize(const char* jsonString, size_t jsonSize) {
     }, jsonString, jsonSize);
 }
 
-inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap &screenmap) {
+EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(int cledcontoller_id, const ScreenMap &screenmap) {
     // TODO: ScreenMap::toJson() should be used here. Right now we just send
     // the screen map updates one at a time. While the ScreenMap::toJson() allows
     // bulk conversion and is tested. This is an ad-hoc json format for the FastLED.js
@@ -56,7 +60,7 @@ inline void jsSetCanvasSize(int cledcontoller_id, const ScreenMap &screenmap) {
     jsSetCanvasSize(jsonBuffer.c_str(), jsonBuffer.size());
 }
 
-inline void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {
+EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {
     struct Function {
         static bool isSquare(int num) {
             int root = sqrt(num);
@@ -107,7 +111,7 @@ inline void jsFillInMissingScreenMaps(ActiveStripData &active_strips) {
     }
 }
 
-inline void jsOnFrame(ActiveStripData& active_strips) {
+EMSCRIPTEN_KEEPALIVE void jsOnFrame(ActiveStripData& active_strips) {
     jsFillInMissingScreenMaps(active_strips);
     Str json_str = active_strips.infoJsonString();
     EM_ASM_({
@@ -143,7 +147,7 @@ inline void jsOnFrame(ActiveStripData& active_strips) {
     }, json_str.c_str());
 }
 
-inline void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
+EMSCRIPTEN_KEEPALIVE void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
     EM_ASM_({
         globalThis.FastLED_onStripAdded = globalThis.FastLED_onStripAdded || function() {
             console.log("Missing globalThis.FastLED_onStripAdded(id, length) function");
@@ -153,7 +157,7 @@ inline void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
     }, strip, num_leds);
 }
 
-inline void updateJs(const char* jsonStr) {
+EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
     printf("updateJs: %s\n", jsonStr);
     EM_ASM_({
             globalThis.FastLED_onUiElementsAdded = globalThis.FastLED_onUiElementsAdded || function(jsonData, updateFunc) {

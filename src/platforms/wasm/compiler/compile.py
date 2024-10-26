@@ -209,6 +209,8 @@ def main() -> int:
     print(f"Keep files flag: {args.keep_files}")
 
     try:
+        if JS_SRC.exists():
+            shutil.rmtree(JS_SRC)
         JS_SRC.mkdir(parents=True, exist_ok=True)
         src_dir = find_project_dir(MAPPED_DIR)
 
