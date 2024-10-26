@@ -89,5 +89,7 @@ env.Append(LINKFLAGS=wasmflags)
 # Pass flags to the other Project Dependencies (libraries)
 for lb in env.GetLibBuilders():
     lb.env.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib")
+    # Add whole-archive flag to ensure all objects are included
+    lb.env.Append(LINKFLAGS=["-Wl,--whole-archive"])
 
 
