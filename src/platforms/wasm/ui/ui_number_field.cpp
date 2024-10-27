@@ -1,7 +1,5 @@
 
-
-#ifndef UI_NUMBER_FIELD_HPP
-#define UI_NUMBER_FIELD_HPP
+#ifdef __EMSCRIPTEN__
 
 #include "namespace.h"
 #include "json.h"
@@ -66,4 +64,4 @@ jsNumberField::operator int() const {
 
 FASTLED_NAMESPACE_END
 
-#endif // UI_NUMBER_FIELD_HPP
+#endif // __EMSCRIPTEN__

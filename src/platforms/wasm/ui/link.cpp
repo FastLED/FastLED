@@ -3,5 +3,4 @@
 #ifdef __EMSCRIPTEN__
 #include "engine_events.hpp"
 #include "setup_and_loop.hpp"
-#include "ui_number_field.hpp"
 #endif
