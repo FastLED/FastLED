@@ -1,9 +1,13 @@
 import os
 
 DEBUG = 0
+USE_CCACHE = True
 
 if "DEBUG" in os.environ:
     DEBUG = 1
+
+if "NO_CCACHE" in os.environ:
+    USE_CCACHE = False
 
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
 # It seems easier to load the program as a pure JS file, so we will use asm.js
@@ -23,9 +27,12 @@ Import("env", "projenv")
 # SCons toolchain file for emscripten, and platformio platform for
 # WebAssembly, but this is easier for now
 
-projenv.Replace(CC="ccache emcc", CXX="ccache em++", LINK="ccache em++", AR="emar", RANLIB="emranlib")
+CC = "ccache emcc" if USE_CCACHE else "emcc"
+CXX = "ccache em++" if USE_CCACHE else "em++"
+LINK = "ccache em++" if USE_CCACHE else "em++"
 
-env.Replace(CC="ccache emcc", CXX="ccache em++", LINK="ccache em++", AR="emar", RANLIB="emranlib")
+projenv.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
+env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 
 # Todo: Investigate the following flags
 # -sSINGLE_FILE=1
@@ -91,7 +98,7 @@ env.Append(LINKFLAGS=wasmflags)
 
 # Pass flags to the other Project Dependencies (libraries)
 for lb in env.GetLibBuilders():
-    lb.env.Replace(CC="ccache emcc", CXX="ccache em++", LINK="ccache em++", AR="emar", RANLIB="emranlib")
+    lb.env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
     # Add whole-archive flag to ensure all objects are included
     lb.env.Append(LINKFLAGS=["-Wl,--whole-archive"])
 
