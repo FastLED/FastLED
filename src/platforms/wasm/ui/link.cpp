@@ -2,7 +2,6 @@
 
 #ifdef __EMSCRIPTEN__
 #include "slider.hpp"
-#include "ui_manager.hpp"
 #include "ui_canvas_size.hpp"
 #include "engine_events.hpp"
 #include "setup_and_loop.hpp"

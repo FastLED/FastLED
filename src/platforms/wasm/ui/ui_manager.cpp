@@ -1,32 +1,30 @@
-#pragma once
+#ifdef __EMSCRIPTEN__
 
+#include "ui_manager.h"
 #include "fixed_map.h"
 #include "json.h"
-#include "ui_manager.h"
 #include <emscripten.h>
 #include <sstream>
 #include <vector>
 
 FASTLED_NAMESPACE_BEGIN
 
-
-inline void jsUiManager::addComponent(WeakPtr<jsUiInternal> component) {
+void jsUiManager::addComponent(WeakPtr<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.insert(component);
     instance().mItemsAdded = true;
 }
 
-inline void
-jsUiManager::removeComponent(WeakPtr<jsUiInternal> component) {
+void jsUiManager::removeComponent(WeakPtr<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.erase(component);
 }
 
-inline jsUiManager &jsUiManager::instance() {
+jsUiManager &jsUiManager::instance() {
     return Singleton<jsUiManager>::instance();
 }
 
-inline std::vector<jsUiInternalPtr> jsUiManager::getComponents() {
+std::vector<jsUiInternalPtr> jsUiManager::getComponents() {
     std::vector<jsUiInternalPtr> components;
     {
         std::lock_guard<std::mutex> lock(mMutex);
@@ -44,7 +42,7 @@ inline std::vector<jsUiInternalPtr> jsUiManager::getComponents() {
     return components;
 }
 
-inline void jsUiManager::updateUiComponents(const char* jsonStr) {
+void jsUiManager::updateUiComponents(const char *jsonStr) {
     ArduinoJson::JsonDocument doc;
     ArduinoJson::DeserializationError error =
         ArduinoJson::deserializeJson(doc, jsonStr);
@@ -57,14 +55,14 @@ inline void jsUiManager::updateUiComponents(const char* jsonStr) {
     self.mHasPendingUpdate = true;
 }
 
-inline void
-jsUiManager::executeUiUpdates(const ArduinoJson::JsonDocument &doc) {
-    auto& self = instance();
+void jsUiManager::executeUiUpdates(const ArduinoJson::JsonDocument &doc) {
+    auto &self = instance();
     for (ArduinoJson::JsonPairConst kv :
          doc.as<ArduinoJson::JsonObjectConst>()) {
         int id = atoi(kv.key().c_str());
         // double loop to avoid copying the value
-        for (auto it = self.mComponents.begin(); it != self.mComponents.end();) {
+        for (auto it = self.mComponents.begin();
+             it != self.mComponents.end();) {
             if (auto component = it->lock()) {
                 ++it;
                 if (component->id() == id) {
@@ -77,9 +75,8 @@ jsUiManager::executeUiUpdates(const ArduinoJson::JsonDocument &doc) {
     }
 }
 
-inline void jsUiManager::toJson(ArduinoJson::JsonArray &json) {
-    std::vector<jsUiInternalPtr> components =
-        instance().getComponents();
+void jsUiManager::toJson(ArduinoJson::JsonArray &json) {
+    std::vector<jsUiInternalPtr> components = instance().getComponents();
     for (const auto &component : components) {
         ArduinoJson::JsonObject componentJson =
             json.add<ArduinoJson::JsonObject>();
@@ -97,3 +94,5 @@ EMSCRIPTEN_BINDINGS(js_interface) {
 }
 
 FASTLED_NAMESPACE_END
+
+#endif // __EMSCRIPTEN__
