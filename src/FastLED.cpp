@@ -3,13 +3,6 @@
 #include "singleton.h"
 #include "engine_events.h"
 
-#ifdef __EMSCRIPTEN__
-// Due to emscripten toolchain, the exports must live in an object
-// that that is guaranteed to be linked in. So we do it here.
-#include "platforms/wasm/link.hpp"
-#endif
-
-
 /// @file FastLED.cpp
 /// Central source file for FastLED, implements the CFastLED class/object
 

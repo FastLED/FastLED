@@ -37,20 +37,8 @@ then you can omit this -b arg and it should be pretty fast.
 
 The --open arg tells the command to open up a webbrowser once it finishes compiling.
 
-## About Exports...
-
-There seems to be a bug either in the emscripten clang compiler or our own compiler flags which
-will strip out referenced symbols in stand alone object files. Therefore the work around on this
-is to put all cpp code as a *.hpp files which are included as one using wasm/link.hpp. This is
-then included in the CFastLED.cpp translation unit and everything works out well.
-
 ## TODO List
 
-  * Creation of buttons / sliders and other ui elements.
-  * Multiple canvases to represent multi strips. Right now the client can only describe one
-    one canvas. This is probably enough right now.
-  * Strip orientations for rectangular screens. Right now we only support rectangular grids, but
-    in the future we should handle serpentine layouts.
   * Support for RGB order. Right now it just ignores whatever RGB order is set and assumes RGB.
   * Control of the `fx_engine` as a first class citizen through a JS or JSON api. The good thing about
     the latter is that JSON can be saved and then run on a real device.
