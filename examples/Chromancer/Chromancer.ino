@@ -104,8 +104,8 @@ float gyroX, gyroY, gyroZ;
 // We'll fire automatic pulses
 #define randomPulsesEnabled true // Fire random rainbow pulses from random nodes
 #define cubePulsesEnabled true   // Draw cubes at random nodes
-#define starburstPulsesEnabled true      // Draw starbursts
-#define simulatedBiometricsEnabled false // Simulate heartbeat and EDA ripples
+Checkbox starburstPulsesEnabled("Starburst Pulses", true);
+Checkbox simulatedBiometricsEnabled("Simulated Biometrics", false);
 
 #define autoPulseTimeout                                                       \
     5000 // If no heartbeat is received in this many ms, begin firing
@@ -115,7 +115,7 @@ unsigned long lastRandomPulse;
 byte lastAutoPulseNode = 255;
 
 byte numberOfAutoPulseTypes =
-    randomPulsesEnabled + cubePulsesEnabled + starburstPulsesEnabled;
+    randomPulsesEnabled + cubePulsesEnabled + int(starburstPulsesEnabled);
 byte currentAutoPulseType = 255;
 #define autoPulseChangeTime 30000
 unsigned long lastAutoPulseChange;
