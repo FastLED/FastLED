@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "platformio==6.1.16",
+    "docker",
     "python-dateutil",
     "ruff",
     "mypy",

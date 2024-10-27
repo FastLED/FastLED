@@ -10,25 +10,26 @@ Push instructions:
   3. docker tag fastled-wasm-compiler:latest niteris/fastled-wasm:latest
   4. docker push niteris/fastled-wasm:latest
 """
-import sys
+
+import os
 import subprocess
+import sys
 import time
 import webbrowser
-import os
 from pathlib import Path
 
 try:
-    import docker
+    import docker  # type: ignore
 except ImportError:
     print("Please install the 'docker' package by running 'pip install docker'.")
     sys.exit(1)
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_WASM_PROJECT_DIR = PROJECT_ROOT / "examples" / "wasm"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+EXAMPLE_WASM = PROJECT_ROOT / "examples" / "wasm"
 # Relative to the current driectory
-DEFAULT_WASM_PROJECT_DIR = DEFAULT_WASM_PROJECT_DIR.relative_to(Path.cwd())
-DEFAULT_WASM_PROJECT_DIR = str(DEFAULT_WASM_PROJECT_DIR)
+DEFAULT_WASM_PROJECT_DIR: str = str(EXAMPLE_WASM.relative_to(Path.cwd()))
+
 
 def is_docker_running():
     """Check if Docker is running by pinging the Docker daemon."""
@@ -40,6 +41,7 @@ def is_docker_running():
     except docker.errors.DockerException as e:
         print(f"Docker is not running: {str(e)}")
         return False
+
 
 def start_docker():
     """Attempt to start Docker Desktop (or the Docker daemon) automatically."""
@@ -68,21 +70,36 @@ def start_docker():
         print(f"Error starting Docker: {str(e)}")
     return False
 
+
 def ensure_image_exists():
     """Check if local image exists, pull from remote if not."""
     try:
         # Check if local image exists
-        result = subprocess.run(["docker", "image", "inspect", "fastled-wasm-compiler:latest"], 
-                              capture_output=True, check=False)
+        result = subprocess.run(
+            ["docker", "image", "inspect", "fastled-wasm-compiler:latest"],
+            capture_output=True,
+            check=False,
+        )
         if result.returncode != 0:
             print("Local image not found. Pulling from niteris/fastled-wasm...")
-            subprocess.run(["docker", "pull", "niteris/fastled-wasm:latest"], check=True)
-            subprocess.run(["docker", "tag", "niteris/fastled-wasm:latest", "fastled-wasm-compiler:latest"], check=True)
+            subprocess.run(
+                ["docker", "pull", "niteris/fastled-wasm:latest"], check=True
+            )
+            subprocess.run(
+                [
+                    "docker",
+                    "tag",
+                    "niteris/fastled-wasm:latest",
+                    "fastled-wasm-compiler:latest",
+                ],
+                check=True,
+            )
             print("Successfully pulled and tagged remote image.")
         return True
     except subprocess.CalledProcessError as e:
         print(f"Failed to ensure image exists: {e}")
         return False
+
 
 def container_exists(container_name):
     """Check if a container with the given name exists."""
@@ -90,11 +107,12 @@ def container_exists(container_name):
         result = subprocess.run(
             ["docker", "container", "inspect", container_name],
             capture_output=True,
-            check=False
+            check=False,
         )
         return result.returncode == 0
     except subprocess.CalledProcessError:
         return False
+
 
 def main():
     if not is_docker_running():
@@ -131,7 +149,7 @@ def main():
                 "docker",
                 "start",
                 "-a",  # Attach to container's output
-                container_name
+                container_name,
             ]
         else:
             # Create new container
@@ -139,42 +157,46 @@ def main():
                 "docker",
                 "run",
             ]
-        
+
         if not container_exists_flag:
             # Only add these flags for 'docker run'
             if sys.stdout.isatty():
                 docker_command.append("-it")
-            docker_command.extend([
-                "--name",
-                container_name,
-                "--platform",
-                "linux/amd64",
-                "-v",
-                f"{absolute_directory}:/mapped/{base_name}",
-                "fastled-wasm-compiler:latest"
-            ])
+            docker_command.extend(
+                [
+                    "--name",
+                    container_name,
+                    "--platform",
+                    "linux/amd64",
+                    "-v",
+                    f"{absolute_directory}:/mapped/{base_name}",
+                    "fastled-wasm-compiler:latest",
+                ]
+            )
 
         print(f"Running command: {' '.join(docker_command)}")
-        process = subprocess.Popen(docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        process = subprocess.Popen(
+            docker_command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
+        )
 
         # Stream the output
         for line in process.stdout:
-            print(line, end='')
+            print(line, end="")
 
         # Wait for the process to complete
         process.wait()
 
         print("\nContainer execution completed.")
-        
+
         # Start HTTP server in the fastled_js directory
         output_dir = os.path.join(absolute_directory, "fastled_js")
         if os.path.exists(output_dir):
             print(f"\nStarting HTTP server in {output_dir}")
             os.chdir(output_dir)
-            
+
             # Start Python's built-in HTTP server
             print("\nStarting HTTP server...")
-            webbrowser.open('http://localhost:8000')
+            webbrowser.open("http://localhost:8000")
             os.system("python -m http.server")
         else:
             print(f"\nOutput directory {output_dir} not found")
@@ -183,6 +205,7 @@ def main():
         print(f"Failed to run Docker container: {e}")
     except KeyboardInterrupt:
         print("\nOperation cancelled by user.")
+
 
 if __name__ == "__main__":
     main()
