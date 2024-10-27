@@ -1,4 +1,4 @@
-#pragma once
+
 
 #include <map>
 
@@ -50,7 +50,8 @@ private:
     }
 };
 
-void EngineListener::Init() {
+// Note: Having trouble getting this into a cpp file.
+inline void EngineListener::Init() {
     Singleton<EngineListener>::instance();
 }
 

@@ -9,7 +9,7 @@
 #include "namespace.h"
 #include "active_strip_data.h"
 #include "singleton.h"
-#include "engine_events.h"
+#include "ui/events.h"
 #include "strip_id_map.h"
 #include "crgb.h"
 #include "pixel_controller.h"

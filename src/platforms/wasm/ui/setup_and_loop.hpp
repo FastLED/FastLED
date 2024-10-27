@@ -7,6 +7,9 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 
+#include "events.h"
+#include "engine_events.h"
+
 
 extern void setup();
 extern void loop();
@@ -23,8 +26,6 @@ inline void setup_once() {
     g_setup_called = true;
     setup();
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
