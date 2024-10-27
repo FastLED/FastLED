@@ -11,7 +11,7 @@ https://github.com/FastLED/FastLED/commit/4444758ffaf853ba4f8deb973532548c9c1ee2
 Edit these files to update the version number
   * library.json 
   * library.properties 
-  * FastLED.h 
+  * src/FastLED.h 
   * docs/Doxyfile
 
 
