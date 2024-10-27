@@ -18,7 +18,7 @@ RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix t
 
 
 # Install PlatformIO
-RUN pip3 install platformio==6.1.16
+RUN pip3 install platformio==6.1.16 wormhole-tx
 
 # Create /container/bin directory and add symbolic links
 RUN mkdir -p /container/bin && \
