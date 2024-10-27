@@ -1,7 +1,8 @@
 
 
-FastLED 4.0.0
+FastLED 3.9.0
 =============
+* Beta 4.0.0 release
 * ESP32 RMT5 Driver Implemented.
   * Driver crashes on boot should now be solved.
   * Parallel AND async.
