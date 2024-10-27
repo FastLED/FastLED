@@ -16,6 +16,7 @@
 
 #include <FastLED.h>
 #include "fx/2d/noisepalette.hpp"
+#include "ui.h"
 
 #define LED_PIN 3
 #define BRIGHTNESS 96
@@ -24,7 +25,12 @@
 
 #define MATRIX_WIDTH 16
 #define MATRIX_HEIGHT 16
+
+#if __EMSCRIPTEN__
+#define GRID_SERPENTINE 0
+#else
 #define GRID_SERPENTINE 1
+#endif
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 
@@ -57,13 +63,14 @@
 // changing these values around to see how it affects the motion of the display.
 // The higher the value of scale, the more "zoomed out" the noise iwll be.  A
 // value of 1 will be so zoomed in, you'll mostly see solid colors.
-#define SCALE 20
+
+Slider SCALE("SCALE", 20, 1, 100, 1);
 
 // We're using the x/y dimensions to map to the x/y pixels on the matrix.  We'll
 // use the z-axis for "time".  speed determines how fast time moves forward. Try
 // 1 for a very slow moving effect, or 60 for something that ends up looking
 // like water.
-#define SPEED 30
+Slider SPEED("SPEED", 30, 1, 60, 1);
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
@@ -80,6 +87,8 @@ void setup() {
 }
 
 void loop() {
+    noisePalette->setSpeed(SPEED);
+    noisePalette->setScale(SCALE);
     EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
 
     noisePalette->draw(Fx::DrawContext(millis(), leds));

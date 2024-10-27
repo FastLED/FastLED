@@ -542,9 +542,14 @@ class GraphicsManagerThreeJS {
         canvas.style.maxHeight = targetHeight + 'px';
 
         this.scene = new THREE.Scene();
+        let left = -this.SCREEN_WIDTH / 2;
+        let up = this.SCREEN_HEIGHT / 2;
+        const margin = 1.1;  // Add a small margin around the screen
+        left *= margin;
+        up *= margin;
         this.camera = new THREE.OrthographicCamera(
-            -this.SCREEN_WIDTH / 2, this.SCREEN_WIDTH / 2,
-            this.SCREEN_HEIGHT / 2, -this.SCREEN_HEIGHT / 2,
+            left, -left,
+            up, -up,
             1, 1000
         );
         this.camera.position.z = 500;
