@@ -642,7 +642,6 @@ class GraphicsManagerThreeJS {
                 } else {
                     stripDiameter = defaultDotSize;
                 }
-                let toggle = false;
                 stripData.map.forEach(pos => {
                     let geometry;
                     if (isDenseScreenMap) {
@@ -659,8 +658,7 @@ class GraphicsManagerThreeJS {
                     // Position LED according to map, normalized to screen coordinates
                     const x = calcXPosition(pos[0]);
                     const y = calcYPosition(pos[1]);
-                    led.position.set(x, y, toggle ? 500: 0);
-                    toggle = !toggle;
+                    led.position.set(x, y, 500);
 
                     this.scene.add(led);
                     this.leds.push(led);
