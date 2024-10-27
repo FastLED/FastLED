@@ -18,14 +18,7 @@ FastLED 3.9.0
   * If for some reason the RMT5 driver doesn't work for you then use the following define `FASTLED_RMT5=0` to get back the old behavior.
 * Improved color mixing algorithm, global brightness, and color scaling are now separate for non-AVR platforms. This only affects chipsets that have higher than RGB8 output, aka APA102, and clones
   right now.
-  * APA102 and APA102HD color mixing algorithms have been rewritten to exploit this separation and now feature drastically improved color resolution across global brightness scales.
-    * APA102-HD mode now has higher color resolution by using the color adjustment scale separation
-    from the global brightness scale. These two are now mixed together during pixel generation
-    instead of using the premixed color state. A new bit-stealing algorithm boosts the global brightness
-    factor by stealing bits from the 5-bit driver brightness and transferring it to the global brightness.
-    * Non-Apa102-HD mode has drastically improved its resolution integrity with respect to global brightness. In the 3.7.X series, the LED color would change drastically as the color values were denormalized by the bottom end of the global brightness scale. Now the colors are stable throughout the global brightness value.
-    As a result, you no longer have to force global brightness on for the APA102 as it's always on by default. The only downside is that the global brightness for the APA102 chipset is now 5-bit instead of
-    8-bit - there is room for splitting the brightness factor between the driver brightness and the color scale, but it seems not that important at this point.
+  * APA102 and APA102HD now perform their own color mixing in psuedo 13 bit space.
     * If you don't like this behavior you can always go back by using setting `FASTLED_HD_COLOR_MIXING=0`.
 * Binary size
   * Avr platforms now use less memory
