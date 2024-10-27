@@ -9,7 +9,7 @@ COPY --from=emscripten_base /emsdk /emsdk
 # Install required tools to run Emscripten SDK
 RUN echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
 
-RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build && \
+RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build ccache && \
     dnf clean all
 
 #RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build clang lld && \
@@ -27,6 +27,8 @@ RUN mkdir -p /container/bin && \
 
 # Add Python and Emscripten to PATH
 ENV PATH="/container/bin:/usr/local/bin:/usr/bin:/emsdk:/emsdk/upstream/emscripten:${PATH}"
+ENV CCACHE_DIR=/ccache
+ENV CCACHE_MAXSIZE=1G
 
 # Create a custom print script
 RUN echo '#!/bin/sh' > /usr/bin/print && \

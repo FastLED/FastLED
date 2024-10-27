@@ -23,9 +23,9 @@ Import("env", "projenv")
 # SCons toolchain file for emscripten, and platformio platform for
 # WebAssembly, but this is easier for now
 
-projenv.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib")
+projenv.Replace(CC="ccache emcc", CXX="ccache em++", LINK="ccache em++", AR="emar", RANLIB="emranlib")
 
-env.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib")
+env.Replace(CC="ccache emcc", CXX="ccache em++", LINK="ccache em++", AR="emar", RANLIB="emranlib")
 
 # Todo: Investigate the following flags
 # -sSINGLE_FILE=1
@@ -91,7 +91,7 @@ env.Append(LINKFLAGS=wasmflags)
 
 # Pass flags to the other Project Dependencies (libraries)
 for lb in env.GetLibBuilders():
-    lb.env.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib")
+    lb.env.Replace(CC="ccache emcc", CXX="ccache em++", LINK="ccache em++", AR="emar", RANLIB="emranlib")
     # Add whole-archive flag to ensure all objects are included
     lb.env.Append(LINKFLAGS=["-Wl,--whole-archive"])
 
