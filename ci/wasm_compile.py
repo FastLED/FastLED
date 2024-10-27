@@ -253,6 +253,11 @@ def main() -> None:
         help="Launch a web server and open a browser after compilation",
     )
     parser.add_argument(
+        "--no-open",
+        action="store_true",
+        help="Skip launching a web server and opening a browser",
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Enables debug flags and disables optimization. Results in larger binary with debug info.",
@@ -260,6 +265,8 @@ def main() -> None:
     args: argparse.Namespace = parser.parse_args()
     if args.no_build:
         args.build = False
+    if args.no_open:
+        args.open = False
 
     try:
         if args.clean:
@@ -318,12 +325,7 @@ def run_web_server(directory: str) -> None:
         cwd=directory,
         # creationflags=CREATE_NEW_CONSOLE | DETACHED_PROCESS
     )
-
-    # import time
-    # time.sleep(3)  # Give the server time to start
-    # webbrowser.open(f"http://localhost:{port}")
     while True:
-
         time.sleep(1)
 
 

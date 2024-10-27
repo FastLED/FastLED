@@ -1,9 +1,4 @@
 #!/bin/bash
 echo "Compiles sketch for wasm"
 build_flag="-b"
-#if [[ "$*" == *"--no-build"* ]]; then
-#    build_flag=""
-#fi
-# remove --no-build from the arguments
-#set -- "${@/--no-build/}"
 uv run ci/wasm_compile.py $build_flag --open "$@"
