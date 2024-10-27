@@ -71,14 +71,14 @@ XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
 NoisePalette noisePalette = NoisePalette(xyMap);
 
 Slider brightness("Brightness", 255, 0, 255);
-Slider speed("Speed", 15, 1, 50);
-Checkbox isOff("Set Black", false);
-Checkbox changePallete("Auto Next", true);
-Slider changePalletTime("Change Palette Time", 5, 1, 100);
-Slider scale( "Scale", 20, 1, 100);
-Button changePalette("Next Palette");
-Button changeFx("Next Fx");
-NumberField fxIndex("Fx index", 0, 0, NUM_ANIMATIONS);
+Checkbox isOff("Off", false);
+Slider speed("Noise - Speed", 15, 1, 50);
+Checkbox changePallete("Noise - Auto Palette", true);
+Slider changePalletTime("Noise - Time until next random Palette", 5, 1, 100);
+Slider scale( "Noise - Scale", 20, 1, 100);
+Button changePalette("Noise - Next Palette");
+Button changeFx("Switch between Noise & Animartrix");
+NumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS);
 
 Animartrix animartrix(xyMap, POLAR_WAVES);
 FxEngine fxEngine(NUM_LEDS);
