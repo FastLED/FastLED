@@ -8,10 +8,10 @@ if "DEBUG" in os.environ:
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
 # It seems easier to load the program as a pure JS file, so we will use asm.js
 # right now as a test.
-USE_WASM = 1
+USE_WASM = 2
 
 if DEBUG:
-    USE_WASM=2
+    USE_WASM=1
 
 Import("env", "projenv")
 
@@ -26,6 +26,9 @@ Import("env", "projenv")
 projenv.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib")
 
 env.Replace(CC="emcc", CXX="em++", LINK="em++", AR="emar", RANLIB="emranlib")
+
+# Todo: Investigate the following flags
+# -sSINGLE_FILE=1
 
 wasmflags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
