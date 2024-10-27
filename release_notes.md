@@ -28,7 +28,8 @@ FastLED 3.9.0
     8-bit - there is room for splitting the brightness factor between the driver brightness and the color scale, but it seems not that important at this point.
     * If you don't like this behavior you can always go back by using setting `FASTLED_HD_COLOR_MIXING=0`.
 * Binary size
-  * You might expect that because of the color mixing feature, this would mean less memory on AVR platforms. However, through profile-guided optimization, this increase was offset for a total *decrease* of 200 bytes in comparison to 3.7.8:
+  * Avr platforms now use less memory
+  * 200 bytes in comparison to 3.7.8:
     * 3.7.8: attiny85 size was 9447 (limit is 9500 before the builder triggers a failure)
     * 3.8.0: attiny85 size is now 9296
     * This is only true for the WS2812 chipset. The APA102 chipset consumes significantly more memory.
@@ -37,6 +38,8 @@ FastLED 3.9.0
   * If you need a working timer value on AVR that increases via an ISR you can do so by defining `FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL=1`
 * Board support
   * nordicnrf52_dk now supported and tested (thanks https://github.com/paulhayes!)
+* Some unannounced features.
+* Happy coding!
 
 
 FastLED 3.8.0
