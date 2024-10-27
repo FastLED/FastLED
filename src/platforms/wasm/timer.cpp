@@ -1,4 +1,4 @@
-#pragma once
+#ifdef __EMSCRIPTEN__
 
 #include <emscripten.h>
 #include <stdint.h>
@@ -23,3 +23,5 @@ extern "C" {
         std::this_thread::sleep_for(std::chrono::milliseconds(ms));
     }
 }
+
+#endif  // __EMSCRIPTEN__
