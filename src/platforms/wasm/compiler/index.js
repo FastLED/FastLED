@@ -542,17 +542,14 @@ class GraphicsManagerThreeJS {
         canvas.style.maxHeight = targetHeight + 'px';
 
         this.scene = new THREE.Scene();
-        let left = -this.SCREEN_WIDTH / 2;
-        let up = this.SCREEN_HEIGHT / 2;
-        const margin = 1.1;  // Add a small margin around the screen
-        left *= margin;
-        up *= margin;
-        this.camera = new THREE.OrthographicCamera(
-            left, -left,
-            up, -up,
-            1, 1000
-        );
-        this.camera.position.z = 500;
+        const margin = 1.05;  // Add a small margin around the screen
+        // Use perspective camera with narrower FOV for less distortion
+        const fov = 45;
+        const aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
+        this.camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 2000);
+        // Position camera closer to fill more of the screen
+        this.camera.position.z = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * margin;
+        this.camera.position.y = 0;
 
         this.renderer = new THREE.WebGLRenderer({
             canvas: canvas,
@@ -645,6 +642,7 @@ class GraphicsManagerThreeJS {
                 } else {
                     stripDiameter = defaultDotSize;
                 }
+                let toggle = false;
                 stripData.map.forEach(pos => {
                     let geometry;
                     if (isDenseScreenMap) {
@@ -661,7 +659,8 @@ class GraphicsManagerThreeJS {
                     // Position LED according to map, normalized to screen coordinates
                     const x = calcXPosition(pos[0]);
                     const y = calcYPosition(pos[1]);
-                    led.position.set(x, y, 500);
+                    led.position.set(x, y, toggle ? 500: 0);
+                    toggle = !toggle;
 
                     this.scene.add(led);
                     this.leds.push(led);
@@ -753,8 +752,13 @@ class GraphicsManagerThreeJS {
             // Convert to normalized coordinates
             const normalizedX = (x / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH / 2;
             const normalizedY = (y / height) * this.SCREEN_HEIGHT - this.SCREEN_HEIGHT / 2;
-
-            led.position.set(normalizedX, normalizedY, 0);
+            
+            // Calculate z position based on distance from center for subtle depth
+            const distFromCenter = Math.sqrt(Math.pow(normalizedX, 2) + Math.pow(normalizedY, 2));
+            const maxDist = Math.sqrt(Math.pow(this.SCREEN_WIDTH/2, 2) + Math.pow(this.SCREEN_HEIGHT/2, 2));
+            const z = (distFromCenter / maxDist) * 100;  // Max depth of 100 units
+            
+            led.position.set(normalizedX, normalizedY, z);
             led.material.color.setRGB(ledData.r, ledData.g, ledData.b);
             ledIndex++;
         }
