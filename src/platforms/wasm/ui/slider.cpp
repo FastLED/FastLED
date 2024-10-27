@@ -1,3 +1,5 @@
+#ifdef __EMSCRIPTEN__
+
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
 #include <sstream>
@@ -81,3 +83,5 @@ jsSlider::operator int() const {
 }
 
 FASTLED_NAMESPACE_END
+
+#endif  // __EMSCRIPTEN__
