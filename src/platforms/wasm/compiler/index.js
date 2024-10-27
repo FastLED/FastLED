@@ -544,6 +544,8 @@ class GraphicsManagerThreeJS {
         this.scene = new THREE.Scene();
         const margin = 1.05;  // Add a small margin around the screen
         // Use perspective camera with narrower FOV for less distortion
+        // BIG TODO: This camera setup does not respond to z-position changes. Eventually
+        // we we want to have a camera that shows leds closer to the screen as larger.
         const fov = 45;
         const aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
         this.camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 2000);
