@@ -1,4 +1,7 @@
 
+#ifdef __EMSCRIPTEN__
+
+
 #include "ptr.h"
 #include "fs.h"
 #include <map>
@@ -7,6 +10,7 @@
 #include "str.h"
 #include "namespace.h"
 #include "warn.h"
+#include <mutex>
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -55,3 +59,5 @@ void jsInjectFile(const char* path, const uint8_t* data, size_t len) {
 }
 
 FASTLED_NAMESPACE_END
+
+#endif  // __EMSCRIPTEN__
