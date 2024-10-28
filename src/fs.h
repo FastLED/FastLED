@@ -12,6 +12,23 @@ FASTLED_NAMESPACE_BEGIN
 DECLARE_SMART_PTR(FsImpl);
 DECLARE_SMART_PTR(FileHandle);
 
+
+class Fs {
+  public:
+    Fs(int cs_pin);
+    Fs(FsImplPtr fs);
+    bool begin(); // Begin using the filesystem.
+    void end(); // Optional - end use of the file system.
+    void close(FileHandlePtr file);
+    FileHandlePtr openRead(const char *path);
+    
+  private:
+    FsImplPtr mFs;  // System dependent filesystem.
+};
+
+
+/// Implementation details
+
 // Platforms eed to implement this to create an instance of the filesystem.
 FsImplPtr make_filesystem(int cs_pin);
 
@@ -22,7 +39,7 @@ class FileHandle: public Referent {
   public:
     virtual ~FileHandle() {}
     virtual bool available() const = 0;
-    virtual size_t bytesLeft() const { return size() - pos(); }
+    virtual size_t bytesLeft() const;
     virtual size_t size() const = 0;
     virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
     virtual size_t pos() const = 0;
@@ -53,17 +70,5 @@ class FsImpl : public Referent {
 };
 
 
-class Fs {
-  public:
-    Fs(int cs_pin) : mFs(make_filesystem(cs_pin)) {}
-    Fs(FsImplPtr fs) : mFs(fs) {}
-    bool begin();
-    void end() { mFs->end(); }
-    void close(FileHandlePtr file) { mFs->close(file); }
-    FileHandlePtr openRead(const char *path) { return mFs->openRead(path); }
-    
-  private:
-    Ptr<FsImpl> mFs;
-};
 
 FASTLED_NAMESPACE_END

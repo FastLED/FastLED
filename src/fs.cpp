@@ -15,4 +15,24 @@ bool Fs::begin() {
   return true;
 }
 
+size_t FileHandle::bytesLeft() const {
+    return size() - pos();
+}
+
+Fs::Fs(int cs_pin) : mFs(make_filesystem(cs_pin)) {}
+
+Fs::Fs(FsImplPtr fs) : mFs(fs) {}
+
+void Fs::end() {
+    mFs->end();
+}
+
+void Fs::close(FileHandlePtr file) {
+    mFs->close(file);
+}
+
+FileHandlePtr Fs::openRead(const char *path) {
+    return mFs->openRead(path);
+}
+
 FASTLED_NAMESPACE_END
