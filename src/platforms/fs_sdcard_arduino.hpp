@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/storage/fs.h"
+#include "fs.h"
 
 #include <SPI.h>
 #ifdef USE_SDFAT

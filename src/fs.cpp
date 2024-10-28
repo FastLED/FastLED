@@ -1,5 +1,14 @@
 #include "fs.h"
 
+
+#ifdef __EMSCRIPTEN__
+#include "platforms/wasm/fs_wasm.h"
+#elif __has_include(<SD.h>)
+#include "platforms/fs_sdcard_arduino.hpp"
+#endif
+
+
+
 FASTLED_NAMESPACE_BEGIN
 
 // Override this if you want to supply a file system for your platform.
