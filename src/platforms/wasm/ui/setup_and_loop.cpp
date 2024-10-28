@@ -27,8 +27,22 @@ inline void setup_once() {
     setup();
 }
 
+
+
+
 EMSCRIPTEN_KEEPALIVE extern "C" void fastled_inject_files(const char* jsonStr) {
     printf("fastled_inject_files: %s\n", jsonStr);
+    ArduinoJson::JsonDocument doc;
+    ArduinoJson::deserializeJson(doc, jsonStr);
+    for (auto file_infos : doc.as<ArduinoJson::JsonArray>()) {
+        size_t len = file_infos["size"].as<size_t>();
+        //Str path = file_infos["path"].as<Str>();
+        //std::string path = file_infos["path"].as<std::string>();
+        const char* path = file_infos["path"].as<const char*>();
+        printf("Injecting file %s with size %d\n", path, int(len));
+
+        //jsInjectFile(path, path.c_str(), len);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////

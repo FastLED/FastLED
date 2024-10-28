@@ -292,15 +292,16 @@ def main() -> int:
                 )
             optional_input_data_dir = src_dir / "data"
             output_data_dir = fastled_js_dir / optional_input_data_dir.name
-            if not optional_input_data_dir.exists():
-                optional_input_data_dir.mkdir(parents=True, exist_ok=True)
-            # remove all files in data dir
-            for _file in output_data_dir.iterdir():
-                _file.unlink()
+
             # copy all files from data dir
-            for _file in output_data_dir.iterdir():
-                print(f"Copying {_file.name} -> {output_data_dir}")
-                shutil.copy2(_file, output_data_dir / _file.name)
+            if output_data_dir.exists():
+                for _file in output_data_dir.iterdir():
+                    _file.unlink()
+            if optional_input_data_dir.exists():
+                output_data_dir.mkdir(parents=True, exist_ok=True)
+                for _file in optional_input_data_dir.iterdir():
+                    print(f"Copying {_file.name} -> {output_data_dir}")
+                    shutil.copy2(_file, output_data_dir / _file.name)
             # now write a file to indicate the data dir is present
             # this will be a json dict with the file names
             print("Writing manifest files.json")
