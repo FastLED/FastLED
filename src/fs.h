@@ -12,14 +12,15 @@ FASTLED_NAMESPACE_BEGIN
 DECLARE_SMART_PTR(FsImpl);
 DECLARE_SMART_PTR(FileHandle);
 
-
+// Instantiate this with a pin number to create a filesystem.
 class Fs {
   public:
-    Fs(int cs_pin);
-    Fs(FsImplPtr fs);
+    Fs(int cs_pin);  // Initializes this as a spi sd card file system.
+    Fs(FsImplPtr fs);  // Use this to provide a custom filesystem.
     bool begin(); // Begin using the filesystem.
     void end(); // Optional - end use of the file system.
     void close(FileHandlePtr file);
+    // Null if file could not be opened.
     FileHandlePtr openRead(const char *path);
     
   private:
