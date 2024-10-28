@@ -22,7 +22,7 @@ bool jsInjectFile(const char *path, const uint8_t *data, size_t len);
 bool jsDeclareFile(const char* path, size_t len);
 
 // After a file is declared, it can be appended with more data.
-bool jsAppendFile(const char *path, const uint8_t *data, size_t len);
+void jsAppendFile(const char *path, const uint8_t *data, size_t len);
 
 
 }  // extern "C"

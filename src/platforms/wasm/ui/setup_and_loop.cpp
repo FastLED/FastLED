@@ -9,6 +9,7 @@
 
 #include "events.h"
 #include "engine_events.h"
+#include "platforms/wasm/fs_wasm.h"
 
 
 extern void setup();
@@ -42,7 +43,17 @@ EMSCRIPTEN_KEEPALIVE extern "C" void fastled_inject_files(std::string jsonStr) {
     }
 
     for (auto file : files_array) {
-        printf("would have processed file\n");
+        auto size_obj = file["size"];
+        if (size_obj.isNull()) {
+            continue;
+        }
+        auto size = size_obj.as<int>();
+        auto path_obj = file["path"];
+        if (path_obj.isNull()) {
+            continue;
+        }
+        printf("Declaring file %s with size %d. These will become available as File system paths within the app.\n", path_obj.as<const char*>(), size);
+        jsDeclareFile(path_obj.as<const char*>(), size);
     }
 }
 
