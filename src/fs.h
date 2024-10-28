@@ -17,11 +17,11 @@ class Fs {
   public:
     Fs(int cs_pin);  // Initializes this as a spi sd card file system.
     Fs(FsImplPtr fs);  // Use this to provide a custom filesystem.
-    bool begin(); // Begin using the filesystem.
-    void end(); // Optional - end use of the file system.
+    bool begin(); // Signal to begin using the filesystem resource.
+    void end(); // Signal to end use of the file system.
+    
+    FileHandlePtr openRead(const char *path);  // Null if file could not be opened.
     void close(FileHandlePtr file);
-    // Null if file could not be opened.
-    FileHandlePtr openRead(const char *path);
     
   private:
     FsImplPtr mFs;  // System dependent filesystem.
