@@ -1,6 +1,6 @@
 
 #include "ptr.h"
-#include "fx/storage/fs.h"
+#include "fs.h"
 
 #include "namespace.h"
 
