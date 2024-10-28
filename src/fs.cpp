@@ -4,7 +4,8 @@
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/fs_wasm.h"
 #elif __has_include(<SD.h>)
-#include "platforms/fs_sdcard_arduino.hpp"
+// work in progress.
+//#include "platforms/fs_sdcard_arduino.hpp"
 #endif
 
 
