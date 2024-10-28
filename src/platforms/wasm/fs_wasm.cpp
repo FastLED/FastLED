@@ -13,6 +13,8 @@
 #include "warn.h"
 #include <mutex>
 
+#include <emscripten.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -30,20 +32,6 @@ namespace {
     std::mutex gFileMapMutex;
 }  // namespace
 
-void jsInjectFile(const char* path, const uint8_t* data, size_t len) {
-    //gFileMap[Str(path)] = std::vector<uint8_t>(data, data + len);
-    // lock guard
-    Str path_str(path);
-    auto new_data = std::vector<uint8_t>(data, data + len);
-    // Lock may not be necessary.
-    std::lock_guard<std::mutex> lock(gFileMapMutex);
-    auto it = gFileMap.find(path_str);
-    if (it != gFileMap.end()) {
-        FASTLED_WARN("File can only be injected once.");
-    } else {
-        gFileMap.insert(std::make_pair(path_str, new_data));
-    }
-}
 
 
 class WasmFileHandle : public FileHandle {
@@ -116,7 +104,26 @@ FsImplPtr make_filesystem(int cs_pin) {
     return FsImplWasmPtr::New();
 }
 
-
 FASTLED_NAMESPACE_END
+
+extern "C" {
+
+EMSCRIPTEN_KEEPALIVE void jsInjectFile(const char* path, const uint8_t* data, size_t len) {
+    //gFileMap[Str(path)] = std::vector<uint8_t>(data, data + len);
+    // lock guard
+    Str path_str(path);
+    auto new_data = std::vector<uint8_t>(data, data + len);
+    // Lock may not be necessary.
+    std::lock_guard<std::mutex> lock(gFileMapMutex);
+    auto it = gFileMap.find(path_str);
+    if (it != gFileMap.end()) {
+        FASTLED_WARN("File can only be injected once.");
+    } else {
+        gFileMap.insert(std::make_pair(path_str, new_data));
+    }
+}
+
+}
+
 
 #endif  // __EMSCRIPTEN__
