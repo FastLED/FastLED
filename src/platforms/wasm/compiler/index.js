@@ -1208,20 +1208,12 @@ class UiManager {
                 const n = moduleInstance.lengthBytesUTF8();
                 const nameDataArray = new Uint8Array(n);
                 stringToUTF8(filepath, nameDataArray, n);
-
-                //var buf = Module._malloc(myTypedArray.length*myTypedArray.BYTES_PER_ELEMENT);
                 moduleInstance.HEAPU8.set(fileDataArray, ptr);
                 moduleInstance.HEAPU8.set(nameDataArray, ptrName);
                 moduleInstance.ccall('jsAppendFile', 'number', ['number', 'number', 'number'], [ptrName, ptr, bytes]);
                 moduleInstance._free(ptr);
                 moduleInstance._free(ptrName);
-
-                //moduleInstance.HEAPU8.set(fileDataArray, ptr);
-                //moduleInstance.jsAppendFile(file.path, ptr, bytes);
-                //moduleInstance._free(ptr);
             }
-            //const fileDataArray = new Uint8Array(fileData);
-            //moduleInstance._fastled_inject_data(fileDataArray);
         };
 
         fetchAllFiles(filesJson);
