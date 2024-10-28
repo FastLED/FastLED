@@ -57,13 +57,7 @@ class Fs {
   public:
     Fs(int cs_pin) : mFs(make_filesystem(cs_pin)) {}
     Fs(FsImplPtr fs) : mFs(fs) {}
-    bool begin() {
-      if (!mFs) {
-        return false;
-      }
-      mFs->begin();
-      return true;
-    }
+    bool begin();
     void end() { mFs->end(); }
     void close(FileHandlePtr file) { mFs->close(file); }
     FileHandlePtr openRead(const char *path) { return mFs->openRead(path); }
