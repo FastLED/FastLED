@@ -1,4 +1,6 @@
-FROM emscripten/emsdk:3.1.70 AS emscripten_base
+ARG PLATFORM_TAG=""
+
+FROM emscripten/emsdk:3.1.70${PLATFORM_TAG} AS emscripten_base
 
 # Target base image
 FROM fedora

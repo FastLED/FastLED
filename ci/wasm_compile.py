@@ -8,7 +8,10 @@ from typing import List
 
 from ci.paths import PROJECT_ROOT
 
-IMAGE_NAME = "fastled-wasm-compiler"
+IS_ARM: bool = "arm" in os.uname().machine
+PLATFORM_TAG: str = "-arm64" if IS_ARM else ""
+
+IMAGE_NAME = f"fastled-wasm-compiler{PLATFORM_TAG}"
 
 HERE: Path = Path(__file__).parent
 DOCKER_FILE: Path = (
@@ -138,13 +141,13 @@ def build_image(debug: bool = True) -> None:
         cmd_list: List[str] = [
             "docker",
             "build",
-            "--platform",
-            "linux/amd64",
             "-t",
             IMAGE_NAME,
         ]
         if debug:
             cmd_list.extend(["--build-arg", "DEBUG=1"])
+        if IS_ARM:
+            cmd_list.extend(["--build-arg", f"PLATFORM_TAG={PLATFORM_TAG}"])
         cmd_list.extend(
             [
                 "-f",
@@ -187,8 +190,6 @@ def run_container(directory: str, interactive: bool, debug: bool = False) -> Non
             "run",
             "--name",
             IMAGE_NAME,
-            "--platform",
-            "linux/amd64",
             "-v",
             f"{absolute_directory}:/mapped/{base_name}",
         ]
