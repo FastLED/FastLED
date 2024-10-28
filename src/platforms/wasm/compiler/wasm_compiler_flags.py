@@ -42,7 +42,7 @@ env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 wasmflags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
     "-DFASTLED_USE_PROGMEM=0",
-    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS']",
+    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']",
     "-sALLOW_MEMORY_GROWTH=0",
     "-Oz",
     #"-sEXPORT_ES6=1",
@@ -51,7 +51,6 @@ wasmflags = [
     "-DUSE_OFFSET_CONVERTER=0",
     "-sINITIAL_MEMORY=134217728",
     "--no-entry",
-    "--embed-file ./data",
     "-s",
     # Enable C++17 with GNU extensions.
     "-std=gnu++17",

@@ -11,6 +11,8 @@
 
 
 import argparse
+import hashlib
+import json
 import os
 import re
 import shutil
@@ -203,6 +205,14 @@ def cleanup(args: argparse.Namespace, js_src: Path) -> None:
         print("Keeping temporary source files")
 
 
+def hash_file(file_path: Path) -> str:
+    hasher = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
 def main() -> int:
     print("Starting FastLED WASM compilation script...")
     args = parse_args()
@@ -280,7 +290,34 @@ def main() -> int:
                 shutil.copy2(
                     fastled_js_symbols, fastled_js_dir / fastled_js_symbols.name
                 )
-
+            optional_input_data_dir = src_dir / "data"
+            output_data_dir = fastled_js_dir / optional_input_data_dir.name
+            if not optional_input_data_dir.exists():
+                optional_input_data_dir.mkdir(parents=True, exist_ok=True)
+            # remove all files in data dir
+            for _file in output_data_dir.iterdir():
+                _file.unlink()
+            # copy all files from data dir
+            for _file in output_data_dir.iterdir():
+                print(f"Copying {_file.name} -> {output_data_dir}")
+                shutil.copy2(_file, output_data_dir / _file.name)
+            # now write a file to indicate the data dir is present
+            # this will be a json dict with the file names
+            print("Writing manifest files.json")
+            manifest: list[dict] = []
+            for _file in optional_input_data_dir.iterdir():
+                hash = hash_file(_file)
+                manifest.append(
+                    {
+                        "name": _file.name,
+                        "path": f"data/{_file.name}",
+                        "size": _file.stat().st_size,
+                        "hash": hash,
+                    }
+                )
+            manifest_json_str = json.dumps(manifest, indent=2, sort_keys=True)
+            with open(fastled_js_dir / "files.json", "w") as f:
+                f.write(manifest_json_str)
         cleanup(args, JS_SRC)
 
         print("Compilation process completed successfully")

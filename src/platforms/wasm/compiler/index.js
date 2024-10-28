@@ -1160,8 +1160,31 @@ class UiManager {
     };
 
     // Function to call the setup and loop functions
-    function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance) {
+    function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
         console.log("Calling setup function...");
+  
+        /*
+        const trimmedFilesJson = filesJson.map(file => {
+            return {
+                path: file.path,
+            };
+        });
+        const options = {
+            files: trimmedFilesJson,
+            frameRate: frame_rate,
+        };
+        // convert to cstr
+        const jsonStr = JSON.stringify(options);
+        const jsonPtr = moduleInstance._malloc(jsonStr.length + 1);
+        const cStr = moduleInstance.stringToUTF8(jsonStr, jsonPtr, jsonStr.length + 1);
+
+        try {
+            extern_setup(cStr);
+        } catch (error) {
+            console.error("Error calling setup function:", error);
+        }
+        moduleInstance._free(jsonPtr);
+        */
         extern_setup();
 
         console.log("Starting loop...");
@@ -1216,21 +1239,37 @@ class UiManager {
     // Ensure we wait for the module to load
     const onModuleLoaded = async (fastLedLoader) => {
         // Unpack the module functions and send them to the runFastLED function
-        function __runFastLED(moduleInstance, frameRate) {
+
+        const fetchFilePromise = async (fetchFilePath) => {
+            const response = await fetch(fetchFilePath);
+            const data = await response.json();
+            return data;
+        };
+        const filesJsonPromise = fetchFilePromise("files.json");
+        function __runFastLED(moduleInstance, frameRate, filesJson) {
             const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
             if (!exports_exist) {
                 console.error("FastLED setup or loop functions are not available.");
                 return;
             }
+
             return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance);
         }
 
         try {
             if (typeof fastLedLoader === 'function') {
                 // Load the module
-                fastLedLoader().then(instance => {
+                fastLedLoader().then(async (instance) => {
                     console.log("Module loaded, running FastLED...");
-                    __runFastLED(instance, frameRate);
+                    let filesJson = null;
+                    try {
+                        filesJson = await filesJsonPromise;
+                        console.log("Files JSON:", filesJson);
+                    } catch (error) {
+                        console.error("Error fetching files.json:", error);
+                        filesJson = {};
+                    }
+                    __runFastLED(instance, frameRate, filesJson);
                 }).catch(err => {
                     console.error("Error loading fastled as a module:", err);
                 });
