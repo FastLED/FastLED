@@ -1167,6 +1167,7 @@ class UiManager {
         const trimmedFilesJson = filesJson.map(file => {
             return {
                 path: file.path,
+                size: file.size,
             };
         });
         const options = {
