@@ -1177,6 +1177,28 @@ class UiManager {
         moduleInstance._fastled_inject_files(jsonStr);
         extern_setup();
 
+            /*
+        // Now launch a streaming fetch for all the files that are in the files.json
+        const fetchFilePromise = async (fetchFilePath) => {
+            const response = await fetch(fetchFilePath);
+            const data = await response.arrayBuffer();
+            console.log("Fetched file:", fetchFilePath, "size:", data.byteLength);
+            return data;
+        };
+
+        const fetchAllFiles = async (filesJson) => {
+            const fetchPromises = filesJson.map(async file => {
+                return fetchFilePromise(file.path);
+            });
+            const fileData = await Promise.all(fetchPromises);
+            console.log("All files fetched, sending to FastLED module");
+            //const fileDataArray = new Uint8Array(fileData);
+            //moduleInstance._fastled_inject_data(fileDataArray);
+        };
+
+        fetchAllFiles(filesJson);
+        */
+
         console.log("Starting loop...");
         const frameInterval = 1000 / frame_rate;
         let lastFrameTime = 0;
