@@ -43,6 +43,23 @@ void jsInjectFile(const char* path, const uint8_t* data, size_t len) {
     }
 }
 
+
+// An abstract class that represents a file handle.
+// Devices like the SD card will return one of these.
+class WasmFileHandle : public FileHandle {
+  public:
+    virtual ~FileHandle() {}
+    virtual bool available() 
+    virtual size_t bytesLeft()
+    virtual size_t size() const = 0;
+    virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
+    virtual size_t pos() const = 0;
+    virtual const char* path() const = 0;
+    virtual void seek(size_t pos) = 0;
+    virtual void close() = 0;
+};
+
+
 class FsImplWasm : public FsImpl {
   public:
     FsImplWasm() = default;
