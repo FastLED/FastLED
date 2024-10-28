@@ -8,6 +8,7 @@
 #include <mutex>
 #include <vector>
 #include "str.h"
+#include "math_macros.h"
 #include "namespace.h"
 #include "warn.h"
 #include <mutex>
@@ -16,6 +17,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 DECLARE_SMART_PTR(FsImplWasm);
+DECLARE_SMART_PTR(WasmFileHandle);
 
 
 namespace {
@@ -44,31 +46,69 @@ void jsInjectFile(const char* path, const uint8_t* data, size_t len) {
 }
 
 
-// An abstract class that represents a file handle.
-// Devices like the SD card will return one of these.
 class WasmFileHandle : public FileHandle {
-  public:
-    virtual ~FileHandle() {}
-    virtual bool available() 
-    virtual size_t bytesLeft()
-    virtual size_t size() const = 0;
-    virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
-    virtual size_t pos() const = 0;
-    virtual const char* path() const = 0;
-    virtual void seek(size_t pos) = 0;
-    virtual void close() = 0;
+private:
+    const std::vector<uint8_t>* mData;
+    size_t mPos;
+    Str mPath;
+
+public:
+    // The std::vector is add only, it wil never be destroyed, however it could theoretically
+    // be resized.
+    WasmFileHandle(const Str& path, const std::vector<uint8_t>* data)
+        : mPath(path), mData(data), mPos(0) {}
+
+    virtual ~WasmFileHandle() override {}
+
+    bool available() const override { return mPos < mData->size(); }
+    size_t bytesLeft() const override { return mData->size() - mPos; }
+    size_t size() const override { return mData->size(); }
+
+    size_t read(uint8_t *dst, size_t bytesToRead) override {
+        size_t bytesAvailable = bytesLeft();
+        size_t bytesToActuallyRead = MIN(bytesToRead, bytesAvailable);
+        std::copy(mData->begin() + mPos, mData->begin() + mPos + bytesToActuallyRead, dst);
+        mPos += bytesToActuallyRead;
+        return bytesToActuallyRead;
+    }
+
+    size_t pos() const override { return mPos; }
+    const char* path() const override { return mPath.c_str(); }
+
+    void seek(size_t pos) override {
+        mPos = MIN(pos, mData->size());
+    }
+
+    void close() override {
+        // No need to do anything for in-memory files
+    }
 };
 
-
 class FsImplWasm : public FsImpl {
-  public:
+public:
     FsImplWasm() = default;
     ~FsImplWasm() override {}
 
     bool begin() override { return true; }
     void end() override {}
-    void close(FileHandlePtr file) override {}
-    FileHandlePtr openRead(const char *path) override { return FileHandlePtr::Null(); }
+
+    void close(FileHandlePtr file) override {
+        if (file) {
+            file->close();
+        }
+    }
+
+    FileHandlePtr openRead(const char *path) override {
+        Str key(path);
+        std::lock_guard<std::mutex> lock(gFileMapMutex);
+        auto it = gFileMap.find(key);
+        if (it != gFileMap.end()) {
+            WasmFileHandlePtr out;
+            out = WasmFileHandlePtr::TakeOwnership(new WasmFileHandle(key, &(it->second)));
+            return out;
+        }
+        return FileHandlePtr::Null();
+    }
 };
 
 // Platforms eed to implement this to create an instance of the filesystem.
