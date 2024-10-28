@@ -113,7 +113,7 @@ public:
 };
 
 inline FsImplPtr make_filesystem(int cs_pin) {
-    return FsImpl::Null();
+    return FsImplPtr::Null();
 }
 
 

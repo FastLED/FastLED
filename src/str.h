@@ -209,6 +209,14 @@ template <size_t SIZE = 64> class StrN {
     // Append method
     void append(const char *str) { write(str, strlen(str)); }
 
+    bool operator<(const StrN &other) const {
+        return strcmp(c_str(), other.c_str()) < 0;
+    }
+
+    template<size_t M> bool operator<(const StrN<M> &other) const {
+        return strcmp(c_str(), other.c_str()) < 0;
+    }
+
   private:
     StringHolderPtr mData;
 };
