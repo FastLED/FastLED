@@ -1,0 +1,1 @@
+data/ directory will appear automatically in emscripten web builds.
