@@ -1162,8 +1162,7 @@ class UiManager {
     // Function to call the setup and loop functions
     function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
         console.log("Calling setup function...");
-  
-        /*
+ 
         const trimmedFilesJson = filesJson.map(file => {
             return {
                 path: file.path,
@@ -1174,29 +1173,9 @@ class UiManager {
             files: trimmedFilesJson,
             frameRate: frame_rate,
         };
-        // convert to cstr
         const jsonStr = JSON.stringify(options);
-        const jsonPtr = moduleInstance._malloc(jsonStr.length + 1);
-        const cStr = moduleInstance.stringToUTF8(jsonStr, jsonPtr, jsonStr.length + 1);
-
-        try {
-            extern_setup(cStr);
-        } catch (error) {
-            console.error("Error calling setup function:", error);
-        }
-        moduleInstance._free(jsonPtr);
-        */
-        const jsonStr = JSON.stringify(filesJson);
-        const n = moduleInstance.lengthBytesUTF8(jsonStr) + 1;
-        const filesJsonPtr = moduleInstance._malloc(n);
-        moduleInstance.stringToUTF8(jsonStr, filesJsonPtr, moduleInstance);
-        moduleInstance._fastled_inject_files(filesJsonPtr);
-        moduleInstance._free(filesJsonPtr);
+        moduleInstance._fastled_inject_files(jsonStr);
         extern_setup();
-
-
-
- 
 
         console.log("Starting loop...");
         const frameInterval = 1000 / frame_rate;

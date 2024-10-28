@@ -29,9 +29,9 @@ inline void setup_once() {
 
 
 
-
-EMSCRIPTEN_KEEPALIVE extern "C" void fastled_inject_files(const char* jsonStr) {
-    printf("fastled_inject_files: %s\n", jsonStr);
+EMSCRIPTEN_KEEPALIVE extern "C" void fastled_inject_files(std::string jsonStr) {
+    printf("fastled_inject_files: %s, %p\n", jsonStr.c_str(), &jsonStr);
+    return;
     ArduinoJson::JsonDocument doc;
     ArduinoJson::deserializeJson(doc, jsonStr);
     for (auto file_infos : doc.as<ArduinoJson::JsonArray>()) {
@@ -44,6 +44,11 @@ EMSCRIPTEN_KEEPALIVE extern "C" void fastled_inject_files(const char* jsonStr) {
         //jsInjectFile(path, path.c_str(), len);
     }
 }
+
+
+EMSCRIPTEN_BINDINGS(_fastled_inject_files) {
+    emscripten::function("_fastled_inject_files", &fastled_inject_files);
+};
 
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
