@@ -80,7 +80,7 @@ DEFAULT_EXAMPLES = [
     "TwinkleFox",
     "XYMatrix",
     "Video/Stream",
-    "Fs",
+    "SdCard",
 ]
 
 

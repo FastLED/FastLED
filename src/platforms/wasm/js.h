@@ -181,6 +181,8 @@ void jsOnFrame(ActiveStripData& active_strips);
 void jsOnStripAdded(uintptr_t strip, uint32_t num_leds);
 void updateJs(const char* jsonStr);
 
+
+
 #define FASTLED_HAS_UI_BUTTON 1
 #define FASTLED_HAS_UI_SLIDER 1
 #define FASTLED_HAS_UI_CHECKBOX 1
