@@ -13,9 +13,9 @@ void loop() {
 
 #include <FastLED.h>
 #include "Arduino.h"
-#include "fx/storage/sd.hpp"
+#include "fx/storage/fs.hpp"
 
-SdCardPtr sd = SdCardPtr::New(5);
+FsPtr sd = FsPtr::New(5);
 
 #define INVALID_FILENAME "fhjdiskljdskj.txt"
 

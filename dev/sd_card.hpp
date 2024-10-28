@@ -14,10 +14,10 @@ using namespace std;
 #define SPEED 30
 #define CS_PIN 5
 
-SdCardPtr SD_CARD_READER = SdCardPtr::New(CS_PIN);
+FsPtr SD_CARD_READER = FsPtr::New(CS_PIN);
 
 
-void runSdCardTest() {
+void runFsTest() {
     cout << "Running SD card test" << endl;
     SD_CARD_READER->begin(CS_PIN);
     FileHandlePtr file = SD_CARD_READER->openRead("/test.txt");
@@ -44,6 +44,6 @@ void setup() {
 
 
 void loop() {
-    runSdCardTest();
+    runFsTest();
     delay(1000);
 }

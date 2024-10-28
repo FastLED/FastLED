@@ -1,14 +1,14 @@
 #pragma once
 
-#include "sd.h"
+#include "fs.h"
 
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/sd.h"
 #elif __has_include(<SD.h>)
-#include "sd_arduino.hpp"
+#include "fs_sdcard_arduino.hpp"
 #else
-SdCardPtr SdCard::New(int cs_pin) {
-    SdCardPtr out;
+FsPtr Fs::New(int cs_pin) {
+    FsPtr out;
     return out;
 
 }

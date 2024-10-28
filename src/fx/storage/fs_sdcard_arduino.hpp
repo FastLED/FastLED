@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fx/storage/sd.h"
+#include "fx/storage/fs.h"
 
 #include <SPI.h>
 #ifdef USE_SDFAT
@@ -60,7 +60,7 @@ public:
 };
 #endif
 
-class SdCardArduino : public SdCard {
+class FsArduino : public Fs {
 private:
     int _cs_pin;
 #ifdef USE_SDFAT
@@ -68,7 +68,7 @@ private:
 #endif
 
 public:
-    SdCardArduino(int cs_pin) : _cs_pin(cs_pin) {}
+    FsArduino(int cs_pin) : _cs_pin(cs_pin) {}
 
     bool begin(int chipSelect) override {
 #ifdef USE_SDFAT
@@ -112,9 +112,9 @@ public:
     }
 };
 
-inline SdCardPtr SdCard::New(int cs_pin) {
-    SdCard* ptr = new SdCardArduino(cs_pin);
-    return Ptr<SdCard>::TakeOwnership(ptr);
+inline FsPtr Fs::New(int cs_pin) {
+    Fs* ptr = new FsArduino(cs_pin);
+    return Ptr<Fs>::TakeOwnership(ptr);
 }
 
 
