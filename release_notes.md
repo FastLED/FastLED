@@ -35,6 +35,30 @@ FastLED 3.9.0
 * Happy coding!
 
 
+For sketches that do a lot of heavy processing for each frame, FastLED is going to be **significantly** faster with this new release.
+
+How much faster?
+
+I benchmarked the animartrix sketch, which has heavy floating point requirements (you'll need a Teensy41 or an ESP32S3 to handle the processing requirements).
+
+FastLED 3.7.X - 34fps
+FastLED 3.9.0 - 59fps (+70% speedup!)
+
+Why?
+
+In FastLED 3.7.X, FastLED.show() was always a blocking operation. Now it's only blocking when the previous frame is waiting to complete it's render.
+
+In the benchmark I measured:
+12 ms - preparing the frame for draw.
+17 ms - actually drawing the frame.
+
+@ 22x22 WS2812 grid.
+
+So for FastLED 3.7.X this meant that these two values would sum together. So 12ms + 17ms = 29ms = 34fps.
+But in FastLED 3.9.0 the calculation works like this MAX(12, 17) = 17ms = 59fps. If you fall into this category, FastLED will now free up 17ms to do available work @ 60fps, which is a game changer.
+
+As of today's release, nobody else is doing async drawing. FastLED is the only one to offer this feature.
+
 FastLED 3.8.0
 =============
 * Attiny0/1 (commonly Attiny85) support added.
