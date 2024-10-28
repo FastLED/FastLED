@@ -1187,8 +1187,9 @@ class UiManager {
         moduleInstance._free(jsonPtr);
         */
         const jsonStr = JSON.stringify(filesJson);
-        const filesJsonPtr = moduleInstance._malloc(jsonStr.length + 1);
-        const cStr = moduleInstance.stringToUTF8(jsonStr, filesJsonPtr, jsonStr.length + 1);
+        const n = moduleInstance.lengthBytesUTF8(jsonStr) + 1;
+        const filesJsonPtr = moduleInstance._malloc(n);
+        const cStr = moduleInstance.stringToUTF8(jsonStr, filesJsonPtr, moduleInstance);
         moduleInstance._fastled_inject_files(cStr);
         moduleInstance._free(filesJsonPtr);
         extern_setup();
