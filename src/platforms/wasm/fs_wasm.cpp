@@ -49,7 +49,10 @@ class FileData : public Referent {
         return bytesToActuallyRead;
     }
 
-    size_t capacity() const { return mCapacity; }
+    size_t capacity() const {
+        std::lock_guard<std::mutex> lock(mMutex);
+        return mCapacity;
+    }
 private:
     std::vector<uint8_t> mData;
     size_t mCapacity = 0;
