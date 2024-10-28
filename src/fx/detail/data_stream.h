@@ -3,7 +3,6 @@
 #include "namespace.h"
 #include "crgb.h"
 #include "ptr.h"
-#include "fx/storage/filereader.h"
 #include "fx/storage/filebuffer.h"
 #include "fx/storage/bytestream.h"
 #include "fx/frame.h"
