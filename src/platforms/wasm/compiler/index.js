@@ -1177,7 +1177,7 @@ class UiManager {
         moduleInstance._fastled_inject_files(jsonStr);
         extern_setup();
 
-            /*
+ 
         // Now launch a streaming fetch for all the files that are in the files.json
         const fetchFilePromise = async (fetchFilePath) => {
             const response = await fetch(fetchFilePath);
@@ -1197,7 +1197,7 @@ class UiManager {
         };
 
         fetchAllFiles(filesJson);
-        */
+
 
         console.log("Starting loop...");
         const frameInterval = 1000 / frame_rate;
