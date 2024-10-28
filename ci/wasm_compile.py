@@ -1,5 +1,6 @@
 import argparse
 import os
+import platform
 import subprocess
 import sys
 import time
@@ -8,7 +9,8 @@ from typing import List
 
 from ci.paths import PROJECT_ROOT
 
-IS_ARM: bool = "arm" in os.uname().machine
+machine = platform.machine().lower()
+IS_ARM: bool = "arm" in machine or "aarch64" in machine
 PLATFORM_TAG: str = "-arm64" if IS_ARM else ""
 
 IMAGE_NAME = f"fastled-wasm-compiler{PLATFORM_TAG}"

@@ -21,12 +21,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
-      - name: Cache Docker images.
-        uses: ScribeMD/docker-cache@0.5.0
-        with:
-          #key: docker-${{ runner.os }}-${{ hashFiles('src/**') }}
-          key: docker-${{ runner.os }}
       
       - name: Install UV for python
         run: pip install uv
