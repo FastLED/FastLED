@@ -10,8 +10,9 @@
 #define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
 
 #if defined(ARDUINO)
-#define __RESTORE_ARDUINO ARDUINO
+#pragma push_macro("ARDUINO")
 #undef ARDUINO
+#define FASTLED_RESTORE_ARDUINO
 #endif
 
 #define FASTLED_JSON_GUARD
@@ -20,7 +21,7 @@
 
 #undef FASTLED_JSON_GUARD
 
-#if defined(__RESTORE_ARDUINO)
-#define ARDUINO __RESTORE_ARDUINO
-#undef __RESTORE_ARDUINO
+#if defined(FASTLED_RESTORE_ARDUINO)
+#pragma pop_macro("ARDUINO")
+#undef FASTLED_RESTORE_ARDUINO
 #endif
