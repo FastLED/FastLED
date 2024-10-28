@@ -17,21 +17,6 @@ FASTLED_NAMESPACE_BEGIN
 
 DECLARE_SMART_PTR(FsImplWasm);
 
-class FsImplWasm : public FsImpl {
-  public:
-    FsImplWasm() = default;
-    ~FsImplWasm() override {}
-
-    bool begin() override { return true; }
-    void end() override {}
-    void close(FileHandlePtr file) override {}
-    FileHandlePtr openRead(const char *path) override { return FileHandlePtr::Null(); }
-};
-
-// Platforms eed to implement this to create an instance of the filesystem.
-FsImplPtr make_filesystem(int cs_pin) {
-    return FsImplWasmPtr::New();
-}
 
 namespace {
     // Map is great because it doesn't invalidate it's data members unless erase is called.
@@ -57,6 +42,23 @@ void jsInjectFile(const char* path, const uint8_t* data, size_t len) {
         gFileMap.insert(std::make_pair(path_str, new_data));
     }
 }
+
+class FsImplWasm : public FsImpl {
+  public:
+    FsImplWasm() = default;
+    ~FsImplWasm() override {}
+
+    bool begin() override { return true; }
+    void end() override {}
+    void close(FileHandlePtr file) override {}
+    FileHandlePtr openRead(const char *path) override { return FileHandlePtr::Null(); }
+};
+
+// Platforms eed to implement this to create an instance of the filesystem.
+FsImplPtr make_filesystem(int cs_pin) {
+    return FsImplWasmPtr::New();
+}
+
 
 FASTLED_NAMESPACE_END
 
