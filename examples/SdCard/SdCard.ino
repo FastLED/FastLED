@@ -17,29 +17,25 @@ void loop() {
 
 const int CHIP_SELECT_PIN = 5;
 
-FsPtr fs = FsPtr::New(CHIP_SELECT_PIN);
+Fs fs(CHIP_SELECT_PIN);
 
 #define INVALID_FILENAME "fhjdiskljdskj.txt"
 
 void setup() {
     Serial.begin(115200);
-    if (fs) {
-        fs->begin();
-    } else {
-        Serial.println("Failed to initialize SD card because sd is null");
+    if (!fs.begin()) {
+        Serial.println("Failed to initialize file system.");
     }
-
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
 
 void loop() {
-    if (fs) {
-      FileHandlePtr file = fs->openRead(INVALID_FILENAME);
-      fs->close(file);
+    FileHandlerPtr fh = fs.openRead(INVALID_FILENAME);
+    if (!fh) {
+      Serial.println("Failed to open SD card because sd is null");
     } else {
-        Serial.println("Failed to open SD card because sd is null");
+      fs.close(fh);
     }
-
     delay(1000);    
 }
 
