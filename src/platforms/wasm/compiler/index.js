@@ -1187,11 +1187,38 @@ class UiManager {
         };
 
         const fetchAllFiles = async (filesJson) => {
+            const finishedData = {};
             const fetchPromises = filesJson.map(async file => {
-                return fetchFilePromise(file.path);
+                const out = fetchFilePromise(file.path);
+                finishedData[file.path] = {
+                    data: out,
+                    size: file.size,
+                }
+                return out;
             });
             const fileData = await Promise.all(fetchPromises);
             console.log("All files fetched, sending to FastLED module");
+            //for (filepath of finishedData) {
+            for (const filepath in finishedData) {
+                const bytes = finishedData[filepath].size;
+                const data = finishedData[filepath].data;
+                const ptr = moduleInstance._malloc(bytes);
+                const ptrName = moduleInstance._malloc(filepath.length + 1);
+
+                const fileDataArray = new Uint8Array(data);
+                const nameDataArray = new Uint8Array(new TextEncoder().encode(filepath));
+
+                //var buf = Module._malloc(myTypedArray.length*myTypedArray.BYTES_PER_ELEMENT);
+                moduleInstance.HEAPU8.set(fileDataArray, ptr);
+                moduleInstance.HEAPU8.set(nameDataArray, ptrName);
+                moduleInstance.ccall('jsAppendFile', 'number', ['number', 'number', 'number'], [ptrName, ptr, bytes]);
+                moduleInstance._free(ptr);
+                moduleInstance._free(ptrName);
+
+                //moduleInstance.HEAPU8.set(fileDataArray, ptr);
+                //moduleInstance.jsAppendFile(file.path, ptr, bytes);
+                //moduleInstance._free(ptr);
+            }
             //const fileDataArray = new Uint8Array(fileData);
             //moduleInstance._fastled_inject_data(fileDataArray);
         };

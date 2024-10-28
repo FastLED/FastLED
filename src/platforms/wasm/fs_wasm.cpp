@@ -188,6 +188,7 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
 
 EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const uint8_t *data,
                                        size_t len) {
+    printf("Appending file %s with %d bytes\n", path, len);
     auto entry = _findIfExists(Str(path));
     if (!entry) {
         FASTLED_WARN("File must be declared before it can be appended.");
@@ -237,12 +238,14 @@ EMSCRIPTEN_KEEPALIVE void fastled_declare_files(std::string jsonStr) {
 
 
 
-
 } // extern "C"
+
+
 
 
 EMSCRIPTEN_BINDINGS(_fastled_declare_files) {
     emscripten::function("_fastled_declare_files", &fastled_declare_files);
+    //emscripten::function("jsAppendFile", emscripten::select_overload<bool(const char*, const uint8_t*, size_t)>(&jsAppendFile), emscripten::allow_raw_pointer<arg<0>, arg<1>>());
 };
 
 #endif // __EMSCRIPTEN__
