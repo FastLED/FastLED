@@ -21,13 +21,23 @@ SdCardSpiPtr sd = SdCardSpiPtr::New(5);
 
 void setup() {
     Serial.begin(115200);
-    sd->begin(5);
+    if (sd) {
+        sd->begin(5);
+    } else {
+        Serial.println("Failed to initialize SD card because sd is null");
+    }
+
     delay(2000);  // If something ever goes wrong this delay will allow upload.
 }
 
 void loop() {
-    FileHandlePtr file = sd->openRead(INVALID_FILENAME);
-    sd->close(file);
+    if (sd) {
+      FileHandlePtr file = sd->openRead(INVALID_FILENAME);
+      sd->close(file);
+    } else {
+        Serial.println("Failed to open SD card because sd is null");
+    }
+
     delay(1000);    
 }
 
