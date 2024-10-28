@@ -14,12 +14,13 @@ FASTLED_NAMESPACE_BEGIN
 
 DECLARE_SMART_PTR(Fs);
 
+// A filesystem interface that abstracts the underlying filesystem, usually
+// an sd card.
 class Fs : public Referent, public FileReader {
   public:
     static FsPtr New(int cs_pin);
 
-    virtual ~Fs() {}  // Use default pins for spi.
-    virtual bool begin(int chipSelect) = 0;
+    virtual ~Fs() {}
     //  End use of card
     virtual void end() = 0;
     virtual void close(FileHandlePtr file) = 0;
