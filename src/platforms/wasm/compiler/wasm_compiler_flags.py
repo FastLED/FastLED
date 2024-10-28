@@ -51,6 +51,7 @@ wasmflags = [
     "-DUSE_OFFSET_CONVERTER=0",
     "-sINITIAL_MEMORY=134217728",
     "--no-entry",
+    "--embed-file ./data",
     "-s",
     # Enable C++17 with GNU extensions.
     "-std=gnu++17",
