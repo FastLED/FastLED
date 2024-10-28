@@ -20,7 +20,8 @@ class Fs : public Referent, public FileReader {
   public:
     static FsPtr New(int cs_pin);
 
-    virtual ~Fs() {}
+    virtual ~Fs() {}  // Use default pins for spi.
+    virtual bool begin() = 0;
     //  End use of card
     virtual void end() = 0;
     virtual void close(FileHandlePtr file) = 0;

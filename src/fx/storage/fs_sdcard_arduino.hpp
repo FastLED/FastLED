@@ -70,11 +70,11 @@ private:
 public:
     FsArduino(int cs_pin) : _cs_pin(cs_pin) {}
 
-    bool begin(int chipSelect) override {
+    bool begin() override {
 #ifdef USE_SDFAT
         return _sd.begin(chipSelect, SPI_HALF_SPEED);
 #else
-        return SD.begin(chipSelect);
+        return SD.begin(_cs_pin);
 #endif
     }
 

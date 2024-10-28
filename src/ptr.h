@@ -121,6 +121,8 @@ template <typename T> class Ptr : public PtrTraits<T> {
         }
     }
 
+    static Ptr<T> Null() { return Ptr<T>(); }
+
     Ptr() : referent_(nullptr) {}
 
     // Forbidden to convert a raw pointer to a Referent into a Ptr, because

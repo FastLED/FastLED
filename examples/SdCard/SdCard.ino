@@ -15,14 +15,16 @@ void loop() {
 #include "Arduino.h"
 #include "fx/storage/fs.hpp"
 
-FsPtr sd = FsPtr::New(5);
+const int CHIP_SELECT_PIN = 5;
+
+FsPtr fs = FsPtr::New(CHIP_SELECT_PIN);
 
 #define INVALID_FILENAME "fhjdiskljdskj.txt"
 
 void setup() {
     Serial.begin(115200);
-    if (sd) {
-        sd->begin(5);
+    if (fs) {
+        fs->begin();
     } else {
         Serial.println("Failed to initialize SD card because sd is null");
     }
@@ -31,9 +33,9 @@ void setup() {
 }
 
 void loop() {
-    if (sd) {
-      FileHandlePtr file = sd->openRead(INVALID_FILENAME);
-      sd->close(file);
+    if (fs) {
+      FileHandlePtr file = fs->openRead(INVALID_FILENAME);
+      fs->close(file);
     } else {
         Serial.println("Failed to open SD card because sd is null");
     }
