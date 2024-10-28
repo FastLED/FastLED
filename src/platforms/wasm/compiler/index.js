@@ -1204,9 +1204,10 @@ class UiManager {
                 const data = finishedData[filepath].data;
                 const ptr = moduleInstance._malloc(bytes);
                 const ptrName = moduleInstance._malloc(filepath.length + 1);
-
-                const fileDataArray = new Uint8Array(data);
-                const nameDataArray = new Uint8Array(new TextEncoder().encode(filepath));
+                const fileDataArray = new Uint8Array(data);                
+                const n = moduleInstance.lengthBytesUTF8();
+                const nameDataArray = new Uint8Array(n);
+                stringToUTF8(filepath, nameDataArray, n);
 
                 //var buf = Module._malloc(myTypedArray.length*myTypedArray.BYTES_PER_ELEMENT);
                 moduleInstance.HEAPU8.set(fileDataArray, ptr);
