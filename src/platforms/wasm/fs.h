@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ptr.h"
-#include "fx/storage/sd.h"
+#include "fx/storage/fs.h"
 
-inline FsPtr Fs::New(int cs_pin) {
-    return FsPtr::Null();
+inline FsImplPtr FsImpl::New(int cs_pin) {
+    return FsImplPtr::Null();
 }
