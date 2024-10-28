@@ -7,9 +7,8 @@
 #elif __has_include(<SD.h>)
 #include "fs_sdcard_arduino.hpp"
 #else
-FsImplPtr FsImpl::New(int cs_pin) {
+inline FsImplPtr make_filesystem(int cs_pin) {
     return FsImplPtr::Null();
-
 }
 #endif
 

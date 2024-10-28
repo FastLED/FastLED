@@ -60,7 +60,7 @@ public:
 };
 #endif
 
-class FsArduino : public Fs {
+class FsArduino : public FsImpl {
 private:
     int _cs_pin;
 #ifdef USE_SDFAT
@@ -112,11 +112,9 @@ public:
     }
 };
 
-inline FsPtr Fs::New(int cs_pin) {
-    Fs* ptr = new FsArduino(cs_pin);
-    return Ptr<Fs>::TakeOwnership(ptr);
+inline FsImplPtr make_filesystem(int cs_pin) {
+    return FsImpl::Null();
 }
-
 
 
 FASTLED_NAMESPACE_END
