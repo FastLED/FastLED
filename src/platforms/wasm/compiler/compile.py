@@ -293,29 +293,32 @@ def main() -> int:
             optional_input_data_dir = src_dir / "data"
             output_data_dir = fastled_js_dir / optional_input_data_dir.name
 
-            # copy all files from data dir
-            if output_data_dir.exists():
-                for _file in output_data_dir.iterdir():
-                    _file.unlink()
+            # Handle data directory if it exists
+            manifest: list[dict] = []
             if optional_input_data_dir.exists():
+                # Clean up existing output data directory
+                if output_data_dir.exists():
+                    for _file in output_data_dir.iterdir():
+                        _file.unlink()
+
+                # Create output data directory and copy files
                 output_data_dir.mkdir(parents=True, exist_ok=True)
                 for _file in optional_input_data_dir.iterdir():
-                    print(f"Copying {_file.name} -> {output_data_dir}")
-                    shutil.copy2(_file, output_data_dir / _file.name)
-            # now write a file to indicate the data dir is present
-            # this will be a json dict with the file names
+                    if _file.is_file():  # Only copy files, not directories
+                        print(f"Copying {_file.name} -> {output_data_dir}")
+                        shutil.copy2(_file, output_data_dir / _file.name)
+                        hash = hash_file(_file)
+                        manifest.append(
+                            {
+                                "name": _file.name,
+                                "path": f"data/{_file.name}",
+                                "size": _file.stat().st_size,
+                                "hash": hash,
+                            }
+                        )
+
+            # Write manifest file even if empty
             print("Writing manifest files.json")
-            manifest: list[dict] = []
-            for _file in optional_input_data_dir.iterdir():
-                hash = hash_file(_file)
-                manifest.append(
-                    {
-                        "name": _file.name,
-                        "path": f"data/{_file.name}",
-                        "size": _file.stat().st_size,
-                        "hash": hash,
-                    }
-                )
             manifest_json_str = json.dumps(manifest, indent=2, sort_keys=True)
             with open(fastled_js_dir / "files.json", "w") as f:
                 f.write(manifest_json_str)
