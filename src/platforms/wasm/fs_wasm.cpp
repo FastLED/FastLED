@@ -21,16 +21,42 @@ DECLARE_SMART_PTR(WasmFileHandle);
 namespace {
 // Map is great because it doesn't invalidate it's data members unless erase is
 // called.
-struct FileData {
-    std::vector<uint8_t> data;
-    size_t len = 0;
-    FileData(size_t len) : len(len) {}
+DECLARE_SMART_PTR(FileData);
+
+class FileData : public Referent {
+  public:
+
+    FileData(size_t capacity) : mCapacity(capacity) {}
     FileData(const std::vector<uint8_t> &data, size_t len)
-        : data(data), len(len) {}
+        : mData(data), mCapacity(len) {}
     FileData() = default;
+
+    void append(const uint8_t *data, size_t len) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mData.insert(mData.end(), data, data + len);
+        mCapacity = MAX(mCapacity, mData.size());
+    }
+
+    size_t read(size_t pos, uint8_t *dst, size_t len) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        if (pos >= mData.size()) {
+            return 0;
+        }
+        size_t bytesAvailable = mData.size() - pos;
+        size_t bytesToActuallyRead = MIN(len, bytesAvailable);
+        std::copy(mData.begin() + pos, mData.begin() + pos + bytesToActuallyRead,
+                  dst);
+        return bytesToActuallyRead;
+    }
+
+    size_t capacity() const { return mCapacity; }
+private:
+    std::vector<uint8_t> mData;
+    size_t mCapacity = 0;
+    std::mutex mMutex;
 };
 
-typedef std::map<Str, FileData> FileMap;
+typedef std::map<Str, FileDataPtr> FileMap;
 FileMap gFileMap;
 // At the time of creation, it's unclear whether this can be called by multiple
 // threads. With an std::map items remain valid while not erased. So we only
@@ -41,35 +67,28 @@ std::mutex gFileMapMutex;
 
 class WasmFileHandle : public FileHandle {
   private:
-    const std::vector<uint8_t> *mData;
+    FileDataPtr mData;
     size_t mPos;
     Str mPath;
 
   public:
-    // The std::vector is add only, it wil never be destroyed, however it could
-    // theoretically be resized.
-    WasmFileHandle(const Str &path, const std::vector<uint8_t> *data)
+    WasmFileHandle(const Str &path, const FileDataPtr data)
         : mPath(path), mData(data), mPos(0) {}
 
     virtual ~WasmFileHandle() override {}
 
-    bool available() const override { return mPos < mData->size(); }
-    size_t bytesLeft() const override { return mData->size() - mPos; }
-    size_t size() const override { return mData->size(); }
+    bool available() const override { return mPos < mData->capacity(); }
+    size_t bytesLeft() const override { return mData->capacity() - mPos; }
+    size_t size() const override { return mData->capacity(); }
 
     size_t read(uint8_t *dst, size_t bytesToRead) override {
-        size_t bytesAvailable = bytesLeft();
-        size_t bytesToActuallyRead = MIN(bytesToRead, bytesAvailable);
-        std::copy(mData->begin() + mPos,
-                  mData->begin() + mPos + bytesToActuallyRead, dst);
-        mPos += bytesToActuallyRead;
-        return bytesToActuallyRead;
+        return mData->read(mPos, dst, bytesToRead);
     }
 
     size_t pos() const override { return mPos; }
     const char *path() const override { return mPath.c_str(); }
 
-    void seek(size_t pos) override { mPos = MIN(pos, mData->size()); }
+    void seek(size_t pos) override { mPos = MIN(pos, mData->capacity()); }
 
     void close() override {
         // No need to do anything for in-memory files
@@ -95,10 +114,9 @@ class FsImplWasm : public FsImpl {
         std::lock_guard<std::mutex> lock(gFileMapMutex);
         auto it = gFileMap.find(key);
         if (it != gFileMap.end()) {
-            auto& data = it->second;
-            auto& vec = data.data;
-            WasmFileHandlePtr out;
-            out = WasmFileHandlePtr::TakeOwnership(new WasmFileHandle(key, &vec));
+            auto &data = it->second;
+            WasmFileHandlePtr out =
+                WasmFileHandlePtr::TakeOwnership(new WasmFileHandle(key, data));
             return out;
         }
         return FileHandlePtr::Null();
@@ -108,61 +126,78 @@ class FsImplWasm : public FsImpl {
 // Platforms eed to implement this to create an instance of the filesystem.
 FsImplPtr make_filesystem(int cs_pin) { return FsImplWasmPtr::New(); }
 
+
+FileDataPtr _findIfExists(const Str& path) {
+    std::lock_guard<std::mutex> lock(gFileMapMutex);
+    auto it = gFileMap.find(path);
+    if (it != gFileMap.end()) {
+        return it->second;
+    }
+    return FileDataPtr::Null();
+}
+
+FileDataPtr _findOrCreate(const Str& path, size_t len) {
+    std::lock_guard<std::mutex> lock(gFileMapMutex);
+    auto it = gFileMap.find(path);
+    if (it != gFileMap.end()) {
+        return it->second;
+    }
+    auto entry = FileDataPtr::New(len);
+    gFileMap.insert(std::make_pair(path, entry));
+    return entry;
+}
+
+FileDataPtr _createIfNotExists(const Str& path, size_t len) {
+    std::lock_guard<std::mutex> lock(gFileMapMutex);
+    auto it = gFileMap.find(path);
+    if (it != gFileMap.end()) {
+        return FileDataPtr::Null();
+    }
+    auto entry = FileDataPtr::New(len);
+    gFileMap.insert(std::make_pair(path, entry));
+    return entry;
+}
+
+
+
+
 FASTLED_NAMESPACE_END
 
 extern "C" {
 
+
 EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
                                        size_t len) {
-    Str path_str(path);
-    auto entry = FileData(len);
-    entry.data.insert(entry.data.end(), data, data + len);
-    // Lock may not be necessary. We don't know how this is going to be called exactly yet.
-    {
-        std::lock_guard<std::mutex> lock(gFileMapMutex);
-        auto it = gFileMap.find(path_str);
-        if (it != gFileMap.end()) {
-            FASTLED_WARN("File can only be injected once.");
-            return false;
-        } else {
-            auto it = gFileMap.insert(std::make_pair(path_str, FileData(len)));
-            std::swap(it.first->second.data, entry.data);
-            return true;
-        }
+
+    auto inserted = _createIfNotExists(Str(path), len);
+    if (!inserted) {
+        FASTLED_WARN("File can only be injected once.");
+        return false;
     }
+    inserted->append(data, len);
 }
 
 EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const uint8_t *data,
                                        size_t len) {
-    Str path_str(path);
-    {
-        std::lock_guard<std::mutex> lock(gFileMapMutex);
-        auto it = gFileMap.find(path_str);
-        if (it != gFileMap.end()) {
-            auto* file_data = &(it->second.data);
-            file_data->insert(file_data->end(), data, data + len);
-            return true;
-        } else {
-            FASTLED_WARN("File must be declared before appending.");
-            return false;
-        }
-    }    
+    auto entry = _findIfExists(Str(path));
+    if (!entry) {
+        FASTLED_WARN("File must be declared before it can be appended.");
+        return false;
+    }
+    entry->append(data, len);
+    return true;
 }
 
 EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
     // declare a file and it's length. But don't fill it in yet
-    std::lock_guard<std::mutex> lock(gFileMapMutex);
-    auto it = gFileMap.find(path);
-    if (it != gFileMap.end()) {
+    auto inserted = _createIfNotExists(Str(path), len);
+    if (!inserted) {
         FASTLED_WARN("File can only be declared once.");
         return false;
-    } else {
-        gFileMap.insert(std::make_pair(path, FileData(len)));
-        return true;
     }
+    return true;
 }
 
-
-}  // extern "C"
+} // extern "C"
 
 #endif // __EMSCRIPTEN__
