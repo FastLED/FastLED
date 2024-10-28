@@ -42,11 +42,11 @@ env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 wasmflags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
     "-DFASTLED_USE_PROGMEM=0",
-    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap']",
+    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
     "-sALLOW_MEMORY_GROWTH=0",
     "-Oz",
     #"-sEXPORT_ES6=1",
-    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop']",
+    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_inject_files']",
     "--bind",
     "-DUSE_OFFSET_CONVERTER=0",
     "-sINITIAL_MEMORY=134217728",

@@ -1186,7 +1186,16 @@ class UiManager {
         }
         moduleInstance._free(jsonPtr);
         */
+        const jsonStr = JSON.stringify(filesJson);
+        const filesJsonPtr = moduleInstance._malloc(jsonStr.length + 1);
+        const cStr = moduleInstance.stringToUTF8(jsonStr, filesJsonPtr, jsonStr.length + 1);
+        moduleInstance._fastled_inject_files(cStr);
+        moduleInstance._free(filesJsonPtr);
         extern_setup();
+
+
+
+ 
 
         console.log("Starting loop...");
         const frameInterval = 1000 / frame_rate;
@@ -1241,12 +1250,7 @@ class UiManager {
     const onModuleLoaded = async (fastLedLoader) => {
         // Unpack the module functions and send them to the runFastLED function
 
-        const fetchFilePromise = async (fetchFilePath) => {
-            const response = await fetch(fetchFilePath);
-            const data = await response.json();
-            return data;
-        };
-        const filesJsonPromise = fetchFilePromise("files.json");
+  
         function __runFastLED(moduleInstance, frameRate, filesJson) {
             const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
             if (!exports_exist) {
@@ -1254,14 +1258,21 @@ class UiManager {
                 return;
             }
 
-            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance);
+            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance, filesJson);
         }
-
+        // Start fetch now in parallel
+        const fetchFilePromise = async (fetchFilePath) => {
+            const response = await fetch(fetchFilePath);
+            const data = await response.json();
+            return data;
+        };
+        const filesJsonPromise = fetchFilePromise("files.json");
         try {
             if (typeof fastLedLoader === 'function') {
                 // Load the module
                 fastLedLoader().then(async (instance) => {
                     console.log("Module loaded, running FastLED...");
+                    // Wait for the files.json to load.
                     let filesJson = null;
                     try {
                         filesJson = await filesJsonPromise;

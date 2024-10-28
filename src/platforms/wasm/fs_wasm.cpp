@@ -56,7 +56,7 @@ class FileData : public Referent {
 private:
     std::vector<uint8_t> mData;
     size_t mCapacity = 0;
-    std::mutex mMutex;
+    mutable std::mutex mMutex;
 };
 
 typedef std::map<Str, FileDataPtr> FileMap;
@@ -178,6 +178,7 @@ EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,
         return false;
     }
     inserted->append(data, len);
+    return true;
 }
 
 EMSCRIPTEN_KEEPALIVE bool jsAppendFile(const char *path, const uint8_t *data,

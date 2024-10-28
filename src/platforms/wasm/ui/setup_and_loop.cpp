@@ -27,6 +27,10 @@ inline void setup_once() {
     setup();
 }
 
+EMSCRIPTEN_KEEPALIVE extern "C" void fastled_inject_files(const char* jsonStr) {
+    printf("fastled_inject_files: %s\n", jsonStr);
+}
+
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS
 EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
