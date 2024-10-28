@@ -60,7 +60,7 @@ public:
 };
 #endif
 
-class SdCardSpiArduino : public SdCardSpi {
+class SdCardArduino : public SdCard {
 private:
     int _cs_pin;
 #ifdef USE_SDFAT
@@ -68,7 +68,7 @@ private:
 #endif
 
 public:
-    SdCardSpiArduino(int cs_pin) : _cs_pin(cs_pin) {}
+    SdCardArduino(int cs_pin) : _cs_pin(cs_pin) {}
 
     bool begin(int chipSelect) override {
 #ifdef USE_SDFAT
@@ -112,9 +112,9 @@ public:
     }
 };
 
-inline SdCardSpiPtr SdCardSpi::New(int cs_pin) {
-    SdCardSpi* ptr = new SdCardSpiArduino(cs_pin);
-    return Ptr<SdCardSpi>::TakeOwnership(ptr);
+inline SdCardPtr SdCard::New(int cs_pin) {
+    SdCard* ptr = new SdCardArduino(cs_pin);
+    return Ptr<SdCard>::TakeOwnership(ptr);
 }
 
 

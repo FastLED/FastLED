@@ -12,13 +12,13 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(SdCardSpi);
+DECLARE_SMART_PTR(SdCard);
 
-class SdCardSpi : public Referent, public FileReader {
+class SdCard : public Referent, public FileReader {
   public:
-    static SdCardSpiPtr New(int cs_pin);
+    static SdCardPtr New(int cs_pin);
 
-    virtual ~SdCardSpi() {}  // Use default pins for spi.
+    virtual ~SdCard() {}  // Use default pins for spi.
     virtual bool begin(int chipSelect) = 0;
     //  End use of card
     virtual void end() = 0;
@@ -31,6 +31,6 @@ class SdCardSpi : public Referent, public FileReader {
     }
 };
 
-DECLARE_SMART_PTR_CONSTRUCTOR(SdCardSpi, SdCardSpi::New);
+DECLARE_SMART_PTR_CONSTRUCTOR(SdCard, SdCard::New);
 
 FASTLED_NAMESPACE_END

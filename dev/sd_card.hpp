@@ -14,7 +14,7 @@ using namespace std;
 #define SPEED 30
 #define CS_PIN 5
 
-SdCardSpiPtr SD_CARD_READER = SdCardSpiPtr::New(CS_PIN);
+SdCardPtr SD_CARD_READER = SdCardPtr::New(CS_PIN);
 
 
 void runSdCardTest() {
