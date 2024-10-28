@@ -19,6 +19,8 @@ if DEBUG:
 
 Import("env", "projenv")
 
+
+
 # projenv is used for compiling individual files, env for linking
 # libraries have their own env in env.GetLibBuilders()
 
@@ -40,17 +42,14 @@ env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 wasmflags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
     "-DFASTLED_USE_PROGMEM=0",
-    "-s",
-    "EXPORTED_RUNTIME_METHODS=['ccall','cwrap']",
-    "-s",
-    "ALLOW_MEMORY_GROWTH=0",
+    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','FS']",
+    "-sALLOW_MEMORY_GROWTH=0",
     "-Oz",
-    "-s",
-    "EXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop']",
+    #"-sEXPORT_ES6=1",
+    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop']",
     "--bind",
     "-DUSE_OFFSET_CONVERTER=0",
-    "-s",
-    "INITIAL_MEMORY=134217728",
+    "-sINITIAL_MEMORY=134217728",
     "--no-entry",
     "-s",
     # Enable C++17 with GNU extensions.
@@ -99,7 +98,8 @@ env.Append(LINKFLAGS=wasmflags)
 # Pass flags to the other Project Dependencies (libraries)
 for lb in env.GetLibBuilders():
     lb.env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
-    # Add whole-archive flag to ensure all objects are included
+    # Add whole-archive flag to ensure all objects have all symbols available
+    # for final linking.
     lb.env.Append(LINKFLAGS=["-Wl,--whole-archive"])
 
 
