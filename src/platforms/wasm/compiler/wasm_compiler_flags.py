@@ -46,7 +46,7 @@ wasmflags = [
     "-sALLOW_MEMORY_GROWTH=0",
     "-Oz",
     #"-sEXPORT_ES6=1",
-    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_inject_files']",
+    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']",
     "--bind",
     "-DUSE_OFFSET_CONVERTER=0",
     "-sINITIAL_MEMORY=134217728",

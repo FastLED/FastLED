@@ -30,37 +30,6 @@ inline void setup_once() {
 
 
 
-EMSCRIPTEN_KEEPALIVE extern "C" void fastled_inject_files(std::string jsonStr) {
-    ArduinoJson::JsonDocument doc;
-    ArduinoJson::deserializeJson(doc, jsonStr);
-    auto files = doc["files"];
-    if (files.isNull()) {
-        return;
-    }
-    auto files_array = files.as<ArduinoJson::JsonArray>();
-    if (files_array.isNull()) {
-        return;
-    }
-
-    for (auto file : files_array) {
-        auto size_obj = file["size"];
-        if (size_obj.isNull()) {
-            continue;
-        }
-        auto size = size_obj.as<int>();
-        auto path_obj = file["path"];
-        if (path_obj.isNull()) {
-            continue;
-        }
-        printf("Declaring file %s with size %d. These will become available as File system paths within the app.\n", path_obj.as<const char*>(), size);
-        jsDeclareFile(path_obj.as<const char*>(), size);
-    }
-}
-
-
-EMSCRIPTEN_BINDINGS(_fastled_inject_files) {
-    emscripten::function("_fastled_inject_files", &fastled_inject_files);
-};
 
 //////////////////////////////////////////////////////////////////////////
 // BEGIN EMSCRIPTEN EXPORTS

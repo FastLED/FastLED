@@ -6,12 +6,17 @@
 #include "namespace.h"
 #include "ptr.h"
 #include "str.h"
+#include "json.h"
 #include "warn.h"
 #include <map>
 #include <mutex>
 #include <vector>
 
 #include <emscripten.h>
+#include <emscripten/emscripten.h> // Include Emscripten headers
+#include <emscripten/html5.h>
+#include <emscripten/bind.h>
+#include <emscripten/val.h>
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -202,6 +207,42 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
     return true;
 }
 
+
+EMSCRIPTEN_KEEPALIVE void fastled_declare_files(std::string jsonStr) {
+    ArduinoJson::JsonDocument doc;
+    ArduinoJson::deserializeJson(doc, jsonStr);
+    auto files = doc["files"];
+    if (files.isNull()) {
+        return;
+    }
+    auto files_array = files.as<ArduinoJson::JsonArray>();
+    if (files_array.isNull()) {
+        return;
+    }
+
+    for (auto file : files_array) {
+        auto size_obj = file["size"];
+        if (size_obj.isNull()) {
+            continue;
+        }
+        auto size = size_obj.as<int>();
+        auto path_obj = file["path"];
+        if (path_obj.isNull()) {
+            continue;
+        }
+        printf("Declaring file %s with size %d. These will become available as File system paths within the app.\n", path_obj.as<const char*>(), size);
+        jsDeclareFile(path_obj.as<const char*>(), size);
+    }
+}
+
+
+
+
 } // extern "C"
+
+
+EMSCRIPTEN_BINDINGS(_fastled_declare_files) {
+    emscripten::function("_fastled_declare_files", &fastled_declare_files);
+};
 
 #endif // __EMSCRIPTEN__

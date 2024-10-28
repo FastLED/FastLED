@@ -1174,7 +1174,7 @@ class UiManager {
             frameRate: frame_rate,
         };
         const jsonStr = JSON.stringify(options);
-        moduleInstance._fastled_inject_files(jsonStr);
+        moduleInstance._fastled_declare_files(jsonStr);
         extern_setup();
 
  
