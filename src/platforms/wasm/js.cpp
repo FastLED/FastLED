@@ -42,12 +42,12 @@ EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(int cledcontoller_id, const ScreenMap 
     // the screen map updates one at a time. While the ScreenMap::toJson() allows
     // bulk conversion and is tested. This is an ad-hoc json format for the FastLED.js
     // and it should be normalized to the way the ScreenMap::toJson() does it.
-    ArduinoJson::JsonDocument doc;
+    FLArduinoJson::JsonDocument doc;
     doc["strip_id"] = cledcontoller_id;
     doc["event"] = "set_canvas_map";
-    auto array = doc["map"].to<ArduinoJson::JsonArray>();
+    auto array = doc["map"].to<FLArduinoJson::JsonArray>();
     for (uint32_t i = 0; i < screenmap.getLength(); i++) {
-        auto entry = array[i].to<ArduinoJson::JsonArray>();
+        auto entry = array[i].to<FLArduinoJson::JsonArray>();
         entry.add(screenmap[i].x);
         entry.add(screenmap[i].y);
     }

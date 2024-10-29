@@ -43,7 +43,7 @@ class jsSlider {
     jsSlider& Group(const char* name) { mGroup = name; return *this; }
 
     const char *name() const;
-    void toJson(ArduinoJson::JsonObject& json) const;
+    void toJson(FLArduinoJson::JsonObject& json) const;
     float value() const;
     void setValue(float value);
     operator float() const;
@@ -64,7 +64,7 @@ class jsSlider {
     jsSlider& operator=(int value) { setValue(static_cast<float>(value)); return *this; }
 
   private:
-    void updateInternal(const ArduinoJson::JsonVariantConst& value);
+    void updateInternal(const FLArduinoJson::JsonVariantConst& value);
 
     jsUiInternalPtr mInternal;
     float mMin;
@@ -82,7 +82,7 @@ class jsNumberField {
     jsNumberField& Group(const char* name) { mGroup = name; return *this; }
 
     const char *name() const;
-    void toJson(ArduinoJson::JsonObject& json) const;
+    void toJson(FLArduinoJson::JsonObject& json) const;
     double value() const;
     void setValue(double value);
     operator double() const;
@@ -97,7 +97,7 @@ class jsNumberField {
     bool operator!=(int v) const { return value() != v; }
 
   private:
-    void updateInternal(const ArduinoJson::JsonVariantConst& value);
+    void updateInternal(const FLArduinoJson::JsonVariantConst& value);
 
     jsUiInternalPtr mInternal;
     double mValue;
@@ -114,7 +114,7 @@ class jsCheckbox {
     jsCheckbox& Group(const char* name) { mGroup = name; return *this; };
 
     const char *name() const;
-    void toJson(ArduinoJson::JsonObject& json) const;
+    void toJson(FLArduinoJson::JsonObject& json) const;
     bool value() const;
     void setValue(bool value);
     operator bool() const;
@@ -125,7 +125,7 @@ class jsCheckbox {
     jsCheckbox& operator=(int value) { setValue(value != 0); return *this; }
 
   private:
-    void updateInternal(const ArduinoJson::JsonVariantConst& value);
+    void updateInternal(const FLArduinoJson::JsonVariantConst& value);
 
     jsUiInternalPtr mInternal;
     bool mValue;
@@ -139,7 +139,7 @@ class jsButton {
     jsButton& Group(const char* name) { mGroup = name; return *this; }
 
     const char *name() const;
-    void toJson(ArduinoJson::JsonObject& json) const;
+    void toJson(FLArduinoJson::JsonObject& json) const;
     bool isPressed() const;
     bool clicked() const {
         bool clickedHappened = mPressed && (mPressed != mPressedLast);
@@ -164,7 +164,7 @@ class jsButton {
 
     Updater mUpdater;
 
-    void updateInternal(const ArduinoJson::JsonVariantConst& value);
+    void updateInternal(const FLArduinoJson::JsonVariantConst& value);
 
     jsUiInternalPtr mInternal;
     bool mPressed = false;

@@ -11,7 +11,7 @@
 #pragma push_macro("ARDUINOJSON_ENABLE_ARDUINO_PRINT")
 #pragma push_macro("ARDUINOJSON_ENABLE_PROGMEM")
 
-// Safely undefine ArduinoJson macros if defined
+// Safely undefine FLArduinoJson macros if defined
 #ifdef ARDUINOJSON_ENABLE_STD_STREAM
 #undef ARDUINOJSON_ENABLE_STD_STREAM
 #endif

@@ -18,8 +18,8 @@ DECLARE_SMART_PTR(jsUiInternal);
 class jsUiInternal : public Referent {
 public:
 
-    using UpdateFunction = Callback<const ArduinoJson::JsonVariantConst&>;
-    using ToJsonFunction = Callback<ArduinoJson::JsonObject&>;
+    using UpdateFunction = Callback<const FLArduinoJson::JsonVariantConst&>;
+    using ToJsonFunction = Callback<FLArduinoJson::JsonObject&>;
 
     jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc);
     ~jsUiInternal() {
@@ -31,8 +31,8 @@ public:
     }
 
     const char* name() const;
-    void update(const ArduinoJson::JsonVariantConst& json);
-    void toJson(ArduinoJson::JsonObject& json) const;
+    void update(const FLArduinoJson::JsonVariantConst& json);
+    void toJson(FLArduinoJson::JsonObject& json) const;
     int id() const;
 
     bool clearFunctions();

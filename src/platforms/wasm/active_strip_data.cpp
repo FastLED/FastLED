@@ -49,11 +49,11 @@ emscripten::val ActiveStripData::getPixelData_Uint8(int stripIndex) {
 }
 
 Str ActiveStripData::infoJsonString() {
-    ArduinoJson::JsonDocument doc;
-    auto array = doc.to<ArduinoJson::JsonArray>();
+    FLArduinoJson::JsonDocument doc;
+    auto array = doc.to<FLArduinoJson::JsonArray>();
 
     for (const auto &[stripIndex, stripData] : mStripMap) {
-        auto obj = array.add<ArduinoJson::JsonObject>();
+        auto obj = array.add<FLArduinoJson::JsonObject>();
         obj["strip_id"] = stripIndex;
         obj["type"] = "r8g8b8";
     }

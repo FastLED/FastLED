@@ -8,13 +8,13 @@ FASTLED_NAMESPACE_BEGIN
     : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc), mId(nextId()), mMutex() {}
 
  const char* jsUiInternal::name() const { return mName; }
- void jsUiInternal::update(const ArduinoJson::JsonVariantConst& json) { 
+ void jsUiInternal::update(const FLArduinoJson::JsonVariantConst& json) { 
     std::lock_guard<std::mutex> lock(mMutex);
     if (mUpdateFunc) {
         mUpdateFunc(json);
     }
 }
- void jsUiInternal::toJson(ArduinoJson::JsonObject& json) const {
+ void jsUiInternal::toJson(FLArduinoJson::JsonObject& json) const {
     std::lock_guard<std::mutex> lock(mMutex);
     if (mtoJsonFunc) {
         mtoJsonFunc(json);

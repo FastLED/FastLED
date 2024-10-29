@@ -210,13 +210,13 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(std::string jsonStr) {
-    ArduinoJson::JsonDocument doc;
-    ArduinoJson::deserializeJson(doc, jsonStr);
+    FLArduinoJson::JsonDocument doc;
+    FLArduinoJson::deserializeJson(doc, jsonStr);
     auto files = doc["files"];
     if (files.isNull()) {
         return;
     }
-    auto files_array = files.as<ArduinoJson::JsonArray>();
+    auto files_array = files.as<FLArduinoJson::JsonArray>();
     if (files_array.isNull()) {
         return;
     }

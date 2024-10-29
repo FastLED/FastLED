@@ -14,10 +14,10 @@ FASTLED_NAMESPACE_BEGIN
 
 jsNumberField::jsNumberField(const char* name, double value, double min, double max)
     : mValue(value), mMin(min), mMax(max) {
-    auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const ArduinoJson::JsonVariantConst& json) {
+    auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const FLArduinoJson::JsonVariantConst& json) {
         static_cast<jsNumberField*>(self)->updateInternal(json);
     });
-    auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, ArduinoJson::JsonObject& json) {
+    auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
         static_cast<jsNumberField*>(self)->toJson(json);
     });
     mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
@@ -32,7 +32,7 @@ const char* jsNumberField::name() const {
     return mInternal->name();
 }
 
-void jsNumberField::toJson(ArduinoJson::JsonObject& json) const {
+void jsNumberField::toJson(FLArduinoJson::JsonObject& json) const {
     json["name"] = name();
     json["group"] = mGroup.c_str();
     json["type"] = "number";
@@ -50,7 +50,7 @@ void jsNumberField::setValue(double value) {
     mValue = MAX(mMin, MIN(mMax, value));
 }
 
-void jsNumberField::updateInternal(const ArduinoJson::JsonVariantConst& value) {
+void jsNumberField::updateInternal(const FLArduinoJson::JsonVariantConst& value) {
     mValue = MAX(mMin, MIN(mMax, value.as<double>()));
 }
 

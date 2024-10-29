@@ -264,13 +264,13 @@
         ARDUINOJSON_SLOT_ID_SIZE, ARDUINOJSON_STRING_LENGTH_SIZE)
 #endif
 #define ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE \
-  namespace ArduinoJson {                  \
+  namespace FLArduinoJson {                  \
   inline namespace ARDUINOJSON_VERSION_NAMESPACE {
 #define ARDUINOJSON_END_PUBLIC_NAMESPACE \
   }                                      \
   }
 #define ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE        \
-  namespace ArduinoJson {                          \
+  namespace FLArduinoJson {                          \
   inline namespace ARDUINOJSON_VERSION_NAMESPACE { \
   namespace detail {
 #define ARDUINOJSON_END_PRIVATE_NAMESPACE \
@@ -1195,7 +1195,7 @@ struct pgm_p {
 };
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 #ifndef strlen_P
-inline size_t strlen_P(ArduinoJson::detail::pgm_p s) {
+inline size_t strlen_P(FLArduinoJson::detail::pgm_p s) {
   const char* p = s.address;
   ARDUINOJSON_ASSERT(p != NULL);
   while (pgm_read_byte(p))
@@ -1204,7 +1204,7 @@ inline size_t strlen_P(ArduinoJson::detail::pgm_p s) {
 }
 #endif
 #ifndef strncmp_P
-inline int strncmp_P(const char* a, ArduinoJson::detail::pgm_p b, size_t n) {
+inline int strncmp_P(const char* a, FLArduinoJson::detail::pgm_p b, size_t n) {
   const char* s1 = a;
   const char* s2 = b.address;
   ARDUINOJSON_ASSERT(s1 != NULL);
@@ -1223,7 +1223,7 @@ inline int strncmp_P(const char* a, ArduinoJson::detail::pgm_p b, size_t n) {
 }
 #endif
 #ifndef strcmp_P
-inline int strcmp_P(const char* a, ArduinoJson::detail::pgm_p b) {
+inline int strcmp_P(const char* a, FLArduinoJson::detail::pgm_p b) {
   const char* s1 = a;
   const char* s2 = b.address;
   ARDUINOJSON_ASSERT(s1 != NULL);
@@ -1241,7 +1241,7 @@ inline int strcmp_P(const char* a, ArduinoJson::detail::pgm_p b) {
 }
 #endif
 #ifndef memcmp_P
-inline int memcmp_P(const void* a, ArduinoJson::detail::pgm_p b, size_t n) {
+inline int memcmp_P(const void* a, FLArduinoJson::detail::pgm_p b, size_t n) {
   const uint8_t* p1 = reinterpret_cast<const uint8_t*>(a);
   const char* p2 = b.address;
   ARDUINOJSON_ASSERT(p1 != NULL);
@@ -1256,7 +1256,7 @@ inline int memcmp_P(const void* a, ArduinoJson::detail::pgm_p b, size_t n) {
 }
 #endif
 #ifndef memcpy_P
-inline void* memcpy_P(void* dst, ArduinoJson::detail::pgm_p src, size_t n) {
+inline void* memcpy_P(void* dst, FLArduinoJson::detail::pgm_p src, size_t n) {
   uint8_t* d = reinterpret_cast<uint8_t*>(dst);
   const char* s = src.address;
   ARDUINOJSON_ASSERT(d != NULL);
@@ -1268,14 +1268,14 @@ inline void* memcpy_P(void* dst, ArduinoJson::detail::pgm_p src, size_t n) {
 }
 #endif
 #ifndef pgm_read_dword
-inline uint32_t pgm_read_dword(ArduinoJson::detail::pgm_p p) {
+inline uint32_t pgm_read_dword(FLArduinoJson::detail::pgm_p p) {
   uint32_t result;
   memcpy_P(&result, p.address, 4);
   return result;
 }
 #endif
 #ifndef pgm_read_float
-inline float pgm_read_float(ArduinoJson::detail::pgm_p p) {
+inline float pgm_read_float(FLArduinoJson::detail::pgm_p p) {
   float result;
   memcpy_P(&result, p.address, sizeof(float));
   return result;
@@ -1284,11 +1284,11 @@ inline float pgm_read_float(ArduinoJson::detail::pgm_p p) {
 #ifndef pgm_read_double
 #  if defined(__SIZEOF_DOUBLE__) && defined(__SIZEOF_FLOAT__) && \
       __SIZEOF_DOUBLE__ == __SIZEOF_FLOAT__
-inline double pgm_read_double(ArduinoJson::detail::pgm_p p) {
+inline double pgm_read_double(FLArduinoJson::detail::pgm_p p) {
   return pgm_read_float(p.address);
 }
 #  else
-inline double pgm_read_double(ArduinoJson::detail::pgm_p p) {
+inline double pgm_read_double(FLArduinoJson::detail::pgm_p p) {
   double result;
   memcpy_P(&result, p.address, sizeof(double));
   return result;
@@ -1296,7 +1296,7 @@ inline double pgm_read_double(ArduinoJson::detail::pgm_p p) {
 #  endif
 #endif
 #ifndef pgm_read_ptr
-inline void* pgm_read_ptr(ArduinoJson::detail::pgm_p p) {
+inline void* pgm_read_ptr(FLArduinoJson::detail::pgm_p p) {
   void* result;
   memcpy_P(&result, p.address, sizeof(result));
   return result;
@@ -2011,7 +2011,7 @@ typedef unsigned long JsonUInt;
 #endif
 ARDUINOJSON_END_PUBLIC_NAMESPACE
 #define ARDUINOJSON_ASSERT_INTEGER_TYPE_IS_SUPPORTED(T)                  \
-  static_assert(sizeof(T) <= sizeof(ArduinoJson::JsonInteger),           \
+  static_assert(sizeof(T) <= sizeof(FLArduinoJson::JsonInteger),           \
                 "To use 64-bit integers with ArduinoJson, you must set " \
                 "ARDUINOJSON_USE_LONG_LONG to 1. See "                   \
                 "https://arduinojson.org/v7/api/config/use_long_long/");
@@ -3206,9 +3206,9 @@ class VariantRefBase : public VariantTag {
   VariantData* getOrCreateData() const {
     return VariantAttorney::getOrCreateData(derived());
   }
-  FORCE_INLINE ArduinoJson::JsonVariant getVariant() const;
-  FORCE_INLINE ArduinoJson::JsonVariantConst getVariantConst() const {
-    return ArduinoJson::JsonVariantConst(getData(), getResourceManager());
+  FORCE_INLINE FLArduinoJson::JsonVariant getVariant() const;
+  FORCE_INLINE FLArduinoJson::JsonVariantConst getVariantConst() const {
+    return FLArduinoJson::JsonVariantConst(getData(), getResourceManager());
   }
   template <typename T>
   FORCE_INLINE enable_if_t<is_same<T, JsonVariantConst>::value, T> getVariant()
@@ -3232,7 +3232,7 @@ class VariantRefBase : public VariantTag {
   bool doSet(T&& value, false_type) const;
   template <typename TConverter, typename T>
   bool doSet(T&& value, true_type) const;
-  ArduinoJson::JsonVariant getOrCreateVariant() const;
+  FLArduinoJson::JsonVariant getOrCreateVariant() const;
 };
 template <typename TUpstream>
 class ElementProxy : public VariantRefBase<ElementProxy<TUpstream>>,
@@ -4434,13 +4434,13 @@ struct VariantComparer : ComparerBase {
 };
 template <typename T>
 struct Comparer<
-    T, enable_if_t<is_convertible<T, ArduinoJson::JsonVariantConst>::value>>
+    T, enable_if_t<is_convertible<T, FLArduinoJson::JsonVariantConst>::value>>
     : VariantComparer {
   explicit Comparer(const T& value)
       : VariantComparer(static_cast<JsonVariantConst>(value)) {}
 };
 template <typename T>
-CompareResult compare(ArduinoJson::JsonVariantConst lhs, const T& rhs) {
+CompareResult compare(FLArduinoJson::JsonVariantConst lhs, const T& rhs) {
   Comparer<T> comparer(rhs);
   return accept(lhs, comparer);
 }
@@ -5034,7 +5034,7 @@ class DummyWriter {
   }
 };
 template <template <typename> class TSerializer>
-size_t measure(ArduinoJson::JsonVariantConst source) {
+size_t measure(FLArduinoJson::JsonVariantConst source) {
   DummyWriter dp;
   auto data = VariantAttorney::getData(source);
   auto resources = VariantAttorney::getResourceManager(source);
@@ -5184,27 +5184,27 @@ ARDUINOJSON_END_PRIVATE_NAMESPACE
 #endif
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 template <template <typename> class TSerializer, typename TWriter>
-size_t doSerialize(ArduinoJson::JsonVariantConst source, TWriter writer) {
+size_t doSerialize(FLArduinoJson::JsonVariantConst source, TWriter writer) {
   auto data = VariantAttorney::getData(source);
   auto resources = VariantAttorney::getResourceManager(source);
   TSerializer<TWriter> serializer(writer, resources);
   return VariantData::accept(data, resources, serializer);
 }
 template <template <typename> class TSerializer, typename TDestination>
-size_t serialize(ArduinoJson::JsonVariantConst source,
+size_t serialize(FLArduinoJson::JsonVariantConst source,
                  TDestination& destination) {
   Writer<TDestination> writer(destination);
   return doSerialize<TSerializer>(source, writer);
 }
 template <template <typename> class TSerializer>
 enable_if_t<!TSerializer<StaticStringWriter>::producesText, size_t> serialize(
-    ArduinoJson::JsonVariantConst source, void* buffer, size_t bufferSize) {
+    FLArduinoJson::JsonVariantConst source, void* buffer, size_t bufferSize) {
   StaticStringWriter writer(reinterpret_cast<char*>(buffer), bufferSize);
   return doSerialize<TSerializer>(source, writer);
 }
 template <template <typename> class TSerializer>
 enable_if_t<TSerializer<StaticStringWriter>::producesText, size_t> serialize(
-    ArduinoJson::JsonVariantConst source, void* buffer, size_t bufferSize) {
+    FLArduinoJson::JsonVariantConst source, void* buffer, size_t bufferSize) {
   StaticStringWriter writer(reinterpret_cast<char*>(buffer), bufferSize);
   size_t n = doSerialize<TSerializer>(source, writer);
   if (n < bufferSize)
@@ -5213,7 +5213,7 @@ enable_if_t<TSerializer<StaticStringWriter>::producesText, size_t> serialize(
 }
 template <template <typename> class TSerializer, typename TChar, size_t N>
 enable_if_t<IsChar<TChar>::value, size_t> serialize(
-    ArduinoJson::JsonVariantConst source, TChar (&buffer)[N]) {
+    FLArduinoJson::JsonVariantConst source, TChar (&buffer)[N]) {
   return serialize<TSerializer>(source, buffer, N);
 }
 template <typename TWriter>
@@ -7284,16 +7284,16 @@ ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 template <typename TDestination>
 detail::enable_if_t<!detail::is_pointer<TDestination>::value, size_t>
 serializeJsonPretty(JsonVariantConst source, TDestination& destination) {
-  using namespace ArduinoJson::detail;
+  using namespace FLArduinoJson::detail;
   return serialize<PrettyJsonSerializer>(source, destination);
 }
 inline size_t serializeJsonPretty(JsonVariantConst source, void* buffer,
                                   size_t bufferSize) {
-  using namespace ArduinoJson::detail;
+  using namespace FLArduinoJson::detail;
   return serialize<PrettyJsonSerializer>(source, buffer, bufferSize);
 }
 inline size_t measureJsonPretty(JsonVariantConst source) {
-  using namespace ArduinoJson::detail;
+  using namespace FLArduinoJson::detail;
   return measure<PrettyJsonSerializer>(source);
 }
 class MsgPackBinary {
@@ -8110,16 +8110,16 @@ ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 template <typename TDestination>
 detail::enable_if_t<!detail::is_pointer<TDestination>::value, size_t>
 serializeMsgPack(JsonVariantConst source, TDestination& output) {
-  using namespace ArduinoJson::detail;
+  using namespace FLArduinoJson::detail;
   return serialize<MsgPackSerializer>(source, output);
 }
 inline size_t serializeMsgPack(JsonVariantConst source, void* output,
                                size_t size) {
-  using namespace ArduinoJson::detail;
+  using namespace FLArduinoJson::detail;
   return serialize<MsgPackSerializer>(source, output, size);
 }
 inline size_t measureMsgPack(JsonVariantConst source) {
-  using namespace ArduinoJson::detail;
+  using namespace FLArduinoJson::detail;
   return measure<MsgPackSerializer>(source);
 }
 ARDUINOJSON_END_PUBLIC_NAMESPACE
@@ -8134,18 +8134,18 @@ ARDUINOJSON_END_PUBLIC_NAMESPACE
 #define ARDUINOJSON_COMPILE_ERROR(msg) ARDUINOJSON_PRAGMA(GCC error msg)
 #define ARDUINOJSON_STRINGIFY(S) #S
 #define ARDUINOJSON_DEPRECATION_ERROR(X, Y) \
-  ARDUINOJSON_COMPILE_ERROR(ARDUINOJSON_STRINGIFY(X is a Y from ArduinoJson 5. Please see https:/\/arduinojson.org/v7/upgrade-from-v5/ to learn how to upgrade to ArduinoJson 7))
+  ARDUINOJSON_COMPILE_ERROR(ARDUINOJSON_STRINGIFY(X is a Y from FLArduinoJson 5. Please see https:/\/arduinojson.org/v7/upgrade-from-v5/ to learn how to upgrade to FLArduinoJson 7))
 #define StaticJsonBuffer ARDUINOJSON_DEPRECATION_ERROR(StaticJsonBuffer, class)
 #define DynamicJsonBuffer ARDUINOJSON_DEPRECATION_ERROR(DynamicJsonBuffer, class)
 #define JsonBuffer ARDUINOJSON_DEPRECATION_ERROR(JsonBuffer, class)
 #define RawJson ARDUINOJSON_DEPRECATION_ERROR(RawJson, function)
-#define ARDUINOJSON_NAMESPACE _Pragma ("GCC warning \"ARDUINOJSON_NAMESPACE is deprecated, use ArduinoJson instead\"") ArduinoJson
-#define JSON_ARRAY_SIZE(N) _Pragma ("GCC warning \"JSON_ARRAY_SIZE is deprecated, you don't need to compute the size anymore\"") (ArduinoJson::detail::sizeofArray(N))
-#define JSON_OBJECT_SIZE(N) _Pragma ("GCC warning \"JSON_OBJECT_SIZE is deprecated, you don't need to compute the size anymore\"") (ArduinoJson::detail::sizeofObject(N))
+#define ARDUINOJSON_NAMESPACE _Pragma ("GCC warning \"ARDUINOJSON_NAMESPACE is deprecated, use ArduinoJson instead\"") FLArduinoJson
+#define JSON_ARRAY_SIZE(N) _Pragma ("GCC warning \"JSON_ARRAY_SIZE is deprecated, you don't need to compute the size anymore\"") (FLArduinoJson::detail::sizeofArray(N))
+#define JSON_OBJECT_SIZE(N) _Pragma ("GCC warning \"JSON_OBJECT_SIZE is deprecated, you don't need to compute the size anymore\"") (FLArduinoJson::detail::sizeofObject(N))
 #define JSON_STRING_SIZE(N) _Pragma ("GCC warning \"JSON_STRING_SIZE is deprecated, you don't need to compute the size anymore\"") (N+1)
 #else
-#define JSON_ARRAY_SIZE(N) (ArduinoJson::detail::sizeofArray(N))
-#define JSON_OBJECT_SIZE(N) (ArduinoJson::detail::sizeofObject(N))
+#define JSON_ARRAY_SIZE(N) (FLArduinoJson::detail::sizeofArray(N))
+#define JSON_OBJECT_SIZE(N) (FLArduinoJson::detail::sizeofObject(N))
 #define JSON_STRING_SIZE(N) (N+1)
 #endif
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
@@ -8213,7 +8213,7 @@ inline JsonObject JsonArray::createNestedObject() const {
 }
 ARDUINOJSON_END_PUBLIC_NAMESPACE
 
-// using namespace ArduinoJson;
+// using namespace FLArduinoJson;
 
 #else
 

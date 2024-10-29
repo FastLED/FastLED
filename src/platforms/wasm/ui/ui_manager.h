@@ -30,7 +30,7 @@ class jsUiManager : EngineEvents::Listener {
     static void updateUiComponents(const char* jsonStr) ;
 
   private:
-    static void executeUiUpdates(const ArduinoJson::JsonDocument& doc);
+    static void executeUiUpdates(const FLArduinoJson::JsonDocument& doc);
     typedef FixedSet<WeakPtr<jsUiInternal>, 64> jsUIPtrSet;
     friend class Singleton<jsUiManager>;
     jsUiManager() {
@@ -52,25 +52,25 @@ class jsUiManager : EngineEvents::Listener {
     void onEndShowLeds() override {
         if (mItemsAdded) {
             // std::string jsonStr = toJsonStr();
-            ArduinoJson::JsonDocument doc;
-            ArduinoJson::JsonArray jarray = doc.to<ArduinoJson::JsonArray>();
+            FLArduinoJson::JsonDocument doc;
+            FLArduinoJson::JsonArray jarray = doc.to<FLArduinoJson::JsonArray>();
             toJson(jarray);
             Str buff;
-            ArduinoJson::serializeJson(doc, buff);
+            FLArduinoJson::serializeJson(doc, buff);
             updateJs(buff.c_str());
             mItemsAdded = false;
         }
     }
 
     std::vector<jsUiInternalPtr> getComponents();
-    void toJson(ArduinoJson::JsonArray& json);
+    void toJson(FLArduinoJson::JsonArray& json);
 
     jsUIPtrSet mComponents;
     std::mutex mMutex;
 
     static jsUiManager &instance();
     bool mItemsAdded = false;
-    ArduinoJson::JsonDocument mPendingJsonUpdate;
+    FLArduinoJson::JsonDocument mPendingJsonUpdate;
     bool mHasPendingUpdate = false;
 };
 
