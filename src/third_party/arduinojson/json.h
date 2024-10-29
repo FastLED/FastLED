@@ -13,16 +13,12 @@
 #if defined(ARDUINO)
 #pragma push_macro("ARDUINO")
 #undef ARDUINO
-#define FASTLED_RESTORE_ARDUINO
 #endif
 
 #define FASTLED_JSON_GUARD
-
 #include "json.hpp"
-
 #undef FASTLED_JSON_GUARD
 
-#if defined(FASTLED_RESTORE_ARDUINO)
+#if defined(ARDUINO)
 #pragma pop_macro("ARDUINO")
-#undef FASTLED_RESTORE_ARDUINO
 #endif
