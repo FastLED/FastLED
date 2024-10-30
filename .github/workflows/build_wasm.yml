@@ -71,7 +71,7 @@ jobs:
         with:
           name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
           path: examples/wasm/fastled_js/*.*
-          if-no-files-found: error
+          if-no-files-found: ${{ matrix.os == 'ubuntu-latest' && 'error' || 'ignore' }}
 
       - name: Install Playwright and verify FastLED_onFrame
         run: |
