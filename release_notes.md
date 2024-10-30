@@ -5,6 +5,7 @@ FastLED 3.9.2
   * See define `FASTLED_LED_OVERCLOCK`
     * Example: `#define FASTLED_OVERCLOCK 1.2` (gives 20% overclock).
     * You can set this define before you include `"FastLED.h"`
+    * Slower chips like AVR which do software bitbanging will ignore this.
   * You can either overclock globally or per led chipset on supported chipsets.
   * I've seen 20% overclock on my own test setup.
     * Assuming 550 WS2812's can be driven at 60fps, a 20% overclock means you can now drive 660 at @ 60fps.
