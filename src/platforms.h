@@ -1,9 +1,12 @@
-#ifndef __INC_PLATFORMS_H
-#define __INC_PLATFORMS_H
+#pragma once
 
 #include "FastLED.h"
 
 #include "fastled_config.h"
+
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 /// @file platforms.h
 /// Determines which platforms headers to include
@@ -54,4 +57,5 @@
 #include "platforms/avr/fastled_avr.h"
 #endif
 
-#endif
+
+FASTLED_NAMESPACE_END

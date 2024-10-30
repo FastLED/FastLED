@@ -11,7 +11,7 @@
 
 #include "fastspi_bitbang.h"
 
-FASTLED_NAMESPACE_BEGIN
+
 
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
 #define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
@@ -33,6 +33,8 @@ FASTLED_NAMESPACE_BEGIN
 // mappings are known at compile time.
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_STUB_IMPL)
 

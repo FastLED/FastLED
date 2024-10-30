@@ -4,6 +4,7 @@
 #include "json.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
+#include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

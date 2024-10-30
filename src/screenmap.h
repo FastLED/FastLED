@@ -13,6 +13,9 @@
 #include "str.h"
 #include "fixed_map.h"
 #include "json.h"
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 class Str;
 
@@ -113,3 +116,6 @@ class ScreenMap {
     float mDiameter = -1.0f;  // Only serialized if it's not > 0.0f.
     LUTXYFLOATPtr mLookUpTable;
 };
+
+
+FASTLED_NAMESPACE_END

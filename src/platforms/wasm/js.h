@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
+#include "str.h"
 
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
@@ -15,7 +16,7 @@
 #include "ptr.h"
 #include "active_strip_data.h"
 
-FASTLED_NAMESPACE_BEGIN
+
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.
@@ -30,6 +31,8 @@ EMSCRIPTEN_KEEPALIVE uint32_t micros();
 // Replacement for 'delay' in WebAssembly context
 EMSCRIPTEN_KEEPALIVE void delay(int ms);
 }
+
+FASTLED_NAMESPACE_BEGIN
 
 // Sets the canvas size. This assumes one strip per row. This is
 // method is pretty inflexible and is likely to change in the future.

@@ -72,3 +72,5 @@ private:
     StripDataMap mStripMap;
     ScreenMapMap mScreenMap;
 };
+
+FASTLED_NAMESPACE_END

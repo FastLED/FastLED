@@ -13,7 +13,7 @@
 /// designed for high-performance LED programming. 
 
 
-FASTLED_NAMESPACE_BEGIN
+
 
 
 #include <stdint.h>
@@ -387,7 +387,7 @@ FASTLED_NAMESPACE_BEGIN
 
 
 
-
+FASTLED_NAMESPACE_BEGIN
 
 
 ///////////////////////////////////////////////////////////////////////

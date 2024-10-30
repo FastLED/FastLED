@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string.h>
 #include "json.h"
+#include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

@@ -1,5 +1,4 @@
-#ifndef __INC_PIXELSET_H
-#define __INC_PIXELSET_H
+#pragma once
 
 #include "FastLED.h"
 #include "force_inline.h"
@@ -8,6 +7,10 @@
 #include <stdlib.h>
 #endif
 
+
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 template<class PIXEL_TYPE>
 class CPixelView;
@@ -424,5 +427,4 @@ public:
 
 /// @} PixelSet
 
-
-#endif
+FASTLED_NAMESPACE_END

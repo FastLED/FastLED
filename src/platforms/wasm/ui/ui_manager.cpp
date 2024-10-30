@@ -3,9 +3,12 @@
 #include "ui_manager.h"
 #include "fixed_map.h"
 #include "json.h"
+
 #include <emscripten.h>
 #include <sstream>
 #include <vector>
+
+#include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

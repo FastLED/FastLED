@@ -3,6 +3,10 @@
 #include "crgb.h"
 #include "lib8tion/math8.h"
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 CRGB CRGB::computeAdjustment(uint8_t scale, const CRGB & colorCorrection, const CRGB & colorTemperature) {
     #if defined(NO_CORRECTION) && (NO_CORRECTION==1)
             return CRGB(scale,scale,scale);
@@ -35,3 +39,5 @@ CRGB CRGB::blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2) {
         blend8(p1.b, p2.b, amountOfP2)
     );
 }
+
+FASTLED_NAMESPACE_END

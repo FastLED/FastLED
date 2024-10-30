@@ -1,6 +1,9 @@
 #ifdef __EMSCRIPTEN__
 
+#include "namespace.h"
+
 #include "ui_internal.h"
+
 
 FASTLED_NAMESPACE_BEGIN
 
