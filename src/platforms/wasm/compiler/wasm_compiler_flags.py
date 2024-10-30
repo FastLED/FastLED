@@ -41,6 +41,7 @@ env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 
 wasmflags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
+    "-DFASTLED_FORCE_NAMESPACE=1",
     "-DFASTLED_USE_PROGMEM=0",
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
     "-sALLOW_MEMORY_GROWTH=0",
