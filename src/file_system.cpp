@@ -13,6 +13,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// WEAK SYMBOL
 // Override this if you want to supply a file system for your platform.
 __attribute__((weak)) FsImplRef make_filesystem(int cs_pin) {
     return FsImplRef::Null();

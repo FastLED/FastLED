@@ -117,6 +117,7 @@ class FsImplWasm : public FsImpl {
     void end() override {}
 
     void close(FileHandleRef file) override {
+        printf('Closing file %s\n', file->path());
         if (file) {
             file->close();
         }
