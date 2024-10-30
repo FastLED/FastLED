@@ -27,8 +27,9 @@ jobs:
           colima start --cpu 2 --memory 4 || (echo "Colima failed to start" && exit 1)
 
       - name: Verify Colima installation
-        run: colima version || (echo "Colima is not installed correctly" && exit 1)
-        run: docker --version
+        run: |
+          colima version || (echo "Colima is not installed correctly" && exit 1)
+          docker --version
 
       - name: Install Python
         uses: actions/setup-python@v5
