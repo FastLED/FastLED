@@ -1186,34 +1186,47 @@ class UiManager {
             return data;
         };
 
-        const fetchAllFiles = async (filesJson) => {
-            const fetchPromises = filesJson.map(async file => {
-                try {
-                    const data = await fetchFilePromise(file.path);
-                    console.log(`File fetched: ${file.path}, size: ${file.size}`);
-                    
-                    const ptr = moduleInstance._malloc(file.size);
-                    const ptrName = moduleInstance._malloc(file.path.length + 1);
-                    const fileDataArray = new Uint8Array(data);
-                    const n = moduleInstance.lengthBytesUTF8(file.path);
-                    const nameDataArray = new Uint8Array(n);
-                    
-                    moduleInstance.stringToUTF8(file.path, nameDataArray, n);
-                    moduleInstance.HEAPU8.set(fileDataArray, ptr);
-                    moduleInstance.HEAPU8.set(nameDataArray, ptrName);
-                    
-                    moduleInstance.ccall('jsAppendFile', 'number', ['number', 'number', 'number'], [ptrName, ptr, file.size]);
-                    
-                    moduleInstance._free(ptr);
-                    moduleInstance._free(ptrName);
-                } catch (error) {
-                    console.error(`Error processing file ${file.path}:`, error);
-                }
-            });
+        const fetchAllFiles = (filesJson, onComplete) => {
+            let filesRemaining = filesJson.length;
             
-            // Still wait for all promises to complete before continuing
-            await Promise.all(fetchPromises);
-            console.log("All files processed");
+            const processFile = (file) => {
+                fetch(file.path)
+                    .then(response => response.arrayBuffer())
+                    .then(data => {
+                        console.log(`File fetched: ${file.path}, size: ${file.size}`);
+                        
+                        const ptr = moduleInstance._malloc(file.size);
+                        const ptrName = moduleInstance._malloc(file.path.length + 1);
+                        const fileDataArray = new Uint8Array(data);
+                        const n = moduleInstance.lengthBytesUTF8(file.path);
+                        const nameDataArray = new Uint8Array(n);
+                        
+                        moduleInstance.stringToUTF8(file.path, nameDataArray, n);
+                        moduleInstance.HEAPU8.set(fileDataArray, ptr);
+                        moduleInstance.HEAPU8.set(nameDataArray, ptrName);
+                        
+                        moduleInstance.ccall('jsAppendFile', 'number', ['number', 'number', 'number'], [ptrName, ptr, file.size]);
+                        
+                        moduleInstance._free(ptr);
+                        moduleInstance._free(ptrName);
+                        
+                        filesRemaining--;
+                        if (filesRemaining === 0) {
+                            console.log("All files processed");
+                            onComplete && onComplete();
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error processing file ${file.path}:`, error);
+                        filesRemaining--;
+                        if (filesRemaining === 0) {
+                            console.log("All files processed");
+                            onComplete && onComplete();
+                        }
+                    });
+            };
+            
+            filesJson.forEach(processFile);
         };
 
         fetchAllFiles(filesJson);
