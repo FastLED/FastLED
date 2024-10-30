@@ -1,5 +1,6 @@
-/// @file    VideoTest.ino
-/// @brief   Demonstrates a simple video test using alternating black/red pixels
+/// @file    Frame2Video.ino
+/// @brief   Demonstrates drawing to a frame buffer, which is used as source video for the memory player.
+///          The render pattern is alternating black/red pixels as a checkerboard.
 /// @example VideoTest.ino
 
 

@@ -13,8 +13,8 @@
 #   1. docker login
 #   2. ./wasm (builds the image and then runs a container)
 #     a. This will create an image tagged by fastled-wasm-compiler
-#   3. docker tag fastled-wasm-compiler:latest niteris/fastled-wasm:latest-arm
-#   4. docker push niteris/fastled-wasm-arm:latest-arm
+#   3. docker tag fastled-wasm-compiler-arm64:latest niteris/fastled-wasm-arm64:latest
+#   4. docker push niteris/fastled-wasm-arm64:latest
 
 
 echo "Compiles sketch for wasm"
