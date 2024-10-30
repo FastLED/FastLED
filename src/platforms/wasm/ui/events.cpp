@@ -11,15 +11,10 @@
 
 #include <map>
 
-
-#include "platforms/wasm/js.h"
-#include "platforms/wasm/active_strip_data.h"
 #include "events.h"
-#include "platforms/wasm/strip_id_map.h"
-#include "platforms/wasm/js.h"
-
-
 #include "namespace.h"
+
+#include "platforms/wasm/js.h"
 
 FASTLED_NAMESPACE_BEGIN
 

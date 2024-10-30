@@ -10,6 +10,7 @@
 #include "events.h"
 #include "engine_events.h"
 #include "platforms/wasm/fs_wasm.h"
+#include "namespace.h"
 
 
 extern void setup();
