@@ -3,6 +3,25 @@
 
 #include <string.h>
 
+#if defined(__clang__)
+// Clang doesn't have variable length arrays. Therefore we need to emulate them using
+// alloca.
+#define VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION 1
+#else
+// Else, assume the compiler is gcc, which has variable length arrays
+#define VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION 0
+#endif
+
+#if !VARIABLE_LENGTH_ARRAY_NEEDS_EMULATION
+#define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) TYPE NAME[SIZE]
+#else
+#include <alloca.h>
+#define VARIABLE_LENGTH_ARRAY(TYPE, NAME, SIZE) \
+    TYPE* NAME = reinterpret_cast<TYPE*>(alloca(sizeof(TYPE) * (SIZE)))
+#endif
+
+
+
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 #include "FastLED.h"
@@ -756,8 +775,9 @@ void fill_noise8(CRGB *leds, int num_leds,
         const int LedsRemaining = num_leds - j;
         const int LedsPer = LedsRemaining > 255 ? 255 : LedsRemaining;  // limit to 255 max
 
-        uint8_t V[LedsPer];
-        uint8_t H[LedsPer];
+        if (LedsPer <= 0) continue;
+        VARIABLE_LENGTH_ARRAY(uint8_t, V, LedsPer);
+        VARIABLE_LENGTH_ARRAY(uint8_t, H, LedsPer);
 
         memset(V, 0, LedsPer);
         memset(H, 0, LedsPer);
@@ -781,9 +801,9 @@ void fill_noise16(CRGB *leds, int num_leds,
     for (int j = 0; j < num_leds; j += 255) {
         const int LedsRemaining = num_leds - j;
         const int LedsPer = LedsRemaining > 255 ? 255 : LedsRemaining;  // limit to 255 max
-
-        uint8_t V[LedsPer];
-        uint8_t H[LedsPer];
+        if (LedsPer <= 0) continue;
+        VARIABLE_LENGTH_ARRAY(uint8_t, V, LedsPer);
+        VARIABLE_LENGTH_ARRAY(uint8_t, H, LedsPer);
 
         memset(V, 0, LedsPer);
         memset(H, 0, LedsPer);
@@ -800,8 +820,10 @@ void fill_noise16(CRGB *leds, int num_leds,
 void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
             uint8_t octaves, uint16_t x, int xscale, uint16_t y, int yscale, uint16_t time,
             uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time,bool blend) {
-  uint8_t V[height][width];
-  uint8_t H[height][width];
+  const size_t array_size = (size_t)height * width;
+  if (array_size <= 0) return;
+  VARIABLE_LENGTH_ARRAY(uint8_t, V, array_size);
+  VARIABLE_LENGTH_ARRAY(uint8_t, H, array_size);
 
   memset(V,0,height*width);
   memset(H,0,height*width);
@@ -814,7 +836,7 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
   for(int i = 0; i < height; ++i) {
     int wb = i*width;
     for(int j = 0; j < width; ++j) {
-      CRGB led(CHSV(H[h1-i][w1-j],255,V[i][j]));
+      CRGB led(CHSV(H[(h1-i)*width + (w1-j)], 255, V[i*width + j]));
 
       int pos = j;
       if(serpentine && (i & 0x1)) {
@@ -822,7 +844,11 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
       }
 
       if(blend) {
-        leds[wb+pos] >>= 1; leds[wb+pos] += (led>>=1);
+        // Safer blending to avoid potential undefined behavior
+        CRGB temp = leds[wb+pos];
+        temp.nscale8(128); // Scale by 50%
+        led.nscale8(128);
+        leds[wb+pos] = temp + led;
       } else {
         leds[wb+pos] = led;
       }
@@ -830,12 +856,14 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
   }
 }
 
+
 void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
             uint8_t octaves, uint32_t x, int xscale, uint32_t y, int yscale, uint32_t time,
             uint8_t hue_octaves, uint16_t hue_x, int hue_xscale, uint16_t hue_y, uint16_t hue_yscale,uint16_t hue_time, bool blend, uint16_t hue_shift) {
-  uint8_t V[height][width];
-  uint8_t H[height][width];
 
+  VARIABLE_LENGTH_ARRAY(uint8_t, V, height*width);
+  VARIABLE_LENGTH_ARRAY(uint8_t, H, height*width);
+  
   memset(V,0,height*width);
   memset(H,0,height*width);
 
@@ -852,7 +880,7 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
   for(int i = 0; i < height; ++i) {
     int wb = i*width;
     for(int j = 0; j < width; ++j) {
-      CRGB led(CHSV(hue_shift + (H[h1-i][w1-j]),196,V[i][j]));
+      CRGB led(CHSV(hue_shift + (H[(h1-i)*width + (w1-j)]), 196, V[i*width + j]));
 
       int pos = j;
       if(serpentine && (i & 0x1)) {
