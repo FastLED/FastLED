@@ -1,5 +1,6 @@
 #pragma once
 
+// Note, fs.h breaks ESPAsyncWebServer so we use file_system.h instead.
 
 #include <stdint.h>
 #include <stddef.h>

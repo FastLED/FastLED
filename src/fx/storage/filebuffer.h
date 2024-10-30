@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "fs.h"
+#include "file_system.h"
 #include "ref.h"
 #include "namespace.h"
 

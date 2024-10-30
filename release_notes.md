@@ -10,6 +10,7 @@ FastLED 3.9.2
   * I've seen 20% overclock on my own test setup.
     * Assuming 550 WS2812's can be driven at 60fps, a 20% overclock means you can now drive 660 at @ 60fps.
     * See examples/Overclock.ino on how to do this.
+* Fixes `ESPAsyncWebServer.h` namespace collision with `fs.h` in FastLED, which has been renamed to `file_system.h`
 
 FastLED 3.9.1
 =============
