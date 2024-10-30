@@ -91,12 +91,15 @@ protected:
 // 		STREAM.begin(115200);
 // 	}
 // };
+
+FASTLED_NAMESPACE_END
 #endif
 #endif
 
 // Emulution layer to support RGBW leds on RGB controllers. This works by creating
 // a side buffer dedicated for the RGBW data. The RGB data is then converted to RGBW
 // and sent to the delegate controller for rendering as if it were RGB data.
+FASTLED_NAMESPACE_BEGIN
 template <
 	typename CONTROLLER,
 	EOrder RGB_ORDER = GRB>  // Default on WS2812>
