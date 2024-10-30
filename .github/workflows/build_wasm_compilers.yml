@@ -1,18 +1,28 @@
 name: wasm compilers
 
 on:
-  push:
-    branches:
-      - master
-
+    push:
+      branches:
+        - master
+  
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Check for changes
+      id: changes
+      run: |
+        git fetch origin master
+        if [ "$(git rev-list --count HEAD...origin/master)" -eq 0 ]; then
+          echo "No changes detected"
+          exit 0
+        fi
+      shell: bash
 
 
     - name: Install UV
@@ -30,3 +40,4 @@ jobs:
             gh release upload "$GITHUB_REF" "$file" --clobber
           fi
         done
+      shell: bash
