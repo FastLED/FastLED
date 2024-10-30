@@ -39,12 +39,24 @@ setup_docker2exe() {
         echo "docker2exe.exe already exists, skipping download."
     fi
     ./ignore/docker2exe.exe --name fastled --image niteris/fastled-wasm --module "github.com/FastLED/FastLED"
+    echo "Making wasm web cmd"
+    mv ./ignore/fastled-darwin-amd64 ./ignore/fastled-wasm-darwin-amd64
+    mv ./ignore/fastled-darwin-arm64 ./ignore/fastled-wasm-darwin-arm64
+    mv ./ignore/fastled-linux-amd64 ./ignore/fastled-wasm-linux-amd64
+    mv ./ignore/fastled-windows-amd64.exe ./ignore/fastled-wasm-windows-amd64.exe
+    echo "Making wasm full cmd with no dependencies"
+    ./ignore/docker2exe.exe --name fastled --image niteris/fastled-wasm --module "github.com/FastLED/FastLED" --embed
+    mv ./ignore/fastled-darwin-amd64 ./ignore/fastled-wasm-darwin-amd64-full
+    mv ./ignore/fastled-darwin-arm64 ./ignore/fastled-wasm-darwin-arm64-full
+    mv ./ignore/fastled-linux-amd64 ./ignore/fastled-wasm-linux-amd64-full
+    mv ./ignore/fastled-windows-amd64.exe ./ignore/fastled-wasm-windows-amd64-full.exe
+    echo "Docker2exe done."
 }
 
 echo "Compiles sketch for wasm"
 
 # Check if -b is in the arguments
-if [[ " $@ " =~ " -bc " ]]; then
+if [[ " $@ " =~ " --build_wasm_compiler " ]]; then
     setup_docker2exe
     exit 0
 fi
