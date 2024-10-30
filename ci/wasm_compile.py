@@ -243,7 +243,7 @@ def setup_docker2exe() -> None:
         "--module",
         "github.com/FastLED/FastLED",
         "--target",
-        "windows/amd64",
+        "linux/amd64",
     ]
     full_cmd = slim_cmd + ["--embed"]
 
