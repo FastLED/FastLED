@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef FASTLED_FORCE_NAMESPACE
+#define FASTLED_NAMESPACE fl
+#endif
+
 #ifndef FASTLED_NAMESPACE
 #define FASTLED_IS_USING_NAMESPACE 0
 /// Start of the FastLED namespace

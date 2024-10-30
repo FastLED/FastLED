@@ -4,6 +4,9 @@
 #if defined(STM32F10X_MD) || defined(STM32F2XX)
 
 #include <application.h>
+#include <stdint.h>
+
+#include "namespace.h"
 
 #ifndef FASTLED_NAMESPACE_BEGIN
 #define FASTLED_NAMESPACE_BEGIN namespace NSFastLED {
