@@ -85,4 +85,6 @@ void __init_ActiveStripData() {
     ActiveStripData::Instance();
 }
 
+FASTLED_NAMESPACE_END
+
 #endif
