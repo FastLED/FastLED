@@ -1,8 +1,8 @@
-#ifndef _FIVE_BIT_HD_GAMMA_H_
-#define _FIVE_BIT_HD_GAMMA_H_
+#pragma once
+
+#include <stdint.h>
 
 #include "namespace.h"
-#include <stdint.h>
 #include "force_inline.h"
 #include "crgb.h"
 
@@ -89,4 +89,3 @@ void five_bit_hd_gamma_function(CRGB color,
 
 FASTLED_NAMESPACE_END
 
-#endif // _FIVE_BIT_HD_GAMMA_H_

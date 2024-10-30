@@ -1,8 +1,10 @@
 
 #pragma once
 
-#include "namespace.h"
+
 #include <stddef.h>
+
+#include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 
