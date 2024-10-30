@@ -14,6 +14,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+
+    - name: Install UV
+      run: pip install uv
+
     - name: Build WASM Compiler
       run: ./wasm --build_wasm_compiler
 
