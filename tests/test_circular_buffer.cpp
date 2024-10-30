@@ -6,6 +6,9 @@
 #include "doctest.h"
 #include "fx/detail/circular_buffer.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("circular_buffer basic operations") {
     CircularBuffer<int> buffer(5);
 

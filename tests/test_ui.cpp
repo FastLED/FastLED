@@ -6,6 +6,9 @@
 #include "doctest.h"
 #include "ui.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("compile ui test") {
 }
 

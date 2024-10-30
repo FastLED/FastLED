@@ -4,6 +4,8 @@
 #include "doctest.h"
 #include "fixed_map.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
 
 TEST_CASE("FixedMap operations") {
     FixedMap<int, int, 5> map;

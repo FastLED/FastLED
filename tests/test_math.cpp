@@ -9,6 +9,9 @@
 #include "lib8tion/intmap.h"
 #include <math.h>
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 
 TEST_CASE("scale16") {
     CHECK_EQ(scale16(0, 0), 0);

@@ -9,6 +9,9 @@
 #include "fx/video/frame_interpolator.h"
 #include "namespace.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("FrameInterpolator::selectFrames") {
     SUBCASE("Empty interpolator") {
         FrameInterpolator interpolator(5, -1);

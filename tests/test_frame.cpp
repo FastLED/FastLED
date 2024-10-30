@@ -8,6 +8,9 @@
 #include <cstdlib>
 #include "allocator.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 namespace {
     int allocation_count = 0;
 

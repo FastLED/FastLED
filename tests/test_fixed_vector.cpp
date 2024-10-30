@@ -6,6 +6,9 @@
 #include "doctest.h"
 #include "fixed_vector.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("Fixed vector simple") {
     FASTLED_USING_NAMESPACE;
     FixedVector<int, 5> vec;

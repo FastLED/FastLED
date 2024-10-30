@@ -9,6 +9,9 @@
 #include "cled_controller.h"
 #include "platforms/wasm/strip_id_map.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 struct FakeSpi {
     int value = 0;
 };

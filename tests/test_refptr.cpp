@@ -6,6 +6,9 @@
 #include "doctest.h"
 #include "ptr.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 class MyClass;
 typedef Ptr<MyClass> MyClassPtr;
 class MyClass : public Referent {

@@ -5,6 +5,9 @@
 #include "doctest.h"
 #include "fx/storage/bytestreammemory.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("ByteStreamMemory basic operations") {
 
     SUBCASE("Write and read single byte") {

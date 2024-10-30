@@ -4,6 +4,9 @@
 #include "doctest.h"
 #include "fixed_set.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 
 TEST_CASE("FixedSet operations") {
     FixedSet<int, 5> set;

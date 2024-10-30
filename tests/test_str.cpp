@@ -7,6 +7,9 @@
 #include "str.h"
 #include "fixed_vector.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("Str basic operations") {
     SUBCASE("Construction and assignment") {
         Str s1;

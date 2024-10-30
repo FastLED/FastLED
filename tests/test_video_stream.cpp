@@ -9,6 +9,9 @@
 #include "fx/storage/bytestreammemory.h"
 #include "ptr.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("video stream simple test") {
     const int BYTES_PER_FRAME = 3 * 10 * 10; // Assuming a 10x10 RGB video
     

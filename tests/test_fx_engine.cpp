@@ -9,6 +9,9 @@
 #include "fx/fx_engine.h"
 #include "FastLED.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 DECLARE_SMART_PTR(MockFx);
 
 class MockFx : public Fx {

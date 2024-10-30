@@ -6,6 +6,9 @@
 #include "doctest.h"
 #include "slice.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("compile test") {
 
 }

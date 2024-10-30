@@ -6,6 +6,9 @@
 #include "doctest.h"
 #include "fx/detail/time_warp.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("TimeWarp basic functionality") {
     FASTLED_USING_NAMESPACE;
 

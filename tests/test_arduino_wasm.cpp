@@ -6,6 +6,9 @@
 #include "doctest.h"
 #include "platforms/wasm/compiler/Arduino.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("arduino_wasm") {
     SUBCASE("random") {
         for (int i = 0; i < 100; i++) {

@@ -18,6 +18,9 @@
 #include "fx/2d/redsquare.hpp"
 #include "fx/2d/video.hpp"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 // To satisfy the linker, we must also define uint16_t XY( uint8_t, uint8_t);
 // This should go away someday and only use functions supplied by the user.
 uint16_t XY(uint8_t, uint8_t) { return 0; }

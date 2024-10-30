@@ -9,14 +9,15 @@
 #include <iostream>
 #include <bitset>
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("brightness_bitshifter") {
     SUBCASE("random test to check that the product is the same") {
         int count = 0;
         for (int i = 0; i < 10000; ++i) {
             uint8_t brightness_src = 0b10000000 >> rand() % 6;
             uint8_t brightness_dst = rand() % 256;
-            uint8_t src_saved = brightness_src;
-            uint8_t dst_saved = brightness_dst;
             uint16_t product = uint16_t(brightness_src) * brightness_dst;
             uint8_t shifts = brightness_bitshifter8(&brightness_src, &brightness_dst, 7);
             uint16_t new_product = uint16_t(brightness_src) * brightness_dst;  
@@ -59,8 +60,6 @@ TEST_CASE("brightness_bitshifter16") {
         for (int i = 0; i < 10000; ++i) {
             uint8_t brightness_src = 0b10000000 >> (rand() % 8);
             uint16_t brightness_dst = rand() % uint32_t(65536);
-            uint8_t src_saved = brightness_src;
-            uint16_t dst_saved = brightness_dst;
             uint32_t product = uint32_t(brightness_src >> 8) * brightness_dst;
             uint8_t max_shifts = 8;
             uint8_t steps = 2;

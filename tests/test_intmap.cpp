@@ -5,6 +5,8 @@
 
 #include "doctest.h"
 #include "lib8tion/intmap.h"
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
 
 TEST_CASE("map8_to_16") {
     CHECK_EQ(map8_to_16(0), 0);

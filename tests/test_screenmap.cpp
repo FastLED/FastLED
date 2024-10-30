@@ -6,6 +6,9 @@
 #include "doctest.h"
 #include "screenmap.h"
 
+#include "namespace.h"
+FASTLED_USING_NAMESPACE
+
 TEST_CASE("ScreenMap basic functionality") {
     // Create a screen map for 3 LEDs
     ScreenMap map(3);
