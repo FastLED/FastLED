@@ -101,7 +101,4 @@
 #define FL_ALIGN_PROGMEM
 #endif
 
-
-FASTLED_NAMESPACE_END
-
 #endif

@@ -10,6 +10,13 @@
 #include <string>
 #include "str.h"
 
+#include "namespace.h"
+FASTLED_NAMESPACE_BEGIN
+class Str;
+FASTLED_NAMESPACE_END
+
+FASTLED_USING_NAMESPACE
+
 using std::min;
 using std::max;
 
