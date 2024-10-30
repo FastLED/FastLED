@@ -1187,33 +1187,33 @@ class UiManager {
         };
 
         const fetchAllFiles = async (filesJson) => {
-            const finishedData = {};
             const fetchPromises = filesJson.map(async file => {
-                const out = fetchFilePromise(file.path);
-                finishedData[file.path] = {
-                    data: out,
-                    size: file.size,
+                try {
+                    const data = await fetchFilePromise(file.path);
+                    console.log(`File fetched: ${file.path}, size: ${file.size}`);
+                    
+                    const ptr = moduleInstance._malloc(file.size);
+                    const ptrName = moduleInstance._malloc(file.path.length + 1);
+                    const fileDataArray = new Uint8Array(data);
+                    const n = moduleInstance.lengthBytesUTF8(file.path);
+                    const nameDataArray = new Uint8Array(n);
+                    
+                    moduleInstance.stringToUTF8(file.path, nameDataArray, n);
+                    moduleInstance.HEAPU8.set(fileDataArray, ptr);
+                    moduleInstance.HEAPU8.set(nameDataArray, ptrName);
+                    
+                    moduleInstance.ccall('jsAppendFile', 'number', ['number', 'number', 'number'], [ptrName, ptr, file.size]);
+                    
+                    moduleInstance._free(ptr);
+                    moduleInstance._free(ptrName);
+                } catch (error) {
+                    console.error(`Error processing file ${file.path}:`, error);
                 }
-                return out;
             });
+            
+            // Still wait for all promises to complete before continuing
             await Promise.all(fetchPromises);
-            console.log("All files fetched, sending to FastLED module");
-            //for (filepath of finishedData) {
-            for (const filepath in finishedData) {
-                const bytes = finishedData[filepath].size;
-                const data = finishedData[filepath].data;
-                const ptr = moduleInstance._malloc(bytes);
-                const ptrName = moduleInstance._malloc(filepath.length + 1);
-                const fileDataArray = new Uint8Array(data);                
-                const n = moduleInstance.lengthBytesUTF8(filepath);
-                const nameDataArray = new Uint8Array(n);
-                moduleInstance.stringToUTF8(filepath, nameDataArray, n);
-                moduleInstance.HEAPU8.set(fileDataArray, ptr);
-                moduleInstance.HEAPU8.set(nameDataArray, ptrName);
-                moduleInstance.ccall('jsAppendFile', 'number', ['number', 'number', 'number'], [ptrName, ptr, bytes]);
-                moduleInstance._free(ptr);
-                moduleInstance._free(ptrName);
-            }
+            console.log("All files processed");
         };
 
         fetchAllFiles(filesJson);
