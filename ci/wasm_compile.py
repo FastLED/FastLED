@@ -1,4 +1,5 @@
 import argparse
+import download
 import os
 import platform
 import shutil
@@ -218,24 +219,15 @@ def run_container(directory: str, interactive: bool, debug: bool = False) -> Non
 
 
 def setup_docker2exe() -> None:
-    if not shutil.which("wget"):
-        raise WASMCompileError(
-            "Error: wget is not installed. Please install it using: winget install GnuWin32.Wget"
-        )
 
     ignore_dir = PROJECT_ROOT / "ignore"
     ignore_dir.mkdir(exist_ok=True)
 
     docker2exe_path = ignore_dir / "docker2exe.exe"
     if not docker2exe_path.exists():
-        subprocess.run(
-            [
-                "wget",
-                "-O",
-                str(docker2exe_path),
-                "https://github.com/rzane/docker2exe/releases/download/v0.2.1/docker2exe-windows-amd64",
-            ],
-            check=True,
+        download.download(
+            "https://github.com/rzane/docker2exe/releases/download/v0.2.1/docker2exe-windows-amd64",
+            str(docker2exe_path)
         )
         docker2exe_path.chmod(0o755)
     else:
