@@ -3,6 +3,32 @@
 #include "FastLED.h"
 #include "force_inline.h"
 
+#if FASTLED_IS_USING_NAMESPACE
+#define FUNCTION_FILL_RAINBOW(a,b,c,d) FASTLED_NAMESPACE::fill_rainbow(a,b,c,d)
+#define FUNCTION_NAPPLY_GAMMA(a,b,c) FASTLED_NAMESPACE::napplyGamma_video(a,b,c)
+#define FUNCTION_NAPPLY_GAMMA_RGB(a,b,c,d,e) FASTLED_NAMESPACE::napplyGamma_video(a,b,c,d,e)
+#define FUNCTION_BLUR1D(a,b,c) FASTLED_NAMESPACE::blur1d(a,b,c)
+#define FUNCTION_FILL_GRADIENT(a,b,c,d,e) FASTLED_NAMESPACE::fill_gradient(a,b,c,d,e)
+#define FUNCTION_FILL_GRADIENT3(a,b,c,d,e,f) FASTLED_NAMESPACE::fill_gradient(a,b,c,d,e,f)
+#define FUNCTION_FILL_GRADIENT4(a,b,c,d,e,f,g) FASTLED_NAMESPACE::fill_gradient(a,b,c,d,e,f,g)
+#define FUNCTION_NBLEND(a,b,c) FASTLED_NAMESPACE::nblend(a,b,c)
+#define FUNCTION_FILL_GRADIENT_RGB(a,b,c,d) FASTLED_NAMESPACE::fill_gradient_RGB(a,b,c,d)
+#define FUNCTION_FILL_GRADIENT_RGB3(a,b,c,d,e) FASTLED_NAMESPACE::fill_gradient_RGB(a,b,c,d,e)
+#define FUNCTION_FILL_GRADIENT_RGB4(a,b,c,d,e,f) FASTLED_NAMESPACE::fill_gradient_RGB(a,b,c,d,e,f)
+#else
+#define FUNCTION_FILL_RAINBOW(a,b,c,d) ::fill_rainbow(a,b,c,d)
+#define FUNCTION_NAPPLY_GAMMA(a,b,c) ::napplyGamma_video(a,b,c)
+#define FUNCTION_NAPPLY_GAMMA_RGB(a,b,c,d,e) ::napplyGamma_video(a,b,c,d,e)
+#define FUNCTION_BLUR1D(a,b,c) ::blur1d(a,b,c)
+#define FUNCTION_FILL_GRADIENT(a,b,c,d,e) ::fill_gradient(a,b,c,d,e)
+#define FUNCTION_FILL_GRADIENT3(a,b,c,d,e,f) ::fill_gradient(a,b,c,d,e,f)
+#define FUNCTION_FILL_GRADIENT4(a,b,c,d,e,f,g) ::fill_gradient(a,b,c,d,e,f,g)
+#define FUNCTION_NBLEND(a,b,c) ::nblend(a,b,c)
+#define FUNCTION_FILL_GRADIENT_RGB(a,b,c,d) ::fill_gradient_RGB(a,b,c,d)
+#define FUNCTION_FILL_GRADIENT_RGB3(a,b,c,d,e) ::fill_gradient_RGB(a,b,c,d,e)
+#define FUNCTION_FILL_GRADIENT_RGB4(a,b,c,d,e,f) ::fill_gradient_RGB(a,b,c,d,e,f)
+#endif
+
 #ifndef abs
 #include <stdlib.h>
 #endif
@@ -214,9 +240,9 @@ public:
     /// @see ::fill_rainbow(struct CRGB*, int, uint8_t, uint8_t)
     inline CPixelView & fill_rainbow(uint8_t initialhue, uint8_t deltahue=5) {
         if(dir >= 0) {
-            ::fill_rainbow(leds,len,initialhue,deltahue);
+            FUNCTION_FILL_RAINBOW(leds,len,initialhue,deltahue);
         } else {
-            ::fill_rainbow(leds+len+1,-len,initialhue,deltahue);
+            FUNCTION_FILL_RAINBOW(leds+len+1,-len,initialhue,deltahue);
         }
         return *this;
     }
@@ -228,9 +254,9 @@ public:
     /// @see ::fill_gradient(T*, uint16_t, const CHSV&, const CHSV&, TGradientDirectionCode)
     inline CPixelView & fill_gradient(const CHSV & startcolor, const CHSV & endcolor, TGradientDirectionCode directionCode  = SHORTEST_HUES) {
         if(dir >= 0) {
-            ::fill_gradient(leds,len,startcolor, endcolor, directionCode);
+            FUNCTION_FILL_GRADIENT(leds,len,startcolor, endcolor, directionCode);
         } else {
-            ::fill_gradient(leds + len + 1, (-len), endcolor, startcolor, directionCode);
+            FUNCTION_FILL_GRADIENT(leds + len + 1, (-len), endcolor, startcolor, directionCode);
         }
         return *this;
     }
@@ -243,9 +269,9 @@ public:
     /// @see ::fill_gradient(T*, uint16_t, const CHSV&, const CHSV&, const CHSV&, TGradientDirectionCode)
     inline CPixelView & fill_gradient(const CHSV & c1, const CHSV & c2, const CHSV &  c3, TGradientDirectionCode directionCode = SHORTEST_HUES) {
         if(dir >= 0) {
-            ::fill_gradient(leds, len, c1, c2, c3, directionCode);
+            FUNCTION_FILL_GRADIENT3(leds, len, c1, c2, c3, directionCode);
         } else {
-            ::fill_gradient(leds + len + 1, -len, c3, c2, c1, directionCode);
+            FUNCTION_FILL_GRADIENT3(leds + len + 1, -len, c3, c2, c1, directionCode);
         }
         return *this;
     }
@@ -259,9 +285,9 @@ public:
     /// @see ::fill_gradient(T*, uint16_t, const CHSV&, const CHSV&, const CHSV&, const CHSV&, TGradientDirectionCode)
     inline CPixelView & fill_gradient(const CHSV & c1, const CHSV & c2, const CHSV & c3, const CHSV & c4, TGradientDirectionCode directionCode = SHORTEST_HUES) {
         if(dir >= 0) {
-            ::fill_gradient(leds, len, c1, c2, c3, c4, directionCode);
+            FUNCTION_FILL_GRADIENT4(leds, len, c1, c2, c3, c4, directionCode);
         } else {
-            ::fill_gradient(leds + len + 1, -len, c4, c3, c2, c1, directionCode);
+            FUNCTION_FILL_GRADIENT4(leds + len + 1, -len, c4, c3, c2, c1, directionCode);
         }
         return *this;
     }
@@ -273,9 +299,9 @@ public:
     /// @see ::fill_gradient_RGB(CRGB*, uint16_t, const CRGB&, const CRGB&)
     inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & startcolor, const PIXEL_TYPE & endcolor, TGradientDirectionCode directionCode  = SHORTEST_HUES) {
         if(dir >= 0) {
-            ::fill_gradient_RGB(leds,len,startcolor, endcolor);
+            FUNCTION_FILL_GRADIENT_RGB(leds,len,startcolor, endcolor);
         } else {
-            ::fill_gradient_RGB(leds + len + 1, (-len), endcolor, startcolor);
+            FUNCTION_FILL_GRADIENT_RGB(leds + len + 1, (-len), endcolor, startcolor);
         }
         return *this;
     }
@@ -287,9 +313,9 @@ public:
     /// @see ::fill_gradient_RGB(CRGB*, uint16_t, const CRGB&, const CRGB&, const CRGB&)
     inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & c1, const PIXEL_TYPE & c2, const PIXEL_TYPE &  c3) {
         if(dir >= 0) {
-            ::fill_gradient_RGB(leds, len, c1, c2, c3);
+            FUNCTION_FILL_GRADIENT_RGB3(leds, len, c1, c2, c3);
         } else {
-            ::fill_gradient_RGB(leds + len + 1, -len, c3, c2, c1);
+            FUNCTION_FILL_GRADIENT_RGB3(leds + len + 1, -len, c3, c2, c1);
         }
         return *this;
     }
@@ -302,9 +328,9 @@ public:
     /// @see ::fill_gradient_RGB(CRGB*, uint16_t, const CRGB&, const CRGB&, const CRGB&, const CRGB&)
     inline CPixelView & fill_gradient_RGB(const PIXEL_TYPE & c1, const PIXEL_TYPE & c2, const PIXEL_TYPE & c3, const PIXEL_TYPE & c4) {
         if(dir >= 0) {
-            ::fill_gradient_RGB(leds, len, c1, c2, c3, c4);
+            FUNCTION_FILL_GRADIENT_RGB4(leds, len, c1, c2, c3, c4);
         } else {
-            ::fill_gradient_RGB(leds + len + 1, -len, c4, c3, c2, c1);
+            FUNCTION_FILL_GRADIENT_RGB4(leds + len + 1, -len, c4, c3, c2, c1);
         }
         return *this;
     }
@@ -313,13 +339,13 @@ public:
     /// @param overlay the color to blend in
     /// @param amountOfOverlay the fraction of overlay to blend in
     /// @see ::nblend(CRGB&, const CRGB&, fract8)
-    inline CPixelView & nblend(const PIXEL_TYPE & overlay, fract8 amountOfOverlay) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { ::nblend((*pixel), overlay, amountOfOverlay); } return *this; }
+    inline CPixelView & nblend(const PIXEL_TYPE & overlay, fract8 amountOfOverlay) { for(iterator pixel = begin(), _end = end(); pixel != _end; ++pixel) { FUNCTION_NBLEND((*pixel), overlay, amountOfOverlay); } return *this; }
 
     /// Destructively blend another set of LEDs into this one
     /// @param rhs the set of LEDs to blend into this set
     /// @param amountOfOverlay the fraction of each color in the other set to blend in
     /// @see ::nblend(CRGB&, const CRGB&, fract8)
-    inline CPixelView & nblend(const CPixelView & rhs, fract8 amountOfOverlay) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { ::nblend((*pixel), (*rhspixel), amountOfOverlay); } return *this; }
+    inline CPixelView & nblend(const CPixelView & rhs, fract8 amountOfOverlay) { for(iterator pixel = begin(), rhspixel = rhs.begin(), _end = end(), rhs_end = rhs.end(); (pixel != _end) && (rhspixel != rhs_end); ++pixel, ++rhspixel) { FUNCTION_NBLEND((*pixel), (*rhspixel), amountOfOverlay); } return *this; }
 
     /// One-dimensional blur filter
     /// @param blur_amount the amount of blur to apply
@@ -327,9 +353,9 @@ public:
     /// @see ::blur1d(CRGB*, uint16_t, fract8)
     inline CPixelView & blur1d(fract8 blur_amount) {
         if(dir >= 0) {
-            ::blur1d(leds, len, blur_amount);
+            FUNCTION_BLUR1D(leds, len, blur_amount);
         } else {
-            ::blur1d(leds + len + 1, -len, blur_amount);
+            FUNCTION_BLUR1D(leds + len + 1, -len, blur_amount);
         }
         return *this;
     }
@@ -339,9 +365,9 @@ public:
     /// @see ::napplyGamma_video(CRGB&, float)
     inline CPixelView & napplyGamma_video(float gamma) {
         if(dir >= 0) {
-            ::napplyGamma_video(leds, len, gamma);
+            FUNCTION_NAPPLY_GAMMA(leds, len, gamma);
         } else {
-            ::napplyGamma_video(leds + len + 1, -len, gamma);
+            FUNCTION_NAPPLY_GAMMA(leds + len + 1, -len, gamma);
         }
         return *this;
     }
@@ -353,9 +379,9 @@ public:
     /// @see ::napplyGamma_video(CRGB&, float, float, float)
     inline CPixelView & napplyGamma_video(float gammaR, float gammaG, float gammaB) {
         if(dir >= 0) {
-            ::napplyGamma_video(leds, len, gammaR, gammaG, gammaB);
+            FUNCTION_NAPPLY_GAMMA_RGB(leds, len, gammaR, gammaG, gammaB);
         } else {
-            ::napplyGamma_video(leds + len + 1, -len, gammaR, gammaG, gammaB);
+            FUNCTION_NAPPLY_GAMMA_RGB(leds + len + 1, -len, gammaR, gammaG, gammaB);
         }
         return *this;
     }
@@ -428,3 +454,15 @@ public:
 /// @} PixelSet
 
 FASTLED_NAMESPACE_END
+
+#undef FUNCTION_FILL_RAINBOW
+#undef FUNCTION_NAPPLY_GAMMA
+#undef FUNCTION_NAPPLY_GAMMA_RGB
+#undef FUNCTION_BLUR1D
+#undef FUNCTION_FILL_GRADIENT
+#undef FUNCTION_FILL_GRADIENT3
+#undef FUNCTION_FILL_GRADIENT4
+#undef FUNCTION_NBLEND
+#undef FUNCTION_FILL_GRADIENT_RGB
+#undef FUNCTION_FILL_GRADIENT_RGB3
+#undef FUNCTION_FILL_GRADIENT_RGB4
