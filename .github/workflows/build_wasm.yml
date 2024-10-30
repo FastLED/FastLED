@@ -8,7 +8,6 @@ on:
     branches:
       - master
 
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -19,11 +18,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Docker on macOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install docker
+          brew install colima
+          colima start --cpu 2 --memory 4
+
+      - name: Verify Docker installation
+        run: docker --version
+
       - name: Install Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install UV for python
         run: pip install uv
 
