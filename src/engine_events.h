@@ -4,10 +4,9 @@
 #include "singleton.h"
 #include "xymap.h"
 #include "screenmap.h"
-
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+
 
 #ifndef FASTLED_ENGINE_EVENTS_MAX_LISTENERS
 #define FASTLED_ENGINE_EVENTS_MAX_LISTENERS 8
@@ -20,6 +19,8 @@ FASTLED_NAMESPACE_BEGIN
 #define FASTLED_HAS_ENGINE_EVENTS 1
 #endif
 #endif  // FASTLED_HAS_ENGINE_EVENTS
+
+FASTLED_NAMESPACE_BEGIN
 
 class CLEDController;
 

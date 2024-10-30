@@ -2,6 +2,7 @@
 #pragma once
 
 #include <stdint.h>
+
 #include "chsv.h"
 #include "namespace.h"
 #include "color.h"
