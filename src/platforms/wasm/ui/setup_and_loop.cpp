@@ -12,6 +12,8 @@
 #include "platforms/wasm/fs_wasm.h"
 #include "namespace.h"
 
+FASTLED_USING_NAMESPACE
+
 
 extern void setup();
 extern void loop();
