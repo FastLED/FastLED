@@ -242,6 +242,8 @@ def setup_docker2exe() -> None:
             "niteris/fastled-wasm",
             "--module",
             "github.com/FastLED/FastLED",
+            "--target",
+            "windows/amd64",
         ],
         check=True,
     )
@@ -256,6 +258,8 @@ def setup_docker2exe() -> None:
             "niteris/fastled-wasm",
             "--module",
             "github.com/FastLED/FastLED",
+            "--target",
+            "windows/amd64",
             "--embed",
         ],
         check=True,
@@ -273,6 +277,9 @@ def move_files_to_dist(full: bool = False) -> None:
         ("fastled-windows-amd64.exe", f"fastled-windows-amd64{suffix}.exe"),
     ]
     for src, dest in files:
+        if not os.path.exists(src):
+            print(f"Skipping {src} as it does not exist.")
+            continue
         src_path = PROJECT_ROOT / "dist" / src
         dest_path = PROJECT_ROOT / "dist" / dest
         if src_path.exists():
