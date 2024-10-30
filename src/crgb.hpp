@@ -8,6 +8,12 @@
 #include "namespace.h"
 #include "force_inline.h"
 
+#if FASTLED_IS_USING_NAMESPACE
+#define FUNCTION_SCALE8(a,b) FASTLED_NAMESPACE::scale8(a,b)
+#else
+#define FUNCTION_SCALE8(a,b) ::scale8(a,b)
+#endif
+
 FASTLED_NAMESPACE_BEGIN
 
 /// Add one CRGB to another, saturating at 0xFF for each channel
@@ -117,9 +123,9 @@ constexpr CRGB CRGB::nscale8_constexpr(const CRGB scaledown) const
 
 FASTLED_FORCE_INLINE CRGB& CRGB::nscale8 (const CRGB & scaledown )
 {
-    r = ::scale8(r, scaledown.r);
-    g = ::scale8(g, scaledown.g);
-    b = ::scale8(b, scaledown.b);
+    r = FUNCTION_SCALE8(r, scaledown.r);
+    g = FUNCTION_SCALE8(g, scaledown.g);
+    b = FUNCTION_SCALE8(b, scaledown.b);
     return *this;
 }
 
@@ -133,9 +139,9 @@ FASTLED_FORCE_INLINE CRGB CRGB::scale8 (uint8_t scaledown ) const
 FASTLED_FORCE_INLINE CRGB CRGB::scale8 (const CRGB & scaledown ) const
 {
     CRGB out;
-    out.r = ::scale8(r, scaledown.r);
-    out.g = ::scale8(g, scaledown.g);
-    out.b = ::scale8(b, scaledown.b);
+    out.r = FUNCTION_SCALE8(r, scaledown.r);
+    out.g = FUNCTION_SCALE8(g, scaledown.g);
+    out.b = FUNCTION_SCALE8(b, scaledown.b);
     return out;
 }
 
@@ -225,3 +231,5 @@ FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d)
 }
 
 FASTLED_NAMESPACE_END
+
+#undef FUNCTION_SCALE8

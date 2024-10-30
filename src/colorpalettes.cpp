@@ -1,4 +1,3 @@
-#pragma once
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
