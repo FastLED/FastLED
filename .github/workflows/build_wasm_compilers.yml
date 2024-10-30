@@ -1,9 +1,9 @@
-name: Build WASM Compilers
+name: wasm Compilers
 
 on:
   push:
     branches:
-      - main
+      - master
 
 
 jobs:
