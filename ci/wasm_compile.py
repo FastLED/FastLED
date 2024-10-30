@@ -220,6 +220,13 @@ def run_container(directory: str, interactive: bool, debug: bool = False) -> Non
 
 
 def setup_docker2exe() -> None:
+    platform = ""
+    if sys.platform == "win32":
+        platform = "windows"
+    elif sys.platform == "darwin":
+        platform = "darwin"
+    elif sys.platform == "linux":
+        platform = "linux"
 
     ignore_dir = PROJECT_ROOT / "ignore"
     ignore_dir.mkdir(exist_ok=True)
@@ -227,7 +234,7 @@ def setup_docker2exe() -> None:
     docker2exe_path = ignore_dir / "docker2exe.exe"
     if not docker2exe_path.exists():
         download.download(
-            "https://github.com/rzane/docker2exe/releases/download/v0.2.1/docker2exe-windows-amd64",
+            f"https://github.com/rzane/docker2exe/releases/download/v0.2.1/docker2exe-{platform}-amd64",
             str(docker2exe_path),
         )
         docker2exe_path.chmod(0o755)
@@ -243,7 +250,7 @@ def setup_docker2exe() -> None:
         "--module",
         "github.com/FastLED/FastLED",
         "--target",
-        "linux/amd64",
+        f"{platform}/amd64",
     ]
     full_cmd = slim_cmd + ["--embed"]
 
