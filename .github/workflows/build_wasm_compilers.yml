@@ -14,16 +14,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Check for changes
-      id: changes
-      run: |
-        git fetch origin master
-        if [ "$(git rev-list --count HEAD...origin/master)" -eq 0 ]; then
-          echo "No changes detected"
-          exit 0
-        fi
-      shell: bash
-
 
     - name: Install UV
       run: pip install uv
