@@ -10,8 +10,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(Video);
-DECLARE_SMART_PTR(VideoFx);
+FASTLED_SMART_REF(Video);
+FASTLED_SMART_REF(VideoFx);
 
 class Video : public FxGrid {
   public:

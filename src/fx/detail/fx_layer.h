@@ -14,7 +14,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(FxLayer);
+FASTLED_SMART_REF(FxLayer);
 class FxLayer : public Referent {
   public:
     void setFx(Ref<Fx> newFx) {

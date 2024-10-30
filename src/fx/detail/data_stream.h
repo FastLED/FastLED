@@ -9,7 +9,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(DataStream);
+FASTLED_SMART_REF(DataStream);
 
 // DataStream is a class that reads data from a file or a stream.
 // It's sort of a merging point for the two types of data sources.

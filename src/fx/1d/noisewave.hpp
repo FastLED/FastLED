@@ -7,7 +7,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(NoiseWave);
+FASTLED_SMART_REF(NoiseWave);
 
 class NoiseWave : public FxStrip {
   public:

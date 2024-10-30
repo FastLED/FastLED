@@ -33,8 +33,8 @@ class LUT;
 typedef LUT<uint16_t> LUT16;
 typedef LUT<pair_xy_float> LUTXYFLOAT;
 
-DECLARE_SMART_PTR_NO_FWD(LUT16);
-DECLARE_SMART_PTR_NO_FWD(LUTXYFLOAT);
+FASTLED_SMART_REF_NO_FWD(LUT16);
+FASTLED_SMART_REF_NO_FWD(LUTXYFLOAT);
 
 // Templated lookup table.
 template<typename T>

@@ -10,7 +10,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(Fx);
+FASTLED_SMART_REF(Fx);
 
 // Abstract base class for effects on a strip/grid of LEDs.
 class Fx : public Referent {

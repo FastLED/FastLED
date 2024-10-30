@@ -12,7 +12,7 @@
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
 
-DECLARE_SMART_PTR(MockFx);
+FASTLED_SMART_REF(MockFx);
 
 class MockFx : public Fx {
 public:

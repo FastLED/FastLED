@@ -8,7 +8,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(RedSquare);
+FASTLED_SMART_REF(RedSquare);
 
 class RedSquare : public FxGrid {
   public:

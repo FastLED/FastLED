@@ -25,13 +25,13 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(FsImplWasm);
-DECLARE_SMART_PTR(WasmFileHandle);
+FASTLED_SMART_REF(FsImplWasm);
+FASTLED_SMART_REF(WasmFileHandle);
 
 namespace {
 // Map is great because it doesn't invalidate it's data members unless erase is
 // called.
-DECLARE_SMART_PTR(FileData);
+FASTLED_SMART_REF(FileData);
 
 class FileData : public Referent {
   public:

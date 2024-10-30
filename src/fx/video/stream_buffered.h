@@ -7,7 +7,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(VideoStream);
+FASTLED_SMART_REF(VideoStream);
 
 class VideoStream : public Referent {
 public:

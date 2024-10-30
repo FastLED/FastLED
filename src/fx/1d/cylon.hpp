@@ -6,7 +6,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(Cylon);
+FASTLED_SMART_REF(Cylon);
 
 /// @brief   An animation that moves a single LED back and forth (Larson Scanner
 /// effect)

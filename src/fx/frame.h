@@ -10,7 +10,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(Frame);
+FASTLED_SMART_REF(Frame);
 
 // Frames are used to hold led data. This includes an optional alpha channel. This object
 // is used by the fx and video engines. Most of the memory used for Fx and Video will be located

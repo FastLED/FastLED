@@ -9,7 +9,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(FxGrid);
+FASTLED_SMART_REF(FxGrid);
 
 // Abstract base class for 2D effects that use a grid, which is defined
 // by an XYMap.

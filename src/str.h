@@ -30,7 +30,7 @@ class Str;
 ///////////////////////////////////////////////////////
 // Implementation details.
 
-DECLARE_SMART_PTR(StringHolder);
+FASTLED_SMART_REF(StringHolder);
 
 class StringFormatter {
   public:

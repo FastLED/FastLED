@@ -10,8 +10,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(FsImpl);
-DECLARE_SMART_PTR(FileHandle);
+FASTLED_SMART_REF(FsImpl);
+FASTLED_SMART_REF(FileHandle);
 
 // Instantiate this with a pin number to create a filesystem.
 class Fs {

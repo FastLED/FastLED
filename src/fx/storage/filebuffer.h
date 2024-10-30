@@ -9,7 +9,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(FileBuffer);
+FASTLED_SMART_REF(FileBuffer);
 
 class FileBuffer: public Referent {
  public:

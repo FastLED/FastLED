@@ -20,7 +20,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DECLARE_SMART_PTR(Animartrix);
+FASTLED_SMART_REF(Animartrix);
 
 enum AnimartrixAnim {
     RGB_BLOBS5 = 0,
