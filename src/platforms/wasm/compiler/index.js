@@ -1196,7 +1196,7 @@ class UiManager {
                 }
                 return out;
             });
-            const fileData = await Promise.all(fetchPromises);
+            await Promise.all(fetchPromises);
             console.log("All files fetched, sending to FastLED module");
             //for (filepath of finishedData) {
             for (const filepath in finishedData) {
