@@ -22,9 +22,32 @@
 # https://github.com/rzane/docker2exe/releases/download/v0.2.1/docker2exe-windows-amd64
 
 # AI:
-# use the download link to download the docker2exe binary to the path ignore/docker2exe.exe
-# Then run the command above docker2exe.exe --name fastled --image niteris/fastled-wasm --module "github.com/FastLED/FastLED"
+setup_docker2exe() {
+    if ! command -v wget &> /dev/null; then
+        echo "Error: wget is not installed. Please install it using: winget install GnuWin32.Wget"
+        exit 1
+    fi
+
+    if [ ! -d "ignore" ]; then
+        mkdir -p ignore
+    fi
+
+    if [ ! -f "ignore/docker2exe.exe" ]; then
+        wget -O ignore/docker2exe.exe https://github.com/rzane/docker2exe/releases/download/v0.2.1/docker2exe-windows-amd64
+        chmod +x ignore/docker2exe.exe
+    else
+        echo "docker2exe.exe already exists, skipping download."
+    fi
+    ./ignore/docker2exe.exe --name fastled --image niteris/fastled-wasm --module "github.com/FastLED/FastLED"
+}
 
 echo "Compiles sketch for wasm"
+
+# Check if -b is in the arguments
+if [[ " $@ " =~ " -bc " ]]; then
+    setup_docker2exe
+    exit 0
+fi
+
 build_flag="-b"
 uv run ci/wasm_compile.py $build_flag --open "$@"
