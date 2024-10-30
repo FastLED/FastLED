@@ -12,6 +12,7 @@
 #include <map>
 #include <mutex>
 #include <vector>
+#include <stdio.h>
 
 
 #include "file_system.h"
@@ -127,7 +128,7 @@ class FsImplWasm : public FsImpl {
         printf("Opening file %s\n", _path);
         Str path(_path);
         std::lock_guard<std::mutex> lock(gFileMapMutex);
-        auto it = gFileMap.find(key);
+        auto it = gFileMap.find(path);
         if (it != gFileMap.end()) {
             auto &data = it->second;
             WasmFileHandleRef out =
