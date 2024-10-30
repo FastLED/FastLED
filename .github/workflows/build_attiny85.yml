@@ -1,7 +1,6 @@
 name: attiny85
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

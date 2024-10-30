@@ -1,6 +1,8 @@
 # https://github.com/arduino/arduino-lint-action?tab=readme-ov-file
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 name: Arduino Library Lint
 jobs:
   lint:

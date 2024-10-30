@@ -1,7 +1,6 @@
 name: maple_mini
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

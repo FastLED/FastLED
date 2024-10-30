@@ -1,7 +1,6 @@
 name: esp32c3
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

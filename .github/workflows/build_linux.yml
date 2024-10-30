@@ -1,7 +1,6 @@
 name: linux_native
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

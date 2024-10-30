@@ -1,7 +1,6 @@
 name: esp32-8266
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

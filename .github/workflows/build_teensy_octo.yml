@@ -1,7 +1,6 @@
 name: teensy_octoWS2811
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

@@ -1,7 +1,6 @@
 name: rp2040 earle
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

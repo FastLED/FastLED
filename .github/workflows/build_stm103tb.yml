@@ -1,7 +1,6 @@
 name: stm103tb
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

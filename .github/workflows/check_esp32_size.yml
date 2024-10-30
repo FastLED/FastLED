@@ -1,7 +1,6 @@
 name: esp32dev_binary_size
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

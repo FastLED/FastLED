@@ -1,7 +1,6 @@
 name: esp32dev-idf4.4
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

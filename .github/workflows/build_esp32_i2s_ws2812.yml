@@ -1,7 +1,6 @@
 name: esp32_i2s_ws2812
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

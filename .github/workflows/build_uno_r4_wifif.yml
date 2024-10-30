@@ -1,7 +1,6 @@
 name: uno_r4_wifi
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

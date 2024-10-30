@@ -1,7 +1,6 @@
 name: rp2350
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

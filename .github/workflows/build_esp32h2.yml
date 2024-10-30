@@ -1,7 +1,6 @@
 name: esp32h2
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

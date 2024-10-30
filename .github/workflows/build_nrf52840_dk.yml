@@ -1,7 +1,6 @@
 name: nrf52840_dk
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

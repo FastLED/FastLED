@@ -1,7 +1,6 @@
 name: nano_every
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

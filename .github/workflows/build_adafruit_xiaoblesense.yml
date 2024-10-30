@@ -1,7 +1,6 @@
 name: adafruit_xiaoblesense_nRF52840
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

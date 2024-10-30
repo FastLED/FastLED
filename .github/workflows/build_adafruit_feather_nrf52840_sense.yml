@@ -1,7 +1,6 @@
 name: nrf52840_sense
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

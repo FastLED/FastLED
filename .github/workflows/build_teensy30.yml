@@ -1,7 +1,6 @@
 name: teensy30
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master

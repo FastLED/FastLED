@@ -1,7 +1,6 @@
 name: yun-32u4
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - master
