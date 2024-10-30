@@ -8,6 +8,7 @@
 //#include "platforms/fs_sdcard_arduino.hpp"
 #endif
 
+#include "namespace.h"
 
 
 FASTLED_NAMESPACE_BEGIN
