@@ -1177,15 +1177,6 @@ class UiManager {
         moduleInstance._fastled_declare_files(jsonStr);
         extern_setup();
 
- 
-        // Now launch a streaming fetch for all the files that are in the files.json
-        const fetchFilePromise = async (fetchFilePath) => {
-            const response = await fetch(fetchFilePath);
-            const data = await response.arrayBuffer();
-            console.log("Fetched file:", fetchFilePath, "size:", data.byteLength);
-            return data;
-        };
-
         const fetchAllFiles = (filesJson, onComplete) => {
             let filesRemaining = filesJson.length;
             
