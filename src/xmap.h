@@ -8,6 +8,7 @@
 #include "lut.h"
 
 #include "namespace.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_FORCE_INLINE uint16_t x_linear(uint16_t x, uint16_t length) {
@@ -136,4 +137,4 @@ private:
     uint16_t mOffset = 0;  // offset to be added to the output
 };
 
-FASTLED_NAMESPACE_BEGIN
+FASTLED_NAMESPACE_END
