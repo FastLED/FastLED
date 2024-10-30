@@ -27,6 +27,7 @@ jobs:
           colima start --cpu 2 --memory 4 || (echo "Colima failed to start" && exit 1)
 
       - name: Verify Colima installation
+        if: matrix.os == 'macos-latest'
         run: |
           colima version || (echo "Colima is not installed correctly" && exit 1)
           docker --version
