@@ -1,10 +1,12 @@
 
+#include <string.h>
+
 #include "frame.h"
 #include "crgb.h"
 #include "namespace.h"
 #include "ptr.h"
 #include "allocator.h"
-#include <string.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 

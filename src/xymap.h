@@ -1,14 +1,14 @@
 #pragma once
 
+#include <stdint.h>
+#include <string.h>
+
 #include "force_inline.h"
 #include "ptr.h"
 #include "xmap.h" // Include xmap.h for LUT16
-#include <stdint.h>
-#include <string.h>
 #include "lut.h"
 #include "crgb.h"
 #include "screenmap.h"
-
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
