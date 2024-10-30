@@ -52,7 +52,7 @@ console.error = error;
 
 function isDenseGrid(frameData) {
     const screenMap = frameData.screenMap;
-    
+
     // Check if all pixel densities are undefined
     let allPixelDensitiesUndefined = true;
     for (const stripId in screenMap.strips) {
@@ -668,7 +668,7 @@ class GraphicsManagerThreeJS {
                 });
             }
         });
-        return {isDenseScreenMap}
+        return { isDenseScreenMap }
     }
 
     updateCanvas(frameData) {
@@ -752,12 +752,12 @@ class GraphicsManagerThreeJS {
             // Convert to normalized coordinates
             const normalizedX = (x / width) * this.SCREEN_WIDTH - this.SCREEN_WIDTH / 2;
             const normalizedY = (y / height) * this.SCREEN_HEIGHT - this.SCREEN_HEIGHT / 2;
-            
+
             // Calculate z position based on distance from center for subtle depth
             const distFromCenter = Math.sqrt(Math.pow(normalizedX, 2) + Math.pow(normalizedY, 2));
-            const maxDist = Math.sqrt(Math.pow(this.SCREEN_WIDTH/2, 2) + Math.pow(this.SCREEN_HEIGHT/2, 2));
+            const maxDist = Math.sqrt(Math.pow(this.SCREEN_WIDTH / 2, 2) + Math.pow(this.SCREEN_HEIGHT / 2, 2));
             const z = (distFromCenter / maxDist) * 100;  // Max depth of 100 units
-            
+
             led.position.set(normalizedX, normalizedY, z);
             led.material.color.setRGB(ledData.r, ledData.g, ledData.b);
             ledIndex++;
@@ -1162,7 +1162,7 @@ class UiManager {
     // Function to call the setup and loop functions
     function runFastLED(extern_setup, extern_loop, frame_rate, moduleInstance, filesJson) {
         console.log("Calling setup function...");
- 
+
         const trimmedFilesJson = filesJson.map(file => {
             return {
                 path: file.path,
@@ -1179,28 +1179,38 @@ class UiManager {
 
         const fetchAllFiles = (filesJson, onComplete) => {
             let filesRemaining = filesJson.length;
-            
+
             const processFile = (file) => {
                 fetch(file.path)
-                    .then(response => response.arrayBuffer())
-                    .then(data => {
+                    .then(response => response.body.getReader())
+                    .then(async (reader) => {
                         console.log(`File fetched: ${file.path}, size: ${file.size}`);
                         
-                        const ptr = moduleInstance._malloc(file.size);
-                        const ptrName = moduleInstance._malloc(file.path.length + 1);
-                        const fileDataArray = new Uint8Array(data);
-                        const n = moduleInstance.lengthBytesUTF8(file.path);
-                        const nameDataArray = new Uint8Array(n);
-                        
-                        moduleInstance.stringToUTF8(file.path, nameDataArray, n);
-                        moduleInstance.HEAPU8.set(fileDataArray, ptr);
-                        moduleInstance.HEAPU8.set(nameDataArray, ptrName);
-                        
-                        moduleInstance.ccall('jsAppendFile', 'number', ['number', 'number', 'number'], [ptrName, ptr, file.size]);
-                        
-                        moduleInstance._free(ptr);
+                        // Allocate name buffer once
+                        const n = moduleInstance.lengthBytesUTF8(file.path) + 1;
+                        const ptrName = moduleInstance._malloc(n);
+             
+                        moduleInstance.stringToUTF8(file.path, ptrName, n);
+
+                        while (true) {
+                            const { value, done } = await reader.read();
+                            if (done) break;
+
+                            // Allocate and copy chunk data
+                            const ptr = moduleInstance._malloc(value.length);
+                            moduleInstance.HEAPU8.set(value, ptr);
+                            
+                            // Stream this chunk
+                            moduleInstance.ccall('jsAppendFile', 'number', 
+                                ['number', 'number', 'number'], 
+                                [ptrName, ptr, value.length]
+                            );
+
+                            moduleInstance._free(ptr);
+                        }
+
                         moduleInstance._free(ptrName);
-                        
+
                         filesRemaining--;
                         if (filesRemaining === 0) {
                             console.log("All files processed");
@@ -1216,7 +1226,7 @@ class UiManager {
                         }
                     });
             };
-            
+
             filesJson.forEach(processFile);
         };
 
@@ -1242,8 +1252,8 @@ class UiManager {
 
 
     function updateCanvas(frameData) {
-       // we are going to add the screenMap to the graphicsManager
-       frameData.screenMap = screenMap;
+        // we are going to add the screenMap to the graphicsManager
+        frameData.screenMap = screenMap;
         if (!graphicsManager) {
             const isDenseMap = isDenseGrid(frameData);
             if (FORCE_THREEJS_RENDERER) {
@@ -1267,7 +1277,7 @@ class UiManager {
             graphicsManager.reset();
         }
 
- 
+
         graphicsManager.updateCanvas(frameData);
     }
 
@@ -1276,7 +1286,7 @@ class UiManager {
     const onModuleLoaded = async (fastLedLoader) => {
         // Unpack the module functions and send them to the runFastLED function
 
-  
+
         function __runFastLED(moduleInstance, frameRate, filesJson) {
             const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
             if (!exports_exist) {
