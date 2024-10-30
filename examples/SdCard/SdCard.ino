@@ -13,7 +13,7 @@ void loop() {
 
 #include <FastLED.h>
 #include "Arduino.h"
-#include "fx/storage/fs.hpp"
+#include "file_system.h"
 
 const int CHIP_SELECT_PIN = 5;
 
