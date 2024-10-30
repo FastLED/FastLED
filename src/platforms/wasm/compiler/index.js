@@ -1207,7 +1207,7 @@ class UiManager {
                 const fileDataArray = new Uint8Array(data);                
                 const n = moduleInstance.lengthBytesUTF8(filepath);
                 const nameDataArray = new Uint8Array(n);
-                stringToUTF8(filepath, nameDataArray, n);
+                moduleInstance.stringToUTF8(filepath, nameDataArray, n);
                 moduleInstance.HEAPU8.set(fileDataArray, ptr);
                 moduleInstance.HEAPU8.set(nameDataArray, ptrName);
                 moduleInstance.ccall('jsAppendFile', 'number', ['number', 'number', 'number'], [ptrName, ptr, bytes]);
