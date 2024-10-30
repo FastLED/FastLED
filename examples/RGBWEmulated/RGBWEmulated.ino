@@ -1,9 +1,4 @@
 
-
-#define FASTLED_RMT_BUILTIN_DRIVER 0
-#define FASTLED_EXPERIMENTAL_ESP32_RGBW_ENABLED 0
-#define FASTLED_EXPERIMENTAL_ESP32_RGBW_MODE kRGBWExactColors
-
 #include <FastLED.h>
 
 // How many leds in your strip?
