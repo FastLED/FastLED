@@ -9,6 +9,10 @@ LUT - Look up table implementation for various types.
 #include "force_inline.h"
 #include "allocator.h"
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 template<typename T>
 struct pair_xy {
     T x = 0;
@@ -68,3 +72,4 @@ private:
     uint32_t length;
 };
 
+FASTLED_NAMESPACE_END
