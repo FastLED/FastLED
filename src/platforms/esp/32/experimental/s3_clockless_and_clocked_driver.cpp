@@ -227,6 +227,9 @@ __attribute__((always_inline)) inline void transpose8x1(unsigned char *A,
 // const uint16_t max_strips = 8;
 const uint32_t minimum_delay_between_frames_us = 350;
 
+
+// Zach's note: IRAM_ATTR is NOT honored for implicitly instantiated
+// templates. This needs to be refactored.
 template <uint16_t max_strips, uint16_t bytes_per_pixel>
 class S3ClocklessDriver {
   uint16_t num_strips;
