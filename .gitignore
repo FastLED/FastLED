@@ -42,6 +42,7 @@ ci/tests/output
 # sometimes appears on windows during test compilation
 ci/-
 **/fastled_js
+dist
 
 ignore/
 .env
