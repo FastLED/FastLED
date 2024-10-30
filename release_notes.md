@@ -3,7 +3,7 @@ FastLED 3.9.2
 =============
 * WS28XX family can now be overclocked
   * See define `FASTLED_LED_OVERCLOCK`
-    * Example: `#define FASTLED_OVERCLOCK`
+    * Example: `#define FASTLED_OVERCLOCK 1.2` (gives 20% overclock).
     * You can set this define before you include `"FastLED.h"`
   * You can either overclock globally or per led chipset on supported chipsets.
   * I've seen 20% overclock on my own test setup.
