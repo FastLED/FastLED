@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+
 #include "namespace.h"
 #include "xmap.h"
 #include "fx/fx.h"

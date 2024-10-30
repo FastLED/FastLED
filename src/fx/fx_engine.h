@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+#include <string.h>
+
+
 #include "crgb.h"
 #include "fixed_map.h"
 #include "fx/fx.h"
@@ -9,8 +13,6 @@
 #include "ptr.h"
 #include "ui.h"
 #include "fx/detail/time_warp.h"
-#include <stdint.h>
-#include <string.h>
 
 
 // Forward declaration

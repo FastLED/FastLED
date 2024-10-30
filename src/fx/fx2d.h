@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+
 #include "xymap.h"
 #include "namespace.h"
 #include "fx/fx.h"
