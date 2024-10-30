@@ -1,4 +1,8 @@
-#pragma once
+#include "enabled.h"
+
+
+#if FASTLED_ESP32_SPI_CLOCKLESS_ENABLED
+
 
 // File copied from https://github.com/chroma-tech/micropython/blob/fern/ports/esp32/usermodules/modcanopy/driver.h#L225
 
@@ -692,3 +696,5 @@ IRAM_ATTR void NewS3ClockedDriver<color_depth, spi_width, epp>::dma_callback(
     portYIELD_FROM_ISR(HPTaskAwoken);
   }
 }
+
+#endif  // FASTLED_ESP32_SPI_CLOCKLESS_ENABLED
