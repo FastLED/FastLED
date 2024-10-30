@@ -17,6 +17,85 @@
   #endif
 #endif
 
+
+/// Defines a static RGB palette very compactly using a series
+/// of connected color gradients.
+///
+/// For example, if you want the first 3/4ths of the palette to be a slow
+/// gradient ramping from black to red, and then the remaining 1/4 of the
+/// palette to be a quicker ramp to white, you specify just three points: the
+/// starting black point (at index 0), the red midpoint (at index 192),
+/// and the final white point (at index 255).  It looks like this:
+///   @code
+///   index:  0                                    192          255
+///           |----------r-r-r-rrrrrrrrRrRrRrRrRRRR-|-RRWRWWRWWW-|
+///   color: (0,0,0)                           (255,0,0)    (255,255,255)
+///   @endcode
+///
+/// Here's how you'd define that gradient palette using this macro:
+///   @code{.cpp}
+///   DEFINE_GRADIENT_PALETTE( black_to_red_to_white_p ) {
+///        0,    0,   0,   0,  /* at index 0,   black(0,0,0) */
+///       192, 255,   0,   0,  /* at index 192, red(255,0,0) */
+///       255, 255, 255, 255   /* at index 255, white(255,255,255) */
+///   };
+///   @endcode
+///
+/// This format is designed for compact storage.  The example palette here
+/// takes up just 12 bytes of PROGMEM (flash) storage, and zero bytes
+/// of SRAM when not currently in use.
+///
+/// To use one of these gradient palettes, simply assign it into a
+/// CRGBPalette16 or a CRGBPalette256, like this:
+///   @code{.cpp}
+///   CRGBPalette16 pal = black_to_red_to_white_p;
+///   @endcode
+///
+/// When the assignment is made, the gradients are expanded out into
+/// either 16 or 256 palette entries, depending on the kind of palette
+/// object they're assigned to.
+///
+/// @warning The last "index" position **MUST** be 255! Failure to end
+/// with index 255 will result in program hangs or crashes.  
+/// @par
+/// @warning At this point, these gradient palette definitions **MUST**
+/// be stored in PROGMEM on AVR-based Arduinos. If you use the
+/// `DEFINE_GRADIENT_PALETTE` macro, this is taken of automatically.
+///
+/// TProgmemRGBGradientPalette_byte must remain in the global namespace.
+#define DEFINE_GRADIENT_PALETTE(X) \
+  FL_ALIGN_PROGMEM \
+  extern const ::TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
+
+/// Forward-declaration macro for DEFINE_GRADIENT_PALETTE(X)
+#define DECLARE_GRADIENT_PALETTE(X) \
+  FL_ALIGN_PROGMEM \
+  extern const ::TProgmemRGBGradientPalette_byte X[] FL_PROGMEM
+
+
+typedef uint32_t TProgmemRGBPalette16[16];  ///< CRGBPalette16 entries stored in PROGMEM memory
+typedef uint32_t TProgmemHSVPalette16[16];  ///< CHSVPalette16 entries stored in PROGMEM memory
+/// Alias for TProgmemRGBPalette16
+#define TProgmemPalette16 TProgmemRGBPalette16
+typedef uint32_t TProgmemRGBPalette32[32];  ///< CRGBPalette32 entries stored in PROGMEM memory
+typedef uint32_t TProgmemHSVPalette32[32];  ///< CHSVPalette32 entries stored in PROGMEM memory
+/// Alias for TProgmemRGBPalette32
+#define TProgmemPalette32 TProgmemRGBPalette32
+
+/// Byte of an RGB gradient, stored in PROGMEM memory
+typedef const uint8_t TProgmemRGBGradientPalette_byte;
+/// Pointer to bytes of an RGB gradient, stored in PROGMEM memory
+/// @see DEFINE_GRADIENT_PALETTE
+/// @see DECLARE_GRADIENT_PALETTE
+typedef const TProgmemRGBGradientPalette_byte *TProgmemRGBGradientPalette_bytes;
+/// Alias of ::TProgmemRGBGradientPalette_bytes
+typedef TProgmemRGBGradientPalette_bytes TProgmemRGBGradientPalettePtr;
+
+
+
+
+
+
 FASTLED_NAMESPACE_BEGIN
 
 /// @defgroup ColorUtils Color Utility Functions
@@ -582,23 +661,7 @@ class CHSVPalette16;
 class CHSVPalette32;
 class CHSVPalette256;
 
-typedef uint32_t TProgmemRGBPalette16[16];  ///< CRGBPalette16 entries stored in PROGMEM memory
-typedef uint32_t TProgmemHSVPalette16[16];  ///< CHSVPalette16 entries stored in PROGMEM memory
-/// Alias for TProgmemRGBPalette16
-#define TProgmemPalette16 TProgmemRGBPalette16
-typedef uint32_t TProgmemRGBPalette32[32];  ///< CRGBPalette32 entries stored in PROGMEM memory
-typedef uint32_t TProgmemHSVPalette32[32];  ///< CHSVPalette32 entries stored in PROGMEM memory
-/// Alias for TProgmemRGBPalette32
-#define TProgmemPalette32 TProgmemRGBPalette32
 
-/// Byte of an RGB gradient, stored in PROGMEM memory
-typedef const uint8_t TProgmemRGBGradientPalette_byte;
-/// Pointer to bytes of an RGB gradient, stored in PROGMEM memory
-/// @see DEFINE_GRADIENT_PALETTE
-/// @see DECLARE_GRADIENT_PALETTE
-typedef const TProgmemRGBGradientPalette_byte *TProgmemRGBGradientPalette_bytes;
-/// Alias of ::TProgmemRGBGradientPalette_bytes
-typedef TProgmemRGBGradientPalette_bytes TProgmemRGBGradientPalettePtr;
 
 /// Struct for digesting gradient pointer data into its components. 
 /// This is used when loading a gradient stored in PROGMEM or on
@@ -2146,58 +2209,6 @@ void nblendPaletteTowardPalette( CRGBPalette16& currentPalette,
 /// @} PaletteColors
 
 
-/// Defines a static RGB palette very compactly using a series
-/// of connected color gradients.
-///
-/// For example, if you want the first 3/4ths of the palette to be a slow
-/// gradient ramping from black to red, and then the remaining 1/4 of the
-/// palette to be a quicker ramp to white, you specify just three points: the
-/// starting black point (at index 0), the red midpoint (at index 192),
-/// and the final white point (at index 255).  It looks like this:
-///   @code
-///   index:  0                                    192          255
-///           |----------r-r-r-rrrrrrrrRrRrRrRrRRRR-|-RRWRWWRWWW-|
-///   color: (0,0,0)                           (255,0,0)    (255,255,255)
-///   @endcode
-///
-/// Here's how you'd define that gradient palette using this macro:
-///   @code{.cpp}
-///   DEFINE_GRADIENT_PALETTE( black_to_red_to_white_p ) {
-///        0,    0,   0,   0,  /* at index 0,   black(0,0,0) */
-///       192, 255,   0,   0,  /* at index 192, red(255,0,0) */
-///       255, 255, 255, 255   /* at index 255, white(255,255,255) */
-///   };
-///   @endcode
-///
-/// This format is designed for compact storage.  The example palette here
-/// takes up just 12 bytes of PROGMEM (flash) storage, and zero bytes
-/// of SRAM when not currently in use.
-///
-/// To use one of these gradient palettes, simply assign it into a
-/// CRGBPalette16 or a CRGBPalette256, like this:
-///   @code{.cpp}
-///   CRGBPalette16 pal = black_to_red_to_white_p;
-///   @endcode
-///
-/// When the assignment is made, the gradients are expanded out into
-/// either 16 or 256 palette entries, depending on the kind of palette
-/// object they're assigned to.
-///
-/// @warning The last "index" position **MUST** be 255! Failure to end
-/// with index 255 will result in program hangs or crashes.  
-/// @par
-/// @warning At this point, these gradient palette definitions **MUST**
-/// be stored in PROGMEM on AVR-based Arduinos. If you use the
-/// `DEFINE_GRADIENT_PALETTE` macro, this is taken of automatically.
-///
-#define DEFINE_GRADIENT_PALETTE(X) \
-  FL_ALIGN_PROGMEM \
-  extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM =
-
-/// Forward-declaration macro for DEFINE_GRADIENT_PALETTE(X)
-#define DECLARE_GRADIENT_PALETTE(X) \
-  FL_ALIGN_PROGMEM \
-  extern const TProgmemRGBGradientPalette_byte X[] FL_PROGMEM
 
 /// @} ColorPalettes
 

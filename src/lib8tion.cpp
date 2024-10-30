@@ -10,11 +10,13 @@
 
 #include "FastLED.h"
 
-FASTLED_NAMESPACE_BEGIN
+
 
 /// @copydoc ::rand16seed
 #define RAND16_SEED  1337
 uint16_t rand16seed = RAND16_SEED;
+
+
 
 
 // memset8, memcpy8, memmove8:
@@ -256,5 +258,3 @@ void testnscale8x3()
 }
 
 #endif
-
-FASTLED_NAMESPACE_END
