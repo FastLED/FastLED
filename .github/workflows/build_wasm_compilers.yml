@@ -1,4 +1,4 @@
-name: wasm Compilers
+name: wasm compilers
 
 on:
   push:
