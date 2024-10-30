@@ -17,7 +17,7 @@
 #include "engine_events.h"
 #include "namespace.h"
 #include "screenmap.h"
-#include "ptr.h"
+#include "ref.h"
 #include "active_strip_data.h"
 
 

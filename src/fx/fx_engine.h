@@ -10,7 +10,7 @@
 #include "fx/detail/fx_compositor.h"
 #include "fx/detail/fx_layer.h"
 #include "namespace.h"
-#include "ptr.h"
+#include "ref.h"
 #include "ui.h"
 #include "fx/detail/time_warp.h"
 

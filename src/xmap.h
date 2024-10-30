@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "ptr.h"
+#include "ref.h"
 #include "force_inline.h"
 #include "lut.h"
 

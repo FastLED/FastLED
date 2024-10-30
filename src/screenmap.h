@@ -4,7 +4,7 @@
 
 #include "force_inline.h"
 #include "lut.h"
-#include "ptr.h"
+#include "ref.h"
 
 #include "str.h"
 #include "fixed_map.h"

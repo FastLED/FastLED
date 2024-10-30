@@ -7,7 +7,7 @@
 #include "lib8tion/intmap.h"
 #include "fx/detail/data_stream.h"
 #include "fx/storage/bytestreammemory.h"
-#include "ptr.h"
+#include "ref.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE

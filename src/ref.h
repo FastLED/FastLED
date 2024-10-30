@@ -3,7 +3,8 @@
 
 #include <stddef.h>
 
-// FastLED smart pointer. Used mainly by the fx components.
+// FastLED smart pointer. This was originally called Ptr<T> but that conflicts with
+// ArduinoJson::Ptr<T> so it was renamed to Ref<T>.
 
 #include "namespace.h"
 #include "scoped_ptr.h"

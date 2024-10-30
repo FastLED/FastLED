@@ -10,7 +10,7 @@
 #endif
 
 #include "namespace.h"
-#include "ptr.h"
+#include "ref.h"
 
 FASTLED_NAMESPACE_BEGIN
 

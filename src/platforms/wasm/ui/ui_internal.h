@@ -9,7 +9,7 @@
 #include "namespace.h"
 #include "callback.h"
 #include "json.h"
-#include "ptr.h"
+#include "ref.h"
 
 FASTLED_NAMESPACE_BEGIN
 

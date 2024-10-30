@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "ptr.h"
+#include "ref.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN

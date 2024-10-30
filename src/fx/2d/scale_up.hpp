@@ -13,7 +13,7 @@
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
-#include "ptr.h"
+#include "ref.h"
 #include "xymap.h"
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.

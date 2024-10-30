@@ -12,7 +12,7 @@
 
 #include "fixed_set.h"
 #include "fixed_map.h"
-#include "ptr.h"
+#include "ref.h"
 
 #include "platforms/wasm/js.h"
 #include "json.h"

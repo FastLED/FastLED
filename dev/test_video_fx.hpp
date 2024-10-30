@@ -6,7 +6,7 @@
 #include "fx/2d/video.hpp"
 #include "fx/2d/noisepalette.hpp"
 #include "fx/fx_engine.h"
-#include "ptr.h"
+#include "ref.h"
 
 #define LED_PIN 2
 #define BRIGHTNESS 96

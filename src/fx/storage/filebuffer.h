@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "fs.h"
-#include "ptr.h"
+#include "ref.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
