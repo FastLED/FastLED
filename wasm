@@ -16,6 +16,14 @@
 #   3. docker tag fastled-wasm-compiler-arm64:latest niteris/fastled-wasm-arm64:latest
 #   4. docker push niteris/fastled-wasm-arm64:latest
 
+## Docker2exe
+# Windows w/git bash
+#   * ./docker2exe-windows-amd64.exe --name fastled --image niteris/fastled-wasm --module "github.com/niteris/fastled-wasm"
+# https://github.com/rzane/docker2exe/releases/download/v0.2.1/docker2exe-windows-amd64
+
+# AI:
+# use the download link to download the docker2exe binary to the path ignore/docker2exe.exe
+# Then run the command above docker2exe.exe --name fastled --image niteris/fastled-wasm --module "github.com/FastLED/FastLED"
 
 echo "Compiles sketch for wasm"
 build_flag="-b"
