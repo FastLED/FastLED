@@ -1,10 +1,12 @@
 /// @file noise.cpp
 /// Functions to generate and fill arrays with noise.
 
+#include <string.h>
+
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 #include "FastLED.h"
-#include <string.h>
+
 
 // Compiler throws a warning about stack usage possibly being unbounded even
 // though bounds are checked, silence that so users don't see it
@@ -15,10 +17,13 @@
   #pragma GCC diagnostic ignored "-Wunknown-warning-option"
 #endif
 
-FASTLED_NAMESPACE_BEGIN
+
 
 /// Reads a single byte from the p array
 #define P(x) FL_PGM_READ_BYTE_NEAR(p + x)
+
+FASTLED_NAMESPACE_BEGIN
+
 
 FL_PROGMEM static uint8_t const p[] = {
     151, 160, 137,  91,  90,  15, 131,  13, 201,  95,  96,  53, 194, 233,   7, 225,

@@ -1,13 +1,16 @@
 
 #ifdef __EMSCRIPTEN__
 
-#include <memory>
-
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 #include <emscripten/val.h>
+
+#include <memory>
+#include <stdio.h>
+
+
 
 #include "fixed_map.h"
 #include "singleton.h"
@@ -19,7 +22,7 @@
 #include "js.h"
 #include "str.h"
 #include "namespace.h"
-#include <stdio.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 

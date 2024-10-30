@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 /// @file controller.h
 /// base definitions used by led controllers for writing out led data
 
@@ -7,7 +9,7 @@
 #include "led_sysdefs.h"
 #include "pixeltypes.h"
 #include "color.h"
-#include <stddef.h>
+
 #include "force_inline.h"
 #include "pixel_controller.h"
 #include "dither_mode.h"

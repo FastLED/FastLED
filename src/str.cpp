@@ -1,6 +1,8 @@
+#include <stdlib.h>
+
 #include "str.h"
 #include "namespace.h"
-#include <stdlib.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 

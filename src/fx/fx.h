@@ -1,11 +1,13 @@
 #pragma once
 
+#include <stdint.h>
+
 #include "crgb.h"
 #include "namespace.h"
 #include "ptr.h"
 #include "detail/draw_context.h"
 #include "detail/transition.h"
-#include <stdint.h>
+
 FASTLED_NAMESPACE_BEGIN
 
 DECLARE_SMART_PTR(Fx);
@@ -14,7 +16,7 @@ DECLARE_SMART_PTR(Fx);
 class Fx : public Referent {
   public:
     // Alias DrawContext for use within Fx
-    using DrawContext = ::DrawContext;
+    using DrawContext = _DrawContext;
 
     Fx(uint16_t numLeds) : mNumLeds(numLeds) {}
 

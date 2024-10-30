@@ -1,9 +1,11 @@
 #pragma once
 
-#include "namespace.h"
-#include "ptr.h"
 #include <stddef.h>
 #include <stdint.h>
+
+#include "namespace.h"
+#include "ptr.h"
+
 #include "crgb.h"
 
 FASTLED_NAMESPACE_BEGIN

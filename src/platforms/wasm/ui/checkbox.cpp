@@ -1,11 +1,13 @@
 
 #ifdef __EMSCRIPTEN__
 
-#include "json.h"
-#include "platforms/wasm/js.h"
-#include "ui_manager.h"
 #include <string.h>
 #include "namespace.h"
+
+#include "platforms/wasm/js.h"
+#include "json.h"
+#include "ui_manager.h"
+
 
 FASTLED_NAMESPACE_BEGIN
 

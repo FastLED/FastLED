@@ -1,8 +1,10 @@
 #ifdef __EMSCRIPTEN__
 
-#include <emscripten.h>
 #include <stdint.h>
 #include <thread>
+
+#include <emscripten.h>
+
 
 // Needed or the wasm compiler will strip them out.
 // Provide missing functions for WebAssembly build.

@@ -1,5 +1,4 @@
-#ifndef __INC_COLOR_H
-#define __INC_COLOR_H
+#pragma once
 
 #include "namespace.h"
 
@@ -97,5 +96,3 @@ typedef enum {
 
 FASTLED_NAMESPACE_END
 
-///@}
-#endif

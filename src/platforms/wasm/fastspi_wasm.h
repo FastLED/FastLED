@@ -6,6 +6,10 @@
 
 #include <stdint.h>
 
+#include <vector>
+#include <stdio.h>
+
+
 #include "namespace.h"
 #include "active_strip_data.h"
 #include "singleton.h"
@@ -14,8 +18,6 @@
 #include "crgb.h"
 #include "pixel_controller.h"
 #include "dither_mode.h"
-#include <vector>
-#include <stdio.h>
 
 FASTLED_NAMESPACE_BEGIN
 

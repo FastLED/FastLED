@@ -8,13 +8,13 @@ FASTLED_NAMESPACE_BEGIN
 
 // Abstract base class for effects on a strip/grid of LEDs.
 
-struct DrawContext {
+struct _DrawContext {
     uint32_t now;
     CRGB* leds;
     uint16_t frame_time = 0;
     float speed = 1.0f;
     uint8_t* alpha_channel = nullptr;
-    DrawContext(
+    _DrawContext(
         uint32_t now,
         CRGB* leds,
         uint16_t frame_time = 0,

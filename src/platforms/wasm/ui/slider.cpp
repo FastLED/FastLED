@@ -1,9 +1,10 @@
 #ifdef __EMSCRIPTEN__
 
-#include "platforms/wasm/js.h"
-#include "ui_manager.h"
 #include <sstream>
 #include <string.h>
+
+#include "platforms/wasm/js.h"
+#include "ui_manager.h"
 #include "json.h"
 #include "namespace.h"
 

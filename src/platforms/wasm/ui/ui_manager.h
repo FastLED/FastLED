@@ -1,12 +1,14 @@
 #pragma once
 
-#include "events.h"
-#include "singleton.h"
 #include <mutex>
 #include <set>
 #include <string>
 #include <memory>
 #include <map>
+
+#include "events.h"
+#include "singleton.h"
+
 
 #include "fixed_set.h"
 #include "fixed_map.h"

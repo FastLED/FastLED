@@ -1,5 +1,9 @@
 #pragma once
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 // A templated singleton class, parameterized by the type of the singleton and an optional integer.
 template<typename T, int N = 0>
 class Singleton {
@@ -17,3 +21,5 @@ private:
     Singleton() = default;
     ~Singleton() = default;
 };
+
+FASTLED_NAMESPACE_END

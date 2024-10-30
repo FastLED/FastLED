@@ -1,17 +1,22 @@
 #pragma once
 
-#include "namespace.h"
-#include "eorder.h"
 #include <stdint.h>
+#include <vector>
 
-#include "active_strip_data.h"
-#include "crgb.h"
-#include "exports.h"
-#include "strip_id_map.h"
-#include "singleton.h"
 #include "pixel_controller.h"
 #include "pixel_iterator.h"
-#include <vector>
+#include "namespace.h"
+#include "eorder.h"
+#include "crgb.h"
+#include "singleton.h"
+
+#include "active_strip_data.h"
+
+#include "exports.h"
+#include "strip_id_map.h"
+
+
+
 
 FASTLED_NAMESPACE_BEGIN
 

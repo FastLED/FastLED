@@ -9,8 +9,9 @@
 // infact everything it touches. PixelIterator is concrete and doesn't have these
 // problems. See PixelController::as_iterator() for how to create a PixelIterator.
 
-#include "FastLED.h"
 #include <stddef.h>
+
+#include "FastLED.h"
 #include "rgbw.h"
 #include "five_bit_hd_gamma.h"
 #include "force_inline.h"

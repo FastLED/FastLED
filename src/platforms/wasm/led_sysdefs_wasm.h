@@ -1,5 +1,4 @@
-#ifndef __INC_LED_SYSDEFS_STUB_H
-#define __INC_LED_SYSDEFS_STUB_H
+#pragma once
 
 #ifndef FASTLED_STUB_IMPL
 #define FASTLED_STUB_IMPL
@@ -40,5 +39,3 @@ extern "C" {
     void delay(int ms);
     void yield(void);
 }
-
-#endif // __INC_LED_SYSDEFS_STUB_H

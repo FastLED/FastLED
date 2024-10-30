@@ -1,8 +1,7 @@
 /// @file dmx.h
 /// Defines the DMX512-based LED controllers.
 
-#ifndef __INC_DMX_H
-#define __INC_DMX_H
+#pragma once
 
 #include "FastLED.h"
 
@@ -87,4 +86,3 @@ FASTLED_NAMESPACE_END
 
 #endif
 
-#endif

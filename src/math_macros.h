@@ -1,7 +1,5 @@
 #pragma once
 
-#include "namespace.h"
-
 #ifndef MAX
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #endif

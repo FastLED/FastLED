@@ -6,6 +6,7 @@
 
 #include "FastLED.h"
 #include "force_inline.h"
+#include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 

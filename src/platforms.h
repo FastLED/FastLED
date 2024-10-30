@@ -4,9 +4,7 @@
 
 #include "fastled_config.h"
 
-#include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 /// @file platforms.h
 /// Determines which platforms headers to include
@@ -58,4 +56,3 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 
 
-FASTLED_NAMESPACE_END

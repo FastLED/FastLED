@@ -2,6 +2,9 @@
 
 #include "filebuffer.h"
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 FileBuffer::FileBuffer(FileHandlePtr fh) {
   mFile = fh;
@@ -87,3 +90,5 @@ void FileBuffer::RefillBuffer() {
     mCurrIdx = 0;
   }
 }
+
+FASTLED_NAMESPACE_END

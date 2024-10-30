@@ -5,9 +5,13 @@
 
 #include <application.h>
 
+#ifndef FASTLED_NAMESPACE_BEGIN
 #define FASTLED_NAMESPACE_BEGIN namespace NSFastLED {
 #define FASTLED_NAMESPACE_END }
 #define FASTLED_USING_NAMESPACE using namespace NSFastLED;
+#else
+FASTLED_USING_NAMESPACE
+#endif  // FASTLED_NAMESPACE_BEGIN
 
 // reusing/abusing cli/sei defs for due
 #define cli()  __disable_irq(); __disable_fault_irq();

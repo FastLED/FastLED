@@ -1,8 +1,17 @@
 #ifdef __EMSCRIPTEN__
 
+#include <emscripten.h>
+
+#include <sstream>
+#include <vector>
+
+
+
 #include "ui_manager.h"
 #include "fixed_map.h"
 #include "json.h"
+#include "namespace.h"
+
 
 #include <emscripten.h>
 #include <sstream>

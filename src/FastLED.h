@@ -1,6 +1,8 @@
+#pragma once
 #ifndef __INC_FASTSPI_LED2_H
 #define __INC_FASTSPI_LED2_H
 
+#include <stdint.h>
 
 /// @file FastLED.h
 /// central include file for FastLED, defines the CFastLED class/object
@@ -48,7 +50,7 @@
 #include <OctoWS2811.h>
 #endif
 
-#include <stdint.h>
+
 
 #include "force_inline.h"
 #include "cpp_compat.h"

@@ -1,6 +1,4 @@
-#ifndef __INC_COLORPALETTES_H
-/// Include guard
-#define __INC_COLORPALETTES_H
+#pragma once
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
@@ -8,6 +6,7 @@
 #include "FastLED.h"
 #include "colorutils.h"
 #include "colorpalettes.h"
+#include "namespace.h"
 
 FASTLED_USING_NAMESPACE
 
@@ -190,5 +189,3 @@ DEFINE_GRADIENT_PALETTE( Rainbow_gp ) {
 
 /// @}
 /// @}
-
-#endif

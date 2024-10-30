@@ -26,6 +26,10 @@ License CC BY-NC 3.0
 
 */
 
+#include <vector>  // ok include
+#include <math.h>  // ok include
+#include <stdint.h>
+
 #ifndef ANIMARTRIX_INTERNAL
 #error "This file is not meant to be included directly. Include animartrix.hpp instead."
 #endif
@@ -45,9 +49,7 @@ License CC BY-NC 3.0
 // If you are using this header for commercial purposes, then you need to contact Stefan Petrick for a commercial use license.
 
 
-#include <vector>  // ok include
-#include <math.h>  // ok include
-#include <stdint.h>
+
 
 #include "force_inline.h"
 #include "namespace.h"

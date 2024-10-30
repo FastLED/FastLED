@@ -2,10 +2,12 @@
 /// Fast, efficient 8-bit math functions specifically
 /// designed for high-performance LED programming. 
 
+#include <stdint.h>
+
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 
-#include <stdint.h>
+
 #include "FastLED.h"
 
 FASTLED_NAMESPACE_BEGIN

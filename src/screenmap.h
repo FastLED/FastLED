@@ -1,19 +1,23 @@
 #pragma once
 
+#include <stdint.h>
+
+#include "force_inline.h"
+#include "lut.h"
+#include "ptr.h"
+
+#include "str.h"
+#include "fixed_map.h"
+#include "json.h"
+#include "namespace.h"
+
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED.js
  * to map the 1D strip to a 2D grid. Note that the strip can have arbitrary
  * size. this was first motivated during the (attempted? Oct. 19th 2024) port of
  * the Chromancer project to FastLED.js.
  */
 
-#include "force_inline.h"
-#include "lut.h"
-#include "ptr.h"
-#include <stdint.h>
-#include "str.h"
-#include "fixed_map.h"
-#include "json.h"
-#include "namespace.h"
+
 
 FASTLED_NAMESPACE_BEGIN
 

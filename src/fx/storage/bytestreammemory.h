@@ -1,9 +1,11 @@
 #pragma once
 
-#include "namespace.h"
-#include "ptr.h"
 #include <stddef.h>
 #include <stdint.h>
+
+#include "namespace.h"
+#include "ptr.h"
+
 #include "bytestream.h"
 #include "fx/detail/circular_buffer.h"
 

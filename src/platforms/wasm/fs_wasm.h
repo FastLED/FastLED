@@ -1,10 +1,13 @@
 #pragma once
+
+#include <string>
+#include <stdint.h>
+
 #include "fs.h"
 #include "namespace.h"
 #include "ptr.h"
 #include "slice.h"
-#include <string>
-#include <stdint.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 

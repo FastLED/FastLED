@@ -1,11 +1,12 @@
 #pragma once
 
+#include <stdint.h>
+#pragma once
+
 #include "namespace.h"
 #include <stdint.h>
 
-
 #if defined(ARDUNIO_CORE_SPI)
-#include <SPI.h>
 #endif
 
 #if defined(ARDUNIO_CORE_SPI)
@@ -103,5 +104,7 @@ public:
 
 FASTLED_NAMESPACE_END
 
+
 #endif
+
 

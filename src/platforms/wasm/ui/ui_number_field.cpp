@@ -1,13 +1,15 @@
 
 #ifdef __EMSCRIPTEN__
 
+#include <memory>
+
 #include "namespace.h"
 #include "json.h"
 #include "ui_internal.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
 #include "math_macros.h"
-#include <memory>
+
 
 FASTLED_NAMESPACE_BEGIN
 

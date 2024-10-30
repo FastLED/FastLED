@@ -15,7 +15,6 @@
 #include "namespace.h"
 #include "engine_events.h"
 #include "fixed_map.h"
-#include "active_strip_data.h"
 #include "screenmap.h"
 #include "strip_id_map.h"
 

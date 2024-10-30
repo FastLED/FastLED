@@ -1,15 +1,23 @@
 #ifdef __EMSCRIPTEN__
 
-#include "ui/ui_internal.h"
+#include <emscripten.h>
+#include <emscripten/emscripten.h> // Include Emscripten headers
+
+#include <emscripten.h>
+#include <emscripten/emscripten.h> // Include Emscripten headers
+#include <emscripten/html5.h>
+
+
+
 #include <memory>
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
+
+
+
+#include "ui/ui_internal.h"
 #include "str.h"
-
-#include <emscripten.h>
-#include <emscripten/emscripten.h> // Include Emscripten headers
-
 #include "active_strip_data.h"
 #include "engine_events.h"
 #include "js.h"
@@ -18,9 +26,6 @@
 #include "screenmap.h"
 #include "fixed_map.h"
 
-#include <emscripten.h>
-#include <emscripten/emscripten.h> // Include Emscripten headers
-#include <emscripten/html5.h>
 
 
 FASTLED_NAMESPACE_BEGIN

@@ -1,13 +1,15 @@
 #pragma once
 
+#include <stdint.h>
+#include <string.h>
+
 #include "crgb.h"
 #include "fixed_vector.h"
 #include "fx/fx.h"
 #include "namespace.h"
 #include "ptr.h"
 #include "fx/frame.h"
-#include <stdint.h>
-#include <string.h>
+
 //#include <assert.h>
 
 FASTLED_NAMESPACE_BEGIN

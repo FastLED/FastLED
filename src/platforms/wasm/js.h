@@ -1,15 +1,19 @@
 #pragma once
 
-#include "ui/ui_internal.h"
+
+#include <emscripten.h>
+#include <emscripten/emscripten.h> // Include Emscripten headers
+
 #include <memory>
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
 #include "str.h"
 
-#include <emscripten.h>
-#include <emscripten/emscripten.h> // Include Emscripten headers
 
+
+#include "ui/ui_internal.h"
+#include "str.h"
 #include "engine_events.h"
 #include "namespace.h"
 #include "screenmap.h"

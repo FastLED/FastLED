@@ -1,8 +1,10 @@
-#ifndef __INC_LIB8TION_SCALE_H
-#define __INC_LIB8TION_SCALE_H
+#pragma once
 
 #include "lib8static.h"
 #include "crgb.h"
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 /// @file scale8.h
 /// Fast, efficient 8-bit scaling functions specifically
@@ -742,4 +744,4 @@ LIB8STATIC uint8_t brighten8_lin(uint8_t x) {
 /// @} Dimming
 /// @} lib8tion
 
-#endif
+FASTLED_NAMESPACE_END

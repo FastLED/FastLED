@@ -1,5 +1,7 @@
 #include "fx/video/stream_buffered.h"
 
+#include "namespace.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 VideoStream::VideoStream(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo)

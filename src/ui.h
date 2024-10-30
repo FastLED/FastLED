@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+
 #include "platforms/ui_defs.h"
 #include "namespace.h"
 #include "math_macros.h"
