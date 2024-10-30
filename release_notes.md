@@ -4,6 +4,9 @@ FastLED 3.9.1
 * Bug fix for namespace conflicts
 * One of our third_party libraries was causing a namespace conflict with ArduinoJson included by the user.
   * If you are affected then please upgrade.
+* FastLED now supports it's own namespace, default is `fl`
+  * Off by default, as old code wants FastLED stuff to be global.
+  * Enable it by defining: `FASTLED_FORCE_NAMESPACE`
 
 
 FastLED 3.9.0
