@@ -1,5 +1,4 @@
 import argparse
-import download
 import os
 import platform
 import shutil
@@ -8,6 +7,8 @@ import sys
 import time
 from pathlib import Path
 from typing import List
+
+import download  # type: ignore
 
 from ci.paths import PROJECT_ROOT
 
@@ -227,41 +228,33 @@ def setup_docker2exe() -> None:
     if not docker2exe_path.exists():
         download.download(
             "https://github.com/rzane/docker2exe/releases/download/v0.2.1/docker2exe-windows-amd64",
-            str(docker2exe_path)
+            str(docker2exe_path),
         )
         docker2exe_path.chmod(0o755)
     else:
         print("docker2exe.exe already exists, skipping download.")
 
+    slim_cmd = [
+        str(docker2exe_path),
+        "--name",
+        "fastled",
+        "--image",
+        "niteris/fastled-wasm",
+        "--module",
+        "github.com/FastLED/FastLED",
+        "--target",
+        "windows/amd64",
+    ]
+    full_cmd = slim_cmd + ["--embed"]
+
     subprocess.run(
-        [
-            str(docker2exe_path),
-            "--name",
-            "fastled",
-            "--image",
-            "niteris/fastled-wasm",
-            "--module",
-            "github.com/FastLED/FastLED",
-            "--target",
-            "windows/amd64",
-        ],
+        slim_cmd,
         check=True,
     )
     print("Building wasm web command...")
     print("Building wasm full command with no dependencies...")
     subprocess.run(
-        [
-            str(docker2exe_path),
-            "--name",
-            "fastled",
-            "--image",
-            "niteris/fastled-wasm",
-            "--module",
-            "github.com/FastLED/FastLED",
-            "--target",
-            "windows/amd64",
-            "--embed",
-        ],
+        full_cmd,
         check=True,
     )
     move_files_to_dist(full=True)
