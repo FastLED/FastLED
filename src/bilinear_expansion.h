@@ -5,10 +5,12 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #include "crgb.h"
 #include "namespace.h"
 #include "xymap.h"
-#include <stdint.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 

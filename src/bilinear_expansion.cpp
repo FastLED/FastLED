@@ -3,11 +3,13 @@
 /// 2D LED matrix
 /// @example NoisePlusPalette.hpp
 
+#include <stdint.h>
+
 #include "bilinear_expansion.h"
 #include "crgb.h"
 #include "namespace.h"
 #include "xymap.h"
-#include <stdint.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 
