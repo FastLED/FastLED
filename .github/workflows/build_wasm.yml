@@ -11,7 +11,6 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -43,13 +42,21 @@ jobs:
       - name: Compile fastled.js, fastled.wasm, and index.html
         run: |
           uv run ci/wasm_compile.py -b examples/wasm
-          echo $? > compile_exit_status.txt
+          echo $? > ./compile_exit_status.txt
+          if [ "$(cat compile_exit_status.txt)" -ne 0 ]; then
+            echo "Compilation failed."
+            exit 1
+          fi
         shell: bash
 
       - name: Scan for wasm/js/html artifacts
         run: |
           find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
-          echo $? > scan_exit_status.txt
+          echo $? > ./scan_exit_status.txt
+          if [ "$(cat scan_exit_status.txt)" -ne 0 ]; then
+            echo "Artifact scan failed."
+            exit 1
+          fi
 
       - name: Check for required artifacts
         run: |
@@ -59,7 +66,11 @@ jobs:
             exit 1
           fi
           echo "All required files are present."
-          echo $? > check_exit_status.txt
+          echo $? > ./check_exit_status.txt
+          if [ "$(cat check_exit_status.txt)" -ne 0 ]; then
+            echo "Required files check failed."
+            exit 1
+          fi
 
       - name: Generate timestamp and random hex
         id: generate_id
@@ -136,7 +147,11 @@ jobs:
               }
             })();
           "
-          echo $? > playwright_exit_status.txt
+          echo $? > ./playwright_exit_status.txt
+          if [ "$(cat playwright_exit_status.txt)" -ne 0 ]; then
+            echo "Playwright test failed."
+            exit 1
+          fi
       - name: Check all exit statuses
         run: |
           compile_status=$(cat compile_exit_status.txt)
