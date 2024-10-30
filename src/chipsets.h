@@ -814,6 +814,14 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMU
 
 #else
 
+#ifndef FASTLED_LED_OVERCLOCK
+#define FASTLED_LED_OVERCLOCK 1.0
+#endif
+
+#ifndef FASTLED_LED_OVERCLOCK_WS2812
+#define FASTLED_LED_OVERCLOCK_WS2812 FASTLED_LED_OVERCLOCK
+#endif
+
 /// Calculates the number of cycles for the clockless chipset (which may differ from CPU cycles)
 /// @see ::NS()
 #if FASTLED_CLOCKLESS_USES_NANOSECONDS
@@ -822,6 +830,9 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMU
 #else
 #define C_NS(_NS) (((_NS * ((CLOCKLESS_FREQUENCY / 1000000L)) + 999)) / 1000)
 #endif
+
+// A special case for WS2812 to allow overclocking the led.
+#define C_NS_WS2812(_NS) (C_NS(int(_NS / FASTLED_LED_OVERCLOCK_WS2812)))
 
 // At T=0        : the line is raised hi to start a bit
 // At T=T1       : the line is dropped low to transmit a zero bit
@@ -891,7 +902,7 @@ class WS2813Controller : public ClocklessController<DATA_PIN, C_NS(320), C_NS(32
 
 // WS2812 - 250ns, 625ns, 375ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2812Controller800Khz : public ClocklessController<DATA_PIN, C_NS(250), C_NS(625), C_NS(375), RGB_ORDER> {};
+class WS2812Controller800Khz : public ClocklessController<DATA_PIN, C_NS_WS2812(250), C_NS_WS2812(625), C_NS_WS2812(375), RGB_ORDER> {};
 
 // WS2811@400khz - 800ns, 800ns, 900ns
 template <uint8_t DATA_PIN, EOrder RGB_ORDER = GRB>
