@@ -40,16 +40,16 @@ setup_docker2exe() {
     fi
     ./ignore/docker2exe.exe --name fastled --image niteris/fastled-wasm --module "github.com/FastLED/FastLED"
     echo "Making wasm web cmd"
-    mv ./ignore/fastled-darwin-amd64 ./ignore/fastled-wasm-darwin-amd64
-    mv ./ignore/fastled-darwin-arm64 ./ignore/fastled-wasm-darwin-arm64
-    mv ./ignore/fastled-linux-amd64 ./ignore/fastled-wasm-linux-amd64
-    mv ./ignore/fastled-windows-amd64.exe ./ignore/fastled-wasm-windows-amd64.exe
+    mv ./ignore/fastled-darwin-amd64 ./dist/fastled-darwin-amd64
+    mv ./ignore/fastled-darwin-arm64 ./dist/fastled-darwin-arm64
+    mv ./ignore/fastled-linux-amd64 ./dist/fastled-linux-amd64
+    mv ./ignore/fastled-windows-amd64.exe ./dist/fastled-windows-amd64.exe
     echo "Making wasm full cmd with no dependencies"
     ./ignore/docker2exe.exe --name fastled --image niteris/fastled-wasm --module "github.com/FastLED/FastLED" --embed
-    mv ./ignore/fastled-darwin-amd64 ./ignore/fastled-wasm-darwin-amd64-full
-    mv ./ignore/fastled-darwin-arm64 ./ignore/fastled-wasm-darwin-arm64-full
-    mv ./ignore/fastled-linux-amd64 ./ignore/fastled-wasm-linux-amd64-full
-    mv ./ignore/fastled-windows-amd64.exe ./ignore/fastled-wasm-windows-amd64-full.exe
+    mv ./ignore/fastled-darwin-amd64 ./dist/fastled-darwin-amd64-full
+    mv ./ignore/fastled-darwin-arm64 ./dist/fastled-darwin-arm64-full
+    mv ./ignore/fastled-linux-amd64 ./dist/fastled-linux-amd64-full
+    mv ./ignore/fastled-windows-amd64.exe ./dist/fastled-windows-amd64-full.exe
     echo "Docker2exe done."
 }
 
