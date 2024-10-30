@@ -1,8 +1,10 @@
 #pragma once
 
 #include <stdint.h>
+
 #include "engine_events.h"
 #include "namespace.h"
+
 
 
 FASTLED_NAMESPACE_BEGIN

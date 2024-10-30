@@ -1,14 +1,18 @@
 #ifdef __EMSCRIPTEN__
 
-#include <map>
+
 
 #include <emscripten.h>
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
-#include "platforms/wasm/js.h"
 
+
+#include <map>
+
+
+#include "platforms/wasm/js.h"
 #include "platforms/wasm/active_strip_data.h"
 #include "events.h"
 #include "platforms/wasm/strip_id_map.h"
