@@ -18,6 +18,9 @@ jobs:
     - name: Install UV
       run: pip install uv
 
+    - name: Build Image
+      run: ./wasm --no-open -b
+
     - name: Build WASM Compiler
       run: ./wasm --build_wasm_compiler
 
