@@ -123,15 +123,15 @@ class FsImplWasm : public FsImpl {
         }
     }
 
-    FileHandleRef openRead(const char *path) override {
-        printf("Opening file %s\n", path);
-        Str key(path);
+    FileHandleRef openRead(const char *_path) override {
+        printf("Opening file %s\n", _path);
+        Str path(_path);
         std::lock_guard<std::mutex> lock(gFileMapMutex);
         auto it = gFileMap.find(key);
         if (it != gFileMap.end()) {
             auto &data = it->second;
             WasmFileHandleRef out =
-                WasmFileHandleRef::TakeOwnership(new WasmFileHandle(key, data));
+                WasmFileHandleRef::TakeOwnership(new WasmFileHandle(path, data));
             return out;
         }
         return FileHandleRef::Null();
