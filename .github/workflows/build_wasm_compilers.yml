@@ -23,6 +23,7 @@ jobs:
 
     - name: Build WASM Compiler
       run: ./wasm --build_wasm_compiler
+      shell: bash
 
     - name: Upload Artifacts
       run: |
