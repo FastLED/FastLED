@@ -22,8 +22,7 @@ FastLED 3.9.2
         * 3.9.0: 59fps
         * 3.9.2: 70fps @ 20% overclock (after this the CPU becomes the bottleneck).
       * FastLED is now likely at the theoretical maximum speed and efficiency for frame draw (async) & dispatch (overclock).
-
-* Fixes `ESPAsyncWebServer.h` namespace collision with `fs.h` in FastLED, which has been renamed to `file_system.h`
+  * Fixes `ESPAsyncWebServer.h` namespace collision with `fs.h` in FastLED, which has been renamed to `file_system.h`
 
 FastLED 3.9.1
 =============
