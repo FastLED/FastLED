@@ -814,6 +814,10 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMU
 
 #else
 
+// Allow overclocking of the clockless family of leds. 1.2 would be
+// 20% overclocking. In tests WS2812 can be overclocked at 20%, but
+// various manufacturers may be different.  This is a global value
+// which is overridable by each supported chipset.
 #ifndef FASTLED_LED_OVERCLOCK
 #define FASTLED_LED_OVERCLOCK 1.0
 #endif
