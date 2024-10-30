@@ -135,14 +135,13 @@ def run_command(command: str, cwd=None, capture: bool = False) -> tuple[str, str
     process = subprocess.run(
         command,
         shell=True,
-        text=True,
         cwd=cwd,
         capture_output=capture,
     )
 
     if capture:
-        stdout = process.stdout
-        stderr = process.stderr
+        stdout = process.stdout.decode("utf-8")
+        stderr = process.stderr.decode("utf-8")
     else:
         stdout = stderr = ""
 
