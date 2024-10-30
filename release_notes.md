@@ -1,4 +1,10 @@
 
+FastLED 3.9.1
+=============
+* Bug fix for namespace conflicts
+* One of our third_party libraries was causing a namespace conflict with ArduinoJson included by the user.
+  * If you are affected then please upgrade.
+
 
 FastLED 3.9.0
 =============
