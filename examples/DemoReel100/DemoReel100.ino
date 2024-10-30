@@ -15,7 +15,7 @@ CRGB leds[NUM_LEDS];
 #define BRIGHTNESS          96
 #define FRAMES_PER_SECOND  120
 
-DemoReel100Ptr demoReel = DemoReel100Ptr::New(NUM_LEDS);
+DemoReel100Ref demoReel = DemoReel100Ref::New(NUM_LEDS);
 
 void setup() {
   delay(3000); // 3 second delay for recovery

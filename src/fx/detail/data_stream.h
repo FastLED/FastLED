@@ -23,8 +23,8 @@ class DataStream: public Referent {
 
   explicit DataStream(int bytes_per_frame);
 
-  bool begin(FileHandlePtr h);
-  bool beginStream(ByteStreamPtr s);
+  bool begin(FileHandleRef h);
+  bool beginStream(ByteStreamRef s);
   void Close();
   int32_t BytesPerFrame();
   bool ReadPixel(CRGB* dst);
@@ -43,9 +43,9 @@ class DataStream: public Referent {
  private:
   void init(int bytes_per_frame);
   int32_t mBytesPerFrame;
-  FileHandlePtr mFileHandle;
-  FileBufferPtr mFileBuffer;
-  ByteStreamPtr mByteStream;
+  FileHandleRef mFileHandle;
+  FileBufferRef mFileBuffer;
+  ByteStreamRef mByteStream;
   bool mUsingByteStream;
 
 protected:

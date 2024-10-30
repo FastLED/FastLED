@@ -22,11 +22,11 @@ FASTLED_NAMESPACE_BEGIN
 class FxCompositor {
 public:
     FxCompositor(uint16_t numLeds) : mNumLeds(numLeds) {
-        mLayers[0] = FxLayerPtr::New();
-        mLayers[1] = FxLayerPtr::New();
+        mLayers[0] = FxLayerRef::New();
+        mLayers[1] = FxLayerRef::New();
     }
 
-    void startTransition(uint32_t now, uint32_t duration, Ptr<Fx> nextFx) {
+    void startTransition(uint32_t now, uint32_t duration, Ref<Fx> nextFx) {
         completeTransition();
         if (duration == 0) {
             mLayers[0]->setFx(nextFx);
@@ -48,12 +48,12 @@ public:
 
 private:
     void swapLayers() {
-        FxLayerPtr tmp = mLayers[0];
+        FxLayerRef tmp = mLayers[0];
         mLayers[0] = mLayers[1];
         mLayers[1] = tmp;
     }
 
-    FxLayerPtr mLayers[2];
+    FxLayerRef mLayers[2];
     const uint16_t mNumLeds;
     Transition mTransition;
 };

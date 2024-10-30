@@ -17,7 +17,7 @@ jsButton::jsButton(const char* name)
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
         static_cast<jsButton*>(self)->toJson(json);
     });
-    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
+    mInternal = jsUiInternalRef::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
     mUpdater.init(this);
 }

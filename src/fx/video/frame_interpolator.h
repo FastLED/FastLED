@@ -15,7 +15,7 @@ DECLARE_SMART_PTR(FrameInterpolator);
 // respond to things like sound which can modify the timing.
 class FrameInterpolator : public Referent {
 public:
-    typedef CircularBuffer<FramePtr> FrameBuffer;
+    typedef CircularBuffer<FrameRef> FrameBuffer;
     FrameInterpolator(size_t nframes, float fpsVideo);
 
     HighPrecisionInterval& getInterval() { return mInterval; }
@@ -36,8 +36,8 @@ public:
     bool add(const Frame& frame);
 
     // Used for recycling externally.
-    bool pop_back(FramePtr* dst) { return mFrames.pop_back(dst); }
-    bool push_front(FramePtr frame, uint32_t timestamp) {
+    bool pop_back(FrameRef* dst) { return mFrames.pop_back(dst); }
+    bool push_front(FrameRef frame, uint32_t timestamp) {
         if (mFrames.full()) {
             return false;
         }
@@ -48,11 +48,11 @@ public:
         return mFrames.push_front(frame);
     }
 
-    bool pushNewest(FramePtr frame, uint32_t timestamp) {
+    bool pushNewest(FrameRef frame, uint32_t timestamp) {
         frame->setTimestamp(timestamp);
         return push_front(frame, timestamp);
     }
-    bool popOldest(FramePtr* dst) { return mFrames.pop_back(dst); }
+    bool popOldest(FrameRef* dst) { return mFrames.pop_back(dst); }
 
     bool addWithTimestamp(const Frame& frame, uint32_t timestamp);
 

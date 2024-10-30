@@ -66,14 +66,14 @@ Str ActiveStripData::infoJsonString() {
     return jsonBuffer;
 }
 
-static ActiveStripData* getActiveStripDataPtr() {
+static ActiveStripData* getActiveStripDataRef() {
     ActiveStripData* instance = &Singleton<ActiveStripData>::instance();
     return instance;
 }
 
 EMSCRIPTEN_BINDINGS(engine_events_constructors) {
     emscripten::class_<ActiveStripData>("ActiveStripData")
-        .constructor(&getActiveStripDataPtr, emscripten::allow_raw_pointers())
+        .constructor(&getActiveStripDataRef, emscripten::allow_raw_pointers())
         .function("getPixelData_Uint8", &ActiveStripData::getPixelData_Uint8);
 }
 

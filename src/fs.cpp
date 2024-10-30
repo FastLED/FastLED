@@ -14,8 +14,8 @@
 FASTLED_NAMESPACE_BEGIN
 
 // Override this if you want to supply a file system for your platform.
-__attribute__((weak)) FsImplPtr make_filesystem(int cs_pin) {
-    return FsImplPtr::Null();
+__attribute__((weak)) FsImplRef make_filesystem(int cs_pin) {
+    return FsImplRef::Null();
 }
 
 bool Fs::begin() {
@@ -30,7 +30,7 @@ size_t FileHandle::bytesLeft() const { return size() - pos(); }
 
 Fs::Fs(int cs_pin) : mFs(make_filesystem(cs_pin)) {}
 
-Fs::Fs(FsImplPtr fs) : mFs(fs) {}
+Fs::Fs(FsImplRef fs) : mFs(fs) {}
 
 void Fs::end() {
     if (mFs) {
@@ -38,8 +38,8 @@ void Fs::end() {
     }
 }
 
-void Fs::close(FileHandlePtr file) { mFs->close(file); }
+void Fs::close(FileHandleRef file) { mFs->close(file); }
 
-FileHandlePtr Fs::openRead(const char *path) { return mFs->openRead(path); }
+FileHandleRef Fs::openRead(const char *path) { return mFs->openRead(path); }
 
 FASTLED_NAMESPACE_END

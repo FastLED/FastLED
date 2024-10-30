@@ -40,7 +40,7 @@ DECLARE_SMART_PTR_NO_FWD(LUTXYFLOAT);
 template<typename T>
 class LUT : public Referent {
 public:
-    friend class PtrTraits<LUT<T>>;
+    friend class RefTraits<LUT<T>>;
     LUT(uint32_t length) : length(length) {
         T* ptr = LargeBlockAllocator<T>::Alloc(length);
         mDataHandle.reset(ptr);

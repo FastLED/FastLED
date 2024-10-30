@@ -7,7 +7,7 @@
 #define NUM_LEDS    484
 
 CRGB leds[NUM_LEDS];
-NoiseWavePtr noiseWave = Fx::make<NoiseWave>(NUM_LEDS);
+NoiseWaveRef noiseWave = Fx::make<NoiseWave>(NUM_LEDS);
 
 void setup() {
   delay(3000); // sanity delay

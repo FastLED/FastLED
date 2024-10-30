@@ -10,7 +10,7 @@
 FASTLED_USING_NAMESPACE
 
 class MyClass;
-typedef Ptr<MyClass> MyClassPtr;
+typedef Ref<MyClass> MyClassRef;
 class MyClass : public Referent {
   public:
     MyClass() {}
@@ -23,59 +23,59 @@ class MyClass : public Referent {
     uint32_t destructor_signal = 0;
 };
 
-TEST_CASE("Ptr basic functionality") {
-    Ptr<MyClass> ptr = MyClassPtr::New();
+TEST_CASE("Ref basic functionality") {
+    Ref<MyClass> ptr = MyClassRef::New();
 
-    SUBCASE("Ptr is not null after construction") {
+    SUBCASE("Ref is not null after construction") {
         CHECK(ptr.get() != nullptr);
     }
 
-    SUBCASE("Ptr increments reference count") {
+    SUBCASE("Ref increments reference count") {
         CHECK(ptr->ref_count() == 1);
     }
 
-    SUBCASE("Ptr can be reassigned") {
-        Ptr<MyClass> ptr2 = ptr;
+    SUBCASE("Ref can be reassigned") {
+        Ref<MyClass> ptr2 = ptr;
         CHECK(ptr2.get() == ptr.get());
         CHECK(ptr->ref_count() == 2);
     }
 }
 
-TEST_CASE("Ptr move semantics") {
+TEST_CASE("Ref move semantics") {
 
     SUBCASE("Move constructor works correctly") {
-        Ptr<MyClass> ptr1 = MyClassPtr::New();
-        MyClass *rawPtr = ptr1.get();
-        Ptr<MyClass> ptr2(std::move(ptr1));
-        CHECK(ptr2.get() == rawPtr);
+        Ref<MyClass> ptr1 = MyClassRef::New();
+        MyClass *rawRef = ptr1.get();
+        Ref<MyClass> ptr2(std::move(ptr1));
+        CHECK(ptr2.get() == rawRef);
         CHECK(ptr1.get() == nullptr);
         CHECK(ptr2->ref_count() == 1);
     }
 
     SUBCASE("Move assignment works correctly") {
-        Ptr<MyClass> ptr1 = MyClassPtr::New();
-        MyClass *rawPtr = ptr1.get();
-        Ptr<MyClass> ptr2;
+        Ref<MyClass> ptr1 = MyClassRef::New();
+        MyClass *rawRef = ptr1.get();
+        Ref<MyClass> ptr2;
         ptr2 = std::move(ptr1);
-        CHECK(ptr2.get() == rawPtr);
+        CHECK(ptr2.get() == rawRef);
         CHECK(ptr1.get() == nullptr);
         CHECK(ptr2->ref_count() == 1);
     }
 }
 
-TEST_CASE("Ptr reference counting") {
+TEST_CASE("Ref reference counting") {
 
     SUBCASE("Reference count increases when copied") {
-        Ptr<MyClass> ptr1 = MyClassPtr::New();
-        Ptr<MyClass> ptr2 = ptr1;
+        Ref<MyClass> ptr1 = MyClassRef::New();
+        Ref<MyClass> ptr2 = ptr1;
         CHECK(ptr1->ref_count() == 2);
         CHECK(ptr2->ref_count() == 2);
     }
 
-    SUBCASE("Reference count decreases when Ptr goes out of scope") {
-        Ptr<MyClass> ptr1 = MyClassPtr::New();
+    SUBCASE("Reference count decreases when Ref goes out of scope") {
+        Ref<MyClass> ptr1 = MyClassRef::New();
         {
-            Ptr<MyClass> ptr2 = ptr1;
+            Ref<MyClass> ptr2 = ptr1;
             CHECK(ptr1->ref_count() == 2);
         }
         CHECK(ptr1->ref_count() == 1);
@@ -84,141 +84,141 @@ TEST_CASE("Ptr reference counting") {
 
 
 
-TEST_CASE("Ptr reset functionality") {
+TEST_CASE("Ref reset functionality") {
 
     SUBCASE("Reset to nullptr") {
-        Ptr<MyClass> ptr = Ptr<MyClass>::New();
+        Ref<MyClass> ptr = Ref<MyClass>::New();
         CHECK_EQ(1, ptr->ref_count());
         ptr->ref();
         CHECK_EQ(2, ptr->ref_count());
-        MyClass *originalPtr = ptr.get();
+        MyClass *originalRef = ptr.get();
         ptr.reset();
-        CHECK_EQ(1, originalPtr->ref_count());
+        CHECK_EQ(1, originalRef->ref_count());
         CHECK(ptr.get() == nullptr);
-        CHECK(originalPtr->ref_count() == 1);
-        originalPtr->unref();
+        CHECK(originalRef->ref_count() == 1);
+        originalRef->unref();
     }
 
 }
 
 
-TEST_CASE("Ptr from static memory") {
+TEST_CASE("Ref from static memory") {
     MyClass staticObject;
     {
-        MyClassPtr ptr = MyClassPtr::NoTracking(staticObject);
+        MyClassRef ptr = MyClassRef::NoTracking(staticObject);
     }
     CHECK_EQ(staticObject.ref_count(), 0);
     CHECK_NE(staticObject.destructor_signal, 0xdeadbeef);
 }
 
-TEST_CASE("WeakPtr functionality") {
-    WeakPtr<MyClass> weakPtr;
-    MyClassPtr strongPtr = MyClassPtr::New();
-    weakPtr = strongPtr;
+TEST_CASE("WeakRef functionality") {
+    WeakRef<MyClass> weakRef;
+    MyClassRef strongRef = MyClassRef::New();
+    weakRef = strongRef;
 
-    REQUIRE_EQ(strongPtr->ref_count(), 1);
-    bool expired = weakPtr.expired();
+    REQUIRE_EQ(strongRef->ref_count(), 1);
+    bool expired = weakRef.expired();
     REQUIRE_FALSE(expired);
-    REQUIRE(weakPtr != nullptr);
+    REQUIRE(weakRef != nullptr);
     
-    SUBCASE("WeakPtr can be locked to get a strong reference") {
-        MyClassPtr lockedPtr = weakPtr.lock();
-        CHECK(lockedPtr.get() == strongPtr.get());
-        CHECK_EQ(strongPtr->ref_count(), 2);
+    SUBCASE("WeakRef can be locked to get a strong reference") {
+        MyClassRef lockedRef = weakRef.lock();
+        CHECK(lockedRef.get() == strongRef.get());
+        CHECK_EQ(strongRef->ref_count(), 2);
     }
-    weakPtr.reset();
-    expired = weakPtr.expired();
+    weakRef.reset();
+    expired = weakRef.expired();
     CHECK(expired);
 }
 
-TEST_CASE("WeakPtr functionality early expiration") {
-    WeakPtr<MyClass> weakPtr;
-    MyClassPtr strongPtr = MyClassPtr::New();
-    weakPtr = strongPtr;
+TEST_CASE("WeakRef functionality early expiration") {
+    WeakRef<MyClass> weakRef;
+    MyClassRef strongRef = MyClassRef::New();
+    weakRef = strongRef;
 
-    REQUIRE_EQ(strongPtr->ref_count(), 1);
-    bool expired = weakPtr.expired();
+    REQUIRE_EQ(strongRef->ref_count(), 1);
+    bool expired = weakRef.expired();
     REQUIRE_FALSE(expired);
-    REQUIRE(weakPtr != nullptr);
+    REQUIRE(weakRef != nullptr);
     
-    SUBCASE("WeakPtr can be locked to get a strong reference") {
-        MyClassPtr lockedPtr = weakPtr.lock();
-        CHECK(lockedPtr.get() == strongPtr.get());
-        CHECK_EQ(strongPtr->ref_count(), 2);
+    SUBCASE("WeakRef can be locked to get a strong reference") {
+        MyClassRef lockedRef = weakRef.lock();
+        CHECK(lockedRef.get() == strongRef.get());
+        CHECK_EQ(strongRef->ref_count(), 2);
     }
-    strongPtr.reset();
-    expired = weakPtr.expired();
+    strongRef.reset();
+    expired = weakRef.expired();
     CHECK(expired);
 }
 
-TEST_CASE("WeakPtr additional functionality") {
-    SUBCASE("WeakPtr default constructor") {
-        WeakPtr<MyClass> weakPtr;
-        CHECK(weakPtr.expired());
-        CHECK(weakPtr.lock() == nullptr);
+TEST_CASE("WeakRef additional functionality") {
+    SUBCASE("WeakRef default constructor") {
+        WeakRef<MyClass> weakRef;
+        CHECK(weakRef.expired());
+        CHECK(weakRef.lock() == nullptr);
     }
 
-    SUBCASE("WeakPtr assignment and reset") {
-        MyClassPtr strongPtr1 = MyClassPtr::New();
-        MyClassPtr strongPtr2 = MyClassPtr::New();
-        WeakPtr<MyClass> weakPtr = strongPtr1;
+    SUBCASE("WeakRef assignment and reset") {
+        MyClassRef strongRef1 = MyClassRef::New();
+        MyClassRef strongRef2 = MyClassRef::New();
+        WeakRef<MyClass> weakRef = strongRef1;
 
-        CHECK_FALSE(weakPtr.expired());
-        CHECK(weakPtr.lock().get() == strongPtr1.get());
+        CHECK_FALSE(weakRef.expired());
+        CHECK(weakRef.lock().get() == strongRef1.get());
 
-        weakPtr = strongPtr2;
-        CHECK_FALSE(weakPtr.expired());
-        CHECK(weakPtr.lock().get() == strongPtr2.get());
+        weakRef = strongRef2;
+        CHECK_FALSE(weakRef.expired());
+        CHECK(weakRef.lock().get() == strongRef2.get());
 
-        weakPtr.reset();
-        CHECK(weakPtr.expired());
-        CHECK(weakPtr.lock() == nullptr);
+        weakRef.reset();
+        CHECK(weakRef.expired());
+        CHECK(weakRef.lock() == nullptr);
     }
 
-    SUBCASE("WeakPtr multiple instances") {
-        MyClassPtr strongPtr = MyClassPtr::New();
-        WeakPtr<MyClass> weakPtr1 = strongPtr;
-        WeakPtr<MyClass> weakPtr2 = strongPtr;
+    SUBCASE("WeakRef multiple instances") {
+        MyClassRef strongRef = MyClassRef::New();
+        WeakRef<MyClass> weakRef1 = strongRef;
+        WeakRef<MyClass> weakRef2 = strongRef;
 
-        CHECK_FALSE(weakPtr1.expired());
-        CHECK_FALSE(weakPtr2.expired());
-        CHECK(weakPtr1.lock().get() == weakPtr2.lock().get());
+        CHECK_FALSE(weakRef1.expired());
+        CHECK_FALSE(weakRef2.expired());
+        CHECK(weakRef1.lock().get() == weakRef2.lock().get());
 
-        strongPtr.reset();
-        CHECK(weakPtr1.expired());
-        CHECK(weakPtr2.expired());
+        strongRef.reset();
+        CHECK(weakRef1.expired());
+        CHECK(weakRef2.expired());
     }
 
-    SUBCASE("WeakPtr with temporary strong pointer") {
-        WeakPtr<MyClass> weakPtr;
+    SUBCASE("WeakRef with temporary strong pointer") {
+        WeakRef<MyClass> weakRef;
         {
-            MyClassPtr tempStrongPtr = MyClassPtr::New();
-            weakPtr = tempStrongPtr;
-            CHECK_FALSE(weakPtr.expired());
+            MyClassRef tempStrongRef = MyClassRef::New();
+            weakRef = tempStrongRef;
+            CHECK_FALSE(weakRef.expired());
         }
-        CHECK(weakPtr.expired());
+        CHECK(weakRef.expired());
     }
 
-    SUBCASE("WeakPtr lock performance") {
-        MyClassPtr strongPtr = MyClassPtr::New();
-        WeakPtr<MyClass> weakPtr = strongPtr;
+    SUBCASE("WeakRef lock performance") {
+        MyClassRef strongRef = MyClassRef::New();
+        WeakRef<MyClass> weakRef = strongRef;
 
         for (int i = 0; i < 1000; ++i) {
-            MyClassPtr lockedPtr = weakPtr.lock();
-            CHECK(lockedPtr.get() == strongPtr.get());
+            MyClassRef lockedRef = weakRef.lock();
+            CHECK(lockedRef.get() == strongRef.get());
         }
-        CHECK_EQ(strongPtr->ref_count(), 1);
+        CHECK_EQ(strongRef->ref_count(), 1);
     }
 
-    SUBCASE("WeakPtr with inheritance") {
+    SUBCASE("WeakRef with inheritance") {
         class DerivedClass : public MyClass {};
-        Ptr<DerivedClass> derivedPtr = Ptr<DerivedClass>::New();
-        WeakPtr<MyClass> weakBasePtr = derivedPtr;
-        WeakPtr<DerivedClass> weakDerivedPtr = derivedPtr;
+        Ref<DerivedClass> derivedRef = Ref<DerivedClass>::New();
+        WeakRef<MyClass> weakBaseRef = derivedRef;
+        WeakRef<DerivedClass> weakDerivedRef = derivedRef;
 
-        CHECK_FALSE(weakBasePtr.expired());
-        CHECK_FALSE(weakDerivedPtr.expired());
-        CHECK(weakBasePtr.lock().get() == weakDerivedPtr.lock().get());
+        CHECK_FALSE(weakBaseRef.expired());
+        CHECK_FALSE(weakDerivedRef.expired());
+        CHECK(weakBaseRef.lock().get() == weakDerivedRef.lock().get());
     }
 }
 

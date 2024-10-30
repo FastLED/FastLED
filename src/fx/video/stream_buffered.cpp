@@ -6,19 +6,19 @@ FASTLED_NAMESPACE_BEGIN
 
 VideoStream::VideoStream(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo)
     : mPixelsPerFrame(pixelsPerFrame),
-      mInterpolator(FrameInterpolatorPtr::New(nFramesInBuffer, fpsVideo)) {
+      mInterpolator(FrameInterpolatorRef::New(nFramesInBuffer, fpsVideo)) {
 }
 
-void VideoStream::begin(uint32_t now, FileHandlePtr h) {
+void VideoStream::begin(uint32_t now, FileHandleRef h) {
     end();
     // Removed setStartTime call
-    mStream = DataStreamPtr::New(mPixelsPerFrame);
+    mStream = DataStreamRef::New(mPixelsPerFrame);
     mStream->begin(h);
 }
 
-void VideoStream::beginStream(uint32_t now, ByteStreamPtr bs) {
+void VideoStream::beginStream(uint32_t now, ByteStreamRef bs) {
     end();
-    mStream = DataStreamPtr::New(mPixelsPerFrame);
+    mStream = DataStreamRef::New(mPixelsPerFrame);
     // Removed setStartTime call
     mStream->beginStream(bs);
 }
@@ -60,13 +60,13 @@ void VideoStream::updateBufferIfNecessary(uint32_t now) {
     // if we dropped frames (because of time manipulation) just set
     // the frame counter to the current frame number + 1
     // read the frame from the stream
-    FramePtr frame;
+    FrameRef frame;
     if (mInterpolator->full()) {
         if (!mInterpolator->popOldest(&frame)) {
             return;  // Something went wrong
         }
     } else {
-        frame = FramePtr::New(mPixelsPerFrame, false);
+        frame = FrameRef::New(mPixelsPerFrame, false);
     }
     if (mStream->readFrame(frame.get())) {
         if (mInterpolator->pushNewest(frame, now)) {

@@ -12,7 +12,7 @@ public:
         static T instance;
         return instance;
     }
-    static T* instancePtr() {
+    static T* instanceRef() {
         return &instance();
     }
     Singleton(const Singleton&) = delete;

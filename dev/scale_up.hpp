@@ -30,7 +30,7 @@
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
 XYMap xyMapSmall = XYMap::constructRectangularGrid(MATRIX_SMALL_WIDTH, MATRIX_SMALL_HEIGHT);
-AnimartrixPtr animartrix = Fx::make<Animatrix>(xyMapSmall, POLAR_WAVES);
+AnimartrixRef animartrix = Fx::make<Animatrix>(xyMapSmall, POLAR_WAVES);
 ScaleUp scaleUp(xyMap, animartrix.get());
 FxEngine fxEngine(NUM_LEDS);
 

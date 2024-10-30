@@ -22,8 +22,8 @@
 
 CRGB leds[NUM_LEDS];
 
-VideoFxPtr videoFx;
-NoisePalettePtr noisePalette;
+VideoFxRef videoFx;
+NoisePaletteRef noisePalette;
 FxEngine fxEngine(NUM_LEDS);
 
 void setup() {
@@ -36,13 +36,13 @@ void setup() {
     XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
 
     // Create and initialize NoisePalette object
-    noisePalette = NoisePalettePtr::New(xymap);
+    noisePalette = NoisePaletteRef::New(xymap);
     noisePalette->lazyInit();
     noisePalette->setSpeed(SPEED);
     noisePalette->setScale(SCALE);
 
     // Create and initialize VideoFx object
-    videoFx = VideoFxPtr::New(xymap, noisePalette);
+    videoFx = VideoFxRef::New(xymap, noisePalette);
     
     // Add the video effect to the FxEngine
     fxEngine.addFx(videoFx);

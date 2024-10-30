@@ -35,7 +35,7 @@ FASTLED_NAMESPACE_BEGIN
  */
 class FxEngine {
   public:
-    typedef FixedMap<int, FxPtr, FASTLED_FX_ENGINE_MAX_FX> IntFxMap;
+    typedef FixedMap<int, FxRef, FASTLED_FX_ENGINE_MAX_FX> IntFxMap;
     /**
      * @brief Constructs an FxEngine with the specified number of LEDs.
      * @param numLeds The number of LEDs in the strip.
@@ -52,17 +52,17 @@ class FxEngine {
      * @param effect Pointer to the effect to be added.
      * @return The index of the added effect, or -1 if the effect couldn't be added.
      */
-    int addFx(FxPtr effect);
+    int addFx(FxRef effect);
 
     /**
      * @brief Adds a new effect to the engine. Allocate from static memory.
      *        This is not reference tracked and an object passed in must never be
-     *        deleted, as the engine will use a non tracking Ptr which may outlive
+     *        deleted, as the engine will use a non tracking Ref which may outlive
      *        a call to removeFx() and the engine will thefore not know that an
      *        object has been deleted. But if it's a static object that's
      *        then the object probably wasn't going to be deleted anyway.
      */
-    int addFx(Fx& effect) { return addFx(Ptr<Fx>::NoTracking(effect)); }
+    int addFx(Fx& effect) { return addFx(Ref<Fx>::NoTracking(effect)); }
 
     /**
      * @brief Requests removal of an effect from the engine, which might not happen
@@ -70,14 +70,14 @@ class FxEngine {
      * @param index The index of the effect to remove.
      * @return A pointer to the removed effect, or nullptr if the index was invalid.
      */
-    FxPtr removeFx(int index);
+    FxRef removeFx(int index);
 
     /**
      * @brief Retrieves an effect from the engine without removing it.
      * @param index The id of the effect to retrieve.
      * @return A pointer to the effect, or nullptr if the index was invalid.
      */
-    FxPtr getFx(int index);
+    FxRef getFx(int index);
 
     int getCurrentFxId() const { return mCurrId; }
 
@@ -132,7 +132,7 @@ inline FxEngine::FxEngine(uint16_t numLeds)
 
 inline FxEngine::~FxEngine() {}
 
-inline int FxEngine::addFx(FxPtr effect) {
+inline int FxEngine::addFx(FxRef effect) {
     bool auto_set = mEffects.empty();
     bool ok = mEffects.insert(mCounter, effect);
     if (!ok) {
@@ -164,15 +164,15 @@ inline bool FxEngine::setNextFx(int index, uint16_t duration) {
     return true;
 }
 
-inline FxPtr FxEngine::removeFx(int index) {
+inline FxRef FxEngine::removeFx(int index) {
     if (!mEffects.has(index)) {
-        return FxPtr();
+        return FxRef();
     }
     
-    FxPtr removedFx;
+    FxRef removedFx;
     bool ok = mEffects.get(index, &removedFx);
     if (!ok) {
-        return FxPtr();
+        return FxRef();
     }
     
     if (mCurrId == index) {
@@ -185,13 +185,13 @@ inline FxPtr FxEngine::removeFx(int index) {
     return removedFx;
 }
 
-inline FxPtr FxEngine::getFx(int id) {
+inline FxRef FxEngine::getFx(int id) {
     if (mEffects.has(id)) {
-        FxPtr fx;
+        FxRef fx;
         mEffects.get(id, &fx);
         return fx;
     }
-    return FxPtr();
+    return FxRef();
 }
 
 inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
@@ -203,7 +203,7 @@ inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
         return false;
     }
     if (mDurationSet) {
-        FxPtr fx;
+        FxRef fx;
         bool ok = mEffects.get(mCurrId, &fx);
         if (!ok) {
             // something went wrong.

@@ -74,7 +74,7 @@ Slider SPEED("SPEED", 30, 1, 60, 1);
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePalettePtr noisePalette = NoisePalettePtr::New(xyMap);
+NoisePaletteRef noisePalette = NoisePaletteRef::New(xyMap);
 
 void setup() {
     delay(1000); // sanity delay

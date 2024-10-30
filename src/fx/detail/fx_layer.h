@@ -17,7 +17,7 @@ FASTLED_NAMESPACE_BEGIN
 DECLARE_SMART_PTR(FxLayer);
 class FxLayer : public Referent {
   public:
-    void setFx(Ptr<Fx> newFx) {
+    void setFx(Ref<Fx> newFx) {
         if (newFx != fx) {
             release();
             fx = newFx;
@@ -27,7 +27,7 @@ class FxLayer : public Referent {
     void draw(uint32_t now) {
         //assert(fx);
         if (!frame) {
-            frame = FramePtr::New(fx->getNumLeds());
+            frame = FrameRef::New(fx->getNumLeds());
         }
 
         if (!running) {
@@ -58,7 +58,7 @@ class FxLayer : public Referent {
         fx.reset();
     }
 
-    Ptr<Fx> getFx() { return fx; }
+    Ref<Fx> getFx() { return fx; }
 
     CRGB *getSurface() { return frame->rgb(); }
     uint8_t *getSurfaceAlpha() {
@@ -66,8 +66,8 @@ class FxLayer : public Referent {
     }
 
   private:
-    Ptr<Frame> frame;
-    Ptr<Fx> fx;
+    Ref<Frame> frame;
+    Ref<Fx> fx;
     bool running = false;
 };
 

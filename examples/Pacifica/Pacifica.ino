@@ -21,7 +21,7 @@
 #define COLOR_ORDER         GRB
 
 CRGB leds[NUM_LEDS];
-PacificaPtr pacifica = PacificaPtr::New(NUM_LEDS);
+PacificaRef pacifica = PacificaRef::New(NUM_LEDS);
 
 void setup() {
   delay(3000); // 3 second delay for boot recovery, and a moment of silence

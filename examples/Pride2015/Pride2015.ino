@@ -8,7 +8,7 @@
 #define BRIGHTNESS  255
 
 CRGB leds[NUM_LEDS];
-Pride2015Ptr pride = Pride2015Ptr::New(NUM_LEDS);
+Pride2015Ref pride = Pride2015Ref::New(NUM_LEDS);
 
 void setup() {
   delay(3000); // 3 second delay for recovery

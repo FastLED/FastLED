@@ -26,8 +26,8 @@
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePalettePtr noisePalette = Fx::make<NoisePalette>(xyMap);
-AnimartrixPtr animartrix = Fx::make<Animartrix>(xyMap, POLAR_WAVES);
+NoisePaletteRef noisePalette = Fx::make<NoisePalette>(xyMap);
+AnimartrixRef animartrix = Fx::make<Animartrix>(xyMap, POLAR_WAVES);
 
 FxEngine fxEngine(NUM_LEDS);
 

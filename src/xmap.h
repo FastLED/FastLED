@@ -84,7 +84,7 @@ public:
             return;
         }
         mLookUpTable.reset();
-        mLookUpTable = LUT16Ptr::New(length);
+        mLookUpTable = LUT16Ref::New(length);
         uint16_t* dataMutable = mLookUpTable->getData();
         mData = mLookUpTable->getData();
         for (uint16_t x = 0; x < length; x++) {
@@ -133,7 +133,7 @@ private:
     Type type = kLinear;
     XFunction xFunction = nullptr;
     const uint16_t *mData = nullptr;
-    LUT16Ptr mLookUpTable;
+    LUT16Ref mLookUpTable;
     uint16_t mOffset = 0;  // offset to be added to the output
 };
 

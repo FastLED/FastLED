@@ -51,7 +51,7 @@
 #define REVERSE_DIRECTION false
 
 CRGB leds[NUM_LEDS];
-Fire2012Ptr fire = Fire2012Ptr::New(NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
+Fire2012Ref fire = Fire2012Ref::New(NUM_LEDS, COOLING, SPARKING, REVERSE_DIRECTION);
 
 void setup() {
   delay(3000); // sanity delay

@@ -21,13 +21,13 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-void jsUiManager::addComponent(WeakPtr<jsUiInternal> component) {
+void jsUiManager::addComponent(WeakRef<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.insert(component);
     instance().mItemsAdded = true;
 }
 
-void jsUiManager::removeComponent(WeakPtr<jsUiInternal> component) {
+void jsUiManager::removeComponent(WeakRef<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.erase(component);
 }
@@ -36,8 +36,8 @@ jsUiManager &jsUiManager::instance() {
     return Singleton<jsUiManager>::instance();
 }
 
-std::vector<jsUiInternalPtr> jsUiManager::getComponents() {
-    std::vector<jsUiInternalPtr> components;
+std::vector<jsUiInternalRef> jsUiManager::getComponents() {
+    std::vector<jsUiInternalRef> components;
     {
         std::lock_guard<std::mutex> lock(mMutex);
 
@@ -88,7 +88,7 @@ void jsUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
 }
 
 void jsUiManager::toJson(FLArduinoJson::JsonArray &json) {
-    std::vector<jsUiInternalPtr> components = instance().getComponents();
+    std::vector<jsUiInternalRef> components = instance().getComponents();
     for (const auto &component : components) {
         FLArduinoJson::JsonObject componentJson =
             json.add<FLArduinoJson::JsonObject>();

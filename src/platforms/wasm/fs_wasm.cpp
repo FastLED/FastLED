@@ -69,7 +69,7 @@ private:
     mutable std::mutex mMutex;
 };
 
-typedef std::map<Str, FileDataPtr> FileMap;
+typedef std::map<Str, FileDataRef> FileMap;
 FileMap gFileMap;
 // At the time of creation, it's unclear whether this can be called by multiple
 // threads. With an std::map items remain valid while not erased. So we only
@@ -80,12 +80,12 @@ std::mutex gFileMapMutex;
 
 class WasmFileHandle : public FileHandle {
   private:
-    FileDataPtr mData;
+    FileDataRef mData;
     size_t mPos;
     Str mPath;
 
   public:
-    WasmFileHandle(const Str &path, const FileDataPtr data)
+    WasmFileHandle(const Str &path, const FileDataRef data)
         : mPath(path), mData(data), mPos(0) {}
 
     virtual ~WasmFileHandle() override {}
@@ -116,57 +116,57 @@ class FsImplWasm : public FsImpl {
     bool begin() override { return true; }
     void end() override {}
 
-    void close(FileHandlePtr file) override {
+    void close(FileHandleRef file) override {
         if (file) {
             file->close();
         }
     }
 
-    FileHandlePtr openRead(const char *path) override {
+    FileHandleRef openRead(const char *path) override {
         Str key(path);
         std::lock_guard<std::mutex> lock(gFileMapMutex);
         auto it = gFileMap.find(key);
         if (it != gFileMap.end()) {
             auto &data = it->second;
-            WasmFileHandlePtr out =
-                WasmFileHandlePtr::TakeOwnership(new WasmFileHandle(key, data));
+            WasmFileHandleRef out =
+                WasmFileHandleRef::TakeOwnership(new WasmFileHandle(key, data));
             return out;
         }
-        return FileHandlePtr::Null();
+        return FileHandleRef::Null();
     }
 };
 
 // Platforms eed to implement this to create an instance of the filesystem.
-FsImplPtr make_filesystem(int cs_pin) { return FsImplWasmPtr::New(); }
+FsImplRef make_filesystem(int cs_pin) { return FsImplWasmRef::New(); }
 
 
-FileDataPtr _findIfExists(const Str& path) {
+FileDataRef _findIfExists(const Str& path) {
     std::lock_guard<std::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
         return it->second;
     }
-    return FileDataPtr::Null();
+    return FileDataRef::Null();
 }
 
-FileDataPtr _findOrCreate(const Str& path, size_t len) {
+FileDataRef _findOrCreate(const Str& path, size_t len) {
     std::lock_guard<std::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
         return it->second;
     }
-    auto entry = FileDataPtr::New(len);
+    auto entry = FileDataRef::New(len);
     gFileMap.insert(std::make_pair(path, entry));
     return entry;
 }
 
-FileDataPtr _createIfNotExists(const Str& path, size_t len) {
+FileDataRef _createIfNotExists(const Str& path, size_t len) {
     std::lock_guard<std::mutex> lock(gFileMapMutex);
     auto it = gFileMap.find(path);
     if (it != gFileMap.end()) {
-        return FileDataPtr::Null();
+        return FileDataRef::Null();
     }
-    auto entry = FileDataPtr::New(len);
+    auto entry = FileDataRef::New(len);
     gFileMap.insert(std::make_pair(path, entry));
     return entry;
 }

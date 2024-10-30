@@ -24,12 +24,12 @@ const int BYTES_PER_FRAME = 3 * MATRIX_WIDTH * MATRIX_HEIGHT;
 const int NUM_FRAMES = 2;
 const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * NUM_FRAMES;
 
-ByteStreamMemoryPtr memoryStream;
-VideoPtr videoFx;
+ByteStreamMemoryRef memoryStream;
+VideoRef videoFx;
 FxEngine fxEngine(NUM_LEDS);
 
 
-void write_one_frame(ByteStreamMemoryPtr memoryStream) {
+void write_one_frame(ByteStreamMemoryRef memoryStream) {
     //memoryStream->seek(0);  // Reset to the beginning of the stream
     uint32_t total_bytes_written = 0;
     int toggle = (millis() / 500) % 2;
@@ -51,12 +51,12 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
 
     // Create and fill the ByteStreamMemory with test data
-    memoryStream = Ptr::New<ByteStreamMemory>(BUFFER_SIZE);
+    memoryStream = Ref::New<ByteStreamMemory>(BUFFER_SIZE);
     write_one_frame(memoryStream);  // Write initial frame data
 
     // Create and initialize Video fx object
     XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
-    videoFx = Fx::make<VideoPtr>(xymap);
+    videoFx = Fx::make<VideoRef>(xymap);
     videoFx->beginStream(memoryStream);
 
     // Add the video effect to the FxEngine

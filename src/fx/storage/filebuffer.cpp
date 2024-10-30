@@ -6,7 +6,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FileBuffer::FileBuffer(FileHandlePtr fh) {
+FileBuffer::FileBuffer(FileHandleRef fh) {
   mFile = fh;
   ResetBuffer();
 }

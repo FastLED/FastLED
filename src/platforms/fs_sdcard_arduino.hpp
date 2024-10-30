@@ -82,13 +82,13 @@ public:
         // SD library doesn't have an end() method
     }
 
-    FileHandlePtr openRead(const char *name) override {
+    FileHandleRef openRead(const char *name) override {
 #ifdef USE_SDFAT
         SdFile file;
         if (!file.open(name, oflag)) {
-            return Ptr<FileHandle>::TakeOwnership(nullptr);
+            return Ref<FileHandle>::TakeOwnership(nullptr);
         }
-        return Ptr<FileHandle>::TakeOwnership(new SdFatFileHandle(std::move(file), name));
+        return Ref<FileHandle>::TakeOwnership(new SdFatFileHandle(std::move(file), name));
 #else
 
         #ifdef ESP32
@@ -97,13 +97,13 @@ public:
         File file = SD.open(name);
         #endif
         if (!file) {
-            return Ptr<FileHandle>::TakeOwnership(nullptr);
+            return Ref<FileHandle>::TakeOwnership(nullptr);
         }
-        return Ptr<FileHandle>::TakeOwnership(new SDFileHandle(std::move(file), name));
+        return Ref<FileHandle>::TakeOwnership(new SDFileHandle(std::move(file), name));
 #endif
     }
 
-    void close(FileHandlePtr file) override {
+    void close(FileHandleRef file) override {
         // The close operation is now handled in the FileHandle wrapper classes
         // This method is no longer necessary, but we keep it for compatibility
         if (file) {
@@ -112,8 +112,8 @@ public:
     }
 };
 
-inline FsImplPtr make_filesystem(int cs_pin) {
-    return FsImplPtr::Null();
+inline FsImplRef make_filesystem(int cs_pin) {
+    return FsImplRef::Null();
 }
 
 

@@ -23,8 +23,8 @@ class jsUiInternal;
 
 class jsUiManager : EngineEvents::Listener {
   public:
-    static void addComponent(WeakPtr<jsUiInternal> component);
-    static void removeComponent(WeakPtr<jsUiInternal> component);
+    static void addComponent(WeakRef<jsUiInternal> component);
+    static void removeComponent(WeakRef<jsUiInternal> component);
 
     // Called from the JS engine.
     static void jsUpdateUiComponents(const std::string& jsonStr) { updateUiComponents(jsonStr.c_str()); }
@@ -33,7 +33,7 @@ class jsUiManager : EngineEvents::Listener {
 
   private:
     static void executeUiUpdates(const FLArduinoJson::JsonDocument& doc);
-    typedef FixedSet<WeakPtr<jsUiInternal>, 64> jsUIPtrSet;
+    typedef FixedSet<WeakRef<jsUiInternal>, 64> jsUIRefSet;
     friend class Singleton<jsUiManager>;
     jsUiManager() {
         EngineEvents::addListener(this);
@@ -64,10 +64,10 @@ class jsUiManager : EngineEvents::Listener {
         }
     }
 
-    std::vector<jsUiInternalPtr> getComponents();
+    std::vector<jsUiInternalRef> getComponents();
     void toJson(FLArduinoJson::JsonArray& json);
 
-    jsUIPtrSet mComponents;
+    jsUIRefSet mComponents;
     std::mutex mMutex;
 
     static jsUiManager &instance();

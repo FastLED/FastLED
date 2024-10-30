@@ -24,15 +24,15 @@ class Video : public FxGrid {
         }
     }
 
-    bool begin(FileHandlePtr fileHandle) {
+    bool begin(FileHandleRef fileHandle) {
         const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mDataStream = DataStreamPtr::New(bytes_per_frame);
+        mDataStream = DataStreamRef::New(bytes_per_frame);
         return mDataStream->begin(fileHandle);
     }
 
-    bool beginStream(ByteStreamPtr byteStream) {
+    bool beginStream(ByteStreamRef byteStream) {
         const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mDataStream = DataStreamPtr::New(bytes_per_frame);
+        mDataStream = DataStreamRef::New(bytes_per_frame);
         return mDataStream->beginStream(byteStream);
     }
 
@@ -68,7 +68,7 @@ class Video : public FxGrid {
     const char *fxName(int) const override { return "video"; }
 
   private:
-    DataStreamPtr mDataStream;
+    DataStreamRef mDataStream;
     bool mInitialized = false;
 };
 
@@ -78,7 +78,7 @@ class VideoFx : public FxGrid {
   public:
     VideoFx(XYMap xymap) : FxGrid(xymap) {}
 
-    void begin(uint32_t now, FxGridPtr fx,uint16_t nFrameHistory, float fps = -1) {
+    void begin(uint32_t now, FxGridRef fx,uint16_t nFrameHistory, float fps = -1) {
         mDelegate = fx;
         if (!mDelegate) {
             return; // Early return if delegate is null
@@ -86,7 +86,7 @@ class VideoFx : public FxGrid {
         mDelegate->getXYMap().setRectangularGrid();
         mFps = fps < 0 ? 30 : fps;
         mDelegate->hasFixedFrameRate(&mFps);
-        mFrameInterpolator = FrameInterpolatorPtr::New(nFrameHistory, mFps);
+        mFrameInterpolator = FrameInterpolatorRef::New(nFrameHistory, mFps);
         mFrameInterpolator->reset(now);
     }
 
@@ -104,7 +104,7 @@ class VideoFx : public FxGrid {
 
         uint32_t precise_timestamp;
         if (mFrameInterpolator->needsRefresh(context.now, &precise_timestamp)) {
-            FramePtr frame;
+            FrameRef frame;
             bool wasFullBeforePop = mFrameInterpolator->full();
             if (wasFullBeforePop) {
                 if (!mFrameInterpolator->popOldest(&frame)) {
@@ -114,7 +114,7 @@ class VideoFx : public FxGrid {
                     return; // Still full after popping, something went wrong
                 }
             } else {
-                frame = FramePtr::New(mDelegate->getNumLeds(), mDelegate->hasAlphaChannel());
+                frame = FrameRef::New(mDelegate->getNumLeds(), mDelegate->hasAlphaChannel());
             }
 
             if (!frame) {
@@ -137,9 +137,9 @@ class VideoFx : public FxGrid {
     const char *fxName(int) const override { return "video_fx"; }
 
   private:
-    Ptr<FxGrid> mDelegate;
+    Ref<FxGrid> mDelegate;
     bool mInitialized = false;
-    FrameInterpolatorPtr mFrameInterpolator;
+    FrameInterpolatorRef mFrameInterpolator;
     float mFps;
 };
 

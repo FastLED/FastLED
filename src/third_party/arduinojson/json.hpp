@@ -3328,9 +3328,9 @@ struct Converter<JsonVariantConst> : private detail::VariantAttorney {
   }
 };
 template <typename T>
-class Ptr {
+class Ref {
  public:
-  Ptr(T value) : value_(value) {}
+  Ref(T value) : value_(value) {}
   T* operator->() {
     return &value_;
   }
@@ -3350,7 +3350,7 @@ class JsonArrayIterator {
   JsonVariant operator*() {
     return JsonVariant(iterator_.data(), resources_);
   }
-  Ptr<JsonVariant> operator->() {
+  Ref<JsonVariant> operator->() {
     return operator*();
   }
   bool operator==(const JsonArrayIterator& other) const {
@@ -3377,7 +3377,7 @@ class JsonArrayConstIterator {
   JsonVariantConst operator*() const {
     return JsonVariantConst(iterator_.data(), resources_);
   }
-  Ptr<JsonVariantConst> operator->() {
+  Ref<JsonVariantConst> operator->() {
     return operator*();
   }
   bool operator==(const JsonArrayConstIterator& other) const {
@@ -3644,7 +3644,7 @@ class JsonObjectIterator {
   JsonPair operator*() const {
     return JsonPair(iterator_, resources_);
   }
-  Ptr<JsonPair> operator->() {
+  Ref<JsonPair> operator->() {
     return operator*();
   }
   bool operator==(const JsonObjectIterator& other) const {
@@ -3672,7 +3672,7 @@ class JsonObjectConstIterator {
   JsonPairConst operator*() const {
     return JsonPairConst(iterator_, resources_);
   }
-  Ptr<JsonPairConst> operator->() {
+  Ref<JsonPairConst> operator->() {
     return operator*();
   }
   bool operator==(const JsonObjectConstIterator& other) const {

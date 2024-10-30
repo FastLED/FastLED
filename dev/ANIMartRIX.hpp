@@ -24,7 +24,7 @@
 CRGB leds[NUM_LED];               // framebuffer
 
 XYMap xyMap(WIDTH, HEIGHT, SERPENTINE);
-AnimartrixPtr fxAnimator = AnimartrixPtr::New(xyMap, POLAR_WAVES);
+AnimartrixRef fxAnimator = AnimartrixRef::New(xyMap, POLAR_WAVES);
 
 void setup() {
   FastLED.addLeds<WS2811, 2, GRB>(leds, NUM_LED);   

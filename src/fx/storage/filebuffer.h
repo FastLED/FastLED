@@ -13,7 +13,7 @@ DECLARE_SMART_PTR(FileBuffer);
 
 class FileBuffer: public Referent {
  public:
-  FileBuffer(FileHandlePtr file);
+  FileBuffer(FileHandleRef file);
   virtual ~FileBuffer();
   void RewindToStart();
   bool available() const;
@@ -39,7 +39,7 @@ class FileBuffer: public Referent {
   int16_t mCurrIdx;
   int16_t mLength;
 
-  FileHandlePtr mFile;
+  FileHandleRef mFile;
   bool mIsOpen;
 };
 

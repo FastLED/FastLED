@@ -89,7 +89,7 @@ typedef const uint8_t TProgmemRGBGradientPalette_byte;
 /// @see DECLARE_GRADIENT_PALETTE
 typedef const TProgmemRGBGradientPalette_byte *TProgmemRGBGradientPalette_bytes;
 /// Alias of ::TProgmemRGBGradientPalette_bytes
-typedef TProgmemRGBGradientPalette_bytes TProgmemRGBGradientPalettePtr;
+typedef TProgmemRGBGradientPalette_bytes TProgmemRGBGradientPaletteRef;
 
 
 
@@ -680,7 +680,7 @@ typedef union {
 
 typedef uint8_t TDynamicRGBGradientPalette_byte;  ///< Byte of an RGB gradient entry, stored in dynamic (heap) memory
 typedef const TDynamicRGBGradientPalette_byte *TDynamicRGBGradientPalette_bytes;  ///< Pointer to bytes of an RGB gradient, stored in dynamic (heap) memory
-typedef TDynamicRGBGradientPalette_bytes TDynamicRGBGradientPalettePtr;  ///< Alias of ::TDynamicRGBGradientPalette_bytes
+typedef TDynamicRGBGradientPalette_bytes TDynamicRGBGradientPaletteRef;  ///< Alias of ::TDynamicRGBGradientPalette_bytes
 
 /// @}
 

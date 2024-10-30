@@ -18,15 +18,15 @@ DataStream::~DataStream() {
     Close();
 }
 
-bool DataStream::begin(FileHandlePtr h) {
+bool DataStream::begin(FileHandleRef h) {
     Close();
     mFileHandle = h;
-    mFileBuffer = FileBufferPtr::New(h);
+    mFileBuffer = FileBufferRef::New(h);
     mUsingByteStream = false;
     return mFileBuffer->available();
 }
 
-bool DataStream::beginStream(ByteStreamPtr s) {
+bool DataStream::beginStream(ByteStreamRef s) {
     Close();
     mByteStream = s;
     mUsingByteStream = true;

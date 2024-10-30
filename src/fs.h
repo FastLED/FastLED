@@ -17,22 +17,22 @@ DECLARE_SMART_PTR(FileHandle);
 class Fs {
   public:
     Fs(int cs_pin);  // Initializes this as a spi sd card file system.
-    Fs(FsImplPtr fs);  // Use this to provide a custom filesystem.
+    Fs(FsImplRef fs);  // Use this to provide a custom filesystem.
     bool begin(); // Signal to begin using the filesystem resource.
     void end(); // Signal to end use of the file system.
     
-    FileHandlePtr openRead(const char *path);  // Null if file could not be opened.
-    void close(FileHandlePtr file);
+    FileHandleRef openRead(const char *path);  // Null if file could not be opened.
+    void close(FileHandleRef file);
     
   private:
-    FsImplPtr mFs;  // System dependent filesystem.
+    FsImplRef mFs;  // System dependent filesystem.
 };
 
 
 /// Implementation details
 
 // Platforms eed to implement this to create an instance of the filesystem.
-FsImplPtr make_filesystem(int cs_pin);
+FsImplRef make_filesystem(int cs_pin);
 
 
 // An abstract class that represents a file handle.
@@ -62,8 +62,8 @@ class FsImpl : public Referent {
     virtual bool begin() = 0;
     //  End use of card
     virtual void end() = 0;
-    virtual void close(FileHandlePtr file) = 0;
-    virtual FileHandlePtr openRead(const char *path) = 0;
+    virtual void close(FileHandleRef file) = 0;
+    virtual FileHandleRef openRead(const char *path) = 0;
 
     virtual bool ls(Visitor &visitor) {
       // todo: implement.

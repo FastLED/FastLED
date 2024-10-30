@@ -30,7 +30,7 @@ void setup() {
 }
 
 void loop() {
-    FileHandlePtr fh = fs.openRead(INVALID_FILENAME);
+    FileHandleRef fh = fs.openRead(INVALID_FILENAME);
     if (!fh) {
       Serial.println("Failed to open SD card because sd is null");
     } else {
