@@ -9,6 +9,10 @@
 #include "crgb.h"
 #include "screenmap.h"
 
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
+
 FASTLED_FORCE_INLINE uint16_t xy_serpentine(uint16_t x, uint16_t y,
                                             uint16_t width, uint16_t height) {
     if (y & 1) // Even or odd row?
@@ -153,3 +157,5 @@ class XYMap {
     LUT16Ptr mLookUpTable; // optional refptr to look up table.
     uint16_t mOffset = 0;  // offset to be added to the output
 };
+
+FASTLED_NAMESPACE_END
