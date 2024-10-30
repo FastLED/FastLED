@@ -1,11 +1,13 @@
 
 #pragma once
 
+#include <stddef.h>
+
 // FastLED smart pointer. Used mainly by the fx components.
 
 #include "namespace.h"
 #include "scoped_ptr.h"
-#include <stddef.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 

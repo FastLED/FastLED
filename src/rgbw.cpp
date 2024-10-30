@@ -1,9 +1,11 @@
 
+#include <stdint.h>
+
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
 #include "rgbw.h"
-#include <stdint.h>
+
 
 FASTLED_NAMESPACE_BEGIN
 

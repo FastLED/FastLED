@@ -1,5 +1,4 @@
-#ifndef POWER_MGT_H
-#define POWER_MGT_H
+#pragma once
 
 #include "FastLED.h"
 
@@ -106,4 +105,3 @@ uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, uint3
 
 FASTLED_NAMESPACE_END
 
-#endif
