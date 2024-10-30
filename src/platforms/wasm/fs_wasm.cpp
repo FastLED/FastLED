@@ -123,6 +123,7 @@ class FsImplWasm : public FsImpl {
     }
 
     FileHandleRef openRead(const char *path) override {
+        printf("Opening file %s\n", path);
         Str key(path);
         std::lock_guard<std::mutex> lock(gFileMapMutex);
         auto it = gFileMap.find(key);
