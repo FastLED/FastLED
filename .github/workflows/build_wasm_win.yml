@@ -1,0 +1,128 @@
+name: wasm
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install UV for python
+        run: pip install uv
+
+      - name: Compile fastled.js, fastled.wasm, and index.html
+        run: |
+          uv run ci/wasm_compile.py -b examples/wasm
+        continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
+        shell: bash
+
+      - name: Scan for wasm/js/html artifacts
+        run: |
+          find . -name "*.wasm" -o -name "*.js" -o -name "*.html"
+        continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
+
+      - name: Check for required artifacts
+        run: |
+          cd examples/wasm/fastled_js
+          if [ ! -f fastled.js ] || [ ! -f fastled.wasm ] || [ ! -f index.html ]; then
+            echo "Error: One or more required files (fastled.js, fastled.wasm, index.html) are missing."
+            exit 1
+          fi
+          echo "All required files are present."
+        continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
+
+      - name: Generate timestamp and random hex
+        id: generate_id
+        run: |
+          echo "timestamp=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+          echo "random_hex=$(openssl rand -hex 3)" >> $GITHUB_OUTPUT
+
+      - name: Upload wasm artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-artifacts-${{ steps.generate_id.outputs.timestamp }}-${{ github.sha }}-${{ steps.generate_id.outputs.random_hex }}
+          path: examples/wasm/fastled_js/*.*
+          if-no-files-found: ${{ matrix.os == 'ubuntu-latest' && 'error' || 'ignore' }}
+
+      - name: Install Playwright and verify FastLED_onFrame
+        run: |
+          npm init -y
+          npm install playwright
+          npm install http-server
+          npx playwright install chromium
+          
+          # Find an available port
+          PORT=$(node -e "
+            const net = require('net');
+            const server = net.createServer();
+            server.listen(0, () => {
+              console.log(server.address().port);
+              server.close();
+            });
+          ")
+          echo "Using port: $PORT"
+          
+          # Start http-server with the dynamic port
+          npx http-server examples/wasm/fastled_js -p $PORT &
+          SERVER_PID=$!
+          
+          # Wait for the server to start
+          sleep 5
+          
+          node -e "
+            const { chromium } = require('playwright');
+            (async () => {
+              const browser = await chromium.launch();
+              const page = await browser.newPage();
+              try {
+                await page.goto('http://localhost:${PORT}', { timeout: 30000 });
+                page.on('console', msg => {
+                  if (msg.text().includes('INVALID_OPERATION')) {
+                    console.error('INVALID_OPERATION detected in console log');
+                    process.exit(1);
+                  }
+                });
+                await page.evaluate(() => {
+                  window.frameCallCount = 0;
+                  globalThis.FastLED_onFrame = (jsonStr) => {
+                    console.log('FastLED_onFrame called with:', jsonStr);
+                    window.frameCallCount++;
+                  };
+                });
+                await page.waitForTimeout(5000);
+                const callCount = await page.evaluate(() => window.frameCallCount);
+                if (callCount > 0) {
+                  console.log('Success: FastLED.js was initialized and FastLED_onFrame was called', callCount, 'times');
+                } else {
+                  console.error('Error: FastLED.js had something go wrong and FastLED_onFrame was not called within 5 seconds');
+                  process.exit(1);
+                }
+              } catch (error) {
+                console.error('An error occurred:', error);
+                process.exit(1);
+              } finally {
+                await browser.close();
+                process.kill(${SERVER_PID});
+              }
+            })();
+          "
+        continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
+
