@@ -9,7 +9,7 @@ FROM fedora
 COPY --from=emscripten_base /emsdk /emsdk
 
 # Install required tools to run Emscripten SDK
-# RUN echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
+RUN echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
 
 RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build ccache && \
     dnf clean all
