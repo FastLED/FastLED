@@ -12,8 +12,9 @@ FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_REF(DataStream);
 
-// DataStream is a class that reads data from a file or a stream.
-// It's sort of a merging point for the two types of data sources.
+// DataStream takes either a file handle or a byte stream
+// and reads frames from it in order to serve data to the
+// video system.
 class DataStream: public Referent {
  public:
 
