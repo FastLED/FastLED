@@ -6,6 +6,7 @@
 #include "fx/storage/filebuffer.h"
 #include "fx/storage/bytestream.h"
 #include "fx/frame.h"
+#include "file_system.h"
 
 FASTLED_NAMESPACE_BEGIN
 
