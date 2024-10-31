@@ -18,7 +18,6 @@ HERE = Path(__file__).parent.resolve()
 
 LIBS = ["src", "ci"]
 EXTRA_LIBS = [
-    "ESP Async WebServer",
     "AsyncTCP",
     "ArduinoOTA",
     "SD",
