@@ -22,10 +22,10 @@ Release notes should list highlight changes (not necessarily all minor bug fixes
 
 Git commands to commit and tag release'
 ```bash
-$ git commit -m "Rev 3.9.1 to add a couple more platform defs and bug fixes"
-$ git tag 3.9.1 master 
+$ git commit -m "Rev 3.9.2 - fixes header issue with esp32 async server, prelease of WS812 overclocking"
+$ git tag 3.9.2 master 
 $ git push 
-$ git push origin 3.9.1 
+$ git push origin 3.9.2 
 ```
 
 Then use the GitHub UI to make a new “Release”:
