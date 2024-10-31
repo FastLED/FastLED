@@ -33,6 +33,8 @@ We have multiple goals with this library:
 
 *This is an Arduino Sketch that will run on Arduino Uno/Esp32/Raspberri Pi*
 ```C++
+// New feature! Overclocking WS2812
+// #define FASTLED_OVERCLOCK 1.2 // 20% overclock ~ 960 khz.
 #include <FastLED.h>
 #define NUM_LEDS 60
 #define DATA_PIN 6

@@ -1,6 +1,7 @@
 
 FastLED 3.9.2
 =============
+* In this version we introduce WS2812 overclocking, we also have compile fixes for 3.9.X
 * WS28XX family of led chipsets can now be overclocked
   * See also define `FASTLED_LED_OVERCLOCK`
     * Example: `#define FASTLED_OVERCLOCK 1.2` (gives 20% overclock).
@@ -23,6 +24,15 @@ FastLED 3.9.2
         * 3.9.2: 70fps @ 20% overclock (after this the CPU becomes the bottleneck).
       * FastLED is now likely at the theoretical maximum speed and efficiency for frame draw (async) & dispatch (overclock).
   * Fixes `ESPAsyncWebServer.h` namespace collision with `fs.h` in FastLED, which has been renamed to `file_system.h`
+
+
+Example of how to enable overclocking.
+
+```
+#define FASTLED_OVERCLOCK 1.2 // 20% overclock ~ 960 khz.
+#include "FastLED.h"
+```
+
 
 FastLED 3.9.1
 =============
