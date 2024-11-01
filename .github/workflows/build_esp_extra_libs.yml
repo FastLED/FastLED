@@ -7,6 +7,20 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build_template.yml
-    with:
-      args: --boards esp32-s3-devkitc-1 --add-extra-esp32-libs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install UV
+        run: |
+          pip install uv
+
+      - name: Run Native Build
+        run: |
+          uv run cd ci/kitchensink && pio run

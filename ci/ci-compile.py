@@ -18,7 +18,7 @@ HERE = Path(__file__).parent.resolve()
 
 LIBS = ["src", "ci"]
 EXTRA_LIBS = [
-    "AsyncTCP",
+    "https://github.com/me-no-dev/ESPAsyncWebServer.git",
     "ArduinoOTA",
     "SD",
     "FS",

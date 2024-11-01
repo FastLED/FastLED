@@ -1,7 +1,9 @@
 
 FastLED 3.9.2
 =============
-* In this version we introduce WS2812 overclocking, we also have compile fixes for 3.9.X
+* Beta release 2 for FastLED 4.0.0
+  * In this version we introduce the pre-release of our WS2812 overclocking
+  * We have compile fixes for 3.9.X
 * WS28XX family of led chipsets can now be overclocked
   * See also define `FASTLED_LED_OVERCLOCK`
     * Example: `#define FASTLED_OVERCLOCK 1.2` (gives 20% overclock).
