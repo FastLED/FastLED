@@ -7,8 +7,8 @@ FastLED
 [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs)
 [![Reddit](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
-## New!
-![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
+
+
 
 
 ## About
@@ -48,6 +48,7 @@ void loop() {
 ```
 
 For more examples see this [link](examples).
+
 
 ## Supported Platforms
 #### Arduino
@@ -185,6 +186,11 @@ Espressif's current evaluation of FastLED's compatibility with their product she
 
 
 [![teensy41_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml)
+
+
+## New in 3.9.2!
+![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
+
 
 
 ## Getting Started
