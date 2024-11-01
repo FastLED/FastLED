@@ -17,10 +17,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install UV
+      - name: Install Platformio Latest
         run: |
-          pip install uv
+          pip install platformio
 
       - name: Run Native Build
         run: |
-          uv run cd ci/kitchensink && pio run
+          cd ci/kitchensink && pio run
