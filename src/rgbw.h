@@ -58,6 +58,17 @@ struct RgbwDefault : public Rgbw {
     }
 };
 
+struct RgbwWhiteIsOff : public Rgbw {
+    RgbwWhiteIsOff() {
+        white_color_temp = kRGBWDefaultColorTemp;
+        rgbw_mode = kRGBWNullWhitePixel;
+    }
+    static Rgbw value() {
+        RgbwWhiteIsOff _default;
+        return _default;
+    }
+};
+
 typedef void (*rgb_2_rgbw_function)(uint16_t w_color_temperature, uint8_t r,
                                     uint8_t g, uint8_t b, uint8_t r_scale,
                                     uint8_t g_scale, uint8_t b_scale,
