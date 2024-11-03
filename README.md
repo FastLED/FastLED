@@ -49,17 +49,6 @@ For more examples see this [link](examples).
 
 
 
-## Star History
-
-
-
-<a href="https://star-history.com/#fastled/fastled&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
- </picture>
-</a>
 
 
 
@@ -205,6 +194,17 @@ Espressif's current evaluation of FastLED's compatibility with their product she
 ## New in 3.9.2!
 ![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
 
+## Star History
+
+
+
+<a href="https://star-history.com/#fastled/fastled&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+ </picture>
+</a>
 
 
 ## Getting Started
