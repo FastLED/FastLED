@@ -12,6 +12,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_FORCE_INLINE uint16_t x_linear(uint16_t x, uint16_t length) {
+    (void)length;
     return x;
 }
 

@@ -10,6 +10,7 @@ VideoStream::VideoStream(size_t pixelsPerFrame, size_t nFramesInBuffer, float fp
 }
 
 void VideoStream::begin(uint32_t now, FileHandleRef h) {
+    (void)now;  // todo remove?
     end();
     // Removed setStartTime call
     mStream = DataStreamRef::New(mPixelsPerFrame);
@@ -17,6 +18,7 @@ void VideoStream::begin(uint32_t now, FileHandleRef h) {
 }
 
 void VideoStream::beginStream(uint32_t now, ByteStreamRef bs) {
+    (void)now;  // todo remove?
     end();
     mStream = DataStreamRef::New(mPixelsPerFrame);
     // Removed setStartTime call

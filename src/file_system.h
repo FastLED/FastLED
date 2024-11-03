@@ -68,6 +68,7 @@ class FsImpl : public Referent {
 
     virtual bool ls(Visitor &visitor) {
       // todo: implement.
+      (void)visitor;
       return false;
     }
 };

@@ -40,6 +40,7 @@ void Frame::draw(CRGB* leds, uint8_t* alpha) const {
 }
 
 void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2, CRGB* pixels, uint8_t* alpha) {
+    (void)alpha;  // Reserved for future use.
     if (frame1.size() != frame2.size()) {
         return;  // Frames must have the same size
     }

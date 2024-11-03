@@ -22,6 +22,7 @@ public:
     }
 
     static void Free(T* p, size_t n) {
+        (void)n;
         if (p == nullptr) {
             return;
         }

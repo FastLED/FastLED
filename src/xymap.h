@@ -15,6 +15,7 @@ FASTLED_NAMESPACE_BEGIN
 
 FASTLED_FORCE_INLINE uint16_t xy_serpentine(uint16_t x, uint16_t y,
                                             uint16_t width, uint16_t height) {
+    (void)height;
     if (y & 1) // Even or odd row?
         // reverse every second line for a serpentine lled layout
         return (y + 1) * width - 1 - x;
