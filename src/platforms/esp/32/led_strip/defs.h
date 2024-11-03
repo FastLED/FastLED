@@ -23,7 +23,7 @@
 #endif  // LED_STRIP_RMT_DEFAULT_MEM_BLOCK_SYMBOLS
 
 #ifndef FASTLED_RMT_WITH_DMA
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(ESP8266) || defined(CONFIG_IDF_TARGET_ESP32C3)
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(ESP8266) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
 // This can be a runtime parameter that adjusts to the chip detection feature of esp-idf.
  #define FASTLED_RMT_WITH_DMA 0
 #else
