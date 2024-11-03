@@ -97,7 +97,7 @@ RUN dos2unix /js/compile.py /js/process-ino.py
 RUN dos2unix /js/*.sh
 RUN chmod +x /js/*.sh
 
-RUN python /js/compile.py || echo "####### ERROR FAILED to run pre warm compiler toolchain. Compile performance will degrade with this docker image."
+RUN python /js/compile.py
 
 #Clean up before the volume get's mapped in.
 RUN rm -rf /mapped
