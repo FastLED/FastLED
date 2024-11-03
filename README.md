@@ -9,8 +9,6 @@ FastLED
 
 
 
-
-
 ## About
 
 The led driver for tiny computers the size of a quarter, more or less.
@@ -48,6 +46,21 @@ void loop() {
 ```
 
 For more examples see this [link](examples).
+
+
+
+## Star History
+
+
+
+<a href="https://star-history.com/#fastled/fastled&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=fastled/fastled&type=Date" />
+ </picture>
+</a>
+
 
 
 ## Supported Platforms
@@ -187,6 +200,7 @@ Espressif's current evaluation of FastLED's compatibility with their product she
 
 
 [![teensy41_binary_size](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/check_teensy41_size.yml)
+
 
 
 ## New in 3.9.2!
