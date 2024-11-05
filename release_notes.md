@@ -1,4 +1,13 @@
 
+FastLED 3.9.3
+=============
+* Beta Release 3 for FastLED 4.0.0
+* ESP32C6 now supported with RMT5 driver. This chip does not use DMA and so must go through the non DMA path for RMT.
+* RMT5 tweaks for ESP32
+  * For non DMA memory boards like the ESP32, ESP32C3, ESP32C6 RMT will now double it's memory but only allow 4 RMT workers.
+  * This was the behavior for the RMT4.X drivers.
+  * This is done to reduce LED corruption when WIFI is enabled.
+
 FastLED 3.9.2
 =============
 * Beta release 2 for FastLED 4.0.0
