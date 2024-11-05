@@ -248,15 +248,30 @@ When changes are made then push to your fork to your repo and git will give you 
 
 ```bash
 Available boards:
-[0]: uno
-[1]: esp32dev
-[2]: esp01
-[3]: esp32-c3-devkitm-1
-[4]: esp32-s3-devkitc-1
-[5]: yun
-[6]: digix
-[7]: teensy30
-[8]: teensy41
+[0]: ATtiny1616
+[1]: adafruit_feather_nrf52840_sense
+[2]: attiny85
+[3]: bluepill
+[4]: digix
+[5]: esp01
+[6]: esp32-c2-devkitm-1
+[7]: esp32-c3-devkitm-1
+[8]: esp32-c6-devkitc-1
+[9]: esp32-s3-devkitc-1
+[10]: esp32dev
+[11]: esp32dev_i2s
+[12]: esp32dev_idf44
+[13]: esp32rmt_51
+[14]: nano_every
+[15]: rpipico
+[16]: rpipico2
+[17]: teensy30
+[18]: teensy41
+[19]: uno
+[20]: uno_r4_wifi
+[21]: xiaoblesense_adafruit
+[22]: yun
+[all]: All boards
 Enter the number of the board you want to use: 0
 ```
 
