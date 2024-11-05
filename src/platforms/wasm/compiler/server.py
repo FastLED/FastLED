@@ -3,6 +3,7 @@ import tempfile
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 import threading
 import shutil
+import zipfile
 import warnings
 from pathlib import Path
 
@@ -15,6 +16,10 @@ app = FastAPI()
 upload_dir = Path("uploads")
 upload_dir.mkdir(exist_ok=True)
 compile_lock = threading.Lock()
+
+MAPPED_DIR = Path("/mapped")
+
+assert MAPPED_DIR.exists(), f"Directory {MAPPED_DIR} does not exist."
 
 @app.get("/", include_in_schema=False)
 async def read_root() -> RedirectResponse:
@@ -39,10 +44,16 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
         file_path = Path(temp_dir.name) / file.filename
         with open(file_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
-        
+
+        # Acquire the compile lock and decompress the file
         with compile_lock:
-            print("Compile would happen here")
-        
+            with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                zip_ref.extractall(MAPPED_DIR)
+            # now print out the contents of the /mapped directory
+            print("Contents of /mapped:")
+            for path in MAPPED_DIR.rglob("*"):
+                print(path)
+
         return FileResponse(path=str(file_path), filename=file.filename)
     except Exception as e:
         return {"error": str(e)}
