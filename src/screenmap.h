@@ -80,6 +80,17 @@ class ScreenMap {
         }
     }
 
+    pair_xy_float& operator[](uint32_t x) {
+        if (x >= length || !mLookUpTable) {
+            return const_cast<pair_xy_float &>(empty()); // better than crashing.
+        }
+        LUTXYFLOAT &lut = *mLookUpTable.get();
+        auto *data = lut.getData();
+        return data[x];
+    }
+
+    // TODO: change this name to setDiameterLed. Default should be .5f
+    // for 5 mm ws lense.
     void setDiameter(float diameter) { mDiameter = diameter; }
 
     // define the assignment operator

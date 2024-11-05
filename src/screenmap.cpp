@@ -55,6 +55,9 @@ void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16>& segmentMaps, FLArduin
             y_array.add(xy.y);
         }
         float diameter = kv.second.getDiameter();
+        if (diameter < 0.0f) {
+            diameter = .5f; // 5mm.
+        }
         if (diameter > 0.0f) {
             segment["diameter"] = diameter;
         }
