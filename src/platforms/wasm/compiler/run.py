@@ -4,6 +4,8 @@ import sys
 from typing import Tuple
 from pathlib import Path
 
+_PORT = 80
+
 _CHOICES = [
     "compile",
     "server"
@@ -18,10 +20,13 @@ def _parse_args() -> Tuple[argparse.Namespace, list[str]]:
 
 def _run_server(unknown_args: list[str]) -> None:
     cmd_list = [
-        "flask",
-        "run",
-        "server.py"
-    ]
+        "uvicorn",
+        "server:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        f"{_PORT}"
+    ] + unknown_args
     subprocess.run(cmd_list, cwd=str(HERE))
 
 def _run_compile(unknown_args: list[str]) -> None:
