@@ -92,9 +92,8 @@ RUN cp -r /examples/wasm /mapped/ || mkdir -p /mapped/wasm
 # RUN source /entrypoint.sh && pio run
 
 # Copy the compile script
-COPY src/platforms/wasm/compiler/compile.py /js/
-COPY src/platforms/wasm/compiler/process-ino.py /js/
-RUN dos2unix /js/compile.py /js/process-ino.py
+COPY src/platforms/wasm/compiler/*.py /js/
+RUN dos2unix /js/*.py
 RUN dos2unix /js/*.sh
 RUN chmod +x /js/*.sh
 
