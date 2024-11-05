@@ -200,7 +200,7 @@ def run_container(directory: str, interactive: bool, debug: bool = False) -> Non
         ]
         docker_command.append(IMAGE_NAME)
         if debug and not interactive:
-            docker_command.extend(["python", "/js/compile.py", "--debug"])
+            docker_command.extend(["python", "/js/run.py", "compile", "--debug"])
         if is_tty():
             docker_command.insert(4, "-it")
         if interactive:
