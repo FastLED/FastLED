@@ -1,14 +1,11 @@
 import argparse
 import os
 import platform
-import shutil
 import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import List
-
-import download  # type: ignore
 
 from ci.paths import PROJECT_ROOT
 
@@ -177,7 +174,9 @@ def is_tty() -> bool:
     return sys.stdout.isatty()
 
 
-def run_container(directory: str, interactive: bool, debug: bool = False) -> None:
+def run_container(
+    directory: str, interactive: bool, debug: bool = False, server: bool = False
+) -> None:
 
     absolute_directory: str = os.path.abspath(directory)
     base_name = os.path.basename(absolute_directory)
@@ -199,7 +198,9 @@ def run_container(directory: str, interactive: bool, debug: bool = False) -> Non
             f"{absolute_directory}:/mapped/{base_name}",
         ]
         docker_command.append(IMAGE_NAME)
-        if debug and not interactive:
+        if server:
+            docker_command.extend(["python", "/js/run.py", "server"])
+        elif debug and not interactive:
             docker_command.extend(["python", "/js/run.py", "compile", "--debug"])
         if is_tty():
             docker_command.insert(4, "-it")
@@ -217,76 +218,6 @@ def run_container(directory: str, interactive: bool, debug: bool = False) -> Non
         subprocess.run(docker_command, check=True)
     except subprocess.CalledProcessError as e:
         raise WASMCompileError(f"ERROR: Failed to run Docker container.\n{e}")
-
-
-def setup_docker2exe() -> None:
-    platform = ""
-    if sys.platform == "win32":
-        platform = "windows"
-    elif sys.platform == "darwin":
-        platform = "darwin"
-    elif sys.platform == "linux":
-        platform = "linux"
-
-    ignore_dir = PROJECT_ROOT / "ignore"
-    ignore_dir.mkdir(exist_ok=True)
-
-    docker2exe_path = ignore_dir / "docker2exe.exe"
-    if not docker2exe_path.exists():
-        download.download(
-            f"https://github.com/rzane/docker2exe/releases/download/v0.2.1/docker2exe-{platform}-amd64",
-            str(docker2exe_path),
-        )
-        docker2exe_path.chmod(0o755)
-    else:
-        print("docker2exe.exe already exists, skipping download.")
-
-    slim_cmd = [
-        str(docker2exe_path),
-        "--name",
-        "fastled",
-        "--image",
-        "niteris/fastled-wasm:main",
-        "--module",
-        "github.com/FastLED/FastLED",
-        "--target",
-        f"{platform}/amd64",
-    ]
-    full_cmd = slim_cmd + ["--embed"]
-
-    subprocess.run(
-        slim_cmd,
-        check=True,
-    )
-    print("Building wasm web command...")
-    print("Building wasm full command with no dependencies...")
-    subprocess.run(
-        full_cmd,
-        check=True,
-    )
-    move_files_to_dist(full=True)
-    print("Docker2exe done.")
-
-
-def move_files_to_dist(full: bool = False) -> None:
-    suffix = "-full" if full else ""
-    files = [
-        ("fastled-darwin-amd64", f"fastled-darwin-amd64{suffix}"),
-        ("fastled-darwin-arm64", f"fastled-darwin-arm64{suffix}"),
-        ("fastled-linux-amd64", f"fastled-linux-amd64{suffix}"),
-        ("fastled-windows-amd64.exe", f"fastled-windows-amd64{suffix}.exe"),
-    ]
-    for src, dest in files:
-        if not os.path.exists(src):
-            print(f"Skipping {src} as it does not exist.")
-            continue
-        src_path = PROJECT_ROOT / "dist" / src
-        dest_path = PROJECT_ROOT / "dist" / dest
-        if src_path.exists():
-            shutil.move(str(src_path), str(dest_path))
-        else:
-            print(f"Warning: {src_path} does not exist and will not be moved.")
-            print(f"Warning: {src_path} was expected to exist but does not.")
 
 
 def run_web_server(directory: str) -> None:
@@ -368,15 +299,12 @@ def main():
         help="Enables debug flags and disables optimization. Results in larger binary with debug info.",
     )
     parser.add_argument(
-        "--build_wasm_compiler",
+        "--server",
         action="store_true",
-        help="Setup docker2exe for wasm compilation",
+        help="Run the server instead of compiling",
     )
     args: argparse.Namespace = parser.parse_args()
 
-    if args.build_wasm_compiler:
-        setup_docker2exe()
-        return
     if args.no_build:
         args.build = False
     if args.no_open:
@@ -395,7 +323,9 @@ def main():
             build_image(debug_mode)
             remove_dangling_images()
 
-        run_container(args.directory, args.interactive, debug_mode)
+        run_container(args.directory, args.interactive, debug_mode, args.server)
+        if args.server:
+            return
 
         output_dir = str(Path(args.directory) / "fastled_js")
 
