@@ -20,7 +20,11 @@ compile_lock = threading.Lock()
 
 MAPPED_DIR = Path("/mapped")
 
-assert MAPPED_DIR.exists(), f"Directory {MAPPED_DIR} does not exist."
+# Make sure the /mapped directory exists to match the expectations of the compile.py script.
+# When that script is used, a volume will be passed in. However when the server script is used
+# there will not be a volume mount passed in.
+if not MAPPED_DIR.exists():
+    MAPPED_DIR.mkdir(exist_ok=True)
 
 @app.get("/", include_in_schema=False)
 async def read_root() -> RedirectResponse:
