@@ -16,7 +16,7 @@ machine = platform.machine().lower()
 IS_ARM: bool = "arm" in machine or "aarch64" in machine
 PLATFORM_TAG: str = "-arm64" if IS_ARM else ""
 
-IMAGE_NAME = f"fastled-wasm-compiler{PLATFORM_TAG}"
+IMAGE_NAME = "fastled-wasm"
 
 HERE: Path = Path(__file__).parent
 DOCKER_FILE: Path = (
@@ -246,7 +246,7 @@ def setup_docker2exe() -> None:
         "--name",
         "fastled",
         "--image",
-        "niteris/fastled-wasm",
+        "niteris/fastled-wasm:main",
         "--module",
         "github.com/FastLED/FastLED",
         "--target",

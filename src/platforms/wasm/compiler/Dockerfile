@@ -19,13 +19,14 @@ RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix t
 
 
 
-# Install PlatformIO
-RUN pip3 install platformio==6.1.16 wormhole-tx
-
 # Create /container/bin directory and add symbolic links
 RUN mkdir -p /container/bin && \
     ln -s /usr/bin/python3 /container/bin/python && \
     ln -s /usr/bin/pip3 /container/bin/pip
+
+
+COPY src/platforms/wasm/compiler/requirements.txt /install/requirements.txt
+RUN pip install -r /install/requirements.txt
 
 # Add Python and Emscripten to PATH
 ENV PATH="/container/bin:/usr/local/bin:/usr/bin:/emsdk:/emsdk/upstream/emscripten:${PATH}"
