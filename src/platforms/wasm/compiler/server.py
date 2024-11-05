@@ -6,6 +6,7 @@ import shutil
 import zipfile
 import warnings
 from pathlib import Path
+import subprocess
 
 _UPLOAD_LIMIT = 10 * 1024 * 1024
 
@@ -53,6 +54,16 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
             print("Contents of /mapped:")
             for path in MAPPED_DIR.rglob("*"):
                 print(path)
+
+            cp: subprocess.CompletedProcess = subprocess.run(["python", "run.py", "compile"], cwd="/js")
+            if cp.returncode != 0:
+                return {"error": "Compilation failed."}
+            
+            # now print out the contents of the /mapped directory
+            print("Contents of /mapped:")
+            for path in MAPPED_DIR.rglob("*"):
+                print(path)
+
 
         return FileResponse(path=str(file_path), filename=file.filename)
     except Exception as e:
