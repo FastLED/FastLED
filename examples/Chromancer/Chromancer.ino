@@ -105,7 +105,7 @@ float gyroX, gyroY, gyroZ;
 #define randomPulsesEnabled true // Fire random rainbow pulses from random nodes
 #define cubePulsesEnabled true   // Draw cubes at random nodes
 Checkbox starburstPulsesEnabled("Starburst Pulses", true);
-Checkbox simulatedBiometricsEnabled("Simulated Biometrics", false);
+Checkbox simulatedBiometricsEnabled("Simulated Biometrics", true);
 
 #define autoPulseTimeout                                                       \
     5000 // If no heartbeat is received in this many ms, begin firing
