@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile  # type: ignore
+from fastapi import FastAPI, File, UploadFile, HTTPException  # type: ignore
 import tempfile
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 import threading
@@ -7,6 +7,9 @@ import warnings
 from pathlib import Path
 
 _UPLOAD_LIMIT = 10 * 1024 * 1024
+
+# Protect the endpoints from random bots.
+_AUTH_TOKEN = "oBOT5jbsO4ztgrpNsQwlmFLIKB"
 
 app = FastAPI()
 upload_dir = Path("uploads")
@@ -19,8 +22,11 @@ async def read_root() -> RedirectResponse:
     return RedirectResponse(url="/docs")
 
 @app.post("/compile/")
-def upload_file(file: UploadFile = File(...)) -> FileResponse:
+def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileResponse:
     """Upload a file into a temporary directory."""
+
+    if auth_token != _AUTH_TOKEN:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
     if not file.filename.endswith('.zip'):
         return {"error": "Only .zip files are allowed."}
