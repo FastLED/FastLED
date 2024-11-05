@@ -6,6 +6,8 @@ import asyncio
 import shutil
 from pathlib import Path
 
+_UPLOAD_LIMIT = 10 * 1024 * 1024
+
 app = FastAPI()
 upload_dir = Path("uploads")
 upload_dir.mkdir(exist_ok=True)
@@ -19,11 +21,12 @@ async def read_root() -> RedirectResponse:
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)) -> dict:
     """Upload a file asynchronously into a temporary directory."""
+
+    if file.size > _UPLOAD_LIMIT:
+        return {"error": "File size exceeds 10 MB limit"}
+
     async with upload_lock:
         try:
-            if file.size > 10 * 1024 * 1024:
-                return {"error": "File size exceeds 10 MB limit"}
-            
             temp_dir = tempfile.TemporaryDirectory()
             file_path = Path(temp_dir.name) / file.filename
             with open(file_path, "wb") as f:
@@ -32,9 +35,3 @@ async def upload_file(file: UploadFile = File(...)) -> dict:
         except Exception as e:
             return {"error": str(e)}
 
-@app.get("/download/{filename}")
-async def download_file(filename: str) -> FileResponse | dict:
-    file_path = upload_dir / filename
-    if file_path.exists():
-        return FileResponse(file_path)
-    return {"error": "File not found"}

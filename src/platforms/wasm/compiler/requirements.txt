@@ -2,5 +2,5 @@ platformio==6.1.16
 wormhole-tx
 fastapi==0.114.2
 uvicorn[standard]==0.30.6
-python-multipart
-aiohttp
+python-multipart==0.0.17
+aiohttp==3.10.10
