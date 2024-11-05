@@ -77,7 +77,7 @@ ScreenMap makeScreenMap(int numLeds, float cm_between_leds) {
 
     for (int i = 0; i < numLeds; i++) {
         float angle = i * 2 * M_PI / numLeds;
-        float x = radius * cos(angle);
+        float x = radius * cos(angle) * 2;
         float y = radius * sin(angle);
         // screenMap[i] = {x, y};
         screenMap.set(i, {x, y});
@@ -88,7 +88,7 @@ ScreenMap makeScreenMap(int numLeds, float cm_between_leds) {
 
 
 void setup() {
-    ScreenMap xyMap = makeScreenMap(NUM_LEDS, 4.0);
+    ScreenMap xyMap = makeScreenMap(NUM_LEDS, 2.0);
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenCoords(xyMap);
@@ -99,15 +99,34 @@ void setup() {
     //fxEngine.addFx(noisePalette);
 }
 
+
+
+
 void loop() {
-    //FastLED.setBrightness(!isOff ? brightness.as<uint8_t>() : 0);
-    //fxEngine.draw(millis(), leds);
-    // set each led white
+    //for (int i = 0; i < NUM_LEDS; i++) {
+    //    leds[i] = CRGB::White;
+    //}
+
+    uint32_t now = millis();
+
+    // inoise8(x + ioffset,y + joffset,z);
+    // go in circular formation and set the leds
     for (int i = 0; i < NUM_LEDS; i++) {
-        leds[i] = CRGB::White;
+        float angle = i * 2 * M_PI / NUM_LEDS;
+        float x = cos(angle);
+        float y = sin(angle);
+        x *= 0xffff;
+        y *= 0xffff;
+        float noise = inoise16(x, y, now);
+        float noise2 = inoise16(x, y, 255 + now);
+        float noise3 = inoise16(x, y, 512 + now);
+
+        leds[i] = CHSV(noise >> 8, noise2 >> 8, noise3 >> 8);
     }
+
+
     FastLED.show();
-    //frame++;
+
 }
 
 
