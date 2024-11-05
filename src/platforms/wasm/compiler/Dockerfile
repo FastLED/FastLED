@@ -94,6 +94,7 @@ RUN cp -r /examples/wasm /mapped/ || mkdir -p /mapped/wasm
 # Copy the compile script
 COPY src/platforms/wasm/compiler/compile.py /js/compile.py
 COPY src/platforms/wasm/compiler/run.py /js/run.py
+COPY src/platforms/wasm/compiler/server.py /js/server.py
 RUN dos2unix /js/*.py
 RUN dos2unix /js/*.sh
 RUN chmod +x /js/*.sh

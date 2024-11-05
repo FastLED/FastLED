@@ -1,22 +1,22 @@
-from flask import Flask, request, send_file
-import io
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import FileResponse
+import shutil
+from pathlib import Path
 
-app = Flask(__name__)
+app = FastAPI()
+upload_dir = Path("uploads")
+upload_dir.mkdir(exist_ok=True)
 
-@app.route('/compile', methods=['POST'])
-def upload_and_return_file():
-    if 'file' not in request.files:
-        return "No file part", 400
-    file = request.files['file']
-    file_content = file.read()  # Read the uploaded file content
-    file_like = io.BytesIO(file_content)  # Create an in-memory stream for the response
-    file_like.seek(0)
-    return send_file(
-        file_like,
-        as_attachment=True,
-        download_name=file.filename,
-        mimetype=file.mimetype or 'application/octet-stream'
-    )
+@app.post("/upload/")
+async def upload_file(file: UploadFile = File(...)):
+    file_path = upload_dir / file.filename
+    with file_path.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    return {"filename": file.filename}
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.get("/download/{filename}")
+async def download_file(filename: str):
+    file_path = upload_dir / filename
+    if file_path.exists():
+        return FileResponse(file_path)
+    return {"error": "File not found"}
