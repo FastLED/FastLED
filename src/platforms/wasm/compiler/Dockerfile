@@ -1,5 +1,6 @@
 ARG PLATFORM_TAG=""
 
+
 FROM emscripten/emsdk:3.1.70${PLATFORM_TAG} AS emscripten_base
 
 # Target base image
@@ -98,6 +99,15 @@ COPY src/platforms/wasm/compiler/server.py /js/server.py
 RUN dos2unix /js/*.py
 RUN dos2unix /js/*.sh
 RUN chmod +x /js/*.sh
+
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LC_CTYPE=UTF-8
+
+# dump to /etc/profile
+RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
+    echo 'export LC_ALL=en_US.UTF-8' >> /etc/profile && \
+    echo 'export LC_CTYPE=UTF-8' >> /etc/profile
 
 RUN python /js/run.py compile
 
