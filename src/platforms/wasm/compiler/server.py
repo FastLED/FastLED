@@ -1,5 +1,4 @@
 from fastapi import FastAPI, File, UploadFile
-import aiohttp
 import tempfile
 from fastapi.responses import FileResponse, RedirectResponse
 import asyncio
