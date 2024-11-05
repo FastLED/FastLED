@@ -92,16 +92,17 @@ RUN cp -r /examples/wasm /mapped/ || mkdir -p /mapped/wasm
 # RUN source /entrypoint.sh && pio run
 
 # Copy the compile script
-COPY src/platforms/wasm/compiler/*.py /js/
+COPY src/platforms/wasm/compiler/compile.py /js/compile.py
+COPY src/platforms/wasm/compiler/run.py /js/run.py
 RUN dos2unix /js/*.py
 RUN dos2unix /js/*.sh
 RUN chmod +x /js/*.sh
 
-RUN python /js/compile.py
+RUN python /js/run.py compile
 
 #Clean up before the volume get's mapped in.
 RUN rm -rf /mapped
 RUN rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "/js/compile.py"]
+CMD ["python", "/js/run.py", "compile"]
