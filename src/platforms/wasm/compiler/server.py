@@ -1,8 +1,9 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile  # type: ignore
 import tempfile
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 import threading
 import shutil
+import warnings
 from pathlib import Path
 
 _UPLOAD_LIMIT = 10 * 1024 * 1024
@@ -17,8 +18,8 @@ async def read_root() -> RedirectResponse:
     """Redirect to the /docs endpoint."""
     return RedirectResponse(url="/docs")
 
-@app.post("/upload/")
-def upload_file(file: UploadFile = File(...)) -> dict:
+@app.post("/compile/")
+def upload_file(file: UploadFile = File(...)) -> FileResponse:
     """Upload a file into a temporary directory."""
 
     if not file.filename.endswith('.zip'):
@@ -36,9 +37,12 @@ def upload_file(file: UploadFile = File(...)) -> dict:
         with compile_lock:
             print("Compile would happen here")
         
-        return {"message": "File uploaded successfully", "path": str(file_path)}
+        return FileResponse(path=str(file_path), filename=file.filename)
     except Exception as e:
         return {"error": str(e)}
     finally:
-        temp_dir.cleanup(ignore_errors=True)
+        try:
+            temp_dir.cleanup()
+        except Exception as e:
+            warnings.warn(f"Error cleaning up temporary directory: {e}")
 
