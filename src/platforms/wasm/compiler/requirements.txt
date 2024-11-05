@@ -3,3 +3,4 @@ wormhole-tx
 fastapi==0.114.2
 uvicorn[standard]==0.30.6
 python-multipart
+aiohttp
