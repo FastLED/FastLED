@@ -197,6 +197,9 @@ def run_container(
             "-v",
             f"{absolute_directory}:/mapped/{base_name}",
         ]
+        if server:
+            # add the port mapping before the image name is added.
+            docker_command.extend(["-p", "80:80"])
         docker_command.append(IMAGE_NAME)
         if server:
             docker_command.extend(["python", "/js/run.py", "server"])

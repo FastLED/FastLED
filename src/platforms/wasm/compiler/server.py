@@ -1,11 +1,16 @@
 from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 import shutil
 from pathlib import Path
 
 app = FastAPI()
 upload_dir = Path("uploads")
 upload_dir.mkdir(exist_ok=True)
+
+@app.get("/", include_in_schema=False)
+async def read_root():
+    """Redirect to the /docs endpoint."""
+    return RedirectResponse(url="/docs")
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
