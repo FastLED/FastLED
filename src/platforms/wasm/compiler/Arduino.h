@@ -3,12 +3,12 @@
 
 #pragma once
 
+#include "str.h"
+#include <algorithm>
+#include <random>
 #include <stdint.h>
 #include <stdio.h>
-#include <random>
-#include <algorithm>
 #include <string>
-#include "str.h"
 
 #include "namespace.h"
 FASTLED_NAMESPACE_BEGIN
@@ -17,37 +17,59 @@ FASTLED_NAMESPACE_END
 
 FASTLED_USING_NAMESPACE
 
-using std::min;
 using std::max;
+using std::min;
+
+namespace fl {
+long map(long x, long in_min, long in_max, long out_min, long out_max) {
+    const long run = in_max - in_min;
+    if (run == 0) {
+        return 0; // AVR returns -1, SAM returns 0
+    }
+    const long rise = out_max - out_min;
+    const long delta = x - in_min;
+    return (delta * rise) / run + out_min;
+}
+
+// constrain
+template <typename T> T constrain(T x, T a, T b) {
+    return x < a ? a : (x > b ? b : x);
+}
+} // namespace fl
+
+using fl::map;
+using fl::constrain;
 
 inline long random(long min, long max) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    // Arduino random is exclusive of the max value, but std::uniform_int_distribution is inclusive.
-    // So we subtract 1 from the max value.
-    std::uniform_int_distribution<> dis(min, max-1);
+    // Arduino random is exclusive of the max value, but
+    // std::uniform_int_distribution is inclusive. So we subtract 1 from the max
+    // value.
+    std::uniform_int_distribution<> dis(min, max - 1);
     return dis(gen);
 }
 
-inline long random(long max) {
-    return random(0, max);
-}
+inline long random(long max) { return random(0, max); }
 
-template<typename T>
-struct PrintHelper {};
+template <typename T> struct PrintHelper {};
 
-#define DEFINE_PRINT_HELPER(type, format) \
-    template<> \
-    struct PrintHelper<type> { \
-        static void print(type val) { printf(format, val); } \
-        static void println(type val) { printf(format, val); printf("\n"); } \
+#define DEFINE_PRINT_HELPER(type, format)                                      \
+    template <> struct PrintHelper<type> {                                     \
+        static void print(type val) { printf(format, val); }                   \
+        static void println(type val) {                                        \
+            printf(format, val);                                               \
+            printf("\n");                                                      \
+        }                                                                      \
     }
 
-#define DEFINE_PRINT_HELPER_EXT(type, format, val_opp) \
-    template<> \
-    struct PrintHelper<type> { \
-        static void print(type val) { printf(format, val_opp); } \
-        static void println(type val) { printf(format, val_opp); printf("\n"); } \
+#define DEFINE_PRINT_HELPER_EXT(type, format, val_opp)                         \
+    template <> struct PrintHelper<type> {                                     \
+        static void print(type val) { printf(format, val_opp); }               \
+        static void println(type val) {                                        \
+            printf(format, val_opp);                                           \
+            printf("\n");                                                      \
+        }                                                                      \
     }
 
 // gcc push options
@@ -73,10 +95,8 @@ DEFINE_PRINT_HELPER_EXT(Str, "%s", val.c_str());
 
 struct SerialEmulation {
     void begin(int) {}
-    template<typename T>
-    void print(T val) { PrintHelper<T>::print(val); }
-    template<typename T>
-    void println(T val) { PrintHelper<T>::println(val); }
+    template <typename T> void print(T val) { PrintHelper<T>::print(val); }
+    template <typename T> void println(T val) { PrintHelper<T>::println(val); }
     int available() { return 0; }
     int read() { return 0; }
     void write(uint8_t) {}
@@ -110,7 +130,6 @@ void pinMode(int, int) {}
 
 #define FL_PGM_READ_PTR_NEAR(addr) (*(addr))
 typedef unsigned char byte;
-
 
 SerialEmulation Serial;
 SerialEmulation Serial1;
