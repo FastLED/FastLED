@@ -1,7 +1,9 @@
 import json
+import os
 import shutil
 import subprocess
 import warnings
+from os import stat
 from pathlib import Path
 
 from ci.boards import Board
@@ -70,6 +72,15 @@ def insert_tool_aliases(meta_json: dict[str, dict]) -> None:
         meta_json[board]["aliases"] = aliases
 
 
+def remove_readonly(func, path, _):
+    "Clear the readonly bit and reattempt the removal"
+    if os.name == "nt":
+        os.system(f"attrib -r {path}")
+    else:
+        os.chmod(path, stat.S_IWRITE)
+    func(path)
+
+
 def create_build_dir(
     board: Board,
     defines: list[str],
@@ -96,7 +107,7 @@ def create_build_dir(
     # recycled build directories for fastled to update. This is a fast operation.
     srcdir = builddir / "lib"
     if srcdir.exists():
-        shutil.rmtree(srcdir)
+        shutil.rmtree(srcdir, onerror=remove_readonly)
     platformio_ini = builddir / "platformio.ini"
     if platformio_ini.exists():
         try:

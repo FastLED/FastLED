@@ -66,7 +66,7 @@ def compile_for_board_and_example(
         ]
         # in this case we need to manually copy the example to the src directory
         # because platformio doesn't support building a single file.
-        ino_file = example / f"{example.name}.ino"
+        # ino_file = example / f"{example.name}.ino"
     else:
         cmd_list = [
             "pio",
