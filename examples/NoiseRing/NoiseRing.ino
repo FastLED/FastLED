@@ -68,6 +68,9 @@
 CRGB leds[NUM_LEDS];
 
 Slider brightness("Brightness", 255, 0, 255);
+Slider scale("Scale", 1, .1, 4, .1);
+
+Slider timescale("Time Scale", 1, .1, 10, .1);
 
 
 ScreenMap makeScreenMap(int numLeds, float cm_between_leds) {
@@ -78,11 +81,11 @@ ScreenMap makeScreenMap(int numLeds, float cm_between_leds) {
     for (int i = 0; i < numLeds; i++) {
         float angle = i * 2 * M_PI / numLeds;
         float x = radius * cos(angle) * 2;
-        float y = radius * sin(angle);
+        float y = radius * sin(angle) * 2;
         // screenMap[i] = {x, y};
         screenMap.set(i, {x, y});
     }
-    screenMap.setDiameter(.5);
+    screenMap.setDiameter(2);
     return screenMap;
 }
 
@@ -103,30 +106,23 @@ void setup() {
 
 
 void loop() {
-    //for (int i = 0; i < NUM_LEDS; i++) {
-    //    leds[i] = CRGB::White;
-    //}
-
-    uint32_t now = millis();
-
+    FastLED.setBrightness(brightness);
+    uint32_t now = millis() << 5;
+    now *= timescale.as<uint32_t>();
     // inoise8(x + ioffset,y + joffset,z);
     // go in circular formation and set the leds
     for (int i = 0; i < NUM_LEDS; i++) {
         float angle = i * 2 * M_PI / NUM_LEDS;
         float x = cos(angle);
         float y = sin(angle);
-        x *= 0xffff;
-        y *= 0xffff;
-        float noise = inoise16(x, y, now);
-        float noise2 = inoise16(x, y, 255 + now);
-        float noise3 = inoise16(x, y, 512 + now);
-
+        x *= 0xffff * scale.as<float>();
+        y *= 0xffff * scale.as<float>();
+        uint16_t noise = inoise16(x, y, now);
+        uint16_t noise2 = inoise16(x, y, 255 + now);
+        uint16_t noise3 = inoise16(x, y, 512 + now);
         leds[i] = CHSV(noise >> 8, noise2 >> 8, noise3 >> 8);
     }
-
-
     FastLED.show();
-
 }
 
 
