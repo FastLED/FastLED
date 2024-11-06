@@ -753,7 +753,7 @@ public:
     CHSVPalette16( const TProgmemHSVPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; ++i) {
-            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            CRGB xyz(FL_PGM_READ_DWORD_NEAR( rhs + i));
             entries[i].hue = xyz.red;
             entries[i].sat = xyz.green;
             entries[i].val = xyz.blue;
@@ -764,7 +764,7 @@ public:
     CHSVPalette16& operator=( const TProgmemHSVPalette16& rhs)
     {
         for( uint8_t i = 0; i < 16; ++i) {
-            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            CRGB xyz(FL_PGM_READ_DWORD_NEAR( rhs + i));
             entries[i].hue = xyz.red;
             entries[i].sat = xyz.green;
             entries[i].val = xyz.blue;
@@ -1337,7 +1337,7 @@ public:
     CHSVPalette32( const TProgmemHSVPalette32& rhs)
     {
         for( uint8_t i = 0; i < 32; ++i) {
-            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            CRGB xyz(FL_PGM_READ_DWORD_NEAR( rhs + i));
             entries[i].hue = xyz.red;
             entries[i].sat = xyz.green;
             entries[i].val = xyz.blue;
@@ -1347,7 +1347,7 @@ public:
     CHSVPalette32& operator=( const TProgmemHSVPalette32& rhs)
     {
         for( uint8_t i = 0; i < 32; ++i) {
-            CRGB xyz   =  FL_PGM_READ_DWORD_NEAR( rhs + i);
+            CRGB xyz(FL_PGM_READ_DWORD_NEAR( rhs + i));
             entries[i].hue = xyz.red;
             entries[i].sat = xyz.green;
             entries[i].val = xyz.blue;
