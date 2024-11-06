@@ -124,6 +124,7 @@ XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
 XIAOBLESENSE_NRF52 = Board(
     board_name="xiaoblesense",
     platform="https://github.com/maxgerhardt/platform-nordicnrf52",
+    platform_needs_install=True,
 )
 
 NRF52840 = Board(
