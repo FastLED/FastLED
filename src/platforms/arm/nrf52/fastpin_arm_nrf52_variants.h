@@ -6,7 +6,7 @@
 
 // Adafruit Bluefruit nRF52832 Feather
 // From https://www.adafruit.com/package_adafruit_index.json
-#if defined (ARDUINO_NRF52832_FEATHER) 
+#if defined (ARDUINO_NRF52832_FEATHER) || defined(NRF52840_XXAA)
     #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
         #error "Cannot define more than one board at a time"
     #else
@@ -51,7 +51,7 @@
 
 // Adafruit Circuit Playground Bluefruit
 // From https://www.adafruit.com/package_adafruit_index.json
-#if defined (ARDUINO_NRF52840_CIRCUITPLAY)
+#if defined (ARDUINO_NRF52840_CIRCUITPLAY) || defined(NRF52840_XXAA)
     #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
         #error "Cannot define more than one board at a time"
     #else
@@ -86,7 +86,7 @@
 
 // Adafruit Bluefruit nRF52840 Feather Express
 // From https://www.adafruit.com/package_adafruit_index.json
-#if defined (ARDUINO_NRF52840_FEATHER)
+#if defined (ARDUINO_NRF52840_FEATHER) || defined(NRF52840_XXAA)
     #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
         #error "Cannot define more than one board at a time"
     #else
@@ -140,7 +140,7 @@
 
 // Adafruit Bluefruit nRF52840 Feather Sense
 // From https://www.adafruit.com/package_adafruit_index.json
-#if defined (ARDUINO_NRF52840_FEATHER_SENSE)
+#if defined (ARDUINO_NRF52840_FEATHER_SENSE) || defined(NRF52840_XXAA)
     #if defined(__FASTPIN_ARM_NRF52_VARIANT_FOUND)
         #error "Cannot define more than one board at a time"
     #else

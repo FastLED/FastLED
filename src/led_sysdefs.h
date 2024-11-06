@@ -10,7 +10,7 @@
 
 #if defined(NRF51) || defined(__RFduino__) || defined (__Simblee__)
 #include "platforms/arm/nrf51/led_sysdefs_arm_nrf51.h"
-#elif defined(NRF52_SERIES)
+#elif defined(NRF52_SERIES) || defined(NRF52840_XXAA)
 #include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
 // Include k20/T3 headers
@@ -74,7 +74,7 @@
 #include "namespace.h"
 
 // Arduino.h needed for convenience functions digitalPinToPort/BitMask/portOutputRegister and the pinMode methods.
-#ifdef ARDUINO
+#if defined(ARDUINO)
 #include <Arduino.h>  // ok include
 #endif
 
