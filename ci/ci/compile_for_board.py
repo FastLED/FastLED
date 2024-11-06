@@ -54,11 +54,11 @@ def compile_for_board_and_example(
             build_lib = builddir / "lib" / lib
             shutil.rmtree(build_lib, ignore_errors=True)
             shutil.copytree(project_libdir, build_lib)
-        # now copy the example into the "src" directory
-        ino_file = example / f"{example.name}.ino"
-        locked_print(f"Copying {ino_file} to {srcdir / f'{example.name}.ino'}")
-        srcdir.mkdir(parents=True, exist_ok=True)
-        shutil.copy(ino_file, srcdir / f"{example.name}.ino")
+        # Copy all files from the example directory to the "src" directory
+        for src_file in example.rglob("*"):
+            if src_file.is_file():
+                locked_print(f"Copying {src_file} to {srcdir / src_file.name}")
+                shutil.copy(src_file, srcdir / src_file.name)
         cwd = str(builddir)
         cmd_list = [
             "pio",
