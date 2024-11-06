@@ -11,9 +11,25 @@
 #include "json.h"
 #include "namespace.h"
 #include "fixed_vector.h"
+#include "math_macros.h"
+#include "math.h"
 
 FASTLED_NAMESPACE_BEGIN
 
+ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds, float cm_led_diameter) {
+    ScreenMap screenMap = ScreenMap(numLeds);
+    float circumference = numLeds * cm_between_leds;
+    float radius = circumference / (2 * PI);
+
+    for (int i = 0; i < numLeds; i++) {
+        float angle = i * 2 * PI / numLeds;
+        float x = radius * cos(angle) * 2;
+        float y = radius * sin(angle) * 2;
+        screenMap[i] = {x, y};
+    }
+    screenMap.setDiameter(cm_led_diameter);
+    return screenMap;
+}
 
 
 void ScreenMap::ParseJson(const char *jsonStrOfMapFile,

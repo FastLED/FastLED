@@ -28,6 +28,9 @@ class Str;
 // This class is cheap to copy as it uses smart pointers for shared data.
 class ScreenMap {
   public:
+
+    static ScreenMap Circle(int numLeds, float cm_between_leds = 1.5f, float cm_led_diameter = 0.5f);
+
     ScreenMap() = default;
 
     // is_reverse is false by default for linear layout
