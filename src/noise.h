@@ -4,6 +4,7 @@
 
 #include "crgb.h"
 #include "namespace.h"
+#include "qfx.h"
 
 /// @file noise.h
 /// Functions to generate and fill arrays with noise.
