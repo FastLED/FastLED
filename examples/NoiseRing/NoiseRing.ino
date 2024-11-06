@@ -1,6 +1,5 @@
 
 
-
 /// @file    NoisePlusPalette.ino
 /// @brief   Demonstrates how to mix noise generation with color palettes on a
 /// 2D LED matrix
@@ -11,18 +10,18 @@
 #include <string>
 #include <vector>
 
-#include <FastLED.h>
 #include "json.h"
-#include "slice.h"
+#include "math_macros.h"
 #include "noisegen.h"
 #include "screenmap.h"
-#include "math_macros.h"
+#include "slice.h"
+#include <Arduino.h>
 
-
+#include <algorithm>
 #include "ui.h"
+#include "FastLED.h"
 
-
-#define LED_PIN 3
+#define LED_PIN 2
 #define BRIGHTNESS 96
 #define COLOR_ORDER GRB
 
@@ -67,11 +66,61 @@
 
 CRGB leds[NUM_LEDS];
 
+Button detectMotion("Detect Motion");
+
 Slider brightness("Brightness", 255, 0, 255);
-Slider scale("Scale", 1, .1, 4, .1);
+Slider scale("Scale", 4, .1, 4, .1);
+Slider timeBitshift("Time Bitshift", 5, 0, 16, 1);
 
 Slider timescale("Time Scale", 1, .1, 10, .1);
+bool first = true;
 
+
+
+class Timer {
+  public:
+    Timer() : start_time(0), duration(0), running(false) {}
+    void start(uint32_t duration) {
+        start_time = millis();
+        this->duration = duration;
+        running = true;
+    }
+    bool update(uint32_t now) {
+        if (!running) {
+            return false;
+        }
+        uint32_t elapsed = now - start_time;
+        if (elapsed > duration) {
+            running = false;
+            return false;
+        }
+        return true;
+    }
+
+  private:
+    uint32_t start_time;
+    uint32_t duration;
+    bool running;
+};
+
+Timer timer;
+float current_brightness = 0;
+
+uint8_t update_brightness(bool clicked, uint32_t now) {
+    if (clicked) {
+        timer.start(1000 * 60 * 3);
+    }
+    if (timer.update(now)) {
+        current_brightness += .6;
+    } else {
+        current_brightness *= .97;
+    }
+    uint32_t brightness = current_brightness;
+    if (brightness > 255) {
+        brightness = 255;
+    }
+    return brightness;
+}
 
 ScreenMap makeScreenMap(int numLeds, float cm_between_leds) {
     ScreenMap screenMap = ScreenMap(numLeds);
@@ -89,40 +138,47 @@ ScreenMap makeScreenMap(int numLeds, float cm_between_leds) {
     return screenMap;
 }
 
-
 void setup() {
     ScreenMap xyMap = makeScreenMap(NUM_LEDS, 2.0);
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenCoords(xyMap);
     FastLED.setBrightness(brightness);
-    //noisePalette.setSpeed(speed);
-    //noisePalette.setScale(scale);
-    //fxEngine.addFx(animartrix);
-    //fxEngine.addFx(noisePalette);
+    // noisePalette.setSpeed(speed);
+    // noisePalette.setScale(scale);
+    // fxEngine.addFx(animartrix);
+    // fxEngine.addFx(noisePalette);
 }
 
-
-
-
 void loop() {
-    FastLED.setBrightness(brightness);
-    uint32_t now = millis() << 5;
-    now *= timescale.as<uint32_t>();
+    const bool detected_motion = detectMotion || first;
+    first = false;
+    uint8_t bri = update_brightness(detected_motion, millis());
+    printf("brightness: %d, %d\n", bri, detected_motion);
+    FastLED.setBrightness(bri);
+    uint32_t now = millis();
+    double angle_offset = double(now) / 8000.0 * 2 * M_PI;
+    angle_offset = 0;
+    now = (now << timeBitshift.as<int>()) * timescale.as<double>();
     // inoise8(x + ioffset,y + joffset,z);
     // go in circular formation and set the leds
     for (int i = 0; i < NUM_LEDS; i++) {
-        float angle = i * 2 * M_PI / NUM_LEDS;
+        float angle = i * 2 * M_PI / NUM_LEDS + angle_offset;
         float x = cos(angle);
         float y = sin(angle);
-        x *= 0xffff * scale.as<float>();
-        y *= 0xffff * scale.as<float>();
+        x *= 0xffff * scale.as<double>();
+        y *= 0xffff * scale.as<double>();
         uint16_t noise = inoise16(x, y, now);
-        uint16_t noise2 = inoise16(x, y, 255 + now);
-        uint16_t noise3 = inoise16(x, y, 512 + now);
-        leds[i] = CHSV(noise >> 8, noise2 >> 8, noise3 >> 8);
+        uint16_t noise2 = inoise16(x, y, 0xfff + now);
+        uint16_t noise3 = inoise16(x, y, 0xffff + now);
+        noise3 = noise3 >> 8;
+        int16_t noise4 = map(noise3, 0, 255, -64, 255);
+        if (noise4 < 0) {
+            noise4 = 0;
+        }
+
+        leds[i] = CHSV(noise >> 8, MAX(128, noise2 >> 8), noise4);
+        // std::swap(leds[i].b, leds[i].g);
     }
     FastLED.show();
 }
-
-
