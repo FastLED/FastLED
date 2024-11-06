@@ -121,6 +121,11 @@ XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
     platform_needs_install=True,  # Install platform package to get the boards
 )
 
+XIAOBLESENSE_NRF52 = Board(
+    board_name="xiaoblesense",
+    platform="https://github.com/maxgerhardt/platform-nordicnrf52",
+)
+
 NRF52840 = Board(
     board_name="nrf52840_dk",
     real_board_name="xiaoble_adafruit",
@@ -206,6 +211,7 @@ ALL: list[Board] = [
     ESP32_S3_DEVKITC_1,
     ESP32_H2_DEVKITM_1,
     ADA_FEATHER_NRF52840_SENSE,
+    XIAOBLESENSE_NRF52,
     RPI_PICO,
     RPI_PICO2,
     UNO_R4_WIFI,
