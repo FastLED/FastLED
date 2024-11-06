@@ -13,24 +13,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
       fail-fast: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker on macOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install docker
-          brew install colima
-          colima start --cpu 2 --memory 4 || (echo "Colima failed to start" && exit 1)
-
-      - name: Verify Colima installation
-        if: matrix.os == 'macos-latest'
-        run: |
-          colima version || (echo "Colima is not installed correctly" && exit 1)
-          docker --version
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -59,7 +47,6 @@ jobs:
             exit 1
           fi
           echo "All required files are present."
-        continue-on-error: ${{ matrix.os != 'ubuntu-latest' }}
 
       - name: Generate timestamp and random hex
         id: generate_id
