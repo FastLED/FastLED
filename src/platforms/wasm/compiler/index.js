@@ -165,14 +165,15 @@ async function initThreeJS(threeJsModules, containerId) {
     }
 
     function onWindowResize() {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+        const canvas = document.getElementById(this.canvasId);
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
 
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
+        this.camera.aspect = width / height;
+        this.camera.updateProjectionMatrix();
 
-        renderer.setSize(width, height);
-        composer.setSize(width, height);
+        this.renderer.setSize(width, height);
+        this.composer.setSize(width, height);
     }
 
     function animate() {
@@ -546,11 +547,11 @@ class GraphicsManagerThreeJS {
         // Use perspective camera with narrower FOV for less distortion
         // BIG TODO: This camera setup does not respond to z-position changes. Eventually
         // we we want to have a camera that shows leds closer to the screen as larger.
-        const fov = 45;
+        const fov = 60; // Increase FOV for a wider view
         const aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
         this.camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 2000);
-        // Position camera closer to fill more of the screen
-        this.camera.position.z = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * margin;
+        // Adjust camera position to ensure the circle fits within the view
+        this.camera.position.z = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * margin * 1.5;
         this.camera.position.y = 0;
 
         this.renderer = new THREE.WebGLRenderer({
