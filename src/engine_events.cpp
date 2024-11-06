@@ -34,10 +34,12 @@ EngineEvents* EngineEvents::getInstance() {
 
 #if FASTLED_HAS_ENGINE_EVENTS
 void EngineEvents::_onPlatformPreLoop() {
-    for (auto [listener, _] : mListeners) {
+    for (auto& item : mListeners) {
+        auto listener = item.listener;
         listener->onPlatformPreLoop();
     }
-    for (auto [listener, _] : mListeners) {
+    for (auto& item : mListeners) {
+        auto listener = item.listener;
         listener->onPlatformPreLoop2();
     }
 }
@@ -78,7 +80,8 @@ void EngineEvents::_removeListener(Listener* listener) {
 void EngineEvents::_onBeginFrame() {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto [listener, _] : copy) {
+    for (auto& item : copy) {
+        auto listener = item.listener;
         listener->onBeginFrame();
     }
 }
@@ -86,7 +89,8 @@ void EngineEvents::_onBeginFrame() {
 void EngineEvents::_onEndShowLeds() {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto [listener, _] : copy) {
+    for (auto& item : copy) {
+        auto listener = item.listener;
         listener->onEndShowLeds();
     }
 }
@@ -94,7 +98,8 @@ void EngineEvents::_onEndShowLeds() {
 void EngineEvents::_onEndFrame() {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto [listener, _] : copy) {
+    for (auto& item : copy) {
+        auto listener = item.listener;
         listener->onEndFrame();
     }
 }
@@ -102,7 +107,8 @@ void EngineEvents::_onEndFrame() {
 void EngineEvents::_onStripAdded(CLEDController* strip, uint32_t num_leds) {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto [listener, _] : copy) {
+    for (auto& item : copy) {
+        auto listener = item.listener;
         listener->onStripAdded(strip, num_leds);
     }
 }
@@ -111,9 +117,9 @@ void EngineEvents::_onStripAdded(CLEDController* strip, uint32_t num_leds) {
 void EngineEvents::_onCanvasUiSet(CLEDController *strip, const ScreenMap& screenmap) {
     // Make the copy of the listener list to avoid issues with listeners being added or removed during the loop.
     ListenerList copy = mListeners;
-    for (auto [listener, _] : copy) {
+    for (auto& item : copy) {
+        auto listener = item.listener;
         listener->onCanvasUiSet(strip, screenmap);
-    }
 }
 
 
