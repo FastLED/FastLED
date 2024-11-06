@@ -120,6 +120,7 @@ void EngineEvents::_onCanvasUiSet(CLEDController *strip, const ScreenMap& screen
     for (auto& item : copy) {
         auto listener = item.listener;
         listener->onCanvasUiSet(strip, screenmap);
+    }
 }
 
 
