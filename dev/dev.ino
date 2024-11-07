@@ -14,4 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "noisering.hpp"
+#include "NoiseRing.hpp"
