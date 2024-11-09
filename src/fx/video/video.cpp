@@ -1,15 +1,15 @@
-#include "fx/video/stream_buffered.h"
+#include "fx/video.h"
 
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 
-VideoStream::VideoStream(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo)
+Video::Video(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo)
     : mPixelsPerFrame(pixelsPerFrame),
       mInterpolator(FrameInterpolatorRef::New(nFramesInBuffer, fpsVideo)) {
 }
 
-void VideoStream::begin(uint32_t now, FileHandleRef h) {
+void Video::begin(uint32_t now, FileHandleRef h) {
     (void)now;  // todo remove?
     end();
     // Removed setStartTime call
@@ -17,7 +17,7 @@ void VideoStream::begin(uint32_t now, FileHandleRef h) {
     mStream->begin(h);
 }
 
-void VideoStream::beginStream(uint32_t now, ByteStreamRef bs) {
+void Video::beginStream(uint32_t now, ByteStreamRef bs) {
     (void)now;  // todo remove?
     end();
     mStream = DataStreamRef::New(mPixelsPerFrame);
@@ -25,13 +25,13 @@ void VideoStream::beginStream(uint32_t now, ByteStreamRef bs) {
     mStream->beginStream(bs);
 }
 
-void VideoStream::end() {
+void Video::end() {
     mInterpolator->clear();
     // Removed resetFrameCounter and setStartTime calls
     mStream.reset();
 }
 
-bool VideoStream::draw(uint32_t now, Frame* frame) {
+bool Video::draw(uint32_t now, Frame* frame) {
     if (!mStream) {
         return false;
     }
@@ -42,7 +42,7 @@ bool VideoStream::draw(uint32_t now, Frame* frame) {
     return mInterpolator->draw(now, frame);
 }
 
-bool VideoStream::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
+bool Video::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
     if (!mStream) {
         return false;
     }
@@ -50,7 +50,7 @@ bool VideoStream::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
     return true;
 }
 
-void VideoStream::updateBufferIfNecessary(uint32_t now) {
+void Video::updateBufferIfNecessary(uint32_t now) {
     // get the number of frames according to the time elapsed
     uint32_t precise_timestamp;
     // At most, update one frame. That way if the user forgets to call draw and
@@ -81,7 +81,7 @@ void VideoStream::updateBufferIfNecessary(uint32_t now) {
     }
 }
 
-bool VideoStream::Rewind() {
+bool Video::Rewind() {
     if (!mStream || !mStream->Rewind()) {
         return false;
     }

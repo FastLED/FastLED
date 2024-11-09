@@ -26,7 +26,6 @@ void loop() {
 #include "fx/2d/noisepalette.hpp"
 #include "fx/2d/animartrix.hpp"
 #include "fx/fx_engine.h"
-#include "fx/storage/sd.h"
 #include "file_system.h"
 #include "ui.h"
 
@@ -37,8 +36,8 @@ void loop() {
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 
-#define MATRIX_WIDTH 22
-#define MATRIX_HEIGHT 22
+#define MATRIX_WIDTH 32
+#define MATRIX_HEIGHT 32
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 
@@ -59,11 +58,14 @@ Animartrix animartrix(xyMap, POLAR_WAVES);
 FxEngine fxEngine(NUM_LEDS);
 Checkbox switchFx("Switch Fx", true);
 
-/*
-
 const int CHIP_SELECT_PIN = 5;
 
 FileSystem fs(CHIP_SELECT_PIN);
+
+
+
+/*
+
 
 
 void setup() {
