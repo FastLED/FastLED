@@ -70,8 +70,8 @@ public:
 
     FrameBuffer* getFrames() { return &mFrames; }
 
-    bool needsRefresh(uint32_t now, uint32_t* precise_timestamp) const {
-        return mInterval.needsRefresh(now, precise_timestamp);
+    bool needsFrame(uint32_t now, uint32_t* precise_timestamp) const {
+        return mInterval.needsFrame(now, precise_timestamp);
     }
 
     void reset(uint32_t startTime) { mInterval.reset(startTime); }

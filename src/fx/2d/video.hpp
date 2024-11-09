@@ -103,7 +103,7 @@ class VideoFx : public FxGrid {
         }
 
         uint32_t precise_timestamp;
-        if (mFrameInterpolator->needsRefresh(context.now, &precise_timestamp)) {
+        if (mFrameInterpolator->needsFrame(context.now, &precise_timestamp)) {
             FrameRef frame;
             bool wasFullBeforePop = mFrameInterpolator->full();
             if (wasFullBeforePop) {

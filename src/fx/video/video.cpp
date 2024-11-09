@@ -68,9 +68,9 @@ void Video::updateBufferIfNecessary(uint32_t now) {
     uint32_t precise_timestamp;
     // At most, update one frame. That way if the user forgets to call draw and
     // then sends a really old timestamp, we don't update the buffer too much.
-    bool needs_refresh = mInterpolator->needsRefresh(now, &precise_timestamp);
-    DBG(cout << "needs_refresh: " << needs_refresh << endl);
-    if (!needs_refresh) {
+    bool needs_frame = mInterpolator->needsFrame(now, &precise_timestamp);
+    DBG(cout << "needs_frame: " << needs_frame << endl);
+    if (!needs_frame) {
         return;
     }
     // if we dropped frames (because of time manipulation) just set

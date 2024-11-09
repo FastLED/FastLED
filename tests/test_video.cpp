@@ -38,6 +38,13 @@ class FakeFileHandle: public FileHandle {
     size_t size() const override {
         return data.size();
     }
+
+    void write(const uint8_t *src, size_t len) {
+        data.insert(data.end(), src, src + len);
+    }
+    void write(const CRGB *src, size_t len) {
+        write((const uint8_t *)src, len * 3);
+    }
     size_t read(uint8_t *dst, size_t bytesToRead) override {
         size_t bytesRead = 0;
         while (bytesRead < bytesToRead && mPos < data.size()) {
@@ -72,7 +79,14 @@ TEST_CASE("video with memory stream") {
 
 TEST_CASE("video with file handle") {
     Video video(LEDS_PER_FRAME, FPS);
-    FileHandleRef fileHandle = FakeFileHandleRef::New();
+    FakeFileHandleRef fileHandle = FakeFileHandleRef::New();
+    CRGB led_frame[LEDS_PER_FRAME];
+    // alternate between red and black
+    for (int i = 0; i < LEDS_PER_FRAME; i++) {
+        led_frame[i] = i % 2 == 0 ? CRGB::Red : CRGB::Black;
+    }
+    // now write the data
+    fileHandle->write(led_frame, LEDS_PER_FRAME);
     video.begin(fileHandle);
     CRGB leds[LEDS_PER_FRAME];
     video.draw(FRAME_TIME+1, leds);

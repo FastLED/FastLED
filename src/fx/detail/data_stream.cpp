@@ -35,7 +35,6 @@ bool DataStream::beginStream(ByteStreamRef s) {
 
 void DataStream::Close() {
     if (!mUsingByteStream && mFileBuffer) {
-        mFileBuffer->close();
         mFileBuffer.reset();
     }
     mByteStream.reset();
@@ -78,7 +77,10 @@ bool DataStream::readFrame(Frame* frame) {
 int32_t DataStream::FramesRemaining() const {
     if (mBytesPerFrame == 0) return 0;
     int32_t bytes_left = BytesRemaining();
-    return (bytes_left > 0) ? (bytes_left / mBytesPerFrame) : 0;
+    if (bytes_left <= 0) {
+        return 0;
+    }
+    return bytes_left / mBytesPerFrame;
 }
 
 int32_t DataStream::FramesDisplayed() const {

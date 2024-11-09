@@ -20,10 +20,6 @@ class FileBuffer: public Referent {
   bool available() const;
   int32_t BytesLeft() const;
   int32_t FileSize() const;
-  void close() {
-    mFile->close();
-    mIsOpen = false;
-  }
 
   // Reads the next byte, else -1 is returned for end of buffer.
   int16_t read();
@@ -42,7 +38,6 @@ class FileBuffer: public Referent {
   int16_t mLength;
 
   FileHandleRef mFile;
-  bool mIsOpen;
 };
 
 FASTLED_NAMESPACE_END

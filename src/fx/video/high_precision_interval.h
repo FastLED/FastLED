@@ -32,7 +32,7 @@ public:
         }
     }
 
-    bool needsRefresh(uint32_t now, uint32_t* precise_timestamp) const {
+    bool needsFrame(uint32_t now, uint32_t* precise_timestamp) const {
         if (mIsPaused) {
             return false;
         }
