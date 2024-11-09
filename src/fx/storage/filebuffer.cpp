@@ -14,7 +14,7 @@ FileBuffer::FileBuffer(FileHandleRef fh) {
 FileBuffer::~FileBuffer() {
 }
 
-void FileBuffer::RewindToStart() {
+void FileBuffer::rewindToStart() {
   mFile->seek(0);
   RefillBuffer();
 }

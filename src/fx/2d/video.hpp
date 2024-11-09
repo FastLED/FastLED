@@ -41,7 +41,7 @@ class Video : public FxGrid {
     void draw(DrawContext context) override {
         if (!mDataStream || !mDataStream->framesRemaining()) {
             if (mDataStream && mDataStream->getType() != DataStream::kStreaming) {
-                mDataStream->Rewind();
+                mDataStream->rewind();
             } else {
                 return; // Can't draw or rewind
             }

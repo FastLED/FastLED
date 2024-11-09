@@ -100,8 +100,8 @@ void Video::updateBufferIfNecessary(uint32_t now) {
     }
 }
 
-bool Video::Rewind() {
-    if (!mStream || !mStream->Rewind()) {
+bool Video::rewind() {
+    if (!mStream || !mStream->rewind()) {
         return false;
     }
     mInterpolator->clear();

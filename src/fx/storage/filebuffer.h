@@ -16,7 +16,7 @@ class FileBuffer: public Referent {
  public:
   FileBuffer(FileHandleRef file);
   virtual ~FileBuffer();
-  void RewindToStart();
+  void rewindToStart();
   bool available() const;
   int32_t BytesLeft() const;
   int32_t FileSize() const;

@@ -105,12 +105,12 @@ int32_t DataStream::bytesRemainingInFrame() const {
     return bytesRemaining() % mbytesPerFrame;
 }
 
-bool DataStream::Rewind() {
+bool DataStream::rewind() {
     if (mUsingByteStream) {
         // ByteStream doesn't support rewinding
         return false;
     } else {
-        mFileBuffer->RewindToStart();
+        mFileBuffer->rewindToStart();
         return true;
     }
 }

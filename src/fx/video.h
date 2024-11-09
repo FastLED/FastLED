@@ -19,7 +19,7 @@ public:
     void beginStream(ByteStreamRef s);
     bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
     void end();
-    bool Rewind();
+    bool rewind();
 
     // internal use
     bool draw(uint32_t now, Frame* frame);

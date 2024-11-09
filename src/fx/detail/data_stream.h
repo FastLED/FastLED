@@ -39,7 +39,7 @@ class DataStream: public Referent {
 
   int32_t bytesRemaining() const;
   int32_t bytesRemainingInFrame() const;
-  bool Rewind();  // Returns false on failure, which can happen for streaming mode.
+  bool rewind();  // Returns false on failure, which can happen for streaming mode.
   Type getType() const;  // Returns the type of the video stream (kStreaming or kFile)
   
  private:
