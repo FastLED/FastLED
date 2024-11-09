@@ -1,6 +1,10 @@
 #include "fx/video.h"
 
+#ifdef __EMSCRIPTEN__
+#define DEBUG_IO_STREAM 1
+#else
 #define DEBUG_IO_STREAM 0
+#endif
 
 #if DEBUG_IO_STREAM
 #include <iostream>  // ok include
