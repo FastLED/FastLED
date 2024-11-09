@@ -63,7 +63,7 @@ bool DataStream::available() const {
 
 bool DataStream::readFrame(Frame* frame) {
     // returns true if a frame was read.
-    if (!FramesRemaining() || !frame) {
+    if (!framesRemaining() || !frame) {
         return false;
     }
     if (mUsingByteStream) {
@@ -74,16 +74,16 @@ bool DataStream::readFrame(Frame* frame) {
     return true;
 }
 
-int32_t DataStream::FramesRemaining() const {
+int32_t DataStream::framesRemaining() const {
     if (mbytesPerFrame == 0) return 0;
-    int32_t bytes_left = BytesRemaining();
+    int32_t bytes_left = bytesRemaining();
     if (bytes_left <= 0) {
         return 0;
     }
     return bytes_left / mbytesPerFrame;
 }
 
-int32_t DataStream::FramesDisplayed() const {
+int32_t DataStream::framesDisplayed() const {
     if (mUsingByteStream) {
         // ByteStream doesn't have a concept of total size, so we can't calculate this
         return -1;
@@ -93,7 +93,7 @@ int32_t DataStream::FramesDisplayed() const {
     }
 }
 
-int32_t DataStream::BytesRemaining() const {
+int32_t DataStream::bytesRemaining() const {
     if (mUsingByteStream) {
         return INT32_MAX;
     } else {
@@ -101,8 +101,8 @@ int32_t DataStream::BytesRemaining() const {
     }
 }
 
-int32_t DataStream::BytesRemainingInFrame() const {
-    return BytesRemaining() % mbytesPerFrame;
+int32_t DataStream::bytesRemainingInFrame() const {
+    return bytesRemaining() % mbytesPerFrame;
 }
 
 bool DataStream::Rewind() {
@@ -119,7 +119,7 @@ DataStream::Type DataStream::getType() const {
     return mUsingByteStream ? Type::kStreaming : Type::kFile;
 }
 
-size_t DataStream::ReadBytes(uint8_t* dst, size_t len) {
+size_t DataStream::readBytes(uint8_t* dst, size_t len) {
     uint16_t bytesRead = 0;
     if (mUsingByteStream) {
         while (bytesRead < len && mByteStream->available(len)) {

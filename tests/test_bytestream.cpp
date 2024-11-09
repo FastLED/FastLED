@@ -245,15 +245,15 @@ TEST_CASE("byte stream memory basic operations") {
 
     // Read some bytes
     uint8_t buffer[10];
-    size_t bytesRead = stream->ReadBytes(buffer, 10);
+    size_t bytesRead = stream->readBytes(buffer, 10);
     CHECK(bytesRead == 10);
     for (int i = 0; i < 10; ++i) {
         CHECK(buffer[i] == static_cast<uint8_t>((i + 3) % 256));
     }
 
     // Check frame counting - streaming mode doesn't support this.
-    //CHECK(DataStream->FramesDisplayed() == 0);
-    //CHECK(DataStream->FramesRemaining() == 10); // We have 10 frames of data
+    //CHECK(DataStream->framesDisplayed() == 0);
+    //CHECK(DataStream->framesRemaining() == 10); // We have 10 frames of data
 
     // Close the stream
     stream->close();

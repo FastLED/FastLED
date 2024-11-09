@@ -30,15 +30,15 @@ class DataStream: public Referent {
   void close();
   int32_t bytesPerFrame();
   bool readPixel(CRGB* dst);  // Convenience function to read a pixel
-  size_t ReadBytes(uint8_t* dst, size_t len);
+  size_t readBytes(uint8_t* dst, size_t len);
 
   bool readFrame(Frame* frame);
-  int32_t FramesRemaining() const;
-  int32_t FramesDisplayed() const;
+  int32_t framesRemaining() const;
+  int32_t framesDisplayed() const;
   bool available() const;
 
-  int32_t BytesRemaining() const;
-  int32_t BytesRemainingInFrame() const;
+  int32_t bytesRemaining() const;
+  int32_t bytesRemainingInFrame() const;
   bool Rewind();  // Returns false on failure, which can happen for streaming mode.
   Type getType() const;  // Returns the type of the video stream (kStreaming or kFile)
   
