@@ -574,7 +574,7 @@ class GraphicsManagerThreeJS {
             canvas: canvas,
             antialias: true
         });
-        this.renderer.setSize(this.SCREEN_WIDTH * margin, this.SCREEN_HEIGHT * margin);
+        this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
         const renderScene = new RenderPass(this.scene, this.camera);
         this.composer = new EffectComposer(this.renderer);
         this.composer.addPass(renderScene);
