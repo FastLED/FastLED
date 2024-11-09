@@ -36,7 +36,7 @@ class Video : public FxGrid {
         return mDataStream->beginStream(byteStream);
     }
 
-    void close() { mDataStream->Close(); }
+    void close() { mDataStream->close(); }
 
     void draw(DrawContext context) override {
         if (!mDataStream || !mDataStream->FramesRemaining()) {

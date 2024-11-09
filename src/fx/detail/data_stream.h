@@ -27,7 +27,7 @@ class DataStream: public Referent {
 
   bool begin(FileHandleRef h);
   bool beginStream(ByteStreamRef s);
-  void Close();
+  void close();
   int32_t BytesPerFrame();
   bool ReadPixel(CRGB* dst);
   size_t ReadBytes(uint8_t* dst, size_t len);

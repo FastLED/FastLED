@@ -256,5 +256,5 @@ TEST_CASE("byte stream memory basic operations") {
     //CHECK(DataStream->FramesRemaining() == 10); // We have 10 frames of data
 
     // Close the stream
-    stream->Close();
+    stream->close();
 }

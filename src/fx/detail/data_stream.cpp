@@ -15,11 +15,11 @@ DataStream::DataStream(int bytes_per_frame) : mBytesPerFrame(bytes_per_frame), m
 }
 
 DataStream::~DataStream() {
-    Close();
+    close();
 }
 
 bool DataStream::begin(FileHandleRef h) {
-    Close();
+    close();
     mFileHandle = h;
     mFileBuffer = FileBufferRef::New(h);
     mUsingByteStream = false;
@@ -27,13 +27,13 @@ bool DataStream::begin(FileHandleRef h) {
 }
 
 bool DataStream::beginStream(ByteStreamRef s) {
-    Close();
+    close();
     mByteStream = s;
     mUsingByteStream = true;
     return mByteStream->available(mBytesPerFrame);
 }
 
-void DataStream::Close() {
+void DataStream::close() {
     if (!mUsingByteStream && mFileBuffer) {
         mFileBuffer.reset();
     }
