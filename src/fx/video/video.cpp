@@ -1,5 +1,15 @@
 #include "fx/video.h"
 
+#define DEBUG_IO_STREAM 0
+
+#if DEBUG_IO_STREAM
+#include <iostream>  // ok include
+using namespace std;
+#define DBG(X) X
+#else
+#define DBG(X)
+#endif
+
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
@@ -44,6 +54,7 @@ bool Video::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
     if (!mStream) {
         return false;
     }
+    updateBufferIfNecessary(now);
     mInterpolator->draw(now, leds, alpha);
     return true;
 }
@@ -54,6 +65,7 @@ void Video::updateBufferIfNecessary(uint32_t now) {
     // At most, update one frame. That way if the user forgets to call draw and
     // then sends a really old timestamp, we don't update the buffer too much.
     bool needs_refresh = mInterpolator->needsRefresh(now, &precise_timestamp);
+    DBG(cout << "needs_refresh: " << needs_refresh << endl);
     if (!needs_refresh) {
         return;
     }
@@ -62,18 +74,22 @@ void Video::updateBufferIfNecessary(uint32_t now) {
     // read the frame from the stream
     FrameRef frame;
     if (mInterpolator->full()) {
+        DBG(cout << "popOldest" << endl);
         if (!mInterpolator->popOldest(&frame)) {
             return;  // Something went wrong
         }
     } else {
+        DBG(cout << "New Frame" << endl);
         frame = FrameRef::New(mPixelsPerFrame, false);
     }
     if (mStream->readFrame(frame.get())) {
+        DBG(cout << "readFrame successful" << endl);
         if (mInterpolator->pushNewest(frame, now)) {
             // we have a new frame
             mInterpolator->incrementFrameCounter();
         }
     } else {
+        DBG(cout << "readFrame failed" << endl);
         // Something went wrong so put the frame back in the buffer.
         mInterpolator->push_front(frame, frame->getTimestamp());
     }

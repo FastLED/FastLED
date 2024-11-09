@@ -118,6 +118,19 @@ void loop() {
     }
     // fxEngine.draw(millis(), leds);
     video.draw(now, leds);
+
+    EVERY_N_SECONDS(1){
+        Serial.println("Drawing");
+        for (int i = 0; i < NUM_LEDS; i++) {
+            CRGB c = leds[i];
+            Serial.print("c.r: ");
+            Serial.print(c.r);
+            Serial.print(" c.g: ");
+            Serial.print(c.g);
+            Serial.print(" c.b: ");
+            Serial.println(c.b);
+        }
+    }
     FastLED.show();
 }
 
