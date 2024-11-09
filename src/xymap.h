@@ -8,10 +8,12 @@
 #include "xmap.h" // Include xmap.h for LUT16
 #include "lut.h"
 #include "crgb.h"
-#include "screenmap.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
+
+class ScreenMap;
+
 
 FASTLED_FORCE_INLINE uint16_t xy_serpentine(uint16_t x, uint16_t y,
                                             uint16_t width, uint16_t height) {
@@ -70,21 +72,7 @@ class XYMap {
 
     XYMap(const XYMap &other) = default;
 
-    ScreenMap toScreenMap() const {
-        const uint16_t length = width * height;
-        ScreenMap out(length);
-        for (uint16_t w = 0; w < width; w++) {
-            for (uint16_t h = 0; h < height; h++) {
-                uint16_t index = mapToIndex(w, h);
-                pair_xy_float p = {
-                    static_cast<float>(w),
-                    static_cast<float>(h)
-                };
-                out.set(index, p);
-            }
-        }
-        return out;
-    }
+    ScreenMap toScreenMap() const;
 
     void mapPixels(const CRGB* input, CRGB* output) const {
         uint16_t pos = 0;
