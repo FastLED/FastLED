@@ -9,7 +9,7 @@
 #if DEBUG_IO_STREAM
 #include <iostream>  // ok include
 using namespace std;
-#define DBG(X) X
+#define DBG(X) (X)
 #else
 #define DBG(X)
 #endif
@@ -80,6 +80,7 @@ void Video::updateBufferIfNecessary(uint32_t now) {
     if (mInterpolator->full()) {
         DBG(cout << "popOldest" << endl);
         if (!mInterpolator->popOldest(&frame)) {
+            DBG(cout << "popOldest failed" << endl);
             return;  // Something went wrong
         }
     } else {
