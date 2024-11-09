@@ -56,6 +56,14 @@ CFastLED::CFastLED() {
 	m_nMinMicros = 0;
 }
 
+int CFastLED::size() {
+	return (*this)[0].size();
+}
+
+CRGB* CFastLED::leds() {
+	return (*this)[0].leds();
+}
+
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
 								  struct CRGB *data,
 								  int nLedsOrOffset, int nLedsIfOffset) {
