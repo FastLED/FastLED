@@ -24,6 +24,7 @@ class ByteStreamMemory : public ByteStream {
     }
     const char *path() const override { return "ByteStreamMemory"; }
     size_t write(const uint8_t* src, size_t n);
+    size_t write(const CRGB* src, size_t n);
 
   private:
     CircularBuffer<uint8_t> mBuffer;

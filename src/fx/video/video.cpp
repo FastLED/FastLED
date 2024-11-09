@@ -20,7 +20,7 @@ FASTLED_NAMESPACE_BEGIN
 
 Video::Video(size_t pixelsPerFrame, float fpsVideo, size_t nFramesInBuffer)
     : mPixelsPerFrame(pixelsPerFrame),
-      mInterpolator(FrameInterpolatorRef::New(nFramesInBuffer, fpsVideo)) {
+      mInterpolator(FrameInterpolatorRef::New(MAX(1, nFramesInBuffer), fpsVideo)) {
 }
 
 void Video::begin(FileHandleRef h) {

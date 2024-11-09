@@ -1,12 +1,13 @@
 #include "fx/video/frame_interpolator.h"
 #include "fx/detail/circular_buffer.h"
 #include "fx/detail/data_stream.h"
+#include "math_macros.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 FrameInterpolator::FrameInterpolator(size_t nframes, float fps)
-    : mFrames(nframes), mInterval(fps) {
+    : mFrames(MAX(1, nframes)), mInterval(fps) {
 }
 
 bool FrameInterpolator::draw(uint32_t now, Frame *dst) {

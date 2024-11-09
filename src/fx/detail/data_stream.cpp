@@ -67,8 +67,10 @@ bool DataStream::readFrame(Frame* frame) {
     if (!FramesRemaining() || !frame) {
         return false;
     }
-    if (!readFrame(frame)) {
-        return false;
+    if (mUsingByteStream) {
+        mByteStream->read(frame->rgb(), mBytesPerFrame);
+    } else {
+        mFileBuffer->read(frame->rgb(), mBytesPerFrame);
     }
     return true;
 }
