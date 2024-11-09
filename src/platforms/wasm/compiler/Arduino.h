@@ -97,6 +97,7 @@ struct SerialEmulation {
     void begin(int) {}
     template <typename T> void print(T val) { PrintHelper<T>::print(val); }
     template <typename T> void println(T val) { PrintHelper<T>::println(val); }
+    void println() { printf("\n"); }
     int available() { return 0; }
     int read() { return 0; }
     void write(uint8_t) {}
