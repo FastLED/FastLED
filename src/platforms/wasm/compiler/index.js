@@ -98,6 +98,7 @@ async function initThreeJS(threeJsModules, containerId) {
     }
 
     let camera, stats;
+    console.log("Initializing ThreeJS...");
     let composer, renderer, mixer, clock;
 
     const params = {
@@ -114,14 +115,24 @@ async function initThreeJS(threeJsModules, containerId) {
         clock = new THREE.Clock();
         const scene = new THREE.Scene();
 
+        console.log("Creating PerspectiveCamera with parameters:");
+        console.log("Field of View (FOV):", 40);
+        console.log("Aspect Ratio:", window.innerWidth / window.innerHeight);
+        console.log("Near Clipping Plane:", 1);
+        console.log("Far Clipping Plane:", 100);
         camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 1, 100);
         camera.position.set(-5, 2.5, -3.5);
+        console.log("Camera Position - X:", camera.position.x, "Y:", camera.position.y, "Z:", camera.position.z);
         scene.add(camera);
+        console.log("Camera added to scene.");
 
         scene.add(new THREE.AmbientLight(0xcccccc));
+        console.log("Ambient light added to scene.");
 
         const pointLight = new THREE.PointLight(0xffffff, 100);
+        console.log("Point light created with intensity 100.");
         camera.add(pointLight);
+        console.log("Point light added to camera.");
 
         const loader = new GLTFLoader();
         const gltf = await loader.loadAsync('https://threejs.org/examples/models/gltf/PrimaryIonDrive.glb');
@@ -520,14 +531,18 @@ class GraphicsManagerThreeJS {
     }
 
     initThreeJS(frameData) {
+        const FOV = 45;
 
         const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
+        const screenMap = frameData.screenMap;
+        const screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
+        const screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
 
         // Always set width to 640px and scale height proportionally
         const targetWidth = 640;
-        const aspectRatio = canvas.height / canvas.width;
-        const targetHeight = Math.round(targetWidth * aspectRatio);
+        const aspectRatio = screenMapWidth / screenMapHeight;
+        const targetHeight = Math.round(targetWidth / aspectRatio);
 
         // Set the rendering resolution (2x the display size)
         this.SCREEN_WIDTH = targetWidth * 2;
@@ -541,26 +556,20 @@ class GraphicsManagerThreeJS {
         canvas.style.height = targetHeight + 'px';
         canvas.style.maxWidth = targetWidth + 'px';
         canvas.style.maxHeight = targetHeight + 'px';
-        const screenMap = frameData.screenMap;
 
         this.scene = new THREE.Scene();
         const margin = 1.05;  // Add a small margin around the screen
         // Use perspective camera with narrower FOV for less distortion
-        // BIG TODO: This camera setup does not respond to z-position changes. Eventually
-        // we we want to have a camera that shows leds closer to the screen as larger.
-        const fov = 60; // Increase FOV for a wider view
-        const aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
-        this.camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 3000);
+        this.camera = new THREE.PerspectiveCamera(FOV, aspectRatio, 0.1, 5000);
         // Adjust camera position to ensure the circle fits within the view
-        this.camera.position.z = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * margin * 1.5;
+        this.camera.position.z = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * margin;
         this.camera.position.y = 0;
 
         this.renderer = new THREE.WebGLRenderer({
             canvas: canvas,
             antialias: true
         });
-        this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
-
+        this.renderer.setSize(screenMapWidth * margin, screenMapHeight * margin);
         const renderScene = new RenderPass(this.scene, this.camera);
         this.composer = new EffectComposer(this.renderer);
         this.composer.addPass(renderScene);
