@@ -11,7 +11,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DataStream::DataStream(int bytes_per_frame) : mBytesPerFrame(bytes_per_frame), mUsingByteStream(false) {
+DataStream::DataStream(int bytes_per_frame) : mbytesPerFrame(bytes_per_frame), mUsingByteStream(false) {
 }
 
 DataStream::~DataStream() {
@@ -30,7 +30,7 @@ bool DataStream::beginStream(ByteStreamRef s) {
     close();
     mByteStream = s;
     mUsingByteStream = true;
-    return mByteStream->available(mBytesPerFrame);
+    return mByteStream->available(mbytesPerFrame);
 }
 
 void DataStream::close() {
@@ -41,11 +41,11 @@ void DataStream::close() {
     mFileHandle.reset();
 }
 
-int32_t DataStream::BytesPerFrame() {
-    return mBytesPerFrame;
+int32_t DataStream::bytesPerFrame() {
+    return mbytesPerFrame;
 }
 
-bool DataStream::ReadPixel(CRGB* dst) {
+bool DataStream::readPixel(CRGB* dst) {
     if (mUsingByteStream) {
         return mByteStream->read(&dst->r, 1) && mByteStream->read(&dst->g, 1) && mByteStream->read(&dst->b, 1);
     } else {
@@ -55,7 +55,7 @@ bool DataStream::ReadPixel(CRGB* dst) {
 
 bool DataStream::available() const {
     if (mUsingByteStream) {
-        return mByteStream->available(mBytesPerFrame);
+        return mByteStream->available(mbytesPerFrame);
     } else {
         return mFileBuffer->available();
     }
@@ -67,20 +67,20 @@ bool DataStream::readFrame(Frame* frame) {
         return false;
     }
     if (mUsingByteStream) {
-        mByteStream->read(frame->rgb(), mBytesPerFrame);
+        mByteStream->read(frame->rgb(), mbytesPerFrame);
     } else {
-        mFileBuffer->read(frame->rgb(), mBytesPerFrame);
+        mFileBuffer->read(frame->rgb(), mbytesPerFrame);
     }
     return true;
 }
 
 int32_t DataStream::FramesRemaining() const {
-    if (mBytesPerFrame == 0) return 0;
+    if (mbytesPerFrame == 0) return 0;
     int32_t bytes_left = BytesRemaining();
     if (bytes_left <= 0) {
         return 0;
     }
-    return bytes_left / mBytesPerFrame;
+    return bytes_left / mbytesPerFrame;
 }
 
 int32_t DataStream::FramesDisplayed() const {
@@ -89,7 +89,7 @@ int32_t DataStream::FramesDisplayed() const {
         return -1;
     } else {
         int32_t bytes_played = mFileBuffer->FileSize() - mFileBuffer->BytesLeft();
-        return bytes_played / mBytesPerFrame;
+        return bytes_played / mbytesPerFrame;
     }
 }
 
@@ -102,7 +102,7 @@ int32_t DataStream::BytesRemaining() const {
 }
 
 int32_t DataStream::BytesRemainingInFrame() const {
-    return BytesRemaining() % mBytesPerFrame;
+    return BytesRemaining() % mbytesPerFrame;
 }
 
 bool DataStream::Rewind() {

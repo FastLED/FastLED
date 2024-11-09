@@ -233,11 +233,11 @@ TEST_CASE("byte stream memory basic operations") {
 
     // Test basic properties
     CHECK(stream->getType() == DataStream::kStreaming);
-    CHECK(stream->BytesPerFrame() == BYTES_PER_FRAME);
+    CHECK(stream->bytesPerFrame() == BYTES_PER_FRAME);
 
     // Read a pixel
     CRGB pixel;
-    bool readSuccess = stream->ReadPixel(&pixel);
+    bool readSuccess = stream->readPixel(&pixel);
     REQUIRE(readSuccess);
     CHECK(pixel.r == 0);
     CHECK(pixel.g == 1);
