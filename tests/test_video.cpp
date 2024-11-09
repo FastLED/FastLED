@@ -28,4 +28,5 @@ TEST_CASE("video") {
     video.beginStream(memoryStream);
     CRGB leds[LEDS_PER_FRAME];
     video.draw(FRAME_TIME+1, leds);
+    video.draw(2*FRAME_TIME + 1, leds);
 }
