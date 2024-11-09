@@ -549,7 +549,7 @@ class GraphicsManagerThreeJS {
         // we we want to have a camera that shows leds closer to the screen as larger.
         const fov = 60; // Increase FOV for a wider view
         const aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
-        this.camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 2000);
+        this.camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 5000);
         // Adjust camera position to ensure the circle fits within the view
         this.camera.position.z = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * margin * 1.5;
         this.camera.position.y = 0;
