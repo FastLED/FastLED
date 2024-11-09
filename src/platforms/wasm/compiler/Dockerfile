@@ -101,12 +101,10 @@ RUN dos2unix /js/*.sh
 RUN chmod +x /js/*.sh
 
 ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
 ENV LC_CTYPE=UTF-8
 
 # dump to /etc/profile
 RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
-    echo 'export LC_ALL=en_US.UTF-8' >> /etc/profile && \
     echo 'export LC_CTYPE=UTF-8' >> /etc/profile
 
 RUN python /js/run.py compile
