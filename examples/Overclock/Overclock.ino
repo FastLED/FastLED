@@ -64,7 +64,7 @@ NoisePalette noisePalette(xyMap);
 void setup() {
     delay(1000); // sanity delay
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
-        .setCorrection(TypicalLEDStrip).setScreenCoords(xyMap);
+        .setCorrection(TypicalLEDStrip).setScreenMap(xyMap);
     FastLED.setBrightness(96);
     noisePalette.setSpeed(SPEED);
     noisePalette.setScale(SCALE);

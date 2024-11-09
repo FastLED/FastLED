@@ -189,10 +189,10 @@ void setup() {
     CRGB* green_leds = leds[GreenStrip];
     CRGB* blue_leds = leds[BlueStrip];
 
-    FastLED.addLeds<WS2812, 2>(black_leds, lengths[BlackStrip]).setScreenCoords(black);
-    FastLED.addLeds<WS2812, 3>(green_leds, lengths[GreenStrip]).setScreenCoords(green);
-    FastLED.addLeds<WS2812, 1>(red_leds, lengths[RedStrip]).setScreenCoords(red);
-    FastLED.addLeds<WS2812, 4>(blue_leds, lengths[BlueStrip]).setScreenCoords(blue);
+    FastLED.addLeds<WS2812, 2>(black_leds, lengths[BlackStrip]).setScreenMap(black);
+    FastLED.addLeds<WS2812, 3>(green_leds, lengths[GreenStrip]).setScreenMap(green);
+    FastLED.addLeds<WS2812, 1>(red_leds, lengths[RedStrip]).setScreenMap(red);
+    FastLED.addLeds<WS2812, 4>(blue_leds, lengths[BlueStrip]).setScreenMap(blue);
 
     FastLED.show();
     net_init();

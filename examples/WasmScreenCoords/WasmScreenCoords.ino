@@ -53,10 +53,10 @@ void setup() {
     ScreenMap screenmap2 = ScreenMap(map2.data(), map2.size());
 
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
-        .setScreenCoords(screenmap);
+        .setScreenMap(screenmap);
 
     FastLED.addLeds<WS2811, LED_PIN+1, COLOR_ORDER>(leds2, NUM_LEDS)
-        .setScreenCoords(screenmap2);
+        .setScreenMap(screenmap2);
 }
 
 void loop() {

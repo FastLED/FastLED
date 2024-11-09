@@ -19,7 +19,7 @@ __attribute__((weak)) FsImplRef make_filesystem(int cs_pin) {
     return FsImplRef::Null();
 }
 
-bool Fs::begin() {
+bool FileSystem::begin() {
     if (!mFs) {
         return false;
     }
@@ -29,18 +29,18 @@ bool Fs::begin() {
 
 size_t FileHandle::bytesLeft() const { return size() - pos(); }
 
-Fs::Fs(int cs_pin) : mFs(make_filesystem(cs_pin)) {}
+FileSystem::FileSystem(int cs_pin) : mFs(make_filesystem(cs_pin)) {}
 
-Fs::Fs(FsImplRef fs) : mFs(fs) {}
+FileSystem::FileSystem(FsImplRef fs) : mFs(fs) {}
 
-void Fs::end() {
+void FileSystem::end() {
     if (mFs) {
         mFs->end();
     }
 }
 
-void Fs::close(FileHandleRef file) { mFs->close(file); }
+void FileSystem::close(FileHandleRef file) { mFs->close(file); }
 
-FileHandleRef Fs::openRead(const char *path) { return mFs->openRead(path); }
+FileHandleRef FileSystem::openRead(const char *path) { return mFs->openRead(path); }
 
 FASTLED_NAMESPACE_END

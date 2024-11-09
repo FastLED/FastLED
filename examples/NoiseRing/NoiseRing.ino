@@ -58,7 +58,7 @@ void setup() {
     ScreenMap xyMap = ScreenMap::Circle(NUM_LEDS, 2.0, 2.0);
     FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
-        .setScreenCoords(xyMap);
+        .setScreenMap(xyMap);
     FastLED.setBrightness(brightness);
 }
 

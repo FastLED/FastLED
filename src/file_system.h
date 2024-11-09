@@ -15,10 +15,10 @@ FASTLED_SMART_REF(FsImpl);
 FASTLED_SMART_REF(FileHandle);
 
 // Instantiate this with a pin number to create a filesystem.
-class Fs {
+class FileSystem {
   public:
-    Fs(int cs_pin);  // Initializes this as a spi sd card file system.
-    Fs(FsImplRef fs);  // Use this to provide a custom filesystem.
+    FileSystem(int cs_pin);  // Initializes this as a spi sd card file system.
+    FileSystem(FsImplRef fs);  // Use this to provide a custom filesystem.
     bool begin(); // Signal to begin using the filesystem resource.
     void end(); // Signal to end use of the file system.
     

@@ -42,7 +42,7 @@ void setup() {
     delay(1000); // sanity delay
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
-        .setScreenCoords(MATRIX_WIDTH, MATRIX_HEIGHT);
+        .setScreenMap(MATRIX_WIDTH, MATRIX_HEIGHT);
     FastLED.setBrightness(96);
     noisePalette.lazyInit();
     noisePalette.setPalettePreset(2);
