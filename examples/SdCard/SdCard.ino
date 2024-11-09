@@ -14,17 +14,9 @@ void loop() {
 #include <FastLED.h>
 #include "Arduino.h"
 
-#endif
-
-
-/// 
-
-
-
-#include <FastLED.h>
 
 #include "fx/2d/noisepalette.hpp"
-#include "fx/2d/animartrix.hpp"
+// #include "fx/2d/animartrix.hpp"
 #include "fx/fx_engine.h"
 #include "fx/video.h"
 #include "file_system.h"
@@ -58,7 +50,7 @@ Slider SPEED("SPEED", 30, 20, 100);
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
 NoisePalette noisePalette(xyMap);
-Animartrix animartrix(xyMap, POLAR_WAVES);
+//Animartrix animartrix(xyMap, POLAR_WAVES);
 FxEngine fxEngine(NUM_LEDS);
 Checkbox switchFx("Switch Fx", true);
 
@@ -98,7 +90,7 @@ void setup() {
     noisePalette.lazyInit();
     noisePalette.setPalettePreset(2);
     fxEngine.addFx(noisePalette);
-    fxEngine.addFx(animartrix);
+    //fxEngine.addFx(animartrix);
     FileHandleRef fh = fs.openRead("data/video.dat");
     if (!fh) {
       Serial.println("Failed to open SD card because sd is null");
@@ -134,5 +126,4 @@ void loop() {
     FastLED.show();
 }
 
-
-
+#endif
