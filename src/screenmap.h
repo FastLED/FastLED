@@ -119,7 +119,7 @@ class ScreenMap {
     // The diameter each point represents.
     float getDiameter() const { return mDiameter; }
 
-    static void ParseJson(const char *jsonStrOfMapFile,
+    static void ParseJson(const char *jsonStrScreenMap,
                           FixedMap<Str, ScreenMap, 16> *segmentMaps);
 
     static void toJsonStr(const FixedMap<Str, ScreenMap, 16>&, Str* jsonBuffer);
