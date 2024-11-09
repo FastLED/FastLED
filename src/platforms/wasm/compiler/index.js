@@ -544,14 +544,21 @@ class GraphicsManagerThreeJS {
 
         this.scene = new THREE.Scene();
         const margin = 1.05;  // Add a small margin around the screen
-        // Use perspective camera with narrower FOV for less distortion
-        // BIG TODO: This camera setup does not respond to z-position changes. Eventually
-        // we we want to have a camera that shows leds closer to the screen as larger.
-        const fov = 60; // Increase FOV for a wider view
+        const screenMap = frameData.screenMap;
+        const fov = 60; // Field of view
         const aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
         this.camera = new THREE.PerspectiveCamera(fov, aspect, 0.1, 5000);
-        // Adjust camera position to ensure the circle fits within the view
-        this.camera.position.z = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * margin * 1.5;
+
+        // Calculate the dimensions of the LED array
+        const width = screenMap.absMax[0] - screenMap.absMin[0];
+        const height = screenMap.absMax[1] - screenMap.absMin[1];
+
+        // Determine the larger dimension to set the camera distance
+        const maxDimension = Math.max(width, height);
+        const distance = (maxDimension / 2) / Math.tan((fov / 2) * (Math.PI / 180));
+
+        // Adjust camera position to ensure the LED array fits within the view
+        this.camera.position.z = distance * margin;
         this.camera.position.y = 0;
 
         this.renderer = new THREE.WebGLRenderer({
@@ -992,6 +999,8 @@ class UiManager {
     // to a screen pixel with xy.
     let screenMap = {
         strips: {},
+        absMin: [0, 0],
+        absMax: [0, 0]
     };
     let canvasId;
     let uiControlsId;
