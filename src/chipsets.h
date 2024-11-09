@@ -822,6 +822,11 @@ class UCS1912Controller : public ClocklessController<DATA_PIN, 2 * FMUL, 8 * FMU
 #define FASTLED_LED_OVERCLOCK 1.0
 #endif
 
+// WS2812 can be overclocked pretty aggressively, however, there are
+// some excellent articles that you should read about WS2812 overclocking
+// and corruption for a large number of LEDs.
+// https://wp.josh.com/2014/05/16/why-you-should-give-your-neopixel-bits-room-to-breathe/
+// https://wp.josh.com/2014/05/13/ws2812-neopixels-are-not-so-finicky-once-you-get-to-know-them/
 #ifndef FASTLED_LED_OVERCLOCK_WS2812
 #define FASTLED_LED_OVERCLOCK_WS2812 FASTLED_LED_OVERCLOCK
 #endif
