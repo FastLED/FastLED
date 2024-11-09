@@ -7,7 +7,6 @@
 // For details on the animartrix library and licensing information, see
 // fx/aninamtrix_detail.hpp
 
-#include <iostream> // ok include
 
 #include "crgb.h"
 #include "fx/fx2d.h"
