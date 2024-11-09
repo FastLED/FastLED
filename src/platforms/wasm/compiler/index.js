@@ -532,6 +532,9 @@ class GraphicsManagerThreeJS {
 
     initThreeJS(frameData) {
         const FOV = 45;
+        const margin = 1.05;  // Add a small margin around the screen
+        const RESOLUTION_BOOST = 2;  // 2x resolution for higher quality
+        const MAX_WIDTH = 640;  // Max pixels width on browser.
 
         const { THREE, EffectComposer, RenderPass, UnrealBloomPass } = this.threeJsModules;
         const canvas = document.getElementById(this.canvasId);
@@ -540,36 +543,38 @@ class GraphicsManagerThreeJS {
         const screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
 
         // Always set width to 640px and scale height proportionally
-        const targetWidth = 640;
+        const targetWidth = MAX_WIDTH;
         const aspectRatio = screenMapWidth / screenMapHeight;
         const targetHeight = Math.round(targetWidth / aspectRatio);
 
         // Set the rendering resolution (2x the display size)
-        this.SCREEN_WIDTH = targetWidth * 2;
-        this.SCREEN_HEIGHT = targetHeight * 2;
+        this.SCREEN_WIDTH = targetWidth * RESOLUTION_BOOST;
+        this.SCREEN_HEIGHT = targetHeight * RESOLUTION_BOOST;
 
         // Set internal canvas size to 2x for higher resolution
-        canvas.width = targetWidth * 2;
-        canvas.height = targetHeight * 2;
+        canvas.width = targetWidth * RESOLUTION_BOOST;
+        canvas.height = targetHeight * RESOLUTION_BOOST;
         // But keep display size the same
         canvas.style.width = targetWidth + 'px';
         canvas.style.height = targetHeight + 'px';
         canvas.style.maxWidth = targetWidth + 'px';
         canvas.style.maxHeight = targetHeight + 'px';
+        const circleRadius = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * 0.5;
+        const cameraZ = circleRadius / Math.tan(THREE.MathUtils.degToRad(FOV / 2)) * margin;
 
         this.scene = new THREE.Scene();
-        const margin = 1.05;  // Add a small margin around the screen
+
         // Use perspective camera with narrower FOV for less distortion
         this.camera = new THREE.PerspectiveCamera(FOV, aspectRatio, 0.1, 5000);
         // Adjust camera position to ensure the circle fits within the view
-        this.camera.position.z = Math.max(this.SCREEN_WIDTH, this.SCREEN_HEIGHT) * margin;
+        this.camera.position.z = cameraZ;
         this.camera.position.y = 0;
 
         this.renderer = new THREE.WebGLRenderer({
             canvas: canvas,
             antialias: true
         });
-        this.renderer.setSize(screenMapWidth * margin, screenMapHeight * margin);
+        this.renderer.setSize(this.SCREEN_WIDTH * margin, this.SCREEN_HEIGHT * margin);
         const renderScene = new RenderPass(this.scene, this.camera);
         this.composer = new EffectComposer(this.renderer);
         this.composer.addPass(renderScene);
