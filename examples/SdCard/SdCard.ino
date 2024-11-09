@@ -26,6 +26,7 @@ void loop() {
 #include "fx/2d/noisepalette.hpp"
 #include "fx/2d/animartrix.hpp"
 #include "fx/fx_engine.h"
+#include "fx/video.h"
 #include "file_system.h"
 #include "ui.h"
 
@@ -35,9 +36,12 @@ void loop() {
 #define BRIGHTNESS 96
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
+#define FPS 30
+
 
 #define MATRIX_WIDTH 32
 #define MATRIX_HEIGHT 32
+
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 
@@ -61,6 +65,7 @@ Checkbox switchFx("Switch Fx", true);
 const int CHIP_SELECT_PIN = 5;
 
 FileSystem fs(CHIP_SELECT_PIN);
+Video video(NUM_LEDS, FPS);
 
 
 
@@ -94,9 +99,16 @@ void setup() {
     noisePalette.setPalettePreset(2);
     fxEngine.addFx(noisePalette);
     fxEngine.addFx(animartrix);
+    FileHandleRef fh = fs.openRead("data/video.dat");
+    if (!fh) {
+      Serial.println("Failed to open SD card because sd is null");
+    } else {
+      video.begin(fh);
+    }
 }
 
 void loop() {
+    uint32_t now = millis();
     noisePalette.setSpeed(SPEED);
     noisePalette.setScale(SCALE);
     EVERY_N_SECONDS(1) {
@@ -104,15 +116,9 @@ void loop() {
             fxEngine.nextFx(500);
         }
     }
-    fxEngine.draw(millis(), leds);
+    // fxEngine.draw(millis(), leds);
+    video.draw(now, leds);
     FastLED.show();
-
-    FileHandleRef fh = fs.openRead("data/video.dat");
-    if (!fh) {
-      Serial.println("Failed to open SD card because sd is null");
-    } else {
-      fs.close(fh);
-    }
 }
 
 

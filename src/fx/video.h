@@ -11,14 +11,18 @@ FASTLED_SMART_REF(Video);
 
 class Video : public Referent {
 public:
-    Video(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo);
-    void begin(uint32_t now, FileHandleRef h);
-    void beginStream(uint32_t now, ByteStreamRef s);
+    // frameHistoryCount is the number of frames to keep in the buffer after draw. This
+    // allows for time based effects like syncing video speed to audio triggers.
+    Video(size_t pixelsPerFrame, float fpsVideo, size_t frameHistoryCount = 0);
+    // Api
+    void begin(FileHandleRef h);
+    void beginStream(ByteStreamRef s);
+    bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
     void end();
-    bool draw(uint32_t now, Frame* frame);
-    bool draw(uint32_t now, CRGB* leds, uint8_t* alpha);
     bool Rewind();
 
+    // internal use
+    bool draw(uint32_t now, Frame* frame);
     bool full() const {
         return mInterpolator->getFrames()->full();
     }

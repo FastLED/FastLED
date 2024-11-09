@@ -4,21 +4,19 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-Video::Video(size_t pixelsPerFrame, size_t nFramesInBuffer, float fpsVideo)
+Video::Video(size_t pixelsPerFrame, float fpsVideo, size_t nFramesInBuffer)
     : mPixelsPerFrame(pixelsPerFrame),
       mInterpolator(FrameInterpolatorRef::New(nFramesInBuffer, fpsVideo)) {
 }
 
-void Video::begin(uint32_t now, FileHandleRef h) {
-    (void)now;  // todo remove?
+void Video::begin(FileHandleRef h) {
     end();
     // Removed setStartTime call
     mStream = DataStreamRef::New(mPixelsPerFrame);
     mStream->begin(h);
 }
 
-void Video::beginStream(uint32_t now, ByteStreamRef bs) {
-    (void)now;  // todo remove?
+void Video::beginStream(ByteStreamRef bs) {
     end();
     mStream = DataStreamRef::New(mPixelsPerFrame);
     // Removed setStartTime call
