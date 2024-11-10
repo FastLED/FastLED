@@ -128,7 +128,6 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
     // At most, update one frame. That way if the user forgets to call draw and
     // then sends a really old timestamp, we don't update the buffer too much.
     bool needs_frame = mInterpolator->needsFrame(now, &precise_timestamp);
-    DBG(cout << "needs_frame: " << needs_frame << endl);
     if (!needs_frame) {
         return true;
     }
@@ -137,17 +136,14 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
     // read the frame from the stream
     FrameRef frame;
     if (mInterpolator->full()) {
-        DBG(cout << "popOldest" << endl);
         if (!mInterpolator->popOldest(&frame)) {
             DBG(cout << "popOldest failed" << endl);
             return false;
         }
     } else {
-        DBG(cout << "New Frame" << endl);
         frame = FrameRef::New(mPixelsPerFrame, false);
     }
     if (mStream->readFrame(frame.get())) {
-        DBG(cout << "readFrame successful" << endl);
         if (mInterpolator->pushNewest(frame, now)) {
             // we have a new frame
             mInterpolator->incrementFrameCounter();
