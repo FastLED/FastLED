@@ -8,6 +8,7 @@
 
 #include "namespace.h"
 #include "scoped_ptr.h"
+#include "template_magic.h"
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -111,14 +112,10 @@ template <typename T> class Ref : public RefTraits<T> {
     // the refcount reaches 0.
     static Ref NoTracking(T &referent) { return Ref(&referent, false); }
 
-    // create an upcasted Ref
-    template <typename U> Ref(Ref<U> &refptr) : referent_(refptr.get()) {
-        if (referent_ && isOwned()) {
-            referent_->ref();
-        }
-    }
 
-    template <typename U> Ref(const Ref<U> &refptr) : referent_(refptr.get()) {
+    // Allow upcasting of Refs.
+    template <typename U, typename = fl::is_derived<T, U>>
+    Ref(const Ref<U>& refptr) : referent_(refptr.get()) {
         if (referent_ && isOwned()) {
             referent_->ref();
         }
