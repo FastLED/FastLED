@@ -112,7 +112,7 @@ public:
     }
 };
 
-inline FsImplRef make_filesystem(int cs_pin) {
+inline FsImplRef make_sdcard_filesystem(int cs_pin) {
     return FsImplRef::Null();
 }
 

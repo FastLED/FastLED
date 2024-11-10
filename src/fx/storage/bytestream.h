@@ -19,9 +19,11 @@ class ByteStream : public Referent {
     virtual ~ByteStream() {}
     virtual bool available(size_t) const = 0;
     virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
-    size_t read(CRGB *dst, size_t n) { return read((uint8_t *)dst, n * 3); }
     virtual const char *path() const = 0;
     virtual void close() {}  // default is do nothing on close.
+
+    // convenience functions
+    size_t read(CRGB *dst, size_t n) { return read((uint8_t *)dst, n * 3); }
 };
 
 

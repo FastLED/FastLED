@@ -17,6 +17,9 @@ FASTLED_SMART_REF(VideoFx);
 FASTLED_SMART_REF(Frame);
 struct CRGB;
 
+// Video represents a video file that can be played back on a LED strip.
+// The video file is expected to be a sequence of frames. You can either use
+// a file handle or a byte stream to read the video data.
 class Video {
 public:
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This

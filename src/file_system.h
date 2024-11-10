@@ -9,12 +9,14 @@
 #include "ref.h"
 #include "fx/video.h"
 
-
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_REF(FsImpl);
-FASTLED_SMART_REF(FileHandle);
 
+// Platforms need to implement this to create an instance of the filesystem.
+FsImplRef make_sdcard_filesystem(int cs_pin);
+
+FASTLED_SMART_REF(FileHandle);
 class Video;
 
 // Instantiate this with a pin number to create a filesystem.
@@ -35,11 +37,6 @@ class FileSystem {
 };
 
 
-/// Implementation details
-
-// Platforms eed to implement this to create an instance of the filesystem.
-FsImplRef make_filesystem(int cs_pin);
-
 
 // An abstract class that represents a file handle.
 // Devices like the SD card will return one of these.
@@ -56,8 +53,7 @@ class FileHandle: public Referent {
     virtual void close() = 0;
 };
 
-// A filesystem interface that abstracts the underlying filesystem, usually
-// an sd card.
+// Platforms will subclass this to implement the filesystem.
 class FsImpl : public Referent {
   public:
     struct Visitor {
@@ -77,7 +73,5 @@ class FsImpl : public Referent {
       return false;
     }
 };
-
-
 
 FASTLED_NAMESPACE_END

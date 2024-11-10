@@ -66,7 +66,7 @@ void setup() {
     // Create and fill the ByteStreamMemory with test data
     memoryStream = ByteStreamMemoryRef::New(BUFFER_SIZE);
     write_one_frame(memoryStream);  // Write initial frame data
-    Video video(static_cast<ByteStreamRef>(memoryStream), NUM_LEDS, 30.0f, 0);
+    Video video(memoryStream, NUM_LEDS, 30.0f, 0);
     // Add the video effect to the FxEngine
     fxEngine.addVideo(video, xymap);
 }

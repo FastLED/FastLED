@@ -9,7 +9,7 @@
 #include "fs_sdcard_arduino.hpp"
 #else
 FASTLED_NAMESPACE_BEGIN
-inline FsImplRef make_filesystem(int cs_pin) {
+inline FsImplRef make_sdcard_filesystem(int cs_pin) {
     return FsImplRef::Null();
 }
 FASTLED_NAMESPACE_END

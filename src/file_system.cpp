@@ -15,12 +15,12 @@ FASTLED_NAMESPACE_BEGIN
 
 // WEAK SYMBOL
 // Override this if you want to supply a file system for your platform.
-__attribute__((weak)) FsImplRef make_filesystem(int cs_pin) {
+__attribute__((weak)) FsImplRef make_sdcard_filesystem(int cs_pin) {
     return FsImplRef::Null();
 }
 
 bool FileSystem::beginSd(int cs_pin) {
-    mFs = make_filesystem(cs_pin);
+    mFs = make_sdcard_filesystem(cs_pin);
     if (!mFs) {
         return false;
     }

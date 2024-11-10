@@ -143,7 +143,7 @@ class FsImplWasm : public FsImpl {
 };
 
 // Platforms eed to implement this to create an instance of the filesystem.
-FsImplRef make_filesystem(int cs_pin) { return FsImplWasmRef::New(); }
+FsImplRef make_sdcard_filesystem(int cs_pin) { return FsImplWasmRef::New(); }
 
 
 FileDataRef _findIfExists(const Str& path) {
