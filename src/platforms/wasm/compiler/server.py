@@ -9,6 +9,8 @@ from pathlib import Path
 import subprocess
 
 _UPLOAD_LIMIT = 10 * 1024 * 1024
+MAPPED_DIR = Path("/mapped")
+OUTPUT_PATH = MAPPED_DIR / "out.js"
 
 # Protect the endpoints from random bots.
 # Note that that the wasm_compiler.py greps for this string to get the URL of the server.
@@ -19,8 +21,6 @@ app = FastAPI()
 upload_dir = Path("uploads")
 upload_dir.mkdir(exist_ok=True)
 compile_lock = threading.Lock()
-
-MAPPED_DIR = Path("/mapped")
 
 # Make sure the /mapped directory exists to match the expectations of the compile.py script.
 # When that script is used, a volume will be passed in. However when the server script is used
@@ -63,21 +63,34 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
             for path in MAPPED_DIR.rglob("*"):
                 print(path)
 
-            cp: subprocess.CompletedProcess = subprocess.run(["python", "run.py", "compile"], cwd="/js")
-            if cp.returncode != 0:
-                return {"error": "Compilation failed."}
+            # Just run the compiler and return the results
+            cp: subprocess.CompletedProcess = subprocess.run(
+                ["python", "run.py", "compile"], 
+                cwd="/js",
+                capture_output=True,
+                text=True
+            )
             
-            # now print out the contents of the /mapped directory
-            print("Contents of /mapped:")
-            for path in MAPPED_DIR.rglob("*"):
-                print(path)
+            print("Compiler stdout:", cp.stdout)
+            print("Compiler stderr:", cp.stderr)
+            
+            return {
+                "status": "completed",
+                "return_code": cp.returncode,
+                "stdout": cp.stdout,
+                "stderr": cp.stderr
+            }
 
-
-        return FileResponse(path=str(file_path), filename=file.filename)
     except Exception as e:
-        return {"error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         try:
+            # Clean up temporary files after sending the response
+            for item in MAPPED_DIR.iterdir():
+                if item.is_file():
+                    item.unlink()
+                elif item.is_dir():
+                    shutil.rmtree(item)
             temp_dir.cleanup()
         except Exception as e:
             warnings.warn(f"Error cleaning up temporary directory: {e}")
