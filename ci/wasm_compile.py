@@ -199,6 +199,8 @@ def run_container(
         ]
         if server:
             # add the port mapping before the image name is added.
+            auth_token = _get_auth_token()
+            print(f"Using auth token: {auth_token}")
             docker_command.extend(["-p", "80:80"])
         docker_command.append(IMAGE_NAME)
         if server:
@@ -250,6 +252,16 @@ def run_web_server(directory: str) -> None:
     )
     while True:
         time.sleep(1)
+
+
+def _get_auth_token() -> str:
+    """Grep the _AUTH_TOKEN from server.py"""
+    server_py = PROJECT_ROOT / "src" / "platforms" / "wasm" / "compiler" / "server.py"
+    with open(server_py, "r") as f:
+        for line in f:
+            if "_AUTH_TOKEN" in line:
+                return line.split('"')[1].strip()
+    raise WASMCompileError("Could not find _AUTH_TOKEN in server.py")
 
 
 def main() -> None:

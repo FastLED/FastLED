@@ -11,6 +11,8 @@ import subprocess
 _UPLOAD_LIMIT = 10 * 1024 * 1024
 
 # Protect the endpoints from random bots.
+# Note that that the wasm_compiler.py greps for this string to get the URL of the server.
+# Changing the name could break the compiler.
 _AUTH_TOKEN = "oBOT5jbsO4ztgrpNsQwlmFLIKB"
 
 app = FastAPI()
@@ -48,11 +50,13 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
     try:
         file_path = Path(temp_dir.name) / file.filename
         with open(file_path, "wb") as f:
+            print(f"Saving file to {file_path}")
             shutil.copyfileobj(file.file, f)
 
         # Acquire the compile lock and decompress the file
         with compile_lock:
             with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                print(f"Extracting {file_path} to {MAPPED_DIR}")
                 zip_ref.extractall(MAPPED_DIR)
             # now print out the contents of the /mapped directory
             print("Contents of /mapped:")
