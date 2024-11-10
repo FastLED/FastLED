@@ -4,6 +4,8 @@
 Provides eanble_if and is_derived for compilers before C++14.
 */
 
+#include <stdint.h>
+
 #include "namespace.h"
 
 namespace fl {  // mandatory namespace to prevent name collision with std::enable_if.
@@ -18,7 +20,11 @@ struct enable_if<true, T> {
     using type = T;
 };
 
-// Helper alias to simplify usage
+// if enable_if<Condition, T> is true, then there will be a member type
+// called type. Otherwise it will not exist. This is (ab)used to enable
+// constructors and other functions based on template parameters. If there
+// is no member type, then the compiler will not fail to bind to the target
+// function or operation.
 template <bool Condition, typename T = void>
 using enable_if_t = typename enable_if<Condition, T>::type;
 
@@ -26,10 +32,15 @@ using enable_if_t = typename enable_if<Condition, T>::type;
 template <typename Base, typename Derived>
 struct is_base_of {
 private:
-    static char test(Base*); // Matches if Derived is convertible to Base*
-    static int test(...);    // Fallback if not convertible
+    typedef uint8_t yes;
+    typedef uint16_t no;
+    static yes test(Base*); // Matches if Derived is convertible to Base*
+    static no test(...);  // Fallback if not convertible
+    enum {
+        kSizeDerived = sizeof(test(static_cast<Derived*>(nullptr))),
+    };
 public:
-    static constexpr bool value = sizeof(test(static_cast<Derived*>(nullptr))) == sizeof(char);
+    static constexpr bool value = (kSizeDerived == sizeof(yes));
 };
 
 // Define is_base_of_v for compatibility with pre-C++14
@@ -40,14 +51,17 @@ struct is_base_of_v_helper {
 };
 
 
-// Example of of how to use is_base_of_v to check if Derived is a subclass of Base
-// and enable a constructor if it is.
+// This uses template magic to maybe generate a type for the given condition. If that type
+// doesn't exist then a type will fail to be generated, and the compiler will skip the
+// consideration of a target function. This is useful for enabling template constructors
+// that only become available if the class can be upcasted to the desired type.
+//
+// Example:
+// This is an optional upcasting constructor for a Ref<T>. If the type U is not derived from T
+// then the constructor will not be generated, and the compiler will skip it.
+//
 // template <typename U, typename = fl::is_derived<T, U>>
-// Ref(const Ref<U>& refptr) : referent_(refptr.get()) {
-//     if (referent_ && isOwned()) {
-//         referent_->ref();
-//     }
-// }
+// Ref(const Ref<U>& refptr) : referent_(refptr.get());
 template <typename Base, typename Derived>
 using is_derived = enable_if_t<is_base_of<Base, Derived>::value>;
 
