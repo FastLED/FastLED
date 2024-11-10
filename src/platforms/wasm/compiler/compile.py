@@ -43,6 +43,7 @@ assert INDEX_CSS_SRC.exists()
 assert INDEX_JS_SRC.exists()
 assert WASM_COMPILER_SETTTINGS.exists()
 
+
 def copy_files(src_dir: Path, js_src: Path) -> None:
     print("Copying files from mapped directory to container...")
     for item in src_dir.iterdir():

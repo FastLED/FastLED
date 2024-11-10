@@ -3,9 +3,7 @@ import tempfile
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 import threading
 import shutil
-from typing import Optional
 import zipfile
-import warnings
 from pathlib import Path
 import subprocess
 
