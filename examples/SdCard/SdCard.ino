@@ -38,70 +38,34 @@ void loop() {
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 #define IS_SERPINTINE true
 
-
-
-Slider SCALE("SCALE", 20, 20, 100);
-Slider SPEED("SPEED", 30, 20, 100);
-
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
-NoisePalette noisePalette(xyMap);
-//Animartrix animartrix(xyMap, POLAR_WAVES);
-FxEngine fxEngine(NUM_LEDS);
-Checkbox switchFx("Switch Fx", true);
 
 const int CHIP_SELECT_PIN = 5;
-
 FileSystem fs;
-Video video(NUM_LEDS, FPS);
+Video video;
 
-
-
-/*
-
-
-
-void setup() {
-    Serial.begin(115200);
-    if (!fs.begin()) {
-        Serial.println("Failed to initialize file system.");
-    }
-    delay(2000);  // If something ever goes wrong this delay will allow upload.
-}
-
-*/
 
 void setup() {
     Serial.begin(115200);
     delay(1000); // sanity delay
-
-    if (!fs.begin(CHIP_SELECT_PIN)) {
+    if (!fs.beginSd(CHIP_SELECT_PIN)) {
         Serial.println("Failed to initialize file system.");
     }
-
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
-        .setScreenMap(MATRIX_WIDTH, MATRIX_HEIGHT);
+        .setScreenMap(xyMap);
     FastLED.setBrightness(96);
-    fxEngine.addFx(noisePalette);
     //fxEngine.addFx(animartrix);
-    FileHandleRef fh = fs.openRead("data/video.dat");
-    if (!fh) {
-      Serial.println("Failed to open SD card because sd is null");
-    } else {
-      video.begin(fh);
+    video = fs.openVideo("data/video.dat", NUM_LEDS, FPS, 0);
+    if (!video) {
+      Serial.println("Failed to instantiate video");
     }
 }
 
 void loop() {
     uint32_t now = millis();
-    noisePalette.setSpeed(SPEED);
-    noisePalette.setScale(SCALE);
-    EVERY_N_SECONDS(1) {
-        if (switchFx) {
-            fxEngine.nextFx(500);
-        }
-    }
+
     // fxEngine.draw(millis(), leds);
     video.draw(now, leds);
 

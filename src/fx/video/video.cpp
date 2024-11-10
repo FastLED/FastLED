@@ -18,48 +18,48 @@ using namespace std;
 
 FASTLED_NAMESPACE_BEGIN
 
-Video::Video(size_t pixelsPerFrame, float fpsVideo, size_t nFramesInBuffer)
+VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo, size_t nFramesInBuffer)
     : mPixelsPerFrame(pixelsPerFrame),
       mInterpolator(
           FrameInterpolatorRef::New(MAX(1, nFramesInBuffer), fpsVideo)) {}
 
-Video::~Video() { end(); }
+VideoImpl::~VideoImpl() { end(); }
 
-void Video::begin(FileHandleRef h) {
+void VideoImpl::begin(FileHandleRef h) {
     end();
     // Removed setStartTime call
     mStream = DataStreamRef::New(mPixelsPerFrame);
     mStream->begin(h);
 }
 
-void Video::beginStream(ByteStreamRef bs) {
+void VideoImpl::beginStream(ByteStreamRef bs) {
     end();
     mStream = DataStreamRef::New(mPixelsPerFrame);
     // Removed setStartTime call
     mStream->beginStream(bs);
 }
 
-void Video::end() {
+void VideoImpl::end() {
     mInterpolator->clear();
     // Removed resetFrameCounter and setStartTime calls
     mStream.reset();
 }
 
-void Video::pushNewest(FrameRef frame) {
+void VideoImpl::pushNewest(FrameRef frame) {
     mInterpolator->push_front(frame, frame->getTimestamp());
 }
 
-bool Video::full() const {
+bool VideoImpl::full() const {
     return mInterpolator->getFrames()->full();
 }
 
-FrameRef Video::popOldest() {
+FrameRef VideoImpl::popOldest() {
     FrameRef frame;
     mInterpolator->pop_back(&frame);
     return frame;
 }
 
-bool Video::draw(uint32_t now, Frame *frame) {
+bool VideoImpl::draw(uint32_t now, Frame *frame) {
     if (!mStream) {
         return false;
     }
@@ -70,7 +70,7 @@ bool Video::draw(uint32_t now, Frame *frame) {
     return mInterpolator->draw(now, frame);
 }
 
-bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
+bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     if (!mStream) {
         return false;
     }
@@ -79,7 +79,7 @@ bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     return true;
 }
 
-void Video::updateBufferIfNecessary(uint32_t now) {
+void VideoImpl::updateBufferIfNecessary(uint32_t now) {
     // get the number of frames according to the time elapsed
     uint32_t precise_timestamp;
     // At most, update one frame. That way if the user forgets to call draw and
@@ -116,12 +116,47 @@ void Video::updateBufferIfNecessary(uint32_t now) {
     }
 }
 
-bool Video::rewind() {
+bool VideoImpl::rewind() {
     if (!mStream || !mStream->rewind()) {
         return false;
     }
     mInterpolator->clear();
     return true;
+}
+
+Video::Video() = default;
+Video::~Video() = default;
+
+void Video::begin(FileHandleRef h, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
+    mImpl.reset();
+    mImpl = VideoImplRef::New(pixelsPerFrame, fps, frameHistoryCount);
+    mImpl->begin(h);
+}
+
+void Video::beginStream(ByteStreamRef bs, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
+    mImpl.reset();
+    mImpl = VideoImplRef::New(pixelsPerFrame, fps, frameHistoryCount);
+    mImpl->beginStream(bs);
+}
+
+bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
+    if (!mImpl) {
+        return false;
+    }
+    return mImpl->draw(now, leds, alpha);
+}
+
+void Video::end() {
+    if (mImpl) {
+        mImpl->end();
+    }
+}
+
+bool Video::rewind() {
+    if (!mImpl) {
+        return false;
+    }
+    return mImpl->rewind();
 }
 
 FASTLED_NAMESPACE_END

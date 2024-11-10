@@ -67,18 +67,20 @@ class FakeFileHandle: public FileHandle {
 };
 
 TEST_CASE("video with memory stream") {
-    Video video(LEDS_PER_FRAME, FPS);
+    // Video video(LEDS_PER_FRAME, FPS);
+    Video video;
     ByteStreamMemoryRef memoryStream = ByteStreamMemoryRef::New(LEDS_PER_FRAME);
     uint8_t testData[LEDS_PER_FRAME];
     memoryStream->write(testData, LEDS_PER_FRAME);
-    video.beginStream(memoryStream);
+    video.beginStream(memoryStream, LEDS_PER_FRAME, FPS);
     CRGB leds[LEDS_PER_FRAME];
     video.draw(FRAME_TIME+1, leds);
     video.draw(2*FRAME_TIME + 1, leds);
 }
 
 TEST_CASE("video with file handle") {
-    Video video(LEDS_PER_FRAME, FPS);
+    // Video video(LEDS_PER_FRAME, FPS);
+    Video video;
     FakeFileHandleRef fileHandle = FakeFileHandleRef::New();
     CRGB led_frame[LEDS_PER_FRAME];
     // alternate between red and black
@@ -87,7 +89,7 @@ TEST_CASE("video with file handle") {
     }
     // now write the data
     fileHandle->write(led_frame, LEDS_PER_FRAME);
-    video.begin(fileHandle);
+    video.begin(fileHandle, LEDS_PER_FRAME, FPS);
     CRGB leds[LEDS_PER_FRAME];
     video.draw(FRAME_TIME+1, leds);
     video.draw(2*FRAME_TIME + 1, leds);

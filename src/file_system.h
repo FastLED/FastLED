@@ -14,7 +14,8 @@ FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_REF(FsImpl);
 FASTLED_SMART_REF(FileHandle);
-FASTLED_SMART_REF(Video);
+
+class Video;
 
 // Instantiate this with a pin number to create a filesystem.
 class FileSystem {
@@ -26,7 +27,7 @@ class FileSystem {
 
     
     FileHandleRef openRead(const char *path);  // Null if file could not be opened.
-    VideoRef openVideo(const char *path, size_t pixelsPerFrame, float fps = 30.0f, size_t nFrameHistory = 0);  // Null if video could not be opened.
+    Video openVideo(const char *path, size_t pixelsPerFrame, float fps = 30.0f, size_t nFrameHistory = 0);  // Null if video could not be opened.
     void close(FileHandleRef file);
     
   private:
