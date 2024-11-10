@@ -13,6 +13,7 @@
 #include "ref.h"
 #include "ui.h"
 #include "fx/detail/time_warp.h"
+#include "fx/video.h"
 
 
 // Forward declaration
@@ -53,6 +54,15 @@ class FxEngine {
      * @return The index of the added effect, or -1 if the effect couldn't be added.
      */
     int addFx(FxRef effect);
+
+
+    /**
+     * @brief Adds a new video effect to the engine.
+     * @param video The video to be added.
+     * @param xymap The XYMap to be added.
+     * @return The index of the added effect, or -1 if the effect couldn't be added.
+     */
+    int addVideo(Video video, XYMap xymap);
 
     /**
      * @brief Adds a new effect to the engine. Allocate from static memory.
@@ -143,6 +153,12 @@ inline int FxEngine::addFx(FxRef effect) {
         mCompositor.startTransition(0, 0, effect);
     }
     return mCounter++;
+}
+
+int FxEngine::addVideo(Video video, XYMap xymap) {
+    auto vidfx = VideoFxRef::New(video, xymap);
+    int id = addFx(vidfx);
+    return id;
 }
 
 inline bool FxEngine::nextFx(uint16_t duration) {

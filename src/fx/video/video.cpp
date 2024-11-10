@@ -166,6 +166,12 @@ bool VideoImpl::rewind() {
 }
 
 Video::Video() = default;
+Video::Video(FileHandleRef h, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
+    begin(h, pixelsPerFrame, fps, frameHistoryCount);
+}
+Video::Video(ByteStreamRef s, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
+    beginStream(s, pixelsPerFrame, fps, frameHistoryCount);
+}
 Video::~Video() = default;
 Video::Video(const Video &) = default;
 Video &Video::operator=(const Video &) = default;

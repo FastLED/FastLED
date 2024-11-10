@@ -39,8 +39,6 @@ const int NUM_FRAMES = 2;
 const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * NUM_FRAMES;
 
 ByteStreamMemoryRef memoryStream;
-Video video;
-VideoFxRef videoFx;
 FxEngine fxEngine(NUM_LEDS);
 // Create and initialize Video fx object
 XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
@@ -68,10 +66,9 @@ void setup() {
     // Create and fill the ByteStreamMemory with test data
     memoryStream = ByteStreamMemoryRef::New(BUFFER_SIZE);
     write_one_frame(memoryStream);  // Write initial frame data
-    video.beginStream(memoryStream, NUM_LEDS, 30.0f, 0);
-    videoFx = VideoFxRef::New(video, xymap);
+    Video video(static_cast<ByteStreamRef>(memoryStream), NUM_LEDS, 30.0f, 0);
     // Add the video effect to the FxEngine
-    fxEngine.addFx(videoFx);
+    fxEngine.addVideo(video, xymap);
 }
 
 void loop() {
