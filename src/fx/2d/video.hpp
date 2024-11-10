@@ -10,56 +10,38 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-#if 0
 
-FASTLED_SMART_REF(Video);
+
 FASTLED_SMART_REF(VideoFx);
 
-class Video : public FxGrid {
+
+class VideoFx : public FxGrid {
   public:
-    Video(XYMap xymap) : FxGrid(xymap) {}
-
-    void lazyInit() override {
-        if (!mInitialized) {
-            mInitialized = true;
-            // Initialize video stream here if needed
-        }
-    }
-
-    bool begin(FileHandleRef fileHandle) {
-        const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mDataStream = DataStreamRef::New(bytes_per_frame);
-        return mDataStream->begin(fileHandle);
-    }
-
-    bool beginStream(ByteStreamRef byteStream) {
-        const uint8_t bytes_per_frame = getXYMap().getTotal() * 3;
-        mDataStream = DataStreamRef::New(bytes_per_frame);
-        return mDataStream->beginStream(byteStream);
-    }
-
-    void close() { mDataStream->close(); }
-
+    VideoFx(XYMap xymap, Video video) : FxGrid(xymap) {}
     void draw(DrawContext context) override {
-        if (!mDataStream || !mDataStream->framesRemaining()) {
-            if (mDataStream && mDataStream->getType() != DataStream::kStreaming) {
-                mDataStream->rewind();
-            } else {
+        if (!mFrame) {
+            mFrame = FrameRef::New(mXyMap.getTotal(), false);
+        }
+        bool ok = mVideo.draw(context.now, mFrame.get());
+        if (!ok) {
+            mVideo.rewind();
+            ok = mVideo.draw(context.now, mFrame.get());
+            if (!ok) {
                 return; // Can't draw or rewind
             }
         }
-
-        if (!mDataStream->available()) {
-            return; // No data available
+        if (!mFrame) {
+            return; // Can't draw without a frame
         }
 
+        const CRGB* src_pixels = mFrame->rgb();
+        CRGB* dst_pixels = context.leds;
+        size_t dst_pos = 0;
         for (uint16_t w = 0; w < mXyMap.getWidth(); w++) {
             for (uint16_t h = 0; h < mXyMap.getHeight(); h++) {
-                CRGB pixel;
-                if (mDataStream->readPixel(&pixel)) {
-                    context.leds[mXyMap.mapToIndex(w, h)] = pixel;
-                } else {
-                    context.leds[mXyMap.mapToIndex(w, h)] = CRGB::Black;
+                const size_t index = mXyMap.mapToIndex(w, h);
+                if (index < mFrame->size()) {
+                    dst_pixels[dst_pos++] = src_pixels[index];
                 }
             }
         }
@@ -70,9 +52,13 @@ class Video : public FxGrid {
     const char *fxName(int) const override { return "video"; }
 
   private:
-    DataStreamRef mDataStream;
-    bool mInitialized = false;
+    Video mVideo;
+    FrameRef mFrame;
 };
+
+#if 0
+
+FASTLED_SMART_REF(VideoFx);
 
 // Converts a FxGrid to a video effect. This primarily allows for
 // fixed frame rates and frame interpolation.

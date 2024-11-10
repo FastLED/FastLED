@@ -172,6 +172,7 @@ bool VideoImpl::rewind() {
 Video::Video() = default;
 Video::~Video() = default;
 Video::Video(const Video&) = default;
+Video& Video::operator=(const Video&) = default;
 
 void Video::begin(FileHandleRef h, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
     mImpl.reset();
@@ -195,6 +196,13 @@ bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
         mFinished = true;
     }
     return ok;
+}
+
+bool Video::draw(uint32_t now, Frame *frame) {
+    if (!mImpl) {
+        return false;
+    }
+    return mImpl->draw(now, frame);
 }
 
 void Video::end() {

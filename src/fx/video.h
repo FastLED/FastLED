@@ -13,6 +13,7 @@ FASTLED_SMART_REF(VideoImpl);
 FASTLED_SMART_REF(ByteStream);
 FASTLED_SMART_REF(FileHandle);
 struct CRGB;
+class Frame;
 
 class Video {
 public:
@@ -21,10 +22,12 @@ public:
     Video();  // Please use FileSytem to construct a Video.
     ~Video();
     Video(const Video&);
+    Video& operator=(const Video&);
     // Api
     void begin(FileHandleRef h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
     void beginStream(ByteStreamRef s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
     bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
+    bool draw(uint32_t now, Frame* frame);
     void end();
     bool finished();
     bool rewind();
