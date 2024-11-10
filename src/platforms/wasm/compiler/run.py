@@ -18,7 +18,7 @@ def _parse_args() -> Tuple[argparse.Namespace, list[str]]:
     parser.add_argument("mode", help="Which mode does this script run in", choices=_CHOICES)
     return parser.parse_known_args()
 
-def _run_server(unknown_args: list[str]) -> None:
+def _run_server(unknown_args: list[str]) -> int:
     cmd_list = [
         "uvicorn",
         "server:app",
@@ -27,9 +27,10 @@ def _run_server(unknown_args: list[str]) -> None:
         "--port",
         f"{_PORT}"
     ] + unknown_args
-    subprocess.run(cmd_list, cwd=str(HERE))
+    cp: subprocess.CompletedProcess = subprocess.run(cmd_list, cwd=str(HERE))
+    return cp.returncode
 
-def _run_compile(unknown_args: list[str]) -> None:
+def _run_compile(unknown_args: list[str]) -> int:
 
     # Construct the command to call compile.py with unknown arguments
     command = [sys.executable, 'compile.py'] + unknown_args
@@ -41,14 +42,21 @@ def _run_compile(unknown_args: list[str]) -> None:
     print(result.stdout)
     if result.stderr:
         print(result.stderr, file=sys.stderr)
+    return result.returncode
 
-def main():
+def main() -> int:
     args, unknown_args = _parse_args()
 
-    if args.mode == "compile":
-        _run_compile(unknown_args)
-    elif args.mode == "server":
-        _run_server(unknown_args)
+    try:
+        if args.mode == "compile":
+            rtn = _run_compile(unknown_args)
+            return rtn
+        elif args.mode == "server":
+            rtn = _run_server(unknown_args)
+            return rtn
+    except KeyboardInterrupt:
+        print("Exiting...")
+        return 1
 
 if __name__ == "__main__":
     main()
