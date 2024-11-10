@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import List
 
 JS_DIR = Path("/js")
-MAPPED_DIR = Path("/mapped")
+
 JS_SRC = JS_DIR / "src"
 PIO_BUILD_DIR = JS_DIR / ".pio/build"
 ARDUINO_H_SRC = JS_DIR / "Arduino.h"
@@ -37,13 +37,11 @@ MAX_COMPILE_ATTEMPTS = 2
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
 assert JS_DIR.exists()
-assert MAPPED_DIR.exists()
 assert ARDUINO_H_SRC.exists()
 assert INDEX_HTML_SRC.exists()
 assert INDEX_CSS_SRC.exists()
 assert INDEX_JS_SRC.exists()
 assert WASM_COMPILER_SETTTINGS.exists()
-
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
     print("Copying files from mapped directory to container...")
@@ -157,6 +155,12 @@ def process_ino_files(src_dir: Path) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Compile FastLED for WASM")
     parser.add_argument(
+        "--mapped-dir",
+        type=Path,
+        default="/mapped",
+        help="Directory containing source files (default: /mapped)",
+    )
+    parser.add_argument(
         "--keep-files", action="store_true", help="Keep source files after compilation"
     )
     parser.add_argument(
@@ -217,12 +221,13 @@ def main() -> int:
     print("Starting FastLED WASM compilation script...")
     args = parse_args()
     print(f"Keep files flag: {args.keep_files}")
+    print(f"Using mapped directory: {args.mapped_dir}")
 
     try:
         if JS_SRC.exists():
             shutil.rmtree(JS_SRC)
         JS_SRC.mkdir(parents=True, exist_ok=True)
-        src_dir = find_project_dir(MAPPED_DIR)
+        src_dir = find_project_dir(args.mapped_dir)
 
         any_only_flags = args.only_copy or args.only_insert_header or args.only_compile
 
