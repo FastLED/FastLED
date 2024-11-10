@@ -15,46 +15,6 @@ FASTLED_NAMESPACE_BEGIN
 FASTLED_SMART_REF(VideoFx);
 
 
-class VideoFx : public FxGrid {
-  public:
-    VideoFx(XYMap xymap, Video video) : FxGrid(xymap) {}
-    void draw(DrawContext context) override {
-        if (!mFrame) {
-            mFrame = FrameRef::New(mXyMap.getTotal(), false);
-        }
-        bool ok = mVideo.draw(context.now, mFrame.get());
-        if (!ok) {
-            mVideo.rewind();
-            ok = mVideo.draw(context.now, mFrame.get());
-            if (!ok) {
-                return; // Can't draw or rewind
-            }
-        }
-        if (!mFrame) {
-            return; // Can't draw without a frame
-        }
-
-        const CRGB* src_pixels = mFrame->rgb();
-        CRGB* dst_pixels = context.leds;
-        size_t dst_pos = 0;
-        for (uint16_t w = 0; w < mXyMap.getWidth(); w++) {
-            for (uint16_t h = 0; h < mXyMap.getHeight(); h++) {
-                const size_t index = mXyMap.mapToIndex(w, h);
-                if (index < mFrame->size()) {
-                    dst_pixels[dst_pos++] = src_pixels[index];
-                }
-            }
-        }
-    }
-
-
-
-    const char *fxName(int) const override { return "video"; }
-
-  private:
-    Video mVideo;
-    FrameRef mFrame;
-};
 
 #if 0
 

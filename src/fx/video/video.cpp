@@ -1,9 +1,9 @@
 #include "fx/video.h"
 
-#include "fx/video/frame_interpolator.h"
+#include "crgb.h"
 #include "fx/detail/data_stream.h"
 #include "fx/frame.h"
-#include "crgb.h"
+#include "fx/video/frame_interpolator.h"
 
 #ifdef __EMSCRIPTEN__
 #define DEBUG_IO_STREAM 1
@@ -27,33 +27,35 @@ FASTLED_SMART_REF(DataStream);
 FASTLED_SMART_REF(FrameInterpolator);
 FASTLED_SMART_REF(Frame);
 
-
 class VideoImpl : public Referent {
-public:
-    // frameHistoryCount is the number of frames to keep in the buffer after draw. This
-    // allows for time based effects like syncing video speed to audio triggers.
-    VideoImpl(size_t pixelsPerFrame, float fpsVideo, size_t frameHistoryCount = 0);
+  public:
+    // frameHistoryCount is the number of frames to keep in the buffer after
+    // draw. This allows for time based effects like syncing video speed to
+    // audio triggers.
+    VideoImpl(size_t pixelsPerFrame, float fpsVideo,
+              size_t frameHistoryCount = 0);
     ~VideoImpl();
     // Api
     void begin(FileHandleRef h);
     void beginStream(ByteStreamRef s);
-    bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
+    bool draw(uint32_t now, CRGB *leds, uint8_t *alpha = nullptr);
     void end();
     bool rewind();
     // internal use
-    bool draw(uint32_t now, Frame* frame);
+    bool draw(uint32_t now, Frame *frame);
     bool full() const;
     FrameRef popOldest();
     void pushNewest(FrameRef frame);
 
-private:
+  private:
     bool updateBufferIfNecessary(uint32_t now);
     uint32_t mPixelsPerFrame = 0;
     DataStreamRef mStream;
     FrameInterpolatorRef mInterpolator;
 };
 
-VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo, size_t nFramesInBuffer)
+VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
+                     size_t nFramesInBuffer)
     : mPixelsPerFrame(pixelsPerFrame),
       mInterpolator(
           FrameInterpolatorRef::New(MAX(1, nFramesInBuffer), fpsVideo)) {}
@@ -84,9 +86,7 @@ void VideoImpl::pushNewest(FrameRef frame) {
     mInterpolator->push_front(frame, frame->getTimestamp());
 }
 
-bool VideoImpl::full() const {
-    return mInterpolator->getFrames()->full();
-}
+bool VideoImpl::full() const { return mInterpolator->getFrames()->full(); }
 
 FrameRef VideoImpl::popOldest() {
     FrameRef frame;
@@ -171,16 +171,18 @@ bool VideoImpl::rewind() {
 
 Video::Video() = default;
 Video::~Video() = default;
-Video::Video(const Video&) = default;
-Video& Video::operator=(const Video&) = default;
+Video::Video(const Video &) = default;
+Video &Video::operator=(const Video &) = default;
 
-void Video::begin(FileHandleRef h, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
+void Video::begin(FileHandleRef h, size_t pixelsPerFrame, float fps,
+                  size_t frameHistoryCount) {
     mImpl.reset();
     mImpl = VideoImplRef::New(pixelsPerFrame, fps, frameHistoryCount);
     mImpl->begin(h);
 }
 
-void Video::beginStream(ByteStreamRef bs, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
+void Video::beginStream(ByteStreamRef bs, size_t pixelsPerFrame, float fps,
+                        size_t frameHistoryCount) {
     mImpl.reset();
     mImpl = VideoImplRef::New(pixelsPerFrame, fps, frameHistoryCount);
     mImpl->beginStream(bs);
@@ -216,7 +218,7 @@ bool Video::finished() {
         return true;
     }
     return mFinished;
-}   
+}
 
 bool Video::rewind() {
     if (!mImpl) {
@@ -224,5 +226,38 @@ bool Video::rewind() {
     }
     return mImpl->rewind();
 }
+
+VideoFx::VideoFx(Video video, XYMap xymap) : FxGrid(xymap), mVideo(video) {}
+
+void VideoFx::draw(DrawContext context) {
+    if (!mFrame) {
+        mFrame = FrameRef::New(mXyMap.getTotal(), false);
+    }
+    bool ok = mVideo.draw(context.now, mFrame.get());
+    if (!ok) {
+        mVideo.rewind();
+        ok = mVideo.draw(context.now, mFrame.get());
+        if (!ok) {
+            return; // Can't draw or rewind
+        }
+    }
+    if (!mFrame) {
+        return; // Can't draw without a frame
+    }
+
+    const CRGB *src_pixels = mFrame->rgb();
+    CRGB *dst_pixels = context.leds;
+    size_t dst_pos = 0;
+    for (uint16_t w = 0; w < mXyMap.getWidth(); w++) {
+        for (uint16_t h = 0; h < mXyMap.getHeight(); h++) {
+            const size_t index = mXyMap.mapToIndex(w, h);
+            if (index < mFrame->size()) {
+                dst_pixels[dst_pos++] = src_pixels[index];
+            }
+        }
+    }
+}
+
+const char * VideoFx::fxName(int) const { return "video"; }
 
 FASTLED_NAMESPACE_END

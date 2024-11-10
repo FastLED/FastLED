@@ -252,7 +252,7 @@ def run_web_server(directory: str) -> None:
         time.sleep(1)
 
 
-def main():
+def main() -> None:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
         description="WASM Compiler for FastLED"
     )

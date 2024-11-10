@@ -4,6 +4,7 @@
 
 #include "namespace.h"
 #include "ref.h"
+#include "fx/fx2d.h"
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -12,8 +13,9 @@ FASTLED_NAMESPACE_BEGIN
 FASTLED_SMART_REF(VideoImpl);
 FASTLED_SMART_REF(ByteStream);
 FASTLED_SMART_REF(FileHandle);
+FASTLED_SMART_REF(VideoFx);
+FASTLED_SMART_REF(Frame);
 struct CRGB;
-class Frame;
 
 class Video {
 public:
@@ -37,6 +39,18 @@ public:
 private:
     bool mFinished = false;
     VideoImplRef mImpl;
+};
+
+
+class VideoFx : public FxGrid {
+  public:
+    VideoFx(Video video, XYMap xymap);
+    void draw(DrawContext context) override;
+    const char *fxName(int) const override;
+
+  private:
+    Video mVideo;
+    FrameRef mFrame;
 };
 
 FASTLED_NAMESPACE_END
