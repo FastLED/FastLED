@@ -1,9 +1,10 @@
-#pragma
+#pragma once
 
 #include "namespace.h"
 
 namespace fl {  // mandatory namespace
 
+// Define enable_if for SFINAE
 template <bool Condition, typename T = void>
 struct enable_if {};
 
@@ -17,6 +18,7 @@ struct enable_if<true, T> {
 template <bool Condition, typename T = void>
 using enable_if_t = typename enable_if<Condition, T>::type;
 
+// Define is_base_of to check inheritance relationship
 template <typename Base, typename Derived>
 struct is_base_of {
 private:
@@ -25,6 +27,10 @@ private:
 public:
     static constexpr bool value = sizeof(test(static_cast<Derived*>(nullptr))) == sizeof(char);
 };
+
+// Define is_base_of_v for compatibility with pre-C++14
+template <typename Base, typename Derived>
+constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
 
 // Example of of how to use is_base_of_v to check if Derived is a subclass of Base
 // and enable a constructor if it is.
@@ -35,9 +41,6 @@ public:
 //     }
 // }
 template <typename Base, typename Derived>
-constexpr bool is_base_of_v = is_base_of<Base, Derived>::value;
-
-template <typename Base, typename Derived>
-using is_derived = enable_if_t<is_base_of_v<Base, Derived>>;
+using is_derived = enable_if_t<is_base_of<Base, Derived>::value>;
 
 } // namespace fl
