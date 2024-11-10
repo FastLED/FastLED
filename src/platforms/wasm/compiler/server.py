@@ -35,7 +35,7 @@ async def read_root() -> RedirectResponse:
     """Redirect to the /docs endpoint."""
     return RedirectResponse(url="/docs")
 
-@app.post("/compile")
+@app.post("/compile/wasm")
 def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileResponse:
     """Upload a file into a temporary directory."""
     print(f"Starting upload process for file: {file.filename}")
