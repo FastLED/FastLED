@@ -25,10 +25,10 @@ void loop() {
 #include "file_system.h"
 
 #define LED_PIN 2
-#define BRIGHTNESS 96
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
 #define FPS 30
+#define CHIP_SELECT_PIN 5
 
 
 #define MATRIX_WIDTH 32
@@ -41,15 +41,14 @@ void loop() {
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
 
-const int CHIP_SELECT_PIN = 5;
-FileSystem fs;
+FileSystem filesystem;
 Video video;
 
 
 void setup() {
     Serial.begin(115200);
     delay(1000); // sanity delay
-    if (!fs.beginSd(CHIP_SELECT_PIN)) {
+    if (!filesystem.beginSd(CHIP_SELECT_PIN)) {
         Serial.println("Failed to initialize file system.");
     }
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
@@ -57,7 +56,7 @@ void setup() {
         .setScreenMap(xyMap);
     FastLED.setBrightness(96);
     //fxEngine.addFx(animartrix);
-    video = fs.openVideo("data/video.dat", NUM_LEDS, FPS, 0);
+    video = filesystem.openVideo("data/video.dat", NUM_LEDS, FPS);
     if (!video) {
       Serial.println("Failed to instantiate video");
     }
