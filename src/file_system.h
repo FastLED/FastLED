@@ -23,9 +23,10 @@ class FileSystem {
     bool beginSd(int cs_pin); // Signal to begin using the filesystem resource.
     bool begin(FsImplRef platform_filesystem); // Signal to begin using the filesystem resource.
     void end(); // Signal to end use of the file system.
+
     
     FileHandleRef openRead(const char *path);  // Null if file could not be opened.
-    VideoRef openVideo(const char *path);  // Null if video could not be opened.
+    VideoRef openVideo(const char *path, size_t pixelsPerFrame, float fps = 30.0f, size_t nFrameHistory = 0);  // Null if video could not be opened.
     void close(FileHandleRef file);
     
   private:

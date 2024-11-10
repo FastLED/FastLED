@@ -51,5 +51,15 @@ void FileSystem::end() {
 void FileSystem::close(FileHandleRef file) { mFs->close(file); }
 
 FileHandleRef FileSystem::openRead(const char *path) { return mFs->openRead(path); }
+VideoRef FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, size_t nFrameHistory) {
+    FileHandleRef file = openRead(path);
+    if (!file) {
+        return VideoRef::Null();
+    }
+    // return mFs->openVideo(path);
+    VideoRef video = VideoRef::New(pixelsPerFrame, fps, nFrameHistory);
+    video->begin(file);
+    return video;
+}
 
 FASTLED_NAMESPACE_END
