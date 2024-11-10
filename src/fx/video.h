@@ -8,12 +8,18 @@
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_REF(Video);
+FASTLED_SMART_REF(ByteStream);
+FASTLED_SMART_REF(DataStream);
+FASTLED_SMART_REF(FileHandle);
+FASTLED_SMART_REF(FrameInterpolator);
+FASTLED_SMART_REF(Frame);
 
 class Video : public Referent {
 public:
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This
     // allows for time based effects like syncing video speed to audio triggers.
     Video(size_t pixelsPerFrame, float fpsVideo, size_t frameHistoryCount = 0);
+    ~Video();
     // Api
     void begin(FileHandleRef h);
     void beginStream(ByteStreamRef s);
@@ -23,19 +29,9 @@ public:
 
     // internal use
     bool draw(uint32_t now, Frame* frame);
-    bool full() const {
-        return mInterpolator->getFrames()->full();
-    }
-
-    FrameRef popOldest() {
-        FrameRef frame;
-        mInterpolator->pop_back(&frame);
-        return frame;
-    }
-
-    void pushNewest(FrameRef frame) {
-        mInterpolator->push_front(frame, frame->getTimestamp());
-    }
+    bool full() const;
+    FrameRef popOldest();
+    void pushNewest(FrameRef frame);
 
 private:
     void updateBufferIfNecessary(uint32_t now);

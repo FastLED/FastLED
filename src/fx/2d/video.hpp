@@ -10,6 +10,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+#if 0
+
 FASTLED_SMART_REF(Video);
 FASTLED_SMART_REF(VideoFx);
 
@@ -142,5 +144,7 @@ class VideoFx : public FxGrid {
     FrameInterpolatorRef mFrameInterpolator;
     float mFps;
 };
+
+#endif
 
 FASTLED_NAMESPACE_END

@@ -7,7 +7,7 @@
 #endif
 
 #if DEBUG_IO_STREAM
-#include <iostream>  // ok include
+#include <iostream> // ok include
 using namespace std;
 #define DBG(X) (X)
 #else
@@ -20,8 +20,10 @@ FASTLED_NAMESPACE_BEGIN
 
 Video::Video(size_t pixelsPerFrame, float fpsVideo, size_t nFramesInBuffer)
     : mPixelsPerFrame(pixelsPerFrame),
-      mInterpolator(FrameInterpolatorRef::New(MAX(1, nFramesInBuffer), fpsVideo)) {
-}
+      mInterpolator(
+          FrameInterpolatorRef::New(MAX(1, nFramesInBuffer), fpsVideo)) {}
+
+Video::~Video() { end(); }
 
 void Video::begin(FileHandleRef h) {
     end();
@@ -43,7 +45,21 @@ void Video::end() {
     mStream.reset();
 }
 
-bool Video::draw(uint32_t now, Frame* frame) {
+void Video::pushNewest(FrameRef frame) {
+    mInterpolator->push_front(frame, frame->getTimestamp());
+}
+
+bool Video::full() const {
+    return mInterpolator->getFrames()->full();
+}
+
+FrameRef Video::popOldest() {
+    FrameRef frame;
+    mInterpolator->pop_back(&frame);
+    return frame;
+}
+
+bool Video::draw(uint32_t now, Frame *frame) {
     if (!mStream) {
         return false;
     }
@@ -54,7 +70,7 @@ bool Video::draw(uint32_t now, Frame* frame) {
     return mInterpolator->draw(now, frame);
 }
 
-bool Video::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
+bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     if (!mStream) {
         return false;
     }
@@ -81,7 +97,7 @@ void Video::updateBufferIfNecessary(uint32_t now) {
         DBG(cout << "popOldest" << endl);
         if (!mInterpolator->popOldest(&frame)) {
             DBG(cout << "popOldest failed" << endl);
-            return;  // Something went wrong
+            return; // Something went wrong
         }
     } else {
         DBG(cout << "New Frame" << endl);

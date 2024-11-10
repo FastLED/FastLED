@@ -11,6 +11,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_REF(FileBuffer);
+FASTLED_SMART_REF(FileHandle);
 
 class FileBuffer: public Referent {
  public:

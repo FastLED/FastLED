@@ -36,12 +36,8 @@ void loop() {
 
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
-
-#ifdef __EMSCRIPTEN__
-#define IS_SERPINTINE false
-#else
 #define IS_SERPINTINE true
-#endif
+
 
 
 Slider SCALE("SCALE", 20, 20, 100);
@@ -56,7 +52,7 @@ Checkbox switchFx("Switch Fx", true);
 
 const int CHIP_SELECT_PIN = 5;
 
-FileSystem fs(CHIP_SELECT_PIN);
+FileSystem fs;
 Video video(NUM_LEDS, FPS);
 
 
@@ -79,7 +75,7 @@ void setup() {
     Serial.begin(115200);
     delay(1000); // sanity delay
 
-    if (!fs.begin()) {
+    if (!fs.begin(CHIP_SELECT_PIN)) {
         Serial.println("Failed to initialize file system.");
     }
 
@@ -87,8 +83,6 @@ void setup() {
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(MATRIX_WIDTH, MATRIX_HEIGHT);
     FastLED.setBrightness(96);
-    noisePalette.lazyInit();
-    noisePalette.setPalettePreset(2);
     fxEngine.addFx(noisePalette);
     //fxEngine.addFx(animartrix);
     FileHandleRef fh = fs.openRead("data/video.dat");

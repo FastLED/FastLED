@@ -19,7 +19,17 @@ __attribute__((weak)) FsImplRef make_filesystem(int cs_pin) {
     return FsImplRef::Null();
 }
 
-bool FileSystem::begin() {
+bool FileSystem::beginSd(int cs_pin) {
+    mFs = make_filesystem(cs_pin);
+    if (!mFs) {
+        return false;
+    }
+    mFs->begin();
+    return true;
+}
+
+bool FileSystem::begin(FsImplRef platform_filesystem) {
+    mFs = platform_filesystem;
     if (!mFs) {
         return false;
     }
@@ -29,9 +39,8 @@ bool FileSystem::begin() {
 
 size_t FileHandle::bytesLeft() const { return size() - pos(); }
 
-FileSystem::FileSystem(int cs_pin) : mFs(make_filesystem(cs_pin)) {}
+FileSystem::FileSystem() : mFs() {}
 
-FileSystem::FileSystem(FsImplRef fs) : mFs(fs) {}
 
 void FileSystem::end() {
     if (mFs) {

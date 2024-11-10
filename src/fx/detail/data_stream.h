@@ -11,6 +11,9 @@
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_REF(DataStream);
+FASTLED_SMART_REF(ByteStream);
+FASTLED_SMART_REF(FileHandle);
+FASTLED_SMART_REF(FileBuffer);
 
 // DataStream takes either a file handle or a byte stream
 // and reads frames from it in order to serve data to the

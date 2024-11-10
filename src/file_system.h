@@ -7,22 +7,25 @@
 
 #include "namespace.h"
 #include "ref.h"
+#include "fx/video.h"
 
 
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_REF(FsImpl);
 FASTLED_SMART_REF(FileHandle);
+FASTLED_SMART_REF(Video);
 
 // Instantiate this with a pin number to create a filesystem.
 class FileSystem {
   public:
-    FileSystem(int cs_pin);  // Initializes this as a spi sd card file system.
-    FileSystem(FsImplRef fs);  // Use this to provide a custom filesystem.
-    bool begin(); // Signal to begin using the filesystem resource.
+    FileSystem();
+    bool beginSd(int cs_pin); // Signal to begin using the filesystem resource.
+    bool begin(FsImplRef platform_filesystem); // Signal to begin using the filesystem resource.
     void end(); // Signal to end use of the file system.
     
     FileHandleRef openRead(const char *path);  // Null if file could not be opened.
+    VideoRef openVideo(const char *path);  // Null if video could not be opened.
     void close(FileHandleRef file);
     
   private:
