@@ -26,10 +26,13 @@ public:
     void beginStream(ByteStreamRef s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
     bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
     void end();
+    bool finished();
     bool rewind();
+
     // make compatible with if statements
     operator bool() const { return mImpl.get(); }
 private:
+    bool mFinished = false;
     VideoImplRef mImpl;
 };
 

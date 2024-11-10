@@ -40,7 +40,6 @@ public:
     bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
     void end();
     bool rewind();
-
     // internal use
     bool draw(uint32_t now, Frame* frame);
     bool full() const;
@@ -48,7 +47,7 @@ public:
     void pushNewest(FrameRef frame);
 
 private:
-    void updateBufferIfNecessary(uint32_t now);
+    bool updateBufferIfNecessary(uint32_t now);
     uint32_t mPixelsPerFrame = 0;
     DataStreamRef mStream;
     FrameInterpolatorRef mInterpolator;
@@ -110,12 +109,20 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     if (!mStream) {
         return false;
     }
-    updateBufferIfNecessary(now);
+    bool ok = updateBufferIfNecessary(now);
+    if (!ok) {
+        // paint black
+        memset(leds, 0, mPixelsPerFrame * sizeof(CRGB));
+        if (alpha) {
+            memset(alpha, 0, mPixelsPerFrame);
+        }
+        return false;
+    }
     mInterpolator->draw(now, leds, alpha);
     return true;
 }
 
-void VideoImpl::updateBufferIfNecessary(uint32_t now) {
+bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
     // get the number of frames according to the time elapsed
     uint32_t precise_timestamp;
     // At most, update one frame. That way if the user forgets to call draw and
@@ -123,7 +130,7 @@ void VideoImpl::updateBufferIfNecessary(uint32_t now) {
     bool needs_frame = mInterpolator->needsFrame(now, &precise_timestamp);
     DBG(cout << "needs_frame: " << needs_frame << endl);
     if (!needs_frame) {
-        return;
+        return true;
     }
     // if we dropped frames (because of time manipulation) just set
     // the frame counter to the current frame number + 1
@@ -133,7 +140,7 @@ void VideoImpl::updateBufferIfNecessary(uint32_t now) {
         DBG(cout << "popOldest" << endl);
         if (!mInterpolator->popOldest(&frame)) {
             DBG(cout << "popOldest failed" << endl);
-            return; // Something went wrong
+            return false;
         }
     } else {
         DBG(cout << "New Frame" << endl);
@@ -145,10 +152,12 @@ void VideoImpl::updateBufferIfNecessary(uint32_t now) {
             // we have a new frame
             mInterpolator->incrementFrameCounter();
         }
+        return true;
     } else {
         DBG(cout << "readFrame failed" << endl);
         // Something went wrong so put the frame back in the buffer.
         mInterpolator->push_front(frame, frame->getTimestamp());
+        return false;
     }
 }
 
@@ -180,7 +189,12 @@ bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     if (!mImpl) {
         return false;
     }
-    return mImpl->draw(now, leds, alpha);
+    bool ok = mImpl->draw(now, leds, alpha);
+    if (!ok) {
+        // Interpret not being able to draw as a finished signal.
+        mFinished = true;
+    }
+    return ok;
 }
 
 void Video::end() {
@@ -188,6 +202,13 @@ void Video::end() {
         mImpl->end();
     }
 }
+
+bool Video::finished() {
+    if (!mImpl) {
+        return true;
+    }
+    return mFinished;
+}   
 
 bool Video::rewind() {
     if (!mImpl) {

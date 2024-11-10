@@ -21,6 +21,7 @@
 #include "fx/2d/video.hpp"
 #include "fx/fx_engine.h"
 #include "ref.h"
+#include "fx/video.h"
 
 #define LED_PIN 2
 #define BRIGHTNESS 96
@@ -38,7 +39,7 @@ const int NUM_FRAMES = 2;
 const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * NUM_FRAMES;
 
 ByteStreamMemoryRef memoryStream;
-VideoRef videoFx;
+Video videoFx;
 FxEngine fxEngine(NUM_LEDS);
 
 
