@@ -43,6 +43,7 @@ wasmflags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
     "-DFASTLED_FORCE_NAMESPACE=1",
     "-DFASTLED_USE_PROGMEM=0",
+    "-DDISABLE_EXCEPTION_CATCHING=1",
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
     "-sALLOW_MEMORY_GROWTH=0",
     "-Oz",
