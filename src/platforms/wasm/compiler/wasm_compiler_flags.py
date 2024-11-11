@@ -20,8 +20,8 @@ assert not (FAST_BUILD and DEBUG), "Cannot build fast and debug at the same time
 # right now as a test.
 USE_WASM = 2
 
-if DEBUG:
-    USE_WASM=1
+if DEBUG or FAST_BUILD:
+    USE_WASM=1  # disable wasm2js on these builds.
 
 build_mode = "-O0" if FAST_BUILD else "-Oz"
 
