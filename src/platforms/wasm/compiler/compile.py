@@ -36,6 +36,8 @@ FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 2
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
+FAST_BUILD = "RENDER_SERVICE_TYPE" in os.environ
+
 assert JS_DIR.exists()
 assert ARDUINO_H_SRC.exists()
 assert INDEX_HTML_SRC.exists()
@@ -55,9 +57,13 @@ def copy_files(src_dir: Path, js_src: Path) -> None:
             shutil.copy2(item, js_src / item.name)
 
 
-def compile(js_dir: Path) -> int:
+def compile(js_dir: Path, fast_build: bool) -> int:
     print("Starting compilation process...")
     max_attempts = 2
+    env = os.environ.copy()
+    if fast_build:
+        print("Fast build enabled")
+        env["FAST_BUILD"] = "1"
 
     for attempt in range(1, max_attempts + 1):
         try:
@@ -68,6 +74,7 @@ def compile(js_dir: Path) -> int:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 universal_newlines=True,
+                env=env,
             )
             assert process.stdout is not None
             for line in process.stdout:
@@ -195,9 +202,9 @@ def find_project_dir(mapped_dir: Path) -> Path:
     return src_dir
 
 
-def process_compile(js_dir: Path) -> None:
+def process_compile(js_dir: Path, fast_build: bool) -> None:
     print("Starting compilation...")
-    if compile(js_dir) != 0:
+    if compile(js_dir, fast_build) != 0:
         raise RuntimeError("Compilation failed.")
     print("Compilation successful.")
 
@@ -260,7 +267,7 @@ def main() -> int:
             f.write(content)
 
         if do_compile:
-            process_compile(JS_DIR)
+            process_compile(JS_DIR, FAST_BUILD)
             build_dirs = [d for d in PIO_BUILD_DIR.iterdir() if d.is_dir()]
             if len(build_dirs) != 1:
                 raise RuntimeError(

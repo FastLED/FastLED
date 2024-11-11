@@ -2,12 +2,16 @@ import os
 
 DEBUG = 0
 USE_CCACHE = True
+FAST_BUILD = False
 
 if "DEBUG" in os.environ:
     DEBUG = 1
 
 if "NO_CCACHE" in os.environ:
     USE_CCACHE = False
+
+if "FAST_BUILD" in os.environ and not DEBUG:
+    FAST_BUILD = True
 
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
 # It seems easier to load the program as a pure JS file, so we will use asm.js
@@ -17,9 +21,9 @@ USE_WASM = 2
 if DEBUG:
     USE_WASM=1
 
+build_mode = "-O0" if FAST_BUILD else "-Oz"
+
 Import("env", "projenv")
-
-
 
 # projenv is used for compiling individual files, env for linking
 # libraries have their own env in env.GetLibBuilders()
@@ -46,7 +50,7 @@ wasmflags = [
     "-DDISABLE_EXCEPTION_CATCHING=1",
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
     "-sALLOW_MEMORY_GROWTH=0",
-    "-Oz",
+    build_mode,
     #"-sEXPORT_ES6=1",
     "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']",
     "--bind",
@@ -76,7 +80,7 @@ if DEBUG:
         '-fsanitize=undefined',
     ]
     # Remove -Oz flag
-    opt_flags = ["-Oz", "-Os", "-O1", "-O2", "-O3"]
+    opt_flags = ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"]
     for opt in opt_flags:
         if opt in wasmflags:
             wasmflags.remove(opt)
