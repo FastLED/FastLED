@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Header  # type: ignore
+from fastapi import FastAPI, File, UploadFile, HTTPException, Header, BackgroundTasks  # type: ignore
 import tempfile
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 import threading
@@ -13,9 +13,6 @@ from threading import Timer
 
 
 _TEST = False
-
-_PURGE_TIME = 60 * 10  # Purge user cache after 10 mins
-
 _UPLOAD_LIMIT = 10 * 1024 * 1024
 # Protect the endpoints from random bots.
 # Note that that the wasm_compiler.py greps for this string to get the URL of the server.
@@ -25,13 +22,6 @@ _AUTH_TOKEN = "oBOT5jbsO4ztgrpNsQwlmFLIKB"
 _GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
 _GIT_REPO_PATH = "/js/fastled"  # Path to the git repository
 
-def cleanup_file(file_path: Path) -> None:
-    """Clean up a file after it has been sent."""
-    try:
-        if file_path.exists():
-            file_path.unlink()
-    except Exception as e:
-        print(f"Error cleaning up file {file_path}: {e}")
 
 def update_git_repo():
     """Update git repository by fetching and resetting to origin/main."""
@@ -64,8 +54,9 @@ async def read_root() -> RedirectResponse:
     """Redirect to the /docs endpoint."""
     return RedirectResponse(url="/docs")
 
-def compile_source(temp_src_dir: Path, file_path: Path) -> FileResponse | HTTPException:
+def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: BackgroundTasks) -> FileResponse | HTTPException:
     """Compile source code and return compiled artifacts as a zip file."""
+    temp_zip_dir = None
     try:
         # Find the first directory in temp_src_dir
         src_dir = next(Path(temp_src_dir).iterdir())
@@ -133,21 +124,28 @@ def compile_source(temp_src_dir: Path, file_path: Path) -> FileResponse | HTTPEx
                 print(f"  Adding: {arc_path}")
                 zip_out.write(file_path, arc_path)
 
-    response = FileResponse(
+    def cleanup_files():
+        if output_zip_path.exists():
+            output_zip_path.unlink()
+        if temp_zip_dir:
+            shutil.rmtree(temp_zip_dir, ignore_errors=True)
+        if temp_src_dir:
+            shutil.rmtree(temp_src_dir, ignore_errors=True)
+
+    background_tasks.add_task(cleanup_files)
+
+    return FileResponse(
         path=output_zip_path,
         media_type="application/zip",
-        filename="fastled_output.zip"
+        filename="fastled_output.zip",
+        background=background_tasks
     )
-    
-    # Schedule cleanup after response is sent
-    threading.Timer(_PURGE_TIME, cleanup_file, args=[output_zip_path]).start()
-    
-    return response
 
 @app.post("/compile/wasm")
-def compile_wasm(
+async def compile_wasm(
     file: UploadFile = File(...),
-    authorization: str = Header(None)
+    authorization: str = Header(None),
+    background_tasks: BackgroundTasks = BackgroundTasks()
 ) -> FileResponse:
     """Upload a file into a temporary directory."""
     print(f"Starting upload process for file: {file.filename}")
@@ -184,7 +182,7 @@ def compile_wasm(
         for path in Path(temp_src_dir).rglob("*"):
             print(f"  {path}")
 
-        out = compile_source(Path(temp_src_dir), file_path)
+        out = compile_source(Path(temp_src_dir), file_path, background_tasks)
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
             raise out
