@@ -23,7 +23,7 @@ USE_WASM = 2
 if DEBUG or FAST_BUILD:
     USE_WASM=1  # disable wasm2js on these builds.
 
-build_mode = "-O0" if FAST_BUILD else "-Oz"
+build_mode = "-O1" if FAST_BUILD else "-Oz"
 
 Import("env", "projenv")
 
