@@ -30,6 +30,9 @@ upload_dir = Path("uploads")
 upload_dir.mkdir(exist_ok=True)
 compile_lock = threading.Lock()
 
+output_dir = Path("output")
+output_dir.mkdir(exist_ok=True)
+
 @app.get("/", include_in_schema=False)
 async def read_root() -> RedirectResponse:
     """Redirect to the /docs endpoint."""
@@ -65,25 +68,26 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
             shutil.copyfileobj(file.file, f)
 
         # Acquire the compile lock and decompress the file
+
+        print("extracting zip file...")
+        with zipfile.ZipFile(file_path, 'r') as zip_ref:
+            zip_ref.extractall(temp_src_dir)
+        
+        print("\nContents of source directory:")
+        for path in Path(temp_src_dir).rglob("*"):
+            print(f"  {path}")
+
+        try:
+            # Find the first directory in temp_src_dir
+            src_dir = next(Path(temp_src_dir).iterdir())
+            print(f"\nFound source directory: {src_dir}")
+        except StopIteration:
+            raise HTTPException(
+                status_code=500,
+                detail=f"No files found in extracted directory: {temp_src_dir}"
+            )
+        print(f"Files are ready, waiting for compile lock...")
         with compile_lock:
-            print("Acquired compile lock, extracting zip file...")
-            with zipfile.ZipFile(file_path, 'r') as zip_ref:
-                zip_ref.extractall(temp_src_dir)
-            
-            print("\nContents of source directory:")
-            for path in Path(temp_src_dir).rglob("*"):
-                print(f"  {path}")
-
-            try:
-                # Find the first directory in temp_src_dir
-                src_dir = next(Path(temp_src_dir).iterdir())
-                print(f"\nFound source directory: {src_dir}")
-            except StopIteration:
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"No files found in extracted directory: {temp_src_dir}"
-                )
-
             print("\nRunning compiler...")
             cp: subprocess.CompletedProcess = subprocess.run(
                 ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"], 
@@ -92,66 +96,69 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
                 text=True
             )
             
-            print(f"\nCompiler output:\nstdout:\n{cp.stdout}\nstderr:\n{cp.stderr}")
+        print(f"\nCompiler output:\nstdout:\n{cp.stdout}\nstderr:\n{cp.stderr}")
 
-            if cp.returncode != 0:
-                raise HTTPException(
-                    status_code=500, 
-                    detail=f"Compilation failed:\nstdout: {cp.stdout}\nstderr: {cp.stderr}"
-                )
+        if cp.returncode != 0:
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Compilation failed:\nstdout: {cp.stdout}\nstderr: {cp.stderr}"
+            )
 
-            try:
-                # Find the fastled_js directory
-                fastled_js_dir = src_dir / "fastled_js"
-                print(f"\nLooking for fastled_js directory at: {fastled_js_dir}")
-                
-                if not fastled_js_dir.exists():
-                    print(f"Directory contents of {src_dir}:")
-                    for path in src_dir.rglob("*"):
-                        print(f"  {path}")
-                    raise HTTPException(
-                        status_code=500,
-                        detail=f"Compilation artifacts not found at {fastled_js_dir}"
-                    )
-
-                # Create output zip file in a persistent location
-                output_dir = Path("output")
-                output_dir.mkdir(exist_ok=True)
-                output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
-                print(f"\nCreating output zip at: {output_zip_path}")
-                
-                with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_out:
-                    print("\nAdding files to output zip:")
-                    for file_path in fastled_js_dir.rglob("*"):
-                        if file_path.is_file():
-                            arc_path = file_path.relative_to(fastled_js_dir)
-                            print(f"  Adding: {arc_path}")
-                            zip_out.write(file_path, arc_path)
-
-                print("\nCleaning up temporary directories...")
-                if temp_zip_dir:
-                    shutil.rmtree(temp_zip_dir, ignore_errors=True)
-                if temp_src_dir:
-                    shutil.rmtree(temp_src_dir, ignore_errors=True)
-
-                print("Returning FileResponse...")
-                response = FileResponse(
-                    path=output_zip_path,
-                    media_type="application/zip",
-                    filename="fastled_output.zip"
-                )
-                
-                # Schedule cleanup after response is sent
-                threading.Timer(_PURGE_TIME, cleanup_file, args=[output_zip_path]).start()
-                
-                return response
-
-            except Exception as e:
-                print(f"Error in file processing: {str(e)}")
+        try:
+            # Find the fastled_js directory
+            fastled_js_dir = src_dir / "fastled_js"
+            print(f"\nLooking for fastled_js directory at: {fastled_js_dir}")
+            
+            if not fastled_js_dir.exists():
+                print(f"Directory contents of {src_dir}:")
+                for path in src_dir.rglob("*"):
+                    print(f"  {path}")
                 raise HTTPException(
                     status_code=500,
-                    detail=f"Error processing files: {str(e)}\nTrace: {e.__traceback__}"
+                    detail=f"Compilation artifacts not found at {fastled_js_dir}"
                 )
+
+            stdout_txt = fastled_js_dir / "stdout.txt"
+            stderr_txt = fastled_js_dir / "stderr.txt"
+            print(f"\nCompiler output files:\nstdout: {stdout_txt}\nstderr: {stderr_txt}")
+            stdout_txt.write_text(cp.stdout)
+            stderr_txt.write_text(cp.stderr)
+
+            output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
+            print(f"\nCreating output zip at: {output_zip_path}")
+            
+            with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_out:
+                print("\nAdding files to output zip:")
+                for file_path in fastled_js_dir.rglob("*"):
+                    if file_path.is_file():
+                        arc_path = file_path.relative_to(fastled_js_dir)
+                        print(f"  Adding: {arc_path}")
+                        zip_out.write(file_path, arc_path)
+
+            print("\nCleaning up temporary directories...")
+            if temp_zip_dir:
+                shutil.rmtree(temp_zip_dir, ignore_errors=True)
+            if temp_src_dir:
+                shutil.rmtree(temp_src_dir, ignore_errors=True)
+
+            print("Returning FileResponse...")
+            response = FileResponse(
+                path=output_zip_path,
+                media_type="application/zip",
+                filename="fastled_output.zip"
+            )
+            
+            # Schedule cleanup after response is sent
+            threading.Timer(_PURGE_TIME, cleanup_file, args=[output_zip_path]).start()
+            
+            return response
+
+        except Exception as e:
+            print(f"Error in file processing: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error processing files: {str(e)}\nTrace: {e.__traceback__}"
+            )
 
     except Exception as e:
         print(f"Error in upload process: {str(e)}")
