@@ -322,7 +322,7 @@ def main() -> None:
 
     if args.no_build:
         args.build = False
-    if args.no_open:
+    if args.just_compile:
         args.open = False
 
     try:
