@@ -39,6 +39,87 @@ async def read_root() -> RedirectResponse:
     """Redirect to the /docs endpoint."""
     return RedirectResponse(url="/docs")
 
+def compile_source(temp_src_dir: Path, file_path: Path) -> FileResponse | HTTPException:
+    """Compile source code and return compiled artifacts as a zip file."""
+    try:
+        # Find the first directory in temp_src_dir
+        src_dir = next(Path(temp_src_dir).iterdir())
+        print(f"\nFound source directory: {src_dir}")
+    except StopIteration:
+        return HTTPException(
+            status_code=500,
+            detail=f"No files found in extracted directory: {temp_src_dir}"
+        )
+    
+    print(f"Files are ready, waiting for compile lock...")
+    compile_lock_start = time.time()
+    with compile_lock:
+        compile_lock_end = time.time()
+        print("\nRunning compiler...")
+        cp: subprocess.CompletedProcess = subprocess.run(
+            ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"], 
+            cwd="/js",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # Redirect stderr to stdout
+            text=True
+        )
+    compile_time = time.time() - compile_lock_end
+    compile_lock_time = compile_lock_end - compile_lock_start
+        
+    print(f"\nCompiler output:\nstdout:\n{cp.stdout}")
+    print(f"Compile lock time: {compile_lock_time:.2f}s")
+    print(f"Compile time: {compile_time:.2f}s")
+    
+    print(f"Compiler return code: {cp.returncode}")
+
+    if cp.returncode != 0:
+        return HTTPException(
+            status_code=400, 
+            detail=f"Compilation failed:\n{cp.stdout}"
+        )
+
+    # Find the fastled_js directory
+    fastled_js_dir = src_dir / "fastled_js"
+    print(f"\nLooking for fastled_js directory at: {fastled_js_dir}")
+    
+    if not fastled_js_dir.exists():
+        print(f"Directory contents of {src_dir}:")
+        for path in src_dir.rglob("*"):
+            print(f"  {path}")
+        return HTTPException(
+            status_code=500,
+            detail=f"Compilation artifacts not found at {fastled_js_dir}"
+        )
+
+    # Replace separate stdout/stderr files with single out.txt
+    out_txt = fastled_js_dir / "out.txt"
+    perf_txt = fastled_js_dir / "perf.txt"
+    print(f"\nSaving combined output to: {out_txt}")
+    out_txt.write_text(cp.stdout)
+    perf_txt.write_text(f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s")
+
+    output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
+    print(f"\nCreating output zip at: {output_zip_path}")
+    
+    with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_out:
+        print("\nAdding files to output zip:")
+        for file_path in fastled_js_dir.rglob("*"):
+            if file_path.is_file():
+                arc_path = file_path.relative_to(fastled_js_dir)
+                print(f"  Adding: {arc_path}")
+                zip_out.write(file_path, arc_path)
+
+    response = FileResponse(
+        path=output_zip_path,
+        media_type="application/zip",
+        filename="fastled_output.zip"
+    )
+    
+    # Schedule cleanup after response is sent
+    threading.Timer(_PURGE_TIME, cleanup_file, args=[output_zip_path]).start()
+    
+    return response
+
 @app.post("/compile/wasm")
 def upload_file(
     file: UploadFile = File(...),
@@ -71,8 +152,6 @@ def upload_file(
         with open(file_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
 
-        # Acquire the compile lock and decompress the file
-
         print("extracting zip file...")
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
             zip_ref.extractall(temp_src_dir)
@@ -81,97 +160,10 @@ def upload_file(
         for path in Path(temp_src_dir).rglob("*"):
             print(f"  {path}")
 
-        try:
-            # Find the first directory in temp_src_dir
-            src_dir = next(Path(temp_src_dir).iterdir())
-            print(f"\nFound source directory: {src_dir}")
-        except StopIteration:
-            raise HTTPException(
-                status_code=500,
-                detail=f"No files found in extracted directory: {temp_src_dir}"
-            )
-        print(f"Files are ready, waiting for compile lock...")
-        compile_lock_start = time.time()
-        with compile_lock:
-            compile_lock_end = time.time()
-            print("\nRunning compiler...")
-            cp: subprocess.CompletedProcess = subprocess.run(
-                ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"], 
-                cwd="/js",
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,  # Redirect stderr to stdout
-                text=True
-            )
-        compile_time = time.time() - compile_lock_end
-        compile_lock_time = compile_lock_end - compile_lock_start
-            
-        print(f"\nCompiler output:\nstdout:\n{cp.stdout}\nstderr:\n{cp.stderr}")
-        print(f"Compile lock time: {compile_lock_time:.2f}s")
-        print(f"Compile time: {compile_time:.2f}s")
-
-
-        if cp.returncode != 0:
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Compilation failed:\n{cp.stdout}"
-            )
-
-        try:
-            # Find the fastled_js directory
-            fastled_js_dir = src_dir / "fastled_js"
-            print(f"\nLooking for fastled_js directory at: {fastled_js_dir}")
-            
-            if not fastled_js_dir.exists():
-                print(f"Directory contents of {src_dir}:")
-                for path in src_dir.rglob("*"):
-                    print(f"  {path}")
-                raise HTTPException(
-                    status_code=500,
-                    detail=f"Compilation artifacts not found at {fastled_js_dir}"
-                )
-
-            # Replace separate stdout/stderr files with single out.txt
-            out_txt = fastled_js_dir / "out.txt"
-            perf_txt = fastled_js_dir / "perf.txt"
-            print(f"\nSaving combined output to: {out_txt}")
-            out_txt.write_text(cp.stdout)
-            perf_txt.write_text(f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s")
-
-            output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
-            print(f"\nCreating output zip at: {output_zip_path}")
-            
-            with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_out:
-                print("\nAdding files to output zip:")
-                for file_path in fastled_js_dir.rglob("*"):
-                    if file_path.is_file():
-                        arc_path = file_path.relative_to(fastled_js_dir)
-                        print(f"  Adding: {arc_path}")
-                        zip_out.write(file_path, arc_path)
-
-            print("\nCleaning up temporary directories...")
-            if temp_zip_dir:
-                shutil.rmtree(temp_zip_dir, ignore_errors=True)
-            if temp_src_dir:
-                shutil.rmtree(temp_src_dir, ignore_errors=True)
-
-            print("Returning FileResponse...")
-            response = FileResponse(
-                path=output_zip_path,
-                media_type="application/zip",
-                filename="fastled_output.zip"
-            )
-            
-            # Schedule cleanup after response is sent
-            threading.Timer(_PURGE_TIME, cleanup_file, args=[output_zip_path]).start()
-            
-            return response
-
-        except Exception as e:
-            print(f"Error in file processing: {str(e)}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error processing files: {str(e)}\nTrace: {e.__traceback__}"
-            )
+        out = compile_source(Path(temp_src_dir), file_path)
+        if isinstance(out, HTTPException):
+            raise out
+        return out
 
     except Exception as e:
         print(f"Error in upload process: {str(e)}")

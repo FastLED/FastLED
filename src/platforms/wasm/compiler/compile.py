@@ -204,7 +204,10 @@ def find_project_dir(mapped_dir: Path) -> Path:
 
 def process_compile(js_dir: Path, fast_build: bool) -> None:
     print("Starting compilation...")
-    if compile(js_dir, fast_build) != 0:
+    rtn = compile(js_dir, fast_build)
+    print(f"Compilation return code: {rtn}")
+    if rtn != 0:
+        print("Compilation failed.")
         raise RuntimeError("Compilation failed.")
     print("Compilation successful.")
 
@@ -267,7 +270,11 @@ def main() -> int:
             f.write(content)
 
         if do_compile:
-            process_compile(JS_DIR, FAST_BUILD)
+            try:
+                process_compile(JS_DIR, FAST_BUILD)
+            except Exception as e:
+                print(f"Error: {str(e)}")
+                return 1
             build_dirs = [d for d in PIO_BUILD_DIR.iterdir() if d.is_dir()]
             if len(build_dirs) != 1:
                 raise RuntimeError(
