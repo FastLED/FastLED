@@ -100,6 +100,7 @@ if export_name:
         f"EXPORT_NAME='{export_name}'",
         "-o",
         f"{env.subst('$BUILD_DIR')}/{export_name}.js",
+        "-fuse-ld=lld",
     ]
 
 env.Append(LINKFLAGS=wasmflags)
@@ -110,6 +111,6 @@ for lb in env.GetLibBuilders():
     lb.env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
     # Add whole-archive flag to ensure all objects have all symbols available
     # for final linking.
-    lb.env.Append(LINKFLAGS=["-Wl,--whole-archive"])
+    lb.env.Append(LINKFLAGS=["-Wl,--whole-archive,-fuse-ld=lld"])
 
 
