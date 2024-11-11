@@ -1,25 +1,19 @@
 import os
 
-DEBUG = 0
-USE_CCACHE = True
-QUICK_BUILD = False
-OPTIMIZED = False
+USE_CCACHE = True if "NO_CCACHE" not in os.environ else False
 
-if "DEBUG" in os.environ:
-    DEBUG = 1
+# Get build mode from environment variable, default to RELEASE if not set
+BUILD_MODE = os.environ.get("BUILD_MODE", "QUICK").upper()
 
-if "NO_CCACHE" in os.environ:
-    USE_CCACHE = False
+# Validate build mode
+valid_modes = ["DEBUG", "QUICK", "RELEASE"]
+if BUILD_MODE not in valid_modes:
+    raise ValueError(f"BUILD_MODE must be one of {valid_modes}, got {BUILD_MODE}")
 
-if "QUICK_BUILD" in os.environ and not DEBUG:
-    QUICK_BUILD = True
-
-if "OPTIMIZED" in os.environ:
-    OPTIMIZED = True
-
-assert not (QUICK_BUILD and DEBUG), "Cannot build fast and debug at the same time"
-assert not (QUICK_BUILD and OPTIMIZED), "Cannot build fast and optimized at the same time"
-assert not (DEBUG and OPTIMIZED), "Cannot build debug and optimized at the same time"
+# Set flags based on build mode
+DEBUG = BUILD_MODE == "DEBUG"
+QUICK_BUILD = BUILD_MODE == "QUICK" 
+OPTIMIZED = BUILD_MODE == "RELEASE"
 
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
 # It seems easier to load the program as a pure JS file, so we will use asm.js

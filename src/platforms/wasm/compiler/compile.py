@@ -18,8 +18,24 @@ import re
 import shutil
 import subprocess
 import sys
+from enum import Enum
 from pathlib import Path
 from typing import List
+
+
+class BuildMode(Enum):
+    DEBUG = "DEBUG"
+    QUICK = "QUICK"
+    RELEASE = "RELEASE"
+
+    @classmethod
+    def from_string(cls, mode_str: str) -> "BuildMode":
+        try:
+            return cls[mode_str.upper()]
+        except KeyError:
+            valid_modes = [mode.name for mode in cls]
+            raise ValueError(f"BUILD_MODE must be one of {valid_modes}, got {mode_str}")
+
 
 JS_DIR = Path("/js")
 
@@ -36,7 +52,7 @@ FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 2
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
-QUICK_BUILD = "RENDER_SERVICE_TYPE" in os.environ
+BUILD_MODE = BuildMode.from_string(os.environ.get("BUILD_MODE", "QUICK"))
 
 assert JS_DIR.exists()
 assert ARDUINO_H_SRC.exists()
@@ -57,13 +73,12 @@ def copy_files(src_dir: Path, js_src: Path) -> None:
             shutil.copy2(item, js_src / item.name)
 
 
-def compile(js_dir: Path, fast_build: bool) -> int:
+def compile(js_dir: Path, build_mode: BuildMode) -> int:
     print("Starting compilation process...")
     max_attempts = 2
     env = os.environ.copy()
-    if fast_build:
-        print("Fast build enabled")
-        env["QUICK_BUILD"] = "1"
+    env["BUILD_MODE"] = build_mode.name
+    print(f"Build mode: {build_mode.name}")
 
     for attempt in range(1, max_attempts + 1):
         try:
@@ -202,9 +217,9 @@ def find_project_dir(mapped_dir: Path) -> Path:
     return src_dir
 
 
-def process_compile(js_dir: Path, fast_build: bool) -> None:
+def process_compile(js_dir: Path, build_mode: BuildMode) -> None:
     print("Starting compilation...")
-    rtn = compile(js_dir, fast_build)
+    rtn = compile(js_dir, build_mode)
     print(f"Compilation return code: {rtn}")
     if rtn != 0:
         print("Compilation failed.")
@@ -271,7 +286,8 @@ def main() -> int:
 
         if do_compile:
             try:
-                process_compile(JS_DIR, QUICK_BUILD)
+                build_mode = BuildMode.DEBUG if debug else BUILD_MODE
+                process_compile(JS_DIR, build_mode)
             except Exception as e:
                 print(f"Error: {str(e)}")
                 return 1
