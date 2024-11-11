@@ -73,32 +73,28 @@ RUN mkdir -p /mapped /examples/wasm
 # Copy platforms directory separately, since it changes a lot during development
 COPY ./src/platforms/ /js/fastled/src/platforms/
 
-# Hack for now to get the wasm platform to compile
-RUN cp /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini && \
-    cp /js/fastled/src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py && \
-    cp /js/fastled/src/platforms/wasm/compiler/index.html /js/index.html && \
-    cp /js/fastled/src/platforms/wasm/compiler/index.css /js/index.css && \
-    cp /js/fastled/src/platforms/wasm/compiler/*.js /js/ && \
-    cp /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
-    cp /js/fastled/src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh && \
-    cp /js/fastled/src/platforms/wasm/compiler/*.sh /js/
+RUN dos2unix /js/fastled/src/platforms/wasm/compiler/*.sh && \
+    chmod +x /js/fastled/src/platforms/wasm/compiler/*.sh && \
+    dos2unix /js/fastled/src/platforms/wasm/compiler/*.py
+    
+
+
+# Create symlinks for wasm platform files
+RUN ln -s /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/index.html /js/index.html && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/index.css /js/index.css && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh && \
+    for file in /js/fastled/src/platforms/wasm/compiler/*.js; do ln -s "$file" /js/$(basename "$file"); done && \
+    for file in /js/fastled/src/platforms/wasm/compiler/*.sh; do ln -s "$file" /js/$(basename "$file"); done && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/compile.py /js/compile.py && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/run.py /js/run.py && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/server.py /js/server.py    
 
 WORKDIR /js
 
-# This is too slow for lots of testing, disabled for now
-# Prewarm the cache with a first compile.
-#RUN mkdir -p /js/src && mkdir -p /mapped
-# COPY /examples/Wasm /mapped/
-RUN cp -r /examples/wasm /mapped/ || mkdir -p /mapped/wasm
-# RUN source /entrypoint.sh && pio run
 
-# Copy the compile script
-COPY src/platforms/wasm/compiler/compile.py /js/compile.py
-COPY src/platforms/wasm/compiler/run.py /js/run.py
-COPY src/platforms/wasm/compiler/server.py /js/server.py
-RUN dos2unix /js/*.py
-RUN dos2unix /js/*.sh
-RUN chmod +x /js/*.sh
 
 ENV LANG=en_US.UTF-8
 ENV LC_CTYPE=UTF-8
@@ -107,6 +103,9 @@ ENV LC_CTYPE=UTF-8
 RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
     echo 'export LC_CTYPE=UTF-8' >> /etc/profile
 
+# Prewarm the ccache with a first compile and also give a chance for
+# platformio to install the required tools.
+RUN cp -r /examples/wasm /mapped/ || mkdir -p /mapped/wasm
 RUN python /js/run.py compile
 
 #Clean up before the volume get's mapped in.
