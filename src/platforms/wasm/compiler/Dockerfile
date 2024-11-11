@@ -75,7 +75,6 @@ RUN ln -s /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.
     ln -s /js/fastled/src/platforms/wasm/compiler/index.html /js/index.html && \
     ln -s /js/fastled/src/platforms/wasm/compiler/index.css /js/index.css && \
     ln -s /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh && \
     for file in /js/fastled/src/platforms/wasm/compiler/*.js; do ln -s "$file" /js/$(basename "$file"); done && \
     for file in /js/fastled/src/platforms/wasm/compiler/*.sh; do ln -s "$file" /js/$(basename "$file"); done && \
     ln -s /js/fastled/src/platforms/wasm/compiler/compile.py /js/compile.py && \

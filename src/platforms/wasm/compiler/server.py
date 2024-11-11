@@ -7,6 +7,8 @@ import zipfile
 from pathlib import Path
 import subprocess
 import time
+import os
+from threading import Timer
 
 def cleanup_file(file_path: Path) -> None:
     """Clean up a file after it has been sent."""
@@ -26,7 +28,28 @@ _UPLOAD_LIMIT = 10 * 1024 * 1024
 # Changing the name could break the compiler.
 _AUTH_TOKEN = "oBOT5jbsO4ztgrpNsQwlmFLIKB"
 
+_GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
+_GIT_REPO_PATH = "/js/fastled"  # Path to the git repository
+
+def update_git_repo():
+    """Update git repository by fetching and resetting to origin/main."""
+    try:
+        print("\nAttempting to update git repository...")
+        with compile_lock:
+            # Change to repo directory
+            os.chdir(_GIT_REPO_PATH)
+            # Fetch and reset to origin/main
+            subprocess.run(["git", "fetch", "origin"], check=True)
+            subprocess.run(["git", "reset", "--hard", "origin/master"], check=True)
+            print("Git repository updated successfully")
+    except Exception as e:
+        print(f"Error updating git repository: {e}")
+    finally:
+        # Schedule next update
+        Timer(_GIT_UPDATE_INTERVAL, update_git_repo).start()
+
 app = FastAPI()
+Timer(_GIT_UPDATE_INTERVAL, update_git_repo).start()  # Start the periodic git update
 upload_dir = Path("uploads")
 upload_dir.mkdir(exist_ok=True)
 compile_lock = threading.Lock()
