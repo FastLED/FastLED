@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException  # type: ignore
+from fastapi import FastAPI, File, UploadFile, HTTPException, Header  # type: ignore
 import tempfile
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 import threading
@@ -40,11 +40,14 @@ async def read_root() -> RedirectResponse:
     return RedirectResponse(url="/docs")
 
 @app.post("/compile/wasm")
-def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileResponse:
+def upload_file(
+    file: UploadFile = File(...),
+    authorization: str = Header(None)
+) -> FileResponse:
     """Upload a file into a temporary directory."""
     print(f"Starting upload process for file: {file.filename}")
 
-    if not _TEST and auth_token != _AUTH_TOKEN:
+    if not _TEST and authorization != _AUTH_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     if not file.filename.endswith('.zip'):
