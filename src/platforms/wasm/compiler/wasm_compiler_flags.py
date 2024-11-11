@@ -3,6 +3,7 @@ import os
 DEBUG = 0
 USE_CCACHE = True
 FAST_BUILD = False
+OPTIMIZED = False
 
 if "DEBUG" in os.environ:
     DEBUG = 1
@@ -13,7 +14,12 @@ if "NO_CCACHE" in os.environ:
 if "FAST_BUILD" in os.environ and not DEBUG:
     FAST_BUILD = True
 
+if "OPTIMIZED" in os.environ:
+    OPTIMIZED = True
+
 assert not (FAST_BUILD and DEBUG), "Cannot build fast and debug at the same time"
+assert not (FAST_BUILD and OPTIMIZED), "Cannot build fast and optimized at the same time"
+assert not (DEBUG and OPTIMIZED), "Cannot build debug and optimized at the same time"
 
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
 # It seems easier to load the program as a pure JS file, so we will use asm.js
@@ -70,6 +76,7 @@ wasmflags = [
 
 if FAST_BUILD:
     wasmflags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
+
 elif DEBUG:
     wasmflags += [
         '-g3',
@@ -88,6 +95,9 @@ elif DEBUG:
     for opt in opt_flags:
         if opt in wasmflags:
             wasmflags.remove(opt)
+
+elif OPTIMIZED:
+    wasmflags += ["-flto"]
     
 
 
@@ -101,6 +111,7 @@ if export_name:
         "-o",
         f"{env.subst('$BUILD_DIR')}/{export_name}.js",
         "-fuse-ld=lld",
+
     ]
 
 env.Append(LINKFLAGS=wasmflags)
