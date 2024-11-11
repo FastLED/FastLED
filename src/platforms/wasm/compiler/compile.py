@@ -36,7 +36,7 @@ FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 2
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
-FAST_BUILD = "RENDER_SERVICE_TYPE" in os.environ
+QUICK_BUILD = "RENDER_SERVICE_TYPE" in os.environ
 
 assert JS_DIR.exists()
 assert ARDUINO_H_SRC.exists()
@@ -63,7 +63,7 @@ def compile(js_dir: Path, fast_build: bool) -> int:
     env = os.environ.copy()
     if fast_build:
         print("Fast build enabled")
-        env["FAST_BUILD"] = "1"
+        env["QUICK_BUILD"] = "1"
 
     for attempt in range(1, max_attempts + 1):
         try:
@@ -271,7 +271,7 @@ def main() -> int:
 
         if do_compile:
             try:
-                process_compile(JS_DIR, FAST_BUILD)
+                process_compile(JS_DIR, QUICK_BUILD)
             except Exception as e:
                 print(f"Error: {str(e)}")
                 return 1

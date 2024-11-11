@@ -2,7 +2,7 @@ import os
 
 DEBUG = 0
 USE_CCACHE = True
-FAST_BUILD = False
+QUICK_BUILD = False
 OPTIMIZED = False
 
 if "DEBUG" in os.environ:
@@ -11,14 +11,14 @@ if "DEBUG" in os.environ:
 if "NO_CCACHE" in os.environ:
     USE_CCACHE = False
 
-if "FAST_BUILD" in os.environ and not DEBUG:
-    FAST_BUILD = True
+if "QUICK_BUILD" in os.environ and not DEBUG:
+    QUICK_BUILD = True
 
 if "OPTIMIZED" in os.environ:
     OPTIMIZED = True
 
-assert not (FAST_BUILD and DEBUG), "Cannot build fast and debug at the same time"
-assert not (FAST_BUILD and OPTIMIZED), "Cannot build fast and optimized at the same time"
+assert not (QUICK_BUILD and DEBUG), "Cannot build fast and debug at the same time"
+assert not (QUICK_BUILD and OPTIMIZED), "Cannot build fast and optimized at the same time"
 assert not (DEBUG and OPTIMIZED), "Cannot build debug and optimized at the same time"
 
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
@@ -26,10 +26,10 @@ assert not (DEBUG and OPTIMIZED), "Cannot build debug and optimized at the same 
 # right now as a test.
 USE_WASM = 2
 
-if DEBUG or FAST_BUILD:
+if DEBUG or QUICK_BUILD:
     USE_WASM=1  # disable wasm2js on these builds.
 
-build_mode = "-O1" if FAST_BUILD else "-Oz"
+build_mode = "-O1" if QUICK_BUILD else "-Oz"
 
 Import("env", "projenv")
 
@@ -74,7 +74,7 @@ wasmflags = [
     f"-sWASM={USE_WASM}",
 ]
 
-if FAST_BUILD:
+if QUICK_BUILD:
     wasmflags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
 
 elif DEBUG:
