@@ -120,7 +120,7 @@ def compile_source(temp_src_dir: Path, file_path: Path) -> FileResponse | HTTPEx
     return response
 
 @app.post("/compile/wasm")
-def upload_file(
+def compile_wasm(
     file: UploadFile = File(...),
     authorization: str = Header(None)
 ) -> FileResponse:
