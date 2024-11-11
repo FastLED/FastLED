@@ -130,13 +130,15 @@ RUN ln -s /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.
 
 RUN ln -s /js/fastled/examples /js/examples
 
+COPY src/platforms/wasm/compiler/prewarm.sh /prewarm.sh
+RUN chmod +x /prewarm.sh && dos2unix /prewarm.sh
+
 WORKDIR /js
 
 # NOW DO THE 1st PRE-WARM CYCLE
 # Prewarm the ccache with a first compile and also give a chance for
 # platformio to install the required tools.
-RUN mkdir -p /mapped && cp -r /js/fastled/examples/wasm /mapped/wasm
-RUN python run.py compile && rm -rf /mapped && rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
+RUN /prewarm.sh
 
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will
@@ -164,9 +166,7 @@ RUN dos2unix /js/fastled/src/platforms/wasm/compiler/*.sh && \
     dos2unix /js/fastled/src/platforms/wasm/compiler/*.py
 
 # Pre-warm with a second compile with updated files.
-RUN mkdir -p /mapped && cp -r /js/fastled/examples/wasm /mapped/wasm
-RUN python run.py compile && rm -rf /mapped && rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
-
+RUN /prewarm.sh
 # Okay that it's, we are ready to do fast compiles now.
 
 ENTRYPOINT ["/entrypoint.sh"]
