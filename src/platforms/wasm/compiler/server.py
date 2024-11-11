@@ -10,17 +10,11 @@ import time
 import os
 from threading import Timer
 
-def cleanup_file(file_path: Path) -> None:
-    """Clean up a file after it has been sent."""
-    try:
-        if file_path.exists():
-            file_path.unlink()
-    except Exception as e:
-        print(f"Error cleaning up file {file_path}: {e}")
+
 
 _TEST = False
 
-_PURGE_TIME = 60 * 60 * 1  # 1 hour
+_PURGE_TIME = 60 * 10  # Purge user cache after 10 mins
 
 _UPLOAD_LIMIT = 10 * 1024 * 1024
 # Protect the endpoints from random bots.
@@ -30,6 +24,14 @@ _AUTH_TOKEN = "oBOT5jbsO4ztgrpNsQwlmFLIKB"
 
 _GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
 _GIT_REPO_PATH = "/js/fastled"  # Path to the git repository
+
+def cleanup_file(file_path: Path) -> None:
+    """Clean up a file after it has been sent."""
+    try:
+        if file_path.exists():
+            file_path.unlink()
+    except Exception as e:
+        print(f"Error cleaning up file {file_path}: {e}")
 
 def update_git_repo():
     """Update git repository by fetching and resetting to origin/main."""
