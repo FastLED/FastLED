@@ -1,17 +1,17 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Header, BackgroundTasks  # type: ignore
-import zlib
-import tempfile
-from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
-import threading
-import shutil
-import zipfile
-from pathlib import Path
-import subprocess
-import time
 import os
+import shutil
+import subprocess
+import tempfile
+import threading
+import time
+import zipfile
+import zlib
+from pathlib import Path
 from threading import Timer
 
-
+from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
+                     HTTPException, UploadFile)
+from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 
 _TEST = False
 _UPLOAD_LIMIT = 10 * 1024 * 1024
