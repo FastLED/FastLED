@@ -52,8 +52,6 @@ FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 2
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
-BUILD_MODE = BuildMode.from_string(os.environ.get("BUILD_MODE", "QUICK"))
-
 assert JS_DIR.exists()
 assert ARDUINO_H_SRC.exists()
 assert INDEX_HTML_SRC.exists()
@@ -199,10 +197,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--only-compile", action="store_true", help="Only compile the project"
     )
-    parser.add_argument("--debug", action="store_true", help="Enable debug and symbols")
-    debug_from_env = bool(int(os.getenv("DEBUG", 0)))
-    if debug_from_env:
-        parser.set_defaults(debug=True)
+    # Add mutually exclusive build mode group
+    build_mode = parser.add_mutually_exclusive_group()
+    build_mode.add_argument("--debug", action="store_true", help="Build in debug mode")
+    build_mode.add_argument(
+        "--quick",
+        action="store_true",
+        default=True,
+        help="Build in quick mode (default)",
+    )
+    build_mode.add_argument(
+        "--release", action="store_true", help="Build in release mode"
+    )
+
     return parser.parse_args()
 
 
@@ -286,7 +293,15 @@ def main() -> int:
 
         if do_compile:
             try:
-                build_mode = BuildMode.DEBUG if debug else BUILD_MODE
+                # Determine build mode from args
+                if args.debug:
+                    build_mode = BuildMode.DEBUG
+                elif args.release:
+                    build_mode = BuildMode.RELEASE
+                else:
+                    # Default to QUICK mode if neither debug nor release specified
+                    build_mode = BuildMode.QUICK
+
                 process_compile(JS_DIR, build_mode)
             except Exception as e:
                 print(f"Error: {str(e)}")
