@@ -6,6 +6,7 @@ import shutil
 import zipfile
 from pathlib import Path
 import subprocess
+import time
 
 def cleanup_file(file_path: Path) -> None:
     """Clean up a file after it has been sent."""
@@ -87,7 +88,9 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
                 detail=f"No files found in extracted directory: {temp_src_dir}"
             )
         print(f"Files are ready, waiting for compile lock...")
+        compile_lock_start = time.time()
         with compile_lock:
+            compile_lock_end = time.time()
             print("\nRunning compiler...")
             cp: subprocess.CompletedProcess = subprocess.run(
                 ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"], 
@@ -95,8 +98,13 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
                 capture_output=True,
                 text=True
             )
+        compile_time = time.time() - compile_lock_end
+        compile_lock_time = compile_lock_end - compile_lock_start
             
         print(f"\nCompiler output:\nstdout:\n{cp.stdout}\nstderr:\n{cp.stderr}")
+        print(f"Compile lock time: {compile_lock_time:.2f}s")
+        print(f"Compile time: {compile_time:.2f}s")
+
 
         if cp.returncode != 0:
             raise HTTPException(
@@ -120,9 +128,11 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
 
             stdout_txt = fastled_js_dir / "stdout.txt"
             stderr_txt = fastled_js_dir / "stderr.txt"
+            perf_txt = fastled_js_dir / "perf.txt"
             print(f"\nCompiler output files:\nstdout: {stdout_txt}\nstderr: {stderr_txt}")
             stdout_txt.write_text(cp.stdout)
             stderr_txt.write_text(cp.stderr)
+            perf_txt.write_text(f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s")
 
             output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
             print(f"\nCreating output zip at: {output_zip_path}")
