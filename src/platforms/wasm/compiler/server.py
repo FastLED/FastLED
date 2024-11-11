@@ -95,7 +95,8 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
             cp: subprocess.CompletedProcess = subprocess.run(
                 ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"], 
                 cwd="/js",
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Redirect stderr to stdout
                 text=True
             )
         compile_time = time.time() - compile_lock_end
@@ -109,7 +110,7 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
         if cp.returncode != 0:
             raise HTTPException(
                 status_code=500, 
-                detail=f"Compilation failed:\nstdout: {cp.stdout}\nstderr: {cp.stderr}"
+                detail=f"Compilation failed:\n{cp.stdout}"
             )
 
         try:
@@ -126,12 +127,11 @@ def upload_file(auth_token: str = "", file: UploadFile = File(...)) -> FileRespo
                     detail=f"Compilation artifacts not found at {fastled_js_dir}"
                 )
 
-            stdout_txt = fastled_js_dir / "stdout.txt"
-            stderr_txt = fastled_js_dir / "stderr.txt"
+            # Replace separate stdout/stderr files with single out.txt
+            out_txt = fastled_js_dir / "out.txt"
             perf_txt = fastled_js_dir / "perf.txt"
-            print(f"\nCompiler output files:\nstdout: {stdout_txt}\nstderr: {stderr_txt}")
-            stdout_txt.write_text(cp.stdout)
-            stderr_txt.write_text(cp.stderr)
+            print(f"\nSaving combined output to: {out_txt}")
+            out_txt.write_text(cp.stdout)
             perf_txt.write_text(f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s")
 
             output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
