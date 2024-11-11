@@ -304,7 +304,7 @@ def main() -> None:
         help="Launch a web server and open a browser after compilation",
     )
     parser.add_argument(
-        "--no-open",
+        "--just-compile",
         action="store_true",
         help="Skip launching a web server and opening a browser",
     )
