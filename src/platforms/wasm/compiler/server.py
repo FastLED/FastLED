@@ -56,27 +56,26 @@ def compile_source(temp_src_dir: Path, file_path: Path) -> FileResponse | HTTPEx
     with compile_lock:
         compile_lock_end = time.time()
         print("\nRunning compiler...")
-        cp: subprocess.CompletedProcess = subprocess.run(
-            ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"], 
+        proc = subprocess.Popen(
+            ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"],
             cwd="/js",
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,  # Redirect stderr to stdout
-            text=True
+            stderr=subprocess.STDOUT,
+            text=True,
         )
+        stdout = proc.communicate()[0]
+        return_code = proc.returncode
+        if return_code != 0:
+            return HTTPException(
+                status_code=400,
+                detail=f"Compilation failed with return code {return_code}:\n{stdout}"
+            )
     compile_time = time.time() - compile_lock_end
     compile_lock_time = compile_lock_end - compile_lock_start
         
-    print(f"\nCompiler output:\nstdout:\n{cp.stdout}")
+    print(f"\nCompiler output:\nstdout:\n{stdout}")
     print(f"Compile lock time: {compile_lock_time:.2f}s")
     print(f"Compile time: {compile_time:.2f}s")
-    
-    print(f"Compiler return code: {cp.returncode}")
-
-    if cp.returncode != 0:
-        return HTTPException(
-            status_code=400, 
-            detail=f"Compilation failed:\n{cp.stdout}"
-        )
 
     # Find the fastled_js directory
     fastled_js_dir = src_dir / "fastled_js"
@@ -95,7 +94,7 @@ def compile_source(temp_src_dir: Path, file_path: Path) -> FileResponse | HTTPEx
     out_txt = fastled_js_dir / "out.txt"
     perf_txt = fastled_js_dir / "perf.txt"
     print(f"\nSaving combined output to: {out_txt}")
-    out_txt.write_text(cp.stdout)
+    out_txt.write_text(stdout)
     perf_txt.write_text(f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s")
 
     output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
@@ -162,8 +161,12 @@ def upload_file(
 
         out = compile_source(Path(temp_src_dir), file_path)
         if isinstance(out, HTTPException):
+            print("Raising HTTPException")
             raise out
         return out
+    except HTTPException as e:
+        print(f"HTTPException in upload process: {str(e)}")
+        raise e
 
     except Exception as e:
         print(f"Error in upload process: {str(e)}")
