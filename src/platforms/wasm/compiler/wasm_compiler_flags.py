@@ -13,6 +13,8 @@ if "NO_CCACHE" in os.environ:
 if "FAST_BUILD" in os.environ and not DEBUG:
     FAST_BUILD = True
 
+assert not (FAST_BUILD and DEBUG), "Cannot build fast and debug at the same time"
+
 # Global variable to control WASM output (0 for asm.js, 1 for WebAssembly)
 # It seems easier to load the program as a pure JS file, so we will use asm.js
 # right now as a test.
@@ -66,7 +68,9 @@ wasmflags = [
     f"-sWASM={USE_WASM}",
 ]
 
-if DEBUG:
+if FAST_BUILD:
+    wasmflags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
+elif DEBUG:
     wasmflags += [
         '-g3',
         '-gsource-map',
