@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Header, BackgroundTasks  # type: ignore
+import zlib
 import tempfile
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 import threading
@@ -46,7 +47,7 @@ upload_dir = Path("uploads")
 upload_dir.mkdir(exist_ok=True)
 compile_lock = threading.Lock()
 
-output_dir = Path("output")
+output_dir = Path("/output")
 output_dir.mkdir(exist_ok=True)
 
 @app.get("/", include_in_schema=False)
@@ -113,16 +114,36 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     out_txt.write_text(stdout)
     perf_txt.write_text(f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s")
 
+    output_dir.mkdir(exist_ok=True)  # Ensure output directory exists
     output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
     print(f"\nCreating output zip at: {output_zip_path}")
     
-    with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_out:
-        print("\nAdding files to output zip:")
-        for file_path in fastled_js_dir.rglob("*"):
-            if file_path.is_file():
-                arc_path = file_path.relative_to(fastled_js_dir)
-                print(f"  Adding: {arc_path}")
-                zip_out.write(file_path, arc_path)
+    try:
+        with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_out:
+            print("\nAdding files to output zip:")
+            for file_path in fastled_js_dir.rglob("*"):
+                if file_path.is_file():
+                    arc_path = file_path.relative_to(fastled_js_dir)
+                    print(f"  Adding: {arc_path}")
+                    zip_out.write(file_path, arc_path)
+    except zipfile.BadZipFile as e:
+        print(f"Error creating zip file: {e}")
+        return HTTPException(
+            status_code=500,
+            detail=f"Failed to create zip file: {e}"
+        )
+    except zlib.error as e:
+        print(f"Compression error: {e}")
+        return HTTPException(
+            status_code=500,
+            detail=f"Zip compression failed - zlib error: {e}"
+        )
+    except Exception as e:
+        print(f"Unexpected error creating zip: {e}")
+        return HTTPException(
+            status_code=500,
+            detail=f"Failed to create zip file: {e}"
+        )
 
     def cleanup_files():
         if output_zip_path.exists():
