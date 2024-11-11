@@ -45,6 +45,12 @@ RUN echo 'print() { echo "$@"; }' >> /etc/profile && \
     echo 'export PATH="/container/bin:/usr/bin:/emsdk:/emsdk/upstream/emscripten:$PATH"' >> /etc/profile && \
     echo 'source /emsdk/emsdk_env.sh' >> /etc/profile
 
+
+ENV LANG=en_US.UTF-8
+ENV LC_CTYPE=UTF-8
+RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
+    echo 'export LC_CTYPE=UTF-8' >> /etc/profile
+
 #COPY src/platforms/wasm/compiler/install-arduino-cli.sh /install-arduino-cli.sh
 #RUN chmod +x /install-arduino-cli.sh && /install-arduino-cli.sh || echo "Failed to install Arduino CLI"
     
@@ -55,6 +61,39 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
+
+# git clone fastled repo to /js/fastled
+RUN git clone https://github.com/fastled/FastLED.git /js/fastled
+
+RUN dos2unix /js/fastled/src/platforms/wasm/compiler/*.sh && \
+    chmod +x /js/fastled/src/platforms/wasm/compiler/*.sh && \
+    dos2unix /js/fastled/src/platforms/wasm/compiler/*.py
+    
+# Create symlinks for wasm platform files
+RUN ln -s /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/index.html /js/index.html && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/index.css /js/index.css && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh && \
+    for file in /js/fastled/src/platforms/wasm/compiler/*.js; do ln -s "$file" /js/$(basename "$file"); done && \
+    for file in /js/fastled/src/platforms/wasm/compiler/*.sh; do ln -s "$file" /js/$(basename "$file"); done && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/compile.py /js/compile.py && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/run.py /js/run.py && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/server.py /js/server.py
+
+RUN ln -s /js/fastled/examples /js/examples
+
+WORKDIR /js
+
+# Prewarm the ccache with a first compile and also give a chance for
+# platformio to install the required tools.
+RUN mkdir -p /mapped && cp -r /js/fastled/examples/wasm /mapped/wasm
+RUN python run.py compile && rm -rf /mapped && rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
+
+#Clean up before the volume get's mapped in.
+RUN rm -rf /mapped
+RUN rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
 
 # In order to speed up the build, copy files that are not likely
 # to be changed first.
@@ -76,38 +115,10 @@ COPY ./src/platforms/ /js/fastled/src/platforms/
 RUN dos2unix /js/fastled/src/platforms/wasm/compiler/*.sh && \
     chmod +x /js/fastled/src/platforms/wasm/compiler/*.sh && \
     dos2unix /js/fastled/src/platforms/wasm/compiler/*.py
-    
 
-
-# Create symlinks for wasm platform files
-RUN ln -s /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/index.html /js/index.html && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/index.css /js/index.css && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/arduino-pre-process.sh /js/arduino-pre-process.sh && \
-    for file in /js/fastled/src/platforms/wasm/compiler/*.js; do ln -s "$file" /js/$(basename "$file"); done && \
-    for file in /js/fastled/src/platforms/wasm/compiler/*.sh; do ln -s "$file" /js/$(basename "$file"); done && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/compile.py /js/compile.py && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/run.py /js/run.py && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/server.py /js/server.py    
-
-WORKDIR /js
-
-
-
-ENV LANG=en_US.UTF-8
-ENV LC_CTYPE=UTF-8
-
-# dump to /etc/profile
-RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
-    echo 'export LC_CTYPE=UTF-8' >> /etc/profile
-
-# Prewarm the ccache with a first compile and also give a chance for
-# platformio to install the required tools.
-RUN cp -r /examples/wasm /mapped/ || mkdir -p /mapped/wasm
-RUN python /js/run.py compile
-
+# Pre-warm with a second compile with updated files.
+RUN mkdir -p /mapped && cp -r /js/fastled/examples/wasm /mapped/wasm
+RUN python run.py compile && rm -rf /mapped && rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
 #Clean up before the volume get's mapped in.
 RUN rm -rf /mapped
 RUN rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"

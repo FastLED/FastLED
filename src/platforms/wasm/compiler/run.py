@@ -36,12 +36,12 @@ def _run_compile(unknown_args: list[str]) -> int:
     command = [sys.executable, 'compile.py'] + unknown_args
 
     # Call compile.py with the unknown arguments
-    result = subprocess.run(command, capture_output=True, text=True)
+    result = subprocess.run(command, text=True)
 
     # Print the output from compile.py
-    print(result.stdout)
-    if result.stderr:
-        print(result.stderr, file=sys.stderr)
+    #print(result.stdout)
+    #if result.stderr:
+    #    print(result.stderr, file=sys.stderr)
     return result.returncode
 
 def main() -> int:
