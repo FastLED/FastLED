@@ -16,7 +16,7 @@ def cleanup_file(file_path: Path) -> None:
     except Exception as e:
         print(f"Error cleaning up file {file_path}: {e}")
 
-_TEST = True
+_TEST = False
 
 _PURGE_TIME = 60 * 60 * 1  # 1 hour
 
