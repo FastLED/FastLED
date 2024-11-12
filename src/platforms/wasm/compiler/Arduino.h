@@ -50,6 +50,9 @@ inline long random(long min, long max) {
     return dis(gen);
 }
 
+
+inline int analogRead(int) { return random(0, 1023); }
+
 inline long random(long max) { return random(0, max); }
 
 template <typename T> struct PrintHelper {};
