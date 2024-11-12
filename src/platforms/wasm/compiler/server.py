@@ -121,9 +121,9 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     output_dir.mkdir(exist_ok=True)  # Ensure output directory exists
     output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
     print(f"\nCreating output zip at: {output_zip_path}")
-    
+    start_zip = time.time()
     try:
-        with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_out:
+        with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as zip_out:
             print("\nAdding files to output zip:")
             for file_path in fastled_js_dir.rglob("*"):
                 if file_path.is_file():
@@ -148,6 +148,8 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
             status_code=500,
             detail=f"Failed to create zip file: {e}"
         )
+    zip_time = time.time() - start_zip
+    print(f"Zip file created in {zip_time:.2f}s")
 
     def cleanup_files():
         if output_zip_path.exists():
