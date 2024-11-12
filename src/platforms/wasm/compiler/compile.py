@@ -54,7 +54,7 @@ WASM_COMPILER_SETTTINGS = JS_DIR / "wasm_compiler_flags.py"
 OUTPUT_FILES = ["fastled.js", "fastled.wasm"]
 HEADERS_TO_INSERT = ['#include "Arduino.h"', '#include "platforms/wasm/js.h"']
 FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
-MAX_COMPILE_ATTEMPTS = 2
+MAX_COMPILE_ATTEMPTS = 1  # Occasionally the compiler fails for unknown reasons, but disabled because it increases the build time on failure.
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
 
@@ -77,7 +77,7 @@ def copy_files(src_dir: Path, js_src: Path) -> None:
             shutil.copy2(item, js_src / item.name)
 
 
-def compile(js_dir: Path, build_mode: BuildMode) -> int:
+def compile(js_dir: Path, build_mode: BuildMode, auto_clean: bool) -> int:
     print("Starting compilation process...")
     max_attempts = 2
     env = os.environ.copy()
@@ -88,7 +88,7 @@ def compile(js_dir: Path, build_mode: BuildMode) -> int:
         try:
             print(f"Attempting compilation (attempt {attempt}/{max_attempts})...")
             cmd_list = ["pio", "run"]
-            if _DISABLE_AUTO_CLEAN:
+            if not auto_clean:
                 cmd_list.append("--disable-auto-clean")
             process = subprocess.Popen(
                 cmd_list,
@@ -211,6 +211,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable profiling for compilation to see what's taking so long.",
     )
+    parser.add_argument(
+        "--disable-auto-clean",
+        action="store_true",
+        help="Disable automatic cleaning of build directory",
+    )
     # Add mutually exclusive build mode group
     build_mode = parser.add_mutually_exclusive_group()
     build_mode.add_argument("--debug", action="store_true", help="Build in debug mode")
@@ -238,9 +243,9 @@ def find_project_dir(mapped_dir: Path) -> Path:
     return src_dir
 
 
-def process_compile(js_dir: Path, build_mode: BuildMode) -> None:
+def process_compile(js_dir: Path, build_mode: BuildMode, auto_clean: bool) -> None:
     print("Starting compilation...")
-    rtn = compile(js_dir, build_mode)
+    rtn = compile(js_dir, build_mode, auto_clean)
     print(f"Compilation return code: {rtn}")
     if rtn != 0:
         print("Compilation failed.")
@@ -321,7 +326,11 @@ def main() -> int:
                     # Default to QUICK mode if neither debug nor release specified
                     build_mode = BuildMode.QUICK
 
-                process_compile(JS_DIR, build_mode)
+                process_compile(
+                    js_dir=JS_DIR,
+                    build_mode=build_mode,
+                    auto_clean=not args.disable_auto_clean,
+                )
             except Exception as e:
                 print(f"Error: {str(e)}")
                 return 1
