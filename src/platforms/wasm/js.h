@@ -181,30 +181,6 @@ class jsButton {
 };
 
 
-void jsSetCanvasSize(const char* jsonString, size_t jsonSize);
-void jsSetCanvasSize(int cledcontoller_id, uint16_t width, uint16_t height);
-void jsSetCanvasSize(int cledcontoller_id, const ScreenMap& screenmap);
-void jsOnFrame(ActiveStripData& active_strips);
-void jsOnStripAdded(uintptr_t strip, uint32_t num_leds);
-void updateJs(const char* jsonStr);
-
-
-
-#define FASTLED_HAS_UI_BUTTON 1
-#define FASTLED_HAS_UI_SLIDER 1
-#define FASTLED_HAS_UI_CHECKBOX 1
-#define FASTLED_HAS_UI_NUMBER_FIELD 1
-#define FASTLED_HAS_UI_TITLE 1
-#define FASTLED_HAS_UI_DESCRIPTION 1
-
-typedef jsNumberField NumberField;
-typedef jsSlider Slider;
-typedef jsCheckbox Checkbox;
-typedef jsButton Button;
-typedef jsTitle Title;
-typedef jsDescription Description;
-
-
 class jsTitle {
   public:
     jsTitle(const char *name);
@@ -234,6 +210,30 @@ class jsDescription {
     jsUiInternalRef mInternal;
     Str mGroup;
 };
+
+
+void jsSetCanvasSize(const char* jsonString, size_t jsonSize);
+void jsSetCanvasSize(int cledcontoller_id, uint16_t width, uint16_t height);
+void jsSetCanvasSize(int cledcontoller_id, const ScreenMap& screenmap);
+void jsOnFrame(ActiveStripData& active_strips);
+void jsOnStripAdded(uintptr_t strip, uint32_t num_leds);
+void updateJs(const char* jsonStr);
+
+
+
+#define FASTLED_HAS_UI_BUTTON 1
+#define FASTLED_HAS_UI_SLIDER 1
+#define FASTLED_HAS_UI_CHECKBOX 1
+#define FASTLED_HAS_UI_NUMBER_FIELD 1
+#define FASTLED_HAS_UI_TITLE 1
+#define FASTLED_HAS_UI_DESCRIPTION 1
+
+typedef jsNumberField NumberField;
+typedef jsSlider Slider;
+typedef jsCheckbox Checkbox;
+typedef jsButton Button;
+typedef jsTitle Title;
+typedef jsDescription Description;
 
 
 FASTLED_NAMESPACE_END
