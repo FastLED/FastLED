@@ -7,10 +7,10 @@
 
 FASTLED_NAMESPACE_BEGIN
 
- jsUiInternal::jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc)
+ jsUiInternal::jsUiInternal(const Str& name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc)
     : mName(name), mUpdateFunc(updateFunc), mtoJsonFunc(toJsonFunc), mId(nextId()), mMutex() {}
 
- const char* jsUiInternal::name() const { return mName; }
+ const Str& jsUiInternal::name() const { return mName; }
  void jsUiInternal::update(const FLArduinoJson::JsonVariantConst& json) { 
     std::lock_guard<std::mutex> lock(mMutex);
     if (mUpdateFunc) {

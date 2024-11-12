@@ -11,7 +11,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-jsCheckbox::jsCheckbox(const char* name, bool value)
+jsCheckbox::jsCheckbox(const Str& name, bool value)
     : mValue(value) {
     auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const FLArduinoJson::JsonVariantConst& json) {
         static_cast<jsCheckbox*>(self)->updateInternal(json);
@@ -28,7 +28,7 @@ jsCheckbox::~jsCheckbox() {
     jsUiManager::removeComponent(mInternal);
 }
 
-const char* jsCheckbox::name() const {
+const Str& jsCheckbox::name() const {
     return mInternal->name();
 }
 

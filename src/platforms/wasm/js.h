@@ -44,12 +44,12 @@ void jsSetCanvasSize(int cledcontroler_id, int width, int height);
 
 class jsSlider {
   public:
-    jsSlider(const char *name, float value = 128.0f, float min = 0.0f, float max = 255.0f,
+    jsSlider(const Str& name, float value = 128.0f, float min = 0.0f, float max = 255.0f,
              float step = 1.0f);
     ~jsSlider();
-    jsSlider& Group(const char* name) { mGroup = name; return *this; }
+    jsSlider& Group(const Str& name) { mGroup = name; return *this; }
 
-    const char *name() const;
+    const Str& name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
     float value() const;
     void setValue(float value);
@@ -84,11 +84,11 @@ class jsSlider {
 
 class jsNumberField {
   public:
-    jsNumberField(const char *name, double value, double min = 0, double max = 100);
+    jsNumberField(const Str&, double value, double min = 0, double max = 100);
     ~jsNumberField();
-    jsNumberField& Group(const char* name) { mGroup = name; return *this; }
+    jsNumberField& Group(const Str& name) { mGroup = name; return *this; }
 
-    const char *name() const;
+    const Str& name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
     double value() const;
     void setValue(double value);
@@ -116,11 +116,11 @@ class jsNumberField {
 
 class jsCheckbox {
   public:
-    jsCheckbox(const char *name, bool value);
+    jsCheckbox(const Str&, bool value);
     ~jsCheckbox();
-    jsCheckbox& Group(const char* name) { mGroup = name; return *this; };
+    jsCheckbox& Group(const Str& name) { mGroup = name; return *this; };
 
-    const char *name() const;
+    const Str& name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
     bool value() const;
     void setValue(bool value);
@@ -141,11 +141,11 @@ class jsCheckbox {
 
 class jsButton {
   public:
-    jsButton(const char *name);
+    jsButton(const Str& name);
     ~jsButton();
-    jsButton& Group(const char* name) { mGroup = name; return *this; }
+    jsButton& Group(const Str& name) { mGroup = name; return *this; }
 
-    const char *name() const;
+    const Str& name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
     bool isPressed() const;
     bool clicked() const {
@@ -183,32 +183,35 @@ class jsButton {
 
 class jsTitle {
   public:
-    jsTitle(const char *name);
+    jsTitle(const Str& text);
     ~jsTitle();
-    jsTitle& Group(const char* name) { mGroup = name; return *this; }
+    jsTitle& Group(const Str& name) { mGroup = name; return *this; }
 
-    const char *name() const;
     void toJson(FLArduinoJson::JsonObject& json) const;
     const Str& groupName() const { return mGroup; }
+    const Str& text() const { return mText; }
 
   private:
     jsUiInternalRef mInternal;
     Str mGroup;
+    Str mText;
 };
 
 class jsDescription {
   public:
-    jsDescription(const char *name);
+    jsDescription(const Str& text);
     ~jsDescription();
-    jsDescription& Group(const char* name) { mGroup = name; return *this; }
+    jsDescription& Group(const Str& name) { mGroup = name; return *this; }
 
-    const char *name() const;
+
     void toJson(FLArduinoJson::JsonObject& json) const;
     const Str& groupName() const { return mGroup; }
+    const Str& text() const { return mText; }
 
   private:
     jsUiInternalRef mInternal;
     Str mGroup;
+    Str mText;
 };
 
 

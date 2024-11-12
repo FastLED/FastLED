@@ -5,22 +5,21 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-jsDescription::jsDescription(const char* name) {
-    mInternal = jsUiInternalRef::New("description", name);
+jsDescription::jsDescription(const Str& name) {
+    jsUiInternal::UpdateFunction update_fcn;
+    jsUiInternal::ToJsonFunction to_json_fcn;
+    mInternal = jsUiInternalRef::New("description", update_fcn, to_json_fcn);
 }
 
 jsDescription::~jsDescription() {
 }
 
-const char* jsDescription::name() const {
-    return mInternal->name();
-}
 
 void jsDescription::toJson(FLArduinoJson::JsonObject& json) const {
-    mInternal->toJson(json);
-    if (mGroup.length() > 0) {
-        json["group"] = mGroup.c_str();
-    }
+    json["name"] = mInternal->name();
+    json["group"] = mGroup.c_str();
+    json["id"] = mInternal->id();
+    json["text"] = text();
 }
 
 FASTLED_NAMESPACE_END

@@ -10,6 +10,7 @@
 #include "callback.h"
 #include "json.h"
 #include "ref.h"
+#include "str.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -21,21 +22,18 @@ public:
     using UpdateFunction = Callback<const FLArduinoJson::JsonVariantConst&>;
     using ToJsonFunction = Callback<FLArduinoJson::JsonObject&>;
 
-    jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc);
-    jsUiInternal(const char* type, const char* name) : 
-        mId(nextId()),
-        mName(name) {
-        // For display-only components that don't need update/toJson functions
-    }
+    jsUiInternal(const Str& name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc);
     ~jsUiInternal() {
         const bool functions_exist = mUpdateFunc || mtoJsonFunc;
         if (functions_exist) {
             clearFunctions();
-            printf("Warning: %s: The owner of the jsUiInternal should clear the functions, not this destructor.\n", mName);
+            printf(
+                "Warning: %s: The owner of the jsUiInternal should clear the functions, not this destructor.\n",
+                mName.c_str());
         }
     }
 
-    const char* name() const;
+    const Str& name() const;
     void update(const FLArduinoJson::JsonVariantConst& json);
     void toJson(FLArduinoJson::JsonObject& json) const;
     int id() const;
@@ -46,7 +44,7 @@ private:
     static int nextId();
     static std::atomic<uint32_t> sNextId;
     int mId;
-    const char* mName;
+    Str mName;
     UpdateFunction mUpdateFunc;
     ToJsonFunction mtoJsonFunc;
     mutable std::mutex mMutex;
