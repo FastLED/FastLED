@@ -6,7 +6,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 jsDescription::jsDescription(const char* name) {
-    mInternal = jsUiInternal::New("description", name);
+    mInternal = jsUiInternalRef::New("description", name);
 }
 
 jsDescription::~jsDescription() {

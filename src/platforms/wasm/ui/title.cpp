@@ -6,7 +6,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 jsTitle::jsTitle(const char* name) {
-    mInternal = jsUiInternal::New("title", name);
+    mInternal = jsUiInternalRef::New("title", name);
 }
 
 jsTitle::~jsTitle() {
