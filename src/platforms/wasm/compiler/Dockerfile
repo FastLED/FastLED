@@ -135,6 +135,9 @@ RUN chmod +x /prewarm.sh && dos2unix /prewarm.sh
 
 WORKDIR /js
 
+ARG PREWARM="true"
+ENV PREWARM=${PREWARM}
+
 # NOW DO THE 1st PRE-WARM CYCLE
 # Prewarm the ccache with a first compile and also give a chance for
 # platformio to install the required tools.
