@@ -2,13 +2,19 @@
 
 #include "../js.h"
 #include "ui_internal.h"
+#include "ui_manager.h"
+
+
 
 FASTLED_NAMESPACE_BEGIN
 
-jsDescription::jsDescription(const Str& name) {
+jsDescription::jsDescription(const Str& text) : mText(text) {
     jsUiInternal::UpdateFunction update_fcn;
-    jsUiInternal::ToJsonFunction to_json_fcn;
+    jsUiInternal::ToJsonFunction to_json_fcn = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
+        static_cast<jsDescription*>(self)->toJson(json);
+    });
     mInternal = jsUiInternalRef::New("description", update_fcn, to_json_fcn);
+    jsUiManager::addComponent(mInternal);
 }
 
 jsDescription::~jsDescription() {
