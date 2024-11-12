@@ -55,7 +55,7 @@ async def read_root() -> RedirectResponse:
     """Redirect to the /docs endpoint."""
     return RedirectResponse(url="/docs")
 
-def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: BackgroundTasks) -> FileResponse | HTTPException:
+def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: BackgroundTasks, build_mode: str) -> FileResponse | HTTPException:
     """Compile source code and return compiled artifacts as a zip file."""
     temp_zip_dir = None
     try:
@@ -73,8 +73,10 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     with compile_lock:
         compile_lock_end = time.time()
         print("\nRunning compiler...")
+        cmd = ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"]
+        cmd.append(f"--{build_mode.lower()}")
         proc = subprocess.Popen(
-            ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"],
+            cmd,
             cwd="/js",
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -162,13 +164,22 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
         background=background_tasks
     )
 
+
+
 @app.post("/compile/wasm")
 async def compile_wasm(
     file: UploadFile = File(...),
     authorization: str = Header(None),
+    build_mode: str = "quick",
     background_tasks: BackgroundTasks = BackgroundTasks()
 ) -> FileResponse:
     """Upload a file into a temporary directory."""
+
+    if build_mode not in ["quick", "release", "debug"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid build mode. Must be one of 'quick', 'release', or 'debug'."
+        )
     print(f"Starting upload process for file: {file.filename}")
 
     if not _TEST and authorization != _AUTH_TOKEN:
@@ -203,7 +214,7 @@ async def compile_wasm(
         for path in Path(temp_src_dir).rglob("*"):
             print(f"  {path}")
 
-        out = compile_source(Path(temp_src_dir), file_path, background_tasks)
+        out = compile_source(Path(temp_src_dir), file_path, background_tasks, build_mode)
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
             raise out
