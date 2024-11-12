@@ -22,6 +22,11 @@ public:
     using ToJsonFunction = Callback<FLArduinoJson::JsonObject&>;
 
     jsUiInternal(const char* name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc);
+    jsUiInternal(const char* type, const char* name) : 
+        mId(nextId()),
+        mName(name) {
+        // For display-only components that don't need update/toJson functions
+    }
     ~jsUiInternal() {
         const bool functions_exist = mUpdateFunc || mtoJsonFunc;
         if (functions_exist) {

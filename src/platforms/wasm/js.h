@@ -200,5 +200,40 @@ typedef jsSlider Slider;
 typedef jsCheckbox Checkbox;
 typedef jsButton Button;
 
+class jsTitle {
+  public:
+    jsTitle(const char *name);
+    ~jsTitle();
+    jsTitle& Group(const char* name) { mGroup = name; return *this; }
+
+    const char *name() const;
+    void toJson(FLArduinoJson::JsonObject& json) const;
+    const Str& groupName() const { return mGroup; }
+
+  private:
+    jsUiInternalRef mInternal;
+    Str mGroup;
+};
+
+class jsDescription {
+  public:
+    jsDescription(const char *name);
+    ~jsDescription();
+    jsDescription& Group(const char* name) { mGroup = name; return *this; }
+
+    const char *name() const;
+    void toJson(FLArduinoJson::JsonObject& json) const;
+    const Str& groupName() const { return mGroup; }
+
+  private:
+    jsUiInternalRef mInternal;
+    Str mGroup;
+};
+
+typedef jsTitle Title;
+typedef jsDescription Description;
+
+#define FASTLED_HAS_UI_TITLE 1
+#define FASTLED_HAS_UI_DESCRIPTION 1
 
 FASTLED_NAMESPACE_END
