@@ -21,6 +21,7 @@ jsTitle::~jsTitle() {
 
 void jsTitle::toJson(FLArduinoJson::JsonObject& json) const {
     json["name"] = mInternal->name();
+    json["type"] = "title";
     json["group"] = mGroup.c_str();
     json["id"] = mInternal->id();
     json["text"] = text();
