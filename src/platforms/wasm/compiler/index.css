@@ -102,6 +102,17 @@ h1 {
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
+#fastled-description {
+    width: 100%;
+    max-width: 1000px; /* Match the max-width of main-container */
+    box-sizing: border-box;
+    text-align: center;
+    margin: 10px auto; /* Center horizontally */
+    padding: 0 20px;
+    color: #666;
+    font-size: 1.1em;
+}
+
 #output {
     font-size: 1em;
     padding: 20px;
