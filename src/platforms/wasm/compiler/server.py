@@ -168,6 +168,10 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
         background=background_tasks
     )
 
+@app.get("/healthz")
+async def healthz() -> dict:
+    """Health check endpoint."""
+    return {"status": "ok"}
 
 
 @app.post("/compile/wasm")
