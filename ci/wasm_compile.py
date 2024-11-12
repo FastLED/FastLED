@@ -162,6 +162,7 @@ def build_image() -> None:
             "-t",
             IMAGE_NAME,
         ]
+        cmd_list.extend(["--build-arg", f"PREWARM=false"])
         if IS_ARM:
             cmd_list.extend(["--build-arg", f"PLATFORM_TAG={PLATFORM_TAG}"])
         cmd_list.extend(
