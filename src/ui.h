@@ -1,9 +1,5 @@
 #pragma once
 
-
-
-#error
-
 #include <stdint.h>
 
 #include "platforms/ui_defs.h"
