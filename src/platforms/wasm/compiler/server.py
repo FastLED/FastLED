@@ -55,7 +55,7 @@ async def read_root() -> RedirectResponse:
     """Redirect to the /docs endpoint."""
     return RedirectResponse(url="/docs")
 
-def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: BackgroundTasks, build_mode: str) -> FileResponse | HTTPException:
+def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: BackgroundTasks, build_mode: str, profile: bool) -> FileResponse | HTTPException:
     """Compile source code and return compiled artifacts as a zip file."""
     temp_zip_dir = None
     try:
@@ -75,6 +75,8 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
         print("\nRunning compiler...")
         cmd = ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}", f"--{build_mode}"]
         cmd.append(f"--{build_mode.lower()}")
+        if profile:
+            cmd.append("--profile")
         proc = subprocess.Popen(
             cmd,
             cwd="/js",
@@ -171,6 +173,7 @@ async def compile_wasm(
     file: UploadFile = File(...),
     authorization: str = Header(None),
     build: str = Header(None),
+    profile: str = Header(None),
     background_tasks: BackgroundTasks = BackgroundTasks()
 ) -> FileResponse:
     """Upload a file into a temporary directory."""
@@ -182,6 +185,10 @@ async def compile_wasm(
              status_code=400,
              detail="Invalid build mode. Must be one of 'quick', 'release', or 'debug' or omitted"
          )
+    if profile is not None:
+        profile = profile.lower() == "true" or profile.lower() == "1"
+    else:
+        profile = False
     print(f"Build mode is {build}")
     build = build or "quick"
     print(f"Starting upload process for file: {file.filename}")
@@ -217,7 +224,7 @@ async def compile_wasm(
         print("\nContents of source directory:")
         for path in Path(temp_src_dir).rglob("*"):
             print(f"  {path}")
-        out = compile_source(Path(temp_src_dir), file_path, background_tasks, build)
+        out = compile_source(Path(temp_src_dir), file_path, background_tasks, build, profile)
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
             raise out

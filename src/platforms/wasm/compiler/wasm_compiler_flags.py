@@ -45,7 +45,7 @@ env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 # Todo: Investigate the following flags
 # -sSINGLE_FILE=1
 
-common_flags = [
+sketch_flags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
     "-DFASTLED_FORCE_NAMESPACE=1",
     "-DFASTLED_USE_PROGMEM=0",
@@ -64,14 +64,14 @@ common_flags = [
 ]
 
 if QUICK_BUILD:
-    common_flags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
+    sketch_flags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
 elif DEBUG:
     # Remove -Oz flag
     opt_flags = ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"]
     for opt in opt_flags:
-        if opt in common_flags:
-            common_flags.remove(opt)
-    common_flags += [
+        if opt in sketch_flags:
+            sketch_flags.remove(opt)
+    sketch_flags += [
         '-g3',
         '-gsource-map',
         '--emit-symbol-map',
@@ -82,7 +82,7 @@ elif DEBUG:
     ]
 
 
-sketch_flags = common_flags + [
+sketch_flags += [
     "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
     "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']",
     "--no-entry",

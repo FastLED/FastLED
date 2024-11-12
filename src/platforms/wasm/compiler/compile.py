@@ -52,6 +52,7 @@ FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 2
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
+
 assert JS_DIR.exists()
 assert ARDUINO_H_SRC.exists()
 assert INDEX_HTML_SRC.exists()
@@ -197,6 +198,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--only-compile", action="store_true", help="Only compile the project"
     )
+    parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Enable profiling for compilation to see what's taking so long.",
+    )
     # Add mutually exclusive build mode group
     build_mode = parser.add_mutually_exclusive_group()
     build_mode.add_argument("--debug", action="store_true", help="Build in debug mode")
@@ -255,6 +261,11 @@ def main() -> int:
     args = parse_args()
     print(f"Keep files flag: {args.keep_files}")
     print(f"Using mapped directory: {args.mapped_dir}")
+
+    if args.profile:
+        print("Enabling profiling for compilation.")
+        # Profile linking
+        os.environ["EMPROFILE"] = "2"
 
     try:
         if JS_SRC.exists():
