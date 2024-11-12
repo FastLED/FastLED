@@ -841,6 +841,16 @@ class UiManager {
                 console.log(`Group ${group} found, for item ${data.name}`);
             }
 
+            if (data.type === 'title') {
+                this.setTitle(data);
+                return; // Skip creating UI control for title
+            }
+
+            if (data.type === 'description') {
+                this.setDescription(data);
+                return; // Skip creating UI control for description
+            }
+
             let control;
             if (data.type === 'slider') {
                 control = this.createSlider(data);
@@ -875,6 +885,42 @@ class UiManager {
             error('UI controls container not found in the HTML');
         }
         return container;
+    }
+
+    setTitle(titleData) {
+        if (titleData && titleData.text) {
+            document.title = titleData.text;
+            const h1Element = document.querySelector('h1');
+            if (h1Element) {
+                h1Element.textContent = titleData.text;
+            } else {
+                console.warn("H1 element not found in document");
+            }
+        } else {
+            console.warn("Invalid title data received:", titleData);
+        }
+    }
+
+    setDescription(descData) {
+        if (descData && descData.text) {
+            // Create or find description element
+            let descElement = document.querySelector('#fastled-description');
+            if (!descElement) {
+                descElement = document.createElement('div');
+                descElement.id = 'fastled-description';
+                // Insert after h1
+                const h1Element = document.querySelector('h1');
+                if (h1Element && h1Element.nextSibling) {
+                    h1Element.parentNode.insertBefore(descElement, h1Element.nextSibling);
+                } else {
+                    console.warn("Could not find h1 element to insert description after");
+                    document.body.insertBefore(descElement, document.body.firstChild);
+                }
+            }
+            descElement.textContent = descData.text;
+        } else {
+            console.warn("Invalid description data received:", descData);
+        }
     }
 
     createNumberField(element) {
