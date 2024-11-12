@@ -9,7 +9,7 @@ import zlib
 from pathlib import Path
 from threading import Timer
 
-from fastapi import (BackgroundTasks, FastAPI, File, Header, Body,  # type: ignore
+from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
                      HTTPException, UploadFile)
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 
@@ -170,16 +170,18 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
 async def compile_wasm(
     file: UploadFile = File(...),
     authorization: str = Header(None),
-    # build_mode: str = Body("quick"),
+    build_mode: str = Header(None),
     background_tasks: BackgroundTasks = BackgroundTasks()
 ) -> FileResponse:
     """Upload a file into a temporary directory."""
+    if build_mode is not None:
+        build_mode = build_mode.lower()
 
-    # if build_mode not in ["quick", "release", "debug"]:
-    #     raise HTTPException(
-    #         status_code=400,
-    #         detail="Invalid build mode. Must be one of 'quick', 'release', or 'debug'."
-    #     )
+    if build_mode not in ["quick", "release", "debug", None]:
+         raise HTTPException(
+             status_code=400,
+             detail="Invalid build mode. Must be one of 'quick', 'release', or 'debug' or omitted"
+         )
     build_mode = "quick"
     print(f"Starting upload process for file: {file.filename}")
 
