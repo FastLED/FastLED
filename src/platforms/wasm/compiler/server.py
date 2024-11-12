@@ -73,7 +73,7 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     with compile_lock:
         compile_lock_end = time.time()
         print("\nRunning compiler...")
-        cmd = ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}"]
+        cmd = ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}", f"--{build_mode}"]
         cmd.append(f"--{build_mode.lower()}")
         proc = subprocess.Popen(
             cmd,
@@ -182,7 +182,7 @@ async def compile_wasm(
              status_code=400,
              detail="Invalid build mode. Must be one of 'quick', 'release', or 'debug' or omitted"
          )
-    build_mode = "quick"
+    build_mode = build_mode or "quick"
     print(f"Starting upload process for file: {file.filename}")
 
     if not _TEST and authorization != _AUTH_TOKEN:
