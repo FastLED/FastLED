@@ -22,6 +22,14 @@
 #define FASTLED_HAS_UI_NUMBER_FIELD 0
 #endif
 
+#ifndef FASTLED_HAS_UI_TITLE
+#define FASTLED_HAS_UI_TITLE 0
+#endif
+
+#ifndef FASTLED_HAS_UI_DESCRIPTION
+#define FASTLED_HAS_UI_DESCRIPTION 0
+#endif
+
 FASTLED_NAMESPACE_BEGIN
 
 
@@ -109,6 +117,26 @@ class NumberField {
 
 #endif
 
+#if !FASTLED_HAS_UI_TITLE
+
+class Title {
+  public:
+    Title(const char *name) {}
+    ~Title() {}
+};
+
+#endif
+
+#if !FASTLED_HAS_UI_DESCRIPTION
+
+class Description {
+  public:
+    Description(const char *name) {}
+    ~Description() {}
+};
+
+#endif
+
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS) \
 template <typename T> bool operator>= (T v, const UI_CLASS& ui) { return ui >= v; } \
 template <typename T> bool operator<= (T v, const UI_CLASS& ui) { return ui <= v; } \
@@ -127,5 +155,7 @@ FASTLED_UI_DEFINE_OPERATORS(Slider);
 FASTLED_UI_DEFINE_OPERATORS(NumberField);
 FASTLED_UI_DEFINE_OPERATORS(Checkbox);
 FASTLED_UI_DEFINE_OPERATORS(Button);
+FASTLED_UI_DEFINE_OPERATORS(Title);
+FASTLED_UI_DEFINE_OPERATORS(Description);
 
 FASTLED_NAMESPACE_END
