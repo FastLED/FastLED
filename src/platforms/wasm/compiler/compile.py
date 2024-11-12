@@ -22,6 +22,11 @@ from enum import Enum
 from pathlib import Path
 from typing import List
 
+# Massive speed improvement to not have to rebuild everything.
+# We do use ccache in front of the compiler to mitigate unnecessary recompilation.
+# But this seems to skip it entirely.
+_DISABLE_AUTO_CLEAN = True
+
 
 class BuildMode(Enum):
     DEBUG = "DEBUG"
@@ -82,8 +87,11 @@ def compile(js_dir: Path, build_mode: BuildMode) -> int:
     for attempt in range(1, max_attempts + 1):
         try:
             print(f"Attempting compilation (attempt {attempt}/{max_attempts})...")
+            cmd_list = ["pio", "run"]
+            if _DISABLE_AUTO_CLEAN:
+                cmd_list.append("--disable-auto-clean")
             process = subprocess.Popen(
-                ["pio", "run"],
+                cmd_list,
                 cwd=js_dir,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
