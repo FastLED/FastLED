@@ -45,70 +45,64 @@ env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
 # Todo: Investigate the following flags
 # -sSINGLE_FILE=1
 
-wasmflags = [
+common_flags = [
     "-DFASTLED_ENGINE_EVENTS_MAX_LISTENERS=50",
     "-DFASTLED_FORCE_NAMESPACE=1",
     "-DFASTLED_USE_PROGMEM=0",
     "-DDISABLE_EXCEPTION_CATCHING=1",
-    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
     "-sALLOW_MEMORY_GROWTH=0",
     build_mode,
-    #"-sEXPORT_ES6=1",
-    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']",
     "--bind",
     "-DUSE_OFFSET_CONVERTER=0",
     "-sINITIAL_MEMORY=134217728",
-    "--no-entry",
-    "-s",
-    # Enable C++17 with GNU extensions.
     "-std=gnu++17",
     "-fpermissive",
     "-Wno-constant-logical-operand",
     "-Wnon-c-typedef-for-linkage",
     f"-sWASM={USE_WASM}",
+    "-fuse-ld=lld",
 ]
 
 if QUICK_BUILD:
-    wasmflags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
-
+    common_flags += ["-sERROR_ON_WASM_CHANGES_AFTER_LINK", "-sWASM_BIGINT"]
 elif DEBUG:
-    wasmflags += [
-        '-g3',
-        '-gsource-map',
-        '--emit-symbol-map',
-        #'-sSTACK_OVERFLOW_CHECK=2',
-        #'-sSAFE_HEAP=1',
-        #'-sSAFE_HEAP_LOG=1',
-        '-ASSERTIONS=1',
-        # sanitize address
-        '-fsanitize=address',
-        '-fsanitize=undefined',
-    ]
     # Remove -Oz flag
     opt_flags = ["-Oz", "-Os", "-O0", "-O1", "-O2", "-O3"]
     for opt in opt_flags:
-        if opt in wasmflags:
-            wasmflags.remove(opt)
+        if opt in common_flags:
+            common_flags.remove(opt)
+    common_flags += [
+        '-g3',
+        '-gsource-map',
+        '--emit-symbol-map',
+        '-sSTACK_OVERFLOW_CHECK=2',
+        '-ASSERTIONS=1',
+        '-fsanitize=address',
+        '-fsanitize=undefined',
+    ]
 
-elif OPTIMIZED:
-    wasmflags += ["-flto"]
-    
 
+sketch_flags = common_flags + [
+    "-sEXPORTED_RUNTIME_METHODS=['ccall','cwrap','stringToUTF8','lengthBytesUTF8']",
+    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_extern_setup','_extern_loop','_fastled_declare_files']",
+    "--no-entry",
+]
+
+if OPTIMIZED:
+    sketch_flags += ["-flto"]
 
 export_name = env.GetProjectOption("custom_wasm_export_name", "")
 if export_name:
-    wasmflags += [
+    sketch_flags += [
         "-s",
         "MODULARIZE=1",
         "-s",
         f"EXPORT_NAME='{export_name}'",
         "-o",
         f"{env.subst('$BUILD_DIR')}/{export_name}.js",
-        "-fuse-ld=lld",
-
     ]
 
-env.Append(LINKFLAGS=wasmflags)
+env.Append(LINKFLAGS=sketch_flags)
 
 
 # Pass flags to the other Project Dependencies (libraries)
