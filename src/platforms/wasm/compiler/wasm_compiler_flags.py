@@ -105,11 +105,15 @@ if export_name:
 env.Append(LINKFLAGS=sketch_flags)
 
 
+fastled_compile_flags = [
+    "-Wl,--whole-archive,-fuse-ld=lld"
+]
+
 # Pass flags to the other Project Dependencies (libraries)
 for lb in env.GetLibBuilders():
     lb.env.Replace(CC=CC, CXX=CXX, LINK=LINK, AR="emar", RANLIB="emranlib")
     # Add whole-archive flag to ensure all objects have all symbols available
     # for final linking.
-    lb.env.Append(LINKFLAGS=["-Wl,--whole-archive,-fuse-ld=lld"])
+    lb.env.Append(LINKFLAGS=fastled_compile_flags)
 
 
