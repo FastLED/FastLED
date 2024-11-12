@@ -170,19 +170,20 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
 async def compile_wasm(
     file: UploadFile = File(...),
     authorization: str = Header(None),
-    build_mode: str = Header(None),
+    build: str = Header(None),
     background_tasks: BackgroundTasks = BackgroundTasks()
 ) -> FileResponse:
     """Upload a file into a temporary directory."""
-    if build_mode is not None:
-        build_mode = build_mode.lower()
+    if build is not None:
+        build = build.lower()
 
-    if build_mode not in ["quick", "release", "debug", None]:
+    if build not in ["quick", "release", "debug", None]:
          raise HTTPException(
              status_code=400,
              detail="Invalid build mode. Must be one of 'quick', 'release', or 'debug' or omitted"
          )
-    build_mode = build_mode or "quick"
+    print(f"Build mode is {build}")
+    build = build or "quick"
     print(f"Starting upload process for file: {file.filename}")
 
     if not _TEST and authorization != _AUTH_TOKEN:
@@ -216,7 +217,7 @@ async def compile_wasm(
         print("\nContents of source directory:")
         for path in Path(temp_src_dir).rglob("*"):
             print(f"  {path}")
-        out = compile_source(Path(temp_src_dir), file_path, background_tasks, build_mode)
+        out = compile_source(Path(temp_src_dir), file_path, background_tasks, build)
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
             raise out
