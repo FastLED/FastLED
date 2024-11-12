@@ -1,5 +1,9 @@
 #pragma once
 
+
+
+#error
+
 #include <stdint.h>
 
 #include "platforms/ui_defs.h"
@@ -118,6 +122,7 @@ class NumberField {
 #endif
 
 #if !FASTLED_HAS_UI_TITLE
+
 
 class Title {
   public:

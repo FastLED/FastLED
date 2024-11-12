@@ -182,6 +182,7 @@ template <size_t SIZE = 64> class StrN {
 
     // Accessors
     size_t size() const { return mLength; }
+    size_t length() const { return mLength; }
     const char *c_str() const {
         return mHeapData ? mHeapData->data() : mInlineData;
     }

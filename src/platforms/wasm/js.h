@@ -194,11 +194,16 @@ void updateJs(const char* jsonStr);
 #define FASTLED_HAS_UI_SLIDER 1
 #define FASTLED_HAS_UI_CHECKBOX 1
 #define FASTLED_HAS_UI_NUMBER_FIELD 1
+#define FASTLED_HAS_UI_TITLE 1
+#define FASTLED_HAS_UI_DESCRIPTION 1
 
 typedef jsNumberField NumberField;
 typedef jsSlider Slider;
 typedef jsCheckbox Checkbox;
 typedef jsButton Button;
+typedef jsTitle Title;
+typedef jsDescription Description;
+
 
 class jsTitle {
   public:
@@ -230,10 +235,5 @@ class jsDescription {
     Str mGroup;
 };
 
-typedef jsTitle Title;
-typedef jsDescription Description;
-
-#define FASTLED_HAS_UI_TITLE 1
-#define FASTLED_HAS_UI_DESCRIPTION 1
 
 FASTLED_NAMESPACE_END
