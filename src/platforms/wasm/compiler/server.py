@@ -9,7 +9,7 @@ import zlib
 from pathlib import Path
 from threading import Timer
 
-from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
+from fastapi import (BackgroundTasks, FastAPI, File, Header, Body,  # type: ignore
                      HTTPException, UploadFile)
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 
@@ -170,7 +170,7 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
 async def compile_wasm(
     file: UploadFile = File(...),
     authorization: str = Header(None),
-    build_mode: str = "quick",
+    build_mode: str = Body("quick"),
     background_tasks: BackgroundTasks = BackgroundTasks()
 ) -> FileResponse:
     """Upload a file into a temporary directory."""
