@@ -25,7 +25,7 @@ from typing import List
 # Massive speed improvement to not have to rebuild everything.
 # We do use ccache in front of the compiler to mitigate unnecessary recompilation.
 # But this seems to skip it entirely.
-_DISABLE_AUTO_CLEAN = True
+_DISABLE_AUTO_CLEAN = False
 
 
 class BuildMode(Enum):
