@@ -49,6 +49,15 @@ class StringHolder : public Referent {
     char *data() { return mData; }
     size_t length() const { return mLength; }
     size_t capacity() const { return mCapacity; }
+    bool copy(const char *str, size_t len) {
+        if ((len+1) > mCapacity) {
+            return false;
+        }
+        memcpy(mData, str, len);
+        mData[len] = '\0';
+        mLength = len;
+        return true;
+    }
 
   private:
     char *mData = nullptr;
@@ -88,8 +97,7 @@ template <size_t SIZE = 64> class StrN {
         } else {
             if (mHeapData && !mHeapData->isShared()) {
                 // We are the sole owners of this data so we can modify it
-                mHeapData->grow(len);
-                memcpy(mHeapData->data(), str, len + 1);
+                mHeapData->copy(str, len);
                 return;
             }
             mHeapData.reset();
@@ -234,5 +242,11 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 };
+
+template<typename OutputStream>
+OutputStream &operator<<(OutputStream &os, const Str &str) {
+    os << str.c_str();
+    return os;
+}
 
 FASTLED_NAMESPACE_END
