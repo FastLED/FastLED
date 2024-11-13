@@ -274,7 +274,8 @@ class CacheEntry:
 
 CACHE_LOCK = threading.Lock()
 CACHE: dict[str, CacheEntry] = {}
-CACHE_MAX_ENTRIES = 20
+CACHE_MAX_SIZE = 1 * 1024 * 1024
+CACHE_MAX_ENTRIES = 50
 
 def try_get_cached_zip(hash: str) -> bytes | None:
     with CACHE_LOCK:
@@ -285,7 +286,7 @@ def try_get_cached_zip(hash: str) -> bytes | None:
         return entry.data
 
 def cache_zip(hash: str, data: bytes) -> None:
-    if len(data) > 1 * 1024 * 1024:
+    if len(data) > CACHE_MAX_SIZE:
         print("Data too large to cache")
         return None
     with CACHE_LOCK:
