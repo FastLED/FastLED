@@ -8,7 +8,7 @@ import zipfile
 import zlib
 from pathlib import Path
 from threading import Timer
-
+from dataclasses import dataclass
 import os
 import subprocess
 from typing import List
@@ -19,7 +19,14 @@ from tempfile import TemporaryDirectory
 
 from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
                      HTTPException, UploadFile)
-from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse  # type: ignore
+from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
+
+
+@dataclass
+class CacheEntry:
+    hash: str
+    data: bytes
+    last_access: float
 
 _TEST = False
 _UPLOAD_LIMIT = 10 * 1024 * 1024
@@ -264,13 +271,6 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
         background=background_tasks
     )
 
-from dataclasses import dataclass
-
-@dataclass
-class CacheEntry:
-    hash: str
-    data: bytes
-    last_access: float
 
 CACHE_LOCK = threading.Lock()
 CACHE: dict[str, CacheEntry] = {}
