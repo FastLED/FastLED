@@ -17,6 +17,7 @@ import re
 import shutil
 import subprocess
 import sys
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import List
@@ -34,6 +35,13 @@ class BuildMode(Enum):
         except KeyError:
             valid_modes = [mode.name for mode in cls]
             raise ValueError(f"BUILD_MODE must be one of {valid_modes}, got {mode_str}")
+
+
+@dataclass
+class SyntaxCheckResult:
+    file_path: Path
+    is_valid: bool
+    message: str
 
 
 JS_DIR = Path("/js")
@@ -176,6 +184,71 @@ def process_ino_files(src_dir: Path) -> None:
     print("Transform to cpp and insert header operations completed.")
 
 
+def check_syntax_with_gcc(file_path, gcc_path="gcc"):
+    """
+    Perform syntax checking on a C or C++ source file using GCC.
+
+    Parameters:
+        file_path (str): Path to the source file to check.
+        gcc_path (str): Path to the GCC executable (default is 'gcc').
+
+    Returns:
+        bool: True if syntax is correct, False otherwise.
+        str: Output or error message from GCC.
+    """
+    try:
+        # Run GCC with -fsyntax-only flag for syntax checking
+        result = subprocess.run(
+            [gcc_path, "-fsyntax-only", file_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+        # Check the return code to determine if syntax is valid
+        if result.returncode == 0:
+            return True, "Syntax check passed successfully."
+        else:
+            return False, result.stderr
+    except FileNotFoundError:
+        return False, f"GCC not found at {gcc_path}."
+    except Exception as e:
+        return False, str(e)
+
+
+def check_syntax(
+    directory_path: Path, gcc_path: str = "gcc"
+) -> list[SyntaxCheckResult]:
+    # os walk
+    out: list[SyntaxCheckResult] = []
+    exclusion_list = set("fastled_js")
+    for root, dirs, files in os.walk(directory_path):
+        # if sub directory is in exclusion list, skip
+        dirs[:] = [d for d in dirs if d not in exclusion_list]
+        for file in files:
+            if file.endswith(".cpp") or file.endswith(".ino"):
+                file_path = os.path.join(root, file)
+                is_valid, message = check_syntax_with_gcc(file_path, gcc_path)
+                if not is_valid:
+                    print(f"Syntax check failed for file: {file_path}")
+                    print(f"Error message: {message}")
+                    out.append(
+                        SyntaxCheckResult(
+                            file_path=Path(file_path), is_valid=False, message=message
+                        )
+                    )
+                else:
+                    print(f"Syntax check passed for file: {file_path}")
+                    out.append(
+                        SyntaxCheckResult(
+                            file_path=Path(file_path),
+                            is_valid=True,
+                            message="Syntax check passed successfully.",
+                        )
+                    )
+    return out
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Compile FastLED for WASM")
     parser.add_argument(
@@ -295,6 +368,17 @@ def main() -> int:
             shutil.copy(ARDUINO_H_SRC, JS_SRC / "Arduino.h")
             if args.only_copy:
                 return 0
+
+        print("Performing syntax check...")
+        syntax_results = check_syntax(JS_SRC)
+        failed_checks = [r for r in syntax_results if not r.is_valid]
+        if failed_checks:
+            print("\nSyntax check failed!")
+            for result in failed_checks:
+                print(f"\nFile: {result.file_path}")
+                print(f"Error: {result.message}")
+            return 1
+        print("Syntax check passed for all files.")
 
         if do_insert_header:
             process_ino_files(JS_SRC)

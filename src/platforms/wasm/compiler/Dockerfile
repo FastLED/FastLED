@@ -55,7 +55,7 @@ COPY --from=emscripten_base /emsdk /emsdk
 RUN echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
 
 # Standard tools needed to actually us this container
-RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build ccache zlib zlib-devel && \
+RUN dnf install -y git nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build ccache zlib zlib-devel gcc gcc-c++ && \
     dnf clean all
 
 
