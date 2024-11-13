@@ -140,7 +140,6 @@ TEST_CASE("five_bit_hd_gamma_bitshift functionality") {
 #if STRESS_TEST
   SUBCASE("Randomized Power Matching Test for 5 bit power") {
     srand(0);  // Seed the random number generator so we get consitent results.
-    bool fail = false;
     std::vector<Data> failures;
     for (int i = 0; i < NUM_TESTS; i++) {
       CRGB color;

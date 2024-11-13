@@ -40,7 +40,7 @@ FASTLED_NAMESPACE_BEGIN
 class Slider {
   public:
     Slider(const char *name, float value = 128.0f, float min = 1, float max = 255, float step = 1)
-      : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)), mStep(step) {}
+      : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {}
     ~Slider() {}
     float value() const { return mValue; }
     void setValue(float value) { mValue = MAX(mMin, MIN(mMax, value)); }
@@ -56,7 +56,6 @@ class Slider {
     float mValue;
     float mMin;
     float mMax;
-    float mStep;
 };
 
 
