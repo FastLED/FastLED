@@ -19,7 +19,7 @@ from tempfile import TemporaryDirectory
 
 from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
                      HTTPException, UploadFile)
-from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
+from fastapi.responses import FileResponse, RedirectResponse, StreamingResponse  # type: ignore
 
 _TEST = False
 _UPLOAD_LIMIT = 10 * 1024 * 1024
@@ -151,11 +151,6 @@ def generate_hash_of_src_files(root_dir: Path) -> str:
 
 
 
-@app.get("/", include_in_schema=False)
-async def read_root() -> RedirectResponse:
-    """Redirect to the /docs endpoint."""
-    return RedirectResponse(url="/docs")
-
 def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: BackgroundTasks, build_mode: str, profile: bool) -> FileResponse | HTTPException:
     """Compile source code and return compiled artifacts as a zip file."""
     temp_zip_dir = None
@@ -269,6 +264,46 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
         background=background_tasks
     )
 
+from dataclasses import dataclass
+
+@dataclass
+class CacheEntry:
+    hash: str
+    data: bytes
+    last_access: float
+
+CACHE_LOCK = threading.Lock()
+CACHE: dict[str, CacheEntry] = {}
+CACHE_MAX_ENTRIES = 20
+
+def try_get_cached_zip(hash: str) -> bytes | None:
+    with CACHE_LOCK:
+        entry = CACHE.get(hash)
+        if entry is None:
+            return None
+        entry.last_access = time.time()
+        return entry.data
+
+def cache_zip(hash: str, data: bytes) -> None:
+    if len(data) > 1 * 1024 * 1024:
+        print("Data too large to cache")
+        return None
+    with CACHE_LOCK:
+        if len(CACHE) >= CACHE_MAX_ENTRIES:
+            # Remove the oldest entry
+            oldest_key = min(CACHE, key=lambda k: CACHE[k].last_access)
+            del CACHE[oldest_key]
+        CACHE[hash] = CacheEntry(hash=hash, data=data, last_access=time.time())
+        
+
+
+
+@app.get("/", include_in_schema=False)
+async def read_root() -> RedirectResponse:
+    """Redirect to the /docs endpoint."""
+    return RedirectResponse(url="/docs")
+
+
 @app.get("/healthz")
 async def healthz() -> dict:
     """Health check endpoint."""
@@ -328,8 +363,33 @@ async def compile_wasm(
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
             zip_ref.extractall(temp_src_dir)
             hash_value = generate_hash_of_src_files(Path(temp_src_dir))
-        
+
+        from io import BytesIO
+        from tempfile import NamedTemporaryFile
+
         print(f"Hash of source files: {hash_value}")
+        entry: bytes | None = try_get_cached_zip(hash_value)
+        if entry is not None:
+            print("Returning cached zip file")
+            # Create a temporary file for the cached data
+            tmp_file = NamedTemporaryFile(delete=False)
+            tmp_file.write(entry)
+            tmp_file.close()
+            
+            def cleanup_temp():
+                try:
+                    os.unlink(tmp_file.name)
+                except:
+                    pass
+                    
+            background_tasks.add_task(cleanup_temp)
+            
+            return FileResponse(
+                path=tmp_file.name,
+                media_type="application/zip",
+                filename="fastled_output.zip",
+                background=background_tasks
+            )
         
         print("\nContents of source directory:")
         for path in Path(temp_src_dir).rglob("*"):
@@ -338,6 +398,12 @@ async def compile_wasm(
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
             raise out
+        # Cache the compiled zip file
+        # get bytes from the file object
+        path = out.path
+        with open(path, "rb") as f:
+            data = f.read()
+        cache_zip(hash_value, data)
         return out
     except HTTPException as e:
         print(f"HTTPException in upload process: {str(e)}")
