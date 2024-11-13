@@ -266,7 +266,7 @@ def generate_hash_of_project_files(root_dir: Path) -> str:
 
 
 
-def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: BackgroundTasks, build_mode: str, profile: bool) -> FileResponse | HTTPException:
+def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: BackgroundTasks, build_mode: str, profile: bool, hash_value: str | None = None) -> FileResponse | HTTPException:
     """Compile source code and return compiled artifacts as a zip file."""
     temp_zip_dir = None
     try:
@@ -325,9 +325,12 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     # Replace separate stdout/stderr files with single out.txt
     out_txt = fastled_js_dir / "out.txt"
     perf_txt = fastled_js_dir / "perf.txt"
+    hash_txt = fastled_js_dir / "hash.txt"
     print(f"\nSaving combined output to: {out_txt}")
     out_txt.write_text(stdout)
     perf_txt.write_text(f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s")
+    if hash_value is not None:
+        hash_txt.write_text(hash_value)
 
     output_dir.mkdir(exist_ok=True)  # Ensure output directory exists
     output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
