@@ -13,6 +13,8 @@ Edit these files to update the version number
   * library.properties 
   * src/FastLED.h 
   * docs/Doxyfile
+  * RELEASE.md
+    * This file: update instructions with the current release.
 
 
 Edit this file with release notes and version number.
@@ -22,10 +24,10 @@ Release notes should list highlight changes (not necessarily all minor bug fixes
 
 Git commands to commit and tag release'
 ```bash
-$ git commit -m "Rev 3.9.2 - fixes header issue with esp32 async server, prelease of WS812 overclocking"
-$ git tag 3.9.2 master 
+$ git commit -m "Rev 3.9.3 - Update with new support and fixes."
+$ git tag 3.9.3 master 
 $ git push 
-$ git push origin 3.9.2 
+$ git push origin 3.9.3 
 ```
 
 Then use the GitHub UI to make a new “Release”:
