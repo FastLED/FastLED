@@ -1,21 +1,18 @@
+import hashlib
 import os
 import shutil
 import subprocess
 import tempfile
 import threading
 import time
+import warnings
 import zipfile
 import zlib
-from pathlib import Path
-from threading import Timer
 from dataclasses import dataclass
-import os
-import subprocess
+from pathlib import Path
+from tempfile import NamedTemporaryFile, TemporaryDirectory
+from threading import Timer
 from typing import List
-import hashlib
-
-# import tempdir
-from tempfile import TemporaryDirectory
 
 from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
                      HTTPException, UploadFile)
@@ -34,6 +31,8 @@ _UPLOAD_LIMIT = 10 * 1024 * 1024
 # Note that that the wasm_compiler.py greps for this string to get the URL of the server.
 # Changing the name could break the compiler.
 _AUTH_TOKEN = "oBOT5jbsO4ztgrpNsQwlmFLIKB"
+
+_SOURCE_EXTENSIONS = ['.cpp', '.hpp', '.h', '.ino']
 
 _GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
 _GIT_REPO_PATH = "/js/fastled"  # Path to the git repository
@@ -65,32 +64,49 @@ compile_lock = threading.Lock()
 output_dir = Path("/output")
 output_dir.mkdir(exist_ok=True)
 
+@dataclass
+class ProjectFiles:
+    """A class to represent the project files."""
+    src_files: list[Path]
+    other_files: list[Path]
 
-def collect_files(directory: str, extensions: List[str]) -> List[Path]:
-    """Collect files with specific extensions from a directory.
+
+def collect_files(directory: Path) -> ProjectFiles:
+    """Collect files from a directory and separate them into source and other files.
 
     Args:
-        directory (str): The directory to scan for files.
-        extensions (List[str]): The list of file extensions to include.
+        directory (Path): The directory to scan for files.
 
     Returns:
-        List[str]: A list of file paths matching the extensions.
+        ProjectFiles: Object containing lists of source and other files.
     """
-    files: list[Path] = []
-    for root, _, filenames in os.walk(directory):
-        for filename in filenames:
-            if any(filename.endswith(ext) for ext in extensions):
-                files.append(Path(os.path.join(root, filename)))
-    return files
+    print(f"Collecting files from {directory}")
+    src_files: list[Path] = []
+    other_files: list[Path] = []
 
-def concatenate_files(file_list: List[Path], output_file: str) -> None:
+    def is_source_file(filename: str) -> bool:
+        return any(filename.endswith(ext) for ext in _SOURCE_EXTENSIONS)
+    
+    for root, _, filenames in os.walk(str(directory)):
+        for filename in filenames:
+            print(f"Checking file: {filename}")
+            file_path = Path(os.path.join(root, filename))
+
+            if is_source_file(filename):
+                src_files.append(file_path)
+            else:
+                other_files.append(file_path)
+    
+    return ProjectFiles(src_files=src_files, other_files=other_files)
+
+def concatenate_files(file_list: List[Path], output_file: Path) -> None:
     """Concatenate files into a single output file.
 
     Args:
         file_list (List[str]): List of file paths to concatenate.
         output_file (str): Path to the output file.
     """
-    with open(output_file, 'w', encoding='utf-8') as outfile:
+    with open(str(output_file), 'w', encoding='utf-8') as outfile:
         for file_path in file_list:
             outfile.write(f"// File: {file_path}\n")
             with open(file_path, 'r', encoding='utf-8') as infile:
@@ -98,21 +114,86 @@ def concatenate_files(file_list: List[Path], output_file: str) -> None:
                 outfile.write("\n\n")
 
 # return a hash
-def preprocess_with_gcc(input_file: str, output_file: str) -> None:
+def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
     """Preprocess a file with GCC, leaving #include directives intact.
 
     Args:
         input_file (str): Path to the input file.
         output_file (str): Path to the preprocessed output file.
     """
-    gcc_command = [
-        "gcc", "-E", "-fdirectives-only", input_file, "-o", output_file
-    ]
+    # Convert paths to absolute paths
+    # input_file = os.path.abspath(str(input_file))
+    input_file = input_file.absolute()
+    output_file = output_file.absolute()
+    temp_input = str(input_file) + ".tmp"
+    
     try:
-        subprocess.run(gcc_command, check=True)
+        # Create modified version of input that comments out includes
+        with open(str(input_file), 'r') as fin, open(str(temp_input), 'w') as fout:
+            for line in fin:
+                if line.strip().startswith('#include'):
+                    fout.write(f"// PRESERVED: {line}")
+                else:
+                    fout.write(line)
+
+        # Run GCC preprocessor with explicit output path
+        gcc_command: list[str] = [
+            "gcc",
+            "-E",  # Preprocess only
+            "-P",  # No line markers
+            "-fdirectives-only",
+            "-fpreprocessed",  # Handle preprocessed input
+            "-x", "c++",  # Explicitly treat input as C++ source
+            "-o", str(output_file),  # Explicit output file
+            temp_input
+        ]
+        
+        result = subprocess.run(gcc_command, 
+                              check=True,
+                              capture_output=True,
+                              text=True)
+        
+        if not os.path.exists(output_file):
+            raise FileNotFoundError(f"GCC failed to create output file. stderr: {result.stderr}")
+
+        # Restore include lines
+        with open(output_file, 'r') as f:
+            content = f.read()
+        
+        content = content.replace('// PRESERVED: #include', '#include')
+        out_lines: list[str] = []
+        prev_line = None
+        for line in content.split("\n"):
+            # Skip file marker comments and empty lines
+            if not line.strip() or line.startswith("// File:"):
+                continue
+            # Collapse multiple spaces into single space and strip whitespace
+            line = ' '.join(line.split())
+            # Only add line if it's different from the previous non-empty line
+            if line != prev_line:
+                out_lines.append(line)
+                prev_line = line
+        # Join with single spaces
+        content = ' '.join(out_lines)
+        with open(output_file, 'w') as f:
+            f.write(content)
+            
         print(f"Preprocessed file saved to {output_file}")
+        
     except subprocess.CalledProcessError as e:
-        print(f"GCC preprocessing failed: {e}")
+        print(f"GCC preprocessing failed: {e.stderr}")
+        raise
+    except Exception as e:
+        print(f"Preprocessing error: {str(e)}")
+        raise
+    finally:
+        # Clean up temporary file
+        try:
+            if os.path.exists(temp_input):
+                os.remove(temp_input)
+        except:  # noqa: E722
+            warnings.warn(f"Failed to remove temporary file: {temp_input}")
+            pass
 
 
 
@@ -122,39 +203,66 @@ def hash_string(s: str) -> str:
     return hashlib.sha256(s.encode()).hexdigest()
 
 
-def generate_hash_of_src_files(root_dir: Path) -> str:
+def generate_hash_of_src_files(src_files: list[Path]) -> str:
+    """Generate a hash of all source files in a directory.
+
+    Args:
+        root_dir (Path): The root directory to hash.
+
+    Returns:
+        str: The hash of all src files in the directory.
+    """
+    try:
+        with TemporaryDirectory() as temp_dir:
+            temp_file = Path(temp_dir) / "concatenated_output.cpp"
+            preprocessed_file = Path(temp_dir) / "preprocessed_output.cpp"
+            concatenate_files(src_files, Path(temp_file))
+            preprocess_with_gcc(temp_file, preprocessed_file)
+            contents = preprocessed_file.read_text()
+
+            # strip the last line in it:
+            parts = contents.split("\n")
+            out_lines: list[str] = []
+            for line in parts:
+                if "concatenated_output.cpp" not in line:
+                    out_lines.append(line)
+
+            contents = "\n".join(out_lines)
+            return hash_string(contents)
+    except Exception:
+        import traceback
+        stack_trae = traceback.format_exc()
+        print(stack_trae)
+        raise
+
+
+def generate_hash_of_project_files(root_dir: Path) -> str:
     """Generate a hash of all files in a directory.
 
     Args:
         root_dir (Path): The root directory to hash.
 
     Returns:
-        str: The hash of all src files in the directory like cpp and hpp, h.
+        str: The hash of all files in the directory.
     """
-    extensions = ['.cpp', '.hpp', '.h']
-    files: list[Path] = collect_files(root_dir, extensions)
-    try:
-        with TemporaryDirectory() as temp_dir:
-            temp_file = Path(temp_dir) / "concatenated_output.cpp"
-            preprocessed_file = Path(temp_dir) / "preprocessed_output.cpp"
-            concatenate_files(files, temp_file)
-            preprocess_with_gcc(temp_file, preprocessed_file)
-            contents = preprocessed_file.read_text()
-            # strip the last line in it:
-            contents = contents.split("\n")[:-1]
-            out_lines: list[str] = []
-            for line in contents:
-                if "concatenated_output.cpp" not in line:
-                    out_lines.append(line)
-            contents = "\n".join(out_lines)
-            # print("contents: ", contents)
-            return hash_string(contents)
-    except Exception as e:
-        import traceback
-        stack_trae = traceback.format_exc()
-        print(stack_trae)
-        print(f"Error generating hash of src files: {e}")
-        return "error"
+    """Generate a hash of all source files in a directory.
+
+    Args:
+        root_dir (Path): The root directory to hash.
+
+    Returns:
+        str: The hash of all src files in the directory.
+    """
+
+    project_files = collect_files(root_dir)
+    src_file_hash = generate_hash_of_src_files(project_files.src_files)
+    other_files = project_files.other_files
+    # for all other files, don't pre-process them, just hash them
+    hash_object = hashlib.sha256()
+    for file in other_files:
+        hash_object.update(file.read_bytes())
+    other_files_hash = hash_object.hexdigest()
+    return hash_string(src_file_hash + other_files_hash)
 
 
 
@@ -171,7 +279,7 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
             detail=f"No files found in extracted directory: {temp_src_dir}"
         )
     
-    print(f"Files are ready, waiting for compile lock...")
+    print("Files are ready, waiting for compile lock...")
     compile_lock_start = time.time()
     with compile_lock:
         compile_lock_end = time.time()
@@ -311,6 +419,8 @@ async def healthz() -> dict:
     return {"status": "ok"}
 
 
+
+
 @app.post("/compile/wasm")
 async def compile_wasm(
     file: UploadFile = File(...),
@@ -328,10 +438,9 @@ async def compile_wasm(
              status_code=400,
              detail="Invalid build mode. Must be one of 'quick', 'release', or 'debug' or omitted"
          )
+    do_profile: bool = False
     if profile is not None:
-        profile = profile.lower() == "true" or profile.lower() == "1"
-    else:
-        profile = False
+        do_profile = profile.lower() == "true" or profile.lower() == "1"
     print(f"Build mode is {build}")
     build = build or "quick"
     print(f"Starting upload process for file: {file.filename}")
@@ -339,11 +448,23 @@ async def compile_wasm(
     if not _TEST and authorization != _AUTH_TOKEN:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
+    if file is None:
+        raise HTTPException(status_code=400, detail="No file uploaded.")
+    
+    if file.filename is None:
+        raise HTTPException(status_code=400, detail="No filename provided.")
+    
+    if file.size is None:
+        raise HTTPException(status_code=400, detail="No file size provided.")
+
     if not file.filename.endswith('.zip'):
-        return {"error": "Only .zip files are allowed."}
+        raise HTTPException(status_code=400, detail="Uploaded file must be a zip archive.")
 
     if file.size > _UPLOAD_LIMIT:
-        return {"error": f"File size exceeds {_UPLOAD_LIMIT} byte limit."}
+        raise HTTPException(
+            status_code=400,
+            detail=f"File size exceeds {_UPLOAD_LIMIT} byte limit."
+        )
 
     temp_zip_dir = None
     temp_src_dir = None
@@ -361,15 +482,18 @@ async def compile_wasm(
             shutil.copyfileobj(file.file, f)
 
         print("extracting zip file...")
+        hash_value: str | None = None
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
             zip_ref.extractall(temp_src_dir)
-            hash_value = generate_hash_of_src_files(Path(temp_src_dir))
+            try:
+                hash_value = generate_hash_of_project_files(Path(temp_src_dir))
+            except Exception as e:
+                warnings.warn(f"Error generating hash: {e}, fast cache access is disabled for this build.")
 
-        from io import BytesIO
-        from tempfile import NamedTemporaryFile
-
-        print(f"Hash of source files: {hash_value}")
-        entry: bytes | None = try_get_cached_zip(hash_value)
+        entry: bytes | None = None
+        if hash_value is not None:
+            print(f"Hash of source files: {hash_value}")
+            entry = try_get_cached_zip(hash_value)
         if entry is not None:
             print("Returning cached zip file")
             # Create a temporary file for the cached data
@@ -380,7 +504,7 @@ async def compile_wasm(
             def cleanup_temp():
                 try:
                     os.unlink(tmp_file.name)
-                except:
+                except:  # noqa: E722
                     pass
                     
             background_tasks.add_task(cleanup_temp)
@@ -395,16 +519,15 @@ async def compile_wasm(
         print("\nContents of source directory:")
         for path in Path(temp_src_dir).rglob("*"):
             print(f"  {path}")
-        out = compile_source(Path(temp_src_dir), file_path, background_tasks, build, profile)
+        out = compile_source(Path(temp_src_dir), file_path, background_tasks, build, do_profile)
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
             raise out
         # Cache the compiled zip file
-        # get bytes from the file object
-        path = out.path
-        with open(path, "rb") as f:
-            data = f.read()
-        cache_zip(hash_value, data)
+        out_path = Path(out.path)
+        data = out_path.read_bytes()
+        if hash_value is not None:
+            cache_zip(hash_value, data)
         return out
     except HTTPException as e:
         print(f"HTTPException in upload process: {str(e)}")
