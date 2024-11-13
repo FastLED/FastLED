@@ -18,9 +18,16 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import List
+
+
+@dataclass
+class DateLine:
+    dt: datetime
+    line: str
 
 
 class BuildMode(Enum):
@@ -86,6 +93,7 @@ def compile(js_dir: Path, build_mode: BuildMode, auto_clean: bool) -> int:
     env["BUILD_MODE"] = build_mode.name
     print(f"Build mode: {build_mode.name}")
 
+    output_lines = []
     for attempt in range(1, max_attempts + 1):
         try:
             print(f"Attempting compilation (attempt {attempt}/{max_attempts})...")
@@ -103,10 +111,13 @@ def compile(js_dir: Path, build_mode: BuildMode, auto_clean: bool) -> int:
             assert process.stdout is not None
             for line in process.stdout:
                 processed_line = line.replace(".pio/libdeps/wasm/FastLED/", "")
-                print(processed_line, end="")
+                timestamped_line = _timestamp_output(processed_line)
+                output_lines.append(timestamped_line)
             process.wait()
             if process.returncode == 0:
                 print(f"Compilation successful on attempt {attempt}")
+                relative_output = _make_timestamps_relative("\n".join(output_lines))
+                print(relative_output)
                 return 0
             else:
                 raise subprocess.CalledProcessError(process.returncode, ["pio", "run"])
@@ -247,6 +258,53 @@ def check_syntax(
                         )
                     )
     return out
+
+
+def _make_timestamps_relative(stdout: str) -> str:
+    def parse(line: str) -> DateLine:
+        parts = line.split(" ")
+        if len(parts) < 2:
+            raise ValueError(f"Invalid line: {line}")
+
+        date_str, time_str = parts[:2]
+        rest = " ".join(parts[2:])
+        # Parse with microsecond precision
+        dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S.%f")
+        return DateLine(dt, rest)
+
+    lines = stdout.split("\n")
+    if not lines:
+        return stdout
+    parsed: list[DateLine] = []
+    for line in lines:
+        if not line.strip():  # Skip empty lines
+            continue
+        try:
+            parsed.append(parse(line))
+        except ValueError:
+            print(f"Failed to parse line: {line}")
+            continue
+
+    if not parsed:
+        return stdout
+
+    outlines: list[str] = []
+    start_time = parsed[0].dt
+
+    # Calculate relative times with
+    for p in parsed:
+        delta = p.dt - start_time
+        seconds = delta.total_seconds()
+        line_str = f"{seconds:3.2f} {p.line}"
+        outlines.append(line_str)
+
+    return "\n".join(outlines)
+
+
+def _timestamp_output(line: str) -> str:
+    now = datetime.now()
+    timestamp = now.strftime("%Y-%m-%d %H:%M:%S.%f")
+    return f"{timestamp} {line.rstrip()}"
 
 
 def parse_args() -> argparse.Namespace:
