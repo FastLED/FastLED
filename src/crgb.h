@@ -8,6 +8,7 @@
 #include "color.h"
 #include "lib8tion/types.h"
 #include "force_inline.h"
+#include "template_magic.h"
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -726,13 +727,17 @@ FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, uint8_t d);
 /// Scale using CRGB::nscale8_video()
 FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d);
 
-/// Generic template for ostream operator to print CRGB objects. Usefull
-/// for the unit_tests.
-template<typename T>
-T& operator<<(T& os, const CRGB& rgb) {
-    os << "CRGB(" << static_cast<int>(rgb.r) << ", " 
-       << static_cast<int>(rgb.g) << ", " 
-       << static_cast<int>(rgb.b) << ")";
+
+
+// Make compatible with std::ostream and other ostream-like objects
+FASTLED_DEFINE_OUTPUT_OPERATOR(CRGB) {
+    os <<("CRGB(");
+    os <<(static_cast<int>(obj.r));
+    os <<(", ");
+    os <<(static_cast<int>(obj.g));
+    os <<(", ");
+    os <<(static_cast<int>(obj.b));
+    os <<(")");
     return os;
 }
 

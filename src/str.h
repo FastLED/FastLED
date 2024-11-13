@@ -4,13 +4,14 @@
 #include <stdint.h>
 
 #include "ref.h"
+#include "template_magic.h"
 #include "namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
+
+FASTLED_NAMESPACE_BEGIN
 
 template <size_t N> class StrN;
 
@@ -243,9 +244,9 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 };
 
-template<typename OutputStream>
-OutputStream &operator<<(OutputStream &os, const Str &str) {
-    os << str.c_str();
+// Make compatible with std::ostream and other ostream-like objects
+FASTLED_DEFINE_OUTPUT_OPERATOR(Str) {
+    os << obj.c_str();
     return os;
 }
 

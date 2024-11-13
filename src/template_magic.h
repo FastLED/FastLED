@@ -50,6 +50,24 @@ struct is_base_of_v_helper {
     static constexpr bool value = is_base_of<Base, Derived>::value;
 };
 
+// Define is_same trait
+template <typename T, typename U>
+struct is_same {
+    static constexpr bool value = false;
+};
+
+// Specialization for when T and U are the same type
+template <typename T>
+struct is_same<T, T> {
+    static constexpr bool value = true;
+};
+
+// Define is_same_v for compatibility with variable templates
+template <typename T, typename U>
+struct is_same_v_helper {
+    static constexpr bool value = is_same<T, U>::value;
+};
+
 
 // This uses template magic to maybe generate a type for the given condition. If that type
 // doesn't exist then a type will fail to be generated, and the compiler will skip the
@@ -66,3 +84,49 @@ template <typename Base, typename Derived>
 using is_derived = enable_if_t<is_base_of<Base, Derived>::value>;
 
 } // namespace fl
+
+
+// Convienence macro to define an output operator for a class to make it compatible
+// with std::ostream. This is useful for debugging and logging. The operator will
+// be defined as "os" and the right hand object will be named "obj".
+//
+// Example:
+//  FASTLED_DEFINE_OUTPUT_OPERATOR(CRGB) {
+//      os <<("CRGB(");
+//      os <<(static_cast<int>(obj.r));
+//      os <<(", ");
+//      os <<(static_cast<int>(obj.g));
+//      os <<(", ");
+//      os <<(static_cast<int>(obj.b));
+//      os <<(")");
+//      return os;
+//  }
+//
+// This is needed because in C++ there is two phase lookup, in which ONLY the first
+// parameter will be considered if matched, even if the second argument is a non match.
+//
+// This macro get's around this issue.
+//
+// Consider the following templated operator definition:
+// template<typename OutputStream>
+// OutputStream &operator<<(OutputStream &os, const Str &str) {
+//    os << str.c_str();
+//    return os;
+// }
+//
+// You would think this would only match if the left hand side is an ostream and the
+// second parameter is "Str", but you would be wrong, because of two phase lookup
+// this function will be considered for any type of ostream and ANY type of second
+// parameter, even "float" or "int".
+//
+// This means that normally, this template will match std::stream << float
+// then fail because of ambiguity, even though the second template is not
+// a match. Therefore we use the enable_if which will generate a type if
+// and only if the the second condition is a match.
+//
+// This essentially forces two phase lookup in one pass. Making the compiler skip
+// the definition if the second parameter doesn't match.
+#define FASTLED_DEFINE_OUTPUT_OPERATOR(CLASS)                  \
+template <typename T, typename U>                              \
+typename fl::enable_if<fl::is_same<U, CLASS>::value, T&>::type \
+operator<<(T& os, const CLASS& obj)
