@@ -136,7 +136,10 @@ def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
                 else:
                     fout.write(line)
 
-        # Run GCC preprocessor with explicit output path
+        # Run GCC preprocessor with explicit output path in order to remove
+        # comments. This is necessary to ensure that the hash
+        # of the preprocessed file is consistent without respect to formatting
+        # and whitespace.
         gcc_command: list[str] = [
             "gcc",
             "-E",  # Preprocess only
@@ -162,19 +165,19 @@ def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
         
         content = content.replace('// PRESERVED: #include', '#include')
         out_lines: list[str] = []
-        prev_line = None
+        # now preform minification to further strip out horizontal whitespace and // File: comments.
         for line in content.split("\n"):
             # Skip file marker comments and empty lines
-            if not line.strip() or line.startswith("// File:"):
+            line = line.strip()
+            if not line:  # skip empty line
+                continue
+            if line.startswith("// File:"):  # these change because of the temp file, so need to be removed.
                 continue
             # Collapse multiple spaces into single space and strip whitespace
             line = ' '.join(line.split())
-            # Only add line if it's different from the previous non-empty line
-            if line != prev_line:
-                out_lines.append(line)
-                prev_line = line
-        # Join with single spaces
-        content = ' '.join(out_lines)
+            out_lines.append(line)
+        # Join with new lines
+        content = '\n'.join(out_lines)
         with open(output_file, 'w') as f:
             f.write(content)
             
