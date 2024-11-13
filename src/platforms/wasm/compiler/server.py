@@ -9,6 +9,14 @@ import zlib
 from pathlib import Path
 from threading import Timer
 
+import os
+import subprocess
+from typing import List
+import hashlib
+
+# import tempdir
+from tempfile import TemporaryDirectory
+
 from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
                      HTTPException, UploadFile)
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
@@ -49,6 +57,99 @@ compile_lock = threading.Lock()
 
 output_dir = Path("/output")
 output_dir.mkdir(exist_ok=True)
+
+
+def collect_files(directory: str, extensions: List[str]) -> List[Path]:
+    """Collect files with specific extensions from a directory.
+
+    Args:
+        directory (str): The directory to scan for files.
+        extensions (List[str]): The list of file extensions to include.
+
+    Returns:
+        List[str]: A list of file paths matching the extensions.
+    """
+    files: list[Path] = []
+    for root, _, filenames in os.walk(directory):
+        for filename in filenames:
+            if any(filename.endswith(ext) for ext in extensions):
+                files.append(Path(os.path.join(root, filename)))
+    return files
+
+def concatenate_files(file_list: List[Path], output_file: str) -> None:
+    """Concatenate files into a single output file.
+
+    Args:
+        file_list (List[str]): List of file paths to concatenate.
+        output_file (str): Path to the output file.
+    """
+    with open(output_file, 'w', encoding='utf-8') as outfile:
+        for file_path in file_list:
+            outfile.write(f"// File: {file_path}\n")
+            with open(file_path, 'r', encoding='utf-8') as infile:
+                outfile.write(infile.read())
+                outfile.write("\n\n")
+
+# return a hash
+def preprocess_with_gcc(input_file: str, output_file: str) -> None:
+    """Preprocess a file with GCC, leaving #include directives intact.
+
+    Args:
+        input_file (str): Path to the input file.
+        output_file (str): Path to the preprocessed output file.
+    """
+    gcc_command = [
+        "gcc", "-E", "-fdirectives-only", input_file, "-o", output_file
+    ]
+    try:
+        subprocess.run(gcc_command, check=True)
+        print(f"Preprocessed file saved to {output_file}")
+    except subprocess.CalledProcessError as e:
+        print(f"GCC preprocessing failed: {e}")
+
+
+
+def hash_string(s: str) -> str:
+    # sha 256
+
+    return hashlib.sha256(s.encode()).hexdigest()
+
+
+def generate_hash_of_src_files(root_dir: Path) -> str:
+    """Generate a hash of all files in a directory.
+
+    Args:
+        root_dir (Path): The root directory to hash.
+
+    Returns:
+        str: The hash of all src files in the directory like cpp and hpp, h.
+    """
+    extensions = ['.cpp', '.hpp', '.h']
+    files: list[Path] = collect_files(root_dir, extensions)
+    try:
+        with TemporaryDirectory() as temp_dir:
+            temp_file = Path(temp_dir) / "concatenated_output.cpp"
+            preprocessed_file = Path(temp_dir) / "preprocessed_output.cpp"
+            concatenate_files(files, temp_file)
+            preprocess_with_gcc(temp_file, preprocessed_file)
+            contents = preprocessed_file.read_text()
+            # strip the last line in it:
+            contents = contents.split("\n")[:-1]
+            out_lines: list[str] = []
+            for line in contents:
+                if "concatenated_output.cpp" not in line:
+                    out_lines.append(line)
+            contents = "\n".join(out_lines)
+            # print("contents: ", contents)
+            return hash_string(contents)
+    except Exception as e:
+        import traceback
+        stack_trae = traceback.format_exc()
+        print(stack_trae)
+        print(f"Error generating hash of src files: {e}")
+        return "error"
+
+
 
 @app.get("/", include_in_schema=False)
 async def read_root() -> RedirectResponse:
@@ -226,6 +327,9 @@ async def compile_wasm(
         print("extracting zip file...")
         with zipfile.ZipFile(file_path, 'r') as zip_ref:
             zip_ref.extractall(temp_src_dir)
+            hash_value = generate_hash_of_src_files(Path(temp_src_dir))
+        
+        print(f"Hash of source files: {hash_value}")
         
         print("\nContents of source directory:")
         for path in Path(temp_src_dir).rglob("*"):
