@@ -4,6 +4,11 @@
 #if FASTLED_RMT5
 
 #include <assert.h>
+
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include "idf5_rmt.h"
 #include "led_strip/led_strip.h"
 #include "esp_log.h"
@@ -13,6 +18,10 @@
 using namespace fastled_rmt51_strip;
 
 #define TAG "idf5_rmt.cpp"
+
+#ifndef FASTLED_RMT5_EXTRA_WAIT_MS
+#define FASTLED_RMT5_EXTRA_WAIT_MS 0
+#endif
 
 namespace {  // anonymous namespace
 
@@ -24,6 +33,13 @@ void convert(int T1, int T2, int T3, uint16_t* T0H, uint16_t* T0L, uint16_t* T1H
     *T0L = T2 + T3;
     *T1H = T1 + T2;
     *T1L = T3;
+}
+
+
+void do_extra_wait() {
+    if (FASTLED_RMT5_EXTRA_WAIT_MS > 0) {
+        vTaskDelay(FASTLED_RMT5_EXTRA_WAIT_MS / portTICK_PERIOD_MS);
+    }
 }
 
 }  // namespace
@@ -75,6 +91,7 @@ void RmtController5::loadPixelData(PixelIterator &pixels) {
 }
 
 void RmtController5::showPixels() {
+    do_extra_wait();
     mLedStrip->draw();
 }
 
