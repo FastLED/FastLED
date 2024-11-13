@@ -1,5 +1,6 @@
 import argparse
 import subprocess
+import os
 import sys
 from typing import Tuple
 from pathlib import Path
@@ -19,6 +20,10 @@ def _parse_args() -> Tuple[argparse.Namespace, list[str]]:
     return parser.parse_known_args()
 
 def _run_server(unknown_args: list[str]) -> int:
+    env = os.environ.copy()
+    if "--disable-auto-clean" in unknown_args:
+        env["DISABLE_AUTO_CLEAN"] = "1"
+        unknown_args.remove("--disable-auto-clean")
     cmd_list = [
         "uvicorn",
         "server:app",
@@ -27,7 +32,7 @@ def _run_server(unknown_args: list[str]) -> int:
         "--port",
         f"{_PORT}"
     ] + unknown_args
-    cp: subprocess.CompletedProcess = subprocess.run(cmd_list, cwd=str(HERE))
+    cp: subprocess.CompletedProcess = subprocess.run(cmd_list, cwd=str(HERE), env=env)
     return cp.returncode
 
 def _run_compile(unknown_args: list[str]) -> int:
@@ -54,9 +59,11 @@ def main() -> int:
         elif args.mode == "server":
             rtn = _run_server(unknown_args)
             return rtn
+        raise ValueError(f"Unknown mode: {args.mode}")
     except KeyboardInterrupt:
         print("Exiting...")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

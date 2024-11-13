@@ -9,7 +9,6 @@
 #    enforced by the script that sets up the docker container.
 # 2. The docker container has installed compiler dependencies in the /js directory.
 
-
 import argparse
 import hashlib
 import json
@@ -21,11 +20,6 @@ import sys
 from enum import Enum
 from pathlib import Path
 from typing import List
-
-# Massive speed improvement to not have to rebuild everything.
-# We do use ccache in front of the compiler to mitigate unnecessary recompilation.
-# But this seems to skip it entirely.
-_DISABLE_AUTO_CLEAN = False
 
 
 class BuildMode(Enum):
@@ -211,10 +205,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable profiling for compilation to see what's taking so long.",
     )
+
     parser.add_argument(
         "--disable-auto-clean",
         action="store_true",
-        help="Disable automatic cleaning of build directory",
+        help="Massaive speed improvement to not have to rebuild everything, but flakes out sometimes.",
+        default=os.getenv("DISABLE_AUTO_CLEAN", "0") == "1",
     )
     # Add mutually exclusive build mode group
     build_mode = parser.add_mutually_exclusive_group()
