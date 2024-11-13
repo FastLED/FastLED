@@ -522,7 +522,13 @@ async def compile_wasm(
         print("\nContents of source directory:")
         for path in Path(temp_src_dir).rglob("*"):
             print(f"  {path}")
-        out = compile_source(Path(temp_src_dir), file_path, background_tasks, build, do_profile)
+        out = compile_source(
+            Path(temp_src_dir),
+            file_path,
+            background_tasks,
+            build,
+            do_profile,
+            hash_value)
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
             raise out
