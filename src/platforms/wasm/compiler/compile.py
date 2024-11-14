@@ -88,7 +88,7 @@ def copy_files(src_dir: Path, js_src: Path) -> None:
 
 def compile(js_dir: Path, build_mode: BuildMode, auto_clean: bool) -> int:
     print("Starting compilation process...")
-    max_attempts = 2
+    max_attempts = 1
     env = os.environ.copy()
     env["BUILD_MODE"] = build_mode.name
     print(f"Build mode: {build_mode.name}")
