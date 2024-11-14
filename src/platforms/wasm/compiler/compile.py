@@ -114,10 +114,10 @@ def compile(js_dir: Path, build_mode: BuildMode, auto_clean: bool) -> int:
                 timestamped_line = _timestamp_output(processed_line)
                 output_lines.append(timestamped_line)
             process.wait()
+            relative_output = _make_timestamps_relative("\n".join(output_lines))
+            print(relative_output)
             if process.returncode == 0:
                 print(f"Compilation successful on attempt {attempt}")
-                relative_output = _make_timestamps_relative("\n".join(output_lines))
-                print(relative_output)
                 return 0
             else:
                 raise subprocess.CalledProcessError(process.returncode, ["pio", "run"])
