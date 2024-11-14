@@ -1,6 +1,19 @@
 #pragma once
 #pragma message "ESP32 Hardware SPI support added"
 
+#include "namespace.h"
+#include "crgb.h"
+
+// When enabled, use the bulk transfer mode to speed up SPI writes and avoid
+// lock contention.
+#ifndef FASTLED_ESP32_SPI_BULK_TRANSFER
+#define FASTLED_ESP32_SPI_BULK_TRANSFER 0
+#endif
+
+#ifndef FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE
+#define FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE 64
+#endif
+
 FASTLED_NAMESPACE_BEGIN
 
 #include <SPI.h>
@@ -125,6 +138,12 @@ public:
 		m_ledSPI.transfer(b);
 	}
 
+	void writePixelsBulk(const CRGB* pixels, size_t n) {
+		uint8_t* data = reinterpret_cast<uint8_t*>(pixels);
+		size_t n_bytes = n * 3;
+		m_ledSPI.writePixels(data, n_bytes);
+	}
+
 public:
 
 	// select the SPI output (TODO: research whether this really means hi or lo.  Alt TODO: move select responsibility out of the SPI classes
@@ -177,6 +196,36 @@ public:
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
 	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context) {
+		#if FASTLED_ESP32_SPI_BULK_TRANSFER
+		select();
+		int len = pixels.mLen;
+		CRGB data_block[FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE] = {0};
+		size_t data_block_index = 0;
+
+		while(pixels.has(1)) {
+			if(FLAGS & FLAG_START_BIT) {
+				writeBit<0>(1);
+			}
+			if (data_block_index >= FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE) {
+				writePixelsBulk(data_block, data_block_index);
+				data_block_index = 0;
+			}
+			CRGB rgb(
+				D::adjust(pixels.loadAndScale0()),
+				D::adjust(pixels.loadAndScale1()),
+				D::adjust(pixels.loadAndScale2())
+			);
+			data_block[data_block_index++] = rgb;
+			pixels.advanceData();
+			pixels.stepDithering();
+		}
+		if (data_block_index > 0) {
+			writePixelsBulk(data_block, data_block_index);
+			data_block_index = 0;
+		}
+		D::postBlock(len, context);
+		release();
+		#else
 		select();
 		int len = pixels.mLen;
 		while(pixels.has(1)) {
@@ -191,6 +240,7 @@ public:
 		}
 		D::postBlock(len, context);
 		release();
+		#endif
 	}
 };
 
