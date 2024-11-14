@@ -46,8 +46,7 @@ ARG PLATFORM_TAG=""
 FROM emscripten/emsdk:3.1.70${PLATFORM_TAG} AS emscripten_base
 
 # Target base image that performs the actual compilation
-FROM fedora
-
+FROM fedora:41
 # Copy pre-compiled content of Emscripten SDK to target image
 COPY --from=emscripten_base /emsdk /emsdk
 
