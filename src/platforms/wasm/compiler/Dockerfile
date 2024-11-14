@@ -42,20 +42,30 @@
 # This will be set to arm64 to support MacOS M1+ devices (and Linux-based arm64 devices)
 ARG PLATFORM_TAG=""
 
-# Emscripten base image, we will use this to copy the files into the host container.
-FROM emscripten/emsdk:3.1.70${PLATFORM_TAG} AS emscripten_base
+# Use only Emscripten base image
+FROM emscripten/emsdk:3.1.70${PLATFORM_TAG}
 
-# Target base image that performs the actual compilation
-FROM fedora:41
-# Copy pre-compiled content of Emscripten SDK to target image
-COPY --from=emscripten_base /emsdk /emsdk
-
-# To increase build speed, we use a parallel downloads for the dnf installer.
-RUN echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
-
-# Standard tools needed to actually us this container
-RUN dnf install -y git awk nano which ca-certificates python3 python3-pip dos2unix tar wget unzip make cmake ninja-build ccache zlib zlib-devel gcc gcc-c++ && \
-    dnf clean all
+# Update apt and install required packages
+RUN apt-get update && apt-get install -y \
+    git \
+    gawk \
+    nano \
+    ca-certificates \
+    python3 \
+    python3-pip \
+    dos2unix \
+    tar \
+    wget \
+    unzip \
+    make \
+    cmake \
+    ninja-build \
+    ccache \
+    zlib1g \
+    zlib1g-dev \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 
 # /container/bin contains symbolic links to python3 and pip3 as python and pip that we use for the compiler.
