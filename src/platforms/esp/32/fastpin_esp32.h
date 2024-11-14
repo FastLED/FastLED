@@ -1,8 +1,12 @@
 #pragma once
 
+#include <stdint.h>
 
+#include "register.h"
+#include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wvolatile"
