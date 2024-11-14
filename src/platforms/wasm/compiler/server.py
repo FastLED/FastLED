@@ -205,15 +205,20 @@ def hash_string(s: str) -> str:
 
     return hashlib.sha256(s.encode()).hexdigest()
 
+@dataclass
+class SrcFileHashResult:
+    hash: str
+    stdout: str
+    error: bool
 
-def generate_hash_of_src_files(src_files: list[Path]) -> str:
+def generate_hash_of_src_files(src_files: list[Path]) -> SrcFileHashResult:
     """Generate a hash of all source files in a directory.
 
     Args:
-        root_dir (Path): The root directory to hash.
+        src_files (list[Path]): List of source files to hash.
 
     Returns:
-        str: The hash of all src files in the directory.
+        SrcFileHashResult: Object containing hash, stdout and error status.
     """
     try:
         with TemporaryDirectory() as temp_dir:
@@ -231,12 +236,20 @@ def generate_hash_of_src_files(src_files: list[Path]) -> str:
                     out_lines.append(line)
 
             contents = "\n".join(out_lines)
-            return hash_string(contents)
+            return SrcFileHashResult(
+                hash=hash_string(contents),
+                stdout="",  # No stdout in success case
+                error=False
+            )
     except Exception:
         import traceback
-        stack_trae = traceback.format_exc()
-        print(stack_trae)
-        raise
+        stack_trace = traceback.format_exc()
+        print(stack_trace)
+        return SrcFileHashResult(
+            hash="",
+            stdout=stack_trace,
+            error=True
+        )
 
 
 def generate_hash_of_project_files(root_dir: Path) -> str:
@@ -248,24 +261,18 @@ def generate_hash_of_project_files(root_dir: Path) -> str:
     Returns:
         str: The hash of all files in the directory.
     """
-    """Generate a hash of all source files in a directory.
-
-    Args:
-        root_dir (Path): The root directory to hash.
-
-    Returns:
-        str: The hash of all src files in the directory.
-    """
-
     project_files = collect_files(root_dir)
-    src_file_hash = generate_hash_of_src_files(project_files.src_files)
+    src_result = generate_hash_of_src_files(project_files.src_files)
+    if src_result.error:
+        raise Exception(f"Error hashing source files: {src_result.stdout}")
+        
     other_files = project_files.other_files
     # for all other files, don't pre-process them, just hash them
     hash_object = hashlib.sha256()
     for file in other_files:
         hash_object.update(file.read_bytes())
     other_files_hash = hash_object.hexdigest()
-    return hash_string(src_file_hash + other_files_hash)
+    return hash_string(src_result.hash + other_files_hash)
 
 
 
@@ -291,15 +298,9 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
         cmd.append(f"--{build_mode.lower()}")
         if profile:
             cmd.append("--profile")
-        proc = subprocess.Popen(
-            cmd,
-            cwd="/js",
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-        )
-        stdout = proc.communicate()[0]
-        return_code = proc.returncode
+        cp = subprocess.run(cmd, cwd="/js", capture_output=True, text=True)
+        stdout = cp.stdout
+        return_code = cp.returncode
         if return_code != 0:
             return HTTPException(
                 status_code=400,
