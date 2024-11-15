@@ -8,7 +8,7 @@ import time
 import warnings
 import zipfile
 import zlib
-from disklru import DiskLRUCache
+from disklru import DiskLRUCache  # type: ignore
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
@@ -20,11 +20,6 @@ from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 
 
-@dataclass
-class CacheEntry:
-    hash: str
-    data: bytes
-    last_access: float
 
 _TEST = False
 _UPLOAD_LIMIT = 10 * 1024 * 1024
@@ -38,6 +33,36 @@ _SOURCE_EXTENSIONS = ['.cpp', '.hpp', '.h', '.ino']
 _GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
 _GIT_REPO_PATH = "/js/fastled"  # Path to the git repository
 _ALLOW_SHUTDOWN = os.environ.get("ALLOW_SHUTDOWN", "false").lower() in ["true", "1"]
+
+upload_dir = Path("uploads")
+upload_dir.mkdir(exist_ok=True)
+compile_lock = threading.Lock()
+
+output_dir = Path("/output")
+output_dir.mkdir(exist_ok=True)
+
+# Initialize disk cache
+CACHE_FILE = output_dir / "compile_cache.db" 
+CACHE_MAX_ENTRIES = 50
+disk_cache = DiskLRUCache(str(CACHE_FILE), CACHE_MAX_ENTRIES)
+app = FastAPI()
+
+@dataclass
+class CacheEntry:
+    hash: str
+    data: bytes
+    last_access: float
+
+def hash_string(s: str) -> str:
+    # sha 256
+
+    return hashlib.sha256(s.encode()).hexdigest()
+
+@dataclass
+class SrcFileHashResult:
+    hash: str
+    stdout: str
+    error: bool
 
 
 def update_git_repo():
@@ -59,19 +84,9 @@ def update_git_repo():
         # Schedule next update
         Timer(_GIT_UPDATE_INTERVAL, update_git_repo).start()
 
-app = FastAPI()
+
 Timer(_GIT_UPDATE_INTERVAL, update_git_repo).start()  # Start the periodic git update
-upload_dir = Path("uploads")
-upload_dir.mkdir(exist_ok=True)
-compile_lock = threading.Lock()
 
-output_dir = Path("/output")
-output_dir.mkdir(exist_ok=True)
-
-# Initialize disk cache
-CACHE_FILE = output_dir / "compile_cache.db" 
-CACHE_MAX_ENTRIES = 50
-disk_cache = DiskLRUCache(str(CACHE_FILE), CACHE_MAX_ENTRIES)
 
 @dataclass
 class ProjectFiles:
@@ -209,16 +224,7 @@ def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
 
 
 
-def hash_string(s: str) -> str:
-    # sha 256
 
-    return hashlib.sha256(s.encode()).hexdigest()
-
-@dataclass
-class SrcFileHashResult:
-    hash: str
-    stdout: str
-    error: bool
 
 def generate_hash_of_src_files(src_files: list[Path]) -> SrcFileHashResult:
     """Generate a hash of all source files in a directory.
@@ -427,8 +433,9 @@ if _ALLOW_SHUTDOWN:
         os._exit(0)
         return {"status": "ok"}
 
+# THIS MUST NOT BE ASYNC!!!!
 @app.post("/compile/wasm")
-async def compile_wasm(
+def compile_wasm(
     file: UploadFile = File(...),
     authorization: str = Header(None),
     build: str = Header(None),
