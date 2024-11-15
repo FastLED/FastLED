@@ -36,6 +36,7 @@ _SOURCE_EXTENSIONS = ['.cpp', '.hpp', '.h', '.ino']
 
 _GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
 _GIT_REPO_PATH = "/js/fastled"  # Path to the git repository
+_ALLOW_SHUTDOWN = os.environ.get("ALLOW_SHUTDOWN", "false").lower() in ["true", "1"]
 
 
 def update_git_repo():
@@ -427,6 +428,13 @@ async def healthz() -> dict:
 
 
 
+if _ALLOW_SHUTDOWN:
+    @app.get("/shutdown")
+    async def shutdown() -> dict:
+        """Shutdown the server."""
+        print("Shutting down server...")
+        os._exit(0)
+        return {"status": "ok"}
 
 @app.post("/compile/wasm")
 async def compile_wasm(
