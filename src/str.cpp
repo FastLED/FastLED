@@ -43,6 +43,58 @@ int itoa(int value, char *sp, int radix) {
     return len;
 }
 
+float atoff(const char *str, size_t len) {
+    float result = 0.0f;    // The resulting number
+    float sign = 1.0f;      // Positive or negative
+    float fraction = 0.0f;  // Fractional part
+    float divisor = 1.0f;   // Divisor for the fractional part
+    int isFractional = 0;   // Whether the current part is fractional
+
+    size_t pos = 0; // Current position in the string
+
+    // Handle empty input
+    if (len == 0) {
+        return 0.0f;
+    }
+
+    // Skip leading whitespace (manual check instead of isspace)
+    while (pos < len && (str[pos] == ' ' || str[pos] == '\t' || str[pos] == '\n' || str[pos] == '\r' || str[pos] == '\f' || str[pos] == '\v')) {
+        pos++;
+    }
+
+    // Handle optional sign
+    if (pos < len && str[pos] == '-') {
+        sign = -1.0f;
+        pos++;
+    } else if (pos < len && str[pos] == '+') {
+        pos++;
+    }
+
+    // Main parsing loop
+    while (pos < len) {
+        if (str[pos] >= '0' && str[pos] <= '9') {
+            if (isFractional) {
+                divisor *= 10.0f;
+                fraction += (str[pos] - '0') / divisor;
+            } else {
+                result = result * 10.0f + (str[pos] - '0');
+            }
+        } else if (str[pos] == '.' && !isFractional) {
+            isFractional = 1;
+        } else {
+            // Stop parsing at invalid characters
+            break;
+        }
+        pos++;
+    }
+
+    // Combine integer and fractional parts
+    result = result + fraction;
+
+    // Apply the sign
+    return sign * result;
+}
+
 } // namespace string_functions
 
 void StringFormatter::append(int val, StrN<64> *dst) {
@@ -66,6 +118,19 @@ StringHolder::StringHolder(size_t length) {
     mData = (char *)malloc(length + 1);
     if (mData) {
         mLength = length;
+        mData[mLength] = '\0';
+    } else {
+        mLength = 0;
+    }
+    mCapacity = mLength;
+}
+
+
+StringHolder::StringHolder(const char *str, size_t length) {
+    mData = (char *)malloc(length + 1);
+    if (mData) {
+        mLength = length;
+        memcpy(mData, str, mLength);
         mData[mLength] = '\0';
     } else {
         mLength = 0;
@@ -103,5 +168,11 @@ void StringHolder::grow(size_t newLength) {
         }
     }
 }
+
+float StringFormatter::parseFloat(const char *str, size_t len) {
+    return string_functions::atoff(str, len);
+}
+
+
 
 FASTLED_NAMESPACE_END

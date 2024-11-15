@@ -124,6 +124,7 @@ class ScreenMap {
 
     static void toJsonStr(const FixedMap<Str, ScreenMap, 16>&, Str* jsonBuffer);
     static void toJson(const FixedMap<Str, ScreenMap, 16>&, FLArduinoJson::JsonDocument* doc);
+    static ScreenMap FromCsv(const Str& csv_data);
 
   private:
     static const pair_xy_float &empty() {

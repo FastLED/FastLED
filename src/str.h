@@ -5,6 +5,7 @@
 
 #include "ref.h"
 #include "template_magic.h"
+#include "fixed_vector.h"
 #include "namespace.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
@@ -36,12 +37,16 @@ FASTLED_SMART_REF(StringHolder);
 class StringFormatter {
   public:
     static void append(int val, StrN<64> *dst);
+    static bool isSpace(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r'; }
+    static float parseFloat(const char *str, size_t len);
+    static bool isDigit(char c) { return c >= '0' && c <= '9'; }
 };
 
 class StringHolder : public Referent {
   public:
     StringHolder(const char *str);
     StringHolder(size_t length);
+    StringHolder(const char *str, size_t length);
     ~StringHolder();
     bool isShared() const { return ref_count() > 1; }
     void grow(size_t newLength);
@@ -121,6 +126,16 @@ template <size_t SIZE = 64> class StrN {
 
     bool operator!=(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) != 0;
+    }
+
+    void copy(const char* str, size_t len) {
+        mLength = len;
+        if (len + 1 <= SIZE) {
+            memcpy(mInlineData, str, len + 1);
+            mHeapData.reset();
+        } else {
+            mHeapData = StringHolderRef::New(str, len);
+        }
     }
 
     template <size_t M> void copy(const StrN<M> &other) {
@@ -234,6 +249,51 @@ template <size_t SIZE = 64> class StrN {
         if (mHeapData) {
             mHeapData.reset();
         }
+    }
+
+
+
+    int16_t find(const char &value) const {
+        for (size_t i = 0; i < mLength; ++i) {
+            if (c_str()[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    StrN substring(size_t start, size_t end) const {
+        if (start >= mLength) {
+            return StrN();
+        }
+        if (end > mLength) {
+            end = mLength;
+        }
+        if (start >= end) {
+            return StrN();
+        }
+        StrN out;
+        out.copy(c_str() + start, end - start);
+        return out;
+    }
+
+
+
+    StrN trim() const {
+        StrN out;
+        size_t start = 0;
+        size_t end = mLength;
+        while (start < mLength && StringFormatter::isSpace(c_str()[start])) {
+            start++;
+        }
+        while (end > start && StringFormatter::isSpace(c_str()[end - 1])) {
+            end--;
+        }
+        return substring(start, end);
+    }
+
+    float toFloat() const {
+        return StringFormatter::parseFloat(c_str(), mLength);
     }
 
   private:
