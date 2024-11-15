@@ -51,6 +51,7 @@ TEST_CASE("ScreenMap JSON parsing") {
                 "y": [25.0, 45.0],
                 "diameter": 1.5
             }
+            
         }
     })";
 
