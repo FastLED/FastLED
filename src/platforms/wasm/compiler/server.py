@@ -8,6 +8,7 @@ import time
 import warnings
 import zipfile
 import zlib
+from disklru import DiskLRUCache
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
@@ -66,6 +67,11 @@ compile_lock = threading.Lock()
 
 output_dir = Path("/output")
 output_dir.mkdir(exist_ok=True)
+
+# Initialize disk cache
+CACHE_FILE = output_dir / "compile_cache.db" 
+CACHE_MAX_ENTRIES = 50
+disk_cache = DiskLRUCache(str(CACHE_FILE), CACHE_MAX_ENTRIES)
 
 @dataclass
 class ProjectFiles:
@@ -390,29 +396,11 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     )
 
 
-CACHE_LOCK = threading.Lock()
-CACHE: dict[str, CacheEntry] = {}
-CACHE_MAX_SIZE = 1 * 1024 * 1024
-CACHE_MAX_ENTRIES = 50
-
 def try_get_cached_zip(hash: str) -> bytes | None:
-    with CACHE_LOCK:
-        entry = CACHE.get(hash)
-        if entry is None:
-            return None
-        entry.last_access = time.time()
-        return entry.data
+    return disk_cache.get_bytes(hash)
 
 def cache_zip(hash: str, data: bytes) -> None:
-    if len(data) > CACHE_MAX_SIZE:
-        print("Data too large to cache")
-        return None
-    with CACHE_LOCK:
-        if len(CACHE) >= CACHE_MAX_ENTRIES:
-            # Remove the oldest entry
-            oldest_key = min(CACHE, key=lambda k: CACHE[k].last_access)
-            del CACHE[oldest_key]
-        CACHE[hash] = CacheEntry(hash=hash, data=data, last_access=time.time())
+    disk_cache.put_bytes(hash, data)
         
 
 
@@ -435,6 +423,7 @@ if _ALLOW_SHUTDOWN:
     async def shutdown() -> dict:
         """Shutdown the server."""
         print("Shutting down server...")
+        disk_cache.close()
         os._exit(0)
         return {"status": "ok"}
 
