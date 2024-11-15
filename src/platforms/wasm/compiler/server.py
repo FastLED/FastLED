@@ -18,6 +18,9 @@ from typing import List
 from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
                      HTTPException, UploadFile)
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request 
+from starlette.responses import Response
 
 
 
@@ -46,6 +49,25 @@ CACHE_FILE = output_dir / "compile_cache.db"
 CACHE_MAX_ENTRIES = 50
 disk_cache = DiskLRUCache(str(CACHE_FILE), CACHE_MAX_ENTRIES)
 app = FastAPI()
+
+class UploadSizeMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app, max_upload_size: int):
+        super().__init__(app)
+        self.max_upload_size = max_upload_size
+
+    async def dispatch(self, request: Request, call_next):
+        if request.method == "POST" and "/compile/wasm" in request.url.path:
+            content_length = request.headers.get('content-length')
+            if content_length:
+                content_length = int(content_length)
+                if content_length > self.max_upload_size:
+                    return Response(
+                        status_code=413,
+                        content=f"File size exceeds {self.max_upload_size} byte limit",
+                    )
+        return await call_next(request)
+
+app.add_middleware(UploadSizeMiddleware, max_upload_size=_UPLOAD_LIMIT)
 
 @dataclass
 class CacheEntry:
@@ -467,17 +489,8 @@ def compile_wasm(
     if file.filename is None:
         raise HTTPException(status_code=400, detail="No filename provided.")
     
-    if file.size is None:
-        raise HTTPException(status_code=400, detail="No file size provided.")
-
     if not file.filename.endswith('.zip'):
         raise HTTPException(status_code=400, detail="Uploaded file must be a zip archive.")
-
-    if file.size > _UPLOAD_LIMIT:
-        raise HTTPException(
-            status_code=400,
-            detail=f"File size exceeds {_UPLOAD_LIMIT} byte limit."
-        )
 
     temp_zip_dir = None
     temp_src_dir = None
@@ -491,6 +504,7 @@ def compile_wasm(
         file_path = Path(temp_zip_dir) / file.filename
         print(f"Saving uploaded file to: {file_path}")
         
+        # Simple file save since size is already checked by middleware
         with open(file_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
 
