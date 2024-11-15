@@ -3,6 +3,7 @@ import subprocess
 import os
 import sys
 from typing import Tuple
+import warnings
 from pathlib import Path
 
 _PORT = 80
@@ -24,6 +25,12 @@ def _run_server(unknown_args: list[str]) -> int:
     if "--disable-auto-clean" in unknown_args:
         env["DISABLE_AUTO_CLEAN"] = "1"
         unknown_args.remove("--disable-auto-clean")
+    if "--allow-shutdown" in unknown_args:
+        env["ALLOW_SHUTDOWN"] = "1"
+        unknown_args.remove("--allow-shutdown")
+    if unknown_args:
+        warnings.warn(f"Unknown arguments: {unknown_args}", file=sys.stderr)
+        unknown_args = []
     cmd_list = [
         "uvicorn",
         "server:app",
@@ -31,7 +38,7 @@ def _run_server(unknown_args: list[str]) -> int:
         "0.0.0.0",
         "--port",
         f"{_PORT}"
-    ] + unknown_args
+    ]
     cp: subprocess.CompletedProcess = subprocess.run(cmd_list, cwd=str(HERE), env=env)
     return cp.returncode
 
