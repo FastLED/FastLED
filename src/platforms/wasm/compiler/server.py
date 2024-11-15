@@ -47,9 +47,11 @@ def update_git_repo():
             # Change to repo directory
             os.chdir(_GIT_REPO_PATH)
             # Fetch and reset to origin/main
-            subprocess.run(["git", "fetch", "origin"], check=True)
-            subprocess.run(["git", "reset", "--hard", "origin/master"], check=True)
+            subprocess.run(["git", "fetch", "origin"], check=True, capture_output=True)
+            subprocess.run(["git", "reset", "--hard", "origin/master"], check=True, capture_output=True)
             print("Git repository updated successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"Error updating git repository: {e.stdout}\n\n{e.stderr}")
     except Exception as e:
         print(f"Error updating git repository: {e}")
     finally:
