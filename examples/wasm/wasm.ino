@@ -120,11 +120,6 @@ void loop() {
         animartrix.fxSet(fxIndex);
     }
 
-    EVERY_N_MILLISECONDS(1000) {
-        printf("fastled running\r\n");
-        printf("Numberfield: %f\r\n", fxIndex.value());
-    }
-
 
     fxEngine.draw(millis(), leds);
     FastLED.show();
