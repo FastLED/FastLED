@@ -218,6 +218,8 @@ template <size_t SIZE = 64> class StrN {
 
     // Append method
     void append(const char *str) { write(str, strlen(str)); }
+    void append(char c) { write(&c, 1); }
+    void append(const StrN &str) { write(str.c_str(), str.size()); }
 
     bool operator<(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) < 0;
@@ -225,6 +227,13 @@ template <size_t SIZE = 64> class StrN {
 
     template<size_t M> bool operator<(const StrN<M> &other) const {
         return strcmp(c_str(), other.c_str()) < 0;
+    }
+
+    void clear() {
+        mLength = 0;
+        if (mHeapData) {
+            mHeapData.reset();
+        }
     }
 
   private:
