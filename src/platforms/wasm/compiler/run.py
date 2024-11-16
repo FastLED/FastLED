@@ -28,6 +28,9 @@ def _run_server(unknown_args: list[str]) -> int:
     if "--allow-shutdown" in unknown_args:
         env["ALLOW_SHUTDOWN"] = "1"
         unknown_args.remove("--allow-shutdown")
+    if "--no-auto-update" in unknown_args:
+        env["NO_AUTO_UPDATE"] = "1"
+        unknown_args.remove("--no-auto-update")
     if unknown_args:
         warnings.warn(f"Unknown arguments: {unknown_args}", file=sys.stderr)
         unknown_args = []
