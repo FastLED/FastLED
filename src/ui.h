@@ -138,25 +138,14 @@ class Description {
 
 #endif
 
-// For comparison operators that return bool
-#define FASTLED_UI_COMPARISON_OP(UI_CLASS, OP) \
-template <typename T, typename U>  \
-typename fl::enable_if<fl::is_same<U, UI_CLASS>::value && fl::is_pod<T>::value, bool>::type \
-operator OP (const T& os, const UI_CLASS& ui) { return os OP ui; }
 
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS) \
-FASTLED_UI_COMPARISON_OP(UI_CLASS, >=) \
-FASTLED_UI_COMPARISON_OP(UI_CLASS, <=) \
-FASTLED_UI_COMPARISON_OP(UI_CLASS, >)  \
-FASTLED_UI_COMPARISON_OP(UI_CLASS, <)  \
-FASTLED_UI_COMPARISON_OP(UI_CLASS, ==) \
-FASTLED_UI_COMPARISON_OP(UI_CLASS, !=) \
-template<typename T> bool operator >= (const UI_CLASS& ui, const T& v) { return ui >= v; } \
-template<typename T> bool operator <= (const UI_CLASS& ui, const T& v) { return ui <= v; } \
-template<typename T> bool operator > (const UI_CLASS& ui, const T& v) { return ui > v; } \
-template<typename T> bool operator < (const UI_CLASS& ui, const T& v) { return ui < v; } \
-template<typename T> bool operator == (const UI_CLASS& ui, const T& v) { return ui == v; } \
-template<typename T> bool operator != (const UI_CLASS& ui, const T& v) { return ui != v; }
+FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, >=) \
+FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, <=) \
+FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, >)  \
+FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, <)  \
+FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, ==) \
+FASTLED_DEFINE_POD_COMPARISON_OPERATOR(UI_CLASS, !=)
 
 FASTLED_UI_DEFINE_OPERATORS(Slider);
 FASTLED_UI_DEFINE_OPERATORS(NumberField);

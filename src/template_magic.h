@@ -158,3 +158,18 @@ using is_derived = enable_if_t<is_base_of<Base, Derived>::value>;
 template <typename T, typename U>                              \
 typename fl::enable_if<fl::is_same<U, CLASS>::value, T&>::type \
 operator<<(T& os, const CLASS& obj)
+
+
+// For comparison operators that return bool against pod data. The class obj will need
+// to supply the comparison operator for the pod type.
+// This example will show how to define a comparison operator for a class that can be
+// compared against a pod type.
+// Example:
+//   FASTLED_DEFINE_POD_COMPARISON_OPERATOR(Myclass, >=) will allow MyClass to be compared
+//   MyClass obj;
+//   return obj >= 0;
+#define FASTLED_DEFINE_POD_COMPARISON_OPERATOR(CLASS, OP) \
+template <typename T, typename U>  \
+typename fl::enable_if<fl::is_same<U, CLASS>::value && fl::is_pod<T>::value, bool>::type \
+operator OP (const T& pod, const CLASS& obj) { return pod OP obj; } \
+template <typename T> bool operator OP (const CLASS& obj, const T& pod) { return obj OP pod; }
