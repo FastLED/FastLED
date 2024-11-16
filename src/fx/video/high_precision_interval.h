@@ -5,9 +5,15 @@
 FASTLED_NAMESPACE_BEGIN
 
 class HighPrecisionInterval {
-public:
-    HighPrecisionInterval(uint64_t microsSecondsPerInterval)
-        : mMicrosSecondsPerInterval(microsSecondsPerInterval), mIntervalCounter(0), mStartTime(0), mPauseOffset(0), mPauseTime(0), mIsPaused(false) {}
+  public:
+    HighPrecisionInterval(float fps) {
+        mMicrosSecondsPerInterval = 1000000.0f / fps;
+        mIntervalCounter = 0;
+        mStartTime = 0;
+        mPauseOffset = 0;
+        mPauseTime = 0;
+        mIsPaused = false;
+    }
 
     void reset(uint32_t startTime) {
         mStartTime = startTime;
@@ -32,7 +38,7 @@ public:
         }
     }
 
-    bool needsFrame(uint32_t now, uint32_t* precise_timestamp) const {
+    bool needsFrame(uint32_t now, uint32_t *precise_timestamp) const {
         if (mIsPaused) {
             return false;
         }
@@ -43,14 +49,17 @@ public:
         uint32_t intervalNumber = elapsedMicros / mMicrosSecondsPerInterval;
         bool needs_update = intervalNumber > mIntervalCounter;
         if (needs_update) {
-            *precise_timestamp = mStartTime + ((mIntervalCounter+1) * mMicrosSecondsPerInterval) / 1000 + mPauseOffset;
+            *precise_timestamp =
+                mStartTime +
+                ((mIntervalCounter + 1) * mMicrosSecondsPerInterval) / 1000 +
+                mPauseOffset;
         }
         return needs_update;
     }
 
     bool isPaused() const { return mIsPaused; }
 
-private:
+  private:
     uint64_t mMicrosSecondsPerInterval;
     uint32_t mIntervalCounter;
     uint32_t mStartTime;

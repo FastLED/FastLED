@@ -43,7 +43,6 @@ void loop() {
 #define IS_SERPINTINE true
 
 CRGB leds[NUM_LEDS];
-XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
 ScreenMap screenMap;
 
 FileSystem filesystem;
@@ -74,8 +73,6 @@ void setup() {
 
 void loop() {
     uint32_t now = millis();
-
-    // fxEngine.draw(millis(), leds);
     video.draw(now, leds);
     FastLED.show();
 }
