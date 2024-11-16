@@ -3,6 +3,10 @@
 
 #if FASTLED_RMT5
 
+#ifdef FASTLED_RMT_BUILTIN_DRIVER
+#warning "FASTLED_RMT_BUILTIN_DRIVER is not supported in RMT5 and will be ignored."
+#endif
+
 #include <assert.h>
 
 
