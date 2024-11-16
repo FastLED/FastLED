@@ -105,6 +105,10 @@ class XYMap {
         mLookUpTable.reset();
     }
 
+    uint16_t operator()(uint16_t x, uint16_t y) const {
+        return mapToIndex(x, y);
+    }
+
     uint16_t mapToIndex(uint16_t x, uint16_t y) const {
         uint16_t index;
         switch (type) {

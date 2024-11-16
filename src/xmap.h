@@ -117,6 +117,10 @@ public:
         return index + mOffset;
     }
 
+    uint16_t operator()(uint16_t x) const {
+        return mapToIndex(x);
+    }
+
     uint16_t getLength() const {
         return length;
     }
