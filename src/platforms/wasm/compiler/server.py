@@ -38,6 +38,10 @@ _SOURCE_EXTENSIONS = ['.cpp', '.hpp', '.h', '.ino']
 _GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
 _GIT_REPO_PATH = "/js/fastled"  # Path to the git repository
 _ALLOW_SHUTDOWN = os.environ.get("ALLOW_SHUTDOWN", "false").lower() in ["true", "1"]
+_NO_SKETCH_CACHE = os.environ.get("NO_SKETCH_CACHE", "false").lower() in ["true", "1"]
+
+if _NO_SKETCH_CACHE:
+    print("Sketch caching disabled")
 
 upload_dir = Path("uploads")
 upload_dir.mkdir(exist_ok=True)
@@ -86,9 +90,15 @@ class SrcFileHashResult:
 
 
 def try_get_cached_zip(hash: str) -> bytes | None:
+    if _NO_SKETCH_CACHE:
+        print("Sketch caching disabled, skipping cache get")
+        return None
     return disk_cache.get_bytes(hash)
 
-def cache_zip(hash: str, data: bytes) -> None:
+def cache_put(hash: str, data: bytes) -> None:
+    if _NO_SKETCH_CACHE:
+        print("Sketch caching disabled, skipping cache put")
+        return
     disk_cache.put_bytes(hash, data)
 
 def on_files_changed() -> None:
@@ -97,7 +107,9 @@ def on_files_changed() -> None:
         
 
 FILEWATCHER = FileWatcher(path="/js/fastled/src", callback=on_files_changed)
-FILEWATCHER.start()
+
+if not _NO_SKETCH_CACHE:
+    FILEWATCHER.start()
 
 
 def update_git_repo():
@@ -571,7 +583,7 @@ def compile_wasm(
         out_path = Path(out.path)
         data = out_path.read_bytes()
         if hash_value is not None:
-            cache_zip(hash_value, data)
+            cache_put(hash_value, data)
         return out
     except HTTPException as e:
         print(f"HTTPException in upload process: {str(e)}")

@@ -222,7 +222,7 @@ def run_container(
             "-v",
             f"{absolute_directory}:/mapped/{base_name}",
             "-v",
-            f"{PROJECT_ROOT}:/js/fastled",
+            f"{PROJECT_ROOT/'src'}:/js/fastled/src",
         ]
         if server:
             # add the port mapping before the image name is added.
@@ -230,8 +230,10 @@ def run_container(
             print(f"Using auth token: {auth_token}")
             docker_command.extend(["-p", "80:80"])
         docker_command.append(IMAGE_NAME)
-        if server:
-            docker_command.extend(["python", "/js/run.py", "server"])
+        if server and not interactive:
+            docker_command.extend(
+                ["python", "/js/run.py", "server", "--no-sketch-cache"]
+            )
         elif not interactive:
             docker_command.extend(["python", "/js/run.py", "compile"])
             if build_mode == BuildMode.DEBUG:

@@ -31,6 +31,9 @@ def _run_server(unknown_args: list[str]) -> int:
     if "--no-auto-update" in unknown_args:
         env["NO_AUTO_UPDATE"] = "1"
         unknown_args.remove("--no-auto-update")
+    if "--no-sketch-cache" in unknown_args:
+        env["NO_SKETCH_CACHE"] = "1"
+        unknown_args.remove("--no-sketch-cache")
     if unknown_args:
         warnings.warn(f"Unknown arguments: {unknown_args}", file=sys.stderr)
         unknown_args = []
