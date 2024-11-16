@@ -131,10 +131,12 @@ WORKDIR /js
 
 RUN python /js/init_runtime.py
 
+# First pre-warm cycle
 RUN /js/prewarm.sh
 
 COPY src/ /js/fastled/src
 
+# Second pre-warm cycle with the fastled repo from the host machine
 RUN /js/prewarm.sh
 
 
