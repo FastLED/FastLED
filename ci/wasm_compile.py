@@ -221,6 +221,8 @@ def run_container(
             IMAGE_NAME,
             "-v",
             f"{absolute_directory}:/mapped/{base_name}",
+            "-v",
+            f"{PROJECT_ROOT}:/js/fastled",
         ]
         if server:
             # add the port mapping before the image name is added.
