@@ -45,8 +45,17 @@ ARG PLATFORM_TAG=""
 # Use only Emscripten base image
 FROM emscripten/emsdk:3.1.70${PLATFORM_TAG}
 
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install apt-fast first
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:apt-fast/stable -y && \
+    apt-get update && \
+    apt-get -y install apt-fast
+
 # Update apt and install required packages
-RUN apt-get update && apt-get install -y \
+RUN apt-fast install -y \
     git \
     gawk \
     nano \
