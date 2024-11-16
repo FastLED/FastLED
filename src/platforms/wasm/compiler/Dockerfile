@@ -114,8 +114,6 @@ RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
 # invalidating cache layers that clone a github repo.
 RUN git clone https://github.com/fastled/FastLED.git /js/fastled
 
-COPY src/platforms/wasm/compiler/init_runtime.py /js/init_runtime.py
-
 # Set up the entrypoint script
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'source /emsdk/emsdk_env.sh' >> /entrypoint.sh && \
@@ -129,10 +127,12 @@ RUN pip install -r /install/requirements.txt
 # Create symlinks for wasm platform files.
 COPY src/platforms/wasm/compiler/init_runtime.py /js/init_runtime.py
 
-
 WORKDIR /js
 
 RUN python /js/init_runtime.py
+
+RUN /js/prewarm.sh
+
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will
 # be much quicker than the first pre-warm cycle.
