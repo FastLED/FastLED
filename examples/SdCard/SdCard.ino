@@ -42,6 +42,11 @@ void loop() {
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 #define IS_SERPINTINE true
 
+
+Title title("SDCard Demo - Mapped Video");
+Description description("Video data is streamed off of a SD card and displayed on a LED strip. The video data is mapped to the LED strip using a ScreenMap.");
+
+
 CRGB leds[NUM_LEDS];
 ScreenMap screenMap;
 
