@@ -14,6 +14,7 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from threading import Timer
 from typing import List
+import re
 
 from filewatcher import FileWatcher
 
@@ -117,11 +118,9 @@ def update_git_repo():
     try:
         print("\nAttempting to update git repository...")
         with compile_lock:
-            # Change to repo directory
-            os.chdir(_GIT_REPO_PATH)
             # Fetch and reset to origin/main
-            subprocess.run(["git", "fetch", "origin"], check=True, capture_output=True)
-            subprocess.run(["git", "reset", "--hard", "origin/master"], check=True, capture_output=True)
+            subprocess.run(["git", "fetch", "origin"], check=True, capture_output=True, cwd=_GIT_REPO_PATH)
+            subprocess.run(["git", "reset", "--hard", "origin/master"], check=True, capture_output=True, cwd=_GIT_REPO_PATH)
             print("Git repository updated successfully")
     except subprocess.CalledProcessError as e:
         print(f"Error updating git repository: {e.stdout}\n\n{e.stderr}")
@@ -187,6 +186,24 @@ def concatenate_files(file_list: List[Path], output_file: Path) -> None:
                 outfile.write(infile.read())
                 outfile.write("\n\n")
 
+
+def collapse_spaces_preserve_cstrings(line: str):
+    def replace_outside_cstrings(match):
+        # This function processes the part outside of C strings
+        content = match.group(0)
+        if content.startswith('"') or content.startswith("'"):
+            return content  # It's inside a C string, keep as is
+        else:
+            # Collapse spaces outside of C strings
+            return ' '.join(content.split())
+    
+    # Regular expression to match C strings and non-C string parts
+    pattern = r'\"(?:\\.|[^\"])*\"|\'.*?\'|[^"\']+'
+    processed_line = ''.join(
+        replace_outside_cstrings(match) for match in re.finditer(pattern, line)
+    )
+    return processed_line
+
 # return a hash
 def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
     """Preprocess a file with GCC, leaving #include directives intact.
@@ -248,7 +265,8 @@ def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
             if line.startswith("// File:"):  # these change because of the temp file, so need to be removed.
                 continue
             # Collapse multiple spaces into single space and strip whitespace
-            line = ' '.join(line.split())
+            # line = ' '.join(line.split())
+            line = collapse_spaces_preserve_cstrings(line)
             out_lines.append(line)
         # Join with new lines
         content = '\n'.join(out_lines)
