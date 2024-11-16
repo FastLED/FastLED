@@ -21,8 +21,12 @@ void loop() {
 #include "fx/video.h"
 #include "file_system.h"
 #include "ui.h"
-
+#include "screenmap.h"
 #include "file_system.h"
+
+
+#include "screenmap.json.h"  // const char JSON_SCREEN_MAP[] = { ... }
+
 
 #define LED_PIN 2
 #define LED_TYPE WS2811
@@ -40,6 +44,7 @@ void loop() {
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, IS_SERPINTINE);  // No serpentine
+ScreenMap screenMap;
 
 FileSystem filesystem;
 Video video;
@@ -51,9 +56,14 @@ void setup() {
     if (!filesystem.beginSd(CHIP_SELECT_PIN)) {
         Serial.println("Failed to initialize file system.");
     }
+    // JSON_SCREEN_MAP
+    FixedMap<Str, ScreenMap, 16> screenMaps;
+    ScreenMap::ParseJson(JSON_SCREEN_MAP, &screenMaps);
+    ScreenMap screenMap = screenMaps["strip1"];
+
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
-        .setScreenMap(xyMap);
+        .setScreenMap(screenMap);
     FastLED.setBrightness(96);
     //fxEngine.addFx(animartrix);
     video = filesystem.openVideo("data/video.dat", NUM_LEDS, FPS);
