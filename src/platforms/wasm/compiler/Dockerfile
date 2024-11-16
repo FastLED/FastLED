@@ -133,6 +133,7 @@ RUN ln -s /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.
     ln -s /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
     for file in /js/fastled/src/platforms/wasm/compiler/*.js; do ln -s "$file" /js/$(basename "$file"); done && \
     for file in /js/fastled/src/platforms/wasm/compiler/*.sh; do ln -s "$file" /js/$(basename "$file"); done && \
+    ln -s /js/fastled/src/platforms/wasm/compiler/filewatcher.py /js/filewatcher.py && \
     ln -s /js/fastled/src/platforms/wasm/compiler/compile.py /js/compile.py && \
     ln -s /js/fastled/src/platforms/wasm/compiler/run.py /js/run.py && \
     ln -s /js/fastled/src/platforms/wasm/compiler/server.py /js/server.py

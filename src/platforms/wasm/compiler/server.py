@@ -15,6 +15,8 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from threading import Timer
 from typing import List
 
+from filewatcher import FileWatcher
+
 from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
                      HTTPException, UploadFile)
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
@@ -50,6 +52,7 @@ CACHE_MAX_ENTRIES = 50
 disk_cache = DiskLRUCache(str(CACHE_FILE), CACHE_MAX_ENTRIES)
 app = FastAPI()
 
+
 class UploadSizeMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, max_upload_size: int):
         super().__init__(app)
@@ -59,8 +62,8 @@ class UploadSizeMiddleware(BaseHTTPMiddleware):
         if request.method == "POST" and "/compile/wasm" in request.url.path:
             content_length = request.headers.get('content-length')
             if content_length:
-                content_length = int(content_length)
-                if content_length > self.max_upload_size:
+                content_length = int(content_length) # type: ignore
+                if content_length > self.max_upload_size:  # type: ignore
                     return Response(
                         status_code=413,
                         content=f"File size exceeds {self.max_upload_size} byte limit",
@@ -68,12 +71,6 @@ class UploadSizeMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 app.add_middleware(UploadSizeMiddleware, max_upload_size=_UPLOAD_LIMIT)
-
-@dataclass
-class CacheEntry:
-    hash: str
-    data: bytes
-    last_access: float
 
 def hash_string(s: str) -> str:
     # sha 256
@@ -85,6 +82,22 @@ class SrcFileHashResult:
     hash: str
     stdout: str
     error: bool
+
+
+
+def try_get_cached_zip(hash: str) -> bytes | None:
+    return disk_cache.get_bytes(hash)
+
+def cache_zip(hash: str, data: bytes) -> None:
+    disk_cache.put_bytes(hash, data)
+
+def on_files_changed() -> None:
+    print("Files changed, clearing cache")
+    disk_cache.clear()
+        
+
+FILEWATCHER = FileWatcher(path="/js/fastled/src", callback=on_files_changed)
+FILEWATCHER.start()
 
 
 def update_git_repo():
@@ -424,12 +437,6 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     )
 
 
-def try_get_cached_zip(hash: str) -> bytes | None:
-    return disk_cache.get_bytes(hash)
-
-def cache_zip(hash: str, data: bytes) -> None:
-    disk_cache.put_bytes(hash, data)
-        
 
 
 
@@ -451,6 +458,7 @@ if _ALLOW_SHUTDOWN:
     async def shutdown() -> dict:
         """Shutdown the server."""
         print("Shutting down server...")
+        FILEWATCHER.stop()
         disk_cache.close()
         os._exit(0)
         return {"status": "ok"}
