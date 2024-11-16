@@ -5,6 +5,7 @@
 #include "platforms/ui_defs.h"
 #include "namespace.h"
 #include "math_macros.h"
+#include "template_magic.h"
 
 #ifndef FASTLED_HAS_UI_SLIDER
 #define FASTLED_HAS_UI_SLIDER 0
@@ -137,19 +138,21 @@ class Description {
 
 #endif
 
+
+#define FASTLED_UI_OP(UI_CLASS, OP) \
+template <typename T, typename U>  \
+typename fl::enable_if<fl::is_same<U, UI_CLASS>::value, T&>::type \
+operator OP (T& os, const UI_CLASS& ui) { return os OP ui; } \
+template<typename T> bool operator OP (const UI_CLASS& ui, const T& v) { return ui OP v; }
+
+
 #define FASTLED_UI_DEFINE_OPERATORS(UI_CLASS) \
-template <typename T> bool operator>= (T v, const UI_CLASS& ui) { return ui >= v; } \
-template <typename T> bool operator<= (T v, const UI_CLASS& ui) { return ui <= v; } \
-template <typename T> bool operator> (T v, const UI_CLASS& ui) { return ui > v; } \
-template <typename T> bool operator< (T v, const UI_CLASS& ui) { return ui < v; } \
-template <typename T> bool operator== (T v, const UI_CLASS& ui) { return ui == v; } \
-template <typename T> bool operator!= (T v, const UI_CLASS& ui) { return ui != v; } \
-template <typename T> bool operator>=(const UI_CLASS& ui, T v) { return ui >= v; }  \
-template <typename T> bool operator<=(const UI_CLASS& ui, T v) { return ui <= v; } \
-template <typename T> bool operator>(const UI_CLASS& ui, T v) { return ui > v; } \
-template <typename T> bool operator<(const UI_CLASS& ui, T v) { return ui < v; } \
-template <typename T> bool operator==(const UI_CLASS& ui, T v) { return ui == v; } \
-template <typename T> bool operator!=(const UI_CLASS& ui, T v) { return ui != v; }
+FASTLED_UI_OP(UI_CLASS, >=) \
+FASTLED_UI_OP(UI_CLASS, <=) \
+FASTLED_UI_OP(UI_CLASS, >)  \
+FASTLED_UI_OP(UI_CLASS, <)  \
+FASTLED_UI_OP(UI_CLASS, ==) \
+FASTLED_UI_OP(UI_CLASS, !=)
 
 FASTLED_UI_DEFINE_OPERATORS(Slider);
 FASTLED_UI_DEFINE_OPERATORS(NumberField);
