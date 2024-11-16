@@ -26,7 +26,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 
-
+_GIT_UPDATES_DISABLED = True
 _TEST = False
 _UPLOAD_LIMIT = 10 * 1024 * 1024
 # Protect the endpoints from random bots.
@@ -131,7 +131,7 @@ def update_git_repo():
         # Schedule next update
         Timer(_GIT_UPDATE_INTERVAL, update_git_repo).start()
 
-_NO_AUTO_UPDATE = os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"]
+_NO_AUTO_UPDATE = os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"] or _GIT_UPDATES_DISABLED
 
 if not _NO_AUTO_UPDATE:
     Timer(_GIT_UPDATE_INTERVAL, update_git_repo).start()  # Start the periodic git update
