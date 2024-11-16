@@ -14,4 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "NoiseRing.hpp"
+#include "s3_parallel.hpp"
