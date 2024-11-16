@@ -172,4 +172,6 @@ operator<<(T& os, const CLASS& obj)
 template <typename T, typename U>  \
 typename fl::enable_if<fl::is_same<U, CLASS>::value && fl::is_pod<T>::value, bool>::type \
 operator OP (const T& pod, const CLASS& obj) { return pod OP obj; } \
-template <typename T> bool operator OP (const CLASS& obj, const T& pod) { return obj OP pod; }
+template <typename T> \
+typename fl::enable_if<fl::is_pod<T>::value, bool>::type \
+operator OP (const CLASS& obj, const T& pod) { return obj OP pod; }
