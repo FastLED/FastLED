@@ -65,6 +65,7 @@ class UploadSizeMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         if request.method == "POST" and "/compile/wasm" in request.url.path:
+            print(f"Upload request with content-length: {request.headers.get('content-length')}")
             content_length = request.headers.get('content-length')
             if content_length:
                 content_length = int(content_length) # type: ignore
