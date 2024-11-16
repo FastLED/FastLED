@@ -68,6 +68,34 @@ struct is_same_v_helper {
     static constexpr bool value = is_same<T, U>::value;
 };
 
+// Define is_pod trait (basic implementation)
+template <typename T>
+struct is_pod {
+    static constexpr bool value = false;  // Default to false for safety
+};
+
+// Specializations for fundamental types
+template<> struct is_pod<bool> { static constexpr bool value = true; };
+template<> struct is_pod<char> { static constexpr bool value = true; };
+template<> struct is_pod<signed char> { static constexpr bool value = true; };
+template<> struct is_pod<unsigned char> { static constexpr bool value = true; };
+template<> struct is_pod<short> { static constexpr bool value = true; };
+template<> struct is_pod<unsigned short> { static constexpr bool value = true; };
+template<> struct is_pod<int> { static constexpr bool value = true; };
+template<> struct is_pod<unsigned int> { static constexpr bool value = true; };
+template<> struct is_pod<long> { static constexpr bool value = true; };
+template<> struct is_pod<unsigned long> { static constexpr bool value = true; };
+template<> struct is_pod<long long> { static constexpr bool value = true; };
+template<> struct is_pod<unsigned long long> { static constexpr bool value = true; };
+template<> struct is_pod<float> { static constexpr bool value = true; };
+template<> struct is_pod<double> { static constexpr bool value = true; };
+template<> struct is_pod<long double> { static constexpr bool value = true; };
+
+// Helper struct for is_pod_v (similar to other _v helpers)
+template <typename T>
+struct is_pod_v_helper {
+    static constexpr bool value = is_pod<T>::value;
+};
 
 // This uses template magic to maybe generate a type for the given condition. If that type
 // doesn't exist then a type will fail to be generated, and the compiler will skip the
