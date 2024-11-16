@@ -103,7 +103,6 @@ class FileWatcher(threading.Thread):
             callback = self.callback or (lambda: print("File changed"))
             while not self.stopped:
                 changes = self.get_all_changes()
-                print("Changes:", changes)
                 if changes:
                     callback()
                 time.sleep(1)

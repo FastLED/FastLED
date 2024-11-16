@@ -73,9 +73,6 @@ RUN mkdir -p /container/bin && \
     ln -s /usr/bin/python3 /container/bin/python && \
     ln -s /usr/bin/pip3 /container/bin/pip
 
-# Get the compiler requirements and install them.
-COPY src/platforms/wasm/compiler/requirements.txt /install/requirements.txt
-RUN pip install -r /install/requirements.txt
 
 # Add Python and Emscripten to PATH
 ENV PATH="/container/bin:/usr/local/bin:/usr/bin:/emsdk:/emsdk/upstream/emscripten:${PATH}"
@@ -107,13 +104,9 @@ RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
 # isn't wasm.
 #COPY src/platforms/wasm/compiler/install-arduino-cli.sh /install-arduino-cli.sh
 #RUN chmod +x /install-arduino-cli.sh && /install-arduino-cli.sh || echo "Failed to install Arduino CLI"
-    
 
-# Set up the entrypoint script
-RUN echo '#!/bin/bash' > /entrypoint.sh && \
-    echo 'source /emsdk/emsdk_env.sh' >> /entrypoint.sh && \
-    echo 'exec "$@"' >> /entrypoint.sh && \
-    chmod +x /entrypoint.sh
+
+
 
 # FIRST PRE-WARM CYCLE and initial setup: Download the fastled repo from the github and pre-warm the cache with a compilation.
 # This is by far the most expensive part of the build, because platformio needs to download initial tools. This
@@ -121,66 +114,29 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
 # invalidating cache layers that clone a github repo.
 RUN git clone https://github.com/fastled/FastLED.git /js/fastled
 
-RUN dos2unix /js/fastled/src/platforms/wasm/compiler/*.sh && \
-    chmod +x /js/fastled/src/platforms/wasm/compiler/*.sh && \
-    dos2unix /js/fastled/src/platforms/wasm/compiler/*.py
+COPY src/platforms/wasm/compiler/init_runtime.py /js/init_runtime.py
+
+# Set up the entrypoint script
+RUN echo '#!/bin/bash' > /entrypoint.sh && \
+    echo 'source /emsdk/emsdk_env.sh' >> /entrypoint.sh && \
+    echo 'exec "$@"' >> /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
+# Get the compiler requirements and install them.
+COPY src/platforms/wasm/compiler/requirements.txt /install/requirements.txt
+RUN pip install -r /install/requirements.txt
     
 # Create symlinks for wasm platform files.
-RUN ln -s /js/fastled/src/platforms/wasm/compiler/platformio.ini /js/platformio.ini && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/wasm_compiler_flags.py /js/wasm_compiler_flags.py && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/index.html /js/index.html && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/index.css /js/index.css && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/Arduino.h /js/Arduino.h && \
-    for file in /js/fastled/src/platforms/wasm/compiler/*.js; do ln -s "$file" /js/$(basename "$file"); done && \
-    for file in /js/fastled/src/platforms/wasm/compiler/*.sh; do ln -s "$file" /js/$(basename "$file"); done && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/filewatcher.py /js/filewatcher.py && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/compile.py /js/compile.py && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/run.py /js/run.py && \
-    ln -s /js/fastled/src/platforms/wasm/compiler/server.py /js/server.py
+COPY src/platforms/wasm/compiler/init_runtime.py /js/init_runtime.py
 
-RUN ln -s /js/fastled/examples /js/examples
-
-COPY src/platforms/wasm/compiler/prewarm.sh /prewarm.sh
-RUN chmod +x /prewarm.sh && dos2unix /prewarm.sh
 
 WORKDIR /js
 
-ARG PREWARM="true"
-ENV PREWARM=${PREWARM}
-
-# NOW DO THE 1st PRE-WARM CYCLE
-# Prewarm the ccache with a first compile and also give a chance for
-# platformio to install the required tools.
-RUN /prewarm.sh
-
+RUN python /js/init_runtime.py
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will
 # be much quicker than the first pre-warm cycle.
 
-# In order to speed up the build, copy files that are not likely
-# to be changed first.
-COPY ./*.json /js/fastled/
-COPY ./*.properties /js/fastled/
-COPY ./src/*.* /js/fastled/src/
-COPY ./src/fx/ /js/fastled/src/fx/
-COPY ./src/lib8tion/ /js/fastled/src/lib8tion
-COPY ./src/third_party/ /js/fastled/src/third_party
-
-COPY examples /examples
-
-# Create required directories
-RUN mkdir -p /mapped /examples/wasm
-
-# Copy platforms directory separately, since it changes a lot during development
-COPY ./src/platforms/ /js/fastled/src/platforms/
-
-RUN dos2unix /js/fastled/src/platforms/wasm/compiler/*.sh && \
-    chmod +x /js/fastled/src/platforms/wasm/compiler/*.sh && \
-    dos2unix /js/fastled/src/platforms/wasm/compiler/*.py
-
-# Pre-warm with a second compile with updated files.
-RUN /prewarm.sh
-# Okay that it's, we are ready to do fast compiles now.
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["python", "/js/run.py", "compile"]
