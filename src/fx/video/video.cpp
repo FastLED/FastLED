@@ -143,6 +143,11 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
     } else {
         frame = FrameRef::New(mPixelsPerFrame, false);
     }
+    if (mStream->atEnd()) {
+        if (!mStream->rewind()) {
+            return false;
+        }
+    }
     if (mStream->readFrame(frame.get())) {
         if (mInterpolator->pushNewest(frame, now)) {
             // we have a new frame

@@ -39,6 +39,7 @@ class DataStream: public Referent {
   int32_t framesRemaining() const;
   int32_t framesDisplayed() const;
   bool available() const;
+  bool atEnd() const;
 
   int32_t bytesRemaining() const;
   int32_t bytesRemainingInFrame() const;

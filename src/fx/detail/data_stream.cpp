@@ -61,6 +61,14 @@ bool DataStream::available() const {
     }
 }
 
+bool DataStream::atEnd() const {
+    if (mUsingByteStream) {
+        return false;
+    } else {
+        return !mFileBuffer->available();
+    }
+}
+
 bool DataStream::readFrame(Frame* frame) {
     // returns true if a frame was read.
     if (!framesRemaining() || !frame) {
