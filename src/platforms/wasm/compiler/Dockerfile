@@ -74,6 +74,7 @@ RUN apt-fast install -y \
     zlib1g-dev \
     gcc \
     g++ \
+    rsync \
     && rm -rf /var/lib/apt/lists/*
 
 
