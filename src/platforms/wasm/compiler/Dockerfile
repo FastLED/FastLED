@@ -145,13 +145,18 @@ ENV NO_PREWARM=${NO_PREWARM}
 
 RUN python /js/init_runtime.py
 
-# First pre-warm cycle
-RUN /js/prewarm.sh
+COPY src/platforms/wasm/compiler/prewarm.sh /js/prewarm.sh
+COPY src/platforms/wasm/compiler/run.py /js/run.py
+
+# First pre-warm cycle - always do it as part of the build.
+RUN mkdir -p /logs
+RUN /js/prewarm.sh --force > /logs/prewarm.log.1
 
 COPY src/ /js/fastled/src
 
+COPY src/platforms/wasm/compiler/prewarm.sh /js/prewarm.sh
 # Second pre-warm cycle with the fastled repo from the host machine
-RUN /js/prewarm.sh
+RUN /js/prewarm.sh  > /logs/prewarm.log.2
 
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will

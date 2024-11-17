@@ -54,7 +54,7 @@ def _run_compile(unknown_args: list[str]) -> int:
     command = [sys.executable, 'compile.py'] + unknown_args
 
     # Call compile.py with the unknown arguments
-    result = subprocess.run(command, text=True)
+    result = subprocess.run(command, text=True, cwd=str(HERE))
 
     # Print the output from compile.py
     #print(result.stdout)

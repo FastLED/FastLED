@@ -1,17 +1,34 @@
 #!/bin/bash
 
-# if os env has PREWARM == "true"
-if [ "$PREWARM" == "true" ]; then
-  echo "Prewarming..."
-else
-  exit 0
+# --force flag to force prewarm
+#test to see if --force flag is set
+forced=0
+if [ "$1" == "--force" ]; then
+  forced=1
 fi
 
-mkdir -p /mapped && cp -r /js/fastled/examples/wasm /mapped/wasm
-python /js/run.py compile --debug --mapped-dir /js/fastled/examples/wasm && rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
+echo "Forced: $forced"
+echo "NO_PREWARM: $NO_PREWARM"
 
-mkdir -p /mapped && cp -r /js/fastled/examples/wasm /mapped/wasm
-python /js/run.py compile --quick --mapped-dir /js/fastled/examples/wasm && rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
+# if os env has PREWARM == "true"
+if [ "$forced" == "0" ]; then
+  if [ "$NO_PREWARM" != "1" ]; then
+    echo "Prewarming..."
+  else
+    echo "Skipping prewarm..."
+    exit 0
+  fi
+fi
 
-mkdir -p /mapped && cp -r /js/fastled/examples/wasm /mapped/wasm
-python /js/run.py compile --release --mapped-dir /js/fastled/examples/wasm && -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
+rm -rf /prewarm
+mkdir -p /prewarm && cp -r /js/fastled/examples/wasm /prewarm/wasm
+python /js/compile.py --debug --mapped-dir /prewarm && rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
+rm -rf /prewarm
+
+mkdir -p /prewarm && cp -r /js/fastled/examples/wasm /prewarm/wasm
+python /js/compile.py --quick --mapped-dir /prewarm && rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
+rm -rf /prewarm
+
+mkdir -p /prewarm && cp -r /js/fastled/examples/wasm /prewarm/wasm
+python /js/compile.py --release --mapped-dir /prewarm && -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
+rm -rf /prewarm
