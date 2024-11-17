@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from threading import Timer
-from typing import List
+from typing import List, Callable
 import re
 
 from filewatcher import FileWatcher
@@ -27,7 +27,6 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 _VOLUME_MAPPED_SRC = Path("/host/fastled/src")
-_RSYNC_SRC = Path(_VOLUME_MAPPED_SRC)
 _RSYNC_DEST = Path("/js/fastled/src")
 
 _GIT_UPDATES_DISABLED = True
@@ -41,14 +40,16 @@ _AUTH_TOKEN = "oBOT5jbsO4ztgrpNsQwlmFLIKB"
 _SOURCE_EXTENSIONS = ['.cpp', '.hpp', '.h', '.ino']
 
 _GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
-_GIT_REPO_PATH = "/js/fastled"  # Path to the git repository
 _ALLOW_SHUTDOWN = os.environ.get("ALLOW_SHUTDOWN", "false").lower() in ["true", "1"]
 _NO_SKETCH_CACHE = os.environ.get("NO_SKETCH_CACHE", "false").lower() in ["true", "1"]
+_LIVE_GIT_FASTLED_DIR = Path("/git/fastled2")
+_LIVE_GIT_FASTLED_ENABLED = not _VOLUME_MAPPED_SRC.exists()  # disable updates if volume is mapped
+
 
 if _NO_SKETCH_CACHE:
     print("Sketch caching disabled")
 
-upload_dir = Path("uploads")
+upload_dir = Path("/uploads")
 upload_dir.mkdir(exist_ok=True)
 compile_lock = threading.Lock()
 
@@ -92,6 +93,20 @@ def hash_string(s: str) -> str:
     return hashlib.sha256(s.encode()).hexdigest()
 
 
+def update_live_git_repo() -> None:
+    if not _LIVE_GIT_FASTLED_ENABLED:
+        return
+    try:
+        if not _LIVE_GIT_FASTLED_DIR.exists():
+            subprocess.run(["git", "clone", "https://github.com/fastled/fastled.git", "/git/fastled2"], check=True)
+            print("Cloned live FastLED repository")
+        else:
+            print("Updating live FastLED repository")
+            subprocess.run(["git", "fetch", "origin"], check=True, capture_output=True, cwd=_LIVE_GIT_FASTLED_DIR)
+            subprocess.run(["git", "reset", "--hard", "origin/master"], check=True, capture_output=True, cwd=_LIVE_GIT_FASTLED_DIR)
+            print("Live FastLED repository updated successfully")
+    except subprocess.CalledProcessError as e:
+        warnings.warn(f"Error updating live FastLED repository: {e.stdout}\n\n{e.stderr}")
 
 
 
@@ -109,74 +124,72 @@ def cache_put(hash: str, data: bytes) -> None:
 
 
 
-
-def sync_source_directory_if_volume_is_mapped() -> bool:
+def sync_src_to_target(src: Path, dst: Path, callback: Callable[[], None] | None = None) -> bool:
     """Sync the volume mapped source directory to the FastLED source directory."""
-    if not _VOLUME_MAPPED_SRC.exists():
+    if not src.exists():
         # Volume is not mapped in so we don't rsync it.
-        print("Skipping rsync, as fastled src volume not mapped")
+        print(f"Skipping rsync, as fastled src at {src} doesn't exist")
         return
     try:
         print("\nSyncing source directories...")
+        with compile_lock:
+            # Use rsync to copy files, preserving timestamps and deleting removed files
+            cp: subprocess.CompletedProcess = subprocess.run(
+                ["rsync", "-av", "--info=NAME", "--delete", f"{src}/", f"{dst}/"],
+                check=True,
+                text=True,
+                capture_output=True
+            )
+            if cp.returncode == 0:
+                changed = False
+                changed_lines: list[str] = []
+                lines = cp.stdout.split("\n")
+                for line in lines:
+                    suffix = line.strip().split(".")[-1]
+                    if suffix in ["cpp", "h", "hpp", "ino", "py", "js", "html", "css"]:
+                        print(f"Changed file: {line}")
+                        changed = True
+                        changed_lines.append(line)
+                if changed:
+                    print(f"FastLED code had updates: {changed_lines}")
+                    if callback:
+                        callback()
+                    return True
+                print(f"Source directory synced successfully with no changes")
+                return False
+            else:
+                print(f"Error syncing directories: {cp.stdout}\n\n{cp.stderr}")
+                return False
 
-        if _RSYNC_SRC.exists():
-            with compile_lock:
-                # Use rsync to copy files, preserving timestamps and deleting removed files
-                cp: subprocess.CompletedProcess = subprocess.run(
-                    ["rsync", "-av", "--info=NAME", "--delete", f"{_RSYNC_SRC}/", f"{_RSYNC_DEST}/"],
-                    check=True,
-                    text=True,
-                    capture_output=True
-                )
-                if cp.returncode == 0:
-                    changed = False
-                    changed_lines: list[str] = []
-                    lines = cp.stdout.split("\n")
-                    for line in lines:
-                        suffix = line.strip().split(".")[-1]
-                        if suffix in ["cpp", "h", "hpp", "ino", "py", "js", "html", "css"]:
-                            print(f"Changed file: {line}")
-                            changed = True
-                            changed_lines.append(line)
-                    if changed:
-                        print(f"FastLED code had updates: {changed_lines}")
-                        return True
-                    print(f"Source directory synced successfully with no changes")
-                    return False
-                else:
-                    print(f"Error syncing directories: {cp.stdout}\n\n{cp.stderr}")
-                    return False
-        else:
-            print(f"Source directory {_RSYNC_SRC} does not exist, skipping sync")
     except subprocess.CalledProcessError as e:
         print(f"Error syncing directories: {e.stdout}\n\n{e.stderr}")
     except Exception as e:
         print(f"Error syncing directories: {e}")
 
 
-def update_git_repo():
-    """Update git repository by fetching and resetting to origin/main."""
-    try:
-        print("\nAttempting to update git repository...")
-        with compile_lock:
-            # Fetch and reset to origin/main
-            subprocess.run(["git", "fetch", "origin"], check=True, capture_output=True, cwd=_GIT_REPO_PATH)
-            subprocess.run(["git", "reset", "--hard", "origin/master"], check=True, capture_output=True, cwd=_GIT_REPO_PATH)
-            print("Git repository updated successfully")
-    except subprocess.CalledProcessError as e:
-        print(f"Error updating git repository: {e.stdout}\n\n{e.stderr}")
-    except Exception as e:
-        print(f"Error updating git repository: {e}")
-    finally:
-        # Schedule next update
-        Timer(_GIT_UPDATE_INTERVAL, update_git_repo).start()
+def sync_source_directory_if_volume_is_mapped(callback: Callable[[], None] | None = None) -> bool:
+    """Sync the volume mapped source directory to the FastLED source directory."""
+    if not _VOLUME_MAPPED_SRC.exists():
+        # Volume is not mapped in so we don't rsync it.
+        print("Skipping rsync, as fastled src volume not mapped")
+        return
+    return sync_src_to_target(_VOLUME_MAPPED_SRC, _RSYNC_DEST, callback=callback)
+
+
+def sync_live_git_to_target() -> None:
+    if not _LIVE_GIT_FASTLED_ENABLED:
+        return
+    update_live_git_repo()  # no lock
+    src_changed = sync_src_to_target(_LIVE_GIT_FASTLED_DIR, _RSYNC_DEST, callback=disk_cache.clear)
+    if src_changed:
+        disk_cache.clear()
+        print("FastLED source changed from github repo, clearing cache")
+    Timer(_GIT_UPDATE_INTERVAL, sync_live_git_to_target).start()  # Start the periodic git update
+
 
 _NO_AUTO_UPDATE = os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"] or _GIT_UPDATES_DISABLED
 
-if not _NO_AUTO_UPDATE:
-    Timer(_GIT_UPDATE_INTERVAL, update_git_repo).start()  # Start the periodic git update
-else:
-    print("Auto updates disabled")
+
 
 @dataclass
 class ProjectFiles:
@@ -514,6 +527,10 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
 @app.on_event("startup")
 def startup_event():
     sync_source_directory_if_volume_is_mapped()
+    if not _NO_AUTO_UPDATE:
+        Timer(_GIT_UPDATE_INTERVAL, sync_live_git_to_target).start()  # Start the periodic git update
+    else:
+        print("Auto updates disabled")
 
 @app.get("/", include_in_schema=False)
 async def read_root() -> RedirectResponse:
@@ -600,10 +617,11 @@ def compile_wasm(
             except Exception as e:
                 warnings.warn(f"Error generating hash: {e}, fast cache access is disabled for this build.")
 
-        files_changed = sync_source_directory_if_volume_is_mapped()
-        if files_changed:
-            print("Files changed, clearing cache")
+        def on_files_changed() -> None:
+            print("Source files changed, clearing cache")
             disk_cache.clear()
+
+        sync_source_directory_if_volume_is_mapped(callback=on_files_changed)
 
         entry: bytes | None = None
         if hash_value is not None:
