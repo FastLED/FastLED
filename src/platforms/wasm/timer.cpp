@@ -12,12 +12,13 @@ extern "C" {
 
     // Replacement for 'millis' in WebAssembly context
     EMSCRIPTEN_KEEPALIVE uint32_t millis() {
-        return emscripten_get_now();
+        return uint32_t(emscripten_get_now());
     }
 
     // Replacement for 'micros' in WebAssembly context
     EMSCRIPTEN_KEEPALIVE uint32_t micros() {
-        return millis() * 1000;
+        uint64_t out = uint64_t(emscripten_get_now() * 1000);
+        return uint32_t(out & 0xFFFFFFFF);
     }
 
     // Replacement for 'delay' in WebAssembly context
