@@ -52,6 +52,7 @@ _NO_AUTO_UPDATE = (
     or _VOLUME_MAPPED_SRC.exists()
 )
 _LIVE_GIT_UPDATES_ENABLED = not _NO_AUTO_UPDATE
+_START_TIME = time.time()
 
 
 if _NO_SKETCH_CACHE:
@@ -160,6 +161,7 @@ def sync_src_to_target(
     src: Path, dst: Path, callback: Callable[[], None] | None = None
 ) -> bool:
     """Sync the volume mapped source directory to the FastLED source directory."""
+    suppress_print = _START_TIME + 10 > time.time()  # Don't print during initial volume map.
     if not src.exists():
         # Volume is not mapped in so we don't rsync it.
         print(f"Skipping rsync, as fastled src at {src} doesn't exist")
@@ -181,11 +183,13 @@ def sync_src_to_target(
                 for line in lines:
                     suffix = line.strip().split(".")[-1]
                     if suffix in ["cpp", "h", "hpp", "ino", "py", "js", "html", "css"]:
-                        print(f"Changed file: {line}")
+                        if not suppress_print:
+                            print(f"Changed file: {line}")
                         changed = True
                         changed_lines.append(line)
                 if changed:
-                    print(f"FastLED code had updates: {changed_lines}")
+                    if not suppress_print:
+                        print(f"FastLED code had updates: {changed_lines}")
                     if callback:
                         callback()
                     return True
