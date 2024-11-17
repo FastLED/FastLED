@@ -11,25 +11,28 @@ import zlib
 from pathlib import Path
 from disklru import DiskLRUCache  # type: ignore
 from dataclasses import dataclass
-from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from threading import Timer
 from typing import List, Callable
 import re
 
-from filewatcher import FileWatcher
 
-from fastapi import (BackgroundTasks, FastAPI, File, Header,  # type: ignore
-                     HTTPException, UploadFile)
+from fastapi import (
+    BackgroundTasks,
+    FastAPI,
+    File,
+    Header,  # type: ignore
+    HTTPException,
+    UploadFile,
+)
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request 
+from starlette.requests import Request
 from starlette.responses import Response
 
 _VOLUME_MAPPED_SRC = Path("/host/fastled/src")
 _RSYNC_DEST = Path("/js/fastled/src")
 
-_GIT_UPDATES_DISABLED = True
 _TEST = False
 _UPLOAD_LIMIT = 10 * 1024 * 1024
 # Protect the endpoints from random bots.
@@ -37,13 +40,18 @@ _UPLOAD_LIMIT = 10 * 1024 * 1024
 # Changing the name could break the compiler.
 _AUTH_TOKEN = "oBOT5jbsO4ztgrpNsQwlmFLIKB"
 
-_SOURCE_EXTENSIONS = ['.cpp', '.hpp', '.h', '.ino']
+_SOURCE_EXTENSIONS = [".cpp", ".hpp", ".h", ".ino"]
 
 _GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
 _ALLOW_SHUTDOWN = os.environ.get("ALLOW_SHUTDOWN", "false").lower() in ["true", "1"]
 _NO_SKETCH_CACHE = os.environ.get("NO_SKETCH_CACHE", "false").lower() in ["true", "1"]
 _LIVE_GIT_FASTLED_DIR = Path("/git/fastled2")
-_LIVE_GIT_FASTLED_ENABLED = not _VOLUME_MAPPED_SRC.exists()  # disable updates if volume is mapped
+
+_NO_AUTO_UPDATE = (
+    os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"]
+    or _VOLUME_MAPPED_SRC.exists()
+)
+_LIVE_GIT_UPDATES_ENABLED = not _NO_AUTO_UPDATE
 
 
 if _NO_SKETCH_CACHE:
@@ -57,7 +65,7 @@ output_dir = Path("/output")
 output_dir.mkdir(exist_ok=True)
 
 # Initialize disk cache
-CACHE_FILE = output_dir / "compile_cache.db" 
+CACHE_FILE = output_dir / "compile_cache.db"
 CACHE_MAX_ENTRIES = 50
 disk_cache = DiskLRUCache(str(CACHE_FILE), CACHE_MAX_ENTRIES)
 app = FastAPI()
@@ -69,6 +77,7 @@ class SrcFileHashResult:
     stdout: str
     error: bool
 
+
 class UploadSizeMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, max_upload_size: int):
         super().__init__(app)
@@ -76,10 +85,12 @@ class UploadSizeMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         if request.method == "POST" and "/compile/wasm" in request.url.path:
-            print(f"Upload request with content-length: {request.headers.get('content-length')}")
-            content_length = request.headers.get('content-length')
+            print(
+                f"Upload request with content-length: {request.headers.get('content-length')}"
+            )
+            content_length = request.headers.get("content-length")
             if content_length:
-                content_length = int(content_length) # type: ignore
+                content_length = int(content_length)  # type: ignore
                 if content_length > self.max_upload_size:  # type: ignore
                     return Response(
                         status_code=413,
@@ -87,27 +98,48 @@ class UploadSizeMiddleware(BaseHTTPMiddleware):
                     )
         return await call_next(request)
 
+
 app.add_middleware(UploadSizeMiddleware, max_upload_size=_UPLOAD_LIMIT)
+
 
 def hash_string(s: str) -> str:
     return hashlib.sha256(s.encode()).hexdigest()
 
 
 def update_live_git_repo() -> None:
-    if not _LIVE_GIT_FASTLED_ENABLED:
+    if not _LIVE_GIT_UPDATES_ENABLED:
         return
     try:
         if not _LIVE_GIT_FASTLED_DIR.exists():
-            subprocess.run(["git", "clone", "https://github.com/fastled/fastled.git", "/git/fastled2"], check=True)
+            subprocess.run(
+                [
+                    "git",
+                    "clone",
+                    "https://github.com/fastled/fastled.git",
+                    "/git/fastled2",
+                ],
+                check=True,
+            )
             print("Cloned live FastLED repository")
         else:
             print("Updating live FastLED repository")
-            subprocess.run(["git", "fetch", "origin"], check=True, capture_output=True, cwd=_LIVE_GIT_FASTLED_DIR)
-            subprocess.run(["git", "reset", "--hard", "origin/master"], check=True, capture_output=True, cwd=_LIVE_GIT_FASTLED_DIR)
+            subprocess.run(
+                ["git", "fetch", "origin"],
+                check=True,
+                capture_output=True,
+                cwd=_LIVE_GIT_FASTLED_DIR,
+            )
+            subprocess.run(
+                ["git", "reset", "--hard", "origin/master"],
+                check=True,
+                capture_output=True,
+                cwd=_LIVE_GIT_FASTLED_DIR,
+            )
             print("Live FastLED repository updated successfully")
     except subprocess.CalledProcessError as e:
-        warnings.warn(f"Error updating live FastLED repository: {e.stdout}\n\n{e.stderr}")
-
+        warnings.warn(
+            f"Error updating live FastLED repository: {e.stdout}\n\n{e.stderr}"
+        )
 
 
 def try_get_cached_zip(hash: str) -> bytes | None:
@@ -116,6 +148,7 @@ def try_get_cached_zip(hash: str) -> bytes | None:
         return None
     return disk_cache.get_bytes(hash)
 
+
 def cache_put(hash: str, data: bytes) -> None:
     if _NO_SKETCH_CACHE:
         print("Sketch caching disabled, skipping cache put")
@@ -123,13 +156,14 @@ def cache_put(hash: str, data: bytes) -> None:
     disk_cache.put_bytes(hash, data)
 
 
-
-def sync_src_to_target(src: Path, dst: Path, callback: Callable[[], None] | None = None) -> bool:
+def sync_src_to_target(
+    src: Path, dst: Path, callback: Callable[[], None] | None = None
+) -> bool:
     """Sync the volume mapped source directory to the FastLED source directory."""
     if not src.exists():
         # Volume is not mapped in so we don't rsync it.
         print(f"Skipping rsync, as fastled src at {src} doesn't exist")
-        return
+        return False
     try:
         print("\nSyncing source directories...")
         with compile_lock:
@@ -138,7 +172,7 @@ def sync_src_to_target(src: Path, dst: Path, callback: Callable[[], None] | None
                 ["rsync", "-av", "--info=NAME", "--delete", f"{src}/", f"{dst}/"],
                 check=True,
                 text=True,
-                capture_output=True
+                capture_output=True,
             )
             if cp.returncode == 0:
                 changed = False
@@ -155,7 +189,7 @@ def sync_src_to_target(src: Path, dst: Path, callback: Callable[[], None] | None
                     if callback:
                         callback()
                     return True
-                print(f"Source directory synced successfully with no changes")
+                print("Source directory synced successfully with no changes")
                 return False
             else:
                 print(f"Error syncing directories: {cp.stdout}\n\n{cp.stderr}")
@@ -165,35 +199,39 @@ def sync_src_to_target(src: Path, dst: Path, callback: Callable[[], None] | None
         print(f"Error syncing directories: {e.stdout}\n\n{e.stderr}")
     except Exception as e:
         print(f"Error syncing directories: {e}")
+    return False
 
 
-def sync_source_directory_if_volume_is_mapped(callback: Callable[[], None] | None = None) -> bool:
+def sync_source_directory_if_volume_is_mapped(
+    callback: Callable[[], None] | None = None
+) -> bool:
     """Sync the volume mapped source directory to the FastLED source directory."""
     if not _VOLUME_MAPPED_SRC.exists():
         # Volume is not mapped in so we don't rsync it.
         print("Skipping rsync, as fastled src volume not mapped")
-        return
+        return False
     return sync_src_to_target(_VOLUME_MAPPED_SRC, _RSYNC_DEST, callback=callback)
 
 
 def sync_live_git_to_target() -> None:
-    if not _LIVE_GIT_FASTLED_ENABLED:
+    if not _LIVE_GIT_UPDATES_ENABLED:
         return
     update_live_git_repo()  # no lock
-    src_changed = sync_src_to_target(_LIVE_GIT_FASTLED_DIR, _RSYNC_DEST, callback=disk_cache.clear)
+    src_changed = sync_src_to_target(
+        _LIVE_GIT_FASTLED_DIR, _RSYNC_DEST, callback=disk_cache.clear
+    )
     if src_changed:
         disk_cache.clear()
         print("FastLED source changed from github repo, clearing cache")
-    Timer(_GIT_UPDATE_INTERVAL, sync_live_git_to_target).start()  # Start the periodic git update
-
-
-_NO_AUTO_UPDATE = os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"] or _GIT_UPDATES_DISABLED
-
+    Timer(
+        _GIT_UPDATE_INTERVAL, sync_live_git_to_target
+    ).start()  # Start the periodic git update
 
 
 @dataclass
 class ProjectFiles:
     """A class to represent the project files."""
+
     src_files: list[Path]
     other_files: list[Path]
 
@@ -213,7 +251,7 @@ def collect_files(directory: Path) -> ProjectFiles:
 
     def is_source_file(filename: str) -> bool:
         return any(filename.endswith(ext) for ext in _SOURCE_EXTENSIONS)
-    
+
     for root, _, filenames in os.walk(str(directory)):
         for filename in filenames:
             print(f"Checking file: {filename}")
@@ -223,8 +261,9 @@ def collect_files(directory: Path) -> ProjectFiles:
                 src_files.append(file_path)
             else:
                 other_files.append(file_path)
-    
+
     return ProjectFiles(src_files=src_files, other_files=other_files)
+
 
 def concatenate_files(file_list: List[Path], output_file: Path) -> None:
     """Concatenate files into a single output file.
@@ -233,10 +272,10 @@ def concatenate_files(file_list: List[Path], output_file: Path) -> None:
         file_list (List[str]): List of file paths to concatenate.
         output_file (str): Path to the output file.
     """
-    with open(str(output_file), 'w', encoding='utf-8') as outfile:
+    with open(str(output_file), "w", encoding="utf-8") as outfile:
         for file_path in file_list:
             outfile.write(f"// File: {file_path}\n")
-            with open(file_path, 'r', encoding='utf-8') as infile:
+            with open(file_path, "r", encoding="utf-8") as infile:
                 outfile.write(infile.read())
                 outfile.write("\n\n")
 
@@ -249,14 +288,15 @@ def collapse_spaces_preserve_cstrings(line: str):
             return content  # It's inside a C string, keep as is
         else:
             # Collapse spaces outside of C strings
-            return ' '.join(content.split())
-    
+            return " ".join(content.split())
+
     # Regular expression to match C strings and non-C string parts
     pattern = r'\"(?:\\.|[^\"])*\"|\'.*?\'|[^"\']+'
-    processed_line = ''.join(
+    processed_line = "".join(
         replace_outside_cstrings(match) for match in re.finditer(pattern, line)
     )
     return processed_line
+
 
 # return a hash
 def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
@@ -271,12 +311,12 @@ def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
     input_file = input_file.absolute()
     output_file = output_file.absolute()
     temp_input = str(input_file) + ".tmp"
-    
+
     try:
         # Create modified version of input that comments out includes
-        with open(str(input_file), 'r') as fin, open(str(temp_input), 'w') as fout:
+        with open(str(input_file), "r") as fin, open(str(temp_input), "w") as fout:
             for line in fin:
-                if line.strip().startswith('#include'):
+                if line.strip().startswith("#include"):
                     fout.write(f"// PRESERVED: {line}")
                 else:
                     fout.write(line)
@@ -291,24 +331,25 @@ def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
             "-P",  # No line markers
             "-fdirectives-only",
             "-fpreprocessed",  # Handle preprocessed input
-            "-x", "c++",  # Explicitly treat input as C++ source
-            "-o", str(output_file),  # Explicit output file
-            temp_input
+            "-x",
+            "c++",  # Explicitly treat input as C++ source
+            "-o",
+            str(output_file),  # Explicit output file
+            temp_input,
         ]
-        
-        result = subprocess.run(gcc_command, 
-                              check=True,
-                              capture_output=True,
-                              text=True)
-        
+
+        result = subprocess.run(gcc_command, check=True, capture_output=True, text=True)
+
         if not os.path.exists(output_file):
-            raise FileNotFoundError(f"GCC failed to create output file. stderr: {result.stderr}")
+            raise FileNotFoundError(
+                f"GCC failed to create output file. stderr: {result.stderr}"
+            )
 
         # Restore include lines
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
-        
-        content = content.replace('// PRESERVED: #include', '#include')
+
+        content = content.replace("// PRESERVED: #include", "#include")
         out_lines: list[str] = []
         # now preform minification to further strip out horizontal whitespace and // File: comments.
         for line in content.split("\n"):
@@ -316,19 +357,21 @@ def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
             line = line.strip()
             if not line:  # skip empty line
                 continue
-            if line.startswith("// File:"):  # these change because of the temp file, so need to be removed.
+            if line.startswith(
+                "// File:"
+            ):  # these change because of the temp file, so need to be removed.
                 continue
             # Collapse multiple spaces into single space and strip whitespace
             # line = ' '.join(line.split())
             line = collapse_spaces_preserve_cstrings(line)
             out_lines.append(line)
         # Join with new lines
-        content = '\n'.join(out_lines)
-        with open(output_file, 'w') as f:
+        content = "\n".join(out_lines)
+        with open(output_file, "w") as f:
             f.write(content)
-            
+
         print(f"Preprocessed file saved to {output_file}")
-        
+
     except subprocess.CalledProcessError as e:
         print(f"GCC preprocessing failed: {e.stderr}")
         raise
@@ -373,17 +416,14 @@ def generate_hash_of_src_files(src_files: list[Path]) -> SrcFileHashResult:
             return SrcFileHashResult(
                 hash=hash_string(contents),
                 stdout="",  # No stdout in success case
-                error=False
+                error=False,
             )
     except Exception:
         import traceback
+
         stack_trace = traceback.format_exc()
         print(stack_trace)
-        return SrcFileHashResult(
-            hash="",
-            stdout=stack_trace,
-            error=True
-        )
+        return SrcFileHashResult(hash="", stdout=stack_trace, error=True)
 
 
 def generate_hash_of_project_files(root_dir: Path) -> str:
@@ -399,7 +439,7 @@ def generate_hash_of_project_files(root_dir: Path) -> str:
     src_result = generate_hash_of_src_files(project_files.src_files)
     if src_result.error:
         raise Exception(f"Error hashing source files: {src_result.stdout}")
-        
+
     other_files = project_files.other_files
     # for all other files, don't pre-process them, just hash them
     hash_object = hashlib.sha256()
@@ -409,8 +449,14 @@ def generate_hash_of_project_files(root_dir: Path) -> str:
     return hash_string(src_result.hash + other_files_hash)
 
 
-
-def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: BackgroundTasks, build_mode: str, profile: bool, hash_value: str | None = None) -> FileResponse | HTTPException:
+def compile_source(
+    temp_src_dir: Path,
+    file_path: Path,
+    background_tasks: BackgroundTasks,
+    build_mode: str,
+    profile: bool,
+    hash_value: str | None = None,
+) -> FileResponse | HTTPException:
     """Compile source code and return compiled artifacts as a zip file."""
     temp_zip_dir = None
     try:
@@ -420,16 +466,22 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     except StopIteration:
         return HTTPException(
             status_code=500,
-            detail=f"No files found in extracted directory: {temp_src_dir}"
+            detail=f"No files found in extracted directory: {temp_src_dir}",
         )
-    
+
     print("Files are ready, waiting for compile lock...")
     compile_lock_start = time.time()
     with compile_lock:
         compile_lock_end = time.time()
 
         print("\nRunning compiler...")
-        cmd = ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}", f"--{build_mode}"]
+        cmd = [
+            "python",
+            "run.py",
+            "compile",
+            f"--mapped-dir={temp_src_dir}",
+            f"--{build_mode}",
+        ]
         cmd.append(f"--{build_mode.lower()}")
         if profile:
             cmd.append("--profile")
@@ -439,11 +491,11 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
         if return_code != 0:
             return HTTPException(
                 status_code=400,
-                detail=f"Compilation failed with return code {return_code}:\n{stdout}"
+                detail=f"Compilation failed with return code {return_code}:\n{stdout}",
             )
     compile_time = time.time() - compile_lock_end
     compile_lock_time = compile_lock_end - compile_lock_start
-        
+
     print(f"\nCompiler output:\nstdout:\n{stdout}")
     print(f"Compile lock time: {compile_lock_time:.2f}s")
     print(f"Compile time: {compile_time:.2f}s")
@@ -451,14 +503,14 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     # Find the fastled_js directory
     fastled_js_dir = src_dir / "fastled_js"
     print(f"\nLooking for fastled_js directory at: {fastled_js_dir}")
-    
+
     if not fastled_js_dir.exists():
         print(f"Directory contents of {src_dir}:")
         for path in src_dir.rglob("*"):
             print(f"  {path}")
         return HTTPException(
             status_code=500,
-            detail=f"Compilation artifacts not found at {fastled_js_dir}"
+            detail=f"Compilation artifacts not found at {fastled_js_dir}",
         )
 
     # Replace separate stdout/stderr files with single out.txt
@@ -467,7 +519,9 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     hash_txt = fastled_js_dir / "hash.txt"
     print(f"\nSaving combined output to: {out_txt}")
     out_txt.write_text(stdout)
-    perf_txt.write_text(f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s")
+    perf_txt.write_text(
+        f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s"
+    )
     if hash_value is not None:
         hash_txt.write_text(hash_value)
 
@@ -476,7 +530,9 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     print(f"\nCreating output zip at: {output_zip_path}")
     start_zip = time.time()
     try:
-        with zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as zip_out:
+        with zipfile.ZipFile(
+            output_zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9
+        ) as zip_out:
             print("\nAdding files to output zip:")
             for file_path in fastled_js_dir.rglob("*"):
                 if file_path.is_file():
@@ -485,22 +541,15 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
                     zip_out.write(file_path, arc_path)
     except zipfile.BadZipFile as e:
         print(f"Error creating zip file: {e}")
-        return HTTPException(
-            status_code=500,
-            detail=f"Failed to create zip file: {e}"
-        )
+        return HTTPException(status_code=500, detail=f"Failed to create zip file: {e}")
     except zlib.error as e:
         print(f"Compression error: {e}")
         return HTTPException(
-            status_code=500,
-            detail=f"Zip compression failed - zlib error: {e}"
+            status_code=500, detail=f"Zip compression failed - zlib error: {e}"
         )
     except Exception as e:
         print(f"Unexpected error creating zip: {e}")
-        return HTTPException(
-            status_code=500,
-            detail=f"Failed to create zip file: {e}"
-        )
+        return HTTPException(status_code=500, detail=f"Failed to create zip file: {e}")
     zip_time = time.time() - start_zip
     print(f"Zip file created in {zip_time:.2f}s")
 
@@ -518,19 +567,21 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
         path=output_zip_path,
         media_type="application/zip",
         filename="fastled_output.zip",
-        background=background_tasks
+        background=background_tasks,
     )
-
 
 
 # on startup
 @app.on_event("startup")
 def startup_event():
     sync_source_directory_if_volume_is_mapped()
-    if not _NO_AUTO_UPDATE:
-        Timer(_GIT_UPDATE_INTERVAL, sync_live_git_to_target).start()  # Start the periodic git update
+    if _LIVE_GIT_UPDATES_ENABLED:
+        Timer(
+            _GIT_UPDATE_INTERVAL, sync_live_git_to_target
+        ).start()  # Start the periodic git update
     else:
         print("Auto updates disabled")
+
 
 @app.get("/", include_in_schema=False)
 async def read_root() -> RedirectResponse:
@@ -544,16 +595,16 @@ async def healthz() -> dict:
     return {"status": "ok"}
 
 
-
 if _ALLOW_SHUTDOWN:
+
     @app.get("/shutdown")
     async def shutdown() -> dict:
         """Shutdown the server."""
         print("Shutting down server...")
-        FILEWATCHER.stop()
         disk_cache.close()
         os._exit(0)
         return {"status": "ok"}
+
 
 # THIS MUST NOT BE ASYNC!!!!
 @app.post("/compile/wasm")
@@ -562,17 +613,17 @@ def compile_wasm(
     authorization: str = Header(None),
     build: str = Header(None),
     profile: str = Header(None),
-    background_tasks: BackgroundTasks = BackgroundTasks()
+    background_tasks: BackgroundTasks = BackgroundTasks(),
 ) -> FileResponse:
     """Upload a file into a temporary directory."""
     if build is not None:
         build = build.lower()
 
     if build not in ["quick", "release", "debug", None]:
-         raise HTTPException(
-             status_code=400,
-             detail="Invalid build mode. Must be one of 'quick', 'release', or 'debug' or omitted"
-         )
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid build mode. Must be one of 'quick', 'release', or 'debug' or omitted",
+        )
     do_profile: bool = False
     if profile is not None:
         do_profile = profile.lower() == "true" or profile.lower() == "1"
@@ -585,37 +636,43 @@ def compile_wasm(
 
     if file is None:
         raise HTTPException(status_code=400, detail="No file uploaded.")
-    
+
     if file.filename is None:
         raise HTTPException(status_code=400, detail="No filename provided.")
-    
-    if not file.filename.endswith('.zip'):
-        raise HTTPException(status_code=400, detail="Uploaded file must be a zip archive.")
+
+    if not file.filename.endswith(".zip"):
+        raise HTTPException(
+            status_code=400, detail="Uploaded file must be a zip archive."
+        )
 
     temp_zip_dir = None
     temp_src_dir = None
-    
+
     try:
         # Create temporary directories - one for zip, one for source
         temp_zip_dir = tempfile.mkdtemp()
         temp_src_dir = tempfile.mkdtemp()
-        print(f"Created temporary directories:\nzip_dir: {temp_zip_dir}\nsrc_dir: {temp_src_dir}")
-        
+        print(
+            f"Created temporary directories:\nzip_dir: {temp_zip_dir}\nsrc_dir: {temp_src_dir}"
+        )
+
         file_path = Path(temp_zip_dir) / file.filename
         print(f"Saving uploaded file to: {file_path}")
-        
+
         # Simple file save since size is already checked by middleware
         with open(file_path, "wb") as f:
             shutil.copyfileobj(file.file, f)
 
         print("extracting zip file...")
         hash_value: str | None = None
-        with zipfile.ZipFile(file_path, 'r') as zip_ref:
+        with zipfile.ZipFile(file_path, "r") as zip_ref:
             zip_ref.extractall(temp_src_dir)
             try:
                 hash_value = generate_hash_of_project_files(Path(temp_src_dir))
             except Exception as e:
-                warnings.warn(f"Error generating hash: {e}, fast cache access is disabled for this build.")
+                warnings.warn(
+                    f"Error generating hash: {e}, fast cache access is disabled for this build."
+                )
 
         def on_files_changed() -> None:
             print("Source files changed, clearing cache")
@@ -633,22 +690,22 @@ def compile_wasm(
             tmp_file = NamedTemporaryFile(delete=False)
             tmp_file.write(entry)
             tmp_file.close()
-            
+
             def cleanup_temp():
                 try:
                     os.unlink(tmp_file.name)
                 except:  # noqa: E722
                     pass
-                    
+
             background_tasks.add_task(cleanup_temp)
-            
+
             return FileResponse(
                 path=tmp_file.name,
                 media_type="application/zip",
                 filename="fastled_output.zip",
-                background=background_tasks
+                background=background_tasks,
             )
-        
+
         print("\nContents of source directory:")
         for path in Path(temp_src_dir).rglob("*"):
             print(f"  {path}")
@@ -658,7 +715,8 @@ def compile_wasm(
             background_tasks,
             build,
             do_profile,
-            hash_value)
+            hash_value,
+        )
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
             raise out
@@ -681,6 +739,5 @@ def compile_wasm(
             shutil.rmtree(temp_src_dir, ignore_errors=True)
         raise HTTPException(
             status_code=500,
-            detail=f"Upload process failed: {str(e)}\nTrace: {e.__traceback__}"
+            detail=f"Upload process failed: {str(e)}\nTrace: {e.__traceback__}",
         )
-
