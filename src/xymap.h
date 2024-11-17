@@ -39,7 +39,7 @@ typedef uint16_t (*XYFunction)(uint16_t x, uint16_t y, uint16_t width,
 // 1D index.
 class XYMap {
   public:
-    enum XyMapType { kSeperentine = 0, kLineByLine, kFunction, kLookUpTable };
+    enum XyMapType { kSerpentine = 0, kLineByLine, kFunction, kLookUpTable };
 
     static XYMap constructWithUserFunction(uint16_t width, uint16_t height,
                                            XYFunction xyFunction, uint16_t offset = 0) {
@@ -68,7 +68,7 @@ class XYMap {
     // is_serpentine is true by default. You probably want this unless you are
     // using a different layout
     XYMap(uint16_t width, uint16_t height, bool is_serpentine = true, uint16_t offset = 0)
-        : type(is_serpentine ? kSeperentine : kLineByLine),
+        : type(is_serpentine ? kSerpentine : kLineByLine),
           width(width), height(height), mOffset(offset) {}
 
     XYMap(const XYMap &other) = default;
@@ -113,7 +113,7 @@ class XYMap {
     uint16_t mapToIndex(uint16_t x, uint16_t y) const {
         uint16_t index;
         switch (type) {
-        case kSeperentine:
+        case kSerpentine:
             x = x % width;
             y = y % height;
             index = xy_serpentine(x, y, width, height);
