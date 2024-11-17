@@ -42,7 +42,7 @@ _AUTH_TOKEN = "oBOT5jbsO4ztgrpNsQwlmFLIKB"
 
 _SOURCE_EXTENSIONS = [".cpp", ".hpp", ".h", ".ino"]
 
-_GIT_UPDATE_INTERVAL = 600  # Fetch the git repository every 10 mins.
+_LIVE_GIT_UPDATES_INTERVAL = 600  # Fetch the git repository every 10 mins.
 _ALLOW_SHUTDOWN = os.environ.get("ALLOW_SHUTDOWN", "false").lower() in ["true", "1"]
 _NO_SKETCH_CACHE = os.environ.get("NO_SKETCH_CACHE", "false").lower() in ["true", "1"]
 _LIVE_GIT_FASTLED_DIR = Path("/git/fastled2")
@@ -229,7 +229,7 @@ def sync_live_git_to_target() -> None:
         _LIVE_GIT_FASTLED_DIR, _RSYNC_DEST, callback=on_files_changed
     )
     Timer(
-        _GIT_UPDATE_INTERVAL, sync_live_git_to_target
+        _LIVE_GIT_UPDATES_INTERVAL, sync_live_git_to_target
     ).start()  # Start the periodic git update
 
 
@@ -582,7 +582,7 @@ def startup_event():
     sync_source_directory_if_volume_is_mapped()
     if _LIVE_GIT_UPDATES_ENABLED:
         Timer(
-            _GIT_UPDATE_INTERVAL, sync_live_git_to_target
+            _LIVE_GIT_UPDATES_INTERVAL, sync_live_git_to_target
         ).start()  # Start the periodic git update
     else:
         print("Auto updates disabled")
@@ -617,7 +617,7 @@ async def settings() -> dict:
         "ALLOW_SHUTDOWN": _ALLOW_SHUTDOWN,
         "NO_SKETCH_CACHE": _NO_SKETCH_CACHE,
         "LIVE_GIT_UPDATES_ENABLED": _LIVE_GIT_UPDATES_ENABLED,
-        "GIT_UPDATE_INTERVAL": _GIT_UPDATE_INTERVAL,
+        "LIVE_GIT_UPDATES_INTERVAL": _LIVE_GIT_UPDATES_INTERVAL,
         "UPLOAD_LIMIT": _UPLOAD_LIMIT,
     }
     return settings
