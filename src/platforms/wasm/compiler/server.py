@@ -161,7 +161,7 @@ def sync_src_to_target(
     src: Path, dst: Path, callback: Callable[[], None] | None = None
 ) -> bool:
     """Sync the volume mapped source directory to the FastLED source directory."""
-    suppress_print = _START_TIME + 10 > time.time()  # Don't print during initial volume map.
+    suppress_print = _START_TIME + 30 > time.time()  # Don't print during initial volume map.
     if not src.exists():
         # Volume is not mapped in so we don't rsync it.
         print(f"Skipping rsync, as fastled src at {src} doesn't exist")
@@ -609,6 +609,18 @@ if _ALLOW_SHUTDOWN:
         disk_cache.close()
         os._exit(0)
         return {"status": "ok"}
+    
+@app.get("/settings")
+async def settings() -> dict:
+    """Get the current settings."""
+    settings = {
+        "ALLOW_SHUTDOWN": _ALLOW_SHUTDOWN,
+        "NO_SKETCH_CACHE": _NO_SKETCH_CACHE,
+        "LIVE_GIT_UPDATES_ENABLED": _LIVE_GIT_UPDATES_ENABLED,
+        "GIT_UPDATE_INTERVAL": _GIT_UPDATE_INTERVAL,
+        "UPLOAD_LIMIT": _UPLOAD_LIMIT,
+    }
+    return settings
 
 
 # THIS MUST NOT BE ASYNC!!!!
