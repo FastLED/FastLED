@@ -109,7 +109,7 @@ h1 {
     text-align: center;
     margin: 10px auto; /* Center horizontally */
     padding: 0 20px;
-    color: #666;
+    color: #B0B0B0;  /* Changed from #666 to a lighter gray for better contrast */
     font-size: 1.1em;
 }
 
