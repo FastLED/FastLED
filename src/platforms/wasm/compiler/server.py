@@ -217,12 +217,13 @@ def sync_live_git_to_target() -> None:
     if not _LIVE_GIT_UPDATES_ENABLED:
         return
     update_live_git_repo()  # no lock
-    src_changed = sync_src_to_target(
-        _LIVE_GIT_FASTLED_DIR, _RSYNC_DEST, callback=disk_cache.clear
-    )
-    if src_changed:
+
+    def on_files_changed() -> None:
+        print("FastLED source changed from github repo, clearing disk cache.")
         disk_cache.clear()
-        print("FastLED source changed from github repo, clearing cache")
+    sync_src_to_target(
+        _LIVE_GIT_FASTLED_DIR, _RSYNC_DEST, callback=on_files_changed
+    )
     Timer(
         _GIT_UPDATE_INTERVAL, sync_live_git_to_target
     ).start()  # Start the periodic git update
