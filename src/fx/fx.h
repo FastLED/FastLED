@@ -40,10 +40,10 @@ class Fx : public Referent {
     virtual int fxNum() const {
         return 1;
     }; // Return 1 if you only have one fx managed by this class.
-    virtual void fxSet(int fx) {}; // Set the current fx number.
+    virtual void fxSet(int fx) {(void)fx;}; // Set the current fx number.
 
      // Negative numbers are allowed. -1 means previous fx.
-    virtual void fxNext(int fx = 1) {};
+    virtual void fxNext(int fx = 1) {(void)fx;};
     virtual int fxGet() const { return 0; }; // Get the current fx number.
 
     virtual void pause() {

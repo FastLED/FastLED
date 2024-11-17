@@ -39,6 +39,7 @@ void rgb_2_rgbw_exact(uint16_t w_color_temperature, uint8_t r, uint8_t g,
                       uint8_t b, uint8_t r_scale, uint8_t g_scale,
                       uint8_t b_scale, uint8_t *out_r, uint8_t *out_g,
                       uint8_t *out_b, uint8_t *out_w) {
+    (void)w_color_temperature;
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
     b = scale8(b, b_scale);
@@ -53,6 +54,7 @@ void rgb_2_rgbw_max_brightness(uint16_t w_color_temperature, uint8_t r,
                                uint8_t g, uint8_t b, uint8_t r_scale,
                                uint8_t g_scale, uint8_t b_scale, uint8_t *out_r,
                                uint8_t *out_g, uint8_t *out_b, uint8_t *out_w) {
+    (void)w_color_temperature;
     *out_r = scale8(r, r_scale);
     *out_g = scale8(g, g_scale);
     *out_b = scale8(b, b_scale);
@@ -64,6 +66,7 @@ void rgb_2_rgbw_null_white_pixel(uint16_t w_color_temperature, uint8_t r,
                                  uint8_t g_scale, uint8_t b_scale,
                                  uint8_t *out_r, uint8_t *out_g, uint8_t *out_b,
                                  uint8_t *out_w) {
+    (void)w_color_temperature;
     *out_r = scale8(r, r_scale);
     *out_g = scale8(g, g_scale);
     *out_b = scale8(b, b_scale);
@@ -74,6 +77,7 @@ void rgb_2_rgbw_white_boosted(uint16_t w_color_temperature, uint8_t r,
                               uint8_t g, uint8_t b, uint8_t r_scale,
                               uint8_t g_scale, uint8_t b_scale, uint8_t *out_r,
                               uint8_t *out_g, uint8_t *out_b, uint8_t *out_w) {
+    (void)w_color_temperature;
     r = scale8(r, r_scale);
     g = scale8(g, g_scale);
     b = scale8(b, b_scale);
