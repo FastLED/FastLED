@@ -1,5 +1,6 @@
 import hashlib
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -8,23 +9,15 @@ import time
 import warnings
 import zipfile
 import zlib
-from pathlib import Path
-from disklru import DiskLRUCache  # type: ignore
 from dataclasses import dataclass
+from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from threading import Timer
-from typing import List, Callable
-import re
+from typing import Callable, List
 
-
-from fastapi import (
-    BackgroundTasks,
-    FastAPI,
-    File,
-    Header,  # type: ignore
-    HTTPException,
-    UploadFile,
-)
+from disklru import DiskLRUCache  # type: ignore
+from fastapi import Header  # type: ignore
+from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, RedirectResponse  # type: ignore
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -47,11 +40,18 @@ _ALLOW_SHUTDOWN = os.environ.get("ALLOW_SHUTDOWN", "false").lower() in ["true", 
 _NO_SKETCH_CACHE = os.environ.get("NO_SKETCH_CACHE", "false").lower() in ["true", "1"]
 _LIVE_GIT_FASTLED_DIR = Path("/git/fastled2")
 
+
+# TODO - cleanup
 _NO_AUTO_UPDATE = (
     os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"]
     or _VOLUME_MAPPED_SRC.exists()
 ) and False
-_LIVE_GIT_UPDATES_ENABLED = not _NO_AUTO_UPDATE
+_LIVE_GIT_UPDATES_ENABLED = True
+if not _NO_AUTO_UPDATE:
+    _LIVE_GIT_UPDATES_ENABLED = False
+if os.environ.get("LIVE_GIT_UPDATES", "0") in ["1", "true"]:
+    _LIVE_GIT_UPDATES_ENABLED = True
+
 _START_TIME = time.time()
 
 
@@ -118,6 +118,7 @@ def update_live_git_repo() -> None:
                     "clone",
                     "https://github.com/fastled/fastled.git",
                     "/git/fastled2",
+                    "--depth=1",
                 ],
                 check=True,
             )
@@ -161,7 +162,9 @@ def sync_src_to_target(
     src: Path, dst: Path, callback: Callable[[], None] | None = None
 ) -> bool:
     """Sync the volume mapped source directory to the FastLED source directory."""
-    suppress_print = _START_TIME + 30 > time.time()  # Don't print during initial volume map.
+    suppress_print = (
+        _START_TIME + 30 > time.time()
+    )  # Don't print during initial volume map.
     if not src.exists():
         # Volume is not mapped in so we don't rsync it.
         print(f"Skipping rsync, as fastled src at {src} doesn't exist")
@@ -225,9 +228,9 @@ def sync_live_git_to_target() -> None:
     def on_files_changed() -> None:
         print("FastLED source changed from github repo, clearing disk cache.")
         disk_cache.clear()
-    sync_src_to_target(
-        _LIVE_GIT_FASTLED_DIR, _RSYNC_DEST, callback=on_files_changed
-    )
+
+    sync_src_to_target(_LIVE_GIT_FASTLED_DIR, _RSYNC_DEST, callback=on_files_changed)
+    # Basically a setTimeout() in JS.
     Timer(
         _LIVE_GIT_UPDATES_INTERVAL, sync_live_git_to_target
     ).start()  # Start the periodic git update
@@ -608,7 +611,8 @@ if _ALLOW_SHUTDOWN:
         disk_cache.close()
         os._exit(0)
         return {"status": "ok"}
-    
+
+
 @app.get("/settings")
 async def settings() -> dict:
     """Get the current settings."""
@@ -744,6 +748,7 @@ def compile_wasm(
         return out
     except HTTPException as e:
         import traceback
+
         stacktrace = traceback.format_exc()
         print(f"HTTPException in upload process: {str(e)}\n{stacktrace}")
         raise e

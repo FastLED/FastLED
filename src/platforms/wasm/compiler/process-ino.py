@@ -67,7 +67,7 @@ def main() -> None:
 
     # Print warning if there was an error, but continue processing
     if returncode != 0:
-        print(f"Warning: Clang reported an error (possibly due to missing stdio.h), but continuing to process output.", file=sys.stderr)
+        print("Warning: Clang reported an error (possibly due to missing stdio.h), but continuing to process output.", file=sys.stderr)
         print(f"Clang error: {stderr}", file=sys.stderr)
 
     # Read the contents of the input file
@@ -118,7 +118,7 @@ def main() -> None:
         for prototype in function_prototypes:
             f.write(f"{prototype}\n")
     
-    print(f"Function prototypes have also been written to protos.txt")
+    print("Function prototypes have also been written to protos.txt")
 
 if __name__ == "__main__":
     main()

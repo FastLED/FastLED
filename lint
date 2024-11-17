@@ -13,15 +13,19 @@ fi
 echo "Running ruff check"
 uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
 uv run ruff check --fix src/platforms/wasm/compiler/compile.py
+uv run ruff check --fix src/platforms/wasm/compiler/server.py
 echo Running black
 black ci --exclude ci/tmp/ --exclude ci/wasm/
 black src/platforms/wasm/compiler/compile.py
+black src/platforms/wasm/compiler/server.py
 echo Running isort
 isort --profile black ci --skip ci/tmp/ --skip ci/wasm/
 isort --profile black src/platforms/wasm/compiler/compile.py
+isort --profile black src/platforms/wasm/compiler/server.py
 echo "Running mypy"
 uv run mypy ci --exclude ci/tmp/ --exclude ci/wasm/
 uv run mypy src/platforms/wasm/compiler/compile.py
+uv run mypy src/platforms/wasm/compiler/server.py
 
 
 # Linting the C++ code.
