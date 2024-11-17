@@ -11,11 +11,7 @@ def make_links() -> None:
     files = [
         "platformio.ini",
         "wasm_compiler_flags.py",
-        "index.html",
-        "index.css",
-        "index.js",
         "Arduino.h",
-        "filewatcher.py",
         "compile.py",
         "run.py",
         "server.py",

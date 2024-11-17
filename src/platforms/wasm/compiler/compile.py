@@ -52,13 +52,18 @@ class SyntaxCheckResult:
 
 
 JS_DIR = Path("/js")
+FASTLED_DIR = JS_DIR / "fastled"
+FASTLED_SRC = FASTLED_DIR / "src"
+FASTLED_SRC_PLATFORMS = FASTLED_SRC / "platforms"
+FASTLED_SRC_PLATFORMS_WASM = FASTLED_SRC_PLATFORMS / "wasm"
+FASTLED_SRC_PLATFORMS_WASM_COMPILER = FASTLED_SRC_PLATFORMS_WASM / "compiler"
+
 
 JS_SRC = JS_DIR / "src"
 PIO_BUILD_DIR = JS_DIR / ".pio/build"
 ARDUINO_H_SRC = JS_DIR / "Arduino.h"
-INDEX_HTML_SRC = JS_DIR / "index.html"
-INDEX_CSS_SRC = JS_DIR / "index.css"
-INDEX_JS_SRC = JS_DIR / "index.js"
+
+
 WASM_COMPILER_SETTTINGS = JS_DIR / "wasm_compiler_flags.py"
 OUTPUT_FILES = ["fastled.js", "fastled.wasm"]
 HEADERS_TO_INSERT = ['#include "Arduino.h"', '#include "platforms/wasm/js.h"']
@@ -66,13 +71,17 @@ FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 1  # Occasionally the compiler fails for unknown reasons, but disabled because it increases the build time on failure.
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
+INDEX_CSS_SRC = FASTLED_SRC_PLATFORMS_WASM_COMPILER / "index.css"
+INDEX_JS_SRC = FASTLED_SRC_PLATFORMS_WASM_COMPILER / "index.js"
+INDEX_HTML_SRC = FASTLED_SRC_PLATFORMS_WASM_COMPILER / "index.html"
 
 assert JS_DIR.exists()
 assert ARDUINO_H_SRC.exists()
 assert INDEX_HTML_SRC.exists()
-assert INDEX_CSS_SRC.exists()
+assert INDEX_CSS_SRC.exists(), f"Index CSS not found at {INDEX_CSS_SRC}"
 assert INDEX_JS_SRC.exists()
 assert WASM_COMPILER_SETTTINGS.exists()
+assert FASTLED_SRC_PLATFORMS_WASM_COMPILER.exists()
 
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
