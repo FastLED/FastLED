@@ -8,6 +8,7 @@ import time
 import warnings
 import zipfile
 import zlib
+from pathlib import Path
 from disklru import DiskLRUCache  # type: ignore
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,6 +26,9 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request 
 from starlette.responses import Response
 
+_VOLUME_MAPPED_SRC = Path("/host/fastled/src")
+_RSYNC_SRC = Path(_VOLUME_MAPPED_SRC)
+_RSYNC_DEST = Path("/js/fastled/src")
 
 _GIT_UPDATES_DISABLED = True
 _TEST = False
@@ -112,6 +116,50 @@ FILEWATCHER = FileWatcher(path="/js/fastled/src", callback=on_files_changed)
 
 if not _NO_SKETCH_CACHE:
     FILEWATCHER.start()
+
+
+def sync_source_directory_if_volume_is_mapped() -> bool:
+    """Sync the volume mapped source directory to the FastLED source directory."""
+    if not _VOLUME_MAPPED_SRC.exists():
+        # Volume is not mapped in so we don't rsync it.
+        print("Skipping rsync, as fastled src volume not mapped")
+        return
+    try:
+        print("\nSyncing source directories...")
+
+        if _RSYNC_SRC.exists():
+            with compile_lock:
+                # Use rsync to copy files, preserving timestamps and deleting removed files
+                cp: subprocess.CompletedProcess = subprocess.run(
+                    ["rsync", "-av", "--info=NAME", "--delete", f"{_RSYNC_SRC}/", f"{_RSYNC_DEST}/"],
+                    check=True,
+                    text=True,
+                    capture_output=True
+                )
+                if cp.returncode == 0:
+                    changed = False
+                    changed_lines: list[str] = []
+                    lines = cp.stdout.split("\n")
+                    for line in lines:
+                        suffix = line.strip().split(".")[-1]
+                        if suffix in ["cpp", "h", "hpp", "ino", "py", "js", "html", "css"]:
+                            print(f"Changed file: {line}")
+                            changed = True
+                            changed_lines.append(line)
+                    if changed:
+                        print(f"FastLED code had updates: {changed_lines}")
+                        return True
+                    print(f"Source directory synced successfully with no changes")
+                    return False
+                else:
+                    print(f"Error syncing directories: {cp.stdout}\n\n{cp.stderr}")
+                    return False
+        else:
+            print(f"Source directory {_RSYNC_SRC} does not exist, skipping sync")
+    except subprocess.CalledProcessError as e:
+        print(f"Error syncing directories: {e.stdout}\n\n{e.stderr}")
+    except Exception as e:
+        print(f"Error syncing directories: {e}")
 
 
 def update_git_repo():
@@ -377,6 +425,7 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
     compile_lock_start = time.time()
     with compile_lock:
         compile_lock_end = time.time()
+
         print("\nRunning compiler...")
         cmd = ["python", "run.py", "compile", f"--mapped-dir={temp_src_dir}", f"--{build_mode}"]
         cmd.append(f"--{build_mode.lower()}")
@@ -472,7 +521,10 @@ def compile_source(temp_src_dir: Path, file_path: Path, background_tasks: Backgr
 
 
 
-
+# on startup
+@app.on_event("startup")
+def startup_event():
+    sync_source_directory_if_volume_is_mapped()
 
 @app.get("/", include_in_schema=False)
 async def read_root() -> RedirectResponse:
@@ -558,6 +610,11 @@ def compile_wasm(
                 hash_value = generate_hash_of_project_files(Path(temp_src_dir))
             except Exception as e:
                 warnings.warn(f"Error generating hash: {e}, fast cache access is disabled for this build.")
+
+        files_changed = sync_source_directory_if_volume_is_mapped()
+        if files_changed:
+            print("Files changed, clearing cache")
+            disk_cache.clear()
 
         entry: bytes | None = None
         if hash_value is not None:

@@ -147,6 +147,7 @@ RUN python /js/init_runtime.py
 
 COPY src/platforms/wasm/compiler/prewarm.sh /js/prewarm.sh
 COPY src/platforms/wasm/compiler/run.py /js/run.py
+COPY src/platforms/wasm/compiler/server.py /js/server.py
 
 # First pre-warm cycle - always do it as part of the build.
 RUN mkdir -p /logs

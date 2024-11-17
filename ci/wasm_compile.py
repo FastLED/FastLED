@@ -232,7 +232,7 @@ def run_container(
         docker_command.append(IMAGE_NAME)
         if server and not interactive:
             docker_command.extend(
-                ["python", "/js/run.py", "server", "--no-sketch-cache"]
+                ["python", "/js/run.py", "server"]
             )
         elif not interactive:
             docker_command.extend(["python", "/js/run.py", "compile"])

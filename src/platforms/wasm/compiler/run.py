@@ -42,6 +42,8 @@ def _run_server(unknown_args: list[str]) -> int:
         "server:app",
         "--host",
         "0.0.0.0",
+        "--workers",
+        "1",
         "--port",
         f"{_PORT}"
     ]

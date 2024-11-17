@@ -444,15 +444,6 @@ def main() -> int:
                 print("Transform to cpp and insert header operations completed.")
                 return 0
 
-        with open(WASM_COMPILER_SETTTINGS, "r") as f:
-            content = f.read()
-        if debug:
-            content = re.sub(r"DEBUG = 0", "DEBUG = 1", content)
-        else:
-            content = re.sub(r"DEBUG = 1", "DEBUG = 0", content)
-        with open(WASM_COMPILER_SETTTINGS, "w") as f:
-            f.write(content)
-
         if do_compile:
             try:
                 # Determine build mode from args
