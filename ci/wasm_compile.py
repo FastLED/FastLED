@@ -231,9 +231,7 @@ def run_container(
             docker_command.extend(["-p", "80:80"])
         docker_command.append(IMAGE_NAME)
         if server and not interactive:
-            docker_command.extend(
-                ["python", "/js/run.py", "server"]
-            )
+            docker_command.extend(["python", "/js/run.py", "server"])
         elif not interactive:
             docker_command.extend(["python", "/js/run.py", "compile"])
             if build_mode == BuildMode.DEBUG:

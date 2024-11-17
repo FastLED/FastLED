@@ -418,7 +418,6 @@ def main() -> int:
         do_copy = not any_only_flags or args.only_copy
         do_insert_header = not any_only_flags or args.only_insert_header
         do_compile = not any_only_flags or args.only_compile
-        debug = args.debug
 
         if do_copy:
             copy_files(src_dir, JS_SRC)
