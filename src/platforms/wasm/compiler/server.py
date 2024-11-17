@@ -743,7 +743,9 @@ def compile_wasm(
             cache_put(hash_value, data)
         return out
     except HTTPException as e:
-        print(f"HTTPException in upload process: {str(e)}")
+        import traceback
+        stacktrace = traceback.format_exc()
+        print(f"HTTPException in upload process: {str(e)}\n{stacktrace}")
         raise e
 
     except Exception as e:
