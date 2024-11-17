@@ -2,6 +2,9 @@
 import os
 from pathlib import Path
 
+HERE = Path(__file__).parent
+os.chdir(str(HERE   ))
+
 _COMPILER_DIR = Path("/js/fastled/src/platforms/wasm/compiler")
 
 def make_links() -> None:

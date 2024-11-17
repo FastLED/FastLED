@@ -47,7 +47,8 @@ FROM emscripten/emsdk:3.1.70${PLATFORM_TAG}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install apt-fast first
+# Update the apt-get package list. This takes a long time, so we do it first to maximize cache hits.
+# Also install apt-fast first
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
     add-apt-repository ppa:apt-fast/stable -y && \
@@ -138,6 +139,9 @@ RUN pip install -r /install/requirements.txt
 COPY src/platforms/wasm/compiler/init_runtime.py /js/init_runtime.py
 
 WORKDIR /js
+
+ARG NO_PREWARM=0
+ENV NO_PREWARM=${NO_PREWARM}
 
 RUN python /js/init_runtime.py
 

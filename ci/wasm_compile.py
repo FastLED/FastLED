@@ -162,7 +162,7 @@ def build_image() -> None:
             "-t",
             IMAGE_NAME,
         ]
-        cmd_list.extend(["--build-arg", "PREWARM=false"])
+        cmd_list.extend(["--build-arg", "NO_PREWARM=1"])
         if IS_ARM:
             cmd_list.extend(["--build-arg", f"PLATFORM_TAG={PLATFORM_TAG}"])
         cmd_list.extend(
@@ -222,7 +222,7 @@ def run_container(
             "-v",
             f"{absolute_directory}:/mapped/{base_name}",
             "-v",
-            f"{PROJECT_ROOT/'src'}:/js/fastled/src",
+            f"{PROJECT_ROOT/'src'}:/host/fastled/src",
         ]
         if server:
             # add the port mapping before the image name is added.
