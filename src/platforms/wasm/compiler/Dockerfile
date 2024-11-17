@@ -123,11 +123,12 @@ RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
 # This is by far the most expensive part of the build, because platformio needs to download initial tools. This
 # pre-warm cycle is "sticky" and tends to stay in the cache for a long time since docker is very relaxed about
 # invalidating cache layers that clone a github repo.
-RUN git clone https://github.com/fastled/FastLED.git /js/fastled
+RUN git clone https://github.com/fastled/FastLED.git --depth 1 /js/fastled
 
 # Set up the entrypoint script
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'source /emsdk/emsdk_env.sh' >> /entrypoint.sh && \
+    echo 'python /js/init_runtime.py' >> /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
