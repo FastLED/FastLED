@@ -521,17 +521,37 @@ def main() -> int:
                 output_data_dir.mkdir(parents=True, exist_ok=True)
                 for _file in optional_input_data_dir.iterdir():
                     if _file.is_file():  # Only copy files, not directories
-                        print(f"Copying {_file.name} -> {output_data_dir}")
-                        shutil.copy2(_file, output_data_dir / _file.name)
-                        hash = hash_file(_file)
-                        manifest.append(
-                            {
-                                "name": _file.name,
-                                "path": f"data/{_file.name}",
-                                "size": _file.stat().st_size,
-                                "hash": hash,
-                            }
-                        )
+                        filename: str = _file.name
+                        if filename.endswith(".embedded.json"):
+                            print("Embedding data file")
+                            filename_no_embedded = filename.replace(
+                                ".embedded.json", ""
+                            )
+                            # read json file
+                            with open(_file, "r") as f:
+                                data = json.load(f)
+                            hash_value = data["hash"]
+                            size = data["size"]
+                            manifest.append(
+                                {
+                                    "name": filename_no_embedded,
+                                    "path": f"data/{filename_no_embedded}",
+                                    "size": size,
+                                    "hash": hash_value,
+                                }
+                            )
+                        else:
+                            print(f"Copying {_file.name} -> {output_data_dir}")
+                            shutil.copy2(_file, output_data_dir / _file.name)
+                            hash = hash_file(_file)
+                            manifest.append(
+                                {
+                                    "name": _file.name,
+                                    "path": f"data/{_file.name}",
+                                    "size": _file.stat().st_size,
+                                    "hash": hash,
+                                }
+                            )
 
             # Write manifest file even if empty
             print("Writing manifest files.json")
