@@ -62,6 +62,12 @@ disk_cache = DiskLRUCache(str(CACHE_FILE), CACHE_MAX_ENTRIES)
 app = FastAPI()
 
 
+@dataclass
+class SrcFileHashResult:
+    hash: str
+    stdout: str
+    error: bool
+
 class UploadSizeMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, max_upload_size: int):
         super().__init__(app)
@@ -83,15 +89,9 @@ class UploadSizeMiddleware(BaseHTTPMiddleware):
 app.add_middleware(UploadSizeMiddleware, max_upload_size=_UPLOAD_LIMIT)
 
 def hash_string(s: str) -> str:
-    # sha 256
-
     return hashlib.sha256(s.encode()).hexdigest()
 
-@dataclass
-class SrcFileHashResult:
-    hash: str
-    stdout: str
-    error: bool
+
 
 
 
@@ -107,15 +107,7 @@ def cache_put(hash: str, data: bytes) -> None:
         return
     disk_cache.put_bytes(hash, data)
 
-def on_files_changed() -> None:
-    print("Files changed, clearing cache")
-    disk_cache.clear()
-        
 
-FILEWATCHER = FileWatcher(path="/js/fastled/src", callback=on_files_changed)
-
-if not _NO_SKETCH_CACHE:
-    FILEWATCHER.start()
 
 
 def sync_source_directory_if_volume_is_mapped() -> bool:
@@ -338,9 +330,6 @@ def preprocess_with_gcc(input_file: Path, output_file: Path) -> None:
         except:  # noqa: E722
             warnings.warn(f"Failed to remove temporary file: {temp_input}")
             pass
-
-
-
 
 
 def generate_hash_of_src_files(src_files: list[Path]) -> SrcFileHashResult:
