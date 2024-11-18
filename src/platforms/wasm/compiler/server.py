@@ -48,7 +48,7 @@ _NO_AUTO_UPDATE = (
     or _VOLUME_MAPPED_SRC.exists()
 ) and False
 _LIVE_GIT_UPDATES_ENABLED = True
-if not _NO_AUTO_UPDATE:
+if _NO_AUTO_UPDATE:
     _LIVE_GIT_UPDATES_ENABLED = False
 if os.environ.get("LIVE_GIT_UPDATES", "0") in ["1", "true"]:
     _LIVE_GIT_UPDATES_ENABLED = True
