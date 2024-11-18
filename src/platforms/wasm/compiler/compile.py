@@ -93,7 +93,9 @@ assert ARDUINO_H_SRC.exists(), f"ARDUINO_H_SRC does not exist: {ARDUINO_H_SRC}"
 assert INDEX_HTML_SRC.exists(), f"INDEX_HTML_SRC does not exist: {INDEX_HTML_SRC}"
 assert INDEX_CSS_SRC.exists(), f"INDEX_CSS_SRC does not exist: {INDEX_CSS_SRC}"
 assert INDEX_JS_SRC.exists(), f"INDEX_JS_SRC does not exist: {INDEX_JS_SRC}"
-assert WASM_COMPILER_SETTTINGS.exists(), f"WASM_COMPILER_SETTTINGS does not exist: {WASM_COMPILER_SETTTINGS}"
+assert (
+    WASM_COMPILER_SETTTINGS.exists()
+), f"WASM_COMPILER_SETTTINGS does not exist: {WASM_COMPILER_SETTTINGS}"
 
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
@@ -577,6 +579,7 @@ def main() -> int:
 
     except Exception as e:
         import traceback
+
         stacktrace = traceback.format_exc()
         print(stacktrace)
         print(f"Error: {str(e)}")

@@ -1,4 +1,5 @@
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -620,6 +621,7 @@ async def settings() -> dict:
     """Get the current settings."""
     settings = {
         "ALLOW_SHUTDOWN": _ALLOW_SHUTDOWN,
+        "NO_AUTO_UPDATE": os.environ.get("NO_AUTO_UPDATE", "0"),
         "NO_SKETCH_CACHE": _NO_SKETCH_CACHE,
         "LIVE_GIT_UPDATES_ENABLED": _LIVE_GIT_UPDATES_ENABLED,
         "LIVE_GIT_UPDATES_INTERVAL": _LIVE_GIT_UPDATES_INTERVAL,
@@ -741,9 +743,6 @@ def compile_wasm(
         )
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
-            import traceback
-            import warnings
-            import json
             txt = out.detail
             json_str = json.dumps(txt)
             warnings.warn(f"Error compiling source: {json_str}")
@@ -763,6 +762,7 @@ def compile_wasm(
 
     except Exception as e:
         import traceback
+
         stack_trace = traceback.format_exc()
         print(f"Error in upload process: {stack_trace}")
         raise HTTPException(
