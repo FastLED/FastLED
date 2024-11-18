@@ -14,6 +14,8 @@ void on_startup() {
 
 #endif  // ESP32
 
+#include "FastLED.h"
+
 using namespace fl;
 
 #include "NoiseRing.hpp"
