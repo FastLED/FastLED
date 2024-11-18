@@ -60,8 +60,18 @@ FASTLED_SRC_PLATFORMS_WASM_COMPILER = FASTLED_SRC_PLATFORMS_WASM / "compiler"
 
 
 JS_SRC = JS_DIR / "src"
+
+FASTLED_DIR = JS_DIR / "fastled"
+FASTLED_SRC_DIR = FASTLED_DIR / "src"
+FASTLED_PLATFORMS_DIR = FASTLED_SRC_DIR / "platforms"
+FASTLED_WASM_DIR = FASTLED_PLATFORMS_DIR / "wasm"
+FASTLED_COMPILER_DIR = FASTLED_WASM_DIR / "compiler"
+
 PIO_BUILD_DIR = JS_DIR / ".pio/build"
 ARDUINO_H_SRC = JS_DIR / "Arduino.h"
+INDEX_HTML_SRC = FASTLED_COMPILER_DIR / "index.html"
+INDEX_CSS_SRC = FASTLED_COMPILER_DIR / "index.css"
+INDEX_JS_SRC = FASTLED_COMPILER_DIR / "index.js"
 
 
 WASM_COMPILER_SETTTINGS = JS_DIR / "wasm_compiler_flags.py"
@@ -71,10 +81,6 @@ FILE_EXTENSIONS = [".ino", ".h", ".hpp", ".cpp"]
 MAX_COMPILE_ATTEMPTS = 1  # Occasionally the compiler fails for unknown reasons, but disabled because it increases the build time on failure.
 FASTLED_OUTPUT_DIR_NAME = "fastled_js"
 
-INDEX_CSS_SRC = FASTLED_SRC_PLATFORMS_WASM_COMPILER / "index.css"
-INDEX_JS_SRC = FASTLED_SRC_PLATFORMS_WASM_COMPILER / "index.js"
-INDEX_HTML_SRC = FASTLED_SRC_PLATFORMS_WASM_COMPILER / "index.html"
-
 assert JS_DIR.exists()
 assert ARDUINO_H_SRC.exists()
 assert INDEX_HTML_SRC.exists()
@@ -82,6 +88,12 @@ assert INDEX_CSS_SRC.exists(), f"Index CSS not found at {INDEX_CSS_SRC}"
 assert INDEX_JS_SRC.exists()
 assert WASM_COMPILER_SETTTINGS.exists()
 assert FASTLED_SRC_PLATFORMS_WASM_COMPILER.exists()
+assert JS_DIR.exists(), f"JS_DIR does not exist: {JS_DIR}"
+assert ARDUINO_H_SRC.exists(), f"ARDUINO_H_SRC does not exist: {ARDUINO_H_SRC}"
+assert INDEX_HTML_SRC.exists(), f"INDEX_HTML_SRC does not exist: {INDEX_HTML_SRC}"
+assert INDEX_CSS_SRC.exists(), f"INDEX_CSS_SRC does not exist: {INDEX_CSS_SRC}"
+assert INDEX_JS_SRC.exists(), f"INDEX_JS_SRC does not exist: {INDEX_JS_SRC}"
+assert WASM_COMPILER_SETTTINGS.exists(), f"WASM_COMPILER_SETTTINGS does not exist: {WASM_COMPILER_SETTTINGS}"
 
 
 def copy_files(src_dir: Path, js_src: Path) -> None:
@@ -564,6 +576,9 @@ def main() -> int:
         return 0
 
     except Exception as e:
+        import traceback
+        stacktrace = traceback.format_exc()
+        print(stacktrace)
         print(f"Error: {str(e)}")
         return 1
 

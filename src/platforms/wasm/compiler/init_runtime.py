@@ -11,7 +11,11 @@ def make_links() -> None:
     files = [
         "platformio.ini",
         "wasm_compiler_flags.py",
+        #"index.html",
+        #"index.css",
+        #"index.js",
         "Arduino.h",
+        #"filewatcher.py",
         "compile.py",
         "run.py",
         "server.py",
@@ -24,7 +28,10 @@ def make_links() -> None:
             os.system(f"dos2unix {src} && chmod +x {src}")
         if not link_dst.exists():
             print(f"Linking {src} to {link_dst}")
-            os.symlink(str(src), str(link_dst))
+            try:
+                os.symlink(str(src), str(link_dst))
+            except FileExistsError:
+                print(f"Target {link_dst} already exists")
         else:
             print(f"Target {link_dst} already exists")
 
