@@ -8,6 +8,7 @@
 #include "json.h"
 #include "ui_manager.h"
 
+using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 

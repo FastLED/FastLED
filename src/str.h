@@ -12,7 +12,7 @@
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {  // Mandatory namespace for this class since it has name collisions.
 
 template <size_t N> class StrN;
 
@@ -319,4 +319,4 @@ FASTLED_DEFINE_OUTPUT_OPERATOR(Str) {
     return os;
 }
 
-FASTLED_NAMESPACE_END
+} // namespace fl

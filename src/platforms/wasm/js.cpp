@@ -26,6 +26,8 @@
 #include "screenmap.h"
 #include "fixed_map.h"
 
+using namespace fl;
+
 
 
 FASTLED_NAMESPACE_BEGIN

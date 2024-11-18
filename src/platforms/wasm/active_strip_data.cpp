@@ -23,6 +23,8 @@
 #include "str.h"
 #include "namespace.h"
 
+using namespace fl;
+
 
 FASTLED_NAMESPACE_BEGIN
 

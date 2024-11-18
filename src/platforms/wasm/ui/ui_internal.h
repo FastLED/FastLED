@@ -22,7 +22,7 @@ public:
     using UpdateFunction = Callback<const FLArduinoJson::JsonVariantConst&>;
     using ToJsonFunction = Callback<FLArduinoJson::JsonObject&>;
 
-    jsUiInternal(const Str& name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc);
+    jsUiInternal(const fl::Str& name, UpdateFunction updateFunc, ToJsonFunction toJsonFunc);
     ~jsUiInternal() {
         const bool functions_exist = mUpdateFunc || mtoJsonFunc;
         if (functions_exist) {
@@ -33,7 +33,7 @@ public:
         }
     }
 
-    const Str& name() const;
+    const fl::Str& name() const;
     void update(const FLArduinoJson::JsonVariantConst& json);
     void toJson(FLArduinoJson::JsonObject& json) const;
     int id() const;
@@ -44,7 +44,7 @@ private:
     static int nextId();
     static std::atomic<uint32_t> sNextId;
     int mId;
-    Str mName;
+    fl::Str mName;
     UpdateFunction mUpdateFunc;
     ToJsonFunction mtoJsonFunc;
     mutable std::mutex mMutex;

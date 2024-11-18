@@ -19,6 +19,8 @@
 
 #include "namespace.h"
 
+using namespace fl;
+
 FASTLED_NAMESPACE_BEGIN
 
 void jsUiManager::addComponent(WeakRef<jsUiInternal> component) {

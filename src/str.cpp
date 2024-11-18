@@ -4,7 +4,7 @@
 #include "namespace.h"
 
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 namespace string_functions {
 // Yet, another good itoa implementation
@@ -174,5 +174,4 @@ float StringFormatter::parseFloat(const char *str, size_t len) {
 }
 
 
-
-FASTLED_NAMESPACE_END
+}

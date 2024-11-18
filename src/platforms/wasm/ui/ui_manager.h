@@ -57,7 +57,7 @@ class jsUiManager : EngineEvents::Listener {
             FLArduinoJson::JsonDocument doc;
             FLArduinoJson::JsonArray jarray = doc.to<FLArduinoJson::JsonArray>();
             toJson(jarray);
-            Str buff;
+            fl::Str buff;
             FLArduinoJson::serializeJson(doc, buff);
             updateJs(buff.c_str());
             mItemsAdded = false;

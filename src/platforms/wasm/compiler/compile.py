@@ -133,7 +133,7 @@ def compile(js_dir: Path, build_mode: BuildMode, auto_clean: bool) -> int:
             )
             assert process.stdout is not None
             for line in process.stdout:
-                processed_line = line.replace(".pio/libdeps/wasm/FastLED/", "")
+                processed_line = line.replace("fastled/src", "src")
                 timestamped_line = _timestamp_output(processed_line)
                 output_lines.append(timestamped_line)
             process.wait()

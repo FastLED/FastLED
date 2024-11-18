@@ -20,6 +20,10 @@ FASTLED_USING_NAMESPACE
 using std::max;
 using std::min;
 
+using fl::map;
+using fl::constrain;
+
+
 namespace fl {
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
     const long run = in_max - in_min;
@@ -37,8 +41,7 @@ template <typename T> T constrain(T x, T a, T b) {
 }
 } // namespace fl
 
-using fl::map;
-using fl::constrain;
+
 
 inline long random(long min, long max) {
     std::random_device rd;
@@ -91,7 +94,7 @@ DEFINE_PRINT_HELPER(int32_t, "%d");
 DEFINE_PRINT_HELPER(int16_t, "%d");
 DEFINE_PRINT_HELPER(int8_t, "%d");
 DEFINE_PRINT_HELPER_EXT(std::string, "%s", val.c_str());
-DEFINE_PRINT_HELPER_EXT(Str, "%s", val.c_str());
+DEFINE_PRINT_HELPER_EXT(fl::Str, "%s", val.c_str());
 
 // gcc pop options
 #pragma GCC diagnostic pop

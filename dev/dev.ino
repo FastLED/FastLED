@@ -14,4 +14,6 @@ void on_startup() {
 
 #endif  // ESP32
 
+using namespace fl;
+
 #include "NoiseRing.hpp"

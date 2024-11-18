@@ -4,6 +4,7 @@
 
 #include "ui_internal.h"
 
+using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 

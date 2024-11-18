@@ -16,6 +16,8 @@
 #include "fx/2d/animartrix.hpp"
 #include "ui.h"
 
+using namespace fl;
+
 
 #define LED_PIN 3
 #define BRIGHTNESS 96

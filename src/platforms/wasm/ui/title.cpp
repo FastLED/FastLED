@@ -4,6 +4,8 @@
 #include "ui_internal.h"
 #include "ui_manager.h"
 
+using namespace fl;
+
 FASTLED_NAMESPACE_BEGIN
 
 jsTitle::jsTitle(const Str& text) : mText(text) {

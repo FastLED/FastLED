@@ -6,6 +6,8 @@
 #include "ui_manager.h"
 #include "namespace.h"
 
+using namespace fl;
+
 FASTLED_NAMESPACE_BEGIN
 
 jsButton::jsButton(const Str& name)

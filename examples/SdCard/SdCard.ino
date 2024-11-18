@@ -26,6 +26,8 @@ void loop() {
 
 #include "screenmap.json.h"  // const char JSON_SCREEN_MAP[] = { ... }
 
+using namespace fl;
+
 
 #define LED_PIN 2
 #define LED_TYPE WS2811
@@ -68,7 +70,11 @@ void setup() {
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(screenMap);
     FastLED.setBrightness(96);
-    //fxEngine.addFx(animartrix);
+    // Note that data/ is a special directory used by our wasm compiler. Any data
+    // is placed in it will be included in the files.json file which the browser will
+    // use to stream the file asynchroniously in during the runtime. For a real sd card
+    // just place all this in the /data/ directory of the SD card to get matching
+    // behavior.
     video = filesystem.openVideo("data/video.dat", NUM_LEDS, FPS);
     if (!video) {
       Serial.println("Failed to instantiate video");

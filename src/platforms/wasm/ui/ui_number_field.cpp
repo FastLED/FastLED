@@ -10,6 +10,7 @@
 #include "ui_manager.h"
 #include "math_macros.h"
 
+using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 

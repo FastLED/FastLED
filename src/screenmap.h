@@ -17,11 +17,12 @@
  * the Chromancer project to FastLED.js.
  */
 
-
+namespace fl {
+    class Str;
+}
 
 FASTLED_NAMESPACE_BEGIN
 
-class Str;
 
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui
 // canvas in float format.
@@ -120,10 +121,10 @@ class ScreenMap {
     float getDiameter() const { return mDiameter; }
 
     static void ParseJson(const char *jsonStrScreenMap,
-                          FixedMap<Str, ScreenMap, 16> *segmentMaps);
+                          FixedMap<fl::Str, ScreenMap, 16> *segmentMaps);
 
-    static void toJsonStr(const FixedMap<Str, ScreenMap, 16>&, Str* jsonBuffer);
-    static void toJson(const FixedMap<Str, ScreenMap, 16>&, FLArduinoJson::JsonDocument* doc);
+    static void toJsonStr(const FixedMap<fl::Str, ScreenMap, 16>&, fl::Str* jsonBuffer);
+    static void toJson(const FixedMap<fl::Str, ScreenMap, 16>&, FLArduinoJson::JsonDocument* doc);
 
   private:
     static const pair_xy_float &empty() {

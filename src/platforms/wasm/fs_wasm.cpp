@@ -23,6 +23,7 @@
 #include "json.h"
 #include "warn.h"
 
+using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 
