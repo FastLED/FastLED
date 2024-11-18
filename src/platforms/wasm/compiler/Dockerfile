@@ -139,6 +139,9 @@ RUN pip install -r /install/requirements.txt
 # Create symlinks for wasm platform files.
 COPY src/platforms/wasm/compiler/init_runtime.py /js/init_runtime.py
 
+RUN pio settings set check_platformio_interval 9999
+RUN pio settings set enable_telemetry 0
+
 WORKDIR /js
 
 ARG NO_PREWARM=0

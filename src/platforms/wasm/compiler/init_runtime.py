@@ -37,8 +37,7 @@ def make_links() -> None:
 def init_runtime() -> None:
     os.chdir(str(HERE))
     make_links()
-    os.system("pio settings set check_platformio_interval 9999")
-    os.system("pio settings set enable_telemetry 0")
+
 
 if __name__ == "__main__":
     init_runtime()
