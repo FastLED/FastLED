@@ -35,7 +35,7 @@ def _run_server(unknown_args: list[str]) -> int:
         env["NO_SKETCH_CACHE"] = "1"
         unknown_args.remove("--no-sketch-cache")
     if unknown_args:
-        warnings.warn(f"Unknown arguments: {unknown_args}", file=sys.stderr)
+        warnings.warn(f"Unknown arguments: {unknown_args}")
         unknown_args = []
     cmd_list = [
         "uvicorn",

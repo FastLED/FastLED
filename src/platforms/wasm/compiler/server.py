@@ -41,7 +41,6 @@ _ALLOW_SHUTDOWN = os.environ.get("ALLOW_SHUTDOWN", "false").lower() in ["true", 
 _NO_SKETCH_CACHE = os.environ.get("NO_SKETCH_CACHE", "false").lower() in ["true", "1"]
 _LIVE_GIT_FASTLED_DIR = Path("/git/fastled2")
 
-
 # TODO - cleanup
 _NO_AUTO_UPDATE = (
     os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"]
@@ -649,6 +648,12 @@ async def settings() -> dict:
         "VOLUME_MAPPED_SRC_EXISTS": _VOLUME_MAPPED_SRC.exists(),
     }
     return settings
+
+
+@app.get("/compile/wasm/inuse")
+async def compiler_in_use() -> dict:
+    """Check if the compiler is in use."""
+    return {"in_use": compile_lock.locked()}
 
 
 # THIS MUST NOT BE ASYNC!!!!
