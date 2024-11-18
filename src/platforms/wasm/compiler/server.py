@@ -496,6 +496,8 @@ def compile_source(
         stdout = cp.stdout
         return_code = cp.returncode
         if return_code != 0:
+            print(f"{cp}")
+            print(f"Compilation failed with return code {return_code}:\n{stdout}")
             return HTTPException(
                 status_code=400,
                 detail=f"Compilation failed with return code {return_code}:\n{stdout}",
@@ -739,6 +741,12 @@ def compile_wasm(
         )
         if isinstance(out, HTTPException):
             print("Raising HTTPException")
+            import traceback
+            import warnings
+            import json
+            txt = out.detail
+            json_str = json.dumps(txt)
+            warnings.warn(f"Error compiling source: {json_str}")
             raise out
         # Cache the compiled zip file
         out_path = Path(out.path)
@@ -754,13 +762,16 @@ def compile_wasm(
         raise e
 
     except Exception as e:
-        print(f"Error in upload process: {str(e)}")
+        import traceback
+        stack_trace = traceback.format_exc()
+        print(f"Error in upload process: {stack_trace}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Upload process failed: {str(e)}\nTrace: {e.__traceback__}",
+        )
+    finally:
         # Clean up in case of error
         if temp_zip_dir:
             shutil.rmtree(temp_zip_dir, ignore_errors=True)
         if temp_src_dir:
             shutil.rmtree(temp_src_dir, ignore_errors=True)
-        raise HTTPException(
-            status_code=500,
-            detail=f"Upload process failed: {str(e)}\nTrace: {e.__traceback__}",
-        )
