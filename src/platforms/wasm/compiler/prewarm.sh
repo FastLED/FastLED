@@ -30,5 +30,5 @@ python /js/compile.py --quick --mapped-dir /prewarm && rm -rf /js/.pio/build/was
 rm -rf /prewarm
 
 mkdir -p /prewarm && cp -r /js/fastled/examples/wasm /prewarm/wasm
-python /js/compile.py --release --mapped-dir /prewarm && -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
+python /js/compile.py --release --mapped-dir /prewarm && rm -rf /js/.pio/build/wasm/src/wasm.ino.o || echo "failed to delete wasm.ino.o"
 rm -rf /prewarm
