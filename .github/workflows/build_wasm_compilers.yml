@@ -22,7 +22,7 @@ jobs:
       run: uv run ci/wasm_compile.py -b --just-compile examples/wasm
 
     - name: Build WASM Compiler
-      run: ./wasm --build_wasm_compiler
+      run: ./wasm -b
       shell: bash
 
     - name: Generate timestamp and random hex
