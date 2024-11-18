@@ -55,17 +55,19 @@ _START_TIME = time.time()
 if _NO_SKETCH_CACHE:
     print("Sketch caching disabled")
 
-upload_dir = Path("/uploads")
-upload_dir.mkdir(exist_ok=True)
-compile_lock = threading.Lock()
+UPLOAD_DIR = Path("/uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)
+COMPILE_LOCK = threading.Lock()
 
-output_dir = Path("/output")
-output_dir.mkdir(exist_ok=True)
+OUTPUT_DIR = Path("/output")
+OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Initialize disk cache
-CACHE_FILE = output_dir / "compile_cache.db"
-CACHE_MAX_ENTRIES = 50
-disk_cache = DiskLRUCache(str(CACHE_FILE), CACHE_MAX_ENTRIES)
+SKETCH_CACHE_FILE = OUTPUT_DIR / "compile_cache.db"
+SKETCH_CACHE_MAX_ENTRIES = 50
+SKETCH_CACHE = DiskLRUCache(str(SKETCH_CACHE_FILE), SKETCH_CACHE_MAX_ENTRIES)
+
+
 app = FastAPI()
 
 
@@ -145,14 +147,14 @@ def try_get_cached_zip(hash: str) -> bytes | None:
     if _NO_SKETCH_CACHE:
         print("Sketch caching disabled, skipping cache get")
         return None
-    return disk_cache.get_bytes(hash)
+    return SKETCH_CACHE.get_bytes(hash)
 
 
 def cache_put(hash: str, data: bytes) -> None:
     if _NO_SKETCH_CACHE:
         print("Sketch caching disabled, skipping cache put")
         return
-    disk_cache.put_bytes(hash, data)
+    SKETCH_CACHE.put_bytes(hash, data)
 
 
 def sync_src_to_target(
@@ -168,7 +170,7 @@ def sync_src_to_target(
         return False
     try:
         print("\nSyncing source directories...")
-        with compile_lock:
+        with COMPILE_LOCK:
             # Use rsync to copy files, preserving timestamps and deleting removed files
             cp: subprocess.CompletedProcess = subprocess.run(
                 ["rsync", "-av", "--info=NAME", "--delete", f"{src}/", f"{dst}/"],
@@ -224,7 +226,7 @@ def sync_live_git_to_target() -> None:
 
     def on_files_changed() -> None:
         print("FastLED source changed from github repo, clearing disk cache.")
-        disk_cache.clear()
+        SKETCH_CACHE.clear()
 
     sync_src_to_target(
         _LIVE_GIT_FASTLED_DIR / "src", _RSYNC_DEST, callback=on_files_changed
@@ -477,9 +479,9 @@ def compile_source(
         )
 
     print("Files are ready, waiting for compile lock...")
-    compile_lock_start = time.time()
-    with compile_lock:
-        compile_lock_end = time.time()
+    COMPILE_LOCK_start = time.time()
+    with COMPILE_LOCK:
+        COMPILE_LOCK_end = time.time()
 
         print("\nRunning compiler...")
         cmd = [
@@ -501,11 +503,11 @@ def compile_source(
                 status_code=400,
                 detail=f"Compilation failed with return code {return_code}:\n{stdout}",
             )
-    compile_time = time.time() - compile_lock_end
-    compile_lock_time = compile_lock_end - compile_lock_start
+    compile_time = time.time() - COMPILE_LOCK_end
+    COMPILE_LOCK_time = COMPILE_LOCK_end - COMPILE_LOCK_start
 
     print(f"\nCompiler output:\nstdout:\n{stdout}")
-    print(f"Compile lock time: {compile_lock_time:.2f}s")
+    print(f"Compile lock time: {COMPILE_LOCK_time:.2f}s")
     print(f"Compile time: {compile_time:.2f}s")
 
     # Find the fastled_js directory
@@ -528,13 +530,13 @@ def compile_source(
     print(f"\nSaving combined output to: {out_txt}")
     out_txt.write_text(stdout)
     perf_txt.write_text(
-        f"Compile lock time: {compile_lock_time:.2f}s\nCompile time: {compile_time:.2f}s"
+        f"Compile lock time: {COMPILE_LOCK_time:.2f}s\nCompile time: {compile_time:.2f}s"
     )
     if hash_value is not None:
         hash_txt.write_text(hash_value)
 
-    output_dir.mkdir(exist_ok=True)  # Ensure output directory exists
-    output_zip_path = output_dir / f"fastled_output_{hash(str(file_path))}.zip"
+    OUTPUT_DIR.mkdir(exist_ok=True)  # Ensure output directory exists
+    output_zip_path = OUTPUT_DIR / f"fastled_output_{hash(str(file_path))}.zip"
     print(f"\nCreating output zip at: {output_zip_path}")
     start_zip = time.time()
     try:
@@ -629,7 +631,7 @@ if _ALLOW_SHUTDOWN:
     async def shutdown() -> dict:
         """Shutdown the server."""
         print("Shutting down server...")
-        disk_cache.close()
+        SKETCH_CACHE.close()
         os._exit(0)
         return {"status": "ok"}
 
@@ -653,7 +655,7 @@ async def settings() -> dict:
 @app.get("/compile/wasm/inuse")
 async def compiler_in_use() -> dict:
     """Check if the compiler is in use."""
-    return {"in_use": compile_lock.locked()}
+    return {"in_use": COMPILE_LOCK.locked()}
 
 
 # THIS MUST NOT BE ASYNC!!!!
@@ -726,7 +728,7 @@ def compile_wasm(
 
         def on_files_changed() -> None:
             print("Source files changed, clearing cache")
-            disk_cache.clear()
+            SKETCH_CACHE.clear()
 
         sync_source_directory_if_volume_is_mapped(callback=on_files_changed)
 
