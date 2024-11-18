@@ -1,31 +1,30 @@
 
 import os
 from pathlib import Path
+import glob
 
 HERE = Path(__file__).parent
-os.chdir(str(HERE   ))
+
 
 _COMPILER_DIR = Path("/js/fastled/src/platforms/wasm/compiler")
 
 def make_links() -> None:
-    files = [
-        "platformio.ini",
-        "wasm_compiler_flags.py",
-        #"index.html",
-        #"index.css",
-        #"index.js",
-        "Arduino.h",
-        #"filewatcher.py",
-        "compile.py",
-        "run.py",
-        "server.py",
-        "prewarm.sh"
-    ]
-    for file in files:
-        link_dst = Path("/js") / file
-        src = _COMPILER_DIR / file
-        if str(src).endswith(".sh"):
+    # Define file patterns to include
+    patterns = ['*.h', '*.py', '*.css', '*.js', '*.sh', "*.ino", "*.hpp", "*.cpp", "*.ini"]
+    
+    # Get all matching files in compiler directory
+    files = []
+    for pattern in patterns:
+        files.extend(glob.glob(str(_COMPILER_DIR / pattern)))
+    
+    for src in files:
+        src = Path(src)
+        link_dst = Path("/js") / src.name
+        
+        # Handle shell scripts
+        if src.suffix == '.sh':
             os.system(f"dos2unix {src} && chmod +x {src}")
+            
         if not link_dst.exists():
             print(f"Linking {src} to {link_dst}")
             try:
@@ -36,6 +35,7 @@ def make_links() -> None:
             print(f"Target {link_dst} already exists")
 
 def init_runtime() -> None:
+    os.chdir(str(HERE))
     make_links()
     os.system("pio settings set check_platformio_interval 9999")
     os.system("pio settings set enable_telemetry 0")
