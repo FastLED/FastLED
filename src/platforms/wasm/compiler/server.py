@@ -46,7 +46,7 @@ _LIVE_GIT_FASTLED_DIR = Path("/git/fastled2")
 _NO_AUTO_UPDATE = (
     os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"]
     or _VOLUME_MAPPED_SRC.exists()
-) and False
+)
 _LIVE_GIT_UPDATES_ENABLED = (not _NO_AUTO_UPDATE) or (
     os.environ.get("LIVE_GIT_UPDATES", "0") in ["1", "true"]
 )
