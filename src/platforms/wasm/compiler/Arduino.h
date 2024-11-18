@@ -11,20 +11,15 @@
 #include <string>
 
 #include "namespace.h"
-FASTLED_NAMESPACE_BEGIN
-class Str;
-FASTLED_NAMESPACE_END
 
 FASTLED_USING_NAMESPACE
 
 using std::max;
 using std::min;
 
-using fl::map;
-using fl::constrain;
-
 
 namespace fl {
+class Str;
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
     const long run = in_max - in_min;
     if (run == 0) {
@@ -41,6 +36,9 @@ template <typename T> T constrain(T x, T a, T b) {
 }
 } // namespace fl
 
+
+using fl::map;
+using fl::constrain;
 
 
 inline long random(long min, long max) {
