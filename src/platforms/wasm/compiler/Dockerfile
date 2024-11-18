@@ -158,4 +158,4 @@ RUN /js/prewarm.sh  > /logs/prewarm.log.2
 
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "/js/run.py", "compile"]
+CMD ["python", "/js/run.py", "server"]

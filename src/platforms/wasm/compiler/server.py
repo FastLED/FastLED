@@ -259,11 +259,25 @@ def compile_source(
         cmd.append(f"--{build_mode.lower()}")
         if profile:
             cmd.append("--profile")
-        cp = subprocess.run(cmd, cwd="/js", capture_output=True, text=True)
-        stdout = cp.stdout
-        return_code = cp.returncode
+        # cp = subprocess.run(cmd, cwd="/js", capture_output=True, text=True)
+        # cp = subprocess.run(cmd, cwd="/js", stdout=subprocess.STDOUT, stderr=subprocess.STDOUT, text=True)
+        proc = subprocess.Popen(
+            cmd,
+            cwd="/js",
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+        assert proc.stdout is not None
+        stdout_lines: list[str] = []
+
+        for line in iter(proc.stdout.readline, ""):
+            print(line, end="")
+            stdout_lines.append(line)
+        stdout = "".join(stdout_lines)
+        proc.stdout.close()
+        return_code = proc.wait()
         if return_code != 0:
-            print(f"{cp}")
             print(f"Compilation failed with return code {return_code}:\n{stdout}")
             return HTTPException(
                 status_code=400,
