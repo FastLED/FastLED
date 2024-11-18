@@ -230,7 +230,9 @@ def sync_live_git_to_target() -> None:
         print("FastLED source changed from github repo, clearing disk cache.")
         disk_cache.clear()
 
-    sync_src_to_target(_LIVE_GIT_FASTLED_DIR, _RSYNC_DEST, callback=on_files_changed)
+    sync_src_to_target(
+        _LIVE_GIT_FASTLED_DIR / "src", _RSYNC_DEST, callback=on_files_changed
+    )
     # Basically a setTimeout() in JS.
     Timer(
         _LIVE_GIT_UPDATES_INTERVAL, sync_live_git_to_target
