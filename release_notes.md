@@ -1,4 +1,10 @@
 
+FastLED 3.9.4
+=============
+* Fixes some name collisions from users including a lot of libraries.
+* Other misc fixes.
+
+
 FastLED 3.9.3
 =============
 * Beta Release 3 for FastLED 4.0.0
