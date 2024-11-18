@@ -47,12 +47,9 @@ _NO_AUTO_UPDATE = (
     os.environ.get("NO_AUTO_UPDATE", "0") in ["1", "true"]
     or _VOLUME_MAPPED_SRC.exists()
 ) and False
-_LIVE_GIT_UPDATES_ENABLED = True
-if _NO_AUTO_UPDATE:
-    _LIVE_GIT_UPDATES_ENABLED = False
-if os.environ.get("LIVE_GIT_UPDATES", "0") in ["1", "true"]:
-    _LIVE_GIT_UPDATES_ENABLED = True
-
+_LIVE_GIT_UPDATES_ENABLED = (not _NO_AUTO_UPDATE) or (
+    os.environ.get("LIVE_GIT_UPDATES", "0") in ["1", "true"]
+)
 _START_TIME = time.time()
 
 
@@ -583,9 +580,29 @@ def compile_source(
     )
 
 
+def get_settings() -> dict:
+    settings = {
+        "ALLOW_SHUTDOWN": _ALLOW_SHUTDOWN,
+        "NO_AUTO_UPDATE": os.environ.get("NO_AUTO_UPDATE", "0"),
+        "NO_SKETCH_CACHE": _NO_SKETCH_CACHE,
+        "LIVE_GIT_UPDATES_ENABLED": _LIVE_GIT_UPDATES_ENABLED,
+        "LIVE_GIT_UPDATES_INTERVAL": _LIVE_GIT_UPDATES_INTERVAL,
+        "UPLOAD_LIMIT": _UPLOAD_LIMIT,
+        "VOLUME_MAPPED_SRC": str(_VOLUME_MAPPED_SRC),
+        "VOLUME_MAPPED_SRC_EXISTS": _VOLUME_MAPPED_SRC.exists(),
+    }
+    return settings
+
+
 # on startup
 @app.on_event("startup")
 def startup_event():
+    """Run on startup."""
+    print("Starting FastLED wasm compiler server...")
+    try:
+        print(f"Settings: {json.dumps(get_settings(), indent=2)}")
+    except Exception as e:
+        print(f"Error getting settings: {e}")
     sync_source_directory_if_volume_is_mapped()
     if _LIVE_GIT_UPDATES_ENABLED:
         Timer(
@@ -628,6 +645,8 @@ async def settings() -> dict:
         "LIVE_GIT_UPDATES_ENABLED": _LIVE_GIT_UPDATES_ENABLED,
         "LIVE_GIT_UPDATES_INTERVAL": _LIVE_GIT_UPDATES_INTERVAL,
         "UPLOAD_LIMIT": _UPLOAD_LIMIT,
+        "VOLUME_MAPPED_SRC": str(_VOLUME_MAPPED_SRC),
+        "VOLUME_MAPPED_SRC_EXISTS": _VOLUME_MAPPED_SRC.exists(),
     }
     return settings
 
