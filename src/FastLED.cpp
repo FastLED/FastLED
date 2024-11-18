@@ -8,7 +8,12 @@
 
 #ifndef MAX_CLED_CONTROLLERS
 #ifdef __AVR__
+// if mega or leonardo, allow more controllers
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) || defined(__AVR_ATmega32U4__)
+#define MAX_CLED_CONTROLLERS 16
+#else
 #define MAX_CLED_CONTROLLERS 8
+#endif
 #else
 #define MAX_CLED_CONTROLLERS 64
 #endif  // __AVR__
