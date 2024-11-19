@@ -204,6 +204,9 @@ void Video::beginStream(ByteStreamRef bs, size_t pixelsPerFrame, float fps,
 }
 
 bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
+    if (!mTimeScale) {
+        mTimeScale = TimeScaleRef::New(now);
+    }
     mTimeScale->update(now);
     now = mTimeScale->time();
     if (!mImpl) {
