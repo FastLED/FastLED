@@ -89,7 +89,6 @@ public:
     // Clear all frames
     void clear() {
         mFrames.clear();
-        mFrameTracker.reset(0);
     }
 
     bool empty() const { return mFrames.empty(); }
@@ -133,12 +132,6 @@ public:
         *frameNumber = front.frameNumber;
         return true;
     }
-
-    void reset(uint32_t startTime) { mFrameTracker.reset(startTime); }
-
-    void pause(uint32_t now) { mFrameTracker.pause(now); }
-    void resume(uint32_t now) { mFrameTracker.resume(now); }
-    bool isPaused() const { return mFrameTracker.isPaused(); }
 
     uint32_t get_exact_timestamp_ms(uint32_t frameNumber) const {
         return mFrameTracker.get_exact_timestamp_ms(frameNumber);
