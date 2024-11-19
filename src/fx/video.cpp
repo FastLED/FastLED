@@ -11,6 +11,8 @@
 #define DEBUG_IO_STREAM 0
 #endif
 
+#define DEBUG_IO_STREAM 0
+
 #if DEBUG_IO_STREAM
 #include <iostream> // ok include
 using namespace std;
@@ -128,8 +130,14 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
             // we are missing the first frame
             FrameRef frame = FrameRef::New(mPixelsPerFrame, false);
             if (!mStream->readFrame(frame.get())) {
-                DBG(cout << "readFrame failed" << endl);
-                return false;
+                if (!mStream->rewind()) {
+                    DBG(cout << "readFrame (1) failed" << endl);
+                    return false;
+                }
+                if (!mStream->readFrame(frame.get())) {
+                    DBG(cout << "readFrame (2) failed" << endl);
+                    return false;
+                }
             }
             uint32_t timestamp = mFrameTracker->get_exact_timestamp_ms(0);
             frame->setFrameNumberAndTime(0, timestamp);
@@ -153,8 +161,14 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
             frame = FrameRef::New(mPixelsPerFrame, false);
         }
         if (!mStream->readFrame(frame.get())) {
-            DBG(cout << "readFrame failed" << endl);
-            return false;
+            if (!mStream->rewind()) {
+                DBG(cout << "readFrame (3) failed" << endl);
+                return false;
+            }
+            if (!mStream->readFrame(frame.get())) {
+                DBG(cout << "readFrame (4) failed" << endl);
+                return false;
+            }
         }
         uint32_t next_frame = newest_frame_number + 1;
         uint32_t next_timestamp = mFrameTracker->get_exact_timestamp_ms(next_frame);

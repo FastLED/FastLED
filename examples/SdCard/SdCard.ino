@@ -32,8 +32,9 @@ using namespace fl;
 #define LED_PIN 2
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
-#define FPS 1
+#define FPS 30
 #define CHIP_SELECT_PIN 5
+
 
 
 #define MATRIX_WIDTH 32
