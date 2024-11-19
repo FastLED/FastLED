@@ -153,7 +153,9 @@ RUN python /js/init_runtime.py
 RUN mkdir -p /logs
 RUN /js/prewarm.sh --force > /logs/prewarm.log.1
 
+COPY src/*.json /js/fastled/
 COPY src/ /js/fastled/src
+
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will
 # be much quicker than the first pre-warm cycle.
