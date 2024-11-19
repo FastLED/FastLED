@@ -4,7 +4,7 @@
 
 // #include <iostream>
 
-using namespace std;
+// using namespace std;
 
 FASTLED_NAMESPACE_BEGIN
 
