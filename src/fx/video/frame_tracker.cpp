@@ -38,7 +38,6 @@ void FrameTracker::get_interval_frames(uint32_t now, uint32_t *frameNumber,
         uint64_t frame2_start = (*nextFrameNumber * mMicrosSecondsPerInterval);
         uint32_t rel_time = microseconds - frame1_start;
         uint32_t frame_duration = frame2_start - frame1_start;
-        // float progress = static_cast<float>(rel_time) / frame_duration;
         uint8_t progress = uint8_t(map(rel_time, 0, frame_duration, 0, 255));
         *amountOfNextFrame = progress;
     }

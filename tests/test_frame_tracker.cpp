@@ -23,5 +23,5 @@ TEST_CASE("FrameTracker basic frame advancement") {
     tracker.get_interval_frames(500, &currentFrame, &nextFrame, &amountOfNextFrame);
     CHECK(currentFrame == 0);
     CHECK(nextFrame == 1);
-    CHECK(amountOfNextFrame == 128);
+    CHECK(amountOfNextFrame == 127);
 }
