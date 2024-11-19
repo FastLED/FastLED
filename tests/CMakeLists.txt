@@ -75,7 +75,7 @@ file(GLOB_RECURSE FASTLED_SOURCES
     "${FASTLED_SOURCE_DIR}/src/fl/*.cpp"
 )
 
-message(STATUS "Found FastLED sources: ${FASTLED_SOURCES}")
+#message(STATUS "Found FastLED sources: ${FASTLED_SOURCES}")
 
 # Group sources by directory
 set(FX_SOURCES "")
@@ -100,16 +100,16 @@ foreach(SOURCE ${FASTLED_SOURCES})
 endforeach()
 
 # Debug output for source categorization
-message(STATUS "FX Sources: ${FX_SOURCES}")
-message(STATUS "Platforms Sources: ${PLATFORMS_SOURCES}")
-message(STATUS "Lib8tion Sources: ${LIB8TION_SOURCES}")
-message(STATUS "FL Sources: ${FL_SOURCES}")
-message(STATUS "Other Sources: ${OTHER_SOURCES}")
+#message(STATUS "FX Sources: ${FX_SOURCES}")
+#message(STATUS "Platforms Sources: ${PLATFORMS_SOURCES}")
+#message(STATUS "Lib8tion Sources: ${LIB8TION_SOURCES}")
+#message(STATUS "FL Sources: ${FL_SOURCES}")
+#message(STATUS "Other Sources: ${OTHER_SOURCES}")
 
 # Create core library with essential components
 file(GLOB CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../src/*.cpp")
 
-add_library(FastLED_core STATIC ${CORE_SOURCES})
+add_library(FastLED_core OBJECT ${CORE_SOURCES})
 set_target_properties(FastLED_core PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
@@ -117,46 +117,72 @@ set_target_properties(FastLED_core PROPERTIES
 )
 target_compile_options(FastLED_core PRIVATE ${COMMON_COMPILE_FLAGS})
 target_compile_definitions(FastLED_core PRIVATE ${COMMON_COMPILE_DEFINITIONS})
-if(NOT APPLE)
-    target_link_options(FastLED_core PRIVATE -static-libgcc -static-libstdc++)
-endif()
 
-# Create a list of available libraries
-set(FASTLED_LIBS FastLED_core)
+# Create component libraries as OBJECT libraries
 if(FX_SOURCES)
-    add_library(FastLED_fx STATIC ${FX_SOURCES})
-    target_link_libraries(FastLED_fx PUBLIC FastLED_core)
-    list(APPEND FASTLED_LIBS FastLED_fx)
-endif()
-if(PLATFORMS_SOURCES)
-    add_library(FastLED_platforms STATIC ${PLATFORMS_SOURCES})
-    target_link_libraries(FastLED_platforms PUBLIC FastLED_core)
-    list(APPEND FASTLED_LIBS FastLED_platforms)
-endif()
-if(LIB8TION_SOURCES)
-    add_library(FastLED_lib8tion STATIC ${LIB8TION_SOURCES})
-    target_link_libraries(FastLED_lib8tion PUBLIC FastLED_core)
-    list(APPEND FASTLED_LIBS FastLED_lib8tion)
-endif()
-if(FL_SOURCES)
-    add_library(FastLED_fl STATIC ${FL_SOURCES})
-    target_link_libraries(FastLED_fl PUBLIC FastLED_core)
-    list(APPEND FASTLED_LIBS FastLED_fl)
-endif()
-
-# Set properties for all created libraries
-foreach(LIB ${FASTLED_LIBS})
-    set_target_properties(${LIB} PROPERTIES
+    add_library(FastLED_fx OBJECT ${FX_SOURCES})
+    set_target_properties(FastLED_fx PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
         POSITION_INDEPENDENT_CODE ON
     )
-    target_compile_options(${LIB} PRIVATE ${COMMON_COMPILE_FLAGS})
-    target_compile_definitions(${LIB} PRIVATE ${COMMON_COMPILE_DEFINITIONS})
-    if(NOT APPLE)
-        target_link_options(${LIB} PRIVATE -static-libgcc -static-libstdc++)
-    endif()
-endforeach()
+    target_compile_options(FastLED_fx PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_fx PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
+if(PLATFORMS_SOURCES)
+    add_library(FastLED_platforms OBJECT ${PLATFORMS_SOURCES})
+    set_target_properties(FastLED_platforms PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_platforms PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_platforms PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
+if(LIB8TION_SOURCES)
+    add_library(FastLED_lib8tion OBJECT ${LIB8TION_SOURCES})
+    set_target_properties(FastLED_lib8tion PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_lib8tion PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_lib8tion PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
+if(FL_SOURCES)
+    add_library(FastLED_fl OBJECT ${FL_SOURCES})
+    set_target_properties(FastLED_fl PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(FastLED_fl PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(FastLED_fl PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+endif()
+
+# Create the main FastLED static library that includes all components
+add_library(FastLED STATIC 
+    $<TARGET_OBJECTS:FastLED_core>
+    $<$<TARGET_EXISTS:FastLED_fx>:$<TARGET_OBJECTS:FastLED_fx>>
+    $<$<TARGET_EXISTS:FastLED_platforms>:$<TARGET_OBJECTS:FastLED_platforms>>
+    $<$<TARGET_EXISTS:FastLED_lib8tion>:$<TARGET_OBJECTS:FastLED_lib8tion>>
+    $<$<TARGET_EXISTS:FastLED_fl>:$<TARGET_OBJECTS:FastLED_fl>>
+)
+
+# Set properties for the main library
+set_target_properties(FastLED PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_options(FastLED PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(FastLED PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+if(NOT APPLE)
+    target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
+endif()
 
 # Try to find libunwind, but make it optional
 find_package(LibUnwind QUIET)
@@ -177,10 +203,7 @@ list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
 
 
 # Create FastLEDTest with OTHER_SOURCES
-add_library(FastLEDTest STATIC ${OTHER_SOURCES})
-
-# Link with the sub-libraries if they exist
-target_link_libraries(FastLEDTest PUBLIC ${FASTLED_LIBS})
+add_library(FastLEDTest OBJECT ${OTHER_SOURCES})
 
 # Set C++ standard and shared library properties for FastLEDTest
 set_target_properties(FastLEDTest PROPERTIES
@@ -189,17 +212,15 @@ set_target_properties(FastLEDTest PROPERTIES
     POSITION_INDEPENDENT_CODE ON
 )
 
-# Add static linking flags and debug flags for FastLEDTest
-if(NOT APPLE)
-    target_link_options(FastLEDTest PRIVATE -static-libgcc -static-libstdc++)
-endif()
-
 # Add custom build flags for FastLEDTest
 target_compile_options(FastLEDTest PRIVATE ${COMMON_COMPILE_FLAGS})
 target_compile_definitions(FastLEDTest PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
+# Add FastLEDTest objects to main FastLED library
+target_sources(FastLED PRIVATE $<TARGET_OBJECTS:FastLEDTest>)
+
 if(USE_LIBUNWIND)
-    target_link_libraries(FastLEDTest PRIVATE ${LIBUNWIND_LIBRARIES})
+    target_link_libraries(FastLED PRIVATE ${LIBUNWIND_LIBRARIES})
 endif()
 
 # Enable testing
@@ -215,7 +236,7 @@ file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTA
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
-    target_link_libraries(${TEST_NAME} FastLEDTest)
+    target_link_libraries(${TEST_NAME} FastLED)
     if(USE_LIBUNWIND)
         target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
     endif()

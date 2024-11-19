@@ -9,6 +9,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+
 ScreenMap XYMap::toScreenMap() const {
     const uint16_t length = width * height;
     ScreenMap out(length);
