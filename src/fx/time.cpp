@@ -18,8 +18,9 @@ float TimeScale::scale() const {
     return mTimeScale;
 }
 
-void TimeScale::update(uint32_t timeNow) {
+uint32_t TimeScale::update(uint32_t timeNow) {
     applyExact(timeNow);
+    return time();
 }
 
 uint32_t TimeScale::time() const {

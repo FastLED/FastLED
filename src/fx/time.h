@@ -16,7 +16,7 @@ FASTLED_SMART_REF(TimeScale);
 class TimeFunction: public Referent {
   public:
     virtual ~TimeFunction() {}
-    virtual void update(uint32_t timeNow) = 0;
+    virtual uint32_t update(uint32_t timeNow) = 0;  // Inputs the real clock time and outputs the virtual time.
     virtual uint32_t time() const = 0;
     virtual void reset(uint32_t realTimeNow) = 0;
 };
@@ -29,7 +29,7 @@ class TimeScale: public TimeFunction {
     ~TimeScale();
     void setScale(float timeScale);
     float scale() const;
-    void update(uint32_t timeNow) override;
+    uint32_t update(uint32_t timeNow) override;
     uint32_t time() const override;
     void reset(uint32_t realTimeNow) override;
   private:
