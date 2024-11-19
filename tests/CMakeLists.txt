@@ -69,7 +69,94 @@ include_directories(${FASTLED_SOURCE_DIR}/src)
 # Find all FastLED source files
 file(GLOB_RECURSE FASTLED_SOURCES 
     "${FASTLED_SOURCE_DIR}/src/*.cpp"
+    "${FASTLED_SOURCE_DIR}/src/fx/*.cpp"
+    "${FASTLED_SOURCE_DIR}/src/platforms/*.cpp"
+    "${FASTLED_SOURCE_DIR}/src/lib8tion/*.cpp"
+    "${FASTLED_SOURCE_DIR}/src/fl/*.cpp"
 )
+
+message(STATUS "Found FastLED sources: ${FASTLED_SOURCES}")
+
+# Group sources by directory
+set(FX_SOURCES "")
+set(PLATFORMS_SOURCES "")
+set(LIB8TION_SOURCES "")
+set(FL_SOURCES "")
+set(OTHER_SOURCES "")
+
+# Categorize each source file
+foreach(SOURCE ${FASTLED_SOURCES})
+    if(SOURCE MATCHES "/fx/")
+        list(APPEND FX_SOURCES ${SOURCE})
+    elseif(SOURCE MATCHES "/platforms/")
+        list(APPEND PLATFORMS_SOURCES ${SOURCE})
+    elseif(SOURCE MATCHES "/lib8tion/")
+        list(APPEND LIB8TION_SOURCES ${SOURCE})
+    elseif(SOURCE MATCHES "/fl/")
+        list(APPEND FL_SOURCES ${SOURCE})
+    else()
+        list(APPEND OTHER_SOURCES ${SOURCE})
+    endif()
+endforeach()
+
+# Debug output for source categorization
+message(STATUS "FX Sources: ${FX_SOURCES}")
+message(STATUS "Platforms Sources: ${PLATFORMS_SOURCES}")
+message(STATUS "Lib8tion Sources: ${LIB8TION_SOURCES}")
+message(STATUS "FL Sources: ${FL_SOURCES}")
+message(STATUS "Other Sources: ${OTHER_SOURCES}")
+
+# Create core library with essential components
+file(GLOB CORE_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../src/*.cpp")
+
+add_library(FastLED_core STATIC ${CORE_SOURCES})
+set_target_properties(FastLED_core PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    POSITION_INDEPENDENT_CODE ON
+)
+target_compile_options(FastLED_core PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(FastLED_core PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+if(NOT APPLE)
+    target_link_options(FastLED_core PRIVATE -static-libgcc -static-libstdc++)
+endif()
+
+# Create a list of available libraries
+set(FASTLED_LIBS FastLED_core)
+if(FX_SOURCES)
+    add_library(FastLED_fx STATIC ${FX_SOURCES})
+    target_link_libraries(FastLED_fx PUBLIC FastLED_core)
+    list(APPEND FASTLED_LIBS FastLED_fx)
+endif()
+if(PLATFORMS_SOURCES)
+    add_library(FastLED_platforms STATIC ${PLATFORMS_SOURCES})
+    target_link_libraries(FastLED_platforms PUBLIC FastLED_core)
+    list(APPEND FASTLED_LIBS FastLED_platforms)
+endif()
+if(LIB8TION_SOURCES)
+    add_library(FastLED_lib8tion STATIC ${LIB8TION_SOURCES})
+    target_link_libraries(FastLED_lib8tion PUBLIC FastLED_core)
+    list(APPEND FASTLED_LIBS FastLED_lib8tion)
+endif()
+if(FL_SOURCES)
+    add_library(FastLED_fl STATIC ${FL_SOURCES})
+    target_link_libraries(FastLED_fl PUBLIC FastLED_core)
+    list(APPEND FASTLED_LIBS FastLED_fl)
+endif()
+
+# Set properties for all created libraries
+foreach(LIB ${FASTLED_LIBS})
+    set_target_properties(${LIB} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ON
+    )
+    target_compile_options(${LIB} PRIVATE ${COMMON_COMPILE_FLAGS})
+    target_compile_definitions(${LIB} PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+    if(NOT APPLE)
+        target_link_options(${LIB} PRIVATE -static-libgcc -static-libstdc++)
+    endif()
+endforeach()
 
 # Try to find libunwind, but make it optional
 find_package(LibUnwind QUIET)
@@ -88,8 +175,12 @@ list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
 
-# Create a common test library that includes FastLED
-add_library(FastLEDTest STATIC ${FASTLED_SOURCES})
+
+# Create FastLEDTest with OTHER_SOURCES
+add_library(FastLEDTest STATIC ${OTHER_SOURCES})
+
+# Link with the sub-libraries if they exist
+target_link_libraries(FastLEDTest PUBLIC ${FASTLED_LIBS})
 
 # Set C++ standard and shared library properties for FastLEDTest
 set_target_properties(FastLEDTest PROPERTIES
