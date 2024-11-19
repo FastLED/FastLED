@@ -135,7 +135,6 @@ public:
     }
 
     void reset(uint32_t startTime) { mFrameTracker.reset(startTime); }
-    void incrementFrameCounter() { mFrameTracker.incrementIntervalCounter(); }
 
     void pause(uint32_t now) { mFrameTracker.pause(now); }
     void resume(uint32_t now) { mFrameTracker.resume(now); }

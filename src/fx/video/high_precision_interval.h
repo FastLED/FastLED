@@ -13,7 +13,6 @@ class FrameTracker {
   public:
     FrameTracker(float fps) {
         mMicrosSecondsPerInterval = 1000000.0f / fps;
-        mIntervalCounter = 0;
         mStartTime = 0;
         mPauseOffset = 0;
         mPauseTime = 0;
@@ -22,12 +21,10 @@ class FrameTracker {
 
     void reset(uint32_t startTime) {
         mStartTime = startTime;
-        mIntervalCounter = 0;
         mPauseOffset = 0;
         mIsPaused = false;
     }
 
-    void incrementIntervalCounter() { mIntervalCounter++; }
 
     void pause(uint32_t now) {
         if (!mIsPaused) {
@@ -67,7 +64,6 @@ class FrameTracker {
 
   private:
     uint64_t mMicrosSecondsPerInterval;
-    uint32_t mIntervalCounter;
     uint32_t mStartTime;
     uint32_t mPauseOffset;
     uint32_t mPauseTime;
