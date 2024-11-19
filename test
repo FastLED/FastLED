@@ -12,24 +12,17 @@ fi
 if [ "$1" = "--cpp" ]; then
     if [ -n "$2" ]; then
         # Compile and run specific C++ test
-        uv run ci/cpp_test_compile.py --test "$2"
-        uv run ci/cpp_test_run.py --run-only --test "$2"
+        time uv run ci/cpp_test_run.py --test "$2"
     else
         # Compile all C++ tests
-        uv run ci/cpp_test_compile.py
-        uv run ci/cpp_test_run.py --run-only
+        # uv run ci/cpp_test_compile.py
+        time uv run ci/cpp_test_run.py
     fi
 else
-    if [ "$1" = "--test" ] && [ -n "$2" ]; then
-        # Run specific test
-        uv run ci/cpp_test_compile.py --test "$2"
-        uv run ci/cpp_test_run.py --test "$2"
-    else
-        # Run all tests
-        uv run ci/cpp_test_compile.py
-        uv run ci/cpp_test_run.py
-        uv run ci/ci-compile-native.py
-        uv run pytest ci/tests
-        uv run pio check --skip-packages --src-filters="+<src/>" --severity=medium --fail-on-defect=high --flags "--inline-suppr --enable=all --std=c++17"
-    fi
+    # Run all tests
+    uv run ci/cpp_test_compile.py
+    uv run ci/cpp_test_run.py
+    uv run ci/ci-compile-native.py
+    uv run pytest ci/tests
+    uv run pio check --skip-packages --src-filters="+<src/>" --severity=medium --fail-on-defect=high --flags "--inline-suppr --enable=all --std=c++17"
 fi
