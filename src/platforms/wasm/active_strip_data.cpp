@@ -20,7 +20,7 @@
 #include "ui/events.h"
 #include "fixed_map.h"
 #include "js.h"
-#include "str.h"
+#include "fl/str.h"
 #include "namespace.h"
 
 using namespace fl;

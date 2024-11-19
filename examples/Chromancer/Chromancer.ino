@@ -22,7 +22,7 @@
 #include "fixed_map.h"
 
 #include "screenmap.json.h"
-#include "str.h"
+#include "fl/str.h"
 
 enum {
     BlackStrip = 0,

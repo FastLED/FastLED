@@ -10,7 +10,7 @@
 #include "callback.h"
 #include "json.h"
 #include "ref.h"
-#include "str.h"
+#include "fl/str.h"
 
 FASTLED_NAMESPACE_BEGIN
 
