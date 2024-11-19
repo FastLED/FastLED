@@ -4,7 +4,7 @@
 #include "fx/frame.h"
 #include "namespace.h"
 #include "fx/detail/circular_buffer.h"
-#include "fx/video/high_precision_interval.h"
+#include "fx/video/frame_tracker.h"
 
 FASTLED_NAMESPACE_BEGIN
 
