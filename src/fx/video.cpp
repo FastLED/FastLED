@@ -197,6 +197,8 @@ void Video::begin(FileHandleRef h, size_t pixelsPerFrame, float fps,
     mImpl->begin(h);
 }
 
+
+
 void Video::beginStream(ByteStreamRef bs, size_t pixelsPerFrame, float fps,
                         size_t frameHistoryCount) {
     mImpl.reset();
@@ -228,6 +230,10 @@ void Video::end() {
         mImpl->end();
     }
 }
+
+void Video::setScale(float timeScale) { mTimeScale->setScale(timeScale); }
+
+float Video::scale() const { return mTimeScale->scale(); }
 
 bool Video::finished() {
     if (!mImpl) {
