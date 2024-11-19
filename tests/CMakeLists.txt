@@ -88,44 +88,27 @@ list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*esp.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*arm.*")
 list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
 
-# Create FastLED library
-add_library(FastLED STATIC ${FASTLED_SOURCES})
+# Create a common test library that includes FastLED
+add_library(FastLEDTest STATIC ${FASTLED_SOURCES})
 
-# Get the archive name (platform specific)
-set(FASTLED_ARCHIVE "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${CMAKE_STATIC_LIBRARY_PREFIX}FastLED${CMAKE_STATIC_LIBRARY_SUFFIX}")
-
-# Create response file containing object files
-set(RESPONSE_FILE "${CMAKE_CURRENT_BINARY_DIR}/objects.rsp")
-file(GENERATE OUTPUT ${RESPONSE_FILE} CONTENT
-    "$<JOIN:$<TARGET_OBJECTS:FastLED>,\n>"
-)
-
-# Use response file with gcc tools to create archive
-add_custom_command(TARGET FastLED POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E rm -f "${FASTLED_ARCHIVE}"
-    COMMAND ${CMAKE_AR} cr "${FASTLED_ARCHIVE}" @${RESPONSE_FILE}
-    COMMAND ${CMAKE_RANLIB} "${FASTLED_ARCHIVE}"
-    COMMENT "Creating archive index for FastLED static library"
-)
-
-# Set C++ standard and shared library properties for FastLED
-set_target_properties(FastLED PROPERTIES
+# Set C++ standard and shared library properties for FastLEDTest
+set_target_properties(FastLEDTest PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     POSITION_INDEPENDENT_CODE ON
 )
 
-# Add static linking flags and debug flags for FastLED
+# Add static linking flags and debug flags for FastLEDTest
 if(NOT APPLE)
-    target_link_options(FastLED PRIVATE -static-libgcc -static-libstdc++)
+    target_link_options(FastLEDTest PRIVATE -static-libgcc -static-libstdc++)
 endif()
 
-# Add custom build flags for FastLED
-target_compile_options(FastLED PRIVATE ${COMMON_COMPILE_FLAGS})
-target_compile_definitions(FastLED PRIVATE ${COMMON_COMPILE_DEFINITIONS})
+# Add custom build flags for FastLEDTest
+target_compile_options(FastLEDTest PRIVATE ${COMMON_COMPILE_FLAGS})
+target_compile_definitions(FastLEDTest PRIVATE ${COMMON_COMPILE_DEFINITIONS})
 
 if(USE_LIBUNWIND)
-    target_link_libraries(FastLED PRIVATE ${LIBUNWIND_LIBRARIES})
+    target_link_libraries(FastLEDTest PRIVATE ${LIBUNWIND_LIBRARIES})
 endif()
 
 # Enable testing
@@ -141,7 +124,7 @@ file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTA
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
-    target_link_libraries(${TEST_NAME} FastLED)
+    target_link_libraries(${TEST_NAME} FastLEDTest)
     if(USE_LIBUNWIND)
         target_link_libraries(${TEST_NAME} ${LIBUNWIND_LIBRARIES})
     endif()
