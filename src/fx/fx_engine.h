@@ -12,12 +12,12 @@
 #include "namespace.h"
 #include "ref.h"
 #include "ui.h"
-#include "fx/detail/time_warp.h"
+#include "fx/time.h"
 #include "fx/video.h"
 
 
 // Forward declaration
-class TimeWarp;
+class TimeFunction;
 
 #ifndef FASTLED_FX_ENGINE_MAX_FX
 #define FASTLED_FX_ENGINE_MAX_FX 64
@@ -117,15 +117,15 @@ class FxEngine {
     IntFxMap& _getEffects() { return mEffects; }
 
     /**
-     * @brief Sets the time scale for the TimeWarp object.
+     * @brief Sets the time scale for the TimeFunction object.
      * @param timeScale The new time scale value.
      */
-    void setTimeScale(float timeScale) { mTimeWarp.setTimeScale(timeScale); }
+    void setTimeScale(float timeScale) { mTimeFunction.setTimeScale(timeScale); }
 
   private:
     Slider mTimeBender;
     int mCounter = 0;
-    TimeWarp mTimeWarp;  // FxEngine controls the clock, to allow "time-bending" effects.
+    TimeFunction mTimeFunction;  // FxEngine controls the clock, to allow "time-bending" effects.
     IntFxMap mEffects; ///< Collection of effects
     FxCompositor mCompositor; ///< Handles effect transitions and rendering
     int mCurrId; ///< Id of the current effect
@@ -135,7 +135,7 @@ class FxEngine {
 
 inline FxEngine::FxEngine(uint16_t numLeds)
     : mTimeBender("FxEngineSpeed", 1.0f, -50.0f, 50.0f, 0.01f), 
-      mTimeWarp(0), 
+      mTimeFunction(0), 
       mCompositor(numLeds), 
       mCurrId(0) {
 }
@@ -211,9 +211,9 @@ inline FxRef FxEngine::getFx(int id) {
 }
 
 inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
-    mTimeWarp.setTimeScale(mTimeBender);
-    mTimeWarp.update(now);
-    uint32_t warpedTime = mTimeWarp.getTime();
+    mTimeFunction.setTimeScale(mTimeBender);
+    mTimeFunction.update(now);
+    uint32_t warpedTime = mTimeFunction.getTime();
 
     if (mEffects.empty()) {
         return false;

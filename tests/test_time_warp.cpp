@@ -4,7 +4,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "doctest.h"
-#include "fx/detail/time_warp.h"
+#include "fx/time.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
@@ -13,7 +13,7 @@ TEST_CASE("TimeWarp basic functionality") {
     FASTLED_USING_NAMESPACE;
 
     SUBCASE("Initialization and normal time progression") {
-        TimeWarp tw(1000, 1.0f);
+        TimeFunction tw(1000, 1.0f); // 1000 ms is the start time, speed is set at 1x
         CHECK(tw.getTime() == 1000);
         CHECK(tw.getTimeScale() == 1.0f);
 
@@ -22,7 +22,7 @@ TEST_CASE("TimeWarp basic functionality") {
     }
 
     SUBCASE("Time scaling") {
-        TimeWarp tw(1000, 2.0f);
+        TimeFunction tw(1000, 2.0f);
         CHECK(tw.getTimeScale() == 2.0f);
 
         tw.update(1500);
@@ -36,7 +36,7 @@ TEST_CASE("TimeWarp basic functionality") {
     }
 
     SUBCASE("Reset functionality") {
-        TimeWarp tw(1000, 1.0f);
+        TimeFunction tw(1000, 1.0f);
         tw.update(2000);
         CHECK(tw.getTime() == 2000);
 
@@ -49,7 +49,7 @@ TEST_CASE("TimeWarp basic functionality") {
     }
 
     SUBCASE("Wrap-around protection - prevent from going below start time") {
-        TimeWarp tw(1000, 1.0f);
+        TimeFunction tw(1000, 1.0f);
         tw.update(1001);
         CHECK(tw.getTime() == 1001);
         tw.setTimeScale(-1.0f);

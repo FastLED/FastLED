@@ -6,14 +6,14 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-// This class keeps track of the current time and modifies it to allow for time
-// warping effects. You will get the warped time value by calling getTime().
-class TimeWarp {
+// Keeps track of time, also allows you to bend it to your will.
+// any time-tracking Fx can use this to say, sync movement to music.
+class TimeFunction {
   public:
     enum MODE {
         EXACT,
     };
-    TimeWarp(uint32_t realTimeNow, float initialTimeScale = 1.0f)
+    TimeFunction(uint32_t realTimeNow, float initialTimeScale = 1.0f)
         : mRealTime(realTimeNow), mLastRealTime(realTimeNow),
           mStartTime(realTimeNow), mTimeScale(initialTimeScale) {}
     void setTimeScale(float timeScale) { mTimeScale = timeScale; }
