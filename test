@@ -1,23 +1,28 @@
 #!/bin/bash
-
 set -e
 
 cd "$(dirname "$0")"
+
 # if .venv not found
 if [ ! -d .venv ]; then
     # create virtual environment
     ./install
 fi
 
-# Check if --cpp flag is present
-if [[ "$*" == *--cpp* ]]; then
-    # Only run cpp tests if --cpp flag is present
-    uv run ci/cpp_test_run.py
-    uv run ci/ci-compile-native.py
+if [ "$1" = "--cpp" ]; then
+    if [ -n "$2" ]; then
+        # Compile and run specific C++ test
+        uv run ci/cpp_test_compile.py --test "$2"
+    else
+        # Compile all C++ tests
+        uv run ci/cpp_test_compile.py
+    fi
+    uv run ci/cpp_test_run.py --run-only
 else
-    # Run all tests if --cpp flag is not present
+    # Run all tests
+    uv run ci/cpp_test_compile.py
     uv run ci/cpp_test_run.py
     uv run ci/ci-compile-native.py
     uv run pytest ci/tests
-    uv run pio check --skip-packages --src-filters="+<src/>"  --severity=medium --fail-on-defect=high --flags "--inline-suppr --enable=all --std=c++17"
+    uv run pio check --skip-packages --src-filters="+<src/>" --severity=medium --fail-on-defect=high --flags "--inline-suppr --enable=all --std=c++17"
 fi

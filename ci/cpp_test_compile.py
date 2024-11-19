@@ -13,20 +13,6 @@ from ci.paths import PROJECT_ROOT
 BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
 
-"""
- clang \
-   --target=wasm32 \
-   -O3 \
-   -flto \
-   -nostdlib \
-   -Wl,--no-entry \
-   -Wl,--export-all \
-   -Wl,--lto-O3 \
-+  -Wl,-z,stack-size=$[8 * 1024 * 1024] \ # Set maximum stack size to 8MiB
-   -o add.wasm \
-   add.c
-"""
-
 
 def clean_build_directory():
     print("Cleaning build directory...")
@@ -96,19 +82,19 @@ def use_zig_compiler() -> Tuple[Path, Path, Path]:
         CC_PATH.chmod(0o755)
         CXX_PATH.chmod(0o755)
 
-    if WASM_BUILD:
-        wasm_flags = [
-            # "--target=wasm32",
-            # "-O3",
-            # "-flto",
-            # "-nostdlib",
-            "-Wl,--no-entry",
-            # "-Wl,--export-all",
-            # "-Wl,--lto-O3",
-            "-Wl,-z,stack-size=8388608",  # 8 * 1024 * 1024 (8MiB)
-        ]
-    os.environ["CFLAGS"] = " ".join(wasm_flags)
-    os.environ["CXXFLAGS"] = " ".join(wasm_flags)
+    # if WASM_BUILD:
+    #     wasm_flags = [
+    #         # "--target=wasm32",
+    #         # "-O3",
+    #         # "-flto",
+    #         # "-nostdlib",
+    #         "-Wl,--no-entry",
+    #         # "-Wl,--export-all",
+    #         # "-Wl,--lto-O3",
+    #         "-Wl,-z,stack-size=8388608",  # 8 * 1024 * 1024 (8MiB)
+    #     ]
+    # os.environ["CFLAGS"] = " ".join(wasm_flags)
+    # os.environ["CXXFLAGS"] = " ".join(wasm_flags)
 
     cc, cxx = CC_PATH, CXX_PATH
     # use the system path, so on windows this looks like "C:\Program Files\Zig\zig.exe"
@@ -159,7 +145,7 @@ def run_command(command: str, cwd=None, capture: bool = False) -> tuple[str, str
     return stdout, stderr
 
 
-def compile_fastled_library() -> None:
+def compile_fastled_library(specific_test: str | None = None) -> None:
     if USE_ZIG:
         print("USING ZIG COMPILER")
         zig_prog = shutil.which("zig")
@@ -196,7 +182,10 @@ def compile_fastled_library() -> None:
     run_command(cmake_configure_command, cwd=BUILD_DIR)
 
     # Build the project
-    cmake_build_command = f"cmake --build {BUILD_DIR}"
+    if specific_test:
+        cmake_build_command = f"cmake --build {BUILD_DIR} --target test_{specific_test}"
+    else:
+        cmake_build_command = f"cmake --build {BUILD_DIR}"
     run_command(cmake_build_command)
 
     print("FastLED library compiled successfully.")
@@ -213,6 +202,10 @@ def parse_arguments():
         "--clean",
         action="store_true",
         help="Clean the build directory before compiling",
+    )
+    parser.add_argument(
+        "--test",
+        help="Specific test to compile (without test_ prefix)",
     )
     return parser.parse_args()
 
@@ -267,7 +260,7 @@ def main() -> None:
     if args.clean or should_clean_build(build_info):
         clean_build_directory()
 
-    compile_fastled_library()
+    compile_fastled_library(args.test)
     update_build_info(build_info)
     print("FastLED library compiled successfully.")
 

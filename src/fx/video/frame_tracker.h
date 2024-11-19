@@ -31,4 +31,5 @@ class FrameTracker {
     bool mIsPaused;
 };
 
+
 FASTLED_NAMESPACE_END
