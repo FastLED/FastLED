@@ -80,8 +80,8 @@ def run_tests(specific_test: str | None = None) -> None:
     print("Running tests...")
     failed_tests: list[FailedTest] = []
     files = os.listdir(test_dir)
-    # filter out all pdb files (windows)
-    files = [f for f in files if not f.endswith(".pdb")]
+    # filter out all pdb files (windows) and only keep test_ executables
+    files = [f for f in files if not f.endswith(".pdb") and f.startswith("test_")]
 
     # If specific test is specified, filter for just that test
     if specific_test:

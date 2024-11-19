@@ -5,6 +5,24 @@
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
+# Check if mold linker is available
+find_program(MOLD_EXECUTABLE mold)
+
+if(MOLD_EXECUTABLE)
+    # Set mold as the default linker
+    message(STATUS "Using mold linker: ${MOLD_EXECUTABLE}")
+    
+    # Add mold linker flags to the common flags
+    list(APPEND COMMON_COMPILE_FLAGS "-fuse-ld=mold")
+    
+    # Set linker flags globally
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=mold")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=mold")
+else()
+    message(STATUS "Mold linker not found. Using system default linker.")
+endif()
+
 # Set build type to Debug
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
 
@@ -73,7 +91,24 @@ list(FILTER FASTLED_SOURCES EXCLUDE REGEX ".*avr.*")
 # Create FastLED library
 add_library(FastLED STATIC ${FASTLED_SOURCES})
 
-# Set C++ standard and static linking for FastLED
+# Get the archive name (platform specific)
+set(FASTLED_ARCHIVE "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}/${CMAKE_STATIC_LIBRARY_PREFIX}FastLED${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+# Create response file containing object files
+set(RESPONSE_FILE "${CMAKE_CURRENT_BINARY_DIR}/objects.rsp")
+file(GENERATE OUTPUT ${RESPONSE_FILE} CONTENT
+    "$<JOIN:$<TARGET_OBJECTS:FastLED>,\n>"
+)
+
+# Use response file with gcc tools to create archive
+add_custom_command(TARGET FastLED POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E rm -f "${FASTLED_ARCHIVE}"
+    COMMAND ${CMAKE_AR} cr "${FASTLED_ARCHIVE}" @${RESPONSE_FILE}
+    COMMAND ${CMAKE_RANLIB} "${FASTLED_ARCHIVE}"
+    COMMENT "Creating archive index for FastLED static library"
+)
+
+# Set C++ standard and shared library properties for FastLED
 set_target_properties(FastLED PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
@@ -99,7 +134,7 @@ enable_testing()
 # Find all test source files
 file(GLOB TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test_*.cpp")
 
-# Find all test binaries
+# Find test executables (only actual test executables, not libraries)
 file(GLOB TEST_BINARIES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_*${CMAKE_EXECUTABLE_SUFFIX}")
 
 # Process source files
@@ -123,21 +158,6 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     target_compile_definitions(${TEST_NAME} PRIVATE 
         ${COMMON_COMPILE_DEFINITIONS}
         $<$<BOOL:${USE_LIBUNWIND}>:USE_LIBUNWIND>
-    )
-    
-    # Create a custom command to build the test only if source or FastLED library changes
-    add_custom_command(
-        OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_NAME}
-        COMMAND ${CMAKE_COMMAND} --build . --target ${TEST_NAME}
-        DEPENDS ${TEST_SOURCE} FastLED
-        COMMENT "Building ${TEST_NAME}"
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    )
-    
-    # Create a custom target that depends on the custom command
-    add_custom_target(
-        ${TEST_NAME}_target ALL
-        DEPENDS ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TEST_NAME}
     )
     
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
