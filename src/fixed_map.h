@@ -5,6 +5,7 @@
 
 #include "namespace.h"
 #include "fixed_vector.h"
+#include "template_magic.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -59,6 +60,50 @@ public:
             }
         }
         return end();
+    }
+
+    template<typename LessThan>
+    iterator lowest(LessThan less_than = LessThan()) {
+        iterator lowest = end();
+        for (iterator it = begin(); it != end(); ++it) {
+            if (lowest == end() || less_than(it->first, lowest->first)) {
+                lowest = it;
+            }
+        }
+        return lowest;
+    }
+
+    template<typename LessThan>
+    const_iterator lowest(LessThan less_than = LessThan()) const {
+        const_iterator lowest = end();
+        for (const_iterator it = begin(); it != end(); ++it) {
+            if (lowest == end() || less_than(it->first, lowest->first)) {
+                lowest = it;
+            }
+        }
+        return lowest;
+    }
+
+    template<typename LessThan>
+    iterator highest(LessThan less_than = LessThan()) {
+        iterator highest = end();
+        for (iterator it = begin(); it != end(); ++it) {
+            if (highest == end() || less_than(highest->first, it->first)) {
+                highest = it;
+            }
+        }
+        return highest;
+    }
+
+    template<typename LessThan>
+    const_iterator highest(LessThan less_than = LessThan()) const {
+        const_iterator highest = end();
+        for (const_iterator it = begin(); it != end(); ++it) {
+            if (highest == end() || less_than(highest->first, it->first)) {
+                highest = it;
+            }
+        }
+        return highest;
     }
 
     // We differ from the std standard here so that we don't allow

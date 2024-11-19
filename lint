@@ -2,6 +2,9 @@
 
 set -e
 
+# Unset VIRTUAL_ENV to avoid warnings about mismatched paths
+unset VIRTUAL_ENV
+
 cd "$(dirname "$0")"
 # if .venv not found
 if [ ! -d .venv ]; then

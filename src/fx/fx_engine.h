@@ -120,12 +120,12 @@ class FxEngine {
      * @brief Sets the time scale for the TimeFunction object.
      * @param timeScale The new time scale value.
      */
-    void setTimeScale(float timeScale) { mTimeFunction.setTimeScale(timeScale); }
+    void setTimeScale(float timeScale) { mTimeFunction.setScale(timeScale); }
 
   private:
     Slider mTimeBender;
     int mCounter = 0;
-    TimeFunction mTimeFunction;  // FxEngine controls the clock, to allow "time-bending" effects.
+    TimeScale mTimeFunction;  // FxEngine controls the clock, to allow "time-bending" effects.
     IntFxMap mEffects; ///< Collection of effects
     FxCompositor mCompositor; ///< Handles effect transitions and rendering
     int mCurrId; ///< Id of the current effect
@@ -211,9 +211,9 @@ inline FxRef FxEngine::getFx(int id) {
 }
 
 inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
-    mTimeFunction.setTimeScale(mTimeBender);
+    mTimeFunction.setScale(mTimeBender);
     mTimeFunction.update(now);
-    uint32_t warpedTime = mTimeFunction.getTime();
+    uint32_t warpedTime = mTimeFunction.time();
 
     if (mEffects.empty()) {
         return false;
