@@ -12,9 +12,9 @@
 
 #ifdef FASTLED_DEBUG
 #include <iostream>  // ok include
+using namespace std;
 #endif
 
-using namespace std;
 
 FASTLED_NAMESPACE_BEGIN
 

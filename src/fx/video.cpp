@@ -5,9 +5,6 @@
 #include "fx/frame.h"
 #include "fx/video/frame_interpolator.h"
 
-
-using namespace std;
-
 #ifdef __EMSCRIPTEN__
 #define DEBUG_IO_STREAM 1
 #else

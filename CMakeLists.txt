@@ -5,6 +5,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 file(GLOB FastLED_SRCS "src/*.cpp")
+file(GLOB FastLED_SRCS "src/fl/*.cpp")
 list(REMOVE_ITEM FastLED_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/stub_main.cpp")
 
 file(GLOB ESP32_SRCS "src/platforms/esp/32/*.cpp")

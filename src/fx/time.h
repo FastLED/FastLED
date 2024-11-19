@@ -22,7 +22,7 @@ class TimeFunction: public Referent {
 };
 
 // Time clock, but you can warp time. Scale can go negative for back and
-// forth time based effects.
+// forth time based effects. Starts at 0.
 class TimeScale: public TimeFunction {
   public:
     TimeScale(uint32_t realTimeNow, float initialTimeScale = 1.0f);
