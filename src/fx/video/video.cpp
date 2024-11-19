@@ -5,6 +5,9 @@
 #include "fx/frame.h"
 #include "fx/video/frame_interpolator.h"
 
+
+using namespace std;
+
 #ifdef __EMSCRIPTEN__
 #define DEBUG_IO_STREAM 1
 #else
@@ -18,6 +21,7 @@ using namespace std;
 #else
 #define DBG(X)
 #endif
+
 
 #include "namespace.h"
 
@@ -45,19 +49,18 @@ class VideoImpl : public Referent {
     bool draw(uint32_t now, Frame *frame);
     bool full() const;
     FrameRef popOldest();
-    void pushNewest(FrameRef frame);
 
   private:
     bool updateBufferIfNecessary(uint32_t now);
     uint32_t mPixelsPerFrame = 0;
     DataStreamRef mStream;
-    FrameInterpolatorRef mInterpolator;
+    FrameInterpolatorRef mFrameTracker;
 };
 
 VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
                      size_t nFramesInBuffer)
     : mPixelsPerFrame(pixelsPerFrame),
-      mInterpolator(
+      mFrameTracker(
           FrameInterpolatorRef::New(MAX(1, nFramesInBuffer), fpsVideo)) {}
 
 VideoImpl::~VideoImpl() { end(); }
@@ -77,20 +80,16 @@ void VideoImpl::beginStream(ByteStreamRef bs) {
 }
 
 void VideoImpl::end() {
-    mInterpolator->clear();
+    mFrameTracker->clear();
     // Removed resetFrameCounter and setStartTime calls
     mStream.reset();
 }
 
-void VideoImpl::pushNewest(FrameRef frame) {
-    mInterpolator->push_front(frame, frame->getTimestamp());
-}
-
-bool VideoImpl::full() const { return mInterpolator->getFrames()->full(); }
+bool VideoImpl::full() const { return mFrameTracker->getFrames()->full(); }
 
 FrameRef VideoImpl::popOldest() {
     FrameRef frame;
-    mInterpolator->pop_back(&frame);
+    mFrameTracker->pop_back(&frame);
     return frame;
 }
 
@@ -102,7 +101,7 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
     if (!frame) {
         return false;
     }
-    return mInterpolator->draw(now, frame);
+    return mFrameTracker->draw(now, frame);
 }
 
 bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
@@ -118,55 +117,65 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
         }
         return false;
     }
-    mInterpolator->draw(now, leds, alpha);
+    mFrameTracker->draw(now, leds, alpha);
     return true;
 }
 
 bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
-    // get the number of frames according to the time elapsed
-    uint32_t precise_timestamp;
     // At most, update one frame. That way if the user forgets to call draw and
     // then sends a really old timestamp, we don't update the buffer too much.
-    bool needs_frame = mInterpolator->needsFrame(now, &precise_timestamp);
-    if (!needs_frame) {
-        return true;
-    }
-    // if we dropped frames (because of time manipulation) just set
-    // the frame counter to the current frame number + 1
-    // read the frame from the stream
-    FrameRef frame;
-    if (mInterpolator->full()) {
-        if (!mInterpolator->popOldest(&frame)) {
-            DBG(cout << "popOldest failed" << endl);
+    uint32_t currFrameNumber = 0;
+    uint32_t nextFrameNumber = 0;
+    while (mFrameTracker->needsFrame(now, &currFrameNumber, &nextFrameNumber)) {
+        if (mFrameTracker->empty()) {
+            // we are missing the first frame
+            FrameRef frame = FrameRef::New(mPixelsPerFrame, false);
+            if (!mStream->readFrame(frame.get())) {
+                DBG(cout << "readFrame failed" << endl);
+                return false;
+            }
+            uint32_t timestamp = mFrameTracker->get_exact_timestamp_ms(0);
+            frame->setFrameNumberAndTime(0, timestamp);
+            mFrameTracker->push_front(frame, 0, timestamp);
+            continue;
+        }
+
+        uint32_t newest_frame_number = 0;
+        bool has_newest = mFrameTracker->get_newest_frame_number(&newest_frame_number);
+        if (!has_newest) {
+            DBG(cout << "get_newest_frame_number failed" << endl);
             return false;
         }
-    } else {
-        frame = FrameRef::New(mPixelsPerFrame, false);
-    }
-    if (mStream->atEnd()) {
-        if (!mStream->rewind()) {
+
+        FrameRef frame;
+        if (full()) {
+            frame = popOldest();
+        } else {
+            // We will continue allocating until the buffer fills up with frames, then we start
+            // recycling.
+            frame = FrameRef::New(mPixelsPerFrame, false);
+        }
+        if (!mStream->readFrame(frame.get())) {
+            DBG(cout << "readFrame failed" << endl);
+            return false;
+        }
+        uint32_t next_frame = newest_frame_number + 1;
+        uint32_t next_timestamp = mFrameTracker->get_exact_timestamp_ms(next_frame);
+        frame->setFrameNumberAndTime(next_frame, next_timestamp);
+        bool ok = mFrameTracker->push_front(frame, next_frame, next_timestamp);
+        if (!ok) {
+            DBG(cout << "pushNewest failed" << endl);
             return false;
         }
     }
-    if (mStream->readFrame(frame.get())) {
-        if (mInterpolator->pushNewest(frame, now)) {
-            // we have a new frame
-            mInterpolator->incrementFrameCounter();
-        }
-        return true;
-    } else {
-        DBG(cout << "readFrame failed" << endl);
-        // Something went wrong so put the frame back in the buffer.
-        mInterpolator->push_front(frame, frame->getTimestamp());
-        return false;
-    }
+    return true;
 }
 
 bool VideoImpl::rewind() {
     if (!mStream || !mStream->rewind()) {
         return false;
     }
-    mInterpolator->clear();
+    mFrameTracker->clear();
     return true;
 }
 

@@ -15,11 +15,13 @@ FASTLED_SMART_REF(FrameInterpolator);
 // respond to things like sound which can modify the timing.
 class FrameInterpolator : public Referent {
 public:
-    typedef CircularBuffer<FrameRef> FrameBuffer;
-    FrameInterpolator(size_t nframes, float fpsVideo);
 
-    HighPrecisionInterval& getInterval() { return mInterval; }
-    const HighPrecisionInterval& getInterval() const { return mInterval; }
+    struct Pair {
+        uint32_t frameNumber;  // Lit bit faster to inline.
+        FrameRef frame;
+    };
+    typedef CircularBuffer<Pair> FrameBuffer;
+    FrameInterpolator(size_t nframes, float fpsVideo);
 
     // Will search through the array, select the two frames that are closest to the current time
     // and then interpolate between them, storing the results in the provided frame.
@@ -32,34 +34,82 @@ public:
     bool draw(uint32_t adjustable_time, Frame* dst);
     bool draw(uint32_t adjustable_time, CRGB* leds, uint8_t* alpha, uint32_t* precise_timestamp = nullptr);
 
-    // Frame's resources are copied into the internal data structures.
-    bool add(const Frame& frame);
-
     // Used for recycling externally.
-    bool pop_back(FrameRef* dst) { return mFrames.pop_back(dst); }
-    bool push_front(FrameRef frame, uint32_t timestamp) {
+    bool pop_back(FrameRef* dst) {
+        Pair pair;
+        if (!mFrames.pop_back(&pair)) {
+            return false;
+        }
+        *dst = pair.frame;
+        return true;
+    }
+
+    // push the frame if and only if
+    // 1. The frame is the next frame in the sequence.
+    // 2. The frame is the newest frame.
+    bool push_front(FrameRef frame, uint32_t frameNumber, uint32_t timestamp) {
         if (mFrames.full()) {
+            // we are in an invalid state. We don't want to pop off frames unless
+            // the caller supplies us with a destination to put the frame so the memory
+            // block can be reused.
             return false;
         }
-        if (!mFrames.empty() && timestamp <= mFrames.front()->getTimestamp()) {
+        if (mFrames.empty()) {
+            frame->setFrameNumberAndTime(frameNumber, timestamp);
+            Pair new_entry = {frameNumber, frame};
+            mFrames.push_front(new_entry);
+            return true;
+        }
+        if (!mFrames.empty()) {
+            auto& front = mFrames.front();
+            // auto& front_frame = front.frame;
+            uint32_t front_frameNumber = front.frameNumber;
+            if (front_frameNumber+1 == frameNumber) {
+                // we got a new front frame and we have the capacity for it.
+                Pair new_entry = {frameNumber, frame};
+                frame->setFrameNumberAndTime(frameNumber, timestamp);
+                mFrames.push_front(new_entry);
+                return true;
+            }
+            // how did we end up here? This is an invalid state.
             return false;
         }
-        frame->setTimestamp(timestamp);
-        return mFrames.push_front(frame);
+        return false;
+    }
+    bool popOldest(FrameRef* dst) {
+        Pair pair;
+        if (!mFrames.pop_front(&pair)) {
+            return false;
+        }
+        *dst = pair.frame;
+        return true;
     }
 
-    bool pushNewest(FrameRef frame, uint32_t timestamp) {
-        frame->setTimestamp(timestamp);
-        return push_front(frame, timestamp);
-    }
-    bool popOldest(FrameRef* dst) { return mFrames.pop_back(dst); }
-
-    bool addWithTimestamp(const Frame& frame, uint32_t timestamp);
 
     // Clear all frames
     void clear() {
         mFrames.clear();
-        mInterval.reset(0);
+        mFrameTracker.reset(0);
+    }
+
+    bool empty() const { return mFrames.empty(); }
+
+    bool has(uint32_t frameNum) const {
+        for (uint32_t i = 0; i < mFrames.size(); ++i) {
+            if (mFrames[i].frameNumber == frameNum) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    FrameRef get(uint32_t frameNum) const {
+        for (uint32_t i = 0; i < mFrames.size(); ++i) {
+            if (mFrames[i].frameNumber == frameNum) {
+                return mFrames[i].frame;
+            }
+        }
+        return FrameRef();
     }
 
     // Selects the two frames that are closest to the current time. Returns false on failure.
@@ -70,20 +120,36 @@ public:
 
     FrameBuffer* getFrames() { return &mFrames; }
 
-    bool needsFrame(uint32_t now, uint32_t* precise_timestamp) const {
-        return mInterval.needsFrame(now, precise_timestamp);
+    bool needsFrame(uint32_t now, uint32_t* currentFrameNumber, uint32_t* nextFrameNumber) const {
+        mFrameTracker.get_interval_frames(now, currentFrameNumber, nextFrameNumber);
+        return !has(*currentFrameNumber) || !has(*nextFrameNumber);
     }
 
-    void reset(uint32_t startTime) { mInterval.reset(startTime); }
-    void incrementFrameCounter() { mInterval.incrementIntervalCounter(); }
+    bool get_newest_frame_number(uint32_t* frameNumber) const {
+        if (mFrames.empty()) {
+            return false;
+        }
+        auto& front = mFrames.front();
+        *frameNumber = front.frameNumber;
+        return true;
+    }
 
-    void pause(uint32_t now) { mInterval.pause(now); }
-    void resume(uint32_t now) { mInterval.resume(now); }
-    bool isPaused() const { return mInterval.isPaused(); }
+    void reset(uint32_t startTime) { mFrameTracker.reset(startTime); }
+    void incrementFrameCounter() { mFrameTracker.incrementIntervalCounter(); }
+
+    void pause(uint32_t now) { mFrameTracker.pause(now); }
+    void resume(uint32_t now) { mFrameTracker.resume(now); }
+    bool isPaused() const { return mFrameTracker.isPaused(); }
+
+    uint32_t get_exact_timestamp_ms(uint32_t frameNumber) const {
+        return mFrameTracker.get_exact_timestamp_ms(frameNumber);
+    }
+
+    FrameTracker& getFrameTracker() { return mFrameTracker; }
 
 private:
     FrameBuffer mFrames;
-    HighPrecisionInterval mInterval;
+    FrameTracker mFrameTracker;
 };
 
 FASTLED_NAMESPACE_END

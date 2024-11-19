@@ -32,7 +32,7 @@ using namespace fl;
 #define LED_PIN 2
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
-#define FPS 30
+#define FPS 1
 #define CHIP_SELECT_PIN 5
 
 
@@ -75,7 +75,7 @@ void setup() {
     // use to stream the file asynchroniously in during the runtime. For a real sd card
     // just place all this in the /data/ directory of the SD card to get matching
     // behavior.
-    video = filesystem.openVideo("data/video.dat", NUM_LEDS, FPS);
+    video = filesystem.openVideo("data/video.dat", NUM_LEDS, FPS, 2);
     if (!video) {
       Serial.println("Failed to instantiate video");
     }

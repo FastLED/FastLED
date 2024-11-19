@@ -59,11 +59,11 @@ void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t amount
     // We will eventually do something with alpha.
 }
 
-void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t progress) {
+void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountOfFrame2) {
     if (frame1.size() != frame2.size() || frame1.size() != mPixelsCount) {
         return;  // Frames must have the same size
     }
-    interpolate(frame1, frame2, progress, mRgb.get(), mAlpha.get());
+    interpolate(frame1, frame2, amountOfFrame2, mRgb.get(), mAlpha.get());
 }
 
 FASTLED_NAMESPACE_END

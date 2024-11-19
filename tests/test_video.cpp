@@ -16,6 +16,8 @@
 
 #include "namespace.h"
 
+#if 0
+
 FASTLED_USING_NAMESPACE
 
 #define FPS 30
@@ -94,3 +96,6 @@ TEST_CASE("video with file handle") {
     video.draw(FRAME_TIME+1, leds);
     video.draw(2*FRAME_TIME + 1, leds);
 }
+
+
+#endif

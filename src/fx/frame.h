@@ -27,11 +27,15 @@ public:
     size_t size() const { return mPixelsCount; }
     uint8_t* alpha() { return mAlpha.get(); }
     const uint8_t* alpha() const { return mAlpha.get(); }
-    void setTimestamp(uint32_t now) { mTimeStamp = now; }
     uint32_t getTimestamp() const { return mTimeStamp; }
-
+    uint32_t getFrameNumber() const { return mFrameNumber; }
+    void setFrameNumber(uint32_t n) { mFrameNumber = n; }
+    void setFrameNumberAndTime(uint32_t frameNumber, uint32_t timestamp) {
+        mFrameNumber = frameNumber;
+        mTimeStamp = timestamp;
+    }
     void copy(const Frame& other);
-    void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2);
+    void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountOfFrame2);
     static void interpolate(const Frame& frame1, const Frame& frame2, uint8_t amountofFrame2, CRGB* pixels, uint8_t* alpha);
     void draw(CRGB* leds, uint8_t* alpha) const;
 private:
@@ -39,11 +43,14 @@ private:
     uint32_t mTimeStamp = 0;
     scoped_array<CRGB> mRgb;
     scoped_array<uint8_t> mAlpha;  // Optional alpha channel.
+    uint32_t mFrameNumber = 0;  // optional
 };
 
 
 inline void Frame::copy(const Frame& other) {
     memcpy(mRgb.get(), other.mRgb.get(), other.mPixelsCount * sizeof(CRGB));
+    mFrameNumber = other.mFrameNumber;
+    mTimeStamp = other.mTimeStamp;
     if (other.mAlpha) {
         // mAlpha.reset(new uint8_t[mPixelsCount]);
         mAlpha.reset(LargeBlockAllocator<uint8_t>::Alloc(mPixelsCount));
