@@ -64,7 +64,8 @@ class StringHolder : public Referent {
         mLength = len;
         return true;
     }
-
+    
+    
   private:
     char *mData = nullptr;
     size_t mLength = 0;

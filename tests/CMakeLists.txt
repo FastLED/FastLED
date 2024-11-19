@@ -5,6 +5,13 @@
 cmake_minimum_required(VERSION 3.10)
 project(FastLED_Tests)
 
+# Enable parallel compilation
+include(ProcessorCount)
+ProcessorCount(CPU_COUNT)
+if(CPU_COUNT)
+    set(CMAKE_BUILD_PARALLEL_LEVEL ${CPU_COUNT})
+endif()
+
 # Check if mold linker is available
 find_program(MOLD_EXECUTABLE mold)
 
@@ -20,7 +27,13 @@ if(MOLD_EXECUTABLE)
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=mold")
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=mold")
 else()
-    message(STATUS "Mold linker not found. Using system default linker.")
+    find_program(LLDLINK_EXECUTABLE lld-link)
+    if(LLDLINK_EXECUTABLE)
+        message(STATUS "Using lld-link linker: ${LLDLINK_EXECUTABLE}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+    else()
+        message(STATUS "Neither mold nor lld-link found. Using system default linker.")
+    endif()
 endif()
 
 # Set build type to Debug
