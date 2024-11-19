@@ -12,6 +12,11 @@
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
 
-TEST_CASE("FrameTracker") {
-    
+TEST_CASE("FrameTracker basic initialization") {
+    FrameTracker tracker(30.0f);
+    uint32_t currentFrame, nextFrame;
+    tracker.reset(1000); // start at time 1000ms
+    tracker.get_interval_frames(1000, &currentFrame, &nextFrame);
+    CHECK(currentFrame == 0);
+    CHECK(nextFrame == 1);
 }
