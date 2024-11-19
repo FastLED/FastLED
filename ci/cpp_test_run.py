@@ -71,7 +71,7 @@ def compile_tests(clean: bool = False, unknown_args: list[str] = []) -> None:
     print("Compilation successful.")
 
 
-def run_tests() -> None:
+def run_tests(specific_test: str | None = None) -> None:
     test_dir = os.path.join("tests", ".build", "bin")
     if not os.path.exists(test_dir):
         print(f"Test directory not found: {test_dir}")
@@ -82,6 +82,16 @@ def run_tests() -> None:
     files = os.listdir(test_dir)
     # filter out all pdb files (windows)
     files = [f for f in files if not f.endswith(".pdb")]
+
+    # If specific test is specified, filter for just that test
+    if specific_test:
+        test_name = f"test_{specific_test}"
+        if sys.platform == "win32":
+            test_name += ".exe"
+        files = [f for f in files if f == test_name]
+        if not files:
+            print(f"Test {test_name} not found in {test_dir}")
+            sys.exit(1)
     for test_file in files:
         test_path = os.path.join(test_dir, test_file)
         if os.path.isfile(test_path) and os.access(test_path, os.X_OK):
@@ -195,6 +205,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--clean", action="store_true", help="Clean build before compiling"
     )
+    parser.add_argument(
+        "--test",
+        help="Specific test to run (without test_ prefix)",
+    )
     args, unknown = parser.parse_known_args()
     args.unknown = unknown
     return args
@@ -207,7 +221,7 @@ def main() -> None:
         compile_tests(clean=args.clean, unknown_args=args.unknown)
 
     if not args.compile_only:
-        run_tests()
+        run_tests(args.test)
 
 
 if __name__ == "__main__":
