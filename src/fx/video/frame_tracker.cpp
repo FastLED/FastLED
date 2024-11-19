@@ -34,7 +34,7 @@ void FrameTracker::get_interval_frames(uint32_t now, uint32_t* frameNumber, uint
 
 uint32_t FrameTracker::get_exact_timestamp_ms(uint32_t frameNumber) const {
     uint64_t microseconds = frameNumber * mMicrosSecondsPerInterval;
-    return static_cast<uint32_t>(microseconds / 1000) + mStartTime + mPauseOffset;
+    return static_cast<uint32_t>(microseconds / 1000) + mStartTime;
 }
 
 FASTLED_NAMESPACE_END

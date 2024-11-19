@@ -6,7 +6,7 @@ namespace fl {
 #ifndef FASTLED_HAS_DPRINT
 // make a dummy class for DBG. It will be used like this:
 // example: FASTLED_DPRINT() << "Hello World" << endl;
-// This class must compile out to nothing when not in debug mode.
+
 
 class DBG {
 public:
