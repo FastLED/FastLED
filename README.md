@@ -206,11 +206,6 @@ Espressif's current evaluation of FastLED's compatibility with their product she
 ![image](https://github.com/user-attachments/assets/be98fbe6-0ec7-492d-8ed1-b7eb6c627e86)
 Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLED/comments/1gkcb6m/fastled_fastled_led_overclock_17/
 
-## Star History
-
-
-
-
 ## Getting Started
 
 ### Arduino IDE / PlatformIO Dual Repo
