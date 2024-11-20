@@ -4,22 +4,13 @@
 #include "fx/detail/data_stream.h"
 #include "fx/frame.h"
 #include "fx/video/frame_interpolator.h"
+#include "fl/dbg.h"
 
-#ifdef __EMSCRIPTEN__
-#define DEBUG_IO_STREAM 1
-#else
-#define DEBUG_IO_STREAM 0
-#endif
 
-#define DEBUG_IO_STREAM 0
 
-#if DEBUG_IO_STREAM
-#include <iostream> // ok include
-using namespace std;
-#define DBG(X) (X)
-#else
-#define DBG(X)
-#endif
+
+#define DBG(X) FASTLED_DBG((X))
+
 
 
 #include "namespace.h"
@@ -131,11 +122,11 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
             FrameRef frame = FrameRef::New(mPixelsPerFrame, false);
             if (!mStream->readFrame(frame.get())) {
                 if (!mStream->rewind()) {
-                    DBG(cout << "readFrame (1) failed" << endl);
+                    DBG("readFrame (1) failed");
                     return false;
                 }
                 if (!mStream->readFrame(frame.get())) {
-                    DBG(cout << "readFrame (2) failed" << endl);
+                    DBG("readFrame (2) failed");
                     return false;
                 }
             }
@@ -148,7 +139,7 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
         uint32_t newest_frame_number = 0;
         bool has_newest = mFrameTracker->get_newest_frame_number(&newest_frame_number);
         if (!has_newest) {
-            DBG(cout << "get_newest_frame_number failed" << endl);
+            DBG("get_newest_frame_number failed");
             return false;
         }
 
@@ -162,11 +153,11 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
         }
         if (!mStream->readFrame(frame.get())) {
             if (!mStream->rewind()) {
-                DBG(cout << "readFrame (3) failed" << endl);
+                DBG("readFrame (3) failed");
                 return false;
             }
             if (!mStream->readFrame(frame.get())) {
-                DBG(cout << "readFrame (4) failed" << endl);
+                DBG("readFrame (4) failed");
                 return false;
             }
         }
@@ -175,7 +166,7 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
         frame->setFrameNumberAndTime(next_frame, next_timestamp);
         bool ok = mFrameTracker->push_front(frame, next_frame, next_timestamp);
         if (!ok) {
-            DBG(cout << "pushNewest failed" << endl);
+            DBG("pushNewest failed");
             return false;
         }
     }
