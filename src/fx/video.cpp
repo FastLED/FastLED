@@ -40,13 +40,13 @@ class VideoImpl : public Referent {
     bool updateBufferIfNecessary(uint32_t now);
     uint32_t mPixelsPerFrame = 0;
     DataStreamRef mStream;
-    FrameInterpolatorRef mFrameTracker;
+    FrameInterpolatorRef mFrameInterpolator;
 };
 
 VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
                      size_t nFramesInBuffer)
     : mPixelsPerFrame(pixelsPerFrame),
-      mFrameTracker(
+      mFrameInterpolator(
           FrameInterpolatorRef::New(MAX(1, nFramesInBuffer), fpsVideo)) {}
 
 VideoImpl::~VideoImpl() { end(); }
@@ -66,16 +66,16 @@ void VideoImpl::beginStream(ByteStreamRef bs) {
 }
 
 void VideoImpl::end() {
-    mFrameTracker->clear();
+    mFrameInterpolator->clear();
     // Removed resetFrameCounter and setStartTime calls
     mStream.reset();
 }
 
-bool VideoImpl::full() const { return mFrameTracker->getFrames()->full(); }
+bool VideoImpl::full() const { return mFrameInterpolator->getFrames()->full(); }
 
 FrameRef VideoImpl::popOldest() {
     FrameRef frame;
-    mFrameTracker->pop_back(&frame);
+    mFrameInterpolator->pop_back(&frame);
     return frame;
 }
 
@@ -87,7 +87,7 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
     if (!frame) {
         return false;
     }
-    return mFrameTracker->draw(now, frame);
+    return mFrameInterpolator->draw(now, frame);
 }
 
 bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
@@ -103,7 +103,7 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
         }
         return false;
     }
-    mFrameTracker->draw(now, leds, alpha);
+    mFrameInterpolator->draw(now, leds, alpha);
     return true;
 }
 
@@ -112,8 +112,8 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
     // then sends a really old timestamp, we don't update the buffer too much.
     uint32_t currFrameNumber = 0;
     uint32_t nextFrameNumber = 0;
-    while (mFrameTracker->needsFrame(now, &currFrameNumber, &nextFrameNumber)) {
-        if (mFrameTracker->empty()) {
+    while (mFrameInterpolator->needsFrame(now, &currFrameNumber, &nextFrameNumber)) {
+        if (mFrameInterpolator->empty()) {
             FASTLED_DBG("empty frame tracker");
             // we are missing the first frame
             FrameRef frame = FrameRef::New(mPixelsPerFrame, false);
@@ -127,16 +127,16 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
                     return false;
                 }
             }
-            uint32_t timestamp = mFrameTracker->get_exact_timestamp_ms(currFrameNumber);
+            uint32_t timestamp = mFrameInterpolator->get_exact_timestamp_ms(currFrameNumber);
             frame->setFrameNumberAndTime(currFrameNumber, timestamp);
-            mFrameTracker->push_front(frame, currFrameNumber, timestamp);
+            mFrameInterpolator->push_front(frame, currFrameNumber, timestamp);
             continue;
         }
 
         DBG("has currFrameNumber: " << currFrameNumber << " nextFrameNumber: " << nextFrameNumber);
 
         uint32_t newest_frame_number = 0;
-        bool has_newest = mFrameTracker->get_newest_frame_number(&newest_frame_number);
+        bool has_newest = mFrameInterpolator->get_newest_frame_number(&newest_frame_number);
         if (!has_newest) {
             DBG("get_newest_frame_number failed");
             return false;
@@ -161,9 +161,9 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
             }
         }
         uint32_t next_frame = newest_frame_number + 1;
-        uint32_t next_timestamp = mFrameTracker->get_exact_timestamp_ms(next_frame);
+        uint32_t next_timestamp = mFrameInterpolator->get_exact_timestamp_ms(next_frame);
         frame->setFrameNumberAndTime(next_frame, next_timestamp);
-        bool ok = mFrameTracker->push_front(frame, next_frame, next_timestamp);
+        bool ok = mFrameInterpolator->push_front(frame, next_frame, next_timestamp);
         if (!ok) {
             DBG("pushNewest failed");
             return false;
@@ -176,7 +176,7 @@ bool VideoImpl::rewind() {
     if (!mStream || !mStream->rewind()) {
         return false;
     }
-    mFrameTracker->clear();
+    mFrameInterpolator->clear();
     return true;
 }
 

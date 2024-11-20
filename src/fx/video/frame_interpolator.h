@@ -31,8 +31,8 @@ public:
     // Returns true if the interpolation was successful, false otherwise. If false then
     // the destination frame will not be modified.
     // Note that this adjustable_time is allowed to go pause or go backward in time. 
-    bool draw(uint32_t adjustable_time, Frame* dst);
-    bool draw(uint32_t adjustable_time, CRGB* leds, uint8_t* alpha, uint32_t* precise_timestamp = nullptr);
+    bool draw(uint32_t adjustable_time, Frame* dst);  // Frame has alpha.
+    bool draw(uint32_t adjustable_time, CRGB* leds, uint8_t* alpha = nullptr);
 
     // Used for recycling externally.
     bool pop_back(FrameRef* dst) {
@@ -111,12 +111,7 @@ public:
         return FrameRef();
     }
 
-    // Selects the two frames that are closest to the current time. Returns false on failure.
-    // frameMin will be before or equal to the current time, frameMax will be after.
-    bool selectFrames(uint32_t now, const Frame** frameMin, const Frame** frameMax) const;
     bool full() const { return mFrames.full(); }
-
-
     FrameBuffer* getFrames() { return &mFrames; }
 
     bool needsFrame(uint32_t now, uint32_t* currentFrameNumber, uint32_t* nextFrameNumber) const {
