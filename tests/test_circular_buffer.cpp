@@ -242,6 +242,54 @@ TEST_CASE("circular_buffer zero capacity") {
 
 #endif  
 
+TEST_CASE("circular_buffer insert operation") {
+    CircularBuffer<int> buffer(5);
+
+    // Insert into empty buffer
+    CHECK(buffer.insert(0, 1));
+    CHECK_EQ(buffer.size(), 1);
+    CHECK_EQ(buffer[0], 1);
+
+    // Insert at beginning
+    CHECK(buffer.insert(0, 2));
+    CHECK_EQ(buffer.size(), 2);
+    CHECK_EQ(buffer[0], 2);
+    CHECK_EQ(buffer[1], 1);
+
+    // Insert at end
+    CHECK(buffer.insert(2, 3));
+    CHECK_EQ(buffer.size(), 3);
+    CHECK_EQ(buffer[0], 2);
+    CHECK_EQ(buffer[1], 1);
+    CHECK_EQ(buffer[2], 3);
+
+    // Insert in middle
+    CHECK(buffer.insert(1, 4));
+    CHECK_EQ(buffer.size(), 4);
+    CHECK_EQ(buffer[0], 2);
+    CHECK_EQ(buffer[1], 4);
+    CHECK_EQ(buffer[2], 1);
+    CHECK_EQ(buffer[3], 3);
+
+    // Insert at invalid index
+    CHECK_FALSE(buffer.insert(5, 5));
+    CHECK_EQ(buffer.size(), 4);
+
+    // Fill buffer
+    CHECK(buffer.insert(4, 5));
+    CHECK_EQ(buffer.size(), 5);
+    CHECK(buffer.full());
+
+    // Attempt to insert when full
+    CHECK_FALSE(buffer.insert(2, 6));
+    CHECK_EQ(buffer.size(), 5);
+    CHECK_EQ(buffer[0], 2);
+    CHECK_EQ(buffer[1], 4);
+    CHECK_EQ(buffer[2], 1);
+    CHECK_EQ(buffer[3], 3);
+    CHECK_EQ(buffer[4], 5);
+}
+
 TEST_CASE("circular_buffer pop_back operation") {
     CircularBuffer<int> buffer(5);
 
