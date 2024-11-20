@@ -449,6 +449,8 @@ class CRGBArray : public CPixelView<CRGB> {
 public:
     CRGBArray() : CPixelView<CRGB>(rawleds, SIZE) {}
     using CPixelView::operator=;
+    CRGB* get() { return &rawleds[0]; }
+    const CRGB* get() const {  return &rawleds[0]; }
 };
 
 /// @} PixelSet
