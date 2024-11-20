@@ -37,9 +37,10 @@ class VideoImpl : public Referent {
     FrameRef popOldest();
 
   private:
-    bool updateBufferIfNecessary(uint32_t now);
+    bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
     uint32_t mPixelsPerFrame = 0;
     DataStreamRef mStream;
+    uint32_t mPrevNow = 0;
     FrameInterpolatorRef mFrameInterpolator;
 };
 
@@ -57,6 +58,7 @@ void VideoImpl::begin(FileHandleRef h) {
     // Removed setStartTime call
     mStream = DataStreamRef::New(mPixelsPerFrame);
     mStream->begin(h);
+    mPrevNow = 0;
 }
 
 void VideoImpl::beginStream(ByteStreamRef bs) {
@@ -64,6 +66,7 @@ void VideoImpl::beginStream(ByteStreamRef bs) {
     mStream = DataStreamRef::New(mPixelsPerFrame);
     // Removed setStartTime call
     mStream->beginStream(bs);
+    mPrevNow = 0;
 }
 
 void VideoImpl::end() {
@@ -84,18 +87,21 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
     if (!mStream) {
         return false;
     }
-    updateBufferIfNecessary(now);
+    updateBufferIfNecessary(mPrevNow, now);
+    mPrevNow = now;
     if (!frame) {
         return false;
     }
-    return mFrameInterpolator->draw(now, frame);
+    bool ok = mFrameInterpolator->draw(now, frame);
+    return ok;
 }
 
 bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     if (!mStream) {
         return false;
     }
-    bool ok = updateBufferIfNecessary(now);
+    bool ok = updateBufferIfNecessary(mPrevNow, now);
+    mPrevNow = now;
     if (!ok) {
         // paint black
         memset(leds, 0, mPixelsPerFrame * sizeof(CRGB));
@@ -108,7 +114,8 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     return true;
 }
 
-bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
+bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
+    const bool forward = now >= prev;
     // At most, update one frame. That way if the user forgets to call draw and
     // then sends a really old timestamp, we don't update the buffer too much.
     uint32_t currFrameNumber = 0;
