@@ -4,24 +4,22 @@
 
 #include "crgb.h"
 #include "fixed_vector.h"
-
 #include "namespace.h"
+
+#include "third_party/I2SClocklessVirtualLedDriver/I2SClocklessLedDriver.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 class YvezI2C {
   public:
-    typedef FixedVector<uint8_t, 6> Pins;
+    typedef FixedVector<uint8_t, 16> Pins;
+    typedef CRGB CRGBArray[NUM_LEDS_PER_STRIP * 16];
     static Pins DefaultPins() {
-#ifdef CONFIG_IDF_TARGET_ESP32S3
-        return Pins({9, 10, 12, 8, 18, 17});
-#else
-        return Pins({14, 12, 13, 25, 33, 32});
-#endif
+        return Pins({0,2,4,5,12,13,14,15,16,18,19,21,22,23,25,26});
     }
 
     YvezI2C(const YvezI2C &) = delete;
-    YvezI2C(const CRGB *leds, int clock_pin, int latch_pin,
+    YvezI2C(const CRGBArray& leds, int clock_pin, int latch_pin,
             const Pins &pins = DefaultPins());
 
     ~YvezI2C();
