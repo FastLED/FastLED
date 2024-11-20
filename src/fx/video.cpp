@@ -48,7 +48,7 @@ VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
     : mPixelsPerFrame(pixelsPerFrame),
       mFrameInterpolator(
           // todo: the max number of frames should be 1 or 0.
-          FrameInterpolatorRef::New(MAX(2, nFramesInBuffer), fpsVideo)) {}
+          FrameInterpolatorRef::New(MAX(0, nFramesInBuffer), fpsVideo)) {}
 
 VideoImpl::~VideoImpl() { end(); }
 

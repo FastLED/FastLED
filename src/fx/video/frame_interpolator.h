@@ -76,15 +76,6 @@ public:
         }
         return false;
     }
-    bool popOldest(FrameRef* dst) {
-        Pair pair;
-        if (!mFrames.pop_front(&pair)) {
-            return false;
-        }
-        *dst = pair.frame;
-        return true;
-    }
-
 
     // Clear all frames
     void clear() {

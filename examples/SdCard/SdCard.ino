@@ -55,7 +55,7 @@ ScreenMap screenMap;
 FileSystem filesystem;
 Video video;
 
-Slider videoSpeed("Video Speed", 1.0f, 0.1f, 2.0f, 0.1f);
+Slider videoSpeed("Video Speed", 1.0f, -1, 2.0f, 0.1f);
 
 
 void setup() {
