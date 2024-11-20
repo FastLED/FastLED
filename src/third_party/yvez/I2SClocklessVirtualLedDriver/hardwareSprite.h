@@ -9,21 +9,24 @@
 #ifndef SPRITE_HEIGHT
 #define SPRITE_HEIGHT 20
 #endif
-#ifndef nb_componentss
-#define nb_componentss 3
+#ifndef nb_components
+#define nb_components 3
 #endif
 
-
+struct res {
+    bool result;
+    CRGB color;
+};
 static int _spritenumber;
 uint16_t * target; //to be sized in the main
-uint8_t _spritesleds[NBSPRITE*SPRITE_HEIGHT*SPRITE_WIDTH*nb_componentss];
+uint8_t _spritesleds[NBSPRITE*SPRITE_HEIGHT*SPRITE_WIDTH*nb_components];
 class hardwareSprite
 {
 public:
   hardwareSprite()
   {
       displaySprite=false;
-      leds=(CRGB*)&_spritesleds[_spritenumber*SPRITE_WIDTH*SPRITE_HEIGHT*nb_componentss];
+      leds=(CRGB*)&_spritesleds[_spritenumber*SPRITE_WIDTH*SPRITE_HEIGHT*nb_components];
       spritenumber=_spritenumber;
       _spritenumber++;
 
@@ -78,7 +81,7 @@ public:
           {
               int _offset=offset(i, j, width, height);
               if(_offset>=0 and _offset<width*height)
-                target[_offset]=(uint16_t)(((j * SPRITE_WIDTH + i)+spritenumber*SPRITE_WIDTH*SPRITE_HEIGHT)*nb_componentss+1); //if 0 then no print
+                target[_offset]=(uint16_t)(((j * SPRITE_WIDTH + i)+spritenumber*SPRITE_WIDTH*SPRITE_HEIGHT)*nb_components+1); //if 0 then no print
             //else    
               //  Serial.printf("%d %d out\n",i,j);
         //lednumber[j * WIDTH + i] = offset(i, j, width, height);

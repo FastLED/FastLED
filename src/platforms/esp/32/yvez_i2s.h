@@ -36,7 +36,7 @@ class YvezI2S {
     YvezI2S &operator=(const YvezI2S &) = delete;
 
   private:
-    I2SClocklessLedDriver driver;
+    I2SClocklessVirtualLedDriver driver;
 };
 
 inline YvezI2S::YvezI2S(const CRGBArray& leds, int clock_pin, int latch_pin,

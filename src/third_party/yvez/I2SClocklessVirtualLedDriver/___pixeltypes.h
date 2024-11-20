@@ -2,7 +2,7 @@
 #ifdef USE_FASTLED
     #include "FastLED.h"
 #endif
-
+#include <Arduino.h>  // ok include
 
 #define _OUT_OF_BOUND -12
 
@@ -10,7 +10,7 @@
 
 struct Pixel {
     union {
-        uint8_t raw[3];
+        uint8_t raw[4];
         struct 
         {
             uint8_t red;
@@ -116,6 +116,20 @@ inline Pixel &operator= (const CRGB& rhs) __attribute__((always_inline))
         blue = rhs.b;
         return *this;
     }
+    inline Pixel &operator= ( CRGB& rhs) __attribute__((always_inline))
+    {
+        red = rhs.r;
+        green = rhs.g;
+        blue = rhs.b;
+        return *this;
+    }
+    inline Pixel ( const CRGB& rhs) __attribute__((always_inline))
+    {
+        red = rhs.r;
+        green = rhs.g;
+        blue = rhs.b;
+       
+    }
    #endif
 
 inline Pixel (const Pixel& rhs) __attribute__((always_inline))
@@ -133,9 +147,18 @@ inline Pixel (const Pixel& rhs) __attribute__((always_inline))
         blue = (colorcode >>  0) & 0xFF;
         return *this;
     }
-        
+        inline __attribute__((always_inline)) bool operator== ( const Pixel& rhs)
+{
+    return (red == rhs.red) && (green == rhs.green) && (blue == rhs.blue);
+}
+       inline __attribute__((always_inline)) bool operator!= ( const Pixel& rhs)
+{
+    return !((red == rhs.red) && (green == rhs.green) && (blue == rhs.blue));
+}
+
 
 };
+ 
 #endif
 
 enum  class leddirection
@@ -269,6 +292,7 @@ class Pixels
 
     void copy(Pixels ori,leddirection dir)
     {
+        /*
         leddirection ledd=_direction;
         if (_direction == leddirection::MAP)
             ledd=leddirection::FORWARD;
@@ -283,6 +307,7 @@ class Pixels
                 (*this)[i]=ori[ori._size-i%(ori._size)-1];
             }
         }
+        */
     }
 
     Pixels getStrip(int num_strip,leddirection direction)
@@ -326,11 +351,7 @@ class Pixels
     }
     void clear()
     {
-#ifdef ESP_IDF        
-        memset((void *)ledpointer,0,_size*sizeof(Pixel));
-#else        
-        memset(ledpointer,0,_size*sizeof(Pixel));
-#endif
+        //memset(ledpointer,0,_size*sizeof(Pixel));
     }
 
     Pixels  createSubset(int start,int length)
