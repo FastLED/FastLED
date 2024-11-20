@@ -31,11 +31,9 @@ bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
 }
 
 bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
-
     uint32_t frameNumber, nextFrameNumber;
     uint8_t amountOfNextFrame;
-    this->mFrameTracker.get_interval_frames(now, &frameNumber, &nextFrameNumber, &amountOfNextFrame);
-
+    mFrameTracker.get_interval_frames(now, &frameNumber, &nextFrameNumber, &amountOfNextFrame);
     if (!has(frameNumber)) {
         DBG("FrameInterpolator::draw: !has(frameNumber)");
         return false;
