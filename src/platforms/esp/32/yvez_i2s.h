@@ -5,6 +5,7 @@
 #include "crgb.h"
 #include "fixed_vector.h"
 #include "namespace.h"
+#include "singleton.h"
 
 #include "third_party/yvez/I2SClocklessLedDriver.h"
 
@@ -15,7 +16,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-class YvezI2C {
+class YvezI2S {
   public:
     typedef FixedVector<uint8_t, 16> Pins;
     typedef CRGB CRGBArray[NUM_LEDS_PER_STRIP * 16];
@@ -23,20 +24,26 @@ class YvezI2C {
         return Pins({0,2,4,5,12,13,14,15,16,18,19,21,22,23,25,26});
     }
 
-    YvezI2C(const YvezI2C &) = delete;
-    YvezI2C(const CRGBArray& leds, int clock_pin, int latch_pin,
+    YvezI2S(const CRGBArray& leds, int clock_pin, int latch_pin,
             const Pins &pins = DefaultPins());
 
-    ~YvezI2C();
     void showPixels();
     void waitForDrawComplete();
 
     // Disable copy constructor and assignment operator
-    YvezI2C() = delete;
-    YvezI2C(YvezI2C &&) = delete;
-    YvezI2C &operator=(const YvezI2C &) = delete;
+    YvezI2S() = delete;
+    YvezI2S(YvezI2S &&) = delete;
+    YvezI2S &operator=(const YvezI2S &) = delete;
 
   private:
+    I2SClocklessLedDriver driver;
 };
+
+inline YvezI2S::YvezI2S(const CRGBArray& leds, int clock_pin, int latch_pin,
+            const Pins &pins) {
+    
+}
+
+
 
 FASTLED_NAMESPACE_END
