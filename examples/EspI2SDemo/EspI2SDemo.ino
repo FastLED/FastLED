@@ -7,7 +7,7 @@
 #else
 
 #include <FastLED.h>
-#include "platforms/esp/32/yvez_i2c.h"
+#include "platforms/esp/32/yvez_i2s.h"
 
 void setup() {
     // TODO: Implement
