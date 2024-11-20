@@ -3,9 +3,6 @@
     #include "FastLED.h"
 #endif
 
-#ifndef ESP_IDF
-#include "Arduino.h"  // ok include
-#endif
 
 #define _OUT_OF_BOUND -12
 

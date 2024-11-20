@@ -2,7 +2,7 @@
 #ifdef USE_FASTLED
     #include "FastLED.h"
 #endif
-#include "Arduino.h"  // ok include  TODO: Remove
+
 
 #define _OUT_OF_BOUND -12
 
