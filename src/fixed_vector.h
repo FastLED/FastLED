@@ -17,8 +17,8 @@ template<typename T, size_t N>
 class FixedVector {
 private:
     union {
-        char raw[N * sizeof(T)];
-        T data[N];
+        char mRaw[N * sizeof(T)];
+        T mData[N];
     };
     size_t current_size = 0;
 
@@ -39,12 +39,12 @@ public:
 
     // Array subscript operator
     T& operator[](size_t index) {
-        return data[index];
+        return mData[index];
     }
 
     // Const array subscript operator
     const T& operator[](size_t index) const {
-        return data[index];
+        return mData[index];
     }
 
     // Get the current size of the vector
@@ -64,7 +64,7 @@ public:
     // Add an element to the end of the vector
     void push_back(const T& value) {
         if (current_size < N) {
-            void* mem = &data[current_size];
+            void* mem = &mData[current_size];
             new (mem) T(value);
             ++current_size;
         }
@@ -81,7 +81,7 @@ public:
     void pop_back() {
         if (current_size > 0) {
             --current_size;
-            data[current_size].~T();
+            mData[current_size].~T();
         }
     }
 
@@ -156,32 +156,40 @@ public:
         return end();
     }
 
+    iterator data() {
+        return begin();
+    }
+
+    const_iterator data() const {
+        return begin();
+    }
+
     bool has(const T& value) const {
         return find(value) != end();
     }
 
     // Access to first and last elements
     T& front() {
-        return data[0];
+        return mData[0];
     }
 
     const T& front() const {
-        return data[0];
+        return mData[0];
     }
 
     T& back() {
-        return data[current_size - 1];
+        return mData[current_size - 1];
     }
 
     const T& back() const {
-        return data[current_size - 1];
+        return mData[current_size - 1];
     }
 
     // Iterator support
-    iterator begin() { return &data[0]; }
-    const_iterator begin() const { return &data[0]; }
-    iterator end() { return &data[current_size]; }
-    const_iterator end() const { return &data[current_size]; }
+    iterator begin() { return &mData[0]; }
+    const_iterator begin() const { return &mData[0]; }
+    iterator end() { return &mData[current_size]; }
+    const_iterator end() const { return &mData[current_size]; }
 };
 
 FASTLED_NAMESPACE_END
