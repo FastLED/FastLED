@@ -8,6 +8,11 @@
 
 #include "third_party/yvez/I2SClocklessLedDriver.h"
 
+#ifndef NUM_LEDS_PER_STRIP
+#warning "NUM_LEDS_PER_STRIP not defined, using default 256"
+#define NUM_LEDS_PER_STRIP 256
+#endif
+
 FASTLED_NAMESPACE_BEGIN
 
 class YvezI2C {

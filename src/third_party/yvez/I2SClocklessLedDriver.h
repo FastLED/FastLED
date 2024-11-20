@@ -13,19 +13,6 @@
 #endif
 
 
-#include "platforms/esp/esp_version.h"
-
-
-#if CONFIG_IDF_TARGET_ESP32S3
-#error "ESP32-S3 is not supported by this library"
-#elif CONFIG_IDF_TARGET_ESP32C3
-#error "ESP32-C3 is not supported by this library"
-#elif CONFIG_IDF_TARGET_ESP32H2
-#error "ESP32-H2 is not supported by this library"
-#elif CONFIG_IDF_TARGET_ESP32C6
-#error "ESP32-C6 is not supported by this library"
-#endif
-
 // esp32 dev
 #if CONFIG_IDF_TARGET_ESP32S3
 #include "third_party/yvez/I2SClockLessLedDriveresp32s3/I2SClockLessLedDriveresp32s3.h"
