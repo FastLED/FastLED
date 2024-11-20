@@ -6,7 +6,7 @@
 #include "fixed_vector.h"
 #include "namespace.h"
 
-#include "third_party/I2SClocklessVirtualLedDriver/I2SClocklessLedDriver.h"
+#include "third_party/yvez/I2SClocklessLedDriver.h"
 
 FASTLED_NAMESPACE_BEGIN
 
