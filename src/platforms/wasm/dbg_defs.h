@@ -5,4 +5,5 @@
 #include <iostream>
 using std::endl;
 using std::cout;
-#define FASTLED_DBG(X) cout << X
+#define _FASTLED_DGB(X) cout << X
+#define FASTLED_DBG(X) _FASTLED_DGB(X) << endl

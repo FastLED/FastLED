@@ -6,11 +6,7 @@
 #include "fx/video/frame_interpolator.h"
 #include "fl/dbg.h"
 
-
-
-
-#define DBG(X) FASTLED_DBG((X))
-
+#define DBG FASTLED_DBG
 
 
 #include "namespace.h"
@@ -118,23 +114,26 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
     uint32_t nextFrameNumber = 0;
     while (mFrameTracker->needsFrame(now, &currFrameNumber, &nextFrameNumber)) {
         if (mFrameTracker->empty()) {
+            FASTLED_DBG("empty frame tracker");
             // we are missing the first frame
             FrameRef frame = FrameRef::New(mPixelsPerFrame, false);
             if (!mStream->readFrame(frame.get())) {
                 if (!mStream->rewind()) {
-                    DBG("readFrame (1) failed");
+                    FASTLED_DBG("readFrame (1) failed");
                     return false;
                 }
                 if (!mStream->readFrame(frame.get())) {
-                    DBG("readFrame (2) failed");
+                    FASTLED_DBG("readFrame (2) failed");
                     return false;
                 }
             }
-            uint32_t timestamp = mFrameTracker->get_exact_timestamp_ms(0);
-            frame->setFrameNumberAndTime(0, timestamp);
-            mFrameTracker->push_front(frame, 0, timestamp);
+            uint32_t timestamp = mFrameTracker->get_exact_timestamp_ms(currFrameNumber);
+            frame->setFrameNumberAndTime(currFrameNumber, timestamp);
+            mFrameTracker->push_front(frame, currFrameNumber, timestamp);
             continue;
         }
+
+        DBG("has currFrameNumber: " << currFrameNumber << " nextFrameNumber: " << nextFrameNumber);
 
         uint32_t newest_frame_number = 0;
         bool has_newest = mFrameTracker->get_newest_frame_number(&newest_frame_number);

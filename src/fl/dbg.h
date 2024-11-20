@@ -7,6 +7,7 @@
 
 #ifndef FASTLED_HAS_DBG
 // FLDPRINT is a macro that can be defined to enable debug printing.
-#define FASTLED_DBG(X)((void)X)
+#define FASTLED_DBG(X)
+
 
 #endif
