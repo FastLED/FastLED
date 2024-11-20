@@ -32,7 +32,7 @@ using namespace fl;
 #define LED_PIN 2
 #define LED_TYPE WS2811
 #define COLOR_ORDER GRB
-#define FPS 1
+#define FPS 120
 #define CHIP_SELECT_PIN 5
 
 
@@ -54,6 +54,8 @@ ScreenMap screenMap;
 
 FileSystem filesystem;
 Video video;
+
+Slider videoSpeed("Video Speed", 1.0f, 0.1f, 2.0f, 0.1f);
 
 
 void setup() {
@@ -83,6 +85,7 @@ void setup() {
 }
 
 void loop() {
+    video.setScale(videoSpeed);
     uint32_t now = millis();
     video.draw(now, leds);
     FastLED.show();

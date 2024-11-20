@@ -114,7 +114,6 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
     uint32_t nextFrameNumber = 0;
     while (mFrameInterpolator->needsFrame(now, &currFrameNumber, &nextFrameNumber)) {
         if (mFrameInterpolator->empty()) {
-            FASTLED_DBG("empty frame tracker");
             // we are missing the first frame
             FrameRef frame = FrameRef::New(mPixelsPerFrame, false);
             if (!mStream->readFrame(frame.get())) {
@@ -132,8 +131,6 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t now) {
             mFrameInterpolator->push_front(frame, currFrameNumber, timestamp);
             continue;
         }
-
-        DBG("has currFrameNumber: " << currFrameNumber << " nextFrameNumber: " << nextFrameNumber);
 
         uint32_t newest_frame_number = 0;
         bool has_newest = mFrameInterpolator->get_newest_frame_number(&newest_frame_number);
