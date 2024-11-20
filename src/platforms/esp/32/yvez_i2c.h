@@ -24,7 +24,7 @@ public:
     }
  
     YvezI2C(const YvezI2C &) = delete;
-    YvezI2C(CRGB* leds, int clock_pin, int latch_pin, const Pins& pins = DefaultPins());  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these.
+    YvezI2C(const CRGB* leds, int clock_pin, int latch_pin, const Pins& pins = DefaultPins());  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these.
 
     ~YvezI2C();
     void showPixels();
