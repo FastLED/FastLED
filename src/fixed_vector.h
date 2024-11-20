@@ -28,6 +28,10 @@ public:
     // Constructor
     constexpr FixedVector() : current_size(0) {}
 
+    FixedVector(const T (&values)[N]) : current_size(N) {
+        assign(values, N);
+    }
+
     // Destructor
     ~FixedVector() {
         clear();
@@ -63,6 +67,13 @@ public:
             void* mem = &data[current_size];
             new (mem) T(value);
             ++current_size;
+        }
+    }
+
+    void assign(const T* values, size_t count) {
+        clear();
+        for (size_t i = 0; i < count; ++i) {
+            push_back(values[i]);
         }
     }
 
