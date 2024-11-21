@@ -18,7 +18,10 @@
 #define ESP_LOGE(tag, ...)
 #endif
 
-// esp32 dev
+// silence the warning above
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"  // silence warnings about the auto-generated iram1 section common on esp32.
+
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
 #include "third_party/yvez/I2SClocklessVirtualLedDriver/I2SClocklessVirtualLedDriver.h"
 #else
@@ -26,3 +29,5 @@
 #endif
 
 
+// pop the warning silence
+#pragma GCC diagnostic pop
