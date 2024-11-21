@@ -355,7 +355,7 @@ private:
         push_back(value);
         auto curr = end() - 1;
         while (curr != pos) {
-            swap(*curr, *(curr - 1));
+            swap(curr, (curr - 1));
             --curr;
         }
         return true;
@@ -413,7 +413,7 @@ public:
         while (first != last) {
             iterator mid = first + (last - first) / 2;
             
-            if (mLessThan(*mid, value)) {
+            if (mLess(*mid, value)) {
                 first = mid + 1;
             } else {
                 last = mid;
@@ -429,7 +429,7 @@ public:
     // Lookup operations
     iterator find(const T& value) {
         iterator pos = lower_bound(value);
-        if (pos != end() && !mLessThan(value, *pos) && !mLessThan(*pos, value)) {
+        if (pos != end() && !mLess(value, *pos) && !mLess(*pos, value)) {
             return pos;
         }
         return end();

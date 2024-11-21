@@ -300,3 +300,25 @@ TEST_CASE("Fixed vector with custom type") {
         CHECK(it->y == 4);
     }
 }
+
+
+TEST_CASE("SortedVector") {    
+    struct Less {
+        bool operator()(int a, int b) const { return a < b; }
+    };
+    
+    SortedHeapVector<int, Less> vec(5);
+
+    SUBCASE("Insert maintains order") {
+        vec.insert(3);
+        vec.insert(1);
+        vec.insert(4);
+        vec.insert(2);
+
+        CHECK(vec.size() == 4);
+        CHECK(vec[0] == 1);
+        CHECK(vec[1] == 2);
+        CHECK(vec[2] == 3);
+        CHECK(vec[3] == 4);
+    }
+}
