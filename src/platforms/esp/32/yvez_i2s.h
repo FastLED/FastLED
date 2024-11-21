@@ -34,6 +34,8 @@ class YvezI2S {
         return Pins({9,10,12,8,18,17});  // S3 only at the moment.
     }
 
+    // Safe to initialize in static memory because the driver will be instantiated
+    // on first call to showPixels().
     YvezI2S(CRGBArray6Strips* leds, int clock_pin, int latch_pin,
             const Pins &pins = DefaultPins());
 
@@ -48,6 +50,9 @@ class YvezI2S {
   private:
     scoped_ptr<YvezI2SImpl> mDriver;
     Pins mPins;
+    int mClockPin;
+    int mLatchPin;
+    CRGBArray6Strips* mLeds;
 };
 
 

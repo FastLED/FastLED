@@ -9,16 +9,17 @@
 #include <FastLED.h>
 #include "platforms/esp/32/yvez_i2s.h"
 
+#define CLOCK_PIN 22
+#define LATCH_PIN 23
+
 // Note that this isn't the final api and this is intentionally
 // overly strict. The final api will be more flexible.
 YvezI2S::CRGBArray6Strips leds;
-YvezI2S* i2s = nullptr;
+YvezI2S i2s(&leds, CLOCK_PIN, LATCH_PIN);
 
 void BlinkAndDraw(CRGB color, int times);
 
 void setup() {
-    // TODO: Implement
-    i2s = new YvezI2S(&leds, 22, 23);
 }
 
 void loop() {
@@ -29,7 +30,10 @@ void loop() {
 }
 
 
-/// Implementations
+
+
+
+/// Helper function definitions.
 
 void Fill(CRGB color) {
     CRGB* start = leds.get();
@@ -42,10 +46,10 @@ void Fill(CRGB color) {
 void BlinkAndDraw(CRGB color, int times) {
     for (int i = 0; i < times; i++) {
         Fill(color);
-        i2s->showPixels();
+        i2s.showPixels();
         delay(250);
         Fill(CRGB::Black);
-        i2s->showPixels();
+        i2s.showPixels();
         delay(250);
     }
 }
