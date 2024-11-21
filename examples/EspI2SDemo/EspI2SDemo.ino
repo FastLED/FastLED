@@ -16,7 +16,7 @@
 YvezI2S::CRGBArray6Strips leds;
 YvezI2S* i2s = nullptr;
 
-void Blink(CRGB color, int times);
+void BlinkAndDraw(CRGB color, int times);
 
 void setup() {
     // TODO: Implement
@@ -24,9 +24,9 @@ void setup() {
 }
 
 void loop() {
-    Blink(CRGB(4, 0, 0), 1);
-    Blink(CRGB(0, 4, 0), 2);
-    Blink(CRGB(0, 0, 4), 3);
+    BlinkAndDraw(CRGB(4, 0, 0), 1);
+    BlinkAndDraw(CRGB(0, 4, 0), 2);
+    BlinkAndDraw(CRGB(0, 0, 4), 3);
     delay(1000);
 }
 
@@ -41,7 +41,7 @@ void Fill(CRGB color) {
     }
 }
 
-void Blink(CRGB color, int times) {
+void BlinkAndDraw(CRGB color, int times) {
     for (int i = 0; i < times; i++) {
         Fill(color);
         i2s->showPixels();
