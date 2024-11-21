@@ -444,13 +444,14 @@ CRGB *operator+(const CRGBSet & pixels, int offset) {
 /// @tparam SIZE the number of LEDs to include in the array
 template<int SIZE>
 class CRGBArray : public CPixelView<CRGB> {
-    CRGB rawleds[SIZE];  ///< the LED data
+    CRGB rawleds[SIZE] = {0};  ///< the LED data
 
 public:
     CRGBArray() : CPixelView<CRGB>(rawleds, SIZE) {}
     using CPixelView::operator=;
     CRGB* get() { return &rawleds[0]; }
     const CRGB* get() const {  return &rawleds[0]; }
+    size_t size() const { return SIZE; }
 };
 
 /// @} PixelSet
