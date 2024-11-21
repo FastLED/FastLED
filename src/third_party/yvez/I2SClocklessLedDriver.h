@@ -18,6 +18,10 @@
 #define ESP_LOGE(tag, ...)
 #endif
 
+#ifndef FASTLED_YVEZ_INTERNAL
+#error "This file should only be included from platforms/esp/32/yvez_i2s.cpp"
+#endif
+
 // silence the warning above
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wattributes"  // silence warnings about the auto-generated iram1 section common on esp32.

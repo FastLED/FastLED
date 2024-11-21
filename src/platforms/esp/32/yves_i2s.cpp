@@ -1,7 +1,9 @@
 #if defined(ESP32) && defined(ENABLE_ESP32_I2S_YVEZ_DRIVER)
 
+
 #include "platforms/esp/32/yvez_i2s.h"
 
+#define FASTLED_YVEZ_INTERNAL
 #include "third_party/yvez/I2SClocklessLedDriver.h"
 #include "namespace.h"
 #include "warn.h"
