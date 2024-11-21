@@ -321,4 +321,21 @@ TEST_CASE("SortedVector") {
         CHECK(vec[2] == 3);
         CHECK(vec[3] == 4);
     }
+
+    SUBCASE("Erase removes element") {
+        vec.insert(3);
+        vec.insert(1);
+        vec.insert(4);
+        vec.insert(2);
+        
+        vec.erase(3);  // Remove the value 3
+        
+        CHECK(vec.size() == 3);
+        CHECK_FALSE(vec.has(3));  // Verify 3 is no longer present
+        
+        // Verify remaining elements are still in order
+        CHECK(vec[0] == 1);
+        CHECK(vec[1] == 2);
+        CHECK(vec[2] == 4);
+    }
 }
