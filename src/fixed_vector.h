@@ -462,6 +462,7 @@ public:
     bool empty() const { return mArray.empty(); }
     size_t capacity() const { return mArray.capacity(); }
     void clear() { mArray.clear(); }
+    bool full() const { return mArray.full(); }
 
     // Element access
     T& operator[](size_t index) { return mArray[index]; }
