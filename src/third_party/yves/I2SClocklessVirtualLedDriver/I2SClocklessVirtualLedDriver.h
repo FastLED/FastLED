@@ -1755,6 +1755,7 @@ Driver data (overall frames):\n     - nb of frames displayed:%d\n     - nb of fr
     }
 #endif
 
+
 #ifdef USE_FASTLED
     void initled(CRGB *leds, int *Pinsq, int clock_pin, int latch_pin)
     {

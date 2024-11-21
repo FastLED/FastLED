@@ -7,17 +7,17 @@
 #else
 
 #include <FastLED.h>
-#include "platforms/esp/32/yvez_i2s.h"
+#include "platforms/esp/32/yves_i2s.h"
 
 #define CLOCK_PIN 22
 #define LATCH_PIN 23
 
 // Note that this isn't the final api and this is intentionally
 // overly strict. The final api will be more flexible.
-YvezI2S::CRGBArray6Strips leds;  // 256 leds per strip, 6 strips. Mandatory, for now.
-YvezI2S::Pins pins({9,10,12,8,18,17});  // Esp32s3 pins from examples.
+YvesI2S::CRGBArray6Strips leds;  // 256 leds per strip, 6 strips. Mandatory, for now.
+YvesI2S::Pins pins({9,10,12,8,18,17});  // Esp32s3 pins from examples.
 
-YvezI2S i2s(&leds, CLOCK_PIN, LATCH_PIN, pins);
+YvesI2S i2s(&leds, CLOCK_PIN, LATCH_PIN, pins);
 
 void BlinkAndDraw(CRGB color, int times);
 

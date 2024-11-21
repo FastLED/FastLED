@@ -18,14 +18,14 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-class YvezI2SImpl;
+class YvesI2SImpl;
 
 // Note that this is a work in progress. The API will change and things right
 // now are overly strict and hard to compile on purpose as the driver is undergoing
 // development. I don't want to be dealing with memory errors because of all the
 // the raw pointers so types are strict and the API is strict. This will change
 // in the future.
-class YvezI2S {
+class YvesI2S {
   public:
     // Note that this is a WS2812 driver ONLY.
     typedef FixedVector<int, 6> Pins;
@@ -37,19 +37,19 @@ class YvezI2S {
 
     // Safe to initialize in static memory because the driver will be instantiated
     // on first call to showPixels().
-    YvezI2S(CRGBArray6Strips* leds, int clock_pin, int latch_pin,
+    YvesI2S(CRGBArray6Strips* leds, int clock_pin, int latch_pin,
             const Pins &pins = DefaultPins());
 
     void showPixels();
 
     // Disable copy constructor and assignment operator
-    YvezI2S() = delete;
-    YvezI2S(YvezI2S &&) = delete;
-    YvezI2S &operator=(const YvezI2S &) = delete;
-    ~YvezI2S();
+    YvesI2S() = delete;
+    YvesI2S(YvesI2S &&) = delete;
+    YvesI2S &operator=(const YvesI2S &) = delete;
+    ~YvesI2S();
 
   private:
-    scoped_ptr<YvezI2SImpl> mDriver;
+    scoped_ptr<YvesI2SImpl> mDriver;
     Pins mPins;
     int mClockPin;
     int mLatchPin;
