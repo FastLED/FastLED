@@ -8,10 +8,7 @@
 #include "singleton.h"
 #include "pixelset.h"
 
-
 #include "third_party/yvez/I2SClocklessLedDriver.h"
-
-
 
 #ifndef NUM_LEDS_PER_STRIP
 #warning "NUM_LEDS_PER_STRIP not defined, using default 256"
@@ -20,6 +17,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
+// Note that this is a work in progress. The API will change and things right
+// now are overly strict and hard to compile on purpose as the driver is undergoing
+// development. I don't want to be dealing with memory errors because of all the
+// the raw pointers so types are strict and the API is strict. This will change
+// in the future.
 class YvezI2S {
   public:
     typedef FixedVector<int, 6> Pins;
