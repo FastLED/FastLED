@@ -328,6 +328,7 @@ private:
         }
         back() = T();
         --mSize;
+        return true;
     }
 
     void erase(const T& value) {

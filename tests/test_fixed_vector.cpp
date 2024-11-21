@@ -338,4 +338,26 @@ TEST_CASE("SortedVector") {
         CHECK(vec[1] == 2);
         CHECK(vec[2] == 4);
     }
+
+    SUBCASE("Insert when full") {
+        // Fill the vector to capacity
+        vec.insert(1);
+        vec.insert(2);
+        vec.insert(3);
+        vec.insert(4);
+        vec.insert(5);  // Capacity is 5
+        
+        bool result = vec.insert(6);  // Try to insert into full vector
+        
+        CHECK_FALSE(result);  // Should return false
+        CHECK(vec.size() == 5);  // Size shouldn't change
+        CHECK(vec[4] == 5);  // Last element should still be 5
+    }
+
+    SUBCASE("Erase from empty") {
+        vec.erase(1);  // Try to erase from empty vector
+        
+        CHECK(vec.size() == 0);  // Should still be empty
+        CHECK(vec.empty());
+    }
 }
