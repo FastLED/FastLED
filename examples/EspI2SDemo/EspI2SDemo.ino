@@ -6,8 +6,6 @@
 // this is only for ESP32 and ESP32-S3
 #else
 
-#define NUM_LEDS_PER_STRIP 32
-
 #include <FastLED.h>
 #include "platforms/esp/32/yvez_i2s.h"
 
