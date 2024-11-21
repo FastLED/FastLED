@@ -20,7 +20,6 @@ void Blink(CRGB color, int times);
 
 void setup() {
     // TODO: Implement
-    memset(leds.get(), 0, sizeof(leds));
     i2s = new YvezI2S(&leds, 22, 23);
 }
 
