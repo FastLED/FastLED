@@ -14,8 +14,10 @@
 
 // Note that this isn't the final api and this is intentionally
 // overly strict. The final api will be more flexible.
-YvezI2S::CRGBArray6Strips leds;
-YvezI2S i2s(&leds, CLOCK_PIN, LATCH_PIN);
+YvezI2S::CRGBArray6Strips leds;  // 256 leds per strip, 6 strips. Mandatory.
+YvezI2S::Pins pins({9,10,12,8,18,17});  // Esp32s3 pins from examples.
+
+YvezI2S i2s(&leds, CLOCK_PIN, LATCH_PIN, pins);
 
 void BlinkAndDraw(CRGB color, int times);
 
