@@ -27,6 +27,7 @@ class YvezI2SImpl;
 // in the future.
 class YvezI2S {
   public:
+    // Note that this is a WS2812 driver ONLY.
     typedef FixedVector<int, 6> Pins;
     // CRGBArray6Strips data is a strict type to enforce correctness during driver bringup.
     typedef CRGBArray<NUM_LEDS_PER_STRIP * 6> CRGBArray6Strips;
