@@ -43,6 +43,7 @@ class YvezI2S {
     YvezI2S() = delete;
     YvezI2S(YvezI2S &&) = delete;
     YvezI2S &operator=(const YvezI2S &) = delete;
+    ~YvezI2S();
 
   private:
     scoped_ptr<YvezI2SImpl> mDriver;

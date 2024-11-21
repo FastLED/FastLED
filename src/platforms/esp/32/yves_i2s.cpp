@@ -17,6 +17,8 @@ YvezI2S::YvezI2S(CRGBArray6Strips* leds, int clock_pin, int latch_pin,
     mDriver->initled(leds->get(), mPins.data(), clock_pin, latch_pin);
 }
 
+YvezI2S::~YvezI2S() = default;
+
 void YvezI2S::showPixels() { mDriver->showPixels(); }
 
 FASTLED_NAMESPACE_END
