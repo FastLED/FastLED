@@ -21,11 +21,12 @@ class FileBuffer: public Referent {
   bool available() const;
   int32_t BytesLeft() const;
   int32_t FileSize() const;
+  bool seek(uint32_t pos);
 
   // Reads the next byte, else -1 is returned for end of buffer.
   int16_t read();
   size_t read(uint8_t* dst, size_t n);
-  size_t read(CRGB* dst, size_t n) { return read((uint8_t*)dst, n * 3); }
+  size_t read(CRGB* dst, size_t n);
 
  private:
   void ResetBuffer();

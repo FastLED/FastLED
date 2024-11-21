@@ -2,11 +2,13 @@
 #include "fx/detail/data_stream.h"
 #include "namespace.h"
 #include "fx/storage/filebuffer.h"
+#include "fl/dbg.h"
 
 #ifndef INT32_MAX
 #define INT32_MAX 0x7fffffff
 #endif
 
+#define DBG FASTLED_DBG
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -80,6 +82,17 @@ bool DataStream::readFrame(Frame* frame) {
         mFileBuffer->read(frame->rgb(), mbytesPerFrame);
     }
     return true;
+}
+
+bool DataStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
+    DBG("read frame at " << frameNumber);
+    if (mUsingByteStream) {
+        // ByteStream doesn't support seeking
+        return false;
+    } else {
+        mFileBuffer->seek(frameNumber * mbytesPerFrame);
+        return readFrame(frame);
+    }
 }
 
 int32_t DataStream::framesRemaining() const {

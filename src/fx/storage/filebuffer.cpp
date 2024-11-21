@@ -4,6 +4,10 @@
 
 #include "namespace.h"
 
+#include "fl/dbg.h"
+
+#define DBG FASTLED_DBG
+
 FASTLED_NAMESPACE_BEGIN
 
 FileBuffer::FileBuffer(FileHandleRef fh) {
@@ -40,6 +44,15 @@ int32_t FileBuffer::BytesLeft() const {
   return remaining_buffer + remaining_disk;
 }
 
+bool FileBuffer::seek(uint32_t pos) {
+  DBG("FileBuffer::seek: " << pos);
+  if (mFile->seek(pos)) {
+    ResetBuffer();
+    return true;
+  }
+  return false;
+}
+
 int32_t FileBuffer::FileSize() const {
   if (!available()) {
     return -1;
@@ -67,6 +80,10 @@ size_t FileBuffer::read(uint8_t* dst, size_t n) {
     dst[bytes_read++] = static_cast<uint8_t>(next_byte);
   }
   return bytes_read;
+}
+
+size_t FileBuffer::read(CRGB* dst, size_t n) {
+  return read((uint8_t*)dst, n * 3);
 }
 
 void FileBuffer::ResetBuffer() {

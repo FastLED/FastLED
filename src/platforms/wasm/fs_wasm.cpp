@@ -106,7 +106,13 @@ class WasmFileHandle : public FileHandle {
     size_t pos() const override { return mPos; }
     const char *path() const override { return mPath.c_str(); }
 
-    void seek(size_t pos) override { mPos = MIN(pos, mData->capacity()); }
+    bool seek(size_t pos) override {
+        if (pos > mData->capacity()) {
+            return false;
+        }
+        mPos = pos;
+        return true;
+    }
 
     void close() override {
         // No need to do anything for in-memory files

@@ -49,7 +49,7 @@ class FileHandle: public Referent {
     virtual size_t read(uint8_t *dst, size_t bytesToRead) = 0;
     virtual size_t pos() const = 0;
     virtual const char* path() const = 0;
-    virtual void seek(size_t pos) = 0;
+    virtual bool seek(size_t pos) = 0;
     virtual void close() = 0;
 };
 

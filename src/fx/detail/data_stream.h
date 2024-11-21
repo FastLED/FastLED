@@ -36,6 +36,7 @@ class DataStream: public Referent {
   size_t readBytes(uint8_t* dst, size_t len);
 
   bool readFrame(Frame* frame);
+  bool readFrameAt(uint32_t frameNumber, Frame* frame);
   int32_t framesRemaining() const;
   int32_t framesDisplayed() const;
   bool available() const;

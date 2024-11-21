@@ -55,7 +55,7 @@ public:
     size_t read(uint8_t *dst, size_t bytesToRead) override { return _file.read(dst, bytesToRead); }
     size_t pos() const override { return _file.position(); }
     const char* path() const override { return _path; }
-    void seek(size_t pos) override { _file.seek(pos); }
+    bool seek(size_t pos) override { return _file.seek(pos); }
     void close() override { _file.close(); }
 };
 #endif

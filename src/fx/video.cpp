@@ -175,15 +175,16 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
             recycled_frame = FrameRef::New(mPixelsPerFrame, false);
         }
         if (!mStream->readFrame(recycled_frame.get())) {
-            DBG("readFrame failed, rewinding");
-            if (!mStream->rewind()) {
-                DBG("readFrame (1) failed");
+            if (!forward) {
+                // nothing more we can do, we can't go negative.
                 return false;
             }
-            if (!mStream->readFrame(recycled_frame.get())) {
-                DBG("readFrame (2) failed");
+            if (mStream->atEnd()) {
+                DBG("Can't go rewind until the TimeScale is migrated to VideoImpl");
                 return false;
             }
+            DBG("We failed for some other reason");
+            return false;
         }
         uint32_t timestamp = mFrameInterpolator->get_exact_timestamp_ms(frame_to_fetch);
         recycled_frame->setFrameNumberAndTime(frame_to_fetch, timestamp);
