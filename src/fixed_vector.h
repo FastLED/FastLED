@@ -5,6 +5,7 @@
 
 #include "inplacenew.h"
 #include "namespace.h"
+#include "scoped_ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -340,6 +341,10 @@ private:
         T temp = *a;
         *a = *b;
         *b = temp;
+    }
+
+    bool full() const {
+        return mSize == mCapacity;
     }
 
     bool insert(iterator pos, const T& value) {
