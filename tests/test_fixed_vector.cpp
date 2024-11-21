@@ -307,9 +307,10 @@ TEST_CASE("SortedVector") {
         bool operator()(int a, int b) const { return a < b; }
     };
     
-    SortedHeapVector<int, Less> vec(5);
+
 
     SUBCASE("Insert maintains order") {
+        SortedHeapVector<int, Less> vec(5);
         vec.insert(3);
         vec.insert(1);
         vec.insert(4);
@@ -323,6 +324,7 @@ TEST_CASE("SortedVector") {
     }
 
     SUBCASE("Erase removes element") {
+        SortedHeapVector<int, Less> vec(5);
         vec.insert(3);
         vec.insert(1);
         vec.insert(4);
@@ -340,6 +342,7 @@ TEST_CASE("SortedVector") {
     }
 
     SUBCASE("Insert when full") {
+        SortedHeapVector<int, Less> vec(5);
         // Fill the vector to capacity
         vec.insert(1);
         vec.insert(2);
@@ -355,6 +358,7 @@ TEST_CASE("SortedVector") {
     }
 
     SUBCASE("Erase from empty") {
+        SortedHeapVector<int, Less> vec(5);
         vec.erase(1);  // Try to erase from empty vector
         
         CHECK(vec.size() == 0);  // Should still be empty
