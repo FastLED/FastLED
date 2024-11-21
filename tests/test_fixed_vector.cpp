@@ -359,8 +359,18 @@ TEST_CASE("SortedVector") {
 
     SUBCASE("Erase from empty") {
         SortedHeapVector<int, Less> vec(5);
-        vec.erase(1);  // Try to erase from empty vector
-        
+        bool ok = vec.erase(1);  // Try to erase from empty vector
+        CHECK(!ok);  // Should return false
+        CHECK(vec.size() == 0);  // Should still be empty
+        CHECK(vec.empty());
+
+        ok = vec.erase(vec.end());
+        CHECK(!ok);  // Should return false
+        CHECK(vec.size() == 0);  // Should still be empty
+        CHECK(vec.empty());
+
+        ok = vec.erase(vec.begin());
+        CHECK(!ok);  // Should return false
         CHECK(vec.size() == 0);  // Should still be empty
         CHECK(vec.empty());
     }

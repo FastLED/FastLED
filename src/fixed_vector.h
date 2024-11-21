@@ -445,11 +445,16 @@ public:
     }
 
     // Removal operations
-    void erase(const T& value) {
+    bool erase(const T& value) {
         iterator it = find(value);
         if (it != end()) {
-            mArray.erase(it);
+            return mArray.erase(it);
         }
+        return false;
+    }
+
+    bool erase(iterator pos) {
+        return mArray.erase(pos);
     }
 
     // Basic container operations
