@@ -12,7 +12,7 @@ class YvezI2SImpl : public I2SClocklessVirtualLedDriver {};
 
 
 YvezI2S::YvezI2S(CRGBArray6Strips* leds, int clock_pin, int latch_pin,
-        const Pins &pins = DefaultPins()) : mPins(pins){
+        const Pins &pins) : mPins(pins){
     mDriver->initled(leds->get(), mPins.data(), clock_pin, latch_pin);
 }
 
