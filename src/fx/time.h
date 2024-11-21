@@ -34,9 +34,9 @@ class TimeScale: public TimeFunction {
     void reset(uint32_t realTimeNow) override;
   private:
     void applyExact(uint32_t timeNow);
-    uint32_t mRealTime = 0;
     uint32_t mLastRealTime = 0;
     uint32_t mStartTime = 0;
+    uint32_t mRelativeTime = 0;
     float mTimeScale = 1.0f;
 };
 

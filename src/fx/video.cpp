@@ -77,7 +77,7 @@ void VideoImpl::end() {
 bool VideoImpl::full() const { return mFrameInterpolator->getFrames()->full(); }
 
 bool VideoImpl::draw(uint32_t now, Frame *frame) {
-    DBG("draw");
+    //DBG("draw with now = " << now);
     if (!mStream) {
         DBG("no stream");
         return false;
@@ -92,6 +92,7 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
 }
 
 bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
+    //DBG("draw with now = " << now);
     if (!mStream) {
         DBG("no stream");
         return false;
@@ -118,69 +119,83 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
     // then sends a really old timestamp, we don't update the buffer too much.
     uint32_t currFrameNumber = 0;
     uint32_t nextFrameNumber = 0;
-    if (mFrameInterpolator->needsFrame(now, &currFrameNumber, &nextFrameNumber)) {
-        if (mFrameInterpolator->capacity() == 0) {
-            DBG("capacity == 0");
-            return false;
-        }
+    bool needs_frame = mFrameInterpolator->needsFrame(now, &currFrameNumber, &nextFrameNumber);
+    //DBG("needs_frame: " << needs_frame);
+    //DBG("currFrameNumber: " << currFrameNumber << " nextFrameNumber: " << nextFrameNumber);
+    //DBG("has curr frame: " << mFrameInterpolator->has(currFrameNumber));
+    //DBG("has next frame: " << mFrameInterpolator->has(nextFrameNumber));
+    if (!needs_frame) {
+        return true;
+    }
+    bool has_curr_frame = mFrameInterpolator->has(currFrameNumber);
+    bool has_next_frame = mFrameInterpolator->has(nextFrameNumber);
+    if (has_curr_frame && has_next_frame) {
+        return true;
+    }
+    if (mFrameInterpolator->capacity() == 0) {
+        DBG("capacity == 0");
+        return false;
+    }
 
-        FixedVector<uint32_t, 2> frame_numbers;
-        if (!mFrameInterpolator->has(currFrameNumber)) {
-            frame_numbers.push_back(currFrameNumber);
-        }
-        if (mFrameInterpolator->capacity() > 1 && !mFrameInterpolator->has(nextFrameNumber)) {
-            frame_numbers.push_back(nextFrameNumber);
-        }
+    FixedVector<uint32_t, 2> frame_numbers;
+    if (!mFrameInterpolator->has(currFrameNumber)) {
+        frame_numbers.push_back(currFrameNumber);
+    }
+    if (mFrameInterpolator->capacity() > 1 && !mFrameInterpolator->has(nextFrameNumber)) {
+        frame_numbers.push_back(nextFrameNumber);
+    }
 
-        for (size_t i = 0; i < frame_numbers.size(); ++i) {
-            FrameRef recycled_frame;
-            if (mFrameInterpolator->full()) {
-                uint32_t frame_to_erase = 0;
-                bool ok = false;
-                if (forward) {
-                    ok = mFrameInterpolator->get_oldest_frame_number(&frame_to_erase);
-                    if (!ok) {
-                        DBG("get_oldest_frame_number failed");
-                        return false;
-                    }
-                } else {
-                    ok = mFrameInterpolator->get_newest_frame_number(&frame_to_erase);
-                    if (!ok) {
-                        DBG("get_newest_frame_number failed");
-                        return false;
-                    }
+    for (size_t i = 0; i < frame_numbers.size(); ++i) {
+        FrameRef recycled_frame;
+        if (mFrameInterpolator->full()) {
+            uint32_t frame_to_erase = 0;
+            bool ok = false;
+            if (forward) {
+                ok = mFrameInterpolator->get_oldest_frame_number(&frame_to_erase);
+                if (!ok) {
+                    DBG("get_oldest_frame_number failed");
+                    return false;
                 }
-                recycled_frame = mFrameInterpolator->erase(frame_to_erase);
-                if (!recycled_frame) {
-                    DBG("erase failed for frame: " << frame_to_erase);
+            } else {
+                ok = mFrameInterpolator->get_newest_frame_number(&frame_to_erase);
+                if (!ok) {
+                    DBG("get_newest_frame_number failed");
                     return false;
                 }
             }
-            uint32_t frame_to_fetch = frame_numbers[i];
+            recycled_frame = mFrameInterpolator->erase(frame_to_erase);
             if (!recycled_frame) {
-                // Happens when we are not full and we need to allocate a new frame.
-                recycled_frame = FrameRef::New(mPixelsPerFrame, false);
-            }
-            if (!mStream->readFrame(recycled_frame.get())) {
-                if (!mStream->rewind()) {
-                    DBG("readFrame (1) failed");
-                    return false;
-                }
-                if (!mStream->readFrame(recycled_frame.get())) {
-                    DBG("readFrame (2) failed");
-                    return false;
-                }
-            }
-            uint32_t timestamp = mFrameInterpolator->get_exact_timestamp_ms(frame_to_fetch);
-            recycled_frame->setFrameNumberAndTime(frame_to_fetch, timestamp);
-            bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
-            if (!ok) {
-                DBG("insert failed");
+                DBG("erase failed for frame: " << frame_to_erase);
                 return false;
             }
         }
-
+        uint32_t frame_to_fetch = frame_numbers[i];
+        if (!recycled_frame) {
+            // Happens when we are not full and we need to allocate a new frame.
+            recycled_frame = FrameRef::New(mPixelsPerFrame, false);
+        }
+        if (!mStream->readFrame(recycled_frame.get())) {
+            DBG("readFrame failed, rewinding");
+            if (!mStream->rewind()) {
+                DBG("readFrame (1) failed");
+                return false;
+            }
+            if (!mStream->readFrame(recycled_frame.get())) {
+                DBG("readFrame (2) failed");
+                return false;
+            }
+        }
+        uint32_t timestamp = mFrameInterpolator->get_exact_timestamp_ms(frame_to_fetch);
+        recycled_frame->setFrameNumberAndTime(frame_to_fetch, timestamp);
+        DBG("inserting frame: " << frame_to_fetch);
+        bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
+        if (!ok) {
+            DBG("insert failed");
+            return false;
+        }
     }
+
+
     return true;
 }
 
