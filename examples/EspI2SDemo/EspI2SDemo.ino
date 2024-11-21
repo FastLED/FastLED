@@ -26,7 +26,6 @@ void Fill(CRGB color) {
     size_t numLeds = leds.size();
     for (size_t i = 0; i < numLeds; i++) {
         start[i] = color;
-        start[i] = CRGB::Black;
     }
 }
 
