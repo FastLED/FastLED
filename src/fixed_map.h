@@ -314,6 +314,11 @@ public:
         return it;
     }
 
+    Pair& front() { return data.front(); }
+    const Pair& front() const { return data.front(); }
+    Pair& back() { return data.back(); }
+    const Pair& back() const { return data.back(); }
+
 
 };
 
