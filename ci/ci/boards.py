@@ -65,6 +65,10 @@ class Board:
         json_str = json.dumps(self.to_dictionary(), indent=4, sort_keys=True)
         return json_str
 
+    def __hash__(self) -> int:
+        data_str = self.__repr__()
+        return hash(data_str)
+
 
 ESP32DEV = Board(
     board_name="esp32dev",

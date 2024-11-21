@@ -12,6 +12,11 @@
 #define USE_FASTLED 1
 #endif
 
+// Hack to get lib to work in non debug mode.
+#ifdef ESP_LOGE
+#undef ESP_LOGE
+#define ESP_LOGE(tag, ...)
+#endif
 
 // esp32 dev
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
