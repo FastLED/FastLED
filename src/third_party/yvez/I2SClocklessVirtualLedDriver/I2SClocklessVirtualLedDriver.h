@@ -10,8 +10,12 @@
 #include "freertos/semphr.h"
 #include <stdio.h>  // ok include
 
-// #include "esp32-hal-log.h"
-#include <driver/periph_ctrl.h>
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
+#include "esp_private/periph_ctrl.h"
+#else
+#include "driver/periph_ctrl.h"
+#endif
+
 #include <soc/gdma_channel.h>
 //#include "esp_private/periph_ctrl.h"
 //#include "gdma_priv.h"
