@@ -228,4 +228,93 @@ private:
     VectorType data;
 };
 
+template <typename Key, typename Value, typename LessThan>
+class SortedHeapMap {
+private:
+    struct Pair {
+        Key first;
+        Value second;
+        
+        Pair(const Key& k = Key(), const Value& v = Value()) 
+            : first(k), second(v) {}
+    };
+
+    struct PairLess {
+        LessThan less;
+        bool operator()(const Pair& a, const Pair& b) const {
+            return less(a.first, b.first);
+        }
+    };
+
+    SortedHeapVector<Pair, PairLess> data;
+
+public:
+
+    typedef typename SortedHeapVector<Pair, PairLess>::iterator iterator;
+    typedef typename SortedHeapVector<Pair, PairLess>::const_iterator const_iterator;
+
+    SortedHeapMap(size_t capacity, LessThan less = LessThan()) 
+        : data(capacity, PairLess{less}) {}
+
+    bool insert(const Key& key, const Value& value) {
+        return data.insert(Pair(key, value));
+    }
+
+    bool has(const Key& key) const {
+        return data.has(Pair(key));
+    }
+
+    size_t size() const { return data.size(); }
+    bool empty() const { return data.empty(); }
+    bool full() const { return data.full(); }
+    size_t capacity() const { return data.capacity(); }
+    void clear() { data.clear(); }
+    
+    // begin, dend
+    iterator begin() { return data.begin(); }
+    iterator end() { return data.end(); }
+    const_iterator begin() const { return data.begin(); }
+    const_iterator end() const { return data.end(); }
+
+    iterator find(const Key& key) {
+        return data.find(Pair(key));
+    }
+    const_iterator find(const Key& key) const {
+        return data.find(Pair(key));
+    }
+
+    bool erase(const Key& key) {
+        return data.erase(Pair(key));
+    }
+    bool erase(iterator it) {
+        return data.erase(it);
+    }
+
+    iterator lower_bound(const Key& key) {
+        return data.lower_bound(Pair(key));
+    }
+
+    const_iterator lower_bound(const Key& key) const {
+        return data.lower_bound(Pair(key));
+    }
+
+    iterator upper_bound(const Key& key) {
+        iterator it = lower_bound(key);
+        if (it != end() && it->first == key) {
+            ++it;
+        }
+        return it;
+    }
+
+    const_iterator upper_bound(const Key& key) const {
+        const_iterator it = lower_bound(key);
+        if (it != end() && it->first == key) {
+            ++it;
+        }
+        return it;
+    }
+
+
+};
+
 FASTLED_NAMESPACE_END
