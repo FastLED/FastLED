@@ -13,6 +13,8 @@
 #define nb_components 3
 #endif
 
+namespace fl {
+
 struct res {
     bool result;
     CRGB color;
@@ -101,3 +103,5 @@ public:
 };
 
 hardwareSprite sprites[NBSPRITE];
+
+} // namespace fl

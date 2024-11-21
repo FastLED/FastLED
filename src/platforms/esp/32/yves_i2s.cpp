@@ -9,7 +9,8 @@ FASTLED_NAMESPACE_BEGIN
 
 static_assert(NUM_LEDS_PER_STRIP == 256, "Only 256 supported");
 
-class YvezI2SImpl : public I2SClocklessVirtualLedDriver {};
+// Use an empty subclass to avoid having to include the implementation in the header.
+class YvezI2SImpl : public fl::I2SClocklessVirtualLedDriver {};
 
 
 YvezI2S::YvezI2S(CRGBArray6Strips* leds, int clock_pin, int latch_pin,

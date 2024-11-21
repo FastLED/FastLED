@@ -1,5 +1,7 @@
 #pragma once
 
+namespace fl {
+
 //#include "_pixelslib.h"
 #define _NB_FRAME 2
 
@@ -88,3 +90,4 @@ void setCopyFunction(bool copy)
 
 };
 
+} // namespace fl

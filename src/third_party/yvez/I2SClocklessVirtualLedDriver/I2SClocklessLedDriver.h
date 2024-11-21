@@ -153,6 +153,8 @@
 #endif
 //#define FULL_DMA_BUFFER
 
+namespace fl {
+
 typedef union
 {
     uint8_t bytes[16];
@@ -1632,6 +1634,7 @@ static void IRAM_ATTR loadAndTranspose(I2SClocklessLedDriver *driver)//uint8_t *
         transpose16x1_noinline2(secondPixel[3].bytes, (uint16_t *)buffer + 3 * 3 * 8);
 }
 
+}  // namespace I2S
 
 #endif
 

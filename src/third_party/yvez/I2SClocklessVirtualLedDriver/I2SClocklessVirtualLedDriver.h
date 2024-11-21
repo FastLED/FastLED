@@ -31,6 +31,8 @@
 #include "esp_rom_gpio.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
+
+namespace fl {
 typedef struct gdma_pair_t gdma_pair_t;
 
 
@@ -80,6 +82,8 @@ clock_speed clock_1123KHZ={4,20,9};
 clock_speed clock_1111KHZ={4,2,1};
 clock_speed clock_1000KHZ={5,1,0};
 clock_speed clock_800KHZ={6,4,1};
+
+} // namespace fl
 
 
 
@@ -302,6 +306,8 @@ clock_speed clock_800KHZ={6,4,1};
 #define _MAX_VALUE 5000
 
 #include "framebuffer.h"
+
+namespace fl {
 
 uint16_t __default__mapping(uint16_t pos)
 {
@@ -3822,3 +3828,5 @@ static void showPixelsTask(void *pvParameters)
     #endif
 
 }
+
+} // namespace I2S
