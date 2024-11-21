@@ -34,7 +34,6 @@ class VideoImpl : public Referent {
     // internal use
     bool draw(uint32_t now, Frame *frame);
     bool full() const;
-    FrameRef popOldest();
 
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
@@ -77,14 +76,10 @@ void VideoImpl::end() {
 
 bool VideoImpl::full() const { return mFrameInterpolator->getFrames()->full(); }
 
-FrameRef VideoImpl::popOldest() {
-    FrameRef frame;
-    mFrameInterpolator->pop_back(&frame);
-    return frame;
-}
-
 bool VideoImpl::draw(uint32_t now, Frame *frame) {
+    DBG("draw");
     if (!mStream) {
+        DBG("no stream");
         return false;
     }
     updateBufferIfNecessary(mPrevNow, now);
@@ -98,11 +93,13 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
 
 bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     if (!mStream) {
+        DBG("no stream");
         return false;
     }
     bool ok = updateBufferIfNecessary(mPrevNow, now);
     mPrevNow = now;
     if (!ok) {
+        DBG("updateBufferIfNecessary failed");
         // paint black
         memset(leds, 0, mPixelsPerFrame * sizeof(CRGB));
         if (alpha) {
@@ -115,64 +112,74 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
 }
 
 bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
+
     const bool forward = now >= prev;
     // At most, update one frame. That way if the user forgets to call draw and
     // then sends a really old timestamp, we don't update the buffer too much.
     uint32_t currFrameNumber = 0;
     uint32_t nextFrameNumber = 0;
-    while (mFrameInterpolator->needsFrame(now, &currFrameNumber, &nextFrameNumber)) {
-        if (mFrameInterpolator->empty()) {
-            // we are missing the first frame
-            FrameRef frame = FrameRef::New(mPixelsPerFrame, false);
-            if (!mStream->readFrame(frame.get())) {
+    if (mFrameInterpolator->needsFrame(now, &currFrameNumber, &nextFrameNumber)) {
+        if (mFrameInterpolator->capacity() == 0) {
+            DBG("capacity == 0");
+            return false;
+        }
+
+        FixedVector<uint32_t, 2> frame_numbers;
+        if (!mFrameInterpolator->has(currFrameNumber)) {
+            frame_numbers.push_back(currFrameNumber);
+        }
+        if (mFrameInterpolator->capacity() > 1 && !mFrameInterpolator->has(nextFrameNumber)) {
+            frame_numbers.push_back(nextFrameNumber);
+        }
+
+        for (size_t i = 0; i < frame_numbers.size(); ++i) {
+            FrameRef recycled_frame;
+            if (mFrameInterpolator->full()) {
+                uint32_t frame_to_erase = 0;
+                bool ok = false;
+                if (forward) {
+                    ok = mFrameInterpolator->get_oldest_frame_number(&frame_to_erase);
+                    if (!ok) {
+                        DBG("get_oldest_frame_number failed");
+                        return false;
+                    }
+                } else {
+                    ok = mFrameInterpolator->get_newest_frame_number(&frame_to_erase);
+                    if (!ok) {
+                        DBG("get_newest_frame_number failed");
+                        return false;
+                    }
+                }
+                recycled_frame = mFrameInterpolator->erase(frame_to_erase);
+                if (!recycled_frame) {
+                    DBG("erase failed for frame: " << frame_to_erase);
+                    return false;
+                }
+            }
+            uint32_t frame_to_fetch = frame_numbers[i];
+            if (!recycled_frame) {
+                // Happens when we are not full and we need to allocate a new frame.
+                recycled_frame = FrameRef::New(mPixelsPerFrame, false);
+            }
+            if (!mStream->readFrame(recycled_frame.get())) {
                 if (!mStream->rewind()) {
-                    FASTLED_DBG("readFrame (1) failed");
+                    DBG("readFrame (1) failed");
                     return false;
                 }
-                if (!mStream->readFrame(frame.get())) {
-                    FASTLED_DBG("readFrame (2) failed");
+                if (!mStream->readFrame(recycled_frame.get())) {
+                    DBG("readFrame (2) failed");
                     return false;
                 }
             }
-            uint32_t timestamp = mFrameInterpolator->get_exact_timestamp_ms(currFrameNumber);
-            frame->setFrameNumberAndTime(currFrameNumber, timestamp);
-            mFrameInterpolator->push_front(frame, currFrameNumber, timestamp);
-            continue;
-        }
-
-        uint32_t newest_frame_number = 0;
-        bool has_newest = mFrameInterpolator->get_newest_frame_number(&newest_frame_number);
-        if (!has_newest) {
-            DBG("get_newest_frame_number failed");
-            return false;
-        }
-
-        FrameRef frame;
-        if (full()) {
-            frame = popOldest();
-        } else {
-            // We will continue allocating until the buffer fills up with frames, then we start
-            // recycling.
-            frame = FrameRef::New(mPixelsPerFrame, false);
-        }
-        if (!mStream->readFrame(frame.get())) {
-            if (!mStream->rewind()) {
-                DBG("readFrame (3) failed");
-                return false;
-            }
-            if (!mStream->readFrame(frame.get())) {
-                DBG("readFrame (4) failed");
+            uint32_t timestamp = mFrameInterpolator->get_exact_timestamp_ms(frame_to_fetch);
+            recycled_frame->setFrameNumberAndTime(frame_to_fetch, timestamp);
+            bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
+            if (!ok) {
+                DBG("insert failed");
                 return false;
             }
         }
-        uint32_t next_frame = newest_frame_number + 1;
-        uint32_t next_timestamp = mFrameInterpolator->get_exact_timestamp_ms(next_frame);
-        frame->setFrameNumberAndTime(next_frame, next_timestamp);
-        bool ok = mFrameInterpolator->push_front(frame, next_frame, next_timestamp);
-        if (!ok) {
-            DBG("pushNewest failed");
-            return false;
-        }
+
     }
     return true;
 }

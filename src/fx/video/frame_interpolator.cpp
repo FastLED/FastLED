@@ -4,16 +4,9 @@
 #include "math_macros.h"
 #include "namespace.h"
 
-#ifdef FASTLED_DEBUG
-#define DBG(X)(X)
-#else
-#define DBG(X)
-#endif
+#include "fl/dbg.h"
 
-#ifdef FASTLED_DEBUG
-#include <iostream>  // ok include
-using namespace std;
-#endif
+#define DBG FASTLED_DBG
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -23,6 +16,7 @@ FrameInterpolator::FrameInterpolator(size_t nframes, float fps)
 }
 
 bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
+    // DBG("FrameInterpolator::draw");
     bool ok = draw(now, dst->rgb(), dst->alpha());
     if (ok) {
         // dst->setTimestamp(now);
@@ -33,6 +27,7 @@ bool FrameInterpolator::draw(uint32_t now, Frame *dst) {
 bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
     uint32_t frameNumber, nextFrameNumber;
     uint8_t amountOfNextFrame;
+    // DBG("now: " << now);
     mFrameTracker.get_interval_frames(now, &frameNumber, &nextFrameNumber, &amountOfNextFrame);
     if (!has(frameNumber)) {
         DBG("FrameInterpolator::draw: !has(frameNumber)");
@@ -55,9 +50,8 @@ bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
     Frame* frame1 = get(frameNumber).get();
     Frame* frame2 = get(nextFrameNumber).get();
     Frame::interpolate(*frame1, *frame2, amountOfNextFrame, leds, alpha);
+    // DBG("Interpolated frame " << frameNumber << " and " << nextFrameNumber);
     return true;
 }
-
-
 
 FASTLED_NAMESPACE_END
