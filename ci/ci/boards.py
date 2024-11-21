@@ -94,7 +94,8 @@ ESP32_C2_DEVKITM_1 = Board(
 )
 
 ESP32_C3_DEVKITM_1 = Board(
-    board_name="esp32-c3-devkitm-1",
+    board_name="esp32c3",
+    real_board_name="esp32-c3-devkitm-1",
     platform=ESP32_IDF_5_1_PIOARDUINO,
 )
 
