@@ -9,11 +9,12 @@
 #include "pixelset.h"
 #include "scoped_ptr.h"
 
-
-#ifndef NUM_LEDS_PER_STRIP
-#warning "NUM_LEDS_PER_STRIP not defined, using default 256"
+#if defined(NUM_LEDS_PER_STRIP)
+#error "you can't set this yourself, yet."
+#else
 #define NUM_LEDS_PER_STRIP 256
 #endif
+
 
 FASTLED_NAMESPACE_BEGIN
 
