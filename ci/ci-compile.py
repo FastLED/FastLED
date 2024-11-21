@@ -41,7 +41,7 @@ DEFAULT_BOARDS_NAMES = [
     "attiny85",
     "ATtiny1616",
     "esp32-c6-devkitc-1",
-    "esp32-s3-devkitc-1",
+    "esp32s3",
     "yun",
     "digix",
     "teensy30",
