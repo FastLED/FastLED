@@ -236,6 +236,8 @@ template <size_t SIZE = 64> class StrN {
         return c_str()[index];
     }
 
+    bool empty() const { return mLength == 0; }
+
     // Append method
     void append(const char *str) { write(str, strlen(str)); }
     void append(const char *str, size_t len) { write(str, len); }

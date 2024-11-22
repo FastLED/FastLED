@@ -9,6 +9,8 @@
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
 
+using fl::Str;
+
 TEST_CASE("ScreenMap basic functionality") {
     // Create a screen map for 3 LEDs
     ScreenMap map(3);

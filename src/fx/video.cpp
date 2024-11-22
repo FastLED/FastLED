@@ -5,6 +5,9 @@
 #include "fx/frame.h"
 #include "fx/video/frame_interpolator.h"
 #include "fl/dbg.h"
+#include "fl/str.h"
+#include "warn.h"
+
 
 #define DBG FASTLED_DBG
 
@@ -242,6 +245,7 @@ Video &Video::operator=(const Video &) = default;
 
 void Video::begin(FileHandleRef h, size_t pixelsPerFrame, float fps,
                   size_t frameHistoryCount) {
+    mError.clear();
     mImpl.reset();
     mImpl = VideoImplRef::New(pixelsPerFrame, fps, frameHistoryCount);
     mImpl->begin(h);
@@ -251,6 +255,7 @@ void Video::begin(FileHandleRef h, size_t pixelsPerFrame, float fps,
 
 void Video::beginStream(ByteStreamRef bs, size_t pixelsPerFrame, float fps,
                         size_t frameHistoryCount) {
+    mError.clear();
     mImpl.reset();
     mImpl = VideoImplRef::New(pixelsPerFrame, fps, frameHistoryCount);
     mImpl->beginStream(bs);
@@ -259,6 +264,7 @@ void Video::beginStream(ByteStreamRef bs, size_t pixelsPerFrame, float fps,
 bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
 
     if (!mImpl) {
+        FASTLED_WARN_IF(!mError.empty(), mError.c_str());
         return false;
     }
     bool ok = mImpl->draw(now, leds, alpha);
