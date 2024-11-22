@@ -75,6 +75,29 @@
             margin: 0;
             padding: 10px;
         }
+
+        .toast-notification {
+            position: fixed;
+            top: 33vh;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(50, 50, 50, 0.9);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .toast-notification-show {
+            opacity: 1;
+            transition: opacity 0.1s ease-in;
+        }
+
+        .toast-notification-hide {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+        }
     </style>
 </head>
 
@@ -163,11 +186,32 @@
     });
 
     document.getElementById('output').addEventListener('click', function() {
-        // Get the text content of the output element
+        if (document.querySelector('.toast-notification')) {
+            return; // We are already showing a toast notification
+        }
+
         const text = this.textContent;
         
-        // Copy to clipboard using the modern clipboard API
-        navigator.clipboard.writeText(text).catch(err => {
+        navigator.clipboard.writeText(text).then(() => {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.textContent = 'Copied to clipboard';
+            document.body.appendChild(toast);
+            
+            // Force reflow
+            void toast.offsetHeight;
+            
+            toast.classList.add('toast-notification-show');
+            
+            setTimeout(() => {
+                toast.classList.add('toast-notification-hide');
+                toast.addEventListener('transitionend', () => {
+                    if (toast.parentElement) {
+                        document.body.removeChild(toast);
+                    }
+                }, {once: true});
+            }, 2000);
+        }).catch(err => {
             console.error('Failed to copy text: ', err);
         });
     });
