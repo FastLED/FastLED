@@ -1,9 +1,13 @@
 #pragma once
 
+#include <vector>  // ok include
+
 #include "env.h"
 #include "framebuffer.h"
 
 namespace fl {
+
+
 
 class I2SClocklessVirtualLedDriver {
 #ifndef CONFIG_IDF_TARGET_ESP32S3
@@ -18,6 +22,7 @@ class I2SClocklessVirtualLedDriver {
                                              PERIPH_I2S1_MODULE};
 #endif
   public:
+    static const uint16_t mLedsPerStrip = NUM_LEDS_PER_STRIP;
     Lines firstPixel[nb_components];
 #ifndef CONFIG_IDF_TARGET_ESP32S3
     i2s_dev_t *i2s;
@@ -43,6 +48,8 @@ class I2SClocklessVirtualLedDriver {
     // int linewidth;
     float _gammar, _gammab, _gammag, _gammaw;
     OffsetDisplay _offsetDisplay, _defaultOffsetDisplay;
+    // unused, buth should replace any possible uses of NUM_LEDS_PER_STRIP.
+
 
     volatile xSemaphoreHandle I2SClocklessVirtualLedDriver_sem = NULL;
     volatile xSemaphoreHandle I2SClocklessVirtualLedDriver_semSync = NULL;
@@ -59,7 +66,7 @@ class I2SClocklessVirtualLedDriver {
     float scalingy[INTERUPT_NUM_LINE_MAX];
 #endif
 #if CORE_DEBUG_LEVEL >= 4
-    uint32_t _times[NUM_LEDS_PER_STRIP];
+    std::vector<uint32_t> _times = std::vector<uint32_t>(num_led_per_strip);
 #endif
     frameBuffer *framebuff;
     bool useFrame = false;
@@ -921,7 +928,7 @@ class I2SClocklessVirtualLedDriver {
         _max = 0;
         _min = 500 * 240;
         _nb_frames_displayed++;
-        for (int _time = 1; _time < NUM_LEDS_PER_STRIP; _time++) {
+        for (int _time = 1; _time < _times.size(); _time++) {
             if (_times[_time] > (_BUFFER_TIMING * 240)) {
                 totalmax++;
                 // framenum=_time;
@@ -953,7 +960,7 @@ class I2SClocklessVirtualLedDriver {
             "\nFrame data:\n     - frame number:%d\n     - interupt time min:%0.2fus\n     - interupt time max:%0.2fus\n     - interupt time average:%0.2fus\n     - nb of pixel with interuptime > %0.2fus: %d\n\
 Driver data (overall frames):\n     - nb of frames displayed:%d\n     - nb of frames with pixels 'out of time':%d\n     - max interuptime %.2fus\n     - max number of pixels out of interuptime in a frame:%d\n     - proposed DMA extension:%d",
             _nb_frames_displayed, (float)_min / 240, (float)_max / 240,
-            (float)total / 240 / (NUM_LEDS_PER_STRIP - 1), _BUFFER_TIMING,
+            (float)total / 240 / (_times.size() - 1), _BUFFER_TIMING,
             totalmax, _nb_frames_displayed, _over_frames, (float)_maxtime / 240,
             _max_pixels_out_of_time, _proposed_dma_extension);
 #endif
@@ -1071,8 +1078,8 @@ Driver data (overall frames):\n     - nb of frames displayed:%d\n     - nb of fr
     void calculateDefaultMapping() {
 
         uint16_t offset2 = 0;
-        for (uint16_t leddisp = 0; leddisp < NUM_LEDS_PER_STRIP; leddisp++) {
-            uint16_t led_tmp = NUM_LEDS_PER_STRIP + leddisp;
+        for (uint16_t leddisp = 0; leddisp < mNumLedsPerStrip; leddisp++) {
+            uint16_t led_tmp = mNumLedsPerStrip + leddisp;
 
             for (uint16_t i = 0; i < NBIS2SERIALPINS; i++) {
 
@@ -1186,7 +1193,7 @@ Driver data (overall frames):\n     - nb of frames displayed:%d\n     - nb of fr
 #if (I2S_MAPPING_MODE & I2S_MAPPING_MODE_OPTION_MAPPING_IN_MEMORY) > 0
         _hmapoff = _defaulthmap;
         for (uint16_t leddisp = 0;
-             leddisp < NUM_LEDS_PER_STRIP * NBIS2SERIALPINS * 8; leddisp++) {
+             leddisp < mNumLedsPerStrip * NBIS2SERIALPINS * 8; leddisp++) {
             _hmapscroll[leddisp] = remapStatic() * _palette_size;
             _hmapoff++;
         }
@@ -1195,8 +1202,8 @@ Driver data (overall frames):\n     - nb of frames displayed:%d\n     - nb of fr
         uint16_t offset2 = 0;
         uint16_t val;
         _hmapoff = &val;
-        for (uint16_t leddisp = 0; leddisp < NUM_LEDS_PER_STRIP; leddisp++) {
-            uint16_t led_tmp = NUM_LEDS_PER_STRIP + leddisp;
+        for (uint16_t leddisp = 0; leddisp < mNumLedsPerStrip; leddisp++) {
+            uint16_t led_tmp = mNumLedsPerStrip + leddisp;
 
             for (uint16_t i = 0; i < NBIS2SERIALPINS; i++) {
 
@@ -1373,7 +1380,7 @@ Driver data (overall frames):\n     - nb of frames displayed:%d\n     - nb of fr
         startleds = 0;
         dmaBufferCount = __NB_DMA_BUFFER;
         // linewidth = NUM_LEDS_PER_STRIP;
-        this->num_led_per_strip = NUM_LEDS_PER_STRIP;
+        this->num_led_per_strip = num_led_per_strip;
         ESP_LOGD(TAG, "offset initiation");
         _offsetDisplay.offsetx = 0;
         _offsetDisplay.offsety = 0;
@@ -1434,7 +1441,7 @@ Driver data (overall frames):\n     - nb of frames displayed:%d\n     - nb of fr
 
         ESP_LOGD(TAG, "creating map array");
         _defaulthmap = (uint16_t *)malloc(
-            NUM_LEDS_PER_STRIP * NBIS2SERIALPINS * 8 * 2 + 2);
+            num_led_per_strip * NBIS2SERIALPINS * 8 * 2 + 2);
         // _defaulthmap = (uint16_t *) heap_caps_malloc(NUM_LEDS_PER_STRIP *
         // NBIS2SERIALPINS * 8 * 2 + 2,MALLOC_CAP_INTERNAL);
         if (!_defaulthmap) {
@@ -1451,7 +1458,7 @@ Driver data (overall frames):\n     - nb of frames displayed:%d\n     - nb of fr
 #if (I2S_MAPPING_MODE & I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_IN_MEMORY) > 0
         ESP_LOGD(TAG, "create scroll mapping");
         _hmapscroll = (uint16_t *)malloc(
-            NUM_LEDS_PER_STRIP * NBIS2SERIALPINS * 8 * 2 + 2);
+            num_led_per_strip * NBIS2SERIALPINS * 8 * 2 + 2);
         if (!_hmapscroll) {
             Serial.printf("no memory\n");
         }
