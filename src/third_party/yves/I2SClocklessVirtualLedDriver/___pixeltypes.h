@@ -1,8 +1,7 @@
 
 #ifdef USE_FASTLED
-    #include "FastLED.h"
+    #include "crgb.h"
 #endif
-#include <Arduino.h>  // ok include
 
 #define _OUT_OF_BOUND -12
 

@@ -6,7 +6,7 @@
 
 #else
 
-#include "esp32-hal.h"
+#include "sdkconfig.h"
 
 #if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
 

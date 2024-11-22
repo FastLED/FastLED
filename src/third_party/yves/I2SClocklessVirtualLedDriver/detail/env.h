@@ -326,9 +326,10 @@ LCD_DATA_OUT12_IDX,
 LCD_DATA_OUT13_IDX,
 LCD_DATA_OUT14_IDX,
 LCD_DATA_OUT15_IDX,
-
 };
 static gdma_channel_handle_t dma_chan;
+#endif
+
 
 // Note - Unused and can be removed
 #define __delay (((NUM_LEDS_PER_STRIP * 125 * 8 * nb_components) / 100000) + 1)
@@ -336,6 +337,7 @@ static gdma_channel_handle_t dma_chan;
 #define _MAX_VALUE 5000
 
 }  // namespace fl
+
 
 namespace fl {
 
@@ -439,6 +441,3 @@ LCD_CAM.lcd_misc.lcd_afifo_reset = 1;
     #endif
 }
 } // namespace fl
-
-
-#endif
