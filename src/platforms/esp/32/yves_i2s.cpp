@@ -1,14 +1,16 @@
 
 
 
-#if !defined(ESP32) || !ENABLE_ESP32_I2S_YVES_DRIVER 
+#if !defined(ESP32)
+
 // do nothing
 
 #else
 
+
 #include "sdkconfig.h"
 
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32
+#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32)
 
 // #define NBIS2SERIALPINS 6 // the number of virtual pins here mavimum 6x8=48
 // strips #define NUM_LEDS_PER_STRIP 256 #define NUM_LEDS (NUM_LEDS_PER_STRIP *

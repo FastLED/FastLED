@@ -296,39 +296,6 @@ clock_speed clock_800KHZ={6,4,1};
 #define WS2812_DMA_DESCRIPTOR_BUFFER_MAX_SIZE ((NUM_VIRT_PINS + 1) * nb_components * 8 * 3 * 2 + _DMA_EXTENSTION * 4)
 #endif
 
-namespace fl {
-
-uint16_t __default__mapping(uint16_t pos)
-{
-    return pos;
-}
-typedef union
-{
-    uint8_t bytes[16 * 8];
-    uint32_t shorts[16 * 2];
-} Lines;
-
-#ifdef CONFIG_IDF_TARGET_ESP32S3
-static uint8_t signalsID[16]={
-LCD_DATA_OUT0_IDX,
-LCD_DATA_OUT1_IDX,
-LCD_DATA_OUT2_IDX,
-LCD_DATA_OUT3_IDX,
-LCD_DATA_OUT4_IDX,
-LCD_DATA_OUT5_IDX,
-LCD_DATA_OUT6_IDX,
-LCD_DATA_OUT7_IDX,
-LCD_DATA_OUT8_IDX,
-LCD_DATA_OUT9_IDX,
-LCD_DATA_OUT10_IDX,
-LCD_DATA_OUT11_IDX,
-LCD_DATA_OUT12_IDX,
-LCD_DATA_OUT13_IDX,
-LCD_DATA_OUT14_IDX,
-LCD_DATA_OUT15_IDX,
-};
-static gdma_channel_handle_t dma_chan;
-#endif
 
 
 // Note - Unused and can be removed
@@ -336,7 +303,7 @@ static gdma_channel_handle_t dma_chan;
 
 #define _MAX_VALUE 5000
 
-}  // namespace fl
+
 
 
 namespace fl {
@@ -422,11 +389,45 @@ enum displayMode
 
 __OffsetDisplay _internalOffsetDisplay;
 
+
+uint16_t __default__mapping(uint16_t pos)
+{
+    return pos;
+}
+typedef union
+{
+    uint8_t bytes[16 * 8];
+    uint32_t shorts[16 * 2];
+} Lines;
+
+
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+static uint8_t signalsID[16]={
+LCD_DATA_OUT0_IDX,
+LCD_DATA_OUT1_IDX,
+LCD_DATA_OUT2_IDX,
+LCD_DATA_OUT3_IDX,
+LCD_DATA_OUT4_IDX,
+LCD_DATA_OUT5_IDX,
+LCD_DATA_OUT6_IDX,
+LCD_DATA_OUT7_IDX,
+LCD_DATA_OUT8_IDX,
+LCD_DATA_OUT9_IDX,
+LCD_DATA_OUT10_IDX,
+LCD_DATA_OUT11_IDX,
+LCD_DATA_OUT12_IDX,
+LCD_DATA_OUT13_IDX,
+LCD_DATA_OUT14_IDX,
+LCD_DATA_OUT15_IDX,
+};
+static gdma_channel_handle_t dma_chan;
+
+
 static void IRAM_ATTR i2sReset()
 {
     #ifdef CONFIG_IDF_TARGET_ESP32S3
-gdma_reset(dma_chan);  
-LCD_CAM.lcd_misc.lcd_afifo_reset = 1;
+    gdma_reset(dma_chan);  
+    LCD_CAM.lcd_misc.lcd_afifo_reset = 1;
     #else
     const unsigned long lc_conf_reset_flags = I2S_IN_RST_M | I2S_OUT_RST_M | I2S_AHBM_RST_M | I2S_AHBM_FIFO_RST_M;
     //(&I2S0)->lc_conf.val |= lc_conf_reset_flags;
@@ -440,4 +441,8 @@ LCD_CAM.lcd_misc.lcd_afifo_reset = 1;
     (&I2S0)->conf.val = (&I2S0)->conf.val & (~conf_reset_flags);
     #endif
 }
+
+
+#endif
+
 } // namespace fl
