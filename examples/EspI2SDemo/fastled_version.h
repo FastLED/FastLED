@@ -3,6 +3,18 @@
 #ifdef ESP32  // This example is only for the ESP32
 
 
+
+#if !(CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32)
+// this is only for ESP32 and ESP32-S3
+void init() {}
+void setup() {}
+#else
+#include <FastLED.h>
+#include "scoped_ptr.h"
+#include "fixed_vector.h"
+
+
+
 // printf
 #include <stdio.h>
 
@@ -11,24 +23,12 @@
 
 #include "Arduino.h"
 
-#if !(CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32)
-// this is only for ESP32 and ESP32-S3
-void init() {}
-void setup() {}
-
-#else
-
-#include <FastLED.h>
-#include "scoped_ptr.h"
-#include "fixed_vector.h"
-
-
 #define NBIS2SERIALPINS 6 // the number of virtual pins here mavimum 6x8=48 strips
 #define NUM_LEDS_PER_STRIP 256
 #define NUM_LEDS (NUM_LEDS_PER_STRIP * NBIS2SERIALPINS * 8)
 #define NUM_STRIPS (NBIS2SERIALPINS * 8)
-#include "platforms/esp/32/yves_i2s.h"
 
+#include "platforms/esp/32/yves_i2s.h"
 
 #define CLOCK_PIN 46
 #define LATCH_PIN 3
@@ -38,9 +38,6 @@ void setup() {}
 // YvesI2S::CRGBArray6Strips leds;  // 256 leds per strip, 6 strips. Mandatory, for now.
 
 CRGB leds[NUM_STRIPS * NUM_LEDS_PER_STRIP] = {0};
-
-
-
 FixedVector<int, 6>  pins({9,10,12,8,18,17});  // Esp32s3 pins from examples.
 
 void BlinkAndDraw(CRGB color, int times);
