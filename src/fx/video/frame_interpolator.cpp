@@ -6,6 +6,9 @@
 
 #include "fl/dbg.h"
 
+#include "math_macros.h"
+#include <math.h>
+
 #define DBG FASTLED_DBG
 
 
@@ -49,6 +52,7 @@ bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
 
     Frame* frame1 = get(frameNumber).get();
     Frame* frame2 = get(nextFrameNumber).get();
+
     Frame::interpolate(*frame1, *frame2, amountOfNextFrame, leds, alpha);
     // DBG("Interpolated frame " << frameNumber << " and " << nextFrameNumber);
     return true;
