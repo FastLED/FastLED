@@ -9,6 +9,7 @@
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
+using fl::Str;
 
 TEST_CASE("Str basic operations") {
     SUBCASE("Construction and assignment") {
@@ -59,6 +60,17 @@ TEST_CASE("Str basic operations") {
         CHECK(strcmp(s1.c_str(), "hello") == 0);
         CHECK(strcmp(s2.c_str(), "hello world") == 0);
     }
+}
+
+TEST_CASE("Str with + operator") {
+    Str s1("hello");
+    Str s2 = s1 + " world";
+    CHECK(s2.size() == 11);
+    CHECK(strcmp(s2.c_str(), "hello world") == 0);
+
+    Str s3 = s2 + "!";
+    CHECK(s3.size() == 12);
+    CHECK(strcmp(s3.c_str(), "hello world!") == 0);
 }
 
 TEST_CASE("Str with FixedVector") {
