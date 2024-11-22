@@ -65,19 +65,20 @@ YvesI2S::~YvesI2S() {
     mLeds.reset();
 }
 
-CRGB* YvesI2S::leds() {
+Slice<CRGB> YvesI2S::leds() {
     if (!mLeds) {
         mLeds.reset(LargeBlockAllocator<CRGB>::Alloc(NUM_LEDS));
     }
-    return mLeds.get();
+    return Slice<CRGB>(mLeds.get(), NUM_LEDS);
 }
 
-void YvesI2S::initOnce() {
+Slice<CRGB> YvesI2S::initOnce() {
+    Slice<CRGB> leds = this->leds();
     if (!mDriver) {
-        CRGB* leds = this->leds();  // Ensure mLeds is initialized
         mDriver.reset(new YvesI2SImpl());
-        mDriver->initled(leds, mPins.data(), mClockPin, mLatchPin);
+        mDriver->initled(leds.begin(), mPins.data(), mClockPin, mLatchPin);
     }
+    return leds;
 }
 
 void YvesI2S::showPixels() {

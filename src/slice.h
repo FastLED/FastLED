@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+// Slice<int> is equivalent to int* with a length. It is used to pass around
+// arrays of integers with a length, without needing to pass around a separate
+// length parameter.
+// It works just like an array of objects, but it also knows its length.
 template<typename T>
 class Slice {
 public:

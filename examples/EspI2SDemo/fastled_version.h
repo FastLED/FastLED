@@ -13,20 +13,9 @@ void setup() {}
 #include "scoped_ptr.h"
 #include "fixed_vector.h"
 
-
-
-// printf
 #include <stdio.h>
-
 #include <iostream>
 
-
-#include "Arduino.h"
-
-#define NBIS2SERIALPINS 6 // the number of virtual pins here mavimum 6x8=48 strips
-#define NUM_LEDS_PER_STRIP 256
-#define NUM_LEDS (NUM_LEDS_PER_STRIP * NBIS2SERIALPINS * 8)
-#define NUM_STRIPS (NBIS2SERIALPINS * 8)
 
 #include "platforms/esp/32/yves_i2s.h"
 
@@ -45,14 +34,13 @@ void BlinkAndDraw(CRGB color, int times);
 
 
 YvesI2S i2s(pins, CLOCK_PIN, LATCH_PIN);
-CRGB* leds = nullptr;
+Slice<CRGB> leds;
 
 void setup() {
     Serial.begin(115200);
     // FastLED.delay(2000);
     // driver.initled(leds, Pins, CLOCK_PIN, LATCH_PIN);
-    i2s.initOnce();
-    leds = i2s.leds();
+    leds = i2s.initOnce();
     //i2s = new YvesI2S(leds, CLOCK_PIN, LATCH_PIN);
 }
 
@@ -72,7 +60,7 @@ void loop() {
 /// Helper function definitions.
 
 void Fill(CRGB color) {
-    for (size_t i = 0; i < NUM_LEDS; i++) {
+    for (size_t i = 0; i < leds.size(); i++) {
         leds[i] = color;
     }
 }
