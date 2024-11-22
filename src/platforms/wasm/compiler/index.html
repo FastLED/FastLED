@@ -44,27 +44,6 @@
             transition: opacity 0.2s ease;
         }
 
-        #show-output-popup {
-            background-color: #2a2a2a;
-            color: #E0E0E0;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Roboto Condensed', sans-serif;
-            transition: all 0.2s ease;
-            margin: 10px 0;
-        }
-
-        #show-output-popup:hover {
-            background-color: #3a3a3a;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        #show-output-popup:active {
-            transform: translateY(0);
-        }
         #output-popup {
             /* disable scroll bars */
             overflow: hidden;
@@ -111,10 +90,10 @@
             <div id="ui-controls"></div>
         </div>
         <div id="container"></div>
-        <button id="show-output-popup">Show Output</button>
         <div class="popup-overlay" id="popup-overlay"></div>
         <div class="popup" id="output-popup">
-            <pre id="output"></pre>
+            <pre id="output">stdout:
+</pre>
         </div>
     </div>
 
@@ -152,7 +131,7 @@
 <script src="fastled.js"></script>
 <script src="index.js"></script>
 <script type="module">
-    document.getElementById('show-output-popup').addEventListener('click', function() {
+    document.getElementById('myCanvas').addEventListener('click', function() {
         const output = document.getElementById('output');
         const popup = document.getElementById('output-popup');
         const overlay = document.getElementById('popup-overlay');
