@@ -65,6 +65,16 @@
         #show-output-popup:active {
             transform: translateY(0);
         }
+        #output-popup {
+            /* disable scroll bars */
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        #output {
+            margin: 0;
+            padding: 10px;
+        }
     </style>
 </head>
 
@@ -147,7 +157,7 @@
                 popup.style.display = 'none';
                 overlay.style.display = 'none';
                 // Move the output element back to its original location
-                document.getElementById('main-container').appendChild(output);
+                // document.getElementById('main-container').appendChild(output);
             }, 200); // Match the transition duration
         };
     });
