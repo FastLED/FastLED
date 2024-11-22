@@ -82,6 +82,13 @@ public:
         }
     }
 
+    void assign(const_iterator begin, const_iterator end) {
+        clear();
+        for (const_iterator it = begin; it != end; ++it) {
+            push_back(*it);
+        }
+    }
+
     // Remove the last element from the vector
     void pop_back() {
         if (current_size > 0) {
