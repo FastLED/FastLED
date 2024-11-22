@@ -12,6 +12,33 @@
     <link rel="stylesheet" href="index.css">
     <!-- Include Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap" rel="stylesheet">
+    <style>
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+    </style>
 </head>
 
 <body>
@@ -24,7 +51,11 @@
             <div id="ui-controls"></div>
         </div>
         <div id="container"></div>
-        <pre id="output"></pre>
+        <button id="show-output-popup">Show Output</button>
+        <div class="popup-overlay" id="popup-overlay"></div>
+        <div class="popup" id="output-popup">
+            <pre id="output"></pre>
+        </div>
     </div>
 
     <script type="importmap">
@@ -61,6 +92,26 @@
 <script src="fastled.js"></script>
 <script src="index.js"></script>
 <script type="module">
+    document.getElementById('show-output-popup').addEventListener('click', function() {
+        const output = document.getElementById('output');
+        const popup = document.getElementById('output-popup');
+        const overlay = document.getElementById('popup-overlay');
+        
+        // Move the output element to the popup
+        popup.appendChild(output);
+        
+        // Show the popup and overlay
+        popup.style.display = 'block';
+        overlay.style.display = 'block';
+        
+        // Close popup when clicking overlay
+        overlay.onclick = function() {
+            popup.style.display = 'none';
+            overlay.style.display = 'none';
+            // Move the output element back to its original location
+            document.getElementById('main-container').appendChild(output);
+        };
+    });
 
     async function loadThreeJs() {
         console.log('Using ThreeJS modules:', window.threeJsModules);
