@@ -212,8 +212,6 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
             return false;
         }
     }
-
-
     return true;
 }
 
