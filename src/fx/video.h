@@ -47,7 +47,7 @@ public:
 private:
     bool mFinished = false;
     VideoImplRef mImpl;
-    TimeScaleRef mTimeScale;
+
 };
 
 

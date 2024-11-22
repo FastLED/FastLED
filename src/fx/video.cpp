@@ -34,6 +34,8 @@ class VideoImpl : public Referent {
     // internal use
     bool draw(uint32_t now, Frame *frame);
     bool full() const;
+    void setScale(float timeScale);
+    float scale() const { return mTimeScale ? mTimeScale->scale() : 1.0f; }
 
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
@@ -41,6 +43,7 @@ class VideoImpl : public Referent {
     DataStreamRef mStream;
     uint32_t mPrevNow = 0;
     FrameInterpolatorRef mFrameInterpolator;
+    TimeScaleRef mTimeScale;
 };
 
 VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
@@ -49,6 +52,15 @@ VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
       mFrameInterpolator(
           // todo: the max number of frames should be 1 or 0.
           FrameInterpolatorRef::New(MAX(0, nFramesInBuffer), fpsVideo)) {}
+
+
+void VideoImpl::setScale(float timeScale) {
+    if (!mTimeScale) {
+        mTimeScale = TimeScaleRef::New(0, timeScale);
+    }
+    mTimeScale->setScale(timeScale);
+}
+
 
 VideoImpl::~VideoImpl() { end(); }
 
@@ -93,6 +105,11 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
 
 bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     //DBG("draw with now = " << now);
+    if (!mTimeScale) {
+        mTimeScale = TimeScaleRef::New(now);
+    }
+    mTimeScale->update(now);
+    now = mTimeScale->time();
     if (!mStream) {
         DBG("no stream");
         return false;
@@ -236,11 +253,7 @@ void Video::beginStream(ByteStreamRef bs, size_t pixelsPerFrame, float fps,
 }
 
 bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
-    if (!mTimeScale) {
-        mTimeScale = TimeScaleRef::New(now);
-    }
-    mTimeScale->update(now);
-    now = mTimeScale->time();
+
     if (!mImpl) {
         return false;
     }
@@ -265,9 +278,12 @@ void Video::end() {
     }
 }
 
-void Video::setScale(float timeScale) { mTimeScale->setScale(timeScale); }
+void Video::setScale(float timeScale) {
+    // mTimeScale->setScale(timeScale);
+    mImpl->setScale(timeScale);
+}
 
-float Video::scale() const { return mTimeScale->scale(); }
+float Video::scale() const { return mImpl->scale(); }
 
 bool Video::finished() {
     if (!mImpl) {
