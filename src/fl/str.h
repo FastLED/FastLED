@@ -234,6 +234,7 @@ template <size_t SIZE = 64> class StrN {
 
     // Append method
     void append(const char *str) { write(str, strlen(str)); }
+    void append(const char *str, size_t len) { write(str, len); }
     void append(char c) { write(&c, 1); }
     void append(const StrN &str) { write(str.c_str(), str.size()); }
 
@@ -245,9 +246,35 @@ template <size_t SIZE = 64> class StrN {
         return strcmp(c_str(), other.c_str()) < 0;
     }
 
-    void clear() {
+    void reserve(size_t newCapacity) {
+        // If capacity is less than current length, do nothing
+        if (newCapacity <= mLength) {
+            return;
+        }
+
+        // If new capacity fits in inline buffer, no need to allocate
+        if (newCapacity + 1 <= SIZE) {
+            return;
+        }
+
+        // If we already have unshared heap data with sufficient capacity, do nothing
+        if (mHeapData && !mHeapData->isShared() && mHeapData->hasCapacity(newCapacity)) {
+            return;
+        }
+
+        // Need to allocate new storage
+        StringHolderRef newData = StringHolderRef::New(newCapacity);
+        if (newData) {
+            // Copy existing content
+            memcpy(newData->data(), c_str(), mLength);
+            newData->data()[mLength] = '\0';
+            mHeapData = newData;
+        }
+    }
+
+    void clear(bool freeMemory = false) {
         mLength = 0;
-        if (mHeapData) {
+        if (freeMemory && mHeapData) {
             mHeapData.reset();
         }
     }
@@ -297,6 +324,8 @@ template <size_t SIZE = 64> class StrN {
         return StringFormatter::parseFloat(c_str(), mLength);
     }
 
+
+
   private:
     StringHolderRef mData;
 };
@@ -310,6 +339,30 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     Str(const StrN<M> &other) : StrN<FASTLED_STR_INLINED_SIZE>(other) {}
     Str &operator=(const Str &other) {
         copy(other);
+        return *this;
+    }
+
+    Str& operator<<(uint16_t val) {  // uint8_t is promoted to uint16_t
+        write(val);
+        return *this;
+    }
+    Str& operator<<(int val) {
+        write(val);
+        return *this;
+    }
+
+    Str& operator<<(const char* str) {
+        append(str);
+        return *this;
+    }
+
+    Str& operator<<(const StrN& str) {
+        append(str.c_str(), str.size());
+        return *this;
+    }
+
+    Str& operator+(const char* str) {
+        append(str);
         return *this;
     }
 };

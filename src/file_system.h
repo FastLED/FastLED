@@ -8,6 +8,7 @@
 #include "namespace.h"
 #include "ref.h"
 #include "fx/video.h"
+#include "fl/str.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -30,6 +31,7 @@ class FileSystem {
     
     FileHandleRef openRead(const char *path);  // Null if file could not be opened.
     Video openVideo(const char *path, size_t pixelsPerFrame, float fps = 30.0f, size_t nFrameHistory = 0);  // Null if video could not be opened.
+    bool readText(const char *path, fl::Str* out);
     void close(FileHandleRef file);
     
   private:

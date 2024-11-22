@@ -289,6 +289,10 @@ void Video::setTimeScale(float timeScale) {
 
 float Video::timeScale() const { return mImpl->timeScale(); }
 
+fl::Str Video::error() const {
+    return mError;
+}
+
 bool Video::finished() {
     if (!mImpl) {
         return true;

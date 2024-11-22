@@ -55,10 +55,26 @@ Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, 
     Video video;
     FileHandleRef file = openRead(path);
     if (!file) {
+        video.setError(fl::Str("Could not open file: ") + path);
         return video;
     }
     video.begin(file, pixelsPerFrame, fps, nFrameHistory);
     return video;
+}
+
+bool FileSystem::readText(const char *path, fl::Str* out) {
+    FileHandleRef file = openRead(path);
+    if (!file) {
+        return false;
+    }
+    size_t size = file->size();
+    out->reserve(size + out->size());
+    while (file->available()) {
+        uint8_t buf[64];
+        size_t n = file->read(buf, sizeof(buf));
+        // out->append(buf, n);
+        out->append((const char*)buf, n);
+    }
 }
 
 FASTLED_NAMESPACE_END

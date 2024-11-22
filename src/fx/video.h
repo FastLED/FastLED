@@ -6,6 +6,7 @@
 #include "ref.h"
 #include "fx/fx2d.h"
 #include "fx/time.h"
+#include "fl/str.h"
 
 
 FASTLED_NAMESPACE_BEGIN
@@ -41,12 +42,15 @@ public:
     bool rewind();
     void setTimeScale(float timeScale);
     float timeScale() const;
+    fl::Str error() const;
+    void setError(const fl::Str& error) { mError = error; }
 
     // make compatible with if statements
     operator bool() const { return mImpl.get(); }
 private:
     bool mFinished = false;
     VideoImplRef mImpl;
+    fl::Str mError;
 
 };
 
