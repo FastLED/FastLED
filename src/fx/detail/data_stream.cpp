@@ -77,21 +77,31 @@ bool DataStream::readFrame(Frame* frame) {
         return false;
     }
     if (mUsingByteStream) {
-        mByteStream->read(frame->rgb(), mbytesPerFrame);
+        mByteStream->readCRGB(frame->rgb(), mbytesPerFrame);
     } else {
-        mFileBuffer->read(frame->rgb(), mbytesPerFrame);
+        mFileBuffer->readCRGB(frame->rgb(), mbytesPerFrame);
+        DBG("pos: " << mFileBuffer->Position());
     }
     return true;
 }
 
 bool DataStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
-    DBG("read frame at " << frameNumber);
+    // DBG("read frame at " << frameNumber);
     if (mUsingByteStream) {
         // ByteStream doesn't support seeking
         return false;
     } else {
+        // DBG("mbytesPerFrame: " << mbytesPerFrame);
         mFileBuffer->seek(frameNumber * mbytesPerFrame);
-        return readFrame(frame);
+        size_t read = mFileBuffer->readCRGB(frame->rgb(), mbytesPerFrame / 3);
+        // DBG("read: " << read);
+        // DBG("pos: " << mFileBuffer->Position());
+
+        bool ok = int(read) == mbytesPerFrame;
+        if (!ok) {
+            DBG("readFrameAt failed");
+        }
+        return ok;
     }
 }
 

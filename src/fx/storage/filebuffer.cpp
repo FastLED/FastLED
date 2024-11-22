@@ -44,8 +44,15 @@ int32_t FileBuffer::BytesLeft() const {
   return remaining_buffer + remaining_disk;
 }
 
+uint32_t FileBuffer::Position() const {
+  if (!available()) {
+    return -1;
+  }
+  return mFile->pos() - mLength + mCurrIdx;
+}
+
 bool FileBuffer::seek(uint32_t pos) {
-  DBG("FileBuffer::seek: " << pos);
+  // DBG("FileBuffer::seek: " << pos);
   if (mFile->seek(pos)) {
     ResetBuffer();
     return true;
@@ -82,7 +89,7 @@ size_t FileBuffer::read(uint8_t* dst, size_t n) {
   return bytes_read;
 }
 
-size_t FileBuffer::read(CRGB* dst, size_t n) {
+size_t FileBuffer::readCRGB(CRGB* dst, size_t n) {
   return read((uint8_t*)dst, n * 3);
 }
 

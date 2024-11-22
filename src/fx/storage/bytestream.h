@@ -23,7 +23,8 @@ class ByteStream : public Referent {
     virtual void close() {}  // default is do nothing on close.
 
     // convenience functions
-    size_t read(CRGB *dst, size_t n) { return read((uint8_t *)dst, n * 3); }
+    size_t readCRGB(CRGB *dst, size_t n) { return read((uint8_t *)dst, n * 3); }
+
 };
 
 

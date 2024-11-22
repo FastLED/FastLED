@@ -19,6 +19,9 @@ FASTLED_SMART_REF(Frame);
 
 class VideoImpl : public Referent {
   public:
+    enum {
+        kSizeRGB8 = 3,
+    };
     // frameHistoryCount is the number of frames to keep in the buffer after
     // draw. This allows for time based effects like syncing video speed to
     // audio triggers.
@@ -67,14 +70,14 @@ VideoImpl::~VideoImpl() { end(); }
 void VideoImpl::begin(FileHandleRef h) {
     end();
     // Removed setStartTime call
-    mStream = DataStreamRef::New(mPixelsPerFrame);
+    mStream = DataStreamRef::New(mPixelsPerFrame * kSizeRGB8);
     mStream->begin(h);
     mPrevNow = 0;
 }
 
 void VideoImpl::beginStream(ByteStreamRef bs) {
     end();
-    mStream = DataStreamRef::New(mPixelsPerFrame);
+    mStream = DataStreamRef::New(mPixelsPerFrame * kSizeRGB8);
     // Removed setStartTime call
     mStream->beginStream(bs);
     mPrevNow = 0;
@@ -130,7 +133,6 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
 }
 
 bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
-
     const bool forward = now >= prev;
     // At most, update one frame. That way if the user forgets to call draw and
     // then sends a really old timestamp, we don't update the buffer too much.
@@ -191,13 +193,17 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
             // Happens when we are not full and we need to allocate a new frame.
             recycled_frame = FrameRef::New(mPixelsPerFrame, false);
         }
-        if (!mStream->readFrame(recycled_frame.get())) {
+        if (!mStream->readFrameAt(frame_to_fetch, recycled_frame.get())) {
             if (!forward) {
                 // nothing more we can do, we can't go negative.
                 return false;
             }
             if (mStream->atEnd()) {
-                DBG("Can't go rewind until the TimeScale is migrated to VideoImpl");
+                if (!mStream->rewind()) {  // Is this still 
+                    DBG("rewind failed");
+                    return false;
+                }
+                mTimeScale->reset(now);
                 return false;
             }
             DBG("We failed for some other reason");
@@ -205,7 +211,7 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
         }
         uint32_t timestamp = mFrameInterpolator->get_exact_timestamp_ms(frame_to_fetch);
         recycled_frame->setFrameNumberAndTime(frame_to_fetch, timestamp);
-        DBG("inserting frame: " << frame_to_fetch);
+        // DBG("inserting frame: " << frame_to_fetch);
         bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
         if (!ok) {
             DBG("insert failed");
