@@ -21,8 +21,7 @@ public:
         return reinterpret_cast<T*>(ptr);
     }
 
-    static void Free(T* p, size_t n) {
-        (void)n;
+    static void Free(T* p) {
         if (p == nullptr) {
             return;
         }

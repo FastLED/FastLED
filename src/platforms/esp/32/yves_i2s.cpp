@@ -43,31 +43,40 @@
 
 #include "crgb.h"
 #include "namespace.h"
+#include "allocator.h"
 
 FASTLED_NAMESPACE_BEGIN
 
 class YvesI2SImpl : public fl::I2SClocklessVirtualLedDriver {};
 
-YvesI2S::YvesI2S(CRGB *leds, const FixedVector<int, 6> &pins, int clock_pin,
+YvesI2S::YvesI2S(const FixedVector<int, 6> &pins, int clock_pin,
                  int latch_pin) {
     // driver.initled(leds, Pins, CLOCK_PIN, LATCH_PIN);
     for (int i = 0; i < pins.size(); i++) {
         // mPins[i] = pins[i];
         mPins.push_back(pins[i]);
     }
-    mLeds = leds;
     mClockPin = clock_pin;
     mLatchPin = latch_pin;
 }
 
 YvesI2S::~YvesI2S() {
     // delete mDriver;
+    mLeds.reset();
+}
+
+CRGB* YvesI2S::leds() {
+    if (!mLeds) {
+        mLeds.reset(LargeBlockAllocator<CRGB>::Alloc(NUM_LEDS));
+    }
+    return mLeds.get();
 }
 
 void YvesI2S::initOnce() {
     if (!mDriver) {
+        CRGB* leds = this->leds();  // Ensure mLeds is initialized
         mDriver.reset(new YvesI2SImpl());
-        mDriver->initled(mLeds, mPins.data(), mClockPin, mLatchPin);
+        mDriver->initled(leds, mPins.data(), mClockPin, mLatchPin);
     }
 }
 

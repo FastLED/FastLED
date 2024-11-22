@@ -51,7 +51,7 @@ public:
         this->data = data;
     }
     ~LUT() {
-        LargeBlockAllocator<T>::Free(mDataHandle.release(), length);
+        LargeBlockAllocator<T>::Free(mDataHandle.release());
         data = mDataHandle.get();
     }
 

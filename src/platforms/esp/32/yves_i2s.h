@@ -8,6 +8,7 @@
 #include "singleton.h"
 #include "pixelset.h"
 #include "scoped_ptr.h"
+#include "allocator.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -25,7 +26,7 @@ class YvesI2S {
   public:
     // Safe to initialize in static memory because the driver will be instantiated
     // on first call to showPixels().
-    YvesI2S(CRGB* leds, const FixedVector<int, 6>& pins, int clock_pin, int latch_pin);
+    YvesI2S(const FixedVector<int, 6>& pins, int clock_pin, int latch_pin);
 
     void initOnce();
     void showPixels();
@@ -36,13 +37,15 @@ class YvesI2S {
     YvesI2S &operator=(const YvesI2S &) = delete;
     ~YvesI2S();
 
+    CRGB* leds();
+
   private:
     scoped_ptr<YvesI2SImpl> mDriver;
     //Pins mPins;
     int mClockPin;
     int mLatchPin;
-    CRGB* mLeds;
     FixedVector<int, 6> mPins;
+    scoped_array<CRGB> mLeds;
 };
 
 FASTLED_NAMESPACE_END

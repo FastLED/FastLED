@@ -2,7 +2,7 @@
 
 #ifdef ESP32  // This example is only for the ESP32
 
-
+#include "esp32-hal.h"
 
 #if !(CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32)
 // this is only for ESP32 and ESP32-S3
@@ -19,7 +19,7 @@ void setup() {}
 #include <stdio.h>
 
 #include <iostream>
-#include "esp32-hal.h"
+
 
 #include "Arduino.h"
 
@@ -37,26 +37,28 @@ void setup() {}
 // overly strict. The final api will be more flexible.
 // YvesI2S::CRGBArray6Strips leds;  // 256 leds per strip, 6 strips. Mandatory, for now.
 
-CRGB leds[NUM_STRIPS * NUM_LEDS_PER_STRIP] = {0};
-// FixedVector<int, 6>  pins({0,1,2,3,18,17});  // Esp32s3 pins from examples.
-FixedVector<int, 6>  pins({9,10,12,8,18,17});
+// CRGB leds[NUM_STRIPS * NUM_LEDS_PER_STRIP] = {0};
+FixedVector<int, 6>  pins({0,1,2,3,18,17});
+// FixedVector<int, 6>  pins({9,10,12,8,18,17});  // Esp32s3 pins from examples.
 
 void BlinkAndDraw(CRGB color, int times);
 
 
-YvesI2S i2s(leds, pins, CLOCK_PIN, LATCH_PIN);
+YvesI2S i2s(pins, CLOCK_PIN, LATCH_PIN);
+CRGB* leds = nullptr;
 
 void setup() {
     Serial.begin(115200);
     // FastLED.delay(2000);
     // driver.initled(leds, Pins, CLOCK_PIN, LATCH_PIN);
     i2s.initOnce();
+    leds = i2s.leds();
     //i2s = new YvesI2S(leds, CLOCK_PIN, LATCH_PIN);
 }
 
 void loop() {
     // std::cout << "loop" << std::endl;
-    printf("loop\n");
+    printf("loop2\n");
     BlinkAndDraw(CRGB(4, 0, 0), 1);
     BlinkAndDraw(CRGB(0, 4, 0), 2);
     BlinkAndDraw(CRGB(0, 0, 4), 3);
