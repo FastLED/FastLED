@@ -84,7 +84,8 @@
 
         @keyframes labelFade {
             0% { opacity: 0; }
-            3% { opacity: 1; }  /* Quick fade in (0.25s) */
+            3% { opacity: 0; }  /* Quick fade in (0.25s) */
+            10% { opacity: 1; } /* Hold for 0.5s */
             80% { opacity: 1; }  /* Hold for 1s */
             100% { opacity: 0; } /* Slow fade out (2s) */
         }
@@ -93,8 +94,8 @@
             position: absolute;
             top: 10px;
             right: 10px;
-            background-color: rgba(50, 50, 50, 0.5);
-            color: white;
+            background-color: rgba(50, 50, 50, .25);
+            color: rgba(255, 255, 255, 0.7);
             padding: 5px 10px;
             border-radius: 3px;
             font-family: 'Roboto Condensed', sans-serif;
@@ -106,7 +107,7 @@
         /* Add a new class for when we want to trigger the animation */
         #canvas-label.show-animation {
             animation: labelFade 10s ease-out forwards;
-            animation-delay: 1s;  /* Delay animation start */
+            animation-delay: 0;  /* Delay animation start */
         }
     </style>
 </head>
