@@ -23,7 +23,7 @@ int itoa(int value, char *sp, int radix) {
 
     while (v || tp == tmp) {
         i = v % radix;
-        v /= radix;
+        v = radix ? v / radix : 0;
         if (i < 10)
             *tp++ = i + '0';
         else

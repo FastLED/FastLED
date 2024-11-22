@@ -23,8 +23,7 @@ class FrameTracker {
 
   private:
     uint32_t mMicrosSecondsPerInterval;
-    uint32_t mStartTime;
-    bool mIsPaused;
+    uint32_t mStartTime = 0;
 };
 
 

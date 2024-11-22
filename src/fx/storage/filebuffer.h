@@ -35,7 +35,7 @@ class FileBuffer: public Referent {
 
   // Experimentally found to be as fast as larger values.
   static const int kBufferSize = 64;
-  uint8_t mBuffer[kBufferSize];
+  uint8_t mBuffer[kBufferSize] = {0};
   int16_t mCurrIdx;
   int16_t mLength;
 
