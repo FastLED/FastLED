@@ -171,12 +171,6 @@ template <size_t SIZE = 64> class StrN {
 
     size_t write(const char *str, size_t n) {
         size_t newLen = mLength + n;
-        if (newLen + 1 <= SIZE) {
-            memcpy(mInlineData + mLength, str, n);
-            mLength = newLen;
-            mInlineData[mLength] = '\0';
-            return mLength;
-        }
         if (mHeapData && !mHeapData->isShared()) {
             if (!mHeapData->hasCapacity(newLen)) {
                 mHeapData->grow(newLen * 3 / 2); // Grow by 50%
@@ -184,6 +178,12 @@ template <size_t SIZE = 64> class StrN {
             memcpy(mHeapData->data() + mLength, str, n);
             mLength = newLen;
             mHeapData->data()[mLength] = '\0';
+            return mLength;
+        }
+        if (newLen + 1 <= SIZE) {
+            memcpy(mInlineData + mLength, str, n);
+            mLength = newLen;
+            mInlineData[mLength] = '\0';
             return mLength;
         }
         mHeapData.reset();
@@ -362,11 +362,6 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
 
     Str& operator<<(const StrN& str) {
         append(str.c_str(), str.size());
-        return *this;
-    }
-
-    Str& operator+(const char* str) {
-        append(str);
         return *this;
     }
 };

@@ -55,7 +55,7 @@ Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, 
     Video video;
     FileHandleRef file = openRead(path);
     if (!file) {
-        video.setError(fl::Str("Could not open file: ") + path);
+        video.setError(fl::Str("Could not open file: ") << path);
         return video;
     }
     video.begin(file, pixelsPerFrame, fps, nFrameHistory);
