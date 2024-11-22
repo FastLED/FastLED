@@ -9,10 +9,7 @@
 
 #include "___pixeltypes.h"
 
-// Note - Unused and can be removed
-#define __delay (((NUM_LEDS_PER_STRIP * 125 * 8 * nb_components) / 100000) + 1)
 
-#define _MAX_VALUE 5000
 
 #include "framebuffer.h"
 #include "detail/transpose.h"

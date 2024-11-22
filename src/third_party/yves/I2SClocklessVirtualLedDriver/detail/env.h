@@ -329,6 +329,12 @@ LCD_DATA_OUT15_IDX,
 
 };
 static gdma_channel_handle_t dma_chan;
+
+// Note - Unused and can be removed
+#define __delay (((NUM_LEDS_PER_STRIP * 125 * 8 * nb_components) / 100000) + 1)
+
+#define _MAX_VALUE 5000
+
 }  // namespace fl
 
 #endif
