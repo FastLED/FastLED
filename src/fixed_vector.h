@@ -45,6 +45,10 @@ public:
 
     // Const array subscript operator
     const T& operator[](size_t index) const {
+        if (index >= current_size) {
+            const T* out = nullptr;
+            return *out;  // Cause a nullptr dereference
+        }
         return mData[index];
     }
 
