@@ -73,6 +73,21 @@ TEST_CASE("Str with + operator") {
     CHECK(strcmp(s3.c_str(), "hello world!") == 0);
 }
 
+TEST_CASE("Str::reserve") {
+    Str s;
+    s.reserve(10);
+    CHECK(s.size() == 0);
+    CHECK(s.capacity() >= 10);
+
+    s.reserve(5);
+    CHECK(s.size() == 0);
+    CHECK(s.capacity() >= 10);
+
+    s.reserve(500);
+    CHECK(s.size() == 0);
+    CHECK(s.capacity() >= 500);
+}
+
 TEST_CASE("Str with FixedVector") {
     FixedVector<Str, 10> vec;
     vec.push_back(Str("hello"));

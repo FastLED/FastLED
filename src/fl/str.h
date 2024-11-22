@@ -154,6 +154,10 @@ template <size_t SIZE = 64> class StrN {
         mLength = len;
     }
 
+    size_t capacity() const {
+        return mHeapData ? mHeapData->capacity() : SIZE;
+    }
+
     size_t write(int n) {
         StrN<64> dst;
         StringFormatter::append(n, &dst); // Inlined size should suffice
