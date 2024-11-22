@@ -29,23 +29,6 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
-namespace fl {
-typedef struct gdma_pair_t gdma_pair_t;
-
-
-struct gdma_channel_t {
-    gdma_pair_t *pair;  // which pair the channel belongs to
-    intr_handle_t intr; // per-channel interrupt handle
-    portMUX_TYPE spinlock;  // channel level spinlock
-    gdma_channel_direction_t direction; // channel direction
-    int periph_id; // Peripheral instance ID, indicates which peripheral is connected to this GDMA channel
-    size_t int_mem_alignment; // alignment for memory in internal memory
-    size_t ext_mem_alignment; // alignment for memory in external memory
-    esp_err_t (*del)(gdma_channel_t *channel); // channel deletion function, it's polymorphic, see `gdma_del_tx_channel` or `gdma_del_rx_channel`
-    struct {
-        uint32_t start_stop_by_etm: 1; // whether the channel is started/stopped by ETM
-    } flags;
-};
 
 #ifdef OVER_CLOCK_MAX
 #define CLOCK_DIV_NUM 4
@@ -67,6 +50,26 @@ struct gdma_channel_t {
 #define CLOCK_DIV_A  4
 #define CLOCK_DIV_B  1
 #endif
+
+namespace fl {
+typedef struct gdma_pair_t gdma_pair_t;
+
+
+struct gdma_channel_t {
+    gdma_pair_t *pair;  // which pair the channel belongs to
+    intr_handle_t intr; // per-channel interrupt handle
+    portMUX_TYPE spinlock;  // channel level spinlock
+    gdma_channel_direction_t direction; // channel direction
+    int periph_id; // Peripheral instance ID, indicates which peripheral is connected to this GDMA channel
+    size_t int_mem_alignment; // alignment for memory in internal memory
+    size_t ext_mem_alignment; // alignment for memory in external memory
+    esp_err_t (*del)(gdma_channel_t *channel); // channel deletion function, it's polymorphic, see `gdma_del_tx_channel` or `gdma_del_rx_channel`
+    struct {
+        uint32_t start_stop_by_etm: 1; // whether the channel is started/stopped by ETM
+    } flags;
+};
+
+
 
 typedef struct 
 {
@@ -117,9 +120,12 @@ clock_speed clock_800KHZ={6,4,1};
 
 #include "math.h"
 #include "../helper.h"
+
 #define I2S_DEVICE 0
 
+#ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
 
 #define NUM_VIRT_PINS 7
 
@@ -421,6 +427,7 @@ LCD_DATA_OUT14_IDX,
 LCD_DATA_OUT15_IDX,
 };
 static gdma_channel_handle_t dma_chan;
+#endif
 
 
 static void IRAM_ATTR i2sReset()
@@ -441,8 +448,5 @@ static void IRAM_ATTR i2sReset()
     (&I2S0)->conf.val = (&I2S0)->conf.val & (~conf_reset_flags);
     #endif
 }
-
-
-#endif
 
 } // namespace fl
