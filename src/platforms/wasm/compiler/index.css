@@ -121,6 +121,7 @@ h1 {
     background-color: #1E1E1E;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    margin: 0;  /* Add this line to remove margins */
 }
 
 .ui-control {
