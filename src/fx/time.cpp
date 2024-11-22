@@ -24,6 +24,14 @@ float TimeScale::scale() const {
 }
 
 uint32_t TimeScale::update(uint32_t timeNow) {
+
+    DBG("TimeScale::update: timeNow: " << timeNow << " mLastRealTime: " << mLastRealTime
+    << " mRelativeTime: " << mRelativeTime << " mTimeScale: " << mTimeScale);
+
+    if (mLastRealTime > timeNow) {
+        DBG("TimeScale::applyExact: mLastRealTime > timeNow: " << mLastRealTime << " > " << timeNow);
+    }
+
     applyExact(timeNow);
     return time();
 }
@@ -40,10 +48,7 @@ void TimeScale::reset(uint32_t realTimeNow) {
 
 void TimeScale::applyExact(uint32_t timeNow) {
     //DBG("TimeScale::applyExact: timeNow: " << timeNow << " mLastRealTime: " << mLastRealTime);
-    if (mLastRealTime > timeNow) {
-        DBG("TimeScale::applyExact: mLastRealTime > timeNow");
-        return;
-    }
+
     uint32_t elapsedRealTime = timeNow - mLastRealTime;
     mLastRealTime = timeNow;
     int32_t diff = static_cast<int32_t>(elapsedRealTime * mTimeScale);

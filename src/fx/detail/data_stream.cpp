@@ -99,7 +99,7 @@ bool DataStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
 
         bool ok = int(read) == mbytesPerFrame;
         if (!ok) {
-            DBG("readFrameAt failed");
+            DBG("readFrameAt failed" << read << " " << mbytesPerFrame);
         }
         return ok;
     }

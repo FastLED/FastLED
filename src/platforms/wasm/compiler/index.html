@@ -82,6 +82,13 @@
             position: relative;
         }
 
+        @keyframes labelFade {
+            0% { opacity: 0; }
+            3% { opacity: 1; }  /* Quick fade in (0.25s) */
+            80% { opacity: 1; }  /* Hold for 1s */
+            100% { opacity: 0; } /* Slow fade out (2s) */
+        }
+
         #canvas-label {
             position: absolute;
             top: 10px;
@@ -92,7 +99,14 @@
             border-radius: 3px;
             font-family: 'Roboto Condensed', sans-serif;
             font-size: 14px;
-            pointer-events: none;  /* This ensures clicks pass through to canvas */
+            pointer-events: none;
+            opacity: 0;  /* Start hidden */
+        }
+
+        /* Add a new class for when we want to trigger the animation */
+        #canvas-label.show-animation {
+            animation: labelFade 10s ease-out forwards;
+            animation-delay: 1s;  /* Delay animation start */
         }
     </style>
 </head>
@@ -176,8 +190,13 @@
             setTimeout(() => {
                 popup.style.display = 'none';
                 overlay.style.display = 'none';
-                // Move the output element back to its original location
-                // document.getElementById('main-container').appendChild(output);
+                
+                // Remove and re-add the animation class to trigger it again
+                const label = document.getElementById('canvas-label');
+                label.classList.remove('show-animation');
+                // Force reflow to ensure animation restarts
+                void label.offsetWidth;
+                label.classList.add('show-animation');
             }, 200); // Match the transition duration
         };
     });
@@ -234,6 +253,10 @@
             threeJs: threeJs,
         }
         await globalThis.loadFastLED(options);
+        
+        // Trigger the animation (it will start after the delay)
+        const label = document.getElementById('canvas-label');
+        label.classList.add('show-animation');
     }
 
     // Wait for fonts to load before showing content
