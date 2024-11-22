@@ -1,7 +1,7 @@
 
 
 
-#ifndef ESP32
+#if !defined(ESP32) || !ENABLE_ESP32_I2S_YVES_DRIVER 
 // do nothing
 
 #else

@@ -38,7 +38,8 @@ void setup() {}
 // YvesI2S::CRGBArray6Strips leds;  // 256 leds per strip, 6 strips. Mandatory, for now.
 
 CRGB leds[NUM_STRIPS * NUM_LEDS_PER_STRIP] = {0};
-FixedVector<int, 6>  pins({9,10,12,8,18,17});  // Esp32s3 pins from examples.
+// FixedVector<int, 6>  pins({0,1,2,3,18,17});  // Esp32s3 pins from examples.
+FixedVector<int, 6>  pins({9,10,12,8,18,17});
 
 void BlinkAndDraw(CRGB color, int times);
 
