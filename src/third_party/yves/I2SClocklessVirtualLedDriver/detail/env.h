@@ -4,17 +4,13 @@
 #include "sdkconfig.h"
 
 #ifdef CONFIG_IDF_TARGET_ESP32S3
-
 #include "env_s3.h"
-
-
 #else
 #include "env_esp32dev.h"
-
 #endif
 
-#include "math.h"
 #include "../helper.h"
+#include "math.h"
 
 #define I2S_DEVICE 0
 
@@ -111,9 +107,12 @@
 
 #define OFFSET (NUM_VIRT_PINS + 1)
 #define I2S_OFF (((NUM_VIRT_PINS + 1) * NUM_LEDS_PER_STRIP) * _palette_size)
-#define I2S_OFF2 ((I2S_OFF * NBIS2SERIALPINS - NUM_LEDS_PER_STRIP * _palette_size))
-#define I2S_OFF3 ((I2S_OFF * NBIS2SERIALPINS + NUM_LEDS_PER_STRIP * _palette_size))
-#define I2S_OFF4 ((I2S_OFF * NBIS2SERIALPINS - 3 * NUM_LEDS_PER_STRIP * _palette_size))
+#define I2S_OFF2                                                               \
+    ((I2S_OFF * NBIS2SERIALPINS - NUM_LEDS_PER_STRIP * _palette_size))
+#define I2S_OFF3                                                               \
+    ((I2S_OFF * NBIS2SERIALPINS + NUM_LEDS_PER_STRIP * _palette_size))
+#define I2S_OFF4                                                               \
+    ((I2S_OFF * NBIS2SERIALPINS - 3 * NUM_LEDS_PER_STRIP * _palette_size))
 #define I2S_OFF_MAP (((NUM_VIRT_PINS + 1) * NUM_LEDS_PER_STRIP))
 #define I2S_OFF2_MAP ((I2S_OFF_MAP * NBIS2SERIALPINS - NUM_LEDS_PER_STRIP))
 #define I2S_OFF3_MAP ((I2S_OFF_MAP * NBIS2SERIALPINS + NUM_LEDS_PER_STRIP))
@@ -124,7 +123,8 @@
 #define FFF (0xF0F0F0F0L)
 #define FFF2 (0xF0F0F0FL)
 
-// this below is only the the ws281X if you need more time then you are able to extend the size of the buffer
+// this below is only the the ws281X if you need more time then you are able to
+// extend the size of the buffer
 #ifndef _DMA_EXTENSTION
 #define _DMA_EXTENSTION 0
 #endif
@@ -158,9 +158,11 @@
 #define _BRIGHTNES_2 ((8 - __BRIGHTNESS_BIT + 6) * 48)
 #define _BRIGHTNES_1 ((8 - __BRIGHTNESS_BIT + 7) * 48)
 
-#define _NB_BIT (_DMA_EXTENSTION * 2 + (NUM_VIRT_PINS + 1) * nb_components * 8 * 3)
+#define _NB_BIT                                                                \
+    (_DMA_EXTENSTION * 2 + (NUM_VIRT_PINS + 1) * nb_components * 8 * 3)
 #define _BUFFER_TIMING ((_NB_BIT / 19.2) - 4)
-#define _BASE_BUFFER_TIMING (((NUM_VIRT_PINS + 1) * nb_components * 8 * 3 / 19.2) - 4)
+#define _BASE_BUFFER_TIMING                                                    \
+    (((NUM_VIRT_PINS + 1) * nb_components * 8 * 3 / 19.2) - 4)
 
 #define I2S_DRIVER_MODE_OPTION_VIRTUAL_PIN 0x100
 #define I2S_DRIVER_MODE_OPTION_CLOCKLESS 0x200
@@ -171,12 +173,21 @@
 #define I2S_MAPPING_MODE_OPTION_MAPPING_SOFTWARE 0x8
 #define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_SOFTWARE 0x20
 #define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_IN_MEMORY 0x10
-#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_ALL_IN_MEMORY (I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_IN_MEMORY | I2S_MAPPING_MODE_OPTION_MAPPING_IN_MEMORY)
-#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_IN_MEMORY_SOFTWARE (I2S_MAPPING_MODE_OPTION_MAPPING_IN_MEMORY | I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_SOFTWARE)
-#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_SOFTWARE_SOFTWARE (I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_SOFTWARE | I2S_MAPPING_MODE_OPTION_MAPPING_SOFTWARE)
-#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_SOFTWARE_IN_MEMORY (I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_IN_MEMORY | I2S_MAPPING_MODE_OPTION_MAPPING_SOFTWARE)
+#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_ALL_IN_MEMORY                   \
+    (I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_IN_MEMORY |                        \
+     I2S_MAPPING_MODE_OPTION_MAPPING_IN_MEMORY)
+#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_IN_MEMORY_SOFTWARE              \
+    (I2S_MAPPING_MODE_OPTION_MAPPING_IN_MEMORY |                               \
+     I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_SOFTWARE)
+#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_SOFTWARE_SOFTWARE               \
+    (I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_SOFTWARE |                         \
+     I2S_MAPPING_MODE_OPTION_MAPPING_SOFTWARE)
+#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_SOFTWARE_IN_MEMORY              \
+    (I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_IN_MEMORY |                        \
+     I2S_MAPPING_MODE_OPTION_MAPPING_SOFTWARE)
 
-#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_ALL_IN_MEMORY
+#define I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING                                 \
+    I2S_MAPPING_MODE_OPTION_SCROLL_MAPPING_ALL_IN_MEMORY
 #define I2S_MAPING_MODE_OPTION_MAPPING I2S_MAPPING_MODE_OPTION_MAPPING_IN_MEMORY
 
 #define I2S_MAPPING_MODE_OPTION_INTERRUPT_LINE 0x1000
@@ -192,26 +203,21 @@
 #define SCALEMAX (1 << SCALEMAX_BIT)
 
 #ifdef CONFIG_IDF_TARGET_ESP32S3
-#define WS2812_DMA_DESCRIPTOR_BUFFER_MAX_SIZE (576*2)
+#define WS2812_DMA_DESCRIPTOR_BUFFER_MAX_SIZE (576 * 2)
 #else
-#define WS2812_DMA_DESCRIPTOR_BUFFER_MAX_SIZE ((NUM_VIRT_PINS + 1) * nb_components * 8 * 3 * 2 + _DMA_EXTENSTION * 4)
+#define WS2812_DMA_DESCRIPTOR_BUFFER_MAX_SIZE                                  \
+    ((NUM_VIRT_PINS + 1) * nb_components * 8 * 3 * 2 + _DMA_EXTENSTION * 4)
 #endif
-
-
 
 // Note - Unused and can be removed
 #define __delay (((NUM_LEDS_PER_STRIP * 125 * 8 * nb_components) / 100000) + 1)
 
 #define _MAX_VALUE 5000
 
-
-
-
 namespace fl {
 
 class I2SClocklessVirtualLedDriver;
-struct OffsetDisplay
-{
+struct OffsetDisplay {
     int offsetx;
     int offsety;
     int panel_height;
@@ -237,8 +243,7 @@ struct OffsetDisplay
     int _offy;
 };
 
-typedef struct
-{
+typedef struct {
     int xc;
     int yc;
     int _cos;
@@ -257,7 +262,10 @@ typedef struct
 static const char *TAG = "I2SClocklessVirtualLedDriver";
 #endif
 #ifdef CONFIG_IDF_TARGET_ESP32S3
-static IRAM_ATTR bool _I2SClocklessVirtualLedDriverinterruptHandler(gdma_channel_handle_t dma_chan,gdma_event_data_t *event_data, void *user_data);
+static IRAM_ATTR bool
+_I2SClocklessVirtualLedDriverinterruptHandler(gdma_channel_handle_t dma_chan,
+                                              gdma_event_data_t *event_data,
+                                              void *user_data);
 #else
 static void IRAM_ATTR _I2SClocklessVirtualLedDriverinterruptHandler(void *arg);
 #endif
@@ -269,8 +277,7 @@ static TaskHandle_t I2SClocklessVirtualLedDriver_returnTaskHandle = 0;
 static void showPixelsTask(void *pvParameters);
 int interruptSource;
 
-enum colorarrangment
-{
+enum colorarrangment {
     ORDER_GRBW,
     ORDER_RGB,
     ORDER_RBG,
@@ -280,8 +287,7 @@ enum colorarrangment
     ORDER_BGR,
 };
 
-enum displayMode
-{
+enum displayMode {
     NO_WAIT,
     WAIT,
     LOOP,
@@ -290,19 +296,11 @@ enum displayMode
 
 __OffsetDisplay _internalOffsetDisplay;
 
+inline uint16_t __default__mapping(uint16_t pos) { return pos; }
 
-uint16_t __default__mapping(uint16_t pos)
-{
-    return pos;
-}
-typedef union
-{
+typedef union {
     uint8_t bytes[16 * 8];
     uint32_t shorts[16 * 2];
 } Lines;
-
-
-
-
 
 } // namespace fl

@@ -4,8 +4,8 @@
 
 namespace fl {
 
-static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinline2(unsigned char *A, uint8_t *B)
-{
+static inline __attribute__((always_inline)) void IRAM_ATTR
+transpose16x1_noinline2(unsigned char *A, uint8_t *B) {
 
     uint32_t x, y, t;
 #if NBIS2SERIALPINS >= 8
@@ -93,37 +93,45 @@ static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinli
 
 #if __MAX_BRIGTHNESS >= 128
 #if _BRIGHTNES_8 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_8)) = (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_8)) =
+        (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 64
 #if _BRIGHTNES_7 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_7)) = (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
+    *((uint16_t *)(B + _BRIGHTNES_7)) =
+        (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 32
 #if _BRIGHTNES_6 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_6)) = (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_6)) =
+        (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 16
 #if _BRIGHTNES_5 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_5)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_5)) =
+        (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 8
 #if _BRIGHTNES_4 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_4)) = (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_4)) =
+        (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if _BRIGHTNES_3 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_3)) = (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_3)) =
+        (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
 #endif
 #if _BRIGHTNES_2 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_2)) = (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_2)) =
+        (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
 #endif
 #if _BRIGHTNES_1 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_1)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_1)) =
+        (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 #endif
 
 #else
@@ -237,37 +245,45 @@ static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinli
 
 #if __MAX_BRIGTHNESS >= 128
 #if _BRIGHTNES_8 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_8)) = (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_8)) =
+        (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 64
 #if _BRIGHTNES_7 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_7)) = (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
+    *((uint16_t *)(B + _BRIGHTNES_7)) =
+        (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 32
 #if _BRIGHTNES_6 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_6)) = (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_6)) =
+        (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 16
 #if _BRIGHTNES_5 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_5)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_5)) =
+        (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 8
 #if _BRIGHTNES_4 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_4)) = (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_4)) =
+        (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if _BRIGHTNES_3 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_3)) = (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_3)) =
+        (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
 #endif
 #if _BRIGHTNES_2 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_2)) = (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_2)) =
+        (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
 #endif
 #if _BRIGHTNES_1 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_1)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_1)) =
+        (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 #endif
 
 #else
@@ -382,37 +398,45 @@ static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinli
 
 #if __MAX_BRIGTHNESS >= 128
 #if _BRIGHTNES_8 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_8)) = (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_8)) =
+        (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 64
 #if _BRIGHTNES_7 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_7)) = (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
+    *((uint16_t *)(B + _BRIGHTNES_7)) =
+        (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 32
 #if _BRIGHTNES_6 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_6)) = (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_6)) =
+        (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 16
 #if _BRIGHTNES_5 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_5)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_5)) =
+        (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 8
 #if _BRIGHTNES_4 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_4)) = (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_4)) =
+        (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if _BRIGHTNES_3 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_3)) = (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_3)) =
+        (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
 #endif
 #if _BRIGHTNES_2 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_2)) = (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_2)) =
+        (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
 #endif
 #if _BRIGHTNES_1 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_1)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_1)) =
+        (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 #endif
 
 #else
@@ -525,37 +549,45 @@ static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinli
 #if NBIS2SERIALPINS >= 8
 #if __MAX_BRIGTHNESS >= 128
 #if _BRIGHTNES_8 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_8)) = (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_8)) =
+        (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 64
 #if _BRIGHTNES_7 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_7)) = (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
+    *((uint16_t *)(B + _BRIGHTNES_7)) =
+        (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 32
 #if _BRIGHTNES_6 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_6)) = (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_6)) =
+        (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 16
 #if _BRIGHTNES_5 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_5)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_5)) =
+        (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 8
 #if _BRIGHTNES_4 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_4)) = (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_4)) =
+        (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if _BRIGHTNES_3 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_3)) = (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_3)) =
+        (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
 #endif
 #if _BRIGHTNES_2 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_2)) = (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_2)) =
+        (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
 #endif
 #if _BRIGHTNES_1 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_1)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_1)) =
+        (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 #endif
 
 #else
@@ -671,37 +703,45 @@ static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinli
 
 #if __MAX_BRIGTHNESS >= 128
 #if _BRIGHTNES_8 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_8)) = (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_8)) =
+        (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 64
 #if _BRIGHTNES_7 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_7)) = (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
+    *((uint16_t *)(B + _BRIGHTNES_7)) =
+        (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 32
 #if _BRIGHTNES_6 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_6)) = (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_6)) =
+        (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 16
 #if _BRIGHTNES_5 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_5)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_5)) =
+        (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 8
 #if _BRIGHTNES_4 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_4)) = (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_4)) =
+        (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if _BRIGHTNES_3 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_3)) = (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_3)) =
+        (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
 #endif
 #if _BRIGHTNES_2 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_2)) = (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_2)) =
+        (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
 #endif
 #if _BRIGHTNES_1 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_1)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_1)) =
+        (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 #endif
 
 #else
@@ -815,37 +855,45 @@ static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinli
 
 #if __MAX_BRIGTHNESS >= 128
 #if _BRIGHTNES_8 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_8)) = (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_8)) =
+        (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 64
 #if _BRIGHTNES_7 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_7)) = (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
+    *((uint16_t *)(B + _BRIGHTNES_7)) =
+        (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 32
 #if _BRIGHTNES_6 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_6)) = (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_6)) =
+        (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 16
 #if _BRIGHTNES_5 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_5)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_5)) =
+        (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 8
 #if _BRIGHTNES_4 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_4)) = (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_4)) =
+        (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if _BRIGHTNES_3 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_3)) = (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_3)) =
+        (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
 #endif
 #if _BRIGHTNES_2 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_2)) = (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_2)) =
+        (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
 #endif
 #if _BRIGHTNES_1 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_1)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_1)) =
+        (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 #endif
 
 #else
@@ -960,37 +1008,45 @@ static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinli
 
 #if __MAX_BRIGTHNESS >= 128
 #if _BRIGHTNES_8 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_8)) = (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_8)) =
+        (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 64
 #if _BRIGHTNES_7 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_7)) = (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
+    *((uint16_t *)(B + _BRIGHTNES_7)) =
+        (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 32
 #if _BRIGHTNES_6 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_6)) = (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_6)) =
+        (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 16
 #if _BRIGHTNES_5 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_5)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_5)) =
+        (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 8
 #if _BRIGHTNES_4 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_4)) = (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_4)) =
+        (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if _BRIGHTNES_3 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_3)) = (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_3)) =
+        (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
 #endif
 #if _BRIGHTNES_2 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_2)) = (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_2)) =
+        (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
 #endif
 #if _BRIGHTNES_1 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_1)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_1)) =
+        (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 #endif
 
 #else
@@ -1116,37 +1172,45 @@ static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinli
 
 #if __MAX_BRIGTHNESS >= 128
 #if _BRIGHTNES_8 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_8)) = (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_8)) =
+        (uint16_t)(((x & 0xff000000) >> 8 | ((x1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 64
 #if _BRIGHTNES_7 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_7)) = (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
+    *((uint16_t *)(B + _BRIGHTNES_7)) =
+        (uint16_t)(((x & 0xff0000) >> 16 | ((x1 & 0xff0000) >> 8)));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 32
 #if _BRIGHTNES_6 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_6)) = (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_6)) =
+        (uint16_t)(((x & 0xff00) | ((x1 & 0xff00) << 8)) >> 8);
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 16
 #if _BRIGHTNES_5 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_5)) = (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_5)) =
+        (uint16_t)((x & 0xff) | ((x1 & 0xff) << 8));
 #endif
 #endif
 #if __MAX_BRIGTHNESS >= 8
 #if _BRIGHTNES_4 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_4)) = (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_4)) =
+        (uint16_t)(((y & 0xff000000) >> 8 | ((y1 & 0xff000000))) >> 16);
 #endif
 #endif
 #if _BRIGHTNES_3 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_3)) = (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
+    *((uint16_t *)(B + _BRIGHTNES_3)) =
+        (uint16_t)(((y & 0xff0000) | ((y1 & 0xff0000) << 8)) >> 16);
 #endif
 #if _BRIGHTNES_2 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_2)) = (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
+    *((uint16_t *)(B + _BRIGHTNES_2)) =
+        (uint16_t)(((y & 0xff00) | ((y1 & 0xff00) << 8)) >> 8);
 #endif
 #if _BRIGHTNES_1 < (8 * 48)
-    *((uint16_t *)(B + _BRIGHTNES_1)) = (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
+    *((uint16_t *)(B + _BRIGHTNES_1)) =
+        (uint16_t)((y & 0xff) | ((y1 & 0xff) << 8));
 #endif
 
 #else
@@ -1191,4 +1255,4 @@ static inline __attribute__((always_inline)) void IRAM_ATTR transpose16x1_noinli
     // }
 }
 
-}  // namespace fl
+} // namespace fl
