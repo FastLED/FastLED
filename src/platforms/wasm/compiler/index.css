@@ -20,7 +20,10 @@ body {
     flex: 0 0 300px;
     display: none;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 640px;
 }
 
 #ui-controls.active {
@@ -83,15 +86,15 @@ h1 {
 
 #top-row {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     width: 100%;
     margin-bottom: 20px;
 }
 
 #canvas-container {
     flex: 0 0 auto;
-    margin-right: 20px;
 }
 
 #myCanvas {
