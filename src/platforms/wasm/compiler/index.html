@@ -162,6 +162,16 @@
         };
     });
 
+    document.getElementById('output').addEventListener('click', function() {
+        // Get the text content of the output element
+        const text = this.textContent;
+        
+        // Copy to clipboard using the modern clipboard API
+        navigator.clipboard.writeText(text).catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+    });
+
     async function loadThreeJs() {
         console.log('Using ThreeJS modules:', window.threeJsModules);
         return {
