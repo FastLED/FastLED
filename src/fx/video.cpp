@@ -37,8 +37,8 @@ class VideoImpl : public Referent {
     // internal use
     bool draw(uint32_t now, Frame *frame);
     bool full() const;
-    void setScale(float timeScale);
-    float scale() const { return mTimeScale ? mTimeScale->scale() : 1.0f; }
+    void setTimeScale(float timeScale);
+    float timeScale() const { return mTimeScale ? mTimeScale->scale() : 1.0f; }
 
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
@@ -57,7 +57,7 @@ VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
           FrameInterpolatorRef::New(MAX(0, nFramesInBuffer), fpsVideo)) {}
 
 
-void VideoImpl::setScale(float timeScale) {
+void VideoImpl::setTimeScale(float timeScale) {
     if (!mTimeScale) {
         mTimeScale = TimeScaleRef::New(0, timeScale);
     }
@@ -282,12 +282,12 @@ void Video::end() {
     }
 }
 
-void Video::setScale(float timeScale) {
+void Video::setTimeScale(float timeScale) {
     // mTimeScale->setScale(timeScale);
-    mImpl->setScale(timeScale);
+    mImpl->setTimeScale(timeScale);
 }
 
-float Video::scale() const { return mImpl->scale(); }
+float Video::timeScale() const { return mImpl->timeScale(); }
 
 bool Video::finished() {
     if (!mImpl) {

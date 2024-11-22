@@ -39,8 +39,8 @@ public:
     void end();
     bool finished();
     bool rewind();
-    void setScale(float timeScale);
-    float scale() const;
+    void setTimeScale(float timeScale);
+    float timeScale() const;
 
     // make compatible with if statements
     operator bool() const { return mImpl.get(); }

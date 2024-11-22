@@ -85,7 +85,7 @@ void setup() {
 }
 
 void loop() {
-    video.setScale(videoSpeed);
+    video.setTimeScale(videoSpeed);
     uint32_t now = millis();
     video.draw(now, leds);
     FastLED.show();
