@@ -62,6 +62,11 @@ class FileData : public Referent {
         return bytesToActuallyRead;
     }
 
+    size_t bytesRead() const {
+        std::lock_guard<std::mutex> lock(mMutex);
+        return mData.size();
+    }
+
     size_t capacity() const {
         std::lock_guard<std::mutex> lock(mMutex);
         return mCapacity;
@@ -93,8 +98,21 @@ class WasmFileHandle : public FileHandle {
 
     virtual ~WasmFileHandle() override {}
 
-    bool available() const override { return mPos < mData->capacity(); }
-    size_t bytesLeft() const override { return mData->capacity() - mPos; }
+    bool available() const override {
+        if (mPos >= mData->capacity()) {
+            return false;
+        }
+        if (mData->bytesRead() > mPos) {
+            return true;
+        }
+        return false;
+    }
+    size_t bytesLeft() const override {
+        if (!available()) {
+            return 0;
+        }
+        return mData->capacity() - mPos;
+    }
     size_t size() const override { return mData->capacity(); }
 
     size_t read(uint8_t *dst, size_t bytesToRead) override {

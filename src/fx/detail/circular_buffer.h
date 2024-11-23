@@ -11,84 +11,54 @@ FASTLED_NAMESPACE_BEGIN
 template <typename T>
 class CircularBuffer {
 public:
-    // Constructor
-    CircularBuffer(size_t capacity) 
-        : mCapacity(capacity), mSize(0), mHead(0), mTail(0) {
-        size_t n = MAX(1, mCapacity);
-        mBuffer.reset(new T[n]);
+    CircularBuffer(size_t capacity)
+        : mCapacity(capacity + 1), mHead(0), mTail(0) { // Extra space for distinguishing full/empty
+        mBuffer.reset(new T[mCapacity]);
     }
 
-    // Deleted copy constructor and assignment operator to prevent copying
     CircularBuffer(const CircularBuffer&) = delete;
     CircularBuffer& operator=(const CircularBuffer&) = delete;
 
-    // Push value to the back of the buffer
     bool push_back(const T& value) {
-        if (mCapacity == 0) {
-            return false;
+        if (full()) {
+            mTail = increment(mTail); // Overwrite the oldest element
         }
         mBuffer[mHead] = value;
-        if (mSize < mCapacity) {
-            ++mSize;
-        }
         mHead = increment(mHead);
-        if (mSize == mCapacity) {
-            mTail = mHead;
-        }
         return true;
     }
 
-    // Pop value from the front of the buffer
     bool pop_front(T* dst = nullptr) {
         if (empty()) {
-            // Handle underflow appropriately (e.g., return default value)
             return false;
         }
-        T value = mBuffer[mTail];
-        mTail = increment(mTail);
-        --mSize;
-        if (empty()) {
-            mHead = mTail;
-        }
         if (dst) {
-            *dst = value;
+            *dst = mBuffer[mTail];
         }
+        mTail = increment(mTail);
         return true;
     }
 
-    // Pop value from the back of the buffer
+    bool push_front(const T& value) {
+        if (full()) {
+            mHead = decrement(mHead); // Overwrite the oldest element
+        }
+        mTail = decrement(mTail);
+        mBuffer[mTail] = value;
+        return true;
+    }
+
     bool pop_back(T* dst = nullptr) {
         if (empty()) {
             return false;
         }
         mHead = decrement(mHead);
-        T value = mBuffer[mHead];
-        --mSize;
-        if (empty()) {
-            mTail = mHead;
-        }
         if (dst) {
-            *dst = value;
+            *dst = mBuffer[mHead];
         }
         return true;
     }
 
-    // Push value to the front of the buffer
-    bool push_front(const T& value) {
-        if (mCapacity == 0) {
-            return false;
-        }
-        mTail = decrement(mTail);
-        mBuffer[mTail] = value;
-        if (mSize < mCapacity) {
-            ++mSize;
-        } else {
-            mHead = mTail;
-        }
-        return true;
-    }
-
-    // Access the front element
     T& front() {
         return mBuffer[mTail];
     }
@@ -97,7 +67,6 @@ public:
         return mBuffer[mTail];
     }
 
-    // Access the back element
     T& back() {
         return mBuffer[(mHead + mCapacity - 1) % mCapacity];
     }
@@ -106,9 +75,7 @@ public:
         return mBuffer[(mHead + mCapacity - 1) % mCapacity];
     }
 
-    // Random access operator
     T& operator[](size_t index) {
-        // No bounds checking to avoid overhead
         return mBuffer[(mTail + index) % mCapacity];
     }
 
@@ -116,76 +83,40 @@ public:
         return mBuffer[(mTail + index) % mCapacity];
     }
 
-    // Get the current size
     size_t size() const {
-        return mSize;
+        return (mHead + mCapacity - mTail) % mCapacity;
     }
 
-    // Get the capacity
     size_t capacity() const {
-        return mCapacity;
+        return mCapacity - 1;
     }
 
-    // Check if the buffer is empty
     bool empty() const {
-        return mSize == 0;
+        return mHead == mTail;
     }
 
-    // Check if the buffer is full
     bool full() const {
-        return mSize == mCapacity;
+        return increment(mHead) == mTail;
     }
 
-    // Clear the buffer
     void clear() {
-        mBuffer.reset();
-        size_t n = MAX(1, mCapacity);
-        mBuffer.reset(new T[n]);
-        mSize = 0;
-        mHead = 0;
-        mTail = 0;
-    }
-
-    // Insert value at specified index
-    bool insert(size_t index, const T& value) {
-        if (index > mSize || mCapacity == 0 || mSize >= mCapacity) {
-            return false;
-        }
-
-        if (index == 0) {
-            return push_front(value);
-        }
-        
-        if (index == mSize) {
-            return push_back(value);
-        }
-
-        // Shift elements from index to end one position right
-        for (size_t i = mSize; i > index; --i) {
-            (*this)[i] = (*this)[i - 1];
-        }
-        (*this)[index] = value;
-        ++mSize;
-        mHead = increment(mHead);
-        return true;
+        mHead = mTail = 0;
     }
 
 private:
-    // Helper function to increment an index with wrap-around
     size_t increment(size_t index) const {
         return (index + 1) % mCapacity;
     }
 
-    // Helper function to decrement an index with wrap-around
     size_t decrement(size_t index) const {
         return (index + mCapacity - 1) % mCapacity;
     }
 
-    scoped_array<T> mBuffer;  // Assuming `scoped_array` is defined in "ptr.h"
+    scoped_array<T> mBuffer;
     size_t mCapacity;
-    size_t mSize;
     size_t mHead;
     size_t mTail;
 };
+
 
 FASTLED_NAMESPACE_END
