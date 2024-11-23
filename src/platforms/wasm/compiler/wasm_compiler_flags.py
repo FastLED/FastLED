@@ -62,8 +62,8 @@ sketch_flags = [
     f"-sWASM={USE_WASM}",
     "-fuse-ld=lld",
     #-Wbad-function-cast -Wcast-function
-    "-Wbad-function-cast",
-    "-Wcast-function",
+    "-Werror=bad-function-cast",
+    "-Werror=cast-function-type",
 ]
 
 if QUICK_BUILD:
