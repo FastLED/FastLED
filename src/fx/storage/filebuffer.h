@@ -15,7 +15,7 @@ FASTLED_SMART_PTR(FileHandle);
 
 class FileBuffer: public fl::Referent {
  public:
-  FileBuffer(FileHandleRef file);
+  FileBuffer(FileHandlePtr file);
   virtual ~FileBuffer();
   void rewindToStart();
   bool available() const;
@@ -40,7 +40,7 @@ class FileBuffer: public fl::Referent {
   int16_t mCurrIdx;
   int16_t mLength;
 
-  FileHandleRef mFile;
+  FileHandlePtr mFile;
 };
 
 FASTLED_NAMESPACE_END

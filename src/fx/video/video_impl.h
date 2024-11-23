@@ -28,8 +28,8 @@ class VideoImpl : public fl::Referent {
               size_t frameHistoryCount = 0);
     ~VideoImpl();
     // Api
-    void begin(FileHandleRef h);
-    void beginStream(ByteStreamRef s);
+    void begin(FileHandlePtr h);
+    void beginStream(ByteStreamPtr s);
     bool draw(uint32_t now, CRGB *leds, uint8_t *alpha = nullptr);
     void end();
     bool rewind();
@@ -42,10 +42,10 @@ class VideoImpl : public fl::Referent {
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
     uint32_t mPixelsPerFrame = 0;
-    PixelStreamRef mStream;
+    PixelStreamPtr mStream;
     uint32_t mPrevNow = 0;
-    FrameInterpolatorRef mFrameInterpolator;
-    TimeScaleRef mTimeScale;
+    FrameInterpolatorPtr mFrameInterpolator;
+    TimeScalePtr mTimeScale;
 };
 
 FASTLED_NAMESPACE_END

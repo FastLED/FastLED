@@ -12,9 +12,9 @@ int Referent::ref_count() const { return mRefCount; }
 
 void Referent::unref() {
     if (--mRefCount == 0) {
-        if (mWeakRef) {
-            mWeakRef->setReferent(nullptr);
-            mWeakRef.reset();
+        if (mWeakPtr) {
+            mWeakPtr->setReferent(nullptr);
+            mWeakPtr.reset();
         }
         destroy();
     }

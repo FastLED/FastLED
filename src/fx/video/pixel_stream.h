@@ -27,8 +27,8 @@ class PixelStream: public fl::Referent {
 
   explicit PixelStream(int bytes_per_frame);
 
-  bool begin(FileHandleRef h);
-  bool beginStream(ByteStreamRef s);
+  bool begin(FileHandlePtr h);
+  bool beginStream(ByteStreamPtr s);
   void close();
   int32_t bytesPerFrame();
   bool readPixel(CRGB* dst);  // Convenience function to read a pixel
@@ -50,8 +50,8 @@ class PixelStream: public fl::Referent {
  private:
   void init(int bytes_per_frame);
   int32_t mbytesPerFrame;
-  FileHandleRef mFileHandle;
-  ByteStreamRef mByteStream;
+  FileHandlePtr mFileHandle;
+  ByteStreamPtr mByteStream;
   bool mUsingByteStream;
 
 protected:

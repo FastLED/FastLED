@@ -18,7 +18,7 @@ class FrameInterpolator : public fl::Referent {
     struct Less {
         bool operator()(uint32_t a, uint32_t b) const { return a < b; }
     };
-    typedef SortedHeapMap<uint32_t, FrameRef, Less> FrameBuffer;
+    typedef SortedHeapMap<uint32_t, FramePtr, Less> FrameBuffer;
     FrameInterpolator(size_t nframes, float fpsVideo);
 
     // Will search through the array, select the two frames that are closest to
@@ -31,7 +31,7 @@ class FrameInterpolator : public fl::Referent {
     // that this adjustable_time is allowed to go pause or go backward in time.
     bool draw(uint32_t adjustable_time, Frame *dst); // Frame has alpha.
     bool draw(uint32_t adjustable_time, CRGB *leds, uint8_t *alpha = nullptr);
-    bool insert(uint32_t frameNumber, FrameRef frame) {
+    bool insert(uint32_t frameNumber, FramePtr frame) {
         return mFrames.insert(frameNumber, frame);
     }
 
@@ -42,8 +42,8 @@ class FrameInterpolator : public fl::Referent {
 
     bool has(uint32_t frameNum) const { return mFrames.has(frameNum); }
 
-    FrameRef erase(uint32_t frameNum) {
-        FrameRef out;
+    FramePtr erase(uint32_t frameNum) {
+        FramePtr out;
         auto it = mFrames.find(frameNum);
         if (it == mFrames.end()) {
             return out;
@@ -53,12 +53,12 @@ class FrameInterpolator : public fl::Referent {
         return out;
     }
 
-    FrameRef get(uint32_t frameNum) const {
+    FramePtr get(uint32_t frameNum) const {
         auto it = mFrames.find(frameNum);
         if (it != mFrames.end()) {
             return it->second;
         }
-        return FrameRef();
+        return FramePtr();
     }
 
     bool full() const { return mFrames.full(); }

@@ -16,7 +16,7 @@ FASTLED_SMART_PTR(FsImpl);
 FASTLED_SMART_PTR(FileSystem);
 
 // Platforms need to implement this to create an instance of the filesystem.
-FsImplRef make_sdcard_filesystem(int cs_pin);
+FsImplPtr make_sdcard_filesystem(int cs_pin);
 
 FASTLED_SMART_PTR(FileHandle);
 class Video;
@@ -26,17 +26,17 @@ class FileSystem {
   public:
     FileSystem();
     bool beginSd(int cs_pin); // Signal to begin using the filesystem resource.
-    bool begin(FsImplRef platform_filesystem); // Signal to begin using the filesystem resource.
+    bool begin(FsImplPtr platform_filesystem); // Signal to begin using the filesystem resource.
     void end(); // Signal to end use of the file system.
 
     
-    FileHandleRef openRead(const char *path);  // Null if file could not be opened.
+    FileHandlePtr openRead(const char *path);  // Null if file could not be opened.
     Video openVideo(const char *path, size_t pixelsPerFrame, float fps = 30.0f, size_t nFrameHistory = 0);  // Null if video could not be opened.
     bool readText(const char *path, fl::Str* out);
-    void close(FileHandleRef file);
+    void close(FileHandlePtr file);
     
   private:
-    FsImplRef mFs;  // System dependent filesystem.
+    FsImplPtr mFs;  // System dependent filesystem.
 };
 
 
@@ -72,8 +72,8 @@ class FsImpl : public fl::Referent {
     virtual bool begin() = 0;
     //  End use of card
     virtual void end() = 0;
-    virtual void close(FileHandleRef file) = 0;
-    virtual FileHandleRef openRead(const char *path) = 0;
+    virtual void close(FileHandlePtr file) = 0;
+    virtual FileHandlePtr openRead(const char *path) = 0;
 
     virtual bool ls(Visitor &visitor) {
       // todo: implement.

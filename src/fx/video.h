@@ -27,14 +27,14 @@ public:
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This
     // allows for time based effects like syncing video speed to audio triggers.
     Video();  // Please use FileSytem to construct a Video.
-    Video(FileHandleRef h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
-    Video(ByteStreamRef s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
+    Video(FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
+    Video(ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
     ~Video();
     Video(const Video&);
     Video& operator=(const Video&);
     // Api
-    void begin(FileHandleRef h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
-    void beginStream(ByteStreamRef s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
+    void begin(FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
+    void beginStream(ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
     bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
     bool draw(uint32_t now, Frame* frame);
     void end();
@@ -49,7 +49,7 @@ public:
     operator bool() const { return mImpl.get(); }
 private:
     bool mFinished = false;
-    VideoImplRef mImpl;
+    VideoImplPtr mImpl;
     fl::Str mError;
 
 };
@@ -63,7 +63,7 @@ class VideoFx : public FxGrid {
 
   private:
     Video mVideo;
-    FrameRef mFrame;
+    FramePtr mFrame;
 };
 
 FASTLED_NAMESPACE_END

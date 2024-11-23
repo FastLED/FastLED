@@ -11,7 +11,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FsImplRef make_sdcard_filesystem(int cs_pin);
+FsImplPtr make_sdcard_filesystem(int cs_pin);
 
 FASTLED_NAMESPACE_END
 

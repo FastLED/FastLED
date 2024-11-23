@@ -37,8 +37,8 @@ TEST_CASE("test_fx_engine") {
     FxEngine engine(NUM_LEDS);
     CRGB leds[NUM_LEDS];
 
-    Ref<MockFx> redFx = MockFxRef::New(NUM_LEDS, CRGB::Red);
-    Ref<MockFx> blueFx = MockFxRef::New(NUM_LEDS, CRGB::Blue);
+    Ptr<MockFx> redFx = MockFxPtr::New(NUM_LEDS, CRGB::Red);
+    Ptr<MockFx> blueFx = MockFxPtr::New(NUM_LEDS, CRGB::Blue);
 
     int id0 = engine.addFx(redFx);
     int id1 = engine.addFx(blueFx);

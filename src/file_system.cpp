@@ -15,8 +15,8 @@ FASTLED_NAMESPACE_BEGIN
 
 // WEAK SYMBOL
 // Override this if you want to supply a file system for your platform.
-__attribute__((weak)) FsImplRef make_sdcard_filesystem(int cs_pin) {
-    return FsImplRef::Null();
+__attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
+    return FsImplPtr::Null();
 }
 
 bool FileSystem::beginSd(int cs_pin) {
@@ -28,7 +28,7 @@ bool FileSystem::beginSd(int cs_pin) {
     return true;
 }
 
-bool FileSystem::begin(FsImplRef platform_filesystem) {
+bool FileSystem::begin(FsImplPtr platform_filesystem) {
     mFs = platform_filesystem;
     if (!mFs) {
         return false;
@@ -48,12 +48,12 @@ void FileSystem::end() {
     }
 }
 
-void FileSystem::close(FileHandleRef file) { mFs->close(file); }
+void FileSystem::close(FileHandlePtr file) { mFs->close(file); }
 
-FileHandleRef FileSystem::openRead(const char *path) { return mFs->openRead(path); }
+FileHandlePtr FileSystem::openRead(const char *path) { return mFs->openRead(path); }
 Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, size_t nFrameHistory) {
     Video video;
-    FileHandleRef file = openRead(path);
+    FileHandlePtr file = openRead(path);
     if (!file) {
         video.setError(fl::Str("Could not open file: ") << path);
         return video;
@@ -63,7 +63,7 @@ Video FileSystem::openVideo(const char *path, size_t pixelsPerFrame, float fps, 
 }
 
 bool FileSystem::readText(const char *path, fl::Str* out) {
-    FileHandleRef file = openRead(path);
+    FileHandlePtr file = openRead(path);
     if (!file) {
         return false;
     }

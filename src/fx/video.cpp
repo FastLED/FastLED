@@ -24,31 +24,31 @@ FASTLED_SMART_PTR(Frame);
 
 
 Video::Video() = default;
-Video::Video(FileHandleRef h, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
+Video::Video(FileHandlePtr h, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
     begin(h, pixelsPerFrame, fps, frameHistoryCount);
 }
-Video::Video(ByteStreamRef s, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
+Video::Video(ByteStreamPtr s, size_t pixelsPerFrame, float fps, size_t frameHistoryCount) {
     beginStream(s, pixelsPerFrame, fps, frameHistoryCount);
 }
 Video::~Video() = default;
 Video::Video(const Video &) = default;
 Video &Video::operator=(const Video &) = default;
 
-void Video::begin(FileHandleRef h, size_t pixelsPerFrame, float fps,
+void Video::begin(FileHandlePtr h, size_t pixelsPerFrame, float fps,
                   size_t frameHistoryCount) {
     mError.clear();
     mImpl.reset();
-    mImpl = VideoImplRef::New(pixelsPerFrame, fps, frameHistoryCount);
+    mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frameHistoryCount);
     mImpl->begin(h);
 }
 
 
 
-void Video::beginStream(ByteStreamRef bs, size_t pixelsPerFrame, float fps,
+void Video::beginStream(ByteStreamPtr bs, size_t pixelsPerFrame, float fps,
                         size_t frameHistoryCount) {
     mError.clear();
     mImpl.reset();
-    mImpl = VideoImplRef::New(pixelsPerFrame, fps, frameHistoryCount);
+    mImpl = VideoImplPtr::New(pixelsPerFrame, fps, frameHistoryCount);
     mImpl->beginStream(bs);
 }
 
@@ -108,7 +108,7 @@ VideoFx::VideoFx(Video video, XYMap xymap) : FxGrid(xymap), mVideo(video) {}
 
 void VideoFx::draw(DrawContext context) {
     if (!mFrame) {
-        mFrame = FrameRef::New(mXyMap.getTotal(), false);
+        mFrame = FramePtr::New(mXyMap.getTotal(), false);
     }
     bool ok = mVideo.draw(context.now, mFrame.get());
     if (!ok) {

@@ -19,14 +19,14 @@ PixelStream::~PixelStream() {
     close();
 }
 
-bool PixelStream::begin(FileHandleRef h) {
+bool PixelStream::begin(FileHandlePtr h) {
     close();
     mFileHandle = h;
     mUsingByteStream = false;
     return mFileHandle->available();
 }
 
-bool PixelStream::beginStream(ByteStreamRef s) {
+bool PixelStream::beginStream(ByteStreamPtr s) {
     close();
     mByteStream = s;
     mUsingByteStream = true;

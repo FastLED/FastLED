@@ -17,12 +17,12 @@ VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
     : mPixelsPerFrame(pixelsPerFrame),
       mFrameInterpolator(
           // todo: the max number of frames should be 1 or 0.
-          FrameInterpolatorRef::New(MAX(0, nFramesInBuffer), fpsVideo)) {}
+          FrameInterpolatorPtr::New(MAX(0, nFramesInBuffer), fpsVideo)) {}
 
 
 void VideoImpl::setTimeScale(float timeScale) {
     if (!mTimeScale) {
-        mTimeScale = TimeScaleRef::New(0, timeScale);
+        mTimeScale = TimeScalePtr::New(0, timeScale);
     }
     mTimeScale->setScale(timeScale);
 }
@@ -30,17 +30,17 @@ void VideoImpl::setTimeScale(float timeScale) {
 
 VideoImpl::~VideoImpl() { end(); }
 
-void VideoImpl::begin(FileHandleRef h) {
+void VideoImpl::begin(FileHandlePtr h) {
     end();
     // Removed setStartTime call
-    mStream = PixelStreamRef::New(mPixelsPerFrame * kSizeRGB8);
+    mStream = PixelStreamPtr::New(mPixelsPerFrame * kSizeRGB8);
     mStream->begin(h);
     mPrevNow = 0;
 }
 
-void VideoImpl::beginStream(ByteStreamRef bs) {
+void VideoImpl::beginStream(ByteStreamPtr bs) {
     end();
-    mStream = PixelStreamRef::New(mPixelsPerFrame * kSizeRGB8);
+    mStream = PixelStreamPtr::New(mPixelsPerFrame * kSizeRGB8);
     // Removed setStartTime call
     mStream->beginStream(bs);
     mPrevNow = 0;
@@ -72,7 +72,7 @@ bool VideoImpl::draw(uint32_t now, Frame *frame) {
 bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     //DBG("draw with now = " << now);
     if (!mTimeScale) {
-        mTimeScale = TimeScaleRef::New(now);
+        mTimeScale = TimeScalePtr::New(now);
     }
     now = mTimeScale->update(now);
     if (!mStream) {
@@ -127,7 +127,7 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
     }
 
     for (size_t i = 0; i < frame_numbers.size(); ++i) {
-        FrameRef recycled_frame;
+        FramePtr recycled_frame;
         if (mFrameInterpolator->full()) {
             uint32_t frame_to_erase = 0;
             bool ok = false;
@@ -153,7 +153,7 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
         uint32_t frame_to_fetch = frame_numbers[i];
         if (!recycled_frame) {
             // Happens when we are not full and we need to allocate a new frame.
-            recycled_frame = FrameRef::New(mPixelsPerFrame, false);
+            recycled_frame = FramePtr::New(mPixelsPerFrame, false);
         }
 
        do {  // only to use break
