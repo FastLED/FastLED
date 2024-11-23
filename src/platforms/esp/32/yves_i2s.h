@@ -41,12 +41,12 @@ class YvesI2S {
     Slice<CRGB> leds();
 
   private:
-    scoped_ptr<YvesI2SImpl> mDriver;
+    fl::scoped_ptr<YvesI2SImpl> mDriver;
     //Pins mPins;
     int mClockPin;
     int mLatchPin;
     FixedVector<int, 6> mPins;
-    scoped_array<CRGB> mLeds;
+    fl::scoped_array<CRGB> mLeds;
 };
 
 FASTLED_NAMESPACE_END

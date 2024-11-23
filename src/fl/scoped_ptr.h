@@ -6,7 +6,7 @@
 
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 template<typename T>
@@ -150,4 +150,4 @@ template <typename T, typename Deleter=ArrayDeleter<T>> class scoped_array {
 };
 
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

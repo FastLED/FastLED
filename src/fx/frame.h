@@ -41,8 +41,8 @@ public:
 private:
     const size_t mPixelsCount;
     uint32_t mTimeStamp = 0;
-    scoped_array<CRGB> mRgb;
-    scoped_array<uint8_t> mAlpha;  // Optional alpha channel.
+    fl::scoped_array<CRGB> mRgb;
+    fl::scoped_array<uint8_t> mAlpha;  // Optional alpha channel.
     uint32_t mFrameNumber = 0;  // optional
 };
 

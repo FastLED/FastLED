@@ -208,7 +208,7 @@ public:
 template<typename T>
 class HeapVector {
 private:
-    scoped_array<T> mArray;
+    fl::scoped_array<T> mArray;
     
     size_t mCapacity = 0;
     size_t mSize = 0;

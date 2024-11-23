@@ -67,7 +67,7 @@ public:
         return data;
     }
 private:
-    scoped_ptr<T> mDataHandle;
+    fl::scoped_ptr<T> mDataHandle;
     T* data = nullptr;
     uint32_t length;
 };

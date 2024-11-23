@@ -112,7 +112,7 @@ private:
         return (index + mCapacity - 1) % mCapacity;
     }
 
-    scoped_array<T> mBuffer;
+    fl::scoped_array<T> mBuffer;
     size_t mCapacity;
     size_t mHead;
     size_t mTail;
