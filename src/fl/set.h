@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 #include "namespace.h"
-#include "fl/fixed_vector.h"
+#include "fl/vector.h"
 
 FASTLED_NAMESPACE_BEGIN
 

@@ -2,7 +2,7 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
-#include "fl/fixed_set.h"
+#include "fl/set.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE

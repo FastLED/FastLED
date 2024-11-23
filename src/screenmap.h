@@ -7,7 +7,7 @@
 #include "fl/ptr.h"
 
 #include "fl/str.h"
-#include "fl/fixed_map.h"
+#include "fl/map.h"
 #include "json.h"
 #include "namespace.h"
 
