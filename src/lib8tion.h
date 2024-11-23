@@ -14,7 +14,7 @@
 
 #include <stdint.h>
 #include "lib8tion/lib8static.h"
-#include "qfx.h"
+#include "lib8tion/qfx.h"
 
 
 #if !defined(__AVR__)
