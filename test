@@ -2,4 +2,4 @@
 set -e
 
 cd "$(dirname "$0")"
-uv run test.py
+uv run test.py "$@"
