@@ -2,7 +2,7 @@
 #define __INC_FL_DELAY_H
 
 #include "FastLED.h"
-#include "types.h"
+#include "fl/types.h"
 #include "force_inline.h"
 
 /// @file fastled_delay.h
@@ -78,11 +78,11 @@ public:
 /// Delay N clock cycles. 
 /// @tparam CYCLES the number of clock cycles to delay
 /// @note No delay is applied if CYCLES is less than or equal to zero.
-template<cycle_t CYCLES> inline void delaycycles();
+template<fl::cycle_t CYCLES> inline void delaycycles();
 
 /// A variant of ::delaycycles that will always delay
 /// at least one cycle.
-template<cycle_t CYCLES> inline void delaycycles_min1() {
+template<fl::cycle_t CYCLES> inline void delaycycles_min1() {
 	delaycycles<1>();
 	delaycycles<CYCLES-1>();
 }
@@ -93,7 +93,7 @@ template<cycle_t CYCLES> inline void delaycycles_min1() {
 // usable definition
 #if defined(FASTLED_AVR)
 // worker template - this will nop for LOOP * 3 + PAD cycles total
-template<int LOOP, cycle_t PAD> inline void _delaycycles_AVR() {
+template<int LOOP, fl::cycle_t PAD> inline void _delaycycles_AVR() {
 	delaycycles<PAD>();
 	// the loop below is 3 cycles * LOOP.  the LDI is one cycle,
 	// the DEC is 1 cycle, the BRNE is 2 cycles if looping back and
@@ -108,14 +108,14 @@ template<int LOOP, cycle_t PAD> inline void _delaycycles_AVR() {
 		);
 }
 
-template<cycle_t CYCLES> FASTLED_FORCE_INLINE void delaycycles() {
+template<fl::cycle_t CYCLES> FASTLED_FORCE_INLINE void delaycycles() {
 	_delaycycles_AVR<CYCLES / 3, CYCLES % 3>();
 }
 
 
 
 #else
-// template<int LOOP, cycle_t PAD> inline void _delaycycles_ARM() {
+// template<int LOOP, fl::cycle_t PAD> inline void _delaycycles_ARM() {
 // 	delaycycles<PAD>();
 // 	// the loop below is 3 cycles * LOOP.  the LDI is one cycle,
 // 	// the DEC is 1 cycle, the BRNE is 2 cycles if looping back and
@@ -131,7 +131,7 @@ template<cycle_t CYCLES> FASTLED_FORCE_INLINE void delaycycles() {
 // }
 
 
-template<cycle_t CYCLES> FASTLED_FORCE_INLINE void delaycycles() {
+template<fl::cycle_t CYCLES> FASTLED_FORCE_INLINE void delaycycles() {
 	// _delaycycles_ARM<CYCLES / 3, CYCLES % 3>();
 	FL_NOP; delaycycles<CYCLES-1>();
 }

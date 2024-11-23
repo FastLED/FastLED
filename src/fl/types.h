@@ -1,9 +1,9 @@
-#ifndef TYPES_H
-#define TYPES_H
+#pragma once
 
 #include "led_sysdefs.h"
+#include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #if defined(__AVR__)
 typedef int cycle_t;  ///< 8.8 fixed point (signed) value
@@ -11,6 +11,5 @@ typedef int cycle_t;  ///< 8.8 fixed point (signed) value
 typedef int64_t cycle_t;  ///< 8.8 fixed point (signed) value
 #endif
 
-FASTLED_NAMESPACE_END
+}
 
-#endif  // TYPES_H
