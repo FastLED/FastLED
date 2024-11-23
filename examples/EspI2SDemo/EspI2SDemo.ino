@@ -10,7 +10,7 @@ void init() {}
 void setup() {}
 #else
 #include <FastLED.h>
-#include "scoped_ptr.h"
+#include "fl/scoped_ptr.h"
 #include "fixed_vector.h"
 
 #include <stdio.h>

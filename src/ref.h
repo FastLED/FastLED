@@ -7,7 +7,7 @@
 // ArduinoJson::Ptr<T> so it was renamed to Ref<T>.
 
 #include "namespace.h"
-#include "scoped_ptr.h"
+#include "fl/scoped_ptr.h"
 #include "template_magic.h"
 
 

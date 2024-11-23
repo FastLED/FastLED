@@ -7,7 +7,7 @@
 #include "namespace.h"
 #include "singleton.h"
 #include "pixelset.h"
-#include "scoped_ptr.h"
+#include "fl/scoped_ptr.h"
 #include "allocator.h"
 #include "slice.h"
 

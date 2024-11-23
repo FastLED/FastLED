@@ -5,7 +5,7 @@
 
 #include "inplacenew.h"
 #include "namespace.h"
-#include "scoped_ptr.h"
+#include "fl/scoped_ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
 
