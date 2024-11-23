@@ -1,47 +1,118 @@
 #!/usr/bin/env python3
 import os
 import sys
-import tempfile
+import io
 import subprocess
 import time
+import threading
+import queue
+import argparse
+import _thread
 from pathlib import Path
+from typing import List, Tuple, Any, Optional
 
-def run_command(cmd, **kwargs):
+def run_command(cmd: List[str], **kwargs: Any) -> None:
     """Run a command and handle errors"""
     try:
         subprocess.run(cmd, check=True, **kwargs)
     except subprocess.CalledProcessError as e:
         sys.exit(e.returncode)
 
-def main():
-    # Change to script directory
-    os.chdir(Path(__file__).parent)
+def output_reader(process: subprocess.Popen[str], 
+                 output_queue: queue.Queue[Tuple[str, str]], 
+                 stop_event: threading.Event) -> None:
+    """Read output from process and put it in the queue"""
+    try:
+        assert process.stdout is not None  # for mypy
+        assert process.stderr is not None  # for mypy
+        
+        while not stop_event.is_set():
+            # Use a small timeout so we can check the stop_event regularly
+            if process.stdout.readable():
+                stdout_line = process.stdout.readline()
+                if stdout_line:
+                    output_queue.put(('stdout', stdout_line))
+            if process.stderr.readable():
+                stderr_line = process.stderr.readline()
+                if stderr_line:
+                    output_queue.put(('stderr', stderr_line))
+            
+            # Check if process has ended and all output has been read
+            if process.poll() is not None:
+                # Get any remaining output
+                remaining_out, remaining_err = process.communicate()
+                if remaining_out:
+                    output_queue.put(('stdout', remaining_out))
+                if remaining_err:
+                    output_queue.put(('stderr', remaining_err))
+                break
+    except KeyboardInterrupt:
+        # Interrupt main thread and exit
+        _thread.interrupt_main()
+        return
 
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments"""
+    parser = argparse.ArgumentParser(description='Run FastLED tests')
+    parser.add_argument('--cpp', action='store_true',
+                       help='Run C++ tests only')
+    parser.add_argument('--test', type=str,
+                       help='Specific C++ test to run')
+    return parser.parse_args()
 
-    if len(sys.argv) > 1 and sys.argv[1] == '--cpp':
-        if len(sys.argv) > 2:
-            # Compile and run specific C++ test
+def main() -> None:
+    try:
+        args = parse_args()
+        
+        # Change to script directory
+        os.chdir(Path(__file__).parent)
+
+        if args.cpp:
+            # Compile and run C++ tests
             start_time = time.time()
-            run_command(['uv', 'run', 'ci/cpp_test_run.py', '--test', sys.argv[2]])
+            if args.test:
+                # Run specific C++ test
+                run_command(['uv', 'run', 'ci/cpp_test_run.py', '--test', args.test])
+            else:
+                # Run all C++ tests
+                run_command(['uv', 'run', 'ci/cpp_test_run.py'])
             print(f"Time elapsed: {time.time() - start_time:.2f}s")
-        else:
-            # Compile all C++ tests
-            start_time = time.time()
-            run_command(['uv', 'run', 'ci/cpp_test_run.py'])
-            print(f"Time elapsed: {time.time() - start_time:.2f}s")
-    else:
+            return
+        
         # Run all tests
         # Start pio check in background and capture output
-        with tempfile.NamedTemporaryFile(mode='w+') as temp_file:
-            pio_process = subprocess.Popen(
-                ['uv', 'run', 'pio', 'check', '--skip-packages', 
-                 '--src-filters=+<src/>', '--severity=medium',
-                 '--fail-on-defect=high', '--flags',
-                 '--inline-suppr --enable=all --std=c++17'],
-                stdout=temp_file,
-                stderr=temp_file
-            )
+        output_buffer = io.StringIO()
+        output_queue: queue.Queue[Tuple[str, str]] = queue.Queue()
 
+        cmd_list = ['uv', 'run', 'pio', 'check', '--skip-packages', 
+                                           '--src-filters=+<src/>', '--severity=medium',
+                                           '--fail-on-defect=high', '--flags',
+                                           '--inline-suppr --enable=all --std=c++17']
+
+        cmd_str = subprocess.list2cmdline(cmd_list)
+        
+        print(f"Running command (in the background): {cmd_str}")
+
+        pio_process = subprocess.Popen(
+            cmd_list,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1
+        )
+
+        # Create stop event
+        stop_event = threading.Event()
+
+        # Start daemon thread to read output
+        reader_thread = threading.Thread(
+            target=output_reader,
+            args=(pio_process, output_queue, stop_event),
+            daemon=True
+        )
+        reader_thread.start()
+
+        try:
             # Run other tests while pio check runs
             run_command(['uv', 'run', 'ci/cpp_test_compile.py'])
             run_command(['uv', 'run', 'ci/cpp_test_run.py'])
@@ -49,17 +120,44 @@ def main():
             run_command(['uv', 'run', 'pytest', 'ci/tests'])
 
             print("Waiting on pio check to complete...")
-            
-            # Wait for pio check to complete
-            pio_process.wait()
-            
-            # Display pio check output
-            temp_file.seek(0)
-            print(temp_file.read())
 
-            # Exit with pio check's status code if it failed
-            if pio_process.returncode != 0:
-                sys.exit(pio_process.returncode)
+            # Process output queue until pio check completes
+            while pio_process.poll() is None:
+                try:
+                    stream, line = output_queue.get(timeout=0.1)
+                    print(line, end='')
+                    output_buffer.write(line)
+                except queue.Empty:
+                    continue
+
+            # Process any remaining items in queue
+            while not output_queue.empty():
+                stream, line = output_queue.get_nowait()
+                print(line, end='')
+                output_buffer.write(line)
+
+        except KeyboardInterrupt:
+            print("\nInterrupted by user. Cleaning up...", file=sys.stderr)
+            raise
+
+        finally:
+            # Signal thread to stop and wait for it
+            stop_event.set()
+            reader_thread.join(timeout=1.0)  # Wait up to 1 second for thread to finish
+
+            # If process is still running, terminate it
+            if pio_process.poll() is None:
+                pio_process.terminate()
+                try:
+                    pio_process.wait(timeout=1.0)
+                except subprocess.TimeoutExpired:
+                    pio_process.kill()  # Force kill if terminate doesn't work
+
+        # Exit with pio check's status code if it failed
+        if pio_process.returncode != 0:
+            sys.exit(pio_process.returncode)
+    except KeyboardInterrupt:
+        sys.exit(130)  # Standard Unix practice: 128 + SIGINT's signal number (2)
 
 if __name__ == '__main__':
     main()
