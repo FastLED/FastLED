@@ -116,16 +116,12 @@ RUN echo 'export LANG=en_US.UTF-8' >> /etc/profile && \
 #COPY src/platforms/wasm/compiler/install-arduino-cli.sh /install-arduino-cli.sh
 #RUN chmod +x /install-arduino-cli.sh && /install-arduino-cli.sh || echo "Failed to install Arduino CLI"
 
-
-
-
-
 # Get the compiler requirements and install them.
 COPY src/platforms/wasm/compiler/requirements.txt /install/requirements.txt
 RUN pip install -r /install/requirements.txt
 
 RUN pio settings set check_platformio_interval 9999
-RUN pio settings set enable_telemetry 0
+RUN pio settings set enable_telemetry 1
 
 # FIRST PRE-WARM CYCLE and initial setup: Download the fastled repo from the github and pre-warm the cache with a compilation.
 # This is by far the most expensive part of the build, because platformio needs to download initial tools. This
@@ -156,17 +152,24 @@ RUN python /js/init_runtime.py || true
 
 # First pre-warm cycle - always do it as part of the build.
 RUN mkdir -p /logs
-RUN /js/prewarm.sh --force > /logs/prewarm.log.1
 
-COPY *.json /js/fastled/
+# Do not cause the build to fail because the cached pre-warm failed.
+RUN /js/prewarm.sh --force > /logs/prewarm.log.1 || true
 
+COPY *.json /host/fastled/
 
-COPY src/*.* /js/fastled/src/
-COPY src/fx /js/fastled/src/fx
-COPY src/fl /js/fastled/src/fl
-COPY src/lib8tion /js/fastled/src/lib8tion
-COPY src/third_party /js/fastled/src/third_party
-COPY src/platforms /js/fastled/src/platforms
+# Copy the fastled repo from the host machine and prepare for pre-warm
+# Make sure and delete files that have been removed so that we don't get
+# duplicate symbols from stale files.
+COPY *.json /host/fastled/
+COPY src/*.* /host/fastled/src/
+COPY src/fx /host/fastled/src/fx
+COPY src/fl /host/fastled/src/fl
+COPY src/lib8tion /host/fastled/src/lib8tion
+COPY src/third_party /host/fastled/src/third_party
+COPY src/platforms /host/fastled/src/platforms
+# now sync local to the source directory.
+RUN rsync -av --delete /host/fastled/src/ /js/fastled/src/ && rm -rf /host/fastled
 
 
 # SECOND PRE-WARM CYCLE: Copy the fastled repo from the host machine and pre-warm the cache with that compilation. This will
