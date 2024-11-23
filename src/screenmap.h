@@ -120,8 +120,9 @@ class ScreenMap {
     // The diameter each point represents.
     float getDiameter() const { return mDiameter; }
 
-    static void ParseJson(const char *jsonStrScreenMap,
-                          fl::FixedMap<fl::Str, ScreenMap, 16> *segmentMaps);
+    static bool ParseJson(const char *jsonStrScreenMap,
+                          fl::FixedMap<fl::Str, ScreenMap, 16> *segmentMaps,
+                          fl::Str *err = nullptr);
 
     static void toJsonStr(const fl::FixedMap<fl::Str, ScreenMap, 16>&, fl::Str* jsonBuffer);
     static void toJson(const fl::FixedMap<fl::Str, ScreenMap, 16>&, FLArduinoJson::JsonDocument* doc);

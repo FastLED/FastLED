@@ -11,6 +11,7 @@
 #include "fl/json.h"
 #include "namespace.h"
 #include "fl/vector.h"
+#include "fl/warn.h"
 #include "math_macros.h"
 #include "math.h"
 
@@ -36,10 +37,20 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds, float cm_led_dia
 }
 
 
-void ScreenMap::ParseJson(const char *jsonStrScreenMap,
-                          fl::FixedMap<Str, ScreenMap, 16> *segmentMaps) {
-    FLArduinoJson::JsonDocument doc;
-    FLArduinoJson::deserializeJson(doc, jsonStrScreenMap);
+bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
+                          fl::FixedMap<Str, ScreenMap, 16> *segmentMaps,
+                          Str *err) {
+    fl::JsonDocument doc;
+    fl::Str _err;
+    if (!err) {
+        err = &_err;
+    }
+
+    bool ok = fl::parseJson(jsonStrScreenMap, &doc, err);
+    if (!ok) {
+        FASTLED_WARN("Failed to parse json: " << *err);
+        return false;
+    }
     auto map = doc["map"];
     for (auto kv : map.as<FLArduinoJson::JsonObject>()) {
         auto segment = kv.value();
@@ -60,6 +71,7 @@ void ScreenMap::ParseJson(const char *jsonStrScreenMap,
         }
         segmentMaps->insert(kv.key().c_str(), segment_map);
     }
+    return true;
 }
 
 void ScreenMap::toJson(const fl::FixedMap<Str, ScreenMap, 16>& segmentMaps, FLArduinoJson::JsonDocument* _doc) {
