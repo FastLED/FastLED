@@ -35,19 +35,14 @@ function warn(...args) {
     }
 }
 
-function error(...args) {
-    const stackTrace = new Error().stack;
-    args = args + '\n' + stackTrace;
-    _prev_error(args);
-    try { print(args); } catch (e) {
-        _prev_error("Error in error", e);
-    }
-}
+// DO NOT OVERRIDE ERROR! When something goes really wrong we want it
+// to always go to the console. If we hijack it then startup errors become
+// extremely difficult to debug.
 
 console = {};
 console.log = log;
 console.warn = warn;
-console.error = error;
+console.error = _prev_error;
 
 
 function isDenseGrid(frameData) {
@@ -1350,7 +1345,6 @@ class UiManager {
     const onModuleLoaded = async (fastLedLoader) => {
         // Unpack the module functions and send them to the runFastLED function
 
-
         function __runFastLED(moduleInstance, frameRate, filesJson) {
             const exports_exist = moduleInstance && moduleInstance._extern_setup && moduleInstance._extern_loop;
             if (!exports_exist) {
@@ -1358,7 +1352,9 @@ class UiManager {
                 return;
             }
 
-            return runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance, filesJson);
+            let out = runFastLED(moduleInstance._extern_setup, moduleInstance._extern_loop, frameRate, moduleInstance, filesJson);
+            //globalThis.hijackOutputOnce();
+            return out;
         }
         // Start fetch now in parallel
         const fetchFilePromise = async (fetchFilePath) => {
@@ -1396,25 +1392,31 @@ class UiManager {
 
 
     async function loadFastLed(options) {
-        canvasId = options.canvasId;
-        uiControlsId = options.uiControlsId;
-        outputId = options.printId;
-        print = customPrintFunction;
-        console.log("Loading FastLED with options:", options);
-        frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
-        uiManager = new UiManager(uiControlsId);
-        threeJs = options.threeJs;
-        console.log("ThreeJS:", threeJs);
-        const fastLedLoader = options.fastled;
-        threeJsModules = threeJs.modules;
-        containerId = threeJs.containerId;
-        console.log("ThreeJS modules:", threeJsModules);
-        console.log("Container ID:", containerId);
-        graphicsArgs = {
-            canvasId: canvasId,
-            threeJsModules: threeJsModules
+        try {
+            canvasId = options.canvasId;
+            uiControlsId = options.uiControlsId;
+            outputId = options.printId;
+            print = customPrintFunction;
+            console.log("Loading FastLED with options:", options);
+            frameRate = options.frameRate || DEFAULT_FRAME_RATE_60FPS;
+            uiManager = new UiManager(uiControlsId);
+            threeJs = options.threeJs;
+            console.log("ThreeJS:", threeJs);
+            const fastLedLoader = options.fastled;
+            threeJsModules = threeJs.modules;
+            containerId = threeJs.containerId;
+            console.log("ThreeJS modules:", threeJsModules);
+            console.log("Container ID:", containerId);
+            graphicsArgs = {
+                canvasId: canvasId,
+                threeJsModules: threeJsModules
+            }
+            let out = await onModuleLoaded(fastLedLoader);
+            console.log("Module loaded:", out);
+        } catch (error) {
+            console.error("Error loading FastLED:", error);
+            debugger;
         }
-        await onModuleLoaded(fastLedLoader);
     }
     globalThis.loadFastLED = loadFastLed;
 })();
