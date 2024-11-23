@@ -3,18 +3,18 @@
 #include "namespace.h"
 #include "crgb.h"
 #include "fl/ptr.h"
-#include "fx/storage/bytestream.h"
-#include "fx/frame.h"
+#include "fl/bytestream.h"
 #include "fl/file_system.h"
-
+#include "fx/frame.h"
 namespace fl {
 FASTLED_SMART_PTR(FileHandle);
+FASTLED_SMART_PTR(ByteStream);
 }
 
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_PTR(PixelStream);
-FASTLED_SMART_PTR(ByteStream);
+
 
 // PixelStream takes either a file handle or a byte stream
 // and reads frames from it in order to serve data to the
@@ -30,7 +30,7 @@ class PixelStream: public fl::Referent {
   explicit PixelStream(int bytes_per_frame);
 
   bool begin(fl::FileHandlePtr h);
-  bool beginStream(ByteStreamPtr s);
+  bool beginStream(fl::ByteStreamPtr s);
   void close();
   int32_t bytesPerFrame();
   bool readPixel(CRGB* dst);  // Convenience function to read a pixel
@@ -53,7 +53,7 @@ class PixelStream: public fl::Referent {
   void init(int bytes_per_frame);
   int32_t mbytesPerFrame;
   fl::FileHandlePtr mFileHandle;
-  ByteStreamPtr mByteStream;
+  fl::ByteStreamPtr mByteStream;
   bool mUsingByteStream;
 
 protected:

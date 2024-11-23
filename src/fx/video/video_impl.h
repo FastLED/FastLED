@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "fx/storage/bytestream.h"
+#include "fl/bytestream.h"
 #include "fx/video/pixel_stream.h"
 #include "fx/video/frame_interpolator.h"
 #include "fl/file_system.h"
@@ -10,12 +10,12 @@
 
 namespace fl {
 FASTLED_SMART_PTR(FileHandle);
+FASTLED_SMART_PTR(ByteStream);
 }
 
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_PTR(VideoImpl);
-FASTLED_SMART_PTR(ByteStream);
 FASTLED_SMART_PTR(FrameInterpolator);
 FASTLED_SMART_PTR(PixelStream)
 
@@ -32,7 +32,7 @@ class VideoImpl : public fl::Referent {
     ~VideoImpl();
     // Api
     void begin(fl::FileHandlePtr h);
-    void beginStream(ByteStreamPtr s);
+    void beginStream(fl::ByteStreamPtr s);
     bool draw(uint32_t now, CRGB *leds, uint8_t *alpha = nullptr);
     void end();
     bool rewind();

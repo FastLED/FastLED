@@ -8,7 +8,7 @@
 #include "doctest.h"
 #include "lib8tion/intmap.h"
 #include "fx/video/pixel_stream.h"
-#include "fx/storage/bytestreammemory.h"
+#include "fl/bytestreammemory.h"
 #include "fx/video.h"
 #include "fl/ptr.h"
 #include "crgb.h"

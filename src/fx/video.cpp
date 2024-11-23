@@ -14,6 +14,7 @@
 #define DBG FASTLED_DBG
 
 using fl::FileHandlePtr;
+using fl::ByteStreamPtr;
 
 #include "namespace.h"
 

@@ -6,10 +6,10 @@
 #include "namespace.h"
 #include "fl/ptr.h"
 
-#include "bytestream.h"
+#include "fl/bytestream.h"
 #include "fl/circular_buffer.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(ByteStreamMemory);
 
@@ -27,7 +27,7 @@ class ByteStreamMemory : public ByteStream {
     size_t write(const CRGB* src, size_t n);
 
   private:
-    fl::CircularBuffer<uint8_t> mReadBuffer;
+    CircularBuffer<uint8_t> mReadBuffer;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

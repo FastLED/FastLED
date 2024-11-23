@@ -3,7 +3,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "doctest.h"
-#include "fx/storage/bytestreammemory.h"
+#include "fl/bytestreammemory.h"
 #include "fx/video/pixel_stream.h"
 
 #include "namespace.h"

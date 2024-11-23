@@ -8,7 +8,7 @@
 
 #include "crgb.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(ByteStream);
 
@@ -27,6 +27,4 @@ class ByteStream : public fl::Referent {
 
 };
 
-
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "bytestreammemory.h"
+#include "fl/bytestreammemory.h"
 
 #include "math_macros.h"
 
@@ -9,7 +9,7 @@
 
 #define DBG FASTLED_DBG
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 ByteStreamMemory::ByteStreamMemory(uint32_t size_buffer)
     : mReadBuffer(size_buffer) {}
@@ -62,4 +62,4 @@ size_t ByteStreamMemory::write(const CRGB* src, size_t n) {
     return write(reinterpret_cast<const uint8_t*>(src), n * 3);
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
