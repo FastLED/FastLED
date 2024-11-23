@@ -5,7 +5,7 @@
 
 #include "fl/ptr.h"
 #include "template_magic.h"
-#include "fixed_vector.h"
+#include "fl/fixed_vector.h"
 #include "namespace.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE

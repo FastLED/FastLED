@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "crgb.h"
-#include "fixed_vector.h"
+#include "fl/fixed_vector.h"
 #include "namespace.h"
 #include "singleton.h"
 #include "pixelset.h"

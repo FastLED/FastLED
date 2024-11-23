@@ -5,7 +5,7 @@
 
 
 #include "crgb.h"
-#include "fixed_map.h"
+#include "fl/fixed_map.h"
 #include "fx/fx.h"
 #include "fx/detail/fx_compositor.h"
 #include "fx/detail/fx_layer.h"

@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "crgb.h"
-#include "fixed_vector.h"
+#include "fl/fixed_vector.h"
 #include "fx/fx.h"
 #include "namespace.h"
 #include "fl/ptr.h"

@@ -5,7 +5,7 @@
 
 #include "doctest.h"
 #include "fl/str.h"
-#include "fixed_vector.h"
+#include "fl/fixed_vector.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
