@@ -36,6 +36,14 @@ EMSCRIPTEN_KEEPALIVE uint32_t micros();
 EMSCRIPTEN_KEEPALIVE void delay(int ms);
 }
 
+
+
+//////////////////////////////////////////////////////////////////////////
+// BEGIN EMSCRIPTEN EXPORTS
+EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup();
+EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop();
+
+
 FASTLED_NAMESPACE_BEGIN
 
 // Sets the canvas size. This assumes one strip per row. This is

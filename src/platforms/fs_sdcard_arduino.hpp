@@ -11,11 +11,13 @@
 
 #include "namespace.h"
 #include "fl/ptr.h"
+#include "fl/file_system.h"
+
 
 FASTLED_NAMESPACE_BEGIN
 
 #ifdef USE_SDFAT
-class SdFatFileHandle : public FileHandle {
+class SdFatFileHandle : public fl::FileHandle {
 private:
     SdFile _file;
     const char* _path;
@@ -37,7 +39,7 @@ public:
     void close() override { _file.close(); }
 };
 #else
-class SDFileHandle : public FileHandle {
+class SDFileHandle : public fl::FileHandle {
 private:
     File _file;
     const char* _path;
@@ -60,7 +62,7 @@ public:
 };
 #endif
 
-class FsArduino : public FsImpl {
+class FsArduino : public fl::FsImpl {
 private:
     int _cs_pin;
 #ifdef USE_SDFAT
@@ -82,7 +84,7 @@ public:
         // SD library doesn't have an end() method
     }
 
-    FileHandlePtr openRead(const char *name) override {
+    fl::FileHandlePtr openRead(const char *name) override {
 #ifdef USE_SDFAT
         SdFile file;
         if (!file.open(name, oflag)) {
@@ -97,13 +99,13 @@ public:
         File file = SD.open(name);
         #endif
         if (!file) {
-            return Ptr<FileHandle>::TakeOwnership(nullptr);
+            return fl::Ptr<fl::FileHandle>::TakeOwnership(nullptr);
         }
-        return Ptr<FileHandle>::TakeOwnership(new SDFileHandle(std::move(file), name));
+        return fl::Ptr<fl::FileHandle>::TakeOwnership(new SDFileHandle(std::move(file), name));
 #endif
     }
 
-    void close(FileHandlePtr file) override {
+    void close(fl::FileHandlePtr file) override {
         // The close operation is now handled in the FileHandle wrapper classes
         // This method is no longer necessary, but we keep it for compatibility
         if (file) {
@@ -112,8 +114,8 @@ public:
     }
 };
 
-inline FsImplPtr make_sdcard_filesystem(int cs_pin) {
-    return FsImplPtr::Null();
+inline fl::FsImplPtr make_sdcard_filesystem(int cs_pin) {
+    return fl::FsImplPtr::Null();
 }
 
 

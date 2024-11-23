@@ -1,4 +1,5 @@
 #include "fl/file_system.h"
+#include "fl/warn.h"
 
 
 #ifdef __EMSCRIPTEN__
@@ -14,11 +15,46 @@
 
 namespace fl {
 
-// WEAK SYMBOL
-// Override this if you want to supply a file system for your platform.
-__attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
-    return FsImplPtr::Null();
-}
+class NullFileHandle : public FileHandle {
+  public:
+    NullFileHandle() = default;
+    ~NullFileHandle() override {}
+
+    bool available() const override { return false; }
+    size_t size() const override { return 0; }
+    size_t read(uint8_t *dst, size_t bytesToRead) override { return 0; }
+    size_t pos() const override { return 0; }
+    const char *path() const override { return "NULL FILE HANDLE"; }
+    bool seek(size_t pos) override { return false; }
+    void close() override {}
+    bool valid() const override {
+        FASTLED_WARN("NullFileHandle is not valid");
+        return false;
+    }
+};
+
+class NullFileSystem : public FsImpl {
+  public:
+    NullFileSystem() {
+        FASTLED_WARN("NullFileSystem instantiated as a placeholder, please implement a file system for your platform.");
+    }
+    ~NullFileSystem() override {}
+
+    bool begin() override { return true; }
+    void end() override {}
+
+    void close(FileHandlePtr file) override {
+        // No need to do anything for in-memory files
+        FASTLED_WARN("NullFileSystem::close");
+    }
+
+    FileHandlePtr openRead(const char *_path) override {
+        FileHandlePtr out = FileHandlePtr::TakeOwnership(new NullFileHandle());
+        return out;
+    }
+};
+
+
 
 bool FileSystem::beginSd(int cs_pin) {
     mFs = make_sdcard_filesystem(cs_pin);
@@ -85,5 +121,13 @@ bool FileSystem::readText(const char *path, fl::Str* out) {
     file->close();
     return wrote;
 }
+}  // namespace fl
+
+namespace fl {
+__attribute__((weak)) FsImplPtr make_sdcard_filesystem(int cs_pin) {
+    FsImplPtr out = FsImplPtr::TakeOwnership(new NullFileSystem());
+    return out;
+}
 
 }  // namespace fl
+

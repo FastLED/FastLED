@@ -7,30 +7,23 @@
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 
-
-
 #include <memory>
 #include <stdint.h>
 #include <stdio.h>
 #include <string>
 
-
-
 #include "ui/ui_internal.h"
 #include "fl/str.h"
 #include "active_strip_data.h"
-#include "fl/engine_events.h"
 #include "js.h"
 #include "fl/str.h"
 #include "namespace.h"
 #include "screenmap.h"
 #include "fl/map.h"
+#include "engine_listener.h"
 
 using namespace fl;
 
-
-
-FASTLED_NAMESPACE_BEGIN
 
 
 EMSCRIPTEN_KEEPALIVE void jsSetCanvasSize(const char* jsonString, size_t jsonSize) {
@@ -192,7 +185,37 @@ EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
 }
 
 
+// extern setup and loop
+extern void setup();
+extern void loop();
 
-FASTLED_NAMESPACE_END
+
+inline void setup_once() {
+    static bool g_setup_called = false;
+    if (g_setup_called) {
+        return;
+    }
+    EngineListener::Init();
+    g_setup_called = true;
+    setup();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// BEGIN EMSCRIPTEN EXPORTS
+EMSCRIPTEN_KEEPALIVE extern "C" int extern_setup() {
+    setup_once();
+    return 0;
+}
+
+EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
+
+    setup_once();
+    //fastled_resume_timer();
+    fl::EngineEvents::onPlatformPreLoop();
+    loop();
+    //fastled_pause_timer();
+    return 0;
+}
+
 
 #endif  // __EMSCRIPTEN__

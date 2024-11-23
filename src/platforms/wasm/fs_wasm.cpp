@@ -30,7 +30,6 @@ FASTLED_NAMESPACE_BEGIN
 FASTLED_SMART_PTR(FsImplWasm);
 FASTLED_SMART_PTR(WasmFileHandle);
 
-namespace {
 // Map is great because it doesn't invalidate it's data members unless erase is
 // called.
 FASTLED_SMART_PTR(FileData);
@@ -78,15 +77,15 @@ private:
 };
 
 typedef std::map<Str, FileDataPtr> FileMap;
-FileMap gFileMap;
+static FileMap gFileMap;
 // At the time of creation, it's unclear whether this can be called by multiple
 // threads. With an std::map items remain valid while not erased. So we only
 // need to protect the map itself for thread safety. The values in the map are
 // safe to access without a lock.
-std::mutex gFileMapMutex;
-} // namespace
+static std::mutex gFileMapMutex;
 
-class WasmFileHandle : public FileHandle {
+
+class WasmFileHandle : public fl::FileHandle {
   private:
     FileDataPtr mData;
     size_t mPos;
@@ -135,9 +134,11 @@ class WasmFileHandle : public FileHandle {
     void close() override {
         // No need to do anything for in-memory files
     }
+
+    bool valid() const override { return true; }  // always valid if we can open a file.
 };
 
-class FsImplWasm : public FsImpl {
+class FsImplWasm : public fl::FsImpl {
   public:
     FsImplWasm() = default;
     ~FsImplWasm() override {}
@@ -152,7 +153,7 @@ class FsImplWasm : public FsImpl {
         }
     }
 
-    FileHandlePtr openRead(const char *_path) override {
+    fl::FileHandlePtr openRead(const char *_path) override {
         printf("Opening file %s\n", _path);
         Str path(_path);
         std::lock_guard<std::mutex> lock(gFileMapMutex);
@@ -163,12 +164,10 @@ class FsImplWasm : public FsImpl {
                 WasmFileHandlePtr::TakeOwnership(new WasmFileHandle(path, data));
             return out;
         }
-        return FileHandlePtr::Null();
+        return fl::FileHandlePtr::Null();
     }
 };
 
-// Platforms eed to implement this to create an instance of the filesystem.
-FsImplPtr make_sdcard_filesystem(int cs_pin) { return FsImplWasmPtr::New(); }
 
 
 FileDataPtr _findIfExists(const Str& path) {
@@ -248,8 +247,8 @@ EMSCRIPTEN_KEEPALIVE bool jsDeclareFile(const char *path, size_t len) {
 
 
 EMSCRIPTEN_KEEPALIVE void fastled_declare_files(std::string jsonStr) {
-    FLArduinoJson::JsonDocument doc;
-    FLArduinoJson::deserializeJson(doc, jsonStr);
+    fl::JsonDocument doc;
+    fl::parseJson(jsonStr.c_str(), &doc);
     auto files = doc["files"];
     if (files.isNull()) {
         return;
@@ -285,5 +284,15 @@ EMSCRIPTEN_BINDINGS(_fastled_declare_files) {
     emscripten::function("_fastled_declare_files", &fastled_declare_files);
     //emscripten::function("jsAppendFile", emscripten::select_overload<bool(const char*, const uint8_t*, size_t)>(&jsAppendFile), emscripten::allow_raw_pointer<arg<0>, arg<1>>());
 };
+
+namespace fl {
+// Platforms eed to implement this to create an instance of the filesystem.
+FsImplPtr make_sdcard_filesystem(int cs_pin) {
+    return FsImplWasmPtr::New();
+}
+}
+
+
+
 
 #endif // __EMSCRIPTEN__

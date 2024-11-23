@@ -17,7 +17,7 @@
 #include "fl/slice.h"
 
 #include "active_strip_data.h"
-#include "ui/events.h"
+#include "platforms/wasm/engine_listener.h"
 #include "fl/map.h"
 #include "js.h"
 #include "fl/str.h"

@@ -109,7 +109,9 @@ env.Append(LINKFLAGS=sketch_flags)
 
 
 fastled_compile_flags = [
-    "-Wl,--whole-archive,-fuse-ld=lld"
+    "-Wl,--whole-archive,-fuse-ld=lld",
+    "-Werror=bad-function-cast",
+    "-Werror=cast-function-type",
 ]
 
 # Pass flags to the other Project Dependencies (libraries)

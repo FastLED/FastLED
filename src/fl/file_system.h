@@ -10,6 +10,21 @@
 #include "fx/video.h"
 #include "fl/str.h"
 
+
+namespace fl {
+
+FASTLED_SMART_PTR(FsImpl);
+
+// PLATFORM INTERFACE
+// You need to define this for your platform.
+// Otherwise a null filesystem will be used that will do nothing but spew warnings, but otherwise
+// won't crash the system.
+FsImplPtr make_sdcard_filesystem(int cs_pin);
+
+}
+
+
+
 FASTLED_NAMESPACE_BEGIN
 struct CRGB;
 class Video;
@@ -24,12 +39,6 @@ FASTLED_SMART_PTR(FileHandle);
 
 class JsonDocument;
 
-// Platforms need to implement this to create an instance of the filesystem.
-FsImplPtr make_sdcard_filesystem(int cs_pin);
-
-
-
-// Instantiate this with a pin number to create a filesystem.
 class FileSystem {
   public:
     FileSystem();
@@ -40,8 +49,8 @@ class FileSystem {
     
     FileHandlePtr openRead(const char *path);  // Null if file could not be opened.
     Video openVideo(const char *path, size_t pixelsPerFrame, float fps = 30.0f, size_t nFrameHistory = 0);  // Null if video could not be opened.
-    bool readText(const char *path, fl::Str* out);
-    bool readJson(const char *path, fl::JsonDocument* doc, fl::Str* error = nullptr);
+    bool readText(const char *path, Str* out);
+    bool readJson(const char *path, JsonDocument* doc, Str* error = nullptr);
     void close(FileHandlePtr file);
     
   private:
@@ -52,7 +61,7 @@ class FileSystem {
 
 // An abstract class that represents a file handle.
 // Devices like the SD card will return one of these.
-class FileHandle: public fl::Referent {
+class FileHandle: public Referent {
   public:
     virtual ~FileHandle() {}
     virtual bool available() const = 0;
@@ -63,6 +72,7 @@ class FileHandle: public fl::Referent {
     virtual const char* path() const = 0;
     virtual bool seek(size_t pos) = 0;
     virtual void close() = 0;
+    virtual bool valid() const = 0;
 
     // convenience functions
     size_t readCRGB(CRGB* dst, size_t n) {
@@ -71,7 +81,7 @@ class FileHandle: public fl::Referent {
 };
 
 // Platforms will subclass this to implement the filesystem.
-class FsImpl : public fl::Referent {
+class FsImpl : public Referent {
   public:
     struct Visitor {
       virtual void accept(const char* path) = 0;
@@ -91,4 +101,4 @@ class FsImpl : public fl::Referent {
     }
 };
 
-}  // namespace
+}  // namespace fl

@@ -8,16 +8,11 @@
 #include "fl/ptr.h"
 #include "fl/slice.h"
 
-
 namespace fl {
-FASTLED_SMART_PTR_NO_FWD(FsImplPtr);
-}  // namespace fl
 
-FASTLED_NAMESPACE_BEGIN
+FsImplPtr make_sdcard_filesystem(int cs_pin);
 
-fl::FsImplPtr make_sdcard_filesystem(int cs_pin);
-
-FASTLED_NAMESPACE_END
+}
 
 extern "C" {
 // Called from the browser side, this is intended to create a file
