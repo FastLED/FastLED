@@ -74,24 +74,24 @@ Slider SPEED("SPEED", 30, 1, 60, 1);
 
 CRGB leds[NUM_LEDS];
 XYMap xyMap(MATRIX_WIDTH, MATRIX_HEIGHT, GRID_SERPENTINE);
-NoisePaletteRef noisePalette = NoisePaletteRef::New(xyMap);
+NoisePalette noisePalette(xyMap);
 
 void setup() {
     delay(1000); // sanity delay
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip);
     FastLED.setBrightness(96);
-    noisePalette->lazyInit();
-    noisePalette->setSpeed(SPEED);
-    noisePalette->setScale(SCALE);
+    noisePalette.lazyInit();
+    noisePalette.setSpeed(SPEED);
+    noisePalette.setScale(SCALE);
 }
 
 void loop() {
-    noisePalette->setSpeed(SPEED);
-    noisePalette->setScale(SCALE);
-    EVERY_N_MILLISECONDS(5000) { noisePalette->changeToRandomPalette(); }
+    noisePalette.setSpeed(SPEED);
+    noisePalette.setScale(SCALE);
+    EVERY_N_MILLISECONDS(5000) { noisePalette.changeToRandomPalette(); }
 
-    noisePalette->draw(Fx::DrawContext(millis(), leds));
+    noisePalette.draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
 }
 
