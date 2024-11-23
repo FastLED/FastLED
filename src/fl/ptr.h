@@ -23,7 +23,7 @@
 // If you have an interface class that you want to create a smart pointer for,
 // then you need to use this to bind it to a constructor.
 #define FASTLED_SMART_PTR_CONSTRUCTOR(type, constructor)                       \
-    template <> class RefTraits<type> {                                        \
+    template <> class PtrTraits<type> {                                        \
       public:                                                                  \
         template <typename... Args> static Ref<type> New(Args... args) {       \
             fl::Ref<type> ptr = constructor(args...);                          \
@@ -44,7 +44,7 @@ template <typename T> class WeakRef; // Weak reference smart pointer base class.
 template <typename T> class Ref;
 template <typename T> class WeakRef;
 
-template <typename T> class RefTraits {
+template <typename T> class PtrTraits {
   public:
     using element_type = T;
     using ptr_type = Ref<T>;
@@ -99,12 +99,12 @@ template <typename T> class RefTraits {
 //   };
 //   FASTLED_SMART_PTR_CONSTRUCTOR(Foo, FooSubclass::New);
 //   FooRef foo = FooRef::New(1, 2);  // this will now work.
-template <typename T> class Ref : public RefTraits<T> {
+template <typename T> class Ref : public PtrTraits<T> {
   public:
-    friend class RefTraits<T>;
+    friend class PtrTraits<T>;
 
     template <typename... Args> static Ref<T> New(Args... args) {
-        return RefTraits<T>::New(args...);
+        return PtrTraits<T>::New(args...);
     }
     // Used for low level allocations, typically for pointer to an
     // implementation where it needs to convert to a Ref of a base class.
