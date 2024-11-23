@@ -9,7 +9,7 @@
 #define MAX_MA       4000
 
 CRGBArray<NUM_LEDS> leds;
-TwinkleFoxRef twinkleFox = TwinkleFoxRef::New(NUM_LEDS);
+TwinkleFox twinkleFox(NUM_LEDS);
 
 void setup() {
   delay(3000); // safety startup delay
@@ -17,14 +17,12 @@ void setup() {
   FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS)
     .setCorrection(TypicalLEDStrip)
     .setRgbw();
-
-  twinkleFox->lazyInit();
 }
 
 void loop() {
   EVERY_N_SECONDS(SECONDS_PER_PALETTE) { 
-    twinkleFox->chooseNextColorPalette(twinkleFox->targetPalette); 
+    twinkleFox.chooseNextColorPalette(twinkleFox.targetPalette); 
   }
-  twinkleFox->draw(Fx::DrawContext(millis(), leds));
+  twinkleFox.draw(Fx::DrawContext(millis(), leds));
   FastLED.show();
 }

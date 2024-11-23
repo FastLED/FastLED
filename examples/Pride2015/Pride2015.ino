@@ -8,7 +8,7 @@
 #define BRIGHTNESS  255
 
 CRGB leds[NUM_LEDS];
-Pride2015Ref pride = Pride2015Ref::New(NUM_LEDS);
+Pride2015 pride(NUM_LEDS);
 
 void setup() {
   delay(3000); // 3 second delay for recovery
@@ -23,6 +23,6 @@ void setup() {
 }
 
 void loop() {
-  pride->draw(Fx::DrawContext(millis(), leds));
+  pride.draw(Fx::DrawContext(millis(), leds));
   FastLED.show();  
 }

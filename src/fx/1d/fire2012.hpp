@@ -100,7 +100,7 @@ class Fire2012 : public FxStrip {
     const char *fxName(int) const override { return "Fire2012"; }
 
   private:
-    scoped_array<uint8_t> heat;
+    fl::scoped_array<uint8_t> heat;
     uint8_t cooling;
     uint8_t sparking;
     bool reverse_direction;

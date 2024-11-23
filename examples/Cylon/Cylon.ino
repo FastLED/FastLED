@@ -17,7 +17,7 @@
 CRGB leds[NUM_LEDS];
 
 // Create a Cylon instance
-CylonRef cylon = CylonRef::New(NUM_LEDS);
+Cylon cylon(NUM_LEDS);
 
 void setup() { 
     FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS).setRgbw();
@@ -25,7 +25,7 @@ void setup() {
 }
 
 void loop() { 
-    cylon->draw(Fx::DrawContext(millis(), leds));
+    cylon.draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
-    delay(cylon->delay_ms);
+    delay(cylon.delay_ms);
 }

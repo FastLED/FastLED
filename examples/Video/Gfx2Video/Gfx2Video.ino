@@ -17,11 +17,13 @@
 
 
 #include <FastLED.h>
-#include "fx/storage/bytestreammemory.h"
+#include "fl/bytestreammemory.h"
 #include "fx/2d/video.hpp"
 #include "fx/fx_engine.h"
-#include "ref.h"
+#include "fl/ptr.h"
 #include "fx/video.h"
+
+using namespace fl;
 
 #define LED_PIN 2
 #define BRIGHTNESS 96
@@ -38,12 +40,12 @@ const int BYTES_PER_FRAME = 3 * NUM_LEDS;
 const int NUM_FRAMES = 2;
 const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * NUM_FRAMES;
 
-ByteStreamMemoryRef memoryStream;
+ByteStreamMemoryPtr memoryStream;
 FxEngine fxEngine(NUM_LEDS);
 // Create and initialize Video fx object
 XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
 
-void write_one_frame(ByteStreamMemoryRef memoryStream) {
+void write_one_frame(ByteStreamMemoryPtr memoryStream) {
     //memoryStream->seek(0);  // Reset to the beginning of the stream
     uint32_t total_bytes_written = 0;
     int toggle = (millis() / 500) % 2;
@@ -64,7 +66,7 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
 
     // Create and fill the ByteStreamMemory with test data
-    memoryStream = ByteStreamMemoryRef::New(BUFFER_SIZE);
+    memoryStream = ByteStreamMemoryPtr::New(BUFFER_SIZE);
     write_one_frame(memoryStream);  // Write initial frame data
     Video video(memoryStream, NUM_LEDS, 30.0f, 0);
     // Add the video effect to the FxEngine
