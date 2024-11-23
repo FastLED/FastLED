@@ -4,7 +4,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "doctest.h"
-#include "fx/detail/circular_buffer.h"
+#include "fl/circular_buffer.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE

@@ -7,7 +7,7 @@
 #include "ref.h"
 
 #include "bytestream.h"
-#include "fx/detail/circular_buffer.h"
+#include "fl/circular_buffer.h"
 
 FASTLED_NAMESPACE_BEGIN
 
