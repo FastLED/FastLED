@@ -32,6 +32,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gdb
+
+      - name: Install
+        run: ./install
+        shell: bash
       
       - name: Run Test
         run: ./test
