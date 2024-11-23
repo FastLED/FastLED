@@ -25,8 +25,8 @@ float TimeScale::scale() const {
 
 uint32_t TimeScale::update(uint32_t timeNow) {
 
-    DBG("TimeScale::update: timeNow: " << timeNow << " mLastRealTime: " << mLastRealTime
-    << " mRelativeTime: " << mRelativeTime << " mTimeScale: " << mTimeScale);
+    //DBG("TimeScale::update: timeNow: " << timeNow << " mLastRealTime: " << mLastRealTime
+    //<< " mRelativeTime: " << mRelativeTime << " mTimeScale: " << mTimeScale);
 
     if (mLastRealTime > timeNow) {
         DBG("TimeScale::applyExact: mLastRealTime > timeNow: " << mLastRealTime << " > " << timeNow);

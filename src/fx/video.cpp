@@ -7,6 +7,7 @@
 #include "fl/dbg.h"
 #include "fl/str.h"
 #include "warn.h"
+#include "math_macros.h"
 
 
 #define DBG FASTLED_DBG
@@ -114,8 +115,7 @@ bool VideoImpl::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
     if (!mTimeScale) {
         mTimeScale = TimeScaleRef::New(now);
     }
-    mTimeScale->update(now);
-    now = mTimeScale->time();
+    now = mTimeScale->update(now);
     if (!mStream) {
         DBG("no stream");
         return false;
@@ -196,22 +196,32 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
             // Happens when we are not full and we need to allocate a new frame.
             recycled_frame = FrameRef::New(mPixelsPerFrame, false);
         }
-        if (!mStream->readFrameAt(frame_to_fetch, recycled_frame.get())) {
-            if (!forward) {
-                // nothing more we can do, we can't go negative.
-                return false;
-            }
-            if (mStream->atEnd()) {
-                if (!mStream->rewind()) {  // Is this still 
-                    DBG("rewind failed");
+
+       do {  // only to use break
+            if (!mStream->readFrameAt(frame_to_fetch, recycled_frame.get())) {
+                if (!forward) {
+                    // nothing more we can do, we can't go negative.
                     return false;
                 }
-                mTimeScale->reset(now);
+                if (mStream->atEnd()) {
+                    if (!mStream->rewind()) {  // Is this still 
+                        DBG("rewind failed");
+                        return false;
+                    }
+                    mTimeScale->reset(now);
+                    frame_to_fetch = 0;
+                    if (!mStream->readFrameAt(frame_to_fetch, recycled_frame.get())) {
+                        DBG("readFrameAt failed");
+                        return false;
+                    }
+                    break;  // we have the frame, so we can break out of the loop
+                }
+                DBG("We failed for some other reason");
                 return false;
             }
-            DBG("We failed for some other reason");
-            return false;
-        }
+            break;
+        } while (false);
+
         uint32_t timestamp = mFrameInterpolator->get_exact_timestamp_ms(frame_to_fetch);
         recycled_frame->setFrameNumberAndTime(frame_to_fetch, timestamp);
         // DBG("inserting frame: " << frame_to_fetch);

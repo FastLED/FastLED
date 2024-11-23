@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fixed_map.h"
-#include "fx/detail/circular_buffer.h"
 #include "fx/detail/data_stream.h"
 #include "fx/frame.h"
 #include "fx/video/frame_tracker.h"
@@ -32,9 +31,6 @@ class FrameInterpolator : public Referent {
     // that this adjustable_time is allowed to go pause or go backward in time.
     bool draw(uint32_t adjustable_time, Frame *dst); // Frame has alpha.
     bool draw(uint32_t adjustable_time, CRGB *leds, uint8_t *alpha = nullptr);
-
-
-
     bool insert(uint32_t frameNumber, FrameRef frame) {
         return mFrames.insert(frameNumber, frame);
     }
