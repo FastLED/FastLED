@@ -97,8 +97,7 @@ def main() -> None:
             cmd_list,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True,
-            bufsize=1
+            text=True
         )
 
         # Create stop event
