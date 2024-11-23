@@ -152,7 +152,7 @@ WORKDIR /js
 ARG NO_PREWARM=0
 ENV NO_PREWARM=${NO_PREWARM}
 
-RUN python /js/init_runtime.py
+RUN python /js/init_runtime.py || true
 
 # First pre-warm cycle - always do it as part of the build.
 RUN mkdir -p /logs

@@ -9,11 +9,11 @@
 
 #include <stdio.h>
 
-#include "json.h"
-#include "math_macros.h"
+#include "fl/json.h"
+#include "fl/math_macros.h"
 #include "noisegen.h"
 #include "screenmap.h"
-#include "slice.h"
+#include "fl/slice.h"
 #include "ui.h"
 #include "FastLED.h"
 #include "pir.h"

@@ -9,10 +9,10 @@
 #include <vector>
 
 #include <FastLED.h>
-#include "json.h"
-#include "slice.h"
+#include "fl/json.h"
+#include "fl/slice.h"
 #include "screenmap.h"
-#include "math_macros.h"
+#include "fl/math_macros.h"
 
 
 
