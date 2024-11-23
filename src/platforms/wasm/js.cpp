@@ -19,7 +19,7 @@
 #include "ui/ui_internal.h"
 #include "fl/str.h"
 #include "active_strip_data.h"
-#include "engine_events.h"
+#include "fl/engine_events.h"
 #include "js.h"
 #include "fl/str.h"
 #include "namespace.h"

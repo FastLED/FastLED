@@ -82,7 +82,9 @@
 
 #include "fastspi.h"
 #include "chipsets.h"
-#include "engine_events.h"
+#include "fl/engine_events.h"
+
+using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -363,8 +365,8 @@ public:
 
 	// Useful when you want to know when an event like onFrameBegin or onFrameEnd is happening.
 	// This is disabled on AVR to save space.
-	void addListener(EngineEvents::Listener *listener) { EngineEvents::addListener(listener); }
-	void removeListener(EngineEvents::Listener *listener) { EngineEvents::removeListener(listener); }
+	void addListener(fl::EngineEvents::Listener *listener) { fl::EngineEvents::addListener(listener); }
+	void removeListener(fl::EngineEvents::Listener *listener) { fl::EngineEvents::removeListener(listener); }
 
 	/// Add a CLEDController instance to the world.  Exposed to the public to allow people to implement their own
 	/// CLEDController objects or instances.  There are two ways to call this method (as well as the other addLeds()

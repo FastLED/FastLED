@@ -21,8 +21,10 @@
 #endif  // FASTLED_HAS_ENGINE_EVENTS
 
 FASTLED_NAMESPACE_BEGIN
-
 class CLEDController;
+FASTLED_NAMESPACE_END
+
+namespace fl {
 
 class EngineEvents {
   public:
@@ -148,4 +150,4 @@ class EngineEvents {
     friend class fl::Singleton<EngineEvents>;
 };
 
-FASTLED_NAMESPACE_END
+} // namespace fl
