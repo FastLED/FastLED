@@ -6,7 +6,7 @@
 #include "fx/video/pixel_stream.h"
 #include "fx/fx2d.h"
 #include "fx/video/frame_interpolator.h"
-#include "ref.h"
+#include "fl/ref.h"
 
 FASTLED_NAMESPACE_BEGIN
 

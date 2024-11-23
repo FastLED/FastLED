@@ -11,7 +11,7 @@
 #include "crgb.h"
 #include "fx/fx2d.h"
 #include "namespace.h"
-#include "ref.h"
+#include "fl/ref.h"
 #include "xymap.h"
 
 #define ANIMARTRIX_INTERNAL

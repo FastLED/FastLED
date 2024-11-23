@@ -11,7 +11,7 @@
 #include "fx/fx2d.h"
 #include "lib8tion/random8.h"
 #include "noise.h"
-#include "ref.h"
+#include "fl/ref.h"
 #include "xymap.h"
 
 FASTLED_NAMESPACE_BEGIN

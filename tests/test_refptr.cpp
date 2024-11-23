@@ -4,7 +4,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "doctest.h"
-#include "ref.h"
+#include "fl/ref.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
