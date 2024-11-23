@@ -11,7 +11,7 @@ LUT - Look up table implementation for various types.
 
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 template<typename T>
 struct pair_xy {
@@ -71,4 +71,5 @@ private:
     uint32_t length;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
+

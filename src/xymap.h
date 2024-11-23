@@ -6,7 +6,7 @@
 #include "force_inline.h"
 #include "fl/ptr.h"
 #include "xmap.h" // Include xmap.h for LUT16
-#include "lut.h"
+#include "fl/lut.h"
 #include "crgb.h"
 #include "namespace.h"
 
@@ -58,7 +58,7 @@ class XYMap {
     static XYMap constructWithLookUpTable(uint16_t width, uint16_t height,
                                           const uint16_t *lookUpTable, uint16_t offset = 0) {
         XYMap out(width, height, kLookUpTable);
-        out.mLookUpTable = LUT16Ptr::New(width * height);
+        out.mLookUpTable = fl::LUT16Ptr::New(width * height);
         memcpy(out.mLookUpTable->getData(), lookUpTable,
                width * height * sizeof(uint16_t));
         out.mOffset = offset;
@@ -89,7 +89,7 @@ class XYMap {
         if (type == kLookUpTable) {
             return;
         }
-        mLookUpTable = LUT16Ptr::New(width * height);
+        mLookUpTable = fl::LUT16Ptr::New(width * height);
         uint16_t *data = mLookUpTable->getData();
         for (uint16_t y = 0; y < height; y++) {
             for (uint16_t x = 0; x < width; x++) {
@@ -148,7 +148,7 @@ class XYMap {
     uint16_t width;
     uint16_t height;
     XYFunction xyFunction = nullptr;
-    LUT16Ptr mLookUpTable; // optional refptr to look up table.
+    fl::LUT16Ptr mLookUpTable; // optional refptr to look up table.
     uint16_t mOffset = 0;  // offset to be added to the output
 };
 

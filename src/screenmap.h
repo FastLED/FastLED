@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "force_inline.h"
-#include "lut.h"
+#include "fl/lut.h"
 #include "fl/ptr.h"
 
 #include "fl/str.h"
@@ -36,27 +36,27 @@ class ScreenMap {
 
     // is_reverse is false by default for linear layout
     ScreenMap(uint32_t length, float mDiameter = -1.0f) : length(length), mDiameter(mDiameter) {
-        mLookUpTable = LUTXYFLOATPtr::New(length);
-        LUTXYFLOAT &lut = *mLookUpTable.get();
-        pair_xy_float *data = lut.getData();
+        mLookUpTable = fl::LUTXYFLOATPtr::New(length);
+        fl::LUTXYFLOAT &lut = *mLookUpTable.get();
+        fl::pair_xy_float *data = lut.getData();
         for (uint32_t x = 0; x < length; x++) {
             data[x] = {0, 0};
         }
     }
 
-    ScreenMap(const pair_xy_float *lut, uint32_t length, float diameter = -1.0) : length(length), mDiameter(diameter) {
-        mLookUpTable = LUTXYFLOATPtr::New(length);
-        LUTXYFLOAT &lut16xy = *mLookUpTable.get();
-        pair_xy_float *data = lut16xy.getData();
+    ScreenMap(const fl::pair_xy_float *lut, uint32_t length, float diameter = -1.0) : length(length), mDiameter(diameter) {
+        mLookUpTable = fl::LUTXYFLOATPtr::New(length);
+        fl::LUTXYFLOAT &lut16xy = *mLookUpTable.get();
+        fl::pair_xy_float *data = lut16xy.getData();
         for (uint32_t x = 0; x < length; x++) {
             data[x] = lut[x];
         }
     }
 
-    template <uint32_t N> ScreenMap(const pair_xy_float (&lut)[N], float diameter = -1.0) : length(N), mDiameter(diameter) {
-        mLookUpTable = LUTXYFLOATPtr::New(length);
-        LUTXYFLOAT &lut16xy = *mLookUpTable.get();
-        pair_xy_float *data = lut16xy.getData();
+    template <uint32_t N> ScreenMap(const fl::pair_xy_float (&lut)[N], float diameter = -1.0) : length(N), mDiameter(diameter) {
+        mLookUpTable = fl::LUTXYFLOATPtr::New(length);
+        fl::LUTXYFLOAT &lut16xy = *mLookUpTable.get();
+        fl::pair_xy_float *data = lut16xy.getData();
         for (uint32_t x = 0; x < length; x++) {
             data[x] = lut[x];
         }
@@ -68,27 +68,27 @@ class ScreenMap {
         mLookUpTable = other.mLookUpTable;
     }
 
-    const pair_xy_float &operator[](uint32_t x) const {
+    const fl::pair_xy_float &operator[](uint32_t x) const {
         if (x >= length || !mLookUpTable) {
             return empty(); // better than crashing.
         }
-        LUTXYFLOAT &lut = *mLookUpTable.get();
+        fl::LUTXYFLOAT &lut = *mLookUpTable.get();
         return lut[x];
     }
 
-    void set(uint16_t index, const pair_xy_float &p) {
+    void set(uint16_t index, const fl::pair_xy_float &p) {
         if (mLookUpTable) {
-            LUTXYFLOAT &lut = *mLookUpTable.get();
+            fl::LUTXYFLOAT &lut = *mLookUpTable.get();
             auto *data = lut.getData();
             data[index] = p;
         }
     }
 
-    pair_xy_float& operator[](uint32_t x) {
+    fl::pair_xy_float& operator[](uint32_t x) {
         if (x >= length || !mLookUpTable) {
-            return const_cast<pair_xy_float &>(empty()); // better than crashing.
+            return const_cast<fl::pair_xy_float &>(empty()); // better than crashing.
         }
-        LUTXYFLOAT &lut = *mLookUpTable.get();
+        fl::LUTXYFLOAT &lut = *mLookUpTable.get();
         auto *data = lut.getData();
         return data[x];
     }
@@ -107,12 +107,12 @@ class ScreenMap {
         return *this;
     }
 
-    pair_xy_float mapToIndex(uint32_t x) const {
+    fl::pair_xy_float mapToIndex(uint32_t x) const {
         if (x >= length || !mLookUpTable) {
             return {0, 0};
         }
-        LUTXYFLOAT &lut = *mLookUpTable.get();
-        pair_xy_float screen_coords = lut[x];
+        fl::LUTXYFLOAT &lut = *mLookUpTable.get();
+        fl::pair_xy_float screen_coords = lut[x];
         return screen_coords;
     }
 
@@ -128,13 +128,13 @@ class ScreenMap {
     static void toJson(const fl::FixedMap<fl::Str, ScreenMap, 16>&, FLArduinoJson::JsonDocument* doc);
 
   private:
-    static const pair_xy_float &empty() {
-        static const pair_xy_float s_empty = pair_xy_float(0, 0);
+    static const fl::pair_xy_float &empty() {
+        static const fl::pair_xy_float s_empty = fl::pair_xy_float(0, 0);
         return s_empty;
     }
     uint32_t length = 0;
     float mDiameter = -1.0f;  // Only serialized if it's not > 0.0f.
-    LUTXYFLOATPtr mLookUpTable;
+    fl::LUTXYFLOATPtr mLookUpTable;
 };
 
 

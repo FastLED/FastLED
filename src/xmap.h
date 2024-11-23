@@ -5,7 +5,7 @@
 
 #include "fl/ptr.h"
 #include "force_inline.h"
-#include "lut.h"
+#include "fl/lut.h"
 
 #include "namespace.h"
 
@@ -85,7 +85,7 @@ public:
             return;
         }
         mLookUpTable.reset();
-        mLookUpTable = LUT16Ptr::New(length);
+        mLookUpTable = fl::LUT16Ptr::New(length);
         uint16_t* dataMutable = mLookUpTable->getData();
         mData = mLookUpTable->getData();
         for (uint16_t x = 0; x < length; x++) {
@@ -138,7 +138,7 @@ private:
     Type type = kLinear;
     XFunction xFunction = nullptr;
     const uint16_t *mData = nullptr;
-    LUT16Ptr mLookUpTable;
+    fl::LUT16Ptr mLookUpTable;
     uint16_t mOffset = 0;  // offset to be added to the output
 };
 

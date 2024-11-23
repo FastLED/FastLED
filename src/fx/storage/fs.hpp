@@ -8,11 +8,13 @@
 #elif __has_include(<SD.h>)
 #include "fs_sdcard_arduino.hpp"
 #else
-FASTLED_NAMESPACE_BEGIN
+
+namespace fl {
 inline FsImplPtr make_sdcard_filesystem(int cs_pin) {
     return FsImplPtr::Null();
 }
-FASTLED_NAMESPACE_END
+}  // namespace fl
+
 #endif
 
 

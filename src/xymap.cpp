@@ -7,6 +7,8 @@
 #include "xymap.h"
 #include "screenmap.h"
 
+using namespace fl;
+
 FASTLED_NAMESPACE_BEGIN
 
 
