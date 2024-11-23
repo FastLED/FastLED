@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+namespace fl {
+
 // Slice<int> is equivalent to int* with a length. It is used to pass around
 // arrays of integers with a length, without needing to pass around a separate
 // length parameter.
@@ -86,3 +88,5 @@ private:
     T* mData;
     size_t mSize;
 };
+
+} // namespace fl

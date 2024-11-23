@@ -4,7 +4,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "doctest.h"
-#include "slice.h"
+#include "fl/slice.h"
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
