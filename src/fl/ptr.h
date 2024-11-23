@@ -11,21 +11,14 @@
 #include "template_magic.h"
 
 
-FASTLED_NAMESPACE_BEGIN
-
-class Referent; // Inherit this if you want your object to be able to go into a
-                // Ref, or WeakRef.
-template <typename T> class Ref; // Reference counted smart pointer base class.
-template <typename T> class WeakRef; // Weak reference smart pointer base class.
-
 // Declares a smart pointer. FASTLED_SMART_REF(Foo) will declare a class FooRef
 // which will be a typedef of Ref<Foo>. After this FooRef::New(...args) can be
 // used to create a new instance of Ref<Foo>.
 #define FASTLED_SMART_REF(type)                                                \
     class type;                                                                \
-    using type##Ref = Ref<type>;
+    using type##Ref = fl::Ref<type>;
 
-#define FASTLED_SMART_REF_NO_FWD(type) using type##Ref = Ref<type>;
+#define FASTLED_SMART_REF_NO_FWD(type) using type##Ref = fl::Ref<type>;
 
 // If you have an interface class that you want to create a smart pointer for,
 // then you need to use this to bind it to a constructor.
@@ -33,10 +26,20 @@ template <typename T> class WeakRef; // Weak reference smart pointer base class.
     template <> class RefTraits<type> {                                        \
       public:                                                                  \
         template <typename... Args> static Ref<type> New(Args... args) {       \
-            Ref<type> ptr = constructor(args...);                              \
+            fl::Ref<type> ptr = constructor(args...);                          \
             return ptr;                                                        \
         }                                                                      \
     };
+
+
+
+namespace fl {
+
+class Referent; // Inherit this if you want your object to be able to go into a
+                // Ref, or WeakRef.
+template <typename T> class Ref; // Reference counted smart pointer base class.
+template <typename T> class WeakRef; // Weak reference smart pointer base class.
+
 
 template <typename T> class Ref;
 template <typename T> class WeakRef;
@@ -80,7 +83,7 @@ template <typename T> class RefTraits {
 //
 // Example:
 //   FASTLED_SMART_REF(Foo);
-//   class Foo: public Referent {};
+//   class Foo: public fl::Referent {};
 //   FooRef foo = FooRef::New();
 //
 // Example 2: (Manual binding to constructor)
@@ -428,4 +431,4 @@ template <typename T> inline WeakRef<T> Ref<T>::weakRefNoCreate() const {
     return out;
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

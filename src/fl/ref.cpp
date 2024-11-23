@@ -2,7 +2,7 @@
 
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 Referent::Referent() : mRefCount(0) {}
 Referent::~Referent() = default;
@@ -27,4 +27,4 @@ Referent &Referent::operator=(const Referent &) = default;
 Referent::Referent(Referent &&) = default;
 Referent &Referent::operator=(Referent &&) = default;
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

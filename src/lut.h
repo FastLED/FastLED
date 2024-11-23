@@ -38,9 +38,8 @@ FASTLED_SMART_REF_NO_FWD(LUTXYFLOAT);
 
 // Templated lookup table.
 template<typename T>
-class LUT : public Referent {
+class LUT : public fl::Referent {
 public:
-    friend class RefTraits<LUT<T>>;
     LUT(uint32_t length) : length(length) {
         T* ptr = LargeBlockAllocator<T>::Alloc(length);
         mDataHandle.reset(ptr);

@@ -35,7 +35,7 @@ namespace {
 // called.
 FASTLED_SMART_REF(FileData);
 
-class FileData : public Referent {
+class FileData : public fl::Referent {
   public:
 
     FileData(size_t capacity) : mCapacity(capacity) {}

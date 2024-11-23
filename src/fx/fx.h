@@ -13,7 +13,7 @@ FASTLED_NAMESPACE_BEGIN
 FASTLED_SMART_REF(Fx);
 
 // Abstract base class for effects on a strip/grid of LEDs.
-class Fx : public Referent {
+class Fx : public fl::Referent {
   public:
     // Alias DrawContext for use within Fx
     using DrawContext = _DrawContext;

@@ -15,7 +15,7 @@ FASTLED_SMART_REF(Frame);
 // Frames are used to hold led data. This includes an optional alpha channel. This object
 // is used by the fx and video engines. Most of the memory used for Fx and Video will be located
 // in instances of this class. See Frame::SetAllocator() for custom memory allocation.
-class Frame : public Referent {
+class Frame : public fl::Referent {
 public:
     // Frames take up a lot of memory. On some devices like ESP32 there is
     // PSRAM available. You should see allocator.h -> SetLargeBlockAllocator(...)

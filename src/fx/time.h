@@ -13,7 +13,7 @@ FASTLED_SMART_REF(TimeScale);
 
 
 // Interface for time generation and time manipulation.
-class TimeFunction: public Referent {
+class TimeFunction: public fl::Referent {
   public:
     virtual ~TimeFunction() {}
     virtual uint32_t update(uint32_t timeNow) = 0;  // Inputs the real clock time and outputs the virtual time.

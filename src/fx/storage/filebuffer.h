@@ -13,7 +13,7 @@ FASTLED_NAMESPACE_BEGIN
 FASTLED_SMART_REF(FileBuffer);
 FASTLED_SMART_REF(FileHandle);
 
-class FileBuffer: public Referent {
+class FileBuffer: public fl::Referent {
  public:
   FileBuffer(FileHandleRef file);
   virtual ~FileBuffer();

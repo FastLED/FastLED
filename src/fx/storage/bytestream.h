@@ -14,7 +14,7 @@ FASTLED_SMART_REF(ByteStream);
 
 // An abstract class that represents a file handle.
 // Devices like the SD card will return one of these.
-class ByteStream : public Referent {
+class ByteStream : public fl::Referent {
   public:
     virtual ~ByteStream() {}
     virtual bool available(size_t) const = 0;

@@ -17,7 +17,7 @@ FASTLED_SMART_REF(FileBuffer);
 // PixelStream takes either a file handle or a byte stream
 // and reads frames from it in order to serve data to the
 // video system.
-class PixelStream: public Referent {
+class PixelStream: public fl::Referent {
  public:
 
   enum Type {

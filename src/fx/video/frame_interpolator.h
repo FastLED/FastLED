@@ -13,7 +13,7 @@ FASTLED_SMART_REF(FrameInterpolator);
 // Holds onto frames and allow interpolation. This allows
 // effects to have high effective frame rate and also
 // respond to things like sound which can modify the timing.
-class FrameInterpolator : public Referent {
+class FrameInterpolator : public fl::Referent {
   public:
     struct Less {
         bool operator()(uint32_t a, uint32_t b) const { return a < b; }

@@ -16,7 +16,7 @@ FASTLED_SMART_REF(ByteStream);
 FASTLED_SMART_REF(FrameInterpolator);
 FASTLED_SMART_REF(PixelStream)
 
-class VideoImpl : public Referent {
+class VideoImpl : public fl::Referent {
   public:
     enum {
         kSizeRGB8 = 3,

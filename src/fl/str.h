@@ -42,7 +42,7 @@ class StringFormatter {
     static bool isDigit(char c) { return c >= '0' && c <= '9'; }
 };
 
-class StringHolder : public Referent {
+class StringHolder : public fl::Referent {
   public:
     StringHolder(const char *str);
     StringHolder(size_t length);

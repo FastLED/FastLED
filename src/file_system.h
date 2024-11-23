@@ -43,7 +43,7 @@ class FileSystem {
 
 // An abstract class that represents a file handle.
 // Devices like the SD card will return one of these.
-class FileHandle: public Referent {
+class FileHandle: public fl::Referent {
   public:
     virtual ~FileHandle() {}
     virtual bool available() const = 0;
@@ -62,7 +62,7 @@ class FileHandle: public Referent {
 };
 
 // Platforms will subclass this to implement the filesystem.
-class FsImpl : public Referent {
+class FsImpl : public fl::Referent {
   public:
     struct Visitor {
       virtual void accept(const char* path) = 0;

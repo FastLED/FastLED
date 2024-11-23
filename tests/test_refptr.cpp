@@ -11,7 +11,7 @@ FASTLED_USING_NAMESPACE
 
 class MyClass;
 typedef Ref<MyClass> MyClassRef;
-class MyClass : public Referent {
+class MyClass : public fl::Referent {
   public:
     MyClass() {}
     ~MyClass() {
