@@ -9,15 +9,15 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(DataStream);
+FASTLED_SMART_REF(PixelStream);
 FASTLED_SMART_REF(ByteStream);
 FASTLED_SMART_REF(FileHandle);
 FASTLED_SMART_REF(FileBuffer);
 
-// DataStream takes either a file handle or a byte stream
+// PixelStream takes either a file handle or a byte stream
 // and reads frames from it in order to serve data to the
 // video system.
-class DataStream: public Referent {
+class PixelStream: public Referent {
  public:
 
   enum Type {
@@ -25,7 +25,7 @@ class DataStream: public Referent {
     kFile,
   };
 
-  explicit DataStream(int bytes_per_frame);
+  explicit PixelStream(int bytes_per_frame);
 
   bool begin(FileHandleRef h);
   bool beginStream(ByteStreamRef s);
@@ -36,6 +36,7 @@ class DataStream: public Referent {
 
   bool readFrame(Frame* frame);
   bool readFrameAt(uint32_t frameNumber, Frame* frame);
+  bool hasFrame(uint32_t frameNumber);
   int32_t framesRemaining() const;
   int32_t framesDisplayed() const;
   bool available() const;
@@ -54,7 +55,7 @@ class DataStream: public Referent {
   bool mUsingByteStream;
 
 protected:
-  virtual ~DataStream();
+  virtual ~PixelStream();
 };
 
 FASTLED_NAMESPACE_END

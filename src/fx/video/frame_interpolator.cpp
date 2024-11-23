@@ -33,17 +33,14 @@ bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
     // DBG("now: " << now);
     mFrameTracker.get_interval_frames(now, &frameNumber, &nextFrameNumber, &amountOfNextFrame);
     if (!has(frameNumber)) {
-        DBG("FrameInterpolator::draw: !has(frameNumber)");
         return false;
     }
 
     if (!has(nextFrameNumber)) {
-        DBG("FrameInterpolator::draw: !has(frameNumber) || !has(nextFrameNumber)");
         return false;
     }
 
     if (has(frameNumber) && !has(nextFrameNumber)) {
-        DBG("FrameInterpolator::draw: has(frameNumber) && !has(nextFrameNumber)");
         // just paint the current frame
         Frame* frame = get(frameNumber).get();
         frame->draw(leds, alpha);

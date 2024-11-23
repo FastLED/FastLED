@@ -226,13 +226,13 @@ TEST_CASE("byte stream memory basic operations") {
     }
     memoryStream->write(testData, BUFFER_SIZE);
 
-    // Create and initialize DataStream
-    DataStreamRef stream = DataStreamRef::New(BYTES_PER_FRAME);
+    // Create and initialize PixelStream
+    PixelStreamRef stream = PixelStreamRef::New(BYTES_PER_FRAME);
     bool initSuccess = stream->beginStream(memoryStream);
     REQUIRE(initSuccess);
 
     // Test basic properties
-    CHECK(stream->getType() == DataStream::kStreaming);
+    CHECK(stream->getType() == PixelStream::kStreaming);
     CHECK(stream->bytesPerFrame() == BYTES_PER_FRAME);
 
     // Read a pixel
@@ -252,8 +252,8 @@ TEST_CASE("byte stream memory basic operations") {
     }
 
     // Check frame counting - streaming mode doesn't support this.
-    //CHECK(DataStream->framesDisplayed() == 0);
-    //CHECK(DataStream->framesRemaining() == 10); // We have 10 frames of data
+    //CHECK(PixelStream->framesDisplayed() == 0);
+    //CHECK(PixelStream->framesRemaining() == 10); // We have 10 frames of data
 
     // Close the stream
     stream->close();

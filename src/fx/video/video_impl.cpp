@@ -33,14 +33,14 @@ VideoImpl::~VideoImpl() { end(); }
 void VideoImpl::begin(FileHandleRef h) {
     end();
     // Removed setStartTime call
-    mStream = DataStreamRef::New(mPixelsPerFrame * kSizeRGB8);
+    mStream = PixelStreamRef::New(mPixelsPerFrame * kSizeRGB8);
     mStream->begin(h);
     mPrevNow = 0;
 }
 
 void VideoImpl::beginStream(ByteStreamRef bs) {
     end();
-    mStream = DataStreamRef::New(mPixelsPerFrame * kSizeRGB8);
+    mStream = PixelStreamRef::New(mPixelsPerFrame * kSizeRGB8);
     // Removed setStartTime call
     mStream->beginStream(bs);
     mPrevNow = 0;

@@ -14,7 +14,7 @@ FASTLED_SMART_REF(VideoImpl);
 FASTLED_SMART_REF(FileHandle);
 FASTLED_SMART_REF(ByteStream);
 FASTLED_SMART_REF(FrameInterpolator);
-FASTLED_SMART_REF(DataStream)
+FASTLED_SMART_REF(PixelStream)
 
 class VideoImpl : public Referent {
   public:
@@ -42,7 +42,7 @@ class VideoImpl : public Referent {
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
     uint32_t mPixelsPerFrame = 0;
-    DataStreamRef mStream;
+    PixelStreamRef mStream;
     uint32_t mPrevNow = 0;
     FrameInterpolatorRef mFrameInterpolator;
     TimeScaleRef mTimeScale;

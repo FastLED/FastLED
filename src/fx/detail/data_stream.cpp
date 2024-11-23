@@ -12,28 +12,28 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-DataStream::DataStream(int bytes_per_frame) : mbytesPerFrame(bytes_per_frame), mUsingByteStream(false) {
+PixelStream::PixelStream(int bytes_per_frame) : mbytesPerFrame(bytes_per_frame), mUsingByteStream(false) {
 }
 
-DataStream::~DataStream() {
+PixelStream::~PixelStream() {
     close();
 }
 
-bool DataStream::begin(FileHandleRef h) {
+bool PixelStream::begin(FileHandleRef h) {
     close();
     mFileHandle = h;
     mUsingByteStream = false;
     return mFileHandle->available();
 }
 
-bool DataStream::beginStream(ByteStreamRef s) {
+bool PixelStream::beginStream(ByteStreamRef s) {
     close();
     mByteStream = s;
     mUsingByteStream = true;
     return mByteStream->available(mbytesPerFrame);
 }
 
-void DataStream::close() {
+void PixelStream::close() {
     if (!mUsingByteStream && mFileHandle) {
         mFileHandle.reset();
     }
@@ -41,11 +41,11 @@ void DataStream::close() {
     mFileHandle.reset();
 }
 
-int32_t DataStream::bytesPerFrame() {
+int32_t PixelStream::bytesPerFrame() {
     return mbytesPerFrame;
 }
 
-bool DataStream::readPixel(CRGB* dst) {
+bool PixelStream::readPixel(CRGB* dst) {
     if (mUsingByteStream) {
         return mByteStream->read(&dst->r, 1) && mByteStream->read(&dst->g, 1) && mByteStream->read(&dst->b, 1);
     } else {
@@ -53,7 +53,7 @@ bool DataStream::readPixel(CRGB* dst) {
     }
 }
 
-bool DataStream::available() const {
+bool PixelStream::available() const {
     if (mUsingByteStream) {
         return mByteStream->available(mbytesPerFrame);
     } else {
@@ -61,7 +61,7 @@ bool DataStream::available() const {
     }
 }
 
-bool DataStream::atEnd() const {
+bool PixelStream::atEnd() const {
     if (mUsingByteStream) {
         return false;
     } else {
@@ -69,7 +69,7 @@ bool DataStream::atEnd() const {
     }
 }
 
-bool DataStream::readFrame(Frame* frame) {
+bool PixelStream::readFrame(Frame* frame) {
     // returns true if a frame was read.
     if (!framesRemaining() || !frame) {
         return false;
@@ -83,7 +83,18 @@ bool DataStream::readFrame(Frame* frame) {
     return true;
 }
 
-bool DataStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
+bool PixelStream::hasFrame(uint32_t frameNumber) {
+    if (mUsingByteStream) {
+        // ByteStream doesn't support seeking
+        DBG("Not implemented and therefore always returns true");
+        return true;
+    } else {
+        size_t total_bytes = mFileHandle->size();
+        return frameNumber * mbytesPerFrame < total_bytes;
+    }
+}
+
+bool PixelStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
     // DBG("read frame at " << frameNumber);
     if (mUsingByteStream) {
         // ByteStream doesn't support seeking
@@ -107,7 +118,7 @@ bool DataStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
     }
 }
 
-int32_t DataStream::framesRemaining() const {
+int32_t PixelStream::framesRemaining() const {
     if (mbytesPerFrame == 0) return 0;
     int32_t bytes_left = bytesRemaining();
     if (bytes_left <= 0) {
@@ -116,7 +127,7 @@ int32_t DataStream::framesRemaining() const {
     return bytes_left / mbytesPerFrame;
 }
 
-int32_t DataStream::framesDisplayed() const {
+int32_t PixelStream::framesDisplayed() const {
     if (mUsingByteStream) {
         // ByteStream doesn't have a concept of total size, so we can't calculate this
         return -1;
@@ -126,7 +137,7 @@ int32_t DataStream::framesDisplayed() const {
     }
 }
 
-int32_t DataStream::bytesRemaining() const {
+int32_t PixelStream::bytesRemaining() const {
     if (mUsingByteStream) {
         return INT32_MAX;
     } else {
@@ -134,11 +145,11 @@ int32_t DataStream::bytesRemaining() const {
     }
 }
 
-int32_t DataStream::bytesRemainingInFrame() const {
+int32_t PixelStream::bytesRemainingInFrame() const {
     return bytesRemaining() % mbytesPerFrame;
 }
 
-bool DataStream::rewind() {
+bool PixelStream::rewind() {
     if (mUsingByteStream) {
         // ByteStream doesn't support rewinding
         return false;
@@ -148,11 +159,11 @@ bool DataStream::rewind() {
     }
 }
 
-DataStream::Type DataStream::getType() const {
+PixelStream::Type PixelStream::getType() const {
     return mUsingByteStream ? Type::kStreaming : Type::kFile;
 }
 
-size_t DataStream::readBytes(uint8_t* dst, size_t len) {
+size_t PixelStream::readBytes(uint8_t* dst, size_t len) {
     uint16_t bytesRead = 0;
     if (mUsingByteStream) {
         while (bytesRead < len && mByteStream->available(len)) {

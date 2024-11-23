@@ -47,8 +47,6 @@ void TimeScale::reset(uint32_t realTimeNow) {
 }
 
 void TimeScale::applyExact(uint32_t timeNow) {
-    //DBG("TimeScale::applyExact: timeNow: " << timeNow << " mLastRealTime: " << mLastRealTime);
-
     uint32_t elapsedRealTime = timeNow - mLastRealTime;
     mLastRealTime = timeNow;
     int32_t diff = static_cast<int32_t>(elapsedRealTime * mTimeScale);
@@ -63,7 +61,9 @@ void TimeScale::applyExact(uint32_t timeNow) {
     // diff < 0
     uint32_t abs_diff = -diff;
     if (abs_diff > mRelativeTime) {
+        // Protection against rollover.
         mRelativeTime = 0;
+        mLastRealTime = timeNow;
         return;
     }
     mLastRealTime = timeNow;
