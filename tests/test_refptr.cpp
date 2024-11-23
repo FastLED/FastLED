@@ -7,7 +7,8 @@
 #include "fl/ptr.h"
 
 #include "namespace.h"
-FASTLED_USING_NAMESPACE
+
+using namespace fl;
 
 class MyClass;
 typedef Ptr<MyClass> MyClassPtr;

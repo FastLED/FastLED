@@ -7,10 +7,10 @@
 #include "fl/vector.h"
 
 #include "namespace.h"
-FASTLED_USING_NAMESPACE
+
+using namespace fl;
 
 TEST_CASE("Fixed vector simple") {
-    FASTLED_USING_NAMESPACE;
     fl::FixedVector<int, 5> vec;
 
     SUBCASE("Initial state") {

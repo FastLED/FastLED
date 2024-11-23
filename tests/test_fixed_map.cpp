@@ -103,7 +103,7 @@ TEST_CASE("SortedHeapMap operations") {
     };
 
     SUBCASE("Insert maintains key order") {
-        SortedHeapMap<int, std::string, Less> map(5);
+        fl::SortedHeapMap<int, std::string, Less> map(5);
         
         map.insert(3, "three");
         map.insert(1, "one");

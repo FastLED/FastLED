@@ -7,7 +7,8 @@
 #include "fl/circular_buffer.h"
 
 #include "namespace.h"
-FASTLED_USING_NAMESPACE
+
+using namespace fl;
 
 TEST_CASE("circular_buffer basic operations") {
     CircularBuffer<int> buffer(5);

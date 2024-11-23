@@ -9,7 +9,7 @@ FASTLED_USING_NAMESPACE
 
 
 TEST_CASE("FixedSet operations") {
-    FixedSet<int, 5> set;
+    fl::FixedSet<int, 5> set;
 
     SUBCASE("Insert and find") {
         CHECK(set.insert(1));

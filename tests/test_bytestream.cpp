@@ -7,7 +7,8 @@
 #include "fx/video/pixel_stream.h"
 
 #include "namespace.h"
-FASTLED_USING_NAMESPACE
+
+using namespace fl;
 
 TEST_CASE("ByteStreamMemory basic operations") {
 
