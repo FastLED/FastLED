@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "fl/ptr.h"
-#include "template_magic.h"
+#include "fl/template_magic.h"
 #include "fl/vector.h"
 #include "namespace.h"
 

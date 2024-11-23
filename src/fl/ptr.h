@@ -8,7 +8,7 @@
 
 #include "namespace.h"
 #include "fl/scoped_ptr.h"
-#include "template_magic.h"
+#include "fl/template_magic.h"
 
 
 // Declares a smart pointer. FASTLED_SMART_PTR(Foo) will declare a class FooPtr

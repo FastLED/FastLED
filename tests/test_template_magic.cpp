@@ -4,7 +4,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "doctest.h"
-#include "template_magic.h"
+#include "fl/template_magic.h"
 #include "namespace.h"
 #include <type_traits>
 

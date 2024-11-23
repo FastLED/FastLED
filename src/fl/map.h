@@ -5,7 +5,7 @@
 
 #include "namespace.h"
 #include "fl/vector.h"
-#include "template_magic.h"
+#include "fl/template_magic.h"
 
 namespace fl {
 

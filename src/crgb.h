@@ -8,7 +8,7 @@
 #include "color.h"
 #include "lib8tion/types.h"
 #include "force_inline.h"
-#include "template_magic.h"
+#include "fl/template_magic.h"
 
 
 FASTLED_NAMESPACE_BEGIN

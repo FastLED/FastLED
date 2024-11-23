@@ -5,7 +5,7 @@
 #include "platforms/ui_defs.h"
 #include "namespace.h"
 #include "fl/math_macros.h"
-#include "template_magic.h"
+#include "fl/template_magic.h"
 
 #ifndef FASTLED_HAS_UI_SLIDER
 #define FASTLED_HAS_UI_SLIDER 0
