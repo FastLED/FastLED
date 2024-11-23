@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/vector.h"
-#include "singleton.h"
+#include "fl/singleton.h"
 #include "xymap.h"
 #include "screenmap.h"
 #include "namespace.h"
@@ -145,7 +145,7 @@ class EngineEvents {
     static EngineEvents *getInstance();
 
     EngineEvents() = default;
-    friend class Singleton<EngineEvents>;
+    friend class fl::Singleton<EngineEvents>;
 };
 
 FASTLED_NAMESPACE_END

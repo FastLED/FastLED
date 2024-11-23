@@ -1,6 +1,6 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
-#include "singleton.h"
+#include "fl/singleton.h"
 #include "engine_events.h"
 
 /// @file FastLED.cpp

@@ -11,7 +11,7 @@
 #include <memory>
 
 #include "fl/slice.h"
-#include "singleton.h"
+#include "fl/singleton.h"
 #include "namespace.h"
 #include "engine_events.h"
 #include "fl/map.h"
@@ -61,7 +61,7 @@ public:
 
 
 private:
-    friend class Singleton<ActiveStripData>;
+    friend class fl::Singleton<ActiveStripData>;
     ActiveStripData() {
         EngineEvents::Listener* listener = this;
         EngineEvents::addListener(listener);

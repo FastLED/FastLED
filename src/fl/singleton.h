@@ -2,7 +2,7 @@
 
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // A templated singleton class, parameterized by the type of the singleton and an optional integer.
 template<typename T, int N = 0>
@@ -22,4 +22,4 @@ private:
     ~Singleton() = default;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

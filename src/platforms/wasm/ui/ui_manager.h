@@ -7,7 +7,7 @@
 #include <map>
 
 #include "events.h"
-#include "singleton.h"
+#include "fl/singleton.h"
 
 
 #include "fl/set.h"
@@ -34,7 +34,7 @@ class jsUiManager : EngineEvents::Listener {
   private:
     static void executeUiUpdates(const FLArduinoJson::JsonDocument& doc);
     typedef fl::FixedSet<fl::WeakPtr<jsUiInternal>, 64> jsUIRefSet;
-    friend class Singleton<jsUiManager>;
+    friend class fl::Singleton<jsUiManager>;
     jsUiManager() {
         EngineEvents::addListener(this);
     }

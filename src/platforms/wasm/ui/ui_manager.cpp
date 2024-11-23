@@ -35,7 +35,7 @@ void jsUiManager::removeComponent(WeakPtr<jsUiInternal> component) {
 }
 
 jsUiManager &jsUiManager::instance() {
-    return Singleton<jsUiManager>::instance();
+    return fl::Singleton<jsUiManager>::instance();
 }
 
 std::vector<jsUiInternalPtr> jsUiManager::getComponents() {

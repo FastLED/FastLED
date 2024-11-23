@@ -13,7 +13,7 @@
 
 
 #include "fl/map.h"
-#include "singleton.h"
+#include "fl/singleton.h"
 #include "fl/slice.h"
 
 #include "active_strip_data.h"
@@ -29,7 +29,7 @@ using namespace fl;
 FASTLED_NAMESPACE_BEGIN
 
 ActiveStripData& ActiveStripData::Instance() {
-    return Singleton<ActiveStripData>::instance();
+    return fl::Singleton<ActiveStripData>::instance();
 }
 
 void ActiveStripData::update(int id, uint32_t now, const uint8_t* pixel_data, size_t size) {
@@ -69,7 +69,7 @@ Str ActiveStripData::infoJsonString() {
 }
 
 static ActiveStripData* getActiveStripDataRef() {
-    ActiveStripData* instance = &Singleton<ActiveStripData>::instance();
+    ActiveStripData* instance = &fl::Singleton<ActiveStripData>::instance();
     return instance;
 }
 

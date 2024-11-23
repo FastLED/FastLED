@@ -5,7 +5,7 @@
 #include "crgb.h"
 #include "fl/vector.h"
 #include "namespace.h"
-#include "singleton.h"
+#include "fl/singleton.h"
 #include "pixelset.h"
 #include "fl/scoped_ptr.h"
 #include "allocator.h"
