@@ -2,43 +2,4 @@
 set -e
 
 cd "$(dirname "$0")"
-
-# if .venv not found
-if [ ! -d .venv ]; then
-    # create virtual environment
-    ./install
-fi
-
-if [ "$1" = "--cpp" ]; then
-    if [ -n "$2" ]; then
-        # Compile and run specific C++ test
-        time uv run ci/cpp_test_run.py --test "$2"
-    else
-        # Compile all C++ tests
-        # uv run ci/cpp_test_compile.py
-        time uv run ci/cpp_test_run.py
-    fi
-else
-    # Run all tests
-    # Start pio check in background and redirect output to temp file
-    temp_file=$(mktemp)
-    uv run pio check --skip-packages --src-filters="+<src/>" --severity=medium --fail-on-defect=high --flags "--inline-suppr --enable=all --std=c++17" > "$temp_file" 2>&1 &
-    pio_pid=$!
-
-    # Run other tests while pio check runs
-    uv run ci/cpp_test_compile.py
-    uv run ci/cpp_test_run.py
-    uv run ci/ci-compile-native.py
-    uv run pytest ci/tests
-
-    echo "Waiting on pio check to complete..."
-    # Wait for pio check to complete and display its output
-    wait $pio_pid
-    pio_status=$?
-    cat "$temp_file"
-    rm "$temp_file"
-    
-    # Exit with pio check's status code if it failed
-
-    [ $pio_status -eq 0 ] || exit $pio_status
-fi
+uv run test.py

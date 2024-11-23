@@ -12,4 +12,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: esp32-c3-devkitm-1
+      args: esp32c3
