@@ -5,7 +5,7 @@ LUT - Look up table implementation for various types.
 */
 
 #include <stdint.h>
-#include "fl/ref.h"
+#include "fl/ptr.h"
 #include "force_inline.h"
 #include "allocator.h"
 

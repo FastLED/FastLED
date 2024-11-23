@@ -3,7 +3,7 @@
 #include <stddef.h>   // For size_t
 #include <stdint.h>   // For standard integer types
 #include "namespace.h"
-#include "fl/ref.h"      // Assuming this provides `scoped_array` or similar
+#include "fl/ptr.h"      // Assuming this provides `scoped_array` or similar
 #include "math_macros.h"
 
 namespace fl {

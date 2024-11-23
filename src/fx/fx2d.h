@@ -5,7 +5,7 @@
 #include "xymap.h"
 #include "namespace.h"
 #include "fx/fx.h"
-#include "fl/ref.h"
+#include "fl/ptr.h"
 
 FASTLED_NAMESPACE_BEGIN
 
