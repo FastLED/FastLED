@@ -61,6 +61,9 @@ sketch_flags = [
     "-Wnon-c-typedef-for-linkage",
     f"-sWASM={USE_WASM}",
     "-fuse-ld=lld",
+    #-Wbad-function-cast -Wcast-function
+    "-Wbad-function-cast",
+    "-Wcast-function",
 ]
 
 if QUICK_BUILD:
