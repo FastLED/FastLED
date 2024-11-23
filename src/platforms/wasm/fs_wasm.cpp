@@ -20,7 +20,7 @@
 #include "namespace.h"
 #include "fl/ptr.h"
 #include "fl/str.h"
-#include "json.h"
+#include "fl/json.h"
 #include "fl/warn.h"
 
 using namespace fl;

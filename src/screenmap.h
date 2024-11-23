@@ -8,7 +8,7 @@
 
 #include "fl/str.h"
 #include "fl/map.h"
-#include "json.h"
+#include "fl/json.h"
 #include "namespace.h"
 
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED.js
