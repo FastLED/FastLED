@@ -5,8 +5,9 @@
 namespace fl {
 
 class Str;
+class JsonDocument: public ::FLArduinoJson::JsonDocument {};
 
-bool parseJson(const char* json, FLArduinoJson::JsonDocument* doc, Str* error = nullptr);
-void toJson(const FLArduinoJson::JsonDocument& doc, Str* jsonBuffer);
+bool parseJson(const char* json, JsonDocument* doc, Str* error = nullptr);
+void toJson(const JsonDocument& doc, Str* jsonBuffer);
 
 } // namespace fl

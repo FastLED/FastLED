@@ -9,6 +9,7 @@
 #endif
 
 #include "namespace.h"
+#include "fl/json.h"
 
 
 namespace fl {
@@ -46,6 +47,10 @@ void FileSystem::end() {
     if (mFs) {
         mFs->end();
     }
+}
+
+bool FileSystem::readJson(const char *path, JsonDocument* doc, fl::Str* error) {
+    return false;
 }
 
 void FileSystem::close(FileHandlePtr file) { mFs->close(file); }

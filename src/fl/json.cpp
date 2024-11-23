@@ -3,7 +3,7 @@
 
 namespace fl {
 
-bool parseJson(const char* json, FLArduinoJson::JsonDocument* doc, Str* _error) {
+bool parseJson(const char* json, fl::JsonDocument* doc, Str* _error) {
     FLArduinoJson::DeserializationError error = deserializeJson(*doc, json);
     if (error) {
         if (_error) {

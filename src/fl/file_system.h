@@ -15,11 +15,14 @@ struct CRGB;
 class Video;
 FASTLED_NAMESPACE_END
 
+
 namespace fl {
 
 FASTLED_SMART_PTR(FsImpl);
 FASTLED_SMART_PTR(FileSystem);
 FASTLED_SMART_PTR(FileHandle);
+
+class JsonDocument;
 
 // Platforms need to implement this to create an instance of the filesystem.
 FsImplPtr make_sdcard_filesystem(int cs_pin);
@@ -38,6 +41,7 @@ class FileSystem {
     FileHandlePtr openRead(const char *path);  // Null if file could not be opened.
     Video openVideo(const char *path, size_t pixelsPerFrame, float fps = 30.0f, size_t nFrameHistory = 0);  // Null if video could not be opened.
     bool readText(const char *path, fl::Str* out);
+    bool readJson(const char *path, fl::JsonDocument* doc, fl::Str* error = nullptr);
     void close(FileHandlePtr file);
     
   private:
