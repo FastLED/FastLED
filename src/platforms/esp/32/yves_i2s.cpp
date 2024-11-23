@@ -46,7 +46,7 @@
 #include "crgb.h"
 #include "namespace.h"
 #include "allocator.h"
-#include "warn.h"
+#include "fl/warn.h"
 
 FASTLED_NAMESPACE_BEGIN
 
