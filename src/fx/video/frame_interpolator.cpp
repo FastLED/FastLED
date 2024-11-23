@@ -36,10 +36,6 @@ bool FrameInterpolator::draw(uint32_t now, CRGB* leds, uint8_t* alpha) {
         return false;
     }
 
-    if (!has(nextFrameNumber)) {
-        return false;
-    }
-
     if (has(frameNumber) && !has(nextFrameNumber)) {
         // just paint the current frame
         Frame* frame = get(frameNumber).get();
