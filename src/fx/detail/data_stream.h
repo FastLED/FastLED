@@ -3,7 +3,6 @@
 #include "namespace.h"
 #include "crgb.h"
 #include "ref.h"
-#include "fx/storage/filebuffer.h"
 #include "fx/storage/bytestream.h"
 #include "fx/frame.h"
 #include "file_system.h"
@@ -51,7 +50,6 @@ class DataStream: public Referent {
   void init(int bytes_per_frame);
   int32_t mbytesPerFrame;
   FileHandleRef mFileHandle;
-  FileBufferRef mFileBuffer;
   ByteStreamRef mByteStream;
   bool mUsingByteStream;
 

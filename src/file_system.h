@@ -13,6 +13,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_REF(FsImpl);
+FASTLED_SMART_REF(FileSystem);
 
 // Platforms need to implement this to create an instance of the filesystem.
 FsImplRef make_sdcard_filesystem(int cs_pin);
@@ -53,6 +54,11 @@ class FileHandle: public Referent {
     virtual const char* path() const = 0;
     virtual bool seek(size_t pos) = 0;
     virtual void close() = 0;
+
+    // convenience functions
+    size_t readCRGB(CRGB* dst, size_t n) {
+      return read((uint8_t*)dst, n * 3) / 3;
+    }
 };
 
 // Platforms will subclass this to implement the filesystem.

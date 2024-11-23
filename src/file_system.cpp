@@ -69,12 +69,16 @@ bool FileSystem::readText(const char *path, fl::Str* out) {
     }
     size_t size = file->size();
     out->reserve(size + out->size());
+    bool wrote = false;
     while (file->available()) {
         uint8_t buf[64];
         size_t n = file->read(buf, sizeof(buf));
         // out->append(buf, n);
         out->append((const char*)buf, n);
+        wrote = true;
     }
+    file->close();
+    return wrote;
 }
 
 FASTLED_NAMESPACE_END

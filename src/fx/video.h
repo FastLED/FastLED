@@ -8,15 +8,15 @@
 #include "fx/time.h"
 #include "fl/str.h"
 
-
 FASTLED_NAMESPACE_BEGIN
 
 // Forward declare dependencies.
-FASTLED_SMART_REF(VideoImpl);
+
 FASTLED_SMART_REF(ByteStream);
-FASTLED_SMART_REF(FileHandle);
 FASTLED_SMART_REF(VideoFx);
 FASTLED_SMART_REF(Frame);
+FASTLED_SMART_REF(FileHandle);
+FASTLED_SMART_REF(VideoImpl);
 struct CRGB;
 
 // Video represents a video file that can be played back on a LED strip.

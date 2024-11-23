@@ -20,14 +20,14 @@ class ByteStreamMemory : public ByteStream {
     bool available(size_t n) const override;
     size_t read(uint8_t *dst, size_t bytesToRead) override;
     void clear() {
-        mBuffer.clear();
+        mReadBuffer.clear();
     }
     const char *path() const override { return "ByteStreamMemory"; }
     size_t write(const uint8_t* src, size_t n);
     size_t write(const CRGB* src, size_t n);
 
   private:
-    CircularBuffer<uint8_t> mBuffer;
+    CircularBuffer<uint8_t> mReadBuffer;
 };
 
 FASTLED_NAMESPACE_END
