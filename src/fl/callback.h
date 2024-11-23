@@ -2,7 +2,7 @@
 
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /// @brief A void returning callback that can be used to call a function with a variable number of arguments. If this binds
 ///        to a non-static member function then self must be none null. If it's a free function then set self to
@@ -33,4 +33,4 @@ private:
     void (*callback)(void* self, Args... args) = nullptr;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

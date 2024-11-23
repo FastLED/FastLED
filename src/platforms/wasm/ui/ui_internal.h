@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #include "namespace.h"
-#include "callback.h"
+#include "fl/callback.h"
 #include "fl/json.h"
 #include "fl/ptr.h"
 #include "fl/str.h"

@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 #include "fl/ptr.h"
-#include "callback.h"
+#include "fl/callback.h"
 #include "namespace.h"
 
 FASTLED_NAMESPACE_BEGIN
