@@ -9,6 +9,7 @@
 
 #define DBG FASTLED_DBG
 
+using fl::FileHandlePtr;
 
 FASTLED_NAMESPACE_BEGIN
 

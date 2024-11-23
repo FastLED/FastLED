@@ -11,7 +11,7 @@ void setup() {}
 #else
 #include <FastLED.h>
 #include "fl/scoped_ptr.h"
-#include "fixed_vector.h"
+#include "fl/vector.h"
 
 #include <stdio.h>
 #include <iostream>

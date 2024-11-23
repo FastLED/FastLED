@@ -10,19 +10,17 @@
 
 #include <memory>
 
-#include "slice.h"
+#include "fl/slice.h"
 #include "singleton.h"
-#include "fixed_map.h"
-
 #include "namespace.h"
 #include "engine_events.h"
-#include "fixed_map.h"
+#include "fl/map.h"
 #include "screenmap.h"
 #include "strip_id_map.h"
 
 FASTLED_NAMESPACE_BEGIN
 
-typedef Slice<const uint8_t> SliceUint8;
+typedef fl::Slice<const uint8_t> SliceUint8;
 
 // Zero copy data transfer of strip information from C++ to JavaScript.
 class ActiveStripData: public EngineEvents::Listener {
@@ -30,8 +28,8 @@ public:
 
 
     static constexpr size_t MAX_STRIPS = 16; // Adjust this value based on your needs
-    typedef FixedMap<int, SliceUint8, MAX_STRIPS> StripDataMap;
-    typedef FixedMap<int, ScreenMap, MAX_STRIPS> ScreenMapMap;
+    typedef fl::FixedMap<int, SliceUint8, MAX_STRIPS> StripDataMap;
+    typedef fl::FixedMap<int, ScreenMap, MAX_STRIPS> ScreenMapMap;
 
     static ActiveStripData& Instance();
     void update(int id, uint32_t now, const uint8_t* pixel_data, size_t size);

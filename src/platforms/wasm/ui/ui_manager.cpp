@@ -8,8 +8,8 @@
 
 
 #include "ui_manager.h"
-#include "fixed_map.h"
-#include "json.h"
+#include "fl/map.h"
+#include "fl/json.h"
 #include "namespace.h"
 
 
@@ -23,13 +23,13 @@ using namespace fl;
 
 FASTLED_NAMESPACE_BEGIN
 
-void jsUiManager::addComponent(WeakRef<jsUiInternal> component) {
+void jsUiManager::addComponent(WeakPtr<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.insert(component);
     instance().mItemsAdded = true;
 }
 
-void jsUiManager::removeComponent(WeakRef<jsUiInternal> component) {
+void jsUiManager::removeComponent(WeakPtr<jsUiInternal> component) {
     std::lock_guard<std::mutex> lock(instance().mMutex);
     instance().mComponents.erase(component);
 }
@@ -38,8 +38,8 @@ jsUiManager &jsUiManager::instance() {
     return Singleton<jsUiManager>::instance();
 }
 
-std::vector<jsUiInternalRef> jsUiManager::getComponents() {
-    std::vector<jsUiInternalRef> components;
+std::vector<jsUiInternalPtr> jsUiManager::getComponents() {
+    std::vector<jsUiInternalPtr> components;
     {
         std::lock_guard<std::mutex> lock(mMutex);
 
@@ -90,7 +90,7 @@ void jsUiManager::executeUiUpdates(const FLArduinoJson::JsonDocument &doc) {
 }
 
 void jsUiManager::toJson(FLArduinoJson::JsonArray &json) {
-    std::vector<jsUiInternalRef> components = instance().getComponents();
+    std::vector<jsUiInternalPtr> components = instance().getComponents();
     for (const auto &component : components) {
         FLArduinoJson::JsonObject componentJson =
             json.add<FLArduinoJson::JsonObject>();

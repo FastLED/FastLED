@@ -10,6 +10,8 @@
 
 #define DBG FASTLED_DBG
 
+using namespace fl;
+
 FASTLED_NAMESPACE_BEGIN
 
 VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,

@@ -8,6 +8,10 @@
 #include "fx/time.h"
 #include "fl/str.h"
 
+namespace fl {
+FASTLED_SMART_PTR(FileHandle);
+}  // namespace fl
+
 FASTLED_NAMESPACE_BEGIN
 
 // Forward declare dependencies.
@@ -15,7 +19,7 @@ FASTLED_NAMESPACE_BEGIN
 FASTLED_SMART_PTR(ByteStream);
 FASTLED_SMART_PTR(VideoFx);
 FASTLED_SMART_PTR(Frame);
-FASTLED_SMART_PTR(FileHandle);
+
 FASTLED_SMART_PTR(VideoImpl);
 struct CRGB;
 
@@ -27,13 +31,13 @@ public:
     // frameHistoryCount is the number of frames to keep in the buffer after draw. This
     // allows for time based effects like syncing video speed to audio triggers.
     Video();  // Please use FileSytem to construct a Video.
-    Video(FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
+    Video(fl::FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
     Video(ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
     ~Video();
     Video(const Video&);
     Video& operator=(const Video&);
     // Api
-    void begin(FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
+    void begin(fl::FileHandlePtr h, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
     void beginStream(ByteStreamPtr s, size_t pixelsPerFrame, float fps = 30.0f, size_t frameHistoryCount = 0);
     bool draw(uint32_t now, CRGB* leds, uint8_t* alpha = nullptr);
     bool draw(uint32_t now, Frame* frame);

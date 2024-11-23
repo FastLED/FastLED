@@ -7,8 +7,9 @@
 
 #else
 
-
 #include "sdkconfig.h"
+
+
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32)
 
@@ -47,6 +48,9 @@
 #include "namespace.h"
 #include "allocator.h"
 #include "fl/warn.h"
+
+#include "fl/slice.h"
+using fl::Slice;
 
 FASTLED_NAMESPACE_BEGIN
 

@@ -26,7 +26,7 @@ public:
         mLayers[1] = FxLayerPtr::New();
     }
 
-    void startTransition(uint32_t now, uint32_t duration, Ptr<Fx> nextFx) {
+    void startTransition(uint32_t now, uint32_t duration, fl::Ptr<Fx> nextFx) {
         completeTransition();
         if (duration == 0) {
             mLayers[0]->setFx(nextFx);

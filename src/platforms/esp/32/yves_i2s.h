@@ -9,7 +9,7 @@
 #include "pixelset.h"
 #include "fl/scoped_ptr.h"
 #include "allocator.h"
-#include "slice.h"
+#include "fl/slice.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -29,7 +29,7 @@ class YvesI2S {
     // on first call to showPixels().
     YvesI2S(const fl::FixedVector<int, 6>& pins, int clock_pin, int latch_pin);
 
-    Slice<CRGB> initOnce();
+    fl::Slice<CRGB> initOnce();
     void showPixels();
 
     // Disable copy constructor and assignment operator
@@ -38,7 +38,7 @@ class YvesI2S {
     YvesI2S &operator=(const YvesI2S &) = delete;
     ~YvesI2S();
 
-    Slice<CRGB> leds();
+    fl::Slice<CRGB> leds();
 
   private:
     fl::scoped_ptr<YvesI2SImpl> mDriver;

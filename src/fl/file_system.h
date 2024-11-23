@@ -11,15 +11,20 @@
 #include "fl/str.h"
 
 FASTLED_NAMESPACE_BEGIN
+struct CRGB;
+class Video;
+FASTLED_NAMESPACE_END
+
+namespace fl {
 
 FASTLED_SMART_PTR(FsImpl);
 FASTLED_SMART_PTR(FileSystem);
+FASTLED_SMART_PTR(FileHandle);
 
 // Platforms need to implement this to create an instance of the filesystem.
 FsImplPtr make_sdcard_filesystem(int cs_pin);
 
-FASTLED_SMART_PTR(FileHandle);
-class Video;
+
 
 // Instantiate this with a pin number to create a filesystem.
 class FileSystem {
@@ -82,4 +87,4 @@ class FsImpl : public fl::Referent {
     }
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace

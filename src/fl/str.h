@@ -348,10 +348,6 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    Str& operator<<(uint16_t val) {  // uint8_t is promoted to uint16_t
-        write(val);
-        return *this;
-    }
     Str& operator<<(int val) {
         write(val);
         return *this;

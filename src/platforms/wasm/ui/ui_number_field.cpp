@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "namespace.h"
-#include "json.h"
+#include "fl/json.h"
 #include "ui_internal.h"
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
@@ -23,7 +23,7 @@ jsNumberField::jsNumberField(const Str& name, double value, double min, double m
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
         static_cast<jsNumberField*>(self)->toJson(json);
     });
-    mInternal = jsUiInternalRef::New(name, std::move(updateFunc), std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 

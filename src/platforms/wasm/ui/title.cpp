@@ -13,7 +13,7 @@ jsTitle::jsTitle(const Str& text) : mText(text) {
     jsUiInternal::ToJsonFunction to_json_fcn = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
         static_cast<jsTitle*>(self)->toJson(json);
     });
-    mInternal = jsUiInternalRef::New("title", update_fcn, to_json_fcn);
+    mInternal = jsUiInternalPtr::New("title", update_fcn, to_json_fcn);
     jsUiManager::addComponent(mInternal);
 }
 

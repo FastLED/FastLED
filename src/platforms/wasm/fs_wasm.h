@@ -3,15 +3,19 @@
 #include <string>
 #include <stdint.h>
 
-#include "file_system.h"
+#include "fl/file_system.h"
 #include "namespace.h"
 #include "fl/ptr.h"
-#include "slice.h"
+#include "fl/slice.h"
 
+
+namespace fl {
+FASTLED_SMART_PTR_NO_FWD(FsImplPtr);
+}  // namespace fl
 
 FASTLED_NAMESPACE_BEGIN
 
-FsImplPtr make_sdcard_filesystem(int cs_pin);
+fl::FsImplPtr make_sdcard_filesystem(int cs_pin);
 
 FASTLED_NAMESPACE_END
 

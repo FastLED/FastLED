@@ -1,4 +1,4 @@
-#include "file_system.h"
+#include "fl/file_system.h"
 
 
 #ifdef __EMSCRIPTEN__
@@ -11,7 +11,7 @@
 #include "namespace.h"
 
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // WEAK SYMBOL
 // Override this if you want to supply a file system for your platform.
@@ -81,4 +81,4 @@ bool FileSystem::readText(const char *path, fl::Str* out) {
     return wrote;
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

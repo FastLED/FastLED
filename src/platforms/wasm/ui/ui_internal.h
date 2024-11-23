@@ -8,7 +8,7 @@
 
 #include "namespace.h"
 #include "callback.h"
-#include "json.h"
+#include "fl/json.h"
 #include "fl/ptr.h"
 #include "fl/str.h"
 
@@ -16,7 +16,7 @@ FASTLED_NAMESPACE_BEGIN
 
 FASTLED_SMART_PTR(jsUiInternal);
 
-class jsUiInternal : public Referent {
+class jsUiInternal : public fl::Referent {
 public:
 
     using UpdateFunction = Callback<const FLArduinoJson::JsonVariantConst&>;

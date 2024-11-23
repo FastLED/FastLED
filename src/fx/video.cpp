@@ -13,6 +13,7 @@
 
 #define DBG FASTLED_DBG
 
+using fl::FileHandlePtr;
 
 #include "namespace.h"
 

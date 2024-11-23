@@ -33,7 +33,7 @@ class NoisePalette : public FxGrid {
         setPalettePreset(0);
 
         // Allocate memory for the noise array using scoped_ptr
-        noise = scoped_ptr<uint8_t>(new uint8_t[width * height]);
+        noise = fl::scoped_ptr<uint8_t>(new uint8_t[width * height]);
     }
 
     // No need for a destructor, scoped_ptr will handle memory deallocation
@@ -71,7 +71,7 @@ class NoisePalette : public FxGrid {
     uint16_t width, height;
     uint16_t speed = 0;
     uint16_t scale = 0;
-    scoped_ptr<uint8_t> noise;
+    fl::scoped_ptr<uint8_t> noise;
     CRGBPalette16 currentPalette = PartyColors_p;
     bool colorLoop = 0;
     int currentPaletteIndex = 0;

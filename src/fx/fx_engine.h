@@ -72,7 +72,7 @@ class FxEngine {
      *        object has been deleted. But if it's a static object that's
      *        then the object probably wasn't going to be deleted anyway.
      */
-    int addFx(Fx& effect) { return addFx(Ptr<Fx>::NoTracking(effect)); }
+    int addFx(Fx& effect) { return addFx(fl::Ptr<Fx>::NoTracking(effect)); }
 
     /**
      * @brief Requests removal of an effect from the engine, which might not happen

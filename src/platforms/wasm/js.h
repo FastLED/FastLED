@@ -73,7 +73,7 @@ class jsSlider {
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst& value);
 
-    jsUiInternalRef mInternal;
+    jsUiInternalPtr mInternal;
     float mMin;
     float mMax;
     float mValue;
@@ -106,7 +106,7 @@ class jsNumberField {
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst& value);
 
-    jsUiInternalRef mInternal;
+    jsUiInternalPtr mInternal;
     double mValue;
     double mMin;
     double mMax;
@@ -134,7 +134,7 @@ class jsCheckbox {
   private:
     void updateInternal(const FLArduinoJson::JsonVariantConst& value);
 
-    jsUiInternalRef mInternal;
+    jsUiInternalPtr mInternal;
     bool mValue;
     fl::Str mGroup;
 };
@@ -173,7 +173,7 @@ class jsButton {
 
     void updateInternal(const FLArduinoJson::JsonVariantConst& value);
 
-    jsUiInternalRef mInternal;
+    jsUiInternalPtr mInternal;
     bool mPressed = false;
     bool mPressedLast = false;
     bool mClickedHappened = false;
@@ -192,7 +192,7 @@ class jsTitle {
     const fl::Str& text() const { return mText; }
 
   private:
-    jsUiInternalRef mInternal;
+    jsUiInternalPtr mInternal;
     fl::Str mGroup;
     fl::Str mText;
 };
@@ -209,7 +209,7 @@ class jsDescription {
     const fl::Str& text() const { return mText; }
 
   private:
-    jsUiInternalRef mInternal;
+    jsUiInternalPtr mInternal;
     fl::Str mGroup;
     fl::Str mText;
 };

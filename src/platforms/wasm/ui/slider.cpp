@@ -5,7 +5,7 @@
 
 #include "platforms/wasm/js.h"
 #include "ui_manager.h"
-#include "json.h"
+#include "fl/json.h"
 #include "namespace.h"
 
 using namespace fl;
@@ -22,7 +22,7 @@ jsSlider::jsSlider(const Str& name, float value, float min, float max, float ste
     auto toJsonFunc = jsUiInternal::ToJsonFunction(this, [](void* self, FLArduinoJson::JsonObject& json) {
         static_cast<jsSlider*>(self)->toJson(json);
     });
-    mInternal = jsUiInternalRef::New(name, std::move(updateFunc), std::move(toJsonFunc));
+    mInternal = jsUiInternalPtr::New(name, std::move(updateFunc), std::move(toJsonFunc));
     jsUiManager::addComponent(mInternal);
 }
 

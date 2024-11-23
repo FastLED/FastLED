@@ -24,7 +24,7 @@
 #include "fl/str.h"
 #include "namespace.h"
 #include "screenmap.h"
-#include "fixed_map.h"
+#include "fl/map.h"
 
 using namespace fl;
 
