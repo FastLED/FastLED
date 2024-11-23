@@ -27,7 +27,7 @@ class ByteStreamMemory : public ByteStream {
     size_t write(const CRGB* src, size_t n);
 
   private:
-    CircularBuffer<uint8_t> mReadBuffer;
+    fl::CircularBuffer<uint8_t> mReadBuffer;
 };
 
 FASTLED_NAMESPACE_END

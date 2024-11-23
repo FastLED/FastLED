@@ -6,7 +6,7 @@
 #include "ref.h"      // Assuming this provides `scoped_array` or similar
 #include "math_macros.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 template <typename T>
 class CircularBuffer {
@@ -119,4 +119,4 @@ private:
 };
 
 
-FASTLED_NAMESPACE_END
+}
