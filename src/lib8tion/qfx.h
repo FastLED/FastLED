@@ -1,6 +1,9 @@
 #pragma once
 
 #include <stdint.h>
+#include "namespace.h"
+
+FASTLED_NAMESPACE_BEGIN
 
 
 /// @addtogroup FractionalTypes
@@ -49,3 +52,5 @@ typedef qfx<uint8_t, 6,2> q62;
 typedef qfx<uint16_t, 8,8> q88;
 /// A 12.4 integer (12 bits integer, 4 bits fraction)
 typedef qfx<uint16_t, 12,4> q124;
+
+FASTLED_NAMESPACE_END
