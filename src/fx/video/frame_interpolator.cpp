@@ -1,12 +1,12 @@
 #include "fx/video/frame_interpolator.h"
 #include "fl/circular_buffer.h"
 #include "fx/video/pixel_stream.h"
-#include "math_macros.h"
+#include "fl/math_macros.h"
 #include "namespace.h"
 
 #include "fl/dbg.h"
 
-#include "math_macros.h"
+#include "fl/math_macros.h"
 #include <math.h>
 
 #define DBG FASTLED_DBG

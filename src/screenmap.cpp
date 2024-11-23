@@ -12,7 +12,7 @@
 #include "namespace.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "math_macros.h"
+#include "fl/math_macros.h"
 #include "math.h"
 
 using namespace fl;
