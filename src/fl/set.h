@@ -6,7 +6,7 @@
 #include "namespace.h"
 #include "fl/vector.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // A simple unordered set implementation with a fixed size.
 // The user is responsible for making sure that the inserts
@@ -150,4 +150,4 @@ private:
     VectorType data;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

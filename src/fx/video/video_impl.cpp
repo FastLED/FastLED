@@ -118,7 +118,7 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
         return false;
     }
 
-    FixedVector<uint32_t, 2> frame_numbers;
+    fl::FixedVector<uint32_t, 2> frame_numbers;
     if (!mFrameInterpolator->has(currFrameNumber)) {
         frame_numbers.push_back(currFrameNumber);
     }

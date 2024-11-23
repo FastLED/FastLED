@@ -27,7 +27,7 @@ class YvesI2S {
   public:
     // Safe to initialize in static memory because the driver will be instantiated
     // on first call to showPixels().
-    YvesI2S(const FixedVector<int, 6>& pins, int clock_pin, int latch_pin);
+    YvesI2S(const fl::FixedVector<int, 6>& pins, int clock_pin, int latch_pin);
 
     Slice<CRGB> initOnce();
     void showPixels();
@@ -45,7 +45,7 @@ class YvesI2S {
     //Pins mPins;
     int mClockPin;
     int mLatchPin;
-    FixedVector<int, 6> mPins;
+    fl::FixedVector<int, 6> mPins;
     fl::scoped_array<CRGB> mLeds;
 };
 

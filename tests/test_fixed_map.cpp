@@ -8,8 +8,8 @@
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
 
-TEST_CASE("FixedMap operations") {
-    FixedMap<int, int, 5> map;
+TEST_CASE("fl::FixedMap operations") {
+    fl::FixedMap<int, int, 5> map;
 
     SUBCASE("Insert and find") {
         CHECK(map.insert(1, 10));

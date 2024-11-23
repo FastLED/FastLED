@@ -121,10 +121,10 @@ class ScreenMap {
     float getDiameter() const { return mDiameter; }
 
     static void ParseJson(const char *jsonStrScreenMap,
-                          FixedMap<fl::Str, ScreenMap, 16> *segmentMaps);
+                          fl::FixedMap<fl::Str, ScreenMap, 16> *segmentMaps);
 
-    static void toJsonStr(const FixedMap<fl::Str, ScreenMap, 16>&, fl::Str* jsonBuffer);
-    static void toJson(const FixedMap<fl::Str, ScreenMap, 16>&, FLArduinoJson::JsonDocument* doc);
+    static void toJsonStr(const fl::FixedMap<fl::Str, ScreenMap, 16>&, fl::Str* jsonBuffer);
+    static void toJson(const fl::FixedMap<fl::Str, ScreenMap, 16>&, FLArduinoJson::JsonDocument* doc);
 
   private:
     static const pair_xy_float &empty() {

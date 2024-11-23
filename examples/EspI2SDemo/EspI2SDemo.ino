@@ -23,8 +23,8 @@ void setup() {}
 #define LATCH_PIN 3
 
 // Note that this isn't the final api and will change.
-FixedVector<int, 6>  pins({0,1,2,3,18,17});
-// FixedVector<int, 6>  pins({9,10,12,8,18,17});  // Esp32s3 pins from examples.
+fl::FixedVector<int, 6>  pins({0,1,2,3,18,17});
+// fl::FixedVector<int, 6>  pins({9,10,12,8,18,17});  // Esp32s3 pins from examples.
 
 void BlinkAndDraw(CRGB color, int times);
 

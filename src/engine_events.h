@@ -137,7 +137,7 @@ class EngineEvents {
         int priority = 0;
         Pair(Listener *listener, int priority) : listener(listener), priority(priority) {}
     };
-    typedef FixedVector<Pair, FASTLED_ENGINE_EVENTS_MAX_LISTENERS>
+    typedef fl::FixedVector<Pair, FASTLED_ENGINE_EVENTS_MAX_LISTENERS>
         ListenerList;
     ListenerList mListeners;
 #endif

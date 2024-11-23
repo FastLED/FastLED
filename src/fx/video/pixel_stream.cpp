@@ -102,7 +102,6 @@ bool PixelStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
     } else {
         // DBG("mbytesPerFrame: " << mbytesPerFrame);
         mFileHandle->seek(frameNumber * mbytesPerFrame);
-        size_t before = mFileHandle->bytesLeft();
         if (mFileHandle->bytesLeft() == 0) {
             return false;
         }
@@ -112,7 +111,7 @@ bool PixelStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
 
         bool ok = int(read) == mbytesPerFrame;
         if (!ok) {
-            DBG("readFrameAt failed - read: " << read << ", mbytesPerFrame: " << mbytesPerFrame << ", frame:" << frameNumber << ", left: " << mFileHandle->bytesLeft() << ", before: " << before);
+            DBG("readFrameAt failed - read: " << read << ", mbytesPerFrame: " << mbytesPerFrame << ", frame:" << frameNumber << ", left: " << mFileHandle->bytesLeft());
         }
         return ok;
     }

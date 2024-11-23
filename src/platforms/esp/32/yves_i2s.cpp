@@ -52,7 +52,7 @@ FASTLED_NAMESPACE_BEGIN
 
 class YvesI2SImpl : public fl::I2SClocklessVirtualLedDriver {};
 
-YvesI2S::YvesI2S(const FixedVector<int, 6> &pins, int clock_pin,
+YvesI2S::YvesI2S(const fl::FixedVector<int, 6> &pins, int clock_pin,
                  int latch_pin) {
     mPins = pins;
     mClockPin = clock_pin;

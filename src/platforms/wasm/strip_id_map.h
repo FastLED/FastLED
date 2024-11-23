@@ -115,8 +115,8 @@ private:
     static StripIdMap& Instance() {
         return Singleton<StripIdMap>::instance();
     }
-    FixedMap<CLEDController*, int, MAX_STRIPS> mStripMap;
-    FixedMap<int, CLEDController*, MAX_STRIPS> mOwnerMap;
+    fl::FixedMap<CLEDController*, int, MAX_STRIPS> mStripMap;
+    fl::FixedMap<int, CLEDController*, MAX_STRIPS> mOwnerMap;
     int mCounter = 0;
 };
 

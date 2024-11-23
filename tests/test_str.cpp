@@ -91,8 +91,8 @@ TEST_CASE("Str::reserve") {
     CHECK_EQ(s, "hello");
 }
 
-TEST_CASE("Str with FixedVector") {
-    FixedVector<Str, 10> vec;
+TEST_CASE("Str with fl::FixedVector") {
+    fl::FixedVector<Str, 10> vec;
     vec.push_back(Str("hello"));
     vec.push_back(Str("world"));
 

@@ -37,7 +37,7 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds, float cm_led_dia
 
 
 void ScreenMap::ParseJson(const char *jsonStrScreenMap,
-                          FixedMap<Str, ScreenMap, 16> *segmentMaps) {
+                          fl::FixedMap<Str, ScreenMap, 16> *segmentMaps) {
     FLArduinoJson::JsonDocument doc;
     FLArduinoJson::deserializeJson(doc, jsonStrScreenMap);
     auto map = doc["map"];
@@ -62,7 +62,7 @@ void ScreenMap::ParseJson(const char *jsonStrScreenMap,
     }
 }
 
-void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16>& segmentMaps, FLArduinoJson::JsonDocument* _doc) {
+void ScreenMap::toJson(const fl::FixedMap<Str, ScreenMap, 16>& segmentMaps, FLArduinoJson::JsonDocument* _doc) {
     auto& doc = *_doc;
     auto map = doc["map"].to<FLArduinoJson::JsonObject>();
     for (auto kv : segmentMaps) {
@@ -84,7 +84,7 @@ void ScreenMap::toJson(const FixedMap<Str, ScreenMap, 16>& segmentMaps, FLArduin
     }
 }
 
-void ScreenMap::toJsonStr(const FixedMap<Str, ScreenMap, 16>& segmentMaps, Str* jsonBuffer) {
+void ScreenMap::toJsonStr(const fl::FixedMap<Str, ScreenMap, 16>& segmentMaps, Str* jsonBuffer) {
     FLArduinoJson::JsonDocument doc;
     toJson(segmentMaps, &doc);
     FLArduinoJson::serializeJson(doc, *jsonBuffer);

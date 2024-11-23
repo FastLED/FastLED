@@ -7,7 +7,7 @@
 #include "namespace.h"
 #include "fl/scoped_ptr.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 // A fixed sized vector. The user is responsible for making sure that the
@@ -497,4 +497,4 @@ public:
 };
 
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -65,7 +65,7 @@ void setup() {
         Serial.println("Failed to initialize file system.");
     }
     // JSON_SCREEN_MAP
-    FixedMap<Str, ScreenMap, 16> screenMaps;
+    fl::FixedMap<Str, ScreenMap, 16> screenMaps;
     ScreenMap::ParseJson(JSON_SCREEN_MAP, &screenMaps);
     ScreenMap screenMap = screenMaps["strip1"];
 

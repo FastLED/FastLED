@@ -7,7 +7,7 @@
 #include "fl/vector.h"
 #include "template_magic.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // A simple unordered map implementation with a fixed size.
 // The user is responsible for making sure that the inserts
@@ -322,4 +322,4 @@ public:
 
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

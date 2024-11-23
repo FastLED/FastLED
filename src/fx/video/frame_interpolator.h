@@ -18,7 +18,7 @@ class FrameInterpolator : public fl::Referent {
     struct Less {
         bool operator()(uint32_t a, uint32_t b) const { return a < b; }
     };
-    typedef SortedHeapMap<uint32_t, FramePtr, Less> FrameBuffer;
+    typedef fl::SortedHeapMap<uint32_t, FramePtr, Less> FrameBuffer;
     FrameInterpolator(size_t nframes, float fpsVideo);
 
     // Will search through the array, select the two frames that are closest to

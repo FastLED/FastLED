@@ -36,7 +36,7 @@ FASTLED_NAMESPACE_BEGIN
  */
 class FxEngine {
   public:
-    typedef FixedMap<int, FxPtr, FASTLED_FX_ENGINE_MAX_FX> IntFxMap;
+    typedef fl::FixedMap<int, FxPtr, FASTLED_FX_ENGINE_MAX_FX> IntFxMap;
     /**
      * @brief Constructs an FxEngine with the specified number of LEDs.
      * @param numLeds The number of LEDs in the strip.

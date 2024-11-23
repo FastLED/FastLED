@@ -11,7 +11,7 @@ FASTLED_USING_NAMESPACE
 
 TEST_CASE("Fixed vector simple") {
     FASTLED_USING_NAMESPACE;
-    FixedVector<int, 5> vec;
+    fl::FixedVector<int, 5> vec;
 
     SUBCASE("Initial state") {
         CHECK(vec.size() == 0);
@@ -53,7 +53,7 @@ TEST_CASE("Fixed vector simple") {
 
 TEST_CASE("Fixed vector insert") {
     FASTLED_USING_NAMESPACE;
-    FixedVector<int, 5> vec;
+    fl::FixedVector<int, 5> vec;
 
     SUBCASE("Insert at beginning") {
         vec.push_back(20);
@@ -111,7 +111,7 @@ TEST_CASE("Fixed vector insert") {
 
 TEST_CASE("Fixed vector find_if with predicate") {
     FASTLED_USING_NAMESPACE;
-    FixedVector<int, 5> vec;
+    fl::FixedVector<int, 5> vec;
 
     SUBCASE("Find even number") {
         vec.push_back(1);
@@ -152,7 +152,7 @@ TEST_CASE("Fixed vector find_if with predicate") {
     }
 }
 
-TEST_CASE("FixedVector construction and destruction") {
+TEST_CASE("fl::FixedVector construction and destruction") {
     FASTLED_USING_NAMESPACE;
     
     static int live_object_count = 0;
@@ -172,7 +172,7 @@ TEST_CASE("FixedVector construction and destruction") {
         REQUIRE_EQ(0, live_object_count);
         live_object_count = 0;
         {
-            FixedVector<TestObject, 3> vec;
+            fl::FixedVector<TestObject, 3> vec;
             CHECK(live_object_count == 0);
 
             vec.push_back(TestObject(1));
@@ -191,7 +191,7 @@ TEST_CASE("FixedVector construction and destruction") {
     SUBCASE("Clear") {
         live_object_count = 0;
         {
-            FixedVector<TestObject, 3> vec;
+            fl::FixedVector<TestObject, 3> vec;
             vec.push_back(TestObject(1));
             vec.push_back(TestObject(2));
 
@@ -207,7 +207,7 @@ TEST_CASE("FixedVector construction and destruction") {
 
 TEST_CASE("Fixed vector advanced") {
     FASTLED_USING_NAMESPACE;
-    FixedVector<int, 5> vec;
+    fl::FixedVector<int, 5> vec;
 
     SUBCASE("Pop back") {
         vec.push_back(10);
@@ -277,7 +277,7 @@ TEST_CASE("Fixed vector with custom type") {
         bool operator==(const Point& other) const { return x == other.x && y == other.y; }
     };
 
-    FixedVector<Point, 3> vec;
+    fl::FixedVector<Point, 3> vec;
 
     SUBCASE("Push and access custom type") {
         vec.push_back(Point(1, 2));
