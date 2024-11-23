@@ -12,11 +12,11 @@ FASTLED_NAMESPACE_BEGIN
 
 // Forward declare dependencies.
 
-FASTLED_SMART_REF(ByteStream);
-FASTLED_SMART_REF(VideoFx);
-FASTLED_SMART_REF(Frame);
-FASTLED_SMART_REF(FileHandle);
-FASTLED_SMART_REF(VideoImpl);
+FASTLED_SMART_PTR(ByteStream);
+FASTLED_SMART_PTR(VideoFx);
+FASTLED_SMART_PTR(Frame);
+FASTLED_SMART_PTR(FileHandle);
+FASTLED_SMART_PTR(VideoImpl);
 struct CRGB;
 
 // Video represents a video file that can be played back on a LED strip.

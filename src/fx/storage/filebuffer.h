@@ -10,8 +10,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(FileBuffer);
-FASTLED_SMART_REF(FileHandle);
+FASTLED_SMART_PTR(FileBuffer);
+FASTLED_SMART_PTR(FileHandle);
 
 class FileBuffer: public fl::Referent {
  public:

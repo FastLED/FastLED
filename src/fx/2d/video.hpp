@@ -12,13 +12,13 @@ FASTLED_NAMESPACE_BEGIN
 
 
 
-FASTLED_SMART_REF(VideoFx);
+FASTLED_SMART_PTR(VideoFx);
 
 
 
 #if 0
 
-FASTLED_SMART_REF(VideoFx);
+FASTLED_SMART_PTR(VideoFx);
 
 // Converts a FxGrid to a video effect. This primarily allows for
 // fixed frame rates and frame interpolation.

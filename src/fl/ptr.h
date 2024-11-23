@@ -11,18 +11,18 @@
 #include "template_magic.h"
 
 
-// Declares a smart pointer. FASTLED_SMART_REF(Foo) will declare a class FooRef
+// Declares a smart pointer. FASTLED_SMART_PTR(Foo) will declare a class FooRef
 // which will be a typedef of Ref<Foo>. After this FooRef::New(...args) can be
 // used to create a new instance of Ref<Foo>.
-#define FASTLED_SMART_REF(type)                                                \
+#define FASTLED_SMART_PTR(type)                                                \
     class type;                                                                \
     using type##Ref = fl::Ref<type>;
 
-#define FASTLED_SMART_REF_NO_FWD(type) using type##Ref = fl::Ref<type>;
+#define FASTLED_SMART_PTR_NO_FWD(type) using type##Ref = fl::Ref<type>;
 
 // If you have an interface class that you want to create a smart pointer for,
 // then you need to use this to bind it to a constructor.
-#define FASTLED_SMART_REF_CONSTRUCTOR(type, constructor)                       \
+#define FASTLED_SMART_PTR_CONSTRUCTOR(type, constructor)                       \
     template <> class RefTraits<type> {                                        \
       public:                                                                  \
         template <typename... Args> static Ref<type> New(Args... args) {       \
@@ -70,7 +70,7 @@ template <typename T> class RefTraits {
 // must be done explicitly, see the Ref::TakeOwnership() and Ref::NoTracking()
 // methods.
 //
-// To create a Ref to a concrete object, it's best to use FASTLED_SMART_REF(Foo)
+// To create a Ref to a concrete object, it's best to use FASTLED_SMART_PTR(Foo)
 // and then use FooRef::New(...) to create a new instance of Ref<Foo>.
 //
 // To create a Ref of an interface bound to a subclass (common for driver code
@@ -82,7 +82,7 @@ template <typename T> class RefTraits {
 // be used as a Ref.
 //
 // Example:
-//   FASTLED_SMART_REF(Foo);
+//   FASTLED_SMART_PTR(Foo);
 //   class Foo: public fl::Referent {};
 //   FooRef foo = FooRef::New();
 //
@@ -97,7 +97,7 @@ template <typename T> class RefTraits {
 //     public:
 //       static FooRef New(int a, int b);
 //   };
-//   FASTLED_SMART_REF_CONSTRUCTOR(Foo, FooSubclass::New);
+//   FASTLED_SMART_PTR_CONSTRUCTOR(Foo, FooSubclass::New);
 //   FooRef foo = FooRef::New(1, 2);  // this will now work.
 template <typename T> class Ref : public RefTraits<T> {
   public:

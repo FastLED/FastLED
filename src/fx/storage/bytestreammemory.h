@@ -11,7 +11,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(ByteStreamMemory);
+FASTLED_SMART_PTR(ByteStreamMemory);
 
 class ByteStreamMemory : public ByteStream {
   public:

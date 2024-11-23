@@ -106,7 +106,7 @@ FASTLED_NAMESPACE_BEGIN
 // incandescent bulbs change color as they get dim down.
 #define COOL_LIKE_INCANDESCENT 1
 
-FASTLED_SMART_REF(TwinkleFox);
+FASTLED_SMART_PTR(TwinkleFox);
 
 class TwinkleFox : public FxStrip {
   public:

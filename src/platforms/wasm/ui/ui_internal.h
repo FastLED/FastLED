@@ -14,7 +14,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(jsUiInternal);
+FASTLED_SMART_PTR(jsUiInternal);
 
 class jsUiInternal : public Referent {
 public:

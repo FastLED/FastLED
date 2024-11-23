@@ -8,7 +8,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(FrameInterpolator);
+FASTLED_SMART_PTR(FrameInterpolator);
 
 // Holds onto frames and allow interpolation. This allows
 // effects to have high effective frame rate and also

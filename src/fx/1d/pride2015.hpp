@@ -16,7 +16,7 @@ FASTLED_NAMESPACE_BEGIN
 // Animated, ever-changing rainbows.
 // by Mark Kriegsman
 
-FASTLED_SMART_REF(Pride2015);
+FASTLED_SMART_PTR(Pride2015);
 
 class Pride2015 : public FxStrip {
   public:

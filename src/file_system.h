@@ -12,13 +12,13 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(FsImpl);
-FASTLED_SMART_REF(FileSystem);
+FASTLED_SMART_PTR(FsImpl);
+FASTLED_SMART_PTR(FileSystem);
 
 // Platforms need to implement this to create an instance of the filesystem.
 FsImplRef make_sdcard_filesystem(int cs_pin);
 
-FASTLED_SMART_REF(FileHandle);
+FASTLED_SMART_PTR(FileHandle);
 class Video;
 
 // Instantiate this with a pin number to create a filesystem.

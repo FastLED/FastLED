@@ -18,9 +18,9 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(PixelStream);
-FASTLED_SMART_REF(FrameInterpolator);
-FASTLED_SMART_REF(Frame);
+FASTLED_SMART_PTR(PixelStream);
+FASTLED_SMART_PTR(FrameInterpolator);
+FASTLED_SMART_PTR(Frame);
 
 
 Video::Video() = default;

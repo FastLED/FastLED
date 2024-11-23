@@ -8,8 +8,8 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(TimeFunction);
-FASTLED_SMART_REF(TimeScale);
+FASTLED_SMART_PTR(TimeFunction);
+FASTLED_SMART_PTR(TimeScale);
 
 
 // Interface for time generation and time manipulation.

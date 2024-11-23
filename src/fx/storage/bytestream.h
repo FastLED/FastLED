@@ -10,7 +10,7 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(ByteStream);
+FASTLED_SMART_PTR(ByteStream);
 
 // An abstract class that represents a file handle.
 // Devices like the SD card will return one of these.

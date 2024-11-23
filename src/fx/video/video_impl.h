@@ -10,11 +10,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(VideoImpl);
-FASTLED_SMART_REF(FileHandle);
-FASTLED_SMART_REF(ByteStream);
-FASTLED_SMART_REF(FrameInterpolator);
-FASTLED_SMART_REF(PixelStream)
+FASTLED_SMART_PTR(VideoImpl);
+FASTLED_SMART_PTR(FileHandle);
+FASTLED_SMART_PTR(ByteStream);
+FASTLED_SMART_PTR(FrameInterpolator);
+FASTLED_SMART_PTR(PixelStream)
 
 class VideoImpl : public fl::Referent {
   public:

@@ -32,7 +32,7 @@ class Str;
 ///////////////////////////////////////////////////////
 // Implementation details.
 
-FASTLED_SMART_REF(StringHolder);
+FASTLED_SMART_PTR(StringHolder);
 
 class StringFormatter {
   public:

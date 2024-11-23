@@ -9,10 +9,10 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-FASTLED_SMART_REF(PixelStream);
-FASTLED_SMART_REF(ByteStream);
-FASTLED_SMART_REF(FileHandle);
-FASTLED_SMART_REF(FileBuffer);
+FASTLED_SMART_PTR(PixelStream);
+FASTLED_SMART_PTR(ByteStream);
+FASTLED_SMART_PTR(FileHandle);
+FASTLED_SMART_PTR(FileBuffer);
 
 // PixelStream takes either a file handle or a byte stream
 // and reads frames from it in order to serve data to the
