@@ -143,7 +143,7 @@ def main() -> None:
         finally:
             # Signal thread to stop and wait for it
             stop_event.set()
-            reader_thread.join(timeout=1.0)  # Wait up to 1 second for thread to finish
+            reader_thread.join(timeout=4.0)  # Wait up to 1 second for thread to finish
 
             # If process is still running, terminate it
             if pio_process.poll() is None:
@@ -155,7 +155,11 @@ def main() -> None:
 
         # Exit with pio check's status code if it failed
         if pio_process.returncode != 0:
+            import warnings
+            warnings.warn(f"pio check failed with return code {pio_process.returncode}")
             sys.exit(pio_process.returncode)
+        print("All tests passed")
+        sys.exit(0)
     except KeyboardInterrupt:
         sys.exit(130)  # Standard Unix practice: 128 + SIGINT's signal number (2)
 
