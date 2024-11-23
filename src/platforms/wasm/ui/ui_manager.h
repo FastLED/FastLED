@@ -21,7 +21,7 @@ FASTLED_NAMESPACE_BEGIN
 
 class jsUiInternal;
 
-class jsUiManager : EngineEvents::Listener {
+class jsUiManager : fl::EngineEvents::Listener {
   public:
     static void addComponent(fl::WeakPtr<jsUiInternal> component);
     static void removeComponent(fl::WeakPtr<jsUiInternal> component);
@@ -36,10 +36,10 @@ class jsUiManager : EngineEvents::Listener {
     typedef fl::FixedSet<fl::WeakPtr<jsUiInternal>, 64> jsUIRefSet;
     friend class fl::Singleton<jsUiManager>;
     jsUiManager() {
-        EngineEvents::addListener(this);
+        fl::EngineEvents::addListener(this);
     }
     ~jsUiManager() {
-        EngineEvents::removeListener(this);
+        fl::EngineEvents::removeListener(this);
     }
 
     void onPlatformPreLoop() override {

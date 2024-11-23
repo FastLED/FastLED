@@ -12,9 +12,9 @@ FASTLED_NAMESPACE_BEGIN
 class CLEDController;
 class ScreenMap;
 
-class EngineListener: public EngineEvents::Listener {
+class EngineListener: public fl::EngineEvents::Listener {
 public:
-    friend class Singleton<EngineListener>;
+    friend class fl::Singleton<EngineListener>;
     static void Init();
 
 private:

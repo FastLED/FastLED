@@ -16,6 +16,8 @@
 
 #include "platforms/wasm/js.h"
 
+using namespace fl;
+
 FASTLED_NAMESPACE_BEGIN
 
 // Note: Having trouble getting this into a cpp file.

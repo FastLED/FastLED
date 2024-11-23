@@ -364,10 +364,12 @@ class Str : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 };
 
+
+
+} // namespace fl
+
 // Make compatible with std::ostream and other ostream-like objects
-FASTLED_DEFINE_OUTPUT_OPERATOR(Str) {
+FASTLED_DEFINE_OUTPUT_OPERATOR(fl::Str) {
     os << obj.c_str();
     return os;
 }
-
-} // namespace fl

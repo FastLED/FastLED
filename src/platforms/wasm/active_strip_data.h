@@ -23,7 +23,7 @@ FASTLED_NAMESPACE_BEGIN
 typedef fl::Slice<const uint8_t> SliceUint8;
 
 // Zero copy data transfer of strip information from C++ to JavaScript.
-class ActiveStripData: public EngineEvents::Listener {
+class ActiveStripData: public fl::EngineEvents::Listener {
 public:
 
 
@@ -43,7 +43,7 @@ public:
     }
     
     ~ActiveStripData() {
-        EngineEvents::removeListener(this);
+        fl::EngineEvents::removeListener(this);
     }
 
     void onBeginFrame() override {
@@ -63,8 +63,8 @@ public:
 private:
     friend class fl::Singleton<ActiveStripData>;
     ActiveStripData() {
-        EngineEvents::Listener* listener = this;
-        EngineEvents::addListener(listener);
+        fl::EngineEvents::Listener* listener = this;
+        fl::EngineEvents::addListener(listener);
     }
 
 

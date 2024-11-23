@@ -12,7 +12,7 @@
 
 #include "namespace.h"
 #include "active_strip_data.h"
-#include "singleton.h"
+#include "fl/singleton.h"
 #include "ui/events.h"
 #include "strip_id_map.h"
 #include "crgb.h"
@@ -26,14 +26,14 @@ extern uint8_t get_brightness();
 #define FASTLED_ALL_PINS_HARDWARE_SPI
 
 
-class WasmSpiOutput: public EngineEvents::Listener {
+class WasmSpiOutput: public fl::EngineEvents::Listener {
 public:
     WasmSpiOutput() {
-        EngineEvents::addListener(this);
+        fl::EngineEvents::addListener(this);
     }
 
     ~WasmSpiOutput() {
-        EngineEvents::removeListener(this);
+        fl::EngineEvents::removeListener(this);
     }
 
 
@@ -76,7 +76,7 @@ public:
             mRgb.push_back(b);
             pixels.advanceData();
         }
-		ActiveStripData& active_strips = Singleton<ActiveStripData>::instance();
+		ActiveStripData& active_strips = fl::Singleton<ActiveStripData>::instance();
 		active_strips.update(mId, millis(), mRgb.data(), mRgb.size());
     }
 

@@ -156,12 +156,12 @@ class jsButton {
     const fl::Str& groupName() const { return mGroup; }
 
   private:
-    struct Updater : EngineEvents::Listener {
+    struct Updater : fl::EngineEvents::Listener {
         void init(jsButton *owner) {
             mOwner = owner;
-            EngineEvents::addListener(this);
+            fl::EngineEvents::addListener(this);
         }
-        ~Updater() { EngineEvents::removeListener(this); }
+        ~Updater() { fl::EngineEvents::removeListener(this); }
         void onPlatformPreLoop2() override {
             mOwner->mClickedHappened = mOwner->mPressed && (mOwner->mPressed != mOwner->mPressedLast);
             mOwner->mPressedLast = mOwner->mPressed;

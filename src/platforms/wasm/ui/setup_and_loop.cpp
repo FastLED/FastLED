@@ -45,7 +45,7 @@ EMSCRIPTEN_KEEPALIVE extern "C" int extern_loop() {
 
     setup_once();
     //fastled_resume_timer();
-    EngineEvents::onPlatformPreLoop();
+    fl::EngineEvents::onPlatformPreLoop();
     loop();
     //fastled_pause_timer();
     return 0;

@@ -39,7 +39,7 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds, float cm_led_dia
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
                           fl::FixedMap<Str, ScreenMap, 16> *segmentMaps,
-                          Str *err) {
+                          fl::Str *err) {
     fl::JsonDocument doc;
     fl::Str _err;
     if (!err) {
@@ -48,7 +48,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
 
     bool ok = fl::parseJson(jsonStrScreenMap, &doc, err);
     if (!ok) {
-        FASTLED_WARN("Failed to parse json: " << *err);
+        FASTLED_WARN("Failed to parse json: " << err->c_str());
         return false;
     }
     auto map = doc["map"];
