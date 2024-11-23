@@ -1,5 +1,5 @@
 
-#include "fx/detail/data_stream.h"
+#include "fx/video/pixel_stream.h"
 #include "namespace.h"
 #include "fl/dbg.h"
 

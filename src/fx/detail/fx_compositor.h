@@ -21,7 +21,7 @@ FASTLED_NAMESPACE_BEGIN
 // Takes two fx layers and composites them together to a final output buffer.
 class FxCompositor {
 public:
-    FxCompositor(uint16_t numLeds) : mNumLeds(numLeds) {
+    FxCompositor(uint32_t numLeds) : mNumLeds(numLeds) {
         mLayers[0] = FxLayerRef::New();
         mLayers[1] = FxLayerRef::New();
     }
@@ -54,7 +54,7 @@ private:
     }
 
     FxLayerRef mLayers[2];
-    const uint16_t mNumLeds;
+    const uint32_t mNumLeds;
     Transition mTransition;
 };
 
@@ -72,7 +72,7 @@ inline void FxCompositor::draw(uint32_t now, uint32_t warpedTime, CRGB *finalBuf
     const CRGB* surface0 = mLayers[0]->getSurface();
     const CRGB* surface1 = mLayers[1]->getSurface();
 
-    for (uint16_t i = 0; i < mNumLeds; i++) {
+    for (uint32_t i = 0; i < mNumLeds; i++) {
         const CRGB& p0 = surface0[i];
         const CRGB& p1 = surface1[i];
         CRGB out = CRGB::blend(p0, p1, progress);

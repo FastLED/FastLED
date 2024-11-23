@@ -3,7 +3,7 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fx/detail/data_stream.h"
+#include "fx/video/pixel_stream.h"
 #include "fx/fx2d.h"
 #include "fx/video/frame_interpolator.h"
 #include "ref.h"

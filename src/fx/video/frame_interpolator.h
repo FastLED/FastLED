@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fixed_map.h"
-#include "fx/detail/data_stream.h"
+#include "fx/video/pixel_stream.h"
 #include "fx/frame.h"
 #include "fx/video/frame_tracker.h"
 #include "namespace.h"

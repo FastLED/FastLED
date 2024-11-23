@@ -1,6 +1,6 @@
 #include "fx/video/frame_interpolator.h"
 #include "fx/detail/circular_buffer.h"
-#include "fx/detail/data_stream.h"
+#include "fx/video/pixel_stream.h"
 #include "math_macros.h"
 #include "namespace.h"
 

@@ -1,7 +1,7 @@
 #include "fx/video.h"
 
 #include "crgb.h"
-#include "fx/detail/data_stream.h"
+#include "fx/video/pixel_stream.h"
 #include "fx/frame.h"
 #include "fx/video/frame_interpolator.h"
 #include "fl/dbg.h"
