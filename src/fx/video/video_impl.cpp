@@ -182,10 +182,7 @@ bool VideoImpl::updateBufferIfNecessary(uint32_t prev, uint32_t now) {
             }
             break;
         } while (false);
-
-        uint32_t timestamp = mFrameInterpolator->get_exact_timestamp_ms(frame_to_fetch);
-        recycled_frame->setFrameNumberAndTime(frame_to_fetch, timestamp);
-        // DBG("inserting frame: " << frame_to_fetch);
+        
         bool ok = mFrameInterpolator->insert(frame_to_fetch, recycled_frame);
         if (!ok) {
             DBG("insert failed");
