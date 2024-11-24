@@ -11,6 +11,9 @@ import _thread
 from pathlib import Path
 from typing import List, Tuple, Any, Optional
 
+
+_IS_GITHUB = os.environ.get('GITHUB_ACTIONS') == 'true'
+
 def run_command(cmd: List[str], **kwargs: Any) -> None:
     """Run a command and handle errors"""
     try:
@@ -110,6 +113,22 @@ def main() -> None:
             daemon=True
         )
         reader_thread.start()
+
+        if _IS_GITHUB:
+            # github doesn't like this to run concurrently so just run it all now.
+            # Print output to console
+            while pio_process.poll() is None:
+                try:
+                    stream, line = output_queue.get(timeout=0.1)
+                    print(line, end='')
+                    output_buffer.write(line)
+                except queue.Empty:
+                    continue
+            # final drain
+            while not output_queue.empty():
+                stream, line = output_queue.get_nowait()
+                print(line, end='')
+                output_buffer.write(line)
 
         try:
             # Run other tests while pio check runs
