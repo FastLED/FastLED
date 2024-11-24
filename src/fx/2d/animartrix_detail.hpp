@@ -52,6 +52,7 @@ License CC BY-NC 3.0
 
 
 #include "force_inline.h"
+#include "crgb.h"
 #include "namespace.h"
 
 // Setting this to 1 means you agree to the licensing terms of the ANIMartRIX library for non commercial use only.
@@ -2453,7 +2454,7 @@ class ANIMartRIX {
 
         get_ready();
 
-        timings.master_speed = 0.03; // master speed
+        timings.master_speed = 0.005; // master speed
 
         timings.ratio[0] = 0.025; // speed ratios for the oscillators, higher
                                   // values = faster transitions

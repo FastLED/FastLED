@@ -13,6 +13,7 @@
 #include "namespace.h"
 #include "fl/ptr.h"
 #include "fl/scoped_ptr.h"
+#include "fl/dbg.h"
 #include "xymap.h"
 
 #define ANIMARTRIX_INTERNAL
@@ -65,6 +66,16 @@ enum AnimartrixAnim {
     MODULE_EXPERIMENT8,
     MODULE_EXPERIMENT9,
     MODULE_EXPERIMENT10,
+    MODULE_EXPERIMENT_SM1,
+    MODULE_EXPERIMENT_SM2,
+    MODULE_EXPERIMENT_SM3,
+    MODULE_EXPERIMENT_SM4,
+    MODULE_EXPERIMENT_SM5,
+    MODULE_EXPERIMENT_SM6,
+    MODULE_EXPERIMENT_SM7,
+    MODULE_EXPERIMENT_SM8,
+    MODULE_EXPERIMENT_SM9,
+    MODULE_EXPERIMENT_SM10,
     NUM_ANIMATIONS
 };
 
@@ -188,6 +199,22 @@ const char *Animartrix::getAnimationName(AnimartrixAnim animation) {
         return "MODULE_EXPERIMENT9";
     case MODULE_EXPERIMENT10:
         return "MODULE_EXPERIMENT10";
+    case MODULE_EXPERIMENT_SM1:
+        return "MODULE_EXPERIMENT_SM1";
+    case MODULE_EXPERIMENT_SM2:
+        return "MODULE_EXPERIMENT_SM2";
+    case MODULE_EXPERIMENT_SM3:
+        return "MODULE_EXPERIMENT_SM3";
+    case MODULE_EXPERIMENT_SM4:
+        return "MODULE_EXPERIMENT_SM4";
+    case MODULE_EXPERIMENT_SM5:
+        return "MODULE_EXPERIMENT_SM5";
+    case MODULE_EXPERIMENT_SM6:
+        return "MODULE_EXPERIMENT_SM6";
+    case MODULE_EXPERIMENT_SM8:
+        return "MODULE_EXPERIMENT_SM8";
+    case MODULE_EXPERIMENT_SM10:
+        return "MODULE_EXPERIMENT_SM10";
     case NUM_ANIMATIONS:
         return "NUM_ANIMATIONS";
     default:
@@ -343,6 +370,33 @@ class FastLEDANIMartRIX : public animartrix_detail::ANIMartRIX {
         case MODULE_EXPERIMENT10:
             Module_Experiment10();
             break;
+        case MODULE_EXPERIMENT_SM1:
+            SM1();
+            break;
+        case MODULE_EXPERIMENT_SM2:
+            SM2();
+            break;
+        case MODULE_EXPERIMENT_SM3:
+            SM3();
+            break;
+        case MODULE_EXPERIMENT_SM4:
+            SM4();
+            break;
+        case MODULE_EXPERIMENT_SM5:
+            SM5();
+            break;
+        case MODULE_EXPERIMENT_SM6:
+            SM6();
+            break;
+        case MODULE_EXPERIMENT_SM8:
+            SM8();
+            break;
+        case MODULE_EXPERIMENT_SM9:
+            SM9();
+            break;
+        case MODULE_EXPERIMENT_SM10:
+            SM10();
+            break;
         case NUM_ANIMATIONS:
             break;
         }
@@ -359,6 +413,7 @@ void Animartrix::fxSet(int fx) {
     }
     fx = fx % NUM_ANIMATIONS;
     current_animation = static_cast<AnimartrixAnim>(fx);
+    FASTLED_DBG("Setting animation to " << getAnimationName(current_animation));
 }
 
 void AnimartrixLoop(Animartrix &self, uint32_t now) {
