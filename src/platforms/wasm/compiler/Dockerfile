@@ -121,7 +121,7 @@ COPY src/platforms/wasm/compiler/requirements.txt /install/requirements.txt
 RUN pip install -r /install/requirements.txt
 
 RUN pio settings set check_platformio_interval 9999
-RUN pio settings set enable_telemetry 1
+RUN pio settings set enable_telemetry 0
 
 # FIRST PRE-WARM CYCLE and initial setup: Download the fastled repo from the github and pre-warm the cache with a compilation.
 # This is by far the most expensive part of the build, because platformio needs to download initial tools. This
