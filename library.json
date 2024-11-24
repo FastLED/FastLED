@@ -67,7 +67,8 @@
             "+<platforms/wasm/**/*.cpp>",
             "+<third_party/**/*.cpp>",
             "+<fx/**/*.cpp>",
-            "+<fl/**/*.cpp>"
+            "+<fl/**/*.cpp>",
+            "+<sensors/**/*.cpp>"
         ],
         "libArchive": false
     }
