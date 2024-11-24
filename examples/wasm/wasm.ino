@@ -87,6 +87,7 @@ Slider scale( "Noise - Scale", 20, 1, 100);
 Button changePalette("Noise - Next Palette");
 Button changeFx("Switch between Noise & Animartrix");
 NumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS);
+Slider timeSpeed("Time Speed", 1, -10, 10, .1);
 
 Animartrix animartrix(xyMap, POLAR_WAVES);
 FxEngine fxEngine(NUM_LEDS);
@@ -106,6 +107,7 @@ void loop() {
     FastLED.setBrightness(!isOff ? brightness.as<uint8_t>() : 0);
     noisePalette.setSpeed(speed);
     noisePalette.setScale(scale);
+    fxEngine.setSpeed(timeSpeed);
 
     if (changeFx) {
         fxEngine.nextFx();
