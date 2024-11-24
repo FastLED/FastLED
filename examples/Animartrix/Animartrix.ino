@@ -38,7 +38,7 @@ Title title("Animartrix");
 Description description("Demo of the Animatrix effects. @author of fx is StefanPetrick");
 
 Slider brightness("Brightness", 255, 0, 255);
-NumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS);
+NumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS - 1);
 Slider timeSpeed("Time Speed", 1, -10, 10, .1);
 
 Animartrix animartrix(xyMap, FIRST_ANIMATION);
