@@ -10,7 +10,9 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 
-#if __has_include(<Arduino.h>)
+// Not that Raspberry Pi will barf if you include Arduino.h. However it won't barf here, but in a completely
+// different CPP file. I have no idea why this is. However, we detect this here and avoid it.
+#if __has_include(<Arduino.h>) && !defined(RPI)
 #define USE_ARDUINO 1
 #include <Arduino.h>  // ok include
 #else
