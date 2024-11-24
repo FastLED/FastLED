@@ -1,9 +1,14 @@
-/// @file    NoisePlusPalette.ino
-/// @brief   Demonstrates how to mix noise generation with color palettes on a
-/// 2D LED matrix
-/// @example NoisePlusPalette.ino
+/// @file    Animartrix.ino
+/// @brief   Demonstrates Stefan Petricks Animartrix effects.
+/// @author  Stefan Petrick
+/// @author  Zach Vorhies (FastLED adaptation)
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
 
-// printf
+
 #include <stdio.h>
 #include <string>
 
