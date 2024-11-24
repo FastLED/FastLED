@@ -11,10 +11,10 @@
 #include "fl/json.h"
 #include "namespace.h"
 
-/* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED.js
+/* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED Web
  * to map the 1D strip to a 2D grid. Note that the strip can have arbitrary
  * size. this was first motivated during the (attempted? Oct. 19th 2024) port of
- * the Chromancer project to FastLED.js.
+ * the Chromancer project to FastLED Web.
  */
 
 namespace fl {
