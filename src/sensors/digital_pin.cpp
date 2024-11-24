@@ -7,24 +7,24 @@
 #include "namespace.h"
 #include "digital_pin.h"
 
-// guard against including Arduino.h, which will will cause a mysterious build condition to 
-// to compile files that will cause a build failure.
-#ifdef ARDUINO_ARCH_RP2040
+
+
+#if !defined(USE_ARDUINO) && __has_include(<Arduino.h>)
+#define USE_ARDUINO 1
+#else
 #define USE_ARDUINO 0
 #endif
 
-#if !defined(USE_ARDUINO)
-#if __has_include(<Arduino.h>)
-#define USE_ARDUINO 1
+
+#if USE_ARDUINO
 #include <Arduino.h>  // ok include
 #else
-#define USE_ARDUINO 0
 // Fallback
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 #include "fastpin.h"
 #endif
-#endif  // !defined(USE_ARDUINO)
+
 
 namespace fl {
 
@@ -45,8 +45,8 @@ class DigitalPinImpl : public Referent {
                 break;
         }
     }
-    bool digitalRead() { return ::digitalRead(mDigitalPin); }
-    void digitalWrite(bool value) { ::digitalWrite(mDigitalPin, value); }
+    bool digitalRead() { return HIGH == ::digitalRead(mDigitalPin); }
+    void digitalWrite(bool value) { ::digitalWrite(mDigitalPin, value ? HIGH : LOW); }
 
   private:
     int mDigitalPin;
@@ -55,8 +55,7 @@ class DigitalPinImpl : public Referent {
 #else
 class DigitalPinImpl : public Referent {
   public:
-    Pin mPin;
-    DigitalPinImpl(int DigitalPin) : mPin(DigitalPin) {}
+    DigitalPinImpl(int pin) : mPin(pin) {}
     ~DigitalPinImpl() = default;
 
     void setPinMode(DigitalPin::Mode mode) {
@@ -72,6 +71,8 @@ class DigitalPinImpl : public Referent {
 
     bool digitalRead() { return mPin.hival(); }
     void digitalWrite(bool value) { value ? mPin.hi(): mPin.lo(); }
+    // define pin
+    Pin mPin;
 };
 #endif
 
