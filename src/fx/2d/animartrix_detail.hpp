@@ -313,9 +313,8 @@ class ANIMartRIX {
         }
     }
 
-    void run_default_oscillators() {
-
-        timings.master_speed = 0.005; // master speed
+    void run_default_oscillators(float master_speed = 0.005) {        
+        timings.master_speed = master_speed;
 
         timings.ratio[0] = 1; // speed ratios for the oscillators, higher values
                               // = faster transitions
@@ -1124,9 +1123,9 @@ class ANIMartRIX {
         get_ready();
 
         timings.master_speed = 0.000001; // speed ratios for the oscillators
-        timings.ratio[0] = 4;           // higher values = faster transitions
-        timings.ratio[1] = 3.2;
-        timings.ratio[2] = 10;
+        timings.ratio[0] = 0.4;         // higher values = faster transitions
+        timings.ratio[1] = 0.32;
+        timings.ratio[2] = 0.10;
         timings.ratio[3] = 0.05;
         timings.ratio[4] = 0.6;
         timings.offset[0] = 0;
@@ -1394,8 +1393,7 @@ class ANIMartRIX {
     void Hot_Blob() { // nice one
 
         get_ready();
-
-        run_default_oscillators();
+        run_default_oscillators(0.001);
 
         for (int x = 0; x < num_x; x++) {
             for (int y = 0; y < num_y; y++) {
