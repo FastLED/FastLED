@@ -53,7 +53,7 @@ void jsSetCanvasSize(int cledcontroler_id, int width, int height);
 class jsSlider {
   public:
     jsSlider(const fl::Str& name, float value = 128.0f, float min = 0.0f, float max = 255.0f,
-             float step = 1.0f);
+             float step = -1.f);
     ~jsSlider();
     jsSlider& Group(const fl::Str& name) { mGroup = name; return *this; }
 

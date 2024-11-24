@@ -16,6 +16,9 @@ FASTLED_NAMESPACE_BEGIN
 
 jsSlider::jsSlider(const Str& name, float value, float min, float max, float step)
     : mMin(min), mMax(max), mValue(value), mStep(step) {
+    if (mStep == -1.f) {
+        mStep = (mMax - mMin) / 100.0f;
+    }
     auto updateFunc = jsUiInternal::UpdateFunction(this, [](void* self, const FLArduinoJson::JsonVariantConst& json) {
         static_cast<jsSlider*>(self)->updateInternal(json);
     });
