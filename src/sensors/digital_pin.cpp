@@ -7,7 +7,13 @@
 #include "namespace.h"
 #include "digital_pin.h"
 
+// guard against including Arduino.h, which will will cause a mysterious build condition to 
+// to compile files that will cause a build failure.
+#ifdef ARDUINO_ARCH_RP2040
+#define USE_ARDUINO 0
+#endif
 
+#if !defined(USE_ARDUINO)
 #if __has_include(<Arduino.h>)
 #define USE_ARDUINO 1
 #include <Arduino.h>  // ok include
@@ -18,6 +24,7 @@
 #include "FastLED.h"
 #include "fastpin.h"
 #endif
+#endif  // !defined(USE_ARDUINO)
 
 namespace fl {
 
