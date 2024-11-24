@@ -17,13 +17,15 @@ body {
 }
 
 #ui-controls {
-    flex: 0 0 300px;
+    flex: 0 0 auto;
     display: none;
     flex-direction: column;
     align-items: center;
     margin-top: 20px;
     width: 100%;
     max-width: 640px;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 #ui-controls.active {
@@ -33,12 +35,21 @@ body {
 .ui-control {
     margin: 10px 0;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    width: 100%;
+    gap: 10px;
 }
 
 .ui-control input[type="range"] {
-    width: 200px;
+    width: 100%;
+    margin: 0;
+}
+
+.ui-control label {
+    min-width: 120px;
+    margin-right: 10px;
+    flex-shrink: 0;
 }
 
 h1 {
@@ -163,11 +174,17 @@ h1 {
 }
 
 .ui-control input[type="number"] {
-    width: 100px;
+    width: 100%;
     padding: 5px;
+    margin: 0;
     font-size: 16px;
     background-color: #2E2E2E;
     color: #E0E0E0;
     border: 1px solid #444;
     border-radius: 4px;
+}
+
+.ui-control button {
+    width: 100%;
+    margin: 0;
 }
