@@ -167,7 +167,9 @@ COPY src/fx /host/fastled/src/fx
 COPY src/fl /host/fastled/src/fl
 COPY src/lib8tion /host/fastled/src/lib8tion
 COPY src/third_party /host/fastled/src/third_party
+COPY src/sensors /host/fastled/src/sensors
 COPY src/platforms /host/fastled/src/platforms
+
 # now sync local to the source directory.
 RUN rsync -av --delete /host/fastled/src/ /js/fastled/src/ && rm -rf /host/fastled
 
