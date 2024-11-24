@@ -55,6 +55,7 @@ bool PirLatching::detect(uint32_t now) {
 }
 
 uint8_t PirLatching::transition(uint32_t now) {
+    detect(now);
     uint32_t elapsed = now - mLastTrigger;
     
     if (elapsed < mRisingTime) {
