@@ -12,6 +12,7 @@
 #include "fx/fx2d.h"
 #include "namespace.h"
 #include "fl/ptr.h"
+#include "fl/scoped_ptr.h"
 #include "xymap.h"
 
 #define ANIMARTRIX_INTERNAL
@@ -91,7 +92,7 @@ class Animartrix : public FxGrid {
     friend class FastLEDANIMartRIX;
     static const char *getAnimationName(AnimartrixAnim animation);
     AnimartrixAnim prev_animation = NUM_ANIMATIONS;
-    scoped_ptr<FastLEDANIMartRIX> impl;
+    fl::scoped_ptr<FastLEDANIMartRIX> impl;
     CRGB *leds = nullptr; // Only set during draw, then unset back to nullptr.
     AnimartrixAnim current_animation = RGB_BLOBS5;
 };

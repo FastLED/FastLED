@@ -199,6 +199,8 @@ class ANIMartRIX {
             (num_x / 2) - 0.5,
             (num_y / 2) - 0.5); // precalculate all polar coordinates
                                 // polar origin is set to matrix centre
+        // set default speed ratio for the oscillators, not all effects set their own, so start from know state
+        timings.master_speed = 0.01;
     }
 
     /**

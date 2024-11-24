@@ -117,13 +117,12 @@ class FxEngine {
     IntFxMap& _getEffects() { return mEffects; }
 
     /**
-     * @brief Sets the time scale for the TimeFunction object.
+     * @brief Sets the speed of the fx engine, which will impact the speed of all effects.
      * @param timeScale The new time scale value.
      */
-    void setTimeScale(float timeScale) { mTimeFunction.setScale(timeScale); }
+    void setSpeed(float scale) { mTimeFunction.setScale(scale); }
 
   private:
-    Slider mTimeBender;
     int mCounter = 0;
     TimeScale mTimeFunction;  // FxEngine controls the clock, to allow "time-bending" effects.
     IntFxMap mEffects; ///< Collection of effects
@@ -133,8 +132,7 @@ class FxEngine {
     bool mDurationSet = false; ///< Flag indicating if a new transition has been set
 };
 
-inline FxEngine::FxEngine(uint16_t numLeds)
-    : mTimeBender("FxEngineSpeed", 1.0f, -50.0f, 50.0f, 0.01f), 
+inline FxEngine::FxEngine(uint16_t numLeds):
       mTimeFunction(0), 
       mCompositor(numLeds), 
       mCurrId(0) {
@@ -211,7 +209,6 @@ inline FxPtr FxEngine::getFx(int id) {
 }
 
 inline bool FxEngine::draw(uint32_t now, CRGB *finalBuffer) {
-    mTimeFunction.setScale(mTimeBender);
     mTimeFunction.update(now);
     uint32_t warpedTime = mTimeFunction.time();
 
