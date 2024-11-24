@@ -138,6 +138,9 @@ def main() -> None:
         except KeyboardInterrupt:
             print("\nInterrupted by user. Cleaning up...", file=sys.stderr)
             raise
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
+            raise
 
         finally:
             # Signal thread to stop and wait for it
