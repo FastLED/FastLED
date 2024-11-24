@@ -229,8 +229,6 @@ static const AnimartrixEntry ANIMATION_TABLE[] = {
 };
 
 void FastLEDANIMartRIX::loop() {
-    int index = static_cast<int>(data->current_animation) % NUM_ANIMATIONS;
-    FASTLED_DBG("Running animation " << index);
     for (const auto& entry : ANIMATION_TABLE) {
         if (entry.anim == data->current_animation) {
             (this->*entry.func)();
@@ -242,7 +240,6 @@ void FastLEDANIMartRIX::loop() {
 }
 
 const char* Animartrix::getAnimationName(AnimartrixAnim animation) {
-    int index = static_cast<int>(animation) % NUM_ANIMATIONS;
     for (const auto& entry : ANIMATION_TABLE) {
         if (entry.anim == animation) {
             return entry.name;
@@ -251,8 +248,6 @@ const char* Animartrix::getAnimationName(AnimartrixAnim animation) {
     FASTLED_DBG("Animation not found for " << index);
     return "UNKNOWN";
 }
-
-static constexpr size_t ANIMATION_TABLE_SIZE = sizeof(ANIMATION_TABLE) / sizeof(ANIMATION_TABLE[0]);
 
 void Animartrix::draw(DrawContext ctx) {
     this->leds = ctx.leds;
