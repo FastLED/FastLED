@@ -58,22 +58,23 @@ uint8_t PirAdvanced::transition(uint32_t now) {
     detect(now);
     uint32_t elapsed = now - mLastTrigger;
     
+    uint8_t out = 0;
     if (elapsed < mRisingTime) {
         // Rising phase - alpha goes from 0 to 255
-        return (elapsed * 255) / mRisingTime;
+        out = MAX(mLastTransition, (elapsed * 255) / mRisingTime);
     } 
     else if (elapsed >= mLatchMs - mFallingTime && elapsed < mLatchMs) {
         // Falling phase - alpha goes from 255 to 0
         uint32_t fallingElapsed = elapsed - (mLatchMs - mFallingTime);
-        return 255 - ((fallingElapsed * 255) / mFallingTime);
+        out = 255 - ((fallingElapsed * 255) / mFallingTime);
     }
     else if (elapsed >= mRisingTime && elapsed < mLatchMs - mFallingTime) {
         // Fully on
-        return 255;
+        out = 255;
     }
-    
+    mLastTransition = out;
     // Outside latch period
-    return 0;
+    return out;
 }
 
 }  // namespace fl

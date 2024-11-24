@@ -8,9 +8,6 @@
 
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
-class InputPin;
-FASTLED_NAMESPACE_END
 
 namespace fl {
 
@@ -44,7 +41,12 @@ class PirAdvanced {
   public:
     PirAdvanced(int pin, uint32_t latchMs = 0, uint32_t risingTime = 0, uint32_t fallingTime = 0);
     bool detect(uint32_t now);  // Just detects on and off.
+    // When off this will be 0.
+    // When on this will be a value between 0 and 255, defined by the transition params
+    // risingTime and fallingTime which are passed into the constructor.
     uint8_t transition(uint32_t now);  // Detects on and off and also applies transitions.
+
+    // Activate the PIR sensor. This is useful for starting the PIR sensor on startup.
     void activate(uint32_t now) { mLastTrigger = now; }
 
   private:
@@ -54,6 +56,7 @@ class PirAdvanced {
     uint32_t mFallingTime; 
     uint32_t mLastTrigger;
     bool mLastState;
+    uint8_t mLastTransition = 0;
 };
 
 } // namespace fl
