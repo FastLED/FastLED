@@ -1,6 +1,11 @@
 #ifndef __INC_LED_SYSDEFS_ARM_RP2040_H
 #define __INC_LED_SYSDEFS_ARM_RP2040_H
 
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 #include "hardware/sync.h"
 
 // Explicitly include Arduino.h here so any framework-specific defines take
@@ -99,5 +104,8 @@ static uint32_t saved_interrupt_status;
 #define cli() (saved_interrupt_status = save_and_disable_interrupts())
 #define sei() (restore_interrupts(saved_interrupt_status))
 #endif
+
+#pragma GCC diagnostic pop
+
 
 #endif // __INC_LED_SYSDEFS_ARM_RP2040_H
