@@ -58,6 +58,9 @@ public:
 	/// Constructor
 	/// @param pin Arduino digital pin number
 	Pin(int pin) : mPin(pin) { _init(); }
+	#ifndef __AVR__
+	virtual ~Pin() {}  // Shut up the compiler warning, but don't steal bytes from AVR.
+	#endif
 
 	typedef volatile RwReg * port_ptr_t;  ///< type for a pin read/write register, volatile
 	typedef RwReg port_t;  ///< type for a pin read/write register, non-volatile
@@ -135,6 +138,8 @@ class Pin : public Selectable {
 	RwReg mPinMask;
 	uint8_t mPin;
 
+
+
 	void _init() {
 		// TODO: fill in init on a new platform
 		mPinMask = 0;
@@ -144,6 +149,9 @@ class Pin : public Selectable {
 
 public:
 	Pin(int pin) : mPin(pin) { _init(); }
+	#ifndef __AVR__
+	virtual ~Pin() {}  // Shut up the compiler warning, but don't steal bytes from AVR.
+	#endif
 
 	void setPin(int pin) { mPin = pin; _init(); }
 
