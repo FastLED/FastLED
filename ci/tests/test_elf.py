@@ -13,26 +13,27 @@ ELF_FILE = UNO / "firmware.elf"
 BUILD_INFO_PATH = PROJECT_ROOT / ".build" / "uno" / "build_info.json"
 
 
+def init() -> None:
+    uno_build = PROJECT_ROOT / ".build" / "uno"
+    print(f"Checking for Uno build in: {uno_build}")
+    if not uno_build.exists():
+        print("Uno build not found. Running compilation...")
+        try:
+            subprocess.run(
+                "uv run ci/ci-compile.py uno --examples Blink",
+                shell=True,
+                check=True,
+            )
+            print("Compilation completed successfully.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error during compilation: {e}")
+            raise
+
+
 class TestBinToElf(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        uno_build = PROJECT_ROOT / ".build" / "uno"
-        print(f"Checking for Uno build in: {uno_build}")
-        if not uno_build.exists():
-            print("Uno build not found. Running compilation...")
-            try:
-                subprocess.run(
-                    "uv run ci/ci-compile.py uno --examples Blink",
-                    shell=True,
-                    check=True,
-                )
-                print("Compilation completed successfully.")
-            except subprocess.CalledProcessError as e:
-                print(f"Error during compilation: {e}")
-                raise
-
     def test_bin_to_elf_conversion(self) -> None:
+        init()
         tools: Tools = load_tools(BUILD_INFO_PATH)
         msg = dump_symbol_sizes(tools.nm_path, tools.cpp_filt_path, ELF_FILE)
         print(msg)
