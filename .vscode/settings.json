@@ -96,6 +96,7 @@
         "shared_mutex": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "netfwd": "cpp"
+        "netfwd": "cpp",
+        "*.inc": "cpp"
     }
 }

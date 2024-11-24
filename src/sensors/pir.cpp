@@ -7,7 +7,6 @@
 
 namespace fl {
 
-
 namespace {
   int g_counter = 0;
   Str buttonName() {
@@ -20,13 +19,12 @@ namespace {
 }
 
 
-Pir::Pir(int pin): mButton(buttonName().c_str()) {
-    // pinMode(pin, INPUT);
-    mImpl.reset(new InputPin(pin));
+Pir::Pir(int pin): mButton(buttonName().c_str()), mPin(pin) {
+    mPin.setPinMode(DigitalPin::kInput);
 }
 
 bool Pir::detect() {
-    return mImpl->hival() || mButton.clicked();
+    return mPin.high() || mButton.clicked();
 }
 
 }  // namespace fl

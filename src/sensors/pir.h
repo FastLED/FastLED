@@ -1,10 +1,10 @@
 #pragma once
 
-
 #include <stdint.h>
 
-#include "ui.h"
+#include "digital_pin.h"
 #include "fl/ptr.h"
+#include "ui.h"
 
 #include "namespace.h"
 
@@ -12,11 +12,11 @@ FASTLED_NAMESPACE_BEGIN
 class InputPin;
 FASTLED_NAMESPACE_END
 
-
 namespace fl {
 
-
 // A passive infrared sensor common on amazon.
+// Instantiating this class will create a ui Button when
+// compiling using the FastLED web compiler.
 class Pir {
   public:
     Pir(int pin);
@@ -25,8 +25,8 @@ class Pir {
 
   private:
     Button mButton;
-    fl::scoped_ptr<InputPin> mImpl;
-
+    DigitalPin mPin;
 };
 
-}  // namespace fl
+
+} // namespace fl

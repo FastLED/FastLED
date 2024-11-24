@@ -1,0 +1,632 @@
+Compiling tests...
+Compilation failed:
+-- Using lld-link linker: C:/Program Files/LLVM/bin/lld-link.exe
+-- Build type: Debug
+-- LibUnwind not found. Falling back to basic stack traces.
+-- Configuring done (0.6s)
+-- Generating done (0.2s)
+-- Build files have been written to: C:/Users/niteris/dev/fastled/tests/.build
+Change Dir: 'C:/Users/niteris/dev/fastled/tests/.build'
+
+Run Build Command(s): C:/Users/niteris/dev/fastled/.venv/Scripts/ninja.exe -v
+[1/27] C:\ProgramData\chocolatey\bin\c++.exe -DDEBUG -DENABLE_CRASH_HANDLER -DFASTLED_FORCE_NAMESPACE -DFASTLED_NO_PINMAP -DFASTLED_STUB_IMPL -DFASTLED_TESTING -DHAS_HARDWARE_PIN_SUPPORT -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -IC:/Users/niteris/dev/fastled/tests/../src -g -std=gnu++17 -Wall -funwind-tables -g3 -ggdb -fno-omit-frame-pointer -O0 -fno-inline -MD -MT CMakeFiles/FastLEDTest.dir/C_/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp.obj -MF CMakeFiles\FastLEDTest.dir\C_\Users\niteris\dev\fastled\src\sensors\digital_pin.cpp.obj.d -o CMakeFiles/FastLEDTest.dir/C_/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp.obj -c C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp
+FAILED: CMakeFiles/FastLEDTest.dir/C_/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp.obj 
+C:\ProgramData\chocolatey\bin\c++.exe -DDEBUG -DENABLE_CRASH_HANDLER -DFASTLED_FORCE_NAMESPACE -DFASTLED_NO_PINMAP -DFASTLED_STUB_IMPL -DFASTLED_TESTING -DHAS_HARDWARE_PIN_SUPPORT -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -IC:/Users/niteris/dev/fastled/tests/../src -g -std=gnu++17 -Wall -funwind-tables -g3 -ggdb -fno-omit-frame-pointer -O0 -fno-inline -MD -MT CMakeFiles/FastLEDTest.dir/C_/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp.obj -MF CMakeFiles\FastLEDTest.dir\C_\Users\niteris\dev\fastled\src\sensors\digital_pin.cpp.obj.d -o CMakeFiles/FastLEDTest.dir/C_/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp.obj -c C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp
+In file included from C:/Users/niteris/dev/fastled/src/fastspi.h:12,
+                 from C:/Users/niteris/dev/fastled/src/FastLED.h:83,
+                 from C:/Users/niteris/dev/fastled/src/fastpin.h:4,
+                 from C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:16:
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:27:26: error: expected nested-name-specifier before 'FastPin'
+   27 |         typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
+      |                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:27:26: error: expected ';' at end of member declaration
+   27 |         typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
+      |                          ^~~~~~~
+      |                                 ;
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:27:33: error: expected unqualified-id before '<' token
+   27 |         typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
+      |                                 ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:28:26: error: expected nested-name-specifier before 'FastPin'
+   28 |         typedef typename FastPin<CLOCK_PIN>::port_ptr_t clock_ptr_t;
+      |                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:28:26: error: expected ';' at end of member declaration
+   28 |         typedef typename FastPin<CLOCK_PIN>::port_ptr_t clock_ptr_t;
+      |                          ^~~~~~~
+      |                                 ;
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:28:26: error: redeclaration of 'typedef int fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin'
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:27:26: note: previous declaration 'typedef int fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin'
+   27 |         typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
+      |                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:28:33: error: expected unqualified-id before '<' token
+   28 |         typedef typename FastPin<CLOCK_PIN>::port_ptr_t clock_ptr_t;
+      |                                 ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:32:26: error: expected nested-name-specifier before 'FastPin'
+   32 |         typedef typename FastPin<DATA_PIN>::port_t data_t;
+      |                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:32:26: error: expected ';' at end of member declaration
+   32 |         typedef typename FastPin<DATA_PIN>::port_t data_t;
+      |                          ^~~~~~~
+      |                                 ;
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:32:26: error: redeclaration of 'typedef int fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin'
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:27:26: note: previous declaration 'typedef int fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin'
+   27 |         typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
+      |                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:32:33: error: expected unqualified-id before '<' token
+   32 |         typedef typename FastPin<DATA_PIN>::port_t data_t;
+      |                                 ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:33:26: error: expected nested-name-specifier before 'FastPin'
+   33 |         typedef typename FastPin<CLOCK_PIN>::port_t clock_t;
+      |                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:33:26: error: expected ';' at end of member declaration
+   33 |         typedef typename FastPin<CLOCK_PIN>::port_t clock_t;
+      |                          ^~~~~~~
+      |                                 ;
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:33:26: error: redeclaration of 'typedef int fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin'
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:27:26: note: previous declaration 'typedef int fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin'
+   27 |         typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
+      |                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:33:33: error: expected unqualified-id before '<' token
+   33 |         typedef typename FastPin<CLOCK_PIN>::port_t clock_t;
+      |                                 ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:34:9: error: 'Selectable' does not name a type
+   34 |         Selectable      *m_pSelect;  ///< SPI chip select
+      |         ^~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:40:40: error: expected ')' before '*' token
+   40 |         AVRSoftwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
+      |                             ~          ^~
+      |                                        )
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:44:24: error: 'Selectable' has not been declared
+   44 |         void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
+      |                        ^~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:88:42: error: 'clock_ptr_t' has not been declared
+   88 |         static void writeByte(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin)  {
+      |                                          ^~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:88:64: error: 'data_ptr_t' has not been declared
+   88 |         static void writeByte(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin)  {
+      |                                                                ^~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:102:42: error: 'data_ptr_t' has not been declared
+  102 |         static void writeByte(uint8_t b, data_ptr_t datapin,
+      |                                          ^~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:103:51: error: 'data_t' has not been declared
+  103 |                                                   data_t hival, data_t loval,
+      |                                                   ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:103:65: error: 'data_t' has not been declared
+  103 |                                                   data_t hival, data_t loval,
+      |                                                                 ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:104:51: error: 'clock_t' has not been declared
+  104 |                                                   clock_t hiclock, clock_t loclock) {
+      |                                                   ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:104:68: error: 'clock_t' has not been declared
+  104 |                                                   clock_t hiclock, clock_t loclock) {
+      |                                                                    ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:119:42: error: 'clock_ptr_t' has not been declared
+  119 |         static void writeByte(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin,
+      |                                          ^~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:119:64: error: 'data_ptr_t' has not been declared
+  119 |         static void writeByte(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin,
+      |                                                                ^~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:120:51: error: 'data_t' has not been declared
+  120 |                                                   data_t hival, data_t loval,
+      |                                                   ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:120:65: error: 'data_t' has not been declared
+  120 |                                                   data_t hival, data_t loval,
+      |                                                                 ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:121:51: error: 'clock_t' has not been declared
+  121 |                                                   clock_t hiclock, clock_t loclock) {
+      |                                                   ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:121:68: error: 'clock_t' has not been declared
+  121 |                                                   clock_t hiclock, clock_t loclock) {
+      |                                                                    ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:179:85: error: 'clock_ptr_t' has not been declared
+  179 |         template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin) {
+      |                                                                                     ^~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:179:107: error: 'data_ptr_t' has not been declared
+  179 |         template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin) {
+      |                                                                                                           ^~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:194:85: error: 'clock_ptr_t' has not been declared
+  194 |         template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin,
+      |                                                                                     ^~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:194:107: error: 'data_ptr_t' has not been declared
+  194 |         template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, clock_ptr_t clockpin, data_ptr_t datapin,
+      |                                                                                                           ^~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:195:105: error: 'data_t' has not been declared
+  195 |                                                                                                         data_t hival, data_t loval, clock_t hiclock, clock_t loclock) {
+      |                                                                                                         ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:195:119: error: 'data_t' has not been declared
+  195 |                                                                                                         data_t hival, data_t loval, clock_t hiclock, clock_t loclock) {
+      |                                                                                                                       ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:195:133: error: 'clock_t' has not been declared
+  195 |                                                                                                         data_t hival, data_t loval, clock_t hiclock, clock_t loclock) {
+      |                                                                                                                                     ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:195:150: error: 'clock_t' has not been declared
+  195 |                                                                                                         data_t hival, data_t loval, clock_t hiclock, clock_t loclock) {
+      |                                                                                                                                                      ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:211:85: error: 'data_ptr_t' has not been declared
+  211 |         template <uint8_t BIT> FASTLED_FORCE_INLINE static void writeBit(uint8_t b, data_ptr_t clockdatapin,
+      |                                                                                     ^~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:212:105: error: 'data_t' has not been declared
+  212 |                                                                                                         data_t datahiclockhi, data_t dataloclockhi,
+      |                                                                                                         ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:212:127: error: 'data_t' has not been declared
+  212 |                                                                                                         data_t datahiclockhi, data_t dataloclockhi,
+      |                                                                                                                               ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:213:105: error: 'data_t' has not been declared
+  213 |                                                                                                         data_t datahiclocklo, data_t dataloclocklo) {
+      |                                                                                                         ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:213:127: error: 'data_t' has not been declared
+  213 |                                                                                                         data_t datahiclocklo, data_t dataloclocklo) {
+      |                                                                                                                               ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In constructor 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::AVRSoftwareSPIOutput()':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:38:34: error: 'm_pSelect' was not declared in this scope; did you mean 'setSelect'?
+   38 |         AVRSoftwareSPIOutput() { m_pSelect = NULL; }
+      |                                  ^~~~~~~~~
+      |                                  setSelect
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In member function 'void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::setSelect(int*)':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:44:47: error: 'm_pSelect' was not declared in this scope; did you mean 'pSelect'?
+   44 |         void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
+      |                                               ^~~~~~~~~
+      |                                               pSelect
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In member function 'void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::init()':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:50:17: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+   50 |                 FastPin<DATA_PIN>::setOutput();
+      |                 ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:50:45: error: qualified-id in declaration before '(' token
+   50 |                 FastPin<DATA_PIN>::setOutput();
+      |                                             ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:51:17: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+   51 |                 FastPin<CLOCK_PIN>::setOutput();
+      |                 ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:51:46: error: qualified-id in declaration before '(' token
+   51 |                 FastPin<CLOCK_PIN>::setOutput();
+      |                                              ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In static member function 'static void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::writeBit(uint8_t)':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:154:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  154 |                         FastPin<DATA_PIN>::hi();
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:154:46: error: qualified-id in declaration before '(' token
+  154 |                         FastPin<DATA_PIN>::hi();
+      |                                              ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:161:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  161 |                         FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:161:47: error: qualified-id in declaration before '(' token
+  161 |                         FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+      |                                               ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:162:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  162 |                         FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:162:47: error: qualified-id in declaration before '(' token
+  162 |                         FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+      |                                               ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:165:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  165 |                         FastPin<DATA_PIN>::lo();
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:165:46: error: qualified-id in declaration before '(' token
+  165 |                         FastPin<DATA_PIN>::lo();
+      |                                              ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:166:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  166 |                         FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:166:47: error: qualified-id in declaration before '(' token
+  166 |                         FastPin<CLOCK_PIN>::hi(); CLOCK_HI_DELAY;
+      |                                               ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:171:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  171 |                         FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:171:47: error: qualified-id in declaration before '(' token
+  171 |                         FastPin<CLOCK_PIN>::lo(); CLOCK_LO_DELAY;
+      |                                               ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In static member function 'static void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::writeBit(uint8_t, int, int)':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:181:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  181 |                         FastPin<DATA_PIN>::hi(datapin);
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:181:46: error: qualified-id in declaration before '(' token
+  181 |                         FastPin<DATA_PIN>::hi(datapin);
+      |                                              ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:182:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  182 |                         FastPin<CLOCK_PIN>::hi(clockpin); CLOCK_HI_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:182:47: error: qualified-id in declaration before '(' token
+  182 |                         FastPin<CLOCK_PIN>::hi(clockpin); CLOCK_HI_DELAY;
+      |                                               ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:183:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  183 |                         FastPin<CLOCK_PIN>::lo(clockpin); CLOCK_LO_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:183:47: error: qualified-id in declaration before '(' token
+  183 |                         FastPin<CLOCK_PIN>::lo(clockpin); CLOCK_LO_DELAY;
+      |                                               ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:185:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  185 |                         FastPin<DATA_PIN>::lo(datapin);
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:185:46: error: qualified-id in declaration before '(' token
+  185 |                         FastPin<DATA_PIN>::lo(datapin);
+      |                                              ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:186:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  186 |                         FastPin<CLOCK_PIN>::hi(clockpin); CLOCK_HI_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:186:47: error: qualified-id in declaration before '(' token
+  186 |                         FastPin<CLOCK_PIN>::hi(clockpin); CLOCK_HI_DELAY;
+      |                                               ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:187:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  187 |                         FastPin<CLOCK_PIN>::lo(clockpin); CLOCK_LO_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:187:47: error: qualified-id in declaration before '(' token
+  187 |                         FastPin<CLOCK_PIN>::lo(clockpin); CLOCK_LO_DELAY;
+      |                                               ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In static member function 'static void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::writeBit(uint8_t, int, int, int, int, int, int)':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:198:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  198 |                         FastPin<DATA_PIN>::fastset(datapin, hival);
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:198:51: error: qualified-id in declaration before '(' token
+  198 |                         FastPin<DATA_PIN>::fastset(datapin, hival);
+      |                                                   ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:199:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  199 |                         FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:199:52: error: qualified-id in declaration before '(' token
+  199 |                         FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
+      |                                                    ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:200:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  200 |                         FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:200:52: error: qualified-id in declaration before '(' token
+  200 |                         FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
+      |                                                    ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:203:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  203 |                         FastPin<DATA_PIN>::fastset(datapin, loval);
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:203:51: error: qualified-id in declaration before '(' token
+  203 |                         FastPin<DATA_PIN>::fastset(datapin, loval);
+      |                                                   ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:204:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  204 |                         FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:204:52: error: qualified-id in declaration before '(' token
+  204 |                         FastPin<CLOCK_PIN>::fastset(clockpin, hiclock); CLOCK_HI_DELAY;
+      |                                                    ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:205:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  205 |                         FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:205:52: error: qualified-id in declaration before '(' token
+  205 |                         FastPin<CLOCK_PIN>::fastset(clockpin, loclock); CLOCK_LO_DELAY;
+      |                                                    ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In static member function 'static void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::writeBit(uint8_t, int, int, int, int, int)':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:218:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  218 |                         FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo);
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:218:51: error: qualified-id in declaration before '(' token
+  218 |                         FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo);
+      |                                                   ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:219:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  219 |                         FastPin<DATA_PIN>::fastset(clockdatapin, datahiclockhi); CLOCK_HI_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:219:51: error: qualified-id in declaration before '(' token
+  219 |                         FastPin<DATA_PIN>::fastset(clockdatapin, datahiclockhi); CLOCK_HI_DELAY;
+      |                                                   ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:220:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  220 |                         FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); CLOCK_LO_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:220:51: error: qualified-id in declaration before '(' token
+  220 |                         FastPin<DATA_PIN>::fastset(clockdatapin, datahiclocklo); CLOCK_LO_DELAY;
+      |                                                   ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:223:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  223 |                         FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo);
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:223:51: error: qualified-id in declaration before '(' token
+  223 |                         FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo);
+      |                                                   ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:224:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  224 |                         FastPin<DATA_PIN>::fastset(clockdatapin, dataloclockhi); CLOCK_HI_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:224:51: error: qualified-id in declaration before '(' token
+  224 |                         FastPin<DATA_PIN>::fastset(clockdatapin, dataloclockhi); CLOCK_HI_DELAY;
+      |                                                   ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:225:25: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  225 |                         FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); CLOCK_LO_DELAY;
+      |                         ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:225:51: error: qualified-id in declaration before '(' token
+  225 |                         FastPin<DATA_PIN>::fastset(clockdatapin, dataloclocklo); CLOCK_LO_DELAY;
+      |                                                   ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In member function 'void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::select()':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:237:28: error: 'm_pSelect' was not declared in this scope; did you mean 'setSelect'?
+  237 |         void select() { if(m_pSelect != NULL) { m_pSelect->select(); } } // FastPin<SELECT_PIN>::hi(); }
+      |                            ^~~~~~~~~
+      |                            setSelect
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In member function 'void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::release()':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:240:29: error: 'm_pSelect' was not declared in this scope; did you mean 'setSelect'?
+  240 |         void release() { if(m_pSelect != NULL) { m_pSelect->release(); } } // FastPin<SELECT_PIN>::lo(); }
+      |                             ^~~~~~~~~
+      |                             setSelect
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In static member function 'static void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::writeBytesValueRaw(uint8_t, int)':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:263:34: error: 'data_ptr_t' was not declared in this scope; did you mean 'intptr_t'?
+  263 |                 FASTLED_REGISTER data_ptr_t datapin = FastPin<DATA_PIN>::port();
+      |                                  ^~~~~~~~~~
+      |                                  intptr_t
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:265:20: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  265 |                 if(FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
+      |                    ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:265:43: error: qualified-id in declaration before '(' token
+  265 |                 if(FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
+      |                                           ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:268:42: error: 'clock_ptr_t' was not declared in this scope
+  268 |                         FASTLED_REGISTER clock_ptr_t clockpin = FastPin<CLOCK_PIN>::port();
+      |                                          ^~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:269:42: error: 'data_t' was not declared in this scope
+  269 |                         FASTLED_REGISTER data_t datahi = FastPin<DATA_PIN>::hival();
+      |                                          ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:270:49: error: expected ';' before 'datalo'
+  270 |                         FASTLED_REGISTER data_t datalo = FastPin<DATA_PIN>::loval();
+      |                                                 ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:271:42: error: 'clock_t' was not declared in this scope
+  271 |                         FASTLED_REGISTER clock_t clockhi = FastPin<CLOCK_PIN>::hival();
+      |                                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:1:1: note: 'clock_t' is defined in header '<ctime>'; did you forget to '#include <ctime>'?
+  +++ |+#include <ctime>
+    1 | /// @file fastspi_bitbang.h
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:272:50: error: expected ';' before 'clocklo'
+  272 |                         FASTLED_REGISTER clock_t clocklo = FastPin<CLOCK_PIN>::loval();
+      |                                                  ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:274:50: error: 'clockpin' was not declared in this scope
+  274 |                                 writeByte(value, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                  ^~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:274:60: error: 'datapin' was not declared in this scope
+  274 |                                 writeByte(value, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                            ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:274:69: error: 'datahi' was not declared in this scope
+  274 |                                 writeByte(value, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                     ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:274:77: error: 'datalo' was not declared in this scope
+  274 |                                 writeByte(value, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                             ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:274:85: error: 'clockhi' was not declared in this scope
+  274 |                                 writeByte(value, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                     ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:274:94: error: 'clocklo' was not declared in this scope
+  274 |                                 writeByte(value, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                              ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:279:42: error: 'data_t' was not declared in this scope
+  279 |                         FASTLED_REGISTER data_t datahi_clockhi = FastPin<DATA_PIN>::hival() | FastPin<CLOCK_PIN>::mask();
+      |                                          ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:280:49: error: expected ';' before 'datalo_clockhi'
+  280 |                         FASTLED_REGISTER data_t datalo_clockhi = FastPin<DATA_PIN>::loval() | FastPin<CLOCK_PIN>::mask();
+      |                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:281:49: error: expected ';' before 'datahi_clocklo'
+  281 |                         FASTLED_REGISTER data_t datahi_clocklo = FastPin<DATA_PIN>::hival() & ~FastPin<CLOCK_PIN>::mask();
+      |                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:282:49: error: expected ';' before 'datalo_clocklo'
+  282 |                         FASTLED_REGISTER data_t datalo_clocklo = FastPin<DATA_PIN>::loval() & ~FastPin<CLOCK_PIN>::mask();
+      |                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:285:50: error: 'datapin' was not declared in this scope
+  285 |                                 writeByte(value, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                  ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:285:59: error: 'datahi_clockhi' was not declared in this scope
+  285 |                                 writeByte(value, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                           ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:285:75: error: 'datalo_clockhi' was not declared in this scope
+  285 |                                 writeByte(value, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                           ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:285:91: error: 'datahi_clocklo' was not declared in this scope
+  285 |                                 writeByte(value, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                           ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:285:107: error: 'datalo_clocklo' was not declared in this scope
+  285 |                                 writeByte(value, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                                           ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In member function 'void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::writeBytes(uint8_t*, int)':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:304:34: error: 'clock_ptr_t' was not declared in this scope
+  304 |                 FASTLED_REGISTER clock_ptr_t clockpin = FastPin<CLOCK_PIN>::port();
+      |                                  ^~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:305:34: error: 'data_ptr_t' was not declared in this scope; did you mean 'intptr_t'?
+  305 |                 FASTLED_REGISTER data_ptr_t datapin = FastPin<DATA_PIN>::port();
+      |                                  ^~~~~~~~~~
+      |                                  intptr_t
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:307:20: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  307 |                 if(FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
+      |                    ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:307:43: error: qualified-id in declaration before '(' token
+  307 |                 if(FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
+      |                                           ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:310:42: error: 'data_t' was not declared in this scope; did you mean 'data'?
+  310 |                         FASTLED_REGISTER data_t datahi = FastPin<DATA_PIN>::hival();
+      |                                          ^~~~~~
+      |                                          data
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:311:49: error: expected ';' before 'datalo'
+  311 |                         FASTLED_REGISTER data_t datalo = FastPin<DATA_PIN>::loval();
+      |                                                 ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:312:42: error: 'clock_t' was not declared in this scope
+  312 |                         FASTLED_REGISTER clock_t clockhi = FastPin<CLOCK_PIN>::hival();
+      |                                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:312:42: note: 'clock_t' is defined in header '<ctime>'; did you forget to '#include <ctime>'?
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:313:50: error: expected ';' before 'clocklo'
+  313 |                         FASTLED_REGISTER clock_t clocklo = FastPin<CLOCK_PIN>::loval();
+      |                                                  ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:317:63: error: 'clockpin' was not declared in this scope
+  317 |                                 writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                               ^~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:317:73: error: 'datapin' was not declared in this scope; did you mean 'data'?
+  317 |                                 writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                         ^~~~~~~
+      |                                                                         data
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:317:82: error: 'datahi' was not declared in this scope; did you mean 'data'?
+  317 |                                 writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                  ^~~~~~
+      |                                                                                  data
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:317:90: error: 'datalo' was not declared in this scope; did you mean 'data'?
+  317 |                                 writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                          ^~~~~~
+      |                                                                                          data
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:317:98: error: 'clockhi' was not declared in this scope
+  317 |                                 writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                                  ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:317:107: error: 'clocklo' was not declared in this scope
+  317 |                                 writeByte(D::adjust(*data++), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                                           ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:323:42: error: 'data_t' was not declared in this scope; did you mean 'data'?
+  323 |                         FASTLED_REGISTER data_t datahi_clockhi = FastPin<DATA_PIN>::hival() | FastPin<CLOCK_PIN>::mask();
+      |                                          ^~~~~~
+      |                                          data
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:324:49: error: expected ';' before 'datalo_clockhi'
+  324 |                         FASTLED_REGISTER data_t datalo_clockhi = FastPin<DATA_PIN>::loval() | FastPin<CLOCK_PIN>::mask();
+      |                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:325:49: error: expected ';' before 'datahi_clocklo'
+  325 |                         FASTLED_REGISTER data_t datahi_clocklo = FastPin<DATA_PIN>::hival() & ~FastPin<CLOCK_PIN>::mask();
+      |                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:326:49: error: expected ';' before 'datalo_clocklo'
+  326 |                         FASTLED_REGISTER data_t datalo_clocklo = FastPin<DATA_PIN>::loval() & ~FastPin<CLOCK_PIN>::mask();
+      |                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:331:63: error: 'datapin' was not declared in this scope; did you mean 'data'?
+  331 |                                 writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                               ^~~~~~~
+      |                                                               data
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:331:72: error: 'datahi_clockhi' was not declared in this scope
+  331 |                                 writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                        ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:331:88: error: 'datalo_clockhi' was not declared in this scope
+  331 |                                 writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                        ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:331:104: error: 'datahi_clocklo' was not declared in this scope
+  331 |                                 writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                                        ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:331:120: error: 'datalo_clocklo' was not declared in this scope
+  331 |                                 writeByte(D::adjust(*data++), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                                                        ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h: In member function 'void fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::writePixels(fl::PixelController<RGB_ORDER>, void*)':
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:372:34: error: 'data_ptr_t' was not declared in this scope; did you mean 'intptr_t'?
+  372 |                 FASTLED_REGISTER data_ptr_t datapin = FastPin<DATA_PIN>::port();
+      |                                  ^~~~~~~~~~
+      |                                  intptr_t
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:374:20: error: 'fl::AVRSoftwareSPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>::FastPin' {aka 'int'} is not a template
+  374 |                 if(FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
+      |                    ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:374:43: error: qualified-id in declaration before '(' token
+  374 |                 if(FastPin<DATA_PIN>::port() != FastPin<CLOCK_PIN>::port()) {
+      |                                           ^
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:375:42: error: 'clock_ptr_t' was not declared in this scope
+  375 |                         FASTLED_REGISTER clock_ptr_t clockpin = FastPin<CLOCK_PIN>::port();
+      |                                          ^~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:378:42: error: 'data_t' was not declared in this scope
+  378 |                         FASTLED_REGISTER data_t datahi = FastPin<DATA_PIN>::hival();
+      |                                          ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:379:49: error: expected ';' before 'datalo'
+  379 |                         FASTLED_REGISTER data_t datalo = FastPin<DATA_PIN>::loval();
+      |                                                 ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:380:42: error: 'clock_t' was not declared in this scope
+  380 |                         FASTLED_REGISTER clock_t clockhi = FastPin<CLOCK_PIN>::hival();
+      |                                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:380:42: note: 'clock_t' is defined in header '<ctime>'; did you forget to '#include <ctime>'?
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:381:50: error: expected ';' before 'clocklo'
+  381 |                         FASTLED_REGISTER clock_t clocklo = FastPin<CLOCK_PIN>::loval();
+      |                                                  ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:385:56: error: 'clockpin' was not declared in this scope
+  385 |                                         writeBit<0>(1, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                        ^~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:385:66: error: 'datapin' was not declared in this scope
+  385 |                                         writeBit<0>(1, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                  ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:385:75: error: 'datahi' was not declared in this scope
+  385 |                                         writeBit<0>(1, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                           ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:385:83: error: 'datalo' was not declared in this scope
+  385 |                                         writeBit<0>(1, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                   ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:385:91: error: 'clockhi' was not declared in this scope
+  385 |                                         writeBit<0>(1, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                           ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:385:100: error: 'clocklo' was not declared in this scope
+  385 |                                         writeBit<0>(1, clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                                    ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:387:78: error: 'clockpin' was not declared in this scope
+  387 |                                 writeByte(D::adjust(pixels.loadAndScale0()), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                              ^~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:387:88: error: 'datapin' was not declared in this scope
+  387 |                                 writeByte(D::adjust(pixels.loadAndScale0()), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                        ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:387:97: error: 'datahi' was not declared in this scope
+  387 |                                 writeByte(D::adjust(pixels.loadAndScale0()), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                                 ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:387:105: error: 'datalo' was not declared in this scope
+  387 |                                 writeByte(D::adjust(pixels.loadAndScale0()), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                                         ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:387:113: error: 'clockhi' was not declared in this scope
+  387 |                                 writeByte(D::adjust(pixels.loadAndScale0()), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                                                 ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:387:122: error: 'clocklo' was not declared in this scope
+  387 |                                 writeByte(D::adjust(pixels.loadAndScale0()), clockpin, datapin, datahi, datalo, clockhi, clocklo);
+      |                                                                                                                          ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:396:42: error: 'data_t' was not declared in this scope
+  396 |                         FASTLED_REGISTER data_t datahi_clockhi = FastPin<DATA_PIN>::hival() | FastPin<CLOCK_PIN>::mask();
+      |                                          ^~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:397:49: error: expected ';' before 'datalo_clockhi'
+  397 |                         FASTLED_REGISTER data_t datalo_clockhi = FastPin<DATA_PIN>::loval() | FastPin<CLOCK_PIN>::mask();
+      |                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:398:49: error: expected ';' before 'datahi_clocklo'
+  398 |                         FASTLED_REGISTER data_t datahi_clocklo = FastPin<DATA_PIN>::hival() & ~FastPin<CLOCK_PIN>::mask();
+      |                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:399:49: error: expected ';' before 'datalo_clocklo'
+  399 |                         FASTLED_REGISTER data_t datalo_clocklo = FastPin<DATA_PIN>::loval() & ~FastPin<CLOCK_PIN>::mask();
+      |                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:403:56: error: 'datapin' was not declared in this scope
+  403 |                                         writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                        ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:403:65: error: 'datahi_clockhi' was not declared in this scope
+  403 |                                         writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:403:81: error: 'datalo_clockhi' was not declared in this scope
+  403 |                                         writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:403:97: error: 'datahi_clocklo' was not declared in this scope
+  403 |                                         writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:403:113: error: 'datalo_clocklo' was not declared in this scope
+  403 |                                         writeBit<0>(1, datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                                                 ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:405:78: error: 'datapin' was not declared in this scope
+  405 |                                 writeByte(D::adjust(pixels.loadAndScale0()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                              ^~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:405:87: error: 'datahi_clockhi' was not declared in this scope
+  405 |                                 writeByte(D::adjust(pixels.loadAndScale0()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                       ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:405:103: error: 'datalo_clockhi' was not declared in this scope
+  405 |                                 writeByte(D::adjust(pixels.loadAndScale0()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                                       ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:405:119: error: 'datahi_clocklo' was not declared in this scope
+  405 |                                 writeByte(D::adjust(pixels.loadAndScale0()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                                                       ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/fastspi_bitbang.h:405:135: error: 'datalo_clocklo' was not declared in this scope
+  405 |                                 writeByte(D::adjust(pixels.loadAndScale0()), datapin, datahi_clockhi, datalo_clockhi, datahi_clocklo, datalo_clocklo);
+      |                                                                                                                                       ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp: In member function 'void fl::DigitalPinImpl::DigitalPinMode(fl::DigitalPin::Mode)':
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:58:31: error: no matching function for call to 'fl::DigitalPinImpl::DigitalPinMode(fl::DigitalPin&, int)'
+   58 |                 DigitalPinMode(mDigitalPin, INPUT);
+      |                 ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:55:10: note: candidate: 'void fl::DigitalPinImpl::DigitalPinMode(fl::DigitalPin::Mode)'
+   55 |     void DigitalPinMode(DigitalPin::Mode mode) {
+      |          ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:55:10: note:   candidate expects 1 argument, 2 provided
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:61:31: error: no matching function for call to 'fl::DigitalPinImpl::DigitalPinMode(fl::DigitalPin&, int)'
+   61 |                 DigitalPinMode(mDigitalPin, OUTPUT);
+      |                 ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:55:10: note: candidate: 'void fl::DigitalPinImpl::DigitalPinMode(fl::DigitalPin::Mode)'
+   55 |     void DigitalPinMode(DigitalPin::Mode mode) {
+      |          ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:55:10: note:   candidate expects 1 argument, 2 provided
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:64:45: error: 'INPUT_PULLUP' was not declared in this scope
+   64 |                 DigitalPinMode(mDigitalPin, INPUT_PULLUP);
+      |                                             ^~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:67:45: error: 'INPUT_PULLDOWN' was not declared in this scope
+   67 |                 DigitalPinMode(mDigitalPin, INPUT_PULLDOWN);
+      |                                             ^~~~~~~~~~~~~~
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp: In constructor 'fl::DigitalPin::DigitalPin(int)':
+C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:77:16: error: use of deleted function 'fl::Ptr<T>::Ptr(T*) [with T = fl::DigitalPinImpl]'
+   77 |     mImpl.reset(new DigitalPinImpl(DigitalPin));
+      |     ~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from C:/Users/niteris/dev/fastled/src/sensors/digital_pin.cpp:5:
+C:/Users/niteris/dev/fastled/src/fl/ptr.h:133:5: note: declared here
+  133 |     Ptr(T *referent) = delete;
+      |     ^~~
+ninja: build stopped: subcommand failed.
+
+Current directory: C:\Users\niteris\dev\fastled\ci
+Error executing command: cmake --build C:\Users\niteris\dev\fastled\tests\.build
+Return code: 1
+
+
