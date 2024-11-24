@@ -13,16 +13,22 @@ ELF_FILE = UNO / "firmware.elf"
 BUILD_INFO_PATH = PROJECT_ROOT / ".build" / "uno" / "build_info.json"
 
 
+PLATFORMIO_PATH = Path.home() / ".platformio"
+PLATFORMIO_PACKAGES_PATH = PLATFORMIO_PATH / "packages"
+TOOLCHAIN_AVR = PLATFORMIO_PACKAGES_PATH / "toolchain-atmelavr"
+
+
 def init() -> None:
     uno_build = PROJECT_ROOT / ".build" / "uno"
     print(f"Checking for Uno build in: {uno_build}")
-    if not uno_build.exists():
+    if not uno_build.exists() or not TOOLCHAIN_AVR.exists():
         print("Uno build not found. Running compilation...")
         try:
             subprocess.run(
                 "uv run ci/ci-compile.py uno --examples Blink",
                 shell=True,
                 check=True,
+                cwd=str(PROJECT_ROOT),
             )
             print("Compilation completed successfully.")
         except subprocess.CalledProcessError as e:
