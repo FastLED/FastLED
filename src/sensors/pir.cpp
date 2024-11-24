@@ -28,7 +28,7 @@ bool Pir::detect() {
     return mPin.high() || mButton.clicked();
 }
 
-PirLatching::PirLatching(int pin, uint32_t latchMs, uint32_t risingTime, uint32_t fallingTime) 
+PirAdvanced::PirAdvanced(int pin, uint32_t latchMs, uint32_t risingTime, uint32_t fallingTime) 
     : mPir(pin)
     , mLatchMs(latchMs)
     , mRisingTime(risingTime)
@@ -37,13 +37,13 @@ PirLatching::PirLatching(int pin, uint32_t latchMs, uint32_t risingTime, uint32_
     , mLastState(false) {
 
     if (mRisingTime + mFallingTime > mLatchMs) {
-        FASTLED_WARN("PirLatching: risingTime + fallingTime must be less than latchMs");
+        FASTLED_WARN("PirAdvanced: risingTime + fallingTime must be less than latchMs");
         mRisingTime = mLatchMs / 2;
         mFallingTime = mLatchMs / 2;
     }
 }
 
-bool PirLatching::detect(uint32_t now) {
+bool PirAdvanced::detect(uint32_t now) {
     bool currentState = mPir.detect();
     
     if (currentState && !mLastState) {
@@ -54,7 +54,7 @@ bool PirLatching::detect(uint32_t now) {
     return (now - mLastTrigger) < mLatchMs;
 }
 
-uint8_t PirLatching::transition(uint32_t now) {
+uint8_t PirAdvanced::transition(uint32_t now) {
     detect(now);
     uint32_t elapsed = now - mLastTrigger;
     

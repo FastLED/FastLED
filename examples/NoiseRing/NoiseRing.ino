@@ -1,9 +1,14 @@
 
 
-/// @file    NoisePlusPalette.ino
-/// @brief   Demonstrates how to mix noise generation with color palettes on a
-/// 2D LED matrix
-/// @example NoisePlusPalette.ino
+/// @file    NoiseRing.ino
+/// @brief   Shows how to use a circular noise generator to have a continuous noise effect on a ring of LEDs.
+/// @author  Zach Vorhies
+///
+/// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
+/// 1. Install Fastled: `pip install fastled`
+/// 2. cd into this examples page.
+/// 3. Run the FastLED web compiler at root: `fastled`
+/// 4. When the compiler is done a web page will open.
 
 #include <Arduino.h>
 
@@ -16,7 +21,7 @@
 #include "fl/slice.h"
 #include "ui.h"
 #include "FastLED.h"
-#include "pir.h"
+#include "sensors/pir.h"
 #include "timer.h"
 
 #define LED_PIN 2
@@ -25,33 +30,20 @@
 #define NUM_LEDS 250
 #define PIN_PIR 0
 
+#define PIR_LATCH_MS 15000  // how long to keep the PIR sensor active after a trigger
+#define PIR_RISING_TIME 1000  // how long to fade in the PIR sensor
+#define PIR_FALLING_TIME 1000  // how long to fade out the PIR sensor
+
 CRGB leds[NUM_LEDS];
 
-Slider brightness("Brightness", 255, 0, 255);
+Slider brightness("Brightness", 1, 0, 1);
 Slider scale("Scale", 4, .1, 4, .1);
 Slider timeBitshift("Time Bitshift", 5, 0, 16, 1);
 Slider timescale("Time Scale", 1, .1, 10, .1);
-Pir pir(PIN_PIR);
+PirAdvanced pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
 
 Timer timer;
 float current_brightness = 0;
-bool first = true;
-
-uint8_t update_brightness(bool clicked, uint32_t now) {
-    if (clicked) {
-        timer.start(millis(), 1000 * 60 * 3);
-    }
-    if (timer.update(now)) {
-        current_brightness += .6;
-    } else {
-        current_brightness *= .97;
-    }
-    uint32_t brightness = current_brightness;
-    if (brightness > 255) {
-        brightness = 255;
-    }
-    return brightness;
-}
 
 
 void setup() {
@@ -60,14 +52,12 @@ void setup() {
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(xyMap);
     FastLED.setBrightness(brightness);
+    pir.activate(millis());  // Activate the PIR sensor on startup.
 }
 
 void loop() {
-    const bool detectMotion = pir.detect();
-    const bool detected_motion = detectMotion || first || detectMotion;
-    first = false;
-    uint8_t bri = update_brightness(detected_motion, millis());
-    FastLED.setBrightness(bri);
+    uint8_t bri = pir.transition(millis());
+    FastLED.setBrightness(bri * brightness.as<float>());
     uint32_t now = millis();
     double angle_offset = double(now) / 32000.0 * 2 * M_PI;
     //angle_offset = 0;

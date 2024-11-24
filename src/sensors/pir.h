@@ -28,12 +28,23 @@ class Pir {
     DigitalPin mPin;
 };
 
-// An advanced PIR that incorporates time to allow for latching and transitions fx.
-class PirLatching {
+// An advanced PIR that incorporates time to allow for latching and transitions fx. This is useful
+// for detecting motion and the increasing the brightness in response to motion.
+// Example:
+//   #define PIR_LATCH_MS 15000  // how long to keep the PIR sensor active after a trigger
+//   #define PIR_RISING_TIME 1000  // how long to fade in the PIR sensor
+//   #define PIR_FALLING_TIME 1000  // how long to fade out the PIR sensor
+//   PirAdvanced pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
+//   void loop() {
+//      uint8_t bri = pir.transition(millis());
+//      FastLED.setBrightness(bri * brightness.as<float>());
+//   }
+
+class PirAdvanced {
   public:
-    PirLatching(int pin, uint32_t latchMs = 0, uint32_t risingTime = 0, uint32_t fallingTime = 0);
-    bool detect(uint32_t now);
-    uint8_t transition(uint32_t now);  // Returns alpha value 0-255
+    PirAdvanced(int pin, uint32_t latchMs = 0, uint32_t risingTime = 0, uint32_t fallingTime = 0);
+    bool detect(uint32_t now);  // Just detects on and off.
+    uint8_t transition(uint32_t now);  // Detects on and off and also applies transitions.
     void activate(uint32_t now) { mLastTrigger = now; }
 
   private:
