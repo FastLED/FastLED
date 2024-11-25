@@ -19,7 +19,7 @@
 #define ANIMARTRIX_INTERNAL
 #include "animartrix_detail.hpp"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(Animartrix);
 
@@ -255,4 +255,4 @@ void Animartrix::draw(DrawContext ctx) {
     this->leds = nullptr;
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

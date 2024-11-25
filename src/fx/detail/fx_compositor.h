@@ -16,7 +16,7 @@
 #define FASTLED_FX_ENGINE_MAX_FX 64
 #endif
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // Takes two fx layers and composites them together to a final output buffer.
 class FxCompositor {
@@ -83,4 +83,4 @@ inline void FxCompositor::draw(uint32_t now, uint32_t warpedTime, CRGB *finalBuf
     }
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -14,7 +14,7 @@
 #include "fl/ptr.h"
 #include "xymap.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(NoisePalette);
 
@@ -264,4 +264,4 @@ inline uint8_t NoisePalette::changeToRandomPalette() {
     }
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

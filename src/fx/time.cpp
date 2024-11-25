@@ -6,7 +6,7 @@
 
 #define DBG FASTLED_DBG
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 TimeScale::TimeScale(uint32_t realTimeNow, float initialTimeScale)
     : mLastRealTime(realTimeNow),
@@ -70,4 +70,4 @@ void TimeScale::applyExact(uint32_t timeNow) {
     mRelativeTime -= abs_diff;
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -4,7 +4,7 @@
 #include "fx/fx1d.h"
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 /// @brief   Simple one-dimensional fire animation function
@@ -107,4 +107,4 @@ class Fire2012 : public FxStrip {
     CRGBPalette16 palette;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

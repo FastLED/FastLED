@@ -11,7 +11,7 @@ FASTLED_SMART_PTR(FileHandle);
 FASTLED_SMART_PTR(ByteStream);
 }
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(PixelStream);
 
@@ -60,4 +60,4 @@ protected:
   virtual ~PixelStream();
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

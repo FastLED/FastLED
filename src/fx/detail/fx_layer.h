@@ -13,7 +13,7 @@
 
 //#include <assert.h>
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(FxLayer);
 class FxLayer : public fl::Referent {
@@ -63,4 +63,4 @@ class FxLayer : public fl::Referent {
     bool running = false;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

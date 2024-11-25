@@ -12,7 +12,7 @@
 
 using namespace fl;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
                      size_t nFramesInBuffer)
@@ -284,4 +284,4 @@ bool VideoImpl::rewind() {
     return true;
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

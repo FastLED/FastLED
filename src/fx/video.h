@@ -8,21 +8,19 @@
 #include "fx/time.h"
 #include "fl/str.h"
 
+FASTLED_NAMESPACE_BEGIN
+struct CRGB;
+FASTLED_NAMESPACE_END
+
 namespace fl {
+
+// Forward declare classes
 FASTLED_SMART_PTR(FileHandle);
 FASTLED_SMART_PTR(ByteStream);
-}  // namespace fl
-
-FASTLED_NAMESPACE_BEGIN
-
-// Forward declare dependencies.
-
-
 FASTLED_SMART_PTR(VideoFx);
 FASTLED_SMART_PTR(Frame);
-
 FASTLED_SMART_PTR(VideoImpl);
-struct CRGB;
+
 
 // Video represents a video file that can be played back on a LED strip.
 // The video file is expected to be a sequence of frames. You can either use
@@ -77,5 +75,5 @@ class VideoFx : public FxStrip {
     Video mVideo;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 

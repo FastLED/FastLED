@@ -4,7 +4,7 @@
 #include "fx/fx1d.h"
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 
@@ -73,4 +73,4 @@ void Pride2015::draw(Fx::DrawContext ctx) {
     }
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

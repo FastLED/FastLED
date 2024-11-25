@@ -6,7 +6,7 @@
 #include "xmap.h"
 #include "fx/fx.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // Abstract base class for 1D effects that use a strip of LEDs.
 class FxStrip : public Fx {
@@ -24,5 +24,5 @@ protected:
     XMap mXMap;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 

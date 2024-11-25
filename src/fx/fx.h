@@ -9,7 +9,7 @@
 #include "detail/transition.h"
 #include "fl/str.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(Fx);
 
@@ -46,4 +46,4 @@ class Fx : public fl::Referent {
     uint16_t mNumLeds;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

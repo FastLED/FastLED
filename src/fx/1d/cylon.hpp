@@ -4,7 +4,7 @@
 #include "fx/fx1d.h"
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(Cylon);
 
@@ -59,4 +59,4 @@ class Cylon : public FxStrip {
     int16_t position = 0;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -5,7 +5,7 @@
 #include "namespace.h"
 #include "noisegen.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(NoiseWave);
 
@@ -41,4 +41,4 @@ class NoiseWave : public FxStrip {
     uint32_t start_time = 0;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

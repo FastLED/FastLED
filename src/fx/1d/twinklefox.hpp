@@ -5,7 +5,7 @@
 #include "fl/str.h"
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 
@@ -305,4 +305,4 @@ void TwinkleFox::chooseNextColorPalette(CRGBPalette16 &pal) {
     pal = *(ActivePaletteList[whichPalette]);
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -1,6 +1,6 @@
 #include "frame_tracker.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 namespace { // anonymous namespace
 long map(long x, long in_min, long in_max, long out_min, long out_max) {
@@ -48,4 +48,4 @@ uint32_t FrameTracker::get_exact_timestamp_ms(uint32_t frameNumber) const {
     return static_cast<uint32_t>(microseconds / 1000) + mStartTime;
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

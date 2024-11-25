@@ -12,7 +12,7 @@
 #define DBG FASTLED_DBG
 
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FrameInterpolator::FrameInterpolator(size_t nframes, float fps)
     : mFrames(MAX(1, nframes)), mFrameTracker(fps) {
@@ -51,4 +51,4 @@ bool FrameInterpolator::draw(uint32_t now, CRGB* leds) {
     return true;
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

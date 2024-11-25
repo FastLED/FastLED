@@ -6,7 +6,7 @@
 #include "fx/fx2d.h"
 #include "fl/ptr.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(RedSquare);
 
@@ -43,4 +43,4 @@ class RedSquare : public FxGrid {
     fl::Str fxName() const override { return "red_square"; }
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

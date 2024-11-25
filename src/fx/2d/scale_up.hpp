@@ -35,7 +35,7 @@
 #define FASTLED_SCALE_UP FASTLED_SCALE_UP_DECIDE_AT_RUNTIME
 #endif
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(ScaleUp);
 
@@ -102,4 +102,4 @@ class ScaleUp : public FxGrid {
     fl::scoped_array<CRGB> mSurface;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

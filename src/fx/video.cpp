@@ -18,7 +18,7 @@ using fl::ByteStreamPtr;
 
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(PixelStream);
 FASTLED_SMART_PTR(FrameInterpolator);
@@ -144,4 +144,4 @@ fl::Str VideoFx::fxName() const {
 }
 
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

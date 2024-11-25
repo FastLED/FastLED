@@ -9,7 +9,7 @@
 #include "allocator.h"
 
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 Frame::Frame(int pixels_count, bool has_alpha)
@@ -58,4 +58,4 @@ void Frame::interpolate(const Frame& frame1, const Frame& frame2, uint8_t amount
     interpolate(frame1, frame2, amountOfFrame2, mRgb.get());
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

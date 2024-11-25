@@ -12,7 +12,7 @@
 using fl::FileHandlePtr;
 using fl::ByteStreamPtr;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 PixelStream::PixelStream(int bytes_per_frame) : mbytesPerFrame(bytes_per_frame), mUsingByteStream(false) {
 }
@@ -189,4 +189,4 @@ size_t PixelStream::readBytes(uint8_t* dst, size_t len) {
     return bytesRead;
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

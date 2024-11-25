@@ -4,7 +4,7 @@
 #include "fx/fx1d.h"
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 
@@ -131,4 +131,4 @@ class DemoReel100 : public FxStrip {
     }
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -8,7 +8,7 @@
 
 #include "allocator.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(Frame);
 
@@ -39,4 +39,4 @@ inline void Frame::copy(const Frame& other) {
     memcpy(mRgb.get(), other.mRgb.get(), other.mPixelsCount * sizeof(CRGB));
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

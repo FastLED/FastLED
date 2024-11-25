@@ -7,7 +7,7 @@
 #include "fx/fx.h"
 #include "fl/ptr.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(FxGrid);
 
@@ -29,4 +29,4 @@ protected:
     XYMap mXyMap;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

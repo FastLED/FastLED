@@ -13,7 +13,7 @@ FASTLED_SMART_PTR(FileHandle);
 FASTLED_SMART_PTR(ByteStream);
 }
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(VideoImpl);
 FASTLED_SMART_PTR(FrameInterpolator);
@@ -54,4 +54,4 @@ class VideoImpl : public fl::Referent {
     TimeScalePtr mTimeScale;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

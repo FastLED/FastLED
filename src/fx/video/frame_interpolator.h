@@ -6,7 +6,7 @@
 #include "fx/video/frame_tracker.h"
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(FrameInterpolator);
 
@@ -102,4 +102,4 @@ class FrameInterpolator : public fl::Referent {
     FrameTracker mFrameTracker;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

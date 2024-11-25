@@ -8,7 +8,7 @@
 
 // using namespace std;
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // Tracks the current frame number based on the time elapsed since the start of the animation.
 class FrameTracker {
@@ -27,4 +27,4 @@ class FrameTracker {
 };
 
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

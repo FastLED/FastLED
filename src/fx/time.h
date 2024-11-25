@@ -6,7 +6,7 @@
 #include "fl/callback.h"
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 FASTLED_SMART_PTR(TimeFunction);
 FASTLED_SMART_PTR(TimeScale);
@@ -40,4 +40,4 @@ class TimeScale: public TimeFunction {
     float mTimeScale = 1.0f;
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

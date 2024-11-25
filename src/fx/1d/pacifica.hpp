@@ -4,7 +4,7 @@
 #include "fx/fx1d.h"
 #include "namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /// @file    pacifica.hpp
 /// @brief   An animation that simulates gentle, blue-green ocean waves
@@ -132,4 +132,4 @@ void Pacifica::pacifica_deepen_colors(CRGB *leds) {
     }
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
