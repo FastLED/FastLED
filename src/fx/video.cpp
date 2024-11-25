@@ -64,7 +64,6 @@ bool Video::beginStream(ByteStreamPtr bs) {
 }
 
 bool Video::draw(uint32_t now, CRGB *leds, uint8_t *alpha) {
-
     if (!mImpl) {
         FASTLED_WARN_IF(!mError.empty(), mError.c_str());
         return false;
@@ -91,7 +90,6 @@ void Video::end() {
 }
 
 void Video::setTimeScale(float timeScale) {
-    // mTimeScale->setScale(timeScale);
     mImpl->setTimeScale(timeScale);
 }
 
@@ -100,6 +98,8 @@ float Video::timeScale() const { return mImpl->timeScale(); }
 fl::Str Video::error() const {
     return mError;
 }
+
+size_t Video::pixelsPerFrame() const { return mImpl->pixelsPerFrame(); }
 
 bool Video::finished() {
     if (!mImpl) {
@@ -115,40 +115,15 @@ bool Video::rewind() {
     return mImpl->rewind();
 }
 
-#if 0
-
-VideoFx::VideoFx(Video video) : FxStrip(video.), mVideo(video) {}
+VideoFx::VideoFx(Video video): FxStrip(video.pixelsPerFrame()), mVideo(video) {}
 
 void VideoFx::draw(DrawContext context) {
-    if (!mFrame) {
-        mFrame = FramePtr::New(mXyMap.getTotal(), false);
-    }
-    bool ok = mVideo.draw(context.now, mFrame.get());
-    if (!ok) {
-        mVideo.rewind();
-        ok = mVideo.draw(context.now, mFrame.get());
-        if (!ok) {
-            return; // Can't draw or rewind
-        }
-    }
-    if (!mFrame) {
-        return; // Can't draw without a frame
-    }
-
-    const CRGB *src_pixels = mFrame->rgb();
-    CRGB *dst_pixels = context.leds;
-    size_t dst_pos = 0;
-    for (uint16_t w = 0; w < mXyMap.getWidth(); w++) {
-        for (uint16_t h = 0; h < mXyMap.getHeight(); h++) {
-            const size_t index = mXyMap.mapToIndex(w, h);
-            if (index < mFrame->size()) {
-                dst_pixels[dst_pos++] = src_pixels[index];
-            }
-        }
-    }
+    mVideo.draw(context.now, context.leds);
 }
 
-fl::Str VideoFx::fxName() const { return "video"; }
-#endif
+fl::Str VideoFx::fxName() const {
+    return "VideoFx";
+}
+
 
 FASTLED_NAMESPACE_END

@@ -18,7 +18,6 @@
 
 #include <FastLED.h>
 #include "fl/bytestreammemory.h"
-#include "fx/2d/video.hpp"
 #include "fx/fx_engine.h"
 #include "fl/ptr.h"
 #include "fx/video.h"
@@ -43,8 +42,9 @@ const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * NUM_FRAMES;
 
 ByteStreamMemoryPtr memoryStream;
 FxEngine fxEngine(NUM_LEDS);
-// Create and initialize Video fx object
+// Create and initialize Video object
 XYMap xymap(MATRIX_WIDTH, MATRIX_HEIGHT);
+Video video(NUM_LEDS, 2.0f);
 
 void write_one_frame(ByteStreamMemoryPtr memoryStream) {
     //memoryStream->seek(0);  // Reset to the beginning of the stream
@@ -71,9 +71,10 @@ void setup() {
 
     // Create and fill the ByteStreamMemory with test data
     memoryStream = ByteStreamMemoryPtr::New(BUFFER_SIZE*sizeof(CRGB));
-    Video video(memoryStream, NUM_LEDS, 2.0f, 0);
+
+    video.beginStream(memoryStream);
     // Add the video effect to the FxEngine
-    fxEngine.addVideo(video, xymap);
+    fxEngine.addVideo(video);
 }
 
 void loop() {

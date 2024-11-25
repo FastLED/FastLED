@@ -54,6 +54,7 @@ public:
     float timeScale() const;
     fl::Str error() const;
     void setError(const fl::Str& error) { mError = error; }
+    size_t pixelsPerFrame() const;
 
     // make compatible with if statements
     operator bool() const { return mImpl.get(); }
@@ -61,7 +62,6 @@ private:
     bool mFinished = false;
     VideoImplPtr mImpl;
     fl::Str mError;
-
 };
 
 
@@ -74,7 +74,6 @@ class VideoFx : public FxStrip {
 
   private:
     Video mVideo;
-    FramePtr mFrame;
 };
 
 FASTLED_NAMESPACE_END

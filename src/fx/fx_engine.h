@@ -60,10 +60,9 @@ class FxEngine {
     /**
      * @brief Adds a new video effect to the engine.
      * @param video The video to be added.
-     * @param xymap The XYMap to be added.
      * @return The index of the added effect, or -1 if the effect couldn't be added.
      */
-    int addVideo(Video video, XYMap xymap);
+    int addVideo(Video video);
 
     /**
      * @brief Adds a new effect to the engine. Allocate from static memory.
@@ -154,13 +153,11 @@ inline int FxEngine::addFx(FxPtr effect) {
     return mCounter++;
 }
 
-#if 0
-int FxEngine::addVideo(Video video, XYMap xymap) {
-    auto vidfx = VideoFxPtr::New(video, xymap);
+int FxEngine::addVideo(Video video) {
+    auto vidfx = VideoFxPtr::New(video);
     int id = addFx(vidfx);
     return id;
 }
-#endif
 
 inline bool FxEngine::nextFx(uint16_t duration) {
     bool ok = mEffects.next(mCurrId, &mCurrId, true);
