@@ -16,9 +16,9 @@
 
 #include "namespace.h"
 
-#if 0
+#if 1
 
-FASTLED_USING_NAMESPACE
+
 
 #define FPS 30
 #define FRAME_TIME 1000 / FPS
@@ -26,7 +26,9 @@ FASTLED_USING_NAMESPACE
 #define VIDEO_HEIGHT 10
 #define LEDS_PER_FRAME VIDEO_WIDTH * VIDEO_HEIGHT
 
-FASTLED_SMART_REF(FakeFileHandle);
+FASTLED_SMART_PTR(FakeFileHandle);
+
+using namespace fl;
 
 class FakeFileHandle: public FileHandle {
   public:
@@ -40,12 +42,17 @@ class FakeFileHandle: public FileHandle {
     size_t size() const override {
         return data.size();
     }
-
-    void write(const uint8_t *src, size_t len) {
-        data.insert(data.end(), src, src + len);
+    bool valid() const override {
+        return true;
     }
-    void write(const CRGB *src, size_t len) {
-        write((const uint8_t *)src, len * 3);
+
+    size_t write(const uint8_t *src, size_t len) {
+        data.insert(data.end(), src, src + len);
+        return len;
+    }
+    size_t writeCRGB(const CRGB *src, size_t len) {
+        size_t bytes_written = write((const uint8_t *)src, len * 3);
+        return bytes_written / 3;
     }
     size_t read(uint8_t *dst, size_t bytesToRead) override {
         size_t bytesRead = 0;
@@ -60,8 +67,9 @@ class FakeFileHandle: public FileHandle {
         return mPos;
     }
     const char* path() const override { return "fake"; }
-    void seek(size_t pos) override {
+    bool seek(size_t pos) override {
         this->mPos = pos;
+        return true;
     }
     void close() override {}
     std::vector<uint8_t> data;
@@ -71,13 +79,25 @@ class FakeFileHandle: public FileHandle {
 TEST_CASE("video with memory stream") {
     // Video video(LEDS_PER_FRAME, FPS);
     Video video;
-    ByteStreamMemoryPtr memoryStream = ByteStreamMemoryPtr::New(LEDS_PER_FRAME);
-    uint8_t testData[LEDS_PER_FRAME];
-    memoryStream->write(testData, LEDS_PER_FRAME);
+    ByteStreamMemoryPtr memoryStream = ByteStreamMemoryPtr::New(LEDS_PER_FRAME * 3);
+    CRGB testData[LEDS_PER_FRAME] = {};
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        testData[i] = i % 2 == 0 ? CRGB::Red : CRGB::Black;
+    }
+    size_t pixels_written = memoryStream->writeCRGB(testData, LEDS_PER_FRAME);
+    CHECK_EQ(pixels_written, LEDS_PER_FRAME);
     video.beginStream(memoryStream, LEDS_PER_FRAME, FPS);
     CRGB leds[LEDS_PER_FRAME];
-    video.draw(FRAME_TIME+1, leds);
-    video.draw(2*FRAME_TIME + 1, leds);
+    bool ok = video.draw(FRAME_TIME+1, leds);
+    CHECK(ok);
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        CHECK_EQ(leds[i], testData[i]);
+    }
+    ok = video.draw(2*FRAME_TIME + 1, leds);
+    CHECK(ok);
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        CHECK_EQ(leds[i], testData[i]);
+    }    
 }
 
 TEST_CASE("video with file handle") {
@@ -86,15 +106,24 @@ TEST_CASE("video with file handle") {
     FakeFileHandlePtr fileHandle = FakeFileHandlePtr::New();
     CRGB led_frame[LEDS_PER_FRAME];
     // alternate between red and black
-    for (int i = 0; i < LEDS_PER_FRAME; i++) {
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
         led_frame[i] = i % 2 == 0 ? CRGB::Red : CRGB::Black;
     }
     // now write the data
-    fileHandle->write(led_frame, LEDS_PER_FRAME);
+    size_t leds_written = fileHandle->writeCRGB(led_frame, LEDS_PER_FRAME);
+    CHECK_EQ(leds_written, LEDS_PER_FRAME);
     video.begin(fileHandle, LEDS_PER_FRAME, FPS);
     CRGB leds[LEDS_PER_FRAME];
-    video.draw(FRAME_TIME+1, leds);
-    video.draw(2*FRAME_TIME + 1, leds);
+    bool ok = video.draw(FRAME_TIME+1, leds);
+    CHECK(ok);
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        CHECK_EQ(leds[i], led_frame[i]);
+    }
+    ok = video.draw(2*FRAME_TIME + 1, leds);
+    CHECK(ok);
+    for (uint32_t i = 0; i < LEDS_PER_FRAME; i++) {
+        CHECK_EQ(leds[i], led_frame[i]);
+    }
 }
 
 

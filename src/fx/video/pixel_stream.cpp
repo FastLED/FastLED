@@ -74,12 +74,13 @@ bool PixelStream::atEnd() const {
 bool PixelStream::readFrame(Frame* frame) {
     // returns true if a frame was read.
     if (!framesRemaining() || !frame) {
+        DBG("failed to read frame, framesRemaining: " << framesRemaining() << ", frame: " << frame);
         return false;
     }
     if (mUsingByteStream) {
-        mByteStream->readCRGB(frame->rgb(), mbytesPerFrame);
+        mByteStream->readCRGB(frame->rgb(), mbytesPerFrame / 3);
     } else {
-        mFileHandle->readCRGB(frame->rgb(), mbytesPerFrame);
+        mFileHandle->readCRGB(frame->rgb(), mbytesPerFrame / 3);
         DBG("pos: " << mFileHandle->pos());
     }
     return true;
@@ -100,6 +101,7 @@ bool PixelStream::readFrameAt(uint32_t frameNumber, Frame* frame) {
     // DBG("read frame at " << frameNumber);
     if (mUsingByteStream) {
         // ByteStream doesn't support seeking
+        FASTLED_DBG("ByteStream doesn't support seeking");
         return false;
     } else {
         // DBG("mbytesPerFrame: " << mbytesPerFrame);

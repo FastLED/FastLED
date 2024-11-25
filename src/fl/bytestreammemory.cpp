@@ -44,12 +44,15 @@ size_t ByteStreamMemory::read(uint8_t *dst, size_t bytesToRead) {
 
 size_t ByteStreamMemory::write(const uint8_t* src, size_t n) {
     if (src == nullptr || mReadBuffer.capacity() == 0) {
+        FASTLED_DBG_IF(src == nullptr, "ByteStreamMemory::write: src == nullptr");
+        FASTLED_DBG_IF(mReadBuffer.capacity() == 0, "ByteStreamMemory::write: mReadBuffer.capacity() == 0");
         return 0;
     }
 
     size_t written = 0;
     for (size_t i = 0; i < n; ++i) {
         if (mReadBuffer.full()) {
+            FASTLED_DBG("ByteStreamMemory::write: mReadBuffer.full(): " << mReadBuffer.size());
             break;
         }
         mReadBuffer.push_back(src[i]);
@@ -58,8 +61,10 @@ size_t ByteStreamMemory::write(const uint8_t* src, size_t n) {
     return written;
 }
 
-size_t ByteStreamMemory::write(const CRGB* src, size_t n) {
-    return write(reinterpret_cast<const uint8_t*>(src), n * 3);
+size_t ByteStreamMemory::writeCRGB(const CRGB* src, size_t n) {
+    size_t bytes_written = write(reinterpret_cast<const uint8_t*>(src), n * 3);
+    size_t pixels_written = bytes_written / 3;
+    return pixels_written;
 }
 
 }  // namespace fl

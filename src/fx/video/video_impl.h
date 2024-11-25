@@ -44,6 +44,8 @@ class VideoImpl : public fl::Referent {
 
   private:
     bool updateBufferIfNecessary(uint32_t prev, uint32_t now);
+    bool updateBufferFromFile(uint32_t now, bool forward);
+    bool updateBufferFromStream(uint32_t now);
     uint32_t mPixelsPerFrame = 0;
     PixelStreamPtr mStream;
     uint32_t mPrevNow = 0;

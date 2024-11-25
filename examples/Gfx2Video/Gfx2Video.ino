@@ -22,6 +22,7 @@
 #include "fx/fx_engine.h"
 #include "fl/ptr.h"
 #include "fx/video.h"
+#include "fl/dbg.h"
 
 using namespace fl;
 
@@ -49,10 +50,13 @@ void write_one_frame(ByteStreamMemoryPtr memoryStream) {
     //memoryStream->seek(0);  // Reset to the beginning of the stream
     uint32_t total_bytes_written = 0;
     int toggle = (millis() / 500) % 2;
+    FASTLED_DBG("Writing frame data, toggle = " << toggle);
     for (uint32_t i = 0; i < NUM_LEDS; ++i) {
         CRGB color = (i % 2 == toggle) ? CRGB::Black : CRGB::Red;
         size_t bytes_written = memoryStream->write(color.raw, 3);
         if (bytes_written != 3) {
+            FASTLED_DBG("Failed to write frame data, wrote " << bytes_written << " bytes");
+            break;
         }
         total_bytes_written += bytes_written;
     }
@@ -66,7 +70,7 @@ void setup() {
     FastLED.setBrightness(BRIGHTNESS);
 
     // Create and fill the ByteStreamMemory with test data
-    memoryStream = ByteStreamMemoryPtr::New(BUFFER_SIZE);
+    memoryStream = ByteStreamMemoryPtr::New(BUFFER_SIZE*3);
     write_one_frame(memoryStream);  // Write initial frame data
     Video video(memoryStream, NUM_LEDS, 30.0f, 0);
     // Add the video effect to the FxEngine
@@ -76,7 +80,12 @@ void setup() {
 void loop() {
     // Reset the memory stream position before reading
     //memoryStream->seek(0);
+
+    FASTLED_DBG("Byte stream size: " << memoryStream->available(BUFFER_SIZE));
+
     write_one_frame(memoryStream);  // Write next frame data
+
+    FASTLED_DBG("Byte stream size: " << memoryStream->available(BUFFER_SIZE));
 
     // Draw the frame
     fxEngine.draw(millis(), leds);
@@ -84,7 +93,7 @@ void loop() {
     // Show the LEDs
     FastLED.show();
 
-    delay(100); // Adjust this delay to control frame rate
+    delay(1000); // Adjust this delay to control frame rate
 }
 #else
 void setup() {}
