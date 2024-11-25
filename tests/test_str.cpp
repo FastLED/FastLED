@@ -6,6 +6,7 @@
 #include "doctest.h"
 #include "fl/str.h"
 #include "fl/vector.h"
+#include <sstream>
 
 #include "namespace.h"
 FASTLED_USING_NAMESPACE
@@ -71,6 +72,14 @@ TEST_CASE("Str with <<") {
     Str s3 = s2 << "!";
     CHECK(s3.size() == 12);
     CHECK(strcmp(s3.c_str(), "hello world!") == 0);
+}
+
+
+TEST_CASE("outpustream << Str") {
+    Str s1("hello");
+    std::stringstream ss;
+    ss << s1;
+    CHECK_EQ(ss.str(), "hello");
 }
 
 TEST_CASE("Str::reserve") {

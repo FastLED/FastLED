@@ -155,9 +155,13 @@ using is_derived = enable_if_t<is_base_of<Base, Derived>::value>;
 // This essentially forces two phase lookup in one pass. Making the compiler skip
 // the definition if the second parameter doesn't match.
 #define FASTLED_DEFINE_OUTPUT_OPERATOR(CLASS)                  \
-template <typename T, typename U>                              \
-typename fl::enable_if<fl::is_same<U, CLASS>::value, T&>::type \
+template <typename T>                                          \
+typename fl::enable_if<                                        \
+     !fl::is_same<T, CLASS>::value &&                          \
+     !fl::is_pod<T>::value, T&>::type                          \
 operator<<(T& os, const CLASS& obj)
+
+
 
 
 // For comparison operators that return bool against pod data. The class obj will need
