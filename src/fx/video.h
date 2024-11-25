@@ -95,7 +95,6 @@ class VideoFxWrapper : public Fx1d {
     FxPtr mFx;
     VideoImplPtr mVideo;
     ByteStreamMemoryPtr mByteStream;
-    bool mInitialized = false;
     float mFps = 30.0f;
 };
 

@@ -17,6 +17,12 @@
       * adafruit conversation on RMT progress: https://github.com/adafruit/Adafruit_NeoPixel/issues/375
 
 
+# Teensy
+
+DMA all the pins for Teensy.
+
+https://github.com/KurtMF/ObjectFLED/blob/main/ObjectFLED.h
+
 # ESP32 - IDF 4.4
   * RMT: we should use the esp_err_trmt_translator_init
     * https://docs.espressif.com/projects/esp-idf/en/v3.3/api-reference/peripherals/rmt.html
