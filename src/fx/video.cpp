@@ -36,11 +36,11 @@ Video &Video::operator=(const Video &) = default;
 bool Video::begin(FileHandlePtr handle) {
     if (!handle) {
         mError = "FileHandle is null";
-        FASTLED_DBG(mError);
+        FASTLED_DBG(mError.c_str());
         return false;
     }
     if (mError.size()) {
-        FASTLED_DBG(mError);
+        FASTLED_DBG(mError.c_str());
         return false;
     }
     mError.clear();
@@ -51,11 +51,11 @@ bool Video::begin(FileHandlePtr handle) {
 bool Video::beginStream(ByteStreamPtr bs) {
     if (!bs) {
         mError = "FileHandle is null";
-        FASTLED_DBG(mError);
+        FASTLED_DBG(mError.c_str());
         return false;
     }
     if (mError.size()) {
-        FASTLED_DBG(mError);
+        FASTLED_DBG(mError.c_str());
         return false;
     }
     mError.clear();
